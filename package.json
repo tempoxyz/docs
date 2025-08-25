@@ -1,0 +1,18 @@
+{
+  "name": "tip20-viem-scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test:create-token": "bun run src/create-token.ts",
+    "test:transfer": "bun run src/transfer.ts",
+    "test:gas-fees": "bun run src/gas-fees.ts",
+    "test:all": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "viem": "^2.21.48"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.14",
+    "typescript": "^5.7.2"
+  }
+}
