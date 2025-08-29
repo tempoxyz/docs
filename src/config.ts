@@ -1,6 +1,6 @@
 import { createWalletClient, createPublicClient, http, type Address } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { defineChain } from 'viem';
+import { defineChain, keccak256 } from 'viem';
 
 // Contract addresses
 export const TIP20_FACTORY_ADDRESS = '0x20Fc000000000000000000000000000000000000' as const;
@@ -9,7 +9,7 @@ export const TIP403_REGISTRY_ADDRESS = '0x403c0000000000000000000000000000000000
 export const TIP4217_REGISTRY_ADDRESS = '0x4217c00000000000000000000000000000000000' as const;
 
 // Role hashes
-export const ISSUER_ROLE = '0x' + Buffer.from('ISSUER_ROLE').toString('hex').padEnd(64, '0') as `0x${string}`;
+export const ISSUER_ROLE = keccak256(Buffer.from('ISSUER_ROLE')) as `0x${string}`;
 
 export const TEMPO_RPC_USERNAME = process.env.RPC_USER;
 export const TEMPO_RPC_PASSWORD = process.env.RPC_PASS;

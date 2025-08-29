@@ -72,14 +72,14 @@ async function testTransfer() {
   log('Supply cap set');
 
   // Mint tokens
-  const mintAmount = 0n; // 1 million tokens
+  const mintAmount = 1000000n * 10n ** 6n; // 1 million tokens
   log('Minting tokens:', mintAmount.toString());
   
   const mintHash = await walletClient.writeContract({
     address: tokenAddress,
     abi: TIP20_ABI,
     functionName: 'mint',
-    args: ["0x0000000000000000000000000000000000000000", mintAmount],
+    args: [account.address, mintAmount],
   });
   await publicClient.waitForTransactionReceipt({ hash: mintHash });
   log('Tokens minted');
@@ -117,7 +117,7 @@ async function testTransfer() {
   });
 
   // Transfer tokens
-  const transferAmount = 100000n * 10n ** 18n; // 100k tokens
+  const transferAmount = 100000n * 10n ** 6n; // 100k tokens
   log('Transferring tokens:', transferAmount.toString());
 
   const transferHash = await walletClient.writeContract({
