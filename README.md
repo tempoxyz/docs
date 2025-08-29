@@ -29,6 +29,10 @@ Edit `src/config.ts` to set:
 - Chain ID (default: 1001)
 - Private key or mnemonic for test account
 
+Export as environment variables:
+- `RPC_USER` - provided RPC username by Tempo
+- `RPC_PASS` - provided RPC password by Tempo
+
 ## Contract Addresses
 
 The following precompile addresses are used:

@@ -20,7 +20,7 @@ async function testTransfer() {
     address: TIP20_FACTORY_ADDRESS,
     abi: TIP20_FACTORY_ABI,
     functionName: 'createToken',
-    args: ['Transfer Test', 'XFER', 'USD', account.address],
+    args: ['TestUSD', 'TestUSD', 'USD', account.address],
   });
 
   const createReceipt = await publicClient.waitForTransactionReceipt({ hash: createHash });
@@ -39,7 +39,7 @@ async function testTransfer() {
   log('Token created at:', tokenAddress);
 
   // Grant issuer role
-  log('Granting issuer role...');
+  log('Granting issuer role...', ISSUER_ROLE);
   const grantRoleHash = await walletClient.writeContract({
     address: tokenAddress,
     abi: ROLES_AUTH_ABI,
@@ -58,8 +58,21 @@ async function testTransfer() {
   });
   log('Has issuer role:', hasRole);
 
+  const supplyCap = 1000000000n * 10n ** 6n;
+
+  log('Setting supply cap:', supplyCap.toString());
+  
+  const supplyCapHash = await walletClient.writeContract({
+    address: tokenAddress,
+    abi: TIP20_ABI,
+    functionName: 'setSupplyCap',
+    args: [supplyCap],
+  });
+  await publicClient.waitForTransactionReceipt({ hash: supplyCapHash });
+  log('Supply cap set');
+
   // Mint tokens
-  const mintAmount = 1000000n * 10n ** 18n; // 1 million tokens
+  const mintAmount = 1000000n * 10n ** 6n; // 1 million tokens
   log('Minting tokens:', mintAmount.toString());
   
   const mintHash = await walletClient.writeContract({
@@ -104,7 +117,7 @@ async function testTransfer() {
   });
 
   // Transfer tokens
-  const transferAmount = 100000n * 10n ** 18n; // 100k tokens
+  const transferAmount = 100000n * 10n ** 6n; // 100k tokens
   log('Transferring tokens:', transferAmount.toString());
 
   const transferHash = await walletClient.writeContract({

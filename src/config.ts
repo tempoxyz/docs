@@ -1,19 +1,23 @@
 import { createWalletClient, createPublicClient, http, type Address } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { defineChain } from 'viem/chains';
+import { defineChain, keccak256 } from 'viem';
 
 // Contract addresses
-export const TIP20_FACTORY_ADDRESS = '0x20FC000000000000000000000000000000000000' as const;
+export const TIP20_FACTORY_ADDRESS = '0x20Fc000000000000000000000000000000000000' as const;
 export const TIP_FEE_MANAGER_ADDRESS = '0x1559000000000000000000000000000000000000' as const;
-export const TIP403_REGISTRY_ADDRESS = '0x403C000000000000000000000000000000000000' as const;
-export const TIP4217_REGISTRY_ADDRESS = '0x4217C00000000000000000000000000000000000' as const;
+export const TIP403_REGISTRY_ADDRESS = '0x403c000000000000000000000000000000000000' as const;
+export const TIP4217_REGISTRY_ADDRESS = '0x4217c00000000000000000000000000000000000' as const;
 
 // Role hashes
-export const ISSUER_ROLE = '0x' + Buffer.from('ISSUER_ROLE').toString('hex').padEnd(64, '0') as `0x${string}`;
+export const ISSUER_ROLE = keccak256(Buffer.from('ISSUER_ROLE')) as `0x${string}`;
+
+export const TEMPO_RPC_USERNAME = process.env.RPC_USER;
+export const TEMPO_RPC_PASSWORD = process.env.RPC_PASS;
+export const TEMPO_CREDENTIALS = Buffer.from(`${TEMPO_RPC_USERNAME}:${TEMPO_RPC_PASSWORD}`).toString('base64');
 
 // Define Tempo chain
 export const tempoChain = defineChain({
-  id: 1001, // Replace with actual chain ID
+  id: 42424, // Replace with actual chain ID
   name: 'Tempo',
   nativeCurrency: {
     decimals: 18,
@@ -22,7 +26,7 @@ export const tempoChain = defineChain({
   },
   rpcUrls: {
     default: {
-      http: ['http://localhost:8545'], // Replace with actual RPC URL
+      http: ['https://rpc-adagio.tempoxyz.dev'], // Replace with actual RPC URL
     },
   },
   blockExplorers: {
@@ -39,13 +43,25 @@ export const account = privateKeyToAccount(TEST_PRIVATE_KEY as `0x${string}`);
 // Create clients
 export const publicClient = createPublicClient({
   chain: tempoChain,
-  transport: http(),
+  transport: http(tempoChain.rpcUrls.default.http[0], {
+    fetchOptions: {
+      headers: {
+        Authorization: `Basic ${TEMPO_CREDENTIALS}`,
+      },
+    }
+  }),
 });
 
 export const walletClient = createWalletClient({
   account,
   chain: tempoChain,
-  transport: http(),
+  transport: http(tempoChain.rpcUrls.default.http[0], {
+    fetchOptions: {
+      headers: {
+        Authorization: `Basic ${TEMPO_CREDENTIALS}`,
+      },
+    }
+  }),
 });
 
 // Helper function to convert token ID to address
@@ -66,6 +82,6 @@ export function tokenIdToAddress(tokenId: bigint): Address {
 export function log(message: string, data?: any) {
   console.log(`[${new Date().toISOString()}] ${message}`);
   if (data !== undefined) {
-    console.log(JSON.stringify(data, null, 2));
+    console.log(JSON.stringify(data, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2));
   }
 }
