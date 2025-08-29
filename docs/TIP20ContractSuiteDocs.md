@@ -34,9 +34,6 @@ This suite consists of 3 contracts, the main contract, a factory contract, and a
 * Dynamic Decimal Handling  
   * `decimals():` Queries the TIP4217Registry to retrieve the correct number of decimals for the specified currency.  
   * The constructor verifies that the currency is valid; otherwise will revert.  
-* Meta-Transactions  
-  * `permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)`: Allows for off-chain approvals via a signed message.  
-  * `transferWithSig(address from, address to, uint256 value, uint256 deadline, bytes4 salt, uint8 v, bytes32 r, bytes32 s)`: Enables gas-less transfers where the transaction fee can be paid by a third party. It uses a signed message with an anti-replay salt and a deadline.  
 * Administrative Controls  
   * `pause() / unpause():` Controlled by PAUSE\_ROLE / UNPAUSE\_ROLE.  
   * `mint(address to, uint256 amount)`: Controlled by ISSUER\_ROLE.  
@@ -45,7 +42,9 @@ This suite consists of 3 contracts, the main contract, a factory contract, and a
   * `setSupplyCap(uint256 newSupplyCap)`: Controlled by DEFAULT\_ADMIN\_ROLE.  
 * Extensions  
   * `transferWithMemo(address to, uint256 amount, bytes32 memo)`: Behaves like a standard transfer but also emits a TransferWithMemo event containing 32-byte memo.  
-  * `transferFromWithMemo(address from, address to, uint256 amount, bytes32 memo):` Analogously a standard transferFrom but also emits a TransferWithMemo event containing 32-byte memo.   
+  * `transferFromWithMemo(address from, address to, uint256 amount, bytes32 memo):` Analogously a standard transferFrom but also emits a TransferWithMemo event containing 32-byte memo.
+  * `mintWithMemo(address to, unit256 amount, bytes32 memo)`: Standard mint but also emits a MintWithMemo event.
+  * `burnWithMemo(uint256 amount)`: Standard burn but also emits a BurnWithMemo event.    
   * Includes a notTokenAddress modifier that restricts transfers to certain reserved precompile address ranges.
 
 ### Events
@@ -56,7 +55,9 @@ This suite consists of 3 contracts, the main contract, a factory contract, and a
 * `Mint(address indexed to, uint256 amount)`  
 * `Burn(address indexed from, uint256 amount)`  
 * `BurnBlocked(address indexed from, uint256 amount)`  
-* `TransferWithMemo(address indexed from, address indexed to, uint256 amount, bytes32 indexed memo)`  
+* `TransferWithMemo(address indexed from, address indexed to, uint256 amount, bytes32 indexed memo)`
+* `MintWithMemo (address indexed to, uint256 amount, bytes32 indexed memo)`
+* `BurnWithMemo (address indexed from, uint256 amount, bytes32 indexted memo)`
 * `SupplyCapUpdate(address indexed updater, uint256 indexed newSupplyCap)`  
 * `PauseStateUpdate(address indexed updater, bool isPaused)`
 
@@ -154,17 +155,17 @@ This workflow describes how a project administrator can create a new token and d
   2. Grant Issuer Role: The Project Admin, who holds the `DEFAULT_ADMIN_ROLE`, calls `grantRole()` on the new `TIP20` token contract. They grant the `ISSUER_ROLE` to the Token Operator's address.  
   3. Mint Tokens: The Token Operator can now call `mint()` on the `TIP20` token to issue new tokens to any address.
 
-## Creating and Applying a KYC Whitelist Policy
+## Creating and Applying a Whitelist Policy
 
-This workflow shows how to restrict token transfers to a list of approved (e.g., KYC'd) users.
+This workflow shows how to restrict token transfers to a list of approved users.
 
 * Actors:  
-  1. Compliance Admin: An account responsible for managing compliance policies.  
+  1.  Admin: An account responsible for managing approval policies.  
   2. User A & User B: End-users who have completed the KYC process.  
   3. User C: An end-user who has not completed the KYC process.  
 * Steps:  
-  1. Create Whitelist Policy: The Compliance Admin calls `createPolicy()` on the `TIP403Registry`, specifying the policy type as `WHITELIST` and setting their own address as the admin (or an admin policy they control). This returns a new `policyId`.  
-  2. Add Users to Whitelist: The Compliance Admin calls `modifyPolicyWhitelist()` on the `TIP403Registry` for the newly created `policyId`, adding the addresses of User A and User B to the whitelist by setting their status to `true`.  
+  1. Create Whitelist Policy: The Admin calls `createPolicy()` on the `TIP403Registry`, specifying the policy type as `WHITELIST` and setting their own address as the admin (or an admin policy they control). This returns a new `policyId`.  
+  2. Add Users to Whitelist: The Admin calls `modifyPolicyWhitelist()` on the `TIP403Registry` for the newly created `policyId`, adding the addresses of User A and User B to the whitelist by setting their status to `true`.  
   3. Apply Policy to Token: The token's `DEFAULT_ADMIN_ROLE` holder calls `changeTransferPolicyId()` on the `TIP20` token contract, setting the `transferPolicyId` to the new whitelist `policyId`.  
   4. Test Transfers:  
      * User A can successfully transfer tokens to User B because both are on the whitelist.  
