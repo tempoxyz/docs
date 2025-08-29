@@ -140,6 +140,13 @@ export const TIP20_ABI = [
   },
   // Token Management
   {
+    name: 'setSupplyCap',
+    type: 'function',
+    inputs: [{ name: 'supplyCap', type: 'uint256' }],
+    outputs: [],
+    stateMutability: 'nonpayable'
+  },
+  {
     name: 'mint',
     type: 'function',
     inputs: [
