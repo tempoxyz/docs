@@ -44,7 +44,7 @@ This suite consists of 3 contracts, the main contract, a factory contract, and a
   * `transferWithMemo(address to, uint256 amount, bytes32 memo)`: Behaves like a standard transfer but also emits a TransferWithMemo event containing 32-byte memo.  
   * `transferFromWithMemo(address from, address to, uint256 amount, bytes32 memo):` Analogously a standard transferFrom but also emits a TransferWithMemo event containing 32-byte memo.
   * `mintWithMemo(address to, unit256 amount, bytes32 memo)`: Standard mint but also emits a MintWithMemo event.
-  * `burnWithMemo(uint256 amount)`: Standard burn but also emits a BurnWithMemo event.    
+  * `burnWithMemo(uint256 amount, bytes32 memo)`: Standard burn but also emits a BurnWithMemo event.    
   * Includes a notTokenAddress modifier that restricts transfers to certain reserved precompile address ranges.
 
 ### Events
