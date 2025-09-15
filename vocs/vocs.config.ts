@@ -26,6 +26,10 @@ export default defineConfig({
                  link: "/testnet",
              },
              {
+                 text: "Getting Started",
+                 link: "/testnet/getting-started",
+             },
+             {
                  text: "Releases",
                  items: [
                      {
