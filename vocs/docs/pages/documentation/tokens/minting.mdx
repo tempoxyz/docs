@@ -1,0 +1,222 @@
+# Minting & Burning
+
+TIP-20 tokens support dynamic supply management through minting and burning. Only addresses with the `ISSUER_ROLE` can mint tokens, and there are different ways to burn tokens depending on your needs.
+
+## Minting Tokens
+
+### Basic Minting
+
+```javascript
+import { getContract } from 'viem'
+
+const token = getContract({
+  address: tokenAddress,
+  abi: tip20Abi,
+  client: wallet // Must have ISSUER_ROLE
+})
+
+// Mint 1000 tokens to a user
+await token.write.mint([
+  userAddress,
+  1000n * 10n**18n // 1000 tokens with 18 decimals
+])
+```
+
+### Minting with Memo
+
+```javascript
+// Mint with a memo for tracking
+const memo = keccak256('TREASURY_ALLOCATION_Q1_2024')
+await token.write.mintWithMemo([
+  treasuryAddress,
+  5000n * 10n**18n,
+  memo
+])
+```
+
+### Batch Minting
+
+```javascript
+// Mint to multiple addresses
+const recipients = [
+  { address: user1, amount: 1000n * 10n**18n },
+  { address: user2, amount: 2000n * 10n**18n },
+  { address: user3, amount: 1500n * 10n**18n }
+]
+
+for (const recipient of recipients) {
+  await token.write.mint([
+    recipient.address,
+    recipient.amount
+  ])
+}
+```
+
+## Burning Tokens
+
+### Self-Burn
+
+```javascript
+// Burn tokens from your own balance
+await token.write.burn([
+  500n * 10n**18n // Amount to burn
+])
+```
+
+### Burn with Memo
+
+```javascript
+// Burn with a memo for tracking
+const memo = keccak256('BUYBACK_AND_BURN_BATCH_1')
+await token.write.burnWithMemo([
+  1000n * 10n**18n,
+  memo
+])
+```
+
+### Burn from Blocked Addresses
+
+```javascript
+// Burn tokens from a blocked address (requires BURN_BLOCKED_ROLE)
+await token.write.burnBlocked([
+  blockedAddress,
+  1000n * 10n**18n
+])
+```
+
+## Supply Management
+
+### Setting Supply Caps
+
+```javascript
+// Set maximum supply to 1 million tokens
+await token.write.setSupplyCap([
+  1000000n * 10n**18n
+])
+```
+
+### Checking Supply
+
+```javascript
+// Get current total supply
+const totalSupply = await token.read.totalSupply()
+
+// Get supply cap
+const supplyCap = await token.read.supplyCap()
+
+// Check if at cap
+const isAtCap = totalSupply >= supplyCap
+```
+
+## Minting Events
+
+The token emits events for all minting and burning operations:
+
+```javascript
+// Listen for mint events
+token.watchEvent.Mint({
+  onLogs: (logs) => {
+    logs.forEach((log) => {
+      console.log(`Minted ${log.args.amount} to ${log.args.to}`)
+    })
+  }
+})
+
+// Listen for burn events
+token.watchEvent.Burn({
+  onLogs: (logs) => {
+    logs.forEach((log) => {
+      console.log(`Burned ${log.args.amount} from ${log.args.from}`)
+    })
+  }
+})
+```
+
+## Common Patterns
+
+### Treasury Management
+
+```javascript
+// Monthly treasury allocation
+const monthlyAllocation = 10000n * 10n**18n
+const memo = keccak256(`TREASURY_ALLOCATION_${new Date().toISOString().slice(0, 7)}`)
+
+await token.write.mintWithMemo([
+  treasuryAddress,
+  monthlyAllocation,
+  memo
+])
+```
+
+### Buyback and Burn
+
+```javascript
+// Buyback and burn mechanism
+const buybackAmount = 5000n * 10n**18n
+const memo = keccak256(`BUYBACK_${Date.now()}`)
+
+// First burn the tokens
+await token.write.burnWithMemo([buybackAmount, memo])
+
+// Then update total supply tracking
+console.log(`Burned ${buybackAmount} tokens in buyback program`)
+```
+
+### Airdrop Distribution
+
+```javascript
+// Airdrop to multiple users
+const airdropList = [
+  { address: '0x...', amount: 100n * 10n**18n },
+  { address: '0x...', amount: 200n * 10n**18n },
+  // ... more recipients
+]
+
+for (let i = 0; i < airdropList.length; i++) {
+  const recipient = airdropList[i]
+  const memo = keccak256(`AIRDROP_BATCH_1_${i}`)
+  
+  await token.write.mintWithMemo([
+    recipient.address,
+    recipient.amount,
+    memo
+  ])
+}
+```
+
+## Supply Cap Considerations
+
+### Setting Appropriate Caps
+
+```javascript
+// For a stablecoin, set a reasonable cap
+const maxSupply = 1000000000n * 10n**18n // 1 billion tokens
+await token.write.setSupplyCap([maxSupply])
+
+// For a utility token, consider use case
+const utilityTokenCap = 10000000n * 10n**18n // 10 million tokens
+await token.write.setSupplyCap([utilityTokenCap])
+```
+
+### Emergency Supply Reduction
+
+```javascript
+// If you need to reduce the cap (can't increase)
+const newCap = 5000000n * 10n**18n // 5 million tokens
+const currentSupply = await token.read.totalSupply()
+
+if (newCap >= currentSupply) {
+  await token.write.setSupplyCap([newCap])
+} else {
+  console.log('Cannot set cap below current supply')
+}
+```
+
+## Security Considerations
+
+- **Role Management**: Only grant ISSUER_ROLE to trusted addresses
+- **Supply Caps**: Set appropriate limits to prevent runaway inflation
+- **Memo Tracking**: Use memos to track the purpose of minting/burning
+- **Regular Audits**: Monitor supply changes and ensure they align with your tokenomics
+
+For detailed technical specifications, see the [TIP-20 Protocol Reference](/protocol/tokens/tip-20).

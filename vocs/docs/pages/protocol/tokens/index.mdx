@@ -1,0 +1,19 @@
+# TIP-20: Native Token Standard
+
+TIP-20 is a native token standard on Tempo, implemented directly within the Reth client. It is an extension of the ERC-20 standard, designed to address advanced payment and compliance requirements while maintaining full backward compatibility with ERC-20 interfaces.
+
+TIP-20 extends ERC-20 with several advanced features designed for payments and compliance.
+
+It introduces native role-based access control, allowing roles such as pauser, issuer, and burn-blocked to be delegated or revoked as needed for secure token administration. TIP-20 tokens can enforce custom transfer policies by integrating with the [TIP-403 Policy Registry](/protocol/tokens/tip-403), supporting regulatory requirements like whitelisting, blacklisting, and KYC/AML enforcement.
+
+The standard also supports supply cap management, letting authorized roles set or update the maximum token supply. For improved usability, TIP-20 includes native support for [EIP-2612](https://eips.ethereum.org/EIPS/eip-2612) permit functionality, enabling gasless approvals via off-chain signatures.
+
+Additionally, it offers `transferWithSig` for meta-transactions and delegated payments, and `transferWithMemo` for attaching memos to transfers. Finally, TIP-20 features a built-in allowance for the protocol’s FeeManager precompile, allowing transaction fees to be deducted directly in tokens.
+
+For detailed contract interfaces, see below:
+
+| Contract | Description |
+|----------------|-------------|
+| **[TIP-20](/protocol/tokens/tip-20)**     | Extends the `ERC-20` token standard for enhanced payment use-cases while maintaining backward compatibility. Introduces `TransferWithMemo` for including memos in transactions and allows inheriting access lists and policies via the TIP-403 Policy Registry. |
+| **[TIP-4217](/protocol/tokens/tip-4217)**   | Provides a currency metadata interface to standardize representations of stablecoins pegged to the same currency, focusing on decimal precision. |
+| **[TIP-403](/protocol/tokens/tip-403)**    | Offers an interface to register policies, such as access lists, that can be shared across `TIP-20` tokens. |

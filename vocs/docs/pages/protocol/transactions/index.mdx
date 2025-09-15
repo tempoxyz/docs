@@ -1,0 +1,19 @@
+# Transactions
+
+## Fees
+
+Tempo's fee system allows users to pay transaction fees in any supported USD stablecoin, with a target fee of approximately $0.001 USD per transfer. The system features multi-stablecoin support, automatic token conversion when needed, and a fixed base fee rate (20 × 10⁻⁹ USD per gas), all while maintaining network security and preventing spam.
+
+Roughly, it works like this:
+
+1. The user specifies a preferred fee token, or uses the default option.
+2. The validator specifies the preferred fee token they wish to receive.
+3. If the user's token and the validator's token match, the fee is paid directly to the validator.
+4. If the tokens differ, the system automatically converts the fee through the Fee AMM.
+5. In all cases, the fees ultimately go to the validator, maintaining network security.
+
+| Component | Description |
+|-----------|-------------|
+| [**Token Preferences**](/protocol/transactions/token-preferences) | 4-level system for determining fee token (Transaction → Account → Contract → Validator) |
+| [**Fee AMM**](/protocol/transactions/fee-amm) | Automated market maker for converting between different stablecoins |
+

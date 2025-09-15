@@ -1,0 +1,249 @@
+# Token Policies
+
+Token policies let you control who can transfer your tokens. You can create whitelist policies (only approved addresses can transfer) or blacklist policies (blocked addresses cannot transfer). This is useful for compliance, KYC requirements, or security.
+
+## Creating Policies
+
+### Create a Whitelist Policy
+
+```javascript
+import { getContract } from 'viem'
+
+const registry = getContract({
+  address: '0x403c000000000000000000000000000000000000', // TIP403Registry
+  abi: registryAbi,
+  client: wallet
+})
+
+// Create a whitelist policy
+const tx = await registry.write.createPolicy([
+  adminAddress, // Who can manage this policy
+  0 // 0 = WHITELIST
+])
+
+const receipt = await publicClient.waitForTransactionReceipt({ hash: tx })
+const policyId = receipt.logs[0].args.policyId
+```
+
+### Create a Blacklist Policy
+
+```javascript
+// Create a blacklist policy
+const tx = await registry.write.createPolicy([
+  adminAddress,
+  1 // 1 = BLACKLIST
+])
+
+const receipt = await publicClient.waitForTransactionReceipt({ hash: tx })
+const policyId = receipt.logs[0].args.policyId
+```
+
+### Create Policy with Initial Addresses
+
+```javascript
+// Create whitelist with initial addresses
+const tx = await registry.write.createPolicy([
+  adminAddress,
+  0, // WHITELIST
+  [user1Address, user2Address, user3Address] // Initial whitelist
+])
+```
+
+## Managing Whitelist Policies
+
+### Add Addresses to Whitelist
+
+```javascript
+// Add addresses to whitelist
+await registry.write.modifyPolicyWhitelist([
+  policyId,
+  userAddress,
+  true // true = whitelisted
+])
+```
+
+### Remove Addresses from Whitelist
+
+```javascript
+// Remove address from whitelist
+await registry.write.modifyPolicyWhitelist([
+  policyId,
+  userAddress,
+  false // false = not whitelisted
+])
+```
+
+### Batch Whitelist Updates
+
+```javascript
+// Add multiple addresses
+const addresses = [user1, user2, user3]
+const allowed = [true, true, true]
+
+for (let i = 0; i < addresses.length; i++) {
+  await registry.write.modifyPolicyWhitelist([
+    policyId,
+    addresses[i],
+    allowed[i]
+  ])
+}
+```
+
+## Managing Blacklist Policies
+
+### Add Addresses to Blacklist
+
+```javascript
+// Add address to blacklist
+await registry.write.modifyPolicyBlacklist([
+  policyId,
+  suspiciousAddress,
+  true // true = blacklisted
+])
+```
+
+### Remove Addresses from Blacklist
+
+```javascript
+// Remove address from blacklist
+await registry.write.modifyPolicyBlacklist([
+  policyId,
+  addressToUnblock,
+  false // false = not blacklisted
+])
+```
+
+## Applying Policies to Tokens
+
+### Set Transfer Policy
+
+```javascript
+const token = getContract({
+  address: tokenAddress,
+  abi: tip20Abi,
+  client: wallet // Must have DEFAULT_ADMIN_ROLE
+})
+
+// Apply the policy to your token
+await token.write.changeTransferPolicyId([policyId])
+```
+
+### Check Current Policy
+
+```javascript
+// Check what policy is currently applied
+const currentPolicy = await token.read.transferPolicyId()
+console.log(`Current policy ID: ${currentPolicy}`)
+```
+
+## Special Policies
+
+### Always Allow (Default)
+
+```javascript
+// Allow all transfers (default for new tokens)
+await token.write.changeTransferPolicyId([1n])
+```
+
+### Always Reject (Emergency Stop)
+
+```javascript
+// Block all transfers (emergency stop)
+await token.write.changeTransferPolicyId([0n])
+```
+
+## Common Use Cases
+
+### KYC Whitelist
+
+```javascript
+// Create KYC whitelist for compliance
+async function setupKYCWhitelist() {
+  // 1. Create whitelist policy
+  const tx = await registry.write.createPolicy([complianceAdmin, 0])
+  const receipt = await publicClient.waitForTransactionReceipt({ hash: tx })
+  const policyId = receipt.logs[0].args.policyId
+  
+  // 2. Add KYC'd users
+  const kycUsers = [user1, user2, user3]
+  for (const user of kycUsers) {
+    await registry.write.modifyPolicyWhitelist([policyId, user, true])
+  }
+  
+  // 3. Apply to token
+  await token.write.changeTransferPolicyId([policyId])
+  
+  console.log(`KYC whitelist policy ${policyId} applied to token`)
+}
+```
+
+### Security Blacklist
+
+```javascript
+// Create blacklist for security
+async function setupSecurityBlacklist() {
+  // 1. Create blacklist policy
+  const tx = await registry.write.createPolicy([securityAdmin, 1])
+  const receipt = await publicClient.waitForTransactionReceipt({ hash: tx })
+  const policyId = receipt.logs[0].args.policyId
+  
+  // 2. Add blocked addresses
+  const blockedAddresses = [hacker1, hacker2, suspiciousContract]
+  for (const address of blockedAddresses) {
+    await registry.write.modifyPolicyBlacklist([policyId, address, true])
+  }
+  
+  // 3. Apply to token
+  await token.write.changeTransferPolicyId([policyId])
+  
+  console.log(`Security blacklist policy ${policyId} applied to token`)
+}
+```
+
+## Policy Administration
+
+### Transfer Policy Admin
+
+```javascript
+// Transfer admin rights to another address
+await registry.write.setPolicyAdmin([
+  policyId,
+  newAdminAddress
+])
+```
+
+### Check Authorization
+
+```javascript
+// Check if an address is authorized under a policy
+const isAuthorized = await registry.read.isAuthorized([
+  policyId,
+  userAddress
+])
+
+console.log(`Address ${userAddress} is ${isAuthorized ? 'authorized' : 'not authorized'}`)
+```
+
+## Monitoring Policy Changes
+
+```javascript
+// Listen for whitelist updates
+registry.watchEvent.WhitelistUpdated({
+  onLogs: (logs) => {
+    logs.forEach((log) => {
+      console.log(`Policy ${log.args.policyId}: ${log.args.account} ${log.args.allowed ? 'added to' : 'removed from'} whitelist`)
+    })
+  }
+})
+
+// Listen for blacklist updates
+registry.watchEvent.BlacklistUpdated({
+  onLogs: (logs) => {
+    logs.forEach((log) => {
+      console.log(`Policy ${log.args.policyId}: ${log.args.account} ${log.args.restricted ? 'added to' : 'removed from'} blacklist`)
+    })
+  }
+})
+```
+
+For detailed technical specifications, see the [TIP-403 Protocol Reference](/protocol/tokens/tip-403).
