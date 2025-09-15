@@ -9,6 +9,16 @@ export default defineConfig({
         dark:
             "https://raw.githubusercontent.com/tempoxyz/.github/refs/heads/main/assets/combomark-dark.svg",
     },
+    socials: [ 
+        { 
+          icon: "github", 
+          link: "https://github.com/tempoxyz", 
+        }, 
+        { 
+          icon: "x", 
+          link: "https://twitter.com/tempo", 
+        }, 
+      ],
     sidebar: {
          "/testnet": [
              {
@@ -104,7 +114,11 @@ export default defineConfig({
                  text: "Overview",
                  link: "/protocol",
              },
-            {
+             {
+                text: "Github",
+                link: "https://github.com/tempoxyz/specs",
+             },
+             {
                 text: "Tokens",
                 items: [
                     {
