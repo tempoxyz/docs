@@ -66,16 +66,16 @@ await feeManager.setUserToken(usdcTokenAddress);
 ### Changing Your Default
 
 ```javascript
-// Change default to DAI
-await feeManager.setUserToken(daiTokenAddress);
+// Change default
+await feeManager.setUserToken(newUSDTokenAddress);
 
 // Remove default (will use validator's preference)
-await feeManager.setUserToken(ethers.ZeroAddress);
+await feeManager.setUserToken(viem.ZeroAddress);
 ```
 
 ## Fee Token Requirements
 
-- Must be a **USD stablecoin** (USDC, USDT, DAI, etc.)
+- Must be a **USD stablecoin**
 - Must have **sufficient balance** to cover the transaction's gas limit
 - Must have **liquidity** in the Fee AMM for conversion if needed
 - **Transaction-level** preferences override account-level preferences
