@@ -22,9 +22,8 @@ Adagio (Adagio) network details and connection information.
 | **Network Name**   | Adagio (Adagio)              |
 | **Chain ID**       | `42424`                               |
 | **RPC URL**        | `https://rpc-adagio.tempoxyz.dev`     |
-| **RPC Username**   | `vigorous-volhard`                    |
-| **RPC Password**   | `reverent-lamarr`                     |
 
+Speak to the Tempo team for an RPC username and password.
 
 ### Example
 
@@ -32,7 +31,7 @@ To connect to the Adagio (Adagio) and retrieve the latest block information usin
 
 ```sh
 cast block \
-   --rpc-url https://agitated-davinci:frosty-ellis@rpc-adagio.tempoxyz.dev
+   --rpc-url https://${RPC_USERNAME}:${RPC_PASSWORD}@rpc-adagio.tempoxyz.dev
 ```
 
 ## Explorer & Tools
@@ -42,8 +41,8 @@ For now we have stood up a very basic Blockscout instance to explore the testnet
 | Explorer Parameter         | Value                                           |
 |----------------------------|-------------------------------------------------|
 | **Block Explorer**         | `https://adagio.cloud.blockscout.com/`          |
-| **Block Explorer Username**| `tempo`                                         |
-| **Block Explorer Password**| `reverent-einstein-thirsty-edison`              |
+
+Speak to the Tempo team for an explorer username and password.
 
 If there are any tools you rely on we can preconfigure for future testnets, let us know.
 
@@ -100,10 +99,10 @@ Get TestUSD tokens using the built-in faucet:
 ```bash
 # Fund your address with TestUSD
 cast rpc tempo_fundAddress 0x820525B56cF3cD426e58507F65DCaCB90BceEFb8 \
-  --rpc-url https://vigorous-volhard:reverent-lamarr@rpc-adagio.tempoxyz.dev
+  --rpc-url https://${RPC_USERNAME}:${RPC_PASSWORD}@rpc-adagio.tempoxyz.dev
 
 # Check your TestUSD balance
 cast balance --erc20 0x20c0000000000000000000000000000000000000 \
   0x820525B56cF3cD426e58507F65DCaCB90BceEFb8 \
-  --rpc-url https://vigorous-volhard:reverent-lamarr@rpc-adagio.tempoxyz.dev
+  --rpc-url https://${RPC_USERNAME}:${RPC_PASSWORD}@rpc-adagio.tempoxyz.dev
 ```
