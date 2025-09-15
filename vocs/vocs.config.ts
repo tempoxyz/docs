@@ -112,6 +112,15 @@ export default defineConfig({
                     },
                 ],
             },
+            {
+                text: "Liquidity",
+                items: [
+                    {
+                        text: "Fee AMM",
+                        link: "/documentation/liquidity/fee-amm",
+                    },
+                ],
+            },
         ],
          "/protocol": [
              {

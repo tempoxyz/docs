@@ -1,0 +1,146 @@
+# Adding Liquidity to the Fee AMM
+
+The Fee AMM is a specialized Automated Market Maker designed to facilitate gas fee payments in user-preferred stablecoins. By providing liquidity to the Fee AMM, you help ensure smooth fee conversions while earning rewards from trading activity. This system addresses the [motivation](/protocol/transactions/fee-amm#motivation) of reducing friction for users who prefer to transact in stablecoins rather than native tokens.
+
+## Overview
+
+The Fee AMM operates with two distinct swap mechanisms:
+
+- **[Fee Swaps](/protocol/transactions/fee-amm#fee-swaps)**: Fixed-rate swaps at 99.75% for gas fee conversions (protocol-only)
+- **[Rebalancing Swaps](/protocol/transactions/fee-amm#rebalancing-swaps)**: Variable-rate swaps to restore pool balance (public)
+
+As a liquidity provider, you earn fees from both types of swaps while helping maintain the pool's balance for efficient fee conversions. The system is designed with [MEV mitigation strategies](/protocol/transactions/fee-amm#mev-mitigation-strategy) to prevent spam and ensure fair operation.
+
+## Contract Interface
+
+The Fee AMM is implemented through the `StableAMM` contract. For complete technical specifications including all functions, events, and data structures, see the [Fee AMM Protocol Specification](/protocol/transactions/fee-amm).
+
+Key functions for liquidity provision:
+- [`addLiquidity()`](/protocol/transactions/fee-amm#liquidity-provision) - Add liquidity to a pool
+- [`removeLiquidity()`](/protocol/transactions/fee-amm#liquidity-provision) - Remove liquidity from a pool  
+- [`getReserves()`](/protocol/transactions/fee-amm#pool-structure) - Get current pool reserves
+- [`balanceOf()`](/protocol/transactions/fee-amm#liquidity-provision) - Get LP token balance
+
+## Adding Liquidity
+
+### Prerequisites
+
+1. **USD Stablecoins**: Only USD-denominated stablecoins are supported
+2. **Token Approval**: Approve the AMM contract to spend your tokens
+3. **Sufficient Balance**: Ensure you have enough of both tokens
+4. **Pool Exists**: The token pair must already exist in the AMM
+
+### Basic Example
+
+First, approve both tokens for the AMM contract to spend:
+
+```javascript
+await usdc.write.approve([ammAddress, usdcAmount])
+await usdt.write.approve([ammAddress, usdtAmount])
+```
+
+Then call [`addLiquidity()`](/protocol/transactions/fee-amm#liquidity-provision) with equal amounts of both tokens. The function returns the actual amounts added and the LP tokens minted:
+
+```javascript
+const tx = await amm.write.addLiquidity([
+  usdcAddress,    // token0
+  usdtAddress,    // token1
+  usdcAmount,     // amount0Desired
+  usdtAmount,     // amount1Desired
+  0n,             // amount0Min (no slippage protection)
+  0n,             // amount1Min
+  yourAddress
+])
+```
+
+The AMM uses a [concentrated liquidity formula](/protocol/transactions/fee-amm#concentrated-liquidity-formula) to determine the optimal ratio, and you receive fungible LP tokens representing your share of the pool.
+
+### With Slippage Protection
+
+To protect against price changes during the transaction, set minimum amounts you're willing to accept. This is especially important since the pool can experience temporary imbalances from fee swaps:
+
+```javascript
+const usdcMin = usdcAmount * 95n / 100n  // 5% slippage tolerance
+const usdtMin = usdtAmount * 95n / 100n
+
+const tx = await amm.write.addLiquidity([
+  usdcAddress,
+  usdtAddress,
+  usdcAmount,
+  usdtAmount,
+  usdcMin,    // minimum USDC to receive
+  usdtMin,    // minimum USDT to receive
+  yourAddress
+])
+```
+
+## Removing Liquidity
+
+### Basic Removal
+
+To remove all your liquidity, first get your LP token balance:
+
+```javascript
+const lpBalance = await amm.read.balanceOf([yourAddress])
+```
+
+Then call [`removeLiquidity()`](/protocol/transactions/fee-amm#liquidity-provision) to burn your LP tokens and get back the underlying tokens. Note that withdrawals may be blocked if they would prevent pending fee swaps:
+
+```javascript
+const tx = await amm.write.removeLiquidity([
+  usdcAddress,
+  usdtAddress,
+  lpBalance,  // amount of LP tokens to burn
+  0n,         // minimum USDC to receive
+  0n,         // minimum USDT to receive
+  yourAddress
+])
+```
+
+### Remove Half Your Position
+
+To remove only part of your position:
+
+```javascript
+const halfBalance = lpBalance / 2n
+
+const tx = await amm.write.removeLiquidity([
+  usdcAddress,
+  usdtAddress,
+  halfBalance,
+  0n,
+  0n,
+  yourAddress
+])
+```
+
+## LP Token Management
+
+### Check Your LP Tokens
+
+Check your LP token balance:
+
+```javascript
+const lpBalance = await amm.read.balanceOf([yourAddress])
+```
+
+### Check Pool Reserves
+
+Check current pool reserves:
+
+```javascript
+const [usdcReserve, usdtReserve] = await amm.read.getReserves([usdcAddress, usdtAddress])
+```
+
+## Earning Rewards
+
+As a liquidity provider, you earn fees from both types of swaps in the Fee AMM:
+
+- **[Fee Swaps](/protocol/transactions/fee-amm#fee-swaps)**: 0.25% fee on all gas fee conversions (fixed rate at m=0.9975)
+- **[Rebalancing Swaps](/protocol/transactions/fee-amm#rebalancing-swaps)**: Variable fees from arbitrage activity
+
+Fees are automatically added to the pool reserves, increasing the value of your LP tokens over time. The system processes fee swaps at the end of each block, ensuring consistent fee distribution.
+
+
+For complete technical specifications, contract interfaces, and implementation details, see the [Fee AMM Protocol Specification](/protocol/transactions/fee-amm).
+
