@@ -231,10 +231,10 @@ abstract contract TIP20RolesAuth {
 #### Functions
 
 ```solidity
-function grantRole(bytes32 role, address account) external onlyRole(roleAdmin[role])
-function revokeRole(bytes32 role, address account) external onlyRole(roleAdmin[role])
-function renounceRole(bytes32 role) external onlyRole(role)
-function setRoleAdmin(bytes32 role, bytes32 adminRole) external onlyRole(roleAdmin[role])
+function grantRole(bytes32 role, address account) external onlyRole(roleAdmin[role]);
+function revokeRole(bytes32 role, address account) external onlyRole(roleAdmin[role]);
+function renounceRole(bytes32 role) external onlyRole(role);
+function setRoleAdmin(bytes32 role, bytes32 adminRole) external onlyRole(roleAdmin[role]);
 ```
 
 #### Modifiers
