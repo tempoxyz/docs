@@ -1,0 +1,109 @@
+# Adagio (Testnet 1)
+
+## Release Notes
+
+Adagio is the first release of a proof-of-concept of early Tempo features.
+
+We started the Adagio network on September 3rd, 2025.
+
+The main features includes were the first implementations of token standards and the ability to pay for transactions using a single stablecoin implementing the token standard.
+
+| Feature                        | Spec                                                                 | Guides                                                                                 |
+|---------------------------------|----------------------------------------------------------------------|----------------------------------------------------------------------------------------|
+| TIP-20, TIP-403, TIP-4217       | [TIP-20](/protocol/tokens/tip-20), [TIP-403](/protocol/tokens/tip-403), [TIP-4217](/protocol/tokens/tip-4217) | [Token Docs](/documentation/tokens) |
+| Pay fees in one stablecoin      | [Fees Spec](/protocol/fees)                                         | [Transaction Fees](/documentation/transactions/fees)                                   |
+
+## Connecting to Network
+
+Adagio (Adagio) network details and connection information.
+
+| Network Parameter  | Value                                 |
+|--------------------|---------------------------------------|
+| **Network Name**   | Adagio (Adagio)              |
+| **Chain ID**       | `42424`                               |
+| **RPC URL**        | `https://rpc-adagio.tempoxyz.dev`     |
+| **RPC Username**   | `vigorous-volhard`                    |
+| **RPC Password**   | `reverent-lamarr`                     |
+
+
+### Example
+
+To connect to the Adagio (Adagio) and retrieve the latest block information using `cast`, you can use the following command:
+
+```sh
+cast block \
+   --rpc-url https://agitated-davinci:frosty-ellis@rpc-adagio.tempoxyz.dev
+```
+
+## Explorer & Tools
+
+For now we have stood up a very basic Blockscout instance to explore the testnet.
+
+| Explorer Parameter         | Value                                           |
+|----------------------------|-------------------------------------------------|
+| **Block Explorer**         | `https://adagio.cloud.blockscout.com/`          |
+| **Block Explorer Username**| `tempo`                                         |
+| **Block Explorer Password**| `reverent-einstein-thirsty-edison`              |
+
+If there are any tools you rely on we can preconfigure for future testnets, let us know.
+
+## Predeployed Contracts
+
+### TIP-20
+
+The following are the predeployed addresses for Tempo protocol contracts.
+
+| Contract             | Address                                      |
+|----------------------|----------------------------------------------|
+| TIP20 Factory        | `0x20FC000000000000000000000000000000000000` |
+| Fee Manager          | `0x1559000000000000000000000000000000000000` |
+| TIP403 Registry      | `0x403C000000000000000000000000000000000000` |
+| TIP4217 Registry     | `0x4217C00000000000000000000000000000000000` |
+| TIP20 Token Pattern  | `0x20C0000000000000000000000000000[TOKEN_ID]`|
+
+### Supporting Contracts
+
+There are three other predeployed contracts available on Adagio.
+
+| Contract   | Address                                      |
+|------------|----------------------------------------------|
+| Multicall3 | `0xcA11bde05977b3631167028862bE2a173976CA11` |
+| CreateX    | `0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed` |
+| Permit2    | `0x000000000022d473030f116ddee9f6b43ac78ba3` |
+
+If you think others should be available, please let us know!
+
+## Testnet Tokens
+
+There is a single token available on the first testnet for use in paying gas fees.
+
+### TestUSD
+
+The gas token for Adagio. Future testnets will allow paying gas in any USD stablecoin.
+
+| Parameter  | Value                                      |
+|------------|--------------------------------------------|
+| **Address**| `0x20c0000000000000000000000000000000000000`|
+| **Symbol** | TestUSD                                    |
+| **Decimals**| 18                                        |
+
+Get TestUSD tokens using our builtin faucet for the testnet.
+
+```bash
+cast rpc tempo_fundAddress 0x820525B56cF3cD426e58507F65DCaCB90BceEFb8
+```
+
+### Using the Faucet
+
+Get TestUSD tokens using the built-in faucet:
+
+```bash
+# Fund your address with TestUSD
+cast rpc tempo_fundAddress 0x820525B56cF3cD426e58507F65DCaCB90BceEFb8 \
+  --rpc-url https://vigorous-volhard:reverent-lamarr@rpc-adagio.tempoxyz.dev
+
+# Check your TestUSD balance
+cast balance --erc20 0x20c0000000000000000000000000000000000000 \
+  0x820525B56cF3cD426e58507F65DCaCB90BceEFb8 \
+  --rpc-url https://vigorous-volhard:reverent-lamarr@rpc-adagio.tempoxyz.dev
+```

@@ -1,0 +1,162 @@
+# Roles & Permissions
+
+TIP-20 tokens use a role-based access control system that allows you to delegate different administrative functions to different addresses. This is essential for security and operational flexibility.
+
+## Available Roles
+
+| Role | Purpose | Key Functions |
+|------|---------|---------------|
+| **DEFAULT_ADMIN_ROLE** | Full control | Grant/revoke all roles, set supply caps, change policies |
+| **ISSUER_ROLE** | Token supply | Mint and burn tokens |
+| **PAUSE_ROLE** | Emergency control | Pause token transfers |
+| **UNPAUSE_ROLE** | Emergency control | Unpause token transfers |
+| **BURN_BLOCKED_ROLE** | Compliance | Burn tokens from blocked addresses |
+
+## Granting Roles
+
+### Grant Issuer Role
+
+```javascript
+import { getContract } from 'viem'
+
+const token = getContract({
+  address: tokenAddress,
+  abi: tip20Abi,
+  client: wallet
+})
+
+// Grant minting rights to treasury
+await token.write.grantRole([
+  '0x' + keccak256('ISSUER_ROLE').slice(2), // ISSUER_ROLE
+  treasuryAddress
+])
+```
+
+### Grant Pause Role
+
+```javascript
+// Grant pause rights to security team
+await token.write.grantRole([
+  '0x' + keccak256('PAUSE_ROLE').slice(2), // PAUSE_ROLE
+  securityTeamAddress
+])
+```
+
+### Grant Multiple Roles
+
+```javascript
+// Grant multiple roles to a multisig
+const roles = [
+  '0x' + keccak256('ISSUER_ROLE').slice(2),
+  '0x' + keccak256('PAUSE_ROLE').slice(2),
+  '0x' + keccak256('UNPAUSE_ROLE').slice(2)
+]
+
+for (const role of roles) {
+  await token.write.grantRole([role, multisigAddress])
+}
+```
+
+## Revoking Roles
+
+```javascript
+// Remove minting rights from old treasury
+await token.write.revokeRole([
+  '0x' + keccak256('ISSUER_ROLE').slice(2),
+  oldTreasuryAddress
+])
+```
+
+## Checking Role Membership
+
+```javascript
+// Check if address has issuer role
+const hasIssuerRole = await token.read.hasRole([
+  '0x' + keccak256('ISSUER_ROLE').slice(2),
+  addressToCheck
+])
+```
+
+## Role Management Best Practices
+
+### Use Multisig Wallets
+
+Always use multisig wallets for administrative roles:
+
+```javascript
+// Grant admin role to multisig (not individual)
+await token.write.grantRole([
+  '0x0000000000000000000000000000000000000000000000000000000000000000', // DEFAULT_ADMIN_ROLE
+  multisigAddress
+])
+```
+
+### Separate Concerns
+
+Don't give all roles to one address:
+
+- **Treasury team**: ISSUER_ROLE only
+- **Security team**: PAUSE_ROLE and UNPAUSE_ROLE
+- **Compliance team**: BURN_BLOCKED_ROLE
+- **Governance**: DEFAULT_ADMIN_ROLE
+
+### Regular Audits
+
+Periodically review who has what roles:
+
+```javascript
+// Check all roles for an address
+const roles = [
+  'DEFAULT_ADMIN_ROLE',
+  'ISSUER_ROLE', 
+  'PAUSE_ROLE',
+  'UNPAUSE_ROLE',
+  'BURN_BLOCKED_ROLE'
+]
+
+for (const roleName of roles) {
+  const role = '0x' + keccak256(roleName).slice(2)
+  const hasRole = await token.read.hasRole([role, addressToCheck])
+  console.log(`${roleName}: ${hasRole}`)
+}
+```
+
+## Role Events
+
+The token emits events when roles are granted or revoked:
+
+```javascript
+// Listen for role changes
+token.watchEvent.RoleMembershipUpdated({
+  onLogs: (logs) => {
+    logs.forEach((log) => {
+      console.log(`Role ${log.args.role} ${log.args.hasRole ? 'granted to' : 'revoked from'} ${log.args.account}`)
+    })
+  }
+})
+```
+
+## Emergency Procedures
+
+### Immediate Pause
+
+If you have PAUSE_ROLE, you can immediately stop all transfers:
+
+```javascript
+await token.write.pause()
+```
+
+### Remove Compromised Roles
+
+If an address is compromised, immediately revoke all roles:
+
+```javascript
+const compromisedAddress = '0x...'
+const allRoles = [/* role hashes */]
+
+for (const role of allRoles) {
+  await token.write.revokeRole([role, compromisedAddress])
+}
+```
+
+For detailed technical specifications, see the [TIP-20 Protocol Reference](/protocol/tokens/tip-20).

@@ -1,0 +1,17 @@
+# Stablecoin neutrality [Avoiding enshrining issuers or assets]
+
+Stablecoin usage today is fragmented across issuers, rails, and venues. Tempo treats all fiat‑backed tokens as peers and focuses on two pragmatic capabilities that reduce friction.
+
+## Pay network fees in any supported stablecoin
+
+Participants can pay network fees (gas) in the stablecoin they already hold (USD at launch, with others to follow). For consumer apps, processors, and treasurers, this removes the "wrong‑denomination gas" problem, reduces drop‑offs at onboarding, and simplifies accounting since principal and fees share a currency. This feature is enabled by an enshrined Automated Market Maker (Fee-AMM)  that allows users to trade fee stablecoins for the validator's preferred stablecoin. 
+
+## Stablecoin Interoperability
+
+A major goal of Tempo is what we term *stablecoin interoperability:* users can pay in a stablecoin of their choice, while the recipient receives one that they prefer. This enables straightforward payments between parties in different regulatory regimes, which have different stablecoin preferences. 
+
+## Enshrined Cross-stablecoin Decentralized Exchange (DEX)
+
+We achieve these goals via protocol‑native, enshrined decentralized exchanges specialized for trades between stables pegged to the same underlying currency. Its scope is deliberately narrow: keep conversions between tokens pegged to the same fiat currency efficient. 
+
+* Internally, the DEX uses a USD‑denominated accounting unit, linkingUSD, that is non‑transferable, i.e., not usable as a standard stablecoin. Stables trade only against this linkingUSD so that routing is simple,  liquidity fragmentation is minimized, and no specific issuer's token is privileged. By concentrating liquidity where it matters for payments, it reduces reconciliation noise and slippage in everyday flows. 

@@ -1,0 +1,170 @@
+# Fee AMM Specification
+
+## Abstract
+
+This specification defines a dual-purpose Automated Market Maker (AMM) designed to facilitate gas fee payments in user-preferred stablecoins at a constant price, while allowing other users to trade at variable prices to rebalance the pool. The system enables validators to receive fees in their preferred token while users pay in their chosen stablecoin, with automatic conversion handled by the protocol.
+
+## Motivation
+
+Current blockchain fee systems typically require users to hold native tokens for gas payments. This creates friction for users who prefer to transact in stablecoins. 
+
+The Fee AMM is a dedicated AMM for trading between stablecoins, which can only be used by validators to trade tokens they've received as fees in that block, or by arbitrageurs rebalancing it to keep it balanced. The protocol automatically collects fees in many different coins during the block, and then sells them all at the end of the block (paying a constant price). It permits some top-of-block MEV to rebalance the pool, but is designed to minimize the backrunning or JIT MEV that can lead to spam.
+
+### MEV Mitigation Strategy
+
+The system is designed to minimize several forms of MEV:
+
+- **No Probabilistic MEV**: The fixed fee swap rate and batch settlement prevent profitable backrunning of fee swaps. There is no way to profitably spam the chain with transactions hoping an opportunity might arise.
+- **No Sandwich Attacks**: Fee swaps execute at a fixed rate and settle atomically at block end, eliminating sandwich attack vectors.
+- **Top-of-Block Auction**: The main MEV in the AMM (from rebalancing) occurs as a single race at the top of the next block rather than creating probabilistic spam throughout.
+
+## Specification
+
+### Overview
+
+The Fee AMM implements two distinct swap mechanisms:
+
+1. **Fee Swaps**: Fixed-rate swaps at m=0.9975 for gas fee conversions
+2. **Rebalancing Swaps**: Variable-rate swaps to restore pool balance
+
+### Core Components
+
+#### 1. StableAMM Contract
+
+The primary AMM contract managing liquidity pools and swap operations.
+
+##### Pool Structure
+```solidity
+struct Pool {
+    uint128 reserve0;           // Reserve of token0
+    uint128 reserve1;           // Reserve of token1
+    uint128 pendingFeeSwap0In;  // Pending token0 input from fee swaps
+    uint128 pendingFeeSwap1In;  // Pending token1 input from fee swaps
+}
+```
+
+##### Key Functions
+
+**`feeSwap(token0, token1, tokenIn, amountIn, to)`**
+- Executes fee swaps at fixed rate m=0.9975
+- Returns: `amountOut = amountIn * 0.9975`
+- Access: Protocol only (msg.sender == address(0))
+- Tracks pending inputs for later settlement
+
+**`rebalanceSwap(token0, token1, tokenIn, amountIn, to)`**
+- Executes rebalancing swaps toward pool balance
+- Only allowed in direction that reduces imbalance
+- Price determined by concentrated liquidity formula
+- Access: Public
+
+**`executePendingFeeSwaps(token0, token1)`**
+- Settles all pending fee swaps by updating reserves
+- Returns actual input amounts processed
+- Access: FeeManager only
+
+#### 2. FeeManager Contract
+
+Coordinates fee collection and distribution.
+
+##### Key Functions
+
+**`collectFeePreTx(user, maxAmount)`**
+- Called before transaction execution
+- Collects maximum possible fee from protocol
+- Verifies pool liquidity sufficiency
+- Returns user's token preference
+
+**`collectFeePostTx(user, actualUsed, userToken)`**
+- Called after transaction execution
+- Refunds unused tokens to user
+- Queues actual used amount for fee swaps
+
+**`executeBlock()`**
+- Called at end of each block
+- Executes pending fee swaps via AMM
+- Transfers converted tokens to validator
+- Access: Protocol only
+
+### Swap Mechanisms
+
+#### Fee Swaps
+- **Rate**: Fixed at m=0.9975 (seller receives 99.75% of input value)
+- **Direction**: Bidirectional (only one direction per block)
+- **Purpose**: Convert user fee tokens to validator preferred tokens
+- **Settlement**: Batched at block end
+
+#### Rebalancing Swaps
+- **Rate**: Variable, determined by pool reserves (based on concentrated liquidity constant-product)
+- **Direction**: Only toward balance (reduces larger reserve)
+- **Purpose**: Restore pool equilibrium
+
+### Concentrated Liquidity Formula
+
+The AMM uses a modified constant product formula similar to a concentrated Uniswap V3 position:
+
+```
+(x + L√m)(y + L√m) = L²
+```
+
+Where:
+- `x`, `y` = current reserves
+- `m` = 0.9975 (price bound parameter)
+- `L` = dynamic liquidity parameter
+
+Unlike in Uniswap v3, liquidity L must be recomputed each block based on `x` and `y` (since `x` and `y` can change as a result of the fee swaps, while the lower and upper prices of the liquidity range must remain constant). It is computed as:
+
+```
+L = (√(m(x-y)² + 4xy) + √m(x+y)) / (2-2m)
+```
+
+**Key Properties**:
+- At extremes (one token depleted), exchange rate approaches 0.9975 (the price experienced by fee swappers)
+- Liquidity must be recomputed per trade due to fee swap impacts
+
+### Liquidity Provision
+
+#### Adding Liquidity
+- Open to anyone
+- Receives fungible LP tokens
+- Pro-rata share of pool reserves
+- First provider sets initial ratio
+
+#### Removing Liquidity
+- Burns LP tokens
+- Receives pro-rata share of reserves
+- Blocked if withdrawal would prevent pending swaps
+
+### Fee Collection Flow
+
+1. **Pre-Transaction**:
+   - Protocol calculates maximum gas needed
+   - FeeManager verifies pool liquidity
+   - Collects maximum fee from user
+
+2. **Post-Transaction**:
+   - Calculate actual gas used
+   - Refund excess to user
+   - Queue remainder for swap
+
+3. **Block End**:
+   - Execute all pending fee swaps
+   - Update pool reserves
+   - Transfer proceeds to validators
+
+### Events
+
+```solidity
+event PoolCreated(address indexed token0, address indexed token1)
+event RebalanceSwap(address indexed token0, address indexed token1, address indexed user, address tokenIn, uint256 amountIn, uint256 amountOut)
+event Mint(address indexed sender, address indexed token0, address indexed token1, uint256 amount0, uint256 amount1, uint256 liquidity)
+event Burn(address indexed sender, address indexed token0, address indexed token1, uint256 amount0, uint256 amount1, uint256 liquidity, address to)
+```
+
+`Transfer` events are fired as usual. `Transfer` events that are logged as part of the end-of-block operations should have a tx hash of `0xfee000...`.
+
+### Gas Considerations
+
+Fee operations are designed to be gas-free from the user perspective:
+- Collection happens at protocol level
+- Swaps execute outside normal transaction flow
+- Block-end settlement requires no user gas

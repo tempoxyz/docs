@@ -1,0 +1,81 @@
+# Transaction Fees
+
+Tempo lets you pay transaction fees in stablecoins instead of a native network token. When you send a transaction, you can choose which supported token to use for fees.
+
+By default, Tempo will use your preferred fee token if you’ve set one, or you can pick a different token for each transaction. The fee is automatically deducted from your balance in that token, and you don’t have to worry about conversions or extra steps.
+
+This makes it easy to use Tempo for payments and everyday transactions, since you can pay fees directly in the same stablecoins you already use.
+
+
+## Custom Fee Tokens
+
+When sending a transaction, you can specify which stablecoin to use for fees by including a `fee_token` field in your transaction. This gives you complete control over which token is used for that specific transaction.
+
+### Example: Sending USDC with USDC Fees
+
+```javascript
+// Create a transaction that pays fees in USDC
+const transaction = {
+    to: recipientAddress,
+    value: 0,
+    data: transferData,
+    fee_token: usdcTokenAddress, // Specify USDC as fee token
+    maxFeePerGas: 20000000000,   // 20 gwei in 10^-9 USD
+    maxPriorityFeePerGas: 0,
+    gasLimit: 50000
+};
+
+// Send the transaction
+const txHash = await wallet.sendTransaction(transaction);
+```
+
+The system will automatically:
+1. Check if you have sufficient balance in the specified fee token
+2. Deduct the appropriate fee amount from that token
+3. Either pay the validator directly (if they prefer the same token) or convert it through a built in Fee AMM that will find liquidity for your preferred fee-paying stablecoin.
+
+You can learn more about the [Fee AMM](/protocol/transactions/fee-amm) in the protocol specifications.
+
+## Set a Default Fee Token
+
+You can set a default fee token preference for your account to avoid specifying it in every transaction.
+
+### Using the FeeManager Precompile
+
+```javascript
+// Set USDC as your default fee token
+import { getContract } from 'viem'
+
+const feeManager = getContract({
+  // FeeManager precompile
+  address: '0x1559c00000000000000000000000000000000000',
+  abi: feeManagerAbi,
+  client: wallet, // viem wallet client instance
+})
+
+await feeManager.setUserToken(usdcTokenAddress);
+```
+
+### What This Does
+
+- **All future transactions** will use USDC for fees by default
+- **Transaction-level preferences** still override this setting
+- **No fee token specified** in a transaction will use your default
+- **One-time setup** - you don't need to specify the fee token in every transaction
+
+### Changing Your Default
+
+```javascript
+// Change default to DAI
+await feeManager.setUserToken(daiTokenAddress);
+
+// Remove default (will use validator's preference)
+await feeManager.setUserToken(ethers.ZeroAddress);
+```
+
+## Fee Token Requirements
+
+- Must be a **USD stablecoin** (USDC, USDT, DAI, etc.)
+- Must have **sufficient balance** to cover the transaction's gas limit
+- Must have **liquidity** in the Fee AMM for conversion if needed
+- **Transaction-level** preferences override account-level preferences

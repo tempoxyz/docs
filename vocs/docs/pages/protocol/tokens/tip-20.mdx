@@ -1,0 +1,334 @@
+# TIP-20 [Core Token Standard]
+
+TIP-20 provides a complete token implementation suite consisting of three core contracts: the main token contract, a factory for deployment, and a role-based access control system. The standard enhances ERC-20 with payment-specific features while maintaining compatibility with existing Ethereum tooling.
+
+## Motivation
+
+Traditional ERC-20 tokens lack features essential for real-world payments:
+
+- **Memo Support**: No way to include transaction references or notes
+- **Compliance Integration**: No built-in access control or policy enforcement
+- **Administrative Controls**: Limited administrative capabilities
+- **Fee System Integration**: No integration with blockchain fee mechanisms
+
+TIP-20 addresses these limitations while maintaining full ERC-20 compatibility.
+
+## Specification
+
+### Core Contracts
+
+The TIP-20 standard consists of three contracts:
+
+1. **TIP20.sol** - Main token implementation
+2. **TIP20Factory.sol** - Token deployment factory
+3. **TIP20RolesAuth.sol** - Role-based access control
+
+### TIP20.sol - Main Token Contract
+
+#### Contract Interface
+
+```solidity
+contract TIP20 is TIP20RolesAuth {
+    // Registry addresses
+    TIP403Registry internal constant TIP403_REGISTRY = TIP403Registry(0x403c000000000000000000000000000000000000);
+    TIP4217Registry internal constant TIP4217_REGISTRY = TIP4217Registry(0x4217c00000000000000000000000000000000000);
+    address internal constant FEEMANAGER_PRECOMPILE = 0x1559c00000000000000000000000000000000000;
+}
+```
+
+#### State Variables
+
+| Variable | Type | Description |
+|----------|------|-------------|
+| `name` | `string` | Token name |
+| `symbol` | `string` | Token symbol |
+| `currency` | `string` | Currency code (e.g., "USD", "EUR") |
+| `totalSupply` | `uint256` | Total token supply |
+| `balanceOf` | `mapping(address => uint256)` | Account balances |
+| `allowance` | `mapping(address => mapping(address => uint256))` | Spending allowances |
+| `nonces` | `mapping(address => uint256)` | Nonces for permit signatures |
+| `salts` | `mapping(address => mapping(bytes4 => bool))` | Used salts for transferWithSig |
+| `paused` | `bool` | Pause state |
+| `supplyCap` | `uint256` | Maximum supply limit |
+| `transferPolicyId` | `uint64` | Current transfer policy ID |
+| `DOMAIN_SEPARATOR` | `bytes32` | EIP-712 domain separator |
+
+#### Roles
+
+| Role | Constant | Description |
+|------|----------|-------------|
+| `DEFAULT_ADMIN_ROLE` | `0` | Full administrative control |
+| `PAUSE_ROLE` | `keccak256("PAUSE_ROLE")` | Can pause the contract |
+| `UNPAUSE_ROLE` | `keccak256("UNPAUSE_ROLE")` | Can unpause the contract |
+| `ISSUER_ROLE` | `keccak256("ISSUER_ROLE")` | Can mint and burn tokens |
+| `BURN_BLOCKED_ROLE` | `keccak256("BURN_BLOCKED_ROLE")` | Can burn tokens from blocked addresses |
+
+#### Core Functions
+
+##### Standard ERC-20 Functions
+
+```solidity
+function transfer(address to, uint256 amount) external returns (bool)
+function approve(address spender, uint256 amount) external returns (bool)
+function transferFrom(address from, address to, uint256 amount) external returns (bool)
+function balanceOf(address account) external view returns (uint256)
+function allowance(address owner, address spender) external view returns (uint256)
+function totalSupply() external view returns (uint256)
+```
+
+##### EIP-2612 Permit
+
+```solidity
+function permit(
+    address owner,
+    address spender,
+    uint256 value,
+    uint256 deadline,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+) external
+```
+
+##### TIP-20 Extensions
+
+```solidity
+function transferWithMemo(address to, uint256 amount, bytes32 memo) external
+function transferFromWithMemo(address from, address to, uint256 amount, bytes32 memo) external
+function transferWithSig(
+    address from,
+    address to,
+    uint256 value,
+    uint256 deadline,
+    bytes4 salt,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+) external
+```
+
+##### Administrative Functions
+
+```solidity
+function mint(address to, uint256 amount) external onlyRole(ISSUER_ROLE)
+function burn(uint256 amount) external onlyRole(ISSUER_ROLE)
+function burnBlocked(address from, uint256 amount) external onlyRole(BURN_BLOCKED_ROLE)
+function mintWithMemo(address to, uint256 amount, bytes32 memo) external onlyRole(ISSUER_ROLE)
+function burnWithMemo(uint256 amount, bytes32 memo) external onlyRole(ISSUER_ROLE)
+function pause() external onlyRole(PAUSE_ROLE)
+function unpause() external onlyRole(UNPAUSE_ROLE)
+function setSupplyCap(uint256 newSupplyCap) external onlyRole(DEFAULT_ADMIN_ROLE)
+function changeTransferPolicyId(uint64 newPolicyId) external onlyRole(DEFAULT_ADMIN_ROLE)
+```
+
+##### Decimal Handling
+
+```solidity
+function decimals() public view returns (uint8)
+```
+
+Returns decimals based on currency code via TIP-4217 registry.
+
+#### Modifiers
+
+| Modifier | Description |
+|----------|-------------|
+| `notPaused` | Reverts if contract is paused |
+| `notTokenAddress(address to)` | Prevents transfers to token addresses |
+| `transferAuthorized(address from, address to)` | Enforces transfer policy |
+
+#### Events
+
+##### Standard Events
+
+```solidity
+event Transfer(address indexed from, address indexed to, uint256 amount);
+event Approval(address indexed owner, address indexed spender, uint256 amount);
+```
+
+##### TIP-20 Events
+
+```solidity
+event TransferWithMemo(address indexed from, address indexed to, uint256 amount, bytes32 indexed memo);
+event Mint(address indexed to, uint256 amount);
+event Burn(address indexed from, uint256 amount);
+event BurnBlocked(address indexed from, uint256 amount);
+event TransferPolicyUpdate(address indexed updater, uint64 indexed newPolicyId);
+event SupplyCapUpdate(address indexed updater, uint256 indexed newSupplyCap);
+event PauseStateUpdate(address indexed updater, bool isPaused);
+```
+
+#### Error Handling
+
+```solidity
+error PolicyForbids();
+error InvalidRecipient();
+error InsufficientBalance();
+error InsufficientAllowance();
+error InvalidSignature();
+error Expired();
+error SaltAlreadyUsed();
+error SupplyCapExceeded();
+error ContractPaused();
+error InvalidCurrency();
+```
+
+### TIP20Factory.sol - Token Factory
+
+#### Contract Interface
+
+```solidity
+contract TIP20Factory {
+    event TokenCreated(uint256 indexed tokenId, string name, string symbol, string currency, address admin);
+    
+    uint256 public tokenIdCounter = 1;
+    
+    function createToken(
+        string memory name,
+        string memory symbol,
+        string memory currency,
+        address admin
+    ) external returns (TIP20);
+}
+```
+
+#### Functions
+
+```solidity
+function createToken(
+    string memory name,
+    string memory symbol,
+    string memory currency,
+    address admin
+) external returns (TIP20)
+```
+
+Deploys a new TIP20 token with the specified parameters and grants `DEFAULT_ADMIN_ROLE` to the admin.
+
+### TIP20RolesAuth.sol - Role-Based Access Control
+
+#### Contract Interface
+
+```solidity
+abstract contract TIP20RolesAuth {
+    error Unauthorized();
+    
+    event RoleMembershipUpdated(bytes32 indexed role, address indexed account, address indexed sender, bool hasRole);
+    event RoleAdminUpdated(bytes32 indexed role, bytes32 indexed newAdminRole, address indexed sender);
+    
+    mapping(address account => mapping(bytes32 role => bool)) internal hasRole;
+    mapping(bytes32 role => bytes32 adminRole) internal roleAdmin;
+}
+```
+
+#### Constants
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `DEFAULT_ADMIN_ROLE` | `0` | Default admin role |
+| `UNGRANTABLE_ROLE` | `bytes32(type(uint256).max)` | Cannot be granted to anyone |
+
+#### Functions
+
+```solidity
+function grantRole(bytes32 role, address account) external onlyRole(roleAdmin[role])
+function revokeRole(bytes32 role, address account) external onlyRole(roleAdmin[role])
+function renounceRole(bytes32 role) external onlyRole(role)
+function setRoleAdmin(bytes32 role, bytes32 adminRole) external onlyRole(roleAdmin[role])
+```
+
+#### Modifiers
+
+```solidity
+modifier onlyRole(bytes32 role)
+```
+
+## Integration Features
+
+### Policy Integration
+
+TIP-20 tokens integrate with TIP-403 for transfer policy enforcement:
+
+```solidity
+modifier transferAuthorized(address from, address to) {
+    if (
+        !TIP403_REGISTRY.isAuthorized(transferPolicyId, from) ||
+        !TIP403_REGISTRY.isAuthorized(transferPolicyId, to)
+    ) revert PolicyForbids();
+    _;
+}
+```
+
+### Fee System Integration
+
+The contract includes special handling for the FeeManager precompile:
+
+```solidity
+// Allow FeeManager precompile to transferFrom any address without allowance check
+if (msg.sender != FEEMANAGER_PRECOMPILE) {
+    // Standard allowance check
+}
+```
+
+### Currency Metadata Integration
+
+Decimals are determined dynamically via TIP-4217:
+
+```solidity
+function decimals() public view returns (uint8) {
+    return TIP4217_REGISTRY.getCurrencyDecimals(currency);
+}
+```
+
+## Use Cases
+
+### Payment Processing with Memos
+
+```solidity
+// Transfer with order reference
+token.transferWithMemo(merchant, amount, keccak256("ORDER-12345"));
+```
+
+### Compliance-Controlled Tokens
+
+```solidity
+// Set whitelist policy
+token.changeTransferPolicyId(kycPolicyId);
+```
+
+### Administrative Controls
+
+```solidity
+// Emergency pause
+token.pause();
+
+// Set supply cap
+token.setSupplyCap(1000000 * 10**18);
+
+// Mint with memo
+token.mintWithMemo(treasury, amount, keccak256("TREASURY_ALLOCATION"));
+```
+
+### Signature-Based Transfers
+
+```solidity
+// Transfer using signature (meta-transactions)
+token.transferWithSig(from, to, amount, deadline, salt, v, r, s);
+```
+
+## Security Considerations
+
+- **Role Management**: Use multisig wallets for administrative roles
+- **Policy Enforcement**: Transfer policies are enforced on both sender and recipient
+- **Signature Replay**: Salt-based protection prevents signature reuse
+- **Supply Controls**: Supply cap prevents unlimited minting
+- **Pause Functionality**: Emergency stop capability for security incidents
+
+## Backward Compatibility
+
+TIP-20 maintains full ERC-20 compatibility:
+
+- All standard ERC-20 functions work identically
+- Standard events are emitted
+- Existing wallets and tools work without modification
+- EIP-2612 permit functionality included

@@ -1,0 +1,56 @@
+# Token Deployment
+
+The TIP20Factory contract makes it easy to deploy new TIP-20 tokens with a single transaction. When you deploy a token, you become the admin and can immediately start configuring roles and permissions.
+
+## Deploying a Token
+
+### Basic Deployment
+
+```javascript
+import { getContract } from 'viem'
+
+const factory = getContract({
+  address: '0x20FC000000000000000000000000000000000000', // TIP20Factory
+  abi: factoryAbi,
+  client: wallet
+})
+
+// Deploy a new USD token
+const tx = await factory.write.createToken([
+  'My Company USD',    // name
+  'MCUSD',            // symbol  
+  'USD',              // currency
+  wallet.account.address // admin
+])
+
+const receipt = await publicClient.waitForTransactionReceipt({ hash: tx })
+const tokenAddress = receipt.logs[0].args.tokenAddress
+```
+
+### Required Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `name` | string | Full token name (e.g., "My Company USD") |
+| `symbol` | string | Token symbol (e.g., "MCUSD") |
+| `currency` | string | Currency code (e.g., "USD", "EUR") |
+| `admin` | address | Address that will receive admin role |
+
+### Currency Codes
+
+The currency parameter determines decimal precision automatically:
+
+- **USD, EUR, GBP**: 2 decimals
+- **JPY**: 0 decimals  
+- **Custom**: Configurable via TIP-4217 registry
+
+## After Deployment
+
+Once deployed, your token will have:
+
+- **Admin role** granted to the specified address
+- **Default policy** set to "always-allow" (policy ID 1)
+- **No supply cap** (unlimited minting possible)
+- **Paused state** set to false
+
+For detailed technical specifications, see the [TIP-20 Protocol Reference](/protocol/tokens/tip-20).

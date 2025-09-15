@@ -1,0 +1,29 @@
+# Optimized for payments
+
+Tempo extends the ERC-20 token standard to include features that make implementing payment flows easier for developers. 
+
+## Dedicated Transfer Lanes
+
+The dedicated transfer lane ensures that even if the chain is busy with other activity, payment users have reliable, guaranteed throughput at predictable prices.  Transactions that only affect simple transfers have a dedicated lane in Tempo: formally, we reserve a portion of the blockspace for such transfers. 
+
+## Smart Payment Accounts
+
+Tempo's account model is designed from the ground up for high‑volume, programmatic flows: 
+
+* **High‑throughput addresses.** Address behavior is designed so that many transfers can be processed concurrently from the same orchestrator, fixing a limitation in the classic EVM and unlocking streaming and real-time payments use cases.   
+* **Batched transactions.** Orchestrators can submit thousands of payouts, captures, or refunds as a single batched operation. This reduces overhead and makes "one API call to pay a thousand people" practical.  
+* **Sponsored transactions.** An account can sign a transaction and the gas fee can be paid by a different sponsor, allowing platforms to pay gas fees for their users. 
+
+## Policies and compliance (asset‑level controls)
+
+As we suggested in the previous section, we expect there to be many stablecoins. In many cases, these stables will share an issuer and/or compliance policy. The Tempo token standard enables providers to expose policies, for instance, allowlists or blocklists via the TIP-403 standard. Individual TIP-20 tokens can then adopt their desired policies. 
+
+A compliance manager at an issuer needs to update only a single policy, and this will be followed by all tokens adopting the policy. 
+
+## Token implementation and standardized interface
+
+On Tempo all stablecoins or deposit tokens behave in a uniform way. Tempo defines a canonical interface for stablecoins so that there is standardization across stables that represent the same underlying currency. TIP-4217 offers a registry by which TIP-20 tokens can register themselves as representing an underlying currency, and then inheriting various standards. For example, all TIP-20 tokens that register themselves as representing the US Dollar share the same decimal precision (6). These standardizations help ensure that stables of the same underlying currency behave similarly. 
+
+## Memo fields in payments
+
+Transfers in the real world include structured context, e.g., invoice numbers, customer IDs, cost centers, ISO 20022‑style fields, or simple human‑readable notes. The TIP-20 standard enables a new native TransferWithMemo functionality so that a transfer can link to a memo for backend reconciliation. To accommodate larger memos and control costs, Tempo provides an indexer service that stores the full memo while only a small commitment to the memo (formally, a hash) travels with the actual transaction. 
