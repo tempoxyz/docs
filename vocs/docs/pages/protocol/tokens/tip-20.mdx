@@ -110,15 +110,15 @@ function transferWithSig(
 ##### Administrative Functions
 
 ```solidity
-function mint(address to, uint256 amount) external onlyRole(ISSUER_ROLE)
-function burn(uint256 amount) external onlyRole(ISSUER_ROLE)
-function burnBlocked(address from, uint256 amount) external onlyRole(BURN_BLOCKED_ROLE)
-function mintWithMemo(address to, uint256 amount, bytes32 memo) external onlyRole(ISSUER_ROLE)
-function burnWithMemo(uint256 amount, bytes32 memo) external onlyRole(ISSUER_ROLE)
-function pause() external onlyRole(PAUSE_ROLE)
-function unpause() external onlyRole(UNPAUSE_ROLE)
-function setSupplyCap(uint256 newSupplyCap) external onlyRole(DEFAULT_ADMIN_ROLE)
-function changeTransferPolicyId(uint64 newPolicyId) external onlyRole(DEFAULT_ADMIN_ROLE)
+function mint(address to, uint256 amount) external onlyRole(ISSUER_ROLE);
+function burn(uint256 amount) external onlyRole(ISSUER_ROLE);
+function burnBlocked(address from, uint256 amount) external onlyRole(BURN_BLOCKED_ROLE);
+function mintWithMemo(address to, uint256 amount, bytes32 memo) external onlyRole(ISSUER_ROLE);
+function burnWithMemo(uint256 amount, bytes32 memo) external onlyRole(ISSUER_ROLE);
+function pause() external onlyRole(PAUSE_ROLE);
+function unpause() external onlyRole(UNPAUSE_ROLE);
+function setSupplyCap(uint256 newSupplyCap) external onlyRole(DEFAULT_ADMIN_ROLE);
+function changeTransferPolicyId(uint64 newPolicyId) external onlyRole(DEFAULT_ADMIN_ROLE);
 ```
 
 ##### Decimal Handling
