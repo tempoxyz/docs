@@ -154,10 +154,10 @@ L = (√(m(x-y)² + 4xy) + √m(x+y)) / (2-2m)
 ### Events
 
 ```solidity
-event PoolCreated(address indexed token0, address indexed token1)
-event RebalanceSwap(address indexed token0, address indexed token1, address indexed user, address tokenIn, uint256 amountIn, uint256 amountOut)
-event Mint(address indexed sender, address indexed token0, address indexed token1, uint256 amount0, uint256 amount1, uint256 liquidity)
-event Burn(address indexed sender, address indexed token0, address indexed token1, uint256 amount0, uint256 amount1, uint256 liquidity, address to)
+event PoolCreated(address indexed token0, address indexed token1);
+event RebalanceSwap(address indexed token0, address indexed token1, address indexed user, address tokenIn, uint256 amountIn, uint256 amountOut);
+event Mint(address indexed sender, address indexed token0, address indexed token1, uint256 amount0, uint256 amount1, uint256 liquidity);
+event Burn(address indexed sender, address indexed token0, address indexed token1, uint256 amount0, uint256 amount1, uint256 liquidity, address to);
 ```
 
 `Transfer` events are fired as usual. `Transfer` events that are logged as part of the end-of-block operations should have a tx hash of `0xfee000...`.
