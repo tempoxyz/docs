@@ -12,6 +12,6 @@ A major goal of Tempo is what we term *stablecoin interoperability:* users can p
 
 ## Enshrined Cross-stablecoin Decentralized Exchange (DEX)
 
-We achieve this goal via a protocol-native, enshrined decentralized exchange ([Cross-stablecoin DEX](/protocol/transactions/cross-stablecoin-dex)) specialized for trades between stables pegged to the same underlying currency. Its scope is deliberately narrow: keep conversions between tokens pegged to the same fiat currency efficient. At launch the DEX will support USD stablecoins.
+We achieve this goal via a protocol-native, enshrined decentralized exchange specialized for trades between stables pegged to the same underlying currency. Its scope is deliberately narrow: keep conversions between tokens pegged to the same fiat currency efficient. At launch the DEX will support USD stablecoins.
 
 * Internally, the DEX uses a USD-denominated accounting unit, linkingUSD, that is non-transferable, i.e., not usable as a standard stablecoin. Stables trade only against this linkingUSD so that routing is simple,  liquidity fragmentation is minimized, and no specific issuer's token is privileged. By concentrating liquidity where it matters for payments, it reduces reconciliation noise and slippage in everyday flows. 
