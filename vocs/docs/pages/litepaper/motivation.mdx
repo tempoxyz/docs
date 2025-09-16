@@ -12,13 +12,9 @@ To date, blockchains have not solved these problems, despite the tremendous pote
 
 Tempo is built for payments. Rather than starting from generalized compute and retrofitting payments, Tempo starts from payments and will build everything else around them. The goal is to move money reliably, cheaply, and at scale. 
 
-Tempo's north star is simplicity for users: fintechs, traditional banks, merchants, platforms, or anyone else looking to move their payments into the 21st century. The base layer will be permissionless, so anyone can connect and build, while asset issuers retain fine-grained control over the rules their assets must follow. 
+Tempo's north star is simplicity for users: fintechs, traditional banks, merchants, platforms, or anyone else looking to move their payments into the 21st century. The base layer will be permissionless, so anyone can connect and build, while asset issuers retain fine-grained control over the rules their assets must follow. Where today's chains require fee tokens and bespoke contract logic, Tempo lets participants pay fees in the same stablecoins they already hold and exposes common payment workflows at the protocol level so that apps can interoperate out of the box.
 
-Where today's chains require fee tokens and bespoke contract logic, Tempo lets participants pay fees in the same stablecoins they already hold and exposes common payment workflows at the protocol level so that apps can interoperate out of the box.
-
-The Tempo protocol is designed to optimize for payment use-cases by making specific trade-offs across the entire stack. This necessitates a dedicated blockchain rather than building on existing general-purpose blockchains.
-
-For instance, Tempo supports features like transfers, stablecoin AMMs, privacy, and multisigs with optimized implementations that require their own chain. Also, changes to consensus mechanisms and gas accounting, along with blockspace allocation, are tailored for payments. And some features, such as scheduled transactions, are simply not compatible with the Ethereum protocol.
+The Tempo protocol is designed to optimize for payment use-cases by making specific trade-offs across the entire stack. This necessitates a dedicated blockchain rather than building on existing general-purpose blockchains. For instance, Tempo features optimized implementations core payment functionality, e.g., transfers, stablecoin AMMs, privacy, and multisigs. Implementing such optimizations requires a dedicated blockchain. Further, Tempo has changes to consensus mechanisms and gas accounting, along with blockspace allocation, all tailored for payments. Finally, some features, such as scheduled transactions, are simply not compatible with existing protocols.
 
 ## Principles
 
@@ -28,24 +24,24 @@ Tempo is guided by a set of core principles that shape its architecture and user
 
 **Predictable Fees** are another key principle. On Tempo, users can pay transaction fees in any stablecoin they already hold, eliminating the need to acquire or manage a volatile native gas token. This approach simplifies the user experience and makes payments more accessible and intuitive, especially for those new to blockchain technology.
 
-Tempo is **Designed for Payments** from the ground up. Features that are essential for real-world payment flows—such as memos, payment references, and batch transactions—are built directly into the protocol. This avoids the need for ad-hoc or third-party solutions, ensuring that payment workflows are robust, interoperable, and easy to use for developers and end users.
+Tempo is **Designed for Payments** from the ground up. Features that are essential for real-world payment flows—such as memos, payment references, and batch transactions are built directly into the protocol. This avoids the need for ad-hoc or third-party solutions, ensuring that payment workflows are robust, interoperable, and easy to use for developers and end users.
 
 The protocol also balances a **Permissionless Base** with **Issuer Control**. Anyone can use the chain, fostering openness and innovation. At the same time, asset issuers retain the ability to define and enforce compliance and policy rules for their own tokens, allowing them to meet regulatory obligations without compromising the permissionless nature of the network.
 
-**Opt-in, Compliant Privacy** is a further principle. Tempo aims to support fully private balances and transactions at scale, but always on an opt-in basis. This privacy is designed to coexist with the needs of issuers to comply with reporting and regulatory requirements, ensuring that privacy and compliance are not mutually exclusive.
+**Opt-in, Compliant Privacy** is a further principle. Tempo aims to support fully-private balances and transactions at scale, but always on an opt-in basis. This privacy is designed to coexist with the needs of issuers to comply with reporting and regulatory requirements, ensuring that privacy and compliance are not mutually exclusive.
 
-Finally, **High Performance** is engineered into every layer of Tempo. The protocol is optimized for throughput and low-latency confirmations, with dedicated infrastructure—such as a transfer lane—ensuring that pure value transfers remain fast and predictable, even when the network is under heavy load.
+Finally, **High Performance** is engineered into every layer of Tempo. The protocol is optimized for throughput and low-latency confirmations, with dedicated infrastructure—--such as a transfer lane—--ensuring that pure value transfers remain fast and predictable, even when the network is under heavy load.
 
 Together, these principles ensure that Tempo is not just another blockchain, but a purpose-built platform for payments that addresses the real needs of users, issuers, and developers.
 
-
+{/* Benefits 
 ## Benefits
 
 In more detail, here are some of the benefits Tempo gets as a sovereign blockchain protocol.
 
 - **Optimized Transfers**: Tempo includes precompiles for deploying tokens using optimized Rust implementations, enhancing transfer throughput and supporting common payment features like whitelists, blacklists, and memo fields.
-- **Dedicated Blockspace**: Tempo allocates blockspace specifically for transfers, preventing them from being priced out by other transaction types.
-- **Flexible Transaction Fees**: Unlike Base or Solana, Tempo does not require holding another token for transaction fees, allowing validators to include free transactions or those paying fees in other currencies.
+- **Dedicated Blockspace**: Tempo allocates blockspace specifically for transfers so that they do not need to compete with other transaction types for blockspace.
+- **Flexible Transaction Fees**: Unlike other blockchains, Tempo does not require holding a native token for transaction fees, allowing validators to include free transactions or those paying fees in other currencies.
 - **Custom Validator Set**: Tempo can customize its validator set, partnering with entities like Bridge, Coinbase, or Circle to provide free blockspace.
 - **Privacy Enhancements**: Tempo plans to integrate privacy features, potentially using zk-validiums, with deeper L1 integration.
 - **Native Stablecoin Support**: The chain will support stablecoin trading with a "linking currency" to prevent liquidity fragmentation.
@@ -54,13 +50,14 @@ In more detail, here are some of the benefits Tempo gets as a sovereign blockcha
 
 ### Why an L1 Instead of an L2?
 
-- **Fast Finality**: Tempo offers ~1s finality compared to Ethereum’s 12-minute finality.
-- **Interoperability**: Tempo can interoperate with multiple chains through light client bridges, unlike L2s which are limited to their L1.
-- **Higher Throughput and Decentralized Sequencing**: Tempo requires higher throughput and decentralized sequencing, which are challenging on L2s.
+- **Fast Finality**: Tempo offers ~1s finality compared to Ethereum's 12-minute finality.
+- **Interoperability**: Tempo can interoperate with multiple chains through light client bridges, unlike L2's which generally have a native bridge only to their L1.
+- **Higher Throughput and Decentralized Sequencing**: Tempo requires higher throughput and decentralized sequencing, which are challenging on L2's.
 
 ### Limited Benefits of L2
 
 - **Native Bridge**: Initially, Tempo will not require a native bridge with Ethereum, focusing on natively issued stablecoins and RWAs.
 - **Ethereum Finality**: Tempo can inherit Ethereum finality by checkpointing blocks on Ethereum, avoiding full L2 complexities.
 
-In summary, Tempo’s unique requirements and optimizations for payments justify its own L1 chain, providing tailored solutions that existing platforms cannot offer.
+In summary, Tempo's unique requirements and optimizations for payments justify its own L1 chain, providing tailored solutions that existing platforms cannot offer.
+*/}
