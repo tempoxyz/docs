@@ -1,3 +1,5 @@
+import { Callout } from 'vocs/components'
+
 # Token Preferences
 
 ## Abstract
@@ -6,7 +8,7 @@ This spec lays out how the default fee token for a transaction is determined.
 
 ## Motivation
 
-On Tempo, users can pay gas fees in any stablecoin, as long as that stablecoin has sufficient liquidity on the enshrined fee AMM. 
+On Tempo, users can pay gas fees in any stablecoin, as long as that stablecoin either is accepted by the validator **or** has sufficient liquidity on the enshrined fee AMM. 
 
 In determining *which* token a user pays fees in, we want to maximize customizability (so that wallets or users can implement more sophisticated UX than is possible at the protocol layer), minimize surprise (particularly surprises in which a user pays fees in a stablecoin they did not expect to), and have sane default behavior so that users can begin using basic functions like payments even using wallets that are not customized for Tempo support.
 
@@ -23,9 +25,11 @@ The protocol checks preferences at each of these levels, stopping at the first o
 
 * The token must be a TIP-20 token whose currency is USD.
 * The user must have sufficient balance in that token to pay the `gasLimit` on the transaction.
-* There must be sufficient liquidity on the [fee AMM](#fee-amm) to support the transaction.
+* There must be sufficient liquidity on the [fee AMM](#fee-amm) to support the transaction (no liquidity is needed if the user preference is the same as the validator preference).
 
-**Note**: Transaction-level `fee_token` fields and contract-level preferences are not currently implemented, though they may be added in future versions.
+<Callout type="note">
+  Transaction-level `fee_token` fields and contract-level preferences are not currently implemented, though they may be added in future versions.
+</Callout>
 
 ## User Level
 
