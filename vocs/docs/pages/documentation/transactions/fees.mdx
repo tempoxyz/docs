@@ -7,35 +7,6 @@ By default, Tempo will use your preferred fee token if you’ve set one, or you 
 This makes it easy to use Tempo for payments and everyday transactions, since you can pay fees directly in the same stablecoins you already use.
 
 
-## Custom Fee Tokens
-
-When sending a transaction, you can specify which stablecoin to use for fees by including a `fee_token` field in your transaction. This gives you complete control over which token is used for that specific transaction.
-
-### Example: Sending USDC with USDC Fees
-
-```javascript
-// Create a transaction that pays fees in USDC
-const transaction = {
-    to: recipientAddress,
-    value: 0,
-    data: transferData,
-    fee_token: testUSDTokenAddress, // Specify USDC as fee token
-    maxFeePerGas: 20000000000,   // 20 gwei in 10^-9 USD
-    maxPriorityFeePerGas: 0,
-    gasLimit: 50000
-};
-
-// Send the transaction
-const txHash = await wallet.sendTransaction(transaction);
-```
-
-The system will automatically:
-1. Check if you have sufficient balance in the specified fee token
-2. Deduct the appropriate fee amount from that token
-3. Either pay the validator directly (if they prefer the same token) or convert it through a built in Fee AMM that will find liquidity for your preferred fee-paying stablecoin.
-
-You can learn more about the [Fee AMM](/protocol/transactions/fee-amm) in the protocol specifications.
-
 ## Set a Default Fee Token
 
 You can set a default fee token preference for your account to avoid specifying it in every transaction.
