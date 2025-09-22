@@ -1,3 +1,5 @@
+import { Callout } from 'vocs/components'
+
 # Transaction Fees
 
 Tempo lets you pay transaction fees in stablecoins instead of a native network token. When you send a transaction, you can choose which supported token to use for fees.
@@ -5,6 +7,10 @@ Tempo lets you pay transaction fees in stablecoins instead of a native network t
 By default, Tempo will use your preferred fee token if you’ve set one, or you can pick a different token for each transaction. The fee is automatically deducted from your balance in that token, and you don’t have to worry about conversions or extra steps.
 
 This makes it easy to use Tempo for payments and everyday transactions, since you can pay fees directly in the same stablecoins you already use.
+
+<Callout type="info">
+  The fee token will also be possible to configure on a transaction-by-tranasction basis via a new `fee_token` field on user originated transactions. This feature is coming soon.
+</Callout>
 
 ## Set a Default Fee Token
 
@@ -34,7 +40,7 @@ await feeManager.setUserToken(testUSDTokenAddress);
 ### What This Does
 
 - **All future transactions** will use testUSDToken for fees by default
-- **Transaction-level preferences** still override this setting
+- **Transaction-level preferences** will override this setting
 - **No fee token specified** in a transaction will use your default
 - **One-time setup** - you don't need to specify the fee token in every transaction
 
