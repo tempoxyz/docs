@@ -6,11 +6,14 @@ By default, Tempo will use your preferred fee token if you’ve set one, or you 
 
 This makes it easy to use Tempo for payments and everyday transactions, since you can pay fees directly in the same stablecoins you already use.
 
-You can learn more about the [Fee AMM](/protocol/transactions/fee-amm) in the protocol specifications.
-
 ## Set a Default Fee Token
 
-You can set a default fee token preference for your account to avoid specifying it in every transaction.
+You can set a default fee token preference for your account by calling the `setUserToken` function on the Fee Manager precompile. After the default fee token is set, the system will automatically:
+1. Check if you have sufficient balance in the specified fee token
+2. Deduct the appropriate fee amount from that token
+3. Either pay the validator directly (if they prefer the same token) or convert it through a built in Fee AMM that will find liquidity for your preferred fee-paying stablecoin.
+
+You can learn more about the [Fee AMM](/protocol/transactions/fee-amm) in the protocol specifications.
 
 ### Using the FeeManager Precompile
 
