@@ -19,7 +19,7 @@ const transaction = {
     to: recipientAddress,
     value: 0,
     data: transferData,
-    fee_token: usdcTokenAddress, // Specify USDC as fee token
+    fee_token: testUSDTokenAddress, // Specify USDC as fee token
     maxFeePerGas: 20000000000,   // 20 gwei in 10^-9 USD
     maxPriorityFeePerGas: 0,
     gasLimit: 50000
@@ -48,12 +48,12 @@ import { getContract } from 'viem'
 
 const feeManager = getContract({
   // FeeManager precompile
-  address: '0x1559c00000000000000000000000000000000000',
+  address: '0xfeec000000000000000000000000000000000000',
   abi: feeManagerAbi,
   client: wallet, // viem wallet client instance
 })
 
-await feeManager.setUserToken(usdcTokenAddress);
+await feeManager.setUserToken(testUSDTokenAddress);
 ```
 
 ### What This Does

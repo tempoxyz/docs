@@ -26,21 +26,12 @@ export default defineConfig({
                  link: "/testnet",
              },
              {
-                 text: "Getting Started",
-                 link: "/testnet/getting-started",
+                 text: "Adagio",
+                 link: "/testnet/adagio",
              },
              {
-                 text: "Releases",
-                 items: [
-                     {
-                         text: "Adagio",
-                         link: "/testnet/adagio",
-                     },
-                     {
-                         text: "Adiagetto",
-                         link: "/testnet/adiagetto",
-                     },
-                 ],
+                 text: "Adiagetto",
+                 link: "/testnet/adiagetto",
              },
          ],
          "/litepaper": [

@@ -34,23 +34,6 @@ await token.write.mintWithMemo([
 ])
 ```
 
-### Batch Minting
-
-```javascript
-// Mint to multiple addresses
-const recipients = [
-  { address: user1, amount: 1000n * 10n**18n },
-  { address: user2, amount: 2000n * 10n**18n },
-  { address: user3, amount: 1500n * 10n**18n }
-]
-
-for (const recipient of recipients) {
-  await token.write.mint([
-    recipient.address,
-    recipient.amount
-  ])
-}
-```
 
 ## Burning Tokens
 
