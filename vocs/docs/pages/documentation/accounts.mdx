@@ -1,0 +1,111 @@
+# Accounts
+
+Tempo accounts are designed in a way where every address automatically becomes a smart contract wallet on first use. This gives you advanced features like batch transactions, multiple signing keys, and gasless operations without any setup.
+
+We refer to this account design as [Default Account Abstraction (DAA)](/protocol/accounts).
+
+## How It Works
+
+When you send your first transaction from any address, Tempo automatically converts it to a smart contract wallet using [EIP-7702](https://eips.ethereum.org/EIPS/eip-7702). Your address gets all the power of a smart wallet while maintaining full compatibility with existing tools.
+
+The default account contract code is available on Github at [`ithacaxyz/account`](https://github.com/ithacaxyz/account/blob/main/src/IthacaAccount.sol). For more detailed documentation on using the account, refer to the [Ithaca Account docs](https://porto.sh/contracts/account).
+
+The account implements the [ERC-7821](https://eips.ethereum.org/EIPS/eip-7821) Executor interface, which provides a standardized way to execute batches of operations with different execution modes and authorization schemes.
+
+## Example: Sending a Batch of Transactions
+
+One of the most powerful features of account abstraction is batching multiple operations into a single transaction. This allows you to execute several actions atomically (i.e., they all succeed or all fail together). This helps reduce gas costs, prevents partial failures, and creates better user experiences by combining multiple steps into one transaction.
+
+```javascript
+import { getContract } from 'viem'
+
+const account = getContract({
+  address: yourAddress,
+  abi: ithacaAccountAbi,
+  client: walletClient
+})
+
+// Define multiple operations
+const calls = [
+  {
+    to: tokenAddress,
+    value: 0,
+    data: transferCalldata // Transfer tokens
+  },
+  {
+    to: anotherTokenAddress, 
+    value: 0,
+    data: approveCalldata // Approve spending
+  },
+  {
+    to: dexAddress,
+    value: 0, 
+    data: swapCalldata // Execute swap
+  }
+]
+
+// Execute all operations atomically
+await account.write.execute([
+  '0x01000000000078210001', // ERC-7821 batch execution mode
+  encodeCallsWithOpData(calls, nonce, signature)
+])
+```
+
+## Opting Out of DAA
+
+If you don't want your address to be automatically converted to a smart wallet, you can opt out by delegating to a different implementation or undelegating entirely using standard EIP-7702 mechanisms. This can be helpful if you prefer traditional EOA behavior or want to use a custom account implementation instead of the default smart wallet.
+
+```javascript
+// Undelegate (revert to plain EOA)
+await account.write.execute([
+  '0x01000000000078210001', // ERC-7821 batch execution mode
+  encodeCallsWithOpData([{
+    to: accountAddress,
+    value: 0,
+    data: encodeFunctionData({
+      abi: eip7702Abi,
+      functionName: 'setCode',
+      args: ['0x'] // Empty code = plain EOA
+    })
+  }], nonce, signature)
+])
+
+// Delegate to a different implementation
+await account.write.execute([
+  '0x01000000000078210001', // ERC-7821 batch execution mode
+  encodeCallsWithOpData([{
+    to: accountAddress,
+    value: 0,
+    data: encodeFunctionData({
+      abi: eip7702Abi,
+      functionName: 'setCode',
+      args: [customImplementationAddress]
+    })
+  }], nonce, signature)
+])
+```
+
+## Manual Delegation
+
+You can also manually delegate an address to the default implementation before its first use. This is useful if you want to set up a smart wallet before sending the first transaction. This is helpful if you want to prepare an address for smart wallet features before it's used, or delegate using a signature from another chain.
+
+```javascript
+// Delegate using any valid signature from the address
+const registrar = getContract({
+  // DefaultAccountRegistrar
+  address: '0x7702ac000000000000000000000000000000000000',
+  abi: registrarAbi,
+  client: publicClient
+})
+
+// Use any signature from the target address 
+await registrar.write.delegateToDefault([
+  messageHash, // Hash of any message signed by the target address
+  v,
+  r,
+  s
+])
+```
+
+The **DefaultAccountRegistrar** is a precompile that allows anyone to delegate an EOA to the default smart wallet implementation by providing any valid signature from that address. This enables delegation using signatures from tweets, GitHub commits, or other chains. For full details, see the [DAA specification](/protocol/accounts).
+

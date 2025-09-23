@@ -104,6 +104,15 @@ export default defineConfig({
                 ],
             },
             {
+                text: "Accounts",
+                items: [
+                    {
+                        text: "Overview",
+                        link: "/documentation/accounts",
+                    },
+                ],
+            },
+            {
                 text: "Liquidity",
                 items: [
                     {
