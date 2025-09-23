@@ -30,8 +30,8 @@ export default defineConfig({
                  link: "/testnet/adagio",
              },
              {
-                 text: "Adiagetto",
-                 link: "/testnet/adiagetto",
+                 text: "Adagietto",
+                 link: "/testnet/adagietto",
              },
          ],
          "/litepaper": [
