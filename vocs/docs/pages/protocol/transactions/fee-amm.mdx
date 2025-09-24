@@ -6,7 +6,7 @@ This specification defines a system of one-way Automated Market Makers (AMMs) de
 
 ## Motivation
 
-Current blockchain fee systems typically require users to hold native tokens for gas payments. This creates friction for users who prefer to transact in stablecoins. 
+Current blockchain fee systems typically require users to hold native tokens for gas payments. This creates friction for users who prefer to transact in stablecoins.
 
 The Fee AMM is a dedicated AMM for trading between stablecoins, which can only be used by the protocol to trade tokens it has received as fees in that block, or by arbitrageurs rebalancing it to keep it balanced. The protocol automatically collects fees in many different coins during the block, and then sells them all at the end of the block (paying a constant price). It permits some top-of-block MEV to rebalance the pool, but is designed to minimize the backrunning or JIT MEV that can lead to spam.
 
@@ -37,8 +37,8 @@ The primary AMM contract managing liquidity pools and swap operations.
 ```solidity
 struct Pool {
     uint128 reserveUserToken;           // Reserve of userToken
-    uint128 reserveValidatorToken;      // Reserve of userToken
-    uint128 pendingFeeSwapIn;  // Pending token0 input from fee swaps
+    uint128 reserveValidatorToken;      // Reserve of validatorToken
+    uint128 pendingFeeSwapIn;           // Pending token0 input from fee swaps
 }
 ```
 
