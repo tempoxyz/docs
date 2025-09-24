@@ -18,7 +18,7 @@ const factory = getContract({
 // Deploy a new USD token
 const tx = await factory.write.createToken([
   'My Company USD',    // name
-  'MCUSD',            // symbol  
+  'MCUSD',            // symbol
   'USD',              // currency
   wallet.account.address // admin
 ])
@@ -40,8 +40,8 @@ const tokenAddress = receipt.logs[0].args.tokenAddress
 
 The currency parameter determines decimal precision automatically:
 
-- **USD, EUR, GBP**: 2 decimals
-- **JPY**: 0 decimals  
+- **USD, EUR, GBP**: 6 decimals
+- **JPY**: 0 decimals
 - **Custom**: Configurable via TIP-4217 registry
 
 ## After Deployment
