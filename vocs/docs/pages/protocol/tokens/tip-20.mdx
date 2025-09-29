@@ -95,16 +95,6 @@ function permit(
 ```solidity
 function transferWithMemo(address to, uint256 amount, bytes32 memo) external;
 function transferFromWithMemo(address from, address to, uint256 amount, bytes32 memo) external;
-function transferWithSig(
-    address from,
-    address to,
-    uint256 value,
-    uint256 deadline,
-    bytes4 salt,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-) external;
 ```
 
 ##### Administrative Functions
@@ -309,12 +299,6 @@ token.setSupplyCap(1000000 * 10**18);
 token.mintWithMemo(treasury, amount, keccak256("TREASURY_ALLOCATION"));
 ```
 
-### Signature-Based Transfers
-
-```solidity
-// Transfer using signature (meta-transactions)
-token.transferWithSig(from, to, amount, deadline, salt, v, r, s);
-```
 
 ## Security Considerations
 
