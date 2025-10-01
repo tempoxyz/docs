@@ -57,32 +57,32 @@ If you don't want your address to be automatically converted to a smart wallet, 
 
 ```javascript
 // Undelegate (revert to plain EOA)
-await account.write.execute([
-  '0x01000000000078210001', // ERC-7821 batch execution mode
-  encodeCallsWithOpData([{
-    to: accountAddress,
-    value: 0,
-    data: encodeFunctionData({
-      abi: eip7702Abi,
-      functionName: 'setCode',
-      args: ['0x'] // Empty code = plain EOA
-    })
-  }], nonce, signature)
-])
+const authorizationList = [{
+  chainId: chainId,
+  address: '0x0000000000000000000000000000000000000000', // Zero address = undelegate
+  nonce: await publicClient.getTransactionCount({ address: accountAddress }),
+  ...signature // r, s, v from signing the authorization
+}]
+
+await walletClient.sendTransaction({
+  authorizationList,
+  to: accountAddress, // Can be any address or null
+  value: 0n
+})
 
 // Delegate to a different implementation
-await account.write.execute([
-  '0x01000000000078210001', // ERC-7821 batch execution mode
-  encodeCallsWithOpData([{
-    to: accountAddress,
-    value: 0,
-    data: encodeFunctionData({
-      abi: eip7702Abi,
-      functionName: 'setCode',
-      args: [customImplementationAddress]
-    })
-  }], nonce, signature)
-])
+const authorizationList = [{
+  chainId: chainId,
+  address: customImplementationAddress,
+  nonce: await publicClient.getTransactionCount({ address: accountAddress }),
+  ...signature // r, s, v from signing the authorization
+}]
+
+await walletClient.sendTransaction({
+  authorizationList,
+  to: accountAddress, // Can be any address or null
+  value: 0n
+})
 ```
 
 ## Manual Delegation
