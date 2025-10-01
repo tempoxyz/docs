@@ -16,39 +16,29 @@ The account implements the [ERC-7821](https://eips.ethereum.org/EIPS/eip-7821) E
 
 One of the most powerful features of account abstraction is batching multiple operations into a single transaction. This allows you to execute several actions atomically (i.e., they all succeed or all fail together). This helps reduce gas costs, prevents partial failures, and creates better user experiences by combining multiple steps into one transaction.
 
-```javascript
-import { getContract } from 'viem'
+```ts
+import { walletActions } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
 
-const account = getContract({
-  address: yourAddress,
-  abi: ithacaAccountAbi,
-  client: walletClient
-})
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+}).extend(walletActions)
 
-// Define multiple operations
-const calls = [
-  {
-    to: tokenAddress,
-    value: 0,
-    data: transferCalldata // Transfer tokens
-  },
-  {
-    to: anotherTokenAddress, 
-    value: 0,
-    data: approveCalldata // Approve spending
-  },
-  {
-    to: dexAddress,
-    value: 0, 
-    data: swapCalldata // Execute swap
-  }
-]
-
-// Execute all operations atomically
-await account.write.execute([
-  '0x01000000000078210001', // ERC-7821 batch execution mode
-  encodeCallsWithOpData(calls, nonce, signature)
-])
+const { address, hash, id } = await client.sendTransaction({ // [!code focus]
+  calls: [{ // [!code focus]
+    to: tokenAddress, // [!code focus]
+    data: transferCalldata // Transfer tokens // [!code focus]
+  }, // [!code focus]
+  { // [!code focus]
+    to: anotherTokenAddress,  // [!code focus]
+    data: approveCalldata // Approve spending // [!code focus]
+  }, // [!code focus]
+  { // [!code focus]
+    to: dexAddress, // [!code focus]
+    data: swapCalldata // Execute swap // [!code focus]
+  }], // [!code focus]
+}) // [!code focus]
 ```
 
 ## Opting Out of DAA

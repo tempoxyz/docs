@@ -2,7 +2,11 @@
   "name": "tip20-viem-scripts",
   "version": "1.0.0",
   "type": "module",
+  "workspaces": [
+    "vocs"
+  ],
   "scripts": {
+    "docs:dev": "bun run --filter=vocs dev",
     "test:create-token": "bun run src/create-token.ts",
     "test:transfer": "bun run src/transfer.ts",
     "test:gas-fees": "bun run src/gas-fees.ts",

@@ -6,244 +6,334 @@ Token policies let you control who can transfer your tokens. You can create whit
 
 ### Create a Whitelist Policy
 
-```javascript
-import { getContract } from 'viem'
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
 
-const registry = getContract({
-  address: '0x403c000000000000000000000000000000000000', // TIP403Registry
-  abi: registryAbi,
-  client: wallet
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
 })
 
-// Create a whitelist policy
-const tx = await registry.write.createPolicy([
-  adminAddress, // Who can manage this policy
-  0 // 0 = WHITELIST
-])
-
-const receipt = await publicClient.waitForTransactionReceipt({ hash: tx })
-const policyId = receipt.logs[0].args.policyId
+const { hash, policyId } = await client.policy.create({  // [!code focus]
+  type: 'whitelist', // [!code focus]
+}) // [!code focus]
 ```
 
 ### Create a Blacklist Policy
 
-```javascript
-// Create a blacklist policy
-const tx = await registry.write.createPolicy([
-  adminAddress,
-  1 // 1 = BLACKLIST
-])
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
 
-const receipt = await publicClient.waitForTransactionReceipt({ hash: tx })
-const policyId = receipt.logs[0].args.policyId
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const { hash, policyId } = await client.policy.create({  // [!code focus]
+  type: 'blacklist', // [!code focus]
+}) // [!code focus]
 ```
 
 ### Create Policy with Initial Addresses
 
-```javascript
-// Create whitelist with initial addresses
-const tx = await registry.write.createPolicy([
-  adminAddress,
-  0, // WHITELIST
-  [user1Address, user2Address, user3Address] // Initial whitelist
-])
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const { hash, policyId } = await client.policy.create({  // [!code focus]
+  type: 'whitelist', // [!code focus]
+  accounts: [user1Address, user2Address, user3Address], // [!code focus]
+}) // [!code focus]
 ```
 
 ## Managing Whitelist Policies
 
 ### Add Addresses to Whitelist
 
-```javascript
-// Add addresses to whitelist
-await registry.write.modifyPolicyWhitelist([
-  policyId,
-  userAddress,
-  true // true = whitelisted
-])
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const { hash, policyId } = await client.policy.modifyWhitelist({  // [!code focus]
+  address: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
+  allowed: true, // [!code focus]
+  policyId, // [!code focus]
+}) // [!code focus]
 ```
 
 ### Remove Addresses from Whitelist
 
-```javascript
-// Remove address from whitelist
-await registry.write.modifyPolicyWhitelist([
-  policyId,
-  userAddress,
-  false // false = not whitelisted
-])
-```
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
 
-### Batch Whitelist Updates
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
 
-```javascript
-// Add multiple addresses
-const addresses = [user1, user2, user3]
-const allowed = [true, true, true]
-
-for (let i = 0; i < addresses.length; i++) {
-  await registry.write.modifyPolicyWhitelist([
-    policyId,
-    addresses[i],
-    allowed[i]
-  ])
-}
+const { hash, policyId } = await client.policy.modifyWhitelist({  // [!code focus]
+  address: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
+  allowed: false, // [!code focus]
+  policyId, // [!code focus]
+}) // [!code focus]
 ```
 
 ## Managing Blacklist Policies
 
 ### Add Addresses to Blacklist
 
-```javascript
-// Add address to blacklist
-await registry.write.modifyPolicyBlacklist([
-  policyId,
-  suspiciousAddress,
-  true // true = blacklisted
-])
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const { hash, policyId } = await client.policy.modifyBlacklist({  // [!code focus]
+  address: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
+  restricted: true, // [!code focus]
+  policyId, // [!code focus]
+}) // [!code focus]
 ```
 
 ### Remove Addresses from Blacklist
 
-```javascript
-// Remove address from blacklist
-await registry.write.modifyPolicyBlacklist([
-  policyId,
-  addressToUnblock,
-  false // false = not blacklisted
-])
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const { hash, policyId } = await client.policy.modifyBlacklist({  // [!code focus]
+  address: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
+  restricted: false, // [!code focus]
+  policyId, // [!code focus]
+}) // [!code focus]
 ```
 
 ## Applying Policies to Tokens
 
 ### Set Transfer Policy
 
-```javascript
-const token = getContract({
-  address: tokenAddress,
-  abi: tip20Abi,
-  client: wallet // Must have DEFAULT_ADMIN_ROLE
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
 })
 
-// Apply the policy to your token
-await token.write.changeTransferPolicyId([policyId])
+const { hash, policyId } = await client.token.changeTransferPolicy({  // [!code focus]
+  policyId: 1n, // [!code focus]
+  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
+}) // [!code focus]
 ```
 
 ### Check Current Policy
 
-```javascript
-// Check what policy is currently applied
-const currentPolicy = await token.read.transferPolicyId()
-console.log(`Current policy ID: ${currentPolicy}`)
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const { transferPolicy } = await client.token.getMetadata({  // [!code focus]
+  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
+}) // [!code focus]
 ```
 
 ## Special Policies
 
 ### Always Allow (Default)
 
-```javascript
-// Allow all transfers (default for new tokens)
-await token.write.changeTransferPolicyId([1n])
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const { hash, policyId } = await client.token.changeTransferPolicy({  // [!code focus]
+  policyId: 1n, // [!code focus]
+  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
+}) // [!code focus]
 ```
 
 ### Always Reject (Emergency Stop)
 
-```javascript
-// Block all transfers (emergency stop)
-await token.write.changeTransferPolicyId([0n])
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const { hash, policyId } = await client.token.changeTransferPolicy({  // [!code focus]
+  policyId: 0n, // [!code focus]
+  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
+}) // [!code focus]
 ```
 
 ## Common Use Cases
 
 ### KYC Whitelist
 
-```javascript
-// Create KYC whitelist for compliance
-async function setupKYCWhitelist() {
-  // 1. Create whitelist policy
-  const tx = await registry.write.createPolicy([complianceAdmin, 0])
-  const receipt = await publicClient.waitForTransactionReceipt({ hash: tx })
-  const policyId = receipt.logs[0].args.policyId
-  
-  // 2. Add KYC'd users
-  const kycUsers = [user1, user2, user3]
-  for (const user of kycUsers) {
-    await registry.write.modifyPolicyWhitelist([policyId, user, true])
-  }
-  
-  // 3. Apply to token
-  await token.write.changeTransferPolicyId([policyId])
-  
-  console.log(`KYC whitelist policy ${policyId} applied to token`)
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const complianceAdminAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
+const token = '0x20c0000000000000000000000000000000000004' // [!code focus]
+
+// 1. Create whitelist policy // [!code focus]
+const { hash, policyId } = await client.policy.create({  // [!code focus]
+  admin: complianceAdminAddress, // [!code focus]
+  type: 'whitelist', // [!code focus]
+  token, // [!code focus]
+}) // [!code focus]
+await client.waitForTransactionReceipt({ hash }) // [!code focus]
+
+// 2. Add KYC'd users // [!code focus]
+const kycUsers = [user1Address, user2Address, user3Address]
+for (const user of kycUsers) {
+  await client.policy.modifyWhitelist({  // [!code focus]
+    address: user, // [!code focus]
+    allowed: true, // [!code focus]
+    policyId, // [!code focus]
+  }) // [!code focus]
 }
+
+// 3. Apply to token // [!code focus]
+await client.token.changeTransferPolicy({  // [!code focus]
+  policyId, // [!code focus]
+  token, // [!code focus]
+}) // [!code focus]
+
+console.log(`KYC whitelist policy ${policyId} applied to token`)
 ```
 
 ### Security Blacklist
 
-```javascript
-// Create blacklist for security
-async function setupSecurityBlacklist() {
-  // 1. Create blacklist policy
-  const tx = await registry.write.createPolicy([securityAdmin, 1])
-  const receipt = await publicClient.waitForTransactionReceipt({ hash: tx })
-  const policyId = receipt.logs[0].args.policyId
-  
-  // 2. Add blocked addresses
-  const blockedAddresses = [hacker1, hacker2, suspiciousContract]
-  for (const address of blockedAddresses) {
-    await registry.write.modifyPolicyBlacklist([policyId, address, true])
-  }
-  
-  // 3. Apply to token
-  await token.write.changeTransferPolicyId([policyId])
-  
-  console.log(`Security blacklist policy ${policyId} applied to token`)
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const securityAdminAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
+const token = '0x20c0000000000000000000000000000000000004' // [!code focus]
+
+// 1. Create blacklist policy // [!code focus]
+const { hash, policyId } = await client.policy.create({  // [!code focus]
+  admin: securityAdminAddress, // [!code focus]
+  type: 'blacklist', // [!code focus]
+  token, // [!code focus]
+}) // [!code focus]
+await client.waitForTransactionReceipt({ hash }) // [!code focus]
+
+// 2. Add blocked addresses // [!code focus]
+const blockedAddresses = [hacker1, hacker2, suspiciousContract]
+for (const user of blockedAddresses) {
+  await client.policy.modifyBlacklist({  // [!code focus]
+    address: user, // [!code focus]
+    restricted: true, // [!code focus]
+    policyId, // [!code focus]
+  }) // [!code focus]
 }
+
+// 3. Apply to token // [!code focus]
+await client.token.changeTransferPolicy({  // [!code focus]
+  policyId, // [!code focus]
+  token, // [!code focus]
+}) // [!code focus]
+
+console.log(`Security blacklist policy ${policyId} applied to token`)
 ```
 
 ## Policy Administration
 
 ### Transfer Policy Admin
 
-```javascript
-// Transfer admin rights to another address
-await registry.write.setPolicyAdmin([
-  policyId,
-  newAdminAddress
-])
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const adminAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
+
+const { hash, policyId } = await client.policy.setAdmin({  // [!code focus]
+  policyId: 123n, // [!code focus]
+  admin: adminAddress, // [!code focus]
+}) // [!code focus]
 ```
 
 ### Check Authorization
 
-```javascript
-// Check if an address is authorized under a policy
-const isAuthorized = await registry.read.isAuthorized([
-  policyId,
-  userAddress
-])
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
 
-console.log(`Address ${userAddress} is ${isAuthorized ? 'authorized' : 'not authorized'}`)
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const userAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
+
+const { hash, policyId } = await client.policy.isAuthorized({  // [!code focus]
+  policyId: 123n, // [!code focus]
+  user: userAddress, // [!code focus]
+}) // [!code focus]
 ```
 
 ## Monitoring Policy Changes
 
-```javascript
-// Listen for whitelist updates
-registry.watchEvent.WhitelistUpdated({
-  onLogs: (logs) => {
-    logs.forEach((log) => {
-      console.log(`Policy ${log.args.policyId}: ${log.args.account} ${log.args.allowed ? 'added to' : 'removed from'} whitelist`)
-    })
-  }
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
 })
 
-// Listen for blacklist updates
-registry.watchEvent.BlacklistUpdated({
-  onLogs: (logs) => {
-    logs.forEach((log) => {
-      console.log(`Policy ${log.args.policyId}: ${log.args.account} ${log.args.restricted ? 'added to' : 'removed from'} blacklist`)
-    })
-  }
-})
+// Listen for whitelist updates // [!code focus]
+await client.policy.watchWhitelistUpdated({  // [!code focus]
+  policyId: 123n, // [!code focus]
+  onWhitelistUpdated: (args) => {  // [!code focus]
+    console.log(`Policy ${args.policyId}: ${args.account} ${args.allowed ? 'added to' : 'removed from'} whitelist`)  // [!code focus]
+  }  // [!code focus]
+})  // [!code focus]
+
+// Listen for blacklist updates // [!code focus]
+await client.policy.watchBlacklistUpdated({  // [!code focus]
+  policyId: 123n, // [!code focus]
+  onBlacklistUpdated: (args) => {  // [!code focus]
+    console.log(`Policy ${args.policyId}: ${args.account} ${args.restricted ? 'added to' : 'removed from'} blacklist`)  // [!code focus]
+  }  // [!code focus]
+})  // [!code focus]
 ```
 
 For detailed technical specifications, see the [TIP-403 Protocol Reference](/protocol/tokens/tip-403).

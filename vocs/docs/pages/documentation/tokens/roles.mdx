@@ -6,75 +6,89 @@ TIP-20 tokens use a role-based access control system that allows you to delegate
 
 | Role | Purpose | Key Functions |
 |------|---------|---------------|
-| **DEFAULT_ADMIN_ROLE** | Full control | Grant/revoke all roles, set supply caps, change policies |
-| **ISSUER_ROLE** | Token supply | Mint and burn tokens |
-| **PAUSE_ROLE** | Emergency control | Pause token transfers |
-| **UNPAUSE_ROLE** | Emergency control | Unpause token transfers |
-| **BURN_BLOCKED_ROLE** | Compliance | Burn tokens from blocked addresses |
+| `defaultAdmin` | Full control | Grant/revoke all roles, set supply caps, change policies |
+| `issuer` | Token supply | Mint and burn tokens |
+| `pause` | Emergency control | Pause token transfers |
+| `unpause` | Emergency control | Unpause token transfers |
+| `burnBlocked` | Compliance | Burn tokens from blocked addresses |
 
 ## Granting Roles
 
 ### Grant Issuer Role
 
-```javascript
-import { getContract } from 'viem'
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
 
-const token = getContract({
-  address: tokenAddress,
-  abi: tip20Abi,
-  client: wallet
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
 })
 
-// Grant minting rights to treasury
-await token.write.grantRole([
-  '0x' + keccak256('ISSUER_ROLE').slice(2), // ISSUER_ROLE
-  treasuryAddress
-])
+const treasuryAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
+
+const hash = await client.token.grantRoles({ // [!code focus]
+  roles: ['issuer'], // [!code focus]
+  to: treasuryAddress, // [!code focus]
+  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
+}) // [!code focus]
 ```
 
 ### Grant Pause Role
 
-```javascript
-// Grant pause rights to security team
-await token.write.grantRole([
-  '0x' + keccak256('PAUSE_ROLE').slice(2), // PAUSE_ROLE
-  securityTeamAddress
-])
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const securityTeamAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
+
+const hash = await client.token.grantRoles({ // [!code focus]
+  roles: ['pause'], // [!code focus]
+  to: securityTeamAddress, // [!code focus]
+  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
+}) // [!code focus]
 ```
 
 ### Grant Multiple Roles
 
-```javascript
-// Grant multiple roles to a multisig
-const roles = [
-  '0x' + keccak256('ISSUER_ROLE').slice(2),
-  '0x' + keccak256('PAUSE_ROLE').slice(2),
-  '0x' + keccak256('UNPAUSE_ROLE').slice(2)
-]
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
 
-for (const role of roles) {
-  await token.write.grantRole([role, multisigAddress])
-}
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const securityTeamAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
+
+const hash = await client.token.grantRoles({ // [!code focus]
+  roles: ['issuer', 'pause', 'unpause'], // [!code focus]
+  to: securityTeamAddress, // [!code focus]
+  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
+}) // [!code focus]
 ```
 
 ## Revoking Roles
 
-```javascript
-// Remove minting rights from old treasury
-await token.write.revokeRole([
-  '0x' + keccak256('ISSUER_ROLE').slice(2),
-  oldTreasuryAddress
-])
-```
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
 
-## Checking Role Membership
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
 
-```javascript
-// Check if address has issuer role
-const hasIssuerRole = await token.read.hasRole([
-  '0x' + keccak256('ISSUER_ROLE').slice(2),
-  addressToCheck
-])
+const treasuryAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
+
+// Remove minting rights from old treasury // [!code focus]
+const hash = await client.token.revokeRoles({ // [!code focus]
+  from: treasuryAddress, // [!code focus]
+  roles: ['issuer'], // [!code focus]
+  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
+}) // [!code focus]
 ```
 
 ## Role Management Best Practices
@@ -83,24 +97,33 @@ const hasIssuerRole = await token.read.hasRole([
 
 Always use multisig wallets for administrative roles:
 
-```javascript
-// Grant admin role to multisig (not individual)
-await token.write.grantRole([
-  '0x0000000000000000000000000000000000000000000000000000000000000000', // DEFAULT_ADMIN_ROLE
-  multisigAddress
-])
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const multisigAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
+
+const hash = await client.token.grantRoles({ // [!code focus]
+  roles: ['defaultAdmin'], // [!code focus]
+  to: multisigAddress, // [!code focus]
+  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
+}) // [!code focus]
 ```
 
 ### Separate Concerns
 
 Don't give all roles to one address:
 
-- **Treasury team**: ISSUER_ROLE only
-- **Security team**: PAUSE_ROLE and UNPAUSE_ROLE
-- **Compliance team**: BURN_BLOCKED_ROLE
-- **Governance**: DEFAULT_ADMIN_ROLE
+- **Treasury team**: `issuer` only
+- **Security team**: `pause` and `unpause`
+- **Compliance team**: `burnBlocked`
+- **Governance**: `defaultAdmin`
 
-### Regular Audits
+{/* ### Regular Audits
 
 Periodically review who has what roles:
 
@@ -119,13 +142,29 @@ for (const roleName of roles) {
   const hasRole = await token.read.hasRole([role, addressToCheck])
   console.log(`${roleName}: ${hasRole}`)
 }
-```
+``` */}
 
 ## Role Events
 
 The token emits events when roles are granted or revoked:
 
-```javascript
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+await client.token.watchRole({ // [!code focus]
+  onRoleUpdated: (args) => { // [!code focus]
+    console.log(`Role ${args.role} ${args.type === 'granted' ? 'granted to' : 'revoked from'} ${args.account}`) // [!code focus]
+  }, // [!code focus]
+  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
+}) // [!code focus]
+```
+
+{/* ```javascript
 // Listen for role changes
 token.watchEvent.RoleMembershipUpdated({
   onLogs: (logs) => {
@@ -134,29 +173,47 @@ token.watchEvent.RoleMembershipUpdated({
     })
   }
 })
-```
+``` */}
 
 ## Emergency Procedures
 
 ### Immediate Pause
 
-If you have PAUSE_ROLE, you can immediately stop all transfers:
+If you have `pause`, you can immediately stop all transfers:
 
-```javascript
-await token.write.pause()
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const hash = await client.token.pause({ // [!code focus]
+  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
+}) // [!code focus]
 ```
+
 
 ### Remove Compromised Roles
 
 If an address is compromised, immediately revoke all roles:
 
-```javascript
-const compromisedAddress = '0x...'
-const allRoles = [/* role hashes */]
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
 
-for (const role of allRoles) {
-  await token.write.revokeRole([role, compromisedAddress])
-}
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const compromisedAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
+
+const hash = await client.token.revokeRoles({ // [!code focus]
+  from: compromisedAddress, // [!code focus]
+  roles: ['defaultAdmin', 'issuer', 'pause', 'unpause', 'burnBlocked'], // [!code focus]
+  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
+}) // [!code focus]
 ```
 
 For detailed technical specifications, see the [TIP-20 Protocol Reference](/protocol/tokens/tip-20).

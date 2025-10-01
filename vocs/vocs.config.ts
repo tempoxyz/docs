@@ -68,6 +68,10 @@ export default defineConfig({
             {
                 text: "Overview",
                 link: "/documentation",
+            },  
+            {
+                text: "Library Setup",
+                link: "/documentation/library-setup",
             },
             {
                 text: "Tokens",

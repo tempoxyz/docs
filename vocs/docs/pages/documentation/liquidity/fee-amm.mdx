@@ -34,21 +34,56 @@ Key functions for liquidity provision:
 
 First, approve both tokens for the AMM contract to spend:
 
-```javascript
-await testUSD.write.approve([ammAddress, testUSDAmount])
-await alphaUSD.write.approve([ammAddress, alphaUSDAmount])
+```ts
+import { parseUnits } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const testUSDAddress = '0x20c0000000000000000000000000000000000001' // [!code focus]
+const alphaUSDAddress = '0x20c0000000000000000000000000000000000002' // [!code focus]
+
+await client.token.approve({ // [!code focus]
+  amount: parseUnits('1000', 6), // [!code focus]
+  spender: ammAddress, // [!code focus]
+  token: testUSDAddress, // [!code focus]
+}) // [!code focus]
+
+await client.token.approve({ // [!code focus]
+  amount: parseUnits('1000', 6), // [!code focus]
+  spender: ammAddress, // [!code focus]
+  token: alphaUSDAddress, // [!code focus]
+}) // [!code focus]
 ```
 
 Then call [`mint()`](/protocol/transactions/fee-amm#liquidity-provision) with both token amounts. The function returns the LP tokens minted:
 
-```javascript
-const tx = await amm.write.mint([
-  testUSDAddress,    // userToken
-  alphaUSDAddress,    // validatorToken
-  testUSDAmount,     // amountUserToken
-  alphaUSDAmount,     // amountValidatorToken
-  yourAddress     // to
-])
+```ts
+import { parseUnits } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+const testUSDAddress = '0x20c0000000000000000000000000000000000001' // [!code focus]
+const alphaUSDAddress = '0x20c0000000000000000000000000000000000002' // [!code focus]
+
+await client.amm.mint({ // [!code focus]
+  to: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
+  userToken: { // [!code focus]
+    address: testUSDAddress, // [!code focus]
+    amount: parseUnits('1000', 6), // [!code focus]
+  }, // [!code focus]
+  validatorToken: { // [!code focus]
+    address: alphaUSDAddress, // [!code focus]
+    amount: parseUnits('1000', 6), // [!code focus]
+  }, // [!code focus]
+}) // [!code focus]
 ```
 
 For the initial liquidity provision, you can provide the entire amount in the validatorToken. As fees are paid in the user token, the balance changes, but the AMM is designed to incentivize arbitrageurs to rebalance it back toward holding 100% of the validator token, as long as the price of the user token is within 0.15% of the price of the validator token.

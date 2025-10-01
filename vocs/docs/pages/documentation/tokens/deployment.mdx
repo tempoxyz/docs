@@ -6,25 +6,19 @@ The TIP20Factory contract makes it easy to deploy new TIP-20 tokens with a singl
 
 ### Basic Deployment
 
-```javascript
-import { getContract } from 'viem'
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
 
-const factory = getContract({
-  address: '0x20FC000000000000000000000000000000000000', // TIP20Factory
-  abi: factoryAbi,
-  client: wallet
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
 })
 
-// Deploy a new USD token
-const tx = await factory.write.createToken([
-  'My Company USD',    // name
-  'MCUSD',            // symbol
-  'USD',              // currency
-  wallet.account.address // admin
-])
-
-const receipt = await publicClient.waitForTransactionReceipt({ hash: tx })
-const tokenAddress = receipt.logs[0].args.tokenAddress
+const { address, hash, id } = await client.token.create({ // [!code focus]
+  currency: 'USD', // [!code focus]
+  name: 'My Company USD', // [!code focus]
+  symbol: 'MCUSD', // [!code focus]
+}) // [!code focus]
 ```
 
 ### Required Parameters

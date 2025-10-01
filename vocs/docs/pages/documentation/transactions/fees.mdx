@@ -23,18 +23,19 @@ You can learn more about the [Fee AMM](/protocol/transactions/fee-amm) in the pr
 
 ### Using the FeeManager Precompile
 
-```javascript
-// Set USDC as your default fee token
-import { getContract } from 'viem'
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
 
-const feeManager = getContract({
-  // FeeManager precompile
-  address: '0xfeec000000000000000000000000000000000000',
-  abi: feeManagerAbi,
-  client: wallet, // viem wallet client instance
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
 })
 
-await feeManager.setUserToken(testUSDTokenAddress);
+const token = testUSDTokenAddress
+
+const hash = await client.token.setUserToken({ // [!code focus]
+  token, // [!code focus]
+}) // [!code focus]
 ```
 
 ### What This Does
@@ -46,12 +47,23 @@ await feeManager.setUserToken(testUSDTokenAddress);
 
 ### Changing Your Default
 
-```javascript
-// Change default
-await feeManager.setUserToken(newUSDTokenAddress);
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
 
-// Remove default (will use validator's preference)
-await feeManager.setUserToken(viem.ZeroAddress);
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+// Change default // [!code focus]
+const hash = await client.token.setUserToken({ // [!code focus]
+  token: testUSDTokenAddress, // [!code focus]
+}) // [!code focus]
+
+// Remove default (will use validator's preference) // [!code focus]
+const hash = await client.token.setUserToken({ // [!code focus]
+  token: zeroAddress, // [!code focus]
+}) // [!code focus]
 ```
 
 ## Fee Token Requirements
