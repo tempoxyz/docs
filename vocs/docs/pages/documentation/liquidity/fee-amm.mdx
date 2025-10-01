@@ -6,7 +6,7 @@ The Fee AMM is a specialized Automated Market Maker designed to facilitate gas f
 
 The Fee AMM operates with two distinct swap mechanisms:
 
-- **[Fee Swaps](/protocol/transactions/fee-amm#fee-swaps)**: Fixed-rate swaps at 99.75% for gas fee conversions (protocol-only)
+- **[Fee Swaps](/protocol/transactions/fee-amm#fee-swaps)**: Fixed-rate swaps at 99.70% for gas fee conversions (protocol-only)
 - **[Rebalancing Swaps](/protocol/transactions/fee-amm#rebalancing-swaps)**: Variable-rate swaps to restore pool balance (public)
 
  Liquidity providers earn fees from both types of swaps while helping maintain the pool's balance for efficient fee conversions. The system is designed with [MEV mitigation strategies](/protocol/transactions/fee-amm#mev-mitigation-strategy) to prevent spam and ensure fair operation.
@@ -134,7 +134,7 @@ const alphaUSDReserve = pool.reserveValidatorToken
 
 As a liquidity provider, you earn fees from both types of swaps in the Fee AMM:
 
-- **[Fee Swaps](/protocol/transactions/fee-amm#fee-swaps)**: 0.25% fee on all gas fee conversions (fixed rate at m=0.9975)
+- **[Fee Swaps](/protocol/transactions/fee-amm#fee-swaps)**: 0.3% fee on all gas fee conversions (fixed rate at m=0.9970)
 - **[Rebalancing Swaps](/protocol/transactions/fee-amm#rebalancing-swaps)**: Variable fees from arbitrage activity
 
 Fees are automatically added to the pool reserves, increasing the value of your LP tokens over time. The system processes fee swaps at the end of each block, ensuring consistent fee distribution.
