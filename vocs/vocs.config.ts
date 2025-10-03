@@ -26,16 +26,25 @@ export default defineConfig({
                  link: "/testnet",
              },
              {
-                 text: "Lento",
-                 link: "/testnet/lento",
+                 text: "FAQ",
+                 link: "/testnet/faq",
              },
              {
-                 text: "Adagietto",
-                 link: "/testnet/adagietto",
-             },
-             {
-                 text: "Adagio",
-                 link: "/testnet/adagio",
+                 text: "Releases",
+                 items: [
+                     {
+                         text: "Lento (Testnet #3)",
+                         link: "/testnet/lento",
+                     },
+                     {
+                         text: "Adagietto (Testnet #2)",
+                         link: "/testnet/adagietto",
+                     },
+                     {
+                         text: "Adagio (Testnet #1)",
+                         link: "/testnet/adagio",
+                     },
+                 ],
              },
          ],
          "/litepaper": [
@@ -78,11 +87,7 @@ export default defineConfig({
                 link: "/documentation/library-setup",
             },
             {
-                text: "FAQ",
-                link: "/documentation/faq",
-            },
-            {
-                text: "Tokens",
+                text: "Token Management",
                 items: [
                     {
                         text: "Overview",
@@ -107,45 +112,40 @@ export default defineConfig({
                 ],
             },
             {
-                text: "Transactions",
-                items: [
-                    {
-                        text: "Fees",
-                        link: "/documentation/transactions/fees",
-                    },
-                    {
-                        text: "Payments Lane",
-                        link: "/documentation/transactions/payments-lane",
-                    }
-                ],
-            },
-            {
-                text: "Accounts",
+                text: "Sending Transactions",
                 items: [
                     {
                         text: "Overview",
+                        link: "/documentation/transactions",
+                    },
+                    {
+                        text: "Fee Tokens",
+                        link: "/documentation/transactions/fee-tokens",
+                    },
+                    {
+                        text: "Payment Lanes",
+                        link: "/documentation/transactions/payment-lanes",
+                    },
+                    {
+                        text: "Batch Transactions",
+                        link: "/documentation/transactions/batch-transactions",
+                    },
+                    {
+                        text: "Fee AMM",
+                        link: "/documentation/transactions/fee-amm",
+                    },
+                ],
+            },
+            {
+                text: "Account Management",
+                items: [
+                    {
+                        text: "Default Accounts",
                         link: "/documentation/accounts",
                     },
                 ],
             },
-            {
-                text: "Liquidity",
-                items: [
-                    {
-                        text: "Fee AMM",
-                        link: "/documentation/liquidity/fee-amm",
-                    },
-                ],
-            },
-            {
-                text: "Consensus",
-                items: [
-                    {
-                        text: "Overview",
-                        link: "/documentation/consensus",
-                    },
-                ],
-            }
+
         ],
          "/protocol": [
              {
@@ -204,6 +204,15 @@ export default defineConfig({
                     {
                         text: "Overview",
                         link: "/protocol/accounts",
+                    },
+                ],
+            },
+            {
+                text: "Consensus",
+                items: [
+                    {
+                        text: "Overview",
+                        link: "/protocol/consensus",
                     },
                 ],
             },
