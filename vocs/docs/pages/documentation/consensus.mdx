@@ -1,34 +1,20 @@
 # Consensus in Tempo: Commonware Simplex
 
-Tempo uses [Commonware Simplex](https://simplex.blog/) as its consensus protocol. Simplex is a new family of Byzantine fault tolerant (BFT) protocols that achieves safety and liveness with a remarkably simple structure, while also offering flexibility in the number of rounds and fault tolerance it supports. Compared to earlier generations of consensus such as [PBFT](https://dl.acm.org/doi/10.1145/571637.571640) or [HotStuff](https://arxiv.org/abs/1803.05069), Simplex emphasizes **clarity of design**, **predictability of performance**, and **robust fault handling**.
+Tempo uses Commonware's Implementation of the [Simplex protocol](https://simplex.blog/) as its consensus protocol, [Threshold Simplex](https://docs.rs/commonware-consensus/latest/commonware_consensus/threshold_simplex/index.html). Simplex is a new family of Byzantine fault tolerant (BFT) protocols that achieves safety and liveness with a remarkably simple structure, while also offering flexibility in the number of rounds and fault tolerance it supports. It is an evolution of earlier generations of consensus such as [PBFT](https://dl.acm.org/doi/10.1145/571637.571640) or [HotStuff](https://arxiv.org/abs/1803.05069).
 
 ---
 
 ## What is Simplex?
 
-At its core, Simplex is a leader-based consensus protocol designed to commit one block per instance. The protocol proceeds in a series of rounds, where validators exchange votes in order to confirm a block and finalize it. Unlike some other BFT protocols, Simplex avoids unnecessary complexity: it does not require speculative execution, it does not depend on chained locks, and its communication structure is easy to reason about.
+Simplex is a leader-based consensus protocol designed to commit one block per instance. The protocol proceeds in a series of rounds, where validators exchange votes in order to confirm a block and finalize it. One of the key innovations of Simplex is its **two-round variant**, which achieves finality in just two message rounds under normal conditions. In this form, a block proposed by the leader can be finalized quickly if the quorum of validators agrees. This provides very low latency, especially when the network is synchronous and validators are honest. While two rounds are optimal in many cases, Simplex also allows **three-round execution**, which provides additional safety guarantees in asynchronous or partially synchronous conditions.
+
 
 For a clear overview of the motivation and design goals of Simplex, see [this introductory post](https://decentralizedthoughts.github.io/2025-06-18-simplex/).
 
----
-
-## Two-Round Simplex
-
-One of the key innovations of Simplex is its **two-round variant**, which achieves finality in just two message rounds under normal conditions. In this form, a block proposed by the leader can be finalized quickly if the quorum of validators agrees. This provides very low latency, especially when the network is synchronous and validators are honest. 
-
-Details of this design are described in [Two-Round Simplex](https://decentralizedthoughts.github.io/2025-07-18-two-round-Simplex/).
-
----
-
-## Two vs. Three Rounds
-
-While two rounds are optimal in many cases, Simplex also allows **three-round execution**, which provides additional safety guarantees in asynchronous or partially synchronous conditions. This adaptability means Simplex can be tuned for different network assumptions and deployment environments. A deeper comparison of the two- and three-round approaches is available in [this analysis](https://decentralizedthoughts.github.io/2025-07-29-2-round-3-round-simplex/).
-
----
 
 ## Networking Without Gossip
 
-A key architectural choice in Tempo Commonware is its **networking model**. Instead of relying on gossip-style message propagation, Tempo Commonware uses **direct peer-to-peer communication** authenticated by consensus identities. Every validator talks directly to its peers using a purpose-built networking stack, rather than an off-the-shelf library optimized for gossip (like libp2p).  
+A key architectural choice in Commonware's implementation of Simplex is its **networking model**. Instead of relying on gossip-style message propagation, it uses **direct peer-to-peer communication** authenticated by consensus identities. Every validator talks directly to its peers using a purpose-built networking stack, rather than an off-the-shelf library optimized for gossip (like libp2p).  
 
 This design has several advantages for high-performance consensus:
 
@@ -36,7 +22,6 @@ This design has several advantages for high-performance consensus:
 - **Security by Identity:** Each connection is authenticated at the consensus level, ensuring trust in the communication path.  
 - **Resilience to Withholding:** In cases where a validator withholds a block, the system uses **erasure coding** to guarantee recovery rather than relying on best-effort fetching or gossip retries.  
 
-The result is a networking layer that is both **tighter and more reliable**, avoiding assumptions about emergent gossip behavior and giving operators confidence that performance will scale deterministically.
 
 ---
 
@@ -44,21 +29,6 @@ The result is a networking layer that is both **tighter and more reliable**, avo
 
 Another important property of Simplex is its ability to handle Byzantine failures. Like other BFT protocols, it can tolerate up to **f < n/3** faulty nodes. However, recent work has explored ways to push this boundary. For instance, variants of Simplex can extend resilience up to **f < n/5**, trading off additional rounds for stronger guarantees. This line of work is explained in [5f-1 Simplex](https://decentralizedthoughts.github.io/2025-08-06-5fminus1-simplex/).
 
----
-
-## Why Tempo Uses Simplex
-
-Tempo is designed for payments and settlement, where **predictability, clarity, and safety** matter as much as raw throughput. Commonware Simplex provides:
-
-- **Deterministic Finality:** Single-slot finalization ensures users know when a payment is irrevocable.  
-- **Configurable Performance:** Two or three rounds, depending on deployment conditions.  
-- **Robust Fault Handling:** Extensions allow the system to tolerate more adversarial conditions.  
-- **Direct Networking:** Eliminates gossip assumptions for reliability and performance.  
-- **Elegant Simplicity:** The protocol structure is easier to implement, audit, and reason about compared to older BFT designs.  
-
-By building on Simplex, Tempo gains a consensus layer that is both academically rigorous and operationally pragmatic.
-
----
 
 ## Learn More
 
@@ -70,6 +40,3 @@ If youd like to dive deeper, the following resources provide detailed technical 
 - [Two vs. Three Round Tradeoffs](https://decentralizedthoughts.github.io/2025-07-29-2-round-3-round-simplex/)  
 - [5f-1 Resilience Extension](https://decentralizedthoughts.github.io/2025-08-06-5fminus1-simplex/)  
 
----
-
-By choosing Commonware Simplex, Tempo ensures that consensus is **fast, fault-tolerant, and transparent**—a foundation that matches its mission of enabling stable, reliable digital payments.

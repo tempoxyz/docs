@@ -109,6 +109,10 @@ export default defineConfig({
                         text: "Fees",
                         link: "/documentation/transactions/fees",
                     },
+                    {
+                        text: "Payments Lane",
+                        link: "/documentation/transactions/payments-lane",
+                    }
                 ],
             },
             {
@@ -129,6 +133,15 @@ export default defineConfig({
                     },
                 ],
             },
+            {
+                text: "Consensus",
+                items: [
+                    {
+                        text: "Overview",
+                        link: "/documentation/consensus",
+                    },
+                ],
+            }
         ],
          "/protocol": [
              {
@@ -175,6 +188,10 @@ export default defineConfig({
                          text: "Fee AMM",
                          link: "/protocol/transactions/fee-amm",
                      },
+                     {
+                        text: "Payments Lane",
+                        link: "/protocol/transactions/payments-lane",
+                    },
                  ],
              },
             {
