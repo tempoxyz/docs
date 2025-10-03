@@ -72,3 +72,60 @@ const hash = await client.token.setUserToken({ // [!code focus]
 - Must have **sufficient balance** to cover the transaction's gas limit
 - Must have **liquidity** in the Fee AMM for conversion if needed
 - **Transaction-level** preferences override account-level preferences
+
+## Guaranteed Inclusion with Separate Gas Limits
+
+Tempo ensures that payment transactions always have available blockspace, even during periods of high network congestion from DeFi activity or complex smart contracts. This is achieved through **separate gas limits** for payment and non-payment transactions.
+
+### Use Case: Specifying Payment vs Non-Payment Gas Limits
+
+When blocks are constructed, validators enforce two separate gas constraints:
+
+1. **`gasLimit`** — The total gas available for all transactions (standard Ethereum behavior)
+2. **`generalGasLimit`** — The maximum gas that non-payment transactions can consume
+
+This creates a reserved capacity for payment transactions. Even if non-payment transactions fill up to `generalGasLimit`, payment transactions can still use the remaining capacity up to `gasLimit`.
+
+<Callout type="info">
+  A client library is being developed to abstract these details and make it even easier to work with payment transactions on Tempo.
+</Callout>
+
+### How Your Transaction is Classified
+
+Your transaction is automatically classified as a **payment transaction** when the recipient address (`tx.to`) matches the TIP-20 token pattern: `0x20c0000000000000000000000000000[TOKEN_ID]`.
+
+The classification is determined by a pure function that only examines the transaction envelope—no state access is required. This means:
+- **Automatic detection** based on the recipient address
+- **No special flags or configuration** needed
+- **Deterministic classification** that validators can verify instantly
+
+For the complete technical specification of how this works at the consensus level, including the dual gas accounting mechanism, see the [Payments Lane specification](/protocol/payments-lane).
+
+### Example: Sending a Payment
+
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+})
+
+// This transaction automatically uses the payment gas limit
+// because it's sent to a TIP-20 token address (0x20c0...)
+const hash = await client.sendTransaction({
+  to: '0x20c0000000000000000000000000000000000000', // TIP-20 token address
+  data: encodeFunctionData({
+    abi: tip20Abi,
+    functionName: 'transfer',
+    args: [recipientAddress, amount]
+  })
+})
+```
+
+### Benefits
+
+- **Guaranteed inclusion** — Payment transactions are never starved by other transaction types
+- **Predictable costs** — Reserved blockspace prevents fee spikes during network congestion
+- **Transparent** — Same fee market and pricing as non-payment transactions
+- **Simple to use** — Works automatically based on transaction recipient
