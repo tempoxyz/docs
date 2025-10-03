@@ -1,0 +1,66 @@
+# FAQ
+
+## How do I deploy a contract on Tempo?
+
+The easiest way to deploy contract(s) on Tempo is by using [Foundry](https://getfoundry.sh/), a blazing-fast toolkit for EVM networks.
+
+Below is a basic guide on how to deploy your first contract, but for more detailed instructions, see the [Deploying Guide](https://getfoundry.sh/forge/deploying) on the [Foundry docs](https://getfoundry.sh).
+
+::::steps
+
+### 1. Install Foundry
+
+```bash [Terminal]
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+```
+
+### 2a. Initialize a new Project
+
+If you have not initialized a project yet, you can use the `forge init` command.
+
+If you already have a project, continue to [2b. Add Foundry to an existing Project](#2b-add-foundry-to-an-existing-project).
+
+```bash [Terminal]
+forge init example && cd example
+```
+
+### 2b. Add Foundry to an existing Project
+
+If you already have an existing contracts project, add a `foundry.toml` file to the root directory.
+
+```toml [foundry.toml]
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+remappings = ["forge-std/=lib/forge-std/src/"]
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+```
+
+:::info
+Ensure that your source files are hooked up correctly in the `foundry.toml` file.
+:::
+
+### 3. Deploy
+
+Next, we can deploy our contract using the `forge create` or `forge script` command.
+
+```bash [Terminal]
+export PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+
+# Deploy a contract using the `forge create` command.
+forge create src/Counter.sol:Counter \
+  --rpc-url https://{username}:{password}@rpc-adagio.tempoxyz.dev \
+  --private-key $PRIVATE_KEY
+
+# Or deploy contract(s) using a .s.sol script.
+forge script src/Counter.s.sol:Counter \
+  --rpc-url https://{username}:{password}@rpc-adagio.tempoxyz.dev \
+  --private-key $PRIVATE_KEY \
+  --broadcast
+```
+
+::::
+
