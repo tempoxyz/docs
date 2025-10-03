@@ -1,3 +1,8 @@
+---
+layout: landing
+showLogo: false
+---
+
 import { Callout } from 'vocs/components'
 
 <Callout type="warning">
@@ -8,17 +13,40 @@ import { Callout } from 'vocs/components'
 
 Welcome to the documentation for Tempo.
 
-Preliminaries:
-  - **[Library Setup](/documentation/library-setup)** — Setup your development environment
-  - **[FAQ](/documentation/faq)** — Frequently asked questions
-- **[Tokens Overview](/documentation/tokens)** — Overview of token standards and features
-  - **[Token Deployment](/documentation/tokens/deployment)** — How to deploy new tokens using the factory
-  - **[Roles & Permissions](/documentation/tokens/roles)** — Manage admin, mint, and burn roles
-  - **[Minting & Burning](/documentation/tokens/minting)** — Issue and destroy tokens
-  - **[Token Policies](/documentation/tokens/policies)** — Access control and compliance features
-- Transactions:
-  - **[Transaction Fees](/documentation/transactions/fees)** — Learn about Tempo's fee system
-  - **[Payments Lane](/documentation/payments-lane)** — Reserved blockspace for payments
-- **[Accounts](/documentation/accounts)** — Default Account Abstraction (DAA) and smart wallet features
-- Liquidity:
-  - **[Fee AMM Liquidity](/documentation/liquidity/fee-amm)** — Add liquidity to the fee AMM and earn rewards
+## Getting Started
+
+| Topic | Description |
+|-------|-------------|
+| [**Library Setup**](/documentation/library-setup) | Setup your development environment |
+
+## Token Management
+
+Create, deploy, and manage TIP-20 tokens on Tempo.
+
+| Topic | Description |
+|-------|-------------|
+| [**Overview**](/documentation/tokens) | Token standards and features |
+| [**Deployment**](/documentation/tokens/deployment) | Deploy new tokens using the factory |
+| [**Roles & Permissions**](/documentation/tokens/roles) | Manage admin, mint, and burn roles |
+| [**Minting & Burning**](/documentation/tokens/minting) | Issue and destroy tokens |
+| [**Policies**](/documentation/tokens/policies) | Access control and compliance features |
+
+## Sending Transactions
+
+Send transactions, pay fees in stablecoins, and batch operations.
+
+| Topic | Description |
+|-------|-------------|
+| [**Overview**](/documentation/transactions) | Transaction capabilities overview |
+| [**Fee Tokens**](/documentation/transactions/fee-tokens) | Pay fees in any supported USD stablecoin |
+| [**Payment Lanes**](/documentation/transactions/payment-lanes) | Guaranteed blockspace for payments |
+| [**Batch Transactions**](/documentation/transactions/batch-transactions) | Execute multiple operations atomically |
+| [**Fee AMM**](/documentation/transactions/fee-amm) | Provide liquidity for fee conversions |
+
+## Account Management
+
+Manage smart contract wallets with Default Account Abstraction.
+
+| Topic | Description |
+|-------|-------------|
+| [**Default Accounts**](/documentation/accounts) | Smart wallet features and DAA |
