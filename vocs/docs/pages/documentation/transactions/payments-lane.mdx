@@ -1,0 +1,9 @@
+# Payments Lane
+
+The payments lane is a fundamental feature of Tempo that ensures reliable and predictable payment processing even during periods of high network activity. By reserving a dedicated portion of each block's gas limit specifically for payment transactions, Tempo guarantees that simple token transfers will never be starved by other transaction types such as complex smart contract interactions or DeFi operations.
+
+This dedicated blockspace allocation is implemented at the consensus level, where validators enforce strict gas limits for non-payment transactions through a custom header field called `generalGasLimit`. Payment transactions are automatically classified using a pure function that identifies TIP-20 token transfers (i.e., the `to` address is a TIP-20 token address, no state access is required). 
+
+No special activity from the user is required to take advantage of the payments lane. 
+
+
