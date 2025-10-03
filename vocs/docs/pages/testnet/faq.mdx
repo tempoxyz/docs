@@ -1,5 +1,40 @@
 # FAQ
 
+## Prerequisites
+
+Before you start testing on Tempo, you'll need to set up a few things.
+
+### Getting a Test Account
+
+For testing purposes, you'll need a private key. The easiest way to create an ephemeral test account is using viem's `mnemonicToAccount` function:
+
+```ts
+import { mnemonicToAccount } from 'viem/accounts'
+
+const account = mnemonicToAccount('legal winner thank year wave sausage worth useful legal winner thank yellow')
+// Address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+```
+
+For more details, see the [viem documentation on mnemonicToAccount](https://viem.sh/docs/accounts/local/mnemonicToAccount).
+
+### Getting Faucet Tokens
+
+To interact with the testnet, you'll need test tokens. Each testnet has a built-in faucet that can fund your address with test stablecoins.
+
+See the faucet instructions for each testnet:
+- [Lento (Testnet #3)](/testnet/lento#faucet)
+- [Adagietto (Testnet #2)](/testnet/adagietto#faucet)
+- [Adagio (Testnet #1)](/testnet/adagio#using-the-faucet)
+
+Example faucet usage:
+
+```bash
+cast rpc tempo_fundAddress YOUR_ADDRESS \
+  --rpc-url https://${USERNAME}:${PASSWORD}@rpc-lento.tempoxyz.dev
+```
+
+---
+
 ## How do I deploy a contract on Tempo?
 
 The easiest way to deploy contract(s) on Tempo is by using [Foundry](https://getfoundry.sh/), a blazing-fast toolkit for EVM networks.
