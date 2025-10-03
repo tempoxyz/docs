@@ -134,6 +134,10 @@ export default defineConfig({
                         text: "Fee AMM",
                         link: "/documentation/transactions/fee-amm",
                     },
+                    {
+                        text: "Fee Sponsorship",
+                        link: "/documentation/transactions/fee-sponsorship",
+                    },
                 ],
             },
             {
