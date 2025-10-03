@@ -23,8 +23,6 @@ This design has several advantages for high-performance consensus:
 - **Resilience to Withholding:** In cases where a validator withholds a block, the system uses **erasure coding** to guarantee recovery rather than relying on best-effort fetching or gossip retries.  
 
 
----
-
 ## Fault Tolerance
 
 Another important property of Simplex is its ability to handle Byzantine failures. Like other BFT protocols, it can tolerate up to **f < n/3** faulty nodes. However, recent work has explored ways to push this boundary. For instance, variants of Simplex can extend resilience up to **f < n/5**, trading off additional rounds for stronger guarantees. This line of work is explained in [5f-1 Simplex](https://decentralizedthoughts.github.io/2025-08-06-5fminus1-simplex/).
