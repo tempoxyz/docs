@@ -9,15 +9,15 @@ export default defineConfig({
         dark:
             "https://raw.githubusercontent.com/tempoxyz/.github/refs/heads/main/assets/combomark-dark.svg",
     },
-    socials: [ 
-        { 
-          icon: "github", 
-          link: "https://github.com/tempoxyz", 
-        }, 
-        { 
-          icon: "x", 
-          link: "https://twitter.com/tempo", 
-        }, 
+    socials: [
+        {
+          icon: "github",
+          link: "https://github.com/tempoxyz",
+        },
+        {
+          icon: "x",
+          link: "https://twitter.com/tempo",
+        },
       ],
     sidebar: {
          "/testnet": [
@@ -26,12 +26,16 @@ export default defineConfig({
                  link: "/testnet",
              },
              {
-                 text: "Adagio",
-                 link: "/testnet/adagio",
+                 text: "Lento",
+                 link: "/testnet/lento",
              },
              {
                  text: "Adagietto",
                  link: "/testnet/adagietto",
+             },
+             {
+                 text: "Adagio",
+                 link: "/testnet/adagio",
              },
          ],
          "/litepaper": [
@@ -68,7 +72,7 @@ export default defineConfig({
             {
                 text: "Overview",
                 link: "/documentation",
-            },  
+            },
             {
                 text: "Library Setup",
                 link: "/documentation/library-setup",

@@ -4,23 +4,24 @@ showLogo: false
 ---
 
 import { HomePage } from 'vocs/components'
+import { Callout } from 'vocs/components'
 
 <HomePage.Root>
   <div className="mx-auto mt-6" style={{ width: '35vw', height: 'auto'}}>
-    <img 
-      src="https://raw.githubusercontent.com/tempoxyz/.github/refs/heads/main/assets/combomark-bright.svg" 
-      alt="Tempo Logo" 
-      className="w-full h-auto" 
+    <img
+      src="https://raw.githubusercontent.com/tempoxyz/.github/refs/heads/main/assets/combomark-bright.svg"
+      alt="Tempo Logo"
+      className="w-full h-auto"
       style={{ display: 'block' }}
     />
-    <img 
-      src="https://raw.githubusercontent.com/tempoxyz/.github/refs/heads/main/assets/combomark-dark.svg" 
-      alt="Tempo Logo" 
-      className="w-full h-auto" 
+    <img
+      src="https://raw.githubusercontent.com/tempoxyz/.github/refs/heads/main/assets/combomark-dark.svg"
+      alt="Tempo Logo"
+      className="w-full h-auto"
       style={{ display: 'none' }}
     />
   </div>
-  
+
   <style>{`
     .dark img:first-of-type {
       display: none !important;
@@ -29,9 +30,9 @@ import { HomePage } from 'vocs/components'
       display: block !important;
     }
   `}</style>
-  
+
   <HomePage.Tagline>The blockchain designed for payments.</HomePage.Tagline>
-  
+
   <div className="mt-6 mb-8">
     <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-center">
       Tempo is a purpose-built, layer 1 blockchain for payments that enables high-throughput, low-cost global transactions. Tempo is currently in early stages of development.
@@ -45,8 +46,13 @@ import { HomePage } from 'vocs/components'
     <HomePage.Button href="/litepaper" variant="accent">Litepaper</HomePage.Button>
   </HomePage.Buttons>
 
+  <Callout type="success">
+      Testnet #3 "Lento" is now live! <a href="/testnet/lento" className="underline hover:text-blue-600 dark:hover:text-blue-300">Learn more →</a>
+ </Callout>
+
   <HomePage.Buttons>
     <HomePage.Button href="https://github.com/tempoxyz">GitHub</HomePage.Button>
+    <HomePage.Button href="https://x.com/tempo">X</HomePage.Button>
     <HomePage.Button href="https://tempo.xyz">Website</HomePage.Button>
   </HomePage.Buttons>
 </HomePage.Root>

@@ -1,0 +1,58 @@
+# Lento [The third Tempo testnet]
+
+📅 The third testnet, Lento, is now live.
+
+## What's New
+
+The main feature of Lento is the introduction of payment lanes, which allow for faster and cheaper transactions on the Tempo network.
+
+## Network Details
+
+| Network Parameter | Value |
+|-------------------|-------|
+| **Network Name** | Lento |
+| **Chain ID** | `42426` |
+| **RPC URL** | `https://${USERNAME}:${PASSWORD}@rpc-lento.tempoxyz.dev` |
+
+Request credentials from the Tempo team.
+
+### Example Connection
+
+```bash
+cast block --rpc-url \
+    https://${USERNAME}:${PASSWORD}@rpc-lento.tempoxyz.dev
+```
+
+## Faucet
+
+The faucet supports multiple stablecoins and drips tokens to any address:
+
+```bash
+# Fund your address with any supported stablecoin
+cast rpc tempo_fundAddress 0x820525B56cF3cD426e58507F65DCaCB90BceEFb8 \
+  --rpc-url https://${USERNAME}:${PASSWORD}@rpc-lento.tempoxyz.dev
+```
+
+## Explorer & Tools
+
+For now we have stood up a very basic Blockscout instance to explore the testnet.
+
+| Explorer Parameter         | Value                                           |
+|----------------------------|-------------------------------------------------|
+| **Block Explorer**         | `https://lento.cloud.blockscout.com/`          |
+
+Speak to the Tempo team for an explorer username and password.
+
+If there are any tools you rely on we can preconfigure for future testnets, let us know.
+
+## Predeployed Contracts
+
+Coming soon.
+
+## Predeployed Tokens
+
+Coming soon.
+
+## Future Features
+
+We anticipate adding payment lanes functionality and the first approach to consensus in future testnets. These features are not yet documented.
