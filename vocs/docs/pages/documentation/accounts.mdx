@@ -12,34 +12,7 @@ The default account contract code is available on Github at [`ithacaxyz/account`
 
 The account implements the [ERC-7821](https://eips.ethereum.org/EIPS/eip-7821) Executor interface, which provides a standardized way to execute batches of operations with different execution modes and authorization schemes.
 
-## Example: Sending a Batch of Transactions
-
-One of the most powerful features of account abstraction is batching multiple operations into a single transaction. This allows you to execute several actions atomically (i.e., they all succeed or all fail together). This helps reduce gas costs, prevents partial failures, and creates better user experiences by combining multiple steps into one transaction.
-
-```ts
-import { walletActions } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-}).extend(walletActions)
-
-const { address, hash, id } = await client.sendTransaction({ // [!code focus]
-  calls: [{ // [!code focus]
-    to: tokenAddress, // [!code focus]
-    data: transferCalldata // Transfer tokens // [!code focus]
-  }, // [!code focus]
-  { // [!code focus]
-    to: anotherTokenAddress,  // [!code focus]
-    data: approveCalldata // Approve spending // [!code focus]
-  }, // [!code focus]
-  { // [!code focus]
-    to: dexAddress, // [!code focus]
-    data: swapCalldata // Execute swap // [!code focus]
-  }], // [!code focus]
-}) // [!code focus]
-```
+One of the most powerful features of account abstraction is batching multiple operations into a single transaction. See [Batch Transactions](/documentation/transactions/batch-transactions) for details on how to send multiple operations atomically.
 
 ## Opting Out of DAA
 
@@ -50,7 +23,7 @@ import { walletActions, zeroAddress } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { createTempoClient } from 'viem/tempo'
 
-const client = createTempoClient({ 
+const client = createTempoClient({
   account: privateKeyToAccount('0x...')
 }).extend(walletActions)
 
@@ -83,7 +56,7 @@ const registrar = getContract({
   client: publicClient
 })
 
-// Use any signature from the target address 
+// Use any signature from the target address
 await registrar.write.delegateToDefault([
   messageHash, // Hash of any message signed by the target address
   v,
@@ -93,4 +66,3 @@ await registrar.write.delegateToDefault([
 ```
 
 The **DefaultAccountRegistrar** is a precompile that allows anyone to delegate an EOA to the default smart wallet implementation by providing any valid signature from that address. This enables delegation using signatures from tweets, GitHub commits, or other chains. For full details, see the [DAA specification](/protocol/accounts).
-

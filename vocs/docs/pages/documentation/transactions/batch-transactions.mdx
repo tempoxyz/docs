@@ -1,0 +1,42 @@
+import { Callout } from 'vocs/components'
+
+# Batch Transactions
+
+One of the most powerful features of Tempo's account abstraction is batching multiple operations into a single transaction. This allows you to execute several actions atomically (i.e., they all succeed or all fail together). This helps reduce gas costs, prevents partial failures, and creates better user experiences by combining multiple steps into one transaction.
+
+<Callout type="warning">
+  Batch transactions only work if you don't opt out of Default Account Abstraction (DAA). See [Account Management](/documentation/accounts) for details on how DAA works and how to opt out if needed.
+</Callout>
+
+## Example: Sending a Batch of Transactions
+
+```ts
+import { walletActions } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
+
+const client = createTempoClient({
+  account: privateKeyToAccount('0x...')
+}).extend(walletActions)
+
+const { address, hash, id } = await client.sendTransaction({ // [!code focus]
+  calls: [{ // [!code focus]
+    to: tokenAddress, // [!code focus]
+    data: transferCalldata // Transfer tokens // [!code focus]
+  }, // [!code focus]
+  { // [!code focus]
+    to: anotherTokenAddress,  // [!code focus]
+    data: approveCalldata // Approve spending // [!code focus]
+  }, // [!code focus]
+  { // [!code focus]
+    to: dexAddress, // [!code focus]
+    data: swapCalldata // Execute swap // [!code focus]
+  }], // [!code focus]
+}) // [!code focus]
+```
+
+## How It Works
+
+The account implements the [ERC-7821](https://eips.ethereum.org/EIPS/eip-7821) Executor interface, which provides a standardized way to execute batches of operations with different execution modes and authorization schemes.
+
+When you send a transaction with multiple calls, Tempo's Default Account Abstraction automatically converts your address to a smart contract wallet on first use (using [EIP-7702](https://eips.ethereum.org/EIPS/eip-7702)), enabling batch execution.
