@@ -45,34 +45,29 @@ const { address, hash, id } = await client.sendTransaction({ // [!code focus]
 
 If you don't want your address to be automatically converted to a smart wallet, you can opt out by delegating to a different implementation or undelegating entirely using standard EIP-7702 mechanisms. This can be helpful if you prefer traditional EOA behavior or want to use a custom account implementation instead of the default smart wallet.
 
-```javascript
-// Undelegate (revert to plain EOA)
-const authorizationList = [{
-  chainId: chainId,
-  address: '0x0000000000000000000000000000000000000000', // Zero address = undelegate
-  nonce: await publicClient.getTransactionCount({ address: accountAddress }),
-  ...signature // r, s, v from signing the authorization
-}]
+```ts
+import { walletActions, zeroAddress } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { createTempoClient } from 'viem/tempo'
 
-await walletClient.sendTransaction({
-  authorizationList,
-  to: accountAddress, // Can be any address or null
-  value: 0n
-})
+const client = createTempoClient({ 
+  account: privateKeyToAccount('0x...')
+}).extend(walletActions)
 
-// Delegate to a different implementation
-const authorizationList = [{
-  chainId: chainId,
-  address: customImplementationAddress,
-  nonce: await publicClient.getTransactionCount({ address: accountAddress }),
-  ...signature // r, s, v from signing the authorization
-}]
+// Undelegate (revert to plain EOA) // [!code focus]
+const authorization = client.signAuthorization({ // [!code focus]
+  address: zeroAddress, // [!code focus]
+}) // [!code focus]
 
-await walletClient.sendTransaction({
-  authorizationList,
-  to: accountAddress, // Can be any address or null
-  value: 0n
-})
+// Delegate to a different implementation // [!code focus]
+const authorization = client.signAuthorization({ // [!code focus]
+  address: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
+}) // [!code focus]
+
+// Broadcast changes // [!code focus]
+const hash = await client.sendTransaction({ // [!code focus]
+  authorizationList: [authorization], // [!code focus]
+}) // [!code focus]
 ```
 
 ## Manual Delegation
