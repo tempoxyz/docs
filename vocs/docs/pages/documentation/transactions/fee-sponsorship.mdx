@@ -19,27 +19,13 @@ Fee sponsorship allows one account (the **fee payer**) to pay transaction fees o
 The simplest approach is to specify a `feePayer` account directly when sending a transaction. This is useful when you have access to both the sender's and fee payer's private keys locally.
 
 ```ts
-import { createClient, http, publicActions, walletActions } from 'viem'
-import { privateKeyToAccount, mnemonicToAccount } from 'viem/accounts'
-import { tempoLocal } from 'tempo/chains'
-
-// Unfunded account that will send the transaction
-const sender = privateKeyToAccount(
-  '0xecc3fe55647412647e5c6b657c496803b08ef956f927b7a821da298cfbdd9666'
-)
+import { mnemonicToAccount } from 'viem/accounts'
+// [!include ~/snippets/setup.ts:setup] 
 
 // Funded account that will pay the fees
 const feePayer = mnemonicToAccount(
   'test test test test test test test test test test test junk'
 )
-
-const client = createClient({
-  account: sender, // [!code focus]
-  chain: tempoLocal,
-  transport: http(),
-})
-  .extend(publicActions)
-  .extend(walletActions)
 
 const hash = await client.sendTransaction({ // [!code focus]
   feePayer, // [!code focus]
@@ -54,108 +40,3 @@ const hash = await client.sendTransaction({ // [!code focus]
 3. Both signatures are submitted together in a single transaction
 4. The network validates both signatures and executes the transaction
 5. Fees are deducted from the fee payer's balance
-
-## Relay Transport
-
-For production applications, you typically don't want to expose the fee payer's private key on the client. Instead, you can use a **relay service** — a lightweight proxy (NextJS function, Cloudflare Worker, etc.) that holds the fee payer account and adds the fee payer signature server-side.
-
-### Setting Up the Relay
-
-The relay service receives unsigned transactions, adds the fee payer signature, and forwards them to the blockchain:
-
-```ts
-import { createClient, http, walletActions } from 'viem'
-import { mnemonicToAccount } from 'viem/accounts'
-import { RpcRequest, RpcResponse } from 'ox'
-import { parseTransaction } from 'viem/tempo'
-
-// Server-side relay endpoint
-Bun.serve({
-  port: 8546,
-  async fetch(req) {
-    const client = createClient({
-      account: mnemonicToAccount(
-        'test test test test test test test test test test test junk'
-      ),
-      chain: tempoLocal,
-      transport: http(),
-    }).extend(walletActions)
-
-    const request = RpcRequest.from(await req.json())
-
-    // Only support eth_sendRawTransaction
-    if (request.method !== 'eth_sendRawTransaction') {
-      return Response.json(
-        RpcResponse.from({
-          error: new RpcResponse.MethodNotSupportedError({
-            message: 'relay only supports `eth_sendRawTransaction`'
-          })
-        }, { request })
-      )
-    }
-
-    const serialized = request.params[0] as `0x77${string}` // [!code focus]
-    
-    // Parse the sender's signed transaction // [!code focus]
-    const transaction = parseTransaction(serialized) // [!code focus]
-    
-    // Add fee payer signature // [!code focus]
-    const serializedTransaction = await client.signTransaction({ // [!code focus]
-      ...transaction, // [!code focus]
-      feePayer: client.account, // [!code focus]
-    }) // [!code focus]
-    
-    // Submit to blockchain // [!code focus]
-    const hash = await client.sendRawTransaction({ // [!code focus]
-      serializedTransaction, // [!code focus]
-    }) // [!code focus]
-
-    return Response.json(RpcResponse.from({ result: hash }, { request }))
-  }
-})
-```
-
-### Using the Relay Client-Side
-
-On the client, use the `withRelay` transport to automatically route transactions through your relay service:
-
-```ts
-import { createClient, http, walletActions, publicActions } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { withRelay } from 'viem/tempo'
-
-const client = createClient({
-  account: privateKeyToAccount('0xecc3...'), // Unfunded account // [!code focus]
-  chain: tempoLocal,
-  transport: withRelay( // [!code focus]
-    http('https://rpc.tempo.xyz'), // Primary RPC // [!code focus]
-    http('https://relay.myapp.com') // Your relay service // [!code focus]
-  ), // [!code focus]
-})
-  .extend(walletActions)
-  .extend(publicActions)
-
-// Transaction is automatically sent through the relay
-const hash = await client.sendTransaction({
-  to: '0x0000000000000000000000000000000000000000',
-})
-```
-
-### How the Relay Works
-
-1. **Client** signs the transaction with sender's private key
-2. **Client** sends the signed transaction to the relay service
-3. **Relay** parses the transaction and adds fee payer signature
-4. **Relay** submits the fully-signed transaction to the blockchain
-5. **Blockchain** validates both signatures and executes the transaction
-
-<Callout type="warning">
-  The relay service should implement rate limiting and validation to prevent abuse. Consider restricting which accounts can be sponsored and setting spending limits.
-</Callout>
-
-## Benefits
-
-- **Gasless UX** — Users don't need to hold fee tokens
-- **Flexible sponsorship** — Applications control who pays for what
-- **Security** — Fee payer keys stay server-side with relay approach
-- **Native support** — Built into Tempo's transaction type, no smart contracts needed
