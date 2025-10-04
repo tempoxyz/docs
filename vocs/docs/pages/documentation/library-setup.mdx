@@ -4,9 +4,13 @@ Throughout the documentation, we will be using the libraries below for examples.
 
 ## Libraries
 
-### Viem (TypeScript)
+### Viem + Tempo extesion (TypeScript)
 
 Viem is a TypeScript library for interacting with EVM-compatible blockchains such as Tempo.
+
+:::note
+Please request access to the `tempo-ts` library by reaching out to the Tempo team.
+:::
 
 ::::steps
 
@@ -16,14 +20,17 @@ Viem is a TypeScript library for interacting with EVM-compatible blockchains suc
 
 ```bash [npm]
 npm i viem
+npm i tempo@github:tempoxyz/tempo-ts#main
 ```
 
 ```bash [pnpm]
 pnpm i viem
+pnpm i tempo@github:tempoxyz/tempo-ts#main
 ```
 
 ```bash [bun]
 bun i viem
+bun i git+ssh://github.com/tempoxyz/tempo-ts.git#main
 ```
 
 :::
@@ -31,15 +38,7 @@ bun i viem
 #### Configure
 
 ```ts [viem.config.ts]
-import { publicActions } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const account = privateKeyToAccount('0x...')
-
-const client = createTempoClient({ account })
-  // Optionally extend with public actions (ie. `client.getTransactionReceipt`)
-  .extend(publicActions)
+// [!include ~/snippets/setup.ts]
 ```
 
 ::::

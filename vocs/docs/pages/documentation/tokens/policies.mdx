@@ -7,12 +7,7 @@ Token policies let you control who can transfer your tokens. You can create whit
 ### Create a Whitelist Policy
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
+// [!include ~/snippets/setup.ts:setup] 
 
 const { hash, policyId } = await client.policy.create({  // [!code focus]
   type: 'whitelist', // [!code focus]
@@ -22,13 +17,6 @@ const { hash, policyId } = await client.policy.create({  // [!code focus]
 ### Create a Blacklist Policy
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const { hash, policyId } = await client.policy.create({  // [!code focus]
   type: 'blacklist', // [!code focus]
 }) // [!code focus]
@@ -37,13 +25,6 @@ const { hash, policyId } = await client.policy.create({  // [!code focus]
 ### Create Policy with Initial Addresses
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const { hash, policyId } = await client.policy.create({  // [!code focus]
   type: 'whitelist', // [!code focus]
   accounts: [user1Address, user2Address, user3Address], // [!code focus]
@@ -55,13 +36,6 @@ const { hash, policyId } = await client.policy.create({  // [!code focus]
 ### Add Addresses to Whitelist
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const { hash, policyId } = await client.policy.modifyWhitelist({  // [!code focus]
   address: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
   allowed: true, // [!code focus]
@@ -72,13 +46,6 @@ const { hash, policyId } = await client.policy.modifyWhitelist({  // [!code focu
 ### Remove Addresses from Whitelist
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const { hash, policyId } = await client.policy.modifyWhitelist({  // [!code focus]
   address: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
   allowed: false, // [!code focus]
@@ -91,13 +58,6 @@ const { hash, policyId } = await client.policy.modifyWhitelist({  // [!code focu
 ### Add Addresses to Blacklist
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const { hash, policyId } = await client.policy.modifyBlacklist({  // [!code focus]
   address: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
   restricted: true, // [!code focus]
@@ -108,13 +68,6 @@ const { hash, policyId } = await client.policy.modifyBlacklist({  // [!code focu
 ### Remove Addresses from Blacklist
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const { hash, policyId } = await client.policy.modifyBlacklist({  // [!code focus]
   address: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
   restricted: false, // [!code focus]
@@ -127,13 +80,6 @@ const { hash, policyId } = await client.policy.modifyBlacklist({  // [!code focu
 ### Set Transfer Policy
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const { hash, policyId } = await client.token.changeTransferPolicy({  // [!code focus]
   policyId: 1n, // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
@@ -143,13 +89,6 @@ const { hash, policyId } = await client.token.changeTransferPolicy({  // [!code 
 ### Check Current Policy
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const { transferPolicy } = await client.token.getMetadata({  // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
 }) // [!code focus]
@@ -160,13 +99,6 @@ const { transferPolicy } = await client.token.getMetadata({  // [!code focus]
 ### Always Allow (Default)
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const { hash, policyId } = await client.token.changeTransferPolicy({  // [!code focus]
   policyId: 1n, // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
@@ -176,13 +108,6 @@ const { hash, policyId } = await client.token.changeTransferPolicy({  // [!code 
 ### Always Reject (Emergency Stop)
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const { hash, policyId } = await client.token.changeTransferPolicy({  // [!code focus]
   policyId: 0n, // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
@@ -194,13 +119,6 @@ const { hash, policyId } = await client.token.changeTransferPolicy({  // [!code 
 ### KYC Whitelist
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const complianceAdminAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
 const token = '0x20c0000000000000000000000000000000000004' // [!code focus]
 
@@ -234,13 +152,6 @@ console.log(`KYC whitelist policy ${policyId} applied to token`)
 ### Security Blacklist
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const securityAdminAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
 const token = '0x20c0000000000000000000000000000000000004' // [!code focus]
 
@@ -276,13 +187,6 @@ console.log(`Security blacklist policy ${policyId} applied to token`)
 ### Transfer Policy Admin
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const adminAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
 
 const { hash, policyId } = await client.policy.setAdmin({  // [!code focus]
@@ -294,13 +198,6 @@ const { hash, policyId } = await client.policy.setAdmin({  // [!code focus]
 ### Check Authorization
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const userAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
 
 const { hash, policyId } = await client.policy.isAuthorized({  // [!code focus]
@@ -312,13 +209,6 @@ const { hash, policyId } = await client.policy.isAuthorized({  // [!code focus]
 ## Monitoring Policy Changes
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 // Listen for whitelist updates // [!code focus]
 await client.policy.watchWhitelistUpdated({  // [!code focus]
   policyId: 123n, // [!code focus]

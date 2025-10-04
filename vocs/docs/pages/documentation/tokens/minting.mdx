@@ -8,12 +8,7 @@ TIP-20 tokens support dynamic supply management through minting and burning. Onl
 
 ```ts
 import { parseUnits } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
+// [!include ~/snippets/setup.ts:setup] 
 
 const hash = await client.token.mint({ // [!code focus]
   amount: parseUnits('100', 6), // [!code focus]
@@ -25,13 +20,7 @@ const hash = await client.token.mint({ // [!code focus]
 ### Minting with Memo
 
 ```ts
-import { keccak256 } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
+import { keccak256, parseUnits } from 'viem'
 
 const hash = await client.token.mint({ // [!code focus]
   amount: parseUnits('100', 6), // [!code focus]
@@ -48,12 +37,6 @@ const hash = await client.token.mint({ // [!code focus]
 
 ```ts
 import { parseUnits } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
 
 const hash = await client.token.burn({ // [!code focus]
   amount: parseUnits('100', 6), // [!code focus]
@@ -65,12 +48,6 @@ const hash = await client.token.burn({ // [!code focus]
 
 ```ts
 import { keccak256, parseUnits } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
 
 const hash = await client.token.burn({ // [!code focus]
   amount: parseUnits('100', 6), // [!code focus]
@@ -82,13 +59,7 @@ const hash = await client.token.burn({ // [!code focus]
 ### Burn from Blocked Addresses
 
 ```ts
-import { keccak256, parseUnits } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
+import { parseUnits } from 'viem'
 
 const blockedAddress = '0x810c8ed810c8ed810c8ed810c8ed810c8ed810c8' // [!code focus]
 
@@ -106,12 +77,6 @@ const hash = await client.token.burnBlocked({ // [!code focus]
 
 ```ts
 import { parseUnits } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
 
 const hash = await client.token.setSupplyCap({ // [!code focus]
   supplyCap: parseUnits('1000000', 6), // [!code focus]
@@ -122,13 +87,6 @@ const hash = await client.token.setSupplyCap({ // [!code focus]
 ### Checking Supply
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const token = '0x20c0000000000000000000000000000000000004' // [!code focus]
 
 const [totalSupply, supplyCap] = await Promise.all([ // [!code focus]
@@ -144,13 +102,6 @@ const isAtCap = totalSupply >= supplyCap // [!code focus]
 The token emits events for all minting and burning operations: watchTokenMint
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
 const token = '0x20c0000000000000000000000000000000000004' // [!code focus]
 
 await client.token.watchMint({ // [!code focus]
@@ -172,19 +123,12 @@ await client.token.watchBurn({ // [!code focus]
 }) // [!code focus]
 ```
 
-```
-
 ## Common Patterns
 
 ### Treasury Management
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
+import { keccak256, parseUnits } from 'viem';
 
 const monthlyAllocation = parseUnits('10000', 18) // [!code focus]
 const memo = keccak256(`TREASURY_ALLOCATION_${new Date().toISOString().slice(0, 7)}`) // [!code focus]
@@ -200,12 +144,7 @@ const hash = await client.token.mint({  // [!code focus]
 ### Buyback and Burn
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
+import { keccak256, parseUnits } from 'viem';
 
 // Buyback and burn mechanism // [!code focus]
 const buybackAmount = parseUnits('5000', 18) // [!code focus]
@@ -224,12 +163,7 @@ console.log(`Burned ${buybackAmount} tokens in buyback program`) // [!code focus
 ### Airdrop Distribution
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
+import { keccak256, parseUnits } from 'viem';
 
 const airdropList = [ // [!code focus]
   { // [!code focus]
@@ -258,13 +192,7 @@ for (const { amount, address } of airdropList) { // [!code focus]
 ### Setting Appropriate Caps
 
 ```ts
-import { parseUnits } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
+import { parseUnits } from 'viem';
 
 // For a stablecoin, set a reasonable cap // [!code focus]
 const maxSupply = parseUnits('1000000000', 18) // 1 billion tokens
@@ -272,37 +200,6 @@ await client.token.setSupplyCap({ // [!code focus]
   supplyCap: maxSupply, // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
 }) // [!code focus]
-
-// For a utility token, consider use case // [!code focus]
-const utilityTokenCap = parseUnits('10000000', 18) // 10 million tokens // [!code focus]
-await client.token.setSupplyCap({ // [!code focus]
-  supplyCap: utilityTokenCap, // [!code focus]  
-  token: '0x20c0000000000000000000000000000000000005', // [!code focus]
-}) // [!code focus]
-```
-
-### Emergency Supply Reduction
-
-```ts
-import { parseUnits } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
-// If you need to reduce the cap (can't increase) // [!code focus]
-const newCap = parseUnits('5000000', 18) // 5 million tokens // [!code focus]
-const currentSupply = await client.token.getTotalSupply({ token }) // [!code focus]
-
-if (newCap >= currentSupply) // [!code focus]
-  await client.token.setSupplyCap({ // [!code focus]
-    supplyCap: newCap, // [!code focus]
-    token: '0x20c0000000000000000000000000000000000004', // [!code focus]
-  }) // [!code focus]
-else // [!code focus]
-  console.log('Cannot set cap below current supply') // [!code focus]
 ```
 
 ## Security Considerations

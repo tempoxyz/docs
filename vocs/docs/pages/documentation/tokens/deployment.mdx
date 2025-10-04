@@ -7,12 +7,7 @@ The TIP20Factory contract makes it easy to deploy new TIP-20 tokens with a singl
 ### Basic Deployment
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
+// [!include ~/snippets/setup.ts:setup] 
 
 const { address, hash, id } = await client.token.create({ // [!code focus]
   currency: 'USD', // [!code focus]

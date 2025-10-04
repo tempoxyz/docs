@@ -11,13 +11,7 @@ One of the most powerful features of Tempo's account abstraction is batching mul
 ## Example: Sending a Batch of Transactions
 
 ```ts
-import { walletActions } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({
-  account: privateKeyToAccount('0x...')
-}).extend(walletActions)
+// [!include ~/snippets/setup.ts:setup] 
 
 const { address, hash, id } = await client.sendTransaction({ // [!code focus]
   calls: [{ // [!code focus]
