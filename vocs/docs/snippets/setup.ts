@@ -10,7 +10,7 @@ export const TEMPO_CREDENTIALS = Buffer.from(`${TEMPO_RPC_USERNAME}:${TEMPO_RPC_
 
 const client = createClient({
   account: privateKeyToAccount('0x...'),
-  chain: tempo,
+  chain: tempoAdagietto,
   transport: http(tempo.rpcUrls.default.http[0], {
     fetchOptions: {
       headers: {
