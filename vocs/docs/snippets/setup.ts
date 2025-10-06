@@ -1,6 +1,6 @@
 // [!region setup]
 import { createClient, http, publicActions, walletActions } from 'viem'
-import { tempo } from 'tempo/chains';
+import { tempoAdagietto } from 'tempo/chains';
 import { tempoActions } from 'tempo/viem';
 import { privateKeyToAccount } from 'viem/accounts';
 
