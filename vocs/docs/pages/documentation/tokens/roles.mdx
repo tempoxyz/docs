@@ -16,14 +16,8 @@ TIP-20 tokens use a role-based access control system that allows you to delegate
 
 ### Grant Issuer Role
 
-```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
+:::code-group
+```ts [issuer.ts]
 const treasuryAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
 
 const hash = await client.token.grantRoles({ // [!code focus]
@@ -33,16 +27,15 @@ const hash = await client.token.grantRoles({ // [!code focus]
 }) // [!code focus]
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 ### Grant Pause Role
 
-```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
+:::code-group
+```ts [pause.ts]
 const securityTeamAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
 
 const hash = await client.token.grantRoles({ // [!code focus]
@@ -52,16 +45,15 @@ const hash = await client.token.grantRoles({ // [!code focus]
 }) // [!code focus]
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 ### Grant Multiple Roles
 
-```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
+:::code-group
+```ts [multipleRoles.ts]
 const securityTeamAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
 
 const hash = await client.token.grantRoles({ // [!code focus]
@@ -71,16 +63,15 @@ const hash = await client.token.grantRoles({ // [!code focus]
 }) // [!code focus]
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 ## Revoking Roles
 
-```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
+:::code-group
+```ts [revoke.ts]
 const treasuryAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
 
 // Remove minting rights from old treasury // [!code focus]
@@ -91,28 +82,10 @@ const hash = await client.token.revokeRoles({ // [!code focus]
 }) // [!code focus]
 ```
 
-## Role Management Best Practices
-
-### Use Multisig Wallets
-
-Always use multisig wallets for administrative roles:
-
-```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
-const multisigAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
-
-const hash = await client.token.grantRoles({ // [!code focus]
-  roles: ['defaultAdmin'], // [!code focus]
-  to: multisigAddress, // [!code focus]
-  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
-}) // [!code focus]
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
 ```
+:::
 
 ### Separate Concerns
 
@@ -127,7 +100,8 @@ Don't give all roles to one address:
 
 Periodically review who has what roles:
 
-```javascript
+:::code-group
+```ts [getRoles.ts]
 // Check all roles for an address
 const roles = [
   'DEFAULT_ADMIN_ROLE',
@@ -142,20 +116,20 @@ for (const roleName of roles) {
   const hasRole = await token.read.hasRole([role, addressToCheck])
   console.log(`${roleName}: ${hasRole}`)
 }
-``` */}
+```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+ */}
 
 ## Role Events
 
 The token emits events when roles are granted or revoked:
 
-```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
+:::code-group
+```ts [monitorRoles.ts]
 await client.token.watchRole({ // [!code focus]
   onRoleUpdated: (args) => { // [!code focus]
     console.log(`Role ${args.role} ${args.type === 'granted' ? 'granted to' : 'revoked from'} ${args.account}`) // [!code focus]
@@ -164,16 +138,10 @@ await client.token.watchRole({ // [!code focus]
 }) // [!code focus]
 ```
 
-{/* ```javascript
-// Listen for role changes
-token.watchEvent.RoleMembershipUpdated({
-  onLogs: (logs) => {
-    logs.forEach((log) => {
-      console.log(`Role ${log.args.role} ${log.args.hasRole ? 'granted to' : 'revoked from'} ${log.args.account}`)
-    })
-  }
-})
-``` */}
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
 
 ## Emergency Procedures
 
@@ -181,39 +149,52 @@ token.watchEvent.RoleMembershipUpdated({
 
 If you have `pause`, you can immediately stop all transfers:
 
-```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
+:::code-group
+```ts [pause.ts]
 const hash = await client.token.pause({ // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
 }) // [!code focus]
 ```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
 
 
 ### Remove Compromised Roles
 
 If an address is compromised, immediately revoke all roles:
 
-```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
+:::code-group
+```ts [removeRoles.ts]
 const compromisedAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
 
-const hash = await client.token.revokeRoles({ // [!code focus]
-  from: compromisedAddress, // [!code focus]
-  roles: ['defaultAdmin', 'issuer', 'pause', 'unpause', 'burnBlocked'], // [!code focus]
-  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
-}) // [!code focus]
+const roles = [
+  'DEFAULT_ADMIN_ROLE',
+  'ISSUER_ROLE', 
+  'PAUSE_ROLE',
+  'UNPAUSE_ROLE',
+  'BURN_BLOCKED_ROLE'
+]
+
+for (const roleName of roles) { // [!code focus]
+  const role = '0x' + keccak256(roleName).slice(2) // [!code focus]
+  const hash = await client.token.revokeRoles({ // [!code focus]
+    role: role, // [!code focus]
+    account: compromisedAddress, // [!code focus]
+  }) // [!code focus]
+  console.log(`${roleName} revoke hash: ${hash}`) // [!code focus]
+
+  const hasRole = await token.read.hasRole([role, addressToCheck]) // [!code focus]
+
+  console.log(`${roleName}: ${hasRole}`) // [!code focus]
+} // [!code focus]
 ```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
 
 For detailed technical specifications, see the [TIP-20 Protocol Reference](/protocol/tokens/tip-20).

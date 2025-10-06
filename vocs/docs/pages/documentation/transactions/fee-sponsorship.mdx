@@ -18,7 +18,7 @@ Fee sponsorship allows one account (the **fee payer**) to pay transaction fees o
 
 The simplest approach is to specify a `feePayer` account directly when sending a transaction. This is useful when you have access to both the sender's and fee payer's private keys locally.
 
-```ts
+```ts [customFeePayer.ts]
 import { http, publicActions, walletActions } from 'viem'
 import { privateKeyToAccount, mnemonicToAccount } from 'viem/accounts'
 import { createTempoClient } from 'viem/tempo'

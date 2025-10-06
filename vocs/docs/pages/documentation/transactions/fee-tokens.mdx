@@ -1,12 +1,16 @@
 import { Callout } from 'vocs/components'
 
-# Fee Tokens
+# Transaction Fees
 
 Tempo lets you pay transaction fees in stablecoins instead of a native network token. When you send a transaction, you can choose which supported token to use for fees.
 
-By default, Tempo will use your preferred fee token if you've set one, or you can pick a different token for each transaction. The fee is automatically deducted from your balance in that token, and you don't have to worry about conversions or extra steps.
+By default, Tempo will use your preferred fee token if you’ve set one, or you can pick a different token for each transaction. The fee is automatically deducted from your balance in that token, and you don’t have to worry about conversions or extra steps.
 
 This makes it easy to use Tempo for payments and everyday transactions, since you can pay fees directly in the same stablecoins you already use.
+
+<Callout type="info">
+  The fee token will also be possible to configure on a transaction-by-transaction basis via a new `fee_token` field on user originated transactions. This feature is coming soon.
+</Callout>
 
 ## Set a Default Fee Token
 
@@ -19,20 +23,25 @@ You can learn more about the [Fee AMM](/protocol/transactions/fee-amm) in the pr
 
 ### Using the FeeManager Precompile
 
-```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
+:::code-group
+```ts [setUserToken.ts]
+const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
 
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
-const token = testUSDTokenAddress
-
+// Use Alpha USD as fee token
 const hash = await client.token.setUserToken({ // [!code focus]
-  token, // [!code focus]
+  token: alphaUSDAddress, // [!code focus]
+}) // [!code focus]
+
+// Use validator's preference // [!code focus]
+const defaultHash = await client.token.setUserToken({ // [!code focus]
+  token: zeroAddress, // [!code focus]
 }) // [!code focus]
 ```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
 
 ### What This Does
 
@@ -40,50 +49,6 @@ const hash = await client.token.setUserToken({ // [!code focus]
 - **Transaction-level preferences** will override this setting
 - **No fee token specified** in a transaction will use your default
 - **One-time setup** - you don't need to specify the fee token in every transaction
-
-### Changing Your Default
-
-```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
-// Change default // [!code focus]
-const hash = await client.token.setUserToken({ // [!code focus]
-  token: testUSDTokenAddress, // [!code focus]
-}) // [!code focus]
-
-// Remove default (will use validator's preference) // [!code focus]
-const hash = await client.token.setUserToken({ // [!code focus]
-  token: zeroAddress, // [!code focus]
-}) // [!code focus]
-```
-
-## Specify Fee Token Per Transaction
-
-You can override your default fee token for any individual transaction by specifying the `feeToken` parameter:
-
-```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
-const hash = await client.sendTransaction({ // [!code focus]
-  feeToken: '0x20c0000000000000000000000000000000000000', // [!code focus]
-  to: '0x0000000000000000000000000000000000000000', // [!code focus]
-}) // [!code focus]
-```
-
-This allows you to:
-- Use a different fee token for specific transactions
-- Override your account's default fee token preference
-- Pay fees in whichever stablecoin you have available
 
 ## Fee Token Requirements
 

@@ -34,115 +34,103 @@ Key functions for liquidity provision:
 
 First, approve both tokens for the AMM contract to spend:
 
-```ts
+:::code-group
+```ts [approve.ts]
 import { parseUnits } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
 
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
-const testUSDAddress = '0x20c0000000000000000000000000000000000001' // [!code focus]
-const alphaUSDAddress = '0x20c0000000000000000000000000000000000002' // [!code focus]
-
-await client.token.approve({ // [!code focus]
-  amount: parseUnits('1000', 6), // [!code focus]
-  spender: ammAddress, // [!code focus]
-  token: testUSDAddress, // [!code focus]
-}) // [!code focus]
+const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
+const betaUSDAddress = '0x20c0000000000000000000000000000000000001'
 
 await client.token.approve({ // [!code focus]
   amount: parseUnits('1000', 6), // [!code focus]
   spender: ammAddress, // [!code focus]
   token: alphaUSDAddress, // [!code focus]
 }) // [!code focus]
+
+await client.token.approve({ // [!code focus]
+  amount: parseUnits('1000', 6), // [!code focus]
+  spender: ammAddress, // [!code focus]
+  token: betaUSDAddress, // [!code focus]
+}) // [!code focus]
 ```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
 
 Then call [`mint()`](/protocol/transactions/fee-amm#liquidity-provision) with both token amounts. The function returns the LP tokens minted:
 
-```ts
-import { parseUnits } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({ 
-  account: privateKeyToAccount('0x...')
-})
-
-const testUSDAddress = '0x20c0000000000000000000000000000000000001' // [!code focus]
-const alphaUSDAddress = '0x20c0000000000000000000000000000000000002' // [!code focus]
-
+:::code-group
+```ts [mint.ts]
 await client.amm.mint({ // [!code focus]
   to: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
   userToken: { // [!code focus]
-    address: testUSDAddress, // [!code focus]
+    address: alphaUSDAddress, // [!code focus]
     amount: parseUnits('1000', 6), // [!code focus]
   }, // [!code focus]
   validatorToken: { // [!code focus]
-    address: alphaUSDAddress, // [!code focus]
+    address: betaUSDAddress, // [!code focus]
     amount: parseUnits('1000', 6), // [!code focus]
   }, // [!code focus]
 }) // [!code focus]
 ```
 
-For the initial liquidity provision, you can provide the entire amount in the validatorToken. As fees are paid in the user token, the balance changes, but the AMM is designed to incentivize arbitrageurs to rebalance it back toward holding 100% of the validator token, as long as the price of the user token is within 0.15% of the price of the validator token.
-
-### Adding Liquidity Notes
-
-The `mint()` function will:
-- Add both token amounts to the pool reserves
-- Calculate LP tokens based on the current pool ratio
-- Return the amount of liquidity tokens minted
-- Emit a `Mint` event with all details
-
-```javascript
-// The mint function automatically handles the pool ratio
-const tx = await amm.write.mint([
-  testUSDAddress,    // userToken
-  alphaUSDAddress,    // validatorToken
-  testUSDAmount,     // amountUserToken
-  alphaUSDAmount,     // amountValidatorToken
-  yourAddress     // to
-])
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
 ```
+:::
+
+For the initial liquidity provision, you can provide the entire amount in the validatorToken. 
+
+As fees are paid in the user token, the balance changes, but the AMM is designed to incentivize arbitrageurs to rebalance it back toward holding 100% of the validator token, as long as the price of the user token is within 0.15% of the price of the validator token.
 
 ## Removing Liquidity
 
 ### Basic Removal
 
-To remove your liquidity, first get your LP token balance using the pool ID:
+To remove your liquidity, you first must find out how much LP tokens you own by calling `getLiquidityBalance()`:
 
-```javascript
-const poolId = await amm.read.getPoolId([testUSDAddress, alphaUSDAddress])
-const lpBalance = await amm.read.liquidityBalances([poolId, yourAddress])
+:::code-group
+```ts [removeLiquidity.ts]
+const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
+const betaUSDAddress = '0x20c0000000000000000000000000000000000001'
+
+const poolId = await client.amm.getPoolId({
+  userToken: alphaUSDAddress,
+  validatorToken: betaUSDAddress,
+})
+
+const balance = await client.amm.getLiquidityBalance({
+  poolId,
+  address: '0x...',
+})
 ```
 
-Then call [`burn()`](/protocol/transactions/fee-amm#liquidity-provision) to burn your LP tokens and get back the underlying tokens. Note that withdrawals may be blocked if they would prevent pending fee swaps:
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
 
-```javascript
-const tx = await amm.write.burn([
-  testUSDAddress,    // userToken
-  alphaUSDAddress,    // validatorToken
-  lpBalance,      // amount of LP tokens to burn
-  yourAddress     // to
-])
+Then, call `burn()` to burn your LP tokens and get back the underlying tokens. 
+
+Note that withdrawals may be blocked if they would prevent pending fee swaps:
+
+:::code-group
+```ts [burn.ts]
+await client.amm.burn({ // [!code focus]
+  to: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
+  userToken: alphaUSDAddress // [!code focus]
+  validatorToken: betaUSDAddress // [!code focus]
+  liquidity: balance, // [!code focus]
+  amount: parseUnits('1000', 6), // [!code focus]
+}) // [!code focus]
 ```
 
-### Remove Half Your Position
-
-To remove only part of your position:
-
-```javascript
-const halfBalance = lpBalance / 2n
-
-const tx = await amm.write.burn([
-  testUSDAddress,    // userToken
-  alphaUSDAddress,    // validatorToken
-  halfBalance,    // amount of LP tokens to burn
-  yourAddress     // to
-])
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
 ```
+:::
 
 ## LP Token Management
 
@@ -150,20 +138,49 @@ const tx = await amm.write.burn([
 
 Check your LP token balance for a specific pool:
 
-```javascript
-const poolId = await amm.read.getPoolId([testUSDAddress, alphaUSDAddress])
-const lpBalance = await amm.read.liquidityBalances([poolId, yourAddress])
+:::code-group
+```ts [liquidity.ts]
+const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
+const betaUSDAddress = '0x20c0000000000000000000000000000000000001'
+
+const poolId = await client.amm.getPoolId({
+  userToken: alphaUSDAddress,
+  validatorToken: betaUSDAddress,
+})
+
+const balance = await client.amm.getLiquidityBalance({
+  poolId,
+  address: '0x...',
+})
 ```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
 
 ### Check Pool Reserves
 
 Check current pool reserves:
 
-```javascript
-const pool = await amm.read.getPool([testUSDAddress, alphaUSDAddress])
-const testUSDReserve = pool.reserveUserToken
-const alphaUSDReserve = pool.reserveValidatorToken
+:::code-group
+```ts [poolReserves.ts]
+const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
+const betaUSDAddress = '0x20c0000000000000000000000000000000000001'
+
+const pool = await client.amm.getPool({
+  userToken: alphaUSDAddress,
+  validatorToken: betaUSDAddress,
+})
+
+const alphaUSDReserve = pool.reserveUserToken
+const betaUSDReserve = pool.reserveValidatorToken
 ```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
 
 ## Earning Rewards
 

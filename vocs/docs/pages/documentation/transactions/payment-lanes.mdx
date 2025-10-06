@@ -30,22 +30,18 @@ For the complete technical specification of how this works at the consensus leve
 
 ## Example: Sending a Payment
 
-```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
-
-const client = createTempoClient({
-  account: privateKeyToAccount('0x...')
-})
-
+:::code-group
+```ts [sendPayment.ts]
 // This transaction automatically uses the payment gas limit [!code focus]
 // because it's sent to a TIP-20 token address (0x20c0...) [!code focus]
-const hash = await client.sendTransaction({ // [!code focus]
-  to: '0x20c0000000000000000000000000000000000000', // TIP-20 token address // [!code focus]
-  data: encodeFunctionData({ // [!code focus]
-    abi: tip20Abi, // [!code focus]
-    functionName: 'transfer', // [!code focus]
-    args: [recipientAddress, amount] // [!code focus]
-  }) // [!code focus]
-}) // [!code focus]
+const hash = await client.token.transfer({ // [!code focus]
+  token: alphaUSDAddress, // TIP-20 token address // [!code focus]
+  amount, // [!code focus]
+  to: recipient, // [!code focus]
+})
 ```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
