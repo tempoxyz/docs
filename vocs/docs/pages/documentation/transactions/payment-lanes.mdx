@@ -30,9 +30,8 @@ For the complete technical specification of how this works at the consensus leve
 
 ## Example: Sending a Payment
 
-```ts
-// [!include ~/snippets/setup.ts:setup] 
-
+:::code-group
+```ts [sendPayment.ts]
 // This transaction automatically uses the payment gas limit [!code focus]
 // because it's sent to a TIP-20 token address (0x20c0...) [!code focus]
 const hash = await client.token.transfer({ // [!code focus]
@@ -41,3 +40,8 @@ const hash = await client.token.transfer({ // [!code focus]
   to: recipient, // [!code focus]
 })
 ```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::

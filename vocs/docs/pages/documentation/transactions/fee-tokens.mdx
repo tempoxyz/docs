@@ -23,15 +23,25 @@ You can learn more about the [Fee AMM](/protocol/transactions/fee-amm) in the pr
 
 ### Using the FeeManager Precompile
 
-```ts
-// [!include ~/snippets/setup.ts:setup] 
-
+:::code-group
+```ts [setUserToken.ts]
 const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
 
+// Use Alpha USD as fee token
 const hash = await client.token.setUserToken({ // [!code focus]
   token: alphaUSDAddress, // [!code focus]
 }) // [!code focus]
+
+// Use validator's preference // [!code focus]
+const defaultHash = await client.token.setUserToken({ // [!code focus]
+  token: zeroAddress, // [!code focus]
+}) // [!code focus]
 ```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
 
 ### What This Does
 
@@ -39,22 +49,6 @@ const hash = await client.token.setUserToken({ // [!code focus]
 - **Transaction-level preferences** will override this setting
 - **No fee token specified** in a transaction will use your default
 - **One-time setup** - you don't need to specify the fee token in every transaction
-
-### Changing Your Default
-
-```ts
-const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
-
-// Change default // [!code focus]
-const hash = await client.token.setUserToken({ // [!code focus]
-  token: alphaUSDAddress, // [!code focus]
-}) // [!code focus]
-
-// Remove default (will use validator's preference) // [!code focus]
-const hash = await client.token.setUserToken({ // [!code focus]
-  token: zeroAddress, // [!code focus]
-}) // [!code focus]
-```
 
 ## Fee Token Requirements
 

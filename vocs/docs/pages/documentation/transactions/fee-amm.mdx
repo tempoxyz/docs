@@ -34,9 +34,9 @@ Key functions for liquidity provision:
 
 First, approve both tokens for the AMM contract to spend:
 
-```ts
+:::code-group
+```ts [approve.ts]
 import { parseUnits } from 'viem'
-// [!include ~/snippets/setup.ts:setup] 
 
 const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
 const betaUSDAddress = '0x20c0000000000000000000000000000000000001'
@@ -54,9 +54,15 @@ await client.token.approve({ // [!code focus]
 }) // [!code focus]
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 Then call [`mint()`](/protocol/transactions/fee-amm#liquidity-provision) with both token amounts. The function returns the LP tokens minted:
 
-```ts
+:::code-group
+```ts [mint.ts]
 await client.amm.mint({ // [!code focus]
   to: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
   userToken: { // [!code focus]
@@ -70,6 +76,11 @@ await client.amm.mint({ // [!code focus]
 }) // [!code focus]
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 For the initial liquidity provision, you can provide the entire amount in the validatorToken. 
 
 As fees are paid in the user token, the balance changes, but the AMM is designed to incentivize arbitrageurs to rebalance it back toward holding 100% of the validator token, as long as the price of the user token is within 0.15% of the price of the validator token.
@@ -80,7 +91,8 @@ As fees are paid in the user token, the balance changes, but the AMM is designed
 
 To remove your liquidity, you first must find out how much LP tokens you own by calling `getLiquidityBalance()`:
 
-```ts
+:::code-group
+```ts [removeLiquidity.ts]
 const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
 const betaUSDAddress = '0x20c0000000000000000000000000000000000001'
 
@@ -95,11 +107,17 @@ const balance = await client.amm.getLiquidityBalance({
 })
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 Then, call `burn()` to burn your LP tokens and get back the underlying tokens. 
 
 Note that withdrawals may be blocked if they would prevent pending fee swaps:
 
-```ts
+:::code-group
+```ts [burn.ts]
 await client.amm.burn({ // [!code focus]
   to: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
   userToken: alphaUSDAddress // [!code focus]
@@ -109,13 +127,19 @@ await client.amm.burn({ // [!code focus]
 }) // [!code focus]
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 ## LP Token Management
 
 ### Check Your LP Tokens
 
 Check your LP token balance for a specific pool:
 
-```ts
+:::code-group
+```ts [liquidity.ts]
 const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
 const betaUSDAddress = '0x20c0000000000000000000000000000000000001'
 
@@ -130,11 +154,17 @@ const balance = await client.amm.getLiquidityBalance({
 })
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 ### Check Pool Reserves
 
 Check current pool reserves:
 
-```ts
+:::code-group
+```ts [poolReserves.ts]
 const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
 const betaUSDAddress = '0x20c0000000000000000000000000000000000001'
 
@@ -146,6 +176,11 @@ const pool = await client.amm.getPool({
 const alphaUSDReserve = pool.reserveUserToken
 const betaUSDReserve = pool.reserveValidatorToken
 ```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
 
 ## Earning Rewards
 

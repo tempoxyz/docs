@@ -18,9 +18,8 @@ One of the most powerful features of account abstraction is batching multiple op
 
 If you don't want your address to be automatically converted to a smart wallet, you can opt out by delegating to a different implementation or undelegating entirely using standard EIP-7702 mechanisms. This can be helpful if you prefer traditional EOA behavior or want to use a custom account implementation instead of the default smart wallet.
 
-```ts
-// [!include ~/snippets/setup.ts:setup] 
-
+:::code-group
+```ts [optOut.ts]
 // Undelegate (revert to plain EOA) // [!code focus]
 const authorization = client.signAuthorization({ // [!code focus]
   address: zeroAddress, // [!code focus]
@@ -37,11 +36,17 @@ const hash = await client.sendTransaction({ // [!code focus]
 }) // [!code focus]
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 ## Manual Delegation
 
 You can also manually delegate an address to the default implementation before its first use. This is useful if you want to set up a smart wallet before sending the first transaction. This is helpful if you want to prepare an address for smart wallet features before it's used, or delegate using a signature from another chain.
 
-```javascript
+:::code-group
+```ts [delegate.ts]
 // Delegate using any valid signature from the address
 const registrar = getContract({
   // DefaultAccountRegistrar
@@ -58,5 +63,10 @@ await registrar.write.delegateToDefault([
   s
 ])
 ```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
 
 The **DefaultAccountRegistrar** is a precompile that allows anyone to delegate an EOA to the default smart wallet implementation by providing any valid signature from that address. This enables delegation using signatures from tweets, GitHub commits, or other chains. For full details, see the [DAA specification](/protocol/accounts).

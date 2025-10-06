@@ -10,9 +10,8 @@ One of the most powerful features of Tempo's account abstraction is batching mul
 
 ## Example: Sending a Batch of Transactions
 
-```ts
-// [!include ~/snippets/setup.ts:setup] 
-
+:::code-group
+```ts [batchTransactions.ts]
 const { address, hash, id } = await client.sendTransaction({ // [!code focus]
   calls: [{ // [!code focus]
     to: tokenAddress, // [!code focus]
@@ -28,6 +27,11 @@ const { address, hash, id } = await client.sendTransaction({ // [!code focus]
   }], // [!code focus]
 }) // [!code focus]
 ```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
 
 ## How It Works
 

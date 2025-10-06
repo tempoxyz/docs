@@ -6,9 +6,9 @@ TIP-20 tokens support dynamic supply management through minting and burning. Onl
 
 ### Basic Minting
 
-```ts
+:::code-group
+```ts [mint.ts]
 import { parseUnits } from 'viem'
-// [!include ~/snippets/setup.ts:setup] 
 
 const hash = await client.token.mint({ // [!code focus]
   amount: parseUnits('100', 6), // [!code focus]
@@ -17,9 +17,15 @@ const hash = await client.token.mint({ // [!code focus]
 }) // [!code focus]
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 ### Minting with Memo
 
-```ts
+:::code-group
+```ts [mintWithMemo.ts]
 import { keccak256, parseUnits } from 'viem'
 
 const hash = await client.token.mint({ // [!code focus]
@@ -30,12 +36,18 @@ const hash = await client.token.mint({ // [!code focus]
 }) // [!code focus]
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 
 ## Burning Tokens
 
 ### Self-Burn
 
-```ts
+:::code-group
+```ts [burn.ts]
 import { parseUnits } from 'viem'
 
 const hash = await client.token.burn({ // [!code focus]
@@ -44,9 +56,15 @@ const hash = await client.token.burn({ // [!code focus]
 }) // [!code focus]
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 ### Burn with Memo
 
-```ts
+:::code-group
+```ts [burnWithMemo.ts]
 import { keccak256, parseUnits } from 'viem'
 
 const hash = await client.token.burn({ // [!code focus]
@@ -56,9 +74,15 @@ const hash = await client.token.burn({ // [!code focus]
 }) // [!code focus]
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 ### Burn from Blocked Addresses
 
-```ts
+:::code-group
+```ts [burnFromBlocked.ts]
 import { parseUnits } from 'viem'
 
 const blockedAddress = '0x810c8ed810c8ed810c8ed810c8ed810c8ed810c8' // [!code focus]
@@ -71,11 +95,17 @@ const hash = await client.token.burnBlocked({ // [!code focus]
 }) // [!code focus]
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 ## Supply Management
 
 ### Setting Supply Caps
 
-```ts
+:::code-group
+```ts [setSupply.ts]
 import { parseUnits } from 'viem'
 
 const hash = await client.token.setSupplyCap({ // [!code focus]
@@ -84,9 +114,15 @@ const hash = await client.token.setSupplyCap({ // [!code focus]
 }) // [!code focus]
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 ### Checking Supply
 
-```ts
+:::code-group
+```ts [getSupply.ts]
 const token = '0x20c0000000000000000000000000000000000004' // [!code focus]
 
 const [totalSupply, supplyCap] = await Promise.all([ // [!code focus]
@@ -97,11 +133,17 @@ const [totalSupply, supplyCap] = await Promise.all([ // [!code focus]
 const isAtCap = totalSupply >= supplyCap // [!code focus]
 ```
 
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
+
 ## Minting Events
 
 The token emits events for all minting and burning operations: watchTokenMint
 
-```ts
+:::code-group
+```ts [watchMint.ts]
 const token = '0x20c0000000000000000000000000000000000004' // [!code focus]
 
 await client.token.watchMint({ // [!code focus]
@@ -123,84 +165,10 @@ await client.token.watchBurn({ // [!code focus]
 }) // [!code focus]
 ```
 
-## Common Patterns
-
-### Treasury Management
-
-```ts
-import { keccak256, parseUnits } from 'viem';
-
-const monthlyAllocation = parseUnits('10000', 18) // [!code focus]
-const memo = keccak256(`TREASURY_ALLOCATION_${new Date().toISOString().slice(0, 7)}`) // [!code focus]
-
-const hash = await client.token.mint({  // [!code focus]
-  amount: monthlyAllocation, // [!code focus]
-  to: treasuryAddress, // [!code focus]
-  memo, // [!code focus]
-  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
-}) // [!code focus]
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
 ```
-
-### Buyback and Burn
-
-```ts
-import { keccak256, parseUnits } from 'viem';
-
-// Buyback and burn mechanism // [!code focus]
-const buybackAmount = parseUnits('5000', 18) // [!code focus]
-
-// First burn the tokens // [!code focus]
-const hash = await client.token.burn({ // [!code focus]
-  amount: buybackAmount, // [!code focus]
-  memo: keccak256(`BUYBACK_${Date.now()}`), // [!code focus]
-  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
-}) // [!code focus]
-
-// Then update total supply tracking // [!code focus]
-console.log(`Burned ${buybackAmount} tokens in buyback program`) // [!code focus]
-```
-
-### Airdrop Distribution
-
-```ts
-import { keccak256, parseUnits } from 'viem';
-
-const airdropList = [ // [!code focus]
-  { // [!code focus]
-    address: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
-    amount: parseUnits('100', 18), // [!code focus]
-  }, // [!code focus]
-  { // [!code focus]
-    address: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
-    amount: parseUnits('200', 18), // [!code focus]
-  }, // [!code focus]
-] // [!code focus]
-
-for (const { amount, address } of airdropList) { // [!code focus]
-  const memo = keccak256(`AIRDROP_BATCH_1_${address}`) // [!code focus]
-  await client.token.mint({ // [!code focus]
-    amount: amount, // [!code focus]
-    memo, // [!code focus]
-    to: address, // [!code focus]
-    token: '0x20c0000000000000000000000000000000000004', // [!code focus]
-  }) // [!code focus]
-}
-```
-
-## Supply Cap Considerations
-
-### Setting Appropriate Caps
-
-```ts
-import { parseUnits } from 'viem';
-
-// For a stablecoin, set a reasonable cap // [!code focus]
-const maxSupply = parseUnits('1000000000', 18) // 1 billion tokens
-await client.token.setSupplyCap({ // [!code focus]
-  supplyCap: maxSupply, // [!code focus]
-  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
-}) // [!code focus]
-```
+:::
 
 ## Security Considerations
 

@@ -6,15 +6,19 @@ The TIP20Factory contract makes it easy to deploy new TIP-20 tokens with a singl
 
 ### Basic Deployment
 
-```ts
-// [!include ~/snippets/setup.ts:setup] 
-
+:::code-group
+```ts [deploy.ts]
 const { address, hash, id } = await client.token.create({ // [!code focus]
   currency: 'USD', // [!code focus]
   name: 'My Company USD', // [!code focus]
   symbol: 'MCUSD', // [!code focus]
 }) // [!code focus]
 ```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
 
 ### Required Parameters
 

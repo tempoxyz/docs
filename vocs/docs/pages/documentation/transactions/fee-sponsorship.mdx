@@ -18,9 +18,9 @@ Fee sponsorship allows one account (the **fee payer**) to pay transaction fees o
 
 The simplest approach is to specify a `feePayer` account directly when sending a transaction. This is useful when you have access to both the sender's and fee payer's private keys locally.
 
-```ts
+:::code-group
+```ts [customFeePayer.ts]
 import { mnemonicToAccount } from 'viem/accounts'
-// [!include ~/snippets/setup.ts:setup] 
 
 // Funded account that will pay the fees
 const feePayer = mnemonicToAccount(
@@ -32,6 +32,11 @@ const hash = await client.sendTransaction({ // [!code focus]
   to: '0x0000000000000000000000000000000000000000', // [!code focus]
 }) // [!code focus]
 ```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup] 
+```
+:::
 
 ### How It Works
 
