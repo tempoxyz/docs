@@ -1,2 +1,8 @@
 dist
+
+.DS_Store
 node_modules
+
+# Compiler files
+specs/cache/
+specs/out/
