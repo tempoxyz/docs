@@ -19,9 +19,9 @@ Fee sponsorship allows one account (the **fee payer**) to pay transaction fees o
 The simplest approach is to specify a `feePayer` account directly when sending a transaction. This is useful when you have access to both the sender's and fee payer's private keys locally.
 
 ```ts
-import { createClient, http, publicActions, walletActions } from 'viem'
+import { http, publicActions, walletActions } from 'viem'
 import { privateKeyToAccount, mnemonicToAccount } from 'viem/accounts'
-import { tempoLocal } from 'tempo/chains'
+import { createTempoClient } from 'viem/tempo'
 
 // Unfunded account that will send the transaction
 const sender = privateKeyToAccount(
@@ -33,10 +33,9 @@ const feePayer = mnemonicToAccount(
   'test test test test test test test test test test test junk'
 )
 
-const client = createClient({
+const client = createTempoClient({
   account: sender, // [!code focus]
-  chain: tempoLocal,
-  transport: http(),
+  transport: http('https://rpc.tempo.xyz'),
 })
   .extend(publicActions)
   .extend(walletActions)
@@ -55,44 +54,32 @@ const hash = await client.sendTransaction({ // [!code focus]
 4. The network validates both signatures and executes the transaction
 5. Fees are deducted from the fee payer's balance
 
-## Relay Transport
+## Fee Payer Transport
 
-For production applications, you typically don't want to expose the fee payer's private key on the client. Instead, you can use a **relay service** — a lightweight proxy (NextJS function, Cloudflare Worker, etc.) that holds the fee payer account and adds the fee payer signature server-side.
+For production applications, you typically don't want to expose the fee payer's private key on the client. Instead, you can use a **fee payer service** — a lightweight proxy (NextJS function, Cloudflare Worker, etc.) that holds the fee payer account and adds the fee payer signature server-side.
 
-### Setting Up the Relay
+### Setting Up the Fee Payer Service
 
-The relay service receives unsigned transactions, adds the fee payer signature, and forwards them to the blockchain:
+The fee payer service receives unsigned transactions, adds the fee payer signature, and forwards them to the blockchain:
 
 ```ts
-import { createClient, http, walletActions } from 'viem'
+import { walletActions } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
 import { RpcRequest, RpcResponse } from 'ox'
-import { parseTransaction } from 'viem/tempo'
+import { createTempoClient, parseTransaction } from 'viem/tempo'
 
-// Server-side relay endpoint
+// Server-side endpoint
 Bun.serve({
   port: 8546,
   async fetch(req) {
-    const client = createClient({
+    const client = createTempoClient({
       account: mnemonicToAccount(
         'test test test test test test test test test test test junk'
       ),
-      chain: tempoLocal,
-      transport: http(),
+      transport: http('https://rpc.tempo.xyz'),
     }).extend(walletActions)
 
     const request = RpcRequest.from(await req.json())
-
-    // Only support eth_sendRawTransaction
-    if (request.method !== 'eth_sendRawTransaction') {
-      return Response.json(
-        RpcResponse.from({
-          error: new RpcResponse.MethodNotSupportedError({
-            message: 'relay only supports `eth_sendRawTransaction`'
-          })
-        }, { request })
-      )
-    }
 
     const serialized = request.params[0] as `0x77${string}` // [!code focus]
     
@@ -104,7 +91,7 @@ Bun.serve({
       ...transaction, // [!code focus]
       feePayer: client.account, // [!code focus]
     }) // [!code focus]
-    
+
     // Submit to blockchain // [!code focus]
     const hash = await client.sendRawTransaction({ // [!code focus]
       serializedTransaction, // [!code focus]
@@ -115,47 +102,48 @@ Bun.serve({
 })
 ```
 
-### Using the Relay Client-Side
+### Using the Fee Payer Client-Side
 
-On the client, use the `withRelay` transport to automatically route transactions through your relay service:
+On the client, use the `withFeePayer` transport to automatically route transactions through your fee payer service:
 
 ```ts
-import { createClient, http, walletActions, publicActions } from 'viem'
+import { http, walletActions, publicActions } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { withRelay } from 'viem/tempo'
+import { createTempoClient, withFeePayer } from 'viem/tempo'
 
-const client = createClient({
+const client = createTempoClient({
   account: privateKeyToAccount('0xecc3...'), // Unfunded account // [!code focus]
-  chain: tempoLocal,
-  transport: withRelay( // [!code focus]
+  transport: withFeePayer( // [!code focus]
     http('https://rpc.tempo.xyz'), // Primary RPC // [!code focus]
-    http('https://relay.myapp.com') // Your relay service // [!code focus]
+    http('https://sponsor.myapp.com') // Your fee payer service // [!code focus]
   ), // [!code focus]
 })
   .extend(walletActions)
   .extend(publicActions)
 
-// Transaction is automatically sent through the relay
+// Set `feePayer: true` to flag the transaction to be sponsored;
+// transactions are automatically routed via the fee payer service
 const hash = await client.sendTransaction({
+  feePayer: true, // [!code focus]
   to: '0x0000000000000000000000000000000000000000',
 })
 ```
 
-### How the Relay Works
+### How the Fee Payer Service Works
 
 1. **Client** signs the transaction with sender's private key
-2. **Client** sends the signed transaction to the relay service
-3. **Relay** parses the transaction and adds fee payer signature
-4. **Relay** submits the fully-signed transaction to the blockchain
+2. **Client** sends the signed transaction to the fee payer service
+3. **Service** parses the transaction and adds fee payer signature
+4. **Service** submits the fully-signed transaction to the blockchain
 5. **Blockchain** validates both signatures and executes the transaction
 
 <Callout type="warning">
-  The relay service should implement rate limiting and validation to prevent abuse. Consider restricting which accounts can be sponsored and setting spending limits.
+  The fee payer service should implement rate limiting and validation to prevent abuse. Consider restricting which accounts can be sponsored and setting spending limits.
 </Callout>
 
 ## Benefits
 
 - **Gasless UX** — Users don't need to hold fee tokens
 - **Flexible sponsorship** — Applications control who pays for what
-- **Security** — Fee payer keys stay server-side with relay approach
+- **Security** — Fee payer keys stay server-side with fee payer service approach
 - **Native support** — Built into Tempo's transaction type, no smart contracts needed
