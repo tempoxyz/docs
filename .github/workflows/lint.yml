@@ -3,8 +3,12 @@ name: Lint
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'specs/**'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'specs/**'
 
 env:
   FOUNDRY_PROFILE: ci
