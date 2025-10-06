@@ -1,22 +1,28 @@
 {
-  "name": "tip20-viem-scripts",
-  "version": "1.0.0",
+  "name": "docs",
+  "private": true,
   "type": "module",
-  "workspaces": [
-    "vocs"
-  ],
   "scripts": {
-    "docs:dev": "bun run --filter=vocs dev",
-    "test:create-token": "bun run src/create-token.ts",
-    "test:transfer": "bun run src/transfer.ts",
-    "test:gas-fees": "bun run src/gas-fees.ts",
-    "test:all": "bun run src/index.ts"
+    "build": "vocs build",
+    "check": "biome check . --write --unsafe",
+    "check:types": "tsc --noEmit",
+    "dev": "vocs dev",
+    "prepare": "simple-git-hooks",
+    "preview": "vocs preview"
   },
   "dependencies": {
-    "viem": "^2.21.48"
+    "react": "latest",
+    "react-dom": "latest",
+    "vocs": "latest"
   },
   "devDependencies": {
-    "@types/bun": "^1.1.14",
-    "typescript": "^5.7.2"
+    "@biomejs/biome": "2.2.5",
+    "@types/react": "latest",
+    "simple-git-hooks": "^2.13.1",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@10.6.4",
+  "simple-git-hooks": {
+    "pre-commit": "pnpm check"
   }
 }
