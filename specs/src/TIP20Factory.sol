@@ -33,7 +33,7 @@ contract TIP20Factory {
 
         ++tokenIdCounter;
 
-        TIP20 token = new TIP20(name, symbol, currency, linkingToken, admin, address(this));
+        TIP20 token = new TIP20(name, symbol, currency, linkingToken, admin);
         emit TokenCreated(
             address(token), tokenIdCounter, name, symbol, currency, linkingToken, admin
         );

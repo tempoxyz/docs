@@ -7,8 +7,8 @@ contract LinkingUSD is TIP20 {
 
     error TransfersDisabled();
 
-    constructor(address admin, address factory)
-        TIP20("linkingUSD", "linkingUSD", "USD", TIP20(address(0)), admin, factory)
+    constructor(address admin)
+        TIP20("linkingUSD", "linkingUSD", "USD", TIP20(address(0)), admin)
     { }
 
     function depth() public view override returns (uint32) {

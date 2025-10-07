@@ -21,13 +21,18 @@ contract LinkingUSDTest is Test {
         vm.etch(0x403c000000000000000000000000000000000000, type(TIP403Registry).runtimeCode);
         vm.etch(0x4217c00000000000000000000000000000000000, type(MockTIP4217Registry).runtimeCode);
 
-        // Deploy factory
+        // Deploy factory at the constant address
         factory = new TIP20Factory();
+        vm.etch(0x20Fc000000000000000000000000000000000000, address(factory).code);
+        factory = TIP20Factory(0x20Fc000000000000000000000000000000000000);
+
+        // Initialize the tokenIdCounter to 1 (default initial value)
+        vm.store(0x20Fc000000000000000000000000000000000000, bytes32(uint256(0)), bytes32(uint256(1)));
 
         // Deploy LinkingUSD to the root TIP20 address with proper constructor initialization
         deployCodeTo(
             "LinkingUSD.sol:LinkingUSD",
-            abi.encode(admin, address(factory)),
+            abi.encode(admin),
             0x20C0000000000000000000000000000000000000
         );
         linkingToken = LinkingUSD(0x20C0000000000000000000000000000000000000);

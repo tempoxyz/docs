@@ -39,32 +39,34 @@ contract TIP20Test is Test {
         vm.etch(0x403c000000000000000000000000000000000000, type(TIP403Registry).runtimeCode);
         vm.etch(0x4217c00000000000000000000000000000000000, type(MockTIP4217Registry).runtimeCode);
 
-        // Deploy the factory
+        // Deploy the factory at the constant address
         factory = new TIP20Factory();
+        vm.etch(0x20Fc000000000000000000000000000000000000, address(factory).code);
+        factory = TIP20Factory(0x20Fc000000000000000000000000000000000000);
 
         // Increment the tokenIdCounter to match the tokens we're deploying
         // We need tokenIdCounter to be at least 3 for our test tokens
         vm.store(
-            address(factory),
+            0x20Fc000000000000000000000000000000000000,
             bytes32(uint256(0)), // tokenIdCounter is the first storage slot
             bytes32(uint256(3))
         );
 
         // Deploy linkingUSD at the specific TIP20 precompile address
-        deployCodeTo("LinkingUSD.sol", abi.encode(admin, address(factory)), LINKING_USD);
+        deployCodeTo("LinkingUSD.sol", abi.encode(admin), LINKING_USD);
 
         // Deploy linked tokens to TIP20 precompile addresses using deployCodeTo
         // Replace address(0) with linkingUSD
         deployCodeTo(
             "TIP20.sol",
-            abi.encode("Linked Token", "LINK", "USD", TIP20(LINKING_USD), admin, address(factory)),
+            abi.encode("Linked Token", "LINK", "USD", TIP20(LINKING_USD), admin),
             0x20C0000000000000000000000000000000000001
         );
         linkedToken = TIP20(0x20C0000000000000000000000000000000000001);
 
         deployCodeTo(
             "TIP20.sol",
-            abi.encode("Another Token", "OTHER", "USD", TIP20(LINKING_USD), admin, address(factory)),
+            abi.encode("Another Token", "OTHER", "USD", TIP20(LINKING_USD), admin),
             0x20C0000000000000000000000000000000000002
         );
         anotherToken = TIP20(0x20C0000000000000000000000000000000000002);
@@ -72,7 +74,7 @@ contract TIP20Test is Test {
         // Deploy TIP20 token with linkedToken
         deployCodeTo(
             "TIP20.sol",
-            abi.encode("Test Token", "TST", "USD", linkedToken, admin, address(factory)),
+            abi.encode("Test Token", "TST", "USD", linkedToken, admin),
             0x20C0000000000000000000000000000000000003
         );
         token = TIP20(0x20C0000000000000000000000000000000000003);
@@ -574,12 +576,12 @@ contract TIP20Test is Test {
 
     function testDepthWithDeeperChain() public {
         // Increment tokenIdCounter to allow token 4
-        vm.store(address(factory), bytes32(uint256(0)), bytes32(uint256(4)));
+        vm.store(0x20Fc000000000000000000000000000000000000, bytes32(uint256(0)), bytes32(uint256(4)));
 
         // Create a deeper chain: linkingUSD -> linkedToken -> newToken -> deeperToken
         deployCodeTo(
             "TIP20.sol",
-            abi.encode("New Token", "NEW", "USD", token, admin, address(factory)),
+            abi.encode("New Token", "NEW", "USD", token, admin),
             0x20C0000000000000000000000000000000000004
         );
         TIP20 newToken = TIP20(0x20C0000000000000000000000000000000000004);
@@ -608,12 +610,12 @@ contract TIP20Test is Test {
 
     function testCompleteLinkingTokenUpdateCannotCreateIndirectLoop() public {
         // Increment tokenIdCounter to allow token 4
-        vm.store(address(factory), bytes32(uint256(0)), bytes32(uint256(4)));
+        vm.store(0x20Fc000000000000000000000000000000000000, bytes32(uint256(0)), bytes32(uint256(4)));
 
         // Create a chain: linkingUSD -> linkedToken -> token -> newToken
         deployCodeTo(
             "TIP20.sol",
-            abi.encode("New Token", "NEW", "USD", token, admin, address(factory)),
+            abi.encode("New Token", "NEW", "USD", token, admin),
             0x20C0000000000000000000000000000000000004
         );
         TIP20 newToken = TIP20(0x20C0000000000000000000000000000000000004);
@@ -633,19 +635,19 @@ contract TIP20Test is Test {
 
     function testCompleteLinkingTokenUpdateCannotCreateLongerLoop() public {
         // Increment tokenIdCounter to allow tokens 4 and 5
-        vm.store(address(factory), bytes32(uint256(0)), bytes32(uint256(5)));
+        vm.store(0x20Fc000000000000000000000000000000000000, bytes32(uint256(0)), bytes32(uint256(5)));
 
         // Create a longer chain: linkingUSD -> linkedToken -> token -> token2 -> token3
         deployCodeTo(
             "TIP20.sol",
-            abi.encode("Token 2", "TK2", "USD", token, admin, address(factory)),
+            abi.encode("Token 2", "TK2", "USD", token, admin),
             0x20C0000000000000000000000000000000000004
         );
         TIP20 token2 = TIP20(0x20C0000000000000000000000000000000000004);
 
         deployCodeTo(
             "TIP20.sol",
-            abi.encode("Token 3", "TK3", "USD", token2, admin, address(factory)),
+            abi.encode("Token 3", "TK3", "USD", token2, admin),
             0x20c0000000000000000000000000000000000005
         );
         TIP20 token3 = TIP20(0x20c0000000000000000000000000000000000005);

@@ -16,7 +16,7 @@ contract TIP20 is TIP20RolesAuth {
 
     address internal constant TIP_FEE_MANAGER_ADDRESS = 0xfeEC000000000000000000000000000000000000;
 
-    address public immutable factory;
+    address internal constant FACTORY = 0x20Fc000000000000000000000000000000000000;
 
     /*//////////////////////////////////////////////////////////////
                                 METADATA
@@ -51,15 +51,13 @@ contract TIP20 is TIP20RolesAuth {
         string memory _symbol,
         string memory _currency,
         TIP20 _linkingToken,
-        address admin,
-        address _factory
+        address admin
     ) {
         name = _name;
         symbol = _symbol;
         currency = _currency;
         linkingToken = _linkingToken;
         nextLinkingToken = _linkingToken;
-        factory = _factory;
         if (decimals() == 0) revert InvalidCurrency();
 
         hasRole[admin][DEFAULT_ADMIN_ROLE] = true; // Grant admin role to first admin.
@@ -141,7 +139,7 @@ contract TIP20 is TIP20RolesAuth {
     function setNextLinkingToken(TIP20 newLinkingToken) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // sets next linking token, to put the DEX for that pair into place-only mode
         // does not check for loops; that is checked in completeLinkingTokenUpdate
-        if (!TIP20Factory(factory).isTIP20(address(newLinkingToken))) {
+        if (!TIP20Factory(FACTORY).isTIP20(address(newLinkingToken))) {
             revert InvalidLinkingToken();
         }
 

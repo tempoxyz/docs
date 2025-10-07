@@ -18,11 +18,16 @@ contract TIP20FactoryTest is Test {
         vm.etch(0x403c000000000000000000000000000000000000, type(TIP403Registry).runtimeCode);
         vm.etch(0x4217c00000000000000000000000000000000000, type(MockTIP4217Registry).runtimeCode);
 
-        // Deploy factory first
+        // Deploy factory at the constant address
         factory = new TIP20Factory();
+        vm.etch(0x20Fc000000000000000000000000000000000000, address(factory).code);
+        factory = TIP20Factory(0x20Fc000000000000000000000000000000000000);
+
+        // Initialize the tokenIdCounter to 1 (default initial value)
+        vm.store(0x20Fc000000000000000000000000000000000000, bytes32(uint256(0)), bytes32(uint256(1)));
 
         // Deploy and etch LinkingUSD at the root TIP20 address
-        linkingToken = new LinkingUSD(admin, address(factory));
+        linkingToken = new LinkingUSD(admin);
         vm.etch(0x20C0000000000000000000000000000000000000, address(linkingToken).code);
         linkingToken = LinkingUSD(0x20C0000000000000000000000000000000000000);
     }
