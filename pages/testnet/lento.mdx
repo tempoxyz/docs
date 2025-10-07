@@ -1,10 +1,23 @@
-# Lento [The third Tempo testnet]
+import { Callout } from 'vocs/components'
 
-📅 The third testnet, Lento, is now live.
+# Lento [The third Tempo testnet]
 
 ## What's New
 
-The main feature of Lento is the introduction of payment lanes. Payment lanes is a feature of the chain that
+Lento is our third Tempo testnet, released on October 6th. It includes the following features:
+
+### Payment Lanes
+The main feature of Lento is the introduction of [payment lanes](/documentation/transactions/payment-lanes). Payment lanes ensure that payment transactions always have available blockspace, even during periods of high network congestion. This is achieved through separate gas limits for payment and non-payment transactions, creating guaranteed capacity for payments. For full implementation details, see the [payment lanes specs](/protocol/transactions/payments-lane).
+
+### Fee Token Flexibility
+Users can now specify which stablecoin to use for transaction fees on a transaction-by-transaction basis. While you can [set a default fee token](documentation/transactions/fee-tokens#set-a-default-fee-token) for your account, each transaction can override this preference by [specifying a different fee token](/documentation/transactions/fee-tokens#specify-fee-token-per-transaction) directly in the transaction object. The fee token parameter is part of the transaction object and is optional, as detailed in the [fee token specs](/protocol/transactions/fee-tokens#transaction-level).
+
+### Fee Sponsorship
+Accounts can now sponsor the gas costs of another account. [Fee sponsorship](/documentation/transactions/fee-sponsorship) enables gasless transactions where one account (the fee payer) pays transaction fees on behalf of another account (the sender). This is perfect for onboarding new users or subsidizing transactions for your application's users. Gas sponsorship is implemented at the transaction level, where the gas payer can simply sign a message over the transaction object to sponsor the gas costs, and have that submitted inside a `feePayerSignature` field [as specified in the fee payer specs](/protocol/transactions/fee-payers#how-it-works).
+
+### Consensus Engine Update
+
+The Lento testnet is now running a new consensus algorithm instead of running as a single-node network as in Adagio and Adagietto testnets. This is an alpha integration of an alpha piece of software, so things might break during this testnet. Read more about our approach to blockchain consensus on Tempo [here](/protocol/consensus).
 
 ## Network Details
 
@@ -12,7 +25,8 @@ The main feature of Lento is the introduction of payment lanes. Payment lanes is
 |-------------------|-------|
 | **Network Name** | Lento |
 | **Chain ID** | `42426` |
-| **RPC URL** | `https://${USERNAME}:${PASSWORD}@rpc-lento.tempoxyz.dev` |
+| **RPC URL** | `https://rpc-lento.tempoxyz.dev` |
+| **Authenticated RPC URL** | `https://${USERNAME}:${PASSWORD}@rpc-lento.tempoxyz.dev` |
 
 Request credentials from the Tempo team.
 
@@ -25,15 +39,28 @@ cast block --rpc-url \
 
 ## Faucet
 
-The faucet supports multiple stablecoins and drips tokens to any address:
+The faucet now drips (alpha/beta/theta)USD to the given address. It supports multiple stablecoins:
 
 ```bash
-# Fund your address with any supported stablecoin
+# Fund your address with supported stablecoins
 cast rpc tempo_fundAddress 0x820525B56cF3cD426e58507F65DCaCB90BceEFb8 \
   --rpc-url https://${USERNAME}:${PASSWORD}@rpc-lento.tempoxyz.dev
 ```
 
+### Check Token Balance
+
+```bash
+# Example: Check AlphaUSD balance
+cast balance --erc20 0x20c0000000000000000000000000000000000000 0x820525B56cF3cD426e58507F65DCaCB90BceEFb8 \
+  --rpc-url https://${USERNAME}:${PASSWORD}@rpc-lento.tempoxyz.dev
+```
+
 ## Explorer & Tools
+
+<Callout type="warning">
+    Note the block explorer is not functional as of October 6th and will be live on October 7th.
+</Callout>
+
 
 For now we have stood up a very basic Blockscout instance to explore the testnet.
 
@@ -47,12 +74,28 @@ If there are any tools you rely on we can preconfigure for future testnets, let 
 
 ## Predeployed Contracts
 
-Coming soon.
+The following contracts are predeployed on the Lento testnet:
+
+| Contract | Address |
+|----------|---------|
+| **Multicall3** | `0xcA11bde05977b3631167028862bE2a173976CA11` |
+| **CreateX** | `0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed` |
+| **Permit2** | `0x000000000022d473030f116ddee9f6b43ac78ba3` |
+| **IthacaAccount** | `0x7702c00000000000000000000000000000000000` |
 
 ## Predeployed Tokens
 
-Coming soon.
+The testnet includes three predeployed stablecoins:
 
-## Future Features
+| Token | Currency | Address |
+|-------|----------|---------|
+| **AlphaUSD** | USD | `0x20c0000000000000000000000000000000000000` |
+| **BetaUSD** | USD | `0x20c0000000000000000000000000000000000001` |
+| **ThetaUSD** | USD | `0x20c0000000000000000000000000000000000002` |
 
-We anticipate adding payment lanes functionality and the first approach to consensus in future testnets. These features are not yet documented.
+## Predeployed FeeAMM LPs
+
+The following liquidity pools are predeployed with 10k tokens on each side:
+
+- **BetaUSD → AlphaUSD** (10k on each side)
+- **ThetaUSD → AlphaUSD** (10k on each side)
