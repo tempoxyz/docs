@@ -184,8 +184,12 @@ export default defineConfig({
             link: '/protocol/transactions',
           },
           {
-            text: 'Token Preferences',
-            link: '/protocol/transactions/token-preferences',
+            text: 'Fee Tokens',
+            link: '/protocol/transactions/fee-tokens',
+          },
+          {
+            text: 'Fee Payers',
+            link: '/protocol/transactions/fee-payers',
           },
           {
             text: 'Fee AMM',

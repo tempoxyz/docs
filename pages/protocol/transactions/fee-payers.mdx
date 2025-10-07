@@ -1,0 +1,55 @@
+import { Callout } from 'vocs/components'
+
+# Fee Payers
+
+Fee sponsorship enables gasless transactions where applications can subsidize user costs without requiring account abstraction or proxy contracts. Users can interact with the blockchain without holding fee tokens.
+
+This specification describes how one account can pay transaction fees on behalf of another account using Tempo's native `fee_payer_signature` field in transaction type 0x77.
+
+## How It Works
+
+Tempo's transaction type 0x77 includes an optional `fee_payer_signature` field. When present, this signature authorizes a third party to pay the transaction's gas costs while the original sender executes the transaction logic.
+
+### Transaction Fields
+
+The transaction includes:
+- Standard EIP-1559 fields (nonce, gas, to, value, etc.)
+- Optional `fee_token` field to specify which stablecoin pays fees
+- Optional `fee_payer_signature` field containing `(y_parity, r, s)` when sponsored
+
+### Dual Signatures
+
+**Sender signs:** The transaction they want to execute
+**Fee payer signs:** Authorization to pay fees for that specific transaction and sender
+
+The signatures use different signing domains to prevent conflicts:
+- Sender uses magic byte `0x77`
+- Fee payer uses magic byte `0x78`
+
+## Validation
+
+When `fee_payer_signature` is present:
+1. Both sender and fee payer signatures must be valid
+2. Fee payer must have sufficient balance in the fee token
+3. Transaction is rejected if either signature fails or balance is insufficient
+
+When `fee_payer_signature` is absent:
+- Sender pays their own fees (standard behavior)
+
+<Callout type="info">
+  Fee payer information is determined statically from the transaction data, ensuring efficient validation without requiring transaction execution.
+</Callout>
+
+## Execution
+
+1. Recover both sender and fee payer addresses from their signatures
+2. Charge gas fees to the fee payer's balance
+3. Execute transaction with sender as the transaction origin
+4. Refund unused gas to the fee payer
+
+## Security
+
+- Fee payer signature commits to both the transaction details and specific sender
+- Prevents signature reuse or unauthorized fee charging
+- Standard replay protection via chain ID and nonces
+- Fee payers cannot be drained beyond the transaction's gas limit
