@@ -4,13 +4,15 @@ import { Callout } from 'vocs/components'
 
 Tempo lets you pay transaction fees in stablecoins instead of a native network token. When you send a transaction, you can choose which supported token to use for fees.
 
-By default, Tempo will use your preferred fee token if you’ve set one, or you can pick a different token for each transaction. The fee is automatically deducted from your balance in that token, and you don’t have to worry about conversions or extra steps.
+## Fee Token Requirements
+
+To pay fees with a stablecoin, the token must be a USD-denominated stablecoin that's supported by the network. You'll need sufficient balance in that token to cover your transaction's gas limit.
+
+If the validator doesn't directly accept your chosen token, the system will automatically convert it through the built-in Fee AMM, which requires adequate liquidity for the conversion to succeed.
+
+By default, Tempo will use your [preferred fee token](/documentation/transactions/fee-tokens#set-a-default-fee-token) if you've set one, or you can [pick a different token for each transaction](/documentation/transactions/fee-tokens#specify-fee-token-per-transaction). The fee is automatically deducted from your balance in that token, and you don't have to worry about conversions or extra steps.
 
 This makes it easy to use Tempo for payments and everyday transactions, since you can pay fees directly in the same stablecoins you already use.
-
-<Callout type="info">
-  The fee token will also be possible to configure on a transaction-by-transaction basis via a new `fee_token` field on user originated transactions. This feature is coming soon.
-</Callout>
 
 ## Set a Default Fee Token
 
@@ -20,8 +22,6 @@ You can set a default fee token preference for your account by calling the `setU
 3. Either pay the validator directly (if they prefer the same token) or convert it through a built in Fee AMM that will find liquidity for your preferred fee-paying stablecoin.
 
 You can learn more about the [Fee AMM](/protocol/transactions/fee-amm) in the protocol specifications.
-
-### Using the FeeManager Precompile
 
 :::code-group
 ```ts [setUserToken.ts]
@@ -39,20 +39,43 @@ const defaultHash = await client.token.setUserToken({ // [!code focus]
 ```
 
 ```ts [viem.config.ts]
-// [!include ~/snippets/setup.ts:setup] 
+// [!include ~/snippets/setup.ts:setup]
 ```
 :::
 
-### What This Does
+After setting your default fee token, all future transactions will use that token for fees by default unless overridden by transaction-level preferences. When no fee token is specified in a transaction, it will use your default setting. This is a one-time setup, so you don't need to specify the fee token in every transaction.
 
-- **All future transactions** will use testUSDToken for fees by default
-- **Transaction-level preferences** will override this setting
-- **No fee token specified** in a transaction will use your default
-- **One-time setup** - you don't need to specify the fee token in every transaction
+## Specify Fee Token Per Transaction
 
-## Fee Token Requirements
+You can override your default fee token preference for individual transactions by specifying the `feeToken` parameter. This is useful when you want to pay fees with a different stablecoin for a specific transaction.
 
-- Must be a **USD stablecoin**
-- Must have **sufficient balance** to cover the transaction's gas limit
-- Must have **liquidity** in the Fee AMM for conversion if needed
-- **Transaction-level** preferences override account-level preferences
+:::code-group
+```ts [sendWithFeeToken.ts]
+const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
+
+// Send transaction with specific fee token
+const hash = await client.sendTransaction({ // [!code focus]
+  calls: [ // [!code focus]
+    { data: '0x...', to: '0x...' }, // [!code focus]
+    { data: '0x...', to: '0x...' } // [!code focus]
+  ], // [!code focus]
+  feeToken: alphaUSDAddress, // [!code focus]
+}) // [!code focus]
+
+const transaction = await client.getTransaction({ hash })
+```
+
+```ts [viem.config.ts]
+import { createClient, http, publicActions, walletActions } from 'viem'
+import { tempo } from 'tempo/chains'
+
+const client = createClient({
+  chain: tempo,
+  transport: http(),
+})
+  .extend(publicActions)
+  .extend(walletActions)
+```
+:::
+
+This overrides your default fee token for this specific transaction and works with any transaction type including batch transactions and contract calls. The system automatically handles conversion through the Fee AMM if the validator doesn't accept your chosen token, and this transaction-level preference takes precedence over account-level and validator-level preferences.
