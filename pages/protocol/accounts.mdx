@@ -1,6 +1,6 @@
 # Accounts [Default Account Abstraction (DAA)]
 
-Tempo uses a "Default Account Abstraction" (DAA) model for accounts on the Tempo blockchain. DAA extends the Ethereum account model by allowing any externally owned account (EOA) to be seamlessly upgraded into a smart contract wallet, without requiring user intervention or setup. 
+Tempo uses a "Default Account Abstraction" (DAA) model for accounts on the Tempo blockchain. DAA extends the Ethereum account model by allowing any externally owned account (EOA) to be seamlessly upgraded into a smart contract wallet, without requiring user intervention or setup.
 
 The core mechanism is that, on first use (when an EOA sends its first transaction and has never been used before), the protocol automatically delegates the account to a canonical smart contract implementation by setting its code to a special format. This enables all EOAs to immediately benefit from smart wallet features, while preserving full backward compatibility with legacy ECDSA transactions and not affecting contract accounts.
 
@@ -8,7 +8,7 @@ Additionally, a registrar precompile is introduced to allow anyone to permission
 
 Tempo's DAA model is fully compatible with EIP-7702. For a detailed understanding of the underlying delegation format and semantics, see the [EIP-7702 specification](https://eips.ethereum.org/EIPS/eip-7702).
 
-## Abstract
+## Features
 
 Default Account Abstraction (DAA) allows any EOA to be used as a smart contract wallet.
 
@@ -16,7 +16,7 @@ It does so through two new behaviors in-protocol:
 
 1) **Auto-delegation on first use.** When a top-level transaction originates from an address `A`, `nonce(A) == 0`, and `code(A)` is empty, the protocol **sets `code(A) = 0xEF0100 || DEFAULT_7702_IMPL`** during execution, thereby delegating `A` to the default implementation per 7702 semantics. Legacy ECDSA tx validation is unchanged.
 
-2) **Registrar precompile.** A new precompile, **DefaultAccountRegistrar**, takes `(hash, v, r, s)`, derives an `authority` address via `ecrecover(hash, v, r, s)`, and **delegates `authority` to DEFAULT_7702_IMPL**. It reverts if that address is already delegated or is a contract. 
+2) **Registrar precompile.** A new precompile, **DefaultAccountRegistrar**, takes `(hash, v, r, s)`, derives an `authority` address via `ecrecover(hash, v, r, s)`, and **delegates `authority` to DEFAULT_7702_IMPL**. It reverts if that address is already delegated or is a contract.
 
 Additionally, **DEFAULT_7702_IMPL** is treated as **always warm** for gas, like a precompile.
 
@@ -43,7 +43,7 @@ Additionally, **DEFAULT_7702_IMPL** is treated as **always warm** for gas, like 
 **Trigger:** When executing a **top-level** transaction with `tx.from = A`.
 
 **Preconditions (checked at transaction start, during execution):**
-- `code(A) == EMPTY`  
+- `code(A) == EMPTY`
 - `nonce_pre(A) == 0`  _(the nonce value read before nonce increment)_
 
 **State transition:**
@@ -59,7 +59,7 @@ Additionally, **DEFAULT_7702_IMPL** is treated as **always warm** for gas, like 
 - This rule **does not** prohibit later re-delegation or undelegation; those are governed by standard 7702 semantics (see _Redelegation & undelegation_ below).
 
 **Gas:**
-- The gas accounting for installing `EF_PREFIX || DEFAULT_7702_IMPL` matches the cost model for 7702 delegation on Tempo (same schedule as 7702 delegation). 
+- The gas accounting for installing `EF_PREFIX || DEFAULT_7702_IMPL` matches the cost model for 7702 delegation on Tempo (same schedule as 7702 delegation).
 
 ### 2) DefaultAccountRegistrar precompile
 
@@ -211,4 +211,3 @@ fn is_7702_delegated(code: bytes) -> bool:
   - the auto-delegation state transition hook,
   - the DefaultAccountRegistrar precompile at `0x7702ac00000000000…`,
   - the always-warm treatment for `DEFAULT_7702_IMPL`.
-
