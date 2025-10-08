@@ -31,8 +31,8 @@ contract TIP20Test is Test {
     event Approval(address indexed owner, address indexed spender, uint256 amount);
     event Mint(address indexed to, uint256 amount);
     event Burn(address indexed from, uint256 amount);
-    event NextLinkingTokenSet(address indexed updater, TIP20 indexed nextLinkingToken);
-    event LinkingTokenUpdate(address indexed updater, TIP20 indexed newLinkingToken);
+    event NextQuoteTokenSet(address indexed updater, TIP20 indexed nextQuoteToken);
+    event QuoteTokenUpdate(address indexed updater, TIP20 indexed newQuoteToken);
 
     function setUp() public {
         // Deploy mock registries at their precompile addresses
@@ -461,64 +461,64 @@ contract TIP20Test is Test {
     }
 
     /*//////////////////////////////////////////////////////////////
-                          LINKING TOKEN TESTS
+                          QUOTE TOKEN TESTS
     //////////////////////////////////////////////////////////////*/
 
-    function testLinkingTokenSetInConstructor() public {
-        assertEq(address(token.linkingToken()), address(linkedToken));
+    function testQuoteTokenSetInConstructor() public {
+        assertEq(address(token.quoteToken()), address(linkedToken));
     }
 
-    function testSetNextLinkingTokenAndComplete() public {
+    function testSetNextQuoteTokenAndComplete() public {
         vm.startPrank(admin);
 
-        // Expect the NextLinkingTokenSet event
+        // Expect the NextQuoteTokenSet event
         vm.expectEmit(true, true, false, false);
-        emit NextLinkingTokenSet(admin, anotherToken);
+        emit NextQuoteTokenSet(admin, anotherToken);
 
-        token.setNextLinkingToken(anotherToken);
+        token.setNextQuoteToken(anotherToken);
 
-        // Verify nextLinkingToken is set but linkingToken is not changed yet
-        assertEq(address(token.nextLinkingToken()), address(anotherToken));
-        assertEq(address(token.linkingToken()), address(linkedToken));
+        // Verify nextQuoteToken is set but quoteToken is not changed yet
+        assertEq(address(token.nextQuoteToken()), address(anotherToken));
+        assertEq(address(token.quoteToken()), address(linkedToken));
 
-        // Expect the LinkingTokenUpdate event
+        // Expect the QuoteTokenUpdate event
         vm.expectEmit(true, true, false, false);
-        emit LinkingTokenUpdate(admin, anotherToken);
+        emit QuoteTokenUpdate(admin, anotherToken);
 
-        token.completeLinkingTokenUpdate();
+        token.completeQuoteTokenUpdate();
 
         vm.stopPrank();
 
-        assertEq(address(token.linkingToken()), address(anotherToken));
+        assertEq(address(token.quoteToken()), address(anotherToken));
     }
 
-    function testSetNextLinkingTokenRequiresAdmin() public {
+    function testSetNextQuoteTokenRequiresAdmin() public {
         vm.startPrank(alice);
 
         vm.expectRevert();
-        token.setNextLinkingToken(anotherToken);
+        token.setNextQuoteToken(anotherToken);
 
         vm.stopPrank();
     }
 
-    function testCompleteLinkingTokenUpdateRequiresAdmin() public {
+    function testCompleteQuoteTokenUpdateRequiresAdmin() public {
         vm.prank(admin);
-        token.setNextLinkingToken(anotherToken);
+        token.setNextQuoteToken(anotherToken);
 
         vm.startPrank(alice);
 
         vm.expectRevert();
-        token.completeLinkingTokenUpdate();
+        token.completeQuoteTokenUpdate();
 
         vm.stopPrank();
     }
 
-    function testSetNextLinkingTokenToInvalidAddress() public {
+    function testSetNextQuoteTokenToInvalidAddress() public {
         vm.startPrank(admin);
 
         // Should revert when trying to set to zero address (not registered in factory)
-        vm.expectRevert(TIP20.InvalidLinkingToken.selector);
-        token.setNextLinkingToken(TIP20(address(0)));
+        vm.expectRevert(TIP20.InvalidQuoteToken.selector);
+        token.setNextQuoteToken(TIP20(address(0)));
 
         vm.stopPrank();
     }
@@ -534,23 +534,23 @@ contract TIP20Test is Test {
     }
 
     function testDepthOfLinkedToken() public {
-        // linkedToken has linkingUSD as its linking token, so depth should be 1
+        // linkedToken has linkingUSD as its quote token, so depth should be 1
         assertEq(linkedToken.depth(), 1);
     }
 
     function testDepthOfToken() public {
-        // token has linkedToken as its linking token, so depth should be 2
+        // token has linkedToken as its quote token, so depth should be 2
         assertEq(token.depth(), 2);
     }
 
-    function testDepthAfterChangingLinkingToken() public {
+    function testDepthAfterChangingQuoteToken() public {
         // Initially token has depth 2 (linkedToken -> linkingUSD)
         assertEq(token.depth(), 2);
 
-        // Change linking token to linkingUSD directly
+        // Change quote token to linkingUSD directly
         vm.startPrank(admin);
-        token.setNextLinkingToken(TIP20(LINKING_USD));
-        token.completeLinkingTokenUpdate();
+        token.setNextQuoteToken(TIP20(LINKING_USD));
+        token.completeQuoteTokenUpdate();
         vm.stopPrank();
 
         // Now depth should be 1 (linkingUSD)
@@ -564,10 +564,10 @@ contract TIP20Test is Test {
         // anotherToken also has depth 1 (links to linkingUSD)
         assertEq(anotherToken.depth(), 1);
 
-        // Change token's linking token to anotherToken
+        // Change token's quote token to anotherToken
         vm.startPrank(admin);
-        token.setNextLinkingToken(anotherToken);
-        token.completeLinkingTokenUpdate();
+        token.setNextQuoteToken(anotherToken);
+        token.completeQuoteTokenUpdate();
         vm.stopPrank();
 
         // Depth should still be 2 since anotherToken has depth 1
@@ -594,21 +594,21 @@ contract TIP20Test is Test {
                         LOOP PREVENTION TESTS
     //////////////////////////////////////////////////////////////*/
 
-    function testCompleteLinkingTokenUpdateCannotCreateDirectLoop() public {
-        // Try to set token's linking token to itself
+    function testCompleteQuoteTokenUpdateCannotCreateDirectLoop() public {
+        // Try to set token's quote token to itself
         vm.startPrank(admin);
 
-        // setNextLinkingToken doesn't check for loops
-        token.setNextLinkingToken(token);
+        // setNextQuoteToken doesn't check for loops
+        token.setNextQuoteToken(token);
 
-        // completeLinkingTokenUpdate should detect the loop and revert
-        vm.expectRevert(TIP20.InvalidLinkingToken.selector);
-        token.completeLinkingTokenUpdate();
+        // completeQuoteTokenUpdate should detect the loop and revert
+        vm.expectRevert(TIP20.InvalidQuoteToken.selector);
+        token.completeQuoteTokenUpdate();
 
         vm.stopPrank();
     }
 
-    function testCompleteLinkingTokenUpdateCannotCreateIndirectLoop() public {
+    function testCompleteQuoteTokenUpdateCannotCreateIndirectLoop() public {
         // Increment tokenIdCounter to allow token 4
         vm.store(0x20Fc000000000000000000000000000000000000, bytes32(uint256(0)), bytes32(uint256(4)));
 
@@ -620,20 +620,20 @@ contract TIP20Test is Test {
         );
         TIP20 newToken = TIP20(0x20C0000000000000000000000000000000000004);
 
-        // Try to set token's linking token to newToken (which would create a loop)
+        // Try to set token's quote token to newToken (which would create a loop)
         vm.startPrank(admin);
 
-        // setNextLinkingToken doesn't check for loops
-        token.setNextLinkingToken(newToken);
+        // setNextQuoteToken doesn't check for loops
+        token.setNextQuoteToken(newToken);
 
-        // completeLinkingTokenUpdate should detect the loop and revert
-        vm.expectRevert(TIP20.InvalidLinkingToken.selector);
-        token.completeLinkingTokenUpdate();
+        // completeQuoteTokenUpdate should detect the loop and revert
+        vm.expectRevert(TIP20.InvalidQuoteToken.selector);
+        token.completeQuoteTokenUpdate();
 
         vm.stopPrank();
     }
 
-    function testCompleteLinkingTokenUpdateCannotCreateLongerLoop() public {
+    function testCompleteQuoteTokenUpdateCannotCreateLongerLoop() public {
         // Increment tokenIdCounter to allow tokens 4 and 5
         vm.store(0x20Fc000000000000000000000000000000000000, bytes32(uint256(0)), bytes32(uint256(5)));
 
@@ -652,32 +652,32 @@ contract TIP20Test is Test {
         );
         TIP20 token3 = TIP20(0x20c0000000000000000000000000000000000005);
 
-        // Try to set linkedToken's linking token to token3 (would create loop)
+        // Try to set linkedToken's quote token to token3 (would create loop)
         vm.startPrank(admin);
 
-        // setNextLinkingToken doesn't check for loops
-        linkedToken.setNextLinkingToken(token3);
+        // setNextQuoteToken doesn't check for loops
+        linkedToken.setNextQuoteToken(token3);
 
-        // completeLinkingTokenUpdate should detect the loop and revert
-        vm.expectRevert(TIP20.InvalidLinkingToken.selector);
-        linkedToken.completeLinkingTokenUpdate();
+        // completeQuoteTokenUpdate should detect the loop and revert
+        vm.expectRevert(TIP20.InvalidQuoteToken.selector);
+        linkedToken.completeQuoteTokenUpdate();
 
         vm.stopPrank();
     }
 
-    function testCompleteLinkingTokenUpdateValidChangeDoesNotRevert() public {
+    function testCompleteQuoteTokenUpdateValidChangeDoesNotRevert() public {
         // Verify that a valid change doesn't revert
         // token currently links to linkedToken, change it to anotherToken (both depth 1)
         vm.startPrank(admin);
 
         // This should succeed - no loop created
-        token.setNextLinkingToken(anotherToken);
-        token.completeLinkingTokenUpdate();
+        token.setNextQuoteToken(anotherToken);
+        token.completeQuoteTokenUpdate();
 
         vm.stopPrank();
 
         // Verify the change was successful
-        assertEq(address(token.linkingToken()), address(anotherToken));
+        assertEq(address(token.quoteToken()), address(anotherToken));
     }
 
 }

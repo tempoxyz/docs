@@ -49,7 +49,7 @@ contract LinkingUSDTest is Test {
         assertEq(linkingToken.name(), "linkingUSD");
         assertEq(linkingToken.symbol(), "linkingUSD");
         assertEq(linkingToken.currency(), "USD");
-        assertEq(address(linkingToken.linkingToken()), address(0));
+        assertEq(address(linkingToken.quoteToken()), address(0));
     }
 
     function testTransferFails() public {

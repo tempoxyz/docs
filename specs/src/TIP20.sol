@@ -36,8 +36,8 @@ contract TIP20 is TIP20RolesAuth {
                              ADMINISTRATION
     //////////////////////////////////////////////////////////////*/
 
-    TIP20 public linkingToken;
-    TIP20 public nextLinkingToken;
+    TIP20 public quoteToken;
+    TIP20 public nextQuoteToken;
 
     bytes32 public constant PAUSE_ROLE = keccak256("PAUSE_ROLE");
     bytes32 public constant UNPAUSE_ROLE = keccak256("UNPAUSE_ROLE");
@@ -50,14 +50,14 @@ contract TIP20 is TIP20RolesAuth {
         string memory _name,
         string memory _symbol,
         string memory _currency,
-        TIP20 _linkingToken,
+        TIP20 _quoteToken,
         address admin
     ) {
         name = _name;
         symbol = _symbol;
         currency = _currency;
-        linkingToken = _linkingToken;
-        nextLinkingToken = _linkingToken;
+        quoteToken = _quoteToken;
+        nextQuoteToken = _quoteToken;
         if (decimals() == 0) revert InvalidCurrency();
 
         hasRole[admin][DEFAULT_ADMIN_ROLE] = true; // Grant admin role to first admin.
@@ -104,7 +104,7 @@ contract TIP20 is TIP20RolesAuth {
     error SupplyCapExceeded();
     error ContractPaused();
     error InvalidCurrency();
-    error InvalidLinkingToken();
+    error InvalidQuoteToken();
 
     /*//////////////////////////////////////////////////////////////
                                  EVENTS
@@ -121,8 +121,8 @@ contract TIP20 is TIP20RolesAuth {
     event Approval(address indexed owner, address indexed spender, uint256 amount);
     event SupplyCapUpdate(address indexed updater, uint256 indexed newSupplyCap);
     event PauseStateUpdate(address indexed updater, bool isPaused);
-    event NextLinkingTokenSet(address indexed updater, TIP20 indexed nextLinkingToken);
-    event LinkingTokenUpdate(address indexed updater, TIP20 indexed newLinkingToken);
+    event NextQuoteTokenSet(address indexed updater, TIP20 indexed nextQuoteToken);
+    event QuoteTokenUpdate(address indexed updater, TIP20 indexed newQuoteToken);
 
     /*//////////////////////////////////////////////////////////////
                           POLICY ADMINISTRATION
@@ -136,31 +136,31 @@ contract TIP20 is TIP20RolesAuth {
                           TOKEN ADMINISTRATION
     //////////////////////////////////////////////////////////////*/
 
-    function setNextLinkingToken(TIP20 newLinkingToken) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // sets next linking token, to put the DEX for that pair into place-only mode
-        // does not check for loops; that is checked in completeLinkingTokenUpdate
-        if (!TIP20Factory(FACTORY).isTIP20(address(newLinkingToken))) {
-            revert InvalidLinkingToken();
+    function setNextQuoteToken(TIP20 newQuoteToken) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        // sets next quote token, to put the DEX for that pair into place-only mode
+        // does not check for loops; that is checked in completeQuoteTokenUpdate
+        if (!TIP20Factory(FACTORY).isTIP20(address(newQuoteToken))) {
+            revert InvalidQuoteToken();
         }
 
-        nextLinkingToken = newLinkingToken;
-        emit NextLinkingTokenSet(msg.sender, newLinkingToken);
+        nextQuoteToken = newQuoteToken;
+        emit NextQuoteTokenSet(msg.sender, newQuoteToken);
     }
 
-    function completeLinkingTokenUpdate() external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // check that this does not create a loop, by looping through linking token until we reach the root
-        TIP20 current = nextLinkingToken;
+    function completeQuoteTokenUpdate() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        // check that this does not create a loop, by looping through quote token until we reach the root
+        TIP20 current = nextQuoteToken;
         while (address(current) != 0x20C0000000000000000000000000000000000000) {
-            if (current == this) revert InvalidLinkingToken();
-            current = current.linkingToken();
+            if (current == this) revert InvalidQuoteToken();
+            current = current.quoteToken();
         }
 
-        linkingToken = nextLinkingToken;
-        emit LinkingTokenUpdate(msg.sender, nextLinkingToken);
+        quoteToken = nextQuoteToken;
+        emit QuoteTokenUpdate(msg.sender, nextQuoteToken);
     }
 
     function depth() public view virtual returns (uint32) {
-        return linkingToken.depth() + 1;
+        return quoteToken.depth() + 1;
     }
 
     function setSupplyCap(uint256 newSupplyCap) external onlyRole(DEFAULT_ADMIN_ROLE) {

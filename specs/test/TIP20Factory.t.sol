@@ -32,8 +32,8 @@ contract TIP20FactoryTest is Test {
         linkingToken = LinkingUSD(0x20C0000000000000000000000000000000000000);
     }
 
-    function testCreateTokenWithValidLinkingToken() public {
-        // Create token with LinkingUSD as the linking token
+    function testCreateTokenWithValidQuoteToken() public {
+        // Create token with LinkingUSD as the quote token
         address tokenAddr = factory.createToken(
             "Test Token", "TEST", "USD", TIP20(0x20C0000000000000000000000000000000000000), admin
         );
@@ -41,12 +41,12 @@ contract TIP20FactoryTest is Test {
         TIP20 token = TIP20(tokenAddr);
         assertEq(token.name(), "Test Token");
         assertEq(token.symbol(), "TEST");
-        assertEq(address(token.linkingToken()), 0x20C0000000000000000000000000000000000000);
+        assertEq(address(token.quoteToken()), 0x20C0000000000000000000000000000000000000);
     }
 
-    function testCreateTokenWithInvalidLinkingTokenReverts() public {
-        // Try to create token with non-TIP20 address as linking token
-        vm.expectRevert(TIP20Factory.InvalidLinkingToken.selector);
+    function testCreateTokenWithInvalidQuoteTokenReverts() public {
+        // Try to create token with non-TIP20 address as quote token
+        vm.expectRevert(TIP20Factory.InvalidQuoteToken.selector);
         factory.createToken(
             "Test Token",
             "TEST",
@@ -57,8 +57,8 @@ contract TIP20FactoryTest is Test {
     }
 
     function testCreateTokenWithZeroAddressReverts() public {
-        // Try to create token with zero address as linking token
-        vm.expectRevert(TIP20Factory.InvalidLinkingToken.selector);
+        // Try to create token with zero address as quote token
+        vm.expectRevert(TIP20Factory.InvalidQuoteToken.selector);
         factory.createToken("Test Token", "TEST", "USD", TIP20(address(0)), admin);
     }
 

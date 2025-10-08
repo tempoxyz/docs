@@ -60,11 +60,11 @@ interface IStablecoinExchange {
         returns (uint128 amountOut);
 
     // Order management
-    // Only supports placing an order on a pair between a token and its linking token
+    // Only supports placing an order on a pair between a token and its quote token
     // Amount is denominated in the token
-    // Tick is the price of the token denominated in the linking token, minus 1, times 1000
-    // A bid is an order to buy the token using its linking token
-    // A ask is an order to sell the token for its linking token
+    // Tick is the price of the token denominated in the quote token, minus 1, times 1000
+    // A bid is an order to buy the token using its quote token
+    // A ask is an order to sell the token for its quote token
     function place(address token, uint128 amount, bool isBid, int16 tick)
         external
         returns (uint128 orderId);

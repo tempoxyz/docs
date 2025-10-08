@@ -38,7 +38,7 @@ The primary goal is to provide optimal pricing for users who are doing cross-sta
 
 - **Tick Structure**
     - No ticks allowed past certain price limits (e.g., ±2% from $1.00)
-    - **Quote currency:** As discussed in a separate spec, each token specifies one "linking token." DEX pairs are only allowed between a token and its linking token. In the pair between that token and its linking token, the linking token is the quote currency that tick prices are denominated in.
+    - **Quote currency:** As discussed in a separate spec, each token specifies one "quote token." DEX pairs are only allowed between a token and its quote token. In the pair between that token and its quote token, the quote token is the quote currency that tick prices are denominated in.
     - Tick size: 0.1 bps
 
 - **Fees & Limits**
@@ -56,7 +56,7 @@ The primary goal is to provide optimal pricing for users who are doing cross-sta
   - First checks user's balance on the DEX, then transfers from user if insufficient balance
   - When complete, transfers funds to user
   - Credits maker's balance on the DEX when their order is filled
-  - Sell means specify the amount of token that goes in; buy means specify the amount of token that comes out. This is totally independent of which token is the linking token on their pair and the corresponding "bid/ask" terminology.
+  - Sell means specify the amount of token that goes in; buy means specify the amount of token that comes out. This is totally independent of which token is the quote token on their pair and the corresponding "bid/ask" terminology.
   - Will fail with an InsufficientLiquidity error if there is not enough liquidity to satisfy minAmountOut or maxAmountIn.
   - For now, will fail if tokens are not paired directly against each other; later will support multi-hop trades
 
@@ -66,10 +66,10 @@ The primary goal is to provide optimal pricing for users who are doing cross-sta
   - Should be able to calculate this without iterating over all orders in the tick (by tracking the size at each tick)
 
 - `place(address token, uint128 amount, bool isBid, int16 tick) returns (uint128 orderId)`
-  - Only supports placing an order on a pair between a token and its linking token
+  - Only supports placing an order on a pair between a token and its quote token
   - Amount is denominated in the token
-  - Tick is the price of the token denominated in the linking token, minus 1, times 1000
-  - A bid is an order to buy the token using its linking token; ask is an order to sell the token using its linking token
+  - Tick is the price of the token denominated in the quote token, minus 1, times 1000
+  - A bid is an order to buy the token using its quote token; ask is an order to sell the token using its quote token
   - First checks user's balance on the DEX, then transfers from user if insufficient balance
   - Queued for adding to DEX at end of block
   - Allowed to cross placed orders on the other side

@@ -5,7 +5,7 @@ import { TIP20 } from "./TIP20.sol";
 
 contract TIP20Factory {
 
-    error InvalidLinkingToken();
+    error InvalidQuoteToken();
 
     event TokenCreated(
         address indexed token,
@@ -13,7 +13,7 @@ contract TIP20Factory {
         string name,
         string symbol,
         string currency,
-        TIP20 linkingToken,
+        TIP20 quoteToken,
         address admin
     );
 
@@ -23,19 +23,19 @@ contract TIP20Factory {
         string memory name,
         string memory symbol,
         string memory currency,
-        TIP20 linkingToken,
+        TIP20 quoteToken,
         address admin
     ) external returns (address) {
-        // Validate that linkingToken is a valid TIP20
-        if (!isTIP20(address(linkingToken))) {
-            revert InvalidLinkingToken();
+        // Validate that quoteToken is a valid TIP20
+        if (!isTIP20(address(quoteToken))) {
+            revert InvalidQuoteToken();
         }
 
         ++tokenIdCounter;
 
-        TIP20 token = new TIP20(name, symbol, currency, linkingToken, admin);
+        TIP20 token = new TIP20(name, symbol, currency, quoteToken, admin);
         emit TokenCreated(
-            address(token), tokenIdCounter, name, symbol, currency, linkingToken, admin
+            address(token), tokenIdCounter, name, symbol, currency, quoteToken, admin
         );
 
         // Note: Will deploy at specific vanity
