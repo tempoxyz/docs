@@ -1,47 +1,89 @@
-import { Callout } from 'vocs/components'
-
-<Callout type="warning">
-  This documentation is in very active development. Anything is subject to change.
-</Callout>
+:::warning
+This documentation is in active development. Anything is subject to change.
+:::
 
 # Tempo Documentation
 
-Welcome to the documentation for Tempo.
+## What is Tempo?
 
+Tempo is a Layer 1 blockchain purpose-built for global payments. 
+Unlike general-purpose blockchains, every aspect of Tempo is optimized for the specific needs of real-world payment systems: low and predictable costs, stablecoin flexibility, built-in compliance, and payment-grade user experience.
 
-| Topic | Description |
-|-------|-------------|
-| [**Library Setup**](/documentation/library-setup) | Setup your development environment |
+## Key Concepts
 
-## Token Management
+### Payment-Optimized Tokens
 
-Create, deploy, and manage TIP-20 tokens on Tempo.
+[TIP-20 tokens](/documentation/tokens) are Tempo's standard for stablecoins and payment tokens. They extend ERC-20 with features that payments actually need:
 
-| Topic | Description |
-|-------|-------------|
-| [**Overview**](/documentation/tokens) | Token standards and features |
-| [**Deployment**](/documentation/tokens/deployment) | Deploy new tokens using the factory |
-| [**Roles & Permissions**](/documentation/tokens/roles) | Manage admin, mint, and burn roles |
-| [**Minting & Burning**](/documentation/tokens/minting) | Issue and destroy tokens |
-| [**Policies**](/documentation/tokens/policies) | Access control and compliance features |
+- **Transfer policies** for compliance and access control
+- **Role-based permissions** separating governance from issuance
+- **Memo support** for attaching payment references
+- **Currency awareness** with automatic decimal handling
 
-## Sending Transactions
-
-Send transactions, pay fees in stablecoins, and batch operations.
+Any stablecoin issuer can deploy a TIP-20 token permissionlessly.
 
 | Topic | Description |
 |-------|-------------|
-| [**Overview**](/documentation/transactions) | Transaction capabilities overview |
-| [**Fee Tokens**](/documentation/transactions/fee-tokens) | Pay fees in any supported USD stablecoin |
-| [**Payment Lanes**](/documentation/transactions/payment-lanes) | Guaranteed blockspace for payments |
-| [**Batch Transactions**](/documentation/transactions/batch-transactions) | Execute multiple operations atomically |
-| [**Fee AMM**](/documentation/transactions/fee-amm) | Provide liquidity for fee conversions |
-| [**Fee Sponsorship**](/documentation/transactions/fee-sponsorship) | Enable gasless transactions with fee payers |
+| [**Overview**](/documentation/tokens) | Understand TIP-20's payment-focused features |
+| [**Creating Tokens**](/documentation/tokens/creating-tokens) | Create a new TIP-20 token using the factory contract |
+| [**Roles & Permissions**](/documentation/tokens/roles) | Configure who can mint, burn, pause, and manage tokens |
+| [**Minting & Burning**](/documentation/tokens/minting) | Issue new supply and destroy tokens from circulation |
+| [**Transfer Policies**](/documentation/tokens/policies) | Implement compliance rules and access controls |
 
-## Account Management
+### Flexible Payments
 
-Manage smart contract wallets with Default Account Abstraction.
+On Tempo, you can **pay transaction fees in any USD-denominated stablecoin** with sufficient liquidity. No need to hold or manage a native token.
+
+The protocol uses an enshrined [Fee AMM](/documentation/transactions/fee-amm) to convert your chosen stablecoin to the validator's preferred token automatically. You specify your fee token preference at the transaction level, account level, or let it default to the validator's choice.
+
+For apps, [fee sponsorship](/documentation/transactions/fee-sponsorship) enables completely gasless user experiences, and a third-party can pay fees on behalf of users.
 
 | Topic | Description |
 |-------|-------------|
-| [**Default Accounts**](/documentation/accounts) | Smart wallet features and DAA |
+| [**Overview**](/documentation/transactions) | Tempo's payment-optimized transaction types |
+| [**Fee Tokens**](/documentation/transactions/fee-tokens) | Choose which stablecoin to pay fees with |
+| [**Fee Sponsorship**](/documentation/transactions/fee-sponsorship) | Let third parties pay transaction fees for users |
+| [**Payment Lanes**](/documentation/transactions/payment-lanes) | Reserved blockspace for payment transactions |
+| [**Batch Transactions**](/documentation/transactions/batch-transactions) | Execute multiple operations atomically in one transaction |
+
+### Built-In Stablecoin Exchange
+
+Tempo includes an enshrined DEX designed specifically for cross-stablecoin payments. Unlike traditional AMMs, it uses an onchain order book optimized to minimize MEV while providing optimal pricing for users.
+
+- **Price-time priority** – Orders execute in a fair, deterministic order
+- **Flip orders** – Passive liquidity that automatically flips sides when filled, reducing message volume and making market making easier
+- **MEV protection** – Order placements are delayed until the end of the block, preventing JIT and backrunning strategies
+- **Low latency takes** – Trades against existing orders execute immediately
+- **Payment-focused** – Designed for stable pairs (e.g., `USDC ↔ USDT`) with tight spreads, not volatile trading
+
+The DEX enables cross-stablecoin payments – users can send USDC while recipients receive USDT, all in a single transaction.
+
+### "Smarter" Native Accounts
+
+Every account on Tempo is delegated to a ["Default Account Abstraction"](/documentation/accounts) precompile. 
+Regular externally-owned accounts (EOAs) automatically gain "smart" account capabilities on first use, with
+no need to perform manual upgrades.
+
+- **Batched transactions** – Execute multiple operations atomically
+- **Arbitrary signature verification** – Verify signatures via Passkeys (WebAuthn), P256, or standard Secp256k1 curves
+- **Custom logic** – Add recovery mechanisms, spending limits, or multisig
+
+| Topic | Description |
+|-------|-------------|
+| [**Default Accounts**](/documentation/accounts) | How EOAs are upgraded to "smart" accounts automatically |
+
+### Dedicated Payment Infrastructure
+
+Tempo includes protocol-level features designed specifically for high-volume payments:
+
+- **Payment Lanes**: Guaranteed blockspace for payment transactions, isolated from general activity
+- **Optimized throughput**: Architecture focused on maximizing payment processing capacity
+- **Predictable costs**: Fee mechanisms designed for stability, not speculation
+
+---
+
+## Additional Resources
+
+- **[Testnet](/testnet)**: Connect to Tempo's test networks and start building
+- **[Protocol Specifications](/protocol)**: Technical specs for TIP-20, transaction types, and consensus
+- **[Litepaper](/litepaper)**: High-level overview of Tempo's design and motivation

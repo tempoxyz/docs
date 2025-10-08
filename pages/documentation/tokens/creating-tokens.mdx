@@ -1,0 +1,122 @@
+# Creating Tokens
+
+Creating a TIP-20 token on Tempo is achieved by calling the TIP-20 factory contract.
+
+The process deploys a new token with compliance features, role-based permissions, and integration with Tempo's payment infrastructure.
+
+## Example
+
+Create a new token by calling the `createToken` function on the `TIP20Factory` contract.
+
+```solidity 
+TIP20Factory factory = TIP20Factory(0x20Fc000000000000000000000000000000000000);
+
+TIP20 token = factory.createToken(
+  "My Company USD",  // name
+  "MCUSD",           // symbol
+  "USD",             // currency
+  TIP20(0x20c0000000000000000000000000000000000000), // linking token
+  msg.sender         // admin
+);
+```
+
+:::note
+See a full [TypeScript Example](/sdk/typescript/api/token.create)
+:::
+
+When you create a TIP-20 token, you interact with the `TIP20Factory` precompiled contract deployed at a fixed address. The factory:
+
+1. **Validates your parameters** (currency code, linking token, etc.)
+2. **Deploys a new TIP-20 contract** at a deterministic vanity address
+3. **Grants admin role** to your specified address
+4. **Sets up default states** (transfer policy, supply cap, pause state)
+5. **Emits a `TokenCreated` event** with the new token's address and ID
+
+## Interface
+
+```solidity 
+function createToken(
+  /** Name of the token */
+  string memory name,
+  /** Symbol of the token */
+  string memory symbol,
+  /** Currency of the token */
+  string memory currency,
+  /** Linking token */
+  TIP20 linkingToken,
+  /** Admin of the token */
+  address admin
+) external returns (
+  /** Address of the newly created token */
+  address
+);
+```
+
+## FAQ
+
+### Vanity Addresses
+
+Each TIP-20 token is deployed to a predictable address following this pattern:
+
+```
+0x20C0000000000000000000000000<tokenId>
+```
+
+The token ID is an incrementing counter managed by the factory, making token addresses easily identifiable as TIP-20 tokens. For example, token ID `1` deploys to `0x20C0000000000000000000000000000001`.
+
+### Linking Tokens
+
+Every TIP-20 token (except the root token) has a **linking token** that determines:
+
+- Which token it can be traded against on the built-in DEX
+- Its position in the token hierarchy (used for fee preferences and liquidity routing)
+
+Most USD stablecoins link to the root token at `0x20c0000000000000000000000000000000000000`.
+
+### Currency Codes
+
+The `currency` parameter automatically sets decimal precision via the [TIP-4217 registry](/protocol/tokens/tip-4217):
+
+- **USD, EUR, GBP**: 6 decimals (representing cents, e.g., `1000000` = $1.00)
+- **JPY, KRW**: 0 decimals (whole units only)
+- **BTC**: 8 decimals
+- **Custom currencies**: Configurable by the TIP-4217 admin
+
+### Linking Tokens
+
+The `linkingToken` parameter determines trading pairs and token hierarchy:
+
+- **Most stablecoins**: Link to the root token (`0x20c0000000000000000000000000000000000000`)
+- **Custom pairs**: Can link to any existing TIP-20 token
+- **Root token**: The only token that links to itself
+
+:::warning
+Linking tokens cannot be changed after creation. Choose carefully based on your expected liquidity and trading needs.
+:::
+
+### Roles & Permissions
+
+The **admin role** is granted to the address you specified. 
+It can grant/revoke other roles, change transfer policies, and set supply caps.
+
+:::warning
+Note: You will need to [grant roles](/documentation/tokens/roles) for minting, burning, etc, including the admin provided to the `createToken` function.
+:::
+
+### Default State
+
+| Setting | Default Value | Description |
+|---------|---------------|-------------|
+| **Transfer Policy** | `1` (always-allow) | Anyone can send/receive tokens |
+| **Supply Cap** | Unlimited | No maximum token supply |
+| **Total Supply** | `0` | No tokens exist yet - must be minted |
+| **Paused** | `false` | Transfers are enabled |
+
+## Next Steps
+
+After creating your token, you can now:
+
+1. **[Grant the issuer role](/documentation/tokens/roles)** to addresses that can mint tokens
+2. **[Mint initial supply](/documentation/tokens/minting)** to distribute tokens
+3. **[Configure transfer policies](/documentation/tokens/policies)** if compliance is required
+4. **[Add DEX liquidity](#TODO)** so users can trade your token

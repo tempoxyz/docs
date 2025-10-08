@@ -1,11 +1,39 @@
 # Tokens
 
-TIP-20 tokens are designed for real-world payments with built-in features like role-based access control, transfer policies, supply management, and memo support. They integrate seamlessly with Tempo's fee system and compliance requirements.
+## What are TIP-20 Tokens?
 
+[TIP-20](/protocol/tokens/tip-20) is Tempo's token standard for stablecoins and payment tokens. 
+While similar to ERC-20, TIP-20 tokens are purpose-built for real-world payments with features that make them compliant, controllable, and compatible with Tempo's unique fee system.
+
+[Read the full specification](/protocol/tokens/tip-20)
+
+---
+
+### Why TIP-20?
+
+Traditional ERC-20 tokens are great for DeFi, but payments need more:
+
+- **Built-in compliance**: Transfer policies let issuers control who can send and receive tokens, meeting regulatory requirements
+- **Controlled issuance**: Role-based permissions separate who can manage tokens from who can issue (mint or burn) them
+- **Payment metadata**: Attach memos to transfers for payment references, invoice IDs, or transaction notes
+- **Stablecoin-first**: Currency codes (like `USD`, `EUR`, `JPY`) determine decimal precision automatically
+- **Fee flexibility**: Can be used to pay transaction fees on Tempo, swapped automatically through the built-in Fee AMM
+
+### Features
+
+Every TIP-20 token includes:
+
+- **Roles & Permissions**: Grant specific addresses the ability to mint, burn, pause, or manage your token
+- **Transfer Policies**: Control who can transfer tokens using the TIP-403 registry
+- **Supply Management**: Set caps on total supply, mint to issuers, or burn from blocked addresses
+- **Memo Support**: Include 32-byte memos with transfers for payment tracking
+- **Currency Awareness**: Tokens know their currency (`USD`, `EUR`, etc.) and use the correct decimal precision
+
+## Getting Started
 
 | Task | Description |
 |------|-------------|
-| **[Deploy a Token](/documentation/tokens/deployment)** | Create a new TIP-20 token using the factory contract |
+| **[Create a Token](/documentation/tokens/creating-tokens)** | Create a new TIP-20 token using the factory contract |
 | **[Set Up Roles](/documentation/tokens/roles)** | Configure who can mint, burn, and manage your token |
 | **[Manage Supply](/documentation/tokens/minting)** | Mint new tokens and burn existing ones |
 | **[Configure Policies](/documentation/tokens/policies)** | Control who can transfer your tokens |

@@ -1,6 +1,12 @@
 import { defineConfig } from 'vocs'
 
 export default defineConfig({
+  banner: {
+    backgroundColor: '#18436f',
+    textColor: 'white',
+    content:
+      'Testnet #3 "Lento" is now live! <a href="/testnet/lento" className="underline hover:text-blue-600 dark:hover:text-blue-300">Learn more →</a>',
+  },
   title: 'Tempo',
   description: 'Documentation for Tempo testnet and protocol specifications',
   logoUrl: {
@@ -83,15 +89,15 @@ export default defineConfig({
         link: '/documentation',
       },
       {
-        text: 'Token Management',
+        text: 'Tokens',
         items: [
           {
             text: 'Overview',
             link: '/documentation/tokens',
           },
           {
-            text: 'Deployment',
-            link: '/documentation/tokens/deployment',
+            text: 'Creating Tokens',
+            link: '/documentation/tokens/creating-tokens',
           },
           {
             text: 'Roles & Permissions',
