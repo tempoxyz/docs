@@ -14,10 +14,12 @@
   "dependencies": {
     "react": "latest",
     "react-dom": "latest",
+    "viem": "latest",
     "vocs": "latest"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.5",
+    "@types/node": "latest",
     "@types/react": "latest",
     "simple-git-hooks": "^2.13.1",
     "typescript": "^5.9.3"

@@ -1,0 +1,76 @@
+# Getting Started
+
+Tempo distributes a TypeScript SDK in the form of a [Viem](https://viem.sh) extension, 
+a popular TypeScript interface for EVM-compatible blockchains.
+
+The Tempo extension can be used to perform common operations with the chain, such as: 
+ querying the chain, sending Tempo transactions, managing tokens & their AMM pools, and more.
+
+## Steps
+
+::::steps
+
+### Install
+
+To install the Tempo extension, you will need to install [Viem](https://viem.sh) and Tempo:
+
+:::code-group
+
+```bash [npm]
+npm i viem tempo@github:tempoxyz/tempo-ts#main
+```
+
+```bash [pnpm]
+pnpm i viem tempo@github:tempoxyz/tempo-ts#main
+```
+
+:::
+
+:::warning
+Tempo is currently distributed via a private GitHub repository. 
+Please request access to `tempoxyz/tempo-ts` by reaching out to the Tempo team.
+:::
+
+### Configure
+
+Next, we will configure a [Tempo Client](/sdk/typescript/api/createTempoClient).
+
+```ts [viem.config.ts]
+// [!include ~/snippets/viem.config.ts:setup]
+```
+
+### Use Actions
+
+Now you're ready to [start interacting](/sdk/typescript/api) with Tempo!
+
+:::code-group
+
+```ts [example.ts]
+import { client } from './viem.config';
+
+const blockNumber = await client.getBlockNumber();
+
+console.log(blockNumber);
+// @log: 421045
+```
+
+```ts [viem.config.ts] filename="viem.config.ts"
+// [!include ~/snippets/viem.config.ts:setup]
+```
+
+:::
+
+:::tip
+
+[See all Tempo Actions](/sdk/typescript/api)
+
+:::
+
+::::
+
+## Next Steps
+
+After you have set up your Tempo environment, you can now:
+
+- Follow a guide on how to [create and manage tokens](#TODO), [interact with the enshrined DEX](#TODO), [sponsor transactions](#TODO), and [more](#TODO).
+- Use the [suite of Tempo Actions](/sdk/typescript/api)

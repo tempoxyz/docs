@@ -1,0 +1,55 @@
+# Overview
+
+## Actions
+
+| Action | Description |
+|--------|-------------|
+| **AMM Actions** | |
+| [`amm.burn`](/sdk/typescript/api/amm.burn) | Burns liquidity tokens and receives the underlying token pair |
+| [`amm.getLiquidityBalance`](/sdk/typescript/api/amm.getLiquidityBalance) | Gets the liquidity balance for an address in a specific pool |
+| [`amm.getPool`](/sdk/typescript/api/amm.getPool) | Gets the reserves for a liquidity pool |
+| [`amm.getPoolId`](/sdk/typescript/api/amm.getPoolId) | Gets the pool ID for a token pair |
+| [`amm.getTotalSupply`](/sdk/typescript/api/amm.getTotalSupply) | Gets the total supply of liquidity tokens for a specific pool |
+| [`amm.mint`](/sdk/typescript/api/amm.mint) | Mints liquidity tokens by providing a token pair |
+| [`amm.rebalanceSwap`](/sdk/typescript/api/amm.rebalanceSwap) | Performs a rebalance swap between user and validator tokens |
+| **Fee Actions** | |
+| [`fee.getUserToken`](/sdk/typescript/api/fee.getUserToken) | Gets the user's default fee token preference |
+| [`fee.setUserToken`](/sdk/typescript/api/fee.setUserToken) | Sets the user's default fee token preference |
+| **Policy Actions** | |
+| [`policy.create`](/sdk/typescript/api/policy.create) | Creates a new transfer policy for token access control |
+| [`policy.getData`](/sdk/typescript/api/policy.getData) | Gets the data for a transfer policy, including its type and admin address |
+| [`policy.isAuthorized`](/sdk/typescript/api/policy.isAuthorized) | Checks if an address is authorized by a transfer policy |
+| [`policy.modifyBlacklist`](/sdk/typescript/api/policy.modifyBlacklist) | Modifies the blacklist for a blacklist-type transfer policy |
+| [`policy.modifyWhitelist`](/sdk/typescript/api/policy.modifyWhitelist) | Modifies the whitelist for a whitelist-type transfer policy |
+| [`policy.setAdmin`](/sdk/typescript/api/policy.setAdmin) | Sets the admin for a transfer policy |
+| **Token Actions** | |
+| [`token.approve`](/sdk/typescript/api/token.approve) | Approves a spender to transfer TIP-20 tokens on behalf of the caller |
+| [`token.burn`](/sdk/typescript/api/token.burn) | Burns TIP-20 tokens from the caller's balance |
+| [`token.burnBlocked`](/sdk/typescript/api/token.burnBlocked) | Burns TIP-20 tokens from a blocked address |
+| [`token.changeTransferPolicy`](/sdk/typescript/api/token.changeTransferPolicy) | Changes the transfer policy for a TIP-20 token |
+| [`token.create`](/sdk/typescript/api/token.create) | Creates a new TIP-20 token and assigns the admin role to the calling account |
+| [`token.getAllowance`](/sdk/typescript/api/token.getAllowance) | Gets the amount of tokens that a spender is approved to transfer on behalf of an owner |
+| [`token.getBalance`](/sdk/typescript/api/token.getBalance) | Gets the token balance of an address |
+| [`token.getMetadata`](/sdk/typescript/api/token.getMetadata) | Gets the metadata for a TIP-20 token, including name, symbol, decimals, currency, and total supply |
+| [`token.grantRoles`](/sdk/typescript/api/token.grantRoles) | Grants one or more roles to an address |
+| [`token.mint`](/sdk/typescript/api/token.mint) | Mints new TIP-20 tokens to a recipient |
+| [`token.pause`](/sdk/typescript/api/token.pause) | Pauses a TIP-20 token, preventing all transfers |
+| [`token.permit`](/sdk/typescript/api/token.permit) | Approves a spender using an EIP-2612 permit signature, allowing gasless approvals |
+| [`token.renounceRoles`](/sdk/typescript/api/token.renounceRoles) | Renounces one or more roles from the caller's address |
+| [`token.revokeRoles`](/sdk/typescript/api/token.revokeRoles) | Revokes one or more roles from an address |
+| [`token.setRoleAdmin`](/sdk/typescript/api/token.setRoleAdmin) | Sets the admin role for another role |
+| [`token.setSupplyCap`](/sdk/typescript/api/token.setSupplyCap) | Sets the supply cap for a TIP-20 token |
+| [`token.transfer`](/sdk/typescript/api/token.transfer) | Transfers TIP-20 tokens from the caller to a recipient |
+| [`token.unpause`](/sdk/typescript/api/token.unpause) | Unpauses a TIP-20 token, allowing transfers to resume |
+
+## Clients
+
+| Client | Description |
+|--------|-------------|
+| [`createTempoClient`](/sdk/typescript/api/createTempoClient) | Creates a Tempo client with the `tempo` chain and all [Tempo-specific actions](/sdk/typescript/api#actions) pre-configured |
+
+## Transports
+
+| Transport | Description |
+|-----------|-------------|
+| [`withFeePayer`](/sdk/typescript/api/withFeePayer) | Creates a transport that routes requests to a fee payer service when a `feePayer` is requested on an action |

@@ -1,0 +1,50 @@
+import ReadParameters from '../../../../snippets/read-parameters.mdx'
+
+# `amm.getPoolId`
+
+Gets the pool ID for a token pair.
+
+## Usage
+
+:::code-group
+
+```ts [example.ts]
+import { client } from './viem.config'
+
+const poolId = await client.amm.getPoolId({
+  userToken: '0x20c0000000000000000000000000000000000000',
+  validatorToken: '0x20c0000000000000000000000000000000000001',
+})
+
+console.log('Pool ID:', poolId)
+// @log: Pool ID: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+```
+
+```ts [viem.config.ts] filename="viem.config.ts"
+// [!include ~/snippets/viem.config.ts:setup]
+```
+
+:::
+
+## Return Type
+
+```ts
+type ReturnType = `0x${string}` // Pool ID (bytes32)
+```
+
+## Parameters
+
+### userToken
+
+- **Type:** `Address | bigint`
+
+Address or ID of the user token.
+
+### validatorToken
+
+- **Type:** `Address | bigint`
+
+Address or ID of the validator token.
+
+<ReadParameters />
+
