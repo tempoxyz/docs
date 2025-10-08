@@ -93,11 +93,12 @@ Bun.serve({
     }) // [!code focus]
 
     // Submit to blockchain // [!code focus]
-    const hash = await client.sendRawTransaction({ // [!code focus]
-      serializedTransaction, // [!code focus]
+    const result = await client.request({ // [!code focus]
+      method: request.method, // [!code focus]
+      params: [serializedTransaction], // [!code focus]
     }) // [!code focus]
 
-    return Response.json(RpcResponse.from({ result: hash }, { request }))
+    return Response.json(RpcResponse.from({ result }, { request }))
   }
 })
 ```

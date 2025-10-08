@@ -28,7 +28,7 @@ You can learn more about the [Fee AMM](/protocol/transactions/fee-amm) in the pr
 const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
 
 // Use Alpha USD as fee token
-const hash = await client.token.setUserToken({ // [!code focus]
+const result = await client.token.setUserTokenSync({ // [!code focus]
   token: alphaUSDAddress, // [!code focus]
 }) // [!code focus]
 

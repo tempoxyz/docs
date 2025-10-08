@@ -34,7 +34,7 @@ For the complete technical specification of how this works at the consensus leve
 ```ts [sendPayment.ts]
 // This transaction automatically uses the payment gas limit [!code focus]
 // because it's sent to a TIP-20 token address (0x20c0...) [!code focus]
-const hash = await client.token.transfer({ // [!code focus]
+const result = await client.token.transferSync({ // [!code focus]
   token: alphaUSDAddress, // TIP-20 token address // [!code focus]
   amount, // [!code focus]
   to: recipient, // [!code focus]

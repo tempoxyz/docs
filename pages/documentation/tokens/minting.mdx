@@ -10,7 +10,7 @@ TIP-20 tokens support dynamic supply management through minting and burning. Onl
 ```ts [mint.ts]
 import { parseUnits } from 'viem'
 
-const hash = await client.token.mint({ // [!code focus]
+const result = await client.token.mintSync({ // [!code focus]
   amount: parseUnits('100', 6), // [!code focus]
   to: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
@@ -28,7 +28,7 @@ const hash = await client.token.mint({ // [!code focus]
 ```ts [mintWithMemo.ts]
 import { keccak256, parseUnits } from 'viem'
 
-const hash = await client.token.mint({ // [!code focus]
+const result = await client.token.mintSync({ // [!code focus]
   amount: parseUnits('100', 6), // [!code focus]
   memo: keccak256('TREASURY_ALLOCATION_Q1_2024'), // [!code focus]
   to: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef', // [!code focus]
@@ -50,7 +50,7 @@ const hash = await client.token.mint({ // [!code focus]
 ```ts [burn.ts]
 import { parseUnits } from 'viem'
 
-const hash = await client.token.burn({ // [!code focus]
+const result = await client.token.burnSync({ // [!code focus]
   amount: parseUnits('100', 6), // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
 }) // [!code focus]
@@ -67,7 +67,7 @@ const hash = await client.token.burn({ // [!code focus]
 ```ts [burnWithMemo.ts]
 import { keccak256, parseUnits } from 'viem'
 
-const hash = await client.token.burn({ // [!code focus]
+const result = await client.token.burnSync({ // [!code focus]
   amount: parseUnits('100', 6), // [!code focus]
   memo: keccak256('BUYBACK_AND_BURN_BATCH_1'), // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
@@ -88,7 +88,7 @@ import { parseUnits } from 'viem'
 const blockedAddress = '0x810c8ed810c8ed810c8ed810c8ed810c8ed810c8' // [!code focus]
 
 // Burn tokens from a blocked address (requires BURN_BLOCKED_ROLE) // [!code focus]
-const hash = await client.token.burnBlocked({ // [!code focus]
+const result = await client.token.burnBlockedSync({ // [!code focus]
   amount: parseUnits('100', 6), // [!code focus]
   from: blockedAddress, // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
@@ -108,7 +108,7 @@ const hash = await client.token.burnBlocked({ // [!code focus]
 ```ts [setSupply.ts]
 import { parseUnits } from 'viem'
 
-const hash = await client.token.setSupplyCap({ // [!code focus]
+const result = await client.token.setSupplyCapSync({ // [!code focus]
   supplyCap: parseUnits('1000000', 6), // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
 }) // [!code focus]

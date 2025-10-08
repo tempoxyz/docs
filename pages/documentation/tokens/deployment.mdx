@@ -8,7 +8,7 @@ The TIP20Factory contract makes it easy to deploy new TIP-20 tokens with a singl
 
 :::code-group
 ```ts [deploy.ts]
-const { address, hash, id } = await client.token.create({ // [!code focus]
+const { address, id, receipt } = await client.token.createSync({ // [!code focus]
   currency: 'USD', // [!code focus]
   name: 'My Company USD', // [!code focus]
   symbol: 'MCUSD', // [!code focus]

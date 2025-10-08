@@ -188,12 +188,11 @@ const complianceAdminAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [
 const token = '0x20c0000000000000000000000000000000000004' // [!code focus]
 
 // 1. Create whitelist policy // [!code focus]
-const { hash, policyId } = await client.policy.create({  // [!code focus]
+const { policyId } = await client.policy.createSync({  // [!code focus]
   admin: complianceAdminAddress, // [!code focus]
   type: 'whitelist', // [!code focus]
   token, // [!code focus]
 }) // [!code focus]
-await client.waitForTransactionReceipt({ hash }) // [!code focus]
 
 // 2. Add KYC'd users // [!code focus]
 const kycUsers = [user1Address, user2Address, user3Address]
@@ -227,12 +226,11 @@ const securityAdminAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!c
 const token = '0x20c0000000000000000000000000000000000004' // [!code focus]
 
 // 1. Create blacklist policy // [!code focus]
-const { hash, policyId } = await client.policy.create({  // [!code focus]
+const { policyId } = await client.policy.createSync({  // [!code focus]
   admin: securityAdminAddress, // [!code focus]
   type: 'blacklist', // [!code focus]
   token, // [!code focus]
 }) // [!code focus]
-await client.waitForTransactionReceipt({ hash }) // [!code focus]
 
 // 2. Add blocked addresses // [!code focus]
 const blockedAddresses = [hacker1, hacker2, suspiciousContract]

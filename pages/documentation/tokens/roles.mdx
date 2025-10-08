@@ -20,7 +20,7 @@ TIP-20 tokens use a role-based access control system that allows you to delegate
 ```ts [issuer.ts]
 const treasuryAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
 
-const hash = await client.token.grantRoles({ // [!code focus]
+const result = await client.token.grantRolesSync({ // [!code focus]
   roles: ['issuer'], // [!code focus]
   to: treasuryAddress, // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
@@ -38,7 +38,7 @@ const hash = await client.token.grantRoles({ // [!code focus]
 ```ts [pause.ts]
 const securityTeamAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
 
-const hash = await client.token.grantRoles({ // [!code focus]
+const result = await client.token.grantRolesSync({ // [!code focus]
   roles: ['pause'], // [!code focus]
   to: securityTeamAddress, // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
@@ -56,7 +56,7 @@ const hash = await client.token.grantRoles({ // [!code focus]
 ```ts [multipleRoles.ts]
 const securityTeamAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
 
-const hash = await client.token.grantRoles({ // [!code focus]
+const result = await client.token.grantRolesSync({ // [!code focus]
   roles: ['issuer', 'pause', 'unpause'], // [!code focus]
   to: securityTeamAddress, // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
@@ -75,7 +75,7 @@ const hash = await client.token.grantRoles({ // [!code focus]
 const treasuryAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
 
 // Remove minting rights from old treasury // [!code focus]
-const hash = await client.token.revokeRoles({ // [!code focus]
+const result = await client.token.revokeRolesSync({ // [!code focus]
   from: treasuryAddress, // [!code focus]
   roles: ['issuer'], // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
@@ -151,7 +151,7 @@ If you have `pause`, you can immediately stop all transfers:
 
 :::code-group
 ```ts [pause.ts]
-const hash = await client.token.pause({ // [!code focus]
+const result = await client.token.pauseSync({ // [!code focus]
   token: '0x20c0000000000000000000000000000000000004', // [!code focus]
 }) // [!code focus]
 ```
@@ -180,7 +180,7 @@ const roles = [
 
 for (const roleName of roles) { // [!code focus]
   const role = '0x' + keccak256(roleName).slice(2) // [!code focus]
-  const hash = await client.token.revokeRoles({ // [!code focus]
+  const result = await client.token.revokeRolesSync({ // [!code focus]
     role: role, // [!code focus]
     account: compromisedAddress, // [!code focus]
   }) // [!code focus]
