@@ -219,6 +219,33 @@ export default defineConfig({
           },
         ],
       },
+      {
+        text: 'Specs',
+        items: [
+          {
+            text: 'Account Abstraction Tx Type',
+            link: '/protocol/specs/AccountAbstractionTx',
+          },
+          {
+            text: 'Default Account Abstraction (DAA)',
+            link: '/protocol/specs/DefaultAccountAbstraction',
+          },
+          { text: 'Fee AMM Specification', link: '/protocol/specs/FeeAMM' },
+          { text: 'Payment lane', link: '/protocol/specs/PaymentLane' },
+          {
+            text: 'Stablecoin Exchange Specification',
+            link: '/protocol/specs/StablecoinExchange',
+          },
+          {
+            text: 'Tempo Transactions (Type 0x77)',
+            link: '/protocol/specs/TempoTransaction',
+          },
+          {
+            text: 'Token Preferences',
+            link: '/protocol/specs/TokenPreferences',
+          },
+        ],
+      },
     ],
   },
   topNav: [

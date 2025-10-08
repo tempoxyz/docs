@@ -7,6 +7,7 @@
     "check": "biome check . --write --unsafe",
     "check:types": "tsc --noEmit",
     "dev": "vocs dev",
+    "gen:specs": "node scripts/gen:specs.ts",
     "prepare": "simple-git-hooks",
     "preview": "vocs preview"
   },
@@ -21,8 +22,11 @@
     "simple-git-hooks": "^2.13.1",
     "typescript": "^5.9.3"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "packageManager": "pnpm@10.6.4",
   "simple-git-hooks": {
-    "pre-commit": "pnpm check"
+    "pre-commit": "pnpm check && (git diff --cached --name-only | grep -q '^specs/' && pnpm gen:specs || true)"
   }
 }

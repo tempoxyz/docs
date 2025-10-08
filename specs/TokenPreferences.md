@@ -12,7 +12,7 @@ In determining *which* token a user pays fees in, we want to maximize customizab
 
 We also want to limit the complexity of block building, in order to minimize denial-of-service attacks. The rules in this spec ensure that the fee token of every transaction in a block can be statically determined from the state at the top of the block and the contents of those transactions, without having to execute any transactions.
 
-Note that as discussed in the [Tempo transactions](/specs/TempoTransaction.md) spec, the "user" who chooses the fee token for a transaction is the `fee_payer` of that transaction--either the `tx.origin` for normal transactions, or the signer of the `fee_payer_signature` for sponsored transactions.
+Note that as discussed in the [Tempo transactions](/protocol/specs/TempoTransaction) spec, the "user" who chooses the fee token for a transaction is the `fee_payer` of that transaction--either the `tx.origin` for normal transactions, or the signer of the `fee_payer_signature` for sponsored transactions.
 
 ## Order of preference
 
@@ -33,7 +33,7 @@ The protocol checks preferences at each of these levels, stopping at the first o
 
 A transaction can specify a fee token. This overrides any preference at the account, contract, or validator level.
 
-This requires a new 2718 transaction type: [Tempo transactions](/specs/TempoTransaction.md). To allow transactions that include EIP-7702 authorizations to also specify a fee token preference, the functionality supported by these transactions is a superset of set code transactions. 
+This requires a new 2718 transaction type: [Tempo transactions](/protocol/specs/TempoTransaction). To allow transactions that include EIP-7702 authorizations to also specify a fee token preference, the functionality supported by these transactions is a superset of set code transactions. 
 
 This transaction type adds a `fee_token` field as well as a `fee_payer_signature` field. Transactions can use either or both of these features.
 
@@ -41,7 +41,7 @@ If the `fee_payer_signature` field is set, the transaction is a *sponsored trans
 
 The `fee_token` declares which token should be used for fees on the transactions. For sponsored transactions, the `tx.origin` address does not sign over the `fee_token` field (allowing the `fee_payer` to choose the fee token).
 
-The full details of Tempo transactions are described in greater depth in the [Tempo transactions](/specs/TempoTransaction.md) spec.
+The full details of Tempo transactions are described in greater depth in the [Tempo transactions](/protocol/specs/TempoTransaction) spec.
 
 ## Account level
 
