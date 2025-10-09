@@ -104,4 +104,4 @@ The following liquidity pools are predeployed with 10k tokens on each side:
 
 The testnet includes an arbitrage bot that continuously monitors and rebalances the Fee AMM pools. When a user pays gas fees in a token that differs from the validator's preferred fee token, the TIPFeeManager performs a swap through the corresponding Fee AMM pool.
 
-The bot polls all token pairs every two seconds and automatically rebalances the pools by removing excess user fee tokens and adding validator fee tokens. This process ensures sufficient liquidity for future fee AMM swaps. In doing so, the bot captures excess validator tokens that arise from rebalancing swaps.
+The bot polls all token pairs every two seconds and automatically rebalances the pools by removing excess user fee tokens and adding validator fee tokens. This process ensures sufficient liquidity for future fee AMM swaps. In doing so, the bot captures excess user fee tokens that arise from rebalancing swaps.
