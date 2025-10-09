@@ -3,8 +3,9 @@ pragma solidity ^0.8.13;
 
 import { FeeAMM } from "./FeeAMM.sol";
 import { IERC20 } from "./IERC20.sol";
-import { ITIP20 } from "./ITIP20.sol";
+
 import { TIP20Factory } from "./TIP20Factory.sol";
+import { ITIP20 } from "./interfaces/ITIP20.sol";
 
 contract FeeManager is FeeAMM {
 

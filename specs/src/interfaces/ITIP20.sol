@@ -154,6 +154,10 @@ interface ITIP20 {
     /// @return The supply cap amount
     function supplyCap() external view returns (uint256);
 
+    /// @notice Returns the quote token specified for the TIP20 token
+    /// @return Address of the quote token
+    function quoteToken() external view returns (address);
+
     /// @notice Returns whether a salt has been used for a specific account
     /// @param account The address to check
     /// @param salt The salt value to check
@@ -251,5 +255,8 @@ interface ITIP20 {
     function transferFromWithMemo(address from, address to, uint256 amount, bytes32 memo)
         external
         returns (bool);
+
+    // TODO: docs
+    function systemTransferFrom(address from, address to, uint256 amount) external returns (bool);
 
 }

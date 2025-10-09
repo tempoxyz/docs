@@ -576,7 +576,9 @@ contract TIP20Test is Test {
 
     function testDepthWithDeeperChain() public {
         // Increment tokenIdCounter to allow token 4
-        vm.store(0x20Fc000000000000000000000000000000000000, bytes32(uint256(0)), bytes32(uint256(4)));
+        vm.store(
+            0x20Fc000000000000000000000000000000000000, bytes32(uint256(0)), bytes32(uint256(4))
+        );
 
         // Create a deeper chain: linkingUSD -> linkedToken -> newToken -> deeperToken
         deployCodeTo(
@@ -610,7 +612,9 @@ contract TIP20Test is Test {
 
     function testCompleteQuoteTokenUpdateCannotCreateIndirectLoop() public {
         // Increment tokenIdCounter to allow token 4
-        vm.store(0x20Fc000000000000000000000000000000000000, bytes32(uint256(0)), bytes32(uint256(4)));
+        vm.store(
+            0x20Fc000000000000000000000000000000000000, bytes32(uint256(0)), bytes32(uint256(4))
+        );
 
         // Create a chain: linkingUSD -> linkedToken -> token -> newToken
         deployCodeTo(
@@ -635,7 +639,9 @@ contract TIP20Test is Test {
 
     function testCompleteQuoteTokenUpdateCannotCreateLongerLoop() public {
         // Increment tokenIdCounter to allow tokens 4 and 5
-        vm.store(0x20Fc000000000000000000000000000000000000, bytes32(uint256(0)), bytes32(uint256(5)));
+        vm.store(
+            0x20Fc000000000000000000000000000000000000, bytes32(uint256(0)), bytes32(uint256(5))
+        );
 
         // Create a longer chain: linkingUSD -> linkedToken -> token -> token2 -> token3
         deployCodeTo(

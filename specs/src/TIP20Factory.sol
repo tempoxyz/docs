@@ -34,9 +34,7 @@ contract TIP20Factory {
         ++tokenIdCounter;
 
         TIP20 token = new TIP20(name, symbol, currency, quoteToken, admin);
-        emit TokenCreated(
-            address(token), tokenIdCounter, name, symbol, currency, quoteToken, admin
-        );
+        emit TokenCreated(address(token), tokenIdCounter, name, symbol, currency, quoteToken, admin);
 
         // Note: Will deploy at specific vanity
         // address determined by tokenIdCounter.
