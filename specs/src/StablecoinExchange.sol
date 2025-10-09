@@ -5,8 +5,11 @@ import {IStablecoinExchange} from "./interfaces/IStablecoinExchange.sol";
 import {ITIP20} from "./interfaces/ITIP20.sol";
 
 contract StablecoinExchange is IStablecoinExchange {
-    /// @notice Maximum allowed tick range
-    uint16 public constant MAX_TICK_RANGE = 20;
+    /// @notice Minimum allowed tick
+    int16 public constant MIN_TICK = -2000;
+
+    /// @notice Maximum allowed tick
+    int16 public constant MAX_TICK = 2000;
 
     /// @notice Price scaling factor (5 decimal places for 0.1 bps precision)
     uint32 public constant PRICE_SCALE = 100000;
@@ -68,12 +71,6 @@ contract StablecoinExchange is IStablecoinExchange {
         mapping(int16 => uint256) bidBitmap;
         /// Ask tick bitmaps for efficient price discovery
         mapping(int16 => uint256) askBitmap;
-        /// Minimum allowed tick
-        int16 minTick;
-        /// Maximum allowed tick
-        int16 maxTick;
-        /// Pegged price for the pair
-        uint32 pegPrice;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -99,49 +96,39 @@ contract StablecoinExchange is IStablecoinExchange {
                               Functions
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Convert tick to price
-    /// @param tick Price tick
-    /// @return price Price scaled by PRICE_SCALE
-    function _tickToPrice(int16 tick) internal pure returns (uint32 price) {
-        return uint32(int32(tick) + int32(PRICE_SCALE));
+    /// @notice Convert relative tick to scaled price
+    function tickToPrice(int16 tick) public pure returns (uint32 price) {
+        return uint32(int32(PRICE_SCALE) + int32(tick));
     }
 
-    /// @notice Convert price to tick
-    /// @param price Price scaled by PRICE_SCALE
-    /// @return tick Price tick
-    function _priceToTick(uint32 price) internal pure returns (int16 tick) {
+    /// @notice Convert scaled price to relative tick
+    function priceToTick(uint32 price) public pure returns (int16 tick) {
         return int16(int32(price) - int32(PRICE_SCALE));
     }
 
     /// @notice Set bit in bitmap to mark tick as active
-    /// @param bookKey Orderbook key
-    /// @param tick Price tick to mark as active
-    /// @param isBid True for bid bitmap, false for ask bitmap
-    // TODO: check this
     function _setTickBit(bytes32 bookKey, int16 tick, bool isBid) internal {
         Orderbook storage book = books[bookKey];
         int16 wordIndex = tick >> 8;
         uint8 bitIndex = uint8(int8(tick));
+        uint256 mask = (uint256(1) << bitIndex);
         if (isBid) {
-            book.bidBitmap[wordIndex] |= (1 << bitIndex);
+            book.bidBitmap[wordIndex] |= mask;
         } else {
-            book.askBitmap[wordIndex] |= (1 << bitIndex);
+            book.askBitmap[wordIndex] |= mask;
         }
     }
 
     /// @notice Clear bit in bitmap to mark tick as inactive
-    /// @param bookKey Orderbook key
-    /// @param tick Price tick to mark as inactive
-    /// @param isBid True for bid bitmap, false for ask bitmap
-    // TODO: check this
     function _clearTickBit(bytes32 bookKey, int16 tick, bool isBid) internal {
         Orderbook storage book = books[bookKey];
         int16 wordIndex = tick >> 8;
         uint8 bitIndex = uint8(int8(tick));
+        uint256 mask = ~(uint256(1) << bitIndex);
         if (isBid) {
-            book.bidBitmap[wordIndex] &= ~(1 << bitIndex);
+            book.bidBitmap[wordIndex] &= mask;
         } else {
-            book.askBitmap[wordIndex] &= ~(1 << bitIndex);
+            book.askBitmap[wordIndex] &= mask;
         }
     }
 
@@ -149,10 +136,10 @@ contract StablecoinExchange is IStablecoinExchange {
     /// @param tokenA First token address
     /// @param tokenB Second token address
     /// @return key Deterministic pair key
-    function _pairKey(
+    function pairKey(
         address tokenA,
         address tokenB
-    ) internal pure returns (bytes32 key) {
+    ) public pure returns (bytes32 key) {
         (tokenA, tokenB) = tokenA < tokenB
             ? (tokenA, tokenB)
             : (tokenB, tokenA);
@@ -161,28 +148,17 @@ contract StablecoinExchange is IStablecoinExchange {
 
     /// @notice Creates a new trading pair between base and quote tokens
     /// @param base Base token address
-    /// @param pegPrice Peg price scaled by PRICE_SCALE
     /// @return key The orderbook key for the created pair
-    /// @dev Automatically sets tick bounds to +- 10 ticks from the peg price
-    function createPair(
-        address base,
-        uint32 pegPrice
-    ) external returns (bytes32 key) {
+    /// @dev Automatically sets tick bounds to ±2% from the peg price of 1.0
+    function createPair(address base) external returns (bytes32 key) {
         address quote = ITIP20(base).quoteToken();
-        key = _pairKey(base, quote);
+        key = pairKey(base, quote);
 
         // Create new orderbook for pair
         Orderbook storage book = books[key];
         require(book.base == address(0), "PAIR_EXISTS");
         book.base = base;
         book.quote = quote;
-        book.pegPrice = pegPrice;
-
-        // Calculate min/max ticks from peg price using MAX_TICK_RANGE
-        int16 pegTick = _priceToTick(pegPrice);
-        int16 halfRange = int16(MAX_TICK_RANGE / 2);
-        book.minTick = pegTick - halfRange;
-        book.maxTick = pegTick + halfRange;
 
         book.bestBidTick = type(int16).min;
         book.bestAskTick = type(int16).max;
@@ -207,19 +183,16 @@ contract StablecoinExchange is IStablecoinExchange {
         bool isFlip,
         int16 flipTick
     ) internal returns (uint128 orderId) {
-        bytes32 key = _pairKey(base, quote);
+        bytes32 key = pairKey(base, quote);
         Orderbook storage book = books[key];
 
         require(book.base != address(0), "PAIR_NOT_EXISTS");
 
-        require(
-            tick >= book.minTick && tick <= book.maxTick,
-            "TICK_OUT_OF_BOUNDS"
-        );
+        require(tick >= MIN_TICK && tick <= MAX_TICK, "TICK_OUT_OF_BOUNDS");
 
         if (isFlip) {
             require(
-                flipTick >= book.minTick && flipTick <= book.maxTick,
+                flipTick >= MIN_TICK && flipTick <= MAX_TICK,
                 "FLIP_TICK_OUT_OF_BOUNDS"
             );
 
@@ -454,7 +427,6 @@ contract StablecoinExchange is IStablecoinExchange {
         uint128 amountOut,
         uint128 maxAmountIn
     ) external returns (uint128 amountIn) {
-        // TODO: Implement market order logic
         revert("NOT_IMPLEMENTED");
     }
 
