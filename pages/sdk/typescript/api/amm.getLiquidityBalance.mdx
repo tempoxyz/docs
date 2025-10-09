@@ -8,7 +8,7 @@ Gets the liquidity balance for an address in a specific pool.
 
 :::code-group
 
-```ts [example.ts]
+```ts twoslash [example.ts]
 import { client } from './viem.config'
 
 const balance = await client.amm.getLiquidityBalance({
@@ -21,7 +21,7 @@ console.log('Liquidity balance:', balance)
 // @log: Liquidity balance: 10500000000000000000n
 ```
 
-```ts [viem.config.ts] filename="viem.config.ts"
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
 // [!include ~/snippets/viem.config.ts:setup]
 ```
 

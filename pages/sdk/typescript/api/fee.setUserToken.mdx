@@ -8,7 +8,7 @@ Sets the user's default fee token preference. [Learn more about fee tokens](/doc
 
 :::code-group
 
-```ts [example.ts]
+```ts twoslash [example.ts]
 import { client } from './viem.config'
 
 const { receipt } = await client.fee.setUserTokenSync({
@@ -19,7 +19,7 @@ console.log('Transaction hash:', receipt.transactionHash)
 // @log: Transaction hash: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
 ```
 
-```ts [viem.config.ts] filename="viem.config.ts"
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
 // [!include ~/snippets/viem.config.ts:setup]
 ```
 
@@ -31,8 +31,8 @@ The example above uses a `*Sync` variant of the action, that will wait for the t
 
 If you are optimizing for performance, you should use the non-sync `fee.setUserToken` action and wait for inclusion manually:
 
-```ts
-import { actions } from 'tempo/viem'
+```ts twoslash
+import { actions } from 'tempo.ts/viem'
 import { client } from './viem.config'
 
 const hash = await client.fee.setUserToken({

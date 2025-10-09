@@ -8,7 +8,7 @@ Gets the reserves for a liquidity pool.
 
 :::code-group
 
-```ts [example.ts]
+```ts twoslash [example.ts]
 import { client } from './viem.config'
 
 const pool = await client.amm.getPool({
@@ -22,7 +22,7 @@ console.log('Validator token reserve:', pool.reserveValidatorToken)
 // @log: Validator token reserve: 1000000000000000000000n
 ```
 
-```ts [viem.config.ts] filename="viem.config.ts"
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
 // [!include ~/snippets/viem.config.ts:setup]
 ```
 

@@ -8,7 +8,7 @@ Grants one or more roles to an address. Requires the admin role for each role be
 
 :::code-group
 
-```ts [example.ts]
+```ts twoslash [example.ts]
 import { client } from './viem.config'
 
 const { receipt, value } = await client.token.grantRolesSync({
@@ -21,7 +21,7 @@ console.log('Roles granted:', value.length)
 // @log: Roles granted: 2
 ```
 
-```ts [viem.config.ts] filename="viem.config.ts"
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
 // [!include ~/snippets/viem.config.ts:setup]
 ```
 
@@ -33,8 +33,8 @@ The example above uses a `*Sync` variant of the action, that will wait for the t
 
 If you are optimizing for performance, you should use the non-sync `token.grantRoles` action and wait for inclusion manually:
 
-```ts
-import { actions } from 'tempo/viem'
+```ts twoslash
+import { actions } from 'tempo.ts/viem'
 import { client } from './viem.config'
 
 const hash = await client.token.grantRoles({

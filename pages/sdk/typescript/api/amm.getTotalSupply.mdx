@@ -8,7 +8,7 @@ Gets the total supply of liquidity tokens for a specific pool.
 
 :::code-group
 
-```ts [example.ts]
+```ts twoslash [example.ts]
 import { client } from './viem.config'
 
 const totalSupply = await client.amm.getTotalSupply({
@@ -20,7 +20,7 @@ console.log('Total liquidity supply:', totalSupply)
 // @log: Total liquidity supply: 1000000000000000000000n
 ```
 
-```ts [viem.config.ts] filename="viem.config.ts"
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
 // [!include ~/snippets/viem.config.ts:setup]
 ```
 

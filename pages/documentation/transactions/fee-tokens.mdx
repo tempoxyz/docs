@@ -67,7 +67,7 @@ const transaction = await client.getTransaction({ hash })
 
 ```ts [viem.config.ts]
 import { createClient, http, publicActions, walletActions } from 'viem'
-import { tempo } from 'tempo/chains'
+import { tempo } from 'tempo.ts/chains'
 
 const client = createClient({
   chain: tempo,

@@ -8,7 +8,7 @@ Gets the pool ID for a token pair.
 
 :::code-group
 
-```ts [example.ts]
+```ts twoslash [example.ts]
 import { client } from './viem.config'
 
 const poolId = await client.amm.getPoolId({
@@ -20,7 +20,7 @@ console.log('Pool ID:', poolId)
 // @log: Pool ID: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
 ```
 
-```ts [viem.config.ts] filename="viem.config.ts"
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
 // [!include ~/snippets/viem.config.ts:setup]
 ```
 

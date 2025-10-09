@@ -4,8 +4,8 @@ Creates a Tempo client with the `tempo` chain and all [Tempo-specific actions](/
 
 ## Usage
 
-```ts
-import { createTempoClient } from 'tempo/viem'
+```ts twoslash
+import { createTempoClient } from 'tempo.ts/viem'
 import { http } from 'viem'
 
 const credentials = `${process.env['TEMPO_USERNAME']}:${process.env['TEMPO_PASSWORD']}`
@@ -25,10 +25,11 @@ const client = createTempoClient({
 
 If you wish to extend an existing Viem client with Tempo-specific actions, you can use the `.extend` method.
 
-```ts
+```ts twoslash
+// @noErrors
 import { createClient, http } from 'viem'
-import { tempo } from 'tempo/chains'
-import { tempoActions } from 'tempo/viem'
+import { tempo } from 'tempo.ts/chains'
+import { tempoActions } from 'tempo.ts/viem'
 
 const client = createClient({
   chain: tempo,
@@ -42,9 +43,9 @@ const client = createClient({
 
 You can specify a custom chain (e.g. another Tempo testnet).
 
-```ts
-import { createTempoClient } from 'tempo/viem'
-import { tempoLento } from 'tempo/chains' // [!code focus]
+```ts twoslash
+import { createTempoClient } from 'tempo.ts/viem'
+import { tempoLento } from 'tempo.ts/chains' // [!code focus]
 import { privateKeyToAccount } from 'viem/accounts'
 
 const client = createTempoClient({
@@ -57,8 +58,8 @@ const client = createTempoClient({
 
 You can specify a custom transport (defaults to `http`).
 
-```ts
-import { createTempoClient } from 'tempo/viem'
+```ts twoslash
+import { createTempoClient } from 'tempo.ts/viem'
 import { webSocket } from 'viem' // [!code focus]
 
 const client = createTempoClient({

@@ -8,7 +8,7 @@ Gets the token balance of an address.
 
 :::code-group
 
-```ts [example.ts]
+```ts twoslash [example.ts]
 import { client } from './viem.config'
 
 const balance = await client.token.getBalance({
@@ -20,7 +20,7 @@ console.log('Balance:', balance)
 // @log: Balance: 10500000n
 ```
 
-```ts [viem.config.ts] filename="viem.config.ts"
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
 // [!include ~/snippets/viem.config.ts:setup]
 ```
 

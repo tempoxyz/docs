@@ -8,7 +8,7 @@ Gets the data for a transfer policy, including its type and admin address.
 
 :::code-group
 
-```ts [example.ts]
+```ts twoslash [example.ts]
 import { client } from './viem.config'
 
 const { admin, type } = await client.policy.getData({
@@ -21,7 +21,7 @@ console.log('Policy type:', type)
 // @log: Policy type: whitelist
 ```
 
-```ts [viem.config.ts] filename="viem.config.ts"
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
 // [!include ~/snippets/viem.config.ts:setup]
 ```
 

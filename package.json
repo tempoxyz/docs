@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vocs build",
+    "build": "NODE_OPTIONS=\"--max-old-space-size=8192\" vocs build --searchIndex false && vocs search-index",
     "check": "biome check . --write --unsafe",
     "check:types": "tsc --noEmit",
     "dev": "vocs dev",
@@ -14,6 +14,7 @@
   "dependencies": {
     "react": "latest",
     "react-dom": "latest",
+    "tempo.ts": "latest",
     "viem": "latest",
     "vocs": "latest"
   },

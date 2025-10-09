@@ -1,6 +1,6 @@
 // @ts-nocheck
 // [!region setup]
-import { createTempoClient } from 'tempo/viem'
+import { createTempoClient } from 'tempo.ts/viem'
 import { http, publicActions, walletActions } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 

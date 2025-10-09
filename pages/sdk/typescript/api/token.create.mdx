@@ -10,7 +10,7 @@ Use the `token.create` action on the Viem `client` to create and deploy a new TI
 
 :::code-group
 
-```ts [example.ts]
+```ts twoslash [example.ts]
 import { client } from './viem.config'
 
 const { admin, receipt, token, tokenId } = await client.token.createSync({
@@ -27,7 +27,7 @@ console.log('ID:', tokenId)
 // @log: ID: 4n
 ```
 
-```ts [viem.config.ts] filename="viem.config.ts"
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
 // [!include ~/snippets/viem.config.ts:setup]
 ```
 
@@ -39,8 +39,8 @@ The example above uses a `*Sync` variant of the action, that will wait for the t
 
 If you are optimizing for performance, you should use the non-sync `token.create` action and wait for inclusion manually:
 
-```ts
-import { actions } from 'tempo/viem'
+```ts twoslash
+import { actions } from 'tempo.ts/viem'
 import { client } from './viem.config'
 
 const hash = await client.token.create({

@@ -8,7 +8,7 @@ Gets the metadata for a TIP-20 token, including name, symbol, decimals, currency
 
 :::code-group
 
-```ts [example.ts]
+```ts twoslash [example.ts]
 import { client } from './viem.config'
 
 const metadata = await client.token.getMetadata({
@@ -27,7 +27,7 @@ console.log('Total Supply:', metadata.totalSupply)
 // @log: Total Supply: 1000000000000000000000n
 ```
 
-```ts [viem.config.ts] filename="viem.config.ts"
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
 // [!include ~/snippets/viem.config.ts:setup]
 ```
 

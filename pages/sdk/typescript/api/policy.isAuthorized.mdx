@@ -8,7 +8,7 @@ Checks if an address is authorized by a transfer policy.
 
 :::code-group
 
-```ts [example.ts]
+```ts twoslash [example.ts]
 import { client } from './viem.config'
 
 const isAuthorized = await client.policy.isAuthorized({
@@ -20,7 +20,7 @@ console.log('Is authorized:', isAuthorized)
 // @log: Is authorized: true
 ```
 
-```ts [viem.config.ts] filename="viem.config.ts"
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
 // [!include ~/snippets/viem.config.ts:setup]
 ```
 

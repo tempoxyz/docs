@@ -1,3 +1,4 @@
+import { ModuleResolutionKind } from 'typescript'
 import { defineConfig } from 'vocs'
 
 export default defineConfig({
@@ -466,4 +467,9 @@ export default defineConfig({
     { text: 'Litepaper', link: '/litepaper' },
     { text: 'SDK', link: '/sdk/typescript' },
   ],
+  twoslash: {
+    compilerOptions: {
+      moduleResolution: ModuleResolutionKind.Bundler,
+    },
+  },
 })

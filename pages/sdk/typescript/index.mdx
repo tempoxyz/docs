@@ -17,11 +17,11 @@ To install the Tempo extension, you will need to install [Viem](https://viem.sh)
 :::code-group
 
 ```bash [npm]
-npm i viem tempo@github:tempoxyz/tempo-ts#main
+npm i viem tempo.ts
 ```
 
 ```bash [pnpm]
-pnpm i viem tempo@github:tempoxyz/tempo-ts#main
+pnpm i viem tempo.ts
 ```
 
 :::
@@ -35,7 +35,7 @@ Please request access to `tempoxyz/tempo-ts` by reaching out to the Tempo team.
 
 Next, we will configure a [Tempo Client](/sdk/typescript/api/createTempoClient).
 
-```ts [viem.config.ts]
+```ts twoslash [viem.config.ts]
 // [!include ~/snippets/viem.config.ts:setup]
 ```
 
@@ -45,7 +45,7 @@ Now you're ready to [start interacting](/sdk/typescript/api) with Tempo!
 
 :::code-group
 
-```ts [example.ts]
+```ts twoslash [example.ts]
 import { client } from './viem.config';
 
 const blockNumber = await client.getBlockNumber();
@@ -54,7 +54,7 @@ console.log(blockNumber);
 // @log: 421045
 ```
 
-```ts [viem.config.ts] filename="viem.config.ts"
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
 // [!include ~/snippets/viem.config.ts:setup]
 ```
 

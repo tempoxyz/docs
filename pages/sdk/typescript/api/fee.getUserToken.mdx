@@ -8,7 +8,7 @@ Gets the user's default fee token preference. [Learn more about fee tokens](/doc
 
 :::code-group
 
-```ts [example.ts]
+```ts twoslash [example.ts]
 import { client } from './viem.config'
 
 const { address, id } = await client.fee.getUserToken()
@@ -19,7 +19,7 @@ console.log('Fee token ID:', id)
 // @log: Fee token ID: 0n
 ```
 
-```ts [viem.config.ts] filename="viem.config.ts"
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
 // [!include ~/snippets/viem.config.ts:setup]
 ```
 

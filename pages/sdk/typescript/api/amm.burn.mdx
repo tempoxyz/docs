@@ -8,7 +8,7 @@ Burns liquidity tokens and receives the underlying token pair. [Learn more about
 
 :::code-group
 
-```ts [example.ts]
+```ts twoslash [example.ts]
 import { parseUnits } from 'viem'
 import { client } from './viem.config'
 
@@ -26,7 +26,7 @@ console.log('Received validator tokens:', amountValidatorToken)
 // @log: Received validator tokens: 5250000000000000000n
 ```
 
-```ts [viem.config.ts] filename="viem.config.ts"
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
 // [!include ~/snippets/viem.config.ts:setup]
 ```
 
@@ -38,8 +38,8 @@ The example above uses a `*Sync` variant of the action, that will wait for the t
 
 If you are optimizing for performance, you should use the non-sync `amm.burn` action and wait for inclusion manually:
 
-```ts
-import { actions } from 'tempo/viem'
+```ts twoslash
+import { actions } from 'tempo.ts/viem'
 import { client } from './viem.config'
 
 const hash = await client.amm.burn({
