@@ -2,199 +2,218 @@
 
 TIP-20 tokens use a role-based access control system that allows you to delegate different administrative functions to different addresses. This is essential for security and operational flexibility.
 
+## Table of Contents
+
+- [Available Roles](#available-roles)
+- [Granting Roles](#granting-roles)
+- [Revoking Roles](#revoking-roles)
+- [Watching Role Changes](#watching-role-changes)
+- [Watching Role Admin Changes](#watching-role-admin-changes)
+- [Emergency Procedures](#emergency-procedures)
+
 ## Available Roles
 
-| Role | Purpose | Key Functions |
-|------|---------|---------------|
-| `defaultAdmin` | Full control | Grant/revoke all roles, set supply caps, change policies |
-| `issuer` | Token supply | Mint and burn tokens |
-| `pause` | Emergency control | Pause token transfers |
-| `unpause` | Emergency control | Unpause token transfers |
-| `burnBlocked` | Compliance | Burn tokens from blocked addresses |
+| Role | Hash | Purpose | Key Functions |
+|------|----|---------|---------------|
+| **Admin** | `bytes32(0)` | Full control | Grant/revoke all roles, set supply caps, change policies |
+| **Issuer** | `keccak256("ISSUER_ROLE")` | Token supply | Mint and burn tokens |
+| **Pause** | `keccak256("PAUSE_ROLE")` | Emergency control | Pause token transfers |
+| **Unpause** | `keccak256("UNPAUSE_ROLE")` | Emergency control | Unpause token transfers |
+| **Burn Blocked** | `keccak256("BURN_BLOCKED_ROLE")` | Compliance | Burn tokens from blocked addresses |
 
 ## Granting Roles
 
-### Grant Issuer Role
+Grant roles to delegate specific token permissions to an address. This allows you to separate concerns: for example, your treasury can mint tokens while your security team can pause transfers.
 
-:::code-group
-```ts [issuer.ts]
-const treasuryAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
+### Example
 
-const result = await client.token.grantRolesSync({ // [!code focus]
-  roles: ['issuer'], // [!code focus]
-  to: treasuryAddress, // [!code focus]
-  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
-}) // [!code focus]
+```solidity [Example.sol]
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+
+// Grant the issuer role to treasury, to mint tokens
+address treasuryAddress = 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef;
+token.grantRole(keccak256("ISSUER_ROLE"), treasuryAddress);
+
+// Grant the pause role to security, to pause transfers
+address securityAddress = 0xcafecafebabedeadbeefcafebabedeadbeefcafebabe;
+token.grantRole(keccak256("PAUSE_ROLE"), securityAddress);
+token.grantRole(keccak256("UNPAUSE_ROLE"), securityAddress);
+
+// Grant the burn blocked role to compliance, to burn tokens from blocked addresses
+address complianceAddress = 0xbabedeadbeefcafebabedeadbeefcafebabedeadbeef;
+token.grantRole(keccak256("BURN_BLOCKED_ROLE"), complianceAddress);
 ```
 
-```ts [viem.config.ts]
-// [!include ~/snippets/setup.ts:setup] 
-```
+:::note
+See a full [TypeScript Example](/sdk/typescript/api/token.grantRoles)
 :::
 
-### Grant Pause Role
+To grant a role, you must have the **admin role** for that specific role. By default, `DEFAULT_ADMIN_ROLE` (granted to the token creator) is the admin for all other roles.
 
-:::code-group
-```ts [pause.ts]
-const securityTeamAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
+### Interface
 
-const result = await client.token.grantRolesSync({ // [!code focus]
-  roles: ['pause'], // [!code focus]
-  to: securityTeamAddress, // [!code focus]
-  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
-}) // [!code focus]
+```solidity
+function grantRole(
+  /** Keccak256 hash of the role to grant */
+  bytes32 role,
+  /** Address to grant the role to */
+  address account
+) external;
 ```
 
-```ts [viem.config.ts]
-// [!include ~/snippets/setup.ts:setup] 
-```
-:::
+### FAQ
 
-### Grant Multiple Roles
+#### How are roles identified?
 
-:::code-group
-```ts [multipleRoles.ts]
-const securityTeamAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
+Roles are identified by their `bytes32` hash:
 
-const result = await client.token.grantRolesSync({ // [!code focus]
-  roles: ['issuer', 'pause', 'unpause'], // [!code focus]
-  to: securityTeamAddress, // [!code focus]
-  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
-}) // [!code focus]
+```solidity
+bytes32 ISSUER_ROLE = keccak256("ISSUER_ROLE");
+// 0x114e74f6ea3bd819998f78687bfcf11b140da08e9b7d222fa9c1f1ba1f2aa122
+
+bytes32 PAUSE_ROLE = keccak256("PAUSE_ROLE");
+// 0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d
 ```
 
-```ts [viem.config.ts]
-// [!include ~/snippets/setup.ts:setup] 
+The special `DEFAULT_ADMIN_ROLE` is `bytes32(0)`.
+
+#### How to delegate role administration?
+
+Each role has an "admin role" that controls who can grant or revoke it. 
+By default, all roles are administered by `DEFAULT_ADMIN_ROLE`.
+
+You can change the role admins for more granular control.
+For example: the security team (who has `PAUSE_ROLE`) can grant or revoke `PAUSE_ROLE` to other addresses.
+
+```solidity
+// Make PAUSE_ROLE self-administered
+token.setRoleAdmin(PAUSE_ROLE, PAUSE_ROLE);
 ```
-:::
 
 ## Revoking Roles
 
-:::code-group
-```ts [revoke.ts]
-const treasuryAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
+Revoke roles to remove permissions from an address. This is useful when rotating keys, removing compromised addresses, or changing your token's administration structure.
 
-// Remove minting rights from old treasury // [!code focus]
-const result = await client.token.revokeRolesSync({ // [!code focus]
-  from: treasuryAddress, // [!code focus]
-  roles: ['issuer'], // [!code focus]
-  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
-}) // [!code focus]
+### Example
+
+```solidity [Example.sol]
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+
+// Revoke the issuer role from old treasury // [!code focus]
+address oldTreasury = 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef; // [!code focus]
+token.revokeRole(keccak256("ISSUER_ROLE"), oldTreasury); // [!code focus]
+
+// Grant to new treasury
+address newTreasury = 0xcafebabedeadbeefcafebabedeadbeefcafebabe;
+token.grantRole(keccak256("ISSUER_ROLE"), newTreasury);
 ```
 
-```ts [viem.config.ts]
-// [!include ~/snippets/setup.ts:setup] 
-```
+:::note
+See a full [TypeScript Example](/sdk/typescript/api/token.revokeRoles)
 :::
 
-### Separate Concerns
+To revoke a role, you must have the **admin role** for that specific role, just like granting.
 
-Don't give all roles to one address:
+### Interface
 
-- **Treasury team**: `issuer` only
-- **Security team**: `pause` and `unpause`
-- **Compliance team**: `burnBlocked`
-- **Governance**: `defaultAdmin`
-
-{/* ### Regular Audits
-
-Periodically review who has what roles:
-
-:::code-group
-```ts [getRoles.ts]
-// Check all roles for an address
-const roles = [
-  'DEFAULT_ADMIN_ROLE',
-  'ISSUER_ROLE', 
-  'PAUSE_ROLE',
-  'UNPAUSE_ROLE',
-  'BURN_BLOCKED_ROLE'
-]
-
-for (const roleName of roles) {
-  const role = '0x' + keccak256(roleName).slice(2)
-  const hasRole = await token.read.hasRole([role, addressToCheck])
-  console.log(`${roleName}: ${hasRole}`)
-}
+```solidity
+function revokeRole(
+  /** Keccak256 hash of the role to revoke */
+  bytes32 role,
+  /** Address to revoke the role from */
+  address account
+) external;
 ```
 
-```ts [viem.config.ts]
-// [!include ~/snippets/setup.ts:setup] 
-```
-:::
- */}
+### FAQ
 
-## Role Events
+#### Can addresses renounce their own roles?
 
-The token emits events when roles are granted or revoked:
+Yes, addresses can remove roles from themselves using `renounceRole`:
 
-:::code-group
-```ts [monitorRoles.ts]
-await client.token.watchRole({ // [!code focus]
-  onRoleUpdated: (args) => { // [!code focus]
-    console.log(`Role ${args.role} ${args.type === 'granted' ? 'granted to' : 'revoked from'} ${args.account}`) // [!code focus]
-  }, // [!code focus]
-  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
-}) // [!code focus]
+```solidity
+// Renounce your own issuer role
+token.renounceRole(keccak256("ISSUER_ROLE"));
 ```
 
-```ts [viem.config.ts]
-// [!include ~/snippets/setup.ts:setup] 
+## Watching Role Changes
+
+Monitor when roles are granted or revoked to track permission changes and maintain audit logs.
+
+### Example
+
+```solidity [Example.sol]
+// When you call:
+token.grantRole(keccak256("ISSUER_ROLE"), treasuryAddress);
+
+// This event is emitted:
+RoleMembershipUpdated(
+  role: keccak256("ISSUER_ROLE"),
+  account: treasuryAddress,
+  sender: msg.sender,
+  hasRole: true
+)
 ```
+
+:::note
+See a full [TypeScript Example](#TODO) for monitoring events
 :::
 
-## Emergency Procedures
+### Interface
 
-### Immediate Pause
-
-If you have `pause`, you can immediately stop all transfers:
-
-:::code-group
-```ts [pause.ts]
-const result = await client.token.pauseSync({ // [!code focus]
-  token: '0x20c0000000000000000000000000000000000004', // [!code focus]
-}) // [!code focus]
+```solidity
+event RoleMembershipUpdated(
+  /** The role that was granted or revoked */
+  bytes32 indexed role,
+  /** The account that received or lost the role */
+  address indexed account,
+  /** The address that made the change */
+  address indexed sender,
+  /** true if granted, false if revoked */
+  bool hasRole
+);
 ```
 
-```ts [viem.config.ts]
-// [!include ~/snippets/setup.ts:setup] 
+### FAQ
+
+#### When is this event emitted?
+
+The `RoleMembershipUpdated` event is emitted in three cases:
+- When `grantRole()` is called (with `hasRole = true`)
+- When `revokeRole()` is called (with `hasRole = false`)
+- When `renounceRole()` is called (with `hasRole = false` and `sender = account`)
+
+## Watching Role Admin Changes
+
+Monitor when a role's admin is changed to track delegation of role management authority.
+
+### Example
+
+```solidity [Example.sol]
+// When you call:
+token.setRoleAdmin(keccak256("PAUSE_ROLE"), keccak256("PAUSE_ROLE"));
+
+// This event is emitted:
+RoleAdminUpdated(
+  role: keccak256("PAUSE_ROLE"),
+  newAdminRole: keccak256("PAUSE_ROLE"),
+  sender: msg.sender
+)
 ```
+
+:::note
+See a full [TypeScript Example](#TODO) for monitoring events
 :::
 
+### Interface
 
-### Remove Compromised Roles
-
-If an address is compromised, immediately revoke all roles:
-
-:::code-group
-```ts [removeRoles.ts]
-const compromisedAddress = '0xdeadbeefcafebabedeadbeefcafebabedeadbeef' // [!code focus]
-
-const roles = [
-  'DEFAULT_ADMIN_ROLE',
-  'ISSUER_ROLE', 
-  'PAUSE_ROLE',
-  'UNPAUSE_ROLE',
-  'BURN_BLOCKED_ROLE'
-]
-
-for (const roleName of roles) { // [!code focus]
-  const role = '0x' + keccak256(roleName).slice(2) // [!code focus]
-  const result = await client.token.revokeRolesSync({ // [!code focus]
-    role: role, // [!code focus]
-    account: compromisedAddress, // [!code focus]
-  }) // [!code focus]
-  console.log(`${roleName} revoke hash: ${hash}`) // [!code focus]
-
-  const hasRole = await token.read.hasRole([role, addressToCheck]) // [!code focus]
-
-  console.log(`${roleName}: ${hasRole}`) // [!code focus]
-} // [!code focus]
+```solidity
+event RoleAdminUpdated(
+  /** The role whose admin was changed */
+  bytes32 indexed role,
+  /** The new admin role that can now grant/revoke this role */
+  bytes32 indexed newAdminRole,
+  /** The address that made the change */
+  address indexed sender
+);
 ```
-
-```ts [viem.config.ts]
-// [!include ~/snippets/setup.ts:setup] 
-```
-:::
-
-For detailed technical specifications, see the [TIP-20 Protocol Reference](/protocol/tokens/tip-20).

@@ -1,0 +1,329 @@
+---
+showOutline: 1
+---
+
+# Controlling Supply
+
+TIP-20 tokens support dynamic supply management through role-based minting, burning, pausing, and supply caps. These features enable issuers to manage token economics while maintaining security and compliance.
+
+## Minting Tokens
+
+Create new tokens by minting them to a specified address. This increases the total supply.
+
+### Example
+
+```solidity [Example.sol]
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+
+// Mint 1,000 tokens to the treasury (USD has 6 decimals)
+const treasuryAddress = '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef';
+token.mint(treasuryAddress, 1_000_000_000);
+
+// Mint with a memo for tracking
+token.mintWithMemo(
+  treasuryAddress,
+  1_000_000_000,
+  keccak256("Q1_2024_TREASURY_ALLOCATION")
+);
+```
+
+:::note
+See a full [TypeScript Example](/sdk/typescript/api/token.mint)
+:::
+
+Minting requires the **`ISSUER_ROLE`**. The token must not exceed its supply cap (if set).
+
+### Interface
+
+```solidity
+function mint(
+  /** Address to receive the minted tokens */
+  address to,
+  /** Amount of tokens to mint (in token's decimal units) */
+  uint256 amount
+) external;
+
+function mintWithMemo(
+  /** Address to receive the minted tokens */
+  address to,
+  /** Amount of tokens to mint */
+  uint256 amount,
+  /** 32-byte memo for tracking (e.g., invoice ID, allocation reference) */
+  bytes32 memo
+) external;
+```
+
+### FAQ
+
+#### What happens if I exceed the supply cap?
+
+The transaction will revert with `SupplyCapExceeded()`. You must either:
+- Burn tokens to reduce total supply below the cap
+- Increase the supply cap (requires `DEFAULT_ADMIN_ROLE`)
+- Remove the cap entirely by setting it to `type(uint256).max`
+
+See [Setting Supply Caps](#setting-supply-caps) for more information.
+
+#### When should I use `mintWithMemo`?
+
+Use memos when you need to:
+- Track the purpose of minting (e.g., `"INVESTOR_ALLOCATION_SERIES_A"`)
+- Link mints to offchain records (invoice IDs, transaction references)
+- Maintain an audit trail for compliance
+
+The memo is emitted in both a `TransferWithMemo` event and the standard `Mint` event.
+
+## Burning Tokens
+
+Destroy tokens by burning them from **your own** balance. This decreases the total supply.
+
+### Example
+
+```solidity [Example.sol]
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+
+// Burn 100 tokens from your own balance (this account)
+token.burn(100_000_000);
+
+// Burn with a memo for tracking
+token.burnWithMemo(
+  100_000_000,
+  keccak256("BUYBACK_BATCH_5")
+);
+```
+
+:::note
+See a full [TypeScript Example](/sdk/typescript/api/token.burn)
+:::
+
+Burning requires the **`ISSUER_ROLE`** and sufficient balance in the caller's account.
+
+### Interface
+
+```solidity
+function burn(
+  /** Amount of tokens to burn from caller's balance */
+  uint256 amount
+) external;
+
+function burnWithMemo(
+  /** Amount of tokens to burn */
+  uint256 amount,
+  /** 32-byte memo for tracking */
+  bytes32 memo
+) external;
+```
+
+### FAQ
+
+#### Can I burn tokens from other addresses?
+
+Not with `burn()` or `burnWithMemo()`. These only burn from the caller's balance.
+
+To burn from other addresses, use `burnBlocked()` (for blocked addresses only) or have them transfer tokens to you first.
+
+#### What happens to burned tokens?
+
+Burned tokens are sent to the zero address (`0x000...000`) and the `totalSupply` is decreased. They are permanently removed from circulation.
+
+## Burning from Blocked Addresses
+
+Burn tokens from addresses that have been blocked by the transfer policy. This is used for compliance purposes.
+
+### Example
+
+```solidity [Example.sol]
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+
+// Burn tokens from a blocked address
+address blockedAddress = 0x810c8ed810c8ed810c8ed810c8ed810c8ed810c8;
+token.burnBlocked(blockedAddress, 100_000_000);
+```
+
+:::note
+See a full [TypeScript Example](/sdk/typescript/api/token.burnBlocked)
+:::
+
+Burning blocked tokens requires the **`BURN_BLOCKED_ROLE`**. The address must be unauthorized by the current transfer policy.
+
+### Interface
+
+```solidity
+function burnBlocked(
+  /** Address to burn tokens from (must be blocked) */
+  address from,
+  /** Amount of tokens to burn */
+  uint256 amount
+) external;
+```
+
+### FAQ
+
+#### What does "blocked" mean?
+
+An address is blocked when it's not authorized by the token's transfer policy. This is determined by calling `TIP403_REGISTRY.isAuthorized(transferPolicyId, address)`.
+
+If the address returns `false`, it's blocked and cannot send or receive tokens.
+
+## Setting Supply Caps
+
+Control the maximum total supply by setting a supply cap. This prevents unlimited inflation.
+
+### Example
+
+```solidity [Example.sol]
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+
+// Set supply cap to 1 billion tokens (USD has 6 decimals)
+token.setSupplyCap(1_000_000_000_000_000);
+
+// Remove supply cap (unlimited)
+token.setSupplyCap(type(uint256).max);
+```
+
+:::note
+See a full [TypeScript Example](/sdk/typescript/api/token.setSupplyCap)
+:::
+
+Setting supply caps requires the **`DEFAULT_ADMIN_ROLE`**. The new cap cannot be less than the current total supply.
+
+### Interface
+
+```solidity
+function setSupplyCap(
+  /** New maximum total supply (must be >= current total supply) */
+  uint256 newSupplyCap
+) external;
+```
+
+### FAQ
+
+#### What's the default supply cap?
+
+By default, tokens have no supply cap (`type(uint256).max`), allowing unlimited minting.
+
+#### Can I decrease the supply cap?
+
+Yes, but only to a value greater than or equal to the current `totalSupply`. You cannot set a cap below existing supply.
+
+To reduce the cap below current supply, you must first burn tokens.
+
+#### What happens when I hit the cap?
+
+Any `mint()` or `mintWithMemo()` call that would exceed the cap will revert with `SupplyCapExceeded()`.
+
+## Pausing Transfers
+
+Temporarily halt all token transfers for emergency situations or maintenance.
+
+### Example
+
+```solidity [Example.sol]
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+
+// Pause all transfers
+token.pause();
+
+// Later, unpause to resume normal operation
+token.unpause();
+```
+
+:::note
+See a full [TypeScript Example](/sdk/typescript/api/token.pause)
+:::
+
+Pausing requires the **`PAUSE_ROLE`**. Unpausing requires the **`UNPAUSE_ROLE`**.
+
+### Interface
+
+```solidity
+function pause() external;
+
+function unpause() external;
+```
+
+### FAQ
+
+#### What operations are blocked when paused?
+
+All transfer operations are blocked:
+- `transfer()`
+- `transferFrom()`
+- `transferWithMemo()`
+- `transferFromWithMemo()`
+
+Minting, burning, and administrative functions still work during pause.
+
+#### Why separate pause and unpause roles?
+
+Separation allows security best practices:
+- **Pause role**: Given to automated monitoring systems or security team for quick response
+- **Unpause role**: Held by governance or senior management to prevent unauthorized resumption
+
+This prevents a compromised pause key from being used to unpause maliciously.
+
+#### Can I check if a token is paused?
+
+Yes, read the public `paused` state variable:
+
+```solidity
+bool isPaused = token.paused();
+```
+
+## Watching Supply Events
+
+Monitor supply changes to track mints, burns, and administrative actions.
+
+### Example
+
+```solidity [Example.sol]
+// When you call:
+token.mint(treasuryAddress, 1_000_000_000);
+
+// These events are emitted:
+Mint(to: treasuryAddress, amount: 1_000_000_000)
+Transfer(from: 0x000...000, to: treasuryAddress, amount: 1_000_000_000)
+```
+
+:::note
+See a full [TypeScript Example](#TODO)
+:::
+
+### Interface
+
+```solidity
+event Mint(
+  /** Address that received the minted tokens */
+  address indexed to,
+  /** Amount of tokens minted */
+  uint256 amount
+);
+
+event Burn(
+  /** Address that burned tokens */
+  address indexed from,
+  /** Amount of tokens burned */
+  uint256 amount
+);
+
+event BurnBlocked(
+  /** Address that had tokens burned */
+  address indexed from,
+  /** Amount of tokens burned */
+  uint256 amount
+);
+
+event SupplyCapUpdate(
+  /** Address that changed the supply cap */
+  address indexed updater,
+  /** New supply cap */
+  uint256 indexed newSupplyCap
+);
+
+event PauseStateUpdate(
+  /** Address that changed pause state */
+  address indexed updater,
+  /** true if paused, false if unpaused */
+  bool isPaused
+);
+```

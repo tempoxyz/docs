@@ -105,12 +105,12 @@ export default defineConfig({
             link: '/documentation/tokens/roles',
           },
           {
-            text: 'Minting & Burning',
-            link: '/documentation/tokens/minting',
+            text: 'Controlling Supply',
+            link: '/documentation/tokens/controlling-supply',
           },
           {
-            text: 'Policies',
-            link: '/documentation/tokens/policies',
+            text: 'Transfer Policies',
+            link: '/documentation/tokens/transfer-policies',
           },
         ],
       },

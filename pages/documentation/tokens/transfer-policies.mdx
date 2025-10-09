@@ -1,0 +1,383 @@
+---
+showOutline: 1
+---
+
+# Transfer Policies
+
+Transfer policies control who can send and receive your TIP-20 tokens. Using the [TIP-403 registry](/protocol/tokens/tip-403), you can create whitelist policies (only approved addresses can transfer) or blacklist policies (blocked addresses cannot transfer) for compliance, KYC requirements, and security.
+
+## Creating Policies
+
+Create a new transfer policy to control token authorization.
+
+### Example
+
+```solidity [Example.sol]
+TIP403Registry registry = TIP403Registry(0x403c000000000000000000000000000000000000);
+
+// Create a whitelist policy
+uint64 whitelistPolicyId = registry.createPolicy(
+  msg.sender,  // admin
+  TIP403Registry.PolicyType.WHITELIST
+);
+
+// Create a blacklist policy  
+uint64 blacklistPolicyId = registry.createPolicy(
+  msg.sender,  // admin
+  TIP403Registry.PolicyType.BLACKLIST
+);
+
+// Create policy with initial seeded addresses
+address[] memory initialAddresses = new address[](3);
+initialAddresses[0] = 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef;
+initialAddresses[1] = 0xcafebabedeadbeefcafebabedeadbeefcafebabe;
+initialAddresses[2] = 0xbabedeadbeefcafebabedeadbeefcafebabedead;
+
+uint64 policyId = registry.createPolicy(
+  msg.sender,
+  TIP403Registry.PolicyType.WHITELIST,
+  initialAddresses
+);
+```
+
+:::note
+See a full [TypeScript Example](/sdk/typescript/api/policy.create)
+:::
+
+Anyone can create a policy. The creator specifies an admin address that can modify the policy.
+
+### Interface
+
+```solidity
+enum PolicyType {
+  WHITELIST,
+  BLACKLIST
+}
+
+function createPolicy(
+  /** Address that can modify this policy */
+  address admin,
+  /** Type of policy (whitelist or blacklist) */
+  PolicyType policyType
+) external returns (
+  /** ID of the newly created policy */
+  uint64 newPolicyId
+);
+
+function createPolicy(
+  /** Address that can modify this policy */
+  address admin,
+  /** Type of policy */
+  PolicyType policyType,
+  /** Initial addresses to add to the policy */
+  address[] memory accounts
+) external returns (
+  /** ID of the newly created policy */
+  uint64 newPolicyId
+);
+```
+
+### FAQ
+
+#### What's the difference between whitelist and blacklist?
+
+- **Whitelist**: Only addresses in the list can transfer tokens. All others are blocked.
+- **Blacklist**: Addresses in the list are blocked. All others can transfer tokens.
+
+Choose whitelist for strict KYC requirements. Choose blacklist for sanctions screening or fraud prevention.
+
+#### What are the special policy IDs?
+
+Two policies are built into the registry:
+- **Policy ID `0`**: Always-reject policy (blocks all transfers)
+- **Policy ID `1`**: Always-allow policy (allows all transfers - this is the default)
+
+New policies start at ID `2`.
+
+#### Can I change the admin later?
+
+Yes, the current admin can transfer admin rights using `setPolicyAdmin()`:
+
+```solidity
+registry.setPolicyAdmin(policyId, newAdminAddress);
+```
+
+## Managing Whitelist Policies
+
+Add or remove addresses from a whitelist policy. Only the policy admin can modify the whitelist.
+
+### Example
+
+```solidity [Example.sol]
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+TIP403Registry registry = TIP403Registry(0x403c000000000000000000000000000000000000);
+
+address complianceAdmin = 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef;
+
+// 1. Create whitelist policy
+policyId = registry.createPolicy(
+  complianceAdmin,
+  TIP403Registry.PolicyType.WHITELIST
+);
+
+// 2. Define KYC-approved users
+address[3] memory kycUsers = [
+  0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef,
+  0xcafebabedeadbeefcafebabedeadbeefcafebabe,
+  0xbabedeadbeefcafebabedeadbeefcafebabedead
+];
+
+// 3. Add users to whitelist // [!code hl]
+for (uint i = 0; i < kycUsers.length; i++) { // [!code hl]
+  registry.modifyPolicyWhitelist(policyId, kycUsers[i], true); // [!code hl]
+} // [!code hl]
+
+// 4. Apply policy to token
+token.changeTransferPolicyId(policyId);
+```
+
+:::note
+See a full [TypeScript Example](/sdk/typescript/api/policy.modifyWhitelist)
+:::
+
+### Interface
+
+```solidity
+function modifyPolicyWhitelist(
+  /** ID of the whitelist policy */
+  uint64 policyId,
+  /** Address to add or remove */
+  address account,
+  /** true to allow, false to block */
+  bool allowed
+) external;
+```
+
+### FAQ
+
+#### What happens when I add an address to a whitelist?
+
+The address becomes authorized to send and receive tokens controlled by that policy. Setting `allowed = true` adds them; `allowed = false` removes them.
+
+#### Can I modify a blacklist policy with this function?
+
+No. Calling `modifyPolicyWhitelist()` on a blacklist policy will revert with `IncompatiblePolicyType()`.
+
+Use `modifyPolicyBlacklist()` for blacklist policies.
+
+## Managing Blacklist Policies
+
+Add or remove addresses from a blacklist policy. Only the policy admin can modify the blacklist.
+
+### Example
+
+```solidity [Example.sol]
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+TIP403Registry registry = TIP403Registry(0x403c000000000000000000000000000000000000);
+
+// 1. Create blacklist policy
+address securityAdmin = 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef;
+policyId = registry.createPolicy(
+  securityAdmin,
+  TIP403Registry.PolicyType.BLACKLIST
+);
+
+// 2. Add known bad actors
+address[3] memory blockedAddresses = [
+  0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef,
+  0xcafebabedeadbeefcafebabedeadbeefcafebabe,
+  0xbabedeadbeefcafebabedeadbeefcafebabedead
+];
+
+for (uint i = 0; i < blockedAddresses.length; i++) { // [!code hl]
+  registry.modifyPolicyBlacklist(policyId, blockedAddresses[i], true); // [!code hl]
+} // [!code hl]
+
+// 3. Apply policy to token
+token.changeTransferPolicyId(policyId);
+```
+
+:::note
+See a full [TypeScript Example](/sdk/typescript/api/policy.modifyBlacklist)
+:::
+
+### Interface
+
+```solidity
+function modifyPolicyBlacklist(
+  /** ID of the blacklist policy */
+  uint64 policyId,
+  /** Address to add or remove */
+  address account,
+  /** true to block, false to allow */
+  bool restricted
+) external;
+```
+
+### FAQ
+
+#### What happens when I add an address to a blacklist?
+
+The address becomes unauthorized to send or receive tokens controlled by that policy. Setting `restricted = true` blocks them; `restricted = false` unblocks them.
+
+#### What's the difference between whitelist and blacklist authorization?
+
+For **whitelist** policies:
+- `allowed = true` → authorized (can transfer)
+- `allowed = false` → not authorized (cannot transfer)
+
+For **blacklist** policies:
+- `restricted = true` → not authorized (cannot transfer)
+- `restricted = false` → authorized (can transfer)
+
+## Applying Policies to Tokens
+
+Set a token's transfer policy to control who can send and receive it.
+
+### Example
+
+```solidity [Example.sol]
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+
+// Apply a KYC whitelist policy
+uint64 kycWhitelistPolicyId = uint64(11);
+token.changeTransferPolicyId(kycWhitelistPolicyId);
+
+// Emergency: block all transfers
+token.changeTransferPolicyId(0);  // always-reject policy
+
+// Resume normal operation
+token.changeTransferPolicyId(1);  // always-allow policy
+```
+
+:::note
+See a full [TypeScript Example](/sdk/typescript/api/token.changeTransferPolicy)
+:::
+
+### Interface
+
+```solidity
+function changeTransferPolicyId(
+  /** New policy ID to apply */
+  uint64 newPolicyId
+) external;
+```
+
+### FAQ
+
+#### What happens immediately after changing the policy?
+
+All future transfers are subject to the new policy.
+
+#### Can I change back to a previous policy?
+
+Yes, you can switch between policies at any time (as long as you have `DEFAULT_ADMIN_ROLE`). Common pattern:
+1. Start with policy `1` (always-allow)
+2. Switch to KYC whitelist for compliance
+3. Switch to policy `0` (always-reject) for emergencies
+4. Switch back when resolved
+
+## Checking Authorization
+
+Check if an address is authorized under a specific policy.
+
+### Example
+
+```solidity [Example.sol]
+TIP403Registry registry = TIP403Registry(0x403c000000000000000000000000000000000000);
+
+// Check if user can transfer
+address userAddress = 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef;
+bool canTransfer = registry.isAuthorized(policyId, userAddress);
+
+if (canTransfer) {
+  // User is authorized
+} else {
+  // User is blocked
+}
+```
+
+:::note
+See a full [TypeScript Example](/sdk/typescript/api/policy.isAuthorized)
+:::
+
+### Interface
+
+```solidity
+function isAuthorized(
+  /** Policy ID to check against */
+  uint64 policyId,
+  /** Address to check */
+  address user
+) public view returns (
+  /** true if authorized, false if blocked */
+  bool
+);
+```
+
+## Watching Policy Events
+
+Monitor policy changes to track authorization updates and maintain audit logs.
+
+### Example
+
+```solidity [Example.sol]
+// When you call:
+registry.modifyPolicyWhitelist(policyId, userAddress, true);
+
+// This event is emitted:
+WhitelistUpdated(
+  policyId: policyId,
+  updater: msg.sender,
+  account: userAddress,
+  allowed: true
+)
+```
+
+:::note
+See a full [TypeScript Example](#TODO)
+:::
+
+### Interface
+
+```solidity
+event PolicyCreated(
+  /** ID of the newly created policy */
+  uint64 indexed policyId,
+  /** Address that created the policy */
+  address indexed updater,
+  /** Type of policy created */
+  PolicyType policyType
+);
+
+event PolicyAdminUpdated(
+  /** ID of the policy */
+  uint64 indexed policyId,
+  /** Address that made the change */
+  address indexed updater,
+  /** New admin address */
+  address indexed admin
+);
+
+event WhitelistUpdated(
+  /** ID of the whitelist policy */
+  uint64 indexed policyId,
+  /** Address that made the change */
+  address indexed updater,
+  /** Account that was added or removed */
+  address indexed account,
+  /** true if added, false if removed */
+  bool allowed
+);
+
+event BlacklistUpdated(
+  /** ID of the blacklist policy */
+  uint64 indexed policyId,
+  /** Address that made the change */
+  address indexed updater,
+  /** Account that was added or removed */
+  address indexed account,
+  /** true if blocked, false if unblocked */
+  bool restricted
+);
+```
