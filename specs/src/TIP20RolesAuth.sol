@@ -2,19 +2,15 @@
 pragma solidity ^0.8.13;
 
 abstract contract TIP20RolesAuth {
+
     error Unauthorized();
 
     event RoleMembershipUpdated(
-        bytes32 indexed role,
-        address indexed account,
-        address indexed sender,
-        bool hasRole
+        bytes32 indexed role, address indexed account, address indexed sender, bool hasRole
     );
 
     event RoleAdminUpdated(
-        bytes32 indexed role,
-        bytes32 indexed newAdminRole,
-        address indexed sender
+        bytes32 indexed role, bytes32 indexed newAdminRole, address indexed sender
     );
 
     mapping(address account => mapping(bytes32 role => bool)) internal hasRole;
@@ -33,18 +29,12 @@ abstract contract TIP20RolesAuth {
         _;
     }
 
-    function grantRole(
-        bytes32 role,
-        address account
-    ) external onlyRole(roleAdmin[role]) {
+    function grantRole(bytes32 role, address account) external onlyRole(roleAdmin[role]) {
         hasRole[account][role] = true;
         emit RoleMembershipUpdated(role, account, msg.sender, true);
     }
 
-    function revokeRole(
-        bytes32 role,
-        address account
-    ) external virtual onlyRole(roleAdmin[role]) {
+    function revokeRole(bytes32 role, address account) external virtual onlyRole(roleAdmin[role]) {
         hasRole[account][role] = false;
         emit RoleMembershipUpdated(role, account, msg.sender, false);
     }
@@ -54,11 +44,13 @@ abstract contract TIP20RolesAuth {
         emit RoleMembershipUpdated(role, msg.sender, msg.sender, false);
     }
 
-    function setRoleAdmin(
-        bytes32 role,
-        bytes32 adminRole
-    ) external virtual onlyRole(roleAdmin[role]) {
+    function setRoleAdmin(bytes32 role, bytes32 adminRole)
+        external
+        virtual
+        onlyRole(roleAdmin[role])
+    {
         roleAdmin[role] = adminRole;
         emit RoleAdminUpdated(role, adminRole, msg.sender);
     }
+
 }
