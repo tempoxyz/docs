@@ -12,7 +12,7 @@ Sets the admin for a transfer policy. Requires current policy admin role.
 import { client } from './viem.config'
 
 const { receipt } = await client.policy.setAdminSync({
-  admin: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+  admin: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
   policyId: 1n,
 })
 
@@ -37,7 +37,7 @@ import { actions } from 'tempo.ts/viem'
 import { client } from './viem.config'
 
 const hash = await client.policy.setAdmin({
-  admin: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+  admin: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
   policyId: 1n,
 })
 const receipt = await client.waitForTransactionReceipt({ hash })

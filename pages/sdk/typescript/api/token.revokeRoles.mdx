@@ -12,7 +12,7 @@ Revokes one or more roles from an address. Requires the admin role for each role
 import { client } from './viem.config'
 
 const { receipt, value } = await client.token.revokeRolesSync({
-  account: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+  account: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
   roles: ['issuer'],
   token: '0x20c0000000000000000000000000000000000000',
 })
@@ -38,7 +38,7 @@ import { actions } from 'tempo.ts/viem'
 import { client } from './viem.config'
 
 const hash = await client.token.revokeRoles({
-  account: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+  account: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
   roles: ['issuer'],
   token: '0x20c0000000000000000000000000000000000000',
 })

@@ -40,14 +40,14 @@ const client = createClient({
 // Regular transaction (uses default transport) // [!code focus]
 const receipt1 = await client.sendTransactionSync({
   // [!code focus]
-  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb', // [!code focus]
+  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', // [!code focus]
 }) // [!code focus]
 
 // Sponsored transaction (uses feePayer transport) // [!code focus]
 const receipt2 = await client.sendTransactionSync({
   // [!code focus]
   feePayer: true, // [!code focus]
-  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb', // [!code focus]
+  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', // [!code focus]
 }) // [!code focus]
 ```
 

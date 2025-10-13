@@ -14,7 +14,7 @@ import { client } from './viem.config'
 
 const { receipt } = await client.token.permitSync({
   deadline: BigInt(Math.floor(Date.now() / 1000) + 3600),
-  owner: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+  owner: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
   signature: {
     r: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
     s: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
@@ -48,7 +48,7 @@ import { client } from './viem.config'
 
 const hash = await client.token.permit({
   deadline: BigInt(Math.floor(Date.now() / 1000) + 3600),
-  owner: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+  owner: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
   signature: {
     r: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
     s: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',

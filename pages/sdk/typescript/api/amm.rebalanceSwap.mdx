@@ -14,7 +14,7 @@ import { client } from './viem.config'
 
 const { amountIn, receipt } = await client.amm.rebalanceSwapSync({
   amountOut: parseUnits('10.5', 6),
-  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
   userToken: '0x20c0000000000000000000000000000000000000',
   validatorToken: '0x20c0000000000000000000000000000000000001',
 })
@@ -42,7 +42,7 @@ import { client } from './viem.config'
 
 const hash = await client.amm.rebalanceSwap({
   amountOut: parseUnits('10.5', 6),
-  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
   userToken: '0x20c0000000000000000000000000000000000000',
   validatorToken: '0x20c0000000000000000000000000000000000001',
 })
