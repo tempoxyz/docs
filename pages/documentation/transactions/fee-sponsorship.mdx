@@ -82,10 +82,10 @@ Bun.serve({
     const request = RpcRequest.from(await req.json())
 
     const serialized = request.params[0] as `0x77${string}` // [!code focus]
-    
+
     // Parse the sender's signed transaction // [!code focus]
     const transaction = parseTransaction(serialized) // [!code focus]
-    
+
     // Add fee payer signature // [!code focus]
     const serializedTransaction = await client.signTransaction({ // [!code focus]
       ...transaction, // [!code focus]
@@ -129,6 +129,14 @@ const hash = await client.sendTransaction({
   to: '0x0000000000000000000000000000000000000000',
 })
 ```
+
+:::info
+
+**Fee Token Preferences**
+
+When a `feePayer` is defined but a `feeToken` is not specified in the transaction request, then the fee token is determined by the fee payer's account preference (not the sender's). The fee payer controls which token is used to pay for the sponsored transaction.
+
+:::
 
 ### How the Fee Payer Service Works
 
