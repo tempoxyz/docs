@@ -159,10 +159,6 @@ contract TIP20 is TIP20RolesAuth {
         emit QuoteTokenUpdate(msg.sender, nextQuoteToken);
     }
 
-    function depth() public view virtual returns (uint32) {
-        return quoteToken.depth() + 1;
-    }
-
     function setSupplyCap(uint256 newSupplyCap) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (newSupplyCap < totalSupply) revert SupplyCapExceeded();
         emit SupplyCapUpdate(msg.sender, supplyCap = newSupplyCap);
@@ -273,6 +269,11 @@ contract TIP20 is TIP20RolesAuth {
         transferAuthorized(from, to)
         returns (bool)
     {
+        _transferFrom(from, to, amount);
+        return true;
+    }
+
+    function _transferFrom(address from, address to, uint256 amount) internal {
         // Allowance check and update.
         uint256 allowed = allowance[from][msg.sender];
         if (amount > allowed) revert InsufficientAllowance();
@@ -283,7 +284,6 @@ contract TIP20 is TIP20RolesAuth {
         }
 
         _transfer(from, to, amount);
-        return true;
     }
 
     function permit(
