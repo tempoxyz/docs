@@ -6,4 +6,5 @@ node_modules
 # Compiler files
 specs/cache/
 specs/out/
+specs/soljson-latest.js
 .vercel
