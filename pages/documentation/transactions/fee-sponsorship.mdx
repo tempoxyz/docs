@@ -14,6 +14,16 @@ Fee sponsorship allows one account (the **fee payer**) to pay transaction fees o
 - **Subsidizing transactions** — Applications can cover gas costs for their users
 - **Payment flows** — Enable payments from accounts without requiring separate fee tokens
 
+## How it works
+
+1. The sender signs the transaction with their private key, signing over a **blank fee token field** — this means the sender delegates the choice of which fee token to use to the fee payer
+2. The fee payer selects which fee token to use, then signs over the transaction
+3. The fee token and fee payer signature is added to the transaction then submitted
+4. The network validates both signatures and executes the transaction
+5. Fees are deducted from the fee payer's balance
+
+Check out the [specification of the Tempo transaction type](/protocol/transactions/fee-payers) to learn more
+
 ## Local Fee Payer
 
 The simplest approach is to specify a `feePayer` account directly when sending a transaction. This is useful when you have access to both the sender's and fee payer's private keys locally.
