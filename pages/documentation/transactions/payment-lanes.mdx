@@ -26,6 +26,10 @@ The classification is determined by a pure function that only examines the trans
     Internal calls and state are ignored presently. Later upgrades may enable batched calls and other kinds of transactions to be classified as payment transactions as well.
 </Callout>
 
+<Callout type="note">
+    **Capacity and Priority Fees**: While the payment lane has a much higher capacity limit than the general transaction lane, it is theoretically possible for it to fill up during extreme congestion. In such cases, transactions can set a priority fee to increase their likelihood of inclusion. Both payment and non-payment transactions share the same fixed base fee, with the ability to add priority fees when needed. The payment lane's higher capacity means congestion should be rare in practice.
+</Callout>
+
 For the complete technical specification of how this works at the consensus level, including the dual gas accounting mechanism, see the [Payments Lane specification](/protocol/payments-lane).
 
 ## Example: Sending a Payment
