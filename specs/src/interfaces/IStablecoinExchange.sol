@@ -48,7 +48,6 @@ interface IStablecoinExchange {
         external
         returns (uint128 amountIn);
 
-    // View functions
     function quoteBuy(address tokenIn, address tokenOut, uint128 amountOut)
         external
         view
