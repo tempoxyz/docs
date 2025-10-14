@@ -34,44 +34,37 @@ contract LinkingUSDTest is Test {
         assertEq(address(linkingToken.quoteToken()), address(0));
     }
 
-    function test_Transfer_RevertIf_NotStableDex(address sender, uint256 amount) public {
+    function test_Transfer_RevertIf_NoRoleAndNotStableDex(address sender, uint256 amount) public {
+        vm.assume(sender != STABLECOIN_DEX);
         vm.startPrank(sender);
         vm.expectRevert(LinkingUSD.TransfersDisabled.selector);
         linkingToken.transfer(bob, amount);
         vm.stopPrank();
     }
 
-    function test_TransferFrom_RevertIf_NotStableDex(address sender, uint256 amount) public {
+    function test_TransferFrom_RevertIf_NoRoleAndNotStableDex(address sender, uint256 amount)
+        public
+    {
+        vm.assume(sender != STABLECOIN_DEX);
         vm.startPrank(sender);
         vm.expectRevert(LinkingUSD.TransfersDisabled.selector);
         linkingToken.transferFrom(alice, bob, amount);
         vm.stopPrank();
     }
 
-    function test_TransferWithMemo_Reverts(address sender) public {
+    function test_TransferWithMemo_RevertIf_NoRoleAndNotStableDex(address sender) public {
+        vm.assume(sender != STABLECOIN_DEX);
         vm.startPrank(sender);
-        vm.expectRevert(LinkingUSD.TransfersDisabled.selector);
-        linkingToken.transferWithMemo(bob, 100, bytes32(0));
-        vm.stopPrank();
-
-        // Assert that transfer from with memo is disabled for all callers, including stable dex
-        vm.startPrank(STABLECOIN_DEX);
         vm.expectRevert(LinkingUSD.TransfersDisabled.selector);
         linkingToken.transferWithMemo(bob, 100, bytes32(0));
         vm.stopPrank();
     }
 
-    function test_TransferFromWithMemo_Reverts(address sender) public {
+    function test_TransferFromWithMemo_RevertIf_NoRoleAndNotStableDex(address sender) public {
+        vm.assume(sender != STABLECOIN_DEX);
         vm.prank(sender);
         vm.expectRevert(LinkingUSD.TransfersDisabled.selector);
         linkingToken.transferFromWithMemo(alice, bob, 100, bytes32(0));
-        vm.stopPrank();
-
-        // Assert that transfer from with memo is disabled for all callers, including stable dex
-        vm.startPrank(STABLECOIN_DEX);
-        vm.expectRevert(LinkingUSD.TransfersDisabled.selector);
-        linkingToken.transferFromWithMemo(alice, bob, 100, bytes32(0));
-        vm.stopPrank();
     }
 
     function test_Mint(uint128 amount) public {
@@ -168,6 +161,224 @@ contract LinkingUSDTest is Test {
         vm.expectRevert(TIP20.InsufficientBalance.selector);
         linkingToken.transfer(bob, 100);
         vm.stopPrank();
+    }
+
+    function test_Transfer_WithTransferRole(uint128 amount) public {
+        vm.assume(amount > 0);
+
+        vm.startPrank(admin);
+        linkingToken.mint(alice, amount);
+        linkingToken.grantRole(linkingToken.TRANSFER_ROLE(), alice);
+        vm.stopPrank();
+
+        uint256 aliceBalanceBefore = linkingToken.balanceOf(alice);
+        uint256 bobBalanceBefore = linkingToken.balanceOf(bob);
+
+        vm.startPrank(alice);
+        bool success = linkingToken.transfer(bob, amount);
+        assertTrue(success);
+        vm.stopPrank();
+
+        assertEq(linkingToken.balanceOf(alice), aliceBalanceBefore - amount);
+        assertEq(linkingToken.balanceOf(bob), bobBalanceBefore + amount);
+    }
+
+    function test_Transfer_WithReceiveRole(uint128 amount) public {
+        vm.assume(amount > 0);
+
+        vm.startPrank(admin);
+        linkingToken.mint(alice, amount);
+        linkingToken.grantRole(linkingToken.RECEIVE_ROLE(), bob);
+        vm.stopPrank();
+
+        uint256 aliceBalanceBefore = linkingToken.balanceOf(alice);
+        uint256 bobBalanceBefore = linkingToken.balanceOf(bob);
+
+        vm.startPrank(alice);
+        bool success = linkingToken.transfer(bob, amount);
+        assertTrue(success);
+        vm.stopPrank();
+
+        assertEq(linkingToken.balanceOf(alice), aliceBalanceBefore - amount);
+        assertEq(linkingToken.balanceOf(bob), bobBalanceBefore + amount);
+    }
+
+    function test_TransferWithMemo_WithTransferRole(uint128 amount) public {
+        vm.assume(amount > 0);
+
+        vm.startPrank(admin);
+        linkingToken.mint(alice, amount);
+        linkingToken.grantRole(linkingToken.TRANSFER_ROLE(), alice);
+        vm.stopPrank();
+
+        uint256 aliceBalanceBefore = linkingToken.balanceOf(alice);
+        uint256 bobBalanceBefore = linkingToken.balanceOf(bob);
+
+        vm.startPrank(alice);
+        linkingToken.transferWithMemo(bob, amount, "test memo");
+        vm.stopPrank();
+
+        assertEq(linkingToken.balanceOf(alice), aliceBalanceBefore - amount);
+        assertEq(linkingToken.balanceOf(bob), bobBalanceBefore + amount);
+    }
+
+    function test_TransferWithMemo_WithReceiveRole(uint128 amount) public {
+        vm.assume(amount > 0);
+
+        vm.startPrank(admin);
+        linkingToken.mint(alice, amount);
+        linkingToken.grantRole(linkingToken.RECEIVE_ROLE(), bob);
+        vm.stopPrank();
+
+        uint256 aliceBalanceBefore = linkingToken.balanceOf(alice);
+        uint256 bobBalanceBefore = linkingToken.balanceOf(bob);
+
+        vm.startPrank(alice);
+        linkingToken.transferWithMemo(bob, amount, "test memo");
+        vm.stopPrank();
+
+        assertEq(linkingToken.balanceOf(alice), aliceBalanceBefore - amount);
+        assertEq(linkingToken.balanceOf(bob), bobBalanceBefore + amount);
+    }
+
+    function test_TransferWithMemo_WithStablecoinDex(uint128 amount) public {
+        vm.assume(amount > 0);
+
+        vm.prank(admin);
+        linkingToken.mint(STABLECOIN_DEX, amount);
+
+        uint256 dexBalanceBefore = linkingToken.balanceOf(STABLECOIN_DEX);
+        uint256 bobBalanceBefore = linkingToken.balanceOf(bob);
+
+        vm.startPrank(STABLECOIN_DEX);
+        linkingToken.transferWithMemo(bob, amount, "test memo");
+        vm.stopPrank();
+
+        assertEq(linkingToken.balanceOf(STABLECOIN_DEX), dexBalanceBefore - amount);
+        assertEq(linkingToken.balanceOf(bob), bobBalanceBefore + amount);
+    }
+
+    function test_TransferFrom_WithTransferRole(uint128 amount) public {
+        vm.assume(amount > 0);
+
+        vm.startPrank(admin);
+        linkingToken.mint(alice, amount);
+        linkingToken.grantRole(linkingToken.TRANSFER_ROLE(), alice);
+        vm.stopPrank();
+
+        vm.prank(alice);
+        linkingToken.approve(bob, amount);
+
+        uint256 aliceBalanceBefore = linkingToken.balanceOf(alice);
+        uint256 bobBalanceBefore = linkingToken.balanceOf(bob);
+        uint256 allowanceBefore = linkingToken.allowance(alice, bob);
+
+        vm.startPrank(bob);
+        bool success = linkingToken.transferFrom(alice, bob, amount);
+        assertTrue(success);
+        vm.stopPrank();
+
+        assertEq(linkingToken.balanceOf(alice), aliceBalanceBefore - amount);
+        assertEq(linkingToken.balanceOf(bob), bobBalanceBefore + amount);
+        assertEq(linkingToken.allowance(alice, bob), allowanceBefore - amount);
+    }
+
+    function test_TransferFrom_WithReceiveRole(uint128 amount) public {
+        vm.assume(amount > 0);
+
+        vm.startPrank(admin);
+        linkingToken.mint(alice, amount);
+        linkingToken.grantRole(linkingToken.RECEIVE_ROLE(), bob);
+        vm.stopPrank();
+
+        vm.prank(alice);
+        linkingToken.approve(alice, amount);
+
+        uint256 aliceBalanceBefore = linkingToken.balanceOf(alice);
+        uint256 bobBalanceBefore = linkingToken.balanceOf(bob);
+        uint256 allowanceBefore = linkingToken.allowance(alice, alice);
+
+        vm.startPrank(alice);
+        bool success = linkingToken.transferFrom(alice, bob, amount);
+        assertTrue(success);
+        vm.stopPrank();
+
+        assertEq(linkingToken.balanceOf(alice), aliceBalanceBefore - amount);
+        assertEq(linkingToken.balanceOf(bob), bobBalanceBefore + amount);
+        assertEq(linkingToken.allowance(alice, alice), allowanceBefore - amount);
+    }
+
+    function test_TransferFromWithMemo_WithTransferRole(uint128 amount) public {
+        vm.assume(amount > 0);
+
+        vm.startPrank(admin);
+        linkingToken.mint(alice, amount);
+        linkingToken.grantRole(linkingToken.TRANSFER_ROLE(), alice);
+        vm.stopPrank();
+
+        vm.prank(alice);
+        linkingToken.approve(bob, amount);
+
+        uint256 aliceBalanceBefore = linkingToken.balanceOf(alice);
+        uint256 bobBalanceBefore = linkingToken.balanceOf(bob);
+        uint256 allowanceBefore = linkingToken.allowance(alice, bob);
+
+        vm.startPrank(bob);
+        bool success = linkingToken.transferFromWithMemo(alice, bob, amount, "test memo");
+        assertTrue(success);
+        vm.stopPrank();
+
+        assertEq(linkingToken.balanceOf(alice), aliceBalanceBefore - amount);
+        assertEq(linkingToken.balanceOf(bob), bobBalanceBefore + amount);
+        assertEq(linkingToken.allowance(alice, bob), allowanceBefore - amount);
+    }
+
+    function test_TransferFromWithMemo_WithReceiveRole(uint128 amount) public {
+        vm.assume(amount > 0);
+
+        vm.startPrank(admin);
+        linkingToken.mint(alice, amount);
+        linkingToken.grantRole(linkingToken.RECEIVE_ROLE(), bob);
+        vm.stopPrank();
+
+        vm.prank(alice);
+        linkingToken.approve(alice, amount);
+
+        uint256 aliceBalanceBefore = linkingToken.balanceOf(alice);
+        uint256 bobBalanceBefore = linkingToken.balanceOf(bob);
+        uint256 allowanceBefore = linkingToken.allowance(alice, alice);
+
+        vm.startPrank(alice);
+        bool success = linkingToken.transferFromWithMemo(alice, bob, amount, "test memo");
+        assertTrue(success);
+        vm.stopPrank();
+
+        assertEq(linkingToken.balanceOf(alice), aliceBalanceBefore - amount);
+        assertEq(linkingToken.balanceOf(bob), bobBalanceBefore + amount);
+        assertEq(linkingToken.allowance(alice, alice), allowanceBefore - amount);
+    }
+
+    function test_TransferFromWithMemo_WithStablecoinDex(uint128 amount) public {
+        vm.assume(amount > 0);
+
+        vm.prank(admin);
+        linkingToken.mint(alice, amount);
+
+        vm.prank(alice);
+        linkingToken.approve(STABLECOIN_DEX, amount);
+
+        uint256 aliceBalanceBefore = linkingToken.balanceOf(alice);
+        uint256 bobBalanceBefore = linkingToken.balanceOf(bob);
+        uint256 allowanceBefore = linkingToken.allowance(alice, STABLECOIN_DEX);
+
+        vm.startPrank(STABLECOIN_DEX);
+        bool success = linkingToken.transferFromWithMemo(alice, bob, amount, "test memo");
+        assertTrue(success);
+        vm.stopPrank();
+
+        assertEq(linkingToken.balanceOf(alice), aliceBalanceBefore - amount);
+        assertEq(linkingToken.balanceOf(bob), bobBalanceBefore + amount);
+        assertEq(linkingToken.allowance(alice, STABLECOIN_DEX), allowanceBefore - amount);
     }
 
 }

@@ -16,6 +16,12 @@ contract StablecoinExchange is IStablecoinExchange {
     /// @notice Price scaling factor (5 decimal places for 0.1 bps precision)
     uint32 public constant PRICE_SCALE = 100_000;
 
+    /// @notice Minimum valid price (PRICE_SCALE + int16.min)
+    uint32 public constant MIN_PRICE = 67_232;
+
+    /// @notice Maximum valid price (PRICE_SCALE + int16.max)
+    uint32 public constant MAX_PRICE = 132_767;
+
     event PairCreated(bytes32 indexed key, address indexed base, address indexed quote);
 
     /// @notice Represents a price level in the orderbook with a doubly-linked list of orders
@@ -103,6 +109,7 @@ contract StablecoinExchange is IStablecoinExchange {
 
     /// @notice Convert scaled price to relative tick
     function priceToTick(uint32 price) public pure returns (int16 tick) {
+        require(price >= MIN_PRICE && price <= MAX_PRICE, "Price out of bounds");
         return int16(int32(price) - int32(PRICE_SCALE));
     }
 

@@ -8,44 +8,63 @@ contract LinkingUSD is TIP20 {
     error TransfersDisabled();
 
     address private constant STABLECOIN_DEX = 0xDEc0000000000000000000000000000000000000;
+    bytes32 public constant TRANSFER_ROLE = keccak256("TRANSFER_ROLE");
+    bytes32 public constant RECEIVE_ROLE = keccak256("RECEIVE_ROLE");
 
     constructor(address admin) TIP20("linkingUSD", "linkingUSD", "USD", TIP20(address(0)), admin) { }
 
-    function transfer(address to, uint256 amount) external override notPaused returns (bool) {
-        if (msg.sender == STABLECOIN_DEX) {
-            _transfer(msg.sender, to, amount);
-            return true;
+    function transfer(address to, uint256 amount) public override returns (bool) {
+        if (
+            msg.sender == STABLECOIN_DEX || hasRole[msg.sender][TRANSFER_ROLE]
+                || hasRole[to][RECEIVE_ROLE]
+        ) {
+            return super.transfer(to, amount);
         } else {
             revert TransfersDisabled();
         }
     }
 
     function transferFrom(address from, address to, uint256 amount)
-        external
+        public
         override
         notPaused
         returns (bool)
     {
-        if (msg.sender == STABLECOIN_DEX) {
-            _transferFrom(from, to, amount);
-            return true;
+        if (
+            msg.sender == STABLECOIN_DEX || hasRole[from][TRANSFER_ROLE]
+                || hasRole[to][RECEIVE_ROLE]
+        ) {
+            return super.transferFrom(from, to, amount);
         } else {
             revert TransfersDisabled();
         }
     }
 
-    function transferWithMemo(address, uint256, bytes32) external view override notPaused {
-        revert TransfersDisabled();
+    function transferWithMemo(address to, uint256 amount, bytes32 memo) public override notPaused {
+        if (
+            msg.sender == STABLECOIN_DEX || hasRole[msg.sender][TRANSFER_ROLE]
+                || hasRole[to][RECEIVE_ROLE]
+        ) {
+            super.transferWithMemo(to, amount, memo);
+        } else {
+            revert TransfersDisabled();
+        }
     }
 
-    function transferFromWithMemo(address, address, uint256, bytes32)
-        external
-        view
+    function transferFromWithMemo(address from, address to, uint256 amount, bytes32 memo)
+        public
         override
         notPaused
         returns (bool)
     {
-        revert TransfersDisabled();
+        if (
+            msg.sender == STABLECOIN_DEX || hasRole[from][TRANSFER_ROLE]
+                || hasRole[to][RECEIVE_ROLE]
+        ) {
+            return super.transferFromWithMemo(from, to, amount, memo);
+        } else {
+            revert TransfersDisabled();
+        }
     }
 
 }

@@ -245,7 +245,7 @@ contract TIP20 is TIP20RolesAuth {
     }
 
     function transfer(address to, uint256 amount)
-        external
+        public
         virtual
         notPaused
         notTokenAddress(to)
@@ -262,7 +262,7 @@ contract TIP20 is TIP20RolesAuth {
     }
 
     function transferFrom(address from, address to, uint256 amount)
-        external
+        public
         virtual
         notPaused
         notTokenAddress(to)
@@ -356,7 +356,7 @@ contract TIP20 is TIP20RolesAuth {
     //////////////////////////////////////////////////////////////*/
 
     function transferWithMemo(address to, uint256 amount, bytes32 memo)
-        external
+        public
         virtual
         notPaused
         notTokenAddress(to)
@@ -367,7 +367,7 @@ contract TIP20 is TIP20RolesAuth {
     }
 
     function transferFromWithMemo(address from, address to, uint256 amount, bytes32 memo)
-        external
+        public
         virtual
         notPaused
         notTokenAddress(to)
