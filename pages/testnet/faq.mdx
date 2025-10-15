@@ -1,101 +1,16 @@
 # FAQ
 
-## Prerequisites
+## I don't see a balance on my wallet, even though I've funded it
 
-Before you start testing on Tempo, you'll need to set up a few things.
+The Tempo testnets do not have a native currency, instead [gas can be paid in stablecoins](/documentation/transactions/fee-tokens).
+MetaMask and other wallets currently do not support these tokens out-of-the-box, so to see the balance, you may need to add the tokens manually.
 
-### Getting a Test Account
+## What is the max TPS of the Tempo testnets?
 
-For testing purposes, you'll need a private key. The easiest way to create an ephemeral test account is using viem's `mnemonicToAccount` function:
+The current private testnets do not focus on maximizing throughput (although some features are dedicated to that). Instead, the testnets
+are a way for our partners to test our new features and their compatibility with their products.
 
-```ts
-import { mnemonicToAccount } from 'viem/accounts'
+## What is the reliability of the Tempo RPCs?
 
-const account = mnemonicToAccount('legal winner thank year wave sausage worth useful legal winner thank yellow')
-// Address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
-```
-
-For more details, see the [viem documentation on mnemonicToAccount](https://viem.sh/docs/accounts/local/mnemonicToAccount).
-
-### Getting Faucet Tokens
-
-To interact with the testnet, you'll need test tokens. Each testnet has a built-in faucet that can fund your address with test stablecoins.
-
-See the faucet instructions for each testnet:
-- [Lento (Testnet #3)](/testnet/lento#faucet)
-- [Adagietto (Testnet #2)](/testnet/adagietto#faucet)
-- [Adagio (Testnet #1)](/testnet/adagio#using-the-faucet)
-
-Example faucet usage:
-
-```bash
-cast rpc tempo_fundAddress YOUR_ADDRESS \
-  --rpc-url https://${USERNAME}:${PASSWORD}@rpc-lento.tempoxyz.dev
-```
-
----
-
-## How do I deploy a contract on Tempo?
-
-The easiest way to deploy contract(s) on Tempo is by using [Foundry](https://getfoundry.sh/), a blazing-fast toolkit for EVM networks.
-
-Below is a basic guide on how to deploy your first contract, but for more detailed instructions, see the [Deploying Guide](https://getfoundry.sh/forge/deploying) on the [Foundry docs](https://getfoundry.sh).
-
-::::steps
-
-### 1. Install Foundry
-
-```bash [Terminal]
-curl -L https://foundry.paradigm.xyz | bash
-foundryup
-```
-
-### 2a. Initialize a new Project
-
-If you have not initialized a project yet, you can use the `forge init` command.
-
-If you already have a project, continue to [2b. Add Foundry to an existing Project](#2b-add-foundry-to-an-existing-project).
-
-```bash [Terminal]
-forge init example && cd example
-```
-
-### 2b. Add Foundry to an existing Project
-
-If you already have an existing contracts project, add a `foundry.toml` file to the root directory.
-
-```toml [foundry.toml]
-[profile.default]
-src = "src"
-out = "out"
-libs = ["lib"]
-remappings = ["forge-std/=lib/forge-std/src/"]
-
-# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
-```
-
-:::info
-Ensure that your source files are hooked up correctly in the `foundry.toml` file.
-:::
-
-### 3. Deploy
-
-Next, we can deploy our contract using the `forge create` or `forge script` command.
-
-```bash [Terminal]
-export PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-
-# Deploy a contract using the `forge create` command.
-forge create src/Counter.sol:Counter \
-  --rpc-url https://{username}:{password}@rpc-adagio.tempoxyz.dev \
-  --private-key $PRIVATE_KEY
-
-# Or deploy contract(s) using a .s.sol script.
-forge script src/Counter.s.sol:Counter \
-  --rpc-url https://{username}:{password}@rpc-adagio.tempoxyz.dev \
-  --private-key $PRIVATE_KEY \
-  --broadcast
-```
-
-::::
-
+The current testnets are operated on a best-effort basis. We do not guarantee uptime or availability, but we strive to provide a reliable service.
+If we do plan maintenance, we will make sure to notify our partners and users in advance.
