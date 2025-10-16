@@ -98,10 +98,6 @@ export default defineConfig({
         text: 'Performance',
         link: '/litepaper/performance',
       },
-      {
-        text: 'Use Cases',
-        link: '/litepaper/use-cases',
-      },
     ],
     '/documentation': [
       {

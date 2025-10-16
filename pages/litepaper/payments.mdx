@@ -4,11 +4,11 @@ Tempo extends the ERC-20 token standard into the fully backward-compatible [TIP-
 
 ## Memo fields in payments
 
-Transfers in the real world include structured context, e.g., invoice numbers, customer IDs, cost centers, ISO 20022-style fields, or simple human-readable notes. The TIP-20 standard enables a new native TransferWithMemo functionality so that a transfer can link to a memo for backend reconciliation. To accommodate larger memos and control costs, Tempo provides an indexer service that stores the full memo while only a small commitment to the memo (formally, a hash) travels with the actual transaction. 
+Transfers in the real world include structured context, e.g., invoice numbers, customer IDs, cost centers, ISO 20022-style fields, or simple human-readable notes. The TIP-20 standard enables a new native TransferWithMemo functionality so that a transfer can link to a memo for backend reconciliation. To accommodate larger memos and control costs, Tempo provides flexible avenues to store and communicate the full memo while only relevant commitment to the memo (i.e., a hash, a locator, etc.) travels with the actual transfer. 
 
 ## Policies and compliance (asset-level controls)
 
-As we suggested in the previous section, we expect there to be many stablecoins. In many cases, these stables will share an issuer and/or compliance policy. The Tempo token standard enables providers to expose policies, for instance, allowlists or blocklists via the [TIP-403y](/protocol/tokens/tip-403) standard. Individual TIP-20 tokens can then adopt their desired policies. 
+As we suggested in the previous section, we expect there to be many stablecoins. In many cases, these stables will share an issuer and/or compliance policy. The Tempo token standard enables providers to expose policies, for instance, allowlists or blocklists via the [TIP-403](/protocol/tokens/tip-403) standard. Individual TIP-20 tokens can then adopt their desired policies. 
 
 A compliance manager at an issuer needs to update only a single policy, and this will be followed by all tokens adopting the policy. 
 
@@ -20,7 +20,7 @@ Beyond our TIP-20 contract suite, we also have several other payments-focused fe
 
 ## Dedicated Transfer Lanes
 
-The dedicated transfer lane ensures that even if the chain is busy with other activity, payment users have reliable, guaranteed throughput at predictable prices.  Transactions that only affect simple transfers have a dedicated lane in Tempo: formally, we reserve a portion of the blockspace for such transfers. 
+Tempo includes a dedicated transfer lane that ensures that even if the chain is busy with other activity, payment users have reliable, guaranteed throughput at predictable prices.  Transactions that only affect simple transfers have a dedicated lane in Tempo: formally, we reserve a portion of the blockspace for such transfers. For more details, see the [Payments Lane](/protocol/transactions/payments-lane) page.
 
 ## Smart Payment Accounts
 
