@@ -431,12 +431,12 @@ contract StablecoinExchange is IStablecoinExchange {
         return (level.head, level.tail, level.totalLiquidity);
     }
 
-    /// @notice Quote the cost to buy a specific amount of tokens
+    /// @notice Quote swapping tokens for exact amount out
     /// @param tokenIn Token to spend
     /// @param tokenOut Token to buy
     /// @param amountOut Amount of tokenOut to buy
     /// @return amountIn Amount of tokenIn needed
-    function quoteBuy(address tokenIn, address tokenOut, uint128 amountOut)
+    function quoteSwapExactAmountOut(address tokenIn, address tokenOut, uint128 amountOut)
         external
         view
         returns (uint128 amountIn)
@@ -541,16 +541,18 @@ contract StablecoinExchange is IStablecoinExchange {
         }
     }
 
-    /// @notice Buy tokens with another token
+    /// @notice Swap tokens for exact amount out
     /// @param tokenIn Token to spend
     /// @param tokenOut Token to buy
     /// @param amountOut Amount of tokenOut to buy
     /// @param maxAmountIn Maximum amount of tokenIn to spend
     /// @return amountIn Actual amount of tokenIn spent
-    function buy(address tokenIn, address tokenOut, uint128 amountOut, uint128 maxAmountIn)
-        external
-        returns (uint128 amountIn)
-    {
+    function swapExactAmountOut(
+        address tokenIn,
+        address tokenOut,
+        uint128 amountOut,
+        uint128 maxAmountIn
+    ) external returns (uint128 amountIn) {
         bytes32 key = pairKey(tokenIn, tokenOut);
         Orderbook storage book = books[key];
         require(book.base != address(0), "PAIR_NOT_EXISTS");
@@ -562,12 +564,12 @@ contract StablecoinExchange is IStablecoinExchange {
         ITIP20(tokenOut).transfer(msg.sender, amountOut);
     }
 
-    /// @notice Quote the proceeds from selling a specific amount of tokens
+    /// @notice Quote the proceeds from swapping a specific amount of tokens
     /// @param tokenIn Token to sell
     /// @param tokenOut Token to receive
     /// @param amountIn Amount of tokenIn to sell
     /// @return amountOut Amount of tokenOut to receive
-    function quoteSell(address tokenIn, address tokenOut, uint128 amountIn)
+    function quoteSwapExactAmountIn(address tokenIn, address tokenOut, uint128 amountIn)
         external
         view
         returns (uint128 amountOut)
@@ -580,16 +582,18 @@ contract StablecoinExchange is IStablecoinExchange {
         amountOut = _quoteExactIn(key, book, baseForQuote, amountIn);
     }
 
-    /// @notice Sell tokens for another token
+    /// @notice Swap tokens for exact amount in
     /// @param tokenIn Token to sell
     /// @param tokenOut Token to receive
     /// @param amountIn Amount of tokenIn to sell
     /// @param minAmountOut Minimum amount of tokenOut to receive
     /// @return amountOut Actual amount of tokenOut received
-    function sell(address tokenIn, address tokenOut, uint128 amountIn, uint128 minAmountOut)
-        external
-        returns (uint128 amountOut)
-    {
+    function swapExactAmountIn(
+        address tokenIn,
+        address tokenOut,
+        uint128 amountIn,
+        uint128 minAmountOut
+    ) external returns (uint128 amountOut) {
         bytes32 key = pairKey(tokenIn, tokenOut);
         Orderbook storage book = books[key];
         require(book.base != address(0), "PAIR_NOT_EXISTS");

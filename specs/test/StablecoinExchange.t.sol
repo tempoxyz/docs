@@ -204,7 +204,7 @@ contract StablecoinExchangeTest is Test {
         emit OrderPlaced(2, alice, address(baseToken), 1e18, false, 200);
 
         vm.prank(bob);
-        exchange.sell(address(baseToken), address(quoteToken), 1e18, 0);
+        exchange.swapExactAmountIn(address(baseToken), address(quoteToken), 1e18, 0);
 
         assertEq(exchange.pendingOrderId(), 2);
         // TODO: pull the order from orders mapping and assert state changes
@@ -298,21 +298,22 @@ contract StablecoinExchangeTest is Test {
         assertEq(quoteToken.balanceOf(alice), initialTokenBalance + exchangeBalance);
     }
 
-    function test_QuoteBuy() public {
+    function test_QuoteSwapExactAmountOut() public {
         _placeAskOrder(bob, 1000e18, 100);
 
         vm.prank(address(0));
         exchange.executeBlock();
 
         uint128 amountOut = 500e18;
-        uint128 amountIn = exchange.quoteBuy(address(quoteToken), address(baseToken), amountOut);
+        uint128 amountIn =
+            exchange.quoteSwapExactAmountOut(address(quoteToken), address(baseToken), amountOut);
 
         uint32 price = exchange.tickToPrice(100);
         uint128 expectedAmountIn = (amountOut * price) / exchange.PRICE_SCALE();
         assertEq(amountIn, expectedAmountIn);
     }
 
-    function test_Buy() public {
+    function test_SwapExactAmountOut() public {
         uint128 askOrderId = _placeAskOrder(bob, 1000e18, 100);
 
         vm.prank(address(0));
@@ -324,18 +325,19 @@ contract StablecoinExchangeTest is Test {
         uint128 maxAmountIn = expectedAmountIn + 1000;
         uint256 initialBaseBalance = baseToken.balanceOf(alice);
 
-        // Execute buy to partially fill order
+        // Execute swap to partially fill order
         vm.expectEmit(true, true, true, true);
         emit OrderFilled(askOrderId, bob, alice, amountOut, true);
 
         vm.prank(alice);
-        uint128 amountIn =
-            exchange.buy(address(quoteToken), address(baseToken), amountOut, maxAmountIn);
+        uint128 amountIn = exchange.swapExactAmountOut(
+            address(quoteToken), address(baseToken), amountOut, maxAmountIn
+        );
 
         assertEq(amountIn, expectedAmountIn);
         assertEq(baseToken.balanceOf(alice), initialBaseBalance + amountOut);
 
-        // Execute buy to fully fill order
+        // Execute swap to fully fill order
         uint128 remainingAmount = 500e18;
         uint128 expectedAmountIn2 = (remainingAmount * price) / exchange.PRICE_SCALE();
 
@@ -343,14 +345,15 @@ contract StablecoinExchangeTest is Test {
         emit OrderFilled(askOrderId, bob, alice, remainingAmount, false);
 
         vm.prank(alice);
-        uint128 amountIn2 =
-            exchange.buy(address(quoteToken), address(baseToken), remainingAmount, maxAmountIn);
+        uint128 amountIn2 = exchange.swapExactAmountOut(
+            address(quoteToken), address(baseToken), remainingAmount, maxAmountIn
+        );
 
         assertEq(amountIn2, expectedAmountIn2);
         assertEq(baseToken.balanceOf(alice), initialBaseBalance + amountOut + remainingAmount);
     }
 
-    function test_Buy_MultiTick() public {
+    function test_SwapExactAmountOut_MultiTick() public {
         uint128 order1 = _placeAskOrder(bob, 1e18, 1);
         uint128 order2 = _placeAskOrder(bob, 1e18, 2);
         uint128 order3 = _placeAskOrder(bob, 1e18, 3);
@@ -381,27 +384,29 @@ contract StablecoinExchangeTest is Test {
         emit OrderFilled(order3, bob, alice, 5e17, true);
 
         vm.prank(alice);
-        uint128 amountIn = exchange.buy(address(quoteToken), address(baseToken), buyAmount, maxIn);
+        uint128 amountIn =
+            exchange.swapExactAmountOut(address(quoteToken), address(baseToken), buyAmount, maxIn);
 
         assertEq(amountIn, totalCost);
         assertEq(baseToken.balanceOf(alice), initBalance + buyAmount);
     }
 
-    function test_QuoteSell() public {
+    function test_QuoteSwapExactAmountIn() public {
         _placeBidOrder(bob, 1000e18, 100);
 
         vm.prank(address(0));
         exchange.executeBlock();
 
         uint128 amountIn = 500e18;
-        uint128 amountOut = exchange.quoteSell(address(baseToken), address(quoteToken), amountIn);
+        uint128 amountOut =
+            exchange.quoteSwapExactAmountIn(address(baseToken), address(quoteToken), amountIn);
 
         uint32 price = exchange.tickToPrice(100);
         uint128 expectedProceeds = (amountIn * price) / exchange.PRICE_SCALE();
         assertEq(amountOut, expectedProceeds);
     }
 
-    function test_Sell() public {
+    function test_SwapExactAmountIn() public {
         uint128 bidOrderId = _placeBidOrder(bob, 1000e18, 100);
 
         vm.prank(address(0));
@@ -413,18 +418,19 @@ contract StablecoinExchangeTest is Test {
         uint128 minAmountOut = expectedAmountOut - 1000;
         uint256 initialQuoteBalance = quoteToken.balanceOf(alice);
 
-        // Execute sell to partially fill order
+        // Execute swap to partially fill order
         vm.expectEmit(true, true, true, true);
         emit OrderFilled(bidOrderId, bob, alice, amountIn, true);
 
         vm.prank(alice);
-        uint128 amountOut =
-            exchange.sell(address(baseToken), address(quoteToken), amountIn, minAmountOut);
+        uint128 amountOut = exchange.swapExactAmountIn(
+            address(baseToken), address(quoteToken), amountIn, minAmountOut
+        );
 
         assertEq(amountOut, expectedAmountOut);
         assertEq(quoteToken.balanceOf(alice), initialQuoteBalance + amountOut);
 
-        // Execute sell to fully fill order
+        // Execute swap to fully fill order
         uint128 remainingAmount = 500e18; // 1000e18 - 500e18 = 500e18 remaining
         uint128 expectedAmountOut2 = (remainingAmount * price) / exchange.PRICE_SCALE();
         uint128 minAmountOut2 = expectedAmountOut2 - 1000;
@@ -433,14 +439,15 @@ contract StablecoinExchangeTest is Test {
         emit OrderFilled(bidOrderId, bob, alice, remainingAmount, false);
 
         vm.prank(alice);
-        uint128 amountOut2 =
-            exchange.sell(address(baseToken), address(quoteToken), remainingAmount, minAmountOut2);
+        uint128 amountOut2 = exchange.swapExactAmountIn(
+            address(baseToken), address(quoteToken), remainingAmount, minAmountOut2
+        );
 
         assertEq(amountOut2, expectedAmountOut2);
         assertEq(quoteToken.balanceOf(alice), initialQuoteBalance + amountOut + amountOut2);
     }
 
-    function test_Sell_MultiTick() public {
+    function test_SwapExactAmountIn_MultiTick() public {
         uint128 order1 = _placeBidOrder(bob, 1e18, 3);
         uint128 order2 = _placeBidOrder(bob, 1e18, 2);
         uint128 order3 = _placeBidOrder(bob, 1e18, 1);
@@ -472,7 +479,7 @@ contract StablecoinExchangeTest is Test {
 
         vm.prank(alice);
         uint128 amountOut =
-            exchange.sell(address(baseToken), address(quoteToken), sellAmount, minOut);
+            exchange.swapExactAmountIn(address(baseToken), address(quoteToken), sellAmount, minOut);
 
         assertEq(amountOut, totalOut);
         assertEq(quoteToken.balanceOf(alice), initBalance + totalOut);

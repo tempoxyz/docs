@@ -49,19 +49,19 @@ The primary goal is to provide optimal pricing for users who are doing cross-sta
 - `balanceOf(address user, address token) returns (uint128)`
   - View function to check a user's balance of a token on the DEX
 
-- `sell(address tokenIn, address tokenOut, uint128 amountIn, uint128 minAmountOut) returns (uint128 amountOut)`
-- `buy(address tokenIn, address tokenOut, uint128 amountOut, uint128 maxAmountIn) returns (uint128 amountIn)`
+- `swapExactAmountIn(address tokenIn, address tokenOut, uint128 amountIn, uint128 minAmountOut) returns (uint128 amountOut)`
+- `swapExactAmountOut(address tokenIn, address tokenOut, uint128 amountOut, uint128 maxAmountIn) returns (uint128 amountIn)`
   - Execute immediately against onchain orders
   - Pay gas proportional to orders it crosses
   - First checks user's balance on the DEX, then transfers from user if insufficient balance
   - When complete, transfers funds to user
   - Credits maker's balance on the DEX when their order is filled
-  - Sell means specify the amount of token that goes in; buy means specify the amount of token that comes out. This is totally independent of which token is the quote token on their pair and the corresponding "bid/ask" terminology.
+  - swapExactAmountIn means specify the amount of token that goes in; swapExactAmountOut means specify the amount of token that comes out. This is totally independent of which token is the quote token on their pair and the corresponding "bid/ask" terminology.
   - Will fail with an InsufficientLiquidity error if there is not enough liquidity to satisfy minAmountOut or maxAmountIn.
   - For now, will fail if tokens are not paired directly against each other; later will support multi-hop trades
 
-- `quoteBuy(address tokenIn, address tokenOut, uint128 amountOut) returns (uint128 amountIn)`
-- `quoteSell(address tokenIn, address tokenOut, uint128 amountIn) returns (uint128 amountOut)`
+- `quoteSwapExactAmountOut(address tokenIn, address tokenOut, uint128 amountOut) returns (uint128 amountIn)`
+- `quoteSwapExactAmountIn(address tokenIn, address tokenOut, uint128 amountIn) returns (uint128 amountOut)`
   - View functions to give the price for trading from one token to another at a given size
   - Should be able to calculate this without iterating over all orders in the tick (by tracking the size at each tick)
 
@@ -132,7 +132,7 @@ The primary goal is to provide optimal pricing for users who are doing cross-sta
 
 ## Gas Costs
 
-- `sell()` / `buy()`
+- `swapExactAmountIn()` / `swapExactAmountOut()`
     - Cost of transfer call(s)
     - BASE_TAKE_COST
         - Should be low

@@ -38,22 +38,28 @@ interface IStablecoinExchange {
 
     function balanceOf(address user, address token) external view returns (uint128);
 
-    // Trading functions
+    // Swap functions
     // Will support routing across multiple pairs, in the future
-    function sell(address tokenIn, address tokenOut, uint128 amountIn, uint128 minAmountOut)
-        external
-        returns (uint128 amountOut);
+    function swapExactAmountIn(
+        address tokenIn,
+        address tokenOut,
+        uint128 amountIn,
+        uint128 minAmountOut
+    ) external returns (uint128 amountOut);
 
-    function buy(address tokenIn, address tokenOut, uint128 amountOut, uint128 maxAmountIn)
-        external
-        returns (uint128 amountIn);
+    function swapExactAmountOut(
+        address tokenIn,
+        address tokenOut,
+        uint128 amountOut,
+        uint128 maxAmountIn
+    ) external returns (uint128 amountIn);
 
-    function quoteBuy(address tokenIn, address tokenOut, uint128 amountOut)
+    function quoteSwapExactAmountOut(address tokenIn, address tokenOut, uint128 amountOut)
         external
         view
         returns (uint128 amountIn);
 
-    function quoteSell(address tokenIn, address tokenOut, uint128 amountIn)
+    function quoteSwapExactAmountIn(address tokenIn, address tokenOut, uint128 amountIn)
         external
         view
         returns (uint128 amountOut);
