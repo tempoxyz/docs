@@ -156,6 +156,10 @@ export default defineConfig({
             text: 'Fee Sponsorship',
             link: '/documentation/transactions/fee-sponsorship',
           },
+          {
+            text: 'Account Abstraction',
+            link: '/documentation/transactions/account-abstraction',
+          },
         ],
       },
       {

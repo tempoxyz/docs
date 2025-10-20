@@ -1,0 +1,184 @@
+import { Callout } from 'vocs/components'
+
+# Account Abstraction Transactions
+
+Tempo introduces a new transaction type to offer the same features as account abstraction, but natively on Tempo. This includes passkey support, gas sponsorship, and scheduled transactions.
+
+## Features
+
+- **Multiple signature types**: secp256k1, P256 (passkeys), and WebAuthn signatures
+- **Gas sponsorship**: Built-in fee payer support for gasless transactions
+- **Scheduled transactions**: Optional time windows for transaction execution
+- **Batch operations**: Execute multiple calls atomically using ERC-7821
+
+## Signature Types
+
+The AA transaction type supports three different signature schemes, automatically detected by signature length:
+
+### secp256k1 (65 bytes)
+
+Standard Ethereum signatures using the secp256k1 curve.
+
+```ts
+// Standard ECDSA signature
+const hash = await client.sendTransaction({
+  to: '0x...',
+  value: parseEther('1'),
+})
+```
+
+### P256 (130 bytes)
+
+P256 signatures enable passkey-based authentication. Passkeys are cryptographic keys stored in secure hardware like your phone or computer.
+
+```ts
+// P256 signature with passkey
+const signature = await signWithPasskey(transactionHash)
+// Signature is automatically recognized as P256 based on length
+```
+
+### WebAuthn (Variable length)
+
+WebAuthn support allows using biometric authentication (Face ID, Touch ID, Windows Hello) for transaction signing.
+
+```ts
+// WebAuthn signature with biometric auth
+const webAuthnSignature = await navigator.credentials.get({
+  publicKey: {
+    challenge: transactionHash,
+    // ... WebAuthn options
+  }
+})
+```
+
+## Gas Sponsorship
+
+AA transactions have built-in support for gas sponsorship, allowing applications to pay for their users' transaction fees.
+
+```ts
+// User signs the transaction
+const userSignature = await wallet.signTransaction({
+  to: '0x...',
+  value: parseEther('0.1'),
+})
+
+// Sponsor signs to pay the fees
+const feePayerSignature = await sponsor.signFeePayment(transaction)
+
+// Submit with both signatures
+const hash = await client.sendTransaction({
+  ...transaction,
+  signature: userSignature,
+  feePayerSignature: feePayerSignature,
+})
+```
+
+The fee payer's address is recovered from the `feePayerSignature`, and fees are deducted from the fee payer's balance instead of the transaction sender's balance.
+
+For more details, see [Fee Sponsorship](/documentation/transactions/fee-sponsorship).
+
+## Scheduled Transactions
+
+AA transactions can include optional `validBefore` and `validAfter` timestamps to control when the transaction can be executed.
+
+```ts
+// Transaction can only be included after a specific time
+const hash = await client.sendTransaction({
+  to: '0x...',
+  value: parseEther('1'),
+  validAfter: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
+  validBefore: Math.floor(Date.now() / 1000) + 7200, // 2 hours from now
+})
+```
+
+## Transaction Structure
+
+The AA transaction type includes standard EIP-1559 fields plus AA-specific fields:
+
+```typescript
+interface AATransaction {
+  // Standard fields
+  chainId: bigint
+  maxPriorityFeePerGas: bigint
+  maxFeePerGas: bigint
+  gasLimit: bigint
+  calls: Call[]  // Batch of calls to execute)
+  accessList: AccessListItem[]
+
+  // AA-specific fields
+  data: Bytes // ERC-7821 encoded operations
+  signature: Bytes // Variable length based on type
+  nonceKey: bigint // 64-bit nonce key
+  nonce: bigint // 64-bit sequence value
+
+  // Optional fields
+  feePayerSignature?: Bytes
+  feeToken?: Address
+  validBefore?: bigint
+  validAfter?: bigint
+}
+interface AATransaction {
+  // Standard fields
+  chainId: bigint
+  maxPriorityFeePerGas: bigint
+  maxFeePerGas: bigint
+  gasLimit: bigint
+  value: bigint](calls: Call[]  // Batch of calls to execute)
+  accessList: AccessListItem[]
+  to: Address
+  value: bigint
+  accessList: AccessListItem[]
+
+  // AA-specific fields
+  data: Bytes // ERC-7821 encoded operations
+  signature: Bytes // Variable length based on type
+  nonceKey: bigint // 64-bit nonce key
+  nonce: bigint // 64-bit sequence value
+
+  // Optional fields
+  feePayerSignature?: Bytes
+  feeToken?: Address
+  validBefore?: bigint
+  validAfter?: bigint
+}
+```
+
+## Technical Details
+
+For complete protocol specifications and implementation details, see the [Account Abstraction Transaction Type Specification](/protocol/specs/AccountAbstractionTx).
+
+
+## Future Features
+
+### Parallelizable Nonces
+
+AA transactions use a 2D nonce system with nonce keys and sequences. This allows sending multiple transactions in parallel without waiting for previous transactions to confirm.
+
+#### How It Works
+
+- **Nonce Key**: An identifier for a parallel transaction stream (192-bit number)
+- **Nonce Sequence**: The current value for that key (64-bit number)
+- **Protocol Nonce (Key 0)**: The standard sequential nonce, maintained for compatibility
+
+```ts
+// Send transactions in parallel using different nonce keys
+const tx1 = await client.sendTransaction({
+  to: recipient1,
+  value: parseEther('1'),
+  nonceKey: 1,
+  nonceSequence: 0, // First transaction on key 1
+})
+
+const tx2 = await client.sendTransaction({
+  to: recipient2,
+  value: parseEther('1'),
+  nonceKey: 2,
+  nonceSequence: 0, // First transaction on key 2 (parallel)
+})
+
+// Both transactions can be included in the same block
+```
+
+<Callout type="info">
+The protocol nonce (key 0) works exactly like traditional Ethereum nonces. Using nonce key 0 maintains full backward compatibility with existing tools and workflows.
+</Callout>
