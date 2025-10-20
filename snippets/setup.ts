@@ -1,13 +1,13 @@
 // @ts-nocheck
 // [!region setup]
-import { tempoLento } from 'tempo.ts/chains'
+import { tempo } from 'tempo.ts/chains'
 import { createTempoClient, tempoActions } from 'tempo.ts/viem'
 import { http, publicActions, walletActions } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
 export const client = createTempoClient({
   account: privateKeyToAccount('0x...'),
-  chain: tempoLento,
+  chain: tempo,
   transport: http(undefined, {
     fetchOptions: {
       headers: {

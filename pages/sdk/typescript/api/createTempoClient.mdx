@@ -39,21 +39,6 @@ const client = createClient({
 
 :::
 
-### Custom Chain
-
-You can specify a custom chain (e.g. another Tempo testnet).
-
-```ts twoslash
-import { createTempoClient } from 'tempo.ts/viem'
-import { tempoLento } from 'tempo.ts/chains' // [!code focus]
-import { privateKeyToAccount } from 'viem/accounts'
-
-const client = createTempoClient({
-  account: privateKeyToAccount('0x...'),
-  chain: tempoLento, // [!code focus]
-})
-```
-
 ### Custom Transport
 
 You can specify a custom transport (defaults to `http`).
