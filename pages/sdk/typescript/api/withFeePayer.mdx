@@ -98,7 +98,7 @@ const hash = await client.sendTransactionSync({
 import { http, walletActions } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
 import { RpcRequest, RpcResponse } from 'ox'
-import { createTempoClient, parseTransaction } from 'tempo.ts/viem'
+import { createTempoClient, Transaction } from 'tempo.ts/viem'
 
 const credentials = `${process.env['TEMPO_USERNAME']}:${process.env['TEMPO_PASSWORD']}`
 
@@ -119,10 +119,10 @@ Bun.serve({
   port: 3000,
   async fetch(req) {
     const request = RpcRequest.from(await req.json())
-    const serialized = request.params[0] as `0x77${string}`
+    const serialized = request.params[0] as `0x76${string}`
     
-    // Parse the sender's signed transaction
-    const transaction = parseTransaction(serialized)
+    // Deserialize the sender's signed transaction
+    const transaction = Transaction.deserialize(serialized)
     
     // Add fee payer signature
     const serializedTransaction = await client.signTransaction({

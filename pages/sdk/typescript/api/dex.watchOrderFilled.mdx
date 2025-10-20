@@ -1,0 +1,70 @@
+# `dex.watchOrderFilled`
+
+Watches for order filled events on the Stablecoin Exchange.  
+
+## Usage
+
+:::code-group
+
+```ts twoslash [example.ts]
+import { client } from './viem.config'
+
+const unwatch = client.dex.watchOrderFilled({
+  onOrderFilled: (args, log) => {
+    console.log('Order filled:', args.orderId)
+    console.log('Maker:', args.maker)
+    console.log('Taker:', args.taker)
+    console.log('Amount:', args.amount)
+  },
+})
+
+// Later, stop watching
+unwatch()
+```
+
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
+// [!include ~/snippets/viem.config.ts:setup]
+```
+
+:::
+
+## Return Type
+
+```ts
+type ReturnType = () => void
+```
+
+Returns a function to unsubscribe from the event.
+
+## Parameters
+
+### onOrderFilled
+
+- **Type:** `(args: OrderFilledArgs, log: Log) => void`
+
+Callback to invoke when an order is filled.
+
+The `args` object contains:
+- `orderId: bigint` - ID of the filled order
+- `maker: Address` - Address that placed the order
+- `taker: Address` - Address that filled the order
+- `amount: bigint` - Amount of tokens filled
+
+### maker (optional)
+
+- **Type:** `Address | undefined`
+
+Filter events by maker address.
+
+### orderId (optional)
+
+- **Type:** `bigint | undefined`
+
+Filter events by order ID.
+
+### taker (optional)
+
+- **Type:** `Address | undefined`
+
+Filter events by taker address.
+

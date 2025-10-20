@@ -386,6 +386,63 @@ export default defineConfig({
                 ],
               },
               {
+                text: 'Stablecoin Exchange',
+                items: [
+                  { text: 'buy', link: '/sdk/typescript/api/dex.buy' },
+                  { text: 'cancel', link: '/sdk/typescript/api/dex.cancel' },
+                  {
+                    text: 'createPair',
+                    link: '/sdk/typescript/api/dex.createPair',
+                  },
+                  {
+                    text: 'getBalance',
+                    link: '/sdk/typescript/api/dex.getBalance',
+                  },
+                  {
+                    text: 'getBuyQuote',
+                    link: '/sdk/typescript/api/dex.getBuyQuote',
+                  },
+                  {
+                    text: 'getOrder',
+                    link: '/sdk/typescript/api/dex.getOrder',
+                  },
+                  {
+                    text: 'getPriceLevel',
+                    link: '/sdk/typescript/api/dex.getPriceLevel',
+                  },
+                  {
+                    text: 'getSellQuote',
+                    link: '/sdk/typescript/api/dex.getSellQuote',
+                  },
+                  { text: 'place', link: '/sdk/typescript/api/dex.place' },
+                  {
+                    text: 'placeFlip',
+                    link: '/sdk/typescript/api/dex.placeFlip',
+                  },
+                  { text: 'sell', link: '/sdk/typescript/api/dex.sell' },
+                  {
+                    text: 'watchFlipOrderPlaced',
+                    link: '/sdk/typescript/api/dex.watchFlipOrderPlaced',
+                  },
+                  {
+                    text: 'watchOrderCancelled',
+                    link: '/sdk/typescript/api/dex.watchOrderCancelled',
+                  },
+                  {
+                    text: 'watchOrderFilled',
+                    link: '/sdk/typescript/api/dex.watchOrderFilled',
+                  },
+                  {
+                    text: 'watchOrderPlaced',
+                    link: '/sdk/typescript/api/dex.watchOrderPlaced',
+                  },
+                  {
+                    text: 'withdraw',
+                    link: '/sdk/typescript/api/dex.withdraw',
+                  },
+                ],
+              },
+              {
                 text: 'Token',
                 items: [
                   {

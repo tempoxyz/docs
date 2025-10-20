@@ -21,11 +21,11 @@ importers:
         specifier: ^4.1.14
         version: 4.1.14
       tempo.ts:
-        specifier: latest
-        version: 0.0.3(typescript@5.9.3)(viem@2.38.0(typescript@5.9.3))
+        specifier: ~0.1.0
+        version: 0.1.0(typescript@5.9.3)(viem@2.38.3(typescript@5.9.3))
       viem:
-        specifier: latest
-        version: 2.38.0(typescript@5.9.3)
+        specifier: ^2.38.3
+        version: 2.38.3(typescript@5.9.3)
       vocs:
         specifier: latest
         version: 1.0.13(@types/node@24.7.0)(@types/react@19.2.0)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rollup@4.52.4)(typescript@5.9.3)(yaml@2.8.1)
@@ -3178,11 +3178,11 @@ packages:
     resolution: {integrity: sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg==}
     engines: {node: '>=6'}
 
-  tempo.ts@0.0.3:
-    resolution: {integrity: sha512-L6ogquSljUbNIArFejEMX7aEY5fffsfp/qMOZ7ZGKF0jE822abyfqrZvih0j12KAmlyqVOQJTJ4Dz2MJb9yj4A==}
+  tempo.ts@0.1.0:
+    resolution: {integrity: sha512-+vz1HKD37br7Niqz9mRXAz7H7kdOxfjnZoj1ZLcaLM+QeY0CqcEATmP9DEcel0lsYmxEGS4gtd90XNh0iRC2Pg==}
     peerDependencies:
       prool: ^0
-      viem: '>=2.38'
+      viem: '>=2.38.2'
     peerDependenciesMeta:
       prool:
         optional: true
@@ -3332,8 +3332,8 @@ packages:
   vfile@6.0.3:
     resolution: {integrity: sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q==}
 
-  viem@2.38.0:
-    resolution: {integrity: sha512-YU5TG8dgBNeYPrCMww0u9/JVeq2ZCk9fzk6QybrPkBooFysamHXL1zC3ua10aLPt9iWoA/gSVf1D9w7nc5B1aA==}
+  viem@2.38.3:
+    resolution: {integrity: sha512-By2TutLv07iNHHtWqHHzjGipevYsfGqT7KQbGEmqLco1qTJxKnvBbSviqiu6/v/9REV6Q/FpmIxf2Z7/l5AbcQ==}
     peerDependencies:
       typescript: '>=5.0.4'
     peerDependenciesMeta:
@@ -7167,11 +7167,11 @@ snapshots:
 
   tapable@2.3.0: {}
 
-  tempo.ts@0.0.3(typescript@5.9.3)(viem@2.38.0(typescript@5.9.3)):
+  tempo.ts@0.1.0(typescript@5.9.3)(viem@2.38.3(typescript@5.9.3)):
     dependencies:
       ox: 0.9.9(typescript@5.9.3)
     optionalDependencies:
-      viem: 2.38.0(typescript@5.9.3)
+      viem: 2.38.3(typescript@5.9.3)
     transitivePeerDependencies:
       - typescript
       - zod
@@ -7324,7 +7324,7 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  viem@2.38.0(typescript@5.9.3):
+  viem@2.38.3(typescript@5.9.3):
     dependencies:
       '@noble/curves': 1.9.1
       '@noble/hashes': 1.8.0

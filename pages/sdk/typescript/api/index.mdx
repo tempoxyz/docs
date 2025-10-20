@@ -22,6 +22,23 @@
 | [`policy.modifyBlacklist`](/sdk/typescript/api/policy.modifyBlacklist) | Modifies the blacklist for a blacklist-type transfer policy |
 | [`policy.modifyWhitelist`](/sdk/typescript/api/policy.modifyWhitelist) | Modifies the whitelist for a whitelist-type transfer policy |
 | [`policy.setAdmin`](/sdk/typescript/api/policy.setAdmin) | Sets the admin for a transfer policy |
+| **Stablecoin Exchange Actions** | |
+| [`dex.buy`](/sdk/typescript/api/dex.buy) | Buys a specific amount of tokens from the Stablecoin Exchange orderbook |
+| [`dex.cancel`](/sdk/typescript/api/dex.cancel) | Cancels an order from the orderbook |
+| [`dex.createPair`](/sdk/typescript/api/dex.createPair) | Creates a new trading pair on the DEX |
+| [`dex.getBalance`](/sdk/typescript/api/dex.getBalance) | Gets a user's token balance on the Stablecoin Exchange |
+| [`dex.getBuyQuote`](/sdk/typescript/api/dex.getBuyQuote) | Gets the quote for buying a specific amount of tokens |
+| [`dex.getOrder`](/sdk/typescript/api/dex.getOrder) | Gets an order's details from the orderbook |
+| [`dex.getPriceLevel`](/sdk/typescript/api/dex.getPriceLevel) | Gets the price level information at a specific tick |
+| [`dex.getSellQuote`](/sdk/typescript/api/dex.getSellQuote) | Gets the quote for selling a specific amount of tokens |
+| [`dex.place`](/sdk/typescript/api/dex.place) | Places a limit order on the orderbook |
+| [`dex.placeFlip`](/sdk/typescript/api/dex.placeFlip) | Places a flip order that automatically flips when filled |
+| [`dex.sell`](/sdk/typescript/api/dex.sell) | Sells a specific amount of tokens from the Stablecoin Exchange orderbook |
+| [`dex.watchFlipOrderPlaced`](/sdk/typescript/api/dex.watchFlipOrderPlaced) | Watches for flip order placed events |
+| [`dex.watchOrderCancelled`](/sdk/typescript/api/dex.watchOrderCancelled) | Watches for order cancelled events |
+| [`dex.watchOrderFilled`](/sdk/typescript/api/dex.watchOrderFilled) | Watches for order filled events |
+| [`dex.watchOrderPlaced`](/sdk/typescript/api/dex.watchOrderPlaced) | Watches for order placed events |
+| [`dex.withdraw`](/sdk/typescript/api/dex.withdraw) | Withdraws tokens from the DEX to the caller's wallet |
 | **Token Actions** | |
 | [`token.approve`](/sdk/typescript/api/token.approve) | Approves a spender to transfer TIP-20 tokens on behalf of the caller |
 | [`token.burn`](/sdk/typescript/api/token.burn) | Burns TIP-20 tokens from the caller's balance |

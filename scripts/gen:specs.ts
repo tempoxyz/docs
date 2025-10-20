@@ -32,7 +32,7 @@ for (const file of files) {
   })
 }
 
-const configPath = path.join(process.cwd(), 'vocs.config.ts')
+const configPath = path.join(process.cwd(), 'vocs.config.tsx')
 let config = fs.readFileSync(configPath, 'utf-8')
 
 const context = items
@@ -48,4 +48,4 @@ fs.writeFileSync(configPath, config, 'utf-8')
 
 child_process.spawnSync('pnpm', ['check'])
 
-console.log(`✓ Generated ${items.length} spec items in \`vocs.config.ts\``)
+console.log(`✓ Generated ${items.length} spec items in \`vocs.config.tsx\``)
