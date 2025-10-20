@@ -157,8 +157,8 @@ export default defineConfig({
             link: '/documentation/transactions/fee-sponsorship',
           },
           {
-            text: 'Account Abstraction',
-            link: '/documentation/transactions/account-abstraction',
+            text: 'Scheduled Transactions',
+            link: '/documentation/transactions/scheduled-transactions',
           },
         ],
       },
@@ -168,6 +168,10 @@ export default defineConfig({
           {
             text: 'Default Accounts',
             link: '/documentation/accounts',
+          },
+          {
+            text: 'Passkey Authentication',
+            link: '/documentation/accounts/passkeys',
           },
         ],
       },
@@ -225,6 +229,10 @@ export default defineConfig({
             text: 'Payments Lane',
             link: '/protocol/transactions/payments-lane',
           },
+          {
+            text: 'Account Abstraction',
+            link: '/protocol/specs/account-abstraction',
+          },
         ],
       },
       {
@@ -248,14 +256,6 @@ export default defineConfig({
       {
         text: 'Specs',
         items: [
-          {
-            text: 'Account Abstraction Tx Type',
-            link: '/protocol/specs/AccountAbstractionTx',
-          },
-          {
-            text: 'Default Account Abstraction (DAA)',
-            link: '/protocol/specs/DefaultAccountAbstraction',
-          },
           { text: 'Fee AMM Specification', link: '/protocol/specs/FeeAMM' },
           { text: 'Payment lane', link: '/protocol/specs/PaymentLane' },
           {
