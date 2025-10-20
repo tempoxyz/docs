@@ -22,7 +22,7 @@ importers:
         version: 4.1.14
       tempo.ts:
         specifier: latest
-        version: 0.0.1(typescript@5.9.3)(viem@2.38.0(typescript@5.9.3))
+        version: 0.0.3(typescript@5.9.3)(viem@2.38.0(typescript@5.9.3))
       viem:
         specifier: latest
         version: 2.38.0(typescript@5.9.3)
@@ -3178,8 +3178,8 @@ packages:
     resolution: {integrity: sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg==}
     engines: {node: '>=6'}
 
-  tempo.ts@0.0.1:
-    resolution: {integrity: sha512-Wq+Y6q65kwl/OJ9HQnj5MUkuFm04POKof6EIP3d+IOxzGC2nmE+MYoSqoHMpCIBdFV9FgmOknA2JzI2PtFg1xg==}
+  tempo.ts@0.0.3:
+    resolution: {integrity: sha512-L6ogquSljUbNIArFejEMX7aEY5fffsfp/qMOZ7ZGKF0jE822abyfqrZvih0j12KAmlyqVOQJTJ4Dz2MJb9yj4A==}
     peerDependencies:
       prool: ^0
       viem: '>=2.38'
@@ -7167,7 +7167,7 @@ snapshots:
 
   tapable@2.3.0: {}
 
-  tempo.ts@0.0.1(typescript@5.9.3)(viem@2.38.0(typescript@5.9.3)):
+  tempo.ts@0.0.3(typescript@5.9.3)(viem@2.38.0(typescript@5.9.3)):
     dependencies:
       ox: 0.9.9(typescript@5.9.3)
     optionalDependencies:
