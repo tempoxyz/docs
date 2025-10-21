@@ -6,7 +6,7 @@ This documentation is in active development. Anything is subject to change.
 
 ## What is Tempo?
 
-Tempo is a Layer 1 blockchain purpose-built for global payments. 
+Tempo is a Layer 1 blockchain purpose-built for global payments.
 Unlike general-purpose blockchains, every aspect of Tempo is optimized for the specific needs of real-world payment systems: low and predictable costs, stablecoin flexibility, built-in compliance, and payment-grade user experience.
 
 ## Key Concepts
@@ -58,9 +58,15 @@ Tempo includes an enshrined DEX designed specifically for cross-stablecoin payme
 
 The DEX enables cross-stablecoin payments – users can send USDC while recipients receive USDT, all in a single transaction.
 
+| Topic | Description |
+|-------|-------------|
+| [**Overview**](/documentation/exchange) | Understand the enshrined DEX design goals and features |
+| [**Executing Swaps**](/documentation/exchange/executing-swaps) | Quote prices and swap between stablecoins |
+| [**Providing Liquidity**](/documentation/exchange/providing-liquidity) | Place orders and flip orders to earn spreads |
+
 ### "Smarter" Native Accounts
 
-Every account on Tempo is delegated to a ["Default Account Abstraction"](/documentation/accounts) precompile. 
+Every account on Tempo is delegated to a ["Default Account Abstraction"](/documentation/accounts) precompile.
 Regular externally-owned accounts (EOAs) automatically gain "smart" account capabilities on first use, with
 no need to perform manual upgrades.
 

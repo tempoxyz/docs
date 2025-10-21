@@ -15,7 +15,7 @@ TIP20 token = factory.createToken(
   "My Company USD",  // name
   "MCUSD",           // symbol
   "USD",             // currency
-  TIP20(0x20c0000000000000000000000000000000000000), // linking token
+  TIP20(0x20c0000000000000000000000000000000000000), // linkingToken (linkingUSD)
   msg.sender         // admin
 );
 ```
@@ -26,7 +26,7 @@ See a full [TypeScript Example](/sdk/typescript/api/token.create)
 
 When you create a TIP-20 token, you interact with the `TIP20Factory` precompiled contract deployed at a fixed address. The factory:
 
-1. **Validates your parameters** (currency code, linking token, etc.)
+1. **Validates your parameters** (currency code, quote token, etc.)
 2. **Deploys a new TIP-20 contract** at a deterministic vanity address
 3. **Grants admin role** to your specified address
 4. **Sets up default states** (transfer policy, supply cap, pause state)
@@ -64,14 +64,14 @@ Each TIP-20 token is deployed to a predictable address following this pattern:
 
 The token ID is an incrementing counter managed by the factory, making token addresses easily identifiable as TIP-20 tokens. For example, token ID `1` deploys to `0x20C0000000000000000000000000000001`.
 
-### Linking Tokens
+### Quote Tokens
 
-Every TIP-20 token (except the root token) has a **linking token** that determines:
+Every TIP-20 token has a **quote token** that determines:
 
 - Which token it can be traded against on the built-in DEX
 - Its position in the token hierarchy (used for fee preferences and liquidity routing)
 
-Most USD stablecoins link to the root token at `0x20c0000000000000000000000000000000000000`.
+Most USD stablecoins use [linkingUSD](/documentation/tokens/linkingUSD) at `0x20c0000000000000000000000000000000000000` as their quote token.
 
 ### Currency Codes
 
@@ -82,16 +82,16 @@ The `currency` parameter automatically sets decimal precision via the [TIP-4217 
 - **BTC**: 8 decimals
 - **Custom currencies**: Configurable by the TIP-4217 admin
 
-### Linking Tokens
+### Quote Tokens
 
 The `linkingToken` parameter determines trading pairs and token hierarchy:
 
-- **Most stablecoins**: Link to the root token (`0x20c0000000000000000000000000000000000000`)
-- **Custom pairs**: Can link to any existing TIP-20 token
-- **Root token**: The only token that links to itself
+- **Most stablecoins**: Use [linkingUSD](/documentation/tokens/linkingUSD) (`0x20c0000000000000000000000000000000000000`) as their quote token
+- **Custom pairs**: Can use any existing TIP-20 token as a quote token
+- **linkingUSD**: The root quote token that serves as the base for USD stablecoins
 
 :::warning
-Linking tokens cannot be changed after creation. Choose carefully based on your expected liquidity and trading needs.
+Quote tokens cannot be changed after creation. Choose carefully based on your expected liquidity and trading needs.
 :::
 
 ### Roles & Permissions

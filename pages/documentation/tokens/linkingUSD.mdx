@@ -1,0 +1,50 @@
+# linkingUSD
+
+linkingUSD is the root quote token used by USD stablecoins on Tempo's decentralized exchange.
+
+## Overview
+
+linkingUSD is a non-transferable, USD-denominated accounting unit that serves as the common quote token for all USD stablecoins on the exchange. It exists to:
+
+- **Concentrate liquidity** - All USD stablecoins trade against linkingUSD, preventing liquidity fragmentation
+- **Maintain neutrality** - No specific issuer's token is privileged as the base quote
+- **Simplify routing** - Direct trading pairs between stablecoins without complex routing
+- **Reduce slippage** - Concentrated liquidity improves price discovery and minimizes slippage
+
+## Properties
+
+- **Address**: `0x20c0000000000000000000000000000000000000`
+- **Non-transferable**: Cannot be transferred between accounts or used as a standard stablecoin
+- **Quote token only**: Used exclusively for exchange accounting and order books
+
+## How It Works
+
+When you create a USD stablecoin on Tempo, you typically set linkingUSD as its quote token:
+
+```solidity
+TIP20 token = factory.createToken(
+  "My Company USD",
+  "MCUSD",
+  "USD",
+  TIP20(0x20c0000000000000000000000000000000000000), // linkingUSD
+  msg.sender
+);
+```
+
+This means:
+- Your token trades against linkingUSD on the exchange
+- Users can swap between your token and other USD stablecoins that also use linkingUSD
+- All liquidity is concentrated in linkingUSD pairs
+
+## Why Non-Transferable?
+
+linkingUSD is designed as an accounting unit, not a circulating stablecoin. This design:
+- Prevents it from being used outside the exchange
+- Ensures it serves purely as a neutral reference point
+- Avoids regulatory complexity of issuing a transferable USD stablecoin
+
+## See Also
+
+- [Creating Tokens](/documentation/tokens/creating-tokens) - How to set linkingUSD as your quote token
+- [Exchange Overview](/documentation/exchange) - How the exchange uses linkingUSD
+- [Providing Liquidity](/documentation/exchange/providing-liquidity) - Trading against linkingUSD pairs

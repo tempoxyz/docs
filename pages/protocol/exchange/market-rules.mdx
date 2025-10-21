@@ -1,0 +1,222 @@
+import { Callout } from 'vocs/components'
+
+# Market Rules
+
+This page defines the trading parameters, constraints, and governance mechanisms for the Stablecoin Exchange. These rules ensure stable, efficient markets while preventing abuse and maintaining system integrity.
+
+## Overview
+
+This document covers the operational rules and parameters that govern the Stablecoin Exchange:
+
+| Section | Description |
+|---------|-------------|
+| [**Pairing and Asset Constraints**](#pairing-and-asset-constraints) | Which tokens can trade together and how the quote token system works |
+| [**Price Bands, Ticks, and Limits**](#price-bands-ticks-and-limits) | How prices are specified, what ranges are allowed, and minimum order sizes |
+| [**Anti-MEV and Fairness Mechanisms**](#anti-mev-and-fairness-mechanisms) | How the exchange prevents manipulation through deferred execution and other protections |
+| [**Trading Fees**](#trading-fees) | Current fee structure (none) and how gas costs work |
+
+## Pairing and Asset Constraints
+
+### Allowed Trading Pairs
+
+The exchange only supports trading between tokens that have a direct pairing relationship:
+
+- **Direct pairs only**: Token A can trade with Token B only if Token B is Token A's designated quote token
+- **No multi-hop trades**: Currently, trades requiring multiple hops (A → B → C) are not supported
+- **Future routing**: Multi-hop trading with automatic routing is planned for future releases
+
+### Quote Token System
+
+Each token specifies a single quote token in its TIP-20 metadata:
+
+```solidity
+// Most USD stablecoins use linkingUSD as their quote token
+address constant LINKING_USD = 0x20c0000000000000000000000000000000000000;
+
+// A token's quote token is stored in its metadata
+token.quoteToken() => LINKING_USD
+```
+
+**Rules:**
+- Pairs exist only between a token and its quote token
+- The quote token serves as the price denomination
+- Most USD stablecoins share the same quote token ([linkingUSD](/documentation/tokens/linkingUSD))
+- Tokens with different quote tokens cannot trade directly
+
+<Callout type="info">
+  The quote token system creates a hub-and-spoke model where most USD stablecoins can trade with each other through their common quote token.
+</Callout>
+
+### Asset Type Restrictions
+
+**Same-asset stablecoins only**: The exchange is designed exclusively for trading between stablecoins representing the same underlying asset.
+
+- ✅ USDC ↔ USDT (both represent USD)
+- ✅ USDC ↔ DAI (both represent USD)
+- ❌ USDC ↔ EURC (different underlying assets)
+- ❌ USDC ↔ volatile tokens (not stablecoins)
+
+This constraint allows the exchange to:
+- Enforce tight price bands
+- Optimize for stable asset assumptions
+- Minimize risk of extreme price movements
+
+## Price Bands, Ticks, and Limits
+
+### Tick System
+
+Prices are expressed as integer ticks with 0.1 basis point precision:
+
+**Tick formula**: `tick = (price - 1) × 100_000`
+
+**Price formula**: `price = 1 + (tick / 100_000)`
+
+### Tick Constraints
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| Minimum Tick | -200 | Price = $0.9800 (2% below peg) |
+| Maximum Tick | +200 | Price = $1.0200 (2% above peg) |
+| Tick Size | 1 | 0.1 basis points (0.001%) |
+| Price Precision | 0.01% | 1 basis point minimum price movement |
+
+**Examples:**
+
+| Tick | Price | Deviation from Peg |
+|------|-------|--------------------|
+| -200 | $0.9800 | -2.00% |
+| -100 | $0.9900 | -1.00% |
+| -10 | $0.9990 | -0.10% |
+| 0 | $1.0000 | 0.00% |
+| 10 | $1.0010 | +0.10% |
+| 100 | $1.0100 | +1.00% |
+| 200 | $1.0200 | +2.00% |
+
+<Callout type="warning">
+  Orders with ticks outside the ±2000 range will be rejected. This protects against depegging events and ensures the system operates within stable asset assumptions.
+</Callout>
+
+### Minimum Order Size
+
+To prevent excessive small orders that would make swaps expensive:
+
+- **Minimum order size**: $100 USD equivalent
+- **Rationale**: Each order touched during a swap incurs gas costs
+- **Enforcement**: Checked at order placement time
+
+```solidity
+// Example: Minimum 100 USDC (assuming 6 decimals)
+require(amount >= 100e6, "OrderTooSmall");
+```
+
+### Flip Tick Constraints
+
+For flip orders, the flip tick must be on the opposite side of the current tick:
+
+**For bid orders** (buying the token):
+```
+flipTick > tick
+```
+The flip tick must be at a higher price (you'll sell at a higher price after buying)
+
+**For ask orders** (selling the token):
+```
+flipTick < tick
+```
+The flip tick must be at a lower price (you'll buy at a lower price after selling)
+
+**Example:**
+```solidity
+// Valid: Bid at $0.9990 (-10), flip to ask at $1.0010 (+10)
+placeFlip(token, 1000e6, true, -10, 10);
+
+// Invalid: Bid at $0.9990 (-10), flip to ask at $0.9980 (-20)
+// Rejected because flipTick (-20) < tick (-10) for a bid
+placeFlip(token, 1000e6, true, -10, -20); // REVERTS
+```
+
+## Anti-MEV and Fairness Mechanisms
+
+### Deferred Order Execution
+
+Orders are not immediately visible when placed:
+
+```
+Transaction Block N:
+├─ place() called at timestamp T1
+│  └─ Order queued but invisible
+├─ place() called at timestamp T2
+│  └─ Order queued but invisible
+└─ Block ends
+   └─ All orders added to book
+
+Block N+1:
+└─ Orders now visible and matchable
+```
+
+**Benefits:**
+- No backrunning: Can't observe and front-run new orders
+- No JIT attacks: Can't add liquidity just before a trade
+- Fair time priority: Orders placed earlier in block get priority
+
+### Immediate Swap Execution
+
+Swaps execute immediately but only see orders already in the book:
+
+```
+Block N:
+├─ Orders from Block N-1 and earlier: VISIBLE
+├─ Orders placed in Block N: INVISIBLE
+└─ swap() executes against visible orders only
+```
+
+This prevents:
+- Sandwich attacks (can't place order before and after in same block)
+- Toxic order flow (can't react to same-block activity)
+
+### No Probabilistic MEV
+
+The design eliminates profitability of spam transactions:
+
+- Fixed-price execution (no slippage during fill)
+- Batch settlement (all swaps at end of block see same state)
+- High placement costs (spam is expensive)
+
+The only MEV opportunity is the top-of-block race to rebalance after previous block's activity - a fair, competitive auction.
+
+### Order Crossing Allowed
+
+Orders can be placed at crossing prices (bid > ask):
+
+```solidity
+// Both valid and remain in book
+place(USDC, 1000e6, true, 10);   // Bid at $1.0010
+place(USDC, 1000e6, false, -10); // Ask at $0.9990
+```
+
+**Rationale:**
+- Simplifies order placement (no complex rejection logic)
+- Reduces race conditions
+- Market forces will naturally arbitrage crossed orders
+
+## Trading Fees
+
+### Current Fee Structure
+
+**No trading fees**: Currently the exchange is fee-free.
+
+- Costs are covered through gas fees
+- No protocol take rate on trades
+- No LP fees on order fills
+
+### Gas as the Fee Mechanism
+
+Users pay gas for operations:
+
+| Operation | Relative Cost | Rationale |
+|-----------|---------------|-----------|
+| `place()` | High | Prevent spam, encourage meaningful liquidity |
+| `placeFlip()` | High | Similar to place() |
+| `cancel()` | Very Low | Encourage active position management |
+| `swap()` | Medium-High | Scales with orders touched |
+| `withdraw()` | Low | Simple balance transfer |

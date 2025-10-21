@@ -116,6 +116,10 @@ export default defineConfig({
             link: '/documentation/tokens/creating-tokens',
           },
           {
+            text: 'linkingUSD',
+            link: '/documentation/tokens/linkingUSD',
+          },
+          {
             text: 'Roles & Permissions',
             link: '/documentation/tokens/roles',
           },
@@ -159,6 +163,27 @@ export default defineConfig({
           {
             text: 'Scheduled Transactions',
             link: '/documentation/transactions/scheduled-transactions',
+          },
+        ],
+      },
+      {
+        text: 'Exchanging Tokens',
+        items: [
+          {
+            text: 'Overview',
+            link: '/documentation/exchange',
+          },
+          {
+            text: 'Executing Swaps',
+            link: '/documentation/exchange/executing-swaps',
+          },
+          {
+            text: 'Providing Liquidity',
+            link: '/documentation/exchange/providing-liquidity',
+          },
+          {
+            text: 'Exchange Balance',
+            link: '/documentation/exchange/exchange-balance',
           },
         ],
       },
@@ -254,14 +279,27 @@ export default defineConfig({
         ],
       },
       {
+        text: 'Exchange',
+        items: [
+          {
+            text: 'Contract Interface',
+            link: '/protocol/exchange/contract-interface',
+          },
+          {
+            text: 'Execution Semantics',
+            link: '/protocol/exchange/execution-semantics',
+          },
+          {
+            text: 'Market Rules',
+            link: '/protocol/exchange/market-rules',
+          },
+        ],
+      },
+      {
         text: 'Specs',
         items: [
           { text: 'Fee AMM Specification', link: '/protocol/specs/FeeAMM' },
           { text: 'Payment lane', link: '/protocol/specs/PaymentLane' },
-          {
-            text: 'Stablecoin Exchange Specification',
-            link: '/protocol/specs/StablecoinExchange',
-          },
           {
             text: 'Tempo Transactions (Type 0x77)',
             link: '/protocol/specs/TempoTransaction',
