@@ -4,7 +4,7 @@ import { defineConfig } from 'vocs'
 export default defineConfig({
   banner: {
     content:
-      'We have released our third testnet, named <span class="font-medium">Lento</span>. <a href="/testnet/lento" class="text-[#0588F0] no-underline">See updates →</a>',
+      'We have released our fourth testnet, named <span class="font-medium">Andante</span>. <a href="/testnet/andante" class="text-[#0588F0] no-underline">See updates →</a>',
   },
   head() {
     return (
@@ -58,6 +58,10 @@ export default defineConfig({
       {
         text: 'Releases',
         items: [
+          {
+            text: 'Andante (Testnet #4)',
+            link: '/testnet/andante',
+          },
           {
             text: 'Lento (Testnet #3)',
             link: '/testnet/lento',
@@ -256,7 +260,7 @@ export default defineConfig({
           },
           {
             text: 'Account Abstraction',
-            link: '/protocol/specs/account-abstraction',
+            link: '/protocol/transactions/account-abstraction',
           },
         ],
       },
@@ -292,21 +296,6 @@ export default defineConfig({
           {
             text: 'Market Rules',
             link: '/protocol/exchange/market-rules',
-          },
-        ],
-      },
-      {
-        text: 'Specs',
-        items: [
-          { text: 'Fee AMM Specification', link: '/protocol/specs/FeeAMM' },
-          { text: 'Payment lane', link: '/protocol/specs/PaymentLane' },
-          {
-            text: 'Tempo Transactions (Type 0x77)',
-            link: '/protocol/specs/TempoTransaction',
-          },
-          {
-            text: 'Token Preferences',
-            link: '/protocol/specs/TokenPreferences',
           },
         ],
       },

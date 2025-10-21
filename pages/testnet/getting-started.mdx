@@ -22,6 +22,7 @@ For more details, see the [viem documentation on mnemonicToAccount](https://viem
 To interact with the testnet, you'll need test tokens. Each testnet has a built-in faucet that can fund your address with test stablecoins.
 
 See the faucet instructions for each testnet:
+- [Andante (Testnet #4)](/testnet/andante#faucet)
 - [Lento (Testnet #3)](/testnet/lento#faucet)
 - [Adagietto (Testnet #2)](/testnet/adagietto#faucet)
 - [Adagio (Testnet #1)](/testnet/adagio#using-the-faucet)
@@ -30,7 +31,7 @@ Example faucet usage:
 
 ```bash
 cast rpc tempo_fundAddress YOUR_ADDRESS \
-  --rpc-url https://${USERNAME}:${PASSWORD}@rpc-lento.tempoxyz.dev
+  --rpc-url https://${USERNAME}:${PASSWORD}@rpc-andante.tempoxyz.dev
 ```
 
 ---
@@ -87,12 +88,12 @@ export PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4
 
 # Deploy a contract using the `forge create` command.
 forge create src/Counter.sol:Counter \
-  --rpc-url https://{username}:{password}@rpc-adagio.tempoxyz.dev \
+  --rpc-url https://{username}:{password}@rpc-andante.tempoxyz.dev \
   --private-key $PRIVATE_KEY
 
 # Or deploy contract(s) using a .s.sol script.
 forge script src/Counter.s.sol:Counter \
-  --rpc-url https://{username}:{password}@rpc-adagio.tempoxyz.dev \
+  --rpc-url https://{username}:{password}@rpc-andante.tempoxyz.dev \
   --private-key $PRIVATE_KEY \
   --broadcast
 ```

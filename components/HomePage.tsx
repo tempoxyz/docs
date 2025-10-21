@@ -46,10 +46,10 @@ export function HomePage() {
         <div className="h-[60px]" />
         <div className="w-fit">
           <TestnetStatus
-            created="2025-10-06T12:00:00Z"
-            name="Lento"
-            number={3}
-            to="/testnet/lento"
+            created="2025-10-20T12:00:00Z"
+            name="Andante"
+            number={4}
+            to="/testnet/andante"
           />
         </div>
       </div>

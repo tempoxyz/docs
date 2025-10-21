@@ -1,0 +1,135 @@
+import { Callout } from 'vocs/components'
+
+# Andante [The fourth Tempo testnet]
+
+## What's New
+
+Andante is our fourth Tempo testnet, released on October 21st, 2025.
+
+### Stablecoin Exchange
+
+Andante introduces an [enshrined stablecoin exchange](/documentation/exchange) (DEX) designed specifically for trading between stablecoins of the same underlying asset. Built directly into the protocol as a precompiled contract, the exchange provides optimal pricing for cross-stablecoin trading with built-in MEV protection and significantly lower gas costs compared to traditional DEXs.
+
+The exchange also introduces [linkingUSD](/documentation/tokens/linkingUSD), a system-level TIP-20 token that serves as a common accounting unit across all stablecoin pools, enabling efficient multi-hop trading and unified liquidity provision.
+
+Learn how to start [executing swaps](/documentation/exchange/executing-swaps) or [providing liquidity](/documentation/exchange/providing-liquidity) on the exchange.
+
+### Native Account Abstraction
+
+Andante fully integrates [native account abstraction](/protocol/transactions/account-abstraction) at the protocol level as a new kind of transaction type. This should eliminate the need for separate entry point contracts. This transaction type makes it easy to support use cases like [batch transactions](/documentation/transactions/batch-transactions), [fee sponsorship](/documentation/transactions/fee-sponsorship), [scheduling](/documentation/transactions/scheduled-transactions), and the ability to use [passkeys](/documentation/accounts/passkeys) as wallets on Tempo.
+
+## Additional Updates
+
+### Consensus Expansion
+
+This testnet is experimenting with a third-party validator in consensus that is actively working on their deployment during the testnet period. As a result, the testnet may experience reduced performance due to less optimized validator nodes.
+
+### TIP-20 Address Shift
+
+All addresses for TIP-20 tokens have been shifted by one. The `0x20c0000000000000000000000000000000000000` address is now reserved for [linkingUSD](/documentation/tokens/linkingUSD), a system-level TIP-20 built for the newly added enshrined [stablecoin exchange](/documentation/exchange).
+
+### Granular Block Timestamps
+
+Blocks now include a granular timestamp as part of the header via the `timestampMillisPart` field, providing millisecond-level precision for improved time accuracy.
+
+## Network Details
+
+| Network Parameter | Value |
+|-------------------|-------|
+| **Network Name** | Andante |
+| **Chain ID** | `42427` |
+| **RPC URL** | `https://rpc-andante.tempoxyz.dev` |
+| **Authenticated RPC URL** | `https://${USERNAME}:${PASSWORD}@rpc-andante.tempoxyz.dev` |
+
+Request credentials from the Tempo team.
+
+### Example Connection
+
+```bash
+cast block --rpc-url \
+    https://${USERNAME}:${PASSWORD}@rpc-andante.tempoxyz.dev
+```
+
+<Callout type="warning">
+  Replace `${USERNAME}` and `${PASSWORD}` with your assigned credentials.
+</Callout>
+
+## Faucet
+
+The faucet drips AlphaUSD, BetaUSD, and ThetaUSD to the given address:
+
+```bash
+# Fund your address with supported stablecoins
+cast rpc tempo_fundAddress 0x820525B56cF3cD426e58507F65DCaCB90BceEFb8 \
+  --rpc-url https://${USERNAME}:${PASSWORD}@rpc-andante.tempoxyz.dev
+```
+
+### Check Token Balance
+
+```bash
+# Example: Check AlphaUSD balance
+cast balance --erc20 0x20c0000000000000000000000000000000000001 0x820525B56cF3cD426e58507F65DCaCB90BceEFb8 \
+  --rpc-url https://${USERNAME}:${PASSWORD}@rpc-andante.tempoxyz.dev
+```
+
+## Predeployed Contracts
+
+The following contracts are predeployed on the Andante testnet:
+
+| Contract | Address |
+|----------|---------|
+| **[Multicall3](https://github.com/mds1/multicall3)** | `0xcA11bde05977b3631167028862bE2a173976CA11` |
+| **[CreateX](https://github.com/pcaversaccio/createx)** | `0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed` |
+| **[Permit2](https://github.com/Uniswap/permit2)** | `0x000000000022d473030f116ddee9f6b43ac78ba3` |
+| **[IthacaAccount](https://github.com/ithacaxyz/account/blob/main/src/IthacaAccount.sol)** | `0x7702c00000000000000000000000000000000000` |
+| **[SafeDeployer](https://github.com/safe-global/safe-smart-account)** | `0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7` |
+| **[Arachnid Create2 Factory](https://github.com/Arachnid/deterministic-deployment-proxy)** | `0x4e59b44847b379578588920cA78FbF26c0B4956C` |
+
+## Predeployed Tokens
+
+The testnet includes three predeployed stablecoins (all pegged to USD):
+
+| Token | Currency | Address |
+|-------|----------|---------|
+| **AlphaUSD** | USD | `0x20c0000000000000000000000000000000000001` |
+| **BetaUSD** | USD | `0x20c0000000000000000000000000000000000002` |
+| **ThetaUSD** | USD | `0x20c0000000000000000000000000000000000003` |
+
+<Callout type="info">
+  All TIP-20 addresses have been shifted by one. The `0x20c0000000000000000000000000000000000000` address is now reserved for linkingUSD.
+</Callout>
+
+## Predeployed Liquidity
+
+The following liquidity is available on the Fee AMM:
+
+- **BetaUSD → AlphaUSD** (10k on each side)
+- **ThetaUSD → AlphaUSD** (10k on each side)
+
+These pools enable automatic fee token conversions when users pay gas fees in tokens different from the validator's preferred token.
+
+## FAQ
+
+### What is the stablecoin exchange address and how do I use it?
+
+The stablecoin exchange is deployed as a precompiled contract at `0xdec0000000000000000000000000000000000000`. You can interact with it directly through the contract interface to execute swaps or provide liquidity. See the [executing swaps](/documentation/exchange/executing-swaps) and [providing liquidity](/documentation/exchange/providing-liquidity) documentation for detailed instructions.
+
+Note that there is no web interface for the exchange in this release, but one is being actively worked on. If you're interested in building tooling or providing feedback on the exchange, we'd love to hear from you!
+
+### What is linkingUSD?
+
+linkingUSD is a system-level TIP-20 token that acts as a common accounting unit for the stablecoin exchange. Instead of creating separate liquidity pools for every stablecoin pair, liquidity providers deposit their stablecoins into pools paired with linkingUSD. This design enables efficient multi-hop trading and unified liquidity across all stablecoin markets. Learn more in the [linkingUSD documentation](/documentation/tokens/linkingUSD).
+
+### Do regular EOAs (externally owned accounts) still work with native account abstraction?
+
+Yes! Native account abstraction on Tempo is fully backward compatible with traditional EOAs.
+
+You can continue using your existing wallets and accounts exactly as you would on any other EVM chain. The account abstraction features are available as an additional transaction type that unlocks advanced capabilities like batch transactions, fee sponsorship, and passkey authentication, but standard EOA transactions continue to work as expected.
+
+### Will my contracts from the previous testnet work on Andante?
+
+No. Andante is a brand new network with no history from past testnets. You will need to redeploy your contracts and update any integration code to work with the new testnet. We anticipate that by release #6 we will no longer be starting a new testnet each time.
+
+### Where do I report bugs or get help?
+
+Please use the Tempo Slack channels for bug reports, questions, and support. Our team actively monitors these channels and will help you troubleshoot any issues you encounter on the testnet.
