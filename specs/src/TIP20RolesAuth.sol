@@ -13,7 +13,7 @@ abstract contract TIP20RolesAuth {
         bytes32 indexed role, bytes32 indexed newAdminRole, address indexed sender
     );
 
-    mapping(address account => mapping(bytes32 role => bool)) internal hasRole;
+    mapping(address account => mapping(bytes32 role => bool)) public hasRole;
     mapping(bytes32 role => bytes32 adminRole) internal roleAdmin;
 
     bytes32 internal constant DEFAULT_ADMIN_ROLE = 0; // Roles with unset admins will yield this role as admin.
