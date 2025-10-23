@@ -183,24 +183,18 @@ contract LinkingUSDTest is Test {
         assertEq(linkingToken.balanceOf(bob), bobBalanceBefore + amount);
     }
 
-    function test_Transfer_WithReceiveRole(uint128 amount) public {
+    function test_Transfer_WithReceiveWithMemoRole_Reverts(uint128 amount) public {
         vm.assume(amount > 0);
 
         vm.startPrank(admin);
         linkingToken.mint(alice, amount);
-        linkingToken.grantRole(linkingToken.RECEIVE_ROLE(), bob);
+        linkingToken.grantRole(linkingToken.RECEIVE_WITH_MEMO_ROLE(), bob);
         vm.stopPrank();
-
-        uint256 aliceBalanceBefore = linkingToken.balanceOf(alice);
-        uint256 bobBalanceBefore = linkingToken.balanceOf(bob);
 
         vm.startPrank(alice);
-        bool success = linkingToken.transfer(bob, amount);
-        assertTrue(success);
+        vm.expectRevert(LinkingUSD.TransfersDisabled.selector);
+        linkingToken.transfer(bob, amount);
         vm.stopPrank();
-
-        assertEq(linkingToken.balanceOf(alice), aliceBalanceBefore - amount);
-        assertEq(linkingToken.balanceOf(bob), bobBalanceBefore + amount);
     }
 
     function test_TransferWithMemo_WithTransferRole(uint128 amount) public {
@@ -222,12 +216,12 @@ contract LinkingUSDTest is Test {
         assertEq(linkingToken.balanceOf(bob), bobBalanceBefore + amount);
     }
 
-    function test_TransferWithMemo_WithReceiveRole(uint128 amount) public {
+    function test_TransferWithMemo_WithReceiveWithMemoRole(uint128 amount) public {
         vm.assume(amount > 0);
 
         vm.startPrank(admin);
         linkingToken.mint(alice, amount);
-        linkingToken.grantRole(linkingToken.RECEIVE_ROLE(), bob);
+        linkingToken.grantRole(linkingToken.RECEIVE_WITH_MEMO_ROLE(), bob);
         vm.stopPrank();
 
         uint256 aliceBalanceBefore = linkingToken.balanceOf(alice);
@@ -283,29 +277,21 @@ contract LinkingUSDTest is Test {
         assertEq(linkingToken.allowance(alice, bob), allowanceBefore - amount);
     }
 
-    function test_TransferFrom_WithReceiveRole(uint128 amount) public {
+    function test_TransferFrom_WithReceiveWithMemoRole_Reverts(uint128 amount) public {
         vm.assume(amount > 0);
 
         vm.startPrank(admin);
         linkingToken.mint(alice, amount);
-        linkingToken.grantRole(linkingToken.RECEIVE_ROLE(), bob);
+        linkingToken.grantRole(linkingToken.RECEIVE_WITH_MEMO_ROLE(), bob);
         vm.stopPrank();
 
         vm.prank(alice);
         linkingToken.approve(alice, amount);
 
-        uint256 aliceBalanceBefore = linkingToken.balanceOf(alice);
-        uint256 bobBalanceBefore = linkingToken.balanceOf(bob);
-        uint256 allowanceBefore = linkingToken.allowance(alice, alice);
-
         vm.startPrank(alice);
-        bool success = linkingToken.transferFrom(alice, bob, amount);
-        assertTrue(success);
+        vm.expectRevert(LinkingUSD.TransfersDisabled.selector);
+        linkingToken.transferFrom(alice, bob, amount);
         vm.stopPrank();
-
-        assertEq(linkingToken.balanceOf(alice), aliceBalanceBefore - amount);
-        assertEq(linkingToken.balanceOf(bob), bobBalanceBefore + amount);
-        assertEq(linkingToken.allowance(alice, alice), allowanceBefore - amount);
     }
 
     function test_TransferFromWithMemo_WithTransferRole(uint128 amount) public {
@@ -333,12 +319,12 @@ contract LinkingUSDTest is Test {
         assertEq(linkingToken.allowance(alice, bob), allowanceBefore - amount);
     }
 
-    function test_TransferFromWithMemo_WithReceiveRole(uint128 amount) public {
+    function test_TransferFromWithMemo_WithReceiveWithMemoRole(uint128 amount) public {
         vm.assume(amount > 0);
 
         vm.startPrank(admin);
         linkingToken.mint(alice, amount);
-        linkingToken.grantRole(linkingToken.RECEIVE_ROLE(), bob);
+        linkingToken.grantRole(linkingToken.RECEIVE_WITH_MEMO_ROLE(), bob);
         vm.stopPrank();
 
         vm.prank(alice);
