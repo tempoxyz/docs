@@ -567,8 +567,8 @@ export default defineConfig({
     { text: 'Testnet', link: '/testnet' },
     { text: 'Documentation', link: '/documentation' },
     { text: 'Protocol', link: '/protocol' },
-    { text: 'Litepaper', link: '/litepaper' },
     { text: 'SDK', link: '/sdk/typescript' },
+    { text: 'Litepaper', link: '/litepaper' },
   ],
   twoslash: {
     compilerOptions: {
