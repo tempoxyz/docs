@@ -9,8 +9,8 @@ contract MockTIP4217Registry is TIP4217Registry {
 
     constructor() {
         // Set default decimals for common currencies
-        currencyDecimals["USD"] = 2;
-        currencyDecimals["EUR"] = 2;
+        currencyDecimals["USD"] = 6;
+        currencyDecimals["EUR"] = 6;
         currencyDecimals["BTC"] = 8;
         currencyDecimals["ETH"] = 18;
     }
