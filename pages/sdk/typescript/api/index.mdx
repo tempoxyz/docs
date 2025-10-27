@@ -12,9 +12,14 @@
 | [`amm.getTotalSupply`](/sdk/typescript/api/amm.getTotalSupply) | Gets the total supply of liquidity tokens for a specific pool |
 | [`amm.mint`](/sdk/typescript/api/amm.mint) | Mints liquidity tokens by providing a token pair |
 | [`amm.rebalanceSwap`](/sdk/typescript/api/amm.rebalanceSwap) | Performs a rebalance swap between user and validator tokens |
+| [`amm.watchBurn`](/sdk/typescript/api/amm.watchBurn) | Watches for liquidity burn events |
+| [`amm.watchFeeSwap`](/sdk/typescript/api/amm.watchFeeSwap) | Watches for fee swap events |
+| [`amm.watchMint`](/sdk/typescript/api/amm.watchMint) | Watches for liquidity mint events |
+| [`amm.watchRebalanceSwap`](/sdk/typescript/api/amm.watchRebalanceSwap) | Watches for rebalance swap events |
 | **Fee Actions** | |
 | [`fee.getUserToken`](/sdk/typescript/api/fee.getUserToken) | Gets the user's default fee token preference |
 | [`fee.setUserToken`](/sdk/typescript/api/fee.setUserToken) | Sets the user's default fee token preference |
+| [`fee.watchSetUserToken`](/sdk/typescript/api/fee.watchSetUserToken) | Watches for user token set events |
 | **Policy Actions** | |
 | [`policy.create`](/sdk/typescript/api/policy.create) | Creates a new transfer policy for token access control |
 | [`policy.getData`](/sdk/typescript/api/policy.getData) | Gets the data for a transfer policy, including its type and admin address |
@@ -22,6 +27,10 @@
 | [`policy.modifyBlacklist`](/sdk/typescript/api/policy.modifyBlacklist) | Modifies the blacklist for a blacklist-type transfer policy |
 | [`policy.modifyWhitelist`](/sdk/typescript/api/policy.modifyWhitelist) | Modifies the whitelist for a whitelist-type transfer policy |
 | [`policy.setAdmin`](/sdk/typescript/api/policy.setAdmin) | Sets the admin for a transfer policy |
+| [`policy.watchAdminUpdated`](/sdk/typescript/api/policy.watchAdminUpdated) | Watches for policy admin update events |
+| [`policy.watchBlacklistUpdated`](/sdk/typescript/api/policy.watchBlacklistUpdated) | Watches for blacklist update events |
+| [`policy.watchCreate`](/sdk/typescript/api/policy.watchCreate) | Watches for policy creation events |
+| [`policy.watchWhitelistUpdated`](/sdk/typescript/api/policy.watchWhitelistUpdated) | Watches for whitelist update events |
 | **Stablecoin Exchange Actions** | |
 | [`dex.buy`](/sdk/typescript/api/dex.buy) | Buys a specific amount of tokens from the Stablecoin Exchange orderbook |
 | [`dex.cancel`](/sdk/typescript/api/dex.cancel) | Cancels an order from the orderbook |
@@ -58,6 +67,13 @@
 | [`token.setSupplyCap`](/sdk/typescript/api/token.setSupplyCap) | Sets the supply cap for a TIP-20 token |
 | [`token.transfer`](/sdk/typescript/api/token.transfer) | Transfers TIP-20 tokens from the caller to a recipient |
 | [`token.unpause`](/sdk/typescript/api/token.unpause) | Unpauses a TIP-20 token, allowing transfers to resume |
+| [`token.watchAdminRole`](/sdk/typescript/api/token.watchAdminRole) | Watches for role admin update events |
+| [`token.watchApprove`](/sdk/typescript/api/token.watchApprove) | Watches for token approval events |
+| [`token.watchBurn`](/sdk/typescript/api/token.watchBurn) | Watches for token burn events |
+| [`token.watchCreate`](/sdk/typescript/api/token.watchCreate) | Watches for new token creation events |
+| [`token.watchMint`](/sdk/typescript/api/token.watchMint) | Watches for token mint events |
+| [`token.watchRole`](/sdk/typescript/api/token.watchRole) | Watches for role membership update events |
+| [`token.watchTransfer`](/sdk/typescript/api/token.watchTransfer) | Watches for token transfer events |
 
 ## Clients
 

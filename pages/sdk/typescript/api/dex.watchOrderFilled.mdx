@@ -40,15 +40,24 @@ Returns a function to unsubscribe from the event.
 
 ### onOrderFilled
 
-- **Type:** `(args: OrderFilledArgs, log: Log) => void`
+- **Type:**
+
+```ts
+declare function onOrderFilled(args: Args, log: Log): void
+
+type Args = {
+  /** ID of the filled order */
+  orderId: bigint
+  /** Address that placed the order */
+  maker: Address
+  /** Address that filled the order */
+  taker: Address
+  /** Amount of tokens filled */
+  amount: bigint
+}
+```
 
 Callback to invoke when an order is filled.
-
-The `args` object contains:
-- `orderId: bigint` - ID of the filled order
-- `maker: Address` - Address that placed the order
-- `taker: Address` - Address that filled the order
-- `amount: bigint` - Amount of tokens filled
 
 ### maker (optional)
 

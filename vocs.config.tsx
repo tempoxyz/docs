@@ -368,6 +368,22 @@ export default defineConfig({
                     text: 'rebalanceSwap',
                     link: '/sdk/typescript/api/amm.rebalanceSwap',
                   },
+                  {
+                    text: 'watchBurn',
+                    link: '/sdk/typescript/api/amm.watchBurn',
+                  },
+                  {
+                    text: 'watchFeeSwap',
+                    link: '/sdk/typescript/api/amm.watchFeeSwap',
+                  },
+                  {
+                    text: 'watchMint',
+                    link: '/sdk/typescript/api/amm.watchMint',
+                  },
+                  {
+                    text: 'watchRebalanceSwap',
+                    link: '/sdk/typescript/api/amm.watchRebalanceSwap',
+                  },
                 ],
               },
               {
@@ -380,6 +396,10 @@ export default defineConfig({
                   {
                     text: 'setUserToken',
                     link: '/sdk/typescript/api/fee.setUserToken',
+                  },
+                  {
+                    text: 'watchSetUserToken',
+                    link: '/sdk/typescript/api/fee.watchSetUserToken',
                   },
                 ],
               },
@@ -409,6 +429,22 @@ export default defineConfig({
                   {
                     text: 'setAdmin',
                     link: '/sdk/typescript/api/policy.setAdmin',
+                  },
+                  {
+                    text: 'watchAdminUpdated',
+                    link: '/sdk/typescript/api/policy.watchAdminUpdated',
+                  },
+                  {
+                    text: 'watchBlacklistUpdated',
+                    link: '/sdk/typescript/api/policy.watchBlacklistUpdated',
+                  },
+                  {
+                    text: 'watchCreate',
+                    link: '/sdk/typescript/api/policy.watchCreate',
+                  },
+                  {
+                    text: 'watchWhitelistUpdated',
+                    link: '/sdk/typescript/api/policy.watchWhitelistUpdated',
                   },
                 ],
               },
@@ -505,6 +541,10 @@ export default defineConfig({
                     text: 'grantRoles',
                     link: '/sdk/typescript/api/token.grantRoles',
                   },
+                  {
+                    text: 'hasRole',
+                    link: '/sdk/typescript/api/token.hasRole',
+                  },
                   { text: 'mint', link: '/sdk/typescript/api/token.mint' },
                   { text: 'pause', link: '/sdk/typescript/api/token.pause' },
                   {
@@ -534,6 +574,34 @@ export default defineConfig({
                   {
                     text: 'unpause',
                     link: '/sdk/typescript/api/token.unpause',
+                  },
+                  {
+                    text: 'watchAdminRole',
+                    link: '/sdk/typescript/api/token.watchAdminRole',
+                  },
+                  {
+                    text: 'watchApprove',
+                    link: '/sdk/typescript/api/token.watchApprove',
+                  },
+                  {
+                    text: 'watchBurn',
+                    link: '/sdk/typescript/api/token.watchBurn',
+                  },
+                  {
+                    text: 'watchCreate',
+                    link: '/sdk/typescript/api/token.watchCreate',
+                  },
+                  {
+                    text: 'watchMint',
+                    link: '/sdk/typescript/api/token.watchMint',
+                  },
+                  {
+                    text: 'watchRole',
+                    link: '/sdk/typescript/api/token.watchRole',
+                  },
+                  {
+                    text: 'watchTransfer',
+                    link: '/sdk/typescript/api/token.watchTransfer',
                   },
                 ],
               },
