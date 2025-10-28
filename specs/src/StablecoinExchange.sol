@@ -85,7 +85,7 @@ contract StablecoinExchange is IStablecoinExchange {
     //////////////////////////////////////////////////////////////*/
 
     /// Mapping of pair key to orderbook
-    mapping(bytes32 pairKey => Orderbook orderbook) internal books;
+    mapping(bytes32 pairKey => Orderbook orderbook) public books;
 
     /// Mapping of order ID to order data
     mapping(uint128 orderId => Order order) internal orders;
