@@ -1,0 +1,191 @@
+# `amm_getLiquidityPools`
+
+## Overview
+
+Gets paginated liquidity pools from the [Fee AMM](/documentation/transactions/fee-amm) on Tempo.
+
+Each pool is directional (userToken → validatorToken) with fixed swap rates for fee swaps (0.997) and rebalance swaps (0.9985).
+
+Uses cursor-based pagination for stable iteration through pools.
+
+## Request
+
+```ts
+type Request = {
+  method: 'amm_getPools'
+  params: [{
+    /** 
+     * Cursor for pagination (based on poolId). 
+     * 
+     * Defaults to first entry based on the sort and filter configuration.
+     * Use the `nextCursor` in response to get the next set of pools.
+     */
+    cursor?: string
+    /** Filter configuration. */
+    filters?: {
+      /** Effective validator reserve in range */
+      effectiveValidatorReserve?: [min: Hex | null, max: Hex | null]
+      /** Pending fee swap input in range */
+      pendingFeeSwapIn?: [min: Hex | null, max: Hex | null]
+      /** Reserve user token in range */
+      reserveUserToken?: [min: Hex | null, max: Hex | null]
+      /** Reserve validator token in range */
+      reserveValidatorToken?: [min: Hex | null, max: Hex | null]
+      /** Total supply (LP tokens) in range */
+      totalSupply?: [min: Hex | null, max: Hex | null]
+      /** Filter by user token address */
+      userToken?: Address
+      /** Filter by validator token address */
+      validatorToken?: Address
+    }
+    /** 
+     * Maximum number of pools to return.
+     * 
+     * Defaults to 10.
+     * Maximum is 100.
+     */
+    limit?: number
+    /** Sorting configuration */
+    sort?: {
+      /** Field to sort by (e.g., 'totalSupply', 'reserveUserToken', 'reserveValidatorToken', 'pendingFeeSwapIn') */
+      on: string
+      /** Sort direction */
+      order: 'asc' | 'desc'
+    }
+  }]
+}
+```
+
+## Response
+
+```ts
+type Response = {
+  /** Cursor for next page, null if no more results */
+  nextCursor: string | null
+  /** Array of pools matching the query */
+  pools: Pool[]
+}
+
+type Pool = {
+  /** Effective reserve of validator token after pending swaps */
+  effectiveReserveValidatorToken: Hex
+  /** Pool ID (keccak256 of userToken and validatorToken) */
+  poolId: Hex
+  /** User token reserve */
+  reserveUserToken: Hex
+  /** Validator token reserve */
+  reserveValidatorToken: Hex
+  /** Total LP token supply for this pool */
+  totalSupply: Hex
+  /** User token address */
+  userToken: Address
+  /** Validator token address */
+  validatorToken: Address
+}
+```
+
+## Examples
+
+### Basic pagination
+
+```ts twoslash
+// @noErrors
+
+// First page
+const response = await provider.request({
+  method: 'amm_getPools',
+  params: [{
+    limit: 100
+  }]
+})
+// @log: { nextCursor: '0xabc...',pools: [{ poolId: '0x...',userToken: '0x20c0000000000000000000000000000000000001',validatorToken: '0x20c0000000000000000000000000000000000000',reserveUserToken: '0xde0b6b3a7640000',reserveValidatorToken: '0x1bc16d674ec80000',totalSupply: '0xf8b0a10e470000',pendingFeeSwapIn: '0x0',effectiveValidatorReserve: '0x1bc16d674ec80000'}] }
+
+// Next page
+const nextResponse = await provider.request({
+  method: 'amm_getPools',
+  params: [{
+    cursor: response.nextCursor,
+    limit: 100
+  }]
+})
+// @log: { nextCursor: '0xdef...',pools: [{ poolId: '0x...',userToken: '0x20c0000000000000000000000000000000000002',validatorToken: '0x20c0000000000000000000000000000000000000',reserveUserToken: '0x2b5e3af16b1880000',reserveValidatorToken: '0x3782dace9d900000',totalSupply: '0x2f6c9a1c8b8d4000',pendingFeeSwapIn: '0x5f5e100',effectiveValidatorReserve: '0x3782d04f0c800000'}] }
+```
+
+### Filter by token pair
+
+```ts twoslash
+// @noErrors
+const response = await provider.request({
+  method: 'amm_getPools',
+  params: [{
+    filters: {
+      userToken: '0x20c0000000000000000000000000000000000001',
+      validatorToken: '0x20c0000000000000000000000000000000000000'  // quoteUSD
+    },
+    limit: 10
+  }]
+})
+// @log: { nextCursor: null,pools: [{ poolId: '0x...',userToken: '0x20c0000000000000000000000000000000000001',validatorToken: '0x20c0000000000000000000000000000000000000',reserveUserToken: '0xde0b6b3a7640000',reserveValidatorToken: '0x1bc16d674ec80000',totalSupply: '0xf8b0a10e470000',pendingFeeSwapIn: '0x0',effectiveValidatorReserve: '0x1bc16d674ec80000'}] }
+```
+
+### Find pools with high liquidity
+
+```ts twoslash
+// @noErrors
+const response = await provider.request({
+  method: 'amm_getPools',
+  params: [{
+    filters: {
+      totalSupply: ['0x3B9ACA00', null]  // At least 1000 USD equivalent in LP tokens
+    },
+    limit: 50,
+    sort: {
+      on: 'totalSupply',
+      order: 'desc'
+    }
+  }]
+})
+// @log: { nextCursor: null, pools: [{ poolId: '0x...',userToken: '0x20c0000000000000000000000000000000000001',validatorToken: '0x20c0000000000000000000000000000000000000',reserveUserToken: '0x52b7d2dcc80cd2e4000000',reserveValidatorToken: '0x4563918244f40000000000',totalSupply: '0x4a817c800d8e100000000',pendingFeeSwapIn: '0x0',effectiveValidatorReserve: '0x4563918244f40000000000'}] }
+```
+
+### Filter by validator token
+
+```ts twoslash
+// @noErrors
+// Find all pools that use quoteUSD as validator token
+const response = await provider.request({
+  method: 'amm_getPools',
+  params: [{
+    filters: {
+      validatorToken: '0x20c0000000000000000000000000000000000000'  // quoteUSD
+    },
+    limit: 100,
+    sort: {
+      on: 'reserveValidatorToken',
+      order: 'desc'
+    }
+  }]
+})
+// @log: { nextCursor: '0x...', pools: [{ poolId: '0x...',userToken: '0x20c0000000000000000000000000000000000001',validatorToken: '0x20c0000000000000000000000000000000000000',reserveValidatorToken: '0x4563918244f40000000000',totalSupply: '0x4a817c800d8e100000000',... }] }
+```
+
+### Find pools with pending swaps
+
+```ts twoslash
+// @noErrors
+const response = await provider.request({
+  method: 'amm_getPools',
+  params: [{
+    filters: {
+      reserveUserToken: ['0x1', null]  // Has pending fee swaps
+    },
+    limit: 50,
+    sort: {
+      on: 'pendingFeeSwapIn',
+      order: 'desc'
+    }
+  }]
+})
+// @log: { nextCursor: null, pools: [{ poolId: '0x...',pendingFeeSwapIn: '0x2386f26fc10000',effectiveValidatorReserve: '0x1bc0a7e3fb0e0000',... }] }
+```
+

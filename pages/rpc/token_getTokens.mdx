@@ -1,0 +1,258 @@
+# `token_getTokens`
+
+## Overview
+
+Gets paginated [TIP-20 tokens](/documentation/tokens) on Tempo. 
+
+Uses cursor-based pagination for stable iteration through tokens.
+
+## Request
+
+```ts
+type Request = {
+  method: 'token_getTokens'
+  params: [{
+    /** 
+     * Cursor for pagination. Based on tokenId.
+     * 
+     * Defaults to first entry based on the sort and filter configuration.
+     * Use the `nextCursor` in response to get the next set of tokens.
+     */
+    cursor?: string
+    /** Filter configuration. */
+    filters?: {
+      /** Filter by currency code (e.g., "USD", "EUR", "JPY") */
+      currency?: string
+      /** Filter by creator address */
+      creator?: Address
+      /** Created timestamp (seconds) in range */
+      createdAt?: [min: number | null, max: number | null]
+      /** Filter by token name (case-insensitive) */
+      name?: string
+      /** Filter by pause state */
+      paused?: boolean
+      /** Filter by quote token address */
+      quoteToken?: Address
+      /** Supply cap in range */
+      supplyCap?: [min: Hex | null, max: Hex | null]
+      /** Filter by symbol */
+      symbol?: string
+      /** Total supply in range */
+      totalSupply?: [min: Hex | null, max: Hex | null]
+    }
+    /** 
+     * Maximum number of tokens to return.
+     * 
+     * Defaults to 10.
+     * Maximum is 100.
+     */
+    limit?: number
+    /** Sorting configuration */
+    sort?: {
+      /** Field to sort by (e.g., 'tokenId', 'createdAt', 'totalSupply', 'name', 'symbol') */
+      on: string
+      /** Sort direction */
+      order: 'asc' | 'desc'
+    }
+  }]
+}
+```
+
+## Response
+
+```ts
+type Response = {
+  /** Cursor for next page, null if no more results */
+  nextCursor: string | null
+  /** Array of tokens matching the query */
+  tokens: Token[]
+}
+
+type Token = {
+  /** Token contract address (deterministic vanity address based on tokenId) */
+  address: Address
+  /** Timestamp when token was created */
+  createdAt: number
+  /** Address that created the token */
+  creator: Address
+  /** Currency code (e.g., "USD", "EUR") */
+  currency: string
+  /** Token decimals (from TIP-4217 registry based on currency) */
+  decimals: number
+  /** Token name */
+  name: string
+  /** Whether token transfers are paused */
+  paused: boolean
+  /** Quote token address for trading pairs */
+  quoteToken: Address
+  /** Maximum token supply */
+  supplyCap: Hex
+  /** Token symbol */
+  symbol: string
+  /** Unique token ID from factory */
+  tokenId: Hex
+  /** Current total supply */
+  totalSupply: Hex
+  /** Current transfer policy ID */
+  transferPolicyId: Hex
+}
+```
+
+## Examples
+
+### Basic pagination
+
+```ts twoslash
+// @noErrors
+
+// First page
+const response = await provider.request({
+  method: 'token_getTokens',
+  params: [{
+    limit: 100
+  }]
+})
+// @log: { nextCursor: '0xa',tokens: [{ address: '0x20c0000000000000000000000000000000000001',createdAt: 1730000000,currency: 'USD',decimals: 6,name: 'Alpha USD',symbol: 'AlphaUSD',tokenId: '0x1',...}] }
+
+// Next page
+const nextResponse = await provider.request({
+  method: 'token_getTokens',
+  params: [{
+    cursor: response.nextCursor,
+    limit: 100
+  }]
+})
+// @log: { nextCursor: '0x14',tokens: [{ address: '0x20c000000000000000000000000000000000000b',createdAt: 1730010000,currency: 'USD',decimals: 6,name: 'Alpha USD',symbol: 'AlphaUSD',tokenId: '0x1',...}] }
+```
+
+### Filter by currency and quote token
+
+```ts twoslash
+// @noErrors
+const response = await provider.request({
+  method: 'token_getTokens',
+  params: [{
+    filters: {
+      currency: 'USD',
+      quoteToken: '0x20c0000000000000000000000000000000000000'  // quoteUSD
+    },
+    limit: 50
+  }]
+})
+// @log: {
+// @log:   nextCursor: '0x32',
+// @log:   tokens: [
+// @log:     {
+// @log:       address: '0x20c0000000000000000000000000000000000001',
+// @log:       createdAt: 1730000000,
+// @log:       currency: 'USD',
+// @log:       decimals: 6,
+// @log:       name: 'Alpha USD',
+// @log:       quoteToken: '0x20c0000000000000000000000000000000000000',
+// @log:       symbol: 'AlphaUSD',
+// @log:       ...
+// @log:     },
+// @log:     ...
+// @log:   ]
+// @log: }
+```
+
+### Filter & sort by total supply
+
+```ts twoslash
+// @noErrors
+const response = await provider.request({
+  method: 'token_getTokens',
+  params: [{
+    filters: {
+      currency: 'USD',
+      totalSupply: ['0x1', null]  // Only tokens with supply > 0
+    },
+    limit: 20,
+    sort: {
+      on: 'totalSupply',
+      order: 'desc'
+    }
+  }]
+})
+// @log: {
+// @log:   nextCursor: '0x14',
+// @log:   tokens: [
+// @log:     {
+// @log:       address: '0x20c0000000000000000000000000000000000005',
+// @log:       createdAt: 1730005000,
+// @log:       currency: 'USD',
+// @log:       name: 'Mega Stablecoin',
+// @log:       symbol: 'MUSD',
+// @log:       totalSupply: '0x52b7d2dcc80cd2e4000000',  // 100 billion
+// @log:       ...
+// @log:     },
+// @log:     ...
+// @log:   ]
+// @log: }
+```
+
+### Search by currency
+
+```ts twoslash
+// @noErrors
+const response = await provider.request({
+  method: 'token_getTokens',
+  params: [{
+    filters: {
+      currency: 'USD' // Matches "USD"
+    },
+    limit: 50,
+    sort: {
+      on: 'name',
+      order: 'asc'
+    }
+  }]
+})
+// @log: {
+// @log:   nextCursor: null,
+// @log:   tokens: [
+// @log:     {
+// @log:       address: '0x20c0000000000000000000000000000000000001',
+// @log:       name: 'Alpha USD',
+// @log:       symbol: 'AlphaUSD',
+// @log:       ...
+// @log:     },
+// @log:     {
+// @log:       address: '0x20c0000000000000000000000000000000000002',
+// @log:       name: 'Beta USD',
+// @log:       symbol: 'BetaUSD',
+// @log:       ...
+// @log:     },
+// @log:     ...
+// @log:   ]
+// @log: }
+```
+
+### Filter paused tokens
+
+```ts twoslash
+// @noErrors
+const response = await provider.request({
+  method: 'token_getTokens',
+  params: [{
+    filters: {
+      paused: true
+    },
+    limit: 10
+  }]
+})
+// @log: {
+// @log:   nextCursor: null,
+// @log:   tokens: [
+// @log:     {
+// @log:       address: '0x20c000000000000000000000000000000000000a',
+// @log:       name: 'Paused Token',
+// @log:       paused: true,
+// @log:       symbol: 'PAUSED',
+// @log:       ...
+// @log:     }
+// @log:   ]
+// @log: }
+```
+

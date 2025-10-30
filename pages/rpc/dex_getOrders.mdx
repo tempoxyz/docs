@@ -1,0 +1,158 @@
+# `dex_getOrders`
+
+## Overview
+
+Gets paginated orders from the [Stablecoin Exchange](/documentation/exchange) orderbook. 
+
+Uses cursor-based pagination for stable iteration through orders as the orderbook changes.
+
+## Request
+
+```ts
+type Request = {
+  method: 'dex_getOrders'
+  params: [{
+    /** 
+     * Cursor for pagination. Based on orderId.
+     * 
+     * Defaults to first entry based on the sort and filter configuration.
+     * Use the `nextCursor` in response to get the next set of orders.
+     */
+    cursor?: string
+    /** Filter configuration. */
+    filters?: {
+      /** Filter by specific base token */
+      baseToken?: Address
+      /** Filter by order side (true=buy, false=sell) */
+      isBid?: boolean
+      /** Filter flip orders */
+      isFlip?: boolean
+      /** Filter by maker address */
+      maker?: Hex
+      /** Filter by quote token */
+      quoteToken?: Address
+      /** Remaining amount in range */
+      remaining?: [min: Hex | null, max: Hex | null]
+      /** Tick in range (from -2000 to 2000) */
+      tick?: [min: Hex | null, max: Hex | null]
+    }
+    /** 
+     * Maximum number of orders to return.
+     * 
+     * Defaults to 10.
+     * Maximum is 100.
+     */
+    limit?: number
+  }]
+}
+```
+
+## Response
+
+```ts
+type Response = {
+  /** Cursor for next page, null if no more results */
+  nextCursor: string | null
+  /** Array of orders matching the query */
+  orders: Order[]
+}
+
+type Order = {
+  /** Original order amount */
+  amount: Hex
+  /** Address of the base token */
+  baseToken: Address
+  /** Target tick to flip to when order is filled */
+  flipTick: number
+  /** Order side: true for buy (bid), false for sell (ask) */
+  isBid: boolean
+  /** Whether this is a flip order that auto-flips when filled */
+  isFlip: boolean
+  /** Address of order maker */
+  maker: Address
+  /** Next order ID in FIFO queue */
+  next: Hex
+  /** Unique order ID */
+  orderId: Hex
+  /** Address of the quote token */
+  quoteToken: Address
+  /** Previous order ID in FIFO queue */
+  prev: Hex
+  /** Remaining amount to fill */
+  remaining: Hex
+  /** Price tick */
+  tick: number
+}
+```
+
+## Examples
+
+### Basic pagination
+
+```ts twoslash
+// @noErrors
+
+// First page
+const response = await provider.request({
+  method: 'dex_getOrders',
+  params: [{
+    limit: 100
+  }]
+})
+// @log: {
+// @log:   nextCursor: '0xab25b',
+// @log:   orders: [{
+// @log:     amount: '0x123456',
+// @log:     baseToken: '0x20c0000000000000000000000000000000000001',
+// @log:     ...
+// @log:   }, ...]
+// @log: }
+
+// Next page
+const nextResponse = await provider.request({
+  method: 'dex_getOrders',
+  params: [{
+    cursor: response.nextCursor,
+    limit: 100
+  }]
+})
+// @log: {
+// @log:   nextCursor: '0x25b25',
+// @log:   orders: [{
+// @log:     amount: '0xab25b',
+// @log:     baseToken: '0x20c0000000000000000000000000000000000002',
+// @log:     ...
+// @log:   }, ...]
+// @log: }
+```
+
+### Filters
+
+```ts twoslash
+// @noErrors
+const response = await provider.request({
+  method: 'dex_getOrders',
+  params: [{
+    filters: {
+      baseToken: '0x20c0000000000000000000000000000000000001',
+      quoteToken: '0x20c0000000000000000000000000000000000002',
+      isBid: true  // Only buy orders
+    },
+    limit: 50
+  }]
+})
+// @log: {
+// @log:   nextCursor: '0x25b25',
+// @log:   orders: [
+// @log:     {
+// @log:       amount: '0xab25b',
+// @log:       baseToken: '0x20c0000000000000000000000000000000000001',
+// @log:       isBid: true,
+// @log:       quoteToken: '0x20c0000000000000000000000000000000000002',
+// @log:       ...
+// @log:     },
+// @log:     ...
+// @log:   ]
+// @log: }
+```
+
