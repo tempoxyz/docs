@@ -60,17 +60,124 @@ The faucet drips AlphaUSD, BetaUSD, and ThetaUSD to the given address:
 
 ```bash
 # Fund your address with supported stablecoins
-cast rpc tempo_fundAddress 0x820525B56cF3cD426e58507F65DCaCB90BceEFb8 \
+cast rpc tempo_fundAddress 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 \
+  --rpc-url https://${USERNAME}:${PASSWORD}@rpc-andante.tempoxyz.dev
+```
+
+## Debug Transactions
+
+### Check Transaction Data
+```bash
+cast tx 0xc621de98c16acf2ee6fd457eabba72a3be25b50714e9beffa022b8b0a769547b \
+  --rpc-url https://${USERNAME}:${PASSWORD}@rpc-andante.tempoxyz.dev
+```
+```bash
+# Output: transaction information
+blockHash            0x53ae91cf29e5356585b57c43ac315fd5388e349c8c873cdc6d3bf096ccacdd31
+blockNumber          936777
+from                 0x90F79bf6EB2c4f870365E785982E1f101E93b906
+transactionIndex     0
+effectiveGasPrice    45
+
+accessList           []
+chainId              42427
+gasLimit             22944
+hash                 0xc621de98c16acf2ee6fd457eabba72a3be25b50714e9beffa022b8b0a769547b
+input                0xa9059cbb0000000000000000000000008448b7ae4b9e48597f3c0a48d6e5304c4745192b000000000000000000000000000000000000000000000000000000e8d4a51000
+maxFeePerGas         89
+maxPriorityFeePerGas 1
+nonce                92972
+r                    0x7ed436f3de7b107bcded7ea3bb3ffeec47c51ca5df3248420f58a04e38b7496c
+s                    0x059234ff402b6d31c515a828691684a5eb43a9dbe83f1224a9b16e46f07a4135
+to                   0x20C0000000000000000000000000000000000001
+type                 2
+value                0
+yParity              0
+```
+
+### Replay Transactions
+
+The `cast run` command allows you to replay and debug any transaction by its hash. This is particularly useful for understanding what happened in a transaction, viewing internal calls, and analyzing gas usage.
+
+```bash
+# Example: Check AlphaUSD balance
+cast balance --erc20 0x20c0000000000000000000000000000000000001 0x820525B56cF3cD426e58507F65DCaCB90BceEFb8 \
+# Replay a transaction and see its execution trace
+cast run 0x5c7469a9d436516f0c748abdef96fb3628f901cb3393eb4e59cce18a872ba823 \
+  --rpc-url https://${USERNAME}:${PASSWORD}@rpc-andante.tempoxyz.dev
+```
+```bash
+# Output: transaction traces
+Executing previous transactions from the block.
+Traces:
+  [1000] AlphaUSD::transfer(0xDf37F81dAAD2b0327A0A50003740e1C935C70913, 10)
+    └─ ← [Return] true
+
+
+Transaction successfully executed.
+Gas used: 22560
+```
+
+This command replays all transactions in the block up to and including the specified transaction, showing:
+- Function calls with parameters
+- Return values
+- Gas usage
+- Internal contract interactions
+
+
+## Interact with TIP20 tokens
+
+### Check Token Metadata
+
+Get token metadata using the following commands:
+
+```bash
+# Get token symbol: AlphaUSD
+cast erc20 symbol 0x20c0000000000000000000000000000000000001 \
+  --rpc-url https://${USERNAME}:${PASSWORD}@rpc-andante.tempoxyz.dev
+```
+
+```bash
+# Get token decimals: 6
+cast erc20 decimals 0x20c0000000000000000000000000000000000001 \
   --rpc-url https://${USERNAME}:${PASSWORD}@rpc-andante.tempoxyz.dev
 ```
 
 ### Check Token Balance
 
+Query the balance of any ERC20 token using the `cast erc20 balance` command:
+
 ```bash
-# Example: Check AlphaUSD balance
-cast balance --erc20 0x20c0000000000000000000000000000000000001 0x820525B56cF3cD426e58507F65DCaCB90BceEFb8 \
+# Check AlphaUSD balance for an address: 1000000000 [1e9]
+cast erc20 balance 0x20c0000000000000000000000000000000000001 \
+                   0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 \
   --rpc-url https://${USERNAME}:${PASSWORD}@rpc-andante.tempoxyz.dev
 ```
+
+The output shows the balance in both raw format and scientific notation. In this example, the address has 1,000 AlphaUSD (1,000,000,000 in smallest units with 6 decimals).
+
+### Transfer Tokens
+
+Transfer ERC20 tokens using the `cast erc20 transfer` command:
+
+```bash
+# Transfer 100 AlphaUSD tokens (100 * 1e6)
+cast erc20 transfer \
+  0x20c0000000000000000000000000000000000001 \
+  0x70997970C51812dc3A010C7d01b50e0d17dc79C8 \
+  100000000 \
+  --rpc-url https://${USERNAME}:${PASSWORD}@rpc-andante.tempoxyz.dev \
+  --private-key <YOUR_PRIVATE_KEY>
+```
+```bash
+# Output: transaction hash
+0x5c7469a9d436516f0c748abdef96fb3628f901cb3393eb4e59cce18a872ba823
+```
+
+**Important Notes:**
+- Amounts must be specified in the token's smallest unit. AlphaUSD has 6 decimals: `1 AlphaUSD = 1000000` (1e6)
+- The command returns only the transaction hash, not a full receipt
+- Ensure you have sufficient token balance before attempting a transfer
 
 ## Predeployed Contracts
 

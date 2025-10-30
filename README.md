@@ -9,5 +9,5 @@ This repository contains documentation for the Tempo blockchain, including the P
 ```sh
 curl -fsSL https://get.pnpm.io/install.sh | sh - # Install pnpm
 pnpm install # Install dependencies
-pnpm docs:dev # Start docs on a development server
+pnpm dev # Start docs on a development server
 ```
