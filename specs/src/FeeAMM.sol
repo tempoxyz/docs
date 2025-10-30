@@ -181,6 +181,46 @@ contract FeeAMM {
         );
     }
 
+    function mintWithValidatorToken(
+        address userToken,
+        address validatorToken,
+        uint256 amountValidatorToken,
+        address to
+    ) external returns (uint256 liquidity) {
+        bytes32 poolId = getPoolId(userToken, validatorToken);
+
+        Pool storage pool = pools[poolId];
+        uint256 _totalSupply = totalSupply[poolId];
+
+        if (pool.reserveUserToken == 0 && pool.reserveValidatorToken == 0) {
+            // First liquidity provider with validator token only
+            require(amountValidatorToken / 2 > MIN_LIQUIDITY, "INSUFFICIENT_LIQUIDITY_MINTED");
+            liquidity = amountValidatorToken / 2 - MIN_LIQUIDITY;
+            totalSupply[poolId] += MIN_LIQUIDITY; // Permanently lock MIN_LIQUIDITY
+        } else {
+            // Subsequent deposits: mint as if user called rebalanceSwap then minted with both
+            // which works out to the formula:
+            // liquidity = amountValidatorToken * _totalSupply / (V + n * U), with n = N / SCALE
+            uint256 denom =
+                uint256(pool.reserveValidatorToken) + (N * uint256(pool.reserveUserToken)) / SCALE;
+            liquidity = (amountValidatorToken * _totalSupply) / denom; // rounds down
+        }
+
+        require(liquidity > 0, "INSUFFICIENT_LIQUIDITY_MINTED");
+
+        // Transfer validator tokens from user
+        ITIP20(validatorToken).systemTransferFrom(msg.sender, address(this), amountValidatorToken);
+
+        // Update reserves (validator token only)
+        pool.reserveValidatorToken += uint128(amountValidatorToken);
+
+        // Mint LP tokens
+        totalSupply[poolId] += liquidity;
+        liquidityBalances[poolId][to] += liquidity;
+
+        emit Mint(msg.sender, userToken, validatorToken, 0, amountValidatorToken, liquidity);
+    }
+
     function burn(address userToken, address validatorToken, uint256 liquidity, address to)
         external
         returns (uint256 amountUserToken, uint256 amountValidatorToken)

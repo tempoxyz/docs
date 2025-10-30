@@ -103,6 +103,15 @@ Coordinates fee collection and distribution.
 - First provider sets initial reserves, and mints liquidity tokens equal to their arithmetic mean
 - First provider must burn 1,000 liquidity tokens, for the [same reason as in Uniswap v2](https://dapp.org.uk/reports/uniswapv2.html#orgdeb0867). Note that for USD tokens, this has a cost of about $0.02.
 
+##### Single-Sided (Validator-Only) Minting
+
+- Function: `mintWithValidatorToken(userToken, validatorToken, amountValidatorToken, to)`
+- Behavior:
+  - Treats the deposit as equivalent to performing a hypothetical `rebalanceSwap` first at rate `n = 0.9985` until the ratio of reserves match, then minting liquidity by depositing both; this yields the formula implemented in the function.
+  - Rounds down to avoid over-issuing LP tokens
+  - Updates reserves by increasing only `validatorToken` by `amountValidatorToken`
+  - Emits the standard `Mint` event with `amountUserToken = 0`
+
 #### Removing Liquidity
 - Burns LP tokens
 - Receives pro-rata share of reserves
