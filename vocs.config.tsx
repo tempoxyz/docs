@@ -4,7 +4,7 @@ import { defineConfig } from 'vocs'
 export default defineConfig({
   banner: {
     content:
-      'We have released our fourth testnet, named <span class="font-medium">Andante</span>. <a href="/testnet/andante" class="text-[#0588F0] no-underline">See updates →</a>',
+      'We have released our fourth testnet, named <span className="font-medium">Andante</span>. <a href="/testnet/andante" className="text-[#0588F0] no-underline">See updates →</a>',
   },
   head() {
     return (
