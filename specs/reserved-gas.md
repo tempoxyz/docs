@@ -27,15 +27,15 @@ This specification describes the process in temporal order.
 ### 1. Sub-blocks
   * Each validator can construct a sub-block. Sub-blocks follow this structure:
 ```
-sub-block = {version, parent_hash, feeRecipient, [transactions], signature}
+sub-block = rlp([version, parent_hash, fee_recipient, [transactions], signature])
 ```
 where:
 * `version = 1`,
 * `parent_hash` is the parent hash of the previous block.  
-* `feeRecipient` is the EOA at which this validator wants to receive the fees included in this block. 
+* `fee_recipient` is the EOA at which this validator wants to receive the fees included in this block. 
 * `[transactions]` is an ordered list of transactions. Transactions in a sub-block must satisfy additional conditions described below in [Section 1.1](#11-sub-block-transactions). We explicitly allow for this list to be empty: a validator with no transactions to propose may still send a sub-block so that the proposer gets extra gas for the gas incentive region, described below. 
 *  The `signature` field is the validator signing over a hash computed as  
-`keccak256(rlp_encode(magic_byte || version || feeRecipient || transactions || parent_hash))`, 
+`keccak256(magic_byte || rlp([version, parent_hash, fee_recipient, [transactions]]))`, 
 where `magic_byte = 0x78`,  The signature ensures that this sub-block is valid only for the declared slot, and that the proposer cannot alter the order or set of transactions included in a sub-block. 
 * The validator sends this sub-block directly to the next proposer. 
 
@@ -74,7 +74,7 @@ transactions = [list of own transactions] | [sub-block transactions] | [gas ince
 
 We have the following new **header field** = 
 ```
-reservedLaneGasLimit     // The total gas limit allocated for the sub-blocks and gas incentive transactions
+sharedGasLimit     // The total gas limit allocated for the sub-blocks and gas incentive transactions
 ```
 
 
@@ -90,7 +90,7 @@ The block includes a **new system transaction** before the stablecoin DEX system
 | **Position in Block**                 | **Second-Last transaction**                                                                                          | Block is **invalid** if absent.                                                                          |
 | **From (sender)**                     | `0x0000000000000000000000000000000000000000`                                                                  | Zero address                                                                                           |
 | **To (recipient)**                    | `0x0000000000000000000000000000000000000000`                                                                                 | No-op                                                                 |
-| **Calldata**                          | `[version, {validatorPubKey, feeRecipient, signature}]`                                                                                  |  Sub-block version (currently = 1), each included sub-block's validator public key, feeRecipient, and signature.                                                                                               |
+| **Calldata**                          | `rlp([[version, validator_pubkey, fee_recipient, signature], ...])`                                                                |  Sub-block version (currently = 1), each included sub-block's validator public key, feeRecipient, and signature.                                                                                               |
 | **Value**                             | `0`                                                                                                           | No native token transfer.                                                                                             |
 | **Nonce**                             | 0                                                                |                                                                             |
 | **Gas Limit**                         | 0                                                           | Does **not** contribute to block gas accounting.                                                                      |
