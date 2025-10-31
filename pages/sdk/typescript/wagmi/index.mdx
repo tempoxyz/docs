@@ -1,0 +1,158 @@
+# Overview
+
+## Connectors
+
+| Client | Description |
+|--------|-------------|
+| [`webAuthn`](#TODO) | Connector for a WebAuthn EOA. |
+
+## Actions
+
+| Action | Description |
+|--------|-------------|
+| **AMM Actions** | |
+| [`amm.burn`](#TODO) | Burns liquidity tokens and receives the underlying token pair |
+| [`amm.getLiquidityBalance`](#TODO) | Gets the liquidity balance for an address in a specific pool |
+| [`amm.getPool`](#TODO) | Gets the reserves for a liquidity pool |
+| [`amm.getPoolId`](#TODO) | Gets the pool ID for a token pair |
+| [`amm.getTotalSupply`](#TODO) | Gets the total supply of liquidity tokens for a specific pool |
+| [`amm.mint`](#TODO) | Mints liquidity tokens by providing a token pair |
+| [`amm.rebalanceSwap`](#TODO) | Performs a rebalance swap between user and validator tokens |
+| [`amm.watchBurn`](#TODO) | Watches for liquidity burn events |
+| [`amm.watchFeeSwap`](#TODO) | Watches for fee swap events |
+| [`amm.watchMint`](#TODO) | Watches for liquidity mint events |
+| [`amm.watchRebalanceSwap`](#TODO) | Watches for rebalance swap events |
+| **Fee Actions** | |
+| [`fee.getUserToken`](#TODO) | Gets the user's default fee token preference |
+| [`fee.setUserToken`](#TODO) | Sets the user's default fee token preference |
+| [`fee.watchSetUserToken`](#TODO) | Watches for user token set events |
+| **Policy Actions** | |
+| [`policy.create`](#TODO) | Creates a new transfer policy for token access control |
+| [`policy.getData`](#TODO) | Gets the data for a transfer policy, including its type and admin address |
+| [`policy.isAuthorized`](#TODO) | Checks if an address is authorized by a transfer policy |
+| [`policy.modifyBlacklist`](#TODO) | Modifies the blacklist for a blacklist-type transfer policy |
+| [`policy.modifyWhitelist`](#TODO) | Modifies the whitelist for a whitelist-type transfer policy |
+| [`policy.setAdmin`](#TODO) | Sets the admin for a transfer policy |
+| [`policy.watchAdminUpdated`](#TODO) | Watches for policy admin update events |
+| [`policy.watchBlacklistUpdated`](#TODO) | Watches for blacklist update events |
+| [`policy.watchCreate`](#TODO) | Watches for policy creation events |
+| [`policy.watchWhitelistUpdated`](#TODO) | Watches for whitelist update events |
+| **Stablecoin Exchange Actions** | |
+| [`dex.buy`](#TODO) | Buys a specific amount of tokens from the Stablecoin Exchange orderbook |
+| [`dex.cancel`](#TODO) | Cancels an order from the orderbook |
+| [`dex.createPair`](#TODO) | Creates a new trading pair on the DEX |
+| [`dex.getBalance`](#TODO) | Gets a user's token balance on the Stablecoin Exchange |
+| [`dex.getBuyQuote`](#TODO) | Gets the quote for buying a specific amount of tokens |
+| [`dex.getOrder`](#TODO) | Gets an order's details from the orderbook |
+| [`dex.getPriceLevel`](#TODO) | Gets the price level information at a specific tick |
+| [`dex.getSellQuote`](#TODO) | Gets the quote for selling a specific amount of tokens |
+| [`dex.place`](#TODO) | Places a limit order on the orderbook |
+| [`dex.placeFlip`](#TODO) | Places a flip order that automatically flips when filled |
+| [`dex.sell`](#TODO) | Sells a specific amount of tokens from the Stablecoin Exchange orderbook |
+| [`dex.watchFlipOrderPlaced`](#TODO) | Watches for flip order placed events |
+| [`dex.watchOrderCancelled`](#TODO) | Watches for order cancelled events |
+| [`dex.watchOrderFilled`](#TODO) | Watches for order filled events |
+| [`dex.watchOrderPlaced`](#TODO) | Watches for order placed events |
+| [`dex.withdraw`](#TODO) | Withdraws tokens from the DEX to the caller's wallet |
+| **Token Actions** | |
+| [`token.approve`](#TODO) | Approves a spender to transfer TIP-20 tokens on behalf of the caller |
+| [`token.burn`](#TODO) | Burns TIP-20 tokens from the caller's balance |
+| [`token.burnBlocked`](#TODO) | Burns TIP-20 tokens from a blocked address |
+| [`token.changeTransferPolicy`](#TODO) | Changes the transfer policy for a TIP-20 token |
+| [`token.create`](#TODO) | Creates a new TIP-20 token and assigns the admin role to the calling account |
+| [`token.getAllowance`](#TODO) | Gets the amount of tokens that a spender is approved to transfer on behalf of an owner |
+| [`token.getBalance`](#TODO) | Gets the token balance of an address |
+| [`token.getMetadata`](#TODO) | Gets the metadata for a TIP-20 token, including name, symbol, decimals, currency, and total supply |
+| [`token.grantRoles`](#TODO) | Grants one or more roles to an address |
+| [`token.mint`](#TODO) | Mints new TIP-20 tokens to a recipient |
+| [`token.pause`](#TODO) | Pauses a TIP-20 token, preventing all transfers |
+| [`token.permit`](#TODO) | Approves a spender using an EIP-2612 permit signature, allowing gasless approvals |
+| [`token.renounceRoles`](#TODO) | Renounces one or more roles from the caller's address |
+| [`token.revokeRoles`](#TODO) | Revokes one or more roles from an address |
+| [`token.setRoleAdmin`](#TODO) | Sets the admin role for another role |
+| [`token.setSupplyCap`](#TODO) | Sets the supply cap for a TIP-20 token |
+| [`token.transfer`](#TODO) | Transfers TIP-20 tokens from the caller to a recipient |
+| [`token.unpause`](#TODO) | Unpauses a TIP-20 token, allowing transfers to resume |
+| [`token.watchAdminRole`](#TODO) | Watches for role admin update events |
+| [`token.watchApprove`](#TODO) | Watches for token approval events |
+| [`token.watchBurn`](#TODO) | Watches for token burn events |
+| [`token.watchCreate`](#TODO) | Watches for new token creation events |
+| [`token.watchMint`](#TODO) | Watches for token mint events |
+| [`token.watchRole`](#TODO) | Watches for role membership update events |
+| [`token.watchTransfer`](#TODO) | Watches for token transfer events |
+
+## Hooks
+
+| Hook   | Description |
+|--------|-------------|
+| **AMM Hooks** | |
+| [`amm.useBurn`](#TODO) | Hook for burning liquidity tokens and receiving the underlying token pair |
+| [`amm.useLiquidityBalance`](#TODO) | Hook for getting the liquidity balance for an address in a specific pool |
+| [`amm.useMint`](#TODO) | Hook for minting liquidity tokens by providing a token pair |
+| [`amm.usePool`](#TODO) | Hook for getting the reserves for a liquidity pool |
+| [`amm.usePoolId`](#TODO) | Hook for getting the pool ID for a token pair |
+| [`amm.useRebalanceSwap`](#TODO) | Hook for performing a rebalance swap between user and validator tokens |
+| [`amm.useTotalSupply`](#TODO) | Hook for getting the total supply of liquidity tokens for a specific pool |
+| [`amm.useWatchBurn`](#TODO) | Hook for watching liquidity burn events |
+| [`amm.useWatchFeeSwap`](#TODO) | Hook for watching fee swap events |
+| [`amm.useWatchMint`](#TODO) | Hook for watching liquidity mint events |
+| [`amm.useWatchRebalanceSwap`](#TODO) | Hook for watching rebalance swap events |
+| **Fee Hooks** | |
+| [`fee.useSetUserToken`](#TODO) | Hook for setting the user's default fee token preference |
+| [`fee.useUserToken`](#TODO) | Hook for getting the user's default fee token preference |
+| [`fee.useWatchSetUserToken`](#TODO) | Hook for watching user token set events |
+| **Policy Hooks** | |
+| [`policy.useCreate`](#TODO) | Hook for creating a new transfer policy for token access control |
+| [`policy.useData`](#TODO) | Hook for getting the data for a transfer policy, including its type and admin address |
+| [`policy.useIsAuthorized`](#TODO) | Hook for checking if an address is authorized by a transfer policy |
+| [`policy.useModifyBlacklist`](#TODO) | Hook for modifying the blacklist for a blacklist-type transfer policy |
+| [`policy.useModifyWhitelist`](#TODO) | Hook for modifying the whitelist for a whitelist-type transfer policy |
+| [`policy.useSetAdmin`](#TODO) | Hook for setting the admin for a transfer policy |
+| [`policy.useWatchAdminUpdated`](#TODO) | Hook for watching policy admin update events |
+| [`policy.useWatchBlacklistUpdated`](#TODO) | Hook for watching blacklist update events |
+| [`policy.useWatchCreate`](#TODO) | Hook for watching policy creation events |
+| [`policy.useWatchWhitelistUpdated`](#TODO) | Hook for watching whitelist update events |
+| **Stablecoin Exchange Hooks** | |
+| [`dex.useBalance`](#TODO) | Hook for getting a user's token balance on the Stablecoin Exchange |
+| [`dex.useBuy`](#TODO) | Hook for buying a specific amount of tokens from the Stablecoin Exchange orderbook |
+| [`dex.useBuyQuote`](#TODO) | Hook for getting the quote for buying a specific amount of tokens |
+| [`dex.useCancel`](#TODO) | Hook for canceling an order from the orderbook |
+| [`dex.useCreatePair`](#TODO) | Hook for creating a new trading pair on the DEX |
+| [`dex.useOrder`](#TODO) | Hook for getting an order's details from the orderbook |
+| [`dex.usePlace`](#TODO) | Hook for placing a limit order on the orderbook |
+| [`dex.usePlaceFlip`](#TODO) | Hook for placing a flip order that automatically flips when filled |
+| [`dex.usePriceLevel`](#TODO) | Hook for getting the price level information at a specific tick |
+| [`dex.useSell`](#TODO) | Hook for selling a specific amount of tokens from the Stablecoin Exchange orderbook |
+| [`dex.useSellQuote`](#TODO) | Hook for getting the quote for selling a specific amount of tokens |
+| [`dex.useWatchFlipOrderPlaced`](#TODO) | Hook for watching flip order placed events |
+| [`dex.useWatchOrderCancelled`](#TODO) | Hook for watching order cancelled events |
+| [`dex.useWatchOrderFilled`](#TODO) | Hook for watching order filled events |
+| [`dex.useWatchOrderPlaced`](#TODO) | Hook for watching order placed events |
+| [`dex.useWithdraw`](#TODO) | Hook for withdrawing tokens from the DEX to the caller's wallet |
+| **Token Hooks** | |
+| [`token.useAllowance`](#TODO) | Hook for getting the amount of tokens that a spender is approved to transfer on behalf of an owner |
+| [`token.useApprove`](#TODO) | Hook for approving a spender to transfer TIP-20 tokens on behalf of the caller |
+| [`token.useBalance`](#TODO) | Hook for getting the token balance of an address |
+| [`token.useBurn`](#TODO) | Hook for burning TIP-20 tokens from the caller's balance |
+| [`token.useBurnBlocked`](#TODO) | Hook for burning TIP-20 tokens from a blocked address |
+| [`token.useChangeTransferPolicy`](#TODO) | Hook for changing the transfer policy for a TIP-20 token |
+| [`token.useCreate`](#TODO) | Hook for creating a new TIP-20 token and assigning the admin role to the calling account |
+| [`token.useGrantRoles`](#TODO) | Hook for granting one or more roles to an address |
+| [`token.useHasRole`](#TODO) | Hook for checking if an address has a specific role |
+| [`token.useMetadata`](#TODO) | Hook for getting the metadata for a TIP-20 token, including name, symbol, decimals, currency, and total supply |
+| [`token.useMint`](#TODO) | Hook for minting new TIP-20 tokens to a recipient |
+| [`token.usePause`](#TODO) | Hook for pausing a TIP-20 token, preventing all transfers |
+| [`token.usePermit`](#TODO) | Hook for approving a spender using an EIP-2612 permit signature, allowing gasless approvals |
+| [`token.useRenounceRoles`](#TODO) | Hook for renouncing one or more roles from the caller's address |
+| [`token.useRevokeRoles`](#TODO) | Hook for revoking one or more roles from an address |
+| [`token.useSetRoleAdmin`](#TODO) | Hook for setting the admin role for another role |
+| [`token.useSetSupplyCap`](#TODO) | Hook for setting the supply cap for a TIP-20 token |
+| [`token.useTransfer`](#TODO) | Hook for transferring TIP-20 tokens from the caller to a recipient |
+| [`token.useUnpause`](#TODO) | Hook for unpausing a TIP-20 token, allowing transfers to resume |
+| [`token.useWatchAdminRole`](#TODO) | Hook for watching role admin update events |
+| [`token.useWatchApprove`](#TODO) | Hook for watching token approval events |
+| [`token.useWatchBurn`](#TODO) | Hook for watching token burn events |
+| [`token.useWatchCreate`](#TODO) | Hook for watching new token creation events |
+| [`token.useWatchMint`](#TODO) | Hook for watching token mint events |
+| [`token.useWatchRole`](#TODO) | Hook for watching role membership update events |
+| [`token.useWatchTransfer`](#TODO) | Hook for watching token transfer events |

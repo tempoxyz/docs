@@ -374,11 +374,12 @@ export default defineConfig({
         ],
       },
       {
-        text: 'API Reference',
+        // TODO: Add rewrite for /sdk/typescript/viem -> /sdk/typescript/viem
+        text: 'Viem Reference',
         items: [
           {
             text: 'Overview',
-            link: '/sdk/typescript/api',
+            link: '/sdk/typescript/viem',
           },
           {
             text: 'Actions',
@@ -387,40 +388,40 @@ export default defineConfig({
               {
                 text: 'AMM',
                 items: [
-                  { text: 'burn', link: '/sdk/typescript/api/amm.burn' },
+                  { text: 'burn', link: '/sdk/typescript/viem/amm.burn' },
                   {
                     text: 'getLiquidityBalance',
-                    link: '/sdk/typescript/api/amm.getLiquidityBalance',
+                    link: '/sdk/typescript/viem/amm.getLiquidityBalance',
                   },
-                  { text: 'getPool', link: '/sdk/typescript/api/amm.getPool' },
+                  { text: 'getPool', link: '/sdk/typescript/viem/amm.getPool' },
                   {
                     text: 'getPoolId',
-                    link: '/sdk/typescript/api/amm.getPoolId',
+                    link: '/sdk/typescript/viem/amm.getPoolId',
                   },
                   {
                     text: 'getTotalSupply',
-                    link: '/sdk/typescript/api/amm.getTotalSupply',
+                    link: '/sdk/typescript/viem/amm.getTotalSupply',
                   },
-                  { text: 'mint', link: '/sdk/typescript/api/amm.mint' },
+                  { text: 'mint', link: '/sdk/typescript/viem/amm.mint' },
                   {
                     text: 'rebalanceSwap',
-                    link: '/sdk/typescript/api/amm.rebalanceSwap',
+                    link: '/sdk/typescript/viem/amm.rebalanceSwap',
                   },
                   {
                     text: 'watchBurn',
-                    link: '/sdk/typescript/api/amm.watchBurn',
+                    link: '/sdk/typescript/viem/amm.watchBurn',
                   },
                   {
                     text: 'watchFeeSwap',
-                    link: '/sdk/typescript/api/amm.watchFeeSwap',
+                    link: '/sdk/typescript/viem/amm.watchFeeSwap',
                   },
                   {
                     text: 'watchMint',
-                    link: '/sdk/typescript/api/amm.watchMint',
+                    link: '/sdk/typescript/viem/amm.watchMint',
                   },
                   {
                     text: 'watchRebalanceSwap',
-                    link: '/sdk/typescript/api/amm.watchRebalanceSwap',
+                    link: '/sdk/typescript/viem/amm.watchRebalanceSwap',
                   },
                 ],
               },
@@ -429,15 +430,15 @@ export default defineConfig({
                 items: [
                   {
                     text: 'getUserToken',
-                    link: '/sdk/typescript/api/fee.getUserToken',
+                    link: '/sdk/typescript/viem/fee.getUserToken',
                   },
                   {
                     text: 'setUserToken',
-                    link: '/sdk/typescript/api/fee.setUserToken',
+                    link: '/sdk/typescript/viem/fee.setUserToken',
                   },
                   {
                     text: 'watchSetUserToken',
-                    link: '/sdk/typescript/api/fee.watchSetUserToken',
+                    link: '/sdk/typescript/viem/fee.watchSetUserToken',
                   },
                 ],
               },
@@ -446,100 +447,100 @@ export default defineConfig({
                 items: [
                   {
                     text: 'create',
-                    link: '/sdk/typescript/api/policy.create',
+                    link: '/sdk/typescript/viem/policy.create',
                   },
                   {
                     text: 'getData',
-                    link: '/sdk/typescript/api/policy.getData',
+                    link: '/sdk/typescript/viem/policy.getData',
                   },
                   {
                     text: 'isAuthorized',
-                    link: '/sdk/typescript/api/policy.isAuthorized',
+                    link: '/sdk/typescript/viem/policy.isAuthorized',
                   },
                   {
                     text: 'modifyBlacklist',
-                    link: '/sdk/typescript/api/policy.modifyBlacklist',
+                    link: '/sdk/typescript/viem/policy.modifyBlacklist',
                   },
                   {
                     text: 'modifyWhitelist',
-                    link: '/sdk/typescript/api/policy.modifyWhitelist',
+                    link: '/sdk/typescript/viem/policy.modifyWhitelist',
                   },
                   {
                     text: 'setAdmin',
-                    link: '/sdk/typescript/api/policy.setAdmin',
+                    link: '/sdk/typescript/viem/policy.setAdmin',
                   },
                   {
                     text: 'watchAdminUpdated',
-                    link: '/sdk/typescript/api/policy.watchAdminUpdated',
+                    link: '/sdk/typescript/viem/policy.watchAdminUpdated',
                   },
                   {
                     text: 'watchBlacklistUpdated',
-                    link: '/sdk/typescript/api/policy.watchBlacklistUpdated',
+                    link: '/sdk/typescript/viem/policy.watchBlacklistUpdated',
                   },
                   {
                     text: 'watchCreate',
-                    link: '/sdk/typescript/api/policy.watchCreate',
+                    link: '/sdk/typescript/viem/policy.watchCreate',
                   },
                   {
                     text: 'watchWhitelistUpdated',
-                    link: '/sdk/typescript/api/policy.watchWhitelistUpdated',
+                    link: '/sdk/typescript/viem/policy.watchWhitelistUpdated',
                   },
                 ],
               },
               {
                 text: 'Stablecoin Exchange',
                 items: [
-                  { text: 'buy', link: '/sdk/typescript/api/dex.buy' },
-                  { text: 'cancel', link: '/sdk/typescript/api/dex.cancel' },
+                  { text: 'buy', link: '/sdk/typescript/viem/dex.buy' },
+                  { text: 'cancel', link: '/sdk/typescript/viem/dex.cancel' },
                   {
                     text: 'createPair',
-                    link: '/sdk/typescript/api/dex.createPair',
+                    link: '/sdk/typescript/viem/dex.createPair',
                   },
                   {
                     text: 'getBalance',
-                    link: '/sdk/typescript/api/dex.getBalance',
+                    link: '/sdk/typescript/viem/dex.getBalance',
                   },
                   {
                     text: 'getBuyQuote',
-                    link: '/sdk/typescript/api/dex.getBuyQuote',
+                    link: '/sdk/typescript/viem/dex.getBuyQuote',
                   },
                   {
                     text: 'getOrder',
-                    link: '/sdk/typescript/api/dex.getOrder',
+                    link: '/sdk/typescript/viem/dex.getOrder',
                   },
                   {
                     text: 'getPriceLevel',
-                    link: '/sdk/typescript/api/dex.getPriceLevel',
+                    link: '/sdk/typescript/viem/dex.getPriceLevel',
                   },
                   {
                     text: 'getSellQuote',
-                    link: '/sdk/typescript/api/dex.getSellQuote',
+                    link: '/sdk/typescript/viem/dex.getSellQuote',
                   },
-                  { text: 'place', link: '/sdk/typescript/api/dex.place' },
+                  { text: 'place', link: '/sdk/typescript/viem/dex.place' },
                   {
                     text: 'placeFlip',
-                    link: '/sdk/typescript/api/dex.placeFlip',
+                    link: '/sdk/typescript/viem/dex.placeFlip',
                   },
-                  { text: 'sell', link: '/sdk/typescript/api/dex.sell' },
+                  { text: 'sell', link: '/sdk/typescript/viem/dex.sell' },
                   {
                     text: 'watchFlipOrderPlaced',
-                    link: '/sdk/typescript/api/dex.watchFlipOrderPlaced',
+                    link: '/sdk/typescript/viem/dex.watchFlipOrderPlaced',
                   },
                   {
                     text: 'watchOrderCancelled',
-                    link: '/sdk/typescript/api/dex.watchOrderCancelled',
+                    link: '/sdk/typescript/viem/dex.watchOrderCancelled',
                   },
                   {
                     text: 'watchOrderFilled',
-                    link: '/sdk/typescript/api/dex.watchOrderFilled',
+                    link: '/sdk/typescript/viem/dex.watchOrderFilled',
                   },
                   {
                     text: 'watchOrderPlaced',
-                    link: '/sdk/typescript/api/dex.watchOrderPlaced',
+                    link: '/sdk/typescript/viem/dex.watchOrderPlaced',
                   },
                   {
                     text: 'withdraw',
-                    link: '/sdk/typescript/api/dex.withdraw',
+                    link: '/sdk/typescript/viem/dex.withdraw',
                   },
                 ],
               },
@@ -548,98 +549,98 @@ export default defineConfig({
                 items: [
                   {
                     text: 'approve',
-                    link: '/sdk/typescript/api/token.approve',
+                    link: '/sdk/typescript/viem/token.approve',
                   },
-                  { text: 'burn', link: '/sdk/typescript/api/token.burn' },
+                  { text: 'burn', link: '/sdk/typescript/viem/token.burn' },
                   {
                     text: 'burnBlocked',
-                    link: '/sdk/typescript/api/token.burnBlocked',
+                    link: '/sdk/typescript/viem/token.burnBlocked',
                   },
                   {
                     text: 'changeTransferPolicy',
-                    link: '/sdk/typescript/api/token.changeTransferPolicy',
+                    link: '/sdk/typescript/viem/token.changeTransferPolicy',
                   },
                   {
                     text: 'create',
-                    link: '/sdk/typescript/api/token.create',
+                    link: '/sdk/typescript/viem/token.create',
                   },
                   {
                     text: 'getAllowance',
-                    link: '/sdk/typescript/api/token.getAllowance',
+                    link: '/sdk/typescript/viem/token.getAllowance',
                   },
                   {
                     text: 'getBalance',
-                    link: '/sdk/typescript/api/token.getBalance',
+                    link: '/sdk/typescript/viem/token.getBalance',
                   },
                   {
                     text: 'getMetadata',
-                    link: '/sdk/typescript/api/token.getMetadata',
+                    link: '/sdk/typescript/viem/token.getMetadata',
                   },
                   {
                     text: 'grantRoles',
-                    link: '/sdk/typescript/api/token.grantRoles',
+                    link: '/sdk/typescript/viem/token.grantRoles',
                   },
                   {
                     text: 'hasRole',
-                    link: '/sdk/typescript/api/token.hasRole',
+                    link: '/sdk/typescript/viem/token.hasRole',
                   },
-                  { text: 'mint', link: '/sdk/typescript/api/token.mint' },
-                  { text: 'pause', link: '/sdk/typescript/api/token.pause' },
+                  { text: 'mint', link: '/sdk/typescript/viem/token.mint' },
+                  { text: 'pause', link: '/sdk/typescript/viem/token.pause' },
                   {
                     text: 'permit',
-                    link: '/sdk/typescript/api/token.permit',
+                    link: '/sdk/typescript/viem/token.permit',
                   },
                   {
                     text: 'renounceRoles',
-                    link: '/sdk/typescript/api/token.renounceRoles',
+                    link: '/sdk/typescript/viem/token.renounceRoles',
                   },
                   {
                     text: 'revokeRoles',
-                    link: '/sdk/typescript/api/token.revokeRoles',
+                    link: '/sdk/typescript/viem/token.revokeRoles',
                   },
                   {
                     text: 'setRoleAdmin',
-                    link: '/sdk/typescript/api/token.setRoleAdmin',
+                    link: '/sdk/typescript/viem/token.setRoleAdmin',
                   },
                   {
                     text: 'setSupplyCap',
-                    link: '/sdk/typescript/api/token.setSupplyCap',
+                    link: '/sdk/typescript/viem/token.setSupplyCap',
                   },
                   {
                     text: 'transfer',
-                    link: '/sdk/typescript/api/token.transfer',
+                    link: '/sdk/typescript/viem/token.transfer',
                   },
                   {
                     text: 'unpause',
-                    link: '/sdk/typescript/api/token.unpause',
+                    link: '/sdk/typescript/viem/token.unpause',
                   },
                   {
                     text: 'watchAdminRole',
-                    link: '/sdk/typescript/api/token.watchAdminRole',
+                    link: '/sdk/typescript/viem/token.watchAdminRole',
                   },
                   {
                     text: 'watchApprove',
-                    link: '/sdk/typescript/api/token.watchApprove',
+                    link: '/sdk/typescript/viem/token.watchApprove',
                   },
                   {
                     text: 'watchBurn',
-                    link: '/sdk/typescript/api/token.watchBurn',
+                    link: '/sdk/typescript/viem/token.watchBurn',
                   },
                   {
                     text: 'watchCreate',
-                    link: '/sdk/typescript/api/token.watchCreate',
+                    link: '/sdk/typescript/viem/token.watchCreate',
                   },
                   {
                     text: 'watchMint',
-                    link: '/sdk/typescript/api/token.watchMint',
+                    link: '/sdk/typescript/viem/token.watchMint',
                   },
                   {
                     text: 'watchRole',
-                    link: '/sdk/typescript/api/token.watchRole',
+                    link: '/sdk/typescript/viem/token.watchRole',
                   },
                   {
                     text: 'watchTransfer',
-                    link: '/sdk/typescript/api/token.watchTransfer',
+                    link: '/sdk/typescript/viem/token.watchTransfer',
                   },
                 ],
               },
@@ -651,7 +652,7 @@ export default defineConfig({
             items: [
               {
                 text: 'createTempoClient',
-                link: '/sdk/typescript/api/createTempoClient',
+                link: '/sdk/typescript/viem/createTempoClient',
               },
             ],
           },
@@ -661,7 +662,620 @@ export default defineConfig({
             items: [
               {
                 text: 'withFeePayer',
-                link: '/sdk/typescript/api/withFeePayer',
+                link: '/sdk/typescript/viem/withFeePayer',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        text: 'Wagmi Reference',
+        items: [
+          {
+            text: 'Overview',
+            link: '/sdk/typescript/wagmi',
+          },
+          {
+            text: 'Connectors 🚧',
+            collapsed: true,
+            items: [
+              {
+                text: 'dangerous_secp256k1 🚧',
+                link: '/sdk/typescript/wagmi/connectors/dangerous_secp256k1',
+              },
+              {
+                text: 'webAuthn 🚧',
+                link: '/sdk/typescript/wagmi/connectors/webAuthn',
+              },
+            ],
+          },
+          {
+            text: 'Actions 🚧',
+            collapsed: true,
+            items: [
+              {
+                text: 'AMM',
+                items: [
+                  {
+                    text: 'burn 🚧',
+                    link: '/sdk/typescript/wagmi/actions/amm.burn',
+                  },
+                  {
+                    text: 'getLiquidityBalance 🚧',
+                    link: '/sdk/typescript/wagmi/actions/amm.getLiquidityBalance',
+                  },
+                  {
+                    text: 'getPool 🚧',
+                    link: '/sdk/typescript/wagmi/actions/amm.getPool',
+                  },
+                  {
+                    text: 'getPoolId 🚧',
+                    link: '/sdk/typescript/wagmi/actions/amm.getPoolId',
+                  },
+                  {
+                    text: 'getTotalSupply 🚧',
+                    link: '/sdk/typescript/wagmi/actions/amm.getTotalSupply',
+                  },
+                  {
+                    text: 'mint 🚧',
+                    link: '/sdk/typescript/wagmi/actions/amm.mint',
+                  },
+                  {
+                    text: 'rebalanceSwap 🚧',
+                    link: '/sdk/typescript/wagmi/actions/amm.rebalanceSwap',
+                  },
+                  {
+                    text: 'watchBurn 🚧',
+                    link: '/sdk/typescript/wagmi/actions/amm.watchBurn',
+                  },
+                  {
+                    text: 'watchFeeSwap 🚧',
+                    link: '/sdk/typescript/wagmi/actions/amm.watchFeeSwap',
+                  },
+                  {
+                    text: 'watchMint 🚧',
+                    link: '/sdk/typescript/wagmi/actions/amm.watchMint',
+                  },
+                  {
+                    text: 'watchRebalanceSwap 🚧',
+                    link: '/sdk/typescript/wagmi/actions/amm.watchRebalanceSwap',
+                  },
+                ],
+              },
+              {
+                text: 'Fee',
+                items: [
+                  {
+                    text: 'getUserToken 🚧',
+                    link: '/sdk/typescript/wagmi/actions/fee.getUserToken',
+                  },
+                  {
+                    text: 'setUserToken 🚧',
+                    link: '/sdk/typescript/wagmi/actions/fee.setUserToken',
+                  },
+                  {
+                    text: 'watchSetUserToken 🚧',
+                    link: '/sdk/typescript/wagmi/actions/fee.watchSetUserToken',
+                  },
+                ],
+              },
+              {
+                text: 'Policy',
+                items: [
+                  {
+                    text: 'create 🚧',
+                    link: '/sdk/typescript/wagmi/actions/policy.create',
+                  },
+                  {
+                    text: 'getData 🚧',
+                    link: '/sdk/typescript/wagmi/actions/policy.getData',
+                  },
+                  {
+                    text: 'isAuthorized 🚧',
+                    link: '/sdk/typescript/wagmi/actions/policy.isAuthorized',
+                  },
+                  {
+                    text: 'modifyBlacklist 🚧',
+                    link: '/sdk/typescript/wagmi/actions/policy.modifyBlacklist',
+                  },
+                  {
+                    text: 'modifyWhitelist 🚧',
+                    link: '/sdk/typescript/wagmi/actions/policy.modifyWhitelist',
+                  },
+                  {
+                    text: 'setAdmin 🚧',
+                    link: '/sdk/typescript/wagmi/actions/policy.setAdmin',
+                  },
+                  {
+                    text: 'watchAdminUpdated 🚧',
+                    link: '/sdk/typescript/wagmi/actions/policy.watchAdminUpdated',
+                  },
+                  {
+                    text: 'watchBlacklistUpdated 🚧',
+                    link: '/sdk/typescript/wagmi/actions/policy.watchBlacklistUpdated',
+                  },
+                  {
+                    text: 'watchCreate 🚧',
+                    link: '/sdk/typescript/wagmi/actions/policy.watchCreate',
+                  },
+                  {
+                    text: 'watchWhitelistUpdated 🚧',
+                    link: '/sdk/typescript/wagmi/actions/policy.watchWhitelistUpdated',
+                  },
+                ],
+              },
+              {
+                text: 'Stablecoin Exchange',
+                items: [
+                  {
+                    text: 'buy 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.buy',
+                  },
+                  {
+                    text: 'cancel 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.cancel',
+                  },
+                  {
+                    text: 'createPair 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.createPair',
+                  },
+                  {
+                    text: 'getBalance 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.getBalance',
+                  },
+                  {
+                    text: 'getBuyQuote 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.getBuyQuote',
+                  },
+                  {
+                    text: 'getOrder 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.getOrder',
+                  },
+                  {
+                    text: 'getPriceLevel 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.getPriceLevel',
+                  },
+                  {
+                    text: 'getSellQuote 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.getSellQuote',
+                  },
+                  {
+                    text: 'place 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.place',
+                  },
+                  {
+                    text: 'placeFlip 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.placeFlip',
+                  },
+                  {
+                    text: 'sell 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.sell',
+                  },
+                  {
+                    text: 'watchFlipOrderPlaced 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.watchFlipOrderPlaced',
+                  },
+                  {
+                    text: 'watchOrderCancelled 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.watchOrderCancelled',
+                  },
+                  {
+                    text: 'watchOrderFilled 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.watchOrderFilled',
+                  },
+                  {
+                    text: 'watchOrderPlaced 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.watchOrderPlaced',
+                  },
+                  {
+                    text: 'withdraw 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.withdraw',
+                  },
+                ],
+              },
+              {
+                text: 'Token',
+                items: [
+                  {
+                    text: 'approve 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.approve',
+                  },
+                  {
+                    text: 'burn 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.burn',
+                  },
+                  {
+                    text: 'burnBlocked 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.burnBlocked',
+                  },
+                  {
+                    text: 'changeTransferPolicy 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.changeTransferPolicy',
+                  },
+                  {
+                    text: 'create 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.create',
+                  },
+                  {
+                    text: 'getAllowance 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.getAllowance',
+                  },
+                  {
+                    text: 'getBalance 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.getBalance',
+                  },
+                  {
+                    text: 'getMetadata 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.getMetadata',
+                  },
+                  {
+                    text: 'grantRoles 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.grantRoles',
+                  },
+                  {
+                    text: 'hasRole 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.hasRole',
+                  },
+                  {
+                    text: 'mint 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.mint',
+                  },
+                  {
+                    text: 'pause 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.pause',
+                  },
+                  {
+                    text: 'permit 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.permit',
+                  },
+                  {
+                    text: 'renounceRoles 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.renounceRoles',
+                  },
+                  {
+                    text: 'revokeRoles 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.revokeRoles',
+                  },
+                  {
+                    text: 'setRoleAdmin 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.setRoleAdmin',
+                  },
+                  {
+                    text: 'setSupplyCap 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.setSupplyCap',
+                  },
+                  {
+                    text: 'transfer 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.transfer',
+                  },
+                  {
+                    text: 'unpause 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.unpause',
+                  },
+                  {
+                    text: 'watchAdminRole 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.watchAdminRole',
+                  },
+                  {
+                    text: 'watchApprove 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.watchApprove',
+                  },
+                  {
+                    text: 'watchBurn 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.watchBurn',
+                  },
+                  {
+                    text: 'watchCreate 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.watchCreate',
+                  },
+                  {
+                    text: 'watchMint 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.watchMint',
+                  },
+                  {
+                    text: 'watchRole 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.watchRole',
+                  },
+                  {
+                    text: 'watchTransfer 🚧',
+                    link: '/sdk/typescript/wagmi/actions/token.watchTransfer',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            text: 'Hooks 🚧',
+            collapsed: true,
+            items: [
+              {
+                text: 'AMM',
+                items: [
+                  {
+                    text: 'useBurn 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/amm.useBurn',
+                  },
+                  {
+                    text: 'useLiquidityBalance 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/amm.useLiquidityBalance',
+                  },
+                  {
+                    text: 'useMint 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/amm.useMint',
+                  },
+                  {
+                    text: 'usePool 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/amm.usePool',
+                  },
+                  {
+                    text: 'usePoolId 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/amm.usePoolId',
+                  },
+                  {
+                    text: 'useRebalanceSwap 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/amm.useRebalanceSwap',
+                  },
+                  {
+                    text: 'useTotalSupply 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/amm.useTotalSupply',
+                  },
+                  {
+                    text: 'useWatchBurn 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/amm.useWatchBurn',
+                  },
+                  {
+                    text: 'useWatchFeeSwap 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/amm.useWatchFeeSwap',
+                  },
+                  {
+                    text: 'useWatchMint 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/amm.useWatchMint',
+                  },
+                  {
+                    text: 'useWatchRebalanceSwap 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/amm.useWatchRebalanceSwap',
+                  },
+                ],
+              },
+              {
+                text: 'Fee',
+                items: [
+                  {
+                    text: 'useSetUserToken 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/fee.useSetUserToken',
+                  },
+                  {
+                    text: 'useUserToken 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/fee.useUserToken',
+                  },
+                  {
+                    text: 'useWatchSetUserToken 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/fee.useWatchSetUserToken',
+                  },
+                ],
+              },
+              {
+                text: 'Policy',
+                items: [
+                  {
+                    text: 'useCreate 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/policy.useCreate',
+                  },
+                  {
+                    text: 'useData 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/policy.useData',
+                  },
+                  {
+                    text: 'useIsAuthorized 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/policy.useIsAuthorized',
+                  },
+                  {
+                    text: 'useModifyBlacklist 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/policy.useModifyBlacklist',
+                  },
+                  {
+                    text: 'useModifyWhitelist 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/policy.useModifyWhitelist',
+                  },
+                  {
+                    text: 'useSetAdmin 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/policy.useSetAdmin',
+                  },
+                  {
+                    text: 'useWatchAdminUpdated 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/policy.useWatchAdminUpdated',
+                  },
+                  {
+                    text: 'useWatchBlacklistUpdated 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/policy.useWatchBlacklistUpdated',
+                  },
+                  {
+                    text: 'useWatchCreate 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/policy.useWatchCreate',
+                  },
+                  {
+                    text: 'useWatchWhitelistUpdated 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/policy.useWatchWhitelistUpdated',
+                  },
+                ],
+              },
+              {
+                text: 'Stablecoin Exchange',
+                items: [
+                  {
+                    text: 'useBalance 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.useBalance',
+                  },
+                  {
+                    text: 'useBuy 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.useBuy',
+                  },
+                  {
+                    text: 'useBuyQuote 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.useBuyQuote',
+                  },
+                  {
+                    text: 'useCancel 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.useCancel',
+                  },
+                  {
+                    text: 'useCreatePair 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.useCreatePair',
+                  },
+                  {
+                    text: 'useOrder 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.useOrder',
+                  },
+                  {
+                    text: 'usePlace 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.usePlace',
+                  },
+                  {
+                    text: 'usePlaceFlip 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.usePlaceFlip',
+                  },
+                  {
+                    text: 'usePriceLevel 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.usePriceLevel',
+                  },
+                  {
+                    text: 'useSell 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.useSell',
+                  },
+                  {
+                    text: 'useSellQuote 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.useSellQuote',
+                  },
+                  {
+                    text: 'useWatchFlipOrderPlaced 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.useWatchFlipOrderPlaced',
+                  },
+                  {
+                    text: 'useWatchOrderCancelled 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.useWatchOrderCancelled',
+                  },
+                  {
+                    text: 'useWatchOrderFilled 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.useWatchOrderFilled',
+                  },
+                  {
+                    text: 'useWatchOrderPlaced 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.useWatchOrderPlaced',
+                  },
+                  {
+                    text: 'useWithdraw 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.useWithdraw',
+                  },
+                ],
+              },
+              {
+                text: 'Token',
+                items: [
+                  {
+                    text: 'useAllowance 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useAllowance',
+                  },
+                  {
+                    text: 'useApprove 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useApprove',
+                  },
+                  {
+                    text: 'useBalance 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useBalance',
+                  },
+                  {
+                    text: 'useBurn 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useBurn',
+                  },
+                  {
+                    text: 'useBurnBlocked 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useBurnBlocked',
+                  },
+                  {
+                    text: 'useChangeTransferPolicy 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useChangeTransferPolicy',
+                  },
+                  {
+                    text: 'useCreate 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useCreate',
+                  },
+                  {
+                    text: 'useGrantRoles 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useGrantRoles',
+                  },
+                  {
+                    text: 'useHasRole 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useHasRole',
+                  },
+                  {
+                    text: 'useMetadata 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useMetadata',
+                  },
+                  {
+                    text: 'useMint 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useMint',
+                  },
+                  {
+                    text: 'usePause 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.usePause',
+                  },
+                  {
+                    text: 'usePermit 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.usePermit',
+                  },
+                  {
+                    text: 'useRenounceRoles 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useRenounceRoles',
+                  },
+                  {
+                    text: 'useRevokeRoles 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useRevokeRoles',
+                  },
+                  {
+                    text: 'useSetRoleAdmin 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useSetRoleAdmin',
+                  },
+                  {
+                    text: 'useSetSupplyCap 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useSetSupplyCap',
+                  },
+                  {
+                    text: 'useTransfer 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useTransfer',
+                  },
+                  {
+                    text: 'useUnpause 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useUnpause',
+                  },
+                  {
+                    text: 'useWatchAdminRole 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useWatchAdminRole',
+                  },
+                  {
+                    text: 'useWatchApprove 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useWatchApprove',
+                  },
+                  {
+                    text: 'useWatchBurn 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useWatchBurn',
+                  },
+                  {
+                    text: 'useWatchCreate 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useWatchCreate',
+                  },
+                  {
+                    text: 'useWatchMint 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useWatchMint',
+                  },
+                  {
+                    text: 'useWatchRole 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useWatchRole',
+                  },
+                  {
+                    text: 'useWatchTransfer 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/token.useWatchTransfer',
+                  },
+                ],
               },
             ],
           },
