@@ -10,7 +10,7 @@ import "forge-std/Test.sol";
 contract TIP20FactoryTest is Test {
 
     TIP20Factory factory;
-    LinkingUSD linkingToken;
+    LinkingUSD quoteToken;
     address admin = address(0x1);
 
     function setUp() public {
@@ -29,9 +29,9 @@ contract TIP20FactoryTest is Test {
         );
 
         // Deploy and etch LinkingUSD at the root TIP20 address
-        linkingToken = new LinkingUSD(admin);
-        vm.etch(0x20C0000000000000000000000000000000000000, address(linkingToken).code);
-        linkingToken = LinkingUSD(0x20C0000000000000000000000000000000000000);
+        quoteToken = new LinkingUSD(admin);
+        vm.etch(0x20C0000000000000000000000000000000000000, address(quoteToken).code);
+        quoteToken = LinkingUSD(0x20C0000000000000000000000000000000000000);
     }
 
     function testCreateTokenWithValidQuoteToken() public {

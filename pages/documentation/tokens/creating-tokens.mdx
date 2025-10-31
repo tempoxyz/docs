@@ -15,7 +15,7 @@ TIP20 token = factory.createToken(
   "My Company USD",  // name
   "MCUSD",           // symbol
   "USD",             // currency
-  TIP20(0x20c0000000000000000000000000000000000000), // linkingToken (linkingUSD)
+  TIP20(0x20c0000000000000000000000000000000000000), // quoteToken (linkingUSD)
   msg.sender         // admin
 );
 ```
@@ -43,7 +43,7 @@ function createToken(
   /** Currency of the token */
   string memory currency,
   /** Linking token */
-  TIP20 linkingToken,
+  TIP20 quoteToken,
   /** Admin of the token */
   address admin
 ) external returns (
@@ -84,7 +84,7 @@ The `currency` parameter automatically sets decimal precision via the [TIP-4217 
 
 ### Quote Tokens
 
-The `linkingToken` parameter determines trading pairs and token hierarchy:
+The `quoteToken` parameter determines trading pairs and token hierarchy:
 
 - **Most stablecoins**: Use [linkingUSD](/documentation/tokens/linkingUSD) (`0x20c0000000000000000000000000000000000000`) as their quote token
 - **Custom pairs**: Can use any existing TIP-20 token as a quote token
