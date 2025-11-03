@@ -26,7 +26,7 @@ Preserve throughput and predictable inclusion for simple payments under heavy no
 
 A chain-config constant `ClassifierID` selects the active rule set.
 
-- **Classifier v1:** `isPaymentTx(tx) == true` iff `tx.to` has the reserved 14-byte prefix `0x20c000000…` corresponding to TIP20 factory-deployed token contracts.  
+- **Classifier v1:** `isPaymentTx(tx) == true` if `tx.to` has the reserved 14-byte prefix `0x20c000000…` corresponding to TIP20 factory-deployed token contracts OR, for AA transactions, if every item in `tx.calls` is a CALL to an address that has the reserved 14-byte prefix `0x20c000000…`.
   _Note:_ Only the **outer** transaction envelope is considered; internal calls and state are ignored. Later forks may change the classifier by bumping `ClassifierID`.
 
 
@@ -51,8 +51,6 @@ generalGasLimit >= Σ gasConsumed(tx[i])   for all i such that !isPaymentTx(tx[i
 ```
 
 Where `gasConsumed` includes intrinsic gas and gas burned by reverts, as in the existing protocol.
-
-If a non-payment transaction's `gasLimit`, added to the total `gasUsed` by previous non-payment transactions, would cause the `generalGasLimit` of the block to be exceeded, then the transaction is invalid, regardless of whether its actual `gasUsed` would keep it within the limit.
 
 ### 5. Fee market
 
