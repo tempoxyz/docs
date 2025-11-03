@@ -394,14 +394,6 @@ export default defineConfig({
                     link: '/sdk/typescript/viem/amm.getLiquidityBalance',
                   },
                   { text: 'getPool', link: '/sdk/typescript/viem/amm.getPool' },
-                  {
-                    text: 'getPoolId',
-                    link: '/sdk/typescript/viem/amm.getPoolId',
-                  },
-                  {
-                    text: 'getTotalSupply',
-                    link: '/sdk/typescript/viem/amm.getTotalSupply',
-                  },
                   { text: 'mint', link: '/sdk/typescript/viem/amm.mint' },
                   {
                     text: 'rebalanceSwap',

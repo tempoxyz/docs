@@ -96,14 +96,10 @@ To remove your liquidity, you first must find out how much LP tokens you own by 
 const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
 const betaUSDAddress = '0x20c0000000000000000000000000000000000001'
 
-const poolId = await client.amm.getPoolId({
+const balance = await client.amm.getLiquidityBalance({
+  address: '0x...',
   userToken: alphaUSDAddress,
   validatorToken: betaUSDAddress,
-})
-
-const balance = await client.amm.getLiquidityBalance({
-  poolId,
-  address: '0x...',
 })
 ```
 
@@ -143,14 +139,10 @@ Check your LP token balance for a specific pool:
 const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
 const betaUSDAddress = '0x20c0000000000000000000000000000000000001'
 
-const poolId = await client.amm.getPoolId({
+const balance = await client.amm.getLiquidityBalance({
+  address: '0x...',
   userToken: alphaUSDAddress,
   validatorToken: betaUSDAddress,
-})
-
-const balance = await client.amm.getLiquidityBalance({
-  poolId,
-  address: '0x...',
 })
 ```
 
