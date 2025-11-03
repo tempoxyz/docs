@@ -16,7 +16,7 @@
     "react-dom": "latest",
     "react-router": "7.9.4",
     "tailwindcss": "^4.1.14",
-    "tempo.ts": "~0.1.0",
+    "tempo.ts": "https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@639eefa",
     "viem": "^2.38.3",
     "vocs": "latest"
   },

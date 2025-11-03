@@ -488,6 +488,31 @@ export default defineConfig({
                 ],
               },
               {
+                text: 'Reward',
+                items: [
+                  {
+                    text: 'cancel',
+                    link: '/sdk/typescript/api/reward.cancel',
+                  },
+                  {
+                    text: 'getStream',
+                    link: '/sdk/typescript/api/reward.getStream',
+                  },
+                  {
+                    text: 'getTotalPerSecond',
+                    link: '/sdk/typescript/api/reward.getTotalPerSecond',
+                  },
+                  {
+                    text: 'setRecipient',
+                    link: '/sdk/typescript/api/reward.setRecipient',
+                  },
+                  {
+                    text: 'start',
+                    link: '/sdk/typescript/api/reward.start',
+                  },
+                ],
+              },
+              {
                 text: 'Stablecoin Exchange',
                 items: [
                   { text: 'buy', link: '/sdk/typescript/viem/dex.buy' },
