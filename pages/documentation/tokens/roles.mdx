@@ -45,7 +45,7 @@ token.grantRole(keccak256("BURN_BLOCKED_ROLE"), complianceAddress);
 ```
 
 :::note
-See a full [TypeScript Example](/sdk/typescript/api/token.grantRoles)
+See a full [TypeScript Example](/sdk/typescript/viem/token.grantRoles)
 :::
 
 To grant a role, you must have the **admin role** for that specific role. By default, `DEFAULT_ADMIN_ROLE` (granted to the token creator) is the admin for all other roles.
@@ -109,7 +109,7 @@ token.grantRole(keccak256("ISSUER_ROLE"), newTreasury);
 ```
 
 :::note
-See a full [TypeScript Example](/sdk/typescript/api/token.revokeRoles)
+See a full [TypeScript Example](/sdk/typescript/viem/token.revokeRoles)
 :::
 
 To revoke a role, you must have the **admin role** for that specific role, just like granting.

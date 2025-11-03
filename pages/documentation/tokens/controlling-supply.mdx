@@ -28,7 +28,7 @@ token.mintWithMemo(
 ```
 
 :::note
-See a full [TypeScript Example](/sdk/typescript/api/token.mint)
+See a full [TypeScript Example](/sdk/typescript/viem/token.mint)
 :::
 
 Minting requires the **`ISSUER_ROLE`**. The token must not exceed its supply cap (if set).
@@ -93,7 +93,7 @@ token.burnWithMemo(
 ```
 
 :::note
-See a full [TypeScript Example](/sdk/typescript/api/token.burn)
+See a full [TypeScript Example](/sdk/typescript/viem/token.burn)
 :::
 
 Burning requires the **`ISSUER_ROLE`** and sufficient balance in the caller's account.
@@ -141,7 +141,7 @@ token.burnBlocked(blockedAddress, 100_000_000);
 ```
 
 :::note
-See a full [TypeScript Example](/sdk/typescript/api/token.burnBlocked)
+See a full [TypeScript Example](/sdk/typescript/viem/token.burnBlocked)
 :::
 
 Burning blocked tokens requires the **`BURN_BLOCKED_ROLE`**. The address must be unauthorized by the current transfer policy.
@@ -182,7 +182,7 @@ token.setSupplyCap(type(uint256).max);
 ```
 
 :::note
-See a full [TypeScript Example](/sdk/typescript/api/token.setSupplyCap)
+See a full [TypeScript Example](/sdk/typescript/viem/token.setSupplyCap)
 :::
 
 Setting supply caps requires the **`DEFAULT_ADMIN_ROLE`**. The new cap cannot be less than the current total supply.
@@ -229,7 +229,7 @@ token.unpause();
 ```
 
 :::note
-See a full [TypeScript Example](/sdk/typescript/api/token.pause)
+See a full [TypeScript Example](/sdk/typescript/viem/token.pause)
 :::
 
 Pausing requires the **`PAUSE_ROLE`**. Unpausing requires the **`UNPAUSE_ROLE`**.
