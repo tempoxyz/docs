@@ -108,10 +108,12 @@ contract FeeAMM {
         amountOut = (amountIn * M) / SCALE;
     }
 
-    function rebalanceSwap(address userToken, address validatorToken, uint256 amountOut, address to)
-        external
-        returns (uint256 amountIn)
-    {
+    function rebalanceSwap(
+        address userToken,
+        address validatorToken,
+        uint256 amountOut,
+        address to
+    ) external returns (uint256 amountIn) {
         bytes32 poolId = getPoolId(userToken, validatorToken);
 
         // Rebalancing swaps are always from validatorToken to userToken

@@ -57,7 +57,7 @@ contract TIP403RegistryTest is Test {
         assertTrue(registry.isAuthorized(newPolicyId, alice));
         assertTrue(registry.isAuthorized(newPolicyId, bob));
         assertFalse(registry.isAuthorized(newPolicyId, charlie)); // Not in
-            // initial set
+        // initial set
     }
 
     function test_CreatePolicy_WithInitialAccounts_Blacklist() public {
@@ -76,7 +76,7 @@ contract TIP403RegistryTest is Test {
         assertFalse(registry.isAuthorized(newPolicyId, alice));
         assertFalse(registry.isAuthorized(newPolicyId, bob));
         assertTrue(registry.isAuthorized(newPolicyId, charlie)); // Not in
-            // initial set
+        // initial set
     }
 
     function test_CreatePolicy_WithAdmin() public {

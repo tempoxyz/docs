@@ -11,7 +11,9 @@ contract LinkingUSD is TIP20 {
     bytes32 public constant TRANSFER_ROLE = keccak256("TRANSFER_ROLE");
     bytes32 public constant RECEIVE_WITH_MEMO_ROLE = keccak256("RECEIVE_WITH_MEMO_ROLE");
 
-    constructor(address admin) TIP20("linkingUSD", "linkingUSD", "USD", TIP20(address(0)), admin) { }
+    constructor(address admin)
+        TIP20("linkingUSD", "linkingUSD", "USD", TIP20(address(0)), admin)
+    { }
 
     function transfer(address to, uint256 amount) public override returns (bool) {
         if (msg.sender == STABLECOIN_DEX || hasRole[msg.sender][TRANSFER_ROLE]) {

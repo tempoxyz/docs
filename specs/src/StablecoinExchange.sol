@@ -528,9 +528,7 @@ contract StablecoinExchange is IStablecoinExchange {
     /// @param user The user to transfer from
     /// @param token The token to transfer
     /// @param amount The amount to transfer
-    function _decrementBalanceOrTransferFrom(address user, address token, uint128 amount)
-        internal
-    {
+    function _decrementBalanceOrTransferFrom(address user, address token, uint128 amount) internal {
         uint128 userBalance = balances[user][token];
         if (userBalance >= amount) {
             balances[user][token] -= amount;
@@ -910,11 +908,12 @@ contract StablecoinExchange is IStablecoinExchange {
     /// @param baseForQuote True if spending base for quote, false if spending quote for base
     /// @param amountIn Exact amount of input tokens to spend
     /// @return amountOut Amount of output tokens received
-    function _quoteExactIn(bytes32 key, Orderbook storage book, bool baseForQuote, uint128 amountIn)
-        internal
-        view
-        returns (uint128 amountOut)
-    {
+    function _quoteExactIn(
+        bytes32 key,
+        Orderbook storage book,
+        bool baseForQuote,
+        uint128 amountIn
+    ) internal view returns (uint128 amountOut) {
         uint128 remainingIn = amountIn;
 
         if (baseForQuote) {

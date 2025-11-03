@@ -2,6 +2,8 @@
 pragma solidity ^0.8.13;
 
 import { TIP20Factory } from "./TIP20Factory.sol";
+
+import { TIP20RewardsRegistry } from "./TIP20RewardRegistry.sol";
 import { TIP20RolesAuth } from "./TIP20RolesAuth.sol";
 import { TIP403Registry } from "./TIP403Registry.sol";
 import { TIP4217Registry } from "./TIP4217Registry.sol";
@@ -17,6 +19,9 @@ contract TIP20 is TIP20RolesAuth {
     address internal constant TIP_FEE_MANAGER_ADDRESS = 0xfeEC000000000000000000000000000000000000;
 
     address internal constant FACTORY = 0x20Fc000000000000000000000000000000000000;
+
+    TIP20RewardsRegistry internal constant TIP20_REWARDS_REGISTRY =
+        TIP20RewardsRegistry(0x3000000000000000000000000000000000000000);
 
     /*//////////////////////////////////////////////////////////////
                                 METADATA
@@ -79,7 +84,7 @@ contract TIP20 is TIP20RolesAuth {
                               ERC20 STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    uint256 public totalSupply;
+    uint128 internal _totalSupply;
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
     mapping(address => uint256) public nonces;
@@ -89,7 +94,37 @@ contract TIP20 is TIP20RolesAuth {
     //////////////////////////////////////////////////////////////*/
 
     bool public paused = false;
-    uint256 public supplyCap = type(uint256).max; // Default to no supply cap.
+    uint256 public supplyCap = type(uint128).max; // Default to cap at uint128.max
+
+    /*//////////////////////////////////////////////////////////////
+                        REWARD DISTRIBUTION STORAGE
+    //////////////////////////////////////////////////////////////*/
+
+    uint256 internal constant ACC_PRECISION = 1e18;
+    uint256 public globalRewardPerToken;
+    uint64 public lastUpdateTime;
+    uint256 public totalRewardPerSecond;
+    uint128 public optedInSupply;
+    uint64 public nextStreamId = 1;
+
+    struct RewardStream {
+        address funder;
+        uint64 startTime;
+        uint64 endTime;
+        uint256 ratePerSecondScaled;
+        uint256 amountTotal;
+    }
+
+    mapping(uint64 => RewardStream) public streams;
+    mapping(uint64 => uint256) public scheduledRateDecrease;
+
+    struct UserRewardInfo {
+        address rewardRecipient;
+        uint256 rewardPerToken;
+        uint256 rewardBalance;
+    }
+
+    mapping(address => UserRewardInfo) public userRewardInfo;
 
     /*//////////////////////////////////////////////////////////////
                                  ERRORS
@@ -105,6 +140,10 @@ contract TIP20 is TIP20RolesAuth {
     error ContractPaused();
     error InvalidCurrency();
     error InvalidQuoteToken();
+    error InvalidAmount();
+    error NotStreamFunder();
+    error StreamInactive();
+    error NoOptedInSupply();
 
     /*//////////////////////////////////////////////////////////////
                                  EVENTS
@@ -123,6 +162,11 @@ contract TIP20 is TIP20RolesAuth {
     event PauseStateUpdate(address indexed updater, bool isPaused);
     event NextQuoteTokenSet(address indexed updater, TIP20 indexed nextQuoteToken);
     event QuoteTokenUpdate(address indexed updater, TIP20 indexed newQuoteToken);
+    event RewardScheduled(
+        address indexed funder, uint64 indexed id, uint256 amount, uint32 durationSeconds
+    );
+    event RewardCanceled(address indexed funder, uint64 indexed id, uint256 refund);
+    event RewardRecipientSet(address indexed holder, address indexed recipient);
 
     /*//////////////////////////////////////////////////////////////
                           POLICY ADMINISTRATION
@@ -160,7 +204,7 @@ contract TIP20 is TIP20RolesAuth {
     }
 
     function setSupplyCap(uint256 newSupplyCap) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (newSupplyCap < totalSupply) revert SupplyCapExceeded();
+        if (newSupplyCap < _totalSupply) revert SupplyCapExceeded();
         emit SupplyCapUpdate(msg.sender, supplyCap = newSupplyCap);
     }
 
@@ -180,7 +224,7 @@ contract TIP20 is TIP20RolesAuth {
     function burn(uint256 amount) external onlyRole(ISSUER_ROLE) {
         _transfer(msg.sender, address(0), amount);
         unchecked {
-            totalSupply -= amount;
+            _totalSupply -= uint128(amount);
         }
 
         emit Burn(msg.sender, amount);
@@ -194,16 +238,13 @@ contract TIP20 is TIP20RolesAuth {
 
         _transfer(from, address(0), amount);
         unchecked {
-            totalSupply -= amount;
+            _totalSupply -= uint128(amount);
         }
 
         emit BurnBlocked(from, amount);
     }
 
-    function mintWithMemo(address to, uint256 amount, bytes32 memo)
-        external
-        onlyRole(ISSUER_ROLE)
-    {
+    function mintWithMemo(address to, uint256 amount, bytes32 memo) external onlyRole(ISSUER_ROLE) {
         _mint(to, amount);
         emit TransferWithMemo(address(0), to, amount, memo);
         emit Mint(to, amount);
@@ -212,7 +253,7 @@ contract TIP20 is TIP20RolesAuth {
     function burnWithMemo(uint256 amount, bytes32 memo) external onlyRole(ISSUER_ROLE) {
         _transfer(msg.sender, address(0), amount);
         unchecked {
-            totalSupply -= amount;
+            _totalSupply -= uint128(amount);
         }
 
         emit TransferWithMemo(msg.sender, address(0), amount, memo);
@@ -331,8 +372,30 @@ contract TIP20 is TIP20RolesAuth {
         emit Approval(owner, spender, value);
     }
 
+    function totalSupply() public returns (uint256) {
+        return _totalSupply;
+    }
+
     function _transfer(address from, address to, uint256 amount) internal {
         if (amount > balanceOf[from]) revert InsufficientBalance();
+
+        // Accrue rewards before any balance changes
+        _accrue(block.timestamp);
+
+        // Handle reward accounting for opted-in sender
+        address fromsRewardRecipient = _updateRewardsAndGetRecipient(from);
+
+        // Handle reward accounting for opted-in receiver (but not when burning)
+        address tosRewardRecipient = _updateRewardsAndGetRecipient(to);
+
+        if (fromsRewardRecipient != address(0)) {
+            if (tosRewardRecipient == address(0)) {
+                optedInSupply -= uint128(amount);
+            }
+        } else if (tosRewardRecipient != address(0)) {
+            optedInSupply += uint128(amount);
+        }
+
         unchecked {
             balanceOf[from] -= amount;
             if (to != address(0)) balanceOf[to] += amount;
@@ -342,9 +405,19 @@ contract TIP20 is TIP20RolesAuth {
     }
 
     function _mint(address to, uint256 amount) internal {
-        if (totalSupply + amount > supplyCap) revert SupplyCapExceeded(); // Catches overflow.
+        if (_totalSupply + amount > supplyCap) revert SupplyCapExceeded(); // Catches overflow.
+
+        // Accrue rewards before any balance changes
+        _accrue(block.timestamp);
+
+        // Handle reward accounting for opted-in receiver
+        address tosRewardRecipient = _updateRewardsAndGetRecipient(to);
+        if (tosRewardRecipient != address(0)) {
+            optedInSupply += uint128(amount);
+        }
+
         unchecked {
-            totalSupply += amount;
+            _totalSupply += uint128(amount);
             balanceOf[to] += amount;
         }
 
@@ -410,8 +483,16 @@ contract TIP20 is TIP20RolesAuth {
 
     function transferFeePreTx(address from, uint256 amount) external {
         require(msg.sender == TIP_FEE_MANAGER_ADDRESS);
+        require(from != address(0));
 
         if (amount > balanceOf[from]) revert InsufficientBalance();
+
+        _accrue(block.timestamp);
+
+        address fromsRewardRecipient = _updateRewardsAndGetRecipient(from);
+        if (fromsRewardRecipient != address(0)) {
+            optedInSupply -= uint128(amount);
+        }
 
         unchecked {
             balanceOf[from] -= amount;
@@ -421,9 +502,16 @@ contract TIP20 is TIP20RolesAuth {
 
     function transferFeePostTx(address to, uint256 refund, uint256 actualUsed) external {
         require(msg.sender == TIP_FEE_MANAGER_ADDRESS);
+        require(to != address(0));
 
         uint256 feeManagerBalance = balanceOf[TIP_FEE_MANAGER_ADDRESS];
         if (refund > feeManagerBalance) revert InsufficientBalance();
+
+        // We assume that transferFeePreTx is always called first, so `_accrue` has already been called.
+        address tosRewardRecipient = _updateRewardsAndGetRecipient(to);
+        if (tosRewardRecipient != address(0)) {
+            optedInSupply += uint128(refund);
+        }
 
         unchecked {
             balanceOf[TIP_FEE_MANAGER_ADDRESS] -= refund;
@@ -431,6 +519,217 @@ contract TIP20 is TIP20RolesAuth {
         }
 
         emit Transfer(to, TIP_FEE_MANAGER_ADDRESS, actualUsed);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                        REWARD DISTRIBUTION
+    //////////////////////////////////////////////////////////////*/
+
+    function _accrue(uint256 timestampToAccrueTo) internal {
+        uint256 elapsed = timestampToAccrueTo - lastUpdateTime;
+
+        if (elapsed == 0) return;
+
+        lastUpdateTime = uint64(timestampToAccrueTo);
+
+        // Clock keeps running even if optedInSupply == 0 (no backfill)
+        if (optedInSupply == 0) return;
+
+        if (totalRewardPerSecond > 0) {
+            // deltaRPT = totalRewardPerSecond * elapsed / optedInSupply
+            uint256 deltaRPT = (totalRewardPerSecond * elapsed) / uint256(optedInSupply);
+            globalRewardPerToken += deltaRPT;
+        }
+    }
+
+    // Updates the rewards for `user` and their `rewardRecipient`
+    function _updateRewardsAndGetRecipient(address user)
+        internal
+        returns (address rewardRecipient)
+    {
+        rewardRecipient = userRewardInfo[user].rewardRecipient;
+        uint256 cachedGlobalRewardPerToken = globalRewardPerToken;
+        uint256 rewardPerTokenDelta =
+            cachedGlobalRewardPerToken - userRewardInfo[user].rewardPerToken;
+
+        if (rewardPerTokenDelta != 0) {
+            // No rewards to update if not opted-in
+            if (rewardRecipient != address(0)) {
+                // Balance to update
+                uint256 reward = uint256(balanceOf[user]) * (rewardPerTokenDelta) / ACC_PRECISION;
+
+                userRewardInfo[rewardRecipient].rewardBalance += reward;
+            }
+            userRewardInfo[user].rewardPerToken = cachedGlobalRewardPerToken;
+        }
+    }
+
+    function startReward(uint256 amount, uint32 seconds_) external notPaused returns (uint64) {
+        if (amount == 0) revert InvalidAmount();
+        if (!TIP403_REGISTRY.isAuthorized(transferPolicyId, msg.sender)) revert PolicyForbids();
+
+        // Transfer tokens from sender to this contract
+        _transfer(msg.sender, address(this), amount);
+
+        if (seconds_ == 0) {
+            // Immediate payout
+            if (optedInSupply == 0) {
+                revert NoOptedInSupply();
+            }
+            uint256 deltaRPT = (amount * ACC_PRECISION) / optedInSupply;
+            globalRewardPerToken += deltaRPT;
+            emit RewardScheduled(msg.sender, 0, amount, 0);
+            return 0;
+        } else {
+            // Streaming payout
+            uint256 rate = (amount * ACC_PRECISION) / seconds_;
+            uint64 id = nextStreamId++;
+            totalRewardPerSecond += rate;
+            uint64 endTime = uint64(block.timestamp) + seconds_;
+
+            streams[id] = RewardStream({
+                funder: msg.sender,
+                startTime: uint64(block.timestamp),
+                endTime: endTime,
+                ratePerSecondScaled: rate,
+                amountTotal: amount
+            });
+
+            uint256 cachedScheduleRateDecrease = scheduledRateDecrease[endTime];
+            scheduledRateDecrease[endTime] = cachedScheduleRateDecrease + rate;
+
+            // Add only if first stream
+            if (cachedScheduleRateDecrease == 0) {
+                TIP20_REWARDS_REGISTRY.addStream(endTime);
+            }
+            emit RewardScheduled(msg.sender, id, amount, seconds_);
+            return id;
+        }
+    }
+
+    function setRewardRecipient(address newRewardRecipient) external notPaused {
+        // Check TIP-403 authorization
+        if (newRewardRecipient != address(0)) {
+            if (
+                !TIP403_REGISTRY.isAuthorized(transferPolicyId, msg.sender)
+                    || !TIP403_REGISTRY.isAuthorized(transferPolicyId, newRewardRecipient)
+            ) revert PolicyForbids();
+        }
+
+        _accrue(block.timestamp);
+        address oldRewardRecipient = _updateRewardsAndGetRecipient(msg.sender);
+        if (oldRewardRecipient != address(0)) {
+            if (newRewardRecipient == address(0)) {
+                optedInSupply -= uint128(balanceOf[msg.sender]);
+            }
+        } else if (newRewardRecipient != address(0)) {
+            optedInSupply += uint128(balanceOf[msg.sender]);
+        }
+        userRewardInfo[msg.sender].rewardRecipient = newRewardRecipient;
+
+        emit RewardRecipientSet(msg.sender, newRewardRecipient);
+    }
+
+    function claimRewards() external notPaused returns (uint256 maxAmount) {
+        if (!TIP403_REGISTRY.isAuthorized(transferPolicyId, msg.sender)) revert PolicyForbids();
+
+        _accrue(block.timestamp);
+        _updateRewardsAndGetRecipient(msg.sender);
+
+        uint256 amount = userRewardInfo[msg.sender].rewardBalance;
+        uint256 selfBalance = balanceOf[address(this)];
+        maxAmount = (selfBalance > amount ? amount : selfBalance);
+        userRewardInfo[msg.sender].rewardBalance -= maxAmount;
+
+        balanceOf[address(this)] -= maxAmount;
+        if (userRewardInfo[msg.sender].rewardRecipient != address(0)) {
+            optedInSupply += uint128(maxAmount);
+        }
+        balanceOf[msg.sender] += maxAmount;
+
+        emit Transfer(address(this), msg.sender, maxAmount);
+    }
+
+    function cancelReward(uint64 id) external returns (uint256 refund) {
+        RewardStream memory s = streams[id];
+        if (s.funder == address(0)) revert StreamInactive();
+        if (msg.sender != s.funder) revert NotStreamFunder();
+        if (block.timestamp >= s.endTime) revert StreamInactive();
+
+        _accrue(block.timestamp);
+
+        // Compute elapsed within the stream's window
+        uint256 t = block.timestamp <= s.startTime ? 0 : (block.timestamp - s.startTime);
+        uint256 distributed = (s.ratePerSecondScaled * t) / ACC_PRECISION;
+        if (distributed > s.amountTotal) distributed = s.amountTotal; // safety clamp
+        refund = s.amountTotal - distributed;
+
+        // Decrease totalRewardPerSecond
+        totalRewardPerSecond -= s.ratePerSecondScaled;
+
+        // Decrease scheduledRateDecrease (cancel the scheduled end)
+        uint256 newRate = scheduledRateDecrease[s.endTime] - s.ratePerSecondScaled;
+        scheduledRateDecrease[s.endTime] = newRate;
+
+        // Remove from registry
+        if (newRate == 0) {
+            TIP20_REWARDS_REGISTRY.removeStream(s.endTime);
+        }
+
+        // Delete stream
+        delete streams[id];
+
+        // Attempt to transfer refund from pool to funder (TIP-403 check)
+        if (
+            TIP403_REGISTRY.isAuthorized(transferPolicyId, address(this))
+                && TIP403_REGISTRY.isAuthorized(transferPolicyId, s.funder)
+        ) {
+            address funderRewardRecipient = _updateRewardsAndGetRecipient(s.funder);
+            if (funderRewardRecipient != address(0)) {
+                optedInSupply += uint128(refund);
+            }
+
+            unchecked {
+                balanceOf[address(this)] -= refund;
+                balanceOf[s.funder] += refund;
+            }
+            emit Transfer(address(this), s.funder, refund);
+        } else {
+            refund = 0;
+        }
+
+        emit RewardCanceled(s.funder, id, refund);
+        return refund;
+    }
+
+    function finalizeStreams(uint64 timestamp) external {
+        require(msg.sender == address(TIP20_REWARDS_REGISTRY), "Only system");
+
+        uint256 rateDecrease = scheduledRateDecrease[timestamp];
+        require(rateDecrease > 0, "No streams to finalize");
+
+        _accrue(timestamp);
+        totalRewardPerSecond -= rateDecrease;
+        delete scheduledRateDecrease[timestamp];
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                        REWARD DISTRIBUTION VIEWS
+    //////////////////////////////////////////////////////////////*/
+
+    function getStream(uint64 id)
+        external
+        view
+        returns (
+            address funder,
+            uint64 startTime,
+            uint64 endTime,
+            uint256 ratePerSecondScaled,
+            uint256 amountTotal
+        )
+    {
+        RewardStream memory s = streams[id];
+        return (s.funder, s.startTime, s.endTime, s.ratePerSecondScaled, s.amountTotal);
     }
 
 }
