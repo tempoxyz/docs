@@ -490,23 +490,23 @@ export default defineConfig({
                 items: [
                   {
                     text: 'cancel',
-                    link: '/sdk/typescript/api/reward.cancel',
+                    link: '/sdk/typescript/viem/reward.cancel',
                   },
                   {
                     text: 'getStream',
-                    link: '/sdk/typescript/api/reward.getStream',
+                    link: '/sdk/typescript/viem/reward.getStream',
                   },
                   {
                     text: 'getTotalPerSecond',
-                    link: '/sdk/typescript/api/reward.getTotalPerSecond',
+                    link: '/sdk/typescript/viem/reward.getTotalPerSecond',
                   },
                   {
                     text: 'setRecipient',
-                    link: '/sdk/typescript/api/reward.setRecipient',
+                    link: '/sdk/typescript/viem/reward.setRecipient',
                   },
                   {
                     text: 'start',
-                    link: '/sdk/typescript/api/reward.start',
+                    link: '/sdk/typescript/viem/reward.start',
                   },
                 ],
               },
