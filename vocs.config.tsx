@@ -338,6 +338,12 @@ export default defineConfig({
         link: '/rpc/token_getTokensByAddress',
       },
     ],
+    '/sdk/rust': [
+      {
+        text: 'Getting Started',
+        link: '/sdk/rust',
+      },
+    ],
     '/sdk/typescript': [
       {
         text: 'Getting Started',
@@ -1303,7 +1309,13 @@ export default defineConfig({
   topNav: [
     { text: 'Testnet', link: '/testnet' },
     { text: 'Documentation', link: '/documentation' },
-    { text: 'SDK', link: '/sdk/typescript' },
+    {
+      text: 'SDK',
+      items: [
+        { text: 'TypeScript', link: '/sdk/typescript' },
+        { text: 'Rust', link: '/sdk/rust' },
+      ],
+    },
     {
       text: 'References',
       items: [
