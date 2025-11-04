@@ -9,6 +9,8 @@ import { ITIP20 } from "./interfaces/ITIP20.sol";
 
 contract FeeManager is FeeAMM {
 
+    address internal constant LINKING_USD = 0x20C0000000000000000000000000000000000000;
+
     // Validator token preferences
     mapping(address => address) public validatorTokens;
 
@@ -52,6 +54,8 @@ contract FeeManager is FeeAMM {
 
     function setUserToken(address token) external onlyDirectCall {
         require(isTIP20(token), "INVALID_TOKEN");
+        // forbid setting linkingUSD as the user's fee token
+        require(token != LINKING_USD, "CANNOT_SET_LINKINGUSD");
         require(
             keccak256(bytes(ITIP20(token).currency())) == keccak256(bytes("USD")), "INVALID_TOKEN"
         );

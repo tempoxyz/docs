@@ -26,6 +26,7 @@ There are four sources of token preference, with this order of precedence:
 The protocol checks preferences at each of these levels, stopping at the first one at which a preference is specified. At that level, the protocol performs the following checks. If any of the checks fail, the transaction is invalid (without looking at any further levels):
 
 * The token must be a TIP-20 token whose currency is USD.
+* The token must not be linkingUSD. (While validators can accept fees in linkingUSD, users cannot pay fees in linkingUSD.)
 * The user must have sufficient balance in that token to pay the `gasLimit` on the transaction.
 * There must be sufficient liquidity on the [fee AMM](#fee-amm) to support the transaction.
 
@@ -41,13 +42,15 @@ If the `fee_payer_signature` field is set, the transaction is a *sponsored trans
 
 The `fee_token` declares which token should be used for fees on the transactions. For sponsored transactions, the `tx.origin` address does not sign over the `fee_token` field (allowing the `fee_payer` to choose the fee token).
 
+The transaction is invalid if `fee_token` is linkingUSD.
+
 The full details of Tempo transactions are described in greater depth in the [Tempo transactions](/protocol/specs/TempoTransaction) spec.
 
 ## Account level
 
 An account can specify a fee token preference for transactions for which it is the `fee_payer` (including both transactions it sponsors as well as non-sponsored transactions for which it is the `tx.origin`). This overrides any preference set at the contract or validator level.
 
-To set its preference, the account can call the `setUserToken` function on the FeeManager precompile.
+To set its preference, the account can call the `setUserToken` function on the FeeManager precompile. This call reverts if the user specifies linkingUSD as their fee token.
 
 This method can only be called directly by the user, not through account abstraction.
 
@@ -65,3 +68,5 @@ If neither the transaction, the account, or the contract have specified a fee pr
 Validators can set their fee preference by calling `setValidatorToken` on the FeeManager contract. This function cannot be called during a block built by that validator.
 
 If the user does not have sufficient balance in the validator's preferred token to pay the gas limit of the transaction, the transaction is invalid.
+
+If the validator's preferred token is linkingUSD, and the check reaches this point, the transaction is invalid.
