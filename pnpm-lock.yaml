@@ -21,8 +21,8 @@ importers:
         specifier: ^4.1.14
         version: 4.1.16
       tempo.ts:
-        specifier: https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@639eefa
-        version: https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@639eefa(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3))
+        specifier: https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@8276886
+        version: https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@8276886(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3))
       viem:
         specifier: ^2.38.3
         version: 2.38.5(typescript@5.9.3)
@@ -3205,8 +3205,8 @@ packages:
     resolution: {integrity: sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg==}
     engines: {node: '>=6'}
 
-  tempo.ts@https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@639eefa:
-    resolution: {tarball: https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@639eefa}
+  tempo.ts@https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@8276886:
+    resolution: {tarball: https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@8276886}
     version: 0.1.5
     peerDependencies:
       '@tanstack/query-core': '>=5.0.0'
@@ -7223,7 +7223,7 @@ snapshots:
 
   tapable@2.3.0: {}
 
-  tempo.ts@https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@639eefa(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)):
+  tempo.ts@https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@8276886(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)):
     dependencies:
       ox: 0.9.9(typescript@5.9.3)
     optionalDependencies:
