@@ -7,7 +7,7 @@ import { Callout } from 'vocs/components'
 Lento is our third Tempo testnet, released on October 6th. It includes the following features:
 
 ### Payment Lanes
-[Payment lanes](/documentation/transactions/payment-lanes) ensure that payment transactions always have available blockspace, even during periods of high network congestion. This is achieved through separate gas limits for payment and non-payment transactions, creating guaranteed capacity for payments. For full implementation details, see the [payment lanes specs](/protocol/transactions/payments-lane).
+[Payment lanes](/documentation/transactions/payment-lanes) ensure that payment transactions always have available blockspace, even during periods of high network congestion. This is achieved through separate gas limits for payment and non-payment transactions, creating guaranteed capacity for payments. For full implementation details, see the [payment lanes specs](/protocol/specs/PaymentLane).
 
 ### Fee Token Flexibility
 Users can now specify which stablecoin to use for transaction fees on a transaction-by-transaction basis. While you can [set a default fee token](/documentation/transactions/fee-tokens#set-a-default-fee-token) for your account, each transaction can override this preference by [specifying a different fee token](/documentation/transactions/fee-tokens#specify-fee-token-per-transaction) directly in the transaction object. The fee token parameter is part of the transaction object and is optional, as detailed in the [fee token specs](/protocol/transactions/fee-tokens#transaction-level).

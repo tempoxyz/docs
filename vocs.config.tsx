@@ -109,6 +109,10 @@ export default defineConfig({
         link: '/documentation',
       },
       {
+        text: 'Key Differences from Ethereum',
+        link: '/documentation/deviations-from-ethereum',
+      },
+      {
         text: 'Tokens',
         items: [
           {

@@ -68,11 +68,6 @@ No changes to basefee or pricing rules. Payment txs pay the same basefee as non-
 - **Determinism:** A pure, versioned classifier guarantees pre-execution agreement and makes verification possible without state.  
 - **Simplicity:** Single fee market; a single additional cap.
 
----
-
-## Backwards Compatibility
-
-Consensus-breaking at activation. Pre-activation blocks are unaffected. Post-activation blocks MUST include new custom field and satisfy the bounds.
 
 ---
 
