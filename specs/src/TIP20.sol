@@ -6,15 +6,11 @@ import { TIP20Factory } from "./TIP20Factory.sol";
 import { TIP20RewardsRegistry } from "./TIP20RewardRegistry.sol";
 import { TIP20RolesAuth } from "./TIP20RolesAuth.sol";
 import { TIP403Registry } from "./TIP403Registry.sol";
-import { TIP4217Registry } from "./TIP4217Registry.sol";
 
 contract TIP20 is TIP20RolesAuth {
 
     TIP403Registry internal constant TIP403_REGISTRY =
         TIP403Registry(0x403c000000000000000000000000000000000000);
-
-    TIP4217Registry internal constant TIP4217_REGISTRY =
-        TIP4217Registry(0x4217c00000000000000000000000000000000000);
 
     address internal constant TIP_FEE_MANAGER_ADDRESS = 0xfeEC000000000000000000000000000000000000;
 
@@ -32,7 +28,7 @@ contract TIP20 is TIP20RolesAuth {
     string public currency;
 
     function decimals() public view returns (uint8) {
-        return TIP4217_REGISTRY.getCurrencyDecimals(currency);
+        return 6;
     }
 
     bytes32 public immutable DOMAIN_SEPARATOR;
@@ -63,7 +59,7 @@ contract TIP20 is TIP20RolesAuth {
         currency = _currency;
         quoteToken = _quoteToken;
         nextQuoteToken = _quoteToken;
-        if (decimals() == 0) revert InvalidCurrency();
+        // No currency registry; all tokens use 6 decimals by default
 
         hasRole[admin][DEFAULT_ADMIN_ROLE] = true; // Grant admin role to first admin.
 
@@ -185,6 +181,13 @@ contract TIP20 is TIP20RolesAuth {
         // does not check for loops; that is checked in completeQuoteTokenUpdate
         if (!TIP20Factory(FACTORY).isTIP20(address(newQuoteToken))) {
             revert InvalidQuoteToken();
+        }
+
+        // If this token represents USD, enforce USD quote token
+        if (keccak256(bytes(currency)) == keccak256(bytes("USD"))) {
+            if (keccak256(bytes(newQuoteToken.currency())) != keccak256(bytes("USD"))) {
+                revert InvalidQuoteToken();
+            }
         }
 
         nextQuoteToken = newQuoteToken;

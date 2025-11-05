@@ -6,7 +6,6 @@ import "../src/TIP20.sol";
 import "../src/TIP20Factory.sol";
 import "../src/TIP20RewardRegistry.sol";
 import "../src/TIP403Registry.sol";
-import "./MockTIP4217Registry.sol";
 import "forge-std/Test.sol";
 
 contract TIP20Test is Test {
@@ -41,9 +40,8 @@ contract TIP20Test is Test {
     event RewardRecipientSet(address indexed holder, address indexed recipient);
 
     function setUp() public {
-        // Deploy mock registries at their precompile addresses
+        // Deploy mock registry at its precompile addresses
         vm.etch(0x403c000000000000000000000000000000000000, type(TIP403Registry).runtimeCode);
-        vm.etch(0x4217c00000000000000000000000000000000000, type(MockTIP4217Registry).runtimeCode);
 
         // Deploy TIP20RewardsRegistry at its precompile address
         vm.etch(0x3000000000000000000000000000000000000000, type(TIP20RewardsRegistry).runtimeCode);

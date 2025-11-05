@@ -73,14 +73,11 @@ Every TIP-20 token has a **quote token** that determines:
 
 Most USD stablecoins use [linkingUSD](/documentation/tokens/linkingUSD) at `0x20c0000000000000000000000000000000000000` as their quote token.
 
-### Currency Codes
+### Currency & Decimals
 
-The `currency` parameter automatically sets decimal precision via the [TIP-4217 registry](/protocol/tokens/tip-4217):
-
-- **USD, EUR, GBP**: 6 decimals (representing cents, e.g., `1000000` = $1.00)
-- **JPY, KRW**: 0 decimals (whole units only)
-- **BTC**: 8 decimals
-- **Custom currencies**: Configurable by the TIP-4217 admin
+- The `currency` parameter is an arbitrary string (e.g., "USD", "EUR").
+- All TIP-20 tokens use 6 decimals.
+- If a token's `currency` is "USD", its `quoteToken` must also be a USD token.
 
 ### Quote Tokens
 

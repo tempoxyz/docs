@@ -26,6 +26,10 @@ contract MockTIP20WithSystem {
         emit Transfer(address(0), to, amount);
     }
 
+    function currency() external pure returns (string memory) {
+        return "USD";
+    }
+
     function transfer(address to, uint256 amount) external returns (bool) {
         require(balanceOf[msg.sender] >= amount, "INSUFFICIENT_BALANCE");
         unchecked {

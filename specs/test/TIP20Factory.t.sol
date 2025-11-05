@@ -4,7 +4,6 @@ pragma solidity ^0.8.13;
 import "../src/LinkingUSD.sol";
 import "../src/TIP20Factory.sol";
 import "../src/TIP403Registry.sol";
-import "./MockTIP4217Registry.sol";
 import "forge-std/Test.sol";
 
 contract TIP20FactoryTest is Test {
@@ -16,7 +15,7 @@ contract TIP20FactoryTest is Test {
     function setUp() public {
         // Deploy mock registries at their precompile addresses
         vm.etch(0x403c000000000000000000000000000000000000, type(TIP403Registry).runtimeCode);
-        vm.etch(0x4217c00000000000000000000000000000000000, type(MockTIP4217Registry).runtimeCode);
+        
 
         // Deploy factory at the constant address
         factory = new TIP20Factory();
@@ -28,9 +27,8 @@ contract TIP20FactoryTest is Test {
             0x20Fc000000000000000000000000000000000000, bytes32(uint256(0)), bytes32(uint256(1))
         );
 
-        // Deploy and etch LinkingUSD at the root TIP20 address
-        quoteToken = new LinkingUSD(admin);
-        vm.etch(0x20C0000000000000000000000000000000000000, address(quoteToken).code);
+        // Deploy LinkingUSD at the root TIP20 address with proper constructor storage
+        deployCodeTo("LinkingUSD.sol", abi.encode(admin), 0x20C0000000000000000000000000000000000000);
         quoteToken = LinkingUSD(0x20C0000000000000000000000000000000000000);
     }
 

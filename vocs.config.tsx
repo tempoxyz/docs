@@ -226,10 +226,6 @@ export default defineConfig({
             link: '/protocol/tokens/tip-20',
           },
           {
-            text: 'TIP-4217',
-            link: '/protocol/tokens/tip-4217',
-          },
-          {
             text: 'TIP-403',
             link: '/protocol/tokens/tip-403',
           },

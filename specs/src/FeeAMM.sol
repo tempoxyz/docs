@@ -63,6 +63,13 @@ contract FeeAMM {
 
     constructor() { }
 
+    function _requireUSD(address token) private view {
+        require(
+            keccak256(bytes(ITIP20(token).currency())) == keccak256(bytes("USD")),
+            "ONLY_USD_TOKENS"
+        );
+    }
+
     function getPoolId(address userToken, address validatorToken) public pure returns (bytes32) {
         // Each ordered pair has its own pool (userToken→validatorToken is different from validatorToken→userToken)
         return keccak256(abi.encodePacked(userToken, validatorToken));
@@ -140,6 +147,8 @@ contract FeeAMM {
         uint256 amountValidatorToken,
         address to
     ) external returns (uint256 liquidity) {
+        _requireUSD(userToken);
+        _requireUSD(validatorToken);
         bytes32 poolId = getPoolId(userToken, validatorToken);
 
         Pool storage pool = pools[poolId];
@@ -189,6 +198,8 @@ contract FeeAMM {
         uint256 amountValidatorToken,
         address to
     ) external returns (uint256 liquidity) {
+        _requireUSD(userToken);
+        _requireUSD(validatorToken);
         bytes32 poolId = getPoolId(userToken, validatorToken);
 
         Pool storage pool = pools[poolId];

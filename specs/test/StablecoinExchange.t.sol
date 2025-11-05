@@ -7,7 +7,6 @@ import "../src/TIP20.sol";
 import "../src/TIP20Factory.sol";
 import "../src/TIP403Registry.sol";
 import "./MockTIP20.sol";
-import "./MockTIP4217Registry.sol";
 import "forge-std/Test.sol";
 
 contract StablecoinExchangeTest is Test {
@@ -56,8 +55,7 @@ contract StablecoinExchangeTest is Test {
     event PairCreated(bytes32 indexed key, address indexed base, address indexed quote);
 
     function setUp() public {
-        // Deploy mock registries at precompile addresses
-        vm.etch(0x4217c00000000000000000000000000000000000, type(MockTIP4217Registry).runtimeCode);
+        // Deploy mock registry at precompile address
         vm.etch(0x403c000000000000000000000000000000000000, type(TIP403Registry).runtimeCode);
 
         // Deploy factory

@@ -25,6 +25,10 @@ The Fee AMM implements two distinct swap mechanisms:
 1. **Fee Swaps**: Fixed-rate swaps at a price of `0.9970` (validator token per user token) from `userToken` to `validatorToken`
 2. **Rebalancing Swaps**: Fixed-rate swaps at a price of `0.9985` (validator token per user token) from `validatorToken` to `userToken`
 
+<Callout type="warning">
+  Only USD-denominated TIP-20 tokens are eligible for Fee AMM pools and operations.
+</Callout>
+
 ### Core Components
 
 #### 1. FeeAMM Contract

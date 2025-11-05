@@ -29,9 +29,7 @@ The TIP-20 standard consists of three contracts:
 
 ```solidity
 contract TIP20 is TIP20RolesAuth {
-    // Registry addresses
     TIP403Registry internal constant TIP403_REGISTRY = TIP403Registry(0x403c000000000000000000000000000000000000);
-    TIP4217Registry internal constant TIP4217_REGISTRY = TIP4217Registry(0x4217c00000000000000000000000000000000000);
     address internal constant FEEMANAGER_PRECOMPILE = 0xfeec000000000000000000000000000000000000;
 }
 ```
@@ -42,7 +40,7 @@ contract TIP20 is TIP20RolesAuth {
 |----------|------|-------------|
 | `name` | `string` | Token name |
 | `symbol` | `string` | Token symbol |
-| `currency` | `string` | Currency code (e.g., "USD", "EUR") |
+| `currency` | `string` | Arbitrary currency string (e.g., "USD", "EUR") |
 | `totalSupply` | `uint256` | Total token supply |
 | `balanceOf` | `mapping(address => uint256)` | Account balances |
 | `allowance` | `mapping(address => mapping(address => uint256))` | Spending allowances |
@@ -117,7 +115,7 @@ function changeTransferPolicyId(uint64 newPolicyId) external onlyRole(DEFAULT_AD
 function decimals() public view returns (uint8)
 ```
 
-Returns decimals based on currency code via TIP-4217 registry.
+Returns decimals (always 6).
 
 #### Modifiers
 
@@ -260,15 +258,9 @@ if (msg.sender != FEEMANAGER_PRECOMPILE) {
 }
 ```
 
-### Currency Metadata Integration
+### Decimals
 
-Decimals are determined dynamically via TIP-4217:
-
-```solidity
-function decimals() public view returns (uint8) {
-    return TIP4217_REGISTRY.getCurrencyDecimals(currency);
-}
-```
+All TIP-20 tokens use 6 decimals.
 
 ## Use Cases
 

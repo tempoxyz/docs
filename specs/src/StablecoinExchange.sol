@@ -152,6 +152,12 @@ contract StablecoinExchange is IStablecoinExchange {
     /// @dev Automatically sets tick bounds to ±2% from the peg price of 1.0
     function createPair(address base) external returns (bytes32 key) {
         address quote = ITIP20(base).quoteToken();
+        // Only USD-denominated tokens are supported, and their quotes must also be USD
+        require(
+            keccak256(bytes(ITIP20(base).currency())) == keccak256(bytes("USD"))
+                && keccak256(bytes(ITIP20(quote).currency())) == keccak256(bytes("USD")),
+            "ONLY_USD_PAIRS"
+        );
         key = pairKey(base, quote);
 
         // Create new orderbook for pair

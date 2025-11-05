@@ -10,6 +10,7 @@ The primary goal is to provide optimal pricing for users who are doing cross-sta
 
 **Key Design Decisions:**
 - Only designed for trading between two same-asset stablecoins
+- Only USD-denominated TIP-20 tokens are supported; pairs are created only when both the base token and its quote token are USD.
 - Onchain queue of passive orders that use price-time priority, to encourage makers to leave liquidity onchain
 - "Flip orders" to make passive liquidity easy, and reduce message volume
 - Flips/places delayed until end of block, to prevent backrunning/MEV/JIT strategies

@@ -31,6 +31,13 @@ contract TIP20Factory {
             revert InvalidQuoteToken();
         }
 
+        // If token is USD, its quote token must also be USD
+        if (keccak256(bytes(currency)) == keccak256(bytes("USD"))) {
+            if (keccak256(bytes(quoteToken.currency())) != keccak256(bytes("USD"))) {
+                revert InvalidQuoteToken();
+            }
+        }
+
         ++tokenIdCounter;
 
         TIP20 token = new TIP20(name, symbol, currency, quoteToken, admin);

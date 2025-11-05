@@ -5,7 +5,6 @@ import "../src/LinkingUSD.sol";
 import "../src/TIP20.sol";
 import "../src/TIP20Factory.sol";
 import "../src/TIP403Registry.sol";
-import "./MockTIP4217Registry.sol";
 import "forge-std/Test.sol";
 
 contract LinkingUSDTest is Test {
@@ -19,7 +18,7 @@ contract LinkingUSDTest is Test {
 
     function setUp() public {
         vm.etch(0x403c000000000000000000000000000000000000, type(TIP403Registry).runtimeCode);
-        vm.etch(0x4217c00000000000000000000000000000000000, type(MockTIP4217Registry).runtimeCode);
+        
 
         quoteToken = new LinkingUSD(admin);
         vm.startPrank(admin);
