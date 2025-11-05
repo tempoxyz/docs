@@ -1,0 +1,168 @@
+# Foundry
+
+The easiest way to interact with Tempo is by using [Foundry](https://getfoundry.sh/), a blazing-fast toolkit for EVM networks.
+
+### 1. Install Foundry
+
+Since Tempo introduces [several protocol-level features](/documentation/deviations-from-ethereum) that extend beyond Ethereum's vanilla EVM implementation—including custom precompiles, new transaction types, fee payments in stablecoins, and native account abstraction—a custom `forge` and `cast` built from [Tempo's fork](https://github.com/tempoxyz/tempo-foundry) of [Foundry](https://github.com/foundry-rs/foundry) is required.
+
+:::warning
+`anvil` and `chisel` are currently not supported on Tempo.
+:::
+
+### Prerequisites
+
+Ensure you have the Foundry toolchain installed. If you haven't already:
+
+```bash [Terminal]
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+```
+
+### Installation Steps
+
+::::steps
+
+### 1. Download Precompiled Binaries
+
+Download the latest precompiled binaries for your platform from the [Tempo Foundry releases](https://github.com/tempoxyz/tempo-foundry/releases).
+
+Choose the appropriate binary for your system:
+
+**For Linux (x86_64):**
+```bash [Terminal]
+# using curl
+curl -L https://github.com/tempoxyz/tempo-foundry/releases/download/nightly/foundry_nightly_linux_amd64.tar.gz | tar xz
+
+# using github cli
+gh release download nightly --repo tempoxyz/tempo-foundry --pattern 'foundry_nightly_linux_amd64.tar.gz' && tar xzf foundry_nightly_linux_amd64.tar.gz
+```
+
+**For Linux (ARM64):**
+```bash [Terminal]
+# using curl
+curl -L https://github.com/tempoxyz/tempo-foundry/releases/download/nightly/foundry_nightly_linux_arm64.tar.gz | tar xz
+
+# using github cli
+gh release download nightly --repo tempoxyz/tempo-foundry --pattern 'foundry_nightly_linux_arm64.tar.gz' && tar xzf foundry_nightly_linux_arm64.tar.gz
+```
+
+**For macOS (Intel):**
+```bash [Terminal]
+# using curl
+curl -L https://github.com/tempoxyz/tempo-foundry/releases/download/nightly/foundry_nightly_darwin_amd64.tar.gz | tar xz
+
+# using github cli
+gh release download nightly --repo tempoxyz/tempo-foundry --pattern 'foundry_nightly_darwin_amd64.tar.gz' && tar xzf foundry_nightly_darwin_amd64.tar.gz
+```
+
+**For macOS (Apple Silicon):**
+```bash [Terminal]
+# using curl
+curl -L https://github.com/tempoxyz/tempo-foundry/releases/download/nightly/foundry_nightly_darwin_arm64.tar.gz | tar xz
+
+# using github cli
+gh release download nightly --repo tempoxyz/tempo-foundry --pattern 'foundry_nightly_darwin_arm64.tar.gz' && tar xzf foundry_nightly_darwin_arm64.tar.gz
+```
+
+### 2. Install the Binaries
+
+Move the downloaded binaries to your Foundry bin directory:
+
+```bash [Terminal]
+mkdir -p ~/.foundry/bin
+mv forge cast ~/.foundry/bin/
+chmod +x ~/.foundry/bin/forge ~/.foundry/bin/cast
+```
+
+:::info
+This will overwrite your existing `forge` and `cast` installation in `~/.foundry/bin/`.
+:::
+
+Ensure `~/.foundry/bin` is in your PATH. If not already configured, add it:
+
+```bash [Terminal]
+echo 'export PATH="$HOME/.foundry/bin:$PATH"' >> ~/.bashrc  # or ~/.zshrc
+source ~/.bashrc  # or ~/.zshrc
+```
+
+### 3. Verify Installation
+
+Check that `forge` and `cast` are installed correctly:
+
+```bash [Terminal]
+forge --version
+cast --version
+```
+
+You should see version information indicating it was built from the Tempo fork.
+
+::::
+
+### Updating
+
+To update to the latest version of the Tempo fork, simply download and install the latest release following the same steps as the initial installation.
+
+### Switching Back to Standard Forge
+
+If you want to switch back to the standard `forge` installation:
+
+```bash [Terminal]
+foundryup
+```
+
+### 2a. Initialize a new Project
+
+If you have not initialized a project yet, you can use the `forge init --tempo` command.
+
+If you already have a project, continue to [2b. Add Foundry to an existing Project](#2b-add-foundry-to-an-existing-project).
+
+```bash [Terminal]
+forge init --tempo <PROJECT_NAME> && cd <PROJECT_NAME>
+```
+
+### 2b. Add Foundry to an existing Project
+
+If you already have an existing contracts project, add a `foundry.toml` file to the root directory.
+
+```toml [foundry.toml]
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+```
+
+And next run:
+
+```bash [Terminal]
+forge install tempoxyz/tempo-std
+```
+
+### 4. Build and Test
+
+You will now have a project with [`tempo-std`](https://github.com/tempoxyz/tempo-std) installed as a dependency, a collection of helpful contracts and libraries for use with Tempo for Foundry.
+
+Next, you can build and test your contracts using the following commands:
+
+```bash [Terminal]
+forge build
+forge test
+```
+
+### 3. Deploy
+
+Next, we can deploy our contract using the `forge create` or `forge script` command.
+
+To deploy a simple contract using `forge create`:
+
+```bash [Terminal]
+forge create src/Counter.sol:Counter --rpc-url https://rpc.testnet.tempo.xyz --interactive
+```
+
+Or to deploy using a script with `forge script`:
+
+```bash [Terminal]
+forge script src/Counter.s.sol:Counter --rpc-url https://rpc.testnet.tempo.xyz --interactive
+```

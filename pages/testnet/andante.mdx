@@ -99,6 +99,10 @@ yParity              0
 
 The `cast run` command allows you to replay and debug any transaction by its hash. This is particularly useful for understanding what happened in a transaction, viewing internal calls, and analyzing gas usage.
 
+:::note
+`cast run` requires [Tempo's Foundry fork](/tooling/#foundry).
+:::
+
 ```bash
 # Example: Check AlphaUSD balance
 cast balance --erc20 0x20c0000000000000000000000000000000000001 0x820525B56cF3cD426e58507F65DCaCB90BceEFb8 \

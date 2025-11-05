@@ -1302,6 +1302,7 @@ export default defineConfig({
         { text: 'Rust', link: '/sdk/rust' },
       ],
     },
+    { text: 'Tooling', link: '/tooling' },
     {
       text: 'References',
       items: [
