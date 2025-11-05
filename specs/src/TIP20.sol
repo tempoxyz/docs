@@ -27,11 +27,9 @@ contract TIP20 is TIP20RolesAuth {
     string public symbol;
     string public currency;
 
-    function decimals() public view returns (uint8) {
+    function decimals() public pure returns (uint8) {
         return 6;
     }
-
-    bytes32 public immutable DOMAIN_SEPARATOR;
 
     /*//////////////////////////////////////////////////////////////
                              ADMINISTRATION
@@ -62,18 +60,6 @@ contract TIP20 is TIP20RolesAuth {
         // No currency registry; all tokens use 6 decimals by default
 
         hasRole[admin][DEFAULT_ADMIN_ROLE] = true; // Grant admin role to first admin.
-
-        DOMAIN_SEPARATOR = keccak256(
-            abi.encode(
-                keccak256(
-                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-                ),
-                keccak256(bytes(_name)),
-                keccak256(bytes("1")),
-                block.chainid,
-                address(this)
-            )
-        );
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -83,7 +69,6 @@ contract TIP20 is TIP20RolesAuth {
     uint128 internal _totalSupply;
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
-    mapping(address => uint256) public nonces;
 
     /*//////////////////////////////////////////////////////////////
                               TIP20 STORAGE
@@ -130,8 +115,6 @@ contract TIP20 is TIP20RolesAuth {
     error InvalidRecipient();
     error InsufficientBalance();
     error InsufficientAllowance();
-    error InvalidSignature();
-    error Expired();
     error SupplyCapExceeded();
     error ContractPaused();
     error InvalidCurrency();
@@ -332,52 +315,7 @@ contract TIP20 is TIP20RolesAuth {
         _transfer(from, to, amount);
     }
 
-    function permit(
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external {
-        if (block.timestamp > deadline) revert Expired();
-
-        // Unchecked because the only math done is incrementing
-        // the owner's nonce which cannot realistically overflow.
-        unchecked {
-            bytes32 digest = keccak256(
-                abi.encodePacked(
-                    "\x19\x01",
-                    DOMAIN_SEPARATOR,
-                    keccak256(
-                        abi.encode(
-                            keccak256(
-                                "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-                            ),
-                            owner,
-                            spender,
-                            value,
-                            nonces[owner]++,
-                            deadline
-                        )
-                    )
-                )
-            );
-
-            // Signature check.
-            address recovered = ecrecover(digest, v, r, s);
-            if (recovered != owner || recovered == address(0)) {
-                revert InvalidSignature();
-            }
-
-            allowance[owner][spender] = value;
-        }
-
-        emit Approval(owner, spender, value);
-    }
-
-    function totalSupply() public returns (uint256) {
+    function totalSupply() public view returns (uint256) {
         return _totalSupply;
     }
 
