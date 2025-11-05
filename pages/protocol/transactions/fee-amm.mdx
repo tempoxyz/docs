@@ -1,3 +1,5 @@
+import { Callout } from 'vocs/components'
+
 # Fee AMM Specification
 
 This specification defines a system of one-way Automated Market Makers (AMMs) designed to facilitate gas fee payments from the stablecoin preferred by the user (the `userToken`) to a different stablecoin preferred by the validator (the `validatorToken`), while allowing arbitrageurs to rebalance the pools in the other direction. Each AMM handles fee swaps from one `userToken` to another `validatorToken` at a fixed price, and allows rebalancing in the other direction at a variable price (meaning there are two AMMs for each pair of tokens, one in each direction).
