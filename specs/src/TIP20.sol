@@ -140,6 +140,7 @@ contract TIP20 is TIP20RolesAuth {
     error NotStreamFunder();
     error StreamInactive();
     error NoOptedInSupply();
+    error InvalidSupplyCap();
 
     /*//////////////////////////////////////////////////////////////
                                  EVENTS
@@ -207,7 +208,8 @@ contract TIP20 is TIP20RolesAuth {
     }
 
     function setSupplyCap(uint256 newSupplyCap) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (newSupplyCap < _totalSupply) revert SupplyCapExceeded();
+        if (newSupplyCap < _totalSupply) revert InvalidSupplyCap();
+        if (newSupplyCap > type(uint128).max) revert SupplyCapExceeded();
         emit SupplyCapUpdate(msg.sender, supplyCap = newSupplyCap);
     }
 
