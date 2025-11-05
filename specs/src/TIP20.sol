@@ -708,7 +708,7 @@ contract TIP20 is TIP20RolesAuth {
     }
 
     function finalizeStreams(uint64 timestamp) external {
-        require(msg.sender == address(TIP20_REWARDS_REGISTRY), "Only system");
+        if (msg.sender != address(TIP20_REWARDS_REGISTRY)) revert Unauthorized();
 
         uint256 rateDecrease = scheduledRateDecrease[timestamp];
         require(rateDecrease > 0, "No streams to finalize");

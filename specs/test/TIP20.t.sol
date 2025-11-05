@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "../src/LinkingUSD.sol";
 import "../src/TIP20.sol";
+import "../src/TIP20RolesAuth.sol";
 import "../src/TIP20Factory.sol";
 import "../src/TIP20RewardRegistry.sol";
 import "../src/TIP403Registry.sol";
@@ -1339,7 +1340,7 @@ contract TIP20Test is Test {
 
         // Try to call finalizeStreams as non-zero address
         vm.prank(alice);
-        vm.expectRevert("Only system");
+        vm.expectRevert(TIP20RolesAuth.Unauthorized.selector);
         token.finalizeStreams(uint64(block.timestamp));
     }
 
