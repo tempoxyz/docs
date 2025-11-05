@@ -1,18 +1,22 @@
-# Token Preferences
+# Fees
 
 ## Abstract
 
-This spec lays out how the default fee token for a transaction is determined.
+This spec lays out how fees work on Tempo, including how fees are calculated and how the default fee token for a transaction is determined.
 
 ## Motivation
 
-On Tempo, users can pay gas fees in any stablecoin, as long as that stablecoin has sufficient liquidity on the enshrined fee AMM. 
+On Tempo, users can pay gas fees in any stablecoin, as long as that stablecoin has sufficient liquidity on the enshrined fee AMM.
 
 In determining *which* token a user pays fees in, we want to maximize customizability (so that wallets or users can implement more sophisticated UX than is possible at the protocol layer), minimize surprise (particularly surprises in which a user pays fees in a stablecoin they did not expect to), and have sane default behavior so that users can begin using basic functions like payments even using wallets that are not customized for Tempo support.
 
-We also want to limit the complexity of block building, in order to minimize denial-of-service attacks. The rules in this spec ensure that the fee token of every transaction in a block can be statically determined from the state at the top of the block and the contents of those transactions, without having to execute any transactions.
+Note that as discussed in the [Fee Token transactions](/protocol/specs/FeeTokenTransaction) spec, the "user" who chooses the fee token for a transaction is the `fee_payer` of that transaction--either the `tx.origin` for normal transactions, or the signer of the `fee_payer_signature` for sponsored transactions.
 
-Note that as discussed in the [Tempo transactions](/protocol/specs/TempoTransaction) spec, the "user" who chooses the fee token for a transaction is the `fee_payer` of that transaction--either the `tx.origin` for normal transactions, or the signer of the `fee_payer_signature` for sponsored transactions.
+## Fee Unit Specification
+
+Fees in the `max_base_fee_per_gas` and `max_fee_per_gas` fields of transactions, as well as in block `base_fee_per_gas` field, are specified in units of **USD per 10^18 gas**. Since TIP-20 tokens have 6 decimal places, that means the fee for a transaction can be calculated as `ceil(base_fee * gas_used / 10^12)`.
+
+This unit is chosen to provide sufficient precision for low-fee transactions. Since TIP-20 tokens have only 6 decimal places (as opposed to the 18 decimal places of ETH), expressing fees directly in tokens per gas would not provide enough precision for transactions with very low gas costs. By scaling the fee paid by 10^-12, the protocol ensures that even small fee amounts can be accurately represented and calculated.
 
 ## Order of preference
 
@@ -20,7 +24,7 @@ There are four sources of token preference, with this order of precedence:
 
 1. Transaction (set by the `fee_token` field of the transaction)
 2. Account (set on the FeeManager contract by the `fee_payer` of the transaction, who could be either the `tx.origin` address or the provider of the `fee_payer_signature` on the transaction)
-3. Contract (predefined based on the `to` of the transaction)
+3. TIP-20 contract (if transaction is calling any function on a TIP-20 contract, the transaction uses that token as its fee token)
 4. Validator (set by `block.coinbase`)
 
 The protocol checks preferences at each of these levels, stopping at the first one at which a preference is specified. At that level, the protocol performs the following checks. If any of the checks fail, the transaction is invalid (without looking at any further levels):
@@ -34,7 +38,7 @@ The protocol checks preferences at each of these levels, stopping at the first o
 
 A transaction can specify a fee token. This overrides any preference at the account, contract, or validator level.
 
-This requires a new 2718 transaction type: [Tempo transactions](/protocol/specs/TempoTransaction). To allow transactions that include EIP-7702 authorizations to also specify a fee token preference, the functionality supported by these transactions is a superset of set code transactions. 
+This requires a new 2718 transaction type: [Fee Token transactions](/protocol/specs/FeeTokenTransaction). To allow transactions that include EIP-7702 authorizations to also specify a fee token preference, the functionality supported by these transactions is a superset of set code transactions. 
 
 This transaction type adds a `fee_token` field as well as a `fee_payer_signature` field. Transactions can use either or both of these features.
 
@@ -44,7 +48,7 @@ The `fee_token` declares which token should be used for fees on the transactions
 
 The transaction is invalid if `fee_token` is linkingUSD.
 
-The full details of Tempo transactions are described in greater depth in the [Tempo transactions](/protocol/specs/TempoTransaction) spec.
+The full details of Fee Token transactions are described in greater depth in the [Fee Token transactions](/protocol/specs/FeeTokenTransaction) spec.
 
 ## Account level
 
@@ -52,14 +56,11 @@ An account can specify a fee token preference for transactions for which it is t
 
 To set its preference, the account can call the `setUserToken` function on the FeeManager precompile. This call reverts if the user specifies linkingUSD as their fee token.
 
-This method can only be called directly by the user, not through account abstraction.
+In a transaction in which the user is calling `setUserToken` on the FeeManager, the newly specified token is used as the fee token (unless the transaction specifies a `fee_token` at the [transaction level](#transaction-level)).
 
-## Contract level
+## TIP-20 contracts
 
-Certain precompiled contracts specify a fee token preference for transactions for which they are the `to` field. This is overriden by any preferences set at the transaction or account levels, but overrides the validator's fee preference.
-
-* For TIP-20 contracts for which the currency is USD, their fee preference is the token itself. Other TIP-20 contracts have no fee preference.
-* For top-level calls directly to the `setUserToken` function on the FeeManager precompile, the `token` argument to that function is interpreted as the contract's fee token preference for purposes of that transaction.
+If a transaction is a top-level call to a TIP-20 contract for which the currency is USD, that token is used as the user's fee token for that transaction (unless there is a preference specified at the [transaction](#transaction-level) or [account](#account-level) level).
 
 ## Validator level
 
@@ -69,4 +70,5 @@ Validators can set their fee preference by calling `setValidatorToken` on the Fe
 
 If the user does not have sufficient balance in the validator's preferred token to pay the gas limit of the transaction, the transaction is invalid.
 
-If the validator's preferred token is linkingUSD, and the check reaches this point, the transaction is invalid.
+If the validator's preferred token is linkingUSD, and the check reaches this point, the transaction is invalid, since users cannot pay fees in linkingUSD.
+

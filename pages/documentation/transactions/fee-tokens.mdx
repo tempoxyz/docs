@@ -32,12 +32,6 @@ const result = await client.token.setUserTokenSync({ // [!code focus]
   token: alphaUSDAddress, // [!code focus]
 }) // [!code focus]
 
-// Use validator's preference // [!code focus]
-const defaultHash = await client.token.setUserToken({ // [!code focus]
-  token: zeroAddress, // [!code focus]
-}) // [!code focus]
-```
-
 ```ts [viem.config.ts]
 // [!include ~/snippets/setup.ts:setup]
 ```
@@ -79,3 +73,49 @@ const client = createClient({
 :::
 
 This overrides your default fee token for this specific transaction and works with any transaction type including batch transactions and contract calls. The system automatically handles conversion through the Fee AMM if the validator doesn't accept your chosen token, and this transaction-level preference takes precedence over account-level and validator-level preferences.
+
+## Fee Tokens for Payments
+
+If a user is interacting directly with a token contract, then the transaction will use that token as their specified fee token (as long as there is no preference set on the transaction or account level).
+
+::::code-group
+```ts [transfer-uses-token-for-fees.ts]
+const alphaUSDAddress = '0x20c0000000000000000000000000000000000000'
+
+// Direct token interaction: auto-uses Alpha USD for fees (unless overridden)
+const recipient = '0x1111111111111111111111111111111111111111'
+const amount = 100n * 10n ** 6n // 100.000000 with 6 decimals
+
+const hash = await client.writeContract({
+  address: alphaUSDAddress,
+  abi: [
+    {
+      type: 'function',
+      name: 'transfer',
+      stateMutability: 'nonpayable',
+      inputs: [
+        { name: 'to', type: 'address' },
+        { name: 'value', type: 'uint256' },
+      ],
+      outputs: [{ name: 'success', type: 'bool' }],
+    },
+  ],
+  functionName: 'transfer',
+  args: [recipient, amount],
+})
+
+const tx = await client.getTransaction({ hash })
+```
+
+```ts [viem.config.ts]
+import { createClient, http, publicActions, walletActions } from 'viem'
+import { tempo } from 'tempo.ts/chains'
+
+export const client = createClient({
+  chain: tempo,
+  transport: http(),
+})
+  .extend(publicActions)
+  .extend(walletActions)
+```
+::::

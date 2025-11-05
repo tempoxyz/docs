@@ -1,4 +1,4 @@
-## Tempo Transactions (Type 0x77)
+## Fee Token Transactions (Type 0x77)
 
 ### Abstract
 
@@ -59,7 +59,7 @@ Only included for sponsored transactions. For purposes of computing the transact
 - **Authorization semantics:** Identical to EIP-7702 (installation/teardown, gas surcharge, domain separation). Empty list is allowed (behaves like type-2).
 - **Access list semantics:** Identical to EIP-2930.
 - **Blobs:** Not supported.
-- **Token preference check:** When `fee_token` is `Some(address)` the transaction layer uses that address as the user’s preferred token. Validation ensures it is a USD TIP-20 token with sufficient balance/liquidity; failures reject the transaction before execution (see [Token Preferences](/protocol/specs/TokenPreferences) spec).
+- **Token preference check:** When `fee_token` is `Some(address)` the transaction layer uses that address as the user’s preferred token. Validation ensures it is a USD TIP-20 token with sufficient balance/liquidity; failures reject the transaction before execution (see [Token Preferences](/protocol/specs/Fees) spec).
 - **Fee payer resolution:** Execution environments and mempool validators derive the fee payer as:
   - Fee payer signature present → recovered address.
   - Otherwise → sender address.
@@ -70,7 +70,7 @@ Only included for sponsored transactions. For purposes of computing the transact
 ### Execution Semantics
 1. Recover `sender` (as [described above](#sender-signature)).
 2. If `fee_payer_signature` is present, then recover `fee_payer` (as [described above](#fee-payer-signature)).
-3. Determine effective fee token via token-preference precedence (as discussed in the [Token Preferences](/protocol/specs/TokenPreferences) spec).
+3. Determine effective fee token via token-preference precedence (as discussed in the [Token Preferences](/protocol/specs/Fees) spec).
 4. TIP Fee Manager precompile charges fees from the resolved fee payer’s balance in the selected token; refunds also go to the fee payer.
 5. Nonce handling, gas accounting, access-list warmups, authorization installations, and execution all mirror existing 1559/7702 behavior under the Tempo EVM handler.
 
