@@ -296,44 +296,6 @@ export default defineConfig({
         ],
       },
     ],
-    '/rpc': [
-      {
-        text: 'Overview',
-        link: '/rpc',
-      },
-      {
-        text: 'amm_getLiquidityPools 🚧',
-        link: '/rpc/amm_getLiquidityPools',
-      },
-      {
-        text: 'dex_getOrderbooks 🚧',
-        link: '/rpc/dex_getOrderbooks',
-      },
-      {
-        text: 'dex_getOrders',
-        link: '/rpc/dex_getOrders',
-      },
-      {
-        text: 'eth_getTransactions 🚧',
-        link: '/rpc/eth_getTransactions',
-      },
-      {
-        text: 'policy_getAddresses 🚧',
-        link: '/rpc/policy_getAddresses',
-      },
-      {
-        text: 'token_getRoleHistory 🚧',
-        link: '/rpc/token_getRoleHistory',
-      },
-      {
-        text: 'token_getTokens 🚧',
-        link: '/rpc/token_getTokens',
-      },
-      {
-        text: 'token_getTokensByAddress 🚧',
-        link: '/rpc/token_getTokensByAddress',
-      },
-    ],
     '/sdk/rust': [
       {
         text: 'Getting Started',
@@ -1316,7 +1278,6 @@ export default defineConfig({
       text: 'References',
       items: [
         { text: 'Protocol', link: '/protocol' },
-        { text: 'RPC', link: '/rpc' },
         { text: 'Litepaper', link: '/litepaper' },
       ],
     },
