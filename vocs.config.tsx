@@ -302,6 +302,29 @@ export default defineConfig({
         link: '/sdk/rust',
       },
     ],
+    '/operators': [
+      {
+        text: 'Overview',
+        link: '/operators',
+      },
+      {
+        text: 'Setting up a node',
+        items: [
+          {
+            text: 'System Requirements',
+            link: '/operators/system-requirements',
+          },
+          {
+            text: 'Installation',
+            link: '/operators/installation',
+          },
+          {
+            text: 'Running an RPC Node',
+            link: '/operators/rpc-node',
+          },
+        ],
+      },
+    ],
     '/sdk/typescript': [
       {
         text: 'Getting Started',
@@ -1267,6 +1290,7 @@ export default defineConfig({
   topNav: [
     { text: 'Testnet', link: '/testnet' },
     { text: 'Documentation', link: '/documentation' },
+    { text: 'Operators', link: '/operators' },
     {
       text: 'SDK',
       items: [
