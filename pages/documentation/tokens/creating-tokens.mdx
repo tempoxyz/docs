@@ -1,8 +1,16 @@
+import * as Demo from '../../../components/guides/Demo.tsx'
+
 # Creating Tokens
 
 Creating a TIP-20 token on Tempo is achieved by calling the TIP-20 factory contract.
 
 The process deploys a new token with compliance features, role-based permissions, and integration with Tempo's payment infrastructure.
+
+<Demo.Container name="Create a token">
+  <Demo.Connect />
+  <Demo.AddFunds />
+  <Demo.CreateToken stepNumber={3} />
+</Demo.Container>
 
 ## Example
 

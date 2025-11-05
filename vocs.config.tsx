@@ -1,4 +1,8 @@
+import { Instance } from 'tempo.ts/prool'
 import { ModuleResolutionKind } from 'typescript'
+import autoImport from 'unplugin-auto-import/vite'
+import iconsResolver from 'unplugin-icons/resolver'
+import icons from 'unplugin-icons/vite'
 import { defineConfig } from 'vocs'
 
 export default defineConfig({
@@ -1315,5 +1319,41 @@ export default defineConfig({
     compilerOptions: {
       moduleResolution: ModuleResolutionKind.Bundler,
     },
+  },
+  vite: {
+    plugins: [
+      {
+        name: 'tempo-node',
+        async configureServer(_server) {
+          if (
+            'VITE_LOCAL' in process.env &&
+            process.env['VITE_LOCAL'] !== 'true'
+          )
+            return
+          const instance = Instance.tempo({
+            dev: { blockTime: '500ms' },
+            port: 8545,
+          })
+          console.log('→ starting tempo node...')
+          await instance.start()
+          console.log('√ tempo node started on port 8545')
+        },
+      },
+      icons({ compiler: 'jsx', jsx: 'react' }),
+      autoImport({
+        dts: './auto-imports.d.ts',
+        dirs: ['components'],
+        resolvers: [
+          iconsResolver({
+            enabledCollections: [
+              // https://icones.js.org/collection/lucide
+              'lucide',
+            ],
+            extension: 'jsx',
+            prefix: false,
+          }),
+        ],
+      }),
+    ],
   },
 })

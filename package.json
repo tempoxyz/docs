@@ -12,25 +12,46 @@
     "preview": "vocs preview"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.5",
+    "cva": "1.0.0-beta.4",
+    "prool": "^0.0.25",
     "react": "latest",
     "react-dom": "latest",
     "react-router": "7.9.4",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.14",
-    "tempo.ts": "https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@8276886",
-    "viem": "^2.38.3",
-    "vocs": "latest"
+    "tempo.ts": "https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@e00be5c",
+    "viem": "^2.38.5",
+    "vocs": "latest",
+    "wagmi": "^2.19.2"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.5",
+    "@iconify/json": "^2.2.403",
+    "@svgr/core": "^8.1.0",
+    "@svgr/plugin-jsx": "^8.1.0",
     "@types/node": "latest",
     "@types/react": "latest",
     "simple-git-hooks": "^2.13.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "unplugin-auto-import": "^20.2.0",
+    "unplugin-icons": "^22.5.0"
   },
-  "engines": {
-    "node": ">=22"
+  "packageManager": "pnpm@10.20.0",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^24.10.0",
+      "onFail": "download"
+    }
   },
-  "packageManager": "pnpm@10.6.4",
+  "pnpm": {
+    "minimumReleaseAge": 1440,
+    "onlyBuiltDependencies": [
+      "tempo.ts"
+    ]
+  },
   "simple-git-hooks": {
     "pre-commit": "pnpm check && (git diff --cached --name-only | grep -q '^specs/' && pnpm gen:specs || true)"
   }
