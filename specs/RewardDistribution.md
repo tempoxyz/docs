@@ -2,7 +2,7 @@
 
 ## Abstract
 
-This specification defines an opt-in, scalable, pro-rata streaming reward distribution mechanism for TIP20 tokens. It introduces `startReward(amount, seconds)` as a function built into the TIP-20 token contract, which starts a linear stream that distributes `amount` evenly over `seconds`. Streams can be canceled by the funder. Users must opt in to rewards distribution and may delegate rewards to a chosen recipient. Rewards are automatically distributed to recipient balances during balance-changing operations (transfers, mints, burns) or when changing the reward recipient.
+This specification defines an opt-in, scalable, pro-rata streaming reward distribution mechanism for TIP20 tokens. It introduces `startReward(amount, seconds)` as a function built into the TIP-20 token contract, which starts a linear stream that distributes `amount` evenly over `seconds`. Streams can be canceled by the funder. Users must opt in to rewards distribution and may delegate rewards to a chosen recipient. Accrued rewards are tracked in each user's `rewardBalance` and updated during balance-changing operations (transfers, mints, burns) or when changing the reward recipient. Users claim their accumulated rewards via `claimRewards()`.
 
 The design uses a scalable “reward-per-token” accumulator. The reward rate is tracked via a global `totalRewardPerSecond` and applied over time.
 
@@ -13,8 +13,9 @@ Many applications (such as incentive programs, reward distribution, deterministi
 ## Roles and Policy
 
 - Any address may start a reward stream via `startReward(amount, seconds)`.
-- Any token holder may opt in and select a `rewardRecipient` that will receive rewards attributable to their balance.
-- Accrued rewards are automatically distributed to the recipient's balance during any balance-changing operation (transfers, mints, burns) or when changing the reward recipient.
+- Any token holder may opt in and select a `rewardRecipient` for their rewards.
+- Accrued rewards are tracked in the user's `rewardBalance` and updated during balance-changing operations (transfers, mints, burns) or when changing the reward recipient.
+- Users must call `claimRewards()` to transfer their accumulated rewards to their balance.
 - A stream's funder may cancel that stream via `cancelReward(id)`.
 
 ## Interfaces
@@ -23,11 +24,11 @@ Many applications (such as incentive programs, reward distribution, deterministi
 
 - `startReward(uint256 amount, uint32 seconds) returns (uint64 id)`
   - Transfers `amount` of the TIP20 token from `msg.sender` into the token's reward pool (TIP-403 applies).
-  - If `seconds == 0`, immediately distributes `amount` to current opted-in holders by increasing `rewardPerTokenStored`.
+  - If `seconds == 0`, immediately distributes `amount` to current opted-in holders by increasing `globalRewardPerToken`.
   - If `seconds > 0`, starts a linear stream that emits evenly from `block.timestamp` to `block.timestamp + seconds`.
   - Returns a unique `id` for later cancellation (always 0 for immediate payouts).
   - Reverts if `amount == 0`.
-  - Allowed when `optedInSupply == 0` (tokens distributed while `optedInSupply` is 0 are locked permanently).
+  - Reverts with `NoOptedInSupply()` if `seconds == 0` and `optedInSupply == 0`.
 
 - `cancelReward(uint64 id) returns (uint256 refund)`
   - Callable only by the stream’s `funder`.
@@ -37,13 +38,20 @@ Many applications (such as incentive programs, reward distribution, deterministi
 
 - `setRewardRecipient(address recipient)`
   - If `recipient` is `address(0)`, opts out `msg.sender` from rewards distribution.
-  - Otherwise, opts in `msg.sender` for rewards and sets `recipient` as the address that will receive accrued rewards attributable to the balance of `msg.sender`.
+  - Otherwise, opts in `msg.sender` for rewards and sets `recipient` as the reward recipient for `msg.sender`.
   - May be called with `recipient == msg.sender`.
   - Reverts if `recipient` is not `address(0)` and either `msg.sender` or `recipient` is not authorized to receive tokens under TIP-403.
-  - **Automatically distributes any accrued rewards** to the current recipient before changing the recipient setting.
+  - **Updates `rewardBalance` for `msg.sender`** to reflect any accrued rewards before changing the recipient setting.
+
+- `claimRewards() returns (uint256 maxAmount)`
+  - Transfers accumulated rewards from `msg.sender`'s `rewardBalance` to their token balance.
+  - Updates rewards before claiming.
+  - Returns the amount transferred (may be less than `rewardBalance` if contract balance is insufficient).
+  - Reverts if `msg.sender` is not authorized under TIP-403.
+  - If `msg.sender` has a `rewardRecipient` set, the claimed amount is added to `optedInSupply`.
 
 - `finalizeStreams(uint64 timestamp)`
-  - Callable only by the zero address via system transaction.
+  - Callable only by the TIP20RewardsRegistry.
   - Finalizes all streams scheduled to end at `timestamp`.
   - Decreases `totalRewardPerSecond` by `scheduledRateDecrease[timestamp]`.
   - See System Transactions section for details.
@@ -76,6 +84,7 @@ error InvalidAmount();     // amount == 0
 error NotStreamFunder();   // cancel by non-funder
 error StreamInactive();    // cancel on non-existent or already-canceled stream
 error PolicyForbids();     // TIP-403 policy violation
+error NoOptedInSupply();   // No immediate payout when optedInSupply == 0
 ```
 
 ## State and Accounting
@@ -86,19 +95,22 @@ Use a magnified accumulator to avoid per-holder iteration and to maintain O(1) u
   - `ACC_PRECISION = 1e18` — fixed-point scale for both the accumulator and per-second rate.
 
 - **Global**
-  - `uint256 rewardPerTokenStored` — cumulative rewards per whole token, scaled by `ACC_PRECISION`.
+  - `uint256 globalRewardPerToken` — cumulative rewards per whole token, scaled by `ACC_PRECISION`.
   - `uint64  lastUpdateTime` — last timestamp the accumulator was updated.
   - `uint256 totalRewardPerSecond` — aggregate per-second emission, scaled by `ACC_PRECISION`.
   - `uint128 optedInSupply` — aggregate supply counted for rewards at moments of distribution updates.
   - `uint64  nextStreamId` — starts at 1.
   - `mapping(uint64 => uint256) scheduledRateDecrease` — mapping from block timestamp to total rate decrease scheduled for that time.
 
-- **Per holder**
-  - `mapping(address => address) rewardRecipientOf` — current reward recipient for a holder (zero means opted-out).
-
-- **Per recipient**
-  - `mapping(address => uint256) userRewardPerTokenPaid` — snapshot of `rewardPerTokenStored` last time the recipient's accounting was updated.
-  - `mapping(address => uint128) delegatedBalance` — total balance delegated to this recipient by all holders.
+- **Per user**
+  - `mapping(address => UserRewardInfo) userRewardInfo` — reward information for each user:
+    ```solidity
+    struct UserRewardInfo {
+        address rewardRecipient;  // current reward recipient (zero means opted-out)
+        uint256 rewardPerToken;   // snapshot of globalRewardPerToken last time updated
+        uint256 rewardBalance;    // accumulated unclaimed rewards for this user
+    }
+    ```
 
 - **Streams**
   ```solidity
@@ -112,25 +124,56 @@ Use a magnified accumulator to avoid per-holder iteration and to maintain O(1) u
   mapping(uint64 => Stream) streams;
   ```
 
+## TIP20RewardsRegistry
+
+The TIP20RewardsRegistry is a precompile at address `0x3000000000000000000000000000000000000000` that coordinates stream finalization across all TIP20 tokens in the system.
+
+### Purpose
+
+The registry maintains a global index of all pending stream end times across all TIP20 tokens. During block production, the first transaction of every block will be a call to finalizeStreams on the registry. This design ensures that streams will be finalized at their scheduled `endTime` by calling `finalizeStreams(timestamp)` on each token with streams ending at the current block timestamp.
+
+### Interface
+
+```solidity
+interface TIP20RewardsRegistry {
+    /// @notice Register a timestamp for stream finalization
+    /// @dev Called by TIP20 tokens when the first stream ending at `timestamp` is created
+    function addStream(uint64 timestamp) external;
+
+    /// @notice Unregister a timestamp for stream finalization
+    /// @dev Called by TIP20 tokens when the last stream ending at `timestamp` is canceled
+    function removeStream(uint64 timestamp) external;
+}
+```
+
+### Behavior
+
+- **Registration**: When a TIP20 token creates the first stream ending at a particular timestamp, it calls `addStream(endTime)` to register that timestamp with the registry.
+- **Unregistration**: When a TIP20 token cancels the last stream ending at a particular timestamp, it calls `removeStream(endTime)` to unregister that timestamp.
+- **Finalization**: At the top of each block, a system transaction calls finalizeStreams() on the TIP20RewardsRegistry. The registry calls finalizeStreams(timestamp) on each registered TIP20 that had a reward stream expire since the timestamp of the previous block.
+
+This design allows the system to efficiently track and finalize streams without requiring each token to maintain its own timer or iteration logic.
+
 ## Accrual
 
-Accrual is piecewise-linear based on block time and current opted-in supply. Immediate payouts (when `seconds = 0`) directly increase `rewardPerTokenStored` without affecting `totalRewardPerSecond`.
+Accrual is piecewise-linear based on block time and current opted-in supply. Immediate payouts (when `seconds = 0`) directly increase `globalRewardPerToken` without affecting `totalRewardPerSecond`.
 
-### `_accrue()`
+### `_accrue(timestampToAccrueTo)`
 
 ```
-elapsed = block.timestamp - lastUpdateTime
-lastUpdateTime = block.timestamp
+elapsed = timestampToAccrueTo - lastUpdateTime
 
 if (elapsed == 0) return;
+
+lastUpdateTime = uint64(timestampToAccrueTo);
 
 // Clock keeps running even if optedInSupply == 0 (no backfill)
 if (optedInSupply == 0) return;
 
 if (totalRewardPerSecond > 0) {
     // deltaRPT = totalRewardPerSecond * elapsed / optedInSupply
-    deltaRPT = (totalRewardPerSecond * uint256(elapsed)) / uint256(optedInSupply);
-    rewardPerTokenStored += deltaRPT;
+    deltaRPT = (totalRewardPerSecond * elapsed) / uint256(optedInSupply);
+    globalRewardPerToken += deltaRPT;
 }
 ```
 
@@ -141,12 +184,12 @@ Use 256-bit math. Assume `totalSupply < 2^128`.
 ### Starting a Stream — `startReward(amount, seconds)`
 
 1. `if (amount == 0) revert InvalidAmount();`
-2. Transfer `amount` from `msg.sender` to the token contract's reward pool (TIP-403 check; revert `PolicyForbids()` on failure).
-3. `_accrue()`.
+2. Check TIP-403 authorization for `msg.sender`; revert `PolicyForbids()` if not authorized.
+3. Transfer `amount` from `msg.sender` to the token contract's reward pool via `_transfer()`.
 4. If `seconds == 0` (immediate payout):
-   - If `optedInSupply > 0`:
-     - `deltaRPT = (amount * ACC_PRECISION) / optedInSupply`
-     - `rewardPerTokenStored += deltaRPT`
+   - If `optedInSupply == 0`, revert `NoOptedInSupply()`.
+   - `deltaRPT = (amount * ACC_PRECISION) / optedInSupply`
+   - `globalRewardPerToken += deltaRPT`
    - Emit `RewardScheduled(msg.sender, 0, amount, 0)`.
    - Return `0`.
 5. Otherwise (streaming payout):
@@ -164,15 +207,17 @@ Use 256-bit math. Assume `totalSupply < 2^128`.
        amountTotal: amount
      });
      ```
-   - **Scheduling:** Add `rate` to `scheduledRateDecrease[endTime]` to schedule a rate reduction when the stream ends.
+   - **Scheduling:**
+     - Add `rate` to `scheduledRateDecrease[endTime]` to schedule a rate reduction when the stream ends.
+     - If this is the first rate ending at that timetstamp, call `TIP20_REWARDS_REGISTRY.addStream(endTime)` to register this timestamp.
    - Emit `RewardScheduled(msg.sender, id, amount, seconds)`.
    - Return `id`.
 
 ### Scheduled End (System Transaction)
 
-When a block's timestamp matches a scheduled `endTime` value in `scheduledRateDecrease`:
+System transactions are used to ensure streams end at their respective `endTime`.
 
-1. A system transaction calls `finalizeStreams(uint64 timestamp)` on the TIP20 token contract.
+1. A system transaction calls `finalizeStreams(uint64 timestamp)` on the TIP20RewardRegistry.
 2. The function performs:
    - `_accrue()` before changing rates.
    - `totalRewardPerSecond -= scheduledRateDecrease[timestamp]`.
@@ -186,158 +231,142 @@ No transfers occur here; any rounding dust remains in the pool. This system tran
 1. Load `s = streams[id]`; if `s.funder == address(0)`, revert `StreamInactive()`.
 2. If `msg.sender != s.funder`, revert `NotStreamFunder()`.
 3. If `block.timestamp >= s.endTime`, revert `StreamInactive()`.
-4. `_accrue()` before changing rates.
+4. `_accrue(block.timestamp)` before changing rates.
 5. Compute elapsed within the stream's window:
    ```
-   t0 = s.startTime
-   t1 = s.endTime
-   t  = block.timestamp <= t0 ? 0 : (block.timestamp - t0);
-   distributed = (s.ratePerSecondScaled * uint256(t)) / ACC_PRECISION;
+   t = block.timestamp <= s.startTime ? 0 : (block.timestamp - s.startTime);
+   distributed = (s.ratePerSecondScaled * t) / ACC_PRECISION;
    if (distributed > s.amountTotal) distributed = s.amountTotal; // safety clamp
-   remaining = s.amountTotal - distributed;
+   refund = s.amountTotal - distributed;
    ```
 6. Decrease `totalRewardPerSecond` by `s.ratePerSecondScaled`.
-7. Decrease `scheduledRateDecrease[s.endTime]` by `s.ratePerSecondScaled` (cancel the scheduled end).
+7. Decrease `scheduledRateDecrease[s.endTime]` by `s.ratePerSecondScaled`:
+   - `newRate = scheduledRateDecrease[s.endTime] - s.ratePerSecondScaled`
+   - `scheduledRateDecrease[s.endTime] = newRate`
+   - If `newRate == 0`, call `TIP20_REWARDS_REGISTRY.removeStream(s.endTime)` to unregister this timestamp.
 8. Delete `streams[id]`.
-9. Attempt to transfer `remaining` from pool to `s.funder` (TIP-403 check):
-   - If allowed, transfer and set `refund = remaining`.
-   - If forbidden, do not transfer; set `refund = 0`. The undistributed remainder stays in the pool.
+9. Attempt to transfer `refund` from pool to `s.funder` (TIP-403 check):
+   - If both `address(this)` and `s.funder` are authorized by TIP-403:
+     - `funderRewardRecipient = _updateRewardsAndGetRecipient(s.funder)`
+     - If `funderRewardRecipient != address(0)`, `optedInSupply += uint128(refund)`
+     - `balanceOf[address(this)] -= refund`
+     - `balanceOf[s.funder] += refund`
+     - Emit `Transfer(address(this), s.funder, refund)`
+   - If forbidden, set `refund = 0`. The undistributed remainder stays in the pool.
 10. Emit `RewardCanceled(s.funder, id, refund)`.
 11. Return `refund`.
 
-### Balance Changes for Opted-In Holders
+### Balance Changes and Reward Accounting
 
-On any change to an opted-in holder’s balance (mint, burn, transfer in/out), first call `_accrue()` and then update accrued rewards for their recipient:
+On any change to a holder's balance (mint, burn, transfer in/out), first call `_accrue(block.timestamp)` and then update accrued rewards via `_updateRewardsAndGetRecipient(holder)`:
 
 ```
-recipient = rewardRecipientOf[holder]
-if (recipient != address(0)) {
-    accrued = delegatedBalance[recipient] * (rewardPerTokenStored - userRewardPerTokenPaid[recipient]) / ACC_PRECISION
-    rewards[recipient] += accrued
-    userRewardPerTokenPaid[recipient] = rewardPerTokenStored
+function _updateRewardsAndGetRecipient(user) returns (address rewardRecipient) {
+    rewardRecipient = userRewardInfo[user].rewardRecipient;
+    cachedGlobalRewardPerToken = globalRewardPerToken;
+    rewardPerTokenDelta = cachedGlobalRewardPerToken - userRewardInfo[user].rewardPerToken;
+
+    if (rewardPerTokenDelta != 0) {
+        // Only update rewards if opted-in
+        if (rewardRecipient != address(0)) {
+            reward = balanceOf[user] * rewardPerTokenDelta / ACC_PRECISION;
+            userRewardInfo[rewardRecipient].rewardBalance += reward;
+        }
+        userRewardInfo[user].rewardPerToken = cachedGlobalRewardPerToken;
+    }
 }
 ```
 
-Then adjust `balanceOf[holder]`, `delegatedBalance[recipient]`, and `optedInSupply` by the balance delta.
+Then adjust `balanceOf[holder]` and `optedInSupply` based on the balance delta and whether the sender/receiver are opted in.
 
-### Set Reward Recipient
+### Set Reward Recipient — `setRewardRecipient(newRewardRecipient)`
 
-1. `_accrue()`.
-2. Enforce TIP-403 authorization rules for both `msg.sender` and `recipient`; if failing, revert `PolicyForbids()`.
-3. If `recipient` equals the current `rewardRecipientOf[msg.sender]`, return.
-4. If currently opted in:
-   - Settle accrued rewards for the current recipient as above.
-   - Decrease `delegatedBalance[oldRecipient]` by `balanceOf[msg.sender]`.
-5. If `recipient == address(0)`:
-   - Set `rewardRecipientOf[msg.sender] = address(0)`.
-   - Decrease `optedInSupply` by `balanceOf[msg.sender]`.
-   - Emit `RewardRecipientSet(msg.sender, address(0))`.
-6. Otherwise:
-   - Settle accrued rewards for `recipient` as above.
-   - Set `rewardRecipientOf[msg.sender] = recipient`.
-   - Increase `delegatedBalance[recipient]` by `balanceOf[msg.sender]`.
-   - Increase `optedInSupply` by `balanceOf[msg.sender]` if previously opted out.
-   - Emit `RewardRecipientSet(msg.sender, recipient)`.
+1. If `newRewardRecipient != address(0)`, enforce TIP-403 authorization for both `msg.sender` and `newRewardRecipient`; if failing, revert `PolicyForbids()`.
+2. `_accrue(block.timestamp)`.
+3. `oldRewardRecipient = _updateRewardsAndGetRecipient(msg.sender)` to settle any accrued rewards.
+4. Update `optedInSupply`:
+   - If `oldRewardRecipient != address(0)` and `newRewardRecipient == address(0)`:
+     - `optedInSupply -= uint128(balanceOf[msg.sender])` (opting out)
+   - If `oldRewardRecipient == address(0)` and `newRewardRecipient != address(0)`:
+     - `optedInSupply += uint128(balanceOf[msg.sender])` (opting in)
+5. Set `userRewardInfo[msg.sender].rewardRecipient = newRewardRecipient`.
+6. Emit `RewardRecipientSet(msg.sender, newRewardRecipient)`.
 
-### Automatic Reward Distribution
+### Claiming Rewards — `claimRewards()`
 
-Rewards are automatically distributed to recipients during any operation that calls `_updateRewards(recipient)`. This happens during:
-- Token transfers (for both sender and receiver if they have opted in)
-- Token mints (for the recipient if opted in)
-- Token burns (for the sender if opted in)
-- Setting or changing reward recipient
+Users must explicitly claim their accumulated rewards to transfer them from `rewardBalance` to their token balance:
 
-The `_updateRewards(recipient)` function:
-1. Calculates accrued rewards:
-   ```
-   accrued = delegatedBalance[recipient] * (rewardPerTokenStored - userRewardPerTokenPaid[recipient]) / ACC_PRECISION
-   ```
-2. Updates the tracking variable:
-   ```
-   userRewardPerTokenPaid[recipient] = rewardPerTokenStored
-   ```
-3. If `accrued > 0`, immediately transfers the rewards from the contract balance to the recipient's balance and emits a `Transfer(address(this), recipient, accrued)` event.
+1. Check TIP-403 authorization for `msg.sender`; if failing, revert `PolicyForbids()`.
+2. `_accrue(block.timestamp)`.
+3. `_updateRewardsAndGetRecipient(msg.sender)` to update rewards.
+4. `amount = userRewardInfo[msg.sender].rewardBalance`.
+5. `selfBalance = balanceOf[address(this)]`.
+6. `maxAmount = min(selfBalance, amount)` (can't claim more than contract holds).
+7. `userRewardInfo[msg.sender].rewardBalance -= maxAmount`.
+8. Transfer from contract to `msg.sender`:
+   - `balanceOf[address(this)] -= maxAmount`
+   - If `userRewardInfo[msg.sender].rewardRecipient != address(0)`:
+     - `optedInSupply += uint128(maxAmount)` (claimed tokens join opted-in supply)
+   - `balanceOf[msg.sender] += maxAmount`
+9. Emit `Transfer(address(this), msg.sender, maxAmount)`.
+10. Return `maxAmount`.
 
 ## TIP-403 Policy Integration
 
 All movements of tokens precipitated by this mechanism must pass TIP-403 checks using the token's `transferPolicyId`:
 
-- `startReward` validates funder → pool.
-- `setRewardRecipient` validates holder and recipient authorization.
-- Automatic reward distribution (via `_updateRewards`) transfers from pool → recipient are checked by the standard transfer policy during normal transfers, mints, and burns. The recipient must be authorized to receive tokens.
-- `cancelReward` attempts pool → funder; if forbidden, the stream is canceled but no refund is transferred.
+- `startReward` validates funder authorization before transferring tokens to the pool.
+- `setRewardRecipient` validates both holder and recipient authorization.
+- `claimRewards` validates that `msg.sender` is authorized before claiming rewards.
+- `cancelReward` attempts pool → funder; if forbidden by TIP-403, the stream is canceled but no refund is transferred (refund returns 0).
 
 If any check fails, revert `PolicyForbids()`.
 
 ## Gas Considerations
 
-- `_accrue()` is O(1) and triggered on existing touchpoints (transfers, mints, burns, setting reward recipient).
+- `_accrue()` is O(1) and triggered on existing touchpoints (transfers, mints, burns, setting reward recipient, claiming rewards).
 - Starting/ending/canceling a stream is O(1).
 - No per-second or per-stream iteration is required; the scheduled end is a constant-time rate subtraction.
 - Per-holder costs arise on setting a reward recipient and on subsequent balance changes for opted-in holders.
-- Rewards are distributed automatically during balance-changing operations, eliminating the need for a separate claim transaction.
 
 ## System Transactions
 
-This specification uses **system transactions** to finalize streams when they reach their scheduled end time. A system transaction is a legacy transaction with an empty signature (`r = 0`, `s = 0`, `yParity = false`) and with the sender as the zero address (`0x0000000000000000000000000000000000000000`).
+This specification uses the **TIP20RewardsRegistry** precompile to track and finalize streams when they reach their scheduled end time. The registry is called during block production to finalize streams across all TIP20 tokens.
 
-### Stream Finalization Transaction
+### TIP20RewardsRegistry
 
-When any TIP20 token has `scheduledRateDecrease[block.timestamp] > 0`, exactly one system transaction must appear at the end of the block. This single transaction calls the TIP20Factory, which loops over all tokens to finalize those with scheduled stream ends. The transaction must have the following parameters:
+The TIP20RewardsRegistry is a precompile at address `0x3000000000000000000000000000000000000000` that maintains a registry of all pending stream end times across all TIP20 tokens.
 
-| Field                 | Value / Requirement                                          | Notes / Validation                                     |
-|-----------------------|--------------------------------------------------------------|--------------------------------------------------------|
-| **Type**              | Legacy transaction                                           |                                                        |
-| **Position in Block** | End of block (after all user transactions)                   | Block is **invalid** if absent when required.         |
-| **From (sender)**     | `0x0000000000000000000000000000000000000000`                 | Zero address                                           |
-| **To (recipient)**    | `0x20Fc000000000000000000000000000000000000`                 | The TIP20Factory precompile address                    |
-| **Calldata**          | ABI-encoded `finalizeAllStreams(uint64 timestamp)` with `timestamp = block.timestamp` | |
-| **Value**             | `0`                                                          | No native token transfer.                              |
-| **Nonce**             | `0`                                                          |                                                        |
-| **Gas Limit**         | `0`                                                          | Does **not** contribute to block gas accounting.       |
-| **Gas Price**         | `0`                                                          | Independent of block base fee; does not pay fees.      |
-| **Signature**         | `r = 0`, `s = 0`, `yParity = false`                          | Empty signature designates system transaction.         |
+When a TIP20 token starts a new stream:
+- If this is the first stream ending at that timestamp, the token calls `TIP20_REWARDS_REGISTRY.addStream(endTime)` to register the timestamp.
 
-The proposer **must** construct and include this transaction when building the block if any TIP20 token has `scheduledRateDecrease[block.timestamp] > 0`. A block is invalid if the required transaction is absent or positioned incorrectly.
+When a TIP20 token cancels a stream:
+- If the canceled stream was the last one ending at that timestamp, the token calls `TIP20_REWARDS_REGISTRY.removeStream(endTime)` to unregister the timestamp.
 
-The proposer determines which tokens need finalization by checking each TIP20 token's `scheduledRateDecrease[block.timestamp]` mapping.
+### Stream Finalization
 
-### TIP20Factory: `finalizeAllStreams(uint64 timestamp)` Function
-
-This function on the TIP20Factory is callable only by the zero address (i.e., via system transaction). It loops over all TIP20 tokens and finalizes any with scheduled stream ends:
-
-```solidity
-function finalizeAllStreams(uint64 timestamp) external {
-    require(msg.sender == address(0), "Only system");
-    require(timestamp == block.timestamp, "Invalid timestamp");
-    
-    // Loop over all TIP20 tokens
-    for (uint256 i = 0; i < tokenIdCounter; i++) {
-        address tokenAddress = getTokenAddress(i);
-        TIP20 token = TIP20(tokenAddress);
-        
-        // Check if this token has streams to finalize
-        if (token.scheduledRateDecrease(timestamp) > 0) {
-            token.finalizeStreams(timestamp);
-        }
-    }
-}
-```
+A system transaction is inserted at the top of each block calling `finalizeStreams()` on the TIP20RewardsRegistry which subsequently calls each TIP20 token that has streams ending at the current block timestamp. This happens via an internal mechanism in the block production process.
 
 ### TIP20: `finalizeStreams(uint64 timestamp)` Function
 
-This function on each TIP20 token is callable only by the TIP20Factory when invoked via system transaction:
+This function on each TIP20 token is callable only by the TIP20RewardsRegistry:
 
 ```solidity
 function finalizeStreams(uint64 timestamp) external {
-    require(msg.sender == FACTORY, "Only factory");
-    require(timestamp == block.timestamp, "Invalid timestamp");
-    
+    require(msg.sender == address(TIP20_REWARDS_REGISTRY), "Only system");
+
     uint256 rateDecrease = scheduledRateDecrease[timestamp];
     require(rateDecrease > 0, "No streams to finalize");
-    
-    _accrue();
+
+    _accrue(timestamp);
     totalRewardPerSecond -= rateDecrease;
     delete scheduledRateDecrease[timestamp];
 }
 ```
+
+The function:
+1. Verifies the caller is the TIP20RewardsRegistry.
+2. Loads the scheduled rate decrease for the given timestamp.
+3. Accrues rewards up to the finalization timestamp.
+4. Decreases `totalRewardPerSecond` by the scheduled amount.
+5. Deletes the scheduled rate decrease entry.
