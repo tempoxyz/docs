@@ -10,7 +10,7 @@ A key deviation from the Ethereum spec is the fee system:
 2. Tempo has a fixed base fee (rather than a variable base fee as in [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559)). This is set so that a TIP-20 transfer costs &lt;$0.001. 
 3. All fees accrue to the validator who proposes the block. 
 
-More details on this can be found on the Fees page. TODO ADD LINK
+More details on this can be found on [this page](/protocol/specs/Fees).
 
 ## 2. TIP-20 Token Standard
 
