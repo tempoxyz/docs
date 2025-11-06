@@ -158,11 +158,11 @@ Next, we can deploy our contract using the `forge create` or `forge script` comm
 To deploy a simple contract using `forge create`:
 
 ```bash [Terminal]
-forge create src/Counter.sol:Counter --rpc-url https://rpc.testnet.tempo.xyz --interactive
+forge create src/Mail.sol:Mail --rpc-url https://rpc.testnet.tempo.xyz --broadcast --interactive --constructor-args <TIP20_TOKEN_ADDRESS>
 ```
 
 Or to deploy using a script with `forge script`:
 
 ```bash [Terminal]
-forge script src/Counter.s.sol:Counter --rpc-url https://rpc.testnet.tempo.xyz --interactive
+forge script src/Mail.s.sol:MailScript --rpc-url https://rpc.testnet.tempo.xyz --broadcast --interactive
 ```
