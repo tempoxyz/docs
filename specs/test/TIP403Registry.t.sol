@@ -49,7 +49,7 @@ contract TIP403RegistryTest is Test {
         accounts[0] = alice;
         accounts[1] = bob;
 
-        uint64 newPolicyId = registry.createPolicy(admin, policyType, accounts);
+        uint64 newPolicyId = registry.createPolicyWithAccounts(admin, policyType, accounts);
 
         assertEq(newPolicyId, FIRST_USER_POLICY);
         assertEq(registry.policyIdCounter(), FIRST_USER_POLICY + 1);
@@ -68,7 +68,7 @@ contract TIP403RegistryTest is Test {
         accounts[0] = alice;
         accounts[1] = bob;
 
-        uint64 newPolicyId = registry.createPolicy(admin, policyType, accounts);
+        uint64 newPolicyId = registry.createPolicyWithAccounts(admin, policyType, accounts);
 
         assertEq(newPolicyId, FIRST_USER_POLICY);
         assertEq(registry.policyIdCounter(), FIRST_USER_POLICY + 1);
@@ -85,7 +85,7 @@ contract TIP403RegistryTest is Test {
         address[] memory accounts = new address[](1);
         accounts[0] = alice;
 
-        uint64 newPolicyId = registry.createPolicy(bob, policyType, accounts);
+        uint64 newPolicyId = registry.createPolicyWithAccounts(bob, policyType, accounts);
 
         // Check that the policy admin is bob
         (, address storedAdmin) = registry.policyData(newPolicyId);
@@ -148,7 +148,7 @@ contract TIP403RegistryTest is Test {
 
         // Create policy with charlie as admin
         uint64 policyId =
-            registry.createPolicy(charlie, ITIP403Registry.PolicyType.WHITELIST, accounts);
+            registry.createPolicyWithAccounts(charlie, ITIP403Registry.PolicyType.WHITELIST, accounts);
 
         // Charlie should be able to change the admin
         vm.prank(charlie);
@@ -198,7 +198,7 @@ contract TIP403RegistryTest is Test {
     function test_ModifyPolicyWhitelist_RemoveFromWhitelist() public {
         address[] memory accounts = new address[](1);
         accounts[0] = alice;
-        uint64 policyId = registry.createPolicy(bob, ITIP403Registry.PolicyType.WHITELIST, accounts);
+        uint64 policyId = registry.createPolicyWithAccounts(bob, ITIP403Registry.PolicyType.WHITELIST, accounts);
 
         // Initially, alice should be authorized (whitelisted)
         assertTrue(registry.isAuthorized(policyId, alice));
@@ -256,7 +256,7 @@ contract TIP403RegistryTest is Test {
     function test_ModifyPolicyBlacklist_RemoveFromBlacklist() public {
         address[] memory accounts = new address[](1);
         accounts[0] = alice;
-        uint64 policyId = registry.createPolicy(bob, ITIP403Registry.PolicyType.BLACKLIST, accounts);
+        uint64 policyId = registry.createPolicyWithAccounts(bob, ITIP403Registry.PolicyType.BLACKLIST, accounts);
 
         // Initially, alice should not be authorized (blacklisted)
         assertFalse(registry.isAuthorized(policyId, alice));
@@ -356,7 +356,7 @@ contract TIP403RegistryTest is Test {
         initialAccounts[1] = bob;
 
         uint64 policyId =
-            registry.createPolicy(david, ITIP403Registry.PolicyType.WHITELIST, initialAccounts);
+            registry.createPolicyWithAccounts(david, ITIP403Registry.PolicyType.WHITELIST, initialAccounts);
 
         // Alice and bob should be whitelisted initially
         assertTrue(registry.isAuthorized(policyId, alice));
@@ -388,7 +388,7 @@ contract TIP403RegistryTest is Test {
         initialAccounts[1] = bob;
 
         uint64 policyId =
-            registry.createPolicy(david, ITIP403Registry.PolicyType.BLACKLIST, initialAccounts);
+            registry.createPolicyWithAccounts(david, ITIP403Registry.PolicyType.BLACKLIST, initialAccounts);
 
         // Alice and bob should be blacklisted initially
         assertFalse(registry.isAuthorized(policyId, alice));
@@ -477,7 +477,7 @@ contract TIP403RegistryTest is Test {
         vm.expectEmit(true, true, true, true);
         emit ITIP403Registry.PolicyAdminUpdated(FIRST_USER_POLICY, address(this), charlie);
 
-        registry.createPolicy(charlie, ITIP403Registry.PolicyType.WHITELIST, accounts);
+        registry.createPolicyWithAccounts(charlie, ITIP403Registry.PolicyType.WHITELIST, accounts);
     }
 
     function test_Events_PolicyCreation_BlacklistWithAccounts() public {
@@ -499,7 +499,7 @@ contract TIP403RegistryTest is Test {
         vm.expectEmit(true, true, true, true);
         emit ITIP403Registry.PolicyAdminUpdated(FIRST_USER_POLICY, address(this), charlie);
 
-        registry.createPolicy(charlie, ITIP403Registry.PolicyType.BLACKLIST, accounts);
+        registry.createPolicyWithAccounts(charlie, ITIP403Registry.PolicyType.BLACKLIST, accounts);
     }
 
     function test_Events_PolicyCreation_WithAdmin() public {
@@ -517,7 +517,7 @@ contract TIP403RegistryTest is Test {
         vm.expectEmit(true, true, true, true);
         emit ITIP403Registry.PolicyAdminUpdated(FIRST_USER_POLICY, address(this), bob);
 
-        registry.createPolicy(bob, ITIP403Registry.PolicyType.WHITELIST, accounts);
+        registry.createPolicyWithAccounts(bob, ITIP403Registry.PolicyType.WHITELIST, accounts);
     }
 
     function test_Events_WhitelistUpdate_Add() public {
@@ -533,7 +533,7 @@ contract TIP403RegistryTest is Test {
     function test_Events_WhitelistUpdate_Remove() public {
         address[] memory accounts = new address[](1);
         accounts[0] = alice;
-        uint64 policyId = registry.createPolicy(bob, ITIP403Registry.PolicyType.WHITELIST, accounts);
+        uint64 policyId = registry.createPolicyWithAccounts(bob, ITIP403Registry.PolicyType.WHITELIST, accounts);
 
         vm.expectEmit(true, true, true, true);
         emit ITIP403Registry.WhitelistUpdated(policyId, bob, alice, false);
@@ -555,7 +555,7 @@ contract TIP403RegistryTest is Test {
     function test_Events_BlacklistUpdate_Remove() public {
         address[] memory accounts = new address[](1);
         accounts[0] = alice;
-        uint64 policyId = registry.createPolicy(bob, ITIP403Registry.PolicyType.BLACKLIST, accounts);
+        uint64 policyId = registry.createPolicyWithAccounts(bob, ITIP403Registry.PolicyType.BLACKLIST, accounts);
 
         vm.expectEmit(true, true, true, true);
         emit ITIP403Registry.BlacklistUpdated(policyId, bob, alice, false);
@@ -643,7 +643,7 @@ contract TIP403RegistryTest is Test {
         accounts[0] = alice;
 
         uint64 policyId =
-            registry.createPolicy(alice, ITIP403Registry.PolicyType.WHITELIST, accounts);
+            registry.createPolicyWithAccounts(alice, ITIP403Registry.PolicyType.WHITELIST, accounts);
 
         // Alice is the admin, so she should be able to modify it
         vm.prank(alice);
@@ -658,7 +658,7 @@ contract TIP403RegistryTest is Test {
         accounts[0] = alice;
 
         // Should be able to create a blacklist policy with an admin
-        uint64 policyId = registry.createPolicy(bob, ITIP403Registry.PolicyType.BLACKLIST, accounts);
+        uint64 policyId = registry.createPolicyWithAccounts(bob, ITIP403Registry.PolicyType.BLACKLIST, accounts);
 
         (, address storedAdmin) = registry.policyData(policyId);
         assertEq(storedAdmin, bob);
@@ -683,7 +683,7 @@ contract TIP403RegistryTest is Test {
         address[] memory accounts = new address[](1);
         accounts[0] = bob;
         uint64 policyId =
-            registry.createPolicy(alice, ITIP403Registry.PolicyType.WHITELIST, accounts);
+            registry.createPolicyWithAccounts(alice, ITIP403Registry.PolicyType.WHITELIST, accounts);
 
         // Alice should be able to modify the policy (she is the admin)
         vm.prank(alice);
@@ -698,7 +698,7 @@ contract TIP403RegistryTest is Test {
         address[] memory accounts = new address[](1);
         accounts[0] = bob;
         uint64 policyId =
-            registry.createPolicy(alice, ITIP403Registry.PolicyType.BLACKLIST, accounts);
+            registry.createPolicyWithAccounts(alice, ITIP403Registry.PolicyType.BLACKLIST, accounts);
 
         // Alice should be able to modify the policy (she is the admin)
         vm.prank(alice);
@@ -724,7 +724,7 @@ contract TIP403RegistryTest is Test {
         accounts[2] = bob;
 
         uint64 policyId =
-            registry.createPolicy(charlie, ITIP403Registry.PolicyType.WHITELIST, accounts);
+            registry.createPolicyWithAccounts(charlie, ITIP403Registry.PolicyType.WHITELIST, accounts);
 
         // Both alice and bob should be whitelisted (duplicates are handled
         // gracefully)
@@ -782,7 +782,7 @@ contract TIP403RegistryTest is Test {
         address[] memory accounts = new address[](1);
         accounts[0] = david;
         uint64 policyId =
-            registry.createPolicy(alice, ITIP403Registry.PolicyType.WHITELIST, accounts);
+            registry.createPolicyWithAccounts(alice, ITIP403Registry.PolicyType.WHITELIST, accounts);
 
         // Alice transfers admin to bob
         vm.prank(alice);
