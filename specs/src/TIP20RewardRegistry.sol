@@ -2,8 +2,9 @@
 pragma solidity ^0.8.13;
 
 import { ITIP20 } from "./interfaces/ITIP20.sol";
+import { ITIP20RewardsRegistry } from "./interfaces/ITIP20RewardsRegistry.sol";
 
-contract TIP20RewardsRegistry {
+contract TIP20RewardsRegistry is ITIP20RewardsRegistry {
 
     uint128 public lastUpdatedTimestamp;
     mapping(uint128 => address[]) public streamsEndingAt;
@@ -65,7 +66,7 @@ contract TIP20RewardsRegistry {
             // Finalize streams for each token ending at nextTimestamp
             for (uint256 i = 0; i < tokens.length; i++) {
                 address token = tokens[i];
-                try ITIP20(token).finalizeStreams(nextTimestamp) { } catch { }
+                try ITIP20(token).finalizeStreams(uint64(nextTimestamp)) { } catch { }
 
                 bytes32 streamKey = keccak256(abi.encode(token, nextTimestamp));
                 delete streamIndex[streamKey];

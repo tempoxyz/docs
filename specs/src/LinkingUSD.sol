@@ -2,10 +2,10 @@
 pragma solidity ^0.8.13;
 
 import { TIP20 } from "./TIP20.sol";
+import { ILinkingUSD } from "./interfaces/ILinkingUSD.sol";
+import { ITIP20 } from "./interfaces/ITIP20.sol";
 
-contract LinkingUSD is TIP20 {
-
-    error TransfersDisabled();
+contract LinkingUSD is ILinkingUSD, TIP20 {
 
     address private constant STABLECOIN_DEX = 0xDEc0000000000000000000000000000000000000;
     bytes32 public constant TRANSFER_ROLE = keccak256("TRANSFER_ROLE");
@@ -15,7 +15,7 @@ contract LinkingUSD is TIP20 {
         TIP20("linkingUSD", "linkingUSD", "USD", TIP20(address(0)), admin)
     { }
 
-    function transfer(address to, uint256 amount) public override returns (bool) {
+    function transfer(address to, uint256 amount) public override(ITIP20, TIP20) returns (bool) {
         if (msg.sender == STABLECOIN_DEX || hasRole[msg.sender][TRANSFER_ROLE]) {
             return super.transfer(to, amount);
         } else {
@@ -25,7 +25,7 @@ contract LinkingUSD is TIP20 {
 
     function transferFrom(address from, address to, uint256 amount)
         public
-        override
+        override(ITIP20, TIP20)
         notPaused
         returns (bool)
     {
@@ -36,7 +36,11 @@ contract LinkingUSD is TIP20 {
         }
     }
 
-    function transferWithMemo(address to, uint256 amount, bytes32 memo) public override notPaused {
+    function transferWithMemo(address to, uint256 amount, bytes32 memo)
+        public
+        override(ITIP20, TIP20)
+        notPaused
+    {
         if (
             msg.sender == STABLECOIN_DEX || hasRole[msg.sender][TRANSFER_ROLE]
                 || hasRole[to][RECEIVE_WITH_MEMO_ROLE]
@@ -49,7 +53,7 @@ contract LinkingUSD is TIP20 {
 
     function transferFromWithMemo(address from, address to, uint256 amount, bytes32 memo)
         public
-        override
+        override(ITIP20, TIP20)
         notPaused
         returns (bool)
     {

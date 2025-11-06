@@ -1,17 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-abstract contract TIP20RolesAuth {
+import { ITIP20RolesAuth } from "../interfaces/ITIP20RolesAuth.sol";
 
-    error Unauthorized();
-
-    event RoleMembershipUpdated(
-        bytes32 indexed role, address indexed account, address indexed sender, bool hasRole
-    );
-
-    event RoleAdminUpdated(
-        bytes32 indexed role, bytes32 indexed newAdminRole, address indexed sender
-    );
+abstract contract TIP20RolesAuth is ITIP20RolesAuth {
 
     mapping(address account => mapping(bytes32 role => bool)) public hasRole;
     mapping(bytes32 role => bytes32 adminRole) internal roleAdmin;

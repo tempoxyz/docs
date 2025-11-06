@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "../src/LinkingUSD.sol";
-import "../src/TIP20.sol";
-import "../src/TIP20RolesAuth.sol";
-import "../src/TIP20Factory.sol";
-import "../src/TIP20RewardRegistry.sol";
-import "../src/TIP403Registry.sol";
-import "forge-std/Test.sol";
+import { LinkingUSD } from "../src/LinkingUSD.sol";
+import { TIP20 } from "../src/TIP20.sol";
+import { TIP20Factory } from "../src/TIP20Factory.sol";
+import { TIP20RewardsRegistry } from "../src/TIP20RewardRegistry.sol";
+import { TIP403Registry } from "../src/TIP403Registry.sol";
+import { ITIP20 } from "../src/interfaces/ITIP20.sol";
+import { ITIP20RolesAuth } from "../src/interfaces/ITIP20RolesAuth.sol";
+import { Test } from "forge-std/Test.sol";
 
 contract TIP20Test is Test {
 
@@ -177,7 +178,7 @@ contract TIP20Test is Test {
         token.approve(bob, 200e18);
 
         vm.startPrank(bob);
-        vm.expectRevert(TIP20.InsufficientAllowance.selector);
+        vm.expectRevert(ITIP20.InsufficientAllowance.selector);
         token.transferFromWithMemo(alice, charlie, amount, TEST_MEMO);
         vm.stopPrank();
 
@@ -222,7 +223,7 @@ contract TIP20Test is Test {
         vm.stopPrank();
 
         vm.startPrank(alice);
-        vm.expectRevert(TIP20.ContractPaused.selector);
+        vm.expectRevert(ITIP20.ContractPaused.selector);
         token.transferWithMemo(bob, 100e18, TEST_MEMO);
         vm.stopPrank();
     }
@@ -239,7 +240,7 @@ contract TIP20Test is Test {
         vm.stopPrank();
 
         vm.startPrank(bob);
-        vm.expectRevert(TIP20.ContractPaused.selector);
+        vm.expectRevert(ITIP20.ContractPaused.selector);
         token.transferFromWithMemo(alice, charlie, 100e18, TEST_MEMO);
         vm.stopPrank();
     }
@@ -249,7 +250,7 @@ contract TIP20Test is Test {
         address tokenAddress = address(0x2000000000000000000000000000000000000001);
 
         vm.startPrank(alice);
-        vm.expectRevert(TIP20.InvalidRecipient.selector);
+        vm.expectRevert(ITIP20.InvalidRecipient.selector);
         token.transferWithMemo(tokenAddress, 100e18, TEST_MEMO);
         vm.stopPrank();
     }
@@ -263,7 +264,7 @@ contract TIP20Test is Test {
         address tokenAddress = address(0x2000000000000000000000000000000000000001);
 
         vm.startPrank(bob);
-        vm.expectRevert(TIP20.InvalidRecipient.selector);
+        vm.expectRevert(ITIP20.InvalidRecipient.selector);
         token.transferFromWithMemo(alice, tokenAddress, 100e18, TEST_MEMO);
         vm.stopPrank();
     }
@@ -396,7 +397,7 @@ contract TIP20Test is Test {
         token.setSupplyCap(1600e18);
 
         // Try to mint more than the cap allows
-        vm.expectRevert(TIP20.SupplyCapExceeded.selector);
+        vm.expectRevert(ITIP20.SupplyCapExceeded.selector);
         token.mintWithMemo(charlie, 200e18, TEST_MEMO);
 
         vm.stopPrank();
@@ -406,7 +407,7 @@ contract TIP20Test is Test {
         vm.startPrank(admin);
 
         // Try to burn more than admin has
-        vm.expectRevert(TIP20.InsufficientBalance.selector);
+        vm.expectRevert(ITIP20.InsufficientBalance.selector);
         token.burnWithMemo(100e18, TEST_MEMO);
 
         vm.stopPrank();
@@ -525,7 +526,7 @@ contract TIP20Test is Test {
         vm.startPrank(admin);
 
         // Should revert when trying to set to zero address (not registered in factory)
-        vm.expectRevert(TIP20.InvalidQuoteToken.selector);
+        vm.expectRevert(ITIP20.InvalidQuoteToken.selector);
         token.setNextQuoteToken(TIP20(address(0)));
 
         vm.stopPrank();
@@ -543,7 +544,7 @@ contract TIP20Test is Test {
         token.setNextQuoteToken(token);
 
         // completeQuoteTokenUpdate should detect the loop and revert
-        vm.expectRevert(TIP20.InvalidQuoteToken.selector);
+        vm.expectRevert(ITIP20.InvalidQuoteToken.selector);
         token.completeQuoteTokenUpdate();
 
         vm.stopPrank();
@@ -570,7 +571,7 @@ contract TIP20Test is Test {
         token.setNextQuoteToken(newToken);
 
         // completeQuoteTokenUpdate should detect the loop and revert
-        vm.expectRevert(TIP20.InvalidQuoteToken.selector);
+        vm.expectRevert(ITIP20.InvalidQuoteToken.selector);
         token.completeQuoteTokenUpdate();
 
         vm.stopPrank();
@@ -604,7 +605,7 @@ contract TIP20Test is Test {
         linkedToken.setNextQuoteToken(token3);
 
         // completeQuoteTokenUpdate should detect the loop and revert
-        vm.expectRevert(TIP20.InvalidQuoteToken.selector);
+        vm.expectRevert(ITIP20.InvalidQuoteToken.selector);
         linkedToken.completeQuoteTokenUpdate();
 
         vm.stopPrank();
@@ -683,7 +684,7 @@ contract TIP20Test is Test {
         token.mint(admin, 1000e18);
 
         // Should revert with `NoOptedInSupply` if trying to start a timed reward
-        vm.expectRevert(TIP20.NoOptedInSupply.selector);
+        vm.expectRevert(ITIP20.NoOptedInSupply.selector);
         token.startReward(100e18, 0);
     }
 
@@ -1005,7 +1006,7 @@ contract TIP20Test is Test {
         token.pause();
 
         token.mint(admin, 1000e18);
-        vm.expectRevert(TIP20.ContractPaused.selector);
+        vm.expectRevert(ITIP20.ContractPaused.selector);
         token.startReward(100e18, 0);
 
         vm.stopPrank();
@@ -1028,7 +1029,7 @@ contract TIP20Test is Test {
 
         // Alice tries to claim rewards - should fail because paused
         vm.prank(alice);
-        vm.expectRevert(TIP20.ContractPaused.selector);
+        vm.expectRevert(ITIP20.ContractPaused.selector);
         token.claimRewards();
     }
 
@@ -1041,7 +1042,7 @@ contract TIP20Test is Test {
 
         // Alice tries to set reward recipient
         vm.prank(alice);
-        vm.expectRevert(TIP20.ContractPaused.selector);
+        vm.expectRevert(ITIP20.ContractPaused.selector);
         token.setRewardRecipient(alice);
     }
 
@@ -1242,7 +1243,7 @@ contract TIP20Test is Test {
 
         // Alice tries to cancel it
         vm.prank(alice);
-        vm.expectRevert(TIP20.NotStreamFunder.selector);
+        vm.expectRevert(ITIP20.NotStreamFunder.selector);
         token.cancelReward(streamId);
     }
 
@@ -1258,14 +1259,14 @@ contract TIP20Test is Test {
 
         // Try to cancel - should fail
         vm.prank(admin);
-        vm.expectRevert(TIP20.StreamInactive.selector);
+        vm.expectRevert(ITIP20.StreamInactive.selector);
         token.cancelReward(streamId);
     }
 
     function testCancelStreamInactive() public {
         // Try to cancel a non-existent stream
         vm.prank(admin);
-        vm.expectRevert(TIP20.StreamInactive.selector);
+        vm.expectRevert(ITIP20.StreamInactive.selector);
         token.cancelReward(999);
     }
 
@@ -1340,13 +1341,13 @@ contract TIP20Test is Test {
 
         // Try to call finalizeStreams as non-zero address
         vm.prank(alice);
-        vm.expectRevert(TIP20RolesAuth.Unauthorized.selector);
+        vm.expectRevert(ITIP20RolesAuth.Unauthorized.selector);
         token.finalizeStreams(uint64(block.timestamp));
     }
 
     function testRewardWithZeroAmount() public {
         vm.prank(admin);
-        vm.expectRevert(TIP20.InvalidAmount.selector);
+        vm.expectRevert(ITIP20.InvalidAmount.selector);
         token.startReward(0, 100);
     }
 

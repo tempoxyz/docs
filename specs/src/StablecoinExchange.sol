@@ -151,7 +151,7 @@ contract StablecoinExchange is IStablecoinExchange {
     /// @return key The orderbook key for the created pair
     /// @dev Automatically sets tick bounds to ±2% from the peg price of 1.0
     function createPair(address base) external returns (bytes32 key) {
-        address quote = ITIP20(base).quoteToken();
+        address quote = address(ITIP20(base).quoteToken());
         // Only USD-denominated tokens are supported, and their quotes must also be USD
         require(
             keccak256(bytes(ITIP20(base).currency())) == keccak256(bytes("USD"))
@@ -262,7 +262,7 @@ contract StablecoinExchange is IStablecoinExchange {
         external
         returns (uint128 orderId)
     {
-        address quote = ITIP20(token).quoteToken();
+        address quote = address(ITIP20(token).quoteToken());
         orderId = _placeOrder(token, quote, amount, msg.sender, isBid, tick, false, 0);
     }
 
@@ -277,7 +277,7 @@ contract StablecoinExchange is IStablecoinExchange {
         external
         returns (uint128 orderId)
     {
-        address quote = ITIP20(token).quoteToken();
+        address quote = address(ITIP20(token).quoteToken());
         orderId = _placeOrder(token, quote, amount, msg.sender, isBid, tick, true, flipTick);
         emit FlipOrderPlaced(orderId, msg.sender, token, amount, isBid, tick, flipTick);
     }
@@ -430,7 +430,7 @@ contract StablecoinExchange is IStablecoinExchange {
         view
         returns (uint128 head, uint128 tail, uint128 totalLiquidity)
     {
-        address quote = ITIP20(base).quoteToken();
+        address quote = address(ITIP20(base).quoteToken());
         bytes32 key = pairKey(base, quote);
         Orderbook storage book = books[key];
         TickLevel memory level = isBid ? book.bids[tick] : book.asks[tick];
@@ -914,12 +914,11 @@ contract StablecoinExchange is IStablecoinExchange {
     /// @param baseForQuote True if spending base for quote, false if spending quote for base
     /// @param amountIn Exact amount of input tokens to spend
     /// @return amountOut Amount of output tokens received
-    function _quoteExactIn(
-        bytes32 key,
-        Orderbook storage book,
-        bool baseForQuote,
-        uint128 amountIn
-    ) internal view returns (uint128 amountOut) {
+    function _quoteExactIn(bytes32 key, Orderbook storage book, bool baseForQuote, uint128 amountIn)
+        internal
+        view
+        returns (uint128 amountOut)
+    {
         uint128 remainingIn = amountIn;
 
         if (baseForQuote) {

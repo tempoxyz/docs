@@ -1,21 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-contract TIP403Registry {
+import { ITIP403Registry } from "./interfaces/ITIP403Registry.sol";
 
-    /*//////////////////////////////////////////////////////////////
-                         GENERAL POLICY STORAGE
-    //////////////////////////////////////////////////////////////*/
-
-    enum PolicyType {
-        WHITELIST,
-        BLACKLIST
-    }
-
-    struct PolicyData {
-        PolicyType policyType;
-        address admin;
-    }
+contract TIP403Registry is ITIP403Registry {
 
     uint64 public policyIdCounter = 2; // Skip special policies (documented in isAuthorized).
 
@@ -26,30 +14,6 @@ contract TIP403Registry {
     //////////////////////////////////////////////////////////////*/
 
     mapping(uint64 => mapping(address => bool)) internal policySet;
-
-    /*//////////////////////////////////////////////////////////////
-                                 ERRORS
-    //////////////////////////////////////////////////////////////*/
-
-    error Unauthorized();
-    error IncompatiblePolicyType();
-    error PolicyDoesNotExist();
-    error ArrayLengthMismatch();
-
-    /*//////////////////////////////////////////////////////////////
-                                 EVENTS
-    //////////////////////////////////////////////////////////////*/
-
-    event PolicyAdminUpdated(
-        uint64 indexed policyId, address indexed updater, address indexed admin
-    );
-    event PolicyCreated(uint64 indexed policyId, address indexed updater, PolicyType policyType);
-    event WhitelistUpdated(
-        uint64 indexed policyId, address indexed updater, address indexed account, bool allowed
-    );
-    event BlacklistUpdated(
-        uint64 indexed policyId, address indexed updater, address indexed account, bool restricted
-    );
 
     /*//////////////////////////////////////////////////////////////
                       GENERAL POLICY ADMINISTRATION

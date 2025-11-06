@@ -2,12 +2,12 @@
 pragma solidity ^0.8.13;
 
 import { TIP20Factory } from "./TIP20Factory.sol";
-
 import { TIP20RewardsRegistry } from "./TIP20RewardRegistry.sol";
-import { TIP20RolesAuth } from "./TIP20RolesAuth.sol";
 import { TIP403Registry } from "./TIP403Registry.sol";
+import { TIP20RolesAuth } from "./abstracts/TIP20RolesAuth.sol";
+import { ITIP20 } from "./interfaces/ITIP20.sol";
 
-contract TIP20 is TIP20RolesAuth {
+contract TIP20 is ITIP20, TIP20RolesAuth {
 
     TIP403Registry internal constant TIP403_REGISTRY =
         TIP403Registry(0x403c000000000000000000000000000000000000);
@@ -35,8 +35,8 @@ contract TIP20 is TIP20RolesAuth {
                              ADMINISTRATION
     //////////////////////////////////////////////////////////////*/
 
-    TIP20 public quoteToken;
-    TIP20 public nextQuoteToken;
+    ITIP20 public override quoteToken;
+    ITIP20 public override nextQuoteToken;
 
     bytes32 public constant PAUSE_ROLE = keccak256("PAUSE_ROLE");
     bytes32 public constant UNPAUSE_ROLE = keccak256("UNPAUSE_ROLE");
@@ -49,7 +49,7 @@ contract TIP20 is TIP20RolesAuth {
         string memory _name,
         string memory _symbol,
         string memory _currency,
-        TIP20 _quoteToken,
+        ITIP20 _quoteToken,
         address admin
     ) {
         name = _name;
@@ -108,48 +108,7 @@ contract TIP20 is TIP20RolesAuth {
     mapping(address => UserRewardInfo) public userRewardInfo;
 
     /*//////////////////////////////////////////////////////////////
-                                 ERRORS
-    //////////////////////////////////////////////////////////////*/
-
-    error PolicyForbids();
-    error InvalidRecipient();
-    error InsufficientBalance();
-    error InsufficientAllowance();
-    error SupplyCapExceeded();
-    error ContractPaused();
-    error InvalidCurrency();
-    error InvalidQuoteToken();
-    error InvalidAmount();
-    error NotStreamFunder();
-    error StreamInactive();
-    error NoOptedInSupply();
-    error InvalidSupplyCap();
-
-    /*//////////////////////////////////////////////////////////////
-                                 EVENTS
-    //////////////////////////////////////////////////////////////*/
-
-    event TransferPolicyUpdate(address indexed updater, uint64 indexed newPolicyId);
-    event Mint(address indexed to, uint256 amount);
-    event Burn(address indexed from, uint256 amount);
-    event BurnBlocked(address indexed from, uint256 amount);
-    event Transfer(address indexed from, address indexed to, uint256 amount);
-    event TransferWithMemo(
-        address indexed from, address indexed to, uint256 amount, bytes32 indexed memo
-    );
-    event Approval(address indexed owner, address indexed spender, uint256 amount);
-    event SupplyCapUpdate(address indexed updater, uint256 indexed newSupplyCap);
-    event PauseStateUpdate(address indexed updater, bool isPaused);
-    event NextQuoteTokenSet(address indexed updater, TIP20 indexed nextQuoteToken);
-    event QuoteTokenUpdate(address indexed updater, TIP20 indexed newQuoteToken);
-    event RewardScheduled(
-        address indexed funder, uint64 indexed id, uint256 amount, uint32 durationSeconds
-    );
-    event RewardCanceled(address indexed funder, uint64 indexed id, uint256 refund);
-    event RewardRecipientSet(address indexed holder, address indexed recipient);
-
-    /*//////////////////////////////////////////////////////////////
-                          POLICY ADMINISTRATION
+                              POLICY ADMINISTRATION
     //////////////////////////////////////////////////////////////*/
 
     function changeTransferPolicyId(uint64 newPolicyId) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -160,7 +119,7 @@ contract TIP20 is TIP20RolesAuth {
                           TOKEN ADMINISTRATION
     //////////////////////////////////////////////////////////////*/
 
-    function setNextQuoteToken(TIP20 newQuoteToken) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setNextQuoteToken(ITIP20 newQuoteToken) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // sets next quote token, to put the DEX for that pair into place-only mode
         // does not check for loops; that is checked in completeQuoteTokenUpdate
         if (!TIP20Factory(FACTORY).isTIP20(address(newQuoteToken))) {
@@ -180,7 +139,7 @@ contract TIP20 is TIP20RolesAuth {
 
     function completeQuoteTokenUpdate() external onlyRole(DEFAULT_ADMIN_ROLE) {
         // check that this does not create a loop, by looping through quote token until we reach the root
-        TIP20 current = nextQuoteToken;
+        ITIP20 current = nextQuoteToken;
         while (address(current) != 0x20C0000000000000000000000000000000000000) {
             if (current == this) revert InvalidQuoteToken();
             current = current.quoteToken();
@@ -675,4 +634,4 @@ contract TIP20 is TIP20RolesAuth {
         return (s.funder, s.startTime, s.endTime, s.ratePerSecondScaled, s.amountTotal);
     }
 
-}
+    }

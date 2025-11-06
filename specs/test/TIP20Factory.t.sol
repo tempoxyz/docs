@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "../src/LinkingUSD.sol";
-import "../src/TIP20Factory.sol";
-import "../src/TIP403Registry.sol";
-import "forge-std/Test.sol";
+import { LinkingUSD } from "../src/LinkingUSD.sol";
+import { TIP20Factory } from "../src/TIP20Factory.sol";
+import { TIP403Registry } from "../src/TIP403Registry.sol";
+import { ITIP20 } from "../src/interfaces/ITIP20.sol";
+import { ITIP20Factory } from "../src/interfaces/ITIP20Factory.sol";
+import { Test } from "forge-std/Test.sol";
 
 contract TIP20FactoryTest is Test {
 
@@ -15,7 +17,6 @@ contract TIP20FactoryTest is Test {
     function setUp() public {
         // Deploy mock registries at their precompile addresses
         vm.etch(0x403c000000000000000000000000000000000000, type(TIP403Registry).runtimeCode);
-        
 
         // Deploy factory at the constant address
         factory = new TIP20Factory();
@@ -28,17 +29,19 @@ contract TIP20FactoryTest is Test {
         );
 
         // Deploy LinkingUSD at the root TIP20 address with proper constructor storage
-        deployCodeTo("LinkingUSD.sol", abi.encode(admin), 0x20C0000000000000000000000000000000000000);
+        deployCodeTo(
+            "LinkingUSD.sol", abi.encode(admin), 0x20C0000000000000000000000000000000000000
+        );
         quoteToken = LinkingUSD(0x20C0000000000000000000000000000000000000);
     }
 
     function testCreateTokenWithValidQuoteToken() public {
         // Create token with LinkingUSD as the quote token
         address tokenAddr = factory.createToken(
-            "Test Token", "TEST", "USD", TIP20(0x20C0000000000000000000000000000000000000), admin
+            "Test Token", "TEST", "USD", ITIP20(0x20C0000000000000000000000000000000000000), admin
         );
 
-        TIP20 token = TIP20(tokenAddr);
+        ITIP20 token = ITIP20(tokenAddr);
         assertEq(token.name(), "Test Token");
         assertEq(token.symbol(), "TEST");
         assertEq(address(token.quoteToken()), 0x20C0000000000000000000000000000000000000);
@@ -46,20 +49,20 @@ contract TIP20FactoryTest is Test {
 
     function testCreateTokenWithInvalidQuoteTokenReverts() public {
         // Try to create token with non-TIP20 address as quote token
-        vm.expectRevert(TIP20Factory.InvalidQuoteToken.selector);
+        vm.expectRevert(ITIP20Factory.InvalidQuoteToken.selector);
         factory.createToken(
             "Test Token",
             "TEST",
             "USD",
-            TIP20(address(0x1234)), // Invalid address
+            ITIP20(address(0x1234)), // Invalid address
             admin
         );
     }
 
     function testCreateTokenWithZeroAddressReverts() public {
         // Try to create token with zero address as quote token
-        vm.expectRevert(TIP20Factory.InvalidQuoteToken.selector);
-        factory.createToken("Test Token", "TEST", "USD", TIP20(address(0)), admin);
+        vm.expectRevert(ITIP20Factory.InvalidQuoteToken.selector);
+        factory.createToken("Test Token", "TEST", "USD", ITIP20(address(0)), admin);
     }
 
     function testIsTIP20Function() public {
@@ -74,12 +77,12 @@ contract TIP20FactoryTest is Test {
         assertEq(factory.tokenIdCounter(), 1);
 
         factory.createToken(
-            "Token 1", "TK1", "USD", TIP20(0x20C0000000000000000000000000000000000000), admin
+            "Token 1", "TK1", "USD", ITIP20(0x20C0000000000000000000000000000000000000), admin
         );
         assertEq(factory.tokenIdCounter(), 2);
 
         factory.createToken(
-            "Token 2", "TK2", "USD", TIP20(0x20C0000000000000000000000000000000000000), admin
+            "Token 2", "TK2", "USD", ITIP20(0x20C0000000000000000000000000000000000000), admin
         );
         assertEq(factory.tokenIdCounter(), 3);
     }

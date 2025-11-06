@@ -5,13 +5,16 @@ pragma solidity ^0.8.13;
 /// @notice Registry contract for all TIP20 reward streams
 interface ITIP20RewardsRegistry {
 
-    /// Finalize streams for all tokens ending at the current timestamp
-    function finalizeStreams() external;
-
-    /// Add a token to the registry for a given stream end time
-    function addStream(address token, uint128 endTime) external;
-
     error Unauthorized();
     error StreamsAlreadyFinalized();
+
+    /// @notice Add a token to the registry for a given stream end time
+    function addStream(uint128 endTime) external;
+
+    /// @notice Remove a stream before it ends (for cancellation)
+    function removeStream(uint128 endTime) external;
+
+    /// @notice Finalize streams for all tokens ending at the current timestamp
+    function finalizeStreams() external;
 
 }

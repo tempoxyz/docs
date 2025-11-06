@@ -2,12 +2,12 @@
 pragma solidity ^0.8.13;
 
 import { FeeAMM } from "./FeeAMM.sol";
-import { IERC20 } from "./IERC20.sol";
-
 import { TIP20Factory } from "./TIP20Factory.sol";
+import { IERC20 } from "./interfaces/IERC20.sol";
+import { IFeeManager } from "./interfaces/IFeeManager.sol";
 import { ITIP20 } from "./interfaces/ITIP20.sol";
 
-contract FeeManager is FeeAMM {
+contract FeeManager is IFeeManager, FeeAMM {
 
     address internal constant LINKING_USD = 0x20C0000000000000000000000000000000000000;
 
@@ -23,9 +23,6 @@ contract FeeManager is FeeAMM {
     // Track tokens that have collected fees
     address[] private tokensWithFees;
     mapping(address => bool) private tokenInFeesArray;
-
-    event ValidatorTokenSet(address indexed validator, address indexed token);
-    event UserTokenSet(address indexed user, address indexed token);
 
     constructor() FeeAMM() { }
 

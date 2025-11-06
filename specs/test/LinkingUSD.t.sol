@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "../src/LinkingUSD.sol";
-import "../src/TIP20.sol";
-import "../src/TIP20Factory.sol";
-import "../src/TIP403Registry.sol";
-import "forge-std/Test.sol";
+import { LinkingUSD } from "../src/LinkingUSD.sol";
+import { TIP20 } from "../src/TIP20.sol";
+import { TIP20Factory } from "../src/TIP20Factory.sol";
+import { TIP403Registry } from "../src/TIP403Registry.sol";
+import { ILinkingUSD } from "../src/interfaces/ILinkingUSD.sol";
+import { ITIP20 } from "../src/interfaces/ITIP20.sol";
+import { Test } from "forge-std/Test.sol";
 
 contract LinkingUSDTest is Test {
 
@@ -18,7 +20,6 @@ contract LinkingUSDTest is Test {
 
     function setUp() public {
         vm.etch(0x403c000000000000000000000000000000000000, type(TIP403Registry).runtimeCode);
-        
 
         quoteToken = new LinkingUSD(admin);
         vm.startPrank(admin);
@@ -36,7 +37,7 @@ contract LinkingUSDTest is Test {
     function test_Transfer_RevertIf_NoRoleAndNotStableDex(address sender, uint256 amount) public {
         vm.assume(sender != STABLECOIN_DEX);
         vm.startPrank(sender);
-        vm.expectRevert(LinkingUSD.TransfersDisabled.selector);
+        vm.expectRevert(ILinkingUSD.TransfersDisabled.selector);
         quoteToken.transfer(bob, amount);
         vm.stopPrank();
     }
@@ -46,7 +47,7 @@ contract LinkingUSDTest is Test {
     {
         vm.assume(sender != STABLECOIN_DEX);
         vm.startPrank(sender);
-        vm.expectRevert(LinkingUSD.TransfersDisabled.selector);
+        vm.expectRevert(ILinkingUSD.TransfersDisabled.selector);
         quoteToken.transferFrom(alice, bob, amount);
         vm.stopPrank();
     }
@@ -54,7 +55,7 @@ contract LinkingUSDTest is Test {
     function test_TransferWithMemo_RevertIf_NoRoleAndNotStableDex(address sender) public {
         vm.assume(sender != STABLECOIN_DEX);
         vm.startPrank(sender);
-        vm.expectRevert(LinkingUSD.TransfersDisabled.selector);
+        vm.expectRevert(ILinkingUSD.TransfersDisabled.selector);
         quoteToken.transferWithMemo(bob, 100, bytes32(0));
         vm.stopPrank();
     }
@@ -62,7 +63,7 @@ contract LinkingUSDTest is Test {
     function test_TransferFromWithMemo_RevertIf_NoRoleAndNotStableDex(address sender) public {
         vm.assume(sender != STABLECOIN_DEX);
         vm.prank(sender);
-        vm.expectRevert(LinkingUSD.TransfersDisabled.selector);
+        vm.expectRevert(ILinkingUSD.TransfersDisabled.selector);
         quoteToken.transferFromWithMemo(alice, bob, 100, bytes32(0));
     }
 
@@ -89,7 +90,7 @@ contract LinkingUSDTest is Test {
         assertEq(quoteToken.balanceOf(admin), balanceBefore + amount);
 
         vm.expectEmit(true, true, true, true);
-        emit TIP20.Burn(admin, amount);
+        emit ITIP20.Burn(admin, amount);
         quoteToken.burn(amount);
         vm.stopPrank();
 
@@ -147,7 +148,7 @@ contract LinkingUSDTest is Test {
 
     function test_TransferFrom_RevertIf_InsufficientAllowance() public {
         vm.startPrank(STABLECOIN_DEX);
-        vm.expectRevert(TIP20.InsufficientAllowance.selector);
+        vm.expectRevert(ITIP20.InsufficientAllowance.selector);
         quoteToken.transferFrom(alice, bob, 100);
         vm.stopPrank();
     }
@@ -157,7 +158,7 @@ contract LinkingUSDTest is Test {
         quoteToken.mint(STABLECOIN_DEX, 50);
 
         vm.startPrank(STABLECOIN_DEX);
-        vm.expectRevert(TIP20.InsufficientBalance.selector);
+        vm.expectRevert(ITIP20.InsufficientBalance.selector);
         quoteToken.transfer(bob, 100);
         vm.stopPrank();
     }
@@ -191,7 +192,7 @@ contract LinkingUSDTest is Test {
         vm.stopPrank();
 
         vm.startPrank(alice);
-        vm.expectRevert(LinkingUSD.TransfersDisabled.selector);
+        vm.expectRevert(ILinkingUSD.TransfersDisabled.selector);
         quoteToken.transfer(bob, amount);
         vm.stopPrank();
     }
@@ -288,7 +289,7 @@ contract LinkingUSDTest is Test {
         quoteToken.approve(alice, amount);
 
         vm.startPrank(alice);
-        vm.expectRevert(LinkingUSD.TransfersDisabled.selector);
+        vm.expectRevert(ILinkingUSD.TransfersDisabled.selector);
         quoteToken.transferFrom(alice, bob, amount);
         vm.stopPrank();
     }

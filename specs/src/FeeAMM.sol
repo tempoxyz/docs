@@ -1,24 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import { IERC20 } from "./IERC20.sol";
+import { IERC20 } from "./interfaces/IERC20.sol";
+import { IFeeAMM } from "./interfaces/IFeeAMM.sol";
 import { ITIP20 } from "./interfaces/ITIP20.sol";
 
-contract FeeAMM {
-
-    // Each pool is directional: userToken -> validatorToken
-    // For a pair of tokens A and B, there are two separate pools:
-    // - Pool(A, B): for swapping A to B at fixed rate of 0.997 (fee swaps) and B to A at fixed rate of 0.9985 (rebalancing)
-    // - Pool(B, A): for swapping B to A at fixed rate of 0.997 (fee swaps) and A to B at fixed rate of 0.9985 (rebalancing)
-    struct Pool {
-        uint128 reserveUserToken;
-        uint128 reserveValidatorToken;
-    }
-
-    struct PoolKey {
-        address userToken;
-        address validatorToken;
-    }
+contract FeeAMM is IFeeAMM {
 
     uint256 public constant M = 9970; // m = 0.9970 (scaled by 10000)
     uint256 public constant N = 9985;
@@ -29,37 +16,6 @@ contract FeeAMM {
     mapping(bytes32 => uint128) internal pendingFeeSwapIn; // Amount of userToken to be added from fee swaps
     mapping(bytes32 => uint256) public totalSupply; // Total LP tokens for each pool
     mapping(bytes32 => mapping(address => uint256)) public liquidityBalances; // LP token balances
-
-    event RebalanceSwap(
-        address indexed userToken,
-        address indexed validatorToken,
-        address indexed swapper,
-        uint256 amountIn,
-        uint256 amountOut
-    );
-    event FeeSwap(
-        address indexed userToken,
-        address indexed validatorToken,
-        uint256 amountIn,
-        uint256 amountOut
-    );
-    event Mint(
-        address indexed sender,
-        address indexed userToken,
-        address indexed validatorToken,
-        uint256 amountUserToken,
-        uint256 amountValidatorToken,
-        uint256 liquidity
-    );
-    event Burn(
-        address indexed sender,
-        address indexed userToken,
-        address indexed validatorToken,
-        uint256 amountUserToken,
-        uint256 amountValidatorToken,
-        uint256 liquidity,
-        address to
-    );
 
     constructor() { }
 
@@ -115,12 +71,10 @@ contract FeeAMM {
         amountOut = (amountIn * M) / SCALE;
     }
 
-    function rebalanceSwap(
-        address userToken,
-        address validatorToken,
-        uint256 amountOut,
-        address to
-    ) external returns (uint256 amountIn) {
+    function rebalanceSwap(address userToken, address validatorToken, uint256 amountOut, address to)
+        external
+        returns (uint256 amountIn)
+    {
         bytes32 poolId = getPoolId(userToken, validatorToken);
 
         // Rebalancing swaps are always from validatorToken to userToken

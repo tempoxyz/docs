@@ -2,20 +2,10 @@
 pragma solidity ^0.8.13;
 
 import { TIP20 } from "./TIP20.sol";
+import { ITIP20 } from "./interfaces/ITIP20.sol";
+import { ITIP20Factory } from "./interfaces/ITIP20Factory.sol";
 
-contract TIP20Factory {
-
-    error InvalidQuoteToken();
-
-    event TokenCreated(
-        address indexed token,
-        uint256 indexed tokenId,
-        string name,
-        string symbol,
-        string currency,
-        TIP20 quoteToken,
-        address admin
-    );
+contract TIP20Factory is ITIP20Factory {
 
     uint256 public tokenIdCounter = 1;
 
@@ -23,7 +13,7 @@ contract TIP20Factory {
         string memory name,
         string memory symbol,
         string memory currency,
-        TIP20 quoteToken,
+        ITIP20 quoteToken,
         address admin
     ) external returns (address) {
         // Validate that quoteToken is a valid TIP20

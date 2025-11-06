@@ -138,11 +138,14 @@ The registry maintains a global index of all pending stream end times across all
 interface TIP20RewardsRegistry {
     /// @notice Register a timestamp for stream finalization
     /// @dev Called by TIP20 tokens when the first stream ending at `timestamp` is created
-    function addStream(uint64 timestamp) external;
+    function addStream(uint128 timestamp) external;
 
     /// @notice Unregister a timestamp for stream finalization
     /// @dev Called by TIP20 tokens when the last stream ending at `timestamp` is canceled
-    function removeStream(uint64 timestamp) external;
+    function removeStream(uint128 timestamp) external;
+
+    /// @notice Finalize streams for all tokens ending from `lastUpdatedTimestamp` to current timestamp
+    function finalizeStreams() external;
 }
 ```
 

@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "../src/LinkingUSD.sol";
-import "../src/StablecoinExchange.sol";
-import "../src/TIP20.sol";
-import "../src/TIP20Factory.sol";
-import "../src/TIP403Registry.sol";
-import "./MockTIP20.sol";
-import "forge-std/Test.sol";
+import { LinkingUSD } from "../src/LinkingUSD.sol";
+import { StablecoinExchange } from "../src/StablecoinExchange.sol";
+import { TIP20 } from "../src/TIP20.sol";
+import { TIP20Factory } from "../src/TIP20Factory.sol";
+import { TIP403Registry } from "../src/TIP403Registry.sol";
+import { MockTIP20 } from "./mocks/MockTIP20.sol";
+import { Test } from "forge-std/Test.sol";
 
 contract StablecoinExchangeTest is Test {
 

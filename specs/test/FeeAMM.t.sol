@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "../src/FeeAMM.sol";
-import "forge-std/Test.sol";
+import { FeeAMM } from "../src/FeeAMM.sol";
+import { Test } from "forge-std/Test.sol";
 
 contract MockTIP20WithSystem {
 

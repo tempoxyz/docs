@@ -17,14 +17,20 @@ interface ITIP20 {
     /// @notice Error when the spender has insufficient allowance for the requested transfer
     error InsufficientAllowance();
 
-    /// @notice Error when a signature verification fails
-    error InvalidSignature();
-
     /// @notice Error when attempting an operation while the contract is paused
     error ContractPaused();
 
     /// @notice Error when an invalid currency identifier is provided
     error InvalidCurrency();
+
+    // TODO: document these errors
+    error InvalidQuoteToken();
+    error InvalidAmount();
+    error NotStreamFunder();
+    error StreamInactive();
+    error NoOptedInSupply();
+    error InvalidSupplyCap();
+    error SupplyCapExceeded();
 
     /// @notice Emitted when the transfer policy is updated
     /// @param updater The address that initiated the policy update
@@ -77,6 +83,15 @@ interface ITIP20 {
     /// @param isPaused The new pause state of the contract
     event PauseStateUpdate(address indexed updater, bool isPaused);
 
+    // TODO: document these events
+    event NextQuoteTokenSet(address indexed updater, ITIP20 indexed nextQuoteToken);
+    event QuoteTokenUpdate(address indexed updater, ITIP20 indexed newQuoteToken);
+    event RewardScheduled(
+        address indexed funder, uint64 indexed id, uint256 amount, uint32 durationSeconds
+    );
+    event RewardCanceled(address indexed funder, uint64 indexed id, uint256 refund);
+    event RewardRecipientSet(address indexed holder, address indexed recipient);
+
     /// @notice Returns the name of the token
     /// @return The name of the token
     function name() external view returns (string memory);
@@ -92,6 +107,13 @@ interface ITIP20 {
     /// @notice Returns the number of decimals used by the token
     /// @return The number of decimals
     function decimals() external view returns (uint8);
+
+    /// @notice Returns the quote token specified for the TIP20 token
+    /// @return Address of the quote token
+    function quoteToken() external view returns (ITIP20);
+
+    // TODO: docs
+    function nextQuoteToken() external view returns (ITIP20);
 
     /// @notice Returns the role identifier for pausing the contract
     /// @return The pause role identifier
@@ -135,16 +157,6 @@ interface ITIP20 {
     /// @notice Returns the maximum supply cap for the token
     /// @return The supply cap amount
     function supplyCap() external view returns (uint256);
-
-    /// @notice Returns the quote token specified for the TIP20 token
-    /// @return Address of the quote token
-    function quoteToken() external view returns (address);
-
-    /// @notice Returns whether a salt has been used for a specific account
-    /// @param account The address to check
-    /// @param salt The salt value to check
-    /// @return True if the salt has been used, false otherwise
-    function salts(address account, bytes4 salt) external view returns (bool);
 
     /// @notice Changes the transfer policy identifier
     /// @param newPolicyId The new policy identifier to set
@@ -225,6 +237,6 @@ interface ITIP20 {
 
     /// @notice Finalizes all TIP20 reward streams ending at `endTime`
     /// @param endTime Timestamp used to specify which reward streams to finalize
-    function finalizeStreams(uint128 endTime) external;
+    function finalizeStreams(uint64 endTime) external;
 
 }
