@@ -1,3 +1,10 @@
+import LucideArrowLeftRight from '~icons/lucide/arrow-left-right'
+import LucideBanknoteArrowUp from '~icons/lucide/banknote-arrow-up'
+import LucideBolt from '~icons/lucide/bolt'
+import LucideRocket from '~icons/lucide/rocket'
+import LucideUsersRound from '~icons/lucide/users-round'
+import * as Card from "../../../components/Card.tsx"
+
 # Tokens
 
 ## What are TIP-20 Tokens?
@@ -31,12 +38,37 @@ Every TIP-20 token includes:
 
 ## Getting Started
 
-| Task | Description |
-|------|-------------|
-| **[Create a Token](/documentation/tokens/creating-tokens)** | Create a new TIP-20 token using the factory contract |
-| **[linkingUSD](/documentation/tokens/linkingUSD)** | Learn about the root quote token for USD stablecoins |
-| **[Set Up Roles](/documentation/tokens/roles)** | Configure who can mint, burn, and manage your token |
-| **[Manage Supply](/documentation/tokens/controlling-supply)** | Mint new tokens and burn existing ones |
-| **[Configure Policies](/documentation/tokens/transfer-policies)** | Control who can transfer your tokens |
+<Card.Container>
+  <Card.Link
+    description="Create a new TIP-20 token using the factory contract"
+    href="/documentation/tokens/creating-tokens"
+    icon={LucideRocket}
+    title="Create a Token"
+  />
+  <Card.Link
+    description="Learn about the root quote token for USD stablecoins"
+    href="/documentation/tokens/linkingUSD"
+    icon={LucideBolt}
+    title="linkingUSD"
+  />
+  <Card.Link
+    description="Configure who can mint, burn, and manage your token"
+    href="/documentation/tokens/roles"
+    icon={LucideUsersRound}
+    title="Set Up Roles"
+  />
+  <Card.Link
+    description="Mint new tokens and burn existing ones"
+    href="/documentation/tokens/controlling-supply"
+    icon={LucideBanknoteArrowUp}
+    title="Manage Supply"
+  />
+  <Card.Link
+    description="Control who can transfer your tokens"
+    href="/documentation/tokens/transfer-policies"
+    icon={LucideArrowLeftRight}
+    title="Configure Policies"
+  />
+</Card.Container>
 
 For complete technical specifications, see the [Protocol Reference](/protocol/tokens).
