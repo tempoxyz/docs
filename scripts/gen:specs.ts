@@ -46,6 +46,6 @@ config = config.replace(
 
 fs.writeFileSync(configPath, config, 'utf-8')
 
-child_process.spawnSync('pnpm', ['check'])
+child_process.spawnSync('bun', ['run', 'check'])
 
 console.log(`✓ Generated ${items.length} spec items in \`vocs.config.tsx\``)

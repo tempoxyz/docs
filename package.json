@@ -38,21 +38,7 @@
     "unplugin-auto-import": "^20.2.0",
     "unplugin-icons": "^22.5.0"
   },
-  "packageManager": "pnpm@10.20.0",
-  "devEngines": {
-    "runtime": {
-      "name": "node",
-      "version": "^24.10.0",
-      "onFail": "download"
-    }
-  },
-  "pnpm": {
-    "minimumReleaseAge": 1440,
-    "onlyBuiltDependencies": [
-      "tempo.ts"
-    ]
-  },
   "simple-git-hooks": {
-    "pre-commit": "pnpm check && (git diff --cached --name-only | grep -q '^specs/' && pnpm gen:specs || true)"
+    "pre-commit": "bun run check && (git diff --cached --name-only | grep -q '^specs/' && bun run gen:specs || true)"
   }
 }

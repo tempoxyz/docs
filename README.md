@@ -22,12 +22,12 @@ This repository contains documentation for the Tempo blockchain, including the P
 ## Development
 
 ```sh
-# Install pnpm
-curl -fsSL https://get.pnpm.io/install.sh | sh -
+# Install bun
+curl -fsSL https://bun.sh/install | bash
 
 # Install dependencies
-pnpm install
+bun install
 
 # Start docs on a development server
-pnpm dev
+bun run dev
 ```
