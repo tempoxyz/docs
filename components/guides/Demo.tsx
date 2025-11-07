@@ -328,13 +328,15 @@ export function CreateToken(props: { stepNumber: number }) {
                 'bg-gray2 rounded-[10px] scrollbar-width-thin scrollbar-gray9 overflow-auto max-h-[169px] min-h-[169px]',
                 !create.data &&
                   'flex items-center justify-center text-gray9 font-[510] text-[13px] -tracking-[2%] text-center',
-                create.data &&
+                (create.data || create.error) &&
                   'text-[12px] font-mono whitespace-pre-wrap leading-[16px] p-3 -tracking-[2%] font-[500] text-black dark:text-white',
               )}
             >
               {create.data
                 ? stringify(create.data, null, 2)
-                : 'RPC response will display here...'}
+                : create.error
+                  ? stringify(create.error, null, 2)
+                  : 'RPC response will display here...'}
             </div>
             {create.data && (
               <button
