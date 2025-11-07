@@ -599,10 +599,6 @@ export default defineConfig({
                   { text: 'mint', link: '/sdk/typescript/viem/token.mint' },
                   { text: 'pause', link: '/sdk/typescript/viem/token.pause' },
                   {
-                    text: 'permit',
-                    link: '/sdk/typescript/viem/token.permit',
-                  },
-                  {
                     text: 'renounceRoles',
                     link: '/sdk/typescript/viem/token.renounceRoles',
                   },
@@ -655,16 +651,6 @@ export default defineConfig({
                     link: '/sdk/typescript/viem/token.watchTransfer',
                   },
                 ],
-              },
-            ],
-          },
-          {
-            text: 'Clients',
-            collapsed: true,
-            items: [
-              {
-                text: 'createTempoClient',
-                link: '/sdk/typescript/viem/createTempoClient',
               },
             ],
           },
@@ -935,10 +921,6 @@ export default defineConfig({
                   {
                     text: 'pause 🚧',
                     link: '/sdk/typescript/wagmi/actions/token.pause',
-                  },
-                  {
-                    text: 'permit 🚧',
-                    link: '/sdk/typescript/wagmi/actions/token.permit',
                   },
                   {
                     text: 'renounceRoles 🚧',
@@ -1326,8 +1308,8 @@ export default defineConfig({
         name: 'tempo-node',
         async configureServer(_server) {
           if (
-            'VITE_LOCAL' in process.env &&
-            process.env['VITE_LOCAL'] !== 'true'
+            !('VITE_LOCAL' in process.env) ||
+            process.env['VITE_LOCAL'] === 'false'
           )
             return
           const instance = Instance.tempo({

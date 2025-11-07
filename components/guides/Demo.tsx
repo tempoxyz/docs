@@ -29,6 +29,8 @@ import LucideRotateCcw from '~icons/lucide/rotate-ccw'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
 import { cva, cx } from '../../cva.config'
 
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
 export function Connect(props: { stepNumber?: number | undefined }) {
   const { stepNumber = 1 } = props
   const { address } = useAccount()
@@ -121,6 +123,7 @@ export function AddFunds(props: { stepNumber?: number | undefined }) {
   const { address } = useAccount()
   const { data: balance, refetch: balanceRefetch } = Hooks.token.useGetBalance({
     account: address,
+    token: alphaUsd,
   })
   const { data: blockNumber } = useBlockNumber({
     query: {
@@ -150,6 +153,7 @@ export function AddFunds(props: { stepNumber?: number | undefined }) {
           ),
           amount: parseUnits('10000', 6),
           to: address,
+          token: alphaUsd,
         })
       await new Promise((resolve) => setTimeout(resolve, 400))
       balanceRefetch()
@@ -193,6 +197,7 @@ export function CreateToken(props: { stepNumber: number }) {
   const { address } = useAccount()
   const { data: balance, refetch: balanceRefetch } = Hooks.token.useGetBalance({
     account: address,
+    token: alphaUsd,
   })
   const [expanded, setExpanded] = React.useState(false)
   const create = Hooks.token.useCreateSync({
@@ -360,7 +365,7 @@ export function Container(
   const { children, name } = props
   const { address } = useAccount()
   const { data: balance, isPending: balanceIsPending } =
-    Hooks.token.useGetBalance({ account: address })
+    Hooks.token.useGetBalance({ account: address, token: alphaUsd })
   const disconnect = useDisconnect()
   const restart = React.useCallback(() => {
     disconnect.disconnect()

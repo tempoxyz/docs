@@ -36,8 +36,8 @@ importers:
         specifier: ^4.1.14
         version: 4.1.16
       tempo.ts:
-        specifier: https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@e00be5c
-        version: https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@e00be5c(@tanstack/query-core@5.90.6)(@tanstack/react-query@5.90.6(react@19.2.0))(@wagmi/core@2.22.1(@tanstack/query-core@5.90.6)(@types/react@19.2.0)(react@19.2.0)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.0))(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)))(prool@0.0.25)(typescript@5.9.3)(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.2(@tanstack/query-core@5.90.6)(@tanstack/react-query@5.90.6(react@19.2.0))(@types/react@19.2.0)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.2.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76))(zod@3.25.76)
+        specifier: ~0.2.0
+        version: 0.2.0(@tanstack/query-core@5.90.6)(@tanstack/react-query@5.90.6(react@19.2.0))(@wagmi/core@2.22.1(@tanstack/query-core@5.90.6)(@types/react@19.2.0)(react@19.2.0)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.0))(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)))(prool@0.0.25)(typescript@5.9.3)(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.2(@tanstack/query-core@5.90.6)(@tanstack/react-query@5.90.6(react@19.2.0))(@types/react@19.2.0)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.2.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76))(zod@3.25.76)
       viem:
         specifier: ^2.38.5
         version: 2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
@@ -5020,9 +5020,8 @@ packages:
     resolution: {integrity: sha512-hctwP0Nb4AB60bj8WQgRYaMOuJYRAPMGiQUAotms5igN8ppfQM+IvjQ5HcKu1MaZh2Wy2KWVTe563Yj8dfc14w==}
     engines: {node: '>=18'}
 
-  tempo.ts@https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@e00be5c:
-    resolution: {tarball: https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@e00be5c}
-    version: 0.1.5
+  tempo.ts@0.2.0:
+    resolution: {integrity: sha512-pXeAEx8S8zA51y9o7pqKc6y6bMAnsbUA3BMn3XSIQwYG1lZrSH4AqNBIAwosMgDHKZ3YaBFEAZ+nHpEWdjjM6A==}
     peerDependencies:
       '@tanstack/query-core': '>=5.0.0'
       '@tanstack/react-query': '>=5.0.0'
@@ -12188,7 +12187,7 @@ snapshots:
       mkdirp: 3.0.1
       yallist: 5.0.0
 
-  tempo.ts@https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@e00be5c(@tanstack/query-core@5.90.6)(@tanstack/react-query@5.90.6(react@19.2.0))(@wagmi/core@2.22.1(@tanstack/query-core@5.90.6)(@types/react@19.2.0)(react@19.2.0)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.0))(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)))(prool@0.0.25)(typescript@5.9.3)(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.2(@tanstack/query-core@5.90.6)(@tanstack/react-query@5.90.6(react@19.2.0))(@types/react@19.2.0)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.2.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76))(zod@3.25.76):
+  tempo.ts@0.2.0(@tanstack/query-core@5.90.6)(@tanstack/react-query@5.90.6(react@19.2.0))(@wagmi/core@2.22.1(@tanstack/query-core@5.90.6)(@types/react@19.2.0)(react@19.2.0)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.0))(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)))(prool@0.0.25)(typescript@5.9.3)(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.2(@tanstack/query-core@5.90.6)(@tanstack/react-query@5.90.6(react@19.2.0))(@types/react@19.2.0)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.2.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76))(zod@3.25.76):
     dependencies:
       ox: 0.9.9(typescript@5.9.3)(zod@3.25.76)
     optionalDependencies:

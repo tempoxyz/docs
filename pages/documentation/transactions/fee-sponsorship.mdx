@@ -29,9 +29,9 @@ Check out the [specification of the Tempo transaction type](/protocol/transactio
 The simplest approach is to specify a `feePayer` account directly when sending a transaction. This is useful when you have access to both the sender's and fee payer's private keys locally.
 
 ```ts [customFeePayer.ts]
-import { http, publicActions, walletActions } from 'viem'
+import { createClient, http, publicActions, walletActions } from 'viem'
 import { privateKeyToAccount, mnemonicToAccount } from 'viem/accounts'
-import { createTempoClient } from 'viem/tempo'
+import { tempo } from 'tempo.ts/chains'
 
 // Unfunded account that will send the transaction
 const sender = privateKeyToAccount(
@@ -43,8 +43,9 @@ const feePayer = mnemonicToAccount(
   'test test test test test test test test test test test junk'
 )
 
-const client = createTempoClient({
+const client = createClient({
   account: sender, // [!code focus]
+  chain: tempo({ feeToken: '0x20c0000000000000000000000000000000000001' }),
   transport: http('https://rpc.tempo.xyz'),
 })
   .extend(publicActions)
@@ -73,19 +74,20 @@ For production applications, you typically don't want to expose the fee payer's 
 The fee payer service receives unsigned transactions, adds the fee payer signature, and forwards them to the blockchain:
 
 ```ts
-import { walletActions } from 'viem'
+import { createClient, http, walletActions } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
 import { RpcRequest, RpcResponse } from 'ox'
-import { createTempoClient, parseTransaction } from 'viem/tempo'
+import { parseTransaction } from 'viem/tempo'
 
 // Server-side endpoint
 Bun.serve({
   port: 8546,
   async fetch(req) {
-    const client = createTempoClient({
+    const client = createClient({
       account: mnemonicToAccount(
         'test test test test test test test test test test test junk'
       ),
+      chain: tempo({ feeToken: '0x20c0000000000000000000000000000000000001' }),
       transport: http('https://rpc.tempo.xyz'),
     }).extend(walletActions)
 
@@ -118,12 +120,14 @@ Bun.serve({
 On the client, use the `withFeePayer` transport to automatically route transactions through your fee payer service:
 
 ```ts
-import { http, walletActions, publicActions } from 'viem'
+import { createClient, http, walletActions, publicActions } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { createTempoClient, withFeePayer } from 'viem/tempo'
+import { withFeePayer } from 'viem/tempo'
+import { tempo } from 'tempo.ts/chains'
 
-const client = createTempoClient({
+const client = createClient({
   account: privateKeyToAccount('0xecc3...'), // Unfunded account // [!code focus]
+  chain: tempo({ feeToken: '0x20c0000000000000000000000000000000000001' }), // [!code focus]
   transport: withFeePayer( // [!code focus]
     http('https://rpc.tempo.xyz'), // Primary RPC // [!code focus]
     http('https://sponsor.myapp.com') // Your fee payer service // [!code focus]

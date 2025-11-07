@@ -18,7 +18,7 @@ const client = createClient({
   account: privateKeyToAccount(
     '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
   ),
-  chain: tempo,
+  chain: tempo({ feeToken: '0x20c0000000000000000000000000000000000001' }),
   transport: withFeePayer(
     // [!code focus]
     // Transport for regular transactions // [!code focus]
@@ -66,14 +66,16 @@ See `server.ts` for the server-side implementation with [Bun](https://bun.sh).
 :::code-group
 
 ```ts twoslash [client.ts]
-import { createTempoClient, withFeePayer } from 'tempo.ts/viem'
+import { createClient, http, walletActions } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { http, walletActions } from 'viem'
+import { tempo } from 'tempo.ts/chains'
+import { withFeePayer } from 'tempo.ts/viem'
 
 const credentials = `${process.env['TEMPO_USERNAME']}:${process.env['TEMPO_PASSWORD']}`
 
-const client = createTempoClient({
+const client = createClient({
   account: privateKeyToAccount('0x...'),
+  chain: tempo({ feeToken: '0x20c0000000000000000000000000000000000001' }),
   transport: withFeePayer(
     http(undefined, {
       fetchOptions: {
@@ -95,17 +97,19 @@ const hash = await client.sendTransactionSync({
 
 ```ts twoslash [server.ts]
 // @noErrors
-import { http, walletActions } from 'viem'
+import { createClient, http, walletActions } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
 import { RpcRequest, RpcResponse } from 'ox'
-import { createTempoClient, Transaction } from 'tempo.ts/viem'
+import { tempo } from 'tempo.ts/chains'
+import { Transaction } from 'tempo.ts/viem'
 
 const credentials = `${process.env['TEMPO_USERNAME']}:${process.env['TEMPO_PASSWORD']}`
 
-const client = createTempoClient({
+const client = createClient({
   account: mnemonicToAccount(
     'test test test test test test test test test test test junk'
   ),
+  chain: tempo({ feeToken: '0x20c0000000000000000000000000000000000001' }),
   transport: http(undefined, {
     fetchOptions: {
       headers: {
