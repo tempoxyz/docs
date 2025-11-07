@@ -1,12 +1,58 @@
+import LucideCoins from '~icons/lucide/coins'
+import LucideZap from '~icons/lucide/zap'
+import LucideLayers from '~icons/lucide/layers'
+import LucideFileText from '~icons/lucide/file-text'
+import LucideCircleDollarSign from '~icons/lucide/circle-dollar-sign'
+import LucideShieldCheck from '~icons/lucide/shield-check'
+import LucideUser from '~icons/lucide/user'
+import LucideFingerprint from '~icons/lucide/fingerprint'
+import * as Card from "../../../components/Card.tsx"
+
 # Sending Transactions
 
-Tempo provides flexible transaction capabilities designed specifically for payment use cases.
+Tempo makes EIP-7702 a native transaction type, which simplifies how account abstraction works at the protocol level. Instead of relying on middleware layers, special entry points, or custom relayers, the core logic lives directly in the base layer.
 
-| Topic | Description |
-|-------|-------------|
-| [**Fee Tokens**](/documentation/transactions/fee-tokens) | Pay transaction fees in any supported USD stablecoin |
-| [**Payment Lanes**](/documentation/transactions/payment-lanes) | Guaranteed blockspace for payment transactions |
-| [**Batch Transactions**](/documentation/transactions/batch-transactions) | Execute multiple operations atomically |
-| [**Fee AMM**](/documentation/transactions/fee-amm) | Provide liquidity to enable fee conversions |
-| [**Fee Sponsorship**](/documentation/transactions/fee-sponsorship) | Enable gasless transactions with fee payers |
-| [**Account Abstraction**](/documentation/transactions/account-abstraction) | Native AA transaction type with passkeys, parallel nonces, and gas sponsorship |
+This design choice prioritizes simplicity and consistency:
+
+- **Transactions are easier to parse and verify** — nodes natively understand multi-call transactions, alternative fee tokens, and flexible signatures
+- **Wallets integrate directly** — no need for special support contracts or wrapper logic
+- **Predictable infrastructure** — fee markets, mempools, and RPCs work without special cases or custom opcodes
+- **Future-proof architecture** — the chain supports batching, sponsored gas, and programmable payments without requiring constant protocol upgrades
+
+The result is a cleaner, more predictable foundation for building wallets and applications with powerful transaction capabilities built in.
+
+## Transaction Features
+
+<Card.Container>
+  <Card.Link
+    description="Specify which TIP-20 token will be used to pay for fees in a given transaction"
+    href="/documentation/transactions/transaction-fee-tokens"
+    icon={LucideCoins}
+    title="Specify a Transaction Fee Token"
+  />
+  <Card.Link
+    description="Execute multiple operations atomically"
+    href="/documentation/transactions/batch-transactions"
+    icon={LucideLayers}
+    title="Send Batch Transactions"
+  />
+  <Card.Link
+    description="Enable gasless transactions with fee payers"
+    href="/documentation/transactions/fee-sponsorship"
+    icon={LucideShieldCheck}
+    title="Specify a Fee Payer"
+  />
+  <Card.Link
+    description="Schedule transactions to execute at a future time"
+    href="/documentation/transactions/scheduled-transactions"
+    icon={LucideFileText}
+    title="Schedule Transactions"
+  />
+  <Card.Link
+    description="Sign transactions with WebAuthn, P256, or secp256k1 signatures"
+    href="/documentation/transactions/webauthn-p256-signatures"
+    icon={LucideFingerprint}
+    title="Sign Using WebAuthn & P256"
+  />
+
+</Card.Container>

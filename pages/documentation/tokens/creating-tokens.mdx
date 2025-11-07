@@ -1,22 +1,14 @@
-import * as Demo from '../../../components/guides/Demo.tsx'
-
 # Creating Tokens
 
 Creating a TIP-20 token on Tempo is achieved by calling the TIP-20 factory contract.
 
 The process deploys a new token with compliance features, role-based permissions, and integration with Tempo's payment infrastructure.
 
-<Demo.Container name="Create a token">
-  <Demo.Connect />
-  <Demo.AddFunds />
-  <Demo.CreateToken stepNumber={3} />
-</Demo.Container>
-
 ## Example
 
 Create a new token by calling the `createToken` function on the `TIP20Factory` contract.
 
-```solidity 
+```solidity
 TIP20Factory factory = TIP20Factory(0x20Fc000000000000000000000000000000000000);
 
 TIP20 token = factory.createToken(
@@ -42,7 +34,7 @@ When you create a TIP-20 token, you interact with the `TIP20Factory` precompiled
 
 ## Interface
 
-```solidity 
+```solidity
 function createToken(
   /** Name of the token */
   string memory name,
@@ -79,7 +71,7 @@ Every TIP-20 token has a **quote token** that determines:
 - Which token it can be traded against on the built-in DEX
 - Its position in the token hierarchy (used for fee preferences and liquidity routing)
 
-Most USD stablecoins use [linkingUSD](/documentation/tokens/linkingUSD) at `0x20c0000000000000000000000000000000000000` as their quote token.
+Most USD stablecoins use [linkingUSD](/documentation/exchange/linkingUSD) at `0x20c0000000000000000000000000000000000000` as their quote token.
 
 ### Currency & Decimals
 
@@ -91,7 +83,7 @@ Most USD stablecoins use [linkingUSD](/documentation/tokens/linkingUSD) at `0x20
 
 The `quoteToken` parameter determines trading pairs and token hierarchy:
 
-- **Most stablecoins**: Use [linkingUSD](/documentation/tokens/linkingUSD) (`0x20c0000000000000000000000000000000000000`) as their quote token
+- **Most stablecoins**: Use [linkingUSD](/documentation/exchange/linkingUSD) (`0x20c0000000000000000000000000000000000000`) as their quote token
 - **Custom pairs**: Can use any existing TIP-20 token as a quote token
 - **linkingUSD**: The root quote token that serves as the base for USD stablecoins
 
@@ -101,7 +93,7 @@ Quote tokens cannot be changed after creation. Choose carefully based on your ex
 
 ### Roles & Permissions
 
-The **admin role** is granted to the address you specified. 
+The **admin role** is granted to the address you specified.
 It can grant/revoke other roles, change transfer policies, and set supply caps.
 
 :::warning

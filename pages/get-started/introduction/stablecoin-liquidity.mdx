@@ -1,0 +1,76 @@
+# Stablecoin Liquidity
+
+Tempo is designed for a many-stablecoin future. Rather than privileging a single issuer, the protocol enables multiple USD stablecoins to coexist and compete fairly while ensuring efficient liquidity for cross-stablecoin payments.
+
+## Addressing stablecoin liquidity fragmentation
+
+Today's stablecoin ecosystem is fragmented. Users hold USDC, merchants want USDT, platforms need PYUSD. When counterparties prefer different stablecoins, they face a coordination problem.
+
+Without a liquidity solution, parties must agree on a single stablecoin before they can transact. Manual conversions through external exchanges introduce friction, and cross-border payments fail when regulatory regimes favor different issuers. Businesses are forced to maintain complex multi-token treasuries just to accommodate various counterparties.
+
+With fragmented liquidity, every stablecoin pair needs dedicated liquidity pools, creating N² trading pairs as the ecosystem grows. Thinly-traded pairs suffer from poor pricing and slippage, while market makers must spread their capital across too many pools to provide adequate depth.
+
+With a natural monopoly, one stablecoin (like USDC or USDT) becomes the de facto hub that everyone routes through. This creates uphill battles for new issuers trying to gain adoption, and makes the protocol appear to favor established players over newcomers.
+
+Tempo's design intentionally prioritizes neutrality and interoperability: we want the efficiency benefits of a hub-and-spoke model without creating unfair advantages for any stablecoin issuer.
+
+## Introducing linkingUSD, a neutral liquidity hub
+
+Tempo solves this with linkingUSD; a fully-collateralized USD stablecoin that serves as the neutral quote token. Backed by short-term Treasuries and cash reserves, linkingUSD provides market makers the confidence to provide liquidity without competing with user-facing stablecoins.
+
+**What makes linkingUSD neutral:** linkingUSD is intentionally "nerfed" to prevent it from competing in the end-user stablecoin market:
+
+- **Non-transferable**: Can only be deposited/withdrawn from the DEX, not sent between wallets
+- **Cannot pay fees**: Users cannot pay transaction fees with linkingUSD
+- **Not for everyday use**: Designed specifically for liquidity provisioning
+- **Fully collateralized**: Backed reserves provide confidence for market makers who use it
+
+This creates a hub-and-spoke structure where all USD stablecoins trade against linkingUSD:
+
+```
+               USDC
+                |
+    USDP -- linkingUSD -- PYUSD
+                |
+               USDT
+```
+
+Any stablecoin can convert to any other through linkingUSD with just two hops, ensuring simple routing, concentrated liquidity, and efficient pricing—even for thinly-traded pairs.
+
+> **Example: Cross-stablecoin payment**
+>
+> 1. Market makers provide liquidity for USDC/linkingUSD and USDP/linkingUSD pairs
+> 2. User wants to send USDC to a merchant who prefers USDP
+> 3. DEX atomically routes: User's USDC → linkingUSD → Merchant's USDP
+> 4. Single transaction, no manual swaps
+
+This is critical for payments between parties in different regulatory regimes with different stablecoin preferences. The user and merchant never touch linkingUSD, it exists only as routing infrastructure.
+
+[Learn more about linkingUSD →](/documentation/exchange/linkingUSD)
+
+:::info[Flexibilty]
+While linkingUSD is the recommended and incentivized default, users can designate alternative quote tokens if they prefer. Tempo supports this flexibility, but encourages linkingUSD adoption through yield distribution from reserves to DEX participants.
+:::
+
+## Introducing the Tempo Stablecoin Exchange
+
+Routing through a neutral hub only works if there's an efficient venue for trading. Tempo includes an enshrined Stablecoin Exchange at `0xDEc0000000000000000000000000000000000000`; a protocol-native orderbook specialized for USD stablecoin pairs.
+
+**Why an enshrined DEX?** Payment applications need reliable stablecoin liquidity to be protocol-guaranteed, not dependent on third-party DEX deployments that could fail, get exploited, or simply lack liquidity when you need it most. By enshrining the exchange at the protocol level, Tempo ensures:
+
+- Guaranteed availability for all payment flows
+- Optimized performance through native implementation
+- Consistent interface across all stablecoin pairs
+- No dependency on external contracts or teams
+
+**Why an orderbook?** The DEX uses an on-chain orderbook optimized for stablecoin trading:
+
+- **Price-time priority**: Fair, deterministic execution order
+- **Flip orders**: Market makers place orders that automatically reverse when filled, reducing message volume and enabling efficient passive liquidity
+- **MEV protection**: Order placements are delayed until block end, preventing frontrunning and JIT attacks
+- **Low-latency takes**: Trades against existing orders execute immediately
+- **Stable-optimized**: Designed for tight spreads on pegged assets, not volatile trading
+
+The combination of linkingUSD as the hub and the enshrined DEX as the venue enables what Tempo calls **stablecoin interoperability**: users can pay in their preferred stablecoin while recipients receive theirs, all in a single atomic transaction. No coordination required, no manual conversions, no fragmented liquidity.
+
+[Browse all exchange documentation →](/documentation/exchange)

@@ -23,7 +23,7 @@ export function HomePage() {
         </div>
         <div className="h-[24px]" />
         <div className="flex gap-[12px]">
-          <Button variant="inverted" render={<Link to="/documentation" />}>
+          <Button variant="inverted" render={<Link to="/get-started" />}>
             Get Started
           </Button>
           <Button
@@ -37,19 +37,16 @@ export function HomePage() {
               />
             }
           >
-            About
-          </Button>
-          <Button externalLink render={<Link to="/protocol" />}>
-            Protocol
+            Website
           </Button>
         </div>
         <div className="h-[60px]" />
         <div className="w-fit">
           <TestnetStatus
-            created="2025-10-20T12:00:00Z"
-            name="Andante"
-            number={4}
-            to="/testnet/andante"
+            created="2025-11-07T12:00:00Z"
+            name="Andantino"
+            number={5}
+            to="/get-started/quickstart#tempo-testnet-andantino"
           />
         </div>
       </div>

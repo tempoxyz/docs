@@ -1,0 +1,55 @@
+# EVM Compatibility
+
+Tempo is fully compatible with the Ethereum Virtual Machine (EVM). Developers can deploy and interact with smart contracts using the same tools, languages, and frameworks they use on Ethereum, such as Solidity, Foundry, and Hardhat.
+
+While the execution environment mirrors Ethereum's, Tempo introduces several key differences optimized for payments:
+
+* **Stablecoin-native fees:** Pay transaction fees in any USD stablecoin, not ETH
+* **Instant finality:** Transactions finalize in ~1 second with single-slot finality
+* **Payment lanes:** Dedicated blockspace ensures guaranteed throughput for transfers
+* **TIP-20 token standard:** Enhanced ERC-20 with memos, policies, and payment features
+* **Native account abstraction:** Smart accounts with passkey support built into the protocol
+* **Simplex consensus:** BFT consensus optimized for speed and reliability
+
+These changes make Tempo predictable and payment-focused while preserving full EVM compatibility.
+
+## Stablecoin-Native Fees
+
+Tempo uses USD stablecoins for all fees and balances, not ETH. Users can pay transaction fees in any supported USD-denominated TIP-20 token with sufficient liquidity.
+
+The protocol's [Fee AMM](/protocol/transactions/fee-amm) automatically converts your chosen stablecoin to the validator's preferred token at the end of each block. This eliminates the need to hold a volatile gas token.
+
+**Important effects:**
+
+1. All fee calculations are in USD terms with predictable costs
+2. Users only need the stablecoin they're transacting with
+3. Native balances are denominated in the fee token of choice
+4. Treasury management is simplified to single-currency operations
+
+## TIP-20 Token Standard
+
+Tempo uses [TIP-20](/documentation/tokens) as its native token standard, extending ERC-20 with payment-specific features:
+
+* **6 decimal precision:** All TIP-20 tokens use 6 decimals for consistency
+* **Memo support:** Attach payment references with `transferWithMemo()`
+* **Transfer policies:** Built-in compliance via allowlists/blocklists
+* **Role-based permissions:** Separate mint, burn, pause, and admin roles
+* **Currency awareness:** Tokens declare their currency (e.g., "USD")
+
+TIP-20 tokens are fully backward-compatible with ERC-20 interfaces. Standard ERC-20 functions (`transfer`, `approve`, `transferFrom`) work as expected.
+
+## EVM Differences
+
+Tempo targets the **Prague** EVM hard fork with specific differences in execution and consensus behavior.
+
+| Area | Ethereum | Tempo |
+|------|----------|-------|
+| **Native token** | ETH, volatile pricing | USD stablecoins, stable pricing with 6 decimals |
+| **Fee market** | EIP-1559 dynamic base fee | Fixed base fee for predictable costs |
+| **Finality** | Probabilistic (~12-15 min) | Deterministic and instant (~1 second) |
+| **Consensus** | Proof-of-Stake (Gasper) | Simplex BFT with permissioned validators |
+| **Block times** | ~12 seconds per slot | ~1 second with single-slot finality |
+| **Token standard** | ERC-20 (flexible decimals) | TIP-20 (standardized 6 decimals, enhanced features) |
+| **Account model** | EOAs + smart contracts | Default account abstraction for all accounts |
+| **`PREVRANDAO`** | Randomness from beacon chain | Always `0`; use VRF or oracle for randomness |
+| **Payment features** | Contract-level implementation | Protocol-level payment lanes, memos, policies |

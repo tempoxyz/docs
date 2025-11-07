@@ -4,6 +4,7 @@ dist
 
 .DS_Store
 node_modules
+.vocs-cache/
 
 # Compiler files
 specs/cache/

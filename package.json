@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "NODE_OPTIONS=\"--max-old-space-size=16384\" vocs build --searchIndex false && vocs search-index",
+    "build": "NODE_OPTIONS=\"--max-old-space-size=16384\" vocs build --searchIndex",
     "check": "biome check . --write --unsafe",
     "check:types": "tsc --noEmit",
     "dev": "vocs dev",

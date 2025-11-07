@@ -2,171 +2,23 @@ import { Callout } from 'vocs/components'
 
 # Fee Sponsorship
 
+## How it Works
+
 Fee sponsorship allows one account (the **fee payer**) to pay transaction fees on behalf of another account (the **sender**). This enables gasless transactions where users can interact with the blockchain without holding any tokens to pay for gas.
 
-<Callout type="info">
-  Fee sponsorship works with Tempo's native fee token transaction type. The fee payer covers the transaction fees while the sender executes the transaction logic.
-</Callout>
+::::steps
+### Sender signs the transaction
 
-## Use Cases
+The sender signs the transaction with their private key, signing over a **blank fee token field**. This means the sender delegates the choice of which fee token to use to the fee payer.
 
-- **Onboarding new users** — Let users interact without first acquiring tokens
-- **Subsidizing transactions** — Applications can cover gas costs for their users
-- **Payment flows** — Enable payments from accounts without requiring separate fee tokens
+### Fee payer selects and signs
 
-## How it works
+The fee payer selects which fee token to use, then signs over the transaction.
 
-1. The sender signs the transaction with their private key, signing over a **blank fee token field** — this means the sender delegates the choice of which fee token to use to the fee payer
-2. The fee payer selects which fee token to use, then signs over the transaction
-3. The fee token and fee payer signature is added to the transaction then submitted
-4. The network validates both signatures and executes the transaction
-5. Fees are deducted from the fee payer's balance
+### Transaction submission
 
-Check out the [specification of the Tempo transaction type](/protocol/transactions/fee-payers) to learn more
+The fee token and fee payer signature is added to the transaction using the `feePayerSignature` fieldand is then submitted.
 
-## Local Fee Payer
+### Network validation
 
-The simplest approach is to specify a `feePayer` account directly when sending a transaction. This is useful when you have access to both the sender's and fee payer's private keys locally.
-
-```ts [customFeePayer.ts]
-import { createClient, http, publicActions, walletActions } from 'viem'
-import { privateKeyToAccount, mnemonicToAccount } from 'viem/accounts'
-import { tempo } from 'tempo.ts/chains'
-
-// Unfunded account that will send the transaction
-const sender = privateKeyToAccount(
-  '0xecc3fe55647412647e5c6b657c496803b08ef956f927b7a821da298cfbdd9666'
-)
-
-// Funded account that will pay the fees
-const feePayer = mnemonicToAccount(
-  'test test test test test test test test test test test junk'
-)
-
-const client = createClient({
-  account: sender, // [!code focus]
-  chain: tempo({ feeToken: '0x20c0000000000000000000000000000000000001' }),
-  transport: http('https://rpc.tempo.xyz'),
-})
-  .extend(publicActions)
-  .extend(walletActions)
-
-const hash = await client.sendTransaction({ // [!code focus]
-  feePayer, // [!code focus]
-  to: '0x0000000000000000000000000000000000000000', // [!code focus]
-}) // [!code focus]
-```
-
-### How It Works
-
-1. The sender signs the transaction with their private key
-2. The fee payer signs the same transaction to authorize paying the fees
-3. Both signatures are submitted together in a single transaction
-4. The network validates both signatures and executes the transaction
-5. Fees are deducted from the fee payer's balance
-
-## Fee Payer Transport
-
-For production applications, you typically don't want to expose the fee payer's private key on the client. Instead, you can use a **fee payer service** — a lightweight proxy (NextJS function, Cloudflare Worker, etc.) that holds the fee payer account and adds the fee payer signature server-side.
-
-### Setting Up the Fee Payer Service
-
-The fee payer service receives unsigned transactions, adds the fee payer signature, and forwards them to the blockchain:
-
-```ts
-import { createClient, http, walletActions } from 'viem'
-import { mnemonicToAccount } from 'viem/accounts'
-import { RpcRequest, RpcResponse } from 'ox'
-import { parseTransaction } from 'viem/tempo'
-
-// Server-side endpoint
-Bun.serve({
-  port: 8546,
-  async fetch(req) {
-    const client = createClient({
-      account: mnemonicToAccount(
-        'test test test test test test test test test test test junk'
-      ),
-      chain: tempo({ feeToken: '0x20c0000000000000000000000000000000000001' }),
-      transport: http('https://rpc.tempo.xyz'),
-    }).extend(walletActions)
-
-    const request = RpcRequest.from(await req.json())
-
-    const serialized = request.params[0] as `0x77${string}` // [!code focus]
-
-    // Parse the sender's signed transaction // [!code focus]
-    const transaction = parseTransaction(serialized) // [!code focus]
-
-    // Add fee payer signature // [!code focus]
-    const serializedTransaction = await client.signTransaction({ // [!code focus]
-      ...transaction, // [!code focus]
-      feePayer: client.account, // [!code focus]
-    }) // [!code focus]
-
-    // Submit to blockchain // [!code focus]
-    const result = await client.request({ // [!code focus]
-      method: request.method, // [!code focus]
-      params: [serializedTransaction], // [!code focus]
-    }) // [!code focus]
-
-    return Response.json(RpcResponse.from({ result }, { request }))
-  }
-})
-```
-
-### Using the Fee Payer Client-Side
-
-On the client, use the `withFeePayer` transport to automatically route transactions through your fee payer service:
-
-```ts
-import { createClient, http, walletActions, publicActions } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { withFeePayer } from 'viem/tempo'
-import { tempo } from 'tempo.ts/chains'
-
-const client = createClient({
-  account: privateKeyToAccount('0xecc3...'), // Unfunded account // [!code focus]
-  chain: tempo({ feeToken: '0x20c0000000000000000000000000000000000001' }), // [!code focus]
-  transport: withFeePayer( // [!code focus]
-    http('https://rpc.tempo.xyz'), // Primary RPC // [!code focus]
-    http('https://sponsor.myapp.com') // Your fee payer service // [!code focus]
-  ), // [!code focus]
-})
-  .extend(walletActions)
-  .extend(publicActions)
-
-// Set `feePayer: true` to flag the transaction to be sponsored;
-// transactions are automatically routed via the fee payer service
-const hash = await client.sendTransaction({
-  feePayer: true, // [!code focus]
-  to: '0x0000000000000000000000000000000000000000',
-})
-```
-
-:::info
-
-**Fee Token Preferences**
-
-When a `feePayer` is defined but a `feeToken` is not specified in the transaction request, then the fee token is determined by the fee payer's account preference (not the sender's). The fee payer controls which token is used to pay for the sponsored transaction.
-
-:::
-
-### How the Fee Payer Service Works
-
-1. **Client** signs the transaction with sender's private key
-2. **Client** sends the signed transaction to the fee payer service
-3. **Service** parses the transaction and adds fee payer signature
-4. **Service** submits the fully-signed transaction to the blockchain
-5. **Blockchain** validates both signatures and executes the transaction
-
-<Callout type="warning">
-  The fee payer service should implement rate limiting and validation to prevent abuse. Consider restricting which accounts can be sponsored and setting spending limits.
-</Callout>
-
-## Benefits
-
-- **Gasless UX** — Users don't need to hold fee tokens
-- **Flexible sponsorship** — Applications control who pays for what
-- **Security** — Fee payer keys stay server-side with fee payer service approach
-- **Native support** — Built into Tempo's transaction type, no smart contracts needed
+The network validates both signatures and executes the transaction.

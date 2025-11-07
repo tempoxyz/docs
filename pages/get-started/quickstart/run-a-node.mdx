@@ -1,0 +1,82 @@
+# Run a Tempo Node
+
+Running a Tempo node allows you to interact with the network directly, providing your own RPC access or contributing to network infrastructure.
+
+## Prerequisites
+
+- 16+ CPU cores (high clock speed recommended)
+- 32GB+ RAM (64GB recommended)
+- 2TB+ NVMe SSD storage
+- Linux or macOS operating system
+- Docker installed
+
+## Run a Node with Docker
+
+The simplest way to run a Tempo node is using Docker:
+
+```bash
+docker pull tempo/node:latest
+
+docker run -d \
+  --name tempo-node \
+  -p 8545:8545 \
+  -p 8546:8546 \
+  -v tempo-data:/data \
+  tempo/node:latest
+```
+
+This starts a node with:
+- HTTP RPC on port 8545
+- WebSocket RPC on port 8546
+- Persistent data in the `tempo-data` volume
+
+## Verify Your Node
+
+Check that your node is running and syncing:
+
+```bash
+curl -X POST http://localhost:8545 \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
+```
+
+You should see a response with the current block number.
+
+## Node Types
+
+**Full Node**: Maintains current state and recent blocks. Suitable for most applications.
+
+**Archive Node**: Maintains full historical state. Required for historical queries. Needs significantly more storage (5TB+).
+
+To run an archive node, add the `--archive` flag:
+
+```bash
+docker run -d \
+  --name tempo-archive-node \
+  -p 8545:8545 \
+  -p 8546:8546 \
+  -v tempo-archive-data:/data \
+  tempo/node:latest --archive
+```
+
+## Configuration
+
+Common configuration options:
+
+- `--http-port`: Change HTTP RPC port (default: 8545)
+- `--ws-port`: Change WebSocket port (default: 8546)
+- `--max-peers`: Set maximum peer connections
+- `--datadir`: Specify data directory location
+
+## Next Steps
+
+Once your node is synced, you can:
+- Point your applications to your local RPC endpoint
+- Use it for development and testing
+- Contribute to network decentralization
+
+For production deployments or becoming a validator, see:
+
+[Learn about becoming a validator →](/get-started/introduction/validator-network)
+
+[Learn about infrastructure partnerships →](/get-started/infrastructure)

@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { Instance } from 'tempo.ts/prool'
 import { ModuleResolutionKind } from 'typescript'
 import autoImport from 'unplugin-auto-import/vite'
@@ -5,10 +7,15 @@ import iconsResolver from 'unplugin-icons/resolver'
 import icons from 'unplugin-icons/vite'
 import { defineConfig } from 'vocs'
 
+const twoslashSupportFile = readFileSync(
+  join(process.cwd(), 'snippets', 'twoslash-env.d.ts'),
+  'utf-8',
+)
+
 export default defineConfig({
   banner: {
     content:
-      'We have released our fourth testnet, named <span className="font-medium">Andante</span>. <a href="/testnet/andante" className="text-[#0588F0] no-underline">See updates →</a>',
+      'Our fifth testnet, <span className="font-medium">Andantino</span>, is now live. <a href="/get-started/quickstart#tempo-testnet-andantino" className="text-[#0588F0] no-underline">See updates →</a>',
   },
   head() {
     return (
@@ -35,6 +42,7 @@ export default defineConfig({
     dark: '/icon-dark.png',
   },
   rootDir: '.',
+  cacheDir: './.vocs-cache',
   socials: [
     {
       icon: 'github',
@@ -46,94 +54,249 @@ export default defineConfig({
     },
   ],
   sidebar: {
-    '/testnet': [
+    '/get-started': [
       {
-        text: 'Overview',
-        link: '/testnet',
-      },
-      {
-        text: 'Getting started',
-        link: '/testnet/getting-started',
-      },
-      {
-        text: 'FAQ',
-        link: '/testnet/faq',
-      },
-      {
-        text: 'Releases',
+        text: 'Introduction',
         items: [
           {
-            text: 'Andante (Testnet #4)',
-            link: '/testnet/andante',
+            text: 'Welcome',
+            link: '/get-started',
           },
           {
-            text: 'Lento (Testnet #3)',
-            link: '/testnet/lento',
+            text: 'Features',
+            collapsed: false,
+            items: [
+              {
+                text: 'Payment Features',
+                link: '/get-started/introduction/payment-features',
+              },
+              {
+                text: 'Stablecoin Liquidity',
+                link: '/get-started/introduction/stablecoin-liquidity',
+              },
+              {
+                text: 'Wallet Features',
+                link: '/get-started/introduction/wallet-features',
+              },
+              {
+                text: 'Performance',
+                link: '/get-started/introduction/performance',
+              },
+              {
+                text: 'Validator Network',
+                link: '/get-started/introduction/validator-network',
+              },
+            ],
           },
           {
-            text: 'Adagietto (Testnet #2)',
-            link: '/testnet/adagietto',
+            text: 'Use Cases',
+            collapsed: true,
+            items: [
+              {
+                text: 'Remittances',
+                link: '/get-started/use-cases/remittances',
+              },
+              {
+                text: 'Instant Settlement',
+                link: '/get-started/use-cases/instant-settlement',
+              },
+              {
+                text: 'Embedded Finance',
+                link: '/get-started/use-cases/embedded-finance',
+              },
+              {
+                text: 'Global Payouts',
+                link: '/get-started/use-cases/global-payouts',
+              },
+              {
+                text: 'Agentic Commerce',
+                link: '/get-started/use-cases/agentic-commerce',
+              },
+              {
+                text: 'Tokenized Deposits',
+                link: '/get-started/use-cases/tokenized-deposits',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        text: 'Quickstart',
+        items: [
+          {
+            text: 'Connect to Tempo',
+            link: '/get-started/quickstart',
+          },
+
+          {
+            text: 'Send a Payment',
+            link: '/get-started/quickstart/send-payment',
           },
           {
-            text: 'Adagio (Testnet #1)',
-            link: '/testnet/adagio',
+            text: 'Integrate Tempo SDKs',
+            link: '/get-started/quickstart/integrate-sdks',
+          },
+          {
+            text: 'Deploy on Tempo',
+            link: '/sdk/solidity',
+          },
+          {
+            text: 'Issue a Stablecoin',
+            link: '/get-started/quickstart/issue-stablecoin',
+          },
+          {
+            text: 'Run a Node',
+            link: '/documentation/operators',
+          },
+        ],
+      },
+      {
+        text: 'Network Information',
+        items: [
+          {
+            text: 'Overview',
+            link: '/get-started/network-information',
+          },
+          {
+            text: 'Connection Details',
+            link: '/get-started/network-information/connection-details',
+          },
+          {
+            text: 'Testnet Faucet',
+            link: '/get-started/network-information/faucet',
+          },
+          {
+            text: 'Predeployed Contracts',
+            link: '/get-started/network-information/predeployed-contracts',
+          },
+          {
+            text: 'EVM Compatibility',
+            link: '/get-started/network-information/evm-compatibility',
+          },
+        ],
+      },
+      {
+        text: 'Infrastructure Partners',
+        items: [
+          {
+            text: 'Overview',
+            link: '/get-started/infrastructure',
+          },
+          {
+            text: 'Data Indexers',
+            link: '/get-started/infrastructure/data-indexers',
+          },
+          {
+            text: 'Node Providers',
+            link: '/get-started/infrastructure/node-providers',
+          },
+          {
+            text: 'Developer Tools',
+            link: '/get-started/infrastructure/developer-tools',
           },
         ],
       },
     ],
-    '/litepaper': [
-      {
-        text: 'Overview',
-        link: '/litepaper',
-      },
-      {
-        text: 'Motivation',
-        link: '/litepaper/motivation',
-      },
-      {
-        text: 'Neutrality',
-        link: '/litepaper/neutrality',
-      },
-      {
-        text: 'Payments',
-        link: '/litepaper/payments',
-      },
-      {
-        text: 'Privacy',
-        link: '/litepaper/privacy',
-      },
-      {
-        text: 'Performance',
-        link: '/litepaper/performance',
-      },
-    ],
     '/documentation': [
       {
-        text: 'Overview',
-        link: '/documentation',
-      },
-      {
-        text: 'Key Differences from Ethereum',
-        link: '/documentation/deviations-from-ethereum',
-      },
-      {
-        text: 'Tokens',
+        text: 'Introduction',
         items: [
           {
-            text: 'Overview',
-            link: '/documentation/tokens',
+            text: 'Core Concepts',
+            link: '/documentation',
+            collapsed: false,
+            items: [
+              {
+                text: 'Fees',
+                link: '/documentation/fees',
+              },
+              {
+                text: 'Accounts',
+                link: '/documentation/accounts',
+              },
+              {
+                text: 'Transactions',
+                link: '/documentation/transactions',
+              },
+              {
+                text: 'Tokens',
+                link: '/documentation/tokens',
+              },
+              {
+                text: 'Exchange',
+                link: '/documentation/exchange',
+              },
+              {
+                text: 'Payment Lanes',
+                link: '/documentation/blockspace/blockspace-for-payments',
+              },
+              {
+                text: 'Sub-Blocks',
+                link: '/documentation/blockspace/validator-sub-blocks',
+              },
+            ],
           },
+        ],
+      },
+      {
+        text: 'Managing Fees',
+        link: '/documentation/fees',
+        items: [
+          {
+            text: 'Preferences Cascade',
+            link: '/documentation/fees/preferences',
+          },
+          {
+            text: 'Fee AMM Liquidity',
+            link: '/documentation/fees/managing-liquidity',
+          },
+          {
+            text: 'Fee Lifecycle',
+            link: '/documentation/fees/fee-lifecycle',
+          },
+        ],
+      },
+      {
+        text: 'Sending Transactions',
+        link: '/documentation/transactions',
+        items: [
+          {
+            text: 'Transaction Fee Tokens',
+            link: '/documentation/transactions/transaction-fee-tokens',
+          },
+          {
+            text: 'Batch Transactions',
+            link: '/documentation/transactions/batch-transactions',
+          },
+          {
+            text: 'Fee Sponsorship',
+            link: '/documentation/transactions/fee-sponsorship',
+          },
+          {
+            text: 'Scheduled Transactions',
+            link: '/documentation/transactions/scheduled-transactions',
+          },
+          {
+            text: 'WebAuthn/P256 Signatures',
+            link: '/documentation/transactions/webauthn-p256-signatures',
+          },
+        ],
+      },
+      {
+        text: 'TIP-20 Tokens',
+        link: '/documentation/tokens',
+        items: [
           {
             text: 'Creating Tokens',
             link: '/documentation/tokens/creating-tokens',
           },
           {
-            text: 'linkingUSD',
-            link: '/documentation/tokens/linkingUSD',
-          },
-          {
             text: 'Roles & Permissions',
             link: '/documentation/tokens/roles',
+          },
+          {
+            text: 'Reconciliation (Memos)',
+            link: '/documentation/tokens/reconciliation',
           },
           {
             text: 'Controlling Supply',
@@ -146,44 +309,12 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Sending Transactions',
-        items: [
-          {
-            text: 'Overview',
-            link: '/documentation/transactions',
-          },
-          {
-            text: 'Fee Tokens',
-            link: '/documentation/transactions/fee-tokens',
-          },
-          {
-            text: 'Payment Lanes',
-            link: '/documentation/transactions/payment-lanes',
-          },
-          {
-            text: 'Batch Transactions',
-            link: '/documentation/transactions/batch-transactions',
-          },
-          {
-            text: 'Fee AMM',
-            link: '/documentation/transactions/fee-amm',
-          },
-          {
-            text: 'Fee Sponsorship',
-            link: '/documentation/transactions/fee-sponsorship',
-          },
-          {
-            text: 'Scheduled Transactions',
-            link: '/documentation/transactions/scheduled-transactions',
-          },
-        ],
-      },
-      {
         text: 'Exchanging Tokens',
+        link: '/documentation/exchange',
         items: [
           {
-            text: 'Overview',
-            link: '/documentation/exchange',
+            text: 'linkingUSD',
+            link: '/documentation/exchange/linkingUSD',
           },
           {
             text: 'Executing Swaps',
@@ -200,15 +331,20 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Account Management',
+        text: 'Running a Node',
+        link: '/documentation/operators',
         items: [
           {
-            text: 'Default Accounts',
-            link: '/documentation/accounts',
+            text: 'System Requirements',
+            link: '/documentation/operators/system-requirements',
           },
           {
-            text: 'Passkey Authentication',
-            link: '/documentation/accounts/passkeys',
+            text: 'Installation',
+            link: '/documentation/operators/installation',
+          },
+          {
+            text: 'Running an RPC Node',
+            link: '/documentation/operators/rpc-node',
           },
         ],
       },
@@ -220,7 +356,7 @@ export default defineConfig({
       },
       {
         text: 'Github',
-        link: 'https://github.com/tempoxyz/specs',
+        link: 'https://github.com/tempoxyz',
       },
       {
         text: 'Tokens',
@@ -304,33 +440,16 @@ export default defineConfig({
         ],
       },
     ],
+    '/sdk/solidity': [
+      {
+        text: 'Getting Started',
+        link: '/sdk/solidity',
+      },
+    ],
     '/sdk/rust': [
       {
         text: 'Getting Started',
         link: '/sdk/rust',
-      },
-    ],
-    '/operators': [
-      {
-        text: 'Overview',
-        link: '/operators',
-      },
-      {
-        text: 'Setting up a node',
-        items: [
-          {
-            text: 'System Requirements',
-            link: '/operators/system-requirements',
-          },
-          {
-            text: 'Installation',
-            link: '/operators/installation',
-          },
-          {
-            text: 'Running an RPC Node',
-            link: '/operators/rpc-node',
-          },
-        ],
       },
     ],
     '/sdk/typescript': [
@@ -344,27 +463,27 @@ export default defineConfig({
           {
             text: 'Creating & Managing Tokens 🚧',
             link: '/sdk/typescript/guides/creating-managing-tokens',
-            disabled: true,
+            disabled: false,
           },
           {
             text: 'Managing Liquidity with Fee AMM 🚧',
             link: '/sdk/typescript/guides/fee-amm',
-            disabled: true,
+            disabled: false,
           },
           {
             text: 'Interacting with Enshrined DEX 🚧',
             link: '/sdk/typescript/guides/interacting-with-enshrined-dex',
-            disabled: true,
+            disabled: false,
           },
           {
             text: 'Setting Fee Tokens 🚧',
             link: '/sdk/typescript/guides/setting-fee-tokens',
-            disabled: true,
+            disabled: false,
           },
           {
             text: 'Sponsoring Transactions 🚧',
             link: '/sdk/typescript/guides/sponsoring-transactions',
-            disabled: true,
+            disabled: false,
           },
         ],
       },
@@ -378,7 +497,7 @@ export default defineConfig({
           },
           {
             text: 'Actions',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'AMM',
@@ -656,7 +775,7 @@ export default defineConfig({
           },
           {
             text: 'Transports',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'withFeePayer',
@@ -675,7 +794,7 @@ export default defineConfig({
           },
           {
             text: 'Connectors 🚧',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'dangerous_secp256k1 🚧',
@@ -689,7 +808,7 @@ export default defineConfig({
           },
           {
             text: 'Actions 🚧',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'AMM',
@@ -980,7 +1099,7 @@ export default defineConfig({
           },
           {
             text: 'Hooks 🚧',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'AMM',
@@ -1278,28 +1397,28 @@ export default defineConfig({
     ],
   },
   topNav: [
-    { text: 'Testnet', link: '/testnet' },
+    { text: 'Get Started', link: '/get-started' },
     { text: 'Documentation', link: '/documentation' },
-    { text: 'Operators', link: '/operators' },
     {
-      text: 'SDK',
+      text: 'SDKs',
       items: [
         { text: 'TypeScript', link: '/sdk/typescript' },
         { text: 'Rust', link: '/sdk/rust' },
+        { text: 'Solidity', link: '/sdk/solidity' },
       ],
     },
-    { text: 'Tooling', link: '/tooling' },
     {
       text: 'References',
-      items: [
-        { text: 'Protocol', link: '/protocol' },
-        { text: 'Litepaper', link: '/litepaper' },
-      ],
+      items: [{ text: 'Protocol', link: '/protocol' }],
     },
   ],
   twoslash: {
     compilerOptions: {
       moduleResolution: ModuleResolutionKind.Bundler,
+    },
+    cache: new Map(),
+    extraFiles: {
+      'twoslash-env.d.ts': twoslashSupportFile,
     },
   },
   vite: {

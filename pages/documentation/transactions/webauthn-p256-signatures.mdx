@@ -1,0 +1,37 @@
+import { Callout } from 'vocs/components'
+
+# WebAuthn & P256 Signatures
+
+Tempo's default account implementation supports multiple signature types, allowing you to sign transactions with standard Ethereum wallets, hardware security keys, biometric authentication like Face ID and Touch ID, or even using [passkeys](https://passkeys.dev/).
+
+## Signature Types
+
+The signature field accepts three types of signatures, identified by their format and length:
+
+| Signature Type | Type ID | Total Size | Format |
+|----------------|---------|------------|--------|
+| **secp256k1** | None (default) | 65 bytes | `r` (32) + `s` (32) + `v` (1) |
+| **P256** | `0x01` | 130 bytes | `0x01` + `r` (32) + `s` (32) + `pubKeyX` (32) + `pubKeyY` (32) + `preHash` (1) |
+| **WebAuthn** | `0x02` | 129-2049 bytes | `0x02` + `verificationData` (variable) + `r` (32) + `s` (32) + `pubKeyX` (32) + `pubKeyY` (32) |
+
+### secp256k1
+
+The standard Ethereum signature format. No type identifier needed—this is the default.
+
+### P256
+
+Raw P256 signatures that include the public key coordinates. Identified by type `0x01`.
+
+The `preHash` flag indicates whether the digest should be hashed with SHA256 before verification. Set this to `true` if using Web Crypto API or similar implementations that require pre-hashing.
+
+### WebAuthn
+
+WebAuthn signatures include authenticator data from biometric devices. Identified by type `0x02`.
+
+The verification data contains information from the authenticator (device metadata, user presence flags, etc.).
+
+---
+
+<Callout type="info">
+Additional signature types may be supported in the future. For complete technical specifications, see the [Account Abstraction](/protocol/transactions/account-abstraction) protocol documentation.
+</Callout>

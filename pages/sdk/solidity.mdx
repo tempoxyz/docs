@@ -1,0 +1,242 @@
+# Solidity
+
+Set up your development environment and deploy contracts to Tempo.
+
+## Install Foundry
+
+Tempo uses a custom fork of Foundry that supports protocol-level features like custom precompiles, new transaction types, and native account abstraction.
+
+:::warning
+Use Tempo's Foundry fork for compatibility. Standard Foundry won't work with Tempo-specific features.
+:::
+
+### Prerequisites
+
+```bash
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+```
+
+### Install Tempo Foundry
+
+::::steps
+
+### 1. Download Precompiled Binaries
+
+Download the latest binaries for your platform from [Tempo Foundry releases](https://github.com/tempoxyz/tempo-foundry/releases).
+
+**For Linux (x86_64):**
+```bash
+curl -L https://github.com/tempoxyz/tempo-foundry/releases/download/nightly/foundry_nightly_linux_amd64.tar.gz | tar xz
+```
+
+**For Linux (ARM64):**
+```bash
+curl -L https://github.com/tempoxyz/tempo-foundry/releases/download/nightly/foundry_nightly_linux_arm64.tar.gz | tar xz
+```
+
+**For macOS (Intel):**
+```bash
+curl -L https://github.com/tempoxyz/tempo-foundry/releases/download/nightly/foundry_nightly_darwin_amd64.tar.gz | tar xz
+```
+
+**For macOS (Apple Silicon):**
+```bash
+curl -L https://github.com/tempoxyz/tempo-foundry/releases/download/nightly/foundry_nightly_darwin_arm64.tar.gz | tar xz
+```
+
+### 2. Install the Binaries
+
+Move the binaries to your Foundry directory:
+
+```bash
+mkdir -p ~/.foundry/bin
+mv forge cast ~/.foundry/bin/
+chmod +x ~/.foundry/bin/forge ~/.foundry/bin/cast
+```
+
+:::info
+This overwrites your existing `forge` and `cast` installation.
+:::
+
+Ensure `~/.foundry/bin` is in your PATH:
+
+```bash
+echo 'export PATH="$HOME/.foundry/bin:$PATH"' >> ~/.bashrc  # or ~/.zshrc
+source ~/.bashrc  # or ~/.zshrc
+```
+
+### 3. Verify Installation
+
+```bash
+forge --version
+cast --version
+```
+
+You should see version information indicating the Tempo fork.
+
+::::
+
+## Set Up Your Project
+
+### Option A: New Project
+
+Initialize a new project with Tempo support:
+
+```bash
+forge init --tempo my-project && cd my-project
+```
+
+### Option B: Existing Project
+
+Add Foundry to an existing project:
+
+```toml [foundry.toml]
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+```
+
+Install Tempo standard library:
+
+```bash
+forge install tempoxyz/tempo-std
+```
+
+## Configure Foundry for Tempo
+
+Set up environment variables:
+
+```bash
+export TEMPO_RPC_URL=https://rpc.testnet.tempo.xyz
+```
+
+Add to your `foundry.toml`:
+
+```toml [foundry.toml]
+[rpc_endpoints]
+tempo_testnet = "https://rpc.testnet.tempo.xyz"
+
+[etherscan]
+tempo_testnet = { key = "${TEMPO_API_KEY}" }
+```
+
+## Build and Test
+
+Build your contracts:
+
+```bash
+forge build
+```
+
+Run tests:
+
+```bash
+forge test
+```
+
+Run tests with Tempo testnet fork:
+
+```bash
+forge test --fork-url https://rpc.testnet.tempo.xyz
+```
+
+## Deploy Your Contract
+
+### Using forge create
+
+Deploy a simple contract:
+
+```bash
+forge create src/MyContract.sol:MyContract \
+  --rpc-url https://rpc.testnet.tempo.xyz \
+  --interactive
+```
+
+Deploy with constructor arguments:
+
+```bash
+forge create src/MyContract.sol:MyContract \
+  --rpc-url https://rpc.testnet.tempo.xyz \
+  --constructor-args 0x20c0000000000000000000000000000000000001 \
+  --interactive
+```
+
+### Using forge script
+
+Create a deployment script:
+
+```solidity [script/Deploy.s.sol]
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "forge-std/Script.sol";
+import "../src/MyContract.sol";
+
+contract DeployScript is Script {
+    function run() external {
+        vm.startBroadcast();
+
+        MyContract myContract = new MyContract();
+
+        vm.stopBroadcast();
+
+        console.log("MyContract deployed to:", address(myContract));
+    }
+}
+```
+
+Run the deployment script:
+
+```bash
+forge script script/Deploy.s.sol:DeployScript \
+  --rpc-url https://rpc.testnet.tempo.xyz \
+  --broadcast \
+  --interactive
+```
+
+## Verify Your Contract
+
+Check that your contract is deployed:
+
+```bash
+cast code <CONTRACT_ADDRESS> --rpc-url https://rpc.testnet.tempo.xyz
+```
+
+Interact with your contract:
+
+```bash
+cast call <CONTRACT_ADDRESS> "myFunction()(uint256)" \
+  --rpc-url https://rpc.testnet.tempo.xyz
+```
+
+Send a transaction:
+
+```bash
+cast send <CONTRACT_ADDRESS> "myFunction(uint256)" 42 \
+  --rpc-url https://rpc.testnet.tempo.xyz \
+  --interactive
+```
+
+## Configure Hardhat (Alternative)
+
+If you prefer Hardhat, add Tempo to your config:
+
+```javascript [hardhat.config.js]
+module.exports = {
+  networks: {
+    tempo: {
+      url: 'https://rpc.testnet.tempo.xyz',
+      chainId: 64165,
+      accounts: [process.env.PRIVATE_KEY]
+    }
+  }
+}
+```
+
+Deploy with Hardhat:
+
+```bash
+npx hardhat run scripts/deploy.js --network tempo
+```

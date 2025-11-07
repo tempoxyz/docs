@@ -1,0 +1,59 @@
+# Default Accounts
+
+Accounts on Tempo are by default just regular Ethereum-style externally owned accounts (EOAs). You can use standard wallets like MetaMask, hardware wallets, or any tool that works with Ethereum. However, there are a few important differences to be aware of:
+
+## No Native Token
+
+Tempo does not have a native token like ETH. This means certain Ethereum operations don't make sense and will not work as expected:
+
+| Feature | Difference |
+|---------|------------|
+| **`eth_balance` RPC calls** | Since there's no native token, checking the "ETH balance" of an account doesn't apply. For compatability reasons, they return 424242424242... |
+| **EVM `BALANCE` and `SELFBALANCE` opcodes** | These opcodes (and therefore `address(this).balance` in Solidity) will not return any sort of native token balance.  |
+| **Transaction fees** | Instead of paying gas in ETH, you pay fees in supported stablecoins. See the [Fees](/documentation/fees) section for details |
+
+## Native Account Abstraction Transactions
+
+Accounts can submit a special "account abstraction transaction" type that provides smart contract-style functionality without deploying a contract. This includes:
+
+- **Batch transactions** - Execute multiple operations atomically
+- **Passkey signatures** - Sign with WebAuthn/P256 instead of secp256k1
+- **Gas sponsorship** - Allow third parties to pay transaction fees
+- **Parallel nonces** - Send multiple transactions simultaneously
+
+For complete details on these capabilities, see the [Sending Transactions](/documentation/transactions) section.
+
+## Default Account Abstraction (Experimental)
+
+There is currently an experimental feature that automatically converts accounts to smart contract wallets on their first transaction using [EIP-7702](https://eips.ethereum.org/EIPS/eip-7702).
+
+:::warning
+**Note: This feature will likely be deprecated before mainnet launch.** We recommend using the standard account abstraction transaction type instead if you need smart contract functionality.
+:::
+
+### Opting Out (If Enabled)
+
+If you want to opt out of automatic delegation while this feature is still active, you can undelegate using standard EIP-7702 mechanisms:
+
+:::code-group
+```ts [optOut.ts]
+// Undelegate (revert to plain EOA)
+const authorization = client.signAuthorization({
+  address: zeroAddress,
+})
+
+// Or delegate to a different implementation
+const authorization = client.signAuthorization({
+  address: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef',
+})
+
+// Broadcast changes
+const hash = await client.sendTransaction({
+  authorizationList: [authorization],
+})
+```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/setup.ts:setup]
+```
+:::
