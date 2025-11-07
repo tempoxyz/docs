@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { WagmiProvider } from 'wagmi'
+import { ConnectNav } from './components/guides/Demo'
 import * as WagmiConfig from './wagmi.config'
 
 const queryClient = new QueryClient()
@@ -27,5 +28,13 @@ export default function Layout(props: React.PropsWithChildren) {
         }}
       />
     </>
+  )
+}
+
+export function TopNavEnd() {
+  return (
+    <div className="">
+      <ConnectNav />
+    </div>
   )
 }

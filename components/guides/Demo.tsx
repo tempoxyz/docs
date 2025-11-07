@@ -522,6 +522,8 @@ const buttonClassName = cva({
     },
     variant: {
       accent: 'bg-accent text-white hover:not-active:bg-accentHover',
+      accentTint:
+        'bg-accentTint text-accent hover:not-active:bg-accentTintHover',
       default:
         'bg-surface text-primary text-surface hover:not-active:bg-surfaceHover',
       destructive:
@@ -529,3 +531,52 @@ const buttonClassName = cva({
     },
   },
 })
+
+export function ConnectNav() {
+  const account = useAccount()
+  const connect = useConnect()
+  const disconnect = useDisconnect()
+  const connectors = useConnectors()
+  const connector = React.useMemo(() => connectors[0], [connectors])
+
+  if (account.address)
+    return (
+      <div className="flex items-center gap-2">
+        <Button onClick={() => disconnect.disconnect()} variant="destructive">
+          Sign out
+        </Button>
+      </div>
+    )
+  if (connect.isPending)
+    return (
+      <div>
+        <Button disabled>Check prompt</Button>
+      </div>
+    )
+  if (!connector) return null
+  return (
+    <div className="flex gap-1.5">
+      <Button
+        className="h-[32px] px-[14px] text-[13px]"
+        onClick={() =>
+          connect.connect({
+            connector,
+            capabilities: {
+              createAccount: { label: 'Tempo Docs' },
+            },
+          })
+        }
+        variant="default"
+      >
+        Sign up
+      </Button>
+      <Button
+        className="h-[32px] px-[14px] text-[13px]"
+        onClick={() => connect.connect({ connector })}
+        variant="accentTint"
+      >
+        Sign in
+      </Button>
+    </div>
+  )
+}

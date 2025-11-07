@@ -2,6 +2,11 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+.vocs_Navigation,
+.vocs_NavigationMenu_list {
+  align-items: center;
+}
+
 .vocs_Banner {
   background-color: #f6f6f6;
   border-bottom: 1px solid #e6e6e6;
