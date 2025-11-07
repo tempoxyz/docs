@@ -1,6 +1,10 @@
 {
   "permissions": {
-    "allow": ["Bash(git fetch:*)"],
+    "allow": [
+      "Bash(git fetch:*)",
+      "Bash(cat:*)",
+      "Bash(../../tempo-foundry/target/release/forge test:*)"
+    ],
     "deny": [],
     "ask": []
   }

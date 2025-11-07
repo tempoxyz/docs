@@ -24,8 +24,6 @@ contract FeeManager is IFeeManager, FeeAMM {
     address[] private tokensWithFees;
     mapping(address => bool) private tokenInFeesArray;
 
-    constructor() FeeAMM() { }
-
     modifier onlyDirectCall() {
         // In the real implementation, the protocol does a check that this is the top frame,
         // which is no longer possible in the EVM due to 7702

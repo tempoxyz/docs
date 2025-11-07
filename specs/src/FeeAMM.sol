@@ -17,12 +17,9 @@ contract FeeAMM is IFeeAMM {
     mapping(bytes32 => uint256) public totalSupply; // Total LP tokens for each pool
     mapping(bytes32 => mapping(address => uint256)) public liquidityBalances; // LP token balances
 
-    constructor() { }
-
     function _requireUSD(address token) private view {
         require(
-            keccak256(bytes(ITIP20(token).currency())) == keccak256(bytes("USD")),
-            "ONLY_USD_TOKENS"
+            keccak256(bytes(ITIP20(token).currency())) == keccak256(bytes("USD")), "ONLY_USD_TOKENS"
         );
     }
 
@@ -71,10 +68,12 @@ contract FeeAMM is IFeeAMM {
         amountOut = (amountIn * M) / SCALE;
     }
 
-    function rebalanceSwap(address userToken, address validatorToken, uint256 amountOut, address to)
-        external
-        returns (uint256 amountIn)
-    {
+    function rebalanceSwap(
+        address userToken,
+        address validatorToken,
+        uint256 amountOut,
+        address to
+    ) external returns (uint256 amountIn) {
         bytes32 poolId = getPoolId(userToken, validatorToken);
 
         // Rebalancing swaps are always from validatorToken to userToken
@@ -110,10 +109,9 @@ contract FeeAMM is IFeeAMM {
 
         if (pool.reserveUserToken == 0 && pool.reserveValidatorToken == 0) {
             // First liquidity provider
-            require(
-                (amountUserToken + amountValidatorToken) / 2 > MIN_LIQUIDITY,
-                "INSUFFICIENT_LIQUIDITY_MINTED"
-            );
+            if ((amountUserToken + amountValidatorToken) / 2 <= MIN_LIQUIDITY) {
+                revert InsufficientLiquidity();
+            }
             liquidity = (amountUserToken + amountValidatorToken) / 2 - MIN_LIQUIDITY;
             totalSupply[poolId] += MIN_LIQUIDITY; // Permanently lock MIN_LIQUIDITY
         } else {
@@ -127,7 +125,9 @@ contract FeeAMM is IFeeAMM {
             liquidity = liquidityUser < liquidityValidator ? liquidityUser : liquidityValidator;
         }
 
-        require(liquidity > 0, "INSUFFICIENT_LIQUIDITY_MINTED");
+        if (liquidity == 0) {
+            revert InsufficientLiquidity();
+        }
 
         // Transfer tokens from user
         ITIP20(userToken).systemTransferFrom(msg.sender, address(this), amountUserToken);
@@ -161,7 +161,9 @@ contract FeeAMM is IFeeAMM {
 
         if (pool.reserveUserToken == 0 && pool.reserveValidatorToken == 0) {
             // First liquidity provider with validator token only
-            require(amountValidatorToken / 2 > MIN_LIQUIDITY, "INSUFFICIENT_LIQUIDITY_MINTED");
+            if (amountValidatorToken / 2 <= MIN_LIQUIDITY) {
+                revert InsufficientLiquidity();
+            }
             liquidity = amountValidatorToken / 2 - MIN_LIQUIDITY;
             totalSupply[poolId] += MIN_LIQUIDITY; // Permanently lock MIN_LIQUIDITY
         } else {
@@ -173,7 +175,9 @@ contract FeeAMM is IFeeAMM {
             liquidity = (amountValidatorToken * _totalSupply) / denom; // rounds down
         }
 
-        require(liquidity > 0, "INSUFFICIENT_LIQUIDITY_MINTED");
+        if (liquidity == 0) {
+            revert InsufficientLiquidity();
+        }
 
         // Transfer validator tokens from user
         ITIP20(validatorToken).systemTransferFrom(msg.sender, address(this), amountValidatorToken);

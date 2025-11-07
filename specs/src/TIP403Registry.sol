@@ -30,10 +30,11 @@ contract TIP403Registry is ITIP403Registry {
         emit PolicyAdminUpdated(newPolicyId, msg.sender, admin);
     }
 
-    function createPolicyWithAccounts(address admin, PolicyType policyType, address[] calldata accounts)
-        public
-        returns (uint64 newPolicyId)
-    {
+    function createPolicyWithAccounts(
+        address admin,
+        PolicyType policyType,
+        address[] calldata accounts
+    ) public returns (uint64 newPolicyId) {
         newPolicyId = policyIdCounter++;
 
         policyData[newPolicyId] = PolicyData({ policyType: policyType, admin: admin });

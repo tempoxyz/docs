@@ -2,79 +2,34 @@
 pragma solidity ^0.8.13;
 
 import { FeeAMM } from "../src/FeeAMM.sol";
-import { Test } from "forge-std/Test.sol";
+import { TIP20 } from "../src/TIP20.sol";
+import { BaseTest } from "./BaseTest.t.sol";
 
-contract MockTIP20WithSystem {
+contract FeeAMMTest is BaseTest {
 
-    string public name;
-    string public symbol;
-    uint8 public decimals = 18;
+    TIP20 userToken;
+    TIP20 validatorToken;
 
-    uint256 public totalSupply;
-    mapping(address => uint256) public balanceOf;
+    function setUp() public override {
+        super.setUp();
 
-    event Transfer(address indexed from, address indexed to, uint256 value);
+        // Create tokens using TIP20Factory
+        userToken = TIP20(factory.createToken("User", "USR", "USD", linkingUSD, admin));
+        validatorToken = TIP20(factory.createToken("Validator", "VAL", "USD", linkingUSD, admin));
 
-    constructor(string memory _name, string memory _symbol) {
-        name = _name;
-        symbol = _symbol;
-    }
-
-    function mint(address to, uint256 amount) external {
-        totalSupply += amount;
-        balanceOf[to] += amount;
-        emit Transfer(address(0), to, amount);
-    }
-
-    function currency() external pure returns (string memory) {
-        return "USD";
-    }
-
-    function transfer(address to, uint256 amount) external returns (bool) {
-        require(balanceOf[msg.sender] >= amount, "INSUFFICIENT_BALANCE");
-        unchecked {
-            balanceOf[msg.sender] -= amount;
-            balanceOf[to] += amount;
-        }
-        emit Transfer(msg.sender, to, amount);
-        return true;
-    }
-
-    // Loosened version for testing; no special caller requirement
-    function systemTransferFrom(address from, address to, uint256 amount) external returns (bool) {
-        require(balanceOf[from] >= amount, "INSUFFICIENT_BALANCE");
-        unchecked {
-            balanceOf[from] -= amount;
-            balanceOf[to] += amount;
-        }
-        emit Transfer(from, to, amount);
-        return true;
-    }
-
-}
-
-contract FeeAMMTest is Test {
-
-    FeeAMM amm;
-    MockTIP20WithSystem userToken;
-    MockTIP20WithSystem validatorToken;
-
-    address alice = address(0xA11CE);
-
-    function setUp() public {
-        amm = new FeeAMM();
-        userToken = new MockTIP20WithSystem("User", "USR");
-        validatorToken = new MockTIP20WithSystem("Validator", "VAL");
+        // Grant ISSUER_ROLE to admin so we can mint tokens
+        userToken.grantRole(_ISSUER_ROLE, admin);
+        validatorToken.grantRole(_ISSUER_ROLE, admin);
 
         // Fund alice with large balances
-        userToken.mint(alice, 10_000e18);
-        validatorToken.mint(alice, 10_000e18);
+        userToken.mintWithMemo(alice, 10_000e18, bytes32(0));
+        validatorToken.mintWithMemo(alice, 10_000e18, bytes32(0));
     }
 
     function test_MintWithValidatorToken_InitialLiquidity_Succeeds() public {
         uint256 amountV = 10_000e18; // above 2*MIN_LIQUIDITY and within alice balance
 
-        uint256 minLiq = amm.MIN_LIQUIDITY();
+        uint256 minLiq = 1000; // MIN_LIQUIDITY constant
 
         vm.prank(alice);
         uint256 liquidity =
@@ -95,13 +50,19 @@ contract FeeAMMTest is Test {
     }
 
     function test_MintWithValidatorToken_InitialLiquidity_RevertsIf_TooSmall() public {
-        uint256 minLiq = amm.MIN_LIQUIDITY();
+        uint256 minLiq = amm.MIN_LIQUIDITY(); // MIN_LIQUIDITY constant
         uint256 amountV = 2 * minLiq; // amountV/2 == MIN_LIQUIDITY -> should revert
 
-        vm.startPrank(alice);
-        vm.expectRevert(bytes("INSUFFICIENT_LIQUIDITY_MINTED"));
-        amm.mintWithValidatorToken(address(userToken), address(validatorToken), amountV, alice);
-        vm.stopPrank();
+        vm.prank(alice);
+        try amm.mintWithValidatorToken(
+            address(userToken), address(validatorToken), amountV, alice
+        ) {
+            revert("Expected revert but call succeeded");
+        } catch (bytes memory reason) {
+            // Verify it's either InsufficientLiquidity custom error (0xbb55fd27) or Error(string) (0x08c379a0)
+            bytes4 errorSelector = bytes4(reason);
+            assertTrue(errorSelector == bytes4(0xbb55fd27), "Wrong error thrown");
+        }
     }
 
     function test_MintWithValidatorToken_SubsequentDeposit_ProportionalShares() public {
@@ -126,7 +87,7 @@ contract FeeAMMTest is Test {
         (uint128 uRes, uint128 vRes) = _reserves(poolId);
         // uRes,vRes now include the latest deposit; compute from previous state
         // Previous reserves were U0,V0. For expected minted we must use prior reserves.
-        uint256 denom = uint256(V0) + (amm.N() * uint256(U0)) / amm.SCALE();
+        uint256 denom = uint256(V0) + (9985 * uint256(U0)) / 10_000; // N=9985, SCALE=10000
         uint256 expected = (vin * s) / denom;
 
         assertEq(minted, expected);
@@ -137,7 +98,7 @@ contract FeeAMMTest is Test {
 
         // Supply and balances updated
         assertEq(amm.totalSupply(poolId), s + expected);
-        assertEq(amm.liquidityBalances(poolId, alice), s - amm.MIN_LIQUIDITY() + expected);
+        assertEq(amm.liquidityBalances(poolId, alice), s - 1000 + expected); // 1000 is MIN_LIQUIDITY
     }
 
     function test_MintWithValidatorToken_RoundsDown() public {
@@ -154,7 +115,7 @@ contract FeeAMMTest is Test {
         uint256 vin = 55_555_555_555_555_555; // arbitrary
 
         // Expected using prior reserves
-        uint256 denom = uint256(V0) + (amm.N() * uint256(U0)) / amm.SCALE();
+        uint256 denom = uint256(V0) + (9985 * uint256(U0)) / 10_000; // N=9985, SCALE=10000
         uint256 expected = (vin * s) / denom; // integer division floors
 
         vm.prank(alice);

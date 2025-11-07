@@ -48,4 +48,6 @@ interface IFeeAMM {
         address to
     );
 
+    error InsufficientLiquidity();
+
 }

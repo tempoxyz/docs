@@ -6,19 +6,10 @@ import { StablecoinExchange } from "../src/StablecoinExchange.sol";
 import { TIP20 } from "../src/TIP20.sol";
 import { TIP20Factory } from "../src/TIP20Factory.sol";
 import { TIP403Registry } from "../src/TIP403Registry.sol";
+import { BaseTest } from "./BaseTest.t.sol";
 import { MockTIP20 } from "./mocks/MockTIP20.sol";
-import { Test } from "forge-std/Test.sol";
 
-contract StablecoinExchangeTest is Test {
-
-    StablecoinExchange exchange;
-    TIP20 baseToken;
-    TIP20 quoteToken;
-    TIP20Factory factory;
-
-    address admin = address(0x1);
-    address alice = address(0x2);
-    address bob = address(0x3);
+contract StablecoinExchangeTest is BaseTest {
 
     bytes32 pairKey;
     uint128 constant INITIAL_BALANCE = 10_000e18;
@@ -54,44 +45,34 @@ contract StablecoinExchangeTest is Test {
 
     event PairCreated(bytes32 indexed key, address indexed base, address indexed quote);
 
-    function setUp() public {
-        // Deploy mock registry at precompile address
-        vm.etch(0x403c000000000000000000000000000000000000, type(TIP403Registry).runtimeCode);
-
-        // Deploy factory
-        factory = new TIP20Factory();
-
-        // Deploy StablecoinExchange at the STABLECOIN_DEX address
-        vm.etch(0xDEc0000000000000000000000000000000000000, type(StablecoinExchange).runtimeCode);
-        exchange = StablecoinExchange(0xDEc0000000000000000000000000000000000000);
-
-        // Deploy tokens
-        quoteToken = new LinkingUSD(admin);
-        baseToken = new TIP20("Base", "BASE", "USD", quoteToken, admin);
+    function setUp() public override {
+        super.setUp();
 
         vm.startPrank(admin);
-        baseToken.grantRole(baseToken.ISSUER_ROLE(), admin);
-        quoteToken.grantRole(quoteToken.ISSUER_ROLE(), admin);
+        token1.grantRole(_ISSUER_ROLE, admin);
+        token1.mint(alice, INITIAL_BALANCE);
+        token1.mint(bob, INITIAL_BALANCE);
+        vm.stopPrank();
 
-        baseToken.mint(alice, INITIAL_BALANCE);
-        baseToken.mint(bob, INITIAL_BALANCE);
-        quoteToken.mint(alice, INITIAL_BALANCE);
-        quoteToken.mint(bob, INITIAL_BALANCE);
+        vm.startPrank(linkingUSDAdmin);
+        linkingUSD.grantRole(_ISSUER_ROLE, linkingUSDAdmin);
+        linkingUSD.mint(alice, INITIAL_BALANCE);
+        linkingUSD.mint(bob, INITIAL_BALANCE);
         vm.stopPrank();
 
         // Approve exchange to spend tokens
         vm.startPrank(alice);
-        baseToken.approve(address(exchange), type(uint256).max);
-        quoteToken.approve(address(exchange), type(uint256).max);
+        token1.approve(address(exchange), type(uint256).max);
+        linkingUSD.approve(address(exchange), type(uint256).max);
         vm.stopPrank();
 
         vm.startPrank(bob);
-        baseToken.approve(address(exchange), type(uint256).max);
-        quoteToken.approve(address(exchange), type(uint256).max);
+        token1.approve(address(exchange), type(uint256).max);
+        linkingUSD.approve(address(exchange), type(uint256).max);
         vm.stopPrank();
 
         // Create trading pair
-        pairKey = exchange.createPair(address(baseToken));
+        pairKey = exchange.createPair(address(token1));
     }
 
     function test_TickToPrice(int16 tick) public view {
@@ -108,8 +89,8 @@ contract StablecoinExchangeTest is Test {
     }
 
     function test_PairKey(address tokenA, address tokenB) public view {
-        (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
-        bytes32 expectedKey = keccak256(abi.encodePacked(token0, token1));
+        (address _token0, address _token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
+        bytes32 expectedKey = keccak256(abi.encodePacked(_token0, _token1));
 
         bytes32 key1 = exchange.pairKey(tokenA, tokenB);
         bytes32 key2 = exchange.pairKey(tokenB, tokenA);
@@ -120,13 +101,15 @@ contract StablecoinExchangeTest is Test {
     }
 
     function test_CreatePair() public {
-        TIP20 newQuote = new TIP20("New Quote", "NQUOTE", "USD", quoteToken, admin);
+        TIP20 newQuote = TIP20(factory.createToken("New Quote", "NQUOTE", "USD", linkingUSD, admin));
 
-        TIP20 newBase = new TIP20("New Base", "NBASE", "USD", newQuote, admin);
+        TIP20 newBase = TIP20(factory.createToken("New Base", "NBASE", "USD", newQuote, admin));
         bytes32 expectedKey = exchange.pairKey(address(newBase), address(newQuote));
 
-        vm.expectEmit(true, true, true, true);
-        emit PairCreated(expectedKey, address(newBase), address(newQuote));
+        if (!isTempo) {
+            vm.expectEmit(true, true, true, true);
+            emit PairCreated(expectedKey, address(newBase), address(newQuote));
+        }
 
         bytes32 key = exchange.createPair(address(newBase));
         assertEq(key, expectedKey);
@@ -141,8 +124,8 @@ contract StablecoinExchangeTest is Test {
 
         uint32 price = exchange.tickToPrice(100);
         uint256 expectedEscrow = (uint256(1e18) * uint256(price)) / uint256(exchange.PRICE_SCALE());
-        assertEq(quoteToken.balanceOf(alice), uint256(INITIAL_BALANCE) - expectedEscrow);
-        assertEq(quoteToken.balanceOf(address(exchange)), expectedEscrow);
+        assertEq(linkingUSD.balanceOf(alice), uint256(INITIAL_BALANCE) - expectedEscrow);
+        assertEq(linkingUSD.balanceOf(address(exchange)), expectedEscrow);
     }
 
     function test_PlaceAskOrder() public {
@@ -152,16 +135,18 @@ contract StablecoinExchangeTest is Test {
         assertEq(exchange.activeOrderId(), 0);
         assertEq(exchange.pendingOrderId(), 1);
 
-        assertEq(baseToken.balanceOf(alice), INITIAL_BALANCE - 1e18);
-        assertEq(baseToken.balanceOf(address(exchange)), 1e18);
+        assertEq(token1.balanceOf(alice), INITIAL_BALANCE - 1e18);
+        assertEq(token1.balanceOf(address(exchange)), 1e18);
     }
 
     function test_PlaceFlipBidOrder() public {
-        vm.expectEmit(true, true, true, true);
-        emit FlipOrderPlaced(1, alice, address(baseToken), 1e18, true, 100, 200);
+        if (!isTempo) {
+            vm.expectEmit(true, true, true, true);
+            emit FlipOrderPlaced(1, alice, address(token1), 1e18, true, 100, 200);
+        }
 
         vm.prank(alice);
-        uint128 orderId = exchange.placeFlip(address(baseToken), 1e18, true, 100, 200);
+        uint128 orderId = exchange.placeFlip(address(token1), 1e18, true, 100, 200);
 
         assertEq(orderId, 1);
         assertEq(exchange.activeOrderId(), 0);
@@ -169,40 +154,44 @@ contract StablecoinExchangeTest is Test {
 
         uint32 price = exchange.tickToPrice(100);
         uint256 expectedEscrow = (uint256(1e18) * uint256(price)) / uint256(exchange.PRICE_SCALE());
-        assertEq(quoteToken.balanceOf(alice), uint256(INITIAL_BALANCE) - expectedEscrow);
-        assertEq(quoteToken.balanceOf(address(exchange)), expectedEscrow);
+        assertEq(linkingUSD.balanceOf(alice), uint256(INITIAL_BALANCE) - expectedEscrow);
+        assertEq(linkingUSD.balanceOf(address(exchange)), expectedEscrow);
     }
 
     function test_PlaceFlipAskOrder() public {
-        vm.expectEmit(true, true, true, true);
-        emit FlipOrderPlaced(1, alice, address(baseToken), 1e18, false, 100, -200);
+        if (!isTempo) {
+            vm.expectEmit(true, true, true, true);
+            emit FlipOrderPlaced(1, alice, address(token1), 1e18, false, 100, -200);
+        }
 
         vm.prank(alice);
-        uint128 orderId = exchange.placeFlip(address(baseToken), 1e18, false, 100, -200);
+        uint128 orderId = exchange.placeFlip(address(token1), 1e18, false, 100, -200);
 
         assertEq(orderId, 1);
         assertEq(exchange.activeOrderId(), 0);
         assertEq(exchange.pendingOrderId(), 1);
 
-        assertEq(baseToken.balanceOf(alice), INITIAL_BALANCE - 1e18);
-        assertEq(baseToken.balanceOf(address(exchange)), 1e18);
+        assertEq(token1.balanceOf(alice), INITIAL_BALANCE - 1e18);
+        assertEq(token1.balanceOf(address(exchange)), 1e18);
     }
 
     function test_FlipOrderExecution() public {
         vm.prank(alice);
-        uint128 flipOrderId = exchange.placeFlip(address(baseToken), 1e18, true, 100, 200);
+        uint128 flipOrderId = exchange.placeFlip(address(token1), 1e18, true, 100, 200);
 
         vm.prank(address(0));
         exchange.executeBlock();
 
-        vm.expectEmit(true, true, true, true);
-        emit OrderFilled(flipOrderId, alice, bob, 1e18, false);
+        if (!isTempo) {
+            vm.expectEmit(true, true, true, true);
+            emit OrderFilled(flipOrderId, alice, bob, 1e18, false);
 
-        vm.expectEmit(true, true, true, true);
-        emit OrderPlaced(2, alice, address(baseToken), 1e18, false, 200);
+            vm.expectEmit(true, true, true, true);
+            emit OrderPlaced(2, alice, address(token1), 1e18, false, 200);
+        }
 
         vm.prank(bob);
-        exchange.swapExactAmountIn(address(baseToken), address(quoteToken), 1e18, 0);
+        exchange.swapExactAmountIn(address(token1), address(linkingUSD), 1e18, 0);
 
         assertEq(exchange.pendingOrderId(), 2);
         // TODO: pull the order from orders mapping and assert state changes
@@ -227,14 +216,14 @@ contract StablecoinExchangeTest is Test {
 
         // Verify liquidity at tick levels
         (uint128 bidHead, uint128 bidTail, uint128 bidLiquidity) =
-            exchange.getTickLevel(address(baseToken), 100, true);
+            exchange.getTickLevel(address(token1), 100, true);
 
         assertEq(bidHead, bid0);
         assertEq(bidTail, bid1);
         assertEq(bidLiquidity, 3e18);
 
         (uint128 askHead, uint128 askTail, uint128 askLiquidity) =
-            exchange.getTickLevel(address(baseToken), 150, false);
+            exchange.getTickLevel(address(token1), 150, false);
         assertEq(askHead, ask0);
         assertEq(askTail, ask1);
         assertEq(askLiquidity, 3e18);
@@ -243,16 +232,21 @@ contract StablecoinExchangeTest is Test {
     function test_ExecuteBlock_RevertIf_NonSystemTx(address caller) public {
         vm.assume(caller != address(0));
 
-        vm.expectRevert("Only system tx");
         vm.prank(caller);
-        exchange.executeBlock();
+        try exchange.executeBlock() {
+            revert CallShouldHaveReverted();
+        } catch (bytes memory err) {
+            assertEq(err, abi.encodeWithSelector(StablecoinExchange.Unauthorized.selector));
+        }
     }
 
     function test_CancelPendingOrder() public {
         uint128 orderId = _placeBidOrder(alice, 1e18, 100);
 
-        vm.expectEmit(true, true, true, true);
-        emit OrderCancelled(orderId);
+        if (!isTempo) {
+            vm.expectEmit(true, true, true, true);
+            emit OrderCancelled(orderId);
+        }
 
         vm.prank(alice);
         exchange.cancel(orderId);
@@ -260,7 +254,7 @@ contract StablecoinExchangeTest is Test {
         // Verify tokens were returned
         uint32 price = exchange.tickToPrice(100);
         uint256 escrowAmount = (uint256(1e18) * uint256(price)) / uint256(exchange.PRICE_SCALE());
-        assertEq(exchange.balanceOf(alice, address(quoteToken)), escrowAmount);
+        assertEq(exchange.balanceOf(alice, address(linkingUSD)), escrowAmount);
     }
 
     function test_CancelActiveOrder() public {
@@ -269,8 +263,10 @@ contract StablecoinExchangeTest is Test {
         vm.prank(address(0));
         exchange.executeBlock(); // Make order active
 
-        vm.expectEmit(true, true, true, true);
-        emit OrderCancelled(orderId);
+        if (!isTempo) {
+            vm.expectEmit(true, true, true, true);
+            emit OrderCancelled(orderId);
+        }
 
         vm.prank(alice);
         exchange.cancel(orderId);
@@ -278,7 +274,7 @@ contract StablecoinExchangeTest is Test {
         // Verify tokens were returned to balance
         uint32 price = exchange.tickToPrice(100);
         uint256 escrowAmount = (uint256(1e18) * uint256(price)) / uint256(exchange.PRICE_SCALE());
-        assertEq(exchange.balanceOf(alice, address(quoteToken)), escrowAmount);
+        assertEq(exchange.balanceOf(alice, address(linkingUSD)), escrowAmount);
     }
 
     function test_Withdraw() public {
@@ -286,14 +282,14 @@ contract StablecoinExchangeTest is Test {
         vm.prank(alice);
         exchange.cancel(orderId);
 
-        uint128 exchangeBalance = exchange.balanceOf(alice, address(quoteToken));
-        uint256 initialTokenBalance = quoteToken.balanceOf(alice);
+        uint128 exchangeBalance = exchange.balanceOf(alice, address(linkingUSD));
+        uint256 initialTokenBalance = linkingUSD.balanceOf(alice);
 
         vm.prank(alice);
-        exchange.withdraw(address(quoteToken), exchangeBalance);
+        exchange.withdraw(address(linkingUSD), exchangeBalance);
 
-        assertEq(exchange.balanceOf(alice, address(quoteToken)), 0);
-        assertEq(quoteToken.balanceOf(alice), initialTokenBalance + exchangeBalance);
+        assertEq(exchange.balanceOf(alice, address(linkingUSD)), 0);
+        assertEq(linkingUSD.balanceOf(alice), initialTokenBalance + exchangeBalance);
     }
 
     function test_QuoteSwapExactAmountOut() public {
@@ -304,7 +300,7 @@ contract StablecoinExchangeTest is Test {
 
         uint128 amountOut = 500e18;
         uint128 amountIn =
-            exchange.quoteSwapExactAmountOut(address(quoteToken), address(baseToken), amountOut);
+            exchange.quoteSwapExactAmountOut(address(linkingUSD), address(token1), amountOut);
 
         uint32 price = exchange.tickToPrice(100);
         uint128 expectedAmountIn = (amountOut * price) / exchange.PRICE_SCALE();
@@ -321,34 +317,38 @@ contract StablecoinExchangeTest is Test {
         uint32 price = exchange.tickToPrice(100);
         uint128 expectedAmountIn = (amountOut * price) / exchange.PRICE_SCALE();
         uint128 maxAmountIn = expectedAmountIn + 1000;
-        uint256 initialBaseBalance = baseToken.balanceOf(alice);
+        uint256 initialBaseBalance = token1.balanceOf(alice);
 
         // Execute swap to partially fill order
-        vm.expectEmit(true, true, true, true);
-        emit OrderFilled(askOrderId, bob, alice, amountOut, true);
+        if (!isTempo) {
+            vm.expectEmit(true, true, true, true);
+            emit OrderFilled(askOrderId, bob, alice, amountOut, true);
+        }
 
         vm.prank(alice);
         uint128 amountIn = exchange.swapExactAmountOut(
-            address(quoteToken), address(baseToken), amountOut, maxAmountIn
+            address(linkingUSD), address(token1), amountOut, maxAmountIn
         );
 
         assertEq(amountIn, expectedAmountIn);
-        assertEq(baseToken.balanceOf(alice), initialBaseBalance + amountOut);
+        assertEq(token1.balanceOf(alice), initialBaseBalance + amountOut);
 
         // Execute swap to fully fill order
         uint128 remainingAmount = 500e18;
         uint128 expectedAmountIn2 = (remainingAmount * price) / exchange.PRICE_SCALE();
 
-        vm.expectEmit(true, true, true, true);
-        emit OrderFilled(askOrderId, bob, alice, remainingAmount, false);
+        if (!isTempo) {
+            vm.expectEmit(true, true, true, true);
+            emit OrderFilled(askOrderId, bob, alice, remainingAmount, false);
+        }
 
         vm.prank(alice);
         uint128 amountIn2 = exchange.swapExactAmountOut(
-            address(quoteToken), address(baseToken), remainingAmount, maxAmountIn
+            address(linkingUSD), address(token1), remainingAmount, maxAmountIn
         );
 
         assertEq(amountIn2, expectedAmountIn2);
-        assertEq(baseToken.balanceOf(alice), initialBaseBalance + amountOut + remainingAmount);
+        assertEq(token1.balanceOf(alice), initialBaseBalance + amountOut + remainingAmount);
     }
 
     function test_SwapExactAmountOut_MultiTick() public {
@@ -370,23 +370,25 @@ contract StablecoinExchangeTest is Test {
         uint128 totalCost = cost1 + cost2 + cost3;
 
         uint128 maxIn = totalCost * 2;
-        uint256 initBalance = baseToken.balanceOf(alice);
+        uint256 initBalance = token1.balanceOf(alice);
 
-        vm.expectEmit(true, true, true, true);
-        emit OrderFilled(order1, bob, alice, 1e18, false);
+        if (!isTempo) {
+            vm.expectEmit(true, true, true, true);
+            emit OrderFilled(order1, bob, alice, 1e18, false);
 
-        vm.expectEmit(true, true, true, true);
-        emit OrderFilled(order2, bob, alice, 1e18, false);
+            vm.expectEmit(true, true, true, true);
+            emit OrderFilled(order2, bob, alice, 1e18, false);
 
-        vm.expectEmit(true, true, true, true);
-        emit OrderFilled(order3, bob, alice, 5e17, true);
+            vm.expectEmit(true, true, true, true);
+            emit OrderFilled(order3, bob, alice, 5e17, true);
+        }
 
         vm.prank(alice);
         uint128 amountIn =
-            exchange.swapExactAmountOut(address(quoteToken), address(baseToken), buyAmount, maxIn);
+            exchange.swapExactAmountOut(address(linkingUSD), address(token1), buyAmount, maxIn);
 
         assertEq(amountIn, totalCost);
-        assertEq(baseToken.balanceOf(alice), initBalance + buyAmount);
+        assertEq(token1.balanceOf(alice), initBalance + buyAmount);
     }
 
     function test_QuoteSwapExactAmountIn() public {
@@ -397,7 +399,7 @@ contract StablecoinExchangeTest is Test {
 
         uint128 amountIn = 500e18;
         uint128 amountOut =
-            exchange.quoteSwapExactAmountIn(address(baseToken), address(quoteToken), amountIn);
+            exchange.quoteSwapExactAmountIn(address(token1), address(linkingUSD), amountIn);
 
         uint32 price = exchange.tickToPrice(100);
         uint128 expectedProceeds = (amountIn * price) / exchange.PRICE_SCALE();
@@ -414,35 +416,39 @@ contract StablecoinExchangeTest is Test {
         uint32 price = exchange.tickToPrice(100);
         uint128 expectedAmountOut = (amountIn * price) / exchange.PRICE_SCALE();
         uint128 minAmountOut = expectedAmountOut - 1000;
-        uint256 initialQuoteBalance = quoteToken.balanceOf(alice);
+        uint256 initialQuoteBalance = linkingUSD.balanceOf(alice);
 
         // Execute swap to partially fill order
-        vm.expectEmit(true, true, true, true);
-        emit OrderFilled(bidOrderId, bob, alice, amountIn, true);
+        if (!isTempo) {
+            vm.expectEmit(true, true, true, true);
+            emit OrderFilled(bidOrderId, bob, alice, amountIn, true);
+        }
 
         vm.prank(alice);
         uint128 amountOut = exchange.swapExactAmountIn(
-            address(baseToken), address(quoteToken), amountIn, minAmountOut
+            address(token1), address(linkingUSD), amountIn, minAmountOut
         );
 
         assertEq(amountOut, expectedAmountOut);
-        assertEq(quoteToken.balanceOf(alice), initialQuoteBalance + amountOut);
+        assertEq(linkingUSD.balanceOf(alice), initialQuoteBalance + amountOut);
 
         // Execute swap to fully fill order
         uint128 remainingAmount = 500e18; // 1000e18 - 500e18 = 500e18 remaining
         uint128 expectedAmountOut2 = (remainingAmount * price) / exchange.PRICE_SCALE();
         uint128 minAmountOut2 = expectedAmountOut2 - 1000;
 
-        vm.expectEmit(true, true, true, true);
-        emit OrderFilled(bidOrderId, bob, alice, remainingAmount, false);
+        if (!isTempo) {
+            vm.expectEmit(true, true, true, true);
+            emit OrderFilled(bidOrderId, bob, alice, remainingAmount, false);
+        }
 
         vm.prank(alice);
         uint128 amountOut2 = exchange.swapExactAmountIn(
-            address(baseToken), address(quoteToken), remainingAmount, minAmountOut2
+            address(token1), address(linkingUSD), remainingAmount, minAmountOut2
         );
 
         assertEq(amountOut2, expectedAmountOut2);
-        assertEq(quoteToken.balanceOf(alice), initialQuoteBalance + amountOut + amountOut2);
+        assertEq(linkingUSD.balanceOf(alice), initialQuoteBalance + amountOut + amountOut2);
     }
 
     function test_SwapExactAmountIn_MultiTick() public {
@@ -464,23 +470,25 @@ contract StablecoinExchangeTest is Test {
         uint128 totalOut = out1 + out2 + out3;
 
         uint128 minOut = totalOut / 2;
-        uint256 initBalance = quoteToken.balanceOf(alice);
+        uint256 initBalance = linkingUSD.balanceOf(alice);
 
-        vm.expectEmit(true, true, true, true);
-        emit OrderFilled(order1, bob, alice, 1e18, false);
+        if (!isTempo) {
+            vm.expectEmit(true, true, true, true);
+            emit OrderFilled(order1, bob, alice, 1e18, false);
 
-        vm.expectEmit(true, true, true, true);
-        emit OrderFilled(order2, bob, alice, 1e18, false);
+            vm.expectEmit(true, true, true, true);
+            emit OrderFilled(order2, bob, alice, 1e18, false);
 
-        vm.expectEmit(true, true, true, true);
-        emit OrderFilled(order3, bob, alice, 5e17, true);
+            vm.expectEmit(true, true, true, true);
+            emit OrderFilled(order3, bob, alice, 5e17, true);
+        }
 
         vm.prank(alice);
         uint128 amountOut =
-            exchange.swapExactAmountIn(address(baseToken), address(quoteToken), sellAmount, minOut);
+            exchange.swapExactAmountIn(address(token1), address(linkingUSD), sellAmount, minOut);
 
         assertEq(amountOut, totalOut);
-        assertEq(quoteToken.balanceOf(alice), initBalance + totalOut);
+        assertEq(linkingUSD.balanceOf(alice), initBalance + totalOut);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -491,26 +499,30 @@ contract StablecoinExchangeTest is Test {
         internal
         returns (uint128 orderId)
     {
-        vm.expectEmit(true, true, true, true);
-        emit OrderPlaced(
-            exchange.pendingOrderId() + 1, user, address(baseToken), amount, true, tick
-        );
+        if (!isTempo) {
+            vm.expectEmit(true, true, true, true);
+            emit OrderPlaced(
+                exchange.pendingOrderId() + 1, user, address(token1), amount, true, tick
+            );
+        }
 
         vm.prank(user);
-        orderId = exchange.place(address(baseToken), amount, true, tick);
+        orderId = exchange.place(address(token1), amount, true, tick);
     }
 
     function _placeAskOrder(address user, uint128 amount, int16 tick)
         internal
         returns (uint128 orderId)
     {
-        vm.expectEmit(true, true, true, true);
-        emit OrderPlaced(
-            exchange.pendingOrderId() + 1, user, address(baseToken), amount, false, tick
-        );
+        if (!isTempo) {
+            vm.expectEmit(true, true, true, true);
+            emit OrderPlaced(
+                exchange.pendingOrderId() + 1, user, address(token1), amount, false, tick
+            );
+        }
 
         vm.prank(user);
-        orderId = exchange.place(address(baseToken), amount, false, tick);
+        orderId = exchange.place(address(token1), amount, false, tick);
     }
 
 }

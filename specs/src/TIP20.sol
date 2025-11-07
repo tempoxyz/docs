@@ -218,7 +218,7 @@ contract TIP20 is ITIP20, TIP20RolesAuth {
 
     modifier notTokenAddress(address to) {
         // Don't allow sending to other precompiled tokens.
-        if ((uint160(to) >> 64) == 0x200000000000000000000000) {
+        if ((uint160(to) >> 64) == 0x20c000000000000000000000) {
             revert InvalidRecipient();
         }
         _;
@@ -279,7 +279,9 @@ contract TIP20 is ITIP20, TIP20RolesAuth {
     }
 
     function _transfer(address from, address to, uint256 amount) internal {
-        if (amount > balanceOf[from]) revert InsufficientBalance();
+        if (amount > balanceOf[from]) {
+            revert InsufficientBalance(balanceOf[from], amount, address(this));
+        }
 
         // Accrue rewards before any balance changes
         _accrue(block.timestamp);
@@ -387,7 +389,9 @@ contract TIP20 is ITIP20, TIP20RolesAuth {
         require(msg.sender == TIP_FEE_MANAGER_ADDRESS);
         require(from != address(0));
 
-        if (amount > balanceOf[from]) revert InsufficientBalance();
+        if (amount > balanceOf[from]) {
+            revert InsufficientBalance(balanceOf[from], amount, address(this));
+        }
 
         _accrue(block.timestamp);
 
@@ -407,7 +411,9 @@ contract TIP20 is ITIP20, TIP20RolesAuth {
         require(to != address(0));
 
         uint256 feeManagerBalance = balanceOf[TIP_FEE_MANAGER_ADDRESS];
-        if (refund > feeManagerBalance) revert InsufficientBalance();
+        if (refund > feeManagerBalance) {
+            revert InsufficientBalance(feeManagerBalance, refund, address(this));
+        }
 
         // We assume that transferFeePreTx is always called first, so `_accrue` has already been called.
         address tosRewardRecipient = _updateRewardsAndGetRecipient(to);

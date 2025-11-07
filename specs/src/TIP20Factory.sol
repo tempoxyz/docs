@@ -4,8 +4,9 @@ pragma solidity ^0.8.13;
 import { TIP20 } from "./TIP20.sol";
 import { ITIP20 } from "./interfaces/ITIP20.sol";
 import { ITIP20Factory } from "./interfaces/ITIP20Factory.sol";
+import { Test } from "forge-std/Test.sol";
 
-contract TIP20Factory is ITIP20Factory {
+contract TIP20Factory is ITIP20Factory, Test {
 
     uint256 public tokenIdCounter = 1;
 
@@ -28,14 +29,18 @@ contract TIP20Factory is ITIP20Factory {
             }
         }
 
-        ++tokenIdCounter;
+        uint256 tokenId = tokenIdCounter++;
 
-        TIP20 token = new TIP20(name, symbol, currency, quoteToken, admin);
-        emit TokenCreated(address(token), tokenIdCounter, name, symbol, currency, quoteToken, admin);
+        // Calculate the deterministic address for this token
+        address tokenAddr =
+            address(uint160(0x20C0000000000000000000000000000000000000) | uint160(tokenId));
 
-        // Note: Will deploy at specific vanity
-        // address determined by tokenIdCounter.
-        return address(token);
+        // Foundry cheatcode to deploy contract to a specific address
+        deployCodeTo("TIP20.sol", abi.encode(name, symbol, currency, quoteToken, admin), tokenAddr);
+
+        emit TokenCreated(tokenAddr, tokenId, name, symbol, currency, quoteToken, admin);
+
+        return tokenAddr;
     }
 
     function isTIP20(address token) public view returns (bool) {
