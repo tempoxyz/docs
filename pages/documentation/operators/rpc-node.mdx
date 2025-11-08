@@ -13,7 +13,6 @@ tempo download
 
 # Run node
 tempo node \
-  --chain andantino \
   --follow \
   --http --http.port 8545 \
   --http.api eth,net,web3,txpool,trace \
@@ -36,7 +35,6 @@ Environment=RUST_LOG=info
 WorkingDirectory=$HOME/tempo
 ExecStart=/usr/local/bin/tempo node \\
   --datadir <datadir> \\
-  --chain andantino \\
   --follow \\
   --port 30303 \\
   --discovery.addr 0.0.0.0 \\
