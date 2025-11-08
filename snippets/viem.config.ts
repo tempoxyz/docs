@@ -1,5 +1,4 @@
 // [!region setup]
-
 import { tempo } from 'tempo.ts/chains'
 import { tempoActions } from 'tempo.ts/viem'
 import { createClient, http, publicActions, walletActions } from 'viem'

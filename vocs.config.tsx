@@ -42,7 +42,6 @@ export default defineConfig({
     dark: '/icon-dark.png',
   },
   rootDir: '.',
-  cacheDir: './.vocs-cache',
   socials: [
     {
       icon: 'github',
@@ -1416,7 +1415,6 @@ export default defineConfig({
     compilerOptions: {
       moduleResolution: ModuleResolutionKind.Bundler,
     },
-    cache: new Map(),
     extraFiles: {
       'twoslash-env.d.ts': twoslashSupportFile,
     },

@@ -1,5 +1,7 @@
 @import "tailwindcss" important;
 
+@source "./";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 .vocs_Navigation,

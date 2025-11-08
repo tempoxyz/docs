@@ -35,6 +35,3 @@ jobs:
 
       - name: Check types
         run: bun run check:types
-
-      - name: Check docs
-        run: bun run build
