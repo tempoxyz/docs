@@ -496,7 +496,7 @@ export default defineConfig({
           },
           {
             text: 'Actions',
-            collapsed: false,
+            collapsed: true,
             items: [
               {
                 text: 'AMM',
@@ -774,7 +774,7 @@ export default defineConfig({
           },
           {
             text: 'Transports',
-            collapsed: false,
+            collapsed: true,
             items: [
               {
                 text: 'withFeePayer',
@@ -793,7 +793,7 @@ export default defineConfig({
           },
           {
             text: 'Connectors 🚧',
-            collapsed: false,
+            collapsed: true,
             items: [
               {
                 text: 'dangerous_secp256k1 🚧',
@@ -807,7 +807,7 @@ export default defineConfig({
           },
           {
             text: 'Actions 🚧',
-            collapsed: false,
+            collapsed: true,
             items: [
               {
                 text: 'AMM',
@@ -1098,7 +1098,7 @@ export default defineConfig({
           },
           {
             text: 'Hooks 🚧',
-            collapsed: false,
+            collapsed: true,
             items: [
               {
                 text: 'AMM',
