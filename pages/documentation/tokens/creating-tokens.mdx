@@ -32,29 +32,10 @@ When you create a TIP-20 token, you interact with the `TIP20Factory` precompiled
 4. **Sets up default states** (transfer policy, supply cap, pause state)
 5. **Emits a `TokenCreated` event** with the new token's address and ID
 
-## Interface
 
-```solidity
-function createToken(
-  /** Name of the token */
-  string memory name,
-  /** Symbol of the token */
-  string memory symbol,
-  /** Currency of the token */
-  string memory currency,
-  /** Linking token */
-  TIP20 quoteToken,
-  /** Admin of the token */
-  address admin
-) external returns (
-  /** Address of the newly created token */
-  address
-);
-```
+## Details
 
-## FAQ
-
-### Vanity Addresses
+### Predictable Addresses
 
 Each TIP-20 token is deployed to a predictable address following this pattern:
 
@@ -62,16 +43,16 @@ Each TIP-20 token is deployed to a predictable address following this pattern:
 0x20C0000000000000000000000000<tokenId>
 ```
 
-The token ID is an incrementing counter managed by the factory, making token addresses easily identifiable as TIP-20 tokens. For example, token ID `1` deploys to `0x20C0000000000000000000000000000001`.
+The token ID is an incrementing counter managed by the factory, making token addresses easily identifiable as TIP-20 tokens. For example, token ID `1` deploys to `0x20C0000000000000000000000000000000000001`.
 
 ### Quote Tokens
 
-Every TIP-20 token has a **quote token** that determines:
-
-- Which token it can be traded against on the built-in DEX
-- Its position in the token hierarchy (used for fee preferences and liquidity routing)
+Every TIP-20 token has a **quote token** that determines which token it is directly quoted again on the built-in DEX
 
 Most USD stablecoins use [linkingUSD](/documentation/exchange/linkingUSD) at `0x20c0000000000000000000000000000000000000` as their quote token.
+:::warning
+Quote tokens cannot be changed after creation. Choose carefully based on your expected liquidity and trading needs.
+:::
 
 ### Currency & Decimals
 
@@ -79,17 +60,6 @@ Most USD stablecoins use [linkingUSD](/documentation/exchange/linkingUSD) at `0x
 - All TIP-20 tokens use 6 decimals.
 - If a token's `currency` is "USD", its `quoteToken` must also be a USD token.
 
-### Quote Tokens
-
-The `quoteToken` parameter determines trading pairs and token hierarchy:
-
-- **Most stablecoins**: Use [linkingUSD](/documentation/exchange/linkingUSD) (`0x20c0000000000000000000000000000000000000`) as their quote token
-- **Custom pairs**: Can use any existing TIP-20 token as a quote token
-- **linkingUSD**: The root quote token that serves as the base for USD stablecoins
-
-:::warning
-Quote tokens cannot be changed after creation. Choose carefully based on your expected liquidity and trading needs.
-:::
 
 ### Roles & Permissions
 

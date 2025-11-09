@@ -2,17 +2,6 @@
 
 TIP-20 provides a complete token implementation suite consisting of three core contracts: the main token contract, a factory for deployment, and a role-based access control system. The standard enhances ERC-20 with payment-specific features while maintaining compatibility with existing Ethereum tooling.
 
-## Motivation
-
-Traditional ERC-20 tokens lack features essential for real-world payments:
-
-- **Memo Support**: No way to include transaction references or notes
-- **Compliance Integration**: No built-in access control or policy enforcement
-- **Administrative Controls**: Limited administrative capabilities
-- **Fee System Integration**: No integration with blockchain fee mechanisms
-
-TIP-20 addresses these limitations while maintaining full ERC-20 compatibility.
-
 ## Specification
 
 ### Core Contracts
@@ -288,20 +277,3 @@ token.setSupplyCap(1000000 * 10**18);
 token.mintWithMemo(treasury, amount, keccak256("TREASURY_ALLOCATION"));
 ```
 
-
-## Security Considerations
-
-- **Role Management**: Use multisig wallets for administrative roles
-- **Policy Enforcement**: Transfer policies are enforced on both sender and recipient
-- **Signature Replay**: Salt-based protection prevents signature reuse
-- **Supply Controls**: Supply cap prevents unlimited minting
-- **Pause Functionality**: Emergency stop capability for security incidents
-
-## Backward Compatibility
-
-TIP-20 maintains full ERC-20 compatibility:
-
-- All standard ERC-20 functions work identically
-- Standard events are emitted
-- Existing wallets and tools work without modification
-- EIP-2612 permit functionality included

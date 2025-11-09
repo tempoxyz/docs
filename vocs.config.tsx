@@ -145,7 +145,7 @@ export default defineConfig({
           },
           {
             text: 'Run a Node',
-            link: '/documentation/operators',
+            link: '/get-started/quickstart/run-a-node',
           },
         ],
       },
@@ -194,42 +194,36 @@ export default defineConfig({
     ],
     '/documentation': [
       {
-        text: 'Introduction',
+        text: 'Core Concepts',
+        link: '/documentation',
         items: [
           {
-            text: 'Core Concepts',
-            link: '/documentation',
-            collapsed: false,
-            items: [
-              {
-                text: 'Fees',
-                link: '/documentation/fees',
-              },
-              {
-                text: 'Accounts',
-                link: '/documentation/accounts',
-              },
-              {
-                text: 'Transactions',
-                link: '/documentation/transactions',
-              },
-              {
-                text: 'Tokens',
-                link: '/documentation/tokens',
-              },
-              {
-                text: 'Exchange',
-                link: '/documentation/exchange',
-              },
-              {
-                text: 'Payment Lanes',
-                link: '/documentation/blockspace/blockspace-for-payments',
-              },
-              {
-                text: 'Sub-Blocks',
-                link: '/documentation/blockspace/validator-sub-blocks',
-              },
-            ],
+            text: 'Fees',
+            link: '/documentation/fees',
+          },
+          {
+            text: 'Accounts',
+            link: '/documentation/accounts',
+          },
+          {
+            text: 'Transactions',
+            link: '/documentation/transactions',
+          },
+          {
+            text: 'Tokens',
+            link: '/documentation/tokens',
+          },
+          {
+            text: 'Exchange',
+            link: '/documentation/exchange',
+          },
+          {
+            text: 'Payment Lanes',
+            link: '/documentation/blockspace/blockspace-for-payments',
+          },
+          {
+            text: 'Sub-Blocks',
+            link: '/documentation/blockspace/validator-sub-blocks',
           },
         ],
       },
@@ -301,6 +295,10 @@ export default defineConfig({
             text: 'Transfer Policies',
             link: '/documentation/tokens/transfer-policies',
           },
+          {
+            text: 'Streaming Rewards',
+            link: '/documentation/tokens/rewards',
+          },
         ],
       },
       {
@@ -328,20 +326,6 @@ export default defineConfig({
       {
         text: 'Running a Node',
         link: '/documentation/operators',
-        items: [
-          {
-            text: 'System Requirements',
-            link: '/documentation/operators/system-requirements',
-          },
-          {
-            text: 'Installation',
-            link: '/documentation/operators/installation',
-          },
-          {
-            text: 'Running an RPC Node',
-            link: '/documentation/operators/rpc-node',
-          },
-        ],
       },
     ],
     '/protocol': [
@@ -367,6 +351,10 @@ export default defineConfig({
           {
             text: 'TIP-403',
             link: '/protocol/tokens/tip-403',
+          },
+          {
+            text: 'Rewards',
+            link: '/protocol/specs/RewardDistribution',
           },
         ],
       },
@@ -1402,10 +1390,7 @@ export default defineConfig({
         { text: 'Solidity', link: '/sdk/solidity' },
       ],
     },
-    {
-      text: 'References',
-      items: [{ text: 'Protocol', link: '/protocol' }],
-    },
+    { text: 'Protocol Specs', link: '/protocol' },
   ],
   twoslash: {
     compilerOptions: {
