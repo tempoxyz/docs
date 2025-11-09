@@ -2,16 +2,14 @@ import { Callout } from 'vocs/components'
 
 # Payment Lanes
 
-Tempo ensures that payment transactions always have available blockspace, even during periods of high network congestion from DeFi activity or complex smart contracts. This is achieved through **separate gas limits** for payment and non-payment transactions.
+Tempo ensures that payment transactions always have available blockspace, even during periods of high network congestion from DeFi activity or complex smart contracts. No action is required by the user to take advantage of this feature. 
 
-## Use Case: Specifying Payment vs Non-Payment Gas Limits
-
-When blocks are constructed, validators enforce two separate gas constraints:
+This is achieved through **separate gas limits** for payment and non-payment transactions. When blocks are constructed, validators enforce two separate gas constraints:
 
 1. **`gasLimit`** — The total gas available for all transactions (standard Ethereum behavior)
 2. **`generalGasLimit`** — The maximum gas that non-payment transactions can consume
 
-This creates a reserved capacity for payment transactions. Even if non-payment transactions fill up to `generalGasLimit`, payment transactions can still use the remaining capacity up to `gasLimit`.
+Even if non-payment transactions fill up to `generalGasLimit`, payment transactions can still use the remaining capacity up to `gasLimit`.
 
 ## How Your Transaction is Classified
 
@@ -30,25 +28,7 @@ The classification is determined by a pure function that only examines the trans
 </Callout>
 
 <Callout type="note">
-    **Capacity and Priority Fees**: While the payment lane has much higher capacity limit than the general transaction lane, it is theoretically possible for it to fill up during extreme congestion. In such cases, transactions can set a priority fee to increase their likelihood of inclusion. Both payment and non-payment transactions share the same fixed base fee, with the ability to add priority fees when needed. The payment lane's higher capacity means congestion should be rare in practice.
+    **Capacity and Priority Fees**: It is theoretically possible for the payment lane to fill up during extreme congestion. In such cases, transactions can set a priority fee to increase their likelihood of inclusion. The payment lane's capacity limit means congestion should be rare in practice.
 </Callout>
 
 For the complete technical specification of how this works at the consensus level, including the dual gas accounting mechanism, see the [Payments Lane specification](/protocol/specs/PaymentLane).
-
-## Example: Sending a Payment
-
-:::code-group
-```ts [sendPayment.ts]
-// This transaction automatically uses the payment gas limit [!code focus]
-// because it's sent to a TIP-20 token address (0x20c0...) [!code focus]
-const result = await client.token.transferSync({ // [!code focus]
-  token: alphaUSDAddress, // TIP-20 token address // [!code focus]
-  amount, // [!code focus]
-  to: recipient, // [!code focus]
-})
-```
-
-```ts [viem.config.ts]
-// [!include ~/snippets/setup.ts:setup]
-```
-:::

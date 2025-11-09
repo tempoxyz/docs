@@ -137,7 +137,7 @@ export default defineConfig({
           },
           {
             text: 'Deploy on Tempo',
-            link: '/sdk/solidity',
+            link: '/get-started/quickstart/deploy-on-tempo',
           },
           {
             text: 'Issue a Stablecoin',
@@ -152,10 +152,6 @@ export default defineConfig({
       {
         text: 'Network Information',
         items: [
-          {
-            text: 'Overview',
-            link: '/get-started/network-information',
-          },
           {
             text: 'Connection Details',
             link: '/get-started/network-information/connection-details',
