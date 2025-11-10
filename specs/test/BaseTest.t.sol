@@ -3,11 +3,13 @@ pragma solidity ^0.8.13;
 
 import { FeeManager } from "../src/FeeManager.sol";
 import "../src/LinkingUSD.sol";
+import "../src/Nonce.sol";
 import "../src/StablecoinExchange.sol";
 import "../src/TIP20.sol";
 import "../src/TIP20Factory.sol";
 import "../src/TIP20RewardRegistry.sol";
 import "../src/TIP403Registry.sol";
+import { INonce } from "../src/interfaces/INonce.sol";
 import { Test, console } from "forge-std/Test.sol";
 
 // Base test framework - all tests should import this
@@ -20,6 +22,7 @@ contract BaseTest is Test {
     address internal constant _LINKING_USD = 0x20C0000000000000000000000000000000000000;
     address internal constant _STABLECOIN_DEX = 0xDEc0000000000000000000000000000000000000;
     address internal constant _FEE_AMM = 0xfeEC000000000000000000000000000000000000;
+    address internal constant _NONCE = 0x4e4F4E4345000000000000000000000000000000;
 
     // Role constants
     bytes32 internal constant _ISSUER_ROLE = keccak256("ISSUER_ROLE");
@@ -42,6 +45,7 @@ contract BaseTest is Test {
     StablecoinExchange public exchange = StablecoinExchange(_STABLECOIN_DEX);
     FeeManager public amm = FeeManager(_FEE_AMM);
     TIP403Registry public registry = TIP403Registry(_TIP403REGISTRY);
+    INonce public nonce = INonce(_NONCE);
     TIP20 public token1;
     TIP20 public token2;
     bool isTempo;
@@ -53,7 +57,10 @@ contract BaseTest is Test {
         // Is this tempo chain?
         isTempo = _TIP403REGISTRY.code.length + _TIP20REWARDS_REGISTRY.code.length
                 + _TIP20FACTORY.code.length + _LINKING_USD.code.length + _STABLECOIN_DEX.code.length
+                + _NONCE.code.length
             > 0;
+
+        console.log("Tests running with isTempo =", isTempo);
 
         // Deploy contracts if not tempo
         if (!isTempo) {
@@ -64,6 +71,7 @@ contract BaseTest is Test {
             deployCodeTo("TIP20Factory", _TIP20FACTORY);
             // Deploy LinkingUSD with the same admin used on Tempo
             deployCodeTo("LinkingUSD.sol", abi.encode(linkingUSDAdmin), _LINKING_USD);
+            deployCodeTo("Nonce", _NONCE);
         }
 
         if (isTempo) {
@@ -84,6 +92,9 @@ contract BaseTest is Test {
             }
             if (_FEE_AMM.code.length == 0) {
                 revert MissingPrecompile("FeeManager", _STABLECOIN_DEX);
+            }
+            if (_NONCE.code.length == 0) {
+                revert MissingPrecompile("Nonce", _NONCE);
             }
 
             // Grant DEFAULT_ADMIN_ROLE (bytes32(0)) to admin for linkingUSD via direct storage write
