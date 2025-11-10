@@ -32,14 +32,21 @@ import { Container as ParentContainer } from '../Container'
 
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
+function useWebAuthnConnector() {
+  const connectors = useConnectors()
+  return React.useMemo(
+    // biome-ignore lint/style/noNonNullAssertion: webAuthn connector always defined in wagmi.config.ts
+    () => connectors.find((connector) => connector.id === 'webAuthn')!,
+    [connectors],
+  )
+}
+
 export function Connect(props: { stepNumber?: number | undefined }) {
   const { stepNumber = 1 } = props
   const { address } = useAccount()
   const connect = useConnect()
   const disconnect = useDisconnect()
-  const connectors = useConnectors()
-  // biome-ignore lint/style/noNonNullAssertion: defined
-  const connector = React.useMemo(() => connectors[0]!, [connectors])
+  const connector = useWebAuthnConnector()
   const [copied, setCopied] = React.useState(false)
   const copyToClipboard = React.useCallback(() => {
     if (!address) return
@@ -542,8 +549,7 @@ export function ConnectNav() {
   const account = useAccount()
   const connect = useConnect()
   const disconnect = useDisconnect()
-  const connectors = useConnectors()
-  const connector = React.useMemo(() => connectors[0], [connectors])
+  const connector = useWebAuthnConnector()
 
   if (account.address)
     return (

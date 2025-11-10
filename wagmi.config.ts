@@ -15,7 +15,7 @@ export const config = createConfig({
       : tempoLocal({ feeToken }),
   ],
   connectors: [webAuthn()],
-  multiInjectedProviderDiscovery: false,
+  multiInjectedProviderDiscovery: true,
   transports: {
     [tempoAndantino.id]: webSocket(
       'wss://rpc.testnet.tempo.xyz?supersecretargument=pleasedonotusemeinprod',

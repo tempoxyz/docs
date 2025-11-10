@@ -1,4 +1,4 @@
-import { Callout } from 'vocs/components'
+import { AddTempoToWallet } from '../../../components/AddTempoToWallet.tsx'
 
 # Connect to Tempo
 
@@ -23,22 +23,23 @@ Note that the RPC URL is authenticated with a username and password. You can get
 
 ## Add Network to Wallet
 
-You can add Tempo testnet to a wallet that supports custom networks (e.g. MetaMask) manually.
+<AddTempoToWallet />
 
-For example, if you are using MetaMask:
+You can add Tempo testnet to a wallet that supports custom networks (e.g. MetaMask) manually. For example, if you are using MetaMask:
 
-1. Open MetaMask and click on the menu in the top right and select 'Networks'
-2. Click 'Add a custom network'
+1. Open MetaMask and click on the menu in the top right and select "Networks"
+2. Click "Add a custom network"
 3. Enter the network details:
    - **Network Name**: `Tempo Testnet`
    - **RPC URL**: `https://rpc.testnet.tempo.xyz`
    - **Chain ID**: `42429`
    - **Currency Symbol**: `USD`
    - **Block Explorer URL**: `https://explorer.testnet.tempo.xyz`
-4. Click 'Save' to add the network
+4. Click "Save" to add the network
 
 The official documentation from MetaMask on this process is also available [here](https://support.metamask.io/configure/networks/how-to-add-a-custom-network-rpc#adding-a-network-manually).
 
-<Callout type="warning">
-Note that we recommend using the symbol "USD" for the currency symbol, despite there being no native gas token. Legacy wallets like MetaMask don't natively support the Tempo network yet, so there are some quirks to the interface.
-</Callout>
+:::warning
+Note that we recommend using the `symbol` "USD" for the currency symbol, despite there being no native gas token. Legacy wallets like MetaMask don't natively support the Tempo network yet, so there are some quirks to the interface.
+You might also need to set `nativeCurrency.decimals` to `18` instead of `6` in some wallets.
+:::
