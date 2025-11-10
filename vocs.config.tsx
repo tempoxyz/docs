@@ -464,6 +464,10 @@ export default defineConfig({
           },
         ],
       },
+      {
+        text: 'More documentation',
+        link: 'https://alloy.rs/'
+      },
     ],
     '/sdk/typescript': [
       {
