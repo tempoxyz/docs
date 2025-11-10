@@ -426,7 +426,24 @@ export default defineConfig({
     '/sdk/solidity': [
       {
         text: 'Getting Started',
-        link: '/sdk/solidity',
+        items: [
+          {
+            text: 'Introduction',
+            link: '/sdk/solidity',
+          },
+          {
+            text: 'Install',
+            link: '/sdk/solidity/install',
+          },
+          {
+            text: 'Configure your project',
+            link: '/sdk/solidity/configure',
+          },
+          {
+            text: 'Build, test, and deploy contracts',
+            link: '/sdk/solidity/run',
+          }
+        ]
       },
     ],
     '/sdk/rust': [

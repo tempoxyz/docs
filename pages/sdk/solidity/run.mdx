@@ -1,0 +1,91 @@
+# Build, Test & Deploy
+
+Build your contracts:
+
+```bash
+forge build
+```
+
+Run tests:
+
+```bash
+forge test
+```
+
+Run all tests with Tempo testnet fork:
+
+```bash
+forge test --fork-url https://rpc.testnet.tempo.xyz
+```
+
+:::info
+It is recommended to selectively use `vm.createSelectFork("https://rpc.testnet.tempo.xyz")` in your integration tests.
+:::
+
+## Deploy Your Contract
+
+:::info
+This assumes you have set up your repo with `forge init --tempo` as shown above.
+:::
+
+### Using `forge create`
+
+Deploy a simple contract:
+
+```bash
+forge create src/Mail.sol:Mail \
+  --rpc-url https://rpc.testnet.tempo.xyz \
+  --interactive \
+  --broadcast
+```
+
+Deploy with constructor arguments:
+
+```bash
+forge create src/Mail.sol:Mail \
+  --rpc-url https://rpc.testnet.tempo.xyz \
+  --interactive \
+  --broadcast \
+  --constructor-args <ARGUMENTS>
+```
+
+### Using `forge script`
+
+Run a deployment script:
+
+```bash
+forge script script/Mail.s.sol \
+  --rpc-url https://rpc.testnet.tempo.xyz \
+  --interactive \
+  --broadcast
+```
+
+## Verify Your Contract
+
+Check that your contract is deployed:
+
+```bash
+cast code <CONTRACT_ADDRESS> --rpc-url https://rpc.testnet.tempo.xyz
+```
+
+Interact with your contract:
+
+```bash
+cast call <CONTRACT_ADDRESS> "myFunction()(uint256)" \
+  --rpc-url https://rpc.testnet.tempo.xyz
+```
+
+Send a transaction:
+
+```bash
+cast send <CONTRACT_ADDRESS> "myFunction(uint256)" 42 \
+  --rpc-url https://rpc.testnet.tempo.xyz \
+  --interactive
+```
+
+Replay a transaction by hash:
+
+```bash
+cast run <TX_HASH> \
+  --rpc-url https://rpc.testnet.tempo.xyz
+```

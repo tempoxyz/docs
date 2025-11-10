@@ -1,0 +1,61 @@
+# Configure
+
+## Set Up Your Project
+
+### Option A: New Project
+
+Initialize a new project with Tempo support:
+
+```bash
+forge init -n tempo my-project && cd my-project
+```
+
+This creates a new directory `my-project` with a basic project structure configured for Tempo.
+
+```text
+.
+├── foundry.lock
+├── foundry.toml
+├── lib
+│   ├── forge-std
+│   └── tempo-std
+├── README.md
+├── script
+│   └── Mail.s.sol
+├── src
+│   └── Mail.sol
+└── test
+    └── Mail.t.sol
+```
+
+### Option B: Existing Project
+
+Add Foundry to an existing project:
+
+```toml [foundry.toml]
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+```
+
+Install Tempo standard library:
+
+```bash
+forge install tempoxyz/tempo-std
+```
+
+## Configure Foundry for Tempo
+
+Optionally, set up environment variables:
+
+```bash
+export TEMPO_RPC_URL=https://rpc.testnet.tempo.xyz
+```
+
+Add to your `foundry.toml`:
+
+```toml [foundry.toml]
+[rpc_endpoints]
+tempo_testnet = "https://rpc.testnet.tempo.xyz"
+```
