@@ -28,6 +28,7 @@ import LucidePictureInPicture2 from '~icons/lucide/picture-in-picture-2'
 import LucideRotateCcw from '~icons/lucide/rotate-ccw'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
 import { cva, cx } from '../../cva.config'
+import { Container as ParentContainer } from '../Container'
 
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
@@ -373,8 +374,8 @@ export function Container(
     disconnect.disconnect()
   }, [disconnect.disconnect])
   return (
-    <div className="border-gray4 border divide-gray4 divide-y">
-      <header className="px-2.5 py-2 flex items-center justify-between">
+    <ParentContainer
+      headerLeft={
         <div className="flex gap-1.5 items-center">
           <h4 className="text-gray12 text-[13px] leading-none -tracking-[1%]">
             {name}
@@ -383,6 +384,8 @@ export function Container(
             demo
           </span>
         </div>
+      }
+      headerRight={
         <div>
           {address && (
             <button
@@ -395,9 +398,8 @@ export function Container(
             </button>
           )}
         </div>
-      </header>
-      {children}
-      <footer className="px-2.5 h-8 items-center flex">
+      }
+      footer={
         <div className="text-[13px] gap-2 h-full flex items-center leading-none">
           <span className="text-gray10">Balances</span>
           <div className="h-[60%] w-px bg-gray4" />
@@ -409,15 +411,17 @@ export function Container(
                 <span className="text-gray10">
                   {formatUnits(balance ?? 0n, 6)}
                 </span>
-                testUSD
+                AlphaUSD
               </span>
             )
           ) : (
             <span className="text-gray9">No account detected</span>
           )}
         </div>
-      </footer>
-    </div>
+      }
+    >
+      {children}
+    </ParentContainer>
   )
 }
 

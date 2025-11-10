@@ -1,7 +1,7 @@
 import { QueryClient } from '@tanstack/react-query'
 import { tempoAndantino, tempoLocal } from 'tempo.ts/chains'
 import { webAuthn } from 'tempo.ts/wagmi'
-import { createConfig, http } from 'wagmi'
+import { createConfig, http, webSocket } from 'wagmi'
 
 const feeToken = '0x20c0000000000000000000000000000000000001'
 
@@ -17,14 +17,9 @@ export const config = createConfig({
   connectors: [webAuthn()],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempoAndantino.id]: http(undefined, {
-      batch: true,
-      fetchOptions: {
-        headers: {
-          Authorization: `Basic ${btoa(import.meta.env.VITE_RPC_CREDENTIALS)}`,
-        },
-      },
-    }),
+    [tempoAndantino.id]: webSocket(
+      'wss://rpc.testnet.tempo.xyz?supersecretargument=pleasedonotusemeinprod',
+    ),
     [tempoLocal.id]: http(undefined, {
       batch: true,
     }),
