@@ -63,27 +63,27 @@ export default defineConfig({
           },
           {
             text: 'Features',
-            collapsed: false,
+            collapsed: true,
             items: [
               {
                 text: 'Payment Features',
-                link: '/get-started/introduction/payment-features',
+                link: '/get-started/features/payment-features',
               },
               {
                 text: 'Stablecoin Liquidity',
-                link: '/get-started/introduction/stablecoin-liquidity',
+                link: '/get-started/features/stablecoin-liquidity',
               },
               {
-                text: 'Wallet Features',
-                link: '/get-started/introduction/wallet-features',
+                text: 'Account Features',
+                link: '/get-started/features/wallet-features',
               },
               {
                 text: 'Performance',
-                link: '/get-started/introduction/performance',
+                link: '/get-started/features/performance',
               },
               {
                 text: 'Validator Network',
-                link: '/get-started/introduction/validator-network',
+                link: '/get-started/features/validator-network',
               },
             ],
           },
@@ -124,54 +124,87 @@ export default defineConfig({
         items: [
           {
             text: 'Connect to Tempo',
-            link: '/get-started/quickstart',
-          },
-
-          {
-            text: 'Send a Payment',
-            link: '/get-started/quickstart/send-payment',
+            link: '/get-started/quickstart/connect-to-tempo',
           },
           {
-            text: 'Integrate Tempo SDKs',
-            link: '/get-started/quickstart/integrate-sdks',
-          },
-          {
-            text: 'Deploy on Tempo',
-            link: '/get-started/quickstart/deploy-on-tempo',
-          },
-          {
-            text: 'Issue a Stablecoin',
-            link: '/get-started/quickstart/issue-stablecoin',
-          },
-          {
-            text: 'Run a Node',
-            link: '/get-started/quickstart/run-a-node',
-          },
-        ],
-      },
-      {
-        text: 'Network Information',
-        items: [
-          {
-            text: 'Connection Details',
-            link: '/get-started/network-information/connection-details',
+            text: 'Integrate an SDK',
+            link: '/get-started/quickstart/integrate-an-sdk',
           },
           {
             text: 'Testnet Faucet',
-            link: '/get-started/network-information/faucet',
+            link: '/get-started/quickstart/faucet',
           },
           {
             text: 'Predeployed Contracts',
-            link: '/get-started/network-information/predeployed-contracts',
+            link: '/get-started/quickstart/predeployed-contracts',
           },
           {
             text: 'EVM Compatibility',
-            link: '/get-started/network-information/evm-compatibility',
+            link: '/get-started/quickstart/evm-compatibility',
           },
         ],
       },
       {
-        text: 'Infrastructure Partners',
+        text: 'Guides',
+        items: [
+          {
+            text: 'Overview',
+            link: '/get-started/guides',
+          },
+          {
+            text: 'Create a Passkey Account 🚧',
+            disabled: true,
+            link: '/get-started/guides/create-a-passkey-account',
+          },
+          {
+            text: 'Send a Payment 🚧',
+            disabled: true,
+            link: '/get-started/guides/send-a-payment',
+          },
+          {
+            text: 'Deploy a Contract',
+            link: '/get-started/guides/deploy-a-contract',
+          },
+          {
+            text: 'Issue a Stablecoin 🚧',
+            disabled: true,
+            link: '/get-started/guides/issue-a-stablecoin',
+          },
+          {
+            text: 'Exchange Stablecoins 🚧',
+            disabled: true,
+            link: '/get-started/guides/exchange-stablecoins',
+          },
+          {
+            text: 'Sponsor a Transaction 🚧',
+            disabled: true,
+            link: '/get-started/guides/sponsor-a-transaction',
+          },
+        ],
+      },
+      {
+        text: 'Tempo Node',
+        items: [
+          {
+            text: 'Overview',
+            link: '/get-started/node',
+          },
+          {
+            text: 'Installation',
+            link: '/get-started/node/installation',
+          },
+          {
+            text: 'Running the Node',
+            link: '/get-started/node/usage',
+          },
+          {
+            text: 'System Requirements',
+            link: '/get-started/node/system-requirements',
+          },
+        ],
+      },
+      {
+        text: 'Infrastructure & Tooling',
         items: [
           {
             text: 'Overview',
@@ -182,55 +215,41 @@ export default defineConfig({
             link: '/get-started/infrastructure/data-indexers',
           },
           {
-            text: 'Node Providers',
-            link: '/get-started/infrastructure/node-providers',
-          },
-          {
             text: 'Developer Tools',
             link: '/get-started/infrastructure/developer-tools',
+          },
+          {
+            text: 'Node Providers',
+            link: '/get-started/infrastructure/node-providers',
           },
         ],
       },
     ],
     '/documentation': [
       {
-        text: 'Core Concepts',
+        text: 'Overview',
         link: '/documentation',
+      },
+      {
+        text: 'Blockspace',
         items: [
           {
-            text: 'Fees',
-            link: '/documentation/fees',
-          },
-          {
-            text: 'Accounts',
-            link: '/documentation/accounts',
-          },
-          {
-            text: 'Transactions',
-            link: '/documentation/transactions',
-          },
-          {
-            text: 'Tokens',
-            link: '/documentation/tokens',
-          },
-          {
-            text: 'Exchange',
-            link: '/documentation/exchange',
-          },
-          {
             text: 'Payment Lanes',
-            link: '/documentation/blockspace/blockspace-for-payments',
+            link: '/documentation/blockspace/payment-lanes',
           },
           {
             text: 'Sub-Blocks',
-            link: '/documentation/blockspace/validator-sub-blocks',
+            link: '/documentation/blockspace/sub-blocks',
           },
         ],
       },
       {
-        text: 'Managing Fees',
-        link: '/documentation/fees',
+        text: 'Fees',
         items: [
+          {
+            text: 'Overview',
+            link: '/documentation/fees',
+          },
           {
             text: 'Preferences Cascade',
             link: '/documentation/fees/preferences',
@@ -246,9 +265,12 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Sending Transactions',
-        link: '/documentation/transactions',
+        text: 'Transactions',
         items: [
+          {
+            text: 'Overview',
+            link: '/documentation/transactions',
+          },
           {
             text: 'Transaction Fee Tokens',
             link: '/documentation/transactions/transaction-fee-tokens',
@@ -273,8 +295,11 @@ export default defineConfig({
       },
       {
         text: 'TIP-20 Tokens',
-        link: '/documentation/tokens',
         items: [
+          {
+            text: 'Overview',
+            link: '/documentation/tokens',
+          },
           {
             text: 'Creating Tokens',
             link: '/documentation/tokens/creating-tokens',
@@ -302,9 +327,12 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Exchanging Tokens',
-        link: '/documentation/exchange',
+        text: 'Stablecoin Exchange',
         items: [
+          {
+            text: 'Overview',
+            link: '/documentation/exchange',
+          },
           {
             text: 'linkingUSD',
             link: '/documentation/exchange/linkingUSD',
@@ -324,8 +352,13 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Running a Node',
-        link: '/documentation/operators',
+        text: 'Accounts',
+        items: [
+          {
+            text: 'Overview',
+            link: '/documentation/accounts',
+          },
+        ],
       },
     ],
     '/protocol': [
@@ -442,8 +475,8 @@ export default defineConfig({
           {
             text: 'Build, test, and deploy contracts',
             link: '/sdk/solidity/run',
-          }
-        ]
+          },
+        ],
       },
     ],
     '/sdk/rust': [
@@ -465,9 +498,9 @@ export default defineConfig({
           {
             text: 'Perform actions',
             link: '/sdk/rust/perform-actions',
-          }
+          },
         ],
-      }, 
+      },
       {
         text: 'More documentation',
         link: 'https://alloy.rs/',
@@ -479,37 +512,6 @@ export default defineConfig({
         link: '/sdk/typescript',
       },
       {
-        text: 'Guides',
-        items: [
-          {
-            text: 'Creating & Managing Tokens 🚧',
-            link: '/sdk/typescript/guides/creating-managing-tokens',
-            disabled: false,
-          },
-          {
-            text: 'Managing Liquidity with Fee AMM 🚧',
-            link: '/sdk/typescript/guides/fee-amm',
-            disabled: false,
-          },
-          {
-            text: 'Interacting with Enshrined DEX 🚧',
-            link: '/sdk/typescript/guides/interacting-with-enshrined-dex',
-            disabled: false,
-          },
-          {
-            text: 'Setting Fee Tokens 🚧',
-            link: '/sdk/typescript/guides/setting-fee-tokens',
-            disabled: false,
-          },
-          {
-            text: 'Sponsoring Transactions 🚧',
-            link: '/sdk/typescript/guides/sponsoring-transactions',
-            disabled: false,
-          },
-        ],
-      },
-      {
-        // TODO: Add rewrite for /sdk/typescript/viem -> /sdk/typescript/viem
         text: 'Viem Reference',
         items: [
           {
@@ -1428,7 +1430,10 @@ export default defineConfig({
         { text: 'Solidity', link: '/sdk/solidity' },
       ],
     },
-    { text: 'Protocol Specs', link: '/protocol' },
+    {
+      text: 'Protocol Specs',
+      link: '/protocol',
+    },
   ],
   twoslash: {
     compilerOptions: {

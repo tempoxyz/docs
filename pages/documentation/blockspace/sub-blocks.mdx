@@ -51,13 +51,13 @@ The final block structure looks like:
 ::::
 
 :::note
-### Reserved Nonce Space
+**Reserved Nonce Space**
 
 To prevent transaction conflicts, each validator has a reserved nonce space. Transactions in sub-blocks use special nonce sequence keys that identify which validator proposed them. This ensures that validators can't interfere with each other's transactions.
 :::
 
 :::warning
-### Current Limitations
+**Current Limitations**
 
 Sub-blocks currently only support free transactions (transactions with `maxFeePerGas=0`). Paid transactions will be enabled when the Fee Manager is updated to handle fee accounting across sub-blocks.
 :::

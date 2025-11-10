@@ -3,16 +3,22 @@ import LucideArrowLeftRight from '~icons/lucide/arrow-left-right'
 import LucideCoins from '~icons/lucide/coins'
 import LucideArrowRightLeft from '~icons/lucide/arrow-right-left'
 import LucideServer from '~icons/lucide/server'
+import LucideBlocks from '~icons/lucide/blocks'
 import * as Card from "../../components/Card.tsx"
 
-## Core Concepts
+# Documentation
+
+Tempo's documentation is organized by concepts. 
+Each concept contains a high-level overview, as well as a set of documentation pages that dive deeper into its details.
+
+## Concepts
 
 <Card.Container>
   <Card.Link
-    description="Default account abstraction, Ethereum wallets, passkey wallets, and fee tokens"
-    href="/documentation/accounts/"
-    icon={LucideUser}
-    title="Accounts"
+    description="Payment lanes and sub-blocks"
+    href="/documentation/blockspace/payment-lanes"
+    icon={LucideBlocks}
+    title="Blockspace"
   />
   <Card.Link
     description="How fees work on Tempo, user & validator preferences, and fee lifecycle in a transaction"
@@ -39,9 +45,9 @@ import * as Card from "../../components/Card.tsx"
     title="Stablecoin Exchange"
   />
   <Card.Link
-    description="System requirements, installation, and running RPC nodes"
-    href="/documentation/operators"
-    icon={LucideServer}
-    title="Node Operations"
+    description="Default account abstraction, Ethereum wallets, passkey wallets, and fee tokens"
+    href="/documentation/accounts/"
+    icon={LucideUser}
+    title="Accounts"
   />
 </Card.Container>

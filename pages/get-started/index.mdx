@@ -1,15 +1,18 @@
 import LucideCode from '~icons/lucide/code'
 import LucideWallet from '~icons/lucide/wallet'
 import LucideSend from '~icons/lucide/send'
+import LucideBook from '~icons/lucide/book'
 import LucidePuzzle from '~icons/lucide/puzzle'
 import LucideCoins from '~icons/lucide/coins'
 import LucideServer from '~icons/lucide/server'
 import LucideZap from '~icons/lucide/zap'
+import LucideLibraryBig from '~icons/lucide/library-big'
 import LucideCircleDollarSign from '~icons/lucide/circle-dollar-sign'
 import LucideSettings from '~icons/lucide/settings'
 import LucideGauge from '~icons/lucide/gauge'
 import LucideNetwork from '~icons/lucide/network'
 import LucideGlobe from '~icons/lucide/globe'
+import LucideBox from '~icons/lucide/box'
 import LucideTimer from '~icons/lucide/timer'
 import LucideFileText from '~icons/lucide/file-text'
 import LucideCreditCard from '~icons/lucide/credit-card'
@@ -38,48 +41,35 @@ Jump right in and start using Tempo:
     icon={LucideCode}
     title="Connect to Tempo"
   />
-
-  <Card.Link
-    description="Transfer tokens with memos and fee sponsorship"
-    href="/get-started/quickstart/send-payment"
-    icon={LucideSend}
-    title="Send a Payment"
-  />
   <Card.Link
     description="Use TypeScript or Rust SDKs in your application"
     href="/get-started/quickstart/integrate-sdks"
     icon={LucidePuzzle}
-    title="Integrate Tempo SDKs"
+    title="Integrate an SDK"
   />
   <Card.Link
-    description="Set up your dev environment and deploy contracts"
-    href="/sdk/solidity"
+    description="Fund your testnet account with a set of test tokens"
+    href="/get-started/faucet"
     icon={LucideZap}
-    title="Deploy on Tempo"
+    title="Testnet Faucet"
   />
   <Card.Link
-    description="Create and manage your own TIP-20 token"
-    href="/get-started/quickstart/issue-stablecoin"
-    icon={LucideCoins}
-    title="Issue a Stablecoin"
+    description="Follow our guides to dive in and start building"
+    href="/get-started/guides"
+    icon={LucideLibraryBig}
+    title="Follow Guides"
   />
   <Card.Link
-    description="Run your own Tempo node for development or infrastructure"
-    href="/documentation/operators"
-    icon={LucideServer}
-    title="Run a Node"
+    description="Learn about the core concepts of the Tempo protocol"
+    href="/documentation"
+    icon={LucidePuzzle}
+    title="Learn Concepts"
   />
   <Card.Link
-    description="Technical specifications for TIP-20, transaction types, and consensus"
+    description="Read the full specifications for the Tempo protocol"
     href="/protocol"
     icon={LucideFileText}
-    title="Protocol Specifications"
-  />
-  <Card.Link
-    description="Comprehensive guides for tokens, transactions, accounts, and the DEX"
-    href="/documentation"
-    icon={LucideCode}
-    title="Developer Docs"
+    title="Read Specifications"
   />
 </Card.Container>
 
@@ -90,31 +80,31 @@ Understand what makes Tempo unique:
 <Card.Container>
   <Card.Link
     description="TIP-20 tokens, memos, batching, scheduling, and instant finality"
-    href="/get-started/introduction/payment-features"
+    href="/get-started/features/payment-features"
     icon={LucideCircleDollarSign}
     title="Payment Features"
   />
   <Card.Link
     description="linkingUSD, enshrined DEX, and cross-stablecoin payments"
-    href="/get-started/introduction/stablecoin-liquidity"
+    href="/get-started/features/stablecoin-liquidity"
     icon={LucideCoins}
     title="Token Liquidity"
   />
   <Card.Link
     description="Account abstraction, fee tokens, and flexible transaction types"
-    href="/get-started/introduction/wallet-features"
+    href="/get-started/features/wallet-features"
     icon={LucideWallet}
     title="Wallet Features"
   />
   <Card.Link
     description="Simplex consensus, Reth execution, and payment lanes"
-    href="/get-started/introduction/performance"
+    href="/get-started/features/performance"
     icon={LucideGauge}
     title="Performance"
   />
   <Card.Link
     description="Validator economics, reserved blockspace, and network participation"
-    href="/get-started/introduction/validator-network"
+    href="/get-started/features/validator-network"
     icon={LucideNetwork}
     title="Validator Network"
   />
@@ -160,22 +150,5 @@ Here are some examples of what you can do with Tempo:
     href="/get-started/use-cases/tokenized-deposits"
     icon={LucideBuilding}
     title="Tokenized Deposits"
-  />
-</Card.Container>
-
-## Additional Resources
-
-<Card.Container>
-  <Card.Link
-    description="Information on RPC endpoints, chain IDs, faucets, and testnet configuration"
-    href="/get-started/network-information"
-    icon={LucideSettings}
-    title="Network Information"
-  />
-  <Card.Link
-    description="Explore infrastructure like indexers, node providers, developer tools, and more"
-    href="/get-started/infrastructure"
-    icon={LucideServer}
-    title="Infrastructure Partners"
   />
 </Card.Container>
