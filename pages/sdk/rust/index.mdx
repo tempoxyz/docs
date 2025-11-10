@@ -14,14 +14,11 @@ The Tempo extension can be used to perform common operations with the chain, suc
 
 To install the Tempo extension, you will need to install [Alloy](https://alloy.rs) and Tempo:
 
-:::code-group
 
 ```bash [cargo]
 cargo add alloy
 cargo add tempo-alloy --git https://github.com/tempoxyz/tempo
 ```
-
-:::
 
 ### Configure
 
@@ -45,7 +42,6 @@ async fn build_provider() -> Result<impl Provider<TempoNetwork>, TransportError>
 
 Now you're ready to start interacting with Tempo!
 
-:::code-group
 
 ```rs twoslash [main.rs]
 use alloy::{
@@ -69,8 +65,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 ```
-
-:::
 
 ::::
 
