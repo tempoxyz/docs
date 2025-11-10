@@ -34,7 +34,7 @@ const client = createClient({
 :::
 
 :::warning
-Note that if even if a user has a [default fee token](/documentation/accounts) set on their account, the transaction-level `feeToken` parameter takes precedence over the account-level preference.
+Note that even if a user has a [default fee token](/documentation/accounts) set on their account, the transaction-level `feeToken` parameter takes precedence over the account-level preference.
 :::
 
 This works with any transaction type including batch transactions and contract calls. The system automatically handles conversion through the [Fee AMM](/protocol/transactions/fee-amm) if the validator doesn't accept your chosen token, and this transaction-level preference takes precedence over account-level and validator-level preferences.
