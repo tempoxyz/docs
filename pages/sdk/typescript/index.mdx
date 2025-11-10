@@ -143,27 +143,17 @@ Now that everything is set up, every component inside the Wagmi and TanStack Que
 import { useAccount } from 'wagmi'
 import { Hooks } from 'tempo.ts/wagmi'
 
-export function FeeTokenBalance() {
-  const { address } = useAccount()
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
-  const { data: userToken } = Hooks.fee.useUserToken({ account: address })
-  const { data: balance, ...balanceQuery } = Hooks.token.useGetBalance({ 
-    account: address, 
-    token: userToken?.address 
-  })
+export function TokenMetadata() {
   const { data: metadata, ...metadataQuery } = Hooks.token.useGetMetadata({ 
-    token: userToken?.address 
+    token: alphaUsd 
   })
 
-  if (balanceQuery.status === 'error' || metadataQuery.status === 'error')
-    return <div>Error fetching balance: {balance.error.message}</div>
-  if (!balance || !metadata) return <div>Loading balance...</div>
-  return (
-    <div>
-      Fee Token Balance: 
-      {formatUnits(balance, metadata.decimals)} {metadata.symbol}
-    </div>
-  )
+  if (metadataQuery.isError)
+    return <div>Error fetching metadata: {metadataQuery.error.message}</div>
+  if (metadataQuery.isLoading) return <div>Loading metadata...</div>
+  return <div>{metadata.name} ({metadata.symbol})</div>
 }
 ```
 
@@ -239,23 +229,20 @@ Now you're ready to [start interacting](/sdk/typescript/viem) with Tempo!
 import { formatUnits } from 'viem'
 import { client } from './viem.config'
 
-const address = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb'
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
-const userToken = await client.fee.getUserToken({ address })
-const balance = await client.token.getBalance({ 
-  account: address, 
-  token: userToken.address 
-})
 const metadata = await client.token.getMetadata({ 
-  token: userToken.address 
+  token: alphaUsd 
 })
 
 console.log(
-  'Fee Token Balance:', 
-  formatUnits(balance, metadata.decimals), 
-  metadata.symbol
+  'Alpha USD Metadata:', 
+  metadata.name,
+  metadata.symbol,
+  metadata.decimals,
+  metadata.totalSupply
 )
-// @log: Fee Token Balance: 10.5 aUSD
+// @log: Alpha USD Metadata: Alpha USD, AlphaUSD, 6, 1000000000000000000000n
 ```
 
 ```ts twoslash [viem.config.ts] filename="viem.config.ts"
