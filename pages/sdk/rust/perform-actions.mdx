@@ -1,0 +1,30 @@
+# Use Actions
+
+Now we are ready to use the provider to interact with the network. We can use the provider to send transactions, read data, and more.
+
+```rs twoslash [main.rs]
+use alloy::{
+    providers::{Provider, ProviderBuilder},
+    transports::TransportError,
+};
+use tempo_alloy::TempoNetwork;
+
+async fn build_provider() -> Result<impl Provider<TempoNetwork>, TransportError> {
+    ProviderBuilder::new_with_network::<TempoNetwork>()
+        .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
+        .await
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let provider = build_provider().await?;
+
+    println!("{}", provider.get_block_number().await?);
+    // @log: 421045
+    Ok(())
+}
+```
+
+See the Alloy [documentation](https://alloy.rs) or the [`Provider`] docs for more examples.
+
+[`Provider`]: https://docs.rs/alloy/latest/alloy/providers/trait.Provider.html

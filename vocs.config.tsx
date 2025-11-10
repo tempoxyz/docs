@@ -432,8 +432,25 @@ export default defineConfig({
     '/sdk/rust': [
       {
         text: 'Getting Started',
-        link: '/sdk/rust',
-      },
+        items: [
+          {
+            text: 'Introduction',
+            link: '/sdk/rust',
+          },
+          {
+            text: 'Install',
+            link: '/sdk/rust/install',
+          },
+          {
+            text: 'Configure a provider',
+            link: '/sdk/rust/configure',
+          },
+          {
+            text: 'Perform actions',
+            link: '/sdk/rust/perform-actions',
+          }
+        ],
+      }, 
       {
         text: 'More documentation',
         link: 'https://alloy.rs/',

@@ -1,0 +1,23 @@
+# Configure
+
+To use the Tempo extension crate, you will need to create a [`Provider`] using the [`TempoNetwork`].
+This will enable the usage of Tempo specific types on the [`Provider`] instance.
+
+For more information about network types, see the Alloy [documentation](https://alloy.rs/guides/interacting-with-multiple-networks#interacting-with-multiple-networks).
+
+```rust twoslash [main.rs]
+use alloy::{
+    providers::{Provider, ProviderBuilder},
+    transports::TransportError,
+};
+use tempo_alloy::TempoNetwork;
+
+async fn build_provider() -> Result<impl Provider<TempoNetwork>, TransportError> {
+    ProviderBuilder::new_with_network::<TempoNetwork>()
+        .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
+        .await
+}
+```
+
+[`Provider`]: https://docs.rs/alloy/latest/alloy/providers/trait.Provider.html
+[`TempoNetwork`]: #TBD/struct.TempoNetwork.html
