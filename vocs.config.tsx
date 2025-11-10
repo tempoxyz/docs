@@ -434,6 +434,36 @@ export default defineConfig({
         text: 'Getting Started',
         link: '/sdk/rust',
       },
+      {
+        text: 'Guides',
+        items: [
+          {
+            text: 'Creating & Managing Tokens 🚧',
+            link: '/sdk/rust/guides/creating-managing-tokens',
+            disabled: false,
+          },
+          {
+            text: 'Managing Liquidity with Fee AMM 🚧',
+            link: '/sdk/rust/guides/fee-amm',
+            disabled: false,
+          },
+          {
+            text: 'Interacting with Enshrined DEX 🚧',
+            link: '/sdk/rust/guides/interacting-with-enshrined-dex',
+            disabled: false,
+          },
+          {
+            text: 'Setting Fee Tokens 🚧',
+            link: '/sdk/rust/guides/setting-fee-tokens',
+            disabled: false,
+          },
+          {
+            text: 'Sponsoring Transactions 🚧',
+            link: '/sdk/rust/guides/sponsoring-transactions',
+            disabled: false,
+          },
+        ],
+      },
     ],
     '/sdk/typescript': [
       {
