@@ -19,63 +19,28 @@ foundryup
 
 ### Install Tempo Foundry
 
-::::steps
-
-### 1. Download Precompiled Binaries
-
-Download the latest binaries for your platform from [Tempo Foundry releases](https://github.com/tempoxyz/tempo-foundry/releases).
-
-**For Linux (x86_64):**
-```bash
-curl -L https://github.com/tempoxyz/tempo-foundry/releases/download/nightly/foundry_nightly_linux_amd64.tar.gz | tar xz
-```
-
-**For Linux (ARM64):**
-```bash
-curl -L https://github.com/tempoxyz/tempo-foundry/releases/download/nightly/foundry_nightly_linux_arm64.tar.gz | tar xz
-```
-
-**For macOS (Intel):**
-```bash
-curl -L https://github.com/tempoxyz/tempo-foundry/releases/download/nightly/foundry_nightly_darwin_amd64.tar.gz | tar xz
-```
-
-**For macOS (Apple Silicon):**
-```bash
-curl -L https://github.com/tempoxyz/tempo-foundry/releases/download/nightly/foundry_nightly_darwin_arm64.tar.gz | tar xz
-```
-
-### 2. Install the Binaries
-
-Move the binaries to your Foundry directory:
+Run the following command to install the Tempo fork of Foundry:
 
 ```bash
-mkdir -p ~/.foundry/bin
-mv forge cast ~/.foundry/bin/
-chmod +x ~/.foundry/bin/forge ~/.foundry/bin/cast
+foundryup -n tempo
 ```
 
-:::info
-This overwrites your existing `forge` and `cast` installation.
-:::
+This will install the latest `nightly` release of the Tempo fork.
 
-Ensure `~/.foundry/bin` is in your PATH:
+To install a specific version, replace `<TAG_NAME>` with the desired release tag:
 
 ```bash
-echo 'export PATH="$HOME/.foundry/bin:$PATH"' >> ~/.bashrc  # or ~/.zshrc
-source ~/.bashrc  # or ~/.zshrc
+foundryup -n tempo -i <TAG_NAME>
 ```
 
-### 3. Verify Installation
+#### Verify Installation
 
 ```bash
 forge --version
 cast --version
 ```
 
-You should see version information indicating the Tempo fork.
-
-::::
+You should see version information include `-tempo`, indicating you are using the Tempo fork.
 
 ## Set Up Your Project
 
@@ -84,7 +49,25 @@ You should see version information indicating the Tempo fork.
 Initialize a new project with Tempo support:
 
 ```bash
-forge init --tempo my-project && cd my-project
+forge init -n tempo my-project && cd my-project
+```
+
+This creates a new directory `my-project` with a basic project structure configured for Tempo.
+
+```text
+.
+├── foundry.lock
+├── foundry.toml
+├── lib
+│   ├── forge-std
+│   └── tempo-std
+├── README.md
+├── script
+│   └── Mail.s.sol
+├── src
+│   └── Mail.sol
+└── test
+    └── Mail.t.sol
 ```
 
 ### Option B: Existing Project
@@ -106,7 +89,7 @@ forge install tempoxyz/tempo-std
 
 ## Configure Foundry for Tempo
 
-Set up environment variables:
+Optionally, set up environment variables:
 
 ```bash
 export TEMPO_RPC_URL=https://rpc.testnet.tempo.xyz
@@ -117,9 +100,6 @@ Add to your `foundry.toml`:
 ```toml [foundry.toml]
 [rpc_endpoints]
 tempo_testnet = "https://rpc.testnet.tempo.xyz"
-
-[etherscan]
-tempo_testnet = { key = "${TEMPO_API_KEY}" }
 ```
 
 ## Build and Test
@@ -136,64 +116,52 @@ Run tests:
 forge test
 ```
 
-Run tests with Tempo testnet fork:
+Run all tests with Tempo testnet fork:
 
 ```bash
 forge test --fork-url https://rpc.testnet.tempo.xyz
 ```
 
+:::info
+It is recommended to selectively use `vm.createSelectFork("https://rpc.testnet.tempo.xyz")` in your integration tests.
+:::
+
 ## Deploy Your Contract
 
-### Using forge create
+:::info
+This assumes you have set up your repo with `forge init --tempo` as shown above.
+:::
+
+### Using `forge create`
 
 Deploy a simple contract:
 
 ```bash
-forge create src/MyContract.sol:MyContract \
+forge create src/Mail.sol:Mail \
   --rpc-url https://rpc.testnet.tempo.xyz \
-  --interactive
+  --interactive \
+  --broadcast
 ```
 
 Deploy with constructor arguments:
 
 ```bash
-forge create src/MyContract.sol:MyContract \
+forge create src/Mail.sol:Mail \
   --rpc-url https://rpc.testnet.tempo.xyz \
-  --constructor-args 0x20c0000000000000000000000000000000000001 \
-  --interactive
+  --interactive \
+  --broadcast \
+  --constructor-args <ARGUMENTS>
 ```
 
-### Using forge script
+### Using `forge script`
 
-Create a deployment script:
-
-```solidity [script/Deploy.s.sol]
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
-
-import "forge-std/Script.sol";
-import "../src/MyContract.sol";
-
-contract DeployScript is Script {
-    function run() external {
-        vm.startBroadcast();
-
-        MyContract myContract = new MyContract();
-
-        vm.stopBroadcast();
-
-        console.log("MyContract deployed to:", address(myContract));
-    }
-}
-```
-
-Run the deployment script:
+Run a deployment script:
 
 ```bash
-forge script script/Deploy.s.sol:DeployScript \
+forge script script/Mail.s.sol \
   --rpc-url https://rpc.testnet.tempo.xyz \
-  --broadcast \
-  --interactive
+  --interactive \
+  --broadcast
 ```
 
 ## Verify Your Contract
@@ -219,24 +187,9 @@ cast send <CONTRACT_ADDRESS> "myFunction(uint256)" 42 \
   --interactive
 ```
 
-## Configure Hardhat (Alternative)
-
-If you prefer Hardhat, add Tempo to your config:
-
-```javascript [hardhat.config.js]
-module.exports = {
-  networks: {
-    tempo: {
-      url: 'https://rpc.testnet.tempo.xyz',
-      chainId: 42429,
-      accounts: [process.env.PRIVATE_KEY]
-    }
-  }
-}
-```
-
-Deploy with Hardhat:
+Replay a transaction by hash:
 
 ```bash
-npx hardhat run scripts/deploy.js --network tempo
+cast run <TX_HASH> \
+  --rpc-url https://rpc.testnet.tempo.xyz
 ```
