@@ -1,6 +1,6 @@
-# `dex.getPriceLevel`
+# `dex.getTickLevel`
 
-Gets the price level information at a specific tick on the Stablecoin Exchange orderbook.  
+Gets the tick level information at a specific tick on the Stablecoin Exchange orderbook.  
 
 ## Usage
 
@@ -10,14 +10,14 @@ Gets the price level information at a specific tick on the Stablecoin Exchange o
 import { client } from './viem.config'
 import { Tick } from 'tempo.ts/viem'
 
-const level = await client.dex.getPriceLevel({
+const level = await client.dex.getTickLevel({
   base: '0x20c0000000000000000000000000000000000001',
   tick: Tick.fromPrice('1.001'),
   isBid: true,
 })
 
-console.log('Price level:', level)
-// @log: Price level: { head: 1n, tail: 5n, totalLiquidity: 1000000000n }
+console.log('Tick level:', level)
+// @log: Tick level: { head: 1n, tail: 5n, totalLiquidity: 1000000000n }
 ```
 
 ```ts twoslash [viem.config.ts] filename="viem.config.ts"

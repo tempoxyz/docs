@@ -663,8 +663,8 @@ export default defineConfig({
                     link: '/sdk/typescript/viem/dex.getOrder',
                   },
                   {
-                    text: 'getPriceLevel',
-                    link: '/sdk/typescript/viem/dex.getPriceLevel',
+                    text: 'getTickLevel',
+                    link: '/sdk/typescript/viem/dex.getTickLevel',
                   },
                   {
                     text: 'getSellQuote',
@@ -972,8 +972,8 @@ export default defineConfig({
                     link: '/sdk/typescript/wagmi/actions/dex.getOrder',
                   },
                   {
-                    text: 'getPriceLevel 🚧',
-                    link: '/sdk/typescript/wagmi/actions/dex.getPriceLevel',
+                    text: 'getTickLevel 🚧',
+                    link: '/sdk/typescript/wagmi/actions/dex.getTickLevel',
                   },
                   {
                     text: 'getSellQuote 🚧',
@@ -1271,8 +1271,8 @@ export default defineConfig({
                     link: '/sdk/typescript/wagmi/hooks/dex.usePlaceFlip',
                   },
                   {
-                    text: 'usePriceLevel 🚧',
-                    link: '/sdk/typescript/wagmi/hooks/dex.usePriceLevel',
+                    text: 'useTickLevel 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/dex.useTickLevel',
                   },
                   {
                     text: 'useSell 🚧',
