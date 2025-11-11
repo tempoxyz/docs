@@ -1,11 +1,31 @@
+# Protocol Specification Overview
 
-import { Callout } from 'vocs/components'
+## Introduction
 
-Protocol specifications are organized into the following sections:
+Tempo is a blockchain protocol purpose-built for global payments. Rather than being a general-purpose platform, Tempo makes deliberate technical choices optimized for payments at scale.
+
+These specifications provide the technical reference for protocol implementers, auditors, and core contributors building on Tempo. Each specification follows a structured format with an Abstract summarizing the component's purpose, Motivation explaining design goals, detailed Specification of behavior, Rationale for key decisions, and examples or test vectors. Specifications link to corresponding reference implementations in Solidity, providing both the normative behavior definition and canonical code.
+
+## Specification Structure
+
+The protocol specifications are organized into the following sections:
 
 | Category | Description |
 |----------|-------------|
-| [Tokens](/protocol/tokens) | Native token standards and protocols (TIP-20, TIP-403). |
-| [Transactions](/protocol/transactions) | Transaction processing, fees, token preferences, and payments lane. |
-| [Accounts](/protocol/accounts) | Account model (EIP-7702). |
-| [Exchange](/protocol/exchange/contract-interface) | Enshrined stablecoin exchange with order book and MEV protection. |
+| [Overview](/protocol/overview/intro) | Protocol introduction and [precompile contract addresses](/protocol/overview/contract-addresses) |
+| [Transactions](/protocol/transactions) | Transaction types including AATransaction (0x76) and deprecated FeeTokenTransaction (0x77) |
+| [Fees](/protocol/fees/fees) | Fee system and AMM for multi-token fee payment |
+| [Token Standards](/protocol/tokens) | TIP-20 core standard, TIP-403 policy registry, and reward distribution |
+| [Stablecoin Exchange](/protocol/stablecoin-exchange/stablecoin-exchange) | Enshrined exchange and linkingUSD mechanisms |
+| [Consensus & Blockspace](/protocol/consensus-blockspace/consensus) | Consensus, block format, payment lanes, and sub-blocks |
+| [Account Abstraction](/protocol/accounts) | Default Account Abstraction (deprecated) |
+| [ABI References](/protocol/abi-references) | Application Binary Interface references |
+
+## Audience
+
+These specifications are intended for:
+- Protocol developers and auditors
+- Core contributors implementing protocol features
+- Security researchers analyzing the protocol
+
+For application developers and node operators, see the [Documentation](/documentation) section.

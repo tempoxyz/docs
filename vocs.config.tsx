@@ -338,16 +338,11 @@ export default defineConfig({
     '/protocol': [
       {
         text: 'Overview',
-        items: [
-          {
-            text: 'Introduction',
-            link: '/protocol/overview/intro',
-          },
-          {
-            text: 'Precompile Contract Addresses',
-            link: '/protocol/overview/contract-addresses',
-          },
-        ],
+        link: '/protocol',
+      },
+      {
+        text: 'Precompile Contract Addresses',
+        link: '/protocol/overview/contract-addresses',
       },
       {
         text: 'Transactions',
