@@ -1,10 +1,9 @@
 import { useMutation } from '@tanstack/react-query'
 import type { VariantProps } from 'cva'
 import * as React from 'react'
-import { Actions } from 'tempo.ts/viem'
+import { Actions, type Chain } from 'tempo.ts/viem'
 import { Hooks } from 'tempo.ts/wagmi'
 import {
-  type Chain,
   type Client,
   formatUnits,
   parseUnits,
@@ -155,14 +154,17 @@ export function AddFunds(props: { stepNumber?: number | undefined }) {
           params: [address],
         })
       else
-        await Actions.token.transferSync(client as Client<Transport, Chain>, {
-          account: mnemonicToAccount(
-            'test test test test test test test test test test test junk',
-          ),
-          amount: parseUnits('10000', 6),
-          to: address,
-          token: alphaUsd,
-        })
+        await Actions.token.transferSync(
+          client as unknown as Client<Transport, Chain.Chain<null>>,
+          {
+            account: mnemonicToAccount(
+              'test test test test test test test test test test test junk',
+            ),
+            amount: parseUnits('10000', 6),
+            to: address,
+            token: alphaUsd,
+          },
+        )
       await new Promise((resolve) => setTimeout(resolve, 400))
       balanceRefetch()
     },
