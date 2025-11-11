@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import { LinkingUSD } from "../src/LinkingUSD.sol";
-import { StablecoinExchange } from "../src/StablecoinExchange.sol";
-import { TIP20 } from "../src/TIP20.sol";
-import { TIP20Factory } from "../src/TIP20Factory.sol";
-import { TIP403Registry } from "../src/TIP403Registry.sol";
+import { IStablecoinExchange } from "../src/interfaces/IStablecoinExchange.sol";
+import { ITIP20 } from "../src/interfaces/ITIP20.sol";
 import { BaseTest } from "./BaseTest.t.sol";
 import { MockTIP20 } from "./mocks/MockTIP20.sol";
 
@@ -101,9 +98,10 @@ contract StablecoinExchangeTest is BaseTest {
     }
 
     function test_CreatePair() public {
-        TIP20 newQuote = TIP20(factory.createToken("New Quote", "NQUOTE", "USD", linkingUSD, admin));
+        ITIP20 newQuote =
+            ITIP20(factory.createToken("New Quote", "NQUOTE", "USD", linkingUSD, admin));
 
-        TIP20 newBase = TIP20(factory.createToken("New Base", "NBASE", "USD", newQuote, admin));
+        ITIP20 newBase = ITIP20(factory.createToken("New Base", "NBASE", "USD", newQuote, admin));
         bytes32 expectedKey = exchange.pairKey(address(newBase), address(newQuote));
 
         if (!isTempo) {
@@ -236,7 +234,7 @@ contract StablecoinExchangeTest is BaseTest {
         try exchange.executeBlock() {
             revert CallShouldHaveReverted();
         } catch (bytes memory err) {
-            assertEq(err, abi.encodeWithSelector(StablecoinExchange.Unauthorized.selector));
+            assertEq(err, abi.encodeWithSelector(IStablecoinExchange.Unauthorized.selector));
         }
     }
 

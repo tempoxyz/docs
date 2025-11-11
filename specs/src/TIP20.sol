@@ -610,15 +610,15 @@ contract TIP20 is ITIP20, TIP20RolesAuth {
         return refund;
     }
 
-    function finalizeStreams(uint64 timestamp) external {
+    function finalizeStreams(uint64 endTime) external {
         if (msg.sender != address(TIP20_REWARDS_REGISTRY)) revert Unauthorized();
 
-        uint256 rateDecrease = scheduledRateDecrease[timestamp];
+        uint256 rateDecrease = scheduledRateDecrease[endTime];
         require(rateDecrease > 0, "No streams to finalize");
 
-        _accrue(timestamp);
+        _accrue(endTime);
         totalRewardPerSecond -= rateDecrease;
-        delete scheduledRateDecrease[timestamp];
+        delete scheduledRateDecrease[endTime];
     }
 
     /*//////////////////////////////////////////////////////////////

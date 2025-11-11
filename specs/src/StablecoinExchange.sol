@@ -22,10 +22,6 @@ contract StablecoinExchange is IStablecoinExchange {
     /// @notice Maximum valid price (PRICE_SCALE + int16.max)
     uint32 public constant MAX_PRICE = 132_767;
 
-    event PairCreated(bytes32 indexed key, address indexed base, address indexed quote);
-
-    error Unauthorized();
-
     /// @notice Represents a price level in the orderbook with a doubly-linked list of orders
     /// @dev Orders are maintained in FIFO order at each tick level
     struct TickLevel {
@@ -916,12 +912,11 @@ contract StablecoinExchange is IStablecoinExchange {
     /// @param baseForQuote True if spending base for quote, false if spending quote for base
     /// @param amountIn Exact amount of input tokens to spend
     /// @return amountOut Amount of output tokens received
-    function _quoteExactIn(
-        bytes32 key,
-        Orderbook storage book,
-        bool baseForQuote,
-        uint128 amountIn
-    ) internal view returns (uint128 amountOut) {
+    function _quoteExactIn(bytes32 key, Orderbook storage book, bool baseForQuote, uint128 amountIn)
+        internal
+        view
+        returns (uint128 amountOut)
+    {
         uint128 remainingIn = amountIn;
 
         if (baseForQuote) {

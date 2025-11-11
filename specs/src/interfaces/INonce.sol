@@ -8,8 +8,6 @@ pragma solidity ^0.8.13;
 ///      independent nonce sequences identified by a nonce key.
 interface INonce {
 
-    // ============ Events ============
-
     /// @notice Emitted when a nonce is incremented for an account and nonce key
     /// @param account The account whose nonce was incremented
     /// @param nonceKey The nonce key that was incremented
@@ -21,8 +19,6 @@ interface INonce {
     /// @param newCount The new active key count
     event ActiveKeyCountChanged(address indexed account, uint256 newCount);
 
-    // ============ Errors ============
-
     /// @notice Thrown when trying to access protocol nonce (key 0) through the precompile
     /// @dev Protocol nonce should be accessed through account state, not this precompile
     error ProtocolNonceNotSupported();
@@ -32,8 +28,6 @@ interface INonce {
 
     /// @notice Thrown when a nonce value would overflow
     error NonceOverflow();
-
-    // ============ View Functions ============
 
     /// @notice Get the current nonce for a specific account and nonce key
     /// @param account The account address
@@ -45,4 +39,5 @@ interface INonce {
     /// @param account The account address
     /// @return count The number of nonce keys that have been used (nonce > 0)
     function getActiveNonceKeyCount(address account) external view returns (uint256 count);
+
 }

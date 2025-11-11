@@ -350,26 +350,26 @@ When a TIP20 token cancels a stream:
 
 A system transaction is inserted at the top of each block calling `finalizeStreams()` on the TIP20RewardsRegistry which subsequently calls each TIP20 token that has streams ending at the current block timestamp. This happens via an internal mechanism in the block production process.
 
-### TIP20: `finalizeStreams(uint64 timestamp)` Function
+### TIP20: `finalizeStreams(uint64 endTime)` Function
 
 This function on each TIP20 token is callable only by the TIP20RewardsRegistry:
 
 ```solidity
-function finalizeStreams(uint64 timestamp) external {
+function finalizeStreams(uint64 endTime) external {
     require(msg.sender == address(TIP20_REWARDS_REGISTRY), "Only system");
 
-    uint256 rateDecrease = scheduledRateDecrease[timestamp];
+    uint256 rateDecrease = scheduledRateDecrease[endTime];
     require(rateDecrease > 0, "No streams to finalize");
 
-    _accrue(timestamp);
+    _accrue(endTime);
     totalRewardPerSecond -= rateDecrease;
-    delete scheduledRateDecrease[timestamp];
+    delete scheduledRateDecrease[endTime];
 }
 ```
 
 The function:
 1. Verifies the caller is the TIP20RewardsRegistry.
-2. Loads the scheduled rate decrease for the given timestamp.
-3. Accrues rewards up to the finalization timestamp.
+2. Loads the scheduled rate decrease for the given `endTime`.
+3. Accrues rewards up to the finalization `endTime`.
 4. Decreases `totalRewardPerSecond` by the scheduled amount.
 5. Deletes the scheduled rate decrease entry.
