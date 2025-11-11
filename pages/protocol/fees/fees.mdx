@@ -1,0 +1,69 @@
+# Fees
+
+## Overview
+
+Tempo enables users to pay gas fees in any stablecoin with sufficient liquidity on the enshrined Fee AMM. The fee system is designed to maximize customizability while minimizing surprise and providing sane defaults for users.
+
+## Fee Unit Specification
+
+Fees are denominated in **USD per 10^18 gas**. Since TIP-20 tokens use 6 decimal places, the actual fee paid is calculated as:
+
+```
+fee = ceil(base_fee * gas_used / 10^12)
+```
+
+This unit provides sufficient precision for low-fee transactions while accommodating TIP-20's 6-decimal token format.
+
+## Fee Token Selection
+
+The protocol determines which token to use for fees through a four-level preference hierarchy, checked in order:
+
+### 1. Transaction Level
+Transactions can specify a `fee_token` field that overrides all other preferences. This requires using specialized transaction types that support fee token selection.
+
+:::warning
+Transactions cannot use linkingUSD as a fee token, even if specified at the transaction level.
+:::
+
+### 2. Account Level
+Accounts can set a default fee token preference by calling `setUserToken()` on the FeeManager precompile. This preference applies to:
+- Regular transactions where the account is `tx.origin`
+- Sponsored transactions where the account provides the `fee_payer_signature`
+
+### 3. Contract Level
+When a transaction calls a TIP-20 contract function, that token is automatically used for fee payment (unless overridden by transaction or account preferences).
+
+### 4. Validator Level
+As a final fallback, the validator can specify a preferred fee token via `block.coinbase`.
+
+## Validation Rules
+
+At each preference level, the protocol validates:
+
+- ✅ Token must be a TIP-20 token with USD currency
+- ✅ Token must not be linkingUSD (for user payments)
+- ✅ User must have sufficient balance for `gasLimit`
+- ✅ Sufficient liquidity must exist on the Fee AMM
+
+If validation fails at a preference level, the transaction is invalid—the protocol does not fall back to lower preference levels.
+
+## Fee Sponsorship
+
+Transactions can specify a `fee_payer` address different from `tx.origin` by including a `fee_payer_signature`. The fee payer:
+- Chooses the fee token for the transaction
+- Pays for the transaction gas costs
+- Can override the transaction-level fee token in sponsored transactions
+
+## Integration with Fee AMM
+
+The fee system integrates with the [Fee AMM](/protocol/fees/fee-amm) to convert user-preferred stablecoins to validator-preferred stablecoins at fixed rates, with end-of-block settlement to prevent MEV.
+
+## Specification
+
+For complete technical details including validation logic, preference resolution, and integration with transaction types, see [Fees Spec](https://github.com/tempoxyz/docs/blob/main/specs/Fees.md).
+
+## Related
+
+- [Fee AMM](/protocol/fees/fee-amm) - Automated market maker for fee token conversion
+- [AATransaction](/protocol/transactions/aa-transaction) - Transaction type with native fee token support
+- [FeeTokenTransaction](/protocol/transactions/fee-token-transaction) - Deprecated transaction type for fee tokens

@@ -1,0 +1,107 @@
+# Sub-blocks
+
+## Overview
+
+Sub-blocks are organizational units within Tempo blocks that enable parallel transaction execution and improved throughput. They divide block contents into independently executable segments.
+
+## Purpose
+
+Sub-blocks address fundamental blockchain scalability challenges:
+
+### Parallel Execution
+- Multiple sub-blocks can execute simultaneously
+- Reduces total block execution time
+- Better utilizes validator compute resources
+
+### State Isolation
+- Transactions within a sub-block share state dependencies
+- Sub-blocks with independent state can run in parallel
+- Deterministic execution ordering
+
+### MEV Protection
+- Sub-block boundaries limit MEV extraction scope
+- Protects transactions from cross-sub-block attacks
+- Clearer execution semantics for users
+
+## Structure
+
+### Sub-block Organization
+Each block contains multiple sub-blocks with:
+- Sequential ordering within the block
+- Transaction groupings based on dependencies
+- Clear execution boundaries
+
+### Assignment Rules
+Transactions are assigned to sub-blocks based on:
+- State access patterns (which accounts/contracts)
+- Payment lane membership
+- Dependency relationships
+- Gas limits and block capacity
+
+## Execution Model
+
+### Sequential Within Sub-blocks
+Transactions within a single sub-block execute sequentially:
+- Deterministic ordering
+- Standard EVM execution semantics
+- State updates visible to subsequent transactions
+
+### Parallel Across Sub-blocks
+Independent sub-blocks execute in parallel:
+- No shared state dependencies
+- Concurrent execution by validators
+- Results merged deterministically
+
+## Integration with Protocol
+
+### Payment Lanes
+Sub-blocks work with [payment lanes](/protocol/consensus-blockspace/payment-lanes):
+- Each lane produces its own sub-blocks
+- Lane priorities affect sub-block ordering
+- Parallelism within and across lanes
+
+### Fee Settlement
+End-of-block fee operations occur after sub-blocks:
+- All user transactions complete first
+- Fee AMM settlement happens atomically
+- Validator receives aggregated fees
+
+### Consensus
+Sub-blocks affect [consensus](/protocol/consensus-blockspace/consensus):
+- Validators must agree on sub-block boundaries
+- Execution proofs generated per sub-block
+- Parallel verification for faster validation
+
+## Developer Considerations
+
+When building applications:
+- Understand sub-block boundaries for timing assumptions
+- Independent transactions may execute in parallel
+- Don't rely on intra-block transaction ordering across sub-blocks
+
+## Benefits
+
+### For Users
+- Faster transaction confirmation
+- Better throughput during high load
+- Protected from certain MEV attacks
+
+### For Validators
+- Efficient use of hardware resources
+- Parallel block verification
+- Improved block production times
+
+### For the Network
+- Higher overall throughput
+- Better scalability properties
+- More predictable execution costs
+
+## Documentation
+
+For implementation details and practical guides, see the [Sub-blocks Documentation](/documentation/blockspace/sub-blocks).
+
+## Related
+
+- [Payment Lanes](/protocol/consensus-blockspace/payment-lanes) - Transaction ordering
+- [Block Format](/protocol/consensus-blockspace/block-format) - Block structure
+- [Consensus](/protocol/consensus-blockspace/consensus) - Block production

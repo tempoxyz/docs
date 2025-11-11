@@ -1,0 +1,121 @@
+# Stablecoin Exchange
+
+## Overview
+
+The Stablecoin Exchange is an enshrined orderbook exchange implemented as a precompiled contract on Tempo. It provides optimal pricing for cross-stablecoin payments while minimizing MEV and chain load.
+
+## Design Goals
+
+The exchange is specifically designed for trading between same-asset stablecoins (e.g., different USD stablecoins) with these objectives:
+
+### Optimal User Pricing
+- On-chain order queue using price-time priority
+- Encourages makers to leave liquidity on-chain
+- Passive orders allowed to "cross" (bids higher than asks)
+
+### MEV Protection
+- Flip and place operations delayed until end of block
+- Prevents backrunning, JIT strategies, and probabilistic MEV
+- No sandwich attacks on passive limit orders
+
+### Low Chain Load
+- "Flip orders" mechanism reduces message volume
+- High dust limit ($100) prevents excessive small orders
+- Optimized for stable market conditions between pegged assets
+
+## Key Features
+
+### Market Structure
+- **Supported Assets**: Only USD-denominated TIP-20 tokens
+- **Pair Creation**: Automatic for any two USD TIP-20 tokens
+- **Order Types**: Limit orders with price-time priority
+- **Settlement**: End-of-block batch settlement
+
+### Order Management
+- Place limit orders at specific prices
+- Cancel existing orders
+- Flip orders to opposite side of book
+- Query order book depth and best prices
+
+### Balance Management
+- Deposit tokens to exchange contract
+- Withdraw from exchange balance
+- Execute swaps directly from wallet or exchange balance
+
+## Contract Interface
+
+The exchange is deployed as a precompile at:
+```
+0xDEc0000000000000000000000000000000000000
+```
+
+### Core Functions
+
+**Swap Execution**
+- `swap()` - Execute market order against order book
+- `swapExact()` - Swap with exact input or output amounts
+
+**Order Management**
+- `place()` - Place a new limit order
+- `cancel()` - Cancel an existing order
+- `flip()` - Flip order to opposite side
+
+**Balance Operations**
+- `deposit()` - Deposit tokens to exchange
+- `withdraw()` - Withdraw tokens from exchange
+- `getBalance()` - Query exchange balance
+
+**Market Data**
+- `getBestBid()` / `getBestAsk()` - Query top of book
+- `getDepth()` - Query order book depth
+- `getOrder()` - Query specific order details
+
+## Market Rules
+
+### Order Constraints
+- **Minimum Size**: $100 (to prevent spam)
+- **Price Limits**: Must be within reasonable range for stable pairs
+- **TIP-403 Compliance**: Orders must respect token policies
+
+### Execution Rules
+- **Priority**: Price-time priority for matching
+- **Settlement**: Atomic at end of block
+- **Crossing**: Bids can exceed asks (simplified design)
+
+## Integration with Protocol
+
+### Fee Payment
+The exchange integrates with Tempo's fee system:
+- Users can swap stablecoins for fee payment
+- Validators can receive fees in preferred stablecoin
+- Automatic conversion via exchange order book
+
+### LinkingUSD
+The exchange works with [linkingUSD](/protocol/stablecoin-exchange/linking-usd) to provide:
+- Unified liquidity across stablecoin pairs
+- Reduced fragmentation
+- Better pricing for users
+
+## Use Cases
+
+### Cross-Stablecoin Payments
+Users paying in one stablecoin to recipients who prefer another stablecoin.
+
+### Stablecoin Arbitrage
+Arbitrageurs can provide liquidity by placing limit orders to profit from minor price discrepancies.
+
+### Fee Token Conversion
+Applications can swap to validator-preferred fee tokens for optimal gas payment.
+
+## Detailed Documentation
+
+For complete technical specifications, see:
+- [Contract Interface](/protocol/exchange/contract-interface) - Full Solidity interface
+- [Execution Semantics](/protocol/exchange/execution-semantics) - Order matching and settlement
+- [Market Rules](/protocol/exchange/market-rules) - Trading rules and constraints
+
+## Related
+
+- [LinkingUSD](/protocol/stablecoin-exchange/linking-usd) - Unified stablecoin liquidity
+- [Fees](/protocol/fees/fees) - Fee system integration
+- [TIP-20](/protocol/tokens/tip-20) - Token standard for stablecoins

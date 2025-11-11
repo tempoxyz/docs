@@ -1,5 +1,9 @@
 # Accounts [Default Account Abstraction (DAA)]
 
+:::warning Deprecated
+Default Account Abstraction (DAA) is deprecated. New implementations should use [AATransaction (Type 0x76)](/protocol/transactions/aa-transaction) which provides native account abstraction support with additional features.
+:::
+
 Tempo uses a "Default Account Abstraction" (DAA) model for accounts on the Tempo blockchain. DAA extends the Ethereum account model by allowing any externally owned account (EOA) to be seamlessly upgraded into a smart contract wallet, without requiring user intervention or setup.
 
 The core mechanism is that, on first use (when an EOA sends its first transaction and has never been used before), the protocol automatically delegates the account to a canonical smart contract implementation by setting its code to a special format. This enables all EOAs to immediately benefit from smart wallet features, while preserving full backward compatibility with legacy ECDSA transactions and not affecting contract accounts.

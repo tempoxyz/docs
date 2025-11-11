@@ -1,0 +1,56 @@
+# Reward Distribution
+
+## Overview
+
+Tempo's reward distribution system provides an opt-in, scalable, pro-rata streaming mechanism built directly into TIP-20 token contracts. It enables efficient distribution of rewards to token holders without requiring staking on separate contracts or iterating over holder lists.
+
+## Key Features
+
+### Streaming Rewards
+- **Linear Streams**: Distribute rewards evenly over a specified time period using `startReward(amount, seconds)`
+- **Immediate Distribution**: Instantly distribute rewards by setting `seconds = 0`
+- **Cancellable**: Stream funders can cancel active streams and reclaim undistributed tokens
+
+### Opt-In Model
+Token holders must explicitly opt in to receive rewards:
+- Call `setRewardRecipient(address)` to participate
+- Choose a recipient address for accumulated rewards
+- Opt out anytime by setting recipient to `address(0)`
+
+### Reward Accumulation
+- Rewards accrue proportionally based on token balance
+- Tracked in per-user `rewardBalance`
+- Updated during balance changes (transfers, mints, burns)
+- Claimed via `claimRewards()` function
+
+## Use Cases
+
+The reward distribution system supports various applications:
+
+- **Incentive Programs**: Distribute tokens to encourage holding or participation
+- **Staking Rewards**: Provide yield to token holders without external staking contracts
+- **Deterministic Inflation**: Implement scheduled token emissions
+- **Liquidity Mining**: Reward liquidity providers proportionally
+
+## Scalability
+
+The design uses a "reward-per-token" accumulator pattern that scales efficiently:
+- Gas costs independent of holder count
+- No loops over holder addresses
+- Updates occur only during balance-changing operations
+
+## Integration with TIP-403
+
+Reward distribution respects TIP-403 policy enforcement:
+- Policy checks apply when starting rewards
+- Policy checks apply when claiming rewards
+- Restricted recipients cannot receive reward distributions
+
+## Specification
+
+For complete technical details including interfaces, state transitions, and implementation requirements, see [Reward Distribution Spec](https://github.com/tempoxyz/docs/blob/main/specs/RewardDistribution.md).
+
+## Related
+
+- [TIP-20](/protocol/tokens/tip-20) - Core token standard
+- [TIP-403](/protocol/tokens/tip-403) - Policy registry system

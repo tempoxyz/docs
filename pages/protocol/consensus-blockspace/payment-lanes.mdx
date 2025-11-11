@@ -1,0 +1,92 @@
+# Payment Lanes
+
+## Overview
+
+Payment Lanes provide a transaction ordering system that enables parallel processing and priority-based inclusion. Transactions are assigned to different lanes based on their characteristics, allowing validators to optimize block construction.
+
+## Purpose
+
+Payment lanes solve several challenges in blockchain transaction processing:
+
+### Parallel Execution
+- Transactions in different lanes can execute in parallel
+- Reduces block production time
+- Improves overall throughput
+
+### Priority Management
+- Different lanes can have different inclusion priorities
+- Enables market-based transaction ordering
+- Allows fee market segmentation
+
+### MEV Mitigation
+- Separate lanes for different transaction types
+- Reduces opportunities for harmful MEV extraction
+- Protects user transactions from sandwich attacks
+
+## Lane Types
+
+Tempo implements multiple payment lanes with distinct characteristics:
+
+### User Transaction Lane
+- Standard user-initiated transactions
+- Regular priority based on fees
+- Default lane for most activity
+
+### High-Priority Lane
+- Transactions requiring immediate inclusion
+- Higher fee requirements
+- Guaranteed ordering properties
+
+### Protocol Lane
+- System-level transactions
+- End-of-block settlements
+- Fee AMM operations
+
+## Lane Assignment
+
+Transactions are assigned to lanes based on:
+- Transaction type (AATransaction, FeeTokenTransaction, etc.)
+- Fee parameters and priorities
+- Sender characteristics or preferences
+- Protocol requirements
+
+## Integration with Protocol
+
+### Fee System
+Payment lanes integrate with the [fee system](/protocol/fees/fees):
+- Lane assignment affects fee calculation
+- Different lanes may have different fee markets
+- Validators optimize across lanes
+
+### Sub-blocks
+Lanes work with [sub-blocks](/protocol/consensus-blockspace/subblocks):
+- Each lane produces sub-blocks
+- Sub-blocks enable parallel execution
+- Ordering preserved within lanes
+
+### Consensus
+Lane structure affects [consensus](/protocol/consensus-blockspace/consensus):
+- Validators must respect lane ordering
+- Block validity depends on correct lane assignment
+- Finality applies per-lane
+
+## Developer Considerations
+
+When building on Tempo, consider:
+- Which lane suits your transaction type
+- Trade-offs between cost and inclusion speed
+- Impact of lane choice on execution timing
+
+## Specification
+
+For complete technical details including lane assignment rules, priority calculations, and validation logic, see [Payment Lane Spec](https://github.com/tempoxyz/docs/blob/main/specs/PaymentLane.md).
+
+## Documentation
+
+For practical guides and examples, see the [Payment Lanes Documentation](/documentation/blockspace/payment-lanes).
+
+## Related
+
+- [Sub-blocks](/protocol/consensus-blockspace/subblocks) - Block organization
+- [Consensus](/protocol/consensus-blockspace/consensus) - Block production
+- [Fees](/protocol/fees/fees) - Fee payment system

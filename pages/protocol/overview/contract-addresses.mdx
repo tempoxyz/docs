@@ -1,0 +1,27 @@
+# Precompile Contract Addresses
+
+Tempo includes several precompiled contracts that provide core protocol functionality at fixed addresses.
+
+## Core Precompiles
+
+| Address | Contract | Description |
+|---------|----------|-------------|
+| `0x...` | FeeManager | Manages transaction fee payment and token preferences |
+| `0x...` | FeeAMM | Automated market maker for fee token conversion |
+| `0x...` | StablecoinExchange | Enshrined orderbook exchange |
+| `0x...` | TIP20RewardRegistry | Registry for TIP-20 reward distribution |
+| `0x...` | TIP403Registry | Policy registry for TIP-403 tokens |
+
+## Usage
+
+Precompiles can be called like regular contracts but are implemented natively in the execution client for gas efficiency.
+
+```solidity
+// Example: Calling the FeeManager precompile
+IFeeManager feeManager = IFeeManager(FEE_MANAGER_ADDRESS);
+feeManager.setFeeToken(token);
+```
+
+:::info
+Precompile addresses and interfaces are stable across protocol upgrades.
+:::

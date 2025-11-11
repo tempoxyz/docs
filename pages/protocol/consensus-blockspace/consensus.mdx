@@ -1,0 +1,60 @@
+# Consensus
+
+## Overview
+
+Tempo uses a proof-of-stake consensus mechanism to validate transactions and produce blocks. The consensus layer coordinates validators, manages block production, and ensures network security.
+
+## Key Features
+
+### Proof of Stake
+- Validators stake tokens to participate in consensus
+- Economic incentives align validator behavior with network security
+- Slashing for provable misbehavior
+
+### Block Production
+- Regular block times for predictable transaction finality
+- Validator rotation for decentralization
+- Integration with blockspace management (payment lanes, sub-blocks)
+
+### Finality
+- Fast finality for user transactions
+- Economic finality through stake weight
+- Compatible with Ethereum finality gadgets
+
+## Protocol Integration
+
+The consensus layer integrates with core protocol features:
+
+### Fee Token Validation
+- Validators specify preferred fee tokens via `block.coinbase`
+- Validate fee token liquidity requirements
+- Coordinate with Fee AMM for token conversion
+
+### Blockspace Management
+- Support for [payment lanes](/protocol/consensus-blockspace/payment-lanes)
+- Organization of transactions into [sub-blocks](/protocol/consensus-blockspace/subblocks)
+- Priority ordering for transaction inclusion
+
+### Reward Distribution
+- Block rewards distributed to validators
+- Integration with TIP-20 reward mechanisms
+- Validator commission on delegated stake
+
+## Validator Responsibilities
+
+Validators perform several critical functions:
+
+1. **Block Proposal**: Create and propose new blocks containing valid transactions
+2. **Block Validation**: Verify proposed blocks meet consensus rules
+3. **State Transitions**: Execute transactions and update state
+4. **Network Security**: Maintain uptime and honest behavior
+
+## Documentation
+
+For detailed information about Tempo's consensus mechanism, validator operations, and staking parameters, see the [Consensus Documentation](/documentation/consensus).
+
+## Related
+
+- [Payment Lanes](/protocol/consensus-blockspace/payment-lanes) - Transaction ordering system
+- [Sub-blocks](/protocol/consensus-blockspace/subblocks) - Block organization
+- [Block Format](/protocol/consensus-blockspace/block-format) - Block structure specification

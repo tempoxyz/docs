@@ -1,0 +1,38 @@
+# FeeTokenTransaction (Type 0x77)
+
+:::warning Deprecated
+This transaction type is deprecated. Use [AATransaction (Type 0x76)](/protocol/transactions/aa-transaction) instead.
+:::
+
+## Overview
+
+FeeTokenTransaction (Type 0x77) was an EIP-2718 transaction type that extended EIP-1559/EIP-7702 semantics to support:
+
+- Optional fee token preferences at the transaction level
+- Third-party fee payment via additional signatures
+- EIP-7702 authorization lists for delegation
+- Backwards compatibility with standard transaction types
+
+## Key Features
+
+### Fee Token Selection
+Transactions could specify a preferred fee token, overriding account, contract, or validator-level preferences.
+
+### Fee Sponsorship
+Supported sponsored fee payments through an additional `fee_payer_signature` field, allowing third parties to pay transaction fees without account abstraction indirection.
+
+### EIP-7702 Compatibility
+Preserved full EIP-7702 capabilities including authorization lists and delegated code execution.
+
+## Migration
+
+Applications using FeeTokenTransaction should migrate to [AATransaction (Type 0x76)](/protocol/transactions/aa-transaction), which provides:
+- Native account abstraction support
+- WebAuthn/P256 signature validation for passkeys
+- Parallelizable nonces for higher throughput
+- Call batching and scheduled transactions
+- Improved gas sponsorship mechanisms
+
+## Specification
+
+For the complete technical specification, see [FeeTokenTransaction Spec](https://github.com/tempoxyz/docs/blob/main/specs/FeeTokenTransaction.md).

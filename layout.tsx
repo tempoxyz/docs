@@ -33,8 +33,12 @@ export default function Layout(props: React.PropsWithChildren) {
 
 export function TopNavEnd() {
   return (
-    <div className="">
-      <ConnectNav />
-    </div>
+    <WagmiProvider config={WagmiConfig.config}>
+      <QueryClientProvider client={queryClient}>
+        <div className="">
+          <ConnectNav />
+        </div>
+      </QueryClientProvider>
+    </WagmiProvider>
   )
 }

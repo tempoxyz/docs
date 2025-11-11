@@ -339,19 +339,46 @@ export default defineConfig({
     '/protocol': [
       {
         text: 'Overview',
-        link: '/protocol',
-      },
-      {
-        text: 'Github',
-        link: 'https://github.com/tempoxyz',
-      },
-      {
-        text: 'Tokens',
         items: [
           {
-            text: 'Overview',
-            link: '/protocol/tokens',
+            text: 'Introduction',
+            link: '/protocol/overview/intro',
           },
+          {
+            text: 'Precompile Contract Addresses',
+            link: '/protocol/overview/contract-addresses',
+          },
+        ],
+      },
+      {
+        text: 'Transactions',
+        items: [
+          {
+            text: 'AATransaction (Type 0x76)',
+            link: '/protocol/transactions/aa-transaction',
+          },
+          {
+            text: 'FeeTokenTransaction (Type 0x77)',
+            link: '/protocol/transactions/fee-token-transaction',
+          },
+        ],
+      },
+      {
+        text: 'Fees',
+        items: [
+          {
+            text: 'Fees',
+            link: '/protocol/fees/fees',
+          },
+          {
+            text: 'Fee AMM',
+            link: '/protocol/fees/fee-amm',
+          },
+        ],
+      },
+      {
+        text: 'Token Standards',
+        items: [
           {
             text: 'TIP-20',
             link: '/protocol/tokens/tip-20',
@@ -361,65 +388,85 @@ export default defineConfig({
             link: '/protocol/tokens/tip-403',
           },
           {
-            text: 'Rewards',
-            link: '/protocol/specs/RewardDistribution',
+            text: 'Reward Distribution',
+            link: '/protocol/tokens/reward-distribution',
           },
         ],
       },
       {
-        text: 'Transactions',
+        text: 'Stablecoin Exchange',
         items: [
           {
-            text: 'Overview',
-            link: '/protocol/transactions',
+            text: 'Stablecoin Exchange',
+            link: '/protocol/stablecoin-exchange/stablecoin-exchange',
           },
           {
-            text: 'Fee Tokens',
-            link: '/protocol/transactions/fee-tokens',
-          },
-          {
-            text: 'Fee Payers',
-            link: '/protocol/transactions/fee-payers',
-          },
-          {
-            text: 'Fee AMM',
-            link: '/protocol/transactions/fee-amm',
-          },
-          {
-            text: 'Payments Lane',
-            link: '/protocol/transactions/payments-lane',
-          },
-          {
-            text: 'Account Abstraction',
-            link: '/protocol/transactions/account-abstraction',
+            text: 'LinkingUSD',
+            link: '/protocol/stablecoin-exchange/linking-usd',
           },
         ],
       },
       {
-        text: 'Accounts',
+        text: 'Consensus & Blockspace',
         items: [
           {
-            text: 'Overview',
-            link: '/protocol/accounts',
+            text: 'Consensus',
+            link: '/protocol/consensus-blockspace/consensus',
+          },
+          {
+            text: 'Block Format',
+            link: '/protocol/consensus-blockspace/block-format',
+          },
+          {
+            text: 'Payment Lanes',
+            link: '/protocol/consensus-blockspace/payment-lanes',
+          },
+          {
+            text: 'Sub-blocks',
+            link: '/protocol/consensus-blockspace/subblocks',
           },
         ],
       },
       {
-        text: 'Exchange',
+        text: 'Default Account Abstraction',
+        link: '/protocol/accounts',
+      },
+      {
+        text: 'Reference Implementations',
         items: [
           {
-            text: 'Contract Interface',
-            link: '/protocol/exchange/contract-interface',
+            text: 'FeeManager',
+            link: 'https://github.com/tempoxyz/docs/blob/main/specs/src/FeeManager.sol',
           },
           {
-            text: 'Execution Semantics',
-            link: '/protocol/exchange/execution-semantics',
+            text: 'FeeAMM',
+            link: 'https://github.com/tempoxyz/docs/blob/main/specs/src/FeeAMM.sol',
           },
           {
-            text: 'Market Rules',
-            link: '/protocol/exchange/market-rules',
+            text: 'StablecoinExchange',
+            link: 'https://github.com/tempoxyz/docs/blob/main/specs/src/StablecoinExchange.sol',
+          },
+          {
+            text: 'TIP20',
+            link: 'https://github.com/tempoxyz/docs/blob/main/specs/src/TIP20.sol',
+          },
+          {
+            text: 'TIP20RewardRegistry',
+            link: 'https://github.com/tempoxyz/docs/blob/main/specs/src/TIP20RewardRegistry.sol',
+          },
+          {
+            text: 'TIP403Registry',
+            link: 'https://github.com/tempoxyz/docs/blob/main/specs/src/TIP403Registry.sol',
+          },
+          {
+            text: 'LinkingUSD',
+            link: 'https://github.com/tempoxyz/docs/blob/main/specs/src/LinkingUSD.sol',
           },
         ],
+      },
+      {
+        text: 'ABI References',
+        link: '/protocol/abi-references',
       },
     ],
     '/sdk/solidity': [

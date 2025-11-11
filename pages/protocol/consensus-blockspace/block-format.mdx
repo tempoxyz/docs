@@ -1,0 +1,60 @@
+# Block Format
+
+## Overview
+
+This specification defines the structure and encoding of blocks in the Tempo blockchain.
+
+## Abstract
+
+Tempo blocks extend the Ethereum block format with additional fields and structures to support protocol features including payment lanes, sub-blocks, and multi-token fee payment.
+
+## Motivation
+
+The block format must accommodate:
+- Payment lane organization for transaction ordering
+- Sub-block structure for parallel execution
+- Fee token metadata for validator preferences
+- Backwards compatibility with Ethereum tooling
+
+## Specification
+
+:::note Work in Progress
+This specification is currently being developed. Check back for detailed block structure, encoding rules, and validation requirements.
+:::
+
+### Block Header
+
+The block header includes standard Ethereum fields plus Tempo-specific extensions:
+
+```
+TODO: Define block header structure
+```
+
+### Block Body
+
+The block body organizes transactions according to:
+- Payment lane assignments
+- Sub-block boundaries
+- Fee token preferences
+
+```
+TODO: Define block body structure
+```
+
+### Encoding
+
+```
+TODO: Define RLP encoding rules
+```
+
+## Validation Rules
+
+```
+TODO: Define block validation rules
+```
+
+## Related
+
+- [Payment Lanes](/protocol/consensus-blockspace/payment-lanes) - Transaction ordering
+- [Sub-blocks](/protocol/consensus-blockspace/subblocks) - Block organization
+- [Consensus](/protocol/consensus-blockspace/consensus) - Block production

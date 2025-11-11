@@ -1,0 +1,37 @@
+# Protocol Overview
+
+## Introduction
+
+Tempo is a modular blockchain protocol that extends Ethereum with native support for programmable tokens, flexible transaction fees, and enshrined account abstraction.
+
+The protocol specifications define the core technical primitives and mechanisms that enable:
+
+- **Programmable Tokens**: Native token standards (TIP-20, TIP-403) with built-in policy enforcement and reward distribution
+- **Flexible Fees**: Transaction fee payment in multiple tokens via an enshrined AMM
+- **Account Abstraction**: Native support for EIP-7702 delegation and AA transactions (Type 0x76)
+- **Stablecoin Exchange**: On-chain orderbook exchange with MEV protection
+- **Advanced Blockspace**: Payment lanes and sub-block organization for transaction ordering
+
+## Specification Structure
+
+The protocol specifications are organized into the following sections:
+
+| Category | Description |
+|----------|-------------|
+| [Overview](/protocol/overview/intro) | Protocol introduction and [precompile contract addresses](/protocol/overview/contract-addresses) |
+| [Transactions](/protocol/transactions) | Transaction types including AATransaction (0x76) and deprecated FeeTokenTransaction (0x77) |
+| [Fees](/protocol/fees/fees) | Fee system and AMM for multi-token fee payment |
+| [Token Standards](/protocol/tokens) | TIP-20 core standard, TIP-403 policy registry, and reward distribution |
+| [Stablecoin Exchange](/protocol/stablecoin-exchange/stablecoin-exchange) | Enshrined exchange and linkingUSD mechanisms |
+| [Consensus & Blockspace](/protocol/consensus-blockspace/consensus) | Consensus, block format, payment lanes, and sub-blocks |
+| [Account Abstraction](/protocol/accounts) | Default Account Abstraction (deprecated) |
+| [ABI References](/protocol/abi-references) | Application Binary Interface references |
+
+## Audience
+
+These specifications are intended for:
+- Protocol developers and auditors
+- Core contributors implementing protocol features
+- Security researchers analyzing the protocol
+
+For application developers and node operators, see the [Documentation](/documentation) section.
