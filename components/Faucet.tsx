@@ -83,10 +83,14 @@ export function Faucet() {
         >
           <div className="flex gap-2">
             <input
+              autoCapitalize="none"
+              autoComplete="off"
+              autoCorrect="off"
               className="w-full h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-medium -tracking-[2%] placeholder-gray9 text-black dark:text-white"
               defaultValue={address}
               name="address"
               required
+              spellCheck={false}
               placeholder="0x1A60E1922C498c6fD690dB24543fb6Cf0e15F2E7"
             />
             <Button

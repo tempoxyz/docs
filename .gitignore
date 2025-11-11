@@ -11,3 +11,5 @@ specs/cache/
 specs/out/
 specs/soljson-latest.js
 .vercel
+_
+tmp

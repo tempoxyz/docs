@@ -296,11 +296,15 @@ export function CreateToken(props: { stepNumber: number }) {
                   Token name
                 </label>
                 <input
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect="off"
                   className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-[510] -tracking-[2%] placeholder-gray9 text-black dark:text-white"
                   data-1p-ignore
                   type="text"
                   name="name"
                   required
+                  spellCheck={false}
                   placeholder="demoUSD"
                 />
               </div>
@@ -312,11 +316,15 @@ export function CreateToken(props: { stepNumber: number }) {
                   Token symbol
                 </label>
                 <input
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect="off"
                   className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-[510] -tracking-[2%] placeholder-gray9 text-black dark:text-white"
                   data-1p-ignore
                   type="text"
                   name="symbol"
                   required
+                  spellCheck={false}
                   placeholder="DEMO"
                 />
               </div>
