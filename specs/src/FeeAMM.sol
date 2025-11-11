@@ -100,6 +100,8 @@ contract FeeAMM is IFeeAMM {
         uint256 amountValidatorToken,
         address to
     ) external returns (uint256 liquidity) {
+        require(userToken != validatorToken, "IDENTICAL_ADDRESSES");
+
         _requireUSD(userToken);
         _requireUSD(validatorToken);
         bytes32 poolId = getPoolId(userToken, validatorToken);
@@ -152,6 +154,8 @@ contract FeeAMM is IFeeAMM {
         uint256 amountValidatorToken,
         address to
     ) external returns (uint256 liquidity) {
+        require(userToken != validatorToken, "IDENTICAL_ADDRESSES");
+
         _requireUSD(userToken);
         _requireUSD(validatorToken);
         bytes32 poolId = getPoolId(userToken, validatorToken);
