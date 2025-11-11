@@ -13,10 +13,6 @@ const twoslashSupportFile = readFileSync(
 )
 
 export default defineConfig({
-  banner: {
-    content:
-      'Our fifth testnet, <span className="font-medium">Andantino</span>, is now live. <a href="/get-started/quickstart#tempo-testnet-andantino" className="text-[#0588F0] no-underline">See updates →</a>',
-  },
   head() {
     return (
       <>
@@ -84,36 +80,6 @@ export default defineConfig({
               {
                 text: 'Validator Network',
                 link: '/get-started/features/validator-network',
-              },
-            ],
-          },
-          {
-            text: 'Use Cases',
-            collapsed: true,
-            items: [
-              {
-                text: 'Remittances',
-                link: '/get-started/use-cases/remittances',
-              },
-              {
-                text: 'Instant Settlement',
-                link: '/get-started/use-cases/instant-settlement',
-              },
-              {
-                text: 'Embedded Finance',
-                link: '/get-started/use-cases/embedded-finance',
-              },
-              {
-                text: 'Global Payouts',
-                link: '/get-started/use-cases/global-payouts',
-              },
-              {
-                text: 'Agentic Commerce',
-                link: '/get-started/use-cases/agentic-commerce',
-              },
-              {
-                text: 'Tokenized Deposits',
-                link: '/get-started/use-cases/tokenized-deposits',
               },
             ],
           },
@@ -229,19 +195,6 @@ export default defineConfig({
       {
         text: 'Overview',
         link: '/documentation',
-      },
-      {
-        text: 'Blockspace',
-        items: [
-          {
-            text: 'Payment Lanes',
-            link: '/documentation/blockspace/payment-lanes',
-          },
-          {
-            text: 'Sub-Blocks',
-            link: '/documentation/blockspace/sub-blocks',
-          },
-        ],
       },
       {
         text: 'Fees',
@@ -360,6 +313,28 @@ export default defineConfig({
           },
         ],
       },
+      {
+        text: 'Consensus',
+        items: [
+          {
+            text: 'Overview',
+            link: '/documentation/consensus',
+          },
+        ],
+      },
+      {
+        text: 'Blockspace',
+        items: [
+          {
+            text: 'Payment Lanes',
+            link: '/documentation/blockspace/payment-lanes',
+          },
+          {
+            text: 'Sub-Blocks',
+            link: '/documentation/blockspace/sub-blocks',
+          },
+        ],
+      },
     ],
     '/protocol': [
       {
@@ -426,15 +401,6 @@ export default defineConfig({
           {
             text: 'Overview',
             link: '/protocol/accounts',
-          },
-        ],
-      },
-      {
-        text: 'Consensus',
-        items: [
-          {
-            text: 'Overview',
-            link: '/protocol/consensus',
           },
         ],
       },

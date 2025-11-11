@@ -40,15 +40,6 @@ export function HomePage() {
             Website
           </Button>
         </div>
-        <div className="h-[60px]" />
-        <div className="w-fit">
-          <TestnetStatus
-            created="2025-11-07T12:00:00Z"
-            name="Andantino"
-            number={5}
-            to="/get-started/quickstart#tempo-testnet-andantino"
-          />
-        </div>
       </div>
     </div>
   )
@@ -100,72 +91,6 @@ namespace Button {
   } as const
 }
 
-// biome-ignore lint/correctness/noUnusedVariables: _
-function TestnetStatus(props: TestnetStatus.Props) {
-  const { created, name, number, to } = props
-  const timeAgo = TestnetStatus.formatTimeAgo(created)
-
-  return (
-    <div className="border border-dashed border-[var(--vocs-color_inverted)]/20 rounded-[6px]">
-      <div className="border-b border-dashed border-[var(--vocs-color_inverted)]/20 flex items-center h-[40px] px-3 text-[var(--vocs-color_inverted)] bg-[var(--vocs-color_inverted)]/5 text-[15px] font-[400] tracking-tight">
-        <div className="size-[20px] text-[#E2A336]">
-          <CogIcon />
-        </div>
-        <div className="w-2" />
-        We are actively releasing new testnets.
-      </div>
-      <div className="flex h-[38px]">
-        <div className="w-fit border-r border-dashed border-[var(--vocs-color_inverted)]/20 px-3 flex items-center text-[13px] font-[400] tracking-tight text-[var(--vocs-color_inverted)]/50">
-          {timeAgo}
-        </div>
-        <Link
-          className="flex gap-6 items-center px-3 justify-between flex-1"
-          to={to}
-        >
-          <div className="flex items-center">
-            <div className="text-[15px] font-[400] tracking-tight text-[var(--vocs-color_inverted)]">
-              {name}
-            </div>
-            <div className="pl-2 text-[15px] font-[400] tracking-tight text-[var(--vocs-color_inverted)]/50">
-              ⋅ Testnet #{number}
-            </div>
-          </div>
-          <div className="text-[13px] font-[400] tracking-tight text-[#0588F0]">
-            View ↗
-          </div>
-        </Link>
-      </div>
-    </div>
-  )
-}
-
-namespace TestnetStatus {
-  export type Props = {
-    created: string
-    name: string
-    number: number
-    to: string
-  }
-
-  export function formatTimeAgo(dateString: string): string {
-    const diff = (Date.now() - new Date(dateString).getTime()) / 1000
-    const units: [number, Intl.RelativeTimeFormatUnit][] = [
-      [31536000, 'year'],
-      [2592000, 'month'],
-      [86400, 'day'],
-      [3600, 'hour'],
-      [60, 'minute'],
-      [1, 'second'],
-    ]
-    const [divisor, unit] = units.find(([d]) => diff >= d) || [1, 'second']
-    const rtf = new Intl.RelativeTimeFormat('en', {
-      numeric: 'auto',
-      style: 'narrow',
-    })
-    return rtf.format(-Math.floor(diff / divisor), unit)
-  }
-}
-
 function LogoLockup(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -200,26 +125,6 @@ function LogoLockup(props: React.SVGProps<SVGSVGElement>) {
         clipRule="evenodd"
         d="M27.5078 27.6316H0V1.38913e-05H27.5078V27.6316ZM9.37224 7.66781C9.20536 7.66781 9.0573 7.77518 9.00466 7.9342L7.82254 11.497C7.77848 11.6298 7.87683 11.7667 8.01595 11.7667H11.4486C11.5877 11.7667 11.6861 11.9036 11.642 12.0364L9.10092 19.6941C9.05686 19.8269 9.1552 19.9638 9.29434 19.9638H12.9755C13.1424 19.9638 13.2904 19.8564 13.3431 19.6974L15.8867 12.0328C15.9393 11.8737 16.0874 11.7664 16.2543 11.7664H19.6942C19.8611 11.7664 20.0093 11.659 20.062 11.5L21.2439 7.9375C21.288 7.8047 21.1897 7.66781 21.0505 7.66781H9.37224Z"
         fill="currentColor"
-      />
-    </svg>
-  )
-}
-
-function CogIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <title>Cog Icon</title>
-      <path
-        d="M12 20C14.1217 20 16.1566 19.1571 17.6569 17.6569C19.1571 16.1566 20 14.1217 20 12C20 9.87827 19.1571 7.84344 17.6569 6.34315C16.1566 4.84285 14.1217 4 12 4M12 20C9.87827 20 7.84344 19.1571 6.34315 17.6569C4.84285 16.1566 4 14.1217 4 12M12 20V22M12 4C9.87827 4 7.84344 4.84285 6.34315 6.34315C4.84285 7.84344 4 9.87827 4 12M12 4V2M4 12H2M14 12C14 12.5304 13.7893 13.0391 13.4142 13.4142C13.0391 13.7893 12.5304 14 12 14C11.4696 14 10.9609 13.7893 10.5858 13.4142C10.2107 13.0391 10 12.5304 10 12C10 11.4696 10.2107 10.9609 10.5858 10.5858C10.9609 10.2107 11.4696 10 12 10C12.5304 10 13.0391 10.2107 13.4142 10.5858C13.7893 10.9609 14 11.4696 14 12ZM14 12H22M17 20.66L16 18.93M11 10.27L7 3.34M20.66 17L18.93 16M3.34 7L5.07 8M20.66 7L18.93 8M3.34 17L5.07 16M17 3.34L16 5.07M11 13.73L7 20.66"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
   )

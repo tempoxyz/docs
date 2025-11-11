@@ -4,10 +4,6 @@ import { Callout } from 'vocs/components'
 
 One of the most powerful features of Tempo's account abstraction is batching multiple operations into a single transaction. This allows you to execute several actions atomically (i.e., they all succeed or all fail together). This helps reduce gas costs, prevents partial failures, and creates better user experiences by combining multiple steps into one transaction.
 
-<Callout type="warning">
-  Batch transactions only work if you don't opt out of Default Account Abstraction (DAA). See [Account Management](/documentation/accounts) for details on how DAA works and how to opt out if needed.
-</Callout>
-
 ## Example: Sending a Batch of Transactions
 
 :::code-group

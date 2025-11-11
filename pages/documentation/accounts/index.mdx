@@ -23,37 +23,3 @@ Accounts can submit a special "account abstraction transaction" type that provid
 
 For complete details on these capabilities, see the [Sending Transactions](/documentation/transactions) section.
 
-## Default Account Abstraction (Experimental)
-
-There is currently an experimental feature that automatically converts accounts to smart contract wallets on their first transaction using [EIP-7702](https://eips.ethereum.org/EIPS/eip-7702).
-
-:::warning
-**Note: This feature will likely be deprecated before mainnet launch.** We recommend using the standard account abstraction transaction type instead if you need smart contract functionality.
-:::
-
-### Opting Out (If Enabled)
-
-If you want to opt out of automatic delegation while this feature is still active, you can undelegate using standard EIP-7702 mechanisms:
-
-:::code-group
-```ts [optOut.ts]
-// Undelegate (revert to plain EOA)
-const authorization = client.signAuthorization({
-  address: zeroAddress,
-})
-
-// Or delegate to a different implementation
-const authorization = client.signAuthorization({
-  address: '0xdeadbeefcafebabedeadbeefcafebabedeadbeef',
-})
-
-// Broadcast changes
-const hash = await client.sendTransaction({
-  authorizationList: [authorization],
-})
-```
-
-```ts [viem.config.ts]
-// [!include ~/snippets/setup.ts:setup]
-```
-:::
