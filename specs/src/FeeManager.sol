@@ -83,12 +83,9 @@ contract FeeManager is IFeeManager, FeeAMM {
             }
         }
 
-        // If user token is different from validator token, verify pool exists and has liquidity
+        // If user token is different from validator token, reserve AMM liquidity
         if (userToken != validatorToken) {
-            require(
-                hasLiquidity(userToken, validatorToken, maxAmount),
-                "INSUFFICIENT_LIQUIDITY_FOR_FEE_SWAP"
-            );
+            reserveLiquidity(userToken, validatorToken, maxAmount);
         }
 
         ITIP20(userToken).systemTransferFrom(user, address(this), maxAmount);
@@ -113,7 +110,7 @@ contract FeeManager is IFeeManager, FeeAMM {
             IERC20(userToken).transfer(user, refundAmount);
         }
 
-        feeSwap(userToken, validatorToken, actualUsed);
+        releaseLiquidityPostTx(userToken, validatorToken, refundAmount);
 
         // Track collected fees (only the actual used amount)
         if (actualUsed > 0) {

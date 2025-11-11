@@ -37,35 +37,28 @@ contract FeeAMM is IFeeAMM {
         return pools[poolId];
     }
 
-    function hasLiquidity(address userToken, address validatorToken, uint256 amountIn)
+    function reserveLiquidity(address userToken, address validatorToken, uint256 maxAmount)
         internal
-        view
         returns (bool)
     {
         bytes32 poolId = getPoolId(userToken, validatorToken);
 
         // Calculate output at fixed price m = 0.9970
-        uint256 amountOut = (amountIn * M) / SCALE;
+        uint256 maxAmountOut = (maxAmount * M) / SCALE;
 
         // Check if there's enough validatorToken available (accounting for pending swaps)
-        uint256 availableValidatorToken = _getEffectiveValidatorReserve(poolId);
-        return amountOut <= availableValidatorToken;
+        require(
+            _getEffectiveValidatorReserve(poolId) >= maxAmountOut,
+            "INSUFFICIENT_LIQUIDITY_FOR_FEE_SWAP"
+        );
+        pendingFeeSwapIn[poolId] += uint128(maxAmount);
     }
 
-    function feeSwap(address userToken, address validatorToken, uint256 amountIn)
-        internal
-        returns (uint256 amountOut)
-    {
-        require(
-            hasLiquidity(userToken, validatorToken, amountIn), "INSUFFICIENT_LIQUIDITY_FOR_FEE_SWAP"
-        );
-
+    function releaseLiquidityPostTx(address userToken, address validatorToken, uint256 refundAmount) internal {
         bytes32 poolId = getPoolId(userToken, validatorToken);
 
         // Track pending swap input
-        pendingFeeSwapIn[poolId] += uint128(amountIn);
-
-        amountOut = (amountIn * M) / SCALE;
+        pendingFeeSwapIn[poolId] -= uint128(refundAmount);
     }
 
     function rebalanceSwap(
@@ -242,8 +235,6 @@ contract FeeAMM is IFeeAMM {
         // Calculate pro-rata share of reserves
         amountUserToken = (liquidity * pool.reserveUserToken) / _totalSupply;
         amountValidatorToken = (liquidity * pool.reserveValidatorToken) / _totalSupply;
-
-        require(amountUserToken >= 0 && amountValidatorToken >= 0, "INSUFFICIENT_LIQUIDITY_BURNED");
 
         // Check that withdrawal doesn't violate pending swaps
         // Don't need to check userToken since it only increases during the block
