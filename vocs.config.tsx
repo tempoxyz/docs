@@ -118,8 +118,7 @@ export default defineConfig({
             link: '/get-started/guides',
           },
           {
-            text: 'Create a Passkey Account 🚧',
-            disabled: true,
+            text: 'Create a Passkey Account',
             link: '/get-started/guides/create-a-passkey-account',
           },
           {

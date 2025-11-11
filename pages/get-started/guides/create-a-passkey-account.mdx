@@ -1,0 +1,150 @@
+import * as Demo from "../../../components/guides/CreatePasskeyAccount.tsx"
+
+# Create a Passkey Account
+
+Tempo lets users authenticate actions using a passkey. To enable this, add the `webAuthn` connector to your Wagmi config, and reference that connector when connecting on behalf of your users. 
+
+
+::::steps
+
+## Set up Wagmi
+
+Ensure that you have added Wagmi by following the [guide](/sdk/typescript)
+
+## Configure Webauthn
+
+Add the `webAuthn` connector to your Wagmi config.
+
+```tsx [config.ts]
+// [!include ~/snippets/wagmi.config.ts:setup]
+```
+
+## Display Sign In Button
+
+You can find the `webAuthn` connector when your user tries to connect to the app. Below is sample code on how to use Wagmi hooks to implement a basic login flow.
+
+:::warning
+Note that even if you only specify the `webAuthn` connector in your config, Wagmi will add other connectors if it detects them (e.g. a wallet in a browser extension). 
+:::
+
+Once the `connect` call is made, all future calls that write to the network using Wagmi hooks will trigger passkey authentication automatically.
+
+:::code-group
+
+<div data-title="Preview">
+  <Demo.Connect />
+</div>
+
+<div data-title="">
+  <div />
+</div>
+
+:::
+
+:::code-group
+
+```tsx [app.tsx]
+import { useConnect, useConnectors } from 'wagmi';
+
+export default function App() {
+  const { connect } = useConnect();
+  const connectors = useConnectors();
+
+  const handleConnect = ({ createAccount }: { createAccount: boolean }) => () => {
+    const connector = connectors.find((c) => c.id === 'webAuthn');
+    if (connector) {
+      connect({ capabilities: { createAccount }, connector });
+    } else {
+      console.error("webauthn connector not found");
+    }
+  };
+
+  return (
+    <div>
+      <button onClick={handleConnect({ createAccount: false })}>
+        Log in
+      </button>
+      <button onClick={handleConnect({ createAccount: true })}>
+        Sign up
+      </button>
+    </div>
+  );
+}
+
+```
+
+```tsx [config.ts]
+// [!include ~/snippets/wagmi.config.ts:setup]
+```
+
+:::
+
+## Sign Out
+
+After the user has connected, you may want to let the user sign out.
+
+:::code-group
+
+<div data-title="Preview">
+  <Demo.ConnectAndDisconnect />
+</div>
+
+<div data-title="">
+  <div />
+</div>
+
+:::
+
+:::code-group
+
+```tsx [app.tsx]
+import { useAccount, useConnect, useConnectors, useDisconnect } from 'wagmi';
+
+export default function App() {
+  const { isConnected } = useAccount(); // [!code ++]
+  const { connect } = useConnect();
+  const connectors = useConnectors();
+  const { disconnect } = useDisconnect(); // [!code ++]
+
+  const handleConnect = ({ createAccount }: { createAccount: boolean }) => () => {
+    const connector = connectors.find((c) => c.id === 'webAuthn');
+    if (connector) {
+      connect({ capabilities: { createAccount }, connector });
+    } else {
+      console.error("webauthn connector not found");
+    }
+  };
+
+  const handleDisconnect = () => { // [!code ++]
+    disconnect(); // [!code ++]
+  }; // [!code ++]
+
+
+  if (!isConnected) { // [!code ++]
+    return (
+      <div>
+        <button onClick={handleConnect({ createAccount: false })}>
+          Log in
+        </button>
+        <button onClick={handleConnect({ createAccount: true })}>
+          Sign up
+        </button>
+      </div>
+    );
+  } // [!code ++]
+
+  return ( // [!code ++]
+    <button onClick={handleDisconnect}>{/* [!code ++]*/}
+      Disconnect {/* [!code ++]*/}
+    </button> // [!code ++]
+  ); // [!code ++]
+}
+```
+
+```tsx [config.ts]
+// [!include ~/snippets/wagmi.config.ts:setup]
+```
+
+:::
+
+::::
