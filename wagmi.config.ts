@@ -14,7 +14,15 @@ export const config = createConfig({
       ? tempoAndantino({ feeToken })
       : tempoLocal({ feeToken }),
   ],
-  connectors: [webAuthn()],
+  connectors: [
+    webAuthn({
+      rpId:
+        typeof window !== 'undefined' &&
+        window.location.hostname.includes('tempo.xyz')
+          ? 'tempo.xyz'
+          : undefined,
+    }),
+  ],
   multiInjectedProviderDiscovery: true,
   transports: {
     [tempoAndantino.id]: webSocket(
