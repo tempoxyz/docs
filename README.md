@@ -32,6 +32,10 @@ bun install
 bun run dev
 ```
 
+## Contributing
+
+Our contributor guidelines can be found in [`CONTRIBUTING.md`](https://github.com/tempoxyz/docs?tab=contributing-ov-file).
+
 ## Security
 
 See [`SECURITY.md`](https://github.com/tempoxyz/docs?tab=security-ov-file).
