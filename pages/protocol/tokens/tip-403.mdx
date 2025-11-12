@@ -1,6 +1,9 @@
 # TIP-403: Policy Registry System
 
+## Abstract
+
 TIP-403 provides a policy registry system that allows TIP-20 tokens to inherit access control and compliance policies. The registry supports two types of policies (whitelist and blacklist) and includes special built-in policies for common use cases. Policies can be shared across multiple tokens, enabling consistent compliance enforcement.
+
 
 ## Motivation
 
@@ -11,14 +14,22 @@ Token issuers often need to implement compliance policies such as KYC/AML requir
 - **Maintenance Overhead**: Updating policies across multiple tokens
 - **Gas Inefficiency**: Storing policy data in each token contract
 
-TIP-403 solves these problems by providing a centralized, reusable policy registry system.
 
 ## Specification
 
-### Contract Interface
+The TIP-403 registry stores policies that TIP-20 tokens check against on any token transfer. Policies are associated with a unique `policyId`, can either be a blacklist or a whitelist policy, and contain a list of addresses. This list of addresses can be updated by the policy `admin`.
+
+Custom policies start with `policyId = 2`. The registry reserves the first two ids for built-in policies: 
+1. `policyId = 0` is the `always-reject` policy and rejects all token transfers
+2. `policyId = 1` is the `always-allow` policy and allows all token transfers
+
+
+### Interfaces
+
+#### Contract Types
 
 ```solidity
-contract TIP403Registry {
+interface ITIP403Registry {
     enum PolicyType {
         WHITELIST,
         BLACKLIST
@@ -31,24 +42,6 @@ contract TIP403Registry {
 }
 ```
 
-### State Variables
-
-| Variable | Type | Description |
-|----------|------|-------------|
-| `policyIdCounter` | `uint64` | Counter for generating unique policy IDs, starts at 2 |
-| `policyData` | `mapping(uint64 => PolicyData)` | Maps policy IDs to their data |
-| `policySet` | `mapping(uint64 => mapping(address => bool))` | Maps policy IDs to address sets |
-
-### Special Policies
-
-The registry includes two built-in special policies that don't require storage:
-
-| Policy ID | Name | Description |
-|-----------|------|-------------|
-| 0 | "always-reject" | Always returns `false` (blocks all transfers) |
-| 1 | "always-allow" | Always returns `true` (allows all transfers) |
-
-### Core Functions
 
 #### Policy Creation
 
@@ -59,68 +52,91 @@ function createPolicy(
 ) public returns (uint64 newPolicyId)
 ```
 
-Creates a new policy with the specified admin and type. Returns a unique policy ID.
+Creates a new policy with the specified admin and type. Returns the unique policy ID associated with the created policy.
 
 ```solidity
-function createPolicy(
+function createPolicyWithAccounts(
     address admin,
     PolicyType policyType,
     address[] memory accounts
 ) public returns (uint64 newPolicyId)
 ```
 
-Creates a policy and immediately adds the provided accounts to the policy set.
+Creates a policy and immediately adds the provided accounts to the policy set. Returns the unique policy ID associated with the created policy.
+
 
 #### Policy Administration
+
+These policy administrative functions can only be called by the current policy admin.
 
 ```solidity
 function setPolicyAdmin(uint64 policyId, address admin) external
 ```
 
-Transfers admin rights to another address. Only the current admin can call this function.
-
-#### Policy Modification
+Transfers admin rights to another address. 
 
 ```solidity
 function modifyPolicyWhitelist(uint64 policyId, address account, bool allowed) external
 ```
 
-Adds or removes addresses from a whitelist policy. Only the policy admin can call this function.
+Adds or removes addresses from a whitelist policy. 
 
 ```solidity
 function modifyPolicyBlacklist(uint64 policyId, address account, bool restricted) external
 ```
 
-Adds or removes addresses from a blacklist policy. Only the policy admin can call this function.
+Adds or removes addresses from a blacklist policy. 
 
-#### Policy Querying
+
+#### Viewing Policy State
 
 ```solidity
-function isAuthorized(uint64 policyId, address user) public view returns (bool)
+function isAuthorized(uint64 policyId, address user) external view returns (bool)
 ```
 
-Checks if a user is authorized under a specific policy:
-- For special policies (0, 1): Returns the policy value directly
-- For whitelist policies: Returns `true` if user is in the whitelist
-- For blacklist policies: Returns `true` if user is NOT in the blacklist
+Returns whether the provided user is allowed to transfer tokens under the provided policy ID. 
 
-### Events
+```solidity
+function policyIdCounter() external view returns (uint64)
+```
 
-#### Policy Creation Events
+Returns the next policy ID that will be assigned to a newly created policy.
 
+```solidity
+function policyData(uint64 policyId) external returns (PolicyType, address)
+```
+
+Returns the policy type and admin address of the policy associated with the provided policy ID.
+
+
+#### Usage with TIP-20 Tokens
+
+TIP-20 tokens store the current TIP403 registry policy ID they adhere to in it's storage. On any token transfer, it performs a TIP-403 policy check. The policy to use for the token can only be set by the admin of the token. 
+
+A quick example is shown below to create and set a policy:
+
+```solidity
+
+address admin = address(this);
+
+// Create policy with registry
+uint64 policyId = tip403Registry.createPolicy(admin, PolicyType.WHITELIST);
+
+// Set policy on the token
+token.changeTransferPolicyId(policyId);
+```
+
+
+#### Events
 ```solidity
 event PolicyCreated(uint64 indexed policyId, address indexed updater, PolicyType policyType);
 event PolicyAdminUpdated(uint64 indexed policyId, address indexed updater, address indexed admin);
-```
-
-#### Policy Modification Events
-
-```solidity
 event WhitelistUpdated(uint64 indexed policyId, address indexed updater, address indexed account, bool allowed);
 event BlacklistUpdated(uint64 indexed policyId, address indexed updater, address indexed account, bool restricted);
 ```
 
-### Error Handling
+
+#### Errors
 
 The contract defines the following custom errors:
 
@@ -131,7 +147,8 @@ error PolicyDoesNotExist();        // Policy ID doesn't exist
 error ArrayLengthMismatch();       // Array lengths don't match
 ```
 
-## Use Cases
+
+## Example Usage
 
 ### Compliance Enforcement
 
@@ -150,6 +167,7 @@ token1.changeTransferPolicyId(kycPolicy);
 token2.changeTransferPolicyId(kycPolicy);
 ```
 
+
 ### Risk Management
 
 Implement blacklists for blocked addresses:
@@ -163,6 +181,7 @@ registry.modifyPolicyBlacklist(blacklistPolicy, blockedAddress1, true);
 registry.modifyPolicyBlacklist(blacklistPolicy, blockedAddress2, true);
 ```
 
+
 ### Emergency Controls
 
 Use special policies for emergency situations:
@@ -174,26 +193,3 @@ token.changeTransferPolicyId(0); // always-reject
 // Resume normal operations
 token.changeTransferPolicyId(1); // always-allow
 ```
-
-## Integration with TIP-20
-
-TIP-20 tokens reference TIP-403 policies through their `transferPolicyId` state variable:
-
-```solidity
-// In TIP-20 token contract
-uint64 public transferPolicyId;
-
-function _checkTransferPolicy(address from, address to) internal view {
-    if (transferPolicyId > 1) {
-        require(
-            TIP403Registry(registry).isAuthorized(transferPolicyId, from) &&
-            TIP403Registry(registry).isAuthorized(transferPolicyId, to),
-            "Transfer not authorized by policy"
-        );
-    }
-}
-```
-
-## Other Notes
-
-- Policy IDs start from 2 to reserve special policies
