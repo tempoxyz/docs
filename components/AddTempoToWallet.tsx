@@ -27,7 +27,7 @@ export function AddTempoToWallet() {
   const switchChain = useSwitchChain()
   const chainId = useChainId()
   if (!injectedConnectors.length) return null
-  if (!address)
+  if (!address || connector?.id === 'webAuthn')
     return (
       <div className="flex gap-2">
         {injectedConnectors.map((connector) => (
