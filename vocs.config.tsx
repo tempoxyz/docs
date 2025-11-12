@@ -539,10 +539,6 @@ export default defineConfig({
                     link: '/sdk/typescript/viem/amm.getLiquidityBalance',
                   },
                   { text: 'getPool', link: '/sdk/typescript/viem/amm.getPool' },
-                  {
-                    text: 'getTotalSupply',
-                    link: '/sdk/typescript/viem/amm.getTotalSupply',
-                  },
                   { text: 'mint', link: '/sdk/typescript/viem/amm.mint' },
                   {
                     text: 'rebalanceSwap',
@@ -861,10 +857,6 @@ export default defineConfig({
                     link: '/sdk/typescript/wagmi/actions/amm.getPool',
                   },
                   {
-                    text: 'getTotalSupply',
-                    link: '/sdk/typescript/wagmi/actions/amm.getTotalSupply',
-                  },
-                  {
                     text: 'mint',
                     link: '/sdk/typescript/wagmi/actions/amm.mint',
                   },
@@ -1129,54 +1121,46 @@ export default defineConfig({
             ],
           },
           {
-            text: 'Hooks 🚧',
+            text: 'Hooks',
             collapsed: true,
             items: [
               {
                 text: 'AMM',
                 items: [
                   {
-                    text: 'useBurn 🚧',
+                    text: 'useBurn',
                     link: '/sdk/typescript/wagmi/hooks/amm.useBurn',
                   },
                   {
-                    text: 'useLiquidityBalance 🚧',
+                    text: 'useLiquidityBalance',
                     link: '/sdk/typescript/wagmi/hooks/amm.useLiquidityBalance',
                   },
                   {
-                    text: 'useMint 🚧',
+                    text: 'useMint',
                     link: '/sdk/typescript/wagmi/hooks/amm.useMint',
                   },
                   {
-                    text: 'useGetLiquidityBalance 🚧',
-                    link: '/sdk/typescript/wagmi/hooks/amm.useGetLiquidityBalance',
+                    text: 'usePool',
+                    link: '/sdk/typescript/wagmi/hooks/amm.usePool',
                   },
                   {
-                    text: 'useGetPool 🚧',
-                    link: '/sdk/typescript/wagmi/hooks/amm.useGetPool',
-                  },
-                  {
-                    text: 'useGetTotalSupply 🚧',
-                    link: '/sdk/typescript/wagmi/hooks/amm.useGetTotalSupply',
-                  },
-                  {
-                    text: 'useRebalanceSwap 🚧',
+                    text: 'useRebalanceSwap',
                     link: '/sdk/typescript/wagmi/hooks/amm.useRebalanceSwap',
                   },
                   {
-                    text: 'useWatchBurn 🚧',
+                    text: 'useWatchBurn',
                     link: '/sdk/typescript/wagmi/hooks/amm.useWatchBurn',
                   },
                   {
-                    text: 'useWatchFeeSwap 🚧',
+                    text: 'useWatchFeeSwap',
                     link: '/sdk/typescript/wagmi/hooks/amm.useWatchFeeSwap',
                   },
                   {
-                    text: 'useWatchMint 🚧',
+                    text: 'useWatchMint',
                     link: '/sdk/typescript/wagmi/hooks/amm.useWatchMint',
                   },
                   {
-                    text: 'useWatchRebalanceSwap 🚧',
+                    text: 'useWatchRebalanceSwap',
                     link: '/sdk/typescript/wagmi/hooks/amm.useWatchRebalanceSwap',
                   },
                 ],
@@ -1185,15 +1169,15 @@ export default defineConfig({
                 text: 'Fee',
                 items: [
                   {
-                    text: 'useSetUserToken 🚧',
+                    text: 'useSetUserToken',
                     link: '/sdk/typescript/wagmi/hooks/fee.useSetUserToken',
                   },
                   {
-                    text: 'useUserToken 🚧',
+                    text: 'useUserToken',
                     link: '/sdk/typescript/wagmi/hooks/fee.useUserToken',
                   },
                   {
-                    text: 'useWatchSetUserToken 🚧',
+                    text: 'useWatchSetUserToken',
                     link: '/sdk/typescript/wagmi/hooks/fee.useWatchSetUserToken',
                   },
                 ],
@@ -1247,67 +1231,67 @@ export default defineConfig({
                 text: 'Stablecoin Exchange',
                 items: [
                   {
-                    text: 'useBalance 🚧',
+                    text: 'useBalance',
                     link: '/sdk/typescript/wagmi/hooks/dex.useBalance',
                   },
                   {
-                    text: 'useBuy 🚧',
+                    text: 'useBuy',
                     link: '/sdk/typescript/wagmi/hooks/dex.useBuy',
                   },
                   {
-                    text: 'useBuyQuote 🚧',
+                    text: 'useBuyQuote',
                     link: '/sdk/typescript/wagmi/hooks/dex.useBuyQuote',
                   },
                   {
-                    text: 'useCancel 🚧',
+                    text: 'useCancel',
                     link: '/sdk/typescript/wagmi/hooks/dex.useCancel',
                   },
                   {
-                    text: 'useCreatePair 🚧',
+                    text: 'useCreatePair',
                     link: '/sdk/typescript/wagmi/hooks/dex.useCreatePair',
                   },
                   {
-                    text: 'useOrder 🚧',
+                    text: 'useOrder',
                     link: '/sdk/typescript/wagmi/hooks/dex.useOrder',
                   },
                   {
-                    text: 'usePlace 🚧',
+                    text: 'usePlace',
                     link: '/sdk/typescript/wagmi/hooks/dex.usePlace',
                   },
                   {
-                    text: 'usePlaceFlip 🚧',
+                    text: 'usePlaceFlip',
                     link: '/sdk/typescript/wagmi/hooks/dex.usePlaceFlip',
                   },
                   {
-                    text: 'useTickLevel 🚧',
+                    text: 'useTickLevel',
                     link: '/sdk/typescript/wagmi/hooks/dex.useTickLevel',
                   },
                   {
-                    text: 'useSell 🚧',
+                    text: 'useSell',
                     link: '/sdk/typescript/wagmi/hooks/dex.useSell',
                   },
                   {
-                    text: 'useSellQuote 🚧',
+                    text: 'useSellQuote',
                     link: '/sdk/typescript/wagmi/hooks/dex.useSellQuote',
                   },
                   {
-                    text: 'useWatchFlipOrderPlaced 🚧',
+                    text: 'useWatchFlipOrderPlaced',
                     link: '/sdk/typescript/wagmi/hooks/dex.useWatchFlipOrderPlaced',
                   },
                   {
-                    text: 'useWatchOrderCancelled 🚧',
+                    text: 'useWatchOrderCancelled',
                     link: '/sdk/typescript/wagmi/hooks/dex.useWatchOrderCancelled',
                   },
                   {
-                    text: 'useWatchOrderFilled 🚧',
+                    text: 'useWatchOrderFilled',
                     link: '/sdk/typescript/wagmi/hooks/dex.useWatchOrderFilled',
                   },
                   {
-                    text: 'useWatchOrderPlaced 🚧',
+                    text: 'useWatchOrderPlaced',
                     link: '/sdk/typescript/wagmi/hooks/dex.useWatchOrderPlaced',
                   },
                   {
-                    text: 'useWithdraw 🚧',
+                    text: 'useWithdraw',
                     link: '/sdk/typescript/wagmi/hooks/dex.useWithdraw',
                   },
                 ],
@@ -1316,103 +1300,103 @@ export default defineConfig({
                 text: 'Token',
                 items: [
                   {
-                    text: 'useAllowance 🚧',
-                    link: '/sdk/typescript/wagmi/hooks/token.useAllowance',
+                    text: 'useGetAllowance',
+                    link: '/sdk/typescript/wagmi/hooks/token.useGetAllowance',
                   },
                   {
-                    text: 'useApprove 🚧',
+                    text: 'useApprove',
                     link: '/sdk/typescript/wagmi/hooks/token.useApprove',
                   },
                   {
-                    text: 'useBalance 🚧',
-                    link: '/sdk/typescript/wagmi/hooks/token.useBalance',
+                    text: 'useGetBalance',
+                    link: '/sdk/typescript/wagmi/hooks/token.useGetBalance',
                   },
                   {
-                    text: 'useBurn 🚧',
+                    text: 'useBurn',
                     link: '/sdk/typescript/wagmi/hooks/token.useBurn',
                   },
                   {
-                    text: 'useBurnBlocked 🚧',
+                    text: 'useBurnBlocked',
                     link: '/sdk/typescript/wagmi/hooks/token.useBurnBlocked',
                   },
                   {
-                    text: 'useChangeTransferPolicy 🚧',
+                    text: 'useChangeTransferPolicy',
                     link: '/sdk/typescript/wagmi/hooks/token.useChangeTransferPolicy',
                   },
                   {
-                    text: 'useCreate 🚧',
+                    text: 'useCreate',
                     link: '/sdk/typescript/wagmi/hooks/token.useCreate',
                   },
                   {
-                    text: 'useGrantRoles 🚧',
+                    text: 'useGrantRoles',
                     link: '/sdk/typescript/wagmi/hooks/token.useGrantRoles',
                   },
                   {
-                    text: 'useHasRole 🚧',
+                    text: 'useHasRole',
                     link: '/sdk/typescript/wagmi/hooks/token.useHasRole',
                   },
                   {
-                    text: 'useMetadata 🚧',
-                    link: '/sdk/typescript/wagmi/hooks/token.useMetadata',
+                    text: 'useGetMetadata',
+                    link: '/sdk/typescript/wagmi/hooks/token.useGetMetadata',
                   },
                   {
-                    text: 'useMint 🚧',
+                    text: 'useMint',
                     link: '/sdk/typescript/wagmi/hooks/token.useMint',
                   },
                   {
-                    text: 'usePause 🚧',
+                    text: 'usePause',
                     link: '/sdk/typescript/wagmi/hooks/token.usePause',
                   },
                   {
-                    text: 'useRenounceRoles 🚧',
+                    text: 'useRenounceRoles',
                     link: '/sdk/typescript/wagmi/hooks/token.useRenounceRoles',
                   },
                   {
-                    text: 'useRevokeRoles 🚧',
+                    text: 'useRevokeRoles',
                     link: '/sdk/typescript/wagmi/hooks/token.useRevokeRoles',
                   },
                   {
-                    text: 'useSetRoleAdmin 🚧',
+                    text: 'useSetRoleAdmin',
                     link: '/sdk/typescript/wagmi/hooks/token.useSetRoleAdmin',
                   },
                   {
-                    text: 'useSetSupplyCap 🚧',
+                    text: 'useSetSupplyCap',
                     link: '/sdk/typescript/wagmi/hooks/token.useSetSupplyCap',
                   },
                   {
-                    text: 'useTransfer 🚧',
+                    text: 'useTransfer',
                     link: '/sdk/typescript/wagmi/hooks/token.useTransfer',
                   },
                   {
-                    text: 'useUnpause 🚧',
+                    text: 'useUnpause',
                     link: '/sdk/typescript/wagmi/hooks/token.useUnpause',
                   },
                   {
-                    text: 'useWatchAdminRole 🚧',
+                    text: 'useWatchAdminRole',
                     link: '/sdk/typescript/wagmi/hooks/token.useWatchAdminRole',
                   },
                   {
-                    text: 'useWatchApprove 🚧',
+                    text: 'useWatchApprove',
                     link: '/sdk/typescript/wagmi/hooks/token.useWatchApprove',
                   },
                   {
-                    text: 'useWatchBurn 🚧',
+                    text: 'useWatchBurn',
                     link: '/sdk/typescript/wagmi/hooks/token.useWatchBurn',
                   },
                   {
-                    text: 'useWatchCreate 🚧',
+                    text: 'useWatchCreate',
                     link: '/sdk/typescript/wagmi/hooks/token.useWatchCreate',
                   },
                   {
-                    text: 'useWatchMint 🚧',
+                    text: 'useWatchMint',
                     link: '/sdk/typescript/wagmi/hooks/token.useWatchMint',
                   },
                   {
-                    text: 'useWatchRole 🚧',
+                    text: 'useWatchRole',
                     link: '/sdk/typescript/wagmi/hooks/token.useWatchRole',
                   },
                   {
-                    text: 'useWatchTransfer 🚧',
+                    text: 'useWatchTransfer',
                     link: '/sdk/typescript/wagmi/hooks/token.useWatchTransfer',
                   },
                 ],
