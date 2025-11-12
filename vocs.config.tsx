@@ -401,12 +401,8 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Consensus & Blockspace',
+        text: 'Block Organization ',
         items: [
-          {
-            text: 'Consensus',
-            link: '/protocol/consensus-blockspace/consensus',
-          },
           {
             text: 'Block Format',
             link: '/protocol/consensus-blockspace/block-format',
@@ -1439,7 +1435,7 @@ export default defineConfig({
     },
     {
       text: 'Protocol Specs',
-      link: '/protocol',
+      link: '/protocol/overview/intro',
     },
   ],
   twoslash: {

@@ -1,60 +1,48 @@
 # Block Format
 
-## Overview
-
-This specification defines the structure and encoding of blocks in the Tempo blockchain.
-
 ## Abstract
 
-Tempo blocks extend the Ethereum block format with additional fields and structures to support protocol features including payment lanes, sub-blocks, and multi-token fee payment.
+This specification defines the structure of valid blocks in the Tempo blockchain.
 
 ## Motivation
 
-The block format must accommodate:
-- Payment lane organization for transaction ordering
-- Sub-block structure for parallel execution
-- Fee token metadata for validator preferences
-- Backwards compatibility with Ethereum tooling
+Tempo blocks extend the Ethereum block format in multiple ways: there are new header fields to account for payment lanes and sub-blocks, and system transactions are added to the block body for the fee AMM and other protocol operations. This specification contains all the modifications to the block format.
 
 ## Specification
 
-:::note Work in Progress
-This specification is currently being developed. Check back for detailed block structure, encoding rules, and validation requirements.
-:::
-
-### Block Header
-
-The block header includes standard Ethereum fields plus Tempo-specific extensions:
-
+### Header fields
+Tempo extends an Ethereum header with three extra scalars.
+```rust title="Header struct"
+pub struct Header {
+    pub general_gas_limit: u64,
+    pub shared_gas_limit: u64,
+    pub timestamp_millis_part: u64,
+    pub inner: Header,
+}
+pub struct Header {
+    pub general_gas_limit: u64,
+    pub sub_block_gas_limit: u64,
+    pub inner: Header,
+}
 ```
-TODO: Define block header structure
-```
+- `inner` is the canonical Ethereum header (parent_hash, state_root, gas_limit, etc.).
+- `general_gas_limit` and `shared_gas_limit` carve up the canonical `gas_limit` for payment and sub-block gas.
+- `timestamp_millis_part` stores the sub‑second component; the full timestamp is `inner.timestamp * 1000 + timestamp_millis_part` .
 
-### Block Body
+### Block body
+The block body in Tempo retains the canonical Ethereum block body structure, with the addition of new system transactions (see below). These transactions include sub-block transactions as the bottom non-system transactions in the block. 
 
-The block body organizes transactions according to:
-- Payment lane assignments
-- Sub-block boundaries
-- Fee token preferences
+### System transactions
 
-```
-TODO: Define block body structure
-```
+A valid tempo block must contain the following new system transactions
+  - **Rewards Registry (optional top-of-block)** — refreshes validator rewards metadata before user transactions begin.  Detailed specification [here](/protocol/tokens/reward-distribution).
+ - **Fee Manager (end-of-block 1/3)** — settles block fee accounting to keep validator payouts and protocol budgets consistent.  Detailed specification [here](/protocol/transactions/fee-amm).
+ - **Stablecoin Exchange (end-of-block 2/3)** — settles stablecoin exchange balances. Detailed specification [here](/protocol/stablecoin-exchange/stablecoin-exchange).
+ - **Subblock Metadata (end-of-block 3/3)** — contains metadata about the sub-blocks included in the block. Detailed specification [here](/protocol/consensus-blockspace/subblocks).  
 
-### Encoding
 
-```
-TODO: Define RLP encoding rules
-```
 
-## Validation Rules
 
-```
-TODO: Define block validation rules
-```
-
-## Related
-
+## Related Specifications
 - [Payment Lanes](/protocol/consensus-blockspace/payment-lanes) - Transaction ordering
 - [Sub-blocks](/protocol/consensus-blockspace/subblocks) - Block organization
-- [Consensus](/protocol/consensus-blockspace/consensus) - Block production
