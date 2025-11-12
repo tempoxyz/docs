@@ -539,6 +539,10 @@ export default defineConfig({
                     link: '/sdk/typescript/viem/amm.getLiquidityBalance',
                   },
                   { text: 'getPool', link: '/sdk/typescript/viem/amm.getPool' },
+                  {
+                    text: 'getTotalSupply',
+                    link: '/sdk/typescript/viem/amm.getTotalSupply',
+                  },
                   { text: 'mint', link: '/sdk/typescript/viem/amm.mint' },
                   {
                     text: 'rebalanceSwap',
@@ -838,54 +842,50 @@ export default defineConfig({
             ],
           },
           {
-            text: 'Actions 🚧',
+            text: 'Actions',
             collapsed: true,
             items: [
               {
                 text: 'AMM',
                 items: [
                   {
-                    text: 'burn 🚧',
+                    text: 'burn',
                     link: '/sdk/typescript/wagmi/actions/amm.burn',
                   },
                   {
-                    text: 'getLiquidityBalance 🚧',
+                    text: 'getLiquidityBalance',
                     link: '/sdk/typescript/wagmi/actions/amm.getLiquidityBalance',
                   },
                   {
-                    text: 'getPool 🚧',
+                    text: 'getPool',
                     link: '/sdk/typescript/wagmi/actions/amm.getPool',
                   },
                   {
-                    text: 'getPoolId 🚧',
-                    link: '/sdk/typescript/wagmi/actions/amm.getPoolId',
-                  },
-                  {
-                    text: 'getTotalSupply 🚧',
+                    text: 'getTotalSupply',
                     link: '/sdk/typescript/wagmi/actions/amm.getTotalSupply',
                   },
                   {
-                    text: 'mint 🚧',
+                    text: 'mint',
                     link: '/sdk/typescript/wagmi/actions/amm.mint',
                   },
                   {
-                    text: 'rebalanceSwap 🚧',
+                    text: 'rebalanceSwap',
                     link: '/sdk/typescript/wagmi/actions/amm.rebalanceSwap',
                   },
                   {
-                    text: 'watchBurn 🚧',
+                    text: 'watchBurn',
                     link: '/sdk/typescript/wagmi/actions/amm.watchBurn',
                   },
                   {
-                    text: 'watchFeeSwap 🚧',
+                    text: 'watchFeeSwap',
                     link: '/sdk/typescript/wagmi/actions/amm.watchFeeSwap',
                   },
                   {
-                    text: 'watchMint 🚧',
+                    text: 'watchMint',
                     link: '/sdk/typescript/wagmi/actions/amm.watchMint',
                   },
                   {
-                    text: 'watchRebalanceSwap 🚧',
+                    text: 'watchRebalanceSwap',
                     link: '/sdk/typescript/wagmi/actions/amm.watchRebalanceSwap',
                   },
                 ],
@@ -894,15 +894,15 @@ export default defineConfig({
                 text: 'Fee',
                 items: [
                   {
-                    text: 'getUserToken 🚧',
+                    text: 'getUserToken',
                     link: '/sdk/typescript/wagmi/actions/fee.getUserToken',
                   },
                   {
-                    text: 'setUserToken 🚧',
+                    text: 'setUserToken',
                     link: '/sdk/typescript/wagmi/actions/fee.setUserToken',
                   },
                   {
-                    text: 'watchSetUserToken 🚧',
+                    text: 'watchSetUserToken',
                     link: '/sdk/typescript/wagmi/actions/fee.watchSetUserToken',
                   },
                 ],
@@ -956,67 +956,67 @@ export default defineConfig({
                 text: 'Stablecoin Exchange',
                 items: [
                   {
-                    text: 'buy 🚧',
+                    text: 'buy',
                     link: '/sdk/typescript/wagmi/actions/dex.buy',
                   },
                   {
-                    text: 'cancel 🚧',
+                    text: 'cancel',
                     link: '/sdk/typescript/wagmi/actions/dex.cancel',
                   },
                   {
-                    text: 'createPair 🚧',
+                    text: 'createPair',
                     link: '/sdk/typescript/wagmi/actions/dex.createPair',
                   },
                   {
-                    text: 'getBalance 🚧',
+                    text: 'getBalance',
                     link: '/sdk/typescript/wagmi/actions/dex.getBalance',
                   },
                   {
-                    text: 'getBuyQuote 🚧',
+                    text: 'getBuyQuote',
                     link: '/sdk/typescript/wagmi/actions/dex.getBuyQuote',
                   },
                   {
-                    text: 'getOrder 🚧',
+                    text: 'getOrder',
                     link: '/sdk/typescript/wagmi/actions/dex.getOrder',
                   },
                   {
-                    text: 'getTickLevel 🚧',
+                    text: 'getTickLevel',
                     link: '/sdk/typescript/wagmi/actions/dex.getTickLevel',
                   },
                   {
-                    text: 'getSellQuote 🚧',
+                    text: 'getSellQuote',
                     link: '/sdk/typescript/wagmi/actions/dex.getSellQuote',
                   },
                   {
-                    text: 'place 🚧',
+                    text: 'place',
                     link: '/sdk/typescript/wagmi/actions/dex.place',
                   },
                   {
-                    text: 'placeFlip 🚧',
+                    text: 'placeFlip',
                     link: '/sdk/typescript/wagmi/actions/dex.placeFlip',
                   },
                   {
-                    text: 'sell 🚧',
+                    text: 'sell',
                     link: '/sdk/typescript/wagmi/actions/dex.sell',
                   },
                   {
-                    text: 'watchFlipOrderPlaced 🚧',
+                    text: 'watchFlipOrderPlaced',
                     link: '/sdk/typescript/wagmi/actions/dex.watchFlipOrderPlaced',
                   },
                   {
-                    text: 'watchOrderCancelled 🚧',
+                    text: 'watchOrderCancelled',
                     link: '/sdk/typescript/wagmi/actions/dex.watchOrderCancelled',
                   },
                   {
-                    text: 'watchOrderFilled 🚧',
+                    text: 'watchOrderFilled',
                     link: '/sdk/typescript/wagmi/actions/dex.watchOrderFilled',
                   },
                   {
-                    text: 'watchOrderPlaced 🚧',
+                    text: 'watchOrderPlaced',
                     link: '/sdk/typescript/wagmi/actions/dex.watchOrderPlaced',
                   },
                   {
-                    text: 'withdraw 🚧',
+                    text: 'withdraw',
                     link: '/sdk/typescript/wagmi/actions/dex.withdraw',
                   },
                 ],
@@ -1025,103 +1025,103 @@ export default defineConfig({
                 text: 'Token',
                 items: [
                   {
-                    text: 'approve 🚧',
+                    text: 'approve',
                     link: '/sdk/typescript/wagmi/actions/token.approve',
                   },
                   {
-                    text: 'burn 🚧',
+                    text: 'burn',
                     link: '/sdk/typescript/wagmi/actions/token.burn',
                   },
                   {
-                    text: 'burnBlocked 🚧',
+                    text: 'burnBlocked',
                     link: '/sdk/typescript/wagmi/actions/token.burnBlocked',
                   },
                   {
-                    text: 'changeTransferPolicy 🚧',
+                    text: 'changeTransferPolicy',
                     link: '/sdk/typescript/wagmi/actions/token.changeTransferPolicy',
                   },
                   {
-                    text: 'create 🚧',
+                    text: 'create',
                     link: '/sdk/typescript/wagmi/actions/token.create',
                   },
                   {
-                    text: 'getAllowance 🚧',
+                    text: 'getAllowance',
                     link: '/sdk/typescript/wagmi/actions/token.getAllowance',
                   },
                   {
-                    text: 'getBalance 🚧',
+                    text: 'getBalance',
                     link: '/sdk/typescript/wagmi/actions/token.getBalance',
                   },
                   {
-                    text: 'getMetadata 🚧',
+                    text: 'getMetadata',
                     link: '/sdk/typescript/wagmi/actions/token.getMetadata',
                   },
                   {
-                    text: 'grantRoles 🚧',
+                    text: 'grantRoles',
                     link: '/sdk/typescript/wagmi/actions/token.grantRoles',
                   },
                   {
-                    text: 'hasRole 🚧',
+                    text: 'hasRole',
                     link: '/sdk/typescript/wagmi/actions/token.hasRole',
                   },
                   {
-                    text: 'mint 🚧',
+                    text: 'mint',
                     link: '/sdk/typescript/wagmi/actions/token.mint',
                   },
                   {
-                    text: 'pause 🚧',
+                    text: 'pause',
                     link: '/sdk/typescript/wagmi/actions/token.pause',
                   },
                   {
-                    text: 'renounceRoles 🚧',
+                    text: 'renounceRoles',
                     link: '/sdk/typescript/wagmi/actions/token.renounceRoles',
                   },
                   {
-                    text: 'revokeRoles 🚧',
+                    text: 'revokeRoles',
                     link: '/sdk/typescript/wagmi/actions/token.revokeRoles',
                   },
                   {
-                    text: 'setRoleAdmin 🚧',
+                    text: 'setRoleAdmin',
                     link: '/sdk/typescript/wagmi/actions/token.setRoleAdmin',
                   },
                   {
-                    text: 'setSupplyCap 🚧',
+                    text: 'setSupplyCap',
                     link: '/sdk/typescript/wagmi/actions/token.setSupplyCap',
                   },
                   {
-                    text: 'transfer 🚧',
+                    text: 'transfer',
                     link: '/sdk/typescript/wagmi/actions/token.transfer',
                   },
                   {
-                    text: 'unpause 🚧',
+                    text: 'unpause',
                     link: '/sdk/typescript/wagmi/actions/token.unpause',
                   },
                   {
-                    text: 'watchAdminRole 🚧',
+                    text: 'watchAdminRole',
                     link: '/sdk/typescript/wagmi/actions/token.watchAdminRole',
                   },
                   {
-                    text: 'watchApprove 🚧',
+                    text: 'watchApprove',
                     link: '/sdk/typescript/wagmi/actions/token.watchApprove',
                   },
                   {
-                    text: 'watchBurn 🚧',
+                    text: 'watchBurn',
                     link: '/sdk/typescript/wagmi/actions/token.watchBurn',
                   },
                   {
-                    text: 'watchCreate 🚧',
+                    text: 'watchCreate',
                     link: '/sdk/typescript/wagmi/actions/token.watchCreate',
                   },
                   {
-                    text: 'watchMint 🚧',
+                    text: 'watchMint',
                     link: '/sdk/typescript/wagmi/actions/token.watchMint',
                   },
                   {
-                    text: 'watchRole 🚧',
+                    text: 'watchRole',
                     link: '/sdk/typescript/wagmi/actions/token.watchRole',
                   },
                   {
-                    text: 'watchTransfer 🚧',
+                    text: 'watchTransfer',
                     link: '/sdk/typescript/wagmi/actions/token.watchTransfer',
                   },
                 ],
@@ -1148,20 +1148,20 @@ export default defineConfig({
                     link: '/sdk/typescript/wagmi/hooks/amm.useMint',
                   },
                   {
-                    text: 'usePool 🚧',
-                    link: '/sdk/typescript/wagmi/hooks/amm.usePool',
+                    text: 'useGetLiquidityBalance 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/amm.useGetLiquidityBalance',
                   },
                   {
-                    text: 'usePoolId 🚧',
-                    link: '/sdk/typescript/wagmi/hooks/amm.usePoolId',
+                    text: 'useGetPool 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/amm.useGetPool',
+                  },
+                  {
+                    text: 'useGetTotalSupply 🚧',
+                    link: '/sdk/typescript/wagmi/hooks/amm.useGetTotalSupply',
                   },
                   {
                     text: 'useRebalanceSwap 🚧',
                     link: '/sdk/typescript/wagmi/hooks/amm.useRebalanceSwap',
-                  },
-                  {
-                    text: 'useTotalSupply 🚧',
-                    link: '/sdk/typescript/wagmi/hooks/amm.useTotalSupply',
                   },
                   {
                     text: 'useWatchBurn 🚧',
@@ -1362,10 +1362,6 @@ export default defineConfig({
                   {
                     text: 'usePause 🚧',
                     link: '/sdk/typescript/wagmi/hooks/token.usePause',
-                  },
-                  {
-                    text: 'usePermit 🚧',
-                    link: '/sdk/typescript/wagmi/hooks/token.usePermit',
                   },
                   {
                     text: 'useRenounceRoles 🚧',
