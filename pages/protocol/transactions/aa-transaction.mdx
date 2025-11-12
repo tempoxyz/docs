@@ -6,20 +6,17 @@ This spec introduces native protocol support for the following account abstracti
 
 * WebAuthn/P256 signature validation - enables passkey accounts
 * Parallelizable nonces - allows higher tx throughput for each account
-* Gas sponsorship - allows apps to pay for their users's transactions
-* Call Batching - allows users to multicall efficiently
+* Gas sponsorship - allows apps to pay for their users' transactions
+* Call Batching - allows users to multicall efficiently and atomically
 * Scheduled Txs - allow users to specify a time window in which their tx can be executed
 
 ## Motivation
 
-Current accounts are limited to secp256k1 signatures and sequential nonces, creating UX and scalability challenges. Users cannot leverage modern authentication methods like passkeys, applications face throughput limitations due to sequential nonces. This proposal enshrines these features at the protocol level to provide:
+Current accounts are limited to secp256k1 signatures and sequential nonces, creating UX and scalability challenges.  
+Users cannot leverage modern authentication methods like passkeys, applications face throughput limitations due to sequential nonces. 
+This proposal enshrines these features at the protocol level in the form of a new transaction type. 
 
-- Native support for passkey authentication via P256/WebAuthn signatures
-- Parallel transaction execution through 2D nonce system
-- Native Gas Sponsorship using fee payers
-- Call Batching is supported using the ERC 7821 `execute` interface available in all Default Accounts
-- Scheduled Transactions are enabled using the optional `validBefore` and `validAfter` fields in the transaction 
-
+## Specification
 ### Transaction Type
 
 A new EIP-2718 transaction type is introduced with the following structure:
@@ -35,8 +32,8 @@ pub struct AATransaction {
     access_list: Vec<AccessListItem>,
 
     // AA-specific fields
-    nonce_key: U64,           // 64 bit sequence keys (was U192, changed to U64 for simplicity)
-    nonce: U64,      // 64 bit current value of the sequence key
+    nonce_key: U256,          // 256 bit nonce key for 2D nonce system
+    nonce: U64,               // 64 bit current value of the nonce key
 
     // Optional features
     fee_token: Option<Address>,         // Optional fee token preference
@@ -74,7 +71,7 @@ type P256Sig = {
     preHash: bool
 }
 ```
-**Format**: Type identifier `0x01` + 129 bytes of signature data. Total length: 130 bytes.
+**Format**: Type identifier `0x01` + 129 bytes of signature data. Total length: 130 bytes. The `typeId` is a wire format prefix (not a struct field) prepended during encoding.
 
 Note: Some p256 implementers like Web Crypto, require the digests to be prehashed before verification.
 If this bool is set to `true`, then before verification `bytes32 digest = sha256(digest)` needs to be performed.
@@ -91,7 +88,7 @@ type WebAuthnSig = {
     pubKeyY: bytes32
 }
 ```
-**Format**: Type identifier `0x02` + variable verification data + 128 bytes (r, s, pubKeyX, pubKeyY). Total length: variable (minimum 129 bytes, maximum 2049 bytes).
+**Format**: Type identifier `0x02` + variable verification data + 128 bytes (r, s, pubKeyX, pubKeyY). Total length: variable (minimum 129 bytes, maximum 2049 bytes). The `typeId` is a wire format prefix prepended during encoding. Parse by working backwards: last 128 bytes are r, s, pubKeyX, pubKeyY.
 
 ### Address Derivation
 
@@ -114,13 +111,34 @@ function deriveAddressFromP256(bytes32 pubKeyX, bytes32 pubKeyY) public pure ret
 }
 ```
 
+### AA Authorization List
+
+The `aa_authorization_list` field enables EIP-7702 style delegation with support for all three AA signature types (secp256k1, P256, and WebAuthn), not just secp256k1.
+
+#### Structure
+```rust
+pub struct AASignedAuthorization {
+    inner: Authorization,      // Standard EIP-7702 authorization
+    signature: AASignature,    // Can be Secp256k1, P256, or WebAuthn
+}
+```
+
+Each authorization in the list:
+- Delegates an account to a specified implementation contract
+- Is signed by the account's authority using any supported signature type
+- Follows EIP-7702 semantics for delegation and execution
+
+#### Validation
+- Cannot have `Create` calls when `aa_authorization_list` is non-empty (follows EIP-7702 semantics)
+- Authority address is recovered from the signature and matched against the authorization
+
 ### Parallelizable Nonces (Not Live Yet)
 
 - **Protocol nonce (key 0)**: Existing account nonce, incremented for regular txs, 7702 authorization, or `CREATE`
 - **User nonces (keys 1-N)**: Enable parallel execution with special gas schedule
 
 #### Account State Changes
-- `nonces: mapping(uint192 => uint64)` - 2D nonce tracking
+- `nonces: mapping(uint256 => uint64)` - 2D nonce tracking
 - `num_active_user_keys: uint` - tracks number of user keys for gas calculation
 
 **Implementation Note:** Nonces are stored in the storage of a designated precompile at address `0x4E4F4E4345000000000000000000000000000000` (ASCII hex for "NONCE"), as there is currently no clean way to extend account state in Reth.
@@ -128,7 +146,7 @@ function deriveAddressFromP256(bytes32 pubKeyX, bytes32 pubKeyY) public pure ret
 **Storage Layout at 0x4E4F4E4345:**
 - Storage key: `keccak256(abi.encode(account_address, nonce_key))`
 - Storage value: `nonce` (uint64)
-- Active key count for account: stored at `keccak256(abi.encode(account_address, uint192(0)))`
+- Active key count for account: stored at `keccak256(abi.encode(account_address, uint256(0)))`
 
 Note: Protocol Nonce key (0), is directly stored in the account state, just like normal transaction types.
 
@@ -313,6 +331,7 @@ The transaction is RLP encoded as follows:
     valid_after,
     fee_token,           // Always included in encoding (0x80 if None)
     fee_payer_signature, // Always included in encoding (0x80 if None)
+    aa_authorization_list, // EIP-7702 style authorization list with AA signatures
     sender_signature     // The sender's signature (secp256k1, P256, or WebAuthn)
 ])
 ```
@@ -326,7 +345,7 @@ rlp([to, value, input])
 - Optional fields encode as `0x80` (EMPTY_STRING_CODE) when `None`
 - The RLP encoding always includes all fields, even if they are omitted from signature hashes
 - The `calls` field is a list that must contain at least one Call (empty calls list is invalid)
-- The `sender_signature` field (field 13) is the final field and contains the AASignature (secp256k1, P256, or WebAuthn) encoded as bytes
+- The `sender_signature` field (field 14) is the final field and contains the AASignature (secp256k1, P256, or WebAuthn) encoded as bytes
 
 ### WebAuthn Signature Verification
 
@@ -431,7 +450,7 @@ The progressive pricing model prevents state bloat while keeping initial keys af
 ### No Nonce Expiry
 Avoiding expiry simplifies the protocol and prevents edge cases where in-flight transactions become invalid. Wallets handle nonce key allocation to prevent conflicts.
 
-## Backwards Compatibility
+### Backwards Compatibility
 
 This spec introduces a new transaction type and does not modify existing transaction processing. Legacy transactions continue to work unchanged. We special case `nonce key = 0` (also referred to as the protocol nonce key) to maintain compatibility with existing nonce behavior.
 
@@ -444,12 +463,12 @@ Different signature types incur different base transaction costs to reflect thei
 | Signature Type | Base Gas Cost | Calculation | Rationale |
 |----------------|---------------|-------------|-----------|
 | **secp256k1** | 21,000 | Standard | Includes 3,000 gas for ecrecover precompile |
-| **P256** | 26,000 | 21,000 + 8,000 - 3,000 | Adds P256 cost (8,000) minus saved ecrecover cost (3,000) |
+| **P256** | 26,000 | 21,000 + 5,000 | Base 21k + additional 5k for P256 verification |
 | **WebAuthn** | 26,000 + variable data cost | 26,000 + (calldata gas for clientDataJSON) | Base P256 cost plus variable cost for clientDataJSON based on size |
 
 **Rationale:**
 - The base 21,000 gas for standard transactions already includes the cost of secp256k1 signature verification via ecrecover (3,000 gas)
-- [EIP 7951](https://eips.ethereum.org/EIPS/eip-7951) sets P256 verification cost at 6900. We add 1100 gas to this, to account for the additional 65 bytes of signature size as compared to standard ECDSA. 
+- [EIP 7951](https://eips.ethereum.org/EIPS/eip-7951) sets P256 verification cost at 6,900 gas. We add 1,100 gas to account for the additional 65 bytes of signature size (129 bytes total vs 64 bytes for secp256k1), giving 8,000 gas total. Since the base 21k already includes 3,000 gas for ecrecover (which P256 doesn't use), the net additional cost is 8,000 - 3,000 = **5,000 gas**. 
 - WebAuthn signatures require additional computation to parse and validate the clientDataJSON structure. We cap the total signature size at 2kb. The signature is also  charged using the same gas schedule as calldata (16 gas per non-zero byte, 4 gas per zero byte) to prevent the use of this signature space from spam.
 - Individual per-signature-type gas costs allow us to add more advanced verification methods in the future like multisigs, which could have dynamic gas pricing.
 

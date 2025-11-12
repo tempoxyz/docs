@@ -1,6 +1,13 @@
 # Default Accounts
 
-Accounts on Tempo are by default just regular Ethereum-style externally owned accounts (EOAs). You can use standard wallets like MetaMask, hardware wallets, or any tool that works with Ethereum. However, there are a few important differences to be aware of:
+Accounts on Tempo are regular Ethereum-style externally owned accounts (EOAs) compatible with standard wallets like MetaMask and hardware wallets.
+
+:::info 
+Current Testnet Implementation  
+EOAs are automatically delegated to a default smart contract implementation using [Default Account Abstraction (DAA)](/protocol/default-accounts). DAA will be deprecated in the next release in favor of [AATransaction (Type 0x76)](/protocol/transactions/aa-transaction).
+:::
+
+There are a few important differences to be aware of:
 
 ## No Native Token
 

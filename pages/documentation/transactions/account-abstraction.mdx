@@ -19,37 +19,14 @@ The AA transaction type supports three different signature schemes, automaticall
 
 Standard Ethereum signatures using the secp256k1 curve.
 
-```ts
-// Standard ECDSA signature
-const hash = await client.sendTransaction({
-  to: '0x...',
-  value: parseEther('1'),
-})
-```
-
 ### P256 (130 bytes)
 
-P256 signatures enable passkey-based authentication. Passkeys are cryptographic keys stored in secure hardware like your phone or computer.
-
-```ts
-// P256 signature with passkey
-const signature = await signWithPasskey(transactionHash)
-// Signature is automatically recognized as P256 based on length
-```
+P256 signatures using the secp256r1 curve.
 
 ### WebAuthn (Variable length)
 
-WebAuthn support allows using biometric authentication (Face ID, Touch ID, Windows Hello) for transaction signing.
+P256 sigs with Webauthn support allows using passkeys and  biometric authentication for transaction signing.
 
-```ts
-// WebAuthn signature with biometric auth
-const webAuthnSignature = await navigator.credentials.get({
-  publicKey: {
-    challenge: transactionHash,
-    // ... WebAuthn options
-  }
-})
-```
 
 ## Gas Sponsorship
 
@@ -102,38 +79,14 @@ interface AATransaction {
   maxPriorityFeePerGas: bigint
   maxFeePerGas: bigint
   gasLimit: bigint
-  calls: Call[]  // Batch of calls to execute)
+  calls: Call[]  // Batch of calls to execute atomically
   accessList: AccessListItem[]
 
   // AA-specific fields
-  data: Bytes // ERC-7821 encoded operations
-  signature: Bytes // Variable length based on type
-  nonceKey: bigint // 64-bit nonce key
+  nonceKey: bigint // 256-bit nonce key for parallel execution
   nonce: bigint // 64-bit sequence value
 
-  // Optional fields
-  feePayerSignature?: Bytes
-  feeToken?: Address
-  validBefore?: bigint
-  validAfter?: bigint
-}
-interface AATransaction {
-  // Standard fields
-  chainId: bigint
-  maxPriorityFeePerGas: bigint
-  maxFeePerGas: bigint
-  gasLimit: bigint
-  value: bigint](calls: Call[]  // Batch of calls to execute)
-  accessList: AccessListItem[]
-  to: Address
-  value: bigint
-  accessList: AccessListItem[]
-
-  // AA-specific fields
-  data: Bytes // ERC-7821 encoded operations
-  signature: Bytes // Variable length based on type
-  nonceKey: bigint // 64-bit nonce key
-  nonce: bigint // 64-bit sequence value
+  signature: Bytes
 
   // Optional fields
   feePayerSignature?: Bytes
@@ -156,7 +109,7 @@ AA transactions use a 2D nonce system with nonce keys and sequences. This allows
 
 #### How It Works
 
-- **Nonce Key**: An identifier for a parallel transaction stream (192-bit number)
+- **Nonce Key**: An identifier for a parallel transaction stream (256-bit number)
 - **Nonce Sequence**: The current value for that key (64-bit number)
 - **Protocol Nonce (Key 0)**: The standard sequential nonce, maintained for compatibility
 

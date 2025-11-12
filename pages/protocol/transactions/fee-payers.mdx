@@ -4,11 +4,11 @@ import { Callout } from 'vocs/components'
 
 Fee sponsorship enables gasless transactions where applications can subsidize user costs without requiring account abstraction or proxy contracts. Users can interact with the blockchain without holding fee tokens.
 
-This specification describes how one account can pay transaction fees on behalf of another account using Tempo's native `fee_payer_signature` field in transaction type 0x77.
+This specification describes how one account can pay transaction fees on behalf of another account using Tempo's native `fee_payer_signature` field, supported in both transaction type 0x76 (Account Abstraction transactions) and transaction type 0x77 (Fee Token transactions).
 
 ## How It Works
 
-Tempo's transaction type 0x77 includes an optional `fee_payer_signature` field. When present, this signature authorizes a third party to pay the transaction's gas costs while the original sender executes the transaction logic.
+Tempo transactions include an optional `fee_payer_signature` field. When present, this signature authorizes a third party to pay the transaction's gas costs while the original sender executes the transaction logic.
 
 ### Transaction Fields
 
@@ -23,8 +23,8 @@ The transaction includes:
 **Fee payer signs:** Authorization to pay fees for that specific transaction and sender
 
 The signatures use different signing domains to prevent conflicts:
-- Sender uses magic byte `0x77`
-- Fee payer uses magic byte `0x78`
+- Sender uses the transaction type byte (`0x76` for AA transactions, `0x77` for Fee Token transactions)
+- Fee payer always uses magic byte `0x78` (regardless of transaction type)
 
 ## Validation
 

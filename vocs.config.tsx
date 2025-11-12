@@ -351,10 +351,6 @@ export default defineConfig({
             text: 'AATransaction (Type 0x76)',
             link: '/protocol/transactions/aa-transaction',
           },
-          {
-            text: 'FeeTokenTransaction (Type 0x77)',
-            link: '/protocol/transactions/fee-token-transaction',
-          },
         ],
       },
       {
@@ -418,8 +414,17 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Default Account Abstraction',
-        link: '/protocol/accounts',
+        text: 'Deprecated',
+        items: [
+          {
+            text: 'FeeTokenTransaction (Type 0x77)',
+            link: '/protocol/transactions/fee-token-transaction',
+          },
+          {
+            text: 'Default Account Abstraction',
+            link: '/protocol/default-accounts',
+          },
+        ],
       },
       {
         text: 'Reference Implementations',
