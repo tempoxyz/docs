@@ -188,7 +188,8 @@ contract StablecoinExchange is IStablecoinExchange {
         bool isBid,
         int16 tick,
         bool isFlip,
-        int16 flipTick
+        int16 flipTick,
+        bool revertOnTransferFail
     ) internal returns (uint128 orderId) {
         bytes32 key = pairKey(base, quote);
         Orderbook storage book = books[key];
@@ -206,35 +207,44 @@ contract StablecoinExchange is IStablecoinExchange {
                 require(flipTick < tick, "FLIP_TICK_MUST_BE_LESS_FOR_ASK");
             }
         }
+        {
+            // Calculate escrow amount and token
+            uint128 escrowAmount;
+            address escrowToken;
+            if (isBid) {
+                // For bids, escrow quote tokens based on price
+                escrowToken = quote;
+                uint32 price = tickToPrice(tick);
+                escrowAmount = uint128((uint256(amount) * uint256(price)) / uint256(PRICE_SCALE));
+            } else {
+                // For asks, escrow base tokens
+                escrowToken = base;
+                escrowAmount = amount;
+            }
 
-        // Calculate escrow amount and token
-        uint128 escrowAmount;
-        address escrowToken;
-        if (isBid) {
-            // For bids, escrow quote tokens based on price
-            escrowToken = quote;
-            uint32 price = tickToPrice(tick);
-            escrowAmount = uint128((uint256(amount) * uint256(price)) / uint256(PRICE_SCALE));
-        } else {
-            // For asks, escrow base tokens
-            escrowToken = base;
-            escrowAmount = amount;
+            // Check if the user has a balance, transfer the rest
+            uint128 userBalance = balances[maker][escrowToken];
+            if (userBalance >= escrowAmount) {
+                balances[maker][escrowToken] -= escrowAmount;
+            } else {
+                balances[maker][escrowToken] = 0;
+                if (revertOnTransferFail) {
+                    ITIP20(escrowToken)
+                        .transferFrom(maker, address(this), escrowAmount - userBalance);
+                } else {
+                    try ITIP20(escrowToken)
+                        .transferFrom(maker, address(this), escrowAmount - userBalance) { }
+                    catch {
+                        return 0;
+                    }
+                }
+            }
         }
-
-        // Check if the user has a balance, transfer the rest
-        uint128 userBalance = balances[msg.sender][escrowToken];
-        if (userBalance >= escrowAmount) {
-            balances[msg.sender][escrowToken] -= escrowAmount;
-        } else {
-            balances[msg.sender][escrowToken] = 0;
-            ITIP20(escrowToken).transferFrom(msg.sender, address(this), escrowAmount - userBalance);
-        }
-
         orderId = pendingOrderId + 1;
         ++pendingOrderId;
 
         orders[orderId] = Order({
-            maker: msg.sender,
+            maker: maker,
             bookKey: key,
             isBid: isBid,
             tick: tick,
@@ -261,7 +271,7 @@ contract StablecoinExchange is IStablecoinExchange {
         returns (uint128 orderId)
     {
         address quote = address(ITIP20(token).quoteToken());
-        orderId = _placeOrder(token, quote, amount, msg.sender, isBid, tick, false, 0);
+        orderId = _placeOrder(token, quote, amount, msg.sender, isBid, tick, false, 0, true);
     }
 
     /// @notice Place a flip order that auto-flips when filled
@@ -276,7 +286,7 @@ contract StablecoinExchange is IStablecoinExchange {
         returns (uint128 orderId)
     {
         address quote = address(ITIP20(token).quoteToken());
-        orderId = _placeOrder(token, quote, amount, msg.sender, isBid, tick, true, flipTick);
+        orderId = _placeOrder(token, quote, amount, msg.sender, isBid, tick, true, flipTick, true);
         emit FlipOrderPlaced(orderId, msg.sender, token, amount, isBid, tick, flipTick);
     }
 
@@ -511,7 +521,8 @@ contract StablecoinExchange is IStablecoinExchange {
                     !order.isBid,
                     order.flipTick,
                     true,
-                    order.tick
+                    order.tick,
+                    false
                 );
             }
 
@@ -912,11 +923,12 @@ contract StablecoinExchange is IStablecoinExchange {
     /// @param baseForQuote True if spending base for quote, false if spending quote for base
     /// @param amountIn Exact amount of input tokens to spend
     /// @return amountOut Amount of output tokens received
-    function _quoteExactIn(bytes32 key, Orderbook storage book, bool baseForQuote, uint128 amountIn)
-        internal
-        view
-        returns (uint128 amountOut)
-    {
+    function _quoteExactIn(
+        bytes32 key,
+        Orderbook storage book,
+        bool baseForQuote,
+        uint128 amountIn
+    ) internal view returns (uint128 amountOut) {
         uint128 remainingIn = amountIn;
 
         if (baseForQuote) {
