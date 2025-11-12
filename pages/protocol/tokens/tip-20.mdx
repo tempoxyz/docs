@@ -1,279 +1,389 @@
-# TIP-20 [Core Token Standard]
+# TIP-20 Token
 
-TIP-20 provides a complete token implementation suite consisting of three core contracts: the main token contract, a factory for deployment, and a role-based access control system. The standard enhances ERC-20 with payment-specific features while maintaining compatibility with existing Ethereum tooling.
+## Abstract
+
+TIP-20 is a fungible token standard containing a comprehensive set of features to serve a wide range of token use cases.
+
+## Motivation
+
+All major stablecoins today use the ERC-20 token standard. While ERC-20 provides a solid foundation for fungible tokens, it lacks features critical for stablecoin issuers today such as memoized transfers, transfer policies, pause functionality and rewards distribution.
+
+TIP-20 extends ERC-20 building these features into the token directly and is implemented natively in Tempo. This approach makes token operations much more efficient, allows issuers to quickly set up on Tempo and enables deeper integration with the other token infrastructure on Tempo like the StablecoinExchange.
 
 ## Specification
 
-### Core Contracts
+TIP-20 tokens support standard fungible token operations such as standard token transfers and transfers with an attached memo, minting and burning tokens, a role-based access control system for token administrative operations, and a system of rewards distribution. This is provided via multiple components as shown below.
 
-The TIP-20 standard consists of three contracts:
+![TIP-20 Architecture Diagram](tip20-diagram.png)
 
-1. **TIP20.sol** - Main token implementation
-2. **TIP20Factory.sol** - Token deployment factory
-3. **TIP20RolesAuth.sol** - Role-based access control
+### Components
 
-### TIP20.sol - Main Token Contract
+#### TIP20Factory
 
-#### Contract Interface
+New TIP-20 tokens are created through the TIP-20Factory. The factory uses a deterministic address schema; token addresses are assigned sequentially starting at `0x20C0000000000000000000000000000000000001` and this is incremented with each deployment. Note that address `0x20C0000000000000000000000000000000000000` is the address for LinkingUSD. Learn more about LinkingUSD [here](#TODO).
+
+Because of this, addresses of all TIP-20 tokens on Tempo have a prefix of `0x20c000000000000000000000`.
+
+#### TIP-20
+
+The main TIP-20 contract contains standard token transfer functionality such as transferring tokens with `transfer` or `approve` and `transferFrom`. TIP-20 also supports minting and burning tokens with `mint` and `burn`.
+
+If memos are required for operations, you could use TIP-20's `transferWithMemo`, `transferFromWithMemo`, `mintWithMemo` and `burnWithMemo`.
+
+The token can be paused with `pause` and `unpause`. When a token is paused, all token transfer operations will be blocked.
+
+#### TIP20 Rewards
+
+The main TIP-20 contract also contains the implementation for distributing rewards to token holders. Learn more about rewards [here](./reward-distribution.mdx).
+
+#### TIP20RolesAuth
+
+The TIP20RolesAuth contract contains functionality pertaining to role-based access control.
+
+#### TIP403Registry
+
+The TIP-403 registry contract provides optional policies that can be applied and checked for token transfers operations. Learn more about the registry [here](./tip-403.mdx).
+
+### Interfaces
+
+#### TIP-20 Token Attributes
+
+All TIP-20 tokens contain the following metadata and can be retrieved with getter functions.
 
 ```solidity
-contract TIP20 is TIP20RolesAuth {
-    TIP403Registry internal constant TIP403_REGISTRY = TIP403Registry(0x403c000000000000000000000000000000000000);
-    address internal constant FEEMANAGER_PRECOMPILE = 0xfeec000000000000000000000000000000000000;
-}
+function name() external view returns (string memory);
 ```
 
-#### State Variables
-
-| Variable | Type | Description |
-|----------|------|-------------|
-| `name` | `string` | Token name |
-| `symbol` | `string` | Token symbol |
-| `currency` | `string` | Arbitrary currency string (e.g., "USD", "EUR") |
-| `totalSupply` | `uint256` | Total token supply |
-| `balanceOf` | `mapping(address => uint256)` | Account balances |
-| `allowance` | `mapping(address => mapping(address => uint256))` | Spending allowances |
-| `nonces` | `mapping(address => uint256)` | Nonces for permit signatures |
-| `salts` | `mapping(address => mapping(bytes4 => bool))` | Used salts for transferWithSig |
-| `paused` | `bool` | Pause state |
-| `supplyCap` | `uint256` | Maximum supply limit |
-| `transferPolicyId` | `uint64` | Current transfer policy ID |
-| `DOMAIN_SEPARATOR` | `bytes32` | EIP-712 domain separator |
-
-#### Roles
-
-| Role | Constant | Description |
-|------|----------|-------------|
-| `DEFAULT_ADMIN_ROLE` | `0` | Full administrative control |
-| `PAUSE_ROLE` | `keccak256("PAUSE_ROLE")` | Can pause the contract |
-| `UNPAUSE_ROLE` | `keccak256("UNPAUSE_ROLE")` | Can unpause the contract |
-| `ISSUER_ROLE` | `keccak256("ISSUER_ROLE")` | Can mint and burn tokens |
-| `BURN_BLOCKED_ROLE` | `keccak256("BURN_BLOCKED_ROLE")` | Can burn tokens from blocked addresses |
-
-#### Core Functions
-
-##### Standard ERC-20 Functions
+Gets the token name (e.g. "Dai").
 
 ```solidity
-function transfer(address to, uint256 amount) external returns (bool);
-function approve(address spender, uint256 amount) external returns (bool);
-function transferFrom(address from, address to, uint256 amount) external returns (bool);
-function balanceOf(address account) external view returns (uint256);
-function allowance(address owner, address spender) external view returns (uint256);
+function symbol() external view returns (string memory);
+```
+
+Gets the token symbol (e.g. "DAI").
+
+```solidity
+function currency() external view returns (string memory);
+```
+
+Gets the token currency string (e.g. "USD", "EURO").
+
+```solidity
+function decimals() external pure returns (uint8);
+```
+
+Gets the number of decimals for the token. Always returns `6`.
+
+```solidity
 function totalSupply() external view returns (uint256);
 ```
 
-##### EIP-2612 Permit
+Gets the total amount of tokens in circulation.
 
 ```solidity
-function permit(
-    address owner,
-    address spender,
-    uint256 value,
-    uint256 deadline,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-) external
+function quoteToken() external view returns (ITIP20);
 ```
 
-##### TIP-20 Extensions
+Gets the token to be paired with in the StablecoinExchange for swaps.
 
 ```solidity
-function transferWithMemo(address to, uint256 amount, bytes32 memo) external;
-function transferFromWithMemo(address from, address to, uint256 amount, bytes32 memo) external;
+function nextQuoteToken() external view returns (ITIP20);
 ```
 
-##### Administrative Functions
+Gets the next quote token staged for update.
 
 ```solidity
-function mint(address to, uint256 amount) external onlyRole(ISSUER_ROLE);
-function burn(uint256 amount) external onlyRole(ISSUER_ROLE);
-function burnBlocked(address from, uint256 amount) external onlyRole(BURN_BLOCKED_ROLE);
-function mintWithMemo(address to, uint256 amount, bytes32 memo) external onlyRole(ISSUER_ROLE);
-function burnWithMemo(uint256 amount, bytes32 memo) external onlyRole(ISSUER_ROLE);
-function pause() external onlyRole(PAUSE_ROLE);
-function unpause() external onlyRole(UNPAUSE_ROLE);
-function setSupplyCap(uint256 newSupplyCap) external onlyRole(DEFAULT_ADMIN_ROLE);
-function changeTransferPolicyId(uint64 newPolicyId) external onlyRole(DEFAULT_ADMIN_ROLE);
+function paused() external view returns (bool);
 ```
 
-##### Decimal Handling
+Gets whether the token is currently paused.
 
 ```solidity
-function decimals() public view returns (uint8)
+function supplyCap() external view returns (uint256);
 ```
 
-Returns decimals (always 6).
-
-#### Modifiers
-
-| Modifier | Description |
-|----------|-------------|
-| `notPaused` | Reverts if contract is paused |
-| `notTokenAddress(address to)` | Prevents transfers to token addresses |
-| `transferAuthorized(address from, address to)` | Enforces transfer policy |
-
-#### Events
-
-##### Standard Events
+Gets the maximum supply cap for the token, which is checked on mint operations.
 
 ```solidity
-event Transfer(address indexed from, address indexed to, uint256 amount);
-event Approval(address indexed owner, address indexed spender, uint256 amount);
+function transferPolicyId() external view returns (uint64);
 ```
 
-##### TIP-20 Events
+Gets the current transfer policy ID. See [TIP-403 registry](./tip-403.mdx) for more info.
 
-```solidity
-event TransferWithMemo(address indexed from, address indexed to, uint256 amount, bytes32 indexed memo);
-event Mint(address indexed to, uint256 amount);
-event Burn(address indexed from, uint256 amount);
-event BurnBlocked(address indexed from, uint256 amount);
-event TransferPolicyUpdate(address indexed updater, uint64 indexed newPolicyId);
-event SupplyCapUpdate(address indexed updater, uint256 indexed newSupplyCap);
-event PauseStateUpdate(address indexed updater, bool isPaused);
-```
 
-#### Error Handling
-
-```solidity
-error PolicyForbids();
-error InvalidRecipient();
-error InsufficientBalance();
-error InsufficientAllowance();
-error SupplyCapExceeded();
-error ContractPaused();
-error InvalidCurrency();
-```
-
-### TIP20Factory.sol - Token Factory
-
-#### Contract Interface
-
-```solidity
-contract TIP20Factory {
-    event TokenCreated(uint256 indexed tokenId, string name, string symbol, string currency, address admin);
-    
-    uint256 public tokenIdCounter = 1;
-    
-    function createToken(
-        string memory name,
-        string memory symbol,
-        string memory currency,
-        address admin
-    ) external returns (TIP20);
-}
-```
-
-#### Functions
+#### New Token Creation
 
 ```solidity
 function createToken(
     string memory name,
     string memory symbol,
     string memory currency,
+    ITIP20 quoteToken,
     address admin
-) external returns (TIP20)
+) external returns (address)
 ```
 
-Deploys a new TIP20 token with the specified parameters and grants `DEFAULT_ADMIN_ROLE` to the admin.
+`TIP20Factory` creates a new token with the provided name, symbol, currency, quoteToken, and admin. Returns the address of the created token.
 
-### TIP20RolesAuth.sol - Role-Based Access Control
+#### Role-Based Access Control
 
-#### Contract Interface
+There are 5 role types within all TIP-20 tokens: `DEFAULT_ADMIN_ROLE`, `PAUSE_ROLE`, `UNPAUSE_ROLE`, `ISSUER_ROLE`, and `BURN_BLOCKED_ROLE`.
+
+Every role has a set of role admins, and only role admins are able to grant or revoke that role for any address. By default, the role admin of every role (including `DEFAULT_ADMIN_ROLE`) is the `DEFAULT_ADMIN_ROLE`.
+
+Any address with an active role can renounce that role via `renounceRole`:
 
 ```solidity
-abstract contract TIP20RolesAuth {
-    error Unauthorized();
-    
-    event RoleMembershipUpdated(bytes32 indexed role, address indexed account, address indexed sender, bool hasRole);
-    event RoleAdminUpdated(bytes32 indexed role, bytes32 indexed newAdminRole, address indexed sender);
-    
-    mapping(address account => mapping(bytes32 role => bool)) internal hasRole;
-    mapping(bytes32 role => bytes32 adminRole) internal roleAdmin;
-}
+function renounceRole(bytes32 role) external;
 ```
 
-#### Constants
+##### DEFAULT_ADMIN_ROLE
 
-| Constant | Value | Description |
-|----------|-------|-------------|
-| `DEFAULT_ADMIN_ROLE` | `0` | Default admin role |
-| `UNGRANTABLE_ROLE` | `bytes32(type(uint256).max)` | Cannot be granted to anyone |
-
-#### Functions
+The `DEFAULT_ADMIN_ROLE` of a TIP-20 can call these functions on that TIP-20 token:
 
 ```solidity
-function grantRole(bytes32 role, address account) external onlyRole(roleAdmin[role]);
-function revokeRole(bytes32 role, address account) external onlyRole(roleAdmin[role]);
-function renounceRole(bytes32 role) external onlyRole(role);
-function setRoleAdmin(bytes32 role, bytes32 adminRole) external onlyRole(roleAdmin[role]);
+function changeTransferPolicyId(uint64 newPolicyId) external;
 ```
 
-#### Modifiers
+Changes the transfer policy id used from the TIP-403 registry. See [TIP-403 registry](./tip-403.mdx) for more info.
 
 ```solidity
-modifier onlyRole(bytes32 role);
+function setNextQuoteToken(ITIP20 newQuoteToken) external;
 ```
 
-## Integration Features
-
-### Policy Integration
-
-TIP-20 tokens integrate with TIP-403 for transfer policy enforcement:
+Stages a change in the quote token for the token pair in StablecoinExchange.
 
 ```solidity
-modifier transferAuthorized(address from, address to) {
-    if (
-        !TIP403_REGISTRY.isAuthorized(transferPolicyId, from) ||
-        !TIP403_REGISTRY.isAuthorized(transferPolicyId, to)
-    ) revert PolicyForbids();
-    _;
-}
+function completeQuoteTokenUpdate() external;
 ```
 
-### Fee System Integration
-
-The contract includes special handling for the FeeManager precompile:
+Completes the quote token update process.
 
 ```solidity
-// Allow FeeManager precompile to transferFrom any address without allowance check
-if (msg.sender != FEEMANAGER_PRECOMPILE) {
-    // Standard allowance check
-}
+function setSupplyCap(uint256 newSupplyCap) external;
 ```
 
-### Decimals
-
-All TIP-20 tokens use 6 decimals.
-
-## Use Cases
-
-### Payment Processing with Memos
+Sets the maximum supply cap for the token. Limited to `type(uint128).max`.
 
 ```solidity
-// Transfer with order reference
-token.transferWithMemo(merchant, amount, keccak256("ORDER-12345"));
+function grantRole(bytes32 role, address account) external;
 ```
 
-### Compliance-Controlled Tokens
+Grants the role to an account. This is technically permissioned to `roleAdmin` which defaults to `DEFAULT_ADMIN_ROLE`.
 
 ```solidity
-// Set whitelist policy
-token.changeTransferPolicyId(kycPolicyId);
+function revokeRole(bytes32 role, address account) external;
 ```
 
-### Administrative Controls
+Revokes a role from an account. This is technically permissioned to `roleAdmin` which defaults to `DEFAULT_ADMIN_ROLE`.
 
 ```solidity
-// Emergency pause
-token.pause();
-
-// Set supply cap
-token.setSupplyCap(1000000 * 10**18);
-
-// Mint with memo
-token.mintWithMemo(treasury, amount, keccak256("TREASURY_ALLOCATION"));
+function setRoleAdmin(bytes32 role, bytes32 adminRole) external;
 ```
 
+Sets the admin role for a specific role. This is technically permissioned to `roleAdmin` which defaults to `DEFAULT_ADMIN_ROLE`.
+
+##### PAUSE_ROLE
+
+The `PAUSE_ROLE` can be used to call this function:
+
+```solidity
+function pause() external;
+```
+
+Pauses the contract, preventing transfers and other operations.
+
+##### UNPAUSE_ROLE
+
+The `UNPAUSE_ROLE` can be used to call this function:
+
+```solidity
+function unpause() external;
+```
+
+Unpauses the contract, allowing transfers and other operations to resume.
+
+##### ISSUER_ROLE
+
+The `ISSUER_ROLE` can call the following functions. Details on what each function does are in the ***Token Transfer Operations*** section below.
+
+```solidity
+function mint(address to, uint256 amount) external;
+function mintWithMemo(address to, uint256 amount, bytes32 memo) external;
+function burn(uint256 amount) external;
+function burnWithMemo(uint256 amount, bytes32 memo) external;
+```
+
+##### BURN_BLOCKED_ROLE
+
+```solidity
+function burnBlocked(address from, uint256 amount) external;
+```
+
+Burns tokens from an account that is not authorized to transfer tokens under the current transfer policy ID.
+
+#### Token Operations
+
+The following functions pertain to token transfers. These functions all emit a `Transfer` event.
+
+```solidity
+function transfer(address to, uint256 amount) external returns (bool);
+```
+
+Transfers `amount` of tokens from `caller` to `to`. Returns `true` if success.
+
+```solidity
+function transferWithMemo(address to, uint256 amount, bytes32 memo) external;
+```
+
+Transfers `amount` of tokens from `caller` to `to`. Emits an additional `TransferWithMemo` event. Note: this will be updated to also return a `bool` success in the next version.
+
+```solidity
+function transferFrom(address from, address to, uint256 amount) external returns (bool);
+```
+
+Transfers `amount` of tokens from `from` to `to`. Requires an `approve` from `from` to `caller` beforehand. Returns `true` if success.
+
+```solidity
+function transferFromWithMemo(address from, address to, uint256 amount, bytes32 memo) external returns (bool);
+```
+
+Transfers `amount` of tokens from `from` to `to`. Requires an `approve` from `from` to `caller` beforehand. Returns `true` if success. Emits an additional `TransferWithMemo` event.
+
+```solidity
+function mint(address to, uint256 amount) external;
+```
+
+Transfers `amount` of tokens from address(0) to `to`. Caller must have `ISSUER_ROLE`.
+
+```solidity
+function mintWithMemo(address to, uint256 amount, bytes32 memo) external;
+```
+
+Transfers `amount` of tokens from address(0) to `to` and adds it to circulation. Caller must have `ISSUER_ROLE`. Emits an additional `TransferWithMemo` event.
+
+```solidity
+function burn(uint256 amount) external;
+```
+
+Transfers `amount` of tokens from `caller` to address(0) and removes it from circulation. Caller must have `ISSUER_ROLE`.
+
+```solidity
+function burnWithMemo(uint256 amount, bytes32 memo) external;
+```
+
+Transfers `amount` of tokens from `caller` to address(0) and removes it from circulation. Caller must have `ISSUER_ROLE`. Emits an additional `TransferWithMemo` event.
+
+
+#### System Functions
+
+TIP-20 tokens also implement system-level transfer functions. These are restricted to calls originating from address(0), ensuring only the system can invoke them.
+
+```solidity
+function systemTransferFrom(address from, address to, uint256 amount) external returns (bool)
+```
+
+This function is used by the Fee AMM and transfers `amount` of tokens from `from` to `to`. Returns `true` if success.
+
+```solidity
+function transferFeePreTx(address from, uint256 amount) external;
+```
+
+```solidity
+function transferFeePostTx(address to, uint256 refund, uint256 actualUsed) external;
+```
+
+These functions are used by the Fee Manager to transfer fee tokens to pay transacton fees.
+
+
+#### Other Token Functions
+
+```solidity
+function approve(address spender, uint256 amount) external returns (bool);
+```
+
+Approves the `spender` to spend `amount` of tokens from `caller`. Returns `true` if success.
+
+```solidity
+function allowance(address owner, address spender) external view returns (uint256);
+```
+
+Reads the current amount `approved` from the `owner` to the `spender`.
+
+```solidity
+function balanceOf(address account) external view returns (uint256);
+```
+
+Reads the current token balance of the `account`.
+
+
+#### Token Rewards Distribtion
+
+See [rewards distribution](./reward-distribution.mdx) for more information.
+
+
+#### Other Misc Interface Functions
+
+```solidity
+function BURN_BLOCKED_ROLE() external view returns (bytes32)
+```
+
+The `bytes32` value associated with `BURN_BLOCKED_ROLE` which is `keccak256("BURN_BLOCKED_ROLE")`.
+
+```solidity
+function ISSUER_ROLE() external view returns (bytes32)
+```
+
+The `bytes32` value associated with `ISSUER_ROLE` which is `keccak256("ISSUER_ROLE")`.
+
+```solidity
+function PAUSE_ROLE() external view returns (bytes32)
+```
+
+The `bytes32` value associated with `PAUSE_ROLE` which is `keccak256("PAUSE_ROLE")`.
+
+```solidity
+function UNPAUSE_ROLE() external view returns (bytes32)
+```
+
+The `bytes32` value associated with `UNPAUSE_ROLE` which is `keccak256("UNPAUSE_ROLE")`.
+
+#### Events
+
+```solidity
+event Approval(address indexed owner, address indexed spender, uint256 amount);
+event Burn(address indexed from, uint256 amount);
+event BurnBlocked(address indexed from, uint256 amount);
+event Mint(address indexed to, uint256 amount);
+event NextQuoteTokenSet(address indexed updater, ITIP20 indexed nextQuoteToken);
+event PauseStateUpdate(address indexed updater, bool isPaused);
+event QuoteTokenUpdate(address indexed updater, ITIP20 indexed newQuoteToken);
+event RewardCanceled(address indexed funder, uint64 indexed id, uint256 refund);
+event RewardRecipientSet(address indexed holder, address indexed recipient);
+event RewardScheduled(address indexed funder, uint64 indexed id, uint256 amount, uint32 durationSeconds);
+event SupplyCapUpdate(address indexed updater, uint256 indexed newSupplyCap);
+event Transfer(address indexed from, address indexed to, uint256 amount);
+event TransferPolicyUpdate(address indexed updater, uint64 indexed newPolicyId);
+event TransferWithMemo(address indexed from, address indexed to, uint256 amount, bytes32 indexed memo);
+event RoleMembershipUpdated(bytes32 indexed role, address indexed account, address indexed sender, bool hasRole);
+event RoleAdminUpdated(bytes32 indexed role, bytes32 indexed newAdminRole, address indexed sender);
+```
+
+#### Errors
+
+```solidity
+error ContractPaused(); // Token operations are blocked because the contract is paused
+error InsufficientAllowance(); // Spender does not have enough allowance to transfer the requested amount
+error InsufficientBalance(uint256 currentBalance, uint256 expectedBalance, address token); // Account does not have enough tokens for the requested operation
+error InvalidAmount(); // Amount provided is zero or invalid for the operation
+error InvalidCurrency(); // Currency identifier is not valid (defined in interface but not currently used in implementation)
+error InvalidQuoteToken(); // Quote token is not a valid TIP-20 token, creates a circular reference, or has currency mismatch
+error InvalidRecipient(); // Cannot transfer to another TIP-20 token address
+error InvalidSupplyCap(); // New supply cap is less than current total supply
+error NoOptedInSupply(); // Cannot distribute rewards because no token holders have opted in
+error NotStreamFunder(); // Caller is not the funder of the reward stream
+error PolicyForbids(); // Transfer policy denies authorization for sender or receiver
+error StreamInactive(); // Reward stream does not exist or has already ended
+error SupplyCapExceeded(); // Operation would exceed the maximum supply cap
+error Unauthorized(); // Caller does not have the required role or permission for this operation
+```
