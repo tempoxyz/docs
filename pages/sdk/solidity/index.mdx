@@ -2,4 +2,42 @@
 
 Tempo builds on top of [Foundry](https://github.com/foundry-rs/foundry): the leading Ethereum development toolkit, through a custom fork that adds first-class support for Tempo.
 
-This fork extends Foundry with Tempo's [protocol-level features](/protocol/), enabling developers to build, test, and deploy contracts that go [beyond the limits of standard EVM chains](/get-started/quickstart/evm-compatibility).
+This fork extends Foundry with Tempo's [protocol-level features](/protocol/) like custom precompiles, new transaction types and native account abstraction. This enables developers to build, test, and deploy contracts that go [beyond the limits of standard EVM chains](/get-started/quickstart/evm-compatibility).
+
+## Install Foundry
+
+:::warning
+Use Tempo's Foundry fork for compatibility. Standard Foundry won't work with Tempo-specific features.
+:::
+
+### Prerequisites
+
+```bash
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+```
+
+### Install Tempo Foundry
+
+Run the following command to install the Tempo fork of Foundry:
+
+```bash
+foundryup -n tempo
+```
+
+This will install the latest `nightly` release of the Tempo fork.
+
+To install a specific version, replace `<TAG_NAME>` with the desired release tag:
+
+```bash
+foundryup -n tempo -i <TAG_NAME>
+```
+
+### Verify Installation
+
+```bash
+forge --version
+cast --version
+```
+
+You should see version information include `-tempo`, indicating you are using the Tempo fork.

@@ -473,10 +473,6 @@ export default defineConfig({
             link: '/sdk/solidity',
           },
           {
-            text: 'Install',
-            link: '/sdk/solidity/install',
-          },
-          {
             text: 'Configure your project',
             link: '/sdk/solidity/configure',
           },

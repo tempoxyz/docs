@@ -47,13 +47,19 @@ forge install tempoxyz/tempo-std
 
 ## Configure Foundry for Tempo
 
-Optionally, set up environment variables:
+:::info
+It is currently not possible to use `forge test` or `forge script` with the `--rpc-url` (alias: `--fork-url`) flag due to a known limitation in Foundry.
+
+Instead use `vm.createSelectFork(vm.envString("TEMPO_RPC_URL"))` or `vm.createSelectFork("tempo_testnet")` within your tests or scripts.
+:::
+
+Set up the environment variable:
 
 ```bash
 export TEMPO_RPC_URL=https://rpc.testnet.tempo.xyz
 ```
 
-Add to your `foundry.toml`:
+Or add to the `foundry.toml` in your project:
 
 ```toml [foundry.toml]
 [rpc_endpoints]
