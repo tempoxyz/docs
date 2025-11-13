@@ -18,6 +18,10 @@ forge test
 This assumes you have set up your repo with `forge init --tempo` as shown above.
 :::
 
+:::note
+We are using the `--interactive` flag to prompt for your private key securely at runtime.
+:::
+
 ### Using `forge create`
 
 Deploy a simple contract to Tempo's testnet:
@@ -47,8 +51,15 @@ Run a deployment script to deploy to Tempo's testnet:
 forge script script/Mail.s.sol \
   --interactives 1 \
   --sender <YOUR_WALLET_ADDRESS> \
+  --skip-simulation \
+  --slow \
   --broadcast
 ```
+
+:::info
+It is currently required to use the `--skip-simulation` and `--slow` flags for `forge script` due to a known limitation in Foundry.
+:::
+
 
 ## Verify Your Contract
 
