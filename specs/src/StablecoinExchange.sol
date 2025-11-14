@@ -571,7 +571,10 @@ contract StablecoinExchange is IStablecoinExchange {
         require(book.base != address(0), "PAIR_NOT_EXISTS");
 
         bool baseForQuote = tokenIn == book.base;
-        amountIn = _fillOrdersExactOut(key, book, baseForQuote, amountOut, maxAmountIn);
+        amountIn = _fillOrdersExactOut(key, book, baseForQuote, amountOut);
+        if (amountIn > maxAmountIn) {
+            revert("MAX_IN_EXCEEDED");
+        }
 
         _decrementBalanceOrTransferFrom(msg.sender, tokenIn, amountIn);
         ITIP20(tokenOut).transfer(msg.sender, amountOut);
@@ -612,7 +615,10 @@ contract StablecoinExchange is IStablecoinExchange {
         require(book.base != address(0), "PAIR_NOT_EXISTS");
 
         bool baseForQuote = tokenIn == book.base;
-        amountOut = _fillOrdersExactIn(key, book, baseForQuote, amountIn, minAmountOut);
+        amountOut = _fillOrdersExactIn(key, book, baseForQuote, amountIn);
+        if (amountOut < minAmountOut) {
+            revert("INSUFFICIENT_OUTPUT");
+        }
 
         _decrementBalanceOrTransferFrom(msg.sender, tokenIn, amountIn);
         ITIP20(tokenOut).transfer(msg.sender, amountOut);
@@ -623,14 +629,12 @@ contract StablecoinExchange is IStablecoinExchange {
     /// @param book Orderbook storage reference
     /// @param baseForQuote True if spending base for quote, false if spending quote for base
     /// @param amountOut Exact amount of output tokens desired
-    /// @param maxAmountIn Maximum amount of input tokens to spend
     /// @return amountIn Actual amount of input tokens spent
     function _fillOrdersExactOut(
         bytes32 key,
         Orderbook storage book,
         bool baseForQuote,
-        uint128 amountOut,
-        uint128 maxAmountIn
+        uint128 amountOut
     ) internal returns (uint128 amountIn) {
         uint128 remainingOut = amountOut;
 
@@ -653,11 +657,6 @@ contract StablecoinExchange is IStablecoinExchange {
                 uint128 baseNeeded = (remainingOut * PRICE_SCALE) / price;
                 uint128 fillAmount =
                     baseNeeded > currentOrder.remaining ? currentOrder.remaining : baseNeeded;
-
-                // Check if we exceed max input
-                if (amountIn + fillAmount > maxAmountIn) {
-                    revert("MAX_IN_EXCEEDED");
-                }
 
                 // Calculate how much quote to recieve for fillAmount of base
                 remainingOut -= (fillAmount * price) / PRICE_SCALE;
@@ -704,11 +703,6 @@ contract StablecoinExchange is IStablecoinExchange {
                 // Calculate how much quote to pay for fillAmount of base
                 uint128 quoteIn = (fillAmount * price) / PRICE_SCALE;
 
-                // Check if we exceed max input
-                if (amountIn + quoteIn > maxAmountIn) {
-                    revert("MAX_IN_EXCEEDED");
-                }
-
                 remainingOut -= fillAmount;
                 amountIn += quoteIn;
 
@@ -740,14 +734,12 @@ contract StablecoinExchange is IStablecoinExchange {
     /// @param book Orderbook storage reference
     /// @param baseForQuote True if spending base for quote, false if spending quote for base
     /// @param amountIn Exact amount of input tokens to spend
-    /// @param minAmountOut Minimum amount of output tokens to receive
     /// @return amountOut Actual amount of output tokens received
     function _fillOrdersExactIn(
         bytes32 key,
         Orderbook storage book,
         bool baseForQuote,
-        uint128 amountIn,
-        uint128 minAmountOut
+        uint128 amountIn
     ) internal returns (uint128 amountOut) {
         uint128 remainingIn = amountIn;
 
@@ -778,9 +770,6 @@ contract StablecoinExchange is IStablecoinExchange {
                 orderId = _fillOrder(orderId, fillAmount);
 
                 if (remainingIn == 0) {
-                    if (amountOut < minAmountOut) {
-                        revert("INSUFFICIENT_OUTPUT");
-                    }
                     return amountOut;
                 }
 
@@ -825,9 +814,6 @@ contract StablecoinExchange is IStablecoinExchange {
                 orderId = _fillOrder(orderId, fillAmount);
 
                 if (remainingIn == 0) {
-                    if (amountOut < minAmountOut) {
-                        revert("INSUFFICIENT_OUTPUT");
-                    }
                     return amountOut;
                 }
 
