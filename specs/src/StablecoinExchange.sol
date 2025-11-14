@@ -655,11 +655,16 @@ contract StablecoinExchange is IStablecoinExchange {
 
                 // For bids, we want remainingOut quote tokens
                 uint128 baseNeeded = (remainingOut * PRICE_SCALE) / price;
-                uint128 fillAmount =
-                    baseNeeded > currentOrder.remaining ? currentOrder.remaining : baseNeeded;
+                uint128 fillAmount;
 
                 // Calculate how much quote to recieve for fillAmount of base
-                remainingOut -= (fillAmount * price) / PRICE_SCALE;
+                if (baseNeeded > currentOrder.remaining) {
+                    fillAmount = currentOrder.remaining;
+                    remainingOut -= (fillAmount * price) / PRICE_SCALE;
+                } else {
+                    fillAmount = baseNeeded;
+                    remainingOut = 0;
+                }
                 amountIn += fillAmount;
 
                 // Fill the order and get next order
@@ -697,13 +702,18 @@ contract StablecoinExchange is IStablecoinExchange {
                 uint32 price = tickToPrice(currentTick);
                 Order memory currentOrder = orders[orderId];
 
-                uint128 fillAmount =
-                    remainingOut > currentOrder.remaining ? currentOrder.remaining : remainingOut;
+                uint128 fillAmount;
+
+                if (remainingOut > currentOrder.remaining) {
+                    fillAmount = currentOrder.remaining;
+                    remainingOut -= fillAmount;
+                } else {
+                    fillAmount = remainingOut;
+                    remainingOut = 0;
+                }
 
                 // Calculate how much quote to pay for fillAmount of base
                 uint128 quoteIn = (fillAmount * price) / PRICE_SCALE;
-
-                remainingOut -= fillAmount;
                 amountIn += quoteIn;
 
                 // Fill the order and get next order
@@ -757,13 +767,18 @@ contract StablecoinExchange is IStablecoinExchange {
                 uint32 price = tickToPrice(currentTick);
                 Order memory currentOrder = orders[orderId];
 
-                uint128 fillAmount =
-                    remainingIn > currentOrder.remaining ? currentOrder.remaining : remainingIn;
+                uint128 fillAmount;
+
+                if (remainingIn > currentOrder.remaining) {
+                    fillAmount = currentOrder.remaining;
+                    remainingIn -= fillAmount;
+                } else {
+                    fillAmount = remainingIn;
+                    remainingIn = 0;
+                }
 
                 // Calculate how much quote to receive for fillAmount of base
                 uint128 quoteOut = (fillAmount * price) / PRICE_SCALE;
-
-                remainingIn -= fillAmount;
                 amountOut += quoteOut;
 
                 // Fill the order and get next order
@@ -803,11 +818,16 @@ contract StablecoinExchange is IStablecoinExchange {
 
                 // For asks, calculate how much base we can get for remainingIn quote
                 uint128 baseOut = (remainingIn * PRICE_SCALE) / price;
-                uint128 fillAmount =
-                    baseOut > currentOrder.remaining ? currentOrder.remaining : baseOut;
+                uint128 fillAmount;
 
                 // Calculate actual quote needed for fillAmount of base
-                remainingIn -= (fillAmount * price) / PRICE_SCALE;
+                if (baseOut > currentOrder.remaining) {
+                    fillAmount = currentOrder.remaining;
+                    remainingIn -= (fillAmount * price) / PRICE_SCALE;
+                } else {
+                    fillAmount = baseOut;
+                    remainingIn = 0;
+                }
                 amountOut += fillAmount;
 
                 // Fill the order and get next order
@@ -857,13 +877,17 @@ contract StablecoinExchange is IStablecoinExchange {
 
                 uint32 price = tickToPrice(currentTick);
 
-                // Calculate how much quote we can get from this tick's liquidity
                 uint128 baseNeeded = (remainingOut * PRICE_SCALE) / price;
-                uint128 fillAmount =
-                    baseNeeded > level.totalLiquidity ? level.totalLiquidity : baseNeeded;
-                uint128 quoteOut = (fillAmount * price) / PRICE_SCALE;
+                uint128 fillAmount;
 
-                remainingOut -= quoteOut;
+                if (baseNeeded > level.totalLiquidity) {
+                    fillAmount = level.totalLiquidity;
+                    remainingOut -= (fillAmount * price) / PRICE_SCALE;
+                } else {
+                    fillAmount = baseNeeded;
+                    remainingOut = 0;
+                }
+
                 amountIn += fillAmount;
 
                 if (fillAmount == level.totalLiquidity) {
@@ -885,11 +909,17 @@ contract StablecoinExchange is IStablecoinExchange {
                 TickLevel storage level = book.asks[currentTick];
                 uint32 price = tickToPrice(currentTick);
 
-                uint128 fillAmount =
-                    remainingOut > level.totalLiquidity ? level.totalLiquidity : remainingOut;
-                uint128 quoteIn = (fillAmount * price) / PRICE_SCALE;
+                uint128 fillAmount;
 
-                remainingOut -= fillAmount;
+                if (remainingOut > level.totalLiquidity) {
+                    fillAmount = level.totalLiquidity;
+                    remainingOut -= fillAmount;
+                } else {
+                    fillAmount = remainingOut;
+                    remainingOut = 0;
+                }
+
+                uint128 quoteIn = (fillAmount * price) / PRICE_SCALE;
                 amountIn += quoteIn;
 
                 if (fillAmount == level.totalLiquidity) {
@@ -927,12 +957,17 @@ contract StablecoinExchange is IStablecoinExchange {
                 TickLevel storage level = book.bids[currentTick];
                 uint32 price = tickToPrice(currentTick);
 
-                uint128 fillAmount =
-                    remainingIn > level.totalLiquidity ? level.totalLiquidity : remainingIn;
-                uint128 quoteOut = (fillAmount * price) / PRICE_SCALE;
+                uint128 fillAmount;
 
-                remainingIn -= fillAmount;
-                amountOut += quoteOut;
+                if (remainingIn > level.totalLiquidity) {
+                    fillAmount = level.totalLiquidity;
+                    remainingIn -= fillAmount;
+                } else {
+                    fillAmount = remainingIn;
+                    remainingIn = 0;
+                }
+
+                amountOut += (fillAmount * price) / PRICE_SCALE;
 
                 if (fillAmount == level.totalLiquidity) {
                     // Move to next tick if we exhaust this level
@@ -955,10 +990,15 @@ contract StablecoinExchange is IStablecoinExchange {
 
                 // Calculate how much base we can get for remainingIn quote
                 uint128 baseOut = (remainingIn * PRICE_SCALE) / price;
-                uint128 fillAmount = baseOut > level.totalLiquidity ? level.totalLiquidity : baseOut;
-                uint128 quoteNeeded = (fillAmount * price) / PRICE_SCALE;
+                uint128 fillAmount;
 
-                remainingIn -= quoteNeeded;
+                if (baseOut > level.totalLiquidity) {
+                    fillAmount = level.totalLiquidity;
+                    remainingIn -= (fillAmount * price) / PRICE_SCALE;
+                } else {
+                    fillAmount = baseOut;
+                    remainingIn = 0;
+                }
                 amountOut += fillAmount;
 
                 if (fillAmount == level.totalLiquidity) {
