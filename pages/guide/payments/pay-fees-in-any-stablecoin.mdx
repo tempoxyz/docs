@@ -29,9 +29,9 @@ Ensure that you have set up your project with Wagmi and integrated accounts by f
 
 ### Add testnet funds¹
 
-Before we can pay fees in a token of our choice, we need to fund our account. In this this guide we'll be sending `AlphaUSD` (`0x20c000…0001`) and paying fees in `BetaUSD` (`0x20c000…0002`).
+Before you can pay fees in a token of your choice, you need to fund your account. In this guide you will be sending `AlphaUSD` (`0x20c000…0001`) and paying fees in `BetaUSD` (`0x20c000…0002`).
 
-Luckily, the built-in Tempo testnet faucet funds accounts with `AlphaUSD` and `BetaUSD`.
+The built-in Tempo testnet faucet funds accounts with `AlphaUSD` and `BetaUSD`.
 
 <Demo.Container name="Add Funds" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd, Demo.betaUsd]}>
   <Demo.AddFunds stepNumber={1} last />
@@ -74,13 +74,13 @@ export const config = createConfig({
 :::
 
 :::warning
-¹ It is important to note that the `addFunds` Hook only works on testnets as a convienience feature to get
+¹ It is important to note that the `addFunds` Hook only works on testnets as a convenience feature to get
 started quickly. For production, you will need to onramp & fund your account manually.
 :::
 
 ### Add fee token selector
 
-Now that we have `AlphaUSD` to send and `BetaUSD` to pay fees with, we can add a new selector component to allow users to select the fee token.
+Now that you have `AlphaUSD` to send and `BetaUSD` to pay fees with, you can add a new selector component to allow users to select the fee token.
 
 <Demo.Container name="Select Fee Token" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd, Demo.betaUsd]}>
   <Demo.Connect stepNumber={1} />
@@ -126,7 +126,7 @@ export const config = createConfig({
 
 ### Add pay with fee token logic
 
-Now that we have a selector for the fee token, we can add the logic to send a payment with the selected fee token.
+Now that you have a selector for the fee token, you can add the logic to send a payment with the selected fee token.
 
 After this step, your users can send payments with a specified fee token by clicking the "Send" button!
 
@@ -193,7 +193,7 @@ export const config = createConfig({
 
 ### Display a receipt
 
-Now that users can send payments with a specified fee token, we can link to the transaction receipt.
+Now that users can send payments with a specified fee token, you can link to the transaction receipt.
 
 :::code-group
 
@@ -263,9 +263,9 @@ export const config = createConfig({
 
 ### Next steps
 
-Now that you have made a payment using a desired fee token you can
-- follow a guide on how to [sponsor user fees](/guide/payments/sponsor-user-fees) to enable gasless transactions
-- learn more about [transaction fees](/documentation/protocol/fees)
+Now that you have made a payment using a desired fee token, you can:
+- Follow a guide on how to [sponsor user fees](/guide/payments/sponsor-user-fees) to enable gasless transactions
+- Learn more about [transaction fees](/documentation/protocol/fees)
 
 ::::
 
