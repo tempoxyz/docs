@@ -26,13 +26,7 @@ export function getConfig(options: getConfig.Options = {}) {
     ],
     connectors: [
       metaMask(),
-      webAuthn({
-        rpId:
-          typeof window !== 'undefined' &&
-          window.location.hostname.includes('tempo.xyz')
-            ? 'tempo.xyz'
-            : undefined,
-      }),
+      webAuthn(),
     ],
     multiInjectedProviderDiscovery,
     storage: createStorage({
