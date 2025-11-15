@@ -1,0 +1,30 @@
+# Protocol Specification Overview
+
+## Introduction
+
+Tempo is a blockchain protocol purpose-built for global payments. Rather than being a general-purpose platform, Tempo makes deliberate technical choices optimized for payments at scale.
+
+These specifications provide the technical reference for protocol implementers, auditors, and core contributors building on Tempo. Each specification follows a structured format with an Abstract summarizing the component's purpose, Motivation explaining design goals, detailed Specification of behavior, Rationale for key decisions, and examples or test vectors. Specifications link to corresponding reference implementations in Solidity, providing both the normative behavior definition and canonical code.
+
+## Specification Structure
+
+The protocol specifications are organized into the following sections:
+
+| Category | Description |
+|----------|-------------|
+| [Overview](/documentation/protocol) | Protocol introduction and [predeployed contract addresses](/guide/quickstart/predeployed-contracts) |
+| [Transactions](/documentation/protocol/transactions) | Transaction types including AATransaction (0x76) and deprecated FeeTokenTransaction (0x77) |
+| [Fees](/documentation/protocol/fees/spec-fee) | Fee system and AMM for multi-token fee payment |
+| [Token Standards](/documentation/protocol/tip20/overview) | TIP-20 core standard, TIP-403 policy registry, and reward distribution |
+| [Stablecoin Exchange](/documentation/protocol/exchange) | Enshrined exchange and linkingUSD mechanisms |
+| [Blockspace](/documentation/protocol/blockspace/overview) | Block format, payment lanes, and sub-blocks |
+| [Account Abstraction](/documentation/protocol/transactions/spec-default-aa) | Default Account Abstraction (deprecated) |
+
+## Audience
+
+These specifications are intended for:
+- Protocol developers and auditors
+- Core contributors implementing protocol features
+- Security researchers analyzing the protocol
+
+For application developers and node operators, see the [Documentation](/documentation) section.

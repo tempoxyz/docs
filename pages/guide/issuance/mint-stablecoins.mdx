@@ -1,0 +1,78 @@
+import * as Demo from '../../../components/guides/Demo.tsx'
+
+# Mint Stablecoins
+
+Create new tokens by minting them to a specified address. Minting increases the total supply of your stablecoin.
+
+## Demo
+
+This demo walks though the entire process of minting a token to a recipient. 
+
+<Demo.Container name="Mint Your Token" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+  <Demo.Connect stepNumber={1} />
+  <Demo.AddFunds stepNumber={2} />
+  <Demo.CreateToken stepNumber={3} />
+  <Demo.GrantTokenRoles stepNumber={4} roles={['issuer']} />
+  <Demo.MintToken stepNumber={5} last />
+</Demo.Container>
+
+## Quick Start
+
+Mint tokens using the `mint` function on your TIP-20 token:
+
+```solidity
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+
+// Mint 1,000 tokens to the treasury (USD has 6 decimals)
+const treasuryAddress = '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef';
+token.mint(treasuryAddress, 1_000_000_000);
+
+// Mint with a memo for tracking
+token.mintWithMemo(
+  treasuryAddress,
+  1_000_000_000,
+  keccak256("Q1_2024_TREASURY_ALLOCATION")
+);
+```
+
+:::note
+See a full [TypeScript Example](/sdk/typescript/viem/token.mint)
+:::
+
+## Requirements
+
+Minting requires the **`ISSUER_ROLE`**. The token must not exceed its supply cap (if set).
+
+## Minting with Memos
+
+Use `mintWithMemo` when you need to:
+- Track the purpose of minting (e.g., `"INVESTOR_ALLOCATION_SERIES_A"`)
+- Link mints to offchain records (invoice IDs, transaction references)
+- Maintain an audit trail for compliance
+
+The memo is emitted in both a `TransferWithMemo` event and the standard `Mint` event.
+
+## Supply Caps
+
+If your token has a supply cap set, any `mint()` or `mintWithMemo()` call that would exceed the cap will revert with `SupplyCapExceeded()`. You must either:
+- Burn tokens to reduce total supply below the cap
+- Increase the supply cap (requires `DEFAULT_ADMIN_ROLE`)
+- Remove the cap entirely by setting it to `type(uint256).max`
+
+## Burning Tokens
+
+To decrease supply, you can burn tokens from your own balance:
+
+```solidity
+// Burn 100 tokens from your own balance
+token.burn(100_000_000);
+```
+
+Burning requires the **`ISSUER_ROLE`** and sufficient balance in the caller's account.
+
+## Next Steps
+
+- **[Use your stablecoin for fees](/guide/issuance/use-for-fees)** to enable users to pay fees with your token
+- **[Manage your stablecoin](/guide/issuance/manage-stablecoin)** with roles, supply caps, and transfer policies
+
+

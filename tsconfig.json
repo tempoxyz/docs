@@ -31,5 +31,6 @@
 
     "types": ["unplugin-icons/types/react"]
   },
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["snippets/twoslash-env.d.ts"]
 }

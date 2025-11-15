@@ -1,0 +1,159 @@
+import * as Demo from '../../../components/guides/Demo.tsx'
+
+# Providing Liquidity
+
+Adding liquidity to a token pair in the Stablecoin DEX is done by placing an order. There are two types of orders `limit` and `flip`, each of which can be placed on the `buy` or `sell` side. To learn more about these order types see the [documentation](/documentation/protocol/exchange/providing-liquidity)
+
+By the end of this guide you will be able to place orders in the orderbook.
+
+<Demo.Container name="Place an Order" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/exchange">
+  <Demo.Connect stepNumber={1} />
+  <Demo.AddFunds stepNumber={2} />
+  <Demo.PlaceOrder stepNumber={3} last />
+</Demo.Container>
+
+## Steps
+
+::::steps
+
+### Set up your client
+
+Ensure that you have set up your client by following the [guide](guide/sdks/typescript).
+
+### Approve Spend
+
+Placing an order requires a spend approval, as trades are executed by the Stablecoin DEX contract on your behalf. 
+
+
+The code samples in this guide will show how to place an order on the AlphaUSD / LinkingUSD pair.
+
+
+```ts twoslash [PlaceOrder.ts]
+// @noErrors
+import { Addresses } from 'tempo.ts/viem'
+import { parseUnits } from 'viem'
+
+import { client } from './viem.config'
+
+const linkingUsd = '0x20c0000000000000000000000000000000000000'
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
+export default function PlaceOrder(props: { orderType: 'buy' | 'sell' }) {
+  const { orderType } = props
+  // buying AlphaUSD requires we spend LinkingUSD
+  const spendToken = orderType === 'buy' ? linkingUsd : alphaUsd
+
+  const handlePlaceOrder = async () => {
+    await client.token.approveSync({
+      amount: parseUnits('100', 6),
+      spender: Addresses.stablecoinExchange,
+      token: spendToken,
+    })
+  }
+
+  return (
+    <button type="button" onClick={handlePlaceOrder}>
+      Place Order
+    </button>
+  )
+}
+```
+
+
+### Place Order
+
+Once the spend is approved, you can place an order by calling the `place` action on the Stablecoin DEX.
+
+```tsx twoslash [PlaceOrder.ts]
+// @noErrors
+import { Addresses } from 'tempo.ts/viem'
+import { parseUnits } from 'viem'
+
+import { client } from './viem.config'
+
+const linkingUsd = '0x20c0000000000000000000000000000000000000'
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
+export default function PlaceOrder(props: { orderType: 'buy' | 'sell' }) {
+  const { orderType } = props
+  // buying AlphaUSD requires we spend LinkingUSD
+  const spendToken = orderType === 'buy' ? linkingUsd : alphaUsd
+
+  const handlePlaceOrder = async () => {
+    await client.token.approveSync({
+      amount: parseUnits('100', 6),
+      spender: Addresses.stablecoinExchange,
+      token: spendToken,
+    })
+    await client.dex.place({ // [!code ++]
+      amount: parseUnits('100', 6), // [!code ++]
+      tick: 0, // [!code ++]
+      token: alphaUsd, // [!code ++]
+      type: orderType, // [!code ++]
+    }) // [!code ++]
+  }
+
+  return (
+    <button type="button" onClick={handlePlaceOrder}>
+      Place Order 
+    </button>
+  )
+}
+```
+
+::::
+
+## Best practices
+
+You can batch the calls to approve spend and place the order in a single transaction for efficiency
+
+```tsx twoslash [PlaceOrder.ts]
+// @noErrors
+import { Actions, Addresses } from 'tempo.ts/viem'
+import { parseUnits } from 'viem'
+
+import { client } from './viem.config'
+
+const linkingUsd = '0x20c0000000000000000000000000000000000000'
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
+export default function PlaceOrder(props: { orderType: 'buy' | 'sell' }) {
+  const { orderType } = props
+  // buying AlphaUSD requires we spend LinkingUSD
+  const spendToken = orderType === 'buy' ? linkingUsd : alphaUsd
+
+  const handlePlaceOrder = () => {
+    const calls = [
+      Actions.token.approve.call({
+        spender: Addresses.stablecoinExchange,
+        amount: parseUnits('100', 6),
+        token: spendToken,
+      }),
+      Actions.dex.place.call({
+        token: alphaUsd,
+        amount: parseUnits('100', 6), // Amount: 1000 USDC
+        type: 'buy', // Buying USDC
+        tick: 0,
+      }),
+    ]
+    client.sendTransactionSync({
+      calls,
+    })
+  }
+
+  return (
+    <button type="button" onClick={handlePlaceOrder}>
+      Place Order
+    </button>
+  )
+}
+```
+
+
+## Next Steps
+
+- **[Executing Swaps](/guide/stablecoin-exchange/executing-swaps)** to learn how to trade
+- **[Exchange Balance](/guide/stablecoin-exchange/exchange-balance)** to manage your DEX balances
+- Learn more about [Providing Liquidity](/documentation/protocol/exchange/providing-liquidity)
+
+

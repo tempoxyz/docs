@@ -1,0 +1,156 @@
+# Executing Swaps
+
+Execute swaps between stablecoins on Tempo's enshrined exchange. Swaps execute immediately against existing orders in the order book.
+
+## Swap Functions
+
+The exchange provides two primary swap functions:
+
+### Swap Exact Amount In
+
+Specify the exact amount of tokens you want to sell, and receive at least a minimum amount:
+
+```ts
+import { client } from './viem.config'
+
+const { amountOut, receipt } = await client.dex.sellSync({
+  tokenIn: usdcAddress,
+  tokenOut: usdtAddress,
+  amountIn: parseUnits('1000', 6), // Sell exactly 1000 USDC
+  minAmountOut: parseUnits('998', 6), // Receive at least 998 USDT
+})
+
+console.log('Received:', amountOut)
+```
+
+**Parameters:**
+- `tokenIn` - The token address you're selling
+- `tokenOut` - The token address you're buying
+- `amountIn` - The exact amount of `tokenIn` to sell
+- `minAmountOut` - Minimum amount of `tokenOut` you'll accept (slippage protection)
+
+### Swap Exact Amount Out
+
+Specify the exact amount of tokens you want to receive, and pay at most a maximum amount:
+
+```ts
+const { amountIn, receipt } = await client.dex.buySync({
+  tokenIn: usdcAddress,
+  tokenOut: usdtAddress,
+  amountOut: parseUnits('1000', 6), // Receive exactly 1000 USDT
+  maxAmountIn: parseUnits('1002', 6), // Pay at most 1002 USDC
+})
+
+console.log('Paid:', amountIn)
+```
+
+**Parameters:**
+- `tokenIn` - The token address you're selling
+- `tokenOut` - The token address you're buying
+- `amountOut` - The exact amount of `tokenOut` to receive
+- `maxAmountIn` - Maximum amount of `tokenIn` you'll pay (slippage protection)
+
+## Getting Price Quotes
+
+Before executing a swap, you can query the expected price:
+
+### Quote Exact Amount In
+
+```ts
+const expectedOut = await client.dex.getSellQuote({
+  tokenIn: usdcAddress,
+  tokenOut: usdtAddress,
+  amountIn: parseUnits('1000', 6),
+})
+
+console.log('Expected output:', expectedOut)
+```
+
+### Quote Exact Amount Out
+
+```ts
+const expectedIn = await client.dex.getBuyQuote({
+  tokenIn: usdcAddress,
+  tokenOut: usdtAddress,
+  amountOut: parseUnits('1000', 6),
+})
+
+console.log('Expected input:', expectedIn)
+```
+
+## How Swaps Execute
+
+When you call a swap function:
+
+1. **Balance Check**: The exchange first checks your balance on the DEX
+2. **Transfer if Needed**: If your DEX balance is insufficient, tokens are transferred from your wallet
+3. **Order Matching**: The exchange walks through orders at each price tick, from best to worst:
+   - Orders are consumed in price-time priority order
+   - Each filled order credits the maker's balance on the DEX
+   - Continues until your swap is complete or limit price is reached
+4. **Slippage Check**: Reverts if `minAmountOut` (or `maxAmountIn`) constraints aren't met
+5. **Settlement**: Your output tokens are transferred to your wallet
+
+:::warning
+Swaps will revert with an `InsufficientLiquidity` error if there isn't enough liquidity in the order book to satisfy your slippage constraints.
+:::
+
+## Using Solidity
+
+If you're building a smart contract that executes swaps:
+
+```solidity
+interface IStablecoinExchange {
+    function swapExactAmountIn(
+        address tokenIn,
+        address tokenOut,
+        uint128 amountIn,
+        uint128 minAmountOut
+    ) external returns (uint128 amountOut);
+    
+    function swapExactAmountOut(
+        address tokenIn,
+        address tokenOut,
+        uint128 amountOut,
+        uint128 maxAmountIn
+    ) external returns (uint128 amountIn);
+}
+
+contract SwapContract {
+    IStablecoinExchange constant EXCHANGE = 
+        IStablecoinExchange(0xDEc0000000000000000000000000000000000000);
+    
+    function swapUSDCtoUSDT(uint128 amountIn, uint128 minAmountOut) external {
+        EXCHANGE.swapExactAmountIn(
+            USDC_ADDRESS,
+            USDT_ADDRESS,
+            amountIn,
+            minAmountOut
+        );
+    }
+}
+```
+
+## Gas Costs
+
+Swap gas costs scale with the number of orders and ticks your trade crosses:
+
+- Base swap cost (transfers and setup)
+- Per-order cost (for each order filled)
+- Per-tick cost (for each price level crossed)
+- Per-flip cost (if any flip orders are triggered)
+
+Larger swaps that cross more orders will cost more gas, but the cost per unit of volume decreases.
+
+## Token Balances on the DEX
+
+The exchange allows you to hold token balances directly on the DEX contract, which saves gas by avoiding ERC-20 transfers on every trade. When you execute a swap, the exchange first checks your DEX balance and only transfers from your wallet if needed.
+
+For complete details on checking balances, depositing, withdrawing, and managing your exchange balance, see the [Exchange Balance](/guide/stablecoin-exchange/exchange-balance) page.
+
+## Next Steps
+
+- **[Providing Liquidity](/guide/stablecoin-exchange/providing-liquidity)** to learn how to provide liquidity
+- **[Exchange Balance](/guide/stablecoin-exchange/exchange-balance)** to manage your DEX balances
+- Learn more about [Executing Swaps](/documentation/protocol/exchange/executing-swaps)
+

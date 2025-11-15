@@ -55,7 +55,7 @@ export function Faucet() {
 
   return (
     <Container>
-      <div className="flex flex-col justify-between gap-3 p-4">
+      <div className="flex flex-col justify-between gap-3">
         <header className="flex items-center justify-between">
           <div className="flex flex-col gap-2">
             <div className="flex gap-3 text-[16px] dark:text-white font-normal text-black -tracking-[1%]">

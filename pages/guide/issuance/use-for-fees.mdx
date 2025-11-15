@@ -1,0 +1,103 @@
+import * as Demo from '../../../components/guides/Demo.tsx'
+
+# Use Your Stablecoin for Fees
+
+Enable users to pay transaction fees using your stablecoin. Tempo supports flexible fee payment options, allowing users to pay fees in any stablecoin they hold.
+
+## Demo
+
+<Demo.Container name="Create a Stablecoin" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/issuance">
+  <Demo.Connect stepNumber={1} />
+  <Demo.AddFunds stepNumber={2} />
+  <Demo.CreateToken stepNumber={3} />
+  <Demo.GrantTokenRoles stepNumber={4} roles={['issuer']} />
+  <Demo.MintToken stepNumber={5} />
+  <Demo.MintFeeAmmLiquidity stepNumber={6} />
+  <Demo.PayWithIssuedToken stepNumber={7} last />
+</Demo.Container>
+
+## How It Works
+
+Users can specify your stablecoin as their fee token in several ways:
+
+### Account-Level Preference
+
+Users can set your stablecoin as their default fee token at the account level:
+
+:::code-group
+
+```ts [TypeScript]
+// Set default fee token for the account
+await client.fee.setUserToken({
+  token: yourStablecoinAddress,
+})
+```
+
+```rs [Rust]
+IFeeManager::new(TIP_FEE_MANAGER_ADDRESS, provider)
+    .setUserToken(your_stable_coin_address)
+    .send()
+    .await?;
+```
+
+:::
+
+Once set, all transactions from that account will use your stablecoin for fees (unless overridden at the transaction level).
+
+### Transaction-Level Preference
+
+Users can also specify your stablecoin for individual transactions:
+
+:::code-group
+
+```ts [TypeScript]
+// Send transaction with specific fee token
+const hash = await client.sendTransaction({
+  calls: [
+    { data: '0x...', to: '0x...' },
+  ],
+  feeToken: yourStablecoinAddress,
+})
+```
+
+```rs [Rust]
+// Send transaction with specific fee token
+let hash = provider
+    .send_transaction(TempoTransactionRequest {
+        calls: vec![Call {
+            to: address!("0x...").into(),
+            data: bytes!("0x..."),
+        }],
+        fee_token: Some(your_stable_coin_address),
+        ..Default::default()
+    })
+    .await?
+    .tx_hash();
+```
+
+:::
+
+:::warning
+Note that even if a user has a default fee token set on their account, the transaction-level fee token parameter takes precedence over the account-level preference.
+:::
+
+### Automatic Selection
+
+If a user is interacting directly with your token contract (e.g., transferring your stablecoin), the transaction will automatically use your token as the fee token (as long as there is no preference set on the transaction or account level).
+
+## Fee Conversion
+
+The system automatically handles conversion through the [Fee AMM](/documentation/protocol/fees/spec-fee-amm) if the validator doesn't accept your chosen token. This ensures transactions can always be processed, even if validators prefer different stablecoins.
+
+All testnet validators expect fees in linkingUSD, so there needs to be linkingUSD in your token's fee pool in order to pay fees using your token.
+
+## Benefits
+
+- **User convenience**: Users can pay fees with the same token they're using
+- **Liquidity**: Encourages users to hold your stablecoin
+- **Flexibility**: Works seamlessly with Tempo's fee system
+
+## Next Steps
+
+- **[Manage your stablecoin](/guide/issuance/manage-stablecoin)** with roles, supply caps, and transfer policies
+- Learn more about [Transaction Fee Tokens](/documentation/protocol/fees/spec-fee)

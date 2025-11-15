@@ -1,0 +1,87 @@
+# Manage Your Stablecoin
+
+Manage your stablecoin's permissions, supply, and compliance settings using role-based access control and administrative functions.
+
+## Roles & Permissions
+
+TIP-20 tokens use a role-based access control system that allows you to delegate different administrative functions to different addresses:
+
+| Role | Purpose | Key Functions |
+|------|---------|---------------|
+| **Admin** | Full control | Grant/revoke all roles, set supply caps, change policies |
+| **Issuer** | Token supply | Mint and burn tokens |
+| **Pause** | Emergency control | Pause token transfers |
+| **Unpause** | Emergency control | Unpause token transfers |
+| **Burn Blocked** | Compliance | Burn tokens from blocked addresses |
+
+### Granting Roles
+
+Grant roles to delegate specific token permissions:
+
+```solidity
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+
+// Grant the issuer role to treasury, to mint tokens
+address treasuryAddress = 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef;
+token.grantRole(keccak256("ISSUER_ROLE"), treasuryAddress);
+
+// Grant the pause role to security, to pause transfers
+address securityAddress = 0xcafecafebabedeadbeefcafebabedeadbeefcafebabe;
+token.grantRole(keccak256("PAUSE_ROLE"), securityAddress);
+```
+
+:::note
+See a full [TypeScript Example](/sdk/typescript/viem/token.grantRoles)
+:::
+
+## Supply Management
+
+### Setting Supply Caps
+
+Control the maximum total supply by setting a supply cap:
+
+```solidity
+// Set supply cap to 1 billion tokens (USD has 6 decimals)
+token.setSupplyCap(1_000_000_000_000_000);
+
+// Remove supply cap (unlimited)
+token.setSupplyCap(type(uint256).max);
+```
+
+Setting supply caps requires the **`DEFAULT_ADMIN_ROLE`**. The new cap cannot be less than the current total supply.
+
+### Pausing Transfers
+
+Temporarily halt all token transfers for emergency situations or maintenance:
+
+```solidity
+// Pause all transfers
+token.pause();
+
+// Later, unpause to resume normal operation
+token.unpause();
+```
+
+Pausing requires the **`PAUSE_ROLE`**. Unpausing requires the **`UNPAUSE_ROLE`**.
+
+## Transfer Policies
+
+Configure transfer policies to control who can send and receive your stablecoin. This is useful for compliance and regulatory requirements.
+
+Transfer policies can be:
+- **Always allow**: Anyone can send/receive (default)
+- **Whitelist**: Only authorized addresses can send/receive
+- **Blacklist**: Blocked addresses cannot send/receive
+
+## Best Practices
+
+1. **Separate roles**: Use different addresses for different roles (treasury for minting, security for pausing)
+2. **Set supply caps**: Prevent unlimited inflation by setting appropriate supply caps
+3. **Monitor events**: Watch for role changes, mints, burns, and administrative actions
+4. **Emergency procedures**: Have pause/unpause roles ready for security incidents
+
+## Next Steps
+
+- Learn more about [Roles & Permissions](/documentation/protocol/tip403/spec)
+- Learn more about [Transfer Policies](/documentation/protocol/tip403/spec)
+

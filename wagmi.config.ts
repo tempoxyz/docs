@@ -1,38 +1,62 @@
 import { QueryClient } from '@tanstack/react-query'
 import { tempoAndantino, tempoLocal } from 'tempo.ts/chains'
 import { webAuthn } from 'tempo.ts/wagmi'
-import { createConfig, http, webSocket } from 'wagmi'
+import {
+  type CreateConfigParameters,
+  createConfig,
+  createStorage,
+  http,
+  noopStorage,
+  webSocket,
+} from 'wagmi'
+import { metaMask } from 'wagmi/connectors'
 
 const feeToken = '0x20c0000000000000000000000000000000000001'
 
-export const config = createConfig({
-  batch: {
-    multicall: false,
-  },
-  chains: [
-    import.meta.env.VITE_LOCAL !== 'true'
-      ? tempoAndantino({ feeToken })
-      : tempoLocal({ feeToken }),
-  ],
-  connectors: [
-    webAuthn({
-      rpId:
-        typeof window !== 'undefined' &&
-        window.location.hostname.includes('tempo.xyz')
-          ? 'tempo.xyz'
-          : undefined,
+export function getConfig(options: getConfig.Options = {}) {
+  const { multiInjectedProviderDiscovery } = options
+  return createConfig({
+    batch: {
+      multicall: false,
+    },
+    chains: [
+      import.meta.env.VITE_LOCAL !== 'true'
+        ? tempoAndantino({ feeToken })
+        : tempoLocal({ feeToken }),
+    ],
+    connectors: [
+      metaMask(),
+      webAuthn({
+        rpId:
+          typeof window !== 'undefined' &&
+          window.location.hostname.includes('tempo.xyz')
+            ? 'tempo.xyz'
+            : undefined,
+      }),
+    ],
+    multiInjectedProviderDiscovery,
+    storage: createStorage({
+      storage:
+        typeof window !== 'undefined' ? window.localStorage : noopStorage,
     }),
-  ],
-  multiInjectedProviderDiscovery: true,
-  transports: {
-    [tempoAndantino.id]: webSocket(
-      'wss://rpc.testnet.tempo.xyz?supersecretargument=pleasedonotusemeinprod',
-    ),
-    [tempoLocal.id]: http(undefined, {
-      batch: true,
-    }),
-  },
-})
+    transports: {
+      [tempoAndantino.id]: webSocket(
+        'wss://rpc.testnet.tempo.xyz?supersecretargument=pleasedonotusemeinprod',
+      ),
+      [tempoLocal.id]: http(undefined, {
+        batch: true,
+      }),
+    },
+  })
+}
+
+export namespace getConfig {
+  export type Options = Partial<
+    Pick<CreateConfigParameters, 'multiInjectedProviderDiscovery'>
+  >
+}
+
+export const config = getConfig()
 
 export const queryClient = new QueryClient()
 

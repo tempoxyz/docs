@@ -23,8 +23,11 @@ export function HomePage() {
         </div>
         <div className="h-[24px]" />
         <div className="flex gap-[12px]">
-          <Button variant="inverted" render={<Link to="/get-started" />}>
-            Get Started
+          <Button variant="inverted" render={<Link to="/guide" />}>
+            Start Building
+          </Button>
+          <Button variant="inverted" render={<Link to="/documentation" />}>
+            Learn Tempo
           </Button>
           <Button
             externalLink
@@ -40,6 +43,7 @@ export function HomePage() {
             Website
           </Button>
         </div>
+        <div className="h-[60px]" />
       </div>
     </div>
   )

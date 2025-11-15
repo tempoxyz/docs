@@ -1,12 +1,13 @@
 # `withFeePayer`
 
-Creates a transport that routes transactions to a fee payer service when a `feePayer` is requested on an action. [Learn more about Fee Payers](/protocol/transactions/fee-payers)
+Creates a transport that routes transactions to a fee payer service when a `feePayer` is requested on an action. [Learn more about Fee Sponsorship](/documentation/protocol/transactions/spec-account-abstraction)
 
 ## Usage
 
 :::code-group
 
 ```ts twoslash [example.ts]
+// @noErrors
 import { createClient, http, walletActions } from 'viem'
 import { tempo } from 'tempo.ts/chains'
 import { withFeePayer } from 'tempo.ts/viem'
@@ -66,6 +67,7 @@ See `server.ts` for the server-side implementation with [Bun](https://bun.sh).
 :::code-group
 
 ```ts twoslash [client.ts]
+// @noErrors
 import { createClient, http, walletActions } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { tempo } from 'tempo.ts/chains'

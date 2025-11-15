@@ -11,20 +11,19 @@
 | Action | Description |
 |--------|-------------|
 | **AMM Actions** | |
-| [`amm.burn`](#TODO) | Burns liquidity tokens and receives the underlying token pair |
-| [`amm.getLiquidityBalance`](#TODO) | Gets the liquidity balance for an address in a specific pool |
-| [`amm.getPool`](#TODO) | Gets the reserves for a liquidity pool |
-
-| [`amm.mint`](#TODO) | Mints liquidity tokens by providing a token pair |
-| [`amm.rebalanceSwap`](#TODO) | Performs a rebalance swap between user and validator tokens |
-| [`amm.watchBurn`](#TODO) | Watches for liquidity burn events |
-| [`amm.watchFeeSwap`](#TODO) | Watches for fee swap events |
-| [`amm.watchMint`](#TODO) | Watches for liquidity mint events |
-| [`amm.watchRebalanceSwap`](#TODO) | Watches for rebalance swap events |
+| [`amm.burn`](/sdk/typescript/wagmi/actions/amm.burn) | Burns liquidity tokens and receives the underlying token pair |
+| [`amm.getLiquidityBalance`](/sdk/typescript/wagmi/actions/amm.getLiquidityBalance) | Gets the liquidity balance for an address in a specific pool |
+| [`amm.getPool`](/sdk/typescript/wagmi/actions/amm.getPool) | Gets the reserves for a liquidity pool |
+| [`amm.mint`](/sdk/typescript/wagmi/actions/amm.mint) | Mints liquidity tokens by providing a token pair |
+| [`amm.rebalanceSwap`](/sdk/typescript/wagmi/actions/amm.rebalanceSwap) | Performs a rebalance swap between user and validator tokens |
+| [`amm.watchBurn`](/sdk/typescript/wagmi/actions/amm.watchBurn) | Watches for liquidity burn events |
+| [`amm.watchFeeSwap`](/sdk/typescript/wagmi/actions/amm.watchFeeSwap) | Watches for fee swap events |
+| [`amm.watchMint`](/sdk/typescript/wagmi/actions/amm.watchMint) | Watches for liquidity mint events |
+| [`amm.watchRebalanceSwap`](/sdk/typescript/wagmi/actions/amm.watchRebalanceSwap) | Watches for rebalance swap events |
 | **Fee Actions** | |
-| [`fee.getUserToken`](#TODO) | Gets the user's default fee token preference |
-| [`fee.setUserToken`](#TODO) | Sets the user's default fee token preference |
-| [`fee.watchSetUserToken`](#TODO) | Watches for user token set events |
+| [`fee.getUserToken`](/sdk/typescript/wagmi/actions/fee.getUserToken) | Gets the user's default fee token preference |
+| [`fee.setUserToken`](/sdk/typescript/wagmi/actions/fee.setUserToken) | Sets the user's default fee token preference |
+| [`fee.watchSetUserToken`](/sdk/typescript/wagmi/actions/fee.watchSetUserToken) | Watches for user token set events |
 | **Policy Actions** | |
 | [`policy.create`](#TODO) | Creates a new transfer policy for token access control |
 | [`policy.getData`](#TODO) | Gets the data for a transfer policy, including its type and admin address |
@@ -37,66 +36,66 @@
 | [`policy.watchCreate`](#TODO) | Watches for policy creation events |
 | [`policy.watchWhitelistUpdated`](#TODO) | Watches for whitelist update events |
 | **Stablecoin Exchange Actions** | |
-| [`dex.buy`](#TODO) | Buys a specific amount of tokens from the Stablecoin Exchange orderbook |
-| [`dex.cancel`](#TODO) | Cancels an order from the orderbook |
-| [`dex.createPair`](#TODO) | Creates a new trading pair on the DEX |
-| [`dex.getBalance`](#TODO) | Gets a user's token balance on the Stablecoin Exchange |
-| [`dex.getBuyQuote`](#TODO) | Gets the quote for buying a specific amount of tokens |
-| [`dex.getOrder`](#TODO) | Gets an order's details from the orderbook |
-| [`dex.getTickLevel`](#TODO) | Gets the price level information at a specific tick |
-| [`dex.getSellQuote`](#TODO) | Gets the quote for selling a specific amount of tokens |
-| [`dex.place`](#TODO) | Places a limit order on the orderbook |
-| [`dex.placeFlip`](#TODO) | Places a flip order that automatically flips when filled |
-| [`dex.sell`](#TODO) | Sells a specific amount of tokens from the Stablecoin Exchange orderbook |
-| [`dex.watchFlipOrderPlaced`](#TODO) | Watches for flip order placed events |
-| [`dex.watchOrderCancelled`](#TODO) | Watches for order cancelled events |
-| [`dex.watchOrderFilled`](#TODO) | Watches for order filled events |
-| [`dex.watchOrderPlaced`](#TODO) | Watches for order placed events |
-| [`dex.withdraw`](#TODO) | Withdraws tokens from the DEX to the caller's wallet |
+| [`dex.buy`](/sdk/typescript/wagmi/actions/dex.buy) | Buys a specific amount of tokens from the Stablecoin Exchange orderbook |
+| [`dex.cancel`](/sdk/typescript/wagmi/actions/dex.cancel) | Cancels an order from the orderbook |
+| [`dex.createPair`](/sdk/typescript/wagmi/actions/dex.createPair) | Creates a new trading pair on the DEX |
+| [`dex.getBalance`](/sdk/typescript/wagmi/actions/dex.getBalance) | Gets a user's token balance on the Stablecoin Exchange |
+| [`dex.getBuyQuote`](/sdk/typescript/wagmi/actions/dex.getBuyQuote) | Gets the quote for buying a specific amount of tokens |
+| [`dex.getOrder`](/sdk/typescript/wagmi/actions/dex.getOrder) | Gets an order's details from the orderbook |
+| [`dex.getTickLevel`](/sdk/typescript/wagmi/actions/dex.getTickLevel) | Gets the price level information at a specific tick |
+| [`dex.getSellQuote`](/sdk/typescript/wagmi/actions/dex.getSellQuote) | Gets the quote for selling a specific amount of tokens |
+| [`dex.place`](/sdk/typescript/wagmi/actions/dex.place) | Places a limit order on the orderbook |
+| [`dex.placeFlip`](/sdk/typescript/wagmi/actions/dex.placeFlip) | Places a flip order that automatically flips when filled |
+| [`dex.sell`](/sdk/typescript/wagmi/actions/dex.sell) | Sells a specific amount of tokens from the Stablecoin Exchange orderbook |
+| [`dex.watchFlipOrderPlaced`](/sdk/typescript/wagmi/actions/dex.watchFlipOrderPlaced) | Watches for flip order placed events |
+| [`dex.watchOrderCancelled`](/sdk/typescript/wagmi/actions/dex.watchOrderCancelled) | Watches for order cancelled events |
+| [`dex.watchOrderFilled`](/sdk/typescript/wagmi/actions/dex.watchOrderFilled) | Watches for order filled events |
+| [`dex.watchOrderPlaced`](/sdk/typescript/wagmi/actions/dex.watchOrderPlaced) | Watches for order placed events |
+| [`dex.withdraw`](/sdk/typescript/wagmi/actions/dex.withdraw) | Withdraws tokens from the DEX to the caller's wallet |
 | **Token Actions** | |
-| [`token.approve`](#TODO) | Approves a spender to transfer TIP-20 tokens on behalf of the caller |
-| [`token.burn`](#TODO) | Burns TIP-20 tokens from the caller's balance |
-| [`token.burnBlocked`](#TODO) | Burns TIP-20 tokens from a blocked address |
-| [`token.changeTransferPolicy`](#TODO) | Changes the transfer policy for a TIP-20 token |
-| [`token.create`](#TODO) | Creates a new TIP-20 token and assigns the admin role to the calling account |
-| [`token.getAllowance`](#TODO) | Gets the amount of tokens that a spender is approved to transfer on behalf of an owner |
-| [`token.getBalance`](#TODO) | Gets the token balance of an address |
-| [`token.getMetadata`](#TODO) | Gets the metadata for a TIP-20 token, including name, symbol, decimals, currency, and total supply |
-| [`token.grantRoles`](#TODO) | Grants one or more roles to an address |
-| [`token.mint`](#TODO) | Mints new TIP-20 tokens to a recipient |
-| [`token.pause`](#TODO) | Pauses a TIP-20 token, preventing all transfers |
-| [`token.renounceRoles`](#TODO) | Renounces one or more roles from the caller's address |
-| [`token.revokeRoles`](#TODO) | Revokes one or more roles from an address |
-| [`token.setRoleAdmin`](#TODO) | Sets the admin role for another role |
-| [`token.setSupplyCap`](#TODO) | Sets the supply cap for a TIP-20 token |
-| [`token.transfer`](#TODO) | Transfers TIP-20 tokens from the caller to a recipient |
-| [`token.unpause`](#TODO) | Unpauses a TIP-20 token, allowing transfers to resume |
-| [`token.watchAdminRole`](#TODO) | Watches for role admin update events |
-| [`token.watchApprove`](#TODO) | Watches for token approval events |
-| [`token.watchBurn`](#TODO) | Watches for token burn events |
-| [`token.watchCreate`](#TODO) | Watches for new token creation events |
-| [`token.watchMint`](#TODO) | Watches for token mint events |
-| [`token.watchRole`](#TODO) | Watches for role membership update events |
-| [`token.watchTransfer`](#TODO) | Watches for token transfer events |
+| [`token.approve`](/sdk/typescript/wagmi/actions/token.approve) | Approves a spender to transfer TIP-20 tokens on behalf of the caller |
+| [`token.burn`](/sdk/typescript/wagmi/actions/token.burn) | Burns TIP-20 tokens from the caller's balance |
+| [`token.burnBlocked`](/sdk/typescript/wagmi/actions/token.burnBlocked) | Burns TIP-20 tokens from a blocked address |
+| [`token.changeTransferPolicy`](/sdk/typescript/wagmi/actions/token.changeTransferPolicy) | Changes the transfer policy for a TIP-20 token |
+| [`token.create`](/sdk/typescript/wagmi/actions/token.create) | Creates a new TIP-20 token and assigns the admin role to the calling account |
+| [`token.getAllowance`](/sdk/typescript/wagmi/actions/token.getAllowance) | Gets the amount of tokens that a spender is approved to transfer on behalf of an owner |
+| [`token.getBalance`](/sdk/typescript/wagmi/actions/token.getBalance) | Gets the token balance of an address |
+| [`token.getMetadata`](/sdk/typescript/wagmi/actions/token.getMetadata) | Gets the metadata for a TIP-20 token, including name, symbol, decimals, currency, and total supply |
+| [`token.grantRoles`](/sdk/typescript/wagmi/actions/token.grantRoles) | Grants one or more roles to an address |
+| [`token.mint`](/sdk/typescript/wagmi/actions/token.mint) | Mints new TIP-20 tokens to a recipient |
+| [`token.pause`](/sdk/typescript/wagmi/actions/token.pause) | Pauses a TIP-20 token, preventing all transfers |
+| [`token.renounceRoles`](/sdk/typescript/wagmi/actions/token.renounceRoles) | Renounces one or more roles from the caller's address |
+| [`token.revokeRoles`](/sdk/typescript/wagmi/actions/token.revokeRoles) | Revokes one or more roles from an address |
+| [`token.setRoleAdmin`](/sdk/typescript/wagmi/actions/token.setRoleAdmin) | Sets the admin role for another role |
+| [`token.setSupplyCap`](/sdk/typescript/wagmi/actions/token.setSupplyCap) | Sets the supply cap for a TIP-20 token |
+| [`token.transfer`](/sdk/typescript/wagmi/actions/token.transfer) | Transfers TIP-20 tokens from the caller to a recipient |
+| [`token.unpause`](/sdk/typescript/wagmi/actions/token.unpause) | Unpauses a TIP-20 token, allowing transfers to resume |
+| [`token.watchAdminRole`](/sdk/typescript/wagmi/actions/token.watchAdminRole) | Watches for role admin update events |
+| [`token.watchApprove`](/sdk/typescript/wagmi/actions/token.watchApprove) | Watches for token approval events |
+| [`token.watchBurn`](/sdk/typescript/wagmi/actions/token.watchBurn) | Watches for token burn events |
+| [`token.watchCreate`](/sdk/typescript/wagmi/actions/token.watchCreate) | Watches for new token creation events |
+| [`token.watchMint`](/sdk/typescript/wagmi/actions/token.watchMint) | Watches for token mint events |
+| [`token.watchRole`](/sdk/typescript/wagmi/actions/token.watchRole) | Watches for role membership update events |
+| [`token.watchTransfer`](/sdk/typescript/wagmi/actions/token.watchTransfer) | Watches for token transfer events |
 
 ## Hooks
 
 | Hook   | Description |
 |--------|-------------|
 | **AMM Hooks** | |
-| [`amm.useBurn`](#TODO) | Hook for burning liquidity tokens and receiving the underlying token pair |
-| [`amm.useLiquidityBalance`](#TODO) | Hook for getting the liquidity balance for an address in a specific pool |
-| [`amm.useMint`](#TODO) | Hook for minting liquidity tokens by providing a token pair |
-| [`amm.usePool`](#TODO) | Hook for getting the reserves for a liquidity pool |
-| [`amm.useRebalanceSwap`](#TODO) | Hook for performing a rebalance swap between user and validator tokens |
-| [`amm.useWatchBurn`](#TODO) | Hook for watching liquidity burn events |
-| [`amm.useWatchFeeSwap`](#TODO) | Hook for watching fee swap events |
-| [`amm.useWatchMint`](#TODO) | Hook for watching liquidity mint events |
-| [`amm.useWatchRebalanceSwap`](#TODO) | Hook for watching rebalance swap events |
+| [`amm.useBurn`](/sdk/typescript/wagmi/hooks/amm.useBurn) | Hook for burning liquidity tokens and receiving the underlying token pair |
+| [`amm.useLiquidityBalance`](/sdk/typescript/wagmi/hooks/amm.useLiquidityBalance) | Hook for getting the liquidity balance for an address in a specific pool |
+| [`amm.useMint`](/sdk/typescript/wagmi/hooks/amm.useMint) | Hook for minting liquidity tokens by providing a token pair |
+| [`amm.usePool`](/sdk/typescript/wagmi/hooks/amm.usePool) | Hook for getting the reserves for a liquidity pool |
+| [`amm.useRebalanceSwap`](/sdk/typescript/wagmi/hooks/amm.useRebalanceSwap) | Hook for performing a rebalance swap between user and validator tokens |
+| [`amm.useWatchBurn`](/sdk/typescript/wagmi/hooks/amm.useWatchBurn) | Hook for watching liquidity burn events |
+| [`amm.useWatchFeeSwap`](/sdk/typescript/wagmi/hooks/amm.useWatchFeeSwap) | Hook for watching fee swap events |
+| [`amm.useWatchMint`](/sdk/typescript/wagmi/hooks/amm.useWatchMint) | Hook for watching liquidity mint events |
+| [`amm.useWatchRebalanceSwap`](/sdk/typescript/wagmi/hooks/amm.useWatchRebalanceSwap) | Hook for watching rebalance swap events |
 | **Fee Hooks** | |
-| [`fee.useSetUserToken`](#TODO) | Hook for setting the user's default fee token preference |
-| [`fee.useUserToken`](#TODO) | Hook for getting the user's default fee token preference |
-| [`fee.useWatchSetUserToken`](#TODO) | Hook for watching user token set events |
+| [`fee.useSetUserToken`](/sdk/typescript/wagmi/hooks/fee.useSetUserToken) | Hook for setting the user's default fee token preference |
+| [`fee.useUserToken`](/sdk/typescript/wagmi/hooks/fee.useUserToken) | Hook for getting the user's default fee token preference |
+| [`fee.useWatchSetUserToken`](/sdk/typescript/wagmi/hooks/fee.useWatchSetUserToken) | Hook for watching user token set events |
 | **Policy Hooks** | |
 | [`policy.useCreate`](#TODO) | Hook for creating a new transfer policy for token access control |
 | [`policy.useData`](#TODO) | Hook for getting the data for a transfer policy, including its type and admin address |
@@ -109,46 +108,45 @@
 | [`policy.useWatchCreate`](#TODO) | Hook for watching policy creation events |
 | [`policy.useWatchWhitelistUpdated`](#TODO) | Hook for watching whitelist update events |
 | **Stablecoin Exchange Hooks** | |
-| [`dex.useBalance`](#TODO) | Hook for getting a user's token balance on the Stablecoin Exchange |
-| [`dex.useBuy`](#TODO) | Hook for buying a specific amount of tokens from the Stablecoin Exchange orderbook |
-| [`dex.useBuyQuote`](#TODO) | Hook for getting the quote for buying a specific amount of tokens |
-| [`dex.useCancel`](#TODO) | Hook for canceling an order from the orderbook |
-| [`dex.useCreatePair`](#TODO) | Hook for creating a new trading pair on the DEX |
-| [`dex.useOrder`](#TODO) | Hook for getting an order's details from the orderbook |
-| [`dex.usePlace`](#TODO) | Hook for placing a limit order on the orderbook |
-| [`dex.usePlaceFlip`](#TODO) | Hook for placing a flip order that automatically flips when filled |
-| [`dex.useTickLevel`](#TODO) | Hook for getting the price level information at a specific tick |
-| [`dex.useSell`](#TODO) | Hook for selling a specific amount of tokens from the Stablecoin Exchange orderbook |
-| [`dex.useSellQuote`](#TODO) | Hook for getting the quote for selling a specific amount of tokens |
-| [`dex.useWatchFlipOrderPlaced`](#TODO) | Hook for watching flip order placed events |
-| [`dex.useWatchOrderCancelled`](#TODO) | Hook for watching order cancelled events |
-| [`dex.useWatchOrderFilled`](#TODO) | Hook for watching order filled events |
-| [`dex.useWatchOrderPlaced`](#TODO) | Hook for watching order placed events |
-| [`dex.useWithdraw`](#TODO) | Hook for withdrawing tokens from the DEX to the caller's wallet |
+| [`dex.useBalance`](/sdk/typescript/wagmi/hooks/dex.useBalance) | Hook for getting a user's token balance on the Stablecoin Exchange |
+| [`dex.useBuy`](/sdk/typescript/wagmi/hooks/dex.useBuy) | Hook for buying a specific amount of tokens from the Stablecoin Exchange orderbook |
+| [`dex.useBuyQuote`](/sdk/typescript/wagmi/hooks/dex.useBuyQuote) | Hook for getting the quote for buying a specific amount of tokens |
+| [`dex.useCancel`](/sdk/typescript/wagmi/hooks/dex.useCancel) | Hook for canceling an order from the orderbook |
+| [`dex.useCreatePair`](/sdk/typescript/wagmi/hooks/dex.useCreatePair) | Hook for creating a new trading pair on the DEX |
+| [`dex.useOrder`](/sdk/typescript/wagmi/hooks/dex.useOrder) | Hook for getting an order's details from the orderbook |
+| [`dex.usePlace`](/sdk/typescript/wagmi/hooks/dex.usePlace) | Hook for placing a limit order on the orderbook |
+| [`dex.usePlaceFlip`](/sdk/typescript/wagmi/hooks/dex.usePlaceFlip) | Hook for placing a flip order that automatically flips when filled |
+| [`dex.useTickLevel`](/sdk/typescript/wagmi/hooks/dex.useTickLevel) | Hook for getting the price level information at a specific tick |
+| [`dex.useSell`](/sdk/typescript/wagmi/hooks/dex.useSell) | Hook for selling a specific amount of tokens from the Stablecoin Exchange orderbook |
+| [`dex.useSellQuote`](/sdk/typescript/wagmi/hooks/dex.useSellQuote) | Hook for getting the quote for selling a specific amount of tokens |
+| [`dex.useWatchFlipOrderPlaced`](/sdk/typescript/wagmi/hooks/dex.useWatchFlipOrderPlaced) | Hook for watching flip order placed events |
+| [`dex.useWatchOrderCancelled`](/sdk/typescript/wagmi/hooks/dex.useWatchOrderCancelled) | Hook for watching order cancelled events |
+| [`dex.useWatchOrderFilled`](/sdk/typescript/wagmi/hooks/dex.useWatchOrderFilled) | Hook for watching order filled events |
+| [`dex.useWatchOrderPlaced`](/sdk/typescript/wagmi/hooks/dex.useWatchOrderPlaced) | Hook for watching order placed events |
+| [`dex.useWithdraw`](/sdk/typescript/wagmi/hooks/dex.useWithdraw) | Hook for withdrawing tokens from the DEX to the caller's wallet |
 | **Token Hooks** | |
-| [`token.useAllowance`](#TODO) | Hook for getting the amount of tokens that a spender is approved to transfer on behalf of an owner |
-| [`token.useApprove`](#TODO) | Hook for approving a spender to transfer TIP-20 tokens on behalf of the caller |
-| [`token.useBalance`](#TODO) | Hook for getting the token balance of an address |
-| [`token.useBurn`](#TODO) | Hook for burning TIP-20 tokens from the caller's balance |
-| [`token.useBurnBlocked`](#TODO) | Hook for burning TIP-20 tokens from a blocked address |
-| [`token.useChangeTransferPolicy`](#TODO) | Hook for changing the transfer policy for a TIP-20 token |
-| [`token.useCreate`](#TODO) | Hook for creating a new TIP-20 token and assigning the admin role to the calling account |
-| [`token.useGrantRoles`](#TODO) | Hook for granting one or more roles to an address |
-| [`token.useHasRole`](#TODO) | Hook for checking if an address has a specific role |
-| [`token.useMetadata`](#TODO) | Hook for getting the metadata for a TIP-20 token, including name, symbol, decimals, currency, and total supply |
-| [`token.useMint`](#TODO) | Hook for minting new TIP-20 tokens to a recipient |
-| [`token.usePause`](#TODO) | Hook for pausing a TIP-20 token, preventing all transfers |
-
-| [`token.useRenounceRoles`](#TODO) | Hook for renouncing one or more roles from the caller's address |
-| [`token.useRevokeRoles`](#TODO) | Hook for revoking one or more roles from an address |
-| [`token.useSetRoleAdmin`](#TODO) | Hook for setting the admin role for another role |
-| [`token.useSetSupplyCap`](#TODO) | Hook for setting the supply cap for a TIP-20 token |
-| [`token.useTransfer`](#TODO) | Hook for transferring TIP-20 tokens from the caller to a recipient |
-| [`token.useUnpause`](#TODO) | Hook for unpausing a TIP-20 token, allowing transfers to resume |
-| [`token.useWatchAdminRole`](#TODO) | Hook for watching role admin update events |
-| [`token.useWatchApprove`](#TODO) | Hook for watching token approval events |
-| [`token.useWatchBurn`](#TODO) | Hook for watching token burn events |
-| [`token.useWatchCreate`](#TODO) | Hook for watching new token creation events |
-| [`token.useWatchMint`](#TODO) | Hook for watching token mint events |
-| [`token.useWatchRole`](#TODO) | Hook for watching role membership update events |
-| [`token.useWatchTransfer`](#TODO) | Hook for watching token transfer events |
+| [`token.useAllowance`](/sdk/typescript/wagmi/hooks/token.useGetAllowance) | Hook for getting the amount of tokens that a spender is approved to transfer on behalf of an owner |
+| [`token.useApprove`](/sdk/typescript/wagmi/hooks/token.useApprove) | Hook for approving a spender to transfer TIP-20 tokens on behalf of the caller |
+| [`token.useBalance`](/sdk/typescript/wagmi/hooks/token.useGetBalance) | Hook for getting the token balance of an address |
+| [`token.useBurn`](/sdk/typescript/wagmi/hooks/token.useBurn) | Hook for burning TIP-20 tokens from the caller's balance |
+| [`token.useBurnBlocked`](/sdk/typescript/wagmi/hooks/token.useBurnBlocked) | Hook for burning TIP-20 tokens from a blocked address |
+| [`token.useChangeTransferPolicy`](/sdk/typescript/wagmi/hooks/token.useChangeTransferPolicy) | Hook for changing the transfer policy for a TIP-20 token |
+| [`token.useCreate`](/sdk/typescript/wagmi/hooks/token.useCreate) | Hook for creating a new TIP-20 token and assigning the admin role to the calling account |
+| [`token.useGrantRoles`](/sdk/typescript/wagmi/hooks/token.useGrantRoles) | Hook for granting one or more roles to an address |
+| [`token.useHasRole`](/sdk/typescript/wagmi/hooks/token.useHasRole) | Hook for checking if an address has a specific role |
+| [`token.useMetadata`](/sdk/typescript/wagmi/hooks/token.useGetMetadata) | Hook for getting the metadata for a TIP-20 token, including name, symbol, decimals, currency, and total supply |
+| [`token.useMint`](/sdk/typescript/wagmi/hooks/token.useMint) | Hook for minting new TIP-20 tokens to a recipient |
+| [`token.usePause`](/sdk/typescript/wagmi/hooks/token.usePause) | Hook for pausing a TIP-20 token, preventing all transfers |
+| [`token.useRenounceRoles`](/sdk/typescript/wagmi/hooks/token.useRenounceRoles) | Hook for renouncing one or more roles from the caller's address |
+| [`token.useRevokeRoles`](/sdk/typescript/wagmi/hooks/token.useRevokeRoles) | Hook for revoking one or more roles from an address |
+| [`token.useSetRoleAdmin`](/sdk/typescript/wagmi/hooks/token.useSetRoleAdmin) | Hook for setting the admin role for another role |
+| [`token.useSetSupplyCap`](/sdk/typescript/wagmi/hooks/token.useSetSupplyCap) | Hook for setting the supply cap for a TIP-20 token |
+| [`token.useTransfer`](/sdk/typescript/wagmi/hooks/token.useTransfer) | Hook for transferring TIP-20 tokens from the caller to a recipient |
+| [`token.useUnpause`](/sdk/typescript/wagmi/hooks/token.useUnpause) | Hook for unpausing a TIP-20 token, allowing transfers to resume |
+| [`token.useWatchAdminRole`](/sdk/typescript/wagmi/hooks/token.useWatchAdminRole) | Hook for watching role admin update events |
+| [`token.useWatchApprove`](/sdk/typescript/wagmi/hooks/token.useWatchApprove) | Hook for watching token approval events |
+| [`token.useWatchBurn`](/sdk/typescript/wagmi/hooks/token.useWatchBurn) | Hook for watching token burn events |
+| [`token.useWatchCreate`](/sdk/typescript/wagmi/hooks/token.useWatchCreate) | Hook for watching new token creation events |
+| [`token.useWatchMint`](/sdk/typescript/wagmi/hooks/token.useWatchMint) | Hook for watching token mint events |
+| [`token.useWatchRole`](/sdk/typescript/wagmi/hooks/token.useWatchRole) | Hook for watching role membership update events |
+| [`token.useWatchTransfer`](/sdk/typescript/wagmi/hooks/token.useWatchTransfer) | Hook for watching token transfer events |

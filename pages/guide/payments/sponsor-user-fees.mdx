@@ -1,0 +1,157 @@
+# Sponsor User Fees
+
+Enable gasless transactions by sponsoring transaction fees for your users. Tempo's native fee sponsorship allows applications to pay fees on behalf of users, improving UX and removing friction from payment flows.
+
+## How It Works
+
+Fee sponsorship uses Tempo's [Account Abstraction (AA) transaction type](/documentation/protocol/transactions/spec-account-abstraction), which includes an optional `feePayerSignature` field. When present, this signature authorizes a third party (the sponsor) to pay the transaction's gas costs while the original sender executes the transaction logic.
+
+### Dual Signatures
+
+- **Sender signs**: The transaction they want to execute using their preferred signature scheme (secp256k1, P256, or WebAuthn)
+- **Fee payer signs**: Authorization to pay fees for that specific transaction and sender
+
+Each signature is recovered independently to determine the sender and fee payer addresses.
+
+## Implementation
+
+### Step 1: User Signs Transaction
+
+The user signs the transaction with their private key, signing over a **blank fee token field**. This delegates the choice of which fee token to use to the fee payer.
+
+```ts
+// User signs the transaction
+const userSignature = await wallet.signTransaction({
+  to: '0x...',
+  value: parseEther('0.1'),
+  // feeToken is left blank - fee payer will choose
+})
+```
+
+### Step 2: Sponsor Signs and Submits
+
+The sponsor selects which fee token to use, then signs over the transaction:
+
+```ts
+// Sponsor signs to pay the fees
+const feePayerSignature = await sponsor.signFeePayment(transaction)
+
+// Submit with both signatures
+const hash = await client.sendTransaction({
+  ...transaction,
+  feeToken: sponsorPreferredToken,
+  feePayerSignature,
+})
+```
+
+### Step 3: Network Validation
+
+The network validates both signatures and executes the transaction:
+1. Both sender and fee payer signatures must be valid
+2. Fee payer must have sufficient balance in the fee token
+3. Transaction is rejected if either signature fails or balance is insufficient
+
+## Using the SDK
+
+Tempo's SDK provides helpers for fee sponsorship:
+
+```ts
+import { withFeePayer } from 'tempo.ts/viem'
+
+// Create a client with fee payer support
+const sponsoredClient = client.extend(
+  withFeePayer({
+    feePayer: sponsorAccount,
+    feeToken: sponsorPreferredToken,
+  })
+)
+
+// User can now send transactions without paying fees
+const hash = await sponsoredClient.sendTransaction({
+  calls: [
+    { data: '0x...', to: '0x...' },
+  ],
+})
+```
+
+## Use Cases
+
+### Onboarding
+
+Remove friction for new users who don't have tokens yet:
+
+```ts
+// New user can interact with your app immediately
+// You sponsor their first few transactions
+await sponsoredClient.sendTransaction({
+  calls: [
+    { data: '0x...', to: '0x...' },
+  ],
+})
+```
+
+### Payment Processing
+
+Sponsor fees for payment transactions to improve UX:
+
+```ts
+// User sends payment, you sponsor the fee
+await sponsoredClient.token.transfer({
+  token: usdcAddress,
+  to: merchantAddress,
+  amount: parseUnits('100', 6),
+})
+```
+
+### Batch Operations
+
+Sponsor fees for batch transactions:
+
+```ts
+// Sponsor fees for multiple operations
+await sponsoredClient.sendTransaction({
+  calls: [
+    { data: '0x...', to: '0x...' },
+    { data: '0x...', to: '0x...' },
+    { data: '0x...', to: '0x...' },
+  ],
+})
+```
+
+## Security Considerations
+
+- **Transaction-specific**: Fee payer signature is tied to a specific transaction
+- **No delegation risk**: Fee payer can't execute arbitrary transactions
+- **Balance checks**: Network verifies fee payer has sufficient balance
+- **Signature validation**: Both signatures must be valid
+
+## Cost Management
+
+Monitor your sponsorship costs:
+
+```ts
+// Track sponsored transactions
+const sponsoredTransactions = await getSponsoredTransactions({
+  feePayer: sponsorAddress,
+  fromBlock: startBlock,
+  toBlock: endBlock,
+})
+
+const totalFees = sponsoredTransactions.reduce(
+  (sum, tx) => sum + tx.feeAmount,
+  0n
+)
+```
+
+## Best Practices
+
+1. **Set limits**: Implement daily or per-user limits on sponsorship
+2. **Monitor costs**: Track sponsorship expenses
+3. **Selective sponsorship**: Only sponsor fees for specific operations
+4. **User education**: Let users know when fees are sponsored
+
+## Next Steps
+
+- Learn more about [Fee Sponsorship](/guide/use-accounts/fee-sponsorship)
+- Learn more about [Pay Fees in Any Stablecoin](/guide/payments/pay-fees-in-any-stablecoin)
+

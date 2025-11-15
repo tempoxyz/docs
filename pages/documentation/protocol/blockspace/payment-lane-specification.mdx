@@ -1,0 +1,63 @@
+import { Callout } from 'vocs/components'
+
+# Payment Lane Specification
+
+## Abstract
+
+Introduces a second consensus gas constraint for **non-payment** transactions. A new field—`general_gas_limit`—is added to the header. Transactions are classified as either payments or non-payments based solely on their transaction data, without requiring any access to blockchain state. For a block to be valid, total `gas_used` must be less than the `gas_limit`. Non-payment transactions executed in the proposer's lane (i.e. before the gas incentive section) must consume at most `general_gas_limit`; once that budget is exhausted, any additional inclusion must come via the gas incentive lane defined in the sub-blocks spec, which is bounded separately by the shared-gas rules.
+
+## Motivation
+
+Tempo ensures that payment transactions always have available blockspace, even during periods of high network congestion from DeFi activity or complex smart contracts. No action is required by the user to take advantage of this feature. 
+
+This is achieved through **separate gas limits** for payment and non-payment transactions. When blocks are constructed, validators enforce two separate gas constraints:
+
+1. **`gasLimit`** — The total gas available for all transactions (standard Ethereum behavior)
+2. **`generalGasLimit`** — The maximum gas that non-payment transactions can consume
+
+Even if non-payment transactions fill up to `generalGasLimit`, payment transactions can still use the remaining capacity up to `gasLimit`.
+
+
+## Terminology
+
+- **Payment transaction:** Determined by a function, `is_payment(tx) -> bool`.  This function returns true if the transaction is a payment transaction, false otherwise.
+- **Non-payment transaction:** `!is_payment(tx)`.
+
+## Specification
+
+### 1. Transaction classification
+
+A transaction is classified as a **payment transaction** when:
+
+  1.  the recipient address (`tx.to`) starts with the TIP-20 payment prefix `0x20c0000000000000000000000000`, or,
+  2. for AA transactions, every entry in `tx.calls` targets an address starting with the TIP-20 payment prefix `0x20c0000000000000000000000000`.
+
+This classification is performed entirely on the transaction payload—no account state is consulted.
+
+<Callout type="info">
+    Later upgrades may enable other kinds of transactions to be classified as payment transactions as well.
+</Callout>
+
+### 2. Custom Block header fields 
+
+Adds a new limit, `general_gas_limit`, as a custom field in the header. The total amount of gas used by non-payment transactions in the block must be smaller than `general_gas_limit`. 
+
+> Consensus fields unchanged: `gasLimit`, `gasUsed`, `baseFeePerGas`, etc.
+
+### 3. Ordering of Transactions
+
+The specification does not require any specific ordering of transactions: payment and non-payment transactions can be intermixed.
+
+### 4. Gas accounting & validity (consensus)
+
+Validity of a block requires that 
+```
+gasUsed       >= Σ gasConsumed(txs[0..n])
+generalGasLimit >= Σ gasConsumed(tx[i])   for all i such that !isPaymentTx(tx[i])
+```
+
+Where `gasConsumed` includes intrinsic gas and gas burned by reverts, as in the existing protocol.
+
+### 5. Fee market
+
+No changes to basefee or pricing rules. Payment transactions pay the same basefee as non-payment transactions. The additional meter only caps aggregate non-payment gas.

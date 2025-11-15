@@ -1,0 +1,523 @@
+import * as Demo from '../../../components/guides/Demo.tsx'
+import * as Card from '../../../components/Card.tsx'
+import LucideCode from '~icons/lucide/code'
+import LucideSend from '~icons/lucide/send'
+
+# Send a Payment
+
+Send stablecoin payments between accounts on Tempo. Payments can include optional memos for reconciliation and tracking.
+
+## Demo
+
+By the end of this guide you will be able to send payments on Tempo with an optional memo.
+
+<Demo.Container name="Send a Payment" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/payments">
+  <Demo.Connect stepNumber={1} />
+  <Demo.AddFunds stepNumber={2} />
+  <Demo.SendPayment stepNumber={3} last />
+</Demo.Container>
+
+## Steps
+
+::::steps
+
+### Set up Wagmi & integrate accounts
+
+Ensure that you have set up your project with Wagmi and integrated accounts by following either of the guides:
+
+- [Embed Passkey accounts](/guide/use-accounts/embed-passkeys)
+- [Connect to wallets](/guide/use-accounts/connect-to-wallets)
+
+### Add testnet funds¹
+
+Before you can send a payment, you need to fund your account. In this guide you will be sending `AlphaUSD` (`0x20c000…0001`).
+
+The built-in Tempo testnet faucet funds accounts with `AlphaUSD`.
+
+<Demo.Container name="Add Funds" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd]}>
+  <Demo.AddFunds stepNumber={1} last />
+</Demo.Container>
+
+:::code-group
+
+```tsx twoslash [AddFunds.ts]
+// @noErrors
+import { Hooks } from 'tempo.ts/wagmi'
+import { useAccount } from 'wagmi'
+
+export function AddFunds() {
+  const { address } = useAccount()
+  const addFunds = Hooks.faucet.useFund()
+
+  return (
+    <button onClick={() => addFunds.mutate({ account: address })}>
+      Add Funds
+    </button>
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+:::
+
+:::warning
+¹ It is important to note that the `addFunds` Hook only works on testnets as a convienience feature to get
+started quickly. For production, you will need to onramp & fund your account manually.
+:::
+
+### Add send payment logic
+
+Now that you have `AlphaUSD` you are ready to add logic to send a payment with an optional memo.
+
+<Demo.Container name="Send Payment" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd]}>
+  <Demo.AddFunds stepNumber={1} />
+  <Demo.SendPayment stepNumber={2} last />
+</Demo.Container>
+
+:::code-group
+
+```tsx twoslash [SendPaymentWithMemo.tsx]
+import React from 'react'
+import { Hooks } from 'tempo.ts/wagmi'
+import { parseUnits, stringToHex, pad } from 'viem'
+
+// @noErrors
+export function SendPaymentWithMemo() {
+  const [recipient, setRecipient] = React.useState<string>('')
+  const [memo, setMemo] = React.useState<string>('')
+
+  const sendPayment = Hooks.token.useTransferSync() // [!code hl]
+
+  return (
+    <>
+      <div>
+        <label>Recipient address</label>
+        <input
+          type="text"
+          value={recipient}
+          onChange={(e) => setRecipient(e.target.value)}
+        />
+      </div>
+      <div>
+        <label>Memo (optional)</label>
+        <input
+          type="text"
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+        />
+      </div>
+      <button // [!code hl]
+        disabled={sendPayment.isPending} // [!code hl]
+        type="button" // [!code hl]
+        onClick={() => // [!code hl]
+          sendPayment.mutate({ // [!code hl]
+            amount: parseUnits('100', 6), // [!code hl]
+            to: recipient as `0x${string}`, // [!code hl]
+            token: '0x20c0000000000000000000000000000000000001', // [!code hl]
+            memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined, // [!code hl]
+          }) // [!code hl]
+        } // [!code hl]
+      > {/* [!code hl] */}
+        {sendPayment.isPending ? 'Sending...' : 'Send Payment'} {/* [!code hl] */}
+      </button> {/* [!code hl] */}
+    </>
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+:::
+
+### Display receipt
+
+Now that you can send a payment, you can display the transaction receipt on success.
+
+:::code-group
+
+```tsx twoslash [SendPaymentWithMemo.tsx]
+import React from 'react'
+import { Hooks } from 'tempo.ts/wagmi'
+import { parseUnits, stringToHex, pad } from 'viem'
+
+// @noErrors
+export function SendPaymentWithMemo() {
+  const [recipient, setRecipient] = React.useState<string>('')
+  const [memo, setMemo] = React.useState<string>('')
+
+  const sendPayment = Hooks.token.useTransferSync()
+
+  return (
+    <>
+      <div>
+        <label>Recipient address</label>
+        <input
+          type="text"
+          value={recipient}
+          onChange={(e) => setRecipient(e.target.value)}
+        />
+      </div>
+      <div>
+        <label>Memo (optional)</label>
+        <input
+          type="text"
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+        />
+      </div>
+      <button
+        disabled={sendPayment.isPending}
+        type="button"
+        onClick={() =>
+          sendPayment.mutate({
+            amount: parseUnits('100', 6),
+            to: recipient as `0x${string}`,
+            token: '0x20c0000000000000000000000000000000000001',
+            memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
+          })
+        }
+      >
+        {sendPayment.isPending ? 'Sending...' : 'Send Payment'}
+      </button>
+
+      {sendPayment.data && ( // [!code ++]
+        <a // [!code ++]
+          href={`https://explore.tempo.xyz/tx/${sendPayment.data.receipt.transactionHash}`} // [!code ++]
+          target="_blank" // [!code ++]
+          rel="noopener noreferrer" // [!code ++]
+        > {/* // [!code ++] */}
+          View receipt {/* // [!code ++] */}
+        </a> // [!code ++]
+      )} {/* // [!code ++] */}
+    </>
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+:::
+
+### Next steps
+
+Now that you have made a payment you can
+- **[Accept a payment](/guide/payments/accept-a-payment)** to receive payments in your application
+- Learn about [Batch Transactions](/guide/use-accounts/batch-transactions)
+- Send a payment [with a specific fee token](/guide/payments/pay-fees-in-any-stablecoin)
+::::
+
+## Recipes
+
+### Basic transfer
+
+Send a payment using the standard `transfer` function:
+
+:::code-group
+
+```ts [TypeScript]
+import { parseUnits } from 'viem'
+import { client } from './viem.config'
+
+const { receipt } = await client.token.transferSync({
+  amount: parseUnits('100', 6), // 100 tokens (6 decimals)
+  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+  token: '0x20c0000000000000000000000000000000000001', // AlphaUSD
+})
+```
+
+```rs [Rust]
+use alloy::{
+    primitives::{U256, address},
+    providers::ProviderBuilder,
+};
+use tempo_alloy::{TempoNetwork, contracts::precompiles::ITIP20};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
+        .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
+        .await?;
+
+    let token = ITIP20::new( // [!code focus]
+        address!("0x20c0000000000000000000000000000000000001"), // AlphaUSD // [!code focus]
+        provider, // [!code focus]
+    ); // [!code focus]
+
+    let receipt = token // [!code focus]
+        .transfer( // [!code focus]
+            address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb"), // [!code focus]
+            U256::from(100).pow(U256::from(10e6)), // 100 tokens (6 decimals) // [!code focus]
+        ) // [!code focus]
+        .send() // [!code focus]
+        .await? // [!code focus]
+        .get_receipt() // [!code focus]
+        .await?; // [!code focus]
+
+    Ok(())
+}
+```
+
+:::
+
+### Transfer with memo
+
+Include a memo for payment reconciliation and tracking:
+
+:::code-group
+
+```ts [TypeScript]
+import { pad, stringToHex } from 'viem'
+
+const invoiceId = pad(stringToHex('INV-12345'), { size: 32 })
+
+const { receipt } = await client.token.transferSync({
+  amount: parseUnits('100', 6),
+  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+  token: '0x20c0000000000000000000000000000000000001',
+  memo: invoiceId,
+})
+```
+
+```rs [Rust]
+use alloy::{
+    primitives::{B256, U256, address},
+    providers::ProviderBuilder,
+};
+use tempo_alloy::{TempoNetwork, contracts::precompiles::ITIP20};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
+        .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
+        .await?;
+
+    let token = ITIP20::new( // [!code focus]
+        address!("0x20c0000000000000000000000000000000000001"), // AlphaUSD // [!code focus]
+        provider, // [!code focus]
+    ); // [!code focus]
+
+    let receipt = token // [!code focus]
+        .transferWithMemo( // [!code focus]
+            address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb"), // [!code focus]
+            U256::from(100).pow(U256::from(10e6)), // 100 tokens (6 decimals) // [!code focus]
+            B256::left_padding_from("INV-12345".as_bytes()), // [!code focus]
+        ) // [!code focus]
+        .send() // [!code focus]
+        .await? // [!code focus]
+        .get_receipt() // [!code focus]
+        .await?; // [!code focus]
+
+    Ok(())
+}
+```
+
+:::
+
+The memo is a 32-byte value that can store payment references, invoice IDs, order numbers, or any other metadata.
+
+### Using Solidity
+
+If you're building a smart contract that sends payments:
+
+```solidity
+interface ITIP20 {
+    function transfer(address to, uint256 amount) external returns (bool);
+    function transferWithMemo(address to, uint256 amount, bytes32 memo) external;
+}
+
+contract PaymentSender {
+    ITIP20 public token;
+    
+    function sendPayment(address recipient, uint256 amount) external {
+        token.transfer(recipient, amount);
+    }
+    
+    function sendPaymentWithMemo(
+        address recipient, 
+        uint256 amount, 
+        bytes32 invoiceId
+    ) external {
+        token.transferWithMemo(recipient, amount, invoiceId);
+    }
+}
+```
+
+### Batch payment transactions
+
+Send multiple payments in a single transaction using batch transactions:
+
+:::code-group
+
+```ts [TypeScript]
+const calls = [
+  {
+    to: '0x20c0000000000000000000000000000000000001', // AlphaUSD address
+    data: encodeFunctionData({
+      abi: tokenABI,
+      functionName: 'transfer',
+      args: [recipient1, parseUnits('100', 6)],
+    }),
+  },
+  {
+    to: '0x20c0000000000000000000000000000000000001',
+    data: encodeFunctionData({
+      abi: tokenABI,
+      functionName: 'transfer',
+      args: [recipient2, parseUnits('50', 6)],
+    }),
+  },
+]
+
+const hash = await client.sendTransaction({ calls })
+```
+
+```rust [Rust]
+use alloy::{
+    primitives::{U256, address},
+    providers::{Provider, ProviderBuilder},
+    sol_types::SolCall,
+};
+use tempo_alloy::{
+    TempoNetwork, contracts::precompiles::ITIP20, primitives::transaction::Call,
+    rpc::TempoTransactionRequest,
+};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
+        .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
+        .await?;
+
+    let calls = vec![ // [!code focus]
+        Call { // [!code focus]
+            to: address!("0x20c0000000000000000000000000000000000001").into(), // [!code focus]
+            input: ITIP20::transferCall { // [!code focus]
+                to: recipient1, // [!code focus]
+                amount: U256::from(100).pow(U256::from(10e6)), // [!code focus]
+            } // [!code focus]
+            .abi_encode() // [!code focus]
+            .into(), // [!code focus]
+            value: U256::ZERO, // [!code focus]
+        }, // [!code focus]
+        Call { // [!code focus]
+            to: address!("0x20c0000000000000000000000000000000000001").into(), // [!code focus]
+            input: ITIP20::transferCall { // [!code focus]
+                to: recipient2, // [!code focus]
+                amount: U256::from(50).pow(U256::from(10e6)), // [!code focus]
+            } // [!code focus]
+            .abi_encode() // [!code focus]
+            .into(), // [!code focus]
+            value: U256::ZERO, // [!code focus]
+        }, // [!code focus]
+    ]; // [!code focus]
+    let tx_hash = provider // [!code focus]
+        .send_transaction(TempoTransactionRequest { // [!code focus]
+            calls, // [!code focus]
+            ..Default::default() // [!code focus]
+        }) // [!code focus]
+        .await? // [!code focus]
+        .tx_hash(); // [!code focus]
+
+    Ok(())
+}
+```
+
+:::
+
+### Payment events
+
+When you send a payment, the token contract emits events:
+
+- **Transfer**: Standard ERC-20 transfer event
+- **TransferWithMemo**: Additional event with memo (if using `transferWithMemo`)
+
+You can filter these events to track payments in your off-chain systems.
+
+## Best practices
+
+- **[Accept a payment](/guide/payments/accept-a-payment)** to receive payments in your application
+- Learn more about [Batch Transactions](/guide/use-accounts/batch-transactions)
+
+### Loading state
+Users should see a loading state when the payment is being processed.
+
+You can use the `isPending` property from the `useTransferSync` hook to show pending state to the user on our "Send" button.
+
+```tsx
+<button
+  disabled={sendPayment.isPending} // [!code focus] 
+  onClick={() =>
+    sendPayment.mutate({
+      amount: parseUnits('100', 6),
+      to: recipient as `0x${string}`,
+      token: '0x20c0000000000000000000000000000000000001',
+    })
+  }
+>
+  {sendPayment.isPending ? 'Sending...' : 'Send Payment'} {/* // [!code focus] */}
+</button>
+```
+
+### Error handling
+If an error unexpectedly occurs, you can display an error message to the user by using the `error` property from the `useTransferSync` hook.
+
+```tsx
+{sendPayment.error && <div>Error: {sendPayment.error.message}</div>}
+```
+
+## Learning resources
+
+<Card.Container>
+  <Card.Link
+    description="Learn more about the TypeScript SDK"
+    href="/sdk/typescript"
+    icon={LucideCode}
+    title="TypeScript SDK"
+  />
+  <Card.Link
+    description="Learn more about transactions on Tempo"
+    href="/documentation/protocol/transactions"
+    icon={LucideSend}
+    title="Transactions"
+  />
+</Card.Container>

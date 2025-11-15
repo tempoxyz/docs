@@ -1,0 +1,119 @@
+# Exchange Balance
+
+Manage your token balances on the exchange to optimize gas costs. The exchange allows you to hold token balances directly on the DEX contract, which saves gas by avoiding ERC-20 transfers on every trade.
+
+## Why Use Exchange Balances?
+
+Holding balances on the exchange provides several benefits:
+
+- **Gas savings**: Avoid ERC-20 transfers on every trade
+- **Faster execution**: No need to transfer tokens before trading
+- **Simplified workflow**: Manage balances once, trade multiple times
+
+## Checking Your Balance
+
+Query your balance for a specific token on the exchange:
+
+```ts
+import { client } from './viem.config'
+
+const balance = await client.dex.getBalance({
+  token: usdcAddress,
+  address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+})
+
+console.log('DEX balance:', balance)
+```
+
+## Depositing Tokens
+
+Deposit tokens to your exchange balance before trading:
+
+```ts
+// Deposit 1000 USDC to the exchange
+const { receipt } = await client.dex.depositSync({
+  token: usdcAddress,
+  amount: parseUnits('1000', 6),
+})
+```
+
+When you deposit:
+- Tokens are transferred from your wallet to the exchange contract
+- Your exchange balance is credited
+- You can now use this balance for orders and swaps
+
+## Withdrawing Tokens
+
+Withdraw tokens from your exchange balance back to your wallet:
+
+```ts
+// Withdraw 500 USDC from the exchange
+const { receipt } = await client.dex.withdrawSync({
+  token: usdcAddress,
+  amount: parseUnits('500', 6),
+})
+```
+
+When you withdraw:
+- Tokens are transferred from the exchange contract to your wallet
+- Your exchange balance is debited
+
+## Automatic Balance Management
+
+The exchange automatically manages balances for you:
+
+### When Placing Orders
+
+- If your DEX balance is sufficient, tokens are debited from your balance
+- If your DEX balance is insufficient, tokens are automatically transferred from your wallet
+
+### When Orders Fill
+
+- Proceeds are automatically credited to your DEX balance
+- You can withdraw or use them for new orders
+
+### When Executing Swaps
+
+- If your DEX balance is sufficient, tokens are used from your balance
+- If your DEX balance is insufficient, tokens are automatically transferred from your wallet
+- Output tokens are transferred to your wallet (not credited to DEX balance)
+
+## Best Practices
+
+1. **Deposit before trading**: Deposit tokens you plan to use for multiple orders to save gas
+2. **Monitor balances**: Keep track of your exchange balances to avoid unnecessary transfers
+3. **Withdraw unused funds**: Periodically withdraw unused balances back to your wallet
+4. **Use for liquidity provision**: Exchange balances are especially useful for market makers who place many orders
+
+## Using Solidity
+
+If you're building a smart contract that manages exchange balances:
+
+```solidity
+interface IStablecoinExchange {
+    function deposit(address token, uint128 amount) external;
+    function withdraw(address token, uint128 amount) external;
+    function getBalance(address token, address account) external view returns (uint128);
+}
+
+contract ExchangeManager {
+    IStablecoinExchange constant EXCHANGE = 
+        IStablecoinExchange(0xDEc0000000000000000000000000000000000000);
+    
+    function depositUSDC(uint128 amount) external {
+        IERC20(USDC_ADDRESS).approve(address(EXCHANGE), amount);
+        EXCHANGE.deposit(USDC_ADDRESS, amount);
+    }
+    
+    function withdrawUSDC(uint128 amount) external {
+        EXCHANGE.withdraw(USDC_ADDRESS, amount);
+    }
+}
+```
+
+## Next Steps
+
+- **[Executing Swaps](/guide/stablecoin-exchange/executing-swaps)** to learn how to trade
+- **[Providing Liquidity](/guide/stablecoin-exchange/providing-liquidity)** to learn how to provide liquidity
+- Learn more about [Exchange Balance](/documentation/protocol/exchange/exchange-balance)
+

@@ -1,13 +1,17 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { VariantProps } from 'cva'
 import * as React from 'react'
-import { Actions, type Chain } from 'tempo.ts/viem'
+import type { TokenRole } from 'tempo.ts/ox'
+import { Actions, Addresses, type Chain } from 'tempo.ts/viem'
 import { Hooks } from 'tempo.ts/wagmi'
 import {
+  type Address,
   type Client,
   formatUnits,
+  isAddress,
+  pad,
   parseUnits,
-  stringify,
+  stringToHex,
   type Transport,
 } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
@@ -19,19 +23,34 @@ import {
   useConnect,
   useConnectors,
   useDisconnect,
+  useSendTransactionSync,
 } from 'wagmi'
 import LucideCheck from '~icons/lucide/check'
 import LucideCopy from '~icons/lucide/copy'
-import LucideCopyCheck from '~icons/lucide/copy-check'
+import LucideExternalLink from '~icons/lucide/external-link'
 import LucidePictureInPicture2 from '~icons/lucide/picture-in-picture-2'
 import LucideRotateCcw from '~icons/lucide/rotate-ccw'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
 import { cva, cx } from '../../cva.config'
 import { Container as ParentContainer } from '../Container'
+import { DemoContextProvider, useDemoContext } from '../DemoContext'
+import { TokenSelector } from '../TokenSelector'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
+export const linkingUsd = '0x20c0000000000000000000000000000000000000'
+export const alphaUsd = '0x20c0000000000000000000000000000000000001'
+export const betaUsd = '0x20c0000000000000000000000000000000000002'
+export const thetaUsd = '0x20c0000000000000000000000000000000000003'
 
-function useWebAuthnConnector() {
+// Current validator token on testnet
+const validatorToken = alphaUsd
+
+type DemoStepProps = {
+  stepNumber: number
+  // if this is the last step in a flow
+  last?: boolean
+}
+
+export function useWebAuthnConnector() {
   const connectors = useConnectors()
   return React.useMemo(
     // biome-ignore lint/style/noNonNullAssertion: webAuthn connector always defined in wagmi.config.ts
@@ -40,93 +59,26 @@ function useWebAuthnConnector() {
   )
 }
 
-export function Connect(props: { stepNumber?: number | undefined }) {
+export function Connect(props: DemoStepProps) {
   const { stepNumber = 1 } = props
   const { address } = useAccount()
-  const connect = useConnect()
-  const disconnect = useDisconnect()
-  const connector = useWebAuthnConnector()
-  const [copied, setCopied] = React.useState(false)
-  const copyToClipboard = React.useCallback(() => {
-    if (!address) return
-    if (copied) return
-    navigator.clipboard.writeText(address)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2_000)
-  }, [address, copied])
   return (
     <Step
       active={!address}
       completed={Boolean(address)}
-      actions={
-        address ? (
-          <div className="flex items-center gap-1">
-            <Button onClick={copyToClipboard} variant="default">
-              {copied ? (
-                <LucideCheck className="text-gray9 mt-px" />
-              ) : (
-                <LucideWalletCards className="text-gray9 mt-px" />
-              )}
-              {StringFormatter.truncate(address, {
-                start: 6,
-                end: 4,
-                separator: '⋅⋅⋅',
-              })}
-            </Button>
-            <Button
-              variant="destructive"
-              className="text-[14px] -tracking-[2%] font-[510]"
-              onClick={() => disconnect.disconnect({ connector })}
-              type="button"
-            >
-              Sign out
-            </Button>
-          </div>
-        ) : (
-          <div>
-            {connect.isPending ? (
-              <Button disabled variant="default">
-                <LucidePictureInPicture2 className="mt-px" />
-                Check prompt
-              </Button>
-            ) : (
-              <div className="flex gap-1">
-                <Button
-                  variant="accent"
-                  className="text-[14px] -tracking-[2%] font-[510]"
-                  onClick={() => connect.connect({ connector })}
-                  type="button"
-                >
-                  Sign in
-                </Button>
-                <Button
-                  variant="default"
-                  className="text-[14px] -tracking-[2%] font-[510]"
-                  onClick={() =>
-                    connect.connect({
-                      connector,
-                      capabilities: {
-                        createAccount: { label: 'Tempo Docs' },
-                      },
-                    })
-                  }
-                  type="button"
-                >
-                  Sign up
-                </Button>
-              </div>
-            )}
-          </div>
-        )
-      }
+      actions={address ? <Logout /> : <Login />}
       number={stepNumber}
       title="Create an account, or use an existing one."
     />
   )
 }
 
-export function AddFunds(props: { stepNumber?: number | undefined }) {
-  const { stepNumber = 2 } = props
+/**
+ * BEGIN STEPS
+ */
+
+export function AddFunds(props: DemoStepProps) {
+  const { stepNumber = 2, last = false } = props
   const { address } = useAccount()
   const { data: balance, refetch: balanceRefetch } = Hooks.token.useGetBalance({
     account: address,
@@ -153,7 +105,7 @@ export function AddFunds(props: { stepNumber?: number | undefined }) {
           method: 'tempo_fundAddress',
           params: [address],
         })
-      else
+      else {
         await Actions.token.transferSync(
           client as unknown as Client<Transport, Chain.Chain<null>>,
           {
@@ -165,117 +117,112 @@ export function AddFunds(props: { stepNumber?: number | undefined }) {
             token: alphaUsd,
           },
         )
+      }
       await new Promise((resolve) => setTimeout(resolve, 400))
       balanceRefetch()
     },
   })
+
+  const showLogin = stepNumber === 1 && !address
+
+  const active = React.useMemo(() => {
+    // If we need to show the login button, we are active.
+    if (showLogin) return true
+
+    // If this is the last step, simply has to be logged in
+    if (last) return !!address
+
+    // If this is an intermediate step, also needs to not have succeeded
+    return Boolean(address && !balance)
+  }, [address, balance, last])
+
+  const actions = React.useMemo(() => {
+    if (showLogin) return <Login />
+    if (balance && balance > 0n)
+      return (
+        <Button
+          disabled={fundAccount.isPending}
+          variant="default"
+          className="text-[14px] -tracking-[2%] font-normal"
+          onClick={() => fundAccount.mutate()}
+          type="button"
+        >
+          {fundAccount.isPending ? 'Adding funds' : 'Add more funds'}
+        </Button>
+      )
+    return (
+      <Button
+        disabled={!address || fundAccount.isPending}
+        variant={address ? 'accent' : 'default'}
+        className="text-[14px] -tracking-[2%] font-normal"
+        type="button"
+        onClick={() => fundAccount.mutate()}
+      >
+        {fundAccount.isPending ? 'Adding funds' : 'Add funds'}
+      </Button>
+    )
+  }, [stepNumber, address, balance, fundAccount.isPending])
+
   return (
     <Step
-      active={Boolean(address && !balance)}
+      active={active}
       completed={Boolean(address && balance && balance > 0n)}
-      actions={
-        balance && balance > 0n ? (
-          <Button
-            disabled={fundAccount.isPending}
-            variant="default"
-            className="text-[14px] -tracking-[2%] font-[510]"
-            onClick={() => fundAccount.mutate()}
-            type="button"
-          >
-            {fundAccount.isPending ? 'Adding funds' : 'Add more funds'}
-          </Button>
-        ) : (
-          <Button
-            disabled={!address || fundAccount.isPending}
-            variant={address ? 'accent' : 'default'}
-            className="text-[14px] -tracking-[2%] font-[510]"
-            type="button"
-            onClick={() => fundAccount.mutate()}
-          >
-            {fundAccount.isPending ? 'Adding funds' : 'Add funds'}
-          </Button>
-        )
-      }
+      actions={actions}
       number={stepNumber}
       title="Add testnet funds to your account."
     />
   )
 }
 
-export function CreateToken(props: { stepNumber: number }) {
-  const { stepNumber } = props
+export function CreateToken(props: DemoStepProps) {
+  const { stepNumber, last = false } = props
   const { address } = useAccount()
+  const { setData } = useDemoContext()
   const { data: balance, refetch: balanceRefetch } = Hooks.token.useGetBalance({
     account: address,
     token: alphaUsd,
   })
-  const [expanded, setExpanded] = React.useState(false)
   const create = Hooks.token.useCreateSync({
     mutation: {
-      onSettled() {
+      onSettled(data) {
         balanceRefetch()
+        if (data) {
+          setData('tokenAddress', data.token)
+        }
       },
     },
   })
   useAccountEffect({
     onDisconnect() {
-      setExpanded(false)
       create.reset()
     },
   })
-  const [copied, setCopied] = React.useState(false)
-  const copyToClipboard = React.useCallback(() => {
-    if (copied) return
-    navigator.clipboard.writeText(stringify(create.data, null, 2))
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2_000)
-  }, [create.data, copied])
+
+  const showLogin = stepNumber === 1 && !address
+
+  const active = React.useMemo(() => {
+    // If we need to show the login button, we are active.
+    if (showLogin) return true
+
+    // If this is the last step has to be logged in and funded.
+    const activeWithBalance = Boolean(address && balance && balance > 0n)
+    if (last) return activeWithBalance
+
+    // If this is an intermediate step, also needs to not have succeeded
+    return activeWithBalance && !create.isSuccess
+  }, [stepNumber, address, balance, create.isSuccess, last])
+
   return (
     <Step
-      active={Boolean(address && balance && balance > 0n)}
+      active={active}
       completed={create.isSuccess}
-      actions={
-        expanded ? (
-          <Button
-            variant="default"
-            onClick={() => setExpanded(false)}
-            className="text-[14px] -tracking-[2%] font-[510]"
-            type="button"
-          >
-            Cancel
-          </Button>
-        ) : (
-          <Button
-            variant={
-              address && balance && balance > 0n
-                ? create.isSuccess
-                  ? 'default'
-                  : 'accent'
-                : 'default'
-            }
-            disabled={!(address && balance && balance > 0n)}
-            onClick={() => setExpanded(true)}
-            type="button"
-            className="text-[14px] -tracking-[2%] font-[510]"
-          >
-            Create a token
-          </Button>
-        )
-      }
       number={stepNumber}
+      actions={showLogin && <Login />}
       title="Create & deploy a token to testnet."
     >
-      {expanded && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
+      {(active || create.isSuccess) && (
+        <div className="flex ml-6 flex-col gap-3 py-4">
           <div className="ps-5 border-gray4 border-s-2">
-            <div>
-              <h5 className="font-[510] text-[16px] -tracking-[1%] text-black dark:text-white">
-                Token details
-              </h5>
-              <div className="text-gray10 text-[13px] -tracking-[1%] ">
-                Enter the required fields to deploy your token.
-              </div>
-            </div>
             <form
               onSubmit={(event) => {
                 event.preventDefault()
@@ -286,9 +233,10 @@ export function CreateToken(props: { stepNumber: number }) {
                   name,
                   symbol,
                   currency: 'USD',
+                  feeToken: alphaUsd,
                 })
               }}
-              className="flex gap-2 flex-col md:items-end md:flex-row pe-8"
+              className="flex gap-2 flex-col md:items-end md:flex-row -mt-2.5"
             >
               <div className="flex flex-col flex-1">
                 <label
@@ -298,10 +246,7 @@ export function CreateToken(props: { stepNumber: number }) {
                   Token name
                 </label>
                 <input
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  autoCorrect="off"
-                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-[510] -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  className="h-[34px] border border-gray4 px-3.25 rounded-lg text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
                   data-1p-ignore
                   type="text"
                   name="name"
@@ -318,10 +263,7 @@ export function CreateToken(props: { stepNumber: number }) {
                   Token symbol
                 </label>
                 <input
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  autoCorrect="off"
-                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-[510] -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  className="h-[34px] border border-gray4 px-3.25 rounded-lg text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
                   data-1p-ignore
                   type="text"
                   name="symbol"
@@ -340,35 +282,146 @@ export function CreateToken(props: { stepNumber: number }) {
             </form>
           </div>
 
-          <div className="relative">
-            <div
-              className={cx(
-                'bg-gray2 rounded-[10px] scrollbar-width-thin scrollbar-gray9 overflow-auto max-h-[169px] min-h-[169px]',
-                !create.data &&
-                  'flex items-center justify-center text-gray9 font-[510] text-[13px] -tracking-[2%] text-center',
-                (create.data || create.error) &&
-                  'text-[12px] font-mono whitespace-pre-wrap leading-[16px] p-3 -tracking-[2%] font-[500] text-black dark:text-white',
-              )}
-            >
-              {create.data
-                ? stringify(create.data, null, 2)
-                : create.error
-                  ? stringify(create.error, null, 2)
-                  : 'RPC response will display here...'}
-            </div>
-            {create.data && (
-              <button
-                onClick={copyToClipboard}
-                type="button"
-                className="absolute end-3 bottom-3"
-              >
-                <span className="sr-only">Copy</span>
-                {copied ? (
-                  <LucideCopyCheck className="size-3.5 text-gray9" />
-                ) : (
-                  <LucideCopy className="size-3.5 text-gray9" />
+          {create.data && (
+            <div className="relative">
+              <div
+                className={cx(
+                  'bg-gray2 rounded-[10px] p-4 text-center text-gray9 font-normal text-[13px] -tracking-[2%] leading-snug flex flex-col items-center',
                 )}
-              </button>
+              >
+                <div>
+                  Token{' '}
+                  <span className="text-primary font-medium">
+                    {' '}
+                    {create.data.name} ({create.data.symbol}){' '}
+                  </span>{' '}
+                  successfully created and deployed to Tempo!
+                </div>
+                <ExplorerLink
+                  hash={create.data?.receipt.transactionHash ?? ''}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </Step>
+  )
+}
+
+export function GrantTokenRoles(
+  props: DemoStepProps & {
+    roles: TokenRole.TokenRole[]
+  },
+) {
+  const { stepNumber, roles, last = false } = props
+  const { address } = useAccount()
+  const { getData } = useDemoContext()
+  const queryClient = useQueryClient()
+
+  const [expanded, setExpanded] = React.useState(false)
+
+  // Get the address of the token created in a previous step
+  const tokenAddress = getData('tokenAddress')
+
+  const { data: metadata } = Hooks.token.useGetMetadata({
+    token: tokenAddress,
+  })
+
+  const grant = Hooks.token.useGrantRolesSync({
+    mutation: {
+      onSettled() {
+        queryClient.refetchQueries({ queryKey: ['hasRole'] })
+      },
+    },
+  })
+  useAccountEffect({
+    onDisconnect() {
+      setExpanded(false)
+      grant.reset()
+    },
+  })
+
+  const handleGrant = async () => {
+    if (!tokenAddress || !address) return
+
+    await grant.mutate({
+      token: tokenAddress,
+      roles: roles,
+      to: address,
+      feeToken: alphaUsd,
+    })
+  }
+
+  return (
+    <Step
+      active={!!tokenAddress && (last ? true : !grant.isSuccess)}
+      completed={grant.isSuccess}
+      actions={
+        expanded ? (
+          <Button
+            variant="default"
+            onClick={() => setExpanded(false)}
+            className="text-[14px] -tracking-[2%] font-normal"
+            type="button"
+          >
+            Hide
+          </Button>
+        ) : (
+          <Button
+            variant={
+              tokenAddress
+                ? grant.isSuccess
+                  ? 'default'
+                  : 'accent'
+                : 'default'
+            }
+            disabled={!tokenAddress}
+            onClick={() => setExpanded(true)}
+            type="button"
+            className="text-[14px] -tracking-[2%] font-normal"
+          >
+            Enter details
+          </Button>
+        )
+      }
+      number={stepNumber}
+      title={`Grant ${roles.join(', ')} role${roles.length > 1 ? 's' : ''} on ${metadata ? metadata.name : 'token'}.`}
+    >
+      {expanded && (
+        <div className="flex mx-6 flex-col gap-3 pb-4">
+          <div className="ps-5 border-gray4 border-s-2">
+            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-2">
+              <div className="flex flex-col flex-2">
+                <label
+                  className="text-[11px] -tracking-[1%] text-gray9"
+                  htmlFor="recipient"
+                >
+                  Grant role to yourself
+                </label>
+                <input
+                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  data-1p-ignore
+                  type="text"
+                  name="recipient"
+                  value={address}
+                  disabled={true}
+                  onChange={() => {}}
+                  placeholder="0x..."
+                />
+              </div>
+              <Button
+                variant={address ? 'accent' : 'default'}
+                disabled={!address}
+                onClick={handleGrant}
+                type="button"
+                className="text-[14px] -tracking-[2%] font-normal"
+              >
+                {grant.isPending ? 'Granting...' : 'Grant'}
+              </Button>
+            </div>
+            {grant.isSuccess && grant.data && (
+              <ExplorerLink hash={grant.data.receipt.transactionHash} />
             )}
           </div>
         </div>
@@ -377,69 +430,1092 @@ export function CreateToken(props: { stepNumber: number }) {
   )
 }
 
-export function Container(
-  props: React.PropsWithChildren<{
-    name: string
-  }>,
-) {
-  const { children, name } = props
+export function MintToken(props: DemoStepProps) {
+  const { stepNumber, last = false } = props
   const { address } = useAccount()
-  const { data: balance, isPending: balanceIsPending } =
-    Hooks.token.useGetBalance({ account: address, token: alphaUsd })
+  const { getData } = useDemoContext()
+  const queryClient = useQueryClient()
+
+  const [memo, setMemo] = React.useState<string>('')
+  const [expanded, setExpanded] = React.useState(false)
+
+  // Get the address of the token created in a previous step
+  const tokenAddress = getData('tokenAddress')
+
+  const { data: metadata } = Hooks.token.useGetMetadata({
+    token: tokenAddress,
+  })
+  const { data: hasRole } = Hooks.token.useHasRole({
+    account: address,
+    token: tokenAddress,
+    role: 'issuer',
+  })
+
+  const mint = Hooks.token.useMintSync({
+    mutation: {
+      onSettled() {
+        // refetch token balance for later steps in issuer demos
+        queryClient.refetchQueries({ queryKey: ['getBalance'] })
+      },
+    },
+  })
+  useAccountEffect({
+    onDisconnect() {
+      setExpanded(false)
+      mint.reset()
+    },
+  })
+
+  const handleMint = async () => {
+    if (!tokenAddress || !address || !metadata) return
+
+    await mint.mutate({
+      amount: parseUnits('100', metadata.decimals),
+      to: address,
+      token: tokenAddress,
+      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
+      feeToken: alphaUsd,
+    })
+  }
+
+  return (
+    <Step
+      active={!!tokenAddress && !!hasRole && (last ? true : !mint.isSuccess)}
+      completed={mint.isSuccess}
+      actions={
+        expanded ? (
+          <Button
+            variant="default"
+            onClick={() => setExpanded(false)}
+            className="text-[14px] -tracking-[2%] font-normal"
+            type="button"
+          >
+            Hide
+          </Button>
+        ) : (
+          <Button
+            variant={
+              !!tokenAddress && !!hasRole
+                ? mint.isSuccess
+                  ? 'default'
+                  : 'accent'
+                : 'default'
+            }
+            disabled={!tokenAddress || !hasRole}
+            onClick={() => setExpanded(true)}
+            type="button"
+            className="text-[14px] -tracking-[2%] font-normal"
+          >
+            Enter details
+          </Button>
+        )
+      }
+      number={stepNumber}
+      title={`Mint 100 ${metadata ? metadata.name : 'tokens'} to yourself.`}
+    >
+      {expanded && (
+        <div className="flex mx-6 flex-col gap-3 pb-4">
+          <div className="ps-5 border-gray4 border-s-2">
+            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-2">
+              <div className="flex flex-col flex-2">
+                <label
+                  className="text-[11px] -tracking-[1%] text-gray9"
+                  htmlFor="recipient"
+                >
+                  Recipient address
+                </label>
+                <input
+                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  data-1p-ignore
+                  type="text"
+                  name="recipient"
+                  value={address}
+                  disabled={true}
+                  onChange={(_e) => {}}
+                  placeholder="0x..."
+                />
+              </div>
+              <div className="flex flex-col flex-1">
+                <label
+                  className="text-[11px] -tracking-[1%] text-gray9"
+                  htmlFor="memo"
+                >
+                  Memo (optional)
+                </label>
+                <input
+                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  data-1p-ignore
+                  type="text"
+                  name="memo"
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                  placeholder="INV-12345"
+                />
+              </div>
+              <Button
+                variant={address ? 'accent' : 'default'}
+                disabled={!address}
+                onClick={handleMint}
+                type="button"
+                className="text-[14px] -tracking-[2%] font-normal"
+              >
+                {mint.isPending ? 'Minting...' : 'Mint'}
+              </Button>
+            </div>
+            {mint.isSuccess && mint.data && (
+              <ExplorerLink hash={mint.data.receipt.transactionHash} />
+            )}
+          </div>
+        </div>
+      )}
+    </Step>
+  )
+}
+
+export function SendPayment(props: DemoStepProps) {
+  const { stepNumber, last = false } = props
+  const { address } = useAccount()
+  const [recipient, setRecipient] = React.useState<string>(
+    '0xbeefcafe54750903ac1c8909323af7beb21ea2cb',
+  )
+  const [memo, setMemo] = React.useState<string>('')
+  const [expanded, setExpanded] = React.useState(false)
+  const { data: balance, refetch: balanceRefetch } = Hooks.token.useGetBalance({
+    account: address,
+    token: alphaUsd,
+  })
+  const sendPayment = Hooks.token.useTransferSync({
+    mutation: {
+      onSettled() {
+        balanceRefetch()
+      },
+    },
+  })
+  useAccountEffect({
+    onDisconnect() {
+      setExpanded(false)
+      sendPayment.reset()
+    },
+  })
+
+  const isValidRecipient = recipient && isAddress(recipient)
+
+  const handleTransfer = () => {
+    if (!isValidRecipient) return
+    sendPayment.mutate({
+      amount: parseUnits('100', 6),
+      to: recipient as `0x${string}`,
+      token: alphaUsd,
+      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
+    })
+  }
+
+  return (
+    <Step
+      active={
+        Boolean(address && balance && balance > 0n) &&
+        (last ? true : !sendPayment.isSuccess)
+      }
+      completed={sendPayment.isSuccess}
+      actions={
+        expanded ? (
+          <Button
+            variant="default"
+            onClick={() => setExpanded(false)}
+            className="text-[14px] -tracking-[2%] font-normal"
+            type="button"
+          >
+            Cancel
+          </Button>
+        ) : (
+          <Button
+            variant={
+              address && balance && balance > 0n
+                ? sendPayment.isSuccess
+                  ? 'default'
+                  : 'accent'
+                : 'default'
+            }
+            disabled={!(address && balance && balance > 0n)}
+            onClick={() => setExpanded(true)}
+            type="button"
+            className="text-[14px] -tracking-[2%] font-normal"
+          >
+            Enter details
+          </Button>
+        )
+      }
+      number={stepNumber}
+      title="Send 100 AlphaUSD to a recipient."
+    >
+      {expanded && (
+        <div className="flex mx-6 flex-col gap-3 pb-4">
+          <div className="ps-5 border-gray4 border-s-2">
+            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-2">
+              <div className="flex flex-col flex-2">
+                <label
+                  className="text-[11px] -tracking-[1%] text-gray9"
+                  htmlFor="recipient"
+                >
+                  Recipient address
+                </label>
+                <input
+                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  data-1p-ignore
+                  type="text"
+                  name="recipient"
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                  placeholder="0x..."
+                />
+              </div>
+              <div className="flex flex-col flex-1">
+                <label
+                  className="text-[11px] -tracking-[1%] text-gray9"
+                  htmlFor="memo"
+                >
+                  Memo (optional)
+                </label>
+                <input
+                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  data-1p-ignore
+                  type="text"
+                  name="memo"
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                  placeholder="INV-12345"
+                />
+              </div>
+              <Button
+                variant={
+                  address && balance && balance > 0n && isValidRecipient
+                    ? 'accent'
+                    : 'default'
+                }
+                disabled={
+                  !(address && balance && balance > 0n && isValidRecipient)
+                }
+                onClick={handleTransfer}
+                type="button"
+                className="text-[14px] -tracking-[2%] font-normal"
+              >
+                {sendPayment.isPending ? 'Sending...' : 'Send'}
+              </Button>
+            </div>
+            {sendPayment.isSuccess && sendPayment.data && (
+              <ExplorerLink hash={sendPayment.data.receipt.transactionHash} />
+            )}
+          </div>
+        </div>
+      )}
+    </Step>
+  )
+}
+
+export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
+  const { stepNumber, last = false } = props
+  const { address } = useAccount()
+  const [recipient, setRecipient] = React.useState<string>(
+    '0xbeefcafe54750903ac1c8909323af7beb21ea2cb',
+  )
+  const [memo, setMemo] = React.useState<string>('')
+  const [expanded, setExpanded] = React.useState(false)
+  const [feeToken, setFeeToken] = React.useState<Address>(
+    props.feeToken || betaUsd,
+  )
+
+  // Balance for the payment token (AlphaUSD)
+  const { data: alphaBalance, refetch: alphaBalanceRefetch } =
+    Hooks.token.useGetBalance({
+      account: address,
+      token: alphaUsd,
+    })
+
+  // Balance for the fee token (dynamic based on selection)
+  const { data: feeTokenBalance, refetch: feeTokenBalanceRefetch } =
+    Hooks.token.useGetBalance({
+      account: address,
+      token: feeToken,
+    })
+
+  // Metadata for fee token
+  const { data: feeTokenMetadata } = Hooks.token.useGetMetadata({
+    token: feeToken,
+  })
+  // Pool detals. Fees are paid in feeToken, so it's the userToken
+  // validator token is a testnet property set at top of file
+  const { data: pool } = Hooks.amm.usePool({
+    userToken: feeToken,
+    validatorToken,
+    query: {
+      enabled: feeToken !== alphaUsd,
+    },
+  })
+
+  const sendPayment = Hooks.token.useTransferSync({
+    mutation: {
+      onSettled() {
+        alphaBalanceRefetch()
+        feeTokenBalanceRefetch()
+      },
+    },
+  })
+
+  useAccountEffect({
+    onDisconnect() {
+      setExpanded(false)
+      sendPayment.reset()
+    },
+  })
+
+  const isValidRecipient = recipient && isAddress(recipient)
+
+  const handleTransfer = () => {
+    if (!isValidRecipient) return
+    sendPayment.mutate({
+      amount: parseUnits('100', 6),
+      to: recipient as `0x${string}`,
+      token: alphaUsd,
+      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
+      feeToken,
+    })
+  }
+
+  const active = React.useMemo(() => {
+    return Boolean(
+      address &&
+        alphaBalance &&
+        alphaBalance > 0n &&
+        feeTokenBalance &&
+        feeTokenBalance > 0n &&
+        (feeToken !== alphaUsd
+          ? pool && pool.reserveValidatorToken > 0n
+          : true),
+    )
+  }, [address, alphaBalance, feeTokenBalance, pool])
+
+  return (
+    <Step
+      active={active && (last ? true : !sendPayment.isSuccess)}
+      completed={sendPayment.isSuccess}
+      actions={
+        expanded ? (
+          <Button
+            variant="default"
+            onClick={() => setExpanded(false)}
+            className="text-[14px] -tracking-[2%] font-normal"
+            type="button"
+          >
+            Cancel
+          </Button>
+        ) : (
+          <Button
+            variant={
+              active
+                ? sendPayment.isSuccess
+                  ? 'default'
+                  : 'accent'
+                : 'default'
+            }
+            disabled={!active}
+            onClick={() => setExpanded(true)}
+            type="button"
+            className="text-[14px] -tracking-[2%] font-normal"
+          >
+            Enter details
+          </Button>
+        )
+      }
+      number={stepNumber}
+      title={`Send 100 AlphaUSD and pay fees in ${feeTokenMetadata ? feeTokenMetadata.name : 'another token'}.`}
+    >
+      {expanded && (
+        <div className="flex mx-6 flex-col gap-3 pb-4">
+          <div className="ps-5 border-gray4 border-s-2">
+            {/* Token info display */}
+            <div className="mt-2 mb-3 p-3 rounded-lg bg-gray2 text-[13px] -tracking-[1%]">
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray10 font-medium">
+                    Payment Token: AlphaUSD
+                  </span>
+                  <span className="text-gray12">
+                    balance: {formatUnits(alphaBalance ?? 0n, 6)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray10 font-medium">Fee Token</span>
+                  <TokenSelector
+                    tokens={[alphaUsd, betaUsd]}
+                    value={feeToken}
+                    onChange={setFeeToken}
+                    name="feeToken"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray10 font-medium">
+                    {`Fee Token: ${feeTokenMetadata ? feeTokenMetadata.name : ''}`}
+                  </span>
+                  <span className="text-gray12">
+                    balance: {formatUnits(feeTokenBalance ?? 0n, 6)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-2">
+              <div className="flex flex-col flex-2">
+                <label
+                  className="text-[11px] -tracking-[1%] text-gray9"
+                  htmlFor="recipient"
+                >
+                  Recipient address
+                </label>
+                <input
+                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  data-1p-ignore
+                  type="text"
+                  name="recipient"
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                  placeholder="0x..."
+                />
+              </div>
+              <div className="flex flex-col flex-1">
+                <label
+                  className="text-[11px] -tracking-[1%] text-gray9"
+                  htmlFor="memo"
+                >
+                  Memo (optional)
+                </label>
+                <input
+                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  data-1p-ignore
+                  type="text"
+                  name="memo"
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                  placeholder="INV-12345"
+                />
+              </div>
+              <Button
+                variant={active ? 'accent' : 'default'}
+                disabled={!active}
+                onClick={handleTransfer}
+                type="button"
+                className="text-[14px] -tracking-[2%] font-normal"
+              >
+                {sendPayment.isPending ? 'Sending...' : 'Send'}
+              </Button>
+            </div>
+            {sendPayment.isSuccess && sendPayment.data && (
+              <ExplorerLink hash={sendPayment.data.receipt.transactionHash} />
+            )}
+          </div>
+        </div>
+      )}
+    </Step>
+  )
+}
+
+export function PayWithIssuedToken(props: DemoStepProps) {
+  const { stepNumber, last = false } = props
+  const { address } = useAccount()
+  const [recipient, setRecipient] = React.useState<string>(
+    '0xbeefcafe54750903ac1c8909323af7beb21ea2cb',
+  )
+  const [memo, setMemo] = React.useState<string>('')
+  const [expanded, setExpanded] = React.useState(false)
+  const { getData } = useDemoContext()
+  const feeToken = getData('tokenAddress')
+
+  // Balance for the payment token (AlphaUSD)
+  const { data: alphaBalance, refetch: alphaBalanceRefetch } =
+    Hooks.token.useGetBalance({
+      account: address,
+      token: alphaUsd,
+    })
+
+  // Balance for the fee token (dynamic based on selection)
+  const { data: feeTokenBalance, refetch: feeTokenBalanceRefetch } =
+    Hooks.token.useGetBalance({
+      account: address,
+      token: feeToken,
+    })
+
+  // Metadata for fee token
+  const { data: feeTokenMetadata } = Hooks.token.useGetMetadata({
+    token: feeToken,
+  })
+  // Pool detals. Fees are paid in feeToken, so it's the userToken
+  // validator token is a testnet property set at top of file
+  const { data: pool } = Hooks.amm.usePool({
+    userToken: feeToken,
+    validatorToken,
+  })
+
+  const sendPayment = Hooks.token.useTransferSync({
+    mutation: {
+      onSettled() {
+        alphaBalanceRefetch()
+        feeTokenBalanceRefetch()
+      },
+    },
+  })
+
+  useAccountEffect({
+    onDisconnect() {
+      setExpanded(false)
+      sendPayment.reset()
+    },
+  })
+
+  const isValidRecipient = recipient && isAddress(recipient)
+
+  const handleTransfer = () => {
+    if (!isValidRecipient) return
+    sendPayment.mutate({
+      amount: parseUnits('100', 6),
+      to: recipient as `0x${string}`,
+      token: alphaUsd,
+      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
+      feeToken,
+    })
+  }
+
+  const active = React.useMemo(() => {
+    return Boolean(
+      address &&
+        alphaBalance &&
+        alphaBalance > 0n &&
+        feeTokenBalance &&
+        feeTokenBalance > 0n &&
+        pool &&
+        pool.reserveValidatorToken > 0n,
+    )
+  }, [address, alphaBalance, feeTokenBalance, pool])
+
+  return (
+    <Step
+      active={active && (last ? true : !sendPayment.isSuccess)}
+      completed={sendPayment.isSuccess}
+      actions={
+        expanded ? (
+          <Button
+            variant="default"
+            onClick={() => setExpanded(false)}
+            className="text-[14px] -tracking-[2%] font-normal"
+            type="button"
+          >
+            Cancel
+          </Button>
+        ) : (
+          <Button
+            variant={
+              active
+                ? sendPayment.isSuccess
+                  ? 'default'
+                  : 'accent'
+                : 'default'
+            }
+            disabled={!active}
+            onClick={() => setExpanded(true)}
+            type="button"
+            className="text-[14px] -tracking-[2%] font-normal"
+          >
+            Enter details
+          </Button>
+        )
+      }
+      number={stepNumber}
+      title={`Send 100 AlphaUSD and pay fees in ${feeTokenMetadata ? feeTokenMetadata.name : 'your token'}.`}
+    >
+      {expanded && (
+        <div className="flex mx-6 flex-col gap-3 pb-4">
+          <div className="ps-5 border-gray4 border-s-2">
+            {/* Token info display */}
+            <div className="mt-2 mb-3 p-3 rounded-lg bg-gray2 text-[13px] -tracking-[1%]">
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray10 font-medium">
+                    Payment Token: AlphaUSD
+                  </span>
+                  <span className="text-gray12">
+                    balance: {formatUnits(alphaBalance ?? 0n, 6)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray10 font-medium">
+                    {`Fee Token: ${feeTokenMetadata ? feeTokenMetadata.name : ''}`}
+                  </span>
+                  <span className="text-gray12">
+                    balance: {formatUnits(feeTokenBalance ?? 0n, 6)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-2">
+              <div className="flex flex-col flex-2">
+                <label
+                  className="text-[11px] -tracking-[1%] text-gray9"
+                  htmlFor="recipient"
+                >
+                  Recipient address
+                </label>
+                <input
+                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  data-1p-ignore
+                  type="text"
+                  name="recipient"
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                  placeholder="0x..."
+                />
+              </div>
+              <div className="flex flex-col flex-1">
+                <label
+                  className="text-[11px] -tracking-[1%] text-gray9"
+                  htmlFor="memo"
+                >
+                  Memo (optional)
+                </label>
+                <input
+                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  data-1p-ignore
+                  type="text"
+                  name="memo"
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                  placeholder="INV-12345"
+                />
+              </div>
+              <Button
+                variant={active ? 'accent' : 'default'}
+                disabled={!active}
+                onClick={handleTransfer}
+                type="button"
+                className="text-[14px] -tracking-[2%] font-normal"
+              >
+                {sendPayment.isPending ? 'Sending...' : 'Send'}
+              </Button>
+            </div>
+            {sendPayment.isSuccess && sendPayment.data && (
+              <ExplorerLink hash={sendPayment.data.receipt.transactionHash} />
+            )}
+          </div>
+        </div>
+      )}
+    </Step>
+  )
+}
+
+export function MintFeeAmmLiquidity(props: DemoStepProps) {
+  const { stepNumber, last = false } = props
+  const { address } = useAccount()
+  const { getData } = useDemoContext()
+  const queryClient = useQueryClient()
+
+  // Get the address of the token created in a previous step
+  const tokenAddress = getData('tokenAddress')
+
+  const { data: metadata } = Hooks.token.useGetMetadata({
+    token: tokenAddress,
+  })
+  const { data: tokenBalance } = Hooks.token.useGetBalance({
+    account: address,
+    token: tokenAddress,
+  })
+  const mintFeeLiquidity = Hooks.amm.useMintSync({
+    mutation: {
+      onSettled() {
+        queryClient.refetchQueries({ queryKey: ['getPool'] })
+      },
+    },
+  })
+  useAccountEffect({
+    onDisconnect() {
+      mintFeeLiquidity.reset()
+    },
+  })
+
+  const active = React.useMemo(() => {
+    return Boolean(address && tokenAddress && tokenBalance && tokenBalance > 0n)
+  }, [address, tokenAddress, tokenBalance])
+
+  return (
+    <Step
+      active={active && (last ? true : !mintFeeLiquidity.isSuccess)}
+      completed={mintFeeLiquidity.isSuccess}
+      actions={
+        <Button
+          variant={
+            active
+              ? mintFeeLiquidity.isSuccess
+                ? 'default'
+                : 'accent'
+              : 'default'
+          }
+          disabled={!active}
+          onClick={() => {
+            if (!address || !tokenAddress) return
+            mintFeeLiquidity.mutate({
+              userToken: {
+                amount: 0n,
+                address: tokenAddress,
+              },
+              validatorToken: {
+                amount: parseUnits('100', 6),
+                address: validatorToken,
+              },
+              to: address,
+              feeToken: alphaUsd,
+            })
+          }}
+          type="button"
+          className="text-[14px] -tracking-[2%] font-normal"
+        >
+          Add Liquidity
+        </Button>
+      }
+      number={stepNumber}
+      title={`Mint 100 linkingUSD of Fee Liquidity for ${metadata ? metadata.name : 'your token'}.`}
+    >
+      {mintFeeLiquidity.data && (
+        <div className="flex mx-6 flex-col gap-3 pb-4">
+          <div className="ps-5 border-gray4 border-s-2">
+            <ExplorerLink
+              hash={mintFeeLiquidity.data.receipt.transactionHash}
+            />
+          </div>
+        </div>
+      )}
+    </Step>
+  )
+}
+
+export function SelectFeeToken(props: DemoStepProps) {
+  const { stepNumber } = props
+  const { address } = useAccount()
+  const [feeToken, setFeeToken] = React.useState<Address>(alphaUsd)
+
+  const active = Boolean(address)
+  const completed = Boolean(address && feeToken)
+
+  return (
+    <Step
+      active={active}
+      completed={completed}
+      number={stepNumber}
+      title="Select a fee token."
+    >
+      {address && (
+        <div className="flex ml-6 flex-col gap-3 py-4">
+          <div className="ps-5 border-gray4 border-s-2">
+            <TokenSelector
+              tokens={[alphaUsd, betaUsd]}
+              value={feeToken}
+              onChange={setFeeToken}
+              name="feeToken"
+            />
+          </div>
+        </div>
+      )}
+    </Step>
+  )
+}
+
+export function PlaceOrder(props: DemoStepProps) {
+  const { stepNumber, last = false } = props
+  const { address } = useAccount()
+
+  const { data: metadata } = Hooks.token.useGetMetadata({
+    token: alphaUsd,
+  })
+
+  const sendTransaction = useSendTransactionSync()
+
+  useAccountEffect({
+    onDisconnect() {
+      sendTransaction.reset()
+    },
+  })
+
+  const amount = parseUnits('100', metadata?.decimals || 6)
+
+  const calls = [
+    Actions.token.approve.call({
+      spender: Addresses.stablecoinExchange,
+      amount,
+      token: linkingUsd,
+    }),
+    Actions.dex.place.call({
+      amount,
+      tick: 0,
+      token: alphaUsd,
+      type: 'buy',
+    }),
+  ]
+
+  const active = React.useMemo(() => {
+    return !!address
+  }, [address])
+
+  return (
+    <Step
+      active={active && (last ? true : !sendTransaction.isSuccess)}
+      completed={sendTransaction.isSuccess}
+      actions={
+        <Button
+          variant={
+            active
+              ? sendTransaction.isSuccess
+                ? 'default'
+                : 'accent'
+              : 'default'
+          }
+          disabled={!active}
+          onClick={async () => {
+            await sendTransaction.sendTransactionSyncAsync({
+              calls,
+              feeToken: alphaUsd,
+            })
+          }}
+          type="button"
+          className="text-[14px] -tracking-[2%] font-normal"
+        >
+          Place Order
+        </Button>
+      }
+      number={stepNumber}
+      title={`Place buy order for 100 AlphaUSD`}
+    >
+      {sendTransaction.data && (
+        <div className="flex mx-6 flex-col gap-3 pb-4">
+          <div className="ps-5 border-gray4 border-s-2">
+            <ExplorerLink hash={sendTransaction.data.transactionHash} />
+          </div>
+        </div>
+      )}
+    </Step>
+  )
+}
+
+/**
+ * END STEPS
+ */
+
+export function ExplorerLink({ hash }: { hash: string }) {
+  return (
+    <div className="mt-1">
+      <a
+        href={`https://explore.tempo.xyz/tx/${hash}`}
+        target="_blank"
+        rel="noreferrer"
+        className="text-accent text-[13px] -tracking-[1%] flex items-center gap-1 hover:underline"
+      >
+        View receipt
+        <LucideExternalLink className="size-3" />
+      </a>
+    </div>
+  )
+}
+
+export function Container(
+  props: React.PropsWithChildren<
+    {
+      name: string
+      showBadge?: boolean | undefined
+    } & (
+      | {
+          footerVariant: undefined
+        }
+      | {
+          footerVariant: 'balances'
+          tokens: Address[]
+        }
+      | {
+          footerVariant: 'source'
+          src: string
+        }
+    )
+  >,
+) {
+  const { children, name, showBadge = true } = props
+  const { address } = useAccount()
   const disconnect = useDisconnect()
   const restart = React.useCallback(() => {
     disconnect.disconnect()
   }, [disconnect.disconnect])
+
+  const footerElement = React.useMemo(() => {
+    if (props.footerVariant === 'balances')
+      return (
+        <Container.BalancesFooter
+          address={address}
+          tokens={props.tokens || [alphaUsd]}
+        />
+      )
+    if (props.footerVariant === 'source')
+      return <Container.SourceFooter src={props.src} />
+    return null
+  }, [props, address])
+
   return (
-    <ParentContainer
-      headerLeft={
-        <div className="flex gap-1.5 items-center">
-          <h4 className="text-gray12 text-[13px] leading-none -tracking-[1%]">
-            {name}
-          </h4>
-          <span className="text-[9px] text-[#F59E0B] h-[19px] flex items-center text-center justify-center bg-gray4 rounded-[30px] px-1.5 tracking-[2%] uppercase leading-none">
-            demo
-          </span>
-        </div>
-      }
-      headerRight={
-        <div>
-          {address && (
-            <button
-              type="button"
-              onClick={restart}
-              className="flex items-center text-gray9 leading-none gap-1 text-[12.5px] tracking-[-1%]"
-            >
-              <LucideRotateCcw className="text-gray9 size-3 mt-px" />
-              Restart
-            </button>
-          )}
-        </div>
-      }
-      footer={
-        <div className="text-[13px] gap-2 h-full flex items-center leading-none">
-          <span className="text-gray10">Balances</span>
-          <div className="h-[60%] w-px bg-gray4" />
-          {address ? (
-            balanceIsPending || balance === undefined ? (
-              <span></span>
-            ) : (
-              <span className="flex gap-1">
-                <span className="text-gray10">
-                  {formatUnits(balance ?? 0n, 6)}
-                </span>
-                AlphaUSD
+    <DemoContextProvider>
+      <ParentContainer
+        headerLeft={
+          <div className="flex gap-1.5 items-center">
+            <h4 className="text-gray12 text-[14px] font-normal leading-none -tracking-[1%]">
+              {name}
+            </h4>
+            {showBadge && (
+              <span className="text-[9px] font-medium bg-accentTint text-accent h-[19px] flex items-center text-center justify-center rounded-[30px] px-1.5 tracking-[2%] uppercase leading-none">
+                demo
               </span>
-            )
+            )}
+          </div>
+        }
+        headerRight={
+          <div>
+            {address && (
+              <button
+                type="button"
+                onClick={restart}
+                className="flex items-center text-gray9 leading-none gap-1 text-[12.5px] tracking-[-1%]"
+              >
+                <LucideRotateCcw className="text-gray9 size-3 mt-px" />
+                Restart
+              </button>
+            )}
+          </div>
+        }
+        footer={footerElement}
+      >
+        <div className="space-y-4">{children}</div>
+      </ParentContainer>
+    </DemoContextProvider>
+  )
+}
+
+export namespace Container {
+  function BalancesFooterItem(props: { address: Address; token: Address }) {
+    const queryClient = useQueryClient()
+    const { address, token } = props
+    const {
+      data: balance,
+      isPending: balanceIsPending,
+      queryKey: balancesKey,
+    } = Hooks.token.useGetBalance({
+      account: address,
+      token,
+    })
+    const { data: metadata, isPending: metadataIsPending } =
+      Hooks.token.useGetMetadata({
+        token,
+      })
+
+    Hooks.token.useWatchTransfer({
+      token,
+      args: {
+        to: address,
+      },
+      onTransfer: () => {
+        queryClient.invalidateQueries({ queryKey: balancesKey })
+      },
+      enabled: !!address,
+    })
+
+    Hooks.token.useWatchTransfer({
+      token,
+      args: {
+        from: address,
+      },
+      onTransfer: () => {
+        queryClient.invalidateQueries({ queryKey: balancesKey })
+      },
+      enabled: !!address,
+    })
+
+    const isPending = balanceIsPending || metadataIsPending
+    const isUndefined = balance === undefined || metadata === undefined
+
+    return (
+      <div>
+        {isPending || isUndefined ? (
+          <span />
+        ) : (
+          <span className="flex gap-1">
+            <span className="text-gray10">
+              {formatUnits(balance ?? 0n, metadata.decimals)}
+            </span>
+            {metadata.symbol}
+          </span>
+        )}
+      </div>
+    )
+  }
+
+  export function BalancesFooter(props: {
+    address?: string | undefined
+    tokens: Address[]
+  }) {
+    const { address, tokens } = props
+    return (
+      <div className="gap-2 h-full py-2 flex items-center leading-none">
+        <span className="text-gray10">Balances</span>
+        <div className="self-stretch min-h-5 w-px bg-gray4" />
+        <div className="flex flex-col gap-2">
+          {address ? (
+            tokens.map((token) => (
+              <BalancesFooterItem
+                key={token}
+                address={address as Address}
+                token={token}
+              />
+            ))
           ) : (
             <span className="text-gray9">No account detected</span>
           )}
         </div>
-      }
-    >
-      {children}
-    </ParentContainer>
-  )
+      </div>
+    )
+  }
+
+  export function SourceFooter(props: { src: string }) {
+    const { src } = props
+    const [isCopied, copy] = useCopyToClipboard()
+    return (
+      <div className="flex justify-between w-full">
+        {/** biome-ignore lint/a11y/noStaticElementInteractions: _ */}
+        {/** biome-ignore lint/a11y/useKeyWithClickEvents: _ */}
+        <div
+          className="text-primary flex cursor-pointer items-center gap-[6px] font-mono text-[12px] tracking-tight max-sm:hidden"
+          onClick={() => copy(`pnpx gitpick ${src}`)}
+          title="Copy to clipboard"
+        >
+          <div>
+            <span className="text-gray10">pnpx gitpick</span> {src}
+          </div>
+          {isCopied ? (
+            <LucideCheck className="text-gray10 size-3" />
+          ) : (
+            <LucideCopy className="text-gray10 size-3" />
+          )}
+        </div>
+        <div className="text-accent text-[12px] tracking-tight">
+          <a
+            className="flex items-center gap-1"
+            href={`https://github.com/${src}`}
+            rel="noreferrer"
+            target="_blank"
+          >
+            Source <LucideExternalLink className="size-[12px]" />
+          </a>
+        </div>
+      </div>
+    )
+  }
 }
 
 function Step(
@@ -454,7 +1530,7 @@ function Step(
   const { actions, active, children, completed, number, title } = props
   return (
     <div data-active={active} data-completed={completed} className="group">
-      <header className="flex items-center justify-between p-4.5">
+      <header className="flex max-sm:flex-col max-sm:items-start max-sm:justify-start items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div
             className={cx(
@@ -495,6 +1571,79 @@ export namespace StringFormatter {
   }
 }
 
+export function Login() {
+  const connect = useConnect()
+  const connector = useWebAuthnConnector()
+
+  return (
+    <div>
+      {connect.isPending ? (
+        <Button disabled variant="default">
+          <LucidePictureInPicture2 className="mt-px" />
+          Check prompt
+        </Button>
+      ) : (
+        <div className="flex gap-1">
+          <Button
+            variant="accent"
+            className="text-[14px] -tracking-[2%] font-normal"
+            onClick={() => connect.connect({ connector })}
+            type="button"
+          >
+            Sign in
+          </Button>
+          <Button
+            variant="default"
+            className="text-[14px] -tracking-[2%] font-normal"
+            onClick={() =>
+              connect.connect({
+                connector,
+                capabilities: {
+                  createAccount: { label: 'Tempo Docs' },
+                },
+              })
+            }
+            type="button"
+          >
+            Sign up
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function Logout() {
+  const { address, connector } = useAccount()
+  const disconnect = useDisconnect()
+  const [copied, copyToClipboard] = useCopyToClipboard()
+  if (!address) return null
+  return (
+    <div className="flex items-center gap-1">
+      <Button onClick={() => copyToClipboard(address)} variant="default">
+        {copied ? (
+          <LucideCheck className="text-gray9 mt-px" />
+        ) : (
+          <LucideWalletCards className="text-gray9 mt-px" />
+        )}
+        {StringFormatter.truncate(address, {
+          start: 6,
+          end: 4,
+          separator: '⋅⋅⋅',
+        })}
+      </Button>
+      <Button
+        variant="destructive"
+        className="text-[14px] -tracking-[2%] font-normal"
+        onClick={() => disconnect.disconnect({ connector })}
+        type="button"
+      >
+        Sign out
+      </Button>
+    </div>
+  )
+}
+
 export function Button(
   props: Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'> &
     VariantProps<typeof buttonClassName> & {
@@ -528,7 +1677,7 @@ export function Button(
 }
 
 const buttonClassName = cva({
-  base: 'relative inline-flex gap-2 items-center justify-center whitespace-nowrap rounded-default font-[510] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+  base: 'relative inline-flex gap-2 items-center justify-center whitespace-nowrap rounded-md font-normal transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
   defaultVariants: {
     size: 'default',
     variant: 'default',
@@ -538,67 +1687,57 @@ const buttonClassName = cva({
       true: 'pointer-events-none opacity-50',
     },
     size: {
-      default: 'text-[14px] -tracking-[2%] h-[34px] px-[12px]',
+      default: 'text-[14px] -tracking-[2%] h-[32px] px-[14px]',
     },
     static: {
       true: 'pointer-events-none',
     },
     variant: {
-      accent: 'bg-accent text-white hover:not-active:bg-accentHover',
-      accentTint:
-        'bg-accentTint text-accent hover:not-active:bg-accentTintHover',
+      accent:
+        'bg-(--vocs-color_inverted) text-(--vocs-color_background) border dark:border-dashed',
       default:
-        'bg-surface text-primary text-surface hover:not-active:bg-surfaceHover',
+        'text-(--vocs-color_inverted) bg-(--vocs-color_background) border border-dashed',
       destructive:
-        'bg-destructive text-destructive hover:not-active:bg-destructiveHover',
+        'bg-(--vocs-color_backgroundRedTint2) text-(--vocs-color_textRed) border border-dashed',
     },
   },
 })
 
-export function ConnectNav() {
-  const account = useAccount()
-  const connect = useConnect()
-  const disconnect = useDisconnect()
-  const connector = useWebAuthnConnector()
+export function useCopyToClipboard(props?: useCopyToClipboard.Props) {
+  const { timeout = 1_500 } = props ?? {}
 
-  if (account.address)
-    return (
-      <div className="flex items-center gap-2">
-        <Button onClick={() => disconnect.disconnect()} variant="destructive">
-          Sign out
-        </Button>
-      </div>
-    )
-  if (connect.isPending)
-    return (
-      <div>
-        <Button disabled>Check prompt</Button>
-      </div>
-    )
-  if (!connector) return null
-  return (
-    <div className="flex gap-1.5">
-      <Button
-        className="h-[32px] px-[14px] text-[13px]"
-        onClick={() =>
-          connect.connect({
-            connector,
-            capabilities: {
-              createAccount: { label: 'Tempo Docs' },
-            },
-          })
-        }
-        variant="default"
-      >
-        Sign up
-      </Button>
-      <Button
-        className="h-[32px] px-[14px] text-[13px]"
-        onClick={() => connect.connect({ connector })}
-        variant="accentTint"
-      >
-        Sign in
-      </Button>
-    </div>
+  const [isCopied, setIsCopied] = React.useState(false)
+
+  const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const copyToClipboard: useCopyToClipboard.CopyFn = React.useCallback(
+    async (text) => {
+      if (!navigator?.clipboard) {
+        console.warn('Clipboard API not supported')
+        return false
+      }
+
+      if (timer.current) clearTimeout(timer.current)
+
+      try {
+        await navigator.clipboard.writeText(text)
+        setIsCopied(true)
+        timer.current = setTimeout(() => setIsCopied(false), timeout)
+        return true
+      } catch (error) {
+        console.error('Failed to copy text: ', error)
+        return false
+      }
+    },
+    [timeout],
   )
+
+  return [isCopied, copyToClipboard] as const
+}
+
+export declare namespace useCopyToClipboard {
+  type CopyFn = (text: string) => Promise<boolean>
+  type Props = {
+    timeout?: number
+  }
 }

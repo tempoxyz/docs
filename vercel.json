@@ -2,13 +2,13 @@
   "cleanUrls": true,
   "redirects": [
     {
-      "source": "/sdk/typescript/api",
-      "destination": "/sdk/typescript/viem",
+      "source": "/guide/sdks/typescript/api",
+      "destination": "/guide/sdks/typescript/viem",
       "permanent": true
     },
     {
-      "source": "/sdk/typescript/api/:path*",
-      "destination": "/sdk/typescript/viem/:path*",
+      "source": "/guide/sdks/typescript/api/:path*",
+      "destination": "/guide/sdks/typescript/viem/:path*",
       "permanent": true
     }
   ]

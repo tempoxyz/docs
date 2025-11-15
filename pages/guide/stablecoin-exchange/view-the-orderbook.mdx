@@ -1,0 +1,137 @@
+# View the Orderbook
+
+Query and inspect the orderbook to see available liquidity, price levels, and individual orders on Tempo's Stablecoin Exchange.
+
+## Overview
+
+The exchange maintains an on-chain orderbook with price-time priority. You can query:
+- **Price levels**: Total liquidity at specific price ticks
+- **Individual orders**: Details of specific orders by order ID
+- **Best bid/ask**: The best available prices for buying or selling
+
+## Query Price Levels
+
+Get information about liquidity at a specific price tick:
+
+```ts
+import { client } from './viem.config'
+import { Tick } from 'tempo.ts/viem'
+
+// Get bid side liquidity at $0.9990
+const bidLevel = await client.dex.getPriceLevel({
+  base: usdcAddress,
+  tick: Tick.fromPrice('0.9990'),
+  isBid: true,
+})
+
+console.log('Total liquidity:', bidLevel.totalLiquidity)
+console.log('First order ID:', bidLevel.head)
+console.log('Last order ID:', bidLevel.tail)
+```
+
+**Parameters:**
+- `base` - The base token address (e.g., USDC)
+- `tick` - The price tick. Use `Tick.fromPrice()` to convert a price to a tick
+- `isBid` - `true` for bid side (buy orders), `false` for ask side (sell orders)
+
+**Returns:**
+- `head` - Order ID of the first order at this price level (FIFO queue head)
+- `tail` - Order ID of the last order at this price level (FIFO queue tail)
+- `totalLiquidity` - Total amount of tokens available at this price level
+
+## Query Individual Orders
+
+Get detailed information about a specific order:
+
+```ts
+const order = await client.dex.getOrder({
+  orderId: 123n,
+})
+
+console.log('Maker:', order.maker)
+console.log('Amount:', order.amount)
+console.log('Remaining:', order.remaining)
+console.log('Price tick:', order.tick)
+console.log('Is bid:', order.isBid)
+console.log('Is flip order:', order.isFlip)
+```
+
+**Returns:**
+- `maker` - Address of the user who placed the order
+- `amount` - Original order amount
+- `remaining` - Amount still available to fill
+- `tick` - Price tick of the order
+- `isBid` - Whether it's a buy order (`true`) or sell order (`false`)
+- `isFlip` - Whether it's a flip order
+- `flipTick` - For flip orders, the tick to flip to when filled
+- `prev` / `next` - Linked list pointers for the FIFO queue
+
+## Understanding Price Ticks
+
+Price ticks represent prices relative to the quote token (usually linkingUSD). The formula is:
+
+```
+tick = (price - 1) * 100_000
+```
+
+Where `price` is the token price in quote token units.
+
+**Examples:**
+- Price $1.0000 → tick = 0
+- Price $0.9990 → tick = -10
+- Price $1.0010 → tick = 10
+
+Use `Tick.fromPrice()` to convert prices to ticks:
+
+```ts
+import { Tick } from 'tempo.ts/viem'
+
+const tick = Tick.fromPrice('0.9990') // Returns -10
+const price = Tick.toPrice(-10) // Returns '0.9990'
+```
+
+## Iterating Through the Orderbook
+
+To view multiple price levels, query different ticks:
+
+```ts
+// Query a range of bid prices
+const prices = ['0.9990', '0.9995', '1.0000', '1.0005', '1.0010']
+
+for (const price of prices) {
+  const level = await client.dex.getPriceLevel({
+    base: usdcAddress,
+    tick: Tick.fromPrice(price),
+    isBid: true,
+  })
+  
+  console.log(`Price ${price}: ${level.totalLiquidity} available`)
+}
+```
+
+## Best Bid and Ask
+
+The exchange tracks the best bid and ask ticks. To find the best prices:
+
+1. Query price levels at different ticks
+2. Find the highest bid tick and lowest ask tick with liquidity
+3. Or use swap quote functions which automatically find the best prices:
+
+```ts
+// Get a quote for buying 1000 USDT with USDC
+const quote = await client.dex.getBuyQuote({
+  tokenIn: usdcAddress,
+  tokenOut: usdtAddress,
+  amountOut: parseUnits('1000', 6),
+})
+
+console.log('Best price:', quote.price)
+console.log('Amount needed:', quote.amountIn)
+```
+
+## Next Steps
+
+- **[Executing Swaps](/guide/stablecoin-exchange/executing-swaps)** to learn how to trade against the orderbook
+- **[Providing Liquidity](/guide/stablecoin-exchange/providing-liquidity)** to learn how to place orders
+- **[Exchange Balance](/guide/stablecoin-exchange/exchange-balance)** to manage your DEX balances
+
