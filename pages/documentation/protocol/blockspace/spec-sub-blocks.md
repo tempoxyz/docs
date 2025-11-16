@@ -123,7 +123,7 @@ The block includes a **new system transaction**, whose call data contains, for e
       * Each sub-block uses at most its gas limit: `Σ(gasLimit of transactions in sub-block[i]) <= (1-f) * G / n`.
       * `[gas incentive transactions]` use total gas `<= gasIncentiveLimit`.
       * General transactions gas limit from payments lane spec applies to `[list of own transactions]`. 
-  2. Transactions with nonce sequence key prefix `0x5b` appear only in the `[sub-block transactions]`. Transasctions are contiguous by validator. 
+  2. Transactions with nonce sequence key prefix `0x5b` appear only in the `[sub-block transactions]`. Transactions are contiguous by validator. 
   The `[list of own transactions]` and `[gas incentive transactions]` can use any un-reserved `sequence key`. 
   3. [System transaction](#21-system-transaction) is present, in the correct position, and valid (matches contents of the block). 
 
