@@ -51,7 +51,7 @@ export default defineConfig({
   sidebar: {
     '/': [
       {
-        text: 'Quick Start',
+        text: 'Quickstart',
         items: [
           {
             text: 'Overview',
