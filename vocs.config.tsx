@@ -183,8 +183,7 @@ export default defineConfig({
                 link: '/guide/issuance/distribute-rewards',
               },
               {
-                text: 'Manage your stablecoin 🚧',
-                disabled: true,
+                text: 'Manage your stablecoin',
                 link: '/guide/issuance/manage-stablecoin',
               },
             ],

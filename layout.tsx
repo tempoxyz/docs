@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import { Toaster } from 'sonner'
 import { WagmiProvider } from 'wagmi'
+import { DemoContextProvider } from './components/DemoContext'
 import * as WagmiConfig from './wagmi.config'
 
 const queryClient = new QueryClient()
@@ -22,9 +23,9 @@ export default function Layout(
 
   return (
     <>
-      <WagmiProvider config={config} key={props.path}>
+      <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
-          {props.children}
+          <DemoContextProvider>{props.children}</DemoContextProvider>
         </QueryClientProvider>
       </WagmiProvider>
 

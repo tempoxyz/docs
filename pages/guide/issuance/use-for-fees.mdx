@@ -9,12 +9,127 @@ Enable users to pay transaction fees using your stablecoin. Tempo supports flexi
 <Demo.Container name="Create a Stablecoin" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/issuance">
   <Demo.Connect stepNumber={1} />
   <Demo.AddFunds stepNumber={2} />
-  <Demo.CreateToken stepNumber={3} />
+  <Demo.CreateOrLoadToken stepNumber={3} />
   <Demo.GrantTokenRoles stepNumber={4} roles={['issuer']} />
   <Demo.MintToken stepNumber={5} />
   <Demo.MintFeeAmmLiquidity stepNumber={6} />
   <Demo.PayWithIssuedToken stepNumber={7} last />
 </Demo.Container>
+
+## Quick Start
+
+Send a payment using your issued stablecoin as the fee token:
+
+:::code-group
+
+```tsx twoslash [PayWithIssuedToken.tsx]
+import React from 'react'
+import { Hooks } from 'tempo.ts/wagmi'
+import { useAccount } from 'wagmi'
+import { parseUnits, pad, stringToHex, isAddress } from 'viem'
+
+// @noErrors
+export function PayWithIssuedToken() {
+  const { address } = useAccount()
+  const [recipient, setRecipient] = React.useState<string>('')
+  const [memo, setMemo] = React.useState<string>('')
+
+  const feeToken = '0x...' // Your issued token address
+  const paymentToken = '0x20c0000000000000000000000000000000000001' // AlphaUSD
+
+  const { data: paymentBalance, refetch: paymentBalanceRefetch } = // [!code hl]
+    Hooks.token.useGetBalance({ // [!code hl]
+      account: address, // [!code hl]
+      token: paymentToken, // [!code hl]
+    }) // [!code hl]
+
+  const { data: feeTokenBalance, refetch: feeTokenBalanceRefetch } = // [!code hl]
+    Hooks.token.useGetBalance({ // [!code hl]
+      account: address, // [!code hl]
+      token: feeToken, // [!code hl]
+    }) // [!code hl]
+
+  const sendPayment = Hooks.token.useTransferSync({ // [!code hl]
+    mutation: { // [!code hl]
+      onSettled() { // [!code hl]
+        paymentBalanceRefetch() // [!code hl]
+        feeTokenBalanceRefetch() // [!code hl]
+      }, // [!code hl]
+    }, // [!code hl]
+  }) // [!code hl]
+
+  const isValidRecipient = recipient && isAddress(recipient)
+
+  const handleTransfer = () => { // [!code hl]
+    if (!isValidRecipient) return // [!code hl]
+    sendPayment.mutate({ // [!code hl]
+      amount: parseUnits('100', 6), // [!code hl]
+      to: recipient as `0x${string}`, // [!code hl]
+      token: paymentToken, // [!code hl]
+      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined, // [!code hl]
+      feeToken, // Pay fees with your issued token // [!code hl]
+    }) // [!code hl]
+  } // [!code hl]
+
+  return (
+    <>
+      <div>
+        <label>Recipient address</label>
+        <input
+          type="text"
+          value={recipient}
+          onChange={(e) => setRecipient(e.target.value)}
+          placeholder="0x..."
+        />
+      </div>
+      <div>
+        <label>Memo (optional)</label>
+        <input
+          type="text"
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+          placeholder="INV-12345"
+        />
+      </div>
+      <button // [!code hl]
+        disabled={!address || !isValidRecipient || sendPayment.isPending} // [!code hl]
+        onClick={handleTransfer} // [!code hl]
+        type="button" // [!code hl]
+      > {/* [!code hl] */}
+        {sendPayment.isPending ? 'Sending...' : 'Send'} {/* [!code hl] */}
+      </button> {/* [!code hl] */}
+    </>
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+```solidity [Solidity]
+ITIP20 token = ITIP20(0x20c0000000000000000000000000000000000001); // AlphaUSD
+address yourToken = 0x20c0000000000000000000000000000000000004;
+address recipient = 0xbeefcafe54750903ac1c8909323af7beb21ea2cb;
+
+// Send payment using your token for fees
+IFeeManager feeManager = IFeeManager(TIP_FEE_MANAGER_ADDRESS);
+feeManager.setTransactionFeeToken(yourToken);
+token.transfer(recipient, 100_000_000);
+```
+
+:::
 
 ## How It Works
 
@@ -89,7 +204,41 @@ If a user is interacting directly with your token contract (e.g., transferring y
 
 The system automatically handles conversion through the [Fee AMM](/documentation/protocol/fees/spec-fee-amm) if the validator doesn't accept your chosen token. This ensures transactions can always be processed, even if validators prefer different stablecoins.
 
-All testnet validators expect fees in linkingUSD, so there needs to be linkingUSD in your token's fee pool in order to pay fees using your token.
+All testnet validators expect fees in AlphaUSD, so there needs to be AlphaUSD in your token's fee pool in order to pay fees using your token.
+
+### Checking Pool Liquidity
+
+Before using your token for fees, you should verify there's sufficient liquidity in the fee pool:
+
+:::code-group
+
+```tsx twoslash [TypeScript]
+// @noErrors
+import { Hooks } from 'tempo.ts/wagmi'
+
+const { data: pool } = Hooks.amm.usePool({ // [!code hl]
+  userToken: yourToken, // [!code hl]
+  validatorToken, // [!code hl]
+}) // [!code hl]
+
+const hasLiquidity = pool && pool.reserveValidatorToken > 0n // [!code hl]
+```
+
+```solidity [Solidity]
+IFeeAMM feeAmm = IFeeAMM(TIP_FEE_AMM_ADDRESS);
+address yourToken = 0x20c0000000000000000000000000000000000004;
+address validatorToken = 0x20c0000000000000000000000000000000000001; // AlphaUSD
+
+// Get pool reserves
+(uint256 reserveValidator, uint256 reserveUser) = feeAmm.getReserves(yourToken, validatorToken);
+
+// Check if there's sufficient liquidity
+require(reserveValidator > 0, "No liquidity available for fee conversion");
+```
+
+:::
+
+If the pool has no liquidity (`reserveValidatorToken == 0`), you'll need to add liquidity to the fee pool before users can pay fees with your token.
 
 ## Benefits
 

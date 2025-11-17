@@ -33,7 +33,7 @@ import LucideRotateCcw from '~icons/lucide/rotate-ccw'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
 import { cva, cx } from '../../cva.config'
 import { Container as ParentContainer } from '../Container'
-import { DemoContextProvider, useDemoContext } from '../DemoContext'
+import { useDemoContext } from '../DemoContext'
 import { TokenSelector } from '../TokenSelector'
 
 export const linkingUsd = '0x20c0000000000000000000000000000000000000'
@@ -174,6 +174,62 @@ export function AddFunds(props: DemoStepProps) {
   )
 }
 
+export function CreateOrLoadToken(props: DemoStepProps) {
+  const { stepNumber, last = false } = props
+  const { data: contextData, clearData } = useDemoContext()
+
+  const { tokenAddress, tokenReceipt } = contextData
+
+  const { data: metadata } = Hooks.token.useGetMetadata({
+    token: tokenAddress,
+  })
+
+  const handleClear = () => {
+    clearData('tokenReceipt')
+    clearData('tokenAddress')
+  }
+
+  if (last || !metadata || !tokenAddress) {
+    return <CreateToken {...props} />
+  }
+
+  return (
+    <Step
+      active={false}
+      completed={true}
+      number={stepNumber}
+      actions={
+        <Button type="button" variant="default" onClick={handleClear}>
+          Reset
+        </Button>
+      }
+      title={`Using token ${metadata.name}`}
+    >
+      {tokenReceipt && (
+        <div className="flex ml-6 flex-col gap-3 py-4">
+          <div className="relative">
+            <div
+              className={cx(
+                'bg-gray2 rounded-[10px] p-4 text-center text-gray9 font-normal text-[13px] -tracking-[2%] leading-snug flex flex-col items-center',
+              )}
+            >
+              <div>
+                Token{' '}
+                <span className="text-primary font-medium">
+                  {' '}
+                  {metadata.name} ({metadata.symbol}){' '}
+                </span>{' '}
+                successfully created and deployed to Tempo!
+              </div>
+              <ExplorerLink hash={tokenReceipt.transactionHash ?? ''} />
+            </div>
+          </div>
+        </div>
+      )}
+    </Step>
+  )
+}
+
 export function CreateToken(props: DemoStepProps) {
   const { stepNumber, last = false } = props
   const { address } = useAccount()
@@ -188,6 +244,7 @@ export function CreateToken(props: DemoStepProps) {
         balanceRefetch()
         if (data) {
           setData('tokenAddress', data.token)
+          setData('tokenReceipt', data.receipt)
         }
       },
     },
@@ -309,6 +366,127 @@ export function CreateToken(props: DemoStepProps) {
   )
 }
 
+export function SetSupplyCap(props: DemoStepProps) {
+  const { stepNumber, last = false } = props
+  const { address } = useAccount()
+  const { getData } = useDemoContext()
+  const [expanded, setExpanded] = React.useState(false)
+
+  // Get the address of the token created in a previous step
+  const tokenAddress = getData('tokenAddress')
+
+  const { data: metadata, refetch: refetchMetadata } =
+    Hooks.token.useGetMetadata({
+      token: tokenAddress,
+    })
+
+  const setSupplyCap = Hooks.token.useSetSupplyCapSync({
+    mutation: {
+      onSettled() {
+        refetchMetadata()
+      },
+    },
+  })
+
+  useAccountEffect({
+    onDisconnect() {
+      setExpanded(false)
+      setSupplyCap.reset()
+    },
+  })
+
+  const handleSetSupplyCap = () => {
+    if (!tokenAddress) return
+
+    setSupplyCap.mutate({
+      token: tokenAddress,
+      supplyCap: parseUnits('1000', metadata?.decimals || 6),
+      feeToken: alphaUsd,
+    })
+  }
+
+  const active = Boolean(tokenAddress && address)
+  const hasSupplyCap = Boolean(
+    metadata?.supplyCap &&
+      metadata.supplyCap <= parseUnits('1000', metadata.decimals || 6),
+  )
+
+  return (
+    <Step
+      active={active && (last ? true : !setSupplyCap.isSuccess)}
+      completed={setSupplyCap.isSuccess || hasSupplyCap}
+      actions={
+        expanded ? (
+          <Button
+            variant="default"
+            onClick={() => setExpanded(false)}
+            className="text-[14px] -tracking-[2%] font-normal"
+            type="button"
+          >
+            Hide
+          </Button>
+        ) : (
+          <Button
+            variant={
+              active
+                ? setSupplyCap.isSuccess
+                  ? 'default'
+                  : 'accent'
+                : 'default'
+            }
+            disabled={!active}
+            onClick={() => setExpanded(true)}
+            type="button"
+            className="text-[14px] -tracking-[2%] font-normal"
+          >
+            Enter details
+          </Button>
+        )
+      }
+      number={stepNumber}
+      title={`Set supply cap to 1,000 ${metadata ? metadata.name : 'tokens'}.`}
+    >
+      {expanded && (
+        <div className="flex mx-6 flex-col gap-3 pb-4">
+          <div className="ps-5 border-gray4 border-s-2">
+            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-2">
+              <div className="flex flex-col flex-1">
+                <label
+                  className="text-[11px] -tracking-[1%] text-gray9"
+                  htmlFor="supplyCap"
+                >
+                  Supply cap amount
+                </label>
+                <input
+                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  data-1p-ignore
+                  type="text"
+                  name="supplyCap"
+                  value="1,000"
+                  disabled={true}
+                  onChange={() => {}}
+                />
+              </div>
+              <Button
+                variant={active ? 'accent' : 'default'}
+                disabled={!active}
+                onClick={handleSetSupplyCap}
+                type="button"
+                className="text-[14px] -tracking-[2%] font-normal"
+              >
+                {setSupplyCap.isPending ? 'Setting...' : 'Set Cap'}
+              </Button>
+            </div>
+            {setSupplyCap.isSuccess && setSupplyCap.data && (
+              <ExplorerLink hash={setSupplyCap.data.receipt.transactionHash} />
+            )}
+          </div>
+        </div>
+      )}
+    </Step>
+  )
+}
+
 export function GrantTokenRoles(
   props: DemoStepProps & {
     roles: TokenRole.TokenRole[]
@@ -327,6 +505,18 @@ export function GrantTokenRoles(
   const { data: metadata } = Hooks.token.useGetMetadata({
     token: tokenAddress,
   })
+
+  // Check if user has each requested role
+  const roleChecks = roles.map((role) =>
+    Hooks.token.useHasRole({
+      account: address,
+      token: tokenAddress,
+      role: role,
+    }),
+  )
+
+  // Check if user has all roles
+  const hasAllRoles = roleChecks.every((check) => check.data === true)
 
   const grant = Hooks.token.useGrantRolesSync({
     mutation: {
@@ -355,8 +545,10 @@ export function GrantTokenRoles(
 
   return (
     <Step
-      active={!!tokenAddress && (last ? true : !grant.isSuccess)}
-      completed={grant.isSuccess}
+      active={
+        !!tokenAddress && !hasAllRoles && (last ? true : !grant.isSuccess)
+      }
+      completed={grant.isSuccess || hasAllRoles}
       actions={
         expanded ? (
           <Button
@@ -370,13 +562,13 @@ export function GrantTokenRoles(
         ) : (
           <Button
             variant={
-              tokenAddress
+              tokenAddress && !hasAllRoles
                 ? grant.isSuccess
                   ? 'default'
                   : 'accent'
                 : 'default'
             }
-            disabled={!tokenAddress}
+            disabled={!tokenAddress || hasAllRoles}
             onClick={() => setExpanded(true)}
             type="button"
             className="text-[14px] -tracking-[2%] font-normal"
@@ -450,6 +642,10 @@ export function MintToken(props: DemoStepProps) {
     token: tokenAddress,
     role: 'issuer',
   })
+  const { data: balance } = Hooks.token.useGetBalance({
+    account: address,
+    token: tokenAddress,
+  })
 
   const mint = Hooks.token.useMintSync({
     mutation: {
@@ -478,10 +674,18 @@ export function MintToken(props: DemoStepProps) {
     })
   }
 
+  const hasSufficientBalance =
+    balance && metadata && balance >= parseUnits('100', metadata.decimals)
+
   return (
     <Step
-      active={!!tokenAddress && !!hasRole && (last ? true : !mint.isSuccess)}
-      completed={mint.isSuccess}
+      active={Boolean(
+        !!tokenAddress &&
+          !!hasRole &&
+          !hasSufficientBalance &&
+          (last ? true : !mint.isSuccess),
+      )}
+      completed={mint.isSuccess || Boolean(hasSufficientBalance)}
       actions={
         expanded ? (
           <Button
@@ -495,13 +699,15 @@ export function MintToken(props: DemoStepProps) {
         ) : (
           <Button
             variant={
-              !!tokenAddress && !!hasRole
+              !!tokenAddress && !!hasRole && !hasSufficientBalance
                 ? mint.isSuccess
                   ? 'default'
                   : 'accent'
                 : 'default'
             }
-            disabled={!tokenAddress || !hasRole}
+            disabled={Boolean(
+              !tokenAddress || !hasRole || hasSufficientBalance,
+            )}
             onClick={() => setExpanded(true)}
             type="button"
             className="text-[14px] -tracking-[2%] font-normal"
@@ -568,6 +774,234 @@ export function MintToken(props: DemoStepProps) {
           </div>
         </div>
       )}
+    </Step>
+  )
+}
+
+export function BurnToken(props: DemoStepProps) {
+  const { stepNumber, last = false } = props
+  const { address } = useAccount()
+  const { getData } = useDemoContext()
+  const queryClient = useQueryClient()
+
+  const [memo, setMemo] = React.useState<string>('')
+  const [expanded, setExpanded] = React.useState(false)
+
+  // Get the address of the token created in a previous step
+  const tokenAddress = getData('tokenAddress')
+
+  const { data: metadata } = Hooks.token.useGetMetadata({
+    token: tokenAddress,
+  })
+  const { data: hasRole } = Hooks.token.useHasRole({
+    account: address,
+    token: tokenAddress,
+    role: 'issuer',
+  })
+  const { data: balance } = Hooks.token.useGetBalance({
+    account: address,
+    token: tokenAddress,
+  })
+
+  const burn = Hooks.token.useBurnSync({
+    mutation: {
+      onSettled() {
+        // refetch token balance after burning
+        queryClient.refetchQueries({ queryKey: ['getBalance'] })
+      },
+    },
+  })
+  useAccountEffect({
+    onDisconnect() {
+      setExpanded(false)
+      burn.reset()
+    },
+  })
+
+  const handleBurn = async () => {
+    if (!tokenAddress || !address || !metadata) return
+
+    await burn.mutate({
+      amount: parseUnits('100', metadata.decimals),
+      token: tokenAddress,
+      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
+      feeToken: alphaUsd,
+    })
+  }
+
+  const hasSufficientBalance =
+    balance && metadata && balance >= parseUnits('100', metadata.decimals)
+  const canBurn = !!tokenAddress && !!hasRole && hasSufficientBalance
+
+  return (
+    <Step
+      active={Boolean(canBurn && (last ? true : !burn.isSuccess))}
+      completed={burn.isSuccess}
+      actions={
+        expanded ? (
+          <Button
+            variant="default"
+            onClick={() => setExpanded(false)}
+            className="text-[14px] -tracking-[2%] font-normal"
+            type="button"
+          >
+            Hide
+          </Button>
+        ) : (
+          <Button
+            variant={
+              canBurn ? (burn.isSuccess ? 'default' : 'accent') : 'default'
+            }
+            disabled={!canBurn}
+            onClick={() => setExpanded(true)}
+            type="button"
+            className="text-[14px] -tracking-[2%] font-normal"
+          >
+            Enter details
+          </Button>
+        )
+      }
+      number={stepNumber}
+      title={`Burn 100 ${metadata ? metadata.name : 'tokens'} from yourself.`}
+    >
+      {expanded && (
+        <div className="flex mx-6 flex-col gap-3 pb-4">
+          <div className="ps-5 border-gray4 border-s-2">
+            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-2">
+              <div className="flex flex-col flex-1">
+                <label
+                  className="text-[11px] -tracking-[1%] text-gray9"
+                  htmlFor="memo"
+                >
+                  Memo (optional)
+                </label>
+                <input
+                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  data-1p-ignore
+                  type="text"
+                  name="memo"
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                  placeholder="INV-12345"
+                />
+              </div>
+              <Button
+                variant={address ? 'accent' : 'default'}
+                disabled={!address}
+                onClick={handleBurn}
+                type="button"
+                className="text-[14px] -tracking-[2%] font-normal"
+              >
+                {burn.isPending ? 'Burning...' : 'Burn'}
+              </Button>
+            </div>
+            {burn.isSuccess && burn.data && (
+              <ExplorerLink hash={burn.data.receipt.transactionHash} />
+            )}
+          </div>
+        </div>
+      )}
+    </Step>
+  )
+}
+
+export function PauseUnpauseTransfers(props: DemoStepProps) {
+  const { stepNumber, last = false } = props
+  const { address } = useAccount()
+  const { getData } = useDemoContext()
+
+  // Get the address of the token created in a previous step
+  const tokenAddress = getData('tokenAddress')
+
+  const { data: metadata, refetch: refetchMetadata } =
+    Hooks.token.useGetMetadata({
+      token: tokenAddress,
+    })
+
+  // Check for pause and unpause roles
+  const { data: hasPauseRole } = Hooks.token.useHasRole({
+    account: address,
+    token: tokenAddress,
+    role: 'pause',
+  })
+
+  const { data: hasUnpauseRole } = Hooks.token.useHasRole({
+    account: address,
+    token: tokenAddress,
+    role: 'unpause',
+  })
+
+  const pause = Hooks.token.usePauseSync({
+    mutation: {
+      onSettled() {
+        refetchMetadata()
+      },
+    },
+  })
+
+  const unpause = Hooks.token.useUnpauseSync({
+    mutation: {
+      onSettled() {
+        refetchMetadata()
+      },
+    },
+  })
+
+  useAccountEffect({
+    onDisconnect() {
+      pause.reset()
+      unpause.reset()
+    },
+  })
+
+  const paused = metadata?.paused || false
+
+  const handleToggle = () => {
+    if (!tokenAddress) return
+
+    if (paused) {
+      unpause.mutate({ token: tokenAddress, feeToken: alphaUsd })
+    } else {
+      pause.mutate({ token: tokenAddress, feeToken: alphaUsd })
+    }
+  }
+
+  const canToggle = paused ? hasUnpauseRole : hasPauseRole
+  const isProcessing = pause.isPending || unpause.isPending
+  const active = Boolean(tokenAddress && canToggle)
+
+  return (
+    <Step
+      active={active && (last ? true : !pause.isSuccess && !unpause.isSuccess)}
+      completed={pause.isSuccess || unpause.isSuccess}
+      actions={
+        <Button
+          variant={active ? 'accent' : 'default'}
+          disabled={!active || isProcessing}
+          onClick={handleToggle}
+          type="button"
+          className="text-[14px] -tracking-[2%] font-normal"
+        >
+          {isProcessing ? 'Processing...' : paused ? 'Unpause' : 'Pause'}
+        </Button>
+      }
+      number={stepNumber}
+      title={`${paused ? 'Unpause' : 'Pause'} transfers for ${metadata ? metadata.name : 'token'}.`}
+    >
+      {(pause.isSuccess || unpause.isSuccess) &&
+        (pause.data || unpause.data) && (
+          <div className="flex mx-6 flex-col gap-3 pb-4">
+            <div className="ps-5 border-gray4 border-s-2">
+              <ExplorerLink
+                hash={
+                  pause.data?.receipt.transactionHash ??
+                  unpause.data?.receipt.transactionHash ??
+                  ''
+                }
+              />
+            </div>
+          </div>
+        )}
     </Step>
   )
 }
@@ -1362,39 +1796,37 @@ export function Container(
   }, [props, address])
 
   return (
-    <DemoContextProvider>
-      <ParentContainer
-        headerLeft={
-          <div className="flex gap-1.5 items-center">
-            <h4 className="text-gray12 text-[14px] font-normal leading-none -tracking-[1%]">
-              {name}
-            </h4>
-            {showBadge && (
-              <span className="text-[9px] font-medium bg-accentTint text-accent h-[19px] flex items-center text-center justify-center rounded-[30px] px-1.5 tracking-[2%] uppercase leading-none">
-                demo
-              </span>
-            )}
-          </div>
-        }
-        headerRight={
-          <div>
-            {address && (
-              <button
-                type="button"
-                onClick={restart}
-                className="flex items-center text-gray9 leading-none gap-1 text-[12.5px] tracking-[-1%]"
-              >
-                <LucideRotateCcw className="text-gray9 size-3 mt-px" />
-                Restart
-              </button>
-            )}
-          </div>
-        }
-        footer={footerElement}
-      >
-        <div className="space-y-4">{children}</div>
-      </ParentContainer>
-    </DemoContextProvider>
+    <ParentContainer
+      headerLeft={
+        <div className="flex gap-1.5 items-center">
+          <h4 className="text-gray12 text-[14px] font-normal leading-none -tracking-[1%]">
+            {name}
+          </h4>
+          {showBadge && (
+            <span className="text-[9px] font-medium bg-accentTint text-accent h-[19px] flex items-center text-center justify-center rounded-[30px] px-1.5 tracking-[2%] uppercase leading-none">
+              demo
+            </span>
+          )}
+        </div>
+      }
+      headerRight={
+        <div>
+          {address && (
+            <button
+              type="button"
+              onClick={restart}
+              className="flex items-center text-gray9 leading-none gap-1 text-[12.5px] tracking-[-1%]"
+            >
+              <LucideRotateCcw className="text-gray9 size-3 mt-px" />
+              Restart
+            </button>
+          )}
+        </div>
+      }
+      footer={footerElement}
+    >
+      <div className="space-y-4">{children}</div>
+    </ParentContainer>
   )
 }
 

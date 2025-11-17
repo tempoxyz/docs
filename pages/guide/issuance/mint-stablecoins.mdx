@@ -11,7 +11,7 @@ This demo walks though the entire process of minting a token to a recipient.
 <Demo.Container name="Mint Your Token" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
   <Demo.Connect stepNumber={1} />
   <Demo.AddFunds stepNumber={2} />
-  <Demo.CreateToken stepNumber={3} />
+  <Demo.CreateOrLoadToken stepNumber={3} />
   <Demo.GrantTokenRoles stepNumber={4} roles={['issuer']} />
   <Demo.MintToken stepNumber={5} last />
 </Demo.Container>
@@ -20,11 +20,98 @@ This demo walks though the entire process of minting a token to a recipient.
 
 Mint tokens using the `mint` function on your TIP-20 token:
 
-```solidity
+:::code-group
+
+```tsx twoslash [MintToken.tsx]
+import React from 'react'
+import { Hooks } from 'tempo.ts/wagmi'
+import { useAccount } from 'wagmi'
+import { parseUnits, pad, stringToHex } from 'viem'
+import { useQueryClient } from '@tanstack/react-query'
+
+// @noErrors
+export function MintToken() {
+  const { address } = useAccount()
+  const queryClient = useQueryClient()
+  const tokenAddress = '0x...' // Your token address
+  const [recipient, setRecipient] = React.useState<string>('')
+  const [memo, setMemo] = React.useState<string>('')
+
+  const { data: metadata } = Hooks.token.useGetMetadata({ // [!code hl]
+    token: tokenAddress, // [!code hl]
+  }) // [!code hl]
+
+  const mint = Hooks.token.useMintSync({ // [!code hl]
+    mutation: { // [!code hl]
+      onSettled() { // [!code hl]
+        queryClient.refetchQueries({ queryKey: ['getBalance'] }) // [!code hl]
+      }, // [!code hl]
+    }, // [!code hl]
+  }) // [!code hl]
+
+  const handleMint = () => { // [!code hl]
+    if (!tokenAddress || !recipient || !metadata) return // [!code hl]
+    mint.mutate({ // [!code hl]
+      amount: parseUnits('100', metadata.decimals), // [!code hl]
+      to: recipient as `0x${string}`, // [!code hl]
+      token: tokenAddress, // [!code hl]
+      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined, // [!code hl]
+      feeToken: '0x20c0000000000000000000000000000000000001', // [!code hl]
+    }) // [!code hl]
+  } // [!code hl]
+
+  return (
+    <>
+      <div>
+        <label>Recipient address</label>
+        <input
+          type="text"
+          value={recipient}
+          onChange={(e) => setRecipient(e.target.value)}
+          placeholder="0x..."
+        />
+      </div>
+      <div>
+        <label>Memo (optional)</label>
+        <input
+          type="text"
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+          placeholder="INV-12345"
+        />
+      </div>
+      <button // [!code hl]
+        disabled={!address || mint.isPending} // [!code hl]
+        onClick={handleMint} // [!code hl]
+        type="button" // [!code hl]
+      > {/* [!code hl] */}
+        {mint.isPending ? 'Minting...' : 'Mint'} {/* [!code hl] */}
+      </button> {/* [!code hl] */}
+    </>
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+```solidity [Solidity]
 TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
 
 // Mint 1,000 tokens to the treasury (USD has 6 decimals)
-const treasuryAddress = '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef';
+address treasuryAddress = 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef;
 token.mint(treasuryAddress, 1_000_000_000);
 
 // Mint with a memo for tracking
@@ -35,8 +122,6 @@ token.mintWithMemo(
 );
 ```
 
-:::note
-See a full [TypeScript Example](/sdk/typescript/viem/token.mint)
 :::
 
 ## Requirements
@@ -61,12 +146,104 @@ If your token has a supply cap set, any `mint()` or `mintWithMemo()` call that w
 
 ## Burning Tokens
 
+<Demo.Container name="Burn Your Token" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+  <Demo.Connect stepNumber={1} />
+  <Demo.AddFunds stepNumber={2} />
+  <Demo.CreateOrLoadToken stepNumber={3} />
+  <Demo.GrantTokenRoles stepNumber={4} roles={['issuer']} />
+  <Demo.MintToken stepNumber={5} />
+  <Demo.BurnToken stepNumber={6} last />
+</Demo.Container>
+
 To decrease supply, you can burn tokens from your own balance:
 
-```solidity
+:::code-group
+
+```tsx twoslash [BurnToken.tsx]
+import React from 'react'
+import { Hooks } from 'tempo.ts/wagmi'
+import { useAccount } from 'wagmi'
+import { parseUnits, pad, stringToHex } from 'viem'
+import { useQueryClient } from '@tanstack/react-query'
+
+// @noErrors
+export function BurnToken() {
+  const { address } = useAccount()
+  const queryClient = useQueryClient()
+  const tokenAddress = '0x...' // Your token address
+  const [memo, setMemo] = React.useState<string>('')
+
+  const { data: metadata } = Hooks.token.useGetMetadata({ // [!code hl]
+    token: tokenAddress, // [!code hl]
+  }) // [!code hl]
+
+  const burn = Hooks.token.useBurnSync({ // [!code hl]
+    mutation: { // [!code hl]
+      onSettled() { // [!code hl]
+        queryClient.refetchQueries({ queryKey: ['getBalance'] }) // [!code hl]
+      }, // [!code hl]
+    }, // [!code hl]
+  }) // [!code hl]
+
+  const handleBurn = () => { // [!code hl]
+    if (!tokenAddress || !address || !metadata) return // [!code hl]
+    burn.mutate({ // [!code hl]
+      amount: parseUnits('100', metadata.decimals), // [!code hl]
+      token: tokenAddress, // [!code hl]
+      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined, // [!code hl]
+      feeToken: '0x20c0000000000000000000000000000000000001', // [!code hl]
+    }) // [!code hl]
+  } // [!code hl]
+
+  return (
+    <>
+      <div>
+        <label>Memo (optional)</label>
+        <input
+          type="text"
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+          placeholder="INV-12345"
+        />
+      </div>
+      <button // [!code hl]
+        disabled={!address || burn.isPending} // [!code hl]
+        onClick={handleBurn} // [!code hl]
+        type="button" // [!code hl]
+      > {/* [!code hl] */}
+        {burn.isPending ? 'Burning...' : 'Burn'} {/* [!code hl] */}
+      </button> {/* [!code hl] */}
+    </>
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+```solidity [Solidity]
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+
 // Burn 100 tokens from your own balance
 token.burn(100_000_000);
+
+// Burn with a memo for tracking
+token.burnWithMemo(100_000_000, keccak256("REDEMPTION_Q1_2024"));
 ```
+
+:::
 
 Burning requires the **`ISSUER_ROLE`** and sufficient balance in the caller's account.
 

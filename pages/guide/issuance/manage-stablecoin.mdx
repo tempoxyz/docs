@@ -1,24 +1,108 @@
+import * as Demo from '../../../components/guides/Demo.tsx'
+
 # Manage Your Stablecoin
 
-Manage your stablecoin's permissions, supply, and compliance settings using role-based access control and administrative functions.
+Manage your stablecoin's permissions, supply, and compliance settings using role-based access control and administrative functions. TIP-20 tokens use a role-based access control system that allows you to delegate different administrative functions to different addresses. 
 
-## Roles & Permissions
+This guide will walk through examples of how to manage permissions and token behaviors once those permissions are enabled. To learn about the specifics of the role-based access control system, consult the [documentation](/documentation/protocol/tip20/spec#role-based-access-control). To see the full set of management calls, see the [TypeScript SDK](/sdk/typescript/viem/token.grantRoles).
 
-TIP-20 tokens use a role-based access control system that allows you to delegate different administrative functions to different addresses:
 
-| Role | Purpose | Key Functions |
-|------|---------|---------------|
-| **Admin** | Full control | Grant/revoke all roles, set supply caps, change policies |
-| **Issuer** | Token supply | Mint and burn tokens |
-| **Pause** | Emergency control | Pause token transfers |
-| **Unpause** | Emergency control | Unpause token transfers |
-| **Burn Blocked** | Compliance | Burn tokens from blocked addresses |
+## Granting Roles
 
-### Granting Roles
+<Demo.Container name="Grant Roles on Your Token" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+  <Demo.Connect stepNumber={1} />
+  <Demo.AddFunds stepNumber={2} />
+  <Demo.CreateOrLoadToken stepNumber={3} />
+  <Demo.GrantTokenRoles stepNumber={4} roles={['issuer', 'pause', 'unpause', 'burnBlocked']} />
+</Demo.Container>
+
 
 Grant roles to delegate specific token permissions:
 
-```solidity
+:::code-group
+
+```tsx twoslash [GrantRoles.tsx]
+import React from 'react'
+import { Hooks } from 'tempo.ts/wagmi'
+import { useAccount } from 'wagmi'
+import { useQueryClient } from '@tanstack/react-query'
+
+// @noErrors
+export function GrantRoles() {
+  const { address } = useAccount()
+  const queryClient = useQueryClient()
+  const tokenAddress = '0x...' // Your token address
+  const [grantee, setGrantee] = React.useState<string>('')
+
+  const roles = ['issuer', 'pause', 'unpause'] as const // [!code hl]
+
+  // Check if grantee has all roles // [!code hl]
+  const roleChecks = roles.map((role) => // [!code hl]
+    Hooks.token.useHasRole({ // [!code hl]
+      account: grantee as `0x${string}`, // [!code hl]
+      token: tokenAddress, // [!code hl]
+      role: role, // [!code hl]
+    }), // [!code hl]
+  ) // [!code hl]
+  const hasAllRoles = roleChecks.every((check) => check.data === true) // [!code hl]
+
+  const grant = Hooks.token.useGrantRolesSync({ // [!code hl]
+    mutation: { // [!code hl]
+      onSettled() { // [!code hl]
+        queryClient.refetchQueries({ queryKey: ['hasRole'] }) // [!code hl]
+      }, // [!code hl]
+    }, // [!code hl]
+  }) // [!code hl]
+
+  const handleGrant = async () => { // [!code hl]
+    if (!tokenAddress || !grantee) return // [!code hl]
+    await grant.mutate({ // [!code hl]
+      token: tokenAddress, // [!code hl]
+      roles: roles, // [!code hl]
+      to: grantee as `0x${string}`, // [!code hl]
+      feeToken: '0x20c0000000000000000000000000000000000001', // [!code hl]
+    }) // [!code hl]
+  } // [!code hl]
+
+  return (
+    <>
+      <div>
+        <label>Grant roles to address</label>
+        <input
+          type="text"
+          value={grantee}
+          onChange={(e) => setGrantee(e.target.value)}
+          placeholder="0x..."
+        />
+      </div>
+      <button // [!code hl]
+        disabled={!address || hasAllRoles || grant.isPending} // [!code hl]
+        onClick={handleGrant} // [!code hl]
+        type="button" // [!code hl]
+      > {/* [!code hl] */}
+        {grant.isPending ? 'Granting...' : 'Grant'} {/* [!code hl] */}
+      </button> {/* [!code hl] */}
+    </>
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+```solidity [Solidity]
 TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
 
 // Grant the issuer role to treasury, to mint tokens
@@ -30,41 +114,92 @@ address securityAddress = 0xcafecafebabedeadbeefcafebabedeadbeefcafebabe;
 token.grantRole(keccak256("PAUSE_ROLE"), securityAddress);
 ```
 
-:::note
-See a full [TypeScript Example](/sdk/typescript/viem/token.grantRoles)
 :::
 
-## Supply Management
+## Admin Role
 
 ### Setting Supply Caps
 
+<Demo.Container name="Set Supply Cap" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+  <Demo.Connect stepNumber={1} />
+  <Demo.AddFunds stepNumber={2} />
+  <Demo.CreateOrLoadToken stepNumber={3} />
+  <Demo.SetSupplyCap stepNumber={4} last />
+</Demo.Container>
+
 Control the maximum total supply by setting a supply cap:
 
-```solidity
-// Set supply cap to 1 billion tokens (USD has 6 decimals)
+:::code-group
+
+```tsx twoslash [SetSupplyCap.tsx]
+import React from 'react'
+import { Hooks } from 'tempo.ts/wagmi'
+import { parseUnits } from 'viem'
+
+// @noErrors
+export function SetSupplyCap() {
+  const tokenAddress = '0x...' // Your token address
+
+  const { data: metadata, refetch: refetchMetadata } = // [!code hl]
+    Hooks.token.useGetMetadata({ token: tokenAddress }) // [!code hl]
+
+  const setSupplyCap = Hooks.token.useSetSupplyCapSync({ // [!code hl]
+    mutation: { onSettled: () => refetchMetadata() }, // [!code hl]
+  }) // [!code hl]
+
+  const handleSetSupplyCap = () => { // [!code hl]
+    setSupplyCap.mutate({ // [!code hl]
+      token: tokenAddress, // [!code hl]
+      supplyCap: parseUnits('1000', metadata?.decimals || 6), // [!code hl]
+      feeToken: '0x20c0000000000000000000000000000000000001', // [!code hl]
+    }) // [!code hl]
+  } // [!code hl]
+
+  return (
+    <button // [!code hl]
+      disabled={setSupplyCap.isPending} // [!code hl]
+      onClick={handleSetSupplyCap} // [!code hl]
+      type="button" // [!code hl]
+    > {/* [!code hl] */}
+      {setSupplyCap.isPending ? 'Setting...' : 'Set Cap'} {/* [!code hl] */}
+    </button> {/* [!code hl] */}
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+```solidity [Solidity]
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+
+// Set supply cap to 1,000 tokens (USD has 6 decimals)
+token.setSupplyCap(1_000_000_000);
+
+// Set supply cap to 1 billion tokens
 token.setSupplyCap(1_000_000_000_000_000);
 
 // Remove supply cap (unlimited)
 token.setSupplyCap(type(uint256).max);
 ```
 
+:::
+
 Setting supply caps requires the **`DEFAULT_ADMIN_ROLE`**. The new cap cannot be less than the current total supply.
 
-### Pausing Transfers
-
-Temporarily halt all token transfers for emergency situations or maintenance:
-
-```solidity
-// Pause all transfers
-token.pause();
-
-// Later, unpause to resume normal operation
-token.unpause();
-```
-
-Pausing requires the **`PAUSE_ROLE`**. Unpausing requires the **`UNPAUSE_ROLE`**.
-
-## Transfer Policies
+### Transfer Policies
 
 Configure transfer policies to control who can send and receive your stablecoin. This is useful for compliance and regulatory requirements.
 
@@ -72,6 +207,122 @@ Transfer policies can be:
 - **Always allow**: Anyone can send/receive (default)
 - **Whitelist**: Only authorized addresses can send/receive
 - **Blacklist**: Blocked addresses cannot send/receive
+
+## Pause and Unpause Roles
+
+<Demo.Container name="Pause and Unpause Your Token" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+  <Demo.Connect stepNumber={1} />
+  <Demo.AddFunds stepNumber={2} />
+  <Demo.CreateOrLoadToken stepNumber={3} />
+  <Demo.GrantTokenRoles stepNumber={4} roles={['pause', 'unpause']} />
+  <Demo.PauseUnpauseTransfers stepNumber={5} last />
+</Demo.Container>
+
+Control token transfers by pausing and unpausing them when needed for emergency situations or maintenance:
+
+:::code-group
+
+```tsx twoslash [PauseUnpauseTransfers.tsx]
+import React from 'react'
+import { Hooks } from 'tempo.ts/wagmi'
+
+// @noErrors
+export function PauseUnpauseTransfers() {
+  const tokenAddress = '0x...' // Your token address
+
+  const { data: metadata, refetch: refetchMetadata } = // [!code hl]
+    Hooks.token.useGetMetadata({ token: tokenAddress }) // [!code hl]
+
+  const pause = Hooks.token.usePauseSync({ // [!code hl]
+    mutation: { onSettled: () => refetchMetadata() }, // [!code hl]
+  }) // [!code hl]
+
+  const unpause = Hooks.token.useUnpauseSync({ // [!code hl]
+    mutation: { onSettled: () => refetchMetadata() }, // [!code hl]
+  }) // [!code hl]
+
+  const paused = metadata?.paused || false // [!code hl]
+
+  const handleToggle = () => { // [!code hl]
+    if (paused) { // [!code hl]
+      unpause.mutate({ // [!code hl]
+        token: tokenAddress, // [!code hl]
+        feeToken: '0x20c0000000000000000000000000000000000001', // [!code hl]
+      }) // [!code hl]
+    } else { // [!code hl]
+      pause.mutate({ // [!code hl]
+        token: tokenAddress, // [!code hl]
+        feeToken: '0x20c0000000000000000000000000000000000001', // [!code hl]
+      }) // [!code hl]
+    } // [!code hl]
+  } // [!code hl]
+
+  const isProcessing = pause.isPending || unpause.isPending // [!code hl]
+
+  return (
+    <button // [!code hl]
+      disabled={isProcessing} // [!code hl]
+      onClick={handleToggle} // [!code hl]
+      type="button" // [!code hl]
+    > {/* [!code hl] */}
+      {isProcessing ? 'Processing...' : paused ? 'Unpause' : 'Pause'} {/* [!code hl] */}
+    </button> {/* [!code hl] */}
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+```solidity [Solidity]
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+
+// Pause all transfers
+token.pause();
+
+// Later, unpause to resume normal operation
+token.unpause();
+```
+
+:::
+
+## Issuer Role
+
+The Issuer role grants the ability to mint and burn tokens, controlling your stablecoin's total supply.
+
+:::tip 
+
+Minting & Burning Tokens
+To learn how to mint new tokens and burn existing tokens using the issuer role, see the **[Mint Stablecoins](/guide/issuance/mint-stablecoins)** guide.
+
+This guide covers:
+- Minting tokens to create new supply
+- Burning tokens to reduce supply
+- Using memos for tracking mints and burns
+- Best practices for supply management
+
+:::
+
+## Burn Blocked Role
+
+<Demo.Container name="Mint Your Token" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+  <Demo.Connect stepNumber={1} />
+  <Demo.AddFunds stepNumber={2} />
+  <Demo.CreateOrLoadToken stepNumber={3} />
+  <Demo.GrantTokenRoles stepNumber={4} roles={['burnBlocked']} />
+</Demo.Container>
 
 ## Best Practices
 
