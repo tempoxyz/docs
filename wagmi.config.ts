@@ -24,10 +24,7 @@ export function getConfig(options: getConfig.Options = {}) {
         ? tempoAndantino({ feeToken })
         : tempoLocal({ feeToken }),
     ],
-    connectors: [
-      metaMask(),
-      webAuthn(),
-    ],
+    connectors: [metaMask(), webAuthn()],
     multiInjectedProviderDiscovery,
     storage: createStorage({
       storage:

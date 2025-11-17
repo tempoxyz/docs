@@ -12,11 +12,10 @@ Tempo ensures that payment transactions always have available blockspace, even d
 
 This is achieved through **separate gas limits** for payment and non-payment transactions. When blocks are constructed, validators enforce two separate gas constraints:
 
-1. **`gasLimit`** — The total gas available for all transactions (standard Ethereum behavior)
-2. **`generalGasLimit`** — The maximum gas that non-payment transactions can consume
+1. **`gas_limit`** — The total gas available for all transactions (standard Ethereum behavior)
+2. **`general_gas_limit`** — The maximum gas that non-payment transactions can consume
 
-Even if non-payment transactions fill up to `generalGasLimit`, payment transactions can still use the remaining capacity up to `gasLimit`.
-
+Non-payment transactions in the proposer's lane can only fill up to `general_gas_limit`, payment transactions can still use the remaining capacity up.
 
 ## Terminology
 
@@ -32,32 +31,22 @@ A transaction is classified as a **payment transaction** when:
   1.  the recipient address (`tx.to`) starts with the TIP-20 payment prefix `0x20c0000000000000000000000000`, or,
   2. for AA transactions, every entry in `tx.calls` targets an address starting with the TIP-20 payment prefix `0x20c0000000000000000000000000`.
 
-This classification is performed entirely on the transaction payload—no account state is consulted.
+This classification is performed entirely on the transaction payload, no account state is consulted.
 
 <Callout type="info">
     Later upgrades may enable other kinds of transactions to be classified as payment transactions as well.
 </Callout>
 
-### 2. Custom Block header fields 
-
-Adds a new limit, `general_gas_limit`, as a custom field in the header. The total amount of gas used by non-payment transactions in the block must be smaller than `general_gas_limit`. 
-
-> Consensus fields unchanged: `gasLimit`, `gasUsed`, `baseFeePerGas`, etc.
-
-### 3. Ordering of Transactions
+### 2. Ordering of Transactions
 
 The specification does not require any specific ordering of transactions: payment and non-payment transactions can be intermixed.
 
-### 4. Gas accounting & validity (consensus)
+### 3. Gas accounting & validity (consensus)
 
-Validity of a block requires that 
+Validity of a block requires that,
 ```
-gasUsed       >= Σ gasConsumed(txs[0..n])
-generalGasLimit >= Σ gasConsumed(tx[i])   for all i such that !isPaymentTx(tx[i])
+general_gas_limit >= Σ gas_consumed(tx[i])   for all i such that !is_payment(tx[i]) and tx[i] is in the proposer's lane
 ```
 
-Where `gasConsumed` includes intrinsic gas and gas burned by reverts, as in the existing protocol.
+Where `gas_consumed` includes intrinsic gas and gas burned by reverts, as in the existing protocol.
 
-### 5. Fee market
-
-No changes to basefee or pricing rules. Payment transactions pay the same basefee as non-payment transactions. The additional meter only caps aggregate non-payment gas.
