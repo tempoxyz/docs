@@ -675,7 +675,7 @@ export function MintToken(props: DemoStepProps) {
   }
 
   const hasSufficientBalance =
-    balance && metadata && balance >= parseUnits('100', metadata.decimals)
+    balance && metadata && balance >= parseUnits('90', metadata.decimals)
 
   return (
     <Step
