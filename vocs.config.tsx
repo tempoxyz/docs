@@ -982,43 +982,43 @@ export default defineConfig({
                 text: 'Policy',
                 items: [
                   {
-                    text: 'create 🚧',
+                    text: 'create',
                     link: '/sdk/typescript/wagmi/actions/policy.create',
                   },
                   {
-                    text: 'getData 🚧',
+                    text: 'getData',
                     link: '/sdk/typescript/wagmi/actions/policy.getData',
                   },
                   {
-                    text: 'isAuthorized 🚧',
+                    text: 'isAuthorized',
                     link: '/sdk/typescript/wagmi/actions/policy.isAuthorized',
                   },
                   {
-                    text: 'modifyBlacklist 🚧',
+                    text: 'modifyBlacklist',
                     link: '/sdk/typescript/wagmi/actions/policy.modifyBlacklist',
                   },
                   {
-                    text: 'modifyWhitelist 🚧',
+                    text: 'modifyWhitelist',
                     link: '/sdk/typescript/wagmi/actions/policy.modifyWhitelist',
                   },
                   {
-                    text: 'setAdmin 🚧',
+                    text: 'setAdmin',
                     link: '/sdk/typescript/wagmi/actions/policy.setAdmin',
                   },
                   {
-                    text: 'watchAdminUpdated 🚧',
+                    text: 'watchAdminUpdated',
                     link: '/sdk/typescript/wagmi/actions/policy.watchAdminUpdated',
                   },
                   {
-                    text: 'watchBlacklistUpdated 🚧',
+                    text: 'watchBlacklistUpdated',
                     link: '/sdk/typescript/wagmi/actions/policy.watchBlacklistUpdated',
                   },
                   {
-                    text: 'watchCreate 🚧',
+                    text: 'watchCreate',
                     link: '/sdk/typescript/wagmi/actions/policy.watchCreate',
                   },
                   {
-                    text: 'watchWhitelistUpdated 🚧',
+                    text: 'watchWhitelistUpdated',
                     link: '/sdk/typescript/wagmi/actions/policy.watchWhitelistUpdated',
                   },
                 ],
@@ -1265,43 +1265,43 @@ export default defineConfig({
                 text: 'Policy',
                 items: [
                   {
-                    text: 'useCreate 🚧',
+                    text: 'useCreate',
                     link: '/sdk/typescript/wagmi/hooks/policy.useCreate',
                   },
                   {
-                    text: 'useData 🚧',
+                    text: 'useData',
                     link: '/sdk/typescript/wagmi/hooks/policy.useData',
                   },
                   {
-                    text: 'useIsAuthorized 🚧',
+                    text: 'useIsAuthorized',
                     link: '/sdk/typescript/wagmi/hooks/policy.useIsAuthorized',
                   },
                   {
-                    text: 'useModifyBlacklist 🚧',
+                    text: 'useModifyBlacklist',
                     link: '/sdk/typescript/wagmi/hooks/policy.useModifyBlacklist',
                   },
                   {
-                    text: 'useModifyWhitelist 🚧',
+                    text: 'useModifyWhitelist',
                     link: '/sdk/typescript/wagmi/hooks/policy.useModifyWhitelist',
                   },
                   {
-                    text: 'useSetAdmin 🚧',
+                    text: 'useSetAdmin',
                     link: '/sdk/typescript/wagmi/hooks/policy.useSetAdmin',
                   },
                   {
-                    text: 'useWatchAdminUpdated 🚧',
+                    text: 'useWatchAdminUpdated',
                     link: '/sdk/typescript/wagmi/hooks/policy.useWatchAdminUpdated',
                   },
                   {
-                    text: 'useWatchBlacklistUpdated 🚧',
+                    text: 'useWatchBlacklistUpdated',
                     link: '/sdk/typescript/wagmi/hooks/policy.useWatchBlacklistUpdated',
                   },
                   {
-                    text: 'useWatchCreate 🚧',
+                    text: 'useWatchCreate',
                     link: '/sdk/typescript/wagmi/hooks/policy.useWatchCreate',
                   },
                   {
-                    text: 'useWatchWhitelistUpdated 🚧',
+                    text: 'useWatchWhitelistUpdated',
                     link: '/sdk/typescript/wagmi/hooks/policy.useWatchWhitelistUpdated',
                   },
                 ],
