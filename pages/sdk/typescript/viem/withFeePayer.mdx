@@ -8,48 +8,9 @@ Creates a transport that routes transactions to a fee payer service when a `feeP
 
 ```ts twoslash [example.ts]
 // @noErrors
-import { createClient, http, walletActions } from 'viem'
-import { tempo } from 'tempo.ts/chains'
-import { withFeePayer } from 'tempo.ts/viem'
-import { privateKeyToAccount } from 'viem/accounts'
+// [!include ~/snippets/withFeePayer-basic.ts:setup]
 
-const credentials = `${process.env['TEMPO_USERNAME']}:${process.env['TEMPO_PASSWORD']}`
-
-const client = createClient({
-  account: privateKeyToAccount(
-    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
-  ),
-  chain: tempo({ feeToken: '0x20c0000000000000000000000000000000000001' }),
-  transport: withFeePayer(
-    // [!code focus]
-    // Transport for regular transactions // [!code focus]
-    http(undefined, {
-      // [!code focus]
-      fetchOptions: {
-        // [!code focus]
-        headers: {
-          // [!code focus]
-          Authorization: `Basic ${btoa(credentials)}`, // [!code focus]
-        }, // [!code focus]
-      }, // [!code focus]
-    }), // [!code focus]
-    // Transport for sponsored transactions // [!code focus]
-    http('https://sponsor.myapp.com'), // [!code focus]
-  ), // [!code focus]
-}).extend(walletActions) // [!code focus]
-
-// Regular transaction (uses default transport) // [!code focus]
-const receipt1 = await client.sendTransactionSync({
-  // [!code focus]
-  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', // [!code focus]
-}) // [!code focus]
-
-// Sponsored transaction (uses feePayer transport) // [!code focus]
-const receipt2 = await client.sendTransactionSync({
-  // [!code focus]
-  feePayer: true, // [!code focus]
-  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', // [!code focus]
-}) // [!code focus]
+// [!include ~/snippets/withFeePayer-basic.ts:usage]
 ```
 
 ```ts twoslash [viem.config.ts] filename="viem.config.ts"
