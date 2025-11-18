@@ -1,23 +1,111 @@
 import * as Demo from '../../../components/guides/Demo.tsx'
+import * as Card from "../../../components/Card.tsx"
+import LucideShield from '~icons/lucide/shield'
+import LucideFileText from '~icons/lucide/file-text'
 
 # Manage Your Stablecoin
 
-Manage your stablecoin's permissions, supply, and compliance settings using role-based access control and administrative functions. TIP-20 tokens use a role-based access control system that allows you to delegate different administrative functions to different addresses. 
+Configure your stablecoin's permissions, supply limits, and compliance policies after deployment. This guide covers granting roles to manage token operations, setting supply caps, configuring transfer policies, and controlling token transfers through pause/unpause functionality.
 
-This guide will walk through examples of how to manage permissions and token behaviors once those permissions are enabled. To learn about the specifics of the role-based access control system, consult the [documentation](/documentation/protocol/tip20/spec#role-based-access-control). To see the full set of management calls, see the [TypeScript SDK](/sdk/typescript/viem/token.grantRoles).
+TIP-20 tokens use a role-based access control system that allows you to delegate different administrative functions to different addresses. For detailed information about the role system, see the [TIP-20 specification](/documentation/protocol/tip20/spec#role-based-access-control).
 
 
-## Granting Roles
-
-<Demo.Container name="Grant Roles on Your Token" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+<Demo.Container name="Manage Your Stablecoin" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
   <Demo.Connect stepNumber={1} />
   <Demo.AddFunds stepNumber={2} />
   <Demo.CreateOrLoadToken stepNumber={3} />
   <Demo.GrantTokenRoles stepNumber={4} roles={['issuer', 'pause', 'unpause', 'burnBlocked']} />
 </Demo.Container>
 
+## Steps
 
-Grant roles to delegate specific token permissions:
+::::steps
+
+### Set Supply Cap
+
+Limit the maximum total supply of your token to prevent unlimited inflation.
+
+<Demo.Container name="Set Supply Cap" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+  <Demo.Connect stepNumber={1} />
+  <Demo.AddFunds stepNumber={2} />
+  <Demo.CreateOrLoadToken stepNumber={3} />
+  <Demo.SetSupplyCap stepNumber={4} last />
+</Demo.Container>
+
+:::code-group
+
+```tsx twoslash [SetSupplyCap.tsx]
+import React from 'react'
+import { Hooks } from 'tempo.ts/wagmi'
+import { parseUnits } from 'viem'
+
+// @noErrors
+export function SetSupplyCap() {
+  const tokenAddress = '0x...' // Your token address
+
+  const { data: metadata, refetch: refetchMetadata } = // [!code hl]
+    Hooks.token.useGetMetadata({ token: tokenAddress }) // [!code hl]
+
+  const setSupplyCap = Hooks.token.useSetSupplyCapSync({ // [!code hl]
+    mutation: { onSettled: () => refetchMetadata() }, // [!code hl]
+  }) // [!code hl]
+
+  const handleSetSupplyCap = () => { // [!code hl]
+    setSupplyCap.mutate({ // [!code hl]
+      token: tokenAddress, // [!code hl]
+      supplyCap: parseUnits('1000', metadata?.decimals || 6), // [!code hl]
+      feeToken: '0x20c0000000000000000000000000000000000001', // [!code hl]
+    }) // [!code hl]
+  } // [!code hl]
+
+  return (
+    <button // [!code hl]
+      disabled={setSupplyCap.isPending} // [!code hl]
+      onClick={handleSetSupplyCap} // [!code hl]
+      type="button" // [!code hl]
+    > {/* [!code hl] */}
+      {setSupplyCap.isPending ? 'Setting...' : 'Set Cap'} {/* [!code hl] */}
+    </button> {/* [!code hl] */}
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+```solidity [Solidity]
+TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
+
+// Set supply cap to 1,000 tokens (USD has 6 decimals)
+token.setSupplyCap(1_000_000_000);
+
+// Set supply cap to 1 billion tokens
+token.setSupplyCap(1_000_000_000_000_000);
+
+// Remove supply cap (unlimited)
+token.setSupplyCap(type(uint256).max);
+```
+
+:::
+
+Setting supply caps requires the **`DEFAULT_ADMIN_ROLE`**. The new cap cannot be less than the current total supply.
+
+
+### Grant Roles to Delegate Permissions
+
+Assign roles to different addresses to delegate specific token management capabilities:
 
 :::code-group
 
@@ -116,99 +204,21 @@ token.grantRole(keccak256("PAUSE_ROLE"), securityAddress);
 
 :::
 
-## Admin Role
+### Configure Transfer Policies
 
-### Setting Supply Caps
-
-<Demo.Container name="Set Supply Cap" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
-  <Demo.Connect stepNumber={1} />
-  <Demo.AddFunds stepNumber={2} />
-  <Demo.CreateOrLoadToken stepNumber={3} />
-  <Demo.SetSupplyCap stepNumber={4} last />
-</Demo.Container>
-
-Control the maximum total supply by setting a supply cap:
-
-:::code-group
-
-```tsx twoslash [SetSupplyCap.tsx]
-import React from 'react'
-import { Hooks } from 'tempo.ts/wagmi'
-import { parseUnits } from 'viem'
-
-// @noErrors
-export function SetSupplyCap() {
-  const tokenAddress = '0x...' // Your token address
-
-  const { data: metadata, refetch: refetchMetadata } = // [!code hl]
-    Hooks.token.useGetMetadata({ token: tokenAddress }) // [!code hl]
-
-  const setSupplyCap = Hooks.token.useSetSupplyCapSync({ // [!code hl]
-    mutation: { onSettled: () => refetchMetadata() }, // [!code hl]
-  }) // [!code hl]
-
-  const handleSetSupplyCap = () => { // [!code hl]
-    setSupplyCap.mutate({ // [!code hl]
-      token: tokenAddress, // [!code hl]
-      supplyCap: parseUnits('1000', metadata?.decimals || 6), // [!code hl]
-      feeToken: '0x20c0000000000000000000000000000000000001', // [!code hl]
-    }) // [!code hl]
-  } // [!code hl]
-
-  return (
-    <button // [!code hl]
-      disabled={setSupplyCap.isPending} // [!code hl]
-      onClick={handleSetSupplyCap} // [!code hl]
-      type="button" // [!code hl]
-    > {/* [!code hl] */}
-      {setSupplyCap.isPending ? 'Setting...' : 'Set Cap'} {/* [!code hl] */}
-    </button> {/* [!code hl] */}
-  )
-}
-```
-
-```tsx twoslash [config.ts] filename="config.ts"
-// @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
-
-export const config = createConfig({
-  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
-```
-
-```solidity [Solidity]
-TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
-
-// Set supply cap to 1,000 tokens (USD has 6 decimals)
-token.setSupplyCap(1_000_000_000);
-
-// Set supply cap to 1 billion tokens
-token.setSupplyCap(1_000_000_000_000_000);
-
-// Remove supply cap (unlimited)
-token.setSupplyCap(type(uint256).max);
-```
-
-:::
-
-Setting supply caps requires the **`DEFAULT_ADMIN_ROLE`**. The new cap cannot be less than the current total supply.
-
-### Transfer Policies
-
-Configure transfer policies to control who can send and receive your stablecoin. This is useful for compliance and regulatory requirements.
+Control who can send and receive your stablecoin for compliance and regulatory requirements.
 
 Transfer policies can be:
 - **Always allow**: Anyone can send/receive (default)
+- **Always reject**: Nobody can send/receive
 - **Whitelist**: Only authorized addresses can send/receive
 - **Blacklist**: Blocked addresses cannot send/receive
 
-## Pause and Unpause Roles
+Learn more about configuring transfer policies in the [TIP-403 specification](/documentation/protocol/tip403/spec).
+
+### Pause and Unpause Token Transfers
+
+Temporarily halt all token transfers during emergency situations or maintenance windows.
 
 <Demo.Container name="Pause and Unpause Your Token" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
   <Demo.Connect stepNumber={1} />
@@ -217,8 +227,6 @@ Transfer policies can be:
   <Demo.GrantTokenRoles stepNumber={4} roles={['pause', 'unpause']} />
   <Demo.PauseUnpauseTransfers stepNumber={5} last />
 </Demo.Container>
-
-Control token transfers by pausing and unpausing them when needed for emergency situations or maintenance:
 
 :::code-group
 
@@ -298,41 +306,46 @@ token.unpause();
 
 :::
 
-## Issuer Role
+::::
 
-The Issuer role grants the ability to mint and burn tokens, controlling your stablecoin's total supply.
+## Recipes
 
-:::tip 
+### Using the Issuer Role
 
-Minting & Burning Tokens
-To learn how to mint new tokens and burn existing tokens using the issuer role, see the **[Mint Stablecoins](/guide/issuance/mint-stablecoins)** guide.
+The Issuer role grants the ability to mint and burn tokens, controlling your stablecoin's total supply. To learn how to mint new tokens and burn existing tokens, see the [Mint Stablecoins](/guide/issuance/mint-stablecoins) guide.
 
-This guide covers:
-- Minting tokens to create new supply
-- Burning tokens to reduce supply
-- Using memos for tracking mints and burns
-- Best practices for supply management
+### Using the Burn Blocked Role
 
-:::
-
-## Burn Blocked Role
-
-<Demo.Container name="Mint Your Token" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
-  <Demo.Connect stepNumber={1} />
-  <Demo.AddFunds stepNumber={2} />
-  <Demo.CreateOrLoadToken stepNumber={3} />
-  <Demo.GrantTokenRoles stepNumber={4} roles={['burnBlocked']} />
-</Demo.Container>
+The Burn Blocked role allows compliance officers to burn tokens from blocked or frozen addresses. This is useful for regulatory compliance when you need to remove tokens from addresses that violate terms of service or legal requirements.
 
 ## Best Practices
 
-1. **Separate roles**: Use different addresses for different roles (treasury for minting, security for pausing)
-2. **Set supply caps**: Prevent unlimited inflation by setting appropriate supply caps
-3. **Monitor events**: Watch for role changes, mints, burns, and administrative actions
-4. **Emergency procedures**: Have pause/unpause roles ready for security incidents
+### Role Separation
 
-## Next Steps
+Use different addresses for different roles to enhance security. For example, assign the issuer role to your treasury address for minting, and the pause role to your security team for emergency controls.
 
-- Learn more about [Roles & Permissions](/documentation/protocol/tip403/spec)
-- Learn more about [Transfer Policies](/documentation/protocol/tip403/spec)
+### Event Monitoring
+
+Monitor on-chain events for role changes, mints, burns, and administrative actions to maintain visibility into token operations and detect unauthorized activities.
+
+### Emergency Procedures
+
+Ensure pause and unpause roles are assigned to trusted addresses and that your team has documented procedures for responding to security incidents requiring token transfers to be halted.
+
+## Learning Resources
+
+<Card.Container>
+  <Card.Link
+    description="Learn about the role-based access control system and all available roles"
+    href="/documentation/protocol/tip20/spec#role-based-access-control"
+    icon={LucideShield}
+    title="Role-Based Access Control"
+  />
+  <Card.Link
+    description="Learn how to configure transfer policies for compliance requirements"
+    href="/documentation/protocol/tip403/spec"
+    icon={LucideFileText}
+    title="Transfer Policies (TIP-403)"
+  />
+</Card.Container>
 
