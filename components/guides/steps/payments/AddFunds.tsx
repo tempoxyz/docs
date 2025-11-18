@@ -34,11 +34,10 @@ export function AddFunds(props: DemoStepProps) {
       if (!client) throw new Error('client not found')
 
       if (import.meta.env.VITE_LOCAL !== 'true')
-        // biome-ignore lint/suspicious/noExplicitAny: pass
-        await client.request<any>({
-          method: 'tempo_fundAddress',
-          params: [address],
-        })
+        await Actions.faucet.fundSync(
+          client as unknown as Client<Transport, Chain.Chain<null>>,
+          { account: address },
+        )
       else {
         await Actions.token.transferSync(
           client as unknown as Client<Transport, Chain.Chain<null>>,
@@ -102,6 +101,7 @@ export function AddFunds(props: DemoStepProps) {
       active={active}
       completed={Boolean(address && balance && balance > 0n)}
       actions={actions}
+      error={fundAccount.error}
       number={stepNumber}
       title="Add testnet funds to your account."
     />

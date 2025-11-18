@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import type { VariantProps } from 'cva'
 import * as React from 'react'
 import { Hooks } from 'tempo.ts/wagmi'
-import type { Address } from 'viem'
+import type { Address, BaseError } from 'viem'
 import { formatUnits } from 'viem'
 import { useAccount, useConnect, useConnectors, useDisconnect } from 'wagmi'
 import LucideCheck from '~icons/lucide/check'
@@ -256,11 +256,12 @@ export function Step(
     actions?: React.ReactNode | undefined
     active: boolean
     completed: boolean
+    error?: BaseError | Error | null | undefined
     number: number
     title: React.ReactNode
   }>,
 ) {
-  const { actions, active, children, completed, number, title } = props
+  const { actions, active, children, completed, error, number, title } = props
   return (
     <div data-active={active} data-completed={completed} className="group">
       <header className="flex max-sm:flex-col max-sm:items-start max-sm:justify-start items-center justify-between gap-4">
@@ -282,6 +283,14 @@ export function Step(
         </div>
       </header>
       {children}
+      {error && (
+        <>
+          <div className="h-2" />
+          <div className="bg-destructiveTint text-destructive rounded py-2 px-3 text-[14px] -tracking-[2%] leading-normal font-normal">
+            {'shortMessage' in error ? error.shortMessage : error.message}
+          </div>
+        </>
+      )}
     </div>
   )
 }

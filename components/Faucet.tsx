@@ -5,7 +5,6 @@ import { Abis } from 'tempo.ts/viem'
 import { Actions, Hooks } from 'tempo.ts/wagmi'
 import { type Address, formatUnits, parseEventLogs } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
-import { waitForTransactionReceipt } from 'wagmi/actions'
 import LucideDollarSign from '~icons/lucide/dollar-sign'
 
 import { Container } from './Container'
@@ -19,16 +18,13 @@ export function Faucet() {
     undefined,
   )
 
-  const fund = Hooks.faucet.useFund()
+  const fund = Hooks.faucet.useFundSync()
   const receivedTokens = useQuery({
     enabled: Boolean(fund.data),
     queryKey: ['receivedTokens', fund.data] as const,
     async queryFn({ queryKey }) {
-      const [, hashes] = queryKey
-      if (!hashes) throw new Error('hashes not found')
-      const receipts = await Promise.all(
-        hashes.map((hash) => waitForTransactionReceipt(config, { hash })),
-      )
+      const [, receipts] = queryKey
+      if (!receipts) throw new Error('receipts not found')
       const events = receipts.flatMap((receipt) =>
         parseEventLogs({
           abi: Abis.tip20,
@@ -131,6 +127,14 @@ export function Faucet() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {fund.error && (
+          <div className="bg-destructiveTint text-destructive rounded py-2 px-3 text-[14px] -tracking-[2%] leading-normal font-normal">
+            {'shortMessage' in fund.error
+              ? fund.error.shortMessage
+              : (fund.error as Error).message}
           </div>
         )}
       </div>
