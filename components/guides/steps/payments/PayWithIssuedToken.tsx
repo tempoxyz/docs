@@ -3,7 +3,7 @@ import { Hooks } from 'tempo.ts/wagmi'
 import { formatUnits, isAddress, pad, parseUnits, stringToHex } from 'viem'
 import { useAccount, useAccountEffect } from 'wagmi'
 import { useDemoContext } from '../../../DemoContext'
-import { Button, ExplorerLink, Step } from '../../Demo'
+import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
@@ -13,9 +13,7 @@ const validatorToken = alphaUsd
 export function PayWithIssuedToken(props: DemoStepProps) {
   const { stepNumber, last = false } = props
   const { address } = useAccount()
-  const [recipient, setRecipient] = React.useState<string>(
-    '0xbeefcafe54750903ac1c8909323af7beb21ea2cb',
-  )
+  const [recipient, setRecipient] = React.useState<string>(FAKE_RECIPIENT)
   const [memo, setMemo] = React.useState<string>('')
   const [expanded, setExpanded] = React.useState(false)
   const { getData } = useDemoContext()

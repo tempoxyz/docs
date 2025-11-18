@@ -1,20 +1,24 @@
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
+import type { TokenRole } from 'tempo.ts/ox'
 import { Hooks } from 'tempo.ts/wagmi'
-import { type Address, pad, parseUnits, stringToHex } from 'viem'
 import { useAccount, useAccountEffect } from 'wagmi'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
+
 import type { DemoStepProps } from '../types'
 
-export function MintToken(props: DemoStepProps & { recipient?: Address }) {
-  const { stepNumber, recipient, last = false } = props
+export function RevokeTokenRoles(
+  props: DemoStepProps & {
+    roles: TokenRole.TokenRole[]
+  },
+) {
+  const { stepNumber, roles, last = false } = props
   const { address } = useAccount()
-  const { getData, setData } = useDemoContext()
+  const { getData } = useDemoContext()
   const queryClient = useQueryClient()
 
-  const [memo, setMemo] = React.useState<string>('')
   const [expanded, setExpanded] = React.useState(false)
 
   // Get the address of the token created in a previous step
@@ -23,55 +27,48 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
   const { data: metadata } = Hooks.token.useGetMetadata({
     token: tokenAddress,
   })
-  const { data: hasRole } = Hooks.token.useHasRole({
-    account: address,
-    token: tokenAddress,
-    role: 'issuer',
-  })
-  const { data: balance } = Hooks.token.useGetBalance({
-    account: address,
-    token: tokenAddress,
-  })
 
-  const mint = Hooks.token.useMintSync({
+  // Check if user has each requested role
+  const roleChecks = roles.map((role) =>
+    Hooks.token.useHasRole({
+      account: address,
+      token: tokenAddress,
+      role: role,
+    }),
+  )
+
+  // Check if user has any of the roles to revoke
+  const hasAnyRole = roleChecks.some((check) => check.data === true)
+
+  const revoke = Hooks.token.useRevokeRolesSync({
     mutation: {
-      onSettled(data) {
-        queryClient.refetchQueries({ queryKey: ['getBalance'] })
-        setData('transferId', data?.receipt.transactionHash || 'mint')
+      onSettled() {
+        queryClient.refetchQueries({ queryKey: ['hasRole'] })
       },
     },
   })
   useAccountEffect({
     onDisconnect() {
       setExpanded(false)
-      mint.reset()
+      revoke.reset()
     },
   })
 
-  const handleMint = async () => {
-    if (!tokenAddress || !address || !metadata) return
+  const handleRevoke = async () => {
+    if (!tokenAddress || !address) return
 
-    await mint.mutate({
-      amount: parseUnits('100', metadata.decimals),
-      to: recipient || address,
+    await revoke.mutate({
       token: tokenAddress,
-      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
+      roles: roles,
+      from: address,
       feeToken: alphaUsd,
     })
   }
 
-  const hasSufficientBalance =
-    balance && metadata && balance >= parseUnits('90', metadata.decimals)
-
   return (
     <Step
-      active={Boolean(
-        !!tokenAddress &&
-          !!hasRole &&
-          !hasSufficientBalance &&
-          (last ? true : !mint.isSuccess),
-      )}
-      completed={mint.isSuccess || Boolean(hasSufficientBalance)}
+      active={!!tokenAddress && hasAnyRole && (last ? true : !revoke.isSuccess)}
+      completed={revoke.isSuccess}
       actions={
         expanded ? (
           <Button
@@ -85,15 +82,13 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
         ) : (
           <Button
             variant={
-              !!tokenAddress && !!hasRole && !hasSufficientBalance
-                ? mint.isSuccess
+              tokenAddress && hasAnyRole
+                ? revoke.isSuccess
                   ? 'default'
                   : 'accent'
                 : 'default'
             }
-            disabled={Boolean(
-              !tokenAddress || !hasRole || hasSufficientBalance,
-            )}
+            disabled={!tokenAddress || !hasAnyRole}
             onClick={() => setExpanded(true)}
             type="button"
             className="text-[14px] -tracking-[2%] font-normal"
@@ -103,7 +98,7 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
         )
       }
       number={stepNumber}
-      title={`Mint 100 ${metadata ? metadata.name : 'tokens'} to ${recipient ? 'recipient' : 'yourself'}.`}
+      title={`Revoke ${roles.join(', ')} role${roles.length > 1 ? 's' : ''} on ${metadata ? metadata.name : 'token'}.`}
     >
       {expanded && (
         <div className="flex mx-6 flex-col gap-3 pb-4">
@@ -114,48 +109,31 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
                   className="text-[11px] -tracking-[1%] text-gray9"
                   htmlFor="recipient"
                 >
-                  Recipient address
+                  Revoke role from yourself
                 </label>
                 <input
                   className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
                   data-1p-ignore
                   type="text"
                   name="recipient"
-                  value={recipient || address}
+                  value={address}
                   disabled={true}
-                  onChange={(_e) => {}}
+                  onChange={() => {}}
                   placeholder="0x..."
-                />
-              </div>
-              <div className="flex flex-col flex-1">
-                <label
-                  className="text-[11px] -tracking-[1%] text-gray9"
-                  htmlFor="memo"
-                >
-                  Memo (optional)
-                </label>
-                <input
-                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
-                  data-1p-ignore
-                  type="text"
-                  name="memo"
-                  value={memo}
-                  onChange={(e) => setMemo(e.target.value)}
-                  placeholder="INV-12345"
                 />
               </div>
               <Button
                 variant={address ? 'accent' : 'default'}
                 disabled={!address}
-                onClick={handleMint}
+                onClick={handleRevoke}
                 type="button"
                 className="text-[14px] -tracking-[2%] font-normal"
               >
-                {mint.isPending ? 'Minting...' : 'Mint'}
+                {revoke.isPending ? 'Revoking...' : 'Revoke'}
               </Button>
             </div>
-            {mint.isSuccess && mint.data && (
-              <ExplorerLink hash={mint.data.receipt.transactionHash} />
+            {revoke.isSuccess && revoke.data && (
+              <ExplorerLink hash={revoke.data.receipt.transactionHash} />
             )}
           </div>
         </div>

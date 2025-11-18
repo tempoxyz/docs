@@ -15,6 +15,8 @@ import { cva, cx } from '../../cva.config'
 import { Container as ParentContainer } from '../Container'
 import { alphaUsd } from './tokens'
 
+export const FAKE_RECIPIENT = '0xbeefcafe54750903ac1c8909323af7beb21ea2cb'
+
 export function useWebAuthnConnector() {
   const connectors = useConnectors()
   return React.useMemo(

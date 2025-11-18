@@ -2,16 +2,14 @@ import * as React from 'react'
 import { Hooks } from 'tempo.ts/wagmi'
 import { isAddress, pad, parseUnits, stringToHex } from 'viem'
 import { useAccount, useAccountEffect } from 'wagmi'
-import { Button, ExplorerLink, Step } from '../../Demo'
+import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
 export function SendPayment(props: DemoStepProps) {
   const { stepNumber, last = false } = props
   const { address } = useAccount()
-  const [recipient, setRecipient] = React.useState<string>(
-    '0xbeefcafe54750903ac1c8909323af7beb21ea2cb',
-  )
+  const [recipient, setRecipient] = React.useState<string>(FAKE_RECIPIENT)
   const [memo, setMemo] = React.useState<string>('')
   const [expanded, setExpanded] = React.useState(false)
   const { data: balance, refetch: balanceRefetch } = Hooks.token.useGetBalance({

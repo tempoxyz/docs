@@ -10,21 +10,280 @@ Configure your stablecoin's permissions, supply limits, and compliance policies 
 
 TIP-20 tokens use a role-based access control system that allows you to delegate different administrative functions to different addresses. For detailed information about the role system, see the [TIP-20 specification](/documentation/protocol/tip20/spec#role-based-access-control).
 
-
-<Demo.Container name="Manage Your Stablecoin" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.CreateOrLoadToken stepNumber={3} />
-  <Step.GrantTokenRoles stepNumber={4} roles={['issuer', 'pause', 'unpause', 'burnBlocked']} />
-</Demo.Container>
-
 ## Steps
+
+In this guide, we'll walk through how to assign and check the **`issuer`** role, but the process is identical for other roles like `pause`, `unpause`, `burnBlocked`, and `defaultAdmin`.
 
 ::::steps
 
+### Setup
+
+Before you can manage roles on your stablecoin, you need to create one. Follow the [Create a Stablecoin](/guide/issuance/create-a-stablecoin) guide to deploy your token.
+
+Once you've created your token, you can proceed to grant roles to specific addresses.
+
+### Grant Roles to an Address
+
+Assign roles to specific addresses to delegate token management capabilities.
+
+<Demo.Container name="Grant Roles to an Address" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+  <Step.Connect stepNumber={1} />
+  <Step.AddFunds stepNumber={2} />
+  <Step.CreateOrLoadToken stepNumber={3} />
+  <Step.GrantTokenRoles stepNumber={4} roles={['issuer']} last />
+</Demo.Container>
+
+:::code-group
+
+```tsx twoslash [GrantRoles.tsx]
+import React from 'react'
+import { Hooks } from 'tempo.ts/wagmi'
+import { useQueryClient } from '@tanstack/react-query'
+
+// @noErrors
+export function GrantRoles() {
+  const queryClient = useQueryClient()
+  const tokenAddress = '0x...' // Your token address
+  const treasuryAddress = '0x...' // Address to grant the issuer role
+
+  const grant = Hooks.token.useGrantRolesSync({}) // [!code hl]
+
+  const handleGrantIssuer = async () => { // [!code hl]
+    await grant.mutate({ // [!code hl]
+      token: tokenAddress, // [!code hl]
+      roles: ['issuer'], // [!code hl]
+      to: treasuryAddress, // [!code hl]
+      feeToken: '0x20c0000000000000000000000000000000000001', // [!code hl]
+    }) // [!code hl]
+  } // [!code hl]
+
+  return (
+    <button // [!code hl]
+      disabled={grant.isPending} // [!code hl]
+      onClick={handleGrantIssuer} // [!code hl]
+      type="button" // [!code hl]
+    > {/* [!code hl] */}
+      {grant.isPending ? 'Granting...' : 'Grant Issuer Role'} {/* [!code hl] */}
+    </button> {/* [!code hl] */}
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+:::
+
+### Check if an Address Has a Role
+
+Use `hasRole` to verify whether an address has been granted a specific role.
+
+:::code-group
+
+```tsx twoslash [GrantRoles.tsx]
+import React from 'react'
+import { Hooks } from 'tempo.ts/wagmi'
+import { useQueryClient } from '@tanstack/react-query'
+
+// @noErrors
+export function GrantRoles() {
+  const queryClient = useQueryClient()
+  const tokenAddress = '0x...' // Your token address
+  const treasuryAddress = '0x...' // Address to grant the issuer role
+
+  // Grant the issuer role
+  const grant = Hooks.token.useGrantRolesSync({
+    mutation: { // [!code ++]
+      onSettled() { // [!code ++]
+        queryClient.refetchQueries({ queryKey: ['hasRole'] }) // [!code ++]
+      }, // [!code ++]
+    }, // [!code ++]
+  })
+
+  const handleGrantIssuer = async () => {
+    await grant.mutate({
+      token: tokenAddress,
+      roles: ['issuer'],
+      to: treasuryAddress,
+      feeToken: '0x20c0000000000000000000000000000000000001',
+    })
+  }
+
+  const { data: hasIssuerRole } = Hooks.token.useHasRole({ // [!code ++]
+    account: treasuryAddress, // [!code ++]
+    token: tokenAddress, // [!code ++]
+    role: 'issuer', // [!code ++]
+  }) // [!code ++]
+
+  return (
+    <div>
+      <button
+        disabled={grant.isPending}
+        onClick={handleGrantIssuer}
+        type="button"
+      >
+        {grant.isPending ? 'Granting...' : 'Grant Issuer Role'}
+      </button>
+
+      {hasIssuerRole !== undefined && ( // [!code ++]
+        <div> {/* [!code ++] */}
+          Treasury {hasIssuerRole ? 'has' : 'does not have'} the issuer role {/* [!code ++] */}
+        </div> {/* [!code ++] */}
+      )} {/* [!code ++] */}
+    </div>
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+:::
+
+### Revoke the Issuer Role
+
+Revoke roles from addresses when you need to remove their permissions.
+
+<Demo.Container name="Revoke Issuer Role" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+  <Step.Connect stepNumber={1} />
+  <Step.AddFunds stepNumber={2} />
+  <Step.CreateOrLoadToken stepNumber={3} />
+  <Step.GrantTokenRoles stepNumber={4} roles={['issuer']} />
+  <Step.RevokeTokenRoles stepNumber={5} roles={['issuer']} last />
+</Demo.Container>
+
+:::code-group
+
+```tsx twoslash [RevokeRoles.tsx]
+import React from 'react'
+import { Hooks } from 'tempo.ts/wagmi'
+import { useQueryClient } from '@tanstack/react-query'
+
+// @noErrors
+export function RevokeRoles() {
+  const queryClient = useQueryClient()
+  const tokenAddress = '0x...' // Your token address
+  const treasuryAddress = '0x...' // Address to grant/revoke the issuer role
+
+  // Grant the issuer role
+  const grant = Hooks.token.useGrantRolesSync({
+    mutation: {
+      onSettled() {
+        queryClient.refetchQueries({ queryKey: ['hasRole'] })
+      },
+    },
+  })
+
+  const handleGrantIssuer = async () => {
+    await grant.mutate({
+      token: tokenAddress,
+      roles: ['issuer'],
+      to: treasuryAddress,
+      feeToken: '0x20c0000000000000000000000000000000000001',
+    })
+  }
+
+  // Check if the treasury has the issuer role
+  const { data: hasIssuerRole } = Hooks.token.useHasRole({
+    account: treasuryAddress,
+    token: tokenAddress,
+    role: 'issuer',
+  })
+
+  // Revoke the issuer role // [!code ++]
+  const revoke = Hooks.token.useRevokeRolesSync({ // [!code ++]
+    mutation: { // [!code ++]
+      onSettled() { // [!code ++]
+        queryClient.refetchQueries({ queryKey: ['hasRole'] }) // [!code ++]
+      }, // [!code ++]
+    }, // [!code ++]
+  }) // [!code ++]
+
+  const handleRevokeIssuer = async () => { // [!code ++]
+    await revoke.mutate({ // [!code ++]
+      token: tokenAddress, // [!code ++]
+      roles: ['issuer'], // [!code ++]
+      from: treasuryAddress, // [!code ++]
+      feeToken: '0x20c0000000000000000000000000000000000001', // [!code ++]
+    }) // [!code ++]
+  } // [!code ++]
+
+  return (
+    <div>
+      <button
+        disabled={grant.isPending}
+        onClick={handleGrantIssuer}
+        type="button"
+      >
+        {grant.isPending ? 'Granting...' : 'Grant Issuer Role'}
+      </button>
+
+      <button // [!code ++]
+        disabled={revoke.isPending || !hasIssuerRole} // [!code ++]
+        onClick={handleRevokeIssuer} // [!code ++]
+        type="button" // [!code ++]
+      > {/* [!code ++] */}
+        {revoke.isPending ? 'Revoking...' : 'Revoke Issuer Role'} {/* [!code ++] */}
+      </button> {/* [!code ++] */}
+
+      {hasIssuerRole !== undefined && (
+        <div>
+          Treasury {hasIssuerRole ? 'has' : 'does not have'} the issuer role
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+:::
+
+::::
+
+## Recipes
+
 ### Set Supply Cap
 
-Limit the maximum total supply of your token to prevent unlimited inflation.
+Limit the maximum total supply of your token. Setting supply caps requires the **`DEFAULT_ADMIN_ROLE`**. The new cap cannot be less than the current total supply.
 
 <Demo.Container name="Set Supply Cap" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
   <Step.Connect stepNumber={1} />
@@ -86,92 +345,96 @@ export const config = createConfig({
 })
 ```
 
-```solidity [Solidity]
-TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
-
-// Set supply cap to 1,000 tokens (USD has 6 decimals)
-token.setSupplyCap(1_000_000_000);
-
-// Set supply cap to 1 billion tokens
-token.setSupplyCap(1_000_000_000_000_000);
-
-// Remove supply cap (unlimited)
-token.setSupplyCap(type(uint256).max);
-```
-
 :::
 
-Setting supply caps requires the **`DEFAULT_ADMIN_ROLE`**. The new cap cannot be less than the current total supply.
+### Configure Transfer Policies
 
+Control who can send and receive your stablecoin for compliance and regulatory requirements. Setting transer policies requires the **`DEFAULT_ADMIN_ROLE`**.
 
-### Grant Roles to Delegate Permissions
+Transfer policies can be:
+- **Always allow**: Anyone can send/receive (default)
+- **Always reject**: Nobody can send/receive
+- **Whitelist**: Only authorized addresses can send/receive
+- **Blacklist**: Blocked addresses cannot send/receive
 
-Assign roles to different addresses to delegate specific token management capabilities:
+Learn more about configuring transfer policies in the [TIP-403 specification](/documentation/protocol/tip403/spec).
+
+<Demo.Container name="Create and Link Transfer Policy" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+  <Step.Connect stepNumber={1} />
+  <Step.AddFunds stepNumber={2} />
+  <Step.CreateOrLoadToken stepNumber={3} />
+  <Step.CreateTokenPolicy stepNumber={4} />
+  <Step.LinkTokenPolicy stepNumber={5} last />
+</Demo.Container>
 
 :::code-group
 
-```tsx twoslash [GrantRoles.tsx]
+```tsx twoslash [CreateTokenPolicy.tsx]
 import React from 'react'
 import { Hooks } from 'tempo.ts/wagmi'
-import { useAccount } from 'wagmi'
-import { useQueryClient } from '@tanstack/react-query'
 
 // @noErrors
-export function GrantRoles() {
-  const { address } = useAccount()
-  const queryClient = useQueryClient()
+export function CreateTokenPolicy() {
   const tokenAddress = '0x...' // Your token address
-  const [grantee, setGrantee] = React.useState<string>('')
 
-  const roles = ['issuer', 'pause', 'unpause'] as const // [!code hl]
-
-  // Check if grantee has all roles // [!code hl]
-  const roleChecks = roles.map((role) => // [!code hl]
-    Hooks.token.useHasRole({ // [!code hl]
-      account: grantee as `0x${string}`, // [!code hl]
-      token: tokenAddress, // [!code hl]
-      role: role, // [!code hl]
-    }), // [!code hl]
-  ) // [!code hl]
-  const hasAllRoles = roleChecks.every((check) => check.data === true) // [!code hl]
-
-  const grant = Hooks.token.useGrantRolesSync({ // [!code hl]
+  const createPolicy = Hooks.policy.useCreateSync({ // [!code hl]
     mutation: { // [!code hl]
-      onSettled() { // [!code hl]
-        queryClient.refetchQueries({ queryKey: ['hasRole'] }) // [!code hl]
+      onSuccess(result) { // [!code hl]
+        // Store policyId for the next step // [!code hl]
+        console.log('Policy ID:', result.policyId) // [!code hl]
       }, // [!code hl]
     }, // [!code hl]
   }) // [!code hl]
 
-  const handleGrant = async () => { // [!code hl]
-    if (!tokenAddress || !grantee) return // [!code hl]
-    await grant.mutate({ // [!code hl]
-      token: tokenAddress, // [!code hl]
-      roles: roles, // [!code hl]
-      to: grantee as `0x${string}`, // [!code hl]
+  const handleCreatePolicy = async () => { // [!code hl]
+    await createPolicy.mutateAsync({ // [!code hl]
+      addresses: [ // [!code hl]
+        '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', // [!code hl]
+      ], // [!code hl]
+      type: 'blacklist', // [!code hl]
       feeToken: '0x20c0000000000000000000000000000000000001', // [!code hl]
     }) // [!code hl]
   } // [!code hl]
 
   return (
-    <>
-      <div>
-        <label>Grant roles to address</label>
-        <input
-          type="text"
-          value={grantee}
-          onChange={(e) => setGrantee(e.target.value)}
-          placeholder="0x..."
-        />
-      </div>
-      <button // [!code hl]
-        disabled={!address || hasAllRoles || grant.isPending} // [!code hl]
-        onClick={handleGrant} // [!code hl]
-        type="button" // [!code hl]
-      > {/* [!code hl] */}
-        {grant.isPending ? 'Granting...' : 'Grant'} {/* [!code hl] */}
-      </button> {/* [!code hl] */}
-    </>
+    <button // [!code hl]
+      disabled={createPolicy.isPending} // [!code hl]
+      onClick={handleCreatePolicy} // [!code hl]
+      type="button" // [!code hl]
+    > {/* [!code hl] */}
+      {createPolicy.isPending ? 'Creating...' : 'Create Policy'} {/* [!code hl] */}
+    </button> {/* [!code hl] */}
+  )
+}
+```
+
+```tsx twoslash [LinkTokenPolicy.tsx]
+import React from 'react'
+import { Hooks } from 'tempo.ts/wagmi'
+
+// @noErrors
+export function LinkTokenPolicy() {
+  const tokenAddress = '0x...' // Your token address
+  const policyId = 1n // Policy ID from previous step
+
+  const linkPolicy = Hooks.token.useChangeTransferPolicySync() // [!code hl]
+
+  const handleLinkPolicy = async () => { // [!code hl]
+    await linkPolicy.mutateAsync({ // [!code hl]
+      policyId, // [!code hl]
+      token: tokenAddress, // [!code hl]
+      feeToken: '0x20c0000000000000000000000000000000000001', // [!code hl]
+    }) // [!code hl]
+  } // [!code hl]
+
+  return (
+    <button // [!code hl]
+      disabled={linkPolicy.isPending} // [!code hl]
+      onClick={handleLinkPolicy} // [!code hl]
+      type="button" // [!code hl]
+    > {/* [!code hl] */}
+      {linkPolicy.isPending ? 'Linking...' : 'Link Policy'} {/* [!code hl] */}
+    </button> {/* [!code hl] */}
   )
 }
 ```
@@ -191,35 +454,11 @@ export const config = createConfig({
 })
 ```
 
-```solidity [Solidity]
-TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
-
-// Grant the issuer role to treasury, to mint tokens
-address treasuryAddress = 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef;
-token.grantRole(keccak256("ISSUER_ROLE"), treasuryAddress);
-
-// Grant the pause role to security, to pause transfers
-address securityAddress = 0xcafecafebabedeadbeefcafebabedeadbeefcafebabe;
-token.grantRole(keccak256("PAUSE_ROLE"), securityAddress);
-```
-
 :::
-
-### Configure Transfer Policies
-
-Control who can send and receive your stablecoin for compliance and regulatory requirements.
-
-Transfer policies can be:
-- **Always allow**: Anyone can send/receive (default)
-- **Always reject**: Nobody can send/receive
-- **Whitelist**: Only authorized addresses can send/receive
-- **Blacklist**: Blocked addresses cannot send/receive
-
-Learn more about configuring transfer policies in the [TIP-403 specification](/documentation/protocol/tip403/spec).
 
 ### Pause and Unpause Token Transfers
 
-Temporarily halt all token transfers during emergency situations or maintenance windows.
+Temporarily halt all token transfers during emergency situations or maintenance windows. Pausing transfers requires the **`PAUSE_ROLE`**. Unpausing transfers requires the **`UNPAUSE_ROLE`**.
 
 <Demo.Container name="Pause and Unpause Your Token" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
   <Step.Connect stepNumber={1} />
@@ -295,29 +534,80 @@ export const config = createConfig({
 })
 ```
 
-```solidity [Solidity]
-TIP20 token = TIP20(0x20c0000000000000000000000000000000000004);
-
-// Pause all transfers
-token.pause();
-
-// Later, unpause to resume normal operation
-token.unpause();
-```
-
 :::
-
-::::
-
-## Recipes
-
-### Using the Issuer Role
-
-The Issuer role grants the ability to mint and burn tokens, controlling your stablecoin's total supply. To learn how to mint new tokens and burn existing tokens, see the [Mint Stablecoins](/guide/issuance/mint-stablecoins) guide.
 
 ### Using the Burn Blocked Role
 
-The Burn Blocked role allows compliance officers to burn tokens from blocked or frozen addresses. This is useful for regulatory compliance when you need to remove tokens from addresses that violate terms of service or legal requirements.
+The Burn Blocked role allows your team to burn tokens from blocked or frozen addresses. This is useful for regulatory compliance when you need to remove tokens from addresses that violate terms of service or legal requirements.
+
+<Demo.Container name="Create and Link Transfer Policy" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+  <Step.Connect stepNumber={1} />
+  <Step.AddFunds stepNumber={2} />
+  <Step.CreateOrLoadToken stepNumber={3} />
+  <Step.GrantTokenRoles stepNumber={4} roles={['issuer', 'burnBlocked']} />
+  <Step.MintToken stepNumber={5} recipient={Demo.FAKE_RECIPIENT} />
+  <Step.CreateTokenPolicy stepNumber={6} waitForTransfer />
+  <Step.LinkTokenPolicy stepNumber={7} />
+  <Step.BurnTokenBlocked stepNumber={8} last />
+</Demo.Container>
+
+:::code-group
+
+```tsx twoslash [BurnBlocked.tsx]
+import React from 'react'
+import { Hooks } from 'tempo.ts/wagmi'
+import { parseUnits } from 'viem'
+
+// @noErrors
+export function BurnBlocked() {
+  const tokenAddress = '0x...' // Your token address
+  const blockedAddress = '0x...' // The blocked address to burn tokens from
+
+  const { data: metadata } = Hooks.token.useGetMetadata({ // [!code hl]
+    token: tokenAddress, // [!code hl]
+  }) // [!code hl]
+
+  const burnBlocked = Hooks.token.useBurnBlockedSync() // [!code hl]
+
+  const handleBurnBlocked = async () => { // [!code hl]
+    if (!metadata) return // [!code hl]
+
+    await burnBlocked.mutateAsync({ // [!code hl]
+      token: tokenAddress, // [!code hl]
+      from: blockedAddress, // [!code hl]
+      amount: parseUnits('100', metadata.decimals), // [!code hl]
+      feeToken: '0x20c0000000000000000000000000000000000001', // [!code hl]
+    }) // [!code hl]
+  } // [!code hl]
+
+  return (
+    <button // [!code hl]
+      disabled={burnBlocked.isPending} // [!code hl]
+      onClick={handleBurnBlocked} // [!code hl]
+      type="button" // [!code hl]
+    > {/* [!code hl] */}
+      {burnBlocked.isPending ? 'Burning...' : 'Burn Blocked Tokens'} {/* [!code hl] */}
+    </button> {/* [!code hl] */}
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+:::
 
 ## Best Practices
 

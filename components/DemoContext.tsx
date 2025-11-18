@@ -13,6 +13,8 @@ interface DemoData {
   tokenAddress: Address
   tokenReceipt: TransactionReceipt
   sponsorAccount: PrivateKeyAccount
+  transferId: string
+  policyId: bigint
 }
 
 interface DemoContextValue {

@@ -1,20 +1,19 @@
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import { Hooks } from 'tempo.ts/wagmi'
-import { type Address, pad, parseUnits, stringToHex } from 'viem'
+import { parseUnits } from 'viem'
 import { useAccount, useAccountEffect } from 'wagmi'
 import { useDemoContext } from '../../../DemoContext'
-import { Button, ExplorerLink, Step } from '../../Demo'
+import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
-export function MintToken(props: DemoStepProps & { recipient?: Address }) {
-  const { stepNumber, recipient, last = false } = props
+export function BurnTokenBlocked(props: DemoStepProps) {
+  const { stepNumber, last = false } = props
   const { address } = useAccount()
-  const { getData, setData } = useDemoContext()
+  const { getData } = useDemoContext()
   const queryClient = useQueryClient()
 
-  const [memo, setMemo] = React.useState<string>('')
   const [expanded, setExpanded] = React.useState(false)
 
   // Get the address of the token created in a previous step
@@ -26,52 +25,57 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
   const { data: hasRole } = Hooks.token.useHasRole({
     account: address,
     token: tokenAddress,
-    role: 'issuer',
+    role: 'burnBlocked',
   })
-  const { data: balance } = Hooks.token.useGetBalance({
-    account: address,
+  const { data: recipientBalance } = Hooks.token.useGetBalance({
+    account: FAKE_RECIPIENT,
     token: tokenAddress,
   })
 
-  const mint = Hooks.token.useMintSync({
+  const burnBlocked = Hooks.token.useBurnBlockedSync({
     mutation: {
-      onSettled(data) {
+      onSettled() {
         queryClient.refetchQueries({ queryKey: ['getBalance'] })
-        setData('transferId', data?.receipt.transactionHash || 'mint')
       },
     },
   })
   useAccountEffect({
     onDisconnect() {
       setExpanded(false)
-      mint.reset()
+      burnBlocked.reset()
     },
   })
 
-  const handleMint = async () => {
+  const handleBurnBlocked = () => {
     if (!tokenAddress || !address || !metadata) return
 
-    await mint.mutate({
+    burnBlocked.mutate({
       amount: parseUnits('100', metadata.decimals),
-      to: recipient || address,
+      from: FAKE_RECIPIENT,
       token: tokenAddress,
-      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
       feeToken: alphaUsd,
     })
   }
 
   const hasSufficientBalance =
-    balance && metadata && balance >= parseUnits('90', metadata.decimals)
+    recipientBalance &&
+    metadata &&
+    recipientBalance >= parseUnits('100', metadata.decimals)
+
+  const active = React.useMemo(() => {
+    return Boolean(
+      tokenAddress &&
+        hasRole &&
+        hasSufficientBalance &&
+        metadata.transferPolicyId &&
+        metadata.transferPolicyId !== 1n,
+    )
+  }, [tokenAddress, hasRole, hasSufficientBalance, metadata])
 
   return (
     <Step
-      active={Boolean(
-        !!tokenAddress &&
-          !!hasRole &&
-          !hasSufficientBalance &&
-          (last ? true : !mint.isSuccess),
-      )}
-      completed={mint.isSuccess || Boolean(hasSufficientBalance)}
+      active={active && (last ? true : !burnBlocked.isSuccess)}
+      completed={burnBlocked.isSuccess}
       actions={
         expanded ? (
           <Button
@@ -85,15 +89,13 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
         ) : (
           <Button
             variant={
-              !!tokenAddress && !!hasRole && !hasSufficientBalance
-                ? mint.isSuccess
+              active
+                ? burnBlocked.isSuccess
                   ? 'default'
                   : 'accent'
                 : 'default'
             }
-            disabled={Boolean(
-              !tokenAddress || !hasRole || hasSufficientBalance,
-            )}
+            disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
             className="text-[14px] -tracking-[2%] font-normal"
@@ -103,7 +105,7 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
         )
       }
       number={stepNumber}
-      title={`Mint 100 ${metadata ? metadata.name : 'tokens'} to ${recipient ? 'recipient' : 'yourself'}.`}
+      title={`Burn 100 ${metadata ? metadata.name : 'tokens'} from blocked address.`}
     >
       {expanded && (
         <div className="flex mx-6 flex-col gap-3 pb-4">
@@ -112,50 +114,33 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
               <div className="flex flex-col flex-2">
                 <label
                   className="text-[11px] -tracking-[1%] text-gray9"
-                  htmlFor="recipient"
+                  htmlFor="blockedAddress"
                 >
-                  Recipient address
+                  Blocked address
                 </label>
                 <input
                   className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
                   data-1p-ignore
                   type="text"
-                  name="recipient"
-                  value={recipient || address}
+                  name="blockedAddress"
+                  value={FAKE_RECIPIENT}
                   disabled={true}
                   onChange={(_e) => {}}
                   placeholder="0x..."
                 />
               </div>
-              <div className="flex flex-col flex-1">
-                <label
-                  className="text-[11px] -tracking-[1%] text-gray9"
-                  htmlFor="memo"
-                >
-                  Memo (optional)
-                </label>
-                <input
-                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
-                  data-1p-ignore
-                  type="text"
-                  name="memo"
-                  value={memo}
-                  onChange={(e) => setMemo(e.target.value)}
-                  placeholder="INV-12345"
-                />
-              </div>
               <Button
                 variant={address ? 'accent' : 'default'}
                 disabled={!address}
-                onClick={handleMint}
+                onClick={handleBurnBlocked}
                 type="button"
                 className="text-[14px] -tracking-[2%] font-normal"
               >
-                {mint.isPending ? 'Minting...' : 'Mint'}
+                {burnBlocked.isPending ? 'Burning...' : 'Burn'}
               </Button>
             </div>
-            {mint.isSuccess && mint.data && (
-              <ExplorerLink hash={mint.data.receipt.transactionHash} />
+            {burnBlocked.isSuccess && burnBlocked.data && (
+              <ExplorerLink hash={burnBlocked.data.receipt.transactionHash} />
             )}
           </div>
         </div>

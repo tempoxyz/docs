@@ -1,59 +1,46 @@
+import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import { Hooks } from 'tempo.ts/wagmi'
-import type { Address } from 'viem'
 import { formatUnits, isAddress, pad, parseUnits, stringToHex } from 'viem'
 import { useAccount, useAccountEffect } from 'wagmi'
-import { TokenSelector } from '../../../TokenSelector'
+import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
-import { alphaUsd, betaUsd } from '../../tokens'
+import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
-// Current validator token on testnet
-const validatorToken = alphaUsd
-
-export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
+export function SendPaymentWithIssuedToken(props: DemoStepProps) {
   const { stepNumber, last = false } = props
+  const queryClient = useQueryClient()
   const { address } = useAccount()
   const [recipient, setRecipient] = React.useState<string>(FAKE_RECIPIENT)
   const [memo, setMemo] = React.useState<string>('')
   const [expanded, setExpanded] = React.useState(false)
-  const [feeToken, setFeeToken] = React.useState<Address>(
-    props.feeToken || betaUsd,
-  )
+  const { getData, setData } = useDemoContext()
 
-  // Balance for the payment token (AlphaUSD)
-  const { data: alphaBalance, refetch: alphaBalanceRefetch } =
-    Hooks.token.useGetBalance({
-      account: address,
-      token: alphaUsd,
-    })
+  const tokenAddress = getData('tokenAddress')
+  const feeToken = alphaUsd
 
-  // Balance for the fee token (dynamic based on selection)
+  const { data: tokenBalance } = Hooks.token.useGetBalance({
+    account: address,
+    token: tokenAddress,
+  })
+
   const { data: feeTokenBalance, refetch: feeTokenBalanceRefetch } =
     Hooks.token.useGetBalance({
       account: address,
       token: feeToken,
     })
 
-  // Metadata for fee token
-  const { data: feeTokenMetadata } = Hooks.token.useGetMetadata({
-    token: feeToken,
-  })
-  // Pool detals. Fees are paid in feeToken, so it's the userToken
-  // validator token is a testnet property set at top of file
-  const { data: pool } = Hooks.amm.usePool({
-    userToken: feeToken,
-    validatorToken,
-    query: {
-      enabled: feeToken !== alphaUsd,
-    },
+  const { data: tokenMetadata } = Hooks.token.useGetMetadata({
+    token: tokenAddress,
   })
 
   const sendPayment = Hooks.token.useTransferSync({
     mutation: {
-      onSettled() {
-        alphaBalanceRefetch()
+      onSettled(data) {
+        queryClient.refetchQueries({ queryKey: ['getBalance'] })
         feeTokenBalanceRefetch()
+        setData('transferId', data?.receipt.transactionHash || 'transfer')
       },
     },
   })
@@ -68,11 +55,11 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
   const isValidRecipient = recipient && isAddress(recipient)
 
   const handleTransfer = () => {
-    if (!isValidRecipient) return
+    if (!isValidRecipient || !tokenAddress) return
     sendPayment.mutate({
       amount: parseUnits('100', 6),
       to: recipient as `0x${string}`,
-      token: alphaUsd,
+      token: tokenAddress,
       memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
       feeToken,
     })
@@ -81,15 +68,13 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
   const active = React.useMemo(() => {
     return Boolean(
       address &&
-        alphaBalance &&
-        alphaBalance > 0n &&
+        tokenAddress &&
+        tokenBalance &&
+        tokenBalance > 0n &&
         feeTokenBalance &&
-        feeTokenBalance > 0n &&
-        (feeToken !== alphaUsd
-          ? pool && pool.reserveValidatorToken > 0n
-          : true),
+        feeTokenBalance > 0n,
     )
-  }, [address, alphaBalance, feeTokenBalance, pool])
+  }, [address, tokenAddress, tokenBalance, feeTokenBalance])
 
   return (
     <Step
@@ -124,7 +109,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
         )
       }
       number={stepNumber}
-      title={`Send 100 AlphaUSD and pay fees in ${feeTokenMetadata ? feeTokenMetadata.name : 'another token'}.`}
+      title={`Send 100 ${tokenMetadata ? tokenMetadata.name : 'tokens'}.`}
     >
       {expanded && (
         <div className="flex mx-6 flex-col gap-3 pb-4">
@@ -134,24 +119,15 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-gray10 font-medium">
-                    Payment Token: AlphaUSD
+                    {`Payment Token: ${tokenMetadata ? tokenMetadata.name : 'Your Token'}`}
                   </span>
                   <span className="text-gray12">
-                    balance: {formatUnits(alphaBalance ?? 0n, 6)}
+                    balance: {formatUnits(tokenBalance ?? 0n, 6)}
                   </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray10 font-medium">Fee Token</span>
-                  <TokenSelector
-                    tokens={[alphaUsd, betaUsd]}
-                    value={feeToken}
-                    onChange={setFeeToken}
-                    name="feeToken"
-                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray10 font-medium">
-                    {`Fee Token: ${feeTokenMetadata ? feeTokenMetadata.name : ''}`}
+                    Fee Token: AlphaUSD
                   </span>
                   <span className="text-gray12">
                     balance: {formatUnits(feeTokenBalance ?? 0n, 6)}
@@ -196,8 +172,8 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                 />
               </div>
               <Button
-                variant={active ? 'accent' : 'default'}
-                disabled={!active}
+                variant={active && isValidRecipient ? 'accent' : 'default'}
+                disabled={!(active && isValidRecipient)}
                 onClick={handleTransfer}
                 type="button"
                 className="text-[14px] -tracking-[2%] font-normal"

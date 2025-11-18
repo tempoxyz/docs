@@ -5,7 +5,13 @@ import { formatUnits, isAddress, pad, parseUnits, stringToHex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { useAccount, useAccountEffect, useBlockNumber, useClient } from 'wagmi'
 import { useDemoContext } from '../../../DemoContext'
-import { Button, ExplorerAccountLink, ExplorerLink, Step } from '../../Demo'
+import {
+  Button,
+  ExplorerAccountLink,
+  ExplorerLink,
+  FAKE_RECIPIENT,
+  Step,
+} from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
@@ -160,9 +166,7 @@ export function SendSponsoredPayment(props: DemoStepProps) {
   const { stepNumber, last = false } = props
   const { address } = useAccount()
   const { getData } = useDemoContext()
-  const [recipient, setRecipient] = React.useState<string>(
-    '0xbeefcafe54750903ac1c8909323af7beb21ea2cb',
-  )
+  const [recipient, setRecipient] = React.useState<string>(FAKE_RECIPIENT)
   const [memo, setMemo] = React.useState<string>('')
   const [expanded, setExpanded] = React.useState(false)
 
