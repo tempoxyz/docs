@@ -156,6 +156,7 @@ export const config = createConfig({
 ## Next Steps
 
 Now that you've implemented fee sponsorship, you can:
+- Run a [fee sponsor proxy](/sdk/typescript/viem/withFeePayer#example-fee-payer-service) server that sponsors client transactions
 - Learn more about [Account Abstraction transactions](/documentation/protocol/transactions/spec-account-abstraction#fee-payer-signature-details) and fee payer signature details
 - Explore [Batch Transactions](/guide/use-accounts/batch-transactions) to sponsor multiple operations at once
 - Understand how to [Pay Fees in Any Stablecoin](/guide/payments/pay-fees-in-any-stablecoin) 
@@ -164,9 +165,11 @@ Now that you've implemented fee sponsorship, you can:
 
 ## Recipes
 
-### Use SDK helpers
+### Use `withFeePayer`
 
-Tempo's SDK provides helpers to simplify fee sponsorship implementation:
+Tempo's SDK provides a `withFeePayer` helper that simplifies fee sponsorship by creating a transport that routes transactions to a fee payer service when `feePayer` is requested on a transaction.
+
+See the [withFeePayer](/sdk/typescript/viem/withFeePayer) documentation for more details.
 
 ```ts
 import { withFeePayer } from 'tempo.ts/viem'
@@ -181,20 +184,6 @@ const sponsoredClient = client.extend(
 
 // User can now send transactions without paying fees
 const hash = await sponsoredClient.sendTransaction({
-  calls: [
-    { data: '0x...', to: '0x...' },
-  ],
-})
-```
-
-### Onboarding new users
-
-Remove friction for new users who don't have tokens yet by sponsoring their first transactions:
-
-```ts
-// New user can interact with your app immediately
-// You sponsor their first few transactions
-await sponsoredClient.sendTransaction({
   calls: [
     { data: '0x...', to: '0x...' },
   ],
