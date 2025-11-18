@@ -53,8 +53,7 @@ Contracts for smart account functionality.
 
 ```bash
 # Get token symbol
-cast call 0x20c0000000000000000000000000000000000001 \
-  "symbol()(string)" \
+cast erc20 symbol 0x20c0000000000000000000000000000000000001 \
   --rpc-url https://rpc.testnet.tempo.xyz
 
 # Check balance
@@ -92,7 +91,7 @@ const results = await client.readContract({
 ABIs for these contracts are available in the SDK:
 
 ```typescript
-import { 
+import {
   tip20Abi,
   tip20FactoryAbi,
   stablecoinExchangeAbi,
