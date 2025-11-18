@@ -1,3 +1,12 @@
+import LucideCoins from '~icons/lucide/coins'
+import LucideGift from '~icons/lucide/gift'
+import LucideShield from '~icons/lucide/shield'
+import LucideWallet from '~icons/lucide/wallet'
+import LucideLayers from '~icons/lucide/layers'
+import LucideLayout from '~icons/lucide/layout'
+import LucideArrowLeftRight from '~icons/lucide/arrow-left-right'
+import * as Card from "../../../components/Card.tsx"
+
 # Protocol Specification Overview
 
 ## Introduction
@@ -6,19 +15,52 @@ Tempo is a blockchain protocol purpose-built for global payments. Rather than be
 
 These specifications provide the technical reference for protocol implementers, auditors, and core contributors building on Tempo. Each specification follows a structured format with an Abstract summarizing the component's purpose, Motivation explaining design goals, detailed Specification of behavior, Rationale for key decisions, and examples or test vectors. Specifications link to corresponding reference implementations in Solidity, providing both the normative behavior definition and canonical code.
 
-## Specification Structure
+## Protocol Components
 
-The protocol specifications are organized into the following sections:
-
-| Category | Description |
-|----------|-------------|
-| [Overview](/documentation/protocol) | Protocol introduction and [predeployed contract addresses](/guide/quickstart/predeployed-contracts) |
-| [Transactions](/documentation/protocol/transactions) | Transaction types including AATransaction (0x76) and deprecated FeeTokenTransaction (0x77) |
-| [Fees](/documentation/protocol/fees/spec-fee) | Fee system and AMM for multi-token fee payment |
-| [Token Standards](/documentation/protocol/tip20/overview) | TIP-20 core standard, TIP-403 policy registry, and reward distribution |
-| [Stablecoin Exchange](/documentation/protocol/exchange) | Enshrined exchange and linkingUSD mechanisms |
-| [Blockspace](/documentation/protocol/blockspace/overview) | Block format, payment lanes, and sub-blocks |
-| [Account Abstraction](/documentation/protocol/transactions/spec-default-aa) | Default Account Abstraction (deprecated) |
+<Card.Container>
+  <Card.Link
+    description="Core token standard with native stablecoin features and policy registry integration"
+    href="/documentation/protocol/tip20/overview"
+    icon={LucideCoins}
+    title="TIP-20 Tokens"
+  />
+  <Card.Link
+    description="Reward distribution system for token holders with automated yield mechanisms"
+    href="/documentation/protocol/tip20-rewards/overview"
+    icon={LucideGift}
+    title="TIP-20 Rewards"
+  />
+  <Card.Link
+    description="Policy registry system for compliance, access control, and token governance"
+    href="/documentation/protocol/tip403/overview"
+    icon={LucideShield}
+    title="TIP-403 Policies"
+  />
+  <Card.Link
+    description="Multi-token fee payment system with AMM for stablecoin conversion"
+    href="/documentation/protocol/fees"
+    icon={LucideWallet}
+    title="Fees"
+  />
+  <Card.Link
+    description="AATransaction (0x76) and deprecated FeeTokenTransaction (0x77) transaction types"
+    href="/documentation/protocol/transactions"
+    icon={LucideLayers}
+    title="Tempo Transactions"
+  />
+  <Card.Link
+    description="Block format, payment lanes, and sub-blocks for optimized throughput"
+    href="/documentation/protocol/blockspace/overview"
+    icon={LucideLayout}
+    title="Blockspace"
+  />
+  <Card.Link
+    description="Enshrined stablecoin exchange with linkingUSD mechanisms"
+    href="/documentation/protocol/exchange"
+    icon={LucideArrowLeftRight}
+    title="Stablecoin Exchange"
+  />
+</Card.Container>
 
 ## Audience
 
