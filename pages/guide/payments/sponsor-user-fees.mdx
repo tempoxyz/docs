@@ -171,36 +171,45 @@ Tempo's SDK provides a `withFeePayer` helper that simplifies fee sponsorship by 
 
 See the [withFeePayer](/sdk/typescript/viem/withFeePayer) documentation for more details.
 
-```ts
+```ts twoslash
+// @noErrors
+import { createClient, http, walletActions } from 'viem'
+import { tempo } from 'tempo.ts/chains'
 import { withFeePayer } from 'tempo.ts/viem'
+import { privateKeyToAccount } from 'viem/accounts'
 
-// Create a client with fee payer support
-const sponsoredClient = client.extend(
-  withFeePayer({
-    feePayer: sponsorAccount,
-    feeToken: sponsorPreferredToken,
-  })
-)
+const credentials = `${process.env['TEMPO_USERNAME']}:${process.env['TEMPO_PASSWORD']}`
 
-// User can now send transactions without paying fees
-const hash = await sponsoredClient.sendTransaction({
-  calls: [
-    { data: '0x...', to: '0x...' },
-  ],
-})
-```
+const client = createClient({
+  account: privateKeyToAccount(
+    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
+  ),
+  chain: tempo({ feeToken: '0x20c0000000000000000000000000000000000001' }),
+  transport: withFeePayer( // [!code hl]
+    // [!code hl]
+    // Transport for regular transactions // [!code hl]
+    http(undefined, { // [!code hl]
+      fetchOptions: { // [!code hl]
+        headers: { // [!code hl]
+          Authorization: `Basic ${btoa(credentials)}`, // [!code hl]
+        }, // [!code hl]
+      }, // [!code hl]
+    }), // [!code hl]
+    // Transport for sponsored transactions // [!code hl]
+    http('https://sponsor.myapp.com'), // [!code hl]
+  ), // [!code hl]
+}).extend(walletActions)
 
-### Sponsor payment transactions
+// Regular transaction (uses default transport) 
+const receipt1 = await client.sendTransactionSync({
+  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', 
+}) 
 
-Improve payment UX by sponsoring fees for user payment transactions:
-
-```ts
-// User sends payment, you sponsor the fee
-await sponsoredClient.token.transfer({
-  token: usdcAddress,
-  to: merchantAddress,
-  amount: parseUnits('100', 6),
-})
+// Sponsored transaction (uses feePayer transport) // [!code hl]
+const receipt2 = await client.sendTransactionSync({ // [!code hl]
+  feePayer: true, // [!code hl]
+  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', // [!code hl]
+}) // [!code hl]
 ```
 
 ## Best practices
