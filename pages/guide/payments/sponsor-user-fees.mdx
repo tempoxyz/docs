@@ -1,59 +1,172 @@
+import * as Card from '../../../components/Card.tsx'
+import * as Demo from '../../../components/guides/Demo.tsx'
+import * as SponsorUserFees from '../../../components/guides/SponsorUserFees.tsx'
+import LucideBook from '~icons/lucide/book'
+import LucideCoins from '~icons/lucide/coins'
+import LucideFileCode from '~icons/lucide/file-code'
+import LucideLayers from '~icons/lucide/layers'
+
 # Sponsor User Fees
 
 Enable gasless transactions by sponsoring transaction fees for your users. Tempo's native fee sponsorship allows applications to pay fees on behalf of users, improving UX and removing friction from payment flows.
 
-## How It Works
+## Demo
 
-Fee sponsorship uses Tempo's [Account Abstraction (AA) transaction type](/documentation/protocol/transactions/spec-account-abstraction), which includes an optional `feePayerSignature` field. When present, this signature authorizes a third party (the sponsor) to pay the transaction's gas costs while the original sender executes the transaction logic.
+<Demo.Container name="Sponsor User Fees" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/payments">
+  <SponsorUserFees.CreateSponsorAccount stepNumber={1} />
+  <SponsorUserFees.FundSponsorAccount stepNumber={2} />
+  <Demo.Connect stepNumber={3} />
+  <Demo.AddFunds stepNumber={4} />
+  <SponsorUserFees.SendSponsoredPayment stepNumber={5} last />
+</Demo.Container>
 
-### Dual Signatures
+## Steps
 
-- **Sender signs**: The transaction they want to execute using their preferred signature scheme (secp256k1, P256, or WebAuthn)
-- **Fee payer signs**: Authorization to pay fees for that specific transaction and sender
+::::steps
 
-Each signature is recovered independently to determine the sender and fee payer addresses.
+### Create and fund sponsor account
 
-## Implementation
+Create and fund an account to sponsor transaction fees for your users.
 
-### Step 1: User Signs Transaction
+<Demo.Container name="Sponsor User Fees" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/payments">
+  <SponsorUserFees.CreateSponsorAccount stepNumber={1} />
+  <SponsorUserFees.FundSponsorAccount stepNumber={2} />
+</Demo.Container>
 
-The user signs the transaction with their private key, signing over a **blank fee token field**. This delegates the choice of which fee token to use to the fee payer.
+:::code-group
 
-```ts
-// User signs the transaction
-const userSignature = await wallet.signTransaction({
-  to: '0x...',
-  value: parseEther('0.1'),
-  // feeToken is left blank - fee payer will choose
+```tsx twoslash [CreateAndFundSponsorAccount.ts]
+// @noErrors
+import { privateKeyToAccount } from 'viem/accounts'
+import { useClient } from 'wagmi'
+
+export function CreateSponsorAccount() {
+  const client = useClient()
+
+  const handleClick = async () => {
+    const privateKey = `0x${Array.from({ length: 64 }, () =>        // [!code hl]
+      Math.floor(Math.random() * 16).toString(16),                  // [!code hl]
+    ).join('')}` as `0x${string}`                                   // [!code hl]
+    const sponsorAccount = privateKeyToAccount(privateKey)                 // [!code hl]
+    await client.request<any>({                                     // [!code hl]
+      method: 'tempo_fundAddress',                                 // [!code hl]
+      params: [sponsorAccount.address],                                   // [!code hl]
+    })                                                             // [!code hl]
+  }
+
+  return (
+    <button onClick={handleClick}>
+      Create and fund sponsor account
+    </button>
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
 })
 ```
 
-### Step 2: Sponsor Signs and Submits
+:::
 
-The sponsor selects which fee token to use, then signs over the transaction:
+### Sponsor your user's payments
 
-```ts
-// Sponsor signs to pay the fees
-const feePayerSignature = await sponsor.signFeePayment(transaction)
+Now you can pass your sponsor account as the `feePayer` parameter when sending a payment.
 
-// Submit with both signatures
-const hash = await client.sendTransaction({
-  ...transaction,
-  feeToken: sponsorPreferredToken,
-  feePayerSignature,
+See the [Send a payment](/guide/payments/send-a-payment) guide for more details on how to send a payment.
+
+
+<Demo.Container name="Sponsor User Fees" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/payments">
+  <SponsorUserFees.CreateSponsorAccount stepNumber={1} />
+  <SponsorUserFees.FundSponsorAccount stepNumber={2} />
+  <Demo.Connect stepNumber={3} />
+  <Demo.AddFunds stepNumber={4} />
+  <SponsorUserFees.SendSponsoredPayment stepNumber={5} last />
+</Demo.Container>
+
+:::code-group
+
+```tsx twoslash [SendSponsoredPayment.tsx]
+import React from 'react'
+import { Hooks } from 'tempo.ts/wagmi'
+import { parseUnits } from 'viem'
+
+// @noErrors
+export function SendSponsoredPayment({ sponsorAccount }: { sponsorAccount: any }) {
+  const [recipient, setRecipient] = React.useState<string>('')
+
+  const sendPayment = Hooks.token.useTransferSync() // [!code hl]
+
+  return (
+    <>
+      <div>
+        <label>Recipient address</label>
+        <input
+          type="text"
+          value={recipient}
+          onChange={(e) => setRecipient(e.target.value)}
+        />
+      </div>
+      <button // [!code hl]
+        disabled={sendPayment.isPending} // [!code hl]
+        type="button" // [!code hl]
+        onClick={() => // [!code hl]
+          sendPayment.mutate({ // [!code hl]
+            amount: parseUnits('100', 6), // [!code hl]
+            to: recipient as `0x${string}`, // [!code hl]
+            token: '0x20c0000000000000000000000000000000000001', // [!code hl]
+            feePayer: sponsorAccount, // [!code hl] // [!code focus]
+          }) // [!code hl]
+        } // [!code hl]
+      > {/* [!code hl] */}
+        {sendPayment.isPending ? 'Sending...' : 'Send Payment'} {/* [!code hl] */}
+      </button> {/* [!code hl] */}
+    </>
+  )
+}
+```
+
+```tsx twoslash [config.ts] filename="config.ts"
+// @noErrors
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  connectors: [webAuthn()],
+  transports: {
+    [tempo.id]: http(),
+  },
 })
 ```
 
-### Step 3: Network Validation
+:::
 
-The network validates both signatures and executes the transaction:
-1. Both sender and fee payer signatures must be valid
-2. Fee payer must have sufficient balance in the fee token
-3. Transaction is rejected if either signature fails or balance is insufficient
+## Next Steps
 
-## Using the SDK
+Now that you've implemented fee sponsorship, you can:
+- Learn more about [Account Abstraction transactions](/documentation/protocol/transactions/spec-account-abstraction#fee-payer-signature-details) and fee payer signature details
+- Explore [Batch Transactions](/guide/use-accounts/batch-transactions) to sponsor multiple operations at once
+- Understand how to [Pay Fees in Any Stablecoin](/guide/payments/pay-fees-in-any-stablecoin) 
 
-Tempo's SDK provides helpers for fee sponsorship:
+::::
+
+## Recipes
+
+### Use SDK helpers
+
+Tempo's SDK provides helpers to simplify fee sponsorship implementation:
 
 ```ts
 import { withFeePayer } from 'tempo.ts/viem'
@@ -74,11 +187,9 @@ const hash = await sponsoredClient.sendTransaction({
 })
 ```
 
-## Use Cases
+### Onboarding new users
 
-### Onboarding
-
-Remove friction for new users who don't have tokens yet:
+Remove friction for new users who don't have tokens yet by sponsoring their first transactions:
 
 ```ts
 // New user can interact with your app immediately
@@ -90,9 +201,9 @@ await sponsoredClient.sendTransaction({
 })
 ```
 
-### Payment Processing
+### Sponsor payment transactions
 
-Sponsor fees for payment transactions to improve UX:
+Improve payment UX by sponsoring fees for user payment transactions:
 
 ```ts
 // User sends payment, you sponsor the fee
@@ -103,31 +214,10 @@ await sponsoredClient.token.transfer({
 })
 ```
 
-### Batch Operations
+## Best practices
 
-Sponsor fees for batch transactions:
-
-```ts
-// Sponsor fees for multiple operations
-await sponsoredClient.sendTransaction({
-  calls: [
-    { data: '0x...', to: '0x...' },
-    { data: '0x...', to: '0x...' },
-    { data: '0x...', to: '0x...' },
-  ],
-})
-```
-
-## Security Considerations
-
-- **Transaction-specific**: Fee payer signature is tied to a specific transaction
-- **No delegation risk**: Fee payer can't execute arbitrary transactions
-- **Balance checks**: Network verifies fee payer has sufficient balance
-- **Signature validation**: Both signatures must be valid
-
-## Cost Management
-
-Monitor your sponsorship costs:
+1. **Set sponsorship limits**: Implement daily or per-user limits to control costs
+2. **Monitor expenses**: Track sponsorship costs regularly to stay within budget
 
 ```ts
 // Track sponsored transactions
@@ -143,15 +233,41 @@ const totalFees = sponsoredTransactions.reduce(
 )
 ```
 
-## Best Practices
+3. **Consider selective sponsorship**: Only sponsor fees for specific operations or user segments
+4. **Educate users**: Clearly communicate when fees are being sponsored
 
-1. **Set limits**: Implement daily or per-user limits on sponsorship
-2. **Monitor costs**: Track sponsorship expenses
-3. **Selective sponsorship**: Only sponsor fees for specific operations
-4. **User education**: Let users know when fees are sponsored
+### Security Considerations
 
-## Next Steps
+- **Transaction-specific**: Fee payer signatures are tied to specific transactions
+- **No delegation risk**: Fee payer can't execute arbitrary transactions
+- **Balance checks**: Network verifies fee payer has sufficient balance
+- **Signature validation**: Both signatures must be valid
 
-- Learn more about [Fee Sponsorship](/guide/use-accounts/fee-sponsorship)
-- Learn more about [Pay Fees in Any Stablecoin](/guide/payments/pay-fees-in-any-stablecoin)
+## Learning Resources
 
+<Card.Container>
+  <Card.Link
+    description="Deep dive into how fee sponsorship works under the hood"
+    href="/guide/use-accounts/fee-sponsorship"
+    icon={LucideBook}
+    title="Fee Sponsorship Specification"
+  />
+  <Card.Link
+    description="Technical specification for AA transactions and fee payer signature details"
+    href="/documentation/protocol/transactions/spec-account-abstraction"
+    icon={LucideFileCode}
+    title="Account Abstraction Transaction Spec"
+  />
+  <Card.Link
+    description="Learn how to sponsor fees for multiple operations at once"
+    href="/guide/use-accounts/batch-transactions"
+    icon={LucideLayers}
+    title="Batch Transactions Guide"
+  />
+  <Card.Link
+    description="Understand fee token selection and how to pay with different stablecoins"
+    href="/guide/payments/pay-fees-in-any-stablecoin"
+    icon={LucideCoins}
+    title="Pay Fees in Any Stablecoin"
+  />
+</Card.Container>

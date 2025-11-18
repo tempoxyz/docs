@@ -141,8 +141,7 @@ export default defineConfig({
                 link: '/guide/payments/pay-fees-in-any-stablecoin',
               },
               {
-                text: 'Sponsor user fees 🚧',
-                disabled: true,
+                text: 'Sponsor user fees',
                 link: '/guide/payments/sponsor-user-fees',
               },
               // {

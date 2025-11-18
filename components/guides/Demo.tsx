@@ -44,7 +44,7 @@ export const thetaUsd = '0x20c0000000000000000000000000000000000003'
 // Current validator token on testnet
 const validatorToken = alphaUsd
 
-type DemoStepProps = {
+export type DemoStepProps = {
   stepNumber: number
   // if this is the last step in a flow
   last?: boolean
@@ -1755,6 +1755,22 @@ export function ExplorerLink({ hash }: { hash: string }) {
   )
 }
 
+export function ExplorerAccountLink({ address }: { address: string }) {
+  return (
+    <div className="mt-1">
+      <a
+        href={`https://explore.tempo.xyz/account/${address}`}
+        target="_blank"
+        rel="noreferrer"
+        className="text-accent text-[13px] -tracking-[1%] flex items-center gap-1 hover:underline"
+      >
+        View account
+        <LucideExternalLink className="size-3" />
+      </a>
+    </div>
+  )
+}
+
 export function Container(
   props: React.PropsWithChildren<
     {
@@ -1950,7 +1966,7 @@ export namespace Container {
   }
 }
 
-function Step(
+export function Step(
   props: React.PropsWithChildren<{
     actions?: React.ReactNode | undefined
     active: boolean
