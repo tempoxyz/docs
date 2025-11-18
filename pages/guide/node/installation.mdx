@@ -22,11 +22,8 @@ tempo --version
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
 
-# Clone and build
-git clone https://github.com/tempoxyz/tempo.git
-cd tempo
-cargo build --release --bin tempo
-sudo cp target/release/tempo /usr/local/bin/tempo
+# Build and install from source using cargo
+cargo install --git https://github.com/tempoxyz/tempo.git tempo --root /usr/local/bin
 tempo --version
 ```
 
