@@ -1,4 +1,5 @@
 import * as Demo from '../../../components/guides/Demo.tsx'
+import * as Step from '../../../components/guides/steps'
 import * as Card from '../../../components/Card.tsx'
 import LucideCode from '~icons/lucide/code'
 import LucideSend from '~icons/lucide/send'
@@ -12,9 +13,9 @@ Send stablecoin payments between accounts on Tempo. Payments can include optiona
 By the end of this guide you will be able to send payments on Tempo with an optional memo.
 
 <Demo.Container name="Send a Payment" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/payments">
-  <Demo.Connect stepNumber={1} />
-  <Demo.AddFunds stepNumber={2} />
-  <Demo.SendPayment stepNumber={3} last />
+  <Step.Connect stepNumber={1} />
+  <Step.AddFunds stepNumber={2} />
+  <Step.SendPayment stepNumber={3} last />
 </Demo.Container>
 
 ## Steps
@@ -35,7 +36,7 @@ Before you can send a payment, you need to fund your account. In this guide you 
 The built-in Tempo testnet faucet funds accounts with `AlphaUSD`.
 
 <Demo.Container name="Add Funds" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd]}>
-  <Demo.AddFunds stepNumber={1} last />
+  <Step.AddFunds stepNumber={1} last />
 </Demo.Container>
 
 :::code-group
@@ -84,8 +85,8 @@ started quickly. For production, you will need to onramp & fund your account man
 Now that you have `AlphaUSD` you are ready to add logic to send a payment with an optional memo.
 
 <Demo.Container name="Send Payment" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd]}>
-  <Demo.AddFunds stepNumber={1} />
-  <Demo.SendPayment stepNumber={2} last />
+  <Step.AddFunds stepNumber={1} />
+  <Step.SendPayment stepNumber={2} last />
 </Demo.Container>
 
 :::code-group

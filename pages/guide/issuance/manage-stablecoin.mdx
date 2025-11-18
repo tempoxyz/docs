@@ -1,4 +1,5 @@
 import * as Demo from '../../../components/guides/Demo.tsx'
+import * as Step from '../../../components/guides/steps'
 import * as Card from "../../../components/Card.tsx"
 import LucideShield from '~icons/lucide/shield'
 import LucideFileText from '~icons/lucide/file-text'
@@ -11,10 +12,10 @@ TIP-20 tokens use a role-based access control system that allows you to delegate
 
 
 <Demo.Container name="Manage Your Stablecoin" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
-  <Demo.Connect stepNumber={1} />
-  <Demo.AddFunds stepNumber={2} />
-  <Demo.CreateOrLoadToken stepNumber={3} />
-  <Demo.GrantTokenRoles stepNumber={4} roles={['issuer', 'pause', 'unpause', 'burnBlocked']} />
+  <Step.Connect stepNumber={1} />
+  <Step.AddFunds stepNumber={2} />
+  <Step.CreateOrLoadToken stepNumber={3} />
+  <Step.GrantTokenRoles stepNumber={4} roles={['issuer', 'pause', 'unpause', 'burnBlocked']} />
 </Demo.Container>
 
 ## Steps
@@ -26,10 +27,10 @@ TIP-20 tokens use a role-based access control system that allows you to delegate
 Limit the maximum total supply of your token to prevent unlimited inflation.
 
 <Demo.Container name="Set Supply Cap" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
-  <Demo.Connect stepNumber={1} />
-  <Demo.AddFunds stepNumber={2} />
-  <Demo.CreateOrLoadToken stepNumber={3} />
-  <Demo.SetSupplyCap stepNumber={4} last />
+  <Step.Connect stepNumber={1} />
+  <Step.AddFunds stepNumber={2} />
+  <Step.CreateOrLoadToken stepNumber={3} />
+  <Step.SetSupplyCap stepNumber={4} last />
 </Demo.Container>
 
 :::code-group
@@ -221,11 +222,11 @@ Learn more about configuring transfer policies in the [TIP-403 specification](/d
 Temporarily halt all token transfers during emergency situations or maintenance windows.
 
 <Demo.Container name="Pause and Unpause Your Token" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
-  <Demo.Connect stepNumber={1} />
-  <Demo.AddFunds stepNumber={2} />
-  <Demo.CreateOrLoadToken stepNumber={3} />
-  <Demo.GrantTokenRoles stepNumber={4} roles={['pause', 'unpause']} />
-  <Demo.PauseUnpauseTransfers stepNumber={5} last />
+  <Step.Connect stepNumber={1} />
+  <Step.AddFunds stepNumber={2} />
+  <Step.CreateOrLoadToken stepNumber={3} />
+  <Step.GrantTokenRoles stepNumber={4} roles={['pause', 'unpause']} />
+  <Step.PauseUnpauseTransfers stepNumber={5} last />
 </Demo.Container>
 
 :::code-group

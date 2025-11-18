@@ -1,4 +1,5 @@
 import * as Demo from '../../../components/guides/Demo.tsx'
+import * as Step from '../../../components/guides/steps'
 
 # Providing Liquidity
 
@@ -7,9 +8,9 @@ Adding liquidity to a token pair in the Stablecoin DEX is done by placing an ord
 By the end of this guide you will be able to place orders in the orderbook.
 
 <Demo.Container name="Place an Order" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/exchange">
-  <Demo.Connect stepNumber={1} />
-  <Demo.AddFunds stepNumber={2} />
-  <Demo.PlaceOrder stepNumber={3} last />
+  <Step.Connect stepNumber={1} />
+  <Step.AddFunds stepNumber={2} />
+  <Step.PlaceOrder stepNumber={3} last />
 </Demo.Container>
 
 ## Steps

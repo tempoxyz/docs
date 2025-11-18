@@ -1,5 +1,6 @@
 import LucideCoins from '~icons/lucide/coins'
 import * as Demo from '../../../components/guides/Demo.tsx'
+import * as Step from '../../../components/guides/steps'
 import * as Card from '../../../components/Card.tsx'
 import { Faucet } from '../../../components/Faucet.tsx'
 
@@ -14,9 +15,9 @@ and integration with Tempo's payment infrastructure.
 By the end of this guide, you will be able to create a stablecoin on Tempo.
 
 <Demo.Container name="Create a Stablecoin" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/issuance">
-  <Demo.Connect stepNumber={1} />
-  <Demo.AddFunds stepNumber={2} />
-  <Demo.CreateToken stepNumber={3} last />
+  <Step.Connect stepNumber={1} />
+  <Step.AddFunds stepNumber={2} />
+  <Step.CreateToken stepNumber={3} last />
 </Demo.Container>
 
 ## Steps
@@ -41,7 +42,7 @@ as the [default fee token](/sdk/typescript#create-config), we will need to add s
 Luckily, the built-in Tempo testnet faucet supports funding accounts with `AlphaUSD`.
 
 <Demo.Container name="Add Funds" footerVariant="balances" showBadge={false}>
-  <Demo.AddFunds stepNumber={1} last />
+  <Step.AddFunds stepNumber={1} last />
 </Demo.Container>
 
 :::code-group
@@ -92,8 +93,8 @@ Now that we have some funds to cover the transaction fee in our account, we can 
 Let's create a new component and add some input fields for the **name** and **symbol** of our stablecoin, as shown in the demo.
 
 <Demo.Container name="Create Form">
-  <Demo.AddFunds stepNumber={1} />
-  <Demo.CreateToken stepNumber={2} last />
+  <Step.AddFunds stepNumber={1} />
+  <Step.CreateToken stepNumber={2} last />
 </Demo.Container>
 
 :::code-group
@@ -146,7 +147,7 @@ Now that we have some input fields, we need to add some logic to handle the subm
 After this step, your users will be able to create a stablecoin by clicking the "Create" button!
 
 <Demo.Container name="Create Form">
-  <Demo.CreateToken stepNumber={1} last />
+  <Step.CreateToken stepNumber={1} last />
 </Demo.Container>
 
 :::code-group

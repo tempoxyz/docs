@@ -1,4 +1,6 @@
 import * as Demo from '../../../components/guides/Demo.tsx'
+import * as Step from '../../../components/guides/steps'
+import { betaUsd } from '../../../components/guides/tokens.ts'
 import LucideCoins from '~icons/lucide/coins'
 import * as Card from '../../../components/Card.tsx'
 
@@ -11,9 +13,9 @@ Configure users to pay transaction fees in any supported stablecoin. Tempo's fle
 By the end of this guide you will be able to pay fees in any stablecoin on Tempo.
 
 <Demo.Container name="Pay Fees in Any Stablecoin" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/payments">
-  <Demo.Connect stepNumber={1} />
-  <Demo.AddFunds stepNumber={2} />
-  <Demo.PayWithFeeToken stepNumber={3} feeToken={Demo.betaUsd} last />
+  <Step.Connect stepNumber={1} />
+  <Step.AddFunds stepNumber={2} />
+  <Step.PayWithFeeToken stepNumber={3} feeToken={betaUsd} last />
 </Demo.Container>
 
 ## Steps
@@ -34,7 +36,7 @@ Before you can pay fees in a token of your choice, you need to fund your account
 The built-in Tempo testnet faucet funds accounts with `AlphaUSD` and `BetaUSD`.
 
 <Demo.Container name="Add Funds" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd, Demo.betaUsd]}>
-  <Demo.AddFunds stepNumber={1} last />
+  <Step.AddFunds stepNumber={1} last />
 </Demo.Container>
 
 :::code-group
@@ -83,8 +85,8 @@ started quickly. For production, you will need to onramp & fund your account man
 Now that you have `AlphaUSD` to send and `BetaUSD` to pay fees with, you can add a new selector component to allow users to select the fee token.
 
 <Demo.Container name="Select Fee Token" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd, Demo.betaUsd]}>
-  <Demo.Connect stepNumber={1} />
-  <Demo.SelectFeeToken stepNumber={2} last />
+  <Step.Connect stepNumber={1} />
+  <Step.SelectFeeToken stepNumber={2} last />
 </Demo.Container>
 
 :::code-group
@@ -131,8 +133,8 @@ Now that you have a selector for the fee token, you can add the logic to send a 
 After this step, your users can send payments with a specified fee token by clicking the "Send" button!
 
 <Demo.Container name="Pay Fees in Any Stablecoin" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/payments">
-  <Demo.AddFunds stepNumber={1} />
-  <Demo.PayWithFeeToken stepNumber={2} last />
+  <Step.AddFunds stepNumber={1} />
+  <Step.PayWithFeeToken stepNumber={2} last />
 </Demo.Container>
 
 :::code-group

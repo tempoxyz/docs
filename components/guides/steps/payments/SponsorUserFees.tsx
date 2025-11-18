@@ -4,15 +4,10 @@ import { Hooks } from 'tempo.ts/wagmi'
 import { formatUnits, isAddress, pad, parseUnits, stringToHex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { useAccount, useAccountEffect, useBlockNumber, useClient } from 'wagmi'
-import { useDemoContext } from '../DemoContext'
-import {
-  alphaUsd,
-  Button,
-  type DemoStepProps,
-  ExplorerAccountLink,
-  ExplorerLink,
-  Step,
-} from './Demo'
+import { useDemoContext } from '../../../DemoContext'
+import { Button, ExplorerAccountLink, ExplorerLink, Step } from '../../Demo'
+import { alphaUsd } from '../../tokens'
+import type { DemoStepProps } from '../types'
 
 export function CreateSponsorAccount(props: DemoStepProps) {
   const { stepNumber, last = false } = props

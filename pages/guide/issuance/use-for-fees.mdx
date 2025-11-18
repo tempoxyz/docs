@@ -1,4 +1,5 @@
 import * as Demo from '../../../components/guides/Demo.tsx'
+import * as Step from '../../../components/guides/steps'
 
 # Use Your Stablecoin for Fees
 
@@ -7,13 +8,13 @@ Enable users to pay transaction fees using your stablecoin. Tempo supports flexi
 ## Demo
 
 <Demo.Container name="Create a Stablecoin" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/issuance">
-  <Demo.Connect stepNumber={1} />
-  <Demo.AddFunds stepNumber={2} />
-  <Demo.CreateOrLoadToken stepNumber={3} />
-  <Demo.GrantTokenRoles stepNumber={4} roles={['issuer']} />
-  <Demo.MintToken stepNumber={5} />
-  <Demo.MintFeeAmmLiquidity stepNumber={6} />
-  <Demo.PayWithIssuedToken stepNumber={7} last />
+  <Step.Connect stepNumber={1} />
+  <Step.AddFunds stepNumber={2} />
+  <Step.CreateOrLoadToken stepNumber={3} />
+  <Step.GrantTokenRoles stepNumber={4} roles={['issuer']} />
+  <Step.MintToken stepNumber={5} />
+  <Step.MintFeeAmmLiquidity stepNumber={6} />
+  <Step.PayWithIssuedToken stepNumber={7} last />
 </Demo.Container>
 
 ## Quick Start

@@ -1,6 +1,6 @@
 import * as Card from '../../../components/Card.tsx'
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as SponsorUserFees from '../../../components/guides/SponsorUserFees.tsx'
+import * as Step from '../../../components/guides/steps'
 import LucideBook from '~icons/lucide/book'
 import LucideCoins from '~icons/lucide/coins'
 import LucideFileCode from '~icons/lucide/file-code'
@@ -13,11 +13,11 @@ Enable gasless transactions by sponsoring transaction fees for your users. Tempo
 ## Demo
 
 <Demo.Container name="Sponsor User Fees" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/payments">
-  <SponsorUserFees.CreateSponsorAccount stepNumber={1} />
-  <SponsorUserFees.FundSponsorAccount stepNumber={2} />
-  <Demo.Connect stepNumber={3} />
-  <Demo.AddFunds stepNumber={4} />
-  <SponsorUserFees.SendSponsoredPayment stepNumber={5} last />
+  <Step.CreateSponsorAccount stepNumber={1} />
+  <Step.FundSponsorAccount stepNumber={2} />
+  <Step.Connect stepNumber={3} />
+  <Step.AddFunds stepNumber={4} />
+  <Step.SendSponsoredPayment stepNumber={5} last />
 </Demo.Container>
 
 ## Steps
@@ -29,8 +29,8 @@ Enable gasless transactions by sponsoring transaction fees for your users. Tempo
 Create and fund an account to sponsor transaction fees for your users.
 
 <Demo.Container name="Sponsor User Fees" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/payments">
-  <SponsorUserFees.CreateSponsorAccount stepNumber={1} />
-  <SponsorUserFees.FundSponsorAccount stepNumber={2} />
+  <Step.CreateSponsorAccount stepNumber={1} />
+  <Step.FundSponsorAccount stepNumber={2} />
 </Demo.Container>
 
 :::code-group
@@ -87,11 +87,11 @@ See the [Send a payment](/guide/payments/send-a-payment) guide for more details 
 
 
 <Demo.Container name="Sponsor User Fees" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/payments">
-  <SponsorUserFees.CreateSponsorAccount stepNumber={1} />
-  <SponsorUserFees.FundSponsorAccount stepNumber={2} />
-  <Demo.Connect stepNumber={3} />
-  <Demo.AddFunds stepNumber={4} />
-  <SponsorUserFees.SendSponsoredPayment stepNumber={5} last />
+  <Step.CreateSponsorAccount stepNumber={1} />
+  <Step.FundSponsorAccount stepNumber={2} />
+  <Step.Connect stepNumber={3} />
+  <Step.AddFunds stepNumber={4} />
+  <Step.SendSponsoredPayment stepNumber={5} last />
 </Demo.Container>
 
 :::code-group
