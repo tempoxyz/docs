@@ -13,3 +13,6 @@ specs/soljson-latest.js
 .vercel
 _
 tmp
+
+# Local claude settings
+.claude/settings.local.json
