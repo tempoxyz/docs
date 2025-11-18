@@ -26,7 +26,7 @@ Once you've created your token, you can proceed to grant roles to specific addre
 
 Assign roles to specific addresses to delegate token management capabilities.
 
-<Demo.Container name="Grant Roles to an Address" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+<Demo.Container name="Grant Roles to an Address" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/issuance">
   <Step.Connect stepNumber={1} />
   <Step.AddFunds stepNumber={2} />
   <Step.CreateOrLoadToken stepNumber={3} />
@@ -168,7 +168,7 @@ export const config = createConfig({
 
 Revoke roles from addresses when you need to remove their permissions.
 
-<Demo.Container name="Revoke Issuer Role" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+<Demo.Container name="Revoke Issuer Role" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/issuance">
   <Step.Connect stepNumber={1} />
   <Step.AddFunds stepNumber={2} />
   <Step.CreateOrLoadToken stepNumber={3} />
@@ -285,7 +285,7 @@ export const config = createConfig({
 
 Limit the maximum total supply of your token. Setting supply caps requires the **`DEFAULT_ADMIN_ROLE`**. The new cap cannot be less than the current total supply.
 
-<Demo.Container name="Set Supply Cap" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+<Demo.Container name="Set Supply Cap" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/issuance">
   <Step.Connect stepNumber={1} />
   <Step.AddFunds stepNumber={2} />
   <Step.CreateOrLoadToken stepNumber={3} />
@@ -359,7 +359,7 @@ Transfer policies can be:
 
 Learn more about configuring transfer policies in the [TIP-403 specification](/documentation/protocol/tip403/spec).
 
-<Demo.Container name="Create and Link Transfer Policy" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+<Demo.Container name="Create and Link Transfer Policy" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/issuance">
   <Step.Connect stepNumber={1} />
   <Step.AddFunds stepNumber={2} />
   <Step.CreateOrLoadToken stepNumber={3} />
@@ -460,7 +460,7 @@ export const config = createConfig({
 
 Temporarily halt all token transfers during emergency situations or maintenance windows. Pausing transfers requires the **`PAUSE_ROLE`**. Unpausing transfers requires the **`UNPAUSE_ROLE`**.
 
-<Demo.Container name="Pause and Unpause Your Token" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+<Demo.Container name="Pause and Unpause Your Token" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/issuance">
   <Step.Connect stepNumber={1} />
   <Step.AddFunds stepNumber={2} />
   <Step.CreateOrLoadToken stepNumber={3} />
@@ -540,7 +540,7 @@ export const config = createConfig({
 
 The Burn Blocked role allows your team to burn tokens from blocked or frozen addresses. This is useful for regulatory compliance when you need to remove tokens from addresses that violate terms of service or legal requirements.
 
-<Demo.Container name="Create and Link Transfer Policy" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/mint">
+<Demo.Container name="Create and Link Transfer Policy" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/issuance">
   <Step.Connect stepNumber={1} />
   <Step.AddFunds stepNumber={2} />
   <Step.CreateOrLoadToken stepNumber={3} />
