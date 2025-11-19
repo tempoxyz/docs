@@ -26,11 +26,21 @@ export function useWebAuthnConnector() {
   )
 }
 
+function getExplorerHost() {
+  const { VITE_LOCAL, VITE_LOCAL_EXPLORER } = import.meta.env
+
+  if (VITE_LOCAL === 'true' && VITE_LOCAL_EXPLORER !== undefined) {
+    return VITE_LOCAL_EXPLORER
+  }
+
+  return 'https://explore.tempo.xyz'
+}
+
 export function ExplorerLink({ hash }: { hash: string }) {
   return (
     <div className="mt-1">
       <a
-        href={`https://explore.tempo.xyz/tx/${hash}`}
+        href={`${getExplorerHost()}/tx/${hash}`}
         target="_blank"
         rel="noreferrer"
         className="text-accent text-[13px] -tracking-[1%] flex items-center gap-1 hover:underline"
@@ -46,7 +56,7 @@ export function ExplorerAccountLink({ address }: { address: string }) {
   return (
     <div className="mt-1">
       <a
-        href={`https://explore.tempo.xyz/account/${address}`}
+        href={`${getExplorerHost()}/account/${address}`}
         target="_blank"
         rel="noreferrer"
         className="text-accent text-[13px] -tracking-[1%] flex items-center gap-1 hover:underline"
