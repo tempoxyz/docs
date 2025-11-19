@@ -23,7 +23,7 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.14",
     "tempo.ts": "~0.5.4",
-    "viem": "https://pkg.pr.new/viem@4098",
+    "viem": "https://pkg.pr.new/viem@main",
     "vocs": "^1.1.4",
     "wagmi": "^2.19.2"
   },
