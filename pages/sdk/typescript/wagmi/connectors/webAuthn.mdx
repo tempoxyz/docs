@@ -1,0 +1,94 @@
+# `webAuthn`
+
+Connector for a WebAuthn EOA.
+
+## Usage
+
+```ts twoslash [wagmi.config.ts]
+// @noErrors
+import { tempo } from 'tempo.ts/chains'
+import { webAuthn } from 'tempo.ts/wagmi' // [!code focus]
+import { createConfig, http } from 'wagmi'
+
+export const config = createConfig({
+  connectors: [webAuthn()], // [!code focus]
+  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
+  multiInjectedProviderDiscovery: false,
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+## Parameters
+
+### createOptions
+
+Options for WebAuthn registration.
+
+#### createFn
+
+- **Type:** `(options?: CredentialCreationOptions | undefined) => Promise<Credential | null>`
+- **Default:** `window.navigator.credentials.create`
+
+Credential creation function. Useful for environments that do not support
+the WebAuthn API natively (i.e. React Native or testing environments).
+
+#### getChallenge
+
+- **Type:** `() => Promise<Hex.Hex>`
+
+Function to fetch a challenge to sign over at registration.
+
+#### label
+
+- **Type:** `string`
+
+Label associated with the WebAuth registration.
+
+#### rpId
+
+- **Type:** `string`
+
+Relying party ID.
+
+#### timeout
+
+- **Type:** `number`
+
+A numerical hint, in milliseconds, which indicates the time the calling web app is willing to wait for the creation operation to complete.
+
+#### userId
+
+- **Type:** `Bytes.Bytes`
+
+User ID associated with the WebAuth registration.
+
+### getOptions
+
+Options for WebAuthn authentication.
+
+#### getPublicKey
+
+- **Type:** `(credential: P256Credential["raw"]) => Promise<Hex.Hex>`
+
+Function to fetch the public key for a credential.
+
+#### getFn
+
+- **Type:** `(options?: internal.CredentialRequestOptions) => Promise<internal.Credential | null>`
+- **Default:** `window.navigator.credentials.get`
+
+Credential request function. Useful for environments that do not support the WebAuthn API natively (i.e. React Native or testing environments).
+
+#### rpId
+
+- **Type:** `string`
+
+The relying party identifier to use.
+
+### rpId
+
+- **Type:** `string`
+
+The RP ID to use for WebAuthn.

@@ -903,15 +903,15 @@ export default defineConfig({
             link: '/sdk/typescript/wagmi',
           },
           {
-            text: 'Connectors 🚧',
+            text: 'Connectors',
             collapsed: true,
             items: [
               {
-                text: 'dangerous_secp256k1 🚧',
+                text: 'dangerous_secp256k1',
                 link: '/sdk/typescript/wagmi/connectors/dangerous_secp256k1',
               },
               {
-                text: 'webAuthn 🚧',
+                text: 'webAuthn',
                 link: '/sdk/typescript/wagmi/connectors/webAuthn',
               },
             ],
