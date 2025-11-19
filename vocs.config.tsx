@@ -62,12 +62,16 @@ export default defineConfig({
             link: '/guide/quickstart/integrate-tempo',
           },
           {
-            text: 'Faucet',
-            link: '/guide/quickstart/faucet',
-          },
-          {
             text: 'Predeployed Contracts',
             link: '/guide/quickstart/predeployed-contracts',
+          },
+          {
+            text: 'EVM Compatibility',
+            link: '/guide/quickstart/evm-compatibility',
+          },
+          {
+            text: 'Faucet',
+            link: '/guide/quickstart/faucet',
           },
         ],
       },
