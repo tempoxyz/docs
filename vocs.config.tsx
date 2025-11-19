@@ -58,16 +58,12 @@ export default defineConfig({
             link: '/guide/',
           },
           {
+            text: 'Integrate Tempo',
+            link: '/guide/quickstart/integrate-tempo',
+          },
+          {
             text: 'Faucet',
             link: '/guide/quickstart/faucet',
-          },
-          {
-            text: 'RPC Information',
-            link: '/guide/quickstart/rpc',
-          },
-          {
-            text: 'EVM Compatibility',
-            link: '/guide/quickstart/evm-compatibility',
           },
           {
             text: 'Predeployed Contracts',
