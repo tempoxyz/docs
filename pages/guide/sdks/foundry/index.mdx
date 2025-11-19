@@ -26,14 +26,14 @@ foundryup -n tempo -i <TAG_NAME>
 ### Verify Installation
 
 ```bash
-forge --version
-# forge Version: 1.4.4-dev-tempo
-# Commit SHA: 6f3197e9940ea01f39c0bc9962c4529edf4b9768
-# Build Timestamp: 2025-11-10T23:17:40.582299000Z (1762816660)
-# Build Profile: release
+forge -V
 ```
 
 You should see version information include `-tempo`, indicating you are using the Tempo fork.
+
+```bash
+# forge <version>-tempo (<commit> <timestamp>)
+```
 
 ### Create a new Foundry project
 
@@ -49,41 +49,74 @@ Each new project is configured for Tempo out of the box, with [`tempo-std`](http
 
 All standard Foundry commands are supported out of the box.
 
-### Test & deploy with `forge`
+### Test & deploy with `forge` locally
 
 ```bash
 # Build your contracts
 forge build
-# Run tests
+
+# Run all tests locally
 forge test
-# Run tests with Tempo testnet fork
-forge test --fork-url https://rpc.testnet.tempo.xyz
+
+# Run deployment scripts locally
+forge script script/Mail.s.sol
+```
+
+### Test & deploy with `forge` on Tempo's testnet
+
+```bash
+# Set environment variables
+export TEMPO_RPC_URL=https://rpc.testnet.tempo.xyz
+export VERIFIER_URL=https://scout.tempo.xyz/api/
+
+# Optional: create a new keypair and request some testnet tokens from the faucet.
+cast wallet new
+cast rpc tempo_fundAddress <YOUR_WALLET_ADDRESS> --rpc-url $TEMPO_RPC_URL
+
+# Run all tests on Tempo's testnet
+forge test
+
 # Deploy a simple contract
 forge create src/Mail.sol:Mail \
-  --rpc-url https://rpc.testnet.tempo.xyz \
+  --rpc-url $TEMPO_RPC_URL \
   --interactive \
   --broadcast \
+  --verify \
   --constructor-args 0x20c0000000000000000000000000000000000001
-# Run a deployment script
+
+# Run a deployment script and verify on Tempo's explorer
 forge script script/Mail.s.sol \
-  --rpc-url https://rpc.testnet.tempo.xyz \
   --interactive \
-  --broadcast
+  --sender <YOUR_WALLET_ADDRESS> \
+  --broadcast \
+  --verify
 ```
 
 ### Interact & debug with `cast`
 
 ```bash
 # Check that your contract is deployed:
-cast code <CONTRACT_ADDRESS> --rpc-url https://rpc.testnet.tempo.xyz
-# Interact with your contract:
-cast call <CONTRACT_ADDRESS> "myFunction()(uint256)" \
-  --rpc-url https://rpc.testnet.tempo.xyz
-# Send a transaction:
-cast send <CONTRACT_ADDRESS> "myFunction(uint256)" 42 \
-  --rpc-url https://rpc.testnet.tempo.xyz \
+cast code <CONTRACT_ADDRESS> \
+  --rpc-url $TEMPO_RPC_URL
+
+# Interact with the contract, retrieving the token address:
+cast call <CONTRACT_ADDRESS> "token()" \
+  --rpc-url $TEMPO_RPC_URL
+
+# Get the name of an ERC20 token:
+cast erc20 name <TOKEN_ADDRESS> \
+  --rpc-url $TEMPO_RPC_URL
+
+# Check the ERC20 token balance of your address:
+cast erc20 balance <TOKEN_ADDRESS> <YOUR_WALLET_ADDRESS> \
+  --rpc-url $TEMPO_RPC_URL
+
+# Transfer some of your ERC20 tokens:
+cast erc20 transfer <TOKEN_ADDRESS> <RECEIVER_ADDRESS> <AMOUNT> \
+  --rpc-url $TEMPO_RPC_URL \
   --interactive
+
 # Replay a transaction by hash:
 cast run <TX_HASH> \
-  --rpc-url https://rpc.testnet.tempo.xyz
+  --rpc-url $TEMPO_RPC_URL
 ```
