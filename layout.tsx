@@ -1,11 +1,18 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { Json } from 'ox'
 import React from 'react'
 import { Toaster } from 'sonner'
 import { WagmiProvider } from 'wagmi'
 import { DemoContextProvider } from './components/DemoContext'
 import * as WagmiConfig from './wagmi.config'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      queryKeyHashFn: Json.stringify,
+    },
+  },
+})
 
 export default function Layout(
   props: React.PropsWithChildren<{
