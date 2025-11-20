@@ -86,6 +86,10 @@ function ApproveSpend(props: { orderType: 'buy' | 'sell' }) {
 
 Once the spend is approved, you can place an order by calling the `place` action on the Stablecoin DEX.
 
+:::info
+In the code sample below, we use the `useSendCallsSync` hook to batch the approve and place order calls in a single transaction for efficiency. 
+:::
+
 <Demo.Container name="Place Order">
   <Step.Connect stepNumber={1} />
   <Step.PlaceOrder stepNumber={2} last />
@@ -149,6 +153,104 @@ Now that you can place orders to provide liquidity, you can:
 
 ## Recipes
 
+### Cancel order
+
+Cancel an order using its order ID.
+
+When you cancel an order, any remaining funds are credited to your exchange balance (not directly to your wallet). To move funds back to your wallet, you can [withdraw them to your wallet](/documentation/protocol/exchange/exchange-balance#withdrawing-funds).
+
+<Demo.Container name="Place and Cancel an Order" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/exchange">
+  <Step.Connect stepNumber={1} />
+  <Step.AddFunds stepNumber={2} />
+  <Step.PlaceOrder stepNumber={3} />
+  <Step.CancelOrder stepNumber={4} last />
+</Demo.Container>
+
+:::code-group
+
+```tsx twoslash [ManageOrder.tsx]
+// @noErrors
+import React from 'react'
+import { Actions } from 'tempo.ts/viem'
+import { Hooks } from 'tempo.ts/wagmi'
+import { useSendCallsSync } from 'wagmi'
+
+function ManageOrder() {
+  const [orderId, setOrderId] = React.useState<bigint>()
+
+  const sendCalls = useSendCallsSync()
+  const cancelOrder = Hooks.dex.useCancelSync() // [!code hl]
+
+  const placeOrder = () => {
+    sendCalls.sendCallsSync({
+      ...
+    })
+
+    // Extract orderId from the place call result // [!code hl]
+    if (sendCalls.data?.receipts?.[0]) { // [!code hl]
+      const { orderId: newOrderId } = Actions.dex.place.extractEvent( // [!code hl]
+        sendCalls.data.receipts[0].logs // [!code hl]
+      ) // [!code hl]
+      setOrderId(newOrderId) // [!code hl]
+    } // [!code hl]
+  }
+
+  return (
+    <>
+      <button type="button" onClick={placeOrder}>
+        Place Order
+      </button>
+      <button // [!code hl]
+        type="button" // [!code hl]
+        onClick={() => cancelOrder.mutate({ orderId: orderId! })} // [!code hl]
+      > {/* [!code hl] */}
+        {cancelOrder.isPending ? 'Canceling...' : 'Cancel Order'} {/* [!code hl] */}
+      </button> {/* [!code hl] */}
+    </>
+  )
+}
+```
+
+```ts [wagmi.config.ts]
+// [!include ~/snippets/wagmi.config.ts:setup]
+```
+
+:::
+
+### Determining quote token
+Each token has a designated quote token that it trades against on the DEX. For most stablecoins, this will be `linkingUSD`.
+
+Use the `token.useGetMetadata` hook to retrieve a token's quote token.
+
+:::code-group
+
+```ts twoslash [example.ts]
+// @errors: 2322
+import { config } from './wagmi.config'
+declare module 'wagmi' {
+  interface Register {
+    config: typeof config
+  }
+}
+// ---cut---
+import { Hooks } from 'tempo.ts/wagmi'
+
+const { data: metadata } = Hooks.token.useGetMetadata({ // [!code focus]
+  token: '0x20c0000000000000000000000000000000000001', // AlphaUSD // [!code focus]
+}) // [!code focus]
+
+console.log('Token:', metadata?.symbol)
+// @log: Token: AlphaUSD
+console.log('Quote Token:', metadata?.quoteToken) // returns `linkingUSD` address 
+// @log: Quote Token: 0x20c0000000000000000000000000000000000000
+```
+
+```ts [wagmi.config.ts] filename="wagmi.config.ts"
+// @noErrors
+// [!include ~/snippets/wagmi.config.ts:setup]
+```
+:::
+
 ### Flip order
 
 Flip orders automatically switch between buy and sell sides when filled, providing continuous liquidity. Use viem's [`dex.placeFlip`](/sdk/typescript/viem/dex.placeFlip) to create a flip order call.
@@ -200,57 +302,49 @@ function PlaceFlipOrder(props: { orderType: 'buy' | 'sell' }) {
 
 :::
 
+### Place order at specific price
+
+Ticks represent discrete price levels on the orderbook with 0.1 basis point (0.001%) precision. Each tick is calculated as `(price - 1) × 100,000`, allowing you to place orders at specific prices between $0.98 and $1.02 (±2% from peg).
+
+Use the viem's `Tick` utility to easily convert between prices and tick values:
+
+
+```tsx 
+// @noErrors
+import { Actions, Tick } from 'tempo.ts/viem' // [!code hl]
+import { parseUnits } from 'viem'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
+// buy order at $0.9990 (tick: -10) // [!code hl]
+const buyCall = Actions.dex.place.call({ // [!code hl]
+  token: alphaUsd, // [!code hl]
+  amount: parseUnits('100', 6), // [!code hl]
+  type: 'buy', // [!code hl]
+  tick: Tick.fromPrice('0.9990'), // -10 // [!code hl]
+}) // [!code hl]
+
+// sell order at $1.0010 (tick: 10) // [!code hl]
+const sellCall = Actions.dex.place.call({ // [!code hl]
+  token: alphaUsd, // [!code hl]
+  amount: parseUnits('100', 6), // [!code hl]
+  type: 'sell', // [!code hl]
+  tick: Tick.fromPrice('1.0010'), // 10 // [!code hl]
+}) // [!code hl]
+
+```
+
+Common tick values:
+- `Tick.fromPrice('0.9990')` → `-10` (0.1% below peg)
+- `Tick.fromPrice('1.0000')` → `0` (at peg)
+- `Tick.fromPrice('1.0010')` → `10` (0.1% above peg)
+
+For more details, see [Understanding Ticks](/documentation/protocol/exchange/providing-liquidity#understanding-ticks).
+
 ## Best practices
 
 ### Batch calls
-You can batch the calls to approve spend and place the order in a single transaction for efficiency.
-
-:::code-group
-
-```tsx twoslash [PlaceOrder.tsx]
-// @noErrors
-import { Actions, Addresses } from 'tempo.ts/viem'
-import { parseUnits } from 'viem'
-import { useSendCallsSync } from 'wagmi' // [!code focus]
-
-const linkingUsd = '0x20c0000000000000000000000000000000000000'
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
-
-function PlaceOrder(props: { orderType: 'buy' | 'sell' }) {
-  const { orderType } = props
-  // buying AlphaUSD requires we spend LinkingUSD
-  const spendToken = orderType === 'buy' ? linkingUsd : alphaUsd
-  const sendCalls = useSendCallsSync() // [!code focus]
-
-  return (
-    <button type="button" onClick={() => {
-      const calls = [ // [!code focus]
-        Actions.token.approve.call({ // [!code focus]
-          spender: Addresses.stablecoinExchange, // [!code focus]
-          amount: parseUnits('100', 6), // [!code focus]
-          token: spendToken, // [!code focus]
-        }), // [!code focus]
-        Actions.dex.place.call({ // [!code focus]
-          token: alphaUsd, // [!code focus]
-          amount: parseUnits('100', 6), // [!code focus]
-          type: orderType, // [!code focus]
-          tick: 0, // [!code focus]
-        }), // [!code focus]
-      ] // [!code focus]
-      sendCalls.sendCallsSync({ calls }) // [!code focus]
-    }}>
-      Place Order
-    </button>
-  )
-}
-```
-
-```ts [wagmi.config.ts]
-// [!include ~/snippets/wagmi.config.ts:setup]
-```
-
-:::
-
+You can batch the calls to approve spend and place the order in a single transaction for efficiency. See the [guide on batch transactions](/guide/use-accounts/batch-transactions) for more details.
 
 ## Learning resources
 

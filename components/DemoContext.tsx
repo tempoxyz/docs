@@ -15,6 +15,7 @@ interface DemoData {
   sponsorAccount: PrivateKeyAccount
   transferId: string
   policyId: bigint
+  orderId: bigint
 }
 
 interface DemoContextValue {

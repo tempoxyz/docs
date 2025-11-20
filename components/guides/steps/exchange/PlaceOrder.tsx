@@ -1,8 +1,9 @@
 import * as React from 'react'
 import { Actions, Addresses } from 'tempo.ts/viem'
 import { Hooks } from 'tempo.ts/wagmi'
-import { parseUnits } from 'viem'
+import { type Log, parseUnits } from 'viem'
 import { useAccount, useAccountEffect, useSendCallsSync } from 'wagmi'
+import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd, linkingUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -10,6 +11,9 @@ import type { DemoStepProps } from '../types'
 export function PlaceOrder(props: DemoStepProps) {
   const { stepNumber, last = false } = props
   const { address } = useAccount()
+  const { setData, clearData, getData } = useDemoContext()
+
+  const orderId = getData('orderId')
 
   const { data: metadata } = Hooks.token.useGetMetadata({
     token: alphaUsd,
@@ -20,8 +24,26 @@ export function PlaceOrder(props: DemoStepProps) {
   useAccountEffect({
     onDisconnect() {
       sendCalls.reset()
+      clearData('orderId')
     },
   })
+
+  // Extract and store orderId after successful order placement
+  React.useEffect(() => {
+    if (sendCalls.isSuccess && sendCalls.data?.receipts?.[0]) {
+      try {
+        const {
+          args: { orderId },
+        } = Actions.dex.place.extractEvent(
+          sendCalls.data.receipts[0].logs as Log[],
+        )
+        console.log('orderId', orderId)
+        setData('orderId', orderId)
+      } catch (error) {
+        console.error('Failed to extract orderId:', error)
+      }
+    }
+  }, [sendCalls.isSuccess, sendCalls.data, setData])
 
   const amount = parseUnits('100', metadata?.decimals || 6)
 
@@ -40,13 +62,13 @@ export function PlaceOrder(props: DemoStepProps) {
   ]
 
   const active = React.useMemo(() => {
-    return !!address
-  }, [address])
+    return !!address && !orderId
+  }, [address, orderId])
 
   return (
     <Step
       active={active && (last ? true : !sendCalls.isSuccess)}
-      completed={sendCalls.isSuccess}
+      completed={sendCalls.isSuccess || !!orderId}
       actions={
         <Button
           variant={
