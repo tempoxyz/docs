@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.5",
+    "@wagmi/core": "^3.0.0",
     "cva": "1.0.0-beta.4",
     "ox": "~0.9.14",
     "prool": "^0.0.25",
@@ -25,7 +26,7 @@
     "tempo.ts": "~0.5.4",
     "viem": "https://pkg.pr.new/viem@main",
     "vocs": "^1.1.4",
-    "wagmi": "^2.19.2"
+    "wagmi": "^3.0.1"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.5",

@@ -9,7 +9,6 @@ import {
   noopStorage,
   webSocket,
 } from 'wagmi'
-import { metaMask } from 'wagmi/connectors'
 
 const feeToken = '0x20c0000000000000000000000000000000000001'
 
@@ -24,7 +23,7 @@ export function getConfig(options: getConfig.Options = {}) {
         ? tempoAndantino({ feeToken })
         : tempoLocal({ feeToken }),
     ],
-    connectors: [metaMask(), webAuthn()],
+    connectors: [webAuthn()],
     multiInjectedProviderDiscovery,
     storage: createStorage({
       storage:
