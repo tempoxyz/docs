@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import type { Chain } from 'tempo.ts/viem'
 import { Actions } from 'tempo.ts/viem'
@@ -14,6 +14,7 @@ import type { DemoStepProps } from '../types'
 export function AddFunds(props: DemoStepProps) {
   const { stepNumber = 2, last = false } = props
   const { address } = useAccount()
+  const queryClient = useQueryClient()
   const { data: balance, refetch: balanceRefetch } = Hooks.token.useGetBalance({
     account: address,
     token: alphaUsd,
@@ -52,7 +53,7 @@ export function AddFunds(props: DemoStepProps) {
         )
       }
       await new Promise((resolve) => setTimeout(resolve, 400))
-      balanceRefetch()
+      queryClient.refetchQueries({ queryKey: ['getBalance'] })
     },
   })
 
