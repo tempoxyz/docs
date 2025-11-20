@@ -1,156 +1,446 @@
+import * as Card from '../../../components/Card.tsx'
+import * as Demo from '../../../components/guides/Demo.tsx'
+import * as Step from '../../../components/guides/steps'
+import LucideArrowLeftRight from '~icons/lucide/arrow-left-right'
+import LucideWallet from '~icons/lucide/wallet'
+import LucideBookOpen from '~icons/lucide/book-open'
+
 # Executing Swaps
 
-Execute swaps between stablecoins on Tempo's enshrined exchange. Swaps execute immediately against existing orders in the order book.
+Execute swaps between stablecoins on the exchange. Swaps execute immediately against existing orders in the order book, providing instant liquidity for cross-stablecoin payments.
 
-## Swap Functions
+By the end of this guide you will be able to execute swaps, get price quotes, and manage slippage protection.
 
-The exchange provides two primary swap functions:
+<Demo.Container name="Execute a Swap" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/exchange">
+  <Step.Connect stepNumber={1} />
+  <Step.AddFunds stepNumber={2} />
+  <Step.MakeSwaps stepNumber={3} last />
+</Demo.Container>
 
-### Swap Exact Amount In
 
-Specify the exact amount of tokens you want to sell, and receive at least a minimum amount:
+## Steps
 
-```ts
-import { client } from './viem.config'
+::::steps
 
-const { amountOut, receipt } = await client.dex.sellSync({
-  tokenIn: usdcAddress,
-  tokenOut: usdtAddress,
-  amountIn: parseUnits('1000', 6), // Sell exactly 1000 USDC
-  minAmountOut: parseUnits('998', 6), // Receive at least 998 USDT
-})
+### Set up your client
 
-console.log('Received:', amountOut)
+Ensure that you have set up your client by following the [guide](/guide/sdks/typescript).
+
+### Get a price quote
+
+Before executing a swap, get a quote to see the expected price.
+
+:::code-group
+
+```tsx twoslash [Buy.tsx]
+// @noErrors
+import { Hooks } from 'tempo.ts/wagmi'
+import { formatUnits, parseUnits } from 'viem'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const betaUsd = '0x20c0000000000000000000000000000000000002'
+
+function Buy() {
+  const amount = parseUnits('10', 6)
+
+  // How much AlphaUSD do I need to spend to receive 10 BetaUSD? // [!code hl]
+  const { data: quote } = Hooks.dex.useBuyQuote({ // [!code hl]
+    tokenIn: alphaUsd, // [!code hl]
+    tokenOut: betaUsd, // [!code hl]
+    amountOut: amount, // [!code hl]
+  }) // [!code hl]
+
+  return <div>Quote: {formatUnits(quote, 6)}</div>
+}
 ```
 
-**Parameters:**
-- `tokenIn` - The token address you're selling
-- `tokenOut` - The token address you're buying
-- `amountIn` - The exact amount of `tokenIn` to sell
-- `minAmountOut` - Minimum amount of `tokenOut` you'll accept (slippage protection)
+```tsx twoslash [Sell.tsx]
+// @noErrors
+import { Hooks } from 'tempo.ts/wagmi'
+import { formatUnits, parseUnits } from 'viem'
 
-### Swap Exact Amount Out
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const betaUsd = '0x20c0000000000000000000000000000000000002'
 
-Specify the exact amount of tokens you want to receive, and pay at most a maximum amount:
+function Sell() {
+  const amount = parseUnits('10', 6)
 
-```ts
-const { amountIn, receipt } = await client.dex.buySync({
-  tokenIn: usdcAddress,
-  tokenOut: usdtAddress,
-  amountOut: parseUnits('1000', 6), // Receive exactly 1000 USDT
-  maxAmountIn: parseUnits('1002', 6), // Pay at most 1002 USDC
-})
+  // How much BetaUSD will I receive for 10 AlphaUSD? // [!code hl]
+  const { data: quote } = Hooks.dex.useSellQuote({ // [!code hl]
+    tokenIn: alphaUsd, // [!code hl]
+    tokenOut: betaUsd, // [!code hl]
+    amountIn: amount, // [!code hl]
+  }) // [!code hl]
 
-console.log('Paid:', amountIn)
+  return <div>Quote: {formatUnits(quote, 6)}</div>
+}
 ```
 
-**Parameters:**
-- `tokenIn` - The token address you're selling
-- `tokenOut` - The token address you're buying
-- `amountOut` - The exact amount of `tokenOut` to receive
-- `maxAmountIn` - Maximum amount of `tokenIn` you'll pay (slippage protection)
-
-## Getting Price Quotes
-
-Before executing a swap, you can query the expected price:
-
-### Quote Exact Amount In
-
-```ts
-const expectedOut = await client.dex.getSellQuote({
-  tokenIn: usdcAddress,
-  tokenOut: usdtAddress,
-  amountIn: parseUnits('1000', 6),
-})
-
-console.log('Expected output:', expectedOut)
-```
-
-### Quote Exact Amount Out
-
-```ts
-const expectedIn = await client.dex.getBuyQuote({
-  tokenIn: usdcAddress,
-  tokenOut: usdtAddress,
-  amountOut: parseUnits('1000', 6),
-})
-
-console.log('Expected input:', expectedIn)
-```
-
-## How Swaps Execute
-
-When you call a swap function:
-
-1. **Balance Check**: The exchange first checks your balance on the DEX
-2. **Transfer if Needed**: If your DEX balance is insufficient, tokens are transferred from your wallet
-3. **Order Matching**: The exchange walks through orders at each price tick, from best to worst:
-   - Orders are consumed in price-time priority order
-   - Each filled order credits the maker's balance on the DEX
-   - Continues until your swap is complete or limit price is reached
-4. **Slippage Check**: Reverts if `minAmountOut` (or `maxAmountIn`) constraints aren't met
-5. **Settlement**: Your output tokens are transferred to your wallet
-
-:::warning
-Swaps will revert with an `InsufficientLiquidity` error if there isn't enough liquidity in the order book to satisfy your slippage constraints.
 :::
 
-## Using Solidity
+### Calculate slippage tolerance
 
-If you're building a smart contract that executes swaps:
+Set appropriate slippage based on your quote to protect against unfavorable price movements.
 
-```solidity
-interface IStablecoinExchange {
-    function swapExactAmountIn(
-        address tokenIn,
-        address tokenOut,
-        uint128 amountIn,
-        uint128 minAmountOut
-    ) external returns (uint128 amountOut);
-    
-    function swapExactAmountOut(
-        address tokenIn,
-        address tokenOut,
-        uint128 amountOut,
-        uint128 maxAmountIn
-    ) external returns (uint128 amountIn);
-}
+:::code-group
 
-contract SwapContract {
-    IStablecoinExchange constant EXCHANGE = 
-        IStablecoinExchange(0xDEc0000000000000000000000000000000000000);
-    
-    function swapUSDCtoUSDT(uint128 amountIn, uint128 minAmountOut) external {
-        EXCHANGE.swapExactAmountIn(
-            USDC_ADDRESS,
-            USDT_ADDRESS,
-            amountIn,
-            minAmountOut
-        );
-    }
+```tsx twoslash [Buy.tsx]
+// @noErrors
+import { Hooks } from 'tempo.ts/wagmi'
+import { formatUnits, parseUnits } from 'viem'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const betaUsd = '0x20c0000000000000000000000000000000000002'
+
+function Buy() {
+  const amount = parseUnits('10', 6)
+
+  // How much AlphaUSD do I need to spend to receive 10 BetaUSD?
+  const { data: quote } = Hooks.dex.useBuyQuote({
+    tokenIn: alphaUsd,
+    tokenOut: betaUsd,
+    amountOut: amount,
+  })
+
+  // [!code ++] Calculate 0.5% slippage tolerance 
+  const slippageTolerance = 0.005 // [!code ++]
+  const maxAmountIn = quote // [!code ++]
+    ? quote * BigInt(Math.floor((1 + slippageTolerance) * 1000)) / 1000n // [!code ++]
+    : 0n // [!code ++]
+
+  return (
+    <div>
+      <div>Quote: {formatUnits(quote, 6)}</div>
+      <div>Max input (0.5% slippage): {formatUnits(maxAmountIn, 6)}</div> // [!code ++]
+    </div>
+  )
 }
 ```
 
-## Gas Costs
+```tsx twoslash [Sell.tsx]
+// @noErrors
+import { Hooks } from 'tempo.ts/wagmi'
+import { formatUnits, parseUnits } from 'viem'
 
-Swap gas costs scale with the number of orders and ticks your trade crosses:
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const betaUsd = '0x20c0000000000000000000000000000000000002'
 
-- Base swap cost (transfers and setup)
-- Per-order cost (for each order filled)
-- Per-tick cost (for each price level crossed)
-- Per-flip cost (if any flip orders are triggered)
+function Sell() {
+  const amount = parseUnits('10', 6)
 
-Larger swaps that cross more orders will cost more gas, but the cost per unit of volume decreases.
+  // How much BetaUSD will I receive for 10 AlphaUSD?
+  const { data: quote } = Hooks.dex.useSellQuote({
+    tokenIn: alphaUsd,
+    tokenOut: betaUsd,
+    amountIn: amount,
+  })
 
-## Token Balances on the DEX
+  // [!code ++] Calculate 0.5% slippage tolerance
+  const slippageTolerance = 0.005 // [!code ++]
+  const minAmountOut = quote // [!code ++]
+    ? quote * BigInt(Math.floor((1 - slippageTolerance) * 1000)) / 1000n // [!code ++]
+    : 0n // [!code ++]
 
-The exchange allows you to hold token balances directly on the DEX contract, which saves gas by avoiding ERC-20 transfers on every trade. When you execute a swap, the exchange first checks your DEX balance and only transfers from your wallet if needed.
+  return (
+    <div>
+      <div>Quote: {formatUnits(quote, 6)}</div>
+      <div>Min output (0.5% slippage): {formatUnits(minAmountOut, 6)}</div> // [!code ++]
+    </div>
+  )
+}
+```
 
-For complete details on checking balances, depositing, withdrawing, and managing your exchange balance, see the [Exchange Balance](/guide/stablecoin-exchange/exchange-balance) page.
+:::
 
-## Next Steps
+### Approve Spend
 
-- **[Providing Liquidity](/guide/stablecoin-exchange/providing-liquidity)** to learn how to provide liquidity
-- **[Exchange Balance](/guide/stablecoin-exchange/exchange-balance)** to manage your DEX balances
-- Learn more about [Executing Swaps](/documentation/protocol/exchange/executing-swaps)
+To execute a swap, you need to approve the Stablecoin DEX contract to spend the token you're using to fund the swap.
+
+:::code-group
+
+```tsx twoslash [Buy.tsx]
+// @noErrors
+import { Actions, Addresses } from 'tempo.ts/viem' // [!code ++]
+import { Hooks } from 'tempo.ts/wagmi'
+import { formatUnits, parseUnits } from 'viem'
+import { useSendCallsSync } from 'wagmi' // [!code ++]
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const betaUsd = '0x20c0000000000000000000000000000000000002'
+
+function Buy() {
+  const amount = parseUnits('10', 6)
+
+  // How much AlphaUSD do I need to spend to receive 10 BetaUSD?
+  const { data: quote } = Hooks.dex.useBuyQuote({
+    tokenIn: alphaUsd,
+    tokenOut: betaUsd,
+    amountOut: amount,
+  })
+
+  // Calculate 0.5% slippage tolerance
+  const slippageTolerance = 0.005
+  const maxAmountIn = quote
+    ? quote * BigInt(Math.floor((1 + slippageTolerance) * 1000)) / 1000n
+    : 0n
+
+  const sendCalls = useSendCallsSync() // [!code ++]
+
+  return (
+    <div>
+      <div>Quote: {formatUnits(quote, 6)}</div>
+      <div>Max input (0.5% slippage): {formatUnits(maxAmountIn, 6)}</div>
+      <button type="button" onClick={() => { // [!code ++]
+        const calls = [ // [!code ++]
+          Actions.token.approve.call({ // [!code ++]
+            amount: maxAmountIn, // Approve the max amount with slippage // [!code ++]
+            spender: Addresses.stablecoinExchange, // [!code ++]
+            token: alphaUsd, // [!code ++]
+          }), // [!code ++]
+        ] // [!code ++]
+        sendCalls.sendCallsSync({ calls }) // [!code ++]
+      }}> // [!code ++]
+        Approve Spend // [!code ++]
+      </button> // [!code ++]
+    </div>
+  )
+}
+```
+
+```tsx twoslash [Sell.tsx]
+// @noErrors
+import { Actions, Addresses } from 'tempo.ts/viem' // [!code ++]
+import { Hooks } from 'tempo.ts/wagmi'
+import { formatUnits, parseUnits } from 'viem'
+import { useSendCallsSync } from 'wagmi' // [!code ++]
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const betaUsd = '0x20c0000000000000000000000000000000000002'
+
+function Sell() {
+  const amount = parseUnits('10', 6)
+
+  // How much BetaUSD will I receive for 10 AlphaUSD?
+  const { data: quote } = Hooks.dex.useSellQuote({
+    tokenIn: alphaUsd,
+    tokenOut: betaUsd,
+    amountIn: amount,
+  })
+
+  // Calculate 0.5% slippage tolerance
+  const slippageTolerance = 0.005
+  const minAmountOut = quote
+    ? quote * BigInt(Math.floor((1 - slippageTolerance) * 1000)) / 1000n
+    : 0n
+
+  const sendCalls = useSendCallsSync() // [!code ++]
+
+  return (
+    <div>
+      <div>Quote: {formatUnits(quote, 6)}</div>
+      <div>Min output (0.5% slippage): {formatUnits(minAmountOut, 6)}</div>
+      <button type="button" onClick={() => { // [!code ++]
+        const calls = [ // [!code ++]
+          Actions.token.approve.call({ // [!code ++]
+            amount, // Approve the exact amount being sold // [!code ++]
+            spender: Addresses.stablecoinExchange, // [!code ++]
+            token: alphaUsd, // [!code ++]
+          }), // [!code ++]
+        ] // [!code ++]
+        sendCalls.sendCallsSync({ calls }) // [!code ++]
+      }}> // [!code ++]
+        Approve Spend // [!code ++]
+      </button> // [!code ++]
+    </div>
+  )
+}
+```
+
+:::
+
+### Execute a swap
+
+Batch the token approval with the swap in a single transaction for better UX.
+
+:::code-group
+
+```tsx twoslash [Buy.tsx]
+// @noErrors
+import { Actions, Addresses } from 'tempo.ts/viem'
+import { Hooks } from 'tempo.ts/wagmi'
+import { formatUnits, parseUnits } from 'viem'
+import { useSendCallsSync } from 'wagmi'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const betaUsd = '0x20c0000000000000000000000000000000000002'
+
+function Buy() {
+  const amount = parseUnits('10', 6)
+
+  // How much AlphaUSD do I need to spend to receive 10 BetaUSD?
+  const { data: quote } = Hooks.dex.useBuyQuote({
+    tokenIn: alphaUsd,
+    tokenOut: betaUsd,
+    amountOut: amount,
+  })
+
+  // Calculate 0.5% slippage tolerance
+  const slippageTolerance = 0.005
+  const maxAmountIn = quote
+    ? quote * BigInt(Math.floor((1 + slippageTolerance) * 1000)) / 1000n
+    : 0n
+
+  const sendCalls = useSendCallsSync()
+
+  return (
+    <div>
+      <div>Quote: {formatUnits(quote, 6)}</div>
+      <div>Max input (0.5% slippage): {formatUnits(maxAmountIn, 6)}</div>
+      <button type="button" onClick={() => {
+        const calls = [
+          Actions.token.approve.call({
+            amount: maxAmountIn, // Approve the max amount with slippage
+            spender: Addresses.stablecoinExchange,
+            token: alphaUsd,
+          }),
+          Actions.dex.buy.call({ // [!code ++]
+            amountOut: amount, // [!code ++]
+            maxAmountIn, // [!code ++]
+            tokenIn: alphaUsd, // [!code ++]
+            tokenOut: betaUsd, // [!code ++]
+          }), // [!code ++]
+        ]
+        sendCalls.sendCallsSync({ calls })
+      }}>
+        Execute Swap
+      </button>
+    </div>
+  )
+}
+```
+
+```tsx twoslash [Sell.tsx]
+// @noErrors
+import { Actions, Addresses } from 'tempo.ts/viem'
+import { Hooks } from 'tempo.ts/wagmi'
+import { formatUnits, parseUnits } from 'viem'
+import { useSendCallsSync } from 'wagmi'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const betaUsd = '0x20c0000000000000000000000000000000000002'
+
+function Sell() {
+  const amount = parseUnits('10', 6)
+
+  // How much BetaUSD will I receive for 10 AlphaUSD?
+  const { data: quote } = Hooks.dex.useSellQuote({
+    tokenIn: alphaUsd,
+    tokenOut: betaUsd,
+    amountIn: amount,
+  })
+
+  // Calculate 0.5% slippage tolerance
+  const slippageTolerance = 0.005
+  const minAmountOut = quote
+    ? quote * BigInt(Math.floor((1 - slippageTolerance) * 1000)) / 1000n
+    : 0n
+
+  const sendCalls = useSendCallsSync()
+
+  return (
+    <div>
+      <div>Quote: {formatUnits(quote, 6)}</div>
+      <div>Min output (0.5% slippage): {formatUnits(minAmountOut, 6)}</div>
+      <button type="button" onClick={() => {
+        const calls = [
+          Actions.token.approve.call({
+            amount, // Approve the exact amount being sold
+            spender: Addresses.stablecoinExchange,
+            token: alphaUsd,
+          }),
+          Actions.dex.sell.call({ // [!code ++]
+            amountIn: amount, // [!code ++]
+            minAmountOut, // [!code ++]
+            tokenIn: alphaUsd, // [!code ++]
+            tokenOut: betaUsd, // [!code ++]
+          }), // [!code ++]
+        ]
+        sendCalls.sendCallsSync({ calls })
+      }}>
+        Execute Swap
+      </button>
+    </div>
+  )
+}
+```
+
+:::
+
+::::
+
+## Recipes
+
+### Handling insufficient liquidity
+
+Quote requests will fail with an `InsufficientLiquidity` error if there isn't enough liquidity in the order book to satisfy the requested amount.
+
+Handle this error when fetching quotes:
+
+```tsx
+import { Hooks } from 'tempo.ts/wagmi'
+import { parseUnits } from 'viem'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const betaUsd = '0x20c0000000000000000000000000000000000002'
+
+function Swap() {
+  const amount = parseUnits('10', 6)
+
+  const { data: quote, error } = Hooks.dex.useSellQuote({
+    tokenIn: alphaUsd,
+    tokenOut: betaUsd,
+    amountIn: amount,
+  })
+
+  if (error) {
+    if (error.message.includes('InsufficientLiquidity')) {
+      return <div>Not enough liquidity available. Try a smaller amount.</div>
+    }
+    return <div>Error: {error.message}</div>
+  }
+
+  if (!quote) {
+    return <div>Loading quote...</div>
+  }
+
+  return <div>Quote: {quote.toString()}</div>
+}
+```
+
+## Best Practices
+
+### Always get quotes before swapping
+
+Query the expected price before executing a swap to ensure you're getting a fair rate and to set appropriate slippage protection.
+
+### Set appropriate slippage protection
+
+Use `minAmountOut` or `maxAmountIn` to protect against unfavorable price movements between quoting and execution.
+
+## Learning Resources
+
+<Card.Container>
+  <Card.Link
+    description="Learn about how the Stablecoin Exchange interacts with your balances"
+    href="/documentation/protocol/exchange/exchange-balance"
+    icon={LucideWallet}
+    title="Exchange Balance"
+  />
+  <Card.Link
+    description="Learn about the technical details of swap execution"
+    href="/documentation/protocol/exchange/executing-swaps"
+    icon={LucideArrowLeftRight}
+    title="Swap Execution Details"
+  />
+</Card.Container>
 

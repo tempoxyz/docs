@@ -201,8 +201,7 @@ export default defineConfig({
                 link: '/guide/stablecoin-exchange/managing-fee-liquidity',
               },
               {
-                text: 'Executing swaps 🚧',
-                disabled: true,
+                text: 'Executing swaps',
                 link: '/guide/stablecoin-exchange/executing-swaps',
               },
               {
