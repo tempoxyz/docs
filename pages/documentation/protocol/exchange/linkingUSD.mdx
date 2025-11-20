@@ -18,9 +18,63 @@ LinkingUSD can also be accepted as a fee token by validators.
 
 ### Contract
 
-linkingUSD is a precompiled TIP-20-compatible token instance deployed at the address `0x20c0000000000000000000000000000000000000`. Its currency is “USD”, and it uses six decimals.
+linkingUSD is a precompiled TIP-20-compatible token instance deployed at the address `0x20c0000000000000000000000000000000000000`. Its currency is "USD", and it uses six decimals.
 
-### Transfers
+
+
+### Key concepts
+
+#### linkingUSD as a quote token
+linkingUSD is used exclusively as a quote token for exchange accounting and order books. It can be accepted as a fee token by validators, but users cannot pay fees with linkingUSD.
+
+:::info
+While linkingUSD is the recommended and incentivized default, users can designate alternative quote tokens if they prefer. Tempo supports this flexibility, but encourages linkingUSD adoption through yield distribution from reserves to DEX participants.
+:::
+
+##### How It Works
+
+When you create a USD stablecoin on Tempo, you typically set linkingUSD as its quote token:
+
+```solidity
+TIP20 token = factory.createToken(
+  "My Company USD",
+  "MCUSD",
+  "USD",
+  TIP20(0x20c0000000000000000000000000000000000000), // linkingUSD
+  msg.sender
+);
+```
+
+This means:
+- Your token trades against linkingUSD on the exchange
+- Users can swap between your token and other USD stablecoins that also use linkingUSD
+- All liquidity is concentrated in linkingUSD pairs
+
+##### Hub-and-Spoke Structure
+
+This creates a hub-and-spoke structure where all USD stablecoins trade against linkingUSD:
+
+```
+               USDC
+                |
+    USDP -- linkingUSD -- PYUSD
+                |
+               USDT
+```
+
+Any stablecoin can convert to any other through linkingUSD with just two hops, ensuring simple routing, concentrated liquidity, and efficient pricing—even for thinly-traded pairs.
+
+##### Example: Cross-Stablecoin Payment
+
+1. Market makers provide liquidity for USDC/linkingUSD and USDP/linkingUSD pairs
+2. User wants to send USDC to a merchant who prefers USDP
+3. DEX atomically routes: User's USDC → linkingUSD → Merchant's USDP
+4. Single transaction, no manual swaps
+
+This is critical for payments between parties in different regulatory regimes with different stablecoin preferences. The user and merchant never touch linkingUSD, it exists only as routing infrastructure.
+
+
+#### Non-transferable design
 
 Since linkingUSD is not meant to be used as a user‑facing stablecoin, transferring of linkingUSD is only allowed as part of buying, selling, minting, or burning the token, as well as for validator fee payouts. To enable those limited use cases, the following exceptions are allowed:
 
@@ -29,6 +83,12 @@ Since linkingUSD is not meant to be used as a user‑facing stablecoin, transfer
 * Recipients that hold the `RECEIVE_WITH_MEMO_ROLE` may receive `transferWithMemo`/`transferFromWithMemo` even if the sender lacks `TRANSFER_ROLE`. This is intended for use in redemption flows.
 
 All other attempts to transfer revert with `TransfersDisabled()`.
+
+This design:
+- Prevents it from being used outside the exchange
+- Ensures it serves purely as a neutral reference point
+- Avoids regulatory complexity of issuing a transferable USD stablecoin
+- Prevents it from competing in the end-user stablecoin market
 
 ### Interface
 

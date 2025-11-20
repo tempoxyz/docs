@@ -196,10 +196,6 @@ export default defineConfig({
                 link: '/guide/stablecoin-exchange',
               },
               {
-                text: 'linkingUSD',
-                link: '/guide/stablecoin-exchange/linkingUSD',
-              },
-              {
                 text: 'Managing fee liquidity 🚧',
                 disabled: true,
                 link: '/guide/stablecoin-exchange/managing-fee-liquidity',
