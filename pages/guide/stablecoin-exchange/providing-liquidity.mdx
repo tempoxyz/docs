@@ -1,11 +1,17 @@
 import * as Demo from '../../../components/guides/Demo.tsx'
 import * as Step from '../../../components/guides/steps'
+import * as Card from '../../../components/Card.tsx'
+import LucideArrowLeftRight from '~icons/lucide/arrow-left-right'
+import LucideBookOpen from '~icons/lucide/book-open'
+import LucideWallet from '~icons/lucide/wallet'
 
 # Providing Liquidity
 
-Adding liquidity to a token pair in the Stablecoin DEX is done by placing an order. There are two types of orders `limit` and `flip`, each of which can be placed on the `buy` or `sell` side. To learn more about these order types see the [documentation](/documentation/protocol/exchange/providing-liquidity)
+Add liquidity for a token pair by placing orders on the Stablecoin DEX. You can provide liquidity on the `buy` or `sell` side of the orderbook, with `limit` or `flip` orders. To learn more about order types see the [documentation on order types](/documentation/protocol/exchange/providing-liquidity#order-types).
 
-By the end of this guide you will be able to place orders in the orderbook.
+In this guide you will learn how to place buy and sell orders to provide liquidity on the Stablecoin DEX orderbook.
+
+## Demo
 
 <Demo.Container name="Place an Order" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/exchange">
   <Step.Connect stepNumber={1} />
@@ -19,142 +25,254 @@ By the end of this guide you will be able to place orders in the orderbook.
 
 ### Set up your client
 
-Ensure that you have set up your client by following the [guide](guide/sdks/typescript).
+Ensure that you have set up your client by following the [guide](/guide/sdks/typescript).
 
 ### Approve Spend
 
-Placing an order requires a spend approval, as trades are executed by the Stablecoin DEX contract on your behalf. 
+To place an order, you need to approve the Stablecoin DEX contract to spend the order's "spend" token.
 
+:::info
+The code samples in this guide will place orders on the `AlphaUSD` / `LinkingUSD` pair.
 
-The code samples in this guide will show how to place an order on the AlphaUSD / LinkingUSD pair.
+The "spend" token is the token that will be spent to place the order.
+- buying `AlphaUSD` spends `LinkingUSD`
+- selling `AlphaUSD` spends `AlphaUSD`
+:::
 
+<Demo.Container name="Approve Spend">
+  <Step.Connect stepNumber={1} />
+  <Step.ApproveSpend stepNumber={2} last />
+</Demo.Container>
 
-```ts twoslash [PlaceOrder.ts]
+:::code-group
+
+```tsx twoslash [ApproveSpend.tsx]
 // @noErrors
-import { Addresses } from 'tempo.ts/viem'
+import { Addresses, Hooks } from 'tempo.ts/wagmi'
 import { parseUnits } from 'viem'
-
-import { client } from './viem.config'
 
 const linkingUsd = '0x20c0000000000000000000000000000000000000'
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
-export default function PlaceOrder(props: { orderType: 'buy' | 'sell' }) {
+function ApproveSpend(props: { orderType: 'buy' | 'sell' }) {
   const { orderType } = props
-  // buying AlphaUSD requires we spend LinkingUSD
-  const spendToken = orderType === 'buy' ? linkingUsd : alphaUsd
-
-  const handlePlaceOrder = async () => {
-    await client.token.approveSync({
-      amount: parseUnits('100', 6),
-      spender: Addresses.stablecoinExchange,
-      token: spendToken,
-    })
-  }
+  // buying AlphaUSD requires we spend LinkingUSD // [!code hl]
+  const spendToken = orderType === 'buy' ? linkingUsd : alphaUsd // [!code hl]
+  // [!code hl]
+  const { mutate: approve } = Hooks.token.useApproveSync() // [!code hl]
 
   return (
-    <button type="button" onClick={handlePlaceOrder}>
-      Place Order
+    <button type="button" onClick={() => {
+      approve({ // [!code hl]
+        amount: parseUnits('100', 6), // [!code hl]
+        spender: Addresses.stablecoinExchange, // [!code hl]
+        token: spendToken, // [!code hl]
+      }) // [!code hl]
+  }}>
+      Approve Spend
     </button>
   )
 }
 ```
+
+```ts [wagmi.config.ts]
+// [!include ~/snippets/wagmi.config.ts:setup]
+```
+
+:::
 
 
 ### Place Order
 
 Once the spend is approved, you can place an order by calling the `place` action on the Stablecoin DEX.
 
-```tsx twoslash [PlaceOrder.ts]
-// @noErrors
-import { Addresses } from 'tempo.ts/viem'
-import { parseUnits } from 'viem'
+<Demo.Container name="Place Order">
+  <Step.Connect stepNumber={1} />
+  <Step.PlaceOrder stepNumber={2} last />
+</Demo.Container>
 
-import { client } from './viem.config'
+:::code-group
 
-const linkingUsd = '0x20c0000000000000000000000000000000000000'
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
-
-export default function PlaceOrder(props: { orderType: 'buy' | 'sell' }) {
-  const { orderType } = props
-  // buying AlphaUSD requires we spend LinkingUSD
-  const spendToken = orderType === 'buy' ? linkingUsd : alphaUsd
-
-  const handlePlaceOrder = async () => {
-    await client.token.approveSync({
-      amount: parseUnits('100', 6),
-      spender: Addresses.stablecoinExchange,
-      token: spendToken,
-    })
-    await client.dex.place({ // [!code ++]
-      amount: parseUnits('100', 6), // [!code ++]
-      tick: 0, // [!code ++]
-      token: alphaUsd, // [!code ++]
-      type: orderType, // [!code ++]
-    }) // [!code ++]
-  }
-
-  return (
-    <button type="button" onClick={handlePlaceOrder}>
-      Place Order 
-    </button>
-  )
-}
-```
-
-::::
-
-## Best practices
-
-You can batch the calls to approve spend and place the order in a single transaction for efficiency
-
-```tsx twoslash [PlaceOrder.ts]
+```tsx twoslash [PlaceOrder.tsx]
 // @noErrors
 import { Actions, Addresses } from 'tempo.ts/viem'
 import { parseUnits } from 'viem'
-
-import { client } from './viem.config'
+import { useSendCallsSync } from 'wagmi' // [!code hl]
 
 const linkingUsd = '0x20c0000000000000000000000000000000000000'
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
-export default function PlaceOrder(props: { orderType: 'buy' | 'sell' }) {
+function PlaceOrder(props: { orderType: 'buy' | 'sell' }) {
   const { orderType } = props
   // buying AlphaUSD requires we spend LinkingUSD
   const spendToken = orderType === 'buy' ? linkingUsd : alphaUsd
 
-  const handlePlaceOrder = () => {
-    const calls = [
-      Actions.token.approve.call({
-        spender: Addresses.stablecoinExchange,
-        amount: parseUnits('100', 6),
-        token: spendToken,
-      }),
-      Actions.dex.place.call({
-        token: alphaUsd,
-        amount: parseUnits('100', 6), // Amount: 1000 USDC
-        type: 'buy', // Buying USDC
-        tick: 0,
-      }),
-    ]
-    client.sendTransactionSync({
-      calls,
-    })
-  }
+  const sendCalls = useSendCallsSync() // [!code hl]
 
   return (
-    <button type="button" onClick={handlePlaceOrder}>
+    <button type="button" onClick={() => {
+      const calls = [ // [!code hl]
+        Actions.token.approve.call({ // [!code hl]
+          spender: Addresses.stablecoinExchange, // [!code hl]
+          amount: parseUnits('100', 6), // [!code hl]
+          token: spendToken, // [!code hl]
+        }), // [!code hl]
+        Actions.dex.place.call({ // [!code hl]
+          token: alphaUsd, // [!code hl]
+          amount: parseUnits('100', 6), // [!code hl]
+          type: orderType, // [!code hl]
+          tick: 0, // [!code hl]
+        }), // [!code hl]
+      ] // [!code hl]
+      sendCalls.sendCallsSync({ calls }) // [!code hl]
+    }}>
       Place Order
     </button>
   )
 }
 ```
 
+```ts [wagmi.config.ts]
+// [!include ~/snippets/wagmi.config.ts:setup]
+```
 
-## Next Steps
+:::
 
-- **[Executing Swaps](/guide/stablecoin-exchange/executing-swaps)** to learn how to trade
-- **[Exchange Balance](/guide/stablecoin-exchange/exchange-balance)** to manage your DEX balances
-- Learn more about [Providing Liquidity](/documentation/protocol/exchange/providing-liquidity)
+### Next steps
+
+Now that you can place orders to provide liquidity, you can:
+- **[Execute swaps](/guide/stablecoin-exchange/executing-swaps)** to trade on the DEX
+- **[Manage exchange balances](/documentation/protocol/exchange/exchange-balance)** to optimize gas costs
+- Deep dive into the [Stablecoin Exchange protocol specification](/documentation/protocol/exchange/spec)
+
+::::
+
+## Recipes
+
+### Flip order
+
+Flip orders automatically switch between buy and sell sides when filled, providing continuous liquidity. Use viem's [`dex.placeFlip`](/sdk/typescript/viem/dex.placeFlip) to create a flip order call.
+
+:::code-group
+
+```tsx twoslash [PlaceFlipOrder.tsx]
+// @noErrors
+import { Actions, Addresses } from 'tempo.ts/viem'
+import { parseUnits } from 'viem'
+import { useSendCallsSync } from 'wagmi'
+
+const linkingUsd = '0x20c0000000000000000000000000000000000000'
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
+function PlaceFlipOrder(props: { orderType: 'buy' | 'sell' }) {
+  const { orderType } = props
+  // buying AlphaUSD requires we spend LinkingUSD
+  const spendToken = orderType === 'buy' ? linkingUsd : alphaUsd
+
+  const sendCalls = useSendCallsSync()
+
+  return (
+    <button type="button" onClick={() => {
+      const calls = [
+        Actions.token.approve.call({
+          spender: Addresses.stablecoinExchange,
+          amount: parseUnits('100', 6),
+          token: spendToken,
+        }),
+        Actions.dex.placeFlip.call({ // [!code focus]
+          token: alphaUsd,
+          amount: parseUnits('100', 6),
+          type: orderType,
+          tick: 0,
+        }),
+      ]
+      sendCalls.sendCallsSync({ calls })
+    }}>
+      Place Flip Order
+    </button>
+  )
+}
+```
+
+```ts [wagmi.config.ts]
+// [!include ~/snippets/wagmi.config.ts:setup]
+```
+
+:::
+
+## Best practices
+
+### Batch calls
+You can batch the calls to approve spend and place the order in a single transaction for efficiency.
+
+:::code-group
+
+```tsx twoslash [PlaceOrder.tsx]
+// @noErrors
+import { Actions, Addresses } from 'tempo.ts/viem'
+import { parseUnits } from 'viem'
+import { useSendCallsSync } from 'wagmi' // [!code focus]
+
+const linkingUsd = '0x20c0000000000000000000000000000000000000'
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
+function PlaceOrder(props: { orderType: 'buy' | 'sell' }) {
+  const { orderType } = props
+  // buying AlphaUSD requires we spend LinkingUSD
+  const spendToken = orderType === 'buy' ? linkingUsd : alphaUsd
+  const sendCalls = useSendCallsSync() // [!code focus]
+
+  return (
+    <button type="button" onClick={() => {
+      const calls = [ // [!code focus]
+        Actions.token.approve.call({ // [!code focus]
+          spender: Addresses.stablecoinExchange, // [!code focus]
+          amount: parseUnits('100', 6), // [!code focus]
+          token: spendToken, // [!code focus]
+        }), // [!code focus]
+        Actions.dex.place.call({ // [!code focus]
+          token: alphaUsd, // [!code focus]
+          amount: parseUnits('100', 6), // [!code focus]
+          type: orderType, // [!code focus]
+          tick: 0, // [!code focus]
+        }), // [!code focus]
+      ] // [!code focus]
+      sendCalls.sendCallsSync({ calls }) // [!code focus]
+    }}>
+      Place Order
+    </button>
+  )
+}
+```
+
+```ts [wagmi.config.ts]
+// [!include ~/snippets/wagmi.config.ts:setup]
+```
+
+:::
+
+
+## Learning resources
+
+<Card.Container>
+  <Card.Link
+    description="Learn how to execute swaps and trade stablecoins on the DEX"
+    href="/guide/stablecoin-exchange/executing-swaps"
+    icon={LucideArrowLeftRight}
+    title="Executing Swaps"
+  />
+  <Card.Link
+    description="Deep dive into the Stablecoin Exchange protocol specification"
+    href="/documentation/protocol/exchange/spec"
+    icon={LucideBookOpen}
+    title="Protocol Exchange Specification"
+  />
+  <Card.Link
+    description="Manage token balances on the exchange to optimize gas costs"
+    href="/documentation/protocol/exchange/exchange-balance"
+    icon={LucideWallet}
+    title="Exchange Balance"
+  />
+</Card.Container>
 
 

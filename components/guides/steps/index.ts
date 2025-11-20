@@ -1,6 +1,7 @@
 export { MintFeeAmmLiquidity } from './amm/MintFeeAmmLiquidity'
 export { SelectFeeToken } from './amm/SelectFeeToken'
 export { Connect } from './auth/Connect'
+export { ApproveSpend } from './exchange/ApproveSpend'
 export { PlaceOrder } from './exchange/PlaceOrder'
 export { BurnToken } from './issuance/BurnToken'
 export { BurnTokenBlocked } from './issuance/BurnTokenBlocked'

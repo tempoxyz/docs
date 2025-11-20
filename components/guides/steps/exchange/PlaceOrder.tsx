@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Actions, Addresses } from 'tempo.ts/viem'
 import { Hooks } from 'tempo.ts/wagmi'
 import { parseUnits } from 'viem'
-import { useAccount, useAccountEffect, useSendTransactionSync } from 'wagmi'
+import { useAccount, useAccountEffect, useSendCallsSync } from 'wagmi'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd, linkingUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -15,11 +15,11 @@ export function PlaceOrder(props: DemoStepProps) {
     token: alphaUsd,
   })
 
-  const sendTransaction = useSendTransactionSync()
+  const sendCalls = useSendCallsSync()
 
   useAccountEffect({
     onDisconnect() {
-      sendTransaction.reset()
+      sendCalls.reset()
     },
   })
 
@@ -45,37 +45,36 @@ export function PlaceOrder(props: DemoStepProps) {
 
   return (
     <Step
-      active={active && (last ? true : !sendTransaction.isSuccess)}
-      completed={sendTransaction.isSuccess}
+      active={active && (last ? true : !sendCalls.isSuccess)}
+      completed={sendCalls.isSuccess}
       actions={
         <Button
           variant={
-            active
-              ? sendTransaction.isSuccess
-                ? 'default'
-                : 'accent'
-              : 'default'
+            active ? (sendCalls.isSuccess ? 'default' : 'accent') : 'default'
           }
           disabled={!active}
-          onClick={async () => {
-            await sendTransaction.sendTransactionSyncAsync({
+          onClick={() => {
+            sendCalls.sendCallsSync({
               calls,
-              feeToken: alphaUsd,
             })
           }}
           type="button"
           className="text-[14px] -tracking-[2%] font-normal"
         >
-          Place Order
+          {sendCalls.isPending ? 'Placing Order...' : 'Place Order'}
         </Button>
       }
       number={stepNumber}
-      title={`Place buy order for 100 AlphaUSD`}
+      title="Approve spend and place buy order for 100 AlphaUSD"
     >
-      {sendTransaction.data && (
+      {sendCalls.isSuccess && sendCalls.data && (
         <div className="flex mx-6 flex-col gap-3 pb-4">
           <div className="ps-5 border-gray4 border-s-2">
-            <ExplorerLink hash={sendTransaction.data.transactionHash} />
+            <ExplorerLink
+              hash={
+                sendCalls.data.receipts?.at(0)?.transactionHash as `0x${string}`
+              }
+            />
           </div>
         </div>
       )}
