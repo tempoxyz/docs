@@ -37,44 +37,29 @@ Create and fund an account to sponsor transaction fees for your users.
 
 ```tsx twoslash [CreateAndFundSponsorAccount.ts]
 // @noErrors
+import { Hooks } from 'tempo.ts/wagmi'
 import { privateKeyToAccount } from 'viem/accounts'
-import { useClient } from 'wagmi'
 
-export function CreateSponsorAccount() {
-  const client = useClient()
-
-  const handleClick = async () => {
-    const privateKey = `0x${Array.from({ length: 64 }, () =>        // [!code hl]
-      Math.floor(Math.random() * 16).toString(16),                  // [!code hl]
-    ).join('')}` as `0x${string}`                                   // [!code hl]
-    const sponsorAccount = privateKeyToAccount(privateKey)                 // [!code hl]
-    await client.request<any>({                                     // [!code hl]
-      method: 'tempo_fundAddress',                                 // [!code hl]
-      params: [sponsorAccount.address],                                   // [!code hl]
-    })                                                             // [!code hl]
-  }
+export function CreateAndFundSponsorAccount() {
+  const { mutate, isPending } = Hooks.faucet.useFundSync()          // [!code hl]
 
   return (
-    <button onClick={handleClick}>
-      Create and fund sponsor account
+    <button 
+      onClick={() => {
+        const account = privateKeyToAccount('0x...') // [!code hl]
+        mutate({ account: account.address }) // [!code hl]
+      }} 
+      disabled={isPending}
+    >
+      {isPending ? 'Creating and funding...' : 'Create and fund sponsor account'}
     </button>
   )
 }
 ```
 
-```tsx twoslash [config.ts] filename="config.ts"
+```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
-
-export const config = createConfig({
-  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.config.ts:setup]
 ```
 
 :::
@@ -136,19 +121,9 @@ export function SendSponsoredPayment({ sponsorAccount }: { sponsorAccount: any }
 }
 ```
 
-```tsx twoslash [config.ts] filename="config.ts"
+```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
-
-export const config = createConfig({
-  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.config.ts:setup]
 ```
 
 :::

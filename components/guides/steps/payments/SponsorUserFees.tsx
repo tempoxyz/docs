@@ -1,9 +1,8 @@
-import { useMutation } from '@tanstack/react-query'
 import * as React from 'react'
 import { Hooks } from 'tempo.ts/wagmi'
 import { formatUnits, isAddress, pad, parseUnits, stringToHex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { useAccount, useAccountEffect, useBlockNumber, useClient } from 'wagmi'
+import { useAccount, useAccountEffect, useBlockNumber } from 'wagmi'
 import { useDemoContext } from '../../../DemoContext'
 import {
   Button,
@@ -83,7 +82,7 @@ export function CreateSponsorAccount(props: DemoStepProps) {
 export function FundSponsorAccount(props: DemoStepProps) {
   const { stepNumber, last = false } = props
   const { getData } = useDemoContext()
-  const client = useClient()
+  const { mutate, isPending } = Hooks.faucet.useFundSync()
 
   const sponsorAccount = getData('sponsorAccount')
 
@@ -109,21 +108,6 @@ export function FundSponsorAccount(props: DemoStepProps) {
     sponsorBalanceRefetch()
   }, [blockNumber])
 
-  const fundSponsor = useMutation({
-    async mutationFn() {
-      if (!sponsorAccount || !client)
-        throw new Error('Sponsor account or client not found')
-
-      await client.request<any>({
-        method: 'tempo_fundAddress',
-        params: [sponsorAccount.address],
-      })
-
-      await new Promise((resolve) => setTimeout(resolve, 400))
-      sponsorBalanceRefetch()
-    },
-  })
-
   return (
     <Step
       active={
@@ -134,27 +118,21 @@ export function FundSponsorAccount(props: DemoStepProps) {
         sponsorAccount && sponsorBalance && sponsorBalance > 0n,
       )}
       actions={
-        sponsorBalance && sponsorBalance > 0n ? (
-          <Button
-            disabled={fundSponsor.isPending}
-            variant="default"
-            className="text-[14px] -tracking-[2%] font-normal"
-            onClick={() => fundSponsor.mutate()}
-            type="button"
-          >
-            {fundSponsor.isPending ? 'Adding funds' : 'Add more funds'}
-          </Button>
-        ) : (
-          <Button
-            disabled={!sponsorAccount || fundSponsor.isPending}
-            variant={sponsorAccount ? 'accent' : 'default'}
-            className="text-[14px] -tracking-[2%] font-normal"
-            type="button"
-            onClick={() => fundSponsor.mutate()}
-          >
-            {fundSponsor.isPending ? 'Adding funds' : 'Add funds'}
-          </Button>
-        )
+        <Button
+          disabled={isPending}
+          variant="default"
+          className="text-[14px] -tracking-[2%] font-normal"
+          onClick={() =>
+            mutate({ account: sponsorAccount?.address as `0x${string}` })
+          }
+          type="button"
+        >
+          {isPending
+            ? 'Adding funds'
+            : sponsorBalance && sponsorBalance > 0n
+              ? 'Add more funds'
+              : 'Add funds'}
+        </Button>
       }
       number={stepNumber}
       title="Fund your sponsor account with AlphaUSD."
