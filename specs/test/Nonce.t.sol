@@ -26,14 +26,16 @@ contract NonceTest is BaseTest {
     /// @param account The account whose nonce to increment
     /// @param nonceKey The nonce key to increment (must be > 0)
     /// @return newNonce The new nonce value after incrementing
-    function _incrementNonceViaStorage(address account, uint256 nonceKey) internal returns (uint64 newNonce) {
+    function _incrementNonceViaStorage(address account, uint256 nonceKey)
+        internal
+        returns (uint64 newNonce)
+    {
         require(nonceKey > 0, "Cannot increment protocol nonce (key 0)");
 
         // Calculate storage slot for nonces[account][nonceKey]
         // For nested mapping: keccak256(abi.encode(nonceKey, keccak256(abi.encode(account, baseSlot))))
-        bytes32 nonceSlot = keccak256(
-            abi.encode(nonceKey, keccak256(abi.encode(account, NONCES_SLOT)))
-        );
+        bytes32 nonceSlot =
+            keccak256(abi.encode(nonceKey, keccak256(abi.encode(account, NONCES_SLOT))));
 
         // Read current nonce value
         uint64 currentNonce = uint64(uint256(vm.load(_NONCE, nonceSlot)));
@@ -137,15 +139,19 @@ contract NonceTest is BaseTest {
         // We use a direct require in the helper, so we test with try-catch
         bool reverted = false;
         try this.externalIncrementNonceViaStorage(testAlice, 0) {
-            // Should not reach here
-        } catch {
+        // Should not reach here
+        }
+        catch {
             reverted = true;
         }
         assertTrue(reverted, "Should revert when trying to increment protocol key 0");
     }
 
     /// @dev External wrapper for testing reverts
-    function externalIncrementNonceViaStorage(address account, uint256 nonceKey) external returns (uint64) {
+    function externalIncrementNonceViaStorage(address account, uint256 nonceKey)
+        external
+        returns (uint64)
+    {
         return _incrementNonceViaStorage(account, nonceKey);
     }
 
