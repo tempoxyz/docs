@@ -169,7 +169,8 @@ Sets the fee token preference for the caller (validator). Requires token to be a
 function collectFeePreTx(
     address user,
     address txToAddress,
-    uint256 maxAmount
+    uint256 maxAmount,
+    address feeRecipient
 ) external returns (address userToken)
 ```
 
@@ -181,7 +182,8 @@ function collectFeePostTx(
     uint256 maxAmount,
     uint256 actualUsed,
     address userToken,
-    address validatorToken
+    address validatorToken,
+    address feeRecipient
 ) external
 ```
 
