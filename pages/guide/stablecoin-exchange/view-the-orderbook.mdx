@@ -1,137 +1,195 @@
+import { IndexSupplyQuery } from '../../../components/IndexSupplyQuery'
+
+
 # View the Orderbook
 
 Query and inspect the orderbook to see available liquidity, price levels, and individual orders on Tempo's Stablecoin Exchange.
 
-## Overview
+## Recommended Approach
 
-The exchange maintains an on-chain orderbook with price-time priority. You can query:
-- **Price levels**: Total liquidity at specific price ticks
-- **Individual orders**: Details of specific orders by order ID
-- **Best bid/ask**: The best available prices for buying or selling
+We recommend using indexed data to query the orderbook for better performance and ease of use. While you can query logs and transactions directly from an RPC node, indexed data providers offer structured SQL interfaces that make complex queries simpler and more efficient.
 
-## Query Price Levels
+In this guide, we use [Index Supply](https://www.indexsupply.net) as our indexing provider, but you're free to choose your own indexing solution or query the chain directly based on your needs.
 
-Get information about liquidity at a specific price tick:
+## Recipes
 
-```ts
-import { client } from './viem.config'
-import { Tick } from 'tempo.ts/viem'
+### Get the current spread
 
-// Get bid side liquidity at $0.9990
-const bidLevel = await client.dex.getPriceLevel({
-  base: usdcAddress,
-  tick: Tick.fromPrice('0.9990'),
-  isBid: true,
-})
+Query the best bid and ask prices to calculate the current spread for a token pair.
 
-console.log('Total liquidity:', bidLevel.totalLiquidity)
-console.log('First order ID:', bidLevel.head)
-console.log('Last order ID:', bidLevel.tail)
-```
+Find the highest bid prices (buyers) for AlphaUSD. This query filters out fully filled and cancelled orders, groups by price level (tick), and shows the top 5 bid prices with their total liquidity.
 
-**Parameters:**
-- `base` - The base token address (e.g., USDC)
-- `tick` - The price tick. Use `Tick.fromPrice()` to convert a price to a tick
-- `isBid` - `true` for bid side (buy orders), `false` for ask side (sell orders)
+<IndexSupplyQuery
+  title={'Best Bid Prices for AlphaUSD'}
+  query={`SELECT
+    COALESCE(o.tick, f.tick) as tick,
+    SUM(COALESCE(o.amount, 0) + COALESCE(f.amount, 0)) as total_liquidity
+  FROM orderplaced o
+  FULL OUTER JOIN fliporderplaced f
+    ON o."orderId" = f."orderId"
+  WHERE (o.token = '0x20c0000000000000000000000000000000000001' OR f.token = '0x20c0000000000000000000000000000000000001')
+    AND (o."isBid" = true OR f."isBid" = true)
+    AND NOT EXISTS (
+      SELECT 1 FROM orderfilled
+      WHERE orderfilled."orderId" = COALESCE(o."orderId", f."orderId")
+        AND orderfilled."partialFill" = false
+    )
+    AND NOT EXISTS (
+      SELECT 1 FROM ordercancelled
+      WHERE ordercancelled."orderId" = COALESCE(o."orderId", f."orderId")
+    )
+  GROUP BY o.tick, f.tick
+  ORDER BY COALESCE(o.tick, f.tick) DESC
+  LIMIT 5`}
+  signatures={["OrderPlaced", "FlipOrderPlaced", "OrderFilled", "OrderCancelled"]}
+/>
 
-**Returns:**
-- `head` - Order ID of the first order at this price level (FIFO queue head)
-- `tail` - Order ID of the last order at this price level (FIFO queue tail)
-- `totalLiquidity` - Total amount of tokens available at this price level
+Find the lowest ask prices (sellers) for AlphaUSD. The spread is the difference between the highest bid and lowest ask price.
 
-## Query Individual Orders
+<IndexSupplyQuery
+  title={'Best Ask Prices for AlphaUSD'}
+  query={`SELECT
+    COALESCE(o.tick, f.tick) as tick,
+    SUM(COALESCE(o.amount, 0) + COALESCE(f.amount, 0)) as total_liquidity
+  FROM orderplaced o
+  FULL OUTER JOIN fliporderplaced f
+    ON o."orderId" = f."orderId"
+  WHERE (o.token = '0x20c0000000000000000000000000000000000001' OR f.token = '0x20c0000000000000000000000000000000000001')
+    AND (o."isBid" = false OR f."isBid" = false)
+    AND NOT EXISTS (
+      SELECT 1 FROM orderfilled
+      WHERE orderfilled."orderId" = COALESCE(o."orderId", f."orderId")
+        AND orderfilled."partialFill" = false
+    )
+    AND NOT EXISTS (
+      SELECT 1 FROM ordercancelled
+      WHERE ordercancelled."orderId" = COALESCE(o."orderId", f."orderId")
+    )
+  GROUP BY o.tick, f.tick
+  ORDER BY COALESCE(o.tick, f.tick)
+  LIMIT 5`}
+  signatures={["OrderPlaced", "FlipOrderPlaced", "OrderFilled", "OrderCancelled"]}
+/>
 
-Get detailed information about a specific order:
+### Inspect order depth
 
-```ts
-const order = await client.dex.getOrder({
-  orderId: 123n,
-})
+View aggregated liquidity at each price level to understand the orderbook structure.
 
-console.log('Maker:', order.maker)
-console.log('Amount:', order.amount)
-console.log('Remaining:', order.remaining)
-console.log('Price tick:', order.tick)
-console.log('Is bid:', order.isBid)
-console.log('Is flip order:', order.isFlip)
-```
+This query shows all active orders from both OrderPlaced and FlipOrderPlaced events, using a full outer join to combine liquidity at each price level.
 
-**Returns:**
-- `maker` - Address of the user who placed the order
-- `amount` - Original order amount
-- `remaining` - Amount still available to fill
-- `tick` - Price tick of the order
-- `isBid` - Whether it's a buy order (`true`) or sell order (`false`)
-- `isFlip` - Whether it's a flip order
-- `flipTick` - For flip orders, the tick to flip to when filled
-- `prev` / `next` - Linked list pointers for the FIFO queue
+<IndexSupplyQuery
+  title={'Order Depth by Price Level'}
+  query={`SELECT
+    COALESCE(o.tick, f.tick) as price_tick,
+    COALESCE(o."isBid", f."isBid") as is_bid,
+    COUNT(COALESCE(o."orderId", f."orderId")) as num_orders,
+    SUM(COALESCE(o.amount, 0) + COALESCE(f.amount, 0)) as total_amount
+  FROM orderplaced o
+  FULL OUTER JOIN fliporderplaced f
+    ON o."orderId" = f."orderId"
+  WHERE (o.token = '0x20c0000000000000000000000000000000000002' OR f.token = '0x20c0000000000000000000000000000000000002')
+    AND NOT EXISTS (
+      SELECT 1 FROM orderfilled
+      WHERE orderfilled."orderId" = COALESCE(o."orderId", f."orderId")
+        AND orderfilled."partialFill" = false
+    )
+    AND NOT EXISTS (
+      SELECT 1 FROM ordercancelled
+      WHERE ordercancelled."orderId" = COALESCE(o."orderId", f."orderId")
+    )
+  GROUP BY price_tick, is_bid
+  ORDER BY is_bid DESC, price_tick
+  LIMIT 50`}
+  signatures={["OrderPlaced", "FlipOrderPlaced", "OrderFilled", "OrderCancelled"]}
+/>
 
-## Understanding Price Ticks
+### Inspect an individual order
 
-Price ticks represent prices relative to the quote token (usually linkingUSD). The formula is:
+#### Order details 
 
-```
-tick = (price - 1) * 100_000
-```
+Get detailed information about a specific order including its placement details, fill history, and cancellation status.
 
-Where `price` is the token price in quote token units.
+This query inspects the details of the most recent order for AlphaUSD. It shows when the order was created, at what price (tick), the order size, and who placed it.
 
-**Examples:**
-- Price $1.0000 → tick = 0
-- Price $0.9990 → tick = -10
-- Price $1.0010 → tick = 10
+<IndexSupplyQuery
+  title={'Order Placement Details'}
+  query={`SELECT
+    "orderId",
+    tick,
+    "isBid",
+    amount,
+    maker,
+    token,
+    block_num,
+    tx_hash
+  FROM orderplaced
+  WHERE token = '0x20c0000000000000000000000000000000000001'
+  ORDER BY block_num DESC
+  LIMIT 1`}
+  signatures={["OrderPlaced"]}
+/>
 
-Use `Tick.fromPrice()` to convert prices to ticks:
+#### Order fill status
 
-```ts
-import { Tick } from 'tempo.ts/viem'
+Check if an order has been partially or fully filled. This query shows up to 5 fill events for order number `2`, including the amount filled in each transaction and whether it was a partial fill.
 
-const tick = Tick.fromPrice('0.9990') // Returns -10
-const price = Tick.toPrice(-10) // Returns '0.9990'
-```
+<IndexSupplyQuery
+  title={'Order Fill History'}
+  query={`SELECT
+    "orderId",
+    "amountFilled",
+    "partialFill",
+    block_num,
+    tx_hash
+  FROM orderfilled
+  WHERE "orderId" = 2
+  ORDER BY block_num DESC
+  LIMIT 5`}
+  signatures={["OrderFilled"]}
+/>
 
-## Iterating Through the Orderbook
+#### Cancelled orders
 
-To view multiple price levels, query different ticks:
+Check if an order has been cancelled. This query returns an order for AlphaUSD that was explicitly cancelled by the maker before being fully filled.
 
-```ts
-// Query a range of bid prices
-const prices = ['0.9990', '0.9995', '1.0000', '1.0005', '1.0010']
+<IndexSupplyQuery
+  title={'Order Cancellation Status'}
+  query={`SELECT
+    ordercancelled."orderId",
+    ordercancelled.block_num,
+    ordercancelled.tx_hash
+  FROM ordercancelled
+  INNER JOIN orderplaced ON ordercancelled."orderId" = orderplaced."orderId"
+  WHERE orderplaced.token = '0x20c0000000000000000000000000000000000001'
+  ORDER BY orderplaced.block_num DESC
+  LIMIT 1`}
+  signatures={["OrderCancelled", "OrderPlaced"]}
+/>
 
-for (const price of prices) {
-  const level = await client.dex.getPriceLevel({
-    base: usdcAddress,
-    tick: Tick.fromPrice(price),
-    isBid: true,
-  })
-  
-  console.log(`Price ${price}: ${level.totalLiquidity} available`)
-}
-```
+### Get recent trade prices
 
-## Best Bid and Ask
+View the last prices a token traded at to understand recent market activity.
 
-The exchange tracks the best bid and ask ticks. To find the best prices:
+This query joins order fill events with their corresponding placement details to show the price tick and amount for recent trades.
 
-1. Query price levels at different ticks
-2. Find the highest bid tick and lowest ask tick with liquidity
-3. Or use swap quote functions which automatically find the best prices:
-
-```ts
-// Get a quote for buying 1000 USDT with USDC
-const quote = await client.dex.getBuyQuote({
-  tokenIn: usdcAddress,
-  tokenOut: usdtAddress,
-  amountOut: parseUnits('1000', 6),
-})
-
-console.log('Best price:', quote.price)
-console.log('Amount needed:', quote.amountIn)
-```
-
-## Next Steps
-
-- **[Executing Swaps](/guide/stablecoin-exchange/executing-swaps)** to learn how to trade against the orderbook
-- **[Providing Liquidity](/guide/stablecoin-exchange/providing-liquidity)** to learn how to place orders
-- **[Exchange Balance](/guide/stablecoin-exchange/exchange-balance)** to manage your DEX balances
+<IndexSupplyQuery
+  title={'Recent Trade Prices for AlphaUSD'}
+  query={`SELECT
+    of.block_num,
+    of."orderId",
+    COALESCE(o.tick, f.tick) as tickPrice,
+    of."amountFilled",
+    COALESCE(o."isBid", f."isBid") as "isBid"
+  FROM orderfilled of
+  LEFT JOIN orderplaced o
+    ON of."orderId" = o."orderId"
+    AND o.token = '0x20c0000000000000000000000000000000000001'
+  LEFT JOIN fliporderplaced f
+    ON of."orderId" = f."orderId"
+    AND f.token = '0x20c0000000000000000000000000000000000001'
+  WHERE o."orderId" IS NOT NULL OR f."orderId" IS NOT NULL
+  ORDER BY of.block_num DESC
+  LIMIT 10`}
+  signatures={["OrderFilled", "OrderPlaced", "FlipOrderPlaced"]}
+/>
 

@@ -5,6 +5,7 @@ import { ModuleResolutionKind } from 'typescript'
 import autoImport from 'unplugin-auto-import/vite'
 import iconsResolver from 'unplugin-icons/resolver'
 import icons from 'unplugin-icons/vite'
+import { loadEnv } from 'vite'
 import { defineConfig } from 'vocs'
 
 const twoslashSupportFile = readFileSync(
@@ -205,8 +206,7 @@ export default defineConfig({
                 link: '/guide/stablecoin-exchange/executing-swaps',
               },
               {
-                text: 'View the orderbook 🚧',
-                disabled: true,
+                text: 'View the orderbook',
                 link: '/guide/stablecoin-exchange/view-the-orderbook',
               },
               {
@@ -1518,6 +1518,88 @@ export default defineConfig({
           console.log('→ starting tempo node...')
           await instance.start()
           console.log('√ tempo node started on port 8545')
+        },
+      },
+      {
+        name: 'api-routes',
+        configureServer(server) {
+          const env = loadEnv(server.config.mode, process.cwd(), '')
+
+          // Set process.env for development
+          Object.keys(env).forEach((key) => {
+            if (process.env[key] === undefined) {
+              process.env[key] = env[key]
+            }
+          })
+
+          server.middlewares.use(async (req, res, next) => {
+            if (req.url === '/api/index-supply' && req.method === 'POST') {
+              try {
+                let body = ''
+                req.on('data', (chunk) => {
+                  body += chunk.toString()
+                })
+
+                await new Promise((resolve) => {
+                  req.on('end', resolve)
+                })
+
+                const parsedBody = JSON.parse(body)
+
+                // Import and execute the index supply serverless function
+                const handler = (await import('./api/index-supply.js')).default
+
+                const mockRes = {
+                  statusCode: 200,
+                  headers: {} as Record<string, string>,
+                  setHeader(key: string, value: string) {
+                    this.headers[key] = value
+                    return this
+                  },
+                  status(code: number) {
+                    this.statusCode = code
+                    return this
+                  },
+                  json(data: unknown) {
+                    res.setHeader('Content-Type', 'application/json')
+                    res.statusCode = this.statusCode
+                    Object.entries(this.headers).forEach(([key, value]) => {
+                      res.setHeader(key, value)
+                    })
+                    res.end(JSON.stringify(data))
+                    return this
+                  },
+                  end() {
+                    res.end()
+                    return this
+                  },
+                }
+
+                const mockReq = {
+                  method: req.method,
+                  headers: req.headers as Record<string, string>,
+                  body: parsedBody,
+                }
+
+                // biome-ignore lint/suspicious/noExplicitAny: Local mock request
+                await handler(mockReq as any, mockRes as any)
+              } catch (error) {
+                console.error('API route error:', error)
+                res.statusCode = 500
+                res.setHeader('Content-Type', 'application/json')
+                res.end(
+                  JSON.stringify({
+                    error:
+                      error instanceof Error
+                        ? error.message
+                        : 'Internal server error',
+                  }),
+                )
+              }
+              return
+            }
+            next()
+          })
         },
       },
       icons({ compiler: 'jsx', jsx: 'react' }),

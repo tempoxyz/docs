@@ -12,9 +12,12 @@
     "preview": "vocs preview"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "@tanstack/react-query": "^5.90.5",
+    "@vercel/node": "^5.5.10",
     "@wagmi/core": "^3.0.0",
     "cva": "1.0.0-beta.4",
+    "monaco-editor": "^0.55.1",
     "ox": "~0.9.14",
     "prool": "^0.0.25",
     "react": "latest",
@@ -26,7 +29,8 @@
     "tempo.ts": "~0.5.4",
     "viem": "https://pkg.pr.new/viem@main",
     "vocs": "^1.1.4",
-    "wagmi": "^3.0.1"
+    "wagmi": "^3.0.1",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.5",
@@ -35,6 +39,7 @@
     "@svgr/plugin-jsx": "^8.1.0",
     "@types/node": "latest",
     "@types/react": "latest",
+    "monaco-editor-core": "^0.55.1",
     "simple-git-hooks": "^2.13.1",
     "typescript": "^5.9.3",
     "unplugin-auto-import": "^20.2.0",
