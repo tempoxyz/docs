@@ -33,7 +33,7 @@ Ensure that you have set up your project with Wagmi and integrated accounts by f
 
 Before you can pay fees in a token of your choice, you need to fund your account. In this guide you will be sending `AlphaUSD` (`0x20c000…0001`) and paying fees in `BetaUSD` (`0x20c000…0002`).
 
-The built-in Tempo testnet faucet funds accounts with `AlphaUSD` and `BetaUSD`.
+The built-in Tempo testnet faucet includes `AlphaUSD` and `BetaUSD` when funding.
 
 <Demo.Container name="Add Funds" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd, Demo.betaUsd]}>
   <Step.AddFunds stepNumber={1} last />
@@ -46,31 +46,21 @@ The built-in Tempo testnet faucet funds accounts with `AlphaUSD` and `BetaUSD`.
 import { Hooks } from 'tempo.ts/wagmi'
 import { useAccount } from 'wagmi'
 
-export function AddFunds() {
+function AddFunds() {
   const { address } = useAccount()
-  const addFunds = Hooks.faucet.useFund()
+  const { mutate, isPending } = Hooks.faucet.useFundSync()
 
   return (
-    <button onClick={() => addFunds.mutate({ account: address })}>
+    <button onClick={() => mutate({ account: address })} disabled={isPending}>
       Add Funds
     </button>
   )
 }
 ```
 
-```tsx twoslash [config.ts] filename="config.ts"
+```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
-
-export const config = createConfig({
-  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.config.ts:setup]
 ```
 
 :::
@@ -80,57 +70,11 @@ export const config = createConfig({
 started quickly. For production, you will need to onramp & fund your account manually.
 :::
 
-### Add fee token selector
-
-Now that you have `AlphaUSD` to send and `BetaUSD` to pay fees with, you can add a new selector component to allow users to select the fee token.
-
-<Demo.Container name="Select Fee Token" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd, Demo.betaUsd]}>
-  <Step.Connect stepNumber={1} />
-  <Step.SelectFeeToken stepNumber={2} last />
-</Demo.Container>
-
-:::code-group
-
-```tsx twoslash [PayWithFeeToken.tsx]
-import React from 'react'
-
-// @noErrors
-export function PayWithFeeToken() {
-  const [feeToken, setFeeToken] = React.useState<string>('0x20c0000000000000000000000000000000000001')
-
-  return (
-    <div>
-      <select name="feeToken" onChange={(e) => setFeeToken(e.target.value)}>
-        <option value="0x20c0000000000000000000000000000000000001">AlphaUSD</option>
-        <option value="0x20c0000000000000000000000000000000000002">BetaUSD</option>
-      </select>
-    </div>
-  )
-}
-```
-
-```tsx twoslash [config.ts] filename="config.ts"
-// @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
-
-export const config = createConfig({
-  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
-```
-
-:::
-
 ### Add pay with fee token logic
 
-Now that you have a selector for the fee token, you can add the logic to send a payment with the selected fee token.
+Now that you have `AlphaUSD` to send and `BetaUSD` to pay fees with, you can add a form that allows users to select a fee token and send a payment.
 
-After this step, your users can send payments with a specified fee token by clicking the "Send" button!
+After this step, your users can send payments with a specified fee token by clicking the "Send Payment" button!
 
 <Demo.Container name="Pay Fees in Any Stablecoin" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/payments">
   <Step.AddFunds stepNumber={1} />
@@ -140,56 +84,60 @@ After this step, your users can send payments with a specified fee token by clic
 :::code-group
 
 ```tsx twoslash [PayWithFeeToken.tsx]
-import React from 'react'
-import { Hooks } from 'tempo.ts/wagmi' // [!code ++]
-import { parseUnits } from 'viem' // [!code ++]
+import { Hooks } from 'tempo.ts/wagmi'
+import { parseUnits } from 'viem'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const betaUsd = '0x20c0000000000000000000000000000000000002'
 
 // @noErrors
-export function PayWithFeeToken() {
-  const [feeToken, setFeeToken] = React.useState<string>('0x20c0000000000000000000000000000000000001')
-  const sendPayment = Hooks.token.useTransferSync() // [!code ++]
-  const { data: metadata } = Hooks.token.useGetMetadata({ // [!code ++]
-    token: alphaUsd, // [!code ++]
-  }) // [!code ++]
+function PayWithFeeToken() {
+  const sendPayment = Hooks.token.useTransferSync()
+  const metadata = Hooks.token.useGetMetadata({
+    token: alphaUsd,
+  })
 
   return (
-    <div>
-      <select name="feeToken" onChange={(e) => setFeeToken(e.target.value)}>
-        <option value="0x20c0000000000000000000000000000000000001">AlphaUSD</option>
-        <option value="0x20c0000000000000000000000000000000000002">BetaUSD</option>
-      </select>
-      <button // [!code ++]
-        disabled={sendPayment.isPending} // [!code ++]
-        type="button" // [!code ++]
-        onClick={() => // [!code ++]
-          sendPayment.mutate({ // [!code ++]
-            amount: parseUnits('100', metadata.data?.decimals ?? 6), // [!code ++]
-            to: recipient, // [!code ++]
-            token: alphaUsd, // [!code ++]
-            feeToken: feeToken, // [!code ++]
-          }) // [!code ++]
-        } // [!code ++]
-      > {/* // [!code ++] */}
-        Send {/* // [!code ++] */}
-      </button> {/* // [!code ++] */}
-    </div>
+    <form onSubmit={
+      (event) => {
+        event.preventDefault()
+        const formData = new FormData(event.target as HTMLFormElement)
+
+        const recipient = (formData.get('recipient') ||
+          '0x0000000000000000000000000000000000000000') as `0x${string}`
+        const feeToken = (formData.get('feeToken') ||
+          alphaUsd) as `0x${string}`
+
+        sendPayment.mutate({ // [!code hl]
+          amount: parseUnits('100', metadata.data?.decimals ?? 6), // [!code hl]
+          to: recipient, // [!code hl]
+          token: alphaUsd, // [!code hl]
+          feeToken: feeToken, // [!code hl]
+        }) // [!code hl]
+      }
+    }>
+      <div>
+        <label htmlFor="recipient">Recipient address</label>
+        <input type="text" name="recipient" placeholder="0x..." />
+      </div>
+      <div>
+        <label htmlFor="feeToken">Fee token</label>
+        <select name="feeToken">
+          <option value={alphaUsd}>AlphaUSD</option>
+          <option value={betaUsd}>BetaUSD</option>
+        </select>
+      </div>
+      <button type="submit" disabled={sendPayment.isPending}>
+        Send Payment
+      </button>
+    </form>
   )
 }
 ```
 
-```tsx twoslash [config.ts] filename="config.ts"
+```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
-
-export const config = createConfig({
-  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.config.ts:setup]
 ```
 :::
 
@@ -200,66 +148,35 @@ Now that users can send payments with a specified fee token, you can link to the
 :::code-group
 
 ```tsx twoslash [PayWithFeeToken.tsx]
-import React from 'react'
-import { Hooks } from 'tempo.ts/wagmi' // [!code ++]
-import { parseUnits } from 'viem' // [!code ++]
+import { Hooks } from 'tempo.ts/wagmi'
+import { parseUnits } from 'viem'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const betaUsd = '0x20c0000000000000000000000000000000000002'
 
 // @noErrors
-export function PayWithFeeToken() {
-  const [feeToken, setFeeToken] = React.useState<string>('0x20c0000000000000000000000000000000000001')
+function PayWithFeeToken() {
   const sendPayment = Hooks.token.useTransferSync()
-  const { data: metadata } = Hooks.token.useGetMetadata({
+  const metadata = Hooks.token.useGetMetadata({
     token: alphaUsd,
   })
 
   return (
-    <div>
-      <select name="feeToken" onChange={(e) => setFeeToken(e.target.value)}>
-        <option value="0x20c0000000000000000000000000000000000001">AlphaUSD</option>
-        <option value="0x20c0000000000000000000000000000000000002">BetaUSD</option>
-      </select>
-      <button
-        disabled={sendPayment.isPending}
-        type="button"
-        onClick={() =>
-          sendPayment.mutate({
-            amount: parseUnits('100', metadata.data?.decimals ?? 6),
-            to: recipient,
-            token: alphaUsd,
-            feeToken: feeToken,
-          })
-        }
-      >
-        Send
-      </button>
-
+    <>
+      {/* ... your payment form ... */}
       {sendPayment.data && ( // [!code ++]
-        <a // [!code ++]
-          href={`https://explore.tempo.xyz/tx/${sendPayment.data.receipt.transactionHash}`} // [!code ++]
-          target="_blank" // [!code ++]
-          rel="noopener noreferrer" // [!code ++]
-        > {/* // [!code ++] */}
+        <a href={`https://explore.tempo.xyz/tx/${sendPayment.data.receipt.transactionHash}`}> {/* // [!code ++] */}
           View receipt {/* // [!code ++] */}
         </a> // [!code ++]
       )} // [!code ++]
-    </div>
+    </>
   )
 }
 ```
 
-```tsx twoslash [config.ts] filename="config.ts"
+```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
-
-export const config = createConfig({
-  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.config.ts:setup]
 ```
 :::
 

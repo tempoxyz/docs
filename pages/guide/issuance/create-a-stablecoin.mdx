@@ -240,11 +240,7 @@ export function CreateStablecoin() {
       {create.data && ( // [!code ++]
         <div> {/* // [!code ++] */}
           {create.data.name} created successfully! {/* // [!code ++] */}
-          <a // [!code ++]
-            href={`https://explore.tempo.xyz/tx/${create.data.receipt.transactionHash}`} // [!code ++]
-            target="_blank" // [!code ++]
-            rel="noopener noreferrer" // [!code ++]
-          > {/* // [!code ++] */}
+          <a href={`https://explore.tempo.xyz/tx/${create.data.receipt.transactionHash}`}> {/* // [!code ++] */}
             View receipt {/* // [!code ++] */}
           </a> {/* // [!code ++] */}
         </div> /* // [!code ++] */

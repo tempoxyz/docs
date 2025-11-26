@@ -46,31 +46,21 @@ The built-in Tempo testnet faucet funds accounts with `AlphaUSD`.
 import { Hooks } from 'tempo.ts/wagmi'
 import { useAccount } from 'wagmi'
 
-export function AddFunds() {
+function AddFunds() {
   const { address } = useAccount()
-  const addFunds = Hooks.faucet.useFund()
+  const { mutate, isPending } = Hooks.faucet.useFundSync()
 
   return (
-    <button onClick={() => addFunds.mutate({ account: address })}>
+    <button onClick={() => mutate({ account: address })} disabled={isPending}>
       Add Funds
     </button>
   )
 }
 ```
 
-```tsx twoslash [config.ts] filename="config.ts"
+```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
-
-export const config = createConfig({
-  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.config.ts:setup]
 ```
 
 :::
@@ -92,67 +82,53 @@ Now that you have `AlphaUSD` you are ready to add logic to send a payment with a
 :::code-group
 
 ```tsx twoslash [SendPaymentWithMemo.tsx]
-import React from 'react'
 import { Hooks } from 'tempo.ts/wagmi'
 import { parseUnits, stringToHex, pad } from 'viem'
 
 // @noErrors
-export function SendPaymentWithMemo() {
-  const [recipient, setRecipient] = React.useState<string>('')
-  const [memo, setMemo] = React.useState<string>('')
-
+function SendPaymentWithMemo() {
   const sendPayment = Hooks.token.useTransferSync() // [!code hl]
 
   return (
-    <>
+    <form onSubmit={
+      (event) => {
+        event.preventDefault()
+        const formData = new FormData(event.target as HTMLFormElement)
+
+        const recipient = (formData.get('recipient') ||
+          '0x0000000000000000000000000000000000000000') as `0x${string}`
+        const memo = (formData.get('memo') || '') as string
+
+        sendPayment.mutate({ // [!code hl]
+          amount: parseUnits('100', 6), // [!code hl]
+          to: recipient, // [!code hl]
+          token: '0x20c0000000000000000000000000000000000001', // [!code hl]
+          memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined, // [!code hl]
+        }) // [!code hl]
+      }
+    }>
       <div>
-        <label>Recipient address</label>
-        <input
-          type="text"
-          value={recipient}
-          onChange={(e) => setRecipient(e.target.value)}
-        />
+        <label htmlFor="recipient">Recipient address</label>
+        <input type="text" name="recipient" placeholder="0x..." />
       </div>
       <div>
-        <label>Memo (optional)</label>
-        <input
-          type="text"
-          value={memo}
-          onChange={(e) => setMemo(e.target.value)}
-        />
+        <label htmlFor="memo">Memo (optional)</label>
+        <input type="text" name="memo" placeholder="Optional memo" />
       </div>
       <button // [!code hl]
+        type="submit" // [!code hl]
         disabled={sendPayment.isPending} // [!code hl]
-        type="button" // [!code hl]
-        onClick={() => // [!code hl]
-          sendPayment.mutate({ // [!code hl]
-            amount: parseUnits('100', 6), // [!code hl]
-            to: recipient as `0x${string}`, // [!code hl]
-            token: '0x20c0000000000000000000000000000000000001', // [!code hl]
-            memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined, // [!code hl]
-          }) // [!code hl]
-        } // [!code hl]
       > {/* [!code hl] */}
-        {sendPayment.isPending ? 'Sending...' : 'Send Payment'} {/* [!code hl] */}
+        Send Payment {/* [!code hl] */}
       </button> {/* [!code hl] */}
-    </>
+    </form>
   )
 }
 ```
 
-```tsx twoslash [config.ts] filename="config.ts"
+```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
-
-export const config = createConfig({
-  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.config.ts:setup]
 ```
 
 :::
@@ -164,56 +140,18 @@ Now that you can send a payment, you can display the transaction receipt on succ
 :::code-group
 
 ```tsx twoslash [SendPaymentWithMemo.tsx]
-import React from 'react'
 import { Hooks } from 'tempo.ts/wagmi'
 import { parseUnits, stringToHex, pad } from 'viem'
 
 // @noErrors
-export function SendPaymentWithMemo() {
-  const [recipient, setRecipient] = React.useState<string>('')
-  const [memo, setMemo] = React.useState<string>('')
-
+function SendPaymentWithMemo() {
   const sendPayment = Hooks.token.useTransferSync()
 
   return (
     <>
-      <div>
-        <label>Recipient address</label>
-        <input
-          type="text"
-          value={recipient}
-          onChange={(e) => setRecipient(e.target.value)}
-        />
-      </div>
-      <div>
-        <label>Memo (optional)</label>
-        <input
-          type="text"
-          value={memo}
-          onChange={(e) => setMemo(e.target.value)}
-        />
-      </div>
-      <button
-        disabled={sendPayment.isPending}
-        type="button"
-        onClick={() =>
-          sendPayment.mutate({
-            amount: parseUnits('100', 6),
-            to: recipient as `0x${string}`,
-            token: '0x20c0000000000000000000000000000000000001',
-            memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
-          })
-        }
-      >
-        {sendPayment.isPending ? 'Sending...' : 'Send Payment'}
-      </button>
-
+      {/* ... your payment form ... */}
       {sendPayment.data && ( // [!code ++]
-        <a // [!code ++]
-          href={`https://explore.tempo.xyz/tx/${sendPayment.data.receipt.transactionHash}`} // [!code ++]
-          target="_blank" // [!code ++]
-          rel="noopener noreferrer" // [!code ++]
-        > {/* // [!code ++] */}
+        <a href={`https://explore.tempo.xyz/tx/${sendPayment.data.receipt.transactionHash}`}> {/* // [!code ++] */}
           View receipt {/* // [!code ++] */}
         </a> // [!code ++]
       )} {/* // [!code ++] */}
@@ -222,19 +160,9 @@ export function SendPaymentWithMemo() {
 }
 ```
 
-```tsx twoslash [config.ts] filename="config.ts"
+```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
-
-export const config = createConfig({
-  chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.config.ts:setup]
 ```
 
 :::
@@ -255,7 +183,7 @@ Send a payment using the standard `transfer` function:
 
 :::code-group
 
-```ts [TypeScript]
+```ts [example.ts]
 import { parseUnits } from 'viem'
 import { client } from './viem.config'
 
@@ -264,6 +192,10 @@ const { receipt } = await client.token.transferSync({
   to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
   token: '0x20c0000000000000000000000000000000000001', // AlphaUSD
 })
+```
+
+```ts [viem.config.ts] filename="viem.config.ts"
+// [!include ~/snippets/viem.config.ts:setup]
 ```
 
 ```rs [Rust]
@@ -306,8 +238,9 @@ Include a memo for payment reconciliation and tracking:
 
 :::code-group
 
-```ts [TypeScript]
-import { pad, stringToHex } from 'viem'
+```ts [example.ts]
+import { parseUnits } from 'viem'
+import { client } from './viem.config'
 
 const invoiceId = pad(stringToHex('INV-12345'), { size: 32 })
 
@@ -317,6 +250,9 @@ const { receipt } = await client.token.transferSync({
   token: '0x20c0000000000000000000000000000000000001',
   memo: invoiceId,
 })
+```
+```ts [viem.config.ts] filename="viem.config.ts"
+// [!include ~/snippets/viem.config.ts:setup]
 ```
 
 ```rs [Rust]
@@ -389,7 +325,15 @@ Send multiple payments in a single transaction using batch transactions:
 
 :::code-group
 
-```ts [TypeScript]
+```ts [example.ts]
+import { encodeFunctionData, parseUnits } from 'viem'
+import { Abis } from 'tempo.ts/viem'
+import { client } from './viem.config'
+
+const tokenABI = Abis.tip20
+const recipient1 = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb'
+const recipient2 = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
+
 const calls = [
   {
     to: '0x20c0000000000000000000000000000000000001', // AlphaUSD address
@@ -410,6 +354,10 @@ const calls = [
 ]
 
 const hash = await client.sendTransaction({ calls })
+```
+
+```ts [viem.config.ts] filename="viem.config.ts"
+// [!include ~/snippets/viem.config.ts:setup]
 ```
 
 ```rust [Rust]
@@ -476,34 +424,27 @@ You can filter these events to track payments in your off-chain systems.
 
 ## Best practices
 
-- **[Accept a payment](/guide/payments/accept-a-payment)** to receive payments in your application
-- Learn more about [Batch Transactions](/guide/use-accounts/batch-transactions)
-
 ### Loading state
 Users should see a loading state when the payment is being processed.
 
-You can use the `isPending` property from the `useTransferSync` hook to show pending state to the user on our "Send" button.
-
-```tsx
-<button
-  disabled={sendPayment.isPending} // [!code focus] 
-  onClick={() =>
-    sendPayment.mutate({
-      amount: parseUnits('100', 6),
-      to: recipient as `0x${string}`,
-      token: '0x20c0000000000000000000000000000000000001',
-    })
-  }
->
-  {sendPayment.isPending ? 'Sending...' : 'Send Payment'} {/* // [!code focus] */}
-</button>
-```
+You can use the `isPending` property from the `useTransferSync` hook to show pending state to the user.
 
 ### Error handling
 If an error unexpectedly occurs, you can display an error message to the user by using the `error` property from the `useTransferSync` hook.
 
 ```tsx
-{sendPayment.error && <div>Error: {sendPayment.error.message}</div>}
+import { Hooks } from 'tempo.ts/wagmi'
+
+function SendPayment() {
+  const sendPayment = Hooks.token.useTransferSync()
+
+  return (
+    <>
+      {/* ... your paymentform ... */}
+      {sendPayment.error && <div>Error: {sendPayment.error.message}</div>}
+    </>
+  )
+}
 ```
 
 ## Learning resources

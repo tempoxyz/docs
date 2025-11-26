@@ -202,29 +202,33 @@ When you cancel an order, any remaining funds are credited to your exchange bala
 
 ```tsx twoslash [ManageOrder.tsx]
 // @noErrors
-import React from 'react'
-import { Actions } from 'tempo.ts/viem'
+import { Actions, Addresses } from 'tempo.ts/viem'
 import { Hooks } from 'tempo.ts/wagmi'
+import { parseUnits } from 'viem'
 import { useSendCallsSync } from 'wagmi'
 
-function ManageOrder() {
-  const [orderId, setOrderId] = React.useState<bigint>()
+const linkingUsd = '0x20c0000000000000000000000000000000000000'
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
+function ManageOrder() {
   const sendCalls = useSendCallsSync()
   const cancelOrder = Hooks.dex.useCancelSync() // [!code hl]
 
   const placeOrder = () => {
-    sendCalls.sendCallsSync({
-      ...
-    })
-
-    // Extract orderId from the place call result // [!code hl]
-    if (sendCalls.data?.receipts?.[0]) { // [!code hl]
-      const { orderId: newOrderId } = Actions.dex.place.extractEvent( // [!code hl]
-        sendCalls.data.receipts[0].logs // [!code hl]
-      ) // [!code hl]
-      setOrderId(newOrderId) // [!code hl]
-    } // [!code hl]
+    const calls = [
+      Actions.token.approve.call({
+        spender: Addresses.stablecoinExchange,
+        amount: parseUnits('100', 6),
+        token: linkingUsd,
+      }),
+      Actions.dex.place.call({
+        token: alphaUsd,
+        amount: parseUnits('100', 6),
+        type: 'buy',
+        tick: 0,
+      }),
+    ]
+    sendCalls.sendCallsSync({ calls })
   }
 
   return (
@@ -232,12 +236,23 @@ function ManageOrder() {
       <button type="button" onClick={placeOrder}>
         Place Order
       </button>
-      <button // [!code hl]
-        type="button" // [!code hl]
-        onClick={() => cancelOrder.mutate({ orderId: orderId! })} // [!code hl]
-      > {/* [!code hl] */}
-        {cancelOrder.isPending ? 'Canceling...' : 'Cancel Order'} {/* [!code hl] */}
-      </button> {/* [!code hl] */}
+      <form onSubmit={
+        (event) => {
+          event.preventDefault()
+          const formData = new FormData(event.target as HTMLFormElement)
+          const orderId = BigInt(formData.get('orderId') as string)
+
+          cancelOrder.mutate({ orderId }) // [!code hl]
+        }
+      }>
+        <input type="text" name="orderId" placeholder="Order ID" />
+        <button // [!code hl]
+          type="submit" // [!code hl]
+          disabled={cancelOrder.isPending} // [!code hl]
+        > {/* [!code hl] */}
+          {cancelOrder.isPending ? 'Canceling...' : 'Cancel Order'} {/* [!code hl] */}
+        </button> {/* [!code hl] */}
+      </form>
     </>
   )
 }
