@@ -156,18 +156,3 @@ The fee manager is updated to handle fee accounting across sub-blocks:
 In all cases, the fee is paid in the preferred `fee_token` of the `fee_recipient`, using liquidity from the fee AMM as necessary (i.e., `validatorTokens[fee_recipient]` from the FeeManager contract). If the `fee_recipient`  has not set a preferred `fee_token`, then we use LinkingUSD as a fallback. 
 
 
-### 6. Sub-block Transaction Keys
-
-
-We currently require that sub-block transactions are signed solely by the root EOA key of the address sending the transaction. One case that we considered is whether to allow any signature other than the root EOA key of the address sending the transaction. This would open up a transaction failure scenario: 
-
-- The user's key was expired/ revoked earlier in the block.
- 
-At this point we have a few options on how to treat it:
-
-- The proposer should not include such sub-blocks in the block: this sets up a censorship vector where a user has the power to prevent a sub-block from being included in the block.
-- Include the sub-block in the block, but the transaction is a no-op: this transaction can then be included in future blocks, breaking the assumption that a given tx can appear exactly once. 
-- Persist any expired/ revoked key for the block, verify that the signature was valid at the top of the block, and increment the nonce for the sub-block transaction (while still treating it as a no-op). This changes the intended semantics of a key being revoked. 
-
-Are there other options/ objections to restricting the signature to the root EOA key?
-
