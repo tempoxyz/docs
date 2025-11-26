@@ -581,10 +581,6 @@ export default defineConfig({
                 text: 'AMM',
                 items: [
                   {
-                    text: 'burn',
-                    link: '/sdk/typescript/viem/amm.burn',
-                  },
-                  {
                     text: 'getLiquidityBalance',
                     link: '/sdk/typescript/viem/amm.getLiquidityBalance',
                   },
@@ -597,24 +593,8 @@ export default defineConfig({
                     link: '/sdk/typescript/viem/amm.mint',
                   },
                   {
-                    text: 'rebalanceSwap',
-                    link: '/sdk/typescript/viem/amm.rebalanceSwap',
-                  },
-                  {
-                    text: 'watchBurn',
-                    link: '/sdk/typescript/viem/amm.watchBurn',
-                  },
-                  {
-                    text: 'watchFeeSwap',
-                    link: '/sdk/typescript/viem/amm.watchFeeSwap',
-                  },
-                  {
                     text: 'watchMint',
                     link: '/sdk/typescript/viem/amm.watchMint',
-                  },
-                  {
-                    text: 'watchRebalanceSwap',
-                    link: '/sdk/typescript/viem/amm.watchRebalanceSwap',
                   },
                 ],
               },
@@ -683,18 +663,6 @@ export default defineConfig({
               {
                 text: 'Reward',
                 items: [
-                  {
-                    text: 'cancel',
-                    link: '/sdk/typescript/viem/reward.cancel',
-                  },
-                  {
-                    text: 'getStream',
-                    link: '/sdk/typescript/viem/reward.getStream',
-                  },
-                  {
-                    text: 'getTotalPerSecond',
-                    link: '/sdk/typescript/viem/reward.getTotalPerSecond',
-                  },
                   {
                     text: 'setRecipient',
                     link: '/sdk/typescript/viem/reward.setRecipient',
@@ -919,14 +887,6 @@ export default defineConfig({
                 text: 'AMM',
                 items: [
                   {
-                    text: 'burn',
-                    link: '/sdk/typescript/wagmi/actions/amm.burn',
-                  },
-                  {
-                    text: 'getLiquidityBalance',
-                    link: '/sdk/typescript/wagmi/actions/amm.getLiquidityBalance',
-                  },
-                  {
                     text: 'getPool',
                     link: '/sdk/typescript/wagmi/actions/amm.getPool',
                   },
@@ -935,24 +895,8 @@ export default defineConfig({
                     link: '/sdk/typescript/wagmi/actions/amm.mint',
                   },
                   {
-                    text: 'rebalanceSwap',
-                    link: '/sdk/typescript/wagmi/actions/amm.rebalanceSwap',
-                  },
-                  {
-                    text: 'watchBurn',
-                    link: '/sdk/typescript/wagmi/actions/amm.watchBurn',
-                  },
-                  {
-                    text: 'watchFeeSwap',
-                    link: '/sdk/typescript/wagmi/actions/amm.watchFeeSwap',
-                  },
-                  {
                     text: 'watchMint',
                     link: '/sdk/typescript/wagmi/actions/amm.watchMint',
-                  },
-                  {
-                    text: 'watchRebalanceSwap',
-                    link: '/sdk/typescript/wagmi/actions/amm.watchRebalanceSwap',
                   },
                 ],
               },
