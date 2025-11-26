@@ -22,7 +22,7 @@ Find the highest bid prices (buyers) for AlphaUSD. This query filters out fully 
 <IndexSupplyQuery
   title={'Best Bid Prices for AlphaUSD'}
   query={`SELECT
-    COALESCE(o.tick, f.tick) as tick,
+    COALESCE(o.tick, f.tick) as price,
     SUM(COALESCE(o.amount, 0) + COALESCE(f.amount, 0)) as total_liquidity
   FROM orderplaced o
   FULL OUTER JOIN fliporderplaced f
@@ -38,8 +38,8 @@ Find the highest bid prices (buyers) for AlphaUSD. This query filters out fully 
       SELECT 1 FROM ordercancelled
       WHERE ordercancelled."orderId" = COALESCE(o."orderId", f."orderId")
     )
-  GROUP BY o.tick, f.tick
-  ORDER BY COALESCE(o.tick, f.tick) DESC
+  GROUP BY price
+  ORDER BY price DESC
   LIMIT 5`}
   signatures={["OrderPlaced", "FlipOrderPlaced", "OrderFilled", "OrderCancelled"]}
 />
@@ -49,7 +49,7 @@ Find the lowest ask prices (sellers) for AlphaUSD. The spread is the difference 
 <IndexSupplyQuery
   title={'Best Ask Prices for AlphaUSD'}
   query={`SELECT
-    COALESCE(o.tick, f.tick) as tick,
+    COALESCE(o.tick, f.tick) as price,
     SUM(COALESCE(o.amount, 0) + COALESCE(f.amount, 0)) as total_liquidity
   FROM orderplaced o
   FULL OUTER JOIN fliporderplaced f
@@ -65,8 +65,8 @@ Find the lowest ask prices (sellers) for AlphaUSD. The spread is the difference 
       SELECT 1 FROM ordercancelled
       WHERE ordercancelled."orderId" = COALESCE(o."orderId", f."orderId")
     )
-  GROUP BY o.tick, f.tick
-  ORDER BY COALESCE(o.tick, f.tick)
+  GROUP BY price
+  ORDER BY price
   LIMIT 5`}
   signatures={["OrderPlaced", "FlipOrderPlaced", "OrderFilled", "OrderCancelled"]}
 />
@@ -75,12 +75,12 @@ Find the lowest ask prices (sellers) for AlphaUSD. The spread is the difference 
 
 View aggregated liquidity at each price level to understand the orderbook structure.
 
-This query shows all active orders from both OrderPlaced and FlipOrderPlaced events, using a full outer join to combine liquidity at each price level.
+This query shows all active orders from both OrderPlaced and FlipOrderPlaced events for BetaUSD.
 
 <IndexSupplyQuery
-  title={'Order Depth by Price Level'}
+  title={'BetaUSD Order Depth by Price Level'}
   query={`SELECT
-    COALESCE(o.tick, f.tick) as price_tick,
+    COALESCE(o.tick, f.tick) as price,
     COALESCE(o."isBid", f."isBid") as is_bid,
     COUNT(COALESCE(o."orderId", f."orderId")) as num_orders,
     SUM(COALESCE(o.amount, 0) + COALESCE(f.amount, 0)) as total_amount
@@ -97,8 +97,8 @@ This query shows all active orders from both OrderPlaced and FlipOrderPlaced eve
       SELECT 1 FROM ordercancelled
       WHERE ordercancelled."orderId" = COALESCE(o."orderId", f."orderId")
     )
-  GROUP BY price_tick, is_bid
-  ORDER BY is_bid DESC, price_tick
+  GROUP BY price, is_bid
+  ORDER BY is_bid DESC, price
   LIMIT 50`}
   signatures={["OrderPlaced", "FlipOrderPlaced", "OrderFilled", "OrderCancelled"]}
 />
@@ -155,13 +155,13 @@ Check if an order has been cancelled. This query returns an order for AlphaUSD t
 <IndexSupplyQuery
   title={'Order Cancellation Status'}
   query={`SELECT
-    ordercancelled."orderId",
-    ordercancelled.block_num,
-    ordercancelled.tx_hash
-  FROM ordercancelled
-  INNER JOIN orderplaced ON ordercancelled."orderId" = orderplaced."orderId"
-  WHERE orderplaced.token = '0x20c0000000000000000000000000000000000001'
-  ORDER BY orderplaced.block_num DESC
+    oc."orderId",
+    oc.block_num,
+    oc.tx_hash
+  FROM ordercancelled oc
+  INNER JOIN orderplaced op ON oc."orderId" = op."orderId"
+  WHERE op.token = '0x20c0000000000000000000000000000000000001'
+  ORDER BY op.block_num DESC
   LIMIT 1`}
   signatures={["OrderCancelled", "OrderPlaced"]}
 />
@@ -175,20 +175,20 @@ This query joins order fill events with their corresponding placement details to
 <IndexSupplyQuery
   title={'Recent Trade Prices for AlphaUSD'}
   query={`SELECT
-    of.block_num,
-    of."orderId",
-    COALESCE(o.tick, f.tick) as tickPrice,
-    of."amountFilled",
+    ofl.block_num,
+    ofl."orderId",
+    COALESCE(o.tick, f.tick) as price,
+    ofl."amountFilled",
     COALESCE(o."isBid", f."isBid") as "isBid"
-  FROM orderfilled of
+  FROM orderfilled ofl
   LEFT JOIN orderplaced o
-    ON of."orderId" = o."orderId"
+    ON ofl."orderId" = o."orderId"
     AND o.token = '0x20c0000000000000000000000000000000000001'
   LEFT JOIN fliporderplaced f
-    ON of."orderId" = f."orderId"
+    ON ofl."orderId" = f."orderId"
     AND f.token = '0x20c0000000000000000000000000000000000001'
   WHERE o."orderId" IS NOT NULL OR f."orderId" IS NOT NULL
-  ORDER BY of.block_num DESC
+  ORDER BY ofl.block_num DESC
   LIMIT 10`}
   signatures={["OrderFilled", "OrderPlaced", "FlipOrderPlaced"]}
 />
