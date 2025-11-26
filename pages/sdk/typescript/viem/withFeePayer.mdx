@@ -8,9 +8,9 @@ Creates a transport that routes transactions to a fee payer service when a `feeP
 
 ```ts twoslash [example.ts]
 // @noErrors
-// [!include ~/snippets/unformatted/withFeePayer-basic.ts:setup]
+// [!include ~/snippets/unformatted/withFeePayer.ts:client]
 
-// [!include ~/snippets/unformatted/withFeePayer-basic.ts:usage]
+// [!include ~/snippets/unformatted/withFeePayer.ts:usage]
 ```
 
 ```ts twoslash [viem.config.ts] filename="viem.config.ts"
@@ -23,34 +23,13 @@ Creates a transport that routes transactions to a fee payer service when a `feeP
 
 Below is an end-to-end example of a client/server fee payer setup. 
 
-See `server.ts` for the server-side implementation with [Bun](https://bun.sh).
+See `server.ts` for the server-side implementation. It uses `Handler.feePayer` provided by `tempo.ts/server` to handle fee payer requests.
 
 :::code-group
 
 ```ts twoslash [client.ts]
 // @noErrors
-import { createClient, http, walletActions } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { tempo } from 'tempo.ts/chains'
-import { withFeePayer } from 'tempo.ts/viem'
-
-const credentials = `${process.env['TEMPO_USERNAME']}:${process.env['TEMPO_PASSWORD']}`
-
-const client = createClient({
-  account: privateKeyToAccount('0x...'),
-  chain: tempo({ feeToken: '0x20c0000000000000000000000000000000000001' }),
-  transport: withFeePayer(
-    http(undefined, {
-      fetchOptions: {
-        headers: {
-          Authorization: `Basic ${btoa(credentials)}`,
-        },
-      },
-    }), 
-    // `server.ts` running on `http://localhost:3000` [!code hl]
-    http('http://localhost:3000'), // [!code hl]
-  ),
-}).extend(walletActions)
+// [!include ~/snippets/unformatted/withFeePayer.ts:client]
 
 const hash = await client.sendTransactionSync({
   feePayer: true,
@@ -60,52 +39,7 @@ const hash = await client.sendTransactionSync({
 
 ```ts twoslash [server.ts]
 // @noErrors
-import { createClient, http, walletActions } from 'viem'
-import { mnemonicToAccount } from 'viem/accounts'
-import { RpcRequest, RpcResponse } from 'ox'
-import { tempo } from 'tempo.ts/chains'
-import { Transaction } from 'tempo.ts/viem'
-
-const credentials = `${process.env['TEMPO_USERNAME']}:${process.env['TEMPO_PASSWORD']}`
-
-const client = createClient({
-  account: mnemonicToAccount(
-    'test test test test test test test test test test test junk'
-  ),
-  chain: tempo({ feeToken: '0x20c0000000000000000000000000000000000001' }),
-  transport: http(undefined, {
-    fetchOptions: {
-      headers: {
-        Authorization: `Basic ${btoa(credentials)}`,
-      },
-    },
-  }),
-}).extend(walletActions)
-
-Bun.serve({
-  port: 3000,
-  async fetch(req) {
-    const request = RpcRequest.from(await req.json())
-    const serialized = request.params[0] as `0x76${string}`
-    
-    // Deserialize the sender's signed transaction
-    const transaction = Transaction.deserialize(serialized)
-    
-    // Add fee payer signature
-    const serializedTransaction = await client.signTransaction({
-      ...transaction,
-      feePayer: client.account,
-    })
-
-    // Submit to blockchain
-    const result = await client.request({
-      method: request.method,
-      params: [serializedTransaction],
-    })
-
-    return Response.json(RpcResponse.from({ result }, { request }))
-  }
-})
+// [!include ~/snippets/unformatted/withFeePayer.ts:server]
 ```
 
 :::
@@ -129,3 +63,20 @@ The default transport to use for regular (non-sponsored) transactions.
 - **Type:** `Transport`
 
 The relay transport to use for sponsored transactions. This should point to a fee payer service that will sign and submit the transaction with a fee payer signature.
+
+### Parameters (optional)
+
+- **Type:** `withFeePayer.Parameters`
+
+Options for `withFeePayer` usage.
+
+#### `policy` (optional)
+
+- **Type:** `'sign-only' | 'sign-and-broadcast'`
+- **Default:** `'sign-only'`
+
+Controls how the fee payer handles sponsored transactions:
+
+- **`'sign-only'`**: Fee payer co-signs the transaction and returns it to the client transport, which then broadcasts it via the default transport.
+
+- **`'sign-and-broadcast'`**: Fee payer co-signs and broadcasts the transaction directly. The fee payer service handles both signing and submission to the blockchain.
