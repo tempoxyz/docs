@@ -22,43 +22,9 @@ contract StablecoinExchange is IStablecoinExchange {
     /// @notice Maximum valid price (PRICE_SCALE + int16.max)
     uint32 public constant MAX_PRICE = 132_767;
 
-    /// @notice Represents a price level in the orderbook with a doubly-linked list of orders
-    /// @dev Orders are maintained in FIFO order at each tick level
-    struct TickLevel {
-        /// Order ID of the first order at this tick (0 if empty)
-        uint128 head;
-        /// Order ID of the last order at this tick (0 if empty)
-        uint128 tail;
-        /// Total liquidity available at this tick level
-        uint128 totalLiquidity;
-    }
-
-    /// @notice Order data structure for tracking limit orders
-    struct Order {
-        /// Address of order maker
-        address maker;
-        /// Orderbook key
-        bytes32 bookKey;
-        /// Bid or ask indicator
-        bool isBid;
-        /// Price tick
-        int16 tick;
-        /// Original order amount
-        uint128 amount;
-        /// Remaining amount to fill
-        uint128 remaining;
-        /// Previous order ID in FIFO queue
-        uint128 prev;
-        /// Next order ID in FIFO queue
-        uint128 next;
-        /// Boolean indicating if order is flipOrder
-        bool isFlip;
-        /// Flip order tick to place new order at once current order fills
-        int16 flipTick;
-    }
-
     /// @notice Orderbook for token pair with price-time priority
     /// @dev Uses tick-based pricing with bitmaps for price discovery
+    /// @dev Order and TickLevel structs are inherited from IStablecoinExchange
     struct Orderbook {
         /// Base token address
         address base;
@@ -244,6 +210,7 @@ contract StablecoinExchange is IStablecoinExchange {
         ++pendingOrderId;
 
         orders[orderId] = Order({
+            orderId: orderId,
             maker: maker,
             bookKey: key,
             isBid: isBid,
@@ -443,6 +410,16 @@ contract StablecoinExchange is IStablecoinExchange {
         Orderbook storage book = books[key];
         TickLevel memory level = isBid ? book.bids[tick] : book.asks[tick];
         return (level.head, level.tail, level.totalLiquidity);
+    }
+
+    /// @notice Get order information by order ID
+    /// @param orderId The order ID to query
+    /// @return order The order data
+    function getOrder(uint128 orderId) external view returns (Order memory order) {
+        Order storage o = orders[orderId];
+        require(o.maker != address(0), "ORDER_DOES_NOT_EXIST");
+        require(orderId <= activeOrderId, "ORDER_NOT_ACTIVE");
+        return o;
     }
 
     /// @notice Quote swapping tokens for exact amount out
