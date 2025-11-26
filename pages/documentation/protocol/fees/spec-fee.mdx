@@ -24,7 +24,7 @@ Before the execution of each transaction, the protocol takes the following steps
 * Determine the `fee_token` of the transaction, according to the [rules for fee token preferences](#fee-token-preferences). If the fee token cannot be determined, the transaction is invalid.
 * Compute the `max_fee` of the transaction as `gas_limit * gas_price`.
 * Deduct `max_fee` from the `fee_payer`'s balance of `fee_token`. If `fee_payer` does not have sufficient balance in `fee_token`, the transaction is invalid.
-* Reserve `max_fee` of liquidity on the [fee AMM](#fee-amm) between the `fee_token` and the validator's preferred fee token. Is there is insufficient liquidity, the transaction is invalid.
+* Reserve `max_fee` of liquidity on the [fee AMM](/documentation/protocol/fees/spec-fee-amm) between the `fee_token` and the validator's preferred fee token. If there is insufficient liquidity, the transaction is invalid.
 
 After the execution of each transaction:
 
