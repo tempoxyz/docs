@@ -40,8 +40,8 @@ Create and fund an account to sponsor transaction fees for your users.
 import { Hooks } from 'tempo.ts/wagmi'
 import { privateKeyToAccount } from 'viem/accounts'
 
-export function CreateAndFundSponsorAccount() {
-  const { mutate, isPending } = Hooks.faucet.useFundSync()          // [!code hl]
+function CreateAndFundSponsorAccount() {
+  const { mutate, isPending } = Hooks.faucet.useFundSync() // [!code hl]
 
   return (
     <button 
@@ -51,7 +51,7 @@ export function CreateAndFundSponsorAccount() {
       }} 
       disabled={isPending}
     >
-      {isPending ? 'Creating and funding...' : 'Create and fund sponsor account'}
+      Create and fund sponsor account
     </button>
   )
 }
@@ -70,6 +70,10 @@ Now you can pass your sponsor account as the `feePayer` parameter when sending a
 
 See the [Send a payment](/guide/payments/send-a-payment) guide for more details on how to send a payment.
 
+:::info
+You can also sponsor transactions with a fee payer relay. See the [recipe below](/guide/payments/sponsor-user-fees#fee-payer-relay) for more details.
+:::
+
 
 <Demo.Container name="Sponsor User Fees" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/payments">
   <Step.CreateSponsorAccount stepNumber={1} />
@@ -85,38 +89,44 @@ See the [Send a payment](/guide/payments/send-a-payment) guide for more details 
 import React from 'react'
 import { Hooks } from 'tempo.ts/wagmi'
 import { parseUnits } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
 // @noErrors
-export function SendSponsoredPayment({ sponsorAccount }: { sponsorAccount: any }) {
-  const [recipient, setRecipient] = React.useState<string>('')
-
+function SendSponsoredPayment() {
+  const sponsorAccount = privateKeyToAccount('0x...')
   const sendPayment = Hooks.token.useTransferSync() // [!code hl]
+  const metadata = Hooks.token.useGetMetadata({
+    token: alphaUsd,
+  })
 
   return (
-    <>
+    <form onSubmit={
+      (event) => {
+        event.preventDefault()
+        const formData = new FormData(event.target as HTMLFormElement)
+
+        const recipient = (formData.get('recipient') ||
+          '0x0000000000000000000000000000000000000000') as `0x${string}`
+
+        sendPayment.mutate({ // [!code hl]
+          amount: parseUnits('100', metadata.data.decimals), // [!code hl]
+          feePayer: sponsorAccount, // [!code hl]
+          to: recipient, // [!code hl]
+          token: alphaUsd, // [!code hl]
+          feeToken: alphaUsd, // [!code hl]
+        }) // [!code hl]
+      }
+    }>
       <div>
-        <label>Recipient address</label>
-        <input
-          type="text"
-          value={recipient}
-          onChange={(e) => setRecipient(e.target.value)}
-        />
+        <label htmlFor="recipient"> Recipient address </label>
+        <input type="text" placeholder="0x..." />
       </div>
-      <button // [!code hl]
-        disabled={sendPayment.isPending} // [!code hl]
-        type="button" // [!code hl]
-        onClick={() => // [!code hl]
-          sendPayment.mutate({ // [!code hl]
-            amount: parseUnits('100', 6), // [!code hl]
-            to: recipient as `0x${string}`, // [!code hl]
-            token: '0x20c0000000000000000000000000000000000001', // [!code hl]
-            feePayer: sponsorAccount, // [!code hl] // [!code focus]
-          }) // [!code hl]
-        } // [!code hl]
-      > {/* [!code hl] */}
-        {sendPayment.isPending ? 'Sending...' : 'Send Payment'} {/* [!code hl] */}
-      </button> {/* [!code hl] */}
-    </>
+      <button type="submit" disabled={sendPayment.isPending}>
+        Send Payment
+      </button>
+    </form>
   )
 }
 ```
@@ -131,7 +141,7 @@ export function SendSponsoredPayment({ sponsorAccount }: { sponsorAccount: any }
 ## Next Steps
 
 Now that you've implemented fee sponsorship, you can:
-- Run a [fee sponsor proxy](/sdk/typescript/viem/withFeePayer#example-fee-payer-service) server that sponsors client transactions
+- Run a [fee payer relay](/guide/payments/sponsor-user-fees#fee-payer-relay) server that sponsors client transactions
 - Learn more about [Account Abstraction transactions](/documentation/protocol/transactions/spec-account-abstraction#fee-payer-signature-details) and fee payer signature details
 - Explore [Batch Transactions](/guide/use-accounts/batch-transactions) to sponsor multiple operations at once
 - Understand how to [Pay Fees in Any Stablecoin](/guide/payments/pay-fees-in-any-stablecoin) 
@@ -140,38 +150,30 @@ Now that you've implemented fee sponsorship, you can:
 
 ## Recipes
 
-### Use `withFeePayer`
+### Fee payer relay
 
-Tempo's SDK provides a `withFeePayer` helper that simplifies fee sponsorship by creating a transport that routes transactions to a fee payer service when `feePayer` is requested on a transaction.
+Tempo's TypeScript SDK provides a [`withFeePayer` helper](/sdk/typescript/viem/withFeePayer) that simplifies fee sponsorship. It creates a transport that routes transactions to a fee payer service when `feePayer: true` is requested on a transaction. You can also specify whether the sponsored transaction should be broadcasted by the fee payer or your default transport with the `policy` parameter.
 
-See the [withFeePayer](/sdk/typescript/viem/withFeePayer) documentation for more details.
+:::code-group
 
-```ts
+```ts twoslash [client.ts]
 // @noErrors
 // [!include ~/snippets/unformatted/withFeePayer.ts:client]
 
 // [!include ~/snippets/unformatted/withFeePayer.ts:usage]
 ```
 
+```ts twoslash [server.ts]
+// @noErrors
+// [!include ~/snippets/unformatted/withFeePayer.ts:server]
+```
+
+:::
+
 ## Best practices
 
 1. **Set sponsorship limits**: Implement daily or per-user limits to control costs
 2. **Monitor expenses**: Track sponsorship costs regularly to stay within budget
-
-```ts
-// Track sponsored transactions
-const sponsoredTransactions = await getSponsoredTransactions({
-  feePayer: sponsorAddress,
-  fromBlock: startBlock,
-  toBlock: endBlock,
-})
-
-const totalFees = sponsoredTransactions.reduce(
-  (sum, tx) => sum + tx.feeAmount,
-  0n
-)
-```
-
 3. **Consider selective sponsorship**: Only sponsor fees for specific operations or user segments
 4. **Educate users**: Clearly communicate when fees are being sponsored
 

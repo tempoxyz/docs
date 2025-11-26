@@ -16,12 +16,12 @@ const client = createClient({
 // [!endregion client]
 
 // [!region usage]
-// Regular transaction (uses default transport)
+// Regular transaction
 const receipt1 = await client.sendTransactionSync({
   to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
 })
 
-// Sponsored transaction (uses feePayer transport) // [!code hl]
+// Sponsored transaction // [!code hl]
 const receipt2 = await client.sendTransactionSync({ // [!code hl]
   feePayer: true, // [!code hl]
   to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', // [!code hl]
