@@ -92,6 +92,8 @@ interface IStablecoinExchange {
 
     function MIN_TICK() external view returns (int16);
 
+    function TICK_SPACING() external view returns (int16);
+
     function PRICE_SCALE() external view returns (uint32);
 
     function activeOrderId() external view returns (uint128);

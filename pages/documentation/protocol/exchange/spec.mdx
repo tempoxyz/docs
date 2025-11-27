@@ -40,7 +40,7 @@ A flip order behaves like a normal resting order until it is fully filled. When 
 
 #### Pairs, ticks, and prices
 
-Pairs are identified deterministically from the two token addresses (the base token is any TIP‑20, and its `quoteToken()` function points to the quote token). Prices are discretized into integer ticks with a tick size of 0.1 bps: with `PRICE_SCALE = 100_000`, `price = PRICE_SCALE + tick`. The orderbook tracks best bid (highest active bid tick) and best ask (lowest active ask tick), and uses bitmaps over tick words for efficient discovery of the next initialized tick.
+Pairs are identified deterministically from the two token addresses (the base token is any TIP‑20, and its `quoteToken()` function points to the quote token). Prices are discretized into integer ticks with a tick size of 0.1 bps: with `PRICE_SCALE = 100_000`, `price = PRICE_SCALE + tick`. Orders may only be placed at ticks divisible by `TICK_SPACING = 10` (effectively setting a 1 bp tick size). The orderbook tracks best bid (highest active bid tick) and best ask (lowest active ask tick), and uses bitmaps over tick words for efficient discovery of the next initialized tick.
 
 #### Swaps
 
@@ -56,6 +56,7 @@ Crossed books are permitted; the implementation does not enforce that best bid �
 
 - Only USD‑denominated tokens are supported, and their quotes must also be USD
 - Orders must specify ticks within the configured bounds (±2000)
+- Tick spacing is 10: `tick % 10 == 0` for orders and flip orders
 - `executeBlock()` is system‑only (called in a system transaction at end of block)
 - Withdrawals require sufficient internal balance
 
@@ -70,6 +71,12 @@ function PRICE_SCALE() external view returns (uint32);
 ```
 
 Scaling factor for tick‑based prices. One tick equals 1/PRICE_SCALE above or below the peg. Current value: `100_000` (0.001% per tick).
+
+```solidity
+function TICK_SPACING() external view returns (int16);
+```
+
+Orders must be placed on ticks divisible by `TICK_SPACING`. Current value: `10` (i.e., 1 bp grid).
 
 ```solidity
 function MIN_TICK() external view returns (int16);
@@ -140,11 +147,17 @@ function place(address token, uint128 amount, bool isBid, int16 tick) external r
 
 Queues a limit order against the pair of `token` and its quote. Escrows funds: bids escrow quote at tick price; asks escrow base.
 
+Notes:
+- `tick` must be within `[MIN_TICK, MAX_TICK]` and divisible by `TICK_SPACING` (10).
+
 ```solidity
 function placeFlip(address token, uint128 amount, bool isBid, int16 tick, int16 flipTick) external returns (uint128 orderId);
 ```
 
 Like `place`, but marks the order as a flip order. When fully filled, a new pending order for the same maker is scheduled on the opposite side at `flipTick` (which must be greater than `tick` for bids and less for asks).
+
+Notes:
+- Both `tick` and `flipTick` must be within `[MIN_TICK, MAX_TICK]` and divisible by `TICK_SPACING` (10).
 
 ```solidity
 function cancel(uint128 orderId) external;
@@ -210,5 +223,6 @@ error Unauthorized(); // Non‑system caller attempted to call executeBlock
 Other notable revert reasons (string reverts in the reference implementation):
 - Pair creation or usage: `PAIR_EXISTS`, `PAIR_NOT_EXISTS`, `ONLY_USD_PAIRS`
 - Bounds: `TICK_OUT_OF_BOUNDS`, `FLIP_TICK_OUT_OF_BOUNDS`, `FLIP_TICK_MUST_BE_GREATER_FOR_BID`, `FLIP_TICK_MUST_BE_LESS_FOR_ASK`, "Price out of bounds"
+- Tick spacing: `TICK_NOT_MULTIPLE_OF_SPACING`, `FLIP_TICK_NOT_MULTIPLE_OF_SPACING`
 - Liquidity and limits: `INSUFFICIENT_LIQUIDITY`, `MAX_IN_EXCEEDED`, `INSUFFICIENT_OUTPUT`
 - Authorization: `UNAUTHORIZED` (cancel not by maker), `INSUFFICIENT_BALANCE` (withdraw)

@@ -350,17 +350,17 @@ contract StablecoinExchangeTest is BaseTest {
     }
 
     function test_SwapExactAmountOut_MultiTick() public {
-        uint128 order1 = _placeAskOrder(bob, 1e18, 1);
-        uint128 order2 = _placeAskOrder(bob, 1e18, 2);
-        uint128 order3 = _placeAskOrder(bob, 1e18, 3);
+        uint128 order1 = _placeAskOrder(bob, 1e18, 10);
+        uint128 order2 = _placeAskOrder(bob, 1e18, 20);
+        uint128 order3 = _placeAskOrder(bob, 1e18, 30);
 
         vm.prank(address(0));
         exchange.executeBlock();
 
         uint128 buyAmount = 25e17;
-        uint128 p1 = exchange.tickToPrice(1);
-        uint128 p2 = exchange.tickToPrice(2);
-        uint128 p3 = exchange.tickToPrice(3);
+        uint128 p1 = exchange.tickToPrice(10);
+        uint128 p2 = exchange.tickToPrice(20);
+        uint128 p3 = exchange.tickToPrice(30);
 
         uint128 cost1 = (1e18 * p1) / exchange.PRICE_SCALE();
         uint128 cost2 = (1e18 * p2) / exchange.PRICE_SCALE();
@@ -450,17 +450,17 @@ contract StablecoinExchangeTest is BaseTest {
     }
 
     function test_SwapExactAmountIn_MultiTick() public {
-        uint128 order1 = _placeBidOrder(bob, 1e18, 3);
-        uint128 order2 = _placeBidOrder(bob, 1e18, 2);
-        uint128 order3 = _placeBidOrder(bob, 1e18, 1);
+        uint128 order1 = _placeBidOrder(bob, 1e18, 30);
+        uint128 order2 = _placeBidOrder(bob, 1e18, 20);
+        uint128 order3 = _placeBidOrder(bob, 1e18, 10);
 
         vm.prank(address(0));
         exchange.executeBlock();
 
         uint128 sellAmount = 25e17;
-        uint128 p1 = exchange.tickToPrice(3);
-        uint128 p2 = exchange.tickToPrice(2);
-        uint128 p3 = exchange.tickToPrice(1);
+        uint128 p1 = exchange.tickToPrice(30);
+        uint128 p2 = exchange.tickToPrice(20);
+        uint128 p3 = exchange.tickToPrice(10);
 
         uint128 out1 = (1e18 * p1) / exchange.PRICE_SCALE();
         uint128 out2 = (1e18 * p2) / exchange.PRICE_SCALE();

@@ -13,6 +13,9 @@ contract StablecoinExchange is IStablecoinExchange {
     /// @notice Maximum allowed tick
     int16 public constant MAX_TICK = 2000;
 
+    /// @notice Allowed tick spacing for order placement (ticks must be divisible by this)
+    int16 public constant TICK_SPACING = 10;
+
     /// @notice Price scaling factor (5 decimal places for 0.1 bps precision)
     uint32 public constant PRICE_SCALE = 100_000;
 
@@ -163,9 +166,11 @@ contract StablecoinExchange is IStablecoinExchange {
         require(book.base != address(0), "PAIR_NOT_EXISTS");
 
         require(tick >= MIN_TICK && tick <= MAX_TICK, "TICK_OUT_OF_BOUNDS");
+        require(tick % TICK_SPACING == 0, "TICK_NOT_MULTIPLE_OF_SPACING");
 
         if (isFlip) {
             require(flipTick >= MIN_TICK && flipTick <= MAX_TICK, "FLIP_TICK_OUT_OF_BOUNDS");
+            require(flipTick % TICK_SPACING == 0, "FLIP_TICK_NOT_MULTIPLE_OF_SPACING");
 
             if (isBid) {
                 require(flipTick > tick, "FLIP_TICK_MUST_BE_GREATER_FOR_BID");
