@@ -1211,23 +1211,19 @@ export default defineConfig({
             ],
           },
           {
-            text: 'Key Managers 🚧',
-            disabled: true,
+            text: 'Key Managers',
             collapsed: true,
             items: [
               {
-                text: 'Overview 🚧',
-                disabled: true,
+                text: 'Overview',
                 link: '/sdk/typescript/wagmi/keyManagers',
               },
               {
-                text: 'http 🚧',
-                disabled: true,
+                text: 'http',
                 link: '/sdk/typescript/wagmi/keyManagers/http',
               },
               {
-                text: 'localStorage 🚧',
-                disabled: true,
+                text: 'localStorage',
                 link: '/sdk/typescript/wagmi/keyManagers/localStorage',
               },
             ],
@@ -1526,21 +1522,21 @@ export default defineConfig({
         items: [
           {
             text: 'Handlers',
-            disabled: true,
             items: [
               {
-                text: 'Overview 🚧',
-                disabled: true,
+                text: 'Overview',
                 link: '/sdk/typescript/server/handlers',
               },
               {
-                text: 'feePayer 🚧',
-                disabled: true,
+                text: 'compose',
+                link: '/sdk/typescript/server/handler.compose',
+              },
+              {
+                text: 'feePayer',
                 link: '/sdk/typescript/server/handler.feePayer',
               },
               {
-                text: 'keyManager 🚧',
-                disabled: true,
+                text: 'keyManager',
                 link: '/sdk/typescript/server/handler.keyManager',
               },
             ],
