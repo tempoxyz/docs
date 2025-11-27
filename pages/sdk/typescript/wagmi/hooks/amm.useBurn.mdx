@@ -1,6 +1,6 @@
-# `amm.useMint`
+# `amm.useBurn`
 
-Mints liquidity tokens by providing a token pair. [Learn more about the Fee AMM](/documentation/protocol/fees/spec-fee-amm)
+Burns liquidity tokens and receives the underlying token pair. [Learn more about the Fee AMM](/documentation/protocol/fees/spec-fee-amm)
 
 ## Usage
 
@@ -18,18 +18,20 @@ declare module 'wagmi' {
 import { Hooks } from 'tempo.ts/wagmi'
 import { parseUnits } from 'viem'
 
-const { data: result, mutate } = Hooks.amm.useMintSync()
+const { data: result, mutate } = Hooks.amm.useBurnSync()
 
 // Call `mutate` in response to user action (e.g. button click, form submission)
 mutate({
+  liquidity: parseUnits('10.5', 18),
   to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
   userToken: '0x20c0000000000000000000000000000000000000',
   validatorToken: '0x20c0000000000000000000000000000000000001',
-  validatorTokenAmount: parseUnits('100', 6),
 })
 
-console.log('Liquidity minted:', result.liquidity)
-// @log: Liquidity minted: 100000000n
+console.log('Received user tokens:', result.amountUserToken)
+// @log: Received user tokens: 5250000000000000000n
+console.log('Received validator tokens:', result.amountValidatorToken)
+// @log: Received validator tokens: 5250000000000000000n
 ```
 
 ```ts twoslash [wagmi.config.ts] filename="wagmi.config.ts"
@@ -43,7 +45,7 @@ console.log('Liquidity minted:', result.liquidity)
 
 The example above uses a `*Sync` variant of the action, that will wait for the transaction to be included before returning.
 
-If you are optimizing for performance, you should use the non-sync `amm.mint` action and wait for inclusion manually:
+If you are optimizing for performance, you should use the non-sync `amm.burn` action and wait for inclusion manually:
 
 ```ts twoslash
 // @errors: 2322
@@ -59,20 +61,20 @@ import { parseUnits } from 'viem'
 import { useWaitForTransactionReceipt } from 'wagmi'
 import { config } from './wagmi.config'
 
-const { data: hash, mutate } = Hooks.amm.useMint()
+const { data: hash, mutate } = Hooks.amm.useBurn()
 const { data: receipt } = useWaitForTransactionReceipt({ hash })
 
 // Call `mutate` in response to user action (e.g. button click, form submission)
 mutate({
+  liquidity: parseUnits('10.5', 18),
   to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
   userToken: '0x20c0000000000000000000000000000000000000',
   validatorToken: '0x20c0000000000000000000000000000000000001',
-  validatorTokenAmount: parseUnits('100', 6),
 })
 
 if (receipt) {
-  const { args: { liquidity } } 
-    = Actions.amm.mint.extractEvent(receipt.logs)
+  const { args: { amountUserToken, amountValidatorToken } } 
+    = Actions.amm.burn.extractEvent(receipt.logs)
 }
 ```
 
@@ -82,11 +84,11 @@ See [TanStack Query mutation docs](https://tanstack.com/query/v5/docs/framework/
 
 ### data
 
-See [Wagmi Action `amm.mint` Return Type](/sdk/typescript/wagmi/actions/amm.mint#return-type)
+See [Wagmi Action `amm.burn` Return Type](/sdk/typescript/wagmi/actions/amm.burn#return-type)
 
 ### mutate/mutateAsync
 
-See [Wagmi Action `amm.mint` Parameters](/sdk/typescript/wagmi/actions/amm.mint#parameters)
+See [Wagmi Action `amm.burn` Parameters](/sdk/typescript/wagmi/actions/amm.burn#parameters)
 
 ## Parameters
 
@@ -99,4 +101,3 @@ See [Wagmi Action `amm.mint` Parameters](/sdk/typescript/wagmi/actions/amm.mint#
 ### mutation
 
 See the [TanStack Query mutation docs](https://tanstack.com/query/v5/docs/framework/react/reference/useMutation) for more info hook parameters.
-

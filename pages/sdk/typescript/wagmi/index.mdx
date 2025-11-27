@@ -11,10 +11,15 @@
 | Action | Description |
 |--------|-------------|
 | **AMM Actions** | |
+| [`amm.burn`](/sdk/typescript/wagmi/actions/amm.burn) | Burns liquidity tokens and receives the underlying token pair |
 | [`amm.getLiquidityBalance`](/sdk/typescript/wagmi/actions/amm.getLiquidityBalance) | Gets the liquidity balance for an address in a specific pool |
 | [`amm.getPool`](/sdk/typescript/wagmi/actions/amm.getPool) | Gets the reserves for a liquidity pool |
 | [`amm.mint`](/sdk/typescript/wagmi/actions/amm.mint) | Mints liquidity tokens by providing a token pair |
+| [`amm.rebalanceSwap`](/sdk/typescript/wagmi/actions/amm.rebalanceSwap) | Performs a rebalance swap between user and validator tokens |
+| [`amm.watchBurn`](/sdk/typescript/wagmi/actions/amm.watchBurn) | Watches for liquidity burn events |
+| [`amm.watchFeeSwap`](/sdk/typescript/wagmi/actions/amm.watchFeeSwap) | Watches for fee swap events |
 | [`amm.watchMint`](/sdk/typescript/wagmi/actions/amm.watchMint) | Watches for liquidity mint events |
+| [`amm.watchRebalanceSwap`](/sdk/typescript/wagmi/actions/amm.watchRebalanceSwap) | Watches for rebalance swap events |
 | **Fee Actions** | |
 | [`fee.getUserToken`](/sdk/typescript/wagmi/actions/fee.getUserToken) | Gets the user's default fee token preference |
 | [`fee.setUserToken`](/sdk/typescript/wagmi/actions/fee.setUserToken) | Sets the user's default fee token preference |
@@ -78,10 +83,15 @@
 | Hook   | Description |
 |--------|-------------|
 | **AMM Hooks** | |
+| [`amm.useBurn`](/sdk/typescript/wagmi/hooks/amm.useBurn) | Hook for burning liquidity tokens and receiving the underlying token pair |
 | [`amm.useLiquidityBalance`](/sdk/typescript/wagmi/hooks/amm.useLiquidityBalance) | Hook for getting the liquidity balance for an address in a specific pool |
 | [`amm.useMint`](/sdk/typescript/wagmi/hooks/amm.useMint) | Hook for minting liquidity tokens by providing a token pair |
 | [`amm.usePool`](/sdk/typescript/wagmi/hooks/amm.usePool) | Hook for getting the reserves for a liquidity pool |
+| [`amm.useRebalanceSwap`](/sdk/typescript/wagmi/hooks/amm.useRebalanceSwap) | Hook for performing a rebalance swap between user and validator tokens |
+| [`amm.useWatchBurn`](/sdk/typescript/wagmi/hooks/amm.useWatchBurn) | Hook for watching liquidity burn events |
+| [`amm.useWatchFeeSwap`](/sdk/typescript/wagmi/hooks/amm.useWatchFeeSwap) | Hook for watching fee swap events |
 | [`amm.useWatchMint`](/sdk/typescript/wagmi/hooks/amm.useWatchMint) | Hook for watching liquidity mint events |
+| [`amm.useWatchRebalanceSwap`](/sdk/typescript/wagmi/hooks/amm.useWatchRebalanceSwap) | Hook for watching rebalance swap events |
 | **Fee Hooks** | |
 | [`fee.useSetUserToken`](/sdk/typescript/wagmi/hooks/fee.useSetUserToken) | Hook for setting the user's default fee token preference |
 | [`fee.useUserToken`](/sdk/typescript/wagmi/hooks/fee.useUserToken) | Hook for getting the user's default fee token preference |
