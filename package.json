@@ -26,8 +26,8 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.14",
-    "tempo.ts": "~0.5.4",
-    "viem": "https://pkg.pr.new/viem@main",
+    "tempo.ts": "~0.7.1",
+    "viem": "^2.40.3",
     "vocs": "^1.1.4",
     "wagmi": "^3.0.1",
     "zod": "^4.1.12"

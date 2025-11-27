@@ -47,11 +47,13 @@ Next, we will need to configure the `webAuthn` connector in our Wagmi config.
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi' // [!code ++]
+import { KeyManager, webAuthn } from 'tempo.ts/wagmi' // [!code ++]
 
 export const config = createConfig({
   chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()], // [!code ++]
+  connectors: [webAuthn({ // [!code ++]
+    keyManager: KeyManager.localStorage(), // [!code ++]
+  })], // [!code ++]
   multiInjectedProviderDiscovery: false,
   transports: {
     [tempo.id]: http(),
@@ -61,11 +63,20 @@ export const config = createConfig({
 
 :::warning
 
+The `KeyManager.localStorage()` implementation is not recommended for production use as it stores public keys on the client device, meaning it cannot be re-extracted when the user's storage is cleared or if the user is on another device. 
+
+For production, you should opt for a remote key manager such as [`KeyManager.http`](/sdk/typescript/wagmi/keyManagers/http).
+
+:::
+
+:::tip
+
 This Wagmi configuration sets `multiInjectedProviderDiscovery` to `false` to 
 prevent injected browser wallets from being detected, and to prefer the `webAuthn` connector. 
 If you would like to allow connection to other wallets, set this property to `true`.
 
 :::
+
 
 ### Display Sign In Buttons
 
@@ -122,11 +133,13 @@ export function Example() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi' // [!code ++]
+import { KeyManager, webAuthn } from 'tempo.ts/wagmi' // [!code ++]
 
 export const config = createConfig({
   chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()], // [!code ++]
+  connectors: [webAuthn({ // [!code ++] 
+    keyManager: KeyManager.localStorage(), // [!code ++]
+  })], // [!code ++]
   multiInjectedProviderDiscovery: false,
   transports: {
     [tempo.id]: http(),
@@ -198,11 +211,13 @@ export function Example() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi' // [!code ++]
+import { KeyManager, webAuthn } from 'tempo.ts/wagmi' // [!code ++]
 
 export const config = createConfig({
   chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()], // [!code ++]
+  connectors: [webAuthn({ // [!code ++]
+    keyManager: KeyManager.localStorage(), // [!code ++]
+  })], // [!code ++]
   multiInjectedProviderDiscovery: false,
   transports: {
     [tempo.id]: http(),

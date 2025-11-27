@@ -73,11 +73,13 @@ export function GrantRoles() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
+import { KeyManager, webAuthn } from 'tempo.ts/wagmi'
 
 export const config = createConfig({
   chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
+  connectors: [webAuthn({
+    keyManager: KeyManager.localStorage(),
+  })],
   transports: {
     [tempo.id]: http(),
   },
@@ -151,11 +153,13 @@ export function GrantRoles() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
+import { KeyManager, webAuthn } from 'tempo.ts/wagmi'
 
 export const config = createConfig({
   chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
+  connectors: [webAuthn({
+    keyManager: KeyManager.localStorage(),
+  })],
   transports: {
     [tempo.id]: http(),
   },
@@ -264,11 +268,13 @@ export function RevokeRoles() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
+import { KeyManager, webAuthn } from 'tempo.ts/wagmi'
 
 export const config = createConfig({
   chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
+  connectors: [webAuthn({
+    keyManager: KeyManager.localStorage(),
+  })],
   transports: {
     [tempo.id]: http(),
   },
@@ -334,11 +340,13 @@ export function SetSupplyCap() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
+import { KeyManager, webAuthn } from 'tempo.ts/wagmi'
 
 export const config = createConfig({
   chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
+  connectors: [webAuthn({
+    keyManager: KeyManager.localStorage(),
+  })],
   transports: {
     [tempo.id]: http(),
   },
@@ -443,11 +451,13 @@ export function LinkTokenPolicy() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
+import { KeyManager, webAuthn } from 'tempo.ts/wagmi'
 
 export const config = createConfig({
   chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
+  connectors: [webAuthn({
+    keyManager: KeyManager.localStorage(),
+  })],
   transports: {
     [tempo.id]: http(),
   },
@@ -523,11 +533,13 @@ export function PauseUnpauseTransfers() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
+import { KeyManager, webAuthn } from 'tempo.ts/wagmi'
 
 export const config = createConfig({
   chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
+  connectors: [webAuthn({
+    keyManager: KeyManager.localStorage(),
+  })],
   transports: {
     [tempo.id]: http(),
   },
@@ -596,11 +608,13 @@ export function BurnBlocked() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
+import { KeyManager, webAuthn } from 'tempo.ts/wagmi'
 
 export const config = createConfig({
   chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
+  connectors: [webAuthn({
+    keyManager: KeyManager.localStorage(),
+  })],
   transports: {
     [tempo.id]: http(),
   },

@@ -61,14 +61,9 @@ export function MintFeeAmmLiquidity(props: DemoStepProps) {
           onClick={() => {
             if (!address || !tokenAddress) return
             mintFeeLiquidity.mutate({
-              userToken: {
-                amount: 0n,
-                address: tokenAddress,
-              },
-              validatorToken: {
-                amount: parseUnits('100', 6),
-                address: validatorToken,
-              },
+              userTokenAddress: tokenAddress,
+              validatorTokenAddress: validatorToken,
+              validatorTokenAmount: parseUnits('100', 6),
               to: address,
               feeToken: alphaUsd,
             })

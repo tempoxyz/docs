@@ -1,125 +1,10 @@
-import * as Card from "../../../../components/Card.tsx"
+# Setup
 
-# Getting Started
-
-Tempo distributes a TypeScript SDK for:
-- [Viem](https://viem.sh): TypeScript interface for EVM blockchains
-- [Wagmi](https://wagmi.sh): React Hooks (and reactive primitives) for EVM blockchains
-
-The Tempo extensions can be used to perform common operations with the chain, such as: 
- querying the chain, sending Tempo transactions, managing tokens & their AMM pools, and more.
-
-<Card.Container>
-  <Card.Link
-    description="Set up a Viem client to interact with Tempo"
-    href="#viem-setup"
-    icon={() => (
-      <>
-        <img className="size-4.5 dark:hidden" src="https://viem.sh/icon-light.png" alt="Viem" />
-        <img className="size-4.5 not-dark:hidden" src="https://viem.sh/icon-dark.png" alt="Viem" />
-      </>
-    )}
-    title="Viem Setup"
-  />
-  <Card.Link
-    description="Set up a Wagmi configuration with Tempo"
-    href="#wagmi-setup"
-    icon={() => 
-      <img className="size-4.5 not-dark:invert" src="https://wagmi.sh/favicon.svg" alt="Wagmi" />
-    }
-    title="Wagmi Setup"
-  />
-</Card.Container>
-
-:::tip
-
-**When should I use Wagmi vs. Viem?**
-
-- **Viem** is best suited for **libraries, tooling, servers, scripting, etc** – a low-level and stateless interface for the EVM
-- **Wagmi** is best suited for **applications & wallets** – a high-level and stateful interface for the EVM (React Hooks, Vanilla JS, etc)
-
-:::
-
-## Viem Setup
+Setup the Tempo extension for Wagmi by following the steps below.
 
 ::::steps
 
-### Install
-
-To install the Tempo extension, you will need to install [Viem](https://viem.sh) and Tempo:
-
-:::code-group
-
-```bash [npm]
-npm i tempo.ts viem
-```
-
-```bash [pnpm]
-pnpm i tempo.ts viem
-```
-
-:::
-
-### Configure
-
-Next, we will configure a [Viem Client](https://viem.sh/get-started/clients/custom).
-
-```ts twoslash [viem.config.ts]
-// [!include ~/snippets/viem.config.ts:setup]
-```
-
-### Use Actions
-
-Now you're ready to [start interacting](/sdk/typescript/viem/actions) with Tempo!
-
-:::code-group
-
-```ts twoslash [example.ts]
-import { formatUnits } from 'viem'
-import { client } from './viem.config'
-
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
-
-const metadata = await client.token.getMetadata({ 
-  token: alphaUsd 
-})
-
-console.log(
-  'Alpha USD Metadata:', 
-  metadata.name,
-  metadata.symbol,
-  metadata.decimals,
-  metadata.totalSupply
-)
-// @log: Alpha USD Metadata: Alpha USD, AlphaUSD, 6, 1000000000000000000000n
-```
-
-```ts twoslash [viem.config.ts] filename="viem.config.ts"
-// [!include ~/snippets/viem.config.ts:setup]
-```
-
-:::
-
-:::tip
-
-[See all Tempo Actions](/sdk/typescript/viem/actions)
-
-:::
-
-### Next Steps
-
-After you have set up Tempo with Viem, you can now:
-
-- Follow a guide on how to [use accounts](/guide/use-accounts), [make payments](/guide/payments), [issue stablecoins](/guide/issuance), [exchange stablecoins](/guide/stablecoin-exchange), and [more](/guide).
-- Use the [suite of Tempo Actions](/sdk/typescript/viem/actions)
-
-::::
-
-## Wagmi Setup
-
-::::steps
-
-### Install
+## Install
 
 To add Wagmi to your project, install the required packages:
 
@@ -138,7 +23,7 @@ pnpm i tempo.ts wagmi viem @tanstack/react-query
 - [Viem](https://viem.sh) is a TypeScript interface for the EVM that performs blockchain operations.
 - [TanStack Query](https://tanstack.com/query/v5) is an async state manager that handles requests, caching, and more.
 
-### Create Config
+## Create Config
 
 Create and export a new Wagmi config using `createConfig`.
 
@@ -157,7 +42,7 @@ it to `null` to opt in to Tempo's [default fee token preferences](/documentation
 
 :::
 
-### Wrap App in Context Provider
+## Wrap App in Context Provider
 
 Wrap your app in the `WagmiProvider` React Context Provider and pass the `config` you created earlier to the `config` property.
 
@@ -184,7 +69,7 @@ function App() {
 
 Check out the [`WagmiProvider` docs](https://wagmi.sh/react/api/WagmiProvider) to learn more about React Context in Wagmi.
 
-### Setup TanStack Query
+## Setup TanStack Query
 
 Inside the `WagmiProvider`, wrap your app in a TanStack Query React Context Provider, e.g. `QueryClientProvider`, and pass a new `QueryClient` instance to the `client` property.
 
@@ -216,7 +101,7 @@ function App() {
 
 Check out the [TanStack Query docs](https://tanstack.com/query/latest/docs/framework/react/overview) to learn about the library, APIs, and more.
 
-### Use Wagmi
+## Use Wagmi
 
 Now that everything is set up, every component inside the Wagmi and TanStack Query Providers can use Wagmi React Hooks.
 
@@ -265,7 +150,7 @@ function App() {
 
 :::
 
-### Next Steps
+## Next Steps
 
 After you have set up your Tempo with Wagmi, you can now:
 

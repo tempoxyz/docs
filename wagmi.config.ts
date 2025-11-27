@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import { tempoAndantino, tempoLocal } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
+import { KeyManager, webAuthn } from 'tempo.ts/wagmi'
 import {
   type CreateConfigParameters,
   createConfig,
@@ -23,7 +23,11 @@ export function getConfig(options: getConfig.Options = {}) {
         ? tempoAndantino({ feeToken })
         : tempoLocal({ feeToken }),
     ],
-    connectors: [webAuthn()],
+    connectors: [
+      webAuthn({
+        keyManager: KeyManager.localStorage(),
+      }),
+    ],
     multiInjectedProviderDiscovery,
     storage: createStorage({
       storage:

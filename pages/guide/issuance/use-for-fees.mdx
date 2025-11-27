@@ -47,16 +47,11 @@ const mintFeeLiquidity = Hooks.amm.useMintSync() // [!code hl]
 
 // Add 100 AlphaUSD of liquidity to the fee pool // [!code hl]
 mintFeeLiquidity.mutate({ // [!code hl]
-  userToken: { // [!code hl]
-    amount: 0n, // [!code hl]
-    address: yourToken, // [!code hl]
-  }, // [!code hl]
-  validatorToken: { // [!code hl]
-    amount: parseUnits('100', 6), // 100 AlphaUSD // [!code hl]
-    address: validatorToken, // [!code hl]
-  }, // [!code hl]
-  to: address, // [!code hl]
-  feeToken: validatorToken, // [!code hl]
+  feeToken: validatorToken,
+  to: address,
+  userTokenAddress: yourToken,
+  validatorTokenAddress: validatorToken,
+  validatorTokenAmount: parseUnits('100', 6),
 }) // [!code hl]
 ```
 
@@ -199,11 +194,13 @@ export function PayWithIssuedToken() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'tempo.ts/chains'
-import { webAuthn } from 'tempo.ts/wagmi'
+import { KeyManager, webAuthn } from 'tempo.ts/wagmi'
 
 export const config = createConfig({
   chains: [tempo({ feeToken: '0x20c0000000000000000000000000000000000001' })],
-  connectors: [webAuthn()],
+  connectors: [webAuthn({
+    keyManager: KeyManager.localStorage(),
+  })],
   transports: {
     [tempo.id]: http(),
   },

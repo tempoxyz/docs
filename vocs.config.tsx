@@ -563,20 +563,24 @@ export default defineConfig({
     ],
     '/sdk/typescript': [
       {
-        text: 'TypeScript SDK',
+        text: 'Overview',
         link: '/sdk/typescript',
       },
       {
         text: 'Viem Reference',
         items: [
           {
-            text: 'Overview',
-            link: '/sdk/typescript/viem',
+            text: 'Setup',
+            link: '/sdk/typescript/viem/setup',
           },
           {
             text: 'Actions',
             collapsed: true,
             items: [
+              {
+                text: 'Overview',
+                link: '/sdk/typescript/viem/actions',
+              },
               {
                 text: 'AMM',
                 items: [
@@ -883,6 +887,10 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
+                text: 'Overview',
+                link: '/sdk/typescript/viem/transports',
+              },
+              {
                 text: 'withFeePayer',
                 link: '/sdk/typescript/viem/withFeePayer',
               },
@@ -894,13 +902,17 @@ export default defineConfig({
         text: 'Wagmi Reference',
         items: [
           {
-            text: 'Overview',
-            link: '/sdk/typescript/wagmi',
+            text: 'Setup',
+            link: '/sdk/typescript/wagmi/setup',
           },
           {
             text: 'Connectors',
             collapsed: true,
             items: [
+              {
+                text: 'Overview',
+                link: '/sdk/typescript/wagmi/connectors',
+              },
               {
                 text: 'dangerous_secp256k1',
                 link: '/sdk/typescript/wagmi/connectors/dangerous_secp256k1',
@@ -915,6 +927,10 @@ export default defineConfig({
             text: 'Actions',
             collapsed: true,
             items: [
+              {
+                text: 'Overview',
+                link: '/sdk/typescript/wagmi/actions',
+              },
               {
                 text: 'AMM',
                 items: [
@@ -1195,9 +1211,35 @@ export default defineConfig({
             ],
           },
           {
+            text: 'Key Managers 🚧',
+            disabled: true,
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview 🚧',
+                disabled: true,
+                link: '/sdk/typescript/wagmi/keyManagers',
+              },
+              {
+                text: 'http 🚧',
+                disabled: true,
+                link: '/sdk/typescript/wagmi/keyManagers/http',
+              },
+              {
+                text: 'localStorage 🚧',
+                disabled: true,
+                link: '/sdk/typescript/wagmi/keyManagers/localStorage',
+              },
+            ],
+          },
+          {
             text: 'Hooks',
             collapsed: true,
             items: [
+              {
+                text: 'Overview',
+                link: '/sdk/typescript/wagmi/hooks',
+              },
               {
                 text: 'AMM',
                 items: [
@@ -1474,6 +1516,32 @@ export default defineConfig({
                     link: '/sdk/typescript/wagmi/hooks/token.useWatchTransfer',
                   },
                 ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        text: 'Server Reference',
+        items: [
+          {
+            text: 'Handlers',
+            disabled: true,
+            items: [
+              {
+                text: 'Overview 🚧',
+                disabled: true,
+                link: '/sdk/typescript/server/handlers',
+              },
+              {
+                text: 'feePayer 🚧',
+                disabled: true,
+                link: '/sdk/typescript/server/handler.feePayer',
+              },
+              {
+                text: 'keyManager 🚧',
+                disabled: true,
+                link: '/sdk/typescript/server/handler.keyManager',
               },
             ],
           },
