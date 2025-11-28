@@ -191,7 +191,7 @@ We specify the complete gas schedule in more detail in the [gas costs section](#
 
 ### Fee Payer Signature Details
 
-This transaction type supports **gas sponsorship** where a third party (fee payer) can pay transaction fees on behalf of the sender. This is achieved through dual signature domains, following the same pattern as Type 0x77 (Tempo Transaction).
+The Native AA Transaction Type (0x76) supports **gas sponsorship** where a third party (fee payer) can pay transaction fees on behalf of the sender. This is achieved through dual signature domains—the sender signs with transaction type byte `0x76`, while the fee payer signs with magic byte `0x78` to ensure domain separation and prevent signature reuse attacks.
 
 #### Signing Domains
 
