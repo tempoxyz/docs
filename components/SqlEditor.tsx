@@ -56,6 +56,7 @@ export function SqlEditor(props: SqlEditorProps) {
     return false
   })
   const [editorHeight, setEditorHeight] = React.useState<string>(minHeight)
+  const [contentHeight, setContentHeight] = React.useState<number>(0)
   const editorRef = React.useRef<Monaco.editor.IStandaloneCodeEditor | null>(
     null,
   )
@@ -258,17 +259,25 @@ export function SqlEditor(props: SqlEditorProps) {
     editor.onDidFocusEditorText(() => setIsFocused(true))
     editor.onDidBlurEditorText(() => setIsFocused(false))
 
+    // Track content height for all editors
+    const initialContentHeight = editor.getContentHeight()
+    setContentHeight(initialContentHeight)
+
     // Auto-size read-only editors to fit content
     if (readOnly || disabled) {
-      const contentHeight = editor.getContentHeight()
-      setEditorHeight(`${contentHeight}px`)
-
-      // Update height when content changes
-      editor.onDidContentSizeChange(() => {
-        const newHeight = editor.getContentHeight()
-        setEditorHeight(`${newHeight}px`)
-      })
+      setEditorHeight(`${initialContentHeight}px`)
     }
+
+    // Update content height when content changes
+    editor.onDidContentSizeChange(() => {
+      const newHeight = editor.getContentHeight()
+      setContentHeight(newHeight)
+
+      // Auto-size readonly editors (preserve existing behavior)
+      if (readOnly || disabled) {
+        setEditorHeight(`${newHeight}px`)
+      }
+    })
 
     // Add Cmd/Ctrl+Enter shortcut
     if (onKeyDown) {
@@ -325,10 +334,32 @@ export function SqlEditor(props: SqlEditorProps) {
     }
   }, [])
 
+  // Reset editor height when minHeight prop changes
+  React.useEffect(() => {
+    if (!readOnly && !disabled) {
+      setEditorHeight(minHeight)
+    }
+  }, [minHeight, readOnly, disabled])
+
+  const maxHeightPx = contentHeight > 0 ? contentHeight : 1000 // fallback before mount
+
   return (
-    <div className={`${className} ${isFocused ? 'ring-1 ring-accent' : ''}`}>
+    <div
+      className={`${className} ${isFocused ? 'ring-1 ring-accent' : ''} ${
+        !readOnly && !disabled ? 'resize-y overflow-hidden' : ''
+      }`}
+      style={
+        !readOnly && !disabled
+          ? {
+              minHeight: minHeight,
+              maxHeight: `${maxHeightPx}px`,
+              height: editorHeight,
+            }
+          : undefined
+      }
+    >
       <Editor
-        height={editorHeight}
+        height="100%"
         defaultLanguage="sql"
         value={value}
         onChange={(newValue) => onChange(newValue || '')}
