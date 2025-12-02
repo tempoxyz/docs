@@ -6,6 +6,7 @@
       "dependencies": {
         "@monaco-editor/react": "^4.7.0",
         "@tanstack/react-query": "^5.90.5",
+        "@vercel/analytics": "^1.6.1",
         "@vercel/node": "^5.5.10",
         "@wagmi/core": "^3.0.0",
         "cva": "1.0.0-beta.4",
@@ -686,6 +687,8 @@
     "@vanilla-extract/private": ["@vanilla-extract/private@1.0.9", "", {}, "sha512-gT2jbfZuaaCLrAxwXbRgIhGhcXbRZCG3v4TTUnjw0EJ7ArdBRxkq4msNJkbuRkCgfIK5ATmprB5t9ljvLeFDEA=="],
 
     "@vanilla-extract/vite-plugin": ["@vanilla-extract/vite-plugin@5.1.1", "", { "dependencies": { "@vanilla-extract/compiler": "^0.3.1", "@vanilla-extract/integration": "^8.0.4" }, "peerDependencies": { "vite": "^5.0.0 || ^6.0.0 || ^7.0.0" } }, "sha512-Nd1worqkHrd8XED4ZAA7Wmkd3pCqCwpmzCBVF8v6T1BSLHGXQE5HYflVgygw0CsIAbFRMS6zQBIk4F4/r/YKIw=="],
+
+    "@vercel/analytics": ["@vercel/analytics@1.6.1", "", { "peerDependencies": { "@remix-run/react": "^2", "@sveltejs/kit": "^1 || ^2", "next": ">= 13", "react": "^18 || ^19 || ^19.0.0-rc", "svelte": ">= 4", "vue": "^3", "vue-router": "^4" }, "optionalPeers": ["@remix-run/react", "@sveltejs/kit", "next", "react", "svelte", "vue", "vue-router"] }, "sha512-oH9He/bEM+6oKlv3chWuOOcp8Y6fo6/PSro8hEkgCW3pu9/OiCXiUpRUogDh3Fs3LH2sosDrx8CxeOLBEE+afg=="],
 
     "@vercel/build-utils": ["@vercel/build-utils@13.1.2", "", {}, "sha512-2ujydLLfui8JS1DW2bwZA0f9z/kl5YXXskg9p2I2ew+PrdYV++OUJF0R5FsQHJeE+jIZTEGJmdOEW9hknypX0g=="],
 
