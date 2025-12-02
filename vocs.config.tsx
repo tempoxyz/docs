@@ -1557,14 +1557,18 @@ export default defineConfig({
       ],
     },
   ],
-  twoslash: {
-    compilerOptions: {
-      moduleResolution: ModuleResolutionKind.Bundler,
-    },
-    extraFiles: {
-      'twoslash-env.d.ts': twoslashSupportFile,
-    },
-  },
+  twoslash:
+    // biome-ignore lint/style/noNonNullAssertion: _
+    process.env['DISABLE_TWOSLASH']! === 'true'
+      ? false
+      : {
+          compilerOptions: {
+            moduleResolution: ModuleResolutionKind.Bundler,
+          },
+          extraFiles: {
+            'twoslash-env.d.ts': twoslashSupportFile,
+          },
+        },
   vite: {
     plugins: [
       {
