@@ -35,7 +35,7 @@ export function getConfig(options: getConfig.Options = {}) {
     }),
     transports: {
       [tempoAndantino.id]: webSocket(
-        'wss://rpc.testnet.tempo.xyz?supersecretargument=pleasedonotusemeinprod',
+        'wss://rpc-orchestra.testnet.tempo.xyz/zealous-mayer',
       ),
       [tempoLocal.id]: http(undefined, {
         batch: true,
