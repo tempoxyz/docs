@@ -21,7 +21,7 @@
         "sql-formatter": "^15.6.10",
         "tailwind-merge": "^3.3.1",
         "tailwindcss": "^4.1.14",
-        "tempo.ts": "~0.7.1",
+        "tempo.ts": "https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@c83450b",
         "viem": "^2.40.3",
         "vocs": "^1.2.1",
         "wagmi": "^3.0.1",
@@ -1237,6 +1237,8 @@
 
     "iconv-lite": ["iconv-lite@0.6.3", "", { "dependencies": { "safer-buffer": ">= 2.1.2 < 3.0.0" } }, "sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw=="],
 
+    "idb-keyval": ["idb-keyval@6.2.2", "", {}, "sha512-yjD9nARJ/jb1g+CvD0tlhUHOrJ9Sy0P8T9MF3YaLlHnSRpwPfpTX0XIvpmw3gAJUmEu3FiICLBDPXVwyEvrleg=="],
+
     "ieee754": ["ieee754@1.2.1", "", {}, "sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA=="],
 
     "import-fresh": ["import-fresh@3.3.1", "", { "dependencies": { "parent-module": "^1.0.0", "resolve-from": "^4.0.0" } }, "sha512-TR3KfrTZTYLPB6jUjfx6MF9WcWrHL9su5TObK4ZkYgBdWKPOFoSoQIdEuTuR82pmtxH2spWG9h6etwfr1pLBqQ=="],
@@ -1835,7 +1837,7 @@
 
     "tar": ["tar@7.2.0", "", { "dependencies": { "@isaacs/fs-minipass": "^4.0.0", "chownr": "^3.0.0", "minipass": "^7.1.0", "minizlib": "^3.0.1", "mkdirp": "^3.0.1", "yallist": "^5.0.0" } }, "sha512-hctwP0Nb4AB60bj8WQgRYaMOuJYRAPMGiQUAotms5igN8ppfQM+IvjQ5HcKu1MaZh2Wy2KWVTe563Yj8dfc14w=="],
 
-    "tempo.ts": ["tempo.ts@0.7.1", "", { "dependencies": { "@remix-run/fetch-router": "~0.12.0", "ox": "~0.9.17" }, "peerDependencies": { "@tanstack/query-core": ">=5.0.0", "@tanstack/react-query": ">=5.0.0", "@wagmi/core": ">=2.18", "prool": "^0", "viem": ">=2.39.2", "wagmi": ">=2.19" }, "optionalPeers": ["@tanstack/query-core", "@tanstack/react-query", "@wagmi/core", "prool", "viem", "wagmi"] }, "sha512-GmFKvzU7HOnVYljq3Sv1zFMy9HxQNvkCsi8sXBhA9TRr7aN/m7gUwdyZIv4BNhLAXVJ/sx9kRkDUdkCdpzKMTQ=="],
+    "tempo.ts": ["tempo.ts@https://pkg.pr.new/tempoxyz/tempo-ts/tempo.ts@c83450b", { "dependencies": { "@remix-run/fetch-router": "~0.12.0", "idb-keyval": "^6.2.2", "ox": "~0.9.17" }, "peerDependencies": { "@tanstack/query-core": ">=5.0.0", "@tanstack/react-query": ">=5.0.0", "@wagmi/core": ">=2.18", "prool": "^0", "viem": ">=2.39.2", "wagmi": ">=2.19" }, "optionalPeers": ["@tanstack/query-core", "@tanstack/react-query", "@wagmi/core", "prool", "viem", "wagmi"] }],
 
     "time-span": ["time-span@4.0.0", "", { "dependencies": { "convert-hrtime": "^3.0.0" } }, "sha512-MyqZCTGLDZ77u4k+jqg4UlrzPTPZ49NDlaekU6uuFaJLzPIN1woaRXCbGeqOfxwc3Y37ZROGAJ614Rdv7Olt+g=="],
 

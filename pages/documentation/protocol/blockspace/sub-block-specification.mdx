@@ -152,6 +152,6 @@ The fee manager is updated to handle fee accounting across sub-blocks:
 - For the sub-block transactions, fees are paid to the `fee_recipient` of the sub-block (available from the system transaction).
 - For the gas incentive transactions, fees are paid to the proposer's `fee_recipient`.
 
-In all cases, the fee is paid in the preferred `fee_token` of the `fee_recipient`, using liquidity from the fee AMM as necessary (i.e., `validatorTokens[fee_recipient]` from the FeeManager contract). If the `fee_recipient`  has not set a preferred `fee_token`, then we use LinkingUSD as a fallback. 
+In all cases, the fee is paid in the preferred `fee_token` of the `fee_recipient`, using liquidity from the fee AMM as necessary (i.e., `validatorTokens[fee_recipient]` from the FeeManager contract). If the `fee_recipient`  has not set a preferred `fee_token`, then we use pathUSD as a fallback. 
 
 

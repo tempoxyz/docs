@@ -366,14 +366,6 @@ export default defineConfig({
                 text: 'Specification',
                 link: '/documentation/protocol/tip20-rewards/spec',
               },
-              {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/docs/blob/main/specs/src/TIP20RewardRegistry.sol',
-              },
-              {
-                text: 'Rust Implementation',
-                link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip20_rewards_registry',
-              },
             ],
           },
           {
@@ -487,8 +479,8 @@ export default defineConfig({
                 link: '/documentation/protocol/exchange/spec',
               },
               {
-                text: 'linkingUSD',
-                link: '/documentation/protocol/exchange/linkingUSD',
+                text: 'pathUSD',
+                link: '/documentation/protocol/exchange/pathUSD',
               },
               {
                 text: 'Executing Swaps',
@@ -687,18 +679,6 @@ export default defineConfig({
               {
                 text: 'Reward',
                 items: [
-                  {
-                    text: 'cancel',
-                    link: '/sdk/typescript/viem/reward.cancel',
-                  },
-                  {
-                    text: 'getStream',
-                    link: '/sdk/typescript/viem/reward.getStream',
-                  },
-                  {
-                    text: 'getTotalPerSecond',
-                    link: '/sdk/typescript/viem/reward.getTotalPerSecond',
-                  },
                   {
                     text: 'setRecipient',
                     link: '/sdk/typescript/viem/reward.setRecipient',

@@ -218,6 +218,49 @@ feeManager.setTransactionFeeToken(yourToken);
 token.transfer(recipient, 100_000_000);
 ```
 
+```rust [Rust]
+use alloy::{
+    primitives::{U256, address},
+    providers::ProviderBuilder,
+};
+use tempo_alloy::{
+    TempoNetwork,
+    contracts::precompiles::{ITIPFeeAMM, TIP_FEE_MANAGER_ADDRESS},
+};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
+        .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
+        .await?;
+
+    // Your issued token
+    let your_token = address!("0x20c0000000000000000000000000000000000004"); // [!code focus]
+    // AlphaUSD
+    let validator_token = address!("0x20c0000000000000000000000000000000000001"); // [!code focus]
+
+    let fee_amm = ITIPFeeAMM::new( // [!code focus]
+        TIP_FEE_MANAGER_ADDRESS, // [!code focus]
+        provider,                // [!code focus]
+    ); // [!code focus]
+
+    let recipient = address!("0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"); // [!code focus]
+
+    // Add 100 AlphaUSD of liquidity to the fee pool
+    fee_amm // [!code focus]
+        .mintWithValidatorToken( // [!code focus]
+            your_token,              // [!code focus]
+            validator_token,         // [!code focus]
+            U256::from(100_000_000), // [!code focus]
+            recipient,               // [!code focus]
+        ) // [!code focus]
+        .send() // [!code focus]
+        .await?; // [!code focus]
+
+    Ok(())
+}
+```
+
 :::
 
 Users can set your stablecoin as their default fee token at the account level, or specify it for individual transactions. Learn more about [how users pay fees in different stablecoins](/guide/payments/pay-fees-in-any-stablecoin).

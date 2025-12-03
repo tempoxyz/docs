@@ -75,7 +75,7 @@ export function MintFeeAmmLiquidity(props: DemoStepProps) {
         </Button>
       }
       number={stepNumber}
-      title={`Mint 100 linkingUSD of Fee Liquidity for ${metadata ? metadata.name : 'your token'}.`}
+      title={`Mint 100 pathUSD of Fee Liquidity for ${metadata ? metadata.name : 'your token'}.`}
     >
       {mintFeeLiquidity.data && (
         <div className="flex mx-6 flex-col gap-3 pb-4">
