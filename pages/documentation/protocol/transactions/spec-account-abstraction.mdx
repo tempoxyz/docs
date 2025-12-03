@@ -171,7 +171,7 @@ Each authorization in the list:
 - Cannot have `Create` calls when `aa_authorization_list` is non-empty (follows EIP-7702 semantics)
 - Authority address is recovered from the signature and matched against the authorization
 
-### Parallelizable Nonces (Not Live Yet)
+### Parallelizable Nonces
 
 - **Protocol nonce (key 0)**: Existing account nonce, incremented for regular txs, 7702 authorization, or `CREATE`
 - **User nonces (keys 1-N)**: Enable parallel execution with special gas schedule
