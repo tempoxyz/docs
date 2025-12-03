@@ -209,11 +209,6 @@ export default defineConfig({
                 link: '/guide/stablecoin-exchange/view-the-orderbook',
               },
               {
-                text: 'Create your own stablecoin pair 🚧',
-                disabled: true,
-                link: '/guide/stablecoin-exchange/create-pair',
-              },
-              {
                 text: 'Providing liquidity',
                 link: '/guide/stablecoin-exchange/providing-liquidity',
               },
