@@ -99,26 +99,11 @@ export default defineConfig({
                 text: 'Add funds to your balance',
                 link: '/guide/use-accounts/add-funds',
               },
-              {
-                text: 'Batch Transactions 🚧',
-                disabled: true,
-                link: '/guide/use-accounts/batch-transactions',
-              },
-              {
-                text: 'Sponsor transaction fees',
-                link: '/guide/use-accounts/fee-sponsorship',
-              },
-              {
-                text: 'Scheduled Transactions 🚧',
-                disabled: true,
-                link: '/guide/use-accounts/scheduled-transactions',
-              },
-              {
-                text: 'WebAuthn/P256 Signatures 🚧',
-                disabled: true,
-                link: '/guide/use-accounts/webauthn-p256-signatures',
-              },
             ],
+          },
+          {
+            text: 'Use Tempo Transactions',
+            link: '/guide/tempo-transaction',
           },
           {
             text: 'Make Payments',
