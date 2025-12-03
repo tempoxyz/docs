@@ -36,6 +36,9 @@ export function getConfig(options: getConfig.Options = {}) {
     transports: {
       [tempoAndantino.id]: webSocket(
         'wss://rpc-orchestra.testnet.tempo.xyz/zealous-mayer',
+        {
+            keepAlive: { interval: 1_000 },
+        }
       ),
       [tempoLocal.id]: http(undefined, {
         batch: true,
