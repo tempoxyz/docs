@@ -10,25 +10,28 @@ import type { DemoStepProps } from '../types'
 
 const validatorToken = alphaUsd
 
-export function MintFeeAmmLiquidity(
-  props: DemoStepProps & { waitForBalance: boolean },
-) {
-  const { stepNumber, last = false, waitForBalance = true } = props
+export function BurnFeeAmmLiquidity(props: DemoStepProps) {
+  const { stepNumber, last = false } = props
   const { address } = useAccount()
   const { getData } = useDemoContext()
   const queryClient = useQueryClient()
 
-  // Get the address of the token created in a previous step
   const tokenAddress = getData('tokenAddress')
+
+  const { data: lpBalance } = Hooks.amm.useLiquidityBalance({
+    address,
+    userToken: tokenAddress,
+    validatorToken,
+  })
 
   const { data: metadata } = Hooks.token.useGetMetadata({
     token: tokenAddress,
   })
-  const { data: tokenBalance } = Hooks.token.useGetBalance({
-    account: address,
+  const { data: validatorMetadata } = Hooks.token.useGetMetadata({
     token: tokenAddress,
   })
-  const mintFeeLiquidity = Hooks.amm.useMintSync({
+
+  const burnLiquidity = Hooks.amm.useBurnSync({
     mutation: {
       onSettled() {
         queryClient.refetchQueries({ queryKey: ['getPool'] })
@@ -36,28 +39,28 @@ export function MintFeeAmmLiquidity(
       },
     },
   })
+
   useAccountEffect({
     onDisconnect() {
-      mintFeeLiquidity.reset()
+      burnLiquidity.reset()
     },
   })
 
+  const hasSufficientBalance =
+    lpBalance && lpBalance >= parseUnits('10', validatorMetadata?.decimals || 6)
   const active = React.useMemo(() => {
-    const balanceCheck = waitForBalance
-      ? Boolean(tokenBalance && tokenBalance > 0n)
-      : true
-    return Boolean(address && tokenAddress && balanceCheck)
-  }, [address, tokenAddress, tokenBalance])
+    return Boolean(address && tokenAddress && hasSufficientBalance)
+  }, [address, tokenAddress, hasSufficientBalance])
 
   return (
     <Step
-      active={active && (last ? true : !mintFeeLiquidity.isSuccess)}
-      completed={mintFeeLiquidity.isSuccess}
+      active={active && (last ? true : !burnLiquidity.isSuccess)}
+      completed={burnLiquidity.isSuccess}
       actions={
         <Button
           variant={
             active
-              ? mintFeeLiquidity.isSuccess
+              ? burnLiquidity.isSuccess
                 ? 'default'
                 : 'accent'
               : 'default'
@@ -65,10 +68,10 @@ export function MintFeeAmmLiquidity(
           disabled={!active}
           onClick={() => {
             if (!address || !tokenAddress) return
-            mintFeeLiquidity.mutate({
-              userTokenAddress: tokenAddress,
-              validatorTokenAddress: validatorToken,
-              validatorTokenAmount: parseUnits('100', 6),
+            burnLiquidity.mutate({
+              userToken: tokenAddress,
+              validatorToken,
+              liquidity: parseUnits('10', validatorMetadata?.decimals || 6),
               to: address,
               feeToken: alphaUsd,
             })
@@ -76,18 +79,16 @@ export function MintFeeAmmLiquidity(
           type="button"
           className="text-[14px] -tracking-[2%] font-normal"
         >
-          Add Liquidity
+          Burn Liquidity
         </Button>
       }
       number={stepNumber}
-      title={`Mint 100 pathUSD of Fee Liquidity for ${metadata ? metadata.name : 'your token'}.`}
+      title={`Burn 10 LP tokens from ${metadata ? metadata.name : 'your token'} pool.`}
     >
-      {mintFeeLiquidity.data && (
+      {burnLiquidity.data && (
         <div className="flex mx-6 flex-col gap-3 pb-4">
           <div className="ps-5 border-gray4 border-s-2">
-            <ExplorerLink
-              hash={mintFeeLiquidity.data.receipt.transactionHash}
-            />
+            <ExplorerLink hash={burnLiquidity.data.receipt.transactionHash} />
           </div>
         </div>
       )}

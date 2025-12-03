@@ -1,5 +1,9 @@
+import * as Card from '../../../components/Card.tsx'
 import * as Demo from '../../../components/guides/Demo.tsx'
 import * as Step from '../../../components/guides/steps'
+import LucideSettings from '~icons/lucide/settings'
+import LucideDroplet from '~icons/lucide/droplet'
+import LucideFileText from '~icons/lucide/file-text'
 
 # Use Your Stablecoin for Fees
 
@@ -304,5 +308,23 @@ Before promoting fee payments with your token, thoroughly test the flow on testn
 
 ## Next Steps
 
-- **[Manage your stablecoin](/guide/issuance/manage-stablecoin)** with roles, supply caps, and transfer policies
-- Learn more about [Transaction Fee Tokens](/documentation/protocol/fees/spec-fee)
+<Card.Container>
+  <Card.Link
+    description="Manage roles, supply caps, and transfer policies"
+    href="/guide/issuance/manage-stablecoin"
+    icon={LucideSettings}
+    title="Manage Your Stablecoin"
+  />
+  <Card.Link
+    description="Add and remove liquidity to enable fee conversions"
+    href="/guide/stablecoin-exchange/managing-fee-liquidity"
+    icon={LucideDroplet}
+    title="Managing Fee Liquidity"
+  />
+  <Card.Link
+    description="Complete fee token specification"
+    href="/documentation/protocol/fees/spec-fee"
+    icon={LucideFileText}
+    title="Fee Tokens"
+  />
+</Card.Container>

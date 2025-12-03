@@ -197,8 +197,7 @@ export default defineConfig({
                 link: '/guide/stablecoin-exchange',
               },
               {
-                text: 'Managing fee liquidity 🚧',
-                disabled: true,
+                text: 'Managing fee liquidity',
                 link: '/guide/stablecoin-exchange/managing-fee-liquidity',
               },
               {
