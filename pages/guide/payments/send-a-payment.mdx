@@ -413,45 +413,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 :::
 
-### Sponsored payment
-
-Enable gasless transactions by routing payments through a fee payer relay. Set up your client with the `withFeePayer` transport and use `feePayer: true` on transactions:
-
-:::code-group
-
-```ts [example.ts]
-import { parseUnits } from 'viem'
-import { client } from './client'
-
-const { receipt } = await client.token.transferSync({
-  amount: parseUnits('100', 6),
-  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
-  token: '0x20c0000000000000000000000000000000000001',
-  feePayer: true, // [!code hl]
-})
-```
-
-```ts [client.ts] filename="client.ts"
-import { createClient, http, walletActions } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { tempo } from 'tempo.ts/chains'
-import { withFeePayer } from 'tempo.ts/viem' // [!code hl]
-
-export const client = createClient({
-  account: privateKeyToAccount('0x...'),
-  chain: tempo({ feeToken: '0x20c0000000000000000000000000000000000001' }),
-  transport: withFeePayer( // [!code hl]
-    http(), // [!code hl]
-    http('https://your-fee-payer-relay.com'), // [!code hl]
-    { policy: 'sign-only' }, // [!code hl]
-  ), // [!code hl]
-}).extend(walletActions)
-```
-
-:::
-
-For a complete guide on setting up fee sponsorship including running your own fee payer relay server, see the [Sponsor transaction fees](/guide/use-accounts/fee-sponsorship) guide.
-
 ### Payment events
 
 When you send a payment, the token contract emits events:
