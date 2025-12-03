@@ -7,10 +7,7 @@ export function Tabs(props: base_Tabs.Root.Props) {
 
   const tabs = React.useMemo(() => {
     const values = React.Children.map(children, (child) => {
-      if (
-        React.isValidElement(child) &&
-        (child.type as { name: string }).name === 'Tab'
-      )
+      if (React.isValidElement(child))
         return (child.props as { value: string }).value
       return null
     })
