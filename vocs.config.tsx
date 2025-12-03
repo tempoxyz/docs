@@ -1543,6 +1543,15 @@ export default defineConfig({
           },
         ],
       },
+      {
+        text: 'Prool Reference',
+        items: [
+          {
+            text: 'Setup',
+            link: '/sdk/typescript/prool/setup',
+          },
+        ],
+      },
     ],
   },
   topNav: [
