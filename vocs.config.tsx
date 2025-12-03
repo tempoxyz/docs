@@ -105,8 +105,7 @@ export default defineConfig({
                 link: '/guide/use-accounts/batch-transactions',
               },
               {
-                text: 'Fee Sponsorship 🚧',
-                disabled: true,
+                text: 'Sponsor transaction fees',
                 link: '/guide/use-accounts/fee-sponsorship',
               },
               {
@@ -140,10 +139,6 @@ export default defineConfig({
               {
                 text: 'Pay fees in any stablecoin',
                 link: '/guide/payments/pay-fees-in-any-stablecoin',
-              },
-              {
-                text: 'Sponsor user fees',
-                link: '/guide/payments/sponsor-user-fees',
               },
               // {
               //   text: 'Start a subscription 🚧',

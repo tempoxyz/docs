@@ -42,6 +42,31 @@ If the `fee_payer_signature` field is set, then it is used to derive the `fee_pa
 
 For purposes of [fee token preferences](#fee-token-preferences), the `fee_payer` is the account that chooses the fee token.
 
+### Fee sponsorship flow
+
+Presence of the `fee_payer_signature` field authorizes a third party to pay the transaction's gas costs while the original sender executes the transaction logic.
+
+:::steps
+#### Sender signs the transaction
+The sender signs the transaction with their private key, signing over a blank fee token field. This means the sender delegates the choice of which fee token to use to the fee payer.
+
+#### Fee payer selects and signs
+The fee payer selects which fee token to use, then signs over the transaction.
+
+#### Transaction submission
+The fee token and fee payer signature is added to the transaction using the `fee_payer_signature` field and is then submitted.
+
+#### Network validation
+The network validates both signatures and executes the transaction.
+:::
+
+#### Validation
+
+When `feePayerSignature` is present:
+* Both sender and fee payer signatures must be valid
+* Fee payer must have sufficient balance in the fee token
+* Transaction is rejected if either signature fails or fee payer's balance is insufficient
+
 ## Fee token preferences
 
 The protocol checks for token preferences in four ways, with this order of precedence:
