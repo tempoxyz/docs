@@ -212,6 +212,10 @@ export default defineConfig({
             link: '/guide/sdks/typescript',
           },
           {
+            text: 'Go',
+            link: '/guide/sdks/go',
+          },
+          {
             text: 'Foundry',
             link: '/guide/sdks/foundry',
           },
@@ -1519,6 +1523,7 @@ export default defineConfig({
       text: 'SDKs',
       items: [
         { text: 'TypeScript', link: '/sdk/typescript' },
+        { text: 'Go', link: '/guide/sdks/go', match: '/_' },
         { text: 'Foundry', link: '/guide/sdks/foundry', match: '/_' },
         { text: 'Rust', link: '/guide/sdks/rust', match: '/_' },
       ],
