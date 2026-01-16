@@ -1,0 +1,70 @@
+---
+title: Wallet Developers
+description: Integrate Tempo into your wallet
+---
+
+# Wallet Developers
+
+Guide for integrating Tempo into wallet applications.
+
+## Chain Configuration
+
+```json
+{
+  "chainId": 111551119090,
+  "chainName": "Tempo Testnet",
+  "nativeCurrency": {
+    "name": "Ether",
+    "symbol": "ETH",
+    "decimals": 18
+  },
+  "rpcUrls": ["https://rpc.testnet.tempo.xyz"],
+  "blockExplorerUrls": ["https://explorer.testnet.tempo.xyz"]
+}
+```
+
+## Transaction Types
+
+Support both standard EVM and Tempo transactions:
+
+- Type 0: Legacy
+- Type 2: EIP-1559
+- Type 126: Tempo Transaction
+
+## Tempo Transaction Signing
+
+```typescript
+// EIP-712 typed data
+const typedData = {
+  types: {
+    TempoTransaction: [
+      { name: 'to', type: 'address' },
+      { name: 'value', type: 'uint256' },
+      { name: 'data', type: 'bytes' },
+      { name: 'feeToken', type: 'address' },
+      { name: 'nonce', type: 'uint256' },
+      { name: 'nonceSpace', type: 'uint256' },
+    ],
+  },
+  primaryType: 'TempoTransaction',
+  domain: {
+    name: 'Tempo',
+    version: '1',
+    chainId: 111551119090,
+  },
+  message: transaction,
+}
+```
+
+## Fee Display
+
+Show users the fee in their selected token:
+
+```typescript
+const feeQuote = await getFeeQuote({
+  transaction,
+  feeToken: userSelectedToken,
+})
+
+// Display: "Fee: 0.01 USDC"
+```

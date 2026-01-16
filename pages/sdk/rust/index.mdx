@@ -1,0 +1,64 @@
+---
+title: Rust SDK
+description: Build on Tempo with Rust
+---
+
+# Rust SDK
+
+High-performance Tempo integration with Rust.
+
+## Installation
+
+```toml
+[dependencies]
+tempo-rs = "0.1"
+alloy = "0.4"
+```
+
+## Quick Start
+
+```rust
+use tempo_rs::{TempoClient, Chain};
+use alloy::primitives::Address;
+
+#[tokio::main]
+async fn main() -> eyre::Result<()> {
+    let client = TempoClient::new(Chain::TempoTestnet)?;
+    
+    let block = client.get_block_number().await?;
+    println!("Current block: {}", block);
+    
+    Ok(())
+}
+```
+
+## TIP-20 Interaction
+
+```rust
+use tempo_rs::tip20::TIP20;
+
+let token = TIP20::new(token_address, &client);
+
+// Read balance
+let balance = token.balance_of(user_address).await?;
+
+// Transfer (requires signer)
+let tx = token
+    .transfer(recipient, amount)
+    .send()
+    .await?;
+```
+
+## Tempo Transactions
+
+```rust
+use tempo_rs::transaction::TempoTransaction;
+
+let tx = TempoTransaction::new()
+    .to(recipient)
+    .data(calldata)
+    .fee_token(usdc_address)
+    .build();
+
+let hash = client.send_tempo_transaction(tx).await?;
+```

@@ -1,0 +1,77 @@
+---
+title: Wagmi Integration
+description: Use tempo.ts with Wagmi
+---
+
+# Wagmi Integration
+
+React hooks for Tempo applications.
+
+## Setup
+
+```typescript
+import { WagmiProvider, createConfig, http } from 'wagmi'
+import { tempoTestnet } from 'tempo.ts/chains'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+const config = createConfig({
+  chains: [tempoTestnet],
+  transports: {
+    [tempoTestnet.id]: http(),
+  },
+})
+
+const queryClient = new QueryClient()
+
+function App({ children }) {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    </WagmiProvider>
+  )
+}
+```
+
+## Hooks
+
+### useTempoTransaction
+
+```typescript
+import { useTempoTransaction } from 'tempo.ts/hooks'
+
+function SendButton() {
+  const { send, isPending, isSuccess, hash } = useTempoTransaction()
+  
+  return (
+    <button
+      onClick={() => send({
+        to: recipient,
+        data: calldata,
+        feeToken: usdcAddress,
+      })}
+      disabled={isPending}
+    >
+      {isPending ? 'Sending...' : 'Send'}
+    </button>
+  )
+}
+```
+
+### useTIP20
+
+```typescript
+import { useTIP20 } from 'tempo.ts/hooks'
+
+function TokenInfo({ address }) {
+  const { name, symbol, totalSupply, mint, burn } = useTIP20(address)
+  
+  return (
+    <div>
+      <h2>{name} ({symbol})</h2>
+      <p>Supply: {formatUnits(totalSupply, 18)}</p>
+    </div>
+  )
+}
+```

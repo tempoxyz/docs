@@ -1,0 +1,82 @@
+---
+title: Use Existing Wallets
+description: Connect standard Ethereum wallets to Tempo
+---
+
+# Use Existing Wallets
+
+Connect any Ethereum wallet to Tempo.
+
+## Supported Wallets
+
+- MetaMask
+- Rainbow
+- Coinbase Wallet
+- WalletConnect-compatible wallets
+- Hardware wallets (Ledger, Trezor)
+
+## Setup with Wagmi
+
+```typescript
+import { createConfig, http } from 'wagmi'
+import { tempoTestnet } from 'tempo.ts/chains'
+import { injected, coinbaseWallet, walletConnect } from 'wagmi/connectors'
+
+export const config = createConfig({
+  chains: [tempoTestnet],
+  connectors: [
+    injected(),
+    coinbaseWallet({ appName: 'My App' }),
+    walletConnect({ projectId: 'YOUR_PROJECT_ID' }),
+  ],
+  transports: {
+    [tempoTestnet.id]: http(),
+  },
+})
+```
+
+## Connect Wallet
+
+```typescript
+import { useConnect, useAccount } from 'wagmi'
+
+function ConnectWallet() {
+  const { connectors, connect } = useConnect()
+  const { address, isConnected } = useAccount()
+  
+  if (isConnected) {
+    return <div>Connected: {address}</div>
+  }
+  
+  return (
+    <div>
+      {connectors.map((connector) => (
+        <button
+          key={connector.id}
+          onClick={() => connect({ connector })}
+        >
+          {connector.name}
+        </button>
+      ))}
+    </div>
+  )
+}
+```
+
+## Add Tempo Network
+
+Users may need to add Tempo to their wallet. You can prompt them:
+
+```typescript
+import { useAddNetwork } from 'tempo.ts/hooks'
+
+function AddNetwork() {
+  const { addNetwork } = useAddNetwork()
+  
+  return (
+    <button onClick={addNetwork}>
+      Add Tempo to Wallet
+    </button>
+  )
+}
+```

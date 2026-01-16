@@ -1,0 +1,60 @@
+---
+title: Create a Stablecoin
+description: Deploy a TIP-20 stablecoin on Tempo
+---
+
+# Create a Stablecoin
+
+Deploy a new stablecoin with full issuer controls.
+
+## Prerequisites
+
+- ETH for deployment gas
+- Issuer wallet with signing capability
+
+## Deploy Token
+
+```typescript
+import { deployTIP20 } from 'tempo.ts'
+
+const token = await deployTIP20({
+  name: 'My Dollar',
+  symbol: 'MYD',
+  decimals: 18,
+  initialSupply: 0n,
+  issuer: issuerAddress,
+})
+
+console.log('Token deployed:', token.address)
+```
+
+## Configuration Options
+
+```typescript
+const token = await deployTIP20({
+  name: 'My Dollar',
+  symbol: 'MYD',
+  decimals: 18,
+  
+  // Supply management
+  initialSupply: 1_000_000n * 10n ** 18n,
+  maxSupply: 10_000_000n * 10n ** 18n, // Optional cap
+  
+  // Issuer roles
+  issuer: issuerAddress,
+  minter: minterAddress,
+  pauser: pauserAddress,
+  
+  // Features
+  transferFee: 10, // 0.10% (in basis points)
+  feeRecipient: treasuryAddress,
+})
+```
+
+## Verify on Explorer
+
+After deployment, verify your contract on the Tempo Explorer:
+
+```bash
+npx tempo verify --address 0x... --network testnet
+```

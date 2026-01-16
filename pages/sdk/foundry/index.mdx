@@ -1,0 +1,47 @@
+---
+title: Foundry
+description: Smart contract development with Foundry
+---
+
+# Foundry
+
+Deploy and test contracts on Tempo with Foundry.
+
+## Installation
+
+```bash
+forge install tempoxyz/tempo-contracts
+```
+
+## Configuration
+
+```toml
+# foundry.toml
+[profile.tempo-testnet]
+eth_rpc_url = "https://rpc.testnet.tempo.xyz"
+chain_id = 111551119090
+```
+
+## Deploy
+
+```bash
+forge create src/MyContract.sol:MyContract \
+  --rpc-url https://rpc.testnet.tempo.xyz \
+  --private-key $PRIVATE_KEY
+```
+
+## Testing
+
+```solidity
+// test/MyContract.t.sol
+import {Test} from "forge-std/Test.sol";
+import {ITIP20} from "tempo-contracts/interfaces/ITIP20.sol";
+
+contract MyContractTest is Test {
+    function testTransfer() public {
+        ITIP20 token = ITIP20(tokenAddress);
+        token.transfer(recipient, 1000e18);
+        assertEq(token.balanceOf(recipient), 1000e18);
+    }
+}
+```

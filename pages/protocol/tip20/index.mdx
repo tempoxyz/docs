@@ -1,0 +1,50 @@
+---
+title: TIP-20 Token Standard
+description: Tempo's native token standard for stablecoins
+---
+
+# TIP-20 Token Standard
+
+TIP-20 extends ERC-20 with issuer controls and compliance features.
+
+## Overview
+
+TIP-20 tokens are fully ERC-20 compatible while adding:
+
+| Feature | Description |
+|---------|-------------|
+| Minting | Issuers can create new tokens |
+| Burning | Issuers can destroy tokens |
+| Freezing | Temporarily restrict transfers |
+| Recovery | Recover tokens from frozen accounts |
+| Transfer Fees | Optional percentage fee on transfers |
+| Holder Rewards | Distribute yield to token holders |
+
+## Interface
+
+```solidity
+interface ITIP20 is IERC20 {
+    // Issuer functions
+    function mint(address to, uint256 amount) external;
+    function burn(address from, uint256 amount) external;
+    function freeze(address account) external;
+    function unfreeze(address account) external;
+    function recover(address from, address to, uint256 amount) external;
+    
+    // Fee functions
+    function setTransferFee(uint256 basisPoints) external;
+    function transferFee() external view returns (uint256);
+    function feeRecipient() external view returns (address);
+    
+    // Reward functions
+    function distributeRewards(uint256 amount) external;
+    function claimableRewards(address account) external view returns (uint256);
+    function claimRewards() external;
+}
+```
+
+## Learn More
+
+- [TIP-20 Rewards](/protocol/tip20-rewards) - Holder reward distribution
+- [TIP-403 Policies](/protocol/tip403) - Compliance policies
+- [Create a Stablecoin](/guide/issuance/create-a-stablecoin) - Deploy your token

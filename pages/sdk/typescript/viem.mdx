@@ -1,0 +1,55 @@
+---
+title: Viem Integration
+description: Use tempo.ts with viem
+---
+
+# Viem Integration
+
+`tempo.ts` extends viem with Tempo-specific actions.
+
+## Setup
+
+```typescript
+import { createPublicClient, createWalletClient, http } from 'viem'
+import { tempoTestnet } from 'tempo.ts/chains'
+import { tempoActions } from 'tempo.ts/viem'
+
+const publicClient = createPublicClient({
+  chain: tempoTestnet,
+  transport: http(),
+}).extend(tempoActions())
+
+const walletClient = createWalletClient({
+  chain: tempoTestnet,
+  transport: http(),
+}).extend(tempoActions())
+```
+
+## Read Operations
+
+```typescript
+// Get token info
+const tokenInfo = await publicClient.getTIP20({
+  address: tokenAddress,
+})
+
+// Get fee quote
+const fee = await publicClient.estimateTempoFee({
+  transaction: tx,
+  feeToken: usdcAddress,
+})
+```
+
+## Write Operations
+
+```typescript
+// Send Tempo transaction
+const hash = await walletClient.sendTempoTransaction({
+  to: recipient,
+  data: calldata,
+  feeToken: usdcAddress,
+})
+
+// Wait for confirmation
+const receipt = await publicClient.waitForTransactionReceipt({ hash })
+```

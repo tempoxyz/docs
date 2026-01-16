@@ -1,0 +1,50 @@
+---
+title: Remittances
+description: Cross-border payments with Tempo
+---
+
+# Remittances
+
+Send money across borders with stablecoins on Tempo.
+
+## The Problem
+
+Traditional remittances are:
+- Expensive (5-10% fees)
+- Slow (3-5 business days)
+- Limited hours (bank availability)
+- Opaque (hidden fees)
+
+## The Solution
+
+Tempo enables:
+- **Low fees** - Fractions of a cent
+- **Instant** - Sub-second settlement
+- **24/7** - Always available
+- **Transparent** - On-chain verification
+
+## How It Works
+
+1. Sender converts local currency to stablecoin
+2. Transfer stablecoin on Tempo (instant, <$0.01)
+3. Recipient converts to local currency
+
+## Integration
+
+```typescript
+import { useTempoTransaction } from 'tempo.ts/hooks'
+
+function RemittanceWidget() {
+  const { send } = useTempoTransaction()
+  
+  const sendRemittance = async (recipient: string, amount: bigint) => {
+    await send({
+      to: stablecoinAddress,
+      data: encodeTransfer(recipient, amount),
+      feeToken: stablecoinAddress,
+    })
+  }
+  
+  return <RemittanceForm onSubmit={sendRemittance} />
+}
+```

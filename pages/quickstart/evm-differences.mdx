@@ -1,0 +1,39 @@
+---
+title: EVM Differences
+description: How Tempo differs from standard EVM chains
+---
+
+# EVM Differences
+
+Tempo is EVM-compatible with some enhancements.
+
+## Compatible Features
+
+All standard EVM operations work on Tempo:
+- Smart contract deployment
+- Token standards (ERC-20, ERC-721, ERC-1155)
+- Standard RPC methods
+- Existing tooling (Foundry, Hardhat)
+
+## Tempo Extensions
+
+### Tempo Transactions
+
+New transaction type with:
+- Fee token selection
+- Nonce spaces for parallelism
+- Transaction sponsorship
+
+### Precompiles
+
+Additional precompiled contracts:
+| Address | Name | Description |
+|---------|------|-------------|
+| 0x0...100 | TIP20Factory | Deploy TIP-20 tokens |
+| 0x0...101 | FeeAMM | Fee token exchange |
+| 0x0...102 | StablecoinDEX | Stablecoin trading |
+
+### Block Time
+
+- Target: 1 second blocks
+- Finality: Single slot

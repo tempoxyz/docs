@@ -1,0 +1,58 @@
+---
+title: Fees & Fee AMM
+description: Transaction fees and the Fee AMM on Tempo
+---
+
+# Fees & Fee AMM
+
+Tempo's fee system enables stablecoin fee payments through an automated market maker.
+
+## Fee Payment
+
+Users can pay transaction fees in:
+- **ETH** - Standard EVM fee payment
+- **Stablecoins** - Any TIP-20 token via the Fee AMM
+
+## Fee AMM
+
+The Fee AMM automatically converts stablecoin fees to ETH:
+
+1. User submits transaction with stablecoin fee token
+2. Fee AMM quotes the ETH equivalent
+3. User's stablecoins are swapped for ETH
+4. ETH pays the block producer
+
+```
+User (USDC) → Fee AMM → ETH → Block Producer
+```
+
+## Fee Calculation
+
+```typescript
+import { estimateFee } from 'tempo.ts'
+
+const fee = await estimateFee({
+  transaction: tx,
+  feeToken: usdcAddress,
+})
+
+// fee.amount - Amount in fee token
+// fee.ethEquivalent - ETH value
+// fee.exchangeRate - Current rate
+```
+
+## Providing Fee Liquidity
+
+LPs can provide ETH/stablecoin liquidity to the Fee AMM:
+
+```typescript
+import { addFeeLiquidity } from 'tempo.ts/dex'
+
+await addFeeLiquidity({
+  token: usdcAddress,
+  ethAmount: parseEther('1'),
+  tokenAmount: parseUnits('2000', 6),
+})
+```
+
+See [Fee Liquidity](/guide/stablecoin-dex/fee-liquidity) for details.

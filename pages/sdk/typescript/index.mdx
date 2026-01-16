@@ -1,0 +1,65 @@
+---
+title: TypeScript SDK
+description: Build on Tempo with TypeScript
+---
+
+# TypeScript SDK
+
+The `tempo.ts` package provides TypeScript utilities for Tempo.
+
+## Installation
+
+```bash
+npm install tempo.ts viem wagmi
+```
+
+## Quick Start
+
+```typescript
+import { createTempoClient } from 'tempo.ts'
+import { tempoTestnet } from 'tempo.ts/chains'
+
+const client = createTempoClient({
+  chain: tempoTestnet,
+})
+
+// Read token balance
+const balance = await client.readContract({
+  address: tokenAddress,
+  abi: erc20Abi,
+  functionName: 'balanceOf',
+  args: [userAddress],
+})
+```
+
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| `tempo.ts` | Core client and utilities |
+| `tempo.ts/chains` | Chain definitions |
+| `tempo.ts/hooks` | React hooks for Wagmi |
+| `tempo.ts/abi` | Contract ABIs |
+| `tempo.ts/server` | Server-side utilities |
+
+## Learn More
+
+import { Card } from '../../components/Card'
+
+<Card.Container>
+  <Card.Link
+    title="Viem Integration"
+    description="Low-level client usage"
+    href="/sdk/typescript/viem"
+  />
+  <Card.Link
+    title="Wagmi Integration"
+    description="React hooks and providers"
+    href="/sdk/typescript/wagmi"
+  />
+  <Card.Link
+    title="Server Handler"
+    description="Backend transaction handling"
+    href="/sdk/typescript/server-handler"
+  />
+</Card.Container>

@@ -1,0 +1,92 @@
+@import 'tailwindcss';
+
+:root {
+  --vocs-color_background: #0a0a0a;
+  --vocs-color_backgroundDark: #050505;
+  --vocs-color_text: #fafafa;
+  --vocs-color_text2: #a1a1aa;
+  --vocs-color_text3: #71717a;
+  --vocs-color_border: #27272a;
+  --vocs-color_borderAccent: #3f3f46;
+  
+  /* Accent colors */
+  --vocs-color_accent: #22c55e;
+  --vocs-color_accentHover: #16a34a;
+  --vocs-color_accentText: #ffffff;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--vocs-color_backgroundDark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--vocs-color_border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--vocs-color_borderAccent);
+}
+
+/* Code blocks */
+.vocs_CodeBlock {
+  background: var(--vocs-color_backgroundDark) !important;
+}
+
+/* Banner styling */
+.vocs_Banner {
+  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+}
+
+/* Card grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+/* Demo container */
+.demo-container {
+  border: 1px solid var(--vocs-color_border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  background: var(--vocs-color_backgroundDark);
+}
+
+.demo-container h3 {
+  margin-top: 0;
+}
+
+/* Step indicator */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--vocs-color_accent);
+  color: var(--vocs-color_accentText);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Tabs styling */
+.tabs-container [data-state="active"] {
+  border-color: var(--vocs-color_accent);
+}

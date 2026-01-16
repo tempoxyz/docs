@@ -1,0 +1,47 @@
+---
+title: Create & Use Accounts
+description: Account options for Tempo applications
+---
+
+# Create & Use Accounts
+
+Tempo supports multiple account types for different use cases.
+
+## Account Types
+
+### Smart Accounts (Recommended)
+
+Smart accounts with passkey authentication provide:
+- Passwordless login with biometrics
+- Social recovery options
+- Gas abstraction
+- Batch transactions
+
+### EOA Wallets
+
+Traditional Ethereum wallets work on Tempo:
+- MetaMask, Rainbow, Coinbase Wallet
+- Hardware wallets
+- Any EVM-compatible wallet
+
+## Quick Start
+
+import { Card } from '../../components/Card'
+
+<Card.Container>
+  <Card.Link
+    title="Embed Passkey Accounts"
+    description="Add biometric authentication to your app"
+    href="/guide/use-accounts/embed-passkey-accounts"
+  />
+  <Card.Link
+    title="Use Existing Wallets"
+    description="Connect standard Ethereum wallets"
+    href="/guide/use-accounts/use-existing-wallets"
+  />
+  <Card.Link
+    title="Add Funds"
+    description="Fund accounts on testnet and mainnet"
+    href="/guide/use-accounts/add-funds"
+  />
+</Card.Container>

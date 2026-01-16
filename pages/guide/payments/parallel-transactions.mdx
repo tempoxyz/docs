@@ -1,0 +1,58 @@
+---
+title: Parallel Transactions
+description: Execute multiple transactions simultaneously
+---
+
+# Parallel Transactions
+
+Tempo supports parallel transaction execution using nonce spaces.
+
+## Why Parallel Transactions?
+
+Standard Ethereum requires sequential nonces, blocking parallel sends. Tempo's nonce spaces allow:
+
+- Multiple pending transactions simultaneously
+- No waiting for confirmation before next send
+- Higher throughput for batch operations
+
+## Using Nonce Spaces
+
+```typescript
+import { useParallelTransactions } from 'tempo.ts/hooks'
+
+function ParallelPayments() {
+  const { sendParallel, pending } = useParallelTransactions()
+  
+  const sendMultiple = async () => {
+    // All three execute in parallel
+    await Promise.all([
+      sendParallel({ to: alice, data: transfer1, nonceSpace: 0 }),
+      sendParallel({ to: bob, data: transfer2, nonceSpace: 1 }),
+      sendParallel({ to: charlie, data: transfer3, nonceSpace: 2 }),
+    ])
+  }
+  
+  return (
+    <button onClick={sendMultiple}>
+      Send 3 Payments ({pending.length} pending)
+    </button>
+  )
+}
+```
+
+## Auto Nonce Management
+
+Let the SDK manage nonce spaces automatically:
+
+```typescript
+import { createParallelClient } from 'tempo.ts'
+
+const client = createParallelClient({
+  maxParallel: 10, // Up to 10 concurrent transactions
+})
+
+// SDK automatically assigns nonce spaces
+await Promise.all(
+  payments.map(p => client.send(p))
+)
+```

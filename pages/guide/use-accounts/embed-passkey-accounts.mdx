@@ -1,0 +1,63 @@
+---
+title: Embed Passkey Accounts
+description: Add biometric authentication with passkeys
+---
+
+# Embed Passkey Accounts
+
+Create secure, passwordless accounts using passkeys (WebAuthn).
+
+## Installation
+
+```bash
+npm install tempo.ts wagmi viem
+```
+
+## Setup
+
+```typescript
+import { createConfig, http } from 'wagmi'
+import { tempoTestnet } from 'tempo.ts/chains'
+import { webauthnConnector } from 'tempo.ts/connectors'
+
+export const config = createConfig({
+  chains: [tempoTestnet],
+  connectors: [
+    webauthnConnector(),
+  ],
+  transports: {
+    [tempoTestnet.id]: http(),
+  },
+})
+```
+
+## Create Account
+
+```typescript
+import { useConnect } from 'wagmi'
+import { webauthnConnector } from 'tempo.ts/connectors'
+
+function CreateAccount() {
+  const { connect } = useConnect()
+  
+  return (
+    <button onClick={() => connect({ connector: webauthnConnector() })}>
+      Create Account with Passkey
+    </button>
+  )
+}
+```
+
+## How It Works
+
+1. User clicks "Create Account"
+2. Browser prompts for biometric verification (Face ID, Touch ID, etc.)
+3. A new smart account is deployed
+4. The passkey becomes the account's authentication method
+
+## Security
+
+Passkeys are:
+- Phishing-resistant (bound to domain)
+- Hardware-backed (Secure Enclave / TPM)
+- Never leave the device

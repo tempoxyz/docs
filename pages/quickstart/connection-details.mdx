@@ -1,0 +1,63 @@
+---
+title: Connection Details
+description: RPC endpoints and chain configuration for Tempo
+---
+
+# Connection Details
+
+## Testnet
+
+| Property | Value |
+|----------|-------|
+| Network Name | Tempo Testnet |
+| Chain ID | 111551119090 |
+| RPC URL | https://rpc.testnet.tempo.xyz |
+| WebSocket | wss://rpc.testnet.tempo.xyz |
+| Explorer | https://explorer.testnet.tempo.xyz |
+| Native Currency | ETH |
+
+## Configure Your Wallet
+
+Add Tempo Testnet to your wallet using these settings:
+
+:::code-group
+
+```typescript [viem]
+import { defineChain } from 'viem'
+
+export const tempoTestnet = defineChain({
+  id: 111551119090,
+  name: 'Tempo Testnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Ether',
+    symbol: 'ETH',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://rpc.testnet.tempo.xyz'],
+      webSocket: ['wss://rpc.testnet.tempo.xyz'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Tempo Explorer',
+      url: 'https://explorer.testnet.tempo.xyz',
+    },
+  },
+})
+```
+
+```typescript [wagmi]
+import { tempoTestnet } from 'tempo.ts/chains'
+import { createConfig, http } from 'wagmi'
+
+export const config = createConfig({
+  chains: [tempoTestnet],
+  transports: {
+    [tempoTestnet.id]: http(),
+  },
+})
+```
+
+:::

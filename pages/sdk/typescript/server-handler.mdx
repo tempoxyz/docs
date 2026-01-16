@@ -1,0 +1,72 @@
+---
+title: Server Handler
+description: Backend transaction handling
+---
+
+# Server Handler
+
+Handle Tempo transactions server-side for sponsorship and batching.
+
+## Installation
+
+```bash
+npm install tempo.ts
+```
+
+## Transaction Sponsorship
+
+```typescript
+import { createSponsor } from 'tempo.ts/server'
+
+const sponsor = createSponsor({
+  privateKey: process.env.SPONSOR_PRIVATE_KEY,
+  rpcUrl: 'https://rpc.testnet.tempo.xyz',
+})
+
+// In your API handler
+export async function POST(req: Request) {
+  const { transaction, userSignature } = await req.json()
+  
+  const result = await sponsor.sponsorAndSubmit({
+    transaction,
+    userSignature,
+  })
+  
+  return Response.json({ hash: result.hash })
+}
+```
+
+## Webhook Handler
+
+```typescript
+import { createWebhookHandler } from 'tempo.ts/server'
+
+const handler = createWebhookHandler({
+  secret: process.env.WEBHOOK_SECRET,
+  onTransfer: async (event) => {
+    console.log('Transfer:', event.from, '->', event.to, event.amount)
+  },
+  onMint: async (event) => {
+    console.log('Mint:', event.to, event.amount)
+  },
+})
+
+export const POST = handler
+```
+
+## Batch Operations
+
+```typescript
+import { createBatchClient } from 'tempo.ts/server'
+
+const batch = createBatchClient({
+  privateKey: process.env.OPERATOR_KEY,
+})
+
+// Execute multiple operations atomically
+await batch.execute([
+  { type: 'transfer', token, to: alice, amount: 100n },
+  { type: 'transfer', token, to: bob, amount: 200n },
+  { type: 'mint', token, to: treasury, amount: 1000n },
+])
+```

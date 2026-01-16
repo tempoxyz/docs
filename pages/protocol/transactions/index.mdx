@@ -1,0 +1,70 @@
+---
+title: Tempo Transactions
+description: Tempo's enhanced transaction format
+---
+
+# Tempo Transactions
+
+Tempo Transactions extend EVM transactions with additional capabilities.
+
+## Transaction Types
+
+| Type | Description |
+|------|-------------|
+| Legacy | Standard EVM transactions |
+| EIP-1559 | Priority fee transactions |
+| Tempo | Enhanced with fee tokens, sponsorship |
+
+## Tempo Transaction Format
+
+```typescript
+interface TempoTransaction {
+  // Standard fields
+  to: Address
+  value: bigint
+  data: Hex
+  
+  // Tempo extensions
+  feeToken?: Address      // Token to pay fees in
+  sponsor?: Address       // Address paying the fee
+  nonceSpace?: number     // Parallel execution space
+}
+```
+
+## Creating Tempo Transactions
+
+```typescript
+import { createTempoTransaction } from 'tempo.ts'
+
+const tx = createTempoTransaction({
+  to: contractAddress,
+  data: calldata,
+  feeToken: usdcAddress,
+})
+```
+
+## Signing
+
+Tempo transactions use EIP-712 typed data signing:
+
+```typescript
+import { signTempoTransaction } from 'tempo.ts'
+
+const signature = await signTempoTransaction({
+  transaction: tx,
+  signer: wallet,
+})
+```
+
+## Execution
+
+Submit to the Tempo RPC:
+
+```typescript
+import { sendTempoTransaction } from 'tempo.ts'
+
+const hash = await sendTempoTransaction({
+  transaction: tx,
+  signature,
+})
+```

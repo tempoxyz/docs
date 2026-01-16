@@ -1,0 +1,44 @@
+---
+title: Stablecoin DEX
+description: Tempo's built-in stablecoin exchange
+---
+
+# Stablecoin DEX
+
+Tempo includes a native DEX optimized for stablecoin trading.
+
+## Architecture
+
+### AMM Pools
+Constant-product pools for instant swaps:
+- Low slippage for stable pairs
+- Automatic price discovery
+- Fee revenue for LPs
+
+### Orderbook
+Limit orders for precise execution:
+- Maker/taker fees
+- Partial fills
+- Order cancellation
+
+## Swap Execution
+
+```
+User → Router → Best Price Source → Settlement
+```
+
+The router automatically finds the best price between AMM and orderbook.
+
+## Pool Types
+
+| Pool | Description |
+|------|-------------|
+| StableSwap | Optimized for 1:1 pegged assets |
+| Weighted | Variable weight pools |
+| Fee Pool | ETH/stablecoin for fee payment |
+
+## Integration
+
+See the SDK guides:
+- [Swap Stablecoins](/guide/stablecoin-dex/swap-stablecoins)
+- [Provide Liquidity](/guide/stablecoin-dex/provide-liquidity)

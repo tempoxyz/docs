@@ -1,0 +1,71 @@
+---
+title: Mint & Burn
+description: Manage stablecoin supply
+---
+
+# Mint & Burn
+
+Control your stablecoin's circulating supply.
+
+## Minting
+
+Create new tokens and assign to an address:
+
+```typescript
+import { useTIP20 } from 'tempo.ts/hooks'
+
+function MintTokens() {
+  const { mint, isPending } = useTIP20(tokenAddress)
+  
+  const handleMint = () => {
+    mint({
+      to: recipientAddress,
+      amount: 1_000_000n * 10n ** 18n, // 1M tokens
+    })
+  }
+  
+  return (
+    <button onClick={handleMint} disabled={isPending}>
+      Mint 1,000,000 Tokens
+    </button>
+  )
+}
+```
+
+## Burning
+
+Remove tokens from circulation:
+
+```typescript
+function BurnTokens() {
+  const { burn } = useTIP20(tokenAddress)
+  
+  const handleBurn = () => {
+    burn({
+      from: holderAddress,
+      amount: 500_000n * 10n ** 18n,
+    })
+  }
+  
+  return <button onClick={handleBurn}>Burn 500,000 Tokens</button>
+}
+```
+
+## Supply Tracking
+
+Monitor total supply in real-time:
+
+```typescript
+import { useReadContract } from 'wagmi'
+import { tip20Abi } from 'tempo.ts/abi'
+
+function SupplyDisplay() {
+  const { data: totalSupply } = useReadContract({
+    address: tokenAddress,
+    abi: tip20Abi,
+    functionName: 'totalSupply',
+  })
+  
+  return <div>Total Supply: {formatUnits(totalSupply, 18)}</div>
+}
+```

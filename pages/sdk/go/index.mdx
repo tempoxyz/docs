@@ -1,0 +1,49 @@
+---
+title: Go SDK
+description: Build on Tempo with Go
+---
+
+# Go SDK
+
+Server-side integration with the Tempo Go client.
+
+## Installation
+
+```bash
+go get github.com/tempoxyz/tempo-go
+```
+
+## Quick Start
+
+```go
+package main
+
+import (
+    "github.com/tempoxyz/tempo-go"
+    "github.com/tempoxyz/tempo-go/chains"
+)
+
+func main() {
+    client, err := tempo.NewClient(tempo.Config{
+        Chain: chains.TempoTestnet,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    // Get block number
+    blockNum, err := client.BlockNumber(context.Background())
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Println("Block:", blockNum)
+}
+```
+
+## Features
+
+- Full EVM compatibility via go-ethereum
+- Tempo transaction support
+- TIP-20 token interactions
+- Fee AMM integration

@@ -1,0 +1,57 @@
+---
+title: TIP-403 Policies
+description: Compliance policies for TIP-20 tokens
+---
+
+# TIP-403 Policies
+
+TIP-403 defines compliance policies that can be attached to TIP-20 tokens.
+
+## Policy Types
+
+| Policy | Description |
+|--------|-------------|
+| Allowlist | Only approved addresses can hold tokens |
+| Blocklist | Block specific addresses |
+| Transfer Limits | Maximum transfer amounts |
+| Time Locks | Lock tokens for a period |
+
+## Attach Policy
+
+```typescript
+import { attachPolicy } from 'tempo.ts'
+
+await attachPolicy({
+  token: tokenAddress,
+  policy: allowlistPolicyAddress,
+})
+```
+
+## Create Allowlist Policy
+
+```typescript
+import { createAllowlistPolicy } from 'tempo.ts'
+
+const policy = await createAllowlistPolicy({
+  admin: adminAddress,
+  initialAllowlist: [address1, address2],
+})
+```
+
+## Manage Allowlist
+
+```typescript
+import { addToAllowlist, removeFromAllowlist } from 'tempo.ts'
+
+// Add address
+await addToAllowlist({
+  policy: policyAddress,
+  address: newAddress,
+})
+
+// Remove address
+await removeFromAllowlist({
+  policy: policyAddress,
+  address: removedAddress,
+})
+```

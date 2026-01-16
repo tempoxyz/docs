@@ -1,0 +1,37 @@
+---
+title: Blockspace
+description: How Tempo organizes block space
+---
+
+# Blockspace
+
+Tempo optimizes block space for stablecoin transactions.
+
+## Block Structure
+
+| Component | Description |
+|-----------|-------------|
+| Header | Block metadata |
+| Transactions | Ordered transaction list |
+| State Root | Merkle root of state |
+| Receipts Root | Merkle root of receipts |
+
+## Block Time
+
+- Target: 1 second
+- Maximum gas: 30M
+- Finality: Single slot
+
+## Transaction Ordering
+
+1. Priority by fee
+2. Parallel execution where possible
+3. Deterministic ordering
+
+## Gas Pricing
+
+```
+Base Fee + Priority Fee = Total Fee
+```
+
+The base fee adjusts dynamically based on demand.

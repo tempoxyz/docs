@@ -1,0 +1,64 @@
+---
+title: Fee Payment Options
+description: Choose how to pay transaction fees on Tempo
+---
+
+# Fee Payment Options
+
+Tempo offers flexible fee payment options.
+
+## Pay in ETH (Default)
+
+Standard EVM transactions pay fees in ETH:
+
+```typescript
+const { writeContract } = useWriteContract()
+
+writeContract({
+  address: tokenAddress,
+  abi: erc20Abi,
+  functionName: 'transfer',
+  args: [recipient, amount],
+  // Fee automatically paid in ETH
+})
+```
+
+## Pay in Stablecoins
+
+Use Tempo Transactions to pay fees in any supported stablecoin:
+
+```typescript
+import { useTempoTransaction } from 'tempo.ts/hooks'
+
+const { send } = useTempoTransaction()
+
+send({
+  to: tokenAddress,
+  data: transferData,
+  feeToken: usdcAddress, // Pay fee in USDC
+})
+```
+
+## Supported Fee Tokens
+
+| Token | Address |
+|-------|---------|
+| AlphaUSD | 0x... |
+| BetaUSD | 0x... |
+| PathUSD | 0x... |
+
+## Fee Estimation
+
+Estimate fees before sending:
+
+```typescript
+import { estimateTempoFee } from 'tempo.ts'
+
+const fee = await estimateTempoFee({
+  to: tokenAddress,
+  data: transferData,
+  feeToken: usdcAddress,
+})
+
+console.log('Fee:', fee.amount, fee.token)
+```

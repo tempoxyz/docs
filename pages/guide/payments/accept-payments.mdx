@@ -1,0 +1,80 @@
+---
+title: Accept Payments
+description: Receive stablecoin payments in your app
+---
+
+# Accept Payments
+
+Monitor and receive stablecoin payments.
+
+## Watch for Incoming Transfers
+
+```typescript
+import { useWatchContractEvent } from 'wagmi'
+import { erc20Abi } from 'viem'
+
+function PaymentMonitor({ merchantAddress }: { merchantAddress: string }) {
+  useWatchContractEvent({
+    address: '0x...', // Token address
+    abi: erc20Abi,
+    eventName: 'Transfer',
+    args: {
+      to: merchantAddress,
+    },
+    onLogs(logs) {
+      for (const log of logs) {
+        console.log('Payment received:', {
+          from: log.args.from,
+          amount: log.args.value,
+        })
+      }
+    },
+  })
+  
+  return <div>Listening for payments...</div>
+}
+```
+
+## Generate Payment Links
+
+Create payment links for easy checkout:
+
+```typescript
+function generatePaymentLink({
+  recipient,
+  token,
+  amount,
+}: {
+  recipient: string
+  token: string
+  amount: bigint
+}) {
+  const params = new URLSearchParams({
+    to: recipient,
+    token,
+    amount: amount.toString(),
+  })
+  return `https://pay.tempo.xyz?${params}`
+}
+```
+
+## Webhooks (Server-Side)
+
+For production apps, use webhooks to reliably track payments:
+
+```typescript
+// server.ts
+import { createPaymentWebhook } from 'tempo.ts/server'
+
+const webhook = createPaymentWebhook({
+  secret: process.env.WEBHOOK_SECRET,
+  onPayment: async (payment) => {
+    await db.orders.update({
+      where: { id: payment.orderId },
+      data: { status: 'paid' },
+    })
+  },
+})
+
+app.post('/webhooks/tempo', webhook.handler)
+```

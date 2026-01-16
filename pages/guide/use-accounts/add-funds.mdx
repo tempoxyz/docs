@@ -1,0 +1,42 @@
+---
+title: Add Funds
+description: Fund accounts on Tempo
+---
+
+# Add Funds
+
+## Testnet
+
+### Faucet
+
+Visit the [Tempo Faucet](https://faucet.testnet.tempo.xyz) to get testnet ETH.
+
+### Mint Test Tokens
+
+Use the SDK to mint test stablecoins:
+
+```typescript
+import { getTestToken, mintTestToken } from 'tempo.ts/testing'
+
+// Mint 1000 AlphaUSD
+await mintTestToken({
+  token: 'AlphaUSD',
+  amount: 1000n * 10n ** 18n,
+  to: address,
+})
+```
+
+## Mainnet
+
+### Bridge Assets
+
+Bridge ETH and stablecoins from Ethereum:
+
+1. Visit the [Tempo Bridge](https://bridge.tempo.xyz)
+2. Connect your wallet
+3. Select the asset to bridge
+4. Confirm the transaction
+
+### Direct Deposits
+
+For institutional users, contact the Tempo team for direct deposit options.

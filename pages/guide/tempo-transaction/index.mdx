@@ -1,0 +1,50 @@
+---
+title: Use Tempo Transactions
+description: Learn about Tempo's native transaction format
+---
+
+# Use Tempo Transactions
+
+Tempo Transactions are a new transaction format that enables:
+
+- **Gas-free stablecoin transfers** - Pay fees in stablecoins instead of ETH
+- **Parallel execution** - Multiple transactions can execute simultaneously
+- **Sponsored transactions** - Third parties can pay fees for users
+
+## How It Works
+
+Tempo Transactions wrap standard EVM calls with additional metadata:
+
+1. **Fee Token** - Specify which token pays the transaction fee
+2. **Nonce Space** - Enable parallel transactions with separate nonce tracks
+3. **Sponsor** - Optional address that pays the fee
+
+## Getting Started
+
+```typescript
+import { createTempoTransaction } from 'tempo.ts'
+
+const tx = createTempoTransaction({
+  to: '0x...',
+  value: 0n,
+  data: '0x...',
+  feeToken: '0x...', // Pay fees in this stablecoin
+})
+```
+
+## Learn More
+
+import { Card } from '../../components/Card'
+
+<Card.Container>
+  <Card.Link
+    title="Fee Payment Options"
+    description="Choose how to pay transaction fees"
+    href="/guide/payments/fee-payment-options"
+  />
+  <Card.Link
+    title="Parallel Transactions"
+    description="Execute multiple transactions at once"
+    href="/guide/payments/parallel-transactions"
+  />
+</Card.Container>

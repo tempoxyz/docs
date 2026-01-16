@@ -1,0 +1,63 @@
+---
+title: TIP-20 Rewards
+description: Distribute rewards to token holders
+---
+
+# TIP-20 Rewards
+
+TIP-20 tokens can distribute rewards to holders automatically.
+
+## How It Works
+
+1. Issuer deposits reward tokens
+2. Rewards accrue to all holders proportionally
+3. Holders claim rewards at any time
+
+## Enable Rewards
+
+```typescript
+import { enableRewards } from 'tempo.ts'
+
+await enableRewards({
+  token: tokenAddress,
+  rewardToken: usdcAddress, // Token used for rewards
+})
+```
+
+## Distribute Rewards
+
+```typescript
+import { distributeRewards } from 'tempo.ts'
+
+await distributeRewards({
+  token: tokenAddress,
+  amount: parseUnits('10000', 6), // 10,000 USDC
+})
+```
+
+## Claim Rewards
+
+```typescript
+import { claimRewards } from 'tempo.ts'
+
+const rewards = await claimRewards({
+  token: tokenAddress,
+  holder: userAddress,
+})
+
+console.log('Claimed:', formatUnits(rewards, 6), 'USDC')
+```
+
+## View Pending Rewards
+
+```typescript
+import { useReadContract } from 'wagmi'
+import { tip20Abi } from 'tempo.ts/abi'
+
+const { data: pending } = useReadContract({
+  address: tokenAddress,
+  abi: tip20Abi,
+  functionName: 'claimableRewards',
+  args: [userAddress],
+})
+```

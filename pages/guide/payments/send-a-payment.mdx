@@ -1,0 +1,89 @@
+---
+title: Send a Payment
+description: Transfer stablecoins on Tempo
+---
+
+# Send a Payment
+
+Send stablecoins with a simple transfer.
+
+## Basic Transfer
+
+```typescript
+import { useWriteContract } from 'wagmi'
+import { erc20Abi } from 'viem'
+
+function SendPayment() {
+  const { writeContract, isPending } = useWriteContract()
+  
+  const send = () => {
+    writeContract({
+      address: '0x...', // Token address
+      abi: erc20Abi,
+      functionName: 'transfer',
+      args: [
+        '0x...', // Recipient
+        1000n * 10n ** 18n, // Amount (1000 tokens)
+      ],
+    })
+  }
+  
+  return (
+    <button onClick={send} disabled={isPending}>
+      {isPending ? 'Sending...' : 'Send 1000 USD'}
+    </button>
+  )
+}
+```
+
+## Pay Fees in Stablecoins
+
+Use Tempo Transactions to pay fees in stablecoins:
+
+```typescript
+import { useTempoTransaction } from 'tempo.ts/hooks'
+
+function SendWithStablecoinFee() {
+  const { send, isPending } = useTempoTransaction()
+  
+  const transfer = () => {
+    send({
+      to: '0x...', // Token address
+      data: encodeFunctionData({
+        abi: erc20Abi,
+        functionName: 'transfer',
+        args: ['0x...', 1000n * 10n ** 18n],
+      }),
+      feeToken: '0x...', // Pay fee in this stablecoin
+    })
+  }
+  
+  return (
+    <button onClick={transfer} disabled={isPending}>
+      Send (Fee in Stablecoin)
+    </button>
+  )
+}
+```
+
+## Batch Transfers
+
+Send multiple payments in one transaction:
+
+```typescript
+import { useBatchTransaction } from 'tempo.ts/hooks'
+
+function BatchPayments() {
+  const { sendBatch } = useBatchTransaction()
+  
+  const payAll = () => {
+    sendBatch([
+      { to: '0xAlice...', amount: 100n * 10n ** 18n },
+      { to: '0xBob...', amount: 200n * 10n ** 18n },
+      { to: '0xCharlie...', amount: 300n * 10n ** 18n },
+    ])
+  }
+  
+  return <button onClick={payAll}>Pay All Recipients</button>
+}
+```

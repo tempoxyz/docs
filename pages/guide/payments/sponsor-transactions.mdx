@@ -1,0 +1,65 @@
+---
+title: Sponsor Transactions
+description: Pay fees on behalf of your users
+---
+
+# Sponsor Transactions
+
+Let your users transact without holding ETH or paying fees themselves.
+
+## How Sponsorship Works
+
+1. User signs a transaction
+2. Your backend adds sponsorship signature
+3. You submit the sponsored transaction
+4. You pay the fee, user gets gas-free experience
+
+## Setup Sponsorship
+
+```typescript
+// server.ts
+import { createSponsor } from 'tempo.ts/server'
+
+const sponsor = createSponsor({
+  privateKey: process.env.SPONSOR_KEY,
+  maxFeePerTx: 0.01, // Max $0.01 per transaction
+})
+
+app.post('/api/sponsor', async (req, res) => {
+  const { transaction, signature } = req.body
+  
+  const sponsored = await sponsor.sponsorTransaction({
+    transaction,
+    userSignature: signature,
+  })
+  
+  res.json({ txHash: sponsored.hash })
+})
+```
+
+## Client Integration
+
+```typescript
+import { useSponsoredTransaction } from 'tempo.ts/hooks'
+
+function GaslessPayment() {
+  const { sendSponsored } = useSponsoredTransaction({
+    sponsorUrl: '/api/sponsor',
+  })
+  
+  return (
+    <button onClick={() => sendSponsored({
+      to: recipient,
+      data: transferData,
+    })}>
+      Send (Gas-Free)
+    </button>
+  )
+}
+```
+
+## Best Practices
+
+1. **Rate limit** - Prevent abuse by limiting sponsored transactions
+2. **Allowlist** - Only sponsor transactions to verified contracts
+3. **Monitor costs** - Track sponsorship expenses

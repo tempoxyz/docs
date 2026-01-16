@@ -1,0 +1,44 @@
+---
+title: Issue Stablecoins
+description: Create and manage stablecoins on Tempo
+---
+
+# Issue Stablecoins
+
+Tempo provides native stablecoin issuance with built-in compliance features.
+
+## TIP-20 Tokens
+
+TIP-20 is Tempo's native token standard, extending ERC-20 with:
+
+- **Issuer controls** - Mint, burn, freeze, and recover tokens
+- **Transfer fees** - Optional fees on transfers
+- **Holder rewards** - Distribute yield to token holders
+- **Compliance policies** - TIP-403 policy enforcement
+
+## Quick Start
+
+import { Card } from '../../components/Card'
+
+<Card.Container>
+  <Card.Link
+    title="Create a Stablecoin"
+    description="Deploy your first TIP-20 token"
+    href="/guide/issuance/create-a-stablecoin"
+  />
+  <Card.Link
+    title="Mint & Burn"
+    description="Manage token supply"
+    href="/guide/issuance/mint-and-burn"
+  />
+  <Card.Link
+    title="Set Fees"
+    description="Configure transfer fees"
+    href="/guide/issuance/set-fees"
+  />
+  <Card.Link
+    title="Enable Rewards"
+    description="Distribute yield to holders"
+    href="/guide/issuance/enable-rewards"
+  />
+</Card.Container>

@@ -1,0 +1,64 @@
+---
+title: Provide Liquidity
+description: Earn fees by providing liquidity
+---
+
+# Provide Liquidity
+
+Earn trading fees by providing liquidity to the DEX.
+
+## Add Liquidity
+
+```typescript
+import { useAddLiquidity } from 'tempo.ts/hooks'
+
+function AddLiquidityForm() {
+  const { addLiquidity, isPending } = useAddLiquidity()
+  
+  return (
+    <button
+      onClick={() => addLiquidity({
+        tokenA: alphaUsd,
+        tokenB: betaUsd,
+        amountA: parseUnits('10000', 18),
+        amountB: parseUnits('10000', 18),
+      })}
+      disabled={isPending}
+    >
+      Add Liquidity
+    </button>
+  )
+}
+```
+
+## Track Position
+
+```typescript
+import { useLiquidityPosition } from 'tempo.ts/hooks'
+
+function PositionDisplay() {
+  const { position, rewards } = useLiquidityPosition({
+    tokenA: alphaUsd,
+    tokenB: betaUsd,
+  })
+  
+  return (
+    <div>
+      <div>Your Liquidity: ${position.valueUsd}</div>
+      <div>Earned Fees: ${rewards.totalUsd}</div>
+    </div>
+  )
+}
+```
+
+## Remove Liquidity
+
+```typescript
+const { removeLiquidity } = useRemoveLiquidity()
+
+await removeLiquidity({
+  tokenA: alphaUsd,
+  tokenB: betaUsd,
+  percentage: 100, // Remove all
+})
+```

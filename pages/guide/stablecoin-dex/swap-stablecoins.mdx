@@ -1,0 +1,54 @@
+---
+title: Swap Stablecoins
+description: Exchange stablecoins on the Tempo DEX
+---
+
+# Swap Stablecoins
+
+Swap between stablecoins with minimal slippage.
+
+## Get Quote
+
+```typescript
+import { getSwapQuote } from 'tempo.ts/dex'
+
+const quote = await getSwapQuote({
+  tokenIn: alphaUsdAddress,
+  tokenOut: betaUsdAddress,
+  amountIn: 1000n * 10n ** 18n,
+})
+
+console.log('Output:', formatUnits(quote.amountOut, 18))
+console.log('Price Impact:', quote.priceImpact)
+```
+
+## Execute Swap
+
+```typescript
+import { useSwap } from 'tempo.ts/hooks'
+
+function SwapWidget() {
+  const { swap, quote, isPending } = useSwap()
+  
+  return (
+    <div>
+      <div>You receive: {formatUnits(quote.amountOut, 18)}</div>
+      <button 
+        onClick={() => swap({
+          tokenIn: alphaUsd,
+          tokenOut: betaUsd,
+          amountIn: parseUnits('1000', 18),
+          slippage: 0.5, // 0.5% max slippage
+        })}
+        disabled={isPending}
+      >
+        Swap
+      </button>
+    </div>
+  )
+}
+```
+
+## Supported Pairs
+
+All TIP-20 stablecoins can be traded against each other through the Fee AMM.
