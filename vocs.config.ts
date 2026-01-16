@@ -1,4 +1,3 @@
-import { ModuleResolutionKind } from 'typescript'
 import { defineConfig } from 'vocs/config'
 
 const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined
@@ -622,7 +621,8 @@ export default defineConfig({
   twoslash: {
     twoslashOptions: {
       compilerOptions: {
-        moduleResolution: ModuleResolutionKind.Bundler,
+        // ModuleResolutionKind.Bundler = 100
+        moduleResolution: 100,
       },
     },
   },
