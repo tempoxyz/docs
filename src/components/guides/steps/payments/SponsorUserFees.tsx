@@ -14,11 +14,10 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
   const [memo, setMemo] = React.useState<string>('')
   const [expanded, setExpanded] = React.useState(false)
 
-  const { data: userBalance, refetch: userBalanceRefetch } =
-    Hooks.token.useGetBalance({
-      account: address,
-      token: alphaUsd,
-    })
+  const { data: userBalance, refetch: userBalanceRefetch } = Hooks.token.useGetBalance({
+    account: address,
+    token: alphaUsd,
+  })
 
   const sendPayment = Hooks.token.useTransferSync({
     mutation: {
@@ -62,24 +61,18 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             Cancel
           </Button>
         ) : (
           <Button
-            variant={
-              active
-                ? sendPayment.isSuccess
-                  ? 'default'
-                  : 'accent'
-                : 'default'
-            }
+            variant={active ? (sendPayment.isSuccess ? 'default' : 'accent') : 'default'}
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
           >
             Enter details
           </Button>
@@ -89,35 +82,28 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
       title="Send 100 AlphaUSD with fees sponsored by the testnet fee payer."
     >
       {expanded && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
-            <div className="mt-2 mb-3 p-3 rounded-lg bg-gray2 text-[13px] -tracking-[1%]">
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
+            <div className="mt-2 mb-3 rounded-lg bg-gray2 p-3 text-[13px] -tracking-[1%]">
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray10 font-medium">
-                    Payment Token: AlphaUSD
-                  </span>
-                  <span className="text-gray12">
-                    balance: {formatUnits(userBalance ?? 0n, 6)}
-                  </span>
+                  <span className="font-medium text-gray10">Payment Token: AlphaUSD</span>
+                  <span className="text-gray12">balance: {formatUnits(userBalance ?? 0n, 6)}</span>
                 </div>
               </div>
-              <div className="text-gray9 text-[12px] mt-2 pt-2 border-t border-gray4">
-                The testnet fee payer at https://sponsor.moderato.tempo.xyz will
-                pay the transaction fees.
+              <div className="mt-2 border-gray4 border-t pt-2 text-[12px] text-gray9">
+                The testnet fee payer at https://sponsor.moderato.tempo.xyz will pay the transaction
+                fees.
               </div>
             </div>
 
-            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-2">
-              <div className="flex flex-col flex-2">
-                <label
-                  className="text-[11px] -tracking-[1%] text-gray9"
-                  htmlFor="recipient"
-                >
+            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
+              <div className="flex flex-2 flex-col">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient">
                   Recipient address
                 </label>
                 <input
-                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
                   name="recipient"
@@ -126,15 +112,12 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
                   placeholder="0x..."
                 />
               </div>
-              <div className="flex flex-col flex-1">
-                <label
-                  className="text-[11px] -tracking-[1%] text-gray9"
-                  htmlFor="memo"
-                >
+              <div className="flex flex-1 flex-col">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
                   name="memo"
@@ -148,7 +131,7 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
                 disabled={!(active && isValidRecipient)}
                 onClick={handleTransfer}
                 type="button"
-                className="text-[14px] -tracking-[2%] font-normal"
+                className="font-normal text-[14px] -tracking-[2%]"
               >
                 {sendPayment.isPending ? 'Sending...' : 'Send'}
               </Button>

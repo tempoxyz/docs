@@ -35,9 +35,7 @@ export function PlaceOrder(props: DemoStepProps) {
       try {
         const {
           args: { orderId },
-        } = Actions.dex.place.extractEvent(
-          sendCalls.data.receipts[0].logs as Log[],
-        )
+        } = Actions.dex.place.extractEvent(sendCalls.data.receipts[0].logs as Log[])
         console.log('orderId', orderId)
         setData('orderId', orderId)
       } catch (error) {
@@ -72,9 +70,7 @@ export function PlaceOrder(props: DemoStepProps) {
       completed={sendCalls.isSuccess || !!orderId}
       actions={
         <Button
-          variant={
-            active ? (sendCalls.isSuccess ? 'default' : 'accent') : 'default'
-          }
+          variant={active ? (sendCalls.isSuccess ? 'default' : 'accent') : 'default'}
           disabled={!active}
           onClick={() => {
             sendCalls.sendCallsSync({
@@ -82,7 +78,7 @@ export function PlaceOrder(props: DemoStepProps) {
             })
           }}
           type="button"
-          className="text-[14px] -tracking-[2%] font-normal"
+          className="font-normal text-[14px] -tracking-[2%]"
         >
           {sendCalls.isPending ? 'Placing Order...' : 'Place Order'}
         </Button>
@@ -91,13 +87,9 @@ export function PlaceOrder(props: DemoStepProps) {
       title="Approve spend and place buy order for 100 AlphaUSD"
     >
       {sendCalls.isSuccess && sendCalls.data && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
-            <ExplorerLink
-              hash={
-                sendCalls.data.receipts?.at(0)?.transactionHash as `0x${string}`
-              }
-            />
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
+            <ExplorerLink hash={sendCalls.data.receipts?.at(0)?.transactionHash as `0x${string}`} />
           </div>
         </div>
       )}

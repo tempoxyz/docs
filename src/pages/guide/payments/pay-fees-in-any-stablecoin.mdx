@@ -5,8 +5,7 @@ showOutline: 1
 import * as Demo from '../../../components/guides/Demo.tsx'
 import * as Step from '../../../components/guides/steps'
 import { betaUsd, thetaUsd, pathUsd } from '../../../components/guides/tokens.ts'
-import { Cards } from 'vocs'
-import { Tabs, Tab } from '../../../components/Tabs.tsx'
+import { Cards, Card, Tabs, Tab } from 'vocs'
 
 # Pay Fees in Any Stablecoin
 
@@ -26,8 +25,8 @@ By the end of this guide you will be able to pay fees in any stablecoin on Tempo
 
 Using a custom fee token is as simple as passing a `feeToken` attribute to mutable actions like `useTransferSync`, `useSendTransactionSync`, and more.
 
-<Tabs className="-mt-2">
-  <Tab value="Wagmi">
+<Tabs stateKey="library" className="-mt-2">
+  <Tab title="Wagmi">
 
 <div className="h-6" />
 
@@ -50,7 +49,7 @@ sendPayment.mutate({
 ```
 
 </Tab>
-<Tab value="Viem">
+<Tab title="Viem">
 
 <div className="h-6" />
 
@@ -75,8 +74,8 @@ const receipt = await client.token.transferSync({
 
 ## Steps
 
-<Tabs>
-  <Tab value="Wagmi">
+<Tabs stateKey="library">
+  <Tab title="Wagmi">
 ::::steps
 
 ### Set up Wagmi & integrate accounts
@@ -252,7 +251,7 @@ Now that you have made a payment using a desired fee token, you can:
 ::::
 
   </Tab>
-  <Tab value="Viem">
+  <Tab title="Viem">
 
 ::::steps
 
@@ -339,8 +338,8 @@ const receipt = await client.token.transferSync({
 
 You can also set a persistent default fee token for an account, so users don't need to specify `feeToken` on every transaction. Learn more about fee token preferences [here](/protocol/fees/spec-fee#fee-token-preferences).
 
-<Tabs className="-mt-2">
-<Tab value="Wagmi">
+<Tabs stateKey="library" className="-mt-2">
+<Tab title="Wagmi">
 
 <div className="h-6" />
 
@@ -350,7 +349,7 @@ You can also set a persistent default fee token for an account, so users don't n
 ```
 
 </Tab>
-<Tab value="Viem">
+<Tab title="Viem">
 
 <div className="h-6" />
 
@@ -365,7 +364,7 @@ You can also set a persistent default fee token for an account, so users don't n
 ## Learning Resources
 
 <Cards>
-  <Cards.Card
+  <Card
     description="Learn more about transaction fees on Tempo"
     to="/protocol/fees"
     icon="lucide:coins"

@@ -1,4 +1,4 @@
-import { Tabs, Tab } from '../components/Tabs'
+import { Tabs, Tab } from 'vocs'
 import PublicTestnetSponsorTip from './public-testnet-sponsor-tip.mdx'
 
 ### Configurable Fee Tokens
@@ -11,10 +11,8 @@ user's preferred fee token and the validator's preferred token.
 
 <div className="-mt-2" />
 
-<Tabs>
-  <Tab value="Viem">
-
-  <div className="h-4" />
+<Tabs stateKey="library">
+  <Tab title="Viem">
 
     :::code-group
 
@@ -38,9 +36,8 @@ user's preferred fee token and the validator's preferred token.
     :::
   </Tab>
 
-  <Tab value="Wagmi">
+  <Tab title="Wagmi">
 
-    <div className="h-4" />
     
     :::code-group
 
@@ -68,8 +65,7 @@ user's preferred fee token and the validator's preferred token.
 
   </Tab>
 
-  <Tab value="RLP">
-    <div className="h-4" />
+  <Tab title="RLP">
 
     ```tsx
     rlp([
@@ -108,10 +104,8 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
 
 <div className="-mt-2" />
 
-<Tabs>
-  <Tab value="Viem">
-
-  <div className="h-4" />
+<Tabs stateKey="library">
+  <Tab title="Viem">
 
     :::code-group
 
@@ -135,9 +129,8 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
     :::
 
   </Tab>
-  <Tab value="Wagmi">
+  <Tab title="Wagmi">
 
-    <div className="h-4" />
     
     :::code-group
 
@@ -165,8 +158,7 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
 
   </Tab>
 
-  <Tab value="RLP">
-    <div className="h-4" />
+  <Tab title="RLP">
 
     ```tsx
     // 1. User signs over `user_envelope` // [!code focus]
@@ -245,10 +237,8 @@ parameter.
 
 <div className="-mt-2" />
 
-<Tabs>
-  <Tab value="Viem">
-
-  <div className="h-4" />
+<Tabs stateKey="library">
+  <Tab title="Viem">
 
     :::code-group
 
@@ -281,9 +271,8 @@ parameter.
     :::
 
   </Tab>
-  <Tab value="Wagmi">
+  <Tab title="Wagmi">
 
-    <div className="h-4" />
     
     :::code-group
 
@@ -320,8 +309,7 @@ parameter.
 
   </Tab>
 
-  <Tab value="RLP">
-    <div className="h-4" />
+  <Tab title="RLP">
 
     ```tsx
     rlp([
@@ -356,10 +344,8 @@ transactions thereafter can be signed by the access key.
 
 <div className="-mt-2" />
 
-<Tabs>
-  <Tab value="Viem">
-
-  <div className="h-4" />
+<Tabs stateKey="library">
+  <Tab title="Viem">
 
     :::code-group
 
@@ -396,9 +382,8 @@ transactions thereafter can be signed by the access key.
     :::
 
   </Tab>
-  <Tab value="Wagmi">
+  <Tab title="Wagmi">
 
-    <div className="h-4" />
     
     ```tsx twoslash [example.ts]
     // @noErrors
@@ -423,8 +408,7 @@ transactions thereafter can be signed by the access key.
 
   </Tab>
 
-  <Tab value="RLP">
-    <div className="h-4" />
+  <Tab title="RLP">
 
     ```tsx
     rlp([
@@ -462,10 +446,8 @@ enabling parallel execution and significantly improved transaction throughput fo
 
 <div className="-mt-2" />
 
-<Tabs>
-  <Tab value="Viem">
-
-  <div className="h-4" />
+<Tabs stateKey="library">
+  <Tab title="Viem">
 
     :::code-group
 
@@ -495,7 +477,6 @@ enabling parallel execution and significantly improved transaction throughput fo
 
     :::
 
-    <div className="h-4" />
 
     :::code-group
 
@@ -522,9 +503,8 @@ enabling parallel execution and significantly improved transaction throughput fo
     :::
 
   </Tab>
-  <Tab value="Wagmi">
+  <Tab title="Wagmi">
 
-    <div className="h-4" />
     
     :::code-group
 
@@ -555,7 +535,6 @@ enabling parallel execution and significantly improved transaction throughput fo
 
     :::
 
-    <div className="h-4" />
 
     :::code-group
 
@@ -586,8 +565,7 @@ enabling parallel execution and significantly improved transaction throughput fo
 
   </Tab>
 
-  <Tab value="RLP">
-    <div className="h-4" />
+  <Tab title="RLP">
 
     ```tsx
     rlp([
@@ -619,10 +597,8 @@ the transaction can be included in a block.
 
 <div className="-mt-2" />
 
-<Tabs>
-  <Tab value="Viem">
-
-  <div className="h-4" />
+<Tabs stateKey="library">
+  <Tab title="Viem">
 
     :::code-group
 
@@ -645,9 +621,8 @@ the transaction can be included in a block.
     :::
 
   </Tab>
-  <Tab value="Wagmi">
+  <Tab title="Wagmi">
 
-    <div className="h-4" />
     
     :::code-group
 
@@ -673,8 +648,7 @@ the transaction can be included in a block.
 
   </Tab>
 
-  <Tab value="RLP">
-    <div className="h-4" />
+  <Tab title="RLP">
 
     ```tsx
     rlp([

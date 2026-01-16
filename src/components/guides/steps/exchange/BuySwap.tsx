@@ -66,7 +66,7 @@ export function BuySwap({ onSuccess }: { onSuccess?: () => void }) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Buy 10 AlphaUSD with BetaUSD</h3>
+        <h3 className="font-semibold text-sm">Buy 10 AlphaUSD with BetaUSD</h3>
         <Button
           variant={sendCalls.isSuccess ? 'default' : 'accent'}
           disabled={!address}
@@ -76,32 +76,23 @@ export function BuySwap({ onSuccess }: { onSuccess?: () => void }) {
             })
           }}
           type="button"
-          className="text-[14px] -tracking-[2%] font-normal"
+          className="font-normal text-[14px] -tracking-[2%]"
         >
           {sendCalls.isPending ? 'Buying...' : 'Buy'}
         </Button>
       </div>
-      {sendCalls.error && (
-        <div className="text-red-500 text-[14px]">
-          {sendCalls.error.message}
-        </div>
-      )}
+      {sendCalls.error && <div className="text-[14px] text-red-500">{sendCalls.error.message}</div>}
       {quote && address && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-start gap-1">
-            <span className="text-gray11 text-[14px]">Quote:</span>
-            <span className="text-gray12 text-[14px]">
-              10 {tokenOutMetadata?.name} ={' '}
-              {formatUnits(quote, tokenInMetadata?.decimals || 6)}{' '}
+            <span className="text-[14px] text-gray11">Quote:</span>
+            <span className="text-[14px] text-gray12">
+              10 {tokenOutMetadata?.name} = {formatUnits(quote, tokenInMetadata?.decimals || 6)}{' '}
               {tokenInMetadata?.name}
             </span>
           </div>
           {sendCalls.isSuccess && sendCalls.data && (
-            <ExplorerLink
-              hash={
-                sendCalls.data.receipts?.at(0)?.transactionHash as `0x${string}`
-              }
-            />
+            <ExplorerLink hash={sendCalls.data.receipts?.at(0)?.transactionHash as `0x${string}`} />
           )}
         </div>
       )}

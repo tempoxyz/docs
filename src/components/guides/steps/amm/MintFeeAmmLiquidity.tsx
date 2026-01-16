@@ -11,9 +11,7 @@ import type { DemoStepProps } from '../types'
 
 const validatorToken = alphaUsd
 
-export function MintFeeAmmLiquidity(
-  props: DemoStepProps & { waitForBalance: boolean },
-) {
+export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance: boolean }) {
   const { stepNumber, last = false, waitForBalance = true } = props
   const { address } = useConnection()
   const { getData } = useDemoContext()
@@ -44,11 +42,9 @@ export function MintFeeAmmLiquidity(
   })
 
   const active = React.useMemo(() => {
-    const balanceCheck = waitForBalance
-      ? Boolean(tokenBalance && tokenBalance > 0n)
-      : true
+    const balanceCheck = waitForBalance ? Boolean(tokenBalance && tokenBalance > 0n) : true
     return Boolean(address && tokenAddress && balanceCheck)
-  }, [address, tokenAddress, tokenBalance])
+  }, [address, tokenAddress, tokenBalance, waitForBalance])
 
   return (
     <Step
@@ -56,13 +52,7 @@ export function MintFeeAmmLiquidity(
       completed={mintFeeLiquidity.isSuccess}
       actions={
         <Button
-          variant={
-            active
-              ? mintFeeLiquidity.isSuccess
-                ? 'default'
-                : 'accent'
-              : 'default'
-          }
+          variant={active ? (mintFeeLiquidity.isSuccess ? 'default' : 'accent') : 'default'}
           disabled={!active}
           onClick={() => {
             if (!address || !tokenAddress) return
@@ -75,7 +65,7 @@ export function MintFeeAmmLiquidity(
             })
           }}
           type="button"
-          className="text-[14px] -tracking-[2%] font-normal"
+          className="font-normal text-[14px] -tracking-[2%]"
         >
           Add Liquidity
         </Button>
@@ -84,11 +74,9 @@ export function MintFeeAmmLiquidity(
       title={`Mint 100 pathUSD of Fee Liquidity for ${metadata ? metadata.name : 'your token'}.`}
     >
       {mintFeeLiquidity.data && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
-            <ExplorerLink
-              hash={mintFeeLiquidity.data.receipt.transactionHash}
-            />
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
+            <ExplorerLink hash={mintFeeLiquidity.data.receipt.transactionHash} />
           </div>
         </div>
       )}

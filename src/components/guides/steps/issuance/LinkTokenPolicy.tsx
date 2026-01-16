@@ -14,10 +14,9 @@ export function LinkTokenPolicy(props: DemoStepProps) {
 
   const { tokenAddress, policyId } = data
 
-  const { data: metadata, refetch: refetchMetadata } =
-    Hooks.token.useGetMetadata({
-      token: tokenAddress,
-    })
+  const { data: metadata, refetch: refetchMetadata } = Hooks.token.useGetMetadata({
+    token: tokenAddress,
+  })
 
   const linkPolicy = Hooks.token.useChangeTransferPolicySync({
     mutation: {
@@ -57,20 +56,18 @@ export function LinkTokenPolicy(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             Hide
           </Button>
         ) : (
           <Button
-            variant={
-              tokenAddress && policyId && !isComplete ? 'accent' : 'default'
-            }
+            variant={tokenAddress && policyId && !isComplete ? 'accent' : 'default'}
             disabled={!tokenAddress || !policyId || isComplete}
             onClick={() => setExpanded(true)}
             type="button"
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
           >
             Enter details
           </Button>
@@ -80,32 +77,31 @@ export function LinkTokenPolicy(props: DemoStepProps) {
       title={`Link the policy to ${metadata ? metadata.name : 'your token'}.`}
     >
       {expanded && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
-            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-2">
-              <div className="flex flex-col flex-1">
-                <div className="text-[13px] -tracking-[1%] text-gray9 mb-2">
-                  This will link the transfer policy to{' '}
-                  {metadata ? metadata.name : 'your token'}, enforcing the
-                  blacklist.
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
+            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
+              <div className="flex flex-1 flex-col">
+                <div className="mb-2 text-[13px] text-gray9 -tracking-[1%]">
+                  This will link the transfer policy to {metadata ? metadata.name : 'your token'},
+                  enforcing the blacklist.
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-4">
+            <div className="mt-4 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
               <Button
                 variant="accent"
                 onClick={handleLinkPolicy}
                 disabled={isLinking}
                 type="button"
-                className="text-[14px] -tracking-[2%] font-normal"
+                className="font-normal text-[14px] -tracking-[2%]"
               >
                 {isLinking ? 'Linking...' : 'Link Policy'}
               </Button>
             </div>
 
             {hasError && (
-              <div className="text-[13px] text-red-500 mt-2">
+              <div className="mt-2 text-[13px] text-red-500">
                 Failed to link policy. Please try again.
               </div>
             )}

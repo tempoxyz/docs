@@ -1,31 +1,12 @@
 'use client'
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
-import { NuqsAdapter } from '../lib/nuqs-waku-adapter'
-import { Json } from 'ox'
 import { PostHogProvider as PostHogProviderBase } from 'posthog-js/react'
 import type React from 'react'
 import { Toaster } from 'sonner'
-import { WagmiProvider } from 'wagmi'
-import { DemoContextProvider } from '../components/DemoContext'
 import { PageViewTracker } from '../components/PageViewTracker'
 import { PostHogSiteIdentifier } from '../components/PostHogSiteIdentifier'
-import * as WagmiConfig from '../wagmi.config'
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      queryKeyHashFn: Json.stringify,
-    },
-  },
-})
-
-const config = WagmiConfig.getConfig()
-const mipdConfig = WagmiConfig.getConfig({
-  multiInjectedProviderDiscovery: true,
-})
 
 function PostHogProvider({ children }: React.PropsWithChildren) {
   const posthogKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY
@@ -60,19 +41,13 @@ export default function Layout(
   return (
     <>
       <PostHogProvider>
-        <WagmiProvider config={props.frontmatter?.mipd ? mipdConfig : config}>
-          <QueryClientProvider client={queryClient}>
-            <NuqsAdapter>
-              {posthogKey && posthogHost && <PostHogSiteIdentifier />}
-              {posthogKey && posthogHost && <PageViewTracker />}
-              <DemoContextProvider>{props.children}</DemoContextProvider>
-            </NuqsAdapter>
-          </QueryClientProvider>
-        </WagmiProvider>
+        {posthogKey && posthogHost && <PostHogSiteIdentifier />}
+        {posthogKey && posthogHost && <PageViewTracker />}
+        {props.children}
       </PostHogProvider>
 
       <Toaster
-        className="z-[42069] select-none"
+        className="z-42069 select-none"
         expand={false}
         position="bottom-right"
         swipeDirections={['right', 'left', 'top', 'bottom']}

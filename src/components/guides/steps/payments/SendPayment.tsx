@@ -61,17 +61,14 @@ export function SendPayment(props: DemoStepProps) {
 
   return (
     <Step
-      active={
-        Boolean(address && balance && balance > 0n) &&
-        (last ? true : !sendPayment.isSuccess)
-      }
+      active={Boolean(address && balance && balance > 0n) && (last ? true : !sendPayment.isSuccess)}
       completed={sendPayment.isSuccess}
       actions={
         expanded ? (
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             Cancel
@@ -88,7 +85,7 @@ export function SendPayment(props: DemoStepProps) {
             disabled={!(address && balance && balance > 0n)}
             onClick={() => setExpanded(true)}
             type="button"
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
           >
             Enter details
           </Button>
@@ -98,18 +95,15 @@ export function SendPayment(props: DemoStepProps) {
       title="Send 100 AlphaUSD to a recipient."
     >
       {expanded && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
-            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-2">
-              <div className="flex flex-col flex-2">
-                <label
-                  className="text-[11px] -tracking-[1%] text-gray9"
-                  htmlFor="recipient"
-                >
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
+            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
+              <div className="flex flex-2 flex-col">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient">
                   Recipient address
                 </label>
                 <input
-                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
                   name="recipient"
@@ -118,15 +112,12 @@ export function SendPayment(props: DemoStepProps) {
                   placeholder="0x..."
                 />
               </div>
-              <div className="flex flex-col flex-1">
-                <label
-                  className="text-[11px] -tracking-[1%] text-gray9"
-                  htmlFor="memo"
-                >
+              <div className="flex flex-1 flex-col">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  className={`h-[34px] border px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white ${memoError ? 'border-red-500' : 'border-gray4'}`}
+                  className={`h-[34px] rounded-[50px] border px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white ${memoError ? 'border-red-500' : 'border-gray4'}`}
                   data-1p-ignore
                   type="text"
                   name="memo"
@@ -137,28 +128,19 @@ export function SendPayment(props: DemoStepProps) {
               </div>
               <Button
                 variant={
-                  address &&
-                  balance &&
-                  balance > 0n &&
-                  isValidRecipient &&
-                  !memoError
+                  address && balance && balance > 0n && isValidRecipient && !memoError
                     ? 'accent'
                     : 'default'
                 }
-                disabled={
-                  !(address && balance && balance > 0n && isValidRecipient) ||
-                  !!memoError
-                }
+                disabled={!(address && balance && balance > 0n && isValidRecipient) || !!memoError}
                 onClick={handleTransfer}
                 type="button"
-                className="text-[14px] -tracking-[2%] font-normal"
+                className="font-normal text-[14px] -tracking-[2%]"
               >
                 {sendPayment.isPending ? 'Sending...' : 'Send'}
               </Button>
             </div>
-            {memoError && (
-              <span className="text-[11px] text-red-500 mt-1">{memoError}</span>
-            )}
+            {memoError && <span className="mt-1 text-[11px] text-red-500">{memoError}</span>}
             {sendPayment.isSuccess && sendPayment.data && (
               <ExplorerLink hash={sendPayment.data.receipt.transactionHash} />
             )}

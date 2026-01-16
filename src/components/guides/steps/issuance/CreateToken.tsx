@@ -45,7 +45,7 @@ export function CreateToken(props: DemoStepProps) {
 
     // If this is an intermediate step, also needs to not have succeeded
     return activeWithBalance && !create.isSuccess
-  }, [stepNumber, address, balance, create.isSuccess, last])
+  }, [address, balance, create.isSuccess, last, showLogin])
 
   return (
     <Step
@@ -56,8 +56,8 @@ export function CreateToken(props: DemoStepProps) {
       title="Create & deploy a token to testnet."
     >
       {(active || create.isSuccess) && (
-        <div className="flex ml-6 flex-col gap-3 py-4">
-          <div className="ps-5 border-gray4 border-s-2">
+        <div className="ml-6 flex flex-col gap-3 py-4">
+          <div className="border-gray4 border-s-2 ps-5">
             <form
               onSubmit={(event) => {
                 event.preventDefault()
@@ -71,17 +71,14 @@ export function CreateToken(props: DemoStepProps) {
                   feeToken: alphaUsd,
                 })
               }}
-              className="flex gap-2 flex-col md:items-end md:flex-row -mt-2.5"
+              className="-mt-2.5 flex flex-col gap-2 md:flex-row md:items-end"
             >
-              <div className="flex flex-col flex-1">
-                <label
-                  className="text-[11px] -tracking-[1%] text-gray9"
-                  htmlFor="name"
-                >
+              <div className="flex flex-1 flex-col">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="name">
                   Token name
                 </label>
                 <input
-                  className="h-[34px] border border-gray4 px-3.25 rounded-lg text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  className="h-[34px] rounded-lg border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
                   name="name"
@@ -90,15 +87,12 @@ export function CreateToken(props: DemoStepProps) {
                   placeholder="demoUSD"
                 />
               </div>
-              <div className="flex flex-col flex-1">
-                <label
-                  className="text-[11px] -tracking-[1%] text-gray9"
-                  htmlFor="symbol"
-                >
+              <div className="flex flex-1 flex-col">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="symbol">
                   Token symbol
                 </label>
                 <input
-                  className="h-[34px] border border-gray4 px-3.25 rounded-lg text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  className="h-[34px] rounded-lg border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
                   name="symbol"
@@ -107,11 +101,7 @@ export function CreateToken(props: DemoStepProps) {
                   placeholder="DEMO"
                 />
               </div>
-              <Button
-                variant="accent"
-                type="submit"
-                disabled={create.isPending}
-              >
+              <Button variant="accent" type="submit" disabled={create.isPending}>
                 {create.isPending ? 'Deploying...' : 'Deploy'}
               </Button>
             </form>
@@ -121,20 +111,18 @@ export function CreateToken(props: DemoStepProps) {
             <div className="relative">
               <div
                 className={cx(
-                  'bg-gray2 rounded-[10px] p-4 text-center text-gray9 font-normal text-[13px] -tracking-[2%] leading-snug flex flex-col items-center',
+                  'flex flex-col items-center rounded-[10px] bg-gray2 p-4 text-center font-normal text-[13px] text-gray9 leading-snug -tracking-[2%]',
                 )}
               >
                 <div>
                   Token{' '}
-                  <span className="text-primary font-medium">
+                  <span className="font-medium text-primary">
                     {' '}
                     {create.data.name} ({create.data.symbol}){' '}
                   </span>{' '}
                   successfully created and deployed to Tempo!
                 </div>
-                <ExplorerLink
-                  hash={create.data?.receipt.transactionHash ?? ''}
-                />
+                <ExplorerLink hash={create.data?.receipt.transactionHash ?? ''} />
               </div>
             </div>
           )}

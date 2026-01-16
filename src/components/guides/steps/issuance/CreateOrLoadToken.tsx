@@ -38,15 +38,15 @@ export function CreateOrLoadToken(props: DemoStepProps) {
       title={`Using token ${metadata.name}`}
     >
       {tokenReceipt && (
-        <div className="flex ml-6 flex-col gap-3 py-4">
+        <div className="ml-6 flex flex-col gap-3 py-4">
           <div
             className={cx(
-              'bg-gray2 rounded-[10px] p-4 text-center text-gray9 font-normal text-[13px] -tracking-[2%] leading-snug flex flex-col items-center',
+              'flex flex-col items-center rounded-[10px] bg-gray2 p-4 text-center font-normal text-[13px] text-gray9 leading-snug -tracking-[2%]',
             )}
           >
             <div>
               Token{' '}
-              <span className="text-primary font-medium">
+              <span className="font-medium text-primary">
                 {' '}
                 {metadata.name} ({metadata.symbol}){' '}
               </span>{' '}

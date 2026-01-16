@@ -33,8 +33,7 @@ export function MakeSwaps({ stepNumber, last = false }: DemoStepProps) {
   const active = React.useMemo(() => {
     return (
       !!address &&
-      (alphaUsdBalance || 0n) >
-        parseUnits('11', alphaUsdMetadata?.decimals || 6) &&
+      (alphaUsdBalance || 0n) > parseUnits('11', alphaUsdMetadata?.decimals || 6) &&
       (betaUsdBalance || 0n) > parseUnits('11', betaUsdMetadata?.decimals || 6)
     )
   }, [
@@ -62,8 +61,8 @@ export function MakeSwaps({ stepNumber, last = false }: DemoStepProps) {
       title="Make Swaps"
     >
       {(active || completed) && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
             <div className="flex flex-col gap-6">
               <BuySwap onSuccess={() => setBuyCompleted(true)} />
               <SellSwap onSuccess={() => setSellCompleted(true)} />

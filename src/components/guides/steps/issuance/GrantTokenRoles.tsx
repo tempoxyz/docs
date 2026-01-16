@@ -31,6 +31,7 @@ export function GrantTokenRoles(
 
   // Check if user has each requested role
   const roleChecks = roles.map((role) =>
+    // biome-ignore lint/correctness/useHookAtTopLevel: _
     Hooks.token.useHasRole({
       account: address,
       token: tokenAddress,
@@ -68,16 +69,14 @@ export function GrantTokenRoles(
 
   return (
     <Step
-      active={
-        !!tokenAddress && !hasAllRoles && (last ? true : !grant.isSuccess)
-      }
+      active={!!tokenAddress && !hasAllRoles && (last ? true : !grant.isSuccess)}
       completed={grant.isSuccess || hasAllRoles}
       actions={
         expanded ? (
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             Hide
@@ -85,16 +84,12 @@ export function GrantTokenRoles(
         ) : (
           <Button
             variant={
-              tokenAddress && !hasAllRoles
-                ? grant.isSuccess
-                  ? 'default'
-                  : 'accent'
-                : 'default'
+              tokenAddress && !hasAllRoles ? (grant.isSuccess ? 'default' : 'accent') : 'default'
             }
             disabled={!tokenAddress || hasAllRoles}
             onClick={() => setExpanded(true)}
             type="button"
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
           >
             Enter details
           </Button>
@@ -104,18 +99,15 @@ export function GrantTokenRoles(
       title={`Grant ${roles.join(', ')} role${roles.length > 1 ? 's' : ''} on ${metadata ? metadata.name : 'token'}.`}
     >
       {expanded && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
-            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-2">
-              <div className="flex flex-col flex-2">
-                <label
-                  className="text-[11px] -tracking-[1%] text-gray9"
-                  htmlFor="recipient"
-                >
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
+            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
+              <div className="flex flex-2 flex-col">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient">
                   Grant role to yourself
                 </label>
                 <input
-                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
                   name="recipient"
@@ -130,7 +122,7 @@ export function GrantTokenRoles(
                 disabled={!address}
                 onClick={handleGrant}
                 type="button"
-                className="text-[14px] -tracking-[2%] font-normal"
+                className="font-normal text-[14px] -tracking-[2%]"
               >
                 {grant.isPending ? 'Granting...' : 'Grant'}
               </Button>

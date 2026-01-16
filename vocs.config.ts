@@ -1,3 +1,4 @@
+import { ModuleResolutionKind } from 'typescript'
 import { defineConfig } from 'vocs/config'
 
 export default defineConfig({
@@ -575,12 +576,15 @@ export default defineConfig({
     {
       text: 'Docs',
       link: '/',
-      match(path) {
-        if (path?.startsWith('/learn')) return false
-        return true
-      },
     },
     { text: 'Ecosystem', link: 'https://tempo.xyz/ecosystem' },
     { text: 'Blog', link: 'https://tempo.xyz/blog' },
   ],
+  twoslash: {
+    twoslashOptions: {
+      compilerOptions: {
+        moduleResolution: ModuleResolutionKind.Bundler,
+      },
+    },
+  },
 })

@@ -24,14 +24,15 @@ export function ZoomableImage(props: { src: string; alt: string }) {
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = ''
     }
-  }, [isZoomed])
+    // biome-ignore lint/correctness/useExhaustiveDependencies: _
+  }, [isZoomed, handleClose])
 
   return (
     <>
       <img
         src={src}
         alt={alt}
-        className="cursor-zoom-in rounded-lg border border-gray4 transition-opacity hover:opacity-80 bg-[#F9F9F9] p-[10px]"
+        className="cursor-zoom-in rounded-lg border border-gray4 bg-[#F9F9F9] p-[10px] transition-opacity hover:opacity-80"
         onClick={handleOpen}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -52,12 +53,12 @@ export function ZoomableImage(props: { src: string; alt: string }) {
           {/* biome-ignore lint/a11y/useKeyWithClickEvents: only prevents propagation, not interactive */}
           {/* biome-ignore lint/a11y/noStaticElementInteractions: only prevents propagation, not interactive */}
           <div
-            className="relative w-[90vw] h-[90vh] bg-[#F9F9F9] rounded-lg shadow-2xl border border-gray4 p-8 flex items-center justify-center"
+            className="relative flex h-[90vh] w-[90vw] items-center justify-center rounded-lg border border-gray4 bg-[#F9F9F9] p-8 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
-              className="absolute top-4 right-4 flex items-center justify-center w-10 h-10 rounded-full bg-gray3 text-gray12 hover:bg-gray4 transition-colors border border-gray6 z-10"
+              className="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-gray6 bg-gray3 text-gray12 transition-colors hover:bg-gray4"
               onClick={handleClose}
               aria-label="Close zoomed image"
             >
@@ -82,7 +83,7 @@ export function ZoomableImage(props: { src: string; alt: string }) {
             <img
               src={src}
               alt={alt}
-              className="max-w-full max-h-full object-contain rounded cursor-zoom-out"
+              className="max-h-full max-w-full cursor-zoom-out rounded object-contain"
               onClick={handleClose}
             />
           </div>

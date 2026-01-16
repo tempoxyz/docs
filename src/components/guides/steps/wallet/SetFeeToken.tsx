@@ -31,8 +31,7 @@ export function SetFeeToken(props: DemoStepProps) {
   const chainId = useChainId()
   const config = useConfig()
 
-  const [selectedFeeToken, setSelectedFeeToken] =
-    React.useState<FeeTokenOption['value']>('alpha')
+  const [selectedFeeToken, setSelectedFeeToken] = React.useState<FeeTokenOption['value']>('alpha')
   const [customFeeToken, setCustomFeeToken] = React.useState('')
   const [txHash, setTxHash] = React.useState<string | undefined>(undefined)
 
@@ -50,16 +49,13 @@ export function SetFeeToken(props: DemoStepProps) {
   const setUserToken = Hooks.fee.useSetUserTokenSync()
 
   const selectedOption = React.useMemo<FeeTokenOption>(() => {
-    const option = FEE_TOKEN_OPTIONS.find(
-      (candidate) => candidate.value === selectedFeeToken,
-    )
+    const option = FEE_TOKEN_OPTIONS.find((candidate) => candidate.value === selectedFeeToken)
     return option ?? DEFAULT_FEE_TOKEN_OPTION
   }, [selectedFeeToken])
 
   const resolvedFeeToken =
     selectedOption.value === 'other' ? customFeeToken : selectedOption.address
-  const isFeeTokenValid =
-    selectedOption.value !== 'other' || isAddress(customFeeToken)
+  const isFeeTokenValid = selectedOption.value !== 'other' || isAddress(customFeeToken)
   const defaultChainId = chainId ?? config?.chains?.[0]?.id
 
   const hasBalance = Boolean(balance && balance > 0n)
@@ -78,8 +74,7 @@ export function SetFeeToken(props: DemoStepProps) {
     if (!userTokenAddress) return undefined
     const match = FEE_TOKEN_OPTIONS.find(
       (option) =>
-        'address' in option &&
-        option.address.toLowerCase() === userTokenAddress.toLowerCase(),
+        'address' in option && option.address.toLowerCase() === userTokenAddress.toLowerCase(),
     )
     return match && match.value !== 'other'
       ? match.label
@@ -110,7 +105,7 @@ export function SetFeeToken(props: DemoStepProps) {
         },
       },
     )
-  }, [address, isFeeTokenValid, resolvedFeeToken, setUserToken, defaultChainId])
+  }, [address, isFeeTokenValid, resolvedFeeToken, setUserToken, defaultChainId, userToken.refetch])
 
   // Sync selected option with current user token
   React.useEffect(() => {
@@ -118,8 +113,7 @@ export function SetFeeToken(props: DemoStepProps) {
     if (!userTokenAddress) return
     const match = FEE_TOKEN_OPTIONS.find(
       (option) =>
-        'address' in option &&
-        option.address.toLowerCase() === userTokenAddress.toLowerCase(),
+        'address' in option && option.address.toLowerCase() === userTokenAddress.toLowerCase(),
     )
     if (match && match.value !== 'other') {
       setSelectedFeeToken(match.value)
@@ -135,9 +129,9 @@ export function SetFeeToken(props: DemoStepProps) {
 
   const actions = React.useMemo(() => {
     return (
-      <div className="flex gap-2 items-center flex-wrap">
+      <div className="flex flex-wrap items-center gap-2">
         <select
-          className="h-[32px] border border-gray4 px-3 rounded-full text-[14px] font-medium -tracking-[2%] bg-white dark:bg-transparent text-black dark:text-white"
+          className="h-[32px] rounded-full border border-gray4 bg-white px-3 font-medium text-[14px] text-black -tracking-[2%] dark:bg-transparent dark:text-white"
           value={selectedFeeToken}
           onChange={(event) => {
             const value = event.target.value as FeeTokenOption['value']
@@ -162,14 +156,7 @@ export function SetFeeToken(props: DemoStepProps) {
         </Button>
       </div>
     )
-  }, [
-    selectedFeeToken,
-    hasBalance,
-    setUserToken.isPending,
-    active,
-    handleSetFeeToken,
-    canSubmit,
-  ])
+  }, [selectedFeeToken, hasBalance, setUserToken.isPending, active, handleSetFeeToken, canSubmit])
 
   return (
     <Step
@@ -181,18 +168,15 @@ export function SetFeeToken(props: DemoStepProps) {
       title="Set your fee token for EVM transactions."
     >
       {(selectedOption.value === 'other' || currentFeeTokenLabel || txHash) && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
             {selectedOption.value === 'other' && (
-              <div className="flex flex-col mt-2">
-                <label
-                  className="text-[11px] -tracking-[1%] text-gray9"
-                  htmlFor="customFeeToken"
-                >
+              <div className="mt-2 flex flex-col">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="customFeeToken">
                   Custom fee token address
                 </label>
                 <input
-                  className="h-[34px] border border-gray4 px-3.25 rounded-full text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  className="h-[34px] rounded-full border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   autoCapitalize="none"
                   autoComplete="off"
                   autoCorrect="off"
@@ -206,11 +190,9 @@ export function SetFeeToken(props: DemoStepProps) {
               </div>
             )}
             {currentFeeTokenLabel && (
-              <div className="text-[13px] text-gray9 mt-2">
+              <div className="mt-2 text-[13px] text-gray9">
                 Current fee token:{' '}
-                <span className="text-black dark:text-white">
-                  {currentFeeTokenLabel}
-                </span>
+                <span className="text-black dark:text-white">{currentFeeTokenLabel}</span>
               </div>
             )}
             {txHash && <ExplorerLink hash={txHash} />}

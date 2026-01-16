@@ -26,13 +26,8 @@ export function toBigInt(value: RowValue | null | undefined): bigint {
   return BigInt(normalized)
 }
 
-export function toQuantityHex(
-  value: RowValue | null | undefined,
-  fallback: bigint = 0n,
-) {
-  return Hex.fromNumber(
-    value === null || value === undefined ? fallback : toBigInt(value),
-  )
+export function toQuantityHex(value: RowValue | null | undefined, fallback: bigint = 0n) {
+  return Hex.fromNumber(value === null || value === undefined ? fallback : toBigInt(value))
 }
 
 export function toHexData(value: RowValue | null | undefined): Hex.Hex {
@@ -41,9 +36,7 @@ export function toHexData(value: RowValue | null | undefined): Hex.Hex {
   return value
 }
 
-export function toAddressValue(
-  value: RowValue | null | undefined,
-): Address.Address | null {
+export function toAddressValue(value: RowValue | null | undefined): Address.Address | null {
   if (typeof value !== 'string' || value.length === 0) return null
   Address.assert(value)
   return value
@@ -53,10 +46,7 @@ type RunQueryOptions = {
   signatures?: string[]
 }
 
-export async function runIndexSupplyQuery(
-  query: string,
-  options: RunQueryOptions = {},
-) {
+export async function runIndexSupplyQuery(query: string, options: RunQueryOptions = {}) {
   const token = import.meta.env.VITE_FRONTEND_API_TOKEN
 
   if (!token) throw new Error('VITE_FRONTEND_API_TOKEN is not configured')

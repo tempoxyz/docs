@@ -36,9 +36,7 @@ export function CheckFeeAmmPool(props: DemoStepProps) {
   })
 
   const active = React.useMemo(() => {
-    return Boolean(
-      address && tokenAddress && pool && lpBalance && lpBalance > 0n,
-    )
+    return Boolean(address && tokenAddress && pool && lpBalance && lpBalance > 0n)
   }, [address, tokenAddress, pool, lpBalance])
 
   return (
@@ -49,40 +47,27 @@ export function CheckFeeAmmPool(props: DemoStepProps) {
       title={`View Fee AMM pool for ${metadata ? metadata.name : 'your token'}.`}
     >
       {active && pool && lpBalance && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
-            <div className="mt-2 mb-3 p-3 rounded-lg bg-gray2 text-[13px] -tracking-[1%]">
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
+            <div className="mt-2 mb-3 rounded-lg bg-gray2 p-3 text-[13px] -tracking-[1%]">
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray10 font-medium">
-                    Your LP Balance
-                  </span>
+                  <span className="font-medium text-gray10">Your LP Balance</span>
                   <span className="text-gray12">
-                    {formatUnits(lpBalance, validatorMetadata?.decimals || 6)}{' '}
-                    LP tokens
+                    {formatUnits(lpBalance, validatorMetadata?.decimals || 6)} LP tokens
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray10 font-medium">
-                    Validator Token Reserves
-                  </span>
+                  <span className="font-medium text-gray10">Validator Token Reserves</span>
                   <span className="text-gray12">
-                    {formatUnits(
-                      pool.reserveValidatorToken,
-                      validatorMetadata?.decimals || 6,
-                    )}{' '}
+                    {formatUnits(pool.reserveValidatorToken, validatorMetadata?.decimals || 6)}{' '}
                     AlphaUSD
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray10 font-medium">
-                    User Token Reserves
-                  </span>
+                  <span className="font-medium text-gray10">User Token Reserves</span>
                   <span className="text-gray12">
-                    {formatUnits(
-                      pool.reserveUserToken,
-                      metadata?.decimals || 6,
-                    )}{' '}
+                    {formatUnits(pool.reserveUserToken, metadata?.decimals || 6)}{' '}
                     {metadata?.symbol || ''}
                   </span>
                 </div>

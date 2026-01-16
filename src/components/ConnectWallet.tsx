@@ -1,20 +1,10 @@
 'use client'
 import * as React from 'react'
-import {
-  useChains,
-  useConnect,
-  useConnection,
-  useConnectors,
-  useSwitchChain,
-} from 'wagmi'
+import { useChains, useConnect, useConnection, useConnectors, useSwitchChain } from 'wagmi'
 import { Button, Logout } from './guides/Demo'
 import { filterSupportedInjectedConnectors } from './lib/wallets'
 
-export function ConnectWallet({
-  showAddChain = true,
-}: {
-  showAddChain?: boolean
-}) {
+export function ConnectWallet({ showAddChain = true }: { showAddChain?: boolean }) {
   const { address, chain, connector } = useConnection()
   const connect = useConnect()
   const connectors = useConnectors()
@@ -27,9 +17,7 @@ export function ConnectWallet({
   const isSupported = chains.some((c) => c.id === chain?.id)
   if (!injectedConnectors.length)
     return (
-      <div className="text-[14px] -tracking-[2%] flex items-center">
-        No browser wallets found.
-      </div>
+      <div className="flex items-center text-[14px] -tracking-[2%]">No browser wallets found.</div>
     )
   if (!address || connector?.id === 'webAuthn')
     return (
@@ -37,16 +25,12 @@ export function ConnectWallet({
         {injectedConnectors.map((connector) => (
           <Button
             variant="default"
-            className="flex gap-1.5 items-center"
+            className="flex items-center gap-1.5"
             key={connector.id}
             onClick={() => connect.connect({ connector })}
           >
             {connector.icon ? (
-              <img
-                className="size-5"
-                src={connector.icon}
-                alt={connector.name}
-              />
+              <img className="size-5" src={connector.icon} alt={connector.name} />
             ) : (
               <div />
             )}
@@ -80,7 +64,7 @@ export function ConnectWallet({
         </Button>
       )}
       {switchChain.isSuccess && (
-        <div className="text-[14px] -tracking-[2%] font-normal flex items-center">
+        <div className="flex items-center font-normal text-[14px] -tracking-[2%]">
           Added Tempo to {connector?.name ?? 'Wallet'}!
         </div>
       )}

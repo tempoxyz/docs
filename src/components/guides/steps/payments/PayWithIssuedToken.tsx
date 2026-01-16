@@ -21,18 +21,16 @@ export function PayWithIssuedToken(props: DemoStepProps) {
   const feeToken = getData('tokenAddress')
 
   // Balance for the payment token (AlphaUSD)
-  const { data: alphaBalance, refetch: alphaBalanceRefetch } =
-    Hooks.token.useGetBalance({
-      account: address,
-      token: alphaUsd,
-    })
+  const { data: alphaBalance, refetch: alphaBalanceRefetch } = Hooks.token.useGetBalance({
+    account: address,
+    token: alphaUsd,
+  })
 
   // Balance for the fee token (dynamic based on selection)
-  const { data: feeTokenBalance, refetch: feeTokenBalanceRefetch } =
-    Hooks.token.useGetBalance({
-      account: address,
-      token: feeToken,
-    })
+  const { data: feeTokenBalance, refetch: feeTokenBalanceRefetch } = Hooks.token.useGetBalance({
+    account: address,
+    token: feeToken,
+  })
 
   // Metadata for fee token
   const { data: feeTokenMetadata } = Hooks.token.useGetMetadata({
@@ -95,24 +93,18 @@ export function PayWithIssuedToken(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             Cancel
           </Button>
         ) : (
           <Button
-            variant={
-              active
-                ? sendPayment.isSuccess
-                  ? 'default'
-                  : 'accent'
-                : 'default'
-            }
+            variant={active ? (sendPayment.isSuccess ? 'default' : 'accent') : 'default'}
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
           >
             Enter details
           </Button>
@@ -122,21 +114,17 @@ export function PayWithIssuedToken(props: DemoStepProps) {
       title={`Send 100 AlphaUSD and pay fees in ${feeTokenMetadata ? feeTokenMetadata.name : 'your token'}.`}
     >
       {expanded && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
             {/* Token info display */}
-            <div className="mt-2 mb-3 p-3 rounded-lg bg-gray2 text-[13px] -tracking-[1%]">
+            <div className="mt-2 mb-3 rounded-lg bg-gray2 p-3 text-[13px] -tracking-[1%]">
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray10 font-medium">
-                    Payment Token: AlphaUSD
-                  </span>
-                  <span className="text-gray12">
-                    balance: {formatUnits(alphaBalance ?? 0n, 6)}
-                  </span>
+                  <span className="font-medium text-gray10">Payment Token: AlphaUSD</span>
+                  <span className="text-gray12">balance: {formatUnits(alphaBalance ?? 0n, 6)}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray10 font-medium">
+                  <span className="font-medium text-gray10">
                     {`Fee Token: ${feeTokenMetadata ? feeTokenMetadata.name : ''}`}
                   </span>
                   <span className="text-gray12">
@@ -146,16 +134,13 @@ export function PayWithIssuedToken(props: DemoStepProps) {
               </div>
             </div>
 
-            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-2">
-              <div className="flex flex-col flex-2">
-                <label
-                  className="text-[11px] -tracking-[1%] text-gray9"
-                  htmlFor="recipient"
-                >
+            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
+              <div className="flex flex-2 flex-col">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient">
                   Recipient address
                 </label>
                 <input
-                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
                   name="recipient"
@@ -164,15 +149,12 @@ export function PayWithIssuedToken(props: DemoStepProps) {
                   placeholder="0x..."
                 />
               </div>
-              <div className="flex flex-col flex-1">
-                <label
-                  className="text-[11px] -tracking-[1%] text-gray9"
-                  htmlFor="memo"
-                >
+              <div className="flex flex-1 flex-col">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
                   name="memo"
@@ -186,7 +168,7 @@ export function PayWithIssuedToken(props: DemoStepProps) {
                 disabled={!active}
                 onClick={handleTransfer}
                 type="button"
-                className="text-[14px] -tracking-[2%] font-normal"
+                className="font-normal text-[14px] -tracking-[2%]"
               >
                 {sendPayment.isPending ? 'Sending...' : 'Send'}
               </Button>

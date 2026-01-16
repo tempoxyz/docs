@@ -59,13 +59,7 @@ export function BurnFeeAmmLiquidity(props: DemoStepProps) {
       completed={burnLiquidity.isSuccess}
       actions={
         <Button
-          variant={
-            active
-              ? burnLiquidity.isSuccess
-                ? 'default'
-                : 'accent'
-              : 'default'
-          }
+          variant={active ? (burnLiquidity.isSuccess ? 'default' : 'accent') : 'default'}
           disabled={!active}
           onClick={() => {
             if (!address || !tokenAddress) return
@@ -78,7 +72,7 @@ export function BurnFeeAmmLiquidity(props: DemoStepProps) {
             })
           }}
           type="button"
-          className="text-[14px] -tracking-[2%] font-normal"
+          className="font-normal text-[14px] -tracking-[2%]"
         >
           Burn Liquidity
         </Button>
@@ -87,8 +81,8 @@ export function BurnFeeAmmLiquidity(props: DemoStepProps) {
       title={`Burn 10 LP tokens from ${metadata ? metadata.name : 'your token'} pool.`}
     >
       {burnLiquidity.data && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
             <ExplorerLink hash={burnLiquidity.data.receipt.transactionHash} />
           </div>
         </div>

@@ -5,13 +5,7 @@ import * as React from 'react'
 import type { Address, BaseError } from 'viem'
 import { formatUnits } from 'viem'
 import { tempoTestnet } from 'viem/chains'
-import {
-  useAccount,
-  useConnect,
-  useConnections,
-  useConnectors,
-  useDisconnect,
-} from 'wagmi'
+import { useAccount, useConnect, useConnections, useConnectors, useDisconnect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import LucideCheck from '~icons/lucide/check'
 import LucideCopy from '~icons/lucide/copy'
@@ -58,7 +52,7 @@ export function ExplorerLink({ hash }: { hash: string }) {
         href={url}
         target="_blank"
         rel="noreferrer"
-        className="text-accent text-[13px] -tracking-[1%] flex items-center gap-1 hover:underline"
+        className="flex items-center gap-1 text-[13px] text-accent -tracking-[1%] hover:underline"
         onClick={() => trackExternalLinkClick(url, 'View receipt')}
       >
         View receipt
@@ -78,7 +72,7 @@ export function ExplorerAccountLink({ address }: { address: string }) {
         href={url}
         target="_blank"
         rel="noreferrer"
-        className="text-accent text-[13px] -tracking-[1%] flex items-center gap-1 hover:underline"
+        className="flex items-center gap-1 text-[13px] text-accent -tracking-[1%] hover:underline"
         onClick={() => trackExternalLinkClick(url, 'View account')}
       >
         View account
@@ -124,16 +118,12 @@ export function Container(
     if (!source) return address
 
     if (source === 'webAuthn') {
-      const webAuthnConnection = connections.find(
-        (c) => c.connector.id === 'webAuthn',
-      )
+      const webAuthnConnection = connections.find((c) => c.connector.id === 'webAuthn')
       return webAuthnConnection?.accounts[0]
     }
 
     if (source === 'wallet') {
-      const walletConnection = connections.find(
-        (c) => c.connector.id !== 'webAuthn',
-      )
+      const walletConnection = connections.find((c) => c.connector.id !== 'webAuthn')
       return walletConnection?.accounts[0]
     }
 
@@ -143,25 +133,21 @@ export function Container(
   const footerElement = React.useMemo(() => {
     if (props.footerVariant === 'balances')
       return (
-        <Container.BalancesFooter
-          address={balanceAddress}
-          tokens={props.tokens || [alphaUsd]}
-        />
+        <Container.BalancesFooter address={balanceAddress} tokens={props.tokens || [alphaUsd]} />
       )
-    if (props.footerVariant === 'source')
-      return <Container.SourceFooter src={props.src} />
+    if (props.footerVariant === 'source') return <Container.SourceFooter src={props.src} />
     return null
   }, [props, balanceAddress])
 
   return (
     <ParentContainer
       headerLeft={
-        <div className="flex gap-1.5 items-center">
-          <h4 className="text-gray12 text-[14px] font-normal leading-none -tracking-[1%]">
+        <div className="flex items-center gap-1.5">
+          <h4 className="font-normal text-[14px] text-gray12 leading-none -tracking-[1%]">
             {name}
           </h4>
           {showBadge && (
-            <span className="text-[9px] font-medium bg-accentTint text-accent h-[19px] flex items-center text-center justify-center rounded-[30px] px-1.5 tracking-[2%] uppercase leading-none">
+            <span className="flex h-[19px] items-center justify-center rounded-[30px] bg-accentTint px-1.5 text-center font-medium text-[9px] text-accent uppercase leading-none tracking-[2%]">
               demo
             </span>
           )}
@@ -173,9 +159,9 @@ export function Container(
             <button
               type="button"
               onClick={restart}
-              className="flex items-center text-gray9 leading-none gap-1 text-[12.5px] tracking-[-1%]"
+              className="flex items-center gap-1 text-[12.5px] text-gray9 leading-none tracking-[-1%]"
             >
-              <LucideRotateCcw className="text-gray9 size-3 mt-px" />
+              <LucideRotateCcw className="mt-px size-3 text-gray9" />
               Restart
             </button>
           )}
@@ -200,10 +186,9 @@ export namespace Container {
       account: address,
       token,
     })
-    const { data: metadata, isPending: metadataIsPending } =
-      Hooks.token.useGetMetadata({
-        token,
-      })
+    const { data: metadata, isPending: metadataIsPending } = Hooks.token.useGetMetadata({
+      token,
+    })
 
     Hooks.token.useWatchTransfer({
       token,
@@ -236,9 +221,7 @@ export namespace Container {
           <span />
         ) : (
           <span className="flex gap-1">
-            <span className="text-gray10">
-              {formatUnits(balance ?? 0n, metadata.decimals)}
-            </span>
+            <span className="text-gray10">{formatUnits(balance ?? 0n, metadata.decimals)}</span>
             {metadata.symbol}
           </span>
         )}
@@ -246,23 +229,16 @@ export namespace Container {
     )
   }
 
-  export function BalancesFooter(props: {
-    address?: string | undefined
-    tokens: Address[]
-  }) {
+  export function BalancesFooter(props: { address?: string | undefined; tokens: Address[] }) {
     const { address, tokens } = props
     return (
-      <div className="gap-2 h-full py-2 flex items-center leading-none">
+      <div className="flex h-full items-center gap-2 py-2 leading-none">
         <span className="text-gray10">Balances</span>
-        <div className="self-stretch min-h-5 w-px bg-gray4" />
+        <div className="min-h-5 w-px self-stretch bg-gray4" />
         <div className="flex flex-col gap-2">
           {address ? (
             tokens.map((token) => (
-              <BalancesFooterItem
-                key={token}
-                address={address as Address}
-                token={token}
-              />
+              <BalancesFooterItem key={token} address={address as Address} token={token} />
             ))
           ) : (
             <span className="text-gray9">No account detected</span>
@@ -275,16 +251,15 @@ export namespace Container {
   export function SourceFooter(props: { src: string }) {
     const { src } = props
     const [isCopied, copy] = useCopyToClipboard()
-    const { trackCopy, trackDemo, trackExternalLinkClick } =
-      usePostHogTracking()
+    const { trackCopy, trackDemo, trackExternalLinkClick } = usePostHogTracking()
     const command = `pnpx gitpick ${src}`
 
     return (
-      <div className="flex justify-between w-full">
+      <div className="flex w-full justify-between">
         {/** biome-ignore lint/a11y/noStaticElementInteractions: _ */}
         {/** biome-ignore lint/a11y/useKeyWithClickEvents: _ */}
         <div
-          className="text-primary flex cursor-pointer items-center gap-[6px] font-mono text-[12px] tracking-tight max-sm:hidden"
+          className="flex cursor-pointer items-center gap-[6px] font-mono text-[12px] text-primary tracking-tight max-sm:hidden"
           onClick={() => {
             copy(command)
             trackCopy('command', command)
@@ -295,12 +270,12 @@ export namespace Container {
             <span className="text-gray10">pnpx gitpick</span> {src}
           </div>
           {isCopied ? (
-            <LucideCheck className="text-gray10 size-3" />
+            <LucideCheck className="size-3 text-gray10" />
           ) : (
-            <LucideCopy className="text-gray10 size-3" />
+            <LucideCopy className="size-3 text-gray10" />
           )}
         </div>
-        <div className="text-accent text-[12px] tracking-tight">
+        <div className="text-[12px] text-accent tracking-tight">
           <a
             className="flex items-center gap-1"
             href={`https://github.com/${src}`}
@@ -338,17 +313,17 @@ export function Step(
   const { actions, active, children, completed, error, number, title } = props
   return (
     <div data-active={active} data-completed={completed} className="group">
-      <header className="flex max-sm:flex-col max-sm:items-start max-sm:justify-start items-center justify-between gap-4">
+      <header className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:justify-start">
         <div className="flex items-center gap-3.5">
           <div
             className={cx(
-              'text-[13px] dark:text-white text-black size-7 rounded-full text-center flex items-center justify-center tabular-nums opacity-40 group-data-[completed=true]:opacity-100',
+              'flex size-7 items-center justify-center rounded-full text-center text-[13px] text-black tabular-nums opacity-40 group-data-[completed=true]:opacity-100 dark:text-white',
               completed ? 'bg-green3' : 'bg-gray4',
             )}
           >
             {completed ? <LucideCheck className="text-green9" /> : number}
           </div>
-          <div className="text-[14px] dark:text-white text-black -tracking-[1%] group-data-[active=false]:opacity-40">
+          <div className="text-[14px] text-black -tracking-[1%] group-data-[active=false]:opacity-40 dark:text-white">
             {title}
           </div>
         </div>
@@ -360,7 +335,7 @@ export function Step(
       {error && (
         <>
           <div className="h-2" />
-          <div className="bg-destructiveTint text-destructive rounded py-2 px-3 text-[14px] -tracking-[2%] leading-normal font-normal">
+          <div className="rounded bg-destructiveTint px-3 py-2 font-normal text-[14px] text-destructive leading-normal -tracking-[2%]">
             {'shortMessage' in error ? error.shortMessage : error.message}
           </div>
         </>
@@ -402,7 +377,7 @@ export function Login() {
         <div className="flex gap-1">
           <Button
             variant="accent"
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
             onClick={() => connect.connect({ connector })}
             type="button"
           >
@@ -410,7 +385,7 @@ export function Login() {
           </Button>
           <Button
             variant="default"
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
             onClick={() =>
               connect.connect({
                 connector,
@@ -446,9 +421,9 @@ export function Logout() {
         variant="default"
       >
         {copied ? (
-          <LucideCheck className="text-gray9 mt-px" />
+          <LucideCheck className="mt-px text-gray9" />
         ) : (
-          <LucideWalletCards className="text-gray9 mt-px" />
+          <LucideWalletCards className="mt-px text-gray9" />
         )}
         {StringFormatter.truncate(address, {
           start: 6,
@@ -458,7 +433,7 @@ export function Logout() {
       </Button>
       <Button
         variant="destructive"
-        className="text-[14px] -tracking-[2%] font-normal"
+        className="font-normal text-[14px] -tracking-[2%]"
         onClick={() => {
           disconnect.disconnect({ connector })
           trackButtonClick('Sign out', 'destructive')
@@ -477,18 +452,8 @@ export function Button(
       render?: React.ReactElement
     },
 ) {
-  const {
-    className,
-    disabled,
-    render,
-    size,
-    static: static_,
-    variant,
-    ...rest
-  } = props
-  const Element = render
-    ? (p: typeof props) => React.cloneElement(render, p)
-    : 'button'
+  const { className, disabled, render, size, static: static_, variant, ...rest } = props
+  const Element = render ? (p: typeof props) => React.cloneElement(render, p) : 'button'
   return (
     <Element
       className={buttonClassName({
@@ -504,7 +469,7 @@ export function Button(
 }
 
 const buttonClassName = cva({
-  base: 'relative inline-flex gap-2 items-center justify-center whitespace-nowrap rounded-md font-normal transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+  base: 'relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-normal transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
   defaultVariants: {
     size: 'default',
     variant: 'default',
@@ -514,18 +479,15 @@ const buttonClassName = cva({
       true: 'pointer-events-none opacity-50',
     },
     size: {
-      default: 'text-[14px] -tracking-[2%] h-[32px] px-[14px]',
+      default: 'h-[32px] px-[14px] text-[14px] -tracking-[2%]',
     },
     static: {
       true: 'pointer-events-none',
     },
     variant: {
-      accent:
-        'bg-(--vocs-color_inverted) text-(--vocs-color_background) border dark:border-dashed',
-      default:
-        'text-(--vocs-color_inverted) bg-(--vocs-color_background) border border-dashed',
-      destructive:
-        'bg-(--vocs-color_backgroundRedTint2) text-(--vocs-color_textRed) border border-dashed',
+      accent: 'border bg-invert text-invert dark:border-dashed',
+      default: 'border border-invert border-dashed text-primary',
+      destructive: 'border border-dashed bg-destructiveTint text-destructive',
     },
   },
 })

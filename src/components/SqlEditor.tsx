@@ -57,9 +57,7 @@ export function SqlEditor(props: SqlEditorProps) {
     return false
   })
   const [editorHeight, setEditorHeight] = React.useState<string>(minHeight)
-  const editorRef = React.useRef<Monaco.editor.IStandaloneCodeEditor | null>(
-    null,
-  )
+  const editorRef = React.useRef<Monaco.editor.IStandaloneCodeEditor | null>(null)
   const monacoRef = React.useRef<typeof Monaco | null>(null)
   const modelUriRef = React.useRef<string | null>(null)
 
@@ -341,8 +339,7 @@ export function SqlEditor(props: SqlEditorProps) {
           minimap: { enabled: false },
           lineNumbers: 'on',
           fontSize: 12,
-          fontFamily:
-            'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
           wordWrap: 'on',
           scrollBeyondLastLine: false,
           automaticLayout: true,

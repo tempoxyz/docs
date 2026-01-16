@@ -1,11 +1,5 @@
 'use client'
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useState,
-} from 'react'
+import { createContext, type ReactNode, useCallback, useContext, useState } from 'react'
 import type { Address, PrivateKeyAccount, TransactionReceipt } from 'viem'
 import { useConnectionEffect } from 'wagmi'
 
@@ -37,15 +31,12 @@ interface DemoContextProviderProps {
 export function DemoContextProvider({ children }: DemoContextProviderProps) {
   const [data, setDataState] = useState<Partial<DemoData>>({})
 
-  const setData = useCallback(
-    <K extends keyof DemoData>(key: K, value: DemoData[K]) => {
-      setDataState((prev) => ({
-        ...prev,
-        [key]: value,
-      }))
-    },
-    [],
-  )
+  const setData = useCallback(<K extends keyof DemoData>(key: K, value: DemoData[K]) => {
+    setDataState((prev) => ({
+      ...prev,
+      [key]: value,
+    }))
+  }, [])
 
   const getData = useCallback(
     <K extends keyof DemoData>(key: K): DemoData[K] | undefined => {

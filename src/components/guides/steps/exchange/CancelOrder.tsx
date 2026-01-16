@@ -37,9 +37,7 @@ export function CancelOrder(props: DemoStepProps) {
       completed={cancelOrder.isSuccess}
       actions={
         <Button
-          variant={
-            active ? (cancelOrder.isSuccess ? 'default' : 'accent') : 'default'
-          }
+          variant={active ? (cancelOrder.isSuccess ? 'default' : 'accent') : 'default'}
           disabled={!active}
           onClick={() => {
             if (orderId) {
@@ -47,7 +45,7 @@ export function CancelOrder(props: DemoStepProps) {
             }
           }}
           type="button"
-          className="text-[14px] -tracking-[2%] font-normal"
+          className="font-normal text-[14px] -tracking-[2%]"
         >
           {cancelOrder.isPending ? 'Canceling...' : 'Cancel Order'}
         </Button>
@@ -56,12 +54,12 @@ export function CancelOrder(props: DemoStepProps) {
       title="Cancel the order"
     >
       {cancelOrder.isSuccess && cancelOrder.data && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
             <ExplorerLink hash={cancelOrder.data.receipt.transactionHash} />
-            <div className="mt-2 text-xs text-gray-600">
-              Order #{orderId?.toString()} has been cancelled. Refunded tokens
-              are in your exchange balance.
+            <div className="mt-2 text-gray-600 text-xs">
+              Order #{orderId?.toString()} has been cancelled. Refunded tokens are in your exchange
+              balance.
             </div>
           </div>
         </div>

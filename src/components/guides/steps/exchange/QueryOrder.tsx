@@ -52,28 +52,22 @@ export function QueryOrder(props: DemoStepProps) {
           disabled={!active || isQuerying}
           onClick={handleQuery}
           type="button"
-          className="text-[14px] -tracking-[2%] font-normal"
+          className="font-normal text-[14px] -tracking-[2%]"
         >
-          {isQuerying
-            ? 'Querying...'
-            : hasQueried
-              ? 'Query Again'
-              : 'Query Order'}
+          {isQuerying ? 'Querying...' : hasQueried ? 'Query Again' : 'Query Order'}
         </Button>
       }
       number={stepNumber}
       title={`Query order details${orderId ? ` (ID: ${orderId})` : ''}`}
     >
       {hasQueried && isSuccess && order && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
             <div className="flex flex-col gap-3 text-sm">
               {/* Order Type and Price */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <div className="text-gray11 text-xs uppercase tracking-wider mb-1">
-                    Type
-                  </div>
+                  <div className="mb-1 text-gray11 text-xs uppercase tracking-wider">Type</div>
                   <div className="font-medium">
                     {order.isFlip ? 'Flip ' : 'Limit '}
                     {order.isBid ? (
@@ -84,14 +78,10 @@ export function QueryOrder(props: DemoStepProps) {
                   </div>
                 </div>
                 <div>
-                  <div className="text-gray11 text-xs uppercase tracking-wider mb-1">
-                    Price
-                  </div>
+                  <div className="mb-1 text-gray11 text-xs uppercase tracking-wider">Price</div>
                   <div className="font-mono">
                     ${Tick.toPrice(order.tick)}{' '}
-                    <span className="text-gray11 text-xs">
-                      (tick: {order.tick})
-                    </span>
+                    <span className="text-gray11 text-xs">(tick: {order.tick})</span>
                   </div>
                 </div>
               </div>
@@ -99,31 +89,25 @@ export function QueryOrder(props: DemoStepProps) {
               {/* Amounts */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <div className="text-gray11 text-xs uppercase tracking-wider mb-1">
+                  <div className="mb-1 text-gray11 text-xs uppercase tracking-wider">
                     Original Amount
                   </div>
-                  <div className="font-mono">
-                    {formatUnits(order.amount, 6)} AlphaUSD
-                  </div>
+                  <div className="font-mono">{formatUnits(order.amount, 6)} AlphaUSD</div>
                 </div>
                 <div>
-                  <div className="text-gray11 text-xs uppercase tracking-wider mb-1">
-                    Remaining
-                  </div>
-                  <div className="font-mono">
-                    {formatUnits(order.remaining, 6)} AlphaUSD
-                  </div>
+                  <div className="mb-1 text-gray11 text-xs uppercase tracking-wider">Remaining</div>
+                  <div className="font-mono">{formatUnits(order.remaining, 6)} AlphaUSD</div>
                 </div>
               </div>
 
               {/* Fill Progress */}
               {order.amount > 0n && order.amount !== order.remaining && (
                 <div>
-                  <div className="text-gray11 text-xs uppercase tracking-wider mb-1">
+                  <div className="mb-1 text-gray11 text-xs uppercase tracking-wider">
                     Fill Progress
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-2 bg-gray-3 rounded-full overflow-hidden">
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-3">
                       <div
                         className="h-full bg-accent-9 transition-all"
                         style={{
@@ -131,15 +115,12 @@ export function QueryOrder(props: DemoStepProps) {
                         }}
                       />
                     </div>
-                    <span className="text-xs font-mono">
+                    <span className="font-mono text-xs">
                       {Math.max(
                         0,
                         Math.min(
                           100,
-                          Number(
-                            ((order.amount - order.remaining) * 10000n) /
-                              order.amount,
-                          ) / 100,
+                          Number(((order.amount - order.remaining) * 10000n) / order.amount) / 100,
                         ),
                       ).toFixed(1)}
                       %

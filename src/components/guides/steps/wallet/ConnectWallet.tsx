@@ -31,9 +31,7 @@ export function ConnectWallet(props: DemoStepProps) {
   const isSupported = chains.some((c) => c.id === chain?.id)
   const [copied, copyToClipboard] = useCopyToClipboard()
 
-  const walletConnection = connections.find(
-    (c) => c.connector.id !== 'webAuthn',
-  )
+  const walletConnection = connections.find((c) => c.connector.id !== 'webAuthn')
   const walletAddress = walletConnection?.accounts[0]
   const walletConnector = walletConnection?.connector
   const hasNonWebAuthnWallet = Boolean(walletAddress)
@@ -43,7 +41,7 @@ export function ConnectWallet(props: DemoStepProps) {
   const actions = React.useMemo(() => {
     if (!injectedConnectors.length) {
       return (
-        <div className="text-[14px] -tracking-[2%] flex items-center">
+        <div className="flex items-center text-[14px] -tracking-[2%]">
           No browser wallets found.
         </div>
       )
@@ -51,19 +49,15 @@ export function ConnectWallet(props: DemoStepProps) {
 
     if (!hasNonWebAuthnWallet) {
       return (
-        <div className="flex flex-wrap gap-2 justify-center">
+        <div className="flex flex-wrap justify-center gap-2">
           {injectedConnectors.map((conn) => (
             <Button
               variant="default"
-              className="flex gap-1.5 items-center"
+              className="flex items-center gap-1.5"
               key={conn.id}
               onClick={() => connect.connect({ connector: conn })}
             >
-              {conn.icon ? (
-                <img className="size-5" src={conn.icon} alt={conn.name} />
-              ) : (
-                <div />
-              )}
+              {conn.icon ? <img className="size-5" src={conn.icon} alt={conn.name} /> : <div />}
               {conn.name}
             </Button>
           ))}
@@ -74,14 +68,11 @@ export function ConnectWallet(props: DemoStepProps) {
     return (
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-1">
-          <Button
-            onClick={() => walletAddress && copyToClipboard(walletAddress)}
-            variant="default"
-          >
+          <Button onClick={() => walletAddress && copyToClipboard(walletAddress)} variant="default">
             {copied ? (
-              <LucideCheck className="text-gray9 mt-px" />
+              <LucideCheck className="mt-px text-gray9" />
             ) : (
-              <LucideWalletCards className="text-gray9 mt-px" />
+              <LucideWalletCards className="mt-px text-gray9" />
             )}
             {walletAddress &&
               StringFormatter.truncate(walletAddress, {
@@ -92,10 +83,8 @@ export function ConnectWallet(props: DemoStepProps) {
           </Button>
           <Button
             variant="destructive"
-            className="text-[14px] -tracking-[2%] font-normal"
-            onClick={() =>
-              disconnect.disconnect({ connector: walletConnector })
-            }
+            className="font-normal text-[14px] -tracking-[2%]"
+            onClick={() => disconnect.disconnect({ connector: walletConnector })}
             type="button"
           >
             Disconnect
@@ -123,7 +112,7 @@ export function ConnectWallet(props: DemoStepProps) {
           </Button>
         )}
         {switchChain.isSuccess && (
-          <div className="text-[14px] -tracking-[2%] font-normal flex items-center">
+          <div className="flex items-center font-normal text-[14px] -tracking-[2%]">
             Added Tempo to {connector?.name ?? 'Wallet'}!
           </div>
         )}

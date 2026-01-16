@@ -8,6 +8,7 @@ const { receipt } = await client.fee.setUserTokenSync({
 })
 
 console.log('Transaction hash:', receipt.transactionHash)
+
 // @log: Transaction hash: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
 // [!endregion viem]
 
@@ -25,4 +26,3 @@ mutate({
 console.log('Transaction hash:', result.receipt.transactionHash)
 // @log: Transaction hash: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
 // [!endregion wagmi-hooks]
-

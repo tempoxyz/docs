@@ -50,11 +50,7 @@ function AddTokenButton(props: {
         })
       }
     >
-      {isAdded
-        ? `${token.symbol} Added!`
-        : isPending
-          ? 'Adding...'
-          : `Add ${token.symbol}`}
+      {isAdded ? `${token.symbol} Added!` : isPending ? 'Adding...' : `Add ${token.symbol}`}
     </Button>
   )
 }
@@ -96,17 +92,15 @@ export function AddTokensToWallet(props: DemoStepProps) {
       title="Add tokens to your wallet token list."
     >
       {expanded && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
-            <div className="flex flex-wrap gap-2 mt-2">
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
+            <div className="mt-2 flex flex-wrap gap-2">
               {TOKENS.map((token) => (
                 <AddTokenButton
                   key={token.address}
                   token={token}
                   disabled={!hasNonWebAuthnWallet}
-                  onSuccess={() =>
-                    setAddedTokens((prev) => new Set([...prev, token.address]))
-                  }
+                  onSuccess={() => setAddedTokens((prev) => new Set([...prev, token.address]))}
                   isAdded={addedTokens.has(token.address)}
                 />
               ))}

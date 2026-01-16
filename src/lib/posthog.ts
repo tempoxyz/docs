@@ -1,3 +1,5 @@
+'use client'
+
 import { usePostHog } from 'posthog-js/react'
 
 /**
@@ -144,20 +146,13 @@ export function usePostHogTracking() {
     /**
      * Track a copy action
      */
-    trackCopy: (
-      type: 'code' | 'command',
-      content: string,
-      language?: string,
-    ) => {
-      const eventName =
-        type === 'code' ? POSTHOG_EVENTS.COPY_CODE : POSTHOG_EVENTS.COPY_COMMAND
+    trackCopy: (type: 'code' | 'command', content: string, language?: string) => {
+      const eventName = type === 'code' ? POSTHOG_EVENTS.COPY_CODE : POSTHOG_EVENTS.COPY_COMMAND
 
       posthog?.capture(eventName, {
         [POSTHOG_PROPERTIES.CODE_LANGUAGE]: language,
-        [POSTHOG_PROPERTIES.COMMAND_TEXT]:
-          type === 'command' ? content : undefined,
-        [POSTHOG_PROPERTIES.CODE_SNIPPET]:
-          type === 'code' ? content.substring(0, 100) : undefined, // Limit length
+        [POSTHOG_PROPERTIES.COMMAND_TEXT]: type === 'command' ? content : undefined,
+        [POSTHOG_PROPERTIES.CODE_SNIPPET]: type === 'code' ? content.substring(0, 100) : undefined, // Limit length
         [POSTHOG_PROPERTIES.PAGE_PATH]: window.location.pathname,
       })
     },

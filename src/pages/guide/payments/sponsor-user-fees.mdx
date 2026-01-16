@@ -1,4 +1,4 @@
-import { Cards } from 'vocs'
+import { Cards, Card } from 'vocs'
 import * as Demo from '../../../components/guides/Demo.tsx'
 import * as Step from '../../../components/guides/steps'
 import PublicTestnetSponsorTip from '../../../snippets/public-testnet-sponsor-tip.mdx'
@@ -157,25 +157,25 @@ const { receipt } = await client.token.transferSync({
 ## Learning Resources
 
 <Cards>
-  <Cards.Card
+  <Card
     description="Learn more about fees and how they work on Tempo"
     to="/protocol/fees/spec-fee"
     icon="lucide:book"
     title="Fee Specification"
   />
-  <Cards.Card
+  <Card
     description="Technical specification for TempoTransactions and fee payer signature details"
     to="/protocol/transactions/spec-tempo-transaction"
     icon="lucide:file-code"
     title="TempoTransaction Spec"
   />
-  <Cards.Card
+  <Card
     description="Learn how to sponsor fees for multiple operations at once"
     to="/guide/use-accounts/batch-transactions"
     icon="lucide:layers"
     title="Batch Transactions Guide"
   />
-  <Cards.Card
+  <Card
     description="Understand fee token selection and how to pay with different stablecoins"
     to="/guide/payments/pay-fees-in-any-stablecoin"
     icon="lucide:coins"

@@ -21,14 +21,14 @@ export function Connect() {
       <button
         type="button"
         onClick={handleConnect({ type: 'sign-in' })}
-        className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100 rounded-full font-medium transition-colors"
+        className="rounded-full bg-gray-200 px-3 py-1 font-medium text-gray-900 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
       >
         Log in
       </button>
       <button
         type="button"
         onClick={handleConnect({ type: 'sign-up' })}
-        className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 rounded-full font-medium transition-colors"
+        className="rounded-full bg-blue-600 px-2 py-1 font-medium text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
       >
         Sign up
       </button>
@@ -63,14 +63,14 @@ export function ConnectAndDisconnect() {
         <button
           type="button"
           onClick={handleConnect({ type: 'sign-in' })}
-          className="px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100 rounded-full font-medium transition-colors"
+          className="rounded-full bg-gray-200 px-2 py-1 font-medium text-gray-900 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
         >
           Log in
         </button>
         <button
           type="button"
           onClick={handleConnect({ type: 'sign-up' })}
-          className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 rounded-full font-medium transition-colors"
+          className="rounded-full bg-blue-600 px-2 py-1 font-medium text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
         >
           Sign up
         </button>
@@ -82,7 +82,7 @@ export function ConnectAndDisconnect() {
     <button
       type="button"
       onClick={handleDisconnect}
-      className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white dark:bg-red-500 dark:hover:bg-red-600 rounded-full font-medium transition-colors"
+      className="rounded-full bg-red-600 px-2 py-1 font-medium text-white transition-colors hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
     >
       Disconnect
     </button>

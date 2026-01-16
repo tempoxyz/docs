@@ -59,9 +59,7 @@ export function BurnTokenBlocked(props: DemoStepProps) {
   }
 
   const hasSufficientBalance =
-    recipientBalance &&
-    metadata &&
-    recipientBalance >= parseUnits('100', metadata.decimals)
+    recipientBalance && metadata && recipientBalance >= parseUnits('100', metadata.decimals)
 
   const active = React.useMemo(() => {
     return Boolean(
@@ -82,24 +80,18 @@ export function BurnTokenBlocked(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             Hide
           </Button>
         ) : (
           <Button
-            variant={
-              active
-                ? burnBlocked.isSuccess
-                  ? 'default'
-                  : 'accent'
-                : 'default'
-            }
+            variant={active ? (burnBlocked.isSuccess ? 'default' : 'accent') : 'default'}
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
           >
             Enter details
           </Button>
@@ -109,18 +101,15 @@ export function BurnTokenBlocked(props: DemoStepProps) {
       title={`Burn 100 ${metadata ? metadata.name : 'tokens'} from blocked address.`}
     >
       {expanded && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
-            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-2">
-              <div className="flex flex-col flex-2">
-                <label
-                  className="text-[11px] -tracking-[1%] text-gray9"
-                  htmlFor="blockedAddress"
-                >
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
+            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
+              <div className="flex flex-2 flex-col">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="blockedAddress">
                   Blocked address
                 </label>
                 <input
-                  className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
                   name="blockedAddress"
@@ -135,7 +124,7 @@ export function BurnTokenBlocked(props: DemoStepProps) {
                 disabled={!address}
                 onClick={handleBurnBlocked}
                 type="button"
-                className="text-[14px] -tracking-[2%] font-normal"
+                className="font-normal text-[14px] -tracking-[2%]"
               >
                 {burnBlocked.isPending ? 'Burning...' : 'Burn'}
               </Button>

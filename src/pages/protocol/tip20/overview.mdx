@@ -1,4 +1,4 @@
-import { Cards } from 'vocs'
+import { Cards, Card } from 'vocs'
 
 # TIP-20 Token Standard
 
@@ -13,25 +13,25 @@ Below are some of the key benefits and features of TIP-20 tokens:
 ### Payments
 
 <Cards>
-  <Cards.Card
+  <Card
     description="Only TIP-20 tokens can be used to pay for transaction fees on Tempo."
     to="#pay-fees-in-any-stablecoin"
     icon="lucide:wallet"
     title="Pay for Blockchain Transaction Fees"
   />
-  <Cards.Card
+  <Card
     description="TIP-20 tokens have dedicated blockspace from all other transactions, ensuring predictable payment fees."
     to="#payments-lane"
     icon="lucide:route"
     title="Get Predictable Payment Fees"
   />
-  <Cards.Card
+  <Card
     description="Attach 32-byte memos to transfers for payment references, invoice IDs, or transaction notes."
     to="#transfer-memos"
     icon="lucide:message-square"
     title="Transfer Memos"
   />
-  <Cards.Card
+  <Card
     description="Opt-in reward distribution system for issuing rewards to token holders."
     to="#reward-distribution"
     icon="lucide:gift"
@@ -42,13 +42,13 @@ Below are some of the key benefits and features of TIP-20 tokens:
 ### Exchange
 
 <Cards>
-  <Cards.Card
+  <Card
     description="Declare currency identifiers (e.g., USD, EUR) for proper routing and pricing in the Stablecoin DEX."
     to="#currency-declaration"
     icon="lucide:banknote"
     title="Currency Declaration"
   />
-  <Cards.Card
+  <Card
     description="TIP-20 tokens can serve as quote tokens in Tempo's DEX for trading pairs and liquidity pools."
     to="#dex-quote-tokens"
     icon="lucide:arrow-left-right"
@@ -59,19 +59,19 @@ Below are some of the key benefits and features of TIP-20 tokens:
 ### Compliance & Controls
 
 <Cards>
-  <Cards.Card
+  <Card
     description="Set access control roles for minting, burning, pausing, and administrative operations."
     to="#role-based-access-control-rbac"
     icon="lucide:shield"
     title="Built-in Role-Based Access Control"
   />
-  <Cards.Card
+  <Card
     description="Enforce compliance with whitelist and blacklist policies via the TIP-403 Policy Registry."
     to="#tip-403-transfer-policies"
     icon="lucide:file-check"
     title="Enforce Transfer Policies"
   />
-  <Cards.Card
+  <Card
     description="Supply caps, pause/unpause controls, and 32-byte transfer memos for payment references."
     to="#operational-controls"
     icon="lucide:settings"
@@ -139,25 +139,25 @@ By using TIP-20 tokens as quote tokens, the DEX benefits from the same payment-o
 ## Additional Links
 
 <Cards>
-  <Cards.Card
+  <Card
     description="Learn how TIP-20 works and its features"
     to="/protocol/tip20/spec"
     icon="lucide:file-text"
     title="TIP-20 Specification"
   />
-  <Cards.Card
+  <Card
     description="Send and receive payments using stablecoins on Tempo"
     to="/guide/payments"
     icon="lucide:send"
     title="Guide: Make Payments"
   />
-  <Cards.Card
+  <Card
     description="Create and manage your own stablecoin on Tempo"
     to="/guide/issuance"
     icon="lucide:rocket"
     title="Guide: Issue Stablecoins"
   />
-  <Cards.Card
+  <Card
     description="Solidity reference implementation of the TIP-20 standard"
     to="https://github.com/tempoxyz/tempo/blob/main/docs/specs/src/TIP20.sol"
     icon="lucide:file-text"

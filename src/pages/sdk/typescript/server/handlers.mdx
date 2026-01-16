@@ -1,4 +1,4 @@
-import { Cards } from 'vocs'
+import { Cards, Card } from 'vocs'
 
 # Overview
 
@@ -38,19 +38,19 @@ export const POST = handler.fetch // Next.js
 ## Handlers
 
 <Cards>
-  <Cards.Card
+  <Card
     description="Server handler to handle transactions that require a fee payer"
     to="/sdk/typescript/server/handler.feePayer"
     icon="lucide:badge-dollar-sign"
     title="feePayer"
   />
-  <Cards.Card
+  <Card
     description="Server handler to manage public key registrations"
     to="/sdk/typescript/server/handler.keyManager"
     icon="lucide:key-round"
     title="keyManager"
   />
-  <Cards.Card
+  <Card
     description="Compose multiple handlers into a single handler"
     to="/sdk/typescript/server/handler.compose"
     icon="lucide:blocks"

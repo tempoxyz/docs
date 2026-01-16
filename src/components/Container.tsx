@@ -10,16 +10,16 @@ export function Container(
 
   // Note: styling of this container mimics Vocs styles.
   return (
-    <div className="border-gray4 border rounded divide-gray4 divide-y">
+    <div className="divide-y divide-gray4 rounded border border-gray4">
       {(headerLeft || headerRight) && (
-        <header className="px-4 h-[44px] flex items-center justify-between">
+        <header className="flex h-[44px] items-center justify-between px-4">
           {headerLeft}
           {headerRight}
         </header>
       )}
       <div className="p-4">{children}</div>
       {footer && (
-        <footer className="px-2.5 min-h-8 text-[13px] text-gray10 items-center flex">
+        <footer className="flex min-h-8 items-center px-2.5 text-[13px] text-gray10">
           {footer}
         </footer>
       )}

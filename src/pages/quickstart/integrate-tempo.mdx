@@ -1,27 +1,27 @@
 import * as Demo from '../../components/guides/Demo.tsx'
 import { ConnectWallet } from '../../components/ConnectWallet.tsx'
 import TempoTxProperties from '../../snippets/tempo-tx-properties.mdx'
-import { Cards } from 'vocs'
+import { Cards, Card } from 'vocs'
 
-## Integrate Tempo Testnet
+# Integrate Tempo Testnet
 
 Tempo is fully compatible with the Ethereum Virtual Machine (EVM), targeting the **Osaka** EVM hard fork. So, everything you'd expect to work with Ethereum works on Tempo, with only a few exceptions which we detail on the [EVM Differences](/quickstart/evm-compatibility) page. 
 
 
 <Cards>
-  <Cards.Card
+  <Card
     icon="lucide:network"
     title="Connect to the Network"
     description="Learn how to connect to the Tempo Testnet with your wallet or programmatically."
     to="/quickstart/connection-details"
   />
-  <Cards.Card
+  <Card
     icon="lucide:plug"
     title="Explore Testnet Integrations"
     description="Integrate right away with the developer products you're already familiar with."
     to="/quickstart/developer-tools"
   />
-  <Cards.Card
+  <Card
     icon="lucide:wallet"
     title="Wallet Developers"
     description="Support Tempo in your wallet and deliver an enhanced experience for your users."
@@ -29,30 +29,30 @@ Tempo is fully compatible with the Ethereum Virtual Machine (EVM), targeting the
   />
 </Cards>
 
-### Start Building
+## Start Building
 
 The guides below will help you get a sense for what is possible to do with Tempo. All of the guides below are fully-featured Tempo applications themselves, built with the [Tempo SDKs](/sdk).
 
 <Cards>
-  <Cards.Card
+  <Card
     icon="lucide:wallet"
     title="Create & Use Accounts"
     description="Create and integrate Tempo accounts with domain-bound passkeys or EVM-compatible wallets"
     to="/guide/use-accounts"
   />
-  <Cards.Card
+  <Card
     icon="lucide:send"
     title="Make Payments"
     description="Send and receive stablecoin payments with flexible fee options and sponsorship capabilities"
     to="/guide/payments"
   />
-  <Cards.Card
+  <Card
     icon="lucide:coins"
     title="Issue Stablecoins"
     description="Create and manage your own stablecoin with built-in compliance features"
     to="/guide/issuance"
   />
-  <Cards.Card
+  <Card
     icon="lucide:arrow-left-right"
     title="Exchange Stablecoins"
     description="Trade between stablecoins on Tempo's enshrined decentralized exchange"
@@ -60,20 +60,20 @@ The guides below will help you get a sense for what is possible to do with Tempo
   />
 </Cards>
 
-### Go Deeper
+## Go Deeper
 
 The Tempo source code is fully open-source and available on [GitHub](https://github.com/tempoxyz).
 
 If you're interested in learning more about how Tempo works under the hood, feel free to explore the codebase directly, run a node for yourself, or refer to the protocol specifications for a deeper understanding. 
 
 <Cards>
-  <Cards.Card
+  <Card
     icon="lucide:server"
     title="Run a Tempo Node"
     description="System requirements, installation and usage instructions for running a Tempo node."
     to="/guide/node"
   />
-  <Cards.Card
+  <Card
     icon="lucide:book-open"
     title="Protocol Specifications"
     description="Technical specifications for tokens, fees, transactions, and protocol components."

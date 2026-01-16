@@ -1,9 +1,6 @@
 'use client'
 import * as React from 'react'
-import {
-  getAllSignatures,
-  type SignatureInfo,
-} from './lib/IndexSupplySignatures'
+import { getAllSignatures, type SignatureInfo } from './lib/IndexSupplySignatures'
 
 type SignatureSelectorProps = {
   value: string[]
@@ -60,10 +57,7 @@ export function SignatureSelector(props: SignatureSelectorProps) {
     if (!isOpen) return
 
     function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false)
       }
     }
@@ -110,10 +104,7 @@ export function SignatureSelector(props: SignatureSelectorProps) {
   return (
     <div className="relative" ref={dropdownRef}>
       <div className="space-y-2">
-        <label
-          htmlFor="signature-search"
-          className="text-[13px] text-gray11 block"
-        >
+        <label htmlFor="signature-search" className="block text-[13px] text-gray11">
           Filter by Signatures (optional)
         </label>
         <div className="relative">
@@ -124,14 +115,14 @@ export function SignatureSelector(props: SignatureSelectorProps) {
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => !disabled && setIsOpen(true)}
             placeholder={placeholderText}
-            className="w-full h-[34px] px-3 border border-gray4 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-[34px] w-full rounded-lg border border-gray4 px-3 text-[13px] focus:outline-none focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-50"
             disabled={disabled}
           />
           {value.length > 0 && !disabled && (
             <button
               type="button"
               onClick={clearAll}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-gray9 hover:text-gray12"
+              className="absolute top-1/2 right-2 -translate-y-1/2 text-[11px] text-gray9 hover:text-gray12"
             >
               Clear ({value.length})
             </button>
@@ -140,18 +131,13 @@ export function SignatureSelector(props: SignatureSelectorProps) {
       </div>
 
       {isOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-gray1 border border-gray4 rounded-lg shadow-lg max-h-[400px] overflow-y-auto">
+        <div className="absolute z-10 mt-1 max-h-[400px] w-full overflow-y-auto rounded-lg border border-gray4 bg-gray1 shadow-lg">
           {Object.keys(groupedSignatures).length === 0 ? (
-            <div className="px-3 py-4 text-[13px] text-gray9 text-center">
-              No signatures found
-            </div>
+            <div className="px-3 py-4 text-center text-[13px] text-gray9">No signatures found</div>
           ) : (
             Object.entries(groupedSignatures).map(([contract, signatures]) => (
-              <div
-                key={contract}
-                className="border-b border-gray4 last:border-b-0"
-              >
-                <div className="sticky top-0 px-3 py-1 text-[11px] font-medium text-gray10 uppercase tracking-wide bg-gray2 z-10">
+              <div key={contract} className="border-gray4 border-b last:border-b-0">
+                <div className="sticky top-0 z-10 bg-gray2 px-3 py-1 font-medium text-[11px] text-gray10 uppercase tracking-wide">
                   {contract}
                 </div>
                 <div className="py-0.5">
@@ -160,7 +146,7 @@ export function SignatureSelector(props: SignatureSelectorProps) {
                       key={sig.signature}
                       type="button"
                       onClick={() => toggleSignature(sig.signature)}
-                      className="w-full px-3 py-1.5 text-left hover:bg-gray3 flex items-center gap-1.5"
+                      className="flex w-full items-center gap-1.5 px-3 py-1.5 text-left hover:bg-gray3"
                     >
                       <input
                         type="checkbox"
@@ -168,17 +154,13 @@ export function SignatureSelector(props: SignatureSelectorProps) {
                         onChange={() => {}}
                         className="shrink-0"
                       />
-                      <span className="text-[11px] text-gray12 font-mono shrink-0">
-                        {sig.name}
-                      </span>
-                      <span className="text-[11px] text-gray9 font-mono truncate min-w-0">
+                      <span className="shrink-0 font-mono text-[11px] text-gray12">{sig.name}</span>
+                      <span className="min-w-0 truncate font-mono text-[11px] text-gray9">
                         {sig.signature}
                       </span>
                       <span
-                        className={`text-[9px] font-medium h-[16px] flex items-center text-center justify-center rounded px-1.5 tracking-[2%] uppercase leading-none shrink-0 ml-auto ${
-                          sig.type === 'event'
-                            ? 'bg-blue3 text-blue9'
-                            : 'bg-purple3 text-purple9'
+                        className={`ml-auto flex h-[16px] shrink-0 items-center justify-center rounded px-1.5 text-center font-medium text-[9px] uppercase leading-none tracking-[2%] ${
+                          sig.type === 'event' ? 'bg-blue3 text-blue9' : 'bg-purple3 text-purple9'
                         }`}
                       >
                         {sig.type}
@@ -195,18 +177,18 @@ export function SignatureSelector(props: SignatureSelectorProps) {
       {!isOpen && (
         <div className="mt-2 space-y-2">
           {value.length === 0 ? (
-            <div className="bg-gray2 border border-gray4 rounded p-3 space-y-2">
+            <div className="space-y-2 rounded border border-gray4 bg-gray2 p-3">
               <div className="text-[12px] text-gray11 leading-relaxed">
                 No signatures selected. You can query from these base tables:
               </div>
               <div className="flex flex-wrap gap-2">
-                <code className="text-[11px] font-mono bg-gray3 text-gray11 px-2 py-1 rounded">
+                <code className="rounded bg-gray3 px-2 py-1 font-mono text-[11px] text-gray11">
                   blocks
                 </code>
-                <code className="text-[11px] font-mono bg-gray3 text-gray11 px-2 py-1 rounded">
+                <code className="rounded bg-gray3 px-2 py-1 font-mono text-[11px] text-gray11">
                   txs
                 </code>
-                <code className="text-[11px] font-mono bg-gray3 text-gray11 px-2 py-1 rounded">
+                <code className="rounded bg-gray3 px-2 py-1 font-mono text-[11px] text-gray11">
                   logs
                 </code>
               </div>
@@ -230,21 +212,21 @@ export function SignatureSelector(props: SignatureSelectorProps) {
                   return (
                     <div
                       key={sig}
-                      className="inline-flex items-center gap-1.5 px-2 py-1 bg-gray3 border border-gray4 rounded text-[11px] font-mono"
+                      className="inline-flex items-center gap-1.5 rounded border border-gray4 bg-gray3 px-2 py-1 font-mono text-[11px]"
                     >
                       <span
-                        className={`size-2 rounded-full shrink-0 ${
+                        className={`size-2 shrink-0 rounded-full ${
                           isEvent ? 'bg-blue9' : 'bg-purple9'
                         }`}
                       />
-                      <span className="text-gray11 truncate max-w-[300px]">
+                      <span className="max-w-[300px] truncate text-gray11">
                         {sigInfo?.name || sig}
                       </span>
                       {!disabled && (
                         <button
                           type="button"
                           onClick={() => toggleSignature(sig)}
-                          className="text-gray9 hover:text-gray12 leading-none"
+                          className="text-gray9 leading-none hover:text-gray12"
                         >
                           ×
                         </button>
@@ -257,32 +239,29 @@ export function SignatureSelector(props: SignatureSelectorProps) {
               {!disabled && (
                 <>
                   {hasMixedTypes && (
-                    <div className="bg-yellow3 border border-yellow6 text-yellow11 rounded py-2 px-3 text-[12px] leading-normal">
-                      ⚠️ All signatures must be the same type (all events or all
-                      functions)
+                    <div className="rounded border border-yellow6 bg-yellow3 px-3 py-2 text-[12px] text-yellow11 leading-normal">
+                      ⚠️ All signatures must be the same type (all events or all functions)
                     </div>
                   )}
 
                   {!hasMixedTypes && (
-                    <div className="bg-blue2 border border-blue4 rounded p-3 space-y-2">
-                      <div className="text-[11px] font-medium text-blue11">
+                    <div className="space-y-2 rounded border border-blue4 bg-blue2 p-3">
+                      <div className="font-medium text-[11px] text-blue11">
                         Table names for your query:
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {selectedSignatureInfos.map((sig) => (
                           <code
                             key={sig.signature}
-                            className="text-[11px] font-mono bg-blue3 text-blue11 px-2 py-1 rounded"
+                            className="rounded bg-blue3 px-2 py-1 font-mono text-[11px] text-blue11"
                           >
                             {getTableName(sig.name)}
                           </code>
                         ))}
                       </div>
                       <div className="text-[11px] text-blue9 leading-relaxed">
-                        Each signature creates a virtual table. Use these names
-                        in your SQL query.
-                        {value.length > 1 &&
-                          ' You can JOIN these tables together.'}
+                        Each signature creates a virtual table. Use these names in your SQL query.
+                        {value.length > 1 && ' You can JOIN these tables together.'}
                       </div>
                     </div>
                   )}

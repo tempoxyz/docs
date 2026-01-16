@@ -1,13 +1,13 @@
 import * as Demo from '../../../components/guides/Demo.tsx'
 import * as Step from '../../../components/guides/steps'
 import * as Token from '../../../components/guides/tokens'
-import { Cards } from 'vocs'
+import { Cards, Card } from 'vocs'
 
 # Send Parallel Transactions
 
 Submit multiple transactions in parallel using Tempo's [2D nonces](/protocol/transactions/spec-tempo-transaction). The `nonceKey` property allow you to send concurrent transactions without waiting for each one to confirm sequentially.
 
-### Understanding nonce keys
+## Understanding nonce keys
 
 Tempo uses a **2D nonce system** that enables parallel transaction execution:
 
@@ -16,15 +16,15 @@ Tempo uses a **2D nonce system** that enables parallel transaction execution:
 
 When you send a transaction without specifying a `nonceKey`, it uses the protocol nonce and behaves like a standard sequential transaction. By specifying different nonce keys, you can submit multiple transactions simultaneously without waiting for confirmations.
 
-### Key management strategies
+## Key management strategies
 
 There are two ways to specify a `nonceKey` for a transaction:
 
-#### Explicit keys
+### Explicit keys
 
 Explicit keys (1n, 2n, etc.) are best when you want to reuse keys. For high-throughput applications, these keys can be used to load-balance transaction submission to the network in a gas-efficient way. You can track the most recent call on each key in your application, and, once that transaction confirms, the same key can be used for new transactions. This approach is more gas efficient, as provisioning a new `nonceKey` [costs gas](/protocol/transactions/spec-tempo-transaction#gas-schedule).
 
-#### `'random'` keys
+### `'random'` keys
 For simple cases where you don't need to track keys. This approach is recommended when handling bursts of high activity, in which you need to submit transfers to the network and don't care about the added gas costs for provisioning multiple keys.
 
 ## Demo
@@ -212,13 +212,13 @@ Batch transactions are not as appropriate for the payments to multiple recipient
 ## Learning Resources
 
 <Cards>
-  <Cards.Card
+  <Card
     description="View nonce actions in the Viem"
     to="https://viem.sh/tempo/actions/nonce.getNonce"
     icon="lucide:code"
     title="Viem Documentation for Nonces"
   />
-  <Cards.Card
+  <Card
     description="Learn more about transactions on Tempo"
     to="/protocol/transactions"
     icon="lucide:send"

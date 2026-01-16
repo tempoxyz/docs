@@ -50,14 +50,7 @@ export function ClaimReward(props: DemoStepProps) {
     )
     if (last) return activeWithBalance
     return activeWithBalance && !claim.isSuccess
-  }, [
-    address,
-    balance,
-    tokenAddress,
-    flowDependenciesMet,
-    claim.isSuccess,
-    last,
-  ])
+  }, [address, balance, tokenAddress, flowDependenciesMet, claim.isSuccess, last])
 
   return (
     <Step
@@ -71,7 +64,7 @@ export function ClaimReward(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(!expanded)}
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             {expanded ? 'Hide' : 'Show'}
@@ -94,8 +87,8 @@ export function ClaimReward(props: DemoStepProps) {
       }
     >
       {claim.data && expanded && (
-        <div className="flex ml-6 flex-col gap-3 py-4">
-          <div className="ps-5 border-gray4 border-s-2">
+        <div className="ml-6 flex flex-col gap-3 py-4">
+          <div className="border-gray4 border-s-2 ps-5">
             <div className="text-[13px] text-gray9 -tracking-[2%]">
               Successfully claimed {REWARD_AMOUNT} {metadata?.name ?? 'token'}.
             </div>

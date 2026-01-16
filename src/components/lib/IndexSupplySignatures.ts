@@ -19,16 +19,11 @@ function formatEventSignature(event: AbiEvent): string {
 }
 
 function formatFunctionSignature(fn: AbiFunction): string {
-  const inputs = fn.inputs
-    .map((input) => `${input.type} ${input.name || ''}`)
-    .join(', ')
+  const inputs = fn.inputs.map((input) => `${input.type} ${input.name || ''}`).join(', ')
   return `${fn.name}(${inputs})`
 }
 
-function extractSignaturesFromAbi(
-  abi: Abi,
-  contractName: string,
-): SignatureInfo[] {
+function extractSignaturesFromAbi(abi: Abi, contractName: string): SignatureInfo[] {
   const signatures: SignatureInfo[] = []
 
   for (const item of abi) {

@@ -4,33 +4,6 @@
 
 @custom-variant dark (&:where([style*="color-scheme: dark"], [style*="color-scheme: dark"] *));
 
-.vocs_Navigation,
-.vocs_NavigationMenu_list {
-  align-items: center;
-}
-
-.vocs_Banner {
-  background-color: #f6f6f6;
-  border-bottom: 1px solid #e6e6e6;
-  color: #1a191b;
-}
-
-.vocs_Banner_closeButton {
-  background-color: #f6f6f6;
-}
-
-.dark {
-  .vocs_Banner {
-    background-color: #1a191b;
-    border-bottom: 1px solid #2a292b;
-    color: white;
-  }
-
-  .vocs_Banner_closeButton {
-    background-color: #1a191b;
-  }
-}
-
 @utility scrollbar-gutter-auto {
   scrollbar-gutter: auto;
 }
@@ -236,6 +209,7 @@
   --border-color-accent: var(--color-blue9);
   --border-color-accentHover: var(--color-blue10);
   --border-color-active: light-dark(var(--color-black), var(--color-white));
+  --border-color-invert: light-dark(var(--color-black), var(--color-white));
   --border-color-primary: light-dark(var(--color-gray5), var(--color-gray4));
   --border-color-surface: light-dark(var(--color-gray4), var(--color-gray5));
 
@@ -254,4 +228,9 @@
   --spacing-titlebar: 36px;
 
   --radius-default: calc(infinity * 1px);
+}
+
+[data-v-logo] img {
+  height: 28px;
+  margin-top: 2px;
 }

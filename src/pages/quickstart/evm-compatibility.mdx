@@ -1,31 +1,31 @@
-import { Cards } from 'vocs'
+import { Cards, Card } from 'vocs'
 
-## EVM Differences
+# EVM Differences
 
 Tempo is fully compatible with the Ethereum Virtual Machine (EVM), targeting the **Osaka** EVM hard fork. Developers can deploy and interact with smart contracts using the same tools, languages, and frameworks they use on Ethereum, such as Solidity, Foundry, and Hardhat. All Ethereum JSON-RPC methods work out of the box. 
 
 While the execution environment mirrors Ethereum's, Tempo introduces some differences optimized for payments, described below.
 
 <Cards>
-  <Cards.Card
+  <Card
     description="How Tempo handles wallet compatibility and native token representation."
     to="#wallet-differences"
     icon="lucide:wallet"
     title="Wallet Differences"
   />
-  <Cards.Card
+  <Card
     description="Key differences when sending transactions, including fee tokens and default preferences."
     to="#transaction-differences"
     icon="lucide:send"
     title="Transaction Differences"
   />
-  <Cards.Card
+  <Card
     description="VM-level differences including balance opcodes and Solidity compatibility."
     to="#vm-layer-differences"
     icon="lucide:code"
     title="VM Layer Differences"
   />
-  <Cards.Card
+  <Card
     description="How Tempo's consensus and finality differ from Ethereum's approach."
     to="#consensus--finality"
     icon="lucide:check-circle"

@@ -1,4 +1,4 @@
-import { Cards } from 'vocs'
+import { Cards, Card } from 'vocs'
 
 # Create & Use Accounts
 
@@ -14,19 +14,19 @@ You can even use both if you would like to offer both experiences.
 :::
 
 <Cards>
-  <Cards.Card
+  <Card
     description="Use domain-bound passkey accounts for an Embedded Account experience"
     to="/guide/use-accounts/embed-passkeys"
     icon="lucide:fingerprint"
     title="Embed Passkey Accounts"
   />
-  <Cards.Card
+  <Card
     description="Connect your app to wallets using MetaMask and others for a Universal Account experience"
     to="/guide/use-accounts/connect-to-wallets"
     icon="lucide:wallet"
     title="Connect to Wallets"
   />
-  <Cards.Card
+  <Card
     description="Add test stablecoins to your account balance using the testnet faucet"
     to="/quickstart/faucet"
     icon="lucide:coins"

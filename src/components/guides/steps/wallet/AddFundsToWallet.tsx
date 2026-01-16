@@ -30,6 +30,7 @@ export function AddFundsToWallet(props: DemoStepProps) {
       refetchInterval: 1_500,
     },
   })
+  // biome-ignore lint/correctness/useExhaustiveDependencies: _
   React.useEffect(() => {
     balanceRefetch()
   }, [blockNumber])
@@ -40,22 +41,16 @@ export function AddFundsToWallet(props: DemoStepProps) {
       if (!client) throw new Error('client not found')
 
       if (import.meta.env.VITE_ENVIRONMENT !== 'local')
-        await Actions.faucet.fundSync(
-          client as unknown as Client<Transport, Chain>,
-          { account: address },
-        )
+        await Actions.faucet.fundSync(client as unknown as Client<Transport, Chain>, {
+          account: address,
+        })
       else {
-        await Actions.token.transferSync(
-          client as unknown as Client<Transport, Chain>,
-          {
-            account: mnemonicToAccount(
-              'test test test test test test test test test test test junk',
-            ),
-            amount: parseUnits('10000', 6),
-            to: address,
-            token: alphaUsd,
-          },
-        )
+        await Actions.token.transferSync(client as unknown as Client<Transport, Chain>, {
+          account: mnemonicToAccount('test test test test test test test test test test test junk'),
+          amount: parseUnits('10000', 6),
+          to: address,
+          token: alphaUsd,
+        })
       }
       await new Promise((resolve) => setTimeout(resolve, 400))
       queryClient.refetchQueries({ queryKey: ['getBalance'] })
@@ -76,7 +71,7 @@ export function AddFundsToWallet(props: DemoStepProps) {
         <Button
           disabled={!hasNonWebAuthnWallet || fundAccount.isPending}
           variant="default"
-          className="text-[14px] -tracking-[2%] font-normal"
+          className="font-normal text-[14px] -tracking-[2%]"
           onClick={() => fundAccount.mutate()}
           type="button"
         >
@@ -87,14 +82,14 @@ export function AddFundsToWallet(props: DemoStepProps) {
       <Button
         disabled={!hasNonWebAuthnWallet || fundAccount.isPending}
         variant={hasNonWebAuthnWallet ? 'accent' : 'default'}
-        className="text-[14px] -tracking-[2%] font-normal"
+        className="font-normal text-[14px] -tracking-[2%]"
         type="button"
         onClick={() => fundAccount.mutate()}
       >
         {fundAccount.isPending ? 'Adding funds' : 'Add funds'}
       </Button>
     )
-  }, [hasNonWebAuthnWallet, balance, fundAccount.isPending])
+  }, [hasNonWebAuthnWallet, balance, fundAccount.isPending, fundAccount.mutate])
 
   return (
     <Step

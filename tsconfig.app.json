@@ -23,5 +23,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
+  "exclude": ["src/pages.gen.ts"],
   "include": ["src"]
 }

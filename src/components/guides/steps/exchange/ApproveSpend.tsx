@@ -32,9 +32,7 @@ export function ApproveSpend(props: DemoStepProps) {
       completed={approve.isSuccess}
       actions={
         <Button
-          variant={
-            active ? (approve.isSuccess ? 'default' : 'accent') : 'default'
-          }
+          variant={active ? (approve.isSuccess ? 'default' : 'accent') : 'default'}
           disabled={!active}
           onClick={() => {
             approve.mutate({
@@ -45,7 +43,7 @@ export function ApproveSpend(props: DemoStepProps) {
             })
           }}
           type="button"
-          className="text-[14px] -tracking-[2%] font-normal"
+          className="font-normal text-[14px] -tracking-[2%]"
         >
           {approve.isPending ? 'Approving...' : 'Approve Spend'}
         </Button>
@@ -54,8 +52,8 @@ export function ApproveSpend(props: DemoStepProps) {
       title="Approve the Stablecoin DEX to spend pathUSD"
     >
       {approve.data && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
             <ExplorerLink hash={approve.data.receipt.transactionHash} />
           </div>
         </div>

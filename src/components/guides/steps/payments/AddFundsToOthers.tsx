@@ -15,9 +15,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
   const { stepNumber = 2, last = false } = props
   const { address } = useConnection()
   const queryClient = useQueryClient()
-  const [fundAddress, setFundAddress] = React.useState<string | undefined>(
-    undefined,
-  )
+  const [fundAddress, setFundAddress] = React.useState<string | undefined>(undefined)
 
   // Initialize fundAddress with connected wallet address (only once)
   React.useEffect(() => {
@@ -39,6 +37,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
       refetchInterval: 1_500,
     },
   })
+  // biome-ignore lint/correctness/useExhaustiveDependencies: _
   React.useEffect(() => {
     balanceRefetch()
   }, [blockNumber])
@@ -50,10 +49,9 @@ export function AddFundsToOthers(props: DemoStepProps) {
 
       let receipts = null
       if (import.meta.env.VITE_ENVIRONMENT !== 'local')
-        receipts = await Actions.faucet.fundSync(
-          client as unknown as Client<Transport, Chain>,
-          { account: targetAddress as Address },
-        )
+        receipts = await Actions.faucet.fundSync(client as unknown as Client<Transport, Chain>, {
+          account: targetAddress as Address,
+        })
       else {
         const result = await Actions.token.transferSync(
           client as unknown as Client<Transport, Chain>,
@@ -88,7 +86,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
         <Button
           disabled={!isValidTarget || fundAccount.isPending}
           variant="default"
-          className="text-[14px] -tracking-[2%] font-normal"
+          className="font-normal text-[14px] -tracking-[2%]"
           onClick={() => fundAccount.mutate()}
           type="button"
         >
@@ -99,14 +97,14 @@ export function AddFundsToOthers(props: DemoStepProps) {
       <Button
         disabled={!isValidTarget || fundAccount.isPending}
         variant={isValidTarget ? 'accent' : 'default'}
-        className="text-[14px] -tracking-[2%] font-normal"
+        className="font-normal text-[14px] -tracking-[2%]"
         type="button"
         onClick={() => fundAccount.mutate()}
       >
         {fundAccount.isPending ? 'Adding funds' : 'Add funds'}
       </Button>
     )
-  }, [isValidTarget, balance, fundAccount.isPending, fundAccount.isSuccess])
+  }, [isValidTarget, balance, fundAccount.isPending, fundAccount.isSuccess, fundAccount.mutate])
 
   return (
     <Step
@@ -117,17 +115,14 @@ export function AddFundsToOthers(props: DemoStepProps) {
       number={stepNumber}
       title="Add testnet funds to an address."
     >
-      <div className="flex mx-6 flex-col gap-3 pb-4">
-        <div className="ps-5 border-gray4 border-s-2">
-          <div className="flex flex-col mt-2">
-            <label
-              className="text-[11px] -tracking-[1%] text-gray9"
-              htmlFor="fundAddress"
-            >
+      <div className="mx-6 flex flex-col gap-3 pb-4">
+        <div className="border-gray4 border-s-2 ps-5">
+          <div className="mt-2 flex flex-col">
+            <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="fundAddress">
               Address to fund
             </label>
             <input
-              className="h-[34px] border border-gray4 px-3.25 rounded-full text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+              className="h-[34px] rounded-full border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
               autoCapitalize="none"
               autoComplete="off"
               autoCorrect="off"

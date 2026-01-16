@@ -2,20 +2,9 @@
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import { parseUnits } from 'viem'
-import {
-  useConfig,
-  useConnection,
-  useConnectionEffect,
-  useTransaction,
-} from 'wagmi'
+import { useConfig, useConnection, useConnectionEffect, useTransaction } from 'wagmi'
 import { Actions, Hooks } from 'wagmi/tempo'
-import {
-  Button,
-  ExplorerLink,
-  FAKE_RECIPIENT,
-  FAKE_RECIPIENT_2,
-  Step,
-} from '../../Demo'
+import { Button, ExplorerLink, FAKE_RECIPIENT, FAKE_RECIPIENT_2, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
@@ -25,13 +14,7 @@ type TransferState = {
   error?: string
 }
 
-function TransferResult({
-  label,
-  state,
-}: {
-  label: string
-  state: TransferState
-}) {
+function TransferResult({ label, state }: { label: string; state: TransferState }) {
   const { data: transaction } = useTransaction({
     hash: state.hash as `0x${string}` | undefined,
     query: {
@@ -44,22 +27,18 @@ function TransferResult({
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-2">
-        <span className="text-[13px] text-gray9 mt-1">{label}:</span>
+        <span className="mt-1 text-[13px] text-gray9">{label}:</span>
         {state.status === 'pending' && (
-          <span className="text-[13px] text-gray9 mt-1">Sending...</span>
+          <span className="mt-1 text-[13px] text-gray9">Sending...</span>
         )}
         {state.status === 'error' && (
-          <span className="text-[13px] text-red-500 mt-1">
-            Transfer failed, please try again
-          </span>
+          <span className="mt-1 text-[13px] text-red-500">Transfer failed, please try again</span>
         )}
-        {state.status === 'success' && state.hash && (
-          <ExplorerLink hash={state.hash} />
-        )}
+        {state.status === 'success' && state.hash && <ExplorerLink hash={state.hash} />}
       </div>
 
       {state.status === 'success' && (
-        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-gray9 pl-2">
+        <div className="flex flex-wrap gap-x-3 gap-y-1 pl-2 text-[10px] text-gray9">
           {transaction ? (
             <>
               <span>Nonce Key: {transaction.nonceKey}</span>
@@ -150,10 +129,8 @@ export function SendParallelPayments(props: DemoStepProps) {
     )
   }
 
-  const bothSucceeded =
-    transfer1.status === 'success' && transfer2.status === 'success'
-  const isSending =
-    transfer1.status === 'pending' || transfer2.status === 'pending'
+  const bothSucceeded = transfer1.status === 'success' && transfer2.status === 'success'
+  const isSending = transfer1.status === 'pending' || transfer2.status === 'pending'
   const hasStarted = transfer1.status !== 'idle' || transfer2.status !== 'idle'
 
   return (
@@ -168,7 +145,7 @@ export function SendParallelPayments(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             Cancel
@@ -185,7 +162,7 @@ export function SendParallelPayments(props: DemoStepProps) {
             disabled={!(address && balance && balance >= parseUnits('100', 6))}
             onClick={() => setExpanded(true)}
             type="button"
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
           >
             Enter details
           </Button>
@@ -195,19 +172,16 @@ export function SendParallelPayments(props: DemoStepProps) {
       title="Send 50 AlphaUSD to two recipients in parallel."
     >
       {expanded && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
-            <div className="flex gap-3 mt-2">
-              <div className="flex flex-col gap-2 flex-1">
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
+            <div className="mt-2 flex gap-3">
+              <div className="flex flex-1 flex-col gap-2">
                 <div className="flex flex-col">
-                  <label
-                    className="text-[11px] -tracking-[1%] text-gray9"
-                    htmlFor="recipient1"
-                  >
+                  <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient1">
                     Recipient 1
                   </label>
                   <input
-                    className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 disabled:cursor-not-allowed disabled:opacity-60 dark:text-white"
                     data-1p-ignore
                     type="text"
                     name="recipient1"
@@ -217,14 +191,11 @@ export function SendParallelPayments(props: DemoStepProps) {
                   />
                 </div>
                 <div className="flex flex-col">
-                  <label
-                    className="text-[11px] -tracking-[1%] text-gray9"
-                    htmlFor="recipient2"
-                  >
+                  <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient2">
                     Recipient 2
                   </label>
                   <input
-                    className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 disabled:cursor-not-allowed disabled:opacity-60 dark:text-white"
                     data-1p-ignore
                     type="text"
                     name="recipient2"
@@ -237,24 +208,19 @@ export function SendParallelPayments(props: DemoStepProps) {
               <div className="flex items-start">
                 <Button
                   variant={
-                    address && balance && balance >= parseUnits('100', 6)
-                      ? 'accent'
-                      : 'default'
+                    address && balance && balance >= parseUnits('100', 6) ? 'accent' : 'default'
                   }
-                  disabled={
-                    !(address && balance && balance >= parseUnits('100', 6)) ||
-                    isSending
-                  }
+                  disabled={!(address && balance && balance >= parseUnits('100', 6)) || isSending}
                   onClick={handleSendParallel}
                   type="button"
-                  className="text-[14px] -tracking-[2%] font-normal"
+                  className="font-normal text-[14px] -tracking-[2%]"
                 >
                   {isSending ? 'Sending both...' : 'Send both payments'}
                 </Button>
               </div>
             </div>
             {hasStarted && (
-              <div className="flex flex-col gap-1 mt-2">
+              <div className="mt-2 flex flex-col gap-1">
                 <TransferResult label="Payment 1" state={transfer1} />
                 <TransferResult label="Payment 2" state={transfer2} />
               </div>

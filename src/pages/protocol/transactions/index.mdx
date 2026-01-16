@@ -1,44 +1,44 @@
-import { Cards } from 'vocs'
+import { Cards, Card } from 'vocs'
 import TempoTxProperties from '../../../snippets/tempo-tx-properties.mdx'
 
-## Tempo Transactions
+# Tempo Transactions
 
 Tempo Transactions are a new [EIP-2718](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2718.md) transaction type, exclusively available on Tempo.
 
 If you're integrating with Tempo, we **strongly recommend** using Tempo Transactions, and not regular Ethereum transactions. Learn more about the benefits below, or follow the guide on issuance [here](/guide/issuance).
 
 <Cards>
-  <Cards.Card
+  <Card
     description="Pay transaction fees with any USD-denominated TIP-20 token via automatic Fee AMM conversion."
     to="#configurable-fee-tokens"
     icon="lucide:coins"
     title="Configurable Fee Tokens"
   />
-  <Cards.Card
+  <Card
     description="Sponsor gas fees for users, enabling feeless transaction experiences in your application."
     to="#fee-sponsorship"
     icon="lucide:shield-check"
     title="Fee Sponsorship"
   />
-  <Cards.Card
+  <Card
     description="Batch multiple transactions together for higher throughput and simpler wallet management."
     to="#batch-calls"
     icon="lucide:layers"
     title="Batch Calls"
   />
-  <Cards.Card
+  <Card
     description="Delegate transaction signing capabilities to specific keys with customizable permissions."
     to="#access-keys"
     icon="lucide:key"
     title="Access Keys"
   />
-  <Cards.Card
+  <Card
     description="Execute transactions in parallel using independent nonces for improved throughput."
     to="#concurrent-transactions"
     icon="lucide:zap"
     title="Concurrent Transactions"
   />
-  <Cards.Card
+  <Card
     description="Schedule transactions to execute within a specific time window for automated payments."
     to="#scheduled-transactions"
     icon="lucide:clock"
@@ -69,31 +69,31 @@ If you are an EVM smart contract developer, see the [Tempo extension for Foundry
 ## Learn more
 
 <Cards>
-  <Cards.Card
+  <Card
     description="Native protocol support for new transaction features including WebAuthn/P256 signatures, parallelizable nonces, gas sponsorship, call batching, and scheduled transactions"
     to="/protocol/transactions/spec-tempo-transaction"
     icon="lucide:file-code"
     title="Specification"
   />
-  <Cards.Card
+  <Card
     description="Configure users to pay transaction fees in any supported stablecoin"
     to="/guide/payments/pay-fees-in-any-stablecoin"
     icon="lucide:coins"
     title="Guide: Pay Fees in Any Stablecoin"
   />
-  <Cards.Card
+  <Card
     description="Execute multiple operations atomically"
     to="/guide/use-accounts/batch-transactions"
     icon="lucide:layers"
     title="Guide: Send Batch Transactions"
   />
-  <Cards.Card
+  <Card
     description="Enable gasless transactions with fee payers"
     to="/guide/payments/sponsor-user-fees"
     icon="lucide:shield-check"
     title="Guide: Sponsor Transaction Fees"
   />
-  <Cards.Card
+  <Card
     description="Sign transactions with WebAuthn, P256, or secp256k1 signatures"
     to="/guide/use-accounts/webauthn-p256-signatures"
     icon="lucide:fingerprint"

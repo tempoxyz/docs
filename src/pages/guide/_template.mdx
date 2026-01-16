@@ -1,4 +1,4 @@
-import { Cards } from 'vocs'
+import { Cards, Card } from 'vocs'
 import * as Demo from '../../components/guides/Demo.tsx'
 import * as Step from '../../components/guides/steps'
 
@@ -117,13 +117,13 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 {/* Outlink to any useful links to read in /documentation/* */}
 
 <Cards>
-  <Cards.Card
+  <Card
     description="Learn more about the Tempo transaction type that enables passkey signatures"
     to="/guide/use-accounts/webauthn-p256-signatures"
     icon="lucide:file"
     title="Tempo Transaction type"
   />
-  <Cards.Card
+  <Card
     description="Learn more about how (passkey) signatures are structured in the protocol"
     to="/guide/use-accounts/webauthn-p256-signatures"
     icon="lucide:signature"

@@ -1,13 +1,7 @@
 import { QueryClient } from '@tanstack/react-query'
 import { tempoDevnet, tempoLocalnet, tempoTestnet } from 'viem/chains'
 import { withFeePayer } from 'viem/tempo'
-import {
-  type CreateConfigParameters,
-  createConfig,
-  createStorage,
-  http,
-  webSocket,
-} from 'wagmi'
+import { type CreateConfigParameters, createConfig, createStorage, http, webSocket } from 'wagmi'
 import { KeyManager, webAuthn } from 'wagmi/tempo'
 
 const feeToken = '0x20c0000000000000000000000000000000000001'
@@ -57,9 +51,7 @@ export function getConfig(options: getConfig.Options = {}) {
 }
 
 export namespace getConfig {
-  export type Options = Partial<
-    Pick<CreateConfigParameters, 'multiInjectedProviderDiscovery'>
-  >
+  export type Options = Partial<Pick<CreateConfigParameters, 'multiInjectedProviderDiscovery'>>
 }
 
 export const config = getConfig()

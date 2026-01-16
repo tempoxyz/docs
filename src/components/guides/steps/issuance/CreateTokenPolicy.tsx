@@ -43,8 +43,7 @@ export function CreateTokenPolicy(props: DemoStepProps) {
   const isComplete = createPolicy.isSuccess
   const hasError = createPolicy.isError
 
-  const active =
-    !!tokenAddress && !isComplete && checkFlowDependencies(flowDependencies)
+  const active = !!tokenAddress && !isComplete && checkFlowDependencies(flowDependencies)
 
   return (
     <Step
@@ -55,7 +54,7 @@ export function CreateTokenPolicy(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             Hide
@@ -66,7 +65,7 @@ export function CreateTokenPolicy(props: DemoStepProps) {
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
           >
             Enter details
           </Button>
@@ -76,31 +75,31 @@ export function CreateTokenPolicy(props: DemoStepProps) {
       title="Create a transfer policy."
     >
       {expanded && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
-            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-2">
-              <div className="flex flex-col flex-1">
-                <div className="text-[13px] -tracking-[1%] text-gray9 mb-2">
-                  This will create a blacklist policy that blocks{' '}
-                  {FAKE_RECIPIENT} from sending or receiving tokens.
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
+            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
+              <div className="flex flex-1 flex-col">
+                <div className="mb-2 text-[13px] text-gray9 -tracking-[1%]">
+                  This will create a blacklist policy that blocks {FAKE_RECIPIENT} from sending or
+                  receiving tokens.
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-2 flex-col md:items-end md:flex-row pe-8 mt-4">
+            <div className="mt-4 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
               <Button
                 variant="accent"
                 onClick={handleCreatePolicy}
                 disabled={isCreating}
                 type="button"
-                className="text-[14px] -tracking-[2%] font-normal"
+                className="font-normal text-[14px] -tracking-[2%]"
               >
                 {isCreating ? 'Creating...' : 'Create Policy'}
               </Button>
             </div>
 
             {hasError && (
-              <div className="text-[13px] text-red-500 mt-2">
+              <div className="mt-2 text-[13px] text-red-500">
                 Failed to create policy. Please try again.
               </div>
             )}

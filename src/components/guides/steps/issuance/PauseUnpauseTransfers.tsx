@@ -14,10 +14,9 @@ export function PauseUnpauseTransfers(props: DemoStepProps) {
   // Get the address of the token created in a previous step
   const tokenAddress = getData('tokenAddress')
 
-  const { data: metadata, refetch: refetchMetadata } =
-    Hooks.token.useGetMetadata({
-      token: tokenAddress,
-    })
+  const { data: metadata, refetch: refetchMetadata } = Hooks.token.useGetMetadata({
+    token: tokenAddress,
+  })
 
   // Check for pause and unpause roles
   const { data: hasPauseRole } = Hooks.token.useHasRole({
@@ -81,7 +80,7 @@ export function PauseUnpauseTransfers(props: DemoStepProps) {
           disabled={!active || isProcessing}
           onClick={handleToggle}
           type="button"
-          className="text-[14px] -tracking-[2%] font-normal"
+          className="font-normal text-[14px] -tracking-[2%]"
         >
           {isProcessing ? 'Processing...' : paused ? 'Unpause' : 'Pause'}
         </Button>
@@ -89,20 +88,17 @@ export function PauseUnpauseTransfers(props: DemoStepProps) {
       number={stepNumber}
       title={`${paused ? 'Unpause' : 'Pause'} transfers for ${metadata ? metadata.name : 'token'}.`}
     >
-      {(pause.isSuccess || unpause.isSuccess) &&
-        (pause.data || unpause.data) && (
-          <div className="flex mx-6 flex-col gap-3 pb-4">
-            <div className="ps-5 border-gray4 border-s-2">
-              <ExplorerLink
-                hash={
-                  pause.data?.receipt.transactionHash ??
-                  unpause.data?.receipt.transactionHash ??
-                  ''
-                }
-              />
-            </div>
+      {(pause.isSuccess || unpause.isSuccess) && (pause.data || unpause.data) && (
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
+            <ExplorerLink
+              hash={
+                pause.data?.receipt.transactionHash ?? unpause.data?.receipt.transactionHash ?? ''
+              }
+            />
           </div>
-        )}
+        </div>
+      )}
     </Step>
   )
 }
