@@ -5,13 +5,17 @@ const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : u
 
 export default defineConfig({
   checkDeadlinks: false,
-  title: 'Documentation ⋅ Tempo',
-  description: 'Documentation for Tempo testnet and protocol specifications',
+  title: 'Tempo',
+  titleTemplate: '%title ⋅ Tempo',
+  description: 'Documentation for the Tempo network and protocol specifications',
   baseUrl,
-  ogImageUrl: (path) =>
-    path === '/'
-      ? `${baseUrl ?? ''}/og-docs.png`
-      : `${baseUrl ?? ''}/api/og?title=%title&description=%description`,
+  ogImageUrl:
+    baseUrl !== undefined
+      ? (path) =>
+          path === '/'
+            ? `${baseUrl}/og-docs.png`
+            : `${baseUrl}/api/og?title=%title&description=%description`
+      : undefined,
   logoUrl: {
     light: '/lockup-light.svg',
     dark: '/lockup-dark.svg',

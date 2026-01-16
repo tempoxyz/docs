@@ -72,10 +72,10 @@ importers:
         specifier: ^2.44.4
         version: 2.44.4(typescript@5.9.3)(zod@4.3.5)
       vocs:
-        specifier: https://pkg.pr.new/wevm/vocs@0f1c7c3
-        version: https://pkg.pr.new/wevm/vocs@0f1c7c3(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.55.1)(typescript@5.9.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+        specifier: https://pkg.pr.new/wevm/vocs@67bfec0
+        version: https://pkg.pr.new/wevm/vocs@67bfec0(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.55.1)(typescript@5.9.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       wagmi:
-        specifier: ^3.2.0
+        specifier: ^3.3.2
         version: 3.3.2(@tanstack/query-core@5.90.17)(@tanstack/react-query@5.90.17(react@19.2.3))(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))
       waku:
         specifier: 1.0.0-alpha.1
@@ -2820,16 +2820,20 @@ packages:
       vite:
         optional: true
 
-  vocs@https://pkg.pr.new/wevm/vocs@0f1c7c3:
-    resolution: {integrity: sha512-NLebtxZOaMykB1HMzpiOFC/X6dSCb8/JMPOa7XUZ+tjJvAa3eFYh7YthQjA2gUtdq26gn11bl0T7cZ78gRuqcw==, tarball: https://pkg.pr.new/wevm/vocs@0f1c7c3}
+  vocs@https://pkg.pr.new/wevm/vocs@67bfec0:
+    resolution: {integrity: sha512-QEgdqlMm6t+kOfgL//BWb3gslYY8C1K9yYI0D3by/YiA4Q2J9mv8d6GYQ1TIrHFjVQk7xN/yk2H5ONDR+btQ2g==, tarball: https://pkg.pr.new/wevm/vocs@67bfec0}
     version: 0.0.0
+    hasBin: true
     peerDependencies:
+      '@vocs/twoslash-rust': ^0.1.0
       mermaid: ^11
       react: ^19
       react-dom: ^19
       vite: ^7
       waku: ^1
     peerDependenciesMeta:
+      '@vocs/twoslash-rust':
+        optional: true
       mermaid:
         optional: true
       vite:
@@ -5997,7 +6001,7 @@ snapshots:
     optionalDependencies:
       vite: 7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
-  vocs@https://pkg.pr.new/wevm/vocs@0f1c7c3(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.55.1)(typescript@5.9.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)):
+  vocs@https://pkg.pr.new/wevm/vocs@67bfec0(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.55.1)(typescript@5.9.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
       '@base-ui/react': 1.1.0(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@codesandbox/sandpack-react': 2.20.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
