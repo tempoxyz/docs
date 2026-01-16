@@ -7,6 +7,7 @@ import type { PathsForPages, GetConfigResponse } from 'waku/router';
 // prettier-ignore
 type Page =
 | { path: '/_mdx-wrapper'; render: 'static' }
+| { path: '/changelog'; render: 'static' }
 | { path: '/'; render: 'static' }
 | { path: '/sdk'; render: 'static' }
 | { path: '/sdk/typescript'; render: 'static' }

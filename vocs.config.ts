@@ -1,6 +1,7 @@
-import { defineConfig } from 'vocs/config'
+import { Changelog, defineConfig } from 'vocs/config'
 
 export default defineConfig({
+  changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
   checkDeadlinks: false,
   title: 'Tempo',
   titleTemplate: '%s ⋅ Tempo',
@@ -592,6 +593,7 @@ export default defineConfig({
       text: 'Docs',
       link: '/',
     },
+    { text: 'Changelog', link: '/changelog' },
     { text: 'Ecosystem', link: 'https://tempo.xyz/ecosystem' },
     { text: 'Blog', link: 'https://tempo.xyz/blog' },
   ],

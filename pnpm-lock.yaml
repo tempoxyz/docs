@@ -72,8 +72,8 @@ importers:
         specifier: ^2.44.4
         version: 2.44.4(typescript@5.9.3)(zod@4.3.5)
       vocs:
-        specifier: https://pkg.pr.new/wevm/vocs@0f9da0e
-        version: https://pkg.pr.new/wevm/vocs@0f9da0e(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.55.1)(typescript@5.9.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+        specifier: https://pkg.pr.new/wevm/vocs@3c4544e
+        version: https://pkg.pr.new/wevm/vocs@3c4544e(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.55.1)(typescript@5.9.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       wagmi:
         specifier: ^3.3.2
         version: 3.3.2(@tanstack/query-core@5.90.17)(@tanstack/react-query@5.90.17(react@19.2.3))(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))
@@ -2820,8 +2820,8 @@ packages:
       vite:
         optional: true
 
-  vocs@https://pkg.pr.new/wevm/vocs@0f9da0e:
-    resolution: {integrity: sha512-rj7Bl3dnh8DaAM+wzW4LVoC8qkcVQ+G28DcqKQKKwgzY7dYrv0Zg4/c7UYpCAbFe5itXRDy82eiHZFf2T+94LQ==, tarball: https://pkg.pr.new/wevm/vocs@0f9da0e}
+  vocs@https://pkg.pr.new/wevm/vocs@3c4544e:
+    resolution: {integrity: sha512-kKmlfJsv8t+RRnmtk2qmzB756h8P7KMGIYUqb+xXiFeWIsnryBaiwgjyxvMSxGqBFQUEw146mEkciGks4T4Gog==, tarball: https://pkg.pr.new/wevm/vocs@3c4544e}
     version: 0.0.0
     hasBin: true
     peerDependencies:
@@ -6001,7 +6001,7 @@ snapshots:
     optionalDependencies:
       vite: 7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
-  vocs@https://pkg.pr.new/wevm/vocs@0f9da0e(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.55.1)(typescript@5.9.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)):
+  vocs@https://pkg.pr.new/wevm/vocs@3c4544e(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.55.1)(typescript@5.9.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
       '@base-ui/react': 1.1.0(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@codesandbox/sandpack-react': 2.20.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
