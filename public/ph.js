@@ -17,8 +17,7 @@
         (p.crossOrigin = 'anonymous'),
         (p.async = !0),
         (p.src =
-          s.api_host.replace('.i.posthog.com', '-assets.i.posthog.com') +
-          '/static/array.js'),
+          s.api_host.replace('.i.posthog.com', '-assets.i.posthog.com') + '/static/array.js'),
         (r = t.getElementsByTagName('script')[0]).parentNode.insertBefore(p, r)
       var u = e
       for (

@@ -1,10 +1,17 @@
 import { ModuleResolutionKind } from 'typescript'
 import { defineConfig } from 'vocs/config'
 
+const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined
+
 export default defineConfig({
   checkDeadlinks: false,
   title: 'Documentation ⋅ Tempo',
   description: 'Documentation for Tempo testnet and protocol specifications',
+  baseUrl,
+  ogImageUrl: (path) =>
+    path === '/'
+      ? `${baseUrl ?? ''}/og-docs.png`
+      : `${baseUrl ?? ''}/api/og?title=%title&description=%description`,
   logoUrl: {
     light: '/lockup-light.svg',
     dark: '/lockup-dark.svg',
@@ -587,6 +594,26 @@ export default defineConfig({
     },
     { text: 'Ecosystem', link: 'https://tempo.xyz/ecosystem' },
     { text: 'Blog', link: 'https://tempo.xyz/blog' },
+  ],
+  redirects: [
+    {
+      source: '/documentation/protocol/:path*',
+      destination: '/protocol/:path*',
+    },
+    {
+      source: '/errors/tx/SubblockNonceKey',
+      destination: '/protocol/blockspace/subblock-specification#4-block-validity-rules',
+    },
+    {
+      source: '/protocol/blockspace/sub-block-specification',
+      destination: '/protocol/blockspace/subblock-specification',
+      status: 301,
+    },
+    {
+      source: '/stablecoin-exchange/:path*',
+      destination: '/stablecoin-dex/:path*',
+      status: 301,
+    },
   ],
   twoslash: {
     twoslashOptions: {

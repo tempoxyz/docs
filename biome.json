@@ -40,6 +40,6 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!specs/lib", "!src/snippets/unformatted"]
+    "includes": ["**", "!dist", "!node_modules", "!specs/lib", "!src/snippets/unformatted"]
   }
 }

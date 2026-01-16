@@ -1,11 +1,7 @@
 import * as React from 'react'
 import { fromHex, isAddress, pad, parseUnits, stringToHex } from 'viem'
 import { Abis } from 'viem/tempo'
-import {
-  useConnection,
-  useConnectionEffect,
-  useWatchContractEvent,
-} from 'wagmi'
+import { useConnection, useConnectionEffect, useWatchContractEvent } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
@@ -54,10 +50,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
     onLogs: (logs) => {
       for (const log of logs) {
         if (log.args.from === address) {
-          const memoStr = fromHex(
-            log.args.memo as `0x${string}`,
-            'string',
-          ).replace(/\0/g, '')
+          const memoStr = fromHex(log.args.memo as `0x${string}`, 'string').replace(/\0/g, '')
           setMemoEvents((prev) => [
             ...prev,
             {
@@ -107,17 +100,14 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
 
   return (
     <Step
-      active={
-        Boolean(address && balance && balance > 0n) &&
-        (last ? true : !sendPayment.isSuccess)
-      }
+      active={Boolean(address && balance && balance > 0n) && (last ? true : !sendPayment.isSuccess)}
       completed={sendPayment.isSuccess}
       actions={
         expanded ? (
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             Cancel
@@ -134,7 +124,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
             disabled={!(address && balance && balance > 0n)}
             onClick={() => setExpanded(true)}
             type="button"
-            className="text-[14px] -tracking-[2%] font-normal"
+            className="font-normal text-[14px] -tracking-[2%]"
           >
             Enter details
           </Button>
@@ -144,18 +134,15 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
       title="Send a payment with a memo for reconciliation."
     >
       {expanded && (
-        <div className="flex mx-6 flex-col gap-3 pb-4">
-          <div className="ps-5 border-gray4 border-s-2">
-            <div className="flex gap-2 flex-col pe-8 mt-2">
+        <div className="mx-6 flex flex-col gap-3 pb-4">
+          <div className="border-gray4 border-s-2 ps-5">
+            <div className="mt-2 flex flex-col gap-2 pe-8">
               <div className="flex flex-col">
-                <label
-                  className="text-[11px] -tracking-[1%] text-gray9"
-                  htmlFor="memo"
-                >
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="memo">
                   Memo (e.g., customer ID, invoice number)
                 </label>
                 <input
-                  className={`h-[34px] border px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white ${memoError ? 'border-red-500' : 'border-gray4'}`}
+                  className={`h-[34px] rounded-[50px] border px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white ${memoError ? 'border-red-500' : 'border-gray4'}`}
                   data-1p-ignore
                   type="text"
                   name="memo"
@@ -163,22 +150,15 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
                   onChange={handleMemoChange}
                   placeholder="CUST-12345"
                 />
-                {memoError && (
-                  <span className="text-[11px] text-red-500 mt-1">
-                    {memoError}
-                  </span>
-                )}
+                {memoError && <span className="mt-1 text-[11px] text-red-500">{memoError}</span>}
               </div>
-              <div className="flex flex-col md:flex-row gap-2 md:items-end">
-                <div className="flex flex-col flex-1">
-                  <label
-                    className="text-[11px] -tracking-[1%] text-gray9"
-                    htmlFor="recipient"
-                  >
+              <div className="flex flex-col gap-2 md:flex-row md:items-end">
+                <div className="flex flex-1 flex-col">
+                  <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient">
                     Recipient address
                   </label>
                   <input
-                    className="h-[34px] border border-gray4 px-3.25 rounded-[50px] text-[14px] font-normal -tracking-[2%] placeholder-gray9 text-black dark:text-white"
+                    className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                     data-1p-ignore
                     type="text"
                     name="recipient"
@@ -199,17 +179,12 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
                       : 'default'
                   }
                   disabled={
-                    !(
-                      address &&
-                      balance &&
-                      balance > 0n &&
-                      isValidRecipient &&
-                      memo.trim()
-                    ) || !!memoError
+                    !(address && balance && balance > 0n && isValidRecipient && memo.trim()) ||
+                    !!memoError
                   }
                   onClick={handleTransfer}
                   type="button"
-                  className="text-[14px] -tracking-[2%] font-normal"
+                  className="font-normal text-[14px] -tracking-[2%]"
                 >
                   {sendPayment.isPending ? 'Sending...' : 'Send with Memo'}
                 </Button>
@@ -219,14 +194,12 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
               <div className="mt-2">
                 <ExplorerLink hash={sendPayment.data.receipt.transactionHash} />
                 {memoEvents.length > 0 && (
-                  <div className="mt-3 p-2 bg-gray2 rounded-lg">
-                    <p className="text-[11px] text-gray9 mb-1">
-                      TransferWithMemo event detected:
-                    </p>
+                  <div className="mt-3 rounded-lg bg-gray2 p-2">
+                    <p className="mb-1 text-[11px] text-gray9">TransferWithMemo event detected:</p>
                     {memoEvents.map((event) => (
                       <div
                         key={`${event.from}-${event.to}-${event.memo}`}
-                        className="text-[11px] font-mono text-gray11"
+                        className="font-mono text-[11px] text-gray11"
                       >
                         <span className="text-gray9">memo:</span> "{event.memo}"
                       </div>
