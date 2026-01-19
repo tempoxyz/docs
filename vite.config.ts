@@ -6,6 +6,9 @@ import { vocs } from 'vocs/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vocs(), react(), tempoNode()],
+  ssr: {
+    noExternal: ['@iconify-json/lucide', '@iconify-json/simple-icons'],
+  },
 })
 
 function tempoNode(): Plugin {
