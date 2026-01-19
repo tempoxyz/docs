@@ -4,20 +4,19 @@ import * as React from 'react'
 import { parseUnits } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
+import LucideCheck from '~icons/lucide/check'
+import LucideCircle from '~icons/lucide/circle'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
-import { alphaUsd } from '../../tokens'
+import { alphaUsd, pathUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
-const validatorToken = alphaUsd
-
-export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance: boolean }) {
+export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance?: boolean }) {
   const { stepNumber, last = false, waitForBalance = true } = props
   const { address } = useConnection()
   const { getData } = useDemoContext()
   const queryClient = useQueryClient()
 
-  // Get the address of the token created in a previous step
   const tokenAddress = getData('tokenAddress')
 
   const { data: metadata } = Hooks.token.useGetMetadata({
@@ -27,6 +26,12 @@ export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance: boo
     account: address,
     token: tokenAddress,
   })
+
+  const [pathUsdMinted, setPathUsdMinted] = React.useState(false)
+  const [alphaUsdMinted, setAlphaUsdMinted] = React.useState(false)
+  const [pathUsdTxHash, setPathUsdTxHash] = React.useState<string>()
+  const [alphaUsdTxHash, setAlphaUsdTxHash] = React.useState<string>()
+
   const mintFeeLiquidity = Hooks.amm.useMintSync({
     mutation: {
       onSettled() {
@@ -35,48 +40,127 @@ export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance: boo
       },
     },
   })
+
   useConnectionEffect({
     onDisconnect() {
       mintFeeLiquidity.reset()
+      setPathUsdMinted(false)
+      setAlphaUsdMinted(false)
+      setPathUsdTxHash(undefined)
+      setAlphaUsdTxHash(undefined)
     },
   })
+
+  const handleMintAll = React.useCallback(async () => {
+    if (!address || !tokenAddress) return
+
+    if (!pathUsdMinted) {
+      await new Promise<void>((resolve) => {
+        mintFeeLiquidity.mutate(
+          {
+            userTokenAddress: tokenAddress,
+            validatorTokenAddress: pathUsd,
+            validatorTokenAmount: parseUnits('100', 6),
+            to: address,
+            feeToken: alphaUsd,
+          },
+          {
+            onSuccess(data) {
+              setPathUsdMinted(true)
+              setPathUsdTxHash(data.receipt.transactionHash)
+              resolve()
+            },
+            onError() {
+              resolve()
+            },
+          },
+        )
+      })
+    }
+
+    if (!alphaUsdMinted) {
+      mintFeeLiquidity.mutate(
+        {
+          userTokenAddress: tokenAddress,
+          validatorTokenAddress: alphaUsd,
+          validatorTokenAmount: parseUnits('100', 6),
+          to: address,
+          feeToken: alphaUsd,
+        },
+        {
+          onSuccess(data) {
+            setAlphaUsdMinted(true)
+            setAlphaUsdTxHash(data.receipt.transactionHash)
+          },
+        },
+      )
+    }
+  }, [address, tokenAddress, pathUsdMinted, alphaUsdMinted, mintFeeLiquidity])
 
   const active = React.useMemo(() => {
     const balanceCheck = waitForBalance ? Boolean(tokenBalance && tokenBalance > 0n) : true
     return Boolean(address && tokenAddress && balanceCheck)
   }, [address, tokenAddress, tokenBalance, waitForBalance])
 
+  const allMinted = pathUsdMinted && alphaUsdMinted
+  const someMinted = pathUsdMinted || alphaUsdMinted
+
   return (
     <Step
-      active={active && (last ? true : !mintFeeLiquidity.isSuccess)}
-      completed={mintFeeLiquidity.isSuccess}
+      active={active && (last ? true : !allMinted)}
+      completed={allMinted}
       actions={
         <Button
-          variant={active ? (mintFeeLiquidity.isSuccess ? 'default' : 'accent') : 'default'}
-          disabled={!active}
-          onClick={() => {
-            if (!address || !tokenAddress) return
-            mintFeeLiquidity.mutate({
-              userTokenAddress: tokenAddress,
-              validatorTokenAddress: validatorToken,
-              validatorTokenAmount: parseUnits('100', 6),
-              to: address,
-              feeToken: alphaUsd,
-            })
-          }}
+          variant={active ? (allMinted ? 'default' : 'accent') : 'default'}
+          disabled={!active || mintFeeLiquidity.isPending}
+          onClick={handleMintAll}
           type="button"
           className="font-normal text-[14px] -tracking-[2%]"
         >
-          Add Liquidity
+          {mintFeeLiquidity.isPending
+            ? 'Adding...'
+            : allMinted
+              ? 'Done'
+              : someMinted
+                ? 'Continue Adding'
+                : 'Add Liquidity'}
         </Button>
       }
+      error={mintFeeLiquidity.error}
       number={stepNumber}
-      title={`Mint 100 pathUSD of Fee Liquidity for ${metadata ? metadata.name : 'your token'}.`}
+      title={`Add fee liquidity for ${metadata ? metadata.name : 'your token'}.`}
     >
-      {mintFeeLiquidity.data && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
+      {someMinted && (
+        <div className="mx-6 flex flex-col gap-2 pb-4">
           <div className="border-gray4 border-s-2 ps-5">
-            <ExplorerLink hash={mintFeeLiquidity.data.receipt.transactionHash} />
+            <div className="mt-2 space-y-1">
+              <div className="flex items-center gap-2 text-[13px]">
+                {pathUsdMinted ? (
+                  <LucideCheck className="size-4 text-green9" />
+                ) : (
+                  <LucideCircle className="size-4 text-gray9" />
+                )}
+                <span className="w-20 font-mono">pathUSD</span>
+                {pathUsdTxHash && (
+                  <span className="-mt-1">
+                    <ExplorerLink hash={pathUsdTxHash} />
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 text-[13px]">
+                {alphaUsdMinted ? (
+                  <LucideCheck className="size-4 text-green9" />
+                ) : (
+                  <LucideCircle className="size-4 text-gray9" />
+                )}
+                <span className="w-20 font-mono">AlphaUSD</span>
+                {alphaUsdTxHash && (
+                  <span className="-mt-1">
+                    <ExplorerLink hash={alphaUsdTxHash} />
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
