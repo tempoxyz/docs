@@ -1,10 +1,11 @@
 'use client'
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import type { Address } from 'viem'
 import { parseUnits } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
+import LucideCheck from '~icons/lucide/check'
+import LucideCircle from '~icons/lucide/circle'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd, pathUsd } from '../../tokens'
@@ -134,9 +135,11 @@ export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance?: bo
           <div className="border-gray4 border-s-2 ps-5">
             <div className="mt-2 space-y-1">
               <div className="flex items-center gap-2 text-[13px]">
-                <span className={`w-4 ${pathUsdMinted ? 'text-green9' : 'text-gray9'}`}>
-                  {pathUsdMinted ? '✓' : '○'}
-                </span>
+                {pathUsdMinted ? (
+                  <LucideCheck className="size-4 text-green9" />
+                ) : (
+                  <LucideCircle className="size-4 text-gray9" />
+                )}
                 <span className="w-20 font-mono">pathUSD</span>
                 {pathUsdTxHash && (
                   <span className="-mt-1">
@@ -145,9 +148,11 @@ export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance?: bo
                 )}
               </div>
               <div className="flex items-center gap-2 text-[13px]">
-                <span className={`w-4 ${alphaUsdMinted ? 'text-green9' : 'text-gray9'}`}>
-                  {alphaUsdMinted ? '✓' : '○'}
-                </span>
+                {alphaUsdMinted ? (
+                  <LucideCheck className="size-4 text-green9" />
+                ) : (
+                  <LucideCircle className="size-4 text-gray9" />
+                )}
                 <span className="w-20 font-mono">AlphaUSD</span>
                 {alphaUsdTxHash && (
                   <span className="-mt-1">
