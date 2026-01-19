@@ -128,7 +128,7 @@ export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance?: bo
       }
       error={mintFeeLiquidity.error}
       number={stepNumber}
-      title={`Add fee liquidity (pathUSD + AlphaUSD) for ${metadata ? metadata.name : 'your token'}.`}
+      title={`Add fee liquidity for ${metadata ? metadata.name : 'your token'}.`}
     >
       {someMinted && (
         <div className="mx-6 flex flex-col gap-2 pb-4">
