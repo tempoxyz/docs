@@ -32,9 +32,11 @@ First, create and mint your stablecoin by following the [Create a Stablecoin](/g
 
 ### Add fee pool liquidity
 
-Before users can pay fees with your token, ensure there is sufficient liquidity in the fee pool. On the Moderato testnet, all validators expect fees in AlphaUSD, so you need to add AlphaUSD liquidity to your token's fee pool.
+Before users can pay fees with your token, you need to provide liquidity in the Fee AMM between your token and each of the tokens accepted by validators.
 
-Add liquidity to your token's fee pool:
+To determine which validator tokens are needed, sample recent blocks and check the miner's preferred fee token using `getValidatorToken` on the FeeManager contract. For example, on Moderato testnet, roughly 80% of blocks are submitted by validators that accept fees in pathUSD, with the rest accepting AlphaUSD. On mainnet, this token mix is different and subject to change.
+
+Add liquidity to your token's fee pool for each validator token:
 
 :::code-group
 
@@ -302,6 +304,8 @@ Regularly check your token's fee pool reserves to ensure users can consistently 
 ### Maintain adequate reserves
 
 Keep sufficient validator token reserves in your fee pool to handle expected transaction volume. Consider your user base size and typical transaction frequency when determining reserve levels.
+
+As fees accrue in your token, the pool will run low on validator tokens and need to be rebalanced. Use [`rebalanceSwap`](/guide/stablecoin-dex/managing-fee-liquidity#rebalance-liquidity) to replenish validator token reserves when they become depleted.
 
 ### Test before launch
 
