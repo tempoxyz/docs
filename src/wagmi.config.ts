@@ -22,7 +22,7 @@ export function getConfig(options: getConfig.Options = {}) {
     connectors: [
       webAuthn({
         grantAccessKey: true,
-        keyManager: KeyManager.localStorage(),
+        keyManager: KeyManager.http('https://keystore.tempo.xyz'),
       }),
     ],
     multiInjectedProviderDiscovery,
