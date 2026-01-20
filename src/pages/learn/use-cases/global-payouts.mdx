@@ -3,9 +3,10 @@ description: Deliver instant, low-cost payouts to employees and contractors worl
 ---
 
 import { Cards, Card } from 'vocs'
-import { ZoomableImage } from "../../../components/ZoomableImage.tsx"
 
 # Pay your global workforce instantly [Deliver faster, cheaper, and more predictable cross-border payouts to employees and contractors around the world with stablecoins.]
+
+![Instant global payouts](/learn/use-cases/instant-settlement.svg)
 
 ## The challenge with global payroll
 
@@ -14,12 +15,47 @@ Managing global payroll is both complex and expensive. Businesses must either re
 This complexity results in a patchwork of manual workflows that is burdensome for finance teams and often frustrating for employees waiting on delayed transfers. Stablecoins offer a way to simplify this process by reducing cost, improving predictability, and removing much of the operational overhead associated with traditional cross-border payments.
 
 
+## The real cost of traditional payouts
+
+Consider an example: when you send $1,000 to a contractor in Brazil using traditional rails, the costs add up quickly. Your payment processor may charge a $10–$40 fee per payment, while intermediary banks take anywhere from 0.1% to 4.0% on the FX spread. By the time the payment clears five days later, the recipient has lost $80 to fees. If local currency moved adversely in that window, they would lose again.
+
 ## How stablecoins solve this
 
 Blockchains are global by design, allowing companies to send stablecoin payouts directly to employees' wallets anywhere in the world without relying on local banks or intermediaries. These transfers typically cost less than a cent and arrive within seconds, offering far more consistency than traditional international payment rails.
 
+When you send $1,000 to a contractor in Brazil using stablecoin rails, the process is far more straightforward: your stablecoin partner may charge a flat fee of 0.1–0.4% for the onramp and transfer, delivering a **60–80% cost reduction** compared to traditional rails. Recipients receive dollar-denominated stablecoins and can convert to local currency when and how they choose, typically paying a transparent offramp fee in the 0.1–2.0% range.
+
 Companies can also choose to distribute funds through their subsidiaries. In this model, a business can convert funds into stablecoins at the headquarters level, such as in the United States, and distribute those funds to subsidiary wallets around the world. Liquidity moves to subsidiaries in seconds rather than days, removing the need to pre-fund subsidiary accounts in advance. Subsidiaries can then handle payouts to local employees.
 
+## Key benefits
+
+<Cards>
+  <Card
+    title="Instant settlement"
+    description="Stablecoins are powered by blockchains that operate 24/7/365, and payouts settle in seconds, not days. Workers and merchants get paid on time, every time."
+    icon="lucide:zap"
+  />
+  <Card
+    title="Lower costs"
+    description="By eliminating intermediaries, stablecoins can reduce the cost of a cross-border payment by 60-80%, saving on operational costs or passing savings to users."
+    icon="lucide:piggy-bank"
+  />
+  <Card
+    title="Traceability"
+    description="Every stablecoin transaction is recorded on the blockchain, creating an immutable audit trail that reduces disputes and simplifies reconciliation."
+    icon="lucide:search"
+  />
+  <Card
+    title="Dollar-based stability"
+    description="Payouts in USD stablecoins protect recipients from local currency devaluation. They can convert to local currency on their own terms."
+    icon="lucide:shield"
+  />
+  <Card
+    title="Broader access"
+    description="Stablecoins can be sent to any compatible digital wallet, anywhere in the world, opening access for individuals in countries underserved by traditional banking."
+    icon="lucide:globe"
+  />
+</Cards>
 
 ## Benefits beyond speed and cost
 
@@ -30,6 +66,18 @@ Stablecoins also reduce the foreign exchange complexity that comes with global p
 Finally, reconciliation becomes significantly simpler. Because stablecoin payouts settle onchain, every transaction has a clear record. Companies no longer need to track separate reporting formats from multiple domestic banks or reconcile transactions that settle at different speeds. Instead, they rely on a single, unified ledger that provides immediate visibility into outgoing payments, balances, and settlement status.
 
 Global payouts with stablecoins already deliver meaningful benefits for both employers and employees. As familiarity grows and merchant acceptance expands, stablecoins are likely to become a preferred payment method not only for international payouts, but for domestic payroll as well. With lower costs, real-time settlement, and programmability, stablecoins bring payroll systems closer to the always-on, digital nature of today's workforce.
+
+## Evaluating stablecoins for global payouts
+
+Stablecoin adoption starts with a clear business use case. Before evaluating vendors or integration paths, consider this framework:
+
+- **Do you pay people internationally?** If you are paying contractors, merchants, or employees across borders, you are already managing multiple currencies, banks, and regulatory regimes.
+- **Do those payments create friction today?** Delays, failed transfers, opaque fees, FX leakage, and reconciliation errors are signals that your current payout rails are not keeping up.
+- **Are you forced to pre-fund payouts?** Long settlement times often require holding excess balances across banks and currencies, tying up working capital.
+- **Would reducing that friction materially impact your business?** Faster payouts, lower costs, and happier recipients can improve retention, reduce operational overhead, and unlock new geographies.
+- **Can instant payouts become a new revenue stream?** Many platforms offer real-time payouts as a premium feature, turning speed and reliability into a paid upgrade rather than a cost center.
+
+If the answer to these questions is yes, you should be evaluating the stablecoin partner ecosystem. The infrastructure is ready, regulation is clearer, and the economics are hard to ignore.
 
 ## Building with Tempo
 
@@ -51,3 +99,25 @@ If you are interested in seeing how a unified onchain ledger can simplify your g
     title="Build on Tempo"
   />
 </Cards>
+
+## FAQs
+
+### Do I have to hold and manage stablecoins?
+
+No. Many infrastructure providers, such as BVNK, Bridge, and ZeroHash, abstract the complexity of managing stablecoins, wallets, or licensing. You connect to their API to instruct a stablecoin payout, send funds from your bank account in fiat currency, and they handle on- and off-ramp, custody, and liquidity management.
+
+### Will recipients understand stablecoins?
+
+They don't have to. Historically, stablecoin payouts were used primarily by crypto-native developers and contractors. That is changing as new fintech apps hide the complexity. Modern stablecoin infrastructure, like embedded wallets, can be invisible. The recipient gets a notification that payment arrived and sees a balance in US dollars on a mobile app.
+
+### What happens if a recipient wants local currency?
+
+Recipients can convert stablecoins to local currency through supported off-ramps as soon as funds arrive. This is often a one-click experience inside a fintech app or exchange, with transparent fees that are typically far lower than traditional bank FX spreads. Stablecoin orchestration platforms can also automate this process end-to-end.
+
+### Is this only useful for emerging markets?
+
+No. While the benefits are most visible in emerging markets with high fees or volatile currencies, stablecoin payouts are increasingly used in developed markets as well, especially for instant payouts, weekend payments, or premium payout features.
+
+### Is this regulated?
+
+Yes, increasingly so. Since the passage of the GENIUS Act in the United States, the compliance landscape for stablecoins has become clearer. Any money transmitter, financial institution, or nonbank money mover is subject to travel rule requirements. In practice, regulatory requirements like KYC/KYB and screening of senders over $1,000 are lower risk in payout use cases because the payer is the corporation itself.
