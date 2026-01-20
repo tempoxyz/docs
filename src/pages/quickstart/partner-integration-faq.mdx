@@ -1,0 +1,142 @@
+---
+title: Partner Integration FAQ
+description: Common questions and answers for partners integrating with Tempo mainnet. Get pathUSD, understand gas tokens, EVM differences, and deployment costs.
+---
+
+import { Cards, Card } from 'vocs'
+
+# Partner Integration FAQ
+
+This guide answers the most common questions from partners integrating with Tempo mainnet.
+
+## Network Configuration
+
+### What are the mainnet connection details?
+
+| **Property** | **Value** |
+|-------------------|-------|
+| **Network Name** | Tempo Mainnet |
+| **Currency** | `USD` |
+| **Chain ID** | `4217` |
+| **HTTP URL** | `https://rpc.tempo.xyz` |
+| **WebSocket URL** | `wss://rpc.tempo.xyz` |
+| **Block Explorer** | [`https://explore.mainnet.tempo.xyz`](https://explore.mainnet.tempo.xyz) |
+| **Documentation** | [`https://mainnet.docs.tempo.xyz`](https://mainnet.docs.tempo.xyz) |
+
+### Which testnet should I use?
+
+Use **Moderato** (`https://rpc.moderato.tempo.xyz`, Chain ID `42431`). The older testnet (Chain ID `42429`) is being decommissioned.
+
+## Gas & Transaction Fees
+
+### How do I get tokens to pay for transactions?
+
+For mainnet partner access, reach out to the Tempo team in your shared Slack channel. We can send pathUSD directly to your wallet address for contract deployment and testing.
+
+Contract deployment typically costs only a few cents. A standard TIP-20 transfer costs less than $0.001.
+
+### What tokens can be used for gas?
+
+Any TIP-20 stablecoin with sufficient liquidity in the Fee AMM can be used for gas. For mainnet, **pathUSD is the recommended token** for contract deployment and transactions until additional liquidity pairs are seeded in the Fee AMM.
+
+### How will users get pathUSD after public mainnet launch?
+
+Bridge will be issuing backed pathUSD, and liquidity pairs will be seeded in the Stablecoin DEX. Users will be able to:
+
+1. Bridge stablecoins from other chains to receive pathUSD
+2. Swap other stablecoins for pathUSD on the Stablecoin DEX
+3. Receive pathUSD directly from other users or applications
+
+### Can I use my own token for gas fees?
+
+Yes. If you're issuing a TIP-20 stablecoin, you can seed liquidity in the Fee AMM to enable your token for gas payments. See [Managing Fee Liquidity](/guide/stablecoin-dex/managing-fee-liquidity) for details.
+
+**Key points for Fee AMM liquidity:**
+- You can seed pairs in the Fee AMM to enable your token
+- You'll need to periodically rebalance pools to replace accrued user tokens with validator tokens
+- The amount of liquidity needed depends on your rebalance frequency
+- Napkin math: gas per tx is ~$0.001, so $1 supports roughly 1,000 transactions
+
+If the pool runs out of liquidity, transactions paying fees in that token will be rejected until it's rebalanced.
+
+## EVM Compatibility
+
+### Do `msg.value` and `address.balance` work on Tempo?
+
+**No.** Tempo has no native token, so:
+
+| Feature | Behavior on Tempo | Alternative |
+|---------|-------------------|-------------|
+| `msg.value` | Always returns `0` | Use TIP-20 token transfers |
+| `address.balance` / `BALANCE` opcode | Always returns `0` | Use TIP-20 `balanceOf(address)` |
+| `SELFBALANCE` | Always returns `0` | Use TIP-20 `balanceOf(address(this))` |
+
+Smart contracts that rely on `msg.value` or native balance checks will need to be modified to use TIP-20 tokens instead.
+
+### What about `eth_getBalance` RPC calls?
+
+The `eth_getBalance` RPC method returns an extremely large placeholder value (`0x9612084f0316e0ebd5182f398e5195a51b5ca47667d4c9b26c9b26c9b26c9b2`). This prevents wallet UIs from breaking due to "insufficient balance" errors.
+
+We recommend:
+- Removing native balance checks from your UI
+- Not displaying any "native balance" to users
+- Using TIP-20 `balanceOf` for actual stablecoin balances
+
+See [EVM Differences](/quickstart/evm-compatibility) for complete details.
+
+## Minting & Burning Operations
+
+### What do I need for mint/burn operations?
+
+Mint and burn operations require **pathUSD (or another gas-eligible token) in the same vault/wallet** to pay for gas fees. The minted token itself cannot be used to pay fees for its own minting transaction.
+
+**Example flow:**
+1. Ensure your minting wallet holds some pathUSD for gas
+2. Call `mint()` or `mintWithMemo()` on your TIP-20 contract
+3. Gas fees are paid in pathUSD
+4. The full minted amount goes to the recipient
+
+See [Mint Stablecoins](/guide/issuance/mint-stablecoins) for implementation details.
+
+## Contract Deployment
+
+### How much does contract deployment cost?
+
+Contract deployment costs only **a few cents** in pathUSD. Exact costs depend on contract size, but typical deployments are under $0.10.
+
+We typically send partners 5-10 pathUSD for initial contract deployment, which is more than sufficient for most integration needs.
+
+### Do protocol contracts have the same addresses as testnet?
+
+Yes. Tempo protocol contracts (pathUSD, Stablecoin DEX, FeeManager, and all system contracts) maintain the **same addresses on mainnet as on Moderato testnet**.
+
+See [Predeployed Contracts](/quickstart/predeployed-contracts) for the full list.
+
+## Additional Resources
+
+<Cards>
+  <Card
+    description="Complete list of EVM differences and compatibility notes"
+    to="/quickstart/evm-compatibility"
+    icon="lucide:code"
+    title="EVM Differences"
+  />
+  <Card
+    description="How transaction fees work on Tempo"
+    to="/protocol/fees"
+    icon="lucide:coins"
+    title="Transaction Fees"
+  />
+  <Card
+    description="Add liquidity to enable your token for gas payments"
+    to="/guide/stablecoin-dex/managing-fee-liquidity"
+    icon="lucide:droplet"
+    title="Managing Fee Liquidity"
+  />
+  <Card
+    description="Create and mint your own stablecoin"
+    to="/guide/issuance"
+    icon="lucide:landmark"
+    title="Issue Stablecoins"
+  />
+</Cards>

@@ -89,6 +89,10 @@ export default defineConfig({
             text: 'Wallet Developers',
             link: '/quickstart/wallet-developers',
           },
+          {
+            text: 'Partner Integration FAQ',
+            link: '/quickstart/partner-integration-faq',
+          },
         ],
       },
       {

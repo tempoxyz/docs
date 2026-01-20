@@ -31,7 +31,26 @@ cast block-number --rpc-url https://rpc.moderato.tempo.xyz
 
 ## Direct Connection Details
 
-If you're manually connecting to Tempo Testnet, you can use the following details:
+### Mainnet
+
+For production deployments, use the mainnet network:
+
+| **Property** | **Value** |
+|-------------------|-------|
+| **Network Name** | Tempo Mainnet |
+| **Currency** | `USD` |
+| **Chain ID** | `4217` |
+| **HTTP URL** | `https://rpc.tempo.xyz` |
+| **WebSocket URL** | `wss://rpc.tempo.xyz` |
+| **Block Explorer** | [`https://explore.mainnet.tempo.xyz`](https://explore.mainnet.tempo.xyz) |
+
+:::info
+Protocol contracts (pathUSD, Stablecoin DEX, FeeManager) maintain the same addresses on mainnet as on Moderato testnet. See [Predeployed Contracts](/quickstart/predeployed-contracts) for details.
+:::
+
+### Testnet (Moderato)
+
+For development and testing, use the Moderato testnet:
 
 | **Property** | **Value** |
 |-------------------|-------|
@@ -41,3 +60,7 @@ If you're manually connecting to Tempo Testnet, you can use the following detail
 | **HTTP URL** | `https://rpc.moderato.tempo.xyz` |
 | **WebSocket URL** | `wss://rpc.moderato.tempo.xyz` |
 | **Block Explorer** | [`https://explore.tempo.xyz`](https://explore.tempo.xyz) |
+
+:::warning
+The older testnet (Chain ID `42429`) is being decommissioned. Please migrate to Moderato.
+:::
