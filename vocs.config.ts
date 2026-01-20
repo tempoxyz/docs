@@ -645,4 +645,25 @@ export default defineConfig({
       },
     },
   },
+  vite: {
+    plugins: [
+      {
+        // Vocs's default NotFound component shows a generic 404 page.
+        // This patches it to redirect to our custom /404 page instead.
+        name: 'fix-404-route',
+        transform(code, id) {
+          if (!id.includes('vocs/_lib/app/routes')) return
+          return code
+            .replace(
+              "import { NotFound } from './components/NotFound.js';",
+              "import { Navigate } from 'react-router';",
+            )
+            .replace(
+              '_jsx(NotFound, {})',
+              '_jsx(Navigate, { to: "/404", replace: true })',
+            )
+        },
+      },
+    ],
+  },
 })
