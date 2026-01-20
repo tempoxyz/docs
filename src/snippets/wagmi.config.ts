@@ -11,7 +11,7 @@ import { KeyManager, webAuthn } from 'wagmi/tempo'
 export const config = createConfig({
   connectors: [
     webAuthn({
-      keyManager: KeyManager.http('https://keystore.tempo.xyz'),
+      keyManager: KeyManager.http('https://keys.tempo.xyz'),
     }),
   ],
   chains: [tempoModerato],
@@ -33,7 +33,7 @@ import { KeyManager, webAuthn } from 'wagmi/tempo'
 export const config = createConfig({
   connectors: [
     webAuthn({
-      keyManager: KeyManager.http('https://keystore.tempo.xyz'),
+      keyManager: KeyManager.http('https://keys.tempo.xyz'),
     }),
   ],
   chains: [tempoModerato],
