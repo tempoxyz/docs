@@ -636,6 +636,42 @@ export default defineConfig({
       destination: '/stablecoin-dex/:path*',
       status: 301,
     },
+    {
+      source: '/guide',
+      destination: '/quickstart/integrate-tempo',
+    },
+    {
+      source: '/quickstart',
+      destination: '/quickstart/integrate-tempo',
+    },
+    {
+      source: '/protocol/blockspace',
+      destination: '/protocol/blockspace/overview',
+    },
+    {
+      source: '/protocol/tip20',
+      destination: '/protocol/tip20/overview',
+    },
+    {
+      source: '/protocol/tip20-rewards',
+      destination: '/protocol/tip20-rewards/overview',
+    },
+    {
+      source: '/protocol/tip403',
+      destination: '/protocol/tip403/overview',
+    },
+    {
+      source: '/learn/use-cases',
+      destination: '/learn/use-cases/remittances',
+    },
+    {
+      source: '/sdk/typescript/server',
+      destination: '/sdk/typescript/server/handlers',
+    },
+    {
+      source: '/sdk/typescript/prool',
+      destination: '/sdk/typescript/prool/setup',
+    },
   ],
   twoslash: {
     twoslashOptions: {
