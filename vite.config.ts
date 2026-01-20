@@ -39,7 +39,7 @@ function syncTips(): Plugin {
     console.log('→ syncing TIPs from GitHub...')
 
     const res = await fetch(
-      `https://api.github.com/repos/${repo}/contents/tips?ref=jxom/migrate-docs-specs`,
+      `https://api.github.com/repos/${repo}/contents/tips`,
     )
     if (!res.ok) {
       console.error('✗ failed to fetch TIPs directory:', res.statusText)
