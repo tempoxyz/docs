@@ -38,9 +38,7 @@ function syncTips(): Plugin {
 
     console.log('→ syncing TIPs from GitHub...')
 
-    const res = await fetch(
-      `https://api.github.com/repos/${repo}/contents/tips`,
-    )
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/tips`)
     if (!res.ok) {
       console.error('✗ failed to fetch TIPs directory:', res.statusText)
       return
