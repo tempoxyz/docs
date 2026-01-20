@@ -1,5 +1,7 @@
 import { Changelog, defineConfig, McpSource } from 'vocs/config'
 
+const baseUrl = process.env.VITE_BASE_URL ?? ''
+
 export default defineConfig({
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
   checkDeadlinks: false,
@@ -17,11 +19,11 @@ export default defineConfig({
       McpSource.github({ repo: 'tempoxyz/tempo-ts' }),
     ],
   },
-  baseUrl: 'https://docs.tempo.xyz',
-  ogImageUrl: (path: string) =>
+  baseUrl: baseUrl || undefined,
+  ogImageUrl: (path, { baseUrl } = { baseUrl: '' }) =>
     path === '/'
-      ? `https://docs.tempo.xyz/og-docs.png`
-      : `https://docs.tempo.xyz/api/og?title=%title&description=%description`,
+      ? `${baseUrl}/og-docs.png`
+      : `${baseUrl}/api/og?title=%title&description=%description`,
   logoUrl: {
     light: '/lockup-light.svg',
     dark: '/lockup-dark.svg',
