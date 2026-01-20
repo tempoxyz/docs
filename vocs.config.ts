@@ -1,6 +1,11 @@
 import { Changelog, defineConfig, McpSource } from 'vocs/config'
 
-const baseUrl = process.env.VITE_BASE_URL ?? ''
+const baseUrl = (() => {
+  if (process.env.VERCEL_ENV === 'production')
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  return ''
+})()
 
 export default defineConfig({
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
