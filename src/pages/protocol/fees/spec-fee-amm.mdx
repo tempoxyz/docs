@@ -6,7 +6,7 @@ description: Technical specification for the Fee AMM enabling automatic stableco
 
 ## Abstract
 
-This specification defines a system of one-way Automated Market Makers (AMMs) designed to facilitate gas fee payments from a user using one stablecoin (the `userToken`) to a validator who prefers a different stablecoin (the `validatorToken`). Each AMM handles fee swaps from a `userToken` to a `validatorToken` at one price (0.9970 `validatorToken` per `userToken`), and allows rebalancing in the other direction at another fixed price (0.9985 `validatorToken` per `userToken`).
+This specification defines a system of one-way Automated Market Makers (AMMs) designed to facilitate gas fee payments from a user using one stablecoin (the `userToken`) to a validator who prefers a different stablecoin (the `validatorToken`). Each AMM handles fee swaps from a `userToken` to a `validatorToken` at one price (0.9970 `validatorToken` per `userToken`), and allows rebalancing in the other direction at another fixed price (1.0015 `userToken` per `validatorToken`).
 
 ## Motivation
 
@@ -27,7 +27,7 @@ The system is designed to minimize several forms of MEV:
 The Fee AMM implements two distinct swap mechanisms:
 
 1. **Fee Swaps**: Fixed-rate swaps at a price of `0.9970` (validator token per user token) from `userToken` to `validatorToken`
-2. **Rebalancing Swaps**: Fixed-rate swaps at a price of `0.9985` (validator token per user token) from `validatorToken` to `userToken`
+2. **Rebalancing Swaps**: Fixed-rate swaps at a price of `1.0015` (user token per validator token) from `validatorToken` to `userToken`
 
 ### Core Components
 
@@ -82,7 +82,7 @@ function rebalanceSwap(
 ) external returns (uint256 amountIn)
 ```
 
-Executes rebalancing swaps from `validatorToken` to `userToken` at fixed rate of 0.9985 (validator token per user token). Can be executed by anyone. Calculates `amountIn = (amountOut * N) / SCALE + 1` (rounds up). Updates reserves immediately. Emits `RebalanceSwap` event.
+Executes rebalancing swaps from `validatorToken` to `userToken` at fixed rate of 1.0015 (user token per validator token). Can be executed by anyone. Calculates `amountIn = (amountOut * N) / SCALE + 1` (rounds up). Updates reserves immediately. Emits `RebalanceSwap` event.
 
 ```solidity
 function mint(
