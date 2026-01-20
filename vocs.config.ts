@@ -55,6 +55,10 @@ export default defineConfig({
         link: '/',
       },
       {
+        text: 'Changelog',
+        link: '/changelog',
+      },
+      {
         text: 'Integrate Tempo Testnet',
         items: [
           {
