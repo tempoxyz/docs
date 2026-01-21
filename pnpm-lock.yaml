@@ -78,8 +78,8 @@ importers:
         specifier: https://pkg.pr.new/wevm/vocs@7431807
         version: https://pkg.pr.new/wevm/vocs@7431807(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.55.1)(typescript@5.9.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       wagmi:
-        specifier: ^3.3.2
-        version: 3.3.2(@tanstack/query-core@5.90.17)(@tanstack/react-query@5.90.17(react@19.2.3))(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))
+        specifier: https://pkg.pr.new/wagmi@59f5a5c
+        version: https://pkg.pr.new/wagmi@59f5a5c(@tanstack/query-core@5.90.17)(@tanstack/react-query@5.90.17(react@19.2.3))(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))
       waku:
         specifier: 1.0.0-alpha.1
         version: 1.0.0-alpha.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
@@ -1305,8 +1305,9 @@ packages:
       react-server-dom-webpack:
         optional: true
 
-  '@wagmi/connectors@7.1.2':
-    resolution: {integrity: sha512-L5ATHwEjJCWOm/tRWAyQ42hFpe4UrrReqQT8pMEsM+A29CkJxEm0n7/C2Ki7O1hiZ2D/n5emp0s4MfCFe9pdwQ==}
+  '@wagmi/connectors@https://pkg.pr.new/wevm/wagmi/@wagmi/connectors@59f5a5c':
+    resolution: {integrity: sha512-D/D+LWmk8uqI2DVaNgNvQnsPeP9nNOOU5lEV9bRWDk+IP1L8C7GgkqZQFKjU9dyGR6jScUtWn1uF/4qZi42Drw==, tarball: https://pkg.pr.new/wevm/wagmi/@wagmi/connectors@59f5a5c}
+    version: 0.0.0-fix-webauthn-rpid-propagation.3918c86
     peerDependencies:
       '@base-org/account': ^2.5.1
       '@coinbase/wallet-sdk': ^4.3.6
@@ -1314,7 +1315,7 @@ packages:
       '@metamask/sdk': ~0.33.1
       '@safe-global/safe-apps-provider': ~0.18.6
       '@safe-global/safe-apps-sdk': ^9.1.0
-      '@wagmi/core': 3.2.2
+      '@wagmi/core': 0.0.0-fix-webauthn-rpid-propagation.3918c86
       '@walletconnect/ethereum-provider': ^2.21.1
       porto: ~0.2.35
       typescript: '>=5.7.3'
@@ -1339,8 +1340,9 @@ packages:
       typescript:
         optional: true
 
-  '@wagmi/core@3.2.2':
-    resolution: {integrity: sha512-nCCza85tmE/lNorZemv0ah0OwOewMRiNJbSkIkGPr/mSH6mAy+/D/GbP8Gb3j2Nw85LuF5wxgG1fFiU6mB3CyQ==}
+  '@wagmi/core@https://pkg.pr.new/wevm/wagmi/@wagmi/core@59f5a5c':
+    resolution: {integrity: sha512-OwoLuUuNHOXoQ521dmXTrJI7oRKlmUfUfQlNBnZPepulUmphqfYuzzdgdYebxpQnw7jW4u/5EaHJkvHyivIDyQ==, tarball: https://pkg.pr.new/wevm/wagmi/@wagmi/core@59f5a5c}
+    version: 0.0.0-fix-webauthn-rpid-propagation.3918c86
     peerDependencies:
       '@tanstack/query-core': '>=5.0.0'
       ox: '>=0.11.1'
@@ -3253,8 +3255,9 @@ packages:
   w3c-keyname@2.2.8:
     resolution: {integrity: sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==}
 
-  wagmi@3.3.2:
-    resolution: {integrity: sha512-WPHuWnEOWpOTko+P9f5pR22y7Ozjq6nJse79uBOk3j6ke4ipbGCzJtXfdh/QGQzYHQTU+Iv5HXjiYeabdjdvaQ==}
+  wagmi@https://pkg.pr.new/wagmi@59f5a5c:
+    resolution: {integrity: sha512-CUW3I+vaxmSnZklv54YXCAnYjtELhg31fRjRBXfgFgDzsXjSKwPsTahtixLaaaabmYL4txBiU7Iqnzwm9JA9RQ==, tarball: https://pkg.pr.new/wagmi@59f5a5c}
+    version: 0.0.0-fix-webauthn-rpid-propagation.3918c86
     peerDependencies:
       '@tanstack/react-query': '>=5.0.0'
       react: '>=18'
@@ -4522,14 +4525,14 @@ snapshots:
     optionalDependencies:
       react-server-dom-webpack: 19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1)
 
-  '@wagmi/connectors@7.1.2(@wagmi/core@3.2.2(@tanstack/query-core@5.90.17)(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.44.4(typescript@5.9.3)(zod@4.3.5)))(typescript@5.9.3)(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))':
+  '@wagmi/connectors@https://pkg.pr.new/wevm/wagmi/@wagmi/connectors@59f5a5c(@wagmi/core@https://pkg.pr.new/wevm/wagmi/@wagmi/core@59f5a5c(@tanstack/query-core@5.90.17)(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.44.4(typescript@5.9.3)(zod@4.3.5)))(typescript@5.9.3)(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))':
     dependencies:
-      '@wagmi/core': 3.2.2(@tanstack/query-core@5.90.17)(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))
+      '@wagmi/core': https://pkg.pr.new/wevm/wagmi/@wagmi/core@59f5a5c(@tanstack/query-core@5.90.17)(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))
       viem: 2.44.4(typescript@5.9.3)(zod@4.3.5)
     optionalDependencies:
       typescript: 5.9.3
 
-  '@wagmi/core@3.2.2(@tanstack/query-core@5.90.17)(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))':
+  '@wagmi/core@https://pkg.pr.new/wevm/wagmi/@wagmi/core@59f5a5c(@tanstack/query-core@5.90.17)(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))':
     dependencies:
       eventemitter3: 5.0.1
       mipd: 0.0.7(typescript@5.9.3)
@@ -6953,11 +6956,11 @@ snapshots:
 
   w3c-keyname@2.2.8: {}
 
-  wagmi@3.3.2(@tanstack/query-core@5.90.17)(@tanstack/react-query@5.90.17(react@19.2.3))(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(viem@2.44.4(typescript@5.9.3)(zod@4.3.5)):
+  wagmi@https://pkg.pr.new/wagmi@59f5a5c(@tanstack/query-core@5.90.17)(@tanstack/react-query@5.90.17(react@19.2.3))(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(viem@2.44.4(typescript@5.9.3)(zod@4.3.5)):
     dependencies:
       '@tanstack/react-query': 5.90.17(react@19.2.3)
-      '@wagmi/connectors': 7.1.2(@wagmi/core@3.2.2(@tanstack/query-core@5.90.17)(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.44.4(typescript@5.9.3)(zod@4.3.5)))(typescript@5.9.3)(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))
-      '@wagmi/core': 3.2.2(@tanstack/query-core@5.90.17)(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))
+      '@wagmi/connectors': https://pkg.pr.new/wevm/wagmi/@wagmi/connectors@59f5a5c(@wagmi/core@https://pkg.pr.new/wevm/wagmi/@wagmi/core@59f5a5c(@tanstack/query-core@5.90.17)(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.44.4(typescript@5.9.3)(zod@4.3.5)))(typescript@5.9.3)(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))
+      '@wagmi/core': https://pkg.pr.new/wevm/wagmi/@wagmi/core@59f5a5c(@tanstack/query-core@5.90.17)(@types/react@19.2.8)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))
       react: 19.2.3
       use-sync-external-store: 1.4.0(react@19.2.3)
       viem: 2.44.4(typescript@5.9.3)(zod@4.3.5)

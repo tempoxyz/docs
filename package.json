@@ -35,7 +35,7 @@
     "unplugin-icons": "^22.5.0",
     "viem": "^2.44.4",
     "vocs": "https://pkg.pr.new/wevm/vocs@7431807",
-    "wagmi": "^3.3.2",
+    "wagmi": "https://pkg.pr.new/wagmi@59f5a5c",
     "waku": "1.0.0-alpha.1",
     "zod": "^4.3.5"
   },
