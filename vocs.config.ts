@@ -86,6 +86,10 @@ export default defineConfig({
             link: '/quickstart/predeployed-contracts',
           },
           {
+            text: 'Token List Registry',
+            link: '/quickstart/tokenlist',
+          },
+          {
             text: 'Wallet Developers',
             link: '/quickstart/wallet-developers',
           },
