@@ -31,7 +31,7 @@ export function TokenListDemo() {
             className="flex items-center gap-2 text-content"
             href={`https://tokenlist.tempo.xyz/asset/42431/${token.address}`}
           >
-            <img src={token.logoURI} alt={token.name} className="size-7.5" />
+            <img src={token.logoURI} alt={token.name} width={30} height={30} className="size-7.5" />
             <span className="font-medium text-xl tracking-wider">{token.name}</span>
           </a>
         </li>
