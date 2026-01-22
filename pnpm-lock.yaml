@@ -108,9 +108,6 @@ importers:
       anser:
         specifier: ^2.3.5
         version: 2.3.5
-      dotenv:
-        specifier: ^17.2.3
-        version: 17.2.3
       node:
         specifier: runtime:24.12.0
         version: runtime:24.12.0
@@ -3391,7 +3388,7 @@ packages:
         optional: true
 
   vocs@https://pkg.pr.new/wevm/vocs@7431807:
-    resolution: {integrity: sha512-WbAsWt7TLxyGaMyOMTlGwJoICmTRuX2A+LRZIzjt1i5ssYnwoYbz/hYlRdKw1pi1c0r7yQ1/0UVSO5pedjNo1w==, tarball: https://pkg.pr.new/wevm/vocs@7431807}
+    resolution: {tarball: https://pkg.pr.new/wevm/vocs@7431807}
     version: 0.0.0
     hasBin: true
     peerDependencies:
@@ -3415,7 +3412,7 @@ packages:
     resolution: {integrity: sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==}
 
   wagmi@https://pkg.pr.new/wagmi@59f5a5c:
-    resolution: {integrity: sha512-CUW3I+vaxmSnZklv54YXCAnYjtELhg31fRjRBXfgFgDzsXjSKwPsTahtixLaaaabmYL4txBiU7Iqnzwm9JA9RQ==, tarball: https://pkg.pr.new/wagmi@59f5a5c}
+    resolution: {tarball: https://pkg.pr.new/wagmi@59f5a5c}
     version: 0.0.0-fix-webauthn-rpid-propagation.3918c86
     peerDependencies:
       '@tanstack/react-query': '>=5.0.0'
