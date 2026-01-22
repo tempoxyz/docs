@@ -53,6 +53,18 @@ The docs include a built-in "Ask AI" menu (<kbd>⌘I</kbd> / <kbd>Ctrl+I</kbd>) 
 
 The docs include a built-in [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that allows AI assistants to navigate documentation and source code programmatically.
 
+:::code-group
+```bash [Claude Code]
+claude mcp add --transport http tempo https://docs.tempo.xyz/api/mcp
+```
+```bash [Codex CLI]
+codex mcp add vercel --url https://docs.tempo.xyz/api/mcp
+```
+```bash [Amp]
+amp mcp add tempo https://docs.tempo.xyz/api/mcp
+```
+:::
+
 ### Connecting AI Assistants
 
 Configure your AI assistant to connect to the MCP server:
