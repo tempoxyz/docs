@@ -11,7 +11,9 @@ This spec lays out how fees work on Tempo, including how fees are calculated, wh
 
 ## Motivation
 
-On Tempo, users can pay gas fees in any [TIP-20](/protocol/tip20/spec) token whose currency is USD, as long as that stablecoin has sufficient liquidity on the enshrined [fee AMM](/protocol/fees/spec-fee-amm.mdx) against the token that the current validator wants to receive.
+Tempo has no native token. Transaction fees are paid directly in USD-denominated stablecoins. This design removes the need for users or applications to hold volatile assets for gas, keeping the entire payment experience USD-native.
+
+Users can pay gas fees in any [TIP-20](/protocol/tip20/spec) token whose currency is USD, as long as that stablecoin has sufficient liquidity on the enshrined [fee AMM](/protocol/fees/spec-fee-amm.mdx) against the token that the current validator wants to receive.
 
 In determining *which* token a user pays fees in, we want to maximize customizability (so that wallets or users can implement more sophisticated UX than is possible at the protocol layer), minimize surprise (particularly surprises in which a user pays fees in a stablecoin they did not expect to), and have sane default behavior so that users can begin using basic functions like payments even using wallets that are not customized for Tempo support.
 
@@ -25,13 +27,15 @@ This unit is chosen to provide sufficient precision for low-fee transactions. Si
 
 Tempo uses a fixed base fee rather than the dynamic base fee mechanism specified in EIP-1559. The base fee is set such that a TIP-20 transfer costs less than $0.001.
 
-The fixed base fee provides predictable transaction costs. Congestion is managed through:
+The fixed base fee combined with USD-denominated payment provides predictable unit economics. Applications can budget for transaction costs without exposure to fee volatility or native token price fluctuations.
 
-- **Payment lanes**: Reserved blockspace for TIP-20 transfers as specified in the [Payment Lane Specification](/protocol/blockspace/payment-lane-specification)
-- **Priority fees**: The `max_priority_fee_per_gas` field allows transactions to bid for faster inclusion
-- **Block gas limits**: Standard per-block gas limits constrain total computation
+Congestion is managed through:
 
-Transactions can still specify `max_priority_fee_per_gas` to compete for inclusion during periods of high demand.
+- **Payment lanes**: Reserved blockspace for TIP-20 transfers as specified in the [Payment Lane Specification](/protocol/blockspace/payment-lane-specification). This guarantees capacity for payments even during high general network activity.
+- **Priority fees**: The `max_priority_fee_per_gas` field allows transactions to bid for faster inclusion during periods of high demand.
+- **Block gas limits**: Standard per-block gas limits constrain total computation per block.
+
+The payment lane mechanism ensures that payment transactions are not crowded out by other network activity. Fees remain stable and low even when the network is processing high volumes of non-payment transactions.
 
 ## Fee payment
 
