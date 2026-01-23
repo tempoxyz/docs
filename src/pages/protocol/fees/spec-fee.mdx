@@ -31,11 +31,11 @@ The fixed base fee combined with USD-denominated payment provides predictable un
 
 Congestion is managed through:
 
-- **Payment lanes**: Reserved blockspace for TIP-20 transfers as specified in the [Payment Lane Specification](/protocol/blockspace/payment-lane-specification). This guarantees capacity for payments even during high general network activity.
+- **Payment lanes**: Reserved blockspace for TIP-20 transfers as specified in the [Payment Lane Specification](/protocol/blockspace/payment-lane-specification). Approximately 94% of blockspace is reserved for payment transactions, with the remaining 6% available for general computation. This allocation is conservative and may increase over time as total throughput scales.
 - **Priority fees**: The `max_priority_fee_per_gas` field allows transactions to bid for faster inclusion during periods of high demand.
 - **Block gas limits**: Standard per-block gas limits constrain total computation per block.
 
-The payment lane mechanism ensures that payment transactions are not crowded out by other network activity. Fees remain stable and low even when the network is processing high volumes of non-payment transactions.
+The payment lane mechanism ensures that payment transactions are not crowded out by other network activity. General network congestion from non-payment use cases cannot affect payment throughput or fees, providing the consistency that payment applications require.
 
 ## Fee payment
 
