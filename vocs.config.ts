@@ -345,6 +345,14 @@ export default defineConfig({
                 link: '/protocol/transactions/spec-tempo-transaction',
               },
               {
+                text: 'EIP-4337 Comparison',
+                link: '/protocol/transactions/eip-4337',
+              },
+              {
+                text: 'EIP-7702 Comparison',
+                link: '/protocol/transactions/eip-7702',
+              },
+              {
                 text: 'Account Keychain Precompile Specification',
                 link: '/protocol/transactions/AccountKeychain',
               },
