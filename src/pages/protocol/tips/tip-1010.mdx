@@ -36,7 +36,7 @@ The parameters defined in this TIP represent the initial mainnet configuration a
 **Rationale**:
 - A standard TIP-20 transfer costs approximately 50,000 gas
 - Fee calculation: `gas_used × base_fee / 10^12` (the 10^12 denominator is an adjustment Tempo uses when setting gas fees; see [fee units](/protocol/fees/spec-fee#fee-units))
-- At this base fee: `50,000 × 2 × 10^10 / 10^12 = 1000` smallest units, or `1000 / 10^6 = $0.001` (0.1 cent per transfer)
+- At this base fee: `50,000 × 2 × 10^10 / 10^12 = 1000` microdollars, or `1000 / 10^6 = $0.001` (0.1 cent per transfer)
 
 **Note**: This is a fixed base fee; Tempo does not use EIP-1559 to adjust the base fee. However, if blocks are full, transactions may need to include a priority fee to be included, which could result in transfers costing more than $0.001.
 
