@@ -510,6 +510,14 @@ export default defineConfig({
             text: 'Operating your validator',
             link: '/guide/node/operate-validator',
           },
+          {
+            text: 'Monitoring your validator',
+            link: '/guide/node/monitor-validator',
+          },
+          {
+            text: 'Troubleshooting',
+            link: '/guide/node/troubleshoot-validator',
+          },
         ],
       },
       // {

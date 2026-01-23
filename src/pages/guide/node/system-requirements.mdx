@@ -12,10 +12,10 @@ but we still highly recommend to follow the recommended specifications. This wil
 
 | Component | Minimum | Recommended |
 |-----------|---------|-------------|
-| **CPU** | 8 cores | 16+ cores |
-| **RAM** | 16 GB | 32 GB |
-| **Storage** | 250 GB SSD | 500 GB NVMe |
-| **Network** | 500 Mbps | 1 Gbps |
+| **CPU** | 16 cores | 32+ cores |
+| **RAM** | 32 GB | 64 GB |
+| **Storage** | 1000 GB NVMe | 2000 GB NVMe |
+| **Network** | 1 Gbps | 10 Gbps |
 
 ## Validator Node
 
@@ -25,6 +25,20 @@ but we still highly recommend to follow the recommended specifications. This wil
 | **RAM** | 16 GB | 32 GB |
 | **Storage** | 100 GB NVMe | 1 TB NVMe |
 | **Network** | 1 Gbps | 1 Gbps |
+
+## Cloud provider recommendations
+
+These dedicated servers meet or exceed the recommended specs for both RPC and validator nodes:
+
+| Provider | Server | CPU | RAM | Storage |
+|----------|--------|-----|-----|---------|
+| OVH | Advance-4 | Intel Xeon-E 2386G (6c/12t) | 32 GB | 2× 512 GB NVMe |
+| Hetzner | AX42 | AMD Ryzen 5 3600 (6c/12t) | 64 GB | 2× 512 GB NVMe |
+| AWS | `c6id.8xlarge` | 32 vCPUs | 64 GB | 1.9 TB NVMe |
+
+:::warning
+Cloud instances with network-attached storage (e.g., AWS EBS) do not provide sufficient I/O performance. Use dedicated servers or instances with local NVMe storage.
+:::
 
 ## Ports
 

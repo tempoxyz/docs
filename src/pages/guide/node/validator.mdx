@@ -53,24 +53,6 @@ The notable difference between RPC nodes and validator nodes is the omission of 
 
 Once your node is up, it may not start syncing immediately. This is because your node might not be part of the active set. In most cases, your validator will enter the active set in 48-72 hours after the on-chain addition of the validator identity.
 
-## FAQ
-
-### What happens if we lose our validator's signing share?
-
-Your validator won't be able to propose / sign blocks until it receives a new signing share (~48-72 hours, depending on the stage in the current epoch).
-
-### What happens if we lose our validator's signing key?
-
-Your validator will need to rotate its identity by deactivating the current validator identity on-chain and creating a new one. 
-
-### What happens if we run a validator with the same identity on two different instances?
-
-Only the whitelisted IP address will be able to connect to other validators, meaning that the validator on the second instance will be ignored.
-
-### What happens if we lose our node's data, e.g. the consensus database?
-
-You will be able to resync from genesis to the latest block height. We're currently implementing the ability for validators to sync from an execution database snapshot (e.g. by downloading a snapshot by running `tempo download`).
-
 ## Troubleshooting
 
 ### Checking if your node is proposing blocks
@@ -81,26 +63,11 @@ Once your node is proposing blocks, it will start emitting logs like these:
 INFO handle_propose{epoch=18 view=387213 parent.view=387212 parent.digest=0x43885416b4a7ae7550c615ad4dc702045cd26540b78fa2bd75abdcbfbef02d9d}: tempo_commonware_node::consensus::application::actor: constructed proposal proposal.digest=0x6baa8fa813beea491cf598024d8b31cb2927e7ba1b92a29899a795dbafd682c6 proposal.height=5733680
 ```
 
-If you do not see logs like these, please check that your node is synced up to the [latest block height](https://explorer.tempo.xyz/). Additionally, please check that your outgoing IP address matches the one whitelisted on the validator smart contract:
+If you do not see logs like these:
+- please check that your validator is part of the active set, and is both [a player and a dealer](https://docs.tempo.xyz/guide/node/operate-validator#validator-states)
+- please check that your node is synced up to the [latest block height](https://explorer.tempo.xyz/). 
+- please check that your outgoing IP address matches the one whitelisted on the validator smart contract:
 
 ```bash
-cast call 0xCccCcCCC00000000000000000000000000000000 "getValidators()((bytes32, bool, uint64, address, string, string)[])" --json 
+tempo consensus validators-info --rpc-url <YOUR_RPC_URL>
 ```
-
-### Checking that your node has successfully participated in a DKG ceremony
-
-A successful DKG ceremony is necessary for your validator to receive a signing share. You can check that you've participated in a successful DKG ceremony by looking at 
-
-```bash
-curl localhost:8002/metrics | grep consensus_engine_dkg_manager_ceremony_successes_total
-consensus_engine_dkg_manager_ceremony_successes_total 1
-```
-
-The `consensus_engine_dkg_manager_ceremony_successes_total` metric should be greater than 0. If the metric is 0, it doesn't necessarily means that your node has observed a failed DKG ceremony. You can get the total number of DKG ceremony failures by looking at this metric:
-
-```bash
-curl localhost:8002/metrics | grep consensus_engine_dkg_manager_ceremony_failures_total
-consensus_engine_dkg_manager_ceremony_failures_total 0
-```
-
-If the number is greater than 0, it means that your node has observed a failed DKG ceremony.

@@ -7,6 +7,95 @@ description: Day-to-day operations for Tempo validators. Node lifecycle, upgrade
 
 This guide covers day-to-day operations for running a Tempo validator in production.
 
+## Validator states
+
+Your validator moves through different states during operation. Here's how to identify each.
+
+### DKG ceremony
+
+DKG (Distributed Key Generation) ceremonies run approximately every 3 hours to generate threshold signing shares.
+
+#### Non-dealer / non-player
+
+Your validator is not participating in the current DKG ceremony. This is normal if:
+- You're a new validator waiting to join the next ceremony
+- The ceremony hasn't started yet
+
+#### Player
+
+Your validator is receiving shares from dealers during the ceremony.
+
+#### Dealer
+
+Your validator is distributing shares to other validators during the ceremony.
+
+#### Checking DKG state
+
+Monitor these metrics to track DKG participation:
+
+```bash
+# How many times YOUR node has been a dealer (distributing shares) - this metric should be >0 over 6 hours
+curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_how_often_dealer
+
+# How many times YOUR node has been a player (receiving shares) - this metric should be >0 over 6 hours
+curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_how_often_player
+
+# Successful ceremonies (should increase every ~3 hours)
+curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_ceremony_successes_total
+
+# Failed ceremonies (should stay at 0 or increase rarely)
+curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_ceremony_failures_total
+```
+
+If `how_often_dealer` or `how_often_player` is increasing, your node is actively participating in DKG ceremonies.
+
+### Consensus
+
+#### Proposer
+
+Your validator is currently the leader and proposing blocks. Check proposal activity:
+```bash
+# Number of blocks your node has built and resolved
+curl -s localhost:8002/metrics | grep reth_payloads_resolved_block
+```
+
+If this counter is increasing, your validator is actively proposing blocks.
+
+#### Voter
+
+Your validator is voting on blocks proposed by others (notarization and finalization). This is the most common state.
+
+```bash
+# Inbound voting messages (should increase steadily)
+curl -s localhost:8002/metrics | grep consensus_engine_consensus_voter_inbound_messages_total | grep data_0
+```
+
+This counter should increase steadily when your node is participating in consensus.
+
+### Execution
+
+#### Catching up
+
+Your node is syncing historical blocks.
+
+```bash
+# Check sync stage
+curl -s localhost:8002/metrics | grep reth_sync_checkpoint
+```
+
+If `reth_sync_checkpoint` shows stages other than `Finish`, you're still syncing.
+
+#### Up to sync
+
+Your node is fully synced and processing new blocks in real-time.
+
+```bash
+# Processed height should match or be close to finalized height
+curl -s localhost:8002/metrics | grep -E "marshal_finalized_height|marshal_processed_height"
+```
+
+Both values should be nearly equal and increasing together.
+
 ## Node Lifecycle
 
 ### Starting and Stopping
@@ -25,33 +114,11 @@ The node will finish processing the current block before shutting down. Avoid us
 
 ### Resetting your validator's data
 
-Validators can safely restart from a snapshot if needed:
+:::danger
+**You cannot reset a validator's data and continue with the same identity.** Doing so risks inconsistent voting, which can cause irrecoverable network safety failures. See [Recovery procedures](/guide/node/troubleshoot-validator#recovery-procedures) for the correct process.
+:::
 
-```bash
-# Stop the node
-sudo systemctl stop tempo
-
-# Remove old data (keep your signing key!)
-rm -rf <datadir>/db
-
-# Download fresh snapshot
-tempo download --datadir <datadir>
-
-# Start the node
-sudo systemctl start tempo
-```
-
-After restarting, your validator will rejoin the active set once it syncs to the chain tip and participates in the next DKG ceremony (up to 3 hours).
-Your node needs to wait for the next DKG ceremony to receive its' signing share.
-
-### Changing your validator's instance
-
-If needed, you can also migrate your validator to another instance (e.g. move to another bare-metal server). 
-This requires shutting down your old node, downloading a snapshot and starting with the consensus key.
-
-The new validator needs to have the same IP address and port as the old one, since the Tempo validator contract does not currently support updating the IP address.
-
-Since your validator is starting from fresh state, you will need to wait for the next DKG ceremony for your validator to receive a signing share (up to 3 hours).
+If you need to reset your validator's data, you must rotate to a new validator identity. This requires coordinating with the Tempo team to deactivate your old identity and register a new one.
 
 ## Key Management
 
@@ -76,7 +143,12 @@ The old validator identity must be deactivated before the new one is activated
 
 ### Signing Share Recovery
 
-If you lose your signing share (stored on the database in `<datadir>/consensus/`), your validator will automatically receive a new share at the next DKG ceremony. This takes up to 3 hours depending on the epoch stage.
+:::danger
+**You cannot reset a validator's data and continue with the same identity.** Doing so risks inconsistent voting, which can cause irrecoverable network safety failures. See [Recovery procedures](/guide/node/troubleshoot-validator#recovery-procedures) for the correct process.
+:::
+
+If you lose your signing share (stored on the database in `<datadir>/consensus/`), you will need to rotate to a new validator identity. This requires coordinating with the Tempo team to deactivate your old identity and register a new one.
+We're planning to release a high-availability feature that allows storing consensus data in an external database, which will enable signing share recovery without the need for key rotation.
 
 ## Log Management
 
@@ -121,25 +193,3 @@ This is a table of the most important metrics to watch on your validator node:
 | `consensus_engine_consensus_voter_inbound_messages_total` | Number of inbound messages related to voting on the consensus layer | Warning when it's not increasing and your node is synced | Your node is receiving voting messages from the consensus layer |
 | `reth_sync_checkpoint` | Current sync progress | Warning on when there are no changes in the `Finish` stage | Your node is syncing with the network |
 | `reth_payloads_resolved_block` | Number of built and resolved payloads | Warning when it hasn't increased in 12 hours | Your node has built and resolved blocks |
-
-## Troubleshooting
-
-### Node stalled at specific height
-
-If your node stops syncing at a specific block:
-
-1. Check if other validators are also stuck (e.g. on the [Tempo Explorer](https://explore.tempo.xyz))
-2. Check for errors in logs:
-   ```bash
-   sudo journalctl -u tempo -n 5000 | grep -i "error\|panic\|fatal"
-   ```
-3. Try restarting from snapshot if the issue persists
-
-### Not receiving signing share
-
-If `consensus_engine_dkg_manager_ceremony_successes_total` stays at 0 after 6-12 hours:
-
-1. Verify your IP is whitelisted correctly
-2. Check firewall allows inbound/outbound on port 30303
-3. Confirm your node is synced and connected to consensus peers
-4. Wait for the next DKG ceremony (runs every ~3 hours)
