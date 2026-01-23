@@ -1,0 +1,62 @@
+---
+title: EIP-7702 Comparison
+description: "How Tempo Transactions extend EIP-7702 delegation with additional signature schemes and native features."
+---
+
+# EIP-7702 and Tempo Transactions
+
+EIP-7702 allows EOAs to delegate to smart contract code temporarily within a transaction. Tempo Transactions build on this foundation and extend it with additional capabilities.
+
+## EIP-7702 Design Goals
+
+EIP-7702 enables EOAs to:
+
+- **Delegate to contract code**: An EOA can execute as if it were a smart contract
+- **Batch transactions**: Through delegation to a batching contract
+- **Maintain EOA properties**: The account remains an EOA after the transaction
+
+## How Tempo Extends EIP-7702
+
+Tempo Transactions support EIP-7702 style delegation through the `aa_authorization_list` field. This field follows EIP-7702 semantics for delegation and execution.
+
+### Extended Signature Support
+
+EIP-7702 on Ethereum only supports secp256k1 signatures for the authorization.
+
+Tempo extends this to support all Tempo signature types. Authorizations can be signed with secp256k1, P256, or WebAuthn. This enables delegation from passkey-based accounts.
+
+### Native Features Beyond Delegation
+
+EIP-7702 provides delegation as a building block. Applications must implement higher-level features through the delegated contract.
+
+Tempo Transactions include these features natively:
+
+- **Fee sponsorship**: Built into the transaction type, not requiring delegation. See the [fee sponsorship guide](/guide/payments/sponsor-user-fees).
+- **Scheduled execution**: Native `validAfter` and `validBefore` timestamp windows for time-bounded transactions.
+- **Parallelizable nonces**: Multiple nonce keys for concurrent transactions. See the [parallel transactions guide](/guide/payments/send-parallel-transactions).
+- **Access keys**: Delegate signing to secondary keys with configurable permissions. See the [Account Keychain specification](/protocol/transactions/AccountKeychain).
+
+### Combining Delegation with Native Features
+
+Tempo Transactions can use EIP-7702 delegation alongside native features. An application can delegate an EOA to contract code while also using fee sponsorship and batched calls from the protocol.
+
+## Feature Comparison
+
+| Feature | EIP-7702 | Tempo Transactions |
+|---------|----------|-------------------|
+| EOA delegation | Yes | Yes |
+| Signature schemes | secp256k1 only | secp256k1, P256, WebAuthn |
+| Fee sponsorship | Via delegated contract | Native |
+| Batching | Via delegated contract | Native |
+| Scheduled execution | Not available | Native |
+| Concurrent nonces | Not available | Native |
+
+## Implementation
+
+The `aa_authorization_list` field in Tempo Transactions contains authorizations that follow EIP-7702 structure. Each authorization delegates an account to a specified implementation contract and is signed by the account authority.
+
+For full details on the authorization format, see the [Tempo Transaction Specification](/protocol/transactions/spec-tempo-transaction).
+
+## Getting Started
+
+To start using Tempo Transactions, see the [Tempo Transactions guide](/guide/tempo-transaction) for SDK integration in TypeScript, Rust, Go, and Python.
