@@ -1,0 +1,57 @@
+---
+title: Consensus and Finality
+description: "Tempo uses Simplex BFT via Commonware for deterministic sub-second finality with Byzantine fault tolerance."
+---
+
+# Consensus and Finality
+
+Tempo uses Simplex BFT consensus to provide deterministic, sub-second finality. This page describes the consensus mechanism, finality guarantees, and fault tolerance properties.
+
+## Simplex BFT Consensus
+
+Tempo uses Simplex Consensus, implemented by [Commonware](https://www.commonware.xyz/). Simplex is a Byzantine Fault Tolerant consensus protocol optimized for fast finality with graceful degradation under adverse network conditions.
+
+### Block Production
+
+Blocks are produced approximately every 0.5 seconds under normal network conditions. Proposer selection follows a round-robin pattern among active validators. Once a block is finalized, it cannot be reverted.
+
+### Deterministic Finality
+
+Tempo provides deterministic finality rather than probabilistic finality. When a block is marked as finalized, transactions in that block are guaranteed to remain in the canonical chain. There is no reorg risk after finality.
+
+For payment applications, this provides the settlement certainty that operators expect from traditional financial systems.
+
+## Validator Set
+
+### Current Configuration
+
+The testnet operates with 4 validators in a permissioned configuration. Mainnet will launch with institutional validators, also permissioned initially. The roadmap includes a path to permissionless validation.
+
+### Fault Tolerance
+
+Simplex BFT tolerates Byzantine validators up to a threshold:
+
+- The network maintains safety as long as fewer than one-third of validators are Byzantine
+- The network maintains liveness as long as at least two-thirds of validators are honest and online
+
+With 4 validators, the network tolerates 1 Byzantine validator. With 10 validators, the network tolerates 3 Byzantine validators.
+
+## Distributed Validation
+
+Tempo uses a distributed validator set rather than a single sequencer. Multiple validators share block production responsibility. Transactions can be included by any proposer, preventing single points of censorship. The network can continue finalizing blocks as long as two-thirds of validators are online and honest.
+
+## Degraded State Behavior
+
+Under adverse conditions, Simplex consensus degrades gracefully:
+
+| Condition | Behavior |
+|-----------|----------|
+| Network partition | Block times may increase but finality guarantees are preserved |
+| Validator offline within threshold | Network continues with remaining validators |
+| More than one-third of validators offline | Network halts and resumes when threshold is restored |
+
+The protocol prioritizes safety over liveness. It will halt rather than produce conflicting blocks.
+
+## For Integrators
+
+Treat finalized blocks as irreversible for settlement purposes. No additional confirmations are needed after finality. Query finalized blocks using `eth_getBlockByNumber` with the `finalized` tag.

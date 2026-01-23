@@ -370,6 +370,10 @@ export default defineConfig({
                 text: 'Sub-block Specification',
                 link: '/protocol/blockspace/sub-block-specification',
               },
+              {
+                text: 'Consensus and Finality',
+                link: '/protocol/blockspace/consensus',
+              },
             ],
           },
           {
