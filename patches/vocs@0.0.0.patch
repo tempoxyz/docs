@@ -1,0 +1,13 @@
+diff --git a/dist/react/internal/Changelog.client.js b/dist/react/internal/Changelog.client.js
+index dc53ba264977cd2097d1d890cff746413fb61d87..4fc0d8171aecb09d7e9b6b4ada338f7a80ac94ac 100644
+--- a/dist/react/internal/Changelog.client.js
++++ b/dist/react/internal/Changelog.client.js
+@@ -115,7 +115,7 @@ function VersionOutline(props) {
+                             ...indicatorStyle,
+                         }, "data-v-version-indicator": true }), releases.map((release) => {
+                         const isActive = activeVersion === release.version;
+-                        return (_jsx("li", { "data-v-version-item": true, "data-version": release.version, className: "vocs:scroll-my-4", children: _jsx("a", { href: `#${release.version}`, className: cx('vocs:block vocs:leading-snug vocs:py-1 vocs:pl-3 vocs:cursor-pointer vocs:font-mono vocs:text-xs vocs:transition-colors vocs:duration-100', isActive ? 'vocs:text-accent' : 'vocs:text-secondary vocs:hover:text-link'), "data-active": isActive, children: release.version }) }, release.version));
++                        return (_jsx("li", { "data-v-version-item": true, "data-version": release.version, className: "vocs:scroll-my-4", children: _jsx("a", { href: `${typeof window !== 'undefined' ? window.location.pathname : ''}#${release.version}`, className: cx('vocs:block vocs:leading-snug vocs:py-1 vocs:pl-3 vocs:cursor-pointer vocs:font-mono vocs:text-xs vocs:transition-colors vocs:duration-100', isActive ? 'vocs:text-accent' : 'vocs:text-secondary vocs:hover:text-link'), "data-active": isActive, children: release.version }) }, release.version));
+                     })] })] }));
+     return createPortal(outline, document.body);
+ }

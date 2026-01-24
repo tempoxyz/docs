@@ -1,0 +1,2 @@
+patchedDependencies:
+  vocs@0.0.0: patches/vocs@0.0.0.patch
