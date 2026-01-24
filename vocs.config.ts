@@ -127,6 +127,18 @@ export default defineConfig({
                 text: 'Add funds to your balance',
                 link: '/guide/use-accounts/add-funds',
               },
+              {
+                text: 'Batch transactions',
+                link: '/guide/use-accounts/batch-transactions',
+              },
+              {
+                text: 'Schedule transactions',
+                link: '/guide/use-accounts/scheduled-transactions',
+              },
+              {
+                text: 'WebAuthn & P256 signatures',
+                link: '/guide/use-accounts/webauthn-p256-signatures',
+              },
             ],
           },
           {
