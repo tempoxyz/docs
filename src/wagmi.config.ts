@@ -14,7 +14,7 @@ const rpId = (() => {
 })()
 
 export function getConfig(options: getConfig.Options = {}) {
-  const { multiInjectedProviderDiscovery } = options
+  const { multiInjectedProviderDiscovery = false } = options
   return createConfig({
     batch: {
       multicall: false,
