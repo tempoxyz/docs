@@ -28,7 +28,7 @@ export default function Providers({
   mipd?: boolean
 }) {
   return (
-    <WagmiProvider config={mipd ? mipdConfig : config} key={mipd ? 'mipd' : 'default'}>
+    <WagmiProvider config={mipd ? mipdConfig : config}>
       <QueryClientProvider client={queryClient}>
         <DemoContextProvider>{children}</DemoContextProvider>
       </QueryClientProvider>
