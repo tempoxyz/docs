@@ -1,0 +1,579 @@
+---
+title: "CoinGecko for Tempo"
+description: "Integrate CoinGecko price feeds with Tempo. Fetch stablecoin prices, market caps, historical data, and token metadata with TypeScript."
+---
+
+# CoinGecko for Tempo
+
+[CoinGecko](https://www.coingecko.com) provides comprehensive cryptocurrency data including prices, market caps, and historical charts. Use CoinGecko to display real-time stablecoin data in your Tempo dApp.
+
+## Why CoinGecko
+
+- **Comprehensive data** — Prices, volume, market cap, and supply for 10,000+ coins
+- **Historical data** — Price charts, OHLCV data, and trend analysis
+- **Stablecoin focus** — Dedicated endpoints for stablecoin market data
+- **Free tier** — Generous rate limits for development and small apps
+
+## Installation
+
+```bash
+pnpm install axios
+```
+
+Or use the official SDK:
+
+```bash
+pnpm install coingecko-api-v3
+```
+
+## API Setup
+
+### Initialize Client
+
+```typescript
+// coingecko.ts
+import axios, { AxiosInstance } from 'axios'
+
+interface CoinGeckoConfig {
+  apiKey?: string
+  pro?: boolean
+}
+
+export function createCoinGeckoClient(config: CoinGeckoConfig = {}): AxiosInstance {
+  const baseURL = config.pro 
+    ? 'https://pro-api.coingecko.com/api/v3'
+    : 'https://api.coingecko.com/api/v3'
+
+  return axios.create({
+    baseURL,
+    headers: config.apiKey ? {
+      'x-cg-pro-api-key': config.apiKey
+    } : {}
+  })
+}
+
+export const coingecko = createCoinGeckoClient({
+  apiKey: process.env.COINGECKO_API_KEY,
+  pro: !!process.env.COINGECKO_API_KEY
+})
+```
+
+### Using the Official SDK
+
+```typescript
+import CoinGecko from 'coingecko-api-v3'
+
+const client = new CoinGecko({
+  apiKey: process.env.COINGECKO_API_KEY,
+  timeout: 10000,
+  autoRetry: true
+})
+```
+
+## Fetching Stablecoin Prices
+
+### Get Current Prices
+
+```typescript
+interface StablecoinPrice {
+  id: string
+  symbol: string
+  name: string
+  current_price: number
+  market_cap: number
+  total_volume: number
+  price_change_24h: number
+  price_change_percentage_24h: number
+}
+
+const TEMPO_STABLECOINS = ['usd-coin', 'tether', 'dai', 'frax', 'true-usd']
+
+async function getStablecoinPrices(): Promise<StablecoinPrice[]> {
+  const response = await coingecko.get('/coins/markets', {
+    params: {
+      vs_currency: 'usd',
+      ids: TEMPO_STABLECOINS.join(','),
+      order: 'market_cap_desc',
+      per_page: 100,
+      page: 1,
+      sparkline: false,
+      price_change_percentage: '24h'
+    }
+  })
+
+  return response.data
+}
+```
+
+### Simple Price Query
+
+```typescript
+interface SimplePrices {
+  [coinId: string]: {
+    usd: number
+    usd_market_cap?: number
+    usd_24h_vol?: number
+    usd_24h_change?: number
+    last_updated_at?: number
+  }
+}
+
+async function getSimplePrices(coinIds: string[]): Promise<SimplePrices> {
+  const response = await coingecko.get('/simple/price', {
+    params: {
+      ids: coinIds.join(','),
+      vs_currencies: 'usd',
+      include_market_cap: true,
+      include_24hr_vol: true,
+      include_24hr_change: true,
+      include_last_updated_at: true
+    }
+  })
+
+  return response.data
+}
+
+// Usage
+const prices = await getSimplePrices(['usd-coin', 'tether', 'dai'])
+console.log('USDC:', prices['usd-coin'].usd)
+```
+
+## Token Metadata
+
+### Get Coin Details
+
+```typescript
+interface CoinDetail {
+  id: string
+  symbol: string
+  name: string
+  description: { en: string }
+  image: { thumb: string; small: string; large: string }
+  market_data: {
+    current_price: { usd: number }
+    market_cap: { usd: number }
+    total_volume: { usd: number }
+    circulating_supply: number
+    total_supply: number
+  }
+  contract_address: string
+  platforms: { [platform: string]: string }
+}
+
+async function getCoinDetails(coinId: string): Promise<CoinDetail> {
+  const response = await coingecko.get(`/coins/${coinId}`, {
+    params: {
+      localization: false,
+      tickers: false,
+      market_data: true,
+      community_data: false,
+      developer_data: false
+    }
+  })
+
+  return response.data
+}
+```
+
+### Get Token by Contract Address
+
+```typescript
+interface TokenInfo {
+  id: string
+  symbol: string
+  name: string
+  image: { small: string }
+  market_data: {
+    current_price: { usd: number }
+  }
+}
+
+async function getTokenByAddress(
+  platform: string,
+  contractAddress: string
+): Promise<TokenInfo> {
+  const response = await coingecko.get(
+    `/coins/${platform}/contract/${contractAddress}`
+  )
+  return response.data
+}
+
+// Example: Get USDC info on Ethereum
+const usdc = await getTokenByAddress(
+  'ethereum',
+  '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+)
+```
+
+## Historical Data
+
+### Price History
+
+```typescript
+interface PriceHistory {
+  prices: [number, number][]      // [timestamp, price]
+  market_caps: [number, number][]
+  total_volumes: [number, number][]
+}
+
+async function getPriceHistory(
+  coinId: string,
+  days: number | 'max' = 30,
+  interval?: 'daily' | 'hourly'
+): Promise<PriceHistory> {
+  const response = await coingecko.get(`/coins/${coinId}/market_chart`, {
+    params: {
+      vs_currency: 'usd',
+      days,
+      interval
+    }
+  })
+
+  return response.data
+}
+
+// Get 7-day USDC price history
+const history = await getPriceHistory('usd-coin', 7, 'hourly')
+```
+
+### OHLC Data
+
+```typescript
+type OHLCData = [number, number, number, number, number][] // [time, open, high, low, close]
+
+async function getOHLC(
+  coinId: string,
+  days: 1 | 7 | 14 | 30 | 90 | 180 | 365
+): Promise<OHLCData> {
+  const response = await coingecko.get(`/coins/${coinId}/ohlc`, {
+    params: {
+      vs_currency: 'usd',
+      days
+    }
+  })
+
+  return response.data
+}
+```
+
+### Historical Price at Date
+
+```typescript
+interface HistoricalData {
+  id: string
+  symbol: string
+  name: string
+  market_data: {
+    current_price: { usd: number }
+    market_cap: { usd: number }
+  }
+}
+
+async function getPriceAtDate(
+  coinId: string,
+  date: string // DD-MM-YYYY format
+): Promise<HistoricalData> {
+  const response = await coingecko.get(`/coins/${coinId}/history`, {
+    params: { date }
+  })
+
+  return response.data
+}
+
+// Get USDC price on January 1, 2024
+const historical = await getPriceAtDate('usd-coin', '01-01-2024')
+```
+
+## Stablecoin Market Overview
+
+### Global Stablecoin Data
+
+```typescript
+interface StablecoinMarket {
+  id: string
+  name: string
+  market_cap: number
+  market_cap_change_24h: number
+  content: string
+  top_coins: string[]
+}
+
+async function getStablecoinMarket(): Promise<StablecoinMarket[]> {
+  const response = await coingecko.get('/coins/categories', {
+    params: {
+      order: 'market_cap_desc'
+    }
+  })
+
+  // Filter for stablecoin category
+  return response.data.filter((cat: any) => 
+    cat.id === 'stablecoins' || cat.name.toLowerCase().includes('stablecoin')
+  )
+}
+```
+
+### Stablecoin Supply Data
+
+```typescript
+interface StablecoinSupply {
+  id: string
+  symbol: string
+  circulating_supply: number
+  total_supply: number
+  max_supply: number | null
+}
+
+async function getStablecoinSupply(coinId: string): Promise<StablecoinSupply> {
+  const coin = await getCoinDetails(coinId)
+  
+  return {
+    id: coin.id,
+    symbol: coin.symbol,
+    circulating_supply: coin.market_data.circulating_supply,
+    total_supply: coin.market_data.total_supply,
+    max_supply: null
+  }
+}
+```
+
+## React Integration
+
+### Price Display Hook
+
+```typescript
+'use client'
+
+import { useState, useEffect } from 'react'
+import { coingecko } from './coingecko'
+
+interface PriceData {
+  price: number
+  change24h: number
+  marketCap: number
+  isLoading: boolean
+  error: Error | null
+}
+
+export function useTokenPrice(coinId: string): PriceData {
+  const [data, setData] = useState<PriceData>({
+    price: 0,
+    change24h: 0,
+    marketCap: 0,
+    isLoading: true,
+    error: null
+  })
+
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const response = await coingecko.get('/simple/price', {
+          params: {
+            ids: coinId,
+            vs_currencies: 'usd',
+            include_market_cap: true,
+            include_24hr_change: true
+          }
+        })
+
+        const coinData = response.data[coinId]
+        setData({
+          price: coinData.usd,
+          change24h: coinData.usd_24h_change,
+          marketCap: coinData.usd_market_cap,
+          isLoading: false,
+          error: null
+        })
+      } catch (error) {
+        setData(prev => ({
+          ...prev,
+          isLoading: false,
+          error: error as Error
+        }))
+      }
+    }
+
+    fetchPrice()
+    const interval = setInterval(fetchPrice, 60000) // Refresh every minute
+
+    return () => clearInterval(interval)
+  }, [coinId])
+
+  return data
+}
+```
+
+### Price Display Component
+
+```typescript
+'use client'
+
+import { useTokenPrice } from './useTokenPrice'
+
+interface PriceDisplayProps {
+  coinId: string
+  symbol: string
+}
+
+export function PriceDisplay({ coinId, symbol }: PriceDisplayProps) {
+  const { price, change24h, marketCap, isLoading, error } = useTokenPrice(coinId)
+
+  if (isLoading) return <span>Loading...</span>
+  if (error) return <span>Error loading price</span>
+
+  const changeColor = change24h >= 0 ? 'text-green-500' : 'text-red-500'
+
+  return (
+    <div>
+      <h3>{symbol.toUpperCase()}</h3>
+      <p>${price.toFixed(4)}</p>
+      <p className={changeColor}>
+        {change24h >= 0 ? '+' : ''}{change24h.toFixed(2)}%
+      </p>
+      <p>Market Cap: ${(marketCap / 1e9).toFixed(2)}B</p>
+    </div>
+  )
+}
+```
+
+### Price Chart Component
+
+```typescript
+'use client'
+
+import { useState, useEffect } from 'react'
+import { coingecko } from './coingecko'
+
+interface ChartData {
+  timestamp: number
+  price: number
+}
+
+export function PriceChart({ coinId }: { coinId: string }) {
+  const [data, setData] = useState<ChartData[]>([])
+  const [days, setDays] = useState<number>(7)
+
+  useEffect(() => {
+    const fetchChart = async () => {
+      const response = await coingecko.get(`/coins/${coinId}/market_chart`, {
+        params: {
+          vs_currency: 'usd',
+          days
+        }
+      })
+
+      setData(response.data.prices.map(([timestamp, price]: [number, number]) => ({
+        timestamp,
+        price
+      })))
+    }
+
+    fetchChart()
+  }, [coinId, days])
+
+  return (
+    <div>
+      <div>
+        {[1, 7, 30, 90].map(d => (
+          <button 
+            key={d} 
+            onClick={() => setDays(d)}
+            className={days === d ? 'active' : ''}
+          >
+            {d}D
+          </button>
+        ))}
+      </div>
+      {/* Render chart with your preferred charting library */}
+      <pre>{JSON.stringify(data.slice(0, 5), null, 2)}</pre>
+    </div>
+  )
+}
+```
+
+## Server-Side API Route
+
+```typescript
+// app/api/prices/route.ts
+import { NextResponse } from 'next/server'
+import { coingecko } from '@/lib/coingecko'
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const coins = searchParams.get('coins') || 'usd-coin,tether,dai'
+
+  try {
+    const response = await coingecko.get('/simple/price', {
+      params: {
+        ids: coins,
+        vs_currencies: 'usd',
+        include_market_cap: true,
+        include_24hr_change: true
+      }
+    })
+
+    return NextResponse.json(response.data)
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to fetch prices' },
+      { status: 500 }
+    )
+  }
+}
+```
+
+## Rate Limiting
+
+### Handle Rate Limits
+
+```typescript
+import axios from 'axios'
+
+const coingecko = axios.create({
+  baseURL: 'https://api.coingecko.com/api/v3'
+})
+
+let lastRequestTime = 0
+const MIN_REQUEST_INTERVAL = 1200 // 50 requests/minute for free tier
+
+coingecko.interceptors.request.use(async (config) => {
+  const now = Date.now()
+  const timeSinceLastRequest = now - lastRequestTime
+  
+  if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+    await new Promise(resolve => 
+      setTimeout(resolve, MIN_REQUEST_INTERVAL - timeSinceLastRequest)
+    )
+  }
+  
+  lastRequestTime = Date.now()
+  return config
+})
+
+coingecko.interceptors.response.use(
+  response => response,
+  async error => {
+    if (error.response?.status === 429) {
+      // Rate limited - wait and retry
+      await new Promise(resolve => setTimeout(resolve, 60000))
+      return coingecko.request(error.config)
+    }
+    throw error
+  }
+)
+```
+
+## Environment Variables
+
+```bash
+# .env.local
+# Optional - for higher rate limits
+COINGECKO_API_KEY=your-api-key
+```
+
+## Resources
+
+- [CoinGecko API Documentation](https://www.coingecko.com/api/documentation)
+- [CoinGecko Pro API](https://www.coingecko.com/en/api/pricing)
+- [Stablecoin Dashboard](https://www.coingecko.com/en/categories/stablecoins)
+- [API Status](https://status.coingecko.com)
+- [Tempo Developer Docs](https://docs.tempo.xyz)

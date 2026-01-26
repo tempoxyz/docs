@@ -1,0 +1,353 @@
+---
+title: "How to Verify Payment Status"
+description: "Set up webhooks and polling patterns to confirm Tempo payments. Handle transaction receipts and build reliable payment verification with instant finality."
+---
+
+# How to Verify Payment Status
+
+Implement reliable payment confirmation using webhooks for real-time notifications and polling as a fallback, leveraging Tempo's ~0.5s finality.
+
+## The Problem
+
+Blockchain confirmations typically require waiting for multiple blocks, creating uncertainty about when payments are truly final.
+
+## The Solution
+
+Tempo's instant finality (~0.5s) means a single confirmation is sufficient. Combine webhooks for immediate notification with polling for reliability.
+
+## Implementation
+
+### Install Dependencies
+
+```bash
+npm install viem wagmi @tanstack/react-query hono
+```
+
+### Define Payment Status Types
+
+```typescript
+import { Address } from 'viem';
+
+type PaymentStatus = 
+  | 'pending'
+  | 'confirming'
+  | 'confirmed'
+  | 'failed';
+
+interface PaymentRecord {
+  id: string;
+  expectedAmount: bigint;
+  token: Address;
+  recipient: Address;
+  sender?: Address;
+  txHash?: `0x${string}`;
+  status: PaymentStatus;
+  confirmedAt?: Date;
+  metadata?: Record<string, string>;
+}
+```
+
+### Webhook Server Setup
+
+```typescript
+import { Hono } from 'hono';
+import { createHmac } from 'crypto';
+
+const app = new Hono();
+
+function verifyWebhookSignature(
+  payload: string,
+  signature: string,
+  secret: string
+): boolean {
+  const expected = createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+  return signature === `sha256=${expected}`;
+}
+
+app.post('/webhooks/tempo', async (c) => {
+  const signature = c.req.header('x-tempo-signature');
+  const payload = await c.req.text();
+
+  if (!verifyWebhookSignature(payload, signature!, process.env.WEBHOOK_SECRET!)) {
+    return c.json({ error: 'Invalid signature' }, 401);
+  }
+
+  const event = JSON.parse(payload);
+
+  switch (event.type) {
+    case 'payment.pending':
+      await handlePaymentPending(event);
+      break;
+    case 'payment.confirmed':
+      await handlePaymentConfirmed(event);
+      break;
+    case 'payment.failed':
+      await handlePaymentFailed(event);
+      break;
+  }
+
+  return c.json({ received: true });
+});
+
+async function handlePaymentConfirmed(event: {
+  transactionHash: string;
+  from: Address;
+  to: Address;
+  amount: string;
+  token: Address;
+  blockNumber: number;
+  timestamp: number;
+}) {
+  // Update your database
+  await db.payments.update({
+    where: { expectedRecipient: event.to },
+    data: {
+      status: 'confirmed',
+      txHash: event.transactionHash,
+      sender: event.from,
+      confirmedAt: new Date(event.timestamp * 1000),
+    },
+  });
+
+  // Trigger fulfillment
+  await fulfillOrder(event.to);
+}
+```
+
+### Polling Pattern
+
+```typescript
+import { createPublicClient, http, erc20Abi } from 'viem';
+import { tempo } from './chains';
+
+const publicClient = createPublicClient({
+  chain: tempo,
+  transport: http(),
+});
+
+async function pollForPayment(
+  token: Address,
+  recipient: Address,
+  expectedAmount: bigint,
+  options: {
+    timeoutMs?: number;
+    intervalMs?: number;
+    fromBlock?: bigint;
+  } = {}
+): Promise<{ found: boolean; txHash?: `0x${string}` }> {
+  const {
+    timeoutMs = 300_000, // 5 minutes
+    intervalMs = 1_000,  // 1 second (Tempo's fast blocks allow this)
+    fromBlock,
+  } = options;
+
+  const startBlock = fromBlock ?? await publicClient.getBlockNumber();
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    const logs = await publicClient.getLogs({
+      address: token,
+      event: {
+        type: 'event',
+        name: 'Transfer',
+        inputs: [
+          { type: 'address', name: 'from', indexed: true },
+          { type: 'address', name: 'to', indexed: true },
+          { type: 'uint256', name: 'value' },
+        ],
+      },
+      args: {
+        to: recipient,
+      },
+      fromBlock: startBlock,
+      toBlock: 'latest',
+    });
+
+    for (const log of logs) {
+      if (log.args.value && log.args.value >= expectedAmount) {
+        return { found: true, txHash: log.transactionHash };
+      }
+    }
+
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+
+  return { found: false };
+}
+```
+
+### Transaction Receipt Verification
+
+```typescript
+async function verifyTransaction(
+  txHash: `0x${string}`,
+  expected: {
+    token: Address;
+    recipient: Address;
+    minAmount: bigint;
+  }
+): Promise<{ valid: boolean; error?: string }> {
+  const receipt = await publicClient.getTransactionReceipt({ hash: txHash });
+
+  if (receipt.status !== 'success') {
+    return { valid: false, error: 'Transaction reverted' };
+  }
+
+  // Find Transfer event
+  const transferLog = receipt.logs.find(
+    (log) =>
+      log.address.toLowerCase() === expected.token.toLowerCase() &&
+      log.topics[0] === '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
+  );
+
+  if (!transferLog) {
+    return { valid: false, error: 'No transfer event found' };
+  }
+
+  // Decode the transfer
+  const to = `0x${transferLog.topics[2]?.slice(26)}` as Address;
+  const amount = BigInt(transferLog.data);
+
+  if (to.toLowerCase() !== expected.recipient.toLowerCase()) {
+    return { valid: false, error: 'Wrong recipient' };
+  }
+
+  if (amount < expected.minAmount) {
+    return { valid: false, error: `Amount too low: ${amount} < ${expected.minAmount}` };
+  }
+
+  return { valid: true };
+}
+```
+
+### React Hook for Payment Status
+
+```typescript
+import { useQuery } from '@tanstack/react-query';
+
+function usePaymentStatus(paymentId: string) {
+  return useQuery({
+    queryKey: ['payment-status', paymentId],
+    queryFn: async () => {
+      const response = await fetch(`/api/payments/${paymentId}/status`);
+      return response.json() as Promise<PaymentRecord>;
+    },
+    refetchInterval: (query) => {
+      // Stop polling once confirmed or failed
+      const status = query.state.data?.status;
+      if (status === 'confirmed' || status === 'failed') {
+        return false;
+      }
+      return 2000; // Poll every 2 seconds
+    },
+  });
+}
+
+// Usage in component
+function PaymentStatus({ paymentId }: { paymentId: string }) {
+  const { data: payment, isLoading } = usePaymentStatus(paymentId);
+
+  if (isLoading) return <div>Loading...</div>;
+
+  return (
+    <div>
+      <p>Status: {payment?.status}</p>
+      {payment?.txHash && (
+        <a href={`https://explorer.tempo.xyz/tx/${payment.txHash}`}>
+          View transaction
+        </a>
+      )}
+    </div>
+  );
+}
+```
+
+### WebSocket for Real-time Updates
+
+```typescript
+import { createPublicClient, webSocket, erc20Abi } from 'viem';
+import { tempo } from './chains';
+
+const wsClient = createPublicClient({
+  chain: tempo,
+  transport: webSocket('wss://rpc.tempo.xyz'),
+});
+
+function watchForPayment(
+  token: Address,
+  recipient: Address,
+  onPayment: (txHash: `0x${string}`, amount: bigint) => void
+): () => void {
+  const unwatch = wsClient.watchContractEvent({
+    address: token,
+    abi: erc20Abi,
+    eventName: 'Transfer',
+    args: {
+      to: recipient,
+    },
+    onLogs: (logs) => {
+      for (const log of logs) {
+        if (log.args.value) {
+          onPayment(log.transactionHash, log.args.value);
+        }
+      }
+    },
+  });
+
+  return unwatch;
+}
+
+// Usage
+const stopWatching = watchForPayment(
+  USDC_ADDRESS,
+  merchantAddress,
+  (txHash, amount) => {
+    console.log(`Received ${amount} in tx ${txHash}`);
+    // Update UI, fulfill order, etc.
+  }
+);
+
+// Clean up when done
+// stopWatching();
+```
+
+### Confirmation Handler with Retry
+
+```typescript
+async function confirmPaymentWithRetry(
+  txHash: `0x${string}`,
+  maxAttempts: number = 5
+): Promise<boolean> {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: txHash,
+        timeout: 10_000, // 10 seconds per attempt
+      });
+
+      return receipt.status === 'success';
+    } catch (error) {
+      if (attempt === maxAttempts - 1) {
+        throw error;
+      }
+      await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+    }
+  }
+
+  return false;
+}
+```
+
+## Best Practices
+
+1. **Use webhooks as primary** — More efficient than polling; fall back to polling if webhooks fail
+2. **Verify signatures** — Always validate webhook payloads to prevent spoofing
+3. **Implement idempotency** — Handle duplicate webhook deliveries gracefully
+4. **Set reasonable timeouts** — With Tempo's ~0.5s finality, short timeouts work
+5. **Log everything** — Record all status changes for debugging and auditing
+
+## Get Started
+
+Tempo's instant finality eliminates confirmation uncertainty. A single block confirmation is final. Start building at [docs.tempo.xyz](https://docs.tempo.xyz).

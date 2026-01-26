@@ -1,0 +1,127 @@
+---
+title: "Tempo vs Base for USDC"
+description: "Compare Tempo and Base for USDC payments. Analyze L2 characteristics, native USDC, Coinbase ecosystem, fees, and use cases."
+---
+
+# Tempo vs Base for USDC
+
+Base is Coinbase's Ethereum L2 with native USDC support. Tempo is a stablecoin-native chain with fees paid in stablecoins. Both offer low-cost USDC transfers—this guide compares them.
+
+## Comparison Table
+
+| Feature | Base | Tempo |
+|---------|------|-------|
+| Transaction fee | $0.01-0.10 | ~$0.001 |
+| Finality | ~2 seconds (L2) | ~0.5 seconds |
+| L1 finality | 12-15 minutes | N/A (L1) |
+| Gas token | ETH | Stablecoins |
+| Native USDC | Yes (Circle CCTP) | Yes |
+| EVM compatible | Yes | Yes |
+| Payment metadata | No | Yes |
+| Stablecoin DEX | External | Native |
+| Parent ecosystem | Coinbase / Ethereum | Independent |
+
+## Base Strengths
+
+### Coinbase Integration
+
+Base is built by Coinbase with deep integration into their products. Easy onboarding from Coinbase accounts and familiar UX for existing Coinbase users.
+
+### Native USDC via CCTP
+
+Circle issues USDC natively on Base through Cross-Chain Transfer Protocol. This is first-class USDC with full Circle backing, not a bridged token.
+
+### Ethereum Security Model
+
+Base settles to Ethereum L1, inheriting its security guarantees. Your assets are ultimately secured by Ethereum's validator set.
+
+### Growing DeFi Ecosystem
+
+Base has attracted significant DeFi activity including Aerodrome, Moonwell, and other protocols. More options for yield and liquidity.
+
+### OP Stack Compatibility
+
+Built on Optimism's OP Stack, Base benefits from shared development and potential future interoperability with other OP chains.
+
+## Tempo Strengths
+
+### Stablecoin-Native Gas
+
+Pay fees in USDC, USDT, or stablecoins. Base requires ETH for gas—even when only using USDC, you must hold and manage ETH.
+
+### Lower Fees
+
+Tempo fees are ~$0.001 versus $0.01-0.10 on Base. For high-volume operations, this 10-100x difference is significant.
+
+### True Instant Finality
+
+Tempo finalizes in ~0.5 seconds with no reorg risk. Base confirms quickly but ultimate finality depends on L1 settlement (12-15 minutes). Withdrawals to L1 take longer.
+
+### Native Stablecoin DEX
+
+Swap between USDC, USDT, EURC, DAI at oracle prices. Base requires external DEXs with potential slippage and MEV.
+
+### Payment Metadata
+
+Attach invoice references and custom data to transactions. Essential for business reconciliation.
+
+### Multi-Stablecoin First
+
+Tempo treats all stablecoins as first-class citizens. Base focuses on USDC with other stablecoins as secondary.
+
+## Use Cases: Where Each Excels
+
+### Choose Base When
+
+- **Coinbase ecosystem**: You use Coinbase products and want seamless integration
+- **Ethereum security model**: L1 settlement guarantees matter for your use case
+- **DeFi composability**: Need lending, yield, or advanced financial products
+- **OP Stack interoperability**: Building across multiple Optimism-based chains
+- **ETH holdings acceptable**: Comfortable managing ETH for gas
+
+### Choose Tempo When
+
+- **Pure stablecoin operations**: Send, receive, swap without volatile token exposure
+- **Lowest fees**: High-volume transfers where $0.01+ per tx adds up
+- **True instant finality**: No L1 settlement delays for your application
+- **Multiple stablecoins**: Equal support for USDC, USDT, EURC, DAI, PYUSD
+- **Business payments**: Need metadata for invoices and reconciliation
+
+## Cost Comparison
+
+| Monthly Volume | Base Cost | Tempo Cost |
+|----------------|-----------|------------|
+| 1,000 transfers | $10-100 | $1 |
+| 10,000 transfers | $100-1,000 | $10 |
+| 100,000 transfers | $1,000-10,000 | $100 |
+
+Plus: Base users must maintain ETH balances across all accounts for gas.
+
+## L2 vs L1 Considerations
+
+Base is an L2 that settles to Ethereum:
+- **Pros**: Inherits Ethereum security, easier bridging to L1 ecosystem
+- **Cons**: Ultimate finality depends on L1, withdrawal delays, sequencer centralization
+
+Tempo is an L1:
+- **Pros**: Native finality, no L1 dependencies, simpler mental model
+- **Cons**: Smaller ecosystem, separate security model from Ethereum
+
+## When to Choose Tempo
+
+Tempo is the better choice if you:
+
+- Want zero volatile token exposure (no ETH management)
+- Need the lowest possible transaction fees
+- Require true instant finality without L1 settlement delays
+- Use multiple stablecoins beyond just USDC
+- Need native payment metadata for business operations
+
+Base is strong for Coinbase users, those who value Ethereum's security model, and DeFi-focused use cases.
+
+## Get Started
+
+- [Connect to Tempo](https://docs.tempo.xyz)
+- [USDC on Tempo](/how-to/usdc-on-tempo)
+- [Send USDC on Tempo](/how-to/how-to-send-usdc-on-tempo)
+- [Developer integration guide](https://docs.tempo.xyz)

@@ -1,0 +1,553 @@
+---
+title: "WalletConnect for Tempo"
+description: "Integrate WalletConnect v2 with your Tempo dApp. Session management, signing requests, and multi-chain support with TypeScript examples."
+---
+
+# WalletConnect for Tempo
+
+[WalletConnect](https://walletconnect.com) is the open protocol for connecting wallets to dApps. Use WalletConnect v2 to support hundreds of mobile and desktop wallets on Tempo.
+
+## Why WalletConnect
+
+- **Universal support** — Connect 300+ wallets including MetaMask Mobile, Trust Wallet, Rainbow
+- **Cross-platform** — Mobile, desktop, and browser wallet support
+- **Multi-chain** — Single session supports multiple chains
+- **Push notifications** — Real-time transaction requests to mobile wallets
+
+## Installation
+
+```bash
+pnpm install @walletconnect/web3wallet @walletconnect/utils viem
+```
+
+For React apps with wagmi:
+
+```bash
+pnpm install @web3modal/wagmi wagmi viem @tanstack/react-query
+```
+
+## Quick Start with Web3Modal
+
+### 1. Configure Web3Modal
+
+```typescript
+// config.ts
+import { createWeb3Modal } from '@web3modal/wagmi/react'
+import { defaultWagmiConfig } from '@web3modal/wagmi/react/config'
+import { tempoTestnet } from 'wagmi/chains'
+
+const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!
+
+const tempo = {
+  ...tempoTestnet,
+  id: 42431,
+  name: 'Tempo Testnet',
+  nativeCurrency: { name: 'USD', symbol: 'USD', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://rpc.moderato.tempo.xyz'] }
+  },
+  blockExplorers: {
+    default: { name: 'Tempo Explorer', url: 'https://explore.tempo.xyz' }
+  }
+}
+
+const metadata = {
+  name: 'My Tempo App',
+  description: 'A dApp built on Tempo',
+  url: 'https://myapp.com',
+  icons: ['https://myapp.com/icon.png']
+}
+
+export const config = defaultWagmiConfig({
+  chains: [tempo],
+  projectId,
+  metadata
+})
+
+createWeb3Modal({
+  wagmiConfig: config,
+  projectId,
+  themeMode: 'dark',
+  themeVariables: {
+    '--w3m-accent': '#7C3AED'
+  }
+})
+```
+
+### 2. Set Up Providers
+
+```typescript
+// providers.tsx
+'use client'
+
+import { WagmiProvider } from 'wagmi'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { config } from './config'
+
+const queryClient = new QueryClient()
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    </WagmiProvider>
+  )
+}
+```
+
+### 3. Connect Button
+
+```typescript
+'use client'
+
+import { useWeb3Modal } from '@web3modal/wagmi/react'
+import { useAccount, useDisconnect } from 'wagmi'
+
+export function ConnectButton() {
+  const { open } = useWeb3Modal()
+  const { address, isConnected } = useAccount()
+  const { disconnect } = useDisconnect()
+
+  if (isConnected) {
+    return (
+      <div>
+        <p>{address}</p>
+        <button onClick={() => disconnect()}>Disconnect</button>
+      </div>
+    )
+  }
+
+  return <button onClick={() => open()}>Connect Wallet</button>
+}
+```
+
+## Direct WalletConnect Integration
+
+For custom implementations without wagmi:
+
+### Initialize Client
+
+```typescript
+import { Core } from '@walletconnect/core'
+import { Web3Wallet } from '@walletconnect/web3wallet'
+
+const core = new Core({
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
+})
+
+const metadata = {
+  name: 'My Tempo App',
+  description: 'A dApp on Tempo',
+  url: 'https://myapp.com',
+  icons: ['https://myapp.com/icon.png']
+}
+
+const web3wallet = await Web3Wallet.init({
+  core,
+  metadata
+})
+```
+
+### Session Management
+
+```typescript
+interface WalletConnectSession {
+  topic: string
+  accounts: string[]
+  chains: string[]
+}
+
+class WalletConnectManager {
+  private wallet: Web3Wallet
+  private sessions: Map<string, WalletConnectSession> = new Map()
+
+  constructor(wallet: Web3Wallet) {
+    this.wallet = wallet
+    this.setupEventListeners()
+  }
+
+  private setupEventListeners() {
+    this.wallet.on('session_proposal', this.handleSessionProposal.bind(this))
+    this.wallet.on('session_request', this.handleSessionRequest.bind(this))
+    this.wallet.on('session_delete', this.handleSessionDelete.bind(this))
+  }
+
+  private async handleSessionProposal(proposal: any) {
+    const { id, params } = proposal
+    const { requiredNamespaces, optionalNamespaces } = params
+
+    // Build namespaces with Tempo support
+    const namespaces = {
+      eip155: {
+        accounts: [`eip155:42431:${userAddress}`],
+        methods: [
+          'eth_sendTransaction',
+          'eth_signTransaction',
+          'eth_sign',
+          'personal_sign',
+          'eth_signTypedData',
+          'eth_signTypedData_v4'
+        ],
+        events: ['chainChanged', 'accountsChanged']
+      }
+    }
+
+    const session = await this.wallet.approveSession({
+      id,
+      namespaces
+    })
+
+    this.sessions.set(session.topic, {
+      topic: session.topic,
+      accounts: namespaces.eip155.accounts,
+      chains: ['eip155:42431']
+    })
+
+    return session
+  }
+
+  private async handleSessionRequest(event: any) {
+    const { topic, params, id } = event
+    const { request, chainId } = params
+
+    switch (request.method) {
+      case 'personal_sign':
+        return this.handlePersonalSign(topic, id, request.params)
+      case 'eth_sendTransaction':
+        return this.handleSendTransaction(topic, id, request.params)
+      case 'eth_signTypedData_v4':
+        return this.handleSignTypedData(topic, id, request.params)
+      default:
+        throw new Error(`Unsupported method: ${request.method}`)
+    }
+  }
+
+  private handleSessionDelete(event: any) {
+    this.sessions.delete(event.topic)
+  }
+
+  async pair(uri: string): Promise<void> {
+    await this.wallet.pair({ uri })
+  }
+
+  async disconnect(topic: string): Promise<void> {
+    await this.wallet.disconnectSession({
+      topic,
+      reason: { code: 6000, message: 'User disconnected' }
+    })
+    this.sessions.delete(topic)
+  }
+}
+```
+
+### Handle Sign Requests
+
+```typescript
+import { createWalletClient, http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { tempoTestnet } from 'viem/chains'
+
+const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
+
+const walletClient = createWalletClient({
+  account,
+  chain: tempoTestnet,
+  transport: http('https://rpc.moderato.tempo.xyz')
+})
+
+async function handlePersonalSign(
+  topic: string,
+  id: number,
+  params: [string, string]
+): Promise<void> {
+  const [message, address] = params
+  
+  const signature = await walletClient.signMessage({
+    message: { raw: message as `0x${string}` }
+  })
+
+  await web3wallet.respondSessionRequest({
+    topic,
+    response: {
+      id,
+      jsonrpc: '2.0',
+      result: signature
+    }
+  })
+}
+
+async function handleSendTransaction(
+  topic: string,
+  id: number,
+  params: any[]
+): Promise<void> {
+  const [tx] = params
+
+  const hash = await walletClient.sendTransaction({
+    to: tx.to,
+    value: BigInt(tx.value || '0'),
+    data: tx.data,
+    gas: tx.gas ? BigInt(tx.gas) : undefined
+  })
+
+  await web3wallet.respondSessionRequest({
+    topic,
+    response: {
+      id,
+      jsonrpc: '2.0',
+      result: hash
+    }
+  })
+}
+
+async function handleSignTypedData(
+  topic: string,
+  id: number,
+  params: [string, string]
+): Promise<void> {
+  const [address, data] = params
+  const typedData = JSON.parse(data)
+
+  const signature = await walletClient.signTypedData({
+    domain: typedData.domain,
+    types: typedData.types,
+    primaryType: typedData.primaryType,
+    message: typedData.message
+  })
+
+  await web3wallet.respondSessionRequest({
+    topic,
+    response: {
+      id,
+      jsonrpc: '2.0',
+      result: signature
+    }
+  })
+}
+```
+
+## React Hooks with Web3Modal
+
+### Connection State
+
+```typescript
+import { useAccount, useBalance, useChainId } from 'wagmi'
+
+export function WalletInfo() {
+  const { address, isConnected, connector } = useAccount()
+  const chainId = useChainId()
+  const { data: balance } = useBalance({ address })
+
+  if (!isConnected) return null
+
+  return (
+    <div>
+      <p>Address: {address}</p>
+      <p>Chain ID: {chainId}</p>
+      <p>Balance: {balance?.formatted} {balance?.symbol}</p>
+      <p>Connected via: {connector?.name}</p>
+    </div>
+  )
+}
+```
+
+### Send Transaction
+
+```typescript
+import { useSendTransaction, useWaitForTransactionReceipt } from 'wagmi'
+import { parseEther } from 'viem'
+
+export function SendTransaction() {
+  const { sendTransaction, data: hash, isPending, error } = useSendTransaction()
+  const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash })
+
+  const handleSend = () => {
+    sendTransaction({
+      to: '0xRecipientAddress',
+      value: parseEther('10')
+    })
+  }
+
+  return (
+    <div>
+      <button onClick={handleSend} disabled={isPending || isLoading}>
+        {isPending ? 'Check Wallet...' : isLoading ? 'Confirming...' : 'Send 10 USD'}
+      </button>
+      
+      {isSuccess && (
+        <p>
+          Success! <a href={`https://explore.tempo.xyz/tx/${hash}`}>View</a>
+        </p>
+      )}
+      
+      {error && <p>Error: {error.message}</p>}
+    </div>
+  )
+}
+```
+
+### Sign Messages
+
+```typescript
+import { useSignMessage } from 'wagmi'
+
+export function SignMessage() {
+  const { signMessage, data: signature, isPending, error } = useSignMessage()
+
+  return (
+    <div>
+      <button 
+        onClick={() => signMessage({ message: 'Hello from Tempo!' })}
+        disabled={isPending}
+      >
+        {isPending ? 'Check Wallet...' : 'Sign Message'}
+      </button>
+      
+      {signature && <p>Signature: {signature}</p>}
+      {error && <p>Error: {error.message}</p>}
+    </div>
+  )
+}
+```
+
+## Multi-Chain Support
+
+### Configure Multiple Chains
+
+```typescript
+import { mainnet, polygon } from 'wagmi/chains'
+
+const tempo = {
+  id: 42431,
+  name: 'Tempo Testnet',
+  nativeCurrency: { name: 'USD', symbol: 'USD', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://rpc.moderato.tempo.xyz'] }
+  }
+}
+
+export const config = defaultWagmiConfig({
+  chains: [tempo, mainnet, polygon],
+  projectId,
+  metadata
+})
+```
+
+### Switch Chains
+
+```typescript
+import { useSwitchChain } from 'wagmi'
+
+export function ChainSwitcher() {
+  const { chains, switchChain, isPending } = useSwitchChain()
+
+  return (
+    <div>
+      {chains.map(chain => (
+        <button 
+          key={chain.id}
+          onClick={() => switchChain({ chainId: chain.id })}
+          disabled={isPending}
+        >
+          {chain.name}
+        </button>
+      ))}
+    </div>
+  )
+}
+```
+
+## QR Code Connection
+
+```typescript
+'use client'
+
+import { useWeb3Modal } from '@web3modal/wagmi/react'
+import { QRCodeSVG } from 'qrcode.react'
+import { useState, useEffect } from 'react'
+
+export function QRConnect() {
+  const { open } = useWeb3Modal()
+  const [uri, setUri] = useState<string | null>(null)
+
+  // For custom QR display, get the URI from Web3Modal events
+  // Or use the built-in modal which handles QR display
+
+  return (
+    <div>
+      <button onClick={() => open({ view: 'Connect' })}>
+        Show QR Code
+      </button>
+      
+      {uri && <QRCodeSVG value={uri} size={256} />}
+    </div>
+  )
+}
+```
+
+## Environment Variables
+
+```bash
+# .env.local
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your-project-id
+```
+
+Get your Project ID at [cloud.walletconnect.com](https://cloud.walletconnect.com).
+
+## Full Example
+
+```typescript
+// app/layout.tsx
+import { Providers } from './providers'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  )
+}
+
+// app/page.tsx
+'use client'
+
+import { useWeb3Modal } from '@web3modal/wagmi/react'
+import { useAccount, useSendTransaction, useDisconnect } from 'wagmi'
+import { parseEther } from 'viem'
+
+export default function Home() {
+  const { open } = useWeb3Modal()
+  const { address, isConnected } = useAccount()
+  const { disconnect } = useDisconnect()
+  const { sendTransaction } = useSendTransaction()
+
+  if (!isConnected) {
+    return <button onClick={() => open()}>Connect Wallet</button>
+  }
+
+  return (
+    <div>
+      <p>Connected: {address}</p>
+      <button onClick={() => sendTransaction({
+        to: '0xRecipient',
+        value: parseEther('10')
+      })}>
+        Send 10 USD
+      </button>
+      <button onClick={() => disconnect()}>Disconnect</button>
+    </div>
+  )
+}
+```
+
+## Resources
+
+- [WalletConnect Documentation](https://docs.walletconnect.com)
+- [Web3Modal Documentation](https://docs.walletconnect.com/web3modal/about)
+- [WalletConnect Cloud](https://cloud.walletconnect.com)
+- [Wagmi Documentation](https://wagmi.sh)
+- [Tempo Developer Docs](https://docs.tempo.xyz)

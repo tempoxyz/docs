@@ -1,0 +1,316 @@
+---
+title: "How to Batch Payments"
+description: "Execute mass payouts in a single transaction on Tempo. Implement multicall patterns for payroll, affiliate payouts, and bulk transfers with sub-cent fees."
+---
+
+# How to Batch Payments
+
+Send payments to hundreds of recipients in a single transaction using multicall patterns, reducing gas costs and simplifying payroll operations.
+
+## The Problem
+
+Processing payroll or affiliate payouts individually means submitting hundreds of transactions, each with its own gas cost and confirmation time.
+
+## The Solution
+
+Batch multiple transfers into a single transaction using multicall. On Tempo, this means one transaction with ~0.5s finality that pays all recipients, regardless of count.
+
+## Implementation
+
+### Install Dependencies
+
+```bash
+npm install viem wagmi @tanstack/react-query
+```
+
+### Define Payout Types
+
+```typescript
+import { Address } from 'viem';
+
+interface PayoutRecipient {
+  address: Address;
+  amount: bigint;
+  memo?: string;
+}
+
+interface BatchPayout {
+  id: string;
+  token: Address;
+  recipients: PayoutRecipient[];
+  totalAmount: bigint;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+}
+```
+
+### Multicall Contract ABI
+
+```typescript
+const multicallAbi = [
+  {
+    name: 'aggregate3',
+    type: 'function',
+    stateMutability: 'payable',
+    inputs: [
+      {
+        name: 'calls',
+        type: 'tuple[]',
+        components: [
+          { name: 'target', type: 'address' },
+          { name: 'allowFailure', type: 'bool' },
+          { name: 'callData', type: 'bytes' },
+        ],
+      },
+    ],
+    outputs: [
+      {
+        name: 'returnData',
+        type: 'tuple[]',
+        components: [
+          { name: 'success', type: 'bool' },
+          { name: 'returnData', type: 'bytes' },
+        ],
+      },
+    ],
+  },
+] as const;
+
+// Tempo Multicall3 address
+const MULTICALL_ADDRESS = '0xcA11bde05977b3631167028862bE2a173976CA11';
+```
+
+### Build Batch Transfer Calldata
+
+```typescript
+import { encodeFunctionData, erc20Abi } from 'viem';
+
+interface MulticallItem {
+  target: Address;
+  allowFailure: boolean;
+  callData: `0x${string}`;
+}
+
+function buildBatchTransferCalls(
+  token: Address,
+  recipients: PayoutRecipient[]
+): MulticallItem[] {
+  return recipients.map((recipient) => ({
+    target: token,
+    allowFailure: false,
+    callData: encodeFunctionData({
+      abi: erc20Abi,
+      functionName: 'transfer',
+      args: [recipient.address, recipient.amount],
+    }),
+  }));
+}
+```
+
+### Execute Batch Payout
+
+```typescript
+import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+
+function useBatchPayout() {
+  const { writeContractAsync } = useWriteContract();
+
+  async function executeBatch(
+    token: Address,
+    recipients: PayoutRecipient[]
+  ): Promise<string> {
+    const calls = buildBatchTransferCalls(token, recipients);
+
+    const hash = await writeContractAsync({
+      address: MULTICALL_ADDRESS,
+      abi: multicallAbi,
+      functionName: 'aggregate3',
+      args: [calls],
+    });
+
+    return hash;
+  }
+
+  return { executeBatch };
+}
+```
+
+### Validate Before Sending
+
+```typescript
+import { createPublicClient, http, erc20Abi, formatUnits } from 'viem';
+import { tempo } from './chains';
+
+const publicClient = createPublicClient({
+  chain: tempo,
+  transport: http(),
+});
+
+async function validateBatchPayout(
+  sender: Address,
+  token: Address,
+  recipients: PayoutRecipient[]
+): Promise<{ valid: boolean; error?: string }> {
+  // Calculate total
+  const total = recipients.reduce((sum, r) => sum + r.amount, 0n);
+
+  // Check balance
+  const balance = await publicClient.readContract({
+    address: token,
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: [sender],
+  });
+
+  if (balance < total) {
+    return {
+      valid: false,
+      error: `Insufficient balance. Need ${formatUnits(total, 6)}, have ${formatUnits(balance, 6)}`,
+    };
+  }
+
+  // Check for duplicates
+  const addresses = recipients.map((r) => r.address.toLowerCase());
+  const uniqueAddresses = new Set(addresses);
+  if (uniqueAddresses.size !== addresses.length) {
+    return { valid: false, error: 'Duplicate recipient addresses' };
+  }
+
+  // Check for zero amounts
+  const hasZeroAmount = recipients.some((r) => r.amount === 0n);
+  if (hasZeroAmount) {
+    return { valid: false, error: 'Cannot send zero amount' };
+  }
+
+  return { valid: true };
+}
+```
+
+### Payroll Use Case
+
+```typescript
+import { parseUnits } from 'viem';
+
+interface Employee {
+  id: string;
+  name: string;
+  wallet: Address;
+  salary: string; // e.g., "5000.00"
+}
+
+function buildPayroll(
+  employees: Employee[],
+  tokenDecimals: number = 6
+): PayoutRecipient[] {
+  return employees.map((emp) => ({
+    address: emp.wallet,
+    amount: parseUnits(emp.salary, tokenDecimals),
+    memo: `Salary - ${emp.name}`,
+  }));
+}
+
+// Example usage
+async function runPayroll(employees: Employee[], usdcAddress: Address) {
+  const recipients = buildPayroll(employees);
+  
+  const validation = await validateBatchPayout(
+    '0xTreasuryAddress...',
+    usdcAddress,
+    recipients
+  );
+
+  if (!validation.valid) {
+    throw new Error(validation.error);
+  }
+
+  const { executeBatch } = useBatchPayout();
+  const hash = await executeBatch(usdcAddress, recipients);
+
+  console.log(`Payroll processed: ${hash}`);
+  console.log(`Paid ${employees.length} employees in one transaction`);
+}
+```
+
+### Chunk Large Batches
+
+```typescript
+function chunkRecipients(
+  recipients: PayoutRecipient[],
+  maxPerBatch: number = 100
+): PayoutRecipient[][] {
+  const chunks: PayoutRecipient[][] = [];
+  
+  for (let i = 0; i < recipients.length; i += maxPerBatch) {
+    chunks.push(recipients.slice(i, i + maxPerBatch));
+  }
+  
+  return chunks;
+}
+
+async function executeLargeBatch(
+  token: Address,
+  recipients: PayoutRecipient[]
+): Promise<string[]> {
+  const chunks = chunkRecipients(recipients, 100);
+  const hashes: string[] = [];
+
+  for (const chunk of chunks) {
+    const { executeBatch } = useBatchPayout();
+    const hash = await executeBatch(token, chunk);
+    hashes.push(hash);
+  }
+
+  return hashes;
+}
+```
+
+### CSV Import Helper
+
+```typescript
+import { parseUnits, isAddress } from 'viem';
+
+interface CSVRow {
+  address: string;
+  amount: string;
+  memo?: string;
+}
+
+function parsePayoutCSV(
+  rows: CSVRow[],
+  decimals: number = 6
+): { recipients: PayoutRecipient[]; errors: string[] } {
+  const recipients: PayoutRecipient[] = [];
+  const errors: string[] = [];
+
+  rows.forEach((row, index) => {
+    if (!isAddress(row.address)) {
+      errors.push(`Row ${index + 1}: Invalid address`);
+      return;
+    }
+
+    try {
+      const amount = parseUnits(row.amount, decimals);
+      recipients.push({
+        address: row.address as Address,
+        amount,
+        memo: row.memo,
+      });
+    } catch {
+      errors.push(`Row ${index + 1}: Invalid amount "${row.amount}"`);
+    }
+  });
+
+  return { recipients, errors };
+}
+```
+
+## Best Practices
+
+1. **Validate all recipients** — Check addresses and amounts before submitting
+2. **Chunk large batches** — Keep batches under 100 recipients to avoid gas limits
+3. **Set allowFailure wisely** — Use `false` for critical payouts, `true` for optional ones
+4. **Log everything** — Record batch details for reconciliation and auditing
+5. **Test with small batches** — Verify logic with 2-3 recipients before scaling
+
+## Get Started
+
+Tempo's sub-cent fees mean batch size has minimal impact on cost. Pay 10 or 1,000 recipients for roughly the same fee. Start building at [docs.tempo.xyz](https://docs.tempo.xyz).

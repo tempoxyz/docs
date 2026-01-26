@@ -1,0 +1,135 @@
+---
+title: "NGO Cross-Border Donations"
+description: "Accept international donations with stablecoins on Tempo. Reduce fees from 5-10% to ~$0.001, enable transparent fund tracking for donors."
+---
+
+# NGO Cross-Border Donations
+
+International donations lose significant value to processing fees. Credit card processors, wire transfer costs, and currency conversion eat into contributions meant for charitable work. Stablecoin donations on Tempo deliver nearly 100% of donor funds to your organization.
+
+## The Cross-Border Donation Problem
+
+| Donation Method | Fees | Settlement | Transparency |
+|-----------------|------|------------|--------------|
+| Credit card | 2.9-3.5% + $0.30 | 1-3 days | Limited |
+| Wire transfer | $25-50 flat | 2-5 days | None |
+| PayPal Giving | 1.99-2.89% | 1-3 days | Limited |
+| International wire | $40-75 + FX markup | 3-7 days | None |
+| **Tempo** | **~$0.001** | **Instant** | **Full on-chain** |
+
+For a $10,000 international donation:
+
+| Method | Fees Lost | Net to NGO |
+|--------|-----------|------------|
+| International wire + FX | $300-500 | $9,500-9,700 |
+| Credit card | $320 | $9,680 |
+| **Tempo** | **$0.001** | **$9,999.99** |
+
+## Benefits for Nonprofits
+
+### Maximize Donor Impact
+
+Nearly 100% of donations reach your organization. A $100 donation delivers $99.999 instead of $95-97.
+
+### Transparent Fund Tracking
+
+On-chain transactions create an immutable record. Donors can verify their contribution and track how funds flow through your organization.
+
+### Global Reach
+
+Accept donations from supporters worldwide without international payment friction. No correspondent banks, no currency conversion, no geographic restrictions.
+
+### Instant Access
+
+Funds are available immediately for deployment. No waiting for bank processing or payment processor payout cycles.
+
+### Reduced Administrative Overhead
+
+Automated payment tracking and metadata reduce manual reconciliation work.
+
+## How It Works
+
+### Donation Flow
+
+1. Donor selects stablecoin payment on donation page
+2. Display organization wallet address and suggested amount
+3. Donor sends stablecoins from their wallet
+4. Tempo confirms transaction instantly
+5. Donor receives confirmation with on-chain receipt
+
+### Campaign Tracking
+
+Attach campaign and donor metadata to each transaction:
+
+- Campaign ID
+- Donor ID (optional, for tax receipts)
+- Donation type (one-time, recurring, in-memory-of)
+- Designation (unrestricted, program-specific)
+- Source (website, event, partner)
+
+### Recurring Donations
+
+Set up automated monthly giving:
+
+1. Donor authorizes recurring amount
+2. Schedule monthly payment collection
+3. Execute payment at each cycle
+4. Send automated receipts with transaction hash
+
+## Implementation
+
+### Donation Page Integration
+
+Add stablecoin payment option to your donation forms:
+
+- Generate unique payment reference per transaction
+- Display QR code and wallet address
+- Monitor for incoming payments via webhook
+- Confirm donation and trigger thank-you flow
+
+### Fund Tracking Dashboard
+
+Build donor-facing transparency tools:
+
+- Display incoming donation transactions
+- Show fund allocation and disbursements
+- Provide on-chain verification links
+- Generate reports for major donors and grants
+
+### Tax Receipt Generation
+
+Include transaction data in donation receipts:
+
+- Transaction hash for verification
+- Timestamp
+- USD value at time of donation
+- Organization wallet address
+
+## Use Cases
+
+### Disaster Relief
+
+Deploy funds immediately after donation. No waiting for international wire processing during time-critical emergencies.
+
+### International Development
+
+Receive contributions from global supporter base without losing 5-10% to cross-border fees.
+
+### Educational Programs
+
+Accept scholarship and program donations with full tracking for grant reporting and donor stewardship.
+
+### Community Foundations
+
+Manage donor-advised funds with transparent on-chain accounting.
+
+## Compliance Considerations
+
+- **Tax Documentation**: Provide receipts with transaction details for donor tax deductions
+- **Audit Trail**: Immutable on-chain records support financial audits
+- **Grant Reporting**: Transaction metadata enables detailed fund tracking for grant compliance
+- **AML/KYC**: Implement appropriate donor verification based on jurisdiction requirements
+
+## Get Started
+
+Learn about nonprofit donation integration at [docs.tempo.xyz](https://docs.tempo.xyz).

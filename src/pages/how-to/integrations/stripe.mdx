@@ -1,0 +1,658 @@
+---
+title: "Stripe for Tempo"
+description: "Build hybrid fiat+crypto checkout with Stripe and Tempo. Accept cards for fiat, stablecoins for crypto, unified payment experience."
+---
+
+# Stripe for Tempo
+
+[Stripe](https://stripe.com) is the leading payment infrastructure for the internet. Combine Stripe for fiat payments with Tempo for crypto payments to offer users their preferred payment method.
+
+## Why Stripe + Tempo
+
+- **Payment optionality** — Accept both cards and stablecoins
+- **Familiar UX** — Stripe's polished checkout for fiat users
+- **Lower fees** — Crypto payments avoid card processing fees
+- **Global reach** — Stripe for regulated markets, crypto for everywhere else
+
+## Installation
+
+```bash
+pnpm install @stripe/stripe-js stripe wagmi viem
+```
+
+## API Setup
+
+### Initialize Stripe
+
+```typescript
+// lib/stripe.ts
+import Stripe from 'stripe'
+
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2024-06-20'
+})
+```
+
+### Client-Side Setup
+
+```typescript
+// lib/stripe-client.ts
+import { loadStripe, Stripe as StripeClient } from '@stripe/stripe-js'
+
+let stripePromise: Promise<StripeClient | null>
+
+export function getStripe(): Promise<StripeClient | null> {
+  if (!stripePromise) {
+    stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+  }
+  return stripePromise
+}
+```
+
+## Hybrid Checkout Flow
+
+### Create Checkout Session
+
+```typescript
+// app/api/checkout/route.ts
+import { NextResponse } from 'next/server'
+import { stripe } from '@/lib/stripe'
+
+interface CheckoutRequest {
+  items: Array<{
+    name: string
+    amount: number  // in cents
+    quantity: number
+  }>
+  paymentMethod: 'fiat' | 'crypto'
+  walletAddress?: string
+}
+
+export async function POST(request: Request) {
+  const body: CheckoutRequest = await request.json()
+
+  if (body.paymentMethod === 'fiat') {
+    // Create Stripe checkout session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: body.items.map(item => ({
+        price_data: {
+          currency: 'usd',
+          product_data: { name: item.name },
+          unit_amount: item.amount
+        },
+        quantity: item.quantity
+      })),
+      mode: 'payment',
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout`
+    })
+
+    return NextResponse.json({ 
+      type: 'stripe',
+      sessionId: session.id,
+      url: session.url
+    })
+  } else {
+    // Create crypto payment intent
+    const totalAmount = body.items.reduce(
+      (sum, item) => sum + item.amount * item.quantity, 
+      0
+    )
+
+    const paymentIntent = await createCryptoPaymentIntent({
+      amount: totalAmount,
+      walletAddress: body.walletAddress!,
+      items: body.items
+    })
+
+    return NextResponse.json({
+      type: 'crypto',
+      paymentIntent
+    })
+  }
+}
+
+interface CryptoPaymentIntent {
+  id: string
+  amount: number
+  recipient: string
+  token: string
+  expiresAt: Date
+}
+
+async function createCryptoPaymentIntent(params: {
+  amount: number
+  walletAddress: string
+  items: any[]
+}): Promise<CryptoPaymentIntent> {
+  // Store payment intent in your database
+  const id = crypto.randomUUID()
+  
+  return {
+    id,
+    amount: params.amount,
+    recipient: process.env.MERCHANT_WALLET_ADDRESS!,
+    token: 'USDC',
+    expiresAt: new Date(Date.now() + 30 * 60 * 1000) // 30 minutes
+  }
+}
+```
+
+### Unified Checkout Component
+
+```typescript
+'use client'
+
+import { useState } from 'react'
+import { useAccount, useSendTransaction, useWaitForTransactionReceipt } from 'wagmi'
+import { parseUnits, encodeFunctionData, erc20Abi } from 'viem'
+import { getStripe } from '@/lib/stripe-client'
+
+interface CartItem {
+  name: string
+  amount: number
+  quantity: number
+}
+
+interface CheckoutProps {
+  items: CartItem[]
+}
+
+export function HybridCheckout({ items }: CheckoutProps) {
+  const [paymentMethod, setPaymentMethod] = useState<'fiat' | 'crypto'>('fiat')
+  const [isLoading, setIsLoading] = useState(false)
+  const { address, isConnected } = useAccount()
+  const { sendTransaction, data: hash } = useSendTransaction()
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash })
+
+  const total = items.reduce((sum, item) => sum + item.amount * item.quantity, 0)
+  const totalDisplay = (total / 100).toFixed(2)
+
+  const handleCheckout = async () => {
+    setIsLoading(true)
+
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items,
+          paymentMethod,
+          walletAddress: address
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.type === 'stripe') {
+        // Redirect to Stripe Checkout
+        const stripe = await getStripe()
+        await stripe?.redirectToCheckout({ sessionId: data.sessionId })
+      } else {
+        // Handle crypto payment
+        await handleCryptoPayment(data.paymentIntent)
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleCryptoPayment = async (paymentIntent: any) => {
+    const USDC_ADDRESS = '0x20c0000000000000000000000000000000000001'
+    const amount = parseUnits(String(paymentIntent.amount / 100), 18)
+
+    const data = encodeFunctionData({
+      abi: erc20Abi,
+      functionName: 'transfer',
+      args: [paymentIntent.recipient as `0x${string}`, amount]
+    })
+
+    sendTransaction({
+      to: USDC_ADDRESS,
+      data
+    })
+  }
+
+  return (
+    <div>
+      <h2>Checkout</h2>
+      
+      {/* Order Summary */}
+      <div>
+        {items.map((item, i) => (
+          <div key={i}>
+            <span>{item.name}</span>
+            <span>${(item.amount / 100).toFixed(2)} × {item.quantity}</span>
+          </div>
+        ))}
+        <div>
+          <strong>Total: ${totalDisplay}</strong>
+        </div>
+      </div>
+
+      {/* Payment Method Selection */}
+      <div>
+        <h3>Payment Method</h3>
+        <label>
+          <input
+            type="radio"
+            name="payment"
+            value="fiat"
+            checked={paymentMethod === 'fiat'}
+            onChange={() => setPaymentMethod('fiat')}
+          />
+          Credit/Debit Card
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="payment"
+            value="crypto"
+            checked={paymentMethod === 'crypto'}
+            onChange={() => setPaymentMethod('crypto')}
+            disabled={!isConnected}
+          />
+          Pay with USDC {!isConnected && '(Connect wallet)'}
+        </label>
+      </div>
+
+      {/* Checkout Button */}
+      <button 
+        onClick={handleCheckout}
+        disabled={isLoading || isConfirming || (paymentMethod === 'crypto' && !isConnected)}
+      >
+        {isLoading ? 'Processing...' : 
+         isConfirming ? 'Confirming...' :
+         paymentMethod === 'fiat' ? `Pay $${totalDisplay}` : `Pay ${totalDisplay} USDC`}
+      </button>
+
+      {isSuccess && (
+        <p>Payment successful! <a href={`https://explore.tempo.xyz/tx/${hash}`}>View transaction</a></p>
+      )}
+    </div>
+  )
+}
+```
+
+## Stripe Elements Integration
+
+### Payment Form with Card + Crypto Toggle
+
+```typescript
+'use client'
+
+import { useState, FormEvent } from 'react'
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
+import { getStripe } from '@/lib/stripe-client'
+import { useAccount, useWriteContract } from 'wagmi'
+import { erc20Abi, parseUnits } from 'viem'
+
+const USDC_ADDRESS = '0x20c0000000000000000000000000000000000001'
+
+function CheckoutForm({ amount }: { amount: number }) {
+  const stripe = useStripe()
+  const elements = useElements()
+  const { address } = useAccount()
+  const { writeContract, isPending: isCryptoPending } = useWriteContract()
+  
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'crypto'>('card')
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    setError(null)
+
+    if (paymentMethod === 'card') {
+      await handleCardPayment()
+    } else {
+      await handleCryptoPayment()
+    }
+  }
+
+  const handleCardPayment = async () => {
+    if (!stripe || !elements) return
+
+    setIsProcessing(true)
+
+    // Create payment intent on server
+    const res = await fetch('/api/stripe/payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount })
+    })
+    const { clientSecret } = await res.json()
+
+    const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
+      clientSecret,
+      {
+        payment_method: {
+          card: elements.getElement(CardElement)!
+        }
+      }
+    )
+
+    setIsProcessing(false)
+
+    if (stripeError) {
+      setError(stripeError.message || 'Payment failed')
+    } else if (paymentIntent.status === 'succeeded') {
+      window.location.href = '/success'
+    }
+  }
+
+  const handleCryptoPayment = async () => {
+    if (!address) return
+
+    // Get merchant address from server
+    const res = await fetch('/api/crypto/payment-details', {
+      method: 'POST',
+      body: JSON.stringify({ amount })
+    })
+    const { merchantAddress, paymentId } = await res.json()
+
+    writeContract({
+      address: USDC_ADDRESS,
+      abi: erc20Abi,
+      functionName: 'transfer',
+      args: [merchantAddress, parseUnits(String(amount / 100), 18)]
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div>
+        <button
+          type="button"
+          onClick={() => setPaymentMethod('card')}
+          className={paymentMethod === 'card' ? 'active' : ''}
+        >
+          💳 Card
+        </button>
+        <button
+          type="button"
+          onClick={() => setPaymentMethod('crypto')}
+          className={paymentMethod === 'crypto' ? 'active' : ''}
+        >
+          🪙 USDC
+        </button>
+      </div>
+
+      {paymentMethod === 'card' ? (
+        <div>
+          <CardElement options={{
+            style: {
+              base: {
+                fontSize: '16px',
+                color: '#424770',
+                '::placeholder': { color: '#aab7c4' }
+              }
+            }
+          }} />
+        </div>
+      ) : (
+        <div>
+          {address ? (
+            <p>Pay from: {address.slice(0, 6)}...{address.slice(-4)}</p>
+          ) : (
+            <p>Connect your wallet to pay with USDC</p>
+          )}
+        </div>
+      )}
+
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      <button 
+        type="submit" 
+        disabled={isProcessing || isCryptoPending || (paymentMethod === 'crypto' && !address)}
+      >
+        {isProcessing || isCryptoPending ? 'Processing...' : `Pay $${(amount / 100).toFixed(2)}`}
+      </button>
+    </form>
+  )
+}
+
+export function PaymentPage({ amount }: { amount: number }) {
+  return (
+    <Elements stripe={getStripe()}>
+      <CheckoutForm amount={amount} />
+    </Elements>
+  )
+}
+```
+
+## Payment Intent API
+
+```typescript
+// app/api/stripe/payment-intent/route.ts
+import { NextResponse } from 'next/server'
+import { stripe } from '@/lib/stripe'
+
+export async function POST(request: Request) {
+  const { amount, metadata } = await request.json()
+
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency: 'usd',
+      automatic_payment_methods: { enabled: true },
+      metadata
+    })
+
+    return NextResponse.json({ 
+      clientSecret: paymentIntent.client_secret 
+    })
+  } catch (error) {
+    console.error('Error creating payment intent:', error)
+    return NextResponse.json(
+      { error: 'Failed to create payment intent' },
+      { status: 500 }
+    )
+  }
+}
+```
+
+## Webhook Handling
+
+```typescript
+// app/api/stripe/webhook/route.ts
+import { NextResponse } from 'next/server'
+import { stripe } from '@/lib/stripe'
+import Stripe from 'stripe'
+
+export async function POST(request: Request) {
+  const body = await request.text()
+  const signature = request.headers.get('stripe-signature')!
+
+  let event: Stripe.Event
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    )
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: `Webhook Error: ${err.message}` },
+      { status: 400 }
+    )
+  }
+
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      const paymentIntent = event.data.object as Stripe.PaymentIntent
+      await handleSuccessfulPayment(paymentIntent)
+      break
+
+    case 'checkout.session.completed':
+      const session = event.data.object as Stripe.Checkout.Session
+      await handleCheckoutComplete(session)
+      break
+
+    case 'payment_intent.payment_failed':
+      const failedIntent = event.data.object as Stripe.PaymentIntent
+      await handleFailedPayment(failedIntent)
+      break
+  }
+
+  return NextResponse.json({ received: true })
+}
+
+async function handleSuccessfulPayment(paymentIntent: Stripe.PaymentIntent) {
+  console.log('Payment succeeded:', paymentIntent.id)
+  // Fulfill order, send confirmation email, etc.
+}
+
+async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
+  console.log('Checkout complete:', session.id)
+  // Process order
+}
+
+async function handleFailedPayment(paymentIntent: Stripe.PaymentIntent) {
+  console.log('Payment failed:', paymentIntent.id)
+  // Notify customer, offer retry
+}
+```
+
+## Crypto Payment Verification
+
+```typescript
+// app/api/crypto/verify/route.ts
+import { NextResponse } from 'next/server'
+import { createPublicClient, http, parseUnits, erc20Abi } from 'viem'
+import { tempoTestnet } from 'viem/chains'
+
+const USDC_ADDRESS = '0x20c0000000000000000000000000000000000001'
+
+const client = createPublicClient({
+  chain: tempoTestnet,
+  transport: http('https://rpc.moderato.tempo.xyz')
+})
+
+export async function POST(request: Request) {
+  const { txHash, expectedAmount, paymentId } = await request.json()
+
+  try {
+    // Wait for transaction receipt
+    const receipt = await client.getTransactionReceipt({ hash: txHash })
+    
+    if (receipt.status !== 'success') {
+      return NextResponse.json(
+        { error: 'Transaction failed' },
+        { status: 400 }
+      )
+    }
+
+    // Decode transfer event
+    const transferLog = receipt.logs.find(log => 
+      log.address.toLowerCase() === USDC_ADDRESS.toLowerCase()
+    )
+
+    if (!transferLog) {
+      return NextResponse.json(
+        { error: 'No USDC transfer found' },
+        { status: 400 }
+      )
+    }
+
+    // Verify amount matches
+    const amount = BigInt(transferLog.data)
+    const expected = parseUnits(String(expectedAmount / 100), 18)
+
+    if (amount < expected) {
+      return NextResponse.json(
+        { error: 'Insufficient payment amount' },
+        { status: 400 }
+      )
+    }
+
+    // Mark payment as complete
+    await markPaymentComplete(paymentId, txHash)
+
+    return NextResponse.json({ 
+      success: true,
+      txHash,
+      amount: amount.toString()
+    })
+  } catch (error) {
+    console.error('Error verifying payment:', error)
+    return NextResponse.json(
+      { error: 'Failed to verify payment' },
+      { status: 500 }
+    )
+  }
+}
+
+async function markPaymentComplete(paymentId: string, txHash: string) {
+  // Update your database
+}
+```
+
+## Subscription with Crypto Fallback
+
+```typescript
+// app/api/subscriptions/route.ts
+import { NextResponse } from 'next/server'
+import { stripe } from '@/lib/stripe'
+
+export async function POST(request: Request) {
+  const { customerId, priceId, paymentMethod } = await request.json()
+
+  if (paymentMethod === 'fiat') {
+    // Create Stripe subscription
+    const subscription = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [{ price: priceId }],
+      payment_behavior: 'default_incomplete',
+      expand: ['latest_invoice.payment_intent']
+    })
+
+    return NextResponse.json({
+      type: 'stripe',
+      subscriptionId: subscription.id,
+      clientSecret: (subscription.latest_invoice as any).payment_intent.client_secret
+    })
+  } else {
+    // Create crypto recurring payment (requires custom implementation)
+    const cryptoSubscription = await createCryptoSubscription({
+      customerId,
+      priceId
+    })
+
+    return NextResponse.json({
+      type: 'crypto',
+      subscription: cryptoSubscription
+    })
+  }
+}
+
+async function createCryptoSubscription(params: any) {
+  // Implement recurring crypto payments
+  // Could use smart contract with allowance, or scheduled jobs
+  return { id: 'crypto_sub_' + crypto.randomUUID() }
+}
+```
+
+## Environment Variables
+
+```bash
+# .env.local
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+MERCHANT_WALLET_ADDRESS=0xYourMerchantAddress
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+## Resources
+
+- [Stripe Documentation](https://stripe.com/docs)
+- [Stripe Elements](https://stripe.com/docs/stripe-js)
+- [Stripe Checkout](https://stripe.com/docs/checkout)
+- [Stripe Webhooks](https://stripe.com/docs/webhooks)
+- [Stripe React Components](https://stripe.com/docs/stripe-js/react)
+- [Tempo Developer Docs](https://docs.tempo.xyz)

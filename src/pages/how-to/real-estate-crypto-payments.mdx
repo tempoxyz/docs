@@ -1,0 +1,138 @@
+---
+title: "Real Estate Crypto Payments"
+description: "Process property transactions with stablecoins on Tempo. ~$0.001 fees, instant settlement for earnest money, and support for international buyers."
+---
+
+# Real Estate Crypto Payments
+
+Real estate transactions involve large sums and multiple parties. Wire transfer fees, escrow delays, and international buyer complexity add friction and cost. Stablecoin payments on Tempo streamline property transactions with instant settlement and minimal fees.
+
+## The Real Estate Payment Problem
+
+| Transaction Type | Traditional Cost | Traditional Time |
+|-----------------|------------------|------------------|
+| Wire transfer | $25-50 | 1-3 days |
+| International wire | $50-75 + FX | 3-5 days |
+| Cashier's check | $10-30 | Same day pickup required |
+| Escrow processing | 1-2% of transaction | 30-60 days |
+| **Tempo transfer** | **~$0.001** | **Instant** |
+
+For a $500,000 property purchase:
+
+| Payment Stage | Traditional | Tempo |
+|---------------|-------------|-------|
+| Earnest money wire | $40 | ~$0.001 |
+| Down payment wire | $50 | ~$0.001 |
+| Closing funds wire | $50 | ~$0.001 |
+| International buyer FX | $5,000-15,000 | $0* |
+| **Total fees** | **$5,140-15,140** | **~$0.003** |
+
+*Parties transact directly in stablecoins
+
+## Benefits for Real Estate
+
+### Instant Earnest Money
+
+Earnest money deposits confirm immediately. No waiting for wire verification or check clearance before proceeding with inspections.
+
+### International Buyer Access
+
+Foreign buyers send funds without currency conversion complexity or international wire delays. A buyer in Singapore pays as easily as one across town.
+
+### Lower Transaction Costs
+
+Eliminate wire fees across multiple payment stages: earnest money, due diligence funds, down payment, and closing.
+
+### Weekend and Holiday Closings
+
+Schedule closings any day. Stablecoin transfers work 24/7 regardless of banking hours.
+
+### Transparent Fund Tracking
+
+All parties can verify fund transfers on-chain. Reduces disputes and speeds up title clearance.
+
+## How It Works
+
+### Transaction Flow
+
+1. Buyer funds wallet with stablecoins (via exchange or bank on-ramp)
+2. Earnest money sent to escrow wallet with contract metadata
+3. Escrow confirms receipt instantly
+4. Additional funds transferred at each milestone
+5. Final closing funds released to seller upon title transfer
+
+### Escrow Structure
+
+Smart contract escrow provides programmable fund management:
+
+- Define release conditions (inspection completion, title clearance, closing date)
+- Multi-signature approval for fund release
+- Automatic disbursement to seller, agents, and title company
+- Immutable record of all transfers
+
+### Payment Metadata
+
+Attach transaction context to each payment:
+
+- Property address or parcel ID
+- Transaction stage (earnest, due diligence, down payment, closing)
+- Contract reference number
+- Buyer/seller identifiers
+- Agent and escrow company references
+
+## Implementation
+
+### For Title Companies and Escrow Agents
+
+1. Set up multi-signature escrow wallet
+2. Provide payment instructions to buyers with metadata requirements
+3. Monitor incoming funds via webhook or dashboard
+4. Execute disbursements upon closing conditions
+5. Generate closing statement with transaction hashes
+
+### For Real Estate Agents
+
+1. Collect buyer wallet addresses during offer process
+2. Include stablecoin payment instructions in contracts
+3. Track payment status on-chain
+4. Coordinate with escrow for closing timeline
+
+### For International Buyers
+
+1. Convert local currency to USDC via preferred exchange
+2. Transfer directly to escrow wallet
+3. Avoid international wire fees and FX markups
+4. Receive instant confirmation of fund receipt
+
+## Use Cases
+
+### Residential Sales
+
+Streamline standard home purchases with faster earnest money and closing.
+
+### Commercial Transactions
+
+Handle larger commercial deals with reduced wire costs and instant settlement.
+
+### Investment Properties
+
+Investors purchasing multiple properties save significantly on cumulative wire fees.
+
+### International Investment
+
+Foreign investors access US real estate markets without cross-border payment friction.
+
+### 1031 Exchanges
+
+Meet tight exchange deadlines with instant fund transfers between properties.
+
+## Compliance Considerations
+
+- **Title Insurance**: Transaction hashes provide additional verification for title searches
+- **Audit Trail**: Immutable records support closing documentation requirements
+- **AML Compliance**: Implement buyer verification per jurisdiction requirements
+- **Reporting**: Include transaction details in HUD-1/closing disclosure documents
+
+## Get Started
+
+Learn about real estate payment integration at [docs.tempo.xyz](https://docs.tempo.xyz).

@@ -1,0 +1,311 @@
+---
+title: "How to Add Payment Metadata"
+description: "Attach invoice IDs, order numbers, and custom data to Tempo transactions. Enable automatic reconciliation and ERP integration with on-chain metadata."
+---
+
+# How to Add Payment Metadata
+
+Embed structured data directly in transactions—invoice numbers, order IDs, customer references—enabling automatic reconciliation and audit trails.
+
+## The Problem
+
+Standard ERC-20 transfers contain only sender, recipient, and amount. Matching payments to invoices requires manual lookup or fragile off-chain databases.
+
+## The Solution
+
+Encode metadata in transaction calldata or use Tempo's metadata extension. Every payment carries its context on-chain, making reconciliation automatic.
+
+## Implementation
+
+### Install Dependencies
+
+```bash
+npm install viem wagmi @tanstack/react-query
+```
+
+### Define Metadata Types
+
+```typescript
+import { Address } from 'viem';
+
+interface PaymentMetadata {
+  invoiceId?: string;
+  orderId?: string;
+  customerId?: string;
+  memo?: string;
+  reference?: string;
+  custom?: Record<string, string>;
+}
+
+interface PaymentWithMetadata {
+  recipient: Address;
+  token: Address;
+  amount: bigint;
+  metadata: PaymentMetadata;
+}
+```
+
+### Encode Metadata in Calldata
+
+```typescript
+import { encodeFunctionData, stringToHex, concatHex } from 'viem';
+
+const transferWithMetadataAbi = [
+  {
+    name: 'transferWithMetadata',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'to', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+      { name: 'metadata', type: 'bytes' },
+    ],
+    outputs: [{ name: '', type: 'bool' }],
+  },
+] as const;
+
+function encodeMetadata(metadata: PaymentMetadata): `0x${string}` {
+  const json = JSON.stringify(metadata);
+  return stringToHex(json);
+}
+
+function buildTransferWithMetadata(
+  to: Address,
+  amount: bigint,
+  metadata: PaymentMetadata
+): `0x${string}` {
+  return encodeFunctionData({
+    abi: transferWithMetadataAbi,
+    functionName: 'transferWithMetadata',
+    args: [to, amount, encodeMetadata(metadata)],
+  });
+}
+```
+
+### Simple Approach: Memo in Standard Transfer
+
+```typescript
+import { encodeFunctionData, erc20Abi, toHex } from 'viem';
+
+// For tokens without metadata support, append to calldata
+function buildTransferWithMemo(
+  to: Address,
+  amount: bigint,
+  memo: string
+): { to: Address; data: `0x${string}` } {
+  const transferData = encodeFunctionData({
+    abi: erc20Abi,
+    functionName: 'transfer',
+    args: [to, amount],
+  });
+
+  // Append memo as hex (ignored by contract, stored on-chain)
+  const memoHex = toHex(memo);
+  const dataWithMemo = `${transferData}${memoHex.slice(2)}` as `0x${string}`;
+
+  return { to, data: dataWithMemo };
+}
+```
+
+### Execute Payment with Metadata
+
+```typescript
+import { useWriteContract, useSendTransaction } from 'wagmi';
+
+function usePaymentWithMetadata() {
+  const { sendTransactionAsync } = useSendTransaction();
+
+  async function send(payment: PaymentWithMetadata) {
+    const { to, data } = buildTransferWithMemo(
+      payment.recipient,
+      payment.amount,
+      JSON.stringify(payment.metadata)
+    );
+
+    const hash = await sendTransactionAsync({
+      to: payment.token,
+      data,
+    });
+
+    return hash;
+  }
+
+  return { send };
+}
+```
+
+### Decode Metadata from Transaction
+
+```typescript
+import { createPublicClient, http, hexToString, slice } from 'viem';
+import { tempo } from './chains';
+
+const publicClient = createPublicClient({
+  chain: tempo,
+  transport: http(),
+});
+
+async function extractMetadata(
+  txHash: `0x${string}`
+): Promise<PaymentMetadata | null> {
+  const tx = await publicClient.getTransaction({ hash: txHash });
+
+  if (!tx.input || tx.input.length <= 138) {
+    return null; // No metadata appended
+  }
+
+  // Standard transfer is 68 bytes (136 hex chars + 0x)
+  // Metadata starts after that
+  const metadataHex = slice(tx.input, 68);
+
+  try {
+    const metadataJson = hexToString(metadataHex);
+    return JSON.parse(metadataJson);
+  } catch {
+    return null;
+  }
+}
+
+// Usage
+const metadata = await extractMetadata('0xabc123...');
+console.log(metadata?.invoiceId); // "INV-2024-001"
+```
+
+### Index Payments by Metadata
+
+```typescript
+interface IndexedPayment {
+  hash: `0x${string}`;
+  from: Address;
+  to: Address;
+  amount: bigint;
+  token: Address;
+  metadata: PaymentMetadata;
+  timestamp: number;
+}
+
+class PaymentIndex {
+  private byInvoice: Map<string, IndexedPayment[]> = new Map();
+  private byOrder: Map<string, IndexedPayment[]> = new Map();
+  private byCustomer: Map<string, IndexedPayment[]> = new Map();
+
+  index(payment: IndexedPayment): void {
+    const { metadata } = payment;
+
+    if (metadata.invoiceId) {
+      const existing = this.byInvoice.get(metadata.invoiceId) || [];
+      this.byInvoice.set(metadata.invoiceId, [...existing, payment]);
+    }
+
+    if (metadata.orderId) {
+      const existing = this.byOrder.get(metadata.orderId) || [];
+      this.byOrder.set(metadata.orderId, [...existing, payment]);
+    }
+
+    if (metadata.customerId) {
+      const existing = this.byCustomer.get(metadata.customerId) || [];
+      this.byCustomer.set(metadata.customerId, [...existing, payment]);
+    }
+  }
+
+  findByInvoice(invoiceId: string): IndexedPayment[] {
+    return this.byInvoice.get(invoiceId) || [];
+  }
+
+  findByCustomer(customerId: string): IndexedPayment[] {
+    return this.byCustomer.get(customerId) || [];
+  }
+}
+```
+
+### ERP Integration Example
+
+```typescript
+interface ERPInvoice {
+  id: string;
+  amount: number;
+  currency: string;
+  status: 'pending' | 'paid' | 'overdue';
+}
+
+async function reconcilePayment(
+  payment: IndexedPayment,
+  erp: ERPClient
+): Promise<void> {
+  const { invoiceId } = payment.metadata;
+  if (!invoiceId) return;
+
+  const invoice = await erp.getInvoice(invoiceId);
+  if (!invoice) {
+    console.error(`Invoice ${invoiceId} not found`);
+    return;
+  }
+
+  // Convert payment amount to invoice currency
+  const paidAmount = Number(payment.amount) / 1e6; // USDC decimals
+
+  if (paidAmount >= invoice.amount) {
+    await erp.markInvoicePaid(invoiceId, {
+      transactionHash: payment.hash,
+      paidAt: new Date(payment.timestamp * 1000),
+      paidAmount,
+    });
+  } else {
+    await erp.recordPartialPayment(invoiceId, {
+      transactionHash: payment.hash,
+      amount: paidAmount,
+    });
+  }
+}
+```
+
+### Webhook Handler with Metadata
+
+```typescript
+import { Hono } from 'hono';
+
+const app = new Hono();
+
+app.post('/webhooks/payments', async (c) => {
+  const event = await c.req.json();
+
+  if (event.type === 'payment.received') {
+    const metadata = await extractMetadata(event.transactionHash);
+
+    if (metadata?.invoiceId) {
+      // Auto-reconcile with accounting system
+      await reconcilePayment(
+        {
+          hash: event.transactionHash,
+          from: event.from,
+          to: event.to,
+          amount: BigInt(event.amount),
+          token: event.token,
+          metadata,
+          timestamp: event.timestamp,
+        },
+        erpClient
+      );
+    }
+
+    if (metadata?.orderId) {
+      // Trigger order fulfillment
+      await fulfillOrder(metadata.orderId);
+    }
+  }
+
+  return c.json({ received: true });
+});
+```
+
+## Best Practices
+
+1. **Keep metadata compact** — On-chain storage costs gas; use IDs instead of full objects
+2. **Use consistent schemas** — Define a standard structure for your organization
+3. **Validate on decode** — Always handle malformed or missing metadata gracefully
+4. **Index for lookup** — Build off-chain indexes for fast metadata queries
+5. **Include timestamps** — Add creation time for audit trail completeness
+
+## Get Started
+
+Tempo's native metadata support and instant finality make payment reconciliation seamless. Start building at [docs.tempo.xyz](https://docs.tempo.xyz).

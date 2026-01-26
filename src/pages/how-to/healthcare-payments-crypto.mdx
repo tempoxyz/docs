@@ -1,0 +1,137 @@
+---
+title: "Healthcare Payments with Crypto"
+description: "Process international medical payments with stablecoins on Tempo. ~$0.001 fees for medical tourism, cross-border claims, and patient billing."
+---
+
+# Healthcare Payments with Crypto
+
+Healthcare payments across borders face significant friction. International patients, medical tourism, and cross-border insurance claims involve wire fees, currency conversion, and processing delays. Stablecoin payments on Tempo simplify international healthcare transactions.
+
+## The Healthcare Payment Problem
+
+| Payment Scenario | Traditional Cost | Traditional Time |
+|-----------------|------------------|------------------|
+| International patient wire | $40-75 | 3-5 days |
+| Currency conversion | 2-4% markup | Immediate |
+| Cross-border insurance claim | Processing fees + delays | 30-90 days |
+| Medical tourism deposit | $50 wire + FX | 3-5 days |
+| **Tempo transfer** | **~$0.001** | **Instant** |
+
+For a $25,000 medical procedure paid by an international patient:
+
+| Cost Component | Traditional | Tempo |
+|----------------|-------------|-------|
+| Wire transfer fee | $50 | ~$0.001 |
+| Currency conversion (3%) | $750 | $0* |
+| **Total fees** | **$800** | **~$0.001** |
+
+*Parties transact directly in stablecoins
+
+## Benefits for Healthcare
+
+### Medical Tourism Payments
+
+International patients pay deposits and final bills without wire delays or currency conversion losses. Funds arrive instantly regardless of patient location.
+
+### Cross-Border Insurance Claims
+
+Insurers and providers settle claims directly without correspondent banking delays. Reduce days-sales-outstanding for international claims.
+
+### Reduced Administrative Costs
+
+Eliminate manual wire tracking, failed payment follow-up, and currency reconciliation overhead.
+
+### Instant Payment Confirmation
+
+Confirm patient payment immediately. No waiting for wire verification before scheduling procedures.
+
+### Global Patient Access
+
+Accept payments from patients worldwide. Remove payment friction that prevents international patients from accessing care.
+
+## How It Works
+
+### Patient Payment Flow
+
+1. Provider generates invoice with stablecoin payment option
+2. Patient receives payment instructions with procedure metadata
+3. Patient sends stablecoins from their wallet
+4. Provider receives instant confirmation
+5. Procedure scheduled or services rendered
+
+### Payment Metadata
+
+Attach clinical and billing context to transactions:
+
+- Patient ID
+- Invoice or claim number
+- Procedure codes
+- Provider identifiers
+- Insurance reference (if applicable)
+- Payment type (deposit, copay, full payment, balance)
+
+### Insurance Claim Settlement
+
+For cross-border insurance payments:
+
+1. Provider submits claim to insurer
+2. Insurer approves and initiates stablecoin payment
+3. Provider receives instant settlement
+4. Transaction metadata links to original claim
+
+## Implementation
+
+### For Healthcare Providers
+
+1. Set up payment wallet with appropriate security controls
+2. Integrate payment option into patient billing system
+3. Generate unique payment references per invoice
+4. Monitor incoming payments via webhook
+5. Auto-reconcile with billing system using metadata
+
+### For Medical Tourism Facilitators
+
+1. Collect patient wallet addresses during booking
+2. Send deposit requests with procedure details
+3. Confirm deposits instantly before provider booking
+4. Coordinate final payment before patient travel
+
+### For Insurers
+
+1. Configure claims payment system for stablecoin disbursement
+2. Batch provider payments with claim metadata
+3. Reduce international payment costs and delays
+4. Maintain audit trail for regulatory compliance
+
+## Use Cases
+
+### Medical Tourism
+
+Patients traveling for procedures pay deposits and final bills without international wire complexity. Providers confirm payment before patient arrival.
+
+### International Insurance
+
+Global insurers settle claims with providers across multiple countries in a single batch, reducing per-payment costs from $50+ to ~$0.001.
+
+### Expatriate Healthcare
+
+Expats accessing care in their country of residence pay without routing through home country banks.
+
+### Telemedicine
+
+International telemedicine consultations collect payment instantly without cross-border card processing fees.
+
+### Clinical Trial Payments
+
+Research organizations compensate international trial participants without wire overhead.
+
+## Compliance Considerations
+
+- **HIPAA**: Transaction metadata should not include protected health information in public fields
+- **Patient Records**: Link transaction hashes to internal billing records for audit trail
+- **Insurance Regulations**: Maintain documentation per jurisdiction requirements
+- **AML/KYC**: Implement appropriate patient verification for large transactions
+
+## Get Started
+
+Learn about healthcare payment integration at [docs.tempo.xyz](https://docs.tempo.xyz).

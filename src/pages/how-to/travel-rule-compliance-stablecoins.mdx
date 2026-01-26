@@ -1,0 +1,113 @@
+---
+title: "Travel Rule Compliance for Stablecoins"
+description: "Understand FATF Travel Rule requirements for stablecoin transfers including VASP obligations, data sharing protocols, and threshold amounts."
+---
+
+# Travel Rule Compliance for Stablecoins
+
+The Travel Rule requires Virtual Asset Service Providers (VASPs) to collect, transmit, and store originator and beneficiary information for qualifying transfers. This guide explains how Travel Rule requirements apply to stablecoin payments and how to implement compliant data-sharing processes.
+
+> **Disclaimer:** This content is for informational purposes only and does not constitute legal, financial, or regulatory advice. Travel Rule implementation varies by jurisdiction—consult legal counsel for specific requirements.
+
+## Regulatory Context
+
+The Travel Rule originated in traditional finance under FATF Recommendation 16 and was extended to virtual assets in 2019. Key aspects:
+
+- **FATF Guidance:** Establishes global standards that member countries implement through national law
+- **Jurisdictional Variation:** Thresholds, data fields, and enforcement timelines differ across countries
+- **Ongoing Evolution:** FATF continues refining guidance, with updated recommendations issued periodically
+
+The rule aims to prevent anonymous transfers that could facilitate money laundering, terrorist financing, or sanctions evasion.
+
+## Key Requirements
+
+### Threshold Amounts
+
+Travel Rule obligations typically trigger above certain thresholds:
+
+| Jurisdiction | Threshold |
+|-------------|-----------|
+| FATF Recommendation | USD/EUR 1,000 |
+| United States | USD 3,000 |
+| European Union (TFR) | EUR 0 (all transfers) |
+| Singapore | SGD 1,500 |
+| Switzerland | CHF 1,000 |
+
+*Thresholds subject to change—verify current requirements.*
+
+### Required Data Fields
+
+For qualifying transfers, collect and transmit:
+
+**Originator Information:**
+- Full name
+- Account number (wallet address)
+- Physical address, national ID number, or date/place of birth
+- For legal entities: registered name and address
+
+**Beneficiary Information:**
+- Full name
+- Account number (wallet address)
+- Additional identifying information as required by jurisdiction
+
+### VASP Obligations
+
+- **Collect:** Gather required information from originators before executing transfers
+- **Transmit:** Send originator/beneficiary data to the counterparty VASP
+- **Verify:** Confirm beneficiary information accuracy (risk-based approach)
+- **Store:** Retain records for required periods (typically 5+ years)
+- **Screen:** Check parties against sanctions lists before processing
+
+## Implementation Guidance
+
+### Technical Integration Options
+
+Several protocols and providers facilitate Travel Rule compliance:
+
+1. **TRUST (Travel Rule Universal Solution Technology):** Industry consortium solution with broad VASP participation
+2. **Notabene:** Commercial Travel Rule compliance platform with API integration
+3. **Sygna Bridge:** Travel Rule solution popular in Asia-Pacific markets
+4. **OpenVASP:** Open protocol for peer-to-peer Travel Rule messaging
+5. **Shyft Network:** Decentralized identity and Travel Rule compliance
+
+### Integration Steps
+
+1. **Select a Protocol/Provider:** Evaluate based on counterparty network coverage, API capabilities, and jurisdiction support
+2. **Map Data Requirements:** Identify all jurisdictions you operate in and their specific field requirements
+3. **Update Onboarding Flows:** Ensure customer onboarding captures Travel Rule data fields
+4. **Implement Pre-Transfer Checks:** Build workflows to collect beneficiary VASP information before execution
+5. **Configure Messaging:** Integrate with chosen protocol for secure data transmission
+6. **Establish Fallback Procedures:** Define processes when counterparty VASP is unreachable or non-compliant
+
+### Handling Non-Compliant Counterparties
+
+When the beneficiary VASP cannot receive Travel Rule data:
+
+- **Assess Risk:** Evaluate whether to proceed based on transaction risk and regulatory expectations
+- **Document Decisions:** Record rationale for proceeding or declining transactions
+- **Enhanced Monitoring:** Apply additional scrutiny to transfers without complete Travel Rule exchange
+- **Regulatory Guidance:** Some jurisdictions prohibit transfers to non-compliant VASPs—verify local requirements
+
+## Best Practices
+
+- **Sunrise Considerations:** Track Travel Rule implementation timelines across jurisdictions you serve
+- **Data Minimization:** Collect and share only required information to respect privacy
+- **Encryption Standards:** Ensure Travel Rule data is encrypted in transit and at rest
+- **Counterparty Due Diligence:** Verify legitimacy of VASPs before establishing Travel Rule connections
+- **Testing:** Conduct end-to-end testing with counterparties before going live
+- **Audit Trails:** Maintain complete logs of Travel Rule message exchanges
+- **Staff Training:** Ensure operations teams understand Travel Rule workflows and exception handling
+
+## Resources and Further Reading
+
+- [FATF Updated Guidance for Virtual Assets](https://www.fatf-gafi.org/) - Global standards
+- [EU Transfer of Funds Regulation (TFR)](https://eur-lex.europa.eu/) - European requirements
+- [FinCEN Travel Rule](https://www.fincen.gov/) - US requirements
+- [Notabene](https://notabene.id/) - Travel Rule compliance platform
+- [TRUST Solution](https://www.coinbase.com/blog/introducing-trust) - Industry consortium
+- [InterVASP Messaging Standards](https://intervasp.org/) - Technical specifications
+- [Tempo API Documentation](https://docs.tempo.xyz) - Integration guides
+
+---
+
+*Last updated: 2024. Travel Rule requirements are actively evolving—monitor regulatory updates in your operating jurisdictions.*
