@@ -103,85 +103,11 @@ await tempo.yield.deploy({
 });
 ```
 
-## Getting Started
 
-### Week 1: Setup
+## Get Early Access
 
-1. **Create Tempo account** — Sign up at tempo.xyz
-2. **Fund your wallet** — Transfer USDC from exchange or bank on-ramp
-3. **Collect contractor wallets** — Ask contractors for their wallet addresses
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
 
-### Week 2: First Payments
-
-1. **Test payment** — Send small amount to verify addresses
-2. **Batch payment** — Process contractor payments
-3. **Document process** — Create runbook for regular payments
-
-### Week 3+: Expand
-
-- Add customer payment acceptance
-- Integrate with your invoicing system
-- Set up recurring payment schedules
-
-## Integration Patterns
-
-### Simple: Manual Payments
-
-Use Tempo dashboard for occasional payments. Good for:
-- Monthly contractor payments
-- Ad-hoc vendor payments
-- Early-stage startups
-
-### Intermediate: API Integration
-
-Connect your systems to Tempo API:
-
-```typescript
-// Integrate with your contractor management system
-app.post('/pay-contractors', async (req, res) => {
-  const contractors = await getActiveContractors();
-  
-  const batch = await tempo.batch.create({
-    payments: contractors.map(c => ({
-      recipient: c.walletAddress,
-      amount: c.monthlyRate,
-      currency: 'USDC',
-      metadata: { contractorId: c.id }
-    }))
-  });
-  
-  return res.json({ batchId: batch.id, count: contractors.length });
-});
-```
-
-### Advanced: Full Automation
-
-Automate end-to-end:
-
-- Invoice generation triggers payment request
-- Payment confirmation updates your systems
-- Reconciliation happens automatically via webhooks
-
-## Common Questions
-
-### Do contractors need crypto knowledge?
-
-Minimal. They need a wallet address—Tempo smart accounts use passkeys (like FaceID), not seed phrases.
-
-### How do contractors convert to local currency?
-
-They can use any exchange (Coinbase, Kraken, local exchanges) or off-ramp services. Many prefer holding USDC.
-
-### What about taxes?
-
-Same reporting requirements as any contractor payment. Tempo provides transaction records with metadata for your records.
-
-### Is this legal?
-
-Stablecoin payments are legal in most jurisdictions. Consult your lawyer for specific situations, especially for employees vs contractors.
-
-## Resources
-
-- API documentation: [docs.tempo.xyz](https://docs.tempo.xyz)
-- SDK: `npm install @tempo/sdk`
-- Discord community: [discord.tempo.xyz](https://discord.tempo.xyz)
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities
