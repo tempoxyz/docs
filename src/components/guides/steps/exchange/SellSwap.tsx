@@ -25,7 +25,6 @@ export function SellSwap({ onSuccess }: { onSuccess?: () => void }) {
     amountIn: amount,
     query: {
       enabled: !!address,
-      // @ts-expect-error: FIXME: pick type in wagmi
       refetchInterval: 1000,
     },
   })

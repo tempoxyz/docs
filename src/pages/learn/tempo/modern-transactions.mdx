@@ -10,6 +10,8 @@ Tempo has built-in support for gas sponsorship, batch transactions, scheduled pa
 
 On other chains, even when available, these are generally add-on functionalities that require third-party providers to unlock. By natively enabling these features at the protocol level, developers on Tempo can deploy payment logic without managing additional middleware or custom contracts, and can build to enshrined standards.
 
+Tempo Transactions are built into the protocol so developers don't need custom smart contracts or third-party middleware to get batching, sponsorship, scheduling, and modern auth. This reduces integration risk and operational overhead for payment applications.
+
 ## Batched Payments
 
 Payment processors and platforms often need to send thousands of payments at once (e.g., payroll runs, merchant settlements, customer refunds). Tempo supports batch transactions where multiple operations execute atomically in a single transaction.
@@ -21,6 +23,10 @@ This unlocks high-volume use cases: orchestrators can submit thousands of payout
 Applications often want to pay transaction fees on behalf of their users. For instance, to simplify onboarding, to improve the user experience, or to remove friction from their payment flows. 
 
 Tempo's protocol-level fee sponsorship allows an account to sign a transaction while a separate sponsor (typically the application) pays the gas fee. This means end users can interact with your application without holding any tokens for fees, dramatically lowering the barrier to entry.
+
+## Configurable Fee Tokens
+
+Tempo supports paying transaction fees in USD-denominated stablecoins. This removes the need for users to acquire a volatile gas token and simplifies accounting for payment applications operating in dollars. Users can pay fees in any supported USD stablecoin, and the protocol handles conversion automatically.
 
 ## Scheduled Payments
 
@@ -35,3 +41,56 @@ Tempo supports passkey authentication through WebAuthn/P256 signature validation
 Their keys are stored in their device's secure enclave, and passkeys sync across devices via services they already use such as iCloud Keychain or Google Password Manager. This way, users don't need to secure a 12 or 24-word seed phrase for traditional wallets. For payment applications, this means onboarding flows can be as simple as existing consumer apps, without sacrificing security.
 
 Tempo uses an [EIP-2718](https://eips.ethereum.org/EIPS/eip-2718) transaction type with native support for these features.
+
+## Use Cases
+
+Tempo Transactions provide the features necessary to bring a wide range of payment use cases onchain:
+
+### Payroll and Merchant Payouts
+
+Batch transactions allow large payout runs to be processed efficiently and securely. Payments execute in a single atomic batch: the entire batch succeeds as a single transaction, eliminating partial failures and manual reruns.
+
+See: [Global payouts with stablecoins](/learn/use-cases/global-payouts)
+
+### Wallets and Neobanks
+
+Fee sponsorship removes gas from the user experience entirely. Combined with passkey authentication, users interact with a familiar fintech-grade interface with all of the blockchain complexity abstracted away.
+
+### Commerce
+
+As stablecoin adoption grows, platforms need flexibility in how fees are paid. Configurable fee tokens allow transaction fees to be paid in any USD stablecoin, while fee sponsorship enables merchants to offer seamless checkout experiences for users.
+
+See: [TIP-20 Tokens](/learn/tempo/native-stablecoins) for stable fees and payment memos.
+
+### Subscriptions
+
+Scheduled transactions automate recurring payments and enable true subscription services onchain. No need for external automation services or custom smart contracts.
+
+## Partner Ecosystem
+
+Infrastructure partners including [Crossmint](https://www.crossmint.com/), [Fireblocks](https://www.fireblocks.com/), [Privy](https://www.privy.io/), and [Turnkey](https://www.turnkey.com/) support Tempo Transactions and can help accelerate your development. Visit the [Ecosystem](https://tempo.xyz/ecosystem) to explore Tempo's growing network of partners.
+
+For partner testimonials and rollout context, see [Introducing Tempo Transactions](https://tempo.xyz/blog/tempo-transactions).
+
+## Next steps
+
+<Cards>
+  <Card
+    title="Protocol docs"
+    description="Full spec and developer reference for Tempo Transactions."
+    to="/protocol/transactions"
+    icon="lucide:file-code"
+  />
+  <Card
+    title="Global payouts use case"
+    description="How batching and stable fees improve payout operations."
+    to="/learn/use-cases/global-payouts"
+    icon="lucide:send"
+  />
+  <Card
+    title="Deep dive blog post"
+    description="Announcement, context, and partner quotes."
+    to="https://tempo.xyz/blog/tempo-transactions"
+    icon="lucide:book-open"
+  />
+</Cards>

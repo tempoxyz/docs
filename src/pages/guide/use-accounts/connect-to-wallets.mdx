@@ -217,7 +217,7 @@ export function Account() {
       </button>
 
       <button // [!code ++]
-        onClick={() => // [!code ++]
+        onClick={() => {/* [!code ++] */}
           switchChain.switchChain({ // [!code ++]
             chainId: tempo.id, // [!code ++]
             addEthereumChainParameter: { // [!code ++]
@@ -229,9 +229,9 @@ export function Account() {
             }, // [!code ++]
           }) // [!code ++]
         } // [!code ++]
-      > {/* // [!code ++] */}
-        Add {chain.name} to wallet {/* // [!code ++] */}
-      </button> {/* // [!code ++] */}
+      > {/* [!code ++] */}
+        Add {chain.name} to wallet {/* [!code ++] */}
+      </button> {/* [!code ++] */}
     </div>
   )
 }

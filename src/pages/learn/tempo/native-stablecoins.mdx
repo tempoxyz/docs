@@ -24,11 +24,15 @@ For wallets and custodians, this removes the need to hold a balance of new crypt
 
 Costs are predictable and low: TIP-20 transfers target one-tenth of a cent per transaction. This removes a major barrier for mainstream adoption. Users can interact with Tempo using only the stablecoins they're already familiar with, without needing to understand or manage volatile crypto assets.
 
+For how applications sponsor fees and batch payments, see [Tempo Transactions](/learn/tempo/modern-transactions).
+
 ## Native Reconciliation
 
 Tempo's TIP-20 tokens can natively attach a short memo directly to each transfer. This mirrors traditional payment systems, where every transaction carries context (e.g., an invoice number, a customer ID, a cost center, or a simple reference note) for backend systems to automatically match payments to internal records.
 
 For larger memos, Tempo supports flexible approaches where only a commitment (like a hash or locator) travels onchain while the full data (including PII) lives off-chain. This means finance teams can automatically match payments to invoices and payment processors can embed the structured data their systems need without custom solutions or integration with third-party reconciliation infrastructure.
+
+See stablecoin reconciliation in practice: [Global payouts](/learn/use-cases/global-payouts) and [Tokenized deposits](/learn/use-cases/tokenized-deposits).
 
 ## Built-in Compliance
 
@@ -39,3 +43,83 @@ Tempo provides a shared compliance infrastructure through the TIP-403 Policy Reg
 ## Built-in Stable Asset DEX
 
 Tempo includes a native decentralized exchange optimized for stablecoins and tokenized deposits. This means users can pay fees in any USD stablecoin, and validators can receive fees in any USD stablecoin, with the protocol automatically converting between them using onchain liquidity.
+
+## When TIP-20 matters
+
+Use TIP-20 when you need:
+
+- **Predictable throughput** for large payment runs without congestion-driven fee spikes.
+- **Stable-denominated fees** for simpler unit economics.
+- **Reconciliation metadata** to tie onchain transfers to invoices and ERP records.
+- **Shared compliance enforcement** across multiple regulated assets.
+
+For basic token functionality without these requirements, standard ERC-20 contracts work on Tempo as they do on any EVM chain.
+
+## Use Cases for Custom Stablecoins
+
+Beyond peer-to-peer payments, custom stablecoins built on TIP-20 can be designed for specific treasury, settlement, and foreign exchange use cases:
+
+### Corporate Treasury Management
+
+Custom stablecoins can streamline global treasury operations, allowing funds to move instantly between subsidiaries. TIP-20's reward distribution enables reserve income to be shared across business units without complex off-chain accounting.
+
+### Cross-border Payments
+
+Stablecoins allow smaller banks and payment providers to participate in cross-border flows without correspondent banking networks. TIP-20's native transfer memos enable reconciliation between stablecoin transactions and existing payment engines that support SWIFT messaging.
+
+### Wholesale Settlement and Deposit Tokens
+
+Policy registries enable permissioned stablecoins and deposit tokens for bank-to-bank settlement. Issuers can enforce transfer rules directly at the token level, supporting regulated and wholesale payment systems.
+
+### Interest-bearing Stablecoins
+
+TIP-20 simplifies interest-bearing stablecoin issuance with native yield distribution. Issuers can programmatically share yield with users and intermediaries in real time, eliminating manual calculations and off-chain reconciliation.
+
+### Non-USD Stablecoins and Onchain FX
+
+A global stablecoin ecosystem requires currencies beyond USD. TIP-20 tokens include an optional currency identifier specifying the fiat currency they represent. Tempo's native DEX will enable onchain foreign exchange between stablecoins.
+
+## FAQs
+
+### Is TIP-20 compatible with ERC-20 tooling?
+
+TIP-20 extends ERC-20 semantics for payment-scale features while remaining familiar to EVM developers. Most indexers and wallet patterns still apply, but advanced features (memos, policy registry) require TIP-20-aware integrations.
+
+### How big can a reconciliation memo be?
+
+TIP-20 supports short onchain memos for common references (invoice ID, customer ID). For larger data, store details offchain and put only a commitment or locator onchain to avoid leaking PII.
+
+### How should issuers handle compliance updates?
+
+Use the TIP-403 Policy Registry so multiple tokens can share a policy and inherit updates automatically, rather than updating each token contract individually.
+
+## Infrastructure Partners
+
+Work with infrastructure partners who are rolling out TIP-20 support to accelerate your development:
+
+- [AllUnity](https://allunity.com/) - Regulated euro stablecoins for European corporates
+- [Bridge](https://www.bridge.xyz/) - Custom regulated stablecoin issuance with off-the-shelf templates
+- [LayerZero](https://layerzero.network/) - Cross-chain token extensions for Tempo's payment ecosystem
+
+## Related reading
+
+<Cards>
+  <Card
+    title="Deep dive: TIP-20"
+    description="Full feature walkthrough and design rationale."
+    to="https://tempo.xyz/blog/tip20"
+    icon="lucide:book-open"
+  />
+  <Card
+    title="Tempo Transactions"
+    description="Batching, sponsorship, and scheduling primitives."
+    to="/learn/tempo/modern-transactions"
+    icon="lucide:layers"
+  />
+  <Card
+    title="Tokenized deposits"
+    description="Treasury and liquidity management use case."
+    to="/learn/use-cases/tokenized-deposits"
+    icon="lucide:building-2"
+  />
+</Cards>

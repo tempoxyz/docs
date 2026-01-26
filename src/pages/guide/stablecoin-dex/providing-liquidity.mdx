@@ -252,7 +252,7 @@ function ManageOrder() {
           type="submit" // [!code hl]
           disabled={cancelOrder.isPending} // [!code hl]
         > {/* [!code hl] */}
-          {cancelOrder.isPending ? 'Canceling...' : 'Cancel Order'} {/* [!code hl] */}
+        {cancelOrder.isPending ? 'Canceling...' : 'Cancel Order'} {/* [!code hl] */}
         </button> {/* [!code hl] */}
       </form>
     </>

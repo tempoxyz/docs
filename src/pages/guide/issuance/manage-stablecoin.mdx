@@ -64,7 +64,7 @@ export function GrantRoles() {
       onClick={handleGrantIssuer} // [!code hl]
       type="button" // [!code hl]
     > {/* [!code hl] */}
-      {grant.isPending ? 'Granting...' : 'Grant Issuer Role'} {/* [!code hl] */}
+    {grant.isPending ? 'Granting...' : 'Grant Issuer Role'} {/* [!code hl] */}
     </button> {/* [!code hl] */}
   )
 }
@@ -141,9 +141,9 @@ export function GrantRoles() {
 
       {hasIssuerRole !== undefined && ( // [!code ++]
         <div> {/* [!code ++] */}
-          Treasury {hasIssuerRole ? 'has' : 'does not have'} the issuer role {/* [!code ++] */}
+        Treasury {hasIssuerRole ? 'has' : 'does not have'} the issuer role // [!code ++]
         </div> {/* [!code ++] */}
-      )} {/* [!code ++] */}
+        )} // [!code ++]
     </div>
   )
 }
@@ -249,7 +249,7 @@ export function RevokeRoles() {
         onClick={handleRevokeIssuer} // [!code ++]
         type="button" // [!code ++]
       > {/* [!code ++] */}
-        {revoke.isPending ? 'Revoking...' : 'Revoke Issuer Role'} {/* [!code ++] */}
+      {revoke.isPending ? 'Revoking...' : 'Revoke Issuer Role'} {/* [!code ++] */}
       </button> {/* [!code ++] */}
 
       {hasIssuerRole !== undefined && (
@@ -327,7 +327,7 @@ export function SetSupplyCap() {
       onClick={handleSetSupplyCap} // [!code hl]
       type="button" // [!code hl]
     > {/* [!code hl] */}
-      {setSupplyCap.isPending ? 'Setting...' : 'Set Cap'} {/* [!code hl] */}
+    {setSupplyCap.isPending ? 'Setting...' : 'Set Cap'} {/* [!code hl] */}
     </button> {/* [!code hl] */}
   )
 }
@@ -406,8 +406,8 @@ export function CreateTokenPolicy() {
       onClick={handleCreatePolicy} // [!code hl]
       type="button" // [!code hl]
     > {/* [!code hl] */}
-      {createPolicy.isPending ? 'Creating...' : 'Create Policy'} {/* [!code hl] */}
-    </button> // [!code hl]
+    {createPolicy.isPending ? 'Creating...' : 'Create Policy'} {/* [!code hl] */}
+    </button> {/* [!code hl] */}
   )
 }
 ```
@@ -436,8 +436,8 @@ export function LinkTokenPolicy() {
       onClick={handleLinkPolicy} // [!code hl]
       type="button" // [!code hl]
     > {/* [!code hl] */}
-      {linkPolicy.isPending ? 'Linking...' : 'Link Policy'} {/* [!code hl] */}
-    </button> // [!code hl]
+    {linkPolicy.isPending ? 'Linking...' : 'Link Policy'} {/* [!code hl] */}
+    </button> {/* [!code hl] */}
   )
 }
 ```
@@ -516,8 +516,8 @@ export function PauseUnpauseTransfers() {
       onClick={handleToggle} // [!code hl]
       type="button" // [!code hl]
     > {/* [!code hl] */}
-      {isProcessing ? 'Processing...' : paused ? 'Unpause' : 'Pause'} {/* [!code hl] */}
-    </button> // [!code hl]
+    {isProcessing ? 'Processing...' : paused ? 'Unpause' : 'Pause'} {/* [!code hl] */}
+    </button> {/* [!code hl] */}
   )
 }
 ```
@@ -590,8 +590,8 @@ export function BurnBlocked() {
       onClick={handleBurnBlocked} // [!code hl]
       type="button" // [!code hl]
     > {/* [!code hl] */}
-      {burnBlocked.isPending ? 'Burning...' : 'Burn Blocked Tokens'} {/* [!code hl] */}
-    </button> // [!code hl]
+    {burnBlocked.isPending ? 'Burning...' : 'Burn Blocked Tokens'} {/* [!code hl] */}
+    </button> {/* [!code hl] */}
   )
 }
 ```
@@ -645,4 +645,3 @@ Ensure pause and unpause roles are assigned to trusted addresses and that your t
     title="Transfer Policies (TIP-403)"
   />
 </Cards>
-

@@ -228,10 +228,10 @@ function PayWithFeeToken() {
     <>
       {/* ... your payment form ... */}
       {sendPayment.data && ( // [!code ++]
-        <a href={`https://explore.tempo.xyz/tx/${sendPayment.data.receipt.transactionHash}`}> {/* // [!code ++] */}
-          View receipt {/* // [!code ++] */}
-        </a> // [!code ++]
-      )} // [!code ++]
+        <a href={`https://explore.tempo.xyz/tx/${sendPayment.data.receipt.transactionHash}`}> {/* [!code ++] */}
+          View receipt {/* [!code ++] */}
+        </a> {/* [!code ++] */}
+      )} {/* [!code ++] */}
     </>
   )
 }

@@ -1,4 +1,4 @@
-import { Changelog, defineConfig, McpSource } from "vocs/config";
+import { Changelog, defineConfig, Feedback, McpSource } from 'vocs/config'
 
 const baseUrl = (() => {
   if (process.env.VERCEL_ENV === "production")
@@ -10,10 +10,10 @@ const baseUrl = (() => {
 export default defineConfig({
   changelog: Changelog.github({ prereleases: true, repo: "tempoxyz/tempo" }),
   checkDeadlinks: false,
-  title: "Tempo",
-  titleTemplate: "%s ⋅ Tempo",
-  description:
-    "Documentation for the Tempo network and protocol specifications",
+  title: 'Tempo',
+  titleTemplate: '%s ⋅ Tempo',
+  description: 'Documentation for the Tempo network and protocol specifications',
+  feedback: Feedback.slack(),
   mcp: {
     enabled: true,
     sources: [
@@ -87,8 +87,16 @@ export default defineConfig({
             link: "/quickstart/predeployed-contracts",
           },
           {
-            text: "Wallet Developers",
-            link: "/quickstart/wallet-developers",
+            text: 'Token List Registry',
+            link: '/quickstart/tokenlist',
+          },
+          {
+            text: 'Wallet Developers',
+            link: '/quickstart/wallet-developers',
+          },
+          {
+            text: 'Building with AI',
+            link: '/guide/building-with-ai',
           },
         ],
       },
@@ -243,8 +251,8 @@ export default defineConfig({
                 link: "/protocol/tip20/spec",
               },
               {
-                text: "Reference Implementation",
-                link: "https://github.com/tempoxyz/tempo/blob/main/docs/specs/src/TIP20.sol",
+                text: 'Reference Implementation',
+                link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/TIP20.sol',
               },
               {
                 text: "Rust Implementation",
@@ -279,8 +287,8 @@ export default defineConfig({
                 link: "/protocol/tip403/spec",
               },
               {
-                text: "Reference Implementation",
-                link: "https://github.com/tempoxyz/tempo/blob/main/docs/specs/src/TIP403Registry.sol",
+                text: 'Reference Implementation',
+                link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/TIP403Registry.sol',
               },
               {
                 text: "Rust Implementation",
@@ -313,8 +321,8 @@ export default defineConfig({
                     link: "/protocol/fees/spec-fee-amm",
                   },
                   {
-                    text: "Reference Implementation",
-                    link: "https://github.com/tempoxyz/tempo/blob/main/docs/specs/src/FeeManager.sol",
+                    text: 'Reference Implementation',
+                    link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/FeeManager.sol',
                   },
                   {
                     text: "Rust Implementation",
@@ -337,8 +345,16 @@ export default defineConfig({
                 link: "/protocol/transactions/spec-tempo-transaction",
               },
               {
-                text: "Account Keychain Precompile Specification",
-                link: "/protocol/transactions/AccountKeychain",
+                text: 'EIP-4337 Comparison',
+                link: '/protocol/transactions/eip-4337',
+              },
+              {
+                text: 'EIP-7702 Comparison',
+                link: '/protocol/transactions/eip-7702',
+              },
+              {
+                text: 'Account Keychain Precompile Specification',
+                link: '/protocol/transactions/AccountKeychain',
               },
               {
                 text: "Rust Implementation",
@@ -361,6 +377,10 @@ export default defineConfig({
               {
                 text: "Sub-block Specification",
                 link: "/protocol/blockspace/sub-block-specification",
+              },
+              {
+                text: 'Consensus and Finality',
+                link: '/protocol/blockspace/consensus',
               },
             ],
           },
@@ -393,8 +413,8 @@ export default defineConfig({
                 link: "/protocol/exchange/exchange-balance",
               },
               {
-                text: "Reference Implementation",
-                link: "https://github.com/tempoxyz/tempo/blob/main/docs/specs/src/stablecoinDex.sol",
+                text: 'Reference Implementation',
+                link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/stablecoinDex.sol',
               },
               {
                 text: "Rust Implementation",
@@ -628,14 +648,8 @@ export default defineConfig({
       destination: "/protocol/:path*",
     },
     {
-      source: "/errors/tx/SubblockNonceKey",
-      destination:
-        "/protocol/blockspace/subblock-specification#4-block-validity-rules",
-    },
-    {
-      source: "/protocol/blockspace/sub-block-specification",
-      destination: "/protocol/blockspace/subblock-specification",
-      status: 301,
+      source: '/errors/tx/SubblockNonceKey',
+      destination: '/protocol/blockspace/sub-block-specification#4-block-validity-rules',
     },
     {
       source: "/stablecoin-exchange/:path*",
@@ -643,8 +657,12 @@ export default defineConfig({
       status: 301,
     },
     {
-      source: "/guide",
-      destination: "/quickstart/integrate-tempo",
+      source: '/guide/ai-support',
+      destination: '/guide/building-with-ai',
+    },
+    {
+      source: '/guide',
+      destination: '/quickstart/integrate-tempo',
     },
     {
       source: "/quickstart",
@@ -677,6 +695,16 @@ export default defineConfig({
     {
       source: "/sdk/typescript/prool",
       destination: "/sdk/typescript/prool/setup",
+    },
+    {
+      source: '/guide/use-accounts/fee-sponsorship',
+      destination: '/guide/payments/sponsor-user-fees',
+      status: 301,
+    },
+    {
+      source: '/quickstart/tip20',
+      destination: '/protocol/tip20/overview',
+      status: 301,
     },
   ],
   twoslash: {

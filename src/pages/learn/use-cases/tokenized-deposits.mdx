@@ -3,7 +3,6 @@ description: Move treasury liquidity instantly across borders with real-time vis
 ---
 
 import { Cards, Card } from 'vocs'
-import { ZoomableImage } from "../../../components/ZoomableImage.tsx"
 
 # Move treasury liquidity instantly across borders [Enable corporate treasury teams to improve liquidity management across banks, currencies, and regions with tokenized deposits.]
 
@@ -13,6 +12,12 @@ import { ZoomableImage } from "../../../components/ZoomableImage.tsx"
 Operating across multiple geographies requires companies to maintain relationships with multiple banks, manage balances in several currencies, and navigate an array of local settlement systems, cutoff times, and time zones. For global treasury teams, this results in a fragmented operational landscape with inconsistent processes across regions.
 
 Moving liquidity between a company's own accounts can take days and require subsidiaries to hold excess cash "just in case." Visibility into cash positions is incomplete, workflows vary by region, and reconciling activity across dozens of accounts becomes an ongoing operational burden. The result is inefficient use of capital and a patchwork of manual processes for controls and compliance.
+
+For companies operating across multiple jurisdictions, correspondent banking creates three specific problems:
+
+- **Higher borrowing costs** from trapped cash that cannot be deployed efficiently
+- **Suboptimal hedging** based on incomplete or delayed data from disconnected systems
+- **Excess bank fees** for accounts holding idle liquidity across regions
 
 ## How tokenized deposits and stablecoins solve this
 
@@ -25,6 +30,36 @@ Each wallet can hold stablecoins, tokenized deposits, and even tokenized money m
 - **Reconciliation becomes simpler** through onchain settlement records instead of disparate bank statements and siloed reporting systems;
 - **Idle balances can be deployed more efficiently**, improving working-capital usage and enabling immediate access to interest-bearing tokenized assets;
 - **Treasury workflows such as approvals, sweeps, and controls can be automated** with smart contracts, reducing manual processes and operational overhead.
+
+See also: [Global payouts with stablecoins](/learn/use-cases/global-payouts) for the outbound payments use case. For payment references and structured metadata, see [TIP-20 Tokens](/learn/tempo/native-stablecoins). For batching and scheduled treasury movements, see [Tempo Transactions](/learn/tempo/modern-transactions).
+
+## How stablecoins fit into treasury workflows
+
+Stablecoins are most useful when they remove timing and intermediary constraints (cutoff times, weekends, correspondent banks). Common first deployments:
+
+- **Intercompany settlements:** Move USD liquidity between parent and subsidiary entities instantly and settle back to bank accounts on your own schedule.
+- **Cash positioning and forecasting:** Use onchain balances as a real-time view of global liquidity rather than end-of-day bank reports.
+- **International payouts:** Use stablecoins as the settlement leg for high-volume payouts; recipients can receive stablecoins or be paid in local currency via offramps.
+
+## Current limitations
+
+Stablecoins complement bank accounts rather than replace them. Key constraints to plan for:
+
+- **Limited non-USD liquidity:** Most stablecoin liquidity is USD-denominated; EUR and GBP liquidity is improving but thinner.
+- **Off-ramping coverage varies:** Not all markets have reliable bank offramps yet.
+- **Custody and controls:** Decide between self-custody vs institutional custody (multi-sig, insurance, governance).
+- **Systems integration:** Treasury systems may need adapters for onchain settlement data.
+- **Operational risk differs by asset and network:** Prefer regulated, 1:1 reserve-backed assets; evaluate chain uptime and fee variability.
+
+## Reconciliation and operational risk
+
+### Automated GL reconciliation
+
+Fast settlement only matters if transactions reconcile cleanly. Use transfer metadata (e.g., invoice ID, cost center, GL code) so treasury movements can auto-post back into ERP/TMS. Tempo TIP-20 supports native transfer memos designed for reconciliation: see [TIP-20 Tokens](/learn/tempo/native-stablecoins).
+
+### Controls and auditability
+
+24/7 rails require strong approval policy. Enforce role-based permissions and programmable approvals so each movement is attributable and auditable end-to-end.
 
 ## Understanding tokenized deposits vs. stablecoins
 
@@ -44,6 +79,66 @@ The main challenge for banks today is interoperability. Most tokenized deposit p
 
 Public blockchains provide this missing bridge. They allow tokenized deposits from different banks to coexist on shared infrastructure, enabling frictionless swaps between tokenized deposits and stablecoins, and supporting cross-bank liquidity movement with the same speed as stablecoin rails. Banks that issue tokenized deposits on public chains gain the interoperability corporates require, while strengthening their role at the center of onchain financial flows.
 
+## Key questions to answer
+
+Before engaging providers, answer these questions:
+
+1. **What problem are you solving?** Identify your highest-value use case: reducing FX costs, accelerating intercompany transfers, or improving cash visibility in specific regions.
+2. **Use existing stablecoins or issue your own?** USDC and USDT are liquid and widely accepted for off-ramping. Issuing your own stablecoin allows you to move value between entities while maintaining yield, without converting to money market funds.
+3. **Manage internally or via third party?** Wallet setup, custody, and liquidity provider integration can be complex, so many companies outsource to infrastructure providers like Bridge, BVNK, or ZeroHash. Some, like Ant Group, build in-house.
+
+By answering these questions, you'll be ready to define the value more clearly and begin to meet providers.
+
+## Getting started
+
+- **Assess pain points:** Where is cash trapped (weekends, slow corridors, expensive FX)?
+- **Build a business case:** Compare current fees, spreads, and delays vs stablecoin rails using your own data.
+- **Choose build vs buy:** Many teams start with infrastructure providers that handle custody, on/offramps, and compliance.
+- **Pilot a contained flow:** Start with one region or corridor and run in parallel before expanding.
+
+## FAQs
+
+### Do I have to hold and manage stablecoins?
+
+No. You can use stablecoins purely as a settlement rail without holding balances directly. Third parties can manage the stablecoins outside your organization, while your existing bank relationships remain central to day-to-day operations. Over time, you may choose to hold stablecoins directly and expand into other onchain assets such as tokenized treasuries.
+
+### Will my bank support this?
+
+Many banks are actively developing stablecoin and tokenized deposit capabilities, and many more are planning to launch through the coming year. In the meantime, infrastructure providers such as Bridge and BVNK enable seamless movement between traditional bank accounts and stablecoins.
+
+### Who do I need to integrate with?
+
+There are two common approaches. In a buy model, a provider manages licensing, custody, wallets, and blockchain connectivity, so you may never interact with stablecoins directly. In a build model, you integrate directly with custodians, wallet providers, and blockchain networks. The right choice depends on your timeline, internal resources, and how much control you need.
+
+### What about regulatory and audit concerns?
+
+Any treasury implementation must meet regulatory expectations and withstand internal and external audit scrutiny.
+
+- **Regulatory status:** In the US, the GENIUS Act provides a federal framework. The EU's MiCA regulations are in force. The UAE and Singapore have established frameworks, and many jurisdictions expect to publish theirs in the coming year.
+- **Audit trail:** Onchain transactions are permanently recorded with timestamps and cryptographic proof.
+- **Compliance:** Work with providers offering transaction monitoring, sanctions screening, and AML tools for blockchain.
+- **External auditor comfort:** Major issuers like Circle (USDC) and Paxos (USDP) publish monthly attestations. Stablecoin-as-a-service providers like Agora, Bridge, and M0 offer similar capabilities for custom issuance.
+
+### What are the risk considerations?
+
+The primary risks associated with stablecoin-based treasury flows fall into three categories:
+
+- **Counterparty risk:** Stablecoin issuer solvency and infrastructure provider stability. Mitigation: Stablecoins backed 1:1 by HQLA under regulatory frameworks like GENIUS represent lower risk.
+- **Operational risk:** Variable fee structures and network performance across blockchains. Mitigation: Select providers offering fee consistency and evaluate reliability alongside speed.
+- **Regulatory risk:** Potential restrictions in certain jurisdictions. Mitigation: Start with dollar-based movements between your own entities before expanding to external use cases.
+
+### How does this integrate with our ERP/TMS?
+
+Most TMS platforms (e.g. Kyriba, TreasuryXpress, GTreasury) support native integrations or API connections. A typical flow would look like this:
+
+1. Payment instruction originates in ERP/TMS
+2. Instruction routes to a stablecoin infrastructure provider
+3. Settlement occurs onchain
+4. Confirmation and settlement data flows back to TMS
+5. Accounting entries are generated automatically
+
+Tempo offers ISO 20022-compatible messaging, simplifying integration for teams already working with SWIFT MT messages.
+
 ## Building with Tempo
 
 Tempo provides the neutral, high-performance infrastructure required for tokenized deposits and stablecoins to operate side-by-side. For treasury teams looking to modernize their liquidity stack, the challenge is often interoperability between these assets and existing banking systems. We collaborate with financial institutions and enterprises to model how these assets can coexist within your current treasury operations. Let's examine how onchain rails can fit into your broader liquidity management strategy.
@@ -60,5 +155,28 @@ Tempo provides the neutral, high-performance infrastructure required for tokeniz
     to="/quickstart/integrate-tempo"
     icon="lucide:rocket"
     title="Build on Tempo"
+  />
+</Cards>
+
+## Related reading
+
+<Cards>
+  <Card
+    title="Deep dive: Stablecoins for Corporate Treasury"
+    description="Use cases (intercompany, cash positioning), limitations, and risk considerations."
+    to="https://tempo.xyz/blog/corporate-treasury"
+    icon="lucide:book-open"
+  />
+  <Card
+    title="Global payouts"
+    description="How stablecoins simplify outbound payouts and reduce cost 60-80%."
+    to="/learn/use-cases/global-payouts"
+    icon="lucide:send"
+  />
+  <Card
+    title="TIP-20 Tokens"
+    description="Transfer memos and compliance features that make reconciliation easier."
+    to="/learn/tempo/native-stablecoins"
+    icon="lucide:tag"
   />
 </Cards>

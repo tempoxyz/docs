@@ -67,8 +67,8 @@ export function GrantIssuerRole() {
       onClick={handleGrantIssuer} // [!code hl]
       type="button" // [!code hl]
     > {/* [!code hl] */}
-      {grant.isPending ? 'Granting...' : 'Grant Issuer Role'} {/* [!code hl] */}
-    </button> // [!code hl]
+    {grant.isPending ? 'Granting...' : 'Grant Issuer Role'} {/* [!code hl] */}
+    </button> {/* [!code hl] */}
   )
 }
 ```
@@ -169,7 +169,7 @@ export function MintToken() {
         onClick={handleMint} // [!code hl]
         type="button" // [!code hl]
       > {/* [!code hl] */}
-        {mint.isPending ? 'Minting...' : 'Mint'} {/* [!code hl] */}
+      {mint.isPending ? 'Minting...' : 'Mint'} {/* [!code hl] */}
       </button> {/* [!code hl] */}
     </>
   )
@@ -328,7 +328,7 @@ export function BurnToken() {
         onClick={handleBurn} // [!code hl]
         type="button" // [!code hl]
       > {/* [!code hl] */}
-        {burn.isPending ? 'Burning...' : 'Burn'} {/* [!code hl] */}
+      {burn.isPending ? 'Burning...' : 'Burn'} {/* [!code hl] */}
       </button> {/* [!code hl] */}
     </>
   )

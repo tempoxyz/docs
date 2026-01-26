@@ -112,7 +112,7 @@ function Buy() {
   return (
     <div>
       <div>Quote: {formatUnits(quote, 6)}</div>
-      <div>Max input (0.5% slippage): {formatUnits(maxAmountIn, 6)}</div> // [!code ++]
+      <div>Max input (0.5% slippage): {formatUnits(maxAmountIn, 6)}</div> {/* [!code ++] */}
     </div>
   )
 }
@@ -145,7 +145,7 @@ function Sell() {
   return (
     <div>
       <div>Quote: {formatUnits(quote, 6)}</div>
-      <div>Min output (0.5% slippage): {formatUnits(minAmountOut, 6)}</div> // [!code ++]
+      <div>Min output (0.5% slippage): {formatUnits(minAmountOut, 6)}</div> {/* [!code ++] */}
     </div>
   )
 }
@@ -200,9 +200,9 @@ function Buy() {
           }), // [!code ++]
         ] // [!code ++]
         sendCalls.sendCallsSync({ calls }) // [!code ++]
-      }}> // [!code ++]
-        Approve Spend // [!code ++]
-      </button> // [!code ++]
+      }}> {/* [!code ++] */}
+        Approve Spend {/* [!code ++] */}
+      </button> {/* [!code ++] */}
     </div>
   )
 }
@@ -249,9 +249,9 @@ function Sell() {
           }), // [!code ++]
         ] // [!code ++]
         sendCalls.sendCallsSync({ calls }) // [!code ++]
-      }}> // [!code ++]
-        Approve Spend // [!code ++]
-      </button> // [!code ++]
+      }}> {/* [!code ++] */}
+        Approve Spend {/* [!code ++] */}
+      </button> {/* [!code ++] */}
     </div>
   )
 }

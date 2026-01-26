@@ -246,13 +246,13 @@ export function CreateStablecoin() {
       </form>
 
       {create.data && ( // [!code ++]
-        <div> {/* // [!code ++] */}
-          {create.data.name} created successfully! {/* // [!code ++] */}
-          <a href={`https://explore.tempo.xyz/tx/${create.data.receipt.transactionHash}`}> {/* // [!code ++] */}
-            View receipt {/* // [!code ++] */}
-          </a> {/* // [!code ++] */}
-        </div> /* // [!code ++] */
-      )} {/* // [!code ++] */}
+        <div> {/* [!code ++] */}
+          {create.data.name} created successfully! {/* [!code ++] */}
+          <a href={`https://explore.tempo.xyz/tx/${create.data.receipt.transactionHash}`}> {/* [!code ++] */}
+            View receipt {/* [!code ++] */}
+          </a> {/* [!code ++] */}
+        </div> {/* [!code ++] */}
+      )} {/* [!code ++] */}
     </div>
   )
 }
@@ -298,7 +298,7 @@ We can use the `isPending` property from the `useCreateSync` hook to show pendin
   disabled={create.isPending} // [!code ++]
   type="submit"
 >
-  {create.isPending ? 'Creating...' : 'Create'} {/* // [!code ++] */}
+  {create.isPending ? 'Creating...' : 'Create'} {/* [!code ++] */}
 </button>
 ```
 
@@ -314,7 +314,7 @@ export function CreateStablecoin() {
   // ...
 
   if (create.error) // [!code ++]
-    return <div>Error: {create.error.message}</div> // [!code ++]
+    return <div>Error: {create.error.message}</div> {/* [!code ++] */}
 
   // ...
 }

@@ -6,8 +6,15 @@ import { KeyManager, webAuthn } from 'wagmi/tempo'
 
 const feeToken = '0x20c0000000000000000000000000000000000001'
 
+const rpId = (() => {
+  const hostname = globalThis.location?.hostname
+  if (!hostname) return undefined
+  const parts = hostname.split('.')
+  return parts.length > 2 ? parts.slice(-2).join('.') : hostname
+})()
+
 export function getConfig(options: getConfig.Options = {}) {
-  const { multiInjectedProviderDiscovery } = options
+  const { multiInjectedProviderDiscovery = false } = options
   return createConfig({
     batch: {
       multicall: false,
@@ -22,7 +29,8 @@ export function getConfig(options: getConfig.Options = {}) {
     connectors: [
       webAuthn({
         grantAccessKey: true,
-        keyManager: KeyManager.localStorage(),
+        keyManager: KeyManager.http('https://keys.tempo.xyz'),
+        rpId,
       }),
     ],
     multiInjectedProviderDiscovery,

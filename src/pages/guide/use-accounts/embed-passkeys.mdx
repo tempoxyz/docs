@@ -177,10 +177,10 @@ export function Example() {
 
   if (account.address) // [!code ++]
     return ( // [!code ++]
-      <div> {/* // [!code ++] */}
-        <div>{account.address.slice(0, 6)}...{account.address.slice(-4)}</div> {/* // [!code ++] */}
-        <button onClick={() => disconnect.disconnect()}>Sign out</button> {/* // [!code ++] */}
-      </div> // [!code ++]
+      <div> {/* [!code ++] */}
+        <div>{account.address.slice(0, 6)}...{account.address.slice(-4)}</div> {/* [!code ++] */}
+        <button onClick={() => disconnect.disconnect()}>Sign out</button> {/* [!code ++] */}
+      </div> {/* [!code ++] */}
     ) // [!code ++]
 
   return (
@@ -262,7 +262,7 @@ export function Example() {
   const disconnect = useDisconnect()
 
   if (connect.isPending) // [!code ++]
-    return <div>Check prompt...</div> // [!code ++]
+    return <div>Check prompt...</div> {/* [!code ++] */}
   return (/* ... */)
 }
 ```
@@ -290,7 +290,7 @@ export function Example() {
   const disconnect = useDisconnect()
 
   if (connect.error) // [!code ++]
-    return <div>Error: {connect.error.message}</div> // [!code ++]
+    return <div>Error: {connect.error.message}</div> {/* [!code ++] */}
   return (/* ... */)
 }
 ```
