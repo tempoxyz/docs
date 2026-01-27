@@ -200,7 +200,7 @@ This is a table of the most important metrics to watch on your validator node:
 | `consensus_engine_marshal_finalized_height` | Latest finalized height your node is aware of | Warning when it hasn't increased in 1 hour, critical when it hasn't increased in 3 hours | Your node is aware of the latest finalized height |
 | `consensus_engine_marshal_processed_height` | Latest height your node has processed | Critical when it hasn't increased in an hour, warning when it's behind finalized height | Your node is processing blocks |
 | `consensus_network_spawner_connections` | Number of active peers on the consensus layer | Warning when it's below the expected validator count, critical when it's 0 | Your node is connected to the consensus layer |
-| `consensus_engine_consensus_voter_inbound_messages_total` | Number of inbound messages related to voting on the consensus layer | Warning when it's not increasing and your node is synced | Your node is receiving voting messages from the consensus layer |
+| `consensus_engine_epoch_manager_simplex_batcher_inbound_messages_total` | Number of inbound messages related to voting on the consensus layer | Warning when it's not increasing and your node is synced | Your node is receiving voting messages from the consensus layer |
 | `reth_sync_checkpoint` | Current sync progress | Warning on when there are no changes in the `Finish` stage | Your node is syncing with the network |
 | `reth_payloads_resolved_block` | Number of built and resolved payloads | Warning when it hasn't increased in 12 hours | Your node has built and resolved blocks |
 
