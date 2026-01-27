@@ -17,6 +17,12 @@ flowchart TD
     B -->|+1 epoch| C["Syncer and Player"]
     C -->|"+1 epoch, receives share"| D["Syncer<br/>Player<br/>Dealer"]
     D -->|"once fully synced"| E["Voter ↔ Proposer"]
+
+    click A "#not-a-participant-e"
+    click B "#syncer-epoch-e1"
+    click C "#player-epoch-e2"
+    click D "#dealer-epoch-e3"
+    click E "#dealer-epoch-e3"
 ```
 
 Currently, on mainnet and testnet, the epoch length is around 3 hours, which means that your validator will transition through these states approximately every 3 hours. If the epoch length ever changes, the transition times will also change.
