@@ -7,6 +7,19 @@ import { vocs } from 'vocs/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  resolve: {
+    alias: [
+      { find: 'dayjs', replacement: 'dayjs/esm' },
+      { find: 'dayjs/dayjs.min.js', replacement: 'dayjs/esm' },
+      {
+        find: /^@braintree\/sanitize-url$/,
+        replacement: path.resolve(process.cwd(), 'src/shims/sanitize-url.ts'),
+      },
+    ],
+  },
+  optimizeDeps: {
+    include: ['@braintree/sanitize-url'],
+  },
   plugins: [syncTips(), vocs(), react(), tempoNode()],
 })
 

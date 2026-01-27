@@ -11,29 +11,43 @@ This guide covers day-to-day operations for running a Tempo validator in product
 
 Your validator moves through different states during operation. Here's how to identify each.
 
+```mermaid
+flowchart TD
+    A[Inactive] -->|epoch ends| B["Syncer<br/>The validator starts syncing"]
+    B -->|+1 epoch| C["Syncer and Player"]
+    C -->|"+1 epoch, receives share"| D["Syncer<br/>Player<br/>Dealer"]
+    D -->|"once fully synced"| E["Voter ↔ Proposer"]
+```
+
 ### DKG ceremony
 
 DKG (Distributed Key Generation) ceremonies run approximately every 3 hours to generate threshold signing shares.
 
-#### Non-dealer / non-player
+#### Not a participant (E)
 
-Your validator is not participating in the current DKG ceremony. This is normal if:
-- You're a new validator waiting to join the next ceremony
-- The ceremony hasn't started yet
+Your validator isn't considered a peer by validators yet. This is because the validator hasn't been refreshed in the current epoch yet.
 
-#### Player
+#### Syncer (epoch E+1)
+
+Your validator is now considered a peer by validators. It's syncing with the network and will be considered a player in the next 
+
+#### Player (epoch E+2)
 
 Your validator is receiving consensus signing shares from dealers during the ceremony.
 
-#### Dealer
+#### Dealer (epoch E+3)
 
-Your validator is distributing consensus signing shares to other validators during the ceremony.
+Your validator is distributing consensus signing shares to other validators during the ceremony. Once your node is fully synced up, it will also
+be able to propose blocks and vote for other validators' proposed blocks.
 
-#### Checking DKG state
+#### Checking your validator's state
 
-Monitor these metrics to track DKG participation:
+Monitor these metrics to track your validator's state:
 
 ```bash
+# Is your validator connected to other peers (i.e. is it considered a syncer)? This should be >0 in at most 3 hours after your validator's addition
+curl -s localhost:8002/metrics | grep consensus_network_spawner_connections
+
 # How many times YOUR node has been a dealer (distributing shares) - this metric should be >0 over 6 hours
 curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_how_often_dealer
 
