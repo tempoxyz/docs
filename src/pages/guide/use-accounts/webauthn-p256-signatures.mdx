@@ -20,6 +20,20 @@ WebAuthn signatures include authenticator data from biometric devices. Identifie
 
 The verification data contains information from the authenticator (device metadata, user presence flags, etc.).
 
+## Address derivation
+
+### secp256k1
+
+Standard Ethereum address derivation: `keccak256(uncompressed_public_key)[12:32]`.
+
+### P256 and WebAuthn
+
+Both P256 and WebAuthn derive addresses from the public key coordinates: `keccak256(pub_key_x || pub_key_y)[12:32]`.
+
+:::info[Shared address space]
+P256 and WebAuthn use identical address derivation, so the same key pair produces the same address regardless of signature type. A passkey can authorize transactions via raw P256 signatures and vice versa.
+:::
+
 ---
 
 :::info
