@@ -4,7 +4,11 @@ description: Configure and run a Tempo validator node. Generate signing keys, pa
 
 # Running a validator node
 
-Validator nodes are responsible for securing the network by validating blocks and the transactions within them. Tempo uses [Threshold Simplex](https://docs.rs/commonware-consensus/0.0.61/commonware_consensus/threshold_simplex/index.html) to achieve consensus between validators.
+:::info
+The management of the active validator set is currently permissioned by the Tempo team. If you are interested in becoming a validator, please [get in touch](mailto:partners@tempo.xyz) with the Tempo team.
+:::
+
+Validator nodes secure Tempo by validating blocks and transactions, then using [Threshold Simplex](https://docs.rs/commonware-consensus/0.0.61/commonware_consensus/threshold_simplex/index.html) to reach consensus. They distribute signing shares among themselves to collectively sign block approvals and finalizations.
 
 ## Cryptographic key hierarchy
 
@@ -12,7 +16,7 @@ All validators have two kinds of keys:
 * signing key - this is an ED25519 keypair used to identify your validator amongst others
 * signing share - this is a share of a BLS12-381 keypair used to sign block notarizations and finalizations
 
-The signing key is static and can only be rotated by removing and re-creating a validator on-chain. The signing share is dynamic and is updated periodically on each DKG ceremony. Once updated, it will be saved to disk. Currently, the DKG ceremony is scheduled to run on-chain every ~48 hours.
+The signing key is static and can only be rotated by removing and re-creating a validator on-chain. The signing share is dynamic and is updated periodically on each DKG ceremony. Once updated, it will be saved to disk. Currently, the DKG ceremony is scheduled to run on-chain every ~3 hours.
 
 ## Generating a signing key
 
@@ -32,16 +36,14 @@ The public key should match the output of the `generate-private-key` command.
 
 ## Running the validator
 
-:::info
-The management of the active validator set is currently permissioned by the Tempo team. If you are interested in becoming a validator, please [get in touch](mailto:partners@tempo.xyz) with the Tempo team.
-:::
-
 The process for running a validator node is very similar to [running a full node](/guide/node/rpc). 
 
-You should start by downloading the latest snapshot using `tempo download` and then running the validator node as such:
+You should start by downloading the latest snapshot using `tempo download --chain <moderato|mainnet>`. Downloading the snapshot allows your validator to start participating in consensus much faster.
+Once you've downloaded the snapshot and have been whitelisted on-chain, you can proceed to run the validator node as such:
 
 ```bash
 tempo node --datadir <datadir> \
+    --chain <moderato|mainnet> \
     --port 30303 \
     --discovery.addr 0.0.0.0 \
     --discovery.port 30303 \
@@ -51,7 +53,7 @@ tempo node --datadir <datadir> \
 
 The notable difference between RPC nodes and validator nodes is the omission of the `--follow` argument and the addition of the `--consensus.signing-key` and `--consensus.fee-recipient` arguments. The fee recipient is the address that will receive transaction fees in your validators' proposed blocks.
 
-Once your node is up, it may not start syncing immediately. This is because your node might not be part of the active set. In most cases, your validator will enter the active set in 48-72 hours after the on-chain addition of the validator identity.
+Once your node is up, it may not start syncing immediately. This is because your node might not be part of the active set. In most cases, your validator will enter the active set in under 6 hours after the on-chain addition of the validator identity.
 
 ## Troubleshooting
 
