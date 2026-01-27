@@ -19,9 +19,12 @@ flowchart TD
     D -->|"once fully synced"| E["Voter ↔ Proposer"]
 ```
 
+Currently, on mainnet and testnet, the epoch length is around 3 hours, which means that your validator will transition through these states approximately every 3 hours. If the epoch length ever changes, the transition times will also change.
+
 #### Not a participant (E)
 
-Your validator isn't considered a peer by validators yet. This is because the validator hasn't been refreshed in the current epoch yet.
+Epoch E marks the addition of your validator to the on-chain validator configuration smart contract. Your validator isn't considered a peer by validators yet. This is because the validator hasn't been refreshed in the current epoch yet. It is normal that no height metrics progress during this period, your node has to be considered
+a syncer to receive blocks.
 
 #### Syncer (epoch E+1)
 
@@ -57,7 +60,7 @@ curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_ceremony_succ
 curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_ceremony_failures_total
 ```
 
-If `how_often_dealer` or `how_often_player` is increasing, your node is actively participating in DKG ceremonies.
+If `how_often_dealer` or `how_often_player` is increasing, your node is actively participating in DKG ceremonies. After your validator has been added to the network, you should alert on these metrics, as they indicate that your validator is actively participating in the network.
 
 ### Consensus
 
@@ -125,7 +128,7 @@ The node will finish processing the current block before shutting down. Avoid us
 ### Resetting your validator's data
 
 :::danger
-**You cannot reset a validator's data and continue with the same identity.** Doing so risks inconsistent voting, which can cause irrecoverable network safety failures. See [Recovery procedures](/guide/node/troubleshoot-validator#recovery-procedures) for the correct process.
+**You cannot reset a validator's data and continue with the same identity.** Doing so risks inconsistent voting, which can cause irrecoverable network safety failures.
 :::
 
 If you need to reset your validator's data, you must rotate to a new validator identity. This requires coordinating with the Tempo team to deactivate your old identity and register a new one.
@@ -145,7 +148,7 @@ tempo consensus calculate-public-key --private-key <new-key-path>
 
 2. Contact the Tempo team to update your validator's public key on-chain
 
-3. Once confirmed, update your node configuration to use the new key and restart
+3. Once confirmed, update your node configuration to use the new key and restart. Once the node is running, your validator will go through the [validator lifecycle](/guide/node/operate-validator#validator-states).
 
 :::warning
 The old validator identity must be deactivated before the new one is activated
@@ -154,7 +157,7 @@ The old validator identity must be deactivated before the new one is activated
 ### Signing Share Recovery
 
 :::danger
-**You cannot reset a validator's data and continue with the same identity.** Doing so risks inconsistent voting, which can cause irrecoverable network safety failures. See [Recovery procedures](/guide/node/troubleshoot-validator#recovery-procedures) for the correct process.
+**You cannot reset a validator's data and continue with the same identity.** Doing so risks inconsistent voting, which can cause irrecoverable network safety failures. 
 :::
 
 If you lose your signing share (stored on the database in `<datadir>/consensus/`), you will need to rotate to a new validator identity. This requires coordinating with the Tempo team to deactivate your old identity and register a new one.
@@ -172,6 +175,12 @@ sudo journalctl -u tempo | sed 's/\x1b\[[0-9;]*m//g' | grep "error"
 
 # Or disable colors at runtime
 RUST_LOG_STYLE=never tempo node ...
+```
+
+If you're using Loki, you can also use the `decolorize` filter to strip colors:
+
+```logql
+{job="tempo-node"} | decolorize
 ```
 
 ### Log Levels
