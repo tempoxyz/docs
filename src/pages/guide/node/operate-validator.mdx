@@ -9,7 +9,7 @@ This guide covers day-to-day operations for running a Tempo validator in product
 
 ## Validator states
 
-Your validator moves through different states during operation. Here's how to identify each.
+Your validator moves through different states during operation. The transitions will happen only once on your validator's creation. Every state transition will happen on epoch boundaries in the happy case.
 
 ```mermaid
 flowchart TD
@@ -18,10 +18,6 @@ flowchart TD
     C -->|"+1 epoch, receives share"| D["Syncer<br/>Player<br/>Dealer"]
     D -->|"once fully synced"| E["Voter ↔ Proposer"]
 ```
-
-### DKG ceremony
-
-DKG (Distributed Key Generation) ceremonies run approximately every 3 hours to generate threshold signing shares.
 
 #### Not a participant (E)
 
