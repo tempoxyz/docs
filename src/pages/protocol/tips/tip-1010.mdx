@@ -4,7 +4,7 @@ title: Mainnet Gas Parameters
 description: Initial gas parameters for Tempo mainnet launch including base fee pricing, payment lane capacity, and transaction gas limits.
 authors: Dankrad Feist @dankrad
 status: Approved
-related: TIP-1000, Payment Lane Specification
+related: TIP-1000, Payment Lane Specification, Sub block Specification
 protocolVersion: T1
 ---
 
@@ -31,14 +31,14 @@ The parameters defined in this TIP represent the initial mainnet configuration a
 
 ## Base Fee
 
-**Value**: `2 × 10^10`
+**Value**: `2 × 10^10` wei (20 gwei)
 
 **Rationale**:
 - A standard TIP-20 transfer costs approximately 50,000 gas
-- Fee calculation: `gas_used × base_fee / 10^12` (the 10^12 denominator is an adjustment Tempo uses when setting gas fees; see [fee units](/protocol/fees/spec-fee#fee-units))
-- At this base fee: `50,000 × 2 × 10^10 / 10^12 = 1000` microdollars, or `1000 / 10^6 = $0.001` (0.1 cent per transfer)
+- At 20 gwei base fee: `50,000 × 20 × 10^9 = 10^15 wei = 0.001 USD` (assuming 1 ETH = $1000 for unit conversion reference)
+- This targets approximately **0.1 cent per TIP-20 transfer**
 
-**Note**: This is a fixed base fee; Tempo does not use EIP-1559 to adjust the base fee. However, if blocks are full, transactions may need to include a priority fee to be included, which could result in transfers costing more than $0.001.
+**Note**: The base fee may fluctuate based on network demand through the existing EIP-1559-style mechanism. This value represents the target equilibrium base fee.
 
 ## Payment Lane Gas Limit
 
@@ -54,7 +54,7 @@ The parameters defined in this TIP represent the initial mainnet configuration a
 - Complex contract interactions use the general gas limit instead
 
 :::info
-**Shared capacity model**: The payment lane is non-dedicated. General transactions consume from the same 500M total block gas limit, reducing the remaining capacity available for payment transactions. However, general transactions are capped at `general_gas_limit` (30M), guaranteeing that at least 470M gas remains available for payments even under maximum general transaction load.
+**Shared capacity model**: The payment lane is non-dedicated. General and payment transactions selected by the proposer share the non-shared gas budget (`block_gas_limit - shared_gas_limit` = 450M). General transactions are capped at `general_gas_limit` (30M), guaranteeing that at least 420M gas remains available for proposer payment transactions. The remaining 50M (`shared_gas_limit`) is reserved for validator subblocks as defined in the Sub-block Specification.
 :::
 
 ## Main Transaction Gas Limit
@@ -93,19 +93,21 @@ The parameters defined in this TIP represent the initial mainnet configuration a
 
 | Parameter | Value | Purpose |
 |-----------|-------|---------|
-| Base fee | `2 × 10^10` | Target 0.1 cent per TIP-20 transfer |
-| Total block gas limit | 500,000,000 gas/block | Shared capacity; supports ~20,000 TPS for payments |
-| General gas limit | 30,000,000 gas/block | General contract interactions |
+| Base fee | `2 × 10^10` wei (20 gwei) | Target 0.1 cent per TIP-20 transfer |
+| Total block gas limit | 500,000,000 gas/block | Total block capacity |
+| Non-shared gas limit | 450,000,000 gas/block | Proposer pool transactions |
+| Shared gas limit | 50,000,000 gas/block | Validator subblocks (see Sub-block Specification) |
+| General gas limit | 30,000,000 gas/block | Cap for non-payment transactions |
 | Transaction gas cap | 30,000,000 gas | Allow max-size contract deployment |
 
 ## Economic Analysis
 
-### Cost of Attack
+### Fee Revenue Projections
 
-To fill up the payment lane at the base fee, an attacker would need to spend:
-- 10,000 transfers per block × $0.001 per transfer = $10 per block
-- At 2 blocks/second: $20/second
-- Daily: ~$1,728,000
+At full payment lane utilization:
+- 10,000 transfers per block × 50,000 gas × 20 gwei = 10^16 wei per block
+- At 2 blocks/second: 2 × 10^16 wei/second = ~$0.02/second (at reference pricing)
+- Daily: ~$1,728 in base fees from payment lane alone
 
 ### Cost Per Operation
 
@@ -125,7 +127,7 @@ To fill up the payment lane at the base fee, an attacker would need to spend:
 
 2. **Payment Lane Priority**: Transactions qualifying for the payment lane MUST be able to consume up to the remaining block gas capacity (total gas limit minus gas already consumed by general transactions).
 
-3. **Shared Gas Pool**: The payment lane and general transactions share a common block gas limit (500M). General transactions are additionally constrained by `general_gas_limit` (30M), ensuring payment transactions always have access to at least 470M gas.
+3. **Shared Gas Pool**: Proposer pool transactions (payment and general) share the non-shared gas budget (450M). General transactions are additionally constrained by `general_gas_limit` (30M). The remaining 50M is reserved for validator subblocks.
 
 4. **Transaction Gas Cap**: No single transaction MUST be allowed to consume more than the transaction gas cap (30,000,000 gas).
 
@@ -145,7 +147,7 @@ These parameters are configured at the chainspec level and applied during block 
 
 1. **Base fee targeting**: Verify that at equilibrium, TIP-20 transfers cost approximately 0.1 cent
 2. **Payment lane capacity**: Verify that 10,000 TIP-20 transfers can be included in a single block
-3. **General gas limit**: Verify that general transactions are correctly bounded by the 30M gas limit
+3. **General gas limit**: Verify that general transactions are correctly bounded by the 25M gas limit
 4. **Transaction gas cap**: Verify that transactions exceeding 30M gas are rejected
 5. **Contract deployment**: Verify that a 24KB contract can be deployed within the transaction gas cap
 6. **Lane separation**: Verify that payment lane and general transactions are independently tracked
