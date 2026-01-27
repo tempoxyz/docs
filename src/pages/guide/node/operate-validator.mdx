@@ -203,3 +203,31 @@ This is a table of the most important metrics to watch on your validator node:
 | `consensus_engine_consensus_voter_inbound_messages_total` | Number of inbound messages related to voting on the consensus layer | Warning when it's not increasing and your node is synced | Your node is receiving voting messages from the consensus layer |
 | `reth_sync_checkpoint` | Current sync progress | Warning on when there are no changes in the `Finish` stage | Your node is syncing with the network |
 | `reth_payloads_resolved_block` | Number of built and resolved payloads | Warning when it hasn't increased in 12 hours | Your node has built and resolved blocks |
+
+## Grafana Dashboard
+
+We provide a pre-built Grafana dashboard for monitoring your validator. It visualizes key metrics including node status, sync progress, voting activity, consensus latency, and execution performance.
+
+### Importing the dashboard
+
+1. Download the dashboard JSON from the [Tempo repository](https://github.com/tempoxyz/tempo/blob/main/contrib/grafana/dashboards/validator-health.json)
+
+2. In Grafana, go to **Dashboards → Import**
+
+3. Either paste the JSON content or upload the file
+
+4. Select your Prometheus and Loki datasources when prompted
+
+5. Click **Import**
+
+### Dashboard variables
+
+The dashboard uses these template variables:
+
+| Variable | Description |
+| --- | --- |
+| `datasource` | Prometheus datasource |
+| `loki_ds` | Loki datasource (for log-based panels) |
+| `network_name` | Filter by network/validator job name |
+
+Make sure your Prometheus is scraping metrics from your validator's metrics endpoint (default: `localhost:8002/metrics`).
