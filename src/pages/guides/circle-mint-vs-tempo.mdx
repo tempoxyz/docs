@@ -1,0 +1,153 @@
+---
+title: "Circle Mint vs Tempo"
+description: "Compare Circle's USDC infrastructure with Tempo's stablecoin-native blockchain. Understand when to use each for payments and treasury."
+---
+
+# Circle Mint vs Tempo
+
+Circle Mint is Circle's institutional platform for minting and redeeming USDC. Tempo is a blockchain designed for stablecoin payments. They serve different purposes but can work together. This guide explains when to use each.
+
+## What They Are
+
+### Circle Mint
+
+Circle Mint is an institutional service for:
+- Converting USD to USDC (minting)
+- Converting USDC to USD (redeeming)
+- Moving USDC between supported blockchains
+- Cross-Chain Transfer Protocol (CCTP) access
+
+It's infrastructure for getting in and out of USDC, not a blockchain.
+
+### Tempo
+
+Tempo is a blockchain for:
+- Sending and receiving stablecoins
+- Swapping between stablecoins
+- Paying transaction fees in stablecoins
+- Processing payments with metadata
+
+It's infrastructure for using stablecoins once you have them.
+
+## Comparison Table
+
+| Feature | Circle Mint | Tempo |
+|---------|-------------|-------|
+| Primary function | USDC mint/redeem | Stablecoin payments |
+| Transaction fees | Bank wire fees | ~$0.001 |
+| Settlement time | 1-2 business days | ~0.5 seconds |
+| Minimum amounts | Typically $100K+ | None |
+| KYC required | Yes (institutional) | No |
+| Supported stablecoins | USDC only | pathUSD, AlphaUSD, BetaUSD, ThetaUSD |
+| Cross-chain transfer | Yes (CCTP) | Bridge support |
+| Native DEX | No | Yes |
+| Payment metadata | No | Yes |
+
+## Circle Mint Strengths
+
+### Direct USD Access
+
+Circle Mint provides institutional access to mint USDC directly from USD and redeem back to USD. This is the primary on/off ramp for large USDC operations.
+
+### Cross-Chain Transfer Protocol
+
+Move USDC natively between supported chains (Ethereum, Solana, Base, Arbitrum, etc.) through CCTP. USDC is burned on one chain and minted on another—no bridged tokens.
+
+### Institutional Grade
+
+Full compliance, KYC/AML, and audit trails for regulated entities. Built for banks, fintechs, and large enterprises.
+
+### Circle Account Services
+
+Additional services like yield, custody, and API access for programmatic treasury operations.
+
+## Tempo Strengths
+
+### Stablecoin-Native Payments
+
+Purpose-built for moving stablecoins between parties. Transaction fees are ~$0.001 paid in stablecoins—no volatile gas tokens.
+
+### Instant Settlement
+
+Transactions finalize in ~0.5 seconds versus 1-2 business days for Circle Mint redemptions. Critical for payment operations.
+
+### Multi-Stablecoin Support
+
+Use native USD stablecoins like pathUSD, AlphaUSD, BetaUSD, and ThetaUSD. Swap between them natively. Note: USDC is not currently available on Tempo—Circle Mint only handles USDC on chains where Circle has deployed it.
+
+### No Minimums or KYC for Payments
+
+Any amount, any user. Circle Mint targets institutional clients with significant minimums.
+
+### Payment Metadata
+
+Attach invoice references, order IDs, and custom data for reconciliation.
+
+## How They Work Together
+
+Circle Mint and Tempo serve complementary roles in the broader stablecoin ecosystem:
+
+1. **Mint USDC via Circle**: Convert USD to USDC using Circle Mint on supported chains
+2. **Bridge to Tempo**: Convert USDC to Tempo's native stablecoins via bridges
+3. **Process payments on Tempo**: Send, receive, swap with sub-cent fees and instant finality
+4. **Collect and consolidate**: Aggregate payments on Tempo
+5. **Bridge back and redeem**: Move funds to supported chain, redeem via Circle Mint
+
+Note: USDC is not currently available on Tempo. This workflow requires bridging between ecosystems.
+
+## Use Cases: When to Use Each
+
+### Use Circle Mint When
+
+- Converting between USD and USDC
+- Moving USDC between chains via CCTP
+- Institutional treasury operations requiring compliance
+- Large redemptions to traditional banking
+
+### Use Tempo When
+
+- Processing stablecoin payments
+- High-volume, low-value transfers
+- Multi-stablecoin operations (pathUSD, AlphaUSD, BetaUSD, ThetaUSD)
+- Real-time settlement requirements
+- Payment reconciliation with metadata
+
+## Example: Business Payment Flow
+
+**Without Tempo:**
+1. Receive USDC on Ethereum ($5-50 gas)
+2. Accumulate payments
+3. Move to Circle Mint chain if needed
+4. Redeem to USD (1-2 days)
+
+**With Tempo:**
+1. Receive stablecoins on Tempo ($0.001 fee, instant)
+2. Swap to preferred stablecoin if needed ($0.001)
+3. Process hundreds of payments at ~$0.001 each
+4. Bridge to Ethereum when ready to redeem
+5. Redeem via Circle Mint (1-2 days)
+
+Savings: Significant on payment processing; redemption timeline unchanged.
+
+## When to Choose Tempo
+
+Tempo is the right choice for the payment layer:
+
+- **Day-to-day stablecoin operations**: Tempo's sub-cent fees and instant finality
+- **Multi-stablecoin flexibility**: Swap between pathUSD, AlphaUSD, and other native stablecoins as needed
+- **High-volume processing**: Pay $0.001 per transaction, not $5-50
+
+Circle Mint remains essential for:
+
+- **USD on/off ramp**: Getting money into and out of stablecoins
+- **Institutional compliance**: Regulated minting and redemption
+- **Cross-chain USDC**: Native CCTP transfers between major chains
+
+
+## Get Early Access
+
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
+
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities

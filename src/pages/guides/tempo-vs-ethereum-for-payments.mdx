@@ -1,0 +1,107 @@
+---
+title: "Tempo vs Ethereum for Payments"
+description: "Compare Tempo and Ethereum for payment use cases. Analyze gas fees, confirmation times, L1 vs L2 tradeoffs, and stablecoin support."
+---
+
+# Tempo vs Ethereum for Payments
+
+Ethereum pioneered programmable money and hosts the largest stablecoin ecosystem. Tempo is a newer chain purpose-built for stablecoin payments. This guide compares both for payment use cases.
+
+## Comparison Table
+
+| Feature | Ethereum L1 | Ethereum L2s | Tempo |
+|---------|-------------|--------------|-------|
+| Transaction fee | $1-50+ | $0.01-0.50 | ~$0.001 |
+| Finality | 12-15 minutes | Minutes to hours | ~0.5 seconds |
+| Gas token | ETH | ETH | Stablecoins |
+| Native stablecoin gas | No | No | Yes |
+| Payment metadata | No | No | Yes |
+| Stablecoin DEX | External | External | Native |
+| EVM compatible | Yes | Yes | Yes |
+
+## Ethereum Strengths
+
+### Largest Ecosystem
+
+Ethereum has the most stablecoin liquidity, DeFi protocols, and developer tooling. USDC and USDT originated here, and major institutions trust Ethereum's security model.
+
+### Battle-Tested Security
+
+Running since 2015, Ethereum's consensus has withstood years of adversarial conditions. Its decentralization and validator set are unmatched.
+
+### L2 Scaling Options
+
+Rollups like Arbitrum, Optimism, and Base reduce fees significantly while inheriting Ethereum's security. Users can choose their preferred tradeoff between cost and decentralization.
+
+### Composability
+
+Ethereum's DeFi ecosystem allows payments to interact with lending, trading, and yield protocols in single transactions.
+
+## Tempo Strengths
+
+### Stablecoin-Native Gas
+
+Pay fees in stablecoins. No need to hold ETH or manage volatile token balances. Your portfolio stays 100% in stable value.
+
+### Predictable Sub-Cent Fees
+
+Tempo fees are approximately $0.001 regardless of network congestion. Ethereum L1 fees spike during demand; L2 fees, while lower, still vary.
+
+### Instant Finality
+
+Transactions finalize in ~0.5 seconds with no reorg risk. Ethereum L1 requires 12-15 minutes for finality. L2s inherit this delay for withdrawals and have varying confirmation times.
+
+### Native Payment Features
+
+Tempo includes built-in payment metadata for invoice references and reconciliation—features that require custom smart contracts on Ethereum.
+
+## Use Cases: Where Each Excels
+
+### Choose Ethereum When
+
+- **DeFi integration matters**: You need lending, derivatives, or yield strategies
+- **Maximum liquidity**: Large trades requiring deep order books
+- **Established infrastructure**: Enterprise-grade custody, compliance tools
+- **Smart contract complexity**: Advanced programmable logic beyond payments
+
+### Choose Tempo When
+
+- **Pure payment operations**: Send, receive, and hold stablecoins
+- **High-volume, low-value transfers**: Micropayments, API billing, streaming payments
+- **Treasury simplicity**: Avoid managing volatile gas tokens
+- **Instant settlement required**: Point-of-sale, real-time payouts
+- **Cost predictability**: Fixed sub-cent fees for budgeting
+
+## Cost Comparison Example
+
+Sending 100 USDC:
+
+| Chain | Transaction Fee | Gas Token Required | Total Cost |
+|-------|-----------------|-------------------|------------|
+| Ethereum L1 | $5-50 | ETH (~$10 buffer) | $15-60+ |
+| Arbitrum | $0.10-0.50 | ETH (~$5 buffer) | $5-10 |
+| Base | $0.01-0.10 | ETH (~$5 buffer) | $5-10 |
+| Tempo | $0.001 | None (pay in stablecoins) | $0.001 |
+
+*Note: L2 users must also hold ETH for gas, adding complexity and exposure to price volatility.*
+
+## When to Choose Tempo
+
+Tempo is the better choice if you:
+
+- Want to avoid holding or managing ETH
+- Need predictable, sub-cent transaction fees
+- Require instant finality (not probabilistic)
+- Process high volumes of stablecoin payments
+- Value built-in payment metadata for reconciliation
+
+Ethereum remains superior for DeFi composability, maximum decentralization, and access to the broadest ecosystem of protocols.
+
+
+## Get Early Access
+
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
+
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities

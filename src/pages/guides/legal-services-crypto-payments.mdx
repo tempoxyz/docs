@@ -1,0 +1,152 @@
+---
+title: "Legal Services Crypto Payments"
+description: "Accept law firm payments with stablecoins on Tempo. ~$0.001 fees for retainers, settlements, and cross-border legal fees with full audit trails."
+---
+
+# Legal Services Crypto Payments
+
+Law firms handle large transactions that incur significant payment processing costs. Retainer deposits, settlement disbursements, and international client payments all involve wire fees and delays. Stablecoin payments on Tempo reduce these costs to approximately $0.001 per transaction.
+
+## The Legal Payment Problem
+
+| Transaction Type | Traditional Cost | Traditional Time |
+|-----------------|------------------|------------------|
+| Retainer wire deposit | $25-50 | 1-3 days |
+| Settlement disbursement | $25-50 per party | 1-3 days |
+| International client wire | $50-75 + FX | 3-5 days |
+| Trust account transfer | $25-50 | 1-3 days |
+| **Tempo transfer** | **~$0.001** | **Instant** |
+
+For a law firm processing $10M annually in client transactions:
+
+| Scenario | Traditional | Tempo |
+|----------|-------------|-------|
+| 500 retainer deposits | $15,000 | ~$0.50 |
+| 200 settlement disbursements | $10,000 | ~$0.20 |
+| 100 international transactions | $10,000 | ~$0.10 |
+| **Annual savings** | — | **~$35,000** |
+
+## Benefits for Law Firms
+
+### Instant Retainer Funding
+
+Client retainers arrive immediately. Begin work without waiting for wire clearance or check deposits to clear.
+
+### Efficient Settlement Distribution
+
+Disburse settlement funds to multiple parties in a single transaction. Each recipient receives funds instantly with full payment metadata.
+
+### International Client Access
+
+Accept payments from clients worldwide without currency conversion complexity or international wire delays.
+
+### Complete Audit Trail
+
+Every transaction is recorded on-chain with immutable timestamps. Support compliance, malpractice defense, and client accounting.
+
+### Trust Account Clarity
+
+Stablecoin transactions provide clear, timestamped records for IOLTA and client trust account management.
+
+## How It Works
+
+### Client Payment Flow
+
+1. Firm generates invoice with stablecoin payment option
+2. Client receives payment instructions with matter metadata
+3. Client sends stablecoins from their wallet
+4. Firm receives instant confirmation
+5. Payment posted to client matter with transaction reference
+
+### Payment Metadata
+
+Attach legal matter context to transactions:
+
+- Client ID
+- Matter number
+- Payment type (retainer, invoice, cost advance, settlement)
+- Invoice reference
+- Trust vs. operating designation
+- Billing attorney
+
+### Settlement Disbursement
+
+Distribute settlement funds efficiently:
+
+1. Receive settlement amount to firm escrow wallet
+2. Calculate disbursement amounts (client, firm fees, liens, costs)
+3. Execute batch payment to all parties
+4. Each recipient receives funds with settlement reference metadata
+5. Generate disbursement statement with transaction hashes
+
+## Implementation
+
+### For Client Payments
+
+1. Set up operating and trust account wallets
+2. Integrate payment option into client billing portal
+3. Generate unique payment references per matter/invoice
+4. Monitor incoming payments via webhook
+5. Auto-post to practice management system
+
+### For Settlement Processing
+
+1. Receive settlement funds to escrow wallet
+2. Configure multi-signature approval for disbursements
+3. Execute batch payment to all parties
+4. Generate closing statement with on-chain references
+5. Retain immutable record for file
+
+### For International Matters
+
+1. Accept client payments in stablecoins regardless of location
+2. Pay international experts, vendors, and co-counsel
+3. Eliminate cross-border fee accumulation on complex matters
+4. Maintain clear currency records for billing
+
+## Use Cases
+
+### Plaintiff's Litigation
+
+Receive contingency settlements and disburse to clients, medical providers, and lien holders in a single batch transaction.
+
+### Corporate Transactions
+
+Collect deal retainers and escrow funds instantly. Disburse closing funds to multiple parties upon deal completion.
+
+### International Arbitration
+
+Clients across jurisdictions pay retainers without wire delays. Pay international arbitrators and experts without correspondent bank fees.
+
+### Immigration Practice
+
+International clients pay retainers and fees without wire complexity. Particularly valuable for clients in countries with limited banking access.
+
+### Class Action Distribution
+
+Distribute settlement funds to class members efficiently with full documentation of each disbursement.
+
+## Trust Account Compliance
+
+Stablecoin trust accounts require the same controls as traditional accounts:
+
+- **Segregation**: Maintain separate wallets for client funds and operating funds
+- **Record Keeping**: Transaction metadata enables per-client accounting
+- **Audit Trail**: On-chain records provide immutable documentation
+- **Reconciliation**: Export transaction data for trust account reconciliation
+
+## Compliance Considerations
+
+- **State Bar Rules**: Ensure stablecoin handling complies with jurisdiction trust account rules
+- **AML/KYC**: Implement client verification appropriate to matter type and jurisdiction
+- **Tax Reporting**: Include transaction details for 1099 and international reporting
+- **Malpractice Coverage**: Verify coverage extends to digital asset handling
+
+
+## Get Early Access
+
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
+
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities

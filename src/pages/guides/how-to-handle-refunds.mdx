@@ -1,0 +1,434 @@
+---
+title: "How to Handle Refunds"
+description: "Implement stablecoin refund patterns on Tempo. Build reverse payments, partial refunds, and recipient validation with instant settlement and sub-cent fees."
+---
+
+# How to Handle Refunds
+
+Process refunds reliably by reversing the original payment flow—full or partial—with proper recipient validation and audit trails.
+
+## The Problem
+
+Unlike credit cards, blockchain payments are push-based and irreversible. There's no built-in chargeback or refund mechanism.
+
+## The Solution
+
+Implement refunds as new transactions from merchant to customer. Track the original payment to calculate amounts and validate recipients.
+
+## Implementation
+
+### Install Dependencies
+
+```bash
+npm install viem wagmi @tanstack/react-query
+```
+
+### Define Refund Types
+
+```typescript
+import { Address } from 'viem';
+
+type RefundStatus = 'pending' | 'processing' | 'completed' | 'failed';
+
+interface OriginalPayment {
+  txHash: `0x${string}`;
+  from: Address;
+  to: Address;
+  amount: bigint;
+  token: Address;
+  timestamp: number;
+  metadata?: Record<string, string>;
+}
+
+interface RefundRequest {
+  id: string;
+  originalPayment: OriginalPayment;
+  refundAmount: bigint;
+  reason: string;
+  status: RefundStatus;
+  refundTxHash?: `0x${string}`;
+  createdAt: Date;
+  processedAt?: Date;
+}
+```
+
+### Validate Original Payment
+
+```typescript
+import { createPublicClient, http, erc20Abi, decodeEventLog } from 'viem';
+import { tempo } from './chains';
+
+const publicClient = createPublicClient({
+  chain: tempo,
+  transport: http(),
+});
+
+async function getOriginalPayment(
+  txHash: `0x${string}`,
+  expectedRecipient: Address
+): Promise<OriginalPayment | null> {
+  const receipt = await publicClient.getTransactionReceipt({ hash: txHash });
+
+  if (receipt.status !== 'success') {
+    return null;
+  }
+
+  // Find Transfer event to our address
+  for (const log of receipt.logs) {
+    try {
+      const decoded = decodeEventLog({
+        abi: erc20Abi,
+        data: log.data,
+        topics: log.topics,
+      });
+
+      if (decoded.eventName === 'Transfer') {
+        const { from, to, value } = decoded.args as {
+          from: Address;
+          to: Address;
+          value: bigint;
+        };
+
+        if (to.toLowerCase() === expectedRecipient.toLowerCase()) {
+          const block = await publicClient.getBlock({
+            blockNumber: receipt.blockNumber,
+          });
+
+          return {
+            txHash,
+            from,
+            to,
+            amount: value,
+            token: log.address,
+            timestamp: Number(block.timestamp),
+          };
+        }
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return null;
+}
+```
+
+### Process Full Refund
+
+```typescript
+import { useWriteContract } from 'wagmi';
+
+function useRefund() {
+  const { writeContractAsync } = useWriteContract();
+
+  async function processFullRefund(
+    originalPayment: OriginalPayment
+  ): Promise<`0x${string}`> {
+    const hash = await writeContractAsync({
+      address: originalPayment.token,
+      abi: erc20Abi,
+      functionName: 'transfer',
+      args: [originalPayment.from, originalPayment.amount],
+    });
+
+    return hash;
+  }
+
+  return { processFullRefund };
+}
+```
+
+### Process Partial Refund
+
+```typescript
+function usePartialRefund() {
+  const { writeContractAsync } = useWriteContract();
+
+  async function processPartialRefund(
+    originalPayment: OriginalPayment,
+    refundAmount: bigint
+  ): Promise<{ hash: `0x${string}` } | { error: string }> {
+    // Validate refund amount
+    if (refundAmount <= 0n) {
+      return { error: 'Refund amount must be positive' };
+    }
+
+    if (refundAmount > originalPayment.amount) {
+      return { error: 'Refund cannot exceed original payment' };
+    }
+
+    const hash = await writeContractAsync({
+      address: originalPayment.token,
+      abi: erc20Abi,
+      functionName: 'transfer',
+      args: [originalPayment.from, refundAmount],
+    });
+
+    return { hash };
+  }
+
+  return { processPartialRefund };
+}
+```
+
+### Refund with Metadata
+
+```typescript
+import { encodeFunctionData, toHex } from 'viem';
+
+interface RefundMetadata {
+  originalTxHash: string;
+  reason: string;
+  refundId: string;
+  isPartial: boolean;
+}
+
+function buildRefundWithMetadata(
+  token: Address,
+  recipient: Address,
+  amount: bigint,
+  metadata: RefundMetadata
+): { to: Address; data: `0x${string}` } {
+  const transferData = encodeFunctionData({
+    abi: erc20Abi,
+    functionName: 'transfer',
+    args: [recipient, amount],
+  });
+
+  const metadataHex = toHex(JSON.stringify(metadata));
+  const dataWithMetadata = `${transferData}${metadataHex.slice(2)}` as `0x${string}`;
+
+  return { to: token, data: dataWithMetadata };
+}
+```
+
+### Refund Manager
+
+```typescript
+class RefundManager {
+  private refunds: Map<string, RefundRequest> = new Map();
+
+  async createRefundRequest(
+    originalTxHash: `0x${string}`,
+    merchantAddress: Address,
+    amount: bigint | 'full',
+    reason: string
+  ): Promise<RefundRequest | { error: string }> {
+    // Validate original payment
+    const original = await getOriginalPayment(originalTxHash, merchantAddress);
+
+    if (!original) {
+      return { error: 'Original payment not found or not to merchant' };
+    }
+
+    // Check if already refunded
+    const existingRefund = Array.from(this.refunds.values()).find(
+      (r) => r.originalPayment.txHash === originalTxHash
+    );
+
+    if (existingRefund?.status === 'completed') {
+      return { error: 'Payment already refunded' };
+    }
+
+    const refundAmount = amount === 'full' ? original.amount : amount;
+
+    if (refundAmount > original.amount) {
+      return { error: 'Refund exceeds original payment' };
+    }
+
+    const request: RefundRequest = {
+      id: crypto.randomUUID(),
+      originalPayment: original,
+      refundAmount,
+      reason,
+      status: 'pending',
+      createdAt: new Date(),
+    };
+
+    this.refunds.set(request.id, request);
+    return request;
+  }
+
+  async processRefund(
+    refundId: string,
+    sendTransaction: (to: Address, data: `0x${string}`) => Promise<`0x${string}`>
+  ): Promise<{ success: boolean; hash?: `0x${string}`; error?: string }> {
+    const request = this.refunds.get(refundId);
+
+    if (!request) {
+      return { success: false, error: 'Refund not found' };
+    }
+
+    if (request.status !== 'pending') {
+      return { success: false, error: `Invalid status: ${request.status}` };
+    }
+
+    request.status = 'processing';
+
+    try {
+      const { to, data } = buildRefundWithMetadata(
+        request.originalPayment.token,
+        request.originalPayment.from,
+        request.refundAmount,
+        {
+          originalTxHash: request.originalPayment.txHash,
+          reason: request.reason,
+          refundId: request.id,
+          isPartial: request.refundAmount < request.originalPayment.amount,
+        }
+      );
+
+      const hash = await sendTransaction(to, data);
+
+      request.status = 'completed';
+      request.refundTxHash = hash;
+      request.processedAt = new Date();
+
+      return { success: true, hash };
+    } catch (error) {
+      request.status = 'failed';
+      return { success: false, error: String(error) };
+    }
+  }
+}
+```
+
+### Recipient Validation
+
+```typescript
+async function validateRefundRecipient(
+  originalTxHash: `0x${string}`,
+  claimedRecipient: Address,
+  merchantAddress: Address
+): Promise<{ valid: boolean; actualRecipient?: Address; error?: string }> {
+  const original = await getOriginalPayment(originalTxHash, merchantAddress);
+
+  if (!original) {
+    return { valid: false, error: 'Original payment not found' };
+  }
+
+  if (original.from.toLowerCase() !== claimedRecipient.toLowerCase()) {
+    return {
+      valid: false,
+      actualRecipient: original.from,
+      error: 'Claimed recipient does not match original sender',
+    };
+  }
+
+  return { valid: true, actualRecipient: original.from };
+}
+```
+
+### API Endpoint Example
+
+```typescript
+import { Hono } from 'hono';
+
+const app = new Hono();
+const refundManager = new RefundManager();
+
+app.post('/api/refunds', async (c) => {
+  const { originalTxHash, amount, reason } = await c.req.json();
+
+  const result = await refundManager.createRefundRequest(
+    originalTxHash,
+    MERCHANT_ADDRESS,
+    amount === 'full' ? 'full' : BigInt(amount),
+    reason
+  );
+
+  if ('error' in result) {
+    return c.json({ error: result.error }, 400);
+  }
+
+  return c.json({
+    refundId: result.id,
+    status: result.status,
+    amount: result.refundAmount.toString(),
+    recipient: result.originalPayment.from,
+  });
+});
+
+app.post('/api/refunds/:id/process', async (c) => {
+  const { id } = c.req.param();
+
+  const result = await refundManager.processRefund(id, async (to, data) => {
+    // Use your wallet to send
+    return merchantWallet.sendTransaction({ to, data });
+  });
+
+  if (!result.success) {
+    return c.json({ error: result.error }, 400);
+  }
+
+  return c.json({
+    success: true,
+    transactionHash: result.hash,
+  });
+});
+```
+
+### Track Refund History
+
+```typescript
+interface RefundHistory {
+  originalPayment: OriginalPayment;
+  refunds: Array<{
+    txHash: `0x${string}`;
+    amount: bigint;
+    timestamp: number;
+    reason: string;
+  }>;
+  totalRefunded: bigint;
+  remainingAmount: bigint;
+}
+
+async function getRefundHistory(
+  originalTxHash: `0x${string}`,
+  merchantAddress: Address
+): Promise<RefundHistory | null> {
+  const original = await getOriginalPayment(originalTxHash, merchantAddress);
+  if (!original) return null;
+
+  // Query refund transactions from your database
+  const refunds = await db.refunds.findMany({
+    where: { originalTxHash },
+    orderBy: { createdAt: 'asc' },
+  });
+
+  const totalRefunded = refunds.reduce(
+    (sum, r) => sum + BigInt(r.amount),
+    0n
+  );
+
+  return {
+    originalPayment: original,
+    refunds: refunds.map((r) => ({
+      txHash: r.txHash as `0x${string}`,
+      amount: BigInt(r.amount),
+      timestamp: r.createdAt.getTime() / 1000,
+      reason: r.reason,
+    })),
+    totalRefunded,
+    remainingAmount: original.amount - totalRefunded,
+  };
+}
+```
+
+## Best Practices
+
+1. **Always validate the original payment** — Confirm the transaction exists and was sent to you
+2. **Refund to original sender only** — Never refund to a different address without verification
+3. **Track refund history** — Prevent over-refunding by tracking cumulative amounts
+4. **Include metadata** — Link refunds to original payments for audit trails
+5. **Implement approval workflows** — Require review for large refunds
+6. **Set refund windows** — Define time limits for refund eligibility
+
+
+## Get Early Access
+
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
+
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities

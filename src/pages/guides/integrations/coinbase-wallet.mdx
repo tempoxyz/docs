@@ -1,0 +1,433 @@
+---
+title: "Coinbase Wallet for Tempo"
+description: "Connect Coinbase Wallet to your Tempo dApp. Wagmi connector setup, mobile deep links, and smart wallet integration with code examples."
+---
+
+# Coinbase Wallet for Tempo
+
+[Coinbase Wallet](https://www.coinbase.com/wallet) is a self-custody wallet with over 10 million users. Integrate it with your Tempo app for seamless mobile and browser wallet connections.
+
+## Why Coinbase Wallet
+
+- **Massive user base** — Access millions of existing Coinbase Wallet users
+- **Mobile-first** — Deep linking for native mobile app connections
+- **Smart Wallet** — Passkey-based wallets with no seed phrases
+- **Coinbase integration** — Easy fiat on-ramp for new users
+
+## Installation
+
+```bash
+pnpm install @coinbase/wallet-sdk wagmi viem @tanstack/react-query
+```
+
+## Quick Start
+
+### 1. Configure Wagmi with Coinbase Wallet
+
+```typescript
+// config.ts
+import { createConfig, http } from 'wagmi'
+import { tempoTestnet } from 'wagmi/chains'
+import { coinbaseWallet } from 'wagmi/connectors'
+
+const tempo = {
+  ...tempoTestnet,
+  rpcUrls: {
+    default: { http: ['https://rpc.moderato.tempo.xyz'] }
+  }
+}
+
+export const config = createConfig({
+  chains: [tempo],
+  connectors: [
+    coinbaseWallet({
+      appName: 'My Tempo App',
+      appLogoUrl: 'https://myapp.com/logo.png',
+      preference: 'all' // 'eoaOnly' | 'smartWalletOnly' | 'all'
+    })
+  ],
+  transports: {
+    [tempo.id]: http()
+  }
+})
+```
+
+### 2. Set Up Providers
+
+```typescript
+// providers.tsx
+'use client'
+
+import { WagmiProvider } from 'wagmi'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { config } from './config'
+
+const queryClient = new QueryClient()
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    </WagmiProvider>
+  )
+}
+```
+
+### 3. Connect Button
+
+```typescript
+'use client'
+
+import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { coinbaseWallet } from 'wagmi/connectors'
+
+export function ConnectCoinbaseWallet() {
+  const { address, isConnected } = useAccount()
+  const { connect, isPending } = useConnect()
+  const { disconnect } = useDisconnect()
+
+  if (isConnected) {
+    return (
+      <div>
+        <p>Connected: {address}</p>
+        <button onClick={() => disconnect()}>Disconnect</button>
+      </div>
+    )
+  }
+
+  return (
+    <button 
+      onClick={() => connect({ connector: coinbaseWallet() })}
+      disabled={isPending}
+    >
+      {isPending ? 'Connecting...' : 'Connect Coinbase Wallet'}
+    </button>
+  )
+}
+```
+
+## Coinbase Smart Wallet
+
+Coinbase Smart Wallet uses passkeys instead of seed phrases for a more user-friendly experience.
+
+### Configure for Smart Wallet Only
+
+```typescript
+import { coinbaseWallet } from 'wagmi/connectors'
+
+const connector = coinbaseWallet({
+  appName: 'My Tempo App',
+  preference: 'smartWalletOnly' // Only show Smart Wallet option
+})
+```
+
+### Detect Wallet Type
+
+```typescript
+import { useAccount } from 'wagmi'
+
+export function WalletInfo() {
+  const { address, connector } = useAccount()
+  
+  const isSmartWallet = connector?.id === 'coinbaseWalletSDK' && 
+    connector?.type === 'coinbaseWallet'
+  
+  return (
+    <div>
+      <p>Address: {address}</p>
+      <p>Type: {isSmartWallet ? 'Smart Wallet' : 'EOA'}</p>
+    </div>
+  )
+}
+```
+
+## Mobile Deep Links
+
+### Generate Connection URL
+
+```typescript
+import { CoinbaseWalletSDK } from '@coinbase/wallet-sdk'
+
+const sdk = new CoinbaseWalletSDK({
+  appName: 'My Tempo App',
+  appLogoUrl: 'https://myapp.com/logo.png'
+})
+
+function generateMobileLink(): string {
+  const callbackUrl = encodeURIComponent(window.location.href)
+  return `https://go.cb-w.com/dapp?cb_url=${callbackUrl}`
+}
+
+export function MobileConnectButton() {
+  const handleMobileConnect = () => {
+    const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent)
+    
+    if (isMobile) {
+      window.location.href = generateMobileLink()
+    }
+  }
+
+  return (
+    <button onClick={handleMobileConnect}>
+      Open in Coinbase Wallet
+    </button>
+  )
+}
+```
+
+### Handle Deep Link Callback
+
+```typescript
+import { useEffect } from 'react'
+import { useConnect } from 'wagmi'
+import { coinbaseWallet } from 'wagmi/connectors'
+
+export function useDeepLinkHandler() {
+  const { connect } = useConnect()
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const cbAddress = params.get('cb_address')
+    
+    if (cbAddress) {
+      connect({ connector: coinbaseWallet() })
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  }, [connect])
+}
+```
+
+## Sending Transactions
+
+### Basic Transaction
+
+```typescript
+import { useSendTransaction, useWaitForTransactionReceipt } from 'wagmi'
+import { parseEther } from 'viem'
+
+export function SendTransaction() {
+  const { sendTransaction, data: hash, isPending } = useSendTransaction()
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash
+  })
+
+  const send = () => {
+    sendTransaction({
+      to: '0xRecipientAddress',
+      value: parseEther('10') // 10 USD on Tempo
+    })
+  }
+
+  return (
+    <div>
+      <button onClick={send} disabled={isPending || isConfirming}>
+        {isPending ? 'Confirming...' : isConfirming ? 'Processing...' : 'Send 10 USD'}
+      </button>
+      {isSuccess && <p>Transaction confirmed!</p>}
+    </div>
+  )
+}
+```
+
+### Contract Interaction
+
+```typescript
+import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { erc20Abi, parseUnits } from 'viem'
+
+const USDC_ADDRESS = '0x20c0000000000000000000000000000000000001'
+
+export function TransferToken() {
+  const { writeContract, data: hash, isPending } = useWriteContract()
+  const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash })
+
+  const transfer = () => {
+    writeContract({
+      address: USDC_ADDRESS,
+      abi: erc20Abi,
+      functionName: 'transfer',
+      args: ['0xRecipient', parseUnits('100', 18)]
+    })
+  }
+
+  return (
+    <button onClick={transfer} disabled={isPending || isConfirming}>
+      Transfer 100 USDC
+    </button>
+  )
+}
+```
+
+## Sign Messages
+
+### Personal Sign
+
+```typescript
+import { useSignMessage } from 'wagmi'
+
+export function SignMessage() {
+  const { signMessage, data: signature, isPending } = useSignMessage()
+
+  const sign = () => {
+    signMessage({ message: 'Sign in to My Tempo App' })
+  }
+
+  return (
+    <div>
+      <button onClick={sign} disabled={isPending}>
+        {isPending ? 'Signing...' : 'Sign Message'}
+      </button>
+      {signature && <p>Signature: {signature}</p>}
+    </div>
+  )
+}
+```
+
+### Typed Data (EIP-712)
+
+```typescript
+import { useSignTypedData } from 'wagmi'
+
+const domain = {
+  name: 'My Tempo App',
+  version: '1',
+  chainId: 42431,
+  verifyingContract: '0xContractAddress' as const
+}
+
+const types = {
+  Order: [
+    { name: 'from', type: 'address' },
+    { name: 'to', type: 'address' },
+    { name: 'amount', type: 'uint256' }
+  ]
+}
+
+export function SignTypedData() {
+  const { signTypedData, data: signature } = useSignTypedData()
+
+  const sign = () => {
+    signTypedData({
+      domain,
+      types,
+      primaryType: 'Order',
+      message: {
+        from: '0xSender',
+        to: '0xRecipient',
+        amount: 1000n
+      }
+    })
+  }
+
+  return <button onClick={sign}>Sign Order</button>
+}
+```
+
+## Network Switching
+
+```typescript
+import { useSwitchChain } from 'wagmi'
+
+export function SwitchToTempo() {
+  const { switchChain, isPending } = useSwitchChain()
+
+  return (
+    <button 
+      onClick={() => switchChain({ chainId: 42431 })}
+      disabled={isPending}
+    >
+      {isPending ? 'Switching...' : 'Switch to Tempo'}
+    </button>
+  )
+}
+```
+
+## Fiat On-Ramp
+
+Coinbase Wallet includes built-in fiat purchasing:
+
+```typescript
+export function BuyCrypto() {
+  const openCoinbaseBuy = () => {
+    // Opens Coinbase pay flow in the wallet
+    window.open(
+      'https://pay.coinbase.com/buy/select-asset?appId=your-app-id&addresses={"0xUserAddress":["tempo"]}',
+      '_blank'
+    )
+  }
+
+  return <button onClick={openCoinbaseBuy}>Buy with Coinbase</button>
+}
+```
+
+## Full Example
+
+```typescript
+// app/layout.tsx
+import { Providers } from './providers'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  )
+}
+
+// app/page.tsx
+'use client'
+
+import { useAccount, useConnect, useDisconnect, useSendTransaction } from 'wagmi'
+import { coinbaseWallet } from 'wagmi/connectors'
+import { parseEther } from 'viem'
+
+export default function Home() {
+  const { address, isConnected } = useAccount()
+  const { connect } = useConnect()
+  const { disconnect } = useDisconnect()
+  const { sendTransaction } = useSendTransaction()
+
+  if (!isConnected) {
+    return (
+      <button onClick={() => connect({ connector: coinbaseWallet() })}>
+        Connect Coinbase Wallet
+      </button>
+    )
+  }
+
+  return (
+    <div>
+      <p>Connected: {address}</p>
+      <button onClick={() => sendTransaction({
+        to: '0xRecipient',
+        value: parseEther('10')
+      })}>
+        Send 10 USD
+      </button>
+      <button onClick={() => disconnect()}>Disconnect</button>
+    </div>
+  )
+}
+```
+
+## Environment Variables
+
+```bash
+# .env.local
+NEXT_PUBLIC_COINBASE_APP_NAME=My Tempo App
+NEXT_PUBLIC_COINBASE_APP_LOGO=https://myapp.com/logo.png
+```
+
+
+## Get Early Access
+
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
+
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities

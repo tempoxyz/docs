@@ -1,0 +1,214 @@
+---
+title: "How to Build a Payment Link"
+description: "Create shareable payment URLs and QR codes on Tempo. Encode amounts, memos, and metadata into links for instant stablecoin payments with ~0.5s finality."
+---
+
+# How to Build a Payment Link
+
+Generate shareable payment links that encode recipient, amount, and metadata—enabling one-click stablecoin payments without requiring customers to manually enter details.
+
+## The Problem
+
+Collecting payments typically requires sharing wallet addresses and amounts separately, leading to copy-paste errors, incorrect amounts, and lost payment context.
+
+## The Solution
+
+Payment links encode all transaction details into a single URL or QR code. When opened, the user's wallet pre-fills the recipient, amount, and memo—reducing friction and eliminating errors.
+
+## Implementation
+
+### Install Dependencies
+
+```bash
+npm install viem wagmi @tanstack/react-query qrcode
+```
+
+### Define the Payment Link Schema
+
+```typescript
+import { Address, parseUnits, encodeFunctionData } from 'viem';
+
+interface PaymentLinkParams {
+  recipient: Address;
+  token: Address;
+  amount: string;
+  decimals: number;
+  memo?: string;
+  metadata?: Record<string, string>;
+}
+
+const TEMPO_CHAIN_ID = 98985;
+
+function buildPaymentLink(params: PaymentLinkParams): string {
+  const { recipient, token, amount, decimals, memo, metadata } = params;
+
+  const amountWei = parseUnits(amount, decimals);
+
+  const searchParams = new URLSearchParams({
+    chainId: TEMPO_CHAIN_ID.toString(),
+    token,
+    recipient,
+    amount: amountWei.toString(),
+  });
+
+  if (memo) {
+    searchParams.set('memo', memo);
+  }
+
+  if (metadata) {
+    searchParams.set('metadata', JSON.stringify(metadata));
+  }
+
+  return `https://pay.tempo.xyz?${searchParams.toString()}`;
+}
+```
+
+### Generate QR Codes
+
+```typescript
+import QRCode from 'qrcode';
+
+async function generatePaymentQR(
+  params: PaymentLinkParams
+): Promise<string> {
+  const link = buildPaymentLink(params);
+  const qrDataUrl = await QRCode.toDataURL(link, {
+    width: 256,
+    margin: 2,
+    color: {
+      dark: '#000000',
+      light: '#ffffff',
+    },
+  });
+  return qrDataUrl;
+}
+
+// Usage
+const qrCode = await generatePaymentQR({
+  recipient: '0x1234...abcd',
+  token: '0x...', // pathUSD or other stablecoin on Tempo
+  amount: '25.00',
+  decimals: 6,
+  memo: 'Invoice #INV-2024-001',
+  metadata: {
+    orderId: 'order-789',
+    customerId: 'cust-456',
+  },
+});
+```
+
+### Parse Payment Links
+
+```typescript
+function parsePaymentLink(url: string): PaymentLinkParams | null {
+  try {
+    const parsed = new URL(url);
+    const params = parsed.searchParams;
+
+    const recipient = params.get('recipient') as Address;
+    const token = params.get('token') as Address;
+    const amount = params.get('amount');
+    const memo = params.get('memo') || undefined;
+    const metadataRaw = params.get('metadata');
+
+    if (!recipient || !token || !amount) {
+      return null;
+    }
+
+    return {
+      recipient,
+      token,
+      amount,
+      decimals: 6, // Resolve from token contract
+      memo,
+      metadata: metadataRaw ? JSON.parse(metadataRaw) : undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+```
+
+### Execute Payment from Link
+
+```typescript
+import { useWriteContract, useAccount } from 'wagmi';
+import { erc20Abi } from 'viem';
+
+function usePayFromLink() {
+  const { address } = useAccount();
+  const { writeContractAsync } = useWriteContract();
+
+  async function pay(link: string) {
+    const params = parsePaymentLink(link);
+    if (!params) throw new Error('Invalid payment link');
+
+    const hash = await writeContractAsync({
+      address: params.token,
+      abi: erc20Abi,
+      functionName: 'transfer',
+      args: [params.recipient, BigInt(params.amount)],
+    });
+
+    return hash;
+  }
+
+  return { pay };
+}
+```
+
+### React Component Example
+
+```typescript
+import { useState } from 'react';
+
+function PaymentLinkGenerator() {
+  const [link, setLink] = useState<string>('');
+  const [qrCode, setQrCode] = useState<string>('');
+
+  async function createLink() {
+    const params: PaymentLinkParams = {
+      recipient: '0x1234...abcd',
+      token: '0x...',
+      amount: '100.00',
+      decimals: 6,
+      memo: 'Payment for services',
+    };
+
+    const paymentLink = buildPaymentLink(params);
+    const qr = await generatePaymentQR(params);
+
+    setLink(paymentLink);
+    setQrCode(qr);
+  }
+
+  return (
+    <div>
+      <button onClick={createLink}>Generate Payment Link</button>
+      {link && (
+        <div>
+          <input value={link} readOnly />
+          <img src={qrCode} alt="Payment QR Code" />
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+1. **Validate addresses** — Always verify recipient addresses are valid before encoding
+2. **Set expiration** — Include a timestamp for time-sensitive payments
+3. **Use checksummed addresses** — Prevent address typos with EIP-55 checksums
+4. **Encode metadata carefully** — URL-encode special characters in memo fields
+5. **Test on testnet** — Verify link parsing before production deployment
+
+
+## Get Early Access
+
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
+
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities

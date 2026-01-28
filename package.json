@@ -6,7 +6,7 @@
   "packageManager": "pnpm@10.28.1",
   "scripts": {
     "dev": "NODE_OPTIONS='--import tsx' vite",
-    "build": "tsgo --build && vite build",
+    "build": "tsgo --build && NODE_OPTIONS='--max-old-space-size=8192' vite build",
     "check": "biome check --write --unsafe .",
     "check:types": "tsgo --project tsconfig.json --noEmit",
     "preview": "node dist/preview.js"

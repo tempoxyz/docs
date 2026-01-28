@@ -1,0 +1,115 @@
+---
+title: "Tempo vs Solana for Stablecoins"
+description: "Compare Tempo and Solana for stablecoin payments. Analyze fees, finality, stablecoin availability, ecosystem differences, and use cases."
+---
+
+# Tempo vs Solana for Stablecoins
+
+Solana offers high throughput and low fees, making it popular for stablecoin transfers. Tempo is purpose-built for stablecoin payments with native stablecoin gas. This guide compares both chains.
+
+## Comparison Table
+
+| Feature | Solana | Tempo |
+|---------|--------|-------|
+| Transaction fee | $0.001-0.01 | ~$0.001 |
+| Finality | ~0.4 seconds | ~0.5 seconds |
+| Gas token | SOL | Stablecoins |
+| Native USDC | Yes (Circle) | Yes |
+| Native USDT | Yes | Yes |
+| EVM compatible | No | Yes |
+| Payment metadata | No | Yes |
+| Stablecoin DEX | External (Jupiter, etc.) | Native |
+
+## Solana Strengths
+
+### High Throughput
+
+Solana processes thousands of transactions per second with parallel execution. It handles high-volume applications including trading, gaming, and payments.
+
+### Native USDC from Circle
+
+Circle issues USDC natively on Solana via Cross-Chain Transfer Protocol (CCTP). This is first-class USDC, not a bridged token, with full Circle backing.
+
+### Established DeFi Ecosystem
+
+Jupiter, Raydium, and other protocols provide deep liquidity for swaps and trading. Solana's DeFi TVL ranks among the highest.
+
+### Low Fees
+
+Typical transactions cost $0.001-0.01, competitive with most L2s and significantly cheaper than Ethereum L1.
+
+### Developer Adoption
+
+Large developer community with extensive tooling, wallets, and infrastructure providers.
+
+## Tempo Strengths
+
+### Stablecoin-Native Gas
+
+Pay fees in stablecoins. Solana requires holding SOL for every transaction—exposing users to price volatility and requiring gas management.
+
+### EVM Compatibility
+
+Tempo supports Solidity smart contracts and Ethereum tooling (Hardhat, Foundry, ethers.js). Solana uses Rust and a different programming model, requiring specialized knowledge.
+
+### Native Stablecoin DEX
+
+Swap stablecoins at oracle prices with sub-cent fees. No external DEX, slippage, or MEV concerns.
+
+### Payment Metadata
+
+Attach invoice numbers, references, and custom data to transactions. Critical for business reconciliation and compliance.
+
+### Predictable Availability
+
+Tempo prioritizes consistent uptime. Solana has experienced network outages during high-demand periods, though reliability has improved.
+
+## Use Cases: Where Each Excels
+
+### Choose Solana When
+
+- **Trading and DeFi**: Access Jupiter aggregator, perpetuals, and lending markets
+- **NFTs and gaming**: Established ecosystem for collectibles and gaming assets
+- **Existing Solana integration**: Your stack already uses Solana infrastructure
+- **SOL holdings acceptable**: You're comfortable holding volatile tokens for gas
+
+### Choose Tempo When
+
+- **Pure stablecoin operations**: Send, receive, swap, and hold stablecoins
+- **No volatile token exposure**: Keep 100% of funds in stable value
+- **EVM tooling preferred**: Use Solidity, Hardhat, and Ethereum developer experience
+- **Business payments**: Need metadata for invoices and reconciliation
+- **Treasury simplicity**: Avoid managing SOL balances across accounts
+
+## Cost Comparison
+
+Both chains offer comparable fees for simple transfers:
+
+| Operation | Solana | Tempo |
+|-----------|--------|-------|
+| Send stablecoins | ~$0.001 | ~$0.001 |
+| Swap stablecoins | $0.01-0.05 (DEX) | ~$0.001 (native) |
+| Gas token required | SOL (~$5 buffer) | None |
+
+The key difference: Solana users must acquire and manage SOL. Tempo users pay directly in stablecoins.
+
+## When to Choose Tempo
+
+Tempo is the better choice if you:
+
+- Want zero exposure to volatile tokens
+- Prefer EVM compatibility and Ethereum tooling
+- Need native payment metadata for business operations
+- Want native stablecoin swaps without external DEX complexity
+- Prioritize simplicity over DeFi composability
+
+Solana remains strong for trading, gaming, NFTs, and users comfortable with its ecosystem and SOL management.
+
+
+## Get Early Access
+
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
+
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities

@@ -1,0 +1,122 @@
+---
+title: "Tempo vs Tron for USDT"
+description: "Compare USDT on Tron with stablecoins on Tempo. Analyze fees, use cases, decentralization, and which chain suits your needs."
+---
+
+# Tempo vs Tron for USDT
+
+Tron hosts more USDT than any other blockchain, making it the de facto network for USDT transfers. Tempo offers an alternative with stablecoin-native gas and broader stablecoin support. This guide compares both chains.
+
+## Comparison Table
+
+| Feature | Tron | Tempo |
+|---------|------|-------|
+| Transaction fee | $0.50-2.00 | ~$0.001 |
+| Finality | ~3 seconds | ~0.5 seconds |
+| Gas token | TRX (or Energy) | Stablecoins |
+| Primary stablecoin | USDT | USDC, USDT, EURC, DAI |
+| Native USDC | No | Yes |
+| EVM compatible | Partial | Yes |
+| Payment metadata | No | Yes |
+| Stablecoin DEX | External | Native |
+
+## Tron Strengths
+
+### USDT Dominance
+
+Tron has the largest USDT supply of any blockchain. If you specifically need USDT, Tron has unmatched liquidity and adoption, especially in Asia and emerging markets.
+
+### Wide Exchange Support
+
+Nearly every exchange supports Tron USDT deposits and withdrawals. This network effect makes Tron the path of least resistance for many users.
+
+### Established Track Record
+
+Running since 2018, Tron has processed trillions in USDT volume. It's battle-tested for high-value transfers.
+
+### Energy Model
+
+Users can stake TRX for "Energy" to reduce transaction fees. High-volume senders can optimize costs through this mechanism.
+
+## Tempo Strengths
+
+### Lower Fees
+
+Tempo transactions cost approximately $0.001 versus $0.50-2.00 on Tron. For high-volume operations, this difference is significant.
+
+### Stablecoin-Native Gas
+
+Pay fees in stablecoins. Tron requires TRX or staked Energy—still exposing users to a volatile token.
+
+### Multi-Stablecoin Support
+
+Tempo supports native USD stablecoins (pathUSD, AlphaUSD, BetaUSD, ThetaUSD) with native swaps between them. Tron is primarily a USDT chain with limited alternatives.
+
+### Full EVM Compatibility
+
+Use standard Ethereum tooling (Hardhat, Foundry, ethers.js). Tron's EVM compatibility is partial, requiring modified tooling.
+
+### Payment Metadata
+
+Attach invoice references and custom data to transactions for business reconciliation.
+
+### Faster Finality
+
+Tempo finalizes in ~0.5 seconds versus ~3 seconds on Tron.
+
+## Use Cases: Where Each Excels
+
+### Choose Tron When
+
+- **USDT-specific requirements**: Counterparties only accept Tron USDT
+- **Exchange transfers**: Moving USDT between exchanges that prioritize Tron
+- **Emerging market payments**: Recipients in regions where Tron USDT is standard
+- **Existing Tron infrastructure**: Your systems already integrate with Tron
+
+### Choose Tempo When
+
+- **Lower fees matter**: High-volume or frequent transfers where $0.50+ per tx adds up
+- **Multi-stablecoin needs**: Using USDC, EURC, DAI, or wanting to swap between them
+- **No TRX management**: Avoid holding or managing volatile tokens
+- **EVM tooling preferred**: Standard Ethereum development experience
+- **Business payments**: Need metadata for reconciliation and compliance
+
+## Cost Comparison
+
+| Volume | Tron Cost (1000 txs) | Tempo Cost (1000 txs) |
+|--------|---------------------|----------------------|
+| Low-volume sender | $500-2,000 | $1 |
+| Energy-optimized sender | $100-500 | $1 |
+
+Even with Tron's Energy optimization, Tempo is significantly cheaper for most use cases.
+
+## Stablecoin Flexibility
+
+Tron locks you into USDT. Tempo's native DEX lets you:
+
+- Receive USDT, swap to USDC instantly
+- Hold EURC for European operations
+- Convert between any supported stablecoin at oracle prices
+
+This flexibility reduces dependency on any single stablecoin issuer.
+
+## When to Choose Tempo
+
+Tempo is the better choice if you:
+
+- Want the lowest possible transaction fees
+- Need multiple stablecoin options beyond USDT
+- Prefer not to hold TRX or manage Energy
+- Use standard Ethereum development tools
+- Require payment metadata for business operations
+
+Tron remains the practical choice when counterparties specifically require Tron USDT or when operating in ecosystems where Tron dominates.
+
+
+## Get Early Access
+
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
+
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities

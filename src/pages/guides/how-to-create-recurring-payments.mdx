@@ -1,0 +1,286 @@
+---
+title: "How to Create Recurring Payments"
+description: "Build subscription billing with stablecoins on Tempo. Implement payment schedules, allowance-based pulls, and retry logic for reliable recurring charges."
+---
+
+# How to Create Recurring Payments
+
+Implement subscription billing and scheduled payments using stablecoin allowances and automated payment pulls on Tempo.
+
+## The Problem
+
+Traditional subscription billing on blockchain requires users to manually send payments each cycle, leading to failed renewals and churn.
+
+## The Solution
+
+Use ERC-20 allowances to enable merchants to pull authorized amounts on a schedule. Combined with Tempo's instant finality and low fees, this enables reliable recurring billing.
+
+## Implementation
+
+### Install Dependencies
+
+```bash
+npm install viem wagmi @tanstack/react-query
+```
+
+### Define Subscription Types
+
+```typescript
+import { Address } from 'viem';
+
+interface Subscription {
+  id: string;
+  subscriber: Address;
+  merchant: Address;
+  token: Address;
+  amount: bigint;
+  interval: number; // seconds between payments
+  nextPaymentDue: number; // unix timestamp
+  totalPayments: number;
+  paymentsProcessed: number;
+  status: 'active' | 'paused' | 'cancelled';
+}
+
+interface SubscriptionPlan {
+  name: string;
+  amount: string;
+  interval: 'weekly' | 'monthly' | 'yearly';
+  token: Address;
+}
+```
+
+### Set Up Allowance (Subscriber Side)
+
+```typescript
+import { useWriteContract } from 'wagmi';
+import { erc20Abi, parseUnits, maxUint256 } from 'viem';
+
+function useApproveSubscription() {
+  const { writeContractAsync } = useWriteContract();
+
+  async function approve(
+    token: Address,
+    spender: Address, // Merchant or payment contract
+    maxAmount?: bigint
+  ) {
+    const hash = await writeContractAsync({
+      address: token,
+      abi: erc20Abi,
+      functionName: 'approve',
+      args: [spender, maxAmount ?? maxUint256],
+    });
+
+    return hash;
+  }
+
+  return { approve };
+}
+```
+
+### Pull Payments (Merchant Side)
+
+```typescript
+import { createWalletClient, http, erc20Abi } from 'viem';
+import { tempo } from './chains';
+
+const merchantWallet = createWalletClient({
+  chain: tempo,
+  transport: http(),
+});
+
+async function pullSubscriptionPayment(
+  subscription: Subscription,
+  merchantPrivateKey: `0x${string}`
+) {
+  const hash = await merchantWallet.writeContract({
+    account: merchantPrivateKey,
+    address: subscription.token,
+    abi: erc20Abi,
+    functionName: 'transferFrom',
+    args: [
+      subscription.subscriber,
+      subscription.merchant,
+      subscription.amount,
+    ],
+  });
+
+  return hash;
+}
+```
+
+### Payment Scheduler with Retry Logic
+
+```typescript
+interface RetryConfig {
+  maxAttempts: number;
+  backoffMs: number;
+  backoffMultiplier: number;
+}
+
+async function processSubscriptionWithRetry(
+  subscription: Subscription,
+  config: RetryConfig = {
+    maxAttempts: 3,
+    backoffMs: 1000,
+    backoffMultiplier: 2,
+  }
+): Promise<{ success: boolean; hash?: string; error?: string }> {
+  let attempt = 0;
+  let delay = config.backoffMs;
+
+  while (attempt < config.maxAttempts) {
+    try {
+      const hash = await pullSubscriptionPayment(
+        subscription,
+        process.env.MERCHANT_PRIVATE_KEY as `0x${string}`
+      );
+
+      // Tempo's ~0.5s finality means we can confirm quickly
+      await waitForTransactionReceipt(hash);
+
+      return { success: true, hash };
+    } catch (error) {
+      attempt++;
+
+      if (attempt >= config.maxAttempts) {
+        return {
+          success: false,
+          error: `Failed after ${attempt} attempts: ${error}`,
+        };
+      }
+
+      await sleep(delay);
+      delay *= config.backoffMultiplier;
+    }
+  }
+
+  return { success: false, error: 'Max attempts reached' };
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+```
+
+### Subscription Manager
+
+```typescript
+class SubscriptionManager {
+  private subscriptions: Map<string, Subscription> = new Map();
+
+  async processScheduledPayments(): Promise<void> {
+    const now = Math.floor(Date.now() / 1000);
+
+    for (const [id, sub] of this.subscriptions) {
+      if (sub.status !== 'active') continue;
+      if (sub.nextPaymentDue > now) continue;
+
+      const result = await processSubscriptionWithRetry(sub);
+
+      if (result.success) {
+        sub.paymentsProcessed++;
+        sub.nextPaymentDue += sub.interval;
+
+        // Check if subscription is complete
+        if (sub.totalPayments > 0 && 
+            sub.paymentsProcessed >= sub.totalPayments) {
+          sub.status = 'cancelled';
+        }
+
+        await this.notifyPaymentSuccess(sub, result.hash!);
+      } else {
+        await this.notifyPaymentFailed(sub, result.error!);
+        // Optionally pause after failures
+        sub.status = 'paused';
+      }
+    }
+  }
+
+  private async notifyPaymentSuccess(
+    sub: Subscription,
+    hash: string
+  ): Promise<void> {
+    // Send webhook, email, etc.
+  }
+
+  private async notifyPaymentFailed(
+    sub: Subscription,
+    error: string
+  ): Promise<void> {
+    // Notify subscriber of failed payment
+  }
+}
+```
+
+### Check Allowance Before Pulling
+
+```typescript
+import { createPublicClient, http, erc20Abi } from 'viem';
+
+const publicClient = createPublicClient({
+  chain: tempo,
+  transport: http(),
+});
+
+async function hasAllowance(
+  token: Address,
+  owner: Address,
+  spender: Address,
+  requiredAmount: bigint
+): Promise<boolean> {
+  const allowance = await publicClient.readContract({
+    address: token,
+    abi: erc20Abi,
+    functionName: 'allowance',
+    args: [owner, spender],
+  });
+
+  return allowance >= requiredAmount;
+}
+```
+
+### Interval Helpers
+
+```typescript
+const INTERVALS = {
+  weekly: 7 * 24 * 60 * 60,
+  monthly: 30 * 24 * 60 * 60,
+  yearly: 365 * 24 * 60 * 60,
+} as const;
+
+function createSubscription(
+  plan: SubscriptionPlan,
+  subscriber: Address,
+  merchant: Address
+): Subscription {
+  return {
+    id: crypto.randomUUID(),
+    subscriber,
+    merchant,
+    token: plan.token,
+    amount: parseUnits(plan.amount, 6),
+    interval: INTERVALS[plan.interval],
+    nextPaymentDue: Math.floor(Date.now() / 1000),
+    totalPayments: 0, // 0 = unlimited
+    paymentsProcessed: 0,
+    status: 'active',
+  };
+}
+```
+
+## Best Practices
+
+1. **Check balance before pulling** — Verify subscriber has sufficient funds to avoid wasted gas
+2. **Monitor allowance changes** — Subscribers can revoke anytime; handle gracefully
+3. **Implement dunning logic** — Retry failed payments with increasing delays before cancelling
+4. **Send payment reminders** — Notify subscribers before scheduled pulls
+5. **Use dedicated payment contracts** — For complex billing, deploy a subscription contract
+
+
+## Get Early Access
+
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
+
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities

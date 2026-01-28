@@ -1,0 +1,129 @@
+---
+title: "Crypto Payments for SaaS"
+description: "Accept stablecoin payments for SaaS subscriptions on Tempo. ~$0.001 fees, automated recurring billing, and usage-based pricing support."
+---
+
+# Crypto Payments for SaaS
+
+SaaS companies lose significant revenue to payment processing fees. Credit card processors charge 2.5-3.5% on every subscription renewal, plus additional fees for failed payments and chargebacks. Stablecoin payments on Tempo reduce processing costs to approximately $0.001 per transaction.
+
+## The SaaS Payment Problem
+
+For a SaaS company with $5M ARR:
+
+| Payment Method | Annual Processing Cost |
+|----------------|------------------------|
+| Credit cards (2.9% + $0.30) | $150,000+ |
+| PayPal | $145,000+ |
+| ACH | $25,000 |
+| **Tempo stablecoins** | **~$500** |
+
+Beyond direct fees, credit card payments introduce additional costs: failed payment retries, involuntary churn from expired cards, and chargeback management overhead.
+
+## Benefits for SaaS
+
+### Near-Zero Transaction Fees
+
+~$0.001 per transaction regardless of plan tier. A $10/month starter plan and a $10,000/month enterprise plan cost the same to process.
+
+### No Failed Payments
+
+Stablecoin payments don't expire like credit cards. No more involuntary churn from payment method failures or expired cards.
+
+### No Chargebacks
+
+Stablecoin transactions are final. Eliminate chargeback fraud and the operational burden of dispute management.
+
+### Global Subscriptions
+
+Accept payments from customers worldwide without international card fees or currency conversion complexity.
+
+### Instant Settlement
+
+Funds are available immediately. No waiting for weekly or monthly payout cycles from payment processors.
+
+## How It Works
+
+### Recurring Billing
+
+1. Customer authorizes subscription amount and frequency
+2. Set up automated payment collection via smart contract or API trigger
+3. Tempo executes payment at each billing cycle
+4. Customer receives invoice with transaction confirmation
+5. Subscription renews automatically
+
+### Usage-Based Billing
+
+For metered or consumption-based pricing:
+
+1. Track customer usage throughout billing period
+2. Calculate final amount at cycle end
+3. Execute single payment with usage metadata
+4. Provide detailed breakdown in customer portal
+
+### Hybrid Models
+
+Combine base subscription fees with usage-based overages:
+
+- Base fee collected on fixed schedule
+- Overage charges calculated and collected at period end
+- Full metadata for both components
+
+## Implementation
+
+### Subscription Setup
+
+Collect customer wallet address during signup and configure billing:
+
+- Billing frequency (monthly, quarterly, annual)
+- Payment amount or pricing tier
+- Usage thresholds for metered components
+- Payment metadata (customer ID, plan tier, contract reference)
+
+### Payment Execution
+
+Trigger payments via API at each billing cycle:
+
+- Generate payment request with invoice metadata
+- Customer wallet executes pre-authorized payment
+- Tempo confirms transaction instantly
+- Update subscription status and send receipt
+
+### Dunning and Retries
+
+Handle insufficient balance scenarios:
+
+- Check wallet balance before payment attempt
+- Send proactive low-balance notifications
+- Retry logic for temporary balance issues
+- Grace period before service suspension
+
+## Integration Options
+
+### API Integration
+
+Build recurring billing directly into your subscription management system. Use webhooks for payment confirmations and failed payment notifications.
+
+### Billing Platform Integration
+
+Connect Tempo payments to existing subscription billing platforms (check [docs.tempo.xyz](https://docs.tempo.xyz) for current integrations).
+
+### Smart Contract Automation
+
+Deploy payment automation on-chain for fully trustless recurring billing without intermediary systems.
+
+## Operational Considerations
+
+- **Pricing**: Display prices in USD, collect equivalent USDC
+- **Upgrades/Downgrades**: Prorate changes and adjust next billing amount
+- **Refunds**: Process partial or full refunds to customer wallet
+- **Accounting**: Export transaction data with subscription metadata
+
+
+## Get Early Access
+
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
+
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities

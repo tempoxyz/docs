@@ -1,0 +1,630 @@
+---
+title: "Plaid for Tempo"
+description: "Integrate Plaid for fiat on/off-ramps with Tempo. Bank account linking, identity verification, and ACH transfers with TypeScript examples."
+---
+
+# Plaid for Tempo
+
+[Plaid](https://plaid.com) connects your Tempo application to users' bank accounts for seamless fiat on-ramps and off-ramps. Enable identity verification, account linking, and ACH transfers.
+
+## Why Plaid
+
+- **Bank connectivity** — Connect to 12,000+ financial institutions
+- **Identity verification** — KYC/AML compliance with IDV product
+- **ACH transfers** — Direct bank-to-crypto on-ramps and off-ramps
+- **Account verification** — Instant account and balance verification
+
+## Installation
+
+```bash
+pnpm install plaid react-plaid-link
+```
+
+## API Setup
+
+### Initialize Plaid Client
+
+```typescript
+// lib/plaid.ts
+import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid'
+
+const configuration = new Configuration({
+  basePath: PlaidEnvironments[process.env.PLAID_ENV || 'sandbox'],
+  baseOptions: {
+    headers: {
+      'PLAID-CLIENT-ID': process.env.PLAID_CLIENT_ID,
+      'PLAID-SECRET': process.env.PLAID_SECRET
+    }
+  }
+})
+
+export const plaidClient = new PlaidApi(configuration)
+```
+
+### Create Link Token
+
+```typescript
+// app/api/plaid/link-token/route.ts
+import { NextResponse } from 'next/server'
+import { plaidClient } from '@/lib/plaid'
+import { Products, CountryCode } from 'plaid'
+
+export async function POST(request: Request) {
+  const { userId } = await request.json()
+
+  try {
+    const response = await plaidClient.linkTokenCreate({
+      user: { client_user_id: userId },
+      client_name: 'My Tempo App',
+      products: [Products.Auth, Products.Identity],
+      country_codes: [CountryCode.Us],
+      language: 'en',
+      webhook: process.env.PLAID_WEBHOOK_URL,
+      redirect_uri: process.env.PLAID_REDIRECT_URI
+    })
+
+    return NextResponse.json({ link_token: response.data.link_token })
+  } catch (error) {
+    console.error('Error creating link token:', error)
+    return NextResponse.json(
+      { error: 'Failed to create link token' },
+      { status: 500 }
+    )
+  }
+}
+```
+
+## Bank Account Linking
+
+### Plaid Link Component
+
+```typescript
+'use client'
+
+import { useCallback, useState } from 'react'
+import { usePlaidLink, PlaidLinkOptions } from 'react-plaid-link'
+
+interface PlaidLinkButtonProps {
+  userId: string
+  onSuccess: (publicToken: string, metadata: any) => void
+}
+
+export function PlaidLinkButton({ userId, onSuccess }: PlaidLinkButtonProps) {
+  const [linkToken, setLinkToken] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const fetchLinkToken = useCallback(async () => {
+    setIsLoading(true)
+    const response = await fetch('/api/plaid/link-token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    })
+    const data = await response.json()
+    setLinkToken(data.link_token)
+    setIsLoading(false)
+  }, [userId])
+
+  const config: PlaidLinkOptions = {
+    token: linkToken,
+    onSuccess: (publicToken, metadata) => {
+      onSuccess(publicToken, metadata)
+    },
+    onExit: (error, metadata) => {
+      if (error) console.error('Plaid Link error:', error)
+    }
+  }
+
+  const { open, ready } = usePlaidLink(config)
+
+  if (!linkToken) {
+    return (
+      <button onClick={fetchLinkToken} disabled={isLoading}>
+        {isLoading ? 'Loading...' : 'Connect Bank Account'}
+      </button>
+    )
+  }
+
+  return (
+    <button onClick={() => open()} disabled={!ready}>
+      Link Bank Account
+    </button>
+  )
+}
+```
+
+### Exchange Public Token
+
+```typescript
+// app/api/plaid/exchange-token/route.ts
+import { NextResponse } from 'next/server'
+import { plaidClient } from '@/lib/plaid'
+
+export async function POST(request: Request) {
+  const { publicToken, userId } = await request.json()
+
+  try {
+    const response = await plaidClient.itemPublicTokenExchange({
+      public_token: publicToken
+    })
+
+    const { access_token, item_id } = response.data
+
+    // Store access_token securely (e.g., encrypted in database)
+    await saveAccessToken(userId, access_token, item_id)
+
+    return NextResponse.json({ success: true, item_id })
+  } catch (error) {
+    console.error('Error exchanging token:', error)
+    return NextResponse.json(
+      { error: 'Failed to exchange token' },
+      { status: 500 }
+    )
+  }
+}
+
+async function saveAccessToken(
+  userId: string,
+  accessToken: string,
+  itemId: string
+): Promise<void> {
+  // Implement secure storage
+  // NEVER expose access_token to the client
+}
+```
+
+## Account & Balance Data
+
+### Get Accounts
+
+```typescript
+// app/api/plaid/accounts/route.ts
+import { NextResponse } from 'next/server'
+import { plaidClient } from '@/lib/plaid'
+
+interface BankAccount {
+  account_id: string
+  name: string
+  mask: string
+  type: string
+  subtype: string
+  balances: {
+    available: number | null
+    current: number | null
+    iso_currency_code: string
+  }
+}
+
+export async function POST(request: Request) {
+  const { userId } = await request.json()
+
+  try {
+    const accessToken = await getAccessToken(userId)
+    
+    const response = await plaidClient.accountsGet({
+      access_token: accessToken
+    })
+
+    const accounts: BankAccount[] = response.data.accounts.map(account => ({
+      account_id: account.account_id,
+      name: account.name,
+      mask: account.mask || '',
+      type: account.type,
+      subtype: account.subtype || '',
+      balances: {
+        available: account.balances.available,
+        current: account.balances.current,
+        iso_currency_code: account.balances.iso_currency_code || 'USD'
+      }
+    }))
+
+    return NextResponse.json({ accounts })
+  } catch (error) {
+    console.error('Error fetching accounts:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch accounts' },
+      { status: 500 }
+    )
+  }
+}
+```
+
+### Get Auth Data for ACH
+
+```typescript
+// app/api/plaid/auth/route.ts
+import { NextResponse } from 'next/server'
+import { plaidClient } from '@/lib/plaid'
+
+interface ACHDetails {
+  account_id: string
+  account: string
+  routing: string
+  wire_routing: string
+}
+
+export async function POST(request: Request) {
+  const { userId, accountId } = await request.json()
+
+  try {
+    const accessToken = await getAccessToken(userId)
+    
+    const response = await plaidClient.authGet({
+      access_token: accessToken
+    })
+
+    const numbers = response.data.numbers.ach.find(
+      n => n.account_id === accountId
+    )
+
+    if (!numbers) {
+      return NextResponse.json(
+        { error: 'Account not found' },
+        { status: 404 }
+      )
+    }
+
+    const achDetails: ACHDetails = {
+      account_id: numbers.account_id,
+      account: numbers.account,
+      routing: numbers.routing,
+      wire_routing: numbers.wire_routing || ''
+    }
+
+    return NextResponse.json({ ach: achDetails })
+  } catch (error) {
+    console.error('Error fetching auth data:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch auth data' },
+      { status: 500 }
+    )
+  }
+}
+```
+
+## Identity Verification
+
+### Create IDV Session
+
+```typescript
+// app/api/plaid/idv/create/route.ts
+import { NextResponse } from 'next/server'
+import { plaidClient } from '@/lib/plaid'
+
+export async function POST(request: Request) {
+  const { userId, email } = await request.json()
+
+  try {
+    const response = await plaidClient.identityVerificationCreate({
+      client_user_id: userId,
+      is_shareable: true,
+      template_id: process.env.PLAID_IDV_TEMPLATE_ID!,
+      gave_consent: true,
+      user: {
+        email_address: email
+      }
+    })
+
+    return NextResponse.json({
+      id: response.data.id,
+      shareable_url: response.data.shareable_url,
+      status: response.data.status
+    })
+  } catch (error) {
+    console.error('Error creating IDV session:', error)
+    return NextResponse.json(
+      { error: 'Failed to create IDV session' },
+      { status: 500 }
+    )
+  }
+}
+```
+
+### Check IDV Status
+
+```typescript
+// app/api/plaid/idv/status/route.ts
+import { NextResponse } from 'next/server'
+import { plaidClient } from '@/lib/plaid'
+
+interface IDVStatus {
+  id: string
+  status: string
+  steps: {
+    verify_sms: string
+    documentary_verification: string
+    selfie_check: string
+  }
+  user: {
+    name: string
+    date_of_birth: string
+    address: object
+  } | null
+}
+
+export async function POST(request: Request) {
+  const { identityVerificationId } = await request.json()
+
+  try {
+    const response = await plaidClient.identityVerificationGet({
+      identity_verification_id: identityVerificationId
+    })
+
+    const result: IDVStatus = {
+      id: response.data.id,
+      status: response.data.status,
+      steps: {
+        verify_sms: response.data.steps.verify_sms,
+        documentary_verification: response.data.steps.documentary_verification,
+        selfie_check: response.data.steps.selfie_check
+      },
+      user: response.data.status === 'success' ? {
+        name: `${response.data.user.name?.given_name} ${response.data.user.name?.family_name}`,
+        date_of_birth: response.data.user.date_of_birth || '',
+        address: response.data.user.address || {}
+      } : null
+    }
+
+    return NextResponse.json(result)
+  } catch (error) {
+    console.error('Error checking IDV status:', error)
+    return NextResponse.json(
+      { error: 'Failed to check IDV status' },
+      { status: 500 }
+    )
+  }
+}
+```
+
+## Fiat On-Ramp Flow
+
+### Complete On-Ramp Implementation
+
+```typescript
+// lib/onramp.ts
+import { plaidClient } from './plaid'
+import { createWalletClient, http, parseUnits } from 'viem'
+import { tempoTestnet } from 'viem/chains'
+
+interface OnRampRequest {
+  userId: string
+  accountId: string
+  amount: number
+  walletAddress: `0x${string}`
+}
+
+interface OnRampResult {
+  transferId: string
+  amount: number
+  status: 'pending' | 'completed' | 'failed'
+  estimatedArrival: Date
+}
+
+export async function initiateOnRamp(request: OnRampRequest): Promise<OnRampResult> {
+  // 1. Verify user identity status
+  const idvStatus = await verifyUserIdentity(request.userId)
+  if (idvStatus !== 'success') {
+    throw new Error('Identity verification required')
+  }
+
+  // 2. Get ACH details
+  const accessToken = await getAccessToken(request.userId)
+  const authResponse = await plaidClient.authGet({
+    access_token: accessToken
+  })
+
+  const achNumbers = authResponse.data.numbers.ach.find(
+    n => n.account_id === request.accountId
+  )
+
+  if (!achNumbers) {
+    throw new Error('Bank account not found')
+  }
+
+  // 3. Initiate ACH transfer (via your payment processor)
+  const transfer = await initiateACHTransfer({
+    routing: achNumbers.routing,
+    account: achNumbers.account,
+    amount: request.amount,
+    type: 'debit'
+  })
+
+  // 4. Queue crypto delivery after ACH settles
+  await queueCryptoDelivery({
+    transferId: transfer.id,
+    walletAddress: request.walletAddress,
+    amount: request.amount,
+    token: 'USDC'
+  })
+
+  return {
+    transferId: transfer.id,
+    amount: request.amount,
+    status: 'pending',
+    estimatedArrival: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) // 3 days
+  }
+}
+```
+
+### React On-Ramp Component
+
+```typescript
+'use client'
+
+import { useState } from 'react'
+import { PlaidLinkButton } from './PlaidLinkButton'
+import { useAccount } from 'wagmi'
+
+export function OnRampFlow() {
+  const { address } = useAccount()
+  const [linkedAccounts, setLinkedAccounts] = useState<any[]>([])
+  const [selectedAccount, setSelectedAccount] = useState<string | null>(null)
+  const [amount, setAmount] = useState<string>('')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+
+  const handlePlaidSuccess = async (publicToken: string) => {
+    // Exchange token and fetch accounts
+    await fetch('/api/plaid/exchange-token', {
+      method: 'POST',
+      body: JSON.stringify({ publicToken, userId: address })
+    })
+
+    const accountsRes = await fetch('/api/plaid/accounts', {
+      method: 'POST',
+      body: JSON.stringify({ userId: address })
+    })
+    const { accounts } = await accountsRes.json()
+    setLinkedAccounts(accounts)
+  }
+
+  const handleOnRamp = async () => {
+    if (!selectedAccount || !amount || !address) return
+
+    setStatus('loading')
+    try {
+      const res = await fetch('/api/onramp', {
+        method: 'POST',
+        body: JSON.stringify({
+          userId: address,
+          accountId: selectedAccount,
+          amount: parseFloat(amount),
+          walletAddress: address
+        })
+      })
+
+      if (res.ok) {
+        setStatus('success')
+      } else {
+        setStatus('error')
+      }
+    } catch {
+      setStatus('error')
+    }
+  }
+
+  if (!address) {
+    return <p>Connect wallet to continue</p>
+  }
+
+  return (
+    <div>
+      <h2>Buy Crypto with Bank Transfer</h2>
+
+      {linkedAccounts.length === 0 ? (
+        <PlaidLinkButton userId={address} onSuccess={handlePlaidSuccess} />
+      ) : (
+        <div>
+          <select 
+            value={selectedAccount || ''} 
+            onChange={e => setSelectedAccount(e.target.value)}
+          >
+            <option value="">Select account</option>
+            {linkedAccounts.map(acc => (
+              <option key={acc.account_id} value={acc.account_id}>
+                {acc.name} (****{acc.mask})
+              </option>
+            ))}
+          </select>
+
+          <input
+            type="number"
+            placeholder="Amount (USD)"
+            value={amount}
+            onChange={e => setAmount(e.target.value)}
+          />
+
+          <button onClick={handleOnRamp} disabled={status === 'loading'}>
+            {status === 'loading' ? 'Processing...' : 'Buy USDC'}
+          </button>
+
+          {status === 'success' && (
+            <p>Transfer initiated! USDC will arrive in 2-3 business days.</p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+## Webhook Handling
+
+```typescript
+// app/api/plaid/webhook/route.ts
+import { NextResponse } from 'next/server'
+import { plaidClient } from '@/lib/plaid'
+
+export async function POST(request: Request) {
+  const body = await request.json()
+  const { webhook_type, webhook_code, item_id } = body
+
+  switch (webhook_type) {
+    case 'ITEM':
+      if (webhook_code === 'ERROR') {
+        await handleItemError(item_id, body.error)
+      }
+      break
+
+    case 'AUTH':
+      if (webhook_code === 'AUTOMATICALLY_VERIFIED') {
+        await handleAuthVerified(item_id)
+      }
+      break
+
+    case 'IDENTITY_VERIFICATION':
+      if (webhook_code === 'STEP_UPDATED') {
+        await handleIDVStepUpdate(body.identity_verification_id, body.step)
+      }
+      break
+
+    case 'TRANSFER':
+      if (webhook_code === 'TRANSFER_EVENTS_UPDATE') {
+        await handleTransferUpdate(body.transfer_id)
+      }
+      break
+  }
+
+  return NextResponse.json({ received: true })
+}
+
+async function handleItemError(itemId: string, error: any) {
+  console.error(`Item ${itemId} error:`, error)
+  // Notify user to relink account
+}
+
+async function handleAuthVerified(itemId: string) {
+  console.log(`Auth verified for item ${itemId}`)
+  // Enable ACH transfers for this account
+}
+
+async function handleIDVStepUpdate(idvId: string, step: string) {
+  console.log(`IDV ${idvId} step updated: ${step}`)
+  // Update user verification status
+}
+
+async function handleTransferUpdate(transferId: string) {
+  console.log(`Transfer ${transferId} updated`)
+  // Check transfer status and deliver crypto if completed
+}
+```
+
+## Environment Variables
+
+```bash
+# .env.local
+PLAID_CLIENT_ID=your-client-id
+PLAID_SECRET=your-secret
+PLAID_ENV=sandbox  # sandbox, development, or production
+PLAID_WEBHOOK_URL=https://yourapp.com/api/plaid/webhook
+PLAID_REDIRECT_URI=https://yourapp.com/plaid-redirect
+PLAID_IDV_TEMPLATE_ID=your-idv-template-id
+```
+
+
+## Get Early Access
+
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
+
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities

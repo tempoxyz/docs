@@ -1,0 +1,156 @@
+---
+title: "Stablecoins vs ACH Payments"
+description: "Compare stablecoin payments on Tempo to ACH bank transfers. Analyze fees, settlement times, availability, and use cases for each payment method."
+---
+
+# Stablecoins vs ACH Payments
+
+ACH (Automated Clearing House) is the backbone of US domestic payments, processing billions of transactions annually. Stablecoins on Tempo offer a different approach to moving money. This guide compares both for various payment scenarios.
+
+## Comparison Table
+
+| Feature | ACH Standard | ACH Same Day | Tempo Stablecoins |
+|---------|--------------|--------------|-------------------|
+| Transaction fee | $0.26-0.50 median | $0.26-0.50 + premium | ~$0.001 |
+| Settlement time | 1-2 business days | Same business day (hours) | ~0.5 seconds |
+| Availability | Banking days only | Banking days only | 24/7/365 |
+| Transaction limit | Up to $1M+ | Up to $1M (varies by bank) | No protocol limit |
+| Receiver requirements | US bank account | US bank account | Crypto wallet |
+| Reversibility | Can be reversed | Can be reversed | Final |
+
+## ACH Strengths
+
+### Universal Bank Acceptance
+
+Nearly every US bank account can send and receive ACH payments. No special setup, wallets, or onboarding required—just routing and account numbers.
+
+### Established Legal Framework
+
+ACH operates under NACHA rules with clear dispute resolution, error correction, and consumer protection. Regulations like Reg E protect consumers from unauthorized transactions.
+
+### Ideal for Recurring Payments
+
+ACH excels at recurring domestic payments: payroll, subscriptions, utility bills. The batch processing model works well for predictable, scheduled transfers.
+
+### Low Cost for Domestic Volume
+
+At $0.26-0.50 per transaction, ACH is cost-effective for domestic payments, especially compared to wire transfers or card processing.
+
+### Familiar and Trusted
+
+Businesses and consumers understand ACH. Accounting systems, ERPs, and payroll software have built-in ACH support.
+
+## Stablecoin Strengths on Tempo
+
+### True Instant Settlement
+
+Transactions finalize in ~0.5 seconds, 24/7. No waiting for batch processing windows or next business day. Payment received = payment settled.
+
+### Sub-Cent Fees
+
+At ~$0.001 per transaction, fees are negligible even for micropayments. Send $1 or $1 million for the same cost.
+
+### No Banking Day Restrictions
+
+Weekends, holidays, 3 AM—payments work identically. Critical for global operations or time-sensitive transfers.
+
+### Global by Default
+
+Same system works for domestic and international payments. No correspondent banks or cross-border complexity.
+
+### Final Settlement
+
+Transactions cannot be reversed after confirmation. Reduces fraud risk for merchants and eliminates chargeback concerns.
+
+## Detailed Fee Comparison
+
+| Payment Amount | ACH Cost | Tempo Cost | Savings |
+|----------------|----------|------------|---------|
+| $10 | $0.26-0.50 | $0.001 | 99%+ |
+| $100 | $0.26-0.50 | $0.001 | 99%+ |
+| $1,000 | $0.26-0.50 | $0.001 | 99%+ |
+| $10,000 | $0.26-0.50 | $0.001 | 99%+ |
+
+*Note: ACH fees vary by provider. Some charge percentage fees instead of flat rates.*
+
+## Settlement Time Comparison
+
+| Scenario | ACH | Tempo |
+|----------|-----|-------|
+| Friday 5 PM payment | Tuesday delivery | Instant |
+| Holiday weekend | Next business day | Instant |
+| Urgent payment | Same Day ACH (hours, premium fee) | Instant |
+| International | Not supported | Instant |
+
+## Use Cases: When to Use Each
+
+### Choose ACH When
+
+- **Domestic US payments**: Paying US vendors, employees, or customers with bank accounts
+- **Recurring payments**: Payroll, rent, subscriptions where timing is predictable
+- **Traditional business integration**: Partners expect/require ACH
+- **Consumer payments**: Customers prefer paying from bank accounts
+- **Regulatory requirements**: Compliance mandates bank-based payments
+
+### Choose Tempo When
+
+- **Speed matters**: Real-time settlement required
+- **High volume, low value**: Micropayments, API billing, streaming payments
+- **24/7 operations**: Payments needed outside banking hours
+- **International payments**: Same system for domestic and global
+- **Cost optimization**: High transaction volumes where fees add up
+- **Programmable payments**: Smart contract automation, conditional logic
+
+## Example: Payroll Comparison
+
+**100 employees, bi-weekly payroll:**
+
+| Method | Per-Transaction Fee | Total Monthly Cost | Settlement |
+|--------|---------------------|-------------------|------------|
+| ACH | $0.50 | $200 | 1-2 days |
+| Tempo | $0.001 | $0.40 | Instant |
+
+*Savings: $199.60/month ($2,395/year)*
+
+## Hybrid Approach
+
+Many businesses use both:
+
+1. **ACH for**: Employee payroll (where employees prefer bank deposits), vendor payments to traditional businesses, customer recurring billing
+2. **Tempo for**: International contractor payments, real-time settlements, high-frequency micropayments, after-hours urgent transfers
+
+## Limitations to Consider
+
+### ACH Limitations
+- Banking hours only
+- 1-2 day standard settlement
+- US domestic only
+- Reversible (fraud risk for merchants)
+- Batch processing delays
+
+### Tempo Limitations
+- Requires crypto wallet
+- Less familiar to traditional businesses
+- Stablecoin on/off ramps needed
+- Newer technology with evolving ecosystem
+- No built-in dispute resolution
+
+## When to Choose Tempo
+
+Tempo stablecoins are the better choice if you:
+
+- Need payments to settle in seconds, not days
+- Operate 24/7 or across time zones
+- Process high volumes where sub-cent fees matter
+- Want to avoid banking hour restrictions
+- Need the same system for domestic and international
+
+ACH remains the right choice for traditional US domestic payments where recipients expect bank deposits and timing is flexible.
+
+## Get Early Access
+
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
+
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities

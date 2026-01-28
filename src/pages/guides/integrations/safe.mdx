@@ -1,0 +1,424 @@
+---
+title: "Safe (Gnosis) for Tempo"
+description: "Integrate Safe multisig wallets with Tempo. Create Safes, propose transactions, collect confirmations, and execute with full TypeScript examples."
+---
+
+# Safe (Gnosis) for Tempo
+
+[Safe](https://safe.global) (formerly Gnosis Safe) is the most trusted multisig wallet for managing crypto assets. Use Safe on Tempo for secure treasury management and multi-party transaction approval.
+
+## Why Safe
+
+- **Multisig security** — Require M-of-N confirmations for transactions
+- **Treasury management** — Manage team funds with configurable approval thresholds
+- **Transaction batching** — Execute multiple operations in a single transaction
+- **Spending limits** — Set daily limits for individual signers
+
+## Installation
+
+```bash
+pnpm install @safe-global/protocol-kit @safe-global/api-kit @safe-global/safe-core-sdk-types viem
+```
+
+## Quick Start
+
+### 1. Initialize the SDK
+
+```typescript
+import Safe from '@safe-global/protocol-kit'
+import SafeApiKit from '@safe-global/api-kit'
+import { createPublicClient, http } from 'viem'
+import { tempoTestnet } from 'viem/chains'
+
+const TEMPO_RPC = 'https://rpc.moderato.tempo.xyz'
+const TEMPO_CHAIN_ID = 42431n
+
+// Initialize API Kit for transaction service
+const apiKit = new SafeApiKit({
+  chainId: TEMPO_CHAIN_ID
+})
+
+// Initialize Protocol Kit with an existing Safe
+const protocolKit = await Safe.init({
+  provider: TEMPO_RPC,
+  signer: process.env.SIGNER_PRIVATE_KEY,
+  safeAddress: '0xYourSafeAddress'
+})
+```
+
+### 2. Create a New Safe
+
+```typescript
+import { SafeFactory } from '@safe-global/protocol-kit'
+import { SafeAccountConfig } from '@safe-global/safe-core-sdk-types'
+
+async function createSafe(): Promise<string> {
+  const safeFactory = await SafeFactory.init({
+    provider: TEMPO_RPC,
+    signer: process.env.DEPLOYER_PRIVATE_KEY
+  })
+
+  const safeAccountConfig: SafeAccountConfig = {
+    owners: [
+      '0xOwner1Address',
+      '0xOwner2Address',
+      '0xOwner3Address'
+    ],
+    threshold: 2 // 2-of-3 multisig
+  }
+
+  const safe = await safeFactory.deploySafe({ safeAccountConfig })
+  const safeAddress = await safe.getAddress()
+  
+  console.log('Safe deployed at:', safeAddress)
+  return safeAddress
+}
+```
+
+## Proposing Transactions
+
+### Create a Transaction Proposal
+
+```typescript
+import { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
+import { parseEther, encodeFunctionData, erc20Abi } from 'viem'
+
+async function proposeTransaction(
+  safeAddress: string,
+  to: `0x${string}`,
+  amount: bigint
+): Promise<string> {
+  const protocolKit = await Safe.init({
+    provider: TEMPO_RPC,
+    signer: process.env.SIGNER_PRIVATE_KEY,
+    safeAddress
+  })
+
+  // Create transaction data
+  const safeTransactionData: MetaTransactionData = {
+    to,
+    value: amount.toString(),
+    data: '0x'
+  }
+
+  // Create the Safe transaction
+  const safeTransaction = await protocolKit.createTransaction({
+    transactions: [safeTransactionData]
+  })
+
+  // Sign the transaction
+  const signedTransaction = await protocolKit.signTransaction(safeTransaction)
+  
+  // Get transaction hash
+  const safeTxHash = await protocolKit.getTransactionHash(signedTransaction)
+  
+  // Propose to the transaction service
+  const senderAddress = await protocolKit.getAddress()
+  
+  await apiKit.proposeTransaction({
+    safeAddress,
+    safeTransactionData: signedTransaction.data,
+    safeTxHash,
+    senderAddress,
+    senderSignature: signedTransaction.signatures.get(senderAddress.toLowerCase())?.data
+  })
+
+  console.log('Transaction proposed:', safeTxHash)
+  return safeTxHash
+}
+```
+
+### Propose ERC20 Transfer
+
+```typescript
+async function proposeTokenTransfer(
+  safeAddress: string,
+  tokenAddress: `0x${string}`,
+  recipient: `0x${string}`,
+  amount: bigint
+): Promise<string> {
+  const protocolKit = await Safe.init({
+    provider: TEMPO_RPC,
+    signer: process.env.SIGNER_PRIVATE_KEY,
+    safeAddress
+  })
+
+  const transferData = encodeFunctionData({
+    abi: erc20Abi,
+    functionName: 'transfer',
+    args: [recipient, amount]
+  })
+
+  const safeTransaction = await protocolKit.createTransaction({
+    transactions: [{
+      to: tokenAddress,
+      value: '0',
+      data: transferData
+    }]
+  })
+
+  const signedTransaction = await protocolKit.signTransaction(safeTransaction)
+  const safeTxHash = await protocolKit.getTransactionHash(signedTransaction)
+
+  await apiKit.proposeTransaction({
+    safeAddress,
+    safeTransactionData: signedTransaction.data,
+    safeTxHash,
+    senderAddress: await protocolKit.getAddress(),
+    senderSignature: signedTransaction.signatures.values().next().value?.data
+  })
+
+  return safeTxHash
+}
+```
+
+## Confirming Transactions
+
+### Get Pending Transactions
+
+```typescript
+interface PendingTransaction {
+  safeTxHash: string
+  to: string
+  value: string
+  confirmations: Array<{ owner: string }>
+  confirmationsRequired: number
+}
+
+async function getPendingTransactions(
+  safeAddress: string
+): Promise<PendingTransaction[]> {
+  const pendingTxs = await apiKit.getPendingTransactions(safeAddress)
+  
+  return pendingTxs.results.map(tx => ({
+    safeTxHash: tx.safeTxHash,
+    to: tx.to,
+    value: tx.value,
+    confirmations: tx.confirmations || [],
+    confirmationsRequired: tx.confirmationsRequired
+  }))
+}
+```
+
+### Confirm a Transaction
+
+```typescript
+async function confirmTransaction(
+  safeAddress: string,
+  safeTxHash: string
+): Promise<void> {
+  const protocolKit = await Safe.init({
+    provider: TEMPO_RPC,
+    signer: process.env.SIGNER_PRIVATE_KEY,
+    safeAddress
+  })
+
+  // Get the transaction
+  const transaction = await apiKit.getTransaction(safeTxHash)
+  
+  // Sign it
+  const signature = await protocolKit.signHash(safeTxHash)
+
+  // Submit confirmation
+  await apiKit.confirmTransaction(safeTxHash, signature.data)
+  
+  console.log('Transaction confirmed:', safeTxHash)
+}
+```
+
+## Executing Transactions
+
+### Execute When Threshold Met
+
+```typescript
+async function executeTransaction(
+  safeAddress: string,
+  safeTxHash: string
+): Promise<string> {
+  const protocolKit = await Safe.init({
+    provider: TEMPO_RPC,
+    signer: process.env.SIGNER_PRIVATE_KEY,
+    safeAddress
+  })
+
+  // Get the transaction with all signatures
+  const transaction = await apiKit.getTransaction(safeTxHash)
+  
+  // Check if threshold is met
+  const threshold = await protocolKit.getThreshold()
+  if ((transaction.confirmations?.length || 0) < threshold) {
+    throw new Error(`Need ${threshold} confirmations, have ${transaction.confirmations?.length}`)
+  }
+
+  // Execute
+  const executeTxResponse = await protocolKit.executeTransaction(transaction)
+  const receipt = await executeTxResponse.transactionResponse?.wait()
+
+  console.log('Transaction executed:', receipt?.transactionHash)
+  return receipt?.transactionHash || ''
+}
+```
+
+## Batch Transactions
+
+Execute multiple operations atomically:
+
+```typescript
+async function batchTransfer(
+  safeAddress: string,
+  transfers: Array<{ to: `0x${string}`; amount: bigint }>
+): Promise<string> {
+  const protocolKit = await Safe.init({
+    provider: TEMPO_RPC,
+    signer: process.env.SIGNER_PRIVATE_KEY,
+    safeAddress
+  })
+
+  const transactions: MetaTransactionData[] = transfers.map(t => ({
+    to: t.to,
+    value: t.amount.toString(),
+    data: '0x'
+  }))
+
+  const safeTransaction = await protocolKit.createTransaction({ transactions })
+  const signedTransaction = await protocolKit.signTransaction(safeTransaction)
+  const safeTxHash = await protocolKit.getTransactionHash(signedTransaction)
+
+  await apiKit.proposeTransaction({
+    safeAddress,
+    safeTransactionData: signedTransaction.data,
+    safeTxHash,
+    senderAddress: await protocolKit.getAddress(),
+    senderSignature: signedTransaction.signatures.values().next().value?.data
+  })
+
+  return safeTxHash
+}
+```
+
+## React Integration
+
+### Safe Provider Context
+
+```typescript
+'use client'
+
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import Safe from '@safe-global/protocol-kit'
+import SafeApiKit from '@safe-global/api-kit'
+
+interface SafeContextType {
+  safe: Safe | null
+  apiKit: SafeApiKit | null
+  safeAddress: string | null
+  owners: string[]
+  threshold: number
+  isLoading: boolean
+}
+
+const SafeContext = createContext<SafeContextType | null>(null)
+
+export function SafeProvider({ 
+  children, 
+  safeAddress 
+}: { 
+  children: ReactNode
+  safeAddress: string 
+}) {
+  const [state, setState] = useState<SafeContextType>({
+    safe: null,
+    apiKit: null,
+    safeAddress: null,
+    owners: [],
+    threshold: 0,
+    isLoading: true
+  })
+
+  useEffect(() => {
+    async function init() {
+      const apiKit = new SafeApiKit({ chainId: 42431n })
+      const safe = await Safe.init({
+        provider: 'https://rpc.moderato.tempo.xyz',
+        safeAddress
+      })
+
+      const owners = await safe.getOwners()
+      const threshold = await safe.getThreshold()
+
+      setState({
+        safe,
+        apiKit,
+        safeAddress,
+        owners,
+        threshold,
+        isLoading: false
+      })
+    }
+    init()
+  }, [safeAddress])
+
+  return (
+    <SafeContext.Provider value={state}>
+      {children}
+    </SafeContext.Provider>
+  )
+}
+
+export function useSafe() {
+  const context = useContext(SafeContext)
+  if (!context) throw new Error('useSafe must be used within SafeProvider')
+  return context
+}
+```
+
+### Pending Transactions Component
+
+```typescript
+'use client'
+
+import { useSafe } from './SafeProvider'
+import { useState, useEffect } from 'react'
+
+export function PendingTransactions() {
+  const { apiKit, safeAddress, threshold } = useSafe()
+  const [pending, setPending] = useState<any[]>([])
+
+  useEffect(() => {
+    if (!apiKit || !safeAddress) return
+    
+    apiKit.getPendingTransactions(safeAddress)
+      .then(res => setPending(res.results))
+  }, [apiKit, safeAddress])
+
+  return (
+    <div>
+      <h2>Pending Transactions</h2>
+      {pending.map(tx => (
+        <div key={tx.safeTxHash}>
+          <p>To: {tx.to}</p>
+          <p>Value: {tx.value}</p>
+          <p>Confirmations: {tx.confirmations?.length || 0} / {threshold}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+## Environment Variables
+
+```bash
+# .env.local
+SIGNER_PRIVATE_KEY=your-private-key
+DEPLOYER_PRIVATE_KEY=your-deployer-key
+NEXT_PUBLIC_SAFE_ADDRESS=0xYourSafeAddress
+```
+
+
+## Get Early Access
+
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
+
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities

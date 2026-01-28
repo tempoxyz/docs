@@ -1,0 +1,452 @@
+---
+title: "Rainbow Wallet for Tempo"
+description: "Integrate Rainbow wallet with Tempo using RainbowKit. Beautiful wallet connection UI, custom themes, and wagmi hooks with examples."
+---
+
+# Rainbow Wallet for Tempo
+
+[Rainbow](https://rainbow.me) is a fun, simple, and secure Ethereum wallet. Use [RainbowKit](https://www.rainbowkit.com) to add a polished wallet connection experience to your Tempo dApp.
+
+## Why Rainbow & RainbowKit
+
+- **Beautiful UI** — Pre-built, customizable wallet connection modal
+- **Multi-wallet support** — Rainbow, MetaMask, Coinbase, WalletConnect, and more
+- **Mobile-optimized** — Deep linking for mobile wallet apps
+- **Theme support** — Light, dark, and custom themes out of the box
+
+## Installation
+
+```bash
+pnpm install @rainbow-me/rainbowkit wagmi viem @tanstack/react-query
+```
+
+## Quick Start
+
+### 1. Configure Wagmi with RainbowKit
+
+```typescript
+// config.ts
+import { getDefaultConfig } from '@rainbow-me/rainbowkit'
+import { tempoTestnet } from 'wagmi/chains'
+
+const tempo = {
+  ...tempoTestnet,
+  id: 42431,
+  name: 'Tempo Testnet',
+  nativeCurrency: { name: 'USD', symbol: 'USD', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://rpc.moderato.tempo.xyz'] }
+  },
+  blockExplorers: {
+    default: { name: 'Tempo Explorer', url: 'https://explore.tempo.xyz' }
+  }
+}
+
+export const config = getDefaultConfig({
+  appName: 'My Tempo App',
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
+  chains: [tempo],
+  ssr: true
+})
+```
+
+### 2. Set Up Providers
+
+```typescript
+// providers.tsx
+'use client'
+
+import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
+import { WagmiProvider } from 'wagmi'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { config } from './config'
+
+import '@rainbow-me/rainbowkit/styles.css'
+
+const queryClient = new QueryClient()
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider>
+          {children}
+        </RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  )
+}
+```
+
+### 3. Add Connect Button
+
+```typescript
+'use client'
+
+import { ConnectButton } from '@rainbow-me/rainbowkit'
+
+export function Header() {
+  return (
+    <header>
+      <h1>My Tempo App</h1>
+      <ConnectButton />
+    </header>
+  )
+}
+```
+
+## Customizing the Connect Button
+
+### Compact Mode
+
+```typescript
+<ConnectButton 
+  accountStatus="avatar"
+  chainStatus="icon"
+  showBalance={false}
+/>
+```
+
+### Custom Button
+
+```typescript
+import { ConnectButton } from '@rainbow-me/rainbowkit'
+
+export function CustomConnectButton() {
+  return (
+    <ConnectButton.Custom>
+      {({
+        account,
+        chain,
+        openAccountModal,
+        openChainModal,
+        openConnectModal,
+        mounted
+      }) => {
+        const ready = mounted
+        const connected = ready && account && chain
+
+        return (
+          <div>
+            {!connected ? (
+              <button onClick={openConnectModal}>
+                Connect Wallet
+              </button>
+            ) : chain.unsupported ? (
+              <button onClick={openChainModal}>
+                Wrong network
+              </button>
+            ) : (
+              <div>
+                <button onClick={openChainModal}>
+                  {chain.name}
+                </button>
+                <button onClick={openAccountModal}>
+                  {account.displayName}
+                </button>
+              </div>
+            )}
+          </div>
+        )
+      }}
+    </ConnectButton.Custom>
+  )
+}
+```
+
+## Theming
+
+### Built-in Themes
+
+```typescript
+import { 
+  RainbowKitProvider, 
+  darkTheme, 
+  lightTheme,
+  midnightTheme 
+} from '@rainbow-me/rainbowkit'
+
+// Dark theme
+<RainbowKitProvider theme={darkTheme()}>
+
+// Light theme with custom accent
+<RainbowKitProvider theme={lightTheme({
+  accentColor: '#7C3AED',
+  accentColorForeground: 'white',
+  borderRadius: 'medium'
+})}>
+
+// Midnight theme
+<RainbowKitProvider theme={midnightTheme()}>
+```
+
+### Custom Theme
+
+```typescript
+import { Theme } from '@rainbow-me/rainbowkit'
+
+const customTheme: Theme = {
+  blurs: {
+    modalOverlay: 'blur(4px)'
+  },
+  colors: {
+    accentColor: '#7C3AED',
+    accentColorForeground: '#FFF',
+    actionButtonBorder: 'transparent',
+    actionButtonBorderMobile: 'transparent',
+    actionButtonSecondaryBackground: 'rgba(0,0,0,0.1)',
+    closeButton: '#999',
+    closeButtonBackground: 'rgba(0,0,0,0.1)',
+    connectButtonBackground: '#7C3AED',
+    connectButtonBackgroundError: '#FF494A',
+    connectButtonInnerBackground: '#7C3AED',
+    connectButtonText: '#FFF',
+    connectButtonTextError: '#FFF',
+    connectionIndicator: '#30E000',
+    downloadBottomCardBackground: '#FFF',
+    downloadTopCardBackground: '#F9F9F9',
+    error: '#FF494A',
+    generalBorder: '#E8E8E8',
+    generalBorderDim: 'rgba(0,0,0,0.05)',
+    menuItemBackground: 'rgba(0,0,0,0.05)',
+    modalBackdrop: 'rgba(0,0,0,0.5)',
+    modalBackground: '#FFF',
+    modalBorder: 'transparent',
+    modalText: '#333',
+    modalTextDim: '#999',
+    modalTextSecondary: '#666',
+    profileAction: 'rgba(0,0,0,0.05)',
+    profileActionHover: 'rgba(0,0,0,0.1)',
+    profileForeground: '#F9F9F9',
+    selectedOptionBorder: '#7C3AED',
+    standby: '#FFD641'
+  },
+  fonts: {
+    body: 'Inter, sans-serif'
+  },
+  radii: {
+    actionButton: '8px',
+    connectButton: '8px',
+    menuButton: '8px',
+    modal: '16px',
+    modalMobile: '16px'
+  },
+  shadows: {
+    connectButton: '0 4px 12px rgba(0,0,0,0.1)',
+    dialog: '0 8px 32px rgba(0,0,0,0.15)',
+    profileDetailsAction: '0 2px 6px rgba(0,0,0,0.1)',
+    selectedOption: '0 0 0 2px #7C3AED',
+    selectedWallet: '0 0 0 2px #7C3AED',
+    walletLogo: '0 2px 6px rgba(0,0,0,0.1)'
+  }
+}
+
+<RainbowKitProvider theme={customTheme}>
+```
+
+## Wallet Configuration
+
+### Specify Wallet Order
+
+```typescript
+import { 
+  getDefaultConfig,
+  getDefaultWallets 
+} from '@rainbow-me/rainbowkit'
+import {
+  rainbowWallet,
+  metaMaskWallet,
+  coinbaseWallet,
+  walletConnectWallet
+} from '@rainbow-me/rainbowkit/wallets'
+
+const { wallets } = getDefaultWallets()
+
+export const config = getDefaultConfig({
+  appName: 'My Tempo App',
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
+  chains: [tempo],
+  wallets: [
+    {
+      groupName: 'Recommended',
+      wallets: [rainbowWallet, metaMaskWallet, coinbaseWallet]
+    },
+    {
+      groupName: 'Other',
+      wallets: [walletConnectWallet]
+    }
+  ]
+})
+```
+
+## Transactions
+
+### Send Transaction
+
+```typescript
+import { useSendTransaction, useWaitForTransactionReceipt } from 'wagmi'
+import { parseEther } from 'viem'
+
+export function SendTransaction() {
+  const { sendTransaction, data: hash, isPending } = useSendTransaction()
+  const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash })
+
+  return (
+    <div>
+      <button 
+        onClick={() => sendTransaction({
+          to: '0xRecipient',
+          value: parseEther('10')
+        })}
+        disabled={isPending || isLoading}
+      >
+        {isPending ? 'Confirming...' : isLoading ? 'Processing...' : 'Send 10 USD'}
+      </button>
+      {isSuccess && <p>Success! Hash: {hash}</p>}
+    </div>
+  )
+}
+```
+
+### Contract Write
+
+```typescript
+import { useWriteContract } from 'wagmi'
+import { erc20Abi, parseUnits } from 'viem'
+
+const USDC_ADDRESS = '0x20c0000000000000000000000000000000000001'
+
+export function TransferToken() {
+  const { writeContract, isPending } = useWriteContract()
+
+  return (
+    <button
+      onClick={() => writeContract({
+        address: USDC_ADDRESS,
+        abi: erc20Abi,
+        functionName: 'transfer',
+        args: ['0xRecipient', parseUnits('100', 18)]
+      })}
+      disabled={isPending}
+    >
+      Transfer 100 USDC
+    </button>
+  )
+}
+```
+
+## Read Contract Data
+
+```typescript
+import { useReadContract } from 'wagmi'
+import { erc20Abi } from 'viem'
+
+export function TokenBalance({ address }: { address: `0x${string}` }) {
+  const { data: balance, isLoading } = useReadContract({
+    address: '0x20c0000000000000000000000000000000000001',
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: [address]
+  })
+
+  if (isLoading) return <span>Loading...</span>
+
+  return <span>Balance: {balance?.toString()}</span>
+}
+```
+
+## Authentication
+
+### Sign-In with Ethereum (SIWE)
+
+```typescript
+// Install: pnpm install @rainbow-me/rainbowkit-siwe-next-auth next-auth
+
+import { 
+  RainbowKitSiweNextAuthProvider, 
+  GetSiweMessageOptions 
+} from '@rainbow-me/rainbowkit-siwe-next-auth'
+import { SessionProvider } from 'next-auth/react'
+
+const getSiweMessageOptions: GetSiweMessageOptions = () => ({
+  statement: 'Sign in to My Tempo App'
+})
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <WagmiProvider config={config}>
+      <SessionProvider>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitSiweNextAuthProvider getSiweMessageOptions={getSiweMessageOptions}>
+            <RainbowKitProvider>
+              {children}
+            </RainbowKitProvider>
+          </RainbowKitSiweNextAuthProvider>
+        </QueryClientProvider>
+      </SessionProvider>
+    </WagmiProvider>
+  )
+}
+```
+
+## Full Example
+
+```typescript
+// app/layout.tsx
+import { Providers } from './providers'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  )
+}
+
+// app/page.tsx
+'use client'
+
+import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { useAccount, useSendTransaction } from 'wagmi'
+import { parseEther } from 'viem'
+
+export default function Home() {
+  const { isConnected } = useAccount()
+  const { sendTransaction } = useSendTransaction()
+
+  return (
+    <main>
+      <ConnectButton />
+      
+      {isConnected && (
+        <button onClick={() => sendTransaction({
+          to: '0xRecipient',
+          value: parseEther('10')
+        })}>
+          Send 10 USD
+        </button>
+      )}
+    </main>
+  )
+}
+```
+
+## Environment Variables
+
+```bash
+# .env.local
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your-project-id
+```
+
+Get your WalletConnect Project ID at [cloud.walletconnect.com](https://cloud.walletconnect.com).
+
+
+## Get Early Access
+
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
+
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities
