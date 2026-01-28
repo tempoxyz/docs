@@ -95,7 +95,7 @@ export default defineConfig({
             link: '/quickstart/wallet-developers',
           },
           {
-            text: 'Verify Contracts',
+            text: 'Contract Verification',
             link: '/quickstart/verify-contracts',
           },
           {
