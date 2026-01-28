@@ -9,11 +9,13 @@ Verify your smart contracts on Tempo using [contracts.tempo.xyz](https://contrac
 
 ## Verify with Foundry
 
-The easiest way to verify contracts is to include the `--verify` flag when deploying. Set the verifier URL environment variable:
+The easiest way to verify contracts is to include the `--verify` flag when deploying. You can specify Tempo's verifier by either setting the `VERIFIER_URL` environment variable:
 
 ```bash
 export VERIFIER_URL=https://contracts.tempo.xyz
 ```
+
+Or by passing `--verifier-url https://contracts.tempo.xyz` directly to the command.
 
 ### Verify during deployment
 
