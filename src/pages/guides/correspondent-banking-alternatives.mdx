@@ -1,0 +1,289 @@
+---
+title: "Correspondent Banking Alternatives: Modern Payment Infrastructure"
+description: "Explore correspondent banking alternatives including direct connections, fintech rails, stablecoins, and CBDCs. Understand how payments can bypass intermediary banks."
+---
+
+# Correspondent Banking Alternatives
+
+Correspondent banking is the infrastructure behind international payments, but it's also the source of delays, fees, and complexity. This guide explains how correspondent banking works and explores emerging alternatives.
+
+## What Is Correspondent Banking?
+
+Correspondent banking enables banks to make payments in countries where they don't have a physical presence.
+
+### How It Works
+
+1. **Your bank** doesn't have an account in the destination country
+2. **Correspondent banks** act as intermediaries, holding accounts on behalf of other banks
+3. **Nostro/Vostro accounts**: Your bank's account at a correspondent is a "nostro" (ours) account; from the correspondent's view, it's a "vostro" (yours) account
+4. **Chain of correspondents**: A payment may pass through multiple intermediaries
+
+### Example: US to Thailand Transfer
+
+```
+US Bank → US Correspondent Bank → Asian Regional Bank → Thai Bank
+```
+
+Each hop:
+- Takes time (hours to days)
+- May deduct fees
+- Requires the payment to be processed during business hours
+- Adds compliance checks
+
+## Correspondent Banking Pain Points
+
+### Fees Accumulate at Each Hop
+
+| Hop | Typical Fee |
+|-----|-------------|
+| Sender bank wire fee | $45 |
+| First correspondent | $15 |
+| Second correspondent | $15 |
+| Receiver bank fee | $10 |
+| **Total** | **$85+** |
+
+*Plus 1-4% FX markup*
+
+### Settlement Takes Days
+
+- Each correspondent processes during their banking hours
+- Time zone differences add delays
+- Compliance checks at each institution
+- Average: 2-3 days, can be 5+ days for some corridors
+
+### Limited Operating Hours
+
+- Banks process during business hours only
+- Friday payments may not settle until Tuesday
+- Holiday schedules vary by country
+
+### Compliance Complexity
+
+- Each correspondent runs its own KYC/AML checks
+- Payments can be held or rejected at any hop
+- Limited visibility into where delays occur
+
+### De-risking and Shrinking Networks
+
+Banks are closing correspondent relationships due to compliance costs, leaving some corridors with fewer (or no) options.
+
+## Comparison of Alternatives
+
+| Alternative | Speed | Cost | Coverage | Intermediaries |
+|-------------|-------|------|----------|----------------|
+| Direct Bank Connections | Hours-days | Lower | Limited pairs | None |
+| Fintech Rails (Wise, etc.) | Hours-days | 0.5-1.5% | 80+ countries | Internal |
+| Stablecoins (Tempo) | ~0.5 seconds | ~$0.001 | Global (wallets) | None |
+| CBDCs | TBD | TBD | Limited pilots | Varies |
+| Regional Payment Systems | Hours | Low | Regional only | Reduced |
+
+## When Correspondent Banking Is Still Necessary
+
+Correspondent banking has real advantages:
+
+- **Universal reach**: Connects any two banks globally
+- **Established trust**: 50+ years of legal frameworks
+- **Large transactions**: Handles multi-million dollar transfers routinely
+- **Regulatory clarity**: Clear compliance requirements
+- **Bank account delivery**: Funds arrive in recipient's existing bank account
+
+For payments to traditional bank accounts where recipients can't accept alternatives, correspondent banking remains the default.
+
+## Direct Bank Connections
+
+### How It Works
+
+Large banks establish direct relationships with banks in key markets, bypassing correspondents for high-volume corridors.
+
+### Benefits
+
+- Fewer intermediaries = lower fees and faster settlement
+- More predictable routing and timing
+- Better visibility into payment status
+
+### Limitations
+
+- Only available for high-volume corridors
+- Requires significant bilateral volume to justify
+- Still limited to banking hours
+- Not available to smaller institutions
+
+## Fintech Payment Rails
+
+### How They Work
+
+Companies like Wise, Payoneer, and Remitly maintain local bank accounts in multiple countries. Instead of sending money through correspondents, they:
+
+1. Accept payment locally in origin country
+2. Pay out from their local account in destination country
+3. Rebalance their internal accounts periodically
+
+### Benefits
+
+- Avoids correspondent fees
+- Faster settlement (often same or next day)
+- Transparent pricing
+- Mid-market FX rates
+
+### Examples
+
+| Provider | Coverage | Typical Cost | Speed |
+|----------|----------|--------------|-------|
+| Wise | 80+ countries | 0.5-1.5% | 1-2 days |
+| Payoneer | 200+ countries | 2-3% | 1-3 days |
+| Remitly | 100+ countries | 1-3% | Minutes-days |
+
+### Limitations
+
+- Lower limits than bank wires
+- Still requires bank accounts
+- Settlement not instant
+- Coverage varies by corridor
+
+## Stablecoins on Tempo
+
+### How It Works
+
+Stablecoins represent dollars (or other currencies) on blockchain networks. Transfers happen directly between wallets without any intermediary banks.
+
+### No Correspondent Chain
+
+```
+Traditional: Sender Bank → Correspondent → Correspondent → Receiver Bank
+Tempo:       Sender Wallet → Tempo Network → Receiver Wallet
+```
+
+### Speed & Cost
+
+- **Settlement**: ~0.5 seconds to finality
+- **Cost**: ~$0.001 per transaction
+- **Availability**: 24/7/365
+- **Intermediaries**: None
+
+### $100,000 Cross-Border Transfer
+
+| Component | Correspondent Banking | Tempo |
+|-----------|----------------------|-------|
+| Sender fees | $45 | $0.001 |
+| Correspondent 1 | $15 | $0 |
+| Correspondent 2 | $15 | $0 |
+| Receiver fees | $10 | $0 |
+| FX (2%) | $2,000 | ~$50 (DEX) |
+| **Total cost** | **$2,085** | **~$50** |
+| **Time** | **2-4 days** | **0.5 seconds** |
+
+### Best For
+
+- Crypto-native businesses
+- High-frequency international payments
+- Time-sensitive transfers
+- 24/7 global operations
+- Programmable payments
+- Corridors with limited correspondent access
+
+### Limitations
+
+- Recipient needs crypto wallet (not bank account)
+- On/off ramps needed for fiat conversion
+- Less familiar to traditional finance
+- Evolving regulatory landscape
+
+## CBDCs (Central Bank Digital Currencies)
+
+### What They Are
+
+Digital currencies issued by central banks. Potentially enable direct central bank-to-central bank settlement, bypassing commercial correspondent networks.
+
+### Current State
+
+- **Pilots**: China (e-CNY), EU (digital euro), many others testing
+- **mBridge**: Multi-CBDC platform for cross-border between Hong Kong, Thailand, China, UAE
+- **Production**: Bahamas (Sand Dollar), Nigeria (eNaira), Jamaica (JAM-DEX)
+
+### Potential Benefits
+
+- Direct central bank settlement
+- Reduced reliance on correspondent banks
+- 24/7 availability
+- Programmable money
+
+### Limitations
+
+- Most still in pilot/development
+- Interoperability between CBDCs uncertain
+- Design decisions (privacy, programmability) still being made
+- Years from widespread cross-border use
+
+## Regional Payment Systems
+
+### Examples
+
+- **SEPA** (Europe): Instant or same-day within Eurozone
+- **TIPS** (Europe): Instant settlement 24/7
+- **P27** (Nordics): Cross-border Nordic payments
+- **Project Nexus**: BIS initiative linking domestic instant payment systems
+
+### Benefits
+
+- Fast settlement within region
+- Lower costs than correspondent banking
+- Increasing 24/7 availability
+
+### Limitations
+
+- Regional only
+- Cross-region still requires bridges
+- Different systems don't interoperate
+
+## Choosing the Right Alternative
+
+| Your Situation | Best Alternative |
+|----------------|-----------------|
+| High-volume specific corridor | Direct bank connection |
+| SMB international to bank accounts | Fintech rails (Wise) |
+| Crypto-capable counterparties | Stablecoins (Tempo) |
+| Intra-regional (EU, Nordics) | Regional payment systems |
+| Traditional bank, no alternative | Correspondent banking |
+
+## The Evolving Landscape
+
+Correspondent banking won't disappear, but its role is narrowing:
+
+| Payment Type | Likely Future |
+|--------------|---------------|
+| Bank-to-bank, unfamiliar corridor | Correspondent banking |
+| High-volume corridors | Direct connections |
+| SMB/consumer to bank | Fintech rails |
+| Crypto-native businesses | Stablecoins |
+| Intra-regional | Regional systems |
+| Government/central bank | CBDCs (eventually) |
+
+## Cost Comparison: Annual International Payment Volume
+
+**$1M annual international payments (100 transactions):**
+
+| Method | Avg Per-Transaction | Total Annual Cost |
+|--------|---------------------|-------------------|
+| Correspondent banking | $200 (fees + FX) | $20,000 |
+| Direct bank (if available) | $100 | $10,000 |
+| Fintech rails | $100 (1%) | $10,000 |
+| Tempo | $0.50 (incl. FX swap) | $50 |
+
+*Tempo savings: ~$19,950/year*
+
+## Transitioning from Correspondent Banking
+
+For businesses exploring alternatives:
+
+1. **Audit your corridors**: Which countries do you pay most frequently?
+2. **Assess recipient capabilities**: Can they accept stablecoins? Need bank deposits?
+3. **Start with specific corridors**: Test alternatives on highest-volume or most expensive routes
+4. **Hybrid approach**: Use correspondent banking where necessary, alternatives where beneficial
+
+## Get Early Access
+
+Tempo is currently in testnet with mainnet launching soon. To learn more about building on Tempo or integrating stablecoin payments:
+
+- [Explore the testnet](/quickstart/integrate-tempo)
+- [Get testnet funds](/quickstart/faucet)
+- Contact [partners@tempo.xyz](mailto:partners@tempo.xyz) for partnership opportunities
