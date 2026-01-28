@@ -95,6 +95,10 @@ export default defineConfig({
             link: '/quickstart/wallet-developers',
           },
           {
+            text: 'Verify Contracts',
+            link: '/quickstart/verify-contracts',
+          },
+          {
             text: 'Building with AI',
             link: '/guide/building-with-ai',
           },
