@@ -9,13 +9,44 @@ Verify your smart contracts on Tempo using [contracts.tempo.xyz](https://contrac
 
 ## Verify with Foundry
 
-The easiest way to verify contracts is using Foundry's `forge verify-contract` command with the Sourcify verifier.
+The easiest way to verify contracts is to include the `--verify` flag when deploying. You can specify Tempo's verifier by either setting the `VERIFIER_URL` environment variable:
+
+```bash
+export VERIFIER_URL=https://contracts.tempo.xyz
+```
+
+Or by passing `--verifier-url https://contracts.tempo.xyz` directly to the command.
+
+The chain ID is auto-detected from the RPC URL, but you can specify it explicitly with `--chain <CHAIN_ID>` if needed.
+
+### Verify during deployment
+
+Deploy and verify in a single command:
+
+```bash
+# Deploy and verify with forge create
+forge create src/Token.sol:Token \
+  --rpc-url $TEMPO_RPC_URL \
+  --interactive \
+  --broadcast \
+  --verify
+
+# Deploy and verify with forge script
+forge script script/Deploy.s.sol \
+  --rpc-url $TEMPO_RPC_URL \
+  --interactive \
+  --sender <YOUR_WALLET_ADDRESS> \
+  --broadcast \
+  --verify
+```
+
+### Verify an existing contract
+
+To verify a contract that's already deployed, use `forge verify-contract`:
 
 ```bash
 forge verify-contract \
-  --verifier sourcify \
   --verifier-url https://contracts.tempo.xyz \
-  --chain-id 42431 \
   <CONTRACT_ADDRESS> \
   src/MyContract.sol:MyContract
 ```
@@ -26,22 +57,23 @@ Replace `<CONTRACT_ADDRESS>` with your deployed contract address and `src/MyCont
 Make sure you're using the same compiler settings (optimizer, EVM version) that you used when deploying the contract.
 :::
 
-### Example
+### Retry options
 
-After deploying a contract, verify it:
+If verification fails intermittently, use `--retries` and `--delay` to automatically retry:
 
 ```bash
-# Deploy your contract
-forge create src/Token.sol:Token --rpc-url https://rpc.moderato.tempo.xyz --private-key $PRIVATE_KEY
-
-# Verify the deployed contract
-forge verify-contract \
-  --verifier sourcify \
-  --verifier-url https://contracts.tempo.xyz \
-  --chain-id 42431 \
-  0x1234567890abcdef1234567890abcdef12345678 \
-  src/Token.sol:Token
+forge create src/Token.sol:Token \
+  --rpc-url $TEMPO_RPC_URL \
+  --interactive \
+  --broadcast \
+  --verify \
+  --retries 10 \
+  --delay 10
 ```
+
+This retries verification up to 10 times with a 10-second delay between attempts.
+
+For more details on deployment and verification options, see the [Foundry documentation](https://getfoundry.sh/forge/deploying).
 
 ## Verify with the API
 
