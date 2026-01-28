@@ -1,17 +1,17 @@
 ---
 title: "Bridge Stablecoins to Tempo"
-description: "Bridge USDC, USDT, and other stablecoins to Tempo. Use Bridge, Relay, and other interoperability partners for cross-chain transfers."
+description: "Bridge stablecoins to Tempo. Use Bridge, Relay, and other interoperability partners for cross-chain transfers."
 ---
 
 # Bridge Stablecoins to Tempo
 
-Move stablecoins from other chains to Tempo using our interoperability partners.
+Move stablecoins from other chains to Tempo using our interoperability partners. Note: USDC and USDT are not natively available on Tempo—bridging converts source chain assets to Tempo's native stablecoins (pathUSD, AlphaUSD, etc.).
 
 ## Quick Options
 
 | Partner | Best For | Supported Assets |
 |---------|----------|-----------------|
-| [Bridge](https://bridge.xyz) | Enterprise orchestration | USDC, USDT, fiat rails |
+| [Bridge](https://bridge.xyz) | Enterprise orchestration | Multiple stablecoins, fiat rails |
 | [Relay](https://relay.link) | Consumer payments | Any token, any chain |
 | [Thunes](https://thunes.com) | Global remittances | 80+ currencies |
 | [OpenFX](https://openfx.com) | FX liquidity | Multi-currency |
@@ -88,7 +88,7 @@ const quote = await relayClient.actions.getQuote({
   originChainId: 1, // Ethereum
   destinationChainId: 42431, // Tempo Testnet
   originCurrency: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC on ETH
-  destinationCurrency: '0x20c0000000000000000000000000000000000001', // USDC on Tempo
+  destinationCurrency: '0x...', // pathUSD or other native stablecoin on Tempo
   amount: '1000000000' // 1000 USDC (6 decimals on ETH)
 })
 

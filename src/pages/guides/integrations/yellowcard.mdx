@@ -11,8 +11,10 @@ description: "Stablecoin on/off ramps for Africa with Yellow Card. Enable fiat-t
 
 - **Multi-country coverage** — 20+ African countries
 - **Local payment methods** — Mobile money, bank transfers
-- **Stablecoin rails** — USDC, USDT support
+- **Stablecoin rails** — Multiple stablecoin support
 - **Regulatory compliance** — Licensed in operating countries
+
+Note: This guide shows integration patterns for Yellow Card's off-ramp service. Tempo's native stablecoins (pathUSD, AlphaUSD, etc.) would need to be bridged or swapped before using Yellow Card's USDC/USDT rails.
 
 ## API Setup
 
@@ -345,7 +347,7 @@ async function sellStablecoinFlow(
     customerEmail: email
   })
   
-  // 2. Send USDC to deposit address
+  // 2. Send stablecoins to deposit address
   const walletClient = createWalletClient({
     chain: tempo,
     transport: http()

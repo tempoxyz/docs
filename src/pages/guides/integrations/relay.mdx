@@ -33,6 +33,8 @@ const relayClient = createClient({
 
 ## Get Bridge Quote
 
+Note: USDC is not natively available on Tempo. This example shows bridging from other chains to receive native stablecoins on Tempo. Check current bridge support for available destination currencies.
+
 ```typescript
 async function getQuote(
   userAddress: string,
@@ -43,8 +45,8 @@ async function getQuote(
     user: userAddress,
     originChainId,
     destinationChainId: 42431, // Tempo Testnet
-    originCurrency: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC on origin
-    destinationCurrency: '0x20c0000000000000000000000000000000000001', // USDC on Tempo
+    originCurrency: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC on origin chain
+    destinationCurrency: '0x...', // pathUSD or other native stablecoin on Tempo
     amount,
     tradeType: 'EXACT_INPUT'
   })
