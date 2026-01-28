@@ -26,5 +26,5 @@ src/pages.gen.ts
 .env
 .vercel
 .vocs
-
+.env*.local
 src/pages/protocol/tips/tip-*
