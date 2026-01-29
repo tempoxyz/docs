@@ -28,3 +28,7 @@ src/pages.gen.ts
 .vocs
 
 src/pages/protocol/tips/tip-*
+
+# Playwright
+playwright-report/
+test-results/
