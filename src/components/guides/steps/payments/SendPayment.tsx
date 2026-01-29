@@ -105,6 +105,7 @@ export function SendPayment(props: DemoStepProps) {
                 <input
                   className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
+                  id="recipient"
                   type="text"
                   name="recipient"
                   value={recipient}
@@ -119,11 +120,12 @@ export function SendPayment(props: DemoStepProps) {
                 <input
                   className={`h-[34px] rounded-[50px] border px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white ${memoError ? 'border-red-500' : 'border-gray4'}`}
                   data-1p-ignore
+                  id="memo"
                   type="text"
                   name="memo"
                   value={memo}
                   onChange={handleMemoChange}
-                  placeholder="INV-12345"
+                  placeholder="Optional"
                 />
               </div>
               <Button
