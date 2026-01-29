@@ -106,6 +106,7 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
                   className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
+                  id="recipient"
                   name="recipient"
                   value={recipient}
                   onChange={(e) => setRecipient(e.target.value)}
@@ -120,6 +121,7 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
                   className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
+                  id="memo"
                   name="memo"
                   value={memo}
                   onChange={(e) => setMemo(e.target.value)}

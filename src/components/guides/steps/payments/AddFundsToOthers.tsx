@@ -127,6 +127,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
               autoComplete="off"
               autoCorrect="off"
               spellCheck={false}
+              id="fundAddress"
               name="fundAddress"
               placeholder="0x..."
               value={fundAddress ?? ''}

@@ -40,6 +40,14 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!dist", "!node_modules", "!specs/lib", "!src/snippets/unformatted"]
+    "includes": [
+      "**",
+      "!dist",
+      "!node_modules",
+      "!playwright-report",
+      "!specs/lib",
+      "!src/snippets/unformatted",
+      "!test-results"
+    ]
   }
 }
