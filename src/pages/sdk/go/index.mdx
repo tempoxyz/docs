@@ -100,7 +100,7 @@ func main() {
     // [!code focus:13]
     tx := transaction.New()
     tx.ChainID = big.NewInt(42431) // Tempo testnet
-    tx.MaxFeePerGas = big.NewInt(2000000000)
+    tx.MaxFeePerGas = big.NewInt(20000000000) // 20 gwei base fee
     tx.MaxPriorityFeePerGas = big.NewInt(1000000000)
     tx.Gas = 100000
     tx.Calls = []transaction.Call{{

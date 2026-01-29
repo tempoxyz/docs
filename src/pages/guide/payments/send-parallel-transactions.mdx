@@ -1,5 +1,5 @@
 ---
-description: Submit multiple transactions concurrently using Tempo's 2D nonce system. Use nonce keys to avoid waiting for sequential confirmations.
+description: Submit multiple transactions concurrently using Tempo's nonce system. Choose between 2D nonces for ordered sequences or expiring nonces for fire-and-forget.
 ---
 
 import * as Demo from '../../../components/guides/Demo.tsx'
@@ -9,11 +9,35 @@ import { Cards, Card } from 'vocs'
 
 # Send Parallel Transactions
 
-Submit multiple transactions in parallel using Tempo's [2D nonces](/protocol/transactions/spec-tempo-transaction). The `nonceKey` property allow you to send concurrent transactions without waiting for each one to confirm sequentially.
+Submit multiple transactions in parallel using Tempo's flexible nonce system. Choose between:
 
-## Understanding nonce keys
+- **[2D nonces](/protocol/transactions/spec-tempo-transaction)**: Independent nonce sequences for ordered transaction groups
+- **[Expiring nonces](/protocol/tips/tip-1009)**: Time-bounded replay protection for fire-and-forget transactions *(recommended for most use cases)*
 
-Tempo uses a **2D nonce system** that enables parallel transaction execution:
+## Expiring Nonces (Recommended)
+
+[TIP-1009](/protocol/tips/tip-1009) introduces expiring nonces: transactions specify a `validBefore` timestamp (max 30s in the future) instead of tracking sequential nonces. This is the simplest approach for parallel submission.
+
+To use expiring nonces, set `nonceKey` to `UINT256_MAX` (`0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff`). This signals to the protocol that the transaction uses time-based replay protection instead of sequential nonces.
+
+```typescript
+const tx = await Actions.token.transfer(config, {
+  amount: parseUnits('100', 6),
+  to: recipient,
+  token: alphaUsd,
+  nonceKey: BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'),
+  validBefore: Math.floor(Date.now() / 1000) + 30,
+})
+```
+
+Benefits:
+- No nonce tracking required
+- Automatic replay protection via circular buffer
+- No permanent state bloat from unused nonce keys
+
+## 2D Nonces
+
+For cases requiring ordered sequences within a key, Tempo's **2D nonce system** enables parallel transaction execution:
 
 - **Protocol nonce (key 0)**: The default sequential nonce. Transactions must be processed in order.
 - **User nonces (keys 1+)**: Independent nonce sequences that allow concurrent transaction submission.
