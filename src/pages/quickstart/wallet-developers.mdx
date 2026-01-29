@@ -20,7 +20,7 @@ As part of supporting Tempo in your wallet, you can also deliver an enhanced exp
 If you use `eth_getBalance` to validate a user's balance, you should instead check the user's account fee token balance on Tempo. Additionally, you should not display any "native balance" in your UI for Tempo users.
 
 :::info
-In testnet, `eth_getBalance` [returns a large placeholder value](/quickstart/evm-compatibility#handling-eth-native-token-balance-checks) for the native token balance to unblock existing assumptions wallets have about the native token balance.
+On Tempo, `eth_getBalance` [returns a JSON-RPC error](/quickstart/evm-compatibility#handling-eth-native-token-balance-checks) with code `-32000` and a message linking to this documentation, since there is no native token balance.
 :::
 
 :::code-group
