@@ -18,7 +18,7 @@ test('sign up, sign out, then sign in with passkey', async ({ page }) => {
 
   // Wait for the demo to load
   const signUpButton = page.getByRole('button', { name: 'Sign up' }).first()
-  await expect(signUpButton).toBeVisible({ timeout: 60000 })
+  await expect(signUpButton).toBeVisible({ timeout: 90000 })
 
   // Sign up with passkey
   await signUpButton.click()

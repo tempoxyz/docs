@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('send a payment', async ({ page }) => {
+test('create a stablecoin', async ({ page }) => {
   test.setTimeout(120000)
 
   // Set up virtual authenticator via CDP
@@ -16,7 +16,7 @@ test('send a payment', async ({ page }) => {
     },
   })
 
-  await page.goto('/guide/payments/send-a-payment')
+  await page.goto('/guide/issuance/create-a-stablecoin')
 
   // Step 1: Sign up with passkey
   const signUpButton = page.getByRole('button', { name: 'Sign up' }).first()
@@ -38,21 +38,19 @@ test('send a payment', async ({ page }) => {
     timeout: 90000,
   })
 
-  // Step 3: Send payment
-  const enterDetailsButton = page.getByRole('button', { name: 'Enter details' }).first()
-  await expect(enterDetailsButton).toBeVisible()
-  await enterDetailsButton.click()
+  // Step 3: Fill in token details and deploy
+  const nameInput = page.getByPlaceholder('demoUSD').first()
+  await expect(nameInput).toBeVisible()
+  await nameInput.fill('TestUSD')
 
-  // Fill in optional memo
-  const memoInput = page.getByLabel('Memo (optional)').first()
-  await expect(memoInput).toBeVisible()
-  await memoInput.fill('test-memo')
+  const symbolInput = page.getByPlaceholder('DEMO').first()
+  await expect(symbolInput).toBeVisible()
+  await symbolInput.fill('TEST')
 
-  // Click send
-  const sendButton = page.getByRole('button', { name: 'Send' }).first()
-  await sendButton.click()
+  const deployButton = page.getByRole('button', { name: 'Deploy' }).first()
+  await deployButton.click()
 
-  // Wait for transaction receipt link
+  // Wait for success - View receipt link
   await expect(page.getByRole('link', { name: 'View receipt' })).toBeVisible({ timeout: 90000 })
 
   // Clean up

@@ -181,6 +181,7 @@ export function SetFeeToken(props: DemoStepProps) {
                   autoComplete="off"
                   autoCorrect="off"
                   spellCheck={false}
+                  id="customFeeToken"
                   name="customFeeToken"
                   placeholder="0x..."
                   value={customFeeToken}

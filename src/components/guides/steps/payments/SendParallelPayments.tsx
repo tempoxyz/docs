@@ -184,6 +184,7 @@ export function SendParallelPayments(props: DemoStepProps) {
                     className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 disabled:cursor-not-allowed disabled:opacity-60 dark:text-white"
                     data-1p-ignore
                     type="text"
+                    id="recipient1"
                     name="recipient1"
                     value={FAKE_RECIPIENT}
                     disabled
@@ -198,6 +199,7 @@ export function SendParallelPayments(props: DemoStepProps) {
                     className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 disabled:cursor-not-allowed disabled:opacity-60 dark:text-white"
                     data-1p-ignore
                     type="text"
+                    id="recipient2"
                     name="recipient2"
                     value={FAKE_RECIPIENT_2}
                     disabled

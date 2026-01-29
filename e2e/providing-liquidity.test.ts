@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
-test('send a payment', async ({ page }) => {
-  test.setTimeout(120000)
+test('providing liquidity - place and query order', async ({ page }) => {
+  test.setTimeout(180000)
 
   // Set up virtual authenticator via CDP
   const client = await page.context().newCDPSession(page)
@@ -16,14 +16,13 @@ test('send a payment', async ({ page }) => {
     },
   })
 
-  await page.goto('/guide/payments/send-a-payment')
+  await page.goto('/guide/stablecoin-dex/providing-liquidity')
 
   // Step 1: Sign up with passkey
   const signUpButton = page.getByRole('button', { name: 'Sign up' }).first()
   await expect(signUpButton).toBeVisible({ timeout: 90000 })
   await signUpButton.click()
 
-  // Wait for sign out button (indicates successful sign up)
   await expect(page.getByRole('button', { name: 'Sign out' }).first()).toBeVisible({
     timeout: 30000,
   })
@@ -33,27 +32,27 @@ test('send a payment', async ({ page }) => {
   await expect(addFundsButton).toBeVisible()
   await addFundsButton.click()
 
-  // Wait for "Add more funds" button (indicates funds were added)
   await expect(page.getByRole('button', { name: 'Add more funds' }).first()).toBeVisible({
     timeout: 90000,
   })
 
-  // Step 3: Send payment
-  const enterDetailsButton = page.getByRole('button', { name: 'Enter details' }).first()
-  await expect(enterDetailsButton).toBeVisible()
-  await enterDetailsButton.click()
+  // Step 3: Place order
+  const placeOrderButton = page.getByRole('button', { name: 'Place order' }).first()
+  await expect(placeOrderButton).toBeVisible()
+  await placeOrderButton.click()
 
-  // Fill in optional memo
-  const memoInput = page.getByLabel('Memo (optional)').first()
-  await expect(memoInput).toBeVisible()
-  await memoInput.fill('test-memo')
+  // Wait for order to be placed - should see View receipt
+  await expect(page.getByRole('link', { name: 'View receipt' }).first()).toBeVisible({
+    timeout: 90000,
+  })
 
-  // Click send
-  const sendButton = page.getByRole('button', { name: 'Send' }).first()
-  await sendButton.click()
+  // Step 4: Query order - button should become enabled after placing
+  const queryButton = page.getByRole('button', { name: 'Query' }).first()
+  await expect(queryButton).toBeEnabled({ timeout: 30000 })
+  await queryButton.click()
 
-  // Wait for transaction receipt link
-  await expect(page.getByRole('link', { name: 'View receipt' })).toBeVisible({ timeout: 90000 })
+  // Wait for order details to show (order type indicator)
+  await expect(page.getByText('Buy').first()).toBeVisible({ timeout: 30000 })
 
   // Clean up
   await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })

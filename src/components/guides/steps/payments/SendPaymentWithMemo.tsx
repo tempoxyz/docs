@@ -147,6 +147,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
                   className={`h-[34px] rounded-[50px] border px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white ${memoError ? 'border-red-500' : 'border-gray4'}`}
                   data-1p-ignore
                   type="text"
+                  id="memo"
                   name="memo"
                   value={memo}
                   onChange={handleMemoChange}
@@ -163,6 +164,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
                     className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                     data-1p-ignore
                     type="text"
+                    id="recipient"
                     name="recipient"
                     value={recipient}
                     onChange={(e) => setRecipient(e.target.value)}

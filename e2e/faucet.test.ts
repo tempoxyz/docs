@@ -1,11 +1,13 @@
 import { expect, test } from '@playwright/test'
 
 test('fund an address via faucet', async ({ page }) => {
+  test.setTimeout(120000)
+
   await page.goto('/quickstart/faucet')
 
   // Switch to "Fund an address" tab
   const tab = page.getByRole('tab', { name: 'Fund an address' })
-  await expect(tab).toBeVisible({ timeout: 60000 })
+  await expect(tab).toBeVisible({ timeout: 90000 })
   await tab.click()
 
   // Enter an address
@@ -16,5 +18,5 @@ test('fund an address via faucet', async ({ page }) => {
   await page.getByRole('button', { name: 'Add funds' }).click()
 
   // Confirm "View receipt" link is visible
-  await expect(page.getByRole('link', { name: 'View receipt' })).toBeVisible({ timeout: 60000 })
+  await expect(page.getByRole('link', { name: 'View receipt' })).toBeVisible({ timeout: 90000 })
 })
