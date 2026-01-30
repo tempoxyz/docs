@@ -5,54 +5,66 @@ description: Learn what stablecoins are, how they maintain value through reserve
 
 import { Cards, Card } from 'vocs'
 import { ZoomableImage } from "../../components/ZoomableImage.tsx"
+import { FAQSchema } from "../../components/FAQSchema.tsx"
 
-# Stablecoins [Room-temperature superconductors for financial services.]
+# Stablecoins
 
-Stablecoins offer businesses a faster, cheaper, and more programmable way to move money globally. They eliminate many of the delays, costs, and operational constraints of legacy rails, enabling use cases ranging from remittances and global payouts to automated treasury operations and agentic commerce.
+Stablecoins let businesses move value globally with faster settlement and more predictable fees than legacy payment rails. Treasury and payments teams use them for cross-border payouts, vendor settlement, and automated liquidity operations that run 24/7.
 
 ## What are stablecoins?
 
-Stablecoins are digital representations of money on blockchains designed to hold a steady value. Unlike volatile cryptocurrencies such as Bitcoin or Ether, whose prices fluctuate based on market conditions, stablecoins are pegged to established currencies like the U.S. dollar or Euro.
+Stablecoins are blockchain-based digital assets designed to maintain a stable value. Unlike volatile cryptocurrencies such as Bitcoin or Ether, stablecoins are pegged to established currencies like the US dollar or Euro. Examples of USD-pegged stablecoins include USDC and USDT.
 
-Real-world utility, increasing regulatory clarity, and growing institutional adoption are driving rapid growth in stablecoin usage. The circulating supply of stablecoins has grown more than tenfold over the past five years, reaching roughly $300 billion today. The U.S. Treasury now projects that this figure could rise to $3 trillion by 2030.
+This page focuses on fully reserved, fiat-backed stablecoins. Other models (crypto-collateralized or algorithmic) have different risk profiles.
+
+Real-world utility, increasing regulatory clarity, and growing institutional adoption are driving rapid growth in stablecoin usage. The circulating supply of stablecoins has grown more than tenfold over the past five years, reaching roughly $300 billion today. The US Treasury projects this figure could rise to $3 trillion by 2030.
 
 ## How stablecoins work
 
-Fully-reserved fiat-backed stablecoins are issued by regulated entities ("stablecoin issuers") and are backed 1&#58;1 with reserves such as cash and short-term government securities held at licensed financial institutions. Stablecoin issuers use a mint-and-burn process to keep the supply aligned with underlying reserves and ensure that holders can always redeem stablecoins at face value.
+Fully reserved fiat-backed stablecoins are issued by regulated entities and backed 1&#58;1 with reserves such as cash and short-term government securities held at licensed financial institutions. Stablecoin issuers use a mint-and-burn process to keep the supply aligned with underlying reserves and ensure holders can always redeem stablecoins at face value.
 
-When a user deposits fiat currency with an issuer, the issuer mints the corresponding amount of stablecoins onchain and sends them to the user. When the user later redeems stablecoins for fiat, the issuer receives the tokens, burns them, and sends the equivalent amount of fiat from its reserves to the user.
+When a user deposits fiat currency with an issuer, the issuer mints the corresponding amount of stablecoins onchain and sends them to the user. When the user redeems stablecoins for fiat, the issuer burns the tokens and sends the equivalent fiat from reserves.
 
 <ZoomableImage src="/learn/stablecoin-mint-burn-process.svg" alt="Mint and burn process for stablecoins" />
 
-With the introduction of regulatory frameworks like MiCA (Markets in Crypto-Assets) in the EU and the GENIUS Act in the U.S., stablecoins now operate under clearer rules governing reserve management, audits, and disclosures. As a result, they have become compliant, transparent, and reliable instruments for modern payments and financial operations.
+Regulatory frameworks such as the EU's MiCA and the US GENIUS Act are establishing disclosure and reserve requirements for issuers. Requirements and enforcement still vary by jurisdiction, so businesses should evaluate each stablecoin and issuer on its own terms.
 
 ## Why stablecoins matter for businesses
 
-For financial institutions, corporations, and payment providers, fully-reserved fiat-backed stablecoins enable near-instant payments that operate 24/7, work across borders, and bypass much of the friction found in legacy payment rails.
+For financial institutions, corporations, and payment providers, fully reserved fiat-backed stablecoins enable near-instant payments that operate 24/7, work across borders, and bypass friction found in legacy payment rails.
 
-They support established use cases such as remittances, global payouts, and embedded finance, while also enabling newer applications made possible by blockchain rails, including microtransactions and agentic commerce.
+They support established use cases such as [remittances](/learn/use-cases/remittances), [global payouts](/learn/use-cases/global-payouts), and [embedded finance](/learn/use-cases/embedded-finance), while enabling newer applications like [microtransactions](/learn/use-cases/microtransactions) and [agentic commerce](/learn/use-cases/agentic-commerce).
 
 <ZoomableImage src="/learn/stablecoin-use-cases.svg" alt="Stablecoin use cases" />
 
 ## Programmable money
 
-Stablecoins also open the door to programmable money: smart contracts, programs that run on the blockchain, can execute payments automatically based on predefined rules or conditions, improving the efficiency and transparency of payment processing, liquidity management, and reconciliation.
+Stablecoins open the door to programmable money. Smart contracts can execute payments automatically based on predefined rules, improving efficiency and transparency in payment processing, liquidity management, and reconciliation.
 
-For example, a global enterprise can use a smart contract to automatically top up or sweep the wallets of its subsidiaries based on balance thresholds and predefined rules. This allows routine treasury actions, such as maintaining minimum operating balances or consolidating excess funds, to run automatically onchain. In practice, the smart contract replaces functionality that would otherwise require custom integrations with multiple banking partners.
+For example, a global enterprise can use a smart contract to automatically top up or sweep subsidiary wallets based on balance thresholds. Routine treasury actions run automatically onchain, replacing custom integrations with multiple banking partners.
 
-In short, stablecoins provide the stability and familiarity of fiat currency with the speed and innovation of blockchains, offering institutions and enterprises of all sizes a faster, more efficient way to move value globally.
+On Tempo, stablecoins follow the [TIP-20 token standard](/protocol/tip20/overview), which adds transfer memos, compliance controls, and reward distribution to standard token functionality.
+
+## Stablecoins on Tempo
+
+Tempo is purpose-built for stablecoin payments and issuance. Key resources:
+
+- [TIP-20 token standard](/protocol/tip20/overview): How stablecoins and other tokens behave on Tempo, including transfer memos and compliance policies
+- [Native stablecoins](/learn/tempo/native-stablecoins): How Tempo approaches stablecoin design, settlement, and fee payment
+- [Stablecoin DEX](/guide/stablecoin-dex): On-chain exchange for stablecoin-to-stablecoin swaps
+- [Mint stablecoins](/guide/issuance/mint-stablecoins): Create custom stablecoins with built-in compliance features
 
 ## History of stablecoins
 
-Stablecoins emerged as a solution to cryptocurrency's volatility problem. Tether (USDT), launched in 2014 on the Bitcoin blockchain via the Omni Layer protocol, pioneered the concept of a dollar-pegged digital asset. MakerDAO introduced DAI in 2017, creating the first decentralized, crypto-collateralized stablecoin governed by smart contracts. Circle and Coinbase followed in 2018 with USD Coin (USDC), emphasizing regulatory compliance and transparent reserves.
+Stablecoins emerged as a solution to cryptocurrency's volatility. Tether (USDT), launched in 2014 on the Bitcoin blockchain via the Omni Layer protocol, pioneered the concept of a dollar-pegged digital asset. MakerDAO introduced DAI in 2017, creating the first decentralized, crypto-collateralized stablecoin. Circle and Coinbase followed in 2018 with USD Coin (USDC), emphasizing regulatory compliance and transparent reserves.
 
-The 2020 "DeFi Summer" marked an inflection point for stablecoin adoption. Total stablecoin market capitalization surged from under $10 billion to over $100 billion by 2021, as they became essential infrastructure for lending protocols, decentralized exchanges, and yield farming. This explosive growth attracted regulatory attention worldwide.
+The 2020 "DeFi Summer" marked an inflection point. Total stablecoin market capitalization surged from under $10 billion to over $100 billion by 2021, as stablecoins became essential infrastructure for lending protocols, decentralized exchanges, and yield farming.
 
-Regulatory frameworks are now taking shape globally. The European Union's Markets in Crypto-Assets (MiCA) regulation, finalized in 2023, established comprehensive stablecoin requirements including reserve mandates and issuer licensing. In the United States, the GENIUS Act (Guiding and Establishing National Innovation for U.S. Stablecoins) represents ongoing legislative efforts to create a federal framework for stablecoin issuance and oversight.
+Regulatory frameworks are now taking shape globally. The EU's Markets in Crypto-Assets (MiCA) regulation established comprehensive stablecoin requirements including reserve mandates and issuer licensing. In the US, the GENIUS Act represents ongoing legislative efforts to create a federal framework for stablecoin issuance and oversight.
 
 ## Stablecoin use cases
 
-Stablecoins enable a wide range of payment and financial use cases across industries:
+Stablecoins enable a wide range of payment and financial use cases:
 
 <Cards>
   <Card
@@ -97,32 +109,69 @@ Stablecoins enable a wide range of payment and financial use cases across indust
 
 ### What is a stablecoin?
 
-A stablecoin is a digital currency designed to maintain a stable value, typically pegged 1&#58;1 to a fiat currency like the US dollar. Unlike volatile cryptocurrencies, stablecoins combine the speed and programmability of blockchain with the price stability businesses need for payments and treasury operations.
+A stablecoin is a blockchain-based digital asset designed to maintain a stable value, often pegged 1&#58;1 to a fiat currency such as the US dollar. Stablecoins combine blockchain settlement (24/7 transfers, programmability) with price stability useful for payments and treasury operations.
 
 ### Are stablecoins safe?
 
-The safety of a stablecoin depends on its backing and the issuer's transparency. Regulated stablecoins like USDC maintain full reserves in cash and short-term US Treasuries, with regular third-party attestations. Always verify a stablecoin's reserve composition and regulatory status before using it for business operations.
+Safety depends on the stablecoin's backing, redemption model, and issuer disclosures. Widely used USD-pegged stablecoins including USDC and USDT publish reserve reports or attestations. The frequency, detail, and regulatory regime vary by issuer and jurisdiction. Review reserve composition, redemption terms, and disclosure history before use.
 
 ### How are stablecoins different from other cryptocurrencies?
 
-Stablecoins maintain a fixed value while cryptocurrencies like Bitcoin and Ethereum fluctuate based on market demand. This price stability makes stablecoins practical for business payments, payroll, and cross-border transactions where you need predictable values rather than speculative assets.
+Stablecoins target a fixed value (such as 1 USD), while cryptocurrencies like Bitcoin and Ether fluctuate based on market demand. This makes stablecoins practical for payments, settlement, and treasury workflows that require predictable amounts.
 
 ### What are stablecoins used for?
 
-Businesses use stablecoins for cross-border payments, vendor settlements, payroll for international contractors, and treasury management. Stablecoins enable near-instant settlement at a fraction of traditional wire transfer costs, often completing in seconds rather than days.
+Businesses use stablecoins for cross-border payments, vendor settlement, global payouts, and treasury liquidity. Stablecoins settle in minutes and operate 24/7, often with more predictable fees than traditional international wires.
 
 ### How do I get stablecoins?
 
-You can acquire stablecoins through regulated cryptocurrency exchanges, direct purchases from issuers like Circle, or through payment platforms that support stablecoin on-ramps. Enterprise users typically work with licensed custodians or payment providers that handle compliance and custody requirements.
+Businesses typically acquire stablecoins through regulated exchanges, direct onboarding with issuers like Circle or Tether, or payment providers that support stablecoin on-ramps. Enterprise teams often use licensed custodians for custody and settlement.
 
 ### Are stablecoins regulated?
 
-Stablecoin regulation varies by jurisdiction and is rapidly evolving. Major stablecoin issuers operate under state money transmitter licenses in the US, and new frameworks like the EU's MiCA regulation are establishing clear compliance requirements. Work with legal counsel to understand the regulatory requirements for your specific use case and geography.
+Regulation varies by jurisdiction and continues to evolve. Some regions have introduced issuer requirements for reserves, disclosures, and licensing (for example, the EU's MiCA framework). Confirm the rules that apply to your entity, counterparties, and operating geographies.
 
 ### What is counterparty risk in stablecoins?
 
-Counterparty risk refers to the possibility that a stablecoin issuer fails to maintain adequate reserves or becomes insolvent. Major issuers like Circle publish monthly reserve attestations, but these are point-in-time snapshots. Stablecoins backed by cash and T-bills carry less risk than those backed by commercial paper or less liquid assets.
+Counterparty risk is the risk that a stablecoin issuer cannot redeem tokens 1&#58;1 due to insufficient or illiquid reserves, operational failures, or insolvency. Major issuers such as Circle (USDC) and Tether (USDT) publish reserve disclosures, but these are not real-time views of reserves. Businesses prefer reserves held in cash and short-term government securities.
 
 ### What regulatory risks should I consider?
 
-Regulatory frameworks are still evolving globally. A stablecoin compliant in one jurisdiction may face restrictions elsewhere. The EU's MiCA regulation and the US GENIUS Act are establishing clearer rules, but businesses should verify their chosen stablecoin's regulatory status and issuer licensing in all relevant jurisdictions.
+A stablecoin compliant in one jurisdiction may face restrictions elsewhere, and rules can change. Verify issuer licensing and compliance status where you operate, and confirm how custody, reporting, and redemption requirements apply to your use case.
+
+<FAQSchema
+  items={[
+    {
+      question: "What is a stablecoin?",
+      answer: "A stablecoin is a blockchain-based digital asset designed to maintain a stable value, often pegged 1:1 to a fiat currency such as the US dollar. Stablecoins combine blockchain settlement (24/7 transfers, programmability) with price stability useful for payments and treasury operations."
+    },
+    {
+      question: "Are stablecoins safe?",
+      answer: "Safety depends on the stablecoin's backing, redemption model, and issuer disclosures. Widely used USD-pegged stablecoins including USDC and USDT publish reserve reports or attestations. The frequency, detail, and regulatory regime vary by issuer and jurisdiction."
+    },
+    {
+      question: "How are stablecoins different from other cryptocurrencies?",
+      answer: "Stablecoins target a fixed value (such as 1 USD), while cryptocurrencies like Bitcoin and Ether fluctuate based on market demand. This makes stablecoins practical for payments, settlement, and treasury workflows that require predictable amounts."
+    },
+    {
+      question: "What are stablecoins used for?",
+      answer: "Businesses use stablecoins for cross-border payments, vendor settlement, global payouts, and treasury liquidity. Stablecoins settle in minutes and operate 24/7, often with more predictable fees than traditional international wires."
+    },
+    {
+      question: "How do I get stablecoins?",
+      answer: "Businesses typically acquire stablecoins through regulated exchanges, direct onboarding with issuers like Circle or Tether, or payment providers that support stablecoin on-ramps. Enterprise teams often use licensed custodians for custody and settlement."
+    },
+    {
+      question: "Are stablecoins regulated?",
+      answer: "Regulation varies by jurisdiction and continues to evolve. Some regions have introduced issuer requirements for reserves, disclosures, and licensing (for example, the EU's MiCA framework). Confirm the rules that apply to your entity, counterparties, and operating geographies."
+    },
+    {
+      question: "What is counterparty risk in stablecoins?",
+      answer: "Counterparty risk is the risk that a stablecoin issuer cannot redeem tokens 1:1 due to insufficient or illiquid reserves, operational failures, or insolvency. Major issuers such as Circle (USDC) and Tether (USDT) publish reserve disclosures, but these are not real-time views of reserves."
+    },
+    {
+      question: "What regulatory risks should I consider?",
+      answer: "A stablecoin compliant in one jurisdiction may face restrictions elsewhere, and rules can change. Verify issuer licensing and compliance status where you operate, and confirm how custody, reporting, and redemption requirements apply to your use case."
+    }
+  ]}
+/>
