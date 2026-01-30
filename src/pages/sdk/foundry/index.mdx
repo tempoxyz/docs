@@ -130,9 +130,23 @@ forge script script/Mail.s.sol \
   --sender <YOUR_WALLET_ADDRESS> \
   --broadcast \
   --verify
+
+# Batch multiple calls into a single atomic transaction
+forge script script/Deploy.s.sol \
+  --broadcast --batch \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
 ```
 
 For more verification options including verifying existing contracts and API verification, see [Contract Verification](/quickstart/verify-contracts).
+
+:::warning[Batch Transaction Rules]
+- **Atomic execution**: If any call reverts, the entire batch reverts
+- **Single CREATE allowed**: At most one contract deployment per batch
+- **CREATE must be first**: Deployment must be the first operation
+- **Value must be zero**: Since Tempo has no native token, value must be 0
+- **Silent failures**: Calling a non-existent function without a fallback succeeds silently
+:::
 
 ### Interact & debug with `cast`
 
@@ -173,155 +187,57 @@ cast send <CONTRACT_ADDRESS> <FUNCTION_SIGNATURE> \
 # Replay a transaction by hash:
 cast run <TX_HASH> \
   --rpc-url $TEMPO_RPC_URL
-```
 
-## Tempo Features
-
-The following Tempo-specific features are now supported in the Foundry fork.
-
-### Sponsored Transactions
-
-Sponsored transactions allow a separate account to pay gas fees on behalf of the sender.
-
-```bash
-# Step 1: Get the fee payer signature hash
-FEE_PAYER_HASH=$(cast mktx <CONTRACT_ADDRESS> 'increment()' \
-  --rpc-url $TEMPO_RPC_URL \
-  --private-key $SENDER_KEY \
-  --print-sponsor-hash)
-
-# Step 2: Sponsor signs the hash
-SPONSOR_SIG=$(cast wallet sign --private-key $SPONSOR_KEY "$FEE_PAYER_HASH" --no-hash)
-
-# Step 3: Send with sponsor signature
-cast send <CONTRACT_ADDRESS> 'increment()' \
-  --rpc-url $TEMPO_RPC_URL \
-  --private-key $SENDER_KEY \
-  --sponsor-signature "$SPONSOR_SIG"
-```
-
-### Batch Transactions
-
-Batch transactions execute multiple calls atomically in a single type 0x76 transaction. All calls succeed or all revert.
-
-#### Using `cast batch-mktx` and `cast batch-send`
-
-```bash
-# Create a batch transaction (dry-run)
-cast batch-mktx \
+# Send a batch transaction with multiple calls:
+cast batch-send \
   --call "<CONTRACT_ADDRESS>::increment()" \
   --call "<CONTRACT_ADDRESS>::setNumber(uint256):500" \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
 
-# Send a batch transaction
-cast batch-send \
-  --call "<CONTRACT_ADDRESS>::increment()" \
-  --call "<CONTRACT_ADDRESS>::increment()" \
-  --rpc-url $TEMPO_RPC_URL \
-  --private-key $PRIVATE_KEY
-
-# Batch with pre-encoded calldata
+# Batch with pre-encoded calldata:
 ENCODED=$(cast calldata "setNumber(uint256)" 200)
 cast batch-send \
   --call "<CONTRACT_ADDRESS>::$ENCODED" \
   --call "<CONTRACT_ADDRESS>::setNumber(uint256):101" \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
-```
 
-#### Using `forge script --batch`
-
-Deploy and call contracts atomically in a single transaction:
-
-```bash
-forge script script/Deploy.s.sol \
-  --broadcast --batch \
+# Sponsored transaction (gasless for sender):
+# Step 1: Get the fee payer signature hash
+FEE_PAYER_HASH=$(cast mktx <CONTRACT_ADDRESS> 'increment()' \
   --rpc-url $TEMPO_RPC_URL \
-  --private-key $PRIVATE_KEY
-```
+  --private-key $SENDER_KEY \
+  --print-sponsor-hash)
+# Step 2: Sponsor signs the hash
+SPONSOR_SIG=$(cast wallet sign --private-key $SPONSOR_KEY "$FEE_PAYER_HASH" --no-hash)
+# Step 3: Send with sponsor signature
+cast send <CONTRACT_ADDRESS> 'increment()' \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $SENDER_KEY \
+  --sponsor-signature "$SPONSOR_SIG"
 
-All broadcast calls in the script are batched into a single atomic transaction.
-
-#### Batch Transaction Rules
-
-:::warning
-Batch transactions have specific constraints:
-
-1. **Atomic execution**: If any call in the batch reverts, the entire batch reverts. No state changes from earlier calls persist.
-
-2. **Single CREATE allowed**: A batch may contain at most one contract deployment (CREATE opcode).
-
-3. **CREATE must be first**: If deploying a contract in a batch, the deployment must be the first operation. Subsequent calls can interact with the newly deployed contract.
-
-4. **Value must be zero**: Since Tempo has no native token, the `value` field for each call must be 0.
-
-5. **Silent failures**: Calling a non-existent function on a contract without a fallback does not revert - it succeeds silently with empty return data. Ensure your target contracts explicitly revert on invalid calls if you need strict failure handling.
-:::
-
-## T1 Features
-
-The following features require the Tempo T1 hardfork.
-
-### 2D Nonces
-
-2D nonces allow parallel transaction submission by using separate nonce sequences per `nonce-key`. Each key maintains its own nonce counter starting at 0.
-
-```bash
-# Create transaction with nonce-key 1 (starts at nonce 0)
-cast mktx <CONTRACT_ADDRESS> 'increment()' \
+# Send with 2D nonce (parallel tx submission):
+cast send <CONTRACT_ADDRESS> 'increment()' \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY \
   --nonce 0 --nonce-key 1
 
-# Send transaction with nonce-key 2 (independent sequence)
-cast send <CONTRACT_ADDRESS> 'increment()' \
-  --rpc-url $TEMPO_RPC_URL \
-  --private-key $PRIVATE_KEY \
-  --nonce 0 --nonce-key 2
-```
-
-### Expiring Nonces
-
-Expiring nonces allow transactions to be valid only within a time window (max 30 seconds). Useful for time-sensitive operations.
-
-```bash
-# Transaction valid for next 25 seconds
+# Send with expiring nonce (time-bounded tx, max 30s):
 VALID_BEFORE=$(($(date +%s) + 25))
 cast send <CONTRACT_ADDRESS> 'increment()' \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY \
   --expiring-nonce --valid-before $VALID_BEFORE
 
-# Transaction valid between two timestamps
-VALID_AFTER=$(($(date +%s) + 5))
-VALID_BEFORE=$(($(date +%s) + 25))
-cast mktx <CONTRACT_ADDRESS> 'increment()' \
-  --rpc-url $TEMPO_RPC_URL \
-  --private-key $PRIVATE_KEY \
-  --expiring-nonce --valid-before $VALID_BEFORE --valid-after $VALID_AFTER
-```
-
-### Access Keys
-
-Access keys enable delegated signing, where an authorized key can sign transactions on behalf of a root account.
-
-```bash
-# First, authorize an access key on-chain via the Account Keychain precompile
-# SignatureType: 0 = Secp256k1, Expiry: Unix timestamp, enforceLimits: false
+# Send with access key (delegated signing):
+# First authorize the key via Account Keychain precompile
 cast send 0xAAAAAAAA00000000000000000000000000000000 \
   'authorizeKey(address,uint8,uint64,bool,(address,uint256)[])' \
   $ACCESS_KEY_ADDR 0 1893456000 false "[]" \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $ROOT_PRIVATE_KEY
-
-# Create transaction signed by access key
-cast mktx <CONTRACT_ADDRESS> 'increment()' \
-  --rpc-url $TEMPO_RPC_URL \
-  --access-key $ACCESS_KEY_PRIVATE_KEY \
-  --root-account $ROOT_ADDRESS
-
-# Send transaction using access key
+# Then send using the access key
 cast send <CONTRACT_ADDRESS> 'increment()' \
   --rpc-url $TEMPO_RPC_URL \
   --access-key $ACCESS_KEY_PRIVATE_KEY \
