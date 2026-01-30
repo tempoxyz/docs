@@ -1,8 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test.skip('fund an address via faucet', async ({ page }) => {
-  // TODO: This test is flaky - depends on external faucet service timing
-  // Re-enable once faucet reliability is improved or test is mocked
+test('fund an address via faucet', async ({ page }) => {
   await page.goto('/quickstart/faucet')
 
   // Switch to "Fund an address" tab
