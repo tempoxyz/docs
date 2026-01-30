@@ -1,0 +1,3 @@
+patchedDependencies:
+  '@braintree/sanitize-url@7.1.1': patches/@braintree__sanitize-url@7.1.1.patch
+  dayjs@1.11.19: patches/dayjs@1.11.19.patch

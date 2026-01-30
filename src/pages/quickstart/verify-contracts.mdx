@@ -1,0 +1,218 @@
+---
+title: Contract Verification
+description: Verify your smart contracts on Tempo using contracts.tempo.xyz. Sourcify-compatible verification with Foundry integration.
+---
+
+# Contract Verification
+
+Verify your smart contracts on Tempo using [contracts.tempo.xyz](https://contracts.tempo.xyz), a Sourcify-compatible contract verification service. Verified contracts display source code and ABI in the [Tempo Explorer](https://explore.tempo.xyz), making it easier for users to interact with your contracts.
+
+## Verify with Foundry
+
+The easiest way to verify contracts is to include the `--verify` flag when deploying. You can specify Tempo's verifier by either setting the `VERIFIER_URL` environment variable:
+
+```bash
+export VERIFIER_URL=https://contracts.tempo.xyz
+```
+
+Or by passing `--verifier-url https://contracts.tempo.xyz` directly to the command.
+
+The chain ID is auto-detected from the RPC URL, but you can specify it explicitly with `--chain <CHAIN_ID>` if needed.
+
+### Verify during deployment
+
+Deploy and verify in a single command:
+
+```bash
+# Deploy and verify with forge create
+forge create src/Token.sol:Token \
+  --rpc-url $TEMPO_RPC_URL \
+  --interactive \
+  --broadcast \
+  --verify
+
+# Deploy and verify with forge script
+forge script script/Deploy.s.sol \
+  --rpc-url $TEMPO_RPC_URL \
+  --interactive \
+  --sender <YOUR_WALLET_ADDRESS> \
+  --broadcast \
+  --verify
+```
+
+### Verify an existing contract
+
+To verify a contract that's already deployed, use `forge verify-contract`:
+
+```bash
+forge verify-contract \
+  --verifier-url https://contracts.tempo.xyz \
+  <CONTRACT_ADDRESS> \
+  src/MyContract.sol:MyContract
+```
+
+Replace `<CONTRACT_ADDRESS>` with your deployed contract address and `src/MyContract.sol:MyContract` with the path and name of your contract.
+
+:::tip
+Make sure you're using the same compiler settings (optimizer, EVM version) that you used when deploying the contract.
+:::
+
+### Retry options
+
+If verification fails intermittently, use `--retries` and `--delay` to automatically retry:
+
+```bash
+forge create src/Token.sol:Token \
+  --rpc-url $TEMPO_RPC_URL \
+  --interactive \
+  --broadcast \
+  --verify \
+  --retries 10 \
+  --delay 10
+```
+
+This retries verification up to 10 times with a 10-second delay between attempts.
+
+For more details on deployment and verification options, see the [Foundry documentation](https://getfoundry.sh/forge/deploying).
+
+## Verify with the API
+
+You can also verify contracts directly using the REST API. Verification is asynchronous—you submit a request, then poll for the result.
+
+### Submit for Verification
+
+```bash
+curl -X POST https://contracts.tempo.xyz/v2/verify/42431/<CONTRACT_ADDRESS> \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "stdJsonInput": {
+      "language": "Solidity",
+      "sources": {
+        "src/MyContract.sol": {
+          "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\ncontract MyContract { }"
+        }
+      },
+      "settings": {
+        "optimizer": { "enabled": false, "runs": 200 },
+        "evmVersion": "cancun"
+      }
+    },
+    "compilerVersion": "0.8.20+commit.a1b79de6",
+    "contractIdentifier": "src/MyContract.sol:MyContract"
+  }'
+```
+
+The API returns `202 Accepted` with a verification ID:
+
+```json
+{
+  "verificationId": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+:::tip
+If verification has trouble determining the creation bytecode, include `creationTransactionHash` in the request body.
+:::
+
+### Check Verification Status
+
+Poll the status endpoint until verification completes:
+
+```bash
+curl https://contracts.tempo.xyz/v2/verify/<VERIFICATION_ID>
+```
+
+The endpoint returns `200` for completed jobs, but you must check the response body to determine success or failure:
+
+```json
+{
+  "isJobCompleted": true,
+  "contract": {
+    "match": "exact_match",
+    "chainId": "42431",
+    "address": "0x1234567890abcdef1234567890abcdef12345678",
+    "name": "MyContract"
+  }
+}
+```
+
+The `match` field can be `exact_match` (bytecode and metadata match), `match` (bytecode matches but metadata differs), or `null` (verification failed).
+
+### Retrieve Verified Contract
+
+Once verified, retrieve the contract details:
+
+```bash
+curl https://contracts.tempo.xyz/v2/contract/42431/<CONTRACT_ADDRESS>
+```
+
+Add `?fields=all` to get full compilation artifacts including ABI, source files, and bytecode.
+
+## Vyper Support
+
+The verification service supports Vyper contracts. Use `"language": "Vyper"` in the `stdJsonInput`:
+
+```bash
+curl -X POST https://contracts.tempo.xyz/v2/verify/42431/<CONTRACT_ADDRESS> \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "stdJsonInput": {
+      "language": "Vyper",
+      "sources": {
+        "contracts/Token.vy": {
+          "content": "# @version ^0.3.10\n..."
+        }
+      },
+      "settings": {}
+    },
+    "compilerVersion": "0.3.10+commit.91361694",
+    "contractIdentifier": "contracts/Token.vy:Token"
+  }'
+```
+
+## API Reference
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /v2/verify/{chainId}/{address}` | Submit contract for verification |
+| `GET /v2/verify/{verificationId}` | Check verification status |
+| `GET /v2/contract/{chainId}/{address}` | Get verified contract details |
+| `GET /v2/contracts/{chainId}` | List all verified contracts |
+| `GET /chains` | Get supported chains |
+
+View the full API documentation at [contracts.tempo.xyz/docs](https://contracts.tempo.xyz/docs).
+
+## Supported Chains
+
+| Network | Chain ID |
+|---------|----------|
+| Tempo Mainnet | `4217` |
+| Tempo Testnet (Andantino) | `42429` |
+| Tempo Testnet (Moderato) | `42431` |
+| Tempo Devnet | `31318` |
+
+## Troubleshooting
+
+:::tip
+If you encounter unexpected failures, you might be running an older version of Foundry/Forge, or you might not be running Tempo's Foundry fork. See the [Foundry setup guide](/sdk/foundry/index.mdx) for installation instructions.
+:::
+
+### Verification Failed
+
+If verification fails, check the following:
+
+- **Compiler version**: Use the full version string with commit hash (e.g., `0.8.20+commit.a1b79de6`)
+- **Optimizer settings**: Optimizer enabled/disabled and runs must match deployment settings
+- **EVM version**: Must match the EVM version used during deployment
+- **Source files**: All imported files must be included in the `sources` object
+- **Contract identifier**: Must match the format `path/to/Contract.sol:ContractName`
+
+### Common Errors
+
+| Error | Cause |
+|-------|-------|
+| `contract_not_found` | No bytecode exists at the address |
+| `compilation_error` | Source code has syntax errors |
+| `compilation_failed` | Compilation service returned an error |
+| `contract_not_found_in_output` | Contract identifier not found in compiled output |
+| `no_match` | Compiled bytecode doesn't match on-chain code |

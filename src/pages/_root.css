@@ -234,3 +234,7 @@
   height: 28px;
   margin-top: 2px;
 }
+
+.data-v-mermaid-container {
+  min-height: 200px;
+}

@@ -9,7 +9,7 @@ const baseUrl = (() => {
 
 export default defineConfig({
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
-  checkDeadlinks: false,
+  checkDeadlinks: true,
   title: 'Tempo',
   titleTemplate: '%s ⋅ Tempo',
   description: 'Documentation for the Tempo network and protocol specifications',
@@ -93,6 +93,10 @@ export default defineConfig({
           {
             text: 'Wallet Developers',
             link: '/quickstart/wallet-developers',
+          },
+          {
+            text: 'Contract Verification',
+            link: '/quickstart/verify-contracts',
           },
           {
             text: 'Building with AI',
@@ -526,6 +530,10 @@ export default defineConfig({
           {
             text: 'Running a validator',
             link: '/guide/node/validator',
+          },
+          {
+            text: 'Operating your validator',
+            link: '/guide/node/operate-validator',
           },
         ],
       },
