@@ -1,8 +1,11 @@
 import { Changelog, defineConfig, Feedback, McpSource } from 'vocs/config'
 
 const baseUrl = (() => {
+  // VERCEL_BRANCH_URL is the stable URL for the branch (e.g., next.docs.tempo.xyz)
+  // VERCEL_URL is the deployment-specific URL which causes CORS issues with custom domains
   if (process.env.VERCEL_ENV === 'production')
     return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  if (process.env.VERCEL_BRANCH_URL) return `https://${process.env.VERCEL_BRANCH_URL}`
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
   return ''
 })()
