@@ -20,7 +20,9 @@ Submit multiple transactions in parallel using Tempo's flexible nonce system. Ch
 
 To use expiring nonces, set `nonceKey` to `UINT256_MAX` (`0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff`). This signals to the protocol that the transaction uses time-based replay protection instead of sequential nonces.
 
-```typescript
+:::code-group
+
+```typescript [TypeScript]
 const tx = await Actions.token.transfer(config, {
   amount: parseUnits('100', 6),
   to: recipient,
@@ -29,6 +31,18 @@ const tx = await Actions.token.transfer(config, {
   validBefore: Math.floor(Date.now() / 1000) + 30,
 })
 ```
+
+```rust [Rust]
+let pending = provider
+    .send_transaction(TempoTransactionRequest {
+        nonce_key: Some(U256::MAX),
+        valid_before: Some(SystemTime::now().duration_since(UNIX_EPOCH).as_secs() + 30),
+        ..Default::default(),
+    })
+    .await?;
+```
+
+:::code-group
 
 Benefits:
 - No nonce tracking required
