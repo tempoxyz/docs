@@ -32,5 +32,6 @@ export function FAQSchema({ items }: FAQSchemaProps) {
     .replace(/>/g, '\\u003e')
     .replace(/&/g, '\\u0026')
 
+  // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD requires innerHTML; content is escaped above
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeSchema }} />
 }
