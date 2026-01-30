@@ -130,9 +130,23 @@ forge script script/Mail.s.sol \
   --sender <YOUR_WALLET_ADDRESS> \
   --broadcast \
   --verify
+
+# Batch multiple calls into a single atomic transaction
+forge script script/Deploy.s.sol \
+  --broadcast --batch \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
 ```
 
 For more verification options including verifying existing contracts and API verification, see [Contract Verification](/quickstart/verify-contracts).
+
+:::warning[Batch Transaction Rules]
+- **Atomic execution**: If any call reverts, the entire batch reverts
+- **Single CREATE allowed**: At most one contract deployment per batch
+- **CREATE must be first**: Deployment must be the first operation
+- **Value must be zero**: Since Tempo has no native token, value must be 0
+- **Silent failures**: Calling a non-existent function without a fallback succeeds silently
+:::
 
 ### Interact & debug with `cast`
 
@@ -173,6 +187,61 @@ cast send <CONTRACT_ADDRESS> <FUNCTION_SIGNATURE> \
 # Replay a transaction by hash:
 cast run <TX_HASH> \
   --rpc-url $TEMPO_RPC_URL
+
+# Send a batch transaction with multiple calls:
+cast batch-send \
+  --call "<CONTRACT_ADDRESS>::increment()" \
+  --call "<CONTRACT_ADDRESS>::setNumber(uint256):500" \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Batch with pre-encoded calldata:
+ENCODED=$(cast calldata "setNumber(uint256)" 200)
+cast batch-send \
+  --call "<CONTRACT_ADDRESS>::$ENCODED" \
+  --call "<CONTRACT_ADDRESS>::setNumber(uint256):101" \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Sponsored transaction (gasless for sender):
+# Step 1: Get the fee payer signature hash
+FEE_PAYER_HASH=$(cast mktx <CONTRACT_ADDRESS> 'increment()' \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $SENDER_KEY \
+  --print-sponsor-hash)
+# Step 2: Sponsor signs the hash
+SPONSOR_SIG=$(cast wallet sign --private-key $SPONSOR_KEY "$FEE_PAYER_HASH" --no-hash)
+# Step 3: Send with sponsor signature
+cast send <CONTRACT_ADDRESS> 'increment()' \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $SENDER_KEY \
+  --sponsor-signature "$SPONSOR_SIG"
+
+# Send with 2D nonce (parallel tx submission):
+cast send <CONTRACT_ADDRESS> 'increment()' \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY \
+  --nonce 0 --nonce-key 1
+
+# Send with expiring nonce (time-bounded tx, max 30s):
+VALID_BEFORE=$(($(date +%s) + 25))
+cast send <CONTRACT_ADDRESS> 'increment()' \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY \
+  --expiring-nonce --valid-before $VALID_BEFORE
+
+# Send with access key (delegated signing):
+# First authorize the key via Account Keychain precompile
+cast send 0xAAAAAAAA00000000000000000000000000000000 \
+  'authorizeKey(address,uint8,uint64,bool,(address,uint256)[])' \
+  $ACCESS_KEY_ADDR 0 1893456000 false "[]" \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $ROOT_PRIVATE_KEY
+# Then send using the access key
+cast send <CONTRACT_ADDRESS> 'increment()' \
+  --rpc-url $TEMPO_RPC_URL \
+  --access-key $ACCESS_KEY_PRIVATE_KEY \
+  --root-account $ROOT_ADDRESS
 ```
 
 ### Limitations

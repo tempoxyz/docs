@@ -38,18 +38,22 @@ The public key should match the output of the `generate-private-key` command.
 
 The process for running a validator node is very similar to [running a full node](/guide/node/rpc). 
 
-You should start by downloading the latest snapshot using `tempo download --chain <moderato|mainnet>`. Downloading the snapshot allows your validator to start participating in consensus much faster.
+You should start by downloading the latest snapshot using `tempo download --chain <moderato|mainnet|devnet>`. Downloading the snapshot allows your validator to start participating in consensus much faster.
 Once you've downloaded the snapshot and have been whitelisted on-chain, you can proceed to run the validator node as such:
 
 ```bash
 tempo node --datadir <datadir> \
-    --chain <moderato|mainnet> \
+    --chain moderato \
     --port 30303 \
     --discovery.addr 0.0.0.0 \
     --discovery.port 30303 \
     --consensus.signing-key <path> \
     --consensus.fee-recipient <validator_wallet_address> \
 ```
+
+:::warning[Testnet Chain Name Change]
+As of v1.1.0, testnet nodes must use `--chain moderato`. The previous `andantino` chainspec has been removed.
+:::
 
 The notable difference between RPC nodes and validator nodes is the omission of the `--follow` argument and the addition of the `--consensus.signing-key` and `--consensus.fee-recipient` arguments. The fee recipient is the address that will receive transaction fees in your validators' proposed blocks.
 

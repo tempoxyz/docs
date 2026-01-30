@@ -154,6 +154,18 @@ On the Moderato testnet, validators currently expect alphaUSD (one of the tokens
 
 If validators have not specified a fee token preference, the protocol falls back to expecting pathUSD as their fee token.
 
+## Gas Parameters
+
+As of [TIP-1010](/protocol/tips/tip-1010), Tempo uses the following mainnet gas parameters:
+
+| Parameter | Value |
+|-----------|-------|
+| Base fee | 20 gwei |
+| Total block gas limit | 500M gas |
+| General gas limit | 30M gas/block |
+
+A standard TIP-20 transfer costs approximately 0.1 cent at the base fee.
+
 ### Removing validator preference
 
 To remove a validator token preference, set it to the zero address:
