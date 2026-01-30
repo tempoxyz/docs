@@ -22,6 +22,16 @@ tempo node \
   --http.api eth,net,web3,txpool,trace
 ```
 
+## Switching chains
+
+When switching between chains (e.g., from Moderato to Presto), use a fresh datadir or delete the existing database:
+
+```bash
+rm -rf <datadir>/db
+```
+
+This is required because each chain has a different genesis block.
+
 ## Manually downloading snapshots
 
 Daily snapshots for the persistent testnet can be found at [https://snapshots.tempoxyz.dev](https://snapshots.tempoxyz.dev). You can extract them either using
