@@ -133,9 +133,17 @@ Or add to your project's [`.agents/skills/`](https://github.com/tempoxyz/agent-s
 
 For packages that ship their own agent skills, use [`skills-npm`](https://github.com/antfu/skills-npm) to automatically discover and symlink them:
 
-```bash
+:::code-group
+```bash [npm]
+npm add -D skills-npm
+```
+```bash [pnpm]
 pnpm add -D skills-npm
 ```
+```bash [bun]
+bun add -D skills-npm
+```
+:::
 
 Add a `prepare` script to your `package.json`:
 
