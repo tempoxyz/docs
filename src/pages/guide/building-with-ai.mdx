@@ -129,6 +129,26 @@ $ cp -r agent-skills/skills/tempo ~/.config/agents/skills/
 
 Or add to your project's [`.agents/skills/`](https://github.com/tempoxyz/agent-skills/tree/main/skills) directory for project-specific access.
 
+### npm Package Skills
+
+For packages that ship their own agent skills, use [`skills-npm`](https://github.com/antfu/skills-npm) to automatically discover and symlink them:
+
+```bash
+pnpm add -D skills-npm
+```
+
+Add a `prepare` script to your `package.json`:
+
+```json
+{
+  "scripts": {
+    "prepare": "skills-npm"
+  }
+}
+```
+
+Skills from installed npm packages are symlinked to `skills/npm-<package-name>-<skill-name>` for your agent. Add `skills/npm-*` to your `.gitignore`.
+
 ### Usage
 
 Once installed, the skill is automatically available. The agent will use it when relevant tasks are detected.
