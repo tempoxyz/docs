@@ -1,0 +1,146 @@
+---
+title: Building with AI
+description: Tempo documentation is built with AI-first principles, providing llms.txt files, Markdown rendering, and MCP server access for AI assistants.
+---
+
+# Building with AI
+
+Tempo documentation is built with AI-first principles, providing multiple features to make documentation accessible to LLMs and AI assistants.
+
+## llms.txt
+
+The docs automatically generate [`llms.txt`](https://llmstxt.org/) files for LLM consumption:
+
+- `/llms.txt` – A concise index of all pages with titles and descriptions
+- `/llms-full.txt` – Complete documentation content in a single file
+
+These files are generated at build time and served at the root of the site.
+
+## Markdown Rendering for AI Agents
+
+AI user agents are automatically detected and served raw Markdown instead of rendered HTML. This provides better token efficiency and easier parsing for LLMs.
+
+### Supported AI Agents
+
+Popular user agents that are automatically detected:
+
+- **OpenAI**: `GPTBot`, `ChatGPT-User`
+- **Anthropic**: `ClaudeBot`, `claude-web`
+- **Google**: `Googlebot`
+
+See the [full list of supported agents](https://github.com/wevm/vocs/blob/next/src/waku/internal/middleware/md-router.ts#L3) for the most up-to-date list.
+
+### Manual Markdown Access
+
+Any page can be accessed as Markdown by appending `.md` to the URL:
+
+```
+https://docs.tempo.xyz/quickstart/integrate-tempo.md
+```
+
+This is useful for copying documentation into AI conversations or for custom integrations.
+
+## Ask AI Menu
+
+The docs include a built-in "Ask AI" menu (<kbd>⌘I</kbd> / <kbd>Ctrl+I</kbd>) that provides:
+
+- **Open in ChatGPT/Claude**: Opens the current page context in popular AI assistants
+- **Copy page for AI**: Copies the page content as Markdown to your clipboard
+- **View as Markdown**: Opens the raw Markdown version of the current page
+- **Copy MCP URL**: Copies the MCP server URL for AI assistant configuration
+
+## MCP Server
+
+The docs include a built-in [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that allows AI assistants to navigate documentation and source code programmatically.
+
+:::code-group
+```bash [Claude Code]
+claude mcp add --transport http tempo https://docs.tempo.xyz/api/mcp
+```
+```bash [Codex CLI]
+codex mcp add vercel --url https://docs.tempo.xyz/api/mcp
+```
+```bash [Amp]
+amp mcp add tempo https://docs.tempo.xyz/api/mcp
+```
+:::
+
+### Connecting AI Assistants
+
+Configure your AI assistant to connect to the MCP server:
+
+```json
+{
+  "mcpServers": {
+    "tempo-docs": {
+      "url": "https://docs.tempo.xyz/api/mcp"
+    }
+  }
+}
+```
+
+### Available Tools
+
+The MCP server exposes these tools to AI assistants:
+
+| Tool | Description |
+| --- | --- |
+| `list_pages` | List all documentation pages with their paths |
+| `read_page` | Read the content of a specific documentation page |
+| `search_docs` | Search documentation for a query string |
+
+### Source Code Navigation
+
+The MCP server also provides access to source code repositories:
+
+| Tool | Description |
+| --- | --- |
+| `list_sources` | List available source code repositories |
+| `list_source_files` | List files in a directory |
+| `read_source_file` | Read a source code file |
+| `get_file_tree` | Get a recursive file tree |
+| `search_source` | Search source code for a pattern |
+
+Available source repositories:
+
+- [`tempoxyz/tempo`](https://github.com/tempoxyz/tempo) – Tempo node implementation
+- [`tempoxyz/tempo-ts`](https://github.com/tempoxyz/tempo-ts) – TypeScript SDK
+- [`paradigmxyz/reth`](https://github.com/paradigmxyz/reth) – Reth Ethereum client
+- [`foundry-rs/foundry`](https://github.com/foundry-rs/foundry) – Foundry development toolkit
+- [`wevm/viem`](https://github.com/wevm/viem) – TypeScript interface for Ethereum
+- [`wevm/wagmi`](https://github.com/wevm/wagmi) – React hooks for Ethereum
+
+## Agent Skills
+
+Install the [Tempo Agent Skills](https://github.com/tempoxyz/agent-skills) to give AI coding agents (Amp, Claude Code, etc.) access to Tempo documentation, source code via MCP, and examples. Check out [`tempoxyz/agent-skills`](https://github.com/tempoxyz/agent-skills) for more info on available skills.
+
+### Installation
+
+```bash
+npx skills add tempoxyz/agent-skills
+```
+
+Or manually:
+
+```bash
+$ git clone https://github.com/tempoxyz/agent-skills.git
+$ cp -r agent-skills/skills/tempo ~/.config/agents/skills/
+```
+
+Or add to your project's [`.agents/skills/`](https://github.com/tempoxyz/agent-skills/tree/main/skills) directory for project-specific access.
+
+### Usage
+
+Once installed, the skill is automatically available. The agent will use it when relevant tasks are detected.
+
+**Examples:**
+
+```
+How do I create a TIP-20 stablecoin?
+```
+```
+Show me how fee sponsorship works in Viem
+```
+```
+Search the Tempo source for transaction validation
+```

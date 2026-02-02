@@ -1,4 +1,4 @@
-import { Changelog, defineConfig, McpSource } from 'vocs/config'
+import { Changelog, defineConfig, Feedback, McpSource } from 'vocs/config'
 
 const baseUrl = (() => {
   if (process.env.VERCEL_ENV === 'production')
@@ -9,10 +9,11 @@ const baseUrl = (() => {
 
 export default defineConfig({
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
-  checkDeadlinks: false,
+  checkDeadlinks: true,
   title: 'Tempo',
   titleTemplate: '%s ⋅ Tempo',
   description: 'Documentation for the Tempo network and protocol specifications',
+  feedback: Feedback.slack(),
   mcp: {
     enabled: true,
     sources: [
@@ -86,8 +87,20 @@ export default defineConfig({
             link: '/quickstart/predeployed-contracts',
           },
           {
+            text: 'Token List Registry',
+            link: '/quickstart/tokenlist',
+          },
+          {
             text: 'Wallet Developers',
             link: '/quickstart/wallet-developers',
+          },
+          {
+            text: 'Contract Verification',
+            link: '/quickstart/verify-contracts',
+          },
+          {
+            text: 'Building with AI',
+            link: '/guide/building-with-ai',
           },
         ],
       },
@@ -336,6 +349,14 @@ export default defineConfig({
                 link: '/protocol/transactions/spec-tempo-transaction',
               },
               {
+                text: 'EIP-4337 Comparison',
+                link: '/protocol/transactions/eip-4337',
+              },
+              {
+                text: 'EIP-7702 Comparison',
+                link: '/protocol/transactions/eip-7702',
+              },
+              {
                 text: 'Account Keychain Precompile Specification',
                 link: '/protocol/transactions/AccountKeychain',
               },
@@ -360,6 +381,10 @@ export default defineConfig({
               {
                 text: 'Sub-block Specification',
                 link: '/protocol/blockspace/sub-block-specification',
+              },
+              {
+                text: 'Consensus and Finality',
+                link: '/protocol/blockspace/consensus',
               },
             ],
           },
@@ -506,6 +531,10 @@ export default defineConfig({
             text: 'Running a validator',
             link: '/guide/node/validator',
           },
+          {
+            text: 'Operating your validator',
+            link: '/guide/node/operate-validator',
+          },
         ],
       },
       // {
@@ -624,17 +653,16 @@ export default defineConfig({
     },
     {
       source: '/errors/tx/SubblockNonceKey',
-      destination: '/protocol/blockspace/subblock-specification#4-block-validity-rules',
-    },
-    {
-      source: '/protocol/blockspace/sub-block-specification',
-      destination: '/protocol/blockspace/subblock-specification',
-      status: 301,
+      destination: '/protocol/blockspace/sub-block-specification#4-block-validity-rules',
     },
     {
       source: '/stablecoin-exchange/:path*',
       destination: '/stablecoin-dex/:path*',
       status: 301,
+    },
+    {
+      source: '/guide/ai-support',
+      destination: '/guide/building-with-ai',
     },
     {
       source: '/guide',

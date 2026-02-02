@@ -1,0 +1,127 @@
+diff --git a/dist/constants.mjs b/dist/constants.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..3f84d3e87ee0e17a8d0c655dca7c8c9bea747855
+--- /dev/null
++++ b/dist/constants.mjs
+@@ -0,0 +1,8 @@
++export const invalidProtocolRegex = /^([^\w]*)(javascript|data|vbscript)/im;
++export const htmlEntitiesRegex = /&#(\w+)(^\w|;)?/g;
++export const htmlCtrlEntityRegex = /&(newline|tab);/gi;
++export const ctrlCharactersRegex = /[\u0000-\u001F\u007F-\u009F\u2000-\u200D\uFEFF]/gim;
++export const urlSchemeRegex = /^.+(:|&colon;)/gim;
++export const whitespaceEscapeCharsRegex = /(\\|%5[cC])((%(6[eE]|72|74))|[nrt])/g;
++export const relativeFirstCharacters = [".", "/"];
++export const BLANK_URL = "about:blank";
+diff --git a/dist/index.mjs b/dist/index.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..bfe926a4db36ae8fc0925ab41e185e2332190f65
+--- /dev/null
++++ b/dist/index.mjs
+@@ -0,0 +1,86 @@
++import {
++  relativeFirstCharacters,
++  ctrlCharactersRegex,
++  htmlEntitiesRegex,
++  htmlCtrlEntityRegex,
++  whitespaceEscapeCharsRegex,
++  urlSchemeRegex,
++  invalidProtocolRegex,
++  BLANK_URL
++} from './constants.mjs';
++
++function isRelativeUrlWithoutProtocol(url) {
++  return relativeFirstCharacters.indexOf(url[0]) > -1;
++}
++
++function decodeHtmlCharacters(str) {
++  var removedNullByte = str.replace(ctrlCharactersRegex, "");
++  return removedNullByte.replace(htmlEntitiesRegex, function (match, dec) {
++    return String.fromCharCode(dec);
++  });
++}
++
++function isValidUrl(url) {
++  return URL.canParse(url);
++}
++
++function decodeURI(uri) {
++  try {
++    return decodeURIComponent(uri);
++  } catch (e) {
++    return uri;
++  }
++}
++
++export function sanitizeUrl(url) {
++  if (!url) {
++    return BLANK_URL;
++  }
++  var charsToDecode;
++  var decodedUrl = decodeURI(url.trim());
++  do {
++    decodedUrl = decodeHtmlCharacters(decodedUrl)
++      .replace(htmlCtrlEntityRegex, "")
++      .replace(ctrlCharactersRegex, "")
++      .replace(whitespaceEscapeCharsRegex, "")
++      .trim();
++    decodedUrl = decodeURI(decodedUrl);
++    charsToDecode =
++      decodedUrl.match(ctrlCharactersRegex) ||
++      decodedUrl.match(htmlEntitiesRegex) ||
++      decodedUrl.match(htmlCtrlEntityRegex) ||
++      decodedUrl.match(whitespaceEscapeCharsRegex);
++  } while (charsToDecode && charsToDecode.length > 0);
++  var sanitizedUrl = decodedUrl;
++  if (!sanitizedUrl) {
++    return BLANK_URL;
++  }
++  if (isRelativeUrlWithoutProtocol(sanitizedUrl)) {
++    return sanitizedUrl;
++  }
++  var trimmedUrl = sanitizedUrl.trimStart();
++  var urlSchemeParseResults = trimmedUrl.match(urlSchemeRegex);
++  if (!urlSchemeParseResults) {
++    return sanitizedUrl;
++  }
++  var urlScheme = urlSchemeParseResults[0].toLowerCase().trim();
++  if (invalidProtocolRegex.test(urlScheme)) {
++    return BLANK_URL;
++  }
++  var backSanitized = trimmedUrl.replace(/\\/g, "/");
++  if (urlScheme === "mailto:" || urlScheme.includes("://")) {
++    return backSanitized;
++  }
++  if (urlScheme === "http:" || urlScheme === "https:") {
++    if (!isValidUrl(backSanitized)) {
++      return BLANK_URL;
++    }
++    var url_1 = new URL(backSanitized);
++    url_1.protocol = url_1.protocol.toLowerCase();
++    url_1.hostname = url_1.hostname.toLowerCase();
++    return url_1.toString();
++  }
++  return backSanitized;
++}
++
++export default { sanitizeUrl };
+diff --git a/package.json b/package.json
+index 39aca294ea8eacfb2db580b99bd12d21c79e8c15..b41790cd8f42b78c17df66f145146cd6f02f9b35 100644
+--- a/package.json
++++ b/package.json
+@@ -3,7 +3,16 @@
+   "version": "7.1.1",
+   "description": "A url sanitizer",
+   "main": "dist/index.js",
++  "module": "dist/index.mjs",
+   "types": "dist/index.d.ts",
++  "exports": {
++    ".": {
++      "import": "./dist/index.mjs",
++      "require": "./dist/index.js",
++      "types": "./dist/index.d.ts"
++    },
++    "./dist/constants.mjs": "./dist/constants.mjs"
++  },
+   "author": "",
+   "scripts": {
+     "prepublishOnly": "npm run build",
