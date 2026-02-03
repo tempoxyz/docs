@@ -710,6 +710,11 @@ export default defineConfig({
       destination: '/protocol/tip20/overview',
       status: 301,
     },
+    {
+      source: '/protocol/exchange/pathUSD',
+      destination: '/protocol/exchange/quote-tokens#pathusd',
+      status: 301,
+    },
   ],
   twoslash: {
     twoslashOptions: {
