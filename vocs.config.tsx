@@ -461,8 +461,8 @@ export default defineConfig({
                 link: '/documentation/protocol/exchange/spec',
               },
               {
-                text: 'pathUSD',
-                link: '/documentation/protocol/exchange/pathUSD',
+                text: 'Quote Tokens',
+                link: '/documentation/protocol/exchange/quote-tokens',
               },
               {
                 text: 'Executing Swaps',
