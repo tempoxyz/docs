@@ -10,6 +10,7 @@ const baseUrl = (() => {
 export default defineConfig({
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
   checkDeadlinks: true,
+
   title: 'Tempo',
   titleTemplate: '%s ⋅ Tempo',
   description: 'Documentation for the Tempo network and protocol specifications',
@@ -401,8 +402,8 @@ export default defineConfig({
                 link: '/protocol/exchange/spec',
               },
               {
-                text: 'pathUSD',
-                link: '/protocol/exchange/pathUSD',
+                text: 'Quote Tokens',
+                link: '/protocol/exchange/quote-tokens',
               },
               {
                 text: 'Executing Swaps',
@@ -708,6 +709,11 @@ export default defineConfig({
     {
       source: '/quickstart/tip20',
       destination: '/protocol/tip20/overview',
+      status: 301,
+    },
+    {
+      source: '/protocol/exchange/pathUSD',
+      destination: '/protocol/exchange/quote-tokens#pathusd',
       status: 301,
     },
   ],

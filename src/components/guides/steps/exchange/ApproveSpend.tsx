@@ -43,7 +43,7 @@ export function ApproveSpend(props: DemoStepProps) {
             })
           }}
           type="button"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className="-tracking-[2%] font-normal text-[14px]"
         >
           {approve.isPending ? 'Approving...' : 'Approve Spend'}
         </Button>

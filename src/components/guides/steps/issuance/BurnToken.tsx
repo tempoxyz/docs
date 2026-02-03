@@ -73,7 +73,7 @@ export function BurnToken(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="font-normal text-[14px] -tracking-[2%]"
+            className="-tracking-[2%] font-normal text-[14px]"
             type="button"
           >
             Hide
@@ -84,7 +84,7 @@ export function BurnToken(props: DemoStepProps) {
             disabled={!canBurn}
             onClick={() => setExpanded(true)}
             type="button"
-            className="font-normal text-[14px] -tracking-[2%]"
+            className="-tracking-[2%] font-normal text-[14px]"
           >
             Enter details
           </Button>
@@ -98,11 +98,11 @@ export function BurnToken(props: DemoStepProps) {
           <div className="border-gray4 border-s-2 ps-5">
             <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
               <div className="flex flex-1 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="memo">
+                <label className="-tracking-[1%] text-[11px] text-gray9" htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  className="-tracking-[2%] h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
                   name="memo"
@@ -116,7 +116,7 @@ export function BurnToken(props: DemoStepProps) {
                 disabled={!address}
                 onClick={handleBurn}
                 type="button"
-                className="font-normal text-[14px] -tracking-[2%]"
+                className="-tracking-[2%] font-normal text-[14px]"
               >
                 {burn.isPending ? 'Burning...' : 'Burn'}
               </Button>

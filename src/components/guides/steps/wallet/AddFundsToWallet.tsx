@@ -71,7 +71,7 @@ export function AddFundsToWallet(props: DemoStepProps) {
         <Button
           disabled={!hasNonWebAuthnWallet || fundAccount.isPending}
           variant="default"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className="-tracking-[2%] font-normal text-[14px]"
           onClick={() => fundAccount.mutate()}
           type="button"
         >
@@ -82,7 +82,7 @@ export function AddFundsToWallet(props: DemoStepProps) {
       <Button
         disabled={!hasNonWebAuthnWallet || fundAccount.isPending}
         variant={hasNonWebAuthnWallet ? 'accent' : 'default'}
-        className="font-normal text-[14px] -tracking-[2%]"
+        className="-tracking-[2%] font-normal text-[14px]"
         type="button"
         onClick={() => fundAccount.mutate()}
       >

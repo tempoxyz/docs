@@ -80,7 +80,7 @@ export function PauseUnpauseTransfers(props: DemoStepProps) {
           disabled={!active || isProcessing}
           onClick={handleToggle}
           type="button"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className="-tracking-[2%] font-normal text-[14px]"
         >
           {isProcessing ? 'Processing...' : paused ? 'Unpause' : 'Pause'}
         </Button>
