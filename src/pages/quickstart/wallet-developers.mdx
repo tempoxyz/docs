@@ -26,6 +26,7 @@ In testnet, `eth_getBalance` [returns a large placeholder value](/quickstart/evm
 :::code-group
 
 ```ts twoslash [example.ts]
+// @noErrors
 import { client } from './viem.config'
 
 const userFeeToken = await client.fee.getUserToken({ 
