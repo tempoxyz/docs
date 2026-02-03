@@ -78,7 +78,7 @@ export function PlaceOrder(props: DemoStepProps) {
             })
           }}
           type="button"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className="-tracking-[2%] font-normal text-[14px]"
         >
           {sendCalls.isPending ? 'Placing Order...' : 'Place Order'}
         </Button>

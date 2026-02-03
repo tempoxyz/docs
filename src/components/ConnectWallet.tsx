@@ -17,7 +17,7 @@ export function ConnectWallet({ showAddChain = true }: { showAddChain?: boolean 
   const isSupported = chains.some((c) => c.id === chain?.id)
   if (!injectedConnectors.length)
     return (
-      <div className="flex items-center text-[14px] -tracking-[2%]">No browser wallets found.</div>
+      <div className="-tracking-[2%] flex items-center text-[14px]">No browser wallets found.</div>
     )
   if (!address || connector?.id === 'webAuthn')
     return (
@@ -64,7 +64,7 @@ export function ConnectWallet({ showAddChain = true }: { showAddChain?: boolean 
         </Button>
       )}
       {switchChain.isSuccess && (
-        <div className="flex items-center font-normal text-[14px] -tracking-[2%]">
+        <div className="-tracking-[2%] flex items-center font-normal text-[14px]">
           Added Tempo to {connector?.name ?? 'Wallet'}!
         </div>
       )}

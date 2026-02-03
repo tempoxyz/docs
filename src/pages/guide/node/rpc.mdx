@@ -4,10 +4,7 @@ description: Set up and run a Tempo RPC node for API access. Download snapshots,
 
 # Running an RPC Node
 
-RPC nodes provide API access to the Tempo network without participating in consensus. These nodes currently observe and sync with the network's latest state.
-
-By default, RPC nodes will be in archive mode, meaning they do not prune historical
-state.
+RPC nodes provide API access to the Tempo network without participating in consensus.
 
 ## Quick Start
 
@@ -21,6 +18,10 @@ tempo node \
   --http --http.port 8545 \
   --http.api eth,net,web3,txpool,trace
 ```
+
+An RPC node running in follow mode is a **full node**. It fetches blocks from a trusted RPC endpoint, executes every transaction locally through the EVM, validates each block after execution, and stores complete block data with full state. The only trust assumption is block ordering: your node trusts the RPC endpoint to provide the correct sequence of blocks. All execution and validation happens locally on your machine.
+
+By default, RPC nodes run in archive mode, meaning they do not prune historical state.
 
 ## Manually downloading snapshots
 
