@@ -10,6 +10,9 @@ const baseUrl = (() => {
 export default defineConfig({
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
   checkDeadlinks: true,
+  codeHighlight: {
+    langs: ['solidity', 'rust', 'go', 'bash', 'python', 'yaml', 'json'],
+  },
   title: 'Tempo',
   titleTemplate: '%s ⋅ Tempo',
   description: 'Documentation for the Tempo network and protocol specifications',
