@@ -15,6 +15,12 @@ function PostHogInitializer() {
       defaults: '2025-05-24',
       capture_exceptions: true,
       debug: import.meta.env.MODE === 'development',
+      session_recording: {
+        maskAllInputs: false,
+        maskInputOptions: {
+          password: true,
+        },
+      },
       loaded: (posthog) => {
         posthog.capture('$pageview')
       },
