@@ -1,4 +1,5 @@
-import { Changelog, defineConfig, Feedback, McpSource } from 'vocs/config'
+import { Changelog, defineConfig, McpSource } from 'vocs/config'
+import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 
 const baseUrl = (() => {
   if (process.env.VERCEL_ENV === 'production')
@@ -13,7 +14,7 @@ export default defineConfig({
   title: 'Tempo',
   titleTemplate: '%s ⋅ Tempo',
   description: 'Documentation for the Tempo network and protocol specifications',
-  feedback: Feedback.slack(),
+  feedback: createFeedbackAdapter(),
   mcp: {
     enabled: true,
     sources: [
