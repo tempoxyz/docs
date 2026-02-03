@@ -125,9 +125,6 @@ importers:
       node:
         specifier: runtime:24.12.0
         version: runtime:24.12.0
-      shiki:
-        specifier: ^3.22.0
-        version: 3.22.0
       tsx:
         specifier: ^4.21.0
         version: 4.21.0

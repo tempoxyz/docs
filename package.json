@@ -50,7 +50,6 @@
     "@typescript/native-preview": "7.0.0-dev.20260122.3",
     "@vitejs/plugin-react": "^5.1.2",
     "anser": "^2.3.5",
-    "shiki": "^3.22.0",
     "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "use-sync-external-store": "^1.6.0",
