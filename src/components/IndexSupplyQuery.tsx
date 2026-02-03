@@ -246,7 +246,7 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps = {}) {
   return (
     <Container
       headerLeft={
-        <h4 className="font-normal text-[14px] text-gray12 leading-none -tracking-[1%]">
+        <h4 className="-tracking-[1%] font-normal text-[14px] text-gray12 leading-none">
           {props.title || 'IndexSupply SQL Query'}
         </h4>
       }
@@ -325,7 +325,7 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps = {}) {
         </div>
 
         {error && (
-          <div className="rounded bg-destructiveTint px-3 py-2 font-normal text-[14px] text-destructive leading-normal -tracking-[2%]">
+          <div className="-tracking-[2%] rounded bg-destructiveTint px-3 py-2 font-normal text-[14px] text-destructive leading-normal">
             {error}
           </div>
         )}
