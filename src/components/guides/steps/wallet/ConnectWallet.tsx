@@ -100,7 +100,7 @@ export function ConnectWallet(props: DemoStepProps) {
                 addEthereumChainParameter: {
                   nativeCurrency: {
                     name: 'USD',
-                    decimals: 18,
+                    decimals: 6,
                     symbol: 'USD',
                   },
                   blockExplorerUrls: ['https://explore.tempo.xyz'],
