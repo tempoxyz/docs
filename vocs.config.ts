@@ -10,16 +10,7 @@ const baseUrl = (() => {
 export default defineConfig({
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
   checkDeadlinks: true,
-  codeHighlight: {
-    // Extend default langs with Go, Python, YAML, TOML used in docs
-    langs: [
-      // Defaults from vocs
-      'ansi', 'bash', 'html', 'js', 'json', 'jsx', 'markdown', 'md', 'mdx',
-      'plaintext', 'rust', 'sol', 'solidity', 'ts', 'tsx', 'zsh',
-      // Additional languages used in our docs
-      'go', 'python', 'yaml', 'toml',
-    ],
-  },
+
   title: 'Tempo',
   titleTemplate: '%s ⋅ Tempo',
   description: 'Documentation for the Tempo network and protocol specifications',
