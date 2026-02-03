@@ -11,7 +11,7 @@ export default defineConfig({
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
   checkDeadlinks: true,
   codeHighlight: {
-    langs: ['solidity', 'rust', 'go', 'bash', 'python', 'yaml', 'json'],
+    langs: ['solidity', 'rust', 'go', 'bash', 'python', 'yaml', 'json', 'toml'],
   },
   title: 'Tempo',
   titleTemplate: '%s ⋅ Tempo',
