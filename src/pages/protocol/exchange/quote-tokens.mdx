@@ -1,0 +1,68 @@
+---
+description: Quote tokens determine trading pairs on Tempo's DEX. Each TIP-20 specifies a quote token, with pathUSD available as an optional neutral choice.
+---
+
+# Quote Tokens
+
+Each USD TIP-20 on Tempo specifies a single other USD TIP-20 as its quote token. The quote token is the token it trades against on the [stablecoin exchange](/protocol/exchange/spec). This guarantees exactly one path between any two tokens, reducing liquidity fragmentation and simplifying routing.
+
+Tokens can choose any other USD TIP-20 as their quote token. Tempo provides pathUSD as an optional neutral quote token that other stablecoins can use. Use of pathUSD is not required. Tokens can list any other token as their quote token.
+
+## pathUSD
+
+pathUSD is a USD-denominated stablecoin that can be used as a quote token on Tempo's stablecoin exchange. It is the first TIP-20 deployed to the chain and serves as the fallback gas token when the user or validator does not specify one. pathUSD is not intended to compete as a consumer-facing stablecoin.
+
+### Contract
+
+pathUSD is a predeployed [TIP-20](/protocol/tip20/spec) at genesis. Since it is the first TIP-20 deployed, its quote token is the zero address.
+
+| Property       | Value                                        |
+| -------------- | -------------------------------------------- |
+| address        | `0x20c0000000000000000000000000000000000000` |
+| `name()`       | `"pathUSD"`                                  |
+| `symbol()`     | `"pathUSD"`                                  |
+| `currency()`   | `"USD"`                                      |
+| `decimals()`   | `6`                                          |
+| `quoteToken()` | `address(0)`                                 |
+
+### Usage
+
+When creating a USD stablecoin on Tempo, you can set pathUSD as its quote token:
+
+```solidity
+TIP20 token = factory.createToken(
+  "My Company USD",
+  "MCUSD",
+  "USD",
+  TIP20(0x20c0000000000000000000000000000000000000), // pathUSD
+  msg.sender,
+  bytes32("my-unique-salt") // salt for deterministic address
+);
+```
+
+This means:
+- Your token trades against pathUSD on the exchange.
+- Users can swap between your token and other USD stablecoins that also use pathUSD, or ones connected by a multi-hop path.
+
+### Tree Structure
+
+Quote token relationships form a tree structure where all USD stablecoins are connected via multi-hop paths:
+
+```
+               USDX
+                |
+             pathUSD -- USDY -- USDZ
+                |
+               USDA
+```
+
+The tree structure guarantees a single path between any two USD stablecoins. This ensures simple routing, concentrated liquidity, and efficient pricing even for thinly-traded pairs.
+
+### Example: Cross-Stablecoin Payment
+
+1. Market makers provide liquidity for USDX/pathUSD and USDY/pathUSD pairs.
+2. A user wants to send USDX to a merchant who prefers USDY.
+3. The exchange atomically routes the payment: USDX to pathUSD to USDY.
+4. This happens in a single transaction with no manual swaps required.
+
+The user and merchant never hold pathUSD directly. It exists only as routing infrastructure.
