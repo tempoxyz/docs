@@ -401,8 +401,18 @@ export default defineConfig({
                 link: '/protocol/exchange/spec',
               },
               {
-                text: 'pathUSD',
-                link: '/protocol/exchange/pathUSD',
+                text: 'Quote Tokens',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Overview',
+                    link: '/protocol/exchange/quote-tokens',
+                  },
+                  {
+                    text: 'pathUSD',
+                    link: '/protocol/exchange/quote-tokens/pathUSD',
+                  },
+                ],
               },
               {
                 text: 'Executing Swaps',
@@ -708,6 +718,11 @@ export default defineConfig({
     {
       source: '/quickstart/tip20',
       destination: '/protocol/tip20/overview',
+      status: 301,
+    },
+    {
+      source: '/protocol/exchange/pathUSD',
+      destination: '/protocol/exchange/quote-tokens/pathUSD',
       status: 301,
     },
   ],

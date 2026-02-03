@@ -1,20 +1,22 @@
 ---
-description: pathUSD is a USD-denominated stablecoin serving as an optional quote token for DEX trading pairs and fallback gas token on Tempo.
+description: pathUSD is a USD-denominated stablecoin available as one option for a quote token on Tempo's DEX. Use of pathUSD is optional.
 ---
 
 # pathUSD
 
-## Abstract
+pathUSD is one of many possible [quote tokens](/protocol/exchange/quote-tokens) on Tempo. It is a USD-denominated stablecoin that token issuers can optionally select when creating their TIP-20.
 
-pathUSD is a USD-denominated stablecoin that can be used as a quote token on Tempo's decentralized exchange. It is the first stablecoin deployed to the chain, and is used as a fallback gas token when the user or validator does not specify a gas token. Use of pathUSD is optional.
+:::info
+**pathUSD is optional.** Token issuers can choose any TIP-20 as their quote token—pathUSD is simply one available option.
+:::
 
-## Motivation
+## Overview
 
-Each USD TIP-20 on Tempo can choose any other USD TIP-20 as its [quote token](/protocol/exchange/spec.mdx#quote-tokens)—the token it is paired against on the [native decentralized exchange](/protocol/exchange/spec.mdx). This guarantees that there is one path between any two tokens, which reduces fragmentation of liquidity and simplifies routing.
+Each USD TIP-20 on Tempo can choose any other USD TIP-20 as its [quote token](/protocol/exchange/quote-tokens)—the token it is paired against on the [native decentralized exchange](/protocol/exchange/spec.mdx). This guarantees that there is one path between any two tokens, which reduces fragmentation of liquidity and simplifies routing.
 
-While on other chains, most liquidity accrues to a few stablecoins, or even one, Tempo offers a USD-denominated stablecoin, pathUSD, that other stablecoins can choose as their quote token. PathUSD is not meant to compete as a consumer-facing stablecoin. Use of pathUSD is optional, and tokens are able to list any other token as their quote token if they choose.
+Tempo offers pathUSD as one option that stablecoins can choose as their quote token if they wish. pathUSD is not meant to compete as a consumer-facing stablecoin—it exists purely as a routing mechanism for those who choose to use it.
 
-pathUSD can also be accepted as a fee token by validators.
+pathUSD can also be accepted as a fee token by validators, and is used as the fallback gas token when no other is specified.
 
 ## Specification
 

@@ -1,0 +1,61 @@
+---
+description: Quote tokens define trading pairs on Tempo's decentralized exchange. Each TIP-20 can select any other TIP-20 as its quote token.
+---
+
+# Quote Tokens
+
+## Overview
+
+On Tempo's [decentralized exchange](/protocol/exchange/spec.mdx), each TIP-20 token selects another TIP-20 as its **quote token**—the token it trades against. This creates a tree structure that guarantees exactly one path between any two tokens, reducing liquidity fragmentation and simplifying routing.
+
+## How Quote Tokens Work
+
+When creating a TIP-20, you specify a quote token:
+
+```solidity
+TIP20 token = factory.createToken(
+  "My Company USD",
+  "MCUSD",
+  "USD",
+  quoteToken, // The token this will trade against
+  msg.sender,
+  bytes32("my-unique-salt")
+);
+```
+
+This means your token trades directly against the quote token on the DEX. Users can swap between tokens that share a common quote token, or that are connected through a multi-hop path.
+
+## Choosing a Quote Token
+
+You can choose **any** existing TIP-20 as your quote token. Common options include:
+
+- **[pathUSD](/protocol/exchange/quote-tokens/pathUSD)** — A USD-denominated stablecoin designed specifically for use as a quote token
+- **Another stablecoin** — Any other USD stablecoin on Tempo
+- **A different token** — Any TIP-20 that makes sense for your use case
+
+The choice is entirely up to the token issuer. Using pathUSD is optional.
+
+## Tree Structure
+
+The quote token system creates a tree structure where all tokens sharing a currency denomination are connected:
+
+```
+               USDX
+                |
+             pathUSD -- USDY -- USDZ
+                |
+               USDA
+```
+
+This structure:
+- **Guarantees single-path routing** between any two tokens
+- **Concentrates liquidity** instead of fragmenting it across multiple pairs
+- **Simplifies price discovery** even for thinly-traded pairs
+
+## Quote Tokens
+
+<Cards>
+  <Card title="pathUSD" href="/protocol/exchange/quote-tokens/pathUSD">
+    A USD stablecoin designed as an optional quote token for DEX trading pairs
+  </Card>
+</Cards>
