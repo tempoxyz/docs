@@ -38,11 +38,11 @@ import (
 )
 
 func main() {
-    c := client.New("https://rpc.testnet.tempo.xyz") // [!code focus]
+    c := client.New("https://rpc.testnet.tempo.xyz") 
 
     ctx := context.Background()
-    blockNum, _ := c.GetBlockNumber(ctx) // [!code focus]
-    fmt.Printf("Connected to Tempo at block %d\n", blockNum) // [!code focus]
+    blockNum, _ := c.GetBlockNumber(ctx)
+    fmt.Printf("Connected to Tempo at block %d\n", blockNum)
 }
 ```
 
@@ -68,10 +68,10 @@ import (
 )
 
 func main() {
-    s, err := signer.NewSigner("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80") // [!code focus]
-    if err != nil { // [!code focus]
-        panic(err) // [!code focus]
-    } // [!code focus]
+    s, err := signer.NewSigner("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+    if err != nil {
+        panic(err)
+    }
 
     fmt.Printf("Address: %s\n", s.Address().Hex())
 }
@@ -100,11 +100,11 @@ func main() {
     s, _ := signer.NewSigner("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
 
     ctx := context.Background()
-    nonce, _ := c.GetTransactionCount(ctx, s.Address().Hex()) // [!code focus]
+    nonce, _ := c.GetTransactionCount(ctx, s.Address().Hex()) // [!code hl]
 
     recipient := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
 
-    // [!code focus:10]
+    // [!code hl:10]
     tx := transaction.NewBuilder(big.NewInt(42429)). // Tempo testnet
         SetNonce(nonce).
         SetGas(100000).
@@ -115,7 +115,7 @@ func main() {
 
     transaction.SignTransaction(tx, s)
     serialized, _ := transaction.Serialize(tx, nil)
-    hash, _ := c.SendRawTransaction(ctx, serialized) // [!code focus]
+    hash, _ := c.SendRawTransaction(ctx, serialized) // [!code hl]
     log.Printf("Transaction hash: %s", hash)
 }
 ```
@@ -140,14 +140,19 @@ fmt.Printf("Block: %d, Chain: %d, Nonce: %d\n", blockNum, chainID, nonce)
 
 ### Token Transfer
 
-Send a TIP-20 token transfer using ABI-encoded calldata:
+Send a TIP-20 token transfer using go-ethereum's ABI encoding:
 
 ```go [transfer.go]
+import "github.com/ethereum/go-ethereum/accounts/abi"
+
+erc20ABI, _ := abi.JSON(strings.NewReader(`[{"name":"transfer","type":"function","inputs":[{"name":"to","type":"address"},{"name":"amount","type":"uint256"}]}]`))
+
 recipient := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
 amount := big.NewInt(100_000_000) // 100 tokens (6 decimals)
 
-transferData := encodeTransfer(recipient, amount)
+transferData, _ := erc20ABI.Pack("transfer", recipient, amount)
 
+// [!code hl:start]
 tx := transaction.NewBuilder(big.NewInt(42429)).
     SetNonce(nonce).
     SetGas(100000).
@@ -155,14 +160,7 @@ tx := transaction.NewBuilder(big.NewInt(42429)).
     SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
     AddCall(transaction.AlphaUSDAddress, big.NewInt(0), transferData).
     Build()
-
-func encodeTransfer(to common.Address, amount *big.Int) []byte {
-    data := make([]byte, 68)
-    copy(data[0:4], []byte{0xa9, 0x05, 0x9c, 0xbb}) // transfer(address,uint256)
-    copy(data[16:36], to.Bytes())
-    amount.FillBytes(data[36:68])
-    return data
-}
+// [!code hl:end]
 ```
 
 ### Transfer with Memo
@@ -170,13 +168,16 @@ func encodeTransfer(to common.Address, amount *big.Int) []byte {
 Include a memo for payment reconciliation:
 
 ```go [memo.go]
+tip20ABI, _ := abi.JSON(strings.NewReader(`[{"name":"transferWithMemo","type":"function","inputs":[{"name":"to","type":"address"},{"name":"amount","type":"uint256"},{"name":"memo","type":"bytes32"}]}]`))
+
 recipient := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
 amount := big.NewInt(100_000_000)
 memo := [32]byte{}
 copy(memo[:], "INV-12345")
 
-memoData := encodeTransferWithMemo(recipient, amount, memo)
+memoData, _ := tip20ABI.Pack("transferWithMemo", recipient, amount, memo)
 
+// [!code hl:start]
 tx := transaction.NewBuilder(big.NewInt(42429)).
     SetNonce(nonce).
     SetGas(100000).
@@ -184,15 +185,7 @@ tx := transaction.NewBuilder(big.NewInt(42429)).
     SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
     AddCall(transaction.AlphaUSDAddress, big.NewInt(0), memoData).
     Build()
-
-func encodeTransferWithMemo(to common.Address, amount *big.Int, memo [32]byte) []byte {
-    data := make([]byte, 100)
-    copy(data[0:4], []byte{0x63, 0x3e, 0xb4, 0x08}) // transferWithMemo(address,uint256,bytes32)
-    copy(data[16:36], to.Bytes())
-    amount.FillBytes(data[36:68])
-    copy(data[68:100], memo[:])
-    return data
-}
+// [!code hl:end]
 ```
 
 ### Batch Multiple Calls
@@ -205,9 +198,9 @@ tx := transaction.NewBuilder(big.NewInt(42429)).
     SetGas(200000).
     SetMaxFeePerGas(big.NewInt(10000000000)).
     SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
-    AddCall(addr1, big.NewInt(0), transfer1Data).
-    AddCall(addr2, big.NewInt(0), transfer2Data).
-    AddCall(addr3, big.NewInt(0), contractCallData).
+    AddCall(addr1, big.NewInt(0), transfer1Data). // [!code hl]
+    AddCall(addr2, big.NewInt(0), transfer2Data). // [!code hl]
+    AddCall(addr3, big.NewInt(0), contractCallData). // [!code hl]
     Build()
 
 transaction.SignTransaction(tx, s)
@@ -219,7 +212,7 @@ Send multiple transactions concurrently using different nonce keys:
 
 ```go [parallel.go]
 tx1 := transaction.NewBuilder(big.NewInt(42429)).
-    SetNonceKey(big.NewInt(1)). // Sequence A
+    SetNonceKey(big.NewInt(1)). // Sequence A // [!code hl]
     SetNonce(0).
     SetGas(100000).
     SetMaxFeePerGas(big.NewInt(10000000000)).
@@ -228,7 +221,7 @@ tx1 := transaction.NewBuilder(big.NewInt(42429)).
     Build()
 
 tx2 := transaction.NewBuilder(big.NewInt(42429)).
-    SetNonceKey(big.NewInt(2)). // Sequence B (parallel)
+    SetNonceKey(big.NewInt(2)). // Sequence B (parallel) // [!code hl]
     SetNonce(0).
     SetGas(100000).
     SetMaxFeePerGas(big.NewInt(10000000000)).
@@ -254,7 +247,7 @@ tx := transaction.NewBuilder(big.NewInt(42429)).
     SetGas(100000).
     SetMaxFeePerGas(big.NewInt(10000000000)).
     SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
-    SetSponsored(true). // Mark as awaiting fee payer
+    SetSponsored(true). // Mark as awaiting fee payer // [!code hl]
     AddCall(recipient, big.NewInt(0), data).
     Build()
 
@@ -274,8 +267,8 @@ tx := transaction.NewBuilder(big.NewInt(42429)).
     SetGas(100000).
     SetMaxFeePerGas(big.NewInt(10000000000)).
     SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
-    SetValidAfter(uint64(now.Unix())).
-    SetValidBefore(uint64(now.Add(1 * time.Hour).Unix())).
+    SetValidAfter(uint64(now.Unix())). // [!code hl]
+    SetValidBefore(uint64(now.Add(1 * time.Hour).Unix())). // [!code hl]
     AddCall(recipient, big.NewInt(0), data).
     Build()
 ```

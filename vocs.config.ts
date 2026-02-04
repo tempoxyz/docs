@@ -730,4 +730,11 @@ export default defineConfig({
       },
     },
   },
+  markdown: {
+    code: {
+      langAlias: {
+        sol: 'solidity',
+      },
+    },
+  },
 })
