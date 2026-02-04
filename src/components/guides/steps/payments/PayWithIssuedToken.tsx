@@ -93,7 +93,7 @@ export function PayWithIssuedToken(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="-tracking-[2%] font-normal text-[14px]"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             Cancel
@@ -104,7 +104,7 @@ export function PayWithIssuedToken(props: DemoStepProps) {
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className="-tracking-[2%] font-normal text-[14px]"
+            className="font-normal text-[14px] -tracking-[2%]"
           >
             Enter details
           </Button>
@@ -117,7 +117,7 @@ export function PayWithIssuedToken(props: DemoStepProps) {
         <div className="mx-6 flex flex-col gap-3 pb-4">
           <div className="border-gray4 border-s-2 ps-5">
             {/* Token info display */}
-            <div className="-tracking-[1%] mt-2 mb-3 rounded-lg bg-gray2 p-3 text-[13px]">
+            <div className="mt-2 mb-3 rounded-lg bg-gray2 p-3 text-[13px] -tracking-[1%]">
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-gray10">Payment Token: AlphaUSD</span>
@@ -136,11 +136,11 @@ export function PayWithIssuedToken(props: DemoStepProps) {
 
             <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
               <div className="flex flex-2 flex-col">
-                <label className="-tracking-[1%] text-[11px] text-gray9" htmlFor="recipient">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient">
                   Recipient address
                 </label>
                 <input
-                  className="-tracking-[2%] h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black placeholder-gray9 dark:text-white"
+                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -151,11 +151,11 @@ export function PayWithIssuedToken(props: DemoStepProps) {
                 />
               </div>
               <div className="flex flex-1 flex-col">
-                <label className="-tracking-[1%] text-[11px] text-gray9" htmlFor="memo">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  className="-tracking-[2%] h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black placeholder-gray9 dark:text-white"
+                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
                   id="memo"
@@ -170,7 +170,7 @@ export function PayWithIssuedToken(props: DemoStepProps) {
                 disabled={!active}
                 onClick={handleTransfer}
                 type="button"
-                className="-tracking-[2%] font-normal text-[14px]"
+                className="font-normal text-[14px] -tracking-[2%]"
               >
                 {sendPayment.isPending ? 'Sending...' : 'Send'}
               </Button>

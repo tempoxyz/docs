@@ -45,7 +45,7 @@ export function CancelOrder(props: DemoStepProps) {
             }
           }}
           type="button"
-          className="-tracking-[2%] font-normal text-[14px]"
+          className="font-normal text-[14px] -tracking-[2%]"
         >
           {cancelOrder.isPending ? 'Canceling...' : 'Cancel Order'}
         </Button>

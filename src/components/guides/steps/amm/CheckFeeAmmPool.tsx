@@ -49,7 +49,7 @@ export function CheckFeeAmmPool(props: DemoStepProps) {
       {active && pool && lpBalance && (
         <div className="mx-6 flex flex-col gap-3 pb-4">
           <div className="border-gray4 border-s-2 ps-5">
-            <div className="-tracking-[1%] mt-2 mb-3 rounded-lg bg-gray2 p-3 text-[13px]">
+            <div className="mt-2 mb-3 rounded-lg bg-gray2 p-3 text-[13px] -tracking-[1%]">
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-gray10">Your LP Balance</span>

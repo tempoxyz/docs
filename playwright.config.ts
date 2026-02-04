@@ -4,8 +4,8 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 1, // Retry once locally due to testnet flakiness
-  workers: process.env.CI ? 1 : undefined,
+  retries: process.env.CI ? 1 : 1, // Retry once due to testnet flakiness
+  workers: process.env.CI ? 4 : undefined,
   timeout: 180000, // 3 min default timeout for testnet transactions
   reporter: 'html',
   use: {
@@ -19,8 +19,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm run dev',
+    command: 'pnpm run dev 2>/dev/null',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
+    stdout: 'ignore',
+    stderr: 'ignore',
   },
 })

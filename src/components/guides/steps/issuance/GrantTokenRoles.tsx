@@ -76,7 +76,7 @@ export function GrantTokenRoles(
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="-tracking-[2%] font-normal text-[14px]"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             Hide
@@ -89,7 +89,7 @@ export function GrantTokenRoles(
             disabled={!tokenAddress || hasAllRoles}
             onClick={() => setExpanded(true)}
             type="button"
-            className="-tracking-[2%] font-normal text-[14px]"
+            className="font-normal text-[14px] -tracking-[2%]"
           >
             Enter details
           </Button>
@@ -103,11 +103,11 @@ export function GrantTokenRoles(
           <div className="border-gray4 border-s-2 ps-5">
             <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
               <div className="flex flex-2 flex-col">
-                <label className="-tracking-[1%] text-[11px] text-gray9" htmlFor="recipient">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient">
                   Grant role to yourself
                 </label>
                 <input
-                  className="-tracking-[2%] h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black placeholder-gray9 dark:text-white"
+                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -123,7 +123,7 @@ export function GrantTokenRoles(
                 disabled={!address}
                 onClick={handleGrant}
                 type="button"
-                className="-tracking-[2%] font-normal text-[14px]"
+                className="font-normal text-[14px] -tracking-[2%]"
               >
                 {grant.isPending ? 'Granting...' : 'Grant'}
               </Button>

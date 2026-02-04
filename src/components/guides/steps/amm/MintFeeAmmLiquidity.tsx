@@ -115,7 +115,7 @@ export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance?: bo
           disabled={!active || mintFeeLiquidity.isPending}
           onClick={handleMintAll}
           type="button"
-          className="-tracking-[2%] font-normal text-[14px]"
+          className="font-normal text-[14px] -tracking-[2%]"
         >
           {mintFeeLiquidity.isPending
             ? 'Adding...'
