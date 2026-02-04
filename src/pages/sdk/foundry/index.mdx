@@ -205,17 +205,11 @@ cast batch-send \
 
 # Sponsored transaction (gasless for sender):
 # Step 1: Get the fee payer signature hash
-FEE_PAYER_HASH=$(cast mktx <CONTRACT_ADDRESS> 'increment()' \
-  --rpc-url $TEMPO_RPC_URL \
-  --private-key $SENDER_KEY \
-  --tempo.print-sponsor-hash)
+FEE_PAYER_HASH=$(cast mktx <CONTRACT_ADDRESS> 'increment()' --rpc-url $TEMPO_RPC_URL --private-key $SENDER_KEY --tempo.print-sponsor-hash)
 # Step 2: Sponsor signs the hash
 SPONSOR_SIG=$(cast wallet sign --private-key $SPONSOR_KEY "$FEE_PAYER_HASH" --no-hash)
 # Step 3: Send with sponsor signature
-cast send <CONTRACT_ADDRESS> 'increment()' \
-  --rpc-url $TEMPO_RPC_URL \
-  --private-key $SENDER_KEY \
-  --tempo.sponsor-signature "$SPONSOR_SIG"
+cast send <CONTRACT_ADDRESS> 'increment()' --rpc-url $TEMPO_RPC_URL --private-key $SENDER_KEY --tempo.sponsor-signature "$SPONSOR_SIG"
 
 # Send with 2D nonce (parallel tx submission):
 cast send <CONTRACT_ADDRESS> 'increment()' \
@@ -295,6 +289,8 @@ The following flags are available for Tempo-specific features:
 | `--tempo.expiring-nonce` | Enable expiring nonce for time-bounded transactions | `--tempo.expiring-nonce` |
 | `--tempo.valid-before <TIMESTAMP>` | Unix timestamp before which tx must execute (max 30s from now) | `--tempo.valid-before 1704067200` |
 | `--tempo.valid-after <TIMESTAMP>` | Unix timestamp after which tx can execute | `--tempo.valid-after 1704067100` |
+| `--tempo.sponsor-signature <SIG>` | Pre-signed sponsor signature for gasless transactions | `--tempo.sponsor-signature 0x...` |
+| `--tempo.print-sponsor-hash` | Print fee payer signature hash and exit (for sponsor to sign) | `--tempo.print-sponsor-hash` |
 
 ### Limitations
 
