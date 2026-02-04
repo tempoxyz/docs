@@ -208,14 +208,14 @@ cast batch-send \
 FEE_PAYER_HASH=$(cast mktx <CONTRACT_ADDRESS> 'increment()' \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $SENDER_KEY \
-  --print-sponsor-hash)
+  --tempo.print-sponsor-hash)
 # Step 2: Sponsor signs the hash
 SPONSOR_SIG=$(cast wallet sign --private-key $SPONSOR_KEY "$FEE_PAYER_HASH" --no-hash)
 # Step 3: Send with sponsor signature
 cast send <CONTRACT_ADDRESS> 'increment()' \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $SENDER_KEY \
-  --sponsor-signature "$SPONSOR_SIG"
+  --tempo.sponsor-signature "$SPONSOR_SIG"
 
 # Send with 2D nonce (parallel tx submission):
 cast send <CONTRACT_ADDRESS> 'increment()' \
