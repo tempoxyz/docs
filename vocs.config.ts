@@ -9,7 +9,8 @@ const baseUrl = (() => {
 
 export default defineConfig({
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
-  checkDeadlinks: true,
+  // TODO: Set back to true once tempoxyz/tempo#tip-1011 dead link is fixed
+  checkDeadlinks: 'warn',
 
   title: 'Tempo',
   titleTemplate: '%s ⋅ Tempo',
@@ -717,11 +718,23 @@ export default defineConfig({
       status: 301,
     },
   ],
+  codeHighlight: {
+    langAlias: {
+      sol: 'solidity',
+    },
+  },
   twoslash: {
     twoslashOptions: {
       compilerOptions: {
         // ModuleResolutionKind.Bundler = 100
         moduleResolution: 100,
+      },
+    },
+  },
+  markdown: {
+    code: {
+      langAlias: {
+        sol: 'solidity',
       },
     },
   },

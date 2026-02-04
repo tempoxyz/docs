@@ -31,19 +31,27 @@ To interact with Tempo, first create an RPC client connected to a Tempo node:
 package main
 
 import (
+    "context"
     "fmt"
 
     "github.com/tempoxyz/tempo-go/pkg/client"
 )
 
 func main() {
-    c, err := client.New("https://rpc.moderato.tempo.xyz") // [!code focus]
-    if err != nil { // [!code focus]
-        panic(err) // [!code focus]
-    } // [!code focus]
+    c := client.New("https://rpc.testnet.tempo.xyz") 
 
-    fmt.Println("Connected to Tempo")
+    ctx := context.Background()
+    blockNum, _ := c.GetBlockNumber(ctx)
+    fmt.Printf("Connected to Tempo at block %d\n", blockNum)
 }
+```
+
+For authenticated RPC endpoints:
+
+```go [main.go]
+c := client.New("https://rpc.testnet.tempo.xyz",
+    client.WithAuth("username", "password"),
+)
 ```
 
 ## Create a Signer
@@ -56,17 +64,14 @@ package main
 import (
     "fmt"
 
-    "github.com/tempoxyz/tempo-go/pkg/client"
-    "github.com/tempoxyz/tempo-go/pkg/signer" // [!code focus]
+    "github.com/tempoxyz/tempo-go/pkg/signer"
 )
 
 func main() {
-    c, _ := client.New("https://rpc.moderato.tempo.xyz")
-
-    s, err := signer.NewSigner("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80") // [!code focus]
-    if err != nil { // [!code focus]
-        panic(err) // [!code focus]
-    } // [!code focus]
+    s, err := signer.NewSigner("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+    if err != nil {
+        panic(err)
+    }
 
     fmt.Printf("Address: %s\n", s.Address().Hex())
 }
@@ -74,13 +79,14 @@ func main() {
 
 ## Send a Transaction
 
-Now we can build and send a transaction. Tempo transactions support batching multiple calls in a single transaction:
+Build and send a transaction using the builder pattern:
 
 ```go [main.go]
 package main
 
 import (
-    "fmt"
+    "context"
+    "log"
     "math/big"
 
     "github.com/ethereum/go-ethereum/common"
@@ -90,36 +96,27 @@ import (
 )
 
 func main() {
-    c, _ := client.New("https://rpc.moderato.tempo.xyz")
+    c := client.New("https://rpc.testnet.tempo.xyz")
     s, _ := signer.NewSigner("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
 
-    recipient := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
-    amount := new(big.Int).Mul(big.NewInt(10), big.NewInt(1e18))
-    transferData := buildERC20TransferData(recipient, amount)
+    ctx := context.Background()
+    nonce, _ := c.GetTransactionCount(ctx, s.Address().Hex()) // [!code hl]
 
-    // [!code focus:13]
-    tx := transaction.New()
-    tx.ChainID = big.NewInt(42431) // Tempo testnet
-    tx.MaxFeePerGas = big.NewInt(2000000000)
-    tx.MaxPriorityFeePerGas = big.NewInt(1000000000)
-    tx.Gas = 100000
-    tx.Calls = []transaction.Call{{
-        To:    &transaction.AlphaUSDAddress,
-        Value: big.NewInt(0),
-        Data:  transferData,
-    }}
+    recipient := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
+
+    // [!code hl:10]
+    tx := transaction.NewBuilder(big.NewInt(42429)). // Tempo testnet
+        SetNonce(nonce).
+        SetGas(100000).
+        SetMaxFeePerGas(big.NewInt(10000000000)).
+        SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
+        AddCall(recipient, big.NewInt(0), []byte{}).
+        Build()
 
     transaction.SignTransaction(tx, s)
-    hash, _ := c.SendTransaction(tx)
-    fmt.Printf("Transaction hash: %s\n", hash.Hex())
-}
-
-func buildERC20TransferData(to common.Address, amount *big.Int) []byte {
-    data := make([]byte, 68)
-    data[0], data[1], data[2], data[3] = 0xa9, 0x05, 0x9c, 0xbb
-    copy(data[16:36], to.Bytes())
-    amount.FillBytes(data[36:68])
-    return data
+    serialized, _ := transaction.Serialize(tx, nil)
+    hash, _ := c.SendRawTransaction(ctx, serialized) // [!code hl]
+    log.Printf("Transaction hash: %s", hash)
 }
 ```
 
@@ -127,34 +124,131 @@ func buildERC20TransferData(to common.Address, amount *big.Int) []byte {
 
 ## Examples
 
+### Read Chain Data
+
+Query the blockchain for basic information:
+
+```go [read.go]
+ctx := context.Background()
+
+blockNum, _ := c.GetBlockNumber(ctx)
+chainID, _ := c.GetChainID(ctx)
+nonce, _ := c.GetTransactionCount(ctx, "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb")
+
+fmt.Printf("Block: %d, Chain: %d, Nonce: %d\n", blockNum, chainID, nonce)
+```
+
+### Token Transfer
+
+Send a TIP-20 token transfer using go-ethereum's ABI encoding:
+
+```go [transfer.go]
+import "github.com/ethereum/go-ethereum/accounts/abi"
+
+erc20ABI, _ := abi.JSON(strings.NewReader(`[{"name":"transfer","type":"function","inputs":[{"name":"to","type":"address"},{"name":"amount","type":"uint256"}]}]`))
+
+recipient := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
+amount := big.NewInt(100_000_000) // 100 tokens (6 decimals)
+
+transferData, _ := erc20ABI.Pack("transfer", recipient, amount)
+
+tx := transaction.NewBuilder(big.NewInt(42429)).
+    SetNonce(nonce).
+    SetGas(100000).
+    SetMaxFeePerGas(big.NewInt(10000000000)).
+    SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
+    AddCall(transaction.AlphaUSDAddress, big.NewInt(0), transferData).
+    Build()
+```
+
+### Transfer with Memo
+
+Include a memo for payment reconciliation:
+
+```go [memo.go]
+tip20ABI, _ := abi.JSON(strings.NewReader(`[{"name":"transferWithMemo","type":"function","inputs":[{"name":"to","type":"address"},{"name":"amount","type":"uint256"},{"name":"memo","type":"bytes32"}]}]`))
+
+recipient := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
+amount := big.NewInt(100_000_000)
+memo := [32]byte{}
+copy(memo[:], "INV-12345")
+
+memoData, _ := tip20ABI.Pack("transferWithMemo", recipient, amount, memo)
+
+tx := transaction.NewBuilder(big.NewInt(42429)).
+    SetNonce(nonce).
+    SetGas(100000).
+    SetMaxFeePerGas(big.NewInt(10000000000)).
+    SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
+    AddCall(transaction.AlphaUSDAddress, big.NewInt(0), memoData).
+    Build()
+```
+
 ### Batch Multiple Calls
 
-Tempo transactions can batch multiple calls into a single transaction:
+Execute multiple operations atomically in a single transaction:
 
 ```go [batch.go]
-tx := transaction.NewDefault(42431) // Tempo testnet
-tx.Gas = 150000
-tx.Calls = []transaction.Call{
-    {To: &addr1, Value: big.NewInt(0), Data: transfer1Data},
-    {To: &addr2, Value: big.NewInt(0), Data: transfer2Data},
-    {To: &addr3, Value: big.NewInt(0), Data: contractCallData},
-}
+tx := transaction.NewBuilder(big.NewInt(42429)).
+    SetNonce(nonce).
+    SetGas(200000).
+    SetMaxFeePerGas(big.NewInt(10000000000)).
+    SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
+    AddCall(addr1, big.NewInt(0), transfer1Data). // [!code hl]
+    AddCall(addr2, big.NewInt(0), transfer2Data). // [!code hl]
+    AddCall(addr3, big.NewInt(0), contractCallData). // [!code hl]
+    Build()
 
-transaction.SignTransaction(tx, signer)
-client.SendTransaction(tx)
+transaction.SignTransaction(tx, s)
+```
+
+### Parallel Transactions (2D Nonces)
+
+Send multiple transactions concurrently using different nonce keys:
+
+```go [parallel.go]
+tx1 := transaction.NewBuilder(big.NewInt(42429)).
+    SetNonceKey(big.NewInt(1)). // Sequence A // [!code hl]
+    SetNonce(0).
+    SetGas(100000).
+    SetMaxFeePerGas(big.NewInt(10000000000)).
+    SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
+    AddCall(recipient1, big.NewInt(0), data1).
+    Build()
+
+tx2 := transaction.NewBuilder(big.NewInt(42429)).
+    SetNonceKey(big.NewInt(2)). // Sequence B (parallel) // [!code hl]
+    SetNonce(0).
+    SetGas(100000).
+    SetMaxFeePerGas(big.NewInt(10000000000)).
+    SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
+    AddCall(recipient2, big.NewInt(0), data2).
+    Build()
+
+transaction.SignTransaction(tx1, s)
+transaction.SignTransaction(tx2, s)
+
+// Send both in parallel
+go func() { c.SendRawTransaction(ctx, serialize(tx1)) }()
+go func() { c.SendRawTransaction(ctx, serialize(tx2)) }()
 ```
 
 ### Fee Sponsorship
 
-Have another account pay for transaction fees using a fee payer:
+Have another account pay for transaction fees:
 
 ```go [feepayer.go]
-tx := transaction.NewDefault(42431)
+tx := transaction.NewBuilder(big.NewInt(42429)).
+    SetNonce(nonce).
+    SetGas(100000).
+    SetMaxFeePerGas(big.NewInt(10000000000)).
+    SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
+    SetSponsored(true). // Mark as awaiting fee payer // [!code hl]
+    AddCall(recipient, big.NewInt(0), data).
+    Build()
+
 transaction.SignTransaction(tx, userSigner)
-
 transaction.AddFeePayerSignature(tx, feePayerSigner)
-
-client.SendTransaction(tx)
 ```
 
 ### Transaction Validity Window
@@ -162,14 +256,33 @@ client.SendTransaction(tx)
 Set a time window during which the transaction is valid:
 
 ```go [validity.go]
-import "time"
+now := time.Now()
 
-tx := transaction.NewDefault(42431)
-tx.ValidAfter = uint64(time.Now().Unix())
-tx.ValidBefore = uint64(time.Now().Add(1 * time.Hour).Unix())
+tx := transaction.NewBuilder(big.NewInt(42429)).
+    SetNonce(nonce).
+    SetGas(100000).
+    SetMaxFeePerGas(big.NewInt(10000000000)).
+    SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
+    SetValidAfter(uint64(now.Unix())). // [!code hl]
+    SetValidBefore(uint64(now.Add(1 * time.Hour).Unix())). // [!code hl]
+    AddCall(recipient, big.NewInt(0), data).
+    Build()
+```
 
-transaction.SignTransaction(tx, signer)
-client.SendTransaction(tx)
+### Batch RPC Requests
+
+Send multiple RPC calls efficiently in a single HTTP request:
+
+```go [batch_rpc.go]
+batch := client.NewBatchRequest()
+batch.Add("eth_blockNumber").
+    Add("eth_chainId").
+    Add("eth_getBalance", "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb", "latest")
+
+responses, _ := c.SendBatch(ctx, batch)
+for _, resp := range responses {
+    fmt.Printf("Result: %v\n", resp.Result)
+}
 ```
 
 ## Packages
