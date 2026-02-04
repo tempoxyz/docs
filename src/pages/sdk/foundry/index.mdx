@@ -107,7 +107,7 @@ forge create src/Mail.sol:Mail \
 
 # Deploy a simple contract with custom fee token
 forge create src/Mail.sol:Mail \
-  --fee-token <FEE_TOKEN_ADDRESS> \
+  --tempo.fee-token <FEE_TOKEN_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL \
   --interactive \
   --broadcast \
@@ -124,7 +124,7 @@ forge script script/Mail.s.sol \
 
 # Run a deployment script with custom fee token and verify
 forge script script/Mail.s.sol \
-  --fee-token <FEE_TOKEN_ADDRESS> \
+  --tempo.fee-token <FEE_TOKEN_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL \
   --interactive \
   --sender <YOUR_WALLET_ADDRESS> \
@@ -174,13 +174,13 @@ cast erc20 transfer <TOKEN_ADDRESS> <RECEIVER_ADDRESS> <AMOUNT> \
 
 # Transfer some of your ERC20 tokens with custom fee token:
 cast erc20 transfer <TOKEN_ADDRESS> <RECEIVER_ADDRESS> <AMOUNT> \
-  --fee-token <FEE_TOKEN_ADDRESS>
+  --tempo.fee-token <FEE_TOKEN_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL \
   --interactive
 
 # Send a transaction with custom fee token:
 cast send <CONTRACT_ADDRESS> <FUNCTION_SIGNATURE> \
-  --fee-token <FEE_TOKEN_ADDRESS> \
+  --tempo.fee-token <FEE_TOKEN_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL \
   --interactive
 
@@ -205,30 +205,24 @@ cast batch-send \
 
 # Sponsored transaction (gasless for sender):
 # Step 1: Get the fee payer signature hash
-FEE_PAYER_HASH=$(cast mktx <CONTRACT_ADDRESS> 'increment()' \
-  --rpc-url $TEMPO_RPC_URL \
-  --private-key $SENDER_KEY \
-  --print-sponsor-hash)
+FEE_PAYER_HASH=$(cast mktx <CONTRACT_ADDRESS> 'increment()' --rpc-url $TEMPO_RPC_URL --private-key $SENDER_KEY --tempo.print-sponsor-hash)
 # Step 2: Sponsor signs the hash
 SPONSOR_SIG=$(cast wallet sign --private-key $SPONSOR_KEY "$FEE_PAYER_HASH" --no-hash)
 # Step 3: Send with sponsor signature
-cast send <CONTRACT_ADDRESS> 'increment()' \
-  --rpc-url $TEMPO_RPC_URL \
-  --private-key $SENDER_KEY \
-  --sponsor-signature "$SPONSOR_SIG"
+cast send <CONTRACT_ADDRESS> 'increment()' --rpc-url $TEMPO_RPC_URL --private-key $SENDER_KEY --tempo.sponsor-signature "$SPONSOR_SIG"
 
 # Send with 2D nonce (parallel tx submission):
 cast send <CONTRACT_ADDRESS> 'increment()' \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY \
-  --nonce 0 --nonce-key 1
+  --nonce 0 --tempo.nonce-key 1
 
 # Send with expiring nonce (time-bounded tx, max 30s):
 VALID_BEFORE=$(($(date +%s) + 25))
 cast send <CONTRACT_ADDRESS> 'increment()' \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY \
-  --expiring-nonce --valid-before $VALID_BEFORE
+  --tempo.expiring-nonce --tempo.valid-before $VALID_BEFORE
 
 # Send with access key (delegated signing):
 # First authorize the key via Account Keychain precompile
@@ -244,6 +238,60 @@ cast send <CONTRACT_ADDRESS> 'increment()' \
   --root-account $ROOT_ADDRESS
 ```
 
-### Limitations
+### Local Development with Anvil
 
-Ledger and Trezor wallets are not yet compatible with the `--fee-token` option.
+Anvil supports Tempo mode for local testing and forking Tempo networks:
+
+```bash
+# Start anvil in Tempo mode
+anvil --tempo --hardfork t1
+
+# Fork a live Tempo network for local testing
+anvil --tempo --fork-url $TEMPO_RPC_URL
+
+# Test transactions on local anvil fork
+cast send <CONTRACT_ADDRESS> 'increment()' \
+  --tempo.fee-token <FEE_TOKEN_ADDRESS> \
+  --rpc-url http://127.0.0.1:8545 \
+  --private-key $PRIVATE_KEY
+
+# 2D nonce on anvil fork
+cast send <CONTRACT_ADDRESS> 'increment()' \
+  --tempo.fee-token <FEE_TOKEN_ADDRESS> \
+  --rpc-url http://127.0.0.1:8545 \
+  --private-key $PRIVATE_KEY \
+  --nonce 0 --tempo.nonce-key 100
+
+# Expiring nonce on anvil fork
+cast send <CONTRACT_ADDRESS> 'increment()' \
+  --tempo.fee-token <FEE_TOKEN_ADDRESS> \
+  --rpc-url http://127.0.0.1:8545 \
+  --private-key $PRIVATE_KEY \
+  --tempo.expiring-nonce --tempo.valid-before $(($(date +%s) + 25))
+
+# Batch transactions on anvil fork
+cast batch-send \
+  --tempo.fee-token <FEE_TOKEN_ADDRESS> \
+  --rpc-url http://127.0.0.1:8545 \
+  --call "<CONTRACT_ADDRESS>::increment()" \
+  --call "<CONTRACT_ADDRESS>::increment()" \
+  --private-key $PRIVATE_KEY
+```
+
+## Tempo-Specific CLI Flags
+
+The following flags are available for `cast` and `forge script` for Tempo-specific features:
+
+| Flag | Description | Example |
+|------|-------------|---------|
+| `--tempo.fee-token <ADDRESS>` | Specify the TIP-20 token to pay transaction fees | `--tempo.fee-token 0x20c0...0001` |
+| `--tempo.nonce-key <KEY>` | 2D nonce key for parallel transaction submission | `--tempo.nonce-key 1` |
+| `--tempo.expiring-nonce` | Enable expiring nonce for time-bounded transactions | `--tempo.expiring-nonce` |
+| `--tempo.valid-before <TIMESTAMP>` | Unix timestamp before which tx must execute (max 30s from now) | `--tempo.valid-before 1704067200` |
+| `--tempo.valid-after <TIMESTAMP>` | Unix timestamp after which tx can execute | `--tempo.valid-after 1704067100` |
+| `--tempo.sponsor-signature <SIG>` | Pre-signed sponsor signature for gasless transactions | `--tempo.sponsor-signature 0x...` |
+| `--tempo.print-sponsor-hash` | Print fee payer signature hash and exit (for sponsor to sign) | `--tempo.print-sponsor-hash` |
+
+Ledger and Trezor wallets are not yet compatible with any `--tempo.*` option.
+
+
