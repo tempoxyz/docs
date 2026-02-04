@@ -243,11 +243,11 @@ cast send <CONTRACT_ADDRESS> 'increment()' \
 Anvil supports Tempo mode for local testing and forking Tempo networks:
 
 ```bash
-# Start anvil in Tempo mode with T1 hardfork
-anvil --tempo --hardfork t1
+# Start anvil in Tempo mode
+anvil --tempo --evm-version t1
 
 # Fork a live Tempo network for local testing
-anvil --tempo --hardfork t1 --fork-url $TEMPO_RPC_URL
+anvil --tempo --fork-url $TEMPO_RPC_URL
 
 # Test transactions on local anvil fork
 cast send <CONTRACT_ADDRESS> 'increment()' \
@@ -280,7 +280,7 @@ cast batch-send \
 
 ## Tempo-Specific CLI Flags
 
-The following flags are available for Tempo-specific features:
+The following flags are available for `cast` and `forge script` for Tempo-specific features:
 
 | Flag | Description | Example |
 |------|-------------|---------|
