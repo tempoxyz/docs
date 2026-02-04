@@ -717,6 +717,11 @@ export default defineConfig({
       status: 301,
     },
   ],
+  codeHighlight: {
+    langAlias: {
+      sol: 'solidity',
+    },
+  },
   twoslash: {
     twoslashOptions: {
       compilerOptions: {
