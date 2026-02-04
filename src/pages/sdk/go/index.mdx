@@ -152,7 +152,6 @@ amount := big.NewInt(100_000_000) // 100 tokens (6 decimals)
 
 transferData, _ := erc20ABI.Pack("transfer", recipient, amount)
 
-// [!code hl:start]
 tx := transaction.NewBuilder(big.NewInt(42429)).
     SetNonce(nonce).
     SetGas(100000).
@@ -160,7 +159,6 @@ tx := transaction.NewBuilder(big.NewInt(42429)).
     SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
     AddCall(transaction.AlphaUSDAddress, big.NewInt(0), transferData).
     Build()
-// [!code hl:end]
 ```
 
 ### Transfer with Memo
@@ -177,7 +175,6 @@ copy(memo[:], "INV-12345")
 
 memoData, _ := tip20ABI.Pack("transferWithMemo", recipient, amount, memo)
 
-// [!code hl:start]
 tx := transaction.NewBuilder(big.NewInt(42429)).
     SetNonce(nonce).
     SetGas(100000).
@@ -185,7 +182,6 @@ tx := transaction.NewBuilder(big.NewInt(42429)).
     SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
     AddCall(transaction.AlphaUSDAddress, big.NewInt(0), memoData).
     Build()
-// [!code hl:end]
 ```
 
 ### Batch Multiple Calls
