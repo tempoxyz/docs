@@ -24,7 +24,7 @@ Once you've created your token, you can proceed to grant the issuer role and min
 
 Assign the issuer role to the address that will mint tokens. Minting requires the **`ISSUER_ROLE`**.
 
-<Demo.Container name="Grant Issuer Role" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/issuance">
+<Demo.Container name="Grant Issuer Role" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
   <Step.Connect stepNumber={1} />
   <Step.AddFunds stepNumber={2} />
   <Step.CreateOrLoadToken stepNumber={3} />
@@ -96,7 +96,7 @@ export const config = createConfig({
 
 Now that the issuer role is granted, you can mint tokens to any address.
 
-<Demo.Container name="Mint Tokens" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/issuance">
+<Demo.Container name="Mint Tokens" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
   <Step.Connect stepNumber={1} />
   <Step.AddFunds stepNumber={2} />
   <Step.CreateOrLoadToken stepNumber={3} />
@@ -264,7 +264,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 To decrease supply, you can burn tokens from your own balance. Burning requires the **`ISSUER_ROLE`** and sufficient balance in the caller's account.
 
-<Demo.Container name="Burn Your Token" footerVariant="source" src="tempoxyz/tempo-ts/tree/main/examples/issuance">
+<Demo.Container name="Burn Your Token" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
   <Step.Connect stepNumber={1} />
   <Step.AddFunds stepNumber={2} />
   <Step.CreateOrLoadToken stepNumber={3} />
