@@ -13,7 +13,7 @@ import { REWARD_AMOUNT, REWARD_RECIPIENT_UNSET } from './Constants'
 export function StartReward(props: DemoStepProps) {
   const { stepNumber, last = false } = props
   const { address } = useConnection()
-  const { getData } = useDemoContext()
+  const { getData, setData } = useDemoContext()
   const queryClient = useQueryClient()
   const tokenAddress = getData('tokenAddress')
 
@@ -35,6 +35,9 @@ export function StartReward(props: DemoStepProps) {
 
   const start = Hooks.reward.useDistributeSync({
     mutation: {
+      onSuccess() {
+        setData('rewardId', 1n)
+      },
       onSettled() {
         queryClient.refetchQueries({ queryKey: ['getUserRewardInfo'] })
         queryClient.refetchQueries({ queryKey: ['getBalance'] })

@@ -37,14 +37,17 @@ test('distribute rewards', async ({ page }) => {
   })
 
   // Step 3: Create a token
-  const nameInput = page.getByPlaceholder('demoUSD').first()
+  // Use label-based selectors to ensure we're filling the right inputs in the demo form
+  const nameInput = page.getByLabel('Token name').first()
   await expect(nameInput).toBeVisible()
   await nameInput.fill('RewardTestUSD')
 
-  const symbolInput = page.getByPlaceholder('DEMO').first()
+  const symbolInput = page.getByLabel('Token symbol').first()
+  await expect(symbolInput).toBeVisible()
   await symbolInput.fill('REWARD')
 
   const deployButton = page.getByRole('button', { name: 'Deploy' }).first()
+  await expect(deployButton).toBeVisible()
   await deployButton.click()
 
   await expect(page.getByRole('link', { name: 'View receipt' }).first()).toBeVisible({
@@ -63,8 +66,8 @@ test('distribute rewards', async ({ page }) => {
     timeout: 90000,
   })
 
-  // Step 5: Mint tokens
-  const mintEnterDetails = page.getByRole('button', { name: 'Enter details' }).nth(1)
+  // Step 5: Mint tokens (after grant completes, Enter details button is the first visible one)
+  const mintEnterDetails = page.getByRole('button', { name: 'Enter details' }).first()
   await expect(mintEnterDetails).toBeVisible()
   await mintEnterDetails.click()
 
@@ -85,7 +88,7 @@ test('distribute rewards', async ({ page }) => {
   })
 
   // Step 7: Start reward
-  const startButton = page.getByRole('button', { name: 'Start' }).first()
+  const startButton = page.getByRole('button', { name: 'Start Reward' }).first()
   await expect(startButton).toBeVisible()
   await startButton.click()
 

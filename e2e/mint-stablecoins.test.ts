@@ -37,14 +37,17 @@ test('mint stablecoins', async ({ page }) => {
   })
 
   // Step 3: Create a token (fill form and deploy)
-  const nameInput = page.getByPlaceholder('demoUSD').first()
+  // Use label-based selectors to ensure we're filling the right inputs in the demo form
+  const nameInput = page.getByLabel('Token name').first()
   await expect(nameInput).toBeVisible()
   await nameInput.fill('MintTestUSD')
 
-  const symbolInput = page.getByPlaceholder('DEMO').first()
+  const symbolInput = page.getByLabel('Token symbol').first()
+  await expect(symbolInput).toBeVisible()
   await symbolInput.fill('MINT')
 
   const deployButton = page.getByRole('button', { name: 'Deploy' }).first()
+  await expect(deployButton).toBeVisible()
   await deployButton.click()
 
   // Wait for token to be created (View receipt appears)
@@ -66,8 +69,8 @@ test('mint stablecoins', async ({ page }) => {
     timeout: 90000,
   })
 
-  // Step 5: Mint tokens - click "Enter details" then "Mint"
-  const mintEnterDetails = page.getByRole('button', { name: 'Enter details' }).nth(1)
+  // Step 5: Mint tokens - click "Enter details" then "Mint" (now the first visible Enter details)
+  const mintEnterDetails = page.getByRole('button', { name: 'Enter details' }).first()
   await expect(mintEnterDetails).toBeVisible()
   await mintEnterDetails.click()
 

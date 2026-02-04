@@ -39,15 +39,17 @@ test('create a stablecoin', async ({ page }) => {
   })
 
   // Step 3: Fill in token details and deploy
-  const nameInput = page.getByPlaceholder('demoUSD').first()
+  // Use label-based selectors to ensure we're filling the right inputs in the demo form
+  const nameInput = page.getByLabel('Token name').first()
   await expect(nameInput).toBeVisible()
   await nameInput.fill('TestUSD')
 
-  const symbolInput = page.getByPlaceholder('DEMO').first()
+  const symbolInput = page.getByLabel('Token symbol').first()
   await expect(symbolInput).toBeVisible()
   await symbolInput.fill('TEST')
 
   const deployButton = page.getByRole('button', { name: 'Deploy' }).first()
+  await expect(deployButton).toBeVisible()
   await deployButton.click()
 
   // Wait for success - View receipt link

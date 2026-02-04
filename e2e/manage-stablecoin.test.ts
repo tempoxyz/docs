@@ -37,14 +37,17 @@ test('manage stablecoin - grant and revoke roles', async ({ page }) => {
   })
 
   // Step 3: Create a token
-  const nameInput = page.getByPlaceholder('demoUSD').first()
+  // Use label-based selectors to ensure we're filling the right inputs in the demo form
+  const nameInput = page.getByLabel('Token name').first()
   await expect(nameInput).toBeVisible()
   await nameInput.fill('ManageTestUSD')
 
-  const symbolInput = page.getByPlaceholder('DEMO').first()
+  const symbolInput = page.getByLabel('Token symbol').first()
+  await expect(symbolInput).toBeVisible()
   await symbolInput.fill('MANAGE')
 
   const deployButton = page.getByRole('button', { name: 'Deploy' }).first()
+  await expect(deployButton).toBeVisible()
   await deployButton.click()
 
   await expect(page.getByRole('link', { name: 'View receipt' }).first()).toBeVisible({
@@ -64,8 +67,8 @@ test('manage stablecoin - grant and revoke roles', async ({ page }) => {
     timeout: 90000,
   })
 
-  // Step 5: Revoke issuer role
-  const revokeEnterDetails = page.getByRole('button', { name: 'Enter details' }).nth(1)
+  // Step 5: Revoke issuer role (now the first visible Enter details)
+  const revokeEnterDetails = page.getByRole('button', { name: 'Enter details' }).first()
   await expect(revokeEnterDetails).toBeVisible()
   await revokeEnterDetails.click()
 

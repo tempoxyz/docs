@@ -36,10 +36,10 @@ test('executing swaps', async ({ page }) => {
     timeout: 90000,
   })
 
-  // Step 3: Execute a swap
-  const swapButton = page.getByRole('button', { name: 'Swap' }).first()
-  await expect(swapButton).toBeVisible()
-  await swapButton.click()
+  // Step 3: Execute a swap (Buy AlphaUSD with BetaUSD)
+  const buyButton = page.getByRole('button', { name: 'Buy' }).first()
+  await expect(buyButton).toBeVisible()
+  await buyButton.click()
 
   // Wait for swap receipt
   await expect(page.getByRole('link', { name: 'View receipt' })).toBeVisible({ timeout: 90000 })

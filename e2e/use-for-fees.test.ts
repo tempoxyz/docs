@@ -37,14 +37,17 @@ test('use stablecoin for fees', async ({ page }) => {
   })
 
   // Step 3: Create a token
-  const nameInput = page.getByPlaceholder('demoUSD').first()
+  // Use label-based selectors to ensure we're filling the right inputs in the demo form
+  const nameInput = page.getByLabel('Token name').first()
   await expect(nameInput).toBeVisible()
   await nameInput.fill('FeeTestUSD')
 
-  const symbolInput = page.getByPlaceholder('DEMO').first()
+  const symbolInput = page.getByLabel('Token symbol').first()
+  await expect(symbolInput).toBeVisible()
   await symbolInput.fill('FEE')
 
   const deployButton = page.getByRole('button', { name: 'Deploy' }).first()
+  await expect(deployButton).toBeVisible()
   await deployButton.click()
 
   await expect(page.getByRole('link', { name: 'View receipt' }).first()).toBeVisible({
@@ -63,8 +66,8 @@ test('use stablecoin for fees', async ({ page }) => {
     timeout: 90000,
   })
 
-  // Step 5: Mint tokens
-  const mintEnterDetails = page.getByRole('button', { name: 'Enter details' }).nth(1)
+  // Step 5: Mint tokens (after grant completes, Enter details button is the first visible one)
+  const mintEnterDetails = page.getByRole('button', { name: 'Enter details' }).first()
   await expect(mintEnterDetails).toBeVisible()
   await mintEnterDetails.click()
 
@@ -75,17 +78,17 @@ test('use stablecoin for fees', async ({ page }) => {
     timeout: 90000,
   })
 
-  // Step 6: Mint fee AMM liquidity
-  const mintLiquidityButton = page.getByRole('button', { name: 'Mint liquidity' }).first()
-  await expect(mintLiquidityButton).toBeVisible()
-  await mintLiquidityButton.click()
+  // Step 6: Add fee AMM liquidity
+  const addLiquidityButton = page.getByRole('button', { name: 'Add Liquidity' }).first()
+  await expect(addLiquidityButton).toBeVisible()
+  await addLiquidityButton.click()
 
   await expect(page.getByRole('link', { name: 'View receipt' }).nth(3)).toBeVisible({
     timeout: 90000,
   })
 
-  // Step 7: Send payment using token as fee
-  const payEnterDetails = page.getByRole('button', { name: 'Enter details' }).nth(2)
+  // Step 7: Send payment using token as fee (now the only Enter details button visible)
+  const payEnterDetails = page.getByRole('button', { name: 'Enter details' }).first()
   await expect(payEnterDetails).toBeVisible()
   await payEnterDetails.click()
 
