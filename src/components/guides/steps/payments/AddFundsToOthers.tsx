@@ -86,7 +86,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
         <Button
           disabled={!isValidTarget || fundAccount.isPending}
           variant="default"
-          className="-tracking-[2%] font-normal text-[14px]"
+          className="font-normal text-[14px] -tracking-[2%]"
           onClick={() => fundAccount.mutate()}
           type="button"
         >
@@ -97,7 +97,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
       <Button
         disabled={!isValidTarget || fundAccount.isPending}
         variant={isValidTarget ? 'accent' : 'default'}
-        className="-tracking-[2%] font-normal text-[14px]"
+        className="font-normal text-[14px] -tracking-[2%]"
         type="button"
         onClick={() => fundAccount.mutate()}
       >
@@ -118,15 +118,16 @@ export function AddFundsToOthers(props: DemoStepProps) {
       <div className="mx-6 flex flex-col gap-3 pb-4">
         <div className="border-gray4 border-s-2 ps-5">
           <div className="mt-2 flex flex-col">
-            <label className="-tracking-[1%] text-[11px] text-gray9" htmlFor="fundAddress">
+            <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="fundAddress">
               Address to fund
             </label>
             <input
-              className="-tracking-[2%] h-[34px] rounded-full border border-gray4 px-3.25 font-normal text-[14px] text-black placeholder-gray9 dark:text-white"
+              className="h-[34px] rounded-full border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
               autoCapitalize="none"
               autoComplete="off"
               autoCorrect="off"
               spellCheck={false}
+              id="fundAddress"
               name="fundAddress"
               placeholder="0x..."
               value={fundAddress ?? ''}

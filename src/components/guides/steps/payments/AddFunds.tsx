@@ -72,7 +72,7 @@ export function AddFunds(props: DemoStepProps) {
         <Button
           disabled={fundAccount.isPending}
           variant="default"
-          className="-tracking-[2%] font-normal text-[14px]"
+          className="font-normal text-[14px] -tracking-[2%]"
           onClick={() => fundAccount.mutate()}
           type="button"
         >
@@ -83,7 +83,7 @@ export function AddFunds(props: DemoStepProps) {
       <Button
         disabled={!address || fundAccount.isPending}
         variant={address ? 'accent' : 'default'}
-        className="-tracking-[2%] font-normal text-[14px]"
+        className="font-normal text-[14px] -tracking-[2%]"
         type="button"
         onClick={() => fundAccount.mutate()}
       >

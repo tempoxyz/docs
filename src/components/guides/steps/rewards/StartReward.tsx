@@ -13,7 +13,7 @@ import { REWARD_AMOUNT, REWARD_RECIPIENT_UNSET } from './Constants'
 export function StartReward(props: DemoStepProps) {
   const { stepNumber, last = false } = props
   const { address } = useConnection()
-  const { getData } = useDemoContext()
+  const { getData, setData } = useDemoContext()
   const queryClient = useQueryClient()
   const tokenAddress = getData('tokenAddress')
 
@@ -35,6 +35,9 @@ export function StartReward(props: DemoStepProps) {
 
   const start = Hooks.reward.useDistributeSync({
     mutation: {
+      onSuccess() {
+        setData('rewardId', 1n)
+      },
       onSettled() {
         queryClient.refetchQueries({ queryKey: ['getUserRewardInfo'] })
         queryClient.refetchQueries({ queryKey: ['getBalance'] })
@@ -75,7 +78,7 @@ export function StartReward(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(!expanded)}
-            className="-tracking-[2%] font-normal text-[14px]"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             {expanded ? 'Hide' : 'Show'}
@@ -101,7 +104,7 @@ export function StartReward(props: DemoStepProps) {
       {start.data && expanded && (
         <div className="ml-6 flex flex-col gap-3 py-4">
           <div className="border-gray4 border-s-2 ps-5">
-            <div className="-tracking-[2%] text-[13px] text-gray9">
+            <div className="text-[13px] text-gray9 -tracking-[2%]">
               Successfully started reward distribution.
             </div>
             <ExplorerLink hash={start.data.receipt.transactionHash} />
