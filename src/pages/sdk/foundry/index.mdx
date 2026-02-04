@@ -296,13 +296,6 @@ The following flags are available for Tempo-specific features:
 | `--tempo.valid-before <TIMESTAMP>` | Unix timestamp before which tx must execute (max 30s from now) | `--tempo.valid-before 1704067200` |
 | `--tempo.valid-after <TIMESTAMP>` | Unix timestamp after which tx can execute | `--tempo.valid-after 1704067100` |
 
-:::tip[Environment Variable]
-You can set `TEMPO_FEE_TOKEN` environment variable instead of passing `--tempo.fee-token` on every command:
-```bash
-export TEMPO_FEE_TOKEN=0x20c0000000000000000000000000000000000001
-```
-:::
-
 ### Limitations
 
 Ledger and Trezor wallets are not yet compatible with the `--tempo.fee-token` option.
