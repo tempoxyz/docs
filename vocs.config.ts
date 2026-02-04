@@ -718,11 +718,23 @@ export default defineConfig({
       status: 301,
     },
   ],
+  codeHighlight: {
+    langAlias: {
+      sol: 'solidity',
+    },
+  },
   twoslash: {
     twoslashOptions: {
       compilerOptions: {
         // ModuleResolutionKind.Bundler = 100
         moduleResolution: 100,
+      },
+    },
+  },
+  markdown: {
+    code: {
+      langAlias: {
+        sol: 'solidity',
       },
     },
   },

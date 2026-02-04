@@ -37,7 +37,7 @@
     "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",
     "viem": "^2.44.4",
-    "vocs": "https://pkg.pr.new/wevm/vocs@72623ad",
+    "vocs": "https://pkg.pr.new/wevm/vocs@d02f8c5",
     "wagmi": "3.4.1",
     "waku": "1.0.0-alpha.2",
     "zod": "^4.3.5"

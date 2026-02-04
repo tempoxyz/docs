@@ -54,7 +54,7 @@ importers:
         version: 1.333.0
       posthog-node:
         specifier: ^5.24.8
-        version: 5.24.8
+        version: 5.24.10
       prool:
         specifier: ^0.2.2
         version: 0.2.2
@@ -89,8 +89,8 @@ importers:
         specifier: ^2.44.4
         version: 2.44.4(typescript@5.9.3)(zod@4.3.5)
       vocs:
-        specifier: https://pkg.pr.new/wevm/vocs@72623ad
-        version: https://pkg.pr.new/wevm/vocs@72623ad(@types/react@19.2.9)(mermaid@11.12.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.56.0)(typescript@5.9.3)(vite@7.3.1(@types/node@25.2.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.2(@types/node@25.2.0)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+        specifier: https://pkg.pr.new/wevm/vocs@d02f8c5
+        version: https://pkg.pr.new/wevm/vocs@d02f8c5(@types/react@19.2.9)(mermaid@11.12.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.56.0)(typescript@5.9.3)(vite@7.3.1(@types/node@25.2.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.2(@types/node@25.2.0)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       wagmi:
         specifier: 3.4.1
         version: 3.4.1(@tanstack/query-core@5.90.19)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react@19.2.9)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))
@@ -735,8 +735,8 @@ packages:
   '@posthog/core@1.13.0':
     resolution: {integrity: sha512-knjncrk7qRmssFRbGzBl1Tunt21GRpe0Wv+uVelyL0Rh7PdQUsgguulzXFTps8hA6wPwTU4kq85qnbAJ3eH6Wg==}
 
-  '@posthog/core@1.18.0':
-    resolution: {integrity: sha512-irPbrcopCT0LCRgGM4V8jFuMNCFos6EM4QFf5KA2sHQFC/6pGaHZYoyHcjRUDUKFw4vmpLlmGEXA5ah8x5K4LQ==}
+  '@posthog/core@1.20.0':
+    resolution: {integrity: sha512-e/F20we0t6bPMuDOVOe53f908s23vuKEpFKNXmZcx4bSYsPkjRN49akIIHU621HBJdcsFx537vhJYKZxu8uS9w==}
 
   '@posthog/types@1.333.0':
     resolution: {integrity: sha512-9Wg/2ez+EZh6NmtOjhtYSkBHz/yIq8WMS0QSIizUoggh35hHVg4BTMXl3rz/tPearJNKU/8oRjEyuZ0OYTEDOA==}
@@ -3149,8 +3149,8 @@ packages:
   posthog-js@1.333.0:
     resolution: {integrity: sha512-c7vquERMedjuGE2GnaDDJW/V1BIMMQG7BlYKrH0z8O7fc3WpEsQ/IyQ+9aD9+DLxlDCFpzrwgoxVDWi9K37mdA==}
 
-  posthog-node@5.24.8:
-    resolution: {integrity: sha512-rE6p7DYGRR2wHP0FPJIJ9xpDmCPPe6x5p+3CwnyAbO27n7XL4d2GbLeJYpBl0QRGKdUbmDwkEMDXC9u4xvhxZQ==}
+  posthog-node@5.24.10:
+    resolution: {integrity: sha512-C4ueZUrifTJMDFngybSWQ+GthcqCqPiCcGg5qnjoh+f6ie3+tdhFROqqshjttpQ6Q4DPM40USPTmU/UBYqgsbA==}
     engines: {node: ^20.20.0 || >=22.22.0}
 
   preact@10.28.2:
@@ -3810,8 +3810,8 @@ packages:
       vite:
         optional: true
 
-  vocs@https://pkg.pr.new/wevm/vocs@72623ad:
-    resolution: {integrity: sha512-WQ/cr3mwgW5lR/bhjHgguAA7YOit0EpyEEDdLxWeoyxSiwZ5ZUE2DoOLvwAYQ1yJZK1fDz6ksbevC2S2DbXbqg==, tarball: https://pkg.pr.new/wevm/vocs@72623ad}
+  vocs@https://pkg.pr.new/wevm/vocs@d02f8c5:
+    resolution: {integrity: sha512-EB+QdYFxne64ocF+3zTdKSz/j9Fs4HWNeEzOF5WogpgrJ4uB4FAe7hAZtTbVkT1WMwRFc5Al44WcNk2wTD9fcA==, tarball: https://pkg.pr.new/wevm/vocs@d02f8c5}
     version: 0.0.0
     hasBin: true
     peerDependencies:
@@ -4630,7 +4630,7 @@ snapshots:
     dependencies:
       cross-spawn: 7.0.6
 
-  '@posthog/core@1.18.0':
+  '@posthog/core@1.20.0':
     dependencies:
       cross-spawn: 7.0.6
 
@@ -7197,9 +7197,9 @@ snapshots:
       query-selector-shadow-dom: 1.0.1
       web-vitals: 4.2.4
 
-  posthog-node@5.24.8:
+  posthog-node@5.24.10:
     dependencies:
-      '@posthog/core': 1.18.0
+      '@posthog/core': 1.20.0
 
   preact@10.28.2: {}
 
@@ -7974,7 +7974,7 @@ snapshots:
     optionalDependencies:
       vite: 7.3.1(@types/node@25.2.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
-  vocs@https://pkg.pr.new/wevm/vocs@72623ad(@types/react@19.2.9)(mermaid@11.12.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.56.0)(typescript@5.9.3)(vite@7.3.1(@types/node@25.2.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.2(@types/node@25.2.0)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)):
+  vocs@https://pkg.pr.new/wevm/vocs@d02f8c5(@types/react@19.2.9)(mermaid@11.12.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.56.0)(typescript@5.9.3)(vite@7.3.1(@types/node@25.2.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.2(@types/node@25.2.0)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
       '@base-ui/react': 1.1.0(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@codesandbox/sandpack-react': 2.20.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -8001,9 +8001,11 @@ snapshots:
       '@vitejs/plugin-rsc': 0.5.16(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(vite@7.3.1(@types/node@25.2.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       cac: 6.7.14
       cva: class-variance-authority@0.7.1
+      debug: 4.4.3
       esast-util-from-js: 2.0.1
       estree-util-value-to-estree: 3.5.0
       estree-util-visit: 2.0.0
+      extend: 3.0.2
       github-slugger: 2.0.0
       hono: 4.11.5
       image-size: 2.0.2
