@@ -51,7 +51,12 @@ function syncTips(): Plugin {
 
     await Promise.all(
       tipFiles.map(async (file) => {
-        const content = await fetch(file.download_url).then((r) => r.text())
+        let content = await fetch(file.download_url).then((r) => r.text())
+        // Fix dead links in TIPs that reference local paths instead of GitHub URLs
+        content = content.replace(
+          /\(tips\/ref-impls\/src\/interfaces\/(\w+\.sol)\)/g,
+          '(https://github.com/tempoxyz/tempo-std/blob/master/src/interfaces/$1)',
+        )
         const outputPath = path.join(outputDir, file.name.replace('.md', '.mdx'))
         await fs.writeFile(outputPath, content)
       }),
