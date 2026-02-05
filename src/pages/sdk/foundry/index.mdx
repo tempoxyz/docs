@@ -36,7 +36,7 @@ Next, run:
 foundryup -n tempo
 ```
 
-It will automatically install the latest `nightly` release of the precompiled binaries: [`forge`](https://getfoundry.sh/forge/overview#forge) and [`cast`](https://getfoundry.sh/cast/overview#cast).
+It will automatically install the latest `nightly` release of all precompiled binaries: [`forge`](https://getfoundry.sh/forge/overview#forge), [`cast`](https://getfoundry.sh/cast/overview#cast), [`anvil`](https://getfoundry.sh/anvil/overview#anvil), and [`chisel`](https://getfoundry.sh/chisel/overview#chisel).
 
 To install a specific version, replace `<TAG_NAME>` with the desired release tag:
 
@@ -114,8 +114,14 @@ forge create src/Mail.sol:Mail \
   --verify \
   --constructor-args 0x20c0000000000000000000000000000000000001
 
+# Set a salt for deterministic contract address derivation
+# The salt is passed to TIP20_FACTORY.createToken() which uses it with the sender
+# address to compute a deterministic deployment address via getTokenAddress(sender, salt)
+export SALT="my-unique-salt"
+
 # Run a deployment script and verify
 forge script script/Mail.s.sol \
+  --sig "run(string)" $SALT \
   --rpc-url $TEMPO_RPC_URL \
   --interactive \
   --sender <YOUR_WALLET_ADDRESS> \
@@ -124,6 +130,7 @@ forge script script/Mail.s.sol \
 
 # Run a deployment script with custom fee token and verify
 forge script script/Mail.s.sol \
+  --sig "run(string)" $SALT \
   --tempo.fee-token <FEE_TOKEN_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL \
   --interactive \
