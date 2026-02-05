@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { execute } from '@sourcegraph/amp-sdk'
-import { tempoModerato } from 'tempo.ts/chains'
 import { createPublicClient, http, isHash } from 'viem'
+import { tempoModerato } from 'viem/chains'
 
 const PROMPT = `
 Build a TypeScript CLI script that transfers 0.01 pathUSD on Tempo testnet.
