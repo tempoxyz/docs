@@ -675,3 +675,75 @@ the transaction can be included in a block.
     ```
   </Tab>
 </Tabs>
+
+### Expiring Nonces
+
+Expiring nonces allow transactions to automatically expire if not executed within a specified time window. 
+By using the special `'expiring'` nonce key, Tempo will generate a unique nonce key based on the transaction's 
+validity window (`validAfter` and `validBefore`), ensuring the transaction can only be executed during that period 
+and cannot be replayed afterward.
+
+This is useful for time-sensitive operations like limit orders, auctions, or any transaction that should 
+become invalid after a deadline.
+
+<div className="-mt-2" />
+
+<Tabs stateKey="library">
+  <Tab title="Viem">
+
+    :::code-group
+
+    ```tsx twoslash [example.ts]
+    // @noErrors
+    import { client } from './viem.config'
+
+    const hash = await client.sendTransaction({
+      data: '0xdeadbeef',
+      nonceKey: 'expiring', // [!code hl]
+      to: '0xcafebabecafebabecafebabecafebabecafebabe',
+      validAfter: Math.floor(Date.now() / 1000), // [!code hl]
+      validBefore: Math.floor(Date.now() / 1000) + 3600, // expires in 1 hour // [!code hl]
+    })
+    ```
+
+    ```tsx twoslash [viem.config.ts]
+    // [!include ~/snippets/viem.config.ts:setup]
+    ```
+
+    :::
+
+  </Tab>
+  <Tab title="Wagmi">
+
+    
+    :::code-group
+
+    ```tsx twoslash [example.ts]
+    // @noErrors
+    import { useSendTransaction } from 'wagmi'
+
+    const { sendTransaction } = useSendTransaction()
+
+    sendTransaction({
+      data: '0xdeadbeef',
+      nonceKey: 'expiring', // [!code hl]
+      to: '0xcafebabecafebabecafebabecafebabecafebabe',
+      validAfter: Math.floor(Date.now() / 1000), // [!code hl]
+      validBefore: Math.floor(Date.now() / 1000) + 3600, // expires in 1 hour // [!code hl]
+    })
+    ```
+
+    ```tsx twoslash [wagmi.config.ts]
+    // @noErrors
+    // [!include ~/snippets/wagmi.config.ts:setup]
+    ```
+
+    :::
+
+  </Tab>
+</Tabs>
+
+:::tip
+Expiring nonces combine the benefits of [scheduled transactions](#scheduled-transactions) with automatic replay protection. 
+Once the `validBefore` timestamp passes, the transaction becomes permanently invalid.
+:::
