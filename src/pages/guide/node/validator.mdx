@@ -49,7 +49,15 @@ tempo node --datadir <datadir> \
     --discovery.port 30303 \
     --consensus.signing-key <path> \
     --consensus.fee-recipient <validator_wallet_address> \
+    --telemetry-url <TELEMETRY_URL>
 ```
+
+### Optional flags
+
+| Flag | Description |
+|------|-------------|
+| `--telemetry-url <URL>` | Unified metrics and logs export. Pushes both reth and consensus metrics with a `consensus_id` label for node identification. **We ask all validators to configure this so we can support troubleshooting.** |
+| `--consensus.datadir <PATH>` | Store consensus data on a separate volume (e.g., AWS EBS) while keeping execution state on high-performance local disks. Migrate by copying `<datadir>/consensus` to the new location. |
 
 :::warning[Testnet Chain Name Change]
 As of v1.1.0, testnet nodes must use `--chain moderato`. The previous `andantino` chainspec has been removed.

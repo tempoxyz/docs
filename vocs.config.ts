@@ -13,7 +13,9 @@ const baseUrl = (() => {
 
 export default defineConfig({
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
-  checkDeadlinks: true,
+  // TODO: Set back to true once tempoxyz/tempo#tip-1011 dead link is fixed
+  checkDeadlinks: 'warn',
+
   title: 'Tempo',
   titleTemplate: '%s ⋅ Tempo',
   description: 'Documentation for the Tempo network and protocol specifications',
@@ -405,8 +407,8 @@ export default defineConfig({
                 link: '/protocol/exchange/spec',
               },
               {
-                text: 'pathUSD',
-                link: '/protocol/exchange/pathUSD',
+                text: 'Quote Tokens',
+                link: '/protocol/exchange/quote-tokens',
               },
               {
                 text: 'Executing Swaps',
@@ -714,12 +716,29 @@ export default defineConfig({
       destination: '/protocol/tip20/overview',
       status: 301,
     },
+    {
+      source: '/protocol/exchange/pathUSD',
+      destination: '/protocol/exchange/quote-tokens#pathusd',
+      status: 301,
+    },
   ],
+  codeHighlight: {
+    langAlias: {
+      sol: 'solidity',
+    },
+  },
   twoslash: {
     twoslashOptions: {
       compilerOptions: {
         // ModuleResolutionKind.Bundler = 100
         moduleResolution: 100,
+      },
+    },
+  },
+  markdown: {
+    code: {
+      langAlias: {
+        sol: 'solidity',
       },
     },
   },
