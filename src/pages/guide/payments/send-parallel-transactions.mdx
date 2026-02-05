@@ -16,19 +16,16 @@ Submit multiple transactions in parallel using Tempo's flexible nonce system. Ch
 
 ## Expiring Nonces (Recommended)
 
-[TIP-1009](/protocol/tips/tip-1009) introduces expiring nonces: transactions specify a `validBefore` timestamp (max 30s in the future) instead of tracking sequential nonces. This is the simplest approach for parallel submission.
-
-To use expiring nonces, set `nonceKey` to `UINT256_MAX` (`0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff`). This signals to the protocol that the transaction uses time-based replay protection instead of sequential nonces.
+[TIP-1009](/protocol/tips/tip-1009) introduces expiring nonces: transactions automatically expire if not executed within a specified time window. This is the simplest approach for parallel submission—no nonce tracking required.
 
 :::code-group
 
 ```typescript [TypeScript]
-const tx = await Actions.token.transfer(config, {
-  amount: parseUnits('100', 6),
+// Set nonceKey to 'expiring' - the SDK handles everything
+const tx = await client.sendTransaction({
   to: recipient,
-  token: alphaUsd,
-  nonceKey: BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'),
-  validBefore: Math.floor(Date.now() / 1000) + 30,
+  data: '0x...',
+  nonceKey: 'expiring', // [!code hl]
 })
 ```
 
