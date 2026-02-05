@@ -12,17 +12,12 @@ function PostHogInitializer() {
 
     posthog.init(posthogKey, {
       api_host: posthogHost,
-      defaults: '2025-05-24',
+      defaults: '2025-11-30',
       capture_exceptions: true,
       debug: import.meta.env.MODE === 'development',
-      loaded: (posthog) => {
-        posthog.capture('$pageview')
-      },
     })
 
-    return () => {
-      posthog.reset()
-    }
+    posthog.register({ site: 'docs' })
   }, [])
 
   return null
