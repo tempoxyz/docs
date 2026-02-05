@@ -21,6 +21,8 @@ test('pay fees in any stablecoin', async ({ page }) => {
   // Step 1: Sign up with passkey
   const signUpButton = page.getByRole('button', { name: 'Sign up' }).first()
   await expect(signUpButton).toBeVisible({ timeout: 90000 })
+  // Wait for page to fully initialize
+  await page.waitForTimeout(1000)
   await signUpButton.click()
 
   await expect(page.getByRole('button', { name: 'Sign out' }).first()).toBeVisible({
