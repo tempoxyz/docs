@@ -1,7 +1,7 @@
 {
   "redirects": [
     {
-      "source": "/.*",
+      "source": "/*",
       "has": [{ "type": "host", "value": "faucet.tempo.xyz" }],
       "destination": "https://docs.tempo.xyz/quickstart/faucet",
       "permanent": false
