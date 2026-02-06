@@ -40,6 +40,13 @@ These dedicated servers meet or exceed the recommended specs for both RPC and va
 Cloud instances with network-attached storage (e.g., AWS EBS) do not provide sufficient I/O performance. Use dedicated servers or instances with local NVMe storage.
 :::
 
+## Security measures
+
+We do not recommend using a cloud firewall / NAT gateway as it can introduce additional complexity and performance issues. Instead, we've implemented security measures in the networking layer of the node, including:
+- only accepting connections from trusted IP addresses (active validators on-chain)
+- ratelimiting connections and messages in consensus and execution to prevent abuse
+- only accepting consensus connections from validators that can prove their identity
+
 ## Ports
 
 | Port | Protocol | Purpose | Expose |
