@@ -104,7 +104,14 @@ export function AddFundsToOthers(props: DemoStepProps) {
         {fundAccount.isPending ? 'Adding funds' : 'Add funds'}
       </Button>
     )
-  }, [isValidTarget, balance, fundAccount.isPending, fundAccount.isSuccess, fundAccount.mutate])
+  }, [
+    isValidTarget,
+    balance,
+    fundAccount.isPending,
+    fundAccount.isSuccess,
+    fundAccount.mutate,
+    fundAccount,
+  ])
 
   return (
     <Step

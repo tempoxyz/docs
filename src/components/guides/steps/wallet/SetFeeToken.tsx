@@ -105,7 +105,15 @@ export function SetFeeToken(props: DemoStepProps) {
         },
       },
     )
-  }, [address, isFeeTokenValid, resolvedFeeToken, setUserToken, defaultChainId, userToken.refetch])
+  }, [
+    address,
+    isFeeTokenValid,
+    resolvedFeeToken,
+    setUserToken,
+    defaultChainId,
+    userToken.refetch,
+    userToken,
+  ])
 
   // Sync selected option with current user token
   React.useEffect(() => {

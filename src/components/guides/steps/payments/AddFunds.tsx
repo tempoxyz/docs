@@ -90,7 +90,7 @@ export function AddFunds(props: DemoStepProps) {
         {fundAccount.isPending ? 'Adding funds' : 'Add funds'}
       </Button>
     )
-  }, [address, balance, fundAccount.isPending, fundAccount.mutate, showLogin])
+  }, [address, balance, fundAccount.isPending, fundAccount.mutate, showLogin, fundAccount])
 
   return (
     <Step

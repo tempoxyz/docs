@@ -108,7 +108,7 @@ export function Container(
   const disconnect = useDisconnect()
   const restart = React.useCallback(() => {
     disconnect.disconnect()
-  }, [disconnect.disconnect])
+  }, [disconnect.disconnect, disconnect])
 
   const balanceAddress = React.useMemo(() => {
     if (props.footerVariant !== 'balances') return address

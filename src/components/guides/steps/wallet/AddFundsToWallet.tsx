@@ -89,7 +89,7 @@ export function AddFundsToWallet(props: DemoStepProps) {
         {fundAccount.isPending ? 'Adding funds' : 'Add funds'}
       </Button>
     )
-  }, [hasNonWebAuthnWallet, balance, fundAccount.isPending, fundAccount.mutate])
+  }, [hasNonWebAuthnWallet, balance, fundAccount.isPending, fundAccount.mutate, fundAccount])
 
   return (
     <Step
