@@ -2,6 +2,8 @@
 description: Set up and run a Tempo RPC node for API access. Download snapshots, configure systemd services, and monitor node health and sync status.
 ---
 
+import { Callout } from 'vocs'
+
 # Running an RPC Node
 
 RPC nodes provide API access to the Tempo network without participating in consensus.
@@ -19,9 +21,9 @@ tempo node \
   --http.api eth,net,web3,txpool,trace
 ```
 
-:::info
+<Callout type="info">
 For mainnet, you have to use the credentials in `--follow` that are issued to you by the Tempo team.
-:::
+</Callout>
 
 An RPC node running in follow mode is a **full node**. It fetches blocks from a trusted RPC endpoint, executes every transaction locally through the EVM, validates each block after execution, and stores complete block data with full state. The only trust assumption is block ordering: your node trusts the RPC endpoint to provide the correct sequence of blocks. All execution and validation happens locally on your machine.
 
