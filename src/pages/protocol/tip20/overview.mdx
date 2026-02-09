@@ -132,7 +132,7 @@ TIP-20 supports an opt-in [reward distribution system](/protocol/tip20-rewards/o
 
 A TIP-20 token can declare a currency identifier (e.g., `"USD"`, `"EUR"`) that identifies the real-world asset backing the token. This enables proper routing and pricing in Tempo's [Stablecoin DEX](/protocol/exchange). USD-denominated TIP-20 tokens can be used to pay transaction fees and serve as quote tokens in the DEX.
 
-Currency identifiers should be [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) three-letter currency codes. Common examples include:
+Stablecoin currency identifiers should be [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) three-letter currency codes. Common examples include:
 
 | Code  | Currency               |
 |-------|------------------------|
@@ -148,10 +148,10 @@ The `currency` field represents the **denomination**, not the token itself — m
 
 | Token         | Correct `currency` | Incorrect `currency` |
 |---------------|---------------------|----------------------|
-| USDC          | `"USD"` ✅          | `"USDC"` ❌          |
-| USDT          | `"USD"` ✅          | `"USDT"` ❌          |
-| PYUSD         | `"USD"` ✅          | `"PYUSD"` ❌         |
-| EURC          | `"EUR"` ✅          | `"EURC"` ❌          |
+| USDC          | `"USD"`          | `"USDC"`           |
+| USDT          | `"USD"`          | `"USDT"`          |
+| PYUSD         | `"USD"`          | `"PYUSD"`          |
+| EURC          | `"EUR"`          | `"EURC"`           |
 
 :::warning
 The currency code is **immutable** — it cannot be changed after token creation. An incorrect currency code will affect fee payment eligibility, DEX routing, and quote token pairing.
