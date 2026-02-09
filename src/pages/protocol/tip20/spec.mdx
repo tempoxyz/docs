@@ -411,7 +411,7 @@ TIP-20 tokens cannot be sent to other TIP-20 token contract addresses. The imple
 Any attempt to transfer to a TIP-20 token address must revert with `InvalidRecipient`. This prevents accidental token loss by sending funds to token contracts instead of user accounts.
 
 ## Currencies and Quote Tokens
-Each TIP-20 token declares a currency identifier and a corresponding `quoteToken` used for pricing and routing in the Stablecoin DEX. Tokens with `currency == "USD"` must pair with a USD-denominated TIP-20 token.
+Each TIP-20 token declares a currency identifier and a corresponding `quoteToken` used for pricing and routing in the Stablecoin DEX. Currency identifiers should be [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) three-letter codes representing the underlying fiat currency (e.g., `"USD"`, `"EUR"`, `"GBP"`) — not the token's own symbol. The currency is set at token creation and **cannot be changed afterward**. Tokens with `currency == "USD"` must pair with a USD-denominated TIP-20 token.
 
 Updating the quote token occurs in two phases:
 1. `setNextQuoteToken` stages a new quote token.
@@ -470,7 +470,7 @@ interface ITIP20Factory {
     /// @notice Creates and deploys a new TIP-20 token
     /// @param name The token's ERC-20 name
     /// @param symbol The token's ERC-20 symbol
-    /// @param currency The token's currency identifier (e.g. "USD")
+    /// @param currency The token's ISO 4217 currency code (e.g. "USD", "EUR"). Immutable after creation.
     /// @param quoteToken The TIP-20 quote token used for exchange pricing
     /// @param admin The address to receive DEFAULT_ADMIN_ROLE on the new token
     /// @param salt A unique salt for deterministic address derivation
