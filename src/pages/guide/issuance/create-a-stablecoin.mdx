@@ -151,6 +151,10 @@ Now that we have some input fields, we need to add some logic to handle the subm
 
 After this step, your users will be able to create a stablecoin by clicking the "Create" button!
 
+:::warning
+We **strongly** recommend that for stablecoins, the `currency` field be set to the [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) three-letter code for the underlying fiat currency (e.g., `"USD"`, `"EUR"`, `"GBP"`) — **not** the token symbol. This value is **immutable** after token creation and affects fee payment eligibility, DEX routing, and quote token pairing. **Only `USD` stablecoins can be used to pay transaction fees on Tempo** — if your stablecoin is USD-denominated, the currency must be set to `"USD"` to be eligible for fee payment.
+:::
+
 <Demo.Container name="Create Form">
   <Step.CreateToken stepNumber={1} last />
 </Demo.Container>
