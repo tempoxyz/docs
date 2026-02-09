@@ -78,7 +78,7 @@ your validator might've been blocked due to double-signing a block. In that case
 Your validator is currently the leader and proposing blocks. Check proposal activity:
 ```bash
 # Number of blocks your node has built and resolved
-curl -s localhost:8002/metrics | grep reth_payloads_resolved_block
+curl -s localhost:9000/metrics | grep reth_payloads_resolved_block
 ```
 
 If this counter is increasing, your validator is actively proposing blocks.
@@ -89,7 +89,7 @@ Your validator is voting on blocks proposed by others (notarization and finaliza
 
 ```bash
 # Inbound voting messages (should increase steadily)
-curl -s localhost:8002/metrics | grep consensus_engine_consensus_voter_inbound_messages_total | grep data_0
+curl -s localhost:8002/metrics | grep consensus_engine_epoch_manager_simplex_batcher_inbound_messages_total | grep data_0
 ```
 
 This counter should increase steadily when your node is participating in consensus.
