@@ -273,8 +273,9 @@ Access Keys cannot escalate their own privileges because:
 - Keys with `enforceLimits == false` have unlimited spending (no limits checked)
 - Spending limits are enforced by the protocol internally calling `verify_and_update_spending()` during execution
 - Limits are per-TIP20 token and deplete as TIP20 tokens are spent
-- Spending limits only track TIP20 token transfers (via `transfer` and `transferWithMemo`) and approvals (via `approve`)
-- For approvals: only increases in approval amount count against the spending limit. This means approvals indirectly control `transferFrom` spending, since `transferFrom` requires a prior approval
+- Spending limits only track TIP20 `transfer()`, `transferWithMemo()`, `approve()`, and `startReward()` calls
+- `transferFrom()` is NOT subject to spending limits (it is gated only by the ERC-20 allowance mechanism)
+- For approvals: only increases in approval amount count against the spending limit
 - Non-TIP20 asset movements (ETH, NFTs) are not subject to spending limits
 - Root keys (`keyId == address(0)`) have no spending limits - the function returns immediately
 - Failed limit checks revert the entire transaction with `SpendingLimitExceeded`
