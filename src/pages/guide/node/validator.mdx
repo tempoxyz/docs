@@ -62,7 +62,7 @@ tempo node --datadir <datadir> \
 
 ### Telemetry endpoint
 
-The `--telemetry-url` flag enables unified telemetry export. It pushes two types of data to a Tempo-operated Victoria Metrics instance:
+The `--telemetry-url` flag enables unified telemetry export. It pushes two types of data to a Tempo-operated metrics backend:
 
 - **Prometheus metrics** — execution-layer (reth) and consensus-layer metrics in Prometheus text format, pushed at a configurable interval (default every 10 seconds).
 - **Structured logs** — operational logs exported via OTLP at `debug` level, covering consensus events, block processing, and sync progress.
