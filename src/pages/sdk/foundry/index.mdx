@@ -301,4 +301,15 @@ The following flags are available for `cast` and `forge script` for Tempo-specif
 
 Ledger and Trezor wallets are not yet compatible with any `--tempo.*` option.
 
+## Troubleshooting
+
+### Invariant tests with `--fork-url`
+In some Foundry versions, invariant runs may stall when used with `--fork-url` / `--fork-block-number`.
+
+Workarounds:
+- Run invariants without forking, and use `--fork-url` only for non-invariant tests.
+- If you only need a quick sanity check, temporarily focus on non-invariant tests while forking.
+
+Upstream tracking: https://github.com/foundry-rs/foundry/issues/4656
+
 
