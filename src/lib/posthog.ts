@@ -35,6 +35,11 @@ export const POSTHOG_EVENTS = {
   // Code interactions
   CODE_EXAMPLE_VIEW: 'docs_code_example_view',
   CODE_EXAMPLE_COPY: 'docs_code_example_copy',
+
+  // Feedback
+  FEEDBACK_SUBMITTED: 'docs_feedback_submitted',
+  FEEDBACK_HELPFUL: 'docs_feedback_helpful',
+  FEEDBACK_NOT_HELPFUL: 'docs_feedback_not_helpful',
 } as const
 
 /**
@@ -68,6 +73,12 @@ export const POSTHOG_PROPERTIES = {
   SEARCH_QUERY: 'search_query',
   SEARCH_RESULT_TITLE: 'search_result_title',
   SEARCH_RESULT_URL: 'search_result_url',
+
+  // Feedback properties
+  FEEDBACK_HELPFUL: 'feedback_helpful',
+  FEEDBACK_CATEGORY: 'feedback_category',
+  FEEDBACK_MESSAGE: 'feedback_message',
+  FEEDBACK_PAGE_URL: 'feedback_page_url',
 } as const
 
 /**
