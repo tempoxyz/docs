@@ -16,9 +16,9 @@ In determining *which* token a user pays fees in, we want to maximize customizab
 
 ## Fee units
 
-Fees in the `max_base_fee_per_gas` and `max_fee_per_gas` fields of transactions, as well as in the block's `base_fee_per_gas` field, are specified in units of **USD per 10^18 gas**. Since TIP-20 tokens have 6 decimal places, that means the fee for a transaction can be calculated as `ceil(base_fee * gas_used / 10^12)`.
+Fees in the `max_base_fee_per_gas` and `max_fee_per_gas` fields of transactions, as well as in the block's `base_fee_per_gas` field, are specified in **attodollars** (10^-18 USD) per gas. Since TIP-20 tokens have 6 decimal places — where 1 token unit = 1 **microdollar** (10^-6 USD) — the fee for a transaction can be calculated as `ceil(base_fee * gas_used / 10^12)`.
 
-This unit is chosen to provide sufficient precision for low-fee transactions. Since TIP-20 tokens have only 6 decimal places (as opposed to the 18 decimal places of ETH), expressing fees directly in tokens per gas would not provide enough precision for transactions with very low gas costs. By scaling the fee paid by 10^-12, the protocol ensures that even small fee amounts can be accurately represented and calculated.
+Attodollars provide sufficient precision for low-fee transactions. Since TIP-20 tokens have only 6 decimal places (microdollars), expressing fees directly in token units per gas would not provide enough precision for transactions with very low gas costs. By using attodollars (10^-18 USD) and dividing by 10^12 to convert to microdollars, the protocol ensures that even small fee amounts can be accurately represented and calculated.
 
 ## Fee payment
 
@@ -160,11 +160,11 @@ As of [TIP-1010](/protocol/tips/tip-1010), Tempo uses the following mainnet gas 
 
 | Parameter | Value |
 |-----------|-------|
-| Base fee | 20 gwei |
+| Base fee | 20 billion attodollars per gas (`2 × 10^10`) |
 | Total block gas limit | 500M gas |
 | General gas limit | 30M gas/block |
 
-A standard TIP-20 transfer costs approximately 0.1 cent at the base fee.
+A standard TIP-20 transfer (~50,000 gas) costs approximately 1,000 microdollars (0.1 cent / $0.001) at the target base fee.
 
 ### Removing validator preference
 
