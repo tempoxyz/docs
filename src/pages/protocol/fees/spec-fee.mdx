@@ -1,5 +1,6 @@
 ---
-description: Technical specification for Tempo's fee system covering multi-token fee payment, fee sponsorship, token preferences, and validator payouts.
+title: Fee Specification
+description: "Technical specification for Tempo's fee system covering multi-token fee payment, fee sponsorship, token preferences, and validator payouts."
 ---
 
 # Fees
@@ -10,7 +11,9 @@ This spec lays out how fees work on Tempo, including how fees are calculated, wh
 
 ## Motivation
 
-On Tempo, users can pay gas fees in any [TIP-20](/protocol/tip20/spec) token whose currency is USD, as long as that stablecoin has sufficient liquidity on the enshrined [fee AMM](/protocol/fees/spec-fee-amm.mdx) against the token that the current validator wants to receive.
+Tempo has no native token. Transaction fees are paid directly in USD-denominated stablecoins. This design removes the need for users or applications to hold volatile assets for gas, keeping the entire payment experience USD-native.
+
+Users can pay gas fees in any [TIP-20](/protocol/tip20/spec) token whose currency is USD, as long as that stablecoin has sufficient liquidity on the enshrined [fee AMM](/protocol/fees/spec-fee-amm.mdx) against the token that the current validator wants to receive.
 
 In determining *which* token a user pays fees in, we want to maximize customizability (so that wallets or users can implement more sophisticated UX than is possible at the protocol layer), minimize surprise (particularly surprises in which a user pays fees in a stablecoin they did not expect to), and have sane default behavior so that users can begin using basic functions like payments even using wallets that are not customized for Tempo support.
 
@@ -19,6 +22,20 @@ In determining *which* token a user pays fees in, we want to maximize customizab
 Fees in the `max_base_fee_per_gas` and `max_fee_per_gas` fields of transactions, as well as in the block's `base_fee_per_gas` field, are specified in units of **USD per 10^18 gas**. Since TIP-20 tokens have 6 decimal places, that means the fee for a transaction can be calculated as `ceil(base_fee * gas_used / 10^12)`.
 
 This unit is chosen to provide sufficient precision for low-fee transactions. Since TIP-20 tokens have only 6 decimal places (as opposed to the 18 decimal places of ETH), expressing fees directly in tokens per gas would not provide enough precision for transactions with very low gas costs. By scaling the fee paid by 10^-12, the protocol ensures that even small fee amounts can be accurately represented and calculated.
+
+### Base Fee Model
+
+Tempo uses a fixed base fee rather than the dynamic base fee mechanism specified in EIP-1559. The base fee is set such that a TIP-20 transfer costs less than $0.001.
+
+The fixed base fee combined with USD-denominated payment provides predictable unit economics. Applications can budget for transaction costs without exposure to fee volatility or native token price fluctuations.
+
+Congestion is managed through:
+
+- **Payment lanes**: Reserved blockspace for TIP-20 transfers as specified in the [Payment Lane Specification](/protocol/blockspace/payment-lane-specification). Approximately 94% of blockspace is reserved for payment transactions, with the remaining 6% available for general computation. This allocation is conservative and may increase over time as total throughput scales.
+- **Priority fees**: The `max_priority_fee_per_gas` field allows transactions to bid for faster inclusion during periods of high demand.
+- **Block gas limits**: Standard per-block gas limits constrain total computation per block.
+
+The payment lane mechanism ensures that payment transactions are not crowded out by other network activity. General network congestion from non-payment use cases cannot affect payment throughput or fees, providing the consistency that payment applications require.
 
 ## Fee payment
 
@@ -254,3 +271,4 @@ The fee conversion process adds minimal overhead to transactions:
 - **Block settlement**: Amortized across all transactions in the block
 
 For complete technical specifications on the Fee AMM mechanism, see the [Fee AMM Protocol Specification](/protocol/fees/spec-fee-amm).
+
