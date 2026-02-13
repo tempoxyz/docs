@@ -16,6 +16,12 @@ function PostHogInitializer() {
       defaults: '2025-11-30',
       capture_exceptions: true,
       debug: import.meta.env.MODE === 'development',
+      session_recording: {
+        maskAllInputs: false,
+        maskInputOptions: {
+          password: true,
+        },
+      },
     })
 
     posthog.register({ site: 'docs' })
