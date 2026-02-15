@@ -160,6 +160,10 @@ export default defineConfig({
                 link: '/guide/payments/transfer-memos',
               },
               {
+                text: 'Stripe integration',
+                link: '/guide/payments/stripe-integration',
+              },
+              {
                 text: 'Pay fees in any stablecoin',
                 link: '/guide/payments/pay-fees-in-any-stablecoin',
               },
