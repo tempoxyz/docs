@@ -56,8 +56,40 @@ tempo node --datadir <datadir> \
 
 | Flag | Description |
 |------|-------------|
-| `--telemetry-url <URL>` | Unified metrics and logs export. Pushes both reth and consensus metrics with a `consensus_id` label for node identification. **We ask all validators to configure this so we can support troubleshooting.** |
+| `--telemetry-url <URL>` | Unified metrics and logs export. See [Telemetry endpoint](#telemetry-endpoint) below for details. **We ask all validators to configure this so we can support troubleshooting.** |
+| `--telemetry-metrics-interval <DURATION>` | Interval for pushing metrics (default: `10s`). |
 | `--consensus.datadir <PATH>` | Store consensus data on a separate volume (e.g., AWS EBS) while keeping execution state on high-performance local disks. Migrate by copying `<datadir>/consensus` to the new location. |
+
+### Telemetry endpoint
+
+The `--telemetry-url` flag enables unified telemetry export. It pushes two types of data to a Tempo-operated metrics backend:
+
+- **Prometheus metrics** — execution-layer (reth) and consensus-layer metrics in Prometheus text format, pushed at a configurable interval (default every 10 seconds).
+- **Structured logs** — operational logs exported via OTLP at `debug` level, covering consensus events, block processing, and sync progress.
+
+The URL must include credentials: `--telemetry-url https://user:pass@metrics.example.com`
+
+#### What is collected
+
+| Category | Examples |
+|----------|---------|
+| Execution metrics | Block processing times, transaction pool size, peer count, sync status, database stats |
+| Consensus metrics | Epoch and view progress, DKG ceremony status, proposal and finalization counts |
+| Operational logs | Consensus state transitions, block proposals, sync progress, error events |
+
+All consensus metrics are namespaced under a `consensus` prefix.
+
+#### What is **not** collected
+
+The telemetry endpoint does **not** collect any ambient information about the host machine. Specifically:
+
+- No hostname, IP address, or machine identifiers
+- No operating system, CPU, memory, or disk information
+- No information about other processes or services running on the machine
+- No file paths or directory structures beyond the node's own data directory references in logs
+- No network topology or firewall configuration
+
+The data is strictly limited to the node's own operational metrics and logs.
 
 :::info[Testnet Chain]
 The `andantino` chainspec is deprecated. New validators should use `--chain moderato`.
