@@ -544,6 +544,10 @@ export default defineConfig({
             text: 'Operating your validator',
             link: '/guide/node/operate-validator',
           },
+          {
+            text: 'Network Upgrades and Releases',
+            link: '/guide/node/network-upgrades',
+          },
         ],
       },
       // {
