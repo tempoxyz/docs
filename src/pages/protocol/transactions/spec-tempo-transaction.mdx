@@ -287,7 +287,7 @@ For computing the transaction hash that the sender signs:
 * Fields are preceded by transaction type byte `0x76`
 * Field 11 (`fee_token`) is encoded as empty string (`0x80`) **if and only if** `fee_payer_signature` is present. This allows the fee payer to specify the fee token.
 * Field 12 (`fee_payer_signature`) is encoded as:
-  - Single byte `0x00` if fee payer signature will be present (placeholder)
+  - Single byte `0x00` if fee payer signature will be present (placeholder). Note: this `0x00` encoding is used **only in the signing payload** — the wire format uses `Some(Signature::default())` encoded as an RLP list `[0, 0x00…, 0x00…]` (see [RLP Encoding](#rlp-encoding) and [Transaction Flow](#transaction-flow) below).
   - Empty string `0x80` if no fee payer
 
 **Sender Signature Hash:**
@@ -383,8 +383,8 @@ fee_payer_hash = keccak256(0x78 || rlp([  // Note: 0x78 magic byte
 
 #### Transaction Flow
 
-1. **User prepares transaction**: Sets `fee_payer_signature` to placeholder (`Some(Signature::default())`)
-2. **User signs**: Computes sender hash (with fee_token skipped) and signs
+1. **User prepares transaction**: Sets `fee_payer_signature` to placeholder (`Some(Signature::default())`), which is RLP-encoded in the wire format as a list of zeros `[0, 0x00…, 0x00…]`. Note: the signing payload (`encode_for_signing`) encodes this placeholder as a single `0x00` byte — not the full RLP list. Implementations MUST map `Some(Signature::default())` → `0x00` when computing the sender hash.
+2. **User signs**: Computes sender hash (with fee_token skipped and fee_payer_signature as `0x00`) and signs
 3. **Fee payer receives** user-signed transaction
 4. **Fee payer verifies** user signature is valid
 5. **Fee payer signs**: Computes fee payer hash (with fee_token and sender_address) and signs
@@ -416,7 +416,7 @@ The transaction is RLP encoded as follows:
     valid_before,            // 0x80 if None
     valid_after,             // 0x80 if None
     fee_token,               // 0x80 if None
-    fee_payer_signature,     // 0x80 if None, RLP list [v, r, s] if Some
+    fee_payer_signature,     // 0x80 if None, RLP list [v, r, s] if Some (placeholder = [0, 0x00…, 0x00…])
     aa_authorization_list,   // EIP-7702 style authorization list with AA signatures
     key_authorization?,      // Only encoded if present (backwards compatible)
     sender_signature         // TempoSignature bytes (secp256k1, P256, WebAuthn, or Keychain)
@@ -446,6 +446,10 @@ rlp([
 - The `calls` field is a list that must contain at least one Call (empty calls list is invalid)
 - The `sender_signature` field is the final field and contains the TempoSignature bytes (secp256k1, P256, WebAuthn, or Keychain)
 - KeyAuthorization uses RLP trailing field semantics for optional `expiry` and `limits`
+- **Fee payer placeholder**: The `fee_payer_signature` field has different encodings in the wire format vs. the signing payload:
+  - **Wire format** (serialized envelope): `Some(Signature::default())` → RLP list `[0, 0x00…, 0x00…]` (i.e., `c3 80 80 80`)
+  - **Signing payload** (`encode_for_signing`): single byte `0x00`
+  - Implementations deserializing a transaction MUST treat a zero-valued signature (`v=0, r=0, s=0`) as the unsigned fee payer placeholder and encode it as `0x00` when recomputing the sender's signing payload.
 
 ### WebAuthn Signature Verification
 
