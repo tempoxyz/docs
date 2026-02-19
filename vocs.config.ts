@@ -1,4 +1,5 @@
-import { Changelog, defineConfig, Feedback, McpSource } from 'vocs/config'
+import { Changelog, defineConfig, McpSource } from 'vocs/config'
+import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 
 const baseUrl = (() => {
   if (URL.canParse(process.env.VITE_BASE_URL)) return process.env.VITE_BASE_URL
@@ -22,7 +23,7 @@ export default defineConfig({
   title: 'Tempo',
   titleTemplate: '%s ⋅ Tempo',
   description: 'Documentation for the Tempo network and protocol specifications',
-  feedback: Feedback.slack(),
+  feedback: createFeedbackAdapter(),
   mcp: {
     enabled: true,
     sources: [
