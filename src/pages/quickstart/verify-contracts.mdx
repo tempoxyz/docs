@@ -75,6 +75,45 @@ This retries verification up to 10 times with a 10-second delay between attempts
 
 For more details on deployment and verification options, see the [Foundry documentation](https://getfoundry.sh/forge/deploying).
 
+## Verify with Hardhat
+
+If you deployed with Hardhat, add Sourcify verification to your `hardhat.config.ts` using [`@nomicfoundation/hardhat-verify`](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify):
+
+```ts
+import "@nomicfoundation/hardhat-verify";
+
+const config: HardhatUserConfig = {
+  // ... your existing config
+  sourcify: {
+    enabled: true,
+    apiUrl: "https://contracts.tempo.xyz",
+    browserUrl: "https://explore.tempo.xyz",
+  },
+};
+```
+
+Then verify:
+
+```bash
+npx hardhat verify --network tempo <CONTRACT_ADDRESS> [constructor args...]
+```
+
+### Verify from deployment artifacts
+
+If you have Hardhat deployment JSON files (from `hardhat-deploy` or `hardhat-ignition`) but no longer have the project set up, you can still verify. These files contain embedded compiler metadata with full source code (when compiled with `useLiteralContent: true`, the default for `hardhat-deploy`).
+
+Extract the `metadata` field, parse it as JSON, then construct a [verification API request](#verify-with-the-api) using:
+- `metadata.sources` → `stdJsonInput.sources`
+- `metadata.settings` (optimizer, evmVersion, remappings) → `stdJsonInput.settings`
+- `metadata.compiler.version` → `compilerVersion`
+- `metadata.settings.compilationTarget` → `contractIdentifier` (format: `path/to/File.sol:ContractName`)
+
+## Proxy Contracts
+
+OpenZeppelin proxy deployments (e.g., `TransparentUpgradeableProxy`) create multiple contracts — typically an implementation, a proxy, and a `ProxyAdmin`. Each must be verified **separately** and may use **different compiler versions** (e.g., your contract uses `solc 0.8.22` while the OZ proxy uses `solc 0.8.10`).
+
+If you have the deployment artifact for each contract, the correct compiler version and settings are already embedded in each file's metadata.
+
 ## Verify with the API
 
 You can also verify contracts directly using the REST API. Verification is asynchronous—you submit a request, then poll for the result.
@@ -193,7 +232,6 @@ View the full API documentation at [contracts.tempo.xyz/docs](https://contracts.
 :::info
 The `andantino` testnet (chain ID `42429`) has been deprecated. Use `moderato` (chain ID `42431`) for testnet development.
 :::
-
 ## Troubleshooting
 
 :::tip
