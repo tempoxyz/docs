@@ -1,0 +1,136 @@
+---
+title: Stablecoins for Payroll
+description: Faster payroll funding, cheaper cross-border payouts, and new revenue streams for payroll providers using stablecoins.
+---
+
+import { Cards, Card } from 'vocs'
+
+# Stablecoins for Payroll [Faster funding, cheaper cross-border payouts, and new revenue streams for payroll providers.]
+
+Payroll providers are starting to take stablecoins seriously. The reasons are familiar to anyone running global payroll: ACH funding takes 2-3 days and carries return risk, cross-border settlement routes through multiple intermediaries that each extract fees, and employees in emerging markets lose money to forced currency conversion.
+
+Stablecoins fix all of that, but the opportunity goes well beyond faster and cheaper payments. There are three distinct use cases, and they build on each other: faster payroll account funding, cheaper cross-border payouts to employee wallets, and embedded wallets that turn payroll into a financial services platform. Each stands on its own, and each increases in ambition and payoff.
+
+## Three use cases that build on each other
+
+### 1. Faster payroll account funding
+
+Funding payroll accounts with stablecoins is the lowest-lift opportunity and the one most providers overlook.
+
+Today, employers fund payroll accounts via ACH, which takes 2-3 days to settle and can be returned after employees have already been paid. The provider carries that exposure. Stablecoin funding settles in seconds. Same-day payroll cycles become possible without the provider absorbing settlement risk.
+
+Nothing changes for employees here. They still receive payroll the same way. The improvement is entirely on the funding side: faster cycles, no float risk, simpler cash management. Banking platforms like Ramp, Brex, and Meow are already adding stablecoin support, which makes it increasingly easy for employers to fund payroll accounts in stablecoins.
+
+For providers processing significant volume, eliminating 2-3 days of settlement risk and the operational overhead of managing ACH returns is meaningful on its own.
+
+### 2. Cheaper cross-border payouts
+
+Cross-border payroll routes through payment processors, correspondent banking networks, and local receiving banks. Each intermediary takes a cut and employees absorb FX spreads of 1-4% when their payment is converted to local currency — a cost they can't negotiate and often can't see.
+
+Stablecoins cut through the intermediary chain. Payouts settle in seconds to wallets employees already have, regardless of time zone or bank holiday. Transaction costs drop to cents. The total [cost reduction for cross-border payouts runs 60-80%](/learn/use-cases/global-payouts). Providers don't need to build wallet infrastructure either; employees can bring their own.
+
+For employees, the experience also changes for the better. They receive dollar-denominated stablecoins and choose when (or whether) to convert to local currency. In markets with currency volatility — like Argentina, Nigeria, or Turkey — the ability to hold dollars and convert on their own terms preserves purchasing power. Workers stop losing money to exchange rates set by banks they didn't choose.
+
+This is where payroll providers start to differentiate. If your competitors are still routing through correspondent banking and your clients' contractors are getting paid in seconds at a fraction of the cost, that's a tangible advantage in competitive deals.
+
+For a deeper look at cross-border payout mechanics, cost comparisons, and implementation steps, see [Global Payouts](/learn/use-cases/global-payouts).
+
+### 3. Embedded wallets and financial services
+
+The first two use cases make payroll faster and cheaper. The third one changes the business model.
+
+Today, payroll providers handle the payout. Banks capture everything that happens after: employee deposits get monetized through cards, savings accounts, loans, and investment products. The payroll provider did the work of acquiring and paying the employee, but the bank captures the ongoing financial relationship.
+
+Embedded wallets flip this. When a payroll provider issues a wallet to each employee, the provider controls the user interface and maintains the relationship after funds land. That opens three revenue streams that don't exist in traditional payroll:
+
+- **Branded stablecoins and reserve yield.** Instead of paying employees in USDC, a provider can issue its own stablecoin backed 1:1 by reserves (US Treasuries and deposits). The provider earns the yield on those reserves for as long as employees hold balances. Partners like Bridge handle issuance and compliance.
+
+- **Card interchange.** Stablecoin-backed cards with automatic conversion at point of sale generate 1-2% interchange on spend. For a client with 1,000 employees spending $2,000/month on cards, that's $240K-$480K in annual interchange revenue.
+
+- **Tokenized investment products.** Wallets can offer tokenized money market funds yielding 3-3.5%, or structured credit products at 6-8%. This gives employees access to yields they wouldn't typically get through a traditional payroll deposit, and creates distribution revenue for the provider.
+
+The wallet approach also simplifies global rollout. Non-custodial wallets don't hold customer funds, so they don't require banking or payment institution licenses in every jurisdiction. A provider can launch wallets across dozens of countries with the same infrastructure. That's fundamentally different from custodial financial services, which need per-market licensing.
+
+This is the most ambitious path, and it requires investment in infrastructure, compliance, and product. However, it's also the path that transforms payroll from a low-margin transaction business into a platform with compounding revenue streams. The unit economics shift from "fee per payout" to "lifetime value of a financial relationship."
+
+For more on embedded wallet patterns for platforms, see [Embedded Finance](/learn/use-cases/embedded-finance).
+
+## What to evaluate before building
+
+Not every payroll provider needs to go to level three on day one. The right starting point depends on your client base and where the pain is sharpest.
+
+- **Where are your clients' employees?** If you're primarily in the US or Europe, the pain points are real but less acute. If you serve companies with contractors across Latin America, Africa, or Southeast Asia, the case for stablecoins is immediate and measurable.
+
+- **What corridors are most expensive or unreliable?** Focus stablecoin payouts where correspondent banking is slowest and most expensive. Start there.
+
+- **Do you want to capture value beyond the transaction fee?** If the answer is yes, the wallet path is worth serious evaluation. You can start with payroll account funding and cross-border payouts while building toward wallets.
+
+This is a multi-year build, and partner selection matters more than most providers expect. Choose partners who are thinking long term.
+
+## Other factors to consider
+
+Stablecoins solve real problems, but they create new considerations.
+
+- **Regulation and compliance don't disappear.** Stablecoins change the payment mechanism, not the regulatory framework. Tax withholding, labor law, and reporting requirements still apply in every jurisdiction. Some countries restrict or prohibit stablecoin payments entirely, so you need to verify the landscape in every market where you operate.
+
+- **Not all employees will want stablecoins.** Maintaining parallel payroll rails adds complexity, but forcing adoption creates friction. Offer stablecoins as an option, not a mandate.
+
+- **Employee education takes work.** Workers unfamiliar with digital wallets need clear onboarding. Support teams need training. This is operational investment that's easy to underestimate.
+
+## Building with Tempo
+
+The stablecoin you pay employees with is only as reliable as the infrastructure it runs on. At scale, the differences between chains become operationally significant.
+
+- **Privacy for sensitive payroll data.** Salary information on a public blockchain is a non-starter. Tempo's opt-in privacy solution keeps salary amounts, employee identities, and payment patterns shielded from the public while maintaining full auditability for compliance and internal controls. Employees and employers get privacy by default. Auditors and regulators can access data when required.
+
+- **Predictable delivery during congestion.** Dedicated payment lanes ensure payroll transactions process on schedule even when the network is busy. Missing a payroll cycle because of network congestion is not acceptable.
+
+- **Compliance and reconciliation built into the chain.** Native memo fields attach travel rule identifiers, invoice references, and reconciliation metadata directly to transactions, so payroll records map cleanly to onchain activity. Allow/blocklists for transaction control. These aren't add-ons; they're native to the chain.
+
+- **No account rent.** When you're provisioning wallets for hundreds of thousands of employees, account rent fees on other chains become a real cost line. Tempo doesn't charge account rent.
+
+- **Low, predictable fees paid in stablecoins.** No token management overhead. No gas price volatility. Fees are measured in cents and can be sponsored so employees never see them.
+
+<Cards>
+  <Card
+    description="Want to explore stablecoin payroll on Tempo? Email us to discuss your use case."
+    to="mailto:partners@tempo.xyz"
+    icon="lucide:mail"
+    title="Get in Touch"
+  />
+  <Card
+    description="Start building on Tempo with our guides, SDKs, and documentation."
+    to="/quickstart/integrate-tempo"
+    icon="lucide:rocket"
+    title="Build on Tempo"
+  />
+</Cards>
+
+## Related reading
+
+<Cards>
+  <Card
+    title="Global Payouts"
+    description="Cross-border payout mechanics, cost comparisons, and getting started steps."
+    to="/learn/use-cases/global-payouts"
+    icon="lucide:globe"
+  />
+  <Card
+    title="Embedded Finance"
+    description="Embedded wallet patterns for platforms and marketplaces."
+    to="/learn/use-cases/embedded-finance"
+    icon="lucide:wallet"
+  />
+  <Card
+    title="Deep dive: Stablecoins for Payroll"
+    description="Full blog post with detailed analysis and use case examples."
+    to="https://tempo.xyz/blog/stablecoins-payroll"
+    icon="lucide:book-open"
+  />
+  <Card
+    title="TIP-20 Tokens"
+    description="Reconciliation memos and stable fee mechanics."
+    to="/learn/tempo/native-stablecoins"
+    icon="lucide:tag"
+  />
+</Cards>
