@@ -601,6 +601,10 @@ export default defineConfig({
             link: '/learn/use-cases/global-payouts',
           },
           {
+            text: 'Payroll',
+            link: '/learn/use-cases/payroll',
+          },
+          {
             text: 'Embedded Finance',
             link: '/learn/use-cases/embedded-finance',
           },
