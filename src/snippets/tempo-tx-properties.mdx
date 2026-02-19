@@ -441,12 +441,14 @@ Learn more about [Access Keys](/protocol/transactions/spec-tempo-transaction#acc
 Concurrent transactions enable higher throughput by allowing multiple transactions from the same account to be sent 
 in parallel without waiting for sequential nonce confirmation. 
 
-By using different nonce keys, you can submit multiple transactions simultaneously that don't conflict with each other, 
+By utilizing nonce keys, you can submit multiple transactions simultaneously that don't conflict with each other, 
 enabling parallel execution and significantly improved transaction throughput for high-activity accounts.
 
-:::warning
-**Reuse nonce keys instead of generating random ones.** Creating a new nonce key incurs a state creation cost that increases with the number of active keys (see [TIP-1000](/protocol/tips/tip-1000)). For most applications, using a small set of sequential nonce keys (e.g., `1n`, `2n`, `3n`) is sufficient and much more cost-effective than generating random nonce keys for each transaction.
-:::
+Concurrent transactions can be achieved with nonce keys via:
+- [Expiring Nonces](#expiring-nonces)
+- [2D Nonces](#2d-nonces)
+
+In **Viem** and **Wagmi**, expiring nonces are handled automatically.
 
 <div className="-mt-2" />
 
@@ -459,7 +461,7 @@ enabling parallel execution and significantly improved transaction throughput fo
     // @noErrors
     import { client } from './viem.config'
 
-    const [receipt1, receipt2, receipt3] = await Promise.all([ // [!code hl]
+    const [receipt1, receipt2, receipt3] = await Promise.all([
       client.sendTransactionSync({
         data: '0xdeadbeef0000000000000000000000000000000001',
         to: '0xcafebabecafebabecafebabecafebabecafebabe',
@@ -473,31 +475,6 @@ enabling parallel execution and significantly improved transaction throughput fo
         to: '0xcafebabecafebabecafebabecafebabecafebabe',
       }),
     ])
-    ```
-
-    ```tsx twoslash [viem.config.ts]
-    // [!include ~/snippets/viem.config.ts:setup]
-    ```
-
-    :::
-
-
-    :::code-group
-
-    ```tsx twoslash [example.ts]
-    // @noErrors
-    import { client } from './viem.config'
-
-    const hash1 = await client.sendTransaction({
-      data: '0xdeadbeef0000000000000000000000000000000001',
-      nonceKey: 1n, // [!code hl]
-      to: '0xcafebabecafebabecafebabecafebabecafebabe',
-    })
-    const hash2 = await client.sendTransaction({
-      data: '0xdeadbeef0000000000000000000000000000000001',
-      nonceKey: 2n, // [!code hl]
-      to: '0xcafebabecafebabecafebabecafebabecafebabe',
-    })
     ```
 
     ```tsx twoslash [viem.config.ts]
@@ -539,7 +516,180 @@ enabling parallel execution and significantly improved transaction throughput fo
 
     :::
 
+  </Tab>
 
+  <Tab title="RLP">
+
+    ```tsx
+    rlp([
+      chain_id,
+      max_priority_fee_per_gas,
+      max_fee_per_gas,
+      gas,
+      calls,
+      access_list,
+      nonce_key, // [!code focus]
+      nonce,
+      valid_before, // [!code focus]
+      valid_after,
+      fee_token,
+      fee_payer_signature,
+      authorization_list,
+      key_authorization,
+      signature,
+    ])
+    ```
+  </Tab>
+</Tabs>
+
+### Expiring Nonces
+
+[TIP-1009](/protocol/tips/tip-1009) introduces expiring nonces: transactions automatically expire if not executed within a specified time window. 
+
+**Benefits:**
+- No nonce tracking required
+- Automatic replay protection via circular buffer
+- No permanent state bloat from unused nonce keys
+
+Expiring nonces can be used by setting `nonceKey` to `maxUint256` and `validBefore` to a time in the future (within 30 seconds).
+
+<Tabs stateKey="library-exp">
+  <Tab title="Viem">
+
+    :::code-group
+
+    ```tsx twoslash [example.ts]
+    // @noErrors
+    import { maxUint256 } from 'viem'
+    import { client } from './viem.config'
+
+    const receipt = await client.sendTransactionSync({
+      data: '0xdeadbeef0000000000000000000000000000000001',
+      nonceKey: maxUint256, // [!code focus]
+      to: '0xcafebabecafebabecafebabecafebabecafebabe',
+      validBefore: Math.floor(Date.now() / 1000) + 20, // [!code focus]
+    })
+    ```
+
+    ```tsx twoslash [viem.config.ts] filename="viem.config.ts"
+    // [!include ~/snippets/viem.config.ts:setup]
+    ```
+
+    :::
+
+  </Tab>
+  <Tab title="Wagmi">
+
+    
+    :::code-group
+
+    ```tsx twoslash [example.ts]
+    // @noErrors
+    import { maxUint256 } from 'viem'
+    import { useSendTransaction } from 'wagmi'
+
+    const { sendTransaction } = useSendTransaction()
+
+    sendTransaction({
+      data: '0xdeadbeef0000000000000000000000000000000001',
+      nonceKey: maxUint256, // [!code focus]
+      to: '0xcafebabecafebabecafebabecafebabecafebabe',
+      validBefore: Math.floor(Date.now() / 1000) + 20, // [!code focus]
+    })
+    ```
+
+    ```tsx twoslash [wagmi.config.ts]
+    // @noErrors
+    // [!include ~/snippets/wagmi.config.ts:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Rust">
+
+    ```rust
+    let pending = provider
+      .send_transaction(TempoTransactionRequest {
+          nonce_key: Some(U256::MAX), // [!code focus]
+          valid_before: Some(SystemTime::now().duration_since(UNIX_EPOCH).as_secs() + 30), // [!code focus]
+          ..Default::default(),
+      })
+      .await?;
+    ```
+
+  </Tab>
+
+  <Tab title="RLP">
+
+    ```tsx
+    rlp([
+      chain_id,
+      max_priority_fee_per_gas,
+      max_fee_per_gas,
+      gas,
+      calls,
+      access_list,
+      nonce_key, // set to `maxUint256` // [!code focus]
+      nonce,
+      valid_before, // set to `now + <30 seconds` // [!code focus]
+      valid_after,
+      fee_token,
+      fee_payer_signature,
+      authorization_list,
+      key_authorization,
+      signature,
+    ])
+    ```
+  </Tab>
+</Tabs>
+
+### 2D Nonces
+
+For cases requiring ordered sequences within a key, Tempo's **2D nonce system** enables parallel transaction execution:
+
+- **Protocol nonce (key 0)**: The default sequential nonce. Transactions must be processed in order.
+- **User nonces (keys 1+)**: Independent nonce sequences that allow concurrent transaction submission.
+
+<Tabs stateKey="library">
+  <Tab title="Viem">
+
+    :::code-group
+
+    ```tsx twoslash [example.ts]
+    // @noErrors
+    import { client } from './viem.config'
+
+    const [receipt1, receipt2, receipt3] = await Promise.all([ 
+      client.sendTransactionSync({
+        data: '0xdeadbeef0000000000000000000000000000000001',
+        nonceKey: 1n, // [!code focus]
+        to: '0xcafebabecafebabecafebabecafebabecafebabe',
+      }),
+      client.sendTransactionSync({
+        data: '0xcafebabe0000000000000000000000000000000001',
+        nonceKey: 2n, // [!code focus]
+        to: '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef',
+      }),
+      client.sendTransactionSync({
+        data: '0xdeadbeef0000000000000000000000000000000001',
+        nonceKey: 3n, // [!code focus]
+        to: '0xcafebabecafebabecafebabecafebabecafebabe',
+      }),
+    ])
+    ```
+
+    ```tsx twoslash [viem.config.ts]
+    // [!include ~/snippets/viem.config.ts:setup]
+    ```
+
+    :::
+
+  </Tab>
+  <Tab title="Wagmi">
+
+    
     :::code-group
 
     ```tsx twoslash [example.ts]
@@ -550,12 +700,17 @@ enabling parallel execution and significantly improved transaction throughput fo
 
     sendTransaction({
       data: '0xdeadbeef0000000000000000000000000000000001',
-      nonceKey: 1n, // [!code hl]
+      nonceKey: 1n, // [!code focus]
       to: '0xcafebabecafebabecafebabecafebabecafebabe',
     })
     sendTransaction({
       data: '0xdeadbeef0000000000000000000000000000000001',
-      nonceKey: 2n, // [!code hl]
+      nonceKey: 2n, // [!code focus]
+      to: '0xcafebabecafebabecafebabecafebabecafebabe',
+    })
+    sendTransaction({
+      data: '0xdeadbeef0000000000000000000000000000000001',
+      nonceKey: 3n, // [!code focus]
       to: '0xcafebabecafebabecafebabecafebabecafebabe',
     })
     ```
@@ -592,6 +747,10 @@ enabling parallel execution and significantly improved transaction throughput fo
     ```
   </Tab>
 </Tabs>
+
+:::warning
+**Reuse nonce keys instead of generating random ones.** Creating a new nonce key incurs a state creation cost that increases with the number of active keys (see [TIP-1000](/protocol/tips/tip-1000)). For most applications, using a small set of sequential nonce keys (e.g., `1n`, `2n`, `3n`) is sufficient and much more cost-effective than generating random nonce keys for each transaction.
+:::
 
 ### Scheduled Transactions
 

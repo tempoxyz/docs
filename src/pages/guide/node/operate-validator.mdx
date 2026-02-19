@@ -78,7 +78,7 @@ your validator might've been blocked due to double-signing a block. In that case
 Your validator is currently the leader and proposing blocks. Check proposal activity:
 ```bash
 # Number of blocks your node has built and resolved
-curl -s localhost:8002/metrics | grep reth_payloads_resolved_block
+curl -s localhost:9000/metrics | grep reth_payloads_resolved_block
 ```
 
 If this counter is increasing, your validator is actively proposing blocks.
@@ -89,7 +89,7 @@ Your validator is voting on blocks proposed by others (notarization and finaliza
 
 ```bash
 # Inbound voting messages (should increase steadily)
-curl -s localhost:8002/metrics | grep consensus_engine_consensus_voter_inbound_messages_total | grep data_0
+curl -s localhost:8002/metrics | grep consensus_engine_epoch_manager_simplex_batcher_inbound_messages_total | grep data_0
 ```
 
 This counter should increase steadily when your node is participating in consensus.
@@ -172,6 +172,16 @@ The old validator identity must be deactivated before the new one is activated
 If you lose your signing share (stored on the database in `<datadir>/consensus/`), you will need to rotate to a new validator identity. This requires coordinating with the Tempo team to deactivate your old identity and register a new one.
 We're planning to release a high-availability feature that allows storing consensus data in an external database, which will enable signing share recovery without the need for key rotation.
 
+### Deleting Signing Shares
+
+:::warning[Breaking Change in v1.1.0]
+`--delete-signing-share` now requires the `--force` flag to prevent accidental deletion of validator signing keys. **Update any automation scripts that manage validator key lifecycle.**
+:::
+
+```bash
+tempo consensus --delete-signing-share --force
+```
+
 ## Log Management
 
 ### Parsing Logs
@@ -188,7 +198,7 @@ RUST_LOG_STYLE=never tempo node ...
 
 If you're using Loki, you can also use the `decolorize` filter to strip colors:
 
-```logql
+```
 {job="tempo-node"} | decolorize
 ```
 

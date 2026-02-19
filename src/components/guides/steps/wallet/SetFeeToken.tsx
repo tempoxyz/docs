@@ -105,7 +105,15 @@ export function SetFeeToken(props: DemoStepProps) {
         },
       },
     )
-  }, [address, isFeeTokenValid, resolvedFeeToken, setUserToken, defaultChainId, userToken.refetch])
+  }, [
+    address,
+    isFeeTokenValid,
+    resolvedFeeToken,
+    setUserToken,
+    defaultChainId,
+    userToken.refetch,
+    userToken,
+  ])
 
   // Sync selected option with current user token
   React.useEffect(() => {
@@ -131,7 +139,7 @@ export function SetFeeToken(props: DemoStepProps) {
     return (
       <div className="flex flex-wrap items-center gap-2">
         <select
-          className="-tracking-[2%] h-[32px] rounded-full border border-gray4 bg-white px-3 font-medium text-[14px] text-black dark:bg-transparent dark:text-white"
+          className="h-[32px] rounded-full border border-gray4 bg-white px-3 font-medium text-[14px] text-black -tracking-[2%] dark:bg-transparent dark:text-white"
           value={selectedFeeToken}
           onChange={(event) => {
             const value = event.target.value as FeeTokenOption['value']
@@ -172,15 +180,16 @@ export function SetFeeToken(props: DemoStepProps) {
           <div className="border-gray4 border-s-2 ps-5">
             {selectedOption.value === 'other' && (
               <div className="mt-2 flex flex-col">
-                <label className="-tracking-[1%] text-[11px] text-gray9" htmlFor="customFeeToken">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="customFeeToken">
                   Custom fee token address
                 </label>
                 <input
-                  className="-tracking-[2%] h-[34px] rounded-full border border-gray4 px-3.25 font-normal text-[14px] text-black placeholder-gray9 dark:text-white"
+                  className="h-[34px] rounded-full border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   autoCapitalize="none"
                   autoComplete="off"
                   autoCorrect="off"
                   spellCheck={false}
+                  id="customFeeToken"
                   name="customFeeToken"
                   placeholder="0x..."
                   value={customFeeToken}

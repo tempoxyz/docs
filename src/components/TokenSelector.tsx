@@ -29,7 +29,7 @@ export function TokenSelector(props: TokenSelectorProps) {
       name={name}
       value={value}
       onChange={(e) => onChange(e.target.value as Address)}
-      className="-tracking-[2%] h-[34px] rounded-lg border border-gray4 px-3.25 font-normal text-[14px] text-black dark:text-white"
+      className="h-[34px] rounded-lg border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] dark:text-white"
     >
       {tokens.map((token) => (
         <TokenOption key={token} token={token} />

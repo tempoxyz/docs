@@ -1,0 +1,7 @@
+1. how do I know my validator's status
+2. how do i know if my validator is syncing
+3. why is my new validator stuck
+4. what hardware do i need for my validator (e.g. what instance on AWS, OVH)
+5. what metrics do I need to monitor
+6. can I backup my validator's state?
+7. how do I recover my validator from X state?
