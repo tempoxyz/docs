@@ -51,19 +51,19 @@ Monitor these metrics to track your validator's state:
 
 ```bash
 # Is your validator connected to other peers (i.e. is it considered a syncer)? This should be >0 in at most 3 hours after your validator's addition
-curl -s localhost:6060/metrics | grep consensus_network_spawner_connections
+curl -s localhost:8002/metrics | grep consensus_network_spawner_connections
 
 # How many times YOUR node has been a dealer (distributing shares) - this metric should be >0 over 6 hours
-curl -s localhost:6060/metrics | grep consensus_engine_dkg_manager_how_often_dealer
+curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_how_often_dealer
 
 # How many times YOUR node has been a player (receiving shares) - this metric should be >0 over 6 hours
-curl -s localhost:6060/metrics | grep consensus_engine_dkg_manager_how_often_player
+curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_how_often_player
 
 # Successful ceremonies (should increase every ~3 hours)
-curl -s localhost:6060/metrics | grep consensus_engine_dkg_manager_ceremony_successes_total
+curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_ceremony_successes_total
 
 # Failed ceremonies (should stay at 0 or increase rarely)
-curl -s localhost:6060/metrics | grep consensus_engine_dkg_manager_ceremony_failures_total
+curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_ceremony_failures_total
 ```
 
 If `how_often_dealer` or `how_often_player` is increasing, your node is actively participating in DKG ceremonies. After your validator has been added to the network, you should alert on these metrics, as they indicate that your validator is actively participating in the network.
@@ -89,7 +89,7 @@ Your validator is voting on blocks proposed by others (notarization and finaliza
 
 ```bash
 # Inbound voting messages (should increase steadily)
-curl -s localhost:6060/metrics | grep consensus_engine_epoch_manager_simplex_batcher_inbound_messages_total | grep data_0
+curl -s localhost:8002/metrics | grep consensus_engine_epoch_manager_simplex_batcher_inbound_messages_total | grep data_0
 ```
 
 This counter should increase steadily when your node is participating in consensus.
@@ -113,7 +113,7 @@ Your node is fully synced and processing new blocks in real-time.
 
 ```bash
 # Processed height should match or be close to finalized height
-curl -s localhost:6060/metrics | grep -E "marshal_finalized_height|marshal_processed_height"
+curl -s localhost:8002/metrics | grep -E "marshal_finalized_height|marshal_processed_height"
 ```
 
 Both values should be nearly equal and increasing together.
@@ -258,4 +258,4 @@ The dashboard uses these template variables:
 | `loki_ds` | Loki datasource (for log-based panels) |
 | `network_name` | Filter by network/validator job name |
 
-Make sure your Prometheus is scraping metrics from your validator's metrics endpoint (default: `localhost:6060/metrics`).
+Make sure your Prometheus is scraping metrics from your validator's metrics endpoint (default: `localhost:8002/metrics`).
