@@ -9,23 +9,6 @@ function getClient() {
   })
 }
 
-export async function GET(request: Request): Promise<Response> {
-  const origin = request.headers.get('origin')
-  const corsHeaders = cors(origin)
-
-  const url = new URL(request.url)
-  const address = url.searchParams.get('address')
-
-  if (!address || !/^0x[a-fA-F0-9]{40}$/.test(address)) {
-    return Response.json(
-      { data: null, error: 'Invalid or missing address parameter' },
-      { status: 400, headers: corsHeaders },
-    )
-  }
-
-  return fund(address.toLowerCase() as `0x${string}`, corsHeaders)
-}
-
 export async function POST(request: Request): Promise<Response> {
   const origin = request.headers.get('origin')
   const corsHeaders = cors(origin)
@@ -77,7 +60,7 @@ function cors(origin: string | null): Record<string, string> {
   if (process.env.NODE_ENV === 'development') allowedOrigins.push('http://localhost:5173')
 
   const headers: Record<string, string> = {
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, x-api-token',
   }
 

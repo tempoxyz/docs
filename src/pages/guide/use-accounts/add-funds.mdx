@@ -48,7 +48,9 @@ Request tokens programmatically via the faucet API.
 <div className="h-4"/>
 
 ```bash
-curl "https://docs.tempo.xyz/api/faucet?address=<YOUR_ADDRESS>"
+curl -X POST https://docs.tempo.xyz/api/faucet \
+  -H "Content-Type: application/json" \
+  -d '{"address": "<YOUR_ADDRESS>"}'
 ```
 
 <div className="h-4"/>
