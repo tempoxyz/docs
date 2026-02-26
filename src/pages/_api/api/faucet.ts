@@ -5,7 +5,7 @@ import { Actions } from 'viem/tempo'
 function getClient() {
   return createClient({
     chain: tempoModerato,
-    transport: http(import.meta.env.VITE_TEMPO_RPC_URL ?? 'https://rpc.moderato.tempo.xyz'),
+    transport: http(),
   })
 }
 
@@ -65,7 +65,7 @@ async function fund(address: `0x${string}`, headers: Record<string, string>): Pr
     return Response.json({ data, error: null }, { headers })
   } catch (error) {
     console.error('Faucet error:', error)
-    const message = error instanceof Error ? error.message : 'Unknown error'
+    const message = error instanceof Error ? error.message : 'Unknown error occurred'
     return Response.json({ data: null, error: message }, { status: 500, headers })
   }
 }
