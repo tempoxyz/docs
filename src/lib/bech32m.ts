@@ -133,6 +133,199 @@ export function formatTempoAddress(address: string): string {
   return `${address.slice(0, 6)} ${address.slice(6).replace(/(.{5})/g, '$1 ')}`.trim()
 }
 
+// ---------------------------------------------------------------------------
+// Syndrome-based BCH error correction over GF(1024)
+//
+// Ported from Pieter Wuille's reference implementation (sipa/bech32).
+// The bech32m BCH code's syndromes live in GF(1024) = GF(32²). Error
+// positions are found algebraically, then values are corrected by targeted
+// search at the known positions — O(n) total instead of O(n²×32²) brute force.
+// ---------------------------------------------------------------------------
+
+// prettier-ignore
+const GF1024_EXP = [
+  1,32,311,139,206,553,934,180,537,145,910,131,462,373,652,927,675,840,938,
+  308,235,958,948,756,1007,979,356,172,281,124,240,222,41,23,736,367,460,309,
+  203,649,831,570,454,117,464,693,392,1010,115,272,348,667,383,972,644,671,
+  511,610,129,398,818,922,515,977,292,747,15,480,386,690,360,300,1003,851,
+  202,681,520,689,264,604,630,513,913,867,1021,403,146,1006,1011,83,39,471,
+  597,854,106,560,134,366,492,2,64,583,278,412,370,620,321,315,267,572,262,
+  924,707,56,567,102,944,628,577,470,629,609,225,766,687,712,344,539,209,457,
+  405,82,7,224,734,920,579,406,50,887,381,908,195,905,99,784,749,207,521,657,
+  63,727,696,40,55,983,484,258,796,877,573,294,683,584,246,30,960,772,109,720,
+  600,758,943,404,114,304,107,528,433,485,290,555,998,755,783,269,764,751,143,
+  78,903,419,933,212,361,268,732,984,4,128,430,517,785,717,504,642,607,534,
+  369,524,561,166,89,359,204,617,481,418,901,483,482,450,245,126,176,665,319,
+  395,914,771,141,14,448,181,569,422,773,77,999,723,568,390,562,198,809,250,
+  414,306,43,87,167,121,80,71,679,968,516,817,1018,371,588,118,432,453,21,
+  672,808,218,169,441,229,638,769,205,585,214,297,843,970,580,374,748,239,830,
+  538,241,254,286,156,558,838,618,385,722,536,177,697,8,256,860,298,811,186,
+  985,36,439,293,715,312,363,332,155,718,408,498,962,836,554,966,964,900,451,
+  213,329,59,599,790,557,806,282,28,896,323,379,844,810,154,750,175,377,780,
+  365,396,882,477,789,589,86,135,334,219,137,142,110,688,296,875,765,719,440,
+  197,841,906,3,96,880,413,338,859,458,501,802,410,434,389,594,950,692,424,
+  709,248,478,885,317,459,469,533,273,380,940,500,770,173,313,331,123,16,512,
+  945,596,886,349,699,72,839,586,182,601,726,664,287,188,793,973,676,936,372,
+  684,680,552,902,387,658,95,423,805,378,876,541,17,544,646,735,952,884,285,
+  252,350,731,824,730,792,1005,915,803,442,133,270,668,415,274,284,220,105,
+  592,1014,243,190,857,394,946,564,6,192,1001,787,653,959,916,963,868,797,845,
+  778,429,613,97,848,170,473,917,995,595,918,899,291,523,721,632,961,804,346,
+  603,662,223,9,288,619,417,997,659,127,144,942,436,325,443,165,57,535,337,
+  827,698,104,624,705,120,112,368,556,774,45,151,846,874,733,1016,307,11,352,
+  44,183,633,993,531,465,661,191,889,189,825,762,559,870,861,266,540,49,791,
+  525,529,401,210,425,741,463,341,955,788,621,353,12,384,754,815,58,631,545,
+  678,1000,819,954,820,858,490,194,937,340,923,547,742,431,549,550,582,310,
+  171,505,674,872,669,447,37,407,18,576,502,834,746,47,215,265,636,833,650,
+  863,330,91,295,651,895,125,208,489,162,217,201,713,376,812,90,263,956,1012,
+  179,761,591,22,704,88,327,507,738,303,907,35,343,1019,339,891,253,382,1004,
+  947,532,305,75,807,314,299,779,397,850,234,926,643,639,801,506,706,24,768,
+  237,894,93,487,354,108,752,879,637,865,957,980,388,626,641,575,358,236,862,
+  362,364,428,581,342,987,100,1008,51,855,74,775,13,416,965,932,244,94,391,
+  530,497,930,52,951,660,159,590,54,1015,211,393,978,324,411,402,178,729,888,
+  157,526,625,737,335,251,446,5,160,153,654,991,228,606,566,70,647,767,655,
+  1023,467,725,760,623,289,587,150,878,605,598,822,794,941,468,565,38,503,866,
+  989,164,25,800,474,1013,147,974,708,216,233,1022,499,994,627,673,776,493,34,
+  375,716,472,949,724,728,856,426,645,703,200,745,79,935,148,814,26,832,682,
+  616,449,149,782,301,971,612,65,615,33,279,444,69,743,399,786,685,648,799,
+  781,333,187,1017,275,316,491,226,670,479,853,10,320,283,60,695,456,437,357,
+  140,46,247,62,759,911,163,249,510,578,438,261,1020,435,421,869,829,634,897,
+  355,76,967,996,691,328,27,864,925,739,271,700,168,409,466,757,975,740,495,
+  98,816,986,68,711,184,921,611,161,185,953,852,42,119,400,242,158,622,257,
+  892,29,928,116,496,898,259,828,602,694,488,130,494,66,519,849,138,238,798,
+  813,122,48,823,826,666,351,763,527,593,982,452,53,919,931,20,640,543,81,103,
+  912,835,714,280,92,455,85,231,574,326,475,981,420,837,522,753,847,842,1002,
+  883,509,546,710,152,686,744,111,656,31,992,563,230,542,113,336,795,909,227,
+  702,232,990,196,873,701,136,174,345,571,486,322,347,635,929,84,199,777,461,
+  277,508,514,1009,19,608,193,969,548,518,881,445,101,976,260,988,132,302,939,
+  276,476,821,890,221,73,871,893,61,663,255,318,427,677,904,67,551,614,
+]
+
+// prettier-ignore
+const GF1024_LOG = [
+  -1,0,99,363,198,726,462,132,297,495,825,528,561,693,231,66,396,429,594,990,
+  924,264,627,33,660,759,792,858,330,891,165,957,1,804,775,635,304,592,754,90,
+  153,32,883,248,530,521,834,599,911,547,138,689,703,921,708,154,113,508,565,
+  324,828,1013,836,150,100,802,903,1020,874,807,734,253,403,1010,691,646,853,
+  237,189,788,252,927,131,89,982,935,347,249,629,212,620,607,933,664,698,423,
+  364,476,871,144,687,998,115,928,513,453,94,176,667,168,353,955,517,962,174,
+  48,893,43,261,884,516,251,910,395,29,611,223,501,199,58,901,11,1002,446,96,
+  348,973,351,906,3,833,230,352,188,502,9,86,763,790,797,745,522,952,728,336,
+  311,288,719,887,706,727,879,614,839,758,507,211,250,864,268,478,586,27,392,
+  974,338,224,295,716,624,7,233,406,531,876,880,302,816,411,539,457,537,463,
+  992,575,142,970,360,243,983,786,616,74,38,214,273,4,147,612,128,552,710,193,
+  322,275,600,766,615,267,350,452,1009,31,494,133,122,821,966,731,270,960,936,
+  968,767,653,20,679,662,907,282,30,285,886,456,697,222,164,835,380,840,245,
+  724,436,640,286,1015,298,889,157,896,1000,844,110,621,78,601,545,108,195,
+  185,447,862,49,387,450,818,1005,986,102,805,932,28,329,827,451,435,287,410,
+  496,743,180,485,64,306,161,608,355,276,300,649,71,799,1003,633,175,645,247,
+  527,19,37,585,2,308,393,648,107,819,383,1016,226,826,106,978,332,713,505,
+  938,630,857,323,606,394,310,815,349,723,963,510,367,638,577,556,685,636,126,
+  975,491,979,50,401,437,915,529,560,666,852,26,832,678,213,70,194,681,309,
+  682,341,97,35,518,208,104,259,416,13,280,776,618,339,426,333,388,140,641,52,
+  562,292,68,421,674,374,241,699,46,711,459,227,342,651,59,809,885,551,715,85,
+  173,130,137,593,313,865,372,714,103,366,246,449,694,498,217,191,941,847,235,
+  424,378,553,783,1017,683,474,200,581,262,178,373,846,504,831,843,305,359,
+  269,445,506,806,997,725,591,232,796,221,321,920,263,42,934,830,129,369,384,
+  36,985,12,555,44,535,866,739,752,385,119,91,778,479,761,939,1006,344,381,
+  823,67,216,220,219,156,179,977,665,900,613,574,820,98,774,902,870,894,701,
+  314,769,390,370,596,755,204,587,658,631,987,949,841,56,397,81,988,62,256,
+  201,995,904,76,148,943,486,209,549,720,917,177,550,700,534,644,386,207,509,
+  294,8,284,127,546,428,961,926,430,567,950,579,994,582,583,1021,419,5,317,
+  181,519,327,289,542,95,210,242,959,461,753,733,114,240,234,41,976,109,160,
+  937,677,595,118,842,136,279,684,584,101,163,274,405,744,260,346,707,626,454,
+  918,375,482,399,92,748,325,170,407,898,492,79,747,732,206,991,121,57,878,
+  801,475,1022,803,795,215,291,497,105,559,888,742,514,721,675,771,117,120,80,
+  566,488,532,850,980,602,670,271,656,925,676,205,655,54,784,431,735,812,39,
+  604,609,14,466,729,737,956,149,422,500,705,536,493,1014,409,225,914,51,448,
+  590,822,55,265,772,588,16,414,1018,568,254,418,75,794,162,417,811,953,124,
+  354,77,69,856,377,45,899,829,152,296,512,402,863,972,967,785,628,515,659,
+  112,765,379,951,875,125,617,931,307,777,203,312,358,169,487,293,239,780,740,
+  408,151,781,717,440,438,196,525,134,432,34,722,632,861,869,554,580,808,954,
+  787,598,65,281,146,337,187,668,944,563,183,23,867,171,837,741,625,541,916,
+  186,357,123,736,661,272,391,229,167,236,520,692,773,984,473,650,340,814,798,
+  184,145,202,810,465,558,345,326,548,441,412,750,964,158,471,908,813,760,657,
+  371,444,490,425,328,647,266,244,335,301,619,909,791,564,872,257,60,570,572,
+  1007,749,912,439,540,913,511,897,849,283,40,793,603,597,930,316,942,290,404,
+  17,361,946,277,334,472,523,945,477,905,652,73,882,824,93,690,782,458,573,
+  368,299,544,680,605,859,671,756,83,470,848,543,1011,589,971,524,356,427,159,
+  746,669,365,996,343,948,434,382,400,139,718,538,1008,639,890,1012,663,610,
+  331,851,895,484,320,218,420,190,1019,143,362,634,141,965,10,838,929,82,228,
+  443,468,480,483,922,135,877,61,578,111,860,654,15,892,981,702,923,696,192,6,
+  789,415,576,18,1004,389,751,503,172,116,398,460,643,22,779,376,704,433,881,
+  571,557,622,672,21,467,166,489,315,469,319,695,318,854,255,993,278,800,53,
+  413,764,868,999,63,712,25,673,940,919,155,197,303,873,686,1001,757,969,730,
+  958,533,770,481,855,499,182,238,569,464,947,72,642,442,87,24,688,989,47,88,
+  623,762,455,709,526,817,258,637,845,84,768,738,
+]
+
+/**
+ * Maps a 30-bit polymod residue to three 10-bit syndromes in GF(1024).
+ * The syndrome transform is specific to the bech32/bech32m generator polynomial.
+ */
+function computeSyndrome(residue: number): number {
+  const low = residue & 0x1f
+  let syn = low ^ (low << 10) ^ (low << 20)
+  /* prettier-ignore */
+  const BITS = [
+    0x3d0195bd, 0x2a932b53, 0x072653af, 0x0cdc067e, 0x19ac89f5,
+    0x15922369, 0x29b443f2, 0x03f826ed, 0x0574c8fa, 0x087935dd,
+    0x2c6dcf4f, 0x0acfbfbe, 0x158bfa75, 0x2993d5e3, 0x03b70fc6,
+    0x051e8fd6, 0x08b99aa5, 0x1167b06a, 0x205f60d4, 0x12aae581,
+    0x04296874, 0x0846f4c1, 0x108d4d82, 0x210ebf04, 0x1299fb28,
+  ]
+  for (let i = 0; i < 25; i++) {
+    if ((residue >> (i + 5)) & 1) syn ^= BITS[i]
+  }
+  return syn
+}
+
+/**
+ * Locates up to 2 error positions in the data part using syndrome decoding
+ * over GF(1024). Returns positions as offsets from the END of the data
+ * (position 0 = last character). Returns [] if errors cannot be located.
+ */
+function locateErrors(residue: number, length: number): number[] {
+  if (residue === 0) return []
+
+  const syn = computeSyndrome(residue)
+  const s0 = syn & 0x3ff
+  const s1 = (syn >> 10) & 0x3ff
+  const s2 = syn >> 20
+  const l_s0 = GF1024_LOG[s0]
+  const l_s1 = GF1024_LOG[s1]
+  const l_s2 = GF1024_LOG[s2]
+
+  if (l_s0 !== -1 && l_s1 !== -1 && l_s2 !== -1) {
+    if ((2 * l_s1 - l_s2 - l_s0 + 2046) % 1023 === 0) {
+      const p1 = (l_s1 - l_s0 + 1023) % 1023
+      if (p1 < length) {
+        const l_e1 = l_s0 + (1023 - 997) * p1
+        if (l_e1 % 33 === 0) return [p1]
+      }
+    }
+  }
+
+  for (let p1 = 0; p1 < length; p1++) {
+    const s2_s1p1 = s2 ^ (s1 === 0 ? 0 : GF1024_EXP[(l_s1 + p1) % 1023])
+    if (s2_s1p1 === 0) continue
+    const s1_s0p1 = s1 ^ (s0 === 0 ? 0 : GF1024_EXP[(l_s0 + p1) % 1023])
+    if (s1_s0p1 === 0) continue
+    const l_s1_s0p1 = GF1024_LOG[s1_s0p1]
+    const p2 = (GF1024_LOG[s2_s1p1] - l_s1_s0p1 + 1023) % 1023
+    if (p2 >= length || p1 === p2) continue
+    const s1_s0p2 = s1 ^ (s0 === 0 ? 0 : GF1024_EXP[(l_s0 + p2) % 1023])
+    if (s1_s0p2 === 0) continue
+    const inv_p1_p2 = 1023 - GF1024_LOG[GF1024_EXP[p1] ^ GF1024_EXP[p2]]
+    const l_e2 = l_s1_s0p1 + inv_p1_p2 + (1023 - 997) * p2
+    if (l_e2 % 33 !== 0) continue
+    const l_e1 = GF1024_LOG[s1_s0p2] + inv_p1_p2 + (1023 - 997) * p1
+    if (l_e1 % 33 !== 0) continue
+    return p1 < p2 ? [p1, p2] : [p2, p1]
+  }
+
+  return []
+}
+
 export type CorrectionResult = {
   status: 'valid' | 'corrected' | 'detected' | 'invalid_format'
   corrected?: string
@@ -143,11 +336,10 @@ export type CorrectionResult = {
 }
 
 /**
- * Attempts to correct a corrupted tempo1 address using brute-force BCH
- * decoding. Tries single-error correction first (1,280 candidates), then
- * two-error correction (~800K candidates). Returns the unique valid address
- * if one is found, or reports detection-only if correction is ambiguous or
- * the search space is exceeded.
+ * Attempts to correct a corrupted tempo1 address using syndrome-based BCH
+ * decoding (ported from sipa/bech32). Algebraically locates error positions
+ * via GF(1024) syndromes, then tests values only at those positions.
+ * O(n) for position finding + O(32^k) for k located errors.
  */
 export function correctTempoAddress(address: string): CorrectionResult {
   const addr = address.toLowerCase()
@@ -157,11 +349,11 @@ export function correctTempoAddress(address: string): CorrectionResult {
   if (/[A-Z]/.test(address) && /[a-z]/.test(address))
     return { status: 'invalid_format', error: 'Mixed case rejected per BIP-350' }
 
-  const pos = addr.lastIndexOf('1')
-  if (pos < 1) return { status: 'invalid_format', error: 'No separator found' }
+  const sepPos = addr.lastIndexOf('1')
+  if (sepPos < 1) return { status: 'invalid_format', error: 'No separator found' }
 
-  const hrp = addr.slice(0, pos)
-  const dataPart = addr.slice(pos + 1)
+  const hrp = addr.slice(0, sepPos)
+  const dataPart = addr.slice(sepPos + 1)
   if (dataPart.length < 6)
     return { status: 'invalid_format', error: 'Data part too short' }
 
@@ -170,8 +362,9 @@ export function correctTempoAddress(address: string): CorrectionResult {
     return { status: 'invalid_format', error: 'Invalid character in data part' }
 
   const expanded = hrpExpand(hrp)
+  const residue = polymod([...expanded, ...data5]) ^ BECH32M_CONST
 
-  if (polymod([...expanded, ...data5]) === BECH32M_CONST) {
+  if (residue === 0) {
     try {
       decodeTempoAddress(address)
       return { status: 'valid' }
@@ -180,109 +373,90 @@ export function correctTempoAddress(address: string): CorrectionResult {
     }
   }
 
-  // 1-error correction: try each position × each of 32 characters
-  const dataLen = dataPart.length
-  const found: { addr: string; errors: { position: number; was: string; correctedTo: string }[] }[] = []
+  const errorPositions = locateErrors(residue, dataPart.length)
 
-  for (let i = 0; i < dataLen; i++) {
-    const original = data5[i]
+  if (errorPositions.length === 0) {
+    return {
+      status: 'detected',
+      searchedErrors: 2,
+      error: 'Errors detected but positions could not be determined (likely 3+ substitutions)',
+    }
+  }
+
+  // Convert from end-relative positions to data-part indices
+  const dataLen = dataPart.length
+  const indices = errorPositions.map((p) => dataLen - 1 - p)
+
+  // Try all character values at the located positions
+  const originals = indices.map((i) => data5[i])
+
+  if (indices.length === 1) {
+    const [idx] = indices
+    const orig = originals[0]
     for (let c = 0; c < 32; c++) {
-      if (c === original) continue
-      data5[i] = c
+      if (c === orig) continue
+      data5[idx] = c
       if (polymod([...expanded, ...data5]) === BECH32M_CONST) {
-        const fixed = addr.slice(0, pos + 1 + i) + CHARSET[c] + addr.slice(pos + 1 + i + 1)
+        const fixed = addr.slice(0, sepPos + 1 + idx) + CHARSET[c] + addr.slice(sepPos + 1 + idx + 1)
+        data5[idx] = orig
         try {
           decodeTempoAddress(fixed)
-          found.push({
-            addr: fixed,
-            errors: [{ position: pos + 1 + i, was: CHARSET[original], correctedTo: CHARSET[c] }],
-          })
-        } catch {
-          // valid checksum but fails higher-level validation (e.g. wrong version)
-        }
-      }
-      data5[i] = original
-    }
-  }
-
-  if (found.length === 1) {
-    return {
-      status: 'corrected',
-      corrected: found[0].addr,
-      errors: found[0].errors,
-      candidates: 1,
-      searchedErrors: 1,
-    }
-  }
-  if (found.length > 1) {
-    return {
-      status: 'detected',
-      candidates: found.length,
-      searchedErrors: 1,
-      error: `${found.length} candidates found — correction is ambiguous`,
-    }
-  }
-
-  // 2-error correction: try each pair of positions × each pair of characters
-  for (let i = 0; i < dataLen; i++) {
-    const origI = data5[i]
-    for (let j = i + 1; j < dataLen; j++) {
-      const origJ = data5[j]
-      for (let ci = 0; ci < 32; ci++) {
-        if (ci === origI) continue
-        data5[i] = ci
-        for (let cj = 0; cj < 32; cj++) {
-          if (cj === origJ) continue
-          data5[j] = cj
-          if (polymod([...expanded, ...data5]) === BECH32M_CONST) {
-            const fixed =
-              addr.slice(0, pos + 1 + i) +
-              CHARSET[ci] +
-              addr.slice(pos + 1 + i + 1, pos + 1 + j) +
-              CHARSET[cj] +
-              addr.slice(pos + 1 + j + 1)
-            try {
-              decodeTempoAddress(fixed)
-              found.push({
-                addr: fixed,
-                errors: [
-                  { position: pos + 1 + i, was: CHARSET[origI], correctedTo: CHARSET[ci] },
-                  { position: pos + 1 + j, was: CHARSET[origJ], correctedTo: CHARSET[cj] },
-                ],
-              })
-            } catch {
-              // valid checksum but fails higher-level validation
-            }
+          return {
+            status: 'corrected',
+            corrected: fixed,
+            errors: [{ position: sepPos + 1 + idx, was: CHARSET[orig], correctedTo: CHARSET[c] }],
+            candidates: 1,
+            searchedErrors: 1,
           }
-          data5[j] = origJ
+        } catch {
+          return { status: 'detected', error: 'Position located but no valid Tempo address found' }
         }
-        data5[i] = origI
       }
     }
-    if (found.length > 5) break // early exit if ambiguous
+    data5[idx] = orig
   }
 
-  if (found.length === 1) {
-    return {
-      status: 'corrected',
-      corrected: found[0].addr,
-      errors: found[0].errors,
-      candidates: 1,
-      searchedErrors: 2,
+  if (indices.length === 2) {
+    const [idx0, idx1] = indices
+    const [orig0, orig1] = originals
+    for (let c0 = 0; c0 < 32; c0++) {
+      if (c0 === orig0) continue
+      data5[idx0] = c0
+      for (let c1 = 0; c1 < 32; c1++) {
+        if (c1 === orig1) continue
+        data5[idx1] = c1
+        if (polymod([...expanded, ...data5]) === BECH32M_CONST) {
+          const parts = [...addr]
+          parts[sepPos + 1 + idx0] = CHARSET[c0]
+          parts[sepPos + 1 + idx1] = CHARSET[c1]
+          const fixed = parts.join('')
+          data5[idx0] = orig0
+          data5[idx1] = orig1
+          try {
+            decodeTempoAddress(fixed)
+            return {
+              status: 'corrected',
+              corrected: fixed,
+              errors: [
+                { position: sepPos + 1 + idx0, was: CHARSET[orig0], correctedTo: CHARSET[c0] },
+                { position: sepPos + 1 + idx1, was: CHARSET[orig1], correctedTo: CHARSET[c1] },
+              ],
+              candidates: 1,
+              searchedErrors: 2,
+            }
+          } catch {
+            return { status: 'detected', error: 'Positions located but no valid Tempo address found' }
+          }
+        }
+      }
     }
-  }
-  if (found.length > 1) {
-    return {
-      status: 'detected',
-      candidates: found.length,
-      searchedErrors: 2,
-      error: `${found.length} candidates found — correction is ambiguous`,
-    }
+    data5[idx0] = orig0
+    data5[idx1] = orig1
   }
 
   return {
     status: 'detected',
     searchedErrors: 2,
-    error: 'More than 2 errors — detected but cannot correct',
+    error: 'Errors detected but correction failed',
   }
 }
