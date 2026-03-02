@@ -437,6 +437,10 @@ export default defineConfig({
             ],
           },
           {
+            text: 'Address Format',
+            link: '/protocol/addresses',
+          },
+          {
             text: 'TIPs',
             link: '/protocol/tips',
           },

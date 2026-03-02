@@ -20,7 +20,7 @@ const handler = Handler.compose([
   Handler.feePayer({
     account: privateKeyToAccount('0x...'),
     chain: tempoModerato.extend({ 
-      feeToken: '0x20c0...0001' 
+      feeToken: 'tempo1qqsv…9xgnd' // AlphaUSD
     }),
     transport: http(),
     path: '/fee-payer',
