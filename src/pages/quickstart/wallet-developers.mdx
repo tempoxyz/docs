@@ -58,6 +58,28 @@ As a wallet developer, you can set the fee token for your user at the account le
 If you don't, Tempo uses a cascading fee token selection algorithm to determine the fee token for a transaction – learn more about [Fee Token Preferences](/protocol/fees/spec-fee#fee-token-preferences).
 :::
 
+### Display Tempo addresses
+
+Tempo uses a human-readable address format based on [bech32m encoding](/protocol/addresses) (BIP-350). All Tempo addresses start with the `tempo1` prefix and are exactly 46 characters long, providing instant chain recognition and built-in error detection for up to 4 character substitutions.
+
+Your wallet should display and accept `tempo1` addresses throughout the UI. Use the [bech32m library](/protocol/addresses#javascript--typescript-usage) to convert between the internal `0x` hex format used by the EVM and the user-facing `tempo1` format:
+
+```ts
+import { encodeTempoAddress, decodeTempoAddress } from './lib/bech32m'
+
+// Display: convert internal hex to user-facing tempo1
+const display = encodeTempoAddress(account.address)
+// → "tempo1qp6z6dwvvc6vq5efyk3ms39une6etu97hvwnw3n3"
+
+// Input: convert user-pasted tempo1 back to hex for transactions
+const hex = decodeTempoAddress(userInput)
+// → "0x742d35cc6634c0532925a3b844bc9e7595f0bebb"
+```
+
+:::tip
+Display addresses with optional visual spacing for readability (e.g., `tempo1 qp6z6 dwvvc …`), but always copy the canonical form without spaces. See [Display Recommendations](/protocol/addresses#display-recommendations).
+:::
+
 ### Display token and network assets
 
 Tempo provides a public tokenlist service that hosts token and network assets. You can pull these assets from our public tokenlist service to display in your UI.
@@ -130,12 +152,19 @@ Before launching Tempo support, ensure your wallet:
 - [ ] Hides or removes native balance display for Tempo
 - [ ] Displays `USD` as the currency symbol for gas
 - [ ] Quotes gas prices in the user's fee token
+- [ ] Displays and accepts `tempo1` addresses ([format details](/protocol/addresses))
 - [ ] Pulls token/network assets from Tempo's tokenlist
 - [ ] (Recommended) Integrates Tempo Transactions for enhanced UX
 
 ## Learning Resources
 
 <Cards>
+  <Card
+    description="Display and validate tempo1 addresses with bech32m encoding"
+    icon="lucide:at-sign"
+    title="Address Format"
+    to="/protocol/addresses"
+  />
   <Card
     description="Learn how fee token preferences work in the protocol"
     icon="lucide:file-text"
