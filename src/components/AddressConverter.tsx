@@ -6,6 +6,8 @@ import LucideCopy from '~icons/lucide/copy'
 import LucideShieldAlert from '~icons/lucide/shield-alert'
 import LucideShieldCheck from '~icons/lucide/shield-check'
 import {
+  type CorrectionResult,
+  correctTempoAddress,
   decodeTempoAddress,
   encodeTempoAddress,
   formatTempoAddress,
@@ -136,75 +138,139 @@ function ConverterSection() {
   )
 }
 
-const SUBSTITUTION_PRESETS = [
+const ERROR_PRESETS = [
   {
-    label: '2-char substitution',
-    description: 'Positions 8 and 20',
+    label: '1 error',
+    changes: [{ pos: 12, to: 'x' }],
+  },
+  {
+    label: '2 errors',
     changes: [
       { pos: 8, to: 'm' },
       { pos: 20, to: '6' },
     ],
   },
   {
-    label: '4-char substitution',
-    description: 'Positions 8, 15, 25, 35',
+    label: '3 errors',
+    changes: [
+      { pos: 8, to: 'm' },
+      { pos: 20, to: '6' },
+      { pos: 30, to: 'q' },
+    ],
+  },
+  {
+    label: '5 errors',
     changes: [
       { pos: 8, to: 'm' },
       { pos: 15, to: 'e' },
-      { pos: 25, to: 'u' },
-      { pos: 35, to: 'a' },
+      { pos: 22, to: 'x' },
+      { pos: 30, to: 'q' },
+      { pos: 38, to: 'z' },
     ],
   },
 ] as const
 
-function SubstitutionDemo() {
-  const [tampered, setTampered] = React.useState(EXAMPLE_TEMPO)
-  const [activePreset, setActivePreset] = React.useState<number | null>(null)
-  const validation = validateTempoAddress(tampered)
+function StatusBadge({ result }: { result: CorrectionResult }) {
+  if (result.status === 'valid')
+    return (
+      <div className="flex items-center gap-2 rounded bg-successTint px-3 py-2 text-[13px] text-success">
+        <LucideShieldCheck className="size-4 shrink-0" />
+        Valid address — no errors
+      </div>
+    )
 
-  const handlePreset = (idx: number) => {
-    const preset = SUBSTITUTION_PRESETS[idx]
+  if (result.status === 'invalid_format')
+    return (
+      <div className="flex items-center gap-2 rounded bg-destructiveTint px-3 py-2 text-[13px] text-destructive">
+        <LucideShieldAlert className="size-4 shrink-0" />
+        {result.error}
+      </div>
+    )
+
+  if (result.status === 'corrected')
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 rounded bg-successTint px-3 py-2 text-[13px] text-success">
+          <LucideShieldCheck className="size-4 shrink-0" />
+          <span>
+            <strong>Corrected</strong> — recovered the original address by locating{' '}
+            {result.errors!.length} error{result.errors!.length !== 1 ? 's' : ''}
+            {result.searchedErrors === 2 && result.errors!.length === 2 && ' (2-error search)'}
+          </span>
+        </div>
+        <div className="space-y-1.5 rounded border border-gray4 bg-gray2 px-3 py-2">
+          <div className="flex items-center gap-2">
+            <span className="break-all font-mono text-[13px] text-gray12">{result.corrected}</span>
+            <CopyButton text={result.corrected!} />
+          </div>
+          <div className="space-y-0.5">
+            {result.errors!.map((e) => (
+              <div key={e.position} className="font-mono text-[11px] text-gray9">
+                position {e.position}: <span className="text-destructive">{e.was}</span> →{' '}
+                <span className="text-success">{e.correctedTo}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+
+  return (
+    <div className="flex items-center gap-2 rounded bg-destructiveTint px-3 py-2 text-[13px] text-destructive">
+      <LucideShieldAlert className="size-4 shrink-0" />
+      <span>
+        <strong>Detected</strong> — {result.error}
+      </span>
+    </div>
+  )
+}
+
+function ErrorCorrectionDemo() {
+  const [input, setInput] = React.useState(EXAMPLE_TEMPO)
+  const [activePreset, setActivePreset] = React.useState<number | null>(null)
+  const [correction, setCorrection] = React.useState<CorrectionResult | null>(null)
+  const [computing, setComputing] = React.useState(false)
+
+  React.useEffect(() => {
+    if (!input.trim()) {
+      setCorrection(null)
+      return
+    }
+    setComputing(true)
+    // defer to keep UI responsive during 2-error search
+    const id = setTimeout(() => {
+      setCorrection(correctTempoAddress(input.trim()))
+      setComputing(false)
+    }, 10)
+    return () => clearTimeout(id)
+  }, [input])
+
+  const applyPreset = (idx: number) => {
     let addr = EXAMPLE_TEMPO
-    for (const { pos, to } of preset.changes) {
+    for (const { pos, to } of ERROR_PRESETS[idx].changes) {
       addr = addr.slice(0, pos) + to + addr.slice(pos + 1)
     }
-    setTampered(addr)
+    setInput(addr)
     setActivePreset(idx)
   }
 
-  const handleReset = () => {
-    setTampered(EXAMPLE_TEMPO)
-    setActivePreset(null)
-  }
-
-  const diffChars = React.useMemo(() => {
-    const result: number[] = []
-    for (let i = 0; i < Math.max(tampered.length, EXAMPLE_TEMPO.length); i++) {
-      if (tampered[i] !== EXAMPLE_TEMPO[i]) result.push(i)
-    }
-    return new Set(result)
-  }, [tampered])
-
   return (
     <div className="space-y-3">
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <label className="text-[13px] text-gray11">Original (valid)</label>
-        </div>
-        <div className="rounded border border-gray4 bg-gray2 px-3 py-2 font-mono text-[13px] text-gray12">
-          {EXAMPLE_TEMPO}
-        </div>
-      </div>
+      <p className="text-[13px] text-gray11">
+        Paste or type any corrupted <code className="text-[12px]">tempo1</code> address. The
+        bech32m checksum will detect the error, and for 1–2 substitutions the algorithm can locate
+        and recover the original address with no prior knowledge of it.
+      </p>
 
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <label className="text-[13px] text-gray11">Tampered address</label>
+          <label className="text-[13px] text-gray11">Address to check</label>
           <div className="flex gap-1.5">
-            {SUBSTITUTION_PRESETS.map((preset, idx) => (
+            {ERROR_PRESETS.map((preset, idx) => (
               <button
                 key={preset.label}
                 type="button"
-                onClick={() => handlePreset(idx)}
+                onClick={() => applyPreset(idx)}
                 className={`rounded px-2 py-0.5 text-[11px] transition-colors ${
                   activePreset === idx
                     ? 'bg-accent text-white'
@@ -216,72 +282,41 @@ function SubstitutionDemo() {
             ))}
             <button
               type="button"
-              onClick={handleReset}
+              onClick={() => {
+                setInput(EXAMPLE_TEMPO)
+                setActivePreset(null)
+              }}
               className="rounded bg-gray3 px-2 py-0.5 text-[11px] text-gray11 transition-colors hover:bg-gray4"
             >
-              Reset
+              Valid
             </button>
           </div>
         </div>
         <div className="flex items-center gap-2 rounded border border-gray4 bg-gray2 px-3 py-2">
           <input
             type="text"
-            value={tampered}
+            value={input}
             onChange={(e) => {
-              setTampered(e.target.value)
+              setInput(e.target.value)
               setActivePreset(null)
             }}
+            placeholder="tempo1..."
             spellCheck={false}
-            className="w-full bg-transparent font-mono text-[13px] text-gray12 outline-none"
+            className="w-full bg-transparent font-mono text-[13px] text-gray12 outline-none placeholder:text-gray8"
           />
         </div>
-
-        {diffChars.size > 0 && (
-          <div className="rounded border border-gray4 bg-gray2 px-3 py-2 font-mono text-[12px] leading-relaxed">
-            <div className="break-all">
-              {Array.from(tampered).map((ch, i) => (
-                <span
-                  key={`${i}-${ch}`}
-                  className={diffChars.has(i) ? 'bg-destructiveTint text-destructive' : 'text-gray10'}
-                >
-                  {ch}
-                </span>
-              ))}
-            </div>
-            <div className="mt-1 text-[11px] text-gray9">
-              {diffChars.size} character{diffChars.size !== 1 ? 's' : ''} changed from original
-            </div>
-          </div>
-        )}
       </div>
 
-      <div
-        className={`flex items-center gap-2 rounded px-3 py-2 text-[13px] ${
-          validation.valid
-            ? 'bg-successTint text-success'
-            : 'bg-destructiveTint text-destructive'
-        }`}
-      >
-        {validation.valid ? (
-          <>
-            <LucideShieldCheck className="size-4 shrink-0" />
-            <span>Valid tempo1 address</span>
-          </>
-        ) : (
-          <>
-            <LucideShieldAlert className="size-4 shrink-0" />
-            <span>
-              <strong>Rejected:</strong> {validation.error}
-            </span>
-          </>
-        )}
-      </div>
+      {computing && (
+        <div className="py-1 text-[13px] text-gray9">Searching for corrections...</div>
+      )}
+      {!computing && correction && <StatusBadge result={correction} />}
     </div>
   )
 }
 
 export function AddressConverter() {
-  const [tab, setTab] = React.useState<'convert' | 'detect'>('convert')
+  const [tab, setTab] = React.useState<'convert' | 'correct'>('convert')
 
   return (
     <Container
@@ -298,17 +333,17 @@ export function AddressConverter() {
           </button>
           <button
             type="button"
-            onClick={() => setTab('detect')}
+            onClick={() => setTab('correct')}
             className={`text-[13px] font-medium transition-colors ${
-              tab === 'detect' ? 'text-gray12' : 'text-gray9 hover:text-gray11'
+              tab === 'correct' ? 'text-gray12' : 'text-gray9 hover:text-gray11'
             }`}
           >
-            Error Detection
+            Error Correction
           </button>
         </div>
       }
     >
-      {tab === 'convert' ? <ConverterSection /> : <SubstitutionDemo />}
+      {tab === 'convert' ? <ConverterSection /> : <ErrorCorrectionDemo />}
     </Container>
   )
 }

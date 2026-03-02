@@ -15,7 +15,7 @@ tempo1qp6z6dwvvc6vq5efyk3ms39une6etu4a9qtj2kk0
 
 ## Address Converter
 
-Convert between standard `0x` hex addresses and `tempo1` bech32m addresses. Use the **Error Detection** tab to see how bech32m catches character substitution errors.
+Convert between standard `0x` hex addresses and `tempo1` bech32m addresses. Use the **Error Correction** tab to see how the bech32m checksum detects corrupted addresses and recovers the original by locating errors — with no prior knowledge of the correct address.
 
 <AddressConverter />
 
@@ -46,14 +46,21 @@ A Tempo address encodes a 20-byte Ethereum-style address with a version byte, a 
 | Total length | 46 characters |
 | Encoding | bech32m (BIP-350) |
 
-## Error Detection
+## Error Detection and Correction
 
 The bech32m checksum guarantees detection of:
 
 - **Up to 4 character substitutions** anywhere in the address
 - **Insertions and deletions** via checksum (≥ 1 − 2⁻³⁰ probability) plus fixed-length validation
 
-This means if a user accidentally mistypes up to 4 characters in a Tempo address, the error will always be caught before any funds are sent.
+Beyond detection, the BCH code structure enables **error correction** — the algorithm can locate the corrupted characters and recover the original address with no prior knowledge of it:
+
+- **1 substitution**: always correctable (unique solution found)
+- **2 substitutions**: correctable in most cases (searches ~800K candidates)
+- **3–4 substitutions**: detected but too many candidates to correct reliably
+- **5+ substitutions**: probabilistic detection (≥ 1 − 2⁻³⁰)
+
+Try it in the **Error Correction** tab above to see recovery in action.
 
 ## Case Handling
 
