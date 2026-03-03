@@ -11,7 +11,6 @@ import {
   decodeTempoAddress,
   encodeTempoAddress,
   formatTempoAddress,
-  validateTempoAddress,
 } from '../lib/bech32m'
 import { Container } from './Container'
 
