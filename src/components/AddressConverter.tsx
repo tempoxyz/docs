@@ -86,9 +86,12 @@ function ConverterSection() {
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
-        <label className="text-[13px] text-gray11">{inputLabel}</label>
+        <label htmlFor="addr-input" className="text-[13px] text-gray11">
+          {inputLabel}
+        </label>
         <div className="flex items-center gap-2 rounded border border-gray4 bg-gray2 px-3 py-2">
           <input
+            id="addr-input"
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
@@ -112,7 +115,7 @@ function ConverterSection() {
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-[13px] text-gray11">{outputLabel}</label>
+        <span className="text-[13px] text-gray11">{outputLabel}</span>
         <div className="rounded border border-gray4 bg-gray2 px-3 py-2">
           {result.error ? (
             <span className="text-[13px] text-destructive">{result.error}</span>
@@ -193,17 +196,17 @@ function StatusBadge({ result }: { result: CorrectionResult }) {
           <LucideShieldCheck className="size-4 shrink-0" />
           <span>
             <strong>Corrected</strong> — recovered the original address by locating{' '}
-            {result.errors!.length} error{result.errors!.length !== 1 ? 's' : ''}
-            {result.searchedErrors === 2 && result.errors!.length === 2 && ' (2-error search)'}
+            {result.errors?.length} error{result.errors?.length !== 1 ? 's' : ''}
+            {result.searchedErrors === 2 && result.errors?.length === 2 && ' (2-error search)'}
           </span>
         </div>
         <div className="space-y-1.5 rounded border border-gray4 bg-gray2 px-3 py-2">
           <div className="flex items-center gap-2">
             <span className="break-all font-mono text-[13px] text-gray12">{result.corrected}</span>
-            <CopyButton text={result.corrected!} />
+            <CopyButton text={result.corrected ?? ''} />
           </div>
           <div className="space-y-0.5">
-            {result.errors!.map((e) => (
+            {result.errors?.map((e) => (
               <div key={e.position} className="font-mono text-[11px] text-gray9">
                 position {e.position}: <span className="text-destructive">{e.was}</span> →{' '}
                 <span className="text-success">{e.correctedTo}</span>
@@ -256,14 +259,16 @@ function ErrorCorrectionDemo() {
   return (
     <div className="space-y-3">
       <p className="text-[13px] text-gray11">
-        Paste or type any corrupted <code className="text-[12px]">tempo1</code> address. The
-        bech32m checksum will detect the error, and for 1–2 substitutions the algorithm can locate
-        and recover the original address with no prior knowledge of it.
+        Paste or type any corrupted <code className="text-[12px]">tempo1</code> address. The bech32m
+        checksum will detect the error, and for 1–2 substitutions the algorithm can locate and
+        recover the original address with no prior knowledge of it.
       </p>
 
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <label className="text-[13px] text-gray11">Address to check</label>
+          <label htmlFor="addr-check" className="text-[13px] text-gray11">
+            Address to check
+          </label>
           <div className="flex gap-1.5">
             {ERROR_PRESETS.map((preset, idx) => (
               <button
@@ -293,6 +298,7 @@ function ErrorCorrectionDemo() {
         </div>
         <div className="flex items-center gap-2 rounded border border-gray4 bg-gray2 px-3 py-2">
           <input
+            id="addr-check"
             type="text"
             value={input}
             onChange={(e) => {
@@ -306,9 +312,7 @@ function ErrorCorrectionDemo() {
         </div>
       </div>
 
-      {computing && (
-        <div className="py-1 text-[13px] text-gray9">Searching for corrections...</div>
-      )}
+      {computing && <div className="py-1 text-[13px] text-gray9">Searching for corrections...</div>}
       {!computing && correction && <StatusBadge result={correction} />}
     </div>
   )
@@ -324,7 +328,7 @@ export function AddressConverter() {
           <button
             type="button"
             onClick={() => setTab('convert')}
-            className={`text-[13px] font-medium transition-colors ${
+            className={`font-medium text-[13px] transition-colors ${
               tab === 'convert' ? 'text-gray12' : 'text-gray9 hover:text-gray11'
             }`}
           >
@@ -333,7 +337,7 @@ export function AddressConverter() {
           <button
             type="button"
             onClick={() => setTab('correct')}
-            className={`text-[13px] font-medium transition-colors ${
+            className={`font-medium text-[13px] transition-colors ${
               tab === 'correct' ? 'text-gray12' : 'text-gray9 hover:text-gray11'
             }`}
           >
