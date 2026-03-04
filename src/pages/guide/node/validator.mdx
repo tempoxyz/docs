@@ -91,10 +91,6 @@ The telemetry endpoint does **not** collect any ambient information about the ho
 
 The data is strictly limited to the node's own operational metrics and logs.
 
-:::info[Testnet Chain]
-The `andantino` chainspec is deprecated. New validators should use `--chain moderato`.
-:::
-
 The notable difference between RPC nodes and validator nodes is the omission of the `--follow` argument and the addition of the `--consensus.signing-key` and `--consensus.fee-recipient` arguments. The fee recipient is the address that will receive transaction fees in your validators' proposed blocks.
 
 Once your node is up, it may not start syncing immediately. This is because your node might not be part of the active set. In most cases, your validator will enter the active set in under 6 hours after the on-chain addition of the validator identity.
