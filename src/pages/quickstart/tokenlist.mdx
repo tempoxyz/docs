@@ -24,6 +24,25 @@ As an example, here's Tempo Testnet's tokenlist, fetched from [tokenlist.tempo.x
 
 ## Adding a New Token
 
+### Using an AI Agent
+
+If you use an AI coding agent (e.g. [Amp](https://ampcode.com), Cursor, Claude Code), paste the following prompt to have it open a PR for you:
+
+```
+Add my token to the Tempo Token List in tempoxyz/tempo-apps.
+
+- Token name: <name>
+- Symbol: <symbol>
+- Chain ID: <chain_id>
+- Address: <address>
+
+Add the entry to `apps/tokenlist/data/<chain_id>/tokenlist.json` and add the SVG icon
+to `apps/tokenlist/data/<chain_id>/icons/<address>.svg` (lowercase address).
+Open a PR with the changes.
+```
+
+### Manual Steps
+
 1. **Fork** [tempoxyz/tempo-apps](https://github.com/tempoxyz/tempo-apps)
 
 2. **Add token** to `data/<chain_id>/tokenlist.json` in `apps/tokenlist`:
@@ -48,7 +67,7 @@ As an example, here's Tempo Testnet's tokenlist, fetched from [tokenlist.tempo.x
 - Recommended: square aspect ratio, minimal whitespace 1Code has comments. Press enter to view.
 
 <Callout type="info">
-A token that gets added to the tokenlist will atuomatically reflect in the Explorer in the next deployment.
+A token that gets added to the tokenlist will automatically reflect in the Explorer in the next deployment.
 </Callout>
 
 [Full OpenAPI Spec →](https://tokenlist.tempo.xyz/docs)
