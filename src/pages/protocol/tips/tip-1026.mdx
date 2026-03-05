@@ -1,0 +1,76 @@
+---
+id: TIP-1026
+title: "TIP-1026: Token Logo URI"
+description: Adds a logoURI string field to TIP-20 tokens for on-chain token icon metadata.
+authors: dan
+status: Draft
+---
+
+# TIP-1026: Token Logo URI
+
+## Abstract
+
+Adds a `logoURI` field to TIP-20 tokens, allowing issuers to store a URI pointing to the token's icon directly on-chain. The field is a string capped at 256 bytes, mutable by the token admin.
+
+## Motivation
+
+Today, token icons are maintained in an off-chain token list registry ([tokenlist.tempo.xyz](https://tokenlist.tempo.xyz)). Wallets, explorers, and other apps must query this external registry to display token icons. This introduces a dependency on an off-chain service and requires issuers to submit a PR to a separate repository after deploying their token.
+
+By adding `logoURI` as a first-class field on TIP-20, token metadata becomes self-describing. Wallets and explorers can read the icon URI directly from the contract without relying on external registries. Issuers can set and update their token icon as part of normal token administration.
+
+The field is capped at 256 bytes to prevent abuse (e.g., storing excessively large strings that could degrade performance for explorers or indexers).
+
+---
+
+# Specification
+
+## Interface
+
+The following functions are added to the `ITIP20` interface:
+
+```solidity
+/// @notice Returns the logo URI for this token
+/// @return The logo URI string (max 256 bytes)
+function logoURI() external view returns (string memory);
+
+/// @notice Sets the logo URI for this token (requires DEFAULT_ADMIN_ROLE)
+/// @param newLogoURI The new logo URI (must be <= 256 bytes)
+/// @dev Reverts with LogoURITooLong if the URI exceeds 256 bytes
+function setLogoURI(string calldata newLogoURI) external;
+```
+
+## Events
+
+```solidity
+/// @notice Emitted when the logo URI is updated
+/// @param newLogoURI The new logo URI
+/// @param sender The account that performed the update
+event LogoURIUpdated(string newLogoURI, address indexed sender);
+```
+
+## Errors
+
+```solidity
+/// @notice The provided logo URI exceeds the maximum length of 256 bytes
+error LogoURITooLong();
+```
+
+## Behavior
+
+- `logoURI()` returns the current logo URI string. Returns an empty string if not set.
+- `setLogoURI(string)` updates the logo URI. Restricted to `DEFAULT_ADMIN_ROLE`. Reverts with `LogoURITooLong` if `bytes(newLogoURI).length > 256`. An empty string is valid and clears the logo URI.
+- The logo URI is not set during token creation via `TIP20Factory`. Issuers call `setLogoURI` after deployment.
+
+## Recommended URI Formats
+
+- HTTPS: `https://example.com/icon.svg` (~40-120 bytes)
+- IPFS: `ipfs://QmXfzKRvjZz3u5JRgC4v5mGVbm9ahrUiB4DgzHBsnWbTMM` (~53 bytes)
+
+SVG or PNG at a square aspect ratio is recommended.
+
+# Invariants
+
+- `bytes(logoURI()).length` must always be `<= 256`.
+- Only accounts with `DEFAULT_ADMIN_ROLE` can call `setLogoURI`.
+- `setLogoURI` must emit `LogoURIUpdated` on success.
+- `setLogoURI` must revert with `LogoURITooLong` if `bytes(newLogoURI).length > 256`.
