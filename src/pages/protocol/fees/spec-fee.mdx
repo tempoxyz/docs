@@ -13,7 +13,7 @@ This spec lays out how fees work on Tempo, including how fees are calculated, wh
 
 Tempo has no native token. Transaction fees are paid directly in USD-denominated stablecoins. This design removes the need for users or applications to hold volatile assets for gas, keeping the entire payment experience USD-native.
 
-Users can pay gas fees in any [TIP-20](/protocol/tip20/spec) token whose currency is USD, as long as that stablecoin has sufficient liquidity on the enshrined [fee AMM](/protocol/fees/spec-fee-amm.mdx) against the token that the current validator wants to receive.
+Users can pay gas fees in any [TIP-20](/protocol/tip20/spec) token whose currency is USD, as long as that stablecoin has sufficient liquidity on the enshrined [fee AMM](/protocol/fees/spec-fee-amm) against the token that the current validator wants to receive.
 
 In determining *which* token a user pays fees in, we want to maximize customizability (so that wallets or users can implement more sophisticated UX than is possible at the protocol layer), minimize surprise (particularly surprises in which a user pays fees in a stablecoin they did not expect to), and have sane default behavior so that users can begin using basic functions like payments even using wallets that are not customized for Tempo support.
 
@@ -59,11 +59,11 @@ The protocol executes the max fee deduction and refund atomically. If insufficie
 
 ## Fee payer
 
-Tempo supports *sponsored transactions* in which the `fee_payer` is a different address from the `tx.origin` of the transaction. This is supported by Tempo's [new transaction type](/protocol/transactions/spec-tempo-transaction.mdx), which has a `fee_payer_signature` field.
+Tempo supports *sponsored transactions* in which the `fee_payer` is a different address from the `tx.origin` of the transaction. This is supported by Tempo's [new transaction type](/protocol/transactions/spec-tempo-transaction), which has a `fee_payer_signature` field.
 
 If no `fee_payer_signature` is provided, then the `fee_payer` of the transaction is its sender (`tx.origin`).
 
-If the `fee_payer_signature` field is set, then it is used to derive the `fee_payer` for the transaction, as described in the [transaction spec](/protocol/transactions/spec-tempo-transaction.mdx).
+If the `fee_payer_signature` field is set, then it is used to derive the `fee_payer` for the transaction, as described in the [transaction spec](/protocol/transactions/spec-tempo-transaction).
 
 For purposes of [fee token preferences](#fee-token-preferences), the `fee_payer` is the account that chooses the fee token.
 
@@ -107,13 +107,13 @@ The protocol checks preferences at each of these levels, stopping at the first o
 
 * The token must be a TIP-20 token whose currency is USD.
 * The user must have sufficient balance in that token to pay the `gasLimit` on the transaction at the transaction's `gasPrice`.
-* There must be sufficient liquidity on the [fee AMM](/protocol/fees/spec-fee-amm.mdx), as discussed in that specification.
+* There must be sufficient liquidity on the [fee AMM](/protocol/fees/spec-fee-amm), as discussed in that specification.
 
 If no preference is specified at the transaction, account, or contract level, the protocol falls back to [pathUSD](#pathusd).
 
 ### Transaction level
 
-Tempo's [new transaction type](/protocol/transactions/spec-tempo-transaction.mdx), allows transactions to specify a `fee_token` on the transaction. This overrides any preferences set at the account, contract, or validator level.
+Tempo's [new transaction type](/protocol/transactions/spec-tempo-transaction), allows transactions to specify a `fee_token` on the transaction. This overrides any preferences set at the account, contract, or validator level.
 
 For [sponsored transactions](#fee-payer), the `tx.origin` address does not sign over the `fee_token` field (allowing the `fee_payer` to choose the fee token).
 
@@ -125,7 +125,7 @@ To set its preference, the account can call the `setUserToken` function on the F
 
 At this step, the protocol does one more check:
 
-* If the transaction is not a [Tempo transaction](/protocol/transactions/spec-tempo-transaction.mdx) *and* the transaction is a top-level call to the `setUserToken` function on the FeeManager, then the protocol checks the `token` argument to the function:
+* If the transaction is not a [Tempo transaction](/protocol/transactions/spec-tempo-transaction) *and* the transaction is a top-level call to the `setUserToken` function on the FeeManager, then the protocol checks the `token` argument to the function:
   * If that token is a TIP-20 whose currency is USD, that token is used as the fee token (unless the transaction specifies a `fee_token` at the [transaction level](#transaction-level)).
   * If that token is not a TIP-20 or its currency is not USD, the transaction is invalid.
 
@@ -139,14 +139,14 @@ If the top-level call of a transaction is to one of the following functions on a
 
 then that TIP-20 token is used as the user's fee token for that transaction (unless there is a preference specified at the [transaction](#transaction-level) or [account](#account-level) level).
 
-For [Tempo transactions](/protocol/transactions/spec-tempo-transaction.mdx), this rule applies only if _all_ top-level calls are to the same TIP-20 contract, and each such call is to one of the functions listed above, with `fee_payer == tx.origin`.
+For [Tempo transactions](/protocol/transactions/spec-tempo-transaction), this rule applies only if _all_ top-level calls are to the same TIP-20 contract, and each such call is to one of the functions listed above, with `fee_payer == tx.origin`.
 
 
 ### Stablecoin DEX contract
 
-If the top-level call of a transaction is to the [Stablecoin DEX](/protocol/exchange/spec.mdx) contract, the function being called is either `swapExactAmountIn` or `swapExactAmountOut`, and the `tokenIn` argument to that function is the address of a TIP-20 token for which the currency is USD, then the `tokenIn` argument is used as the user's fee token for the transaction (unless there is a preference specified at the [transaction](#transaction-level) or [account](#account-level) level).
+If the top-level call of a transaction is to the [Stablecoin DEX](/protocol/exchange/spec) contract, the function being called is either `swapExactAmountIn` or `swapExactAmountOut`, and the `tokenIn` argument to that function is the address of a TIP-20 token for which the currency is USD, then the `tokenIn` argument is used as the user's fee token for the transaction (unless there is a preference specified at the [transaction](#transaction-level) or [account](#account-level) level).
 
-For [Tempo transactions](/protocol/transactions/spec-tempo-transaction.mdx), this rule applies only if there is only one top-level call in the transaction.
+For [Tempo transactions](/protocol/transactions/spec-tempo-transaction), this rule applies only if there is only one top-level call in the transaction.
 
 ### pathUSD
 
@@ -173,7 +173,7 @@ If validators have not specified a fee token preference, the protocol falls back
 
 ## Gas Parameters
 
-As of [TIP-1010](/protocol/tips/tip-1010), Tempo uses the following mainnet gas parameters:
+As of [TIP-1010](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1010.md), Tempo uses the following mainnet gas parameters:
 
 | Parameter | Value |
 |-----------|-------|
