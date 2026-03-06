@@ -3,6 +3,8 @@ title: Contract Verification
 description: Verify your smart contracts on Tempo using contracts.tempo.xyz. Sourcify-compatible verification with Foundry integration.
 ---
 
+import { ShowUntil } from '../../components/ShowUntil'
+
 # Contract Verification
 
 Verify your smart contracts on Tempo using [contracts.tempo.xyz](https://contracts.tempo.xyz), a Sourcify-compatible contract verification service. Verified contracts display source code and ABI in the [Tempo Explorer](https://explore.tempo.xyz), making it easier for users to interact with your contracts.
@@ -229,9 +231,11 @@ View the full API documentation at [contracts.tempo.xyz/docs](https://contracts.
 | Tempo Testnet (Moderato) | `42431` |
 | Tempo Devnet | `31318` |
 
+<ShowUntil deadline="AndantinoDeprecatedAt">
 :::info
 The `andantino` testnet (chain ID `42429`) has been deprecated. Use `moderato` (chain ID `42431`) for testnet development.
 :::
+</ShowUntil>
 ## Troubleshooting
 
 :::tip

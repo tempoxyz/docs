@@ -2,6 +2,8 @@
 description: Configure and run a Tempo validator node. Generate signing keys, participate in DKG ceremonies, and troubleshoot consensus issues.
 ---
 
+import { ShowUntil } from '../../../components/ShowUntil'
+
 # Running a validator node
 
 :::info
@@ -91,9 +93,11 @@ The telemetry endpoint does **not** collect any ambient information about the ho
 
 The data is strictly limited to the node's own operational metrics and logs.
 
+<ShowUntil deadline="AndantinoDeprecatedAt">
 :::info[Testnet Chain]
 The `andantino` chainspec is deprecated. New validators should use `--chain moderato`.
 :::
+</ShowUntil>
 
 The notable difference between RPC nodes and validator nodes is the omission of the `--follow` argument and the addition of the `--consensus.signing-key` and `--consensus.fee-recipient` arguments. The fee recipient is the address that will receive transaction fees in your validators' proposed blocks.
 
