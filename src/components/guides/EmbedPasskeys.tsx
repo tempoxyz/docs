@@ -37,7 +37,7 @@ export function SignInButtons() {
         variant="accent"
         onClick={async () => {
           await disconnect.disconnectAsync().catch(() => {})
-          connect.connect({
+          connect.mutate({
             connector,
             capabilities: {
               label: 'Tempo Docs',
@@ -53,7 +53,7 @@ export function SignInButtons() {
         variant="default"
         onClick={async () => {
           await disconnect.disconnectAsync().catch(() => {})
-          connect.connect({ connector })
+          connect.mutate({ connector })
         }}
         type="button"
       >

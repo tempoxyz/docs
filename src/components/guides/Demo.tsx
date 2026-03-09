@@ -377,7 +377,7 @@ export function Login() {
           <Button
             variant="accent"
             className="font-normal text-[14px] -tracking-[2%]"
-            onClick={() => connect.connect({ connector })}
+            onClick={() => connect.mutate({ connector })}
             type="button"
           >
             Sign in
@@ -386,7 +386,7 @@ export function Login() {
             variant="default"
             className="font-normal text-[14px] -tracking-[2%]"
             onClick={() =>
-              connect.connect({
+              connect.mutate({
                 connector,
                 capabilities: {
                   label: 'Tempo Docs',

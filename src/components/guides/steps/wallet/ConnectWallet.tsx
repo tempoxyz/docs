@@ -55,7 +55,7 @@ export function ConnectWallet(props: DemoStepProps) {
               variant="default"
               className="flex items-center gap-1.5"
               key={conn.id}
-              onClick={() => connect.connect({ connector: conn })}
+              onClick={() => connect.mutate({ connector: conn })}
             >
               {conn.icon ? <img className="size-5" src={conn.icon} alt={conn.name} /> : <div />}
               {conn.name}
