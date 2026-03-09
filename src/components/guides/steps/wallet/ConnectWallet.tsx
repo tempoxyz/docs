@@ -84,7 +84,7 @@ export function ConnectWallet(props: DemoStepProps) {
           <Button
             variant="destructive"
             className="font-normal text-[14px] -tracking-[2%]"
-            onClick={() => disconnect.disconnect({ connector: walletConnector })}
+            onClick={() => disconnect.mutate({ connector: walletConnector })}
             type="button"
           >
             Disconnect

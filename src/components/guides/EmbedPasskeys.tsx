@@ -11,7 +11,7 @@ export function EmbedPasskeys() {
   if (account.address)
     return (
       <div className="flex items-center gap-2">
-        <Button onClick={() => disconnect.disconnect()} variant="destructive">
+        <Button onClick={() => disconnect.mutate()} variant="destructive">
           Sign out
         </Button>
       </div>
@@ -36,7 +36,7 @@ export function SignInButtons() {
       <Button
         variant="accent"
         onClick={async () => {
-          await disconnect.disconnectAsync().catch(() => {})
+          await disconnect.mutateAsync().catch(() => {})
           connect.mutate({
             connector,
             capabilities: {
@@ -52,7 +52,7 @@ export function SignInButtons() {
       <Button
         variant="default"
         onClick={async () => {
-          await disconnect.disconnectAsync().catch(() => {})
+          await disconnect.mutateAsync().catch(() => {})
           connect.mutate({ connector })
         }}
         type="button"

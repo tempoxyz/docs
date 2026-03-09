@@ -152,7 +152,7 @@ export function Account() {
       <div>
         {account.address?.slice(0, 6)}...{account.address?.slice(-4)}
       </div>
-      <button onClick={() => disconnect.disconnect()}>
+      <button onClick={() => disconnect.mutate()}>
         Sign out
       </button>
     </div>
@@ -212,7 +212,7 @@ export function Account() {
       <div>
         {account.address?.slice(0, 6)}...{account.address?.slice(-4)}
       </div>
-      <button onClick={() => disconnect.disconnect()}>
+      <button onClick={() => disconnect.mutate()}>
         Sign out
       </button>
 

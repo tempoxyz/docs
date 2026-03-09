@@ -179,7 +179,7 @@ export function Example() {
     return ( // [!code ++]
       <div> {/* [!code ++] */}
         <div>{account.address.slice(0, 6)}...{account.address.slice(-4)}</div> {/* [!code ++] */}
-        <button onClick={() => disconnect.disconnect()}>Sign out</button> {/* [!code ++] */}
+        <button onClick={() => disconnect.mutate()}>Sign out</button> {/* [!code ++] */}
       </div> {/* [!code ++] */}
     ) // [!code ++]
 

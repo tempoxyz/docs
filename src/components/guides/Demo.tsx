@@ -107,8 +107,8 @@ export function Container(
   const connections = useConnections()
   const disconnect = useDisconnect()
   const restart = React.useCallback(() => {
-    disconnect.disconnect()
-  }, [disconnect.disconnect, disconnect])
+    disconnect.mutate()
+  }, [disconnect.mutate, disconnect])
 
   const balanceAddress = React.useMemo(() => {
     if (props.footerVariant !== 'balances') return address
@@ -434,7 +434,7 @@ export function Logout() {
         variant="destructive"
         className="font-normal text-[14px] -tracking-[2%]"
         onClick={() => {
-          disconnect.disconnect({ connector })
+          disconnect.mutate({ connector })
           trackButtonClick('Sign out', 'destructive')
         }}
         type="button"
