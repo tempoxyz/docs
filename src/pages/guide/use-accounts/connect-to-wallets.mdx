@@ -89,7 +89,7 @@ export function Connect() {
       {connectors.map((connector) => (
         <button
           key={connector.id}
-          onClick={() => connect.connect({ connector })}
+          onClick={() => connect.mutate({ connector })}
           type="button"
         >
           {connector.name}
