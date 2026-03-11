@@ -551,6 +551,16 @@ export default defineConfig({
           },
         ],
       },
+      {
+        text: 'Observability',
+        collapsed: true,
+        items: [
+          {
+            text: 'Builder Observability',
+            link: '/guide/observability/builder-observability',
+          },
+        ],
+      },
       // {
       //   text: 'Infrastructure & Tooling',
       //   items: [
