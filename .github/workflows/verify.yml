@@ -36,6 +36,7 @@ jobs:
         run: pnpm run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: --max-old-space-size=4096
 
   e2e:
     name: E2E Tests (${{ matrix.shard }}/${{ strategy.job-total }})

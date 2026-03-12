@@ -245,6 +245,36 @@ export default defineConfig({
               },
             ],
           },
+          {
+            text: 'Make Machine Payments',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/guide/machine-payments',
+              },
+              {
+                text: 'Client quickstart',
+                link: '/guide/machine-payments/client',
+              },
+              {
+                text: 'Server quickstart',
+                link: '/guide/machine-payments/server',
+              },
+              {
+                text: 'Accept one-time payments',
+                link: '/guide/machine-payments/one-time-payments',
+              },
+              {
+                text: 'Accept pay-as-you-go payments',
+                link: '/guide/machine-payments/pay-as-you-go',
+              },
+              {
+                text: 'Accept streamed payments',
+                link: '/guide/machine-payments/streamed-payments',
+              },
+            ],
+          },
         ],
       },
       {

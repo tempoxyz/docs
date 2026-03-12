@@ -1,0 +1,104 @@
+---
+title: Machine Payments
+description: Charge for APIs, MCP tools, and digital content using the Machine Payments Protocol (MPP) on Tempo with TIP-20 stablecoins.
+---
+
+import { Card, Cards } from 'vocs'
+import { MermaidDiagram } from '../../../components/MermaidDiagram'
+
+# Make Machine Payments
+
+The [Machine Payments Protocol](https://mpp.dev) (MPP) adds inline payments to any HTTP endpoint. Clients — apps, agents, or humans — pay as part of their request, and the server verifies payment before returning the response.
+
+## Payment flow
+
+A client requests a paid resource, the server responds with `402` and a `Challenge` describing the price. The client pays, retries with a `Credential` transaction, and the server returns the resource with a `Receipt`.
+
+<MermaidDiagram chart={`sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: (1) GET /resource
+    Server-->>Client: (2) 402 Payment Required + Challenge
+    Note over Client: (3) Client fulfills payment
+    Client->>Server: (4) GET /resource + Credential
+    Note over Server: (5) Server verifies payment
+    Server-->>Client: (6) 200 OK + Receipt
+`} />
+
+1. **Request** — Any HTTP method (`GET`, `POST`, etc.)
+2. **Challenge** — `402` with `WWW-Authenticate: Payment` header describing amount, currency, and recipient
+3. **Pay** — Client signs a transaction or fulfills payment off-chain
+4. **Retry** — Client re-sends with `Authorization: Payment` header containing the Credential
+5. **Deliver** — Server verifies, returns `200` with `Payment-Receipt` header
+
+## Why Tempo
+
+Tempo's transaction model is explicitly designed for inline payments using MPP:
+
+- **~500ms finality** — Deterministic confirmation fast enough for synchronous request/response flows
+- **Sub-cent fees** — Low enough for micropayments and per-request billing
+- **Fee sponsorship** — Servers can cover gas on behalf of clients so they only need stablecoins
+- **2D and expiring nonces** — Parallel nonce lanes prevent payment transactions from blocking other account activity
+- **High throughput** — Supports the on-chain settlement volume that payment channels generate at scale
+
+## Payment intents
+
+Two [intents](https://mpp.dev/protocol#payment-intents) are available on Tempo:
+
+| | **Charge** | **Session** |
+|---|---|---|
+| **Pattern** | One-time payment per request | Continuous pay-as-you-go |
+| **Latency** | ~500ms (on-chain confirmation) | Near-zero (off-chain vouchers) |
+| **Best for** | Single API calls, content access, one-off purchases | LLM APIs, metered services, usage-based billing |
+| **On-chain cost** | Per request | Amortized across many requests |
+
+## Use cases
+
+- **Paid APIs** — Charge per request without API keys, billing accounts, or signup flows.
+- **MCP tools** — Monetize tool calls served through the Model Context Protocol. Agents pay per call without OAuth or account setup.
+- **Digital content** — Charge per access for articles, data feeds, or media without subscription paywalls.
+
+## Get started
+
+<Cards>
+  <Card
+    icon="lucide:user"
+    title="Client quickstart"
+    description="Handle payment-gated resources automatically"
+    to="/guide/machine-payments/client"
+  />
+  <Card
+    icon="lucide:server"
+    title="Server quickstart"
+    description="Add payment gating to your HTTP endpoints"
+    to="/guide/machine-payments/server"
+  />
+  <Card
+    icon="lucide:credit-card"
+    title="Accept one-time payments"
+    description="Charge per request with on-chain settlement"
+    to="/guide/machine-payments/one-time-payments"
+  />
+  <Card
+    icon="lucide:repeat"
+    title="Accept pay-as-you-go payments"
+    description="Session-based billing with off-chain vouchers"
+    to="/guide/machine-payments/pay-as-you-go"
+  />
+</Cards>
+
+## SDKs and tools
+
+| SDK | Package | Install |
+|-----|---------|---------|
+| TypeScript | [`mppx`](https://github.com/wevm/mppx) | `npm install mppx viem` |
+| Python | [`pympp`](https://github.com/tempoxyz/pympp) | `pip install pympp` |
+| Rust | [`mpp-rs`](https://github.com/tempoxyz/mpp-rs) | `cargo add mpp-rs` |
+
+See the [full SDK documentation](https://mpp.dev/sdk) for API reference and advanced usage.
+
+## Learn more
+
+- [MPP documentation](https://mpp.dev) — Full protocol docs, SDK reference, and guides
+- [IETF specs](https://paymentauth.org/) — Normative protocol specification
+- [Protocol overview](https://mpp.dev/protocol) — Challenges, Credentials, Receipts, and transports
