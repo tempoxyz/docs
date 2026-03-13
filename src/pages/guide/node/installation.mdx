@@ -35,6 +35,9 @@ source $HOME/.cargo/env
 cargo install --git https://github.com/tempoxyz/tempo.git tempo --root /usr/local
 tempo --version
 ```
+> ⚠️ Linux Requirement: The prebuilt binaries require glibc ≥ 2.38.
+> Ubuntu 22.04 ships with glibc 2.35 and is NOT supported with the prebuilt binary.
+> Use Ubuntu 24.04+ or build from source instead.
 
 ## Docker
 
