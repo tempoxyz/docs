@@ -1,0 +1,217 @@
+---
+description: Build blockchain apps with the Tempo Python SDK. Send transactions, batch calls, and handle fee sponsorship using web3.py.
+---
+
+# Python
+
+Tempo distributes a Python SDK as a [web3.py](https://web3py.readthedocs.io/) extension. The SDK adds native support for Tempo transactions, including call batching, fee sponsorship, and access key management.
+
+The Tempo Python SDK can be used to perform common operations with the chain, such as: sending Tempo transactions, batching multiple calls, fee sponsorship, and more.
+
+::::steps
+
+## Install
+
+To install the Tempo Python SDK:
+
+```bash [pip]
+pip install pytempo
+```
+
+:::tip
+The SDK requires Python 3.9 or higher and web3.py 7.0+.
+:::
+
+## Create a Client
+
+To interact with Tempo, create a web3.py client connected to a Tempo node:
+
+```python [main.py]
+from web3 import Web3
+
+w3 = Web3(Web3.HTTPProvider("https://rpc.testnet.tempo.xyz")) # [!code hl]
+
+block_number = w3.eth.block_number
+print(f"Connected to Tempo at block {block_number}")
+```
+
+## Send a Transaction
+
+Build and send a transaction using the `TempoTransaction` class:
+
+```python [main.py]
+import os
+from web3 import Web3
+from pytempo import Call, TempoTransaction # [!code hl]
+
+w3 = Web3(Web3.HTTPProvider("https://rpc.testnet.tempo.xyz"))
+private_key = os.environ["PRIVATE_KEY"]
+account = w3.eth.account.from_key(private_key)
+
+# [!code hl:12]
+tx = TempoTransaction.create(
+    chain_id=w3.eth.chain_id,
+    gas_limit=100_000,
+    max_fee_per_gas=w3.eth.gas_price * 2,
+    max_priority_fee_per_gas=w3.eth.gas_price,
+    nonce=w3.eth.get_transaction_count(account.address),
+    calls=(
+        Call.create(to="0x70997970C51812dc3A010C7d01b50e0d17dc79C8"),
+    ),
+)
+
+signed_tx = tx.sign(private_key) # [!code hl]
+tx_hash = w3.eth.send_raw_transaction(signed_tx.encode()) # [!code hl]
+receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+print(f"Transaction hash: {tx_hash.hex()}")
+```
+
+::::
+
+## Examples
+
+### Token Transfer
+
+Send a TIP-20 token transfer using web3.py's contract interface:
+
+```python [transfer.py]
+erc20_abi = '[{"name":"transfer","type":"function","inputs":[{"name":"to","type":"address"},{"name":"amount","type":"uint256"}],"outputs":[{"name":"","type":"bool"}]}]'
+token = w3.eth.contract(address="0x20c0000000000000000000000000000000000001", abi=erc20_abi)
+
+recipient = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+amount = 100_000_000  # 100 tokens (6 decimals)
+
+transfer_data = token.encode_abi("transfer", args=[recipient, amount])
+
+tx = TempoTransaction.create(
+    chain_id=42429,
+    gas_limit=100_000,
+    max_fee_per_gas=10_000_000_000,
+    max_priority_fee_per_gas=1_000_000_000,
+    nonce=w3.eth.get_transaction_count(account.address),
+    calls=(
+        Call.create(to=token.address, data=transfer_data),
+    ),
+)
+```
+
+### Pay Fees in a Stablecoin
+
+Use a TIP-20 token to pay for transaction fees instead of the native token:
+
+```python [fee_token.py]
+tx = TempoTransaction.create(
+    chain_id=42429,
+    gas_limit=100_000,
+    max_fee_per_gas=10_000_000_000,
+    max_priority_fee_per_gas=1_000_000_000,
+    nonce=w3.eth.get_transaction_count(account.address),
+    fee_token="0x20c0000000000000000000000000000000000001",  # AlphaUSD // [!code hl]
+    calls=(
+        Call.create(to="0x70997970C51812dc3A010C7d01b50e0d17dc79C8"),
+    ),
+)
+```
+
+### Batch Multiple Calls
+
+Execute multiple operations atomically in a single transaction:
+
+```python [batch.py]
+tx = TempoTransaction.create(
+    chain_id=42429,
+    gas_limit=300_000,
+    max_fee_per_gas=10_000_000_000,
+    max_priority_fee_per_gas=1_000_000_000,
+    nonce=w3.eth.get_transaction_count(account.address),
+    calls=(
+        Call.create(to=addr1, data=transfer1_data), # [!code hl]
+        Call.create(to=addr2, data=transfer2_data), # [!code hl]
+        Call.create(to=addr3, data=contract_call_data), # [!code hl]
+    ),
+)
+
+signed_tx = tx.sign(private_key)
+tx_hash = w3.eth.send_raw_transaction(signed_tx.encode())
+```
+
+### Parallel Transactions (2D Nonces)
+
+Send multiple transactions concurrently using different nonce keys:
+
+```python [parallel.py]
+tx1 = TempoTransaction.create(
+    chain_id=42429,
+    gas_limit=100_000,
+    max_fee_per_gas=10_000_000_000,
+    max_priority_fee_per_gas=1_000_000_000,
+    nonce_key=1, # Sequence A // [!code hl]
+    nonce=0,
+    calls=(Call.create(to=recipient1, data=data1),),
+)
+
+tx2 = TempoTransaction.create(
+    chain_id=42429,
+    gas_limit=100_000,
+    max_fee_per_gas=10_000_000_000,
+    max_priority_fee_per_gas=1_000_000_000,
+    nonce_key=2, # Sequence B (parallel) // [!code hl]
+    nonce=0,
+    calls=(Call.create(to=recipient2, data=data2),),
+)
+
+# Sign and send both in parallel
+signed_tx1 = tx1.sign(private_key)
+signed_tx2 = tx2.sign(private_key)
+w3.eth.send_raw_transaction(signed_tx1.encode())
+w3.eth.send_raw_transaction(signed_tx2.encode())
+```
+
+### Fee Sponsorship
+
+Have another account pay for transaction fees:
+
+```python [fee_payer.py]
+# User creates and signs a transaction marked for fee sponsorship
+tx = TempoTransaction.create(
+    chain_id=42429,
+    gas_limit=100_000,
+    max_fee_per_gas=10_000_000_000,
+    max_priority_fee_per_gas=1_000_000_000,
+    awaiting_fee_payer=True, # [!code hl]
+    calls=(Call.create(to=recipient, data=data),),
+)
+
+signed_by_user = tx.sign(user_private_key)
+final_tx = signed_by_user.sign(fee_payer_private_key, for_fee_payer=True) # [!code hl]
+w3.eth.send_raw_transaction(final_tx.encode())
+```
+
+### Transaction Validity Window
+
+Set a time window during which the transaction is valid:
+
+```python [validity.py]
+import time
+
+now = int(time.time())
+
+tx = TempoTransaction.create(
+    chain_id=42429,
+    gas_limit=100_000,
+    max_fee_per_gas=10_000_000_000,
+    max_priority_fee_per_gas=1_000_000_000,
+    nonce=nonce,
+    valid_after=now, # [!code hl]
+    valid_before=now + 3600, # 1 hour from now // [!code hl]
+    calls=(Call.create(to=recipient, data=data),),
+)
+```
+
+## Next Steps
+
+After setting up the Python SDK, you can:
+
+- Follow a guide on how to [use accounts](/guide/use-accounts), [make payments](/guide/payments), [issue stablecoins](/guide/issuance), [exchange stablecoins](/guide/stablecoin-dex), and [more](/).
+- View the [source on GitHub](https://github.com/tempoxyz/pytempo)
+- View the [package on PyPI](https://pypi.org/project/pytempo/)

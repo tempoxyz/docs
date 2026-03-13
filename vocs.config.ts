@@ -544,6 +544,10 @@ export default defineConfig({
             link: '/sdk/foundry',
           },
           {
+            text: 'Python',
+            link: '/sdk/python',
+          },
+          {
             text: 'Rust',
             link: '/sdk/rust',
           },
