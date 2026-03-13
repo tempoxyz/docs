@@ -140,7 +140,7 @@ Verifies sufficient validator token reserves for the fee swap. Calculates `maxAm
 
 #### 2. FeeManager Contract
 
-Tempo introduces a precompiled contract, the `FeeManager`, at the address `0xfeec000000000000000000000000000000000000`.
+Tempo introduces a precompiled contract, the `FeeManager`, at the address `tempo1qrlwcqqqqqqqqqqqqqqqqqqqqqqqqqqqqqx3a39m`.
 
 The `FeeManager` is a singleton contract that implements all the functions of the Fee AMM for every pool. It handles the collection and refunding of fees during each transaction, executes fee swaps immediately, stores fee token preferences for users and validators, and accumulates fees for validators to claim via `distributeFees()`.
 

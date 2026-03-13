@@ -20,7 +20,7 @@ import { privateKeyToAccount } from 'viem/accounts'
 
 const handler = Handler.feePayer({
   account: privateKeyToAccount('0x...'),
-  chain: tempoModerato.extend({ feeToken: '0x20c0...0001' }),
+  chain: tempoModerato.extend({ feeToken: 'tempo1qqsv…9xgnd' }), // AlphaUSD
   path: '/fee-payer',
   transport: http(),
 })
@@ -44,8 +44,8 @@ const client = createClient({
 const receipt = await client.token.transferSync({
   amount: parseUnits('10', 6),
   feePayer: true,
-  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
-  token: '0x20c0000000000000000000000000000000000001',
+  to: 'tempo1qp6z6dwvvc6vq5efyk3ms39une6etu97hvwnw3n3',
+  token: 'tempo1qqsvqqqqqqqqqqqqqqqqqqqqqqqqqqqqqyr9xgnd', // AlphaUSD
 })
 ```
 

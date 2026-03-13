@@ -1,0 +1,120 @@
+---
+title: Tempo Address Format
+description: Convert between 0x and tempo1 address formats. Tempo uses bech32m encoding (BIP-350) for human-readable addresses with built-in error detection.
+---
+
+import { AddressConverter } from '../../components/AddressConverter'
+
+# Tempo Address Format
+
+Tempo addresses use [bech32m encoding](https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki) (BIP-350) to provide a human-readable format that is instantly distinguishable from addresses on other chains. All Tempo addresses begin with the `tempo1` prefix and are exactly 46 characters long.
+
+```
+tempo1qp6z6dwvvc6vq5efyk3ms39une6etu4a9qtj2kk0
+```
+
+## Address Converter
+
+Convert between standard `0x` hex addresses and `tempo1` bech32m addresses. Use the **Error Correction** tab to see how the bech32m checksum detects corrupted addresses and recovers the original by locating errors — with no prior knowledge of the correct address.
+
+<AddressConverter />
+
+## Format Overview
+
+A Tempo address encodes a 20-byte Ethereum-style address with a version byte, a human-readable prefix, and a 6-character checksum:
+
+```
+┌─────────┬───┬──────────────────────────────────────────────────────┐
+│   HRP   │ 1 │           Base32-encoded data + checksum             │
+│ "tempo" │sep│                                                      │
+└─────────┴───┴──────────────────────────────────────────────────────┘
+                              │
+          ┌───────────────────┴──────────────────────────┐
+          │               Data (base32)                  │
+          ├─────────┬──────────────┬─────────────────────┤
+          │ Version │ Raw Address  │ Bech32m Checksum    │
+          │ 1 byte  │ 20 bytes     │ 6 chars             │
+          └─────────┴──────────────┴─────────────────────┘
+```
+
+| Property | Value |
+|----------|-------|
+| HRP (Human-Readable Part) | `tempo` |
+| Full prefix | `tempo1` |
+| Version byte | `0x00` (current) |
+| Raw address | 20 bytes (Ethereum-style) |
+| Total length | 46 characters |
+| Encoding | bech32m (BIP-350) |
+
+## Error Detection and Correction
+
+The bech32m checksum guarantees detection of:
+
+- **Up to 4 character substitutions** anywhere in the address
+- **Insertions and deletions** via checksum (≥ 1 − 2⁻³⁰ probability) plus fixed-length validation
+
+Beyond detection, the BCH code structure enables **error correction** — the algorithm can locate the corrupted characters and recover the original address with no prior knowledge of it:
+
+- **1 substitution**: always correctable (unique solution found)
+- **2 substitutions**: correctable in most cases (searches ~800K candidates)
+- **3–4 substitutions**: detected but too many candidates to correct reliably
+- **5+ substitutions**: probabilistic detection (≥ 1 − 2⁻³⁰)
+
+Try it in the **Error Correction** tab above to see recovery in action.
+
+## Case Handling
+
+Per BIP-350, Tempo addresses are case-insensitive:
+
+- Encoders produce **lowercase** (`tempo1qp6z...`)
+- Decoders accept all-lowercase or all-uppercase
+- **Mixed case is rejected** — `TeMpO1qp6z...` is invalid
+
+## Display Recommendations
+
+For readability, UIs may display addresses with visual spacing:
+
+<p className="font-mono text-[13px] text-fd-muted-foreground">tempo1 qp6z6 dwvvc 6vq5e fyk3m s39un e6etu 4a9qt j2kk0</p>
+
+Spaces are for **display only** — copy buttons and APIs must always use the canonical form without spaces.
+
+## JavaScript / TypeScript Usage
+
+The `src/lib/bech32m.ts` module provides encode, decode, and validate functions:
+
+```typescript
+import {
+  encodeTempoAddress,
+  decodeTempoAddress,
+  validateTempoAddress,
+} from './lib/bech32m'
+
+// 0x → tempo1
+const tempo = encodeTempoAddress('0x742d35Cc6634C0532925a3b844Bc9e7595f2bD28')
+// → "tempo1qp6z6dwvvc6vq5efyk3ms39une6etu4a9qtj2kk0"
+
+// tempo1 → 0x
+const hex = decodeTempoAddress('tempo1qp6z6dwvvc6vq5efyk3ms39une6etu4a9qtj2kk0')
+// → "0x742d35cc6634c0532925a3b844bc9e7595f2bd28"
+
+// Validate without throwing
+const result = validateTempoAddress('tempo1qp6z6dwvvc6vq5efyk3ms39une6etu4a9qtj2kkq')
+// → { valid: false, error: "Invalid checksum — address is corrupted" }
+```
+
+## Specification
+
+The full specification is defined in [TIP-1023](/protocol/tips/tip-1023), which covers:
+
+- Complete encoding and decoding algorithms
+- Version byte semantics and extensibility
+- Validation rules (8 steps)
+- Invariants (9 properties)
+- Python reference implementation
+- Test vectors for valid addresses, invalid versions, incorrect lengths, and substitution detection
+
+## Source Code
+
+- [TIP-1023 Specification](https://github.com/tempoxyz/tempo/pull/2925) — PR in `tempoxyz/tempo`
+- [TypeScript Implementation](https://github.com/tempoxyz/docs/blob/main/src/lib/bech32m.ts) — `bech32m.ts` in this docs repo
+- [BIP-350 (bech32m)](https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki) — The underlying encoding standard
