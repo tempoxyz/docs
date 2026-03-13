@@ -112,6 +112,7 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
     ```tsx twoslash [example.ts]
     // @noErrors
     import { client } from './viem.config'
+    import { privateKeyToAccount } from 'viem/accounts'
 
     const feePayer = privateKeyToAccount('0x...')
 
@@ -137,6 +138,7 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
     ```tsx twoslash [example.ts]
     // @noErrors
     import { useSendTransactionSync } from 'wagmi'
+    import { privateKeyToAccount } from 'viem/accounts'
 
     export const feePayer = privateKeyToAccount('0x...')
 
