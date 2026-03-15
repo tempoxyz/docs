@@ -49,6 +49,8 @@ tempo node --datadir <datadir> \
     --telemetry-url <TELEMETRY_URL>
 ```
 
+If you are not prepared to accept fees, we recommend setting the `--consensus.fee-recipient` field to `0x0000000000000000000000000000000000000001` as that will funnel the funds to a non-user controllable wallet (there is no known private key for the address).
+
 ### Optional flags
 
 | Flag | Description |
