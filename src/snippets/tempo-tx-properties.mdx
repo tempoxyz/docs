@@ -102,6 +102,47 @@ user's preferred fee token and the validator's preferred token.
 
   </Tab>
 
+  <Tab title="Python">
+
+    :::code-group
+
+    ```python [example.py]
+    from pytempo import Call, TempoTransaction
+    from provider import w3, account
+
+    alpha_usd = "0x20c0000000000000000000000000000000000001"
+
+    tx = TempoTransaction.create(
+        chain_id=w3.eth.chain_id,
+        gas_limit=300_000,
+        max_fee_per_gas=w3.eth.gas_price * 2,
+        max_priority_fee_per_gas=w3.eth.gas_price,
+        nonce=w3.eth.get_transaction_count(account.address),
+        fee_token=alpha_usd, # [!code hl]
+        calls=(
+            Call.create(
+                to="0xcafebabecafebabecafebabecafebabecafebabe",
+                data="0xdeadbeef",
+            ),
+        ),
+    )
+
+    signed_tx = tx.sign(account.key.hex())
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.encode())
+    ```
+
+    ```python [provider.py]
+    from web3 import Web3
+    from eth_account import Account
+
+    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    account = Account.from_key("0x...")
+    ```
+
+    :::
+
+  </Tab>
+
   <Tab title="Cast">
 
     ```bash
@@ -250,6 +291,51 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
 
     ```rust [provider.rs]
     // [!include ~/snippets/rust-provider.rs:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Python">
+
+    :::code-group
+
+    ```python [example.py]
+    from pytempo import Call, TempoTransaction
+    from provider import w3, account
+
+    fee_payer_key = "0x..."
+
+    # Sender signs with awaiting_fee_payer flag
+    tx = TempoTransaction.create(
+        chain_id=w3.eth.chain_id,
+        gas_limit=300_000,
+        max_fee_per_gas=w3.eth.gas_price * 2,
+        max_priority_fee_per_gas=w3.eth.gas_price,
+        nonce=w3.eth.get_transaction_count(account.address),
+        awaiting_fee_payer=True, # [!code hl]
+        calls=(
+            Call.create(
+                to="0xcafebabecafebabecafebabecafebabecafebabe",
+                data="0xdeadbeef",
+            ),
+        ),
+    )
+    sender_signed = tx.sign(account.key.hex())
+
+    # Fee payer co-signs the transaction // [!code hl]
+    fully_signed = sender_signed.sign(fee_payer_key, for_fee_payer=True) # [!code hl]
+
+    tx_hash = w3.eth.send_raw_transaction(fully_signed.encode())
+    ```
+
+    ```python [provider.py]
+    from web3 import Web3
+    from eth_account import Account
+
+    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    account = Account.from_key("0x...")
     ```
 
     :::
@@ -484,6 +570,52 @@ parameter.
 
   </Tab>
 
+  <Tab title="Python">
+
+    :::code-group
+
+    ```python [example.py]
+    from pytempo import Call, TempoTransaction
+    from provider import w3, account
+
+    tx = TempoTransaction.create(
+        chain_id=w3.eth.chain_id,
+        gas_limit=600_000,
+        max_fee_per_gas=w3.eth.gas_price * 2,
+        max_priority_fee_per_gas=w3.eth.gas_price,
+        nonce=w3.eth.get_transaction_count(account.address),
+        calls=( # [!code hl]
+            Call.create( # [!code hl]
+                to="0xcafebabecafebabecafebabecafebabecafebabe", # [!code hl]
+                data="0xdeadbeef0000000000000000000000000000000001", # [!code hl]
+            ), # [!code hl]
+            Call.create( # [!code hl]
+                to="0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef", # [!code hl]
+                data="0xcafebabe0000000000000000000000000000000001", # [!code hl]
+            ), # [!code hl]
+            Call.create( # [!code hl]
+                to="0xcafebabecafebabecafebabecafebabecafebabe", # [!code hl]
+                data="0xdeadbeef0000000000000000000000000000000001", # [!code hl]
+            ), # [!code hl]
+        ), # [!code hl]
+    )
+
+    signed_tx = tx.sign(account.key.hex())
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.encode())
+    ```
+
+    ```python [provider.py]
+    from web3 import Web3
+    from eth_account import Account
+
+    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    account = Account.from_key("0x...")
+    ```
+
+    :::
+
+  </Tab>
+
   <Tab title="Cast">
 
     ```bash
@@ -684,6 +816,70 @@ transactions thereafter can be signed by the access key.
 
   </Tab>
 
+  <Tab title="Python">
+
+    :::code-group
+
+    ```python [example.py]
+    import time
+
+    from eth_account import Account as EthAccount
+    from pytempo import (
+        Call, KeyAuthorization, SignatureType, TempoTransaction,
+        sign_tx_access_key,
+    )
+    from provider import w3, account
+
+    access_key = EthAccount.create()
+
+    # Sign key authorization with root account // [!code hl]
+    auth = KeyAuthorization( # [!code hl]
+        chain_id=w3.eth.chain_id, # [!code hl]
+        key_type=SignatureType.SECP256K1, # [!code hl]
+        key_id=access_key.address, # [!code hl]
+        expiry=int(time.time()) + 3600, # [!code hl]
+        limits=None, # [!code hl]
+    ) # [!code hl]
+    signed_auth = auth.sign(account.key.hex()) # [!code hl]
+
+    # Attach key authorization to a transaction signed by the access key. // [!code hl]
+    # This registers the access key on-chain via the Account Keychain. // [!code hl]
+    tx = TempoTransaction.create(
+        chain_id=w3.eth.chain_id,
+        gas_limit=600_000,
+        max_fee_per_gas=w3.eth.gas_price * 2,
+        max_priority_fee_per_gas=w3.eth.gas_price,
+        nonce=0,
+        nonce_key=201,
+        key_authorization=signed_auth.rlp_encode(), # [!code hl]
+        calls=(
+            Call.create(
+                to="0xcafebabecafebabecafebabecafebabecafebabe",
+                data="0xdeadbeef",
+            ),
+        ),
+    )
+
+    signed_tx = sign_tx_access_key( # [!code hl]
+        tx, # [!code hl]
+        access_key_private_key=access_key.key.hex(), # [!code hl]
+        root_account=account.address, # [!code hl]
+    ) # [!code hl]
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.encode())
+    ```
+
+    ```python [provider.py]
+    from web3 import Web3
+    from eth_account import Account
+
+    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    account = Account.from_key("0x...")
+    ```
+
+    :::
+
+  </Tab>
+
   <Tab title="Cast">
 
     ```bash
@@ -863,6 +1059,45 @@ In **Viem** and **Wagmi**, expiring nonces are handled automatically.
 
   </Tab>
 
+  <Tab title="Python">
+
+    :::code-group
+
+    ```python [example.py]
+    from pytempo import Call, TempoTransaction
+    from provider import w3, account
+
+    # Send three transactions concurrently using different nonce keys
+    for nonce_key, to, data in [
+        (1, "0xcafebabecafebabecafebabecafebabecafebabe", "0xdeadbeef0000000000000000000000000000000001"),
+        (2, "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef", "0xcafebabe0000000000000000000000000000000001"),
+        (3, "0xcafebabecafebabecafebabecafebabecafebabe", "0xdeadbeef0000000000000000000000000000000001"),
+    ]:
+        tx = TempoTransaction.create(
+            chain_id=w3.eth.chain_id,
+            gas_limit=300_000,
+            max_fee_per_gas=w3.eth.gas_price * 2,
+            max_priority_fee_per_gas=w3.eth.gas_price,
+            nonce=0,
+            nonce_key=nonce_key, # [!code hl]
+            calls=(Call.create(to=to, data=data),),
+        )
+        signed_tx = tx.sign(account.key.hex())
+        w3.eth.send_raw_transaction(signed_tx.encode())
+    ```
+
+    ```python [provider.py]
+    from web3 import Web3
+    from eth_account import Account
+
+    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    account = Account.from_key("0x...")
+    ```
+
+    :::
+
+  </Tab>
+
   <Tab title="Cast">
 
     ```bash
@@ -1012,6 +1247,51 @@ Expiring nonces can be used by setting `nonceKey` to `maxUint256` and `validBefo
 
     ```rust [provider.rs]
     // [!include ~/snippets/rust-provider.rs:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Python">
+
+    :::code-group
+
+    ```python [example.py]
+    import time
+
+    from pytempo import Call, TempoTransaction
+    from provider import w3, account
+
+    # maxUint256: signals an expiring nonce
+    MAX_UINT256 = 2**256 - 1
+    valid_before = int(time.time()) + 20
+
+    tx = TempoTransaction.create(
+        chain_id=w3.eth.chain_id,
+        gas_limit=300_000,
+        max_fee_per_gas=w3.eth.gas_price * 2,
+        max_priority_fee_per_gas=w3.eth.gas_price,
+        nonce_key=MAX_UINT256, # [!code focus]
+        valid_before=valid_before, # [!code focus]
+        calls=(
+            Call.create(
+                to="0xcafebabecafebabecafebabecafebabecafebabe",
+                data="0xdeadbeef0000000000000000000000000000000001",
+            ),
+        ),
+    )
+
+    signed_tx = tx.sign(account.key.hex())
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.encode())
+    ```
+
+    ```python [provider.py]
+    from web3 import Web3
+    from eth_account import Account
+
+    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    account = Account.from_key("0x...")
     ```
 
     :::
@@ -1182,6 +1462,44 @@ For cases requiring ordered sequences within a key, Tempo's **2D nonce system** 
 
   </Tab>
 
+  <Tab title="Python">
+
+    :::code-group
+
+    ```python [example.py]
+    from pytempo import Call, TempoTransaction
+    from provider import w3, account
+
+    for nonce_key, to, data in [
+        (1, "0xcafebabecafebabecafebabecafebabecafebabe", "0xdeadbeef0000000000000000000000000000000001"),
+        (2, "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef", "0xcafebabe0000000000000000000000000000000001"),
+        (3, "0xcafebabecafebabecafebabecafebabecafebabe", "0xdeadbeef0000000000000000000000000000000001"),
+    ]:
+        tx = TempoTransaction.create(
+            chain_id=w3.eth.chain_id,
+            gas_limit=300_000,
+            max_fee_per_gas=w3.eth.gas_price * 2,
+            max_priority_fee_per_gas=w3.eth.gas_price,
+            nonce=0,
+            nonce_key=nonce_key, # [!code focus]
+            calls=(Call.create(to=to, data=data),),
+        )
+        signed_tx = tx.sign(account.key.hex())
+        w3.eth.send_raw_transaction(signed_tx.encode())
+    ```
+
+    ```python [provider.py]
+    from web3 import Web3
+    from eth_account import Account
+
+    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    account = Account.from_key("0x...")
+    ```
+
+    :::
+
+  </Tab>
+
   <Tab title="Cast">
 
     ```bash
@@ -1329,6 +1647,54 @@ the transaction can be included in a block.
 
     ```rust [provider.rs]
     // [!include ~/snippets/rust-provider.rs:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Python">
+
+    :::code-group
+
+    ```python [example.py]
+    from datetime import datetime, timezone
+
+    from pytempo import Call, TempoTransaction
+    from provider import w3, account
+
+    # 2026-01-01 00:00:00 UTC
+    valid_after = int(datetime(2026, 1, 1, tzinfo=timezone.utc).timestamp())
+    # 2026-01-02 00:00:00 UTC
+    valid_before = int(datetime(2026, 1, 2, tzinfo=timezone.utc).timestamp())
+
+    tx = TempoTransaction.create(
+        chain_id=w3.eth.chain_id,
+        gas_limit=300_000,
+        max_fee_per_gas=w3.eth.gas_price * 2,
+        max_priority_fee_per_gas=w3.eth.gas_price,
+        nonce=w3.eth.get_transaction_count(account.address),
+        valid_after=valid_after, # [!code hl]
+        valid_before=valid_before, # [!code hl]
+        calls=(
+            Call.create(
+                to="0xcafebabecafebabecafebabecafebabecafebabe",
+                data="0xdeadbeef0000000000000000000000000000000001",
+            ),
+        ),
+    )
+
+    # Sign now, submit to the network for later execution
+    signed_tx = tx.sign(account.key.hex())
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.encode())
+    ```
+
+    ```python [provider.py]
+    from web3 import Web3
+    from eth_account import Account
+
+    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    account = Account.from_key("0x...")
     ```
 
     :::
