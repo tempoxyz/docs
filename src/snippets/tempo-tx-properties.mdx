@@ -65,6 +65,18 @@ user's preferred fee token and the validator's preferred token.
 
   </Tab>
 
+  <Tab title="Cast">
+
+    ```bash
+    $ cast send 0xcafebabecafebabecafebabecafebabecafebabe \
+      --data 0xdeadbeef \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $PRIVATE_KEY \
+      --tempo.fee-token 0x20c0000000000000000000000000000000000001 # [!code hl]
+    ```
+
+  </Tab>
+
   <Tab title="RLP">
 
     ```tsx
@@ -155,6 +167,32 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
     ```
 
     :::
+
+  </Tab>
+
+  <Tab title="Cast">
+
+    ```bash
+    # 1. Get the fee payer signature hash
+    $ FEE_PAYER_HASH=$(cast mktx 0xcafebabecafebabecafebabecafebabecafebabe \
+      --data 0xdeadbeef \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $SENDER_KEY \
+      --tempo.print-sponsor-hash) # [!code hl]
+
+    # 2. Sponsor signs the hash
+    $ SPONSOR_SIG=$(cast wallet sign \
+      --private-key $SPONSOR_KEY \
+      "$FEE_PAYER_HASH" \
+      --no-hash) # [!code hl]
+
+    # 3. Send with sponsor signature
+    $ cast send 0xcafebabecafebabecafebabecafebabecafebabe \
+      --data 0xdeadbeef \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $SENDER_KEY \
+      --tempo.sponsor-signature "$SPONSOR_SIG" # [!code hl]
+    ```
 
   </Tab>
 
@@ -309,6 +347,19 @@ parameter.
 
   </Tab>
 
+  <Tab title="Cast">
+
+    ```bash
+    $ cast batch-send \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $PRIVATE_KEY \
+      --call "0xcafebabecafebabecafebabecafebabecafebabe::increment()" \
+      --call "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef::setNumber(uint256):500" \
+      --call "0xcafebabecafebabecafebabecafebabecafebabe::increment()"
+    ```
+
+  </Tab>
+
   <Tab title="RLP">
 
     ```tsx
@@ -404,6 +455,26 @@ transactions thereafter can be signed by the access key.
         [tempoModerato.id]: http(),
       },
     })
+    ```
+
+  </Tab>
+
+  <Tab title="Cast">
+
+    ```bash
+    # 1. Authorize the access key via Account Keychain precompile
+    $ cast send 0xAAAAAAAA00000000000000000000000000000000 \
+      'authorizeKey(address,uint8,uint64,bool,(address,uint256)[])' \
+      $ACCESS_KEY_ADDR 0 1893456000 false "[]" \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $ROOT_PRIVATE_KEY # [!code hl]
+
+    # 2. Send using the access key
+    $ cast send 0xcafebabecafebabecafebabecafebabecafebabe \
+      --data 0xdeadbeef \
+      --rpc-url $TEMPO_RPC_URL \
+      --tempo.root-account $ROOT_ADDRESS \
+      --tempo.access-key $ACCESS_KEY_PRIVATE_KEY # [!code hl]
     ```
 
   </Tab>
@@ -518,6 +589,31 @@ In **Viem** and **Wagmi**, expiring nonces are handled automatically.
 
   </Tab>
 
+  <Tab title="Cast">
+
+    ```bash
+    # Send three transactions concurrently using different nonce keys
+    $ cast send 0xcafebabecafebabecafebabecafebabecafebabe \
+      --data 0xdeadbeef0000000000000000000000000000000001 \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $PRIVATE_KEY \
+      --async --nonce 0 --tempo.nonce-key 1 # [!code hl]
+
+    $ cast send 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef \
+      --data 0xcafebabe0000000000000000000000000000000001 \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $PRIVATE_KEY \
+      --async --nonce 0 --tempo.nonce-key 2 # [!code hl]
+
+    $ cast send 0xcafebabecafebabecafebabecafebabecafebabe \
+      --data 0xdeadbeef0000000000000000000000000000000001 \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $PRIVATE_KEY \
+      --async --nonce 0 --tempo.nonce-key 3 # [!code hl]
+    ```
+
+  </Tab>
+
   <Tab title="RLP">
 
     ```tsx
@@ -617,6 +713,19 @@ Expiring nonces can be used by setting `nonceKey` to `maxUint256` and `validBefo
           ..Default::default(),
       })
       .await?;
+    ```
+
+  </Tab>
+
+  <Tab title="Cast">
+
+    ```bash
+    $ VALID_BEFORE=$(($(date +%s) + 20))
+    $ cast send 0xcafebabecafebabecafebabecafebabecafebabe \
+      --data 0xdeadbeef0000000000000000000000000000000001 \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $PRIVATE_KEY \
+      --tempo.expiring-nonce --tempo.valid-before $VALID_BEFORE # [!code hl]
     ```
 
   </Tab>
@@ -724,6 +833,30 @@ For cases requiring ordered sequences within a key, Tempo's **2D nonce system** 
 
   </Tab>
 
+  <Tab title="Cast">
+
+    ```bash
+    $ cast send 0xcafebabecafebabecafebabecafebabecafebabe \
+      --data 0xdeadbeef0000000000000000000000000000000001 \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $PRIVATE_KEY \
+      --nonce 0 --tempo.nonce-key 1 # [!code hl]
+
+    $ cast send 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef \
+      --data 0xcafebabe0000000000000000000000000000000001 \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $PRIVATE_KEY \
+      --nonce 0 --tempo.nonce-key 2 # [!code hl]
+
+    $ cast send 0xcafebabecafebabecafebabecafebabecafebabe \
+      --data 0xdeadbeef0000000000000000000000000000000001 \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $PRIVATE_KEY \
+      --nonce 0 --tempo.nonce-key 3 # [!code hl]
+    ```
+
+  </Tab>
+
   <Tab title="RLP">
 
     ```tsx
@@ -808,6 +941,21 @@ the transaction can be included in a block.
     ```
 
     :::
+
+  </Tab>
+
+  <Tab title="Cast">
+
+    ```bash
+    $ VALID_AFTER=$(date -d '2026-01-01' +%s)
+    $ VALID_BEFORE=$(date -d '2026-01-02' +%s)
+    $ cast mktx 0xcafebabecafebabecafebabecafebabecafebabe \
+      --data 0xdeadbeef0000000000000000000000000000000001 \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $PRIVATE_KEY \
+      --tempo.valid-after $VALID_AFTER \
+      --tempo.valid-before $VALID_BEFORE # [!code hl]
+    ```
 
   </Tab>
 
