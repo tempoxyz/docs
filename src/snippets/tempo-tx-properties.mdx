@@ -65,6 +65,43 @@ user's preferred fee token and the validator's preferred token.
 
   </Tab>
 
+  <Tab title="Rust">
+
+    :::code-group
+
+    ```rust [example.rs]
+    use alloy::primitives::{address, bytes};
+    use tempo_alloy::rpc::TempoTransactionRequest;
+
+    mod provider;
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = provider::get_provider().await?;
+
+        let alpha_usd = address!("0x20c0000000000000000000000000000000000001");
+
+        let pending = provider
+            .send_transaction(
+                TempoTransactionRequest::default()
+                    .with_fee_token(alpha_usd) // [!code hl]
+                    .with_to(address!("0xcafebabecafebabecafebabecafebabecafebabe"))
+                    .with_input(bytes!("deadbeef")),
+            )
+            .await?;
+
+        Ok(())
+    }
+    ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-provider.rs:setup]
+    ```
+
+    :::
+
+  </Tab>
+
   <Tab title="Cast">
 
     ```bash
@@ -164,6 +201,55 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
     ```tsx twoslash [wagmi.config.ts]
     // @noErrors
     // [!include ~/snippets/wagmi.config.ts:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Rust">
+
+    :::code-group
+
+    ```rust [example.rs]
+    use alloy::primitives::{U256, address, bytes};
+    use alloy::signers::{SignerSync, local::PrivateKeySigner};
+    use tempo_alloy::primitives::transaction::tempo_transaction::Call;
+    use tempo_alloy::rpc::TempoTransactionRequest;
+
+    mod provider;
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = provider::get_provider().await?;
+
+        let mut tx = TempoTransactionRequest {
+            calls: vec![Call {
+                to: address!("0xcafebabecafebabecafebabecafebabecafebabe").into(),
+                value: U256::ZERO,
+                input: bytes!("deadbeef"),
+            }],
+            ..Default::default()
+        };
+
+        // Fill gas, nonce, etc. from the network
+        let filled = provider.fill(tx).await?;
+        let mut tempo_tx = filled.build_aa()?;
+
+        // Fee payer signs the transaction // [!code hl]
+        let fee_payer = PrivateKeySigner::from_str("0x...")?; // [!code hl]
+        let sender_addr = provider.default_signer_address(); // [!code hl]
+        let fee_payer_hash = tempo_tx.fee_payer_signature_hash(sender_addr); // [!code hl]
+        tempo_tx.fee_payer_signature = Some(fee_payer.sign_hash_sync(&fee_payer_hash)?); // [!code hl]
+
+        let pending = provider.send_transaction(tempo_tx).await?;
+
+        Ok(())
+    }
+    ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-provider.rs:setup]
     ```
 
     :::
@@ -347,6 +433,57 @@ parameter.
 
   </Tab>
 
+  <Tab title="Rust">
+
+    :::code-group
+
+    ```rust [example.rs]
+    use alloy::primitives::{U256, address, bytes};
+    use alloy::providers::Provider;
+    use tempo_alloy::primitives::transaction::Call;
+    use tempo_alloy::rpc::TempoTransactionRequest;
+
+    mod provider;
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = provider::get_provider().await?;
+
+        let pending = provider
+            .send_transaction(TempoTransactionRequest {
+                calls: vec![ // [!code hl]
+                    Call { // [!code hl]
+                        to: address!("0xcafebabecafebabecafebabecafebabecafebabe").into(), // [!code hl]
+                        value: U256::ZERO, // [!code hl]
+                        input: bytes!("deadbeef0000000000000000000000000000000001"), // [!code hl]
+                    }, // [!code hl]
+                    Call { // [!code hl]
+                        to: address!("0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef").into(), // [!code hl]
+                        value: U256::ZERO, // [!code hl]
+                        input: bytes!("cafebabe0000000000000000000000000000000001"), // [!code hl]
+                    }, // [!code hl]
+                    Call { // [!code hl]
+                        to: address!("0xcafebabecafebabecafebabecafebabecafebabe").into(), // [!code hl]
+                        value: U256::ZERO, // [!code hl]
+                        input: bytes!("deadbeef0000000000000000000000000000000001"), // [!code hl]
+                    }, // [!code hl]
+                ], // [!code hl]
+                ..Default::default()
+            })
+            .await?;
+
+        Ok(())
+    }
+    ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-provider.rs:setup]
+    ```
+
+    :::
+
+  </Tab>
+
   <Tab title="Cast">
 
     ```bash
@@ -456,6 +593,94 @@ transactions thereafter can be signed by the access key.
       },
     })
     ```
+
+  </Tab>
+
+  <Tab title="Rust">
+
+    :::code-group
+
+    ```rust [example.rs]
+    use alloy::primitives::{address, bytes};
+    use alloy::providers::Provider;
+    use alloy::signers::{SignerSync, local::PrivateKeySigner};
+    use tempo_alloy::primitives::transaction::key_authorization::{
+        KeyAuthorization, SignedKeyAuthorization,
+    };
+    use tempo_alloy::primitives::transaction::tt_signature::{
+        KeychainSignature, PrimitiveSignature, SignatureType, TempoSignature,
+    };
+    use tempo_alloy::rpc::TempoTransactionRequest;
+
+    mod provider;
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = provider::get_provider().await?;
+
+        let root = PrivateKeySigner::from_str("0x...")?;
+        let access_key = PrivateKeySigner::random();
+
+        // Sign key authorization with root account // [!code hl]
+        let authorization = KeyAuthorization { // [!code hl]
+            chain_id: 4217, // [!code hl]
+            key_type: SignatureType::Secp256k1, // [!code hl]
+            key_id: access_key.address(), // [!code hl]
+            expiry: None, // [!code hl]
+            limits: None, // [!code hl]
+        }; // [!code hl]
+        let sig = root.sign_hash_sync(&authorization.signature_hash())?; // [!code hl]
+        let key_authorization = SignedKeyAuthorization { // [!code hl]
+            authorization, // [!code hl]
+            signature: sig.into(), // [!code hl]
+        }; // [!code hl]
+
+        // Attach key authorization to a transaction signed by the root key. // [!code hl]
+        // This registers the access key on-chain via the Account Keychain. // [!code hl]
+        provider
+            .send_transaction(
+                TempoTransactionRequest {
+                    key_authorization: Some(key_authorization), // [!code hl]
+                    ..Default::default()
+                }
+                .with_to(address!("0xcafebabecafebabecafebabecafebabecafebabe"))
+                .with_input(bytes!("deadbeef")),
+            )
+            .await?
+            .get_receipt()
+            .await?;
+
+        // Sign a subsequent transaction with the access key // [!code hl]
+        let tx = TempoTransactionRequest::default()
+            .with_to(address!("0xcafebabecafebabecafebabecafebabecafebabe"))
+            .with_input(bytes!("deadbeef"));
+
+        let filled = provider.fill(tx).await?;
+        let tempo_tx = filled.build_aa()?;
+
+        // Access key signs a domain-separated hash bound to the root account // [!code hl]
+        let inner_hash = // [!code hl]
+            KeychainSignature::signing_hash(tempo_tx.signature_hash(), root.address()); // [!code hl]
+        let inner_sig = access_key.sign_hash_sync(&inner_hash)?; // [!code hl]
+        let signature = TempoSignature::Keychain(KeychainSignature::new( // [!code hl]
+            root.address(), // [!code hl]
+            PrimitiveSignature::Secp256k1(inner_sig), // [!code hl]
+        )); // [!code hl]
+
+        let envelope = tempo_tx.into_signed(signature); // [!code hl]
+        let pending = provider // [!code hl]
+            .send_raw_transaction(envelope.encoded_2718().as_ref()) // [!code hl]
+            .await?; // [!code hl]
+
+        Ok(())
+    }
+    ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-provider.rs:setup]
+    ```
+
+    :::
 
   </Tab>
 
@@ -589,6 +814,55 @@ In **Viem** and **Wagmi**, expiring nonces are handled automatically.
 
   </Tab>
 
+  <Tab title="Rust">
+
+    :::code-group
+
+    ```rust [example.rs]
+    use alloy::primitives::{U256, address, bytes};
+    use alloy::providers::Provider;
+    use tempo_alloy::rpc::TempoTransactionRequest;
+
+    mod provider;
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = provider::get_provider().await?;
+
+        // Send three transactions concurrently using different nonce keys
+        let (r1, r2, r3) = tokio::try_join!(
+            provider.send_transaction(
+                TempoTransactionRequest::default()
+                    .with_nonce_key(U256::from(1)) // [!code hl]
+                    .with_to(address!("0xcafebabecafebabecafebabecafebabecafebabe"))
+                    .with_input(bytes!("deadbeef0000000000000000000000000000000001")),
+            ),
+            provider.send_transaction(
+                TempoTransactionRequest::default()
+                    .with_nonce_key(U256::from(2)) // [!code hl]
+                    .with_to(address!("0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"))
+                    .with_input(bytes!("cafebabe0000000000000000000000000000000001")),
+            ),
+            provider.send_transaction(
+                TempoTransactionRequest::default()
+                    .with_nonce_key(U256::from(3)) // [!code hl]
+                    .with_to(address!("0xcafebabecafebabecafebabecafebabecafebabe"))
+                    .with_input(bytes!("deadbeef0000000000000000000000000000000001")),
+            ),
+        )?;
+
+        Ok(())
+    }
+    ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-provider.rs:setup]
+    ```
+
+    :::
+
+  </Tab>
+
   <Tab title="Cast">
 
     ```bash
@@ -705,15 +979,42 @@ Expiring nonces can be used by setting `nonceKey` to `maxUint256` and `validBefo
 
   <Tab title="Rust">
 
-    ```rust
-    let pending = provider
-      .send_transaction(TempoTransactionRequest {
-          nonce_key: Some(U256::MAX), // [!code focus]
-          valid_before: Some(SystemTime::now().duration_since(UNIX_EPOCH).as_secs() + 30), // [!code focus]
-          ..Default::default(),
-      })
-      .await?;
+    :::code-group
+
+    ```rust [example.rs]
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    use alloy::primitives::{U256, address, bytes};
+    use alloy::providers::Provider;
+    use tempo_alloy::rpc::TempoTransactionRequest;
+
+    mod provider;
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = provider::get_provider().await?;
+
+        let valid_before = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs() + 30;
+
+        let pending = provider
+            .send_transaction(
+                TempoTransactionRequest::default()
+                    .with_nonce_key(U256::MAX) // [!code focus]
+                    .with_valid_before(valid_before) // [!code focus]
+                    .with_to(address!("0xcafebabecafebabecafebabecafebabecafebabe"))
+                    .with_input(bytes!("deadbeef0000000000000000000000000000000001")),
+            )
+            .await?;
+
+        Ok(())
+    }
     ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-provider.rs:setup]
+    ```
+
+    :::
 
   </Tab>
 
@@ -833,6 +1134,54 @@ For cases requiring ordered sequences within a key, Tempo's **2D nonce system** 
 
   </Tab>
 
+  <Tab title="Rust">
+
+    :::code-group
+
+    ```rust [example.rs]
+    use alloy::primitives::{U256, address, bytes};
+    use alloy::providers::Provider;
+    use tempo_alloy::rpc::TempoTransactionRequest;
+
+    mod provider;
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = provider::get_provider().await?;
+
+        let (r1, r2, r3) = tokio::try_join!(
+            provider.send_transaction(
+                TempoTransactionRequest::default()
+                    .with_nonce_key(U256::from(1)) // [!code focus]
+                    .with_to(address!("0xcafebabecafebabecafebabecafebabecafebabe"))
+                    .with_input(bytes!("deadbeef0000000000000000000000000000000001")),
+            ),
+            provider.send_transaction(
+                TempoTransactionRequest::default()
+                    .with_nonce_key(U256::from(2)) // [!code focus]
+                    .with_to(address!("0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"))
+                    .with_input(bytes!("cafebabe0000000000000000000000000000000001")),
+            ),
+            provider.send_transaction(
+                TempoTransactionRequest::default()
+                    .with_nonce_key(U256::from(3)) // [!code focus]
+                    .with_to(address!("0xcafebabecafebabecafebabecafebabecafebabe"))
+                    .with_input(bytes!("deadbeef0000000000000000000000000000000001")),
+            ),
+        )?;
+
+        Ok(())
+    }
+    ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-provider.rs:setup]
+    ```
+
+    :::
+
+  </Tab>
+
   <Tab title="Cast">
 
     ```bash
@@ -938,6 +1287,48 @@ the transaction can be included in a block.
     ```tsx twoslash [wagmi.config.ts]
     // @noErrors
     // [!include ~/snippets/wagmi.config.ts:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Rust">
+
+    :::code-group
+
+    ```rust [example.rs]
+    use alloy::primitives::{address, bytes};
+    use alloy::providers::Provider;
+    use tempo_alloy::rpc::TempoTransactionRequest;
+
+    mod provider;
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = provider::get_provider().await?;
+
+        // 2026-01-01 00:00:00 UTC
+        let valid_after = 1_767_225_600;
+        // 2026-01-02 00:00:00 UTC
+        let valid_before = 1_767_312_000;
+
+        let pending = provider
+            .send_transaction(
+                TempoTransactionRequest::default()
+                    .with_valid_after(valid_after) // [!code hl]
+                    .with_valid_before(valid_before) // [!code hl]
+                    .with_to(address!("0xcafebabecafebabecafebabecafebabecafebabe"))
+                    .with_input(bytes!("deadbeef0000000000000000000000000000000001")),
+            )
+            .await?;
+
+        Ok(())
+    }
+    ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-provider.rs:setup]
     ```
 
     :::
