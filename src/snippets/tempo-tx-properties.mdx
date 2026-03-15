@@ -143,6 +143,59 @@ user's preferred fee token and the validator's preferred token.
 
   </Tab>
 
+  <Tab title="Go">
+
+    :::code-group
+
+    ```go [main.go]
+    package main
+
+    import (
+    	"context"
+    	"log"
+    	"math/big"
+
+    	"github.com/ethereum/go-ethereum/common"
+    	"github.com/tempoxyz/tempo-go/pkg/signer"
+    	"github.com/tempoxyz/tempo-go/pkg/transaction"
+    )
+
+    func main() {
+    	sgn, _ := signer.NewSigner("0x...")
+    	c := newClient()
+    	ctx := context.Background()
+
+    	nonce, _ := c.GetTransactionCount(ctx, sgn.Address().Hex())
+
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    		SetNonce(nonce).
+    		SetGas(300_000).
+    		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
+    		SetMaxPriorityFeePerGas(big.NewInt(1_000_000_000)).
+    		SetFeeToken(transaction.AlphaUSDAddress). // [!code hl]
+    		AddCall(
+    			common.HexToAddress("0xcafebabecafebabecafebabecafebabecafebabe"),
+    			big.NewInt(0),
+    			common.Hex2Bytes("deadbeef"),
+    		).
+    		Build()
+
+    	_ = transaction.SignTransaction(tx, sgn)
+    	serialized, _ := transaction.Serialize(tx, nil)
+    	txHash, _ := c.SendRawTransaction(ctx, serialized)
+
+    	log.Printf("Transaction hash: %s", txHash)
+    }
+    ```
+
+    ```go [provider.go]
+    // [!include ~/snippets/go-provider.go:setup]
+    ```
+
+    :::
+
+  </Tab>
+
   <Tab title="Cast">
 
     ```bash
@@ -336,6 +389,67 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
 
     w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
     account = Account.from_key("0x...")
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Go">
+
+    :::code-group
+
+    ```go [main.go]
+    package main
+
+    import (
+    	"context"
+    	"log"
+    	"math/big"
+
+    	"github.com/ethereum/go-ethereum/common"
+    	"github.com/tempoxyz/tempo-go/pkg/signer"
+    	"github.com/tempoxyz/tempo-go/pkg/transaction"
+    )
+
+    func main() {
+    	senderSgn, _ := signer.NewSigner("0x...")
+    	sponsorSgn, _ := signer.NewSigner("0x...")
+    	c := newClient()
+    	ctx := context.Background()
+
+    	nonce, _ := c.GetTransactionCount(ctx, senderSgn.Address().Hex())
+
+    	// Sender builds and signs a sponsored transaction
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    		SetNonce(nonce).
+    		SetGas(300_000).
+    		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
+    		SetMaxPriorityFeePerGas(big.NewInt(1_000_000_000)).
+    		SetSponsored(true). // [!code hl]
+    		AddCall(
+    			common.HexToAddress("0xcafebabecafebabecafebabecafebabecafebabe"),
+    			big.NewInt(0),
+    			common.Hex2Bytes("deadbeef"),
+    		).
+    		Build()
+
+    	_ = transaction.SignTransaction(tx, senderSgn)
+
+    	// Fee payer co-signs the transaction // [!code hl]
+    	tx.FeeToken = transaction.AlphaUSDAddress // [!code hl]
+    	tx.AwaitingFeePayer = false // [!code hl]
+    	_ = transaction.AddFeePayerSignature(tx, sponsorSgn) // [!code hl]
+
+    	serialized, _ := transaction.Serialize(tx, nil)
+    	txHash, _ := c.SendRawTransaction(ctx, serialized)
+
+    	log.Printf("Transaction hash: %s", txHash)
+    }
+    ```
+
+    ```go [provider.go]
+    // [!include ~/snippets/go-provider.go:setup]
     ```
 
     :::
@@ -616,6 +730,68 @@ parameter.
 
   </Tab>
 
+  <Tab title="Go">
+
+    :::code-group
+
+    ```go [main.go]
+    package main
+
+    import (
+    	"context"
+    	"log"
+    	"math/big"
+
+    	"github.com/ethereum/go-ethereum/common"
+    	"github.com/tempoxyz/tempo-go/pkg/signer"
+    	"github.com/tempoxyz/tempo-go/pkg/transaction"
+    )
+
+    func main() {
+    	sgn, _ := signer.NewSigner("0x...")
+    	c := newClient()
+    	ctx := context.Background()
+
+    	nonce, _ := c.GetTransactionCount(ctx, sgn.Address().Hex())
+
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    		SetNonce(nonce).
+    		SetGas(600_000).
+    		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
+    		SetMaxPriorityFeePerGas(big.NewInt(1_000_000_000)).
+    		AddCall( // [!code hl]
+    			common.HexToAddress("0xcafebabecafebabecafebabecafebabecafebabe"), // [!code hl]
+    			big.NewInt(0), // [!code hl]
+    			common.Hex2Bytes("deadbeef0000000000000000000000000000000001"), // [!code hl]
+    		). // [!code hl]
+    		AddCall( // [!code hl]
+    			common.HexToAddress("0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"), // [!code hl]
+    			big.NewInt(0), // [!code hl]
+    			common.Hex2Bytes("cafebabe0000000000000000000000000000000001"), // [!code hl]
+    		). // [!code hl]
+    		AddCall( // [!code hl]
+    			common.HexToAddress("0xcafebabecafebabecafebabecafebabecafebabe"), // [!code hl]
+    			big.NewInt(0), // [!code hl]
+    			common.Hex2Bytes("deadbeef0000000000000000000000000000000001"), // [!code hl]
+    		). // [!code hl]
+    		Build()
+
+    	_ = transaction.SignTransaction(tx, sgn)
+    	serialized, _ := transaction.Serialize(tx, nil)
+    	txHash, _ := c.SendRawTransaction(ctx, serialized)
+
+    	log.Printf("Transaction hash: %s", txHash)
+    }
+    ```
+
+    ```go [provider.go]
+    // [!include ~/snippets/go-provider.go:setup]
+    ```
+
+    :::
+
+  </Tab>
+
   <Tab title="Cast">
 
     ```bash
@@ -880,6 +1056,115 @@ transactions thereafter can be signed by the access key.
 
   </Tab>
 
+  <Tab title="Go">
+
+    :::code-group
+
+    ```go [main.go]
+    package main
+
+    import (
+    	"context"
+    	"encoding/hex"
+    	"log"
+    	"math/big"
+    	"strings"
+
+    	"github.com/ethereum/go-ethereum/accounts/abi"
+    	"github.com/ethereum/go-ethereum/common"
+    	"github.com/ethereum/go-ethereum/core/types"
+    	"github.com/ethereum/go-ethereum/crypto"
+    	"github.com/tempoxyz/tempo-go/pkg/keychain"
+    	"github.com/tempoxyz/tempo-go/pkg/signer"
+    	"github.com/tempoxyz/tempo-go/pkg/transaction"
+    )
+
+    func main() {
+    	rootSgn, _ := signer.NewSigner("0x...")
+    	accessKeyPriv, _ := crypto.GenerateKey()
+    	accessKey := signer.NewSignerFromKey(accessKeyPriv)
+    	c := newClient()
+    	ctx := context.Background()
+
+    	chainID := big.NewInt(transaction.ChainIdModerato)
+    	gasPrice := big.NewInt(25_000_000_000)
+    	keychainAddr := common.HexToAddress(keychain.AccountKeychainAddress)
+
+    	// Authorize the access key via Account Keychain precompile // [!code hl]
+    	parsed, _ := abi.JSON(strings.NewReader(`[{
+    		"name": "authorizeKey",
+    		"type": "function",
+    		"inputs": [
+    			{"name": "keyId", "type": "address"},
+    			{"name": "sigType", "type": "uint8"},
+    			{"name": "expiry", "type": "uint64"},
+    			{"name": "enforceLimits", "type": "bool"},
+    			{"name": "limits", "type": "tuple[]", "components": [
+    				{"name": "token", "type": "address"},
+    				{"name": "amount", "type": "uint256"}
+    			]}
+    		]
+    	}]`))
+    	type TokenLimit struct {
+    		Token  common.Address
+    		Amount *big.Int
+    	}
+    	calldata, _ := parsed.Pack("authorizeKey",
+    		accessKey.Address(),
+    		uint8(0),
+    		uint64(1893456000),
+    		false,
+    		[]TokenLimit{},
+    	)
+
+    	nonce, _ := c.GetTransactionCount(ctx, rootSgn.Address().Hex())
+    	authTx := types.NewTx(&types.DynamicFeeTx{
+    		ChainID:   chainID,
+    		Nonce:     nonce,
+    		GasTipCap: gasPrice,
+    		GasFeeCap: gasPrice,
+    		Gas:       600_000,
+    		To:        &keychainAddr,
+    		Data:      calldata,
+    	})
+    	signedAuthTx, _ := types.SignTx(
+    		authTx, types.NewLondonSigner(chainID), rootSgn.PrivateKey(),
+    	)
+    	txBytes, _ := signedAuthTx.MarshalBinary()
+    	authHash, _ := c.SendRawTransaction(ctx, "0x"+hex.EncodeToString(txBytes))
+    	log.Printf("Authorized access key: %s", authHash)
+
+    	// Sign a transaction with the access key // [!code hl]
+    	tx := transaction.NewBuilder(chainID). // [!code hl]
+    		SetNonce(0). // [!code hl]
+    		SetNonceKey(big.NewInt(300)). // [!code hl]
+    		SetGas(500_000). // [!code hl]
+    		SetMaxFeePerGas(gasPrice). // [!code hl]
+    		SetMaxPriorityFeePerGas(gasPrice). // [!code hl]
+    		AddCall( // [!code hl]
+    			common.HexToAddress("0xcafebabecafebabecafebabecafebabecafebabe"), // [!code hl]
+    			big.NewInt(0), // [!code hl]
+    			common.Hex2Bytes("deadbeef"), // [!code hl]
+    		). // [!code hl]
+    		Build() // [!code hl]
+
+    	_ = keychain.SignWithAccessKey(tx, accessKey, rootSgn.Address()) // [!code hl]
+
+    	serialized, _ := transaction.Serialize(tx, nil)
+    	txHash, _ := c.SendRawTransaction(ctx, serialized)
+
+    	log.Printf("Transaction hash: %s", txHash)
+    }
+    ```
+
+    ```go [provider.go]
+    // [!include ~/snippets/go-provider.go:setup]
+    ```
+
+    :::
+
+  </Tab>
+
   <Tab title="Cast">
 
     ```bash
@@ -1098,6 +1383,78 @@ In **Viem** and **Wagmi**, expiring nonces are handled automatically.
 
   </Tab>
 
+  <Tab title="Go">
+
+    :::code-group
+
+    ```go [main.go]
+    package main
+
+    import (
+    	"context"
+    	"log"
+    	"math/big"
+    	"sync"
+
+    	"github.com/ethereum/go-ethereum/common"
+    	"github.com/tempoxyz/tempo-go/pkg/signer"
+    	"github.com/tempoxyz/tempo-go/pkg/transaction"
+    )
+
+    func main() {
+    	sgn, _ := signer.NewSigner("0x...")
+    	c := newClient()
+    	ctx := context.Background()
+
+    	// Send three transactions concurrently using different nonce keys
+    	type txParams struct {
+    		nonceKey int64
+    		to       string
+    		data     string
+    	}
+    	params := []txParams{
+    		{1, "0xcafebabecafebabecafebabecafebabecafebabe", "deadbeef0000000000000000000000000000000001"},
+    		{2, "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef", "cafebabe0000000000000000000000000000000001"},
+    		{3, "0xcafebabecafebabecafebabecafebabecafebabe", "deadbeef0000000000000000000000000000000001"},
+    	}
+
+    	var wg sync.WaitGroup
+    	for _, p := range params {
+    		wg.Add(1)
+    		go func(p txParams) {
+    			defer wg.Done()
+    			tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    				SetNonce(0).
+    				SetNonceKey(big.NewInt(p.nonceKey)). // [!code hl]
+    				SetGas(300_000).
+    				SetMaxFeePerGas(big.NewInt(25_000_000_000)).
+    				SetMaxPriorityFeePerGas(big.NewInt(1_000_000_000)).
+    				AddCall(
+    					common.HexToAddress(p.to),
+    					big.NewInt(0),
+    					common.Hex2Bytes(p.data),
+    				).
+    				Build()
+
+    			_ = transaction.SignTransaction(tx, sgn)
+    			serialized, _ := transaction.Serialize(tx, nil)
+    			txHash, _ := c.SendRawTransaction(ctx, serialized)
+
+    			log.Printf("Nonce key %d tx: %s", p.nonceKey, txHash)
+    		}(p)
+    	}
+    	wg.Wait()
+    }
+    ```
+
+    ```go [provider.go]
+    // [!include ~/snippets/go-provider.go:setup]
+    ```
+
+    :::
+
+  </Tab>
+
   <Tab title="Cast">
 
     ```bash
@@ -1292,6 +1649,63 @@ Expiring nonces can be used by setting `nonceKey` to `maxUint256` and `validBefo
 
     w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
     account = Account.from_key("0x...")
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Go">
+
+    :::code-group
+
+    ```go [main.go]
+    package main
+
+    import (
+    	"context"
+    	"log"
+    	"math/big"
+    	"time"
+
+    	"github.com/ethereum/go-ethereum/common"
+    	"github.com/tempoxyz/tempo-go/pkg/signer"
+    	"github.com/tempoxyz/tempo-go/pkg/transaction"
+    )
+
+    func main() {
+    	sgn, _ := signer.NewSigner("0x...")
+    	c := newClient()
+    	ctx := context.Background()
+
+    	// maxUint256: signals an expiring nonce
+    	maxUint256, _ := new(big.Int).SetString("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16)
+
+    	validBefore := uint64(time.Now().Unix()) + 20
+
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    		SetGas(300_000).
+    		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
+    		SetMaxPriorityFeePerGas(big.NewInt(1_000_000_000)).
+    		SetNonceKey(maxUint256). // [!code focus]
+    		SetValidBefore(validBefore). // [!code focus]
+    		AddCall(
+    			common.HexToAddress("0xcafebabecafebabecafebabecafebabecafebabe"),
+    			big.NewInt(0),
+    			common.Hex2Bytes("deadbeef0000000000000000000000000000000001"),
+    		).
+    		Build()
+
+    	_ = transaction.SignTransaction(tx, sgn)
+    	serialized, _ := transaction.Serialize(tx, nil)
+    	txHash, _ := c.SendRawTransaction(ctx, serialized)
+
+    	log.Printf("Transaction hash: %s", txHash)
+    }
+    ```
+
+    ```go [provider.go]
+    // [!include ~/snippets/go-provider.go:setup]
     ```
 
     :::
@@ -1500,6 +1914,77 @@ For cases requiring ordered sequences within a key, Tempo's **2D nonce system** 
 
   </Tab>
 
+  <Tab title="Go">
+
+    :::code-group
+
+    ```go [main.go]
+    package main
+
+    import (
+    	"context"
+    	"log"
+    	"math/big"
+    	"sync"
+
+    	"github.com/ethereum/go-ethereum/common"
+    	"github.com/tempoxyz/tempo-go/pkg/signer"
+    	"github.com/tempoxyz/tempo-go/pkg/transaction"
+    )
+
+    func main() {
+    	sgn, _ := signer.NewSigner("0x...")
+    	c := newClient()
+    	ctx := context.Background()
+
+    	type txParams struct {
+    		nonceKey int64
+    		to       string
+    		data     string
+    	}
+    	params := []txParams{
+    		{1, "0xcafebabecafebabecafebabecafebabecafebabe", "deadbeef0000000000000000000000000000000001"},
+    		{2, "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef", "cafebabe0000000000000000000000000000000001"},
+    		{3, "0xcafebabecafebabecafebabecafebabecafebabe", "deadbeef0000000000000000000000000000000001"},
+    	}
+
+    	var wg sync.WaitGroup
+    	for _, p := range params {
+    		wg.Add(1)
+    		go func(p txParams) {
+    			defer wg.Done()
+    			tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    				SetNonce(0).
+    				SetNonceKey(big.NewInt(p.nonceKey)). // [!code focus]
+    				SetGas(300_000).
+    				SetMaxFeePerGas(big.NewInt(25_000_000_000)).
+    				SetMaxPriorityFeePerGas(big.NewInt(1_000_000_000)).
+    				AddCall(
+    					common.HexToAddress(p.to),
+    					big.NewInt(0),
+    					common.Hex2Bytes(p.data),
+    				).
+    				Build()
+
+    			_ = transaction.SignTransaction(tx, sgn)
+    			serialized, _ := transaction.Serialize(tx, nil)
+    			txHash, _ := c.SendRawTransaction(ctx, serialized)
+
+    			log.Printf("Nonce key %d tx: %s", p.nonceKey, txHash)
+    		}(p)
+    	}
+    	wg.Wait()
+    }
+    ```
+
+    ```go [provider.go]
+    // [!include ~/snippets/go-provider.go:setup]
+    ```
+
+    :::
+
+  </Tab>
+
   <Tab title="Cast">
 
     ```bash
@@ -1695,6 +2180,67 @@ the transaction can be included in a block.
 
     w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
     account = Account.from_key("0x...")
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Go">
+
+    :::code-group
+
+    ```go [main.go]
+    package main
+
+    import (
+    	"context"
+    	"log"
+    	"math/big"
+    	"time"
+
+    	"github.com/ethereum/go-ethereum/common"
+    	"github.com/tempoxyz/tempo-go/pkg/signer"
+    	"github.com/tempoxyz/tempo-go/pkg/transaction"
+    )
+
+    func main() {
+    	sgn, _ := signer.NewSigner("0x...")
+    	c := newClient()
+    	ctx := context.Background()
+
+    	nonce, _ := c.GetTransactionCount(ctx, sgn.Address().Hex())
+
+    	// 2026-01-01 00:00:00 UTC
+    	validAfter := uint64(time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC).Unix())
+    	// 2026-01-02 00:00:00 UTC
+    	validBefore := uint64(time.Date(2026, 1, 2, 0, 0, 0, 0, time.UTC).Unix())
+
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    		SetNonce(nonce).
+    		SetGas(300_000).
+    		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
+    		SetMaxPriorityFeePerGas(big.NewInt(1_000_000_000)).
+    		SetValidAfter(validAfter). // [!code hl]
+    		SetValidBefore(validBefore). // [!code hl]
+    		AddCall(
+    			common.HexToAddress("0xcafebabecafebabecafebabecafebabecafebabe"),
+    			big.NewInt(0),
+    			common.Hex2Bytes("deadbeef0000000000000000000000000000000001"),
+    		).
+    		Build()
+
+    	// Sign now, submit to the network for later execution
+    	_ = transaction.SignTransaction(tx, sgn)
+    	serialized, _ := transaction.Serialize(tx, nil)
+    	txHash, _ := c.SendRawTransaction(ctx, serialized)
+
+    	log.Printf("Transaction hash: %s", txHash)
+    }
+    ```
+
+    ```go [provider.go]
+    // [!include ~/snippets/go-provider.go:setup]
     ```
 
     :::
