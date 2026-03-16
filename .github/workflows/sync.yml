@@ -28,6 +28,6 @@ jobs:
           echo "branch=$branch" >> "$GITHUB_ENV"
 
       - name: Create pull request
-        run: gh pr create --title "chore: sync from tempoxyz/docs" --body "Automated sync of latest changes from [tempoxyz/docs](https://github.com/tempoxyz/docs)."
+        run: 'gh pr create --title "chore: sync from tempoxyz/docs" --body "Automated sync of latest changes from [tempoxyz/docs](https://github.com/tempoxyz/docs)."'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
