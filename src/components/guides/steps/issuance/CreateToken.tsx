@@ -74,13 +74,14 @@ export function CreateToken(props: DemoStepProps) {
               className="-mt-2.5 flex flex-col gap-2 md:flex-row md:items-end"
             >
               <div className="flex flex-1 flex-col">
-                <label className="-tracking-[1%] text-[11px] text-gray9" htmlFor="name">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="name">
                   Token name
                 </label>
                 <input
-                  className="-tracking-[2%] h-[34px] rounded-lg border border-gray4 px-3.25 font-normal text-[14px] text-black placeholder-gray9 dark:text-white"
+                  className="h-[34px] rounded-lg border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
+                  id="name"
                   name="name"
                   required
                   spellCheck={false}
@@ -88,13 +89,14 @@ export function CreateToken(props: DemoStepProps) {
                 />
               </div>
               <div className="flex flex-1 flex-col">
-                <label className="-tracking-[1%] text-[11px] text-gray9" htmlFor="symbol">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="symbol">
                   Token symbol
                 </label>
                 <input
-                  className="-tracking-[2%] h-[34px] rounded-lg border border-gray4 px-3.25 font-normal text-[14px] text-black placeholder-gray9 dark:text-white"
+                  className="h-[34px] rounded-lg border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                   data-1p-ignore
                   type="text"
+                  id="symbol"
                   name="symbol"
                   required
                   spellCheck={false}
@@ -111,7 +113,7 @@ export function CreateToken(props: DemoStepProps) {
             <div className="relative">
               <div
                 className={cx(
-                  '-tracking-[2%] flex flex-col items-center rounded-[10px] bg-gray2 p-4 text-center font-normal text-[13px] text-gray9 leading-snug',
+                  'flex flex-col items-center rounded-[10px] bg-gray2 p-4 text-center font-normal text-[13px] text-gray9 leading-snug -tracking-[2%]',
                 )}
               >
                 <div>

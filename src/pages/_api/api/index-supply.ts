@@ -115,7 +115,7 @@ export async function OPTIONS(request: Request): Promise<Response> {
 }
 
 function cors(origin: string | null): Record<string, string> {
-  const allowedOrigins = ['https://docs.tempo.xyz']
+  const allowedOrigins = ['https://docs.tempo.xyz', 'https://mainnet.docs.tempo.xyz']
 
   if (origin?.includes('vercel.app')) allowedOrigins.push(origin)
   if (process.env.NODE_ENV === 'development') allowedOrigins.push('http://localhost:5173')

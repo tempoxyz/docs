@@ -41,7 +41,7 @@ export function ConnectWallet(props: DemoStepProps) {
   const actions = React.useMemo(() => {
     if (!injectedConnectors.length) {
       return (
-        <div className="-tracking-[2%] flex items-center text-[14px]">
+        <div className="flex items-center text-[14px] -tracking-[2%]">
           No browser wallets found.
         </div>
       )
@@ -83,7 +83,7 @@ export function ConnectWallet(props: DemoStepProps) {
           </Button>
           <Button
             variant="destructive"
-            className="-tracking-[2%] font-normal text-[14px]"
+            className="font-normal text-[14px] -tracking-[2%]"
             onClick={() => disconnect.disconnect({ connector: walletConnector })}
             type="button"
           >
@@ -112,7 +112,7 @@ export function ConnectWallet(props: DemoStepProps) {
           </Button>
         )}
         {switchChain.isSuccess && (
-          <div className="-tracking-[2%] flex items-center font-normal text-[14px]">
+          <div className="flex items-center font-normal text-[14px] -tracking-[2%]">
             Added Tempo to {connector?.name ?? 'Wallet'}!
           </div>
         )}

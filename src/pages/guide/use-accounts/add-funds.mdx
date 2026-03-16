@@ -6,52 +6,92 @@ mipd: true
 import * as Demo from '../../../components/guides/Demo.tsx'
 import * as Step from '../../../components/guides/steps'
 import * as Token from '../../../components/guides/tokens'
+import { Tabs, Tab } from 'vocs'
 
 # Add Funds to Your Balance
 
 Get test tokens to start building on Tempo testnet.
 
-## Direct Access
+<Tabs>
+  <Tab title="Fund your wallet">
 
-You can access the faucet directly here in the docs.
+<div className="h-4" />
 
-<Demo.Container name="Use the Faucet" footerVariant="balances" tokens={[Token.alphaUsd, Token.betaUsd, Token.thetaUsd]} balanceSource="wallet">
+Connect your wallet to receive test stablecoins directly.
+
+<div className="h-6"/>
+<Demo.Container name="Connect and fund your wallet" footerVariant="balances" tokens={[Token.pathUsd, Token.alphaUsd, Token.betaUsd, Token.thetaUsd]} balanceSource="wallet">
   <Step.ConnectWallet stepNumber={1} />
-  <Step.AddFundsToOthers stepNumber={2} />
+  <Step.AddFundsToWallet stepNumber={2} />
+  <Step.AddTokensToWallet stepNumber={3} />
+  <Step.SetFeeToken stepNumber={4} last />
 </Demo.Container>
 
+  </Tab>
+  <Tab title="Fund an address">
 
-## Testnet Faucet RPC
+<div className="h-4" />
+Send test stablecoins to any address.
 
-The public testnet also offers an RPC endpoint for requesting test tokens.
-The faucet endpoint is only available at the official Tempo testnet RPC endpoint.
+<div className="h-6"/>
+<Demo.Container name="Fund an address">
+  <Step.AddFundsToOthers stepNumber={1} last />
+</Demo.Container>
 
-Request test tokens using the `tempo_fundAddress` RPC method:
+  </Tab>
+  <Tab title="cURL request">
+
+<div className="h-4" />
+
+Request tokens programmatically via the faucet API.
+
+<div className="h-4"/>
+
+```bash
+curl -X POST https://docs.tempo.xyz/api/faucet \
+  -H "Content-Type: application/json" \
+  -d '{"address": "<YOUR_ADDRESS>"}'
+```
+
+<div className="h-4"/>
+
+Replace `<YOUR_ADDRESS>` with a lowercase wallet address.
+
+  </Tab>
+  <Tab title="Cast RPC">
+
+<div className="h-4" />
+
+Request tokens using the `tempo_fundAddress` RPC method.
+
+<div className="h-4"/>
 
 ```bash
 cast rpc tempo_fundAddress <YOUR_ADDRESS> \
   --rpc-url https://rpc.moderato.tempo.xyz
 ```
 
+<div className="h-4"/>
+
 Replace `<YOUR_ADDRESS>` with your wallet address.
 
-## What You'll Receive
+  </Tab>
+</Tabs>
 
-The faucet provides test stablecoins:
+The faucet funds the following assets.
 
-- **pathUSD** - `0x20c0000000000000000000000000000000000000`
-- **AlphaUSD** - `0x20c0000000000000000000000000000000000001`
-- **BetaUSD** - `0x20c0000000000000000000000000000000000002`
-- **ThetaUSD** - `0x20c0000000000000000000000000000000000003`
-
-Each request drips a sufficient amount for testing and development.
+| Asset | Address |Amount|
+|-------|---------|----:|
+| [pathUSD](https://explore.tempo.xyz/address/0x20c0000000000000000000000000000000000000) | `0x20c0000000000000000000000000000000000000` | `1M` |
+| [AlphaUSD](https://explore.tempo.xyz/address/0x20c0000000000000000000000000000000000001) | `0x20c0000000000000000000000000000000000001` | `1M` |
+| [BetaUSD](https://explore.tempo.xyz/address/0x20c0000000000000000000000000000000000002) | `0x20c0000000000000000000000000000000000002` | `1M` |
+| [ThetaUSD](https://explore.tempo.xyz/address/0x20c0000000000000000000000000000000000003) | `0x20c0000000000000000000000000000000000003` | `1M` |
 
 ## Verify Your Balance
 
 After requesting tokens, verify your balance:
 
 ```bash
-# Check AlphaUSD balance
 cast erc20 balance 0x20c0000000000000000000000000000000000001 \
   <YOUR_ADDRESS> \
   --rpc-url https://rpc.moderato.tempo.xyz

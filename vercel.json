@@ -1,0 +1,36 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "faucet.tempo.xyz"
+        }
+      ],
+      "destination": "https://docs.tempo.xyz/quickstart/faucet",
+      "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "faucet.tempo.xyz"
+        }
+      ],
+      "destination": "https://docs.tempo.xyz/quickstart/faucet",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/ingest/static/:path(.*)",
+      "destination": "https://us-assets.i.posthog.com/static/:path"
+    },
+    {
+      "source": "/ingest/:path(.*)",
+      "destination": "https://us.i.posthog.com/:path"
+    }
+  ]
+}

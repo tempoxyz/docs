@@ -1,0 +1,67 @@
+---
+title: Network Upgrades and Releases
+description: Timeline and details for Tempo network upgrades and important releases for node operators.
+---
+
+import { Badge } from '../../../components/Badge'
+
+# Network Upgrades and Releases
+
+Tempo uses scheduled network upgrades to introduce protocol changes. Each upgrade goes through testnet activation before mainnet. This page also tracks important releases that node operators should be aware of.
+
+For detailed release notes and binaries, see the [Changelog](/changelog).
+
+## Required Node Operator Updates
+
+| Release | Date | Network | Description | Priority |
+|---------|------|---------|-------------|----------|
+| [v1.4.0](https://github.com/tempoxyz/tempo/releases/tag/v1.4.0) | Mar 5, 2026 | Moderato + Mainnet | Required for T1C; introduces keychain signature migration so only V2 signatures and hashes are accepted after activation | <Badge variant="red">Required</Badge> |
+| [v1.3.1](https://github.com/tempoxyz/tempo/releases/tag/v1.3.1) | Feb 22, 2026 | Testnet + Mainnet | Fixes high-load issues and finalizes T1A/T1B hardening for expiring nonce replay protection and keychain precompile gas handling | <Badge variant="red">Required</Badge> |
+| [v1.2.0](https://github.com/tempoxyz/tempo/releases/tag/v1.2.0) | Feb 13, 2026 | Mainnet only | Fixes validation bug rejecting transactions with gas limits above ~16.7M, blocking large contract deployments | <Badge variant="red">Required</Badge> |
+
+---
+
+## T1C
+
+| | |
+|---|---|
+| **Scope** | Security hardening, includes breaking change on keychain signatures |
+| **Release** | [v1.4.0](https://github.com/tempoxyz/tempo/releases/tag/v1.4.0) |
+| **Testnet** | Moderato: Mar 9, 2026 15:00 UTC (unix: 1773068400) |
+| **Mainnet** | Mar 12, 2026 15:00 UTC (unix: 1773327600) |
+| **Priority** | <Badge variant="red">Required</Badge> |
+
+---
+
+## T1A / T1B
+
+| | |
+|---|---|
+| **Scope** | T1A removes the 16.7M per-transaction gas limit in favor of Tempo's 30M cap; T1B adds keychain precompile gas metering and expiring nonce replay-protection hardening |
+| **TIPs** | T1A: [TIP-1010: Mainnet Gas Parameters](https://docs.tempo.xyz/protocol/tips/tip-1010); T1B: upgrade hardening release |
+| **Release** | [v1.3.1](https://github.com/tempoxyz/tempo/releases/tag/v1.3.1) |
+| **Testnet** | T1A + T1B: Feb 23, 2026 15:00 UTC (unix: 1771858800) |
+| **Mainnet** | T1A: Feb 12, 2026 15:00 UTC (unix: 1770908400); T1B: Feb 23, 2026 15:00 UTC (unix: 1771858800) |
+| **Priority** | <Badge variant="red">Required</Badge> |
+
+---
+
+## T1 (Bach)
+
+| | |
+|---|---|
+| **Scope** | Mainnet-ready gas economics, expiring nonces, and security hardening |
+| **TIPs** | [TIP-1000: State Creation Cost Increase](https://docs.tempo.xyz/protocol/tips/tip-1000), [TIP-1009: Expiring Nonces](https://docs.tempo.xyz/protocol/tips/tip-1009), [TIP-1010: Mainnet Gas Parameters](https://docs.tempo.xyz/protocol/tips/tip-1010) |
+| **Testnet** | Feb 5, 2026 15:00 UTC (unix: 1770303600) — Release: [v1.1.0](https://github.com/tempoxyz/tempo/releases/tag/v1.1.0) |
+| **Mainnet** | Feb 12, 2026 15:00 UTC (unix: 1770908400) — Release: [v1.1.1](https://github.com/tempoxyz/tempo/releases/tag/v1.1.1) |
+| **Priority** | <Badge variant="red">Required</Badge> |
+
+---
+
+## T0 (Genesis)
+
+| | |
+|---|---|
+| **Scope** | Initial mainnet launch |
+| **Mainnet** | Jan 16, 2026 (genesis) — Release: [v1.0.0](https://github.com/tempoxyz/tempo/releases/tag/v1.0.0) |
+| **Priority** | <Badge variant="red">Required</Badge> |

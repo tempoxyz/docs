@@ -1,20 +1,29 @@
-import { Changelog, defineConfig, Feedback, McpSource } from 'vocs/config'
+import { Changelog, defineConfig, McpSource } from 'vocs/config'
+import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 
 const baseUrl = (() => {
+  if (URL.canParse(process.env.VITE_BASE_URL)) return process.env.VITE_BASE_URL
+  // VERCEL_BRANCH_URL is the stable URL for the branch (e.g., next.docs.tempo.xyz)
+  // VERCEL_URL is the deployment-specific URL which causes CORS issues with custom domains
   if (process.env.VERCEL_ENV === 'production')
     return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  if (process.env.VERCEL_BRANCH_URL) return `https://${process.env.VERCEL_BRANCH_URL}`
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
   return ''
 })()
 
 export default defineConfig({
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
-  checkDeadlinks: true,
-
+  // TODO: Set back to true once tempoxyz/tempo#tip-1011 dead link is fixed
+  checkDeadlinks: 'warn',
+  editLink: {
+    link: 'https://github.com/tempoxyz/docs/edit/main/src/pages/:path',
+    text: 'Suggest changes to this page',
+  },
   title: 'Tempo',
   titleTemplate: '%s ⋅ Tempo',
   description: 'Documentation for the Tempo network and protocol specifications',
-  feedback: Feedback.slack(),
+  feedback: createFeedbackAdapter(),
   mcp: {
     enabled: true,
     sources: [
@@ -536,6 +545,10 @@ export default defineConfig({
             text: 'Operating your validator',
             link: '/guide/node/operate-validator',
           },
+          {
+            text: 'Network Upgrades and Releases',
+            link: '/guide/node/network-upgrades',
+          },
         ],
       },
       // {
@@ -587,6 +600,10 @@ export default defineConfig({
           {
             text: 'Global Payouts',
             link: '/learn/use-cases/global-payouts',
+          },
+          {
+            text: 'Payroll',
+            link: '/learn/use-cases/payroll',
           },
           {
             text: 'Embedded Finance',

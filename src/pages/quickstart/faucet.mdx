@@ -40,6 +40,43 @@ Send test stablecoins to any address.
 </Demo.Container>
 
   </Tab>
+  <Tab title="cURL request">
+
+<div className="h-4" />
+
+Request tokens programmatically via the faucet API.
+
+<div className="h-4"/>
+
+```bash
+curl -X POST https://docs.tempo.xyz/api/faucet \
+  -H "Content-Type: application/json" \
+  -d '{"address": "<YOUR_ADDRESS>"}'
+```
+
+<div className="h-4"/>
+
+Replace `<YOUR_ADDRESS>` with a lowercase wallet address.
+
+  </Tab>
+  <Tab title="Cast RPC">
+
+<div className="h-4" />
+
+Request tokens using the `tempo_fundAddress` RPC method.
+
+<div className="h-4"/>
+
+```bash
+cast rpc tempo_fundAddress <YOUR_ADDRESS> \
+  --rpc-url https://rpc.moderato.tempo.xyz
+```
+
+<div className="h-4"/>
+
+Replace `<YOUR_ADDRESS>` with your wallet address.
+
+  </Tab>
 </Tabs>
 
 The faucet funds the following assets.

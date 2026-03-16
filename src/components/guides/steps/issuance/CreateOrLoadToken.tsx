@@ -41,7 +41,7 @@ export function CreateOrLoadToken(props: DemoStepProps) {
         <div className="ml-6 flex flex-col gap-3 py-4">
           <div
             className={cx(
-              '-tracking-[2%] flex flex-col items-center rounded-[10px] bg-gray2 p-4 text-center font-normal text-[13px] text-gray9 leading-snug',
+              'flex flex-col items-center rounded-[10px] bg-gray2 p-4 text-center font-normal text-[13px] text-gray9 leading-snug -tracking-[2%]',
             )}
           >
             <div>

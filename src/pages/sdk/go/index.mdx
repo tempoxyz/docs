@@ -105,10 +105,10 @@ func main() {
     recipient := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
 
     // [!code hl:10]
-    tx := transaction.NewBuilder(big.NewInt(42429)). // Tempo testnet
+    tx := transaction.NewBuilder(big.NewInt(42431)). // Tempo testnet
         SetNonce(nonce).
         SetGas(100000).
-        SetMaxFeePerGas(big.NewInt(10000000000)).
+        SetMaxFeePerGas(big.NewInt(20000000000)). // 20 gwei base fee
         SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
         AddCall(recipient, big.NewInt(0), []byte{}).
         Build()

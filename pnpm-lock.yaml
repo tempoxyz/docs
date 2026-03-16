@@ -52,6 +52,9 @@ importers:
       posthog-js:
         specifier: ^1.333.0
         version: 1.333.0
+      posthog-node:
+        specifier: ^5.24.15
+        version: 5.24.15
       prool:
         specifier: ^0.2.2
         version: 0.2.2
@@ -86,8 +89,8 @@ importers:
         specifier: ^2.44.4
         version: 2.44.4(typescript@5.9.3)(zod@4.3.5)
       vocs:
-        specifier: https://pkg.pr.new/wevm/vocs@d02f8c5
-        version: https://pkg.pr.new/wevm/vocs@d02f8c5(@types/react@19.2.9)(mermaid@11.12.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.56.0)(typescript@5.9.3)(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.2(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+        specifier: https://pkg.pr.new/wevm/vocs@e5ad67e
+        version: https://pkg.pr.new/wevm/vocs@e5ad67e(@types/react@19.2.9)(mermaid@11.12.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.56.0)(typescript@5.9.3)(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.2(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       wagmi:
         specifier: 3.4.1
         version: 3.4.1(@tanstack/query-core@5.90.19)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react@19.2.9)(ox@0.11.3(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(viem@2.44.4(typescript@5.9.3)(zod@4.3.5))
@@ -129,7 +132,7 @@ importers:
         specifier: ^4.21.0
         version: 4.21.0
       typescript:
-        specifier: ~5.9.3
+        specifier: ^5.9.3
         version: 5.9.3
       use-sync-external-store:
         specifier: ^1.6.0
@@ -731,6 +734,9 @@ packages:
 
   '@posthog/core@1.13.0':
     resolution: {integrity: sha512-knjncrk7qRmssFRbGzBl1Tunt21GRpe0Wv+uVelyL0Rh7PdQUsgguulzXFTps8hA6wPwTU4kq85qnbAJ3eH6Wg==}
+
+  '@posthog/core@1.22.0':
+    resolution: {integrity: sha512-WkmOnq95aAOu6yk6r5LWr5cfXsQdpVbWDCwOxQwxSne8YV6GuZET1ziO5toSQXgrgbdcjrSz2/GopAfiL6iiAA==}
 
   '@posthog/types@1.333.0':
     resolution: {integrity: sha512-9Wg/2ez+EZh6NmtOjhtYSkBHz/yIq8WMS0QSIizUoggh35hHVg4BTMXl3rz/tPearJNKU/8oRjEyuZ0OYTEDOA==}
@@ -3143,6 +3149,10 @@ packages:
   posthog-js@1.333.0:
     resolution: {integrity: sha512-c7vquERMedjuGE2GnaDDJW/V1BIMMQG7BlYKrH0z8O7fc3WpEsQ/IyQ+9aD9+DLxlDCFpzrwgoxVDWi9K37mdA==}
 
+  posthog-node@5.24.15:
+    resolution: {integrity: sha512-0QnWVOZAPwEAlp+r3r0jIGfk2IaNYM/2YnEJJhBMJZXs4LpHcTu7mX42l+e95o9xX87YpVuZU0kOkmtQUxgnOA==}
+    engines: {node: ^20.20.0 || >=22.22.0}
+
   preact@10.28.2:
     resolution: {integrity: sha512-lbteaWGzGHdlIuiJ0l2Jq454m6kcpI1zNje6d8MlGAFlYvP2GO4ibnat7P74Esfz4sPTdM6UxtTwh/d3pwM9JA==}
 
@@ -3800,8 +3810,8 @@ packages:
       vite:
         optional: true
 
-  vocs@https://pkg.pr.new/wevm/vocs@d02f8c5:
-    resolution: {integrity: sha512-EB+QdYFxne64ocF+3zTdKSz/j9Fs4HWNeEzOF5WogpgrJ4uB4FAe7hAZtTbVkT1WMwRFc5Al44WcNk2wTD9fcA==, tarball: https://pkg.pr.new/wevm/vocs@d02f8c5}
+  vocs@https://pkg.pr.new/wevm/vocs@e5ad67e:
+    resolution: {integrity: sha512-CIZ4KPSeTK3f4V2Ti25OG6VPfMpd/2/j5vzbTlapoqd+cbYIbdbB5oOvlnhtInqvfXFLACVU/bNf8fx/HORVHw==, tarball: https://pkg.pr.new/wevm/vocs@e5ad67e}
     version: 0.0.0
     hasBin: true
     peerDependencies:
@@ -4617,6 +4627,10 @@ snapshots:
       playwright: 1.58.0
 
   '@posthog/core@1.13.0':
+    dependencies:
+      cross-spawn: 7.0.6
+
+  '@posthog/core@1.22.0':
     dependencies:
       cross-spawn: 7.0.6
 
@@ -7183,6 +7197,10 @@ snapshots:
       query-selector-shadow-dom: 1.0.1
       web-vitals: 4.2.4
 
+  posthog-node@5.24.15:
+    dependencies:
+      '@posthog/core': 1.22.0
+
   preact@10.28.2: {}
 
   pretty-ms@9.3.0:
@@ -7956,7 +7974,7 @@ snapshots:
     optionalDependencies:
       vite: 7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
-  vocs@https://pkg.pr.new/wevm/vocs@d02f8c5(@types/react@19.2.9)(mermaid@11.12.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.56.0)(typescript@5.9.3)(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.2(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)):
+  vocs@https://pkg.pr.new/wevm/vocs@e5ad67e(@types/react@19.2.9)(mermaid@11.12.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(rollup@4.56.0)(typescript@5.9.3)(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(waku@1.0.0-alpha.2(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react-server-dom-webpack@19.2.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(webpack@5.104.1))(react@19.2.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
       '@base-ui/react': 1.1.0(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@codesandbox/sandpack-react': 2.20.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)

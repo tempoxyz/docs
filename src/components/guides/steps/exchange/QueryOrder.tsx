@@ -52,7 +52,7 @@ export function QueryOrder(props: DemoStepProps) {
           disabled={!active || isQuerying}
           onClick={handleQuery}
           type="button"
-          className="-tracking-[2%] font-normal text-[14px]"
+          className="font-normal text-[14px] -tracking-[2%]"
         >
           {isQuerying ? 'Querying...' : hasQueried ? 'Query Again' : 'Query Order'}
         </Button>

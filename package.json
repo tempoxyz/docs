@@ -25,6 +25,7 @@
     "monaco-editor": "^0.55.1",
     "ox": "^0.11.3",
     "posthog-js": "^1.333.0",
+    "posthog-node": "^5.24.15",
     "prool": "^0.2.2",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
@@ -36,7 +37,7 @@
     "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",
     "viem": "^2.44.4",
-    "vocs": "https://pkg.pr.new/wevm/vocs@d02f8c5",
+    "vocs": "https://pkg.pr.new/wevm/vocs@e5ad67e",
     "wagmi": "3.4.1",
     "waku": "1.0.0-alpha.2",
     "zod": "^4.3.5"
@@ -51,7 +52,7 @@
     "@vitejs/plugin-react": "^5.1.2",
     "anser": "^2.3.5",
     "tsx": "^4.21.0",
-    "typescript": "~5.9.3",
+    "typescript": "^5.9.3",
     "use-sync-external-store": "^1.6.0",
     "vite": "^7.3.1"
   },

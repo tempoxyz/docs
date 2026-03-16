@@ -54,7 +54,7 @@ export function CreateTokenPolicy(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="-tracking-[2%] font-normal text-[14px]"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             Hide
@@ -65,7 +65,7 @@ export function CreateTokenPolicy(props: DemoStepProps) {
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className="-tracking-[2%] font-normal text-[14px]"
+            className="font-normal text-[14px] -tracking-[2%]"
           >
             Enter details
           </Button>
@@ -79,7 +79,7 @@ export function CreateTokenPolicy(props: DemoStepProps) {
           <div className="border-gray4 border-s-2 ps-5">
             <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
               <div className="flex flex-1 flex-col">
-                <div className="-tracking-[1%] mb-2 text-[13px] text-gray9">
+                <div className="mb-2 text-[13px] text-gray9 -tracking-[1%]">
                   This will create a blacklist policy that blocks {FAKE_RECIPIENT} from sending or
                   receiving tokens.
                 </div>
@@ -92,7 +92,7 @@ export function CreateTokenPolicy(props: DemoStepProps) {
                 onClick={handleCreatePolicy}
                 disabled={isCreating}
                 type="button"
-                className="-tracking-[2%] font-normal text-[14px]"
+                className="font-normal text-[14px] -tracking-[2%]"
               >
                 {isCreating ? 'Creating...' : 'Create Policy'}
               </Button>

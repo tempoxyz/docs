@@ -109,7 +109,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="-tracking-[2%] font-normal text-[14px]"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             Cancel
@@ -126,7 +126,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
             disabled={!(address && balance && balance > 0n)}
             onClick={() => setExpanded(true)}
             type="button"
-            className="-tracking-[2%] font-normal text-[14px]"
+            className="font-normal text-[14px] -tracking-[2%]"
           >
             Enter details
           </Button>
@@ -140,13 +140,14 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
           <div className="border-gray4 border-s-2 ps-5">
             <div className="mt-2 flex flex-col gap-2 pe-8">
               <div className="flex flex-col">
-                <label className="-tracking-[1%] text-[11px] text-gray9" htmlFor="memo">
+                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="memo">
                   Memo (e.g., customer ID, invoice number)
                 </label>
                 <input
-                  className={`-tracking-[2%] h-[34px] rounded-[50px] border px-3.25 font-normal text-[14px] text-black placeholder-gray9 dark:text-white ${memoError ? 'border-red-500' : 'border-gray4'}`}
+                  className={`h-[34px] rounded-[50px] border px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white ${memoError ? 'border-red-500' : 'border-gray4'}`}
                   data-1p-ignore
                   type="text"
+                  id="memo"
                   name="memo"
                   value={memo}
                   onChange={handleMemoChange}
@@ -156,13 +157,14 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
               </div>
               <div className="flex flex-col gap-2 md:flex-row md:items-end">
                 <div className="flex flex-1 flex-col">
-                  <label className="-tracking-[1%] text-[11px] text-gray9" htmlFor="recipient">
+                  <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient">
                     Recipient address
                   </label>
                   <input
-                    className="-tracking-[2%] h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black placeholder-gray9 dark:text-white"
+                    className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
                     data-1p-ignore
                     type="text"
+                    id="recipient"
                     name="recipient"
                     value={recipient}
                     onChange={(e) => setRecipient(e.target.value)}
@@ -186,7 +188,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
                   }
                   onClick={handleTransfer}
                   type="button"
-                  className="-tracking-[2%] font-normal text-[14px]"
+                  className="font-normal text-[14px] -tracking-[2%]"
                 >
                   {sendPayment.isPending ? 'Sending...' : 'Send with Memo'}
                 </Button>

@@ -51,7 +51,7 @@ export function ExplorerLink({ hash }: { hash: string }) {
         href={url}
         target="_blank"
         rel="noreferrer"
-        className="-tracking-[1%] flex items-center gap-1 text-[13px] text-accent hover:underline"
+        className="flex items-center gap-1 text-[13px] text-accent -tracking-[1%] hover:underline"
         onClick={() => trackExternalLinkClick(url, 'View receipt')}
       >
         View receipt
@@ -71,7 +71,7 @@ export function ExplorerAccountLink({ address }: { address: string }) {
         href={url}
         target="_blank"
         rel="noreferrer"
-        className="-tracking-[1%] flex items-center gap-1 text-[13px] text-accent hover:underline"
+        className="flex items-center gap-1 text-[13px] text-accent -tracking-[1%] hover:underline"
         onClick={() => trackExternalLinkClick(url, 'View account')}
       >
         View account
@@ -108,7 +108,7 @@ export function Container(
   const disconnect = useDisconnect()
   const restart = React.useCallback(() => {
     disconnect.disconnect()
-  }, [disconnect.disconnect])
+  }, [disconnect.disconnect, disconnect])
 
   const balanceAddress = React.useMemo(() => {
     if (props.footerVariant !== 'balances') return address
@@ -142,7 +142,7 @@ export function Container(
     <ParentContainer
       headerLeft={
         <div className="flex items-center gap-1.5">
-          <h4 className="-tracking-[1%] font-normal text-[14px] text-gray12 leading-none">
+          <h4 className="font-normal text-[14px] text-gray12 leading-none -tracking-[1%]">
             {name}
           </h4>
           {showBadge && (
@@ -322,7 +322,7 @@ export function Step(
           >
             {completed ? <LucideCheck className="text-green9" /> : number}
           </div>
-          <div className="-tracking-[1%] text-[14px] text-black group-data-[active=false]:opacity-40 dark:text-white">
+          <div className="text-[14px] text-black -tracking-[1%] group-data-[active=false]:opacity-40 dark:text-white">
             {title}
           </div>
         </div>
@@ -334,7 +334,7 @@ export function Step(
       {error && (
         <>
           <div className="h-2" />
-          <div className="-tracking-[2%] rounded bg-destructiveTint px-3 py-2 font-normal text-[14px] text-destructive leading-normal">
+          <div className="rounded bg-destructiveTint px-3 py-2 font-normal text-[14px] text-destructive leading-normal -tracking-[2%]">
             {'shortMessage' in error ? error.shortMessage : error.message}
           </div>
         </>
@@ -376,7 +376,7 @@ export function Login() {
         <div className="flex gap-1">
           <Button
             variant="accent"
-            className="-tracking-[2%] font-normal text-[14px]"
+            className="font-normal text-[14px] -tracking-[2%]"
             onClick={() => connect.connect({ connector })}
             type="button"
           >
@@ -384,7 +384,7 @@ export function Login() {
           </Button>
           <Button
             variant="default"
-            className="-tracking-[2%] font-normal text-[14px]"
+            className="font-normal text-[14px] -tracking-[2%]"
             onClick={() =>
               connect.connect({
                 connector,
@@ -432,7 +432,7 @@ export function Logout() {
       </Button>
       <Button
         variant="destructive"
-        className="-tracking-[2%] font-normal text-[14px]"
+        className="font-normal text-[14px] -tracking-[2%]"
         onClick={() => {
           disconnect.disconnect({ connector })
           trackButtonClick('Sign out', 'destructive')
@@ -478,7 +478,7 @@ const buttonClassName = cva({
       true: 'pointer-events-none opacity-50',
     },
     size: {
-      default: '-tracking-[2%] h-[32px] px-[14px] text-[14px]',
+      default: 'h-[32px] px-[14px] text-[14px] -tracking-[2%]',
     },
     static: {
       true: 'pointer-events-none',

@@ -20,7 +20,7 @@ The Tempo Transaction type unlocks a number of new signature schemes, including 
 
 Access Keys are secondary signing keys authorized by an account's Root Key. They can sign transactions on behalf of the account with the following restrictions:
 
-- **Expiry**: Unix timestamp when the key becomes invalid (0 = never expires)
+- **Expiry**: Unix timestamp when the key becomes invalid (0 = never expires, non-zero values must be > current timestamp)
 - **Spending Limits**: Per-TIP20 token limits that deplete as tokens are spent
   - Limits deplete as tokens are spent and can be updated by the Root Key via `updateSpendingLimit()`
   - Spending limits only apply to TIP20 `transfer()`, `transferWithMemo()`, `approve()`, and `startReward()` calls
@@ -136,7 +136,7 @@ interface IAccountKeychain {
      *      The protocol enforces this restriction by checking transactionKey[msg.sender]
      * @param keyId The key identifier (address) to authorize
      * @param signatureType Signature type of the key (0: Secp256k1, 1: P256, 2: WebAuthn)
-     * @param expiry Unix timestamp when key expires (0 = never expires)
+     * @param expiry Unix timestamp when key expires (MUST be > current_timestamp, or 0 for never expires)
      * @param enforceLimits Whether to enforce spending limits for this key
      * @param limits Initial spending limits for tokens (only used if enforceLimits is true)
      */
@@ -273,8 +273,8 @@ Access Keys cannot escalate their own privileges because:
 - Keys with `enforceLimits == false` have unlimited spending (no limits checked)
 - Spending limits are enforced by the protocol internally calling `verify_and_update_spending()` during execution
 - Limits are per-TIP20 token and deplete as TIP20 tokens are spent
-- Spending limits only track TIP20 token transfers (via `transfer` and `transferFrom`) and approvals
-- For approvals: only increases in approval amount count against the spending limit
+- Spending limits only track TIP20 token transfers (via `transfer` and `transferWithMemo`) and approvals (via `approve`)
+- For approvals: only increases in approval amount count against the spending limit. This means approvals indirectly control `transferFrom` spending, since `transferFrom` requires a prior approval
 - Non-TIP20 asset movements (ETH, NFTs) are not subject to spending limits
 - Root keys (`keyId == address(0)`) have no spending limits - the function returns immediately
 - Failed limit checks revert the entire transaction with `SpendingLimitExceeded`

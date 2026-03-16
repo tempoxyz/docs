@@ -145,7 +145,7 @@ export function SendParallelPayments(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="-tracking-[2%] font-normal text-[14px]"
+            className="font-normal text-[14px] -tracking-[2%]"
             type="button"
           >
             Cancel
@@ -162,7 +162,7 @@ export function SendParallelPayments(props: DemoStepProps) {
             disabled={!(address && balance && balance >= parseUnits('100', 6))}
             onClick={() => setExpanded(true)}
             type="button"
-            className="-tracking-[2%] font-normal text-[14px]"
+            className="font-normal text-[14px] -tracking-[2%]"
           >
             Enter details
           </Button>
@@ -177,13 +177,14 @@ export function SendParallelPayments(props: DemoStepProps) {
             <div className="mt-2 flex gap-3">
               <div className="flex flex-1 flex-col gap-2">
                 <div className="flex flex-col">
-                  <label className="-tracking-[1%] text-[11px] text-gray9" htmlFor="recipient1">
+                  <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient1">
                     Recipient 1
                   </label>
                   <input
-                    className="-tracking-[2%] h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black placeholder-gray9 disabled:cursor-not-allowed disabled:opacity-60 dark:text-white"
+                    className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 disabled:cursor-not-allowed disabled:opacity-60 dark:text-white"
                     data-1p-ignore
                     type="text"
+                    id="recipient1"
                     name="recipient1"
                     value={FAKE_RECIPIENT}
                     disabled
@@ -191,13 +192,14 @@ export function SendParallelPayments(props: DemoStepProps) {
                   />
                 </div>
                 <div className="flex flex-col">
-                  <label className="-tracking-[1%] text-[11px] text-gray9" htmlFor="recipient2">
+                  <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient2">
                     Recipient 2
                   </label>
                   <input
-                    className="-tracking-[2%] h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black placeholder-gray9 disabled:cursor-not-allowed disabled:opacity-60 dark:text-white"
+                    className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 disabled:cursor-not-allowed disabled:opacity-60 dark:text-white"
                     data-1p-ignore
                     type="text"
+                    id="recipient2"
                     name="recipient2"
                     value={FAKE_RECIPIENT_2}
                     disabled
@@ -213,7 +215,7 @@ export function SendParallelPayments(props: DemoStepProps) {
                   disabled={!(address && balance && balance >= parseUnits('100', 6)) || isSending}
                   onClick={handleSendParallel}
                   type="button"
-                  className="-tracking-[2%] font-normal text-[14px]"
+                  className="font-normal text-[14px] -tracking-[2%]"
                 >
                   {isSending ? 'Sending both...' : 'Send both payments'}
                 </Button>
