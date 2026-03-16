@@ -19,15 +19,24 @@ jobs:
 
       - name: Fetch upstream and create sync branch
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote add upstream https://github.com/tempoxyz/docs.git
           git fetch upstream main
           branch="sync/docs-$(date +%Y%m%d-%H%M%S)"
           git checkout -b "$branch"
           git merge upstream/main --no-edit
-          git push origin "$branch"
-          echo "branch=$branch" >> "$GITHUB_ENV"
+          if git diff --quiet origin/main; then
+            echo "No changes to sync."
+            echo "has_changes=false" >> "$GITHUB_ENV"
+          else
+            git push origin "$branch"
+            echo "branch=$branch" >> "$GITHUB_ENV"
+            echo "has_changes=true" >> "$GITHUB_ENV"
+          fi
 
       - name: Create pull request
-        run: 'gh pr create --title "chore: sync from tempoxyz/docs" --body "Automated sync of latest changes from [tempoxyz/docs](https://github.com/tempoxyz/docs)."'
+        if: env.has_changes == 'true'
+        run: 'gh pr create --head "$branch" --title "chore: sync from tempoxyz/docs" --body "Automated sync of latest changes from [tempoxyz/docs](https://github.com/tempoxyz/docs)."'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
