@@ -5,10 +5,19 @@ description: Charge for APIs, MCP tools, and digital content using the Machine P
 
 import { Card, Cards } from 'vocs'
 import { MermaidDiagram } from '../../../components/MermaidDiagram'
+import { TerminalDemo } from '../../../components/TerminalDemo'
 
 # Make Machine Payments
 
 The [Machine Payments Protocol](https://mpp.dev) (MPP) adds inline payments to any HTTP endpoint. Clients — apps, agents, or humans — pay as part of their request, and the server verifies payment before returning the response.
+
+## Try it out
+
+See the full payment flow in action. The terminal creates an ephemeral wallet, funds it with testnet USDC, and makes a paid request to fetch a photo.
+
+<div style={{ height: 480 }}>
+  <TerminalDemo />
+</div>
 
 ## Payment flow
 
@@ -93,7 +102,7 @@ Two [intents](https://mpp.dev/protocol#payment-intents) are available on Tempo:
 |-----|---------|---------|
 | TypeScript | [`mppx`](https://github.com/wevm/mppx) | `npm install mppx viem` |
 | Python | [`pympp`](https://github.com/tempoxyz/pympp) | `pip install pympp` |
-| Rust | [`mpp-rs`](https://github.com/tempoxyz/mpp-rs) | `cargo add mpp-rs` |
+| Rust | [`mpp-rs`](https://github.com/tempoxyz/mpp-rs) | `cargo add mpp` |
 
 See the [full SDK documentation](https://mpp.dev/sdk) for API reference and advanced usage.
 
