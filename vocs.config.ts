@@ -72,52 +72,11 @@ export default defineConfig({
         link: '/changelog',
       },
       {
-        text: 'Integrate Tempo Testnet',
-        items: [
-          {
-            text: 'Overview',
-            link: '/quickstart/integrate-tempo',
-          },
-          {
-            text: 'Connect to the Network',
-            link: '/quickstart/connection-details',
-          },
-          {
-            text: 'Get Faucet Funds',
-            link: '/quickstart/faucet',
-          },
-          {
-            text: 'Developer Tools',
-            link: '/quickstart/developer-tools',
-          },
-          {
-            text: 'EVM Differences',
-            link: '/quickstart/evm-compatibility',
-          },
-          {
-            text: 'Predeployed Contracts',
-            link: '/quickstart/predeployed-contracts',
-          },
-          {
-            text: 'Token List Registry',
-            link: '/quickstart/tokenlist',
-          },
-          {
-            text: 'Wallet Developers',
-            link: '/quickstart/wallet-developers',
-          },
-          {
-            text: 'Contract Verification',
-            link: '/quickstart/verify-contracts',
-          },
-          {
-            text: 'Building with AI',
-            link: '/guide/building-with-ai',
-          },
-        ],
+        text: 'Building with AI',
+        link: '/guide/building-with-ai',
       },
       {
-        text: 'Start Building on Tempo',
+        text: 'Build on Tempo',
         items: [
           {
             text: 'Use Tempo Transactions',
@@ -274,6 +233,47 @@ export default defineConfig({
                 link: '/guide/machine-payments/streamed-payments',
               },
             ],
+          },
+        ],
+      },
+      {
+        text: 'Integrate Tempo',
+        items: [
+          {
+            text: 'Overview',
+            link: '/quickstart/integrate-tempo',
+          },
+          {
+            text: 'Connect to the Network',
+            link: '/quickstart/connection-details',
+          },
+          {
+            text: 'Get Faucet Funds',
+            link: '/quickstart/faucet',
+          },
+          {
+            text: 'Developer Tools',
+            link: '/quickstart/developer-tools',
+          },
+          {
+            text: 'EVM Differences',
+            link: '/quickstart/evm-compatibility',
+          },
+          {
+            text: 'Predeployed Contracts',
+            link: '/quickstart/predeployed-contracts',
+          },
+          {
+            text: 'Token List Registry',
+            link: '/quickstart/tokenlist',
+          },
+          {
+            text: 'Wallet Developers',
+            link: '/quickstart/wallet-developers',
+          },
+          {
+            text: 'Contract Verification',
+            link: '/quickstart/verify-contracts',
           },
         ],
       },
