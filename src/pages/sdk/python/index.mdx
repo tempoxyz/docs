@@ -72,16 +72,11 @@ print(f"Transaction hash: {tx_hash.hex()}")
 
 ### Token Transfer
 
-Send a TIP-20 token transfer using web3.py's contract interface:
+Send a TIP-20 token transfer using pytempo's typed contract helpers:
 
 ```python [transfer.py]
-erc20_abi = '[{"name":"transfer","type":"function","inputs":[{"name":"to","type":"address"},{"name":"amount","type":"uint256"}],"outputs":[{"name":"","type":"bool"}]}]'
-token = w3.eth.contract(address="0x20c0000000000000000000000000000000000001", abi=erc20_abi)
-
-recipient = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
-amount = 100_000_000  # 100 tokens (6 decimals)
-
-transfer_data = token.encode_abi("transfer", args=[recipient, amount])
+from pytempo import TempoTransaction
+from pytempo.contracts import TIP20, ALPHA_USD
 
 tx = TempoTransaction.create(
     chain_id=4217,
@@ -90,7 +85,10 @@ tx = TempoTransaction.create(
     max_priority_fee_per_gas=1_000_000_000,
     nonce=w3.eth.get_transaction_count(account.address),
     calls=(
-        Call.create(to=token.address, data=transfer_data),
+        TIP20(ALPHA_USD).transfer( # [!code hl]
+            to="0x70997970C51812dc3A010C7d01b50e0d17dc79C8", # [!code hl]
+            amount=100_000_000, # 100 tokens (6 decimals) # [!code hl]
+        ), # [!code hl]
     ),
 )
 ```
@@ -100,13 +98,16 @@ tx = TempoTransaction.create(
 Use a TIP-20 token to pay for transaction fees instead of the native token:
 
 ```python [fee_token.py]
+from pytempo import TempoTransaction, Call
+from pytempo.contracts import ALPHA_USD
+
 tx = TempoTransaction.create(
     chain_id=4217,
     gas_limit=100_000,
     max_fee_per_gas=10_000_000_000,
     max_priority_fee_per_gas=1_000_000_000,
     nonce=w3.eth.get_transaction_count(account.address),
-    fee_token="0x20c0000000000000000000000000000000000001",  # AlphaUSD // [!code hl]
+    fee_token=ALPHA_USD, # [!code hl]
     calls=(
         Call.create(to="0x70997970C51812dc3A010C7d01b50e0d17dc79C8"),
     ),
@@ -118,6 +119,11 @@ tx = TempoTransaction.create(
 Execute multiple operations atomically in a single transaction:
 
 ```python [batch.py]
+from pytempo import TempoTransaction
+from pytempo.contracts import TIP20, ALPHA_USD
+
+token = TIP20(ALPHA_USD)
+
 tx = TempoTransaction.create(
     chain_id=4217,
     gas_limit=300_000,
@@ -125,9 +131,9 @@ tx = TempoTransaction.create(
     max_priority_fee_per_gas=1_000_000_000,
     nonce=w3.eth.get_transaction_count(account.address),
     calls=(
-        Call.create(to=addr1, data=transfer1_data), # [!code hl]
-        Call.create(to=addr2, data=transfer2_data), # [!code hl]
-        Call.create(to=addr3, data=contract_call_data), # [!code hl]
+        token.transfer(to="0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb", amount=100_000_000), # [!code hl]
+        token.transfer(to="0x70997970C51812dc3A010C7d01b50e0d17dc79C8", amount=50_000_000), # [!code hl]
+        token.transfer(to="0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", amount=25_000_000), # [!code hl]
     ),
 )
 
