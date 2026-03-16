@@ -5,6 +5,7 @@ description: Send stablecoin payments between accounts on Tempo. Include optiona
 import * as Demo from '../../../components/guides/Demo.tsx'
 import * as Step from '../../../components/guides/steps'
 import { Cards, Card } from 'vocs'
+import { Tabs, Tab } from 'vocs'
 
 # Send a Payment
 
@@ -183,248 +184,816 @@ Now that you have made a payment you can
 
 Send a payment using the standard `transfer` function:
 
-:::code-group
+<Tabs stateKey="library">
+  <Tab title="Viem">
 
-```ts [example.ts]
-import { parseUnits } from 'viem'
-import { client } from './viem.config'
+    :::code-group
 
-const { receipt } = await client.token.transferSync({
-  amount: parseUnits('100', 6), // 100 tokens (6 decimals)
-  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
-  token: '0x20c0000000000000000000000000000000000001', // AlphaUSD
-})
-```
+    ```ts twoslash [example.ts]
+    // @noErrors
+    import { parseUnits } from 'viem'
+    import { client } from './viem.config'
 
-```ts [viem.config.ts] filename="viem.config.ts"
-// [!include ~/snippets/viem.config.ts:setup]
-```
+    const { receipt } = await client.token.transferSync({
+      amount: parseUnits('100', 6), // 100 tokens (6 decimals) // [!code hl]
+      to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', // [!code hl]
+      token: '0x20c0000000000000000000000000000000000001', // AlphaUSD // [!code hl]
+    })
+    ```
 
-```rs [Rust]
-use alloy::{
-    primitives::{address, U256},
-    providers::ProviderBuilder,
-};
-use tempo_alloy::{TempoNetwork, contracts::precompiles::ITIP20};
+    ```ts twoslash [viem.config.ts]
+    // [!include ~/snippets/viem.config.ts:setup]
+    ```
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
-        .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
-        .await?;
+    :::
 
-    let token = ITIP20::new( // [!code focus]
-        address!("0x20c0000000000000000000000000000000000001"), // AlphaUSD // [!code focus]
-        &provider, // [!code focus]
-    ); // [!code focus]
+  </Tab>
 
-    let receipt = token // [!code focus]
-        .transfer( // [!code focus]
-            address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb"), // [!code focus]
-            U256::from(100_000_000), // 100 tokens (6 decimals) // [!code focus]
-        ) // [!code focus]
-        .send() // [!code focus]
-        .await? // [!code focus]
-        .get_receipt() // [!code focus]
-        .await?; // [!code focus]
+  <Tab title="Wagmi">
 
-    println!("Transfer successful: {:?}", receipt.transaction_hash); // [!code focus]
+    ```tsx twoslash
+    // @noErrors
+    import { Hooks } from 'wagmi/tempo'
+    import { parseUnits } from 'viem'
 
-    Ok(())
-}
-```
+    function SendPayment() {
+      const { mutate, isPending } = Hooks.token.useTransferSync() // [!code hl]
 
-:::
+      return (
+        <button
+          onClick={() =>
+            mutate({ // [!code hl]
+              amount: parseUnits('100', 6), // [!code hl]
+              to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', // [!code hl]
+              token: '0x20c0000000000000000000000000000000000001', // [!code hl]
+            }) // [!code hl]
+          }
+          disabled={isPending}
+        >
+          Send Payment
+        </button>
+      )
+    }
+    ```
+
+  </Tab>
+
+  <Tab title="Rust">
+
+    :::code-group
+
+    ```rust [example.rs]
+    use alloy::{
+        primitives::{address, U256},
+        providers::ProviderBuilder,
+    };
+    use tempo_alloy::{TempoNetwork, contracts::precompiles::ITIP20};
+
+    mod provider;
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = provider::get_provider().await?;
+
+        let token = ITIP20::new( // [!code hl]
+            address!("0x20c0000000000000000000000000000000000001"), // AlphaUSD // [!code hl]
+            &provider, // [!code hl]
+        ); // [!code hl]
+
+        let receipt = token // [!code hl]
+            .transfer( // [!code hl]
+                address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb"), // [!code hl]
+                U256::from(100_000_000), // 100 tokens (6 decimals) // [!code hl]
+            ) // [!code hl]
+            .send() // [!code hl]
+            .await? // [!code hl]
+            .get_receipt() // [!code hl]
+            .await?; // [!code hl]
+
+        println!("Transfer successful: {:?}", receipt.transaction_hash);
+
+        Ok(())
+    }
+    ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-provider.rs:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Python">
+
+    :::code-group
+
+    ```python [example.py]
+    from eth_abi import encode
+    from pytempo import Call, TempoTransaction
+    from provider import w3, account
+
+    TRANSFER_SELECTOR = bytes.fromhex("a9059cbb")
+    ALPHA_USD = "0x20c0000000000000000000000000000000000001"
+
+    data = TRANSFER_SELECTOR + encode( # [!code hl]
+        ["address", "uint256"], # [!code hl]
+        ["0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb", 100_000_000], # [!code hl]
+    ) # [!code hl]
+
+    tx = TempoTransaction.create(
+        chain_id=w3.eth.chain_id,
+        gas_limit=100_000,
+        max_fee_per_gas=w3.eth.gas_price * 2,
+        max_priority_fee_per_gas=w3.eth.gas_price,
+        nonce=w3.eth.get_transaction_count(account.address),
+        calls=(
+            Call.create(to=ALPHA_USD, data="0x" + data.hex()), # [!code hl]
+        ),
+    )
+
+    signed_tx = tx.sign(account.key.hex())
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.encode())
+    ```
+
+    ```python [provider.py]
+    from web3 import Web3
+    from eth_account import Account
+
+    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    account = Account.from_key("0x...")
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Go">
+
+    :::code-group
+
+    ```go [main.go]
+    package main
+
+    import (
+    	"context"
+    	"log"
+    	"math/big"
+
+    	"github.com/ethereum/go-ethereum/common"
+    	"github.com/tempoxyz/tempo-go/pkg/signer"
+    	"github.com/tempoxyz/tempo-go/pkg/transaction"
+    )
+
+    func buildTransferData(to common.Address, amount *big.Int) []byte {
+    	data := make([]byte, 68) // 4 (selector) + 32 (address) + 32 (uint256)
+    	data[0], data[1], data[2], data[3] = 0xa9, 0x05, 0x9c, 0xbb
+    	copy(data[16:36], to.Bytes())
+    	amount.FillBytes(data[36:68])
+    	return data
+    }
+
+    func main() {
+    	sgn, _ := signer.NewSigner("0x...")
+    	c := newClient()
+    	ctx := context.Background()
+
+    	nonce, _ := c.GetTransactionCount(ctx, sgn.Address().Hex())
+
+    	recipient := common.HexToAddress("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb")
+    	alphaUSD := common.HexToAddress("0x20c0000000000000000000000000000000000001")
+
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    		SetNonce(nonce).
+    		SetGas(100_000).
+    		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
+    		SetMaxPriorityFeePerGas(big.NewInt(1_000_000_000)).
+    		AddCall( // [!code hl]
+    			alphaUSD, // [!code hl]
+    			big.NewInt(0), // [!code hl]
+    			buildTransferData(recipient, big.NewInt(100_000_000)), // [!code hl]
+    		). // [!code hl]
+    		Build()
+
+    	_ = transaction.SignTransaction(tx, sgn)
+    	serialized, _ := transaction.Serialize(tx, nil)
+    	txHash, _ := c.SendRawTransaction(ctx, serialized)
+
+    	log.Printf("Transaction hash: %s", txHash)
+    }
+    ```
+
+    ```go [provider.go]
+    // [!include ~/snippets/go-provider.go:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Cast">
+
+    ```bash
+    $ cast erc20 transfer \
+      0x20c0000000000000000000000000000000000001 \
+      0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb \
+      100000000 \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $PRIVATE_KEY # [!code hl]
+    ```
+
+  </Tab>
+
+  <Tab title="Solidity">
+
+    ```solidity
+    import {ITIP20} from "tempo-std/interfaces/ITIP20.sol";
+
+    contract PaymentSender {
+        ITIP20 public token;
+
+        function sendPayment(address recipient, uint256 amount) external {
+            token.transfer(recipient, amount); // [!code hl]
+        }
+    }
+    ```
+
+  </Tab>
+</Tabs>
 
 ### Transfer with memo
 
-Include a memo for payment reconciliation and tracking:
+Include a memo for payment reconciliation and tracking. The memo is a 32-byte value that can store payment references, invoice IDs, order numbers, or any other metadata.
 
-:::code-group
+<Tabs stateKey="library">
+  <Tab title="Viem">
 
-```ts [example.ts]
-import { parseUnits } from 'viem'
-import { client } from './viem.config'
+    :::code-group
 
-const invoiceId = pad(stringToHex('INV-12345'), { size: 32 })
+    ```ts twoslash [example.ts]
+    // @noErrors
+    import { parseUnits, stringToHex, pad } from 'viem'
+    import { client } from './viem.config'
 
-const { receipt } = await client.token.transferSync({
-  amount: parseUnits('100', 6),
-  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
-  token: '0x20c0000000000000000000000000000000000001',
-  memo: invoiceId,
-})
-```
-```ts [viem.config.ts] filename="viem.config.ts"
-// [!include ~/snippets/viem.config.ts:setup]
-```
+    const invoiceId = pad(stringToHex('INV-12345'), { size: 32 }) // [!code hl]
 
-```rs [Rust]
-use alloy::{
-    primitives::{address, B256, U256},
-    providers::ProviderBuilder,
-};
-use tempo_alloy::{TempoNetwork, contracts::precompiles::ITIP20};
+    const { receipt } = await client.token.transferSync({
+      amount: parseUnits('100', 6),
+      to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+      token: '0x20c0000000000000000000000000000000000001',
+      memo: invoiceId, // [!code hl]
+    })
+    ```
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
-        .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
-        .await?;
+    ```ts twoslash [viem.config.ts]
+    // [!include ~/snippets/viem.config.ts:setup]
+    ```
 
-    let token = ITIP20::new( // [!code focus]
-        address!("0x20c0000000000000000000000000000000000001"), // AlphaUSD // [!code focus]
-        &provider, // [!code focus]
-    ); // [!code focus]
+    :::
 
-    let receipt = token // [!code focus]
-        .transferWithMemo( // [!code focus]
-            address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb"), // [!code focus]
-            U256::from(100_000_000), // 100 tokens (6 decimals) // [!code focus]
-            B256::left_padding_from("INV-12345".as_bytes()), // [!code focus]
-        ) // [!code focus]
-        .send() // [!code focus]
-        .await? // [!code focus]
-        .get_receipt() // [!code focus]
-        .await?; // [!code focus]
+  </Tab>
 
-    println!("Transfer successful: {:?}", receipt.transaction_hash); // [!code focus]
+  <Tab title="Wagmi">
 
-    Ok(())
-}
-```
+    ```tsx twoslash
+    // @noErrors
+    import { Hooks } from 'wagmi/tempo'
+    import { parseUnits, stringToHex, pad } from 'viem'
 
-:::
+    function SendPaymentWithMemo() {
+      const { mutate, isPending } = Hooks.token.useTransferSync()
 
-The memo is a 32-byte value that can store payment references, invoice IDs, order numbers, or any other metadata.
-
-### Using Solidity
-
-If you're building a smart contract that sends payments:
-
-```solidity
-interface ITIP20 {
-    function transfer(address to, uint256 amount) external returns (bool);
-    function transferWithMemo(address to, uint256 amount, bytes32 memo) external;
-}
-
-contract PaymentSender {
-    ITIP20 public token;
-    
-    function sendPayment(address recipient, uint256 amount) external {
-        token.transfer(recipient, amount);
+      return (
+        <button
+          onClick={() =>
+            mutate({
+              amount: parseUnits('100', 6),
+              to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+              token: '0x20c0000000000000000000000000000000000001',
+              memo: pad(stringToHex('INV-12345'), { size: 32 }), // [!code hl]
+            })
+          }
+          disabled={isPending}
+        >
+          Send Payment
+        </button>
+      )
     }
-    
-    function sendPaymentWithMemo(
-        address recipient, 
-        uint256 amount, 
-        bytes32 invoiceId
-    ) external {
-        token.transferWithMemo(recipient, amount, invoiceId);
+    ```
+
+  </Tab>
+
+  <Tab title="Rust">
+
+    :::code-group
+
+    ```rust [example.rs]
+    use alloy::{
+        primitives::{address, B256, U256},
+        providers::ProviderBuilder,
+    };
+    use tempo_alloy::{TempoNetwork, contracts::precompiles::ITIP20};
+
+    mod provider;
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = provider::get_provider().await?;
+
+        let token = ITIP20::new(
+            address!("0x20c0000000000000000000000000000000000001"),
+            &provider,
+        );
+
+        let receipt = token
+            .transferWithMemo( // [!code hl]
+                address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb"),
+                U256::from(100_000_000),
+                B256::left_padding_from("INV-12345".as_bytes()), // [!code hl]
+            )
+            .send()
+            .await?
+            .get_receipt()
+            .await?;
+
+        println!("Transfer successful: {:?}", receipt.transaction_hash);
+
+        Ok(())
     }
-}
-```
+    ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-provider.rs:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Python">
+
+    :::code-group
+
+    ```python [example.py]
+    from eth_abi import encode
+    from pytempo import Call, TempoTransaction
+    from provider import w3, account
+
+    TRANSFER_WITH_MEMO_SELECTOR = bytes.fromhex("76a8ee59")
+    ALPHA_USD = "0x20c0000000000000000000000000000000000001"
+
+    memo = b"INV-12345" + b"\x00" * 23  # right-pad to 32 bytes # [!code hl]
+
+    data = TRANSFER_WITH_MEMO_SELECTOR + encode( # [!code hl]
+        ["address", "uint256", "bytes32"], # [!code hl]
+        ["0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb", 100_000_000, memo], # [!code hl]
+    ) # [!code hl]
+
+    tx = TempoTransaction.create(
+        chain_id=w3.eth.chain_id,
+        gas_limit=100_000,
+        max_fee_per_gas=w3.eth.gas_price * 2,
+        max_priority_fee_per_gas=w3.eth.gas_price,
+        nonce=w3.eth.get_transaction_count(account.address),
+        calls=(
+            Call.create(to=ALPHA_USD, data="0x" + data.hex()),
+        ),
+    )
+
+    signed_tx = tx.sign(account.key.hex())
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.encode())
+    ```
+
+    ```python [provider.py]
+    from web3 import Web3
+    from eth_account import Account
+
+    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    account = Account.from_key("0x...")
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Go">
+
+    :::code-group
+
+    ```go [main.go]
+    package main
+
+    import (
+    	"context"
+    	"log"
+    	"math/big"
+
+    	"github.com/ethereum/go-ethereum/common"
+    	"github.com/tempoxyz/tempo-go/pkg/signer"
+    	"github.com/tempoxyz/tempo-go/pkg/transaction"
+    )
+
+    func buildTransferWithMemoData(to common.Address, amount *big.Int, memo [32]byte) []byte {
+    	data := make([]byte, 100) // 4 + 32 + 32 + 32
+    	data[0], data[1], data[2], data[3] = 0x76, 0xa8, 0xee, 0x59
+    	copy(data[16:36], to.Bytes())
+    	amount.FillBytes(data[36:68])
+    	copy(data[68:100], memo[:])
+    	return data
+    }
+
+    func main() {
+    	sgn, _ := signer.NewSigner("0x...")
+    	c := newClient()
+    	ctx := context.Background()
+
+    	nonce, _ := c.GetTransactionCount(ctx, sgn.Address().Hex())
+
+    	recipient := common.HexToAddress("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb")
+    	alphaUSD := common.HexToAddress("0x20c0000000000000000000000000000000000001")
+
+    	var memo [32]byte // [!code hl]
+    	copy(memo[:], []byte("INV-12345")) // [!code hl]
+
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    		SetNonce(nonce).
+    		SetGas(100_000).
+    		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
+    		SetMaxPriorityFeePerGas(big.NewInt(1_000_000_000)).
+    		AddCall( // [!code hl]
+    			alphaUSD, // [!code hl]
+    			big.NewInt(0), // [!code hl]
+    			buildTransferWithMemoData(recipient, big.NewInt(100_000_000), memo), // [!code hl]
+    		). // [!code hl]
+    		Build()
+
+    	_ = transaction.SignTransaction(tx, sgn)
+    	serialized, _ := transaction.Serialize(tx, nil)
+    	txHash, _ := c.SendRawTransaction(ctx, serialized)
+
+    	log.Printf("Transaction hash: %s", txHash)
+    }
+    ```
+
+    ```go [provider.go]
+    // [!include ~/snippets/go-provider.go:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Cast">
+
+    ```bash
+    $ cast send \
+      0x20c0000000000000000000000000000000000001 \
+      "transferWithMemo(address,uint256,bytes32)" \
+      0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb \
+      100000000 \
+      $(cast --format-bytes32-string "INV-12345") \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $PRIVATE_KEY # [!code hl]
+    ```
+
+  </Tab>
+
+  <Tab title="Solidity">
+
+    ```solidity
+    import {ITIP20} from "tempo-std/interfaces/ITIP20.sol";
+
+    contract PaymentSender {
+        ITIP20 public token;
+
+        function sendPaymentWithMemo(
+            address recipient,
+            uint256 amount,
+            bytes32 invoiceId
+        ) external {
+            token.transferWithMemo(recipient, amount, invoiceId); // [!code hl]
+        }
+    }
+    ```
+
+  </Tab>
+</Tabs>
 
 ### Batch payment transactions
 
 Send multiple payments in a single transaction using batch transactions:
 
-:::code-group
+<Tabs stateKey="library">
+  <Tab title="Viem">
 
-```ts [example.ts]
-import { encodeFunctionData, parseUnits } from 'viem'
-import { Abis } from 'viem/tempo'
-import { client } from './viem.config'
+    :::code-group
 
-const tokenABI = Abis.tip20
-const recipient1 = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb'
-const recipient2 = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
+    ```ts twoslash [example.ts]
+    // @noErrors
+    import { encodeFunctionData, parseUnits } from 'viem'
+    import { Abis } from 'viem/tempo'
+    import { client } from './viem.config'
 
-const calls = [
-  {
-    to: '0x20c0000000000000000000000000000000000001', // AlphaUSD address
-    data: encodeFunctionData({
-      abi: tokenABI,
-      functionName: 'transfer',
-      args: [recipient1, parseUnits('100', 6)],
-    }),
-  },
-  {
-    to: '0x20c0000000000000000000000000000000000001',
-    data: encodeFunctionData({
-      abi: tokenABI,
-      functionName: 'transfer',
-      args: [recipient2, parseUnits('50', 6)],
-    }),
-  },
-]
+    const tokenABI = Abis.tip20
+    const recipient1 = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb'
+    const recipient2 = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
 
-const hash = await client.sendTransaction({ calls })
-```
+    const calls = [ // [!code hl]
+      { // [!code hl]
+        to: '0x20c0000000000000000000000000000000000001', // [!code hl]
+        data: encodeFunctionData({ // [!code hl]
+          abi: tokenABI, // [!code hl]
+          functionName: 'transfer', // [!code hl]
+          args: [recipient1, parseUnits('100', 6)], // [!code hl]
+        }), // [!code hl]
+      }, // [!code hl]
+      { // [!code hl]
+        to: '0x20c0000000000000000000000000000000000001', // [!code hl]
+        data: encodeFunctionData({ // [!code hl]
+          abi: tokenABI, // [!code hl]
+          functionName: 'transfer', // [!code hl]
+          args: [recipient2, parseUnits('50', 6)], // [!code hl]
+        }), // [!code hl]
+      }, // [!code hl]
+    ] // [!code hl]
 
-```ts [viem.config.ts] filename="viem.config.ts"
-// [!include ~/snippets/viem.config.ts:setup]
-```
+    const hash = await client.sendTransaction({ calls })
+    ```
 
-```rust [Rust]
-use alloy::{
-    primitives::{address, Address, U256},
-    providers::{Provider, ProviderBuilder},
-    sol_types::SolCall,
-};
-use tempo_alloy::{
-    TempoNetwork, contracts::precompiles::ITIP20, primitives::transaction::Call,
-    rpc::TempoTransactionRequest,
-};
+    ```ts twoslash [viem.config.ts]
+    // [!include ~/snippets/viem.config.ts:setup]
+    ```
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
-        .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
-        .await?;
+    :::
 
-    let recipient1 = address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb"); // [!code focus]
-    let recipient2 = address!("0x70997970C51812dc3A010C7d01b50e0d17dc79C8"); // [!code focus]
-    let token_address: Address = address!("0x20c0000000000000000000000000000000000001"); // [!code focus]
+  </Tab>
 
-    let calls = vec![ // [!code focus]
-        Call { // [!code focus]
-            to: token_address.into(), // [!code focus]
-            input: ITIP20::transferCall { // [!code focus]
-                to: recipient1, // [!code focus]
-                amount: U256::from(100_000_000), // [!code focus]
-            } // [!code focus]
-            .abi_encode() // [!code focus]
-            .into(), // [!code focus]
-            value: U256::ZERO, // [!code focus]
-        }, // [!code focus]
-        Call { // [!code focus]
-            to: token_address.into(), // [!code focus]
-            input: ITIP20::transferCall { // [!code focus]
-                to: recipient2, // [!code focus]
-                amount: U256::from(50_000_000), // [!code focus]
-            } // [!code focus]
-            .abi_encode() // [!code focus]
-            .into(), // [!code focus]
-            value: U256::ZERO, // [!code focus]
-        }, // [!code focus]
-    ]; // [!code focus]
+  <Tab title="Wagmi">
 
-    let pending = provider // [!code focus]
-        .send_transaction(TempoTransactionRequest { // [!code focus]
-            calls, // [!code focus]
-            ..Default::default() // [!code focus]
-        }) // [!code focus]
-        .await?; // [!code focus]
-    let tx_hash = pending.tx_hash(); // [!code focus]
+    ```tsx twoslash
+    // @noErrors
+    import { useSendTransactionSync } from 'wagmi'
+    import { encodeFunctionData, parseUnits } from 'viem'
+    import { Abis } from 'viem/tempo'
 
-    println!("Batch transaction sent: {tx_hash:?}"); // [!code focus]
+    function BatchPayment() {
+      const { sendTransactionSync, isPending } = useSendTransactionSync()
 
-    Ok(())
-}
-```
+      const tokenABI = Abis.tip20
+      const token = '0x20c0000000000000000000000000000000000001'
 
-:::
+      return (
+        <button
+          onClick={() =>
+            sendTransactionSync({
+              calls: [ // [!code hl]
+                { // [!code hl]
+                  to: token, // [!code hl]
+                  data: encodeFunctionData({ // [!code hl]
+                    abi: tokenABI, // [!code hl]
+                    functionName: 'transfer', // [!code hl]
+                    args: ['0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', parseUnits('100', 6)], // [!code hl]
+                  }), // [!code hl]
+                }, // [!code hl]
+                { // [!code hl]
+                  to: token, // [!code hl]
+                  data: encodeFunctionData({ // [!code hl]
+                    abi: tokenABI, // [!code hl]
+                    functionName: 'transfer', // [!code hl]
+                    args: ['0x70997970C51812dc3A010C7d01b50e0d17dc79C8', parseUnits('50', 6)], // [!code hl]
+                  }), // [!code hl]
+                }, // [!code hl]
+              ], // [!code hl]
+            })
+          }
+          disabled={isPending}
+        >
+          Send Batch Payment
+        </button>
+      )
+    }
+    ```
+
+  </Tab>
+
+  <Tab title="Rust">
+
+    :::code-group
+
+    ```rust [example.rs]
+    use alloy::{
+        primitives::{address, Address, U256},
+        providers::{Provider, ProviderBuilder},
+        sol_types::SolCall,
+    };
+    use tempo_alloy::{
+        TempoNetwork, contracts::precompiles::ITIP20, primitives::transaction::Call,
+        rpc::TempoTransactionRequest,
+    };
+
+    mod provider;
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = provider::get_provider().await?;
+
+        let recipient1 = address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb");
+        let recipient2 = address!("0x70997970C51812dc3A010C7d01b50e0d17dc79C8");
+        let token_address: Address = address!("0x20c0000000000000000000000000000000000001");
+
+        let calls = vec![ // [!code hl]
+            Call { // [!code hl]
+                to: token_address.into(), // [!code hl]
+                input: ITIP20::transferCall { // [!code hl]
+                    to: recipient1, // [!code hl]
+                    amount: U256::from(100_000_000), // [!code hl]
+                } // [!code hl]
+                .abi_encode() // [!code hl]
+                .into(), // [!code hl]
+                value: U256::ZERO, // [!code hl]
+            }, // [!code hl]
+            Call { // [!code hl]
+                to: token_address.into(), // [!code hl]
+                input: ITIP20::transferCall { // [!code hl]
+                    to: recipient2, // [!code hl]
+                    amount: U256::from(50_000_000), // [!code hl]
+                } // [!code hl]
+                .abi_encode() // [!code hl]
+                .into(), // [!code hl]
+                value: U256::ZERO, // [!code hl]
+            }, // [!code hl]
+        ]; // [!code hl]
+
+        let pending = provider
+            .send_transaction(TempoTransactionRequest {
+                calls,
+                ..Default::default()
+            })
+            .await?;
+        let tx_hash = pending.tx_hash();
+
+        println!("Batch transaction sent: {tx_hash:?}");
+
+        Ok(())
+    }
+    ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-provider.rs:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Python">
+
+    :::code-group
+
+    ```python [example.py]
+    from eth_abi import encode
+    from pytempo import Call, TempoTransaction
+    from provider import w3, account
+
+    TRANSFER_SELECTOR = bytes.fromhex("a9059cbb")
+    ALPHA_USD = "0x20c0000000000000000000000000000000000001"
+
+    def build_transfer(to: str, amount: int) -> str:
+        data = TRANSFER_SELECTOR + encode(
+            ["address", "uint256"], [to, amount]
+        )
+        return "0x" + data.hex()
+
+    tx = TempoTransaction.create(
+        chain_id=w3.eth.chain_id,
+        gas_limit=200_000,
+        max_fee_per_gas=w3.eth.gas_price * 2,
+        max_priority_fee_per_gas=w3.eth.gas_price,
+        nonce=w3.eth.get_transaction_count(account.address),
+        calls=( # [!code hl]
+            Call.create( # [!code hl]
+                to=ALPHA_USD, # [!code hl]
+                data=build_transfer("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb", 100_000_000), # [!code hl]
+            ), # [!code hl]
+            Call.create( # [!code hl]
+                to=ALPHA_USD, # [!code hl]
+                data=build_transfer("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", 50_000_000), # [!code hl]
+            ), # [!code hl]
+        ), # [!code hl]
+    )
+
+    signed_tx = tx.sign(account.key.hex())
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.encode())
+    ```
+
+    ```python [provider.py]
+    from web3 import Web3
+    from eth_account import Account
+
+    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    account = Account.from_key("0x...")
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Go">
+
+    :::code-group
+
+    ```go [main.go]
+    package main
+
+    import (
+    	"context"
+    	"log"
+    	"math/big"
+
+    	"github.com/ethereum/go-ethereum/common"
+    	"github.com/tempoxyz/tempo-go/pkg/signer"
+    	"github.com/tempoxyz/tempo-go/pkg/transaction"
+    )
+
+    func buildTransferData(to common.Address, amount *big.Int) []byte {
+    	data := make([]byte, 68)
+    	data[0], data[1], data[2], data[3] = 0xa9, 0x05, 0x9c, 0xbb
+    	copy(data[16:36], to.Bytes())
+    	amount.FillBytes(data[36:68])
+    	return data
+    }
+
+    func main() {
+    	sgn, _ := signer.NewSigner("0x...")
+    	c := newClient()
+    	ctx := context.Background()
+
+    	nonce, _ := c.GetTransactionCount(ctx, sgn.Address().Hex())
+
+    	recipient1 := common.HexToAddress("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb")
+    	recipient2 := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
+    	alphaUSD := common.HexToAddress("0x20c0000000000000000000000000000000000001")
+
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    		SetNonce(nonce).
+    		SetGas(200_000).
+    		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
+    		SetMaxPriorityFeePerGas(big.NewInt(1_000_000_000)).
+    		AddCall(alphaUSD, big.NewInt(0), buildTransferData(recipient1, big.NewInt(100_000_000))). // [!code hl]
+    		AddCall(alphaUSD, big.NewInt(0), buildTransferData(recipient2, big.NewInt(50_000_000))). // [!code hl]
+    		Build()
+
+    	_ = transaction.SignTransaction(tx, sgn)
+    	serialized, _ := transaction.Serialize(tx, nil)
+    	txHash, _ := c.SendRawTransaction(ctx, serialized)
+
+    	log.Printf("Batch transaction sent: %s", txHash)
+    }
+    ```
+
+    ```go [provider.go]
+    // [!include ~/snippets/go-provider.go:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Cast">
+
+    ```bash
+    $ cast batch-send \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $PRIVATE_KEY \
+      --call "0x20c0000000000000000000000000000000000001::transfer(address,uint256):0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb,100000000" \
+      --call "0x20c0000000000000000000000000000000000001::transfer(address,uint256):0x70997970C51812dc3A010C7d01b50e0d17dc79C8,50000000" # [!code hl]
+    ```
+
+  </Tab>
+
+  <Tab title="Solidity">
+
+    ```solidity
+    import {ITIP20} from "tempo-std/interfaces/ITIP20.sol";
+
+    contract BatchPaymentSender {
+        ITIP20 public token;
+
+        struct Payment {
+            address recipient;
+            uint256 amount;
+        }
+
+        function batchPay(Payment[] calldata payments) external {
+            for (uint256 i = 0; i < payments.length; i++) {
+                token.transfer(payments[i].recipient, payments[i].amount); // [!code hl]
+            }
+        }
+    }
+    ```
+
+  </Tab>
+</Tabs>
 
 ### Payment events
 
