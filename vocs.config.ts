@@ -1,3 +1,4 @@
+import { createElement, Fragment } from 'react'
 import { Changelog, defineConfig, McpSource } from 'vocs/config'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 
@@ -15,19 +16,21 @@ const baseUrl = (() => {
 })()
 
 export default defineConfig({
-  head: gaMeasurementId ? (
-    <>
-      <script
-        async
-        src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
-      />
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaMeasurementId}');`,
-        }}
-      />
-    </>
-  ) : undefined,
+  head: gaMeasurementId
+    ? createElement(
+        Fragment,
+        null,
+        createElement('script', {
+          async: true,
+          src: `https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`,
+        }),
+        createElement('script', {
+          dangerouslySetInnerHTML: {
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaMeasurementId}');`,
+          },
+        }),
+      )
+    : undefined,
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
   // TODO: Set back to true once tempoxyz/tempo#tip-1011 dead link is fixed
   checkDeadlinks: 'warn',

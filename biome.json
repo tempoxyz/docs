@@ -60,7 +60,7 @@
   },
   "overrides": [
     {
-      "includes": ["vocs.config.tsx"],
+      "includes": ["vocs.config.ts"],
       "linter": {
         "rules": {
           "security": {
