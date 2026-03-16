@@ -1,0 +1,33 @@
+name: Sync from docs
+on:
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: Sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Fetch upstream and create sync branch
+        run: |
+          git remote add upstream https://github.com/tempoxyz/docs.git
+          git fetch upstream main
+          branch="sync/docs-$(date +%Y%m%d-%H%M%S)"
+          git checkout -b "$branch"
+          git merge upstream/main --no-edit
+          git push origin "$branch"
+          echo "branch=$branch" >> "$GITHUB_ENV"
+
+      - name: Create pull request
+        run: gh pr create --title "chore: sync from tempoxyz/docs" --body "Automated sync of latest changes from [tempoxyz/docs](https://github.com/tempoxyz/docs)."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
