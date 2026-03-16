@@ -23,7 +23,7 @@ const handler = Handler.keyManager({
 
 ```ts twoslash [wagmi.config.ts]
 // @noErrors
-import { tempoModerato } from 'viem/chains'
+import { tempo } from 'viem/chains'
 import { KeyManager, webAuthn } from 'wagmi/tempo'
 import { createConfig, http } from 'wagmi'
 
@@ -34,7 +34,7 @@ export const config = createConfig({
       rpId: 'example.com',
     }),
   ],
-  chains: [tempoModerato],
+  chains: [tempo],
   transports: {
     [tempo.id]: http(),
   },

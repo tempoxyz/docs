@@ -9,7 +9,7 @@ import { TokenListDemo } from '../../components/TokenList.tsx'
 
 A [Uniswap Token Lists](https://tokenlists.org)-compatible API for token metadata and icons on Tempo.
 
-As an example, here's Tempo Testnet's tokenlist, fetched from [tokenlist.tempo.xyz/list/42431](https://tokenlist.tempo.xyz/list/42431):
+As an example, here's Tempo's tokenlist, fetched from [tokenlist.tempo.xyz/list/4217](https://tokenlist.tempo.xyz/list/4217):
 
 <TokenListDemo />
 
@@ -17,10 +17,15 @@ As an example, here's Tempo Testnet's tokenlist, fetched from [tokenlist.tempo.x
 
 | Endpoint | Description |
 |----------|-------------|
-[`/list/{chain_id}`](https://tokenlist.tempo.xyz/list/42431) | Token list for a chain |
-[`/asset/{chain_id}/{id}`](https://tokenlist.tempo.xyz/asset/42431/pathUSD) | Get a single token by symbol or address​
-[`/icon/{chain_id}`](https://tokenlist.tempo.xyz/icon/42431) | Chain icon (SVG) |
-[`/icon/{chain_id}/{address}`](https://tokenlist.tempo.xyz/icon/42431/0x20c0000000000000000000000000000000000000) | Token icon (SVG) |
+[`/list/{chain_id}`](https://tokenlist.tempo.xyz/list/4217) | Token list for a chain |
+[`/asset/{chain_id}/{id}`](https://tokenlist.tempo.xyz/asset/4217/pathUSD) | Get a single token by symbol or address​
+[`/icon/{chain_id}`](https://tokenlist.tempo.xyz/icon/4217) | Chain icon (SVG) |
+[`/icon/{chain_id}/{address}`](https://tokenlist.tempo.xyz/icon/4217/0x20c0000000000000000000000000000000000000) | Token icon (SVG) |
+
+| Chain | `chain_id` |
+|-------|------------|
+| Mainnet | `4217` |
+| Testnet (Moderato) | `42431` |
 
 ## Adding a New Token
 
@@ -32,7 +37,7 @@ As an example, here's Tempo Testnet's tokenlist, fetched from [tokenlist.tempo.x
      "name": "piUSD",
      "symbol": "PiUSD",
      "decimals": 6,
-     "chainId": 42431,
+     "chainId": 4217,
      "address": "0x..."
    }
    ```

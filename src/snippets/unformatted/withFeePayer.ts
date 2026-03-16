@@ -5,7 +5,7 @@ import { withFeePayer } from 'viem/tempo'
 
 const _client = createClient({
   account: privateKeyToAccount('0x...'),
-  chain: tempoModerato,
+  chain: tempo,
   transport: withFeePayer(
     // [!code hl]
     http(), // [!code hl]
@@ -34,10 +34,10 @@ import { Handler } from 'tempo.ts/server'
 // [!region server]
 import { createClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { tempoModerato } from 'viem/chains'
+import { tempo } from 'viem/chains'
 
 const client = createClient({
-  chain: tempoModerato.extend({
+  chain: tempo.extend({
     feeToken: '0x20c0000000000000000000000000000000000001',
   }),
   transport: http(),

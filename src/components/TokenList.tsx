@@ -4,9 +4,9 @@ import { useQuery } from '@tanstack/react-query'
 
 export function TokenListDemo() {
   const tokenList = useQuery({
-    queryKey: ['tokenList', 42431],
+    queryKey: ['tokenList', 4217],
     queryFn: async () => {
-      const response = await fetch('https://tokenlist.tempo.xyz/list/42431')
+      const response = await fetch('https://tokenlist.tempo.xyz/list/4217')
       const data = await response.json()
       if (!Object.hasOwn(data, 'tokens')) throw new Error('Invalid token list')
       return data.tokens as Array<{
@@ -29,7 +29,7 @@ export function TokenListDemo() {
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-content"
-            href={`https://tokenlist.tempo.xyz/asset/42431/${token.address}`}
+            href={`https://tokenlist.tempo.xyz/asset/4217/${token.address}`}
           >
             <img src={token.logoURI} alt={token.name} className="size-7.5" />
             <span className="font-medium text-xl tracking-wider">{token.name}</span>
