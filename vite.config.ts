@@ -12,9 +12,31 @@ export default defineConfig(({ mode }) => {
     if (!(key in process.env)) process.env[key] = env[key]
   }
   return {
-    plugins: [syncTips(), vocs(), react(), tempoNode()],
+    plugins: [googleAnalytics(), syncTips(), vocs(), react(), tempoNode()],
   }
 })
+
+function googleAnalytics(): Plugin {
+  const id = process.env.VITE_GA_MEASUREMENT_ID
+  return {
+    name: 'google-analytics',
+    transformIndexHtml() {
+      if (!id) return []
+      return [
+        {
+          tag: 'script',
+          attrs: { async: true, src: `https://www.googletagmanager.com/gtag/js?id=${id}` },
+          injectTo: 'head',
+        },
+        {
+          tag: 'script',
+          children: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${id}');`,
+          injectTo: 'head',
+        },
+      ]
+    },
+  }
+}
 
 function tempoNode(): Plugin {
   return {
