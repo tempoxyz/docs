@@ -29,7 +29,7 @@ To interact with Tempo, create a web3.py client connected to a Tempo node:
 ```python [main.py]
 from web3 import Web3
 
-w3 = Web3(Web3.HTTPProvider("https://rpc.testnet.tempo.xyz")) # [!code hl]
+w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz")) # [!code hl]
 
 block_number = w3.eth.block_number
 print(f"Connected to Tempo at block {block_number}")
@@ -44,7 +44,7 @@ import os
 from web3 import Web3
 from pytempo import Call, TempoTransaction # [!code hl]
 
-w3 = Web3(Web3.HTTPProvider("https://rpc.testnet.tempo.xyz"))
+w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
 private_key = os.environ["PRIVATE_KEY"]
 account = w3.eth.account.from_key(private_key)
 
@@ -84,7 +84,7 @@ amount = 100_000_000  # 100 tokens (6 decimals)
 transfer_data = token.encode_abi("transfer", args=[recipient, amount])
 
 tx = TempoTransaction.create(
-    chain_id=42429,
+    chain_id=4217,
     gas_limit=100_000,
     max_fee_per_gas=10_000_000_000,
     max_priority_fee_per_gas=1_000_000_000,
@@ -101,7 +101,7 @@ Use a TIP-20 token to pay for transaction fees instead of the native token:
 
 ```python [fee_token.py]
 tx = TempoTransaction.create(
-    chain_id=42429,
+    chain_id=4217,
     gas_limit=100_000,
     max_fee_per_gas=10_000_000_000,
     max_priority_fee_per_gas=1_000_000_000,
@@ -119,7 +119,7 @@ Execute multiple operations atomically in a single transaction:
 
 ```python [batch.py]
 tx = TempoTransaction.create(
-    chain_id=42429,
+    chain_id=4217,
     gas_limit=300_000,
     max_fee_per_gas=10_000_000_000,
     max_priority_fee_per_gas=1_000_000_000,
@@ -141,7 +141,7 @@ Send multiple transactions concurrently using different nonce keys:
 
 ```python [parallel.py]
 tx1 = TempoTransaction.create(
-    chain_id=42429,
+    chain_id=4217,
     gas_limit=100_000,
     max_fee_per_gas=10_000_000_000,
     max_priority_fee_per_gas=1_000_000_000,
@@ -151,7 +151,7 @@ tx1 = TempoTransaction.create(
 )
 
 tx2 = TempoTransaction.create(
-    chain_id=42429,
+    chain_id=4217,
     gas_limit=100_000,
     max_fee_per_gas=10_000_000_000,
     max_priority_fee_per_gas=1_000_000_000,
@@ -174,7 +174,7 @@ Have another account pay for transaction fees:
 ```python [fee_payer.py]
 # User creates and signs a transaction marked for fee sponsorship
 tx = TempoTransaction.create(
-    chain_id=42429,
+    chain_id=4217,
     gas_limit=100_000,
     max_fee_per_gas=10_000_000_000,
     max_priority_fee_per_gas=1_000_000_000,
@@ -197,7 +197,7 @@ import time
 now = int(time.time())
 
 tx = TempoTransaction.create(
-    chain_id=42429,
+    chain_id=4217,
     gas_limit=100_000,
     max_fee_per_gas=10_000_000_000,
     max_priority_fee_per_gas=1_000_000_000,

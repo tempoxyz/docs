@@ -320,7 +320,7 @@ Send a payment using the standard `transfer` function:
     from web3 import Web3
     from eth_account import Account
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
     account = Account.from_key("0x...")
     ```
 
@@ -363,7 +363,7 @@ Send a payment using the standard `transfer` function:
     	recipient := common.HexToAddress("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb")
     	alphaUSD := common.HexToAddress("0x20c0000000000000000000000000000000000001")
 
-    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdMainnet)).
     		SetNonce(nonce).
     		SetGas(100_000).
     		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
@@ -568,7 +568,7 @@ Include a memo for payment reconciliation and tracking. The memo is a 32-byte va
     from web3 import Web3
     from eth_account import Account
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
     account = Account.from_key("0x...")
     ```
 
@@ -615,7 +615,7 @@ Include a memo for payment reconciliation and tracking. The memo is a 32-byte va
     	var memo [32]byte // [!code hl]
     	copy(memo[:], []byte("INV-12345")) // [!code hl]
 
-    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdMainnet)).
     		SetNonce(nonce).
     		SetGas(100_000).
     		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
@@ -890,7 +890,7 @@ Send multiple payments in a single transaction using batch transactions:
     from web3 import Web3
     from eth_account import Account
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
     account = Account.from_key("0x...")
     ```
 
@@ -934,7 +934,7 @@ Send multiple payments in a single transaction using batch transactions:
     	recipient2 := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
     	alphaUSD := common.HexToAddress("0x20c0000000000000000000000000000000000001")
 
-    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdMainnet)).
     		SetNonce(nonce).
     		SetGas(200_000).
     		SetMaxFeePerGas(big.NewInt(25_000_000_000)).

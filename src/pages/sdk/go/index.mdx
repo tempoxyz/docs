@@ -38,7 +38,7 @@ import (
 )
 
 func main() {
-    c := client.New("https://rpc.testnet.tempo.xyz") 
+    c := client.New("https://rpc.tempo.xyz") 
 
     ctx := context.Background()
     blockNum, _ := c.GetBlockNumber(ctx)
@@ -49,7 +49,7 @@ func main() {
 For authenticated RPC endpoints:
 
 ```go [main.go]
-c := client.New("https://rpc.testnet.tempo.xyz",
+c := client.New("https://rpc.tempo.xyz",
     client.WithAuth("username", "password"),
 )
 ```
@@ -96,7 +96,7 @@ import (
 )
 
 func main() {
-    c := client.New("https://rpc.testnet.tempo.xyz")
+    c := client.New("https://rpc.tempo.xyz")
     s, _ := signer.NewSigner("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
 
     ctx := context.Background()
@@ -105,7 +105,7 @@ func main() {
     recipient := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
 
     // [!code hl:10]
-    tx := transaction.NewBuilder(big.NewInt(42431)). // Tempo testnet
+    tx := transaction.NewBuilder(big.NewInt(4217)). // Tempo mainnet
         SetNonce(nonce).
         SetGas(100000).
         SetMaxFeePerGas(big.NewInt(20000000000)). // 20 gwei base fee
@@ -152,7 +152,7 @@ amount := big.NewInt(100_000_000) // 100 tokens (6 decimals)
 
 transferData, _ := erc20ABI.Pack("transfer", recipient, amount)
 
-tx := transaction.NewBuilder(big.NewInt(42429)).
+tx := transaction.NewBuilder(big.NewInt(4217)).
     SetNonce(nonce).
     SetGas(100000).
     SetMaxFeePerGas(big.NewInt(10000000000)).
@@ -175,7 +175,7 @@ copy(memo[:], "INV-12345")
 
 memoData, _ := tip20ABI.Pack("transferWithMemo", recipient, amount, memo)
 
-tx := transaction.NewBuilder(big.NewInt(42429)).
+tx := transaction.NewBuilder(big.NewInt(4217)).
     SetNonce(nonce).
     SetGas(100000).
     SetMaxFeePerGas(big.NewInt(10000000000)).
@@ -189,7 +189,7 @@ tx := transaction.NewBuilder(big.NewInt(42429)).
 Execute multiple operations atomically in a single transaction:
 
 ```go [batch.go]
-tx := transaction.NewBuilder(big.NewInt(42429)).
+tx := transaction.NewBuilder(big.NewInt(4217)).
     SetNonce(nonce).
     SetGas(200000).
     SetMaxFeePerGas(big.NewInt(10000000000)).
@@ -207,7 +207,7 @@ transaction.SignTransaction(tx, s)
 Send multiple transactions concurrently using different nonce keys:
 
 ```go [parallel.go]
-tx1 := transaction.NewBuilder(big.NewInt(42429)).
+tx1 := transaction.NewBuilder(big.NewInt(4217)).
     SetNonceKey(big.NewInt(1)). // Sequence A // [!code hl]
     SetNonce(0).
     SetGas(100000).
@@ -216,7 +216,7 @@ tx1 := transaction.NewBuilder(big.NewInt(42429)).
     AddCall(recipient1, big.NewInt(0), data1).
     Build()
 
-tx2 := transaction.NewBuilder(big.NewInt(42429)).
+tx2 := transaction.NewBuilder(big.NewInt(4217)).
     SetNonceKey(big.NewInt(2)). // Sequence B (parallel) // [!code hl]
     SetNonce(0).
     SetGas(100000).
@@ -238,7 +238,7 @@ go func() { c.SendRawTransaction(ctx, serialize(tx2)) }()
 Have another account pay for transaction fees:
 
 ```go [feepayer.go]
-tx := transaction.NewBuilder(big.NewInt(42429)).
+tx := transaction.NewBuilder(big.NewInt(4217)).
     SetNonce(nonce).
     SetGas(100000).
     SetMaxFeePerGas(big.NewInt(10000000000)).
@@ -258,7 +258,7 @@ Set a time window during which the transaction is valid:
 ```go [validity.go]
 now := time.Now()
 
-tx := transaction.NewBuilder(big.NewInt(42429)).
+tx := transaction.NewBuilder(big.NewInt(4217)).
     SetNonce(nonce).
     SetGas(100000).
     SetMaxFeePerGas(big.NewInt(10000000000)).

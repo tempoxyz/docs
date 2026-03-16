@@ -135,7 +135,7 @@ user's preferred fee token and the validator's preferred token.
     from web3 import Web3
     from eth_account import Account
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
     account = Account.from_key("0x...")
     ```
 
@@ -167,7 +167,7 @@ user's preferred fee token and the validator's preferred token.
 
     	nonce, _ := c.GetTransactionCount(ctx, sgn.Address().Hex())
 
-    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdMainnet)).
     		SetNonce(nonce).
     		SetGas(300_000).
     		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
@@ -387,7 +387,7 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
     from web3 import Web3
     from eth_account import Account
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
     account = Account.from_key("0x...")
     ```
 
@@ -421,7 +421,7 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
     	nonce, _ := c.GetTransactionCount(ctx, senderSgn.Address().Hex())
 
     	// Sender builds and signs a sponsored transaction
-    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdMainnet)).
     		SetNonce(nonce).
     		SetGas(300_000).
     		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
@@ -722,7 +722,7 @@ parameter.
     from web3 import Web3
     from eth_account import Account
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
     account = Account.from_key("0x...")
     ```
 
@@ -754,7 +754,7 @@ parameter.
 
     	nonce, _ := c.GetTransactionCount(ctx, sgn.Address().Hex())
 
-    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdMainnet)).
     		SetNonce(nonce).
     		SetGas(600_000).
     		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
@@ -1048,7 +1048,7 @@ transactions thereafter can be signed by the access key.
     from web3 import Web3
     from eth_account import Account
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
     account = Account.from_key("0x...")
     ```
 
@@ -1086,7 +1086,7 @@ transactions thereafter can be signed by the access key.
     	c := newClient()
     	ctx := context.Background()
 
-    	chainID := big.NewInt(transaction.ChainIdModerato)
+    	chainID := big.NewInt(transaction.ChainIdMainnet)
     	gasPrice := big.NewInt(25_000_000_000)
     	keychainAddr := common.HexToAddress(keychain.AccountKeychainAddress)
 
@@ -1375,7 +1375,7 @@ In **Viem** and **Wagmi**, expiring nonces are handled automatically.
     from web3 import Web3
     from eth_account import Account
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
     account = Account.from_key("0x...")
     ```
 
@@ -1423,7 +1423,7 @@ In **Viem** and **Wagmi**, expiring nonces are handled automatically.
     		wg.Add(1)
     		go func(p txParams) {
     			defer wg.Done()
-    			tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    			tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdMainnet)).
     				SetNonce(0).
     				SetNonceKey(big.NewInt(p.nonceKey)). // [!code hl]
     				SetGas(300_000).
@@ -1647,7 +1647,7 @@ Expiring nonces can be used by setting `nonceKey` to `maxUint256` and `validBefo
     from web3 import Web3
     from eth_account import Account
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
     account = Account.from_key("0x...")
     ```
 
@@ -1683,7 +1683,7 @@ Expiring nonces can be used by setting `nonceKey` to `maxUint256` and `validBefo
 
     	validBefore := uint64(time.Now().Unix()) + 20
 
-    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdMainnet)).
     		SetGas(300_000).
     		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
     		SetMaxPriorityFeePerGas(big.NewInt(1_000_000_000)).
@@ -1906,7 +1906,7 @@ For cases requiring ordered sequences within a key, Tempo's **2D nonce system** 
     from web3 import Web3
     from eth_account import Account
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
     account = Account.from_key("0x...")
     ```
 
@@ -1953,7 +1953,7 @@ For cases requiring ordered sequences within a key, Tempo's **2D nonce system** 
     		wg.Add(1)
     		go func(p txParams) {
     			defer wg.Done()
-    			tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    			tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdMainnet)).
     				SetNonce(0).
     				SetNonceKey(big.NewInt(p.nonceKey)). // [!code focus]
     				SetGas(300_000).
@@ -2178,7 +2178,7 @@ the transaction can be included in a block.
     from web3 import Web3
     from eth_account import Account
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
     account = Account.from_key("0x...")
     ```
 
@@ -2216,7 +2216,7 @@ the transaction can be included in a block.
     	// 2026-01-02 00:00:00 UTC
     	validBefore := uint64(time.Date(2026, 1, 2, 0, 0, 0, 0, time.UTC).Unix())
 
-    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdMainnet)).
     		SetNonce(nonce).
     		SetGas(300_000).
     		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
