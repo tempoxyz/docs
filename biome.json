@@ -60,6 +60,16 @@
   },
   "overrides": [
     {
+      "includes": ["vocs.config.tsx"],
+      "linter": {
+        "rules": {
+          "security": {
+            "noDangerouslySetInnerHtml": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["env.d.ts"],
       "linter": {
         "rules": {

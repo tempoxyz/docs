@@ -1,6 +1,8 @@
 import { Changelog, defineConfig, McpSource } from 'vocs/config'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 
+const gaMeasurementId = process.env.VITE_GA_MEASUREMENT_ID
+
 const baseUrl = (() => {
   if (URL.canParse(process.env.VITE_BASE_URL)) return process.env.VITE_BASE_URL
   // VERCEL_BRANCH_URL is the stable URL for the branch (e.g., next.docs.tempo.xyz)
@@ -13,6 +15,19 @@ const baseUrl = (() => {
 })()
 
 export default defineConfig({
+  head: gaMeasurementId ? (
+    <>
+      <script
+        async
+        src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
+      />
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaMeasurementId}');`,
+        }}
+      />
+    </>
+  ) : undefined,
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
   // TODO: Set back to true once tempoxyz/tempo#tip-1011 dead link is fixed
   checkDeadlinks: 'warn',
