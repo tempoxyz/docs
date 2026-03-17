@@ -24,7 +24,7 @@ jobs:
         run: corepack enable pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Check
         run: pnpm run check
@@ -70,7 +70,7 @@ jobs:
           restore-keys: pnpm-${{ runner.os }}-
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Get Playwright version
         id: playwright-version
@@ -101,3 +101,12 @@ jobs:
           name: playwright-report-${{ matrix.shard }}
           path: playwright-report/
           retention-days: 15
+
+  e2e-result:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: [e2e]
+    steps:
+      - run: exit 1
+        if: ${{ needs.e2e.result == 'failure' || needs.e2e.result == 'cancelled' }}
