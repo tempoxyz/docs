@@ -1,0 +1,104 @@
+---
+title: Tempo Wallet CLI
+description: Learn how to use Tempo Wallet CLI and Tempo Request from your terminal, with quick onboarding guides and command references for daily workflows.
+---
+
+import { Cards, Card, Tab, Tabs } from 'vocs'
+
+# Tempo Wallet CLI
+
+Login and manage your Tempo Wallet from your terminal, with built-in [MPP](https://mpp.dev) support for service discovery and paid API requests.
+
+## Quickstart
+
+<Tabs>
+<Tab title="Agent">
+
+Paste this into your agent to set up Tempo Wallet:
+
+<br />
+
+```
+Read https://wallet.tempo.xyz/SKILL.md and set up tempo
+```
+
+</Tab>
+<Tab title="Human">
+
+::::steps
+
+#### Install the CLI
+
+```bash
+curl -fsSL https://tempo.xyz/install | bash
+```
+
+#### Connect your wallet
+
+```bash
+tempo wallet login
+```
+
+#### Verify setup
+
+```bash
+tempo wallet whoami
+```
+
+Expected result: wallet information is returned and you can continue to service discovery.
+
+#### List available services
+
+```bash
+tempo wallet services --search ai
+```
+
+#### Make a paid request
+
+```bash
+tempo request -X POST \
+  --json '{"prompt":"a sunset over the ocean"}' \
+  https://fal.mpp.tempo.xyz/fal-ai/flux/dev
+```
+
+#### Preview cost before running a new endpoint
+
+```bash
+tempo request --dry-run -X POST \
+  --json '{"prompt":"a sunset over the ocean"}' \
+  https://fal.mpp.tempo.xyz/fal-ai/flux/dev
+```
+
+::::
+
+</Tab>
+</Tabs>
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Use with Agents"
+    description="How auto-installed skills work in Claude Code, Amp, Codex, and similar agent environments"
+    to="/wallet/use-with-agents"
+    icon="lucide:bot"
+  />
+  <Card
+    title="Recipes"
+    description="Task-based recipes for discovery, requests, sessions, and transfers"
+    to="/wallet/recipes"
+    icon="lucide:workflow"
+  />
+  <Card
+    title="Reference"
+    description="Command and flag reference for tempo wallet and tempo request"
+    to="/wallet/reference"
+    icon="lucide:terminal"
+  />
+  <Card
+    title="Troubleshooting"
+    description="Fix the most common setup, auth, key, and request issues quickly"
+    to="/wallet/troubleshooting"
+    icon="lucide:wrench"
+  />
+</Cards>

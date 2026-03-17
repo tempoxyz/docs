@@ -479,6 +479,32 @@ export default defineConfig({
         ],
       },
       {
+        text: 'Tempo Wallet CLI',
+        collapsed: true,
+        items: [
+          {
+            text: 'Overview',
+            link: '/wallet',
+          },
+          {
+            text: 'Use with Agents',
+            link: '/wallet/use-with-agents',
+          },
+          {
+            text: 'Recipes',
+            link: '/wallet/recipes',
+          },
+          {
+            text: 'Reference',
+            link: '/wallet/reference',
+          },
+          {
+            text: 'Troubleshooting',
+            link: '/wallet/troubleshooting',
+          },
+        ],
+      },
+      {
         text: 'Tempo SDKs',
         collapsed: true,
         items: [

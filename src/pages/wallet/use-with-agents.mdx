@@ -1,0 +1,36 @@
+---
+title: Use Tempo Wallet CLI with Agents
+description: Connect Tempo Wallet CLI to your agent and understand the built-in features that make agent-driven paid requests reliable and safe.
+---
+
+# Use with Agents
+
+## Quickstart
+
+Paste this into your agent to set up Tempo Wallet:
+
+
+
+```
+Read https://wallet.tempo.xyz/SKILL.md and set up tempo
+```
+
+## Auto-installed Skills
+
+When you run the setup prompt, your agent installs Tempo's built-in skills automatically — no manual skill wiring required.
+
+- `tempo-wallet`: gives your agent wallet-aware capabilities like readiness checks, balances, service discovery, and session/funding actions.
+- `tempo-request`: gives your agent paid HTTP request capabilities with payment preview (`--dry-run`) and execution support.
+
+This works in supported skill-enabled agents including **Claude Code**, **Amp**, **Codex**, and similar environments.
+
+## Agent-Ready by Design
+
+1. **TOON output mode (`-t` / `--toon-output`)** gives compact, machine-readable, token-efficient output so agent tooling can parse command responses reliably.
+2. **Built-in service discovery** (`tempo wallet services`) lets agents search providers, inspect endpoint details, and use verified method/path metadata instead of guessing URLs or payload shapes.
+3. **`--dry-run` payment previews** let agents validate endpoint reachability, request shape, and expected payment cost before committing funds, which reduces failed paid calls in multi-step workflows.
+4. **Scoped access keys and spend controls** let you enforce spending limits per key so agents can only spend within defined budgets, which contains risk if a prompt, endpoint choice, or loop goes wrong.
+
+## Troubleshooting
+
+If agent runs fail, continue with [Troubleshooting](/wallet/troubleshooting).

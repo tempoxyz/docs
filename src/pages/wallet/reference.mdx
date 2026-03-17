@@ -1,0 +1,84 @@
+---
+title: Tempo Wallet CLI Reference
+description: Command reference for tempo wallet and tempo request, including the most-used commands and flags for interactive and script-based usage.
+---
+
+# Reference
+
+## `tempo wallet` Commands
+
+| Command | Purpose |
+| --- | --- |
+| `tempo wallet login` | Connect or create your wallet via browser auth |
+| `tempo wallet logout` | Disconnect your wallet |
+| `tempo wallet whoami` | Show readiness, address, balances, and key state |
+| `tempo wallet keys` | List keys and spending limits |
+| `tempo wallet fund` | Fund wallet (faucet/bridge flow depends on network) |
+| `tempo wallet transfer <AMOUNT> <TOKEN> <TO>` | Transfer tokens to another address |
+| `tempo wallet services` | List available services |
+| `tempo wallet services <SERVICE_ID>` | Show service details and endpoints |
+| `tempo wallet sessions list` | List payment sessions |
+| `tempo wallet sessions sync` | Reconcile local sessions with on-chain state |
+| `tempo wallet sessions close ...` | Close sessions by target or in bulk |
+| `tempo wallet mpp-sign` | Sign an MPP payment challenge |
+
+### `tempo wallet` Mini Recipe
+
+```bash
+tempo wallet whoami
+tempo wallet keys
+tempo wallet services --search ai
+tempo wallet services <SERVICE_ID>
+```
+
+## `tempo request` Core Usage
+
+| Command | Purpose |
+| --- | --- |
+| `tempo request <URL>` | Make an HTTP request with automatic payment handling |
+| `tempo request --dry-run <URL>` | Preview cost without executing payment |
+| `tempo request <URL> --json '{...}'` | Send a JSON body |
+| `tempo request <URL> -H 'Header: Value'` | Add custom headers |
+
+### `tempo request` Mini Recipe
+
+```bash
+tempo request --dry-run -X POST \
+  --json '{"prompt":"a sunset over the ocean"}' \
+  https://fal.mpp.tempo.xyz/fal-ai/flux/dev
+
+tempo request -X POST \
+  --json '{"prompt":"a sunset over the ocean"}' \
+  https://fal.mpp.tempo.xyz/fal-ai/flux/dev
+```
+
+## Common Flags
+
+| Flag | Works With | Purpose |
+| --- | --- | --- |
+| `-t` | `tempo wallet`, `tempo request` | TOON output (`--toon-output`): compact machine-readable output for scripts and agents |
+| `--dry-run` | `tempo request`, `tempo wallet fund`, `tempo wallet sessions close` | Preview actions without executing |
+| `--help` | all commands | Show full command/flag documentation |
+| `--describe` | supported commands | Output command schema for programmatic tooling |
+
+## Quick Examples
+
+```bash
+tempo wallet -t whoami
+tempo wallet services --search ai
+tempo wallet sessions close --dry-run --orphaned
+
+tempo request --dry-run https://openrouter.mpp.tempo.xyz/v1/chat/completions \
+  --json '{"model":"openai/gpt-4o-mini","messages":[{"role":"user","content":"Ping"}]}'
+```
+
+## Canonical Sources
+
+1. Wallet extension repo: [`tempoxyz/wallet`](https://github.com/tempoxyz/wallet)
+2. Full CLI help: `tempo wallet --help` and `tempo request --help`
+
+## See Also
+
+1. [Recipes](/wallet/recipes)
+2. [Use with Agents](/wallet/use-with-agents)
+3. [Troubleshooting](/wallet/troubleshooting)

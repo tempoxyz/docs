@@ -1,0 +1,99 @@
+---
+title: Tempo Wallet CLI Troubleshooting
+description: Troubleshoot common Tempo Wallet CLI issues including missing installs, login readiness failures, key provisioning errors, and paid request failures.
+---
+
+# Troubleshooting
+
+## Quick Diagnosis
+
+| Symptom | Run Next |
+| --- | --- |
+| `tempo: command not found` | Run the install command in the section below, then run `tempo --help` |
+| `ready=false` | `tempo wallet login` then `tempo wallet -t whoami` |
+| `No wallet configured` | `tempo wallet login` |
+| `access key does not exist` | `tempo wallet logout --yes && tempo wallet login` |
+| Request schema / `422` | `tempo wallet services <SERVICE_ID>` and validate request body |
+| Insufficient funds | `tempo wallet -t whoami` then `tempo wallet fund` |
+| Session close confusion | `tempo wallet sessions close --dry-run --all` |
+
+## `tempo: command not found`
+
+Install Tempo CLI and retry:
+
+```bash
+curl -fsSL https://tempo.xyz/install | bash
+tempo --help
+```
+
+## Wallet Not Ready (`ready=false`)
+
+Run login and check status again:
+
+```bash
+tempo wallet login
+tempo wallet -t whoami
+```
+
+## `No wallet configured` or `Run 'tempo wallet login'`
+
+Your local auth/session is missing.
+
+```bash
+tempo wallet login
+tempo wallet whoami
+```
+
+## `Key is not provisioned` / `access key does not exist`
+
+Refresh auth state and reprovision:
+
+```bash
+tempo wallet logout --yes
+tempo wallet login
+tempo wallet keys
+```
+
+## Request Fails With Schema / 422 Errors
+
+Usually this means body fields are wrong for the selected provider endpoint.
+
+```bash
+tempo wallet services --search <topic>
+tempo wallet services <SERVICE_ID>
+```
+
+Copy the exact method/path and expected request schema from service details.
+
+## Request Fails Due to Insufficient Funds
+
+Check wallet and fund:
+
+```bash
+tempo wallet -t whoami
+tempo wallet fund
+```
+
+## Session Close Behavior Is Unclear
+
+Preview before closing:
+
+```bash
+tempo wallet sessions list
+tempo wallet sessions close --dry-run --all
+tempo wallet sessions close --dry-run --orphaned
+```
+
+Then execute the intended close command.
+
+## Still Stuck?
+
+1. Re-run with `--help` to confirm current flags and usage.
+2. Use `-t` output (`tempo wallet -t ...`) for clearer machine-readable diagnostics.
+3. Cross-check command behavior against [`tempoxyz/wallet`](https://github.com/tempoxyz/wallet).
+
+## See Also
+
+1. [Recipes](/wallet/recipes)
+2. [Reference](/wallet/reference)
+3. [Use with Agents](/wallet/use-with-agents)
