@@ -1,13 +1,13 @@
 ---
 title: Getting Funds on Tempo
-description: Bridge assets to Tempo via LayerZero, Squid, or Relay, onramp through the Tempo Wallet, or get testnet funds from the faucet.
+description: Bridge assets to Tempo, add funds in Tempo Wallet, or use the faucet on testnet.
 ---
 
 import { Cards, Card } from 'vocs'
 
 # Getting Funds on Tempo
 
-There are several ways to get funds on Tempo:
+You can get funds onto Tempo in three ways:
 
 <Cards>
   <Card
@@ -18,7 +18,7 @@ There are several ways to get funds on Tempo:
   />
   <Card
     title="Tempo Wallet"
-    description="Onramp funds directly into a Tempo Wallet."
+    description="Add funds directly in Tempo Wallet"
     to="#tempo-wallet"
     icon="lucide:wallet"
   />
@@ -32,26 +32,34 @@ There are several ways to get funds on Tempo:
 
 ## Bridge
 
-Bridge assets from other chains to Tempo using one of the supported bridges:
+Use one of these supported bridges to move assets to Tempo:
 
-- **[LayerZero](https://layerzero.network/)**: Cross-chain messaging protocol supporting asset transfers to Tempo.
-- **[Squid](https://app.squidrouter.com/)**: Cross-chain swaps and bridging powered by Axelar, with Tempo support.
-- **[Relay](https://relay.link/)**: Instant bridging with low fees across supported chains including Tempo.
+- **[LayerZero](https://layerzero.network/)**: Bridge supported assets from other chains to Tempo.
+- **[Squid](https://app.squidrouter.com/)**: Swap and bridge assets to Tempo in one flow.
+- **[Relay](https://relay.link/)**: Bridge assets to Tempo with low fees.
 
 ## Tempo Wallet
 
-The [Tempo Wallet](https://wallet.tempo.xyz) supports onramping funds directly into your Tempo account. 
+[Tempo Wallet](https://wallet.tempo.xyz) is Tempo's web-based passkey wallet. You can add funds directly in the app.
 
-### Via the Web
+### In Tempo Wallet
 
-1. Sign up or login to [Tempo Wallet](https://wallet.tempo.xyz) using your Passkey.
-2. Press the "Add funds" button on the home dashboard, and choose your preferred option:
+1. Sign up or log in to [Tempo Wallet](https://wallet.tempo.xyz) with your passkey.
+2. Click **Add funds** on the home screen, then choose an option:
 
 <img src="/learn/wallet-add-funds.png" />
 
-### Via an Agent
+### With the CLI
 
-Paste this into your agent to set up a Tempo Wallet and fund it:
+Fund your wallet from the terminal using the [Tempo CLI](/cli):
+
+```bash
+tempo wallet fund
+```
+
+### With an agent
+
+Paste this into your agent to set up Tempo Wallet and add funds:
 
 ```
 Read https://wallet.tempo.xyz/SKILL.md and fund my Tempo Wallet
@@ -59,6 +67,6 @@ Read https://wallet.tempo.xyz/SKILL.md and fund my Tempo Wallet
 
 ## Testnet Funds
 
-To get testnet tokens for development, use the [Tempo Faucet](/quickstart/faucet). 
+For development and testing, use the [Tempo Faucet](/quickstart/faucet).
 
-The faucet will drip you `pathUSD`, `alphaUSD`, `betaUSD`, and `thetaUSD` test stablecoins.
+The faucet provides `pathUSD`, `alphaUSD`, `betaUSD`, and `thetaUSD` test stablecoins.

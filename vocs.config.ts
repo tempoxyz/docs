@@ -521,107 +521,113 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Tempo Wallet CLI',
+        text: 'Tempo Developer Tools',
         collapsed: true,
         items: [
           {
-            text: 'Overview',
-            link: '/wallet',
-          },
-          {
-            text: 'Use with Agents',
-            link: '/wallet/use-with-agents',
-          },
-          {
-            text: 'Recipes',
-            link: '/wallet/recipes',
-          },
-          {
-            text: 'Reference',
-            link: '/wallet/reference',
-          },
-          {
-            text: 'Troubleshooting',
-            link: '/wallet/troubleshooting',
-          },
-        ],
-      },
-      {
-        text: 'Tempo SDKs',
-        collapsed: true,
-        items: [
-          {
-            text: 'Overview',
-            link: '/sdk',
-          },
-          {
-            text: 'TypeScript',
+            text: 'CLI',
             collapsed: true,
             items: [
               {
                 text: 'Overview',
-                link: '/sdk/typescript',
+                link: '/cli',
               },
               {
-                text: 'Viem Reference',
-                link: 'https://viem.sh/tempo',
+                text: 'Wallet',
+                link: '/cli/wallet',
               },
               {
-                text: 'Wagmi Reference',
-                link: 'https://wagmi.sh/tempo',
+                text: 'Request',
+                link: '/cli/request',
               },
               {
-                text: 'Server Reference',
+                text: 'Download',
+                link: '/cli/download',
+              },
+              {
+                text: 'Node',
+                link: '/cli/node',
+              },
+            ],
+          },
+          {
+            text: 'SDKs',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/sdk',
+              },
+              {
+                text: 'TypeScript',
+                collapsed: true,
                 items: [
                   {
-                    text: 'Handlers',
+                    text: 'Overview',
+                    link: '/sdk/typescript',
+                  },
+                  {
+                    text: 'Viem Reference',
+                    link: 'https://viem.sh/tempo',
+                  },
+                  {
+                    text: 'Wagmi Reference',
+                    link: 'https://wagmi.sh/tempo',
+                  },
+                  {
+                    text: 'Server Reference',
                     items: [
                       {
-                        text: 'Overview',
-                        link: '/sdk/typescript/server/handlers',
+                        text: 'Handlers',
+                        items: [
+                          {
+                            text: 'Overview',
+                            link: '/sdk/typescript/server/handlers',
+                          },
+                          {
+                            text: 'compose',
+                            link: '/sdk/typescript/server/handler.compose',
+                          },
+                          {
+                            text: 'feePayer',
+                            link: '/sdk/typescript/server/handler.feePayer',
+                          },
+                          {
+                            text: 'keyManager',
+                            link: '/sdk/typescript/server/handler.keyManager',
+                          },
+                        ],
                       },
+                    ],
+                  },
+                  {
+                    text: 'Prool Reference',
+                    items: [
                       {
-                        text: 'compose',
-                        link: '/sdk/typescript/server/handler.compose',
-                      },
-                      {
-                        text: 'feePayer',
-                        link: '/sdk/typescript/server/handler.feePayer',
-                      },
-                      {
-                        text: 'keyManager',
-                        link: '/sdk/typescript/server/handler.keyManager',
+                        text: 'Setup',
+                        link: '/sdk/typescript/prool/setup',
                       },
                     ],
                   },
                 ],
               },
               {
-                text: 'Prool Reference',
-                items: [
-                  {
-                    text: 'Setup',
-                    link: '/sdk/typescript/prool/setup',
-                  },
-                ],
+                text: 'Go',
+                link: '/sdk/go',
+              },
+              {
+                text: 'Foundry',
+                link: '/sdk/foundry',
+              },
+              {
+                text: 'Python',
+                link: '/sdk/python',
+              },
+              {
+                text: 'Rust',
+                link: '/sdk/rust',
               },
             ],
-          },
-          {
-            text: 'Go',
-            link: '/sdk/go',
-          },
-          {
-            text: 'Foundry',
-            link: '/sdk/foundry',
-          },
-          {
-            text: 'Python',
-            link: '/sdk/python',
-          },
-          {
-            text: 'Rust',
-            link: '/sdk/rust',
           },
         ],
       },
@@ -834,6 +840,26 @@ export default defineConfig({
     {
       source: '/sdk/typescript/prool',
       destination: '/sdk/typescript/prool/setup',
+    },
+    {
+      source: '/wallet',
+      destination: '/cli',
+      status: 301,
+    },
+    {
+      source: '/wallet/reference',
+      destination: '/cli/wallet',
+      status: 301,
+    },
+    {
+      source: '/wallet/:path*',
+      destination: '/cli/:path*',
+      status: 301,
+    },
+    {
+      source: '/cli/reference',
+      destination: '/cli/wallet',
+      status: 301,
     },
     {
       source: '/guide/use-accounts/fee-sponsorship',

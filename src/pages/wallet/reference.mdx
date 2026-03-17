@@ -1,84 +1,85 @@
 ---
-title: Tempo Wallet CLI Reference
-description: Command reference for tempo wallet and tempo request, including the most-used commands and flags for interactive and script-based usage.
+title: Tempo CLI Reference
+description: Complete command and flag reference for tempo wallet and tempo request.
 ---
 
 # Reference
 
-## `tempo wallet` Commands
+## `tempo wallet`
 
-| Command | Purpose |
+Manages your onchain identity and provides service discovery for [MPP](https://mpp.dev) endpoints.
+
+### Auth
+
+| Command | Description |
 | --- | --- |
-| `tempo wallet login` | Connect or create your wallet via browser auth |
-| `tempo wallet logout` | Disconnect your wallet |
-| `tempo wallet whoami` | Show readiness, address, balances, and key state |
-| `tempo wallet keys` | List keys and spending limits |
-| `tempo wallet fund` | Fund wallet (faucet/bridge flow depends on network) |
-| `tempo wallet transfer <AMOUNT> <TOKEN> <TO>` | Transfer tokens to another address |
-| `tempo wallet services` | List available services |
-| `tempo wallet services <SERVICE_ID>` | Show service details and endpoints |
-| `tempo wallet sessions list` | List payment sessions |
-| `tempo wallet sessions sync` | Reconcile local sessions with on-chain state |
-| `tempo wallet sessions close ...` | Close sessions by target or in bulk |
-| `tempo wallet mpp-sign` | Sign an MPP payment challenge |
+| `tempo wallet login` | Connect or create wallet via browser auth |
+| `tempo wallet logout` | Disconnect wallet and clear local credentials |
+| `tempo wallet whoami` | Print readiness, address, balances, and key state |
 
-### `tempo wallet` Mini Recipe
+### Keys
 
-```bash
-tempo wallet whoami
-tempo wallet keys
-tempo wallet services --search ai
-tempo wallet services <SERVICE_ID>
-```
+Each wallet can have multiple access keys with independent spending limits. This is how you constrain what an agent or script can spend.
 
-## `tempo request` Core Usage
-
-| Command | Purpose |
+| Command | Description |
 | --- | --- |
-| `tempo request <URL>` | Make an HTTP request with automatic payment handling |
-| `tempo request --dry-run <URL>` | Preview cost without executing payment |
-| `tempo request <URL> --json '{...}'` | Send a JSON body |
-| `tempo request <URL> -H 'Header: Value'` | Add custom headers |
+| `tempo wallet keys` | List keys and their spending limits |
 
-### `tempo request` Mini Recipe
+### Funds
 
-```bash
-tempo request --dry-run -X POST \
-  --json '{"prompt":"a sunset over the ocean"}' \
-  https://fal.mpp.tempo.xyz/fal-ai/flux/dev
+| Command | Description |
+| --- | --- |
+| `tempo wallet fund` | Fund wallet (faucet on testnet, bridge on mainnet) |
+| `tempo wallet transfer <amount> <token> <to>` | Transfer tokens to another address |
 
-tempo request -X POST \
-  --json '{"prompt":"a sunset over the ocean"}' \
-  https://fal.mpp.tempo.xyz/fal-ai/flux/dev
-```
+### Services
 
-## Common Flags
+The service directory indexes [MPP](https://mpp.dev)-registered providers. Each service entry includes endpoint URLs, HTTP methods, and expected request schemas, enough to construct a valid `tempo request` call.
 
-| Flag | Works With | Purpose |
+| Command | Description |
+| --- | --- |
+| `tempo wallet services` | List all registered services |
+| `tempo wallet services --search <query>` | Filter services by keyword |
+| `tempo wallet services <id>` | Show a service's endpoints, methods, and request schemas |
+
+### Sessions
+
+Sessions are the local state for [pay-as-you-go](/guide/machine-payments/pay-as-you-go) payment channels. The CLI tracks them locally and can reconcile against onchain state.
+
+| Command | Description |
+| --- | --- |
+| `tempo wallet sessions list` | List active payment sessions |
+| `tempo wallet sessions sync` | Reconcile local sessions with onchain state |
+| `tempo wallet sessions close --all` | Close all sessions |
+| `tempo wallet sessions close --orphaned` | Close sessions whose counterparty is unreachable |
+
+### Other
+
+| Command | Description |
+| --- | --- |
+| `tempo wallet mpp-sign` | Sign an MPP payment challenge (used internally by `tempo request`) |
+
+## `tempo request`
+
+A curl-like HTTP client that handles [MPP](https://mpp.dev) payment negotiation transparently. On a `402 Payment Required` response, it reads the challenge, signs and submits the payment, then retries with the credential.
+
+| Command | Description |
+| --- | --- |
+| `tempo request <url>` | Make an HTTP request with automatic payment |
+| `tempo request --dry-run <url>` | Preview cost without executing payment |
+| `tempo request <url> --json '{...}'` | Send a JSON body (implies `-X POST`) |
+| `tempo request <url> -H 'Header: Value'` | Add a custom header |
+
+## Global flags
+
+| Flag | Scope | Description |
 | --- | --- | --- |
-| `-t` | `tempo wallet`, `tempo request` | TOON output (`--toon-output`): compact machine-readable output for scripts and agents |
-| `--dry-run` | `tempo request`, `tempo wallet fund`, `tempo wallet sessions close` | Preview actions without executing |
-| `--help` | all commands | Show full command/flag documentation |
-| `--describe` | supported commands | Output command schema for programmatic tooling |
+| `-t` / `--toon-output` | `tempo wallet`, `tempo request` | Compact machine-readable output for scripts and agents |
+| `--dry-run` | `tempo request`, `tempo wallet fund`, `tempo wallet sessions close` | Preview the action without executing |
+| `--help` | all commands | Show command documentation |
+| `--describe` | supported commands | Output command schema as JSON for programmatic tooling |
 
-## Quick Examples
+## Source
 
-```bash
-tempo wallet -t whoami
-tempo wallet services --search ai
-tempo wallet sessions close --dry-run --orphaned
-
-tempo request --dry-run https://openrouter.mpp.tempo.xyz/v1/chat/completions \
-  --json '{"model":"openai/gpt-4o-mini","messages":[{"role":"user","content":"Ping"}]}'
-```
-
-## Canonical Sources
-
-1. Wallet extension repo: [`tempoxyz/wallet`](https://github.com/tempoxyz/wallet)
-2. Full CLI help: `tempo wallet --help` and `tempo request --help`
-
-## See Also
-
-1. [Recipes](/wallet/recipes)
-2. [Use with Agents](/wallet/use-with-agents)
-3. [Troubleshooting](/wallet/troubleshooting)
+- Repository: [`tempoxyz/wallet`](https://github.com/tempoxyz/wallet)
+- Full help: `tempo wallet --help`, `tempo request --help`

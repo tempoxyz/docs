@@ -28,13 +28,21 @@ Tempo provides AI-assisted skills and tooling for the following:
 
 ## Tempo Wallet
 
-The [Tempo Wallet](https://wallet.tempo.xyz) distributes a CLI with built in spend controls and service discovery. Agents can use `tempo wallet` to pay for powerful new capabilities on demand.
+The [Tempo CLI](/cli) gives agents a wallet with built-in spend controls and service discovery. Agents can use [`tempo wallet`](/cli/wallet) to manage keys and balances, and [`tempo request`](/cli/request) to pay for services on demand.
 
 Paste this into your agent (Claude Code, Amp, Codex, etc.) to set up and start using a Tempo Wallet:
 
+:::code-group
+```bash [Claude Code]
+claude -p "Read https://wallet.tempo.xyz/SKILL.md and set up tempo"
 ```
-Read https://tempo.xyz/SKILL.md and set up a Tempo Wallet
+```bash [Amp]
+amp -x "Read https://wallet.tempo.xyz/SKILL.md and set up tempo"
 ```
+```bash [Codex CLI]
+codex exec "Read https://wallet.tempo.xyz/SKILL.md and set up tempo"
+```
+:::
 
 ## Tempo Docs
 

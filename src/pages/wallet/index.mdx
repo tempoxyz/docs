@@ -1,104 +1,67 @@
 ---
-title: Tempo Wallet CLI
-description: Learn how to use Tempo Wallet CLI and Tempo Request from your terminal, with quick onboarding guides and command references for daily workflows.
+title: Tempo CLI
+description: A terminal client for Tempo wallet management, service discovery, and paid HTTP requests via the Machine Payments Protocol.
 ---
 
-import { Cards, Card, Tab, Tabs } from 'vocs'
+# Tempo CLI
 
-# Tempo Wallet CLI
+The `tempo` CLI is a terminal client for Tempo. It has two command families:
 
-Login and manage your Tempo Wallet from your terminal, with built-in [MPP](https://mpp.dev) support for service discovery and paid API requests.
+- **`tempo wallet`**: manages your onchain identity: authentication, key management, balances, funding, and transfers. It also provides a service directory for discovering [MPP](https://mpp.dev)-compatible endpoints and their request schemas.
+- **`tempo request`**: a curl-like HTTP client that handles [Machine Payments Protocol](https://mpp.dev) negotiation automatically. It sends your request, intercepts `402 Payment Required` challenges, signs and submits the payment onchain, then retries with the credential, all in a single command.
 
-## Quickstart
+Together they let you browse paid APIs, preview costs, and execute paid requests from a terminal, script, or AI agent without writing any integration code.
 
-<Tabs>
-<Tab title="Agent">
-
-Paste this into your agent to set up Tempo Wallet:
-
-<br />
-
-```
-Read https://wallet.tempo.xyz/SKILL.md and set up tempo
-```
-
-</Tab>
-<Tab title="Human">
-
-::::steps
-
-#### Install the CLI
+## Install
 
 ```bash
 curl -fsSL https://tempo.xyz/install | bash
 ```
 
-#### Connect your wallet
+## Authenticate
 
 ```bash
 tempo wallet login
-```
-
-#### Verify setup
-
-```bash
 tempo wallet whoami
 ```
 
-Expected result: wallet information is returned and you can continue to service discovery.
+`login` opens a browser flow that creates or connects a Tempo wallet. `whoami` confirms readiness, prints your address, and shows token balances.
 
-#### List available services
+## Discover and call a paid API
 
 ```bash
+# Find services
 tempo wallet services --search ai
-```
 
-#### Make a paid request
+# Inspect a service's endpoints and request schema
+tempo wallet services <SERVICE_ID>
 
-```bash
+# Preview cost without paying
+tempo request --dry-run -X POST \
+  --json '{"prompt":"a sunset over the ocean"}' \
+  https://fal.mpp.tempo.xyz/fal-ai/flux/dev
+
+# Execute the paid request
 tempo request -X POST \
   --json '{"prompt":"a sunset over the ocean"}' \
   https://fal.mpp.tempo.xyz/fal-ai/flux/dev
 ```
 
-#### Preview cost before running a new endpoint
+## Scripting and agents
 
-```bash
-tempo request --dry-run -X POST \
-  --json '{"prompt":"a sunset over the ocean"}' \
-  https://fal.mpp.tempo.xyz/fal-ai/flux/dev
+The CLI is designed for non-interactive use. Two features matter here:
+
+- **`-t` (TOON output)**: compact, machine-readable output that minimizes token usage when consumed by an LLM or parsed by a script.
+- **`--dry-run`**: previews the payment cost and validates the request shape without spending funds. Useful for agents that need to confirm cost before committing.
+
+To set up an AI agent (Claude Code, Amp, Codex) with wallet and request capabilities:
+
+```
+Read https://wallet.tempo.xyz/SKILL.md and set up tempo
 ```
 
-::::
+This installs `tempo-wallet` and `tempo-request` skills automatically. The agent can then discover services, preview costs, and make paid requests within scoped spending limits.
 
-</Tab>
-</Tabs>
+## Next
 
-## Next Steps
-
-<Cards>
-  <Card
-    title="Use with Agents"
-    description="How auto-installed skills work in Claude Code, Amp, Codex, and similar agent environments"
-    to="/wallet/use-with-agents"
-    icon="lucide:bot"
-  />
-  <Card
-    title="Recipes"
-    description="Task-based recipes for discovery, requests, sessions, and transfers"
-    to="/wallet/recipes"
-    icon="lucide:workflow"
-  />
-  <Card
-    title="Reference"
-    description="Command and flag reference for tempo wallet and tempo request"
-    to="/wallet/reference"
-    icon="lucide:terminal"
-  />
-  <Card
-    title="Troubleshooting"
-    description="Fix the most common setup, auth, key, and request issues quickly"
-    to="/wallet/troubleshooting"
-    icon="lucide:wrench"
-  />
-</Cards>
+- [Reference](/wallet/reference): complete command and flag reference
