@@ -803,6 +803,11 @@ export default defineConfig({
       destination: '/protocol/exchange/quote-tokens#pathusd',
       status: 301,
     },
+    {
+      source: '/quickstart/faucet',
+      destination: '/guide/getting-funds',
+      status: 301,
+    },
   ],
   codeHighlight: {
     langAlias: {
