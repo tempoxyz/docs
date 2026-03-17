@@ -79,6 +79,10 @@ export default defineConfig({
         text: 'Build on Tempo',
         items: [
           {
+            text: 'Getting Funds on Tempo',
+            link: '/guide/getting-funds',
+          },
+          {
             text: 'Use Tempo Transactions',
             link: '/guide/tempo-transaction',
           },

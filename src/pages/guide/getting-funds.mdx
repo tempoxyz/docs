@@ -1,0 +1,64 @@
+---
+title: Getting Funds on Tempo
+description: Bridge assets to Tempo via LayerZero, Squid, or Relay, onramp through the Tempo Wallet, or get testnet funds from the faucet.
+---
+
+import { Cards, Card } from 'vocs'
+
+# Getting Funds on Tempo
+
+There are several ways to get funds on Tempo:
+
+<Cards>
+  <Card
+    title="Bridge"
+    description="Bridge assets from other chains to Tempo via LayerZero, Squid, or Relay."
+    to="#bridge"
+    icon="lucide:arrow-left-right"
+  />
+  <Card
+    title="Tempo Wallet"
+    description="Onramp funds directly into a Tempo Wallet."
+    to="#tempo-wallet"
+    icon="lucide:wallet"
+  />
+  <Card
+    title="Testnet Funds"
+    description="Get test stablecoins from the faucet for development and testing."
+    to="#testnet-funds"
+    icon="lucide:flask-conical"
+  />
+</Cards>
+
+## Bridge
+
+Bridge assets from other chains to Tempo using one of the supported bridges:
+
+- **[LayerZero](https://layerzero.network/)**: Cross-chain messaging protocol supporting asset transfers to Tempo.
+- **[Squid](https://app.squidrouter.com/)**: Cross-chain swaps and bridging powered by Axelar, with Tempo support.
+- **[Relay](https://relay.link/)**: Instant bridging with low fees across supported chains including Tempo.
+
+## Tempo Wallet
+
+The [Tempo Wallet](https://wallet.tempo.xyz) supports onramping funds directly into your Tempo account. 
+
+### Via the Web
+
+1. Sign up or login to [Tempo Wallet](https://wallet.tempo.xyz) using your Passkey.
+2. Press the "Add funds" button on the home dashboard, and choose your preferred option:
+
+<img src="/learn/wallet-add-funds.png" />
+
+### Via an Agent
+
+Paste this into your agent to set up a Tempo Wallet and fund it:
+
+```
+Read https://wallet.tempo.xyz/SKILL.md and fund my Tempo Wallet
+```
+
+## Testnet Funds
+
+To get testnet tokens for development, use the [Tempo Faucet](/quickstart/faucet). 
+
+The faucet will drip you `pathUSD`, `alphaUSD`, `betaUSD`, and `thetaUSD` test stablecoins.
