@@ -257,7 +257,7 @@ export default defineConfig({
           },
           {
             text: 'Developer Tools',
-            link: '/quickstart/developer-tools',
+            link: '/ecosystem',
           },
           {
             text: 'EVM Differences',
@@ -278,6 +278,48 @@ export default defineConfig({
           {
             text: 'Contract Verification',
             link: '/quickstart/verify-contracts',
+          },
+        ],
+      },
+      {
+        text: 'Tempo Ecosystem Infrastructure',
+        collapsed: true,
+        items: [
+          {
+            text: 'Overview',
+            link: '/ecosystem',
+          },
+          {
+            text: 'Bridges',
+            link: '/ecosystem/bridges',
+          },
+          {
+            text: 'Data & Analytics',
+            link: '/ecosystem/data-analytics',
+          },
+          {
+            text: 'Block Explorers',
+            link: '/ecosystem/block-explorers',
+          },
+          {
+            text: 'Wallets',
+            link: '/ecosystem/wallets',
+          },
+          {
+            text: 'Smart Contract Libraries',
+            link: '/ecosystem/smart-contract-libraries',
+          },
+          {
+            text: 'Node Infrastructure',
+            link: '/ecosystem/node-infrastructure',
+          },
+          {
+            text: 'Security & Compliance',
+            link: '/ecosystem/security-compliance',
+          },
+          {
+            text: 'Orchestration',
+            link: '/ecosystem/orchestration',
           },
         ],
       },
@@ -745,6 +787,11 @@ export default defineConfig({
       status: 301,
     },
     {
+      source: '/quickstart/developer-tools',
+      destination: '/ecosystem',
+      status: 301,
+    },
+    {
       source: '/guide/ai-support',
       destination: '/guide/building-with-ai',
     },
@@ -803,7 +850,6 @@ export default defineConfig({
       destination: '/protocol/exchange/quote-tokens#pathusd',
       status: 301,
     },
-
   ],
   codeHighlight: {
     langAlias: {
