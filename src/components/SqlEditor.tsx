@@ -54,7 +54,7 @@ export function SqlEditor(props: SqlEditorProps) {
   const [isDark, setIsDark] = React.useState(() => {
     // Check dark mode on initial render
     if (typeof document !== 'undefined') {
-      return document.documentElement.classList.contains('dark')
+      return document.documentElement.style.colorScheme === 'dark'
     }
     return false
   })
@@ -66,7 +66,7 @@ export function SqlEditor(props: SqlEditorProps) {
   // Detect dark mode
   React.useEffect(() => {
     const checkDarkMode = () => {
-      setIsDark(document.documentElement.classList.contains('dark'))
+      setIsDark(document.documentElement.style.colorScheme === 'dark')
     }
 
     checkDarkMode()
@@ -74,7 +74,7 @@ export function SqlEditor(props: SqlEditorProps) {
     const observer = new MutationObserver(checkDarkMode)
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ['class'],
+      attributeFilter: ['style'],
     })
 
     return () => observer.disconnect()
