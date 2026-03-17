@@ -72,8 +72,8 @@ export default defineConfig({
         link: '/changelog',
       },
       {
-        text: 'Building with AI',
-        link: '/guide/building-with-ai',
+        text: 'Using Tempo with AI',
+        link: '/guide/using-tempo-with-ai',
       },
       {
         text: 'Build on Tempo',
@@ -747,6 +747,10 @@ export default defineConfig({
     {
       source: '/guide/ai-support',
       destination: '/guide/building-with-ai',
+    },
+    {
+      source: '/guide/building-with-ai',
+      destination: '/guide/using-tempo-with-ai',
     },
     {
       source: '/guide',
