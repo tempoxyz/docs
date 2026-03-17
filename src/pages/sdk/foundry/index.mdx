@@ -22,7 +22,19 @@ Install regular `foundryup`:
 
 ```bash
 curl -L https://foundry.paradigm.xyz | bash
+``:::tip Windows Users
+The command above does not work on Windows. You need to use WSL (Windows Subsystem for Linux) first.
+
+1. Open PowerShell as Administrator and run:
+```bash
+wsl --install
 ```
+2. Restart your computer when prompted
+3. Open **Ubuntu** from the Start menu
+4. Now run the curl command above inside Ubuntu — it will work correctly
+
+> The verification warning `Verification is still pending` that appears during deployment is normal and not an error — your contract will verify successfully within 15 seconds.
+:::`
 
 Or if you already have `foundryup` installed:
 
