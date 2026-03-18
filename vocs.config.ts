@@ -13,7 +13,7 @@ const baseUrl = (() => {
 
 export default defineConfig({
   banner: {
-    dismissable: true,
+    dismissable: false,
     backgroundColor: '#5B4CDB',
     content:
       'Tempo Mainnet is live. [Read our announcement.](https://tempo.xyz/blog/mainnet) →',
