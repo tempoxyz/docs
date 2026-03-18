@@ -311,7 +311,7 @@ export default defineConfig({
                 link: '/ecosystem/security-compliance',
               },
               {
-                text: 'Orchestration',
+                text: 'Issuance & Orchestration',
                 link: '/ecosystem/orchestration',
               },
             ],
