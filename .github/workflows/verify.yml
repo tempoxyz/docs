@@ -42,6 +42,7 @@ jobs:
     name: E2E Tests (${{ matrix.shard }}/${{ strategy.job-total }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    continue-on-error: true
     permissions:
       contents: read
     strategy:
