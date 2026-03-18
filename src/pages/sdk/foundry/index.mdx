@@ -12,13 +12,13 @@ For general information about Foundry, see the [Foundry documentation](https://g
 
 ## Get started with Foundry
 
-### Install using `foundryup`
-
 Tempo's Foundry fork is installed through the standard upstream `foundryup` using the `-n tempo` flag, no separate installer is required.
 
-Getting started is very easy:
+::::steps
 
-Install regular `foundryup`:
+## Install `foundryup`
+
+If you don't have `foundryup` installed yet:
 
 ```bash
 curl -L https://foundry.paradigm.xyz | bash
@@ -30,21 +30,22 @@ Or if you already have `foundryup` installed:
 foundryup --update
 ```
 
-Next, run:
+## Install Tempo's Foundry fork
 
 ```bash
 foundryup -n tempo
 ```
 
-It will automatically install the latest `nightly` release of all precompiled binaries: [`forge`](https://getfoundry.sh/forge/overview#forge), [`cast`](https://getfoundry.sh/cast/overview#cast), [`anvil`](https://getfoundry.sh/anvil/overview#anvil), and [`chisel`](https://getfoundry.sh/chisel/overview#chisel).
+This will automatically install the latest `nightly` release of all precompiled binaries: [`forge`](https://getfoundry.sh/forge/overview#forge), [`cast`](https://getfoundry.sh/cast/overview#cast), [`anvil`](https://getfoundry.sh/anvil/overview#anvil), and [`chisel`](https://getfoundry.sh/chisel/overview#chisel).
 
+:::tip
 To install a specific version, replace `<TAG_NAME>` with the desired release tag:
-
 ```bash
 foundryup -n tempo -i <TAG_NAME>
 ```
+:::
 
-### Verify Installation
+## Verify Installation
 
 ```bash
 forge -V
@@ -56,7 +57,7 @@ You should see version information include `-tempo`, indicating you are using th
 # forge <version>-tempo (<commit> <timestamp>)
 ```
 
-### Create a new Foundry project
+## Create a new Foundry project
 
 Initialize a new project with Tempo support:
 
@@ -65,6 +66,8 @@ forge init -n tempo my-project && cd my-project
 ```
 
 Each new project is configured for Tempo out of the box, with [`tempo-std`](https://github.com/tempoxyz/tempo-std), the Tempo standard library installed, containing helpers for Tempo's protocol-level features.
+
+::::
 
 ## Use Foundry for your workflows
 
@@ -87,7 +90,7 @@ forge script script/Mail.s.sol
 
 ```bash
 # Set environment variables
-export TEMPO_RPC_URL=https://rpc.moderato.tempo.xyz
+export TEMPO_RPC_URL=https://rpc.tempo.xyz
 export VERIFIER_URL=https://contracts.tempo.xyz
 
 # Optional: create a new keypair and request some testnet tokens from the faucet.

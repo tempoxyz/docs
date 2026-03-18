@@ -1,0 +1,94 @@
+---
+title: tempo node
+description: Command reference for running a Tempo node.
+---
+
+import { Cards, Card } from 'vocs'
+
+# `tempo node`
+
+Run a Tempo node. For faster initial sync, first download a snapshot with [`tempo download`](/cli/download). For operational setup guides — system requirements, systemd configs, monitoring, validator onboarding — see [Run a Tempo Node](/guide/node).
+
+Flags grouped by function:
+
+### Network
+
+| Flag | Description |
+| --- | --- |
+| `--follow` | Run as a full node following a trusted RPC endpoint |
+| `--chain <network>` | Target network (`mainnet`, `moderato`) |
+| `--datadir <path>` | Data directory for chain state |
+
+### RPC server
+
+| Flag | Description |
+| --- | --- |
+| `--http` | Enable the JSON-RPC HTTP server |
+| `--http.port <port>` | JSON-RPC port (default: `8545`) |
+| `--http.addr <addr>` | JSON-RPC bind address |
+| `--http.api <apis>` | Enabled API namespaces (e.g., `eth,net,web3,txpool,trace`) |
+
+### Consensus (validators)
+
+| Flag | Description |
+| --- | --- |
+| `--consensus.signing-key <path>` | Path to validator signing key |
+| `--consensus.fee-recipient <addr>` | Address to receive validator fees |
+| `--consensus.datadir <path>` | Separate volume for consensus data |
+
+### Observability
+
+| Flag | Description |
+| --- | --- |
+| `--telemetry-url <url>` | Unified metrics and logs export endpoint |
+| `--telemetry-metrics-interval <dur>` | Metrics push interval (default: `10s`) |
+| `--metrics <port>` | Enable Prometheus metrics on this port |
+
+## Examples
+
+Download a snapshot and start an RPC node:
+
+```bash
+tempo node \
+  --follow \
+  --http --http.port 8545 \
+  --http.api eth,net,web3,txpool,trace
+```
+
+Start a validator:
+
+```bash
+tempo node --datadir /data/tempo \
+  --chain mainnet \
+  --consensus.signing-key /etc/tempo/key \
+  --consensus.fee-recipient 0x...
+```
+
+## Learn more
+
+<Cards>
+  <Card
+    title="tempo download"
+    description="Download snapshots for faster initial sync"
+    to="/cli/download"
+    icon="lucide:download"
+  />
+  <Card
+    title="Run a Tempo Node"
+    description="System requirements, systemd, monitoring"
+    to="/guide/node"
+    icon="lucide:book-open"
+  />
+  <Card
+    title="Become a validator"
+    description="Stake and operate a validator node"
+    to="/guide/node/validator"
+    icon="lucide:shield-check"
+  />
+  <Card
+    title="Source code"
+    description="tempoxyz/tempo on GitHub"
+    to="https://github.com/tempoxyz/tempo"
+    icon="lucide:github"
+  />
+</Cards>

@@ -1,0 +1,202 @@
+---
+title: Client Quickstart
+description: Set up an MPP client on Tempo. Polyfill fetch to automatically pay for 402 responses with TIP-20 stablecoins.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Client quickstart
+
+Polyfill `fetch` to handle `402` responses. Your existing code works unchanged — payments happen in the background.
+
+::::steps
+
+### Install dependencies
+
+:::code-group
+```bash [npm]
+npm install mppx viem
+```
+```bash [pnpm]
+pnpm add mppx viem
+```
+```bash [bun]
+bun add mppx viem
+```
+:::
+
+### Define an account
+
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+
+const account = privateKeyToAccount('0xabc…123')
+```
+
+:::tip
+With Tempo, you can also use [Passkey or WebCrypto accounts](https://viem.sh/tempo/accounts).
+:::
+
+### Create payment handler
+
+Call `Mppx.create` at startup. This polyfills `fetch` to automatically handle `402` payment challenges.
+
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { Mppx, tempo } from 'mppx/client'
+
+const account = privateKeyToAccount('0xabc…123')
+
+Mppx.create({
+  methods: [tempo({ account })],
+})
+```
+
+:::tip
+If you want to avoid polyfilling, use the bound `fetch` instead.
+
+```ts
+const mppx = Mppx.create({
+  polyfill: false,
+  methods: [tempo({ account })]
+})
+
+const response = await mppx.fetch('https://api.example.com/resource')
+```
+:::
+
+### Request protected resources
+
+Use `fetch`. Payment happens when a server returns `402`.
+
+```ts
+const response = await fetch('https://api.example.com/resource')
+```
+
+::::
+
+## Learn more
+
+### Wagmi
+
+You can inject a [Wagmi](https://wagmi.sh) connector into Mppx by passing the `getConnectorClient` function.
+
+:::code-group
+
+```ts [example.ts]
+import { Mppx, tempo } from 'mppx/client'
+import { getConnectorClient } from 'wagmi/actions'
+import { config } from './config'
+
+Mppx.create({
+  methods: [tempo({
+    getClient: (parameters) => getConnectorClient(config, parameters),
+  })],
+})
+```
+
+```ts [config.ts]
+import { createConfig, http } from 'wagmi'
+import { webAuthn } from 'wagmi/tempo'
+import { tempoModerato } from 'viem/chains'
+
+export const config = createConfig({
+  connectors: [webAuthn()],
+  chains: [tempoModerato],
+  transports: {
+    [tempoModerato.id]: http(),
+  },
+})
+```
+
+:::
+
+### Per-request accounts
+
+Pass accounts on individual requests instead of at setup:
+
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { Mppx, tempo } from 'mppx/client'
+
+const mppx = Mppx.create({
+  polyfill: false,
+  methods: [tempo()]
+})
+
+const response = await mppx.fetch('https://api.example.com/resource', {
+  context: {
+    account: privateKeyToAccount('0xabc…123'),
+  }
+})
+```
+
+### Manual payment handling
+
+Use `Mppx.create` for full control over the payment flow:
+
+- Present payment UI before paying
+- Implement custom retry logic
+- Handle credentials manually
+
+```ts
+import { Mppx, tempo } from 'mppx/client'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const mppx = Mppx.create({
+  polyfill: false,
+  methods: [tempo()],
+})
+
+const response = await fetch('https://api.example.com/resource')
+
+if (response.status === 402) {
+  const credential = await mppx.createCredential(response, {
+    account: privateKeyToAccount('0x...'),
+  })
+
+  const paidResponse = await fetch('https://api.example.com/resource', {
+    headers: { Authorization: credential },
+  })
+}
+```
+
+### Payment receipts
+
+On success, the server returns a `Payment-Receipt` header:
+
+```ts
+import { Receipt } from 'mppx'
+
+const response = await fetch('https://api.example.com/resource')
+
+const receipt = Receipt.fromResponse(response)
+
+console.log(receipt.status)
+// success
+console.log(receipt.reference)
+// 0xtx789abc...
+```
+
+## Next steps
+
+<Cards>
+  <Card
+    icon="lucide:server"
+    title="Server quickstart"
+    description="Add payment gating to your HTTP endpoints"
+    to="/guide/machine-payments/server"
+  />
+  <Card
+    icon="lucide:credit-card"
+    title="Accept one-time payments"
+    description="Charge per request with on-chain settlement"
+    to="/guide/machine-payments/one-time-payments"
+  />
+  <Card
+    icon="lucide:book-open"
+    title="Full SDK reference"
+    description="Complete mppx client API documentation"
+    to="https://mpp.dev/sdk/typescript/client/Mppx.create"
+  />
+</Cards>

@@ -1,4 +1,4 @@
-import { tempoModerato } from 'viem/chains'
+import { tempo } from 'viem/chains'
 
 type QueryRequest = {
   query: string
@@ -51,7 +51,7 @@ export async function POST(request: Request): Promise<Response> {
 
     const signatures = body.signatures && body.signatures.length > 0 ? body.signatures : ['']
 
-    const chainId = tempoModerato.id
+    const chainId = tempo.id
     const chainCursor = `${chainId}-0`
 
     const response = await fetch(url.toString(), {

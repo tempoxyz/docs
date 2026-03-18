@@ -5,6 +5,7 @@ description: Accept stablecoin payments in your application. Verify transactions
 import * as Demo from '../../../components/guides/Demo.tsx'
 import * as Step from '../../../components/guides/steps'
 import * as Token from '../../../components/guides/tokens'
+import { Tabs, Tab } from 'vocs'
 
 # Accept a Payment
 
@@ -27,170 +28,535 @@ Check if a payment has been received by querying the token balance or listening 
 
 ### Check Balance
 
-:::code-group
+<Tabs stateKey="library">
+  <Tab title="Viem">
 
-```ts [TypeScript]
-import { client } from './viem.config'
+    :::code-group
 
-const balance = await client.token.getBalance({
-  token: '0x20c0000000000000000000000000000000000001', // AlphaUSD
-  address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
-})
+    ```ts [example.ts]
+    import { client } from './viem.config'
 
-console.log('Balance:', balance)
-```
+    const balance = await client.token.getBalance({
+      token: '0x20c0000000000000000000000000000000000001', // AlphaUSD
+      address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+    })
 
-```rust [Rust]
-use alloy::{primitives::address, providers::ProviderBuilder};
-use tempo_alloy::{TempoNetwork, contracts::precompiles::ITIP20};
+    console.log('Balance:', balance)
+    ```
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
-        .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
-        .await?;
+    ```ts [viem.config.ts]
+    // [!include ~/snippets/viem.config.ts:setup]
+    ```
 
-    let balance = ITIP20::new( // [!code focus]
-        address!("0x20c0000000000000000000000000000000000001"), // Alpha USD // [!code focus]
-        &provider, // [!code focus]
-    ) // [!code focus]
-    .balanceOf(address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb")) // [!code focus]
-    .call() // [!code focus]
-    .await?; // [!code focus]
+    :::
 
-    println!("Balance: {balance:?}"); // [!code focus]
+  </Tab>
 
-    Ok(())
-}
-```
+  <Tab title="Rust">
 
-:::
+    :::code-group
+
+    ```rust [example.rs]
+    use alloy::{primitives::address, providers::ProviderBuilder};
+    use tempo_alloy::{TempoNetwork, contracts::precompiles::ITIP20};
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
+            .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
+            .await?;
+
+        let balance = ITIP20::new( // [!code focus]
+            address!("0x20c0000000000000000000000000000000000001"), // AlphaUSD // [!code focus]
+            &provider, // [!code focus]
+        ) // [!code focus]
+        .balanceOf(address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb")) // [!code focus]
+        .call() // [!code focus]
+        .await?; // [!code focus]
+
+        println!("Balance: {balance:?}"); // [!code focus]
+
+        Ok(())
+    }
+    ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-provider.rs:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Python">
+
+    :::code-group
+
+    ```python [example.py]
+    from web3 import Web3
+    from eth_abi import encode
+    from provider import w3
+
+    token_address = "0x20c0000000000000000000000000000000000001"  # AlphaUSD
+    account_address = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb"
+
+    # balanceOf(address) selector: 0x70a08231
+    calldata = "0x70a08231" + encode(["address"], [account_address]).hex() # [!code hl]
+    result = w3.eth.call({"to": token_address, "data": calldata}) # [!code hl]
+    balance = int.from_bytes(result, "big") # [!code hl]
+
+    print(f"Balance: {balance}")
+    ```
+
+    ```python [provider.py]
+    from web3 import Web3
+
+    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Go">
+
+    :::code-group
+
+    ```go [main.go]
+    package main
+
+    import (
+    	"context"
+    	"fmt"
+    	"log"
+    	"math/big"
+    	"strings"
+    )
+
+    func main() {
+    	c := newClient()
+    	ctx := context.Background()
+
+    	token := "0x20c0000000000000000000000000000000000001"
+    	account := "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb"
+
+    	// balanceOf(address) — ABI-encoded eth_call // [!code hl]
+    	calldata := "0x70a08231" + fmt.Sprintf("%064s", strings.TrimPrefix(account, "0x")) // [!code hl]
+
+    	resp, err := c.SendRequest(ctx, "eth_call", map[string]interface{}{ // [!code hl]
+    		"to":   token, // [!code hl]
+    		"data": calldata, // [!code hl]
+    	}, "latest") // [!code hl]
+    	if err != nil {
+    		log.Fatal(err)
+    	}
+
+    	balance := new(big.Int) // [!code hl]
+    	balance.SetString(strings.TrimPrefix(resp.Result.(string), "0x"), 16) // [!code hl]
+    	fmt.Printf("Balance: %s\n", balance)
+    }
+    ```
+
+    ```go [provider.go]
+    // [!include ~/snippets/go-provider.go:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Cast">
+
+    ```bash
+    $ cast call 0x20c0000000000000000000000000000000000001 \
+      "balanceOf(address)(uint256)" \
+      0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb \
+      --rpc-url $TEMPO_RPC_URL
+    ```
+
+  </Tab>
+</Tabs>
 
 ### Listen for Transfer Events
 
-:::code-group
+<Tabs stateKey="library">
+  <Tab title="Viem">
 
-```ts [TypeScript]
-import { watchEvent } from 'viem'
+    :::code-group
 
-// Watch for incoming transfers
-const unwatch = watchEvent(client, {
-  address: '0x20c0000000000000000000000000000000000001',
-  event: {
-    type: 'event',
-    name: 'Transfer',
-    inputs: [
-      { name: 'from', type: 'address', indexed: true },
-      { name: 'to', type: 'address', indexed: true },
-      { name: 'value', type: 'uint256' },
-    ],
-  },
-  onLogs: (logs) => {
-    logs.forEach((log) => {
-      if (log.args.to === yourAddress) {
-        console.log('Received payment:', {
-          from: log.args.from,
-          amount: log.args.value,
-        })
-      }
+    ```ts [example.ts]
+    import { client } from './viem.config'
+
+    // Watch for incoming transfers
+    const unwatch = client.watchEvent({
+      address: '0x20c0000000000000000000000000000000000001',
+      event: {
+        type: 'event',
+        name: 'Transfer',
+        inputs: [
+          { name: 'from', type: 'address', indexed: true },
+          { name: 'to', type: 'address', indexed: true },
+          { name: 'value', type: 'uint256' },
+        ],
+      },
+      onLogs: (logs) => { // [!code focus]
+        logs.forEach((log) => { // [!code focus]
+          console.log('Received payment:', { // [!code focus]
+            from: log.args.from, // [!code focus]
+            amount: log.args.value, // [!code focus]
+          }) // [!code focus]
+        }) // [!code focus]
+      }, // [!code focus]
     })
-  },
-})
-```
+    ```
 
-```rust [Rust]
-use alloy::{primitives::address, providers::ProviderBuilder};
-use futures::StreamExt;
-use tempo_alloy::{TempoNetwork, contracts::precompiles::ITIP20};
+    ```ts [viem.config.ts]
+    // [!include ~/snippets/viem.config.ts:setup]
+    ```
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
-        .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
-        .await?;
+    :::
 
-    // Watch for incoming transfers // [!code focus]
-    let mut transfers = ITIP20::new( // [!code focus]
-        address!("0x20c0000000000000000000000000000000000001"), // [!code focus]
-        &provider, // [!code focus]
-    ) // [!code focus]
-    .Transfer_filter() // [!code focus]
-    .watch() // [!code focus]
-    .await? // [!code focus]
-    .into_stream(); // [!code focus]
+  </Tab>
 
-    while let Some(Ok((payment, _))) = transfers.next().await { // [!code focus]
-        println!("Received payment: {payment:?}") // [!code focus]
-    } // [!code focus]
+  <Tab title="Rust">
 
-    Ok(())
-}
-```
+    :::code-group
 
-:::
+    ```rust [example.rs]
+    use alloy::{primitives::address, providers::ProviderBuilder};
+    use futures::StreamExt;
+    use tempo_alloy::{TempoNetwork, contracts::precompiles::ITIP20};
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
+            .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
+            .await?;
+
+        // Watch for incoming transfers // [!code focus]
+        let mut transfers = ITIP20::new( // [!code focus]
+            address!("0x20c0000000000000000000000000000000000001"), // [!code focus]
+            &provider, // [!code focus]
+        ) // [!code focus]
+        .Transfer_filter() // [!code focus]
+        .watch() // [!code focus]
+        .await? // [!code focus]
+        .into_stream(); // [!code focus]
+
+        while let Some(Ok((payment, _))) = transfers.next().await { // [!code focus]
+            println!("Received payment: {payment:?}") // [!code focus]
+        } // [!code focus]
+
+        Ok(())
+    }
+    ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-provider.rs:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Python">
+
+    :::code-group
+
+    ```python [example.py]
+    import json
+    from web3 import Web3
+    from provider import w3
+
+    token_address = "0x20c0000000000000000000000000000000000001"  # AlphaUSD
+
+    transfer_event_abi = { # [!code focus]
+        "anonymous": False, # [!code focus]
+        "name": "Transfer", # [!code focus]
+        "type": "event", # [!code focus]
+        "inputs": [ # [!code focus]
+            {"indexed": True, "name": "from", "type": "address"}, # [!code focus]
+            {"indexed": True, "name": "to", "type": "address"}, # [!code focus]
+            {"indexed": False, "name": "value", "type": "uint256"}, # [!code focus]
+        ], # [!code focus]
+    } # [!code focus]
+
+    contract = w3.eth.contract( # [!code focus]
+        address=Web3.to_checksum_address(token_address), # [!code focus]
+        abi=[transfer_event_abi], # [!code focus]
+    ) # [!code focus]
+
+    # Get historical Transfer events # [!code focus]
+    events = contract.events.Transfer().get_logs(from_block="latest") # [!code focus]
+    for event in events: # [!code focus]
+        print(f"Transfer: {event.args['from']} -> {event.args['to']}: {event.args['value']}") # [!code focus]
+    ```
+
+    ```python [provider.py]
+    from web3 import Web3
+
+    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Go">
+
+    :::code-group
+
+    ```go [main.go]
+    package main
+
+    import (
+    	"context"
+    	"fmt"
+    	"log"
+
+    	"github.com/ethereum/go-ethereum/crypto"
+    )
+
+    func main() {
+    	c := newClient()
+    	ctx := context.Background()
+
+    	token := "0x20c0000000000000000000000000000000000001"
+
+    	// Transfer(address,address,uint256) event topic // [!code focus]
+    	transferTopic := crypto.Keccak256Hash([]byte("Transfer(address,address,uint256)")) // [!code focus]
+
+    	resp, err := c.SendRequest(ctx, "eth_getLogs", map[string]interface{}{ // [!code focus]
+    		"fromBlock": "0x0", // [!code focus]
+    		"toBlock":   "latest", // [!code focus]
+    		"address":   token, // [!code focus]
+    		"topics":    []interface{}{transferTopic.Hex()}, // [!code focus]
+    	}) // [!code focus]
+    	if err != nil {
+    		log.Fatal(err)
+    	}
+
+    	logs, _ := resp.Result.([]interface{}) // [!code focus]
+    	for _, entry := range logs { // [!code focus]
+    		l := entry.(map[string]interface{}) // [!code focus]
+    		topics := l["topics"].([]interface{}) // [!code focus]
+    		fmt.Printf("Transfer: %s -> %s (data: %s)\n", topics[1], topics[2], l["data"]) // [!code focus]
+    	} // [!code focus]
+    }
+    ```
+
+    ```go [provider.go]
+    // [!include ~/snippets/go-provider.go:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Cast">
+
+    ```bash
+    $ cast logs \
+      --address 0x20c0000000000000000000000000000000000001 \
+      "Transfer(address indexed, address indexed, uint256)" \
+      --rpc-url $TEMPO_RPC_URL
+    ```
+
+  </Tab>
+</Tabs>
 
 ## Payment Reconciliation with Memos
 
 If payments include memos (invoice IDs, order numbers, etc.), you can reconcile them automatically:
 
-:::code-group
+<Tabs stateKey="library">
+  <Tab title="Viem">
 
-```ts [TypeScript]
-// Watch for TransferWithMemo events
-const unwatch = watchEvent(client, {
-  address: tokenAddress,
-  event: {
-    type: 'event',
-    name: 'TransferWithMemo',
-    inputs: [
-      { name: 'from', type: 'address', indexed: true },
-      { name: 'to', type: 'address', indexed: true },
-      { name: 'value', type: 'uint256' },
-      { name: 'memo', type: 'bytes32', indexed: true },
-    ],
-  },
-  onLogs: (logs) => {
-    logs.forEach((log) => {
-      if (log.args.to === yourAddress) {
-        const invoiceId = log.args.memo
-        // Mark invoice as paid in your database
-        markInvoiceAsPaid(invoiceId, log.args.value)
-      }
+    :::code-group
+
+    ```ts [example.ts]
+    import { client } from './viem.config'
+
+    // Watch for TransferWithMemo events
+    const unwatch = client.watchEvent({
+      address: '0x20c0000000000000000000000000000000000001',
+      event: {
+        type: 'event',
+        name: 'TransferWithMemo',
+        inputs: [
+          { name: 'from', type: 'address', indexed: true },
+          { name: 'to', type: 'address', indexed: true },
+          { name: 'value', type: 'uint256' },
+          { name: 'memo', type: 'bytes32', indexed: true },
+        ],
+      },
+      onLogs: (logs) => { // [!code focus]
+        logs.forEach((log) => { // [!code focus]
+          const invoiceId = log.args.memo // [!code focus]
+          // Mark invoice as paid in your database // [!code focus]
+          markInvoiceAsPaid(invoiceId, log.args.value) // [!code focus]
+        }) // [!code focus]
+      }, // [!code focus]
     })
-  },
-})
-```
+    ```
 
-```rust [Rust]
-use alloy::{primitives::address, providers::ProviderBuilder};
-use futures::StreamExt;
-use tempo_alloy::{TempoNetwork, contracts::precompiles::ITIP20};
+    ```ts [viem.config.ts]
+    // [!include ~/snippets/viem.config.ts:setup]
+    ```
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
-        .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
-        .await?;
+    :::
 
-    let mut transfers = ITIP20::new( // [!code focus]
-        address!("0x20c0000000000000000000000000000000000001"), // [!code focus]
-        &provider, // [!code focus]
-    ) // [!code focus]
-    .TransferWithMemo_filter() // [!code focus]
-    .watch() // [!code focus]
-    .await? // [!code focus]
-    .into_stream(); // [!code focus]
+  </Tab>
 
-    while let Some(Ok((transfer, _))) = transfers.next().await { // [!code focus]
-        let invoice_id = transfer.memo; // [!code focus]
-        println!("Transfer received with memo: {invoice_id:?}"); // [!code focus]
-    } // [!code focus]
+  <Tab title="Rust">
 
-    Ok(())
-}
-```
+    :::code-group
 
-:::
+    ```rust [example.rs]
+    use alloy::{primitives::address, providers::ProviderBuilder};
+    use futures::StreamExt;
+    use tempo_alloy::{TempoNetwork, contracts::precompiles::ITIP20};
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
+            .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
+            .await?;
+
+        let mut transfers = ITIP20::new( // [!code focus]
+            address!("0x20c0000000000000000000000000000000000001"), // [!code focus]
+            &provider, // [!code focus]
+        ) // [!code focus]
+        .TransferWithMemo_filter() // [!code focus]
+        .watch() // [!code focus]
+        .await? // [!code focus]
+        .into_stream(); // [!code focus]
+
+        while let Some(Ok((transfer, _))) = transfers.next().await { // [!code focus]
+            let invoice_id = transfer.memo; // [!code focus]
+            println!("Transfer received with memo: {invoice_id:?}"); // [!code focus]
+        } // [!code focus]
+
+        Ok(())
+    }
+    ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-provider.rs:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Python">
+
+    :::code-group
+
+    ```python [example.py]
+    from web3 import Web3
+    from provider import w3
+
+    token_address = "0x20c0000000000000000000000000000000000001"  # AlphaUSD
+
+    transfer_memo_abi = { # [!code focus]
+        "anonymous": False, # [!code focus]
+        "name": "TransferWithMemo", # [!code focus]
+        "type": "event", # [!code focus]
+        "inputs": [ # [!code focus]
+            {"indexed": True, "name": "from", "type": "address"}, # [!code focus]
+            {"indexed": True, "name": "to", "type": "address"}, # [!code focus]
+            {"indexed": False, "name": "value", "type": "uint256"}, # [!code focus]
+            {"indexed": True, "name": "memo", "type": "bytes32"}, # [!code focus]
+        ], # [!code focus]
+    } # [!code focus]
+
+    contract = w3.eth.contract( # [!code focus]
+        address=Web3.to_checksum_address(token_address), # [!code focus]
+        abi=[transfer_memo_abi], # [!code focus]
+    ) # [!code focus]
+
+    events = contract.events.TransferWithMemo().get_logs(from_block="latest") # [!code focus]
+    for event in events: # [!code focus]
+        invoice_id = event.args["memo"] # [!code focus]
+        print(f"Transfer with memo {invoice_id.hex()}: {event.args['value']}") # [!code focus]
+    ```
+
+    ```python [provider.py]
+    from web3 import Web3
+
+    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Go">
+
+    :::code-group
+
+    ```go [main.go]
+    package main
+
+    import (
+    	"context"
+    	"fmt"
+    	"log"
+
+    	"github.com/ethereum/go-ethereum/crypto"
+    )
+
+    func main() {
+    	c := newClient()
+    	ctx := context.Background()
+
+    	token := "0x20c0000000000000000000000000000000000001"
+
+    	// TransferWithMemo(address,address,uint256,bytes32) event topic // [!code focus]
+    	memoTopic := crypto.Keccak256Hash( // [!code focus]
+    		[]byte("TransferWithMemo(address,address,uint256,bytes32)"), // [!code focus]
+    	) // [!code focus]
+
+    	resp, err := c.SendRequest(ctx, "eth_getLogs", map[string]interface{}{ // [!code focus]
+    		"fromBlock": "0x0", // [!code focus]
+    		"toBlock":   "latest", // [!code focus]
+    		"address":   token, // [!code focus]
+    		"topics":    []interface{}{memoTopic.Hex()}, // [!code focus]
+    	}) // [!code focus]
+    	if err != nil {
+    		log.Fatal(err)
+    	}
+
+    	logs, _ := resp.Result.([]interface{}) // [!code focus]
+    	for _, entry := range logs { // [!code focus]
+    		l := entry.(map[string]interface{}) // [!code focus]
+    		topics := l["topics"].([]interface{}) // [!code focus]
+    		fmt.Printf("Transfer: %s -> %s (memo: %s, data: %s)\n", // [!code focus]
+    			topics[1], topics[2], topics[3], l["data"]) // [!code focus]
+    	} // [!code focus]
+    }
+    ```
+
+    ```go [provider.go]
+    // [!include ~/snippets/go-provider.go:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Cast">
+
+    ```bash
+    $ cast logs \
+      --address 0x20c0000000000000000000000000000000000001 \
+      "TransferWithMemo(address indexed, address indexed, uint256, bytes32 indexed)" \
+      --rpc-url $TEMPO_RPC_URL
+    ```
+
+  </Tab>
+</Tabs>
 
 ## Smart Contract Integration
 

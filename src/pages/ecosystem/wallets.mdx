@@ -1,0 +1,79 @@
+---
+title: Wallets
+description: Integrate embedded, custodial, and institutional wallet infrastructure into your Tempo application.
+---
+
+# Wallets
+
+Integrate user-friendly wallet experiences directly into your application.
+
+## Embedded
+
+### Blockradar
+[Blockradar](https://blockradar.co) provides non-custodial wallet infrastructure purpose-built for fintechs running stablecoin payments. The platform focuses on real financial use cases, from merchant settlement to cross-border payouts, with tools designed for payments, compliance, treasury operations, and multi-chain liquidity. Explore the full platform in the [Blockradar Docs](https://docs.blockradar.co/).
+
+**Wallet and Payment Operations:** Through one unified API, teams can issue wallets for users, merchants, or treasury; accept fiat inflows through virtual accounts; enable gasless stablecoin transactions; apply AML checks automatically; consolidate balances through configurable sweeps; and handle cross-chain movement using swap and bridge. Fintechs can start building immediately from our API or [Blockradar Dashboard](https://dashboard.blockradar.co/). For advanced flows or high-volume programs, fintechs can [book a demo](https://www.blockradar.co/contact) to walk through production architectures.
+
+### Crossmint
+
+[Crossmint](https://www.crossmint.com) is an all-in-one platform, with unified APIs for [wallets](https://docs.crossmint.com/wallets/), [stablecoin orchestration](https://docs.crossmint.com/stablecoin-orchestration/), [checkout flows](https://docs.crossmint.com/payments), and [tokenization](https://docs.crossmint.com/minting), giving developers a single interface for everything from payments to asset management on Tempo.
+
+Crossmint delivers a gasless, seed-phrase-free UX backed by bank-grade security and compliance, along with no-code dashboards for managing programs across your team.
+
+Set up a project in the [Crossmint console](https://crossmint.com/console) and explore the [Solution Guide](https://docs.crossmint.com/solutions/overview#fintech) tailored for payment use-cases.
+
+### Dynamic
+
+[Dynamic](https://dynamic.xyz) combines authentication, smart wallets, and key management into a flexible SDK for Tempo developers. Teams can onboard users with familiar login methods and provision Tempo-compatible wallets through Dynamic's secure infrastructure.
+
+Enable Tempo testnet in the [Dynamic dashboard](https://app.dynamic.xyz/dashboard/chains-and-networks), and create an account [here](https://www.dynamic.xyz/get-started) to start integrating Dynamic into your app.
+
+### Para
+
+[Para](https://getpara.com) is a comprehensive wallet and authentication suite for fintech and crypto applications. It provides flexible login methods, secure MPC-backed wallets, fast authentication, and infrastructure for automating onchain activity. Para is adding Tempo chain support so developers can easily build Tempo-enabled wallets and payment flows.
+
+Get started by signing up through the [Para Dev Portal](https://developer.getpara.com/) and following the quickstart in the [Para docs](https://docs.getpara.com/v2/introduction/welcome).
+
+### Privy
+
+[Privy](https://www.privy.io/) builds secure key management and embedded wallets so any developer can easily build secure, scalable wallets into their app. Easily spin up self-custodial wallets for users, manage your treasury wallets and more.
+
+Privy takes advantage of Tempo-native experiences to enable better stablecoin and payments experiences. Easily enable gas sponsorship, leverage webhooks for onchain events, delegated signatures, simple wallet funding, etc.
+
+You can get started now. Simply [create](https://docs.privy.io/wallets/wallets/create/create-a-wallet#param-chain-type-1) an ethereum wallet with Privy and pass in `"caip2": "eip155:42431"` when [making transactions](https://docs.privy.io/wallets/using-wallets/ethereum/send-a-transaction#usage-9).
+
+:::tip
+Check out Privy's [example](https://github.com/privy-io/examples/tree/main/examples/privy-next-tempo) peer-to-peer payments app that uses Tempo transaction memos.
+:::
+
+### Turnkey
+
+[Turnkey](https://www.turnkey.com) provides programmable key management and non-custodial wallet infrastructure for applications that need granular signing policies and automated transaction flows. With Turnkey, developers can securely sign Tempo transactions, automate wallet operations, and build custom logic around how keys are used.
+
+Turnkey also supports sponsor-style workflows, enabling gasless or subsidized transaction flows through configurable signing policies.
+
+[Create your Turnkey account](https://app.turnkey.com/dashboard) and follow the [Turnkey Embedded Wallet Kit guide](https://docs.turnkey.com/sdks/react/getting-started) to integrate embedded wallets into your Tempo app.
+
+:::tip
+Turnkey has a [`with-tempo`](https://github.com/tkhq/sdk/tree/main/examples/with-tempo) example in their SDK to get you started quickly.
+:::
+
+## Custodial & Institutional
+
+### BitGo
+
+[BitGo](https://www.bitgo.com) provides institutional-grade custody, trading, and wallet infrastructure. BitGo supports Tempo with both custodial and self-custody wallet solutions, enabling enterprises to securely store, manage, and transact with Tempo-based assets under robust security and compliance controls. BitGo is a  qualified custodian in the United States and globally [licensed and regulated](https://www.bitgo.com/company/licenses/).
+
+Get started through the [BitGo platform](https://www.bitgo.com) or explore their [developer docs](https://developers.bitgo.com/).
+
+### Fireblocks
+
+[Fireblocks](https://www.fireblocks.com) provides enterprise-grade digital asset infrastructure for custody, transfers, and tokenization. Tempo is supported through Fireblocks' MPC-based signing, policy engine, and transaction API — enabling institutions to securely manage Tempo assets with configurable approval workflows and direct network connectivity.
+
+Access Tempo through the [Fireblocks console](https://console.fireblocks.io/) and explore the [Fireblocks Developer docs](https://developers.fireblocks.com/).
+
+### Utila
+
+[Utila](https://utila.io) provides secure MPC wallet infrastructure and asset-management tooling for teams building with stablecoins and digital assets. Developers can use Utila to manage Tempo-based payments and treasury operations across multiple wallets and blockchains, all within a single policy-driven platform. Utila's MPC technology reduces counterparty risk, while its configurable approval engine gives teams granular control over how funds are moved.
+
+[Learn more](https://utila.io/product/payments/) about how Utila supports stablecoin operations on Tempo, and [request a demo](https://utila.io/request-a-demo/) if you're interested in secure MPC infrastructure.

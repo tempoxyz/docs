@@ -238,3 +238,24 @@
 .data-v-mermaid-container {
   min-height: 200px;
 }
+
+/* ---------------------------------------------------------------------------
+ * Terminal theme — scoped color variables for the embedded terminal demo.
+ * --------------------------------------------------------------------------- */
+
+.terminal-theme {
+  --term-bg1: light-dark(oklch(0.94 0 0), oklch(0.14 0 0));
+  --term-bg2: light-dark(oklch(1 0 0), oklch(0.15 0 0));
+  --term-gray1: light-dark(oklch(0.955 0 0), oklch(0.18 0 0));
+  --term-gray2: light-dark(oklch(0.933 0 0), oklch(0.2 0 0));
+  --term-gray3: light-dark(oklch(0.933 0 0), oklch(0.22 0 0));
+  --term-gray4: light-dark(oklch(0.933 0 0), oklch(0.27 0 0));
+  --term-gray5: light-dark(oklch(0.549 0 0), oklch(0.45 0 0));
+  --term-gray6: light-dark(oklch(0.45 0 0), oklch(0.58 0 0));
+  --term-gray10: light-dark(oklch(0.21 0 0), oklch(0.9 0 0));
+  --term-blue9: light-dark(hsl(211 100% 42%), hsl(210 100% 70%));
+  --term-amber9: light-dark(hsl(30 100% 32%), hsl(39 95% 58%));
+  --term-green9: light-dark(hsl(133 50% 32%), hsl(131 50% 60%));
+  --term-orange9: light-dark(hsl(25 95% 45%), hsl(25 95% 63%));
+  --term-pink9: light-dark(hsl(336 65% 45%), hsl(341 90% 72%));
+}
