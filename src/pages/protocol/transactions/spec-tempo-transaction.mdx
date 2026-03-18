@@ -179,7 +179,7 @@ Each authorization in the list:
 
 - **Protocol nonce (key 0)**: Existing account nonce, incremented for regular txs, 7702 authorization, or `CREATE`
 - **User nonces (keys 1-N)**: Enable parallel execution with special gas schedule
-- **Reserved sequence keys**: Nonce sequence keys with the most significant byte `0x5b` are reserved for [sub-block transactions](/protocol/blockspace/sub-block-specification#11-sub-block-transactions).
+- **Reserved sequence keys**: Nonce sequence keys with the most significant byte `0x5b` are reserved for protocol-managed validator sequencing.
 
 #### Account State Changes
 - `nonces: mapping(uint256 => uint64)` - 2D nonce tracking
@@ -1128,4 +1128,3 @@ The introduction of 7702 delegated accounts already created complex cross-transa
 Because a single transaction can invalidate multiple others by spending balances of multiple accounts
 
 **Assessment:** While this transaction type introduces additional pre-execution validation costs, all costs are bounded to reasonable limits. The mempool complexity issues around cross-transaction dependencies already exist in Ethereum due to 7702 and accounts with code, making static validation inherently difficult. So the incremental cost from this transaction type is acceptable given these existing constraints.
-

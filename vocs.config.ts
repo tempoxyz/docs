@@ -462,10 +462,6 @@ export default defineConfig({
                 link: '/protocol/blockspace/payment-lane-specification',
               },
               {
-                text: 'Sub-block Specification',
-                link: '/protocol/blockspace/sub-block-specification',
-              },
-              {
                 text: 'Consensus and Finality',
                 link: '/protocol/blockspace/consensus',
               },
@@ -784,10 +780,6 @@ export default defineConfig({
     {
       source: '/documentation/protocol/:path*',
       destination: '/protocol/:path*',
-    },
-    {
-      source: '/errors/tx/SubblockNonceKey',
-      destination: '/protocol/blockspace/sub-block-specification#4-block-validity-rules',
     },
     {
       source: '/stablecoin-exchange/:path*',

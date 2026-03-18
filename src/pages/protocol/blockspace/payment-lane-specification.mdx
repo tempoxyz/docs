@@ -6,7 +6,7 @@ description: Technical specification for Tempo payment lanes ensuring dedicated 
 
 ## Abstract
 
-This specification introduces a second consensus gas constraint for **non-payment** transactions. Transactions are classified as either payments or non-payments based solely on their transaction data, without requiring any access to blockchain state. For a block to be valid, total `gas_used` by the block must be less than the `gas_limit`. Non-payment transactions executed in the proposer's lane (i.e. before the gas incentive section) must consume at most `general_gas_limit`, a new field added to the header. Once that budget is exhausted, any additional inclusion must come via the gas incentive lane defined in the [sub-blocks specification](/protocol/blockspace/sub-block-specification).
+This specification introduces a second consensus gas constraint for **non-payment** transactions. Transactions are classified as either payments or non-payments based solely on their transaction data, without requiring any access to blockchain state. For a block to be valid, total `gas_used` by the block must be less than the `gas_limit`. Non-payment transactions executed in the proposer's lane (i.e. before the gas incentive section) must consume at most `general_gas_limit`, a new field added to the header. Once that budget is exhausted, additional inclusion is constrained by the remaining shared gas budget.
 
 ## Motivation
 
@@ -52,4 +52,3 @@ for all i such that !is_payment(tx[i]) and tx[i] is in the proposer's lane
 ```
 
 Where `gas_consumed` includes intrinsic gas and gas burned by reverts, as in the existing protocol.
-
