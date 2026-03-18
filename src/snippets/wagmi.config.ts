@@ -39,7 +39,7 @@ export const config = createConfig({
   chains: [tempo],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempo.id]: withFeePayer(http(), http('https://sponsor.moderato.tempo.xyz')),
+    [tempo.id]: withFeePayer(http(), http('https://sponsor.tempo.xyz')),
   },
 })
 // [!endregion withFeePayer]

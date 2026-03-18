@@ -1,5 +1,5 @@
 import { QueryClient } from '@tanstack/react-query'
-import { tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
+import { tempo, tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
 import { withFeePayer } from 'viem/tempo'
 import { type CreateConfigParameters, createConfig, createStorage, http, webSocket } from 'wagmi'
 import { KeyManager, webAuthn } from 'wagmi/tempo'
@@ -24,7 +24,9 @@ export function getConfig(options: getConfig.Options = {}) {
         ? tempoLocalnet.extend({ feeToken })
         : import.meta.env.VITE_TEMPO_ENV === 'devnet'
           ? tempoDevnet.extend({ feeToken })
-          : tempoModerato.extend({ feeToken }),
+          : import.meta.env.VITE_TEMPO_ENV === 'moderato'
+            ? tempoModerato.extend({ feeToken })
+            : tempo.extend({ feeToken }),
     ],
     connectors: [
       webAuthn({
@@ -39,6 +41,13 @@ export function getConfig(options: getConfig.Options = {}) {
       key: 'tempo-docs',
     }),
     transports: {
+      [tempo.id]: withFeePayer(
+        webSocket('wss://rpc.tempo.xyz', {
+          keepAlive: { interval: 1_000 },
+        }),
+        http('https://sponsor.tempo.xyz'),
+        { policy: 'sign-only' },
+      ),
       [tempoModerato.id]: withFeePayer(
         webSocket('wss://rpc.moderato.tempo.xyz', {
           keepAlive: { interval: 1_000 },
