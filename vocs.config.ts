@@ -12,6 +12,14 @@ const baseUrl = (() => {
 })()
 
 export default defineConfig({
+  banner: {
+    dismissable: true,
+    backgroundColor: '#5B4CDB',
+    content:
+      'Tempo Mainnet is live. [Read our announcement.](https://tempo.xyz/blog/mainnet) →',
+    height: '40px',
+    textColor: 'white',
+  },
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
   // TODO: Set back to true once tempoxyz/tempo#tip-1011 dead link is fixed
   checkDeadlinks: 'warn',
