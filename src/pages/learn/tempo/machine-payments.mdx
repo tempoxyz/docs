@@ -1,0 +1,121 @@
+---
+description: The Machine Payments Protocol (MPP) is an open standard for machine-to-machine payments, co-authored by Stripe and Tempo.
+---
+
+import { Cards, Card } from 'vocs'
+
+# Machine Payments [Programmable payments for agents and services]
+
+Agents can write code, coordinate services, and execute complex workflows. What they can't do, until now, is pay for things.
+
+The [Machine Payments Protocol](https://mpp.dev) (MPP) is an open standard for machine-to-machine payments, co-authored by Stripe and Tempo. MPP lets any client (agents, apps, or humans) pay for any service inline with their HTTP request. No API keys, no billing accounts, no signup flows.
+
+MPP is live on Tempo Mainnet and works with stablecoins on Tempo, cards via Stripe, and Bitcoin via Lightning, with more payment methods coming.
+
+## How it works
+
+A client requests a paid resource. The server responds with `402 Payment Required` and a challenge describing the price. The client pays, retries with a credential, and the server returns the resource with a receipt.
+
+The entire flow happens in a single request cycle. No redirects, no webhooks, no out-of-band settlement.
+
+## What agents can do today
+
+Give your agent a wallet and it can transact autonomously across the internet:
+
+<Cards>
+  <Card
+    icon="lucide:wallet"
+    title="Fund a wallet"
+    description="Create a wallet and deposit stablecoins for your agent to spend"
+    to="/guide/getting-funds"
+  />
+  <Card
+    icon="lucide:search"
+    title="Discover services"
+    description="Browse 100+ MPP-compatible services in the Payments Directory"
+    to="/cli/wallet#discover-services"
+  />
+  <Card
+    icon="lucide:send"
+    title="Pay for APIs and tools"
+    description="Make paid requests to any MPP-enabled endpoint"
+    to="/cli/request"
+  />
+  <Card
+    icon="lucide:repeat"
+    title="Stream payments"
+    description="Open sessions for continuous pay-as-you-go billing"
+    to="/guide/machine-payments/pay-as-you-go"
+  />
+</Cards>
+
+## Sessions: OAuth for money
+
+Sessions let an agent authorize spending once, then make many payments without a separate on-chain transaction for each one.
+
+When an agent opens a session, it deposits funds into escrow. As the agent consumes resources (an API call, a model inference, a data query), payments stream continuously via signed vouchers off-chain. The server periodically settles the accumulated vouchers on-chain.
+
+Thousands of small transactions collapse into a single settlement. True pay-per-use at internet scale.
+
+| | **Charge** | **Session** |
+|---|---|---|
+| **Pattern** | One-time payment per request | Continuous pay-as-you-go |
+| **Latency** | ~500ms (on-chain confirmation) | Near-zero (off-chain vouchers) |
+| **Best for** | Single API calls, content access | LLM APIs, metered services, token streaming |
+| **On-chain cost** | Per request | Amortized across many requests |
+
+## The Payments Directory
+
+The [Payments Directory](https://mpp.dev) catalogs MPP-compatible services that any agent can transact with automatically. At launch, the directory includes integrations with more than 100 services spanning model providers, developer infrastructure, compute platforms, and data services.
+
+Service providers can integrate MPP to monetize their APIs and become discoverable to agents. Use cases include pay-per-call APIs, monetized MCP servers, gated content, and multi-service agent workflows.
+
+## An open, rail-agnostic standard
+
+MPP is not tied to any single payment rail. The same protocol supports:
+
+- **Stablecoins on Tempo**: TIP-20 token transfers with instant finality
+- **Cards via Stripe**: Visa, Mastercard, and other card networks
+- **Bitcoin via Lightning**: Payments over the Lightning Network
+- **Custom methods**: Anyone can build a [payment method](https://mpp.dev/payment-methods/custom) for their rail
+
+The core [Payment HTTP Authentication Scheme](https://paymentauth.org) is submitted to the IETF for standardization. Payment method specifications are separate documents that anyone can author and publish independently.
+
+## Why Tempo
+
+Tempo's infrastructure is purpose-built for the transaction patterns that machine payments produce:
+
+- **~500ms deterministic finality**: Fast enough for synchronous request/response flows
+- **Sub-cent fees**: Low enough for micropayments and per-request billing
+- **Payment lanes**: Dedicated transaction routing that stays reliable under load
+- **Fee sponsorship**: Servers cover gas so clients only need stablecoins
+- **Parallel nonces**: Payment transactions don't block other account activity
+
+## Get started
+
+<Cards>
+  <Card
+    icon="lucide:play"
+    title="Client quickstart"
+    description="Handle payment-gated resources automatically"
+    to="/guide/machine-payments/client"
+  />
+  <Card
+    icon="lucide:server"
+    title="Server quickstart"
+    description="Add payment gating to your HTTP endpoints"
+    to="/guide/machine-payments/server"
+  />
+  <Card
+    icon="lucide:book-open"
+    title="MPP documentation"
+    description="Full protocol docs, SDK reference, and guides"
+    to="https://mpp.dev"
+  />
+  <Card
+    icon="lucide:terminal"
+    title="tempo request"
+    description="curl-like CLI with automatic payment negotiation"
+    to="/cli/request"
+  />
+</Cards>

@@ -1,0 +1,47 @@
+---
+title: tempo download
+description: Download chain snapshots for faster initial sync of a Tempo node.
+---
+
+# `tempo download`
+
+Download chain snapshots for faster initial sync. Fetches MDBX state and static files, and generates a `reth.toml` prune config for the target data directory.
+
+## Usage
+
+```bash
+tempo download [flags]
+```
+
+## Flags
+
+| Flag | Description |
+| --- | --- |
+| `--chain <network>` | Target network (`mainnet`, `moderato`) |
+| `--datadir <path>` | Data directory for downloaded state |
+| `-u, --url <url>` | Download a specific snapshot URL instead of the latest |
+| `--resumable` | Resume an interrupted download |
+| `--minimal` | Download minimal snapshot (pruned state only) |
+| `--archive` | Download full archive snapshot |
+
+## Examples
+
+Download the latest mainnet snapshot:
+
+```bash
+tempo download --chain mainnet
+```
+
+Download to a specific directory:
+
+```bash
+tempo download --chain mainnet --datadir /data/tempo
+```
+
+Resume an interrupted download:
+
+```bash
+tempo download --chain mainnet --resumable
+```
+
+Then start your node with [`tempo node`](/cli/node).

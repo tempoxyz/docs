@@ -1,25 +1,21 @@
 ---
 title: Using Tempo with AI
-description: Tempo is built with AI-first principles, providing neccessary skills and tools for AI assistants.
+description: Give your AI coding agent Tempo documentation context and a wallet for autonomous transactions.
 ---
 
-import { Cards, Card, Tabs, Tab } from 'vocs'
+import { Cards, Card } from 'vocs'
 
 # Using Tempo with AI
 
-Tempo is built with AI-first principles, providing multiple features to make documentation accessible to LLMs and AI assistants.
-
-Tempo provides AI-assisted skills and tooling for the following:
-
 <Cards>
   <Card
-    description="Give your AI agent a wallet with built-in spend controls to discover and pay for services on demand."
+    description="Give your agent a wallet with spend controls to discover and pay for services on demand."
     to="#tempo-wallet"
     icon="lucide:wallet"
     title="Tempo Wallet"
   />
   <Card
-    description="Install AI skills, connect via MCP, and access chain documentation as Markdown for LLM-powered development."
+    description="Feed your agent Tempo docs via skills, llms.txt, Markdown pages, and MCP."
     to="#tempo-docs"
     icon="lucide:blocks"
     title="Tempo Docs"
@@ -28,74 +24,66 @@ Tempo provides AI-assisted skills and tooling for the following:
 
 ## Tempo Wallet
 
-The [Tempo CLI](/cli) gives agents a wallet with built-in spend controls and service discovery. Agents can use [`tempo wallet`](/cli/wallet) to manage keys and balances, and [`tempo request`](/cli/request) to pay for services on demand.
+The [Tempo CLI](/cli) gives agents a wallet with built-in spend controls and service discovery. Agents use [`tempo wallet`](/cli/wallet) to manage keys and balances, and [`tempo request`](/cli/request) to pay for services on demand.
 
-Paste this into your agent (Claude Code, Amp, Codex, etc.) to set up and start using a Tempo Wallet:
+Paste this into your agent to set up a Tempo Wallet:
 
 :::code-group
 ```bash [Claude Code]
-claude -p "Read https://wallet.tempo.xyz/SKILL.md and set up tempo"
+claude -p "Read https://tempo.xyz/SKILL.md and set up Tempo Wallet"
 ```
 ```bash [Amp]
-amp -x "Read https://wallet.tempo.xyz/SKILL.md and set up tempo"
+amp --execute "Read https://tempo.xyz/SKILL.md and set up Tempo Wallet"
 ```
 ```bash [Codex CLI]
-codex exec "Read https://wallet.tempo.xyz/SKILL.md and set up tempo"
+codex exec "Read https://tempo.xyz/SKILL.md and set up Tempo Wallet"
 ```
 :::
 
 ## Tempo Docs
 
-### Skills
+### Docs skill
 
-Install [Tempo Docs Skills](https://github.com/tempoxyz/agent-skills) to give AI coding agents (Amp, Claude Code, etc.) access to Tempo documentation, source code via MCP, and examples. 
+Install the Tempo Docs skill to give AI coding agents access to Tempo documentation, source code via MCP, and examples:
 
 ```bash
-npx skills add tempoxyz/docs
+npx skills add tempoxyz/docs-mainnet
 ```
 
-Once installed, the skill is automatically available. The agent will use it when relevant tasks are detected.
+Once installed, the agent uses it automatically when relevant tasks are detected.
 
-**Examples:**
+### Read docs as Markdown
+
+Every page on this site is available as plain Markdown — append `.md` to any URL:
 
 ```
-How do I create a TIP-20 stablecoin?
-```
-```
-Show me how fee sponsorship works in Viem
-```
-```
-Search the Tempo source for transaction validation
+https://docs.tempo.xyz/quickstart/integrate-tempo.md
 ```
 
-### Ask AI Menu
+For LLM consumption, two [`llms.txt`](https://llmstxt.org/) files are served at the root:
 
-The docs include a built-in "Ask AI" menu (<kbd>⌘I</kbd> / <kbd>Ctrl+I</kbd>) that provides:
+| URL | Contents |
+|---|---|
+| [`/llms.txt`](https://docs.tempo.xyz/llms.txt) | Concise index of all pages with titles and descriptions |
+| [`/llms-full.txt`](https://docs.tempo.xyz/llms-full.txt) | Complete documentation in a single file |
 
-- **Open in ChatGPT/Claude**: Opens the current page context in popular AI assistants
-- **Copy page for AI**: Copies the page content as Markdown to your clipboard
-- **View as Markdown**: Opens the raw Markdown version of the current page
-- **Copy MCP URL**: Copies the MCP server URL for AI assistant configuration
+### MCP server
 
-### MCP Server
-
-The docs include a built-in [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that allows AI assistants to navigate documentation and source code programmatically.
+The docs include a built-in [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for programmatic navigation of documentation and source code.
 
 :::code-group
 ```bash [Claude Code]
 claude mcp add --transport http tempo https://docs.tempo.xyz/api/mcp
 ```
 ```bash [Codex CLI]
-codex mcp add vercel --url https://docs.tempo.xyz/api/mcp
+codex mcp add tempo --url https://docs.tempo.xyz/api/mcp
 ```
 ```bash [Amp]
 amp mcp add tempo https://docs.tempo.xyz/api/mcp
 ```
 :::
 
-#### Connecting AI Assistants
-
-Configure your AI assistant to connect to the MCP server:
+Or configure manually:
 
 ```json
 {
