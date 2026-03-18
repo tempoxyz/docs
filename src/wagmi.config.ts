@@ -6,6 +6,13 @@ import { KeyManager, webAuthn } from 'wagmi/tempo'
 
 const feeToken = '0x20c0000000000000000000000000000000000001'
 
+const chain =
+  import.meta.env.VITE_TEMPO_ENV === 'localnet'
+    ? tempoLocalnet.extend({ feeToken })
+    : import.meta.env.VITE_TEMPO_ENV === 'devnet'
+      ? tempoDevnet.extend({ feeToken })
+      : tempoModerato.extend({ feeToken })
+
 const rpId = (() => {
   const hostname = globalThis.location?.hostname
   if (!hostname) return undefined
@@ -19,16 +26,10 @@ export function getConfig(options: getConfig.Options = {}) {
     batch: {
       multicall: false,
     },
-    chains: [
-      import.meta.env.VITE_TEMPO_ENV === 'localnet'
-        ? tempoLocalnet.extend({ feeToken })
-        : import.meta.env.VITE_TEMPO_ENV === 'devnet'
-          ? tempoDevnet.extend({ feeToken })
-          : tempoModerato.extend({ feeToken }),
-    ],
+    chains: [chain],
     connectors: [
       webAuthn({
-        grantAccessKey: true,
+        grantAccessKey: { chainId: BigInt(chain.id) } as any,
         keyManager: KeyManager.http('https://keys.tempo.xyz'),
         rpId,
       }),
