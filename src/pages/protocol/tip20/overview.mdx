@@ -134,14 +134,15 @@ A TIP-20 token can declare a currency identifier that identifies the reference a
 
 #### General principle
 
-**The `currency` field identifies the reference asset that 1 unit of the token is designed to be worth** — not what the token is called or what it is denominated in. Two tokens that track the same asset should have the same `currency`.
+**The `currency` field identifies the reference asset that 1 unit of the token is designed to be worth** — not what the token is called or what it is denominated in. Two tokens that track the same asset should have the same `currency`. When in doubt, consider that the purpose of this field is to determine what assets a token would trade against on a DEX designed for assets that trade within 2% of a 1:1 price.
 
 #### Guidelines
 
-1. **Fiat-pegged stablecoins** — use the [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) code of the currency the token is pegged to.
-2. **Tokens tracking a non-fiat asset at 1:1** — use the symbol of that asset. For example, a bridged WBTC that tracks BTC should use `"BTC"`. Prefer `"BTC"` over `"XBT"`.
-3. **Yield-bearing or unique-price assets** — use the symbol of the specific asset the token tracks. For example, bridged stETH should use `"stETH"`, not `"ETH"`, because stETH trades at its own price.
+1. **Tokens that track an asset with an [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) code** — use that code. This includes fiat currencies (`"USD"`, `"EUR"`) as well as commodities (`"XAU"` for gold, `"XAG"` for silver).
+2. **Tokens tracking a non-ISO asset at 1:1** — use the symbol of the reference asset. For example, a bridged WBTC that tracks BTC should use `"BTC"`. Prefer `"BTC"` over `"XBT"`. Use the symbol from the asset's origin chain when there is ambiguity across platforms.
+3. **Unique-price assets** — if the token tracks an asset that trades at its own distinct price, use that asset's specific symbol. For example, bridged wstETH should use `"wstETH"`, not `"ETH"`, because wstETH trades at its own price. But bridged stETH should use `"ETH"`, because 1 stETH is designed to be worth 1 ETH.
 4. **Tokens denominated in but not pegged to a currency** — do **not** use that currency's code. A tokenized gold product priced in USD should not use `"USD"`, because 1 unit is not designed to be worth 1 USD.
+5. **Tokens with no reference asset** — if a token does not track any external asset (e.g. a governance or utility token), use its own symbol as the currency.
 
 #### Examples
 
@@ -151,8 +152,10 @@ A TIP-20 token can declare a currency identifier that identifies the reference a
 | USDT | US Dollar | `"USD"` | `"USDT"` |
 | EURC | Euro | `"EUR"` | `"EURC"` |
 | Bridged WBTC | Bitcoin | `"BTC"` | `"WBTC"` |
-| Bridged stETH | Lido Staked Ether | `"stETH"` | `"ETH"` |
+| Bridged stETH | Ether | `"ETH"` | `"stETH"` |
+| Bridged wstETH | Wrapped staked Ether | `"wstETH"` | `"ETH"` |
 | Tokenized gold (priced in USD) | Gold | `"XAU"` | `"USD"` |
+| Governance token (e.g. UNI) | Itself | `"UNI"` | `""` |
 
 :::warning
 The currency code is **immutable** — it cannot be changed after token creation. An incorrect currency code will affect fee payment eligibility, DEX routing, and quote token pairing.
