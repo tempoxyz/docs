@@ -283,7 +283,7 @@ export default defineConfig({
                 link: '/ecosystem',
               },
               {
-                text: 'Bridges',
+                text: 'Bridges & Exchanges',
                 link: '/ecosystem/bridges',
               },
               {
