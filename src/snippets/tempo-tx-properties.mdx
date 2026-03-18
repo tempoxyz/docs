@@ -862,7 +862,10 @@ transactions thereafter can be signed by the access key.
     })
 
     // 3. Sign over key authorization with account.
-    const keyAuthorization = await account.signKeyAuthorization(accessKey)
+    const keyAuthorization = await client.accessKey.signAuthorization({
+      account,
+      accessKey,
+    })
 
     // 4. Attach key authorization to (next) transaction.
     const receipt = await client.sendTransactionSync({
