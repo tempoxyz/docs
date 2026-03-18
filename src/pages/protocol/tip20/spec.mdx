@@ -470,7 +470,7 @@ interface ITIP20Factory {
     /// @notice Creates and deploys a new TIP-20 token
     /// @param name The token's ERC-20 name
     /// @param symbol The token's ERC-20 symbol
-    /// @param currency The token's currency identifier. Immutable after creation. See Currency Declaration.
+    /// @param currency The token's currency identifier (ISO 4217 code, when available). Immutable after creation. See Currency Declaration (https://docs.tempo.xyz/protocol/tip20/overview#currency-declaration).
     /// @param quoteToken The TIP-20 quote token used for exchange pricing
     /// @param admin The address to receive DEFAULT_ADMIN_ROLE on the new token
     /// @param salt A unique salt for deterministic address derivation
