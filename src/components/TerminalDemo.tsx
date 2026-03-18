@@ -1,24 +1,24 @@
-"use client";
+'use client'
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 // ---------------------------------------------------------------------------
 // Constants & helpers
 // ---------------------------------------------------------------------------
 
-const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+const SPINNER_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
 
 function randomHex(bytes: number) {
-  const arr = crypto.getRandomValues(new Uint8Array(bytes));
-  return `0x${Array.from(arr, (b) => b.toString(16).padStart(2, "0")).join("")}`;
+  const arr = crypto.getRandomValues(new Uint8Array(bytes))
+  return `0x${Array.from(arr, (b) => b.toString(16).padStart(2, '0')).join('')}`
 }
 
 function randomAddress() {
-  return randomHex(20);
+  return randomHex(20)
 }
 
 function randomTxHash() {
-  return randomHex(32);
+  return randomHex(32)
 }
 
 // ---------------------------------------------------------------------------
@@ -26,17 +26,12 @@ function randomTxHash() {
 // ---------------------------------------------------------------------------
 
 function Spinner() {
-  const [frame, setFrame] = useState(0);
+  const [frame, setFrame] = useState(0)
   useEffect(() => {
-    const timer = setInterval(
-      () => setFrame((f) => (f + 1) % SPINNER_FRAMES.length),
-      80,
-    );
-    return () => clearInterval(timer);
-  }, []);
-  return (
-    <span style={{ color: "var(--term-blue9)" }}>{SPINNER_FRAMES[frame]}</span>
-  );
+    const timer = setInterval(() => setFrame((f) => (f + 1) % SPINNER_FRAMES.length), 80)
+    return () => clearInterval(timer)
+  }, [])
+  return <span style={{ color: 'var(--term-blue9)' }}>{SPINNER_FRAMES[frame]}</span>
 }
 
 // biome-ignore format: contains unicode ✔︎
@@ -53,7 +48,7 @@ function StepIcon({ spinning }: { spinning: boolean }) {
 }
 
 function BlankLine() {
-  return <div className="h-6" />;
+  return <div className="h-6" />
 }
 
 function TruncatedHex({ hash }: { hash: string }) {
@@ -64,7 +59,7 @@ function TruncatedHex({ hash }: { hash: string }) {
       </span>
       <span className="hidden md:inline">{hash}</span>
     </>
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -72,39 +67,36 @@ function TruncatedHex({ hash }: { hash: string }) {
 // ---------------------------------------------------------------------------
 
 function PhotoOutput({ url }: { url: string }) {
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(false)
 
   return (
     <div>
       <div
-        className="block relative rounded overflow-hidden"
+        className="relative block overflow-hidden rounded"
         style={{
           width: 200,
           height: 200,
-          borderColor: "var(--term-gray4)",
+          borderColor: 'var(--term-gray4)',
           borderWidth: 1,
-          borderStyle: "solid",
+          borderStyle: 'solid',
         }}
       >
         {!loaded && (
-          <div
-            className="absolute inset-0"
-            style={{ backgroundColor: "var(--term-gray3)" }}
-          />
+          <div className="absolute inset-0" style={{ backgroundColor: 'var(--term-gray3)' }} />
         )}
         <img
           src={url}
           alt="Generated"
           onLoad={() => setLoaded(true)}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover"
           style={{
-            transition: "opacity 0.5s",
+            transition: 'opacity 0.5s',
             opacity: loaded ? 1 : 0,
           }}
         />
       </div>
     </div>
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -117,101 +109,102 @@ function ChargeSteps({
   address,
   onDone,
 }: {
-  endpoint: string;
-  output: string;
-  address: string;
-  onDone: () => void;
+  endpoint: string
+  output: string
+  address: string
+  onDone: () => void
 }) {
-  const txHash = useMemo(() => randomTxHash(), []);
-  const doneCalled = useRef(false);
+  const txHash = useMemo(() => randomTxHash(), [])
+  const doneCalled = useRef(false)
 
   const steps = useMemo(
     () => [
-      { key: "wallet", delay: 600 },
-      { key: "fund", delay: 1500 },
-      { key: "req402", delay: 500 },
-      { key: "pay", delay: 500 },
-      { key: "req200", delay: 500 },
+      { key: 'wallet', delay: 600 },
+      { key: 'fund', delay: 1500 },
+      { key: 'req402', delay: 500 },
+      { key: 'pay', delay: 500 },
+      { key: 'req200', delay: 500 },
     ],
     [],
-  );
+  )
 
-  const [step, setStep] = useState(0);
-  const currentKey = steps[step]?.key ?? "done";
+  const [step, setStep] = useState(0)
+  const currentKey = steps[step]?.key ?? 'done'
 
   const pastStep = (key: string) => {
-    const idx = steps.findIndex((s) => s.key === key);
-    return idx !== -1 && step > idx;
-  };
+    const idx = steps.findIndex((s) => s.key === key)
+    return idx !== -1 && step > idx
+  }
   const atOrPast = (key: string) => {
-    const idx = steps.findIndex((s) => s.key === key);
-    return idx !== -1 && step >= idx;
-  };
-  const atStep = (key: string) => currentKey === key;
+    const idx = steps.findIndex((s) => s.key === key)
+    return idx !== -1 && step >= idx
+  }
+  const atStep = (key: string) => currentKey === key
 
   useEffect(() => {
-    if (currentKey === "done") {
+    if (currentKey === 'done') {
       if (!doneCalled.current) {
-        doneCalled.current = true;
-        onDone();
+        doneCalled.current = true
+        onDone()
       }
-      return;
+      return
     }
-    const delay = steps[step].delay;
-    const timer = setTimeout(() => setStep((s) => s + 1), delay);
-    return () => clearTimeout(timer);
-  }, [step, currentKey, steps, onDone]);
+    const delay = steps[step].delay
+    const timer = setTimeout(() => setStep((s) => s + 1), delay)
+    return () => clearTimeout(timer)
+  }, [step, currentKey, steps, onDone])
 
   return (
     <div className="flex flex-col">
       <BlankLine />
-      {atOrPast("wallet") && (
-        <p style={{ color: "var(--term-gray6)" }}>
-          <StepIcon spinning={atStep("wallet")} /> Create a wallet{" "}
-          <span style={{ color: "var(--term-gray5)" }}>⋅</span>{" "}
+      {atOrPast('wallet') && (
+        <p style={{ color: 'var(--term-gray6)' }}>
+          <StepIcon spinning={atStep('wallet')} /> Create a wallet{' '}
+          <span style={{ color: 'var(--term-gray5)' }}>⋅</span>{' '}
           <a
             href={`https://explore.tempo.xyz/address/${address}`}
             target="_blank"
             rel="noopener noreferrer"
             className="hover:underline"
-            style={{ color: "var(--term-blue9)" }}
+            style={{ color: 'var(--term-blue9)' }}
           >
             <TruncatedHex hash={address} />
           </a>
         </p>
       )}
-      {atOrPast("fund") && (
-        <p style={{ color: "var(--term-gray6)" }}>
-          <StepIcon spinning={atStep("fund")} /> Add test funds{" "}
-          <span style={{ color: "var(--term-gray5)" }}>⋅</span>{" "}
-          <span style={{ color: "var(--term-amber9)" }}>100 USD</span>
+      {atOrPast('fund') && (
+        <p style={{ color: 'var(--term-gray6)' }}>
+          <StepIcon spinning={atStep('fund')} /> Add test funds{' '}
+          <span style={{ color: 'var(--term-gray5)' }}>⋅</span>{' '}
+          <span style={{ color: 'var(--term-amber9)' }}>100 USD</span>
         </p>
       )}
       {/* biome-ignore format: contains unicode → */}
-      {atOrPast("req402") && (
-        <p style={{ color: "var(--term-gray6)" }}>
-          <StepIcon spinning={atStep("req402")} /> Call {endpoint}
-          {pastStep("req402") && (
+      {atOrPast('req402') && (
+        <p style={{ color: 'var(--term-gray6)' }}>
+          <StepIcon spinning={atStep('req402')} /> Call {endpoint}
+          {pastStep('req402') && (
             <>
-              {" "}→ <span style={{ color: "var(--term-orange9)" }}>402</span>{" "}
-              <span style={{ color: "var(--term-gray6)" }}>(payment required)</span>
+              {' '}
+              → <span style={{ color: 'var(--term-orange9)' }}>402</span>{' '}
+              <span style={{ color: 'var(--term-gray6)' }}>(payment required)</span>
             </>
           )}
         </p>
       )}
-      {atOrPast("pay") && (
-        <p style={{ color: "var(--term-gray6)" }}>
-          <StepIcon spinning={atStep("pay")} /> Fulfill payment
-          {pastStep("pay") && (
+      {atOrPast('pay') && (
+        <p style={{ color: 'var(--term-gray6)' }}>
+          <StepIcon spinning={atStep('pay')} /> Fulfill payment
+          {pastStep('pay') && (
             <>
-              {" "}
-              <span style={{ color: "var(--term-gray5)" }}>⋅</span>{" "}
+              {' '}
+              <span style={{ color: 'var(--term-gray5)' }}>⋅</span>{' '}
               <a
                 href={`https://explore.tempo.xyz/receipt/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:underline"
-                style={{ color: "var(--term-blue9)" }}
+                style={{ color: 'var(--term-blue9)' }}
               >
                 {txHash.slice(0, 6)}…{txHash.slice(-4)}
               </a>
@@ -220,18 +213,19 @@ function ChargeSteps({
         </p>
       )}
       {/* biome-ignore format: contains unicode → */}
-      {atOrPast("req200") && (
-        <p style={{ color: "var(--term-gray6)" }}>
-          <StepIcon spinning={atStep("req200")} /> Call {endpoint}
-          {pastStep("req200") && (
+      {atOrPast('req200') && (
+        <p style={{ color: 'var(--term-gray6)' }}>
+          <StepIcon spinning={atStep('req200')} /> Call {endpoint}
+          {pastStep('req200') && (
             <>
-              {" "}→ <span style={{ color: "var(--term-orange9)" }}>200</span>{" "}
-              <span style={{ color: "var(--term-gray6)" }}>(success)</span>
+              {' '}
+              → <span style={{ color: 'var(--term-orange9)' }}>200</span>{' '}
+              <span style={{ color: 'var(--term-gray6)' }}>(success)</span>
             </>
           )}
         </p>
       )}
-      {pastStep("req200") && (
+      {pastStep('req200') && (
         <>
           <BlankLine />
           <PhotoOutput url={output} />
@@ -239,7 +233,7 @@ function ChargeSteps({
         </>
       )}
     </div>
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -250,16 +244,16 @@ function CssTriangle() {
   return (
     <span
       style={{
-        display: "inline-block",
+        display: 'inline-block',
         width: 0,
         height: 0,
-        borderTop: "0.3em solid transparent",
-        borderBottom: "0.3em solid transparent",
-        borderLeft: "0.45em solid currentColor",
-        verticalAlign: "middle",
+        borderTop: '0.3em solid transparent',
+        borderBottom: '0.3em solid transparent',
+        borderLeft: '0.45em solid currentColor',
+        verticalAlign: 'middle',
       }}
     />
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -267,100 +261,100 @@ function CssTriangle() {
 // ---------------------------------------------------------------------------
 
 export function TerminalDemo({ className }: { className?: string }) {
-  const [started, setStarted] = useState(false);
-  const [done, setDone] = useState(false);
-  const [key, setKey] = useState(0);
-  const [address] = useState(() => randomAddress());
-  const [photoSeed, setPhotoSeed] = useState(() => Math.random().toString(36).slice(2));
-  const photoUrl = `https://picsum.photos/seed/${photoSeed}/400/400`;
+  const [started, setStarted] = useState(false)
+  const [done, setDone] = useState(false)
+  const [key, setKey] = useState(0)
+  const [address] = useState(() => randomAddress())
+  const [photoSeed, setPhotoSeed] = useState(() => Math.random().toString(36).slice(2))
+  const photoUrl = `https://picsum.photos/seed/${photoSeed}/400/400`
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll when content grows
   useEffect(() => {
-    const scrollEl = scrollRef.current;
-    const contentEl = contentRef.current;
-    if (!scrollEl || !contentEl) return;
+    const scrollEl = scrollRef.current
+    const contentEl = contentRef.current
+    if (!scrollEl || !contentEl) return
     const observer = new ResizeObserver(() => {
       scrollEl.scrollTo({
         top: scrollEl.scrollHeight - scrollEl.clientHeight,
-        behavior: "smooth",
-      });
-    });
-    observer.observe(contentEl);
-    return () => observer.disconnect();
-  }, []);
+        behavior: 'smooth',
+      })
+    })
+    observer.observe(contentEl)
+    return () => observer.disconnect()
+  }, [])
 
   const restart = () => {
-    setStarted(false);
-    setDone(false);
-    setPhotoSeed(Math.random().toString(36).slice(2));
-    setKey((k) => k + 1);
-  };
+    setStarted(false)
+    setDone(false)
+    setPhotoSeed(Math.random().toString(36).slice(2))
+    setKey((k) => k + 1)
+  }
 
   return (
     <div
-      className={`terminal-theme ${className ?? ""}`}
+      className={`terminal-theme ${className ?? ''}`}
       style={{
         fontFamily: 'var(--font-mono, "Geist Mono", monospace)',
-        height: "100%",
+        height: '100%',
         minHeight: 0,
-        userSelect: "text",
-        WebkitUserSelect: "text",
+        userSelect: 'text',
+        WebkitUserSelect: 'text',
       }}
     >
       <div
         className="flex flex-col overflow-hidden rounded-xl"
         style={{
-          height: "100%",
+          height: '100%',
           minHeight: 0,
-          borderColor: "var(--vocs-border-color-primary, var(--term-gray4))",
+          borderColor: 'var(--vocs-border-color-primary, var(--term-gray4))',
           borderWidth: 1,
-          borderStyle: "solid",
-          backgroundColor: "var(--term-bg2)",
+          borderStyle: 'solid',
+          backgroundColor: 'var(--term-bg2)',
         }}
       >
         {/* Title bar */}
         <div
           className="flex items-center gap-2 px-4 py-3"
           style={{
-            backgroundColor: "var(--term-bg2)",
-            borderBottom: "1px solid var(--term-gray4)",
+            backgroundColor: 'var(--term-bg2)',
+            borderBottom: '1px solid var(--term-gray4)',
           }}
         >
           <span
             className="rounded-full"
-            style={{ width: 14, height: 14, backgroundColor: "var(--term-gray4)" }}
+            style={{ width: 14, height: 14, backgroundColor: 'var(--term-gray4)' }}
           />
           <span
             className="rounded-full"
-            style={{ width: 14, height: 14, backgroundColor: "var(--term-gray4)" }}
+            style={{ width: 14, height: 14, backgroundColor: 'var(--term-gray4)' }}
           />
           <span
             className="rounded-full"
-            style={{ width: 14, height: 14, backgroundColor: "var(--term-gray4)" }}
+            style={{ width: 14, height: 14, backgroundColor: 'var(--term-gray4)' }}
           />
           <span style={{ flex: 1 }} />
           <button
             type="button"
             onClick={restart}
             style={{
-              background: "transparent",
-              border: "none",
-              color: "var(--term-gray5)",
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--term-gray5)',
               padding: 2,
               borderRadius: 4,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "color 0.15s",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'color 0.15s',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = "var(--term-gray10)";
+              e.currentTarget.style.color = 'var(--term-gray10)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = "var(--term-gray5)";
+              e.currentTarget.style.color = 'var(--term-gray5)'
             }}
             aria-label="Restart demo"
           >
@@ -387,8 +381,8 @@ export function TerminalDemo({ className }: { className?: string }) {
         {/* Terminal body */}
         <div
           ref={scrollRef}
-          className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-5 pb-5 break-words text-[13.5px] md:text-[0.9rem] leading-[1.35rem] md:leading-[1.5rem]"
-          style={{ backgroundColor: "var(--term-bg2)" }}
+          className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden break-words px-5 pb-5 text-[13.5px] leading-[1.35rem] md:text-[0.9rem] md:leading-[1.5rem]"
+          style={{ backgroundColor: 'var(--term-bg2)' }}
         >
           <div ref={contentRef}>
             <div className="h-2" />
@@ -399,14 +393,12 @@ export function TerminalDemo({ className }: { className?: string }) {
                 <button
                   type="button"
                   className="w-fit cursor-pointer text-left"
-                  style={{ color: "var(--term-pink9)" }}
+                  style={{ color: 'var(--term-pink9)' }}
                   onClick={() => setStarted(true)}
                 >
                   <CssTriangle /> Run demo
                 </button>
-                <p style={{ color: "var(--term-gray5)" }}>
-                  Press Enter or click to start
-                </p>
+                <p style={{ color: 'var(--term-gray5)' }}>Press Enter or click to start</p>
               </div>
             )}
 
@@ -424,7 +416,7 @@ export function TerminalDemo({ className }: { className?: string }) {
               <button
                 type="button"
                 className="cursor-pointer text-left"
-                style={{ color: "var(--term-gray6)" }}
+                style={{ color: 'var(--term-gray6)' }}
                 onClick={restart}
               >
                 [Press Enter or click to restart]
@@ -434,5 +426,5 @@ export function TerminalDemo({ className }: { className?: string }) {
         </div>
       </div>
     </div>
-  );
+  )
 }
