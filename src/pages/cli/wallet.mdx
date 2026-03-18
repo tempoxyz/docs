@@ -23,16 +23,28 @@ CLI interface for [Tempo Wallet](https://wallet.tempo.xyz), Tempo's web-based pa
     icon="lucide:log-in"
   />
   <Card
-    title="Use it"
-    description="Keys, funds, services, and sessions"
-    to="#use-it"
-    icon="lucide:terminal"
+    title="Check Balances"
+    description="View your address, balances, and key state"
+    to="#check-balances"
+    icon="lucide:coins"
   />
   <Card
-    title="Command reference"
-    description="Full command table"
-    to="#command-reference"
-    icon="lucide:list"
+    title="Add Funds"
+    description="Fund your wallet or transfer tokens"
+    to="#add-funds"
+    icon="lucide:plus-circle"
+  />
+  <Card
+    title="Discover Services"
+    description="Browse MPP-registered service providers"
+    to="#discover-services"
+    icon="lucide:search"
+  />
+  <Card
+    title="Manage Sessions"
+    description="Track and close payment sessions"
+    to="#manage-payment-sessions"
+    icon="lucide:refresh-cw"
   />
 </Cards>
 
@@ -66,9 +78,7 @@ To disconnect:
 tempo wallet logout
 ```
 
-## Use it
-
-### Check balances
+## Check balances
 
 ```bash
 tempo wallet whoami
@@ -76,7 +86,7 @@ tempo wallet whoami
 
 Shows your address, token balances, and key state.
 
-### Manage access keys
+## Manage access keys
 
 ```bash
 tempo wallet keys
@@ -84,7 +94,7 @@ tempo wallet keys
 
 Each wallet can have multiple access keys with independent spending limits. Use these to constrain what an agent or script can spend.
 
-### Add funds
+## Add funds
 
 ```bash
 tempo wallet fund
@@ -100,7 +110,7 @@ tempo wallet transfer <amount> <token> <to>
 
 For more options, see [Getting Funds on Tempo](/guide/getting-funds).
 
-### Discover services
+## Discover services
 
 ```bash
 tempo wallet services
@@ -110,7 +120,7 @@ tempo wallet services <id>
 
 The [Machine Payments Protocol](https://mpp.dev/overview) (MPP) lets any HTTP endpoint accept payments inline. The service directory indexes MPP-registered providers — each entry shows endpoint URLs, HTTP methods, pricing, and request schemas. Use it to find the right URL and payload for [`tempo request`](/cli/request).
 
-### Manage payment sessions
+## Manage payment sessions
 
 When you use [pay-as-you-go](/guide/machine-payments/pay-as-you-go) services, MPP opens a [session](https://mpp.dev/payment-methods/tempo/session) — a payment channel where your wallet deposits funds into an escrow contract, then pays per request using signed [vouchers](https://mpp.dev/protocol/credentials) off-chain. This avoids an on-chain transaction for every request, giving sub-100ms latency and near-zero per-request fees.
 

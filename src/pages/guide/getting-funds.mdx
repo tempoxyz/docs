@@ -3,44 +3,11 @@ title: Getting Funds on Tempo
 description: Bridge assets to Tempo, add funds in Tempo Wallet, or use the faucet on testnet.
 ---
 
-import { Cards, Card } from 'vocs'
-
 # Getting Funds on Tempo
-
-You can get funds onto Tempo in three ways:
-
-<Cards>
-  <Card
-    title="Bridges"
-    description="Move assets to and from Tempo with cross-chain bridges"
-    to="#bridge"
-    icon="lucide:arrow-left-right"
-  />
-  <Card
-    title="Tempo Wallet"
-    description="Add funds directly in Tempo Wallet"
-    to="#tempo-wallet"
-    icon="lucide:wallet"
-  />
-  <Card
-    title="Testnet Funds"
-    description="Get test stablecoins from the faucet for development and testing."
-    to="#testnet-funds"
-    icon="lucide:flask-conical"
-  />
-</Cards>
-
-## Bridge
-
-Use one of these supported bridges to move assets to Tempo:
-
-- **[LayerZero](https://layerzero.network/)**: Bridge supported assets from other chains to Tempo.
-- **[Squid](https://app.squidrouter.com/)**: Swap and bridge assets to Tempo in one flow.
-- **[Relay](https://relay.link/)**: Bridge assets to Tempo with low fees.
 
 ## Tempo Wallet
 
-[Tempo Wallet](https://wallet.tempo.xyz) is Tempo's web-based passkey wallet. You can add funds directly in the app.
+[Tempo Wallet](https://wallet.tempo.xyz) is Tempo's web-based passkey wallet. You can onramp with fiat or bridge from other chains directly in the app.
 
 ### In Tempo Wallet
 
@@ -51,7 +18,14 @@ Use one of these supported bridges to move assets to Tempo:
 
 ### With the CLI
 
-Fund your wallet from the terminal using the [Tempo CLI](/cli):
+Install the [Tempo CLI](/cli/wallet) and log in to your wallet:
+
+```bash
+curl -fsSL https://tempo.xyz/install | bash
+tempo wallet login
+```
+
+Then fund your wallet:
 
 ```bash
 tempo wallet fund
@@ -61,9 +35,25 @@ tempo wallet fund
 
 Paste this into your agent to set up Tempo Wallet and add funds:
 
+:::code-group
+```bash [Claude Code]
+claude -p "Read https://tempo.xyz/SKILL.md and fund my Tempo Wallet"
 ```
-Read https://wallet.tempo.xyz/SKILL.md and fund my Tempo Wallet
+```bash [Amp]
+amp --execute "Read https://tempo.xyz/SKILL.md and fund my Tempo Wallet"
 ```
+```bash [Codex CLI]
+codex exec "Read https://tempo.xyz/SKILL.md and fund my Tempo Wallet"
+```
+:::
+
+## Bridge
+
+Use one of these supported bridges to move assets to Tempo:
+
+- **[LayerZero](https://layerzero.network/)**: Bridge supported assets from other chains to Tempo.
+- **[Squid](/ecosystem/bridges#squid)**: Swap and bridge assets to Tempo in one flow.
+- **[Relay](/ecosystem/bridges#relay)**: Bridge assets to Tempo with low fees.
 
 ## Testnet Funds
 

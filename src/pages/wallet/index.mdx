@@ -56,9 +56,17 @@ The CLI is designed for non-interactive use. Two features matter here:
 
 To set up an AI agent (Claude Code, Amp, Codex) with wallet and request capabilities:
 
+:::code-group
+```bash [Claude Code]
+claude -p "Read https://tempo.xyz/SKILL.md and set up tempo"
 ```
-Read https://wallet.tempo.xyz/SKILL.md and set up tempo
+```bash [Amp]
+amp --execute "Read https://tempo.xyz/SKILL.md and set up tempo"
 ```
+```bash [Codex CLI]
+codex exec "Read https://tempo.xyz/SKILL.md and set up tempo"
+```
+:::
 
 This installs `tempo-wallet` and `tempo-request` skills automatically. The agent can then discover services, preview costs, and make paid requests within scoped spending limits.
 

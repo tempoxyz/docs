@@ -1,14 +1,13 @@
 import { Changelog, defineConfig, McpSource } from 'vocs/config'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 
+// Only set baseUrl in production — Vocs injects a <base> tag from this value,
+// which causes all links to resolve to the absolute URL on preview deployments.
 const baseUrl = (() => {
+  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') return ''
   if (URL.canParse(process.env.VITE_BASE_URL)) return process.env.VITE_BASE_URL
-  // VERCEL_BRANCH_URL is the stable URL for the branch (e.g., next.docs.tempo.xyz)
-  // VERCEL_URL is the deployment-specific URL which causes CORS issues with custom domains
   if (process.env.VERCEL_ENV === 'production')
     return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-  if (process.env.VERCEL_BRANCH_URL) return `https://${process.env.VERCEL_BRANCH_URL}`
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
   return ''
 })()
 
@@ -68,10 +67,6 @@ export default defineConfig({
         link: '/',
       },
       {
-        text: 'Changelog',
-        link: '/changelog',
-      },
-      {
         text: 'Using Tempo with AI',
         link: '/guide/using-tempo-with-ai',
       },
@@ -81,10 +76,6 @@ export default defineConfig({
           {
             text: 'Getting Funds on Tempo',
             link: '/guide/getting-funds',
-          },
-          {
-            text: 'Use Tempo Transactions',
-            link: '/guide/tempo-transaction',
           },
           {
             text: 'Create & Use Accounts',
@@ -221,6 +212,10 @@ export default defineConfig({
                 link: '/guide/machine-payments/client',
               },
               {
+                text: 'Agent quickstart',
+                link: '/guide/machine-payments/agent',
+              },
+              {
                 text: 'Server quickstart',
                 link: '/guide/machine-payments/server',
               },
@@ -252,12 +247,12 @@ export default defineConfig({
             link: '/quickstart/connection-details',
           },
           {
-            text: 'Get Faucet Funds',
-            link: '/quickstart/faucet',
+            text: 'Use Tempo Transactions',
+            link: '/guide/tempo-transaction',
           },
           {
-            text: 'Developer Tools',
-            link: '/ecosystem',
+            text: 'Get Testnet Faucet Funds',
+            link: '/quickstart/faucet',
           },
           {
             text: 'EVM Differences',
@@ -279,47 +274,47 @@ export default defineConfig({
             text: 'Contract Verification',
             link: '/quickstart/verify-contracts',
           },
-        ],
-      },
-      {
-        text: 'Tempo Ecosystem Infrastructure',
-        collapsed: true,
-        items: [
           {
-            text: 'Overview',
-            link: '/ecosystem',
-          },
-          {
-            text: 'Bridges',
-            link: '/ecosystem/bridges',
-          },
-          {
-            text: 'Data & Analytics',
-            link: '/ecosystem/data-analytics',
-          },
-          {
-            text: 'Block Explorers',
-            link: '/ecosystem/block-explorers',
-          },
-          {
-            text: 'Wallets',
-            link: '/ecosystem/wallets',
-          },
-          {
-            text: 'Smart Contract Libraries',
-            link: '/ecosystem/smart-contract-libraries',
-          },
-          {
-            text: 'Node Infrastructure',
-            link: '/ecosystem/node-infrastructure',
-          },
-          {
-            text: 'Security & Compliance',
-            link: '/ecosystem/security-compliance',
-          },
-          {
-            text: 'Orchestration',
-            link: '/ecosystem/orchestration',
+            text: 'Ecosystem',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/ecosystem',
+              },
+              {
+                text: 'Bridges',
+                link: '/ecosystem/bridges',
+              },
+              {
+                text: 'Data & Analytics',
+                link: '/ecosystem/data-analytics',
+              },
+              {
+                text: 'Block Explorers',
+                link: '/ecosystem/block-explorers',
+              },
+              {
+                text: 'Wallets',
+                link: '/ecosystem/wallets',
+              },
+              {
+                text: 'Smart Contract Libraries',
+                link: '/ecosystem/smart-contract-libraries',
+              },
+              {
+                text: 'Node Infrastructure',
+                link: '/ecosystem/node-infrastructure',
+              },
+              {
+                text: 'Security & Compliance',
+                link: '/ecosystem/security-compliance',
+              },
+              {
+                text: 'Orchestration',
+                link: '/ecosystem/orchestration',
+              },
+            ],
           },
         ],
       },
@@ -522,7 +517,6 @@ export default defineConfig({
       },
       {
         text: 'Tempo Developer Tools',
-        collapsed: true,
         items: [
           {
             text: 'CLI',
@@ -663,6 +657,10 @@ export default defineConfig({
             text: 'Network Upgrades and Releases',
             link: '/guide/node/network-upgrades',
           },
+          {
+            text: 'Changelog',
+            link: '/changelog',
+          },
         ],
       },
       // {
@@ -763,6 +761,10 @@ export default defineConfig({
           {
             text: 'Privacy',
             link: '/learn/tempo/privacy',
+          },
+          {
+            text: 'Machine Payments',
+            link: '/learn/tempo/machine-payments',
           },
         ],
       },
