@@ -25,7 +25,7 @@ Compare this to the [V1 validator states](/guide/node/operate-validator#validato
 With V2, validators can perform several operations themselves without coordinating with the Tempo team:
 
 - **Rotate your validator identity** — swap to a new ed25519 key without losing your committee slot
-- **Update IP addresses** — change ingress/egress endpoints on the fly
+- **Update IP addresses** — change ingress and egress endpoints independently (V2 supports asymmetric ingress/egress IPs)
 - **Transfer ownership** — rebind your validator entry to a new address
 - **Fee recipient separation** — will be enabled in a future hardfork. For now, continue using `--consensus.fee-recipient` when starting your node.
 
@@ -108,6 +108,8 @@ The returned `Validator` struct fields are:
 
 If your node's network endpoints change, update them on-chain. The change takes effect at the next finalized block.
 
+Unlike V1, V2 supports asymmetric ingress and egress IPs — they no longer need to share the same address. If you only want to update one, pass the current value for the other.
+
 ```bash
 cast send 0xCCCCCCCC00000000000000000000000000000001 \
   "setIpAddresses(uint64,string,string)" \
@@ -117,6 +119,8 @@ cast send 0xCCCCCCCC00000000000000000000000000000001 \
   --rpc-url https://rpc.tempo.xyz \
   --private-key <YOUR_VALIDATOR_PRIVATE_KEY>
 ```
+
+`<NEW_IP>:<NEW_PORT>` and `<NEW_EGRESS_IP>` may remain unchanged if you only need to update one of the two.
 
 :::warning
 Ingress addresses must be unique across all active validators. The transaction will revert if another active validator already uses the same `IP:port`.
