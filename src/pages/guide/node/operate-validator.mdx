@@ -118,16 +118,6 @@ For signing key rotation, IP address updates, signing share recovery, and owners
 - **[ValidatorConfig V2](/guide/node/validator-config-v2)** (post-T2) — self-service operations
 - **[ValidatorConfig V1](/guide/node/validator-config-v1#key-management)** (pre-T2) — coordinated through the Tempo team
 
-### Deleting Signing Shares
-
-:::warning[Breaking Change in v1.1.0]
-`--delete-signing-share` now requires the `--force` flag to prevent accidental deletion of validator signing keys. **Update any automation scripts that manage validator key lifecycle.**
-:::
-
-```bash
-tempo consensus --delete-signing-share --force
-```
-
 ## Log Management
 
 ### Parsing Logs
