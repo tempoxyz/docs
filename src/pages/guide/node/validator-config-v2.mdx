@@ -7,27 +7,18 @@ description: Manage your validator with ValidatorConfig V2. Key rotation, IP upd
 
 ValidatorConfig V2 ([TIP-1017](/protocol/tips/tip-1017)) is a new precompile for managing consensus participants. It replaces the original ValidatorConfig with stronger safety guarantees: ed25519 signature verification at registration, append-only history, and self-service operations for validators.
 
-## Validator lifecycle
+## Validator states
+
+With V2, the syncer warmup phase from V1 is removed. Once added, a validator immediately becomes a player in the next epoch.
 
 ```mermaid
 flowchart TD
-    A["addValidator\n(owner)"] -->|"ed25519 sig verified"| B["Active Validator\n(index assigned)"]
-    B -->|"setIpAddresses"| B
-    B -->|"transferValidatorOwnership"| B
-    B -->|"rotateValidator"| C["Active Validator\n(new key, same index)"]
-    C -->|"setIpAddresses"| C
-    C -->|"transferValidatorOwnership"| C
-    C -->|"rotateValidator"| C
-    B -->|"deactivateValidator"| D["Deactivated\n(irreversible)"]
-    C -->|"deactivateValidator"| D
-
-    click A "#rotate-validator-identity"
-    click B "#reading-validator-state"
-    click C "#rotate-validator-identity"
-    click D "#differences-from-v1"
+    A[Inactive] -->|epoch ends| B["Player<br/>Receives signing shares"]
+    B -->|"+1 epoch, receives share"| C["Player<br/>Dealer"]
+    C -->|"once fully synced"| D["Voter ↔ Proposer"]
 ```
 
-Once added, a validator is **active** and can be rotated, have its IP addresses updated, or have its ownership transferred — all without leaving the committee. Deactivation is irreversible; the entry stays in history but the public key is reserved forever.
+Compare this to the [V1 validator states](/guide/node/operate-validator#validator-states), which required an additional syncer epoch before becoming a player.
 
 ## What changes for operators
 
