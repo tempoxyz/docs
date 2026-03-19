@@ -146,7 +146,10 @@ If you need to reset your validator's data, you must rotate to a new validator i
 
 ### Signing Key Rotation
 
-To rotate your validator's signing key:
+With [ValidatorConfig V2](/guide/node/validator-config-v2), you can rotate your validator's signing key self-service using the `rotateValidator` precompile call. See the [rotation guide](/guide/node/validator-config-v2#rotate-validator-identity) for details.
+
+<details>
+<summary>Legacy rotation (V1)</summary>
 
 1. Generate a new keypair:
 
@@ -162,6 +165,8 @@ tempo consensus calculate-public-key --private-key <new-key-path>
 :::warning
 The old validator identity must be deactivated before the new one is activated
 :::
+
+</details>
 
 ### Signing Share Recovery
 

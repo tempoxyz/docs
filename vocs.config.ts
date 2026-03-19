@@ -15,8 +15,7 @@ export default defineConfig({
   banner: {
     dismissable: false,
     backgroundColor: '#5B4CDB',
-    content:
-      'Tempo Mainnet is live. [Read our announcement.](https://tempo.xyz/blog/mainnet) →',
+    content: 'Tempo Mainnet is live. [Read our announcement.](https://tempo.xyz/blog/mainnet) →',
     height: '40px',
     textColor: 'white',
   },
@@ -656,6 +655,10 @@ export default defineConfig({
           {
             text: 'Operating your validator',
             link: '/guide/node/operate-validator',
+          },
+          {
+            text: 'ValidatorConfig V2',
+            link: '/guide/node/validator-config-v2',
           },
           {
             text: 'Network Upgrades and Releases',
