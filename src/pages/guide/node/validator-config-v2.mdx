@@ -37,6 +37,24 @@ All write operations require either the contract owner or the validator's own ad
 address constant VALIDATOR_CONFIG_V2 = 0xCCCCCCCC00000000000000000000000000000001;
 ```
 
+## Check if V2 is active
+
+After the T2 hardfork, the contract owner migrates validators from V1 to V2. Use these calls to check if migration is complete and V2 is active:
+
+```bash
+# Returns true once migration is complete and V2 is the active config
+cast call 0xCCCCCCCC00000000000000000000000000000001 \
+  "isInitialized()(bool)" \
+  --rpc-url https://rpc.tempo.xyz
+
+# Returns the block height at which V2 was initialized (0 if not yet initialized)
+cast call 0xCCCCCCCC00000000000000000000000000000001 \
+  "getInitializedAtHeight()(uint64)" \
+  --rpc-url https://rpc.tempo.xyz
+```
+
+If `isInitialized()` returns `true`, V2 is active and all operations on this page are available. If it returns `false`, the network is still on [ValidatorConfig V1](/guide/node/validator-config-v1).
+
 ## Reading validator state
 
 ### Query active validators
