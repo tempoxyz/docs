@@ -162,25 +162,6 @@ The new address must not already be used by another active validator.
 | **Self-service ops** | None (owner only) | IP updates, rotation, transfer |
 | **Historical queries** | Required warmup state, bloated snapshots | `addedAtHeight` / `deactivatedAtHeight` fields |
 
-## Migration from V1
-
-Migration happens incrementally — one validator at a time — to avoid out-of-gas issues. During migration, the consensus layer continues reading from V1.
-
-1. The contract owner calls `migrateValidator(idx)` for each V1 validator index (in descending order)
-2. After all indices are processed, the owner calls `initializeIfMigrated()`
-3. Once initialized, the consensus layer switches reads to V2
-
-:::warning
-Migration and `initializeIfMigrated()` should complete before an epoch boundary to avoid DKG disruption. Admins should verify V1/V2 state consistency before finalizing.
-:::
-
-### What happens during migration
-
-| Phase | Consensus reads from | Allowed V2 calls |
-|-------|---------------------|-------------------|
-| Pre-init (migration) | V1 | `migrateValidator`, `deactivateValidator`, `initializeIfMigrated` |
-| Post-init | V2 | All operations except `migrateValidator` |
-
 ## Consensus integration
 
 - **IP changes** take effect at the next finalized block
