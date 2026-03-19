@@ -661,6 +661,10 @@ export default defineConfig({
             link: '/guide/node/validator-config-v2',
           },
           {
+            text: 'ValidatorConfig V1 (Legacy)',
+            link: '/guide/node/validator-config-v1',
+          },
+          {
             text: 'Network Upgrades and Releases',
             link: '/guide/node/network-upgrades',
           },
