@@ -126,27 +126,12 @@ Ingress addresses must be unique across all active validators. The transaction w
 
 V2 lets you rotate to a new ed25519 key while keeping your validator index stable. This is useful for key rotation or recovery without leaving and re-joining the committee.
 
-Rotation requires an ed25519 signature from the **new** key proving ownership. The signature is computed over a domain-separated message containing:
-
-```
-rotateValidatorMessage = keccak256(
-    chainId || contractAddress || validatorAddress ||
-    len(ingress) || ingress || len(egress) || egress
-)
-```
-
-signed with namespace `b"TEMPO_VALIDATOR_CONFIG_V2_ROTATE_VALIDATOR"`.
+The simplest way to rotate is using the `tempo` CLI, which handles signature creation and the on-chain transaction in one step:
 
 ```bash
-cast send 0xCCCCCCCC00000000000000000000000000000001 \
-  "rotateValidator(uint64,bytes32,string,string,bytes)" \
-  <YOUR_VALIDATOR_INDEX> \
-  <NEW_PUBLIC_KEY> \
-  "<NEW_INGRESS_IP>:<PORT>" \
-  "<NEW_EGRESS_IP>" \
-  <ED25519_SIGNATURE> \
-  --rpc-url https://rpc.tempo.xyz \
-  --private-key <YOUR_VALIDATOR_PRIVATE_KEY>
+tempo consensus rotate-validator \
+  --signing-key <NEW_PRIVATE_KEY_PATH> \
+  --rpc-url https://rpc.tempo.xyz
 ```
 
 :::info
@@ -154,6 +139,28 @@ Rotation preserves your validator index and active validator count. The old entr
 :::
 
 After rotation, your validator goes through the [standard lifecycle](#validator-states) with the new identity.
+
+#### Using raw contract calls
+
+If you prefer to call the precompile directly, first generate the required ed25519 signature proving ownership of the new key:
+
+```bash
+tempo consensus create-rotate-validator-signature \
+  --signing-key <NEW_PRIVATE_KEY_PATH> \
+  --rpc-url https://rpc.tempo.xyz
+```
+
+Then use the output signature in a `rotateValidator` call via `cast send`.
+
+#### Initial registration
+
+When registering a new validator, generate the add-validator signature and provide it to the Tempo team:
+
+```bash
+tempo consensus create-add-validator-signature \
+  --signing-key <PRIVATE_KEY_PATH> \
+  --rpc-url https://rpc.tempo.xyz
+```
 
 ### Transfer validator ownership
 
@@ -180,19 +187,4 @@ The new address must not already be used by another active validator.
 | **Self-service ops** | None (owner only) | IP updates, rotation, transfer |
 | **Historical queries** | Required warmup state, bloated snapshots | `addedAtHeight` / `deactivatedAtHeight` fields |
 
-## Consensus integration
 
-- **IP changes** take effect at the next finalized block
-- **Added validators** join the DKG player set at the next epoch — no warmup period
-- **Deactivated validators** leave at the next epoch — no cooldown period
-
-### DKG player selection
-
-The consensus layer determines DKG players for epoch `E+1` by reading state at `boundary(E) - 1`:
-
-```
-players(E+1) = validators.filter(v =>
-    v.addedAtHeight < boundary(E) &&
-    (v.deactivatedAtHeight == 0 || v.deactivatedAtHeight >= boundary(E))
-)
-```
