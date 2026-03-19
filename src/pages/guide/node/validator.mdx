@@ -6,6 +6,8 @@ description: Configure and run a Tempo validator node. Generate signing keys, pa
 
 :::info
 The management of the active validator set is currently permissioned by the Tempo team. If you are interested in becoming a validator, please [get in touch](mailto:partners@tempo.xyz) with the Tempo team.
+
+Once the T2 hardfork is active and [ValidatorConfig V2](/guide/node/validator-config-v2) migration is complete, validators will be able to self-service key rotation, IP updates, and ownership transfers.
 :::
 
 Validator nodes secure Tempo by validating blocks and transactions, then using [Threshold Simplex](https://docs.rs/commonware-consensus/0.0.61/commonware_consensus/threshold_simplex/index.html) to reach consensus. They distribute signing shares among themselves to collectively sign block approvals and finalizations.
@@ -16,7 +18,7 @@ All validators have two kinds of keys:
 * signing key - this is an ED25519 keypair used to identify your validator amongst others
 * signing share - this is a share of a BLS12-381 keypair used to sign block notarizations and finalizations
 
-The signing key is static and can only be rotated by removing and re-creating a validator on-chain. The signing share is dynamic and is updated periodically on each DKG ceremony. Once updated, it will be saved to disk. Currently, the DKG ceremony is scheduled to run on-chain every ~3 hours.
+The signing key is static. Pre-T2, it can only be rotated by removing and re-creating a validator on-chain with the Tempo team. Post-T2, [ValidatorConfig V2](/guide/node/validator-config-v2) enables self-service rotation via the `rotateValidator` precompile. The signing share is dynamic and is updated periodically on each DKG ceremony. Once updated, it will be saved to disk. Currently, the DKG ceremony is scheduled to run on-chain every ~3 hours.
 
 ## Generating a signing key
 

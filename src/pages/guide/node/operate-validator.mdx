@@ -140,16 +140,24 @@ The node will finish processing the current block before shutting down. Avoid us
 **You cannot reset a validator's data and continue with the same identity.** Doing so risks inconsistent voting, which can cause irrecoverable network safety failures.
 :::
 
-If you need to reset your validator's data, you must rotate to a new validator identity. This requires coordinating with the Tempo team to deactivate your old identity and register a new one.
+If you need to reset your validator's data, you must rotate to a new validator identity.
+
+- **Pre-T2**: Coordinate with the Tempo team to deactivate your old identity and register a new one.
+- **Post-T2 (ValidatorConfig V2)**: Use the [`rotateValidator`](/guide/node/validator-config-v2#rotate-validator-identity) precompile call to self-service rotate to a new identity.
 
 ## Key Management
 
 ### Signing Key Rotation
 
-With [ValidatorConfig V2](/guide/node/validator-config-v2), you can rotate your validator's signing key self-service using the `rotateValidator` precompile call. See the [rotation guide](/guide/node/validator-config-v2#rotate-validator-identity) for details.
+:::info[Pre-T2 / Post-T2]
+Before the T2 hardfork, signing key rotation requires coordinating with the Tempo team. Once T2 is active and [ValidatorConfig V2](/guide/node/validator-config-v2) migration is complete, validators can rotate keys self-service using the `rotateValidator` precompile call.
+:::
 
-<details>
-<summary>Legacy rotation (V1)</summary>
+#### Post-T2 (ValidatorConfig V2)
+
+Once T2 is active, use the `rotateValidator` precompile to swap to a new ed25519 key while keeping your validator index and committee slot. See the [rotation guide](/guide/node/validator-config-v2#rotate-validator-identity) for the full walkthrough.
+
+#### Pre-T2 (ValidatorConfig V1)
 
 1. Generate a new keypair:
 
@@ -166,15 +174,17 @@ tempo consensus calculate-public-key --private-key <new-key-path>
 The old validator identity must be deactivated before the new one is activated
 :::
 
-</details>
-
 ### Signing Share Recovery
 
 :::danger
 **You cannot reset a validator's data and continue with the same identity.** Doing so risks inconsistent voting, which can cause irrecoverable network safety failures. 
 :::
 
-If you lose your signing share (stored on the database in `<datadir>/consensus/`), you will need to rotate to a new validator identity. This requires coordinating with the Tempo team to deactivate your old identity and register a new one.
+If you lose your signing share (stored on the database in `<datadir>/consensus/`), you will need to rotate to a new validator identity.
+
+- **Pre-T2**: Coordinate with the Tempo team to deactivate your old identity and register a new one.
+- **Post-T2**: Use [`rotateValidator`](/guide/node/validator-config-v2#rotate-validator-identity) to self-service rotate to a new identity.
+
 We're planning to release a high-availability feature that allows storing consensus data in an external database, which will enable signing share recovery without the need for key rotation.
 
 ### Deleting Signing Shares
