@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import type React from 'react'
 import { Toaster } from 'sonner'
+import GoogleAnalytics from '../components/GoogleAnalytics'
 import PostHogSetup from '../components/PostHogSetup'
 
 export default function Layout(
@@ -29,6 +30,7 @@ export default function Layout(
       />
       <SpeedInsights />
       <Analytics />
+      <GoogleAnalytics />
       <PostHogSetup />
     </>
   )

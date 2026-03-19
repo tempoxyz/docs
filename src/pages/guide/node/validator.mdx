@@ -38,19 +38,18 @@ The public key should match the output of the `generate-private-key` command.
 
 The process for running a validator node is very similar to [running a full node](/guide/node/rpc). 
 
-You should start by downloading the latest snapshot using `tempo download --chain <moderato|mainnet|devnet>`. Downloading the snapshot allows your validator to start participating in consensus much faster.
+You should start by downloading the latest snapshot using `tempo download -u <snapshot_url>`. Downloading the snapshot allows your validator to start participating in consensus much faster.
 Once you've downloaded the snapshot and have been whitelisted on-chain, you can proceed to run the validator node as such:
 
 ```bash
 tempo node --datadir <datadir> \
-    --chain moderato \
-    --port 30303 \
-    --discovery.addr 0.0.0.0 \
-    --discovery.port 30303 \
+    --chain <mainnet|moderato> \
     --consensus.signing-key <path> \
     --consensus.fee-recipient <validator_wallet_address> \
     --telemetry-url <TELEMETRY_URL>
 ```
+
+If you are not prepared to accept fees, we recommend setting the `--consensus.fee-recipient` field to `0x0000000000000000000000000000000000000001` as that will funnel the funds to a non-user controllable wallet (there is no known private key for the address).
 
 ### Optional flags
 
@@ -90,10 +89,6 @@ The telemetry endpoint does **not** collect any ambient information about the ho
 - No network topology or firewall configuration
 
 The data is strictly limited to the node's own operational metrics and logs.
-
-:::info[Testnet Chain]
-The `andantino` chainspec is deprecated. New validators should use `--chain moderato`.
-:::
 
 The notable difference between RPC nodes and validator nodes is the omission of the `--follow` argument and the addition of the `--consensus.signing-key` and `--consensus.fee-recipient` arguments. The fee recipient is the address that will receive transaction fees in your validators' proposed blocks.
 

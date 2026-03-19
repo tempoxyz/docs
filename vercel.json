@@ -8,7 +8,7 @@
           "value": "faucet.tempo.xyz"
         }
       ],
-      "destination": "https://docs.tempo.xyz/quickstart/faucet",
+      "destination": "https://docs.tempo.xyz/guide/getting-funds",
       "permanent": false
     },
     {
@@ -19,7 +19,7 @@
           "value": "faucet.tempo.xyz"
         }
       ],
-      "destination": "https://docs.tempo.xyz/quickstart/faucet",
+      "destination": "https://docs.tempo.xyz/guide/getting-funds",
       "permanent": false
     }
   ],

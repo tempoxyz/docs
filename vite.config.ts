@@ -2,12 +2,18 @@ import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import react from '@vitejs/plugin-react'
 import { Instance } from 'prool'
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, loadEnv, type Plugin } from 'vite'
 import { vocs } from 'vocs/vite'
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [syncTips(), vocs(), react(), tempoNode()],
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  for (const key of Object.keys(env)) {
+    if (!(key in process.env)) process.env[key] = env[key]
+  }
+  return {
+    plugins: [syncTips(), vocs(), react(), tempoNode()],
+  }
 })
 
 function tempoNode(): Plugin {

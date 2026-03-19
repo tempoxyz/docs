@@ -1,0 +1,103 @@
+---
+title: Agent Quickstart
+description: Use the tempo CLI to discover services, preview costs, and make paid requests from a terminal or AI agent — no SDK required.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Agent quickstart
+
+The `tempo` CLI handles `402 Payment Required` responses the same way the client SDK does — but from a terminal, script, or AI agent, with zero integration code.
+
+::::steps
+
+### Install the CLI
+
+```bash
+curl -fsSL https://tempo.xyz/install | bash
+```
+
+### Log in
+
+```bash
+tempo wallet login
+tempo wallet whoami
+```
+
+`login` opens a browser flow that creates or connects a Tempo wallet. `whoami` confirms readiness and prints your address and balances.
+
+:::tip
+If your balance is zero, run `tempo wallet fund` before making requests.
+:::
+
+### Discover services
+
+```bash
+tempo wallet services --search ai
+tempo wallet services <SERVICE_ID>
+```
+
+The service directory shows endpoint URLs, HTTP methods, pricing, and request schemas — everything you need to construct a valid request.
+
+### Preview cost
+
+```bash
+tempo request --dry-run -X POST \
+  --json '{"prompt":"a sunset over the ocean"}' \
+  https://fal.mpp.tempo.xyz/fal-ai/flux/dev
+```
+
+`--dry-run` validates the request and shows the payment cost without spending.
+
+### Make a paid request
+
+```bash
+tempo request -X POST \
+  --json '{"prompt":"a sunset over the ocean"}' \
+  https://fal.mpp.tempo.xyz/fal-ai/flux/dev
+```
+
+`tempo request` sends the request, intercepts the `402` challenge, signs and submits the payment, and retries with the credential — all in one command.
+
+::::
+
+## Set up an AI agent
+
+Paste this into your agent to install Tempo's wallet and request skills:
+
+:::code-group
+```txt [Claude Code]
+Read https://tempo.xyz/SKILL.md and set up tempo
+```
+```txt [Amp]
+Read https://tempo.xyz/SKILL.md and set up tempo
+```
+```txt [Codex]
+Read https://tempo.xyz/SKILL.md and set up tempo
+```
+:::
+
+Once installed, the agent can discover services, preview costs, and make paid requests within scoped spending limits.
+
+## Next steps
+
+<Cards>
+  <Card
+    icon="lucide:server"
+    title="Server quickstart"
+    description="Add payment gating to your HTTP endpoints"
+    to="/guide/machine-payments/server"
+  />
+  <Card
+    icon="lucide:wallet"
+    title="CLI reference"
+    description="Complete tempo wallet and tempo request command reference"
+    to="/cli/wallet"
+  />
+  <Card
+    icon="lucide:credit-card"
+    title="Accept one-time payments"
+    description="Charge per request with on-chain settlement"
+    to="/guide/machine-payments/one-time-payments"
+  />
+</Cards>

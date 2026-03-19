@@ -2,7 +2,7 @@
 description: Enable gasless transactions by sponsoring fees for your users. Set up a fee payer service and improve UX by removing friction from payment flows.
 ---
 
-import { Cards, Card } from 'vocs'
+import { Cards, Card, Tabs, Tab } from 'vocs'
 import * as Demo from '../../../components/guides/Demo.tsx'
 import * as Step from '../../../components/guides/steps'
 import PublicTestnetSponsorTip from '../../../snippets/public-testnet-sponsor-tip.mdx'
@@ -52,7 +52,7 @@ Use the `withFeePayer` transport provided by Viem ([link](https://viem.sh/tempo/
 Now you can sponsor transactions by passing `feePayer: true` in the transaction parameters. For more details on how to send a transaction, see the [Send a payment](/guide/payments/send-a-payment) guide.
 
 :::info
-You can also sponsor transactions with a local account. See the [recipe below](/guide/payments/sponsor-user-fees#local-account-sponsorship) for more details.
+You can also build your own fee paying service. See [Build your own fee paying service](#build-your-own-fee-paying-service) below.
 :::
 
 :::code-group
@@ -108,7 +108,7 @@ function SendSponsoredPayment() {
 
 :::
 
-## Next Steps
+### Next Steps
 
 Now that you've implemented fee sponsorship, you can:
 - Learn more about the [Tempo Transaction](/protocol/transactions/spec-tempo-transaction#fee-payer-signature-details) type and fee payer signature details
@@ -117,30 +117,229 @@ Now that you've implemented fee sponsorship, you can:
 
 ::::
 
-## Recipes
+## Build your own fee paying service
 
-### Local account sponsorship
+Instead of using the hosted fee payer service, you can build your own.
 
-The example above uses a fee payer server to sign and sponsor transactions. If you want to sponsor transactions locally, you can easily do so by passing a local account to the `feePayer` parameter.
+The sender must indicate sponsorship **before signing**, because the transaction's signing hash differs based on whether it will be sponsored:
 
-```ts twoslash [client.ts]
-// @noErrors
-import { createClient, http } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { tempoModerato } from 'viem/chains'
+- **Sponsored transactions**: The `fee_token` field is omitted from the sender's signing payload, and a `0x00` marker is used. This allows the fee payer to choose the fee token.
+- **Non-sponsored transactions**: The `fee_token` is included in the sender's signing payload.
 
-const client = createClient({
-  chain: tempoModerato,
-  transport: http(),
-})
+The SDKs handle this automatically. Here's how each SDK manages the dual-signing flow:
 
-const { receipt } = await client.token.transferSync({
-  amount: parseUnits('10.5', 6),
-  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
-  token: '0x20c0000000000000000000000000000000000000',
-  feePayer: privateKeyToAccount('0x...'), // [!code hl]
-})
-```
+<Tabs stateKey="library">
+  <Tab title="Viem">
+
+    In Viem, pass a local account to the `feePayer` parameter to handle both signatures in your Node.js backend.
+
+    ```ts twoslash
+    // @noErrors
+    import { createClient, http, parseUnits } from 'viem'
+    import { privateKeyToAccount } from 'viem/accounts'
+    import { tempoModerato } from 'viem/chains'
+
+    const client = createClient({
+      chain: tempoModerato,
+      transport: http(),
+    })
+
+    const senderAccount = privateKeyToAccount('0x...')
+    const feePayerAccount = privateKeyToAccount('0x...') // [!code hl]
+
+    // When feePayer is an Account object, Viem:
+    // 1. Has the sender sign the transaction (with feeToken skipped)
+    // 2. Recovers the sender address from their signature
+    // 3. Has the fee payer sign a separate hash (includes sender + feeToken)
+    // 4. Serializes the dual-signed transaction
+    const { receipt } = await client.token.transferSync({
+      account: senderAccount,
+      amount: parseUnits('10.5', 6),
+      to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+      token: '0x20c0000000000000000000000000000000000000',
+      feePayer: feePayerAccount, // [!code hl]
+    })
+    ```
+
+    :::info
+    Alternatively, use `feePayer: true` with the [`withFeePayer`](https://viem.sh/tempo/transports/withFeePayer) transport to delegate signing to a remote fee payer service. See the [Steps section above](#configure-your-client-to-use-the-fee-payer-service) for setup.
+    :::
+
+  </Tab>
+
+  <Tab title="Rust">
+
+    :::code-group
+
+    ```rust [example.rs]
+    use alloy::{
+        primitives::{address, U256},
+        providers::Provider,
+        signers::{SignerSync, local::PrivateKeySigner},
+        sol_types::SolCall,
+    };
+    use tempo_alloy::{
+        contracts::precompiles::ITIP20, primitives::transaction::Call,
+        rpc::TempoTransactionRequest,
+    };
+
+    mod provider;
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = provider::get_provider().await?;
+
+        let tx = TempoTransactionRequest {
+            calls: vec![Call {
+                to: address!("0x20c0000000000000000000000000000000000000").into(),
+                input: ITIP20::transferCall {
+                    to: address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb"),
+                    amount: U256::from(10_500_000),
+                }
+                .abi_encode()
+                .into(),
+                value: U256::ZERO,
+            }],
+            ..Default::default()
+        };
+
+        // Step 1: Build the transaction (sender signs, fee_token excluded from hash)
+        let mut tempo_tx = provider.fill(tx).await?.build_aa()?;
+        let sender_addr = provider.default_signer_address();
+
+        // Step 2: Compute the fee payer hash (includes sender address + fee_token)
+        let fee_payer_hash = tempo_tx.fee_payer_signature_hash(sender_addr); // [!code hl]
+
+        // Step 3: Fee payer counter-signs
+        let fee_payer: PrivateKeySigner = "0x...".parse()?; // [!code hl]
+        tempo_tx.fee_payer_signature = Some(fee_payer.sign_hash_sync(&fee_payer_hash)?); // [!code hl]
+
+        // Step 4: Broadcast
+        let pending = provider.send_transaction(tempo_tx).await?;
+
+        println!("Transaction hash: {:?}", pending.tx_hash());
+
+        Ok(())
+    }
+    ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-signer-provider.rs:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Python">
+
+    :::code-group
+
+    ```python [example.py]
+    from pytempo import TempoTransaction
+    from pytempo.contracts import TIP20
+    from provider import w3, account
+
+    TOKEN = "0x20c0000000000000000000000000000000000000"
+
+    # Step 1: Sender creates and signs (fee_token excluded from signing hash)
+    tx = TempoTransaction.create(
+        chain_id=w3.eth.chain_id,
+        gas_limit=100_000,
+        max_fee_per_gas=w3.eth.gas_price * 2,
+        max_priority_fee_per_gas=w3.eth.gas_price,
+        nonce=w3.eth.get_transaction_count(account.address),
+        awaiting_fee_payer=True, # [!code hl]
+        calls=(
+            TIP20(TOKEN).transfer(
+                to="0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb",
+                amount=10_500_000,
+            ),
+        ),
+    )
+
+    signed_by_sender = tx.sign(account.key.hex())
+
+    # Step 2: Fee payer counter-signs (includes sender address + fee_token)
+    FEE_PAYER_KEY = "0x..."
+    fully_signed = signed_by_sender.sign(FEE_PAYER_KEY, for_fee_payer=True) # [!code hl]
+
+    # Step 3: Broadcast
+    tx_hash = w3.eth.send_raw_transaction(fully_signed.encode())
+    ```
+
+    ```python [provider.py]
+    from web3 import Web3
+    from eth_account import Account
+
+    w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+    account = Account.from_key("0x...")
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Go">
+
+    :::code-group
+
+    ```go [main.go]
+    package main
+
+    import (
+       "context"
+       "log"
+       "math/big"
+
+       "github.com/ethereum/go-ethereum/common"
+       "github.com/tempoxyz/tempo-go/pkg/signer"
+       "github.com/tempoxyz/tempo-go/pkg/transaction"
+    )
+
+    func main() {
+       senderSigner, _ := signer.NewSigner("0x...") // sender key
+       feePayerSigner, _ := signer.NewSigner("0x...") // fee payer key
+       c := newClient()
+       ctx := context.Background()
+
+       nonce, _ := c.GetTransactionCount(ctx, senderSigner.Address().Hex())
+
+       token := common.HexToAddress("0x20c0000000000000000000000000000000000000")
+       recipient := common.HexToAddress("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb")
+
+       // Step 1: Sender creates tx and signs (fee_token excluded from hash)
+       tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+               SetNonce(nonce).
+               SetGas(100_000).
+               SetMaxFeePerGas(big.NewInt(25_000_000_000)).
+               SetMaxPriorityFeePerGas(big.NewInt(1_000_000_000)).
+               SetSponsored(true). // [!code hl]
+               AddCall(token, big.NewInt(0), buildTransferData(recipient, big.NewInt(10_500_000))).
+               Build()
+
+       _ = transaction.SignTransaction(tx, senderSigner)
+
+       // Step 2: Fee payer sets fee token and counter-signs
+       tx.FeeToken = common.HexToAddress("0x20c0000000000000000000000000000000000001") // [!code hl]
+       _ = transaction.AddFeePayerSignature(tx, feePayerSigner) // [!code hl]
+
+       // Step 3: Broadcast
+       serialized, _ := transaction.Serialize(tx, nil)
+       txHash, _ := c.SendRawTransaction(ctx, serialized)
+
+       log.Printf("Sponsored transaction hash: %s", txHash)
+    }
+    ```
+
+    ```go [provider.go]
+    // [!include ~/snippets/go-provider.go:setup]
+    ```
+
+    :::
+
+  </Tab>
+</Tabs>
 
 ## Best practices
 
@@ -155,47 +354,6 @@ const { receipt } = await client.token.transferSync({
 - **No delegation risk**: Fee payer can't execute arbitrary transactions
 - **Balance checks**: Network verifies fee payer has sufficient balance
 - **Signature validation**: Both signatures must be valid
-
-### Signing Hash Behavior
-
-When building fee-sponsored transactions, the sender must indicate sponsorship **before signing**. This is because the transaction's signing hash differs based on whether it will be sponsored:
-
-- **Sponsored transactions**: The `fee_token` field is omitted from the sender's signing payload, and a `0x00` marker is used. This allows the fee payer to choose the fee token.
-- **Non-sponsored transactions**: The `fee_token` is included in the sender's signing payload.
-
-The `withFeePayer` transport and `feePayer: true` parameter handle this automatically. If you're building transactions manually with a local account as fee payer, the Viem SDK handles this for you:
-
-```ts twoslash
-// @noErrors
-import { createClient, http, parseUnits } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { tempoModerato } from 'viem/chains'
-
-const client = createClient({
-  chain: tempoModerato,
-  transport: http(),
-})
-
-const senderAccount = privateKeyToAccount('0x...')
-const feePayerAccount = privateKeyToAccount('0x...')
-
-// When feePayer is an Account object, Viem:
-// 1. Has the sender sign the transaction (with feeToken)
-// 2. Recovers the sender address from their signature  
-// 3. Has the fee payer sign a separate hash (includes sender + feeToken)
-// 4. Serializes the dual-signed transaction
-const { receipt } = await client.token.transferSync({
-  account: senderAccount,
-  amount: parseUnits('10.5', 6),
-  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
-  token: '0x20c0000000000000000000000000000000000000',
-  feePayer: feePayerAccount, // [!code hl]
-})
-```
-
-:::info
-When using `feePayer: true` with the `withFeePayer` transport, the SDK deletes the `feeToken` from the transaction before signing, then sends it to the fee payer service which adds their signature.
-:::
 
 ## Learning Resources
 

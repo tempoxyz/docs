@@ -71,6 +71,134 @@ const receipt = await client.token.transferSync({
 ```
 
 </Tab>
+
+<Tab title="Rust">
+
+:::code-group
+
+```rust [example.rs]
+use alloy::{
+    primitives::{address, U256},
+    providers::Provider,
+    sol_types::SolCall,
+};
+use tempo_alloy::{
+    contracts::precompiles::ITIP20, primitives::transaction::Call,
+    rpc::TempoTransactionRequest,
+};
+
+mod provider;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let provider = provider::get_provider().await?;
+
+    let alpha_usd = address!("0x20c0000000000000000000000000000000000001");
+    let beta_usd = address!("0x20c0000000000000000000000000000000000002");
+
+    let calls = vec![Call {
+        to: alpha_usd.into(),
+        input: ITIP20::transferCall {
+            to: address!("0x0000000000000000000000000000000000000000"),
+            amount: U256::from(100_000_000),
+        }
+        .abi_encode()
+        .into(),
+        value: U256::ZERO,
+    }];
+
+    let pending = provider
+        .send_transaction(TempoTransactionRequest {
+            calls,
+            fee_token: Some(beta_usd), // [!code ++]
+            ..Default::default()
+        })
+        .await?;
+
+    Ok(())
+}
+```
+
+```rust [provider.rs]
+// [!include ~/snippets/rust-signer-provider.rs:setup]
+```
+
+:::
+
+</Tab>
+
+<Tab title="Python">
+
+<div className="h-6" />
+
+```python
+from pytempo import TempoTransaction
+from pytempo.contracts import TIP20, ALPHA_USD, BETA_USD
+
+tx = TempoTransaction.create(
+    chain_id=w3.eth.chain_id,
+    gas_limit=100_000,
+    max_fee_per_gas=w3.eth.gas_price * 2,
+    max_priority_fee_per_gas=w3.eth.gas_price,
+    nonce=w3.eth.get_transaction_count(account.address),
+    fee_token=BETA_USD, # [!code ++]
+    calls=(
+        TIP20(ALPHA_USD).transfer(
+            to="0x0000000000000000000000000000000000000000",
+            amount=100_000_000,
+        ),
+    ),
+)
+```
+
+</Tab>
+
+<Tab title="Go">
+
+<div className="h-6" />
+
+```go
+alphaUSD := common.HexToAddress("0x20c0000000000000000000000000000000000001")
+betaUSD := common.HexToAddress("0x20c0000000000000000000000000000000000002")
+
+tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+        SetNonce(nonce).
+        SetGas(100_000).
+        SetMaxFeePerGas(big.NewInt(25_000_000_000)).
+        SetMaxPriorityFeePerGas(big.NewInt(1_000_000_000)).
+        SetFeeToken(betaUSD). // [!code ++]
+        AddCall(alphaUSD, big.NewInt(0), buildTransferData(recipient, big.NewInt(100_000_000))).
+        Build()
+```
+
+</Tab>
+
+<Tab title="Cast">
+
+<div className="h-6" />
+
+```bash
+$ cast send \
+  0x20c0000000000000000000000000000000000001 \
+  "transfer(address,uint256)" \
+  0x0000000000000000000000000000000000000000 \
+  100000000 \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY \
+  --tempo.fee-token 0x20c0000000000000000000000000000000000002 # [!code ++]
+```
+
+</Tab>
+
+<Tab title="Solidity">
+
+<div className="h-6" />
+
+:::info
+The fee token for a given transaction cannot be set from Solidity — it is a transaction-level parameter handled by the signing SDK. However, you can configure a **default** fee token for an account using [`setUserToken`](#set-user-fee-token), which will apply to all future transactions unless explicitly overridden at submission.
+:::
+
+</Tab>
 </Tabs>
 
 ## Steps
@@ -331,11 +459,49 @@ const receipt = await client.token.transferSync({
 ::::
 
   </Tab>
+
+  <Tab title="Rust">
+
+:::info
+For Rust integration, refer to the [Quick Snippet](#quick-snippet) above and the [Set user fee token](#set-user-fee-token) below.
+:::
+
+  </Tab>
+
+  <Tab title="Python">
+
+:::info
+For Python integration, refer to the [Quick Snippet](#quick-snippet) above and the [Set user fee token](#set-user-fee-token) below.
+:::
+
+  </Tab>
+
+  <Tab title="Go">
+
+:::info
+For Go integration, refer to the [Quick Snippet](#quick-snippet) above and the [Set user fee token](#set-user-fee-token) below.
+:::
+
+  </Tab>
+
+  <Tab title="Cast">
+
+:::info
+For Cast integration, refer to the [Quick Snippet](#quick-snippet) above and the [Set user fee token](#set-user-fee-token) below.
+:::
+
+  </Tab>
+
+  <Tab title="Solidity">
+
+:::info
+For Solidity integration, refer to the [Quick Snippet](#quick-snippet) above and the [Set user fee token](#set-user-fee-token) below.
+:::
+
+  </Tab>
 </Tabs>
 
-# Recipes
-
-## Set user fee token 
+## Set user fee token
 
 You can also set a persistent default fee token for an account, so users don't need to specify `feeToken` on every transaction. Learn more about fee token preferences [here](/protocol/fees/spec-fee#fee-token-preferences).
 
@@ -357,6 +523,173 @@ You can also set a persistent default fee token for an account, so users don't n
 ```ts twoslash
 // @noErrors
 // [!include ~/snippets/unformatted/fee.setUserToken.ts:viem]
+```
+
+</Tab>
+
+<Tab title="Rust">
+
+<div className="h-6" />
+
+:::code-group
+
+```rust [example.rs]
+use alloy::primitives::address;
+use tempo_alloy::contracts::precompiles::IFeeManager;
+
+mod provider;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let provider = provider::get_provider().await?;
+
+    let fee_manager = IFeeManager::new(
+        address!("0xFEEc000000000000000000000000000000000000"),
+        &provider,
+    );
+
+    let receipt = fee_manager
+        .setUserToken( // [!code hl]
+            address!("0x20c0000000000000000000000000000000000001"), // [!code hl]
+        ) // [!code hl]
+        .send()
+        .await?
+        .get_receipt()
+        .await?;
+
+    println!("Transaction hash: {:?}", receipt.transaction_hash);
+
+    Ok(())
+}
+```
+
+```rust [provider.rs]
+// [!include ~/snippets/rust-signer-provider.rs:setup]
+```
+
+:::
+
+</Tab>
+
+<Tab title="Python">
+
+<div className="h-6" />
+
+:::code-group
+
+```python [example.py]
+from pytempo import TempoTransaction
+from pytempo.contracts import FeeManager, ALPHA_USD
+from provider import w3, account
+
+tx = TempoTransaction.create(
+    chain_id=w3.eth.chain_id,
+    gas_limit=100_000,
+    max_fee_per_gas=w3.eth.gas_price * 2,
+    max_priority_fee_per_gas=w3.eth.gas_price,
+    nonce=w3.eth.get_transaction_count(account.address),
+    calls=(
+        FeeManager.set_user_token(ALPHA_USD), # [!code hl]
+    ),
+)
+
+signed_tx = tx.sign(account.key.hex())
+tx_hash = w3.eth.send_raw_transaction(signed_tx.encode())
+```
+
+```python [provider.py]
+from web3 import Web3
+from eth_account import Account
+
+w3 = Web3(Web3.HTTPProvider("https://rpc.presto.tempo.xyz"))
+account = Account.from_key("0x...")
+```
+
+:::
+
+</Tab>
+
+<Tab title="Go">
+
+<div className="h-6" />
+
+:::code-group
+
+```go [main.go]
+package main
+
+import (
+   "context"
+   "log"
+   "math/big"
+
+   "github.com/ethereum/go-ethereum/common"
+   "github.com/tempoxyz/tempo-go/pkg/signer"
+   "github.com/tempoxyz/tempo-go/pkg/transaction"
+)
+
+func main() {
+   sgn, _ := signer.NewSigner("0x...")
+   c := newClient()
+   ctx := context.Background()
+
+   nonce, _ := c.GetTransactionCount(ctx, sgn.Address().Hex())
+
+   feeManager := common.HexToAddress("0xFEEc000000000000000000000000000000000000")
+   token := common.HexToAddress("0x20c0000000000000000000000000000000000001")
+
+   // setUserToken(address) selector: 0xe7897444
+   data := make([]byte, 36) // [!code hl]
+   data[0], data[1], data[2], data[3] = 0xe7, 0x89, 0x74, 0x44 // [!code hl]
+   copy(data[16:36], token.Bytes()) // [!code hl]
+
+   tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
+           SetNonce(nonce).
+           SetGas(100_000).
+           SetMaxFeePerGas(big.NewInt(25_000_000_000)).
+           SetMaxPriorityFeePerGas(big.NewInt(1_000_000_000)).
+           AddCall(feeManager, big.NewInt(0), data).
+           Build()
+
+   _ = transaction.SignTransaction(tx, sgn)
+   serialized, _ := transaction.Serialize(tx, nil)
+   txHash, _ := c.SendRawTransaction(ctx, serialized)
+
+   log.Printf("Transaction hash: %s", txHash)
+}
+```
+
+```go [provider.go]
+// [!include ~/snippets/go-provider.go:setup]
+```
+
+:::
+
+</Tab>
+
+<Tab title="Cast">
+
+<div className="h-6" />
+
+```bash
+$ cast send \
+  0xFEEc000000000000000000000000000000000000 \
+  "setUserToken(address)" \
+  0x20c0000000000000000000000000000000000001 \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY # [!code hl]
+```
+
+</Tab>
+
+<Tab title="Solidity">
+
+<div className="h-6" />
+
+```solidity
+import {StdPrecompiles} from "tempo-std/StdPrecompiles.sol";
+
+StdPrecompiles.TIP_FEE_MANAGER.setUserToken(0x20c0000000000000000000000000000000000001); // [!code hl]
 ```
 
 </Tab>

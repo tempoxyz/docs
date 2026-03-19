@@ -1,5 +1,5 @@
 ---
-description: Get test stablecoins on Tempo testnet using the faucet. Request pathUSD, AlphaUSD, BetaUSD, and ThetaUSD tokens for development and testing.
+description: Get test stablecoins on Tempo Testnet using the faucet. Request pathUSD, AlphaUSD, BetaUSD, and ThetaUSD tokens for development and testing.
 mipd: true
 ---
 
@@ -10,7 +10,7 @@ import { Tabs, Tab } from 'vocs'
 
 # Add Funds to Your Balance
 
-Get test tokens to start building on Tempo testnet.
+Get test tokens to build on Tempo testnet.
 
 <Tabs>
   <Tab title="Fund your wallet">
@@ -43,14 +43,14 @@ Send test stablecoins to any address.
 
 <div className="h-4" />
 
-Request tokens programmatically via the [Tempo API](https://api.tempo.xyz/docs).
+Request tokens programmatically via the faucet API.
 
 <div className="h-4"/>
 
 ```bash
-curl "https://api.tempo.xyz/actions/faucet\
-?chainId=42431\
-&address=<YOUR_ADDRESS>"
+curl -X POST https://docs.tempo.xyz/api/faucet \
+  -H "Content-Type: application/json" \
+  -d '{"address": "<YOUR_ADDRESS>"}'
 ```
 
 <div className="h-4"/>
