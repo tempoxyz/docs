@@ -305,3 +305,25 @@ The following flags are available for `cast` and `forge script` for Tempo-specif
 Ledger and Trezor wallets are not yet compatible with any `--tempo.*` option.
 
 
+## Deploying to Mainnet
+
+Tempo mainnet launched on March 18, 2026. To deploy contracts to mainnet instead of testnet, update your RPC URL:
+```bash
+export TEMPO_RPC_URL=https://rpc.tempo.xyz
+```
+
+Then deploy using the same commands as testnet:
+```bash
+forge create src/MyContract.sol:MyContract \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY \
+  --broadcast \
+  --verify \
+  --verifier-url https://contracts.tempo.xyz
+```
+
+:::warning
+The testnet faucet does not work on mainnet. Mainnet transactions require real stablecoins acquired through Tempo ecosystem partners such as [Brale](https://brale.xyz) or [Crossmint](https://crossmint.com).
+:::
+
+
