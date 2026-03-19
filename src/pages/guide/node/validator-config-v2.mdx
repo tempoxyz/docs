@@ -1,6 +1,6 @@
 ---
 title: ValidatorConfig V2
-description: Manage your validator with ValidatorConfig V2. Key rotation, fee recipient separation, IP updates, and migration from V1.
+description: Manage your validator with ValidatorConfig V2. Key rotation, IP updates, ownership transfer, and migration from V1.
 ---
 
 # ValidatorConfig V2
@@ -13,8 +13,8 @@ With V2, validators can perform several operations themselves without coordinati
 
 - **Rotate your validator identity** — swap to a new ed25519 key without losing your committee slot
 - **Update IP addresses** — change ingress/egress endpoints on the fly
-- **Set a fee recipient** — route block proposal fees to a dedicated treasury address
 - **Transfer ownership** — rebind your validator entry to a new address
+- **Fee recipient separation** — will be enabled in a future hardfork. For now, continue using `--consensus.fee-recipient` when starting your node.
 
 All write operations require either the contract owner or the validator's own address.
 
@@ -91,21 +91,6 @@ cast send 0xCCCCCCCC00000000000000000000000000000001 \
 Ingress addresses must be unique across all active validators. The transaction will revert if another active validator already uses the same `IP:port`.
 :::
 
-### Set fee recipient
-
-Separate fee custody from validator operations by routing block proposal fees to a dedicated address:
-
-```bash
-cast send 0xCCCCCCCC00000000000000000000000000000001 \
-  "setFeeRecipient(uint64,address)" \
-  <YOUR_VALIDATOR_INDEX> \
-  <FEE_RECIPIENT_ADDRESS> \
-  --rpc-url https://rpc.tempo.xyz \
-  --private-key <YOUR_VALIDATOR_PRIVATE_KEY>
-```
-
-This reduces blast radius during key compromise — an exposed operational key does not put historically collected fees at risk.
-
 ### Rotate validator identity
 
 V2 lets you rotate to a new ed25519 key while keeping your validator index stable. This is useful for key rotation or recovery without leaving and re-joining the committee.
@@ -161,8 +146,7 @@ The new address must not already be used by another active validator.
 | **Key ownership** | No verification | Ed25519 signature required |
 | **History** | Mutable, toggle active/inactive | Append-only, deactivate-once |
 | **Validator index** | Could change | Stable for lifetime |
-| **Self-service ops** | None (owner only) | IP updates, fee recipient, rotation, transfer |
-| **Fee recipient** | Not supported | Separate from validator address |
+| **Self-service ops** | None (owner only) | IP updates, rotation, transfer |
 | **Historical queries** | Required warmup state, bloated snapshots | `addedAtHeight` / `deactivatedAtHeight` fields |
 
 ## Migration from V1
@@ -189,7 +173,6 @@ Migration and `initializeIfMigrated()` should complete before an epoch boundary 
 - **IP changes** take effect at the next finalized block
 - **Added validators** join the DKG player set at the next epoch — no warmup period
 - **Deactivated validators** leave at the next epoch — no cooldown period
-- **Fee recipients** are stored on-chain for use in a future hardfork
 
 ### DKG player selection
 
