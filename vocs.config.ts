@@ -15,8 +15,7 @@ export default defineConfig({
   banner: {
     dismissable: false,
     backgroundColor: '#5B4CDB',
-    content:
-      'Tempo Mainnet is live. [Read our announcement.](https://tempo.xyz/blog/mainnet) →',
+    content: 'Tempo Mainnet is live. [Read our announcement.](https://tempo.xyz/blog/mainnet) →',
     height: '40px',
     textColor: 'white',
   },
