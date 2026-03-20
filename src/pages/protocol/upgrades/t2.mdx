@@ -44,14 +44,12 @@ T2 is Tempo's next network upgrade, building on T1. It introduces compound trans
 
 **Operator guide:** [Validator Config V2](https://docs.tempo.xyz/guide/node/validator-config-v2)
 
-**Internal docs for migration:** Migration from Validator Config V1 to V2
-
 **TLDR:** New precompile for managing consensus validators. Adds Ed25519 signature verification at registration, append-only history, stable validator indices, and fee recipient separation.
 
 **Customer use case:** Node operators currently depend on Tempo to make any validator configuration changes. With V2, operators can self-service IP rotations, key rotations, and ownership transfers without waiting on Tempo — reducing operational dependency and enabling faster incident response.
 
 **Partner impact:**
-- **Node operators:** Once T2 activates, the contract owner (Tempo) will migrate validators from V1 to V2 via `migrateValidator()` + `initializeIfMigrated()`. After the migration, operators can then self-service IP updates, key rotation, and ownership transfers. Node operators won't need to do anything for this migration.
+- **Node operators:** Node operators won't need to do anything for this migration. After the migration, operators can self-service IP updates, key rotation, and ownership transfers.
 - **Fee recipient configuration:** Validators should now configure fee recipients on the validator v2 contract to route block fees to a dedicated treasury address. Stripe requested this feature since they didn't want their node operators to have the capability to change this key.
 - **Minimal nodes for validators:** Validator v2 unlocks a major innovation: minimal nodes for validators. Today, validators must keep ~64,000 blocks of history to reconstruct validator sets requiring hundreds of GB of storage. V2 eliminates this requirement, letting validators query the set from the latest state only. Combined with Reth storage v2 (which allows pruning historical data in-place), this enables validators to run in minimal mode reducing disk from hundreds of GB to a fraction. Reth v2 will be released next week. This makes Tempo's node requirements significantly lighter than comparable networks.
 
