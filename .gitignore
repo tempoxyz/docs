@@ -32,3 +32,4 @@ src/pages/protocol/tips/tip-*
 # Playwright
 playwright-report/
 test-results/
+.zed
