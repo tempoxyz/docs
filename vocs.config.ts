@@ -513,6 +513,16 @@ export default defineConfig({
             ],
           },
           {
+            text: 'Network Upgrades',
+            collapsed: true,
+            items: [
+              {
+                text: 'T2',
+                link: '/protocol/upgrades/t2',
+              },
+            ],
+          },
+          {
             text: 'TIPs',
             link: '/protocol/tips',
           },

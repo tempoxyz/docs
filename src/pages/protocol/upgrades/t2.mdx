@@ -1,0 +1,78 @@
+---
+title: T2 Network Upgrade
+description: Details and timeline for the T2 network upgrade including compound transfer policies, Validator Config V2, EIP-2612 permit, and audit-driven bug fixes.
+---
+
+# T2 Network Upgrade
+
+This doc is for internal use only to inform about what is going live with T2 and when. Request for input on: Which partners should we reach out to specifically?
+
+## Timeline
+
+Cut release Monday, 23rd March and send out to partners.
+
+| Network | Date | Timestamp |
+|---------|------|-----------|
+| Moderato (testnet) | Thursday, 24th March 4pm CET | `1774537200` |
+| Presto (mainnet) | Tuesday, March 31st 4pm CET | `1774965600` |
+
+Partners should upgrade nodes to the T2-compatible release before the moderato activation timestamp.
+
+## Overview
+
+T2 is Tempo's next network upgrade, building on T1. It introduces compound transfer policies ([TIP-1015](https://docs.tempo.xyz/protocol/tips/tip-1015)), EIP-2612 permit support for TIP-20 tokens ([TIP-1004](https://docs.tempo.xyz/protocol/tips/tip-1004)), a new Validator Config V2 precompile ([TIP-1017](https://docs.tempo.xyz/protocol/tips/tip-1017)), and 13 audit-driven bug fixes ([TIP-1036](https://docs.tempo.xyz/protocol/tips/tip-1036)).
+
+**Action required:** All node operators must upgrade to the T2-compatible release before the activation timestamp.
+
+## Feature TIPs
+
+### TIP-1015: Compound Transfer Policies
+
+**Spec:** [TIP-1015](https://docs.tempo.xyz/protocol/tips/tip-1015)
+
+**TLDR:** Extends TIP-403 policies so token issuers can set different authorization rules for senders, recipients, and mint recipients. Previously a single policy applied to both sides of a transfer.
+
+**Customer use case:** Issuers of regulated or closed-loop tokens need to enforce different rules for senders vs recipients. For example: KYC required to on-ramp into a stablecoin, but anyone in the approved set can spend. Without compound policies, issuers must apply the same restrictions to both sides, which breaks real-world Commerce patterns and Tokenized Asset distribution flows.
+
+**Partner impact:**
+- If you integrate with TIP-403 policies: new `isAuthorizedSender()`, `isAuthorizedRecipient()`, and `isAuthorizedMintRecipient()` functions are available. The existing `isAuthorized()` still works (returns `senderCheck && recipientCheck`).
+- If you issue TIP-20 tokens: You can now create compound policies for use cases like vendor credits, directional KYC, or asymmetric compliance.
+
+### TIP-1017: Validator Config V2
+
+**Spec:** [TIP-1017](https://docs.tempo.xyz/protocol/tips/tip-1017)
+
+**Operator guide:** [Validator Config V2](https://docs.tempo.xyz/guide/node/validator-config-v2)
+
+**Internal docs for migration:** Migration from Validator Config V1 to V2
+
+**TLDR:** New precompile for managing consensus validators. Adds Ed25519 signature verification at registration, append-only history, stable validator indices, and fee recipient separation.
+
+**Customer use case:** Node operators currently depend on Tempo to make any validator configuration changes. With V2, operators can self-service IP rotations, key rotations, and ownership transfers without waiting on Tempo — reducing operational dependency and enabling faster incident response.
+
+**Partner impact:**
+- **Node operators:** Once T2 activates, the contract owner (Tempo) will migrate validators from V1 to V2 via `migrateValidator()` + `initializeIfMigrated()`. After the migration, operators can then self-service IP updates, key rotation, and ownership transfers. Node operators won't need to do anything for this migration.
+- **Fee recipient configuration:** Validators should now configure fee recipients on the validator v2 contract to route block fees to a dedicated treasury address. Stripe requested this feature since they didn't want their node operators to have the capability to change this key.
+- **Minimal nodes for validators:** Validator v2 unlocks a major innovation: minimal nodes for validators. Today, validators must keep ~64,000 blocks of history to reconstruct validator sets requiring hundreds of GB of storage. V2 eliminates this requirement, letting validators query the set from the latest state only. Combined with Reth storage v2 (which allows pruning historical data in-place), this enables validators to run in minimal mode reducing disk from hundreds of GB to a fraction. Reth v2 will be released next week. This makes Tempo's node requirements significantly lighter than comparable networks.
+
+### TIP-1004: Permit for TIP-20
+
+**Spec:** [TIP-1004](https://docs.tempo.xyz/protocol/tips/tip-1004)
+
+**TLDR:** Adds EIP-2612 `permit()` to all TIP-20 tokens, enabling gasless approvals via off-chain signatures.
+
+**Customer use case:** Any Ramp or Commerce platform that sponsors gas for end users needs `permit()` to avoid forcing two separate transactions. Avenia was the first partner blocked on this — they can't ship their LATAM on/off-ramp flow without it.
+
+**Partner impact:**
+- Users can now use `permit()` to combine approve + action in a single transaction.
+
+### Meta TIP: Audit & Bug Fixes
+
+**(WIP)** [TIP-1036: T2 Hardfork Bug Fixes](https://docs.tempo.xyz/protocol/tips/tip-1036)
+
+**PR:** [#3205](https://github.com/tempoxyz/tempo/pull/3205)
+
+Some items that may affect partners:
+- If you call AccountKeychain admin functions from a contract, refactor to direct EOA calls.
+- If you submit AA transactions with `fee_payer == sender`, use a separate fee payer account.
+- If you estimate gas for 2D nonce key transactions, update gas estimates (ref [#2533](https://github.com/tempoxyz/tempo/pull/2533)).
