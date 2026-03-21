@@ -25,6 +25,12 @@ importers:
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@takumi-rs/image-response':
+        specifier: 0.62.8
+        version: 0.62.8
+      '@takumi-rs/wasm':
+        specifier: 0.62.8
+        version: 0.62.8
       '@tanstack/react-query':
         specifier: ^5.90.19
         version: 5.90.19(react@19.2.3)
@@ -3819,7 +3825,7 @@ packages:
         optional: true
 
   vocs@https://pkg.pr.new/vocs@8b55a2c:
-    resolution: {tarball: https://pkg.pr.new/vocs@8b55a2c}
+    resolution: {integrity: sha512-WcHGGekNPckBxC9A8fdk2gJrrOe7hdvX33VaVa2bIxjZDZQdQ53GGcwMuOIfQr/YfikA93Cp1zXr3G6SsDc0OA==, tarball: https://pkg.pr.new/vocs@8b55a2c}
     version: 0.0.0
     hasBin: true
     peerDependencies:
