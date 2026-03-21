@@ -1,89 +1,240 @@
-import { Handler } from 'vocs/server'
+import { ImageResponse } from '@takumi-rs/image-response/wasm'
+// @ts-expect-error -- vite arraybuffer import
+import wasmModule from '@takumi-rs/wasm/takumi_wasm_bg.wasm?arraybuffer'
+// @ts-expect-error -- vite arraybuffer import
+import hbSetFont from './fonts/HBSet-Light.otf?arraybuffer'
+// @ts-expect-error -- vite arraybuffer import
+import pilatFont from './fonts/Pilat-Regular.otf?arraybuffer'
+// @ts-expect-error -- vite arraybuffer import
+import bgImageBuf from './og-bg.png?arraybuffer'
 
-export default function handler(request: Request) {
-  return Handler.og(({ title, description }) => (
-    <div
-      style={{
-        height: '100%',
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        justifyContent: 'flex-end',
-        backgroundColor: '#0a0a0a',
-        padding: '60px 80px 120px',
-        fontFamily: 'Inter, system-ui, sans-serif',
-      }}
-    >
+function getTitleFontSize(_title: string): number {
+  return 105
+}
+
+/**
+ * Split title into balanced lines so no single word is orphaned.
+ * Finds the word-boundary split closest to the midpoint of the string.
+ */
+function balanceLines(text: string, fontSize: number): string[] {
+  const words = text.split(' ')
+  if (words.length <= 2) return [text]
+
+  const maxWidth = 960
+  const avgCharWidth = fontSize * 0.58
+  const charsPerLine = Math.floor(maxWidth / avgCharWidth)
+
+  if (text.length <= charsPerLine) return [text]
+
+  const needsThreeLines = text.length > charsPerLine * 2
+
+  if (needsThreeLines) {
+    const target = text.length / 3
+    let bestI = 0
+    let bestJ = 1
+    let bestScore = Number.POSITIVE_INFINITY
+    for (let i = 0; i < words.length - 2; i++) {
+      const line1 = words.slice(0, i + 1).join(' ')
+      for (let j = i + 1; j < words.length - 1; j++) {
+        const line2 = words.slice(i + 1, j + 1).join(' ')
+        const line3 = words.slice(j + 1).join(' ')
+        const score =
+          Math.abs(line1.length - target) +
+          Math.abs(line2.length - target) +
+          Math.abs(line3.length - target)
+        if (score < bestScore) {
+          bestScore = score
+          bestI = i
+          bestJ = j
+        }
+      }
+    }
+    return [
+      words.slice(0, bestI + 1).join(' '),
+      words.slice(bestI + 1, bestJ + 1).join(' '),
+      words.slice(bestJ + 1).join(' '),
+    ]
+  }
+
+  let bestSplit = 0
+  let bestDiff = Number.POSITIVE_INFINITY
+  for (let i = 0; i < words.length - 1; i++) {
+    const left = words.slice(0, i + 1).join(' ')
+    const right = words.slice(i + 1).join(' ')
+    const diff = Math.abs(left.length - right.length)
+    if (diff < bestDiff) {
+      bestDiff = diff
+      bestSplit = i
+    }
+  }
+
+  return [words.slice(0, bestSplit + 1).join(' '), words.slice(bestSplit + 1).join(' ')]
+}
+
+export default async function handler(request: Request) {
+  const url = new URL(request.url)
+  const title = url.searchParams.get('title') || 'Tempo'
+  const section = url.searchParams.get('section') || ''
+  const subsection = url.searchParams.get('subsection') || ''
+
+  const hasSubsection = !!subsection
+
+  const fontSize = getTitleFontSize(title)
+
+  const bgBytes = new Uint8Array(bgImageBuf)
+  let bgBinary = ''
+  for (let i = 0; i < bgBytes.length; i++) bgBinary += String.fromCharCode(bgBytes[i])
+  const bgUrl = `data:image/png;base64,${btoa(bgBinary)}`
+
+  try {
+    return new ImageResponse(
       <div
         style={{
-          position: 'absolute',
-          top: '80px',
-          left: '80px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-        }}
-      >
-        {/** biome-ignore lint/a11y/noSvgWithoutTitle: _ */}
-        <svg
-          width="296"
-          height="70"
-          viewBox="500 400 920 300"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M576.59,636.9h-53.04l49.16-150.06h-62.87l13.71-43.98h175.16l-13.71,43.98h-59.51l-48.9,150.06Z"
-            fill="white"
-          />
-          <path
-            d="M773.97,636.9h-125.74l63.13-194.05h125.23l-11.9,37h-72.7l-13.2,41.66h70.38l-11.9,36.48h-70.63l-13.2,41.91h72.19l-11.64,37Z"
-            fill="white"
-          />
-          <path
-            d="M830.88,636.9h-42.17l63.39-194.05h70.38l-2.33,104.79,68.56-104.79h77.1l-63.13,194.05h-52.78l41.91-130.4h-.78l-86.16,130.4h-31.31l1.29-131.95h-.52l-43.47,131.95Z"
-            fill="white"
-          />
-          <path
-            d="M1125.18,478.81l-20.44,62.61h5.69c12.94,0,23.72-3.02,32.34-9.06,8.62-6.21,14.23-15.01,16.82-26.39,2.24-9.83,1.04-16.82-3.62-20.96-4.66-4.14-12.42-6.21-23.29-6.21h-7.5ZM1073.95,636.9h-53.04l63.13-194.05h64.42c14.83,0,27.6,2.41,38.29,7.24,10.87,4.66,18.8,11.38,23.8,20.18,5.17,8.62,6.9,18.71,5.17,30.27-2.24,15.18-8.11,28.55-17.59,40.1-9.49,11.56-21.82,20.53-37,26.91-15.01,6.21-31.82,9.31-50.45,9.31h-17.34l-19.4,60.03Z"
-            fill="white"
-          />
-          <path
-            d="M1342.16,624.48c-17.59,10.35-36.31,15.52-56.15,15.52h-.52c-17.59,0-32.43-3.88-44.5-11.64-11.9-7.93-20.44-18.63-25.61-32.08-5-13.45-6.21-28.2-3.62-44.24,3.28-20.18,10.78-38.81,22.51-55.89,11.73-17.08,26.39-30.7,43.98-40.88,17.59-10.18,36.4-15.27,56.4-15.27h.52c18.28,0,33.38,3.88,45.28,11.64,12.07,7.76,20.44,18.37,25.1,31.82,4.83,13.28,5.86,28.2,3.1,44.76-3.28,19.49-10.78,37.86-22.51,55.11-11.73,17.08-26.39,30.79-43.98,41.14ZM1268.94,591.1c4.66,8.8,12.76,13.19,24.32,13.19h.52c9.49,0,18.28-3.54,26.39-10.61,8.28-7.24,15.27-16.9,20.96-28.98,5.86-12.07,10.18-25.53,12.94-40.36,2.59-14.49,1.55-26.13-3.1-34.93-4.66-8.97-12.68-13.45-24.06-13.45h-.52c-8.8,0-17.34,3.62-25.61,10.87-8.11,7.24-15.18,16.99-21.22,29.24-6.04,12.25-10.44,25.53-13.2,39.84-2.76,14.49-1.9,26.22,2.59,35.19Z"
-            fill="white"
-          />
-        </svg>
-      </div>
-
-      <div
-        style={{
+          width: '100%',
+          height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          gap: '16px',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#F3F3F3',
+          position: 'relative',
         }}
       >
-        <div
-          style={{
-            fontSize: title.length < 15 ? 80 : 64,
-            fontWeight: 700,
-            color: 'white',
-          }}
-        >
-          {title}
-        </div>
+        {/** biome-ignore lint/a11y/useAltText: og image */}
+        <img
+          src={bgUrl}
+          width={1200}
+          height={657}
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+        />
 
-        {description && (
+        {/* Pill / tag at top center */}
+        {section && (
           <div
             style={{
-              fontSize: '24px',
-              color: '#a1a1aa',
+              position: 'absolute',
+              top: 50,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            {description.length > 120 ? `${description.slice(0, 120)}...` : description}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                borderRadius: 7,
+                border: '1px solid rgba(0, 0, 0, 0.2)',
+                backgroundColor: '#F3F3F3',
+                padding: 1,
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  paddingLeft: 14,
+                  paddingRight: 12,
+                  paddingTop: 8,
+                  paddingBottom: 8,
+                  fontFamily: 'Pilat',
+                  fontSize: 22,
+                  letterSpacing: '0.03em',
+                  color: '#3D3D3D',
+                }}
+              >
+                DOCS
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  paddingLeft: 14,
+                  paddingRight: 14,
+                  paddingTop: 8,
+                  paddingBottom: 8,
+                  backgroundColor: '#E7E7E7',
+                  borderRadius: 5,
+                  fontFamily: 'Pilat',
+                  fontSize: 22,
+                  letterSpacing: '0.03em',
+                  color: '#3D3D3D',
+                }}
+              >
+                {hasSubsection ? (
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{ opacity: 0.6 }}>{section}</span>
+                    <span style={{ opacity: 0.6, marginLeft: 8, marginRight: 8 }}>›</span>
+                    <span>{subsection}</span>
+                  </div>
+                ) : (
+                  section
+                )}
+              </div>
+            </div>
           </div>
         )}
-      </div>
-    </div>
-  )).fetch(request)
+
+        {/* Title text */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            maxWidth: 1040,
+            padding: '0 40px',
+          }}
+        >
+          {balanceLines(title, fontSize).map((line) => (
+            <div
+              key={line}
+              style={{
+                fontFamily: 'HBSet',
+                fontSize,
+                fontWeight: 300,
+                letterSpacing: '-0.04em',
+                color: 'black',
+                lineHeight: 1.15,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {line}
+            </div>
+          ))}
+        </div>
+
+        {/* Tempo "T" logo at bottom center */}
+        {/** biome-ignore lint/a11y/noSvgWithoutTitle: og image */}
+        <svg
+          width="28"
+          height="34"
+          viewBox="0 0 28 34"
+          fill="none"
+          style={{ position: 'absolute', bottom: 52, left: 586 }}
+        >
+          <path
+            d="M10.179 33.796H0.976L9.506 7.66H-1.403L0.976 0H31.369L28.99 7.66H18.664L10.179 33.796Z"
+            fill="black"
+          />
+        </svg>
+      </div>,
+      {
+        module: wasmModule,
+        width: 1200,
+        height: 657,
+        fonts: [
+          { name: 'HBSet', data: hbSetFont, weight: 300, style: 'normal' as const },
+          { name: 'Pilat', data: pilatFont, weight: 400, style: 'normal' as const },
+        ],
+      },
+    )
+  } catch (error) {
+    console.error(error)
+    return new Response('Failed to generate OG image', { status: 500 })
+  }
 }
