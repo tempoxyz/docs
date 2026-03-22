@@ -27,7 +27,7 @@ export function ConnectWallet({ showAddChain = true }: { showAddChain?: boolean 
             variant="default"
             className="flex items-center gap-1.5"
             key={connector.id}
-            onClick={() => connect.connect({ connector })}
+            onClick={() => connect.mutate({ connector })}
           >
             {connector.icon ? (
               <img className="size-5" src={connector.icon} alt={connector.name} />

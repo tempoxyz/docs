@@ -109,7 +109,7 @@ export function Example() {
     <div>
       <button
         onClick={() =>
-          connect.connect({
+          connect.mutate({
             connector,
             capabilities: { type: 'sign-up' },
           })
@@ -118,7 +118,7 @@ export function Example() {
         Sign up
       </button>
 
-      <button onClick={() => connect.connect({ connector })}>
+      <button onClick={() => connect.mutate({ connector })}>
         Sign in
       </button>
     </div>
@@ -179,15 +179,15 @@ export function Example() {
     return ( // [!code ++]
       <div> {/* [!code ++] */}
         <div>{account.address.slice(0, 6)}...{account.address.slice(-4)}</div> {/* [!code ++] */}
-        <button onClick={() => disconnect.disconnect()}>Sign out</button> {/* [!code ++] */}
-      </div> {/* [!code ++] */}
+        <button onClick={() => disconnect.mutate()}>Sign out</button> {/* [!code ++] */}
+      </div> // [!code ++]
     ) // [!code ++]
 
   return (
     <div>
       <button
         onClick={() =>
-          connect.connect({
+          connect.mutate({
             connector,
             capabilities: { type: 'sign-up' },
           })
@@ -196,7 +196,7 @@ export function Example() {
         Sign up
       </button>
 
-      <button onClick={() => connect.connect({ connector })}>
+      <button onClick={() => connect.mutate({ connector })}>
         Sign in
       </button>
     </div>
@@ -262,7 +262,7 @@ export function Example() {
   const disconnect = useDisconnect()
 
   if (connect.isPending) // [!code ++]
-    return <div>Check prompt...</div> {/* [!code ++] */}
+    return <div>Check prompt...</div> // [!code ++]
   return (/* ... */)
 }
 ```
@@ -290,7 +290,7 @@ export function Example() {
   const disconnect = useDisconnect()
 
   if (connect.error) // [!code ++]
-    return <div>Error: {connect.error.message}</div> {/* [!code ++] */}
+    return <div>Error: {connect.error.message}</div> // [!code ++]
   return (/* ... */)
 }
 ```
