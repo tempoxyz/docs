@@ -51,21 +51,10 @@ Bridge USDC from Ethereum to Tempo using `cast send`. This calls `sendToken` on 
 **Step 1 — Quote the fee:**
 
 ```bash
-# Encode the SendParam tuple
-SEND_PARAM=$(cast abi-encode \
-  "(uint32,bytes32,uint256,uint256,bytes,bytes,bytes)" \
-  30410 \
-  $(cast --to-bytes32 $YOUR_ADDRESS) \
-  1000000 \
-  990000 \
-  0x \
-  0x \
-  0x)
-
 # Quote the messaging fee (returns nativeFee, lzTokenFee)
 cast call 0xc026395860Db2d07ee33e05fE50ed7bD583189C7 \
-  "quoteSend((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),bool)(uint256,uint256)" \
-  "$SEND_PARAM" \
+  "quoteSend((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),bool)((uint256,uint256))" \
+  "(30410,$(cast --to-bytes32 $YOUR_ADDRESS),1000000,990000,0x,0x,0x)" \
   false \
   --rpc-url https://eth.llamarpc.com
 ```
@@ -251,20 +240,10 @@ To bridge USDC.e from Tempo back to another chain, call `sendToken` on the **Sta
 # StargateOFTUSDC on Tempo: 0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392
 # USDC.e on Tempo: 0x20C000000000000000000000b9537d11c60E8b50
 
-# Step 1 — Quote the fee
-SEND_PARAM=$(cast abi-encode \
-  "(uint32,bytes32,uint256,uint256,bytes,bytes,bytes)" \
-  30101 \
-  $(cast --to-bytes32 $YOUR_ADDRESS) \
-  1000000 \
-  990000 \
-  0x \
-  0x \
-  0x)
-
+# Step 1 — Quote the fee (returns fee in stablecoin units, not ETH)
 cast call 0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392 \
-  "quoteSend((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),bool)(uint256,uint256)" \
-  "$SEND_PARAM" \
+  "quoteSend((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),bool)((uint256,uint256))" \
+  "(30101,$(cast --to-bytes32 $YOUR_ADDRESS),1000000,990000,0x,0x,0x)" \
   false \
   --rpc-url https://rpc.tempo.xyz
 
@@ -276,12 +255,13 @@ cast send 0x20C000000000000000000000b9537d11c60E8b50 \
   --rpc-url https://rpc.tempo.xyz \
   --private-key $PRIVATE_KEY
 
-# Step 3 — Send (use destination EID for the target chain)
-# Ethereum = 30101, Arbitrum = 30110, Base = 30184, etc.
+# Step 3 — Send (no --value needed on Tempo)
+# $LZ_FEE = nativeFee from the quote step (in stablecoin units)
+# Destination EIDs: Ethereum = 30101, Arbitrum = 30110, Base = 30184, etc.
 cast send 0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392 \
   "sendToken((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),(uint256,uint256),address)" \
   "(30101,$(cast --to-bytes32 $YOUR_ADDRESS),1000000,990000,0x,0x,0x)" \
-  "($NATIVE_FEE,0)" \
+  "($LZ_FEE,0)" \
   $YOUR_ADDRESS \
   --rpc-url https://rpc.tempo.xyz \
   --private-key $PRIVATE_KEY
@@ -390,6 +370,10 @@ const sendParam = {
   oftCmd: '0x00' as const, // bus mode
 }
 ```
+
+:::warning
+Bus mode is not available on all routes. If a bus route is not configured for your source/destination pair, the transaction will revert. Use taxi mode (`0x`) for guaranteed delivery.
+:::
 
 ## Further reading
 
