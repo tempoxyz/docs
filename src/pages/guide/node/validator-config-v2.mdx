@@ -61,11 +61,13 @@ If `isInitialized()` returns `true`, V2 is active and all operations on this pag
 
 ### Query active validators
 
+Use `validators-info` to see the current state of all validators:
+
 ```bash
-cast call 0xCCCCCCCC00000000000000000000000000000001 \
-  "getActiveValidators()" \
-  --rpc-url https://rpc.tempo.xyz
+tempo consensus validators-info --rpc-url https://rpc.tempo.xyz
 ```
+
+This returns the committee of the current epoch (validators with `in_committee = true`) as well as validators that have been added but will only become active in a future epoch. Use this to verify your validator's status after registration or rotation.
 
 ### Look up your validator
 
