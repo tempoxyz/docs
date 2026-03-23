@@ -85,6 +85,10 @@ export default defineConfig({
             link: '/guide/getting-funds',
           },
           {
+            text: 'Bridge USDC via Stargate',
+            link: '/guide/bridge-usdc-stargate',
+          },
+          {
             text: 'Create & Use Accounts',
             collapsed: true,
             items: [
