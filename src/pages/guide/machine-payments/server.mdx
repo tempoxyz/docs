@@ -112,6 +112,24 @@ export async function handler(request: Request) {
 `currency` is the TIP-20 token contract address — [`0x20c0…`](https://explore.tempo.xyz/address/0x20c0000000000000000000000000000000000000?live=false) is PathUSD on Tempo. `recipient` is the address that receives payment. See the [Tempo payment method](https://mpp.dev/payment-methods/tempo) for supported tokens.
 :::
 
+## Realm
+
+The `realm` identifies your server in payment challenges and on-chain attribution. By default, mppx auto-detects it from environment variables (`HOSTNAME`, `VERCEL_URL`, etc.), but this can produce incorrect values in containerized environments where `HOSTNAME` is set to an internal identifier (e.g. a Kubernetes pod name).
+
+Set `realm` explicitly to your public domain:
+
+```ts
+const mppx = Mppx.create({
+  realm: 'api.example.com', // [!code hl]
+  methods: [tempo({
+    currency: '0x20c0000000000000000000000000000000000000',
+    recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
+  })],
+})
+```
+
+You can also set the `MPP_REALM` environment variable instead of passing it in code.
+
 ## Push & pull modes
 
 Tempo charges support two transaction submission modes, determined by the client:
