@@ -69,6 +69,11 @@ tempo consensus validators-info --rpc-url https://rpc.tempo.xyz
 
 This returns the committee of the current epoch (validators with `in_committee = true`) as well as validators that have been added but will only become active in a future epoch. Use this to verify your validator's status after registration or rotation.
 
+:::info
+The on-chain contract represents which validators should eventually be members of the committee, not which ones currently are. Every epoch, the Tempo network performs a distribute key generation ceremony, distributing keys to validators that should be
+committee members in the next epoch. So adding, deactiving, or rotating validators entries in epoch `E` can only be taken into account for the next DKG ceremony that runs during epoch `E+1`, and take effect in epoch `E+2`.
+:::
+
 ### Look up your validator
 
 You can query your validator by address, public key, or index:
@@ -101,7 +106,7 @@ The returned `Validator` struct fields are:
 | `validatorAddress` | `address` | Validator control address |
 | `ingress` | `string` | Inbound address (`IP:port`) |
 | `egress` | `string` | Outbound address (`IP`) |
-| `index` | `uint64` | Immutable array position |
+| `index` | `uint64` | Index of the validator (constant under rotation)|
 | `addedAtHeight` | `uint64` | Block height when added |
 | `deactivatedAtHeight` | `uint64` | Block height when deactivated (`0` = active) |
 | `feeRecipient` | `address` | Address that receives block proposal fees |
@@ -159,18 +164,6 @@ tempo consensus validators-info --rpc-url https://rpc.tempo.xyz
 
 Once the old validator shows `in_committee = false`, it is safe to shut down.
 :::
-
-#### Using raw contract calls
-
-If you prefer to call the precompile directly, first generate the required ed25519 signature proving ownership of the new key:
-
-```bash
-tempo consensus create-rotate-validator-signature \
-  --signing-key <NEW_PRIVATE_KEY_PATH> \
-  --rpc-url https://rpc.tempo.xyz
-```
-
-Then use the output signature in a `rotateValidator` call via `cast send`.
 
 #### Initial registration
 
