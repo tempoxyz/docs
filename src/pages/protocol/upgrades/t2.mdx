@@ -20,7 +20,11 @@ Partners should upgrade nodes to the T2-compatible release before the moderato a
 
 ## Overview
 
-T2 is Tempo's next network upgrade, building on T1. It introduces compound transfer policies ([TIP-1015](https://docs.tempo.xyz/protocol/tips/tip-1015)), EIP-2612 permit support for TIP-20 tokens ([TIP-1004](https://docs.tempo.xyz/protocol/tips/tip-1004)), a new Validator Config V2 precompile ([TIP-1017](https://docs.tempo.xyz/protocol/tips/tip-1017)), and 13 audit-driven bug fixes ([TIP-1036](https://docs.tempo.xyz/protocol/tips/tip-1036)).
+T2 is Tempo's next network upgrade, building on T1. It introduces  the following new features: 
+- Compound transfer policies ([TIP-1015](https://docs.tempo.xyz/protocol/tips/tip-1015))
+- EIP-2612 permit support for TIP-20 tokens ([TIP-1004](https://docs.tempo.xyz/protocol/tips/tip-1004))
+- a new Validator Config V2 precompile ([TIP-1017](https://docs.tempo.xyz/protocol/tips/tip-1017))
+- and security improvements ([TIP-1036](https://docs.tempo.xyz/protocol/tips/tip-1036)).
 
 **Action required:** All node operators must upgrade to the T2-compatible release before the activation timestamp.
 
@@ -50,7 +54,7 @@ T2 is Tempo's next network upgrade, building on T1. It introduces compound trans
 
 **Partner impact:**
 - **Node operators:** Node operators won't need to do anything for this migration. After the migration, operators can self-service IP updates, key rotation, and ownership transfers.
-- **Fee recipient configuration:** Validators should now configure fee recipients on the validator v2 contract to route block fees to a dedicated treasury address. Stripe requested this feature since they didn't want their node operators to have the capability to change this key.
+- **Fee recipient configuration:** Validators should now configure fee recipients on the validator v2 contract to route block fees to a dedicated treasury address.
 - **Minimal nodes for validators:** Validator v2 unlocks a major innovation: minimal nodes for validators. Today, validators must keep ~64,000 blocks of history to reconstruct validator sets requiring hundreds of GB of storage. V2 eliminates this requirement, letting validators query the set from the latest state only. Combined with Reth storage v2 (which allows pruning historical data in-place), this enables validators to run in minimal mode reducing disk from hundreds of GB to a fraction. Reth v2 will be released next week. This makes Tempo's node requirements significantly lighter than comparable networks.
 
 ### TIP-1004: Permit for TIP-20
