@@ -9,22 +9,20 @@ This page summarises new features included in the T2 network upgrade.
 
 ## Timeline
 
-Cut release Monday, 23rd March and send out to partners.
-
 | Network | Date | Timestamp |
 |---------|------|-----------|
-| Moderato (testnet) | Thursday, 24th March 4pm CET | `1774537200` |
-| Presto (mainnet) | Tuesday, March 31st 4pm CET | `1774965600` |
+| Moderato (testnet) | Thursday, 26th March 4pm CET | `1774537200` |
+| Presto (mainnet) | Tuesday, 31st March 4pm CEST | `1774965600` |
 
 Partners should upgrade nodes to the T2-compatible release before the moderato activation timestamp.
 
 ## Overview
 
-T2 is Tempo's next network upgrade, building on T1. It introduces  the following new features: 
-- Compound transfer policies ([TIP-1015](https://docs.tempo.xyz/protocol/tips/tip-1015))
-- EIP-2612 permit support for TIP-20 tokens ([TIP-1004](https://docs.tempo.xyz/protocol/tips/tip-1004))
-- a new Validator Config V2 precompile ([TIP-1017](https://docs.tempo.xyz/protocol/tips/tip-1017))
-- and security improvements ([TIP-1036](https://docs.tempo.xyz/protocol/tips/tip-1036)).
+T2 is Tempo's next network upgrade, building on T1. It introduces the following new features:
+- Compound transfer policies ([TIP-1015](/protocol/tips/tip-1015))
+- EIP-2612 permit support for TIP-20 tokens ([TIP-1004](/protocol/tips/tip-1004))
+- a new Validator Config V2 precompile ([TIP-1017](/protocol/tips/tip-1017))
+- and security improvements ([TIP-1036](/protocol/tips/tip-1036)).
 
 **Action required:** All node operators must upgrade to the T2-compatible release before the activation timestamp.
 
@@ -32,7 +30,7 @@ T2 is Tempo's next network upgrade, building on T1. It introduces  the following
 
 ### TIP-1015: Compound Transfer Policies
 
-**Spec:** [TIP-1015](https://docs.tempo.xyz/protocol/tips/tip-1015)
+**Spec:** [TIP-1015](/protocol/tips/tip-1015)
 
 **TLDR:** Extends TIP-403 policies so token issuers can set different authorization rules for senders, recipients, and mint recipients. Previously a single policy applied to both sides of a transfer.
 
@@ -44,9 +42,9 @@ T2 is Tempo's next network upgrade, building on T1. It introduces  the following
 
 ### TIP-1017: Validator Config V2
 
-**Spec:** [TIP-1017](https://docs.tempo.xyz/protocol/tips/tip-1017)
+**Spec:** [TIP-1017](/protocol/tips/tip-1017)
 
-**Operator guide:** [Validator Config V2](https://docs.tempo.xyz/guide/node/validator-config-v2)
+**Operator guide:** [Validator Config V2](/guide/node/validator-config-v2)
 
 **TLDR:** New precompile for managing consensus validators. Adds Ed25519 signature verification at registration, append-only history, stable validator indices, and fee recipient separation.
 
@@ -54,12 +52,11 @@ T2 is Tempo's next network upgrade, building on T1. It introduces  the following
 
 **What this enables:**
 - **Node operators:** Node operators won't need to do anything for this migration. After the migration, operators can self-service IP updates, key rotation, and ownership transfers.
-- **Fee recipient configuration:** Validators should now configure fee recipients on the validator v2 contract to route block fees to a dedicated treasury address.
 - **Minimal nodes for validators:** Validator v2 unlocks a major innovation: minimal nodes for validators. Today, validators must keep ~64,000 blocks of history to reconstruct validator sets requiring hundreds of GB of storage. V2 eliminates this requirement, letting validators query the set from the latest state only. 
 
 ### TIP-1004: Permit for TIP-20
 
-**Spec:** [TIP-1004](https://docs.tempo.xyz/protocol/tips/tip-1004)
+**Spec:** [TIP-1004](/protocol/tips/tip-1004)
 
 **TLDR:** Adds EIP-2612 compatible `permit()` to all TIP-20 tokens, enabling gasless approvals via off-chain signatures.
 
@@ -70,4 +67,4 @@ T2 is Tempo's next network upgrade, building on T1. It introduces  the following
 
 ### Meta TIP: Security Improvements
 
-[TIP-1036: T2 Hardfork Improvements](https://docs.tempo.xyz/protocol/tips/tip-1036)
+[TIP-1036: T2 Hardfork Improvements](/protocol/tips/tip-1036)
