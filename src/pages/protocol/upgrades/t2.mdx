@@ -38,7 +38,7 @@ T2 is Tempo's next network upgrade, building on T1. It introduces  the following
 
 **Customer use case:** Issuers of regulated or closed-loop tokens need to enforce different rules for senders vs recipients. For example: KYC required to on-ramp into a stablecoin, but anyone in the approved set can spend. Without compound policies, issuers must apply the same restrictions to both sides, which breaks real-world Commerce patterns and Tokenized Asset distribution flows.
 
-**Partner impact:**
+**What this enables:**
 - If you integrate with TIP-403 policies: new `isAuthorizedSender()`, `isAuthorizedRecipient()`, and `isAuthorizedMintRecipient()` functions are available. The existing `isAuthorized()` still works (returns `senderCheck && recipientCheck`).
 - If you issue TIP-20 tokens: You can now create compound policies for use cases like vendor credits, directional KYC, or asymmetric compliance.
 
@@ -52,7 +52,7 @@ T2 is Tempo's next network upgrade, building on T1. It introduces  the following
 
 **Customer use case:** Node operators currently depend on Tempo to make any validator configuration changes. With V2, operators can self-service IP rotations, key rotations, and ownership transfers without waiting on Tempo — reducing operational dependency and enabling faster incident response.
 
-**Partner impact:**
+**What this enables:**
 - **Node operators:** Node operators won't need to do anything for this migration. After the migration, operators can self-service IP updates, key rotation, and ownership transfers.
 - **Fee recipient configuration:** Validators should now configure fee recipients on the validator v2 contract to route block fees to a dedicated treasury address.
 - **Minimal nodes for validators:** Validator v2 unlocks a major innovation: minimal nodes for validators. Today, validators must keep ~64,000 blocks of history to reconstruct validator sets requiring hundreds of GB of storage. V2 eliminates this requirement, letting validators query the set from the latest state only. 
@@ -61,24 +61,13 @@ T2 is Tempo's next network upgrade, building on T1. It introduces  the following
 
 **Spec:** [TIP-1004](https://docs.tempo.xyz/protocol/tips/tip-1004)
 
-**TLDR:** Adds EIP-2612 `permit()` to all TIP-20 tokens, enabling gasless approvals via off-chain signatures.
+**TLDR:** Adds EIP-2612 compatible `permit()` to all TIP-20 tokens, enabling gasless approvals via off-chain signatures.
 
 **Customer use case:** Any Ramp or Commerce platform that sponsors gas for end users needs `permit()` to avoid forcing two separate transactions.
 
-**Partner impact:**
+**What this enables:**
 - Users can now use `permit()` to combine approve + action in a single transaction.
 
-### Meta TIP: Audit & Bug Fixes
+### Meta TIP: Security Improvements
 
-**(WIP)** [TIP-1036: T2 Hardfork Bug Fixes](https://docs.tempo.xyz/protocol/tips/tip-1036)
-
-**PR:** [#3205](https://github.com/tempoxyz/tempo/pull/3205)
-
-**(WIP)** [TIP-1036: T2 Hardfork Bug Fixes](https://docs.tempo.xyz/protocol/tips/tip-1036)
-
-**PR:** [#3205](https://github.com/tempoxyz/tempo/pull/3205)
-
-Some items that may affect partners:
-- If you call AccountKeychain admin functions from a contract, refactor to direct EOA calls.
-- If you submit AA transactions with `fee_payer == sender`, use a separate fee payer account.
-- If you estimate gas for 2D nonce key transactions, update gas estimates (ref [#2533](https://github.com/tempoxyz/tempo/pull/2533)).
+[TIP-1036: T2 Hardfork Improvements](https://docs.tempo.xyz/protocol/tips/tip-1036)
