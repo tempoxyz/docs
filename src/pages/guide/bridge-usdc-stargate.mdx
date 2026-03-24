@@ -7,7 +7,7 @@ import { Tabs, Tab } from 'vocs'
 
 # Bridge USDC via Stargate
 
-[Stargate](https://stargate.finance/) uses [LayerZero](https://layerzero.network) to enable 1:1 USDC bridging between Tempo and other chains. When you bridge USDC to Tempo, Stargate locks your USDC on the source chain and mints **USDC.e** (Bridged USDC) on Tempo.
+[Stargate](https://stargate.finance/) uses [LayerZero](https://layerzero.network) to enable 1&#58;1 USDC bridging between Tempo and other chains. Stargate locks USDC on the source chain and mints **USDC.e** (Bridged USDC) on Tempo, typically in under a minute.
 
 ## Contracts on Tempo
 
@@ -42,73 +42,82 @@ Use the Stargate pool contract on the source chain to bridge USDC to Tempo, and 
 3. Set **Tempo** as the destination chain
 4. Enter the amount, approve, and send
 
-USDC.e arrives in your wallet on Tempo once the LayerZero message is delivered (typically under 2 minutes).
-
 ### Using cast (Foundry)
 
-Bridge USDC from Ethereum to Tempo using `cast send`. This calls `sendToken` on the Stargate pool on the source chain.
+Bridge USDC from Base to Tempo using `cast`. This calls `sendToken` on the Stargate pool on the source chain. This example uses [taxi mode](#bus-vs-taxi-mode) for immediate delivery.
 
-**Step 1 — Quote the fee:**
+#### Step 1 — Get a quote fee estimate from Stargate router
+
+Use the same parameters you will pass to `sendToken`. Returns `(nativeFee, lzTokenFee)`.
+Take the first returned number as `<NATIVE_FEE>`.
 
 ```bash
-# Quote the messaging fee (returns nativeFee, lzTokenFee)
-cast call 0xc026395860Db2d07ee33e05fE50ed7bD583189C7 \
-  "quoteSend((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),bool)((uint256,uint256))" \
-  "(30410,$(cast --to-bytes32 $YOUR_ADDRESS),1000000,990000,0x,0x,0x)" \
+cast call 0x27a16dc786820B16E5c9028b75B99F6f604b5d26 \
+  'quoteSend((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),bool)((uint256,uint256))' \
+  "(30410,$(cast abi-encode 'f(address)' <TEMPO_WALLET_ADDRESS>),<AMOUNT>,<MIN_AMOUNT>,0x,0x,0x)" \
   false \
-  --rpc-url https://eth.llamarpc.com
+  --rpc-url https://mainnet.base.org
 ```
 
-**Step 2 — Approve USDC spend:**
+#### Step 2 — Approve USDC on Base
+
+Approve the Stargate router to spend USDC.
 
 ```bash
-# Approve the Stargate pool to spend your USDC (Ethereum USDC)
-cast send 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 \
-  "approve(address,uint256)" \
-  0xc026395860Db2d07ee33e05fE50ed7bD583189C7 \
-  1000000 \
-  --rpc-url https://eth.llamarpc.com \
+cast send 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 \
+  'approve(address,uint256)' \
+  0x27a16dc786820B16E5c9028b75B99F6f604b5d26 \
+  <AMOUNT> \
+  --rpc-url https://mainnet.base.org \
   --private-key $PRIVATE_KEY
 ```
 
-**Step 3 — Send the bridge transaction:**
+#### Step 3 — Send bridge transaction
 
 ```bash
-# Bridge 1 USDC to Tempo (taxi mode — immediate delivery)
-# Replace $NATIVE_FEE with the nativeFee from the quote
-cast send 0xc026395860Db2d07ee33e05fE50ed7bD583189C7 \
-  "sendToken((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),(uint256,uint256),address)" \
-  "(30410,$(cast --to-bytes32 $YOUR_ADDRESS),1000000,990000,0x,0x,0x)" \
-  "($NATIVE_FEE,0)" \
-  $YOUR_ADDRESS \
-  --value $NATIVE_FEE \
-  --rpc-url https://eth.llamarpc.com \
+cast send 0x27a16dc786820B16E5c9028b75B99F6f604b5d26 \
+  'sendToken((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),(uint256,uint256),address)' \
+  "(30410,$(cast abi-encode 'f(address)' <TEMPO_WALLET_ADDRESS>),<AMOUNT>,<MIN_AMOUNT>,0x,0x,0x)" \
+  "(<NATIVE_FEE>,0)" \
+  <SOURCE_BASE_ADDRESS> \
+  --value <NATIVE_FEE> \
+  --rpc-url https://mainnet.base.org \
   --private-key $PRIVATE_KEY
 ```
 
-:::info
-`amountLD` and `minAmountLD` are in USDC's local decimals (6). `1000000` = 1 USDC. Set `minAmountLD` slightly below `amountLD` to account for Stargate fees (e.g. 1% slippage → `990000`).
-:::
+#### Step 4 — Verify transaction status
+
+Track the bridge with the transaction hash returned by `sendToken`:
+
+```text
+https://scan.layerzero-api.com/v1/messages/tx/<SOURCE_TX_HASH>
+```
+
+Once delivered, view the destination transaction on Tempo:
+
+```text
+https://explore.tempo.xyz/tx/<DESTINATION_TX_HASH>
+```
 
 ### Using TypeScript (viem)
 
 ```typescript
-import { createWalletClient, http, parseUnits, pad } from 'viem'
-import { mainnet } from 'viem/chains'
+import { createWalletClient, createPublicClient, http, parseUnits, pad } from 'viem'
+import { base } from 'viem/chains'
 import { privateKeyToAccount } from 'viem/accounts'
 
 const account = privateKeyToAccount('0x...')
 
 const walletClient = createWalletClient({
   account,
-  chain: mainnet,
+  chain: base,
   transport: http(),
 })
 
-// Stargate pool on Ethereum
-const stargatePool = '0xc026395860Db2d07ee33e05fE50ed7bD583189C7' as const
-// USDC on Ethereum
-const usdc = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' as const
+// Stargate pool on Base
+const stargatePool = '0x27a16dc786820B16E5c9028b75B99F6f604b5d26' as const
+// USDC on Base
+const usdc = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as const
 
 const amount = parseUnits('1', 6) // 1 USDC
 const minAmount = parseUnits('0.99', 6) // 1% slippage tolerance
@@ -201,8 +210,7 @@ const erc20Abi = [
 ] as const
 
 // 1. Quote the fee
-const { createPublicClient } = await import('viem')
-const publicClient = createPublicClient({ chain: mainnet, transport: http() })
+const publicClient = createPublicClient({ chain: base, transport: http() })
 
 const msgFee = await publicClient.readContract({
   address: stargatePool,
@@ -235,41 +243,57 @@ To bridge USDC.e from Tempo back to another chain, call `sendToken` on the **Sta
 
 ### Using cast (Foundry)
 
-```bash
-# Bridge 1 USDC.e from Tempo to Ethereum
-# StargateOFTUSDC on Tempo: 0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392
-# USDC.e on Tempo: 0x20C000000000000000000000b9537d11c60E8b50
+Bridge USDC.e from Tempo to Base using `cast`. This calls `sendToken` on the **StargateOFTUSDC** contract on Tempo. This example uses [taxi mode](#bus-vs-taxi-mode) for immediate delivery.
 
-# Step 1 — Quote the fee (returns fee in stablecoin units, not ETH)
+#### Step 1 — Quote the fee
+
+Use the same parameters you will pass to `sendToken`. Returns `(nativeFee, lzTokenFee)`.
+Take the first returned number as `<NATIVE_FEE>` (in stablecoin units, not ETH).
+
+```bash
 cast call 0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392 \
-  "quoteSend((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),bool)((uint256,uint256))" \
-  "(30101,$(cast --to-bytes32 $YOUR_ADDRESS),1000000,990000,0x,0x,0x)" \
+  'quoteSend((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),bool)((uint256,uint256))' \
+  "(30184,$(cast abi-encode 'f(address)' <DESTINATION_ADDRESS>),<AMOUNT>,<MIN_AMOUNT>,0x,0x,0x)" \
   false \
   --rpc-url https://rpc.tempo.xyz
+```
 
-# Step 2 — Approve USDC.e spend
+#### Step 2 — Approve USDC.e on Tempo
+
+Approve the StargateOFTUSDC contract to spend USDC.e.
+
+```bash
 cast send 0x20C000000000000000000000b9537d11c60E8b50 \
-  "approve(address,uint256)" \
+  'approve(address,uint256)' \
   0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392 \
-  1000000 \
-  --rpc-url https://rpc.tempo.xyz \
-  --private-key $PRIVATE_KEY
-
-# Step 3 — Send (no --value needed on Tempo)
-# $LZ_FEE = nativeFee from the quote step (in stablecoin units)
-# Destination EIDs: Ethereum = 30101, Arbitrum = 30110, Base = 30184, etc.
-cast send 0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392 \
-  "sendToken((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),(uint256,uint256),address)" \
-  "(30101,$(cast --to-bytes32 $YOUR_ADDRESS),1000000,990000,0x,0x,0x)" \
-  "($LZ_FEE,0)" \
-  $YOUR_ADDRESS \
+  <AMOUNT> \
   --rpc-url https://rpc.tempo.xyz \
   --private-key $PRIVATE_KEY
 ```
 
-:::info
-When bridging **from** Tempo, the messaging fee is paid via `LZEndpointDollar` in a TIP-20 stablecoin instead of a native gas token. See [EndpointDollar](#endpointdollar) below.
-:::
+#### Step 3 — Send bridge transaction
+
+No `--value` is needed on Tempo — the messaging fee is paid in a TIP-20 stablecoin via [EndpointDollar](#endpointdollar).
+
+```bash
+cast send 0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392 \
+  'sendToken((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),(uint256,uint256),address)' \
+  "(30184,$(cast abi-encode 'f(address)' <DESTINATION_ADDRESS>),<AMOUNT>,<MIN_AMOUNT>,0x,0x,0x)" \
+  "(<NATIVE_FEE>,0)" \
+  <TEMPO_ADDRESS> \
+  --rpc-url https://rpc.tempo.xyz \
+  --private-key $PRIVATE_KEY
+```
+
+#### Step 4 — Verify transaction status
+
+Track the bridge with the transaction hash returned by `sendToken`:
+
+```text
+https://scan.layerzero-api.com/v1/messages/tx/<SOURCE_TX_HASH>
+```
+
+Once delivered, view the destination transaction on the destination chain explorer.
 
 ### Using TypeScript (viem)
 
@@ -280,33 +304,33 @@ import { privateKeyToAccount } from 'viem/accounts'
 
 const account = privateKeyToAccount('0x...')
 
-const publicClient = createPublicClient({ chain: tempo, transport: http() })
 const walletClient = createWalletClient({
   account,
   chain: tempo,
   transport: http(),
 })
 
+// StargateOFTUSDC on Tempo
 const stargateOFT = '0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392' as const
+// USDC.e on Tempo
 const usdce = '0x20C000000000000000000000b9537d11c60E8b50' as const
 
-const amount = parseUnits('1', 6)
-const minAmount = parseUnits('0.99', 6)
-
-// Use the destination chain's EID
-const dstEid = 30101 // Ethereum (change for other chains)
+const amount = parseUnits('1', 6) // 1 USDC.e
+const minAmount = parseUnits('0.99', 6) // 1% slippage tolerance
 
 const sendParam = {
-  dstEid,
+  dstEid: 30184, // Base
   to: pad(account.address),
   amountLD: amount,
   minAmountLD: minAmount,
   extraOptions: '0x' as const,
   composeMsg: '0x' as const,
-  oftCmd: '0x' as const,
+  oftCmd: '0x' as const, // taxi mode (immediate)
 }
 
 // 1. Quote the fee
+const publicClient = createPublicClient({ chain: tempo, transport: http() })
+
 const msgFee = await publicClient.readContract({
   address: stargateOFT,
   abi: stargateAbi, // same ABI as above
@@ -322,7 +346,7 @@ await walletClient.writeContract({
   args: [stargateOFT, amount],
 })
 
-// 3. Send
+// 3. Send the bridge transaction (no value — fee handled via EndpointDollar)
 await walletClient.writeContract({
   address: stargateOFT,
   abi: stargateAbi,
@@ -330,10 +354,6 @@ await walletClient.writeContract({
   args: [sendParam, msgFee, account.address],
 })
 ```
-
-:::info
-Note that no `value` is passed when sending from Tempo — Tempo has no native gas token. The LayerZero messaging fee is handled automatically via `LZEndpointDollar`.
-:::
 
 ## EndpointDollar
 

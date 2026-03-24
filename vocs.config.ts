@@ -85,10 +85,6 @@ export default defineConfig({
             link: '/guide/getting-funds',
           },
           {
-            text: 'Bridge USDC via Stargate',
-            link: '/guide/bridge-usdc-stargate',
-          },
-          {
             text: 'Create & Use Accounts',
             collapsed: true,
             items: [
@@ -296,6 +292,10 @@ export default defineConfig({
               {
                 text: 'Bridges & Exchanges',
                 link: '/ecosystem/bridges',
+              },
+              {
+                text: 'Bridge USDC via Stargate',
+                link: '/guide/bridge-usdc-stargate',
               },
               {
                 text: 'Data & Analytics',
