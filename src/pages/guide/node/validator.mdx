@@ -16,7 +16,7 @@ All validators have two kinds of keys:
 * signing key - this is an ED25519 keypair used to identify your validator amongst others
 * signing share - this is a share of a BLS12-381 keypair used to sign block notarizations and finalizations
 
-The signing key is static and can only be rotated by removing and re-creating a validator on-chain. The signing share is dynamic and is updated periodically on each DKG ceremony. Once updated, it will be saved to disk. Currently, the DKG ceremony is scheduled to run on-chain every ~3 hours.
+The signing key is static. Pre-T2, it can only be rotated by removing and re-creating a validator on-chain with the Tempo team. Post-T2, [ValidatorConfig V2](/guide/node/validator-config-v2) enables self-service rotation via the `rotateValidator` precompile. The signing share is dynamic and is updated periodically on each DKG ceremony. Once updated, it will be saved to disk. Currently, the DKG ceremony is scheduled to run on-chain every ~3 hours.
 
 ## Generating a signing key
 
@@ -105,7 +105,7 @@ INFO handle_propose{epoch=18 view=387213 parent.view=387212 parent.digest=0x4388
 ```
 
 If you do not see logs like these:
-- please check that your validator is part of the active set, and is both [a player and a dealer](https://docs.tempo.xyz/guide/node/operate-validator#validator-states)
+- please check that your validator is part of the active set, and is both a player and a dealer (see validator states under [V2](/guide/node/validator-config-v2#validator-states) or [V1](/guide/node/validator-config-v1#validator-states))
 - please check that your node is synced up to the [latest block height](https://explorer.tempo.xyz/). 
 - please check that your outgoing IP address matches the one whitelisted on the validator smart contract:
 
