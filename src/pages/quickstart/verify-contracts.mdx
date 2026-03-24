@@ -46,6 +46,7 @@ To verify a contract that's already deployed, use `forge verify-contract`:
 
 ```bash
 forge verify-contract \
+  --rpc-url $TEMPO_RPC_URL \
   --verifier-url https://contracts.tempo.xyz \
   <CONTRACT_ADDRESS> \
   src/MyContract.sol:MyContract

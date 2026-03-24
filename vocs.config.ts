@@ -282,6 +282,10 @@ export default defineConfig({
             link: '/quickstart/verify-contracts',
           },
           {
+            text: 'Bridge USDC via Stargate',
+            link: '/guide/bridge-usdc-stargate',
+          },
+          {
             text: 'Ecosystem',
             collapsed: true,
             items: [
@@ -806,6 +810,7 @@ export default defineConfig({
 
     { text: 'Ecosystem', link: 'https://tempo.xyz/ecosystem' },
     { text: 'Blog', link: 'https://tempo.xyz/blog' },
+    { text: 'Wallet', link: 'https://wallet.tempo.xyz' },
   ],
   redirects: [
     {
