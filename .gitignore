@@ -29,6 +29,9 @@ src/pages.gen.ts
 .env*.local
 src/pages/protocol/tips/tip-*
 
+# Test scratch files
+guides/tmp/
+
 # Playwright
 playwright-report/
 test-results/

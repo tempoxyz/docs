@@ -282,6 +282,10 @@ export default defineConfig({
             link: '/quickstart/verify-contracts',
           },
           {
+            text: 'Bridge USDC via Stargate',
+            link: '/guide/bridge-usdc-stargate',
+          },
+          {
             text: 'Ecosystem',
             collapsed: true,
             items: [
