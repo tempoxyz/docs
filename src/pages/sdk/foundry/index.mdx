@@ -95,7 +95,7 @@ export VERIFIER_URL=https://contracts.tempo.xyz
 
 # Optional: create a new keypair and request some testnet tokens from the faucet.
 cast wallet new
-cast rpc tempo_fundAddress <YOUR_WALLET_ADDRESS> --rpc-url $TEMPO_RPC_URL
+cast rpc tempo_fundAddress <YOUR_WALLET_ADDRESS> --rpc-url https://rpc.moderato.tempo.xyz
 
 # Run all tests on Tempo's testnet
 forge test
@@ -113,6 +113,15 @@ forge create src/Mail.sol:Mail \
   --tempo.fee-token <FEE_TOKEN_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL \
   --interactive \
+  --broadcast \
+  --verify \
+  --constructor-args 0x20c0000000000000000000000000000000000001
+
+# Deploy using an access key (delegated signing)
+forge create src/Mail.sol:Mail \
+  --tempo.access-key $ACCESS_KEY_PRIVATE_KEY \
+  --tempo.root-account $ROOT_ADDRESS \
+  --rpc-url $TEMPO_RPC_URL \
   --broadcast \
   --verify \
   --constructor-args 0x20c0000000000000000000000000000000000001
@@ -244,8 +253,8 @@ cast send 0xAAAAAAAA00000000000000000000000000000000 \
 # Then send using the access key
 cast send <CONTRACT_ADDRESS> 'increment()' \
   --rpc-url $TEMPO_RPC_URL \
-  --access-key $ACCESS_KEY_PRIVATE_KEY \
-  --root-account $ROOT_ADDRESS
+  --tempo.access-key $ACCESS_KEY_PRIVATE_KEY \
+  --tempo.root-account $ROOT_ADDRESS
 ```
 
 ### Local Development with Anvil
@@ -301,6 +310,8 @@ The following flags are available for `cast` and `forge script` for Tempo-specif
 | `--tempo.valid-after <TIMESTAMP>` | Unix timestamp after which tx can execute | `--tempo.valid-after 1704067100` |
 | `--tempo.sponsor-signature <SIG>` | Pre-signed sponsor signature for gasless transactions | `--tempo.sponsor-signature 0x...` |
 | `--tempo.print-sponsor-hash` | Print fee payer signature hash and exit (for sponsor to sign) | `--tempo.print-sponsor-hash` |
+| `--tempo.access-key <KEY>` | Private key for delegated signing via access key | `--tempo.access-key $ACCESS_KEY_PRIVATE_KEY` |
+| `--tempo.root-account <ADDRESS>` | Root account address when using an access key | `--tempo.root-account $ROOT_ADDRESS` |
 
 Ledger and Trezor wallets are not yet compatible with any `--tempo.*` option.
 

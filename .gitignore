@@ -35,3 +35,4 @@ guides/tmp/
 # Playwright
 playwright-report/
 test-results/
+.zed

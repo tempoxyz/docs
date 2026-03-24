@@ -803,7 +803,7 @@ export function animate(
   const map = new Map<number, Item>()
   const get = (i: number, isNote = false) => {
     if (!map.has(i)) map.set(i, { si: i, fade: [], isNote })
-    return map.get(i)!
+    return map.get(i) as Item
   }
 
   svg.querySelectorAll<SVGElement>('[data-step]').forEach((el) => {
