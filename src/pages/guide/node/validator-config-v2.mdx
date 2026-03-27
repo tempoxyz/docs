@@ -100,14 +100,14 @@ The returned `Validator` struct fields are:
 
 If your node's network endpoints change, update them on-chain. The change takes effect at the next finalized block.
 
-Unlike V1, V2 supports asymmetric ingress and egress IPs — they no longer need to share the same address. Both can be updated together or individually by supplying only `--ingress` or `--egress`.
+Unlike V1, V2 supports asymmetric ingress and egress IPs — they no longer need to share the same address. Both can be updated together or individually by supplying only `--ingress` or `--egress`. The values not supplied will pulled from the chain and left unchanged in the transaction that is submitted.
 
 ```bash
 tempo consensus set-validator-ip-address <address | pubkey |index>
   --ingress <NEW_IP>:NEW_PROT>
   --egress <NEW_IP>
   --rpc-url https://rpc.tempo.xyz
-  --private-key <YOUR_VALIDATOR_PRIVATE_KEY>
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
 ```
 
 :::warning
@@ -161,11 +161,23 @@ Rebind your validator entry to a new control address:
 ```bash
 tempo consensus transfer-validator-ownership <address | pubkey | index>
   --rpc-url https://rpc.tempo.xyz \
-  --private-key <YOUR_VALIDATOR_PRIVATE_KEY>
-  --new-private-key <NEW_VALDIATOR_PRIVATE_KEY>
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
+  --new-private-key <PATH_TO_NEW_VALIDATOR_PRIVATE_KEY>
 ```
 
 The new address must not already be used by another active validator.
+
+### Deactivate your validator
+
+Deactivate your validator. Once deactivated, please keep your the node. The validator is only removed from the commitee once reaching the end of an epoch where the DKG was successful, thus the validator is no longer dealt any new shares.
+
+See the [validators-info](#query-active-validators) command which lists active validators. It is safe to shut down the node once the deactivated validator is no longer present in this list.
+
+```bash
+tempo consensus deactivate-validator <address | pubkey | index>
+  --rpc-url https://rpc.tempo.xyz \
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
+```
 
 ## Differences from V1
 
