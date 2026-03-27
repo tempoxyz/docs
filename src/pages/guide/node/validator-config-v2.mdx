@@ -78,7 +78,7 @@ committee members in the next epoch. So adding, deactivating, or rotating valida
 You can query your validator by ethereum address, ed25519 public key, or index:
 
 ```bash
-tempo consensus validator <address | public key | index> --rpc-url https://rpc.tempo.xyz
+tempo consensus validator <address/public_key/index> --rpc-url https://rpc.tempo.xyz
 ```
 
 The returned `Validator` struct fields are:
@@ -103,7 +103,7 @@ If your node's network endpoints change, update them on-chain. The change takes 
 Unlike V1, V2 supports asymmetric ingress and egress IPs — they no longer need to share the same address. Both can be updated together or individually by supplying only `--ingress` or `--egress`. The values not supplied will pulled from the chain and left unchanged in the submitted transaction.
 
 ```bash
-tempo consensus set-validator-ip-address <address | pubkey |index>
+tempo consensus set-validator-ip-address <address/pubkey/index>
   --ingress <NEW_IP>:NEW_PROT>
   --egress <NEW_IP>
   --rpc-url https://rpc.tempo.xyz
@@ -159,7 +159,7 @@ tempo consensus create-add-validator-signature \
 Rebind your validator entry to a new control address:
 
 ```bash
-tempo consensus transfer-validator-ownership <address | pubkey | index>
+tempo consensus transfer-validator-ownership <address/pubkey/index>
   --rpc-url https://rpc.tempo.xyz \
   --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
   --new-private-key <PATH_TO_NEW_VALIDATOR_PRIVATE_KEY>
@@ -174,7 +174,7 @@ Deactivate your validator. Once deactivated, please keep your the node. The vali
 See the [validators-info](#query-active-validators) command which lists active validators. It is safe to shut down the node once the deactivated validator is no longer present in this list.
 
 ```bash
-tempo consensus deactivate-validator <address | pubkey | index>
+tempo consensus deactivate-validator <address/pubkey/index>
   --rpc-url https://rpc.tempo.xyz \
   --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
 ```
