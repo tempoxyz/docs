@@ -100,7 +100,7 @@ The returned `Validator` struct fields are:
 
 If your node's network endpoints change, update them on-chain. The change takes effect at the next finalized block.
 
-Unlike V1, V2 supports asymmetric ingress and egress IPs — they no longer need to share the same address. Both can be updated together or individually by supplying only `--ingress` or `--egress`. The values not supplied will pulled from the chain and left unchanged in the transaction that is submitted.
+Unlike V1, V2 supports asymmetric ingress and egress IPs — they no longer need to share the same address. Both can be updated together or individually by supplying only `--ingress` or `--egress`. The values not supplied will pulled from the chain and left unchanged in the submitted transaction.
 
 ```bash
 tempo consensus set-validator-ip-address <address | pubkey |index>
