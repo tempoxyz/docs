@@ -10,11 +10,15 @@ Each USD TIP-20 on Tempo can choose any other USD TIP-20 as its quote token—th
 
 pathUSD is a USD-denominated stablecoin that can be used as a quote token on Tempo's decentralized exchange. It is the first stablecoin deployed to the chain, and is used as a fallback gas token when the user or validator does not specify a gas token. Use of pathUSD is optional.
 
-### Motivation
+### Issuance & Backing
 
-While on other chains, most liquidity accrues to a few stablecoins, or even one, Tempo allows you to choose which stablecoin to use as your quote token. As one option, you can select pathUSD, a USD-denominated stablecoin. PathUSD is not meant to compete as a consumer-facing stablecoin. Use of pathUSD is optional, and tokens are able to list any other token as their quote token if they choose.
+pathUSD is issued by [Bridge](https://www.bridge.xyz) and is backed 1:1 by USD-denominated reserves. pathUSD can be minted by depositing USDC and redeemed back to USDC through Bridge.
 
-pathUSD can also be accepted as a fee token by validators.
+### Why pathUSD?
+
+Tempo is designed to be neutral across stablecoin issuers. Rather than defaulting to any single issuer's stablecoin as the quote token, pathUSD provides a neutral option that any token can pair against on the native exchange. This ensures no single stablecoin issuer has a privileged position in Tempo's liquidity graph.
+
+pathUSD is not meant to compete as a consumer-facing stablecoin. Use of pathUSD is optional, and tokens are able to list any other token as their quote token if they choose. pathUSD can also be accepted as a fee token by validators.
 
 ### Contract
 
