@@ -55,12 +55,12 @@ As an example, here's Tempo's tokenlist, fetched from [tokenlist.tempo.xyz/list/
 
 Tokens support optional `extensions` for richer metadata:
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `chain` | Yes | Always `"tempo"` |
-| `label` | No | Display label override |
-| `coingeckoId` | Recommended | [CoinGecko API](https://www.coingecko.com) identifier for price mapping |
-| `bridgeInfo` | For bridged tokens | Origin chain and contract info |
+| Field | Description |
+|-------|-------------|
+| `chain` | Always `"tempo"` by convention |
+| `coingeckoId` | [CoinGecko](https://www.coingecko.com) identifier for price mapping |
+| `label` | Display label override (used by the Explorer) |
+| `bridgeInfo` | Origin chain and contract info for bridged tokens |
 
 For **bridged tokens**, include `bridgeInfo` so aggregators like DeFi Llama can automatically map to the canonical asset:
 
