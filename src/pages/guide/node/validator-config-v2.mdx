@@ -174,7 +174,7 @@ Ingress addresses must be unique across all active validators. The transaction w
 
 ### Rotate validator identity
 
-V2 lets you rotate to a new ed25519 key while keeping your validator index stable. This is useful for key rotation or recovery without leaving and re-joining the committee.
+V2 lets you rotate to a new ed25519 key while keeping your validator index stable. This is useful for key rotation or recovery without leaving and re-joining the committee. [Generate a new signing key](#generating-a-signing-key) first.
 
 The simplest way to rotate is using the `tempo` CLI, which handles signature creation and the on-chain transaction in one step:
 
