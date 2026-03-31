@@ -40,24 +40,24 @@ function place(
 **Returns:**
 - `orderId` - Unique identifier for this order
 
-**Example: Place a bid to buy 1000 USDC at $0.9990**
+**Example: Place a bid to buy 1000 USDG at $0.9990**
 ```solidity
 // tick = (0.9990 - 1) * 100_000 = -10
 uint128 orderId = exchange.place(
-    USDC_ADDRESS,
-    1000e6,      // Amount: 1000 USDC
-    true,        // isBid: buying USDC
+    USDG_ADDRESS,
+    1000e6,      // Amount: 1000 USDG
+    true,        // isBid: buying USDG
     -10          // tick: price = $0.9990
 );
 ```
 
-**Example: Place an ask to sell 1000 USDC at $1.0010**
+**Example: Place an ask to sell 1000 USDG at $1.0010**
 ```solidity
 // tick = (1.0010 - 1) * 100_000 = 10
 uint128 orderId = exchange.place(
-    USDC_ADDRESS,
-    1000e6,      // Amount: 1000 USDC
-    false,       // isBid: selling USDC
+    USDG_ADDRESS,
+    1000e6,      // Amount: 1000 USDG
+    false,       // isBid: selling USDG
     10           // tick: price = $1.0010
 );
 ```
@@ -89,8 +89,8 @@ function placeFlip(
 ```solidity
 // Place a bid at $0.9990 that flips to an ask at $1.0010
 uint128 orderId = exchange.placeFlip(
-    USDC_ADDRESS,
-    1000e6,      // Amount: 1000 USDC
+    USDG_ADDRESS,
+    1000e6,      // Amount: 1000 USDG
     true,        // isBid: start as a buy order
     -10,         // tick: buy at $0.9990
     10           // flipTick: sell at $1.0010 after filled
@@ -98,8 +98,8 @@ uint128 orderId = exchange.placeFlip(
 ```
 
 When this order is completely filled:
-1. You buy 1000 USDC at $0.9990
-2. A new order automatically sells 1000 USDC at $1.0010
+1. You buy 1000 USDG at $0.9990
+2. A new order automatically sells 1000 USDG at $1.0010
 3. When that fills, it flips back to a bid at $0.9990
 4. This continues indefinitely, earning the spread each time
 
@@ -136,9 +136,9 @@ Price ticks are limited to ±2% from peg (±2000 ticks). Orders outside this ran
 - **Bid (isBid = true)**: An order to *buy* the token using its quote token
 - **Ask (isBid = false)**: An order to *sell* the token for its quote token
 
-For a USDC/USD pair where USD is the quote:
-- A bid buys USDC with USD at your specified price
-- An ask sells USDC for USD at your specified price
+For a USDG/USD pair where USD is the quote:
+- A bid buys USDG with USD at your specified price
+- An ask sells USDG for USD at your specified price
 
 ## Order Execution Timeline
 

@@ -601,10 +601,10 @@ contract PaymentReceiver {
 If you need to accept payments in a specific stablecoin but receive a different one, use the exchange to swap:
 
 ```ts
-// User sends USDC, but you need USDT
-// Swap USDC to USDT using the exchange
+// User sends USDG, but you need USDT
+// Swap USDG to USDT using the exchange
 const { receipt } = await client.dex.sellSync({
-  tokenIn: usdcAddress,
+  tokenIn: usdgAddress,
   tokenOut: usdtAddress,
   amountIn: receivedAmount,
   minAmountOut: receivedAmount * 99n / 100n, // 1% slippage

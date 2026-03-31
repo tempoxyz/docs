@@ -30,12 +30,12 @@ function swapExactAmountIn(
 **Returns:**
 - `amountOut` - The actual amount of `tokenOut` received
 
-**Example:** Swap exactly 1000 USDC for at least 998 USDT:
+**Example:** Swap exactly 1000 USDG for at least 998 USDT:
 ```solidity
 uint128 amountOut = exchange.swapExactAmountIn(
-    USDC_ADDRESS,
+    USDG_ADDRESS,
     USDT_ADDRESS,
-    1000e6,      // Sell exactly 1000 USDC
+    1000e6,      // Sell exactly 1000 USDG
     998e6        // Receive at least 998 USDT
 );
 ```
@@ -62,13 +62,13 @@ function swapExactAmountOut(
 **Returns:**
 - `amountIn` - The actual amount of `tokenIn` spent
 
-**Example:** Receive exactly 1000 USDT by spending at most 1002 USDC:
+**Example:** Receive exactly 1000 USDT by spending at most 1002 USDG:
 ```solidity
 uint128 amountIn = exchange.swapExactAmountOut(
-    USDC_ADDRESS,
+    USDG_ADDRESS,
     USDT_ADDRESS,
     1000e6,      // Receive exactly 1000 USDT
-    1002e6       // Pay at most 1002 USDC
+    1002e6       // Pay at most 1002 USDG
 );
 ```
 
@@ -102,16 +102,16 @@ Returns how much `tokenIn` you would need to spend to receive a given `amountOut
 
 **Example: Getting a price quote**
 ```solidity
-// Check how much USDT you'd get for 1000 USDC
+// Check how much USDT you'd get for 1000 USDG
 uint128 expectedOut = exchange.quoteSwapExactAmountIn(
-    USDC_ADDRESS,
+    USDG_ADDRESS,
     USDT_ADDRESS,
     1000e6
 );
 
 // Only execute if the price is acceptable
 if (expectedOut >= 998e6) {
-    exchange.swapExactAmountIn(USDC_ADDRESS, USDT_ADDRESS, 1000e6, 998e6);
+    exchange.swapExactAmountIn(USDG_ADDRESS, USDT_ADDRESS, 1000e6, 998e6);
 }
 ```
 

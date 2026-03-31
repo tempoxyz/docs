@@ -243,7 +243,7 @@ validatorTokenOut = userTokenIn × 0.9970
 ```
 
 This means:
-- User pays 1.0 USDC for fees
+- User pays 1.0 USDG for fees
 - Validator receives 0.9970 USDT (if that's their preferred token)
 - The 0.003 (0.3%) difference goes to liquidity providers as a fee
 
@@ -251,13 +251,13 @@ This means:
 
 Here's a complete example of the fee lifecycle:
 
-1. **Alice** wants to send a transaction and pays fees in **USDC** (her preferred token)
+1. **Alice** wants to send a transaction and pays fees in **USDG** (her preferred token)
 2. **Validator** prefers to receive fees in **USDT**
-3. Alice's transaction has a max fee of 1.0 USDC
-4. The FeeManager collects 1.0 USDC from Alice before execution
-5. Transaction executes and uses 0.8 USDC worth of gas
-6. The FeeManager refunds 0.2 USDC to Alice
-7. The Fee AMM immediately swaps 0.8 USDC → 0.7976 USDT (0.8 × 0.9970)
+3. Alice's transaction has a max fee of 1.0 USDG
+4. The FeeManager collects 1.0 USDG from Alice before execution
+5. Transaction executes and uses 0.8 USDG worth of gas
+6. The FeeManager refunds 0.2 USDG to Alice
+7. The Fee AMM immediately swaps 0.8 USDG → 0.7976 USDT (0.8 × 0.9970)
 8. The 0.7976 USDT is added to the validator's accumulated fees
 9. Validator calls `distributeFees()` to claim their accumulated fees
 10. Liquidity providers earn 0.0024 USDT from the 0.3% fee

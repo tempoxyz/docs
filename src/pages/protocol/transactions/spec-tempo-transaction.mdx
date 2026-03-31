@@ -692,7 +692,7 @@ The protocol tracks and enforces spending limits for TIP20 token transfers:
      key_id: keyId,                     // address derived from public key
      expiry: timestamp + 86400,         // 24 hours from now (or 0 for never)
      limits: [
-       { token: USDC_ADDRESS, amount: 1000000000 }, // 1000 USDC (6 decimals)
+       { token: USDG_ADDRESS, amount: 1000000000 }, // 1000 USDG (6 decimals)
        { token: DAI_ADDRESS, amount: 500000000000000000000 }  // 500 DAI (18 decimals)
      ]
    };
@@ -804,8 +804,8 @@ const tx = {
     value: 0,
     input: encodeCall("updateSpendingLimit", [
       keyId,
-      USDC_ADDRESS,
-      2000000000  // New limit: 2000 USDC
+      USDG_ADDRESS,
+      2000000000  // New limit: 2000 USDG
     ])
   }],
   // ... sign with Root Key
@@ -824,7 +824,7 @@ const keyInfo = await precompile.getKey(account, keyId);
 // Returns: { signatureType, keyId, expiry }
 
 // Check remaining spending limit for a token
-const remaining = await precompile.getRemainingLimit(account, keyId, USDC_ADDRESS);
+const remaining = await precompile.getRemainingLimit(account, keyId, USDG_ADDRESS);
 // Returns: uint256 amount remaining
 
 // Get which key signed current transaction (callable from contracts)
