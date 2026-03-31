@@ -106,7 +106,7 @@ To register a new validator, you must provide the following values to the Tempo 
 | **Public key** | `0x`-prefixed 32-byte hex | Your ed25519 identity key. Generate one with `tempo consensus generate-private-key` (see [below](#generating-a-signing-key)). |
 | **Ingress** | `IP:port` | The inbound address other validators use to reach your node. Must be unique across all active validators. |
 | **Egress** | `IP` | The outbound IP address your node uses to connect to other validators. |
-| **Fee recipient** | Ethereum address (`0x…`) | The address that receives transaction fees from blocks your validator proposes. If you are not prepared to accept fees, use `0x0000000000000000000000000000000000000001`. |
+| **Fee recipient** | Ethereum address (`0x…`) | The address that receives transaction fees from blocks your validator proposes. If you are not prepared to accept fees, use `0x0000000000000000000000000000000000000000`. |
 | **Signature** | `0x`-prefixed hex | An ed25519 signature proving you control the signing key. See below. |
 
 #### Generating a signing key
