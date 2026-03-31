@@ -21,9 +21,9 @@ In this guide, we use [Index Supply](https://www.indexsupply.net) as our indexin
 
 Query the best bid and ask prices to calculate the current spread for a token pair.
 
-These examples use the mainnet `USDC.e` orderbook. In the DEX event data, the `token` column stores the traded asset, so each query filters directly on the `USDC.e` token address.
+These examples use the mainnet `USDC.e / pathUSD` orderbook; `pathUSD` is the quote token for `USDC.e` — see [Quote Tokens](/protocol/exchange/quote-tokens).
 
-Find the highest bid prices (buyers) for `USDC.e`. This query filters out fully filled and cancelled orders, groups by price level (tick), and shows the top 5 bid prices with their total liquidity.
+Find the highest bid prices (buyers) for the `USDC.e / pathUSD` book. This query filters out fully filled and cancelled orders, groups by price level (tick), and shows the top 5 bid prices with their total liquidity.
 
 <IndexSupplyQuery
   chainId={4217}
@@ -49,7 +49,7 @@ Find the highest bid prices (buyers) for `USDC.e`. This query filters out fully 
   signatures={["OrderPlaced", "OrderFilled", "OrderCancelled"]}
 />
 
-Find the lowest ask prices (sellers) for `USDC.e`. The spread is the difference between the highest bid and lowest ask price.
+Find the lowest ask prices (sellers) for the `USDC.e / pathUSD` book. The spread is the difference between the highest bid and lowest ask price.
 
 <IndexSupplyQuery
   chainId={4217}
@@ -79,7 +79,7 @@ Find the lowest ask prices (sellers) for `USDC.e`. The spread is the difference 
 
 View aggregated liquidity at each price level to understand the orderbook structure.
 
-This query shows all active `USDC.e` orders, including both regular and flip orders.
+This query shows all active orders in the `USDC.e / pathUSD` book, including both regular and flip orders.
 
 <IndexSupplyQuery
   chainId={4217}
@@ -112,7 +112,7 @@ This query shows all active `USDC.e` orders, including both regular and flip ord
 
 Get detailed information about a specific order including its placement details, fill history, and cancellation status.
 
-This query inspects the details of the most recent `USDC.e` order. It shows when the order was created, at what price (tick), the order size, whether it's a flip order, and who placed it.
+This query inspects the details of the most recent order in the `USDC.e / pathUSD` book. It shows when the order was created, at what price (tick), the order size, whether it's a flip order, and who placed it.
 
 <IndexSupplyQuery
   chainId={4217}
@@ -137,7 +137,7 @@ This query inspects the details of the most recent `USDC.e` order. It shows when
 
 #### Order fill status
 
-Check if recent `USDC.e` orders have been partially or fully filled. This query shows up to 5 fill events for the `USDC.e` market, including the amount filled in each transaction and whether it was a partial fill.
+Check if recent `USDC.e` orders have been partially or fully filled. This query shows up to 5 fill events for the `USDC.e / pathUSD` market, including the amount filled in each transaction and whether it was a partial fill.
 
 <IndexSupplyQuery
   chainId={4217}
@@ -159,7 +159,7 @@ Check if recent `USDC.e` orders have been partially or fully filled. This query 
 
 #### Cancelled orders
 
-Check if a `USDC.e` order has been cancelled. This query returns a recent `USDC.e` order that was explicitly cancelled by the maker before being fully filled.
+Check if a `USDC.e` order has been cancelled. This query returns a recent order from the `USDC.e / pathUSD` book that was explicitly cancelled by the maker before being fully filled.
 
 <IndexSupplyQuery
   chainId={4217}
@@ -180,7 +180,7 @@ Check if a `USDC.e` order has been cancelled. This query returns a recent `USDC.
 
 View the last prices a token traded at to understand recent market activity.
 
-This query joins order fill events with their corresponding placement details to show the price tick and amount for recent `USDC.e` trades.
+This query joins order fill events with their corresponding placement details to show the price tick and amount for recent trades in the `USDC.e / pathUSD` book.
 
 <IndexSupplyQuery
   chainId={4217}
