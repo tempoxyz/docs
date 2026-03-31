@@ -235,6 +235,10 @@ export default defineConfig({
                 link: '/guide/machine-payments/pay-as-you-go',
               },
               {
+                text: 'Accept card payments',
+                link: '/guide/machine-payments/card-payments',
+              },
+              {
                 text: 'Accept streamed payments',
                 link: '/guide/machine-payments/streamed-payments',
               },
