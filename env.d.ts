@@ -2,6 +2,7 @@ interface EnvironmentVariables {
   readonly NODE_ENV: 'development' | 'production' | 'test'
 
   readonly VITE_BASE_URL: string
+  readonly VITE_INDEXSUPPLY_API_KEY?: [REDACTED:api-key]
   readonly VITE_POSTHOG_KEY: string
   readonly VITE_POSTHOG_HOST: string
   readonly VITE_TEMPO_ENV: 'localnet' | 'devnet' | 'moderato'

@@ -43,6 +43,7 @@ export function toAddressValue(value: RowValue | null | undefined): Address.Addr
 }
 
 type RunQueryOptions = {
+  chainId?: number
   signatures?: string[]
 }
 
@@ -53,6 +54,7 @@ export async function runIndexSupplyQuery(query: string, options: RunQueryOption
       'content-type': 'application/json',
     },
     body: JSON.stringify({
+      chainId: options.chainId,
       query: query.replace(/\s+/g, ' ').trim(),
       signatures: options.signatures,
     }),

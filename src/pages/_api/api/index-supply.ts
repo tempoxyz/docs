@@ -1,6 +1,7 @@
-import { tempo } from 'viem/chains'
+import { tempo, tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
 
 type QueryRequest = {
+  chainId?: number
   query: string
   signatures?: string[]
 }
@@ -35,9 +36,19 @@ export async function POST(request: Request): Promise<Response> {
     )
   }
 
-  const apiKey = import.meta.env.VITE_INDEXSUPPLY_API_KEY
+  if (body.chainId !== undefined && (!Number.isInteger(body.chainId) || body.chainId <= 0)) {
+    return Response.json(
+      { error: 'Invalid request: chainId must be a positive integer' },
+      { status: 400, headers: corsHeaders },
+    )
+  }
+
+  const apiKey =
+    process.env.INDEXSUPPLY_API_KEY ||
+    import.meta.env.INDEXSUPPLY_API_KEY ||
+    import.meta.env.VITE_INDEXSUPPLY_API_KEY
   if (!apiKey) {
-    console.error('VITE_INDEXSUPPLY_API_KEY is not configured')
+    console.error('INDEXSUPPLY_API_KEY is not configured')
     return Response.json(
       { error: 'Server configuration error: API key not found' },
       { status: 500, headers: corsHeaders },
@@ -51,7 +62,7 @@ export async function POST(request: Request): Promise<Response> {
 
     const signatures = body.signatures && body.signatures.length > 0 ? body.signatures : ['']
 
-    const chainId = tempo.id
+    const chainId = body.chainId ?? getDefaultChainId()
     const chainCursor = `${chainId}-0`
 
     const response = await fetch(url.toString(), {
@@ -129,4 +140,17 @@ function cors(origin: string | null): Record<string, string> {
     headers['Access-Control-Allow-Origin'] = origin
 
   return headers
+}
+
+function getDefaultChainId() {
+  switch (import.meta.env.VITE_TEMPO_ENV) {
+    case 'localnet':
+      return tempoLocalnet.id
+    case 'devnet':
+      return tempoDevnet.id
+    case 'mainnet':
+      return tempo.id
+    default:
+      return tempoModerato.id
+  }
 }
