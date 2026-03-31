@@ -19,7 +19,7 @@ export function ConnectWallet({ showAddChain = true }: { showAddChain?: boolean 
     return (
       <div className="flex items-center text-[14px] -tracking-[2%]">No browser wallets found.</div>
     )
-  if (!address || connector?.id === 'xyz.tempo')
+  if (!address || connector?.id === 'xyz.tempo.webauthn')
     return (
       <div className="flex gap-2">
         {injectedConnectors.map((connector) => (
