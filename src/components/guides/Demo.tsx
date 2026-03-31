@@ -369,14 +369,32 @@ export function Login() {
           Check prompt
         </Button>
       ) : (
-        <Button
-          variant="accent"
-          className="font-normal text-[14px] -tracking-[2%]"
-          onClick={() => connect.connect({ connector })}
-          type="button"
-        >
-          Sign in
-        </Button>
+        <div className="flex gap-1">
+          <Button
+            variant="accent"
+            className="font-normal text-[14px] -tracking-[2%]"
+            onClick={() => connect.connect({ connector })}
+            type="button"
+          >
+            Sign in
+          </Button>
+          <Button
+            variant="default"
+            className="font-normal text-[14px] -tracking-[2%]"
+            onClick={() =>
+              connect.connect({
+                connector,
+                capabilities: {
+                  name: 'Tempo Docs',
+                  method: 'register',
+                },
+              })
+            }
+            type="button"
+          >
+            Sign up
+          </Button>
+        </div>
       )}
     </div>
   )
