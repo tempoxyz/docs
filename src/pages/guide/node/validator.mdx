@@ -18,22 +18,6 @@ All validators have two kinds of keys:
 
 The signing key is static. Pre-T2, it can only be rotated by removing and re-creating a validator on-chain with the Tempo team. Post-T2, [ValidatorConfig V2](/guide/node/validator-config-v2) enables self-service rotation via the `rotateValidator` precompile. The signing share is dynamic and is updated periodically on each DKG ceremony. Once updated, it will be saved to disk. Currently, the DKG ceremony is scheduled to run on-chain every ~3 hours.
 
-## Generating a signing key
-
-You can generate an ED25519 keypair using the following command:
-
-```bash
-tempo consensus generate-private-key --output <path>
-```
-
-Once the private key is generated, you can calculate/verify the public key by running:
-
-```bash
-tempo consensus calculate-public-key --private-key <path>
-```
-
-The public key should match the output of the `generate-private-key` command.
-
 ## Running the validator
 
 The process for running a validator node is very similar to [running a full node](/guide/node/rpc). 
