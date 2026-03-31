@@ -57,7 +57,7 @@ const EVM_TABLE_COLUMNS = {
 } as const
 
 type IndexSupplyQueryProps = {
-  chainId?: number
+  chainId: number
   signatures?: string[]
   query?: string
   title?: string
@@ -133,7 +133,7 @@ function renderCellValue(cell: string | number | boolean | null): React.ReactNod
   )
 }
 
-export function IndexSupplyQuery(props: IndexSupplyQueryProps = {}) {
+export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
   const isReadOnly = props.query !== undefined
 
   const allSignatures = React.useMemo(() => getAllSignatures(), [])

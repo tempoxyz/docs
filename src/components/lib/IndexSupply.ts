@@ -43,11 +43,11 @@ export function toAddressValue(value: RowValue | null | undefined): Address.Addr
 }
 
 type RunQueryOptions = {
-  chainId?: number
+  chainId: number
   signatures?: string[]
 }
 
-export async function runIndexSupplyQuery(query: string, options: RunQueryOptions = {}) {
+export async function runIndexSupplyQuery(query: string, options: RunQueryOptions) {
   const response = await fetch('/api/index-supply', {
     method: 'POST',
     headers: {
