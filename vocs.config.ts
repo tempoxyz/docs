@@ -678,14 +678,13 @@ export default defineConfig({
           },
           {
             text: 'Running a validator',
-            link: '/guide/node/validator',
-          },
-          {
-            text: 'Operating your validator',
-            collapsed: true,
             items: [
               {
                 text: 'Overview',
+                link: '/guide/node/validator',
+              },
+              {
+                text: 'Operation',
                 link: '/guide/node/operate-validator',
               },
               {
