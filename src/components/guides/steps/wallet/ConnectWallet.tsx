@@ -31,7 +31,7 @@ export function ConnectWallet(props: DemoStepProps) {
   const isSupported = chains.some((c) => c.id === chain?.id)
   const [copied, copyToClipboard] = useCopyToClipboard()
 
-  const walletConnection = connections.find((c) => c.connector.id !== 'webAuthn')
+  const walletConnection = connections.find((c) => c.connector.id !== 'xyz.tempo')
   const walletAddress = walletConnection?.accounts[0]
   const walletConnector = walletConnection?.connector
   const hasNonWebAuthnWallet = Boolean(walletAddress)
