@@ -107,8 +107,8 @@ export function Container(
   const connections = useConnections()
   const disconnect = useDisconnect()
   const restart = React.useCallback(() => {
-    disconnect.disconnect()
-  }, [disconnect.disconnect, disconnect])
+    disconnect.mutate()
+  }, [disconnect.mutate, disconnect])
 
   const balanceAddress = React.useMemo(() => {
     if (props.footerVariant !== 'balances') return address
@@ -377,7 +377,7 @@ export function Login() {
           <Button
             variant="accent"
             className="font-normal text-[14px] -tracking-[2%]"
-            onClick={() => connect.connect({ connector })}
+            onClick={() => connect.mutate({ connector })}
             type="button"
           >
             Sign in
@@ -386,7 +386,7 @@ export function Login() {
             variant="default"
             className="font-normal text-[14px] -tracking-[2%]"
             onClick={() =>
-              connect.connect({
+              connect.mutate({
                 connector,
                 capabilities: {
                   label: 'Tempo Docs',
@@ -434,7 +434,7 @@ export function Logout() {
         variant="destructive"
         className="font-normal text-[14px] -tracking-[2%]"
         onClick={() => {
-          disconnect.disconnect({ connector })
+          disconnect.mutate({ connector })
           trackButtonClick('Sign out', 'destructive')
         }}
         type="button"
