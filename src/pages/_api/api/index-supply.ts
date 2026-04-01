@@ -1,6 +1,5 @@
-import { tempo } from 'viem/chains'
-
 type QueryRequest = {
+  chainId: number
   query: string
   signatures?: string[]
 }
@@ -35,9 +34,16 @@ export async function POST(request: Request): Promise<Response> {
     )
   }
 
-  const apiKey = import.meta.env.VITE_INDEXSUPPLY_API_KEY
+  if (!Number.isInteger(body.chainId) || body.chainId <= 0) {
+    return Response.json(
+      { error: 'Invalid request: chainId is required and must be a positive integer' },
+      { status: 400, headers: corsHeaders },
+    )
+  }
+
+  const apiKey = process.env.INDEXSUPPLY_API_KEY
   if (!apiKey) {
-    console.error('VITE_INDEXSUPPLY_API_KEY is not configured')
+    console.error('INDEXSUPPLY_API_KEY is not configured')
     return Response.json(
       { error: 'Server configuration error: API key not found' },
       { status: 500, headers: corsHeaders },
@@ -51,8 +57,7 @@ export async function POST(request: Request): Promise<Response> {
 
     const signatures = body.signatures && body.signatures.length > 0 ? body.signatures : ['']
 
-    const chainId = tempo.id
-    const chainCursor = `${chainId}-0`
+    const chainCursor = `${body.chainId}-0`
 
     const response = await fetch(url.toString(), {
       method: 'POST',

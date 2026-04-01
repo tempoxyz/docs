@@ -57,6 +57,7 @@ const EVM_TABLE_COLUMNS = {
 } as const
 
 type IndexSupplyQueryProps = {
+  chainId: number
   signatures?: string[]
   query?: string
   title?: string
@@ -132,7 +133,7 @@ function renderCellValue(cell: string | number | boolean | null): React.ReactNod
   )
 }
 
-export function IndexSupplyQuery(props: IndexSupplyQueryProps = {}) {
+export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
   const isReadOnly = props.query !== undefined
 
   const allSignatures = React.useMemo(() => getAllSignatures(), [])
@@ -207,7 +208,10 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps = {}) {
     setResult(null)
 
     try {
-      const options = signatures.length > 0 ? { signatures } : {}
+      const options = {
+        chainId: props.chainId,
+        ...(signatures.length > 0 ? { signatures } : {}),
+      }
       const queryResult = await runIndexSupplyQuery(queryToRun, options)
       setResult(queryResult)
     } catch (err) {
@@ -230,7 +234,10 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps = {}) {
       setError(null)
       setResult(null)
 
-      runIndexSupplyQuery(queryToRun, signatures.length > 0 ? { signatures } : {})
+      runIndexSupplyQuery(queryToRun, {
+        chainId: props.chainId,
+        ...(signatures.length > 0 ? { signatures } : {}),
+      })
         .then((queryResult) => {
           setResult(queryResult)
         })
