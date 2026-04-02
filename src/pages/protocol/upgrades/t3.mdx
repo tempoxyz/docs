@@ -47,7 +47,7 @@ T3 introduces one breaking change for access-key integrations.
 
 ### Breaking change for access-key integrations
 
-**What stays the same:** Existing authorized access keys continue to work after T3 activates.
+**What stays the same:** Existing authorized access keys continue to work after T3 activates. Tempo Transactions that provision a new access key through `key_authorization` also continue to work.
 
 **What changes:** T3 replaces the legacy `AccountKeychain.authorizeKey(...)` ABI with the new TIP-1011 authorization format. This only affects flows that create access keys onchain. Access keys created through `KeyAuthorizations` in Tempo Txs don't break.
 
@@ -57,10 +57,9 @@ T3 introduces one breaking change for access-key integrations.
 
 Affected flows include:
 
-- creating a new access key
-- authorizing an access key during onboarding or setup
-- rotating or re-authorizing a key if that path still uses the old ABI
-- any SDK or script wrapper that still encodes the legacy `authorizeKey` call
+- direct onchain calls to `AccountKeychain.authorizeKey(...)`
+- key rotation or re-authorization flows that still submit the legacy `authorizeKey(...)` calldata
+- SDKs, backend services, or admin scripts that still encode the legacy `authorizeKey(...)` call
 
 ## Compatible SDK releases
 
