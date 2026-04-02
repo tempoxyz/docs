@@ -521,6 +521,10 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
+                text: 'T3',
+                link: '/protocol/upgrades/t3',
+              },
+              {
                 text: 'T2',
                 link: '/protocol/upgrades/t2',
               },
