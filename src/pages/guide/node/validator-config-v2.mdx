@@ -96,6 +96,17 @@ The returned `Validator` struct fields are:
 
 ## Operator guide
 
+### Update the Fee Recipient
+
+The fee recipient used by your validator when constructing block proposals is managed on-chain. This can be updated and takes effect on the next finalized block
+
+```bash
+tempo consensus set-validator-fee-recipient <address/pubkey/index>
+  --fee-recipient <ETHEREUM_ADDRESS>
+  --rpc-url https://rpc.tempo.xyz
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
+```
+
 ### Update IP addresses
 
 If your node's network endpoints change, update them on-chain. The change takes effect at the next finalized block.
