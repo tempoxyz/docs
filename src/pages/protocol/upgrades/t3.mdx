@@ -1,0 +1,74 @@
+---
+title: T3 Network Upgrade
+description: Details and timeline for the T3 network upgrade including enhanced access key permissions, signature verification precompile, and virtual deposit forwarding addresses.
+---
+
+# T3 Network Upgrade
+
+This page summarises new features included in the T3 network upgrade.
+
+## Timeline
+
+| Network | Date | Timestamp |
+|---------|------|-----------|
+| Moderato (testnet) | Monday, 21st April 4am CET | TBD |
+| Presto (mainnet) | Sunday, 27th April 4am CET | TBD |
+
+Partners should upgrade nodes to the T3-compatible release before the moderato activation timestamp.
+
+## Overview
+
+T3 is Tempo's next network upgrade, building on [T2](/protocol/upgrades/t2). It introduces the following new features:
+
+- Enhanced access key permissions with periodic spending limits and destination scoping ([TIP-1011](/protocol/tips/tip-1011))
+- Signature verification precompile for secp256k1, P256, and WebAuthn ([TIP-1020](/protocol/tips/tip-1020))
+- Virtual addresses for TIP-20 deposit forwarding ([TIP-1022](/protocol/tips/tip-1022))
+- and audit-driven bug fixes and gas correctness improvements (TIP-1038).
+
+**Action required:** All node operators must upgrade to the T3-compatible release before the activation timestamp.
+
+## Feature TIPs
+
+### TIP-1011: Enhanced Access Keys
+
+**Spec:** [TIP-1011](/protocol/tips/tip-1011)
+
+**TLDR:** Adds periodic spending limits and destination address scoping (restrict keys to specific contracts/selectors) to Access Keys — the core primitive for "Connected Apps" on the Wallet and subscription models.
+
+**Customer use case:** Any app that needs to charge users on a recurring schedule: subscriptions, SaaS, payroll, API billing. Stablecoin subscriptions are already happening — Stripe now supports recurring stablecoin billing, and Bridge handles payroll through virtual accounts. TIP-1011 brings this pattern natively to Tempo: a user authorizes "up to 10 USDC/month to contract X" and the permission auto-renews without re-approval.
+
+**What this enables:**
+- Stripe already supports recurring stablecoin billing — merchants charge 15 USDC/month and the subscription renews automatically. TIP-1011 enables this pattern natively on Tempo through periodic access keys.
+- Payroll contracts can withdraw salaries monthly without re-approval each cycle using periodic budget keys.
+- No breaking changes — existing access keys and integrations work as before.
+
+### TIP-1020: Signature Verification Precompile
+
+**Spec:** [TIP-1020](/protocol/tips/tip-1020)
+
+**TLDR:** Adds a new precompile that verifies all Tempo signature types (secp256k1, P256, WebAuthn) on-chain and returns the recovered signer address, giving contracts a native way of verifying signatures without custom verifier contracts.
+
+**Customer use case:** Seed phrases are still the biggest UX barrier for mainstream wallet adoption, so wallets increasingly want passkeys and biometrics to feel like a normal app. Tempo Wallet already uses passkey-based auth, and the Account SDK builds on that to give developers a drop-in passkey wallet. TIP-1020 is what carries that UX through to the contract layer: a user can approve something with Face ID or a fingerprint, and the contract can verify that approval on-chain.
+
+**What this enables:**
+- Passkey signatures verified on-chain. Contracts can now verify P256 and WebAuthn signatures natively. Before this, only secp256k1 was available via `ecrecover`, and anything else required deploying custom verifier contracts.
+- One interface for all signature types: `recover()` and `verify()` handle secp256k1, P256, and WebAuthn. No need for separate verification logic per type.
+- Contract-level proof for passkey-approved actions. A subscription contract using Access Keys can verify that the passkey holder actually approved a recurring charge — the signature proof carries all the way to the contract layer.
+
+### TIP-1022: Virtual Addresses for TIP-20 Deposit Forwarding
+
+**Spec:** [TIP-1022](/protocol/tips/tip-1022)
+
+**TLDR:** TIP-1022 gives partners per-user deposit addresses without requiring a real on-chain wallet per user. Deposits sent to these virtual addresses are forwarded at the protocol level to a registered master wallet — this removes sweeps, avoids the 200k gas cost of new account creation, and keeps deposit infrastructure much simpler at scale.
+
+**Customer use case:** Businesses that need to generate deposit addresses per customer but don't want to manage complex hot/cold wallet routing infrastructure — this includes exchanges, ramps, payment processors, and custodians.
+
+**What this enables:**
+- Exchanges can create a deposit address per customer; deposits land in the treasury directly without the need for sweeps.
+- Ramps can tell which customer a deposit came from using the user tag in the address.
+- Payment processors can spin up millions of deposit addresses without gas costs or chain bloat.
+- TIP-20 only: non-TIP-20 tokens sent to a virtual address may be lost.
+
+### Meta TIP: Security Improvements
+
+TIP-1038: T3 Security Hardening
