@@ -1,0 +1,70 @@
+---
+title: Pay for Data Enrichment and Lead Generation
+description: Enrich contacts, find emails, profile companies, and generate leads using Apollo, Hunter, Clado, and more via MPP on Tempo.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Pay for data enrichment and lead generation
+
+Let your agents enrich contacts, find emails, profile companies, and search LinkedIn — pay per lookup with stablecoins on Tempo. No API keys, no monthly minimums, no seat-based pricing.
+
+## The problem
+
+Sales and marketing data APIs charge monthly subscriptions with per-seat pricing, even when usage is sporadic. An agent that enriches 50 leads one week and zero the next still pays the same monthly fee. Each provider requires its own account, API key, and billing setup.
+
+## How MPP solves it
+
+With MPP, your agent pays per enrichment request. Look up a company, enrich a contact, verify an email — each operation is a single paid HTTP request. No contracts, no minimums, no wasted spend during quiet periods.
+
+## Available services
+
+| Provider | Capabilities | Service URL |
+|---|---|---|
+| [Apollo](https://apollo.mpp.paywithlocus.com) | 275M+ contacts, company enrichment, lead search | `apollo.mpp.paywithlocus.com` |
+| [Hunter](https://hunter.mpp.paywithlocus.com) | Email finding, verification, company enrichment | `hunter.mpp.paywithlocus.com` |
+| [Clado](https://clado.mpp.paywithlocus.com) | People search, LinkedIn enrichment, deep research | `clado.mpp.paywithlocus.com` |
+| [Company Enrichment](https://abstract-company-enrichment.mpp.paywithlocus.com) | Company data from domain name | `abstract-company-enrichment.mpp.paywithlocus.com` |
+| [Email Reputation](https://abstract-email-reputation.mpp.paywithlocus.com) | Email reputation and risk scoring | `abstract-email-reputation.mpp.paywithlocus.com` |
+| [BuiltWith](https://builtwith.mpp.paywithlocus.com) | Technology profiling for 100M+ websites | `builtwith.mpp.paywithlocus.com` |
+
+## Try it
+
+```bash
+# Install Tempo CLI + wallet
+curl -L https://tempo.xyz/install | bash && tempo add request && tempo wallet login
+
+# Enrich a company via Apollo
+tempo request apollo.mpp.paywithlocus.com/v1/organizations/enrich \
+  -d '{"domain": "tempo.xyz"}'
+```
+
+## Prompt your agent
+
+```
+Use apollo.mpp.paywithlocus.com to enrich company data via Tempo.
+Pay per lookup with stablecoins — no API key needed.
+```
+
+## Next steps
+
+<Cards>
+  <Card
+    icon="lucide:credit-card"
+    title="Accept one-time payments"
+    description="Build a payment-gated enrichment API"
+    to="/guide/machine-payments/one-time-payments"
+  />
+  <Card
+    icon="lucide:bot"
+    title="Agent quickstart"
+    description="Set up your agent to discover and pay for services"
+    to="/guide/machine-payments/agent"
+  />
+  <Card
+    icon="lucide:globe"
+    title="Browse all services"
+    description="85+ MPP-enabled services in the directory"
+    to="https://mpp.dev/services"
+  />
+</Cards>

@@ -1,0 +1,66 @@
+---
+title: Pay for Object Storage and Git Repos
+description: Store files and create Git repositories using MPP with stablecoin payments on Tempo — no cloud accounts required.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Pay for object storage and Git repos
+
+Let your agents store files, upload objects, and create Git repositories — pay per operation with stablecoins on Tempo. No AWS accounts, no access keys, no billing dashboards.
+
+## The problem
+
+Cloud storage requires account creation, IAM configuration, and billing setup before an agent can store a single byte. Even "simple" object storage like S3 requires access keys, bucket policies, and region selection. For agents that need temporary or task-specific storage, the overhead of cloud account provisioning is disproportionate to the need.
+
+## How MPP solves it
+
+With MPP, your agent pays per upload or per repo creation using stablecoins. The storage service publishes its pricing via the `402` Challenge, the agent pays, and the operation completes. No cloud credentials, no IAM roles.
+
+## Available services
+
+| Provider | Capabilities | Service URL |
+|---|---|---|
+| [Object Storage](https://storage.mpp.tempo.xyz) | S3/R2-compatible storage, dynamic per-size pricing | `storage.mpp.tempo.xyz` |
+| [Code Storage](https://codestorage.mpp.tempo.xyz) | Paid Git repo creation, authenticated clone URLs | `codestorage.mpp.tempo.xyz` |
+
+## Try it
+
+```bash
+# Install Tempo CLI + wallet
+curl -L https://tempo.xyz/install | bash && tempo add request && tempo wallet login
+
+# Upload a file to object storage
+tempo request storage.mpp.tempo.xyz/upload \
+  -F "file=@document.pdf"
+```
+
+## Prompt your agent
+
+```
+Use storage.mpp.tempo.xyz to upload files via Tempo.
+Pay per upload with stablecoins — no cloud account needed.
+```
+
+## Next steps
+
+<Cards>
+  <Card
+    icon="lucide:credit-card"
+    title="Accept one-time payments"
+    description="Build a payment-gated storage service"
+    to="/guide/machine-payments/one-time-payments"
+  />
+  <Card
+    icon="lucide:server"
+    title="Server quickstart"
+    description="Add payment gating to your own storage API"
+    to="/guide/machine-payments/server"
+  />
+  <Card
+    icon="lucide:globe"
+    title="Browse all services"
+    description="85+ MPP-enabled services in the directory"
+    to="https://mpp.dev/services"
+  />
+</Cards>

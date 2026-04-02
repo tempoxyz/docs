@@ -1,0 +1,69 @@
+---
+title: Pay for Browser Automation and Web Scraping
+description: Run headless browsers, solve CAPTCHAs, and scrape web pages using Browserbase, 2Captcha, and Oxylabs via MPP on Tempo.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Pay for browser automation and web scraping
+
+Let your agents run headless browser sessions, solve CAPTCHAs, and scrape web pages with geo-targeting — pay per task with stablecoins on Tempo. No API keys, no browser infrastructure to manage.
+
+## The problem
+
+Browser automation at scale requires managing headless browser infrastructure, proxy networks, and CAPTCHA-solving services — each with separate accounts, API keys, and billing. Agents that need to interact with the web face a fragmented stack of tools, each requiring its own integration.
+
+## How MPP solves it
+
+With MPP, your agent pays per browser session, per page scrape, or per CAPTCHA solve using stablecoins on Tempo. The agent sends a request, the service returns its price via a `402` Challenge, the agent pays, and the work is done. No infrastructure setup, no API key management.
+
+## Available services
+
+| Provider | Capabilities | Service URL |
+|---|---|---|
+| [Browserbase](https://mpp.browserbase.com) | Headless browser sessions, web search, page fetching | `mpp.browserbase.com` |
+| [2Captcha](https://twocaptcha.mpp.tempo.xyz) | reCAPTCHA, Turnstile, hCaptcha, image captchas | `twocaptcha.mpp.tempo.xyz` |
+| [Oxylabs](https://oxylabs.mpp.tempo.xyz) | Web scraping with geo-targeting and JS rendering | `oxylabs.mpp.tempo.xyz` |
+| [Firecrawl](https://firecrawl.mpp.tempo.xyz) | Web crawling and structured data extraction | `firecrawl.mpp.tempo.xyz` |
+| [Diffbot](https://diffbot.mpp.paywithlocus.com) | Article, product, and discussion extraction | `diffbot.mpp.paywithlocus.com` |
+
+## Try it
+
+```bash
+# Install Tempo CLI + wallet
+curl -L https://tempo.xyz/install | bash && tempo add request && tempo wallet login
+
+# Scrape a page via Oxylabs
+tempo request oxylabs.mpp.tempo.xyz/v1/queries \
+  -d '{"source": "universal", "url": "https://example.com"}'
+```
+
+## Prompt your agent
+
+```
+Use mpp.browserbase.com to run headless browser sessions via Tempo.
+Pay per session with stablecoins — no account needed.
+```
+
+## Next steps
+
+<Cards>
+  <Card
+    icon="lucide:credit-card"
+    title="Accept one-time payments"
+    description="Build a payment-gated scraping API"
+    to="/guide/machine-payments/one-time-payments"
+  />
+  <Card
+    icon="lucide:bot"
+    title="Agent quickstart"
+    description="Set up your agent to discover and pay for services"
+    to="/guide/machine-payments/agent"
+  />
+  <Card
+    icon="lucide:globe"
+    title="Browse all services"
+    description="85+ MPP-enabled services in the directory"
+    to="https://mpp.dev/services"
+  />
+</Cards>
