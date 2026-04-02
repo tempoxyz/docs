@@ -75,26 +75,10 @@ committee members in the next epoch. So adding, deactivating, or rotating valida
 
 ### Look up your validator
 
-You can query your validator by address, public key, or index:
+You can query your validator by ethereum address, ed25519 public key, or index:
 
 ```bash
-# By address
-cast call 0xCCCCCCCC00000000000000000000000000000001 \
-  "validatorByAddress(address)(bytes32,address,string,string,uint64,uint64,uint64,address)" \
-  <YOUR_VALIDATOR_ADDRESS> \
-  --rpc-url https://rpc.tempo.xyz
-
-# By public key
-cast call 0xCCCCCCCC00000000000000000000000000000001 \
-  "validatorByPublicKey(bytes32)(bytes32,address,string,string,uint64,uint64,uint64,address)" \
-  <YOUR_PUBLIC_KEY> \
-  --rpc-url https://rpc.tempo.xyz
-
-# By index
-cast call 0xCCCCCCCC00000000000000000000000000000001 \
-  "validatorByIndex(uint64)(bytes32,address,string,string,uint64,uint64,uint64,address)" \
-  <INDEX> \
-  --rpc-url https://rpc.tempo.xyz
+tempo consensus validator <address/public_key/index> --rpc-url https://rpc.tempo.xyz
 ```
 
 The returned `Validator` struct fields are:
@@ -112,23 +96,30 @@ The returned `Validator` struct fields are:
 
 ## Operator guide
 
+### Update the Fee Recipient
+
+The fee recipient used by your validator when constructing block proposals is managed on-chain. This can be updated and takes effect on the next finalized block
+
+```bash
+tempo consensus set-validator-fee-recipient <address/pubkey/index>
+  --fee-recipient <ETHEREUM_ADDRESS>
+  --rpc-url https://rpc.tempo.xyz
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
+```
+
 ### Update IP addresses
 
 If your node's network endpoints change, update them on-chain. The change takes effect at the next finalized block.
 
-Unlike V1, V2 supports asymmetric ingress and egress IPs — they no longer need to share the same address. If you only want to update one, pass the current value for the other.
+Unlike V1, V2 supports asymmetric ingress and egress IPs — they no longer need to share the same address. Both can be updated together or individually by supplying only `--ingress` or `--egress`. The values not supplied will pulled from the chain and left unchanged in the submitted transaction.
 
 ```bash
-cast send 0xCCCCCCCC00000000000000000000000000000001 \
-  "setIpAddresses(uint64,string,string)" \
-  <YOUR_VALIDATOR_INDEX> \
-  "<NEW_IP>:<NEW_PORT>" \
-  "<NEW_EGRESS_IP>" \
-  --rpc-url https://rpc.tempo.xyz \
-  --private-key <YOUR_VALIDATOR_PRIVATE_KEY>
+tempo consensus set-validator-ip-address <address/pubkey/index>
+  --ingress <NEW_IP>:NEW_PROT>
+  --egress <NEW_IP>
+  --rpc-url https://rpc.tempo.xyz
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
 ```
-
-`<NEW_IP>:<NEW_PORT>` and `<NEW_EGRESS_IP>` may remain unchanged if you only need to update one of the two.
 
 :::warning
 Ingress addresses must be unique across all active validators. The transaction will revert if another active validator already uses the same `IP:port`.
@@ -179,15 +170,25 @@ tempo consensus create-add-validator-signature \
 Rebind your validator entry to a new control address:
 
 ```bash
-cast send 0xCCCCCCCC00000000000000000000000000000001 \
-  "transferValidatorOwnership(uint64,address)" \
-  <YOUR_VALIDATOR_INDEX> \
-  <NEW_ADDRESS> \
+tempo consensus transfer-validator-ownership <address/pubkey/index>
   --rpc-url https://rpc.tempo.xyz \
-  --private-key <YOUR_VALIDATOR_PRIVATE_KEY>
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
+  --new-private-key <PATH_TO_NEW_VALIDATOR_PRIVATE_KEY>
 ```
 
 The new address must not already be used by another active validator.
+
+### Deactivate your validator
+
+Deactivate your validator. Once deactivated, please keep your the node. The validator is only removed from the commitee once reaching the end of an epoch where the DKG was successful, thus the validator is no longer dealt any new shares.
+
+See the [validators-info](#query-active-validators) command which lists active validators. It is safe to shut down the node once the deactivated validator is no longer present in this list.
+
+```bash
+tempo consensus deactivate-validator <address/pubkey/index>
+  --rpc-url https://rpc.tempo.xyz \
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
+```
 
 ## Differences from V1
 
