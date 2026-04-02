@@ -77,9 +77,6 @@ Tempo's broader tooling ecosystem is available in [Developer tools](/quickstart/
 Versions will be added here once a T3-compatible release has been published for each SDK.
 
 ## Related docs
-
-- [Account Keychain precompile](/protocol/transactions/AccountKeychain)
-- [Predeployed contracts](/quickstart/predeployed-contracts)
 - Virtual addresses guide: coming soon
 - Subscription and recurring-permissions guide: coming soon
 
@@ -87,40 +84,12 @@ Versions will be added here once a T3-compatible release has been published for 
 
 ### TIP-1011: Enhanced Access Key Permissions
 
-**Spec:** [TIP-1011](/protocol/tips/tip-1011)
-
-**TLDR:** Adds periodic spending limits and call scoping to access keys. This lets users authorize patterns such as "up to 10 USDC per month" or "only call this contract for this recipient."
-
-**Customer use case:** Recurring billing, subscriptions, payroll, and app-specific permissions all become easier to implement without repeated approvals.
-
-**Integrator note:** Existing authorized access keys remain valid, but any flow that authorizes or re-authorizes a key must move to the new TIP-1011 ABI after activation.
+[TIP-1011](/protocol/tips/tip-1011) adds periodic spending limits and call scoping to access keys, including restrictions on which contracts a key can call and, for common token flows, which recipient it can target. This gives wallets, account SDKs, and apps a safer way to offer delegated permissions for recurring billing, subscription renewals, payroll, connected-app approvals, or agent budgets without asking the user to approve every transaction manually. For existing partners, previously authorized access keys continue to work after activation, but any flow that creates, rotates, or re-authorizes a key must move to the new TIP-1011 ABI, and access-key transactions can no longer be used for contract creation.
 
 ### TIP-1020: Signature Verification Precompile
 
-**Spec:** [TIP-1020](/protocol/tips/tip-1020)
-
-**TLDR:** Adds a single precompile for verifying secp256k1, P256, and WebAuthn signatures onchain.
-
-**Customer use case:** Contracts can support passkeys, multisigs, governance approvals, and subscription flows without deploying custom verifier contracts for each signature type.
-
-**Integrator note:** Keychain signatures still need `AccountKeychain` for key resolution. This precompile covers the underlying signature schemes, not the full keychain authorization flow.
+[TIP-1020](/protocol/tips/tip-1020) adds a single precompile for verifying secp256k1, P256, and WebAuthn signatures onchain. This gives smart contract teams, wallet builders, and account integrators a standard verification surface for passkey wallets, multisigs, governance approvals, subscription authorization, and other signature-driven flows without deploying and maintaining custom verifier contracts for each signature type. This change is additive for existing partners: nothing breaks if you keep your current verifier setup, but teams that want simpler integrations or forward-compatible support for Tempo signature types can adopt the precompile. Keychain signatures still need `AccountKeychain` for key resolution, so this precompile covers the underlying signature schemes rather than the full keychain authorization flow.
 
 ### TIP-1022: Virtual Addresses for TIP-20 Deposit Forwarding
 
-**Spec:** [TIP-1022](/protocol/tips/tip-1022)
-
-**TLDR:** Lets partners issue per-user deposit addresses that forward TIP-20 deposits to a registered master wallet at the protocol level.
-
-**Customer use case:** Exchanges, ramps, custodians, and payment processors can support large-scale deposit infrastructure without sweep transactions or per-user onchain wallets.
-
-**Integrator note:** Forwarding applies to TIP-20 transfer paths. Explorers, indexers, and backend systems should treat forwarded deposits as deposits to the registered master wallet.
-
-### T3 hardening and gas correctness fixes
-
-**Reference:** TIP-1038
-
-**TLDR:** T3 includes a set of security hardening and gas correctness fixes that ship alongside the new feature work.
-
-**Customer use case:** Most users will experience this as improved reliability and safer execution rather than a new integration surface.
-
-**Partner impact:** All node operators should treat the T3-compatible release as required infrastructure work, even if their application does not use access keys, signature verification, or virtual addresses directly.
+[TIP-1022](/protocol/tips/tip-1022) lets partners issue per-user deposit addresses that forward TIP-20 deposits to a registered master wallet at the protocol level. This is useful for exchanges, ramps, custodians, and payment processors that want one deposit address per customer for reconciliation, attribution, or account crediting, but do not want to maintain sweep jobs or fund separate onchain wallets for every user. For existing partners, nothing changes unless you adopt virtual addresses, but teams that do should update explorers, indexers, and backend systems to treat forwarded deposits as deposits to the registered master wallet. Forwarding applies only to TIP-20 transfer paths.
