@@ -1,0 +1,70 @@
+---
+title: Pay for Maps, Geocoding, and Location Data
+description: Access Google Maps, Mapbox, weather, and flight data via MPP with stablecoin payments on Tempo — no API keys required.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Pay for maps, geocoding, and location data
+
+Let your agents geocode addresses, get directions, check weather, and track flights — pay per request with stablecoins on Tempo. No Google Cloud accounts, no Mapbox tokens, no API keys.
+
+## The problem
+
+Location APIs require cloud platform accounts with billing verification before returning data. Google Maps requires a Google Cloud project with a credit card. Mapbox requires a developer account with access tokens. Weather and flight APIs have their own signup flows. For agents that need location data as part of a larger workflow, this credential overhead is a barrier.
+
+## How MPP solves it
+
+With MPP, your agent pays per geocode, per route, or per weather query using stablecoins. No cloud accounts, no access tokens. The agent makes a request, the service returns its price, the agent pays, and the data arrives.
+
+## Available services
+
+| Provider | Capabilities | Service URL |
+|---|---|---|
+| [Google Maps](https://googlemaps.mpp.tempo.xyz) | Geocoding, directions, places, routes, weather | `googlemaps.mpp.tempo.xyz` |
+| [Mapbox](https://mapbox.mpp.paywithlocus.com) | Geocoding, directions, isochrones, static maps | `mapbox.mpp.paywithlocus.com` |
+| [OpenWeather](https://openweather.mpp.paywithlocus.com) | Current weather, forecasts, air quality, alerts | `openweather.mpp.paywithlocus.com` |
+| [StableTravel](https://stabletravel.dev) | Flights, hotels, activities, transfers, tracking | `stabletravel.dev` |
+| [FlightAPI](https://flightapi.mpp.tempo.xyz) | Flight prices, tracking, airport schedules | `flightapi.mpp.tempo.xyz` |
+| [IPinfo](https://ipinfo.mpp.paywithlocus.com) | IP geolocation, ASN, privacy detection | `ipinfo.mpp.paywithlocus.com` |
+
+## Try it
+
+```bash
+# Install Tempo CLI + wallet
+curl -L https://tempo.xyz/install | bash && tempo add request && tempo wallet login
+
+# Geocode an address via Google Maps
+tempo request googlemaps.mpp.tempo.xyz/maps/api/geocode/json \
+  -d '{"address": "1600 Amphitheatre Parkway, Mountain View, CA"}'
+```
+
+## Prompt your agent
+
+```
+Use googlemaps.mpp.tempo.xyz to geocode addresses via Tempo.
+Pay per request with stablecoins — no API key needed.
+```
+
+## Next steps
+
+<Cards>
+  <Card
+    icon="lucide:credit-card"
+    title="Accept one-time payments"
+    description="Build a payment-gated location API"
+    to="/guide/machine-payments/one-time-payments"
+  />
+  <Card
+    icon="lucide:bot"
+    title="Agent quickstart"
+    description="Set up your agent to discover and pay for services"
+    to="/guide/machine-payments/agent"
+  />
+  <Card
+    icon="lucide:globe"
+    title="Browse all services"
+    description="85+ MPP-enabled services in the directory"
+    to="https://mpp.dev/services"
+  />
+</Cards>

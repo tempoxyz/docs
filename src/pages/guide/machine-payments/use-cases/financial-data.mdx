@@ -1,0 +1,69 @@
+---
+title: Pay for Financial and Market Data
+description: Access stock prices, forex rates, SEC filings, crypto data, and economic indicators via MPP with stablecoin payments on Tempo.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Pay for financial and market data
+
+Access real-time stock prices, forex rates, crypto market data, SEC filings, and economic indicators — pay per request with stablecoins on Tempo. No API keys, no subscriptions, no billing accounts.
+
+## The problem
+
+Financial data is fragmented across dozens of providers, each with its own API key, pricing tier, and billing cycle. Agents that need multi-source data — stock prices from one provider, SEC filings from another, crypto data from a third — face credential sprawl and unpredictable monthly bills. Free tiers are limited, and most providers require credit cards before returning a single data point.
+
+## How MPP solves it
+
+With MPP, your agent pays per data request using stablecoins on Tempo. No signup, no API keys. Point your agent at any MPP-enabled financial data provider, and it handles the rest: price discovery via the `402` Challenge, payment via a TIP-20 transfer, and data delivery in the same response.
+
+## Available services
+
+| Provider | Data | Service URL |
+|---|---|---|
+| [Alpha Vantage](https://alphavantage.mpp.paywithlocus.com) | Stocks, forex, crypto, commodities, technicals | `alphavantage.mpp.paywithlocus.com` |
+| [CoinGecko](https://coingecko.mpp.paywithlocus.com) | Crypto prices, market cap, exchanges, trending | `coingecko.mpp.paywithlocus.com` |
+| [EDGAR (SEC)](https://edgar.mpp.paywithlocus.com) | Company filings, XBRL financials, full-text search | `edgar.mpp.paywithlocus.com` |
+| [EDGAR Full-Text](https://edgar-search.mpp.paywithlocus.com) | 10-K, 10-Q, 8-K, proxy statement search | `edgar-search.mpp.paywithlocus.com` |
+| [Exchange Rates](https://abstract-exchange-rates.mpp.paywithlocus.com) | Live and historical FX rates for 150+ currencies | `abstract-exchange-rates.mpp.paywithlocus.com` |
+
+## Try it
+
+```bash
+# Install Tempo CLI + wallet
+curl -L https://tempo.xyz/install | bash && tempo add request && tempo wallet login
+
+# Get stock data via Alpha Vantage
+tempo request alphavantage.mpp.paywithlocus.com/query \
+  -d '{"function": "TIME_SERIES_DAILY", "symbol": "AAPL"}'
+```
+
+## Prompt your agent
+
+```
+Use edgar.mpp.paywithlocus.com to search SEC filings via Tempo.
+Pay per query with stablecoins — no API key needed.
+```
+
+## Next steps
+
+<Cards>
+  <Card
+    icon="lucide:credit-card"
+    title="Accept one-time payments"
+    description="Build a payment-gated financial data API"
+    to="/guide/machine-payments/one-time-payments"
+  />
+  <Card
+    icon="lucide:bot"
+    title="Agent quickstart"
+    description="Set up your agent to discover and pay for services"
+    to="/guide/machine-payments/agent"
+  />
+  <Card
+    icon="lucide:globe"
+    title="Browse all services"
+    description="85+ MPP-enabled services in the directory"
+    to="https://mpp.dev/services"
+  />
+</Cards>

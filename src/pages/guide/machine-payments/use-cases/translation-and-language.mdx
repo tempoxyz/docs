@@ -1,0 +1,67 @@
+---
+title: Pay for Translation and Language Services
+description: Translate text, transcribe audio, and process language using DeepL, Deepgram, and other MPP services with stablecoin payments on Tempo.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Pay for translation and language services
+
+Let your agents translate text across 30+ languages, transcribe audio, generate speech, and analyze sentiment — pay per request with stablecoins on Tempo.
+
+## The problem
+
+Language APIs require separate developer accounts for each provider, with usage tied to monthly subscription tiers. An agent that needs to translate a document, transcribe a call, and generate a voiceover must manage three sets of credentials and billing cycles. Most providers don't offer true pay-per-use pricing.
+
+## How MPP solves it
+
+With MPP, your agent pays per translation, per transcription, or per TTS request using stablecoins. One Tempo wallet works across all language service providers. The agent pays only for what it uses — no monthly commitments, no unused credits.
+
+## Available services
+
+| Provider | Capabilities | Service URL |
+|---|---|---|
+| [DeepL](https://deepl.mpp.paywithlocus.com) | 30+ languages, professional quality translation | `deepl.mpp.paywithlocus.com` |
+| [Deepgram](https://deepgram.mpp.paywithlocus.com) | Nova-3 transcription, Aura-2 TTS, sentiment | `deepgram.mpp.paywithlocus.com` |
+| [OpenAI](https://openai.mpp.tempo.xyz) | Whisper transcription, TTS | `openai.mpp.tempo.xyz` |
+
+## Try it
+
+```bash
+# Install Tempo CLI + wallet
+curl -L https://tempo.xyz/install | bash && tempo add request && tempo wallet login
+
+# Translate text via DeepL
+tempo request deepl.mpp.paywithlocus.com/v2/translate \
+  -d '{"text": ["Hello, world!"], "target_lang": "DE"}'
+```
+
+## Prompt your agent
+
+```
+Use deepl.mpp.paywithlocus.com to translate text via Tempo.
+Pay per request with stablecoins — no API key needed.
+```
+
+## Next steps
+
+<Cards>
+  <Card
+    icon="lucide:credit-card"
+    title="Accept one-time payments"
+    description="Build a payment-gated translation API"
+    to="/guide/machine-payments/one-time-payments"
+  />
+  <Card
+    icon="lucide:bot"
+    title="Agent quickstart"
+    description="Set up your agent to discover and pay for services"
+    to="/guide/machine-payments/agent"
+  />
+  <Card
+    icon="lucide:globe"
+    title="Browse all services"
+    description="85+ MPP-enabled services in the directory"
+    to="https://mpp.dev/services"
+  />
+</Cards>

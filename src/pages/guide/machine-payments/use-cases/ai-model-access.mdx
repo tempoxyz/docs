@@ -1,0 +1,74 @@
+---
+title: Pay for AI Models Per Request
+description: Let your agents call OpenAI, Anthropic, Gemini, Mistral, and other LLMs without API keys using MPP stablecoin payments on Tempo.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Pay for AI models per request
+
+Give your agents access to any LLM — OpenAI, Anthropic, Gemini, DeepSeek, Mistral, and more — without managing API keys, billing accounts, or usage limits. MPP lets agents pay per token with stablecoins on Tempo, and the model provider gets paid instantly.
+
+## The problem
+
+Every LLM provider requires a separate API key, billing account, and credit card on file. For a single developer this is manageable. For a fleet of autonomous agents, it's a bottleneck: each agent needs its own credentials, each provider has different billing cycles, and rate limits are tied to account tiers rather than willingness to pay.
+
+## How MPP solves it
+
+With MPP, your agent holds a stablecoin balance on Tempo and pays per request. No signup, no API keys, no invoices. The agent discovers the model's price via the `402` Challenge, pays with a stablecoin transfer or session voucher, and gets the response — all in a single HTTP round-trip.
+
+**Tempo Sessions** are ideal for LLM access. The agent opens a payment channel once, then signs off-chain vouchers for each chunk of tokens received. The model provider verifies vouchers in microseconds — no blockchain calls during inference — and settles in batch later. This makes per-token billing practical without adding latency.
+
+## Available services
+
+| Provider | Models | Service URL |
+|---|---|---|
+| [OpenAI](https://openai.mpp.tempo.xyz) | GPT-4o, o3, DALL·E, Whisper | `openai.mpp.tempo.xyz` |
+| [Anthropic](https://anthropic.mpp.tempo.xyz) | Claude Sonnet, Opus, Haiku | `anthropic.mpp.tempo.xyz` |
+| [Google Gemini](https://gemini.mpp.tempo.xyz) | Gemini, Veo video, image gen | `gemini.mpp.tempo.xyz` |
+| [DeepSeek](https://deepseek.mpp.paywithlocus.com) | DeepSeek-V3, R1 reasoning | `deepseek.mpp.paywithlocus.com` |
+| [Mistral](https://mistral.mpp.paywithlocus.com) | Large, Codestral, Pixtral | `mistral.mpp.paywithlocus.com` |
+| [OpenRouter](https://openrouter.mpp.tempo.xyz) | 100+ models, unified API | `openrouter.mpp.tempo.xyz` |
+| [Grok](https://grok.mpp.tempo.xyz) | xAI chat, search, code exec | `grok.mpp.tempo.xyz` |
+| [Perplexity](https://perplexity.mpp.paywithlocus.com) | Sonar search + grounding | `perplexity.mpp.paywithlocus.com` |
+
+## Try it
+
+```bash
+# Install Tempo CLI + wallet
+curl -L https://tempo.xyz/install | bash && tempo add request && tempo wallet login
+
+# Call OpenAI with pay-per-request — no API key needed
+tempo request openai.mpp.tempo.xyz/v1/chat/completions \
+  -d '{"model": "gpt-4o", "messages": [{"role": "user", "content": "Hello"}]}'
+```
+
+## Prompt your agent
+
+```
+Use openai.mpp.tempo.xyz to call GPT-4o via Tempo.
+Pay per request with stablecoins — no API key needed.
+```
+
+## Next steps
+
+<Cards>
+  <Card
+    icon="lucide:repeat"
+    title="Accept pay-as-you-go payments"
+    description="Build session-based billing for your own LLM API"
+    to="/guide/machine-payments/pay-as-you-go"
+  />
+  <Card
+    icon="lucide:book-open"
+    title="Tempo Sessions"
+    description="How payment channels enable per-token billing"
+    to="https://mpp.dev/payment-methods/tempo/session"
+  />
+  <Card
+    icon="lucide:globe"
+    title="Browse all services"
+    description="85+ MPP-enabled services in the directory"
+    to="https://mpp.dev/services"
+  />
+</Cards>
