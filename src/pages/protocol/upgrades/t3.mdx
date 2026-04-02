@@ -7,7 +7,7 @@ description: Details and timeline for the T3 network upgrade, including enhanced
 
 This page summarizes the features, partner impact, and breaking changes included in the T3 network upgrade.
 
-:::warning[T3 is not live yet]
+:::info[T3 is not live yet]
 The features described on this page are scheduled for T3 and are not active on Moderato or Presto yet. They only become live once the T3 activation timestamps are reached.
 :::
 
@@ -28,7 +28,7 @@ T3 is Tempo's next network upgrade. It introduces the following changes:
 - Virtual addresses for TIP-20 deposit forwarding ([TIP-1022](/protocol/tips/tip-1022))
 - Security hardening and gas correctness fixes (TIP-1038)
 
-**Action required:** All node operators must upgrade to the T3-compatible release before the activation timestamp.
+**Action required for integrators:** Partners that create or update access keys should upgrade to a T3-compatible SDK release before activation.
 
 ## Partner impact
 
@@ -36,7 +36,7 @@ T3 is Tempo's next network upgrade. It introduces the following changes:
 |------|-------------------|---------|
 | Access keys | Wallets, account SDKs, and apps using connected apps or subscriptions | Existing authorized access keys remain valid for delegated transaction flows. T3 adds optional periodic limits and call scoping, bans contract creation from access-key transactions, and changes the authorization ABI used to create or rotate keys. |
 | Signature verification precompile | Smart contract teams, account integrators, and wallet SDKs | Contracts can verify secp256k1, P256, and WebAuthn signatures through one precompile instead of custom verifier contracts. |
-| Virtual addresses | Exchanges, ramps, custodians, and payment processors | Partners can generate per-user TIP-20 deposit addresses that forward to a registered master wallet. Explorers and indexers should display forwarded deposits correctly. |
+| Virtual addresses | Exchanges, ramps, custodians, payment processors, explorers, and indexers | Partners can generate per-user TIP-20 deposit addresses that forward to a registered master wallet. Explorers and indexers should display and attribute forwarded deposits correctly. |
 | Node upgrades | Node operators, RPC providers, and infra teams | T3 also includes security hardening and gas correctness fixes. All operators should roll out the T3-compatible release before activation, even if they do not plan to use the new features directly. |
 
 ## Breaking changes
@@ -92,4 +92,4 @@ Versions will be added here once a T3-compatible release has been published for 
 
 ### TIP-1022: Virtual Addresses for TIP-20 Deposit Forwarding
 
-[TIP-1022](/protocol/tips/tip-1022) lets partners issue per-user deposit addresses that forward TIP-20 deposits to a registered master wallet at the protocol level. This is useful for exchanges, ramps, custodians, and payment processors that want one deposit address per customer for reconciliation, attribution, or account crediting, but do not want to maintain sweep jobs or fund separate onchain wallets for every user. For existing partners, nothing changes unless you adopt virtual addresses, but teams that do should update explorers, indexers, and backend systems to treat forwarded deposits as deposits to the registered master wallet. Forwarding applies only to TIP-20 transfer paths.
+[TIP-1022](/protocol/tips/tip-1022) lets partners issue per-user deposit addresses that forward TIP-20 deposits to a registered master wallet at the protocol level. This is useful for exchanges, ramps, custodians, and payment processors that want one deposit address per customer for reconciliation, attribution, or account crediting, but do not want to maintain sweep jobs or fund separate onchain wallets for every user. For existing partners, nothing changes unless you adopt virtual addresses, but any explorer, indexer, or backend system that surfaces TIP-20 deposit activity should handle forwarded deposits correctly. Teams that adopt virtual addresses should treat those forwarded deposits as deposits to the registered master wallet. Forwarding applies only to TIP-20 transfer paths.
