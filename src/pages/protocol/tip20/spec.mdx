@@ -212,6 +212,37 @@ interface ITIP20 {
     function setRoleAdmin(bytes32 role, bytes32 adminRole) external;
     
     // =========================================================================
+    //                     EIP-2612 Permit (TIP-1004)
+    // =========================================================================
+
+    /// @notice Approves a spender via an off-chain signature (EIP-2612)
+    /// @param owner The token owner who signed the permit
+    /// @param spender The address being approved
+    /// @param value The allowance amount
+    /// @param deadline The timestamp after which the signature expires
+    /// @param v ECDSA recovery byte (must be 27 or 28; 0/1 is not normalized)
+    /// @param r ECDSA signature component
+    /// @param s ECDSA signature component
+    function permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external;
+
+    /// @notice Returns the current nonce for an owner (incremented on each permit)
+    /// @param owner The address to query
+    /// @return The current nonce
+    function nonces(address owner) external view returns (uint256);
+
+    /// @notice Returns the EIP-712 domain separator for this token
+    /// @return The domain separator hash (computed dynamically using block.chainid)
+    function DOMAIN_SEPARATOR() external view returns (bytes32);
+
+    // =========================================================================
     //                            System Functions
     // =========================================================================
     
@@ -344,6 +375,12 @@ interface ITIP20 {
     /// @notice The token operation is blocked because the contract is currently paused
     error ContractPaused();
 
+    /// @notice The permit signature has expired (block.timestamp > deadline)
+    error PermitExpired();
+
+    /// @notice The recovered signer does not match the permit owner
+    error InvalidSignature();
+
     /// @notice The spender does not have enough allowance for the attempted transfer
     error InsufficientAllowance();
 
@@ -423,6 +460,11 @@ The implementation must validate that the new quote token is a TIP-20 token, mat
 :::note
 While quote tokens can be changed, choose carefully as the update process requires careful coordination with the DEX.
 :::
+
+## Permit (TIP-1004)
+TIP-20 tokens support [EIP-2612](https://eips.ethereum.org/EIPS/eip-2612) `permit`, added in the [T2 network upgrade](/protocol/upgrades/t2). A token owner signs an EIP-712 typed message off-chain authorizing a spender, and any third party can submit that signature on-chain — combining approve and action into a single transaction without the owner paying gas.
+
+The `DOMAIN_SEPARATOR` is computed dynamically on every call using `block.chainid`, so it remains correct after a chain fork. Each owner has a monotonically increasing `nonce` to prevent replay. Only `v = 27` or `v = 28` is accepted; `v = 0` or `v = 1` is intentionally **not** normalized (see [TIP-1004](/protocol/tips/tip-1004) for rationale).
 
 ## Pause Controls
 Pause controls `pause` and `unpause` govern all transfer operations and reward related flows. When paused, transfers and memo transfers halt, but administrative and configuration functions remain allowed. The `paused()` getter reflects the current state and must be checked by all affected entrypoints.
