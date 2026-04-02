@@ -1,0 +1,339 @@
+---
+title: Bridge via Relay
+description: Bridge tokens to and from Tempo using Relay. Includes supported token discovery, curl commands, TypeScript examples with viem, and status tracking.
+---
+
+# Bridge via Relay
+
+[Relay](https://relay.link/) is a cross-chain payments network powered by a solver that fills bridge requests instantly. Users deposit on the source chain and receive funds on the destination chain within seconds - no lock-and-mint or messaging protocol required.
+
+Tempo's Relay chain ID is **`4217`**.
+
+## Contracts on Tempo
+
+| Contract | Address |
+|----------|---------|
+| **ERC20Router** | [`0xb92fe925dc43a0ecde6c8b1a2709c170ec4fff4f`](https://explore.tempo.xyz/address/0xb92fe925dc43a0ecde6c8b1a2709c170ec4fff4f) |
+| **ApprovalProxy** | [`0xccc88a9d1b4ed6b0eaba998850414b24f1c315be`](https://explore.tempo.xyz/address/0xccc88a9d1b4ed6b0eaba998850414b24f1c315be) |
+
+## Supported tokens
+
+Query the Relay chains API to see which tokens currently support bridging on Tempo:
+
+```bash
+curl -s "https://api.relay.link/chains" | jq '.chains[] | select(.id == 4217) | .erc20Currencies[] | select(.supportsBridging == true) | {symbol, name, address, decimals}'
+```
+
+The list of supported tokens changes over time as Relay adds new routes. Always check the API for the latest availability.
+
+## How Relay works
+
+Relay uses an intent-based model with three steps:
+
+1. **Quote** - Request a quote from the Relay API specifying origin chain, destination chain, currencies, and amount. The API returns ready-to-sign transaction data.
+2. **Execute** - Submit the transaction to the source chain. The user deposits funds into Relay's depository contract.
+3. **Fill** - A Relay solver detects the deposit and fills the request on the destination chain, typically within seconds.
+
+For ERC-20 tokens, the quote response includes any required approval steps automatically.
+
+## Bridge to Tempo
+
+### Using the Relay app
+
+1. Go to [relay.link/bridge](https://relay.link/bridge)
+2. Select your source chain and token
+3. Set **Tempo** as the destination chain and choose the destination token
+4. Enter the amount and confirm the transaction
+
+### Using curl + cast (Foundry)
+
+This example bridges USDC.e (Bridged USDC) from Base to Tempo. Replace the currency addresses and chain IDs for other tokens or routes.
+
+#### Step 1 - Get a quote
+
+Replace `<YOUR_ADDRESS>` with your wallet address and `<AMOUNT>` with the amount in base units (e.g. `1000000` for 1 USDC.e with 6 decimals).
+
+```bash
+curl -X POST "https://api.relay.link/quote/v2" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user": "<YOUR_ADDRESS>",
+    "originChainId": 8453,
+    "destinationChainId": 4217,
+    "originCurrency": "<ORIGIN_TOKEN_ADDRESS>",
+    "destinationCurrency": "<DESTINATION_TOKEN_ADDRESS>",
+    "amount": "<AMOUNT>",
+    "tradeType": "EXACT_INPUT"
+  }'
+```
+
+The response contains a `steps` array with transaction data. Save the `requestId` from the step for tracking.
+
+#### Step 2 - Approve token (if required)
+
+If the quote response includes an approval step, approve the Relay contract to spend your tokens. The approval target address is provided in the quote response's step data.
+
+```bash
+cast send <TOKEN_ADDRESS> \
+  'approve(address,uint256)' \
+  <APPROVAL_TARGET> \
+  <AMOUNT> \
+  --rpc-url https://mainnet.base.org \
+  --private-key $PRIVATE_KEY
+```
+
+#### Step 3 - Submit the deposit transaction
+
+Use the `to`, `data`, and `value` fields from the quote response's transaction step:
+
+```bash
+cast send <TO> \
+  <DATA> \
+  --value <VALUE> \
+  --rpc-url https://mainnet.base.org \
+  --private-key $PRIVATE_KEY
+```
+
+#### Step 4 - Track status
+
+Poll the status endpoint with the `requestId` from the quote response:
+
+```bash
+curl "https://api.relay.link/intents/status/v3?requestId=<REQUEST_ID>"
+```
+
+Status values: `waiting` -> `depositing` -> `pending` -> `success`.
+
+Once complete, view the destination transaction on Tempo:
+
+```text
+https://explore.tempo.xyz/tx/<DESTINATION_TX_HASH>
+```
+
+### Using TypeScript (viem)
+
+```typescript
+import { createWalletClient, createPublicClient, http } from 'viem'
+import { base } from 'viem/chains'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const account = privateKeyToAccount('0x...')
+
+const walletClient = createWalletClient({
+  account,
+  chain: base,
+  transport: http(),
+})
+
+const publicClient = createPublicClient({
+  chain: base,
+  transport: http(),
+})
+
+// 1. Get a quote from Relay
+const quoteRes = await fetch('https://api.relay.link/quote/v2', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    user: account.address,
+    originChainId: 8453, // Base
+    destinationChainId: 4217, // Tempo
+    originCurrency: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC on Base
+    destinationCurrency: '0x20C000000000000000000000b9537d11c60E8b50', // USDC.e on Tempo
+    amount: '1000000', // 1 USDC (6 decimals)
+    tradeType: 'EXACT_INPUT',
+  }),
+})
+
+const quote = await quoteRes.json()
+
+// 2. Execute each step (approval + deposit)
+for (const step of quote.steps) {
+  for (const item of step.items) {
+    if (step.kind === 'transaction') {
+      const hash = await walletClient.sendTransaction({
+        to: item.data.to,
+        data: item.data.data,
+        value: BigInt(item.data.value || '0'),
+      })
+
+      // Wait for confirmation
+      await publicClient.waitForTransactionReceipt({ hash })
+    }
+  }
+}
+
+// 3. Poll for completion
+const requestId = quote.steps[0].requestId
+
+const pollStatus = async () => {
+  while (true) {
+    const statusRes = await fetch(
+      `https://api.relay.link/intents/status/v3?requestId=${requestId}`
+    )
+    const status = await statusRes.json()
+
+    if (status.status === 'success') {
+      console.log('Bridge complete:', status.txHashes)
+      return status
+    }
+    if (status.status === 'failure') {
+      throw new Error('Bridge failed')
+    }
+
+    await new Promise((r) => setTimeout(r, 1000))
+  }
+}
+
+await pollStatus()
+```
+
+## Bridge from Tempo
+
+To bridge tokens from Tempo to another chain, swap the origin and destination in the quote request.
+
+### Using curl + cast (Foundry)
+
+#### Step 1 - Get a quote
+
+```bash
+curl -X POST "https://api.relay.link/quote/v2" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user": "<YOUR_ADDRESS>",
+    "originChainId": 4217,
+    "destinationChainId": 8453,
+    "originCurrency": "<TEMPO_TOKEN_ADDRESS>",
+    "destinationCurrency": "<DESTINATION_TOKEN_ADDRESS>",
+    "amount": "<AMOUNT>",
+    "tradeType": "EXACT_INPUT"
+  }'
+```
+
+#### Step 2 - Approve token (if required)
+
+If the quote includes an approval step, approve the Relay contract to spend your tokens on Tempo.
+
+```bash
+cast send <TOKEN_ADDRESS> \
+  'approve(address,uint256)' \
+  <APPROVAL_TARGET> \
+  <AMOUNT> \
+  --rpc-url https://rpc.tempo.xyz \
+  --private-key $PRIVATE_KEY
+```
+
+#### Step 3 - Submit the deposit transaction
+
+Use the `to`, `data`, and `value` fields from the quote response:
+
+```bash
+cast send <TO> \
+  <DATA> \
+  --rpc-url https://rpc.tempo.xyz \
+  --private-key $PRIVATE_KEY
+```
+
+:::info
+Tempo has no native gas token, so no `--value` flag is needed. Transaction fees on Tempo are paid in a TIP-20 stablecoin automatically.
+:::
+
+#### Step 4 - Track status
+
+```bash
+curl "https://api.relay.link/intents/status/v3?requestId=<REQUEST_ID>"
+```
+
+### Using TypeScript (viem)
+
+```typescript
+import { createWalletClient, createPublicClient, http } from 'viem'
+import { tempo } from 'viem/chains'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const account = privateKeyToAccount('0x...')
+
+const walletClient = createWalletClient({
+  account,
+  chain: tempo,
+  transport: http(),
+})
+
+const publicClient = createPublicClient({
+  chain: tempo,
+  transport: http(),
+})
+
+// 1. Get a quote from Relay (Tempo -> Base)
+const quoteRes = await fetch('https://api.relay.link/quote/v2', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    user: account.address,
+    originChainId: 4217, // Tempo
+    destinationChainId: 8453, // Base
+    originCurrency: '0x20C000000000000000000000b9537d11c60E8b50', // USDC.e on Tempo
+    destinationCurrency: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC on Base
+    amount: '1000000', // 1 USDC.e (6 decimals)
+    tradeType: 'EXACT_INPUT',
+  }),
+})
+
+const quote = await quoteRes.json()
+
+// 2. Execute each step
+for (const step of quote.steps) {
+  for (const item of step.items) {
+    if (step.kind === 'transaction') {
+      const hash = await walletClient.sendTransaction({
+        to: item.data.to,
+        data: item.data.data,
+        value: BigInt(item.data.value || '0'),
+      })
+
+      await publicClient.waitForTransactionReceipt({ hash })
+    }
+  }
+}
+
+// 3. Poll for completion
+const requestId = quote.steps[0].requestId
+
+const pollStatus = async () => {
+  while (true) {
+    const statusRes = await fetch(
+      `https://api.relay.link/intents/status/v3?requestId=${requestId}`
+    )
+    const status = await statusRes.json()
+
+    if (status.status === 'success') {
+      console.log('Bridge complete:', status.txHashes)
+      return status
+    }
+    if (status.status === 'failure') {
+      throw new Error('Bridge failed')
+    }
+
+    await new Promise((r) => setTimeout(r, 1000))
+  }
+}
+
+await pollStatus()
+```
+
+## Supported chains
+
+Relay supports bridging to and from Tempo on many chains. Query the Relay API for the full list:
+
+```bash
+curl "https://api.relay.link/chains"
+```
+
+Common routes include Ethereum, Base, Arbitrum, Optimism, Polygon, and more. See [Relay's supported chains](https://docs.relay.link/resources/supported-chains) for the complete list.
+
+## Further reading
+
+- [Relay documentation](https://docs.relay.link)
+- [Relay API reference](https://docs.relay.link/references/api/overview)
+- [Bridges & Exchanges on Tempo](/ecosystem/bridges)
+- [Getting Funds on Tempo](/guide/getting-funds)

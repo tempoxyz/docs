@@ -21,6 +21,16 @@
       ],
       "destination": "https://docs.tempo.xyz/guide/getting-funds",
       "permanent": false
+    },
+    {
+      "source": "/guide/bridge-usdc-stargate",
+      "destination": "/guide/bridge-layerzero",
+      "permanent": true
+    },
+    {
+      "source": "/guide/bridge-usdc-relay",
+      "destination": "/guide/bridge-relay",
+      "permanent": true
     }
   ],
   "rewrites": [
