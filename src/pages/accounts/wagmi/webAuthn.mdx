@@ -35,7 +35,7 @@ Accepts all [`webAuthn`](/accounts/api/webAuthn) adapter options, plus all [`Pro
 URL of a [WebAuthn server handler](/accounts/server/handler.webAuthn).
 
 :::info
-[See the guide](#TODO)
+[See the guide](/guide/use-accounts/embed-passkeys)
 :::
 
 :::warning
@@ -92,12 +92,12 @@ export const config = createConfig({
 ### ceremony
 
 - **Type:** `WebAuthnCeremony`
-- **Default:** `WebAuthnCeremony.local(){:js}`
+- **Default:** `WebAuthnCeremony.server({ url: authUrl }){:js}`
 
 Ceremony strategy for WebAuthn registration and authentication. [See more](/accounts/api/webauthnceremony).
 
 :::info
-[See the guide](#TODO)
+[See the guide](/guide/use-accounts/embed-passkeys)
 :::
 
 :::warning
@@ -128,7 +128,7 @@ export const config = createConfig({
 Fee payer URL for interacting with a service running [`Handler.feePayer`](/accounts/server/handler.feePayer) from `accounts/server`.
 
 :::info
-[See the guide](#TODO)
+[See the guide](/guide/payments/sponsor-user-fees)
 :::
 
 ```ts twoslash

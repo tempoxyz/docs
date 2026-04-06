@@ -43,7 +43,7 @@ const provider = Provider.create({
 ### ceremony
 
 - **Type:** `WebAuthnCeremony`
-- **Default:** `WebAuthnCeremony.local(){:js}`
+- **Default:** `WebAuthnCeremony.server({ url: authUrl }){:js}`
 
 Ceremony strategy for WebAuthn registration and authentication. [See more](/accounts/api/webauthnceremony).
 

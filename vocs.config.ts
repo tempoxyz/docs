@@ -826,10 +826,6 @@ export default defineConfig({
                   link: '/accounts/api/webauthnceremony.from',
                 },
                 {
-                  text: '.local',
-                  link: '/accounts/api/webauthnceremony.local',
-                },
-                {
                   text: '.server',
                   link: '/accounts/api/webauthnceremony.server',
                 },

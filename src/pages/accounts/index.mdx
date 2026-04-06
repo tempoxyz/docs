@@ -58,7 +58,7 @@ export const wagmiConfig = createConfig({
   },
 })
 ```
-```tsx twoslash [WebAuthn]
+```tsx twoslash [Domain-bound Passkeys]
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
 import { webAuthn } from 'accounts/wagmi'
@@ -73,8 +73,8 @@ export const wagmiConfig = createConfig({
 ```
 :::
 
-:::info[What adapter should I use?]
-Most apps should use **Tempo Wallet** - it provides a universal account experience with embedded onramp, access keys, and transaction orchestration. **Domain-bound Passkeys** is for apps that want to manage domain-bound passkey accounts directly. [Learn more](/accounts/faq#what-adapter-should-i-use).
+:::info[What connector should I use?]
+Most apps should use **Tempo Wallet** - it provides a universal account experience with embedded onramp, access keys, and transaction orchestration. **Domain-bound Passkeys** is for apps that want to manage domain-bound passkey accounts directly. [Learn more](/accounts/faq#what-connector-should-i-use).
 :::
 
 :::tip
