@@ -41,23 +41,26 @@ T3 is Tempo's next network upgrade. It introduces the following changes:
 
 Partners that create or update access keys should upgrade to a T3-compatible SDK release before activation.
 
-T3 introduces one breaking change for access-key integrations.
+For most integrators, no action is needed beyond upgrading to T3-compatible tooling. Existing authorized access keys keep working, and Tempo Transactions that use `key_authorization` keep working.
 
 ### Breaking change for access-key integrations
 
-**What stays the same:** Existing authorized access keys continue to work after T3 activates. Tempo Transactions that provision a new access key through `key_authorization` also continue to work.
-
-**What changes:** T3 replaces the legacy `AccountKeychain.authorizeKey(...)` ABI with the new TIP-1011 authorization format. This only affects flows that create access keys onchain. Access keys created through `KeyAuthorizations` in Tempo Txs don't break.
+The only integrations that need code changes are ones that call `AccountKeychain.authorizeKey(...)` directly onchain. Before T3, those flows used the legacy authorization ABI. After T3, they must use the TIP-1011 authorization format with the updated `authorizeKey(...)` arguments. Legacy calls fail with `LegacyAuthorizeKeySelectorChanged`, sometimes surfaced as `LegacyAuthorizeKeySelectorChanged(newSelector: 0x980a6025)`.
 
 **Before activation:** Integrations must continue using the legacy `AccountKeychain.authorizeKey(...)` ABI. The TIP-1011 authorization format is not yet valid onchain.
 
-**After activation:** Integrations must use the TIP-1011 authorization format. Legacy calls fail with `LegacyAuthorizeKeySelectorChanged`, sometimes surfaced as `LegacyAuthorizeKeySelectorChanged(newSelector: 0x980a6025)`.
+**After activation:** Integrations must use the TIP-1011 authorization format.
 
-Affected flows include:
+T3 also adds one new execution restriction: access-key-signed transactions can no longer create contracts. If your product used access keys for deployments, factory calls, or module-install flows that create contracts, those transactions must move to a Root Key path.
 
-- direct onchain calls to `AccountKeychain.authorizeKey(...)`
-- key rotation or re-authorization flows that still submit the legacy `authorizeKey(...)` calldata
-- SDKs, backend services, or admin scripts that still encode the legacy `authorizeKey(...)` call
+If you support both pre-T3 and post-T3 networks at the same time, branch on network version or activation timestamp. The old authorization ABI only works before T3. The new authorization ABI only works after T3.
+
+### Migration checklist
+
+- upgrade to a T3-compatible SDK mentioned below
+- regenerate contract bindings or replace handcrafted encoders for `authorizeKey(...)`
+- move any access-key contract-creation flows to a Root Key path
+- test key creation, key rotation, and recovery flows on Moderato after T3 activates
 
 ## Compatible SDK releases
 
