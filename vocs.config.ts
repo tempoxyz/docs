@@ -733,6 +733,31 @@ export default defineConfig({
           ],
         },
         {
+          text: 'Guides',
+          items: [
+            {
+              text: 'Embed Tempo Wallet',
+              link: '/guide/use-accounts/embed-tempo-wallet',
+              external: true,
+            },
+            {
+              text: 'Make Payments',
+              link: '/guide/payments',
+              external: true,
+            },
+            {
+              text: 'Issue Stablecoins',
+              link: '/guide/issuance',
+              external: true,
+            },
+            {
+              text: 'Exchange Stablecoins',
+              link: '/guide/stablecoin-dex',
+              external: true,
+            },
+          ],
+        },
+        {
           text: 'Core',
           items: [
             {
