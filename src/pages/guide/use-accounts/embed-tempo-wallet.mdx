@@ -14,13 +14,13 @@ The [`tempoWallet`](/accounts/wagmi/tempoWallet) Wagmi connector is the easiest 
 
 :::info
 
-**When should I use the Tempo Wallet vs Passkey accounts?**
+**When should I use Tempo Wallet vs. domain-bound Passkeys?**
 
 The **Tempo Wallet** provides a universal wallet experience – users manage their account through the Tempo Wallet interface, and their account is portable across all applications that embed it.
 
-**Passkey accounts** are domain-bound – credentials are tied to your specific domain and cannot be used on other applications. This gives you full control over the authentication experience but requires more setup.
+**Domain-bound Passkeys** are tied to your specific domain and cannot be used on other applications. This gives you full control over the authentication experience but requires more setup.
 
-If you want a quick integration with a full-featured wallet, use the Tempo Wallet. If you want a fully custom, domain-bound authentication experience, use [Passkey accounts](/guide/use-accounts/embed-passkeys).
+If you want a quick integration with a full-featured wallet, use the [Tempo Wallet](/accounts/api/dialog). If you want a fully custom, domain-bound authentication experience, use [domain-bound Passkeys](/guide/use-accounts/embed-passkeys).
 
 :::
 
@@ -262,48 +262,25 @@ export const config = createConfig({
 
 See the [Sponsor user fees](/guide/payments/sponsor-user-fees) guide for more details on setting up a fee payer server.
 
-### Access Key Limits
-
-You can configure default access key parameters to restrict the tokens and amounts a session key can spend:
-
-```tsx twoslash [config.ts]
-// @noErrors
-import { parseUnits } from 'viem'
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { Expiry } from 'accounts'
-import { tempoWallet } from 'accounts/wagmi'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet({
-    authorizeAccessKey: () => ({ // [!code ++]
-      expiry: Expiry.days(1), // [!code ++]
-      limits: [{ // [!code ++]
-        token: '0x...', // [!code ++]
-        limit: parseUnits('100', 6), // [!code ++]
-      }], // [!code ++]
-    }), // [!code ++]
-  })],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
-```
-
 ## Learning Resources
 
 <Cards>
+  <Card
+    description="Send and accept stablecoin payments on Tempo"
+    to="/guide/payments"
+    icon="lucide:send"
+    title="Make Payments"
+  />
+  <Card
+    description="Sponsor transaction fees for your users to enable gasless transactions"
+    to="/guide/payments/sponsor-user-fees"
+    icon="lucide:credit-card"
+    title="Sponsor Fees"
+  />
   <Card
     description="API reference for the tempoWallet Wagmi connector"
     to="/accounts/wagmi/tempoWallet"
     icon="lucide:plug"
     title="tempoWallet Reference"
-  />
-  <Card
-    description="Learn how to embed domain-bound passkey accounts instead"
-    to="/guide/use-accounts/embed-passkeys"
-    icon="lucide:fingerprint"
-    title="Embed Passkey Accounts"
   />
 </Cards>

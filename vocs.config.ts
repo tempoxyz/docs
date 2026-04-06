@@ -97,11 +97,11 @@ export default defineConfig({
                 link: '/guide/use-accounts/embed-tempo-wallet',
               },
               {
-                text: 'Embed Passkey accounts',
+                text: 'Embed domain-bound Passkeys',
                 link: '/guide/use-accounts/embed-passkeys',
               },
               {
-                text: 'Connect to wallets',
+                text: 'Connect to other wallets',
                 link: '/guide/use-accounts/connect-to-wallets',
               },
               {
@@ -554,7 +554,7 @@ export default defineConfig({
         text: 'Tempo Developer Tools',
         items: [
           {
-            text: 'Accounts',
+            text: 'Accounts SDK',
             link: '/accounts',
           },
           {
@@ -736,13 +736,18 @@ export default defineConfig({
           text: 'Guides',
           items: [
             {
-              text: 'Embed Tempo Wallet',
-              link: '/guide/use-accounts/embed-tempo-wallet',
+              text: 'Create & Use Accounts',
+              link: '/guide/use-accounts',
               external: true,
             },
             {
               text: 'Make Payments',
               link: '/guide/payments',
+              external: true,
+            },
+            {
+              text: 'Sponsor Fees',
+              link: '/guide/payments/sponsor-user-fees',
               external: true,
             },
             {
@@ -773,7 +778,7 @@ export default defineConfig({
                   link: '/accounts/api/adapters',
                 },
                 {
-                  text: 'dialog',
+                  text: 'dialog / tempoWallet',
                   link: '/accounts/api/dialog',
                 },
                 {
@@ -814,19 +819,19 @@ export default defineConfig({
               items: [
                 {
                   text: 'Overview',
-                  link: '/accounts/api/ceremony',
+                  link: '/accounts/api/webauthnceremony',
                 },
                 {
                   text: '.from',
-                  link: '/accounts/api/ceremony.from',
+                  link: '/accounts/api/webauthnceremony.from',
                 },
                 {
                   text: '.local',
-                  link: '/accounts/api/ceremony.local',
+                  link: '/accounts/api/webauthnceremony.local',
                 },
                 {
                   text: '.server',
-                  link: '/accounts/api/ceremony.server',
+                  link: '/accounts/api/webauthnceremony.server',
                 },
               ],
             },

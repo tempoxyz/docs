@@ -7,6 +7,10 @@ description: Server-side WebAuthn ceremony handler for registration and authenti
 
 Creates a WebAuthn ceremony handler that manages registration and authentication flows server-side.
 
+:::info
+[See the guide](#TODO)
+:::
+
 Exposes 4 POST endpoints:
 
 - `POST /register/options` — Generate credential creation options
@@ -52,12 +56,33 @@ export const POST = handler.fetch // Next.js
 
 Maximum age of a challenge in seconds before it expires.
 
+```ts twoslash
+import { Handler, Kv } from 'accounts/server'
+
+const handler = Handler.webAuthn({
+  kv: Kv.memory(),
+  origin: 'https://example.com',
+  rpId: 'example.com',
+  challengeTtl: 600, // [!code focus]
+})
+```
+
 ### kv
 
-- **Type:** `Kv`
+- **Type:** [`Kv`](/accounts/server/kv)
 - **Required**
 
-Key-value store for challenges and credentials.
+Key-value store for challenges and credentials. [See `Kv`](/accounts/server/kv) for available adapters.
+
+```ts twoslash
+import { Handler, Kv } from 'accounts/server'
+
+const handler = Handler.webAuthn({
+  kv: Kv.memory(), // [!code focus]
+  origin: 'https://example.com',
+  rpId: 'example.com',
+})
+```
 
 ### onAuthenticate
 
@@ -66,12 +91,38 @@ Key-value store for challenges and credentials.
 
 Called after a successful authentication.
 
+```ts twoslash
+import { Handler, Kv } from 'accounts/server'
+
+const handler = Handler.webAuthn({
+  kv: Kv.memory(),
+  origin: 'https://example.com',
+  rpId: 'example.com',
+  onAuthenticate: ({ credentialId, publicKey }) => { // [!code focus]
+    console.log('Authenticated:', credentialId) // [!code focus]
+  }, // [!code focus]
+})
+```
+
 ### onRegister
 
 - **Type:** `(params: { credentialId, publicKey, request }) => Response | void`
 - **Optional**
 
 Called after a successful registration. The returned response is merged onto the default JSON response.
+
+```ts twoslash
+import { Handler, Kv } from 'accounts/server'
+
+const handler = Handler.webAuthn({
+  kv: Kv.memory(),
+  origin: 'https://example.com',
+  rpId: 'example.com',
+  onRegister: ({ credentialId, publicKey }) => { // [!code focus]
+    console.log('Registered:', credentialId) // [!code focus]
+  }, // [!code focus]
+})
+```
 
 ### origin
 
@@ -80,6 +131,16 @@ Called after a successful registration. The returned response is merged onto the
 
 Expected origin(s) for WebAuthn verification (e.g. `'https://example.com'`).
 
+```ts twoslash
+import { Handler, Kv } from 'accounts/server'
+
+const handler = Handler.webAuthn({
+  kv: Kv.memory(),
+  origin: 'https://example.com', // [!code focus]
+  rpId: 'example.com',
+})
+```
+
 ### path
 
 - **Type:** `string`
@@ -87,9 +148,30 @@ Expected origin(s) for WebAuthn verification (e.g. `'https://example.com'`).
 
 Path prefix for the WebAuthn endpoints.
 
+```ts twoslash
+import { Handler, Kv } from 'accounts/server'
+
+const handler = Handler.webAuthn({
+  kv: Kv.memory(),
+  origin: 'https://example.com',
+  rpId: 'example.com',
+  path: '/webauthn', // [!code focus]
+})
+```
+
 ### rpId
 
 - **Type:** `string`
 - **Required**
 
 Relying Party ID (e.g. `'example.com'`).
+
+```ts twoslash
+import { Handler, Kv } from 'accounts/server'
+
+const handler = Handler.webAuthn({
+  kv: Kv.memory(),
+  origin: 'https://example.com',
+  rpId: 'example.com', // [!code focus]
+})
+```

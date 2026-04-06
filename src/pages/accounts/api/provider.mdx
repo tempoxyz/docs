@@ -82,9 +82,10 @@ import { Expiry, Provider } from 'accounts'
 const provider = Provider.create({
   authorizeAccessKey: () => ({ // [!code focus]
     expiry: Expiry.days(7), // [!code focus]
-    limits: [ // [!code focus]
-      { token: '0x20c0000000000000000000000000000000000001', limit: parseUnits('500', 6) }, // [!code focus]
-    ], // [!code focus]
+    limits: [{ // [!code focus]
+      token: '0x20c0000000000000000000000000000000000001', // [!code focus]
+      limit: parseUnits('500', 6), // [!code focus]
+    }], // [!code focus]
   }), // [!code focus]
 })
 ```

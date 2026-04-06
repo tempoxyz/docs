@@ -20,8 +20,7 @@ WebAuthn credentials are bound to a specific domain (the [Relying Party](https:/
 
 This means that credentials created for one domain (e.g., `example.com`) will only work on that domain (and its subdomains) and cannot be used to authenticate on other domains.
 
-This means your users won't be able to use the same passkey account on other applications. If this is not what you want, head to the [Connect to wallets](/guide/use-accounts/connect-to-wallets)
-guide that walks you through on how to connect your application to a universal wallet like MetaMask.
+This means your users won't be able to use the same passkey account on other applications. If this is not what you want, head to the [Embed Tempo Wallet](/guide/use-accounts/embed-tempo-wallet) guide for a universal account experience.
 
 :::
 
@@ -41,9 +40,41 @@ By the end of this guide, you will be able to embed passkey accounts into your a
 
 Ensure that you have set up your project with Wagmi by following the [guide](/sdk/typescript#wagmi-setup).
 
+### Set up the WebAuthn server
+
+Set up a [`Handler.webAuthn`](/accounts/server/handler.webAuthn) server to handle passkey registration and authentication ceremonies.
+
+```ts twoslash [server.ts]
+// @noErrors
+import { Handler, Kv } from 'accounts/server'
+
+const handler = Handler.webAuthn({
+  kv: Kv.memory(),
+  origin: 'https://example.com',
+  rpId: 'example.com',
+})
+```
+
+Then plug `handler` into your server framework of choice:
+
+```ts
+createServer(handler.listener) // Node.js
+Bun.serve(handler) // Bun
+Deno.serve(handler) // Deno
+app.all('*', c => handler.fetch(c.request)) // Elysia
+app.use(handler.listener) // Express
+app.use(c => handler.fetch(c.req.raw)) // Hono
+export const GET = handler.fetch // Next.js
+export const POST = handler.fetch // Next.js
+```
+
+:::warning
+`Kv.memory()` is not recommended for production use. Instead, use a persistent store like Cloudflare or Vercel KV, or a Redis instance. See [`Kv`](/accounts/server/kv) for available adapters.
+:::
+
 ### Configure the WebAuthn Connector
 
-Next, we will need to configure the `webAuthn` connector in our Wagmi config.
+Next, we will need to configure the `webAuthn` connector in our Wagmi config, passing the (relative or absolute) url of your WebAuthn server to `authUrl`.
 
 ```tsx twoslash [config.ts]
 // @noErrors
@@ -53,27 +84,13 @@ import { webAuthn } from 'accounts/wagmi' // [!code ++]
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn()], // [!code ++]
+  connectors: [webAuthn({ authUrl: '/auth' })], // [!code ++]
   multiInjectedProviderDiscovery: false,
   transports: {
     [tempo.id]: http(),
   },
 })
 ```
-
-:::warning
-
-Without an `authUrl`, credentials are stored locally on the client device. This means users will lose access to their passkey account if their storage is cleared or if they sign in from another device.
-
-For production, you should set up a [`Handler.webAuthn`](/accounts/server/handler.webAuthn) server and pass the `authUrl` to the connector:
-
-```tsx
-connectors: [webAuthn({ authUrl: 'https://myapp.com/auth' })]
-```
-
-See [Deploying to Production](/accounts/production) for more details.
-
-:::
 
 :::tip
 
@@ -139,7 +156,7 @@ import { webAuthn } from 'accounts/wagmi' // [!code ++]
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn()], // [!code ++]
+  connectors: [webAuthn({ authUrl: '/auth' })], // [!code ++]
   multiInjectedProviderDiscovery: false,
   transports: {
     [tempo.id]: http(),
@@ -215,7 +232,7 @@ import { webAuthn } from 'accounts/wagmi' // [!code ++]
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn()], // [!code ++]
+  connectors: [webAuthn({ authUrl: '/auth' })], // [!code ++]
   multiInjectedProviderDiscovery: false,
   transports: {
     [tempo.id]: http(),
@@ -299,15 +316,21 @@ export function Example() {
 
 <Cards>
   <Card
-    description="Learn more about the Tempo transaction type that enables passkey signatures"
-    to="/guide/use-accounts/webauthn-p256-signatures"
-    icon="lucide:file"
-    title="Tempo Transaction type"
+    description="Send and accept stablecoin payments on Tempo"
+    to="/guide/payments"
+    icon="lucide:send"
+    title="Make Payments"
   />
   <Card
-    description="Learn more about how (passkey) signatures are structured in the protocol"
-    to="/guide/use-accounts/webauthn-p256-signatures"
-    icon="lucide:signature"
-    title="Signatures"
+    description="Sponsor transaction fees for your users to enable gasless transactions"
+    to="/guide/payments/sponsor-user-fees"
+    icon="lucide:credit-card"
+    title="Sponsor Fees"
+  />
+  <Card
+    description="API reference for the webAuthn Wagmi connector"
+    to="/accounts/wagmi/webAuthn"
+    icon="lucide:plug"
+    title="webAuthn Reference"
   />
 </Cards>

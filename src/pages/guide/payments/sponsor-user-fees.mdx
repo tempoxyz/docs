@@ -36,6 +36,19 @@ You can stand up a minimal fee payer service using the [`Handler.feePayer`](/acc
 // [!include ~/snippets/unformatted/withFeePayer.ts:server]
 ```
 
+Then plug `handler` into your server framework of choice:
+
+```ts
+createServer(handler.listener) // Node.js
+Bun.serve(handler) // Bun
+Deno.serve(handler) // Deno
+app.all('*', c => handler.fetch(c.request)) // Elysia
+app.use(handler.listener) // Express
+app.use(c => handler.fetch(c.req.raw)) // Hono
+export const GET = handler.fetch // Next.js
+export const POST = handler.fetch // Next.js
+```
+
 ### Configure your client to use the fee payer service
 
 <PublicTestnetSponsorTip />
@@ -50,7 +63,7 @@ import { createConfig, http } from 'wagmi'
 
 export const config = createConfig({
   connectors: [tempoWallet({
-    feePayerUrl: 'https://sponsor.moderato.tempo.xyz', // [!code hl]
+    feePayerUrl: 'https://sponsor.moderato.tempo.xyz', // [!code focus]
   })],
   chains: [tempo],
   multiInjectedProviderDiscovery: false,
@@ -60,22 +73,22 @@ export const config = createConfig({
 })
 ```
 
-```ts twoslash [Other]
+```ts twoslash [WebAuthn]
 // @noErrors
-import { tempoWallet } from 'accounts/wagmi'
+import { webAuthn } from 'accounts/wagmi'
 import { tempo } from 'viem/chains'
 import { withFeePayer } from 'viem/tempo'
 import { createConfig, http } from 'wagmi'
 
 export const config = createConfig({
-  connectors: [tempoWallet()],
+  connectors: [webAuthn({ authUrl: 'https://myapp.com/auth' })],
   chains: [tempo],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempo.id]: withFeePayer( // [!code hl]
-      http(), // [!code hl]
-      http('https://sponsor.moderato.tempo.xyz'), // [!code hl]
-        ), // [!code hl]
+    [tempo.id]: withFeePayer( // [!code focus]
+      http(), // [!code focus]
+      http('https://sponsor.moderato.tempo.xyz'), // [!code focus]
+    ), // [!code focus]
   },
 })
 ```
