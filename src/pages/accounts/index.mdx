@@ -1,0 +1,220 @@
+---
+title: Accounts SDK – Getting Started
+description: Set up the Tempo Accounts SDK to create, manage, and interact with accounts on Tempo.
+---
+
+import { Cards, Card } from 'vocs'
+import { AccountsSignIn } from '../../components/guides/AccountsSignIn'
+
+# Getting Started
+
+## Overview
+
+The Tempo Accounts SDK is a TypeScript library for applications and wallets to create, manage, and interact with accounts on Tempo.
+
+<AccountsSignIn />
+
+## Install
+
+The Tempo Accounts SDK is available as an [NPM package](https://www.npmjs.com/package/accounts) under `accounts`
+
+:::code-group
+```bash [npm]
+npm i accounts
+```
+```bash [pnpm]
+pnpm i accounts
+```
+```bash [bun]
+bun i accounts
+```
+:::
+
+## Wagmi Usage
+
+The Tempo Accounts SDK is best used in conjunction with [Wagmi](https://wagmi.sh/) to provide a seamless experience for developers and end-users.
+
+::::steps
+
+### Set up Wagmi
+
+Get started with Wagmi by following the [official guide](https://wagmi.sh/react/getting-started).
+
+### Configure
+
+After you have set up Wagmi, you can set up the Tempo Accounts SDK by using a Connector from `accounts/wagmi`:
+
+<Cards>
+  <Card
+    description="Embeds a universal Tempo Wallet dialog into your app"
+    to="/accounts/wagmi/tempoWallet"
+    title="Tempo Wallet"
+  />
+  <Card
+    description="Embeds domain-bound passkey accounts into your app"
+    to="/accounts/wagmi/webAuthn"
+    title="WebAuthn"
+  />
+</Cards>
+
+:::code-group
+```tsx twoslash [Tempo Wallet]
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'wagmi/chains'
+import { tempoWallet } from 'accounts/wagmi'
+
+export const wagmiConfig = createConfig({
+  chains: [tempo],
+  connectors: [tempoWallet()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+```tsx twoslash [WebAuthn]
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'wagmi/chains'
+import { webAuthn } from 'accounts/wagmi'
+
+export const wagmiConfig = createConfig({
+  chains: [tempo],
+  connectors: [webAuthn({ authUrl: 'https://myapp.com/auth' })],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+:::
+
+:::tip
+If you are using a wallet connection library and cannot supply a custom connector,
+you can use `Provider.create()` to create a new provider instance, and inject itself
+into the wallet connection library via [EIP-6963](https://eips.ethereum.org/EIPS/eip-6963).
+
+```tsx
+import { Provider } from 'accounts'
+Provider.create()
+```
+:::
+
+### Use Accounts
+
+You can now use [Wagmi Hooks](https://wagmi.sh/react/api/hooks) like `useConnect`, or [Tempo Hooks](https://wagmi.sh/tempo) like `useTransfer`.
+
+```tsx twoslash
+// @noErrors
+import { useConnect, useConnectors } from 'wagmi'
+
+function Connect() {
+  const connect = useConnect()
+  const connectors = useConnectors()
+
+  return connectors?.map((connector) => (
+    <button
+      key={connector.uid}
+      onClick={() => connect.connect({ connector })}
+    >
+      Connect
+    </button>
+  ))
+}
+```
+
+### Next Steps
+
+<Cards>
+  <Card
+    description="Connect wallets, sign transactions, and more"
+    href="https://wagmi.sh/react/api/hooks"
+    title="Wagmi Hooks"
+  />
+  <Card
+    description="Transfer stablecoins, manage fees, and more"
+    href="https://wagmi.sh/tempo"
+    title="Tempo Hooks"
+  />
+  <Card
+    description="Send and accept stablecoin payments"
+    to="/guide/payments"
+    title="Make Payments"
+  />
+  <Card
+    description="Create and manage your own stablecoin"
+    to="/guide/issuance"
+    title="Issue Stablecoins"
+  />
+  <Card
+    description="Swap between stablecoins on the built-in exchange"
+    to="/guide/stablecoin-dex"
+    title="Exchange Stablecoins"
+  />
+</Cards>
+
+::::
+
+## Vanilla Usage
+
+You can get started with the Tempo Accounts SDK by creating a new `Provider` instance.
+Once set up, you can use the `provider` to interact with accounts via JSON-RPC.
+
+```tsx twoslash
+import { Provider } from 'accounts'
+
+const provider = Provider.create()
+
+const { accounts } = await provider.request({
+  method: 'wallet_connect',
+})
+
+const client = provider.getClient()
+```
+
+## Secure Origins (HTTPS)
+
+The Tempo Accounts SDK is designed to be used on secure origins (HTTPS). If you are using HTTP,
+it will fallback to using a popup instead of an iframe. This is because
+WebAuthn is not supported on iframes embedded on insecure origins (HTTP).
+
+Web frameworks typically default to HTTP in development environments. You
+will need to ensure to turn on HTTPS in development to leverage the iframe dialog.
+
+### Portless
+
+[Portless](https://github.com/vercel-labs/portless) replaces port numbers with stable, named `.localhost` URLs and can enable HTTPS with auto-generated certificates.
+
+```sh
+npm install -g portless
+portless run dev
+# → https://myapp.localhost
+```
+
+### Next.js
+
+HTTPS can be enabled on Next.js' dev server by setting the `--experimental-https` flag on the `next dev` command.
+
+```bash
+next dev --experimental-https
+```
+
+### Vite
+
+HTTPS can be enabled on Vite's dev server by installing and configuring the `vite-plugin-mkcert` plugin.
+
+```bash
+npm i vite-plugin-mkcert
+```
+
+:::code-group
+```ts [vite.config.ts]
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import mkcert from 'vite-plugin-mkcert'
+
+export default defineConfig({
+  plugins: [
+    mkcert(),
+    react(),
+  ],
+})
+```
+:::

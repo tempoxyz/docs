@@ -93,6 +93,10 @@ export default defineConfig({
                 link: '/guide/use-accounts',
               },
               {
+                text: 'Embed Tempo Wallet',
+                link: '/guide/use-accounts/embed-tempo-wallet',
+              },
+              {
                 text: 'Embed Passkey accounts',
                 link: '/guide/use-accounts/embed-passkeys',
               },
@@ -550,6 +554,10 @@ export default defineConfig({
         text: 'Tempo Developer Tools',
         items: [
           {
+            text: 'Accounts',
+            link: '/accounts',
+          },
+          {
             text: 'CLI',
             collapsed: true,
             items: [
@@ -598,32 +606,6 @@ export default defineConfig({
                   {
                     text: 'Wagmi Reference',
                     link: 'https://wagmi.sh/tempo',
-                  },
-                  {
-                    text: 'Server Reference',
-                    items: [
-                      {
-                        text: 'Handlers',
-                        items: [
-                          {
-                            text: 'Overview',
-                            link: '/sdk/typescript/server/handlers',
-                          },
-                          {
-                            text: 'compose',
-                            link: '/sdk/typescript/server/handler.compose',
-                          },
-                          {
-                            text: 'feePayer',
-                            link: '/sdk/typescript/server/handler.feePayer',
-                          },
-                          {
-                            text: 'keyManager',
-                            link: '/sdk/typescript/server/handler.keyManager',
-                          },
-                        ],
-                      },
-                    ],
                   },
                   {
                     text: 'Prool Reference',
@@ -730,6 +712,222 @@ export default defineConfig({
       //   ],
       // },
     ],
+    '/accounts': {
+      backLink: true,
+      items: [
+        {
+          text: 'Accounts SDK',
+          items: [
+            {
+              text: 'Getting Started',
+              link: '/accounts',
+            },
+            {
+              text: 'Deploying to Production',
+              link: '/accounts/production',
+            },
+            {
+              text: 'FAQ',
+              link: '/accounts/faq',
+            },
+          ],
+        },
+        {
+          text: 'Core',
+          items: [
+            {
+              text: 'Provider',
+              link: '/accounts/api/provider',
+            },
+            {
+              text: 'Adapters',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/accounts/api/adapters',
+                },
+                {
+                  text: 'dialog',
+                  link: '/accounts/api/dialog',
+                },
+                {
+                  text: 'webAuthn',
+                  link: '/accounts/api/webAuthn',
+                },
+                {
+                  text: 'local',
+                  link: '/accounts/api/local',
+                },
+              ],
+            },
+            {
+              text: 'Dialog',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/accounts/api/dialogs',
+                },
+                {
+                  text: '.iframe',
+                  link: '/accounts/api/dialog.iframe',
+                },
+                {
+                  text: '.popup',
+                  link: '/accounts/api/dialog.popup',
+                },
+              ],
+            },
+            {
+              text: 'Expiry',
+              link: '/accounts/api/expiry',
+            },
+            {
+              text: 'WebAuthnCeremony',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/accounts/api/ceremony',
+                },
+                {
+                  text: '.from',
+                  link: '/accounts/api/ceremony.from',
+                },
+                {
+                  text: '.local',
+                  link: '/accounts/api/ceremony.local',
+                },
+                {
+                  text: '.server',
+                  link: '/accounts/api/ceremony.server',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          text: 'Wagmi',
+          items: [
+            {
+              text: 'Connectors',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/accounts/wagmi',
+                },
+                {
+                  text: 'tempoWallet',
+                  link: '/accounts/wagmi/tempoWallet',
+                },
+                {
+                  text: 'webAuthn',
+                  link: '/accounts/wagmi/webAuthn',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          text: 'Server',
+          items: [
+            {
+              text: 'Handlers',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/accounts/server',
+                },
+                {
+                  text: '.compose',
+                  link: '/accounts/server/handler.compose',
+                },
+                {
+                  text: '.feePayer',
+                  link: '/accounts/server/handler.feePayer',
+                },
+                {
+                  text: '.webAuthn',
+                  link: '/accounts/server/handler.webAuthn',
+                },
+              ],
+            },
+            {
+              text: 'Kv',
+              link: '/accounts/server/kv',
+            },
+          ],
+        },
+        {
+          text: 'JSON-RPC',
+          items: [
+            {
+              text: 'wallet_connect 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_connect',
+            },
+            {
+              text: 'wallet_disconnect 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_disconnect',
+            },
+            {
+              text: 'wallet_authorizeAccessKey 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_authorizeAccessKey',
+            },
+            {
+              text: 'wallet_revokeAccessKey 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_revokeAccessKey',
+            },
+            {
+              text: 'wallet_getBalances 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_getBalances',
+            },
+            {
+              text: 'wallet_getCapabilities 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_getCapabilities',
+            },
+            {
+              text: 'wallet_getCallsStatus 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_getCallsStatus',
+            },
+            {
+              text: 'wallet_sendCalls 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_sendCalls',
+            },
+            {
+              text: 'eth_sendTransaction 🚧',
+              disabled: true,
+              link: '/accounts/rpc/eth_sendTransaction',
+            },
+            {
+              text: 'eth_sendTransactionSync 🚧',
+              disabled: true,
+              link: '/accounts/rpc/eth_sendTransactionSync',
+            },
+            {
+              text: 'eth_fillTransaction 🚧',
+              disabled: true,
+              link: '/accounts/rpc/eth_fillTransaction',
+            },
+            {
+              text: 'personal_sign 🚧',
+              disabled: true,
+              link: '/accounts/rpc/personal_sign',
+            },
+          ],
+        },
+      ],
+    },
     '/learn': [
       {
         text: 'Home',
@@ -879,7 +1077,28 @@ export default defineConfig({
     },
     {
       source: '/sdk/typescript/server',
-      destination: '/sdk/typescript/server/handlers',
+      destination: '/accounts/server',
+      status: 301,
+    },
+    {
+      source: '/sdk/typescript/server/handlers',
+      destination: '/accounts/server',
+      status: 301,
+    },
+    {
+      source: '/sdk/typescript/server/handler.compose',
+      destination: '/accounts/server/handler.compose',
+      status: 301,
+    },
+    {
+      source: '/sdk/typescript/server/handler.feePayer',
+      destination: '/accounts/server/handler.feePayer',
+      status: 301,
+    },
+    {
+      source: '/sdk/typescript/server/handler.keyManager',
+      destination: '/accounts/server/handler.webAuthn',
+      status: 301,
     },
     {
       source: '/sdk/typescript/prool',

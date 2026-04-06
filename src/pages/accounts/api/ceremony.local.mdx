@@ -1,0 +1,32 @@
+---
+title: WebAuthnCeremony.local
+description: Pure client-side WebAuthn ceremony for development and prototyping.
+---
+
+# `WebAuthnCeremony.local`
+
+Creates a pure client-side ceremony for development and prototyping. Generates challenges and verifies responses locally. No external server needed.
+
+## Usage
+
+```ts
+import { WebAuthnCeremony } from 'accounts'
+
+const ceremony = WebAuthnCeremony.local()
+```
+
+## Parameters
+
+### rpId
+
+- **Type:** `string`
+- **Default:** `location.hostname{:js}`
+
+Relying Party ID (e.g. `"example.com"{:js}`).
+
+### storage
+
+- **Type:** `Storage`
+- **Default:** `Storage.idb(){:js}` in browser, `Storage.memory(){:js}` otherwise
+
+Storage adapter for credential persistence.

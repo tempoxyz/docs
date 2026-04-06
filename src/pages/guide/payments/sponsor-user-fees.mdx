@@ -29,7 +29,7 @@ Enable gasless transactions by sponsoring transaction fees for your users. Tempo
 Tempo provides a public testnet fee payer service at `https://sponsor.moderato.tempo.xyz` that you can use for development and testing. If you want to run your own, follow the instructions below.
 :::
 
-You can stand up a minimal fee payer service using the `Handler.feePayer` handler provided by the Tempo TypeScript SDK ([link](/sdk/typescript/server/handler.feePayer)). To sponsor transactions, you need a funded account that will act as the fee payer.
+You can stand up a minimal fee payer service using the [`Handler.feePayer`](/accounts/server/handler.feePayer) handler provided by the [Tempo Accounts SDK](/accounts). To sponsor transactions, you need a funded account that will act as the fee payer.
 
 ```ts twoslash [server.ts]
 // @noErrors
@@ -38,14 +38,49 @@ You can stand up a minimal fee payer service using the `Handler.feePayer` handle
 
 ### Configure your client to use the fee payer service
 
-Use the `withFeePayer` transport provided by Viem ([link](https://viem.sh/tempo/transports/withFeePayer)). It routes transactions to the configured fee payer service for sponsorship when `feePayer: true` is requested on a transaction.
-
 <PublicTestnetSponsorTip />
 
-```ts twoslash [wagmi.config.ts]
+:::code-group
+
+```ts twoslash [Tempo Wallet]
 // @noErrors
-// [!include ~/snippets/wagmi.config.ts:withFeePayer]
+import { tempoWallet } from 'accounts/wagmi'
+import { tempo } from 'viem/chains'
+import { createConfig, http } from 'wagmi'
+
+export const config = createConfig({
+  connectors: [tempoWallet({
+    feePayerUrl: 'https://sponsor.moderato.tempo.xyz', // [!code hl]
+  })],
+  chains: [tempo],
+  multiInjectedProviderDiscovery: false,
+  transports: {
+    [tempo.id]: http(),
+  },
+})
 ```
+
+```ts twoslash [Other]
+// @noErrors
+import { tempoWallet } from 'accounts/wagmi'
+import { tempo } from 'viem/chains'
+import { withFeePayer } from 'viem/tempo'
+import { createConfig, http } from 'wagmi'
+
+export const config = createConfig({
+  connectors: [tempoWallet()],
+  chains: [tempo],
+  multiInjectedProviderDiscovery: false,
+  transports: {
+    [tempo.id]: withFeePayer( // [!code hl]
+      http(), // [!code hl]
+      http('https://sponsor.moderato.tempo.xyz'), // [!code hl]
+        ), // [!code hl]
+  },
+})
+```
+
+:::
 
 ### Sponsor your user's transactions
 

@@ -1,0 +1,42 @@
+---
+title: webAuthn
+description: Wagmi connector for passkey-based WebAuthn accounts.
+---
+
+# `webAuthn`
+
+Creates a Wagmi connector backed by the WebAuthn adapter.
+
+## Usage
+
+```ts
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'wagmi/chains'
+import { webAuthn } from 'accounts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo],
+  connectors: [webAuthn({ authUrl: 'https://myapp.com/auth' })],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+## Parameters
+
+Accepts all [`webAuthn`](/accounts/api/webauthn) adapter options, plus all [`Provider`](/accounts/api/provider) options except `adapter`.
+
+### authUrl
+
+- **Type:** `string`
+- **Optional**
+
+URL of a WebAuthn handler.
+
+### ceremony
+
+- **Type:** `WebAuthnCeremony`
+- **Default:** `WebAuthnCeremony.local()`
+
+Ceremony strategy for WebAuthn flows.

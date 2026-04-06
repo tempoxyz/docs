@@ -1,6 +1,7 @@
 'use client'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
-import { Button, useWebAuthnConnector } from './Demo'
+import { useWebAuthnConnector } from '../../wagmi.config'
+import { Button } from './Demo'
 
 export function EmbedPasskeys() {
   const account = useAccount()

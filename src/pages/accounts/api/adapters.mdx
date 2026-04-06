@@ -1,0 +1,28 @@
+---
+title: Adapters
+description: Pluggable adapters for the Tempo Accounts SDK Provider.
+---
+
+import { Cards, Card } from 'vocs'
+
+# Adapters
+
+Adapters control how accounts are created and managed. Pass an adapter to `Provider.create()` to configure the account management strategy.
+
+<Cards>
+  <Card
+    description="Embeds a universal Tempo Wallet dialog into your app"
+    to="/accounts/api/dialog"
+    title="dialog"
+  />
+  <Card
+    description="Embeds domain-bound passkey accounts into your app"
+    to="/accounts/api/webAuthn"
+    title="webAuthn"
+  />
+  <Card
+    description="Uses arbitrary keys for account management"
+    to="/accounts/api/local"
+    title="local"
+  />
+</Cards>

@@ -77,13 +77,11 @@ export function OptInToRewards() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { KeyManager, webAuthn } from 'wagmi/tempo'
+import { tempoWallet } from 'accounts/wagmi'
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn({
-    keyManager: KeyManager.localStorage(),
-  })],
+  connectors: [tempoWallet()],
   transports: {
     [tempo.id]: http(),
   },
@@ -137,13 +135,11 @@ export function StartReward() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { KeyManager, webAuthn } from 'wagmi/tempo'
+import { tempoWallet } from 'accounts/wagmi'
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn({
-    keyManager: KeyManager.localStorage(),
-  })],
+  connectors: [tempoWallet()],
   transports: {
     [tempo.id]: http(),
   },
@@ -190,13 +186,11 @@ export function ClaimReward() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { KeyManager, webAuthn } from 'wagmi/tempo'
+import { tempoWallet } from 'accounts/wagmi'
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn({
-    keyManager: KeyManager.localStorage(),
-  })],
+  connectors: [tempoWallet()],
   transports: {
     [tempo.id]: http(),
   },

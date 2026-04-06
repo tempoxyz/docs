@@ -1,0 +1,69 @@
+---
+title: Handler.feePayer
+description: Server handler that sponsors transaction fees for users.
+---
+
+# `Handler.feePayer`
+
+Creates a server handler that acts as a fee payer for transactions, enabling you to subsidize gas costs for users by signing transactions with a dedicated fee payer account on your backend.
+
+## Usage
+
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { Handler } from 'accounts/server'
+
+const handler = Handler.feePayer({
+  account: privateKeyToAccount('0x...'),
+})
+```
+
+Then plug `handler` into your server framework of choice:
+
+```ts
+createServer(handler.listener) // Node.js
+Bun.serve(handler) // Bun
+Deno.serve(handler) // Deno
+app.all('*', c => handler.fetch(c.request)) // Elysia
+app.use(handler.listener) // Express
+app.use(c => handler.fetch(c.req.raw)) // Hono
+export const GET = handler.fetch // Next.js
+export const POST = handler.fetch // Next.js
+```
+
+## Parameters
+
+### account
+
+- **Type:** `LocalAccount`
+- **Required**
+
+The account to use as the fee payer. This account will sign all transactions and pay the gas fees.
+
+### chains
+
+- **Type:** `readonly [Chain, ...Chain[]]`
+- **Default:** `[tempo, tempoModerato]`
+
+Supported chains. The handler resolves the client based on the `chainId` in the incoming transaction.
+
+### onRequest
+
+- **Type:** `(request: RpcRequest) => Promise<void>`
+- **Optional**
+
+Callback called before processing each request. Useful for logging, rate limiting, or custom validation.
+
+### path
+
+- **Type:** `string`
+- **Default:** `'/'`
+
+Path where the handler listens for requests.
+
+### transports
+
+- **Type:** `Record<number, Transport>`
+- **Default:** `http()` for each chain
+
+Transports keyed by chain ID.

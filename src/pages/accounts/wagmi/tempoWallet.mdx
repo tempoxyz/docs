@@ -1,0 +1,49 @@
+---
+title: tempoWallet
+description: Wagmi connector for the Tempo Wallet dialog.
+---
+
+# `tempoWallet`
+
+Creates a Wagmi connector backed by the Tempo Wallet dialog adapter.
+
+## Usage
+
+```ts
+import { createConfig, http } from 'wagmi'
+import { tempo } from 'wagmi/chains'
+import { tempoWallet } from 'accounts/wagmi'
+
+export const config = createConfig({
+  chains: [tempo],
+  connectors: [tempoWallet()],
+  transports: {
+    [tempo.id]: http(),
+  },
+})
+```
+
+## Parameters
+
+Accepts all [`dialog`](/accounts/api/dialog) adapter options, plus all [`Provider`](/accounts/api/provider) options except `adapter`.
+
+### authorizeAccessKey
+
+- **Type:** `() => { expiry: number; limits?: { token: Address; limit: bigint }[] }`
+- **Optional**
+
+Default access key parameters for `wallet_connect`.
+
+### chains
+
+- **Type:** `readonly [Chain, ...Chain[]]`
+- **Default:** `[tempo, tempoModerato]`
+
+Supported chains.
+
+### host
+
+- **Type:** `string`
+- **Default:** `'https://wallet.tempo.xyz/embed'`
+
+URL of the embed app.

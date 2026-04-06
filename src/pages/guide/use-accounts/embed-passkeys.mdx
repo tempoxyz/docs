@@ -8,9 +8,9 @@ import { EmbedPasskeys, SignInButtons } from '../../../components/guides/EmbedPa
 
 # Embed Passkey Accounts
 
-Create a domain-bound passkey account on Tempo using WebAuthn signatures for secure, passwordless authentication with [Tempo transactions](/protocol/transactions/spec-tempo-transaction).
+Create a domain-bound passkey account on Tempo using the [Tempo Accounts SDK](/accounts) and WebAuthn signatures for secure, passwordless authentication with [Tempo transactions](/protocol/transactions/spec-tempo-transaction).
 
-Passkeys enable users to authenticate with biometrics (fingerprint, Face ID, Touch ID) they already use for other apps. Keys are stored in the device's secure enclave and sync across devices via iCloud Keychain or Google Password Manager.
+The [`webAuthn`](/accounts/wagmi/webAuthn) Wagmi connector is the easiest way to get started. Passkeys enable users to authenticate with biometrics (fingerprint, Face ID, Touch ID) they already use for other apps. Keys are stored in the device's secure enclave and sync across devices via iCloud Keychain or Google Password Manager.
 
 :::info
 
@@ -49,13 +49,11 @@ Next, we will need to configure the `webAuthn` connector in our Wagmi config.
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { KeyManager, webAuthn } from 'wagmi/tempo' // [!code ++]
+import { webAuthn } from 'accounts/wagmi' // [!code ++]
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn({ // [!code ++]
-    keyManager: KeyManager.localStorage(), // [!code ++]
-  })], // [!code ++]
+  connectors: [webAuthn()], // [!code ++]
   multiInjectedProviderDiscovery: false,
   transports: {
     [tempo.id]: http(),
@@ -65,9 +63,15 @@ export const config = createConfig({
 
 :::warning
 
-The `KeyManager.localStorage()` implementation is not recommended for production use as it stores public keys on the client device, meaning it cannot be re-extracted when the user's storage is cleared or if the user is on another device. 
+Without an `authUrl`, credentials are stored locally on the client device. This means users will lose access to their passkey account if their storage is cleared or if they sign in from another device.
 
-For production, you should opt for a remote key manager such as [`KeyManager.http`](https://wagmi.sh/tempo/keyManagers/http).
+For production, you should set up a [`Handler.webAuthn`](/accounts/server/handler.webAuthn) server and pass the `authUrl` to the connector:
+
+```tsx
+connectors: [webAuthn({ authUrl: 'https://myapp.com/auth' })]
+```
+
+See [Deploying to Production](/accounts/production) for more details.
 
 :::
 
@@ -131,13 +135,11 @@ export function Example() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { KeyManager, webAuthn } from 'wagmi/tempo' // [!code ++]
+import { webAuthn } from 'accounts/wagmi' // [!code ++]
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn({ // [!code ++] 
-    keyManager: KeyManager.localStorage(), // [!code ++]
-  })], // [!code ++]
+  connectors: [webAuthn()], // [!code ++]
   multiInjectedProviderDiscovery: false,
   transports: {
     [tempo.id]: http(),
@@ -209,13 +211,11 @@ export function Example() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { KeyManager, webAuthn } from 'wagmi/tempo' // [!code ++]
+import { webAuthn } from 'accounts/wagmi' // [!code ++]
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn({ // [!code ++]
-    keyManager: KeyManager.localStorage(), // [!code ++]
-  })], // [!code ++]
+  connectors: [webAuthn()], // [!code ++]
   multiInjectedProviderDiscovery: false,
   transports: {
     [tempo.id]: http(),

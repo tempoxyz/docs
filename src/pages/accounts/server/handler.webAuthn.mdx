@@ -1,0 +1,95 @@
+---
+title: Handler.webAuthn
+description: Server-side WebAuthn ceremony handler for registration and authentication.
+---
+
+# `Handler.webAuthn`
+
+Creates a WebAuthn ceremony handler that manages registration and authentication flows server-side.
+
+Exposes 4 POST endpoints:
+
+- `POST /register/options` — Generate credential creation options
+- `POST /register` — Verify registration and store credential
+- `POST /login/options` — Generate credential request options
+- `POST /login` — Verify authentication
+
+## Usage
+
+```ts
+import { Handler, Kv } from 'accounts/server'
+
+const handler = Handler.webAuthn({
+  kv: Kv.memory(),
+  origin: 'https://example.com',
+  rpId: 'example.com',
+})
+```
+
+Then plug `handler` into your server framework of choice:
+
+```ts
+createServer(handler.listener) // Node.js
+Bun.serve(handler) // Bun
+Deno.serve(handler) // Deno
+app.all('*', c => handler.fetch(c.request)) // Elysia
+app.use(handler.listener) // Express
+app.use(c => handler.fetch(c.req.raw)) // Hono
+export const GET = handler.fetch // Next.js
+export const POST = handler.fetch // Next.js
+```
+
+:::warning
+`Kv.memory()` is not recommended for production use. Instead, use a persistent store like Cloudflare or Vercel KV, or a Redis instance. See [`Kv`](/accounts/server/kv) for available adapters.
+:::
+
+## Parameters
+
+### challengeTtl
+
+- **Type:** `number`
+- **Default:** `300` (5 minutes)
+
+Maximum age of a challenge in seconds before it expires.
+
+### kv
+
+- **Type:** `Kv`
+- **Required**
+
+Key-value store for challenges and credentials.
+
+### onAuthenticate
+
+- **Type:** `(params: { credentialId, publicKey, userId?, request }) => Response | void`
+- **Optional**
+
+Called after a successful authentication.
+
+### onRegister
+
+- **Type:** `(params: { credentialId, publicKey, request }) => Response | void`
+- **Optional**
+
+Called after a successful registration. The returned response is merged onto the default JSON response.
+
+### origin
+
+- **Type:** `string | readonly string[]`
+- **Required**
+
+Expected origin(s) for WebAuthn verification (e.g. `'https://example.com'`).
+
+### path
+
+- **Type:** `string`
+- **Default:** `''`
+
+Path prefix for the WebAuthn endpoints.
+
+### rpId
+
+- **Type:** `string`
+- **Required**
+
+Relying Party ID (e.g. `'example.com'`).
