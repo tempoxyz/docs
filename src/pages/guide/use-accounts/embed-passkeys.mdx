@@ -58,7 +58,7 @@ export const config = createConfig({
   })], // [!code ++]
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempo.id]: http(),
+    [tempoModerato.id]: http(),
   },
 })
 ```
@@ -140,7 +140,7 @@ export const config = createConfig({
   })], // [!code ++]
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempo.id]: http(),
+    [tempoModerato.id]: http(),
   },
 })
 ```
@@ -218,7 +218,7 @@ export const config = createConfig({
   })], // [!code ++]
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempo.id]: http(),
+    [tempoModerato.id]: http(),
   },
 })
 ```
@@ -229,21 +229,17 @@ export const config = createConfig({
 
 Now that you have created your first passkey account, you can now:
 - learn the [Best Practices](#best-practices) below
-- follow a guide on how to [make a payment](#TODO), [create a stablecoin](#TODO), and [more](#TODO) with a passkey account.
+- follow a guide on how to [send a payment](/guide/payments/send-a-payment), [create a stablecoin](/guide/issuance/create-a-stablecoin), and [execute swaps](/guide/stablecoin-dex/executing-swaps) with a passkey account.
 
 ::::
 
-{/* 
-
-TODO: note on public key retention with credentialId -> pubKey KV service.
-
-## Notes for Production
-
-### Public Key Retention
-
- */}
-
 ## Best Practices
+
+### Use a Remote Key Manager in Production
+
+`KeyManager.localStorage()` is useful for local development, but production applications should persist credential-to-public-key mappings on a backend service.
+
+Use [`KeyManager.http`](https://wagmi.sh/tempo/keyManagers/http) with your API so users can recover and continue using their passkey account across browser storage resets and device changes.
 
 ### Loading State
 
