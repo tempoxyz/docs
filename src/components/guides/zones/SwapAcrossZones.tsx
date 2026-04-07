@@ -7,6 +7,8 @@ import { Actions } from 'viem/tempo'
 import { useConnection, useConnectorClient, usePublicClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import {
+  getTempoZoneClient,
+  getZoneClientParameters,
   moderatoZoneFactory,
   routerCallbackGasLimit,
   stablecoinDex,
@@ -15,8 +17,8 @@ import {
   ZONE_B,
   zeroBytes32,
   zoneOutbox,
+  zoneRpcSyncTimeout,
 } from '../../../lib/private-zones.ts'
-import { getZoneClient, zoneRpcSyncTimeout } from '../../../lib/viem-zone.ts'
 import { Button, ExplorerLink, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { betaUsd, pathUsd } from '../tokens'
@@ -124,19 +126,20 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   const sourceZoneClient = React.useMemo(
     () =>
       connectorClient
-        ? (getZoneClient(connectorClient as never, {
-            feeToken: pathUsd,
-            zone: ZONE_A.id,
-          }) as unknown as ZoneClientLike)
+        ? (getTempoZoneClient(
+            connectorClient as never,
+            getZoneClientParameters(ZONE_A.id, ZONE_A.rpcUrl) as never,
+          ) as unknown as ZoneClientLike)
         : undefined,
     [connectorClient],
   )
   const targetZoneClient = React.useMemo(
     () =>
       connectorClient
-        ? (getZoneClient(connectorClient as never, {
-            zone: ZONE_B.id,
-          }) as unknown as ZoneClientLike)
+        ? (getTempoZoneClient(
+            connectorClient as never,
+            getZoneClientParameters(ZONE_B.id, ZONE_B.rpcUrl) as never,
+          ) as unknown as ZoneClientLike)
         : undefined,
     [connectorClient],
   )

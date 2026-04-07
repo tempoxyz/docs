@@ -15,7 +15,11 @@ import LucideRotateCcw from '~icons/lucide/rotate-ccw'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
 import { cva, cx } from '../../../cva.config'
 import { usePostHogTracking } from '../../lib/posthog'
-import { getZoneClient } from '../../lib/viem-zone.ts'
+import {
+  getTempoZoneClient,
+  getZoneClientParameters,
+  moderatoZoneRpcUrls,
+} from '../../lib/private-zones.ts'
 import { useTempoWalletConnector, useWebAuthnConnector } from '../../wagmi.config'
 import { Container as ParentContainer } from '../Container'
 import { alphaUsd } from './tokens'
@@ -254,17 +258,24 @@ export namespace Container {
   }
 
   function ZoneBalancesFooterItem(props: ZoneBalance & { address: Address; showLabel: boolean }) {
-    const { address, feeToken, label, showLabel, token, zone } = props
+    const { address, label, showLabel, token, zone } = props
     const { data: connectorClient } = useConnectorClient()
+    const zoneRpcUrl =
+      moderatoZoneRpcUrls[zone as keyof typeof moderatoZoneRpcUrls] ??
+      (
+        connectorClient?.chain as
+          | { zones?: Record<number, { rpcUrls: { default: { http: string[] } } }> }
+          | undefined
+      )?.zones?.[zone]?.rpcUrls.default.http[0]
     const zoneClient = React.useMemo(
       () =>
-        connectorClient
-          ? (getZoneClient(connectorClient as never, {
-              ...(feeToken ? { feeToken } : {}),
-              zone,
-            }) as unknown as ZoneClientLike)
+        connectorClient && zoneRpcUrl
+          ? (getTempoZoneClient(
+              connectorClient as never,
+              getZoneClientParameters(zone, zoneRpcUrl) as never,
+            ) as unknown as ZoneClientLike)
           : undefined,
-      [connectorClient, feeToken, zone],
+      [connectorClient, zone, zoneRpcUrl],
     )
     const { data: metadata, isPending: metadataIsPending } = Hooks.token.useGetMetadata({
       token,

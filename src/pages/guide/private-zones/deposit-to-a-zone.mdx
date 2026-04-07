@@ -8,6 +8,10 @@ import { DepositToZone } from '../../../components/guides/zones/DepositToZone.ts
 
 # Deposit to a Zone
 
+:::info
+Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, reach out to us at [zones@tempo.xyz](mailto:zones@tempo.xyz).
+:::
+
 Use this guide when you want to move `pathUSD` from your public Tempo balance into `Zone A`. You will submit a public-chain deposit first, then wait for `Zone A` to credit the net amount after fees.
 
 The deposit is accepted through `ZonePortal` on the public chain. You need private zone authorization to read the resulting zone balance, because those reads are only exposed to the authenticated account.

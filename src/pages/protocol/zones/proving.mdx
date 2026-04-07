@@ -5,6 +5,10 @@ description: Batch submission and proof verification for Tempo zones, including 
 
 # Zone Proving
 
+:::info
+Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, reach out to us at [zones@tempo.xyz](mailto:zones@tempo.xyz).
+:::
+
 :::warning
 The zone prover is not yet live. This page describes the planned design. The prover will be added in a future release.
 :::
@@ -111,4 +115,3 @@ The zone accesses Tempo state via the TempoState predeploy (`0x1c00...0000`). Du
 3. The proof includes Merkle proofs for each Tempo account and storage slot accessed during the batch.
 
 Tempo state staleness depends on how frequently the sequencer calls `advanceTempo()`. The zone client must only finalize Tempo headers after finality to avoid reorg risk.
-

@@ -5,6 +5,10 @@ description: Architecture of Tempo Zones, including contract layout, sequencer m
 
 # Tempo Zone Architecture
 
+:::info
+Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, reach out to us at [zones@tempo.xyz](mailto:zones@tempo.xyz).
+:::
+
 A Tempo Zone is a dedicated blockchain rooted to Tempo Mainnet where one sequencer controls block production and visibility. No zone data is published on Tempo Mainnet. Instead, the sequencer publishes commitments to the current zone state along with proofs of correct execution. These proofs allow funds to move in and out of the Tempo Zone. This scaling approach is known as a validium.
 
 The sequencer can enable any TIP-20 token on the Tempo Zone. Any enabled TIP-20 with USD currency can pay for zone gas. TIP-20 tokens bridge into the zone nearly instantly and bridge out as soon as a validity proof is posted (targeting under 10 seconds).

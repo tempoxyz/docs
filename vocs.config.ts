@@ -649,7 +649,6 @@ export default defineConfig({
                     text: 'Proving',
                     link: '/protocol/zones/proving',
                   },
-
                 ],
               },
             ],

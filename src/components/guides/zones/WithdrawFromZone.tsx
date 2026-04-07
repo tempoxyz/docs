@@ -6,8 +6,13 @@ import { sendTransactionSync } from 'viem/actions'
 import { Actions } from 'viem/tempo'
 import { useConnection, useConnectorClient, usePublicClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
+import {
+  getTempoZoneClient,
+  getZoneClientParameters,
+  moderatoZoneRpcUrls,
+  zoneRpcSyncTimeout,
+} from '../../../lib/private-zones.ts'
 import { encodeAuthenticatedWithdrawalCall } from '../../../lib/private-zones-withdrawal.ts'
-import { getZoneClient, zoneRpcSyncTimeout } from '../../../lib/viem-zone.ts'
 import { Button, ExplorerLink, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { pathUsd } from '../tokens'
@@ -90,10 +95,10 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
   const zoneClient = React.useMemo(
     () =>
       connectorClient
-        ? (getZoneClient(connectorClient as never, {
-            feeToken: pathUsd,
-            zone: ZONE_ID,
-          }) as unknown as ZoneClientLike)
+        ? (getTempoZoneClient(
+            connectorClient as never,
+            getZoneClientParameters(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]) as never,
+          ) as unknown as ZoneClientLike)
         : undefined,
     [connectorClient],
   )

@@ -6,7 +6,11 @@ import { sendTransactionSync } from 'viem/actions'
 import { Actions } from 'viem/tempo'
 import { useConnection, useConnectorClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
-import { getZoneClient } from '../../../lib/viem-zone.ts'
+import {
+  getTempoZoneClient,
+  getZoneClientParameters,
+  moderatoZoneRpcUrls,
+} from '../../../lib/private-zones.ts'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { pathUsd } from '../tokens'
@@ -76,7 +80,10 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   const zoneClient = React.useMemo(
     () =>
       connectorClient
-        ? (getZoneClient(connectorClient as never, { zone: ZONE_ID }) as unknown as ZoneClientLike)
+        ? (getTempoZoneClient(
+            connectorClient as never,
+            getZoneClientParameters(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]) as never,
+          ) as unknown as ZoneClientLike)
         : undefined,
     [connectorClient],
   )

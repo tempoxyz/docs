@@ -5,6 +5,10 @@ description: Account-scoped access control on Tempo Zones, including private bal
 
 # Accounts
 
+:::info
+Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, reach out to us at [zones@tempo.xyz](mailto:zones@tempo.xyz).
+:::
+
 Tempo Zones enforce account privacy at two complementary layers: the EVM execution level and the [RPC access control](/protocol/zones/rpc) level. Neither is sufficient alone.
 
 - **Execution alone is insufficient.** Without RPC restrictions, a caller could use `eth_getStorageAt` to read TIP-20 balance mapping slots directly, bypassing `balanceOf` access control.

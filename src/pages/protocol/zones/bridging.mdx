@@ -5,6 +5,10 @@ description: Deposit and withdraw TIP-20 tokens between Tempo Mainnet and Tempo 
 
 # Zone Bridging
 
+:::info
+Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, reach out to us at [zones@tempo.xyz](mailto:zones@tempo.xyz).
+:::
+
 Tempo Zones use Tempo-centric bridging for cross-chain operations: deposits flow from Tempo into a zone, and withdrawals flow from a zone back to Tempo with optional callbacks for composability.
 
 ## Deposits (Tempo → Zone)
@@ -87,4 +91,3 @@ senderTag = keccak256(abi.encodePacked(sender, txHash))
 The `txHash` acts as a blinding factor known only to the sender and sequencer. The sender can selectively disclose their identity by revealing `txHash` to any party, who verifies it against the `senderTag`.
 
 For automated disclosure, the sender can specify a `revealTo` public key. The sequencer encrypts `(sender, txHash)` to that key using ECDH, populating the `encryptedSender` field in the Tempo Mainnet-facing withdrawal struct. This enables cross-zone transfers where the destination zone's sequencer can automatically attribute incoming deposits.
-
