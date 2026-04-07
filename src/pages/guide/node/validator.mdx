@@ -29,11 +29,8 @@ Once you've downloaded the snapshot and have been whitelisted on-chain, you can 
 tempo node --datadir <datadir> \
     --chain <mainnet|moderato> \
     --consensus.signing-key <path> \
-    --consensus.fee-recipient <validator_wallet_address> \
     --telemetry-url <TELEMETRY_URL>
 ```
-
-If you are not prepared to accept fees, we recommend setting the `--consensus.fee-recipient` field to `0x0000000000000000000000000000000000000000` as that will funnel the funds to a non-user controllable wallet (there is no known private key for the address).
 
 ### Optional flags
 
