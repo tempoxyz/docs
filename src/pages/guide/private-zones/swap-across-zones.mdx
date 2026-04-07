@@ -93,15 +93,6 @@ This guide's swap flow is asynchronous because the trade temporarily leaves the 
 
 The source token is withdrawn through `ZoneOutbox`, transferred to `SwapAndDepositRouter` on Tempo, optionally swapped on the Stablecoin DEX, and then deposited back through a `ZonePortal` as the output token. That routed deposit pays the normal portal deposit fee, so the amount that arrives on the zone is the post-fee output.
 
-That creates multiple checkpoints your app should reflect in the UI:
-
-- The withdrawal request is accepted on the zone.
-- The withdrawal is processed and the funds are released on the L1.
-- The StablecoinDEX completes the swap on the L1 and the output token is deposited back into the `ZonePortal`.
-- Deposit is processed back into the zone and becomes visible through the zone client as a post-fee amount.
-
-A user may see the input asset leave the zone balance before the output asset appears. The swap should only be treated as fully settled once the zone balance for the output token increases. That balance increase reflects the router output minus the portal deposit fee.
-
 :::warning
-  If the routed withdrawal fails on Tempo—for example because the swap fails, the transfer fails, the router callback reverts, or the target deposit cannot be completed—the amount is bounced back to the withdrawal's `fallbackRecipient` inside the source zone. The fee is still paid to the sequencer, so a failed routed swap still results in fees for the sender.
+If the routed withdrawal fails on Tempo - for example because the swap fails, the transfer fails, the router callback reverts, or the target deposit cannot be completed—the amount is bounced back to the withdrawal's `fallbackRecipient` inside the source zone. The fee is still paid to the sequencer, so a failed routed swap still results in fees for the sender.
 :::

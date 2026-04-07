@@ -171,6 +171,10 @@ export default defineConfig({
                 link: '/guide/private-zones/send-tokens-within-a-zone',
               },
               {
+                text: 'Send tokens across zones',
+                link: '/guide/private-zones/send-tokens-across-zones',
+              },
+              {
                 text: 'Swap across zones',
                 link: '/guide/private-zones/swap-across-zones',
               },

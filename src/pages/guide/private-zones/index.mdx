@@ -1,6 +1,6 @@
 ---
 title: Connect to Tempo Zones
-description: Learn how Tempo Zones work alongside the public chain and follow guides for depositing, sending, swapping, and withdrawing pathUSD across Zone A and Zone B.
+description: Learn how Tempo Zones work alongside the public chain and follow guides for depositing, sending within a zone, routing pathUSD across zones, swapping into betaUSD, and withdrawing.
 ---
 
 import { Card, Cards } from 'vocs'
@@ -16,10 +16,10 @@ Tempo Zones let you keep balances and transfers inside a private execution envir
 ## Before you start
 
 - Use a Tempo passkey account in the demo so the page can authorize private zone reads.
-- Keep some `pathUSD` on the public chain if you want to try deposits, zone top-ups, swaps, or withdrawals.
-- Expect deposits, routed swaps, and withdrawals to complete asynchronously rather than in a single balance update.
+- Keep some `pathUSD` on the public chain if you want to try deposits, source-zone top-ups, routed sends, swaps, or withdrawals.
+- Expect deposits, routed sends, routed swaps, and withdrawals to complete asynchronously rather than in a single balance update.
 
-These guides cover the baseline zone workflows used in the current demos: deposits through `Actions.zone.depositSync(...)` and `Actions.zone.encryptedDepositSync(...)`, in-zone transfers, routed swaps, direct withdrawals through `Actions.zone.requestWithdrawalSync(...)`, and authenticated withdrawals through `Actions.zone.requestEncryptedWithdrawalSync(...)`.
+These guides cover the baseline zone workflows used in the current demos: deposits through `Actions.zone.depositSync(...)` and `Actions.zone.encryptedDepositSync(...)`, in-zone transfers, same-token routed sends through `Actions.zone.requestWithdrawalSync(...)`, routed swaps, direct withdrawals, and authenticated withdrawals through `Actions.zone.requestEncryptedWithdrawalSync(...)`.
 
 The deposit guide's demo lets you switch between plaintext and encrypted deposits, and the withdrawal guide lets you switch between standard and authenticated withdrawals, while keeping the transaction flow on the upstream `viem` zone actions.
 
@@ -27,6 +27,7 @@ The deposit guide's demo lets you switch between plaintext and encrypted deposit
 
 - **Deposit to a zone** if you want to move `pathUSD` from your public balance into `Zone A`.
 - **Send tokens within a zone** if you want to transfer `pathUSD` between private accounts without leaving `Zone A`.
+- **Send tokens across zones** if you want to leave `Zone A` with `pathUSD` and arrive in `Zone B` with the same token.
 - **Swap across zones** if you want to leave `Zone A` with `pathUSD` and arrive in `Zone B` with `betaUSD`.
 - **Withdraw from a zone** if you want to move `pathUSD` back from `Zone A` to your public balance.
 
@@ -42,6 +43,12 @@ The deposit guide's demo lets you switch between plaintext and encrypted deposit
     icon="lucide:send-horizontal"
     title="Send tokens within a zone"
     to="/guide/private-zones/send-tokens-within-a-zone"
+  />
+  <Card
+    description="Route pathUSD out of Zone A and into Zone B without changing the token."
+    icon="lucide:move-right"
+    title="Send tokens across zones"
+    to="/guide/private-zones/send-tokens-across-zones"
   />
   <Card
     description="Withdraw from Zone A, swap on the public chain, and land in Zone B as betaUSD."
