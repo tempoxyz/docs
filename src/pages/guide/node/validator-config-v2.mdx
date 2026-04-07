@@ -7,7 +7,7 @@ description: Manage your validator with ValidatorConfig V2. Self-service key rot
 
 ValidatorConfig V2 ([TIP-1017](/protocol/tips/tip-1017)) is a new precompile for managing consensus participants. It replaces the original ValidatorConfig with stronger safety guarantees: ed25519 signature verification at registration, append-only history, and self-service operations for validators.
 
-V2 becomes available after the T2 hardfork is activated and after an admin has finished the migration of entries from V1 to V2. Migration completion will be communicated to operators — you can also [check if V2 is active](#check-if-v2-is-active) yourself.
+V2 was [activated on mainnet](https://explore.mainnet.tempo.xyz/receipt/0x4716147e3c2bf5c8d014b8c27d6e2af0042d5a5f29bdead256d6f33038702d64) as part of the T2 hardfork.
 
 ## Validator states
 
@@ -37,24 +37,6 @@ All write operations require either the contract owner or the validator's own ad
 ```solidity
 address constant VALIDATOR_CONFIG_V2 = 0xCCCCCCCC00000000000000000000000000000001;
 ```
-
-## Check if V2 is active
-
-After the T2 hardfork, the contract owner migrates validators from V1 to V2. Use these calls to check if migration is complete and V2 is active:
-
-```bash
-# Returns true once migration is complete and V2 is the active config
-cast call 0xCCCCCCCC00000000000000000000000000000001 \
-  "isInitialized()(bool)" \
-  --rpc-url https://rpc.tempo.xyz
-
-# Returns the block height at which V2 was initialized (0 if not yet initialized)
-cast call 0xCCCCCCCC00000000000000000000000000000001 \
-  "getInitializedAtHeight()(uint64)" \
-  --rpc-url https://rpc.tempo.xyz
-```
-
-If `isInitialized()` returns `true`, V2 is active and all operations on this page are available. If it returns `false`, the network is still on [ValidatorConfig V1](/guide/node/validator-config-v1).
 
 ## Reading validator state
 
