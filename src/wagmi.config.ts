@@ -13,7 +13,7 @@ import {
   useConnectors,
   webSocket,
 } from 'wagmi'
-import { webAuthn } from 'accounts/wagmi'
+import { KeyManager, webAuthn } from 'wagmi/tempo'
 import { alphaUsd, betaUsd, pathUsd, thetaUsd } from './components/guides/tokens'
 
 const feeToken = '0x20c0000000000000000000000000000000000001'
@@ -24,6 +24,13 @@ const chain =
     : import.meta.env.VITE_TEMPO_ENV === 'devnet'
       ? tempoDevnet.extend({ feeToken })
       : tempoModerato.extend({ feeToken })
+
+const rpId = (() => {
+  const hostname = globalThis.location?.hostname
+  if (!hostname) return undefined
+  const parts = hostname.split('.')
+  return parts.length > 2 ? parts.slice(-2).join('.') : hostname
+})()
 
 export function getConfig(options: getConfig.Options = {}) {
   const { multiInjectedProviderDiscovery = false } = options
@@ -46,8 +53,12 @@ export function getConfig(options: getConfig.Options = {}) {
         feePayerUrl: 'https://sponsor.moderato.tempo.xyz',
       }),
       webAuthn({
-        authUrl: 'https://keys.tempo.xyz',
-        rdns: 'webAuthn',
+        grantAccessKey: {
+          // @ts-expect-error - TODO: migrate to webAuthn on Accounts SDK
+          chainId: BigInt(chain.id),
+        },
+        keyManager: KeyManager.http('https://keys.tempo.xyz'),
+        rpId,
       }),
     ],
     multiInjectedProviderDiscovery,

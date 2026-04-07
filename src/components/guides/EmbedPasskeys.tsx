@@ -41,8 +41,8 @@ export function SignInButtons() {
           connect.connect({
             connector,
             capabilities: {
-              name: 'Tempo Docs',
-              method: 'register',
+              label: 'Tempo Docs',
+              type: 'sign-up',
             },
           })
         }}

@@ -1,7 +1,7 @@
 'use client'
 import * as React from 'react'
 import { useChains, useConnect, useConnection, useConnectors, useSwitchChain } from 'wagmi'
-import { Button, Logout, TEMPO_CONNECTOR_ID } from './guides/Demo'
+import { Button, Logout } from './guides/Demo'
 import { filterSupportedInjectedConnectors } from './lib/wallets'
 
 export function ConnectWallet({ showAddChain = true }: { showAddChain?: boolean }) {
@@ -19,7 +19,7 @@ export function ConnectWallet({ showAddChain = true }: { showAddChain?: boolean 
     return (
       <div className="flex items-center text-[14px] -tracking-[2%]">No browser wallets found.</div>
     )
-  if (!address || connector?.id === TEMPO_CONNECTOR_ID)
+  if (!address || connector?.id === 'webAuthn')
     return (
       <div className="flex gap-2">
         {injectedConnectors.map((connector) => (
