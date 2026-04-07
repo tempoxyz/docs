@@ -29,6 +29,9 @@ const rpId = (() => {
   const hostname = globalThis.location?.hostname
   if (!hostname) return undefined
 
+  // IP hosts and localhost must use the exact hostname as the RP ID.
+  if (hostname === 'localhost' || isIpAddress(hostname)) return hostname
+
   // Vercel preview hosts live under the public suffix `vercel.app`, so the
   // RP ID must stay scoped to the exact preview hostname.
   if (hostname.endsWith('.vercel.app')) return hostname
@@ -36,6 +39,8 @@ const rpId = (() => {
   const parts = hostname.split('.')
   return parts.length > 2 ? parts.slice(-2).join('.') : hostname
 })()
+
+export const webAuthnRpId = rpId
 
 export function getConfig(options: getConfig.Options = {}) {
   const { multiInjectedProviderDiscovery = false } = options
@@ -68,10 +73,7 @@ export function getConfig(options: getConfig.Options = {}) {
               },
             }),
             webAuthn({
-              grantAccessKey: {
-                // @ts-expect-error - TODO: migrate to webAuthn on Accounts SDK
-                chainId: BigInt(chain.id),
-              },
+              grantAccessKey: true,
               keyManager: KeyManager.http('https://keys.tempo.xyz'),
               rpId,
             }),
@@ -114,6 +116,8 @@ export namespace getConfig {
 
 export type Config = ReturnType<typeof getConfig>
 
+export const config = getConfig()
+
 export const queryClient = new QueryClient()
 
 export function useTempoWalletConnector() {
@@ -132,6 +136,10 @@ export function useWebAuthnConnector() {
     () => connectors.find((connector) => connector.id === 'webAuthn')!,
     [connectors],
   )
+}
+
+function isIpAddress(hostname: string) {
+  return /^(?:\d{1,3}\.){3}\d{1,3}$/.test(hostname) || hostname.includes(':')
 }
 
 declare module 'wagmi' {

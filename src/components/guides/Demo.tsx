@@ -21,6 +21,7 @@ import {
   moderatoZoneRpcUrls,
   stripRpcBasicAuth,
 } from '../../lib/private-zones.ts'
+import { useRootWebAuthnAccount } from '../../lib/useRootWebAuthnAccount.ts'
 import { useTempoWalletConnector, useWebAuthnConnector } from '../../wagmi.config'
 import { Container as ParentContainer } from '../Container'
 import { alphaUsd } from './tokens'
@@ -261,6 +262,7 @@ export namespace Container {
   function ZoneBalancesFooterItem(props: ZoneBalance & { address: Address; showLabel: boolean }) {
     const { address, label, showLabel, token, zone } = props
     const { data: connectorClient } = useConnectorClient()
+    const { data: rootWebAuthnAccount } = useRootWebAuthnAccount()
     const zoneRpcUrl =
       moderatoZoneRpcUrls[zone as keyof typeof moderatoZoneRpcUrls] ??
       (
@@ -270,9 +272,9 @@ export namespace Container {
       )?.zones?.[zone]?.rpcUrls.default.http[0]
     const zoneClient = React.useMemo(
       () =>
-        connectorClient?.account && zoneRpcUrl
+        rootWebAuthnAccount && zoneRpcUrl
           ? (createClient({
-              account: connectorClient.account,
+              account: rootWebAuthnAccount,
               chain: zoneModerato(zone),
               transport: zoneHttp(
                 stripRpcBasicAuth(zoneRpcUrl),
@@ -280,7 +282,7 @@ export namespace Container {
               ),
             }).extend(tempoActions()) as unknown as ZoneClientLike)
           : undefined,
-      [connectorClient, zone, zoneRpcUrl],
+      [rootWebAuthnAccount, zone, zoneRpcUrl],
     )
     const { data: metadata, isPending: metadataIsPending } = Hooks.token.useGetMetadata({
       token,

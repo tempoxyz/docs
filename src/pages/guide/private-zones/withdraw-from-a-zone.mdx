@@ -17,8 +17,6 @@ Use this guide when you want to move `pathUSD` out of `Zone A` and back to your 
 
 Direct withdrawals exit through `ZoneOutbox` on the zone chain. You submit the withdrawal request in the zone first, then wait for the public balance to increase after the batch settles.
 
-The demo below supports both the standard `Actions.zone.requestWithdrawalSync(...)` flow and the authenticated `Actions.zone.requestEncryptedWithdrawalSync(...)` flow. In both cases, `signAuthorizationToken()` makes authenticated zone RPC access explicit for the session.
-
 ## Withdrawing pathUSD from Zone A
 
 By the end of this guide you will have withdrawn `pathUSD` from `Zone A` and confirmed the balance update on the public chain.

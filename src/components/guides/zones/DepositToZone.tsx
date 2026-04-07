@@ -11,6 +11,8 @@ import {
   moderatoZoneRpcUrls,
   stripRpcBasicAuth,
 } from '../../../lib/private-zones.ts'
+import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
+import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
 import { Button, ExplorerLink, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { pathUsd } from '../tokens'
@@ -26,15 +28,7 @@ type ZoneClientLike = {
   token: {
     getBalance: (parameters: { account: Hex; token: Hex }) => Promise<bigint>
   }
-  zone: {
-    signAuthorizationToken: () => Promise<{
-      authentication: {
-        expiresAt: number
-        zoneId: number
-      }
-      token: Hex
-    }>
-  }
+  zone: ZoneAuthClientLike['zone']
 }
 
 type RootChainWithZones = {
@@ -76,6 +70,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
   const { address, mode } = props
   const queryClient = useQueryClient()
   const { data: connectorClient } = useConnectorClient()
+  const { data: rootWebAuthnAccount } = useRootWebAuthnAccount()
   const publicClient = usePublicClient()
   const zonePortalAddress = (connectorClient?.chain as RootChainWithZones | undefined)?.zones?.[
     ZONE_ID
@@ -91,9 +86,9 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
 
   const zoneClient = React.useMemo(
     () =>
-      connectorClient?.account
+      rootWebAuthnAccount
         ? (createClient({
-            account: connectorClient.account,
+            account: rootWebAuthnAccount,
             chain: zoneModerato(ZONE_ID),
             transport: zoneHttp(
               stripRpcBasicAuth(moderatoZoneRpcUrls[ZONE_ID]),
@@ -101,35 +96,28 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
             ),
           }).extend(tempoActions()) as unknown as ZoneClientLike)
         : undefined,
-    [connectorClient],
+    [rootWebAuthnAccount],
   )
 
-  const authQuery = useQuery({
-    enabled: false,
+  const zoneAuthorization = useZoneAuthorization({
+    address,
+    chainId: zoneModerato(ZONE_ID).id,
     queryKey: ['guide-private-zones-auth', address, ZONE_ID],
-    queryFn: async () => {
-      if (!zoneClient) throw new Error('zone client not ready')
-
-      const auth = await zoneClient.zone.signAuthorizationToken()
-
-      return { auth }
-    },
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-    retry: false,
-    staleTime: 30_000,
+    zoneClient,
   })
 
   React.useEffect(() => {
-    if (!authQuery.isSuccess) return
+    if (!zoneAuthorization.isAuthorized) return
 
     void queryClient.invalidateQueries({
       queryKey: ['demo-zone-balance', address, ZONE_ID],
     })
-  }, [address, authQuery.isSuccess, queryClient])
+  }, [address, queryClient, zoneAuthorization.isAuthorized])
 
   const depositSetupQuery = useQuery({
-    enabled: Boolean(connectorClient && publicClient && zonePortalAddress && authQuery.isSuccess),
+    enabled: Boolean(
+      connectorClient && publicClient && zonePortalAddress && zoneAuthorization.isAuthorized,
+    ),
     queryKey: ['guide-private-zones-deposit-setup', address, ZONE_ID, zonePortalAddress],
     queryFn: async (): Promise<DepositSetup> => {
       if (!publicClient) throw new Error('public client not ready')
@@ -229,7 +217,9 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
     : undefined
 
   const zoneBalanceQuery = useQuery({
-    enabled: Boolean(zoneClient && authQuery.isSuccess && targetZoneBalance !== undefined),
+    enabled: Boolean(
+      zoneClient && zoneAuthorization.isAuthorized && targetZoneBalance !== undefined,
+    ),
     queryKey: ['guide-private-zones-zone-balance', address, ZONE_ID],
     queryFn: async () => {
       if (!zoneClient) throw new Error('zone client not ready')
@@ -261,18 +251,19 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
       typeof zoneBalanceQuery.data === 'bigint' &&
       zoneBalanceQuery.data >= targetZoneBalance,
   )
-  const authIsPreparing = authQuery.fetchStatus === 'fetching'
-  const stepTwoAction = authQuery.isSuccess ? undefined : (
+  const authIsPreparing =
+    zoneAuthorization.isChecking || zoneAuthorization.authorizeMutation.isPending
+  const stepTwoAction = zoneAuthorization.isAuthorized ? undefined : (
     <Button
       className="font-normal text-[14px] -tracking-[2%]"
       disabled={authIsPreparing || !zoneClient}
-      onClick={() => authQuery.refetch()}
+      onClick={() => zoneAuthorization.authorizeMutation.mutate()}
       type="button"
       variant={zoneClient ? 'accent' : 'default'}
     >
       {authIsPreparing
         ? `Authorizing ${ZONE_LABEL} reads`
-        : authQuery.isError
+        : zoneAuthorization.authorizeMutation.isError
           ? 'Retry'
           : `Authorize ${ZONE_LABEL} reads`}
     </Button>
@@ -283,10 +274,10 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
     stepThreeAction = (
       <Button
         className="font-normal text-[14px] -tracking-[2%]"
-        disabled={fundMutation.isPending || !authQuery.isSuccess || rootBalanceIsPending}
+        disabled={fundMutation.isPending || !zoneAuthorization.isAuthorized || rootBalanceIsPending}
         onClick={() => fundMutation.mutate()}
         type="button"
-        variant={authQuery.isSuccess ? 'accent' : 'default'}
+        variant={zoneAuthorization.isAuthorized ? 'accent' : 'default'}
       >
         {fundMutation.isPending ? 'Getting pathUSD' : 'Get testnet pathUSD'}
       </Button>
@@ -317,10 +308,10 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
     stepThreeAction = (
       <Button
         className="font-normal text-[14px] -tracking-[2%]"
-        disabled={depositMutation.isPending || !authQuery.isSuccess}
+        disabled={depositMutation.isPending || !zoneAuthorization.isAuthorized}
         onClick={() => depositMutation.mutate()}
         type="button"
-        variant={authQuery.isSuccess ? 'accent' : 'default'}
+        variant={zoneAuthorization.isAuthorized ? 'accent' : 'default'}
       >
         {getDepositActionLabel({ isPending: depositMutation.isPending })}
       </Button>
@@ -330,16 +321,16 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
   return (
     <>
       <Step
-        active={!authQuery.isSuccess}
-        completed={authQuery.isSuccess}
+        active={!zoneAuthorization.isAuthorized}
+        completed={zoneAuthorization.isAuthorized}
         actions={stepTwoAction}
-        error={authQuery.error}
+        error={zoneAuthorization.error}
         number={2}
         title={`Authorize private reads in ${ZONE_LABEL}.`}
       />
 
       <Step
-        active={authQuery.isSuccess && !depositMutation.isSuccess}
+        active={zoneAuthorization.isAuthorized && !depositMutation.isSuccess}
         completed={depositMutation.isSuccess}
         actions={stepThreeAction}
         error={depositMutation.error ?? depositSetupQuery.error ?? fundMutation.error}

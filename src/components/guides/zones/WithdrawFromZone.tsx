@@ -12,6 +12,8 @@ import {
   stripRpcBasicAuth,
   zoneRpcSyncTimeout,
 } from '../../../lib/private-zones.ts'
+import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
+import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
 import { Button, ExplorerLink, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { pathUsd } from '../tokens'
@@ -52,13 +54,8 @@ type ZoneClientLike = {
       to: Hex
       token: Hex
     }) => Promise<{ receipt: { blockNumber: bigint; transactionHash: Hex } }>
-    signAuthorizationToken: () => Promise<{
-      authentication: {
-        expiresAt: number
-        zoneId: number
-      }
-      token: Hex
-    }>
+    getAuthorizationTokenInfo: ZoneAuthClientLike['zone']['getAuthorizationTokenInfo']
+    signAuthorizationToken: ZoneAuthClientLike['zone']['signAuthorizationToken']
     getWithdrawalFee: () => Promise<bigint>
   }
 }
@@ -95,6 +92,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
   const queryClient = useQueryClient()
   const publicClient = usePublicClient()
   const { data: connectorClient } = useConnectorClient()
+  const { data: rootWebAuthnAccount } = useRootWebAuthnAccount()
   const {
     data: rootBalance,
     isPending: rootBalanceIsPending,
@@ -106,9 +104,9 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
 
   const zoneClient = React.useMemo(
     () =>
-      connectorClient?.account
+      rootWebAuthnAccount
         ? (createClient({
-            account: connectorClient.account,
+            account: rootWebAuthnAccount,
             chain: zoneModerato(ZONE_ID),
             transport: zoneHttp(
               stripRpcBasicAuth(moderatoZoneRpcUrls[ZONE_ID]),
@@ -116,35 +114,26 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
             ),
           }).extend(tempoActions()) as unknown as ZoneClientLike)
         : undefined,
-    [connectorClient],
+    [rootWebAuthnAccount],
   )
 
-  const authQuery = useQuery({
-    enabled: false,
+  const zoneAuthorization = useZoneAuthorization({
+    address,
+    chainId: zoneModerato(ZONE_ID).id,
     queryKey: ['guide-private-zones-withdraw-auth', address, ZONE_ID],
-    queryFn: async () => {
-      if (!zoneClient) throw new Error('zone client not ready')
-
-      const auth = await zoneClient.zone.signAuthorizationToken()
-
-      return { auth }
-    },
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-    retry: false,
-    staleTime: 30_000,
+    zoneClient,
   })
 
   React.useEffect(() => {
-    if (!authQuery.isSuccess) return
+    if (!zoneAuthorization.isAuthorized) return
 
     void queryClient.invalidateQueries({
       queryKey: ['demo-zone-balance', address, ZONE_ID],
     })
-  }, [address, authQuery.isSuccess, queryClient])
+  }, [address, queryClient, zoneAuthorization.isAuthorized])
 
   const withdrawalFeeQuery = useQuery({
-    enabled: Boolean(zoneClient && authQuery.isSuccess),
+    enabled: Boolean(zoneClient && zoneAuthorization.isAuthorized),
     queryKey: ['guide-private-zones-withdraw-fee', address, ZONE_ID],
     queryFn: async () => {
       if (!zoneClient) throw new Error('zone client not ready')
@@ -155,7 +144,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
   })
 
   const zoneBalanceQuery = useQuery({
-    enabled: Boolean(zoneClient && authQuery.isSuccess),
+    enabled: Boolean(zoneClient && zoneAuthorization.isAuthorized),
     queryKey: ['guide-private-zones-withdraw-zone-balance', address, ZONE_ID],
     queryFn: async () => {
       if (!zoneClient) throw new Error('zone client not ready')
@@ -224,6 +213,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
       if (!connectorClient) throw new Error('connector client not ready')
       if (!publicClient) throw new Error('public client not ready')
       if (!zoneClient) throw new Error('zone client not ready')
+      if (!rootWebAuthnAccount) throw new Error('root account not ready')
       if (withdrawalFeeQuery.data === undefined) throw new Error('withdrawal fee not ready')
 
       const currentRootBalance = await Actions.token.getBalance(connectorClient as never, {
@@ -238,7 +228,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
         mode === 'authenticated'
           ? (
               await zoneClient.zone.requestEncryptedWithdrawalSync({
-                account: connectorClient.account,
+                account: rootWebAuthnAccount,
                 amount: WITHDRAWAL_AMOUNT,
                 feeToken: pathUsd,
                 revealTo: AUTHENTICATED_WITHDRAWAL_REVEAL_TO,
@@ -249,7 +239,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
             ).receipt
           : (
               await zoneClient.zone.requestWithdrawalSync({
-                account: connectorClient.account,
+                account: rootWebAuthnAccount,
                 amount: WITHDRAWAL_AMOUNT,
                 feeToken: pathUsd,
                 timeout: zoneRpcSyncTimeout,
@@ -283,7 +273,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
       publicClient &&
         zoneClient &&
         connectorClient &&
-        authQuery.isSuccess &&
+        zoneAuthorization.isAuthorized &&
         withdrawMutation.isSuccess,
     ),
     queryKey: [
@@ -345,18 +335,19 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
   const settlementTxHash = withdrawalConfirmationQuery.data?.txHash
   const withdrawalConfirmed = Boolean(settlementTxHash)
   const topUpReceipt = topUpMutation.data?.receipt
-  const authIsPreparing = authQuery.fetchStatus === 'fetching'
-  const stepTwoAction = authQuery.isSuccess ? undefined : (
+  const authIsPreparing =
+    zoneAuthorization.isChecking || zoneAuthorization.authorizeMutation.isPending
+  const stepTwoAction = zoneAuthorization.isAuthorized ? undefined : (
     <Button
       className="font-normal text-[14px] -tracking-[2%]"
       disabled={authIsPreparing || !zoneClient}
-      onClick={() => authQuery.refetch()}
+      onClick={() => zoneAuthorization.authorizeMutation.mutate()}
       type="button"
       variant={zoneClient ? 'accent' : 'default'}
     >
       {authIsPreparing
         ? `Authorizing ${ZONE_LABEL} reads`
-        : authQuery.isError
+        : zoneAuthorization.authorizeMutation.isError
           ? 'Retry'
           : `Authorize ${ZONE_LABEL} reads`}
     </Button>
@@ -390,10 +381,10 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
     stepThreeAction = (
       <Button
         className="font-normal text-[14px] -tracking-[2%]"
-        disabled={fundMutation.isPending || !authQuery.isSuccess || rootBalanceIsPending}
+        disabled={fundMutation.isPending || !zoneAuthorization.isAuthorized || rootBalanceIsPending}
         onClick={() => fundMutation.mutate()}
         type="button"
-        variant={authQuery.isSuccess ? 'accent' : 'default'}
+        variant={zoneAuthorization.isAuthorized ? 'accent' : 'default'}
       >
         {fundMutation.isPending ? 'Getting pathUSD' : 'Get testnet pathUSD'}
       </Button>
@@ -402,10 +393,10 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
     stepThreeAction = (
       <Button
         className="font-normal text-[14px] -tracking-[2%]"
-        disabled={topUpMutation.isPending || !authQuery.isSuccess}
+        disabled={topUpMutation.isPending || !zoneAuthorization.isAuthorized}
         onClick={() => topUpMutation.mutate()}
         type="button"
-        variant={authQuery.isSuccess ? 'accent' : 'default'}
+        variant={zoneAuthorization.isAuthorized ? 'accent' : 'default'}
       >
         {topUpMutation.isPending ? 'Approving + topping up Zone A' : 'Approve + top up Zone A'}
       </Button>
@@ -435,16 +426,16 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
   return (
     <>
       <Step
-        active={!authQuery.isSuccess}
-        completed={authQuery.isSuccess}
+        active={!zoneAuthorization.isAuthorized}
+        completed={zoneAuthorization.isAuthorized}
         actions={stepTwoAction}
-        error={authQuery.error}
+        error={zoneAuthorization.error}
         number={2}
         title={`Authorize private reads in ${ZONE_LABEL}.`}
       />
 
       <Step
-        active={authQuery.isSuccess && !zoneBalanceStepComplete}
+        active={zoneAuthorization.isAuthorized && !zoneBalanceStepComplete}
         completed={zoneBalanceStepComplete}
         actions={stepThreeAction}
         error={
@@ -481,17 +472,9 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
         number={5}
         title="Wait for pathUSD to settle back to your public balance."
       >
-        <StepBody>
-          <p className="text-[13px] text-gray10 leading-relaxed -tracking-[1%]">
-            The withdrawal request is already accepted in {ZONE_LABEL}. This final step polls your
-            public-chain pathUSD balance every 1.5 seconds until the batch settles.
-          </p>
-          <p className="text-[13px] text-gray10 leading-relaxed -tracking-[1%]">
-            If Tempo-side settlement fails, the amount returns to the fallback recipient in the zone
-            and the fee is still consumed.
-          </p>
-          {settlementTxHash && <ExplorerLink hash={settlementTxHash} />}
-        </StepBody>
+        {settlementTxHash && (
+          <StepBody>{settlementTxHash && <ExplorerLink hash={settlementTxHash} />}</StepBody>
+        )}
       </Step>
     </>
   )

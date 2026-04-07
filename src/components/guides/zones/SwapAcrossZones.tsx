@@ -18,6 +18,8 @@ import {
   zeroBytes32,
   zoneRpcSyncTimeout,
 } from '../../../lib/private-zones.ts'
+import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
+import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
 import { Button, ExplorerLink, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { betaUsd, pathUsd } from '../tokens'
@@ -70,6 +72,7 @@ type ZoneClientLike = {
     getBalance: (parameters: { account: Hex; token: Hex }) => Promise<bigint>
   }
   zone: {
+    getAuthorizationTokenInfo: ZoneAuthClientLike['zone']['getAuthorizationTokenInfo']
     requestWithdrawalSync: (parameters: {
       account: unknown
       amount: bigint
@@ -81,13 +84,7 @@ type ZoneClientLike = {
       token: Hex
     }) => Promise<{ receipt: { blockNumber: bigint; transactionHash: Hex } }>
     getWithdrawalFee: (parameters?: { gasLimit?: bigint | undefined }) => Promise<bigint>
-    signAuthorizationToken: () => Promise<{
-      authentication: {
-        expiresAt: number
-        zoneId: number
-      }
-      token: Hex
-    }>
+    signAuthorizationToken: ZoneAuthClientLike['zone']['signAuthorizationToken']
   }
 }
 
@@ -120,6 +117,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   const queryClient = useQueryClient()
   const publicClient = usePublicClient()
   const { data: connectorClient } = useConnectorClient()
+  const { data: rootWebAuthnAccount } = useRootWebAuthnAccount()
   const {
     data: rootBalance,
     isPending: rootBalanceIsPending,
@@ -131,9 +129,9 @@ function ConnectedZoneFlow(props: { address: Hex }) {
 
   const sourceZoneClient = React.useMemo(
     () =>
-      connectorClient?.account
+      rootWebAuthnAccount
         ? (createClient({
-            account: connectorClient.account,
+            account: rootWebAuthnAccount,
             chain: zoneModerato(ZONE_A.id),
             transport: zoneHttp(
               stripRpcBasicAuth(ZONE_A.rpcUrl),
@@ -141,13 +139,13 @@ function ConnectedZoneFlow(props: { address: Hex }) {
             ),
           }).extend(tempoActions()) as unknown as ZoneClientLike)
         : undefined,
-    [connectorClient],
+    [rootWebAuthnAccount],
   )
   const targetZoneClient = React.useMemo(
     () =>
-      connectorClient?.account
+      rootWebAuthnAccount
         ? (createClient({
-            account: connectorClient.account,
+            account: rootWebAuthnAccount,
             chain: zoneModerato(ZONE_B.id),
             transport: zoneHttp(
               stripRpcBasicAuth(ZONE_B.rpcUrl),
@@ -155,7 +153,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
             ),
           }).extend(tempoActions()) as unknown as ZoneClientLike)
         : undefined,
-    [connectorClient],
+    [rootWebAuthnAccount],
   )
 
   const sourceFooterQueryKey = React.useMemo(
@@ -167,24 +165,15 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     [address],
   )
 
-  const sourceAuthQuery = useQuery({
-    enabled: false,
+  const sourceZoneAuthorization = useZoneAuthorization({
+    address,
+    chainId: ZONE_A.chainId,
     queryKey: ['guide-private-zones-swap-source-auth', address, ZONE_A.id],
-    queryFn: async () => {
-      if (!sourceZoneClient) throw new Error('Zone A client not ready')
-
-      const auth = await sourceZoneClient.zone.signAuthorizationToken()
-
-      return { auth }
-    },
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-    retry: false,
-    staleTime: 30_000,
+    zoneClient: sourceZoneClient,
   })
 
   const sourceZoneBalanceQuery = useQuery({
-    enabled: Boolean(sourceZoneClient && sourceAuthQuery.isSuccess),
+    enabled: Boolean(sourceZoneClient && sourceZoneAuthorization.isAuthorized),
     queryKey: ['guide-private-zones-swap-source-balance', address, ZONE_A.id],
     queryFn: async () => {
       if (!sourceZoneClient) throw new Error('Zone A client not ready')
@@ -198,7 +187,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   })
 
   const swapPrereqsQuery = useQuery({
-    enabled: Boolean(connectorClient && publicClient && sourceAuthQuery.isSuccess),
+    enabled: Boolean(connectorClient && publicClient && sourceZoneAuthorization.isAuthorized),
     queryKey: ['guide-private-zones-swap-prereqs', address, ZONE_A.id, ZONE_B.id],
     queryFn: async () => {
       if (!connectorClient) throw new Error('connector client not ready')
@@ -212,7 +201,9 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         routerDex,
         routerFactory,
       ] = await Promise.all([
-        sourceZoneClient?.zone.getWithdrawalFee({ gasLimit: routerCallbackGasLimit }),
+        sourceZoneClient?.zone.getWithdrawalFee({
+          gasLimit: routerCallbackGasLimit,
+        }),
         Actions.dex.getSellQuote(publicClient as never, {
           amountIn: SWAP_AMOUNT,
           tokenIn: pathUsd,
@@ -327,6 +318,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       if (!connectorClient) throw new Error('connector client not ready')
       if (!sourceZoneClient) throw new Error('Zone A client not ready')
       if (!publicClient) throw new Error('public client not ready')
+      if (!rootWebAuthnAccount) throw new Error('root account not ready')
       if (!swapPrereqsQuery.data) throw new Error('Swap prerequisites are not ready')
 
       const currentSourceBalance = await sourceZoneClient.token.getBalance({
@@ -346,7 +338,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       })
 
       const { receipt } = await sourceZoneClient.zone.requestWithdrawalSync({
-        account: connectorClient.account,
+        account: rootWebAuthnAccount,
         amount: SWAP_AMOUNT,
         data: callbackData,
         feeToken: pathUsd,
@@ -422,20 +414,17 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     retry: false,
   })
 
-  const targetAuthMutation = useMutation({
-    mutationFn: async () => {
-      if (!targetZoneClient) throw new Error('Zone B client not ready')
-
-      return targetZoneClient.zone.signAuthorizationToken()
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: targetFooterQueryKey })
-      await targetZoneBalanceQuery.refetch()
-    },
+  const targetZoneAuthorization = useZoneAuthorization({
+    address,
+    chainId: ZONE_B.chainId,
+    queryKey: ['guide-private-zones-swap-target-auth', address, ZONE_B.id],
+    zoneClient: targetZoneClient,
   })
 
   const targetZoneBalanceQuery = useQuery({
-    enabled: Boolean(targetZoneClient && targetAuthMutation.isSuccess && settlementQuery.data),
+    enabled: Boolean(
+      targetZoneClient && targetZoneAuthorization.isAuthorized && settlementQuery.data,
+    ),
     queryKey: ['guide-private-zones-swap-target-balance', address, ZONE_B.id],
     queryFn: async () => {
       if (!targetZoneClient) throw new Error('Zone B client not ready')
@@ -456,35 +445,36 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   const routedSwapReceipt = swapMutation.data?.receipt
   const settlementTxHash = settlementQuery.data?.txHash
   const targetBalanceReady =
-    settlementQuery.data && targetAuthMutation.isSuccess && targetZoneBalanceQuery.isSuccess
-  const sourceAuthIsPreparing = sourceAuthQuery.fetchStatus === 'fetching'
-  const stepTwoAction = sourceAuthQuery.isSuccess ? undefined : (
+    settlementQuery.data && targetZoneAuthorization.isAuthorized && targetZoneBalanceQuery.isSuccess
+  const sourceAuthIsPreparing =
+    sourceZoneAuthorization.isChecking || sourceZoneAuthorization.authorizeMutation.isPending
+  const stepTwoAction = sourceZoneAuthorization.isAuthorized ? undefined : (
     <Button
       className="font-normal text-[14px] -tracking-[2%]"
       disabled={sourceAuthIsPreparing || !sourceZoneClient}
-      onClick={() => sourceAuthQuery.refetch()}
+      onClick={() => sourceZoneAuthorization.authorizeMutation.mutate()}
       type="button"
       variant={sourceZoneClient ? 'accent' : 'default'}
     >
       {sourceAuthIsPreparing
         ? `Authorizing ${ZONE_A.label} reads`
-        : sourceAuthQuery.isError
+        : sourceZoneAuthorization.authorizeMutation.isError
           ? 'Retry'
           : `Authorize ${ZONE_A.label} reads`}
     </Button>
   )
 
   React.useEffect(() => {
-    if (!sourceAuthQuery.isSuccess) return
+    if (!sourceZoneAuthorization.isAuthorized) return
 
     void queryClient.invalidateQueries({ queryKey: sourceFooterQueryKey })
-  }, [queryClient, sourceAuthQuery.isSuccess, sourceFooterQueryKey])
+  }, [queryClient, sourceFooterQueryKey, sourceZoneAuthorization.isAuthorized])
 
   React.useEffect(() => {
-    if (!targetAuthMutation.isSuccess) return
+    if (!targetZoneAuthorization.isAuthorized) return
 
     void queryClient.invalidateQueries({ queryKey: targetFooterQueryKey })
-  }, [queryClient, targetAuthMutation.isSuccess, targetFooterQueryKey])
+  }, [queryClient, targetFooterQueryKey, targetZoneAuthorization.isAuthorized])
 
   React.useEffect(() => {
     if (!topUpMutation.isSuccess || sourceZoneBalanceStepComplete) return
@@ -514,10 +504,12 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     stepThreeAction = (
       <Button
         className="font-normal text-[14px] -tracking-[2%]"
-        disabled={fundMutation.isPending || !sourceAuthQuery.isSuccess || rootBalanceIsPending}
+        disabled={
+          fundMutation.isPending || !sourceZoneAuthorization.isAuthorized || rootBalanceIsPending
+        }
         onClick={() => fundMutation.mutate()}
         type="button"
-        variant={sourceAuthQuery.isSuccess ? 'accent' : 'default'}
+        variant={sourceZoneAuthorization.isAuthorized ? 'accent' : 'default'}
       >
         {fundMutation.isPending ? 'Getting pathUSD' : 'Get testnet pathUSD'}
       </Button>
@@ -526,10 +518,10 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     stepThreeAction = (
       <Button
         className="font-normal text-[14px] -tracking-[2%]"
-        disabled={topUpMutation.isPending || !sourceAuthQuery.isSuccess}
+        disabled={topUpMutation.isPending || !sourceZoneAuthorization.isAuthorized}
         onClick={() => topUpMutation.mutate()}
         type="button"
-        variant={sourceAuthQuery.isSuccess ? 'accent' : 'default'}
+        variant={sourceZoneAuthorization.isAuthorized ? 'accent' : 'default'}
       >
         {topUpMutation.isPending ? 'Approving + topping up Zone A' : 'Approve + top up Zone A'}
       </Button>
@@ -582,16 +574,18 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         Retry Zone B read
       </Button>
     )
-  } else if (!targetAuthMutation.isSuccess) {
+  } else if (!targetZoneAuthorization.isAuthorized) {
     stepSixAction = (
       <Button
         className="font-normal text-[14px] -tracking-[2%]"
-        disabled={targetAuthMutation.isPending}
-        onClick={() => targetAuthMutation.mutate()}
+        disabled={targetZoneAuthorization.authorizeMutation.isPending}
+        onClick={() => targetZoneAuthorization.authorizeMutation.mutate()}
         type="button"
         variant="accent"
       >
-        {targetAuthMutation.isPending ? 'Authorizing Zone B reads' : 'Authorize Zone B reads'}
+        {targetZoneAuthorization.authorizeMutation.isPending
+          ? 'Authorizing Zone B reads'
+          : 'Authorize Zone B reads'}
       </Button>
     )
   } else if (targetZoneBalanceQuery.isPending) {
@@ -610,16 +604,16 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   return (
     <>
       <Step
-        active={!sourceAuthQuery.isSuccess}
-        completed={sourceAuthQuery.isSuccess}
+        active={!sourceZoneAuthorization.isAuthorized}
+        completed={sourceZoneAuthorization.isAuthorized}
         actions={stepTwoAction}
-        error={sourceAuthQuery.error}
+        error={sourceZoneAuthorization.error}
         number={2}
         title={`Authorize private reads in ${ZONE_A.label}.`}
       />
 
       <Step
-        active={sourceAuthQuery.isSuccess && !sourceZoneBalanceStepComplete}
+        active={sourceZoneAuthorization.isAuthorized && !sourceZoneBalanceStepComplete}
         completed={sourceZoneBalanceStepComplete}
         actions={stepThreeAction}
         error={
@@ -663,17 +657,9 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         number={5}
         title={`Wait for the routed betaUSD deposit to land in ${ZONE_B.label}.`}
       >
-        <StepBody>
-          <p className="text-[13px] text-gray10 leading-relaxed -tracking-[1%]">
-            The funds have already left {ZONE_A.label}. This step polls the public-chain deposit
-            into {ZONE_B.label} every 2 seconds while the withdrawal, swap, and deposit finish.
-          </p>
-          <p className="text-[13px] text-gray10 leading-relaxed -tracking-[1%]">
-            The final betaUSD amount will be the swap output minus {ZONE_B.label}'s portal deposit
-            fee.
-          </p>
-          {settlementTxHash && <ExplorerLink hash={settlementTxHash} />}
-        </StepBody>
+        {settlementTxHash && (
+          <StepBody>{settlementTxHash && <ExplorerLink hash={settlementTxHash} />}</StepBody>
+        )}
       </Step>
 
       <Step
@@ -681,19 +667,12 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         completed={Boolean(targetBalanceReady)}
         actions={stepSixAction}
         error={
-          targetAuthMutation.error ??
+          targetZoneAuthorization.error ??
           (settlementQuery.data ? targetZoneBalanceQuery.error : undefined)
         }
         number={6}
         title={`Authorize private reads in ${ZONE_B.label} and confirm the betaUSD balance.`}
-      >
-        <StepBody>
-          <p className="text-[13px] text-gray10 leading-relaxed -tracking-[1%]">
-            The routed deposit can settle before this page is allowed to read {ZONE_B.label}. Once
-            you authorize private reads for this session, the demo fetches your betaUSD balance.
-          </p>
-        </StepBody>
-      </Step>
+      />
     </>
   )
 }
