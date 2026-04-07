@@ -42,8 +42,8 @@ export function SignInButtons() {
           connect.connect({
             connector,
             capabilities: isE2E
-              ? { method: 'register' as const, name: 'Tempo Docs' }
-              : { label: 'Tempo Docs', type: 'sign-up' },
+              ? ({ method: 'register', name: 'Tempo Docs' } as any)
+              : { label: 'Tempo Docs', type: 'sign-up' as const },
           })
         }}
         type="button"
