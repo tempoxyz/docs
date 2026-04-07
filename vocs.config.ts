@@ -589,6 +589,46 @@ export default defineConfig({
             ],
           },
           {
+            text: 'Tempo Zones',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/protocol/zones',
+              },
+              {
+                text: 'Reference',
+                items: [
+                  {
+                    text: 'Architecture',
+                    link: '/protocol/zones/architecture',
+                  },
+                  {
+                    text: 'Accounts',
+                    link: '/protocol/zones/accounts',
+                  },
+                  {
+                    text: 'Bridging',
+                    link: '/protocol/zones/bridging',
+                  },
+                  {
+                    text: 'RPC',
+                    link: '/protocol/zones/rpc',
+                  },
+                  {
+                    text: 'Execution & Gas',
+                    link: '/protocol/zones/execution',
+                  },
+                  {
+                    text: 'Proving',
+                    link: '/protocol/zones/proving',
+                  },
+
+                ],
+              },
+            ],
+          },
+          {
             text: 'Network Upgrades',
             collapsed: true,
             items: [
@@ -1150,6 +1190,16 @@ export default defineConfig({
     {
       source: '/quickstart',
       destination: '/quickstart/integrate-tempo',
+    },
+    {
+      source: '/protocol/zones/overview',
+      destination: '/protocol/zones',
+      status: 301,
+    },
+    {
+      source: '/protocol/zones/privacy',
+      destination: '/protocol/zones/accounts',
+      status: 301,
     },
     {
       source: '/protocol/blockspace',

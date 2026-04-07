@@ -1,0 +1,120 @@
+---
+title: Tempo Zone Architecture
+description: Architecture of Tempo Zones, including contract layout, sequencer management, chain IDs, and the trust model.
+---
+
+# Tempo Zone Architecture
+
+A Tempo Zone is a dedicated blockchain rooted to Tempo Mainnet where one sequencer controls block production and visibility. No zone data is published on Tempo Mainnet. Instead, the sequencer publishes commitments to the current zone state along with proofs of correct execution. These proofs allow funds to move in and out of the Tempo Zone. This scaling approach is known as a validium.
+
+The sequencer can enable any TIP-20 token on the Tempo Zone. Any enabled TIP-20 with USD currency can pay for zone gas. TIP-20 tokens bridge into the zone nearly instantly and bridge out as soon as a validity proof is posted (targeting under 10 seconds).
+
+Tempo Zones are tightly integrated with Tempo Mainnet. Withdrawals to Tempo Mainnet are processed by the sequencer and can trigger transfers, trades on Tempo's Stablecoin DEX, or deposits into other Tempo Zones, without further interaction from the user.
+
+Tempo Zones are designed for applications that want safe operation guaranteed by validity proofs and privacy from the rest of the world, where users are comfortable trusting a sequencer for liveness and privacy.
+
+## System Architecture
+
+Each Tempo Zone runs as a separate Tempo chain with its own Tempo node(s). Tempo Zones are tightly coupled with Tempo Mainnet and have direct, synchronous access to Tempo Mainnet state. Zone contracts can read certain Tempo Mainnet state without any message passing delay, such as deposit queues and TIP-403 policy information.
+
+```mermaid
+flowchart TD
+    subgraph TN["Tempo Node"]
+        TE["Tempo Execution"]
+        TE --> Z1["Zone 1<br/>USDX, USDY"]
+        TE --> Z2["Zone 2<br/>pathUSD, ..."]
+    end
+```
+
+The sequencer runs a Tempo node with one or more zone nodes attached. Each zone node:
+
+- Synchronizes the zone's view of Tempo Mainnet each time a Tempo Mainnet block finalizes
+- Executes zone transactions using privately submitted transactions and the zone's own state
+- Produces batches proving state transitions on the zone and posts them to Tempo Mainnet
+- Watches for deposits by monitoring portal events on Tempo Mainnet, and creates corresponding transactions on the zone once the block finalizes
+- Watches for withdrawals on the zone and submits transactions to Tempo Mainnet processing them once the batch has been proven
+
+
+## Contract Architecture
+
+The system consists of contracts on both Tempo Mainnet and within each Tempo Zone.
+
+```mermaid
+flowchart TD
+    ZP["ZonePortal<br/>"] -- "deposits" --> ZI["ZoneInbox<br/>(deposits)"]
+    ZO["ZoneOutbox<br/>(withdrawals)"] -- "withdrawals" --> ZP
+
+    subgraph TEMPO["Tempo Mainnet"]
+        ZF["ZoneFactory<br/>(deploys)"]
+        ZP
+        ZM["ZoneMessenger<br/>(callbacks)"]
+    end
+    subgraph ZONE["Zone"]
+        TS["TempoState<br/>(Tempo Mainnet view)"]
+        ZI
+        ZO
+    end
+```
+
+### Tempo Contracts
+
+- **`ZoneFactory`** deploys new Tempo Zones. Each zone gets its own portal and messenger contracts with deterministic addresses.
+- **`ZonePortal`** is the central bridge contract. It locks all deposited tokens, verifies validity proofs, and processes withdrawals. The portal maintains the authoritative state: which deposits have been made, which batches have been proven, and which withdrawals are pending.
+- **`ZoneMessenger`** handles withdrawals that include callbacks. When a user wants to withdraw tokens and trigger a contract call atomically, the messenger executes both operations together. If the callback fails, the entire withdrawal reverts and funds bounce back to the zone.
+
+### Zone Predeploys
+
+Tempo Zones have four system contract predeploys at fixed addresses:
+
+| Contract | Address | Purpose |
+|----------|---------|---------|
+| `TempoState` | `0x1c00...0000` | Stores the zone's view of Tempo Mainnet. The sequencer updates this with Tempo Mainnet block headers, allowing zone contracts to read Tempo Mainnet state within proofs. |
+| `ZoneInbox` | `0x1c00...0001` | Processes incoming deposits. Mints tokens to recipients and validates that processed deposits match what the portal expects. |
+| `ZoneOutbox` | `0x1c00...0002` | Handles withdrawal requests. Users burn their zone tokens here and specify a Tempo Mainnet recipient. |
+| `ZoneConfig` | `0x1c00...0003` | Central configuration. Reads sequencer and token registry from Tempo Mainnet. |
+
+## Creating a Zone
+
+Tempo Zones are created through the `ZoneFactory`:
+
+1. Choose a TIP-20 token to serve as the zone's initial asset.
+2. Select a verifier contract (ZK prover or TEE attestor).
+3. Designate a sequencer address.
+4. Call `ZoneFactory.createZone()` with these parameters.
+
+The factory deploys a new `ZonePortal` and `ZoneMessenger` for the Tempo Zone. The zone itself runs as a separate chain with the system contracts deployed at genesis. The sequencer can enable additional TIP-20 tokens at any time via `ZonePortal.enableToken()`.
+
+### Chain ID
+
+Each Tempo Zone has a unique EIP-155 chain ID derived deterministically from its on-chain zone ID:
+
+```
+chain_id = 421700000 + zone_id
+```
+
+The prefix `4217` corresponds to the Tempo Mainnet chain ID. This ensures replay protection between Tempo Zones. A transaction signed for one zone cannot be replayed on another.
+
+## Sequencer Transfer
+
+The sequencer can transfer control to a new address via a two-step process on Tempo Mainnet:
+
+1. Current sequencer calls `ZonePortal.transferSequencer(newSequencer)` to nominate a new sequencer.
+2. New sequencer calls `ZonePortal.acceptSequencer()` to accept the transfer.
+
+Sequencer management happens on Tempo Mainnet. Zone-side system contracts read the sequencer from Tempo Mainnet via `ZoneConfig`, which queries `TempoState` to get the sequencer address from the finalized `ZonePortal` storage.
+
+## Trust Model
+
+Tempo Zones make explicit tradeoffs between trust and performance:
+
+| What You Trust | What Could Go Wrong |
+|---|---|
+| Sequencer for liveness | The Tempo Zone halts if the sequencer stops. |
+| Sequencer for inclusion and ordering | Transactions (including withdrawals) can be excluded or reordered. |
+| Sequencer for privacy | The sequencer can see all transactions on the Tempo Zone. |
+| Sequencer for data | Reconstructing the state of the Tempo Zone without the sequencer is impossible. |
+| Sequencer + verifier for correctness | If a critical safety bug exists in the verifier or proving system, and the sequencer is malicious, they could exploit it to steal funds. |
+
+The sequencer cannot steal funds or forge state transitions. Validity proofs prevent this. However, the sequencer can halt the zone entirely, censor specific users, or reorder transactions for MEV.
+
+Failed withdrawals always bounce back to the zone `fallbackRecipient`, ensuring users retain their funds. TIP-403 policy changes or token pauses on Tempo Mainnet will cause affected withdrawals to bounce back rather than block the queue.
