@@ -31,6 +31,7 @@ export function SignInButtons() {
   const connect = useConnect()
   const connector = useWebAuthnConnector()
   const disconnect = useDisconnect()
+  const isE2E = import.meta.env.VITE_E2E === 'true'
 
   return (
     <div className="flex gap-1">
@@ -40,10 +41,9 @@ export function SignInButtons() {
           await disconnect.disconnectAsync().catch(() => {})
           connect.connect({
             connector,
-            capabilities: {
-              label: 'Tempo Docs',
-              type: 'sign-up',
-            },
+            capabilities: isE2E
+              ? { method: 'register' as const, name: 'Tempo Docs' }
+              : { label: 'Tempo Docs', type: 'sign-up' },
           })
         }}
         type="button"
