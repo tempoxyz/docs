@@ -175,28 +175,7 @@ tempo consensus rotate-validator \
   --rpc-url https://rpc.tempo.xyz
 ```
 
-Alternatively, you can create the signature separately and pass it directly:
-
-```bash
-# Step 1: Create the rotation signature
-tempo consensus create-rotate-validator-signature \
-  --validator-address <YOUR_VALIDATOR_ADDRESS> \
-  --public-key <NEW_PUBLIC_KEY> \
-  --ingress <NEW_IP:PORT> \
-  --egress <NEW_IP> \
-  --signing-key <NEW_PRIVATE_KEY_PATH> \
-  --chain-id-from-rpc-url https://rpc.tempo.xyz
-
-# Step 2: Submit the rotation with the pre-computed signature
-tempo consensus rotate-validator \
-  --validator-address <YOUR_VALIDATOR_ADDRESS> \
-  --public-key <NEW_PUBLIC_KEY> \
-  --ingress <NEW_IP:PORT> \
-  --egress <NEW_IP> \
-  --signature <SIGNATURE_FROM_STEP_1> \
-  --private-key <ETHEREUM_PRIVATE_KEY_PATH> \
-  --rpc-url https://rpc.tempo.xyz
-```
+If self-service rotation is not yet enabled for your validator, use `tempo consensus create-rotate-validator-signature` to generate the signature and provide it to the Tempo team.
 
 :::info
 Rotation preserves your validator index and active validator count. The old entry is appended to history as deactivated, and the entry at your index is updated in place. You must use a different ingress address (changing the port is sufficient).
