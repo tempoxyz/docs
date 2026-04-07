@@ -26,6 +26,9 @@ tempo download [flags]
 
 ## Examples
 
+<!--
+This is broken:
+
 Download the latest mainnet snapshot:
 
 ```bash
@@ -37,11 +40,18 @@ Download to a specific directory:
 ```bash
 tempo download --chain mainnet --datadir /data/tempo
 ```
+!-->
+
+Download a snapshot from https://snapshots.tempoxyz.dev:
+
+```bash
+tempo download -u $SNAPSHOT_URL
+```
 
 Resume an interrupted download:
 
 ```bash
-tempo download --chain mainnet --resumable
+tempo download -u $SNAPSHOT_URL --resumable
 ```
 
 Then start your node with [`tempo node`](/cli/node).

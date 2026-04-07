@@ -12,7 +12,9 @@ RPC nodes provide API access to the Tempo network without participating in conse
 
 ```bash /dev/null/quickstart.sh#L1-15
 # Download snapshot (this will help you sync much faster)
-tempo download
+# 
+# See https://snapshots.tempoxyz.dev/ for snapshots.
+tempo download -u $SNAPSHOT_URL
 
 # Run node
 tempo node \
