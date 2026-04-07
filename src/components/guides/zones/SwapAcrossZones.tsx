@@ -1,22 +1,21 @@
 'use client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { encodeAbiParameters, type Hex, parseAbiItem, parseUnits } from 'viem'
-import { sendTransactionSync } from 'viem/actions'
-import { Actions } from 'viem/tempo'
+import { createClient, encodeAbiParameters, type Hex, parseAbiItem, parseUnits } from 'viem'
+import { Actions, tempoActions } from 'viem/tempo'
+import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
 import { useConnection, useConnectorClient, usePublicClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import {
-  getTempoZoneClient,
-  getZoneClientParameters,
+  getZoneTransportConfig,
   moderatoZoneFactory,
   routerCallbackGasLimit,
   stablecoinDex,
+  stripRpcBasicAuth,
   swapAndDepositRouter,
   ZONE_A,
   ZONE_B,
   zeroBytes32,
-  zoneOutbox,
   zoneRpcSyncTimeout,
 } from '../../../lib/private-zones.ts'
 import { Button, ExplorerLink, Logout, Step } from '../Demo'
@@ -71,16 +70,25 @@ type ZoneClientLike = {
     getBalance: (parameters: { account: Hex; token: Hex }) => Promise<bigint>
   }
   zone: {
+    requestWithdrawalSync: (parameters: {
+      account: unknown
+      amount: bigint
+      data?: Hex
+      feeToken: Hex
+      gas?: bigint
+      timeout: number
+      to: Hex
+      token: Hex
+    }) => Promise<{ receipt: { blockNumber: bigint; transactionHash: Hex } }>
     getWithdrawalFee: (parameters?: { gasLimit?: bigint | undefined }) => Promise<bigint>
-    prepareAuthorizationToken: () => Promise<{
-      account: Hex
-      expiresAt: bigint
+    signAuthorizationToken: () => Promise<{
+      authentication: {
+        expiresAt: number
+        zoneId: number
+      }
+      token: Hex
     }>
   }
-}
-
-type RootChainWithZones = {
-  zones?: Record<number, { portalAddress: Hex }>
 }
 
 export function SwapAcrossZones() {
@@ -112,8 +120,6 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   const queryClient = useQueryClient()
   const publicClient = usePublicClient()
   const { data: connectorClient } = useConnectorClient()
-  const sourceZonePortalAddress = (connectorClient?.chain as RootChainWithZones | undefined)
-    ?.zones?.[ZONE_A.id]?.portalAddress
   const {
     data: rootBalance,
     isPending: rootBalanceIsPending,
@@ -125,21 +131,29 @@ function ConnectedZoneFlow(props: { address: Hex }) {
 
   const sourceZoneClient = React.useMemo(
     () =>
-      connectorClient
-        ? (getTempoZoneClient(
-            connectorClient as never,
-            getZoneClientParameters(ZONE_A.id, ZONE_A.rpcUrl) as never,
-          ) as unknown as ZoneClientLike)
+      connectorClient?.account
+        ? (createClient({
+            account: connectorClient.account,
+            chain: zoneModerato(ZONE_A.id),
+            transport: zoneHttp(
+              stripRpcBasicAuth(ZONE_A.rpcUrl),
+              getZoneTransportConfig(ZONE_A.rpcUrl),
+            ),
+          }).extend(tempoActions()) as unknown as ZoneClientLike)
         : undefined,
     [connectorClient],
   )
   const targetZoneClient = React.useMemo(
     () =>
-      connectorClient
-        ? (getTempoZoneClient(
-            connectorClient as never,
-            getZoneClientParameters(ZONE_B.id, ZONE_B.rpcUrl) as never,
-          ) as unknown as ZoneClientLike)
+      connectorClient?.account
+        ? (createClient({
+            account: connectorClient.account,
+            chain: zoneModerato(ZONE_B.id),
+            transport: zoneHttp(
+              stripRpcBasicAuth(ZONE_B.rpcUrl),
+              getZoneTransportConfig(ZONE_B.rpcUrl),
+            ),
+          }).extend(tempoActions()) as unknown as ZoneClientLike)
         : undefined,
     [connectorClient],
   )
@@ -159,7 +173,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     queryFn: async () => {
       if (!sourceZoneClient) throw new Error('Zone A client not ready')
 
-      const auth = await sourceZoneClient.zone.prepareAuthorizationToken()
+      const auth = await sourceZoneClient.zone.signAuthorizationToken()
 
       return { auth }
     },
@@ -273,33 +287,6 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   )
   const sourceZoneBalanceStepComplete = useStickyStepCompletion(hasEnoughSourceZoneBalance)
 
-  const portalAllowanceQuery = useQuery({
-    enabled: Boolean(
-      connectorClient &&
-        sourceZonePortalAddress &&
-        sourceAuthQuery.isSuccess &&
-        !sourceZoneBalanceStepComplete &&
-        sourceZoneTopUpShortfall > 0n,
-    ),
-    queryKey: [
-      'guide-private-zones-swap-portal-allowance',
-      address,
-      ZONE_A.id,
-      sourceZonePortalAddress,
-    ],
-    queryFn: async () => {
-      if (!connectorClient) throw new Error('connector client not ready')
-      if (!sourceZonePortalAddress) throw new Error('Zone A portal address not configured')
-
-      return Actions.token.getAllowance(connectorClient as never, {
-        account: address,
-        spender: sourceZonePortalAddress,
-        token: pathUsd,
-      })
-    },
-    staleTime: 30_000,
-  })
-
   const fundMutation = useMutation({
     mutationFn: async () => {
       if (!connectorClient) throw new Error('connector client not ready')
@@ -316,45 +303,20 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   const topUpMutation = useMutation({
     mutationFn: async () => {
       if (!connectorClient) throw new Error('connector client not ready')
-      if (!sourceZonePortalAddress) throw new Error('Zone A portal address not configured')
       if (sourceZoneTopUpShortfall <= 0n) throw new Error('Zone A top-up is not required')
 
-      const includesApproval = !hasPortalAllowance
-      const receipt = await sendTransactionSync(
-        connectorClient as never,
-        {
-          account: connectorClient.account,
-          calls: [
-            ...(includesApproval
-              ? [
-                  Actions.token.approve.call({
-                    amount: sourceZoneTopUpShortfall,
-                    spender: sourceZonePortalAddress,
-                    token: pathUsd,
-                  }),
-                ]
-              : []),
-            Actions.zone.deposit.call({
-              account: connectorClient.account,
-              amount: sourceZoneTopUpShortfall,
-              chain: connectorClient.chain as never,
-              token: pathUsd,
-              zone: ZONE_A.id,
-            } as never),
-          ],
-          throwOnReceiptRevert: true,
-          timeout: 60_000,
-        } as never,
-      )
+      const { receipt } = await Actions.zone.depositSync(connectorClient as never, {
+        account: connectorClient.account,
+        amount: sourceZoneTopUpShortfall,
+        chain: connectorClient.chain as never,
+        token: pathUsd,
+        zoneId: ZONE_A.id,
+      })
 
-      return {
-        includesApproval,
-        receipt,
-      }
+      return { receipt }
     },
     onSuccess: async () => {
       await refetchRootBalance()
-      await portalAllowanceQuery.refetch()
       await sourceZoneBalanceQuery.refetch()
       await queryClient.invalidateQueries({ queryKey: sourceFooterQueryKey })
     },
@@ -378,46 +340,21 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         throw new Error('Zone A needs more pathUSD before the swap can start.')
       }
 
-      const currentAllowance = await sourceZoneClient.token.getAllowance({
-        account: address,
-        spender: zoneOutbox,
-        token: pathUsd,
-      })
-      const requiredSourceAllowance = SWAP_AMOUNT + swapPrereqsQuery.data.routedWithdrawalFee
-      const includesApproval = currentAllowance < requiredSourceAllowance
       const callbackData = encodeRouterCallback({
         minimumOutput: swapPrereqsQuery.data.minimumOutput,
         recipient: address,
       })
 
-      const receipt = await sendTransactionSync(
-        sourceZoneClient as never,
-        {
-          account: connectorClient.account,
-          feeToken: pathUsd,
-          calls: [
-            ...(includesApproval
-              ? [
-                  Actions.token.approve.call({
-                    amount: requiredSourceAllowance,
-                    spender: zoneOutbox,
-                    token: pathUsd,
-                  }),
-                ]
-              : []),
-            Actions.zone.requestWithdrawal.call({
-              account: connectorClient.account,
-              amount: SWAP_AMOUNT,
-              data: callbackData,
-              gasLimit: routerCallbackGasLimit,
-              to: swapAndDepositRouter,
-              token: pathUsd,
-            }),
-          ],
-          throwOnReceiptRevert: true,
-          timeout: zoneRpcSyncTimeout,
-        } as never,
-      )
+      const { receipt } = await sourceZoneClient.zone.requestWithdrawalSync({
+        account: connectorClient.account,
+        amount: SWAP_AMOUNT,
+        data: callbackData,
+        feeToken: pathUsd,
+        gas: routerCallbackGasLimit,
+        timeout: zoneRpcSyncTimeout,
+        to: swapAndDepositRouter,
+        token: pathUsd,
+      })
 
       const anchorBlock = await publicClient.getBlockNumber()
 
@@ -489,7 +426,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     mutationFn: async () => {
       if (!targetZoneClient) throw new Error('Zone B client not ready')
 
-      return targetZoneClient.zone.prepareAuthorizationToken()
+      return targetZoneClient.zone.signAuthorizationToken()
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: targetFooterQueryKey })
@@ -515,12 +452,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   })
 
   const hasRootBalance = Boolean(rootBalance && rootBalance > 0n)
-  const hasPortalAllowance = Boolean(
-    portalAllowanceQuery.data !== undefined &&
-      portalAllowanceQuery.data >= sourceZoneTopUpShortfall,
-  )
   const topUpReceipt = topUpMutation.data?.receipt
-  const topUpIncludesApproval = topUpMutation.data?.includesApproval ?? !hasPortalAllowance
   const routedSwapReceipt = swapMutation.data?.receipt
   const settlementTxHash = settlementQuery.data?.txHash
   const targetBalanceReady =
@@ -590,31 +522,6 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         {fundMutation.isPending ? 'Getting pathUSD' : 'Get testnet pathUSD'}
       </Button>
     )
-  } else if (!hasEnoughSourceZoneBalance && portalAllowanceQuery.isError) {
-    stepThreeAction = (
-      <Button
-        className="font-normal text-[14px] -tracking-[2%]"
-        onClick={() => portalAllowanceQuery.refetch()}
-        type="button"
-        variant="default"
-      >
-        Retry portal check
-      </Button>
-    )
-  } else if (
-    !hasEnoughSourceZoneBalance &&
-    (portalAllowanceQuery.isPending || portalAllowanceQuery.data === undefined)
-  ) {
-    stepThreeAction = (
-      <Button
-        className="font-normal text-[14px] -tracking-[2%]"
-        disabled
-        type="button"
-        variant="default"
-      >
-        Checking portal approval
-      </Button>
-    )
   } else if (!hasEnoughSourceZoneBalance) {
     stepThreeAction = (
       <Button
@@ -624,13 +531,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         type="button"
         variant={sourceAuthQuery.isSuccess ? 'accent' : 'default'}
       >
-        {topUpMutation.isPending
-          ? topUpIncludesApproval
-            ? 'Approving + topping up Zone A'
-            : 'Topping up Zone A'
-          : topUpIncludesApproval
-            ? 'Approve + top up Zone A'
-            : 'Top up Zone A'}
+        {topUpMutation.isPending ? 'Approving + topping up Zone A' : 'Approve + top up Zone A'}
       </Button>
     )
   }
@@ -723,7 +624,6 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         actions={stepThreeAction}
         error={
           topUpMutation.error ??
-          portalAllowanceQuery.error ??
           sourceZoneBalanceQuery.error ??
           swapPrereqsQuery.error ??
           fundMutation.error

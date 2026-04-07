@@ -46,14 +46,13 @@ It shows the core routed swap submission path; use the demo above when you want 
 
 ```ts
 import { encodeAbiParameters, parseUnits } from 'viem'
-import { sendTransactionSync } from 'viem/actions'
 import { Actions } from 'viem/tempo'
 
 const swapAmount = parseUnits('25', 6)
 
-await zoneAClient.zone.prepareAuthorizationToken()
+await zoneAClient.zone.signAuthorizationToken()
 
-const routedWithdrawalFee = await zoneAClient.zone.getWithdrawalFee({ gasLimit: routerCallbackGasLimit })
+const routedWithdrawalFee = await zoneAClient.zone.getWithdrawalFee({ gas: routerCallbackGasLimit })
 const quotedBetaOut = await rootClient.dex.getSellQuote({
   amountIn: swapAmount,
   tokenIn: pathUsd,
@@ -61,7 +60,6 @@ const quotedBetaOut = await rootClient.dex.getSellQuote({
 })
 
 const minimumBetaOut = quotedBetaOut - quotedBetaOut / 100n
-const requiredZoneAllowance = swapAmount + routedWithdrawalFee
 
 const callbackData = encodeAbiParameters(
   [
@@ -75,25 +73,15 @@ const callbackData = encodeAbiParameters(
   [false, betaUsd, ZONE_B.portalAddress, rootClient.account.address, zeroBytes32, minimumBetaOut],
 )
 
-const receipt = await sendTransactionSync(zoneAClient, {
+const { receipt } = await Actions.zone.requestWithdrawalSync(zoneAClient, {
   account: rootClient.account,
+  amount: swapAmount,
+  data: callbackData,
   feeToken: pathUsd,
-  calls: [
-    Actions.token.approve.call({
-      amount: requiredZoneAllowance,
-      spender: zoneOutbox,
-      token: pathUsd,
-    }),
-    Actions.zone.requestWithdrawal.call({
-      account: rootClient.account,
-      amount: swapAmount,
-      data: callbackData,
-      gasLimit: routerCallbackGasLimit,
-      to: swapAndDepositRouter,
-      token: pathUsd,
-    }),
-  ],
-  throwOnReceiptRevert: true,
+  gas: routerCallbackGasLimit,
+  timeout: zoneRpcSyncTimeout,
+  to: swapAndDepositRouter,
+  token: pathUsd,
 })
 
 console.log(receipt.blockNumber)

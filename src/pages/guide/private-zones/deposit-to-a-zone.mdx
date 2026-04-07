@@ -4,6 +4,7 @@ description: Deposit pathUSD from your public-chain balance into Zone A and conf
 ---
 
 import * as Demo from '../../../components/guides/Demo.tsx'
+import { Tab, Tabs } from 'vocs'
 import { DepositToZone } from '../../../components/guides/zones/DepositToZone.tsx'
 
 # Deposit to a Zone
@@ -15,6 +16,8 @@ Tempo Zones is still in early development and is available for testing purposes 
 Use this guide when you want to move `pathUSD` from your public Tempo balance into `Zone A`. You will submit a public-chain deposit first, then wait for `Zone A` to credit the net amount after fees.
 
 The deposit is accepted through `ZonePortal` on the public chain. You need private zone authorization to read the resulting zone balance, because those reads are only exposed to the authenticated account.
+
+The demo below supports both the standard deposit flow and the upstream `Actions.zone.encryptedDepositSync(...)` flow when you want the zone recipient and memo to stay encrypted from everyone except the sequencer.
 
 ## Depositing pathUSD to Zone A
 
@@ -29,39 +32,51 @@ By the end of this guide you will have deposited `pathUSD` into `Zone A` and con
   <DepositToZone />
 </Demo.Container>
 
-## Code example
+## Code examples
 
-This snippet assumes you already have a signed-in `rootClient` on the public chain and the usual token and zone constants in scope.
-It shows the core deposit transaction path; use the demo above when you want to watch the resulting zone balance update.
+These snippets assume you already have a signed-in `rootClient` on the public chain and the usual token and zone constants in scope.
+Use the plaintext flow when revealing the recipient and memo is acceptable. Use the encrypted flow when only the zone sequencer should be able to read those fields.
+
+<Tabs stateKey="zone-deposit-mode">
+  <Tab title="Plaintext">
 
 ```ts
 import { parseUnits } from 'viem'
-import { sendTransactionSync } from 'viem/actions'
 import { Actions } from 'viem/tempo'
 
 const depositAmount = parseUnits('100', 6)
 
-const receipt = await sendTransactionSync(rootClient, {
+const { receipt } = await Actions.zone.depositSync(rootClient, {
   account: rootClient.account,
-  calls: [
-    Actions.token.approve.call({
-      amount: depositAmount,
-      spender: ZONE_A.portalAddress,
-      token: pathUsd,
-    }),
-    Actions.zone.deposit.call({
-      account: rootClient.account,
-      amount: depositAmount,
-      chain: rootClient.chain,
-      token: pathUsd,
-      zone: ZONE_A.id,
-    }),
-  ],
-  throwOnReceiptRevert: true,
+  amount: depositAmount,
+  token: pathUsd,
+  zoneId: ZONE_A.id,
 })
 
 console.log(receipt.blockNumber)
 ```
+
+  </Tab>
+  <Tab title="Encrypted">
+
+```ts
+import { parseUnits } from 'viem'
+import { Actions } from 'viem/tempo'
+
+const depositAmount = parseUnits('100', 6)
+
+const { receipt } = await Actions.zone.encryptedDepositSync(rootClient, {
+  account: rootClient.account,
+  amount: depositAmount,
+  token: pathUsd,
+  zoneId: ZONE_A.id,
+})
+
+console.log(receipt.blockNumber)
+```
+
+  </Tab>
+</Tabs>
 
 ## What Happens During a Deposit
 

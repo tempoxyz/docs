@@ -19,9 +19,9 @@ Tempo Zones let you keep balances and transfers inside a private execution envir
 - Keep some `pathUSD` on the public chain if you want to try deposits, zone top-ups, swaps, or withdrawals.
 - Expect deposits, routed swaps, and withdrawals to complete asynchronously rather than in a single balance update.
 
-These guides cover the baseline zone workflows used in the current demos: regular deposits through `ZonePortal.deposit(...)`, in-zone transfers, routed swaps, and direct withdrawals through `ZoneOutbox.requestWithdrawal(...)`.
+These guides cover the baseline zone workflows used in the current demos: deposits through `Actions.zone.depositSync(...)` and `Actions.zone.encryptedDepositSync(...)`, in-zone transfers, routed swaps, direct withdrawals through `Actions.zone.requestWithdrawalSync(...)`, and authenticated withdrawals through `Actions.zone.requestEncryptedWithdrawalSync(...)`.
 
-When you need protocol-level privacy features before high-level SDK helpers land, the deposit guide's demo lets you switch between plaintext and encrypted deposits, and the withdrawal guide still includes a hand-rolled `requestWithdrawal(..., revealTo)` example.
+The deposit guide's demo lets you switch between plaintext and encrypted deposits, and the withdrawal guide lets you switch between standard and authenticated withdrawals, while keeping the transaction flow on the upstream `viem` zone actions.
 
 ## Choose the right guide
 

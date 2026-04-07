@@ -1,18 +1,17 @@
 'use client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { type Hex, parseAbiItem, parseUnits } from 'viem'
-import { sendTransactionSync } from 'viem/actions'
-import { Actions } from 'viem/tempo'
+import { createClient, type Hex, parseAbiItem, parseUnits } from 'viem'
+import { Actions, tempoActions } from 'viem/tempo'
+import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
 import { useConnection, useConnectorClient, usePublicClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import {
-  getTempoZoneClient,
-  getZoneClientParameters,
+  getZoneTransportConfig,
   moderatoZoneRpcUrls,
+  stripRpcBasicAuth,
   zoneRpcSyncTimeout,
 } from '../../../lib/private-zones.ts'
-import { encodeAuthenticatedWithdrawalCall } from '../../../lib/private-zones-withdrawal.ts'
 import { Button, ExplorerLink, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { pathUsd } from '../tokens'
@@ -20,7 +19,8 @@ import { useStickyStepCompletion } from './useStickyStepCompletion.ts'
 
 const ZONE_LABEL = 'Zone A'
 const ZONE_ID = 6 as const
-const ZONE_OUTBOX = '0x1c00000000000000000000000000000000000002' as const
+const AUTHENTICATED_WITHDRAWAL_REVEAL_TO =
+  '0x031dc147467e8f106eb22850fef549dc74b8f6634aeac554ebdd4ab896b67cdf68' as const
 const WITHDRAWAL_AMOUNT = parseUnits('100', 6)
 const ZONE_GAS_BUFFER = parseUnits('1', 6)
 
@@ -32,20 +32,35 @@ type WithdrawalMode = 'standard' | 'authenticated'
 
 type ZoneClientLike = {
   token: {
-    getAllowance: (parameters: { account: Hex; spender: Hex; token: Hex }) => Promise<bigint>
     getBalance: (parameters: { account: Hex; token: Hex }) => Promise<bigint>
   }
   zone: {
-    getWithdrawalFee: () => Promise<bigint>
-    prepareAuthorizationToken: () => Promise<{
-      account: Hex
-      expiresAt: bigint
+    requestEncryptedWithdrawalSync: (parameters: {
+      account: unknown
+      amount: bigint
+      feeToken: Hex
+      revealTo: Hex
+      timeout: number
+      to: Hex
+      token: Hex
+    }) => Promise<{ receipt: { blockNumber: bigint; transactionHash: Hex } }>
+    requestWithdrawalSync: (parameters: {
+      account: unknown
+      amount: bigint
+      feeToken: Hex
+      timeout: number
+      to: Hex
+      token: Hex
+    }) => Promise<{ receipt: { blockNumber: bigint; transactionHash: Hex } }>
+    signAuthorizationToken: () => Promise<{
+      authentication: {
+        expiresAt: number
+        zoneId: number
+      }
+      token: Hex
     }>
+    getWithdrawalFee: () => Promise<bigint>
   }
-}
-
-type RootChainWithZones = {
-  zones?: Record<number, { portalAddress: Hex }>
 }
 
 export function WithdrawFromZone() {
@@ -80,9 +95,6 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
   const queryClient = useQueryClient()
   const publicClient = usePublicClient()
   const { data: connectorClient } = useConnectorClient()
-  const zonePortalAddress = (connectorClient?.chain as RootChainWithZones | undefined)?.zones?.[
-    ZONE_ID
-  ]?.portalAddress
   const {
     data: rootBalance,
     isPending: rootBalanceIsPending,
@@ -94,11 +106,15 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
 
   const zoneClient = React.useMemo(
     () =>
-      connectorClient
-        ? (getTempoZoneClient(
-            connectorClient as never,
-            getZoneClientParameters(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]) as never,
-          ) as unknown as ZoneClientLike)
+      connectorClient?.account
+        ? (createClient({
+            account: connectorClient.account,
+            chain: zoneModerato(ZONE_ID),
+            transport: zoneHttp(
+              stripRpcBasicAuth(moderatoZoneRpcUrls[ZONE_ID]),
+              getZoneTransportConfig(moderatoZoneRpcUrls[ZONE_ID]),
+            ),
+          }).extend(tempoActions()) as unknown as ZoneClientLike)
         : undefined,
     [connectorClient],
   )
@@ -109,7 +125,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
     queryFn: async () => {
       if (!zoneClient) throw new Error('zone client not ready')
 
-      const auth = await zoneClient.zone.prepareAuthorizationToken()
+      const auth = await zoneClient.zone.signAuthorizationToken()
 
       return { auth }
     },
@@ -156,72 +172,18 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
     withdrawalFeeQuery.data !== undefined
       ? WITHDRAWAL_AMOUNT + withdrawalFeeQuery.data + ZONE_GAS_BUFFER
       : undefined
-  const zoneApprovalTarget =
-    withdrawalFeeQuery.data !== undefined ? WITHDRAWAL_AMOUNT + withdrawalFeeQuery.data : undefined
-
-  const zoneOutboxAllowanceQuery = useQuery({
-    enabled: Boolean(zoneClient && authQuery.isSuccess && zoneApprovalTarget !== undefined),
-    queryKey: ['guide-private-zones-withdraw-zone-outbox-allowance', address, ZONE_ID],
-    queryFn: async () => {
-      if (!zoneClient) throw new Error('zone client not ready')
-
-      return zoneClient.token.getAllowance({
-        account: address,
-        spender: ZONE_OUTBOX,
-        token: pathUsd,
-      })
-    },
-    staleTime: 30_000,
-  })
-
-  const hasZoneOutboxAllowance = Boolean(
-    zoneApprovalTarget !== undefined &&
-      zoneOutboxAllowanceQuery.data !== undefined &&
-      zoneOutboxAllowanceQuery.data >= zoneApprovalTarget,
-  )
-  const zoneBalanceRequirement =
-    hasZoneOutboxAllowance && zoneApprovalTarget !== undefined
-      ? zoneApprovalTarget
-      : zoneTopUpTarget
   const zoneTopUpShortfall =
-    zoneBalanceRequirement !== undefined &&
+    zoneTopUpTarget !== undefined &&
     zoneBalanceQuery.data !== undefined &&
-    zoneBalanceQuery.data < zoneBalanceRequirement
-      ? zoneBalanceRequirement - zoneBalanceQuery.data
+    zoneBalanceQuery.data < zoneTopUpTarget
+      ? zoneTopUpTarget - zoneBalanceQuery.data
       : 0n
   const hasEnoughZoneBalance = Boolean(
-    zoneBalanceRequirement !== undefined &&
+    zoneTopUpTarget !== undefined &&
       zoneBalanceQuery.data !== undefined &&
-      zoneBalanceQuery.data >= zoneBalanceRequirement,
+      zoneBalanceQuery.data >= zoneTopUpTarget,
   )
   const zoneBalanceStepComplete = useStickyStepCompletion(hasEnoughZoneBalance)
-
-  const portalAllowanceQuery = useQuery({
-    enabled: Boolean(
-      connectorClient &&
-        zonePortalAddress &&
-        authQuery.isSuccess &&
-        !zoneBalanceStepComplete &&
-        zoneTopUpShortfall > 0n,
-    ),
-    queryKey: [
-      'guide-private-zones-withdraw-portal-allowance',
-      address,
-      ZONE_ID,
-      zonePortalAddress,
-    ],
-    queryFn: async () => {
-      if (!connectorClient) throw new Error('connector client not ready')
-      if (!zonePortalAddress) throw new Error('zone portal address not configured')
-
-      return Actions.token.getAllowance(connectorClient as never, {
-        account: address,
-        spender: zonePortalAddress,
-        token: pathUsd,
-      })
-    },
-    staleTime: 30_000,
-  })
 
   const fundMutation = useMutation({
     mutationFn: async () => {
@@ -239,45 +201,20 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
   const topUpMutation = useMutation({
     mutationFn: async () => {
       if (!connectorClient) throw new Error('connector client not ready')
-      if (!zonePortalAddress) throw new Error('zone portal address not configured')
       if (zoneTopUpShortfall <= 0n) throw new Error('zone top-up is not required')
 
-      const includesApproval = !hasPortalAllowance
-      const receipt = await sendTransactionSync(
-        connectorClient as never,
-        {
-          account: connectorClient.account,
-          calls: [
-            ...(includesApproval
-              ? [
-                  Actions.token.approve.call({
-                    amount: zoneTopUpShortfall,
-                    spender: zonePortalAddress,
-                    token: pathUsd,
-                  }),
-                ]
-              : []),
-            Actions.zone.deposit.call({
-              account: connectorClient.account,
-              amount: zoneTopUpShortfall,
-              chain: connectorClient.chain as never,
-              token: pathUsd,
-              zone: ZONE_ID,
-            } as never),
-          ],
-          throwOnReceiptRevert: true,
-          timeout: 60_000,
-        } as never,
-      )
+      const { receipt } = await Actions.zone.depositSync(connectorClient as never, {
+        account: connectorClient.account,
+        amount: zoneTopUpShortfall,
+        chain: connectorClient.chain as never,
+        token: pathUsd,
+        zoneId: ZONE_ID,
+      })
 
-      return {
-        includesApproval,
-        receipt,
-      }
+      return { receipt }
     },
     onSuccess: async () => {
       await refetchRootBalance()
-      await portalAllowanceQuery.refetch()
       await zoneBalanceQuery.refetch()
     },
   })
@@ -287,7 +224,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
       if (!connectorClient) throw new Error('connector client not ready')
       if (!publicClient) throw new Error('public client not ready')
       if (!zoneClient) throw new Error('zone client not ready')
-      if (zoneApprovalTarget === undefined) throw new Error('withdrawal fee not ready')
+      if (withdrawalFeeQuery.data === undefined) throw new Error('withdrawal fee not ready')
 
       const currentRootBalance = await Actions.token.getBalance(connectorClient as never, {
         account: address,
@@ -297,48 +234,33 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
         account: address,
         token: pathUsd,
       })
-      const includesApproval = !hasZoneOutboxAllowance
-      const withdrawalCall =
+      const receipt =
         mode === 'authenticated'
-          ? encodeAuthenticatedWithdrawalCall({
-              amount: WITHDRAWAL_AMOUNT,
-              fallbackRecipient: address,
-              outbox: ZONE_OUTBOX,
-              to: address,
-              token: pathUsd,
-            })
-          : Actions.zone.requestWithdrawal.call({
-              account: connectorClient.account,
-              amount: WITHDRAWAL_AMOUNT,
-              token: pathUsd,
-              to: address,
-            })
-      const receipt = await sendTransactionSync(
-        zoneClient as never,
-        {
-          account: connectorClient.account,
-          feeToken: pathUsd,
-          calls: [
-            ...(includesApproval
-              ? [
-                  Actions.token.approve.call({
-                    amount: zoneApprovalTarget,
-                    spender: ZONE_OUTBOX,
-                    token: pathUsd,
-                  }),
-                ]
-              : []),
-            withdrawalCall,
-          ],
-          throwOnReceiptRevert: true,
-          timeout: zoneRpcSyncTimeout,
-        } as never,
-      )
+          ? (
+              await zoneClient.zone.requestEncryptedWithdrawalSync({
+                account: connectorClient.account,
+                amount: WITHDRAWAL_AMOUNT,
+                feeToken: pathUsd,
+                revealTo: AUTHENTICATED_WITHDRAWAL_REVEAL_TO,
+                timeout: zoneRpcSyncTimeout,
+                to: address,
+                token: pathUsd,
+              })
+            ).receipt
+          : (
+              await zoneClient.zone.requestWithdrawalSync({
+                account: connectorClient.account,
+                amount: WITHDRAWAL_AMOUNT,
+                feeToken: pathUsd,
+                timeout: zoneRpcSyncTimeout,
+                to: address,
+                token: pathUsd,
+              })
+            ).receipt
       const anchorBlock = await publicClient.getBlockNumber()
 
       return {
         anchorBlock,
-        includesApproval,
         receipt,
         startingRootBalance: currentRootBalance,
         startingZoneBalance: currentZoneBalance,
@@ -347,7 +269,6 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
     onSuccess: async () => {
       await refetchRootBalance()
       await zoneBalanceQuery.refetch()
-      await zoneOutboxAllowanceQuery.refetch()
       await withdrawalConfirmationQuery.refetch()
     },
   })
@@ -421,13 +342,9 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
   })
 
   const hasRootBalance = Boolean(rootBalance && rootBalance > 0n)
-  const hasPortalAllowance = Boolean(
-    portalAllowanceQuery.data !== undefined && portalAllowanceQuery.data >= zoneTopUpShortfall,
-  )
   const settlementTxHash = withdrawalConfirmationQuery.data?.txHash
   const withdrawalConfirmed = Boolean(settlementTxHash)
   const topUpReceipt = topUpMutation.data?.receipt
-  const topUpIncludesApproval = topUpMutation.data?.includesApproval ?? !hasPortalAllowance
   const authIsPreparing = authQuery.fetchStatus === 'fetching'
   const stepTwoAction = authQuery.isSuccess ? undefined : (
     <Button
@@ -481,31 +398,6 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
         {fundMutation.isPending ? 'Getting pathUSD' : 'Get testnet pathUSD'}
       </Button>
     )
-  } else if (!hasEnoughZoneBalance && portalAllowanceQuery.isError) {
-    stepThreeAction = (
-      <Button
-        className="font-normal text-[14px] -tracking-[2%]"
-        onClick={() => portalAllowanceQuery.refetch()}
-        type="button"
-        variant="default"
-      >
-        Retry portal check
-      </Button>
-    )
-  } else if (
-    !hasEnoughZoneBalance &&
-    (portalAllowanceQuery.isPending || portalAllowanceQuery.data === undefined)
-  ) {
-    stepThreeAction = (
-      <Button
-        className="font-normal text-[14px] -tracking-[2%]"
-        disabled
-        type="button"
-        variant="default"
-      >
-        Checking portal approval
-      </Button>
-    )
   } else if (!hasEnoughZoneBalance) {
     stepThreeAction = (
       <Button
@@ -515,13 +407,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
         type="button"
         variant={authQuery.isSuccess ? 'accent' : 'default'}
       >
-        {topUpMutation.isPending
-          ? topUpIncludesApproval
-            ? 'Approving + topping up Zone A'
-            : 'Topping up Zone A'
-          : topUpIncludesApproval
-            ? 'Approve + top up Zone A'
-            : 'Top up Zone A'}
+        {topUpMutation.isPending ? 'Approving + topping up Zone A' : 'Approve + top up Zone A'}
       </Button>
     )
   }
@@ -529,17 +415,6 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
   let stepFourAction: React.ReactNode
   if (!zoneBalanceStepComplete) {
     stepFourAction = undefined
-  } else if (zoneOutboxAllowanceQuery.isPending || zoneOutboxAllowanceQuery.data === undefined) {
-    stepFourAction = (
-      <Button
-        className="font-normal text-[14px] -tracking-[2%]"
-        disabled
-        type="button"
-        variant="default"
-      >
-        Checking withdrawal approval
-      </Button>
-    )
   } else {
     stepFourAction = (
       <Button
@@ -574,7 +449,6 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
         actions={stepThreeAction}
         error={
           topUpMutation.error ??
-          portalAllowanceQuery.error ??
           withdrawalFeeQuery.error ??
           zoneBalanceQuery.error ??
           fundMutation.error
@@ -594,7 +468,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
         active={zoneBalanceStepComplete && !withdrawMutation.isSuccess}
         completed={withdrawMutation.isSuccess}
         actions={stepFourAction}
-        error={withdrawMutation.error ?? zoneOutboxAllowanceQuery.error}
+        error={withdrawMutation.error}
         number={4}
         title={getWithdrawalSubmitStepTitle(mode)}
       />
@@ -677,7 +551,7 @@ function WithdrawalModeSelector(props: {
           <p className="text-[12px] text-gray9 uppercase tracking-[0.12em]">Withdrawal mode</p>
           <p className="mt-1 text-[13px] text-gray10 leading-relaxed -tracking-[1%]">
             Standard withdrawals reveal the sender of the withdrawal, while authenticated
-            withdrawals selectively reveal the sender using the revealTo field.
+            withdrawals only reveal sender details to the holder of the reveal key.
           </p>
         </div>
         <div className="flex shrink-0 self-start rounded-lg border border-gray4 bg-background p-1">

@@ -4,6 +4,7 @@ description: Withdraw pathUSD from Zone A back to your public-chain balance with
 ---
 
 import * as Demo from '../../../components/guides/Demo.tsx'
+import { Tab, Tabs } from 'vocs'
 import { WithdrawFromZone } from '../../../components/guides/zones/WithdrawFromZone.tsx'
 
 # Withdraw from a Zone
@@ -14,9 +15,9 @@ Tempo Zones is still in early development and is available for testing purposes 
 
 Use this guide when you want to move `pathUSD` out of `Zone A` and back to your public Tempo balance.
 
-Direct withdrawals exit through `ZoneOutbox` on the zone chain. You approve the withdrawal amount plus fee, submit the request, then wait for the public balance to increase after the batch settles.
+Direct withdrawals exit through `ZoneOutbox` on the zone chain. You submit the withdrawal request in the zone first, then wait for the public balance to increase after the batch settles.
 
-This page covers the standard `ZoneOutbox.requestWithdrawal(...)` flow. The `prepareAuthorizationToken()` call in the example makes authenticated zone RPC access explicit for the session; it is not a separate withdrawal mode.
+The demo below supports both the standard `Actions.zone.requestWithdrawalSync(...)` flow and the authenticated `Actions.zone.requestEncryptedWithdrawalSync(...)` flow. In both cases, `signAuthorizationToken()` makes authenticated zone RPC access explicit for the session.
 
 ## Withdrawing pathUSD from Zone A
 
@@ -31,46 +32,59 @@ By the end of this guide you will have withdrawn `pathUSD` from `Zone A` and con
   <WithdrawFromZone />
 </Demo.Container>
 
-## Code example
+## Code examples
 
-This snippet assumes you already have a signed-in `rootClient` on the public chain, a derived `zoneAClient`, and the usual token and outbox constants in scope.
-It shows the core withdrawal transaction path; use the demo above when you want to watch the public balance settle.
+These snippets assume you already have a signed-in `rootClient` on the public chain, a derived `zoneAClient`, and the usual token constants in scope.
+Use the plaintext flow when normal withdrawal visibility is fine. Use the authenticated flow when the sender details should only be revealed to the holder of a `revealTo` public key.
+
+<Tabs stateKey="zone-withdrawal-example-mode">
+  <Tab title="Plaintext">
 
 ```ts
 import { parseUnits } from 'viem'
-import { sendTransactionSync } from 'viem/actions'
 import { Actions } from 'viem/tempo'
 
 const withdrawalAmount = parseUnits('100', 6)
 
-await zoneAClient.zone.prepareAuthorizationToken()
+await zoneAClient.zone.signAuthorizationToken()
 
-const withdrawalFee = await zoneAClient.zone.getWithdrawalFee()
-const requiredZoneAllowance = withdrawalAmount + withdrawalFee
-
-const receipt = await sendTransactionSync(zoneAClient, {
+const { receipt } = await Actions.zone.requestWithdrawalSync(zoneAClient, {
   account: rootClient.account,
   feeToken: pathUsd,
-  calls: [
-    Actions.token.approve.call({
-      amount: requiredZoneAllowance,
-      spender: zoneOutbox,
-      token: pathUsd,
-    }),
-    Actions.zone.requestWithdrawal.call({
-      account: rootClient.account,
-      amount: withdrawalAmount,
-      token: pathUsd,
-      to: rootClient.account.address,
-    }),
-  ],
-  throwOnReceiptRevert: true,
+  amount: withdrawalAmount,
+  token: pathUsd,
+  to: rootClient.account.address,
 })
 
 console.log(receipt.blockNumber)
 ```
 
-In other words, the withdrawal transaction is still `requestWithdrawal(...)`. The explicit authorization step is there so the app can use the zone RPC without triggering an unexpected wallet prompt later in the flow.
+  </Tab>
+  <Tab title="Authenticated">
+
+```ts
+import { parseUnits } from 'viem'
+import { Actions } from 'viem/tempo'
+
+const withdrawalAmount = parseUnits('100', 6)
+const revealTo = '0x031dc147467e8f106eb22850fef549dc74b8f6634aeac554ebdd4ab896b67cdf68'
+
+await zoneAClient.zone.signAuthorizationToken()
+
+const { receipt } = await Actions.zone.requestEncryptedWithdrawalSync(zoneAClient, {
+  account: rootClient.account,
+  feeToken: pathUsd,
+  amount: withdrawalAmount,
+  revealTo,
+  token: pathUsd,
+  to: rootClient.account.address,
+})
+
+console.log(receipt.blockNumber)
+```
+
+  </Tab>
+</Tabs>
 
 ## What a Direct Withdrawal Does
 

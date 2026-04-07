@@ -2,9 +2,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { VariantProps } from 'cva'
 import * as React from 'react'
-import type { Address, BaseError } from 'viem'
-import { formatUnits } from 'viem'
+import { type Address, type BaseError, createClient, formatUnits } from 'viem'
 import { tempoModerato } from 'viem/chains'
+import { tempoActions } from 'viem/tempo'
+import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
 import { useAccount, useConnect, useConnections, useConnectorClient, useDisconnect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import LucideCheck from '~icons/lucide/check'
@@ -16,9 +17,9 @@ import LucideWalletCards from '~icons/lucide/wallet-cards'
 import { cva, cx } from '../../../cva.config'
 import { usePostHogTracking } from '../../lib/posthog'
 import {
-  getTempoZoneClient,
-  getZoneClientParameters,
+  getZoneTransportConfig,
   moderatoZoneRpcUrls,
+  stripRpcBasicAuth,
 } from '../../lib/private-zones.ts'
 import { useTempoWalletConnector, useWebAuthnConnector } from '../../wagmi.config'
 import { Container as ParentContainer } from '../Container'
@@ -269,11 +270,15 @@ export namespace Container {
       )?.zones?.[zone]?.rpcUrls.default.http[0]
     const zoneClient = React.useMemo(
       () =>
-        connectorClient && zoneRpcUrl
-          ? (getTempoZoneClient(
-              connectorClient as never,
-              getZoneClientParameters(zone, zoneRpcUrl) as never,
-            ) as unknown as ZoneClientLike)
+        connectorClient?.account && zoneRpcUrl
+          ? (createClient({
+              account: connectorClient.account,
+              chain: zoneModerato(zone),
+              transport: zoneHttp(
+                stripRpcBasicAuth(zoneRpcUrl),
+                getZoneTransportConfig(zoneRpcUrl),
+              ),
+            }).extend(tempoActions()) as unknown as ZoneClientLike)
           : undefined,
       [connectorClient, zone, zoneRpcUrl],
     )

@@ -42,7 +42,7 @@ import { Actions } from 'viem/tempo'
 const transferAmount = parseUnits('25', 6)
 const demoRecipient = '0xbeefcafe54750903ac1c8909323af7beb21ea2cb' as Address
 
-await zoneAClient.zone.prepareAuthorizationToken()
+await zoneAClient.zone.signAuthorizationToken()
 
 const { receipt } = await Actions.token.transferSync(zoneAClient, {
   account: rootClient.account,

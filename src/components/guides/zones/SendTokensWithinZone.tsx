@@ -1,15 +1,15 @@
 'use client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { type Hex, parseUnits } from 'viem'
-import { sendTransactionSync } from 'viem/actions'
-import { Actions } from 'viem/tempo'
+import { createClient, type Hex, parseUnits } from 'viem'
+import { Actions, tempoActions } from 'viem/tempo'
+import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
 import { useConnection, useConnectorClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import {
-  getTempoZoneClient,
-  getZoneClientParameters,
+  getZoneTransportConfig,
   moderatoZoneRpcUrls,
+  stripRpcBasicAuth,
 } from '../../../lib/private-zones.ts'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
@@ -26,15 +26,14 @@ type ZoneClientLike = {
     getBalance: (parameters: { account: Hex; token: Hex }) => Promise<bigint>
   }
   zone: {
-    prepareAuthorizationToken: () => Promise<{
-      account: Hex
-      expiresAt: bigint
+    signAuthorizationToken: () => Promise<{
+      authentication: {
+        expiresAt: number
+        zoneId: number
+      }
+      token: Hex
     }>
   }
-}
-
-type RootChainWithZones = {
-  zones?: Record<number, { portalAddress: Hex }>
 }
 
 export function SendTokensWithinZone() {
@@ -65,9 +64,6 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   const { address } = props
   const queryClient = useQueryClient()
   const { data: connectorClient } = useConnectorClient()
-  const zonePortalAddress = (connectorClient?.chain as RootChainWithZones | undefined)?.zones?.[
-    ZONE_ID
-  ]?.portalAddress
   const {
     data: rootBalance,
     isPending: rootBalanceIsPending,
@@ -79,11 +75,15 @@ function ConnectedZoneFlow(props: { address: Hex }) {
 
   const zoneClient = React.useMemo(
     () =>
-      connectorClient
-        ? (getTempoZoneClient(
-            connectorClient as never,
-            getZoneClientParameters(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]) as never,
-          ) as unknown as ZoneClientLike)
+      connectorClient?.account
+        ? (createClient({
+            account: connectorClient.account,
+            chain: zoneModerato(ZONE_ID),
+            transport: zoneHttp(
+              stripRpcBasicAuth(moderatoZoneRpcUrls[ZONE_ID]),
+              getZoneTransportConfig(moderatoZoneRpcUrls[ZONE_ID]),
+            ),
+          }).extend(tempoActions()) as unknown as ZoneClientLike)
         : undefined,
     [connectorClient],
   )
@@ -94,7 +94,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     queryFn: async () => {
       if (!zoneClient) throw new Error('zone client not ready')
 
-      const auth = await zoneClient.zone.prepareAuthorizationToken()
+      const auth = await zoneClient.zone.signAuthorizationToken()
 
       return { auth }
     },
@@ -136,28 +136,6 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   )
   const zoneBalanceStepComplete = useStickyStepCompletion(hasEnoughZoneBalance)
 
-  const portalAllowanceQuery = useQuery({
-    enabled: Boolean(
-      connectorClient &&
-        zonePortalAddress &&
-        authQuery.isSuccess &&
-        !zoneBalanceStepComplete &&
-        zoneTopUpShortfall > 0n,
-    ),
-    queryKey: ['guide-private-zones-send-portal-allowance', address, ZONE_ID, zonePortalAddress],
-    queryFn: async () => {
-      if (!connectorClient) throw new Error('connector client not ready')
-      if (!zonePortalAddress) throw new Error('zone portal address not configured')
-
-      return Actions.token.getAllowance(connectorClient as never, {
-        account: address,
-        spender: zonePortalAddress,
-        token: pathUsd,
-      })
-    },
-    staleTime: 30_000,
-  })
-
   const fundMutation = useMutation({
     mutationFn: async () => {
       if (!connectorClient) throw new Error('connector client not ready')
@@ -174,45 +152,20 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   const topUpMutation = useMutation({
     mutationFn: async () => {
       if (!connectorClient) throw new Error('connector client not ready')
-      if (!zonePortalAddress) throw new Error('zone portal address not configured')
       if (zoneTopUpShortfall <= 0n) throw new Error('zone top-up is not required')
 
-      const includesApproval = !hasPortalAllowance
-      const receipt = await sendTransactionSync(
-        connectorClient as never,
-        {
-          account: connectorClient.account,
-          calls: [
-            ...(includesApproval
-              ? [
-                  Actions.token.approve.call({
-                    amount: zoneTopUpShortfall,
-                    spender: zonePortalAddress,
-                    token: pathUsd,
-                  }),
-                ]
-              : []),
-            Actions.zone.deposit.call({
-              account: connectorClient.account,
-              amount: zoneTopUpShortfall,
-              chain: connectorClient.chain as never,
-              token: pathUsd,
-              zone: ZONE_ID,
-            } as never),
-          ],
-          throwOnReceiptRevert: true,
-          timeout: 60_000,
-        } as never,
-      )
+      const { receipt } = await Actions.zone.depositSync(connectorClient as never, {
+        account: connectorClient.account,
+        amount: zoneTopUpShortfall,
+        chain: connectorClient.chain as never,
+        token: pathUsd,
+        zoneId: ZONE_ID,
+      })
 
-      return {
-        includesApproval,
-        receipt,
-      }
+      return { receipt }
     },
     onSuccess: async () => {
       await refetchRootBalance()
-      await portalAllowanceQuery.refetch()
       await zoneBalanceQuery.refetch()
     },
   })
@@ -280,11 +233,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   })
 
   const hasRootBalance = Boolean(rootBalance && rootBalance > 0n)
-  const hasPortalAllowance = Boolean(
-    portalAllowanceQuery.data !== undefined && portalAllowanceQuery.data >= zoneTopUpShortfall,
-  )
   const topUpReceipt = topUpMutation.data?.receipt
-  const topUpIncludesApproval = topUpMutation.data?.includesApproval ?? !hasPortalAllowance
   const expectedMaxZoneBalance = transferMutation.data?.startingZoneBalance
     ? transferMutation.data.startingZoneBalance - TRANSFER_AMOUNT
     : undefined
@@ -347,31 +296,6 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         {fundMutation.isPending ? 'Getting pathUSD' : 'Get testnet pathUSD'}
       </Button>
     )
-  } else if (!hasEnoughZoneBalance && portalAllowanceQuery.isError) {
-    stepThreeAction = (
-      <Button
-        className="font-normal text-[14px] -tracking-[2%]"
-        onClick={() => portalAllowanceQuery.refetch()}
-        type="button"
-        variant="default"
-      >
-        Retry portal check
-      </Button>
-    )
-  } else if (
-    !hasEnoughZoneBalance &&
-    (portalAllowanceQuery.isPending || portalAllowanceQuery.data === undefined)
-  ) {
-    stepThreeAction = (
-      <Button
-        className="font-normal text-[14px] -tracking-[2%]"
-        disabled
-        type="button"
-        variant="default"
-      >
-        Checking portal approval
-      </Button>
-    )
   } else if (!hasEnoughZoneBalance) {
     stepThreeAction = (
       <Button
@@ -381,13 +305,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         type="button"
         variant={authQuery.isSuccess ? 'accent' : 'default'}
       >
-        {topUpMutation.isPending
-          ? topUpIncludesApproval
-            ? 'Approving + topping up Zone A'
-            : 'Topping up Zone A'
-          : topUpIncludesApproval
-            ? 'Approve + top up Zone A'
-            : 'Top up Zone A'}
+        {topUpMutation.isPending ? 'Approving + topping up Zone A' : 'Approve + top up Zone A'}
       </Button>
     )
   }
@@ -428,12 +346,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         active={authQuery.isSuccess && !zoneBalanceStepComplete}
         completed={zoneBalanceStepComplete}
         actions={stepThreeAction}
-        error={
-          topUpMutation.error ??
-          portalAllowanceQuery.error ??
-          zoneBalanceQuery.error ??
-          fundMutation.error
-        }
+        error={topUpMutation.error ?? zoneBalanceQuery.error ?? fundMutation.error}
         number={3}
         title={`Make sure ${ZONE_LABEL} has enough pathUSD to cover the transfer and fee.`}
       >

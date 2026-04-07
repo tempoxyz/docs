@@ -1,23 +1,16 @@
 'use client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { type Hex, parseUnits } from 'viem'
-import { sendTransactionSync } from 'viem/actions'
-import { Actions } from 'viem/tempo'
+import { createClient, type Hex, parseAbi, parseUnits } from 'viem'
+import { Actions, tempoActions } from 'viem/tempo'
+import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
 import { useConnection, useConnectorClient, usePublicClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import {
-  getTempoZoneClient,
-  getZoneClientParameters,
+  getZoneTransportConfig,
   moderatoZoneRpcUrls,
+  stripRpcBasicAuth,
 } from '../../../lib/private-zones.ts'
-import {
-  encodeEncryptedDepositCall,
-  encryptZoneDepositPayload,
-  getNetZoneDepositAmount,
-  type SequencerEncryptionKey,
-  zonePortalDepositAbi,
-} from '../../../lib/private-zones-encryption.ts'
 import { Button, ExplorerLink, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { pathUsd } from '../tokens'
@@ -25,18 +18,21 @@ import { pathUsd } from '../tokens'
 const ZONE_LABEL = 'Zone A'
 const ZONE_ID = 6 as const
 const DEPOSIT_AMOUNT = parseUnits('100', 6)
+const zonePortalFeeAbi = parseAbi(['function calculateDepositFee() view returns (uint128)'])
 
 type DepositMode = 'plaintext' | 'encrypted'
 
 type ZoneClientLike = {
-  getBlockNumber: () => Promise<bigint>
   token: {
     getBalance: (parameters: { account: Hex; token: Hex }) => Promise<bigint>
   }
   zone: {
-    prepareAuthorizationToken: () => Promise<{
-      account: Hex
-      expiresAt: bigint
+    signAuthorizationToken: () => Promise<{
+      authentication: {
+        expiresAt: number
+        zoneId: number
+      }
+      token: Hex
     }>
   }
 }
@@ -46,12 +42,7 @@ type RootChainWithZones = {
 }
 
 type DepositSetup = {
-  allowance: bigint
   depositFee: bigint
-  encrypted?: {
-    keyIndex: bigint
-    sequencerKey: SequencerEncryptionKey
-  }
 }
 
 export function DepositToZone() {
@@ -100,11 +91,15 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
 
   const zoneClient = React.useMemo(
     () =>
-      connectorClient
-        ? (getTempoZoneClient(
-            connectorClient as never,
-            getZoneClientParameters(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]) as never,
-          ) as unknown as ZoneClientLike)
+      connectorClient?.account
+        ? (createClient({
+            account: connectorClient.account,
+            chain: zoneModerato(ZONE_ID),
+            transport: zoneHttp(
+              stripRpcBasicAuth(moderatoZoneRpcUrls[ZONE_ID]),
+              getZoneTransportConfig(moderatoZoneRpcUrls[ZONE_ID]),
+            ),
+          }).extend(tempoActions()) as unknown as ZoneClientLike)
         : undefined,
     [connectorClient],
   )
@@ -115,7 +110,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
     queryFn: async () => {
       if (!zoneClient) throw new Error('zone client not ready')
 
-      const auth = await zoneClient.zone.prepareAuthorizationToken()
+      const auth = await zoneClient.zone.signAuthorizationToken()
 
       return { auth }
     },
@@ -135,52 +130,17 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
 
   const depositSetupQuery = useQuery({
     enabled: Boolean(connectorClient && publicClient && zonePortalAddress && authQuery.isSuccess),
-    queryKey: ['guide-private-zones-deposit-setup', address, ZONE_ID, zonePortalAddress, mode],
+    queryKey: ['guide-private-zones-deposit-setup', address, ZONE_ID, zonePortalAddress],
     queryFn: async (): Promise<DepositSetup> => {
-      if (!connectorClient) throw new Error('connector client not ready')
       if (!publicClient) throw new Error('public client not ready')
       if (!zonePortalAddress) throw new Error('zone portal address not configured')
 
-      const [allowance, depositFee] = await Promise.all([
-        Actions.token.getAllowance(connectorClient as never, {
-          account: address,
-          spender: zonePortalAddress,
-          token: pathUsd,
-        }),
-        publicClient.readContract({
+      return {
+        depositFee: await publicClient.readContract({
           address: zonePortalAddress,
-          abi: zonePortalDepositAbi,
+          abi: zonePortalFeeAbi,
           functionName: 'calculateDepositFee',
         }),
-      ])
-
-      if (mode === 'encrypted') {
-        const [sequencerKey, encryptionKeyCount] = await Promise.all([
-          publicClient.readContract({
-            address: zonePortalAddress,
-            abi: zonePortalDepositAbi,
-            functionName: 'sequencerEncryptionKey',
-          }),
-          publicClient.readContract({
-            address: zonePortalAddress,
-            abi: zonePortalDepositAbi,
-            functionName: 'encryptionKeyCount',
-          }),
-        ])
-
-        return {
-          allowance,
-          depositFee,
-          encrypted: {
-            keyIndex: encryptionKeyCount - 1n,
-            sequencerKey,
-          },
-        }
-      }
-
-      return {
-        allowance,
-        depositFee,
       }
     },
     staleTime: 30_000,
@@ -203,7 +163,6 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
     mutationFn: async () => {
       if (!connectorClient) throw new Error('connector client not ready')
       if (!zoneClient) throw new Error('zone client not ready')
-      if (!zonePortalAddress) throw new Error('zone portal address not configured')
       if (!depositSetupQuery.data) throw new Error('deposit setup not ready')
 
       const startingZoneBalance = await zoneClient.token
@@ -213,65 +172,41 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
         })
         .catch(() => 0n)
 
-      const includesApproval = depositSetupQuery.data.allowance < DEPOSIT_AMOUNT
       const creditedAmount = getNetZoneDepositAmount(
         DEPOSIT_AMOUNT,
         depositSetupQuery.data.depositFee,
       )
 
-      const depositCall =
+      const receipt =
         mode === 'encrypted'
-          ? await (async () => {
-              const encryptedSetup = depositSetupQuery.data?.encrypted
-              if (!encryptedSetup) throw new Error('encrypted deposit setup not ready')
-
-              const encrypted = await encryptZoneDepositPayload({
-                keyIndex: encryptedSetup.keyIndex,
-                portalAddress: zonePortalAddress,
-                recipient: address,
-                sequencerKey: encryptedSetup.sequencerKey,
-              })
-
-              return encodeEncryptedDepositCall({
-                amount: DEPOSIT_AMOUNT,
-                encrypted,
-                keyIndex: encryptedSetup.keyIndex,
-                portalAddress: zonePortalAddress,
-                token: pathUsd,
-              })
-            })()
-          : Actions.zone.deposit.call({
-              account: connectorClient.account,
-              amount: DEPOSIT_AMOUNT,
-              chain: connectorClient.chain as never,
-              token: pathUsd,
-              zone: ZONE_ID,
-            } as never)
-
-      const receipt = await sendTransactionSync(
-        connectorClient as never,
-        {
-          account: connectorClient.account,
-          calls: [
-            ...(includesApproval
-              ? [
-                  Actions.token.approve.call({
-                    amount: DEPOSIT_AMOUNT,
-                    spender: zonePortalAddress,
-                    token: pathUsd,
-                  }),
-                ]
-              : []),
-            depositCall,
-          ],
-          throwOnReceiptRevert: true,
-          timeout: 60_000,
-        } as never,
-      )
+          ? (
+              await Actions.zone.encryptedDepositSync(
+                connectorClient as never,
+                {
+                  account: connectorClient.account,
+                  amount: DEPOSIT_AMOUNT,
+                  chain: connectorClient.chain as never,
+                  timeout: 60_000,
+                  token: pathUsd,
+                  zoneId: ZONE_ID,
+                } as never,
+              )
+            ).receipt
+          : (
+              await Actions.zone.depositSync(
+                connectorClient as never,
+                {
+                  account: connectorClient.account,
+                  amount: DEPOSIT_AMOUNT,
+                  chain: connectorClient.chain as never,
+                  token: pathUsd,
+                  zoneId: ZONE_ID,
+                } as never,
+              )
+            ).receipt
 
       return {
         creditedAmount,
-        includesApproval,
         receipt,
         startingZoneBalance,
       }
@@ -375,7 +310,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
         type="button"
         variant="default"
       >
-        {mode === 'encrypted' ? 'Checking encrypted deposit setup' : 'Checking deposit setup'}
+        Checking deposit setup
       </Button>
     )
   } else {
@@ -549,4 +484,14 @@ function getConfirmationStepTitle(mode: DepositMode) {
   return mode === 'encrypted'
     ? `Wait for ${ZONE_LABEL} to credit the encrypted deposit.`
     : `Wait for ${ZONE_LABEL} to credit the deposit.`
+}
+
+function getNetZoneDepositAmount(amount: bigint, depositFee: bigint) {
+  if (depositFee > amount) {
+    throw new Error(
+      `Zone portal deposit fee ${depositFee.toString()} is greater than deposit amount ${amount.toString()}.`,
+    )
+  }
+
+  return amount - depositFee
 }

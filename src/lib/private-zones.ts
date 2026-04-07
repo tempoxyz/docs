@@ -1,5 +1,9 @@
-import { type Hex, walletActions } from 'viem'
-import { type GetZoneClientParameters, tempoActions, type ZoneTransportConfig } from 'viem/tempo'
+type ZoneTransportConfig = {
+  onFetchRequest?: (
+    request: Request,
+    init?: RequestInit,
+  ) => Promise<RequestInit | undefined> | RequestInit | undefined
+}
 
 export const feeToken = '0x20c0000000000000000000000000000000000001' as const
 export const stablecoinDex = '0xDEc0000000000000000000000000000000000000' as const
@@ -82,7 +86,7 @@ export function getZoneTransportConfig(rpcUrl: string): ZoneTransportConfig | un
   const authorization = `Basic ${encodeBase64(`${username}:${password}`)}`
 
   return {
-    async onFetchRequest(_request, init) {
+    async onFetchRequest(_request: Request, init?: RequestInit) {
       const headers = new Headers(init?.headers)
       headers.set('authorization', authorization)
 
@@ -92,58 +96,6 @@ export function getZoneTransportConfig(rpcUrl: string): ZoneTransportConfig | un
       }
     },
   }
-}
-
-export function getZoneClientParameters(zone: number, rpcUrl: string) {
-  const transport = getZoneTransportConfig(rpcUrl)
-
-  return transport ? { transport, zone } : { zone }
-}
-
-type ClientWithExtend = {
-  extend: (decorator: unknown) => ClientWithExtend
-}
-
-type AuthorizationTokenInfo = {
-  account: Hex
-  expiresAt: bigint
-}
-
-type DepositStatus = {
-  deposits: readonly unknown[]
-  processed: boolean
-}
-
-type ZoneInfo = {
-  chainId: number
-  zoneId: number
-  zoneTokens: readonly unknown[]
-}
-
-export type TempoZoneClient = {
-  getBlockNumber: () => Promise<bigint>
-  token: {
-    getAllowance: (parameters: { account: Hex; spender: Hex; token: Hex }) => Promise<bigint>
-    getBalance: (parameters: { account: Hex; token: Hex }) => Promise<bigint>
-  }
-  zone: {
-    getAuthorizationTokenInfo: () => Promise<AuthorizationTokenInfo>
-    getDepositStatus: (parameters: { tempoBlockNumber: bigint }) => Promise<DepositStatus>
-    getWithdrawalFee: (parameters?: { gasLimit?: bigint | undefined }) => Promise<bigint>
-    getZoneInfo: () => Promise<ZoneInfo>
-    prepareAuthorizationToken: () => Promise<AuthorizationTokenInfo>
-  }
-}
-
-// `viem/tempo` exposes zone client creation through the public tempo decorator.
-export function getTempoZoneClient(client: ClientWithExtend, parameters: GetZoneClientParameters) {
-  const zoneCapableClient = client
-    .extend(walletActions)
-    .extend(tempoActions()) as ClientWithExtend & {
-    getZoneClient: (parameters: GetZoneClientParameters) => TempoZoneClient
-  }
-
-  return zoneCapableClient.getZoneClient(parameters)
 }
 
 function encodeBase64(value: string) {
