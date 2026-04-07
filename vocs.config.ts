@@ -207,7 +207,7 @@ export default defineConfig({
             ],
           },
           {
-            text: 'Make Machine Payments',
+            text: 'Make Agentic Payments',
             collapsed: true,
             items: [
               {
@@ -798,7 +798,7 @@ export default defineConfig({
             link: '/learn/tempo/privacy',
           },
           {
-            text: 'Machine Payments',
+            text: 'Agentic Payments',
             link: '/learn/tempo/machine-payments',
           },
         ],
