@@ -4,11 +4,11 @@ description: Configure and run a Tempo validator node. Generate signing keys, pa
 
 # Running a validator node
 
-:::info
-The management of the active validator set is currently permissioned by the Tempo team. If you are interested in becoming a validator, please [get in touch](mailto:partners@tempo.xyz) with the Tempo team.
-:::
+Validator nodes secure Tempo by validating blocks and participating in consensus.
 
-Validator nodes secure Tempo by validating blocks and transactions, then using [Threshold Simplex](https://docs.rs/commonware-consensus/0.0.61/commonware_consensus/threshold_simplex/index.html) to reach consensus. They distribute signing shares among themselves to collectively sign block approvals and finalizations.
+## Deploying a validator
+
+The active validator set is currently permissioned. If you are interested in becoming a validator, please [get in touch](mailto:partners@tempo.xyz) with the Tempo team. See [Initial registration](/guide/node/validator-config-v2#initial-registration) for technical details.
 
 ## Cryptographic key hierarchy
 
@@ -17,22 +17,6 @@ All validators have two kinds of keys:
 * signing share - this is a share of a BLS12-381 keypair used to sign block notarizations and finalizations
 
 The signing key is static. Pre-T2, it can only be rotated by removing and re-creating a validator on-chain with the Tempo team. Post-T2, [ValidatorConfig V2](/guide/node/validator-config-v2) enables self-service rotation via the `rotateValidator` precompile. The signing share is dynamic and is updated periodically on each DKG ceremony. Once updated, it will be saved to disk. Currently, the DKG ceremony is scheduled to run on-chain every ~3 hours.
-
-## Generating a signing key
-
-You can generate an ED25519 keypair using the following command:
-
-```bash
-tempo consensus generate-private-key --output <path>
-```
-
-Once the private key is generated, you can calculate/verify the public key by running:
-
-```bash
-tempo consensus calculate-public-key --private-key <path>
-```
-
-The public key should match the output of the `generate-private-key` command.
 
 ## Running the validator
 
@@ -45,11 +29,8 @@ Once you've downloaded the snapshot and have been whitelisted on-chain, you can 
 tempo node --datadir <datadir> \
     --chain <mainnet|moderato> \
     --consensus.signing-key <path> \
-    --consensus.fee-recipient <validator_wallet_address> \
     --telemetry-url <TELEMETRY_URL>
 ```
-
-If you are not prepared to accept fees, we recommend setting the `--consensus.fee-recipient` field to `0x0000000000000000000000000000000000000001` as that will funnel the funds to a non-user controllable wallet (there is no known private key for the address).
 
 ### Optional flags
 

@@ -7,7 +7,7 @@ description: Manage your validator with ValidatorConfig V2. Self-service key rot
 
 ValidatorConfig V2 ([TIP-1017](/protocol/tips/tip-1017)) is a new precompile for managing consensus participants. It replaces the original ValidatorConfig with stronger safety guarantees: ed25519 signature verification at registration, append-only history, and self-service operations for validators.
 
-V2 becomes available after the T2 hardfork is activated and after an admin has finished the migration of entries from V1 to V2. Migration completion will be communicated to operators — you can also [check if V2 is active](#check-if-v2-is-active) yourself.
+V2 was [activated on mainnet](https://explore.mainnet.tempo.xyz/receipt/0x4716147e3c2bf5c8d014b8c27d6e2af0042d5a5f29bdead256d6f33038702d64) after the T2 hardfork.
 
 ## Validator states
 
@@ -37,24 +37,6 @@ All write operations require either the contract owner or the validator's own ad
 ```solidity
 address constant VALIDATOR_CONFIG_V2 = 0xCCCCCCCC00000000000000000000000000000001;
 ```
-
-## Check if V2 is active
-
-After the T2 hardfork, the contract owner migrates validators from V1 to V2. Use these calls to check if migration is complete and V2 is active:
-
-```bash
-# Returns true once migration is complete and V2 is the active config
-cast call 0xCCCCCCCC00000000000000000000000000000001 \
-  "isInitialized()(bool)" \
-  --rpc-url https://rpc.tempo.xyz
-
-# Returns the block height at which V2 was initialized (0 if not yet initialized)
-cast call 0xCCCCCCCC00000000000000000000000000000001 \
-  "getInitializedAtHeight()(uint64)" \
-  --rpc-url https://rpc.tempo.xyz
-```
-
-If `isInitialized()` returns `true`, V2 is active and all operations on this page are available. If it returns `false`, the network is still on [ValidatorConfig V1](/guide/node/validator-config-v1).
 
 ## Reading validator state
 
@@ -96,6 +78,58 @@ The returned `Validator` struct fields are:
 
 ## Operator guide
 
+### Initial registration
+
+To register a new validator, you must provide the following values to the Tempo team:
+
+| Value | Format | Description |
+|-------|--------|-------------|
+| **Validator address** | Ethereum address (`0x…`) | The control address for your validator. Used to authorize on-chain operations (IP updates, rotation, ownership transfer). |
+| **Public key** | `0x`-prefixed 32-byte hex | Your ed25519 identity key. Generate one with `tempo consensus generate-private-key` (see [below](#generating-a-signing-key)). |
+| **Ingress** | `IP:port` | The inbound address other validators use to reach your node. Must be unique across all active validators. |
+| **Egress** | `IP` | The outbound IP address your node uses to connect to other validators. |
+| **Fee recipient** | Ethereum address (`0x…`) | The address that receives transaction fees from blocks your validator proposes. If you are not prepared to accept fees, use `0x0000000000000000000000000000000000000000`. |
+| **Signature** | `0x`-prefixed hex | An ed25519 signature proving you control the signing key. See below. |
+
+#### Generating a signing key
+
+:::warning
+Never share your private signing key. Anyone with access to it can impersonate your validator.
+:::
+
+Generate an ed25519 keypair:
+
+```bash
+tempo consensus generate-private-key --output <path>
+```
+
+Verify the public key:
+
+```bash
+tempo consensus calculate-public-key --private-key <path>
+```
+
+The public key should match the output of the `generate-private-key` command.
+
+#### Creating the add-validator signature
+
+The signature proves ownership of the ed25519 key being registered. Generate it with:
+
+```bash
+tempo consensus create-add-validator-signature \
+  --signing-key <PRIVATE_KEY_PATH> \
+  --validator-address <YOUR_VALIDATOR_ADDRESS> \
+  --public-key <YOUR_PUBLIC_KEY> \
+  --ingress <IP:PORT> \
+  --egress <IP> \
+  --fee-recipient <FEE_RECIPIENT_ADDRESS> \
+  --chain-id-from-rpc-url https://rpc.tempo.xyz
+```
+
+This outputs a hex-encoded signature. Provide this signature along with the values above to the Tempo team to complete registration.
+
+Once the Tempo team adds your validator on-chain, it will enter the active set in the [next epoch](#validator-states).
+
 ### Update the Fee Recipient
 
 The fee recipient used by your validator when constructing block proposals is managed on-chain. This can be updated and takes effect on the next finalized block
@@ -106,7 +140,6 @@ tempo consensus set-validator-fee-recipient <address/pubkey/index>
   --rpc-url https://rpc.tempo.xyz
   --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
 ```
-
 ### Update IP addresses
 
 If your node's network endpoints change, update them on-chain. The change takes effect at the next finalized block.
@@ -127,15 +160,22 @@ Ingress addresses must be unique across all active validators. The transaction w
 
 ### Rotate validator identity
 
-V2 lets you rotate to a new ed25519 key while keeping your validator index stable. This is useful for key rotation or recovery without leaving and re-joining the committee.
+V2 lets you rotate to a new ed25519 key while keeping your validator index stable. This is useful for key rotation or recovery without leaving and re-joining the committee. [Generate a new signing key](#generating-a-signing-key) first.
 
 The simplest way to rotate is using the `tempo` CLI, which handles signature creation and the on-chain transaction in one step:
 
 ```bash
 tempo consensus rotate-validator \
+  --validator-address <YOUR_VALIDATOR_ADDRESS> \
+  --public-key <NEW_PUBLIC_KEY> \
+  --ingress <NEW_IP:PORT> \
+  --egress <NEW_IP> \
   --signing-key <NEW_PRIVATE_KEY_PATH> \
+  --private-key <ETHEREUM_PRIVATE_KEY_PATH> \
   --rpc-url https://rpc.tempo.xyz
 ```
+
+If self-service rotation is not yet enabled for your validator, use `tempo consensus create-rotate-validator-signature` to generate the signature and provide it to the Tempo team.
 
 :::info
 Rotation preserves your validator index and active validator count. The old entry is appended to history as deactivated, and the entry at your index is updated in place. You must use a different ingress address (changing the port is sufficient).
@@ -154,16 +194,6 @@ tempo consensus validators-info --rpc-url https://rpc.tempo.xyz
 
 Once the old validator shows `in_committee = false`, it is safe to shut down.
 :::
-
-#### Initial registration
-
-When registering a new validator, generate the add-validator signature and provide it to the Tempo team:
-
-```bash
-tempo consensus create-add-validator-signature \
-  --signing-key <PRIVATE_KEY_PATH> \
-  --rpc-url https://rpc.tempo.xyz
-```
 
 ### Transfer validator ownership
 
