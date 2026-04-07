@@ -9,7 +9,8 @@ export default defineConfig({
   timeout: 180000, // 3 min default timeout for testnet transactions
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'https://localhost:5173',
+    ignoreHTTPSErrors: true,
     trace: 'on-first-retry',
   },
   projects: [
@@ -19,8 +20,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm run dev 2>/dev/null',
-    url: 'http://localhost:5173',
+    command: process.env.CI ? 'VITE_E2E=true pnpm run dev 2>/dev/null' : 'pnpm run dev 2>/dev/null',
+    url: 'https://localhost:5173',
+    ignoreHTTPSErrors: true,
     reuseExistingServer: !process.env.CI,
     stdout: 'ignore',
     stderr: 'ignore',
