@@ -180,7 +180,35 @@ The simplest way to rotate is using the `tempo` CLI, which handles signature cre
 
 ```bash
 tempo consensus rotate-validator \
+  --validator-address <YOUR_VALIDATOR_ADDRESS> \
+  --public-key <NEW_PUBLIC_KEY> \
+  --ingress <NEW_IP:PORT> \
+  --egress <NEW_IP> \
   --signing-key <NEW_PRIVATE_KEY_PATH> \
+  --private-key <ETHEREUM_PRIVATE_KEY_PATH> \
+  --rpc-url https://rpc.tempo.xyz
+```
+
+Alternatively, you can create the signature separately and pass it directly:
+
+```bash
+# Step 1: Create the rotation signature
+tempo consensus create-rotate-validator-signature \
+  --validator-address <YOUR_VALIDATOR_ADDRESS> \
+  --public-key <NEW_PUBLIC_KEY> \
+  --ingress <NEW_IP:PORT> \
+  --egress <NEW_IP> \
+  --signing-key <NEW_PRIVATE_KEY_PATH> \
+  --chain-id-from-rpc-url https://rpc.tempo.xyz
+
+# Step 2: Submit the rotation with the pre-computed signature
+tempo consensus rotate-validator \
+  --validator-address <YOUR_VALIDATOR_ADDRESS> \
+  --public-key <NEW_PUBLIC_KEY> \
+  --ingress <NEW_IP:PORT> \
+  --egress <NEW_IP> \
+  --signature <SIGNATURE_FROM_STEP_1> \
+  --private-key <ETHEREUM_PRIVATE_KEY_PATH> \
   --rpc-url https://rpc.tempo.xyz
 ```
 
