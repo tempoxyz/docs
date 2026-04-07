@@ -155,6 +155,32 @@ export default defineConfig({
             ],
           },
           {
+            text: 'Connect to Zones',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/guide/private-zones',
+              },
+              {
+                text: 'Deposit to a zone',
+                link: '/guide/private-zones/deposit-to-a-zone',
+              },
+              {
+                text: 'Send tokens within a zone',
+                link: '/guide/private-zones/send-tokens-within-a-zone',
+              },
+              {
+                text: 'Swap across zones',
+                link: '/guide/private-zones/swap-across-zones',
+              },
+              {
+                text: 'Withdraw from a zone',
+                link: '/guide/private-zones/withdraw-from-a-zone',
+              },
+            ],
+          },
+          {
             text: 'Issue Stablecoins',
             collapsed: true,
             items: [

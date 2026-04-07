@@ -1,0 +1,50 @@
+---
+title: Send tokens within a zone
+description: Send pathUSD inside Zone A with a signed zone transfer and confirm the updated zone balance.
+---
+
+import * as Demo from '../../../components/guides/Demo.tsx'
+import { SendTokensWithinZone } from '../../../components/guides/zones/SendTokensWithinZone.tsx'
+
+# Send tokens within a zone
+
+Use this guide when you want to send `pathUSD` from one private `Zone A` balance to another without moving funds back through the public chain.
+
+Zone tokens use the `TIP20` token interface, so once you authorize private reads for the session, an in-zone transfer looks much like a normal token transfer.
+
+## Sending pathUSD within Zone A
+
+By the end of this guide you will have sent `25 pathUSD` inside `Zone A` and confirmed the updated balance.
+
+<Demo.Container
+  name="Send tokens within Zone A"
+  footerVariant="balances"
+  tokens={[Demo.pathUsd]}
+  zoneBalances={[{ label: 'Zone A', token: Demo.pathUsd, zone: 6 }]}
+>
+  <SendTokensWithinZone />
+</Demo.Container>
+
+## Code example
+
+This snippet assumes you already have a signed-in `rootClient` on the public chain and a derived `zoneAClient`.
+
+It shows the core zone transfer path; use the demo above when you want to watch the updated zone balance.
+
+```ts
+import { parseUnits, type Address } from 'viem'
+import { Actions } from 'viem/tempo'
+
+const transferAmount = parseUnits('25', 6)
+const demoRecipient = '0xbeefcafe54750903ac1c8909323af7beb21ea2cb' as Address
+
+await zoneAClient.zone.prepareAuthorizationToken()
+
+const { receipt } = await Actions.token.transferSync(zoneAClient, {
+  account: rootClient.account,
+  amount: transferAmount,
+  feeToken: pathUsd,
+  to: demoRecipient,
+  token: pathUsd,
+})
+```

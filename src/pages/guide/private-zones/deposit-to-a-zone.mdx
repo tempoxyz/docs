@@ -1,0 +1,72 @@
+---
+title: Deposit to a Zone
+description: Deposit pathUSD from your public-chain balance into Zone A and confirm the resulting zone balance.
+---
+
+import * as Demo from '../../../components/guides/Demo.tsx'
+import { DepositToZone } from '../../../components/guides/zones/DepositToZone.tsx'
+
+# Deposit to a Zone
+
+Use this guide when you want to move `pathUSD` from your public Tempo balance into `Zone A`. You will submit a public-chain deposit first, then wait for `Zone A` to credit the net amount after fees.
+
+The deposit is accepted through `ZonePortal` on the public chain. You need private zone authorization to read the resulting zone balance, because those reads are only exposed to the authenticated account.
+
+## Depositing pathUSD to Zone A
+
+By the end of this guide you will have deposited `pathUSD` into `Zone A` and confirmed the balance update.
+
+<Demo.Container
+  name="Deposit to Zone A"
+  footerVariant="balances"
+  tokens={[Demo.pathUsd]}
+  zoneBalances={[{ label: 'Zone A', token: Demo.pathUsd, zone: 6 }]}
+>
+  <DepositToZone />
+</Demo.Container>
+
+## Code example
+
+This snippet assumes you already have a signed-in `rootClient` on the public chain and the usual token and zone constants in scope.
+It shows the core deposit transaction path; use the demo above when you want to watch the resulting zone balance update.
+
+```ts
+import { parseUnits } from 'viem'
+import { sendTransactionSync } from 'viem/actions'
+import { Actions } from 'viem/tempo'
+
+const depositAmount = parseUnits('100', 6)
+
+const receipt = await sendTransactionSync(rootClient, {
+  account: rootClient.account,
+  calls: [
+    Actions.token.approve.call({
+      amount: depositAmount,
+      spender: ZONE_A.portalAddress,
+      token: pathUsd,
+    }),
+    Actions.zone.deposit.call({
+      account: rootClient.account,
+      amount: depositAmount,
+      chain: rootClient.chain,
+      token: pathUsd,
+      zone: ZONE_A.id,
+    }),
+  ],
+  throwOnReceiptRevert: true,
+})
+
+console.log(receipt.blockNumber)
+```
+
+## What Happens During a Deposit
+
+A zone deposit settles in two phases.
+
+First, you submit a public Tempo transaction depositing to the `ZonePortal`. The portal escrows the token, deducts the deposit fee in the same token, and records the net deposit in the portal's deposit queue. Later, the zone sequencer processes that queue and credits the recipient inside the zone.
+
+That means your public transaction receipt and your zone balance do not update at the same time. The Tempo transaction confirms that the deposit request was accepted. The zone balance changes only after the zone has processed that deposit, and it reflects the post-fee amount rather than the full amount you passed into `deposit(...)`.
+
+:::warning
+  If you need a specific net amount inside the zone, account for the portal deposit fee first. The amount minted on the zone is `amount - depositFee`.
+:::

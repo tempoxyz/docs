@@ -16,19 +16,23 @@ import {
 } from 'wagmi'
 import { KeyManager, webAuthn } from 'wagmi/tempo'
 import { alphaUsd, betaUsd, pathUsd, thetaUsd } from './components/guides/tokens'
-
-const feeToken = '0x20c0000000000000000000000000000000000001'
+import { feeToken, moderatoZones } from './lib/private-zones.ts'
 
 const chain =
   import.meta.env.VITE_TEMPO_ENV === 'localnet'
     ? tempoLocalnet.extend({ feeToken })
     : import.meta.env.VITE_TEMPO_ENV === 'devnet'
       ? tempoDevnet.extend({ feeToken })
-      : tempoModerato.extend({ feeToken })
+      : tempoModerato.extend({ feeToken, zones: moderatoZones })
 
 const rpId = (() => {
   const hostname = globalThis.location?.hostname
   if (!hostname) return undefined
+
+  // Vercel preview hosts live under the public suffix `vercel.app`, so the
+  // RP ID must stay scoped to the exact preview hostname.
+  if (hostname.endsWith('.vercel.app')) return hostname
+
   const parts = hostname.split('.')
   return parts.length > 2 ? parts.slice(-2).join('.') : hostname
 })()
