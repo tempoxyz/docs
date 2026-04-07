@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import { Expiry } from 'accounts'
-import { tempoWallet, webAuthn as webAuthnAccounts } from 'accounts/wagmi'
+import { tempoWallet, webAuthn } from 'accounts/wagmi'
 import * as React from 'react'
 import { parseUnits } from 'viem'
 import { tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
@@ -13,7 +13,6 @@ import {
   useConnectors,
   webSocket,
 } from 'wagmi'
-import { KeyManager, webAuthn } from 'wagmi/tempo'
 import { alphaUsd, betaUsd, pathUsd, thetaUsd } from './components/guides/tokens'
 
 const feeToken = '0x20c0000000000000000000000000000000000001'
@@ -25,13 +24,6 @@ const chain =
       ? tempoDevnet.extend({ feeToken })
       : tempoModerato.extend({ feeToken })
 
-const rpId = (() => {
-  const hostname = globalThis.location?.hostname
-  if (!hostname) return undefined
-  const parts = hostname.split('.')
-  return parts.length > 2 ? parts.slice(-2).join('.') : hostname
-})()
-
 export function getConfig(options: getConfig.Options = {}) {
   const { multiInjectedProviderDiscovery = false } = options
   return createConfig({
@@ -40,35 +32,22 @@ export function getConfig(options: getConfig.Options = {}) {
     },
     chains: [chain],
     connectors: [
-      ...(import.meta.env.VITE_E2E === 'true'
-        ? [
-            webAuthnAccounts({
-              authUrl: 'https://keys.tempo.xyz',
-              rdns: 'webAuthn',
-            }),
-          ]
-        : [
-            tempoWallet({
-              authorizeAccessKey: () => ({
-                expiry: Expiry.days(1),
-                limits: [
-                  { token: pathUsd, limit: parseUnits('500', 6) },
-                  { token: alphaUsd, limit: parseUnits('500', 6) },
-                  { token: betaUsd, limit: parseUnits('500', 6) },
-                  { token: thetaUsd, limit: parseUnits('500', 6) },
-                ],
-              }),
-              feePayerUrl: 'https://sponsor.moderato.tempo.xyz',
-            }),
-            webAuthn({
-              grantAccessKey: {
-                // @ts-expect-error - TODO: migrate to webAuthn on Accounts SDK
-                chainId: BigInt(chain.id),
-              },
-              keyManager: KeyManager.http('https://keys.tempo.xyz'),
-              rpId,
-            }),
-          ]),
+      tempoWallet({
+        authorizeAccessKey: () => ({
+          expiry: Expiry.days(1),
+          limits: [
+            { token: pathUsd, limit: parseUnits('500', 6) },
+            { token: alphaUsd, limit: parseUnits('500', 6) },
+            { token: betaUsd, limit: parseUnits('500', 6) },
+            { token: thetaUsd, limit: parseUnits('500', 6) },
+          ],
+        }),
+        feePayerUrl: 'https://sponsor.moderato.tempo.xyz',
+      }),
+      webAuthn({
+        authUrl: 'https://keys.tempo.xyz',
+        rdns: 'webAuthn',
+      }),
     ],
     multiInjectedProviderDiscovery,
     storage: createStorage({

@@ -14,6 +14,15 @@ import IconGitHub from '~icons/simple-icons/github'
 
 The Tempo Accounts SDK is a TypeScript library for applications and wallets to create, manage, and interact with accounts on Tempo.
 
+```mermaid
+flowchart TD
+    app["App<br/>connect · sign · send transaction"] -->|"EIP-5792 requests"| wallet
+    wallet["Tempo Wallet<br/>iframe / popup UI"] <-->|"sign / verify"| passkey
+    wallet -->|"delegates to"| sdk
+    passkey["tempo.xyz domain-bound passkey<br/>WebAuthn credential"] -->|"credential auth"| sdk
+    sdk["Accounts SDK<br/>wallet & account logic"] -->|"built on"| infra["Wagmi + Viem<br/>Ethereum client & tooling"]
+```
+
 <div className="flex gap-2">
   <a
     href="https://github.com/tempoxyz/accounts"
