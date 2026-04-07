@@ -13,7 +13,7 @@ Enables domain-bound passkey experiences by wrapping the `local` adapter with We
 import { webAuthn, Provider } from 'accounts'
 
 const provider = Provider.create({
-  adapter: webAuthn({ authUrl: 'https://myapp.com/auth' }),
+  adapter: webAuthn({ authUrl: '/auth' }),
 })
 ```
 
@@ -35,7 +35,7 @@ import { webAuthn, Provider } from 'accounts'
 
 const provider = Provider.create({
   adapter: webAuthn({
-    authUrl: 'https://myapp.com/auth', // [!code focus]
+    authUrl: '/auth', // [!code focus]
   }),
 })
 ```
@@ -56,7 +56,7 @@ import { webAuthn, WebAuthnCeremony, Provider } from 'accounts'
 
 const provider = Provider.create({
   adapter: webAuthn({
-    ceremony: WebAuthnCeremony.server({ url: 'https://myapp.com/auth' }), // [!code focus]
+    ceremony: WebAuthnCeremony.server({ url: '/auth' }), // [!code focus]
   }),
 })
 ```
@@ -73,7 +73,7 @@ import { webAuthn, Provider } from 'accounts'
 
 const provider = Provider.create({
   adapter: webAuthn({
-    authUrl: 'https://myapp.com/auth',
+    authUrl: '/auth',
     icon: 'data:image/svg+xml,...', // [!code focus]
   }),
 })
@@ -91,7 +91,7 @@ import { webAuthn, Provider } from 'accounts'
 
 const provider = Provider.create({
   adapter: webAuthn({
-    authUrl: 'https://myapp.com/auth',
+    authUrl: '/auth',
     name: 'My Wallet', // [!code focus]
   }),
 })
@@ -109,7 +109,7 @@ import { webAuthn, Provider } from 'accounts'
 
 const provider = Provider.create({
   adapter: webAuthn({
-    authUrl: 'https://myapp.com/auth',
+    authUrl: '/auth',
     rdns: 'com.example.wallet', // [!code focus]
   }),
 })

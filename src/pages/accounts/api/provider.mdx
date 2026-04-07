@@ -64,7 +64,7 @@ Adapter to use for account management.
 import { Provider, webAuthn } from 'accounts'
 
 const provider = Provider.create({
-  adapter: webAuthn({ authUrl: 'https://myapp.com/auth' }), // [!code focus]
+  adapter: webAuthn({ authUrl: '/auth' }), // [!code focus]
 })
 ```
 

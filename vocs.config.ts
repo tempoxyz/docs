@@ -841,10 +841,6 @@ export default defineConfig({
               collapsed: true,
               items: [
                 {
-                  text: 'Overview',
-                  link: '/accounts/wagmi',
-                },
-                {
                   text: 'tempoWallet',
                   link: '/accounts/wagmi/tempoWallet',
                 },

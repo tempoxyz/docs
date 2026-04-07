@@ -81,7 +81,7 @@ import { withFeePayer } from 'viem/tempo'
 import { createConfig, http } from 'wagmi'
 
 export const config = createConfig({
-  connectors: [webAuthn({ authUrl: 'https://myapp.com/auth' })],
+  connectors: [webAuthn({ authUrl: '/auth' })],
   chains: [tempo],
   multiInjectedProviderDiscovery: false,
   transports: {

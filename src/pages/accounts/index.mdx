@@ -12,6 +12,8 @@ import { AccountsSignIn } from '../../components/guides/AccountsSignIn'
 
 The Tempo Accounts SDK is a TypeScript library for applications and wallets to create, manage, and interact with accounts on Tempo.
 
+Try it out by logging into Tempo Wallet below:
+
 <AccountsSignIn />
 
 ## Install
@@ -48,11 +50,11 @@ After you have set up Wagmi, you can set up the Tempo Accounts SDK by using a Co
 ```tsx twoslash [Tempo Wallet]
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { tempoWallet } from 'accounts/wagmi'
+import { tempoWallet } from 'accounts/wagmi' // [!code hl]
 
 export const wagmiConfig = createConfig({
   chains: [tempo],
-  connectors: [tempoWallet()],
+  connectors: [tempoWallet()], // [!code hl]
   transports: {
     [tempo.id]: http(),
   },
@@ -61,11 +63,11 @@ export const wagmiConfig = createConfig({
 ```tsx twoslash [Domain-bound Passkeys]
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { webAuthn } from 'accounts/wagmi'
+import { webAuthn } from 'accounts/wagmi' // [!code hl]
 
 export const wagmiConfig = createConfig({
   chains: [tempo],
-  connectors: [webAuthn({ authUrl: 'https://myapp.com/auth' })],
+  connectors: [webAuthn({ authUrl: '/auth' })], // [!code hl]
   transports: {
     [tempo.id]: http(),
   },
@@ -154,13 +156,16 @@ function Connect() {
 
 ::::
 
-## Vanilla Usage
+## Vanilla + Viem Usage
 
 You can get started with the Tempo Accounts SDK by creating a new `Provider` instance.
-Once set up, you can use the `provider` to interact with accounts via JSON-RPC.
+Once set up, you can use the provider to interact with accounts via JSON-RPC, or use [Viem Actions](https://viem.sh/tempo) with `.getClient(){:js}`.
 
 ```tsx twoslash
+// @noErrors
 import { Provider } from 'accounts'
+import { parseUnits } from 'viem'
+import { tempoActions } from 'viem/tempo'
 
 const provider = Provider.create()
 
@@ -168,8 +173,28 @@ const { accounts } = await provider.request({
   method: 'wallet_connect',
 })
 
-const client = provider.getClient()
+const client = provider.getClient().extend(tempoActions())
+
+const { receipt } = await client.token.transferSync({
+  token: '0x20c0000000000000000000000000000000000001',
+  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+  amount: parseUnits('10', 6),
+})
 ```
+
+## Examples
+
+Check out these examples to get started with the Tempo Accounts SDK.
+
+| Example | Description | |
+| --- | --- | --- |
+| [Embed Tempo Wallet](https://github.com/tempoxyz/accounts/tree/main/examples/basic) | Wagmi-based setup using the `tempoWallet` connector to connect to Tempo Wallets. | [Guide](/guide/use-accounts/embed-tempo-wallet) |
+| [Embed Domain-bound Passkeys](https://github.com/tempoxyz/accounts/tree/main/examples/domain-bound-webauthn) | Domain-bound passkey example using Wagmi and the `webAuthn` connector. | [Guide](/guide/use-accounts/embed-passkeys) |
+| [CLI + Tempo Wallets](https://github.com/tempoxyz/accounts/tree/main/examples/cli) | Minimal CLI setup to connect and authorize local keys using Tempo Wallets. | |
+| [Access Keys + Tempo Wallets](https://github.com/tempoxyz/accounts/tree/main/examples/with-access-key) | Authorize access keys using Tempo Wallets to submit transactions without prompts. | |
+| [Access Keys + Domain-bound Passkeys](https://github.com/tempoxyz/accounts/tree/main/examples/with-access-key-and-webauthn) | Authorize access keys using domain-bound Passkeys. | |
+| [Sponsor Fees + Tempo Wallets](https://github.com/tempoxyz/accounts/tree/main/examples/with-fee-payer) | Sponsor transactions via Tempo Wallets. | [Guide](/guide/payments/sponsor-user-fees) |
+| [Sponsor Fees + Domain-bound Passkeys](https://github.com/tempoxyz/accounts/tree/main/examples/with-fee-payer-and-webauthn) | Sponsor transactions via domain-bound Passkeys. | [Guide](/guide/payments/sponsor-user-fees) |
 
 ## Secure Origins (HTTPS)
 
@@ -220,3 +245,9 @@ export default defineConfig({
 })
 ```
 :::
+
+## Getting Help
+
+Have questions or building something cool with the Accounts SDK?
+
+Join the Telegram group to chat with the team and other devs: [@mpp_devs](https://t.me/mpp_devs)

@@ -16,7 +16,7 @@ import { webAuthn } from 'accounts/wagmi'
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn({ authUrl: 'https://myapp.com/auth' })],
+  connectors: [webAuthn({ authUrl: '/auth' })],
   transports: {
     [tempo.id]: http(),
   },
@@ -51,7 +51,7 @@ export const config = createConfig({
   chains: [tempo],
   connectors: [
     webAuthn({
-      authUrl: 'https://myapp.com/auth', // [!code focus]
+      authUrl: '/auth', // [!code focus]
     }),
   ],
   transports: { [tempo.id]: http() },
@@ -76,7 +76,7 @@ export const config = createConfig({
   chains: [tempo],
   connectors: [
     webAuthn({
-      authUrl: 'https://myapp.com/auth',
+      authUrl: '/auth',
       authorizeAccessKey: () => ({ // [!code focus]
         expiry: Expiry.days(7), // [!code focus]
         limits: [{ // [!code focus]
@@ -115,7 +115,7 @@ export const config = createConfig({
   chains: [tempo],
   connectors: [
     webAuthn({
-      ceremony: WebAuthnCeremony.server({ url: 'https://myapp.com/auth' }), // [!code focus]
+      ceremony: WebAuthnCeremony.server({ url: '/auth' }), // [!code focus]
     }),
   ],
   transports: { [tempo.id]: http() },
@@ -142,7 +142,7 @@ export const config = createConfig({
   chains: [tempo],
   connectors: [
     webAuthn({
-      authUrl: 'https://myapp.com/auth',
+      authUrl: '/auth',
       feePayerUrl: 'https://myapp.com/fee-payer', // [!code focus]
     }),
   ],
@@ -166,7 +166,7 @@ export const config = createConfig({
   chains: [tempo],
   connectors: [
     webAuthn({
-      authUrl: 'https://myapp.com/auth',
+      authUrl: '/auth',
       mpp: true, // [!code focus]
     }),
   ],
@@ -190,7 +190,7 @@ export const config = createConfig({
   chains: [tempo],
   connectors: [
     webAuthn({
-      authUrl: 'https://myapp.com/auth',
+      authUrl: '/auth',
       testnet: true, // [!code focus]
     }),
   ],
