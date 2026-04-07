@@ -729,6 +729,10 @@ export default defineConfig({
               text: 'FAQ',
               link: '/accounts/faq',
             },
+            {
+              text: 'GitHub',
+              link: 'https://github.com/tempoxyz/accounts',
+            },
           ],
         },
         {
