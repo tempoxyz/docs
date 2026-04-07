@@ -5,7 +5,7 @@ import * as React from 'react'
 import type { Address, BaseError } from 'viem'
 import { formatUnits } from 'viem'
 import { tempoModerato } from 'viem/chains'
-import { useAccount, useConnect, useConnections, useConnectors, useDisconnect } from 'wagmi'
+import { useAccount, useConnect, useConnections, useDisconnect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import LucideCheck from '~icons/lucide/check'
 import LucideCopy from '~icons/lucide/copy'
@@ -15,22 +15,16 @@ import LucideRotateCcw from '~icons/lucide/rotate-ccw'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
 import { cva, cx } from '../../../cva.config'
 import { usePostHogTracking } from '../../lib/posthog'
+import { useTempoWalletConnector } from '../../wagmi.config'
 import { Container as ParentContainer } from '../Container'
 import { alphaUsd } from './tokens'
 
 export { alphaUsd, betaUsd, pathUsd, thetaUsd } from './tokens'
 
+export const TEMPO_CONNECTOR_ID = 'xyz.tempo'
+
 export const FAKE_RECIPIENT = '0xbeefcafe54750903ac1c8909323af7beb21ea2cb'
 export const FAKE_RECIPIENT_2 = '0xdeadbeef54750903ac1c8909323af7beb21ea2cb'
-
-export function useWebAuthnConnector() {
-  const connectors = useConnectors()
-  return React.useMemo(
-    // biome-ignore lint/style/noNonNullAssertion: webAuthn connector always defined in wagmi.config.ts
-    () => connectors.find((connector) => connector.id === 'webAuthn')!,
-    [connectors],
-  )
-}
 
 function getExplorerHost() {
   const { VITE_TEMPO_ENV, VITE_EXPLORER_OVERRIDE } = import.meta.env
@@ -117,12 +111,16 @@ export function Container(
     if (!source) return address
 
     if (source === 'webAuthn') {
-      const webAuthnConnection = connections.find((c) => c.connector.id === 'webAuthn')
+      const webAuthnConnection = connections.find(
+        (c) => c.connector.id === 'webAuthn' || c.connector.id === TEMPO_CONNECTOR_ID,
+      )
       return webAuthnConnection?.accounts[0]
     }
 
     if (source === 'wallet') {
-      const walletConnection = connections.find((c) => c.connector.id !== 'webAuthn')
+      const walletConnection = connections.find(
+        (c) => c.connector.id !== 'webAuthn' && c.connector.id !== TEMPO_CONNECTOR_ID,
+      )
       return walletConnection?.accounts[0]
     }
 
@@ -363,7 +361,7 @@ export namespace StringFormatter {
 
 export function Login() {
   const connect = useConnect()
-  const connector = useWebAuthnConnector()
+  const connector = useTempoWalletConnector()
 
   return (
     <div>
@@ -389,8 +387,8 @@ export function Login() {
               connect.connect({
                 connector,
                 capabilities: {
-                  label: 'Tempo Docs',
-                  type: 'sign-up',
+                  name: 'Tempo Docs',
+                  method: 'register',
                 },
               })
             }

@@ -1,0 +1,129 @@
+---
+title: Handler.feePayer
+description: Server handler that sponsors transaction fees for users.
+---
+
+# `Handler.feePayer`
+
+Creates a server handler that acts as a fee payer for transactions, enabling you to subsidize gas costs for users by signing transactions with a dedicated fee payer account on your backend.
+
+:::info
+[See the guide](/guide/payments/sponsor-user-fees)
+:::
+
+## Usage
+
+```ts
+import { privateKeyToAccount } from 'viem/accounts'
+import { Handler } from 'accounts/server'
+
+const handler = Handler.feePayer({
+  account: privateKeyToAccount('0x...'),
+})
+```
+
+Then plug `handler` into your server framework of choice:
+
+```ts
+createServer(handler.listener) // Node.js
+Bun.serve(handler) // Bun
+Deno.serve(handler) // Deno
+app.all('*', c => handler.fetch(c.request)) // Elysia
+app.use(handler.listener) // Express
+app.use(c => handler.fetch(c.req.raw)) // Hono
+export const GET = handler.fetch // Next.js
+export const POST = handler.fetch // Next.js
+```
+
+## Parameters
+
+### account
+
+- **Type:** `LocalAccount`
+- **Required**
+
+The account to use as the fee payer. This account will sign all transactions and pay the gas fees.
+
+```ts twoslash
+import { privateKeyToAccount } from 'viem/accounts'
+import { Handler } from 'accounts/server'
+
+const handler = Handler.feePayer({
+  account: privateKeyToAccount('0x...'), // [!code focus]
+})
+```
+
+### chains
+
+- **Type:** `readonly [Chain, ...Chain[]]`
+- **Default:** `[tempo, tempoModerato]`
+
+Supported chains. The handler resolves the client based on the `chainId` in the incoming transaction.
+
+```ts twoslash
+import { privateKeyToAccount } from 'viem/accounts'
+import { tempo } from 'viem/chains'
+import { Handler } from 'accounts/server'
+
+const handler = Handler.feePayer({
+  account: privateKeyToAccount('0x...'),
+  chains: [tempo], // [!code focus]
+})
+```
+
+### onRequest
+
+- **Type:** `(request: RpcRequest) => Promise<void>`
+- **Optional**
+
+Callback called before processing each request. Useful for logging, rate limiting, or custom validation.
+
+```ts twoslash
+import { privateKeyToAccount } from 'viem/accounts'
+import { Handler } from 'accounts/server'
+
+const handler = Handler.feePayer({
+  account: privateKeyToAccount('0x...'),
+  onRequest: async (request) => { // [!code focus]
+    console.log('Processing request:', request.method) // [!code focus]
+  }, // [!code focus]
+})
+```
+
+### path
+
+- **Type:** `string`
+- **Default:** `'/'`
+
+Path where the handler listens for requests.
+
+```ts twoslash
+import { privateKeyToAccount } from 'viem/accounts'
+import { Handler } from 'accounts/server'
+
+const handler = Handler.feePayer({
+  account: privateKeyToAccount('0x...'),
+  path: '/fee-payer', // [!code focus]
+})
+```
+
+### transports
+
+- **Type:** `Record<number, Transport>`
+- **Default:** `http()` for each chain
+
+Transports keyed by chain ID.
+
+```ts twoslash
+import { http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { tempo } from 'viem/chains'
+import { Handler } from 'accounts/server'
+
+const handler = Handler.feePayer({
+  account: privateKeyToAccount('0x...'),
+  transports: { // [!code focus]
+    [tempo.id]: http('https://rpc.tempo.xyz'), // [!code focus]
+  }, // [!code focus]
+})
+```

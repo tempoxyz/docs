@@ -3,3 +3,5 @@ patchedDependencies:
   dayjs@1.11.19: patches/dayjs@1.11.19.patch
 
 minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+  - accounts

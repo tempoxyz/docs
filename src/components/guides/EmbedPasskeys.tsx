@@ -1,6 +1,7 @@
 'use client'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
-import { Button, useWebAuthnConnector } from './Demo'
+import { useWebAuthnConnector } from '../../wagmi.config'
+import { Button } from './Demo'
 
 export function EmbedPasskeys() {
   const account = useAccount()
@@ -40,8 +41,8 @@ export function SignInButtons() {
           connect.connect({
             connector,
             capabilities: {
-              label: 'Tempo Docs',
-              type: 'sign-up',
+              name: 'Tempo Docs',
+              method: 'register',
             },
           })
         }}

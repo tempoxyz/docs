@@ -12,7 +12,7 @@ import {
 import LucideCheck from '~icons/lucide/check'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
 import { filterSupportedInjectedConnectors } from '../../../lib/wallets'
-import { Button, Step, StringFormatter, useCopyToClipboard } from '../../Demo'
+import { Button, Step, StringFormatter, TEMPO_CONNECTOR_ID, useCopyToClipboard } from '../../Demo'
 import type { DemoStepProps } from '../types'
 
 export function ConnectWallet(props: DemoStepProps) {
@@ -31,7 +31,7 @@ export function ConnectWallet(props: DemoStepProps) {
   const isSupported = chains.some((c) => c.id === chain?.id)
   const [copied, copyToClipboard] = useCopyToClipboard()
 
-  const walletConnection = connections.find((c) => c.connector.id !== 'webAuthn')
+  const walletConnection = connections.find((c) => c.connector.id !== TEMPO_CONNECTOR_ID)
   const walletAddress = walletConnection?.accounts[0]
   const walletConnector = walletConnection?.connector
   const hasNonWebAuthnWallet = Boolean(walletAddress)

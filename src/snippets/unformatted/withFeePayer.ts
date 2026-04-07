@@ -30,23 +30,13 @@ const _receipt2 = await client.sendTransactionSync({
 
 // [!endregion usage]
 
-import { Handler } from 'tempo.ts/server'
 // [!region server]
-import { createClient, http } from 'viem'
+import { Handler } from 'accounts/server'
 import { privateKeyToAccount } from 'viem/accounts'
-import { tempo } from 'viem/chains'
-
-const client = createClient({
-  chain: tempo.extend({
-    feeToken: '0x20c0000000000000000000000000000000000001',
-  }),
-  transport: http(),
-})
 
 const handler = Handler.feePayer({
   // [!code hl]
   account: privateKeyToAccount('0x...'), // [!code hl]
-  client, // [!code hl]
 }) // [!code hl]
 
 const server = createServer(handler.listener)

@@ -1,39 +1,56 @@
 ---
-description: Create and integrate Tempo accounts with domain-bound passkeys or connect to EVM-compatible wallets. Choose embedded or universal account experiences.
+description: Create and integrate Tempo accounts with the universal Tempo Wallet or domain-bound passkeys.
 ---
 
 import { Cards, Card } from 'vocs'
 
 # Create & Use Accounts
 
-Create and integrate Tempo accounts into your product with domain-bound passkeys or connecting your app to EVM-compatible wallets.
+Create and integrate Tempo accounts into your product with the universal Tempo Wallet or domain-bound passkeys.
 
-:::tip
-**Should I use a Passkey account or a wallet?**
+## What should I use?
 
-- If you need a **domain-bound account** experience, you can embed a Passkey account. 
-- If you need a **universal account** experience, you can integrate your app with wallets.
+### Tempo Wallet
 
-You can even use both if you would like to offer both experiences.
+Most apps should use [Tempo Wallet](/accounts/api/dialog) - it provides a universal account experience with a central account for users that includes embedded onramp, access keys, and transaction orchestration out of the box.
+
+### Domain-bound Passkeys
+
+Use [domain-bound passkeys](/accounts/api/webAuthn) when you want to build your own wallet experience or when your app needs to manage and own the WebAuthn ceremony directly.
+
+:::info
+Tempo Wallet uses domain-bound passkeys (on `tempo.xyz`) under the hood.
 :::
+
+### Other Wallets
+
+Offer users a range of existing wallets to connect from, such as MetaMask, Coinbase Wallet, and others.
+
+---
 
 <Cards>
   <Card
-    description="Use domain-bound passkey accounts for an Embedded Account experience"
-    to="/guide/use-accounts/embed-passkeys"
-    icon="lucide:fingerprint"
-    title="Embed Passkey Accounts"
+    description="Embed the Tempo Wallet dialog for a universal account experience"
+    icon="lucide:wallet"
+    to="/guide/use-accounts/embed-tempo-wallet"
+    title="Embed Tempo Wallet"
   />
   <Card
-    description="Connect your app to wallets using MetaMask and others for a Universal Account experience"
+    description="Embed domain-bound passkey accounts for an embedded account experience"
+    icon="lucide:fingerprint"
+    to="/guide/use-accounts/embed-passkeys"
+    title="Embed Domain-bound Passkeys"
+  />
+  <Card
+    description="Connect your app to wallets using MetaMask and others"
+    icon="lucide:plug"
     to="/guide/use-accounts/connect-to-wallets"
-    icon="lucide:wallet"
     title="Connect to Wallets"
   />
   <Card
     description="Add test stablecoins to your account balance using the testnet faucet"
-    to="/quickstart/faucet"
     icon="lucide:coins"
+    to="/quickstart/faucet"
     title="Add Test Funds to Your Account"
   />
 </Cards>
