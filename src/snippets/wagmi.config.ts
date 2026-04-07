@@ -2,18 +2,14 @@
 // biome-ignore-all lint: snippet
 // biome-ignore-all format: snippet
 
-import { KeyManager, webAuthn } from 'tempo.ts/wagmi'
 // [!region setup]
+import { tempoWallet } from 'accounts/wagmi'
 import { tempo } from 'viem/chains'
 import { createConfig, http } from 'wagmi'
 import { KeyManager, webAuthn } from 'wagmi/tempo'
 
 export const config = createConfig({
-  connectors: [
-    webAuthn({
-      keyManager: KeyManager.http('https://keys.tempo.xyz'),
-    }),
-  ],
+  connectors: [tempoWallet()],
   chains: [tempo],
   multiInjectedProviderDiscovery: false,
   transports: {
@@ -23,8 +19,8 @@ export const config = createConfig({
 
 // [!endregion setup]
 
-import { KeyManager, webAuthn } from 'tempo.ts/wagmi'
 // [!region withFeePayer]
+import { tempoWallet } from 'accounts/wagmi'
 import { tempo } from 'viem/chains'
 import { withFeePayer } from 'viem/tempo'
 import { createConfig, http } from 'wagmi'
@@ -32,14 +28,14 @@ import { KeyManager, webAuthn } from 'wagmi/tempo'
 
 export const config = createConfig({
   connectors: [
-    webAuthn({
-      keyManager: KeyManager.http('https://keys.tempo.xyz'),
+    tempoWallet({
+      feePayerUrl: 'https://sponsor.moderato.tempo.xyz',
     }),
   ],
   chains: [tempo],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempo.id]: withFeePayer(http(), http('https://sponsor.moderato.tempo.xyz')),
+    [tempo.id]: http(),
   },
 })
 // [!endregion withFeePayer]

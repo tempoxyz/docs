@@ -14,7 +14,9 @@ import type { DemoStepProps } from '../types'
 export function AddFundsToWallet(props: DemoStepProps) {
   const { stepNumber = 2, last = false } = props
   const { address, connector } = useConnection()
-  const hasNonWebAuthnWallet = Boolean(address && connector?.id !== 'webAuthn')
+  const hasNonWebAuthnWallet = Boolean(
+    address && connector?.id !== 'webAuthn' && connector?.id !== 'xyz.tempo',
+  )
   const queryClient = useQueryClient()
 
   const { data: balance, refetch: balanceRefetch } = Hooks.token.useGetBalance({

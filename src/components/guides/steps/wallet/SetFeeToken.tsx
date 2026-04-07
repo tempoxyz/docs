@@ -27,7 +27,9 @@ const DEFAULT_FEE_TOKEN_OPTION = FEE_TOKEN_OPTIONS[0]
 export function SetFeeToken(props: DemoStepProps) {
   const { stepNumber = 1 } = props
   const { address, connector } = useConnection()
-  const hasNonWebAuthnWallet = Boolean(address && connector?.id !== 'webAuthn')
+  const hasNonWebAuthnWallet = Boolean(
+    address && connector?.id !== 'webAuthn' && connector?.id !== 'xyz.tempo',
+  )
   const chainId = useChainId()
   const config = useConfig()
 

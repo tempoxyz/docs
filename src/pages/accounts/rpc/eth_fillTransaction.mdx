@@ -1,0 +1,47 @@
+---
+title: eth_fillTransaction
+description: Fill missing transaction fields like gas and nonce via the node.
+---
+
+# `eth_fillTransaction`
+
+Fills in missing transaction fields (gas, nonce, fees) by querying the node. This is a node RPC method, not handled by the accounts provider directly.
+
+## Request
+
+```ts
+type Request = {
+  method: 'eth_fillTransaction'
+  params: [TransactionRequest]
+}
+```
+
+## Response
+
+```ts
+type Response = {
+  raw: Hex
+  tx: TransactionRequest
+}
+```
+
+## Example
+
+```ts
+import { createPublicClient, http } from 'viem'
+import { tempo } from 'viem/chains'
+
+const client = createPublicClient({
+  chain: tempo,
+  transport: http(),
+})
+
+const filled = await client.request({
+  method: 'eth_fillTransaction',
+  params: [{
+    from: '0x...',
+    to: '0x...',
+    value: '0x0',
+  }],
+})
+```

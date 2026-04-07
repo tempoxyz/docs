@@ -58,7 +58,9 @@ function AddTokenButton(props: {
 export function AddTokensToWallet(props: DemoStepProps) {
   const { stepNumber = 3, last = false } = props
   const { address, connector } = useConnection()
-  const hasNonWebAuthnWallet = Boolean(address && connector?.id !== 'webAuthn')
+  const hasNonWebAuthnWallet = Boolean(
+    address && connector?.id !== 'webAuthn' && connector?.id !== 'xyz.tempo',
+  )
 
   const [addedTokens, setAddedTokens] = React.useState<Set<string>>(new Set())
   const [expanded, setExpanded] = React.useState(false)
