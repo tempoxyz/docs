@@ -251,13 +251,7 @@ export function getZoneClient(client: ZoneClientRoot, parameters: ZoneParameters
     ...zoneClient,
     token: {
       approveSync: (parameters: Parameters<typeof Actions.token.approveSync>[1]) =>
-        Actions.token.approveSync(
-          zoneClient as never,
-          {
-            ...parameters,
-            timeout: parameters.timeout ?? zoneRpcSyncTimeout,
-          } as never,
-        ),
+        Actions.token.approveSync(zoneClient as never, parameters as never),
       getAllowance: (parameters: Parameters<typeof Actions.token.getAllowance>[1]) =>
         Actions.token.getAllowance(zoneClient as never, parameters as never),
       getBalance: ({ account, token }: { account: `0x${string}`; token: `0x${string}` }) =>
@@ -287,13 +281,7 @@ export function getZoneClient(client: ZoneClientRoot, parameters: ZoneParameters
       requestWithdrawalSync: (
         parameters: Parameters<typeof Actions.zone.requestWithdrawalSync>[1],
       ) =>
-        Actions.zone.requestWithdrawalSync(
-          zoneClient as never,
-          {
-            ...parameters,
-            timeout: parameters.timeout ?? zoneRpcSyncTimeout,
-          } as never,
-        ),
+        Actions.zone.requestWithdrawalSync(zoneClient as never, parameters as never),
     },
   }
 }

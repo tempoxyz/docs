@@ -6,7 +6,7 @@ import { sendTransactionSync } from 'viem/actions'
 import { Actions } from 'viem/tempo'
 import { useConnection, useConnectorClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
-import { getZoneClient, zoneRpcSyncTimeout } from '../../../lib/viem-zone.ts'
+import { getZoneClient } from '../../../lib/viem-zone.ts'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { pathUsd } from '../tokens'
@@ -228,7 +228,6 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         amount: TRANSFER_AMOUNT,
         chain: connectorClient.chain as never,
         feeToken: pathUsd,
-        timeout: zoneRpcSyncTimeout,
         to: FAKE_RECIPIENT as Hex,
         token: pathUsd,
       })
