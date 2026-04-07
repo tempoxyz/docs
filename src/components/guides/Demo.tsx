@@ -15,7 +15,7 @@ import LucideRotateCcw from '~icons/lucide/rotate-ccw'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
 import { cva, cx } from '../../../cva.config'
 import { usePostHogTracking } from '../../lib/posthog'
-import { useTempoWalletConnector } from '../../wagmi.config'
+import { useTempoWalletConnector, useWebAuthnConnector } from '../../wagmi.config'
 import { Container as ParentContainer } from '../Container'
 import { alphaUsd } from './tokens'
 
@@ -359,7 +359,10 @@ export namespace StringFormatter {
 
 export function Login() {
   const connect = useConnect()
-  const connector = useTempoWalletConnector()
+  const tempoWallet = useTempoWalletConnector()
+  const webAuthn = useWebAuthnConnector()
+  const isE2E = import.meta.env.VITE_E2E === 'true'
+  const connector = isE2E ? webAuthn : tempoWallet
 
   return (
     <div>
@@ -372,7 +375,14 @@ export function Login() {
         <Button
           variant="accent"
           className="font-normal text-[14px] -tracking-[2%]"
-          onClick={() => connect.connect({ connector })}
+          onClick={() =>
+            connect.connect({
+              connector,
+              ...(isE2E
+                ? { capabilities: { method: 'register' as const, name: 'Tempo Docs' } }
+                : {}),
+            })
+          }
           type="button"
         >
           Sign in

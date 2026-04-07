@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import { Expiry } from 'accounts'
-import { tempoWallet } from 'accounts/wagmi'
+import { tempoWallet, webAuthn as webAuthnAccounts } from 'accounts/wagmi'
 import * as React from 'react'
 import { parseUnits } from 'viem'
 import { tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
@@ -40,26 +40,35 @@ export function getConfig(options: getConfig.Options = {}) {
     },
     chains: [chain],
     connectors: [
-      tempoWallet({
-        authorizeAccessKey: () => ({
-          expiry: Expiry.days(1),
-          limits: [
-            { token: pathUsd, limit: parseUnits('500', 6) },
-            { token: alphaUsd, limit: parseUnits('500', 6) },
-            { token: betaUsd, limit: parseUnits('500', 6) },
-            { token: thetaUsd, limit: parseUnits('500', 6) },
-          ],
-        }),
-        feePayerUrl: 'https://sponsor.moderato.tempo.xyz',
-      }),
-      webAuthn({
-        grantAccessKey: {
-          // @ts-expect-error - TODO: migrate to webAuthn on Accounts SDK
-          chainId: BigInt(chain.id),
-        },
-        keyManager: KeyManager.http('https://keys.tempo.xyz'),
-        rpId,
-      }),
+      ...(import.meta.env.VITE_E2E === 'true'
+        ? [
+            webAuthnAccounts({
+              authUrl: 'https://keys.tempo.xyz',
+              rdns: 'webAuthn',
+            }),
+          ]
+        : [
+            tempoWallet({
+              authorizeAccessKey: () => ({
+                expiry: Expiry.days(1),
+                limits: [
+                  { token: pathUsd, limit: parseUnits('500', 6) },
+                  { token: alphaUsd, limit: parseUnits('500', 6) },
+                  { token: betaUsd, limit: parseUnits('500', 6) },
+                  { token: thetaUsd, limit: parseUnits('500', 6) },
+                ],
+              }),
+              feePayerUrl: 'https://sponsor.moderato.tempo.xyz',
+            }),
+            webAuthn({
+              grantAccessKey: {
+                // @ts-expect-error - TODO: migrate to webAuthn on Accounts SDK
+                chainId: BigInt(chain.id),
+              },
+              keyManager: KeyManager.http('https://keys.tempo.xyz'),
+              rpId,
+            }),
+          ]),
     ],
     multiInjectedProviderDiscovery,
     storage: createStorage({

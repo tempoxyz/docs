@@ -20,7 +20,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm run dev 2>/dev/null',
+    command: process.env.CI ? 'VITE_E2E=true pnpm run dev 2>/dev/null' : 'pnpm run dev 2>/dev/null',
     url: 'https://localhost:5173',
     ignoreHTTPSErrors: true,
     reuseExistingServer: !process.env.CI,
