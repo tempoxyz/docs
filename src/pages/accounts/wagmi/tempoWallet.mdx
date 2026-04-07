@@ -38,7 +38,8 @@ Default access key parameters for `wallet_connect`.
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
 import { parseUnits } from 'viem'
-import { Expiry, tempoWallet } from 'accounts/wagmi'
+import { Expiry } from 'accounts'
+import { tempoWallet } from 'accounts/wagmi'
 
 export const config = createConfig({
   chains: [tempo],
@@ -67,7 +68,8 @@ Dialog to use for the embed app.
 ```ts twoslash
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { Dialog, tempoWallet } from 'accounts/wagmi'
+import { Dialog } from 'accounts'
+import { tempoWallet } from 'accounts/wagmi'
 
 export const config = createConfig({
   chains: [tempo],

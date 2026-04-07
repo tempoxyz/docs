@@ -69,7 +69,8 @@ Default access key parameters for `wallet_connect`.
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
 import { parseUnits } from 'viem'
-import { Expiry, webAuthn } from 'accounts/wagmi'
+import { Expiry } from 'accounts'
+import { webAuthn } from 'accounts/wagmi'
 
 export const config = createConfig({
   chains: [tempo],
@@ -107,7 +108,8 @@ Cannot be used with `authUrl`.
 ```ts twoslash
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { WebAuthnCeremony, webAuthn } from 'accounts/wagmi'
+import { WebAuthnCeremony } from 'accounts'
+import { webAuthn } from 'accounts/wagmi'
 
 export const config = createConfig({
   chains: [tempo],
