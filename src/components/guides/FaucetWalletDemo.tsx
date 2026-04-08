@@ -6,7 +6,7 @@ import * as Token from './tokens'
 export default function FaucetWalletDemo({ variant }: { variant: 'wallet' | 'address' }) {
   if (variant === 'address') {
     return (
-      <Demo.Container name="Fund an address">
+      <Demo.Container name="Fund an address" footerVariant={undefined}>
         <Step.AddFundsToOthers stepNumber={1} last />
       </Demo.Container>
     )
