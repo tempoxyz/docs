@@ -1,0 +1,196 @@
+---
+title: Stripe Integration
+description: Accept traditional card payments and settle in stablecoins on Tempo. Convert Stripe payouts to onchain liquidity.
+---
+
+# Stripe Integration
+
+Accept traditional card payments through Stripe and settle them as stablecoins on Tempo. This guide shows how to bridge fiat payments into your onchain treasury.
+
+## Overview
+
+The integration flow:
+
+1. Customer pays with card via Stripe Checkout
+2. Your webhook receives payment confirmation
+3. You mint or transfer stablecoins to the customer's Tempo address
+4. Reconcile using Stripe's `payment_intent` ID as a memo
+
+## Prerequisites
+
+- A [Stripe account](https://dashboard.stripe.com/register) with API keys
+- A Tempo wallet with minting authority (for issuer tokens) or stablecoin balance
+- Node.js backend to handle webhooks
+
+## Setup
+
+### 1. Create Stripe Checkout Session
+
+When a customer initiates payment, create a Checkout session with metadata containing their Tempo address:
+
+```ts [server.ts]
+import Stripe from 'stripe'
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+
+async function createCheckoutSession(
+  amount: number,
+  currency: string,
+  customerTempoAddress: string
+) {
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: [
+      {
+        price_data: {
+          currency,
+          product_data: { name: 'Stablecoin Purchase' },
+          unit_amount: amount, // in cents
+        },
+        quantity: 1,
+      },
+    ],
+    mode: 'payment',
+    metadata: {
+      tempo_address: customerTempoAddress,
+    },
+    success_url: `${process.env.BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.BASE_URL}/cancel`,
+  })
+
+  return session.url
+}
+```
+
+### 2. Handle Webhook Events
+
+Listen for successful payments and trigger the onchain settlement:
+
+```ts [webhook.ts]
+import { createWalletClient, http } from 'viem'
+import { tempoModerato } from 'viem/chains'
+import { privateKeyToAccount } from 'viem/accounts'
+import { keccak256, toBytes } from 'viem'
+
+const treasuryAccount = privateKeyToAccount(process.env.TREASURY_PRIVATE_KEY)
+const client = createWalletClient({
+  account: treasuryAccount,
+  chain: tempoModerato,
+  transport: http(),
+})
+
+async function handleStripeWebhook(event: Stripe.Event) {
+  if (event.type !== 'checkout.session.completed') return
+
+  const session = event.data.object as Stripe.Checkout.Session
+  const tempoAddress = session.metadata?.tempo_address
+  const amountPaid = session.amount_total // cents
+  const paymentIntentId = session.payment_intent as string
+
+  if (!tempoAddress || !amountPaid) {
+    throw new Error('Missing tempo_address or amount')
+  }
+
+  // Convert cents to stablecoin units (6 decimals)
+  // $10.00 = 1000 cents = 10_000_000 units
+  const stablecoinAmount = BigInt(amountPaid) * 10_000n
+
+  // Use payment intent ID as memo for reconciliation
+  const memo = keccak256(toBytes(paymentIntentId))
+
+  await client.token.transferWithMemo({
+    token: '0x20c0000000000000000000000000000000000001', // Your stablecoin
+    to: tempoAddress,
+    value: stablecoinAmount,
+    memo,
+  })
+}
+```
+
+### 3. Verify Webhook Signatures
+
+Always verify Stripe webhook signatures in production:
+
+```ts [webhook.ts]
+import { buffer } from 'micro'
+
+export async function POST(req: Request) {
+  const body = await buffer(req)
+  const signature = req.headers.get('stripe-signature')
+
+  let event: Stripe.Event
+  try {
+    event = stripe.webhooks.constructEvent(
+      body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET
+    )
+  } catch (err) {
+    return new Response('Invalid signature', { status: 400 })
+  }
+
+  await handleStripeWebhook(event)
+  return new Response('OK', { status: 200 })
+}
+```
+
+## Reconciliation
+
+Track payments across both systems using the memo field:
+
+```ts
+// Query Tempo for a specific Stripe payment
+const paymentIntentId = 'pi_xxx'
+const memo = keccak256(toBytes(paymentIntentId))
+
+const events = await client.getContractEvents({
+  address: tokenAddress,
+  abi: tip20Abi,
+  eventName: 'TransferWithMemo',
+  args: { memo },
+})
+
+if (events.length > 0) {
+  console.log('Payment settled onchain:', events[0].transactionHash)
+}
+```
+
+## Handling Refunds
+
+When processing Stripe refunds, burn or reclaim the stablecoins:
+
+```ts [refund.ts]
+async function handleRefund(event: Stripe.Event) {
+  if (event.type !== 'charge.refunded') return
+
+  const charge = event.data.object as Stripe.Charge
+  const refundAmount = charge.amount_refunded
+  const paymentIntentId = charge.payment_intent as string
+
+  // Find the original transfer using the memo
+  const memo = keccak256(toBytes(paymentIntentId))
+
+  // Reclaim tokens (requires customer approval or use clawback if authorized)
+  // Implementation depends on your token's capabilities
+}
+```
+
+## Best Practices
+
+1. **Idempotency**: Store processed `payment_intent` IDs to prevent duplicate settlements
+2. **Error handling**: Queue failed settlements for retry with exponential backoff
+3. **Monitoring**: Alert on settlement failures and reconciliation mismatches
+4. **Testing**: Use Stripe's test mode and Tempo's testnet during development
+
+## Security Considerations
+
+- Store Stripe API keys and wallet private keys in secure environment variables
+- Use a dedicated treasury wallet with limited funds for automated settlements
+- Implement rate limiting on your webhook endpoint
+- Log all settlement transactions for audit trails
+
+## Next Steps
+
+- **[Accept a payment](/guide/payments/accept-a-payment)** for direct onchain payment acceptance
+- **[Transfer memos](/guide/payments/transfer-memos)** for payment reconciliation patterns
+- **[Sponsor user fees](/guide/payments/sponsor-user-fees)** to cover gas for your users
