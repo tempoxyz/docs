@@ -10,21 +10,28 @@ function PostHogInitializer() {
 
     if (!posthogKey || !posthogHost) return
 
-    posthog.init(posthogKey, {
-      api_host: '/ingest',
-      ui_host: posthogHost,
-      defaults: '2025-11-30',
-      capture_exceptions: true,
-      debug: import.meta.env.MODE === 'development',
-      session_recording: {
-        maskAllInputs: false,
-        maskInputOptions: {
-          password: true,
+    const init = () => {
+      posthog.init(posthogKey, {
+        api_host: '/ingest',
+        ui_host: posthogHost,
+        defaults: '2025-11-30',
+        capture_exceptions: true,
+        debug: import.meta.env.MODE === 'development',
+        session_recording: {
+          maskAllInputs: false,
+          maskInputOptions: {
+            password: true,
+          },
         },
-      },
-    })
+      })
+      posthog.register({ site: 'docs' })
+    }
 
-    posthog.register({ site: 'docs' })
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(init)
+    } else {
+      setTimeout(init, 1)
+    }
   }, [])
 
   return null
