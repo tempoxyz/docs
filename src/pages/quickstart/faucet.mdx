@@ -3,9 +3,7 @@ description: Get free test stablecoins on Tempo Testnet. Connect your wallet or 
 mipd: true
 ---
 
-import * as Demo from '../../components/guides/Demo.tsx'
-import * as Step from '../../components/guides/steps'
-import * as Token from '../../components/guides/tokens'
+import { LazyFundWallet, LazyFundAddress } from '../../components/guides/LazyFaucetWalletDemo.tsx'
 import { Tabs, Tab } from 'vocs'
 
 
@@ -21,12 +19,7 @@ Get test stablecoins on Tempo testnet.
 Connect your wallet to receive test stablecoins directly.
 
 <div className="h-6"/>
-<Demo.Container name="Connect and fund your wallet" footerVariant="balances" tokens={[Token.pathUsd, Token.alphaUsd, Token.betaUsd, Token.thetaUsd]} balanceSource="wallet">
-  <Step.ConnectWallet stepNumber={1} />
-  <Step.AddFundsToWallet stepNumber={2} />
-  <Step.AddTokensToWallet stepNumber={3} />
-  <Step.SetFeeToken stepNumber={4} last />
-</Demo.Container>
+<LazyFundWallet />
 
   </Tab>
   <Tab title="Fund an address">
@@ -35,9 +28,7 @@ Connect your wallet to receive test stablecoins directly.
 Send test stablecoins to any address.
 
 <div className="h-6"/>
-<Demo.Container name="Fund an address">
-  <Step.AddFundsToOthers stepNumber={1} last />
-</Demo.Container>
+<LazyFundAddress />
 
   </Tab>
   <Tab title="cURL request">
