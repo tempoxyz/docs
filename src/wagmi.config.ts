@@ -9,8 +9,10 @@ import {
   type CreateConfigParameters,
   createConfig,
   createStorage,
+  fallback,
   http,
   useConnectors,
+  webSocket,
 } from 'wagmi'
 import { KeyManager, webAuthn } from 'wagmi/tempo'
 import { alphaUsd, betaUsd, pathUsd, thetaUsd } from './components/guides/tokens'
@@ -76,12 +78,22 @@ export function getConfig(options: getConfig.Options = {}) {
     }),
     transports: {
       [tempoModerato.id]: withFeePayer(
-        http('https://rpc.moderato.tempo.xyz'),
+        fallback([
+          http('https://rpc.moderato.tempo.xyz'),
+          webSocket('wss://rpc.moderato.tempo.xyz', {
+            keepAlive: { interval: 1_000 },
+          }),
+        ]),
         http('https://sponsor.moderato.tempo.xyz'),
         { policy: 'sign-only' },
       ),
       [tempoDevnet.id]: withFeePayer(
-        http(tempoDevnet.rpcUrls.default.http[0]),
+        fallback([
+          http(tempoDevnet.rpcUrls.default.http[0]),
+          webSocket(tempoDevnet.rpcUrls.default.webSocket[0], {
+            keepAlive: { interval: 1_000 },
+          }),
+        ]),
         http('https://sponsor.devnet.tempo.xyz'),
         { policy: 'sign-only' },
       ),
