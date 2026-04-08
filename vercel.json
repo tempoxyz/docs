@@ -8,7 +8,7 @@
           "value": "faucet.tempo.xyz"
         }
       ],
-      "destination": "https://docs.tempo.xyz/guide/getting-funds",
+      "destination": "https://docs.tempo.xyz/quickstart/faucet",
       "permanent": false
     },
     {
@@ -17,6 +17,28 @@
         {
           "type": "host",
           "value": "faucet.tempo.xyz"
+        }
+      ],
+      "destination": "https://docs.tempo.xyz/quickstart/faucet",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "bridge.tempo.xyz"
+        }
+      ],
+      "destination": "https://docs.tempo.xyz/guide/getting-funds",
+      "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "bridge.tempo.xyz"
         }
       ],
       "destination": "https://docs.tempo.xyz/guide/getting-funds",
