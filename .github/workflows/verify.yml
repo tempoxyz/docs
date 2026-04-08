@@ -21,15 +21,18 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v6
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          run_install: false
+          version: 10.28.1
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24.12.0
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-
-      - name: Setup pnpm
-        run: corepack enable pnpm
 
       - name: Install dependencies
         run: pnpm install
@@ -76,15 +79,18 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v6
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          run_install: false
+          version: 10.28.1
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24.12.0
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-
-      - name: Setup pnpm
-        run: corepack enable pnpm
 
       - name: Install dependencies
         run: pnpm install
