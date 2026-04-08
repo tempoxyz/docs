@@ -38,7 +38,7 @@ export default function Layout(
           },
         }}
       />
-      <SpeedInsights />
+      <SpeedInsights route={props.path} />
       <Analytics />
       <GoogleAnalytics />
       <PostHogSetup />
