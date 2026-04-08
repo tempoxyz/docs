@@ -106,7 +106,7 @@ export namespace getConfig {
   export type Options = Partial<Pick<CreateConfigParameters, 'multiInjectedProviderDiscovery'>>
 }
 
-export const config = getConfig()
+export type Config = ReturnType<typeof getConfig>
 
 export const queryClient = new QueryClient()
 
@@ -130,6 +130,6 @@ export function useWebAuthnConnector() {
 
 declare module 'wagmi' {
   interface Register {
-    config: typeof config
+    config: Config
   }
 }
