@@ -1,15 +1,18 @@
 import { defineConfig, devices } from '@playwright/test'
 
+const isCI = !!process.env.CI
+const webServerUrl = isCI ? 'http://127.0.0.1:5173' : 'https://localhost:5173'
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 1, // Retry once due to testnet flakiness
-  workers: process.env.CI ? 4 : undefined,
+  forbidOnly: isCI,
+  retries: isCI ? 1 : 1, // Retry once due to testnet flakiness
+  workers: isCI ? 4 : undefined,
   timeout: 180000, // 3 min default timeout for testnet transactions
   reporter: 'html',
   use: {
-    baseURL: 'https://localhost:5173',
+    baseURL: webServerUrl,
     ignoreHTTPSErrors: true,
     trace: 'on-first-retry',
   },
@@ -20,10 +23,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: process.env.CI ? 'VITE_E2E=true pnpm run dev 2>/dev/null' : 'pnpm run dev 2>/dev/null',
-    url: 'https://localhost:5173',
+    command: isCI ? 'VITE_E2E=true VITE_USE_HTTP=true pnpm run dev' : 'pnpm run dev 2>/dev/null',
+    url: webServerUrl,
     ignoreHTTPSErrors: true,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !isCI,
     stdout: 'ignore',
     stderr: 'ignore',
   },
