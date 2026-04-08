@@ -14,20 +14,6 @@ import IconGitHub from '~icons/simple-icons/github'
 
 The Tempo Accounts SDK is a TypeScript library for applications and wallets to create, manage, and interact with accounts on Tempo.
 
-<div className="flex gap-2">
-  <a
-    href="https://github.com/tempoxyz/accounts"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="bg-surfaceTint px-2 py-1 rounded-lg border border-primary no-underline flex items-center gap-2"
-  >
-    <span className="flex items-center gap-2 text-sm text-primary font-[450]">
-      <IconGitHub className="size-3" />
-      GitHub
-    </span>
-  </a>
-</div>
-
 ### Demo
 
 Try sign in and make a payment on Tempo using the Accounts SDK.
@@ -38,12 +24,40 @@ Try sign in and make a payment on Tempo using the Accounts SDK.
   <Step.SendPayment stepNumber={3} last />
 </Demo.Container>
 
-## Quick Prompt
+### Quick Prompt
 
-Prompt your agent:
+You can integrate the Accounts SDK, and achieve a flow like the demo above by prompting your agent:
 
 ```
 Read docs.tempo.xyz/accounts and integrate Tempo Wallet into my application
+```
+
+### Architecture
+
+The Accounts SDK is a router between your application and a signing [Adapter](/accounts/api/adapters) (e.g. the Tempo Wallet dialog), exposed as an [EIP-1193 Provider](https://eips.ethereum.org/EIPS/eip-1193). 
+
+Adapters handle where keys live and who handles signing. The Accounts SDK currently ships with two adapters:
+
+| Adapter | Description | 
+| --- | --- |
+| [**Tempo Wallet**](/guide/use-accounts/embed-tempo-wallet) | Delegates signing to [`wallet.tempo.xyz`](https://wallet.tempo.xyz) via an iframe dialog or popup. One passkey, one account, portable across apps. 
+| [**Domain-bound Passkeys**](/guide/use-accounts/embed-passkeys) | The app (or wallet) handles passkey ceremonies and signing in-process on its own domain. 
+
+Your application interacts with the SDK through standard JSON-RPC methods (via [Wagmi](https://wagmi.sh/) or [Viem](https://viem.sh/)).
+
+An example of a high-level flow of an Application requesting for a user to perform an action with their Tempo Wallet is shown below:
+
+```mermaid
+sequenceDiagram
+    participant A as Application
+    participant S as Accounts SDK
+    participant W as wallet.tempo.xyz or Other
+
+    A->>S: action request
+    S->>W: routes request
+    note over W: User approves with Passkey
+    W-->>S: result
+    S-->>A: result
 ```
 
 ## Install
