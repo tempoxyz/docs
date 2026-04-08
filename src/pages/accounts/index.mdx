@@ -4,7 +4,6 @@ description: Set up the Tempo Accounts SDK to create, manage, and interact with 
 ---
 
 import { Cards, Card } from 'vocs'
-import { StaticMermaidDiagram } from '../../components/StaticMermaidDiagram'
 import * as Demo from '../../components/guides/Demo.tsx'
 import * as Step from '../../components/guides/steps'
 import IconGitHub from '~icons/simple-icons/github'
@@ -15,11 +14,19 @@ import IconGitHub from '~icons/simple-icons/github'
 
 The Tempo Accounts SDK is a TypeScript library for applications and wallets to create, manage, and interact with accounts on Tempo.
 
-<StaticMermaidDiagram chart={`flowchart TD
-    app["App"] -->|"EIP-5792 requests"| wallet["Tempo Wallet + WebAuthn Passkey"]
-    wallet -->|"delegates to"| sdk["Accounts SDK"]
-    sdk -->|"built on"| infra["Wagmi + Viem"]
-`} />
+<div className="flex gap-2">
+  <a
+    href="https://github.com/tempoxyz/accounts"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="bg-surfaceTint px-2 py-1 rounded-lg border border-primary no-underline flex items-center gap-2"
+  >
+    <span className="flex items-center gap-2 text-sm text-primary font-[450]">
+      <IconGitHub className="size-3" />
+      GitHub
+    </span>
+  </a>
+</div>
 
 ### Demo
 
@@ -274,17 +281,3 @@ export default defineConfig({
 Have questions or building something cool with the Accounts SDK?
 
 Join the Telegram group to chat with the team and other devs: [@mpp_devs](https://t.me/mpp_devs)
-
-<div className="flex gap-2 mt-4">
-  <a
-    href="https://github.com/tempoxyz/accounts"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="bg-surfaceTint px-2 py-1 rounded-lg border border-primary no-underline flex items-center gap-2"
-  >
-    <span className="flex items-center gap-2 text-sm text-primary font-[450]">
-      <IconGitHub className="size-3" />
-      GitHub
-    </span>
-  </a>
-</div>
