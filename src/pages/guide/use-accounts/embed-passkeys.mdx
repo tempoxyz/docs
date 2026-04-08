@@ -3,8 +3,24 @@ description: Create domain-bound passkey accounts on Tempo using WebAuthn for se
 ---
 
 import { Cards, Card } from 'vocs'
-import * as Demo from '../../../components/guides/Demo.tsx'
-import { EmbedPasskeys, SignInButtons } from '../../../components/guides/EmbedPasskeys.tsx'
+import { clientOnly, clientOnlyNamed } from '../../../components/ClientOnly.tsx'
+
+export const EmbedPasskeysDemo = clientOnly(
+  () => import('../../../components/guides/EmbedPasskeysDemo.tsx'),
+  { minHeight: 120 },
+)
+
+export const EmbedPasskeys = clientOnlyNamed(
+  () => import('../../../components/guides/EmbedPasskeys.tsx'),
+  'EmbedPasskeys',
+  { minHeight: 48 },
+)
+
+export const SignInButtons = clientOnlyNamed(
+  () => import('../../../components/guides/EmbedPasskeys.tsx'),
+  'SignInButtons',
+  { minHeight: 48 },
+)
 
 # Embed Passkey Accounts
 
@@ -28,9 +44,7 @@ This means your users won't be able to use the same passkey account on other app
 
 By the end of this guide, you will be able to embed passkey accounts into your application.
 
-<Demo.Container name="Passkey Accounts" footerVariant="source" src="tempoxyz/accounts/tree/main/examples/domain-bound-webauthn">
-  <EmbedPasskeys />
-</Demo.Container>
+<EmbedPasskeysDemo />
 
 ## Steps
 

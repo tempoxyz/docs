@@ -3,9 +3,13 @@ description: Get free test stablecoins on Tempo Testnet. Connect your wallet or 
 mipd: true
 ---
 
-import { LazyFundWallet, LazyFundAddress } from '../../components/guides/LazyFaucetWalletDemo.tsx'
+import { clientOnly } from '../../components/ClientOnly.tsx'
 import { Tabs, Tab } from 'vocs'
 
+export const FaucetWalletDemo = clientOnly(
+  () => import('../../components/guides/FaucetWalletDemo.tsx'),
+  { minHeight: 280 },
+)
 
 # Faucet
 
@@ -19,7 +23,7 @@ Get test stablecoins on Tempo testnet.
 Connect your wallet to receive test stablecoins directly.
 
 <div className="h-6"/>
-<LazyFundWallet />
+<FaucetWalletDemo variant="wallet" />
 
   </Tab>
   <Tab title="Fund an address">
@@ -28,7 +32,7 @@ Connect your wallet to receive test stablecoins directly.
 Send test stablecoins to any address.
 
 <div className="h-6"/>
-<LazyFundAddress />
+<FaucetWalletDemo variant="address" />
 
   </Tab>
   <Tab title="cURL request">

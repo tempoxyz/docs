@@ -3,7 +3,13 @@ title: Tempo Token List Registry
 ---
 import { Callout } from 'vocs'
 
-import { TokenListDemo } from '../../components/TokenList.tsx'
+import { clientOnlyNamed } from '../../components/ClientOnly.tsx'
+
+export const TokenListDemo = clientOnlyNamed(
+  () => import('../../components/TokenList.tsx'),
+  'TokenListDemo',
+  { minHeight: 200 },
+)
 
 # Tempo Token List Registry
 
