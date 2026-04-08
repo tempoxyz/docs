@@ -5,6 +5,7 @@ const webServerUrl = isCI ? 'http://localhost:5173' : 'https://localhost:5173'
 
 export default defineConfig({
   testDir: './e2e',
+  testIgnore: process.env.AGENT_EVAL ? undefined : ['**/agent-*.test.ts'],
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 1 : 1, // Retry once due to testnet flakiness
