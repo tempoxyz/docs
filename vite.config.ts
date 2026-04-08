@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
     plugins: [syncTips(), vocs(), react(), ...(useHttp ? [] : [mkcert()]), tempoNode()],
     server: useHttp
       ? {
-          host: '127.0.0.1',
+          host: 'localhost',
         }
       : undefined,
   }
