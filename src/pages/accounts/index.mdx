@@ -4,6 +4,7 @@ description: Set up the Tempo Accounts SDK to create, manage, and interact with 
 ---
 
 import { Cards, Card } from 'vocs'
+import { ClientOnly } from '../../components/ClientOnly'
 import { StaticMermaidDiagram } from '../../components/StaticMermaidDiagram'
 import * as Demo from '../../components/guides/Demo.tsx'
 import * as Step from '../../components/guides/steps'
@@ -15,11 +16,13 @@ import IconGitHub from '~icons/simple-icons/github'
 
 The Tempo Accounts SDK is a TypeScript library for applications and wallets to create, manage, and interact with accounts on Tempo.
 
-<StaticMermaidDiagram chart={`flowchart TD
-    app["App"] -->|"EIP-5792 requests"| wallet["Tempo Wallet + WebAuthn Passkey"]
-    wallet -->|"delegates to"| sdk["Accounts SDK"]
-    sdk -->|"built on"| infra["Wagmi + Viem"]
-`} />
+<ClientOnly fallback={<div className="rounded-xl border border-gray4 px-6 py-8 text-sm text-gray10">Loading diagram...</div>}>
+  <StaticMermaidDiagram chart={`flowchart TD
+      app["App"] -->|"EIP-5792 requests"| wallet["Tempo Wallet + WebAuthn Passkey"]
+      wallet -->|"delegates to"| sdk["Accounts SDK"]
+      sdk -->|"built on"| infra["Wagmi + Viem"]
+  `} />
+</ClientOnly>
 
 ### Demo
 

@@ -921,10 +921,16 @@ export function MermaidDiagram({ chart }: { chart: string }) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<HTMLDivElement>(null)
   const animRef = useRef<AnimationHandle | null>(null)
+  const [mounted, setMounted] = useState(false)
   const [isDark, setIsDark] = useState(false)
   const [phase, setPhase] = useState<'idle' | 'playing' | 'done'>('idle')
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
     const check = () =>
       setIsDark(
         document.documentElement.style.colorScheme === 'dark' ||
@@ -937,7 +943,7 @@ export function MermaidDiagram({ chart }: { chart: string }) {
       attributeFilter: ['class', 'style'],
     })
     return () => obs.disconnect()
-  }, [])
+  }, [mounted])
 
   const renderDiagram = useCallback(() => {
     const el = svgRef.current
@@ -965,6 +971,7 @@ export function MermaidDiagram({ chart }: { chart: string }) {
   }, [chart, isDark])
 
   useEffect(() => {
+    if (!mounted) return
     const el = svgRef.current
     if (!el) return
     let dead = false
@@ -976,7 +983,7 @@ export function MermaidDiagram({ chart }: { chart: string }) {
       cancelAnimationFrame(raf)
       el.innerHTML = ''
     }
-  }, [renderDiagram])
+  }, [mounted, renderDiagram])
 
   const th = isDark ? THEMES.dark : THEMES.light
 
@@ -1013,8 +1020,10 @@ export function MermaidDiagram({ chart }: { chart: string }) {
         position: 'relative',
       }}
     >
-      <div ref={svgRef} />
-      {phase === 'playing' && (
+      <div ref={svgRef}>
+        {!mounted && <div className="text-gray10 text-sm">Loading diagram...</div>}
+      </div>
+      {mounted && phase === 'playing' && (
         <button
           type="button"
           onClick={() => animRef.current?.skipToEnd()}
@@ -1040,7 +1049,7 @@ export function MermaidDiagram({ chart }: { chart: string }) {
           </svg>
         </button>
       )}
-      {phase === 'done' && (
+      {mounted && phase === 'done' && (
         <button
           type="button"
           onClick={() => {

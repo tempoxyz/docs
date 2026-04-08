@@ -50,6 +50,7 @@ export function getConfig(options: getConfig.Options = {}) {
       }),
     ],
     multiInjectedProviderDiscovery,
+    ssr: true,
     storage: createStorage({
       storage: typeof window !== 'undefined' ? localStorage : undefined,
       key: 'tempo-docs',

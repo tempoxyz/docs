@@ -196,9 +196,15 @@ function esc(s: string): string {
 
 export function StaticMermaidDiagram({ chart }: { chart: string }) {
   const svgRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false)
   const [isDark, setIsDark] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
     const check = () =>
       setIsDark(
         document.documentElement.style.colorScheme === 'dark' ||
@@ -211,9 +217,10 @@ export function StaticMermaidDiagram({ chart }: { chart: string }) {
       attributeFilter: ['class', 'style'],
     })
     return () => obs.disconnect()
-  }, [])
+  }, [mounted])
 
   useEffect(() => {
+    if (!mounted) return
     const el = svgRef.current
     if (!el) return
     const parsed = parseFlowchart(chart)
@@ -226,7 +233,7 @@ export function StaticMermaidDiagram({ chart }: { chart: string }) {
       svg.style.display = 'block'
       svg.style.margin = '0 auto'
     }
-  }, [chart, isDark])
+  }, [chart, isDark, mounted])
 
   return (
     <div
@@ -241,7 +248,9 @@ export function StaticMermaidDiagram({ chart }: { chart: string }) {
         position: 'relative',
       }}
     >
-      <div ref={svgRef} />
+      <div ref={svgRef}>
+        {!mounted && <div className="text-gray10 text-sm">Loading diagram...</div>}
+      </div>
     </div>
   )
 }

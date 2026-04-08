@@ -261,6 +261,7 @@ function CssTriangle() {
 // ---------------------------------------------------------------------------
 
 export function TerminalDemo({ className }: { className?: string }) {
+  const [mounted, setMounted] = useState(false)
   const [started, setStarted] = useState(false)
   const [done, setDone] = useState(false)
   const [key, setKey] = useState(0)
@@ -271,8 +272,13 @@ export function TerminalDemo({ className }: { className?: string }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Auto-scroll when content grows
   useEffect(() => {
+    if (!mounted) return
     const scrollEl = scrollRef.current
     const contentEl = contentRef.current
     if (!scrollEl || !contentEl) return
@@ -284,7 +290,7 @@ export function TerminalDemo({ className }: { className?: string }) {
     })
     observer.observe(contentEl)
     return () => observer.disconnect()
-  }, [])
+  }, [mounted])
 
   const restart = () => {
     setStarted(false)
@@ -387,7 +393,14 @@ export function TerminalDemo({ className }: { className?: string }) {
           <div ref={contentRef}>
             <div className="h-2" />
 
-            {!started && (
+            {!mounted && (
+              <div className="flex flex-col">
+                <BlankLine />
+                <p style={{ color: 'var(--term-gray5)' }}>Loading interactive demo...</p>
+              </div>
+            )}
+
+            {mounted && !started && (
               <div className="flex flex-col">
                 <BlankLine />
                 <button
@@ -402,7 +415,7 @@ export function TerminalDemo({ className }: { className?: string }) {
               </div>
             )}
 
-            {started && (
+            {mounted && started && (
               <ChargeSteps
                 key={key}
                 endpoint="/api/photo"
@@ -412,7 +425,7 @@ export function TerminalDemo({ className }: { className?: string }) {
               />
             )}
 
-            {done && (
+            {mounted && done && (
               <button
                 type="button"
                 className="cursor-pointer text-left"

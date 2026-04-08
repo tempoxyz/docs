@@ -17,6 +17,12 @@ import type { DemoStepProps } from '../types'
 
 export function ConnectWallet(props: DemoStepProps) {
   const { stepNumber = 1 } = props
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const { chain, connector } = useConnection()
   const connections = useConnections()
   const connect = useConnect()
@@ -134,6 +140,21 @@ export function ConnectWallet(props: DemoStepProps) {
   ])
 
   const stackConnectors = injectedConnectors.length > 2
+
+  if (!mounted)
+    return (
+      <Step
+        active
+        completed={false}
+        number={stepNumber}
+        title="Connect your browser wallet."
+        actions={
+          <div className="flex items-center text-[14px] -tracking-[2%]">
+            Loading wallet options...
+          </div>
+        }
+      />
+    )
 
   return (
     <Step
