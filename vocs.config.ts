@@ -242,6 +242,64 @@ export default defineConfig({
                 text: 'Accept streamed payments',
                 link: '/guide/machine-payments/streamed-payments',
               },
+              {
+                text: 'Use Cases',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Monetize Your API',
+                    link: '/guide/machine-payments/use-cases/monetize-your-api',
+                  },
+                  {
+                    text: 'AI Model Access',
+                    link: '/guide/machine-payments/use-cases/ai-model-access',
+                  },
+                  {
+                    text: 'Web Search & Research',
+                    link: '/guide/machine-payments/use-cases/web-search-and-research',
+                  },
+                  {
+                    text: 'Image & Media Generation',
+                    link: '/guide/machine-payments/use-cases/image-and-media-generation',
+                  },
+                  {
+                    text: 'Browser Automation',
+                    link: '/guide/machine-payments/use-cases/browser-automation',
+                  },
+                  {
+                    text: 'Compute & Code Execution',
+                    link: '/guide/machine-payments/use-cases/compute-and-code-execution',
+                  },
+                  {
+                    text: 'Storage',
+                    link: '/guide/machine-payments/use-cases/storage',
+                  },
+                  {
+                    text: 'Blockchain Data & Analytics',
+                    link: '/guide/machine-payments/use-cases/blockchain-data',
+                  },
+                  {
+                    text: 'Financial & Market Data',
+                    link: '/guide/machine-payments/use-cases/financial-data',
+                  },
+                  {
+                    text: 'Data Enrichment & Leads',
+                    link: '/guide/machine-payments/use-cases/data-enrichment-and-leads',
+                  },
+                  {
+                    text: 'Translation & Language',
+                    link: '/guide/machine-payments/use-cases/translation-and-language',
+                  },
+                  {
+                    text: 'Maps & Location Data',
+                    link: '/guide/machine-payments/use-cases/location-and-maps',
+                  },
+                  {
+                    text: 'Agent-to-Agent Services',
+                    link: '/guide/machine-payments/use-cases/agent-to-agent',
+                  },
+                ],
+              },
             ],
           },
         ],
