@@ -12,8 +12,16 @@ export default defineConfig(({ mode }) => {
   for (const key of Object.keys(env)) {
     if (!(key in process.env)) process.env[key] = env[key]
   }
+
+  const useHttp = process.env.CI === 'true' || process.env.VITE_USE_HTTP === 'true'
+
   return {
-    plugins: [syncTips(), vocs(), react(), mkcert(), tempoNode()],
+    plugins: [syncTips(), vocs(), react(), ...(useHttp ? [] : [mkcert()]), tempoNode()],
+    server: useHttp
+      ? {
+          host: 'localhost',
+        }
+      : undefined,
   }
 })
 
