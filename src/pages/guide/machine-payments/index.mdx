@@ -4,6 +4,7 @@ description: Make agentic payments using the Machine Payments Protocol (MPP) on 
 ---
 
 import { Card, Cards } from 'vocs'
+import { ClientOnly } from '../../../components/ClientOnly'
 import { MermaidDiagram } from '../../../components/MermaidDiagram'
 import { TerminalDemo } from '../../../components/TerminalDemo'
 
@@ -16,23 +17,27 @@ Make agentic payments using the [Machine Payments Protocol](https://mpp.dev) (MP
 See the full payment flow in action. The terminal creates an ephemeral wallet, funds it with testnet USDG, and makes a paid request to fetch a photo.
 
 <div style={{ height: 480 }}>
-  <TerminalDemo />
+  <ClientOnly fallback={<div className="rounded-xl border border-gray4 px-6 py-8 text-sm text-gray10">Loading interactive demo...</div>}>
+    <TerminalDemo />
+  </ClientOnly>
 </div>
 
 ## Payment flow
 
 A client requests a paid resource, the server responds with `402` and a `Challenge` describing the price. The client pays, retries with a `Credential` transaction, and the server returns the resource with a `Receipt`.
 
-<MermaidDiagram chart={`sequenceDiagram
-    participant Client
-    participant Server
-    Client->>Server: (1) GET /resource
-    Server-->>Client: (2) 402 Payment Required + Challenge
-    Note over Client: (3) Client fulfills payment
-    Client->>Server: (4) GET /resource + Credential
-    Note over Server: (5) Server verifies payment
-    Server-->>Client: (6) 200 OK + Receipt
-`} />
+<ClientOnly fallback={<div className="rounded-xl border border-gray4 px-6 py-8 text-sm text-gray10">Loading diagram...</div>}>
+  <MermaidDiagram chart={`sequenceDiagram
+      participant Client
+      participant Server
+      Client->>Server: (1) GET /resource
+      Server-->>Client: (2) 402 Payment Required + Challenge
+      Note over Client: (3) Client fulfills payment
+      Client->>Server: (4) GET /resource + Credential
+      Note over Server: (5) Server verifies payment
+      Server-->>Client: (6) 200 OK + Receipt
+  `} />
+</ClientOnly>
 
 1. **Request** — Any HTTP method (`GET`, `POST`, etc.)
 2. **Challenge** — `402` with `WWW-Authenticate: Payment` header describing amount, currency, and recipient

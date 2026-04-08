@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import { Expiry } from 'accounts'
-import { tempoWallet } from 'accounts/wagmi'
+import { tempoWallet, webAuthn } from 'accounts/wagmi'
 import * as React from 'react'
 import { parseUnits } from 'viem'
 import { tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
@@ -13,7 +13,6 @@ import {
   useConnectors,
   webSocket,
 } from 'wagmi'
-import { webAuthn } from 'accounts/wagmi'
 import { alphaUsd, betaUsd, pathUsd, thetaUsd } from './components/guides/tokens'
 
 const feeToken = '0x20c0000000000000000000000000000000000001'
@@ -51,6 +50,7 @@ export function getConfig(options: getConfig.Options = {}) {
       }),
     ],
     multiInjectedProviderDiscovery,
+    ssr: true,
     storage: createStorage({
       storage: typeof window !== 'undefined' ? localStorage : undefined,
       key: 'tempo-docs',

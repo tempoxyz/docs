@@ -4,6 +4,7 @@ description: Session-based billing on Tempo with MPP payment channels. Clients d
 ---
 
 import { Card, Cards } from 'vocs'
+import { ClientOnly } from '../../../components/ClientOnly'
 import { MermaidDiagram } from '../../../components/MermaidDiagram'
 
 # Accept pay-as-you-go payments
@@ -16,26 +17,28 @@ Unlike [one-time payments](/guide/machine-payments/one-time-payments), sessions 
 
 ## How sessions work
 
-<MermaidDiagram chart={`sequenceDiagram
-    participant Client
-    participant Server
-    participant Tempo
-    Client->>Tempo: (1) Deposit tokens
-    Tempo-->>Client: Channel created
-    Client->>Server: (2) Open credential
-    Note over Server: Verify on-chain deposit
-    Server-->>Client: 200 OK (session established)
-    loop Per request
-        Client->>Server: (3) Request + voucher
-        Note over Server: ecrecover only
-        Server-->>Client: 200 OK + Receipt
-    end
-    Note over Server: (4) Periodic settlement
-    Server->>Tempo: settle(channelId, voucher)
-    Client->>Server: (5) Close
-    Server->>Tempo: close(channelId, voucher)
-    Tempo-->>Client: Refund remaining deposit
-`} />
+<ClientOnly fallback={<div className="rounded-xl border border-gray4 px-6 py-8 text-sm text-gray10">Loading diagram...</div>}>
+  <MermaidDiagram chart={`sequenceDiagram
+      participant Client
+      participant Server
+      participant Tempo
+      Client->>Tempo: (1) Deposit tokens
+      Tempo-->>Client: Channel created
+      Client->>Server: (2) Open credential
+      Note over Server: Verify on-chain deposit
+      Server-->>Client: 200 OK (session established)
+      loop Per request
+          Client->>Server: (3) Request + voucher
+          Note over Server: ecrecover only
+          Server-->>Client: 200 OK + Receipt
+      end
+      Note over Server: (4) Periodic settlement
+      Server->>Tempo: settle(channelId, voucher)
+      Client->>Server: (5) Close
+      Server->>Tempo: close(channelId, voucher)
+      Tempo-->>Client: Refund remaining deposit
+  `} />
+</ClientOnly>
 
 1. **Open** — Client deposits funds into an on-chain escrow contract, creating a payment channel
 2. **Session** — Client signs EIP-712 vouchers with increasing cumulative amounts as service is consumed

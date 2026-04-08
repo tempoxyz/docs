@@ -12,11 +12,17 @@ import {
 import LucideCheck from '~icons/lucide/check'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
 import { filterSupportedInjectedConnectors } from '../../../lib/wallets'
-import { Button, Step, StringFormatter, TEMPO_CONNECTOR_ID, useCopyToClipboard } from '../../Demo'
+import { Button, Step, StringFormatter, useCopyToClipboard } from '../../Demo'
 import type { DemoStepProps } from '../types'
 
 export function ConnectWallet(props: DemoStepProps) {
   const { stepNumber = 1 } = props
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const { chain, connector } = useConnection()
   const connections = useConnections()
   const connect = useConnect()
@@ -31,7 +37,7 @@ export function ConnectWallet(props: DemoStepProps) {
   const isSupported = chains.some((c) => c.id === chain?.id)
   const [copied, copyToClipboard] = useCopyToClipboard()
 
-  const walletConnection = connections.find((c) => c.connector.id !== TEMPO_CONNECTOR_ID)
+  const walletConnection = connections.find((c) => c.connector.id !== 'webAuthn')
   const walletAddress = walletConnection?.accounts[0]
   const walletConnector = walletConnection?.connector
   const hasNonWebAuthnWallet = Boolean(walletAddress)
@@ -134,6 +140,21 @@ export function ConnectWallet(props: DemoStepProps) {
   ])
 
   const stackConnectors = injectedConnectors.length > 2
+
+  if (!mounted)
+    return (
+      <Step
+        active
+        completed={false}
+        number={stepNumber}
+        title="Connect your browser wallet."
+        actions={
+          <div className="flex items-center text-[14px] -tracking-[2%]">
+            Loading wallet options...
+          </div>
+        }
+      />
+    )
 
   return (
     <Step

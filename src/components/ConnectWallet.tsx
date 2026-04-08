@@ -1,10 +1,16 @@
 'use client'
 import * as React from 'react'
 import { useChains, useConnect, useConnection, useConnectors, useSwitchChain } from 'wagmi'
-import { Button, Logout, TEMPO_CONNECTOR_ID } from './guides/Demo'
+import { Button, Logout } from './guides/Demo'
 import { filterSupportedInjectedConnectors } from './lib/wallets'
 
 export function ConnectWallet({ showAddChain = true }: { showAddChain?: boolean }) {
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const { address, chain, connector } = useConnection()
   const connect = useConnect()
   const connectors = useConnectors()
@@ -15,11 +21,15 @@ export function ConnectWallet({ showAddChain = true }: { showAddChain?: boolean 
   const switchChain = useSwitchChain()
   const chains = useChains()
   const isSupported = chains.some((c) => c.id === chain?.id)
+  if (!mounted)
+    return (
+      <div className="flex items-center text-[14px] -tracking-[2%]">Loading wallet options...</div>
+    )
   if (!injectedConnectors.length)
     return (
       <div className="flex items-center text-[14px] -tracking-[2%]">No browser wallets found.</div>
     )
-  if (!address || connector?.id === TEMPO_CONNECTOR_ID)
+  if (!address || connector?.id === 'webAuthn')
     return (
       <div className="flex gap-2">
         {injectedConnectors.map((connector) => (

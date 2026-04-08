@@ -4,6 +4,7 @@ description: Per-token billing over Server-Sent Events on Tempo. Stream content 
 ---
 
 import { Card, Cards } from 'vocs'
+import { ClientOnly } from '../../../components/ClientOnly'
 import { MermaidDiagram } from '../../../components/MermaidDiagram'
 
 # Accept streamed payments
@@ -16,30 +17,32 @@ Streamed payments extend [pay-as-you-go sessions](/guide/machine-payments/pay-as
 
 ## How sessions work
 
-<MermaidDiagram chart={`sequenceDiagram
-    participant Client
-    participant Server
-    participant Tempo
-    Client->>Tempo: (1) Deposit tokens
-    Tempo-->>Client: Channel created
-    Client->>Server: (2) Open credential
-    Note over Server: Verify on-chain deposit
-    Server-->>Client: 200 OK (SSE stream begins)
-    loop Per token streamed
-        Server-->>Client: (3) SSE data event + charge
-        Note over Server: ecrecover only
-    end
-    alt Channel balance low
-        Server-->>Client: (4) payment-need-voucher event
-        Client->>Server: New voucher
-        Note over Server: Resume streaming
-    end
-    Note over Server: (5) Periodic settlement
-    Server->>Tempo: settle(channelId, voucher)
-    Client->>Server: (6) Close
-    Server->>Tempo: close(channelId, voucher)
-    Tempo-->>Client: Refund remaining deposit
-`} />
+<ClientOnly fallback={<div className="rounded-xl border border-gray4 px-6 py-8 text-sm text-gray10">Loading diagram...</div>}>
+  <MermaidDiagram chart={`sequenceDiagram
+      participant Client
+      participant Server
+      participant Tempo
+      Client->>Tempo: (1) Deposit tokens
+      Tempo-->>Client: Channel created
+      Client->>Server: (2) Open credential
+      Note over Server: Verify on-chain deposit
+      Server-->>Client: 200 OK (SSE stream begins)
+      loop Per token streamed
+          Server-->>Client: (3) SSE data event + charge
+          Note over Server: ecrecover only
+      end
+      alt Channel balance low
+          Server-->>Client: (4) payment-need-voucher event
+          Client->>Server: New voucher
+          Note over Server: Resume streaming
+      end
+      Note over Server: (5) Periodic settlement
+      Server->>Tempo: settle(channelId, voucher)
+      Client->>Server: (6) Close
+      Server->>Tempo: close(channelId, voucher)
+      Tempo-->>Client: Refund remaining deposit
+  `} />
+</ClientOnly>
 
 1. **Open** — Client deposits funds into an on-chain escrow contract, creating a payment channel
 2. **Stream** — Server streams SSE events, calling `stream.charge()` per token to increment the voucher amount
