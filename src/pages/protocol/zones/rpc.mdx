@@ -26,47 +26,38 @@ Tokens are sent via the `X-Authorization-Token` HTTP header on every request.
 
 Each JSON-RPC method falls into one of four categories:
 
-### Allowed
+Available to any authenticated caller:
 
-Public zone information available to any authenticated caller:
-
-| Method | Notes |
-|--------|-------|
-| `eth_chainId` | Zone chain ID |
-| `eth_blockNumber` | Latest block number |
-| `eth_gasPrice` | Current gas price |
-| `eth_maxPriorityFeePerGas` | Current priority fee |
-| `eth_feeHistory` | Fee history |
-| `eth_getBlockByNumber` | Block headers **without transaction details** |
-| `eth_getBlockByHash` | Block headers **without transaction details** |
-| `eth_subscribe("newHeads")` | Block headers with `logsBloom` zeroed |
-| `eth_syncing` | Sync status |
-| `eth_coinbase` | Sequencer address |
-| `net_version` | Network ID |
-| `net_listening` | Node status |
-| `web3_clientVersion` | Client version |
-| `web3_sha3` | Pure Keccak-256 hash |
-
-### Scoped
-
-Available to any authenticated caller, but filtered to the authenticated account:
-
-| Method | Scoping Rule |
-|--------|-------------|
-| `eth_getBalance` | Returns balance for the authenticated account only. Queries for other accounts return `0x0`. |
-| `eth_getTransactionCount` | Returns nonce for the authenticated account only. Other accounts return `0x0`. |
-| `eth_call` | Executes with `from` set to the authenticated account. [Execution-level privacy](/protocol/zones/accounts) enforces `balanceOf` access control at the contract level. |
-| `eth_estimateGas` | Only allowed when `from` equals the authenticated account. |
-| `eth_getTransactionByHash` | Returns the transaction only if the authenticated account is the sender. Returns `null` otherwise. |
-| `eth_getTransactionReceipt` | Returns the receipt only if the authenticated account is the sender. Logs are filtered (see [Event Filtering](#event-filtering)). |
-| `eth_sendRawTransaction` | Validates that the transaction sender matches the authenticated account. |
-| `eth_getLogs` | Filtered to TIP-20 events where the authenticated account is a relevant party (see [Event Filtering](#event-filtering)). |
-| `eth_getFilterLogs` | Same filtering as `eth_getLogs`. |
-| `eth_getFilterChanges` | Same filtering. Only returns new events since last poll. |
-| `eth_newFilter` | Creates a filter implicitly scoped to the authenticated account. |
-| `eth_subscribe("logs")` | Subscription scoped to the authenticated account. |
-| `eth_newBlockFilter` | Allowed. Returns new block hashes. |
-| `eth_uninstallFilter` | Allowed. Removes a previously created filter. |
+| Method | Access Type | Notes |
+|--------|-------------|-------|
+| `eth_chainId` | Allowed | Zone chain ID |
+| `eth_blockNumber` | Allowed | Latest block number |
+| `eth_gasPrice` | Allowed | Current gas price |
+| `eth_maxPriorityFeePerGas` | Allowed | Current priority fee |
+| `eth_feeHistory` | Allowed | Fee history |
+| `eth_getBlockByNumber` | Allowed | Block headers **without transaction details** |
+| `eth_getBlockByHash` | Allowed | Block headers **without transaction details** |
+| `eth_subscribe("newHeads")` | Allowed | Block headers with `logsBloom` zeroed |
+| `eth_syncing` | Allowed | Sync status |
+| `eth_coinbase` | Allowed | Sequencer address |
+| `net_version` | Allowed | Network ID |
+| `net_listening` | Allowed | Node status |
+| `web3_clientVersion` | Allowed | Client version |
+| `web3_sha3` | Allowed | Pure Keccak-256 hash |
+| `eth_getBalance` | Scoped | Returns balance for the authenticated account only. Queries for other accounts return `0x0`. |
+| `eth_getTransactionCount` | Scoped | Returns nonce for the authenticated account only. Other accounts return `0x0`. |
+| `eth_call` | Scoped | Executes with `from` set to the authenticated account. [Execution-level privacy](/protocol/zones/accounts) enforces `balanceOf` access control at the contract level. |
+| `eth_estimateGas` | Scoped | Only allowed when `from` equals the authenticated account. |
+| `eth_getTransactionByHash` | Scoped | Returns the transaction only if the authenticated account is the sender. Returns `null` otherwise. |
+| `eth_getTransactionReceipt` | Scoped | Returns the receipt only if the authenticated account is the sender. Logs are filtered (see [Event Filtering](#event-filtering)). |
+| `eth_sendRawTransaction` | Scoped | Validates that the transaction sender matches the authenticated account. |
+| `eth_getLogs` | Scoped | Filtered to TIP-20 events where the authenticated account is a relevant party (see [Event Filtering](#event-filtering)). |
+| `eth_getFilterLogs` | Scoped | Same filtering as `eth_getLogs`. |
+| `eth_getFilterChanges` | Scoped | Same filtering. Only returns new events since last poll. |
+| `eth_newFilter` | Scoped | Creates a filter implicitly scoped to the authenticated account. |
+| `eth_subscribe("logs")` | Scoped | Subscription scoped to the authenticated account. |
+| `eth_newBlockFilter` | Scoped | Returns new block hashes. |
+| `eth_uninstallFilter` | Scoped | Removes a previously created filter. |
 
 **Error vs. silent response**: Methods where the user explicitly provides a mismatched parameter (`eth_sendRawTransaction` with wrong sender, `eth_call` with wrong `from`) return explicit errors, since the user already knows the address they supplied and the error leaks nothing. Methods that query *about* other accounts return silent dummy values (`0x0`, `null`, empty results) instead of errors; an error would reveal "this data exists but you can't see it."
 
