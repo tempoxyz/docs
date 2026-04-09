@@ -95,6 +95,12 @@ export function useZoneAuthorization(parameters: {
 }
 
 function isZoneAuthorizationError(error: unknown) {
+  const status = getErrorStatus(error)
+  if (status === 401 || status === 403) return true
+
+  const name = getErrorName(error)
+  if (name === 'HttpRequestError') return true
+
   const message = getErrorMessage(error)
   return /authorization token/i.test(message)
 }
@@ -111,4 +117,36 @@ function getErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message
 
   return ''
+}
+
+function getErrorStatus(error: unknown): number | null {
+  if (typeof error !== 'object' || error === null) return null
+
+  if ('status' in error && typeof error.status === 'number') {
+    return error.status
+  }
+
+  if ('statusCode' in error && typeof error.statusCode === 'number') {
+    return error.statusCode
+  }
+
+  if ('cause' in error) {
+    return getErrorStatus(error.cause)
+  }
+
+  return null
+}
+
+function getErrorName(error: unknown): string | null {
+  if (typeof error !== 'object' || error === null) return null
+
+  if ('name' in error && typeof error.name === 'string') {
+    return error.name
+  }
+
+  if ('cause' in error) {
+    return getErrorName(error.cause)
+  }
+
+  return null
 }
