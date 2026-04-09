@@ -5,3 +5,5 @@ patchedDependencies:
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   - accounts
+  - mppx
+  - incur
