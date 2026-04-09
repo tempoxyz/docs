@@ -17,10 +17,6 @@ Funds deposited into a Tempo Zone are locked in the zone contract on Tempo Mainn
 
 Each Tempo Zone operates as a separate chain, so adding more zones increases throughput without congesting Tempo Mainnet. Tempo Zones share liquidity through Tempo Mainnet. A zone can withdraw tokens, swap them on the Stablecoin DEX, and deposit the result into another zone without exposing who placed the trade. See [composable withdrawals](/protocol/zones/bridging#composable-withdrawals) for details.
 
-### Tempo Zones are safe from theft
-
-Validity proofs guarantee correct state transitions. Sequencers order transactions but cannot steal deposited funds. See the [proving specification](/protocol/zones/proving) for how proofs are constructed and verified.
-
 ### Tempo Zones are private
 
 Tempo Zones make a key trade-off: Each zone has a sequencer who sees all activity on the zone. Privacy depends on the integrity of whoever is running the sequencer. Thanks to this trade-off, they achieve what few other privacy solutions do: Great privacy with good UX.
@@ -32,6 +28,10 @@ The [accounts specification](/protocol/zones/accounts) describes how balance and
 ### Tempo Zones are compliant by design
 
 Every TIP-20 token carries its issuer's compliance policy (whitelists, blacklists, freeze controls) via the [TIP-403 registry](/protocol/tip403/overview). When deposited into a Tempo Zone, the policy is provably mirrored. The validity proof commits that every transaction in the batch followed the issuer's rules.
+
+### Tempo Zones are safe from theft
+
+Validity proofs guarantee correct state transitions. Sequencers order transactions but cannot steal deposited funds. See the [proving specification](/protocol/zones/proving) for how proofs are constructed and verified.
 
 ### Tempo Zones are interoperable
 
