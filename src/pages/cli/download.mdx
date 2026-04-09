@@ -19,23 +19,47 @@ tempo download [flags]
 | --- | --- |
 | `--chain <network>` | Target network (`mainnet`, `moderato`) |
 | `--datadir <path>` | Data directory for downloaded state |
-| `-u, --url <url>` | Download a specific snapshot URL instead of the latest |
+| `--list` | List available snapshots |
 | `--resumable` | Resume an interrupted download |
-| `--minimal` | Download minimal snapshot (pruned state only). Do not use if running a validator. |
-| `--archive` | Download full archive snapshot. Do not use if running a validator. |
+| `--minimal` | Download minimal snapshot (pruned state, suitable for validators) |
+| `--archive` | Download full archive snapshot (suitable for RPC nodes) |
 
 ## Examples
 
-Download a snapshot from https://snapshots.tempoxyz.dev:
+Download the latest archive snapshot (for RPC nodes):
 
 ```bash
-tempo download -u $SNAPSHOT_URL
+tempo download --archive
+```
+
+Download the latest minimal snapshot (for validators):
+
+```bash
+tempo download --minimal
+```
+
+Download a snapshot for a specific chain:
+
+```bash
+tempo download --archive --chain moderato
+```
+
+List available snapshots:
+
+```bash
+tempo download --list
+```
+
+List available snapshots for a specific chain:
+
+```bash
+tempo download --list --chain moderato
 ```
 
 Resume an interrupted download:
 
 ```bash
-tempo download -u $SNAPSHOT_URL --resumable
+tempo download --archive --resumable
 ```
 
 Then start your node with [`tempo node`](/cli/node).
