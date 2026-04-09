@@ -3,6 +3,8 @@ title: Tempo Zone Architecture
 description: Architecture of Tempo Zones, including contract layout, sequencer management, chain IDs, and the trust model.
 ---
 
+import { StaticMermaidDiagram } from '../../../components/StaticMermaidDiagram'
+
 # Tempo Zone Architecture
 
 :::info
@@ -21,14 +23,13 @@ Tempo Zones are designed for applications that want safe operation guaranteed by
 
 Each Tempo Zone runs as a separate Tempo chain with its own Tempo node(s). Tempo Zones are tightly coupled with Tempo Mainnet and have direct, synchronous access to Tempo Mainnet state. Zone contracts can read certain Tempo Mainnet state without any message passing delay, such as deposit queues and TIP-403 policy information.
 
-```mermaid
-flowchart TD
+<StaticMermaidDiagram chart={`flowchart TD
     subgraph TN["Tempo Node"]
         TE["Tempo Execution"]
         TE --> Z1["Zone 1<br/>USDX, USDY"]
         TE --> Z2["Zone 2<br/>pathUSD, ..."]
     end
-```
+`} />
 
 The sequencer runs a Tempo node with one or more zone nodes attached. Each zone node:
 
@@ -43,9 +44,8 @@ The sequencer runs a Tempo node with one or more zone nodes attached. Each zone 
 
 The system consists of contracts on both Tempo Mainnet and within each Tempo Zone.
 
-```mermaid
-flowchart TD
-    ZP["ZonePortal<br/>"] -- "deposits" --> ZI["ZoneInbox<br/>(deposits)"]
+<StaticMermaidDiagram chart={`flowchart TD
+    ZP["ZonePortal"] -- "deposits" --> ZI["ZoneInbox<br/>(deposits)"]
     ZO["ZoneOutbox<br/>(withdrawals)"] -- "withdrawals" --> ZP
 
     subgraph TEMPO["Tempo Mainnet"]
@@ -58,7 +58,7 @@ flowchart TD
         ZI
         ZO
     end
-```
+`} />
 
 ### Tempo Contracts
 
