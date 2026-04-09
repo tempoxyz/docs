@@ -7,7 +7,7 @@ description: Day-to-day operations for Tempo validators. Node lifecycle, monitor
 
 This guide covers day-to-day operations for running a Tempo validator in production.
 
-- **[ValidatorConfig V2](/guide/node/validator-config-v2)**  — self-service key rotation, IP updates, and ownership transfers
+- **[Validator Configuration](/guide/node/validator-config-v2)** — self-service key rotation, IP updates, and ownership transfers
 
 ## Checking your validator's state
 
@@ -104,13 +104,13 @@ The node will finish processing the current block before shutting down. Avoid us
 **You cannot reset a validator's data and continue with the same identity.** Doing so risks inconsistent voting, which can cause irrecoverable network safety failures.
 :::
 
-If you need to reset your validator's data, you must rotate to a new validator identity. See key rotation under [ValidatorConfig V2](/guide/node/validator-config-v2#rotate-validator-identity).
+If you need to reset your validator's data, you must rotate to a new validator identity. See key rotation under [Validator Configuration](/guide/node/validator-config-v2#rotate-validator-identity).
 
 ## Key Management
 
 For signing key rotation, IP address updates, signing share recovery, and ownership transfers, see:
 
-- **[ValidatorConfig V2](/guide/node/validator-config-v2)** (post-T2) — self-service operations
+- **[Validator Configuration](/guide/node/validator-config-v2)** (post-T2) — self-service operations
 
 ## Log Management
 
