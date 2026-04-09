@@ -230,8 +230,10 @@
   --radius-default: calc(infinity * 1px);
 }
 
-[data-v-logo] img {
+[data-v-logo] [data-v-logo-image] {
   height: 28px;
+  max-height: 28px;
+  width: auto;
   margin-top: 2px;
 }
 
