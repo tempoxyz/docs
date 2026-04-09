@@ -9,6 +9,7 @@ import { Hooks } from 'wagmi/tempo'
 import {
   getZoneTransportConfig,
   moderatoZoneFactory,
+  publicSettlementLookbackBlocks,
   routerCallbackGasLimit,
   stablecoinDex,
   stripRpcBasicAuth,
@@ -337,6 +338,8 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         recipient: address,
       })
 
+      const anchorBlock = await publicClient.getBlockNumber()
+
       const { receipt } = await sourceZoneClient.zone.requestWithdrawalSync({
         account: rootWebAuthnAccount,
         amount: SWAP_AMOUNT,
@@ -347,8 +350,6 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         to: swapAndDepositRouter,
         token: pathUsd,
       })
-
-      const anchorBlock = await publicClient.getBlockNumber()
 
       return {
         anchorBlock,
@@ -375,7 +376,10 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       if (!publicClient) throw new Error('public client not ready')
       if (!swapMutation.data) throw new Error('swap submission not ready')
 
-      const fromBlock = swapMutation.data.anchorBlock > 5n ? swapMutation.data.anchorBlock - 5n : 0n
+      const fromBlock =
+        swapMutation.data.anchorBlock > publicSettlementLookbackBlocks
+          ? swapMutation.data.anchorBlock - publicSettlementLookbackBlocks
+          : 0n
       const latest = await publicClient.getBlockNumber()
       const logs = await publicClient.getLogs({
         address: ZONE_B.portalAddress,

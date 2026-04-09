@@ -9,6 +9,7 @@ import { Hooks } from 'wagmi/tempo'
 import {
   getZoneTransportConfig,
   moderatoZoneRpcUrls,
+  publicSettlementLookbackBlocks,
   stripRpcBasicAuth,
   zoneRpcSyncTimeout,
 } from '../../../lib/private-zones.ts'
@@ -224,6 +225,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
         account: address,
         token: pathUsd,
       })
+      const anchorBlock = await publicClient.getBlockNumber()
       const receipt =
         mode === 'authenticated'
           ? (
@@ -247,7 +249,6 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
                 token: pathUsd,
               })
             ).receipt
-      const anchorBlock = await publicClient.getBlockNumber()
 
       return {
         anchorBlock,
@@ -289,7 +290,9 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
       if (!withdrawMutation.data) throw new Error('withdrawal submission not ready')
 
       const fromBlock =
-        withdrawMutation.data.anchorBlock > 5n ? withdrawMutation.data.anchorBlock - 5n : 0n
+        withdrawMutation.data.anchorBlock > publicSettlementLookbackBlocks
+          ? withdrawMutation.data.anchorBlock - publicSettlementLookbackBlocks
+          : 0n
 
       const [currentRootBalance, currentZoneBalance, latest] = await Promise.all([
         Actions.token.getBalance(connectorClient as never, {

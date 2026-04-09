@@ -15,6 +15,7 @@ import { useConnection, useConnectorClient, usePublicClient } from "wagmi";
 import { Hooks } from "wagmi/tempo";
 import {
   getZoneTransportConfig,
+  publicSettlementLookbackBlocks,
   routerCallbackGasLimit,
   stripRpcBasicAuth,
   swapAndDepositRouter,
@@ -315,6 +316,8 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         throw new Error("Zone A needs more pathUSD before the send can start.");
       }
 
+      const anchorBlock = await publicClient.getBlockNumber();
+
       const { receipt } = await sourceZoneClient.zone.requestWithdrawalSync({
         account: rootWebAuthnAccount,
         amount: TRANSFER_AMOUNT,
@@ -325,8 +328,6 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         to: swapAndDepositRouter,
         token: pathUsd,
       });
-
-      const anchorBlock = await publicClient.getBlockNumber();
 
       return {
         anchorBlock,
@@ -357,8 +358,8 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       if (!sendMutation.data) throw new Error("send submission not ready");
 
       const fromBlock =
-        sendMutation.data.anchorBlock > 5n
-          ? sendMutation.data.anchorBlock - 5n
+        sendMutation.data.anchorBlock > publicSettlementLookbackBlocks
+          ? sendMutation.data.anchorBlock - publicSettlementLookbackBlocks
           : 0n;
       const latest = await publicClient.getBlockNumber();
       const logs = await publicClient.getLogs({

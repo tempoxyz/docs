@@ -13,6 +13,8 @@ export const swapAndDepositRouter = '0xf9b794e0dca9bc12ac90067df792d7aad33436e4'
 // Private sequencers currently only accept the raw transaction param on eth_sendRawTransactionSync.
 export const zoneRpcSyncTimeout = 0
 export const routerCallbackGasLimit = 2_000_000n
+// Routed settlement can appear before the UI records a post-submission anchor block.
+export const publicSettlementLookbackBlocks = 100n
 export const zeroBytes32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000' as const
 
