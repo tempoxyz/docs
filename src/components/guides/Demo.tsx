@@ -77,6 +77,30 @@ export function ExplorerLink({ hash }: { hash: string }) {
   )
 }
 
+export function ReceiptHash({ hash }: { hash: string }) {
+  const [copied, copyToClipboard] = useCopyToClipboard()
+  const { trackCopy } = usePostHogTracking()
+
+  return (
+    <div className="mt-1 flex items-center gap-2 text-[13px] -tracking-[1%]">
+      <span className="text-gray9">Receipt hash</span>
+      <code className="min-w-0 break-all font-mono text-[12px] text-gray12">{hash}</code>
+      <button
+        type="button"
+        className="shrink-0 text-gray9 transition-colors hover:text-gray12"
+        onClick={() => {
+          copyToClipboard(hash)
+          trackCopy('code', hash)
+        }}
+        aria-label={copied ? 'Copied receipt hash' : 'Copy receipt hash'}
+        title={copied ? 'Copied' : 'Copy receipt hash'}
+      >
+        {copied ? <LucideCheck className="size-3" /> : <LucideCopy className="size-3" />}
+      </button>
+    </div>
+  )
+}
+
 export function ExplorerAccountLink({ address }: { address: string }) {
   const { trackExternalLinkClick } = usePostHogTracking()
   const url = `${getExplorerHost()}/account/${address}`

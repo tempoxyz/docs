@@ -29,7 +29,7 @@ import {
   type ZoneAuthClientLike,
   useZoneAuthorization,
 } from "../../../lib/useZoneAuthorization.ts";
-import { Button, ExplorerLink, Login, Logout, Step } from "../Demo";
+import { Button, ExplorerLink, Login, Logout, ReceiptHash, Step } from "../Demo";
 import { pathUsd } from "../tokens";
 import { useStickyStepCompletion } from "./useStickyStepCompletion.ts";
 
@@ -662,7 +662,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
               label={`Expected ${ZONE_B.label} net amount`}
               value={`${formatUnits(sendMutation.data.minimumTargetIncrease, 6)} pathUSD`}
             />
-            <ExplorerLink hash={routedSendReceipt.transactionHash} />
+            <ReceiptHash hash={routedSendReceipt.transactionHash} />
           </StepBody>
         )}
       </Step>

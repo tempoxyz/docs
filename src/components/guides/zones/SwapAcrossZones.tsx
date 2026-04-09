@@ -21,7 +21,7 @@ import {
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
-import { Button, ExplorerLink, Logout, Step } from '../Demo'
+import { Button, ExplorerLink, Logout, ReceiptHash, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { betaUsd, pathUsd } from '../tokens'
 import { useStickyStepCompletion } from './useStickyStepCompletion.ts'
@@ -648,7 +648,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         {routedSwapReceipt && (
           <StepBody>
             <DetailLine label="Receipt block" value={routedSwapReceipt.blockNumber.toString()} />
-            <ExplorerLink hash={routedSwapReceipt.transactionHash} />
+            <ReceiptHash hash={routedSwapReceipt.transactionHash} />
           </StepBody>
         )}
       </Step>
