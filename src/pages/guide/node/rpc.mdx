@@ -12,9 +12,7 @@ RPC nodes provide API access to the Tempo network without participating in conse
 
 ```bash /dev/null/quickstart.sh#L1-15
 # Download snapshot (this will help you sync much faster)
-# 
-# See https://snapshots.tempoxyz.dev/ for snapshots.
-tempo download -u $SNAPSHOT_URL
+tempo download --archive
 
 # Run node
 tempo node \
@@ -26,11 +24,6 @@ tempo node \
 An RPC node running in follow mode is a **full node**. It fetches blocks from a trusted RPC endpoint, executes every transaction locally through the EVM, validates each block after execution, and stores complete block data with full state. The only trust assumption is block ordering: your node trusts the RPC endpoint to provide the correct sequence of blocks. All execution and validation happens locally on your machine.
 
 By default, RPC nodes run in archive mode, meaning they do not prune historical state.
-
-## Manually downloading snapshots
-
-Daily snapshots for the persistent testnet can be found at [https://snapshots.tempoxyz.dev](https://snapshots.tempoxyz.dev). You can extract them either using
-`tempo download --url <snapshot_url>` or downloading them manually and extracting them using `curl <snapshot_url> | lz4 -d | tar -xzf -`.
 
 ## Example Systemd Service
 
