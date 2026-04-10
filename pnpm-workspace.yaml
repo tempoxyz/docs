@@ -7,3 +7,5 @@ minimumReleaseAgeExclude:
   - accounts
   - mppx
   - incur
+  - viem
+  - ox

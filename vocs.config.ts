@@ -155,6 +155,28 @@ export default defineConfig({
             ],
           },
           {
+            text: 'Use Access Keys',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/guide/access-keys',
+              },
+              {
+                text: 'Send a payment',
+                link: '/guide/access-keys/send-a-payment',
+              },
+              {
+                text: 'Set up subscriptions',
+                link: '/guide/access-keys/subscriptions',
+              },
+              {
+                text: 'Revoke access keys',
+                link: '/guide/access-keys/revoke',
+              },
+            ],
+          },
+          {
             text: 'Issue Stablecoins',
             collapsed: true,
             items: [
