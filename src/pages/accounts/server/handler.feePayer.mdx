@@ -107,6 +107,41 @@ const handler = Handler.feePayer({
 })
 ```
 
+### name
+
+- **Type:** `string`
+- **Optional**
+
+Sponsor display name. Returned in the `sponsor` metadata of `eth_fillTransaction` responses so wallet UIs can show who is sponsoring the transaction.
+
+```ts twoslash
+import { privateKeyToAccount } from 'viem/accounts'
+import { Handler } from 'accounts/server'
+
+const handler = Handler.feePayer({
+  account: privateKeyToAccount('0x...'),
+  name: 'Acme Inc.', // [!code focus]
+})
+```
+
+### url
+
+- **Type:** `string`
+- **Optional**
+
+Sponsor URL. Returned alongside `name` in the `sponsor` metadata of `eth_fillTransaction` responses.
+
+```ts twoslash
+import { privateKeyToAccount } from 'viem/accounts'
+import { Handler } from 'accounts/server'
+
+const handler = Handler.feePayer({
+  account: privateKeyToAccount('0x...'),
+  name: 'Acme Inc.',
+  url: 'https://acme.com', // [!code focus]
+})
+```
+
 ### transports
 
 - **Type:** `Record<number, Transport>`
@@ -127,3 +162,37 @@ const handler = Handler.feePayer({
   }, // [!code focus]
 })
 ```
+
+## Supported RPC Methods
+
+The handler accepts JSON-RPC requests and supports the following methods:
+
+| Method | Description |
+| --- | --- |
+| `eth_fillTransaction` | Prepares a transaction with fee payer fields and signs the fee payer portion. Returns the prepared transaction and sponsor metadata. |
+| `eth_signRawTransaction` | Counter-signs a sender-signed serialized transaction with the fee payer signature and returns the fully signed serialized transaction (without broadcasting). |
+| `eth_sendRawTransaction` | Counter-signs and broadcasts a sender-signed serialized transaction. Returns the transaction hash. |
+| `eth_sendRawTransactionSync` | Same as `eth_sendRawTransaction` but waits for the transaction to be included before returning. |
+
+All other methods return a `MethodNotSupported` error.
+
+:::info
+Only Tempo transactions (type `0x76` / `0x78`) are supported. The handler will reject non-Tempo serialized transactions.
+:::
+
+### `eth_fillTransaction` Response
+
+When using `eth_fillTransaction`, the response includes a `sponsor` object alongside the prepared transaction:
+
+```json
+{
+  "sponsor": {
+    "address": "0x...",
+    "name": "Acme Inc.",
+    "url": "https://acme.com"
+  },
+  "tx": { ... }
+}
+```
+
+The `sponsor.name` and `sponsor.url` fields are included when the corresponding handler parameters are set. Wallet UIs can use this metadata to display who is sponsoring the transaction.
