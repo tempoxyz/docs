@@ -38,8 +38,8 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3(typescript@5.9.3)(zod@4.3.5)
       accounts:
-        specifier: ^0.5.4
-        version: 0.5.4(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.5))(@types/react@19.2.9)(@wagmi/core@3.4.0(@tanstack/query-core@5.90.19)(@types/react@19.2.9)(ox@0.14.10(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.47.12(typescript@5.9.3)(zod@4.3.5)))(express@5.2.1)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.47.12(typescript@5.9.3)(zod@4.3.5))
+        specifier: ^0.5.8
+        version: 0.5.8(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.5))(@types/react@19.2.9)(@wagmi/core@3.4.0(@tanstack/query-core@5.90.19)(@types/react@19.2.9)(ox@0.14.10(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.47.12(typescript@5.9.3)(zod@4.3.5)))(express@5.2.1)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.47.12(typescript@5.9.3)(zod@4.3.5))
       cva:
         specifier: 1.0.0-beta.4
         version: 1.0.0-beta.4(typescript@5.9.3)
@@ -809,12 +809,6 @@ packages:
     resolution: {integrity: sha512-IwEphTD75liO8g+6taS+4oqz+nnroocNfWVHWz7j+N+ZO2vYrc6PV1q7GQhuahL0IOR7JccFTsFKQ/mb6iZWAg==}
     peerDependencies:
       react: '>=16.8'
-
-  '@remix-run/fetch-proxy@0.7.1':
-    resolution: {integrity: sha512-rPLfOpAaCXtm1dLI45uIPKERNbXbrh0P9AJc1sliz8pWd/McaFYjdr5KzB4QrFSfPvEt/Wmy6F2521qB1kK0ug==}
-
-  '@remix-run/headers@0.19.0':
-    resolution: {integrity: sha512-+62NbkXuXm9r/NdG6KfH9OCKofCWm8VjkrVPICiHKtRl8Gf2Vi6eFTN4mGgBlZRhd5mmEVRV4hTIn/JUSHDAOw==}
 
   '@remix-run/node-fetch-server@0.13.0':
     resolution: {integrity: sha512-1EsNo0ZpgXu/90AWoRZf/oE3RVTUS80tiTUpt+hv5pjtAkw7icN4WskDwz/KdAw5ARbJLMhZBrO1NqThmy/McA==}
@@ -1650,14 +1644,23 @@ packages:
     resolution: {integrity: sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng==}
     engines: {node: '>= 0.6'}
 
-  accounts@0.5.4:
-    resolution: {integrity: sha512-+ASzc3LWptmmx7Fugakz6mS5pbRe3D5xj22h9/ykl6qnHgBcrOxvU377U88I+GwmB117S+z/bxjZ7K/KsyQpsw==}
+  accounts@0.5.8:
+    resolution: {integrity: sha512-Gjg52dS0IHq2cFtglF4nqgqcVaImMyvOXfO2zSTONrRd0hnSsbRVXK4Om/V8K11d3uLdCZlGRD3W6pln5ixiRw==}
     peerDependencies:
+      '@react-native-async-storage/async-storage': ^3.0.2
       '@wagmi/core': '>=2'
+      expo-secure-store: ^55.0.12
+      expo-web-browser: ^55.0.13
       react: '>=18'
       viem: '>=2.43.3'
     peerDependenciesMeta:
+      '@react-native-async-storage/async-storage':
+        optional: true
       '@wagmi/core':
+        optional: true
+      expo-secure-store:
+        optional: true
+      expo-web-browser:
         optional: true
       react:
         optional: true
@@ -2455,6 +2458,10 @@ packages:
     resolution: {integrity: sha512-WemPi9/WfyMwZs+ZUXdiwcCh9Y+m7L+8vki9MzDw3jJ+W9Lc+12HGsd368Qc1vZi1xwW8BWMMsnK5efYKPdt4g==}
     engines: {node: '>=16.9.0'}
 
+  hono@4.12.12:
+    resolution: {integrity: sha512-p1JfQMKaceuCbpJKAPKVqyqviZdS0eUxH9v82oWo1kb9xjQ5wA6iP3FNVAPDFlz5/p7d45lO+BpSk1tuSZMF4Q==}
+    engines: {node: '>=16.9.0'}
+
   hono@4.12.9:
     resolution: {integrity: sha512-wy3T8Zm2bsEvxKZM5w21VdHDDcwVS1yUFFY6i8UobSsKfFceT7TOwhbhfKsDyx7tYQlmRM5FLpIuYvNFyjctiA==}
     engines: {node: '>=16.9.0'}
@@ -2984,8 +2991,8 @@ packages:
   moo@0.5.2:
     resolution: {integrity: sha512-iSAJLHYKnX41mKcJKjqvnAN9sf0LMDTXDEvFv+ffuRR9a1MIuXLjMNL6EsnDHSkKLTWNqQQ5uo61P4EbU4NU+Q==}
 
-  mppx@0.5.9:
-    resolution: {integrity: sha512-j8k8nARqa/C19biw2WA33iY9789GuwjDUFAIugukXwTh1c+BUDiNbviDEbxfticomomeztKJ514x+8M/OWX99g==}
+  mppx@0.5.10:
+    resolution: {integrity: sha512-+B81D9Lha7Yo2hb5Rzph49N8ZFc6kjtQTXDjSW9KG6pDLTkgxkVqvkFDE90koh8+4p1JNKrbfqRH+rS/74jWPw==}
     hasBin: true
     peerDependencies:
       '@modelcontextprotocol/sdk': '>=1.25.0'
@@ -4878,12 +4885,6 @@ snapshots:
     dependencies:
       react: 19.2.3
 
-  '@remix-run/fetch-proxy@0.7.1':
-    dependencies:
-      '@remix-run/headers': 0.19.0
-
-  '@remix-run/headers@0.19.0': {}
-
   '@remix-run/node-fetch-server@0.13.0': {}
 
   '@rolldown/pluginutils@1.0.0-beta.53': {}
@@ -5634,12 +5635,12 @@ snapshots:
       mime-types: 3.0.2
       negotiator: 1.0.0
 
-  accounts@0.5.4(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.5))(@types/react@19.2.9)(@wagmi/core@3.4.0(@tanstack/query-core@5.90.19)(@types/react@19.2.9)(ox@0.14.10(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.47.12(typescript@5.9.3)(zod@4.3.5)))(express@5.2.1)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.47.12(typescript@5.9.3)(zod@4.3.5)):
+  accounts@0.5.8(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.5))(@types/react@19.2.9)(@wagmi/core@3.4.0(@tanstack/query-core@5.90.19)(@types/react@19.2.9)(ox@0.14.10(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.47.12(typescript@5.9.3)(zod@4.3.5)))(express@5.2.1)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.47.12(typescript@5.9.3)(zod@4.3.5)):
     dependencies:
-      hono: 4.12.9
+      hono: 4.12.12
       idb-keyval: 6.2.2
       mipd: 0.0.7(typescript@5.9.3)
-      mppx: 0.5.9(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.5))(express@5.2.1)(hono@4.12.9)(typescript@5.9.3)(viem@2.47.12(typescript@5.9.3)(zod@4.3.5))
+      mppx: 0.5.10(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.5))(express@5.2.1)(hono@4.12.12)(typescript@5.9.3)(viem@2.47.12(typescript@5.9.3)(zod@4.3.5))
       ox: 0.14.10(typescript@5.9.3)(zod@4.3.6)
       webauthx: 0.1.0(typescript@5.9.3)(zod@4.3.6)
       zod: 4.3.6
@@ -6537,6 +6538,8 @@ snapshots:
 
   hono@4.11.5: {}
 
+  hono@4.12.12: {}
+
   hono@4.12.9: {}
 
   html-void-elements@3.0.0: {}
@@ -7307,10 +7310,8 @@ snapshots:
 
   moo@0.5.2: {}
 
-  mppx@0.5.9(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.5))(express@5.2.1)(hono@4.12.9)(typescript@5.9.3)(viem@2.47.12(typescript@5.9.3)(zod@4.3.5)):
+  mppx@0.5.10(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.5))(express@5.2.1)(hono@4.12.12)(typescript@5.9.3)(viem@2.47.12(typescript@5.9.3)(zod@4.3.5)):
     dependencies:
-      '@remix-run/fetch-proxy': 0.7.1
-      '@remix-run/node-fetch-server': 0.13.0
       incur: 0.3.24
       ox: 0.14.7(typescript@5.9.3)(zod@4.3.6)
       viem: 2.47.12(typescript@5.9.3)(zod@4.3.5)
@@ -7318,7 +7319,7 @@ snapshots:
     optionalDependencies:
       '@modelcontextprotocol/sdk': 1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.5)
       express: 5.2.1
-      hono: 4.12.9
+      hono: 4.12.12
     transitivePeerDependencies:
       - typescript
 
