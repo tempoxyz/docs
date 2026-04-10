@@ -1,7 +1,7 @@
-import { expect, test } from '@playwright/test'
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { expect, test } from '@playwright/test'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -26,13 +26,16 @@ test('no raw ```mermaid code blocks in MDX files', () => {
   for (const file of mdxFiles) {
     const content = readFileSync(file, 'utf-8')
     if (/^```mermaid\s*$/m.test(content)) {
-      const relative = file.replace(join(__dirname, '..') + '/', '')
+      const relative = file.replace(`${join(__dirname, '..')}/`, '')
       violations.push(relative)
     }
   }
 
-  expect(violations, [
-    'Found raw ```mermaid code blocks. Use <StaticMermaidDiagram> instead:',
-    ...violations.map((f) => `  - ${f}`),
-  ].join('\n')).toHaveLength(0)
+  expect(
+    violations,
+    [
+      'Found raw ```mermaid code blocks. Use <StaticMermaidDiagram> instead:',
+      ...violations.map((f) => `  - ${f}`),
+    ].join('\n'),
+  ).toHaveLength(0)
 })
