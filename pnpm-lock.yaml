@@ -8,9 +8,6 @@ patchedDependencies:
   '@braintree/sanitize-url@7.1.1':
     hash: 4b5a3f788745121e865755a339649fcbb8a61e07b3b14e46e21157d8a8cd6be2
     path: patches/@braintree__sanitize-url@7.1.1.patch
-  accounts:
-    hash: 6c6488388018bb9b78474f60f3423a119d7267c8f7e6b77ccb1c5a06213761ff
-    path: patches/accounts.patch
   dayjs@1.11.19:
     hash: a7ae60f3216bc5e2c1ef103e76c328ca2c3e7f9860180811b9008c17e9153d5d
     path: patches/dayjs@1.11.19.patch
@@ -42,7 +39,7 @@ importers:
         version: 1.2.3(typescript@5.9.3)(zod@4.3.5)
       accounts:
         specifier: ^0.5.8
-        version: 0.5.8(patch_hash=6c6488388018bb9b78474f60f3423a119d7267c8f7e6b77ccb1c5a06213761ff)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.5))(@types/react@19.2.9)(@wagmi/core@3.4.0(@tanstack/query-core@5.90.19)(@types/react@19.2.9)(ox@0.14.10(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.47.10(typescript@5.9.3)(zod@4.3.5)))(express@5.2.1)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.47.10(typescript@5.9.3)(zod@4.3.5))
+        version: 0.5.8(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.5))(@types/react@19.2.9)(@wagmi/core@3.4.0(@tanstack/query-core@5.90.19)(@types/react@19.2.9)(ox@0.14.10(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.47.10(typescript@5.9.3)(zod@4.3.5)))(express@5.2.1)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.47.10(typescript@5.9.3)(zod@4.3.5))
       cva:
         specifier: 1.0.0-beta.4
         version: 1.0.0-beta.4(typescript@5.9.3)
@@ -5630,7 +5627,7 @@ snapshots:
       mime-types: 3.0.2
       negotiator: 1.0.0
 
-  accounts@0.5.8(patch_hash=6c6488388018bb9b78474f60f3423a119d7267c8f7e6b77ccb1c5a06213761ff)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.5))(@types/react@19.2.9)(@wagmi/core@3.4.0(@tanstack/query-core@5.90.19)(@types/react@19.2.9)(ox@0.14.10(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.47.10(typescript@5.9.3)(zod@4.3.5)))(express@5.2.1)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.47.10(typescript@5.9.3)(zod@4.3.5)):
+  accounts@0.5.8(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.5))(@types/react@19.2.9)(@wagmi/core@3.4.0(@tanstack/query-core@5.90.19)(@types/react@19.2.9)(ox@0.14.10(typescript@5.9.3)(zod@4.3.5))(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.47.10(typescript@5.9.3)(zod@4.3.5)))(express@5.2.1)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.47.10(typescript@5.9.3)(zod@4.3.5)):
     dependencies:
       hono: 4.12.12
       idb-keyval: 6.2.2
