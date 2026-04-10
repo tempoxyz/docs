@@ -59,7 +59,10 @@ export function getConfig(options: getConfig.Options = {}) {
                   { token: thetaUsd, limit: parseUnits('500', 6) },
                 ],
               }),
-              feePayerUrl: 'https://sponsor.moderato.tempo.xyz',
+              feePayer: {
+                precedence: 'user-first',
+                url: 'https://sponsor.moderato.tempo.xyz',
+              },
             }),
             webAuthn({
               grantAccessKey: {

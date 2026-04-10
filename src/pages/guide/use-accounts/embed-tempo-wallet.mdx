@@ -241,7 +241,7 @@ export function Example() {
 
 ### Fee Sponsorship
 
-The `tempoWallet` connector supports fee sponsorship via a `feePayerUrl`. This allows you to sponsor transaction fees for your users.
+The `tempoWallet` connector supports fee sponsorship via a `feePayer` option. This allows you to sponsor transaction fees for your users.
 
 ```tsx twoslash [config.ts]
 // @noErrors
@@ -252,7 +252,7 @@ import { tempoWallet } from 'accounts/wagmi'
 export const config = createConfig({
   chains: [tempo],
   connectors: [tempoWallet({
-    feePayerUrl: 'https://sponsor.example.com', // [!code ++]
+    feePayer: 'https://sponsor.example.com', // [!code ++]
   })],
   transports: {
     [tempo.id]: http(),

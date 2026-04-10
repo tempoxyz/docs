@@ -63,7 +63,7 @@ import { createConfig, http } from 'wagmi'
 
 export const config = createConfig({
   connectors: [tempoWallet({
-    feePayerUrl: 'https://sponsor.moderato.tempo.xyz', // [!code focus]
+    feePayer: 'https://sponsor.moderato.tempo.xyz', // [!code focus]
   })],
   chains: [tempo],
   multiInjectedProviderDiscovery: false,

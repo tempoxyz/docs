@@ -122,12 +122,12 @@ export const config = createConfig({
 })
 ```
 
-### feePayerUrl
+### feePayer
 
-- **Type:** `string`
+- **Type:** `string | { url: string; precedence?: 'fee-payer-first' | 'user-first' }`
 - **Optional**
 
-Fee payer URL for interacting with a service running [`Handler.feePayer`](/accounts/server/handler.feePayer) from `accounts/server`.
+Fee payer configuration for interacting with a service running [`Handler.feePayer`](/accounts/server/handler.feePayer) from `accounts/server`. Pass a URL string, or an object with `url` and optional `precedence`.
 
 :::info
 [See the guide](/guide/payments/sponsor-user-fees)
@@ -143,7 +143,7 @@ export const config = createConfig({
   connectors: [
     webAuthn({
       authUrl: '/auth',
-      feePayerUrl: 'https://myapp.com/fee-payer', // [!code focus]
+      feePayer: 'https://myapp.com/fee-payer', // [!code focus]
     }),
   ],
   transports: { [tempo.id]: http() },
