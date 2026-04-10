@@ -107,7 +107,7 @@ export function StaticMermaidDiagram({ chart }: { chart: string }) {
         position: 'relative',
       }}
     >
-      <div ref={containerRef} />
+      <div ref={containerRef} style={{ maxWidth: '540px', margin: '0 auto' }} />
     </div>
   )
 }
