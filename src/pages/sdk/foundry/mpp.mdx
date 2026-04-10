@@ -22,9 +22,9 @@ When you point any Foundry tool at an MPP-gated RPC URL, the built-in transport 
 
 1. **First request** — Foundry sends a normal JSON-RPC request to the endpoint.
 2. **402 challenge** — The server responds with `402 Payment Required` and a `WWW-Authenticate: Payment` header describing the price.
-3. **Key discovery** — Foundry reads your signing key from `$TEMPO_HOME/wallet/keys.toml` (default `~/.tempo/wallet/keys.toml`) or the `TEMPO_PRIVATE_KEY` env var.
+3. **Key discovery** — Foundry reads your signing key from `$TEMPO_HOME/wallet/keys.toml` (default `~/.tempo/wallet/keys.toml`) or the `TEMPO_PRIVATE_KEY` env var. If the server offers multiple payment challenges (e.g. different chains or currencies), Foundry automatically picks the one matching your key's chain ID and spending allowance.
 4. **Channel open** — If no payment channel exists, Foundry opens one on-chain with a deposit (default: `100,000` base units). This is a one-time on-chain lockup — unused balance remains in the channel.
-5. **Voucher payment** — Foundry signs an off-chain voucher against the open channel and retries the request with an `Authorization: Payment` header.
+5. **Voucher payment** — Foundry signs an off-chain voucher against the open channel and retries the request with an `Authorization: Payment` header. When a channel's deposit is exhausted, Foundry automatically tops it up on-chain so requests continue without interruption.
 6. **Channel reuse** — Subsequent requests reuse the same channel. Channel state is persisted to `$TEMPO_HOME/foundry/channels.json` (default `~/.tempo/foundry/channels.json`) across process invocations.
 
 :::tip
