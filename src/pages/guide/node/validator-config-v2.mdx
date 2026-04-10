@@ -3,6 +3,8 @@ title: ValidatorConfig V2
 description: Manage your validator with ValidatorConfig V2. Self-service key rotation, IP updates, and ownership transfer.
 ---
 
+import { StaticMermaidDiagram } from '../../../components/StaticMermaidDiagram'
+
 # ValidatorConfig V2
 
 ValidatorConfig V2 ([TIP-1017](/protocol/tips/tip-1017)) is the precompile that manages consensus participants. This config was [activated on mainnet](https://explore.mainnet.tempo.xyz/receipt/0x4716147e3c2bf5c8d014b8c27d6e2af0042d5a5f29bdead256d6f33038702d64) after the T2 hardfork.
@@ -11,12 +13,11 @@ ValidatorConfig V2 ([TIP-1017](/protocol/tips/tip-1017)) is the precompile that 
 
 Once added, a validator immediately becomes a player in the next epoch.
 
-```mermaid
-flowchart TD
+<StaticMermaidDiagram chart={`flowchart TD
     A[Inactive] -->|epoch ends| B["Player<br/>Receives signing shares"]
     B -->|"+1 epoch, receives share"| C["Player<br/>Dealer"]
     C -->|"once fully synced"| D["Voter ↔ Proposer"]
-```
+`} />
 ## What changes for operators
 
 Validators can perform several operations themselves without coordinating with the Tempo team:
