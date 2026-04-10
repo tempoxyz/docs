@@ -19,12 +19,13 @@ Tempo Zones let you keep balances and transfers inside a private execution envir
 - Keep some `pathUSD` on the public chain if you want to try deposits, source-zone top-ups, routed sends, swaps, or withdrawals.
 - Expect deposits, routed sends, routed swaps, and withdrawals to complete asynchronously rather than in a single balance update.
 
-These guides cover the baseline zone workflows used in the current demos: deposits through `Actions.zone.depositSync(...)` and `Actions.zone.encryptedDepositSync(...)`, in-zone transfers, same-token routed sends through `Actions.zone.requestWithdrawalSync(...)`, routed swaps, direct withdrawals, and authenticated withdrawals through `Actions.zone.requestEncryptedWithdrawalSync(...)`.
+These guides cover the current zone connection setup plus the baseline workflows used in the demos: deposits through `Actions.zone.depositSync(...)` and `Actions.zone.encryptedDepositSync(...)`, in-zone transfers, same-token routed sends through `Actions.zone.requestWithdrawalSync(...)`, routed swaps, direct withdrawals, and authenticated withdrawals through `Actions.zone.requestEncryptedWithdrawalSync(...)`.
 
 The deposit guide's demo lets you switch between plaintext and encrypted deposits, and the withdrawal guide lets you switch between standard and authenticated withdrawals, while keeping the transaction flow on the upstream `viem` zone actions.
 
 ## Choose the right guide
 
+- **Connect to a zone** if you want the Zone A and Zone B RPC URLs, chain IDs, and a minimal `viem` client setup.
 - **Deposit to a zone** if you want to move `pathUSD` from your public balance into `Zone A`.
 - **Send tokens within a zone** if you want to transfer `pathUSD` between private accounts without leaving `Zone A`.
 - **Send tokens across zones** if you want to leave `Zone A` with `pathUSD` and arrive in `Zone B` with the same token.
@@ -32,6 +33,12 @@ The deposit guide's demo lets you switch between plaintext and encrypted deposit
 - **Withdraw from a zone** if you want to move `pathUSD` back from `Zone A` to your public balance.
 
 <Cards>
+  <Card
+    description="Get the Zone A and Zone B RPC details and start with a minimal viem client setup."
+    icon="lucide:plug"
+    title="Connect to a zone"
+    to="/guide/private-zones/connect-to-a-zone"
+  />
   <Card
     description="Move pathUSD from your public balance into Zone A and confirm the private balance update."
     icon="lucide:shield-ellipsis"

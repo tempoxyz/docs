@@ -163,6 +163,10 @@ export default defineConfig({
                 link: '/guide/private-zones',
               },
               {
+                text: 'Connect to a zone',
+                link: '/guide/private-zones/connect-to-a-zone',
+              },
+              {
                 text: 'Deposit to a zone',
                 link: '/guide/private-zones/deposit-to-a-zone',
               },

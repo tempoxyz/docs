@@ -1,0 +1,59 @@
+---
+title: Connect to a Zone
+description: Connect to Tempo Zones on testnet using Zone 5 and Zone 6 RPC URLs, chain IDs, and a minimal viem client setup for private flows.
+---
+
+# Connect to a Zone
+
+:::info
+Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, reach out to us at [zones@tempo.xyz](mailto:zones@tempo.xyz).
+:::
+
+Use this page when you need the RPC endpoint and chain metadata for `Zone 5` or `Zone 6`.
+
+Account-scoped zone RPC methods require an `X-Authorization-Token` header signed by the Tempo account you are using. The interactive guides handle that for you automatically. If you are building your own integration, see the [Zone RPC specification](/protocol/zones/rpc) for the token format and the list of scoped methods.
+
+## Create a Viem client
+
+Use `zoneModerato(...)` from `viem/tempo/zones` so the client has the correct chain metadata for the zone you want to reach.
+
+```ts
+import { createPublicClient } from 'viem'
+import { http, zoneModerato } from 'viem/tempo/zones'
+
+const rpcUrl = 'https://rpc-zone-005-private.tempoxyz.dev'
+
+const zoneClient = createPublicClient({
+  chain: zoneModerato(6),
+  transport: http(rpcUrl),
+})
+
+const blockNumber = await zoneClient.getBlockNumber()
+console.log(blockNumber)
+```
+
+## Direct Connection Details
+
+### Zone 5
+
+| **Property** | **Value** |
+|-------------------|-------|
+| **Network Name** | Zone 5 |
+| **Zone ID** | `6` |
+| **Chain ID** | `4217000006` |
+| **HTTP URL** | `https://rpc-zone-005-private.tempoxyz.dev` |
+| **Portal Address** | `0x7069DeC4E64Fd07334A0933eDe836C17259c9B23` |
+| **Outbox Address** | `0x1c00000000000000000000000000000000000002` |
+
+### Zone 6
+
+| **Property** | **Value** |
+|-------------------|-------|
+| **Network Name** | Zone 6 |
+| **Zone ID** | `7` |
+| **Chain ID** | `4217000007` |
+| **HTTP URL** | `https://rpc-zone-006-private.tempoxyz.dev` |
+| **Portal Address** | `0x3F5296303400B56271b476F5A0B9cBF74350D6Ac` |
+| **Outbox Address** | `0x1c00000000000000000000000000000000000002` |
+
+Zones do not expose a public block explorer for private activity. Use authenticated RPC reads instead.
