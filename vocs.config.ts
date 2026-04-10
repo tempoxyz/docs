@@ -243,10 +243,6 @@ export default defineConfig({
                 link: '/guide/machine-payments/streamed-payments',
               },
               {
-                text: 'Foundry integration',
-                link: '/guide/machine-payments/foundry',
-              },
-              {
                 text: 'Use Cases',
                 collapsed: true,
                 items: [
@@ -686,7 +682,17 @@ export default defineConfig({
               },
               {
                 text: 'Foundry',
-                link: '/sdk/foundry',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Overview',
+                    link: '/sdk/foundry',
+                  },
+                  {
+                    text: 'MPP integration',
+                    link: '/sdk/foundry/mpp',
+                  },
+                ],
               },
               {
                 text: 'Python',
@@ -1108,6 +1114,11 @@ export default defineConfig({
     { text: 'Wallet', link: 'https://wallet.tempo.xyz' },
   ],
   redirects: [
+    {
+      source: '/guide/machine-payments/foundry',
+      destination: '/sdk/foundry/mpp',
+      status: 301,
+    },
     {
       source: '/documentation/protocol/:path*',
       destination: '/protocol/:path*',
