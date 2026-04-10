@@ -44,7 +44,6 @@ export function getConfig(options: getConfig.Options = {}) {
       ...(import.meta.env.VITE_E2E === 'true'
         ? [
             webAuthnAccounts({
-              authUrl: 'https://keys.tempo.xyz',
               rdns: 'webAuthn',
             }),
           ]
