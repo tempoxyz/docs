@@ -3,8 +3,6 @@ title: Execution & Gas
 description: Specification for gas accounting, fee tokens, fixed TIP-20 gas costs, contract creation limits, and token management on Tempo Zones.
 ---
 
-import { StaticMermaidDiagram } from '../../../components/StaticMermaidDiagram'
-
 # Execution & Gas
 
 :::info
@@ -12,25 +10,6 @@ Tempo Zones is still in early development and is available for testing purposes 
 :::
 
 This page specifies how Tempo Zones handle gas accounting, fee collection, and token management. For deposit and withdrawal flows, see the [bridging specification](/protocol/zones/bridging). For balance visibility and access control rules, see the [accounts specification](/protocol/zones/accounts).
-
-## Execution Flow
-
-The execution pipeline for a zone transaction is:
-
-<StaticMermaidDiagram chart={`flowchart TD
-    A[User submits zone transaction] --> B{Fee token enabled<br/>and USD-denominated?}
-    B -- No --> X[Reject transaction]
-    B -- Yes --> C{TIP-20 user action?}
-    C -- Yes --> D[Apply fixed 100,000 gas cost]
-    C -- No --> E[Use standard gas accounting]
-    D --> F{Uses CREATE or CREATE2?}
-    E --> F
-    F -- Yes --> Y[Revert transaction]
-    F -- No --> G[Execute against zone state]
-    G --> H[Charge fees in selected fee token]
-    H --> I[Pay sequencer]
-    I --> J[Commit updated zone state]
-`} />
 
 ## Fee Tokens
 
