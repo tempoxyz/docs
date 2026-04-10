@@ -243,6 +243,10 @@ export default defineConfig({
                 link: '/guide/machine-payments/streamed-payments',
               },
               {
+                text: 'Foundry integration',
+                link: '/guide/machine-payments/foundry',
+              },
+              {
                 text: 'Use Cases',
                 collapsed: true,
                 items: [
