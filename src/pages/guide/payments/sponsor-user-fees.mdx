@@ -77,18 +77,17 @@ export const config = createConfig({
 // @noErrors
 import { webAuthn } from 'accounts/wagmi'
 import { tempo } from 'viem/chains'
-import { withFeePayer } from 'viem/tempo'
 import { createConfig, http } from 'wagmi'
 
 export const config = createConfig({
-  connectors: [webAuthn({ authUrl: '/auth' })],
+  connectors: [webAuthn({
+    authUrl: '/auth',
+    feePayer: 'https://sponsor.moderato.tempo.xyz', // [!code focus]
+  })],
   chains: [tempo],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempo.id]: withFeePayer( // [!code focus]
-      http(), // [!code focus]
-      http('https://sponsor.moderato.tempo.xyz'), // [!code focus]
-    ), // [!code focus]
+    [tempo.id]: http(),
   },
 })
 ```

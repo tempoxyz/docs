@@ -111,7 +111,12 @@ const provider = Provider.create({
 - **Type:** `string | { url: string; precedence?: 'fee-payer-first' | 'user-first' }`
 - **Optional**
 
-Fee payer configuration for interacting with a service running [`Handler.feePayer`](/accounts/server/handler.feePayer) from `accounts/server`. Pass a URL string, or an object with `url` and optional `precedence` to control whether the fee payer or the user pays first.
+Fee payer configuration for interacting with a service running [`Handler.feePayer`](/accounts/server/handler.feePayer) from `accounts/server`. Pass a URL string, or an object with `url` and optional `precedence`.
+
+The `precedence` option controls the signing order:
+
+- **`'fee-payer-first'`** (default) — The fee payer service handles `eth_fillTransaction`, preparing the transaction and choosing the fee token before the sender signs. Use this when you want the sponsor to fully control fee parameters.
+- **`'user-first'`** — The sender signs first. The fee payer service only counter-signs the already-signed transaction (via `eth_sendRawTransaction` or `eth_sendRawTransactionSync`) when the transaction has an empty fee payer signature. Use this when the sender needs to commit to transaction details before the sponsor gets involved.
 
 ```ts twoslash
 import { Provider } from 'accounts'
