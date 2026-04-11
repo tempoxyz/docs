@@ -29,6 +29,26 @@ Vocs-powered documentation site for Tempo protocol.
 - **Config**: `vocs.config.tsx` sets `baseUrl`, `ogImageUrl` (with `%title` and `%description` template variables), and `titleTemplate`
 - All pages automatically get proper `<title>`, `<meta description>`, Open Graph, and Twitter Card tags from frontmatter
 
+## Numbered Steps
+
+When writing step-by-step instructions in guides, use the `:::::steps` container directive instead of manual `### Step 1`, `#### Step 2` headings. Each step is a `###` heading inside the container. The steps are auto-numbered by the renderer.
+
+```mdx
+:::::steps
+
+### Do the first thing
+
+Content for step 1.
+
+### Do the second thing
+
+Content for step 2.
+
+:::::
+```
+
+See https://mpp.dev/guides/multiple-payment-methods for a reference example.
+
 ## Project Structure
 
 - `src/pages/` - MDX documentation pages
