@@ -167,6 +167,38 @@ For more verification options including verifying existing contracts and API ver
 - **Silent failures**: Calling a non-existent function without a fallback succeeds silently
 :::
 
+### Deploy a stablecoin with `cast`
+
+Deploy a [TIP-20](/protocol/tip20/overview) stablecoin using the built-in `cast tip20 create` command:
+
+```bash
+cast tip20 create "myUSD" "MUSD" "USD" <QUOTE_TOKEN> <ADMIN> <SALT> \
+  --rpc-url $TEMPO_RPC_URL \
+  --interactive
+```
+
+The command validates the currency code against [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) before sending the transaction. If the code is not recognized, you'll see a warning and a confirmation prompt.
+
+To skip the validation prompt, pass `--force`:
+
+```bash
+cast tip20 create "myToken" "MTK" "FOO" <QUOTE_TOKEN> <ADMIN> <SALT> \
+  --rpc-url $TEMPO_RPC_URL \
+  --interactive \
+  --force
+```
+
+:::warning[Currency code is immutable]
+The `currency` field **cannot be changed** after token creation. It must be the [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) three-letter code for the underlying fiat currency (e.g. `"USD"`, `"EUR"`, `"GBP"`) — **not** the token symbol (e.g. don't use `"USDC"` or `"PYUSD"`).
+
+An incorrect currency code will affect:
+- **Fee payment eligibility** — only `"USD"` tokens can pay transaction fees on Tempo
+- **DEX routing** — currency codes determine trading pair classification
+- **Quote token pairing** — `"USD"` tokens must pair with other USD-denominated TIP-20 tokens
+
+The same ISO 4217 validation also runs automatically when deploying TIP-20 tokens via `forge script`.
+:::
+
 ### Interact & debug with `cast`
 
 ```bash
