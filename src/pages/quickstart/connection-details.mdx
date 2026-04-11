@@ -4,8 +4,13 @@ mipd: true
 interactive: true
 ---
 
-import * as Demo from '../../components/guides/Demo.tsx'
-import { ConnectWallet } from '../../components/ConnectWallet.tsx'
+import { clientOnlyNamed } from '../../components/ClientOnly.tsx'
+
+export const ConnectWallet = clientOnlyNamed(
+  () => import('../../components/ConnectWallet.tsx'),
+  'ConnectWallet',
+  { minHeight: 48 },
+)
 
 # Connect to the Network
 

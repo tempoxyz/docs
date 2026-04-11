@@ -4,9 +4,18 @@ mipd: true
 interactive: true
 ---
 
-import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
-import { ConnectWallet } from '../../../components/ConnectWallet.tsx'
+import { clientOnly, clientOnlyNamed } from '../../../components/ClientOnly.tsx'
+
+export const ConnectWallet = clientOnlyNamed(
+  () => import('../../../components/ConnectWallet.tsx'),
+  'ConnectWallet',
+  { minHeight: 48 },
+)
+
+export const ConnectToWalletsDemo = clientOnly(
+  () => import('../../../components/guides/ConnectToWalletsDemo.tsx'),
+  { minHeight: 120 },
+)
 
 # Connect to Wallets
 
@@ -17,13 +26,7 @@ You can use these wallets when building your application on Tempo.
 
 This guide will walk you through how to set up your application to connect to wallets.
 
-<Demo.Container 
-  name="Connect to Wallets" 
-  footerVariant="source" 
-  src="tempoxyz/examples/tree/main/examples/accounts"
->
-  <Step.ConnectWallet stepNumber={1} last />
-</Demo.Container>
+<ConnectToWalletsDemo />
 
 ## Wagmi Setup
 

@@ -4,8 +4,18 @@ interactive: true
 ---
 
 import { Cards, Card } from 'vocs'
-import * as Demo from '../../../components/guides/Demo.tsx'
-import { AccountsSignIn } from '../../../components/guides/AccountsSignIn.tsx'
+import { clientOnly, clientOnlyNamed } from '../../../components/ClientOnly.tsx'
+
+export const AccountsSignInDemo = clientOnly(
+  () => import('../../../components/guides/AccountsSignInDemo.tsx'),
+  { minHeight: 120 },
+)
+
+export const AccountsSignIn = clientOnlyNamed(
+  () => import('../../../components/guides/AccountsSignIn.tsx'),
+  'AccountsSignIn',
+  { minHeight: 48 },
+)
 
 # Embed Tempo Wallet
 
@@ -29,9 +39,7 @@ If you want a quick integration with a full-featured wallet, use the [Tempo Wall
 
 By the end of this guide, you will be able to embed the Tempo Wallet into your application.
 
-<Demo.Container name="Tempo Wallet" footerVariant="source" src="tempoxyz/accounts/tree/main/examples/basic">
-  <AccountsSignIn />
-</Demo.Container>
+<AccountsSignInDemo />
 
 ## Steps
 
