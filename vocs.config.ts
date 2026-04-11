@@ -344,7 +344,7 @@ export default defineConfig({
             link: '/quickstart/verify-contracts',
           },
           {
-            text: 'Bridging Guides',
+            text: 'Bridging',
             collapsed: true,
             items: [
               {
