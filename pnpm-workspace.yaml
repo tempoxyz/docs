@@ -1,4 +1,13 @@
+strictDepBuilds: true
+blockExoticSubdeps: true
+trustPolicy: no-downgrade
 minimumReleaseAge: 1440
+
+onlyBuiltDependencies:
+  - core-js
+  - es5-ext
+  - esbuild
+  - protobufjs
 
 minimumReleaseAgeExclude:
   - accounts
