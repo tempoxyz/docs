@@ -41,7 +41,7 @@
     "tailwindcss": "^4.2.2",
     "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",
-    "viem": "https://pkg.pr.new/tempoxyz/viem-tmp-zones/viem@b6babdcf",
+    "viem": "https://pkg.pr.new/tempoxyz/viem-tmp-zones/viem@c8d5c02",
     "vocs": "https://pkg.pr.new/wevm/vocs@2fb25c2",
     "wagmi": "^3.6.1",
     "waku": "1.0.0-alpha.4",
