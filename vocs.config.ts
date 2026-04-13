@@ -70,701 +70,701 @@ export default defineConfig({
   sidebar: {
     '/': {
       items: [
-      {
-        text: 'Home',
-        link: '/',
-      },
-      {
-        text: 'Using Tempo with AI',
-        link: '/guide/using-tempo-with-ai',
-      },
-      {
-        text: 'Build on Tempo',
-        items: [
-          {
-            text: 'Getting Funds on Tempo',
-            link: '/guide/getting-funds',
-          },
-          {
-            text: 'Create & Use Accounts',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/guide/use-accounts',
-              },
-              {
-                text: 'Embed Tempo Wallet',
-                link: '/guide/use-accounts/embed-tempo-wallet',
-              },
-              {
-                text: 'Embed domain-bound Passkeys',
-                link: '/guide/use-accounts/embed-passkeys',
-              },
-              {
-                text: 'Connect to other wallets',
-                link: '/guide/use-accounts/connect-to-wallets',
-              },
-              {
-                text: 'Add funds to your balance',
-                link: '/guide/use-accounts/add-funds',
-              },
-            ],
-          },
-          {
-            text: 'Make Payments',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/guide/payments',
-              },
-              {
-                text: 'Send a payment',
-                link: '/guide/payments/send-a-payment',
-              },
-              {
-                text: 'Accept a payment',
-                link: '/guide/payments/accept-a-payment',
-              },
-              {
-                text: 'Attach a transfer memo',
-                link: '/guide/payments/transfer-memos',
-              },
-              {
-                text: 'Pay fees in any stablecoin',
-                link: '/guide/payments/pay-fees-in-any-stablecoin',
-              },
-              {
-                text: 'Sponsor user fees',
-                link: '/guide/payments/sponsor-user-fees',
-              },
-              {
-                text: 'Send parallel transactions',
-                link: '/guide/payments/send-parallel-transactions',
-              },
-              // {
-              //   text: 'Start a subscription 🚧',
-              //   disabled: true,
-              //   link: '/guide/payments/start-a-subscription',
-              // },
-              // {
-              //   text: 'Private payments 🚧',
-              //   disabled: true,
-              //   link: '/guide/payments/private-payments',
-              // },
-            ],
-          },
-          {
-            text: 'Issue Stablecoins',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/guide/issuance',
-              },
-              {
-                text: 'Create a stablecoin',
-                link: '/guide/issuance/create-a-stablecoin',
-              },
-              {
-                text: 'Mint stablecoins',
-                link: '/guide/issuance/mint-stablecoins',
-              },
-              {
-                text: 'Use your stablecoin for fees',
-                link: '/guide/issuance/use-for-fees',
-              },
-              {
-                text: 'Distribute rewards',
-                link: '/guide/issuance/distribute-rewards',
-              },
-              {
-                text: 'Manage your stablecoin',
-                link: '/guide/issuance/manage-stablecoin',
-              },
-            ],
-          },
-          {
-            text: 'Exchange Stablecoins',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/guide/stablecoin-dex',
-              },
-              {
-                text: 'Managing fee liquidity',
-                link: '/guide/stablecoin-dex/managing-fee-liquidity',
-              },
-              {
-                text: 'Executing swaps',
-                link: '/guide/stablecoin-dex/executing-swaps',
-              },
-              {
-                text: 'View the orderbook',
-                link: '/guide/stablecoin-dex/view-the-orderbook',
-              },
-              {
-                text: 'Providing liquidity',
-                link: '/guide/stablecoin-dex/providing-liquidity',
-              },
-            ],
-          },
-          {
-            text: 'Make Agentic Payments',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/guide/machine-payments',
-              },
-              {
-                text: 'Client quickstart',
-                link: '/guide/machine-payments/client',
-              },
-              {
-                text: 'Agent quickstart',
-                link: '/guide/machine-payments/agent',
-              },
-              {
-                text: 'Server quickstart',
-                link: '/guide/machine-payments/server',
-              },
-              {
-                text: 'Accept one-time payments',
-                link: '/guide/machine-payments/one-time-payments',
-              },
-              {
-                text: 'Accept pay-as-you-go payments',
-                link: '/guide/machine-payments/pay-as-you-go',
-              },
-              {
-                text: 'Accept streamed payments',
-                link: '/guide/machine-payments/streamed-payments',
-              },
-              {
-                text: 'Use Cases',
-                collapsed: true,
-                items: [
-                  {
-                    text: 'Monetize Your API',
-                    link: '/guide/machine-payments/use-cases/monetize-your-api',
-                  },
-                  {
-                    text: 'AI Model Access',
-                    link: '/guide/machine-payments/use-cases/ai-model-access',
-                  },
-                  {
-                    text: 'Web Search & Research',
-                    link: '/guide/machine-payments/use-cases/web-search-and-research',
-                  },
-                  {
-                    text: 'Image & Media Generation',
-                    link: '/guide/machine-payments/use-cases/image-and-media-generation',
-                  },
-                  {
-                    text: 'Browser Automation',
-                    link: '/guide/machine-payments/use-cases/browser-automation',
-                  },
-                  {
-                    text: 'Compute & Code Execution',
-                    link: '/guide/machine-payments/use-cases/compute-and-code-execution',
-                  },
-                  {
-                    text: 'Storage',
-                    link: '/guide/machine-payments/use-cases/storage',
-                  },
-                  {
-                    text: 'Blockchain Data & Analytics',
-                    link: '/guide/machine-payments/use-cases/blockchain-data',
-                  },
-                  {
-                    text: 'Financial & Market Data',
-                    link: '/guide/machine-payments/use-cases/financial-data',
-                  },
-                  {
-                    text: 'Data Enrichment & Leads',
-                    link: '/guide/machine-payments/use-cases/data-enrichment-and-leads',
-                  },
-                  {
-                    text: 'Translation & Language',
-                    link: '/guide/machine-payments/use-cases/translation-and-language',
-                  },
-                  {
-                    text: 'Maps & Location Data',
-                    link: '/guide/machine-payments/use-cases/location-and-maps',
-                  },
-                  {
-                    text: 'Agent-to-Agent Services',
-                    link: '/guide/machine-payments/use-cases/agent-to-agent',
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        text: 'Integrate Tempo',
-        items: [
-          {
-            text: 'Overview',
-            link: '/quickstart/integrate-tempo',
-          },
-          {
-            text: 'Connect to the Network',
-            link: '/quickstart/connection-details',
-          },
-          {
-            text: 'Use Tempo Transactions',
-            link: '/guide/tempo-transaction',
-          },
-          {
-            text: 'Get Testnet Faucet Funds',
-            link: '/quickstart/faucet',
-          },
-          {
-            text: 'EVM Differences',
-            link: '/quickstart/evm-compatibility',
-          },
-          {
-            text: 'Predeployed Contracts',
-            link: '/quickstart/predeployed-contracts',
-          },
-          {
-            text: 'Token List Registry',
-            link: '/quickstart/tokenlist',
-          },
-          {
-            text: 'Wallet Developers',
-            link: '/quickstart/wallet-developers',
-          },
-          {
-            text: 'Contract Verification',
-            link: '/quickstart/verify-contracts',
-          },
-          {
-            text: 'Bridging',
-            collapsed: true,
-            items: [
-              {
-                text: 'Bridge via LayerZero',
-                link: '/guide/bridge-layerzero',
-              },
-              {
-                text: 'Bridge via Relay',
-                link: '/guide/bridge-relay',
-              },
-            ],
-          },
-          {
-            text: 'Ecosystem',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/ecosystem',
-              },
-              {
-                text: 'Bridges & Exchanges',
-                link: '/ecosystem/bridges',
-              },
-              {
-                text: 'Data & Analytics',
-                link: '/ecosystem/data-analytics',
-              },
-              {
-                text: 'Block Explorers',
-                link: '/ecosystem/block-explorers',
-              },
-              {
-                text: 'Wallets',
-                link: '/ecosystem/wallets',
-              },
-              {
-                text: 'Smart Contract Libraries',
-                link: '/ecosystem/smart-contract-libraries',
-              },
-              {
-                text: 'Node Infrastructure',
-                link: '/ecosystem/node-infrastructure',
-              },
-              {
-                text: 'Security & Compliance',
-                link: '/ecosystem/security-compliance',
-              },
-              {
-                text: 'Issuance & Orchestration',
-                link: '/ecosystem/orchestration',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        text: 'Tempo Protocol Specs',
-        items: [
-          {
-            text: 'Overview',
-            link: '/protocol',
-          },
-          {
-            text: 'TIP-20 Tokens',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/protocol/tip20/overview',
-              },
-              {
-                text: 'Specification',
-                link: '/protocol/tip20/spec',
-              },
-              {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/TIP20.sol',
-              },
-              {
-                text: 'Rust Implementation',
-                link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip20',
-              },
-            ],
-          },
-          {
-            text: 'TIP-20 Rewards',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/protocol/tip20-rewards/overview',
-              },
-              {
-                text: 'Specification',
-                link: '/protocol/tip20-rewards/spec',
-              },
-            ],
-          },
-          {
-            text: 'TIP-403 Policies',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/protocol/tip403/overview',
-              },
-              {
-                text: 'Specification',
-                link: '/protocol/tip403/spec',
-              },
-              {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/TIP403Registry.sol',
-              },
-              {
-                text: 'Rust Implementation',
-                link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip403_registry',
-              },
-            ],
-          },
-          {
-            text: 'Fees',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/protocol/fees',
-              },
-              {
-                text: 'Specification',
-                link: '/protocol/fees/spec-fee',
-              },
-              {
-                text: 'Fee AMM',
-                collapsed: true,
-                items: [
-                  {
-                    text: 'Overview',
-                    link: '/protocol/fees/fee-amm',
-                  },
-                  {
-                    text: 'Specification',
-                    link: '/protocol/fees/spec-fee-amm',
-                  },
-                  {
-                    text: 'Reference Implementation',
-                    link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/FeeManager.sol',
-                  },
-                  {
-                    text: 'Rust Implementation',
-                    link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip_fee_manager',
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            text: 'Tempo Transactions',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/protocol/transactions',
-              },
-              {
-                text: 'Specification',
-                link: '/protocol/transactions/spec-tempo-transaction',
-              },
-              {
-                text: 'EIP-4337 Comparison',
-                link: '/protocol/transactions/eip-4337',
-              },
-              {
-                text: 'EIP-7702 Comparison',
-                link: '/protocol/transactions/eip-7702',
-              },
-              {
-                text: 'Account Keychain Precompile Specification',
-                link: '/protocol/transactions/AccountKeychain',
-              },
-              {
-                text: 'Rust Implementation',
-                link: 'https://github.com/tempoxyz/tempo/blob/main/crates/primitives/src/transaction/tempo_transaction.rs',
-              },
-            ],
-          },
-          {
-            text: 'Blockspace',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/protocol/blockspace/overview',
-              },
-              {
-                text: 'Payment Lane Specification',
-                link: '/protocol/blockspace/payment-lane-specification',
-              },
-              {
-                text: 'Consensus and Finality',
-                link: '/protocol/blockspace/consensus',
-              },
-            ],
-          },
-          {
-            text: 'Stablecoin DEX',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/protocol/exchange',
-              },
-              {
-                text: 'Specification',
-                link: '/protocol/exchange/spec',
-              },
-              {
-                text: 'Quote Tokens',
-                link: '/protocol/exchange/quote-tokens',
-              },
-              {
-                text: 'Executing Swaps',
-                link: '/protocol/exchange/executing-swaps',
-              },
-              {
-                text: 'Providing Liquidity',
-                link: '/protocol/exchange/providing-liquidity',
-              },
-              {
-                text: 'DEX Balance',
-                link: '/protocol/exchange/exchange-balance',
-              },
-              {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/stablecoinDex.sol',
-              },
-              {
-                text: 'Rust Implementation',
-                link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/stablecoin_exchange',
-              },
-            ],
-          },
-          {
-            text: 'Network Upgrades',
-            collapsed: true,
-            items: [
-              {
-                text: 'T3',
-                link: '/protocol/upgrades/t3',
-              },
-              {
-                text: 'T2',
-                link: '/protocol/upgrades/t2',
-              },
-            ],
-          },
-          {
-            text: 'TIPs',
-            link: '/protocol/tips',
-          },
-        ],
-      },
-      {
-        text: 'Tempo Developer Tools',
-        items: [
-          {
-            text: 'Accounts SDK',
-            link: '/accounts',
-          },
-          {
-            text: 'CLI',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/cli',
-              },
-              {
-                text: 'Wallet',
-                link: '/cli/wallet',
-              },
-              {
-                text: 'Request',
-                link: '/cli/request',
-              },
-              {
-                text: 'Download',
-                link: '/cli/download',
-              },
-              {
-                text: 'Node',
-                link: '/cli/node',
-              },
-            ],
-          },
-          {
-            text: 'SDKs',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/sdk',
-              },
-              {
-                text: 'TypeScript',
-                collapsed: true,
-                items: [
-                  {
-                    text: 'Overview',
-                    link: '/sdk/typescript',
-                  },
-                  {
-                    text: 'Viem Reference',
-                    link: 'https://viem.sh/tempo',
-                  },
-                  {
-                    text: 'Wagmi Reference',
-                    link: 'https://wagmi.sh/tempo',
-                  },
-                  {
-                    text: 'Prool Reference',
-                    items: [
-                      {
-                        text: 'Setup',
-                        link: '/sdk/typescript/prool/setup',
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                text: 'Go',
-                link: '/sdk/go',
-              },
-              {
-                text: 'Foundry',
-                link: '/sdk/foundry',
-              },
-              {
-                text: 'Python',
-                link: '/sdk/python',
-              },
-              {
-                text: 'Rust',
-                link: '/sdk/rust',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        text: 'Run a Tempo Node',
-        collapsed: true,
-        items: [
-          {
-            text: 'Overview',
-            link: '/guide/node',
-          },
-          {
-            text: 'System Requirements',
-            link: '/guide/node/system-requirements',
-          },
-          {
-            text: 'Installation',
-            link: '/guide/node/installation',
-          },
-          {
-            text: 'Running an RPC Node',
-            link: '/guide/node/rpc',
-          },
-          {
-            text: 'Running a validator',
-            items: [
-              {
-                text: 'Overview',
-                link: '/guide/node/validator',
-              },
-              {
-                text: 'Operation',
-                link: '/guide/node/operate-validator',
-              },
-              {
-                text: 'ValidatorConfig V2',
-                link: '/guide/node/validator-config-v2',
-              },
-            ],
-          },
-          {
-            text: 'Network Upgrades and Releases',
-            link: '/guide/node/network-upgrades',
-          },
-          {
-            text: 'Changelog',
-            link: '/changelog',
-          },
-        ],
-      },
-      // {
-      //   text: 'Infrastructure & Tooling',
-      //   items: [
-      //     {
-      //       text: 'Overview',
-      //       link: '/guide/infrastructure',
-      //     },
-      //     {
-      //       text: 'Data Indexers',
-      //       link: '/guide/infrastructure/data-indexers',
-      //     },
-      //     {
-      //       text: 'Developer Tools',
-      //       link: '/guide/infrastructure/developer-tools',
-      //     },
-      //     {
-      //       text: 'Node Providers',
-      //       link: '/guide/infrastructure/node-providers',
-      //     },
-      //   ],
-      // },
+        {
+          text: 'Home',
+          link: '/',
+        },
+        {
+          text: 'Using Tempo with AI',
+          link: '/guide/using-tempo-with-ai',
+        },
+        {
+          text: 'Build on Tempo',
+          items: [
+            {
+              text: 'Getting Funds on Tempo',
+              link: '/guide/getting-funds',
+            },
+            {
+              text: 'Create & Use Accounts',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/guide/use-accounts',
+                },
+                {
+                  text: 'Embed Tempo Wallet',
+                  link: '/guide/use-accounts/embed-tempo-wallet',
+                },
+                {
+                  text: 'Embed domain-bound Passkeys',
+                  link: '/guide/use-accounts/embed-passkeys',
+                },
+                {
+                  text: 'Connect to other wallets',
+                  link: '/guide/use-accounts/connect-to-wallets',
+                },
+                {
+                  text: 'Add funds to your balance',
+                  link: '/guide/use-accounts/add-funds',
+                },
+              ],
+            },
+            {
+              text: 'Make Payments',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/guide/payments',
+                },
+                {
+                  text: 'Send a payment',
+                  link: '/guide/payments/send-a-payment',
+                },
+                {
+                  text: 'Accept a payment',
+                  link: '/guide/payments/accept-a-payment',
+                },
+                {
+                  text: 'Attach a transfer memo',
+                  link: '/guide/payments/transfer-memos',
+                },
+                {
+                  text: 'Pay fees in any stablecoin',
+                  link: '/guide/payments/pay-fees-in-any-stablecoin',
+                },
+                {
+                  text: 'Sponsor user fees',
+                  link: '/guide/payments/sponsor-user-fees',
+                },
+                {
+                  text: 'Send parallel transactions',
+                  link: '/guide/payments/send-parallel-transactions',
+                },
+                // {
+                //   text: 'Start a subscription 🚧',
+                //   disabled: true,
+                //   link: '/guide/payments/start-a-subscription',
+                // },
+                // {
+                //   text: 'Private payments 🚧',
+                //   disabled: true,
+                //   link: '/guide/payments/private-payments',
+                // },
+              ],
+            },
+            {
+              text: 'Issue Stablecoins',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/guide/issuance',
+                },
+                {
+                  text: 'Create a stablecoin',
+                  link: '/guide/issuance/create-a-stablecoin',
+                },
+                {
+                  text: 'Mint stablecoins',
+                  link: '/guide/issuance/mint-stablecoins',
+                },
+                {
+                  text: 'Use your stablecoin for fees',
+                  link: '/guide/issuance/use-for-fees',
+                },
+                {
+                  text: 'Distribute rewards',
+                  link: '/guide/issuance/distribute-rewards',
+                },
+                {
+                  text: 'Manage your stablecoin',
+                  link: '/guide/issuance/manage-stablecoin',
+                },
+              ],
+            },
+            {
+              text: 'Exchange Stablecoins',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/guide/stablecoin-dex',
+                },
+                {
+                  text: 'Managing fee liquidity',
+                  link: '/guide/stablecoin-dex/managing-fee-liquidity',
+                },
+                {
+                  text: 'Executing swaps',
+                  link: '/guide/stablecoin-dex/executing-swaps',
+                },
+                {
+                  text: 'View the orderbook',
+                  link: '/guide/stablecoin-dex/view-the-orderbook',
+                },
+                {
+                  text: 'Providing liquidity',
+                  link: '/guide/stablecoin-dex/providing-liquidity',
+                },
+              ],
+            },
+            {
+              text: 'Make Agentic Payments',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/guide/machine-payments',
+                },
+                {
+                  text: 'Client quickstart',
+                  link: '/guide/machine-payments/client',
+                },
+                {
+                  text: 'Agent quickstart',
+                  link: '/guide/machine-payments/agent',
+                },
+                {
+                  text: 'Server quickstart',
+                  link: '/guide/machine-payments/server',
+                },
+                {
+                  text: 'Accept one-time payments',
+                  link: '/guide/machine-payments/one-time-payments',
+                },
+                {
+                  text: 'Accept pay-as-you-go payments',
+                  link: '/guide/machine-payments/pay-as-you-go',
+                },
+                {
+                  text: 'Accept streamed payments',
+                  link: '/guide/machine-payments/streamed-payments',
+                },
+                {
+                  text: 'Use Cases',
+                  collapsed: true,
+                  items: [
+                    {
+                      text: 'Monetize Your API',
+                      link: '/guide/machine-payments/use-cases/monetize-your-api',
+                    },
+                    {
+                      text: 'AI Model Access',
+                      link: '/guide/machine-payments/use-cases/ai-model-access',
+                    },
+                    {
+                      text: 'Web Search & Research',
+                      link: '/guide/machine-payments/use-cases/web-search-and-research',
+                    },
+                    {
+                      text: 'Image & Media Generation',
+                      link: '/guide/machine-payments/use-cases/image-and-media-generation',
+                    },
+                    {
+                      text: 'Browser Automation',
+                      link: '/guide/machine-payments/use-cases/browser-automation',
+                    },
+                    {
+                      text: 'Compute & Code Execution',
+                      link: '/guide/machine-payments/use-cases/compute-and-code-execution',
+                    },
+                    {
+                      text: 'Storage',
+                      link: '/guide/machine-payments/use-cases/storage',
+                    },
+                    {
+                      text: 'Blockchain Data & Analytics',
+                      link: '/guide/machine-payments/use-cases/blockchain-data',
+                    },
+                    {
+                      text: 'Financial & Market Data',
+                      link: '/guide/machine-payments/use-cases/financial-data',
+                    },
+                    {
+                      text: 'Data Enrichment & Leads',
+                      link: '/guide/machine-payments/use-cases/data-enrichment-and-leads',
+                    },
+                    {
+                      text: 'Translation & Language',
+                      link: '/guide/machine-payments/use-cases/translation-and-language',
+                    },
+                    {
+                      text: 'Maps & Location Data',
+                      link: '/guide/machine-payments/use-cases/location-and-maps',
+                    },
+                    {
+                      text: 'Agent-to-Agent Services',
+                      link: '/guide/machine-payments/use-cases/agent-to-agent',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          text: 'Integrate Tempo',
+          items: [
+            {
+              text: 'Overview',
+              link: '/quickstart/integrate-tempo',
+            },
+            {
+              text: 'Connect to the Network',
+              link: '/quickstart/connection-details',
+            },
+            {
+              text: 'Use Tempo Transactions',
+              link: '/guide/tempo-transaction',
+            },
+            {
+              text: 'Get Testnet Faucet Funds',
+              link: '/quickstart/faucet',
+            },
+            {
+              text: 'EVM Differences',
+              link: '/quickstart/evm-compatibility',
+            },
+            {
+              text: 'Predeployed Contracts',
+              link: '/quickstart/predeployed-contracts',
+            },
+            {
+              text: 'Token List Registry',
+              link: '/quickstart/tokenlist',
+            },
+            {
+              text: 'Wallet Developers',
+              link: '/quickstart/wallet-developers',
+            },
+            {
+              text: 'Contract Verification',
+              link: '/quickstart/verify-contracts',
+            },
+            {
+              text: 'Bridging',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Bridge via LayerZero',
+                  link: '/guide/bridge-layerzero',
+                },
+                {
+                  text: 'Bridge via Relay',
+                  link: '/guide/bridge-relay',
+                },
+              ],
+            },
+            {
+              text: 'Ecosystem',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/ecosystem',
+                },
+                {
+                  text: 'Bridges & Exchanges',
+                  link: '/ecosystem/bridges',
+                },
+                {
+                  text: 'Data & Analytics',
+                  link: '/ecosystem/data-analytics',
+                },
+                {
+                  text: 'Block Explorers',
+                  link: '/ecosystem/block-explorers',
+                },
+                {
+                  text: 'Wallets',
+                  link: '/ecosystem/wallets',
+                },
+                {
+                  text: 'Smart Contract Libraries',
+                  link: '/ecosystem/smart-contract-libraries',
+                },
+                {
+                  text: 'Node Infrastructure',
+                  link: '/ecosystem/node-infrastructure',
+                },
+                {
+                  text: 'Security & Compliance',
+                  link: '/ecosystem/security-compliance',
+                },
+                {
+                  text: 'Issuance & Orchestration',
+                  link: '/ecosystem/orchestration',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          text: 'Tempo Protocol Specs',
+          items: [
+            {
+              text: 'Overview',
+              link: '/protocol',
+            },
+            {
+              text: 'TIP-20 Tokens',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/protocol/tip20/overview',
+                },
+                {
+                  text: 'Specification',
+                  link: '/protocol/tip20/spec',
+                },
+                {
+                  text: 'Reference Implementation',
+                  link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/TIP20.sol',
+                },
+                {
+                  text: 'Rust Implementation',
+                  link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip20',
+                },
+              ],
+            },
+            {
+              text: 'TIP-20 Rewards',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/protocol/tip20-rewards/overview',
+                },
+                {
+                  text: 'Specification',
+                  link: '/protocol/tip20-rewards/spec',
+                },
+              ],
+            },
+            {
+              text: 'TIP-403 Policies',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/protocol/tip403/overview',
+                },
+                {
+                  text: 'Specification',
+                  link: '/protocol/tip403/spec',
+                },
+                {
+                  text: 'Reference Implementation',
+                  link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/TIP403Registry.sol',
+                },
+                {
+                  text: 'Rust Implementation',
+                  link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip403_registry',
+                },
+              ],
+            },
+            {
+              text: 'Fees',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/protocol/fees',
+                },
+                {
+                  text: 'Specification',
+                  link: '/protocol/fees/spec-fee',
+                },
+                {
+                  text: 'Fee AMM',
+                  collapsed: true,
+                  items: [
+                    {
+                      text: 'Overview',
+                      link: '/protocol/fees/fee-amm',
+                    },
+                    {
+                      text: 'Specification',
+                      link: '/protocol/fees/spec-fee-amm',
+                    },
+                    {
+                      text: 'Reference Implementation',
+                      link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/FeeManager.sol',
+                    },
+                    {
+                      text: 'Rust Implementation',
+                      link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip_fee_manager',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              text: 'Tempo Transactions',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/protocol/transactions',
+                },
+                {
+                  text: 'Specification',
+                  link: '/protocol/transactions/spec-tempo-transaction',
+                },
+                {
+                  text: 'EIP-4337 Comparison',
+                  link: '/protocol/transactions/eip-4337',
+                },
+                {
+                  text: 'EIP-7702 Comparison',
+                  link: '/protocol/transactions/eip-7702',
+                },
+                {
+                  text: 'Account Keychain Precompile Specification',
+                  link: '/protocol/transactions/AccountKeychain',
+                },
+                {
+                  text: 'Rust Implementation',
+                  link: 'https://github.com/tempoxyz/tempo/blob/main/crates/primitives/src/transaction/tempo_transaction.rs',
+                },
+              ],
+            },
+            {
+              text: 'Blockspace',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/protocol/blockspace/overview',
+                },
+                {
+                  text: 'Payment Lane Specification',
+                  link: '/protocol/blockspace/payment-lane-specification',
+                },
+                {
+                  text: 'Consensus and Finality',
+                  link: '/protocol/blockspace/consensus',
+                },
+              ],
+            },
+            {
+              text: 'Stablecoin DEX',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/protocol/exchange',
+                },
+                {
+                  text: 'Specification',
+                  link: '/protocol/exchange/spec',
+                },
+                {
+                  text: 'Quote Tokens',
+                  link: '/protocol/exchange/quote-tokens',
+                },
+                {
+                  text: 'Executing Swaps',
+                  link: '/protocol/exchange/executing-swaps',
+                },
+                {
+                  text: 'Providing Liquidity',
+                  link: '/protocol/exchange/providing-liquidity',
+                },
+                {
+                  text: 'DEX Balance',
+                  link: '/protocol/exchange/exchange-balance',
+                },
+                {
+                  text: 'Reference Implementation',
+                  link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/stablecoinDex.sol',
+                },
+                {
+                  text: 'Rust Implementation',
+                  link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/stablecoin_exchange',
+                },
+              ],
+            },
+            {
+              text: 'Network Upgrades',
+              collapsed: true,
+              items: [
+                {
+                  text: 'T3',
+                  link: '/protocol/upgrades/t3',
+                },
+                {
+                  text: 'T2',
+                  link: '/protocol/upgrades/t2',
+                },
+              ],
+            },
+            {
+              text: 'TIPs',
+              link: '/protocol/tips',
+            },
+          ],
+        },
+        {
+          text: 'Tempo Developer Tools',
+          items: [
+            {
+              text: 'Accounts SDK',
+              link: '/accounts',
+            },
+            {
+              text: 'CLI',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/cli',
+                },
+                {
+                  text: 'Wallet',
+                  link: '/cli/wallet',
+                },
+                {
+                  text: 'Request',
+                  link: '/cli/request',
+                },
+                {
+                  text: 'Download',
+                  link: '/cli/download',
+                },
+                {
+                  text: 'Node',
+                  link: '/cli/node',
+                },
+              ],
+            },
+            {
+              text: 'SDKs',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/sdk',
+                },
+                {
+                  text: 'TypeScript',
+                  collapsed: true,
+                  items: [
+                    {
+                      text: 'Overview',
+                      link: '/sdk/typescript',
+                    },
+                    {
+                      text: 'Viem Reference',
+                      link: 'https://viem.sh/tempo',
+                    },
+                    {
+                      text: 'Wagmi Reference',
+                      link: 'https://wagmi.sh/tempo',
+                    },
+                    {
+                      text: 'Prool Reference',
+                      items: [
+                        {
+                          text: 'Setup',
+                          link: '/sdk/typescript/prool/setup',
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  text: 'Go',
+                  link: '/sdk/go',
+                },
+                {
+                  text: 'Foundry',
+                  link: '/sdk/foundry',
+                },
+                {
+                  text: 'Python',
+                  link: '/sdk/python',
+                },
+                {
+                  text: 'Rust',
+                  link: '/sdk/rust',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          text: 'Run a Tempo Node',
+          collapsed: true,
+          items: [
+            {
+              text: 'Overview',
+              link: '/guide/node',
+            },
+            {
+              text: 'System Requirements',
+              link: '/guide/node/system-requirements',
+            },
+            {
+              text: 'Installation',
+              link: '/guide/node/installation',
+            },
+            {
+              text: 'Running an RPC Node',
+              link: '/guide/node/rpc',
+            },
+            {
+              text: 'Running a validator',
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/guide/node/validator',
+                },
+                {
+                  text: 'Operation',
+                  link: '/guide/node/operate-validator',
+                },
+                {
+                  text: 'ValidatorConfig V2',
+                  link: '/guide/node/validator-config-v2',
+                },
+              ],
+            },
+            {
+              text: 'Network Upgrades and Releases',
+              link: '/guide/node/network-upgrades',
+            },
+            {
+              text: 'Changelog',
+              link: '/changelog',
+            },
+          ],
+        },
+        // {
+        //   text: 'Infrastructure & Tooling',
+        //   items: [
+        //     {
+        //       text: 'Overview',
+        //       link: '/guide/infrastructure',
+        //     },
+        //     {
+        //       text: 'Data Indexers',
+        //       link: '/guide/infrastructure/data-indexers',
+        //     },
+        //     {
+        //       text: 'Developer Tools',
+        //       link: '/guide/infrastructure/developer-tools',
+        //     },
+        //     {
+        //       text: 'Node Providers',
+        //       link: '/guide/infrastructure/node-providers',
+        //     },
+        //   ],
+        // },
       ],
       prefetch: 'intent',
     },
