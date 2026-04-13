@@ -929,6 +929,10 @@ export default defineConfig({
                   link: '/accounts/server/handler.feePayer',
                 },
                 {
+                  text: '.relay',
+                  link: '/accounts/server/handler.relay',
+                },
+                {
                   text: '.webAuthn',
                   link: '/accounts/server/handler.webAuthn',
                 },
@@ -994,8 +998,7 @@ export default defineConfig({
               link: '/accounts/rpc/eth_sendTransactionSync',
             },
             {
-              text: 'eth_fillTransaction 🚧',
-              disabled: true,
+              text: 'eth_fillTransaction',
               link: '/accounts/rpc/eth_fillTransaction',
             },
             {
