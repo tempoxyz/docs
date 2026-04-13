@@ -3,7 +3,7 @@ index fb0b8b2a3d27b0f97b0230845efbfb4a31553e65..722701819d3ee81a4e4966e57d47a26b
 --- a/package.json
 +++ b/package.json
 @@ -3,7 +3,16 @@
-   "version": "1.11.19",
+   "version": "1.11.20",
    "description": "2KB immutable date time library alternative to Moment.js with the same modern API ",
    "main": "dayjs.min.js",
 +  "module": "esm/index.js",
