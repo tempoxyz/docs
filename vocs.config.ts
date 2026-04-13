@@ -68,7 +68,8 @@ export default defineConfig({
     },
   ],
   sidebar: {
-    '/': [
+    '/': {
+      items: [
       {
         text: 'Home',
         link: '/',
@@ -764,9 +765,12 @@ export default defineConfig({
       //     },
       //   ],
       // },
-    ],
+      ],
+      prefetch: 'intent',
+    },
     '/accounts': {
       backLink: true,
+      prefetch: 'intent',
       items: [
         {
           text: 'Accounts SDK',
