@@ -15,6 +15,8 @@ Tempo Zones is still in early development and is available for testing purposes 
 
 Use this guide when you want to move `pathUSD` from your public Tempo balance into `Zone A`. You will submit a public-chain deposit first, then wait for `Zone A` to credit the net amount after fees.
 
+![Zone contract architecture](/learn/zones/diagram-deposit.svg)
+
 The deposit is accepted through `ZonePortal` on the public chain. You need private zone authorization to read the resulting zone balance, because those reads are only exposed to the authenticated account.
 
 ## Depositing pathUSD to Zone A

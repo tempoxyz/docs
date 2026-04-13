@@ -15,6 +15,8 @@ Tempo Zones is still in early development and is available for testing purposes 
 
 Use this guide when you want to move `pathUSD` out of `Zone A` and back to your public Tempo balance.
 
+![Zone contract architecture](/learn/zones/diagram-withdraw.svg)
+
 Direct withdrawals exit through `ZoneOutbox` on the zone chain. You submit the withdrawal request in the zone first, then wait for the public balance to increase after the batch settles.
 
 ## Withdrawing pathUSD from Zone A

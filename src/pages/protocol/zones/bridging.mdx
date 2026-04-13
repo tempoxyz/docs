@@ -11,6 +11,10 @@ Tempo Zones is still in early development and is available for testing purposes 
 
 Tempo Zones use Tempo-centric bridging for cross-chain operations: deposits flow from Tempo into a zone, and withdrawals flow from a zone back to Tempo with optional callbacks for composability.
 
+![End-to-end privacy flow through a zone](/learn/zones/diagram-privacy.svg)
+
+Above is an example of the type of complex transaction that can remain privacy-preserving via Tempo Zones, while performing operations such as bridging, deposits & sends, and withdrawals. Learn more about [encrypted deposits](#encrypted-deposits) and [verifiable withdrawals](#verifiable-withdrawals) below.
+
 ## Deposits (Tempo → Zone)
 
 1. User calls `ZonePortal.deposit(token, to, amount, memo)` on Tempo, specifying which enabled TIP-20 to deposit.

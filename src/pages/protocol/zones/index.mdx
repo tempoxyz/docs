@@ -13,6 +13,8 @@ Tempo Zones is still in early development and is available for testing purposes 
 
 A Tempo Zone is a private execution environment attached to Tempo Mainnet. Inside a Tempo Zone, balances, transfers, and transaction history are invisible to block explorers, indexers, and other users on Tempo Mainnet. Each Tempo Zone runs its own sequencer and executes transactions independently.
 
+![Tempo Zones overview](/learn/zones/diagram-overview.svg)
+
 Funds deposited into a Tempo Zone are locked in the zone contract on Tempo Mainnet. [Validity proofs](/protocol/zones/proving) guarantee that the sequencer executed every transaction correctly. The sequencer orders and includes transactions, but cannot steal funds or forge state transitions.
 
 Each Tempo Zone operates as a separate chain, so adding more zones increases throughput without congesting Tempo Mainnet. Tempo Zones share liquidity through Tempo Mainnet. A zone can withdraw tokens, swap them on the Stablecoin DEX, and deposit the result into another zone without exposing who placed the trade. See [composable withdrawals](/protocol/zones/bridging#composable-withdrawals) for details.
@@ -25,9 +27,13 @@ Most privacy solutions offer either confidentiality (hide the amount) or anonymi
 
 The [accounts specification](/protocol/zones/accounts) describes how balance and allowance reads are restricted at the contract level, and the [RPC specification](/protocol/zones/rpc) covers how the JSON-RPC interface is scoped per account.
 
+![End-to-end privacy flow through a zone](/learn/zones/diagram-privacy.svg)
+
 ### Tempo Zones are compliant by design
 
 Every TIP-20 token carries its issuer's compliance policy (whitelists, blacklists, freeze controls) via the [TIP-403 registry](/protocol/tip403/overview). When deposited into a Tempo Zone, the policy is provably mirrored. The validity proof commits that every transaction in the batch followed the issuer's rules.
+
+![Policy inheritance from mainnet to zone](/learn/zones/diagram-tip20.svg)
 
 ### Tempo Zones are safe from theft
 
