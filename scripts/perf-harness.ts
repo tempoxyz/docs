@@ -340,6 +340,8 @@ async function getSidebarNavigationTarget(page: import('@playwright/test').Page,
     const candidates = links.filter((link) => link.path !== path)
     if (candidates.length === 0) return undefined
 
+    // Prefer the next visible sibling around the active item so we measure a realistic
+    // sidebar navigation instead of jumping to an arbitrary route elsewhere in the tree.
     const activeIndex = links.findIndex((link) => link.active || link.path === path)
     if (activeIndex >= 0) {
       for (let i = activeIndex + 1; i < links.length; i++) {
@@ -473,6 +475,8 @@ async function captureNetworkSummary(baseUrl: string, pagePath: string): Promise
             (sizes?.responseHeadersSize || 0) +
             (sizes?.requestHeadersSize || 0) || contentLength
 
+        // Bucket requests by their role in the first paint so off-route bytes make eager
+        // prefetch behavior obvious in the report.
         const category = (() => {
           if (isExternal) return 'third-party'
           if (pathname.startsWith('/assets/') || contentType.includes('javascript')) return 'js'

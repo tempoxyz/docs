@@ -1234,6 +1234,8 @@ export default defineConfig({
   twoslash: {
     twoslashOptions: {
       compilerOptions: {
+        // Override the vocs@420 default ('6.0'), which fails under this repo's TS 5.9.
+        ignoreDeprecations: '5.0',
         // ModuleResolutionKind.Bundler = 100
         moduleResolution: 100,
       },
