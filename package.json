@@ -41,7 +41,7 @@
     "tailwindcss": "^4.1.18",
     "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",
-    "viem": "^2.47.10",
+    "viem": "^2.47.15",
     "vocs": "https://pkg.pr.new/wevm/vocs@2fb25c2",
     "wagmi": "^3.5.0",
     "waku": "1.0.0-alpha.4",
