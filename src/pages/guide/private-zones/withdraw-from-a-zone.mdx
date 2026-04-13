@@ -69,7 +69,7 @@ const revealTo = '0x031dc147467e8f106eb22850fef549dc74b8f6634aeac554ebdd4ab896b6
 
 await zoneAClient.zone.signAuthorizationToken()
 
-const { receipt } = await Actions.zone.requestEncryptedWithdrawalSync(zoneAClient, {
+const { receipt } = await Actions.zone.requestVerifiableWithdrawalSync(zoneAClient, {
   account: rootClient.account,
   feeToken: pathUsd,
   amount: withdrawalAmount,

@@ -38,7 +38,7 @@ type ZoneClientLike = {
     getBalance: (parameters: { account: Hex; token: Hex }) => Promise<bigint>
   }
   zone: {
-    requestEncryptedWithdrawalSync: (parameters: {
+    requestVerifiableWithdrawalSync: (parameters: {
       account: unknown
       amount: bigint
       feeToken: Hex
@@ -229,7 +229,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
       const receipt =
         mode === 'authenticated'
           ? (
-              await zoneClient.zone.requestEncryptedWithdrawalSync({
+              await zoneClient.zone.requestVerifiableWithdrawalSync({
                 account: rootWebAuthnAccount,
                 amount: WITHDRAWAL_AMOUNT,
                 feeToken: pathUsd,
