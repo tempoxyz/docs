@@ -642,6 +642,10 @@ export default defineConfig({
             ],
           },
           {
+            text: 'RPC Reference',
+            link: '/protocol/rpc',
+          },
+          {
             text: 'SDKs',
             collapsed: true,
             items: [
