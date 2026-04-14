@@ -317,196 +317,72 @@ Ledger and Trezor wallets are not yet compatible with any `--tempo.*` option.
 
 ## cast keychain
 
-`cast keychain` provides a CLI interface to Tempo's [Account Keychain precompile](/protocol/transactions/AccountKeychain). It lets you authorize access keys, set spending limits and call scopes, revoke keys, and query key state — all from the terminal.
+`cast keychain` provides a CLI interface to Tempo's [Account Keychain precompile](/protocol/transactions/AccountKeychain).
 
 :::info
-`cast keychain` only works on Tempo networks. It will fail with an error on non-Tempo chains.
+`cast keychain` only works on Tempo networks.
 :::
 
-### Authorize a key
-
-Create a new access key for your account:
-
 ```bash
-cast keychain authorize <KEY_ID> <SIGNATURE_TYPE> <EXPIRY> \
+# Authorize a new access key (signature types: secp256k1, p256, webauthn; expiry 0 = never):
+cast keychain authorize <KEY_ID> secp256k1 0 \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
-```
 
-| Parameter | Description |
-|---|---|
-| `KEY_ID` | Address derived from the access key's public key |
-| `SIGNATURE_TYPE` | `secp256k1`, `p256`, or `webauthn` |
-| `EXPIRY` | Unix timestamp when the key expires (`0` for never) |
-
-:::tip
-An expiry of `0` means the key never expires. On-chain this is stored as the max `u64` value (`18446744073709551615`), which is what `key-info` will display.
-:::
-
-#### Spending limits
-
-Restrict how much the key can spend per token with `--limit`:
-
-```bash
+# Authorize with a spending limit (TOKEN:AMOUNT or TOKEN:AMOUNT:PERIOD_SECONDS):
 cast keychain authorize <KEY_ID> secp256k1 0 \
   --limit <TOKEN_ADDRESS>:1000000 \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
-```
 
-Format: `TOKEN:AMOUNT` or `TOKEN:AMOUNT:PERIOD_SECONDS`
-
-- `TOKEN:AMOUNT` — lifetime spending cap
-- `TOKEN:AMOUNT:PERIOD` — spending cap that resets every `PERIOD` seconds
-
-Multiple `--limit` flags can be passed for different tokens.
-
-#### Call scopes
-
-Restrict which contracts and functions the key can call with `--scope`:
-
-```bash
-# Only allow transfer and approve on a specific token
+# Authorize with call scopes (restrict to specific contracts/functions):
 cast keychain authorize <KEY_ID> secp256k1 0 \
   --scope <TOKEN_ADDRESS>:transfer,approve \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
 
-# Allow any call to a specific contract
-cast keychain authorize <KEY_ID> secp256k1 0 \
-  --scope <CONTRACT_ADDRESS> \
-  --rpc-url $TEMPO_RPC_URL \
-  --private-key $PRIVATE_KEY
-
-# Restrict transfer to a specific recipient
+# Authorize with call scope restricted to a specific recipient:
 cast keychain authorize <KEY_ID> secp256k1 0 \
   --scope <TOKEN_ADDRESS>:transfer@<RECIPIENT_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
-```
 
-`--scope` format: `ADDRESS` or `ADDRESS:SELECTORS`
-
-- `ADDRESS` alone allows unrestricted calls to that contract
-- `SELECTORS` is a comma-separated list of named selectors (`transfer`, `transfer_with_memo`, `approve`) or raw 4-byte hex (`0xaabbccdd`)
-- Append `@RECIPIENT` to restrict the first argument (e.g. transfer recipient). Multiple recipients can be chained: `transfer@0xAlice@0xBob`
-
-Multiple `--scope` flags can be combined. Without any `--scope`, the key can call any contract.
-
-Alternatively, pass scopes as JSON with `--scopes` (mutually exclusive with `--scope`):
-
-```bash
-cast keychain authorize <KEY_ID> secp256k1 0 \
-  --scopes '[
-    {"target":"<TOKEN_ADDRESS>","selectors":["transfer","approve"]},
-    {"target":"<DEX_ADDRESS>"}
-  ]' \
-  --rpc-url $TEMPO_RPC_URL \
-  --private-key $PRIVATE_KEY
-```
-
-Selectors in `--scopes` can also include recipient restrictions:
-
-```json
-[{"target":"<TOKEN_ADDRESS>","selectors":[{"selector":"transfer","recipients":["<RECIPIENT>"]}]}]
-```
-
-#### Full example
-
-Authorize a `secp256k1` key that expires in 24 hours, can spend up to 1,000,000 units of a specific token, and is scoped to `transfer` calls only:
-
-```bash
+# Full example: 24h expiry + spending limit + call scope:
 EXPIRY=$(($(date +%s) + 86400))
-
 cast keychain authorize <KEY_ID> secp256k1 $EXPIRY \
   --limit <TOKEN_ADDRESS>:1000000 \
   --scope <TOKEN_ADDRESS>:transfer \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
-```
 
-### Revoke a key
-
-```bash
+# Revoke an access key (permanent, cannot be re-authorized):
 cast keychain revoke <KEY_ID> \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
-```
 
-Revoked keys cannot be re-authorized.
-
-### Update spending limit
-
-```bash
+# Update spending limit for a key-token pair:
 cast keychain update-limit <KEY_ID> <TOKEN_ADDRESS> <NEW_LIMIT> \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
-```
 
-### Set call scopes
-
-Replace all call scope entries for an existing key. At least one `--scope` or `--scopes` is required:
-
-```bash
+# Replace all call scopes for a key:
 cast keychain set-scope <KEY_ID> \
   --scope <TOKEN_ADDRESS>:transfer \
   --scope <CONTRACT_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
-```
 
-JSON scopes are also supported:
-
-```bash
-cast keychain set-scope <KEY_ID> \
-  --scopes '[{"target":"<TOKEN_ADDRESS>","selectors":["transfer","approve"]}]' \
-  --rpc-url $TEMPO_RPC_URL \
-  --private-key $PRIVATE_KEY
-```
-
-### Remove a call scope
-
-```bash
+# Remove a target contract from allowed call list:
 cast keychain remove-scope <KEY_ID> <TARGET_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
-```
 
-### Query key info
-
-```bash
+# Query key info (read-only):
 cast keychain key-info <ACCOUNT> <KEY_ID> \
   --rpc-url $TEMPO_RPC_URL
-```
 
-Use `--json` for machine-readable output.
-
-### Query remaining limit
-
-```bash
+# Query remaining spending limit:
 cast keychain remaining-limit <ACCOUNT> <KEY_ID> <TOKEN_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL
 ```
-
-Use `--json` for machine-readable output.
-
-### Command aliases
-
-| Command | Alias |
-|---|---|
-| `authorize` | `auth` |
-| `revoke` | `rev` |
-| `update-limit` | `ul` |
-| `key-info` | `info` |
-| `remaining-limit` | `rl` |
-| `set-scope` | `ss` |
-| `remove-scope` | `rs` |
-
-### Using with access keys
-
-All write commands support the `--tempo.access-key` and `--tempo.root-account` flags for delegated signing. See [Tempo-specific CLI flags](#tempo-specific-cli-flags) above.
-
-### Learn more
-
-- [Account Keychain precompile specification](/protocol/transactions/AccountKeychain) — full protocol-level details
 
