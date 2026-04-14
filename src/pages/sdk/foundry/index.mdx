@@ -117,15 +117,6 @@ forge create src/Mail.sol:Mail \
   --verify \
   --constructor-args 0x20c0000000000000000000000000000000000001
 
-# Deploy using an access key (delegated signing)
-forge create src/Mail.sol:Mail \
-  --tempo.access-key $ACCESS_KEY_PRIVATE_KEY \
-  --tempo.root-account $ROOT_ADDRESS \
-  --rpc-url $TEMPO_RPC_URL \
-  --broadcast \
-  --verify \
-  --constructor-args 0x20c0000000000000000000000000000000000001
-
 # Set a salt for deterministic contract address derivation
 # The salt is passed to TIP20_FACTORY.createToken() which uses it with the sender
 # address to compute a deterministic deployment address via getTokenAddress(sender, salt)
@@ -156,6 +147,8 @@ forge script script/Deploy.s.sol \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
 ```
+
+Use a root key for `forge create`. Post-T3, access keys can sign calls but not deployments.
 
 For more verification options including verifying existing contracts and API verification, see [Contract Verification](/quickstart/verify-contracts).
 
@@ -246,8 +239,8 @@ cast send <CONTRACT_ADDRESS> 'increment()' \
 # Send with access key (delegated signing):
 # First authorize the key via Account Keychain precompile
 cast send 0xAAAAAAAA00000000000000000000000000000000 \
-  'authorizeKey(address,uint8,uint64,bool,(address,uint256)[])' \
-  $ACCESS_KEY_ADDR 0 1893456000 false "[]" \
+  'authorizeKey(address,uint8,uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[])' \
+  $ACCESS_KEY_ADDR 0 1893456000 false "[]" true "[]" \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $ROOT_PRIVATE_KEY
 # Then send using the access key
@@ -256,6 +249,10 @@ cast send <CONTRACT_ADDRESS> 'increment()' \
   --tempo.access-key $ACCESS_KEY_PRIVATE_KEY \
   --tempo.root-account $ROOT_ADDRESS
 ```
+
+Post-T3, direct `authorizeKey(...)` calls must use the enhanced TIP-1011 ABI shown above. If you need periodic limits or call scopes, fill those arrays instead of passing `[]`.
+
+Post-T3, access-key transactions also cannot create contracts, so use a root key for deployments or other flows that perform `CREATE`.
 
 ### Local Development with Anvil
 
@@ -385,4 +382,3 @@ cast keychain key-info <ACCOUNT> <KEY_ID> \
 cast keychain remaining-limit <ACCOUNT> <KEY_ID> <TOKEN_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL
 ```
-

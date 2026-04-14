@@ -1,11 +1,11 @@
 ---
 title: T3 Network Upgrade
-description: Details and timeline for the T3 network upgrade, including enhanced access keys, signature verification, virtual addresses, and security hardening and gas correctness fixes.
+description: Details and timeline for the T3 network upgrade, including enhanced access keys, signature verification, and virtual addresses.
 ---
 
 # T3 Network Upgrade
 
-This page summarizes the features, partner impact, and breaking changes included in the T3 network upgrade.
+This page summarizes T3 scope, partner impact, and breaking changes.
 
 :::info[T3 is not live yet]
 The features described on this page are scheduled for T3 and are not active on Moderato or Presto yet. They only become live once the T3 activation timestamps are reached.
@@ -27,7 +27,13 @@ T3 is Tempo's next network upgrade. It introduces the following changes:
 - A signature verification precompile for secp256k1, P256, and WebAuthn signatures ([TIP-1020](/protocol/tips/tip-1020))
 - Virtual addresses for TIP-20 deposit forwarding ([TIP-1022](/protocol/tips/tip-1022))
 
-**Action required for integrators:** Partners that create or update access keys should upgrade to a T3-compatible SDK release before activation.
+**Action required for integrators:** Review T3 before activation if you create or update access keys or index TIP-20 transfers.
+
+## Who is affected?
+
+- Access-key integrations that directly call `AccountKeychain.authorizeKey(...)` onchain must migrate to the new TIP-1011 ABI after activation.
+- Explorers and indexers that surface TIP-20 transfer history or counts must handle TIP-1022 virtual-address forwarding as one logical deposit, not two independent transfers.
+- Most other integrators only need to upgrade to T3-compatible tooling. Existing authorized access keys keep working, and teams that do not adopt virtual addresses do not need code changes for TIP-1022.
 
 ## Partner impact
 
@@ -39,28 +45,37 @@ T3 is Tempo's next network upgrade. It introduces the following changes:
 
 ## Breaking changes
 
-Partners that create or update access keys should upgrade to a T3-compatible SDK release before activation.
+Breaking changes only affect two groups: integrations that directly call `AccountKeychain.authorizeKey(...)` onchain, and explorers/indexers that surface TIP-20 transfer history or counts.
 
-For most integrators, no action is needed beyond upgrading to T3-compatible tooling. Existing authorized access keys keep working, and Tempo Transactions that use `key_authorization` keep working.
+For most other integrators, no action is needed beyond upgrading to T3-compatible tooling. Existing authorized access keys keep working, and Tempo Transactions that use `key_authorization` keep working.
 
 ### Breaking change for access-key integrations
 
-The only integrations that need code changes are ones that call `AccountKeychain.authorizeKey(...)` directly onchain. Before T3, those flows used the legacy authorization ABI. After T3, they must use the TIP-1011 authorization format with the updated `authorizeKey(...)` arguments. Legacy calls fail with `LegacyAuthorizeKeySelectorChanged`, sometimes surfaced as `LegacyAuthorizeKeySelectorChanged(newSelector: 0x980a6025)`.
+Only integrations that call `AccountKeychain.authorizeKey(...)` directly onchain need code changes. Before T3, those flows use the legacy authorization ABI. Post-T3, they must use the TIP-1011 authorization format with the updated `authorizeKey(...)` arguments. Legacy calls fail with `LegacyAuthorizeKeySelectorChanged`, sometimes surfaced as `LegacyAuthorizeKeySelectorChanged(newSelector: 0x980a6025)`.
 
 **Before activation:** Integrations must continue using the legacy `AccountKeychain.authorizeKey(...)` ABI. The TIP-1011 authorization format is not yet valid onchain.
 
 **After activation:** Integrations must use the TIP-1011 authorization format.
 
-T3 also adds one new execution restriction: access-key-signed transactions can no longer create contracts. If your product used access keys for deployments, factory calls, or module-install flows that create contracts, those transactions must move to a Root Key path.
+T3 also adds one new execution restriction: access-key-signed transactions can no longer create contracts. If your product used access keys for deployments, factory calls, or module-install flows that create contracts, move those transactions to a Root Key path.
 
-If you support both pre-T3 and post-T3 networks at the same time, branch on network version or activation timestamp. The old authorization ABI only works before T3. The new authorization ABI only works after T3.
+If you support both pre-T3 and post-T3 networks at the same time, branch on network version or activation timestamp. The old authorization ABI only works before T3. The new authorization ABI only works post-T3.
+
+### Breaking changes for explorers and indexers
+
+TIP-20 virtual-address forwarding does not introduce a new transfer event. Forwarded deposits show up as two standard `Transfer` events in the same transaction: one hop into the virtual address and one hop from the virtual address to the registered master wallet.
+
+If your explorer or indexer treats each `Transfer` log as an independent user-facing transfer, forwarded deposits will appear twice: once to the virtual address and once to the master wallet. That inflates transfer counts, shows the wrong effective recipient in transfer/history views, and can mis-credit deposits to the literal virtual address instead of the registered master wallet.
+
+Handle these flows as one logical deposit to the master wallet, using the virtual address only as an attribution alias. Virtual addresses themselves always have a TIP-20 balance of zero.
 
 ### Migration checklist
 
-- upgrade to a T3-compatible SDK mentioned below
+- upgrade to a T3-compatible SDK release listed below
 - regenerate contract bindings or replace handcrafted encoders for `authorizeKey(...)`
 - move any access-key contract-creation flows to a Root Key path
-- test key creation, key rotation, and recovery flows on Moderato after T3 activates
+- if you adopt virtual addresses, collapse the two-hop `Transfer` pair into one logical deposit to the registered master wallet rather than treating the virtual address hop as a separate transfer
+- test key creation, key rotation, and recovery flows on Moderato post-T3 activation
 
 ## Compatible SDK releases
 
@@ -75,7 +90,7 @@ Tempo's broader tooling ecosystem is available in [Developer tools](/quickstart/
 | [Foundry](https://github.com/tempoxyz/tempo-foundry) | [`v1.6.0-t3`](https://github.com/tempoxyz/tempo-foundry/releases/tag/v1.6.0-t3) |
 
 ## Related docs
-Guides about TIPs coming soon.
+For the coordinating meta TIP, see [tempoxyz/tempo#3273](https://github.com/tempoxyz/tempo/pull/3273).
 
 ## Feature TIPs
 

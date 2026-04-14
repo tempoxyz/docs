@@ -56,13 +56,14 @@ pub struct Call {
 }
 
 // Key authorization for provisioning access keys
-// RLP encoding: [chain_id, key_type, key_id, expiry?, limits?]
+// RLP encoding post-T3: [chain_id, key_type, key_id, expiry?, limits?, allowed_calls?]
 pub struct KeyAuthorization {
     chain_id: u64,                              // Chain ID for replay protection (0 = valid on any chain)
     key_type: SignatureType,                    // Type of key: Secp256k1 (0), P256 (1), or WebAuthn (2)
     key_id: Address,                            // Key identifier (address derived from public key)
     expiry: Option<u64>,                        // Unix timestamp when key expires (None = never expires)
     limits: Option<Vec<TokenLimit>>,            // TIP20 spending limits (None = unlimited spending)
+    allowed_calls: Option<Vec<CallScope>>,      // Optional call scopes (None = unrestricted non-create calls)
 }
 
 // Signed key authorization (authorization + root key signature)
@@ -75,6 +76,17 @@ pub struct SignedKeyAuthorization {
 pub struct TokenLimit {
     token: Address,                             // TIP20 token address
     limit: U256,                                // Maximum spending amount for this token
+    period: Option<u64>,                        // None or 0 = one-time limit, otherwise recurring period in seconds
+}
+
+pub struct SelectorRule {
+    selector: FixedBytes<4>,
+    recipients: Vec<Address>,
+}
+
+pub struct CallScope {
+    target: Address,
+    selector_rules: Vec<SelectorRule>,
 }
 ```
 
@@ -436,6 +448,7 @@ rlp([
     key_id,
     expiry?,         // Optional trailing field (omitted or 0x80 if None)
     limits?,         // Optional trailing field (omitted or 0x80 if None)
+    allowed_calls?,  // Optional trailing field (omitted or 0x80 if None)
     signature        // PrimitiveSignature bytes
 ])
 ```
@@ -445,7 +458,7 @@ rlp([
 - The `key_authorization` field is truly optional - when `None`, no bytes are encoded (backwards compatible)
 - The `calls` field is a list that must contain at least one Call (empty calls list is invalid)
 - The `sender_signature` field is the final field and contains the TempoSignature bytes (secp256k1, P256, WebAuthn, or Keychain)
-- KeyAuthorization uses RLP trailing field semantics for optional `expiry` and `limits`
+- KeyAuthorization uses RLP trailing field semantics for optional `expiry`, `limits`, and `allowed_calls`
 
 ### WebAuthn Signature Verification
 
@@ -554,8 +567,12 @@ A sender can authorize a key by signing over a "key authorization" item that con
 - **Expiration** timestamp of when the key should expire (optional - None means never expires)
 - TIP20 token **spending limits** for the key (optional - None means unlimited spending):
   - Limits deplete as tokens are spent
+  - Limits can be one-time or periodic
   - Root key can update limits via `updateSpendingLimit()` without revoking the key
   - Note: Spending limits only apply to TIP20 token transfers, not ETH or other asset transfers
+- Optional **call scopes** that restrict which contracts and selectors the access key can call
+
+Post-T3, access-key transactions also cannot create contracts. See the [Account Keychain Specification](./AccountKeychain) and [TIP-1011](/protocol/tips/tip-1011) for the complete ABI and invariants.
 
 #### RLP Encoding
 
@@ -564,13 +581,14 @@ A sender can authorize a key by signing over a "key authorization" item that con
 The root key signs over the keccak256 hash of the RLP encoded `KeyAuthorization`:
 
 ```
-key_authorization_digest = keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?]))
+key_authorization_digest = keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?]))
 
 chain_id = u64 (0 = valid on any chain)
 key_type = 0 (Secp256k1) | 1 (P256) | 2 (WebAuthn)
 key_id = Address (derived from the public key)
 expiry = Option<u64> (unix timestamp, None = never expires, stored as u64::MAX in precompile)
-limits = Option<Vec<[token, limit]>> (None = unlimited spending)
+limits = Option<Vec<[token, limit, period?]>> (None = unlimited spending)
+allowed_calls = Option<Vec<CallScope>> (None = unrestricted non-create calls)
 ```
 
 **Signed Format:**
@@ -578,12 +596,12 @@ limits = Option<Vec<[token, limit]>> (None = unlimited spending)
 The signed format (`SignedKeyAuthorization`) includes all fields with the `signature` appended:
 
 ```
-signed_key_authorization = rlp([chain_id, key_type, key_id, expiry?, limits?, signature])
+signed_key_authorization = rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, signature])
 ```
 
 The `signature` is a `PrimitiveSignature` (secp256k1, P256, or WebAuthn) signed by the root key.
 
-Note: `expiry` and `limits` use RLP trailing field semantics - they can be omitted entirely when None.
+Note: `expiry`, `limits`, and `allowed_calls` use RLP trailing field semantics and can be omitted entirely when `None`.
 
 #### Keychain Precompile
 
@@ -606,7 +624,7 @@ When a TempoTransaction is received, the protocol:
 2. **Validates KeyAuthorization** (if present in transaction)
    - The `key_authorization` field in `TempoTransaction` provisions a NEW Access Key
    - Root Key MUST sign:
-     - The `key_authorization` digest: `keccak256(rlp([key_type, key_id, expiry, limits]))`
+     - The `key_authorization` digest: `keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?]))`
    - Access Key (being authorized) CAN sign the same tx which it is authorized in.
    - This enables "authorize and use" in a single transaction
 
@@ -671,7 +689,7 @@ The protocol tracks and enforces spending limits for TIP20 token transfers:
 - Limits deplete as tokens are spent
 - Root Key can call `updateSpendingLimit(keyId, token, newLimit)` to set new limits
 - Setting a new limit REPLACES the current remaining amount (does not add to it)
-- Limits do not reset automatically (no time-based periods)
+- One-time limits do not reset automatically; periodic limits reset when their period elapses
 
 ##### Creating and Using KeyAuthorization
 
@@ -894,49 +912,17 @@ Transactions using parallelizable nonces incur additional costs based on the non
 
 ### Key Authorization Gas Schedule
 
-When a transaction includes a `key_authorization` field to provision a new access key, additional intrinsic gas is charged to cover signature verification and storage operations. This gas is charged **before execution** as part of the transaction's intrinsic gas cost.
+When a transaction includes a `key_authorization` field to provision a new access key, additional intrinsic gas is charged to cover signature verification and storage operations. Call scopes contribute additional storage writes on top of the key record and token-limit records.
 
-#### Gas Components
+At a high level, the intrinsic authorization cost is:
 
-| Component | Gas Cost | Notes |
-|-----------|----------|-------|
-| **Signature verification** | 3,000 (secp256k1) / 8,000 (P256) / 8,000 + calldata (WebAuthn) | Verifying the root key's signature on the authorization |
-| **Key storage** | 22,000 | Cold SSTORE to store new key (0→non-zero) |
-| **Overhead buffer** | 5,000 | Buffer for event emission, storage reads, and other overhead |
-| **Per spending limit** | 22,000 each | Cold SSTORE per token limit (0→non-zero) |
+- signature verification for the root key signature
+- one key-record write
+- two storage slots per spending limit when periodic accounting is enabled
+- additional storage for the call-scope marker plus target, selector, and recipient rules
+- a small fixed buffer for bookkeeping overhead
 
-**Signature verification rationale:** KeyAuthorization requires an *additional* signature verification beyond the transaction signature. Unlike the transaction signature (where ecrecover cost is included in the base 21k), KeyAuthorization must pay the full verification cost:
-- **secp256k1**: 3,000 gas (ecrecover precompile cost)
-- **P256**: 8,000 gas (6,900 from EIP-7951 + 1,100 for signature size). Note: the transaction signature schedule charges only 5,000 additional gas for P256 because it subtracts the 3,000 ecrecover "savings" already in base 21k. KeyAuthorization pays the full 8,000.
-- **WebAuthn**: 8,000 + calldata gas for webauthn_data
-
-#### Gas Formula
-
-```
-KEY_AUTH_BASE_GAS = 30,000  # For secp256k1 signature (3,000 + 22,000 + 5,000)
-KEY_AUTH_BASE_GAS = 35,000  # For P256 signature (5,000 + 3,000 + 22,000 + 5,000)
-KEY_AUTH_BASE_GAS = 35,000 + webauthn_calldata_gas  # For WebAuthn signature
-
-PER_LIMIT_GAS = 22,000  # Per spending limit entry
-
-total_key_auth_gas = KEY_AUTH_BASE_GAS + (num_limits * PER_LIMIT_GAS)
-```
-
-#### Examples
-
-| Configuration | Gas Cost | Calculation |
-|--------------|----------|-------------|
-| secp256k1, no limits | 30,000 | Base only |
-| secp256k1, 1 limit | 52,000 | 30,000 + 22,000 |
-| secp256k1, 3 limits | 96,000 | 30,000 + (3 × 22,000) |
-| P256, no limits | 35,000 | Base with P256 verification |
-| P256, 2 limits | 79,000 | 35,000 + (2 × 22,000) |
-
-#### Rationale
-
-1. **Pre-execution charging**: KeyAuthorization is validated and executed during transaction validation (before the EVM runs), so its gas must be included in intrinsic gas
-2. **Storage cost alignment**: The 22,000 gas per storage slot approximates EVM cold SSTORE costs for new slots
-3. **DoS prevention**: Progressive cost based on number of limits prevents abuse through excessive limit creation
+See [TIP-1011](/protocol/tips/tip-1011#intrinsic-gas-for-key-authorization) for the exact slot-counting formula.
 
 ### Reference Pseudocode
 ```python

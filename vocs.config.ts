@@ -597,7 +597,7 @@ export default defineConfig({
                 link: '/protocol/upgrades/t3',
               },
               {
-                text: 'T2',
+                text: 'T2 (Active)',
                 link: '/protocol/upgrades/t2',
               },
             ],

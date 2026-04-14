@@ -22,6 +22,8 @@ The TIP-403 registry stores policies that TIP-20 tokens check against on any tok
 
 The TIP403Registry is deployed at address `0x403c000000000000000000000000000000000000`.
 
+Post-T3, policy-configuration functions that accept addresses as policy members reject [virtual addresses](/protocol/tips/tip-1022). TIP-20 transfer-policy checks resolve virtual-address deposits to the registered master wallet, so policy membership must be configured on the master address rather than the forwarding alias.
+
 ## Built-in Policies
 
 Custom policies start with `policyId = 2`. The registry reserves the first two ids for built-in policies:

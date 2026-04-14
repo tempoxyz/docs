@@ -57,6 +57,8 @@ Users must call `setRewardRecipient(recipient)` to opt in. When opted in:
 
 Setting recipient to `address(0)` opts out.
 
+Post-T3, `setRewardRecipient` rejects virtual addresses introduced by [TIP-1022](/protocol/tips/tip-1022). Reward recipients must be canonical accounts, not forwarding aliases.
+
 ## TIP-403 Integration
 All token movements must pass TIP-403 policy checks:
 - `distributeReward`: Validates funder authorization
