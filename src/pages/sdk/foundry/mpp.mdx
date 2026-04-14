@@ -33,7 +33,11 @@ Channel reuse means the first call to an MPP endpoint has roughly one confirmati
 :::
 
 ## Setup
+:::
 
+:::note
+Some endpoints use a one-shot `charge` intent instead of session-based channels. Foundry handles both — charge payments sign a single TIP-20 transfer without opening a channel.
+:::
 ::::steps
 
 ### Install the Tempo CLI
