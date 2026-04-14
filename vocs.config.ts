@@ -682,17 +682,7 @@ export default defineConfig({
               },
               {
                 text: 'Foundry',
-                collapsed: true,
-                items: [
-                  {
-                    text: 'Overview',
-                    link: '/sdk/foundry',
-                  },
-                  {
-                    text: 'cast keychain',
-                    link: '/sdk/foundry/cast-keychain',
-                  },
-                ],
+                link: '/sdk/foundry',
               },
               {
                 text: 'Python',
