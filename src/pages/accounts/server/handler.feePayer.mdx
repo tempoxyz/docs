@@ -127,3 +127,23 @@ const handler = Handler.feePayer({
   }, // [!code focus]
 })
 ```
+
+
+### validate
+
+- **Type:** `(request: TransactionRequest) => boolean | Promise<boolean>`
+- **Optional**
+
+Validates whether to sponsor a transaction. When omitted, all transactions are sponsored. Return `false` to reject sponsorship — the handler will re-fill without `feePayer` so gas/nonce are correct for self-payment.
+
+```ts twoslash
+import { privateKeyToAccount } from 'viem/accounts'
+import { Handler } from 'accounts/server'
+
+const blocked = '0x...'
+
+const handler = Handler.feePayer({
+  account: privateKeyToAccount('0x...'),
+  validate: (request) => request.from !== blocked, // [!code focus]
+})
+```

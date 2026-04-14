@@ -106,18 +106,31 @@ const provider = Provider.create({
 })
 ```
 
-### feePayerUrl
+### feePayer
 
-- **Type:** `string`
+- **Type:** `string | { url: string; precedence?: 'fee-payer-first' | 'user-first' }`
 - **Optional**
 
-Fee payer URL for interacting with a service running [`Handler.feePayer`](/accounts/server/handler.feePayer) from `accounts/server`.
+Fee payer configuration for interacting with a service running [`Handler.feePayer`](/accounts/server/handler.feePayer) from `accounts/server`. Pass a URL string, or an object with `url` and optional `precedence` to control whether the fee payer or the user pays first.
 
 ```ts twoslash
 import { Provider } from 'accounts'
 
 const provider = Provider.create({
-  feePayerUrl: 'https://myapp.com/fee-payer', // [!code focus]
+  feePayer: 'https://myapp.com/fee-payer', // [!code focus]
+})
+```
+
+Or with precedence:
+
+```ts twoslash
+import { Provider } from 'accounts'
+
+const provider = Provider.create({
+  feePayer: { // [!code focus]
+    url: 'https://myapp.com/fee-payer', // [!code focus]
+    precedence: 'user-first', // [!code focus]
+  }, // [!code focus]
 })
 ```
 

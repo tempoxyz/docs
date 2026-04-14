@@ -29,7 +29,10 @@ import { KeyManager, webAuthn } from 'wagmi/tempo'
 export const config = createConfig({
   connectors: [
     tempoWallet({
-      feePayerUrl: 'https://sponsor.moderato.tempo.xyz',
+      feePayer: {
+        precedence: 'user-first',
+        url: 'https://sponsor.moderato.tempo.xyz',
+      },
     }),
   ],
   chains: [tempo],

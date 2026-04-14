@@ -3,28 +3,24 @@ title: ValidatorConfig V2
 description: Manage your validator with ValidatorConfig V2. Self-service key rotation, IP updates, and ownership transfer.
 ---
 
+import { StaticMermaidDiagram } from '../../../components/StaticMermaidDiagram'
+
 # ValidatorConfig V2
 
-ValidatorConfig V2 ([TIP-1017](/protocol/tips/tip-1017)) is a new precompile for managing consensus participants. It replaces the original ValidatorConfig with stronger safety guarantees: ed25519 signature verification at registration, append-only history, and self-service operations for validators.
-
-V2 was [activated on mainnet](https://explore.mainnet.tempo.xyz/receipt/0x4716147e3c2bf5c8d014b8c27d6e2af0042d5a5f29bdead256d6f33038702d64) after the T2 hardfork.
+ValidatorConfig V2 ([TIP-1017](/protocol/tips/tip-1017)) is the precompile that manages consensus participants. This config was [activated on mainnet](https://explore.mainnet.tempo.xyz/receipt/0x4716147e3c2bf5c8d014b8c27d6e2af0042d5a5f29bdead256d6f33038702d64) after the T2 hardfork.
 
 ## Validator states
 
-With V2, the syncer warmup phase from V1 is removed. Once added, a validator immediately becomes a player in the next epoch.
+Once added, a validator immediately becomes a player in the next epoch.
 
-```mermaid
-flowchart TD
+<StaticMermaidDiagram chart={`flowchart TD
     A[Inactive] -->|epoch ends| B["Player<br/>Receives signing shares"]
     B -->|"+1 epoch, receives share"| C["Player<br/>Dealer"]
     C -->|"once fully synced"| D["Voter ↔ Proposer"]
-```
-
-Compare this to the [V1 validator states](/guide/node/validator-config-v1#validator-states), which required an additional syncer epoch before becoming a player.
-
+`} />
 ## What changes for operators
 
-With V2, validators can perform several operations themselves without coordinating with the Tempo team:
+Validators can perform several operations themselves without coordinating with the Tempo team:
 
 - **Rotate your validator identity** — swap to a new ed25519 key without losing your committee slot
 - **Update IP addresses** — change ingress and egress endpoints independently (V2 supports asymmetric ingress/egress IPs)
@@ -144,8 +140,6 @@ tempo consensus set-validator-fee-recipient <address/pubkey/index>
 
 If your node's network endpoints change, update them on-chain. The change takes effect at the next finalized block.
 
-Unlike V1, V2 supports asymmetric ingress and egress IPs — they no longer need to share the same address. Both can be updated together or individually by supplying only `--ingress` or `--egress`. The values not supplied will pulled from the chain and left unchanged in the submitted transaction.
-
 ```bash
 tempo consensus set-validator-ip-address <address/pubkey/index>
   --ingress <NEW_IP>:NEW_PROT>
@@ -160,7 +154,7 @@ Ingress addresses must be unique across all active validators. The transaction w
 
 ### Rotate validator identity
 
-V2 lets you rotate to a new ed25519 key while keeping your validator index stable. This is useful for key rotation or recovery without leaving and re-joining the committee. [Generate a new signing key](#generating-a-signing-key) first.
+The ed25519 key can be changed while keeping your validator index stable. This is useful for key rotation or recovery without leaving and re-joining the committee. [Generate a new signing key](#generating-a-signing-key) first.
 
 The simplest way to rotate is using the `tempo` CLI, which handles signature creation and the on-chain transaction in one step:
 
@@ -219,15 +213,3 @@ tempo consensus deactivate-validator <address/pubkey/index>
   --rpc-url https://rpc.tempo.xyz \
   --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
 ```
-
-## Differences from V1
-
-| | V1 | V2 |
-|---|---|---|
-| **Key ownership** | No verification | Ed25519 signature required |
-| **History** | Mutable, toggle active/inactive | Append-only, deactivate-once |
-| **Validator index** | Could change | Stable for lifetime |
-| **Self-service ops** | None (owner only) | IP updates, rotation, transfer |
-| **Historical queries** | Required warmup state, bloated snapshots | `addedAtHeight` / `deactivatedAtHeight` fields |
-
-

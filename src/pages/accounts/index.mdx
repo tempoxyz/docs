@@ -1,12 +1,14 @@
 ---
 title: Accounts SDK – Getting Started
 description: Set up the Tempo Accounts SDK to create, manage, and interact with accounts on Tempo.
+interactive: true
 ---
 
 import { Cards, Card } from 'vocs'
 import * as Demo from '../../components/guides/Demo.tsx'
 import * as Step from '../../components/guides/steps'
 import IconGitHub from '~icons/simple-icons/github'
+import { StaticMermaidDiagram } from '../../components/StaticMermaidDiagram'
 
 # Getting Started
 
@@ -47,8 +49,7 @@ Your application interacts with the SDK through standard JSON-RPC methods (via [
 
 An example of a high-level flow of an Application requesting for a user to perform an action with their Tempo Wallet is shown below:
 
-```mermaid
-sequenceDiagram
+<StaticMermaidDiagram chart={`sequenceDiagram
     participant A as Application
     participant S as Accounts SDK
     participant W as wallet.tempo.xyz or Other
@@ -58,7 +59,7 @@ sequenceDiagram
     note over W: User approves with Passkey
     W-->>S: result
     S-->>A: result
-```
+`} />
 
 ## Install
 
