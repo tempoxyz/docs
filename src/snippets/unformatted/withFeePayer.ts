@@ -1,12 +1,12 @@
 // @ts-nocheck
 // [!region client]
 import { walletActions } from 'viem'
-import { withFeePayer } from 'viem/tempo'
+import { withRelay } from 'viem/tempo'
 
 const _client = createClient({
   account: privateKeyToAccount('0x...'),
   chain: tempo,
-  transport: withFeePayer(
+  transport: withRelay(
     // [!code hl]
     http(), // [!code hl]
     http('http://localhost:3000'), // [!code hl]
@@ -34,9 +34,9 @@ const _receipt2 = await client.sendTransactionSync({
 import { Handler } from 'accounts/server'
 import { privateKeyToAccount } from 'viem/accounts'
 
-const handler = Handler.feePayer({
+const handler = Handler.relay({
   // [!code hl]
-  account: privateKeyToAccount('0x...'), // [!code hl]
+  feePayer: { account: privateKeyToAccount('0x...') }, // [!code hl]
 }) // [!code hl]
 
 const server = createServer(handler.listener)

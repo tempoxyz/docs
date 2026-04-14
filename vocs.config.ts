@@ -1188,7 +1188,7 @@ export default defineConfig({
     },
     {
       source: '/sdk/typescript/server/handler.feePayer',
-      destination: '/accounts/server/handler.feePayer',
+      destination: '/accounts/server/handler.relay',
       status: 301,
     },
     {

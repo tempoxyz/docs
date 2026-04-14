@@ -30,7 +30,7 @@ Enable gasless transactions by sponsoring transaction fees for your users. Tempo
 Tempo provides a public testnet fee payer service at `https://sponsor.moderato.tempo.xyz` that you can use for development and testing. If you want to run your own, follow the instructions below.
 :::
 
-You can stand up a minimal fee payer service using the [`Handler.feePayer`](/accounts/server/handler.feePayer) handler provided by the [Tempo Accounts SDK](/accounts). To sponsor transactions, you need a funded account that will act as the fee payer.
+You can stand up a minimal fee payer service using the [`Handler.relay`](/accounts/server/handler.relay) handler provided by the [Tempo Accounts SDK](/accounts). To sponsor transactions, you need a funded account that will act as the fee payer.
 
 ```ts twoslash [server.ts]
 // @noErrors
@@ -78,7 +78,7 @@ export const config = createConfig({
 // @noErrors
 import { webAuthn } from 'accounts/wagmi'
 import { tempo } from 'viem/chains'
-import { withFeePayer } from 'viem/tempo'
+import { withRelay } from 'viem/tempo'
 import { createConfig, http } from 'wagmi'
 
 export const config = createConfig({
@@ -86,7 +86,7 @@ export const config = createConfig({
   chains: [tempo],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempo.id]: withFeePayer( // [!code focus]
+    [tempo.id]: withRelay( // [!code focus]
       http(), // [!code focus]
       http('https://sponsor.moderato.tempo.xyz'), // [!code focus]
     ), // [!code focus]
@@ -211,7 +211,7 @@ The SDKs handle this automatically. Here's how each SDK manages the dual-signing
     ```
 
     :::info
-    Alternatively, use `feePayer: true` with the [`withFeePayer`](https://viem.sh/tempo/transports/withFeePayer) transport to delegate signing to a remote fee payer service. See the [Steps section above](#configure-your-client-to-use-the-fee-payer-service) for setup.
+    Alternatively, use `feePayer: true` with the [`withRelay`](https://viem.sh/tempo/transports/withRelay) transport to delegate signing to a remote fee payer service. See the [Steps section above](#configure-your-client-to-use-the-fee-payer-service) for setup.
     :::
 
   </Tab>

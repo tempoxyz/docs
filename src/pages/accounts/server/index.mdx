@@ -17,8 +17,8 @@ Handlers are compatible with any server framework that supports the:
 import { Handler } from 'accounts/server'
 import { privateKeyToAccount } from 'viem/accounts'
 
-const handler = Handler.feePayer({
-  account: privateKeyToAccount('0x...'),
+const handler = Handler.relay({
+  feePayer: { account: privateKeyToAccount('0x...') },
 })
 
 createServer(handler.listener) // Node.js
@@ -39,7 +39,13 @@ export const POST = handler.fetch // Next.js
     title="Handler.compose"
   />
   <Card
-    description="Handle transactions that require a fee payer"
+    description="Proxy RPC requests with sponsorship, auto-swap, and balance diffs"
+    icon="lucide:radio"
+    to="/accounts/server/relay"
+    title="Handler.relay"
+  />
+  <Card
+    description="Handle transactions that require a fee payer (deprecated)"
     icon="lucide:credit-card"
     to="/accounts/server/feePayer"
     title="Handler.feePayer"
