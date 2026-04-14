@@ -206,7 +206,15 @@ Channels are automatically evicted when fully spent or closed. If the server res
 Use the Moderato testnet MPP endpoint for development:
 
 ```bash
-# Testnet
+### Channel persistence
+
+Open channels are saved to `$TEMPO_HOME/foundry/channels.json` (default `~/.tempo/foundry/channels.json`). This allows channel reuse across process invocations — you won't re-open a channel every time you run `cast` or `forge`.
+
+Channels are automatically evicted when fully spent or closed. If the server restarts and returns `410 Gone`, Foundry clears stale local state and opens a fresh channel on the next request.
+
+### Gas sponsorship
+
+Some MPP endpoints sponsor gas fees on behalf of the caller. When the server's challenge includes a `feePayer` flag, Foundry delegates gas payment to the server — no TEMPO balance needed for gas.
 cast block-number --rpc-url https://rpc.mpp.moderato.tempo.xyz
 
 # Mainnet
