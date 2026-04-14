@@ -18,10 +18,8 @@ export const publicSettlementLookbackBlocks = 100n
 export const zeroBytes32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000' as const
 
-const ZONE_A_RPC_URL =
-  'https://eng:bold-raman-silly-torvalds@rpc-zone-005-private.tempoxyz.dev' as const
-const ZONE_B_RPC_URL =
-  'https://eng:bold-raman-silly-torvalds@rpc-zone-006-private.tempoxyz.dev' as const
+const ZONE_A_RPC_URL = 'https://eng:bold-raman-silly-torvalds@rpc-zone-a.testnet.tempo.xyz' as const
+const ZONE_B_RPC_URL = 'https://eng:bold-raman-silly-torvalds@rpc-zone-b.testnet.tempo.xyz' as const
 
 export const ZONE_A = {
   chainId: 4217000006,
