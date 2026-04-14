@@ -606,10 +606,6 @@ export default defineConfig({
             text: 'TIPs',
             link: '/protocol/tips',
           },
-          {
-            text: 'RPC Reference',
-            link: '/protocol/rpc',
-          },
         ],
       },
       {
@@ -644,6 +640,10 @@ export default defineConfig({
                 link: '/cli/node',
               },
             ],
+          },
+          {
+            text: 'RPC Reference',
+            link: '/protocol/rpc',
           },
           {
             text: 'SDKs',
