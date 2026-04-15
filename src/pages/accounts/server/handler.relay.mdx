@@ -67,6 +67,12 @@ export const POST = handler.fetch // Next.js
     title="Fee Derivation"
     to="#fee-derivation"
   />
+  <Card
+    description="Exact deficit amount and token metadata when funds are insufficient"
+    icon="lucide:wallet"
+    title="Require Funds"
+    to="#require-funds"
+  />
 </Cards>
 
 ### Sponsorship
@@ -124,7 +130,7 @@ result.capabilities.sponsor
 
 ### Auto Swap
 
-When a user has insufficient balance of a required token, the relay automatically injects swap calls (approve + buy) via the [Stablecoin DEX](/guide/stablecoin-dex). Swap details are reported in `capabilities.autoSwap`, and swap-related balance diffs are excluded from `capabilities.balanceDiffs`. Configurable via [`autoSwap`](#autoswap).
+When a user has insufficient balance of a required token, the relay automatically injects swap calls (approve + buy) via the [Stablecoin DEX](/guide/stablecoin-dex). Swap details are reported in `capabilities.autoSwap`, and swap-related balance diffs are excluded from `capabilities.balanceDiffs`. Enabled by [`features: 'all'`](#features), configurable via [`autoSwap`](#autoswap).
 
 :::code-group
 
@@ -299,14 +305,73 @@ const handler = Handler.relay()
 
 :::
 
+### Require Funds
+
+For insufficient balance errors, the relay also returns a `capabilities.requireFunds` object with the exact deficit amount and token metadata — enabling UIs to prompt the user to fund their account.
+
+```ts twoslash
+import { Provider } from 'accounts'
+const provider = Provider.create()
+const [account] = await provider.request({ method: 'eth_accounts' })
+// ---cut---
+const result = await provider.request({
+  method: 'eth_fillTransaction',
+  params: [{
+    from: account,
+    calls: [{
+      to: '0x20c000000000000000000000b9537d11c60e8b50', // USDC.e
+      // transfer 100 USDC.e (but account has 40)
+      data: '0xa9059cbb000000000000000000000000cafebabecafebabecafebabecafebabecafebabe0000000000000000000000000000000000000000000000000000000005f5e100',
+    }],
+  }],
+})
+
+result.capabilities.requireFunds
+// {
+//   amount: '0x3938700',
+//   decimals: 6,
+//   formatted: '60.000000',
+//   token: '0x20c000000000000000000000b9537d11c60e8b50',
+//   symbol: 'USDC.e',
+// }
+
+result.capabilities.balanceDiffs
+// {
+//   '0x1234567890abcdef1234567890abcdef12345678': [{
+//     address: '0x20c000000000000000000000b9537d11c60e8b50',
+//     decimals: 6,
+//     direction: 'outgoing',
+//     formatted: '100.000000',
+//     name: 'USDC.e',
+//     recipients: ['0xcafebabecafebabecafebabecafebabecafebabe'],
+//     symbol: 'USDC.e',
+//     value: '0x5f5e100',
+//   }],
+// }
+```
+
+### Enabling Features
+
+By default, only a minimum set of features are enabled, given on what options you pass to `Handler.relay(){:js}` (e.g. `feePayer`, `autoSwap`, etc).
+
+Set [`features: 'all'`](#features) to enable all features by default such as: **fee token resolution**, **auto-swap**, and **simulation** (balance diffs + fee breakdown). This will come at the cost of slightly increased network latency.
+
+```ts twoslash
+import { privateKeyToAccount } from 'viem/accounts'
+import { Handler } from 'accounts/server'
+
+const handler = Handler.relay({
+  features: 'all', // [!code focus]
+})
+```
+
 ## Parameters
 
 ### autoSwap
 
 - **Type:** `false | { slippage?: number }`
-- **Default:** `{}`
 
-AMM swap options for automatic insufficient balance resolution. When a user doesn't hold enough of a token, the relay auto-swaps from their fee token via the [Stablecoin DEX](/guide/stablecoin-dex). Set to `false` to disable.
+AMM swap options for automatic insufficient balance resolution. When a user doesn't hold enough of a token, the relay auto-swaps from their fee token via the [Stablecoin DEX](/guide/stablecoin-dex). Set to `false` to disable even when `features: 'all'` is set.
 
 ```ts twoslash
 import { Handler } from 'accounts/server'
@@ -336,6 +401,24 @@ import { Handler } from 'accounts/server'
 
 const handler = Handler.relay({
   chains: [tempo], // [!code focus]
+})
+```
+
+### features
+
+- **Type:** `'all'`
+- **Optional**
+
+Controls which relay features are enabled. By default, only fee payer sponsorship is active.
+
+- `'all'`: enables all features (fee token resolution, auto-swap, balance diffs, fee breakdown, etc).
+- `undefined` (default): enables only features that are configured via options (e.g. `feePayer`, `autoSwap`, etc).
+
+```ts twoslash
+import { Handler } from 'accounts/server'
+
+const handler = Handler.relay({
+  features: 'all', // [!code focus]
 })
 ```
 
@@ -499,6 +582,30 @@ type Response = {
       minOut: SwapAmount
       /** Slippage tolerance (e.g. 0.05 = 5%). */
       slippage: number
+    }
+    /** Structured error details when the fill fails (e.g. InsufficientBalance). */
+    error?: {
+      /** ABI item that caused the error. */
+      abiItem: AbiItem
+      /** Data that caused the error. */
+      data: Hex
+      /** Revert error name (e.g. "InsufficientBalance"). */
+      errorName: string
+      /** Human-readable error message. */
+      message: string
+    }
+    /** Funding requirement when InsufficientBalance is encountered. */
+    requireFunds?: {
+      /** Deficit amount in token units (hex-encoded). */
+      amount: Hex
+      /** Token decimals (e.g. 6). */
+      decimals: number
+      /** Human-readable deficit (e.g. "100.000000"). */
+      formatted: string
+      /** Token address. */
+      token: Address
+      /** Token symbol (e.g. "USDC.e"). */
+      symbol: string
     }
     /** Sponsor details (when sponsored). */
     sponsor?: { address: Address; name: string; url: string }
