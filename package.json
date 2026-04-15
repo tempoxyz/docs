@@ -27,6 +27,7 @@
     "abitype": "^1.2.3",
     "accounts": "^0.6.5",
     "cva": "1.0.0-beta.4",
+    "hash-wasm": "^4.12.0",
     "mermaid": "^11.14.0",
     "monaco-editor": "^0.55.1",
     "ox": "~0.14.15",

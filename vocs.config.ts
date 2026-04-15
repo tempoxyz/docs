@@ -131,6 +131,10 @@ export default defineConfig({
                 link: '/guide/payments/transfer-memos',
               },
               {
+                text: 'Use virtual addresses',
+                link: '/guide/payments/virtual-addresses',
+              },
+              {
                 text: 'Pay fees in any stablecoin',
                 link: '/guide/payments/pay-fees-in-any-stablecoin',
               },
@@ -419,6 +423,10 @@ export default defineConfig({
               {
                 text: 'Specification',
                 link: '/protocol/tip20/spec',
+              },
+              {
+                text: 'Virtual addresses',
+                link: '/protocol/tip20/virtual-addresses',
               },
               {
                 text: 'Reference Implementation',

@@ -1,0 +1,111 @@
+---
+title: Use virtual addresses for deposits
+description: Register a virtual-address master, derive deposit addresses offchain, and watch TIP-20 deposits land directly in the registered wallet.
+---
+
+import { Card, Cards } from 'vocs'
+import * as Demo from '../../../components/guides/Demo.tsx'
+import { VirtualAddressesLiveDemo } from '../../../components/guides/VirtualAddressesLiveDemo.tsx'
+import { MermaidDiagram } from '../../../components/MermaidDiagram'
+
+# Use virtual addresses for deposits
+
+Virtual addresses let you issue a distinct deposit address for each customer without creating a separate onchain TIP-20 balance for each one. The deposit is attributed to the virtual address, but the balance is credited directly to the registered master wallet.
+
+This page is intentionally about the operator flow rather than the spec. In preview environments the demo may run against pre-release infrastructure, but the flow is the same one operators will use on public testnet.
+
+## What happens
+
+<MermaidDiagram chart={`sequenceDiagram
+    participant Sender
+    participant TIP20 as TIP-20
+    participant Registry as Virtual registry
+    participant Master as Registered wallet
+
+    Sender->>TIP20: transfer(virtualAddress, amount)
+    TIP20->>Registry: resolve(masterId)
+    Registry-->>TIP20: master wallet
+    TIP20->>Master: credit balance
+    Note over TIP20: emits Transfer(sender → virtual, amount)
+    Note over TIP20: emits Transfer(virtual → master, amount)
+`} />
+
+The important behavior is:
+
+- the sender pays the **virtual address**
+- TIP-20 resolves that address to the registered **master wallet**
+- the **master wallet** receives the balance
+- the virtual address still appears in events, so you can attribute the deposit correctly
+
+## Live demo
+
+This walkthrough shows the full flow:
+
+1. sign in with a passkey and get a Tempo address
+2. register a master id for that address
+3. send `pathUSD` from a second address to a virtual address derived from that master id
+4. confirm that the balance lands in the registered wallet
+
+<Demo.Container name="Virtual addresses" footerVariant={undefined}>
+  <VirtualAddressesLiveDemo />
+</Demo.Container>
+
+## What to look for
+
+When the demo succeeds, you should see all of the following:
+
+- the passkey wallet is shown as the registered master wallet
+- the virtual address is distinct from the master wallet
+- the sender transfers `pathUSD` to the virtual address
+- the master wallet balance increases
+- the virtual address TIP-20 balance remains `0`
+- the receipt shows the expected two-hop `Transfer` events
+
+## Derive deposit addresses offchain
+
+Once a master is registered, operators derive virtual addresses offchain from the `masterId` and their own customer tag.
+
+:::code-group
+
+```ts [buildVirtualAddress.ts]
+function buildVirtualAddress(masterId: `0x${string}`, userTag: `0x${string}`) {
+  const VIRTUAL_MAGIC = 'fdfdfdfdfdfdfdfdfdfd'
+  return `0x${masterId.slice(2)}${VIRTUAL_MAGIC}${userTag.slice(2)}`
+}
+```
+
+:::
+
+In practice, the `userTag` is the operator's internal routing value for a customer, account, or payment reference.
+
+## Operational notes
+
+A few things matter in production:
+
+- virtual forwarding applies only to **TIP-20** transfer and mint paths
+- `balanceOf(virtualAddress)` stays `0`; use events and your own `userTag` mapping for attribution
+- policy checks apply to the **resolved master wallet**, not the literal virtual address
+- protocols that treat addresses literally should reject virtual addresses unless they explicitly support them
+
+## Learn more
+
+<Cards>
+  <Card
+    title="Virtual addresses overview"
+    description="Start with the conceptual model for routing, attribution, and treasury operations."
+    to="/protocol/tip20/virtual-addresses"
+    icon="lucide:route"
+  />
+  <Card
+    title="TIP-1022 specification"
+    description="Read the full protocol definition, including derivation rules, transfer paths, and invariants."
+    to="/protocol/tips/tip-1022"
+    icon="lucide:file-text"
+  />
+  <Card
+    title="T3 network upgrade"
+    description="See when virtual addresses activate and what else ships with T3."
+    to="/protocol/upgrades/t3"
+    icon="lucide:rocket"
+  />
+</Cards>

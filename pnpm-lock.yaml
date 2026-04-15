@@ -43,6 +43,9 @@ importers:
       cva:
         specifier: 1.0.0-beta.4
         version: 1.0.0-beta.4(typescript@5.9.3)
+      hash-wasm:
+        specifier: ^4.12.0
+        version: 4.12.0
       mermaid:
         specifier: ^11.14.0
         version: 11.14.0
@@ -2401,6 +2404,9 @@ packages:
     resolution: {integrity: sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ==}
     engines: {node: '>= 0.4'}
 
+  hash-wasm@4.12.0:
+    resolution: {integrity: sha512-+/2B2rYLb48I/evdOIhP+K/DD2ca2fgBjp6O+GBEnCDk2e4rpeXIK8GvIyRPjTezgmWn9gmKwkQjjx6BtqDHVQ==}
+
   hasown@2.0.2:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
@@ -3903,7 +3909,7 @@ packages:
         optional: true
 
   vocs@https://pkg.pr.new/wevm/vocs@2fb25c2:
-    resolution: {tarball: https://pkg.pr.new/wevm/vocs@2fb25c2}
+    resolution: {integrity: sha512-ks2EN0bid4JPpFiHH8LDtKn4fRII9HrpyeHmD49VoOmZcgFvK6FAQ5iryi8HeS1f7uZfk/UoFdaPKC0mnR7ebw==, tarball: https://pkg.pr.new/wevm/vocs@2fb25c2}
     version: 0.0.0
     hasBin: true
     peerDependencies:
@@ -6326,6 +6332,8 @@ snapshots:
   has-flag@4.0.0: {}
 
   has-symbols@1.1.0: {}
+
+  hash-wasm@4.12.0: {}
 
   hasown@2.0.2:
     dependencies:
