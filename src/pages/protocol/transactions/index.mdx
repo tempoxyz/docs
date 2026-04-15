@@ -2,8 +2,9 @@
 description: Learn about Tempo Transactions, a new EIP-2718 transaction type with passkey support, fee sponsorship, batching, and concurrent execution.
 ---
 
-import { Cards, Card } from 'vocs'
+import { Cards, Card, Tabs, Tab } from 'vocs'
 import TempoTxProperties from '../../../snippets/tempo-tx-properties.mdx'
+import TempoTxPropertiesPostT3 from '../../../snippets/tempo-tx-properties-post-t3.mdx'
 
 # Tempo Transactions
 
@@ -67,7 +68,18 @@ If you are an EVM smart contract developer, see the [Tempo extension for Foundry
 
 ## Properties
 
-<TempoTxProperties />
+:::info[T3 comparison]
+The `Current network` tab shows the pre-T3 Tempo Transaction shape that is live today. The `Post-T3` tab shows the access-key and authorization changes that activate with T3.
+:::
+
+<Tabs stateKey="tempo-tx-version">
+  <Tab title="Current network">
+    <TempoTxProperties />
+  </Tab>
+  <Tab title="Post-T3">
+    <TempoTxPropertiesPostT3 />
+  </Tab>
+</Tabs>
 
 
 ## Learn more

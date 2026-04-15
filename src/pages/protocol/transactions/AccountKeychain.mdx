@@ -7,7 +7,7 @@ description: Technical specification for the Account Keychain precompile managin
 **Address:** `0xAAAAAAAA00000000000000000000000000000000`
 
 :::info[T3 will change this spec]
-The [T3 network upgrade](/protocol/upgrades/t3) will update this specification. The sections below describe the currently active behavior. See [T3 changes](#t3-changes) for the upcoming deltas.
+The [T3 network upgrade](/protocol/upgrades/t3) will update this specification. The sections below describe the currently active behavior. See [Upcoming changes](#upcoming-changes) for the upcoming deltas.
 :::
 
 ## Overview
@@ -18,9 +18,9 @@ The Account Keychain precompile manages authorized Access Keys for accounts, ena
 
 The Tempo Transaction type unlocks a number of new signature schemes, including WebAuthn (Passkeys). However, for an Account using a Passkey as its Root Key, the sender will subsequently be prompted with passkey prompts for every signature request. This can be a poor user experience for highly interactive or multi-step flows. Additionally, users would also see "Sign In" copy in prompts for signing transactions which is confusing. This proposal introduces the concept of the Root Key being able to provision a (scoped) Access Key that can be used for subsequent transactions, without the need for repetitive end-user prompting.
 
-## T3 Changes
+## Upcoming changes
 
-T3 updates the Account Keychain specification in the following ways:
+T3 updates the Account Keychain specification through [TIP-1011](/protocol/tips/tip-1011) in the following ways:
 
 - [TIP-1011](/protocol/tips/tip-1011) extends `TokenLimit` with an optional recurring `period`, so spending limits can be either one-time or periodic.
 - `authorizeKey(...)` moves to the new ABI with `allowAnyCalls` and `allowedCalls`, enabling explicit call scoping during key authorization.

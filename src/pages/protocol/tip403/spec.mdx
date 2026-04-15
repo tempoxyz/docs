@@ -5,7 +5,7 @@ description: Technical specification for TIP-403, the policy registry system ena
 # Overview
 
 :::info[T3 will change this spec]
-The [T3 network upgrade](/protocol/upgrades/t3) will update this specification. The sections below describe the currently active behavior. See [T3 changes](#t3-changes) for the upcoming deltas.
+The [T3 network upgrade](/protocol/upgrades/t3) will update this specification. The sections below describe the currently active behavior. See [Upcoming changes](#upcoming-changes) for the upcoming deltas.
 :::
 
 ## Abstract
@@ -18,9 +18,9 @@ Token issuers often need to implement compliance policies such as KYC/AML requir
 
 TIP-403 addresses this by providing a centralized registry that tokens can reference for authorization decisions. This enables consistent policy enforcement across multiple tokens and reduces implementation complexity for token issuers.
 
-## T3 Changes
+## Upcoming changes
 
-T3 updates TIP-403 interactions with token recipients as follows:
+T3 updates TIP-403 interactions with token recipients through [TIP-1022](/protocol/tips/tip-1022) as follows:
 
 - Policy-configuration functions that accept literal member addresses will reject [TIP-1022](/protocol/tips/tip-1022) virtual addresses.
 - TIP-20 policy checks for virtual-address transfers and mints will run against the resolved master wallet, not the forwarding alias, so policy membership must be configured on the master address.

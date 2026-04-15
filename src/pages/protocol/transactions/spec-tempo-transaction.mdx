@@ -5,7 +5,7 @@ description: Technical specification for the Tempo transaction type (EIP-2718) w
 # Tempo Transaction
 
 :::info[T3 will change this spec]
-The [T3 network upgrade](/protocol/upgrades/t3) will update this specification. The sections below describe the currently active behavior. See [T3 changes](#t3-changes) for the upcoming deltas.
+The [T3 network upgrade](/protocol/upgrades/t3) will update this specification. The sections below describe the currently active behavior. See [Upcoming changes](#upcoming-changes) for the upcoming deltas.
 :::
 
 ## Abstract
@@ -24,9 +24,9 @@ Current accounts are limited to secp256k1 signatures and sequential nonces, crea
 Users cannot leverage modern authentication methods like passkeys, applications face throughput limitations due to sequential nonces. 
 
 
-## T3 Changes
+## Upcoming changes
 
-T3 updates the Tempo Transaction spec in the following ways:
+T3 updates the Tempo Transaction spec through [TIP-1011](/protocol/tips/tip-1011) in the following ways:
 
 - `KeyAuthorization` expands with the [TIP-1011](/protocol/tips/tip-1011) fields `allowed_calls` and periodic `TokenLimit.period`, adding call scoping and recurring spending limits to access keys.
 - The signed post-T3 key-authorization payload remains `SignedKeyAuthorization { authorization, signature }`, but `authorization` now uses the expanded `KeyAuthorization` shape and new RLP encoding.
