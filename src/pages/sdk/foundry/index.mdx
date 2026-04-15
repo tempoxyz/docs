@@ -1,22 +1,26 @@
 ---
-description: Build, test, and deploy smart contracts on Tempo using the Foundry fork. Access protocol-level features with forge and cast tools.
+description: Build, test, and deploy smart contracts on Tempo using Foundry. Access Tempo protocol features with forge, cast, anvil, and chisel.
 ---
 
 # Foundry for Tempo
 
-Tempo builds on top of [Foundry](https://github.com/foundry-rs/foundry): the leading Ethereum development toolkit, through a custom fork that adds first-class support for Tempo.
+Tempo support now lives in upstream [Foundry](https://github.com/foundry-rs/foundry) nightly.
 
-This fork extends Foundry with Tempo's [protocol-level features](/protocol/), enabling developers to build, test, and deploy contracts that go [beyond the limits of standard EVM chains](/quickstart/evm-compatibility).
+Install the latest nightly to access Tempo's [protocol-level features](/protocol/) in `forge`, `cast`, `anvil`, and `chisel`, and to build, test, and deploy contracts that go [beyond the limits of standard EVM chains](/quickstart/evm-compatibility).
+
+:::warning[`tempo-foundry` is deprecated]
+`tempo-foundry` and `foundryup -n tempo` are deprecated. Switch to upstream Foundry nightly with `foundryup --install nightly`.
+:::
 
 For general information about Foundry, see the [Foundry documentation](https://getfoundry.sh/).
 
 ## Get started with Foundry
 
-Tempo's Foundry fork is installed through the standard upstream `foundryup` using the `-n tempo` flag, no separate installer is required.
+Install the latest Foundry nightly to get Tempo support.
 
-::::steps
+:::::steps
 
-## Install `foundryup`
+### Install `foundryup`
 
 If you don't have `foundryup` installed yet:
 
@@ -24,50 +28,85 @@ If you don't have `foundryup` installed yet:
 curl -L https://foundry.paradigm.xyz | bash
 ```
 
-Or if you already have `foundryup` installed:
+### Install the latest Foundry nightly
 
 ```bash
-foundryup --update
+foundryup --install nightly
 ```
 
-## Install Tempo's Foundry fork
+This installs the latest `nightly` release of [`forge`](https://getfoundry.sh/forge/overview#forge), [`cast`](https://getfoundry.sh/cast/overview#cast), [`anvil`](https://getfoundry.sh/anvil/overview#anvil), and [`chisel`](https://getfoundry.sh/chisel/overview#chisel).
 
-```bash
-foundryup -n tempo
-```
-
-This will automatically install the latest `nightly` release of all precompiled binaries: [`forge`](https://getfoundry.sh/forge/overview#forge), [`cast`](https://getfoundry.sh/cast/overview#cast), [`anvil`](https://getfoundry.sh/anvil/overview#anvil), and [`chisel`](https://getfoundry.sh/chisel/overview#chisel).
 
 :::tip
 To install a specific version, replace `<TAG_NAME>` with the desired release tag:
+
 ```bash
-foundryup -n tempo -i <TAG_NAME>
+foundryup --install <TAG_NAME>
 ```
 :::
 
-## Verify Installation
+### Create a new Foundry project
 
-```bash
-forge -V
-```
-
-You should see version information include `-tempo`, indicating you are using the Tempo fork.
-
-```bash
-# forge <version>-tempo (<commit> <timestamp>)
-```
-
-## Create a new Foundry project
-
-Initialize a new project with Tempo support:
+Initialize a new Foundry project with the Tempo template:
 
 ```bash
 forge init -n tempo my-project && cd my-project
 ```
 
-Each new project is configured for Tempo out of the box, with [`tempo-std`](https://github.com/tempoxyz/tempo-std), the Tempo standard library installed, containing helpers for Tempo's protocol-level features.
+This gives you a Tempo-ready starter project, including the Tempo `Mail` example template.
 
-::::
+If you're adding Tempo support to an existing Foundry project, install [`tempo-std`](https://github.com/tempoxyz/tempo-std) manually:
+
+```bash
+forge install tempoxyz/tempo-std
+```
+
+:::::
+
+## Configure `foundry.toml`
+
+The Tempo template gives you a working starting point, but it is often useful to make Tempo explicit in `foundry.toml`.
+
+### Configure RPC aliases
+
+Set a default Tempo RPC alias and keep a separate alias for Moderato testnet:
+
+```toml
+[profile.default]
+eth_rpc_url = "tempo"
+
+[rpc_endpoints]
+tempo = "${TEMPO_RPC_URL}"
+moderato = "${TEMPO_TESTNET_RPC_URL}"
+```
+
+With this config, commands that use the default RPC pick up `tempo` automatically, and you can still switch explicitly with `--rpc-url moderato`.
+
+### Activate Tempo features explicitly
+
+For most projects, the most flexible option is to enable Tempo network features directly:
+
+```toml
+[profile.default]
+tempo = true
+```
+
+This network flag, enables Tempo-specific network behavior while still letting Foundry resolve the right semantics from the chain you are targeting.
+
+If you need advanced testing against a specific Tempo hardfork, pin it explicitly in `foundry.toml` or via inline-config:
+
+```toml
+[profile.default]
+hardfork = "tempo:T3"
+```
+
+This is the advanced option when you want local simulation, tests, or scripts to run against a specific Tempo hardfork such as T3. It also infers the Tempo network in Foundry's config layer.
+
+### Verification config
+
+Tempo's contract verifier is Sourcify-compatible. Configure verification with `VERIFIER_URL=https://contracts.tempo.xyz` or `--verifier-url https://contracts.tempo.xyz`.
+
+The `[etherscan]` table in `foundry.toml` is for Etherscan-style verifiers, not Tempo's verifier.
 
 ## Use Foundry for your workflows
 
@@ -385,4 +424,3 @@ cast keychain key-info <ACCOUNT> <KEY_ID> \
 cast keychain remaining-limit <ACCOUNT> <KEY_ID> <TOKEN_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL
 ```
-
