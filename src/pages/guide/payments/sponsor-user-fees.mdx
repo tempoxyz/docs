@@ -1,5 +1,6 @@
 ---
 description: Enable gasless transactions by sponsoring fees for your users. Set up a fee payer service and improve UX by removing friction from payment flows.
+interactive: true
 ---
 
 import { Cards, Card, Tabs, Tab } from 'vocs'
@@ -29,7 +30,7 @@ Enable gasless transactions by sponsoring transaction fees for your users. Tempo
 Tempo provides a public testnet fee payer service at `https://sponsor.moderato.tempo.xyz` that you can use for development and testing. If you want to run your own, follow the instructions below.
 :::
 
-You can stand up a minimal fee payer service using the [`Handler.feePayer`](/accounts/server/handler.feePayer) handler provided by the [Tempo Accounts SDK](/accounts). To sponsor transactions, you need a funded account that will act as the fee payer.
+You can stand up a minimal fee payer service using the [`Handler.relay`](/accounts/server/handler.relay) handler provided by the [Tempo Accounts SDK](/accounts). To sponsor transactions, you need a funded account that will act as the fee payer.
 
 ```ts twoslash [server.ts]
 // @noErrors
@@ -63,7 +64,7 @@ import { createConfig, http } from 'wagmi'
 
 export const config = createConfig({
   connectors: [tempoWallet({
-    feePayerUrl: 'https://sponsor.moderato.tempo.xyz', // [!code focus]
+    feePayer: 'https://sponsor.moderato.tempo.xyz', // [!code focus]
   })],
   chains: [tempo],
   multiInjectedProviderDiscovery: false,
@@ -77,7 +78,7 @@ export const config = createConfig({
 // @noErrors
 import { webAuthn } from 'accounts/wagmi'
 import { tempo } from 'viem/chains'
-import { withFeePayer } from 'viem/tempo'
+import { withRelay } from 'viem/tempo'
 import { createConfig, http } from 'wagmi'
 
 export const config = createConfig({
@@ -85,7 +86,7 @@ export const config = createConfig({
   chains: [tempo],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempo.id]: withFeePayer( // [!code focus]
+    [tempo.id]: withRelay( // [!code focus]
       http(), // [!code focus]
       http('https://sponsor.moderato.tempo.xyz'), // [!code focus]
     ), // [!code focus]
@@ -97,7 +98,7 @@ export const config = createConfig({
 
 ### Sponsor your user's transactions
 
-Now you can sponsor transactions by passing `feePayer: true` in the transaction parameters. For more details on how to send a transaction, see the [Send a payment](/guide/payments/send-a-payment) guide.
+Now transactions will be sponsored by your relay. For more details on how to send a transaction, see the [Send a payment](/guide/payments/send-a-payment) guide.
 
 :::info
 You can also build your own fee paying service. See [Build your own fee paying service](#build-your-own-fee-paying-service) below.
@@ -131,7 +132,7 @@ function SendSponsoredPayment() {
 
         sendPayment.mutate({ // [!code hl]
           amount: parseUnits('100', metadata.data.decimals), // [!code hl]
-          feePayer: true, // [!code focus]
+          feePayer: sponsorAccount, // [!code focus]
           to: recipient, // [!code hl]
           token: alphaUsd, // [!code hl]
         }) // [!code hl]
@@ -210,7 +211,7 @@ The SDKs handle this automatically. Here's how each SDK manages the dual-signing
     ```
 
     :::info
-    Alternatively, use `feePayer: true` with the [`withFeePayer`](https://viem.sh/tempo/transports/withFeePayer) transport to delegate signing to a remote fee payer service. See the [Steps section above](#configure-your-client-to-use-the-fee-payer-service) for setup.
+    Alternatively, use the [`withRelay`](https://viem.sh/tempo/transports/withRelay) transport to delegate signing to a remote fee payer service. See the [Steps section above](#configure-your-client-to-use-the-fee-payer-service) for setup.
     :::
 
   </Tab>

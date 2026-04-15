@@ -1,129 +1,42 @@
 ---
-title: Handler.feePayer
-description: Server handler that sponsors transaction fees for users.
+title: Handler.feePayer (Deprecated)
+description: Deprecated — use Handler.relay with feePayer option instead.
 ---
 
-# `Handler.feePayer`
+# `Handler.feePayer` (Deprecated)
 
-Creates a server handler that acts as a fee payer for transactions, enabling you to subsidize gas costs for users by signing transactions with a dedicated fee payer account on your backend.
-
-:::info
-[See the guide](/guide/payments/sponsor-user-fees)
+:::warning
+`Handler.feePayer` has been deprecated. Use [`Handler.relay`](/accounts/server/handler.relay) with the [`feePayer`](/accounts/server/handler.relay#feepayer) option instead.
 :::
 
-## Usage
+## Migration
 
-```ts
-import { privateKeyToAccount } from 'viem/accounts'
-import { Handler } from 'accounts/server'
+Replace `Handler.feePayer` calls with `Handler.relay` and nest the `account` under `feePayer`:
 
-const handler = Handler.feePayer({
-  account: privateKeyToAccount('0x...'),
-})
+```diff
+- const handler = Handler.feePayer({
+-   account: privateKeyToAccount('0x...'),
+- })
++ const handler = Handler.relay({
++   feePayer: {
++     account: privateKeyToAccount('0x...'),
++   },
++ })
 ```
 
-Then plug `handler` into your server framework of choice:
+All other options (`chains`, `transports`, `path`, `onRequest`) remain the same — `validate` moves inside `feePayer`:
 
-```ts
-createServer(handler.listener) // Node.js
-Bun.serve(handler) // Bun
-Deno.serve(handler) // Deno
-app.all('*', c => handler.fetch(c.request)) // Elysia
-app.use(handler.listener) // Express
-app.use(c => handler.fetch(c.req.raw)) // Hono
-export const GET = handler.fetch // Next.js
-export const POST = handler.fetch // Next.js
+```diff
+- const handler = Handler.feePayer({
+-   account: privateKeyToAccount('0x...'),
+-   validate: (request) => request.from !== blocked,
+- })
++ const handler = Handler.relay({
++   feePayer: {
++     account: privateKeyToAccount('0x...'),
++     validate: (request) => request.from !== blocked,
++   },
++ })
 ```
 
-## Parameters
-
-### account
-
-- **Type:** `LocalAccount`
-- **Required**
-
-The account to use as the fee payer. This account will sign all transactions and pay the gas fees.
-
-```ts twoslash
-import { privateKeyToAccount } from 'viem/accounts'
-import { Handler } from 'accounts/server'
-
-const handler = Handler.feePayer({
-  account: privateKeyToAccount('0x...'), // [!code focus]
-})
-```
-
-### chains
-
-- **Type:** `readonly [Chain, ...Chain[]]`
-- **Default:** `[tempo, tempoModerato]`
-
-Supported chains. The handler resolves the client based on the `chainId` in the incoming transaction.
-
-```ts twoslash
-import { privateKeyToAccount } from 'viem/accounts'
-import { tempo } from 'viem/chains'
-import { Handler } from 'accounts/server'
-
-const handler = Handler.feePayer({
-  account: privateKeyToAccount('0x...'),
-  chains: [tempo], // [!code focus]
-})
-```
-
-### onRequest
-
-- **Type:** `(request: RpcRequest) => Promise<void>`
-- **Optional**
-
-Callback called before processing each request. Useful for logging, rate limiting, or custom validation.
-
-```ts twoslash
-import { privateKeyToAccount } from 'viem/accounts'
-import { Handler } from 'accounts/server'
-
-const handler = Handler.feePayer({
-  account: privateKeyToAccount('0x...'),
-  onRequest: async (request) => { // [!code focus]
-    console.log('Processing request:', request.method) // [!code focus]
-  }, // [!code focus]
-})
-```
-
-### path
-
-- **Type:** `string`
-- **Default:** `'/'`
-
-Path where the handler listens for requests.
-
-```ts twoslash
-import { privateKeyToAccount } from 'viem/accounts'
-import { Handler } from 'accounts/server'
-
-const handler = Handler.feePayer({
-  account: privateKeyToAccount('0x...'),
-  path: '/fee-payer', // [!code focus]
-})
-```
-
-### transports
-
-- **Type:** `Record<number, Transport>`
-- **Default:** `http()` for each chain
-
-Transports keyed by chain ID.
-
-```ts twoslash
-import { http } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { tempo } from 'viem/chains'
-import { Handler } from 'accounts/server'
-
-const handler = Handler.feePayer({
-  account: privateKeyToAccount('0x...'),
-  transports: { // [!code focus]
-    [tempo.id]: http('https://rpc.tempo.xyz'), // [!code focus]
-  }, // [!code focus]
-})
-```
+See [`Handler.relay`](/accounts/server/handler.relay) for the full API reference.

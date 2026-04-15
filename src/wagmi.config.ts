@@ -4,7 +4,7 @@ import { tempoWallet, webAuthn as webAuthnAccounts } from 'accounts/wagmi'
 import * as React from 'react'
 import { parseUnits } from 'viem'
 import { tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
-import { withFeePayer } from 'viem/tempo'
+import { withRelay } from 'viem/tempo'
 import {
   type CreateConfigParameters,
   createConfig,
@@ -44,7 +44,6 @@ export function getConfig(options: getConfig.Options = {}) {
       ...(import.meta.env.VITE_E2E === 'true'
         ? [
             webAuthnAccounts({
-              authUrl: 'https://keys.tempo.xyz',
               rdns: 'webAuthn',
             }),
           ]
@@ -59,7 +58,10 @@ export function getConfig(options: getConfig.Options = {}) {
                   { token: thetaUsd, limit: parseUnits('500', 6) },
                 ],
               }),
-              feePayerUrl: 'https://sponsor.moderato.tempo.xyz',
+              feePayer: {
+                precedence: 'user-first',
+                url: 'https://sponsor.moderato.tempo.xyz',
+              },
             }),
             webAuthn({
               grantAccessKey: {
@@ -77,7 +79,7 @@ export function getConfig(options: getConfig.Options = {}) {
       key: 'tempo-docs',
     }),
     transports: {
-      [tempoModerato.id]: withFeePayer(
+      [tempoModerato.id]: withRelay(
         fallback([
           http('https://rpc.moderato.tempo.xyz'),
           webSocket('wss://rpc.moderato.tempo.xyz', {
@@ -87,7 +89,7 @@ export function getConfig(options: getConfig.Options = {}) {
         http('https://sponsor.moderato.tempo.xyz'),
         { policy: 'sign-only' },
       ),
-      [tempoDevnet.id]: withFeePayer(
+      [tempoDevnet.id]: withRelay(
         fallback([
           http(tempoDevnet.rpcUrls.default.http[0]),
           webSocket(tempoDevnet.rpcUrls.default.webSocket[0], {

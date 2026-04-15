@@ -1,0 +1,233 @@
+---
+title: Tempo RPC Reference
+description: Reference for Tempo-specific JSON-RPC methods in the tempo, consensus, and admin namespaces, plus modified eth_ behavior.
+---
+
+# Tempo RPC Reference
+
+Tempo nodes expose all standard [Ethereum JSON-RPC methods](https://ethereum.org/developers/docs/apis/json-rpc/) (`eth_`, `net_`, `web3_`, `txpool_`, `trace_`, `debug_`) plus Tempo-specific namespaces for fork scheduling, consensus data, and node administration.
+
+Connect to a public RPC endpoint or [run your own node](/guide/node/rpc):
+
+| Network | RPC URL |
+|---------|---------|
+| Mainnet | `https://rpc.tempo.xyz` |
+| Testnet | `https://rpc.moderato.tempo.xyz` |
+
+:::info
+Not all methods listed below are available on public endpoints. Method availability depends on node role and configuration.
+:::
+
+| Method group | Availability |
+|---|---|
+| `tempo_forkSchedule` | All Tempo nodes |
+| `tempo_fundAddress` | Faucet-enabled testnet endpoints only |
+| `consensus_*` | Validator nodes only |
+| `consensus_subscribe` | Validator nodes over WebSocket only |
+| `admin_validatorKey` | Self-hosted nodes with `admin` API enabled |
+
+## `tempo_` namespace
+
+### `tempo_forkSchedule`
+
+Returns the Tempo fork schedule and the currently active fork at the chain head. Each entry includes the fork name, activation timestamp, whether it is active, and an [EIP-2124](https://eips.ethereum.org/EIPS/eip-2124) fork hash.
+
+**Parameters:** None.
+
+**Returns:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `schedule` | `ForkInfo[]` | Ordered list of Tempo forks |
+| `active` | `string` | Name of the currently active fork |
+
+Each `ForkInfo`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | `string` | Fork name (e.g. `"T0"`, `"T1"`, `"T2"`) |
+| `activationTime` | `number` | Unix timestamp of activation |
+| `active` | `boolean` | Whether this fork is active at the chain head |
+| `forkId` | `string` | EIP-2124 fork hash (e.g. `"0x471a451c"`). Omitted for forks that are not yet active |
+
+```bash
+cast rpc tempo_forkSchedule --rpc-url https://rpc.tempo.xyz
+```
+
+**Example response:**
+
+```json
+{
+  "schedule": [
+    { "name": "T0", "activationTime": 0, "active": true, "forkId": "0xa88e90f8" },
+    { "name": "T1", "activationTime": 1770908400, "active": true, "forkId": "0x5e3041a4" },
+    { "name": "T1A", "activationTime": 1770908400, "active": true, "forkId": "0x5e3041a4" },
+    { "name": "T1B", "activationTime": 1771858800, "active": true, "forkId": "0x92b1c4d7" },
+    { "name": "T1C", "activationTime": 1773327600, "active": true, "forkId": "0xf3a901bc" },
+    { "name": "T2", "activationTime": 1774965600, "active": true, "forkId": "0x471a451c" },
+    { "name": "T3", "activationTime": 0, "active": false }
+  ],
+  "active": "T2"
+}
+```
+
+### `tempo_fundAddress`
+
+Available on faucet-enabled testnet endpoints only. Mints test stablecoins to the given address. On the public Moderato testnet endpoint, this currently mints pathUSD, AlphaUSD, BetaUSD, and ThetaUSD.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `address` | `Address` | Recipient address |
+
+**Returns:** `B256[]` — array of transaction hashes, one per token minted.
+
+```bash
+cast rpc tempo_fundAddress 0xYOUR_ADDRESS \
+  --rpc-url https://rpc.moderato.tempo.xyz
+```
+
+## `consensus_` namespace
+
+Available on validator nodes only. Provides real-time consensus state for explorers, bridges, and indexers.
+
+### `consensus_getFinalization`
+
+Get a finalized block by height or latest.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `query` | `"latest"` or `{"height": number}` | Which finalization to retrieve |
+
+**Returns:** `CertifiedBlock | null`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `epoch` | `number` | Consensus epoch |
+| `view` | `number` | Consensus view |
+| `digest` | `B256` | Block digest |
+| `certificate` | `string` | Hex-encoded BLS finalization certificate |
+| `block` | `Block` | The full Tempo block |
+
+```bash
+# Latest finalization
+cast rpc consensus_getFinalization '"latest"' --rpc-url <VALIDATOR_RPC>
+
+# By height
+cast rpc consensus_getFinalization '{"height": 1000000}' --rpc-url <VALIDATOR_RPC>
+```
+
+### `consensus_getLatest`
+
+Returns the current consensus state snapshot: the latest finalized block and the latest notarized block (if not yet finalized).
+
+**Parameters:** None.
+
+**Returns:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `finalized` | `CertifiedBlock \| null` | Latest finalized block |
+| `notarized` | `CertifiedBlock \| null` | Latest notarized block (if ahead of finalized) |
+
+```bash
+cast rpc consensus_getLatest --rpc-url <VALIDATOR_RPC>
+```
+
+### `consensus_subscribe` / `consensus_unsubscribe`
+
+WebSocket-only subscription to consensus events. Emits events when blocks are notarized, finalized, or views are nullified.
+
+**Event types:**
+
+| Type | Fields | Description |
+|------|--------|-------------|
+| `notarized` | `epoch`, `view`, `digest`, `certificate`, `block`, `seen` | A block was notarized |
+| `finalized` | `epoch`, `view`, `digest`, `certificate`, `block`, `seen` | A block was finalized |
+| `nullified` | `epoch`, `view`, `seen` | A view was nullified (no block produced) |
+
+The `seen` field is a Unix timestamp in milliseconds.
+
+**Example event:**
+
+```json
+{
+  "type": "finalized",
+  "epoch": 42,
+  "view": 387213,
+  "digest": "0x6baa8fa8...",
+  "certificate": "0x...",
+  "block": { ... },
+  "seen": 1775134536000
+}
+```
+
+### `consensus_getIdentityTransitionProof`
+
+Returns DKG (Distributed Key Generation) identity transition proofs. Useful for light client verification and bridge implementations.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `from_epoch` | `number \| null` | Epoch to search from (defaults to latest finalized) |
+| `full` | `boolean \| null` | If `true`, return all transitions back to genesis; if `false` (default), only the most recent |
+
+**Returns:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `identity` | `string` | Hex-encoded BLS public key at the requested epoch |
+| `transitions` | `IdentityTransition[]` | Transitions ordered newest to oldest |
+
+Each `IdentityTransition`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `transitionEpoch` | `number` | Epoch where the DKG ceremony occurred |
+| `oldIdentity` | `string` | BLS public key before the transition |
+| `newIdentity` | `string` | BLS public key after the transition |
+| `proof` | `object` | Block header + finalization certificate. Omitted for genesis (epoch 0) |
+
+```bash
+# Most recent transition
+cast rpc consensus_getIdentityTransitionProof null null --rpc-url <VALIDATOR_RPC>
+
+# Full chain back to genesis
+cast rpc consensus_getIdentityTransitionProof null true --rpc-url <VALIDATOR_RPC>
+```
+
+## `admin_` namespace
+
+Requires the `admin` API to be enabled on a self-hosted node (`--http.api admin`).
+
+### `admin_validatorKey`
+
+Returns the node's ed25519 validator public key if configured, or `null` for non-validator nodes.
+
+**Parameters:** None.
+
+**Returns:** `B256 | null`
+
+```bash
+cast rpc admin_validatorKey --rpc-url http://localhost:8545
+```
+
+## Modified `eth_` methods
+
+Tempo is fully [EVM compatible](/quickstart/evm-compatibility), but the following standard methods behave differently due to the lack of a native gas token:
+
+### `eth_getBalance`
+
+Always returns a large constant (`0x9612084f0316e0ebd5182f398e5195a51b5ca47667d4c9b26c9b26c9b26c9b2`) rather than an actual balance. Tempo has no native token — use TIP-20 `balanceOf` to query token balances.
+
+### `eth_estimateGas`
+
+Gas estimation accounts for TIP-20 fee token balances instead of native ETH. The gas allowance is calculated from the effective fee payer's selected fee token balance.
+
+### `eth_sendRawTransaction`
+
+Accepts both standard EVM transaction types and [Tempo Transactions](/protocol/transactions) (type `0x54`). Transactions targeting a subblock proposer are routed directly to the consensus layer when submitted to the matching validator node; other nodes reject them.

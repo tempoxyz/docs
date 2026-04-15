@@ -1,0 +1,256 @@
+---
+title: Foundry Integration
+description: Use Foundry tools (cast, forge, anvil, chisel) with MPP-gated RPC endpoints on Tempo — automatic 402 handling with zero config.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Use MPP with Foundry
+
+[Tempo Foundry](https://github.com/tempoxyz/tempo-foundry) extends Foundry with native MPP support. When an RPC endpoint returns `402 Payment Required`, Foundry automatically handles the payment challenge — no wrapper scripts, no middleware, no code changes.
+
+Every Foundry tool works transparently with MPP-gated endpoints:
+
+- **`cast`** — queries and transactions
+- **`forge`** — scripts and forked tests
+- **`anvil`** — local forks of paid endpoints
+- **`chisel`** — interactive REPL sessions
+
+## How it works
+
+When you point any Foundry tool at an MPP-gated RPC URL, the built-in transport intercepts `402` responses and resolves them using MPP's [session flow](/guide/machine-payments/pay-as-you-go):
+
+1. **First request** — Foundry sends a normal JSON-RPC request to the endpoint.
+2. **402 challenge** — The server responds with `402 Payment Required` and a `WWW-Authenticate: Payment` header describing the price.
+3. **Key discovery** — Foundry reads your signing key from `$TEMPO_HOME/wallet/keys.toml` (default `~/.tempo/wallet/keys.toml`) or the `TEMPO_PRIVATE_KEY` env var. If the server offers multiple payment challenges (e.g. different chains or currencies), Foundry automatically picks the one matching your key's chain ID and spending allowance.
+4. **Channel open** — If no payment channel exists, Foundry opens one on-chain with a deposit (default: `100,000` base units). This is a one-time on-chain lockup — unused balance remains in the channel.
+5. **Voucher payment** — Foundry signs an off-chain voucher against the open channel and retries the request with an `Authorization: Payment` header.
+6. **Auto top-up** — When a channel's deposit is exhausted, Foundry sends a top-up transaction. The server accepts it with `204 No Content`, then Foundry signs a fresh voucher and retries automatically.
+6. **Channel reuse** — Subsequent requests reuse the same channel. Channel state is persisted to `$TEMPO_HOME/foundry/channels.json` (default `~/.tempo/foundry/channels.json`) across process invocations.
+
+:::tip
+Channel reuse means the first call to an MPP endpoint has roughly one confirmation of overhead (~500ms on Tempo), but all subsequent calls add near-zero latency.
+:::
+
+## Setup
+:::
+
+:::note
+Some endpoints use a one-shot `charge` intent instead of session-based channels. Foundry handles both — charge payments sign a single TIP-20 transfer without opening a channel.
+:::
+::::steps
+
+### Install the Tempo CLI
+
+```bash
+curl -fsSL https://tempo.xyz/install | bash
+```
+
+### Install Tempo Foundry
+
+Tempo's fork is installed through the standard `foundryup` using the `-n tempo` flag:
+
+```bash
+foundryup -n tempo
+```
+
+All standard Foundry commands work as before — MPP activates only when an endpoint returns `402`.
+
+### Configure your wallet
+
+```bash
+tempo wallet login
+```
+
+This creates `~/.tempo/wallet/keys.toml` with your signing key. Foundry discovers this key automatically on the first `402` response.
+
+Alternatively, set the `TEMPO_PRIVATE_KEY` environment variable:
+
+```bash
+export TEMPO_PRIVATE_KEY=0xabc…123
+```
+
+### Use MPP endpoints
+
+Point any Foundry tool at an MPP-gated RPC URL. No additional flags or config needed.
+
+```bash
+cast block-number --rpc-url https://rpc.mpp.tempo.xyz
+```
+
+::::
+
+## Examples
+
+### cast
+
+Query chain state through a paid endpoint:
+
+```bash
+# Get latest block number
+cast block-number --rpc-url https://rpc.mpp.tempo.xyz
+
+# Read a contract
+cast call 0x20c0000000000000000000000000000000000000 \
+  "balanceOf(address)(uint256)" 0xYourAddress \
+  --rpc-url https://rpc.mpp.tempo.xyz
+```
+
+### forge script
+
+Run deployment or read scripts against a paid endpoint:
+
+```solidity
+// script/ReadBlock.s.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "forge-std/Script.sol";
+
+contract ReadBlock is Script {
+    function run() public view {
+        console.log("block", block.number);
+        console.log("chain", block.chainid);
+    }
+}
+```
+
+```bash
+forge script script/ReadBlock.s.sol --rpc-url https://rpc.mpp.tempo.xyz
+```
+
+### forge test with forks
+
+Fork a paid endpoint in tests using `vm.createSelectFork`:
+
+```solidity
+// test/MppFork.t.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "forge-std/Test.sol";
+
+contract MppForkTest is Test {
+    function test_fork_via_mpp() public {
+        vm.createSelectFork("https://rpc.mpp.tempo.xyz");
+        assertGt(block.number, 0);
+        assertEq(block.chainid, 4217);
+    }
+}
+```
+
+```bash
+forge test --match-test test_fork_via_mpp -vvv
+```
+
+### anvil
+
+Fork a paid endpoint locally. Local RPC calls stay local, but any upstream fetches Anvil makes to the fork URL go through MPP:
+
+```bash
+anvil --fork-url https://rpc.mpp.tempo.xyz
+```
+
+### chisel
+
+Interactive REPL against a paid endpoint:
+
+```bash
+chisel --fork-url https://rpc.mpp.tempo.xyz
+```
+
+```
+➜ block.number
+Type: uint256
+├ Hex: 0x...
+└ Decimal: 1234567
+```
+
+## Configuration
+
+### Deposit amount
+
+Set the fallback deposit amount used when the server does not suggest one:
+
+```bash
+export MPP_DEPOSIT=500000
+cast block-number --rpc-url https://rpc.mpp.tempo.xyz
+```
+
+The deposit determines how many RPC calls you can make before the channel needs a top-up. When a channel is exhausted, Foundry automatically tops it up.
+
+### Key discovery
+
+Foundry discovers MPP signing keys in this order:
+
+1. **`TEMPO_PRIVATE_KEY`** env var — highest priority, no keychain metadata
+2. **`$TEMPO_HOME/wallet/keys.toml`** — created by `tempo wallet login`, includes keychain signing mode and authorized signer metadata
+
+Within `keys.toml`, the key selection priority is:
+- Passkey entries first
+- Entries with an inline private key second
+- First entry as fallback
+
+Foundry needs a usable inline private key — entries without one are skipped.
+
+When the server offers multiple chains or currencies, Foundry picks the first key that matches both the chain ID and currency from the challenge.
+
+### Channel persistence
+
+Open channels are saved to `$TEMPO_HOME/foundry/channels.json` (default `~/.tempo/foundry/channels.json`). This allows channel reuse across process invocations — you won't re-open a channel every time you run `cast` or `forge`.
+
+Channels are automatically evicted when fully spent or closed. If the server restarts and returns `410 Gone`, Foundry clears stale local state and opens a fresh channel on the next request.
+
+## Testnet
+
+Use the Moderato testnet MPP endpoint for development:
+
+```bash
+### Channel persistence
+
+Open channels are saved to `$TEMPO_HOME/foundry/channels.json` (default `~/.tempo/foundry/channels.json`). This allows channel reuse across process invocations — you won't re-open a channel every time you run `cast` or `forge`.
+
+Channels are automatically evicted when fully spent or closed. If the server restarts and returns `410 Gone`, Foundry clears stale local state and opens a fresh channel on the next request.
+
+### Gas sponsorship
+
+Some MPP endpoints sponsor gas fees on behalf of the caller. When the server's challenge includes a `feePayer` flag, Foundry delegates gas payment to the server — no TEMPO balance needed for gas.
+cast block-number --rpc-url https://rpc.mpp.moderato.tempo.xyz
+
+# Mainnet
+cast block-number --rpc-url https://rpc.mpp.tempo.xyz
+```
+
+Fund your testnet wallet with `tempo wallet fund` before making requests.
+
+## Troubleshooting
+
+| Error | Cause | Fix |
+|---|---|---|
+| `tempo: command not found` | Tempo CLI not installed | Run `curl -fsSL https://tempo.xyz/install \| bash` |
+| `no supported MPP challenge` | Missing wallet key or wrong chain/currency | Run `tempo wallet login` or check `keys.toml` |
+| `410 Gone` | Stale local channel state | Re-run the command — Foundry clears stale state and opens a fresh channel |
+| `access key does not exist` | Signing key not yet provisioned on-chain | Foundry retries automatically with a key provisioning bundle — no action needed |
+
+## Next steps
+
+<Cards>
+  <Card
+    icon="lucide:user"
+    title="Client quickstart"
+    description="Handle payment-gated resources with the TypeScript SDK"
+    to="/guide/machine-payments/client"
+  />
+  <Card
+    icon="lucide:bot"
+    title="Agent quickstart"
+    description="Make paid requests from a terminal or AI agent"
+    to="/guide/machine-payments/agent"
+  />
+  <Card
+    icon="lucide:repeat"
+    title="Pay-as-you-go"
+    description="Session-based billing with off-chain vouchers"
+    to="/guide/machine-payments/pay-as-you-go"
+  />
+</Cards>

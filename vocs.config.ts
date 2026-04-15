@@ -366,7 +366,7 @@ export default defineConfig({
             link: '/quickstart/verify-contracts',
           },
           {
-            text: 'Bridging Guides',
+            text: 'Bridging',
             collapsed: true,
             items: [
               {
@@ -664,6 +664,10 @@ export default defineConfig({
             ],
           },
           {
+            text: 'RPC Reference',
+            link: '/protocol/rpc',
+          },
+          {
             text: 'SDKs',
             collapsed: true,
             items: [
@@ -704,7 +708,17 @@ export default defineConfig({
               },
               {
                 text: 'Foundry',
-                link: '/sdk/foundry',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Overview',
+                    link: '/sdk/foundry',
+                  },
+                  {
+                    text: 'Use MPP with Foundry',
+                    link: '/sdk/foundry/mpp',
+                  },
+                ],
               },
               {
                 text: 'Python',
@@ -951,6 +965,10 @@ export default defineConfig({
                   link: '/accounts/server/handler.feePayer',
                 },
                 {
+                  text: '.relay',
+                  link: '/accounts/server/handler.relay',
+                },
+                {
                   text: '.webAuthn',
                   link: '/accounts/server/handler.webAuthn',
                 },
@@ -1016,8 +1034,7 @@ export default defineConfig({
               link: '/accounts/rpc/eth_sendTransactionSync',
             },
             {
-              text: 'eth_fillTransaction 🚧',
-              disabled: true,
+              text: 'eth_fillTransaction',
               link: '/accounts/rpc/eth_fillTransaction',
             },
             {
@@ -1193,7 +1210,7 @@ export default defineConfig({
     },
     {
       source: '/sdk/typescript/server/handler.feePayer',
-      destination: '/accounts/server/handler.feePayer',
+      destination: '/accounts/server/handler.relay',
       status: 301,
     },
     {
