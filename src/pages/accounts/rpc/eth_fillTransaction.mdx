@@ -242,7 +242,7 @@ result.capabilities.fee
 
 ### With Sponsorship
 
-When the relay is configured with a [`feePayer`](/accounts/server/handler.relay#feepayer), all transactions are automatically sponsored. The response includes `sponsored: true` and `sponsor` details. Clients can opt out per-transaction by passing `feePayer: false`.
+When the relay is configured with a [`feePayer`](/accounts/server/handler.relay#feepayer), validated transactions are sponsored. The response includes `sponsored: true` and `sponsor` details.
 
 ```ts twoslash
 // @noErrors

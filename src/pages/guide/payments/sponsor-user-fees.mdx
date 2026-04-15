@@ -98,7 +98,7 @@ export const config = createConfig({
 
 ### Sponsor your user's transactions
 
-All transactions are now automatically sponsored when a relay with a fee payer is configured — no client-side opt-in is needed. To opt out of sponsorship for a specific transaction, pass `feePayer: false`. For more details on how to send a transaction, see the [Send a payment](/guide/payments/send-a-payment) guide.
+Now transactions will be sponsored by your relay. For more details on how to send a transaction, see the [Send a payment](/guide/payments/send-a-payment) guide.
 
 :::info
 You can also build your own fee paying service. See [Build your own fee paying service](#build-your-own-fee-paying-service) below.
@@ -132,7 +132,7 @@ function SendSponsoredPayment() {
 
         sendPayment.mutate({ // [!code hl]
           amount: parseUnits('100', metadata.data.decimals), // [!code hl]
-          // feePayer: false, // uncomment to opt out of sponsorship // [!code focus]
+          feePayer: sponsorAccount, // [!code focus]
           to: recipient, // [!code hl]
           token: alphaUsd, // [!code hl]
         }) // [!code hl]
@@ -211,7 +211,7 @@ The SDKs handle this automatically. Here's how each SDK manages the dual-signing
     ```
 
     :::info
-    Alternatively, use the [`withRelay`](https://viem.sh/tempo/transports/withRelay) transport to delegate signing to a remote fee payer service — sponsorship is automatic. See the [Steps section above](#configure-your-client-to-use-the-fee-payer-service) for setup.
+    Alternatively, use the [`withRelay`](https://viem.sh/tempo/transports/withRelay) transport to delegate signing to a remote fee payer service. See the [Steps section above](#configure-your-client-to-use-the-fee-payer-service) for setup.
     :::
 
   </Tab>
