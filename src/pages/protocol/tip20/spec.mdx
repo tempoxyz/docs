@@ -4,6 +4,10 @@ description: Technical specification for TIP-20, the optimized token standard ex
 
 # TIP20
 
+:::info[T3 will change this spec]
+The [T3 network upgrade](/protocol/upgrades/t3) will update this specification. The sections below describe the currently active behavior. See [T3 changes](#t3-changes) for the upcoming deltas.
+:::
+
 ## Abstract
 TIP20 is a suite of precompiles that provide a built-in optimized token implementation in the core protocol. It extends the ERC-20 token standard with built-in functionality like memo fields and reward distribution.
 
@@ -11,6 +15,15 @@ TIP20 is a suite of precompiles that provide a built-in optimized token implemen
 All major stablecoins today use the ERC-20 token standard. While ERC-20 provides a solid foundation for fungible tokens, it lacks features critical for stablecoin issuers today such as memos, transfer policies, and rewards distribution. Additionally, since each ERC-20 token has its own implementation, integrators can't depend on consistent behavior across tokens.
 TIP-20 extends ERC-20, building these features into precompiled contracts that anyone can permissionlessly deploy on Tempo. This makes token operations much more efficient, allows issuers to quickly set up on Tempo, and simplifies integrations since it ensures standardized behavior across tokens.
 It also enables deeper integration with token-specific Tempo features like paying gas in stablecoins and payment lanes.
+
+## T3 Changes
+
+T3 updates TIP-20 behavior in the following ways:
+
+- [TIP-1022](/protocol/tips/tip-1022) adds virtual-address recipient resolution for recipient-bearing TIP-20 paths: `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo`.
+- When a TIP-20 operation targets a registered virtual address, the effective recipient becomes the registered master wallet before recipient authorization and mint-recipient checks run.
+- Forwarded virtual-address deposits appear as two-hop standard `Transfer` events in the same transaction. Indexers and explorers should collapse that pair into one logical deposit to the resolved master wallet.
+- Virtual addresses are valid TIP-20 recipients on those paths, but they remain forwarding aliases rather than canonical TIP-20 holders. Non-TIP-20 tokens sent to a virtual address do not forward.
 
 ## Specification
 TIP-20 tokens support standard fungible token operations such as transfers, mints, and burns. They also support transfers, mints, and burns with an attached 32-byte memo; a role-based access control system for token administrative operations; and a system for opt-in [reward distribution](/protocol/tip20-rewards/spec).
@@ -443,13 +456,9 @@ Internally, this is implemented via a `transferAuthorized` modifier that:
 Both checks must return `true`, otherwise the call reverts with `PolicyForbids`.
 Reward operations (`distributeReward`, `setRewardRecipient`, `claimRewards`) also perform the same TIP-403 authorization checks before moving any funds.
 
-Post-T3, TIP-20 recipient resolution also recognizes [virtual addresses](/protocol/tips/tip-1022) on transfer paths. If a transfer or mint targets a registered virtual address, the token resolves it to the registered master wallet before applying policy checks. The virtual address itself never accumulates TIP-20 balance.
-
 ## Invalid Recipient Protection
 TIP-20 tokens cannot be sent to other TIP-20 token contract addresses. The implementation uses a `validRecipient` guard that rejects recipients whose address is zero, or has the TIP-20 prefix (`0x20c000000000000000000000`).
 Any attempt to transfer to a TIP-20 token address must revert with `InvalidRecipient`. This prevents accidental token loss by sending funds to token contracts instead of user accounts.
-
-Virtual addresses are not invalid recipients for TIP-20 transfers. Instead, they are aliases that resolve through the Address Registry precompile at `0xFDC0000000000000000000000000000000000000` and forward to the registered master wallet. This forwarding only applies to TIP-20 transfer paths. Non-TIP-20 tokens sent to a virtual address do not forward.
 
 ## Currencies and Quote Tokens
 Each TIP-20 token declares a currency identifier and a corresponding `quoteToken` used for pricing and routing in the Stablecoin DEX. Stablecoin currency identifiers should be [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) three-letter codes representing the underlying fiat currency (e.g., `"USD"`, `"EUR"`, `"GBP"`) — not the token's own symbol. The currency is set at token creation and **cannot be changed afterward**. **Only tokens with `currency == "USD"` are eligible for paying transaction fees.** Tokens with `currency == "USD"` must pair with a USD-denominated TIP-20 token.
@@ -471,7 +480,7 @@ TIP-20 tokens support [EIP-2612](https://eips.ethereum.org/EIPS/eip-2612) `permi
 The `DOMAIN_SEPARATOR` is computed dynamically on every call using `block.chainid`, so it remains correct after a chain fork. Each owner has a monotonically increasing `nonce` to prevent replay. Only `v = 27` or `v = 28` is accepted; `v = 0` or `v = 1` is intentionally **not** normalized (see [TIP-1004](/protocol/tips/tip-1004) for rationale).
 
 ## Pause Controls
-Pause controls `pause` and `unpause` govern all transfer operations and reward related flows. When paused, transfers, memo transfers, minting, burning, `burnBlocked`, and reward-related flows halt, but administrative and configuration functions remain allowed. The `paused()` getter reflects the current state and must be checked by all affected entrypoints.
+Pause controls `pause` and `unpause` govern all transfer operations and reward related flows. When paused, transfers and memo transfers halt, but administrative and configuration functions remain allowed. The `paused()` getter reflects the current state and must be checked by all affected entrypoints.
 
 ## TIP-20 Roles
 TIP-20 uses a role-based authorization system. The main roles are:

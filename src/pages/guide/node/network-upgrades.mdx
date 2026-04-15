@@ -46,7 +46,7 @@ For detailed release notes and binaries, see the [Changelog](/changelog).
 
 ### Who is affected?
 
-Partners that directly call `AccountKeychain.authorizeKey(...)` to create or rotate access keys should also review the T3 upgrade page. Existing authorized access keys remain valid, but those onchain authorization flows must move to the new TIP-1011 ABI post-T3.
+Partners that directly call `AccountKeychain.authorizeKey(...)` or manually encode `key_authorization` to create or rotate access keys should also review the T3 upgrade page. Existing authorized access keys remain valid, but those low-level authorization flows must move to the new TIP-1011 format post-T3.
 
 Partners that index TIP-20 transfers should also review the T3 upgrade page. Virtual-address forwarding emits two-hop `Transfer` events, so raw transfer lists and counts will be misleading unless that pair is handled as one logical deposit.
 

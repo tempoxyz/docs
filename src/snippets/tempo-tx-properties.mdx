@@ -225,7 +225,7 @@ user's preferred fee token and the validator's preferred token.
       valid_after,
       fee_token, // [!code focus]
       fee_payer_signature,
-      authorization_list,
+      aa_authorization_list,
       key_authorization,
       signature,
     ])
@@ -501,7 +501,7 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
       valid_after,
       fee_token,
       0x00, // indicate intention for a fee payer // [!code focus]
-      authorization_list,
+      aa_authorization_list,
       key_authorization
     ])
 
@@ -519,7 +519,7 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
       valid_after,
       fee_token,
       sender_address, // scope to sender // [!code focus]
-      authorization_list,
+      aa_authorization_list,
       key_authorization
     ])
 
@@ -537,7 +537,7 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
       valid_after,
       fee_token,
       fee_payer_signature, // signature over `fee_payer_envelope` // [!code focus]
-      authorization_list,
+      aa_authorization_list,
       key_authorization,
       signature, // signature over `user_envelope` // [!code focus]
     ])
@@ -823,7 +823,7 @@ parameter.
       valid_after,
       fee_token,
       fee_payer_signature,
-      authorization_list,
+      aa_authorization_list,
       key_authorization,
       signature,
     ])
@@ -1227,7 +1227,7 @@ Post-T3, access keys can sign calls but not contract deployments or other transa
       valid_after,
       fee_token,
       fee_payer_signature,
-      authorization_list,
+      aa_authorization_list,
       key_authorization, // [!code focus]
       signature,
     ])
@@ -1522,7 +1522,7 @@ In **Viem** and **Wagmi**, expiring nonces are handled automatically.
       valid_after,
       fee_token,
       fee_payer_signature,
-      authorization_list,
+      aa_authorization_list,
       key_authorization,
       signature,
     ])
@@ -1767,7 +1767,7 @@ Expiring nonces can be used by setting `nonceKey` to `maxUint256` and `validBefo
       valid_after,
       fee_token,
       fee_payer_signature,
-      authorization_list,
+      aa_authorization_list,
       key_authorization,
       signature,
     ])
@@ -2051,7 +2051,7 @@ For cases requiring ordered sequences within a key, Tempo's **2D nonce system** 
       valid_after,
       fee_token,
       fee_payer_signature,
-      authorization_list,
+      aa_authorization_list,
       key_authorization,
       signature,
     ])
@@ -2304,7 +2304,7 @@ the transaction can be included in a block.
       valid_after, // [!code focus]
       fee_token,
       fee_payer_signature,
-      authorization_list,
+      aa_authorization_list,
       key_authorization,
       signature,
     ])

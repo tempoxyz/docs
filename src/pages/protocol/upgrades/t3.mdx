@@ -31,7 +31,7 @@ T3 is Tempo's next network upgrade. It introduces the following changes:
 
 ## Who is affected?
 
-- Access-key integrations that directly call `AccountKeychain.authorizeKey(...)` onchain must migrate to the new TIP-1011 ABI after activation.
+- Access-key integrations that directly call `AccountKeychain.authorizeKey(...)` onchain or manually encode `key_authorization` payloads must migrate to the new TIP-1011 format after activation.
 - Explorers and indexers that surface TIP-20 transfer history or counts must handle TIP-1022 virtual-address forwarding as one logical deposit, not two independent transfers.
 - Most other integrators only need to upgrade to T3-compatible tooling. Existing authorized access keys keep working, and teams that do not adopt virtual addresses do not need code changes for TIP-1022.
 
@@ -45,13 +45,13 @@ T3 is Tempo's next network upgrade. It introduces the following changes:
 
 ## Breaking changes
 
-Breaking changes only affect two groups: integrations that directly call `AccountKeychain.authorizeKey(...)` onchain, and explorers/indexers that surface TIP-20 transfer history or counts.
+Breaking changes only affect two groups: access-key integrations that either manually encode `key_authorization` or directly call `AccountKeychain.authorizeKey(...)` onchain, and explorers/indexers that surface TIP-20 transfer history or counts.
 
 For most other integrators, no action is needed beyond upgrading to T3-compatible tooling. Existing authorized access keys keep working, and Tempo Transactions that use `key_authorization` continue to work through T3-compatible tooling.
 
 ### Breaking change for access-key integrations
 
-Only integrations that call `AccountKeychain.authorizeKey(...)` directly onchain need code changes. Before T3, those flows use the legacy authorization ABI. Post-T3, they must use the TIP-1011 authorization format with the updated `authorizeKey(...)` arguments. Legacy calls fail with `LegacyAuthorizeKeySelectorChanged`, sometimes surfaced as `LegacyAuthorizeKeySelectorChanged(newSelector: 0x980a6025)`.
+Only integrations that directly call `AccountKeychain.authorizeKey(...)` or manually construct `key_authorization` payloads need code changes. Before T3, those flows use the legacy authorization ABI and legacy key-authorization encoding. Post-T3, they must use the TIP-1011 authorization format with the updated `authorizeKey(...)` arguments and post-T3 `key_authorization` payload shape. Legacy calls fail with `LegacyAuthorizeKeySelectorChanged`, sometimes surfaced as `LegacyAuthorizeKeySelectorChanged(newSelector: 0x980a6025)`.
 
 **Before activation:** Integrations must continue using the legacy `AccountKeychain.authorizeKey(...)` ABI. The TIP-1011 authorization format is not yet valid onchain.
 
@@ -108,4 +108,4 @@ For the coordinating meta TIP, see [tempoxyz/tempo#3273](https://github.com/temp
 
 ### TIP-1022: Virtual Addresses for TIP-20 Deposit Forwarding
 
-[TIP-1022](/protocol/tips/tip-1022) lets partners issue per-user deposit addresses that forward TIP-20 deposits to a registered master wallet at the protocol level. Nothing changes unless you adopt virtual addresses, but explorers, indexers, and backends that surface TIP-20 deposit activity should collapse the two-hop forwarding path into one logical deposit to the master wallet. Forwarding applies only to TIP-20 transfer paths.
+[TIP-1022](/protocol/tips/tip-1022) lets partners issue per-user deposit addresses that forward TIP-20 deposits to a registered master wallet at the protocol level. Nothing changes unless you adopt virtual addresses, but explorers, indexers, and backends that surface TIP-20 deposit activity should collapse the two-hop forwarding path into one logical deposit to the master wallet. Forwarding applies to recipient-bearing TIP-20 paths, including transfers and mints.
