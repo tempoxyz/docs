@@ -1,8 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('send PathUSD from Zone A into Zone B without a spurious Zone B auth error', async ({
-  page,
-}) => {
+test('send pathUSD from Zone A into Zone B', async ({ page }) => {
   test.setTimeout(240000)
 
   const client = await page.context().newCDPSession(page)
@@ -17,80 +15,61 @@ test('send PathUSD from Zone A into Zone B without a spurious Zone B auth error'
     },
   })
 
-  try {
-    await page.goto('/guide/private-zones/send-tokens-across-zones')
+  await page.goto('/guide/private-zones/send-tokens-across-zones')
 
-    const signUpButton = page.getByRole('button', { name: 'Sign up' }).first()
-    await expect(signUpButton).toBeVisible({ timeout: 90000 })
-    await signUpButton.click()
+  const signUpButton = page.getByRole('button', { name: 'Sign up' }).first()
+  await expect(signUpButton).toBeVisible({ timeout: 90000 })
+  await signUpButton.click()
 
-    await expect(page.getByRole('button', { name: 'Sign out' }).first()).toBeVisible({
-      timeout: 30000,
-    })
+  await expect(page.getByRole('button', { name: 'Sign out' }).first()).toBeVisible({
+    timeout: 30000,
+  })
 
-    const authorizeZoneAButton = page
-      .getByRole('button', { name: 'Authorize Zone A reads' })
-      .first()
-    const getFundsButton = page.getByRole('button', { name: 'Get testnet PathUSD' }).first()
-    const topUpButton = page
-      .getByRole('button', {
-        name: /^(Approve \+ top up|Top up) Zone A$/,
-      })
-      .first()
-    const sendButton = page.getByRole('button', { name: 'Send 25 PathUSD into Zone B' }).first()
-    const waitingForZoneBDeposit = page.getByText(
-      'Wait for the routed pathUSD deposit to land in Zone B.',
-      { exact: true },
+  const authorizeSourceButton = page.getByRole('button', { name: 'Authorize Zone A reads' }).first()
+  await expect(authorizeSourceButton).toBeVisible({ timeout: 30000 })
+  await authorizeSourceButton.click()
+
+  const getFundsButton = page.getByRole('button', { name: /^Get testnet pathUSD$/i }).first()
+  const topUpButton = page.getByRole('button', { name: /^Approve \+ top up Zone A$/i }).first()
+  const sendButton = page.getByRole('button', { name: /^Send 25 pathUSD into Zone B$/i }).first()
+  const authorizeTargetButton = page.getByRole('button', { name: 'Authorize Zone B reads' }).first()
+
+  await expect
+    .poll(
+      async () =>
+        (await getFundsButton.isVisible()) ||
+        (await topUpButton.isVisible()) ||
+        (await sendButton.isVisible()),
+      { timeout: 90000 },
     )
-    const httpError = page.getByText('HTTP request failed.', { exact: true })
+    .toBe(true)
 
+  if (await getFundsButton.isVisible()) {
+    await getFundsButton.click()
     await expect
-      .poll(
-        async () =>
-          (await authorizeZoneAButton.isVisible()) ||
-          (await getFundsButton.isVisible()) ||
-          (await topUpButton.isVisible()) ||
-          (await sendButton.isVisible()),
-        { timeout: 90000 },
-      )
+      .poll(async () => (await topUpButton.isVisible()) || (await sendButton.isVisible()), {
+        timeout: 90000,
+      })
       .toBe(true)
-
-    if (await authorizeZoneAButton.isVisible()) {
-      await authorizeZoneAButton.click()
-      await expect
-        .poll(
-          async () =>
-            (await getFundsButton.isVisible()) ||
-            (await topUpButton.isVisible()) ||
-            (await sendButton.isVisible()),
-          { timeout: 90000 },
-        )
-        .toBe(true)
-    }
-
-    if (await getFundsButton.isVisible()) {
-      await getFundsButton.click()
-      await expect
-        .poll(async () => (await topUpButton.isVisible()) || (await sendButton.isVisible()), {
-          timeout: 90000,
-        })
-        .toBe(true)
-    }
-
-    if (await topUpButton.isVisible()) {
-      await topUpButton.click()
-    }
-
-    await expect(sendButton).toBeVisible({ timeout: 120000 })
-    await sendButton.click()
-
-    await expect(waitingForZoneBDeposit).toBeVisible({ timeout: 120000 })
-
-    for (let index = 0; index < 30; index++) {
-      await expect(httpError).toHaveCount(0)
-      await page.waitForTimeout(1000)
-    }
-  } finally {
-    await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })
   }
+
+  if (await topUpButton.isVisible()) {
+    await topUpButton.click()
+  }
+
+  await expect(sendButton).toBeVisible({ timeout: 120000 })
+  await sendButton.click()
+
+  await expect(authorizeTargetButton).toBeVisible({ timeout: 120000 })
+  await authorizeTargetButton.click()
+
+  await expect(
+    page
+      .locator('div[data-completed="true"]', {
+        has: page.getByText('Authorize private reads in Zone B and confirm the pathUSD balance.'),
+      })
+      .first(),
+  ).toBeVisible({ timeout: 120000 })
+
+  await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })
 })

@@ -1,7 +1,7 @@
 'use client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { createClient, type Hex, parseAbi, parseUnits } from 'viem'
+import { createClient, custom, type Hex, parseAbi, parseUnits } from 'viem'
 import { Actions, tempoActions } from 'viem/tempo'
 import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
 import { useConnection, useConnectorClient, usePublicClient } from 'wagmi'
@@ -69,6 +69,7 @@ export function DepositToZone() {
 function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
   const { address, mode } = props
   const queryClient = useQueryClient()
+  const { connector } = useConnection()
   const { data: connectorClient } = useConnectorClient()
   const { data: rootWebAuthnAccount } = useRootWebAuthnAccount()
   const publicClient = usePublicClient()
@@ -98,6 +99,20 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
         : undefined,
     [rootWebAuthnAccount],
   )
+  const encryptedDepositClient = React.useMemo(
+    () =>
+      rootWebAuthnAccount && publicClient?.chain
+        ? createClient({
+            account: rootWebAuthnAccount,
+            chain: publicClient.chain,
+            transport: custom(publicClient),
+          })
+        : undefined,
+    [publicClient, rootWebAuthnAccount],
+  )
+  const encryptedDepositRequiresRootClient = connector?.id === 'webAuthn'
+  const encryptedDepositReady =
+    !encryptedDepositRequiresRootClient || Boolean(encryptedDepositClient)
 
   const zoneAuthorization = useZoneAuthorization({
     address,
@@ -165,15 +180,18 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
         depositSetupQuery.data.depositFee,
       )
 
+      if (mode === 'encrypted' && encryptedDepositRequiresRootClient && !encryptedDepositClient)
+        throw new Error('encrypted deposit client not ready')
+
       const receipt =
         mode === 'encrypted'
           ? (
               await Actions.zone.encryptedDepositSync(
-                connectorClient as never,
+                (encryptedDepositClient ?? connectorClient) as never,
                 {
-                  account: connectorClient.account,
+                  account: (encryptedDepositClient ?? connectorClient).account,
                   amount: DEPOSIT_AMOUNT,
-                  chain: connectorClient.chain as never,
+                  chain: (encryptedDepositClient ?? connectorClient).chain as never,
                   timeout: 60_000,
                   token: pathUsd,
                   zoneId: ZONE_ID,
@@ -308,12 +326,18 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
     stepThreeAction = (
       <Button
         className="font-normal text-[14px] -tracking-[2%]"
-        disabled={depositMutation.isPending || !zoneAuthorization.isAuthorized}
+        disabled={
+          depositMutation.isPending ||
+          !zoneAuthorization.isAuthorized ||
+          (mode === 'encrypted' && !encryptedDepositReady)
+        }
         onClick={() => depositMutation.mutate()}
         type="button"
         variant={zoneAuthorization.isAuthorized ? 'accent' : 'default'}
       >
-        {getDepositActionLabel({ isPending: depositMutation.isPending })}
+        {mode === 'encrypted' && !encryptedDepositReady
+          ? 'Preparing encrypted deposit'
+          : getDepositActionLabel({ isPending: depositMutation.isPending })}
       </Button>
     )
   }

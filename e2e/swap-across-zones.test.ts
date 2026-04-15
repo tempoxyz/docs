@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('swap PathUSD from Zone A into BetaUSD on Zone B', async ({ page }) => {
+test('swap pathUSD from Zone A into betaUSD on Zone B', async ({ page }) => {
   test.setTimeout(240000)
 
   const client = await page.context().newCDPSession(page)
@@ -25,16 +25,16 @@ test('swap PathUSD from Zone A into BetaUSD on Zone B', async ({ page }) => {
     timeout: 30000,
   })
 
-  const getFundsButton = page.getByRole('button', { name: 'Get testnet PathUSD' }).first()
-  const topUpButton = page
-    .getByRole('button', {
-      name: /^(Approve \+ top up|Top up) Zone A$/,
-    })
-    .first()
+  const authorizeSourceButton = page.getByRole('button', { name: 'Authorize Zone A reads' }).first()
+  await expect(authorizeSourceButton).toBeVisible({ timeout: 30000 })
+  await authorizeSourceButton.click()
+
+  const getFundsButton = page.getByRole('button', { name: /^Get testnet pathUSD$/i }).first()
+  const topUpButton = page.getByRole('button', { name: /^Approve \+ top up Zone A$/i }).first()
   const swapButton = page
-    .getByRole('button', { name: 'Swap 25 PathUSD into Zone B BetaUSD' })
+    .getByRole('button', { name: /^Swap 25 pathUSD into Zone B betaUSD$/i })
     .first()
-  const prepareTargetAuthButton = page.getByRole('button', { name: 'Prepare Zone B auth' }).first()
+  const authorizeTargetButton = page.getByRole('button', { name: 'Authorize Zone B reads' }).first()
 
   await expect
     .poll(
@@ -62,15 +62,13 @@ test('swap PathUSD from Zone A into BetaUSD on Zone B', async ({ page }) => {
   await expect(swapButton).toBeVisible({ timeout: 120000 })
   await swapButton.click()
 
-  await expect(prepareTargetAuthButton).toBeVisible({ timeout: 120000 })
-  await prepareTargetAuthButton.click()
+  await expect(authorizeTargetButton).toBeVisible({ timeout: 120000 })
+  await authorizeTargetButton.click()
 
   await expect(
     page
       .locator('div[data-completed="true"]', {
-        has: page.getByText(
-          'Prepare authenticated access for Zone B and read the BetaUSD balance.',
-        ),
+        has: page.getByText('Authorize private reads in Zone B and confirm the betaUSD balance.'),
       })
       .first(),
   ).toBeVisible({ timeout: 120000 })

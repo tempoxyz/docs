@@ -25,13 +25,13 @@ test('prepare zone balance and send tokens within Zone A', async ({ page }) => {
     timeout: 30000,
   })
 
-  const getFundsButton = page.getByRole('button', { name: 'Get testnet PathUSD' }).first()
-  const topUpButton = page
-    .getByRole('button', {
-      name: /^(Approve \+ top up|Top up) Zone A$/,
-    })
-    .first()
-  const sendButton = page.getByRole('button', { name: 'Send 25 PathUSD' }).first()
+  const authorizeButton = page.getByRole('button', { name: 'Authorize Zone A reads' }).first()
+  await expect(authorizeButton).toBeVisible({ timeout: 30000 })
+  await authorizeButton.click()
+
+  const getFundsButton = page.getByRole('button', { name: /^Get testnet pathUSD$/i }).first()
+  const topUpButton = page.getByRole('button', { name: /^Approve \+ top up Zone A$/i }).first()
+  const sendButton = page.getByRole('button', { name: /^Send 25 pathUSD$/i }).first()
 
   await expect
     .poll(
@@ -56,7 +56,7 @@ test('prepare zone balance and send tokens within Zone A', async ({ page }) => {
   await expect(
     page
       .locator('div[data-completed="true"]', {
-        has: page.getByText('Wait for the Zone A balance to reflect the transfer.'),
+        has: page.getByText('Wait for Zone A to show the updated private balance.'),
       })
       .first(),
   ).toBeVisible({ timeout: 120000 })

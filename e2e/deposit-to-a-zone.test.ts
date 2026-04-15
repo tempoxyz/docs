@@ -25,10 +25,12 @@ test('prepare zone access and deposit to Zone A', async ({ page }) => {
     timeout: 30000,
   })
 
-  const getFundsButton = page.getByRole('button', { name: 'Get testnet PathUSD' }).first()
-  const depositButton = page
-    .getByRole('button', { name: /^(Approve \+ deposit|Deposit) 100 PathUSD$/ })
-    .first()
+  const authorizeButton = page.getByRole('button', { name: 'Authorize Zone A reads' }).first()
+  await expect(authorizeButton).toBeVisible({ timeout: 30000 })
+  await authorizeButton.click()
+
+  const getFundsButton = page.getByRole('button', { name: /^Get testnet pathUSD$/i }).first()
+  const depositButton = page.getByRole('button', { name: /^Deposit 100 pathUSD$/i }).first()
 
   if (await getFundsButton.isVisible()) {
     await getFundsButton.click()
@@ -40,7 +42,7 @@ test('prepare zone access and deposit to Zone A', async ({ page }) => {
   await expect(
     page
       .locator('div[data-completed="true"]', {
-        has: page.getByText('Poll Zone A until the batched deposit is reflected.'),
+        has: page.getByText('Wait for Zone A to credit the deposit.'),
       })
       .first(),
   ).toBeVisible({ timeout: 120000 })

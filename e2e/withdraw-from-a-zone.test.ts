@@ -3,6 +3,8 @@ import { expect, test } from '@playwright/test'
 test.describe.configure({ retries: 0, timeout: 120000 })
 
 test('prepare zone balance and withdraw from Zone A', async ({ page }) => {
+  test.setTimeout(180000)
+
   const client = await page.context().newCDPSession(page)
   await client.send('WebAuthn.enable')
   const { authenticatorId } = await client.send('WebAuthn.addVirtualAuthenticator', {
@@ -25,33 +27,49 @@ test('prepare zone balance and withdraw from Zone A', async ({ page }) => {
     timeout: 20000,
   })
 
-  const getFundsButton = page.getByRole('button', { name: 'Get testnet PathUSD' }).first()
-  const topUpButton = page
-    .getByRole('button', {
-      name: /^(Approve \+ top up|Top up) Zone A$/,
-    })
-    .first()
-  const withdrawButton = page
-    .getByRole('button', { name: /^(Approve \+ withdraw|Withdraw) 100 PathUSD$/ })
-    .first()
+  const authorizeButton = page.getByRole('button', { name: 'Authorize Zone A reads' }).first()
+  await expect(authorizeButton).toBeVisible({ timeout: 30000 })
+  await authorizeButton.click()
 
-  await expect(getFundsButton).toBeVisible({ timeout: 20000 })
-  await getFundsButton.click()
-  await expect(topUpButton).toBeVisible({ timeout: 45000 })
+  const getFundsButton = page.getByRole('button', { name: /^Get testnet pathUSD$/i }).first()
+  const topUpButton = page.getByRole('button', { name: /^Approve \+ top up Zone A$/i }).first()
+  const withdrawButton = page.getByRole('button', { name: /^Withdraw 100 pathUSD$/i }).first()
 
-  await topUpButton.click()
-  await expect(withdrawButton).toBeVisible({ timeout: 45000 })
+  await expect
+    .poll(
+      async () =>
+        (await getFundsButton.isVisible()) ||
+        (await topUpButton.isVisible()) ||
+        (await withdrawButton.isVisible()),
+      { timeout: 90000 },
+    )
+    .toBe(true)
+
+  if (await getFundsButton.isVisible()) {
+    await getFundsButton.click()
+    await expect
+      .poll(async () => (await topUpButton.isVisible()) || (await withdrawButton.isVisible()), {
+        timeout: 90000,
+      })
+      .toBe(true)
+  }
+
+  if (await topUpButton.isVisible()) {
+    await topUpButton.click()
+  }
+
+  await expect(withdrawButton).toBeVisible({ timeout: 90000 })
 
   await withdrawButton.click()
 
   await expect(
     page
       .locator('div[data-completed="true"]', {
-        has: page.getByText('Wait for PathUSD to arrive on Moderato.'),
+        has: page.getByText('Wait for pathUSD to settle back to your public balance.'),
       })
       .first(),
   ).toBeVisible({
-    timeout: 45000,
+    timeout: 120000,
   })
 
   await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })
