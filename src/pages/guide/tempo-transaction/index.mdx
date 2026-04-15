@@ -2,9 +2,8 @@
 description: Learn how to use Tempo Transactions for configurable fee tokens, fee sponsorship, batch calls, access keys, and concurrent execution.
 ---
 
-import { Cards, Card, Tabs, Tab } from 'vocs'
+import { Cards, Card } from 'vocs'
 import TempoTxProperties from '../../../snippets/tempo-tx-properties.mdx'
-import TempoTxPropertiesPostT3 from '../../../snippets/tempo-tx-properties-post-t3.mdx'
 
 ## Use Tempo Transactions
 
@@ -84,15 +83,8 @@ If you are an EVM smart contract developer, see the [Tempo extension for Foundry
 
 ## Properties
 
-:::info[T3 comparison]
-The `Current network` tab shows the pre-T3 Tempo Transaction shape that is live today. The `Post-T3` tab shows the access-key and authorization changes that activate with T3.
+:::info[T3 will change these examples]
+The examples below show the currently active Tempo Transaction shape. T3 changes the access-key examples and parts of the transaction envelope, and the affected lines are called out inline.
 :::
 
-<Tabs stateKey="tempo-tx-version">
-  <Tab title="Current network">
-    <TempoTxProperties />
-  </Tab>
-  <Tab title="Post-T3">
-    <TempoTxPropertiesPostT3 />
-  </Tab>
-</Tabs>
+<TempoTxProperties />
