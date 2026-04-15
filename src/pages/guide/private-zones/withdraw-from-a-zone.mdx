@@ -7,6 +7,8 @@ import * as Demo from '../../../components/guides/Demo.tsx'
 import { Tab, Tabs } from 'vocs'
 import { WithdrawFromZone } from '../../../components/guides/zones/WithdrawFromZone.tsx'
 
+export const withdrawalZoneBalances = [{ label: 'Zone A', token: Demo.pathUsd, zone: 6 }]
+
 # Withdraw from a Zone
 
 :::info
@@ -27,7 +29,7 @@ By the end of this guide you will have withdrawn `pathUSD` from `Zone A` and con
   name="Withdraw from Zone A"
   footerVariant="balances"
   tokens={[Demo.pathUsd]}
-  zoneBalances={[{ label: 'Zone A', token: Demo.pathUsd, zone: 6 }]}
+  zoneBalances={withdrawalZoneBalances}
 >
   <WithdrawFromZone />
 </Demo.Container>
@@ -67,15 +69,15 @@ import { parseUnits } from 'viem'
 import { Actions } from 'viem/tempo'
 
 const withdrawalAmount = parseUnits('100', 6)
-const revealTo = '0x031dc147467e8f106eb22850fef549dc74b8f6634aeac554ebdd4ab896b67cdf68'
+const revealTo = '0x031dc147467e8f106eb22850fef549dc74b8f6634aeac554ebdd4ab896b67cdf68' // [!code focus]
 
 await zoneAClient.zone.signAuthorizationToken()
 
-const { receipt } = await Actions.zone.requestVerifiableWithdrawalSync(zoneAClient, {
+const { receipt } = await Actions.zone.requestVerifiableWithdrawalSync(zoneAClient, { // [!code focus]
   account: rootClient.account,
   feeToken: pathUsd,
   amount: withdrawalAmount,
-  revealTo,
+  revealTo, // [!code focus]
   token: pathUsd,
   to: rootClient.account.address,
 })
@@ -93,10 +95,6 @@ A direct withdrawal is the simplest way to exit a zone. You ask `ZoneOutbox` on 
 Like deposits, withdrawals settle in phases. The request is accepted on the zone first, and the public balance changes later when the sequencer submits and processes the corresponding batch on Tempo.
 
 If Tempo-side processing fails, the withdrawal does not stay stuck in limbo. The protocol re-deposits the withdrawal amount back into the zone to the request's `fallbackRecipient`. The fee is still consumed.
-
-:::tip
-  If a user is trying to withdraw most or all of a zone balance, subtract the withdrawal fee first. `ZoneOutbox` burns `amount + fee`, and the fee is paid in the same token being withdrawn.
-:::
 
 :::warning
   Even with `gasLimit: 0n`, a direct withdrawal can still fail on Tempo—for example because of token transfer or policy checks. In that case, the amount bounces back to `fallbackRecipient` on the zone instead of increasing the public balance.

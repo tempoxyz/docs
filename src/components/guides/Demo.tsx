@@ -283,8 +283,8 @@ export namespace Container {
     )
   }
 
-  function ZoneBalancesFooterItem(props: ZoneBalance & { address: Address; showLabel: boolean }) {
-    const { address, label, showLabel, token, zone } = props
+  function ZoneBalancesFooterItem(props: ZoneBalance & { address: Address }) {
+    const { address, token, zone } = props
     const { data: connectorClient } = useConnectorClient()
     const { data: rootWebAuthnAccount } = useRootWebAuthnAccount()
     const zoneRpcUrl =
@@ -337,13 +337,7 @@ export namespace Container {
       return <span />
     }
 
-    return showLabel ? (
-      <span className="flex gap-1">
-        <span className="text-gray9">{label}</span>
-        <span className="text-gray10">{formatUnits(balance, metadata.decimals)}</span>
-        {metadata.symbol}
-      </span>
-    ) : (
+    return (
       <span className="flex gap-1">
         <span className="text-gray10">{formatUnits(balance, metadata.decimals)}</span>
         {metadata.symbol}
@@ -357,12 +351,12 @@ export namespace Container {
     zoneBalances?: ZoneBalance[] | undefined
   }) {
     const { address, tokens, zoneBalances } = props
-    const showZoneBalanceLabels = Boolean(zoneBalances && zoneBalances.length > 1)
+    const personalBalanceLabel = tokens.length > 1 ? 'Personal balances' : 'Personal balance'
 
     return (
       <div className="flex h-full flex-col gap-2 py-2 leading-none">
         <div className="grid grid-cols-[7rem_1px_minmax(0,1fr)] items-center gap-x-2 gap-y-1">
-          <span className="text-gray10">Balances</span>
+          <span className="text-gray10">{personalBalanceLabel}</span>
           <div className="min-h-5 w-px self-stretch bg-gray4" />
           <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-3 sm:gap-y-2">
             {address ? (
@@ -374,22 +368,21 @@ export namespace Container {
             )}
           </div>
         </div>
-        {address && zoneBalances && zoneBalances.length > 0 && (
-          <div className="grid grid-cols-[7rem_1px_minmax(0,1fr)] items-center gap-x-2 gap-y-1">
-            <span className="text-gray10">Zone balances</span>
-            <div className="min-h-5 w-px self-stretch bg-gray4" />
-            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-3 sm:gap-y-2">
-              {zoneBalances.map((zoneBalance) => (
-                <ZoneBalancesFooterItem
-                  key={`${zoneBalance.zone}:${zoneBalance.token}:${zoneBalance.label}`}
-                  address={address as Address}
-                  showLabel={showZoneBalanceLabels}
-                  {...zoneBalance}
-                />
-              ))}
+        {address &&
+          zoneBalances &&
+          zoneBalances.length > 0 &&
+          zoneBalances.map((zoneBalance) => (
+            <div
+              key={`${zoneBalance.zone}:${zoneBalance.token}:${zoneBalance.label}`}
+              className="grid grid-cols-[7rem_1px_minmax(0,1fr)] items-center gap-x-2 gap-y-1"
+            >
+              <span className="text-gray10">{zoneBalance.label} balance</span>
+              <div className="min-h-5 w-px self-stretch bg-gray4" />
+              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-3 sm:gap-y-2">
+                <ZoneBalancesFooterItem address={address as Address} {...zoneBalance} />
+              </div>
             </div>
-          </div>
-        )}
+          ))}
       </div>
     )
   }

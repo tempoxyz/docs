@@ -6,6 +6,11 @@ description: Swap pathUSD from Zone A into betaUSD on Zone B by routing a zone w
 import * as Demo from '../../../components/guides/Demo.tsx'
 import { SwapAcrossZones } from '../../../components/guides/zones/SwapAcrossZones.tsx'
 
+export const swapZoneBalances = [
+  { label: 'Zone A', token: Demo.pathUsd, zone: 6 },
+  { label: 'Zone B', token: Demo.betaUsd, zone: 7 },
+]
+
 # Swap across zones
 
 :::info
@@ -33,10 +38,7 @@ By the end of this guide you will have swapped **25 pathUSD** from **Zone A** in
   name="Swap across zones"
   footerVariant="balances"
   tokens={[Demo.pathUsd]}
-  zoneBalances={[
-    { label: 'Zone A', token: Demo.pathUsd, zone: 6 },
-    { label: 'Zone B', token: Demo.betaUsd, zone: 7 },
-  ]}
+  zoneBalances={swapZoneBalances}
 >
   <SwapAcrossZones />
 </Demo.Container>

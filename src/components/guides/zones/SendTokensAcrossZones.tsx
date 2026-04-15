@@ -1,14 +1,7 @@
 'use client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import {
-  createClient,
-  encodeAbiParameters,
-  formatUnits,
-  type Hex,
-  parseAbiItem,
-  parseUnits,
-} from 'viem'
+import { createClient, encodeAbiParameters, type Hex, parseAbiItem, parseUnits } from 'viem'
 import { Actions, tempoActions } from 'viem/tempo'
 import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
 import { useConnection, useConnectorClient, usePublicClient } from 'wagmi'
@@ -598,14 +591,6 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         {routedSendReceipt && sendMutation.data && (
           <StepBody>
             <DetailLine label="Receipt block" value={routedSendReceipt.blockNumber.toString()} />
-            <DetailLine
-              label={`${ZONE_B.label} deposit fee`}
-              value={`${formatUnits(sendMutation.data.targetDepositFee, 6)} pathUSD`}
-            />
-            <DetailLine
-              label={`Expected ${ZONE_B.label} net amount`}
-              value={`${formatUnits(sendMutation.data.minimumTargetIncrease, 6)} pathUSD`}
-            />
             <ReceiptHash hash={routedSendReceipt.transactionHash} />
           </StepBody>
         )}

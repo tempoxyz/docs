@@ -7,6 +7,8 @@ import * as Demo from '../../../components/guides/Demo.tsx'
 import { Tab, Tabs } from 'vocs'
 import { DepositToZone } from '../../../components/guides/zones/DepositToZone.tsx'
 
+export const depositZoneBalances = [{ label: 'Zone A', token: Demo.pathUsd, zone: 6 }]
+
 # Deposit to a Zone
 
 :::info
@@ -27,7 +29,7 @@ By the end of this guide you will have deposited `pathUSD` into `Zone A` and con
   name="Deposit to Zone A"
   footerVariant="balances"
   tokens={[Demo.pathUsd]}
-  zoneBalances={[{ label: 'Zone A', token: Demo.pathUsd, zone: 6 }]}
+  zoneBalances={depositZoneBalances}
 >
   <DepositToZone />
 </Demo.Container>
@@ -65,7 +67,7 @@ import { Actions } from 'viem/tempo'
 
 const depositAmount = parseUnits('100', 6)
 
-const { receipt } = await Actions.zone.encryptedDepositSync(rootClient, {
+const { receipt } = await Actions.zone.encryptedDepositSync(rootClient, { // [!code focus]
   account: rootClient.account,
   amount: depositAmount,
   token: pathUsd,

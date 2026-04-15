@@ -6,6 +6,11 @@ description: Send pathUSD from Zone A into Zone B by routing a same-token withdr
 import * as Demo from '../../../components/guides/Demo.tsx'
 import { SendTokensAcrossZones } from '../../../components/guides/zones/SendTokensAcrossZones.tsx'
 
+export const crossZoneBalances = [
+  { label: 'Zone A', token: Demo.pathUsd, zone: 6 },
+  { label: 'Zone B', token: Demo.pathUsd, zone: 7 },
+]
+
 # Send tokens across zones
 
 :::info
@@ -24,10 +29,7 @@ By the end of this guide you will have sent **25 pathUSD** from **Zone A** into 
   name="Send tokens across zones"
   footerVariant="balances"
   tokens={[Demo.pathUsd]}
-  zoneBalances={[
-    { label: 'Zone A', token: Demo.pathUsd, zone: 6 },
-    { label: 'Zone B', token: Demo.pathUsd, zone: 7 },
-  ]}
+  zoneBalances={crossZoneBalances}
 >
   <SendTokensAcrossZones />
 </Demo.Container>
