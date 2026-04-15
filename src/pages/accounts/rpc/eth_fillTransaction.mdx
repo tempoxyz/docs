@@ -162,6 +162,7 @@ type SwapAmount = {
 ## Example
 
 ```ts twoslash
+// @noErrors
 import { Provider } from 'accounts'
 
 const provider = Provider.create()
@@ -212,6 +213,7 @@ result.capabilities
 Pay fees with a specific stablecoin.
 
 ```ts twoslash
+// @noErrors
 import { Provider } from 'accounts'
 const provider = Provider.create()
 const [account] = await provider.request({ method: 'eth_accounts' })
@@ -243,6 +245,7 @@ result.capabilities.fee
 When the relay is configured with a [`feePayer`](/accounts/server/handler.relay#feepayer) and the request is sponsorable, the response includes `sponsored: true` and `sponsor` details.
 
 ```ts twoslash
+// @noErrors
 import { Provider } from 'accounts'
 const provider = Provider.create()
 const [account] = await provider.request({ method: 'eth_accounts' })
@@ -275,6 +278,7 @@ result.capabilities.sponsor
 When the user has insufficient balance of a required token, the relay automatically injects swap calls (approve + buy) via the [Stablecoin DEX](/guide/stablecoin-dex). The swap details are reported in `meta.autoSwap`, and swap-related balance diffs are excluded from `meta.balanceDiffs`.
 
 ```ts twoslash
+// @noErrors
 import { Provider } from 'accounts'
 const provider = Provider.create()
 const [account] = await provider.request({ method: 'eth_accounts' })
@@ -340,6 +344,7 @@ result.capabilities.fee
 When `eth_fillTransaction` fails, the relay returns structured error details in `capabilities.error` instead of throwing.
 
 ```ts twoslash
+// @noErrors
 import { Provider } from 'accounts'
 const provider = Provider.create()
 const [account] = await provider.request({ method: 'eth_accounts' })
@@ -367,6 +372,7 @@ result.capabilities.error
 For `InsufficientBalance` errors, the relay also returns a `capabilities.requireFunds` object with the exact deficit amount and token metadata.
 
 ```ts twoslash
+// @noErrors
 import { Provider } from 'accounts'
 const provider = Provider.create()
 const [account] = await provider.request({ method: 'eth_accounts' })

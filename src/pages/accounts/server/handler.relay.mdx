@@ -99,6 +99,7 @@ const handler = Handler.relay({
 ```
 
 ```ts twoslash [client.ts]
+// @noErrors
 import { Provider } from 'accounts'
 const provider = Provider.create()
 const [account] = await provider.request({ method: 'eth_accounts' })
@@ -135,6 +136,7 @@ When a user has insufficient balance of a required token, the relay automaticall
 :::code-group
 
 ```ts twoslash [client.ts]
+// @noErrors
 import { Provider } from 'accounts'
 const provider = Provider.create()
 const [account] = await provider.request({ method: 'eth_accounts' })
@@ -192,6 +194,7 @@ Picks the user's optimal `feeToken` automatically:
 3. Validator fallback
 
 ```ts twoslash
+// @noErrors
 import { Provider } from 'accounts'
 const provider = Provider.create()
 const [account] = await provider.request({ method: 'eth_accounts' })
@@ -224,6 +227,7 @@ Simulates the transaction and returns per-account token balance diffs in `capabi
 :::code-group
 
 ```ts twoslash [client.ts]
+// @noErrors
 import { Provider } from 'accounts'
 const provider = Provider.create()
 const [account] = await provider.request({ method: 'eth_accounts' })
@@ -271,6 +275,7 @@ Derives fee estimates from the filled transaction and returns them as both raw a
 :::code-group
 
 ```ts twoslash [client.ts]
+// @noErrors
 import { Provider } from 'accounts'
 const provider = Provider.create()
 const [account] = await provider.request({ method: 'eth_accounts' })
@@ -310,6 +315,7 @@ const handler = Handler.relay()
 For insufficient balance errors, the relay also returns a `capabilities.requireFunds` object with the exact deficit amount and token metadata — enabling UIs to prompt the user to fund their account.
 
 ```ts twoslash
+// @noErrors
 import { Provider } from 'accounts'
 const provider = Provider.create()
 const [account] = await provider.request({ method: 'eth_accounts' })
@@ -357,6 +363,7 @@ By default, only a minimum set of features are enabled, given on what options yo
 Set [`features: 'all'`](#features) to enable all features by default such as: **fee token resolution**, **auto-swap**, and **simulation** (balance diffs + fee breakdown). This will come at the cost of slightly increased network latency.
 
 ```ts twoslash
+// @noErrors
 import { privateKeyToAccount } from 'viem/accounts'
 import { Handler } from 'accounts/server'
 
@@ -415,6 +422,7 @@ Controls which relay features are enabled. By default, only fee payer sponsorshi
 - `undefined` (default): enables only features that are configured via options (e.g. `feePayer`, `autoSwap`, etc).
 
 ```ts twoslash
+// @noErrors
 import { Handler } from 'accounts/server'
 
 const handler = Handler.relay({
