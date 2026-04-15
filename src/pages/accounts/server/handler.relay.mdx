@@ -77,7 +77,7 @@ export const POST = handler.fetch // Next.js
 
 ### Sponsorship
 
-Configure a [`feePayer`](#feepayer) to sponsor transactions. The relay signs `feePayerSignature` on the filled transaction and returns sponsor details in the response metadata. Use a [`validate`](#feepayervalidate) callback for conditional sponsorship — rejected transactions are re-filled for self-payment.
+Configure a [`feePayer`](#feepayer) to sponsor transactions. When a fee payer is configured, **all transactions are sponsored by default** — clients do not need to opt in. A client can opt out of sponsorship for a specific transaction by passing `feePayer: false`. Use a [`validate`](#feepayervalidate) callback for conditional sponsorship — rejected transactions are re-filled for self-payment.
 
 :::code-group
 
@@ -435,7 +435,7 @@ const handler = Handler.relay({
 - **Type:** `object`
 - **Optional**
 
-Fee payer configuration. When provided, the relay will sign `feePayerSignature` on the filled transaction.
+Fee payer configuration. When provided, the relay automatically sponsors all transactions by signing `feePayerSignature` on the filled transaction. Clients can opt out per-transaction by passing `feePayer: false`.
 
 ```ts twoslash
 import { privateKeyToAccount } from 'viem/accounts'

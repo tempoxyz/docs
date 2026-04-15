@@ -16,15 +16,15 @@ const _client = createClient({
 // [!endregion client]
 
 // [!region usage]
-// Regular transaction
+// Sponsored transaction (automatic when relay has feePayer configured)
 const _receipt1 = await client.sendTransactionSync({
   to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
 })
 
-// Sponsored transaction // [!code hl]
+// Opt out of sponsorship // [!code hl]
 const _receipt2 = await client.sendTransactionSync({
   // [!code hl]
-  feePayer: true, // [!code hl]
+  feePayer: false, // [!code hl]
   to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', // [!code hl]
 }) // [!code hl]
 
