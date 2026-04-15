@@ -586,7 +586,7 @@ key_authorization_digest = keccak256(rlp([chain_id, key_type, key_id, expiry?, l
 chain_id = u64 (0 = valid on any chain)
 key_type = 0 (Secp256k1) | 1 (P256) | 2 (WebAuthn)
 key_id = Address (derived from the public key)
-expiry = Option<u64> (unix timestamp, None = never expires, stored as u64::MAX in precompile)
+expiry = Option<u64> (unix timestamp, None = never expires)
 limits = Option<Vec<[token, limit, period?]>> (None = unlimited spending)
 allowed_calls = Option<Vec<CallScope>> (None = unrestricted non-create calls)
 ```
@@ -605,7 +605,7 @@ Note: `expiry`, `limits`, and `allowed_calls` use RLP trailing field semantics a
 
 #### Keychain Precompile
 
-The Account Keychain precompile (deployed at address `0xAAAAAAAA00000000000000000000000000000000`) manages authorized access keys for accounts. It enables root keys to provision scoped access keys with expiry timestamps and per-TIP20 token spending limits.
+The Account Keychain precompile (deployed at address `0xAAAAAAAA00000000000000000000000000000000`) manages authorized access keys for accounts. It enables root keys to provision scoped access keys with expiry timestamps, per-TIP20 token spending limits, and optional call scopes.
 
 **See the [Account Keychain Specification](./AccountKeychain) for complete interface details, storage layout, and implementation.**
 
@@ -636,7 +636,7 @@ When a TempoTransaction is received, the protocol:
 4. **Validates Key Authorization** (for Access Keys)
    - Queries precompile: `getKey(account, keyId)` returns `KeyInfo`
    - Checks key is active (not revoked)
-   - Checks expiry: `current_timestamp < expiry` (or `expiry == 0` for never expires)
+   - Checks expiry if one is configured
    - Rejects transaction if validation fails
 
 ##### Authorization Hierarchy Enforcement
@@ -651,12 +651,12 @@ The protocol enforces a strict two-tier hierarchy:
 
 **Access Keys** (keyId != address(0)):
 - Secondary keys authorized by Root Key
-- CANNOT call mutable precompile functions (`authorizeKey`, `revokeKey`, `updateSpendingLimit`)
+- CANNOT call mutable precompile functions (`authorizeKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`)
 - Precompile functions check: `transactionKey[msg.sender] == 0` before allowing mutations
 - Subject to per-TIP20 token spending limits
 - Can have expiry timestamps
 
-When an Access Key attempts to call `authorizeKey()`, `revokeKey()`, or `updateSpendingLimit()`:
+When an Access Key attempts to call one of those mutable key-management functions:
 1. Transaction executes normally until the precompile call
 2. Precompile checks `getTransactionKey()` returns non-zero (Access Key)
 3. Call reverts with `UnauthorizedCaller` error
@@ -706,17 +706,29 @@ The protocol tracks and enforces spending limits for TIP20 token transfers:
    ```typescript
    // Define key parameters
    const keyAuth = {
-     key_type: SignatureType.P256,      // 1
-     key_id: keyId,                     // address derived from public key
-     expiry: timestamp + 86400,         // 24 hours from now (or 0 for never)
-     limits: [
-       { token: USDG_ADDRESS, amount: 1000000000 }, // 1000 USDG (6 decimals)
-       { token: DAI_ADDRESS, amount: 500000000000000000000 }  // 500 DAI (18 decimals)
-     ]
-   };
+      chain_id: 1,
+      key_type: SignatureType.P256,      // 1
+      key_id: keyId,                     // address derived from public key
+      expiry: timestamp + 86400,         // 24 hours from now
+      limits: [
+        { token: USDG_ADDRESS, limit: 1000000000n, period: 86400 },
+        { token: DAI_ADDRESS, limit: 500000000000000000000n },
+      ],
+      allowed_calls: [
+        {
+          target: SUBSCRIPTION_ADDRESS,
+          selector_rules: [
+            {
+              selector: '0xa9059cbb',
+              recipients: [MERCHANT_ADDRESS],
+            },
+          ],
+        },
+      ],
+    };
 
-   // Compute digest: keccak256(rlp([key_type, key_id, expiry, limits]))
-   const authDigest = computeAuthorizationDigest(keyAuth);
+    // Compute digest: keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?]))
+    const authDigest = computeAuthorizationDigest(keyAuth);
    ```
 
 3. **Root Key Signs Authorization**
@@ -736,9 +748,11 @@ The protocol tracks and enforces spending limits for TIP20 token transfers:
      max_fee_per_gas: 1000000000,
      max_priority_fee_per_gas: 1000000000,
      key_authorization: {
+       chain_id: keyAuth.chain_id,
        key_type: keyAuth.key_type,
        expiry: keyAuth.expiry,
        limits: keyAuth.limits,
+       allowed_calls: keyAuth.allowed_calls,
        key_id: keyAuth.key_id,
        signature: rootSignature  // Root Key's signature on authDigest
      },
@@ -839,11 +853,13 @@ Applications can query key information and spending limits:
 ```typescript
 // Check if key is authorized and get info
 const keyInfo = await precompile.getKey(account, keyId);
-// Returns: { signatureType, keyId, expiry }
+// Returns: { signatureType, keyId, expiry, enforceLimits, isRevoked }
 
 // Check remaining spending limit for a token
-const remaining = await precompile.getRemainingLimit(account, keyId, USDG_ADDRESS);
-// Returns: uint256 amount remaining
+const [remaining, periodEnd] = await precompile.getRemainingLimit(account, keyId, USDG_ADDRESS);
+
+// Inspect whether the key is scoped and which targets/selectors are allowed
+const [isScoped, scopes] = await precompile.getAllowedCalls(account, keyId);
 
 // Get which key signed current transaction (callable from contracts)
 const currentKey = await precompile.getTransactionKey();
@@ -975,47 +991,13 @@ def calculate_signature_verification_gas(signature: PrimitiveSignature) -> uint2
 
 def calculate_key_authorization_gas(key_auth: SignedKeyAuthorization) -> uint256:
     """
-    Calculate the intrinsic gas cost for a KeyAuthorization.
+    Exact intrinsic gas for KeyAuthorization follows TIP-1011's slot-counting rules.
 
-    This is charged BEFORE execution as part of transaction validation.
-
-    Args:
-        key_auth: SignedKeyAuthorization with fields:
-            - signature: PrimitiveSignature (root key's signature)
-            - limits: Optional[List[TokenLimit]]
-
-    Returns:
-        gas_cost: uint256
+    Periodic limits and call scopes can add multiple storage writes beyond the base
+    key record, so implementations should defer to the TIP-1011 formula instead of
+    hard-coding a simplified estimate here.
     """
-    # Constants - KeyAuthorization pays FULL signature verification costs
-    # (not the "additional" costs used for transaction signatures)
-    ECRECOVER_GAS = 3_000   # Full ecrecover cost
-    P256_FULL_GAS = 8_000   # Full P256 cost (6,900 + 1,100)
-    COLD_SSTORE_SET_GAS = 22_000  # Storage cost for new slot
-    OVERHEAD_BUFFER = 5_000  # Buffer for event emission, storage reads, etc.
-
-    gas = 0
-
-    # Step 1: Signature verification cost (full cost, not additional)
-    if key_auth.signature.type == Secp256k1:
-        gas += ECRECOVER_GAS  # 3,000
-    elif key_auth.signature.type == P256:
-        gas += P256_FULL_GAS  # 8,000
-    elif key_auth.signature.type == WebAuthn:
-        webauthn_data_gas = calculate_calldata_gas(key_auth.signature.webauthn_data)
-        gas += P256_FULL_GAS + webauthn_data_gas  # 8,000 + calldata
-
-    # Step 2: Key storage
-    gas += COLD_SSTORE_SET_GAS  # 22,000 - store new key (0 → non-zero)
-
-    # Step 3: Overhead buffer
-    gas += OVERHEAD_BUFFER  # 5,000
-
-    # Step 4: Per-limit storage cost
-    num_limits = len(key_auth.limits) if key_auth.limits else 0
-    gas += num_limits * COLD_SSTORE_SET_GAS  # 22,000 per limit
-
-    return gas
+    return tip_1011_key_authorization_gas(key_auth)
 
 
 def calculate_tempo_tx_base_gas(tx):

@@ -47,7 +47,7 @@ T3 is Tempo's next network upgrade. It introduces the following changes:
 
 Breaking changes only affect two groups: integrations that directly call `AccountKeychain.authorizeKey(...)` onchain, and explorers/indexers that surface TIP-20 transfer history or counts.
 
-For most other integrators, no action is needed beyond upgrading to T3-compatible tooling. Existing authorized access keys keep working, and Tempo Transactions that use `key_authorization` keep working.
+For most other integrators, no action is needed beyond upgrading to T3-compatible tooling. Existing authorized access keys keep working, and Tempo Transactions that use `key_authorization` continue to work through T3-compatible tooling.
 
 ### Breaking change for access-key integrations
 
@@ -55,7 +55,7 @@ Only integrations that call `AccountKeychain.authorizeKey(...)` directly onchain
 
 **Before activation:** Integrations must continue using the legacy `AccountKeychain.authorizeKey(...)` ABI. The TIP-1011 authorization format is not yet valid onchain.
 
-**After activation:** Integrations must use the TIP-1011 authorization format.
+**Post-T3:** Integrations must use the TIP-1011 authorization format.
 
 T3 also adds one new execution restriction: access-key-signed transactions can no longer create contracts. If your product used access keys for deployments, factory calls, or module-install flows that create contracts, move those transactions to a Root Key path.
 
@@ -89,6 +89,10 @@ Tempo's broader tooling ecosystem is available in [Developer tools](/quickstart/
 | [Python](https://github.com/tempoxyz/pytempo) | [`0.5.0`](https://github.com/tempoxyz/pytempo/releases/tag/pytempo%400.5.0) |
 | [Foundry](https://github.com/tempoxyz/tempo-foundry) | [`v1.6.0-t3`](https://github.com/tempoxyz/tempo-foundry/releases/tag/v1.6.0-t3) |
 
+:::note[Current SDK caveat]
+The Accounts SDK and `wallet_authorizeAccessKey` docs still describe the legacy pre-T3 access-key shape. Until their T3 support lands, use the protocol specs and the T3-compatible SDK releases above for the post-T3 `authorizeKey(...)` ABI.
+:::
+
 ## Related docs
 For the coordinating meta TIP, see [tempoxyz/tempo#3273](https://github.com/tempoxyz/tempo/pull/3273).
 
@@ -96,12 +100,12 @@ For the coordinating meta TIP, see [tempoxyz/tempo#3273](https://github.com/temp
 
 ### TIP-1011: Enhanced Access Key Permissions
 
-[TIP-1011](/protocol/tips/tip-1011) adds periodic spending limits and call scoping to access keys, including restrictions on which contracts a key can call and, for common token flows, which recipient it can target. This gives wallets, account SDKs, and apps a safer way to offer delegated permissions for recurring billing, subscription renewals, payroll, connected-app approvals, or agent budgets without asking the user to approve every transaction manually. For existing partners, previously authorized access keys continue to work after activation, but any flow that creates, rotates, or re-authorizes a key must move to the new TIP-1011 ABI, and access-key transactions can no longer be used for contract creation.
+[TIP-1011](/protocol/tips/tip-1011) adds periodic spending limits and call scoping to access keys, including restrictions on which contracts a key can call and, for common token flows, which recipient it can target. Previously authorized access keys continue to work, but any flow that creates, rotates, or re-authorizes a key must move to the new TIP-1011 ABI, and access-key transactions can no longer be used for contract creation.
 
 ### TIP-1020: Signature Verification Precompile
 
-[TIP-1020](/protocol/tips/tip-1020) adds a single precompile for verifying secp256k1, P256, and WebAuthn signatures onchain. This gives smart contract teams, wallet builders, and account integrators a standard verification surface for passkey wallets, multisigs, governance approvals, subscription authorization, and other signature-driven flows without deploying and maintaining custom verifier contracts for each signature type. This change is additive for existing partners: nothing breaks if you keep your current verifier setup, but teams that want simpler integrations or forward-compatible support for Tempo signature types can adopt the precompile. Keychain signatures still need `AccountKeychain` for key resolution, so this precompile covers the underlying signature schemes rather than the full keychain authorization flow.
+[TIP-1020](/protocol/tips/tip-1020) adds a single precompile for verifying secp256k1, P256, and WebAuthn signatures onchain. This is additive: existing verifier setups keep working, but teams that want a standard verification surface for passkey wallets, multisigs, governance approvals, and other signature-driven flows can adopt the precompile instead of maintaining custom verifier contracts.
 
 ### TIP-1022: Virtual Addresses for TIP-20 Deposit Forwarding
 
-[TIP-1022](/protocol/tips/tip-1022) lets partners issue per-user deposit addresses that forward TIP-20 deposits to a registered master wallet at the protocol level. This is useful for exchanges, ramps, custodians, and payment processors that want one deposit address per customer for reconciliation, attribution, or account crediting, but do not want to maintain sweep jobs or fund separate onchain wallets for every user. For existing partners, nothing changes unless you adopt virtual addresses, but any explorer, indexer, or backend system that surfaces TIP-20 deposit activity should handle forwarded deposits correctly. Teams that adopt virtual addresses should treat those forwarded deposits as deposits to the registered master wallet. Forwarding applies only to TIP-20 transfer paths.
+[TIP-1022](/protocol/tips/tip-1022) lets partners issue per-user deposit addresses that forward TIP-20 deposits to a registered master wallet at the protocol level. Nothing changes unless you adopt virtual addresses, but explorers, indexers, and backends that surface TIP-20 deposit activity should collapse the two-hop forwarding path into one logical deposit to the master wallet. Forwarding applies only to TIP-20 transfer paths.
