@@ -1,5 +1,5 @@
 strictDepBuilds: true
-blockExoticSubdeps: true
+blockExoticSubdeps: false
 trustPolicy: no-downgrade
 minimumReleaseAge: 1440
 
