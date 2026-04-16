@@ -12,13 +12,9 @@ Virtual addresses let you give each customer their own TIP-20 deposit address wi
 
 For exchanges, ramps, custodians, and payment processors, this changes the operational model. You still get one address per customer for attribution and reconciliation, but you no longer need sweep jobs to consolidate funds.
 
-:::info[T3 is not live yet]
-Virtual addresses are scheduled for T3. They are not active on Moderato or Presto yet.
-:::
-
 ## Why this feature exists
 
-Without virtual addresses, per-customer deposit addresses are operationally expensive. Each deposit address becomes a real onchain balance holder. Funds land there first, and then the operator has to sweep those funds back into a central wallet.
+Without virtual addresses, per-customer deposit addresses are operationally expensive. Each deposit address becomes a real onchain balance holder. Funds land there first, and then the operator has to sweep those funds  into a central wallet.
 
 With virtual addresses, the customer-facing address is still unique, but it behaves like a routing alias. The protocol resolves it to the registered master wallet during the TIP-20 transfer itself.
 
@@ -37,7 +33,7 @@ With virtual addresses, the customer-facing address is still unique, but it beha
 
 This means:
 
-- you keep one deposit address per customer
+- you keep one deposit address per customer 
 - the master wallet receives the balance directly
 - no sweep transaction is needed
 - no separate TIP-20 balance is created for each deposit address
@@ -105,7 +101,7 @@ For an exchange or payment processor, the normal flow becomes:
 
 1. register one master wallet
 2. derive deposit addresses offchain for each customer
-3. watch TIP-20 events and map the `userTag` back to the customer record
+3. watch TIP-20 events and map the `userTag` back to the customer record on the backend
 4. credit the customer internally once the deposit is observed
 
 This gives you the accounting benefits of per-customer addresses without managing thousands or millions of real onchain balances.
@@ -136,7 +132,7 @@ If a non-TIP-20 token contract receives a transfer to a virtual address, that co
 
 Some protocols record ownership against the literal address they are given. If they mint LP shares, receipts, or similar positions to a virtual address, those positions can become stranded unless that protocol explicitly supports resolution.
 
-### It does not bypass TIP-20 policy checks
+### It does not bypass TIP-403 policy checks
 
 Policy checks run against the resolved master wallet. If the master is not allowed to receive a token, deposits to that master's virtual addresses fail too.
 
