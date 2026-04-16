@@ -94,7 +94,9 @@ The Accounts SDK and `wallet_authorizeAccessKey` docs still describe the legacy 
 :::
 
 ## Related docs
-For the coordinating meta TIP, see [tempoxyz/tempo#3273](https://github.com/tempoxyz/tempo/pull/3273).
+- [Virtual addresses for TIP-20 deposits](/protocol/tip20/virtual-addresses)
+- [TIP-1022](/protocol/tips/tip-1022)
+- For the coordinating meta TIP, see [tempoxyz/tempo#3273](https://github.com/tempoxyz/tempo/pull/3273).
 
 ## Feature TIPs
 
@@ -109,3 +111,5 @@ For the coordinating meta TIP, see [tempoxyz/tempo#3273](https://github.com/temp
 ### TIP-1022: Virtual Addresses for TIP-20 Deposit Forwarding
 
 [TIP-1022](/protocol/tips/tip-1022) lets partners issue per-user deposit addresses that forward TIP-20 deposits to a registered master wallet at the protocol level. Nothing changes unless you adopt virtual addresses, but explorers, indexers, and backends that surface TIP-20 deposit activity should collapse the two-hop forwarding path into one logical deposit to the master wallet. Forwarding applies to recipient-bearing TIP-20 paths, including transfers and mints.
+
+See [Virtual addresses for TIP-20 deposits](/protocol/tip20/virtual-addresses) for the routing model, address layout, and indexing implications.

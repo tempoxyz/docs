@@ -421,6 +421,10 @@ export default defineConfig({
                 link: '/protocol/tip20/spec',
               },
               {
+                text: 'Virtual addresses',
+                link: '/protocol/tip20/virtual-addresses',
+              },
+              {
                 text: 'Reference Implementation',
                 link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/TIP20.sol',
               },
