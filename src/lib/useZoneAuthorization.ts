@@ -94,7 +94,7 @@ export function useZoneAuthorization(parameters: {
     authorizeMutation,
     error: authorizeMutation.error ?? statusQuery.error,
     isAuthorized: statusQuery.data !== null && statusQuery.data !== undefined,
-    isChecking: statusQuery.fetchStatus === 'fetching',
+    isChecking: statusQuery.isPending,
     statusQuery,
   }
 }
