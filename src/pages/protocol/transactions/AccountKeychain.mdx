@@ -28,7 +28,7 @@ T3 updates the Account Keychain specification through [TIP-1011](/protocol/tips/
 - New root-key-only functions `setAllowedCalls(...)` and `removeAllowedCalls(...)`, plus a new `getAllowedCalls(...)` view, are added for managing and inspecting call scopes.
 - `getRemainingLimit(...)` changes to return both `remaining` and `periodEnd` so callers can observe periodic reset state.
 - `updateSpendingLimit(...)` resets the remaining amount to `newLimit` but does not change the configured `period` or current `periodEnd`.
-- Access-key-signed transactions can no longer create contracts anywhere in the batch. Deployments and other `CREATE` / `CREATE2` flows must use the root key post-T3.
+- Access-key-signed transactions cannot use the batch’s direct CREATE path. Direct contract deployment must use the root key. Factory/internal CREATE or CREATE2 flows are not explicitly blocked by the current code.
 
 ## Concepts
 
