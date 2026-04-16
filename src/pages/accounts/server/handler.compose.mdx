@@ -13,8 +13,8 @@ Composes multiple handlers into a single handler, routing requests to the handle
 import { Handler } from 'accounts/server'
 
 const handler = Handler.compose([
-  Handler.feePayer({ 
-    account: privateKeyToAccount('0x...') 
+  Handler.relay({ 
+    feePayer: { account: privateKeyToAccount('0x...') },
   }),
   Handler.webAuthn({ 
     kv: Kv.memory(), 
