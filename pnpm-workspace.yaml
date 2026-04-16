@@ -13,6 +13,7 @@ minimumReleaseAgeExclude:
   - accounts
   - mppx
   - incur
+  - ox
   - viem
 
 patchedDependencies:
