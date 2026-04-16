@@ -1,6 +1,7 @@
 'use client'
 
 import { useMutation } from '@tanstack/react-query'
+import { VirtualAddress } from 'ox/tempo'
 import * as React from 'react'
 import {
   type Address,
@@ -16,7 +17,7 @@ import {
 } from 'viem'
 import { mnemonicToAccount, privateKeyToAccount } from 'viem/accounts'
 import { tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
-import { Actions, tempoActions, withFeePayer } from 'viem/tempo'
+import { Abis, Actions, tempoActions, withFeePayer } from 'viem/tempo'
 import { useClient, useConnect, useConnection, useDisconnect, useWriteContract } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useWebAuthnConnector } from '../../wagmi.config'
@@ -32,55 +33,10 @@ const DEMO_USER_TAG = '0x000000000001' as const
 const DEVNET_SPONSOR_URL = 'https://sponsor.devnet.tempo.xyz' as const
 const MODERATO_SPONSOR_URL = 'https://sponsor.moderato.tempo.xyz' as const
 const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef' as const
-const VIRTUAL_MAGIC = 'fdfdfdfdfdfdfdfdfdfd'
-
-const virtualRegistryAbi = [
-  {
-    type: 'function',
-    name: 'registerVirtualMaster',
-    stateMutability: 'nonpayable',
-    inputs: [{ name: 'salt', type: 'bytes32' }],
-    outputs: [{ name: 'masterId', type: 'bytes4' }],
-  },
-  {
-    type: 'function',
-    name: 'getMaster',
-    stateMutability: 'view',
-    inputs: [{ name: 'masterId', type: 'bytes4' }],
-    outputs: [{ name: '', type: 'address' }],
-  },
-] as const
-
-const tip20Abi = [
-  {
-    type: 'function',
-    name: 'transfer',
-    stateMutability: 'nonpayable',
-    inputs: [
-      { name: 'to', type: 'address' },
-      { name: 'amount', type: 'uint256' },
-    ],
-    outputs: [{ name: '', type: 'bool' }],
-  },
-  {
-    type: 'function',
-    name: 'balanceOf',
-    stateMutability: 'view',
-    inputs: [{ name: 'account', type: 'address' }],
-    outputs: [{ name: '', type: 'uint256' }],
-  },
-  {
-    type: 'function',
-    name: 'decimals',
-    stateMutability: 'view',
-    inputs: [],
-    outputs: [{ name: '', type: 'uint8' }],
-  },
-] as const
 
 type RegistrationResult = {
-  hash: Hex
   masterId: Hex
+  registrationHash: Hex
   salt: Hex
   txHash: Hex
   virtualAddress: Address
@@ -102,16 +58,6 @@ type SendResult = {
   }>
   sender: Address
   txHash: Hex
-}
-
-function buildVirtualAddress(masterId: Hex, userTag: Hex): Address {
-  const mid = masterId.slice(2)
-  const tag = userTag.slice(2)
-
-  if (mid.length !== 8) throw new Error('masterId must be bytes4')
-  if (tag.length !== 12) throw new Error('userTag must be bytes6')
-
-  return `0x${mid}${VIRTUAL_MAGIC}${tag}` as Address
 }
 
 function formatCount(value: number): string {
@@ -192,6 +138,7 @@ export function VirtualAddressesLiveDemo() {
 
   const publicClient = React.useMemo(() => {
     if (!runtimeChain) return null
+
     return createPublicClient({
       chain: runtimeChain,
       transport: isLocalnet ? http() : http(runtimeChain.rpcUrls.default.http[0]),
@@ -200,6 +147,7 @@ export function VirtualAddressesLiveDemo() {
 
   const demoAdminClient = React.useMemo(() => {
     if (!isLocalnet) return null
+
     return createClient({
       account: demoAdmin,
       chain: tempoLocalnet,
@@ -232,6 +180,7 @@ export function VirtualAddressesLiveDemo() {
 
   React.useEffect(() => {
     if (previousAddressRef.current === address) return
+
     previousAddressRef.current = address as Address | undefined
     minerRef.current?.stop()
     setMinerState({ status: 'idle' })
@@ -247,36 +196,38 @@ export function VirtualAddressesLiveDemo() {
   )
 
   const mineSalt = React.useCallback((masterAddress: Address) => {
-    return new Promise<{ hash: Hex; masterId: Hex; salt: Hex }>((resolve, reject) => {
-      minerRef.current?.stop()
-      let settled = false
+    return new Promise<Pick<RegistrationResult, 'masterId' | 'registrationHash' | 'salt'>>(
+      (resolve, reject) => {
+        minerRef.current?.stop()
+        let settled = false
 
-      const pool = createMinerPool({
-        masterAddress,
-        onStateChange: (state) => {
-          setMinerState(state)
-          if (settled) return
+        const pool = createMinerPool({
+          masterAddress,
+          onStateChange: (state) => {
+            setMinerState(state)
+            if (settled) return
 
-          if (state.status === 'found') {
-            settled = true
-            resolve({
-              hash: state.hash as Hex,
-              masterId: state.masterId as Hex,
-              salt: state.salt as Hex,
-            })
-            return
-          }
+            if (state.status === 'found') {
+              settled = true
+              resolve({
+                masterId: state.masterId as Hex,
+                registrationHash: state.registrationHash as Hex,
+                salt: state.salt as Hex,
+              })
+              return
+            }
 
-          if (state.status === 'error') {
-            settled = true
-            reject(new Error(state.message))
-          }
-        },
-      })
+            if (state.status === 'error') {
+              settled = true
+              reject(new Error(state.message))
+            }
+          },
+        })
 
-      minerRef.current = pool
-      pool.start()
-    })
+        minerRef.current = pool
+        pool.start()
+      },
+    )
   }, [])
 
   const getTokenBalance = React.useCallback(
@@ -285,7 +236,7 @@ export function VirtualAddressesLiveDemo() {
 
       return (await publicClient.readContract({
         address: token,
-        abi: tip20Abi,
+        abi: Abis.tip20,
         functionName: 'balanceOf',
         args: [target],
       })) as bigint
@@ -313,6 +264,7 @@ export function VirtualAddressesLiveDemo() {
 
       if (isLocalnet) {
         if (!demoAdminClient) return
+
         const adminClient = demoAdminClient as unknown as Client<Transport, Chain>
 
         await publicClient
@@ -372,7 +324,7 @@ export function VirtualAddressesLiveDemo() {
 
       const txHash = await writeContractAsync({
         address: VIRTUAL_REGISTRY_ADDRESS,
-        abi: virtualRegistryAbi,
+        abi: Abis.addressRegistry,
         functionName: 'registerVirtualMaster',
         args: [mined.salt],
         ...(isPublicTestnet ? { feePayer: true } : {}),
@@ -383,7 +335,10 @@ export function VirtualAddressesLiveDemo() {
       return {
         ...mined,
         txHash,
-        virtualAddress: buildVirtualAddress(mined.masterId, DEMO_USER_TAG),
+        virtualAddress: VirtualAddress.from({
+          masterId: mined.masterId,
+          userTag: DEMO_USER_TAG,
+        }),
       }
     },
     onSuccess: (result) => {
@@ -401,7 +356,7 @@ export function VirtualAddressesLiveDemo() {
       const decimals = Number(
         await publicClient.readContract({
           address: pathUsd,
-          abi: tip20Abi,
+          abi: Abis.tip20,
           functionName: 'decimals',
         }),
       )
@@ -411,6 +366,7 @@ export function VirtualAddressesLiveDemo() {
 
       if (isLocalnet) {
         if (!demoAdminClient) throw new Error('Localnet admin client unavailable.')
+
         const adminClient = demoAdminClient as unknown as Client<Transport, Chain>
 
         await Actions.token.mint(adminClient, {
@@ -425,13 +381,13 @@ export function VirtualAddressesLiveDemo() {
       const [masterBefore, virtualBefore] = await Promise.all([
         publicClient.readContract({
           address: pathUsd,
-          abi: tip20Abi,
+          abi: Abis.tip20,
           functionName: 'balanceOf',
           args: [address as Address],
         }) as Promise<bigint>,
         publicClient.readContract({
           address: pathUsd,
-          abi: tip20Abi,
+          abi: Abis.tip20,
           functionName: 'balanceOf',
           args: [registration.virtualAddress],
         }) as Promise<bigint>,
@@ -447,13 +403,13 @@ export function VirtualAddressesLiveDemo() {
       const [masterAfter, virtualAfter] = await Promise.all([
         publicClient.readContract({
           address: pathUsd,
-          abi: tip20Abi,
+          abi: Abis.tip20,
           functionName: 'balanceOf',
           args: [address as Address],
         }) as Promise<bigint>,
         publicClient.readContract({
           address: pathUsd,
-          abi: tip20Abi,
+          abi: Abis.tip20,
           functionName: 'balanceOf',
           args: [registration.virtualAddress],
         }) as Promise<bigint>,
@@ -524,14 +480,10 @@ export function VirtualAddressesLiveDemo() {
             <div className="mt-2 flex flex-col gap-1 text-[13px] text-gray9 -tracking-[1%]">
               <span className="text-primary">Connected passkey account</span>
               <code className="break-all font-mono text-[12px] text-primary">{address}</code>
-              {isSupported ? (
-                <span>
-                  The demo auto-funds the passkey account, mines the registration salt in your
-                  browser, and uses a separate sender for the deposit step.
-                </span>
-              ) : (
-                <span>This live demo currently supports Tempo testnet and localnet.</span>
-              )}
+              <span>
+                The demo auto-funds the passkey account, uses `ox` to grind the registration salt in
+                a background worker, and sends the deposit from a separate demo address.
+              </span>
             </div>
           </div>
         )}
@@ -553,7 +505,7 @@ export function VirtualAddressesLiveDemo() {
           ) : !address ? (
             <div className="mt-2 text-[13px] text-gray9 -tracking-[1%]">
               Sign in first, then the demo will fund the account if needed, mine the required salt
-              in your browser, and prompt the passkey for registration.
+              with `VirtualMaster.mineSalt`, and prompt the passkey for registration.
             </div>
           ) : registration ? (
             <div className="mt-2 grid gap-2 text-[13px] text-gray9 -tracking-[1%]">
@@ -595,7 +547,7 @@ export function VirtualAddressesLiveDemo() {
                 </code>
               </div>
               <div className="col-span-full">
-                The browser is mining the 32-bit proof-of-work required for registration. This
+                The browser is searching for the 32-bit proof-of-work required by TIP-1022. This
                 usually takes a few minutes.
               </div>
             </div>
@@ -700,9 +652,10 @@ export function VirtualAddressesLiveDemo() {
                 </>
               ) : (
                 <div>
-                  The demo uses a separate sender account, funds it if needed, transfers 100{' '}
-                  {tokenSymbol} to the virtual address, and then reads both balances so you can see
-                  the tokens land in the registered passkey wallet.
+                  The demo uses `VirtualAddress.from` to derive a deposit address, funds a separate
+                  sender if needed, transfers 100 {tokenSymbol} to the virtual address, and then
+                  reads both balances so you can see the tokens land in the registered passkey
+                  wallet.
                 </div>
               )}
             </div>

@@ -1,6 +1,7 @@
 ---
 title: Use virtual addresses for deposits
 description: Register a virtual-address master, derive deposit addresses offchain, and watch TIP-20 deposits land directly in the registered wallet.
+interactive: true
 ---
 
 import { Card, Cards } from 'vocs'
@@ -67,11 +68,13 @@ Once a master is registered, operators derive virtual addresses offchain from th
 
 :::code-group
 
-```ts [buildVirtualAddress.ts]
-function buildVirtualAddress(masterId: `0x${string}`, userTag: `0x${string}`) {
-  const VIRTUAL_MAGIC = 'fdfdfdfdfdfdfdfdfdfd'
-  return `0x${masterId.slice(2)}${VIRTUAL_MAGIC}${userTag.slice(2)}`
-}
+```ts [virtualAddress.ts]
+import { VirtualAddress } from 'ox/tempo'
+
+const virtualAddress = VirtualAddress.from({
+  masterId,
+  userTag: '0x000000000001',
+})
 ```
 
 :::

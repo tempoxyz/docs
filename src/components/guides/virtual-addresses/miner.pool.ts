@@ -1,3 +1,4 @@
+import type { Address } from 'viem'
 import type { FromWorker, ToWorker } from './miner.protocol'
 
 export type MinerState =
@@ -12,16 +13,20 @@ export type MinerState =
       status: 'found'
       salt: string
       masterId: string
-      hash: string
+      registrationHash: string
       attempts: number
-      minedForAddress: string
+      minedForAddress: Address
     }
   | { status: 'error'; message: string }
 
 export type MinerPoolOptions = {
-  masterAddress: string
+  masterAddress: Address
   workerCount?: number
   onStateChange: (state: MinerState) => void
+}
+
+function toHex(value: bigint) {
+  return `0x${value.toString(16).padStart(64, '0')}`
 }
 
 export function createMinerPool(options: MinerPoolOptions) {
@@ -34,9 +39,10 @@ export function createMinerPool(options: MinerPoolOptions) {
   const workerHps = new Map<number, number>()
   let stopped = false
 
-  const seedBytes = new Uint8Array(24)
+  const seedBytes = new Uint8Array(32)
   crypto.getRandomValues(seedBytes)
   const seedHex = `0x${Array.from(seedBytes, (b) => b.toString(16).padStart(2, '0')).join('')}`
+  const seed = BigInt(seedHex)
   const batchSize = 100_000
 
   function aggregateProgress() {
@@ -45,6 +51,15 @@ export function createMinerPool(options: MinerPoolOptions) {
     for (const attempts of workerAttempts.values()) total += attempts
     for (const rate of workerHps.values()) hps += rate
     return { total, hps }
+  }
+
+  function stopWorkers() {
+    for (const worker of workers) {
+      worker.postMessage({ type: 'stop' } satisfies ToWorker)
+    }
+    setTimeout(() => {
+      for (const worker of workers) worker.terminate()
+    }, 100)
   }
 
   function start() {
@@ -90,21 +105,20 @@ export function createMinerPool(options: MinerPoolOptions) {
               status: 'found',
               salt: message.saltHex,
               masterId: message.masterIdHex,
-              hash: message.hashHex,
+              registrationHash: message.registrationHashHex,
               attempts: total,
               minedForAddress: masterAddress,
             })
-
-            for (const current of workers) {
-              current.postMessage({ type: 'stop' } satisfies ToWorker)
-            }
-            setTimeout(() => {
-              for (const current of workers) current.terminate()
-            }, 100)
+            stopWorkers()
             break
           }
           case 'error': {
+            stopped = true
             onStateChange({ status: 'error', message: message.message })
+            stopWorkers()
+            break
+          }
+          case 'stopped': {
             break
           }
         }
@@ -112,15 +126,16 @@ export function createMinerPool(options: MinerPoolOptions) {
 
       worker.onerror = (error) => {
         if (stopped) return
+        stopped = true
         onStateChange({ status: 'error', message: error.message })
+        stopWorkers()
       }
 
       worker.postMessage({
         type: 'start',
         workerId: i,
         masterAddress,
-        seedHex,
-        startCounter: i,
+        startHex: toHex(seed + BigInt(i * batchSize)),
         stride: workerCount,
         batchSize,
       } satisfies ToWorker)
@@ -130,12 +145,7 @@ export function createMinerPool(options: MinerPoolOptions) {
 
   function stop() {
     stopped = true
-    for (const worker of workers) {
-      worker.postMessage({ type: 'stop' } satisfies ToWorker)
-    }
-    setTimeout(() => {
-      for (const worker of workers) worker.terminate()
-    }, 100)
+    stopWorkers()
     onStateChange({ status: 'idle' })
   }
 

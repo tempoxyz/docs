@@ -1,10 +1,11 @@
+import type { Address } from 'viem'
+
 export type ToWorker =
   | {
       type: 'start'
       workerId: number
-      masterAddress: string
-      seedHex: string
-      startCounter: number
+      masterAddress: Address
+      startHex: string
       stride: number
       batchSize: number
     }
@@ -24,7 +25,7 @@ export type FromWorker =
       attempts: number
       saltHex: string
       masterIdHex: string
-      hashHex: string
+      registrationHashHex: string
     }
   | { type: 'stopped'; workerId: number; attempts: number }
   | { type: 'error'; workerId: number; message: string }
