@@ -3,31 +3,24 @@
 import { useQuery } from '@tanstack/react-query'
 import { Account } from 'viem/tempo'
 import { useConnection } from 'wagmi'
+import { config, webAuthnRpId } from '../wagmi.config.ts'
 
-type RootWebAuthnAccount = ReturnType<typeof Account.fromWebAuthnP256>
-type RootWebAuthnAccountProvider = {
-  getAccount: (options: {
-    accessKey?: boolean | undefined
-    address?: `0x${string}` | undefined
-    signable?: boolean | undefined
-  }) => RootWebAuthnAccount
-}
+type RootWebAuthnCredential = Parameters<typeof Account.fromWebAuthnP256>[0]
 
 export function useRootWebAuthnAccount() {
   const { address, connector } = useConnection()
 
   return useQuery({
-    enabled: Boolean(address && connector?.id === 'webAuthn'),
-    queryKey: ['root-webauthn-account', address],
+    enabled: Boolean(address && connector?.id === 'webAuthn' && webAuthnRpId),
+    queryKey: ['root-webauthn-account', address, webAuthnRpId],
     queryFn: async () => {
-      if (!address) throw new Error('account address not ready')
-      if (!connector) throw new Error('connector not ready')
+      if (!webAuthnRpId) throw new Error('webauthn RP ID is not configured')
 
-      const provider = (await connector.getProvider()) as RootWebAuthnAccountProvider
-      return provider.getAccount({
-        accessKey: false,
-        address: address as `0x${string}`,
-        signable: true,
+      const credential = await config.storage?.getItem('webAuthn.activeCredential')
+      if (!credential) throw new Error('webauthn credential not available')
+
+      return Account.fromWebAuthnP256(credential as RootWebAuthnCredential, {
+        rpId: webAuthnRpId,
       })
     },
     refetchOnReconnect: false,
