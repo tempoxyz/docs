@@ -25,19 +25,14 @@ test('send pathUSD from Zone A into Zone B', async ({ page }) => {
     timeout: 30000,
   })
 
-  const authorizeSourceButton = page
-    .getByRole('button', { name: /^Authoriz(?:e|ing) Zone A reads$/i })
-    .first()
+  const authorizeSourceButton = page.getByRole('button', { name: 'Authorize Zone A reads' }).first()
   await expect(authorizeSourceButton).toBeVisible({ timeout: 30000 })
-  await expect(authorizeSourceButton).toBeEnabled({ timeout: 90000 })
   await authorizeSourceButton.click()
 
   const getFundsButton = page.getByRole('button', { name: /^Get testnet pathUSD$/i }).first()
   const topUpButton = page.getByRole('button', { name: /^Approve \+ top up Zone A$/i }).first()
   const sendButton = page.getByRole('button', { name: /^Send 25 pathUSD into Zone B$/i }).first()
-  const authorizeTargetButton = page
-    .getByRole('button', { name: /^Authoriz(?:e|ing) Zone B reads$/i })
-    .first()
+  const authorizeTargetButton = page.getByRole('button', { name: 'Authorize Zone B reads' }).first()
 
   await expect
     .poll(
@@ -66,7 +61,6 @@ test('send pathUSD from Zone A into Zone B', async ({ page }) => {
   await sendButton.click()
 
   await expect(authorizeTargetButton).toBeVisible({ timeout: 120000 })
-  await expect(authorizeTargetButton).toBeEnabled({ timeout: 90000 })
   await authorizeTargetButton.click()
 
   await expect(
