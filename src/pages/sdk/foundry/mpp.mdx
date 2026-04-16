@@ -1,13 +1,13 @@
 ---
 title: Foundry Integration
-description: Use Foundry tools (cast, forge, anvil, chisel) with MPP-gated RPC endpoints on Tempo — automatic 402 handling with zero config.
+description: Use Foundry tools (forge, cast, anvil, chisel) with MPP-gated RPC endpoints on Tempo — automatic 402 handling with zero config.
 ---
 
 import { Card, Cards } from 'vocs'
 
 # Use MPP with Foundry
 
-[Tempo Foundry](https://github.com/tempoxyz/tempo-foundry) extends Foundry with native MPP support. When an RPC endpoint returns `402 Payment Required`, Foundry automatically handles the payment challenge — no wrapper scripts, no middleware, no code changes.
+[Foundry](https://github.com/foundry-rs/foundry) extends Foundry with native MPP support. When an RPC endpoint returns `402 Payment Required`, Foundry automatically handles the payment challenge — no wrapper scripts, no middleware, no code changes.
 
 Every Foundry tool works transparently with MPP-gated endpoints:
 
@@ -46,15 +46,13 @@ Some endpoints use a one-shot `charge` intent instead of session-based channels.
 curl -fsSL https://tempo.xyz/install | bash
 ```
 
-### Install Tempo Foundry
-
-Tempo's fork is installed through the standard `foundryup` using the `-n tempo` flag:
+## Install Foundry's latest nightly release
 
 ```bash
-foundryup -n tempo
+foundryup -i nightly
 ```
 
-All standard Foundry commands work as before — MPP activates only when an endpoint returns `402`.
+All standard Foundry commands work — MPP activates only when an endpoint returns `402`.
 
 ### Configure your wallet
 

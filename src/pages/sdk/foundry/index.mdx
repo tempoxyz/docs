@@ -1,18 +1,16 @@
 ---
-description: Build, test, and deploy smart contracts on Tempo using the Foundry fork. Access protocol-level features with forge and cast tools.
+description: Build, test, and deploy smart contracts on Tempo using Foundry. Access protocol-level features with forge, cast, anvil and chisel.
 ---
 
 # Foundry for Tempo
 
-Tempo builds on top of [Foundry](https://github.com/foundry-rs/foundry): the leading Ethereum development toolkit, through a custom fork that adds first-class support for Tempo.
+Tempo is supported out-of-the-box in [Foundry](https://github.com/foundry-rs/foundry): the leading Ethereum development toolkit.
 
-This fork extends Foundry with Tempo's [protocol-level features](/protocol/), enabling developers to build, test, and deploy contracts that go [beyond the limits of standard EVM chains](/quickstart/evm-compatibility).
+Foundry supports all of Tempo's [protocol-level features](/protocol/), enabling developers to build, test, and deploy contracts that go [beyond the limits of standard EVM chains](/quickstart/evm-compatibility).
 
 For general information about Foundry, see the [Foundry documentation](https://getfoundry.sh/).
 
 ## Get started with Foundry
-
-Tempo's Foundry fork is installed through the standard upstream `foundryup` using the `-n tempo` flag, no separate installer is required.
 
 ::::steps
 
@@ -30,18 +28,18 @@ Or if you already have `foundryup` installed:
 foundryup --update
 ```
 
-## Install Tempo's Foundry fork
+## Install Foundry's latest nightly release
 
 ```bash
-foundryup -n tempo
+foundryup -i nightly
 ```
 
 This will automatically install the latest `nightly` release of all precompiled binaries: [`forge`](https://getfoundry.sh/forge/overview#forge), [`cast`](https://getfoundry.sh/cast/overview#cast), [`anvil`](https://getfoundry.sh/anvil/overview#anvil), and [`chisel`](https://getfoundry.sh/chisel/overview#chisel).
 
 :::tip
-To install a specific version, replace `<TAG_NAME>` with the desired release tag:
+To install a specific nightly version, replace `<TAG_NAME>` with the desired release tag:
 ```bash
-foundryup -n tempo -i <TAG_NAME>
+foundryup -i <TAG_NAME>
 ```
 :::
 
@@ -49,12 +47,6 @@ foundryup -n tempo -i <TAG_NAME>
 
 ```bash
 forge -V
-```
-
-You should see version information include `-tempo`, indicating you are using the Tempo fork.
-
-```bash
-# forge <version>-tempo (<commit> <timestamp>)
 ```
 
 ## Create a new Foundry project
