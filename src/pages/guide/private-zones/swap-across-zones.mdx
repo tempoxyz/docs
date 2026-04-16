@@ -1,0 +1,103 @@
+---
+title: Swap stablecoins across zones
+description: Swap pathUSD from Zone A into betaUSD on Zone B by routing a zone withdrawal through Tempo's L1 router and confirming the target deposit.
+interactive: true
+---
+
+import * as Demo from '../../../components/guides/Demo.tsx'
+import { SwapAcrossZones } from '../../../components/guides/zones/SwapAcrossZones.tsx'
+
+export const swapZoneBalances = [
+  { label: 'Zone A', token: Demo.pathUsd, zone: 6 },
+  { label: 'Zone B', token: Demo.betaUsd, zone: 7 },
+]
+
+# Swap across zones
+
+:::info
+Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, reach out to us at [zones@tempo.xyz](mailto:zones@tempo.xyz).
+:::
+
+Use this guide when you want to leave `Zone A` with `pathUSD` and arrive in `Zone B` with `betaUSD` in one routed flow. The trade briefly touches the public chain, so the confirmation happens in stages rather than as a single balance update.
+
+The route uses `swapAndDepositRouter` on the public chain: withdraw from `Zone A`, swap on the Stablecoin DEX, then deposit the output token into `Zone B`.
+
+![Cross-zone DEX swap flow](/learn/zones/diagram-swap.svg)
+
+## Swapping pathUSD from Zone A into betaUSD on Zone B
+
+By the end of this guide you will have swapped **25 pathUSD** from **Zone A** into **betaUSD** on **Zone B** and confirmed the routed deposit.
+
+## What this swap does
+
+1. Withdraws `pathUSD` from `Zone A`.
+2. Routes it through the public chain and swaps it on the Stablecoin DEX.
+3. Deposits the output token into `Zone B` through `ZonePortal`.
+4. Lets you authorize private reads in `Zone B` so you can confirm the final `betaUSD` balance.
+
+<Demo.Container
+  name="Swap across zones"
+  footerVariant="balances"
+  tokens={[Demo.pathUsd]}
+  zoneBalances={swapZoneBalances}
+>
+  <SwapAcrossZones />
+</Demo.Container>
+
+## Code example
+
+This snippet assumes you already have a signed-in `rootClient` on the public chain plus `zoneAClient`, and the shared token, router, and portal constants used throughout the zone guides.
+It shows the core routed swap submission path; use the demo above when you want to watch the output deposit settle into Zone B.
+
+```ts
+import { encodeAbiParameters, parseUnits } from 'viem'
+import { Actions } from 'viem/tempo'
+
+const swapAmount = parseUnits('25', 6)
+
+await zoneAClient.zone.signAuthorizationToken()
+
+const routedWithdrawalFee = await zoneAClient.zone.getWithdrawalFee({ gas: routerCallbackGasLimit })
+const quotedBetaOut = await rootClient.dex.getSellQuote({
+  amountIn: swapAmount,
+  tokenIn: pathUsd,
+  tokenOut: betaUsd,
+})
+
+const minimumBetaOut = quotedBetaOut - quotedBetaOut / 100n
+
+const callbackData = encodeAbiParameters(
+  [
+    { type: 'bool' },
+    { type: 'address' },
+    { type: 'address' },
+    { type: 'address' },
+    { type: 'bytes32' },
+    { type: 'uint128' },
+  ],
+  [false, betaUsd, ZONE_B.portalAddress, rootClient.account.address, zeroBytes32, minimumBetaOut],
+)
+
+const { receipt } = await Actions.zone.requestWithdrawalSync(zoneAClient, {
+  account: rootClient.account,
+  amount: swapAmount,
+  data: callbackData,
+  feeToken: pathUsd,
+  gas: routerCallbackGasLimit,
+  timeout: zoneRpcSyncTimeout,
+  to: swapAndDepositRouter,
+  token: pathUsd,
+})
+
+console.log(receipt.blockNumber)
+```
+
+## How Routed Zone Swaps Settle
+
+This guide's swap flow is asynchronous because the trade temporarily leaves the zone.
+
+The source token is withdrawn through `ZoneOutbox`, transferred to `SwapAndDepositRouter` on Tempo, optionally swapped on the Stablecoin DEX, and then deposited back through a `ZonePortal` as the output token. That routed deposit pays the normal portal deposit fee, so the amount that arrives on the zone is the post-fee output.
+
+:::warning
+If the routed withdrawal fails on Tempo - for example because the swap fails, the transfer fails, the router callback reverts, or the target deposit cannot be completed—the amount is bounced back to the withdrawal's `fallbackRecipient` inside the source zone. The fee is still paid to the sequencer, so a failed routed swap still results in fees for the sender.
+:::

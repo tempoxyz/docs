@@ -1,0 +1,57 @@
+---
+title: Send tokens within a zone
+description: Send pathUSD inside Zone A with a signed zone transfer and confirm the updated zone balance.
+interactive: true
+---
+
+import * as Demo from '../../../components/guides/Demo.tsx'
+import { SendTokensWithinZone } from '../../../components/guides/zones/SendTokensWithinZone.tsx'
+
+export const inZoneBalances = [{ label: 'Zone A', token: Demo.pathUsd, zone: 6 }]
+
+# Send tokens within a zone
+
+:::info
+Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, reach out to us at [zones@tempo.xyz](mailto:zones@tempo.xyz).
+:::
+
+Use this guide when you want to send `pathUSD` from one private `Zone A` balance to another without moving funds back through the public chain.
+
+Zone tokens use the `TIP20` token interface, so once you authorize private reads for the session, an in-zone transfer looks much like a normal token transfer.
+
+## Sending pathUSD within Zone A
+
+By the end of this guide you will have sent `25 pathUSD` inside `Zone A` and confirmed the updated balance.
+
+<Demo.Container
+  name="Send tokens within Zone A"
+  footerVariant="balances"
+  tokens={[Demo.pathUsd]}
+  zoneBalances={inZoneBalances}
+>
+  <SendTokensWithinZone />
+</Demo.Container>
+
+## Code example
+
+This snippet assumes you already have a signed-in `rootClient` on the public chain and a derived `zoneAClient`.
+
+It shows the core zone transfer path; use the demo above when you want to watch the updated zone balance.
+
+```ts
+import { parseUnits, type Address } from 'viem'
+import { Actions } from 'viem/tempo'
+
+const transferAmount = parseUnits('25', 6)
+const demoRecipient = '0xbeefcafe54750903ac1c8909323af7beb21ea2cb' as Address
+
+await zoneAClient.zone.signAuthorizationToken()
+
+const { receipt } = await Actions.token.transferSync(zoneAClient, {
+  account: rootClient.account,
+  amount: transferAmount,
+  feeToken: pathUsd,
+  to: demoRecipient,
+  token: pathUsd,
+})
+```

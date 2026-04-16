@@ -1,0 +1,74 @@
+---
+title: Connect to Tempo Zones
+description: Learn how Tempo Zones work alongside the public chain and follow guides for depositing, sending within a zone, routing pathUSD across zones, swapping into betaUSD, and withdrawing.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Connect to Tempo Zones
+
+:::info
+Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, reach out to us at [zones@tempo.xyz](mailto:zones@tempo.xyz).
+:::
+
+Tempo Zones let you keep balances and transfers inside a private execution environment while still using the public Tempo chain when funds enter or leave. The important thing to remember is that most zone flows settle in stages: a public or zone transaction lands first, then the private balance update appears shortly after.
+
+![Tempo Zones overview](/learn/zones/diagram-overview.svg)
+
+## Before you start
+
+- Use a Tempo passkey account in the demo so the page can authorize private zone reads.
+- Keep some `pathUSD` on the public chain if you want to try deposits, source-zone top-ups, routed sends, swaps, or withdrawals.
+- Expect deposits, routed sends, routed swaps, and withdrawals to complete asynchronously rather than in a single balance update.
+
+These guides cover the current zone connection setup plus the baseline workflows used in the demos: deposits through `Actions.zone.depositSync(...)` and `Actions.zone.encryptedDepositSync(...)`, in-zone transfers, same-token routed sends through `Actions.zone.requestWithdrawalSync(...)`, routed swaps, direct withdrawals, and authenticated withdrawals through `Actions.zone.requestVerifiableWithdrawalSync(...)`.
+
+The deposit guide's demo lets you switch between plaintext and encrypted deposits, and the withdrawal guide lets you switch between standard and authenticated withdrawals, while keeping the transaction flow on the upstream `viem` zone actions.
+
+## Choose the right guide
+
+- **Connect to a zone** if you want the Zone A and Zone B RPC URLs, chain IDs, and a minimal `viem` client setup.
+- **Deposit to a zone** if you want to move `pathUSD` from your public balance into `Zone A`.
+- **Send tokens within a zone** if you want to transfer `pathUSD` between private accounts without leaving `Zone A`.
+- **Send tokens across zones** if you want to leave `Zone A` with `pathUSD` and arrive in `Zone B` with the same token.
+- **Swap across zones** if you want to leave `Zone A` with `pathUSD` and arrive in `Zone B` with `betaUSD`.
+- **Withdraw from a zone** if you want to move `pathUSD` back from `Zone A` to your public balance.
+
+<Cards>
+  <Card
+    description="Get the Zone A and Zone B RPC details and start with a minimal viem client setup."
+    icon="lucide:plug"
+    title="Connect to a zone"
+    to="/guide/private-zones/connect-to-a-zone"
+  />
+  <Card
+    description="Move pathUSD from your public balance into Zone A and confirm the private balance update."
+    icon="lucide:shield-ellipsis"
+    title="Deposit to a zone"
+    to="/guide/private-zones/deposit-to-a-zone"
+  />
+  <Card
+    description="Send pathUSD between private accounts inside Zone A without returning to the public chain."
+    icon="lucide:send-horizontal"
+    title="Send tokens within a zone"
+    to="/guide/private-zones/send-tokens-within-a-zone"
+  />
+  <Card
+    description="Route pathUSD out of Zone A and into Zone B without changing the token."
+    icon="lucide:move-right"
+    title="Send tokens across zones"
+    to="/guide/private-zones/send-tokens-across-zones"
+  />
+  <Card
+    description="Withdraw from Zone A, swap on the public chain, and land in Zone B as betaUSD."
+    icon="lucide:repeat-2"
+    title="Swap stablecoins across zones"
+    to="/guide/private-zones/swap-across-zones"
+  />
+  <Card
+    description="Withdraw stablecoins from a zone back to your public balance."
+    icon="lucide:arrow-up-right"
+    title="Withdraw from a zone"
+    to="/guide/private-zones/withdraw-from-a-zone"
+  />
+</Cards>

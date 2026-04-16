@@ -1,0 +1,94 @@
+---
+title: Deposit to a Zone
+description: Deposit pathUSD from your public-chain balance into Zone A and confirm the resulting zone balance.
+interactive: true
+---
+
+import * as Demo from '../../../components/guides/Demo.tsx'
+import { Tab, Tabs } from 'vocs'
+import { DepositToZone } from '../../../components/guides/zones/DepositToZone.tsx'
+
+export const depositZoneBalances = [{ label: 'Zone A', token: Demo.pathUsd, zone: 6 }]
+
+# Deposit to a Zone
+
+:::info
+Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, reach out to us at [zones@tempo.xyz](mailto:zones@tempo.xyz).
+:::
+
+Use this guide when you want to move `pathUSD` from your public Tempo balance into `Zone A`. You will submit a public-chain deposit first, then wait for `Zone A` to credit the net amount after fees.
+
+![Zone contract architecture](/learn/zones/diagram-deposit.svg)
+
+The deposit is accepted through `ZonePortal` on the public chain. You need private zone authorization to read the resulting zone balance, because those reads are only exposed to the authenticated account.
+
+## Depositing pathUSD to Zone A
+
+By the end of this guide you will have deposited `pathUSD` into `Zone A` and confirmed the balance update.
+
+<Demo.Container
+  name="Deposit to Zone A"
+  footerVariant="balances"
+  tokens={[Demo.pathUsd]}
+  zoneBalances={depositZoneBalances}
+>
+  <DepositToZone />
+</Demo.Container>
+
+## Code examples
+
+These snippets assume you already have a signed-in `rootClient` on the public chain and the usual token and zone constants in scope.
+Use the plaintext flow when revealing the recipient and memo is acceptable. Use the encrypted flow when only the zone sequencer should be able to read those fields.
+
+<Tabs stateKey="zone-deposit-mode">
+  <Tab title="Plaintext">
+
+```ts
+import { parseUnits } from 'viem'
+import { Actions } from 'viem/tempo'
+
+const depositAmount = parseUnits('100', 6)
+
+const { receipt } = await Actions.zone.depositSync(rootClient, {
+  account: rootClient.account,
+  amount: depositAmount,
+  token: pathUsd,
+  zoneId: ZONE_A.id,
+})
+
+console.log(receipt.blockNumber)
+```
+
+  </Tab>
+  <Tab title="Encrypted">
+
+```ts
+import { parseUnits } from 'viem'
+import { Actions } from 'viem/tempo'
+
+const depositAmount = parseUnits('100', 6)
+
+const { receipt } = await Actions.zone.encryptedDepositSync(rootClient, { // [!code focus]
+  account: rootClient.account,
+  amount: depositAmount,
+  token: pathUsd,
+  zoneId: ZONE_A.id,
+})
+
+console.log(receipt.blockNumber)
+```
+
+  </Tab>
+</Tabs>
+
+## What Happens During a Deposit
+
+A zone deposit settles in two phases.
+
+First, you submit a public Tempo transaction depositing to the `ZonePortal`. The portal escrows the token, deducts the deposit fee in the same token, and records the net deposit in the portal's deposit queue. Later, the zone sequencer processes that queue and credits the recipient inside the zone.
+
+That means your public transaction receipt and your zone balance do not update at the same time. The Tempo transaction confirms that the deposit request was accepted. The zone balance changes only after the zone has processed that deposit, and it reflects the post-fee amount rather than the full amount you passed into `deposit(...)`.
+
+:::warning
+  If you need a specific net amount inside the zone, account for the portal deposit fee first. The amount minted on the zone is `amount - depositFee`.
+:::

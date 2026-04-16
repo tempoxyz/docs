@@ -1,0 +1,91 @@
+---
+title: Send tokens across zones
+description: Send pathUSD from Zone A into Zone B by routing a same-token withdrawal through Tempo's L1 router and confirming the target deposit.
+interactive: true
+---
+
+import * as Demo from '../../../components/guides/Demo.tsx'
+import { SendTokensAcrossZones } from '../../../components/guides/zones/SendTokensAcrossZones.tsx'
+
+export const crossZoneBalances = [
+  { label: 'Zone A', token: Demo.pathUsd, zone: 6 },
+  { label: 'Zone B', token: Demo.pathUsd, zone: 7 },
+]
+
+# Send tokens across zones
+
+:::info
+Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, reach out to us at [zones@tempo.xyz](mailto:zones@tempo.xyz).
+:::
+
+Use this guide when you want to move `pathUSD` from `Zone A` into `Zone B` without changing the token. The route still touches the public chain, so the confirmation happens in stages rather than as a single balance update.
+
+The flow uses `swapAndDepositRouter` on the public chain in same-token mode: withdraw from `Zone A`, skip the swap because the asset stays as `pathUSD`, then deposit that `pathUSD` into `Zone B`.
+
+## Sending pathUSD from Zone A into Zone B
+
+By the end of this guide you will have sent **25 pathUSD** from **Zone A** into **Zone B** and confirmed the routed deposit.
+
+<Demo.Container
+  name="Send tokens across zones"
+  footerVariant="balances"
+  tokens={[Demo.pathUsd]}
+  zoneBalances={crossZoneBalances}
+>
+  <SendTokensAcrossZones />
+</Demo.Container>
+
+## Code example
+
+This snippet assumes you already have a signed-in `rootClient` on the public chain plus `zoneAClient`, and the shared token, router, and portal constants used throughout the zone guides.
+
+It shows the core routed send submission path; use the demo above when you want to watch the routed deposit settle into Zone B.
+
+```ts
+import { encodeAbiParameters, parseUnits } from 'viem'
+import { Actions } from 'viem/tempo'
+
+const transferAmount = parseUnits('25', 6)
+
+await zoneAClient.zone.signAuthorizationToken()
+
+const callbackData = encodeAbiParameters(
+  [
+    { type: 'bool' },
+    { type: 'address' },
+    { type: 'address' },
+    { type: 'address' },
+    { type: 'bytes32' },
+    { type: 'uint128' },
+  ],
+  [false, pathUsd, ZONE_B.portalAddress, rootClient.account.address, zeroBytes32, 0n],
+)
+
+const { receipt } = await Actions.zone.requestWithdrawalSync(zoneAClient, {
+  account: rootClient.account,
+  amount: transferAmount,
+  data: callbackData,
+  feeToken: pathUsd,
+  gas: routerCallbackGasLimit,
+  timeout: zoneRpcSyncTimeout,
+  to: swapAndDepositRouter,
+  token: pathUsd,
+})
+
+console.log(receipt.blockNumber)
+```
+
+## What this routed send does
+
+The cross-zone transfer path looks like this: the token leaves `Zone A`, briefly lands on the public chain, and is deposited back into `Zone B` as the same asset.
+
+1. Withdraws `pathUSD` from `Zone A` through `ZoneOutbox`.
+2. Routes that withdrawal to `swapAndDepositRouter` on Tempo.
+3. Skips the DEX swap because the input and output token are both `pathUSD`.
+4. Deposits the routed `pathUSD` into `Zone B` through `ZonePortal`.
+
+The target deposit still pays the normal portal deposit fee, so the amount that arrives in `Zone B` is the routed `pathUSD` minus that fee.
+
+:::warning
+  If the routed withdrawal fails on Tempo—for example because the callback reverts or the target deposit cannot be completed—the amount is bounced back to the withdrawal's `fallbackRecipient` inside `Zone A`. The fee is still paid to the sequencer.
+:::
