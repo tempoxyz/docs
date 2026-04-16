@@ -2,11 +2,12 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { Account } from 'viem/tempo'
-import type { P256Credential as RootWebAuthnCredential } from 'viem/tempo/WebAuthnP256'
+import type { WebAuthnP256 } from 'viem/tempo'
 import { useConnection } from 'wagmi'
 import { config, webAuthnRpId } from '../wagmi.config'
 
 type RootWebAuthnAccount = ReturnType<typeof Account.fromWebAuthnP256>
+type RootWebAuthnCredential = WebAuthnP256.P256Credential
 type RootWebAuthnAccountProvider = {
   getAccount: (options: {
     accessKey?: boolean | undefined
