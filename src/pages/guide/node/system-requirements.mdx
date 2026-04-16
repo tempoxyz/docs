@@ -52,16 +52,7 @@ We do not recommend using a cloud firewall / NAT gateway as it can introduce add
 
 ## Network Tuning
 
-For optimal P2P and consensus performance we recommend switching the TCP congestion-control algorithm to **BBR** and the packet scheduler (qdisc) to **fq**. Together they reduce latency and improve throughput, especially on high-bandwidth links.
-
-### Apply at runtime (resets on reboot)
-
-```bash
-sudo sysctl -w net.core.default_qdisc=fq
-sudo sysctl -w net.ipv4.tcp_congestion_control=bbr
-```
-
-### Persist across reboots
+We recommend enabling TCP **BBR** congestion control with the **fq** packet scheduler for better P2P and consensus performance.
 
 Add the following to your sysctl configuration (e.g. `/etc/sysctl.d/99-tempo-network.conf` or equivalent):
 
@@ -70,22 +61,15 @@ net.core.default_qdisc = fq
 net.ipv4.tcp_congestion_control = bbr
 ```
 
-Then reload:
+Apply and verify:
 
 ```bash
 sudo sysctl --system
-```
-
-### Verify
-
-```bash
 sysctl net.ipv4.tcp_congestion_control   # should print: bbr
 sysctl net.core.default_qdisc            # should print: fq
 ```
 
-:::info
-BBR requires Linux kernel ≥ 4.9. All recommended cloud providers listed above ship kernels that support it out of the box.
-:::
+Restart the node after applying for the changes to take effect.
 
 ## Ports
 
