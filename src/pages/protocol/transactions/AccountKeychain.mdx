@@ -6,13 +6,29 @@ description: Technical specification for the Account Keychain precompile managin
 
 **Address:** `0xAAAAAAAA00000000000000000000000000000000`
 
+:::info[T3 will change this spec]
+The [T3 network upgrade](/protocol/upgrades/t3) will update this specification. The sections below describe the currently active behavior. See [Upcoming changes](#upcoming-changes) for the upcoming deltas.
+:::
+
 ## Overview
 
-The Account Keychain precompile manages authorized Access Keys for accounts, enabling Root Keys (e.g., passkeys) to provision scoped "secondary" Access Keys with expiry timestamps and per-TIP20 token spending limits. 
+The Account Keychain precompile manages authorized Access Keys for accounts, enabling Root Keys (e.g., passkeys) to provision scoped "secondary" Access Keys with expiry timestamps and per-TIP20 token spending limits.
 
 ## Motivation
 
 The Tempo Transaction type unlocks a number of new signature schemes, including WebAuthn (Passkeys). However, for an Account using a Passkey as its Root Key, the sender will subsequently be prompted with passkey prompts for every signature request. This can be a poor user experience for highly interactive or multi-step flows. Additionally, users would also see "Sign In" copy in prompts for signing transactions which is confusing. This proposal introduces the concept of the Root Key being able to provision a (scoped) Access Key that can be used for subsequent transactions, without the need for repetitive end-user prompting.
+
+## Upcoming changes
+
+T3 updates the Account Keychain specification through [TIP-1011](/protocol/tips/tip-1011) in the following ways:
+
+- [TIP-1011](/protocol/tips/tip-1011) extends `TokenLimit` with an optional recurring `period`, so spending limits can be either one-time or periodic.
+- `authorizeKey(...)` moves to the new ABI with `allowAnyCalls` and `allowedCalls`, enabling explicit call scoping during key authorization.
+- New `SelectorRule` and `CallScope` structs define per-target and per-selector allowlists, including recipient-bound rules for supported TIP-20 selectors.
+- New root-key-only functions `setAllowedCalls(...)` and `removeAllowedCalls(...)`, plus a new `getAllowedCalls(...)` view, are added for managing and inspecting call scopes.
+- `getRemainingLimit(...)` changes to return both `remaining` and `periodEnd` so callers can observe periodic reset state.
+- `updateSpendingLimit(...)` resets the remaining amount to `newLimit` but does not change the configured `period` or current `periodEnd`.
+- Access-key-signed transactions can no longer create contracts anywhere in the batch. Deployments and other `CREATE` / `CREATE2` flows must use the root key post-T3.
 
 ## Concepts
 
@@ -35,7 +51,7 @@ The protocol enforces a strict hierarchy at validation time:
 1. **Root Key**: The account's main key (derived from the account address)
    - Can call all precompile functions
    - Has no spending limits
-   
+
 2. **Access Keys**: Secondary authorized keys
    - Cannot call mutable precompile functions (only view functions are allowed)
    - Subject to per-TIP20 token spending limits

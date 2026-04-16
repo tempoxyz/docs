@@ -85,6 +85,28 @@ type Response = {
       symbol: string
     }
 
+    /** Structured error details when the fill fails. */
+    error?: {
+      /** Revert error name (e.g. "InsufficientBalance"). */
+      errorName: string
+      /** Human-readable error message. */
+      message: string
+    }
+
+    /** Funding requirement when InsufficientBalance is encountered. */
+    requireFunds?: {
+      /** Deficit amount in token units. */
+      amount: `0x${string}`
+      /** Token decimals (e.g. 6). */
+      decimals: number
+      /** Human-readable deficit (e.g. "100.000000"). */
+      formatted: string
+      /** Token address. */
+      token: `0x${string}`
+      /** Token symbol (e.g. "USDC.e"). */
+      symbol: string
+    }
+
     /** Sponsor details, present when `sponsored` is `true`. */
     sponsor?: {
       /** Sponsor address. */
@@ -140,6 +162,7 @@ type SwapAmount = {
 ## Example
 
 ```ts twoslash
+// @noErrors
 import { Provider } from 'accounts'
 
 const provider = Provider.create()
@@ -190,6 +213,7 @@ result.capabilities
 Pay fees with a specific stablecoin.
 
 ```ts twoslash
+// @noErrors
 import { Provider } from 'accounts'
 const provider = Provider.create()
 const [account] = await provider.request({ method: 'eth_accounts' })
@@ -218,9 +242,10 @@ result.capabilities.fee
 
 ### With Sponsorship
 
-When the relay is configured with a [`feePayer`](/accounts/server/handler.relay#feepayer) and the request is sponsorable, the response includes `sponsored: true` and `sponsor` details.
+When the relay is configured with a [`feePayer`](/accounts/server/handler.relay#feepayer), validated transactions are sponsored. The response includes `sponsored: true` and `sponsor` details.
 
 ```ts twoslash
+// @noErrors
 import { Provider } from 'accounts'
 const provider = Provider.create()
 const [account] = await provider.request({ method: 'eth_accounts' })
@@ -253,6 +278,7 @@ result.capabilities.sponsor
 When the user has insufficient balance of a required token, the relay automatically injects swap calls (approve + buy) via the [Stablecoin DEX](/guide/stablecoin-dex). The swap details are reported in `meta.autoSwap`, and swap-related balance diffs are excluded from `meta.balanceDiffs`.
 
 ```ts twoslash
+// @noErrors
 import { Provider } from 'accounts'
 const provider = Provider.create()
 const [account] = await provider.request({ method: 'eth_accounts' })
@@ -310,5 +336,79 @@ result.capabilities.fee
 //   decimals: 6,
 //   formatted: '0.027526',
 //   symbol: 'pathUSD',
+// }
+```
+
+### Error Details
+
+When `eth_fillTransaction` fails, the relay returns structured error details in `capabilities.error` instead of throwing.
+
+```ts twoslash
+// @noErrors
+import { Provider } from 'accounts'
+const provider = Provider.create()
+const [account] = await provider.request({ method: 'eth_accounts' })
+// ---cut---
+const result = await provider.request({
+  method: 'eth_fillTransaction',
+  params: [{
+    from: account,
+    calls: [{
+      to: '0x20c000000000000000000000b9537d11c60e8b50', // USDC.e
+      data: '0xa9059cbb000000000000000000000000cafebabecafebabecafebabecafebabecafebabe0000000000000000000000000000000000000000000000000000000005f5e100',
+    }],
+  }],
+})
+
+result.capabilities.error
+// {
+//   errorName: 'BelowMinimumOrderSize',
+//   message: 'Below minimum order size: 1000000.',
+// }
+```
+
+### Require Funds
+
+For `InsufficientBalance` errors, the relay also returns a `capabilities.requireFunds` object with the exact deficit amount and token metadata.
+
+```ts twoslash
+// @noErrors
+import { Provider } from 'accounts'
+const provider = Provider.create()
+const [account] = await provider.request({ method: 'eth_accounts' })
+// ---cut---
+const result = await provider.request({
+  method: 'eth_fillTransaction',
+  params: [{
+    from: account,
+    calls: [{
+      to: '0x20c000000000000000000000b9537d11c60e8b50', // USDC.e
+      // transfer 100 USDC.e (but account has 0)
+      data: '0xa9059cbb000000000000000000000000cafebabecafebabecafebabecafebabecafebabe0000000000000000000000000000000000000000000000000000000005f5e100',
+    }],
+  }],
+})
+
+result.capabilities.requireFunds
+// {
+//   amount: '0x5f5e100',
+//   decimals: 6,
+//   formatted: '100.000000',
+//   token: '0x20c000000000000000000000b9537d11c60e8b50',
+//   symbol: 'USDC.e',
+// }
+
+result.capabilities.balanceDiffs
+// {
+//   '0x1234567890abcdef1234567890abcdef12345678': [{
+//     address: '0x20c000000000000000000000b9537d11c60e8b50',
+//     decimals: 6,
+//     direction: 'outgoing',
+//     formatted: '100.000000',
+//     name: 'USDC.e',
+//     recipients: ['0xcafebabecafebabecafebabecafebabecafebabe'],
+//     symbol: 'USDC.e',
+//     value: '0x5f5e100',
+//   }],
 // }
 ```

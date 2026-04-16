@@ -212,13 +212,13 @@ export function VirtualAddressesLiveDemo() {
 
     return createClient({
       account: demoSender,
-        chain: runtimeChain,
-        transport: isLocalnet
-          ? http()
-          : withFeePayer(
-              http(runtimeChain.rpcUrls.default.http[0]),
-              http(isDevnet ? DEVNET_SPONSOR_URL : MODERATO_SPONSOR_URL),
-            ),
+      chain: runtimeChain,
+      transport: isLocalnet
+        ? http()
+        : withFeePayer(
+            http(runtimeChain.rpcUrls.default.http[0]),
+            http(isDevnet ? DEVNET_SPONSOR_URL : MODERATO_SPONSOR_URL),
+          ),
     }).extend(tempoActions())
   }, [demoSender, isDevnet, isLocalnet, runtimeChain])
 
@@ -337,7 +337,9 @@ export function VirtualAddressesLiveDemo() {
       if (!client) throw new Error('Client unavailable.')
       if (requiredTokens.length === 0) return
 
-      const balances = await Promise.all(requiredTokens.map((token) => getTokenBalance(target, token)))
+      const balances = await Promise.all(
+        requiredTokens.map((token) => getTokenBalance(target, token)),
+      )
       if (balances.every((balance) => balance > 0n)) return
 
       await Actions.faucet.fund(client as unknown as Client<Transport, Chain>, {

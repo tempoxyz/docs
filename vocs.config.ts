@@ -605,7 +605,7 @@ export default defineConfig({
                 link: '/protocol/upgrades/t3',
               },
               {
-                text: 'T2',
+                text: 'T2 (Active)',
                 link: '/protocol/upgrades/t2',
               },
             ],
@@ -650,6 +650,10 @@ export default defineConfig({
             ],
           },
           {
+            text: 'RPC Reference',
+            link: '/protocol/rpc',
+          },
+          {
             text: 'SDKs',
             collapsed: true,
             items: [
@@ -690,7 +694,17 @@ export default defineConfig({
               },
               {
                 text: 'Foundry',
-                link: '/sdk/foundry',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Overview',
+                    link: '/sdk/foundry',
+                  },
+                  {
+                    text: 'Use MPP with Foundry',
+                    link: '/sdk/foundry/mpp',
+                  },
+                ],
               },
               {
                 text: 'Python',
@@ -1182,7 +1196,7 @@ export default defineConfig({
     },
     {
       source: '/sdk/typescript/server/handler.feePayer',
-      destination: '/accounts/server/handler.feePayer',
+      destination: '/accounts/server/handler.relay',
       status: 301,
     },
     {

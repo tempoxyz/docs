@@ -4,13 +4,15 @@ import { tempoWallet, webAuthn as webAuthnAccounts } from 'accounts/wagmi'
 import * as React from 'react'
 import { parseUnits } from 'viem'
 import { tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
-import { withFeePayer } from 'viem/tempo'
+import { withRelay } from 'viem/tempo'
 import {
   type CreateConfigParameters,
   createConfig,
   createStorage,
+  fallback,
   http,
   useConnectors,
+  webSocket,
 } from 'wagmi'
 import { KeyManager, webAuthn } from 'wagmi/tempo'
 import { alphaUsd, betaUsd, pathUsd, thetaUsd } from './components/guides/tokens'
@@ -62,6 +64,10 @@ export function getConfig(options: getConfig.Options = {}) {
               },
             }),
             webAuthn({
+              grantAccessKey: {
+                // @ts-expect-error - TODO: migrate to webAuthn on Accounts SDK
+                chainId: BigInt(chain.id),
+              },
               keyManager: KeyManager.http('https://keys.tempo.xyz'),
               rpId,
             }),
@@ -73,13 +79,25 @@ export function getConfig(options: getConfig.Options = {}) {
       key: 'tempo-docs',
     }),
     transports: {
-      [tempoModerato.id]: withFeePayer(
-        http('https://rpc.moderato.tempo.xyz'),
+      [tempoModerato.id]: withRelay(
+        fallback([
+          http('https://rpc.moderato.tempo.xyz'),
+          webSocket('wss://rpc.moderato.tempo.xyz', {
+            keepAlive: { interval: 1_000 },
+          }),
+        ]),
         http('https://sponsor.moderato.tempo.xyz'),
+        { policy: 'sign-only' },
       ),
-      [tempoDevnet.id]: withFeePayer(
-        http(tempoDevnet.rpcUrls.default.http[0]),
+      [tempoDevnet.id]: withRelay(
+        fallback([
+          http(tempoDevnet.rpcUrls.default.http[0]),
+          webSocket(tempoDevnet.rpcUrls.default.webSocket[0], {
+            keepAlive: { interval: 1_000 },
+          }),
+        ]),
         http('https://sponsor.devnet.tempo.xyz'),
+        { policy: 'sign-only' },
       ),
       [tempoLocalnet.id]: http(undefined, { batch: true }),
     },

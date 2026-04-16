@@ -14,7 +14,7 @@ For general information about Foundry, see the [Foundry documentation](https://g
 
 Tempo's Foundry fork is installed through the standard upstream `foundryup` using the `-n tempo` flag, no separate installer is required.
 
-::::steps
+:::::steps
 
 ## Install `foundryup`
 
@@ -67,7 +67,7 @@ forge init -n tempo my-project && cd my-project
 
 Each new project is configured for Tempo out of the box, with [`tempo-std`](https://github.com/tempoxyz/tempo-std), the Tempo standard library installed, containing helpers for Tempo's protocol-level features.
 
-::::
+:::::
 
 ## Use Foundry for your workflows
 
@@ -90,7 +90,7 @@ forge script script/Mail.s.sol
 
 ```bash
 # Set environment variables
-export TEMPO_RPC_URL=https://rpc.tempo.xyz
+export TEMPO_RPC_URL=https://rpc.moderato.tempo.xyz
 export VERIFIER_URL=https://contracts.tempo.xyz
 
 # Optional: create a new keypair and request some testnet tokens from the faucet.
@@ -113,15 +113,6 @@ forge create src/Mail.sol:Mail \
   --tempo.fee-token <FEE_TOKEN_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL \
   --interactive \
-  --broadcast \
-  --verify \
-  --constructor-args 0x20c0000000000000000000000000000000000001
-
-# Deploy using an access key (delegated signing)
-forge create src/Mail.sol:Mail \
-  --tempo.access-key $ACCESS_KEY_PRIVATE_KEY \
-  --tempo.root-account $ROOT_ADDRESS \
-  --rpc-url $TEMPO_RPC_URL \
   --broadcast \
   --verify \
   --constructor-args 0x20c0000000000000000000000000000000000001
@@ -156,6 +147,8 @@ forge script script/Deploy.s.sol \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
 ```
+
+Use a root key for `forge create`. Post-T3, access keys can sign calls but not deployments.
 
 For more verification options including verifying existing contracts and API verification, see [Contract Verification](/quickstart/verify-contracts).
 
@@ -246,8 +239,8 @@ cast send <CONTRACT_ADDRESS> 'increment()' \
 # Send with access key (delegated signing):
 # First authorize the key via Account Keychain precompile
 cast send 0xAAAAAAAA00000000000000000000000000000000 \
-  'authorizeKey(address,uint8,uint64,bool,(address,uint256)[])' \
-  $ACCESS_KEY_ADDR 0 1893456000 false "[]" \
+  'authorizeKey(address,uint8,uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[])' \
+  $ACCESS_KEY_ADDR 0 1893456000 false "[]" true "[]" \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $ROOT_PRIVATE_KEY
 # Then send using the access key
@@ -256,6 +249,10 @@ cast send <CONTRACT_ADDRESS> 'increment()' \
   --tempo.access-key $ACCESS_KEY_PRIVATE_KEY \
   --tempo.root-account $ROOT_ADDRESS
 ```
+
+Post-T3, direct `authorizeKey(...)` calls must use the enhanced TIP-1011 ABI shown above. If you need periodic limits or call scopes, fill those arrays instead of passing `[]`.
+
+Post-T3, access-key transactions also cannot create contracts, so use a root key for deployments or other flows that perform `CREATE`.
 
 ### Local Development with Anvil
 
@@ -315,4 +312,73 @@ The following flags are available for `cast` and `forge script` for Tempo-specif
 
 Ledger and Trezor wallets are not yet compatible with any `--tempo.*` option.
 
+## cast keychain
 
+`cast keychain` provides a CLI interface to Tempo's [Account Keychain precompile](/protocol/transactions/AccountKeychain).
+
+:::info
+`cast keychain` only works on Tempo networks.
+:::
+
+```bash
+# Authorize a new access key (signature types: secp256k1, p256, webauthn; expiry 0 = never):
+cast keychain authorize <KEY_ID> secp256k1 0 \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Authorize with a spending limit (TOKEN:AMOUNT or TOKEN:AMOUNT:PERIOD_SECONDS):
+cast keychain authorize <KEY_ID> secp256k1 0 \
+  --limit <TOKEN_ADDRESS>:1000000 \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Authorize with call scopes (restrict to specific contracts/functions):
+cast keychain authorize <KEY_ID> secp256k1 0 \
+  --scope <TOKEN_ADDRESS>:transfer,approve \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Authorize with call scope restricted to a specific recipient:
+cast keychain authorize <KEY_ID> secp256k1 0 \
+  --scope <TOKEN_ADDRESS>:transfer@<RECIPIENT_ADDRESS> \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Full example: 24h expiry + spending limit + call scope:
+EXPIRY=$(($(date +%s) + 86400))
+cast keychain authorize <KEY_ID> secp256k1 $EXPIRY \
+  --limit <TOKEN_ADDRESS>:1000000 \
+  --scope <TOKEN_ADDRESS>:transfer \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Revoke an access key (permanent, cannot be re-authorized):
+cast keychain revoke <KEY_ID> \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Update spending limit for a key-token pair:
+cast keychain update-limit <KEY_ID> <TOKEN_ADDRESS> <NEW_LIMIT> \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Replace all call scopes for a key:
+cast keychain set-scope <KEY_ID> \
+  --scope <TOKEN_ADDRESS>:transfer \
+  --scope <CONTRACT_ADDRESS> \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Remove a target contract from allowed call list:
+cast keychain remove-scope <KEY_ID> <TARGET_ADDRESS> \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Query key info (read-only):
+cast keychain key-info <ACCOUNT> <KEY_ID> \
+  --rpc-url $TEMPO_RPC_URL
+
+# Query remaining spending limit:
+cast keychain remaining-limit <ACCOUNT> <KEY_ID> <TOKEN_ADDRESS> \
+  --rpc-url $TEMPO_RPC_URL
+```
