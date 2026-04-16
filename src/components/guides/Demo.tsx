@@ -598,8 +598,6 @@ export function Button(
 ) {
   const { className, disabled, render, size, static: static_, variant, ...rest } = props
   const Element = render ? (p: typeof props) => React.cloneElement(render, p) : 'button'
-  const accessibilityProps = render ? { 'aria-disabled': disabled || undefined } : { disabled }
-
   return (
     <Element
       className={buttonClassName({
@@ -609,7 +607,6 @@ export function Button(
         static: static_,
         variant,
       })}
-      {...accessibilityProps}
       {...rest}
     />
   )
