@@ -24,7 +24,7 @@ On Tempo Mainnet, anyone can read any account's balance. On a Tempo Zone, `balan
 - If `msg.sender` is the sequencer, the call succeeds (required for block production and fee accounting).
 - Otherwise, the call reverts with `Unauthorized()`.
 
-Enforcing this at the contract level (not just the RPC layer) ensures that even on-chain composition cannot leak balances. A contract on the Tempo Zone cannot read and emit another account's balance.
+Enforcing this at the contract level (not just the RPC layer) ensures that even onchain composition cannot leak balances. A contract on the Tempo Zone cannot read and emit another account's balance.
 
 ## Private Allowances
 

@@ -63,7 +63,7 @@ The proof verifies that:
 
 ## State Transition Function
 
-The prover takes a complete witness of zone blocks and their dependencies, executes the EVM state transitions, and outputs commitments for on-chain verification:
+The prover takes a complete witness of zone blocks and their dependencies, executes the EVM state transitions, and outputs commitments for onchain verification:
 
 ```rust
 pub fn prove_zone_batch(witness: BatchWitness) -> Result<BatchOutput, Error>
@@ -122,7 +122,7 @@ The solution verifies ancestry inside the ZK circuit:
 | Direct | `recentTempoBlockNumber = 0` | Portal reads `tempoBlockNumber` hash from EIP-2935 |
 | Ancestry | `recentTempoBlockNumber > tempoBlockNumber` | Portal reads `recentTempoBlockNumber` hash; proof verifies parent chain |
 
-Proving time increases linearly with the block gap (each gap block adds ~1 keccak operation), but on-chain verification cost remains constant. This prevents the zone from becoming stuck after an extended downtime.
+Proving time increases linearly with the block gap (each gap block adds ~1 keccak operation), but onchain verification cost remains constant. This prevents the zone from becoming stuck after an extended downtime.
 
 ## Tempo State Access
 
