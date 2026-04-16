@@ -25,8 +25,11 @@ test('prepare zone access and deposit to Zone A', async ({ page }) => {
     timeout: 30000,
   })
 
-  const authorizeButton = page.getByRole('button', { name: 'Authorize Zone A reads' }).first()
+  const authorizeButton = page
+    .getByRole('button', { name: /^Authoriz(?:e|ing) Zone A reads$/i })
+    .first()
   await expect(authorizeButton).toBeVisible({ timeout: 30000 })
+  await expect(authorizeButton).toBeEnabled({ timeout: 90000 })
   await authorizeButton.click()
 
   const getFundsButton = page.getByRole('button', { name: /^Get testnet pathUSD$/i }).first()

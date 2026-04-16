@@ -4,6 +4,8 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import type { Hex } from 'viem'
 import { Storage as ZoneStorage } from 'viem/tempo'
 
+const zoneAuthorizationInfoTimeoutMs = 5_000
+
 export type ZoneAuthClientLike = {
   zone: {
     getAuthorizationTokenInfo: () => Promise<{
@@ -44,7 +46,10 @@ export function useZoneAuthorization(parameters: {
       if (accountToken) await storage.setItem(chainStorageKey, accountToken)
 
       try {
-        const info = await zoneClient.zone.getAuthorizationTokenInfo()
+        const info = await withTimeout(
+          zoneClient.zone.getAuthorizationTokenInfo(),
+          zoneAuthorizationInfoTimeoutMs,
+        )
         const expired = info.expiresAt <= BigInt(Math.floor(Date.now() / 1000))
         const matchesAccount = info.account.toLowerCase() === lowerAddress
 
@@ -94,12 +99,27 @@ export function useZoneAuthorization(parameters: {
   }
 }
 
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) => {
+      const timeout = setTimeout(() => {
+        const error = new Error('zone authorization info request timed out')
+        error.name = 'TimeoutError'
+        reject(error)
+      }, timeoutMs)
+
+      promise.finally(() => clearTimeout(timeout))
+    }),
+  ])
+}
+
 function isZoneAuthorizationError(error: unknown) {
   const status = getErrorStatus(error)
   if (status === 401 || status === 403) return true
 
   const name = getErrorName(error)
-  if (name === 'HttpRequestError') return true
+  if (name === 'HttpRequestError' || name === 'TimeoutError') return true
 
   const message = getErrorMessage(error)
   return /authorization token/i.test(message)
