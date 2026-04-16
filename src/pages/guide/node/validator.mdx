@@ -13,24 +13,58 @@ The active validator set is currently permissioned. If you are interested in bec
 ## Cryptographic key hierarchy
 
 All validators have two kinds of keys:
-* signing key - this is an ED25519 keypair used to identify your validator amongst others
-* signing share - this is a share of a BLS12-381 keypair used to sign block notarizations and finalizations
+* **Signing key** — an ED25519 keypair used to identify your validator amongst others.
+* **Signing share** — a share of a BLS12-381 keypair used to sign block notarizations and finalizations.
 
-The signing key is static. Pre-T2, it can only be rotated by removing and re-creating a validator on-chain with the Tempo team. Post-T2, [ValidatorConfig V2](/guide/node/validator-config-v2) enables self-service rotation via the `rotateValidator` precompile. The signing share is dynamic and is updated periodically on each DKG ceremony. Once updated, it will be saved to disk. Currently, the DKG ceremony is scheduled to run on-chain every ~3 hours.
+The signing key can be rotated while preserving your validator index — see [Signing key rotation](/guide/node/operate-validator#signing-key-rotation) for details. The signing share is dynamic and is updated periodically on each DKG ceremony. Once updated, it will be saved to disk. Currently, the DKG ceremony is scheduled to run on-chain every ~3 hours.
+
+## Generating a signing key
+
+You can generate an ED25519 keypair using the following command:
+
+```bash
+tempo consensus generate-private-key --output <path>
+```
+
+Once the private key is generated, you can calculate/verify the public key by running:
+
+```bash
+tempo consensus calculate-public-key --private-key <path>
+```
+
+The public key should match the output of the `generate-private-key` command.
 
 ## Running the validator
 
 The process for running a validator node is very similar to [running a full node](/guide/node/rpc). 
 
-You should start by downloading the latest snapshot using `tempo download --minimal`. Downloading the snapshot allows your validator to start participating in consensus much faster.
-Once you've downloaded the snapshot and have been whitelisted on-chain, you can proceed to run the validator node as such:
+You should start by downloading the latest snapshot. Downloading the snapshot allows your validator to start participating in consensus much faster.
 
-```bash
+::::code-group
+```bash [Mainnet]
+tempo download --chain mainnet
+```
+```bash [Testnet]
+tempo download --chain moderato
+```
+::::
+
+Once you've downloaded the snapshot and have been whitelisted on-chain, you can proceed to run the validator node:
+
+::::code-group
+```bash [Mainnet]
 tempo node --datadir <datadir> \
-    --chain <mainnet|moderato> \
+    --chain mainnet \
     --consensus.signing-key <path> \
     --telemetry-url <TELEMETRY_URL>
 ```
+```bash [Testnet]
+tempo node --datadir <datadir> \
+    --chain moderato \
+    --consensus.signing-key <path> \
+    --telemetry-url <TELEMETRY_URL>
+```
+::::
 
 :::warning
 `--consensus.fee-recipient` is deprecated as of `v1.5.2` and will be removed in an upcoming release. Validators should migrate fee-recipient management to [Validator Config V2](/guide/node/validator-config-v2).
@@ -90,10 +124,15 @@ INFO handle_propose{epoch=18 view=387213 parent.view=387212 parent.digest=0x4388
 ```
 
 If you do not see logs like these:
-- please check that your validator is part of the active set, and is both a player and a dealer. See [validator states](/guide/node/validator-config-v2#validator-states)
-- please check that your node is synced up to the [latest block height](https://explorer.tempo.xyz/). 
-- please check that your outgoing IP address matches the one whitelisted on the validator smart contract:
+- Check that your validator is part of the active set, and is both [a player and a dealer](/guide/node/operate-validator#dealer-epoch-e3).
+- Check that your node is synced up to the [latest block height](https://explorer.tempo.xyz/). 
+- Check that your outgoing IP address matches the one whitelisted on the validator smart contract:
 
-```bash
-tempo consensus validators-info --rpc-url <YOUR_RPC_URL>
+::::code-group
+```bash [Mainnet]
+tempo consensus validators-info --rpc-url https://rpc.tempo.xyz
 ```
+```bash [Testnet]
+tempo consensus validators-info --rpc-url https://rpc.testnet.tempo.xyz
+```
+::::
