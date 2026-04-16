@@ -1,5 +1,31 @@
 import { VirtualMaster } from 'ox/tempo'
-import type { FromWorker, ToWorker } from './miner.protocol'
+import type { Address, Hex } from 'viem'
+
+type ToWorker =
+  | {
+      type: 'start'
+      batchSize: number
+      masterAddress: Address
+      startHex: Hex
+    }
+  | { type: 'stop' }
+
+type FromWorker =
+  | { type: 'ready' }
+  | {
+      type: 'progress'
+      attempts: number
+      hashesPerSecond: number
+    }
+  | {
+      type: 'found'
+      attempts: number
+      saltHex: string
+      masterIdHex: string
+      registrationHashHex: string
+    }
+  | { type: 'stopped'; attempts: number }
+  | { type: 'error'; message: string }
 
 function post(message: FromWorker) {
   self.postMessage(message)
@@ -19,15 +45,14 @@ self.onmessage = (event: MessageEvent<ToWorker>) => {
 
   running = true
 
-  const { workerId, masterAddress, startHex, stride, batchSize } = message
-  const strideSize = BigInt(batchSize) * BigInt(stride)
+  const { masterAddress, startHex, batchSize } = message
   let nextStart = BigInt(startHex)
   let totalAttempts = 0
   const startedAt = performance.now()
 
   const mine = () => {
     if (!running) {
-      post({ type: 'stopped', workerId, attempts: totalAttempts })
+      post({ type: 'stopped', attempts: totalAttempts })
       return
     }
 
@@ -44,7 +69,6 @@ self.onmessage = (event: MessageEvent<ToWorker>) => {
 
         post({
           type: 'found',
-          workerId,
           attempts: totalAttempts + attemptsInBatch,
           saltHex: result.salt,
           masterIdHex: result.masterId,
@@ -54,13 +78,12 @@ self.onmessage = (event: MessageEvent<ToWorker>) => {
       }
 
       totalAttempts += batchSize
-      nextStart += strideSize
+      nextStart += BigInt(batchSize)
       const elapsed = performance.now() - startedAt
       const hashesPerSecond = Math.round((totalAttempts / elapsed) * 1000)
 
       post({
         type: 'progress',
-        workerId,
         attempts: totalAttempts,
         hashesPerSecond,
       })
@@ -70,12 +93,11 @@ self.onmessage = (event: MessageEvent<ToWorker>) => {
       running = false
       post({
         type: 'error',
-        workerId,
         message: error instanceof Error ? error.message : 'Virtual master mining failed.',
       })
     }
   }
 
-  post({ type: 'ready', workerId })
+  post({ type: 'ready' })
   mine()
 }

@@ -23,7 +23,6 @@ import { Hooks } from 'wagmi/tempo'
 import { useWebAuthnConnector } from '../../wagmi.config'
 import { Button, Logout, Step, StringFormatter } from './Demo'
 import { alphaUsd, pathUsd } from './tokens'
-import { createMinerPool, type MinerState } from './virtual-addresses/miner.pool'
 
 const TEST_MNEMONIC = 'test test test test test test test test test test test junk'
 const DEMO_SENDER_KEY =
@@ -41,6 +40,48 @@ type RegistrationResult = {
   txHash: Hex
   virtualAddress: Address
 }
+
+type MinerState =
+  | { status: 'idle' }
+  | {
+      status: 'mining'
+      totalAttempts: number
+      hashesPerSecond: number
+    }
+  | {
+      status: 'found'
+      salt: string
+      masterId: string
+      registrationHash: string
+      attempts: number
+    }
+  | { status: 'error'; message: string }
+
+type MinerWorkerCommand =
+  | {
+      type: 'start'
+      batchSize: number
+      masterAddress: Address
+      startHex: Hex
+    }
+  | { type: 'stop' }
+
+type MinerWorkerMessage =
+  | { type: 'ready' }
+  | {
+      type: 'progress'
+      attempts: number
+      hashesPerSecond: number
+    }
+  | {
+      type: 'found'
+      attempts: number
+      saltHex: string
+      masterIdHex: string
+      registrationHashHex: string
+    }
+  | { type: 'stopped'; attempts: number }
+  | { type: 'error'; message: string }
 
 type SendResult = {
   after: {
@@ -65,6 +106,12 @@ function formatCount(value: number): string {
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`
   if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`
   return value.toString()
+}
+
+function randomHex(size: number): Hex {
+  const bytes = new Uint8Array(size)
+  crypto.getRandomValues(bytes)
+  return `0x${Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')}` as Hex
 }
 
 function PasskeyLogin() {
@@ -125,7 +172,7 @@ export function VirtualAddressesLiveDemo() {
   const [registration, setRegistration] = React.useState<RegistrationResult | null>(null)
   const [sendResult, setSendResult] = React.useState<SendResult | null>(null)
 
-  const minerRef = React.useRef<ReturnType<typeof createMinerPool> | null>(null)
+  const minerRef = React.useRef<Worker | null>(null)
   const previousAddressRef = React.useRef<Address | undefined>(undefined)
 
   const demoAdmin = React.useMemo(() => mnemonicToAccount(TEST_MNEMONIC), [])
@@ -178,57 +225,106 @@ export function VirtualAddressesLiveDemo() {
     },
   })
 
+  const stopMiner = React.useCallback(() => {
+    if (!minerRef.current) return
+    minerRef.current.postMessage({ type: 'stop' } satisfies MinerWorkerCommand)
+    minerRef.current.terminate()
+    minerRef.current = null
+  }, [])
+
   React.useEffect(() => {
     if (previousAddressRef.current === address) return
 
     previousAddressRef.current = address as Address | undefined
-    minerRef.current?.stop()
+    stopMiner()
     setMinerState({ status: 'idle' })
     setRegistration(null)
     setSendResult(null)
-  }, [address])
+  }, [address, stopMiner])
 
   React.useEffect(
     () => () => {
-      minerRef.current?.stop()
+      stopMiner()
     },
-    [],
+    [stopMiner],
   )
 
-  const mineSalt = React.useCallback((masterAddress: Address) => {
-    return new Promise<Pick<RegistrationResult, 'masterId' | 'registrationHash' | 'salt'>>(
-      (resolve, reject) => {
-        minerRef.current?.stop()
-        let settled = false
+  const mineSalt = React.useCallback(
+    (masterAddress: Address) => {
+      return new Promise<Pick<RegistrationResult, 'masterId' | 'registrationHash' | 'salt'>>(
+        (resolve, reject) => {
+          stopMiner()
+          setMinerState({ status: 'mining', totalAttempts: 0, hashesPerSecond: 0 })
 
-        const pool = createMinerPool({
-          masterAddress,
-          onStateChange: (state) => {
-            setMinerState(state)
-            if (settled) return
+          const worker = new Worker(
+            new URL('./virtual-addresses/miner.worker.ts', import.meta.url),
+            {
+              type: 'module',
+            },
+          )
+          minerRef.current = worker
 
-            if (state.status === 'found') {
-              settled = true
-              resolve({
-                masterId: state.masterId as Hex,
-                registrationHash: state.registrationHash as Hex,
-                salt: state.salt as Hex,
-              })
-              return
+          worker.onmessage = (event: MessageEvent<MinerWorkerMessage>) => {
+            const message = event.data
+
+            switch (message.type) {
+              case 'ready': {
+                break
+              }
+              case 'progress': {
+                setMinerState({
+                  status: 'mining',
+                  totalAttempts: message.attempts,
+                  hashesPerSecond: message.hashesPerSecond,
+                })
+                break
+              }
+              case 'found': {
+                setMinerState({
+                  status: 'found',
+                  salt: message.saltHex,
+                  masterId: message.masterIdHex,
+                  registrationHash: message.registrationHashHex,
+                  attempts: message.attempts,
+                })
+                stopMiner()
+                resolve({
+                  masterId: message.masterIdHex as Hex,
+                  registrationHash: message.registrationHashHex as Hex,
+                  salt: message.saltHex as Hex,
+                })
+                break
+              }
+              case 'error': {
+                setMinerState({ status: 'error', message: message.message })
+                stopMiner()
+                reject(new Error(message.message))
+                break
+              }
+              case 'stopped': {
+                break
+              }
             }
+          }
 
-            if (state.status === 'error') {
-              settled = true
-              reject(new Error(state.message))
-            }
-          },
-        })
+          worker.onerror = (error) => {
+            const message = error.message || 'Virtual master mining failed.'
+            setMinerState({ status: 'error', message })
+            stopMiner()
+            reject(new Error(message))
+          }
 
-        minerRef.current = pool
-        pool.start()
-      },
-    )
-  }, [])
+          worker.postMessage({
+            type: 'start',
+            batchSize: 100_000,
+            masterAddress,
+            startHex: randomHex(32),
+          } satisfies MinerWorkerCommand)
+        },
+      )
+    },
+    [stopMiner],
+  )
 
   const getTokenBalance = React.useCallback(
     async (target: Address, token: Address): Promise<bigint> => {
