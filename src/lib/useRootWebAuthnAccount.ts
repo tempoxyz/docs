@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { Account } from 'viem/tempo'
+import type { Account } from 'viem/tempo'
 import { useConnection } from 'wagmi'
 
 type RootWebAuthnAccount = ReturnType<typeof Account.fromWebAuthnP256>
