@@ -7,6 +7,10 @@ description: Generate, rotate, and recover validator signing keys and shares.
 
 Tempo validators use two kinds of cryptographic keys. This page covers how to generate, rotate, and recover them.
 
+:::warning
+Never share your private signing key. Anyone with access to it can impersonate your validator. Store keys securely and restrict file permissions.
+:::
+
 ## Key hierarchy
 
 * **Signing key** — an ED25519 keypair used to identify your validator amongst others. Can be rotated while preserving your validator index.
