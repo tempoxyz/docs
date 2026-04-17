@@ -87,7 +87,7 @@ Tempo's broader tooling ecosystem is available in [Developer tools](/quickstart/
 | [Rust](https://github.com/tempoxyz/tempo/releases/tag/tempo-alloy%401.5.1) | [`tempo-alloy@1.5.1`](https://github.com/tempoxyz/tempo/releases/tag/tempo-alloy%401.5.1) |
 | [Go](https://github.com/tempoxyz/tempo-go) | [`v0.4.0`](https://github.com/tempoxyz/tempo-go/releases/tag/v0.4.0) |
 | [Python](https://github.com/tempoxyz/pytempo) | [`0.5.0`](https://github.com/tempoxyz/pytempo/releases/tag/pytempo%400.5.0) |
-| [Foundry](https://github.com/tempoxyz/tempo-foundry) | [`v1.6.0-t3`](https://github.com/tempoxyz/tempo-foundry/releases/tag/v1.6.0-t3) |
+| [Foundry](https://github.com/foundry-rs/foundry) | [`nightly`](https://github.com/foundry-rs/foundry/releases/tag/nightly) |
 
 :::note[Current SDK caveat]
 The Accounts SDK and `wallet_authorizeAccessKey` docs still describe the legacy pre-T3 access-key shape. Until their T3 support lands, use the protocol specs and the T3-compatible SDK releases above for the post-T3 `authorizeKey(...)` ABI.
@@ -107,6 +107,8 @@ The Accounts SDK and `wallet_authorizeAccessKey` docs still describe the legacy 
 ### TIP-1020: Signature Verification Precompile
 
 [TIP-1020](/protocol/tips/tip-1020) adds a single precompile for verifying secp256k1, P256, and WebAuthn signatures onchain. This is additive: existing verifier setups keep working, but teams that want a standard verification surface for passkey wallets, multisigs, governance approvals, and other signature-driven flows can adopt the precompile instead of maintaining custom verifier contracts.
+
+The Foundry project template for Tempo includes a working example that uses the `SignatureVerifier` precompile to verify P256 signatures inside a smart contract. See the [Signature Verification with Foundry](/sdk/foundry/signature-verifier) guide to get started.
 
 ### TIP-1022: Virtual Addresses for TIP-20 Deposit Forwarding
 

@@ -7,7 +7,11 @@ import { Card, Cards } from 'vocs'
 
 # Use MPP with Foundry
 
-[Tempo Foundry](https://github.com/tempoxyz/tempo-foundry) extends Foundry with native MPP support. When an RPC endpoint returns `402 Payment Required`, Foundry automatically handles the payment challenge — no wrapper scripts, no middleware, no code changes.
+Foundry includes native MPP support on Tempo. When an RPC endpoint returns `402 Payment Required`, Foundry automatically handles the payment challenge with no wrapper scripts, middleware, or code changes.
+
+:::warning[`tempo-foundry` is deprecated]
+`tempo-foundry` and `foundryup -n tempo` are deprecated. Install upstream Foundry nightly with `foundryup -i nightly`.
+:::
 
 Every Foundry tool works transparently with MPP-gated endpoints:
 
@@ -26,19 +30,18 @@ When you point any Foundry tool at an MPP-gated RPC URL, the built-in transport 
 4. **Channel open** — If no payment channel exists, Foundry opens one on-chain with a deposit (default: `100,000` base units). This is a one-time on-chain lockup — unused balance remains in the channel.
 5. **Voucher payment** — Foundry signs an off-chain voucher against the open channel and retries the request with an `Authorization: Payment` header.
 6. **Auto top-up** — When a channel's deposit is exhausted, Foundry sends a top-up transaction. The server accepts it with `204 No Content`, then Foundry signs a fresh voucher and retries automatically.
-6. **Channel reuse** — Subsequent requests reuse the same channel. Channel state is persisted to `$TEMPO_HOME/foundry/channels.json` (default `~/.tempo/foundry/channels.json`) across process invocations.
+7. **Channel reuse** — Subsequent requests reuse the same channel. Channel state is persisted to `$TEMPO_HOME/foundry/channels.json` (default `~/.tempo/foundry/channels.json`) across process invocations.
 
 :::tip
 Channel reuse means the first call to an MPP endpoint has roughly one confirmation of overhead (~500ms on Tempo), but all subsequent calls add near-zero latency.
 :::
 
 ## Setup
-:::
 
 :::note
 Some endpoints use a one-shot `charge` intent instead of session-based channels. Foundry handles both — charge payments sign a single TIP-20 transfer without opening a channel.
 :::
-::::steps
+:::::steps
 
 ### Install the Tempo CLI
 
@@ -46,12 +49,12 @@ Some endpoints use a one-shot `charge` intent instead of session-based channels.
 curl -fsSL https://tempo.xyz/install | bash
 ```
 
-### Install Tempo Foundry
+### Install Foundry
 
-Tempo's fork is installed through the standard `foundryup` using the `-n tempo` flag:
+Tempo support now ships in Foundry's nightly:
 
 ```bash
-foundryup -n tempo
+foundryup -i nightly
 ```
 
 All standard Foundry commands work as before — MPP activates only when an endpoint returns `402`.
@@ -78,7 +81,7 @@ Point any Foundry tool at an MPP-gated RPC URL. No additional flags or config ne
 cast block-number --rpc-url https://rpc.mpp.tempo.xyz
 ```
 
-::::
+:::::
 
 ## Examples
 
@@ -206,15 +209,6 @@ Channels are automatically evicted when fully spent or closed. If the server res
 Use the Moderato testnet MPP endpoint for development:
 
 ```bash
-### Channel persistence
-
-Open channels are saved to `$TEMPO_HOME/foundry/channels.json` (default `~/.tempo/foundry/channels.json`). This allows channel reuse across process invocations — you won't re-open a channel every time you run `cast` or `forge`.
-
-Channels are automatically evicted when fully spent or closed. If the server restarts and returns `410 Gone`, Foundry clears stale local state and opens a fresh channel on the next request.
-
-### Gas sponsorship
-
-Some MPP endpoints sponsor gas fees on behalf of the caller. When the server's challenge includes a `feePayer` flag, Foundry delegates gas payment to the server — no TEMPO balance needed for gas.
 cast block-number --rpc-url https://rpc.mpp.moderato.tempo.xyz
 
 # Mainnet
@@ -222,6 +216,10 @@ cast block-number --rpc-url https://rpc.mpp.tempo.xyz
 ```
 
 Fund your testnet wallet with `tempo wallet fund` before making requests.
+
+### Gas sponsorship
+
+Some MPP endpoints sponsor gas fees on behalf of the caller. When the server's challenge includes a `feePayer` flag, Foundry delegates gas payment to the server, so no native balance is needed for gas.
 
 ## Troubleshooting
 

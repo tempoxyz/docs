@@ -155,6 +155,40 @@ export default defineConfig({
             ],
           },
           {
+            text: 'Connect to Zones',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/guide/private-zones',
+              },
+              {
+                text: 'Connect to a zone',
+                link: '/guide/private-zones/connect-to-a-zone',
+              },
+              {
+                text: 'Deposit to a zone',
+                link: '/guide/private-zones/deposit-to-a-zone',
+              },
+              {
+                text: 'Send tokens within a zone',
+                link: '/guide/private-zones/send-tokens-within-a-zone',
+              },
+              {
+                text: 'Send tokens across zones',
+                link: '/guide/private-zones/send-tokens-across-zones',
+              },
+              {
+                text: 'Swap across zones',
+                link: '/guide/private-zones/swap-across-zones',
+              },
+              {
+                text: 'Withdraw from a zone',
+                link: '/guide/private-zones/withdraw-from-a-zone',
+              },
+            ],
+          },
+          {
             text: 'Issue Stablecoins',
             collapsed: true,
             items: [
@@ -593,6 +627,45 @@ export default defineConfig({
             ],
           },
           {
+            text: 'Tempo Zones',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/protocol/zones',
+              },
+              {
+                text: 'Reference',
+                items: [
+                  {
+                    text: 'Architecture',
+                    link: '/protocol/zones/architecture',
+                  },
+                  {
+                    text: 'Accounts',
+                    link: '/protocol/zones/accounts',
+                  },
+                  {
+                    text: 'Bridging',
+                    link: '/protocol/zones/bridging',
+                  },
+                  {
+                    text: 'RPC',
+                    link: '/protocol/zones/rpc',
+                  },
+                  {
+                    text: 'Execution & Gas',
+                    link: '/protocol/zones/execution',
+                  },
+                  {
+                    text: 'Proving',
+                    link: '/protocol/zones/proving',
+                  },
+                ],
+              },
+            ],
+          },
+          {
             text: 'Network Upgrades',
             collapsed: true,
             items: [
@@ -699,6 +772,10 @@ export default defineConfig({
                   {
                     text: 'Use MPP with Foundry',
                     link: '/sdk/foundry/mpp',
+                  },
+                  {
+                    text: 'Signature Verification',
+                    link: '/sdk/foundry/signature-verifier',
                   },
                 ],
               },
@@ -1154,6 +1231,16 @@ export default defineConfig({
     {
       source: '/quickstart',
       destination: '/quickstart/integrate-tempo',
+    },
+    {
+      source: '/protocol/zones/overview',
+      destination: '/protocol/zones',
+      status: 301,
+    },
+    {
+      source: '/protocol/zones/privacy',
+      destination: '/protocol/zones/accounts',
+      status: 301,
     },
     {
       source: '/protocol/blockspace',
