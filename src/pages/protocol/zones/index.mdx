@@ -15,7 +15,7 @@ A Tempo Zone is a private execution environment attached to Tempo Mainnet. Insid
 
 ![Tempo Zones overview](/learn/zones/diagram-overview.svg)
 
-Funds deposited into a Tempo Zone are locked in the zone contract on Tempo Mainnet. [Validity proofs](/protocol/zones/proving) guarantee that the sequencer executed every transaction correctly. The sequencer orders and includes transactions, but cannot steal funds or forge state transitions.
+Funds deposited into a Tempo Zone are locked in the Zone Portal contract on Tempo Mainnet. [Validity proofs](/protocol/zones/proving) guarantee that the sequencer executed every transaction correctly. The sequencer orders and includes transactions, but cannot steal funds or forge state transitions.
 
 Each Tempo Zone operates as a separate chain, so adding more zones increases throughput without congesting Tempo Mainnet. Tempo Zones share liquidity through Tempo Mainnet. A zone can withdraw tokens, swap them on the Stablecoin DEX, and deposit the result into another zone without exposing who placed the trade. See [composable withdrawals](/protocol/zones/bridging#composable-withdrawals) for details.
 
