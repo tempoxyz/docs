@@ -18,18 +18,8 @@ Without virtual addresses, per-customer deposit addresses are operationally expe
 
 With virtual addresses, the customer-facing address is still unique, but it behaves like a routing alias. The protocol resolves it to the registered master wallet during the TIP-20 transfer itself.
 
-<StaticMermaidDiagram chart={`flowchart LR
-    subgraph A[Without virtual addresses]
-        D1[Customer deposit address] --> B1[Separate onchain balance]
-        B1 --> S1[Sweep transaction]
-        S1 --> M1[Master wallet]
-    end
-
-    subgraph B[With virtual addresses]
-        D2[Customer virtual address] --> F2[TIP-20 forwarding]
-        F2 --> M2[Master wallet]
-    end
-`} />
+<img src="/images/tip20/virtual-addresses-light.png" alt="Without virtual addresses, each customer deposit address holds a separate onchain balance that must be swept to the master wallet. With virtual addresses, TIP-20 forwarding routes deposits directly to the master wallet." className="dark:hidden" />
+<img src="/images/tip20/virtual-addresses-dark.png" alt="Without virtual addresses, each customer deposit address holds a separate onchain balance that must be swept to the master wallet. With virtual addresses, TIP-20 forwarding routes deposits directly to the master wallet." className="hidden dark:block" />
 
 This means:
 
