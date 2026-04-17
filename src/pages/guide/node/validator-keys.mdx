@@ -1,0 +1,57 @@
+---
+title: Managing validator keys
+description: Generate, rotate, and recover validator signing keys and shares.
+---
+
+# Managing validator keys
+
+Tempo validators use two kinds of cryptographic keys. This page covers how to generate, rotate, and recover them.
+
+## Key hierarchy
+
+* **Signing key** — an ED25519 keypair used to identify your validator amongst others. Can be rotated while preserving your validator index.
+* **Signing share** — a share of a BLS12-381 keypair used to sign block notarizations and finalizations. Updated automatically every DKG ceremony (~3 hours).
+
+## Generating a signing key
+
+:::warning
+Never share your private signing key. Anyone with access to it can impersonate your validator.
+:::
+
+Generate an ed25519 keypair:
+
+```bash
+tempo consensus generate-private-key --output <path>
+```
+
+Verify the public key:
+
+```bash
+tempo consensus calculate-public-key --private-key <path>
+```
+
+The public key should match the output of the `generate-private-key` command.
+
+## Signing key rotation
+
+The ed25519 signing key can be rotated while preserving your validator index and committee slot. See [Rotate validator identity](/guide/node/validator-lifecycle#rotate-validator-identity) for the full procedure.
+
+## Signing share recovery
+
+:::danger
+**You cannot reset a validator's data and continue with the same identity.** Doing so risks inconsistent voting, which can cause irrecoverable network safety failures.
+:::
+
+If you lose your signing share (stored in `<datadir>/consensus/`), you will need to rotate to a new validator identity. This requires coordinating with the Tempo team to deactivate your old identity and register a new one.
+
+We're planning to release a high-availability feature that allows storing consensus data in an external database, which will enable signing share recovery without the need for key rotation.
+
+## ValidatorConfig V2 precompile
+
+All key and identity operations are executed through the ValidatorConfig V2 precompile ([TIP-1017](/protocol/tips/tip-1017)):
+
+```solidity
+address constant VALIDATOR_CONFIG_V2 = 0xCCCCCCCC00000000000000000000000000000001;
+```
+
+All write operations require either the contract owner or the validator's own address.

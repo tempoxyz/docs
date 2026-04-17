@@ -8,7 +8,7 @@ Validator nodes secure Tempo by validating blocks and participating in consensus
 
 ## Deploying a validator
 
-The active validator set is currently permissioned. If you are interested in becoming a validator, please [get in touch](mailto:partners@tempo.xyz) with the Tempo team. See [Initial registration](/guide/node/validator-config-v2#initial-registration) for technical details.
+The active validator set is currently permissioned. If you are interested in becoming a validator, please [get in touch](mailto:partners@tempo.xyz) with the Tempo team. See [Initial registration](/guide/node/validator-lifecycle#initial-registration) for technical details.
 
 ## Cryptographic key hierarchy
 
@@ -16,7 +16,7 @@ All validators have two kinds of keys:
 * **Signing key** — an ED25519 keypair used to identify your validator amongst others.
 * **Signing share** — a share of a BLS12-381 keypair used to sign block notarizations and finalizations.
 
-The signing key can be rotated while preserving your validator index — see [Signing key rotation](/guide/node/operate-validator#signing-key-rotation) for details. The signing share is dynamic and is updated periodically on each DKG ceremony. Once updated, it will be saved to disk. Currently, the DKG ceremony is scheduled to run on-chain every ~3 hours.
+The signing key can be rotated while preserving your validator index — see [Signing key rotation](/guide/node/validator-keys#signing-key-rotation) for details. The signing share is dynamic and is updated periodically on each DKG ceremony. Once updated, it will be saved to disk. Currently, the DKG ceremony is scheduled to run on-chain every ~3 hours.
 
 ## Generating a signing key
 
@@ -67,7 +67,7 @@ tempo node --datadir <datadir> \
 ::::
 
 :::warning
-`--consensus.fee-recipient` is deprecated as of `v1.5.2` and will be removed in an upcoming release. Validators should migrate fee-recipient management to [Validator Config V2](/guide/node/validator-config-v2).
+`--consensus.fee-recipient` is deprecated as of `v1.5.2` and will be removed in an upcoming release. Validators should migrate fee-recipient management to [Update the fee recipient](/guide/node/validator-lifecycle#update-the-fee-recipient).
 :::
 
 ### Optional flags
@@ -124,7 +124,7 @@ INFO handle_propose{epoch=18 view=387213 parent.view=387212 parent.digest=0x4388
 ```
 
 If you do not see logs like these:
-- Check that your validator is part of the active set, and is both [a player and a dealer](/guide/node/operate-validator#dealer-epoch-e3).
+- Check that your validator is part of the active set, and is both [a player and a dealer](/guide/node/validator-state#dealer-epoch-e3).
 - Check that your node is synced up to the [latest block height](https://explorer.tempo.xyz/). 
 - Check that your outgoing IP address matches the one whitelisted on the validator smart contract:
 

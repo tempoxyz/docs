@@ -815,12 +815,20 @@ export default defineConfig({
                 link: '/guide/node/validator',
               },
               {
-                text: 'Operation',
-                link: '/guide/node/operate-validator',
+                text: 'Checking validator state',
+                link: '/guide/node/validator-state',
               },
               {
-                text: 'ValidatorConfig V2',
-                link: '/guide/node/validator-config-v2',
+                text: 'Controlling validator lifecycle',
+                link: '/guide/node/validator-lifecycle',
+              },
+              {
+                text: 'Managing validator keys',
+                link: '/guide/node/validator-keys',
+              },
+              {
+                text: 'Observing a validator',
+                link: '/guide/node/validator-monitoring',
               },
             ],
           },
