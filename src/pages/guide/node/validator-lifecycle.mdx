@@ -29,50 +29,6 @@ The node will finish processing the current block before shutting down. Avoid us
 
 If you need to reset your validator's data, you must rotate to a new validator identity. This requires coordinating with the Tempo team to deactivate your old identity and register a new one. Don't hesitate to reach out — even with the Tempo team, this is a routine operation.
 
-## Initial registration
-
-To register a new validator, you must provide the following values to the Tempo team:
-
-| Value | Format | Description |
-|-------|--------|-------------|
-| **Validator address** | Ethereum address (`0x…`) | The control address for your validator. Used to authorize on-chain operations (IP updates, rotation, ownership transfer). |
-| **Public key** | `0x`-prefixed 32-byte hex | Your ed25519 identity key. Generate one with `tempo consensus generate-private-key` (see [Managing validator keys](/guide/node/validator-keys#generating-a-signing-key)). |
-| **Ingress** | `IP:port` | The inbound address other validators use to reach your node. Must be unique across all active validators. |
-| **Egress** | `IP` | The outbound IP address your node uses to connect to other validators. |
-| **Fee recipient** | Ethereum address (`0x…`) | The address that receives transaction fees from blocks your validator proposes. If you are not prepared to accept fees, use `0x0000000000000000000000000000000000000000`. |
-| **Signature** | `0x`-prefixed hex | An ed25519 signature proving you control the signing key. See below. |
-
-### Creating the add-validator signature
-
-The signature proves ownership of the ed25519 key being registered. Generate it with:
-
-::::code-group
-```bash [Mainnet]
-tempo consensus create-add-validator-signature \
-  --signing-key <PRIVATE_KEY_PATH> \
-  --validator-address <YOUR_VALIDATOR_ADDRESS> \
-  --public-key <YOUR_PUBLIC_KEY> \
-  --ingress <IP:PORT> \
-  --egress <IP> \
-  --fee-recipient <FEE_RECIPIENT_ADDRESS> \
-  --chain-id-from-rpc-url https://rpc.tempo.xyz
-```
-```bash [Testnet]
-tempo consensus create-add-validator-signature \
-  --signing-key <PRIVATE_KEY_PATH> \
-  --validator-address <YOUR_VALIDATOR_ADDRESS> \
-  --public-key <YOUR_PUBLIC_KEY> \
-  --ingress <IP:PORT> \
-  --egress <IP> \
-  --fee-recipient <FEE_RECIPIENT_ADDRESS> \
-  --chain-id-from-rpc-url https://rpc.testnet.tempo.xyz
-```
-::::
-
-Provide this signature along with the values above to the Tempo team to complete registration.
-
-Once the Tempo team adds your validator on-chain, it will enter the active set in the [next epoch](/guide/node/validator-state#state-transitions).
-
 ## Rotate validator identity
 
 The ed25519 key can be changed while keeping your validator index stable. This is useful for key rotation or recovery without leaving and re-joining the committee. [Generate a new signing key](/guide/node/validator-keys#generating-a-signing-key) first.
