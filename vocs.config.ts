@@ -769,6 +769,10 @@ export default defineConfig({
                     text: 'Use MPP with Foundry',
                     link: '/sdk/foundry/mpp',
                   },
+                  {
+                    text: 'Signature Verification',
+                    link: '/sdk/foundry/signature-verifier',
+                  },
                 ],
               },
               {
