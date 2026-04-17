@@ -815,6 +815,10 @@ export default defineConfig({
                 link: '/guide/node/validator',
               },
               {
+                text: 'Initial setup',
+                link: '/guide/node/validator-setup',
+              },
+              {
                 text: 'Checking validator state',
                 link: '/guide/node/validator-state',
               },
@@ -829,6 +833,10 @@ export default defineConfig({
               {
                 text: 'Observing a validator',
                 link: '/guide/node/validator-monitoring',
+              },
+              {
+                text: 'Troubleshooting and FAQ',
+                link: '/guide/node/validator-troubleshooting',
               },
             ],
           },

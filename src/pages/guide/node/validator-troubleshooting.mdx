@@ -1,0 +1,28 @@
+---
+title: Troubleshooting and FAQ
+description: Common issues and solutions for Tempo validator operators.
+---
+
+# Troubleshooting and FAQ
+
+## My node is not proposing blocks
+
+Once your node is proposing blocks, it will start emitting logs like these:
+
+```
+INFO handle_propose{epoch=18 view=387213 parent.view=387212 parent.digest=0x43885416b4a7ae7550c615ad4dc702045cd26540b78fa2bd75abdcbfbef02d9d}: tempo_commonware_node::consensus::application::actor: constructed proposal proposal.digest=0x6baa8fa813beea491cf598024d8b31cb2927e7ba1b92a29899a795dbafd682c6 proposal.height=5733680
+```
+
+If you do not see logs like these:
+- Check that your validator is part of the active set, and is both [a player and a dealer](/guide/node/validator-state#dealer-epoch-e3).
+- Check that your node is synced up to the [latest block height](https://explorer.tempo.xyz/). 
+- Check that your outgoing IP address matches the one whitelisted on the validator smart contract:
+
+::::code-group
+```bash [Mainnet]
+tempo consensus validators-info --rpc-url https://rpc.tempo.xyz
+```
+```bash [Testnet]
+tempo consensus validators-info --rpc-url https://rpc.testnet.tempo.xyz
+```
+::::
