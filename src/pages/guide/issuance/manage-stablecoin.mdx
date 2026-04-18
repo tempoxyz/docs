@@ -4,7 +4,17 @@ interactive: true
 ---
 
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
+import { AddFunds } from '../../../components/guides/steps/payments/AddFunds.tsx'
+import { BurnTokenBlocked } from '../../../components/guides/steps/issuance/BurnTokenBlocked.tsx'
+import { Connect } from '../../../components/guides/steps/auth/Connect.tsx'
+import { CreateOrLoadToken } from '../../../components/guides/steps/issuance/CreateOrLoadToken.tsx'
+import { CreateTokenPolicy } from '../../../components/guides/steps/issuance/CreateTokenPolicy.tsx'
+import { GrantTokenRoles } from '../../../components/guides/steps/issuance/GrantTokenRoles.tsx'
+import { LinkTokenPolicy } from '../../../components/guides/steps/issuance/LinkTokenPolicy.tsx'
+import { MintToken } from '../../../components/guides/steps/issuance/MintToken.tsx'
+import { PauseUnpauseTransfers } from '../../../components/guides/steps/issuance/PauseUnpauseTransfers.tsx'
+import { RevokeTokenRoles } from '../../../components/guides/steps/issuance/RevokeTokenRoles.tsx'
+import { SetSupplyCap } from '../../../components/guides/steps/issuance/SetSupplyCap.tsx'
 import { Cards, Card } from 'vocs'
 
 # Manage Your Stablecoin
@@ -30,10 +40,10 @@ Once you've created your token, you can proceed to grant roles to specific addre
 Assign roles to specific addresses to delegate token management capabilities.
 
 <Demo.Container name="Grant Roles to an Address" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.CreateOrLoadToken stepNumber={3} />
-  <Step.GrantTokenRoles stepNumber={4} roles={['issuer']} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <CreateOrLoadToken stepNumber={3} />
+  <GrantTokenRoles stepNumber={4} roles={['issuer']} last />
 </Demo.Container>
 
 :::code-group
@@ -170,11 +180,11 @@ export const config = createConfig({
 Revoke roles from addresses when you need to remove their permissions.
 
 <Demo.Container name="Revoke Issuer Role" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.CreateOrLoadToken stepNumber={3} />
-  <Step.GrantTokenRoles stepNumber={4} roles={['issuer']} />
-  <Step.RevokeTokenRoles stepNumber={5} roles={['issuer']} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <CreateOrLoadToken stepNumber={3} />
+  <GrantTokenRoles stepNumber={4} roles={['issuer']} />
+  <RevokeTokenRoles stepNumber={5} roles={['issuer']} last />
 </Demo.Container>
 
 :::code-group
@@ -285,10 +295,10 @@ export const config = createConfig({
 Limit the maximum total supply of your token. Setting supply caps requires the **`DEFAULT_ADMIN_ROLE`**. The new cap cannot be less than the current total supply.
 
 <Demo.Container name="Set Supply Cap" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.CreateOrLoadToken stepNumber={3} />
-  <Step.SetSupplyCap stepNumber={4} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <CreateOrLoadToken stepNumber={3} />
+  <SetSupplyCap stepNumber={4} last />
 </Demo.Container>
 
 :::code-group
@@ -358,11 +368,11 @@ Transfer policies can be:
 Learn more about configuring transfer policies in the [TIP-403 specification](/protocol/tip403/spec).
 
 <Demo.Container name="Create and Link Transfer Policy" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.CreateOrLoadToken stepNumber={3} />
-  <Step.CreateTokenPolicy stepNumber={4} />
-  <Step.LinkTokenPolicy stepNumber={5} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <CreateOrLoadToken stepNumber={3} />
+  <CreateTokenPolicy stepNumber={4} />
+  <LinkTokenPolicy stepNumber={5} last />
 </Demo.Container>
 
 :::code-group
@@ -457,11 +467,11 @@ export const config = createConfig({
 Temporarily halt all token transfers during emergency situations or maintenance windows. Pausing transfers requires the **`PAUSE_ROLE`**. Unpausing transfers requires the **`UNPAUSE_ROLE`**.
 
 <Demo.Container name="Pause and Unpause Your Token" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.CreateOrLoadToken stepNumber={3} />
-  <Step.GrantTokenRoles stepNumber={4} roles={['pause', 'unpause']} />
-  <Step.PauseUnpauseTransfers stepNumber={5} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <CreateOrLoadToken stepNumber={3} />
+  <GrantTokenRoles stepNumber={4} roles={['pause', 'unpause']} />
+  <PauseUnpauseTransfers stepNumber={5} last />
 </Demo.Container>
 
 :::code-group
@@ -535,14 +545,14 @@ export const config = createConfig({
 The Burn Blocked role allows your team to burn tokens from blocked or frozen addresses. This is useful for regulatory compliance when you need to remove tokens from addresses that violate terms of service or legal requirements.
 
 <Demo.Container name="Create and Link Transfer Policy" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.CreateOrLoadToken stepNumber={3} />
-  <Step.GrantTokenRoles stepNumber={4} roles={['issuer', 'burnBlocked']} />
-  <Step.MintToken stepNumber={5} recipient={Demo.FAKE_RECIPIENT} />
-  <Step.CreateTokenPolicy stepNumber={6} flowDependencies={['transferId']} />
-  <Step.LinkTokenPolicy stepNumber={7} />
-  <Step.BurnTokenBlocked stepNumber={8} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <CreateOrLoadToken stepNumber={3} />
+  <GrantTokenRoles stepNumber={4} roles={['issuer', 'burnBlocked']} />
+  <MintToken stepNumber={5} recipient={Demo.FAKE_RECIPIENT} />
+  <CreateTokenPolicy stepNumber={6} flowDependencies={['transferId']} />
+  <LinkTokenPolicy stepNumber={7} />
+  <BurnTokenBlocked stepNumber={8} last />
 </Demo.Container>
 
 :::code-group
