@@ -503,6 +503,7 @@ export namespace StringFormatter {
 
 export function Login() {
   const connect = useConnect()
+  const disconnect = useDisconnect()
   const hydrated = useHydrated()
   const tempoWallet = useTempoWalletConnector()
   const webAuthn = useWebAuthnConnector()
@@ -527,14 +528,15 @@ export function Login() {
         <Button
           variant="accent"
           className="font-normal text-[14px] -tracking-[2%]"
-          onClick={() =>
+          onClick={async () => {
+            await disconnect.disconnectAsync().catch(() => {})
             connect.connect({
               connector,
               ...(isE2E
                 ? { capabilities: { method: 'register' as const, name: 'Tempo Docs' } }
                 : {}),
             })
-          }
+          }}
           type="button"
         >
           Sign in

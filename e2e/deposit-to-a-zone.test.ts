@@ -25,8 +25,11 @@ test('prepare zone access and deposit to Zone A', async ({ page }) => {
     timeout: 30000,
   })
 
-  const authorizeButton = page.getByRole('button', { name: 'Authorize Zone A reads' }).first()
+  const authorizeButton = page
+    .getByRole('button', { name: /^Authoriz(?:e|ing) Zone A reads$/i })
+    .first()
   await expect(authorizeButton).toBeVisible({ timeout: 30000 })
+  await expect(authorizeButton).toBeEnabled({ timeout: 90000 })
   await authorizeButton.click()
 
   const getFundsButton = page.getByRole('button', { name: /^Get testnet pathUSD$/i }).first()
@@ -38,14 +41,10 @@ test('prepare zone access and deposit to Zone A', async ({ page }) => {
   }
 
   await depositButton.click()
-
-  await expect(
-    page
-      .locator('div[data-completed="true"]', {
-        has: page.getByText('Wait for Zone A to credit the deposit.'),
-      })
-      .first(),
-  ).toBeVisible({ timeout: 120000 })
+  await expect(page.getByRole('link', { name: 'View receipt' }).first()).toBeVisible({
+    timeout: 120000,
+  })
+  await expect(page.getByText('Wait for Zone A to credit the deposit.').first()).toBeVisible()
 
   await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })
 })

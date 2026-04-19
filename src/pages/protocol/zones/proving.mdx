@@ -3,6 +3,8 @@ title: Zone Proving
 description: Batch submission and proof verification for Tempo zones, including the state transition function, ZK and TEE deployment modes, and ancestry proofs.
 ---
 
+import { StaticMermaidDiagram } from '../../../components/StaticMermaidDiagram'
+
 # Zone Proving
 
 :::info
@@ -63,7 +65,7 @@ The proof verifies that:
 
 ## State Transition Function
 
-The prover takes a complete witness of zone blocks and their dependencies, executes the EVM state transitions, and outputs commitments for onchain verification:
+The prover takes a complete witness of zone blocks and their dependencies, executes the EVM state transitions, and outputs commitments for on-chain verification:
 
 ```rust
 pub fn prove_zone_batch(witness: BatchWitness) -> Result<BatchOutput, Error>
@@ -71,23 +73,22 @@ pub fn prove_zone_batch(witness: BatchWitness) -> Result<BatchOutput, Error>
 
 ### Execution Flow
 
-```mermaid
-flowchart TD
-    A[Batch witness] --> B[Verify Tempo state proofs]
-    B --> C[Initialize zone state from previous block hash]
-    C --> D{Next zone block}
-    D --> E[Check parent hash and block number]
-    E --> F[Verify beneficiary is the sequencer]
-    F --> G[Execute advanceTempo system transaction if present]
-    G --> H[Execute user transactions via revm]
-    H --> I{Final block in batch?}
-    I -- No --> J[Compute simplified zone block hash]
+<StaticMermaidDiagram chart={`flowchart TD
+    A["Batch witness"] --> B["Verify Tempo state proofs"]
+    B --> C["Initialize zone state from previous block hash"]
+    C --> D{"Next zone block"}
+    D --> E["Check parent hash and block number"]
+    E --> F["Verify beneficiary is the sequencer"]
+    F --> G["Execute advanceTempo system transaction if present"]
+    G --> H["Execute user transactions via revm"]
+    H --> I{"Final block in batch?"}
+    I -- No --> J["Compute simplified zone block hash"]
     J --> D
-    I -- Yes --> K[Execute finalizeWithdrawalBatch]
-    K --> L[Compute simplified zone block hash]
-    L --> M[Extract output commitments]
-    M --> N[Return batch output for verification]
-```
+    I -- Yes --> K["Execute finalizeWithdrawalBatch"]
+    K --> L["Compute simplified zone block hash"]
+    L --> M["Extract output commitments"]
+    M --> N["Return batch output for verification"]
+`} />
 
 1. **Verify Tempo state proofs.** Validate MPT proofs for all Tempo storage reads against Tempo state roots.
 2. **Initialize zone state.** Load the zone state from the witness, binding the initial state root to the previous block hash.
@@ -122,7 +123,7 @@ The solution verifies ancestry inside the ZK circuit:
 | Direct | `recentTempoBlockNumber = 0` | Portal reads `tempoBlockNumber` hash from EIP-2935 |
 | Ancestry | `recentTempoBlockNumber > tempoBlockNumber` | Portal reads `recentTempoBlockNumber` hash; proof verifies parent chain |
 
-Proving time increases linearly with the block gap (each gap block adds ~1 keccak operation), but onchain verification cost remains constant. This prevents the zone from becoming stuck after an extended downtime.
+Proving time increases linearly with the block gap (each gap block adds ~1 keccak operation), but on-chain verification cost remains constant. This prevents the zone from becoming stuck after an extended downtime.
 
 ## Tempo State Access
 
