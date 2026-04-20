@@ -1,6 +1,12 @@
+---
+interactive: true
+---
+
 import { Cards, Card } from 'vocs'
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
+import { AddFunds } from '../../../components/guides/steps/payments/AddFunds.tsx'
+import { Connect } from '../../../components/guides/steps/auth/Connect.tsx'
+import { SendPaymentWithMemo } from '../../../components/guides/steps/payments/SendPaymentWithMemo.tsx'
 
 # Attach a Transfer Memo
 
@@ -9,9 +15,9 @@ Attach 32-byte references to [TIP-20](/protocol/tip20/overview) transfers for pa
 ## Demo
 
 <Demo.Container name="Transfer with Memo" footerVariant="source" src="tempoxyz/examples/tree/main/examples/payments">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.SendPaymentWithMemo stepNumber={3} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <SendPaymentWithMemo stepNumber={3} last />
 </Demo.Container>
 
 ## Steps

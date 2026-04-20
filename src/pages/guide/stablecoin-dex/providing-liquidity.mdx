@@ -1,10 +1,16 @@
 ---
 description: Place limit and flip orders to provide liquidity on the Stablecoin DEX orderbook. Learn to manage orders and set prices using ticks.
+interactive: true
 ---
 
 import { Cards, Card } from 'vocs'
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
+import { AddFunds } from '../../../components/guides/steps/payments/AddFunds.tsx'
+import { ApproveSpend } from '../../../components/guides/steps/exchange/ApproveSpend.tsx'
+import { CancelOrder } from '../../../components/guides/steps/exchange/CancelOrder.tsx'
+import { Connect } from '../../../components/guides/steps/auth/Connect.tsx'
+import { PlaceOrder } from '../../../components/guides/steps/exchange/PlaceOrder.tsx'
+import { QueryOrder } from '../../../components/guides/steps/exchange/QueryOrder.tsx'
 
 # Providing Liquidity
 
@@ -15,10 +21,10 @@ In this guide you will learn how to place buy and sell orders to provide liquidi
 ## Demo
 
 <Demo.Container name="Place an Order" footerVariant="source" src="tempoxyz/examples/tree/main/examples/exchange">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.PlaceOrder stepNumber={3} />
-  <Step.QueryOrder stepNumber={4} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <PlaceOrder stepNumber={3} />
+  <QueryOrder stepNumber={4} last />
 </Demo.Container>
 
 ## Steps
@@ -42,8 +48,8 @@ The "spend" token is the token that will be spent to place the order.
 :::
 
 <Demo.Container name="Approve Spend">
-  <Step.Connect stepNumber={1} />
-  <Step.ApproveSpend stepNumber={2} last />
+  <Connect stepNumber={1} />
+  <ApproveSpend stepNumber={2} last />
 </Demo.Container>
 
 :::code-group
@@ -94,8 +100,8 @@ In the code sample below, we use the `useSendCallsSync` hook to batch the approv
 :::
 
 <Demo.Container name="Place Order">
-  <Step.Connect stepNumber={1} />
-  <Step.PlaceOrder stepNumber={2} last />
+  <Connect stepNumber={1} />
+  <PlaceOrder stepNumber={2} last />
 </Demo.Container>
 
 :::code-group
@@ -150,10 +156,10 @@ function PlaceOrder(props: { orderType: 'buy' | 'sell' }) {
 After placing an order, you can query its details to see the current state, including the amount filled and remaining using [`Hooks.dex.useOrder`](https://wagmi.sh/tempo/hooks/dex.useOrder).
 
 <Demo.Container name="View Order">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.PlaceOrder stepNumber={3} />
-  <Step.QueryOrder stepNumber={4} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <PlaceOrder stepNumber={3} />
+  <QueryOrder stepNumber={4} last />
 </Demo.Container>
 
 :::code-group
@@ -194,10 +200,10 @@ Cancel an order using its order ID.
 When you cancel an order, any remaining funds are credited to your exchange balance (not directly to your wallet). To move funds back to your wallet, you can [withdraw them to your wallet](/protocol/exchange/exchange-balance#withdrawing-funds).
 
 <Demo.Container name="Place and Cancel an Order" footerVariant="source" src="tempoxyz/examples/tree/main/examples/exchange">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.PlaceOrder stepNumber={3} />
-  <Step.CancelOrder stepNumber={4} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <PlaceOrder stepNumber={3} />
+  <CancelOrder stepNumber={4} last />
 </Demo.Container>
 
 :::code-group

@@ -1,0 +1,45 @@
+---
+title: Accounts
+description: Account-scoped access control on Tempo Zones, including private balances, private allowances, and the two-layer privacy model.
+---
+
+# Accounts
+
+:::info
+Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
+:::
+
+Tempo Zones enforce account privacy at two complementary layers: the EVM execution level and the [RPC access control](/protocol/zones/rpc) level. Neither is sufficient alone.
+
+- **Execution alone is insufficient.** Without RPC restrictions, a caller could use `eth_getStorageAt` to read TIP-20 balance mapping slots directly, bypassing `balanceOf` access control.
+- **RPC alone is insufficient.** Without execution-level changes, a caller could use `eth_call` to invoke a contract that reads another account's balance and returns it, bypassing RPC-level filtering.
+
+This page covers the execution-level protections. For the RPC layer, see the [RPC specification](/protocol/zones/rpc).
+
+## Private Balances
+
+On Tempo Mainnet, anyone can read any account's balance. On a Tempo Zone, `balanceOf(address)` enforces caller restrictions for TIP-20s:
+
+- If `msg.sender == account`, the call succeeds and returns the balance.
+- If `msg.sender` is the sequencer, the call succeeds (required for block production and fee accounting).
+- Otherwise, the call reverts with `Unauthorized()`.
+
+Enforcing this at the contract level (not just the RPC layer) ensures that even onchain composition cannot leak balances. A contract on the Tempo Zone cannot read and emit another account's balance.
+
+## Private Allowances
+
+The `allowance(owner, spender)` function is similarly restricted:
+
+- If `msg.sender == owner` or `msg.sender == spender`, the call succeeds.
+- If `msg.sender` is the sequencer, the call succeeds.
+- Otherwise, the call reverts with `Unauthorized()`.
+
+A non-zero allowance reveals that `owner` has interacted with `spender`, a relationship that should be private. Restricting reads to the two parties involved preserves standard TIP-20 (ERC-20) approval flows without leaking relationship information.
+
+Public views like `totalSupply()`, `name()`, `symbol()`, and `decimals()` remain unrestricted.
+
+## Related Specifications
+
+Tempo Zones also charge fixed gas costs for TIP-20 operations to prevent gas-based side channels. See [Execution & Gas](/protocol/zones/execution#fixed-gas-costs) for details.
+
+Tempo Zones currently disable contract creation (`CREATE` and `CREATE2`). See [Execution & Gas](/protocol/zones/execution#contract-creation-disabled) for details.

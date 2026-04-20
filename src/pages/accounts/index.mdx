@@ -1,11 +1,14 @@
 ---
 title: Accounts SDK – Getting Started
 description: Set up the Tempo Accounts SDK to create, manage, and interact with accounts on Tempo.
+interactive: true
 ---
 
 import { Cards, Card } from 'vocs'
 import * as Demo from '../../components/guides/Demo.tsx'
-import * as Step from '../../components/guides/steps'
+import { AddFunds } from '../../components/guides/steps/payments/AddFunds.tsx'
+import { Connect } from '../../components/guides/steps/auth/Connect.tsx'
+import { SendPayment } from '../../components/guides/steps/payments/SendPayment.tsx'
 import IconGitHub from '~icons/simple-icons/github'
 import { StaticMermaidDiagram } from '../../components/StaticMermaidDiagram'
 
@@ -20,9 +23,9 @@ The Tempo Accounts SDK is a TypeScript library for applications and wallets to c
 Try sign in and make a payment on Tempo using the Accounts SDK.
 
 <Demo.Container name="Make a Payment" footerVariant="source" src="tempoxyz/accounts/tree/main/examples/basic">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.SendPayment stepNumber={3} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <SendPayment stepNumber={3} last />
 </Demo.Container>
 
 ### Quick Prompt

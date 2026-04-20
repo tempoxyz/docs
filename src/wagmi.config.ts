@@ -4,7 +4,7 @@ import { tempoWallet, webAuthn as webAuthnAccounts } from 'accounts/wagmi'
 import * as React from 'react'
 import { parseUnits } from 'viem'
 import { tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
-import { withFeePayer } from 'viem/tempo'
+import { withRelay } from 'viem/tempo'
 import {
   type CreateConfigParameters,
   createConfig,
@@ -16,22 +16,31 @@ import {
 } from 'wagmi'
 import { KeyManager, webAuthn } from 'wagmi/tempo'
 import { alphaUsd, betaUsd, pathUsd, thetaUsd } from './components/guides/tokens'
-
-const feeToken = '0x20c0000000000000000000000000000000000001'
+import { feeToken, moderatoZones } from './lib/private-zones.ts'
 
 const chain =
   import.meta.env.VITE_TEMPO_ENV === 'localnet'
     ? tempoLocalnet.extend({ feeToken })
     : import.meta.env.VITE_TEMPO_ENV === 'devnet'
       ? tempoDevnet.extend({ feeToken })
-      : tempoModerato.extend({ feeToken })
+      : tempoModerato.extend({ feeToken, zones: moderatoZones })
 
 const rpId = (() => {
   const hostname = globalThis.location?.hostname
   if (!hostname) return undefined
+
+  // IP hosts and localhost must use the exact hostname as the RP ID.
+  if (hostname === 'localhost' || isIpAddress(hostname)) return hostname
+
+  // Vercel preview hosts live under the public suffix `vercel.app`, so the
+  // RP ID must stay scoped to the exact preview hostname.
+  if (hostname.endsWith('.vercel.app')) return hostname
+
   const parts = hostname.split('.')
   return parts.length > 2 ? parts.slice(-2).join('.') : hostname
 })()
+
+export const webAuthnRpId = rpId
 
 export function getConfig(options: getConfig.Options = {}) {
   const { multiInjectedProviderDiscovery = false } = options
@@ -44,7 +53,6 @@ export function getConfig(options: getConfig.Options = {}) {
       ...(import.meta.env.VITE_E2E === 'true'
         ? [
             webAuthnAccounts({
-              authUrl: 'https://keys.tempo.xyz',
               rdns: 'webAuthn',
             }),
           ]
@@ -59,13 +67,13 @@ export function getConfig(options: getConfig.Options = {}) {
                   { token: thetaUsd, limit: parseUnits('500', 6) },
                 ],
               }),
-              feePayerUrl: 'https://sponsor.moderato.tempo.xyz',
+              feePayer: {
+                precedence: 'user-first',
+                url: 'https://sponsor.moderato.tempo.xyz',
+              },
             }),
             webAuthn({
-              grantAccessKey: {
-                // @ts-expect-error - TODO: migrate to webAuthn on Accounts SDK
-                chainId: BigInt(chain.id),
-              },
+              grantAccessKey: true,
               keyManager: KeyManager.http('https://keys.tempo.xyz'),
               rpId,
             }),
@@ -77,7 +85,7 @@ export function getConfig(options: getConfig.Options = {}) {
       key: 'tempo-docs',
     }),
     transports: {
-      [tempoModerato.id]: withFeePayer(
+      [tempoModerato.id]: withRelay(
         fallback([
           http('https://rpc.moderato.tempo.xyz'),
           webSocket('wss://rpc.moderato.tempo.xyz', {
@@ -87,7 +95,7 @@ export function getConfig(options: getConfig.Options = {}) {
         http('https://sponsor.moderato.tempo.xyz'),
         { policy: 'sign-only' },
       ),
-      [tempoDevnet.id]: withFeePayer(
+      [tempoDevnet.id]: withRelay(
         fallback([
           http(tempoDevnet.rpcUrls.default.http[0]),
           webSocket(tempoDevnet.rpcUrls.default.webSocket[0], {
@@ -108,6 +116,8 @@ export namespace getConfig {
 
 export type Config = ReturnType<typeof getConfig>
 
+export const config = getConfig()
+
 export const queryClient = new QueryClient()
 
 export function useTempoWalletConnector() {
@@ -126,6 +136,10 @@ export function useWebAuthnConnector() {
     () => connectors.find((connector) => connector.id === 'webAuthn')!,
     [connectors],
   )
+}
+
+function isIpAddress(hostname: string) {
+  return /^(?:\d{1,3}\.){3}\d{1,3}$/.test(hostname) || hostname.includes(':')
 }
 
 declare module 'wagmi' {

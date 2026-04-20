@@ -1,10 +1,13 @@
 ---
 searchable: false
+interactive: true
 ---
 
 import { Cards, Card } from 'vocs'
 import * as Demo from '../../components/guides/Demo.tsx'
-import * as Step from '../../components/guides/steps'
+import { AddFunds } from '../../components/guides/steps/payments/AddFunds.tsx'
+import { Connect } from '../../components/guides/steps/auth/Connect.tsx'
+import { CreateToken } from '../../components/guides/steps/issuance/CreateToken.tsx'
 
 # !Replace Me!
 
@@ -13,9 +16,9 @@ import * as Step from '../../components/guides/steps'
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam elementum odio ante, sit amet tincidunt leo scelerisque vitae.
 
 <Demo.Container name="!Replace Me!" footerVariant="source" src="tempoxyz/examples/tree/main/examples/replace-me">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.CreateToken stepNumber={3} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <CreateToken stepNumber={3} last />
 </Demo.Container>
 
 ## Steps

@@ -49,7 +49,9 @@ For ERC-20 tokens, the quote response includes any required approval steps autom
 
 This example bridges USDC.e (Bridged USDC) from Base to Tempo. Replace the currency addresses and chain IDs for other tokens or routes.
 
-#### Step 1 - Get a quote
+:::::steps
+
+### Get a quote
 
 Replace `<YOUR_ADDRESS>` with your wallet address and `<AMOUNT>` with the amount in base units (e.g. `1000000` for 1 USDC.e with 6 decimals).
 
@@ -69,7 +71,7 @@ curl -X POST "https://api.relay.link/quote/v2" \
 
 The response contains a `steps` array with transaction data. Save the `requestId` from the step for tracking.
 
-#### Step 2 - Approve token (if required)
+### Approve token (if required)
 
 If the quote response includes an approval step, approve the Relay contract to spend your tokens. The approval target address is provided in the quote response's step data.
 
@@ -82,7 +84,7 @@ cast send <TOKEN_ADDRESS> \
   --private-key $PRIVATE_KEY
 ```
 
-#### Step 3 - Submit the deposit transaction
+### Submit the deposit transaction
 
 Use the `to`, `data`, and `value` fields from the quote response's transaction step:
 
@@ -94,7 +96,7 @@ cast send <TO> \
   --private-key $PRIVATE_KEY
 ```
 
-#### Step 4 - Track status
+### Track status
 
 Poll the status endpoint with the `requestId` from the quote response:
 
@@ -109,6 +111,8 @@ Once complete, view the destination transaction on Tempo:
 ```text
 https://explore.tempo.xyz/tx/<DESTINATION_TX_HASH>
 ```
+
+:::::
 
 ### Using TypeScript (viem)
 
@@ -194,7 +198,9 @@ To bridge tokens from Tempo to another chain, swap the origin and destination in
 
 ### Using curl + cast (Foundry)
 
-#### Step 1 - Get a quote
+:::::steps
+
+### Get a quote
 
 ```bash
 curl -X POST "https://api.relay.link/quote/v2" \
@@ -210,7 +216,7 @@ curl -X POST "https://api.relay.link/quote/v2" \
   }'
 ```
 
-#### Step 2 - Approve token (if required)
+### Approve token (if required)
 
 If the quote includes an approval step, approve the Relay contract to spend your tokens on Tempo.
 
@@ -223,7 +229,7 @@ cast send <TOKEN_ADDRESS> \
   --private-key $PRIVATE_KEY
 ```
 
-#### Step 3 - Submit the deposit transaction
+### Submit the deposit transaction
 
 Use the `to`, `data`, and `value` fields from the quote response:
 
@@ -238,11 +244,13 @@ cast send <TO> \
 Tempo has no native gas token, so no `--value` flag is needed. Transaction fees on Tempo are paid in a TIP-20 stablecoin automatically.
 :::
 
-#### Step 4 - Track status
+### Track status
 
 ```bash
 curl "https://api.relay.link/intents/status/v3?requestId=<REQUEST_ID>"
 ```
+
+:::::
 
 ### Using TypeScript (viem)
 

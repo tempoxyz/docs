@@ -1,10 +1,11 @@
 ---
 description: Connect your application to EVM-compatible wallets like MetaMask on Tempo. Set up Wagmi connectors and add the Tempo network to user wallets.
 mipd: true
+interactive: true
 ---
 
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
+import { ConnectWallet as ConnectWalletStep } from '../../../components/guides/steps/wallet/ConnectWallet.tsx'
 import { ConnectWallet } from '../../../components/ConnectWallet.tsx'
 
 # Connect to Wallets
@@ -21,7 +22,7 @@ This guide will walk you through how to set up your application to connect to wa
   footerVariant="source" 
   src="tempoxyz/examples/tree/main/examples/accounts"
 >
-  <Step.ConnectWallet stepNumber={1} last />
+  <ConnectWalletStep stepNumber={1} last />
 </Demo.Container>
 
 ## Wagmi Setup

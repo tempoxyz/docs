@@ -1,0 +1,59 @@
+---
+title: Connect to a Zone
+description: Connect to Tempo Zones on testnet using Zone A and Zone B RPC URLs, chain IDs, and a minimal viem client setup for private flows.
+---
+
+# Connect to a Zone
+
+:::info
+Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
+:::
+
+Use this page when you need the RPC endpoint and chain metadata for `Zone A` or `Zone B`.
+
+Account-scoped zone RPC methods require an `X-Authorization-Token` header signed by the Tempo account you are using. The interactive guides handle that for you automatically. If you are building your own integration, see the [Zone RPC specification](/protocol/zones/rpc) for the token format and the list of scoped methods.
+
+## Create a Viem client
+
+Use `zoneModerato(...)` from `viem/tempo/zones` so the client has the correct chain metadata for the zone you want to reach.
+
+```ts
+import { createPublicClient } from 'viem'
+import { http, zoneModerato } from 'viem/tempo/zones'
+
+const rpcUrl = 'https://rpc-zone-a.testnet.tempo.xyz'
+
+const zoneClient = createPublicClient({
+  chain: zoneModerato(6),
+  transport: http(rpcUrl),
+})
+
+const blockNumber = await zoneClient.getBlockNumber()
+console.log(blockNumber)
+```
+
+## Direct Connection Details
+
+### Zone A
+
+| **Property** | **Value** |
+|-------------------|-------|
+| **Network Name** | Zone A |
+| **Zone ID** | `6` |
+| **Chain ID** | `4217000006` |
+| **HTTP URL** | `https://rpc-zone-a.testnet.tempo.xyz` |
+| **Portal Address** | `0x7069DeC4E64Fd07334A0933eDe836C17259c9B23` |
+| **Outbox Address** | `0x1c00000000000000000000000000000000000002` |
+
+### Zone B
+
+| **Property** | **Value** |
+|-------------------|-------|
+| **Network Name** | Zone B |
+| **Zone ID** | `7` |
+| **Chain ID** | `4217000007` |
+| **HTTP URL** | `https://rpc-zone-b.testnet.tempo.xyz` |
+| **Portal Address** | `0x3F5296303400B56271b476F5A0B9cBF74350D6Ac` |
+| **Outbox Address** | `0x1c00000000000000000000000000000000000002` |
+
+Zones do not expose a public block explorer for private activity. Use authenticated RPC reads instead.

@@ -1,5 +1,6 @@
 ---
 description: Create domain-bound passkey accounts on Tempo using WebAuthn for secure, passwordless authentication with biometrics like Face ID and Touch ID.
+interactive: true
 ---
 
 import { Cards, Card } from 'vocs'
@@ -139,7 +140,7 @@ export function Example() {
         Sign up
       </button>
 
-      <button onClick={() => connect.connect({ connector })}>
+      <button onClick={() => connect.connect({ connector, capabilities: { type: 'sign-in' } })}>
         Sign in
       </button>
     </div>
@@ -215,7 +216,7 @@ export function Example() {
         Sign up
       </button>
 
-      <button onClick={() => connect.connect({ connector })}>
+      <button onClick={() => connect.connect({ connector, capabilities: { type: 'sign-in' } })}>
         Sign in
       </button>
     </div>

@@ -74,7 +74,9 @@ Tempo's LayerZero Endpoint ID is **`30410`**.
 
 This example bridges USDC from Base to Tempo. Replace addresses for other tokens or source chains.
 
-##### Step 1 - Get a quote
+:::::steps
+
+### Get a quote
 
 ```bash
 cast call 0x27a16dc786820B16E5c9028b75B99F6f604b5d26 \
@@ -86,7 +88,7 @@ cast call 0x27a16dc786820B16E5c9028b75B99F6f604b5d26 \
 
 Take the first returned number as `<NATIVE_FEE>`.
 
-##### Step 2 - Approve token on source chain
+### Approve token on source chain
 
 ```bash
 cast send 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 \
@@ -97,7 +99,7 @@ cast send 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 \
   --private-key $PRIVATE_KEY
 ```
 
-##### Step 3 - Send bridge transaction
+### Send bridge transaction
 
 ```bash
 cast send 0x27a16dc786820B16E5c9028b75B99F6f604b5d26 \
@@ -110,11 +112,13 @@ cast send 0x27a16dc786820B16E5c9028b75B99F6f604b5d26 \
   --private-key $PRIVATE_KEY
 ```
 
-##### Step 4 - Verify transaction status
+### Verify transaction status
 
 ```text
 https://scan.layerzero-api.com/v1/messages/tx/<SOURCE_TX_HASH>
 ```
+
+:::::
 
 #### Using TypeScript (viem)
 
@@ -262,7 +266,9 @@ To bridge from Tempo back to another chain, call `sendToken` on the Stargate OFT
 
 This example bridges USDC.e from Tempo to Base.
 
-##### Step 1 - Quote the fee
+:::::steps
+
+### Quote the fee
 
 ```bash
 cast call 0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392 \
@@ -274,7 +280,7 @@ cast call 0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392 \
 
 Take the first returned number as `<NATIVE_FEE>` (in stablecoin units, not ETH).
 
-##### Step 2 - Approve token on Tempo
+### Approve token on Tempo
 
 ```bash
 cast send 0x20C000000000000000000000b9537d11c60E8b50 \
@@ -285,7 +291,7 @@ cast send 0x20C000000000000000000000b9537d11c60E8b50 \
   --private-key $PRIVATE_KEY
 ```
 
-##### Step 3 - Send bridge transaction
+### Send bridge transaction
 
 No `--value` is needed on Tempo - the messaging fee is paid in a TIP-20 stablecoin via [EndpointDollar](#endpointdollar).
 
@@ -299,11 +305,13 @@ cast send 0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392 \
   --private-key $PRIVATE_KEY
 ```
 
-##### Step 4 - Verify transaction status
+### Verify transaction status
 
 ```text
 https://scan.layerzero-api.com/v1/messages/tx/<SOURCE_TX_HASH>
 ```
+
+:::::
 
 #### Using TypeScript (viem)
 

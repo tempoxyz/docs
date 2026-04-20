@@ -1,22 +1,28 @@
 ---
 description: Add and remove liquidity in the Fee AMM to enable stablecoin fee conversions. Monitor pools, check LP balances, and rebalance reserves.
+interactive: true
 ---
 
 import { Cards, Card } from 'vocs'
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
+import { AddFunds } from '../../../components/guides/steps/payments/AddFunds.tsx'
+import { BurnFeeAmmLiquidity } from '../../../components/guides/steps/amm/BurnFeeAmmLiquidity.tsx'
+import { CheckFeeAmmPool } from '../../../components/guides/steps/amm/CheckFeeAmmPool.tsx'
+import { Connect } from '../../../components/guides/steps/auth/Connect.tsx'
+import { CreateOrLoadToken } from '../../../components/guides/steps/issuance/CreateOrLoadToken.tsx'
+import { MintFeeAmmLiquidity } from '../../../components/guides/steps/amm/MintFeeAmmLiquidity.tsx'
 
 # Managing Fee Liquidity
 
 The Fee AMM converts transaction fees between stablecoins when users pay in a different token than the validator prefers. This guide shows you how to add and remove liquidity to enable fee conversions.
 
 <Demo.Container name="Manage Fee Liquidity" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.CreateOrLoadToken stepNumber={3} />
-  <Step.MintFeeAmmLiquidity stepNumber={4} waitForBalance={false} />
-  <Step.CheckFeeAmmPool stepNumber={5} />
-  <Step.BurnFeeAmmLiquidity stepNumber={6} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <CreateOrLoadToken stepNumber={3} />
+  <MintFeeAmmLiquidity stepNumber={4} waitForBalance={false} />
+  <CheckFeeAmmPool stepNumber={5} />
+  <BurnFeeAmmLiquidity stepNumber={6} last />
 </Demo.Container>
 
 ## Steps

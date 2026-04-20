@@ -1,9 +1,11 @@
 ---
 description: Accept stablecoin payments in your application. Verify transactions, listen for transfer events, and reconcile payments using memos.
+interactive: true
 ---
 
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
+import { AddFunds } from '../../../components/guides/steps/payments/AddFunds.tsx'
+import { Connect } from '../../../components/guides/steps/auth/Connect.tsx'
 import * as Token from '../../../components/guides/tokens'
 import { Tabs, Tab } from 'vocs'
 
@@ -18,8 +20,8 @@ Payments are automatically credited to the recipient's address when a transfer i
 In this basic receiving demo you can see the balances update after you add funds to your account, using the `getBalance` and `watchEvent` calls documented below.
 
 <Demo.Container name="Receive a Payment" footerVariant="balances" tokens={[Token.alphaUsd, Token.betaUsd, Token.thetaUsd]} src="tempoxyz/examples/tree/main/examples/payments">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} last />
 </Demo.Container>
 
 ## Verifying Payments
