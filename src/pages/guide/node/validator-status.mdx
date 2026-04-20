@@ -7,10 +7,6 @@ description: Understand validator state transitions, check your validator's part
 
 Your validator moves through different states after registration. Understanding these states helps you verify that your node is healthy and participating in consensus.
 
-:::danger
-**You cannot reset a validator's data and continue with the same identity.** Doing so risks inconsistent voting, which can cause irrecoverable network safety failures. If you need to reset your validator's data, you must rotate to a new validator identity — see [Signing key rotation](/guide/node/validator-keys#signing-key-rotation).
-:::
-
 ## Look up your validator
 
 You can query a single validator by its consensus public key (the ed25519 key generated during [initial setup](/guide/node/validator-setup#step-1-generate-a-signing-keypair) — see also [Managing validator keys](/guide/node/validator-keys#generating-a-signing-key)):
