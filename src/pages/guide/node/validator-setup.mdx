@@ -112,11 +112,6 @@ tempo node --datadir <datadir> \
     --telemetry-url <TELEMETRY_URL>
 ```
 ::::
-
-:::warning
-`--consensus.fee-recipient` is deprecated as of `v1.5.2` and will be removed in an upcoming release. Validators should migrate fee-recipient management to [Update the fee recipient](/guide/node/validator-lifecycle#update-the-fee-recipient).
-:::
-
 The notable difference between RPC nodes and validator nodes is the omission of the `--follow` argument and the addition of the `--consensus.signing-key` argument.
 
 Once your node is up, it may not start syncing immediately. This is because your node might not be part of the active set. In most cases, your validator will enter the active set in under 6 hours after the on-chain addition of the validator identity.
