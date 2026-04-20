@@ -5,7 +5,9 @@ interactive: true
 
 import { Cards, Card } from 'vocs'
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
+import { AddFunds } from '../../../components/guides/steps/payments/AddFunds.tsx'
+import { Connect } from '../../../components/guides/steps/auth/Connect.tsx'
+import { MakeSwaps } from '../../../components/guides/steps/exchange/MakeSwaps.tsx'
 
 # Executing Swaps
 
@@ -14,9 +16,9 @@ Execute swaps between stablecoins on the exchange. Swaps execute immediately aga
 By the end of this guide you will be able to execute swaps, get price quotes, and manage slippage protection.
 
 <Demo.Container name="Execute a Swap" footerVariant="source" src="tempoxyz/examples/tree/main/examples/exchange">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.MakeSwaps stepNumber={3} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <MakeSwaps stepNumber={3} last />
 </Demo.Container>
 
 
