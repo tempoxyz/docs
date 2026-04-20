@@ -13,18 +13,33 @@ This guide walks through registering, generating your signing key, and starting 
 
 ## Initial registration
 
-To register a new validator, you must provide the following values to the Tempo team:
+Registering a validator takes three steps:
 
-| Value | Format | Description |
-|-------|--------|-------------|
-| **Validator address** | Ethereum address (`0x…`) | The control address for your validator. Used to authorize on-chain operations (IP updates, rotation, ownership transfer). |
-| **Public key** | `0x`-prefixed 32-byte hex | Your ed25519 identity key. Generate one with `tempo consensus generate-private-key` (see [below](#generating-a-signing-key)). |
-| **Ingress** | `IP:port` | The inbound address other validators use to reach your node. Must be unique across all active validators. |
-| **Egress** | `IP` | The outbound IP address your node uses to connect to other validators. |
-| **Fee recipient** | Ethereum address (`0x…`) | The address that receives transaction fees from blocks your validator proposes. If you are not prepared to accept fees, use `0x0000000000000000000000000000000000000000`. |
-| **Signature** | `0x`-prefixed hex | An ed25519 signature proving you control the signing key. See [below](#creating-the-add-validator-signature). |
+1. **[Generate a signing keypair](#step-1-generate-a-signing-keypair)** — Create an ed25519 private key and derive the public key.
+2. **[Create the add-validator signature](#step-2-create-the-add-validator-signature)** — Prove ownership of the signing key by producing a signature over your registration details.
+3. **[Submit registration details](#step-3-submit-registration-details)** — Provide the Tempo team with all required values to add your validator on-chain.
 
-### Creating the add-validator signature
+### Step 1: Generate a signing keypair
+
+:::warning
+Never share your private signing key. Anyone with access to it can impersonate your validator. The Tempo team will never ask for your private key.
+:::
+
+Generate an ed25519 keypair:
+
+```bash
+tempo consensus generate-private-key --output <path>
+```
+
+Verify the public key:
+
+```bash
+tempo consensus calculate-public-key --private-key <path>
+```
+
+The public key should match the output of the `generate-private-key` command.
+
+### Step 2: Create the add-validator signature
 
 The signature proves ownership of the ed25519 key being registered. Generate it with:
 
@@ -51,29 +66,20 @@ tempo consensus create-add-validator-signature \
 ```
 ::::
 
-Provide this signature along with the values above to the Tempo team to complete registration.
+### Step 3: Submit registration details
+
+Provide the following values along with the signature to the Tempo team:
+
+| Value | Format | Description |
+|-------|--------|-------------|
+| **Validator address** | Ethereum address (`0x…`) | The control address for your validator. Used to authorize on-chain operations (IP updates, rotation, ownership transfer). |
+| **Public key** | `0x`-prefixed 32-byte hex | Your ed25519 identity key (from [Step 1](#step-1-generate-a-signing-keypair)). |
+| **Ingress** | `IP:port` | The inbound address other validators use to reach your node. Must be unique across all active validators. |
+| **Egress** | `IP` | The outbound IP address your node uses to connect to other validators. |
+| **Fee recipient** | Ethereum address (`0x…`) | The address that receives transaction fees from blocks your validator proposes. If you are not prepared to accept fees, use `0x0000000000000000000000000000000000000000`. |
+| **Signature** | `0x`-prefixed hex | The ed25519 signature proving you control the signing key (from [Step 2](#step-2-create-the-add-validator-signature)). |
 
 Once the Tempo team adds your validator on-chain, it will enter the active set in the [next epoch](/guide/node/validator-state#state-transitions).
-
-## Generating a signing key
-
-:::warning
-Never share your private signing key. Anyone with access to it can impersonate your validator. The Tempo team will never ask for your private key.
-:::
-
-You can generate an ED25519 keypair using the following command:
-
-```bash
-tempo consensus generate-private-key --output <path>
-```
-
-Once the private key is generated, you can calculate/verify the public key by running:
-
-```bash
-tempo consensus calculate-public-key --private-key <path>
-```
-
-The public key should match the output of the `generate-private-key` command.
 
 ## Running the validator
 
