@@ -42,13 +42,7 @@ The ed25519 signing key can be rotated while preserving your validator index and
 
 ## Signing share recovery
 
-:::danger
-**You cannot reset a validator's data and continue with the same identity.** Doing so risks inconsistent voting, which can cause irrecoverable network safety failures.
-:::
-
-If you lose your signing share (stored in `<datadir>/consensus/`), you will need to rotate to a new validator identity. This requires coordinating with the Tempo team to deactivate your old identity and register a new one.
-
-We're planning to release a high-availability feature that allows storing consensus data in an external database, which will enable signing share recovery without the need for key rotation.
+If the signing share is lost — for example by deleting `<datadir>/consensus` — the node will automatically recover its share from the network when it restarts.
 
 ## ValidatorConfig V2 precompile
 
