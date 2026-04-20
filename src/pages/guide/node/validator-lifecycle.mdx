@@ -64,7 +64,7 @@ If self-service rotation is not yet enabled for your validator, use `tempo conse
 Rotation preserves your validator index and active validator count. The old entry is appended to history as deactivated, and the entry at your index is updated in place. You must use a different ingress address (changing the port is sufficient).
 :::
 
-After rotation, your validator goes through the [standard state transitions](/guide/node/validator-state#state-transitions) with the new identity.
+After rotation, your validator goes through the [standard state transitions](/guide/node/validator-status#state-transitions) with the new identity.
 
 :::danger[Do not shut down the old validator immediately]
 After rotation, the rotated-out validator is still a member of the current committee until the next successful DKG ceremony completes. Shutting it down early will degrade network liveness.
@@ -165,4 +165,4 @@ tempo consensus deactivate-validator <address/pubkey/index> \
 ```
 ::::
 
-Keep your node running after deactivation. Use [validators-info](/guide/node/validator-state#querying-on-chain-state) to check when your validator is no longer listed — it is safe to shut down the node at that point.
+Keep your node running after deactivation. Use [validators-info](/guide/node/validator-status#querying-on-chain-state) to check when your validator is no longer listed — it is safe to shut down the node at that point.

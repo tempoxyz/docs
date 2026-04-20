@@ -1,9 +1,9 @@
 ---
-title: Checking validator state
-description: Understand validator state transitions, check your validator's participation status, and query on-chain state.
+title: Checking validator status
+description: Understand validator state transitions, check your validator's participation status, and query on-chain status.
 ---
 
-# Checking validator state
+# Checking validator status
 
 Your validator moves through different states after registration. Understanding these states helps you verify that your node is healthy and participating in consensus.
 
@@ -94,26 +94,35 @@ This returns the committee of the current epoch (validators with `in_committee =
 
 ### Look up your validator
 
-You can query your validator by ethereum address, ed25519 public key, or index:
+You can query a single validator by its consensus public key (the ed25519 key generated during [initial setup](/guide/node/validator-setup#step-1-generate-a-signing-keypair) — see also [Managing validator keys](/guide/node/validator-keys#generating-a-signing-key)):
 
 ::::code-group
 ```bash [Mainnet]
-tempo consensus validator <address/public_key/index> --rpc-url https://rpc.tempo.xyz
+tempo consensus validator <pubkey> --rpc-url https://rpc.tempo.xyz
 ```
 ```bash [Testnet]
-tempo consensus validator <address/public_key/index> --rpc-url https://rpc.testnet.tempo.xyz
+tempo consensus validator <pubkey> --rpc-url https://rpc.testnet.tempo.xyz
 ```
 ::::
 
-The returned `Validator` struct fields are:
+Example output:
+
+```json
+{
+  "publicKey": "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
+  "active": true,
+  "index": 5,
+  "validatorAddress": "0x1234567890abcdef1234567890abcdef12345678",
+  "inboundAddress": "203.0.113.10:9000",
+  "outboundAddress": "203.0.113.10:9001"
+}
+```
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `publicKey` | `bytes32` | Ed25519 communication public key |
+| `publicKey` | `bytes32` | Ed25519 consensus public key |
+| `active` | `bool` | Whether the validator is active in the current contract state |
+| `index` | `uint64` | Index of the validator (constant under rotation) |
 | `validatorAddress` | `address` | Validator control address |
-| `ingress` | `string` | Inbound address (`IP:port`) |
-| `egress` | `string` | Outbound address (`IP`) |
-| `index` | `uint64` | Index of the validator (constant under rotation)|
-| `addedAtHeight` | `uint64` | Block height when added |
-| `deactivatedAtHeight` | `uint64` | Block height when deactivated (`0` = active) |
-| `feeRecipient` | `address` | Address that receives block proposal fees |
+| `inboundAddress` | `string` | Inbound address (`IP:port`) for incoming connections |
+| `outboundAddress` | `string` | Outbound IP address for firewall whitelisting |

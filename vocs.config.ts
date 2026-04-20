@@ -819,8 +819,8 @@ export default defineConfig({
                 link: '/guide/node/validator-setup',
               },
               {
-                text: 'Checking validator state',
-                link: '/guide/node/validator-state',
+                text: 'Checking validator status',
+                link: '/guide/node/validator-status',
               },
               {
                 text: 'Controlling validator lifecycle',
