@@ -28,48 +28,23 @@ Example output:
 
 ```json
 {
-  "current_epoch": 18,
-  "current_height": 5733680,
-  "last_boundary": 5732400,
-  "epoch_length": 1280,
-  "is_next_full_dkg": false,
-  "next_full_dkg_epoch": 25,
-  "validators": [
-    {
-      "onchain_address": "0x1234567890abcdef1234567890abcdef12345678",
-      "public_key": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
-      "inbound_address": "203.0.113.10:9000",
-      "outbound_address": "203.0.113.10:9001",
-      "active": true,
-      "is_player": true,
-      "is_dealer": true
-    }
-  ]
+  "publicKey": "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
+  "active": true,
+  "index": 5,
+  "validatorAddress": "0x1234567890abcdef1234567890abcdef12345678",
+  "inboundAddress": "203.0.113.10:9000",
+  "outboundAddress": "203.0.113.10:9001"
 }
 ```
 
-**Top-level fields:**
-
 | Field | Description |
 |-------|-------------|
-| `current_epoch` | The epoch at the time of the query |
-| `current_height` | The block height at the time of the query |
-| `last_boundary` | The boundary height from which the DKG outcome was read |
-| `epoch_length` | The epoch length as set in the chain spec |
-| `is_next_full_dkg` | Whether the next DKG ceremony is a full DKG (new polynomial) or a reshare |
-| `next_full_dkg_epoch` | The epoch at which the next full DKG ceremony will be triggered |
-
-**Per-validator fields:**
-
-| Field | Description |
-|-------|-------------|
-| `onchain_address` | Validator control address |
-| `public_key` | Ed25519 consensus public key (hex) |
-| `inbound_address` | Inbound address (`IP:port`) for incoming connections |
-| `outbound_address` | Outbound IP address for firewall whitelisting |
+| `publicKey` | Ed25519 consensus public key (`bytes32`) |
 | `active` | Whether the validator is active in the current contract state |
-| `is_player` | Whether the validator is a player (receiving shares) in the current epoch |
-| `is_dealer` | Whether the validator is a dealer (distributing shares) in the current epoch |
+| `index` | Index of the validator (constant under rotation) |
+| `validatorAddress` | Validator control address |
+| `inboundAddress` | Address where other validators connect to this validator (`IP:port`) |
+| `outboundAddress` | Outbound IP address for firewall whitelisting |
 
 ## State transitions
 
