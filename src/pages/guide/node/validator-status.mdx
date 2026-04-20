@@ -28,23 +28,35 @@ Example output:
 
 ```json
 {
-  "publicKey": "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
-  "active": true,
+  "current_epoch": 18,
+  "current_height": 5733680,
+  "onchain_address": "0x1234567890abcdef1234567890abcdef12345678",
+  "public_key": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
+  "inbound_address": "203.0.113.10:9000",
+  "outbound_address": "203.0.113.10:9001",
+  "fee_recipient": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
   "index": 5,
-  "validatorAddress": "0x1234567890abcdef1234567890abcdef12345678",
-  "inboundAddress": "203.0.113.10:9000",
-  "outboundAddress": "203.0.113.10:9001"
+  "active": true,
+  "is_dkg_dealer": true,
+  "is_dkg_player": true,
+  "in_committee": true
 }
 ```
 
 | Field | Description |
 |-------|-------------|
-| `publicKey` | Ed25519 consensus public key (`bytes32`) |
-| `active` | Whether the validator is active in the current contract state |
+| `current_epoch` | The epoch at the time of the query |
+| `current_height` | The block height at the time of the query |
+| `onchain_address` | Validator control address |
+| `public_key` | Ed25519 consensus public key (hex) |
+| `inbound_address` | Inbound address (`IP:port`) for incoming connections |
+| `outbound_address` | Outbound IP address for firewall whitelisting |
+| `fee_recipient` | Address that receives block proposal fees |
 | `index` | Index of the validator (constant under rotation) |
-| `validatorAddress` | Validator control address |
-| `inboundAddress` | Address where other validators connect to this validator (`IP:port`) |
-| `outboundAddress` | Outbound IP address for firewall whitelisting |
+| `active` | Whether the validator is active in the current contract state |
+| `is_dkg_dealer` | Whether the validator is a dealer (distributing shares) in the current epoch |
+| `is_dkg_player` | Whether the validator is a player (receiving shares) in the current epoch |
+| `in_committee` | Whether the validator is in the committee for the current epoch |
 
 ## State transitions
 
