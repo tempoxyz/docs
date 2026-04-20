@@ -64,33 +64,27 @@ Every state transition happens on epoch boundaries. Currently on mainnet and tes
 
 ```mermaid {style: {maxWidth: '520px', margin: '0 auto'}}
 flowchart LR
-    A["Inactive<br/><small>Epoch E</small>"] -->|"epoch boundary"| B["Syncer<br/><small>Epoch E+1</small>"]
-    B -->|"epoch boundary"| C["Player<br/><small>Epoch E+2</small>"]
-    C -->|"receives share"| D["Dealer<br/><small>Epoch E+3</small>"]
-    D -->|"fully synced"| E["Voter / Proposer"]
+    A["Syncer<br/><small>Epoch E</small>"] -->|"epoch boundary"| B["Player<br/><small>Epoch E+1</small>"]
+    B -->|"receives share"| C["Dealer / Validator<br/><small>Epoch E+2</small>"]
+    C -->|"fully synced"| D["Voter / Proposer"]
 
-    click A "#not-a-participant-e"
-    click B "#syncer-epoch-e1"
-    click C "#player-epoch-e2"
-    click D "#dealer-epoch-e3"
-    click E "#dealer-epoch-e3"
+    click A "#syncer-epoch-e"
+    click B "#player-epoch-e1"
+    click C "#dealer--validator-epoch-e2"
+    click D "#dealer--validator-epoch-e2"
 ```
 
-#### Not a participant (E)
+#### Syncer (epoch E)
 
-Epoch E marks the addition of your validator to the on-chain validator configuration smart contract. Your validator isn't considered a peer by validators yet. This is because the validator hasn't been refreshed in the current epoch yet. It is normal that no height metrics progress during this period — your node has to be considered a syncer to receive blocks.
+Once your validator is added to the on-chain contract, it is immediately registered on the p2p peer set and starts syncing blocks from the network.
 
-#### Syncer (epoch E+1)
+#### Player (epoch E+1)
 
-Your validator is now considered a peer by validators. It's syncing with the network and will be considered a player in the next epoch.
+Your validator is receiving consensus signing shares from dealers during the DKG ceremony.
 
-#### Player (epoch E+2)
+#### Dealer / Validator (epoch E+2)
 
-Your validator is receiving consensus signing shares from dealers during the ceremony.
-
-#### Dealer (epoch E+3)
-
-Your validator is distributing consensus signing shares to other validators during the ceremony. Once your node is fully synced up, it will also be able to propose blocks and vote for other validators' proposed blocks.
+Your validator is distributing consensus signing shares to other validators during the ceremony. Once your node is fully synced, it will also be able to propose blocks and vote on other validators' proposals.
 
 :::info
 The on-chain contract represents which validators should eventually be members of the committee, not which ones currently are. Every epoch, the Tempo network performs a distributed key generation ceremony, distributing keys to validators that should be committee members in the next epoch. So adding, deactivating, or rotating validator entries in epoch `E` can only be taken into account for the next DKG ceremony that runs during epoch `E+1`, and take effect in epoch `E+2`.
