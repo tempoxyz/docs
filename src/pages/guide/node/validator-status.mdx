@@ -62,12 +62,12 @@ Example output:
 
 Every state transition happens on epoch boundaries. Currently on mainnet and testnet, the epoch length is around 3 hours.
 
-```mermaid {style: {maxWidth: '480px', margin: '0 auto'}}
-flowchart TD
-    A[Inactive] -->|epoch ends| B["Syncer<br/>The validator starts syncing"]
-    B -->|+1 epoch| C["Syncer and Player"]
-    C -->|"+1 epoch, receives share"| D["Syncer<br/>Player<br/>Dealer"]
-    D -->|"once fully synced"| E["Voter ↔ Proposer"]
+```mermaid {style: {maxWidth: '520px', margin: '0 auto'}}
+flowchart LR
+    A["Inactive<br/><small>Epoch E</small>"] -->|"epoch boundary"| B["Syncer<br/><small>Epoch E+1</small>"]
+    B -->|"epoch boundary"| C["Player<br/><small>Epoch E+2</small>"]
+    C -->|"receives share"| D["Dealer<br/><small>Epoch E+3</small>"]
+    D -->|"fully synced"| E["Voter / Proposer"]
 
     click A "#not-a-participant-e"
     click B "#syncer-epoch-e1"
