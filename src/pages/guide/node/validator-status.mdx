@@ -11,6 +11,66 @@ Your validator moves through different states after registration. Understanding 
 **You cannot reset a validator's data and continue with the same identity.** Doing so risks inconsistent voting, which can cause irrecoverable network safety failures. If you need to reset your validator's data, you must rotate to a new validator identity — see [Signing key rotation](/guide/node/validator-keys#signing-key-rotation).
 :::
 
+## Look up your validator
+
+You can query a single validator by its consensus public key (the ed25519 key generated during [initial setup](/guide/node/validator-setup#step-1-generate-a-signing-keypair) — see also [Managing validator keys](/guide/node/validator-keys#generating-a-signing-key)):
+
+::::code-group
+```bash [Mainnet]
+tempo consensus validator <pubkey> --rpc-url https://rpc.tempo.xyz
+```
+```bash [Testnet]
+tempo consensus validator <pubkey> --rpc-url https://rpc.testnet.tempo.xyz
+```
+::::
+
+Example output:
+
+```json
+{
+  "current_epoch": 18,
+  "current_height": 5733680,
+  "last_boundary": 5732400,
+  "epoch_length": 1280,
+  "is_next_full_dkg": false,
+  "next_full_dkg_epoch": 25,
+  "validators": [
+    {
+      "onchain_address": "0x1234567890abcdef1234567890abcdef12345678",
+      "public_key": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
+      "inbound_address": "203.0.113.10:9000",
+      "outbound_address": "203.0.113.10:9001",
+      "active": true,
+      "is_player": true,
+      "is_dealer": true
+    }
+  ]
+}
+```
+
+**Top-level fields:**
+
+| Field | Description |
+|-------|-------------|
+| `current_epoch` | The epoch at the time of the query |
+| `current_height` | The block height at the time of the query |
+| `last_boundary` | The boundary height from which the DKG outcome was read |
+| `epoch_length` | The epoch length as set in the chain spec |
+| `is_next_full_dkg` | Whether the next DKG ceremony is a full DKG (new polynomial) or a reshare |
+| `next_full_dkg_epoch` | The epoch at which the next full DKG ceremony will be triggered |
+
+**Per-validator fields:**
+
+| Field | Description |
+|-------|-------------|
+| `onchain_address` | Validator control address |
+| `public_key` | Ed25519 consensus public key (hex) |
+| `inbound_address` | Inbound address (`IP:port`) for incoming connections |
+| `outbound_address` | Outbound IP address for firewall whitelisting |
+| `active` | Whether the validator is active in the current contract state |
+| `is_player` | Whether the validator is a player (receiving shares) in the current epoch |
+| `is_dealer` | Whether the validator is a dealer (distributing shares) in the current epoch |
+
 ## State transitions
 
 Every state transition happens on epoch boundaries. Currently on mainnet and testnet, the epoch length is around 3 hours.
@@ -77,77 +137,4 @@ If `how_often_dealer` or `how_often_player` is increasing, your node is actively
 
 If your validator is not connected to other peers, but at least 3 epochs have passed, check that your node is properly configured — e.g. firewall settings are open to other peers. If you have reset your validator's state, your validator might have been blocked due to double-signing a block. In that case, please reach out to the Tempo team — even with the Tempo team, resolving this requires coordinating a new validator identity.
 
-## Querying on-chain state
 
-Check your validator's on-chain status using the CLI:
-
-::::code-group
-```bash [Mainnet]
-tempo consensus validators-info --rpc-url https://rpc.tempo.xyz
-```
-```bash [Testnet]
-tempo consensus validators-info --rpc-url https://rpc.testnet.tempo.xyz
-```
-::::
-
-This returns the committee of the current epoch (validators with `in_committee = true`) as well as validators that have been added but will only become active in a future epoch. Use this to verify your validator's status after registration or rotation.
-
-### Look up your validator
-
-You can query a single validator by its consensus public key (the ed25519 key generated during [initial setup](/guide/node/validator-setup#step-1-generate-a-signing-keypair) — see also [Managing validator keys](/guide/node/validator-keys#generating-a-signing-key)):
-
-::::code-group
-```bash [Mainnet]
-tempo consensus validator <pubkey> --rpc-url https://rpc.tempo.xyz
-```
-```bash [Testnet]
-tempo consensus validator <pubkey> --rpc-url https://rpc.testnet.tempo.xyz
-```
-::::
-
-Example output:
-
-```json
-{
-  "current_epoch": 18,
-  "current_height": 5733680,
-  "last_boundary": 5732400,
-  "epoch_length": 1280,
-  "is_next_full_dkg": false,
-  "next_full_dkg_epoch": 25,
-  "validators": [
-    {
-      "onchain_address": "0x1234567890abcdef1234567890abcdef12345678",
-      "public_key": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
-      "inbound_address": "203.0.113.10:9000",
-      "outbound_address": "203.0.113.10:9001",
-      "active": true,
-      "is_player": true,
-      "is_dealer": true
-    }
-  ]
-}
-```
-
-**Top-level fields:**
-
-| Field | Description |
-|-------|-------------|
-| `current_epoch` | The epoch at the time of the query |
-| `current_height` | The block height at the time of the query |
-| `last_boundary` | The boundary height from which the DKG outcome was read |
-| `epoch_length` | The epoch length as set in the chain spec |
-| `is_next_full_dkg` | Whether the next DKG ceremony is a full DKG (new polynomial) or a reshare |
-| `next_full_dkg_epoch` | The epoch at which the next full DKG ceremony will be triggered |
-
-**Per-validator fields:**
-
-| Field | Description |
-|-------|-------------|
-| `onchain_address` | Validator control address |
-| `public_key` | Ed25519 consensus public key (hex) |
-| `inbound_address` | Inbound address (`IP:port`) for incoming connections |
-| `outbound_address` | Outbound IP address for firewall whitelisting |
-| `active` | Whether the validator is active in the current contract state |
-| `is_player` | Whether the validator is a player (receiving shares) in the current epoch |
-| `is_dealer` | Whether the validator is a dealer (distributing shares) in the current epoch |
