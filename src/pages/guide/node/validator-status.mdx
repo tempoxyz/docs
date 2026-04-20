@@ -58,29 +58,13 @@ Example output:
 
 Every state transition happens on epoch boundaries. Currently on mainnet and testnet, the epoch length is around 3 hours.
 
-```mermaid {style: {maxWidth: '600px', margin: '0 auto'}}
-block-beta
-    columns 3
-    start(["Add / Rotate in"]):3
-    space
-    A["Syncer — Epoch E"]:1
-    space
-    space
-    B["Player — Epoch E+1"]:1
-    space
-    space
-    C["Dealer / Validator — Epoch E+2"]:1
-    space
-    space
-    D["Voter / Proposer"]:1
-    space
-    end_(["Deactivate / Rotate out"]):3
-
-    start --> A
-    A --> B
-    B --> C
-    C --> D
-    D --> end_
+```mermaid {style: {maxWidth: '360px', margin: '0 auto'}}
+flowchart TD
+    Start(["Add / Rotate in"]) --> A["Syncer — Epoch E"]
+    A --> B["Player — Epoch E+1"]
+    B --> C["Dealer / Validator — Epoch E+2"]
+    C --> D["Voter / Proposer"]
+    D --> End(["Deactivate / Rotate out"])
 ```
 
 #### Syncer (epoch E)
