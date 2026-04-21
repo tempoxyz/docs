@@ -39,16 +39,12 @@ For detailed release notes and binaries, see the [Changelog](/changelog).
 | **Scope** | Enhanced access keys with periodic limits, call scoping, and an authorization ABI update; signature verification precompile; and virtual addresses for TIP-20 deposit forwarding |
 | **TIPs** | [TIP-1011: Enhanced Access Key Permissions](/protocol/tips/tip-1011), [TIP-1020: Signature Verification Precompile](/protocol/tips/tip-1020), [TIP-1022: Virtual Addresses for TIP-20 Deposit Forwarding](/protocol/tips/tip-1022) |
 | **Details** | [T3 network upgrade](/protocol/upgrades/t3) |
-| **Release** | T3-compatible release coming soon |
-| **Testnet** | Moderato: Apr 21, 2026 16:00 CEST (unix: TBD) |
-| **Mainnet** | Presto: Apr 27, 2026 16:00 CEST (unix: TBD) |
+| **Release** | [v1.6.0](https://github.com/tempoxyz/tempo/releases/tag/v1.6.0) |
+| **Testnet** | Moderato: Apr 21, 2026 16:00 CEST (unix: 1776780000) |
+| **Mainnet** | Presto: Apr 27, 2026 16:00 CEST (unix: 1777298400) |
 | **Priority** | <Badge variant="red">Required</Badge> |
 
-### Who is affected?
-
-Partners that directly call `AccountKeychain.authorizeKey(...)` or manually encode `key_authorization` to create or rotate access keys should also review the T3 upgrade page. Existing authorized access keys remain valid, but those low-level authorization flows must move to the new TIP-1011 format post-T3.
-
-Partners that index TIP-20 transfers should also review the T3 upgrade page. Virtual-address forwarding emits two-hop `Transfer` events, so raw transfer lists and counts will be misleading unless that pair is handled as one logical deposit.
+See the [T3 network upgrade](/protocol/upgrades/t3) page for breaking changes, migration checklist, and integration guidance.
 
 ---
 

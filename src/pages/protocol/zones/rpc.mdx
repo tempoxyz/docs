@@ -1,0 +1,145 @@
+---
+title: Zone RPC
+description: Authenticated JSON-RPC interface for Tempo Zones with per-account scoping, timing side channel mitigations, and event filtering.
+---
+
+# Zone RPC
+
+:::info
+Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
+:::
+
+The zone RPC starts from the standard Ethereum JSON-RPC and restricts it to enforce privacy guarantees. Every RPC request must include an authorization token that proves the caller controls a Tempo account and scopes all responses to that account.
+
+## Authorization Tokens
+
+Authorization tokens are short-lived credentials (maximum 1 month) signed by the caller's Tempo account key. Tempo accounts support multiple signature types (secp256k1, P256, WebAuthn), and accounts with Access Keys via the `AccountKeychain` precompile can use those keys to authenticate.
+
+The signed message includes:
+- `"TempoZoneRPC"` magic prefix for domain separation
+- Spec version, zone ID, and chain ID for replay protection (zone 0 can be used to allow access to all zones)
+- Issuance and expiry timestamps
+
+Tokens are sent via the `X-Authorization-Token` HTTP header on every request.
+
+## Method Access Control
+
+Each JSON-RPC method falls into one of four categories:
+
+Available to any authenticated caller:
+
+| Method | Access Type | Notes |
+|--------|-------------|-------|
+| `eth_chainId` | Allowed | Zone chain ID |
+| `eth_blockNumber` | Allowed | Latest block number |
+| `eth_gasPrice` | Allowed | Current gas price |
+| `eth_maxPriorityFeePerGas` | Allowed | Current priority fee |
+| `eth_feeHistory` | Allowed | Fee history |
+| `eth_getBlockByNumber` | Allowed | Block headers **without transaction details** |
+| `eth_getBlockByHash` | Allowed | Block headers **without transaction details** |
+| `eth_subscribe("newHeads")` | Allowed | Block headers with `logsBloom` zeroed |
+| `eth_syncing` | Allowed | Sync status |
+| `eth_coinbase` | Allowed | Sequencer address |
+| `net_version` | Allowed | Network ID |
+| `net_listening` | Allowed | Node status |
+| `web3_clientVersion` | Allowed | Client version |
+| `web3_sha3` | Allowed | Pure Keccak-256 hash |
+| `eth_getBalance` | Scoped | Returns balance for the authenticated account only. Queries for other accounts return `0x0`. |
+| `eth_getTransactionCount` | Scoped | Returns nonce for the authenticated account only. Other accounts return `0x0`. |
+| `eth_call` | Scoped | Executes with `from` set to the authenticated account. [Execution-level privacy](/protocol/zones/accounts) enforces `balanceOf` access control at the contract level. |
+| `eth_estimateGas` | Scoped | Only allowed when `from` equals the authenticated account. |
+| `eth_getTransactionByHash` | Scoped | Returns the transaction only if the authenticated account is the sender. Returns `null` otherwise. |
+| `eth_getTransactionReceipt` | Scoped | Returns the receipt only if the authenticated account is the sender. Logs are filtered (see [Event Filtering](#event-filtering)). |
+| `eth_sendRawTransaction` | Scoped | Validates that the transaction sender matches the authenticated account. |
+| `eth_getLogs` | Scoped | Filtered to TIP-20 events where the authenticated account is a relevant party (see [Event Filtering](#event-filtering)). |
+| `eth_getFilterLogs` | Scoped | Same filtering as `eth_getLogs`. |
+| `eth_getFilterChanges` | Scoped | Same filtering. Only returns new events since last poll. |
+| `eth_newFilter` | Scoped | Creates a filter implicitly scoped to the authenticated account. |
+| `eth_subscribe("logs")` | Scoped | Subscription scoped to the authenticated account. |
+| `eth_newBlockFilter` | Scoped | Returns new block hashes. |
+| `eth_uninstallFilter` | Scoped | Removes a previously created filter. |
+
+**Error vs. silent response**: Methods where the user explicitly provides a mismatched parameter (`eth_sendRawTransaction` with wrong sender, `eth_call` with wrong `from`) return explicit errors, since the user already knows the address they supplied and the error leaks nothing. Methods that query *about* other accounts return silent dummy values (`0x0`, `null`, empty results) instead of errors; an error would reveal "this data exists but you can't see it."
+
+### Restricted (sequencer-only)
+
+| Method | Reason |
+|--------|--------|
+| `eth_getStorageAt` | Raw storage reads bypass all access control |
+| `eth_getCode` | No legitimate non-sequencer use case |
+| `eth_createAccessList` | Reveals storage layout |
+| `eth_getBlockByNumber` (with `true`) | Full block with all transactions |
+| `eth_getBlockByHash` (with `true`) | Full block with all transactions |
+| `eth_getBlockTransactionCountByNumber` | Transaction counts reveal activity levels |
+| `eth_getBlockTransactionCountByHash` | Same as above |
+| `eth_getTransactionByBlockNumberAndIndex` | Arbitrary transaction access |
+| `eth_getTransactionByBlockHashAndIndex` | Same as above |
+| `debug_*`, `admin_*`, `txpool_*` | All debug, admin, and txpool namespaces |
+
+### Disabled
+
+| Method | Reason |
+|--------|--------|
+| `eth_getProof` | Merkle proofs leak state trie structure |
+| `eth_newPendingTransactionFilter` | Mempool observation |
+| `eth_subscribe("newPendingTransactions")` | Mempool observation |
+| Mining-related methods | Tempo Zones have no mining |
+
+Any method not explicitly listed returns error code `-32601` (method not found), ensuring new methods are not accidentally exposed.
+
+## Timing Side Channels
+
+Scoped methods that fetch data before checking authorization have a mandatory **100 ms minimum response time**. This ensures that `eth_getTransactionByHash` for a non-existent transaction hash and for another user's transaction have indistinguishable response times, preventing existence probing.
+
+Methods that need the speed bump:
+
+| Method | Reason |
+|--------|--------|
+| `eth_getTransactionByHash` | Must fetch the transaction to check if sender matches |
+| `eth_getTransactionReceipt` | Must fetch the receipt to check the sender |
+| `eth_getLogs` | Response time correlates with total log volume, not just the caller's logs |
+| `eth_getFilterLogs` | Same as `eth_getLogs` |
+| `eth_getFilterChanges` | Same as `eth_getLogs` |
+
+Methods that do **not** need the speed bump include `eth_getBalance` and `eth_getTransactionCount` (address checked before any data fetch), `eth_call` and `eth_estimateGas` (`from` validated before execution), and `eth_sendRawTransaction` (sender verified during decoding).
+
+## Block Responses
+
+Block headers returned to non-sequencer callers are sanitized:
+
+- `transactions` is always an empty array.
+- `logsBloom` is replaced with a zero Bloom. The real Bloom filter would allow probing whether a specific address had activity in a block.
+- All other header fields (`number`, `hash`, `gasUsed`, `stateRoot`, etc.) are returned normally.
+
+## Event Filtering
+
+Log queries are restricted to TIP-20 events where the authenticated account is a relevant party:
+
+| Event | Visible if |
+|-------|-----------|
+| `Transfer` | `from == caller` OR `to == caller` |
+| `Approval` | `owner == caller` OR `spender == caller` |
+| `TransferWithMemo` | `from == caller` OR `to == caller` |
+| `Mint` | `to == caller` |
+| `Burn` | `from == caller` |
+
+All other event topics (system events, role events, configuration events) are filtered out.
+
+## Zone-Specific RPC Methods
+
+| Method | Access | Description |
+|--------|--------|-------------|
+| `zone_getAuthorizationTokenInfo` | Any authenticated | Returns the authenticated account address and token expiry |
+| `zone_getZoneInfo` | Any authenticated | Returns zone metadata: `zoneId`, `zoneTokens`, `sequencer`, `chainId` |
+| `zone_getDepositStatus` | Scoped | Returns whether deposits from a given Tempo block have been processed, filtered to the caller's deposits |
+
+## Error Codes
+
+| Code | Message | Meaning |
+|------|---------|---------|
+| `-32001` | Authorization token required | No authorization token provided |
+| `-32002` | Authorization token expired | The authorization token has expired |
+| `-32003` | Transaction rejected | Transaction sender does not match authenticated account |
+| `-32004` | Account mismatch | The `from` field does not match the authenticated account |
+| `-32005` | Sequencer only | Method requires sequencer access |
+| `-32006` | Method disabled | Method is not available on zones |

@@ -12,13 +12,13 @@ const baseUrl = (() => {
 })()
 
 export default defineConfig({
-  banner: {
-    dismissable: false,
-    backgroundColor: '#5B4CDB',
-    content: 'Tempo Mainnet is live. [Read our announcement.](https://tempo.xyz/blog/mainnet) →',
-    height: '40px',
-    textColor: 'white',
-  },
+  // banner: {
+  //   dismissable: false,
+  //   backgroundColor: '#5B4CDB',
+  //   content: 'Your announcement here. [Learn more.](https://tempo.xyz) →',
+  //   height: '40px',
+  //   textColor: 'white',
+  // },
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
   // TODO: Set back to true once tempoxyz/tempo#tip-1011 dead link is fixed
   checkDeadlinks: 'warn',
@@ -156,6 +156,40 @@ export default defineConfig({
               //   disabled: true,
               //   link: '/guide/payments/private-payments',
               // },
+            ],
+          },
+          {
+            text: 'Connect to Zones',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/guide/private-zones',
+              },
+              {
+                text: 'Connect to a zone',
+                link: '/guide/private-zones/connect-to-a-zone',
+              },
+              {
+                text: 'Deposit to a zone',
+                link: '/guide/private-zones/deposit-to-a-zone',
+              },
+              {
+                text: 'Send tokens within a zone',
+                link: '/guide/private-zones/send-tokens-within-a-zone',
+              },
+              {
+                text: 'Send tokens across zones',
+                link: '/guide/private-zones/send-tokens-across-zones',
+              },
+              {
+                text: 'Swap across zones',
+                link: '/guide/private-zones/swap-across-zones',
+              },
+              {
+                text: 'Withdraw from a zone',
+                link: '/guide/private-zones/withdraw-from-a-zone',
+              },
             ],
           },
           {
@@ -597,6 +631,45 @@ export default defineConfig({
             ],
           },
           {
+            text: 'Tempo Zones',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/protocol/zones',
+              },
+              {
+                text: 'Reference',
+                items: [
+                  {
+                    text: 'Architecture',
+                    link: '/protocol/zones/architecture',
+                  },
+                  {
+                    text: 'Accounts',
+                    link: '/protocol/zones/accounts',
+                  },
+                  {
+                    text: 'Bridging',
+                    link: '/protocol/zones/bridging',
+                  },
+                  {
+                    text: 'RPC',
+                    link: '/protocol/zones/rpc',
+                  },
+                  {
+                    text: 'Execution & Gas',
+                    link: '/protocol/zones/execution',
+                  },
+                  {
+                    text: 'Proving',
+                    link: '/protocol/zones/proving',
+                  },
+                ],
+              },
+            ],
+          },
+          {
             text: 'Network Upgrades',
             collapsed: true,
             items: [
@@ -703,6 +776,10 @@ export default defineConfig({
                   {
                     text: 'Use MPP with Foundry',
                     link: '/sdk/foundry/mpp',
+                  },
+                  {
+                    text: 'Signature Verification',
+                    link: '/sdk/foundry/signature-verifier',
                   },
                 ],
               },
@@ -1160,6 +1237,16 @@ export default defineConfig({
       destination: '/quickstart/integrate-tempo',
     },
     {
+      source: '/protocol/zones/overview',
+      destination: '/protocol/zones',
+      status: 301,
+    },
+    {
+      source: '/protocol/zones/privacy',
+      destination: '/protocol/zones/accounts',
+      status: 301,
+    },
+    {
       source: '/protocol/blockspace',
       destination: '/protocol/blockspace/overview',
     },
@@ -1241,6 +1328,11 @@ export default defineConfig({
     {
       source: '/protocol/exchange/pathUSD',
       destination: '/protocol/exchange/quote-tokens#pathusd',
+      status: 301,
+    },
+    {
+      source: '/protocol/zones/overview',
+      destination: '/protocol/zones',
       status: 301,
     },
   ],

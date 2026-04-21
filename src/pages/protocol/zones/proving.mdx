@@ -1,0 +1,136 @@
+---
+title: Zone Proving
+description: Batch submission and proof verification for Tempo zones, including the state transition function, ZK and TEE deployment modes, and ancestry proofs.
+---
+
+import { StaticMermaidDiagram } from '../../../components/StaticMermaidDiagram'
+
+# Zone Proving
+
+:::info
+Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
+:::
+
+:::warning
+The zone prover is not yet live. This page describes the planned design. The prover will be added in a future release.
+:::
+
+Zone settlement uses validity proofs to verify correct execution. The prover implements a pure state transition function in Rust with `no_std` compatibility, allowing it to run in both ZKVMs (SP1) and TEEs (SGX/TDX).
+
+## Batch Submission
+
+The sequencer posts batches to Tempo Mainnet via `submitBatch` on the portal. Each batch covers one or more zone blocks and includes:
+
+| Field | Description |
+|-------|-------------|
+| `tempoBlockNumber` | Tempo block the zone committed to (from zone's TempoState) |
+| `recentTempoBlockNumber` | Optional recent block for ancestry proof (`0` = direct lookup) |
+| `blockTransition` | Zone block hash transition (`prevBlockHash` → `nextBlockHash`) |
+| `depositQueueTransition` | Deposit queue processing progress |
+| `withdrawalQueueHash` | Hash chain of withdrawals for this batch (`0` if none) |
+| `verifierConfig` | Opaque payload for the verifier (domain separation / attestation) |
+| `proof` | Validity proof or TEE attestation |
+
+The portal verifies that `prevBlockHash` matches the stored `blockHash`, calls the verifier, and on success updates `withdrawalBatchIndex`, `blockHash`, `lastSyncedTempoBlockNumber`, and adds withdrawals to the queue.
+
+## Verifier Interface
+
+The verifier is abstracted behind a minimal interface. ZK systems and TEE attesters implement the same contract:
+
+```solidity
+interface IVerifier {
+    function verify(
+        uint64 tempoBlockNumber,
+        uint64 anchorBlockNumber,
+        bytes32 anchorBlockHash,
+        uint64 expectedWithdrawalBatchIndex,
+        address sequencer,
+        BlockTransition calldata blockTransition,
+        DepositQueueTransition calldata depositQueueTransition,
+        bytes32 withdrawalQueueHash,
+        bytes calldata verifierConfig,
+        bytes calldata proof
+    ) external view returns (bool);
+}
+```
+
+The proof verifies that:
+
+1. Valid state transition from `prevBlockHash` to `nextBlockHash`.
+2. Zone committed to `tempoBlockNumber` via TempoState.
+3. Anchor block hash matches (direct or ancestry mode).
+4. `ZoneOutbox.lastBatch()` has the correct `withdrawalBatchIndex` and `withdrawalQueueHash`.
+5. Deposit processing is correct (validated via Tempo state read inside proof).
+6. Zone block `beneficiary` matches the registered sequencer.
+
+## State Transition Function
+
+The prover takes a complete witness of zone blocks and their dependencies, executes the EVM state transitions, and outputs commitments for on-chain verification:
+
+```rust
+pub fn prove_zone_batch(witness: BatchWitness) -> Result<BatchOutput, Error>
+```
+
+### Execution Flow
+
+<StaticMermaidDiagram chart={`flowchart TD
+    A["Batch witness"] --> B["Verify Tempo state proofs"]
+    B --> C["Initialize zone state from previous block hash"]
+    C --> D{"Next zone block"}
+    D --> E["Check parent hash and block number"]
+    E --> F["Verify beneficiary is the sequencer"]
+    F --> G["Execute advanceTempo system transaction if present"]
+    G --> H["Execute user transactions via revm"]
+    H --> I{"Final block in batch?"}
+    I -- No --> J["Compute simplified zone block hash"]
+    J --> D
+    I -- Yes --> K["Execute finalizeWithdrawalBatch"]
+    K --> L["Compute simplified zone block hash"]
+    L --> M["Extract output commitments"]
+    M --> N["Return batch output for verification"]
+`} />
+
+1. **Verify Tempo state proofs.** Validate MPT proofs for all Tempo storage reads against Tempo state roots.
+2. **Initialize zone state.** Load the zone state from the witness, binding the initial state root to the previous block hash.
+3. **Execute zone blocks.** For each block:
+   - Validate parent hash continuity and block number sequencing.
+   - Verify beneficiary matches the registered sequencer.
+   - Execute `advanceTempo()` system transaction (if present) to process deposits.
+   - Execute user transactions via revm.
+   - Execute `finalizeWithdrawalBatch()` in the final block only.
+   - Compute the zone block hash from the simplified header.
+4. **Extract output commitments.** Block hash transition, deposit queue transition, withdrawal queue hash, and last batch parameters.
+
+### Deployment Modes
+
+**ZKVM (SP1):** The prover runs inside a ZKVM. The witness is read from the ZKVM IO, and the output is committed to the proof.
+
+**TEE (SGX/TDX):** The same function runs inside a trusted execution environment. The output is signed by the TEE attestation.
+
+## Ancestry Proofs
+
+EIP-2935 provides access to the last ~8,192 block hashes on Tempo. If a zone is inactive longer than this window, `tempoBlockNumber` rotates out of EIP-2935, which would prevent batch submission.
+
+The solution verifies ancestry inside the ZK circuit:
+
+1. The portal reads `recentTempoBlockNumber` hash from EIP-2935 (must be recent).
+2. The prover includes Tempo headers from `tempoBlockNumber + 1` to `recentTempoBlockNumber` as witness data.
+3. The proof verifies the parent hash chain: each header's parent hash must match the previous header's hash.
+4. The portal verifies the constant-size proof against the recent block hash.
+
+| Mode | Condition | Behavior |
+|------|-----------|----------|
+| Direct | `recentTempoBlockNumber = 0` | Portal reads `tempoBlockNumber` hash from EIP-2935 |
+| Ancestry | `recentTempoBlockNumber > tempoBlockNumber` | Portal reads `recentTempoBlockNumber` hash; proof verifies parent chain |
+
+Proving time increases linearly with the block gap (each gap block adds ~1 keccak operation), but on-chain verification cost remains constant. This prevents the zone from becoming stuck after an extended downtime.
+
+## Tempo State Access
+
+The zone accesses Tempo state via the TempoState predeploy (`0x1c00...0000`). During batch execution:
+
+1. `ZoneInbox` calls `TempoState.finalizeTempo(header)` to advance the zone's view of Tempo.
+2. System contracts read Tempo storage via `TempoState.readTempoStorageSlot()`, restricted to zone system contracts only.
+3. The proof includes Merkle proofs for each Tempo account and storage slot accessed during the batch.
+
+Tempo state staleness depends on how frequently the sequencer calls `advanceTempo()`. The zone client must only finalize Tempo headers after finality to avoid reorg risk.
