@@ -3,6 +3,8 @@ title: Zone Proving
 description: Batch submission and proof verification for Tempo zones, including the state transition function, ZK and TEE deployment modes, and ancestry proofs.
 ---
 
+import { StaticMermaidDiagram } from '../../../components/StaticMermaidDiagram'
+
 # Zone Proving
 
 :::info
@@ -71,23 +73,22 @@ pub fn prove_zone_batch(witness: BatchWitness) -> Result<BatchOutput, Error>
 
 ### Execution Flow
 
-```mermaid
-flowchart TD
-    A[Batch witness] --> B[Verify Tempo state proofs]
-    B --> C[Initialize zone state from previous block hash]
-    C --> D{Next zone block}
-    D --> E[Check parent hash and block number]
-    E --> F[Verify beneficiary is the sequencer]
-    F --> G[Execute advanceTempo system transaction if present]
-    G --> H[Execute user transactions via revm]
-    H --> I{Final block in batch?}
-    I -- No --> J[Compute simplified zone block hash]
+<StaticMermaidDiagram chart={`flowchart TD
+    A["Batch witness"] --> B["Verify Tempo state proofs"]
+    B --> C["Initialize zone state from previous block hash"]
+    C --> D{"Next zone block"}
+    D --> E["Check parent hash and block number"]
+    E --> F["Verify beneficiary is the sequencer"]
+    F --> G["Execute advanceTempo system transaction if present"]
+    G --> H["Execute user transactions via revm"]
+    H --> I{"Final block in batch?"}
+    I -- No --> J["Compute simplified zone block hash"]
     J --> D
-    I -- Yes --> K[Execute finalizeWithdrawalBatch]
-    K --> L[Compute simplified zone block hash]
-    L --> M[Extract output commitments]
-    M --> N[Return batch output for verification]
-```
+    I -- Yes --> K["Execute finalizeWithdrawalBatch"]
+    K --> L["Compute simplified zone block hash"]
+    L --> M["Extract output commitments"]
+    M --> N["Return batch output for verification"]
+`} />
 
 1. **Verify Tempo state proofs.** Validate MPT proofs for all Tempo storage reads against Tempo state roots.
 2. **Initialize zone state.** Load the zone state from the witness, binding the initial state root to the previous block hash.

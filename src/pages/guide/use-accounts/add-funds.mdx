@@ -5,7 +5,11 @@ interactive: true
 ---
 
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
+import { AddFundsToOthers } from '../../../components/guides/steps/payments/AddFundsToOthers.tsx'
+import { AddFundsToWallet } from '../../../components/guides/steps/wallet/AddFundsToWallet.tsx'
+import { AddTokensToWallet } from '../../../components/guides/steps/wallet/AddTokensToWallet.tsx'
+import { ConnectWallet } from '../../../components/guides/steps/wallet/ConnectWallet.tsx'
+import { SetFeeToken } from '../../../components/guides/steps/wallet/SetFeeToken.tsx'
 import * as Token from '../../../components/guides/tokens'
 import { Tabs, Tab } from 'vocs'
 
@@ -14,6 +18,17 @@ import { Tabs, Tab } from 'vocs'
 Get test tokens to build on Tempo testnet.
 
 <Tabs>
+  <Tab title="Fund an address">
+
+<div className="h-4" />
+Send test stablecoins to any address.
+
+<div className="h-6"/>
+<Demo.Container name="Fund an address">
+  <AddFundsToOthers stepNumber={1} last />
+</Demo.Container>
+
+  </Tab>
   <Tab title="Fund your wallet">
 
 <div className="h-4" />
@@ -22,21 +37,10 @@ Connect your wallet to receive test stablecoins directly.
 
 <div className="h-6"/>
 <Demo.Container name="Connect and fund your wallet" footerVariant="balances" tokens={[Token.pathUsd, Token.alphaUsd, Token.betaUsd, Token.thetaUsd]} balanceSource="wallet">
-  <Step.ConnectWallet stepNumber={1} />
-  <Step.AddFundsToWallet stepNumber={2} />
-  <Step.AddTokensToWallet stepNumber={3} />
-  <Step.SetFeeToken stepNumber={4} last />
-</Demo.Container>
-
-  </Tab>
-  <Tab title="Fund an address">
-
-<div className="h-4" />
-Send test stablecoins to any address.
-
-<div className="h-6"/>
-<Demo.Container name="Fund an address">
-  <Step.AddFundsToOthers stepNumber={1} last />
+  <ConnectWallet stepNumber={1} />
+  <AddFundsToWallet stepNumber={2} />
+  <AddTokensToWallet stepNumber={3} />
+  <SetFeeToken stepNumber={4} last />
 </Demo.Container>
 
   </Tab>

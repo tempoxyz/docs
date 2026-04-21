@@ -18,7 +18,7 @@ Above is an example of the type of complex transaction that can remain privacy-p
 ## Deposits (Tempo → Zone)
 
 1. User calls `ZonePortal.deposit(token, to, amount, memo)` on Tempo, specifying which enabled TIP-20 to deposit.
-2. The portal validates the token is enabled and deposits are active, deducts the [deposit fee](/protocol/zones/execution#deposit-fees), holds the locked funds, and appends a deposit to the queue.
+2. The Zone Portal contract validates the token is enabled and deposits are active, deducts the [deposit fee](/protocol/zones/execution#deposit-fees), locks the funds, and appends a deposit to the queue.
 3. The sequencer observes `DepositMade` events and processes deposits in order via `ZoneInbox.advanceTempo()`, minting the corresponding zone-side TIP-20 to the recipient.
 4. A batch proof must prove the zone correctly processed deposits by validating the Tempo state read inside the proof.
 
@@ -33,7 +33,7 @@ For privacy-sensitive use cases, users can make encrypted deposits where the rec
 |-------|------------|--------|
 | `token` | Public | Needed for locked token accounting |
 | `sender` | Public | Needed for potential refunds if decryption fails |
-| `amount` | Public | Needed for on-chain accounting |
+| `amount` | Public | Needed for onchain locked token accounting |
 | `to` | Encrypted | Only sequencer knows recipient |
 | `memo` | Encrypted | Only sequencer knows payment context |
 
@@ -42,9 +42,9 @@ The encryption uses ECIES with secp256k1:
 1. Sequencer publishes a secp256k1 encryption public key via `setSequencerEncryptionKey()` with a proof of possession.
 2. User generates an ephemeral keypair and derives a shared secret via ECDH.
 3. User encrypts `(to || memo)` with AES-256-GCM using the derived key.
-4. User calls `depositEncrypted(token, amount, keyIndex, encryptedPayload)` on the portal.
+4. User calls `depositEncrypted(token, amount, keyIndex, encryptedPayload)` on the Zone Portal contract.
 
-If decryption fails (invalid ciphertext, wrong key), the zone mints tokens to the `sender`'s address on the zone. The Tempo Mainnet funds remain locked in the portal. This ensures chain progress is never blocked by invalid encrypted deposits.
+If decryption fails (invalid ciphertext, wrong key), the zone mints tokens to the `sender`'s address on the zone. The Tempo Mainnet funds remain locked in the Zone Portal contract. This ensures chain progress is never blocked by invalid encrypted deposits.
 
 
 ## Withdrawals (Zone → Tempo)
@@ -58,7 +58,7 @@ Users withdraw by creating a withdrawal request on the zone. Withdrawals are pro
 
 Withdrawals support callbacks to Tempo contracts via the `ZoneMessenger`. When `gasLimit > 0`, the messenger:
 
-1. Transfers tokens from the portal to the target via `transferFrom`.
+1. Transfers tokens from the Zone Portal contract to the target via `transferFrom`.
 2. Calls the target with the provided `callbackData`.
 
 Both operations are atomic. If the callback reverts, the transfer reverts too. Receiving contracts implement `IWithdrawalReceiver` and verify `msg.sender == zoneMessenger` to authenticate calls. This enables direct composition with DEX swaps, staking, or cross-zone deposits.
@@ -76,7 +76,7 @@ interface IWithdrawalReceiver {
 
 ### Withdrawal Failure and Bounce-Back
 
-Withdrawals can fail if the token transfer or callback reverts (out of gas, TIP-403 policy, token pause, etc.). When a withdrawal fails, the portal bounces back the funds by re-depositing into the same zone to the withdrawal's `fallbackRecipient`:
+Withdrawals can fail if the token transfer or callback reverts (out of gas, TIP-403 policy, token pause, etc.). When a withdrawal fails, the Zone Portal contract bounces back the funds by re-depositing into the same zone to the withdrawal's `fallbackRecipient`:
 
 - The withdrawal is **popped unconditionally** from the queue, even on failure.
 - A new deposit is enqueued for the `fallbackRecipient` on the zone.

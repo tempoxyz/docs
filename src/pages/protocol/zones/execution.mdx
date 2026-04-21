@@ -65,4 +65,4 @@ The sequencer manages which TIP-20 tokens are available on a Tempo Zone:
 | `pauseDeposits(token)` | Stops new deposits for the token. Withdrawals continue. |
 | `resumeDeposits(token)` | Restarts deposits for a previously paused token. |
 
-Once enabled, a token cannot be disabled. This preserves the withdrawal guarantee. Enabled tokens use the same address on the Tempo Zone as on Tempo Mainnet. `ZoneInbox` mints on deposit, `ZoneOutbox` burns on withdrawal. No mechanism exists to create new tokens on the Tempo Zone.
+Once enabled, a token cannot be disabled. This preserves withdrawals for that token, subject to the token's own compliance policy. Tokens on the Tempo Zone use the same address as their Tempo Mainnet counterpart. `ZoneInbox` mints on deposit, `ZoneOutbox` burns on withdrawal. No mechanism exists to create new tokens on the Tempo Zone.

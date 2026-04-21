@@ -5,7 +5,9 @@ interactive: true
 ---
 
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
+import { AddFunds } from '../../../components/guides/steps/payments/AddFunds.tsx'
+import { Connect } from '../../../components/guides/steps/auth/Connect.tsx'
+import { PayWithFeeToken } from '../../../components/guides/steps/payments/PayWithFeeToken.tsx'
 import { betaUsd, thetaUsd, pathUsd } from '../../../components/guides/tokens.ts'
 import { Cards, Card, Tabs, Tab } from 'vocs'
 
@@ -18,9 +20,9 @@ Configure users to pay transaction fees in any supported stablecoin. Tempo's fle
 By the end of this guide you will be able to pay fees in any stablecoin on Tempo.
 
 <Demo.Container name="Pay Fees in Any Stablecoin" footerVariant="source" src="tempoxyz/examples/tree/main/examples/payments">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.PayWithFeeToken stepNumber={3} feeToken={betaUsd} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <PayWithFeeToken stepNumber={3} feeToken={betaUsd} last />
 </Demo.Container>
 
 ## Quick Snippet
@@ -222,7 +224,7 @@ Before you can pay fees in a token of your choice, you need to fund your account
 The built-in Tempo testnet faucet includes `AlphaUSD` and `BetaUSD` when funding.
 
 <Demo.Container name="Add Funds" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd, Demo.betaUsd, Demo.thetaUsd, Demo.pathUsd]}>
-  <Step.AddFunds stepNumber={1} last />
+  <AddFunds stepNumber={1} last />
 </Demo.Container>
 
 :::code-group
@@ -263,8 +265,8 @@ Now that you have `AlphaUSD` to send and `BetaUSD` to pay fees with, you can add
 After this step, your users can send payments with a specified fee token by clicking the "Send Payment" button!
 
 <Demo.Container name="Pay Fees in Any Stablecoin" footerVariant="source" src="tempoxyz/examples/tree/main/examples/payments">
-  <Step.AddFunds stepNumber={1} />
-  <Step.PayWithFeeToken stepNumber={2} last />
+  <AddFunds stepNumber={1} />
+  <PayWithFeeToken stepNumber={2} last />
 </Demo.Container>
 
 :::code-group
@@ -406,7 +408,7 @@ Before you can pay fees in a token of your choice, you need to fund your account
 The built-in Tempo testnet faucet includes `AlphaUSD` and `BetaUSD` when funding.
 
 <Demo.Container name="Add Funds" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd, Demo.betaUsd, Demo.thetaUsd, Demo.pathUsd]}>
-  <Step.AddFunds stepNumber={1} last />
+  <AddFunds stepNumber={1} last />
 </Demo.Container>
 
 :::code-group
@@ -432,8 +434,8 @@ await client.faucet.fundSync({
 Now that you have `AlphaUSD` to send and `BetaUSD` to pay fees with, you can now add logic to send a payment with a specified fee token.
 
 <Demo.Container name="Pay Fees in Any Stablecoin" footerVariant="source" src="tempoxyz/examples/tree/main/examples/payments">
-  <Step.AddFunds stepNumber={1} />
-  <Step.PayWithFeeToken stepNumber={2} last />
+  <AddFunds stepNumber={1} />
+  <PayWithFeeToken stepNumber={2} last />
 </Demo.Container>
 
 :::code-group

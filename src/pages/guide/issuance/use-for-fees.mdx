@@ -5,7 +5,13 @@ interactive: true
 
 import { Cards, Card } from 'vocs'
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
+import { AddFunds } from '../../../components/guides/steps/payments/AddFunds.tsx'
+import { Connect } from '../../../components/guides/steps/auth/Connect.tsx'
+import { CreateOrLoadToken } from '../../../components/guides/steps/issuance/CreateOrLoadToken.tsx'
+import { GrantTokenRoles } from '../../../components/guides/steps/issuance/GrantTokenRoles.tsx'
+import { MintFeeAmmLiquidity } from '../../../components/guides/steps/amm/MintFeeAmmLiquidity.tsx'
+import { MintToken } from '../../../components/guides/steps/issuance/MintToken.tsx'
+import { PayWithIssuedToken } from '../../../components/guides/steps/payments/PayWithIssuedToken.tsx'
 
 # Use Your Stablecoin for Fees
 
@@ -14,13 +20,13 @@ Enable users to pay transaction fees using your stablecoin. Tempo supports flexi
 ## Demo
 
 <Demo.Container name="Use Your Stablecoin for Fees" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.CreateOrLoadToken stepNumber={3} />
-  <Step.GrantTokenRoles stepNumber={4} roles={['issuer']} />
-  <Step.MintToken stepNumber={5} />
-  <Step.MintFeeAmmLiquidity stepNumber={6} />
-  <Step.PayWithIssuedToken stepNumber={7} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <CreateOrLoadToken stepNumber={3} />
+  <GrantTokenRoles stepNumber={4} roles={['issuer']} />
+  <MintToken stepNumber={5} />
+  <MintFeeAmmLiquidity stepNumber={6} />
+  <PayWithIssuedToken stepNumber={7} last />
 </Demo.Container>
 
 ## Steps

@@ -85,7 +85,7 @@ console.log(receipt.blockNumber)
 
 A zone deposit settles in two phases.
 
-First, you submit a public Tempo transaction depositing to the `ZonePortal`. The portal escrows the token, deducts the deposit fee in the same token, and records the net deposit in the portal's deposit queue. Later, the zone sequencer processes that queue and credits the recipient inside the zone.
+First, you submit a public Tempo transaction depositing to the `ZonePortal`. The Zone Portal contract locks the token, deducts the deposit fee in the same token, and records the net deposit in its deposit queue. Later, the zone sequencer processes that queue and credits the recipient inside the zone.
 
 That means your public transaction receipt and your zone balance do not update at the same time. The Tempo transaction confirms that the deposit request was accepted. The zone balance changes only after the zone has processed that deposit, and it reflects the post-fee amount rather than the full amount you passed into `deposit(...)`.
 

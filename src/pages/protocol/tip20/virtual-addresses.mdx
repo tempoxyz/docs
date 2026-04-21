@@ -1,0 +1,186 @@
+---
+title: Virtual addresses for TIP-20 deposits
+description: Understand how TIP-20 virtual addresses work, why they remove sweep transactions, and how to attribute forwarded deposits on Tempo.
+---
+
+import { Cards, Card } from 'vocs'
+import { StaticMermaidDiagram } from '../../../components/StaticMermaidDiagram'
+
+# Virtual addresses for TIP-20 deposits
+
+Virtual addresses let you give each customer their own TIP-20 deposit address without giving each customer their own onchain wallet balance. A deposit sent to that address is forwarded by the protocol to a registered master wallet.
+
+For exchanges, ramps, custodians, and payment processors, this changes the operational model. You still get one address per customer for attribution and reconciliation, but you no longer need sweep jobs to consolidate funds.
+
+## Why this feature exists
+
+Without virtual addresses, per-customer deposit addresses are operationally expensive. Each deposit address becomes a real onchain balance holder. Funds land there first, and then the operator has to sweep those funds  into a central wallet.
+
+With virtual addresses, the customer-facing address is still unique, but it behaves like a routing alias. The protocol resolves it to the registered master wallet during the TIP-20 transfer itself.
+
+<img src="/images/tip20/virtual-addresses-light.png" alt="Without virtual addresses, each customer deposit address holds a separate onchain balance that must be swept to the master wallet. With virtual addresses, TIP-20 forwarding routes deposits directly to the master wallet." className="dark:hidden" />
+<img src="/images/tip20/virtual-addresses-dark.png" alt="Without virtual addresses, each customer deposit address holds a separate onchain balance that must be swept to the master wallet. With virtual addresses, TIP-20 forwarding routes deposits directly to the master wallet." className="hidden dark:block" />
+
+This means:
+
+- you keep one deposit address per customer 
+- the master wallet receives the balance directly
+- no sweep transaction is needed
+- no separate TIP-20 balance is created for each deposit address
+
+Forwarding happens inside the same TIP-20 precompile call that processes the transfer — there is no second transaction or additional token movement. The only extra cost is a single storage read (SLOAD) to look up the registered master wallet in the virtual-address registry.
+
+## The mental model
+
+A virtual address is not a second wallet. It is a deposit alias for one canonical wallet.
+
+The important idea is simple: the virtual address is for routing and attribution, while the master wallet is where the TIP-20 balance actually lives.
+
+## Address format
+
+A virtual address is still a normal 20-byte EVM address. [TIP-1022](/protocol/tips/tip-1022) gives those 20 bytes a specific layout:
+
+```text
+0x | masterId (4 bytes) | VIRTUAL_MAGIC (10 bytes) | userTag (6 bytes)
+```
+
+Example:
+
+```text
+0x2612766c fdfdfdfdfdfdfdfdfdfd 000000000001
+```
+
+Where:
+
+| Part | Size | Purpose |
+| --- | --- | --- |
+| `masterId` | 4 bytes | identifies which registered master wallet should receive the funds |
+| `VIRTUAL_MAGIC` | 10 bytes | marks the address as virtual so TIP-20 can recognize it |
+| `userTag` | 6 bytes | operator-chosen routing or attribution value |
+
+TIP-20 recognizes a virtual address by the fixed 10-byte middle marker. It then uses the leading `masterId` to resolve the registered wallet and leaves the trailing `userTag` available for operator-side attribution.
+
+## What happens when someone sends funds
+
+When a sender transfers a covered TIP-20 token to a virtual address, the TIP-20 precompile detects the virtual format, looks up the registered master, and credits that master wallet.
+
+<StaticMermaidDiagram chart={`sequenceDiagram
+    participant Sender
+    participant TIP20 as TIP-20
+    participant Registry as Virtual registry
+    participant Master as Registered wallet
+
+    Sender->>TIP20: transfer(virtualAddress, amount)
+    TIP20->>Registry: resolve(masterId)
+    Registry-->>TIP20: master wallet
+    TIP20->>Master: credit balance
+    Note over TIP20: emits Transfer(sender → virtual, amount)
+    Note over TIP20: emits Transfer(virtual → master, amount)
+`} />
+
+Two things matter here:
+
+1. The balance is credited only to the master wallet.
+2. The transaction still exposes the virtual address in events, so backends and indexers can attribute the deposit correctly.
+
+That is why `balanceOf(virtualAddress)` remains `0`. The virtual address is visible in the transfer path, but it does not end up holding the token balance.
+
+## What this changes for operators
+
+Virtual addresses are mainly an operations feature.
+
+For an exchange or payment processor, the normal flow becomes:
+
+1. register one master wallet
+2. derive deposit addresses offchain for each customer
+3. watch TIP-20 events and map the `userTag` back to the customer record on the backend
+4. credit the customer internally once the deposit is observed
+
+This gives you the accounting benefits of per-customer addresses without managing thousands or millions of real onchain balances.
+
+## What this changes for wallets, explorers, and indexers
+
+A virtual address is a forwarding alias, not a balance-holding account. Treat it as such in any UI or tooling: do not show it as holding a balance. Wallets, block explorers, and operational tooling that truncate addresses should display enough of the address to distinguish both the `masterId` and the `userTag`; ideally show the full address.
+
+For indexers, the event sequences vary by operation. The basic transfer pattern is shown above. Memo and mint paths produce additional events in the same forwarding pattern:
+
+**transferWithMemo / transferFromWithMemo:**
+```
+Transfer(sender, virtualAddress, amount)
+TransferWithMemo(sender, virtualAddress, amount, memo)
+Transfer(virtualAddress, masterWallet, amount)
+```
+
+**mint:**
+```
+Transfer(0x0, virtualAddress, amount)
+Mint(virtualAddress, amount)
+Transfer(virtualAddress, masterWallet, amount)
+```
+
+**mintWithMemo:**
+```
+Transfer(0x0, virtualAddress, amount)
+TransferWithMemo(0x0, virtualAddress, amount, memo)
+Mint(virtualAddress, amount)
+Transfer(virtualAddress, masterWallet, amount)
+```
+
+In all cases, treat the full sequence as one logical deposit to the master wallet. If you surface each `Transfer` log independently, forwarded deposits will appear twice and the effective recipient will be wrong.
+
+For deposit attribution, extract the `userTag` (trailing 6 bytes) directly from the virtual address to map the deposit to the right customer record without additional onchain queries.
+
+If the sender and registered master wallet are the same address, two `Transfer` events still emit but the net balance change is zero. Account for this when counting deposits or computing balances.
+
+## What this does not do
+
+TIP-1022 is deliberately narrow in scope.
+
+### It only changes TIP-20 deposit paths
+
+Virtual forwarding applies only to the TIP-20 transfer and mint paths defined by [TIP-1022](/protocol/tips/tip-1022). It is not a general EVM alias system.
+
+### It does not change ERC-20 contracts deployed on Tempo
+
+If a non-TIP-20 token contract receives a transfer to a virtual address, that contract treats it as a normal literal address. TIP-1022 does not help there.
+
+### It does not make every protocol virtual-address aware
+
+Some protocols record ownership against the literal address they are given. If they mint LP shares, receipts, or similar positions to a virtual address, those positions can become stranded unless that protocol explicitly supports resolution.
+
+### It does not bypass TIP-403 policy checks
+
+Policy checks run against the resolved master wallet. If the master is not allowed to receive a token, deposits to that master's virtual addresses fail too.
+
+## Adoption at a glance
+
+Adopting virtual addresses is straightforward conceptually:
+
+- one-time setup: register a master wallet and mine the required salt
+- ongoing operations: derive deposit addresses offchain
+- reconciliation: decode the `userTag` from events and credit the right customer internally
+
+If you want the exact transfer semantics, event shape, and validation rules, read [TIP-1022](/protocol/tips/tip-1022) alongside the [TIP-20 specification](/protocol/tip20/spec).
+
+## Learn more
+
+<Cards>
+  <Card
+    title="TIP-20 specification"
+    description="See how T3 updates recipient resolution and event semantics for TIP-20 transfers and mints."
+    to="/protocol/tip20/spec"
+    icon="lucide:file-text"
+  />
+  <Card
+    title="TIP-1022 specification"
+    description="Read the full TIP with address derivation, forwarding semantics, and invariants."
+    to="/protocol/tips/tip-1022"
+    icon="lucide:file-text"
+  />
+  <Card
+    title="T3 network upgrade"
+    description="See when virtual addresses activate and what else ships in T3."
+    to="/protocol/upgrades/t3"
+    icon="lucide:rocket"
+  />
+</Cards>

@@ -36,7 +36,7 @@ The sequencer runs a Tempo node with one or more zone nodes attached. Each zone 
 - Synchronizes the zone's view of Tempo Mainnet each time a Tempo Mainnet block finalizes
 - Executes zone transactions using privately submitted transactions and the zone's own state
 - Produces batches proving state transitions on the zone and posts them to Tempo Mainnet
-- Watches for deposits by monitoring portal events on Tempo Mainnet, and creates corresponding transactions on the zone once the block finalizes
+- Watches for deposits by monitoring Zone Portal events on Tempo Mainnet, and creates corresponding transactions on the zone once the block finalizes
 - Watches for withdrawals on the zone and submits transactions to Tempo Mainnet processing them once the batch has been proven
 
 
@@ -62,8 +62,8 @@ The system consists of contracts on both Tempo Mainnet and within each Tempo Zon
 
 ### Tempo Contracts
 
-- **`ZoneFactory`** deploys new Tempo Zones. Each zone gets its own portal and messenger contracts with deterministic addresses.
-- **`ZonePortal`** is the central bridge contract. It locks all deposited tokens, verifies validity proofs, and processes withdrawals. The portal maintains the authoritative state: which deposits have been made, which batches have been proven, and which withdrawals are pending.
+- **`ZoneFactory`** deploys new Tempo Zones. Each zone gets its own Zone Portal and Zone Messenger contracts with deterministic addresses.
+- **`ZonePortal`** is the central bridge contract. It locks all deposited tokens, verifies validity proofs, and processes withdrawals. The Zone Portal contract maintains the authoritative state: which deposits have been made, which batches have been proven, and which withdrawals are pending.
 - **`ZoneMessenger`** handles withdrawals that include callbacks. When a user wants to withdraw tokens and trigger a contract call atomically, the messenger executes both operations together. If the callback fails, the entire withdrawal reverts and funds bounce back to the zone.
 
 ### Zone Predeploys
@@ -73,7 +73,7 @@ Tempo Zones have four system contract predeploys at fixed addresses:
 | Contract | Address | Purpose |
 |----------|---------|---------|
 | `TempoState` | `0x1c00...0000` | Stores the zone's view of Tempo Mainnet. The sequencer updates this with Tempo Mainnet block headers, allowing zone contracts to read Tempo Mainnet state within proofs. |
-| `ZoneInbox` | `0x1c00...0001` | Processes incoming deposits. Mints tokens to recipients and validates that processed deposits match what the portal expects. |
+| `ZoneInbox` | `0x1c00...0001` | Processes incoming deposits. Mints tokens to recipients and validates that processed deposits match what the Zone Portal contract expects. |
 | `ZoneOutbox` | `0x1c00...0002` | Handles withdrawal requests. Users burn their zone tokens here and specify a Tempo Mainnet recipient. |
 | `ZoneConfig` | `0x1c00...0003` | Central configuration. Reads sequencer and token registry from Tempo Mainnet. |
 
@@ -90,7 +90,7 @@ The factory deploys a new `ZonePortal` and `ZoneMessenger` for the Tempo Zone. T
 
 ### Chain ID
 
-Each Tempo Zone has a unique EIP-155 chain ID derived deterministically from its on-chain zone ID:
+Each Tempo Zone has a unique EIP-155 chain ID derived deterministically from its onchain zone ID:
 
 ```
 chain_id = 421700000 + zone_id
@@ -105,7 +105,7 @@ The sequencer can transfer control to a new address via a two-step process on Te
 1. Current sequencer calls `ZonePortal.transferSequencer(newSequencer)` to nominate a new sequencer.
 2. New sequencer calls `ZonePortal.acceptSequencer()` to accept the transfer.
 
-Sequencer management happens on Tempo Mainnet. Zone-side system contracts read the sequencer from Tempo Mainnet via `ZoneConfig`, which queries `TempoState` to get the sequencer address from the finalized `ZonePortal` storage.
+Sequencer management occurs on Tempo Mainnet. Zone-side system contracts read the sequencer from Tempo Mainnet via `ZoneConfig`, which queries `TempoState` to get the sequencer address from the finalized `ZonePortal` storage.
 
 ## Trust Model
 

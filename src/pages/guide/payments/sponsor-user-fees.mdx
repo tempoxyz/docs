@@ -5,7 +5,9 @@ interactive: true
 
 import { Cards, Card, Tabs, Tab } from 'vocs'
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
+import { AddFunds } from '../../../components/guides/steps/payments/AddFunds.tsx'
+import { Connect } from '../../../components/guides/steps/auth/Connect.tsx'
+import { SendRelayerSponsoredPayment } from '../../../components/guides/steps/payments/SponsorUserFees.tsx'
 import PublicTestnetSponsorTip from '../../../snippets/public-testnet-sponsor-tip.mdx'
 
 # Sponsor User Fees
@@ -15,9 +17,9 @@ Enable gasless transactions by sponsoring transaction fees for your users. Tempo
 ## Demo
 
 <Demo.Container name="Sponsor User Fees" footerVariant="source" src="tempoxyz/accounts/tree/main/examples/with-fee-payer">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.SendRelayerSponsoredPayment stepNumber={3} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <SendRelayerSponsoredPayment stepNumber={3} last />
 </Demo.Container>
 
 ## Steps
