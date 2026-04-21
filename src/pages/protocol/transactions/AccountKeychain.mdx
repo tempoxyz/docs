@@ -26,7 +26,7 @@ T3 updates this spec through [TIP-1011](/protocol/tips/tip-1011):
 - `authorizeKey(...)` moves to a new ABI with `allowAnyCalls` and `CallScope[]` for call scoping
 - New functions: `setAllowedCalls(...)`, `removeAllowedCalls(...)`, `getAllowedCalls(...)`
 - `getRemainingLimit(...)` returns both `remaining` and `periodEnd`
-- Access-key-signed transactions can no longer create contracts in any configuration
+- Access-key-signed transactions can no longer create contracts in any configuration. Calling the `CREATE` opcode onchain still works 
 
 ## Concepts
 
