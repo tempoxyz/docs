@@ -214,6 +214,142 @@ tx = TempoTransaction.create(
 )
 ```
 
+## Account Keychain
+
+The `AccountKeychain` class provides typed helpers for Tempo's [Account Keychain precompile](/protocol/transactions/AccountKeychain), enabling access key management directly from Python.
+
+:::info
+Enhanced access key features — periodic spending limits and call scoping — require the [T3 network upgrade](/protocol/upgrades/t3).
+:::
+
+```python [keychain.py]
+from pytempo import (
+    TempoTransaction, Call,
+    KeyRestrictions, SignatureType, TokenLimit, CallScope,
+)
+from pytempo.contracts import AccountKeychain, ALPHA_USD
+from web3 import Web3
+
+w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
+
+# Authorize a new access key (secp256k1, no expiry):
+call = AccountKeychain.authorize_key(
+    key_id="<ACCESS_KEY_ADDRESS>",
+    signature_type=SignatureType.SECP256K1,
+    restrictions=KeyRestrictions(expiry=0),
+)
+tx = TempoTransaction.create(
+    chain_id=w3.eth.chain_id,
+    gas_limit=200_000,
+    max_fee_per_gas=w3.eth.gas_price * 2,
+    max_priority_fee_per_gas=w3.eth.gas_price,
+    nonce=w3.eth.get_transaction_count(account.address),
+    calls=(call,),
+)
+
+# Authorize with a spending limit:
+call = AccountKeychain.authorize_key(
+    key_id="<ACCESS_KEY_ADDRESS>",
+    signature_type=SignatureType.SECP256K1,
+    restrictions=KeyRestrictions(
+        expiry=0,
+        limits=[TokenLimit(token=ALPHA_USD, limit=1_000_000)],
+    ),
+)
+
+# Authorize with call scopes (restrict to specific contracts/functions):
+call = AccountKeychain.authorize_key(
+    key_id="<ACCESS_KEY_ADDRESS>",
+    signature_type=SignatureType.SECP256K1,
+    restrictions=KeyRestrictions(
+        expiry=0,
+        allowed_calls=[
+            CallScope.transfer(target=ALPHA_USD),
+            CallScope.approve(target=ALPHA_USD),
+        ],
+    ),
+)
+
+# Full example: 24h expiry + spending limit + call scope:
+import time
+expiry = int(time.time()) + 86400
+call = AccountKeychain.authorize_key(
+    key_id="<ACCESS_KEY_ADDRESS>",
+    signature_type=SignatureType.SECP256K1,
+    restrictions=KeyRestrictions(
+        expiry=expiry,
+        limits=[TokenLimit(token=ALPHA_USD, limit=1_000_000)],
+        allowed_calls=[CallScope.transfer(target=ALPHA_USD)],
+    ),
+)
+
+# Revoke an access key (permanent, cannot be re-authorized):
+call = AccountKeychain.revoke_key(key_id="<ACCESS_KEY_ADDRESS>")
+
+# Update spending limit for a key-token pair:
+call = AccountKeychain.update_spending_limit(
+    key_id="<ACCESS_KEY_ADDRESS>",
+    token=str(ALPHA_USD),
+    new_limit=2_000_000,
+)
+
+# Replace all call scopes for a key:
+call = AccountKeychain.set_allowed_calls(
+    key_id="<ACCESS_KEY_ADDRESS>",
+    scopes=[
+        CallScope.transfer(target=ALPHA_USD),
+        CallScope.unrestricted(target="<CONTRACT_ADDRESS>"),
+    ],
+)
+
+# Remove a target contract from allowed call list:
+call = AccountKeychain.remove_allowed_calls(
+    key_id="<ACCESS_KEY_ADDRESS>",
+    target="<TARGET_ADDRESS>",
+)
+
+# Query key info (read-only):
+key_info = AccountKeychain.get_key(
+    w3,
+    account_address="<ACCOUNT_ADDRESS>",
+    key_id="<ACCESS_KEY_ADDRESS>",
+)
+print(key_info)
+# {'signature_type': 0, 'key_id': '0x...', 'expiry': 1893456000, ...}
+
+# Query remaining spending limit:
+remaining = AccountKeychain.get_remaining_limit(
+    w3,
+    account_address="<ACCOUNT_ADDRESS>",
+    key_id="<ACCESS_KEY_ADDRESS>",
+    token_address=str(ALPHA_USD),
+)
+print(f"Remaining: {remaining}")
+```
+
+### Signing with an Access Key
+
+Use `sign_access_key` to sign a transaction as an access key holder:
+
+```python [access_key_sign.py]
+from pytempo import TempoTransaction, Call
+
+tx = TempoTransaction.create(
+    chain_id=w3.eth.chain_id,
+    gas_limit=100_000,
+    max_fee_per_gas=w3.eth.gas_price * 2,
+    max_priority_fee_per_gas=w3.eth.gas_price,
+    nonce=w3.eth.get_transaction_count(root_account_address),
+    calls=(Call.create(to="<CONTRACT_ADDRESS>"),),
+)
+
+signed_tx = tx.sign_access_key( # [!code hl]
+    access_key_private_key="<ACCESS_KEY_PRIVATE_KEY>", # [!code hl]
+    root_account="<ROOT_ACCOUNT_ADDRESS>", # [!code hl]
+) # [!code hl]
+tx_hash = w3.eth.send_raw_transaction(signed_tx.encode())
+```
+
 ## Next Steps
 
 After setting up the Python SDK, you can:

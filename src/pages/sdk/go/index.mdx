@@ -285,6 +285,128 @@ for _, resp := range responses {
 }
 ```
 
+## Account Keychain
+
+The `keychain` package provides typed helpers for Tempo's [Account Keychain precompile](/protocol/transactions/AccountKeychain), enabling access key management and signing directly from Go.
+
+:::info
+Enhanced access key features — periodic spending limits and call scoping — require the [T3 network upgrade](/protocol/upgrades/t3).
+:::
+
+```go [keychain_manage.go]
+package main
+
+import (
+	"context"
+	"math/big"
+	"time"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/tempoxyz/tempo-go/pkg/client"
+	"github.com/tempoxyz/tempo-go/pkg/keychain"
+	"github.com/tempoxyz/tempo-go/pkg/signer"
+	"github.com/tempoxyz/tempo-go/pkg/transaction"
+)
+
+func main() {
+	c := client.New("https://rpc.tempo.xyz")
+	s, _ := signer.NewSigner("0xYOUR_PRIVATE_KEY")
+
+	ctx := context.Background()
+	nonce, _ := c.GetTransactionCount(ctx, s.Address().Hex())
+
+	accessKeyAddr := common.HexToAddress("<ACCESS_KEY_ADDRESS>")
+
+	// Authorize a new access key (secp256k1, no expiry):
+	restrictions := keychain.NewKeyRestrictions(0)
+	call, _ := keychain.AuthorizeKey(accessKeyAddr, keychain.SignatureTypeSecp256k1, restrictions)
+
+	tx := transaction.NewBuilder(big.NewInt(4217)).
+		SetNonce(nonce).
+		SetGas(200000).
+		SetMaxFeePerGas(big.NewInt(20000000000)).
+		SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
+		AddCall(call.To, big.NewInt(0), call.Data).
+		Build()
+
+	// Authorize with a spending limit:
+	token := common.HexToAddress("<TOKEN_ADDRESS>")
+	restrictions = keychain.NewKeyRestrictions(0).
+		WithLimits([]keychain.TokenLimit{{Token: token, Amount: big.NewInt(1_000_000)}})
+	call, _ = keychain.AuthorizeKey(accessKeyAddr, keychain.SignatureTypeSecp256k1, restrictions)
+
+	// Authorize with call scopes (restrict to specific contracts/functions):
+	scope := keychain.NewCallScopeBuilder(token).
+		Transfer(nil).
+		Approve(nil).
+		Build()
+	restrictions = keychain.NewKeyRestrictions(0).
+		WithAllowedCalls([]keychain.CallScope{scope})
+	call, _ = keychain.AuthorizeKey(accessKeyAddr, keychain.SignatureTypeSecp256k1, restrictions)
+
+	// Full example: 24h expiry + spending limit + call scope:
+	expiry := uint64(time.Now().Add(24 * time.Hour).Unix())
+	restrictions = keychain.NewKeyRestrictions(expiry).
+		WithLimits([]keychain.TokenLimit{{Token: token, Amount: big.NewInt(1_000_000)}}).
+		WithAllowedCalls([]keychain.CallScope{
+			keychain.NewCallScopeBuilder(token).Transfer(nil).Build(),
+		})
+	call, _ = keychain.AuthorizeKey(accessKeyAddr, keychain.SignatureTypeSecp256k1, restrictions)
+
+	// Revoke an access key (permanent, cannot be re-authorized):
+	call, _ = keychain.RevokeKey(accessKeyAddr)
+
+	// Update spending limit for a key-token pair:
+	call, _ = keychain.UpdateSpendingLimit(accessKeyAddr, token, big.NewInt(2_000_000))
+
+	// Replace all call scopes for a key:
+	call, _ = keychain.SetAllowedCalls(accessKeyAddr, []keychain.CallScope{
+		keychain.NewCallScopeBuilder(token).Transfer(nil).Build(),
+	})
+
+	// Remove a target contract from allowed call list:
+	call, _ = keychain.RemoveAllowedCalls(accessKeyAddr, token)
+
+	_ = ctx
+	_ = tx
+	_ = call
+}
+```
+
+### Signing with an Access Key
+
+Use `keychain.SignWithAccessKey` to sign a transaction as an access key holder:
+
+```go [access_key_sign.go]
+accessKeySigner, _ := signer.NewSigner("<ACCESS_KEY_PRIVATE_KEY>")
+rootAccount := common.HexToAddress("<ROOT_ACCOUNT_ADDRESS>")
+
+tx := transaction.NewBuilder(big.NewInt(4217)).
+	SetNonce(nonce).
+	SetGas(100000).
+	SetMaxFeePerGas(big.NewInt(20000000000)).
+	SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
+	AddCall(recipient, big.NewInt(0), data).
+	Build()
+
+keychain.SignWithAccessKey(tx, accessKeySigner, rootAccount) // [!code hl]
+serialized, _ := transaction.Serialize(tx, nil)
+hash, _ := c.SendRawTransaction(ctx, serialized)
+```
+
+### Query Remaining Spending Limit
+
+```go [query_limit.go]
+calldata := keychain.EncodeGetRemainingLimitCalldata(
+	common.HexToAddress("<ACCOUNT_ADDRESS>"),
+	common.HexToAddress("<ACCESS_KEY_ADDRESS>"),
+	common.HexToAddress("<TOKEN_ADDRESS>"),
+)
+result, _ := c.Call(ctx, keychain.GetKeychainAddress().Hex(), calldata)
+remaining := keychain.ParseRemainingLimitResult(result)
+fmt.Printf("Remaining: %s\n", remaining.String())
+```
+
 ## Packages
 
 | Package | Description |
@@ -292,6 +414,7 @@ for _, resp := range responses {
 | `transaction` | TempoTransaction encoding, signing, and validation |
 | `client` | RPC client for interacting with Tempo nodes |
 | `signer` | Key management and signature generation |
+| `keychain` | Account Keychain precompile: access key management and signing |
 
 ## Next Steps
 
