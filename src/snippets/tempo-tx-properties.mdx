@@ -884,6 +884,7 @@ transactions thereafter can be signed by the access key.
       ],
     })
 
+    // `keyAuthorization` provisions the access key and uses it in this same transaction.
     const receipt = await client.sendTransactionSync({
       account: accessKey, // [!code hl]
       data: '0xa9059cbb000000000000000000000000cafebabecafebabecafebabecafebabecafebabe00000000000000000000000000000000000000000000000000000000000f4240',
@@ -1018,6 +1019,7 @@ transactions thereafter can be signed by the access key.
         let filled = provider.fill(tx).await?;
         let tempo_tx = filled.build_aa()?;
 
+        // Keychain signatures are domain-separated by the root account address.
         let inner_hash = // [!code hl]
             KeychainSignature::signing_hash(tempo_tx.signature_hash(), root.address()); // [!code hl]
         let inner_sig = access_key.sign_hash_sync(&inner_hash)?; // [!code hl]
@@ -1073,6 +1075,7 @@ transactions thereafter can be signed by the access key.
         ), # [!code hl]
     ) # [!code hl]
 
+    # Root key authorizes first, then the access key signs later transactions.
     auth_tx = TempoTransaction.create(
         chain_id=w3.eth.chain_id,
         gas_limit=300_000,
@@ -1163,9 +1166,10 @@ transactions thereafter can be signed by the access key.
 		restrictions, // [!code hl]
 	) // [!code hl]
 
+	// Go shows the explicit two-step flow: root key authorizes first, then the access key signs later transactions.
 	nonce, _ := c.GetTransactionCount(ctx, rootSgn.Address().Hex())
 	authTx := transaction.NewBuilder(chainID).
-    		SetNonce(nonce).
+		SetNonce(nonce).
 		SetGas(300_000).
 		SetMaxFeePerGas(gasPrice).
     		SetMaxPriorityFeePerGas(gasPrice).
