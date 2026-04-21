@@ -4,6 +4,10 @@ description: Technical specification for the Tempo transaction type (EIP-2718) w
 
 # Tempo Transaction
 
+:::info[T3 will change this spec]
+The [T3 network upgrade](/protocol/upgrades/t3) will update this specification. The sections below describe the currently active behavior. See [Upcoming changes](#upcoming-changes) for the upcoming deltas.
+:::
+
 ## Abstract
 
 This spec introduces native protocol support for the following features, using a new Tempo transaction type:
@@ -18,6 +22,18 @@ This spec introduces native protocol support for the following features, using a
 ## Motivation
 Current accounts are limited to secp256k1 signatures and sequential nonces, creating UX and scalability challenges.  
 Users cannot leverage modern authentication methods like passkeys, applications face throughput limitations due to sequential nonces. 
+
+
+## Upcoming changes
+
+T3 updates the Tempo Transaction spec through [TIP-1011](/protocol/tips/tip-1011) in the following ways:
+
+- `KeyAuthorization` expands with the [TIP-1011](/protocol/tips/tip-1011) fields `allowed_calls` and periodic `TokenLimit.period`, adding call scoping and recurring spending limits to access keys.
+- The signed post-T3 key-authorization payload remains `SignedKeyAuthorization { authorization, signature }`, but `authorization` now uses the expanded `KeyAuthorization` shape and new RLP encoding.
+- Low-level integrators that manually encode `key_authorization` must branch pre-T3 vs post-T3. The post-T3 digest and signed payload include `allowed_calls?` in addition to `expiry?` and `limits?`.
+- Access-key validation gains two new execution checks: call scopes must pass before execution begins, and access-key-signed transactions may no longer perform contract creation anywhere in the batch.
+- The Account Keychain precompile ABI changes in lockstep with T3 to support periodic limits, call-scoped authorizations, and new scope-management functions.
+- Intrinsic gas for `key_authorization` changes to account for periodic-limit state and call-scope storage. See [TIP-1011](/protocol/tips/tip-1011#intrinsic-gas-for-key-authorization) for the post-T3 slot-counting rules.
 
 
 ## Specification
@@ -688,16 +704,17 @@ The protocol tracks and enforces spending limits for TIP20 token transfers:
    ```typescript
    // Define key parameters
    const keyAuth = {
+     chain_id: 1,
      key_type: SignatureType.P256,      // 1
      key_id: keyId,                     // address derived from public key
      expiry: timestamp + 86400,         // 24 hours from now (or 0 for never)
      limits: [
-       { token: USDG_ADDRESS, amount: 1000000000 }, // 1000 USDG (6 decimals)
-       { token: DAI_ADDRESS, amount: 500000000000000000000 }  // 500 DAI (18 decimals)
+       { token: USDG_ADDRESS, limit: 1000000000 }, // 1000 USDG (6 decimals)
+       { token: DAI_ADDRESS, limit: 500000000000000000000 }  // 500 DAI (18 decimals)
      ]
    };
 
-   // Compute digest: keccak256(rlp([key_type, key_id, expiry, limits]))
+   // Compute digest: keccak256(rlp([chain_id, key_type, key_id, expiry, limits]))
    const authDigest = computeAuthorizationDigest(keyAuth);
    ```
 
@@ -718,10 +735,7 @@ The protocol tracks and enforces spending limits for TIP20 token transfers:
      max_fee_per_gas: 1000000000,
      max_priority_fee_per_gas: 1000000000,
      key_authorization: {
-       key_type: keyAuth.key_type,
-       expiry: keyAuth.expiry,
-       limits: keyAuth.limits,
-       key_id: keyAuth.key_id,
+       authorization: keyAuth,
        signature: rootSignature  // Root Key's signature on authDigest
      },
      // ... other fields

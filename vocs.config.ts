@@ -135,6 +135,10 @@ export default defineConfig({
                 link: '/guide/payments/transfer-memos',
               },
               {
+                text: 'Use virtual addresses',
+                link: '/guide/payments/virtual-addresses',
+              },
+              {
                 text: 'Pay fees in any stablecoin',
                 link: '/guide/payments/pay-fees-in-any-stablecoin',
               },
@@ -459,6 +463,10 @@ export default defineConfig({
                 link: '/protocol/tip20/spec',
               },
               {
+                text: 'Virtual addresses',
+                link: '/protocol/tip20/virtual-addresses',
+              },
+              {
                 text: 'Reference Implementation',
                 link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/TIP20.sol',
               },
@@ -674,7 +682,7 @@ export default defineConfig({
                 link: '/protocol/upgrades/t3',
               },
               {
-                text: 'T2',
+                text: 'T2 (Active)',
                 link: '/protocol/upgrades/t2',
               },
             ],
@@ -1324,6 +1332,11 @@ export default defineConfig({
     {
       source: '/protocol/exchange/pathUSD',
       destination: '/protocol/exchange/quote-tokens#pathusd',
+      status: 301,
+    },
+    {
+      source: '/protocol/zones/overview',
+      destination: '/protocol/zones',
       status: 301,
     },
   ],
