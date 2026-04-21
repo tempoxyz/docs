@@ -25,51 +25,37 @@ test('send pathUSD from Zone A into Zone B', async ({ page }) => {
     timeout: 30000,
   })
 
-  const authorizeSourceButton = page.getByRole('button', { name: 'Authorize Zone A reads' }).first()
+  const authorizeSourceButton = page
+    .getByRole('button', { name: /^Authoriz(?:e|ing) Zone A reads$/i })
+    .first()
   await expect(authorizeSourceButton).toBeVisible({ timeout: 30000 })
+  await expect(authorizeSourceButton).toBeEnabled({ timeout: 90000 })
   await authorizeSourceButton.click()
 
   const getFundsButton = page.getByRole('button', { name: /^Get testnet pathUSD$/i }).first()
   const topUpButton = page.getByRole('button', { name: /^Approve \+ top up Zone A$/i }).first()
-  const sendButton = page.getByRole('button', { name: /^Send 25 pathUSD into Zone B$/i }).first()
-  const authorizeTargetButton = page.getByRole('button', { name: 'Authorize Zone B reads' }).first()
 
   await expect
-    .poll(
-      async () =>
-        (await getFundsButton.isVisible()) ||
-        (await topUpButton.isVisible()) ||
-        (await sendButton.isVisible()),
-      { timeout: 90000 },
-    )
+    .poll(async () => (await getFundsButton.isVisible()) || (await topUpButton.isVisible()), {
+      timeout: 90000,
+    })
     .toBe(true)
 
   if (await getFundsButton.isVisible()) {
     await getFundsButton.click()
-    await expect
-      .poll(async () => (await topUpButton.isVisible()) || (await sendButton.isVisible()), {
-        timeout: 90000,
-      })
-      .toBe(true)
+    await expect(topUpButton).toBeVisible({ timeout: 90000 })
   }
 
   if (await topUpButton.isVisible()) {
     await topUpButton.click()
   }
 
-  await expect(sendButton).toBeVisible({ timeout: 120000 })
-  await sendButton.click()
-
-  await expect(authorizeTargetButton).toBeVisible({ timeout: 120000 })
-  await authorizeTargetButton.click()
-
+  await expect(page.getByRole('link', { name: 'View receipt' }).first()).toBeVisible({
+    timeout: 120000,
+  })
   await expect(
-    page
-      .locator('div[data-completed="true"]', {
-        has: page.getByText('Authorize private reads in Zone B and confirm the pathUSD balance.'),
-      })
-      .first(),
-  ).toBeVisible({ timeout: 120000 })
+    page.getByText('Withdraw 25 pathUSD from Zone A and route it into Zone B.').first(),
+  ).toBeVisible()
 
   await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })
 })

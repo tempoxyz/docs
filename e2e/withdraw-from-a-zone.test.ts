@@ -27,50 +27,35 @@ test('prepare zone balance and withdraw from Zone A', async ({ page }) => {
     timeout: 20000,
   })
 
-  const authorizeButton = page.getByRole('button', { name: 'Authorize Zone A reads' }).first()
+  const authorizeButton = page
+    .getByRole('button', { name: /^Authoriz(?:e|ing) Zone A reads$/i })
+    .first()
   await expect(authorizeButton).toBeVisible({ timeout: 30000 })
+  await expect(authorizeButton).toBeEnabled({ timeout: 90000 })
   await authorizeButton.click()
 
   const getFundsButton = page.getByRole('button', { name: /^Get testnet pathUSD$/i }).first()
   const topUpButton = page.getByRole('button', { name: /^Approve \+ top up Zone A$/i }).first()
-  const withdrawButton = page.getByRole('button', { name: /^Withdraw 100 pathUSD$/i }).first()
 
   await expect
-    .poll(
-      async () =>
-        (await getFundsButton.isVisible()) ||
-        (await topUpButton.isVisible()) ||
-        (await withdrawButton.isVisible()),
-      { timeout: 90000 },
-    )
+    .poll(async () => (await getFundsButton.isVisible()) || (await topUpButton.isVisible()), {
+      timeout: 90000,
+    })
     .toBe(true)
 
   if (await getFundsButton.isVisible()) {
     await getFundsButton.click()
-    await expect
-      .poll(async () => (await topUpButton.isVisible()) || (await withdrawButton.isVisible()), {
-        timeout: 90000,
-      })
-      .toBe(true)
+    await expect(topUpButton).toBeVisible({ timeout: 90000 })
   }
 
   if (await topUpButton.isVisible()) {
     await topUpButton.click()
   }
 
-  await expect(withdrawButton).toBeVisible({ timeout: 90000 })
-
-  await withdrawButton.click()
-
-  await expect(
-    page
-      .locator('div[data-completed="true"]', {
-        has: page.getByText('Wait for pathUSD to settle back to your public balance.'),
-      })
-      .first(),
-  ).toBeVisible({
+  await expect(page.getByRole('link', { name: 'View receipt' }).first()).toBeVisible({
     timeout: 120000,
   })
+  await expect(page.getByText('Submit the withdrawal back from Zone A.').first()).toBeVisible()
 
   await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })
 })

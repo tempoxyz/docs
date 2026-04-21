@@ -12,13 +12,13 @@ const baseUrl = (() => {
 })()
 
 export default defineConfig({
-  banner: {
-    dismissable: false,
-    backgroundColor: '#5B4CDB',
-    content: 'Tempo Mainnet is live. [Read our announcement.](https://tempo.xyz/blog/mainnet) →',
-    height: '40px',
-    textColor: 'white',
-  },
+  // banner: {
+  //   dismissable: false,
+  //   backgroundColor: '#5B4CDB',
+  //   content: 'Your announcement here. [Learn more.](https://tempo.xyz) →',
+  //   height: '40px',
+  //   textColor: 'white',
+  // },
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
   // TODO: Set back to true once tempoxyz/tempo#tip-1011 dead link is fixed
   checkDeadlinks: 'warn',
@@ -1324,6 +1324,11 @@ export default defineConfig({
     {
       source: '/protocol/exchange/pathUSD',
       destination: '/protocol/exchange/quote-tokens#pathusd',
+      status: 301,
+    },
+    {
+      source: '/protocol/zones/overview',
+      destination: '/protocol/zones',
       status: 301,
     },
   ],
