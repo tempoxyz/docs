@@ -100,14 +100,37 @@ This gives you the accounting benefits of per-customer addresses without managin
 
 ## What this changes for wallets, explorers, and indexers
 
-A virtual address is a forwarding alias, not a balance-holding account. Each deposit emits two `Transfer` events in one transaction:
+A virtual address is a forwarding alias, not a balance-holding account. Treat it as such in any UI or tooling: do not show it as holding a balance. Wallets, block explorers, and operational tooling that truncate addresses should display enough of the address to distinguish both the `masterId` and the `userTag`; ideally show the full address.
 
-1. `Transfer(sender, virtualAddress, amount)` — attribution hop
-2. `Transfer(virtualAddress, masterAddress, amount)` — forwarding hop
+For indexers, the event sequences vary by operation. The basic transfer pattern is shown above. Memo and mint paths produce additional events in the same forwarding pattern:
 
-Collapse these into one logical deposit. Treating them independently will double-count transfers and show misleading balances. Use the `userTag` (trailing 6 bytes of the virtual address) for deposit attribution, not `balanceOf(virtualAddress)` which is always zero.
+**transferWithMemo / transferFromWithMemo:**
+```
+Transfer(sender, virtualAddress, amount)
+TransferWithMemo(sender, virtualAddress, amount, memo)
+Transfer(virtualAddress, masterWallet, amount)
+```
 
-Wallets and explorers should display enough of the address to distinguish the `masterId` and `userTag`.
+**mint:**
+```
+Transfer(0x0, virtualAddress, amount)
+Mint(virtualAddress, amount)
+Transfer(virtualAddress, masterWallet, amount)
+```
+
+**mintWithMemo:**
+```
+Transfer(0x0, virtualAddress, amount)
+TransferWithMemo(0x0, virtualAddress, amount, memo)
+Mint(virtualAddress, amount)
+Transfer(virtualAddress, masterWallet, amount)
+```
+
+In all cases, treat the full sequence as one logical deposit to the master wallet. If you surface each `Transfer` log independently, forwarded deposits will appear twice and the effective recipient will be wrong.
+
+For deposit attribution, extract the `userTag` (trailing 6 bytes) directly from the virtual address to map the deposit to the right customer record without additional onchain queries.
+
+If the sender and registered master wallet are the same address, two `Transfer` events still emit but the net balance change is zero. Account for this when counting deposits or computing balances.
 
 ## What this does not do
 
