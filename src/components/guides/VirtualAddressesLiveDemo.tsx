@@ -1,7 +1,7 @@
 'use client'
 
 import { useMutation } from '@tanstack/react-query'
-import { VirtualAddress } from 'ox/tempo'
+import { VirtualAddress, VirtualMaster } from 'ox/tempo'
 import * as React from 'react'
 import {
   type Address,
@@ -21,7 +21,7 @@ import { Abis, Actions, tempoActions, withFeePayer } from 'viem/tempo'
 import { useClient, useConnect, useConnection, useDisconnect, useWriteContract } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useWebAuthnConnector } from '../../wagmi.config'
-import { Button, Logout, Step, StringFormatter } from './Demo'
+import { Button, ExplorerAccountLink, ExplorerLink, Logout, Step, StringFormatter } from './Demo'
 import { alphaUsd, pathUsd } from './tokens'
 
 const TEST_MNEMONIC = 'test test test test test test test test test test test junk'
@@ -53,35 +53,8 @@ type MinerState =
       salt: string
       masterId: string
       registrationHash: string
-      attempts: number
     }
   | { status: 'error'; message: string }
-
-type MinerWorkerCommand =
-  | {
-      type: 'start'
-      batchSize: number
-      masterAddress: Address
-      startHex: Hex
-    }
-  | { type: 'stop' }
-
-type MinerWorkerMessage =
-  | { type: 'ready' }
-  | {
-      type: 'progress'
-      attempts: number
-      hashesPerSecond: number
-    }
-  | {
-      type: 'found'
-      attempts: number
-      saltHex: string
-      masterIdHex: string
-      registrationHashHex: string
-    }
-  | { type: 'stopped'; attempts: number }
-  | { type: 'error'; message: string }
 
 type SendResult = {
   after: {
@@ -112,6 +85,13 @@ function randomHex(size: number): Hex {
   const bytes = new Uint8Array(size)
   crypto.getRandomValues(bytes)
   return `0x${Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')}` as Hex
+}
+
+function isAbortError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    (error.name === 'AbortError' || error.message.toLowerCase().includes('aborted'))
+  )
 }
 
 function PasskeyLogin() {
@@ -164,6 +144,7 @@ export function VirtualAddressesLiveDemo() {
   const isModerato = !isLocalnet && !isDevnet
   const isPublicTestnet = isDevnet || isModerato
   const isSupported = isLocalnet || isPublicTestnet
+  const hasExplorerLink = isModerato || Boolean(import.meta.env.VITE_EXPLORER_OVERRIDE)
   const { address } = useConnection()
   const client = useClient()
   const { writeContractAsync } = useWriteContract()
@@ -172,7 +153,7 @@ export function VirtualAddressesLiveDemo() {
   const [registration, setRegistration] = React.useState<RegistrationResult | null>(null)
   const [sendResult, setSendResult] = React.useState<SendResult | null>(null)
 
-  const minerRef = React.useRef<Worker | null>(null)
+  const abortControllerRef = React.useRef<AbortController | null>(null)
   const previousAddressRef = React.useRef<Address | undefined>(undefined)
 
   const demoAdmin = React.useMemo(() => mnemonicToAccount(TEST_MNEMONIC), [])
@@ -226,10 +207,8 @@ export function VirtualAddressesLiveDemo() {
   })
 
   const stopMiner = React.useCallback(() => {
-    if (!minerRef.current) return
-    minerRef.current.postMessage({ type: 'stop' } satisfies MinerWorkerCommand)
-    minerRef.current.terminate()
-    minerRef.current = null
+    abortControllerRef.current?.abort()
+    abortControllerRef.current = null
   }, [])
 
   React.useEffect(() => {
@@ -250,78 +229,50 @@ export function VirtualAddressesLiveDemo() {
   )
 
   const mineSalt = React.useCallback(
-    (masterAddress: Address) => {
-      return new Promise<Pick<RegistrationResult, 'masterId' | 'registrationHash' | 'salt'>>(
-        (resolve, reject) => {
-          stopMiner()
-          setMinerState({ status: 'mining', totalAttempts: 0, hashesPerSecond: 0 })
+    async (masterAddress: Address) => {
+      stopMiner()
+      setMinerState({ status: 'mining', totalAttempts: 0, hashesPerSecond: 0 })
 
-          const worker = new Worker(
-            new URL('./virtual-addresses/miner.worker.ts', import.meta.url),
-            {
-              type: 'module',
-            },
-          )
-          minerRef.current = worker
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
 
-          worker.onmessage = (event: MessageEvent<MinerWorkerMessage>) => {
-            const message = event.data
+      try {
+        const result = await VirtualMaster.mineSaltAsync({
+          address: masterAddress,
+          onProgress: (progress) => {
+            setMinerState({
+              status: 'mining',
+              totalAttempts: progress.attempts,
+              hashesPerSecond: Math.round(progress.rate),
+            })
+          },
+          signal: abortController.signal,
+          start: randomHex(32),
+        })
 
-            switch (message.type) {
-              case 'ready': {
-                break
-              }
-              case 'progress': {
-                setMinerState({
-                  status: 'mining',
-                  totalAttempts: message.attempts,
-                  hashesPerSecond: message.hashesPerSecond,
-                })
-                break
-              }
-              case 'found': {
-                setMinerState({
-                  status: 'found',
-                  salt: message.saltHex,
-                  masterId: message.masterIdHex,
-                  registrationHash: message.registrationHashHex,
-                  attempts: message.attempts,
-                })
-                stopMiner()
-                resolve({
-                  masterId: message.masterIdHex as Hex,
-                  registrationHash: message.registrationHashHex as Hex,
-                  salt: message.saltHex as Hex,
-                })
-                break
-              }
-              case 'error': {
-                setMinerState({ status: 'error', message: message.message })
-                stopMiner()
-                reject(new Error(message.message))
-                break
-              }
-              case 'stopped': {
-                break
-              }
-            }
-          }
+        if (!result) throw new Error('Unable to find a valid TIP-1022 salt.')
 
-          worker.onerror = (error) => {
-            const message = error.message || 'Virtual master mining failed.'
-            setMinerState({ status: 'error', message })
-            stopMiner()
-            reject(new Error(message))
-          }
+        setMinerState({
+          status: 'found',
+          salt: result.salt,
+          masterId: result.masterId,
+          registrationHash: result.registrationHash,
+        })
 
-          worker.postMessage({
-            type: 'start',
-            batchSize: 100_000,
-            masterAddress,
-            startHex: randomHex(32),
-          } satisfies MinerWorkerCommand)
-        },
-      )
+        return {
+          masterId: result.masterId,
+          registrationHash: result.registrationHash,
+          salt: result.salt,
+        }
+      } catch (error) {
+        if (isAbortError(error)) throw error
+
+        const message = error instanceof Error ? error.message : 'Virtual master mining failed.'
+        setMinerState({ status: 'error', message })
+        throw new Error(message)
+      } finally {
+        if (abortControllerRef.current === abortController) abortControllerRef.current = null
+      }
     },
     [stopMiner],
   )
@@ -577,8 +528,9 @@ export function VirtualAddressesLiveDemo() {
               <span className="text-primary">Connected passkey account</span>
               <code className="break-all font-mono text-[12px] text-primary">{address}</code>
               <span>
-                The demo auto-funds the passkey account, uses `ox` to grind the registration salt in
-                a background worker, and sends the deposit from a separate demo address.
+                The demo auto-funds the passkey account, uses `VirtualMaster.mineSaltAsync` to mine
+                a valid salt with parallel workers when available, and sends the deposit from a
+                separate demo address.
               </span>
             </div>
           </div>
@@ -601,7 +553,7 @@ export function VirtualAddressesLiveDemo() {
           ) : !address ? (
             <div className="mt-2 text-[13px] text-gray9 -tracking-[1%]">
               Sign in first, then the demo will fund the account if needed, mine the required salt
-              with `VirtualMaster.mineSalt`, and prompt the passkey for registration.
+              with `VirtualMaster.mineSaltAsync`, and prompt the passkey for registration.
             </div>
           ) : registration ? (
             <div className="mt-2 grid gap-2 text-[13px] text-gray9 -tracking-[1%]">
@@ -643,8 +595,8 @@ export function VirtualAddressesLiveDemo() {
                 </code>
               </div>
               <div className="col-span-full">
-                The browser is searching for the 32-bit proof-of-work required by TIP-1022. This
-                usually takes a few minutes.
+                `VirtualMaster.mineSaltAsync` is searching for the 32-bit proof-of-work required by
+                TIP-1022 using parallel workers when the browser supports them.
               </div>
             </div>
           ) : minerState.status === 'found' ? (
@@ -698,26 +650,38 @@ export function VirtualAddressesLiveDemo() {
             <div className="mt-2 space-y-3 text-[13px] text-gray9 -tracking-[1%]">
               <div>
                 <span className="text-primary">demo sender:</span>{' '}
-                <code className="font-mono text-[12px] text-primary">{demoSender.address}</code>
+                <span className="inline-flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span className="font-mono text-[12px] text-primary">{demoSender.address}</span>
+                  {hasExplorerLink && <ExplorerAccountLink address={demoSender.address} inline />}
+                </span>
               </div>
               <div>
                 <span className="text-primary">virtual address:</span>{' '}
-                <code className="break-all font-mono text-[12px] text-primary">
-                  {registration.virtualAddress}
-                </code>
+                <span className="inline-flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span className="break-all font-mono text-[12px] text-primary">
+                    {registration.virtualAddress}
+                  </span>
+                  {hasExplorerLink && <ExplorerAccountLink address={registration.virtualAddress} inline />}
+                </span>
               </div>
               <div>
                 <span className="text-primary">registered wallet:</span>{' '}
-                <code className="break-all font-mono text-[12px] text-primary">{address}</code>
+                <span className="inline-flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span className="break-all font-mono text-[12px] text-primary">{address}</span>
+                  {hasExplorerLink && <ExplorerAccountLink address={address} inline />}
+                </span>
               </div>
 
               {sendResult ? (
                 <>
                   <div>
                     <span className="text-primary">transfer tx:</span>{' '}
-                    <code className="break-all font-mono text-[12px] text-primary">
-                      {sendResult.txHash}
-                    </code>
+                    <span className="inline-flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <span className="break-all font-mono text-[12px] text-primary">
+                        {sendResult.txHash}
+                      </span>
+                      {hasExplorerLink && <ExplorerLink hash={sendResult.txHash} inline />}
+                    </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 max-sm:grid-cols-1">
                     <div>
@@ -734,7 +698,14 @@ export function VirtualAddressesLiveDemo() {
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <span className="text-primary">two-hop Transfer events</span>
+                    <span className="text-primary">Transfer events in this receipt</span>
+                    <div>
+                      Treat the <span className="font-mono text-primary">sender → virtual</span>{' '}
+                      and <span className="font-mono text-primary">virtual → master</span> pair as
+                      one
+                      logical deposit to the registered wallet. Other transfer logs in the receipt,
+                      like fees, are separate.
+                    </div>
                     {sendResult.events.map((event, index) => (
                       <div key={`${event.from}-${event.to}-${index}`}>
                         <code className="break-all font-mono text-[12px] text-primary">
