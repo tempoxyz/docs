@@ -106,7 +106,7 @@ export function ExplorerAccountLink({
   inline = false,
 }: { address: string; inline?: boolean }) {
   const { trackExternalLinkClick } = usePostHogTracking()
-  const url = `${getExplorerHost()}/account/${address}`
+  const url = `${getExplorerHost()}/address/${address}`
 
   return (
     <div className={inline ? 'inline-flex' : 'mt-1'}>
