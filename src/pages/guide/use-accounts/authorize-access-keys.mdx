@@ -1,0 +1,841 @@
+---
+title: Authorize access keys
+description: Authorize access keys on Tempo. Use a secondary signing key to send transactions without repeated passkey prompts, with spending limits and expiry for security.
+interactive: true
+---
+
+import * as Demo from '../../../components/guides/Demo.tsx'
+import { Connect } from '../../../components/guides/steps/auth/Connect.tsx'
+import { AddFunds } from '../../../components/guides/steps/payments/AddFunds.tsx'
+import { SendPayment } from '../../../components/guides/steps/payments/SendPayment.tsx'
+import { Cards, Card } from 'vocs'
+import { Tabs, Tab } from 'vocs'
+
+# Authorize access keys
+
+Send stablecoin payments using an access key: a secondary signing key that lets you transact without repeated passkey prompts. Access keys can be scoped with spending limits and expiry for security.
+
+## Demo
+
+By the end of this guide you will be able to send payments on Tempo using an access key. Notice that no passkey prompt appears when sending a payment.
+
+<Demo.Container name="Send a Payment" footerVariant="source" src="tempoxyz/accounts/tree/main/examples/with-access-key">
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <SendPayment stepNumber={3} last />
+</Demo.Container>
+
+## Steps
+
+::::steps
+
+### Set up Wagmi & integrate accounts
+
+Ensure that you have set up your project with Wagmi and integrated accounts by following either of the guides:
+
+- [Embed Tempo Wallet](/guide/use-accounts/embed-tempo-wallet)
+- [Embed domain-bound Passkeys](/guide/use-accounts/embed-passkeys)
+
+### Authorize an access key
+
+Configure your connector to authorize an access key when the user connects. The access key will be used to sign subsequent transactions without passkey prompts.
+
+<Tabs stateKey="connector">
+  <Tab title="Tempo Wallet">
+
+    ```ts twoslash [wagmi.config.ts]
+    // @noErrors
+    import { createConfig, http } from 'wagmi'
+    import { tempo } from 'wagmi/chains'
+    import { parseUnits } from 'viem'
+    import { Expiry } from 'accounts'
+    import { tempoWallet } from 'accounts/wagmi'
+
+    export const config = createConfig({
+      chains: [tempo],
+      connectors: [
+        tempoWallet({
+          authorizeAccessKey: () => ({ // [!code hl]
+            // When the key expires // [!code hl]
+            expiry: Expiry.days(7), // [!code hl]
+            // Max spend per token // [!code hl]
+            limits: [{ // [!code hl]
+              token: '0x20c0000000000000000000000000000000000001', // [!code hl]
+              limit: parseUnits('100', 6), // 100 AlphaUSD // [!code hl]
+            }], // [!code hl]
+            // Tokens & functions the key can call // [!code hl]
+            scopes: [{ // [!code hl]
+              target: '0x20c0000000000000000000000000000000000001', // AlphaUSD // [!code hl]
+              selector: 'transfer(address,uint256)', // [!code hl]
+            }], // [!code hl]
+          }), // [!code hl]
+        }),
+      ],
+      transports: { [tempo.id]: http() },
+    })
+    ```
+
+  </Tab>
+
+  <Tab title="Domain-bound WebAuthn">
+
+    ```ts twoslash [wagmi.config.ts]
+    // @noErrors
+    import { createConfig, http } from 'wagmi'
+    import { tempo } from 'wagmi/chains'
+    import { parseUnits } from 'viem'
+    import { Expiry } from 'accounts'
+    import { webAuthn } from 'accounts/wagmi'
+
+    export const config = createConfig({
+      chains: [tempo],
+      connectors: [
+        webAuthn({
+          authUrl: '/auth',
+          authorizeAccessKey: () => ({ // [!code hl]
+            // When the key expires // [!code hl]
+            expiry: Expiry.days(7), // [!code hl]
+            // Max spend per token // [!code hl]
+            limits: [{ // [!code hl]
+              token: '0x20c0000000000000000000000000000000000001', // [!code hl]
+              limit: parseUnits('100', 6), // 100 AlphaUSD // [!code hl]
+            }], // [!code hl]
+            // Tokens & functions the key can call // [!code hl]
+            scopes: [{ // [!code hl]
+              target: '0x20c0000000000000000000000000000000000001', // AlphaUSD // [!code hl]
+              selector: 'transfer(address,uint256)', // [!code hl]
+            }], // [!code hl]
+          }), // [!code hl]
+        }),
+      ],
+      transports: { [tempo.id]: http() },
+    })
+    ```
+
+  </Tab>
+</Tabs>
+
+When the user connects, the connector will authorize an access key with:
+- **7-day expiry**: the key automatically becomes invalid after 7 days
+- **Scopes**: the key can only call `transfer` on the AlphaUSD token
+- **100 AlphaUSD spending limit**: the key can spend up to 100 AlphaUSD
+
+### Add testnet funds
+
+Before you can send a payment, you need to fund your account with `AlphaUSD` (`0x20c000…0001`).
+
+```tsx twoslash [AddFunds.tsx]
+// @noErrors
+import { Hooks } from 'wagmi/tempo'
+import { useConnection } from 'wagmi'
+
+function AddFunds() {
+  const { address } = useConnection()
+  const { mutate, isPending } = Hooks.faucet.useFundSync()
+
+  return (
+    <button onClick={() => mutate({ account: address })} disabled={isPending}>
+      Add Funds
+    </button>
+  )
+}
+```
+
+:::warning
+The `addFunds` Hook only works on testnets as a convenience feature to get
+started quickly. For production, you will need to onramp & fund your account manually.
+:::
+
+### Send a payment
+
+Now send a payment using `useTransferSync`. Because you authorized an access key in step 2, this transaction will be signed automatically: no passkey prompt.
+
+```tsx twoslash [SendPayment.tsx]
+// @noErrors
+import { Hooks } from 'wagmi/tempo'
+import { parseUnits } from 'viem'
+
+function SendPayment() {
+  const transfer = Hooks.token.useTransferSync() // [!code hl]
+
+  return (
+    <form onSubmit={
+      (event) => {
+        event.preventDefault()
+        const formData = new FormData(event.target as HTMLFormElement)
+        const recipient = formData.get('recipient') as `0x${string}`
+
+        transfer.mutate({ // [!code hl]
+          amount: parseUnits('100', 6), // [!code hl]
+          to: recipient, // [!code hl]
+          token: '0x20c0000000000000000000000000000000000001', // [!code hl]
+        }) // [!code hl]
+      }
+    }>
+      <label htmlFor="recipient">Recipient address</label>
+      <input type="text" name="recipient" placeholder="0x..." />
+      <button type="submit" disabled={transfer.isPending}>
+        Send Payment
+      </button>
+    </form>
+  )
+}
+```
+
+### Display receipt
+
+Display the transaction receipt on success.
+
+```tsx twoslash [SendPayment.tsx]
+// @noErrors
+import { Hooks } from 'wagmi/tempo'
+import { parseUnits } from 'viem'
+
+function SendPayment() {
+  const sendPayment = Hooks.token.useTransferSync()
+
+  return (
+    <>
+      {/* ... your payment form ... */}
+      {sendPayment.data && ( // [!code hl]
+        <a href={`https://explore.tempo.xyz/tx/${sendPayment.data.receipt.transactionHash}`}> {/* [!code hl] */}
+          View receipt {/* [!code hl] */}
+        </a> {/* [!code hl] */}
+      )} {/* [!code hl] */}
+    </>
+  )
+}
+```
+
+### Next steps
+
+Now that you can send payments with access keys:
+- **[Revoke access keys](/guide/access-keys/revoke)** when they are no longer needed
+- Learn about the [Account Keychain specification](/protocol/transactions/AccountKeychain)
+- Send a payment [with a specific fee token](/guide/payments/pay-fees-in-any-stablecoin)
+
+::::
+
+## SDKs
+
+### Basic transfer with access key
+
+Send a payment using an access key across different SDKs:
+
+<Tabs stateKey="library">
+  <Tab title="Viem">
+
+    :::code-group
+
+    ```ts twoslash [example.ts]
+    // @noErrors
+    import { parseUnits } from 'viem'
+    import { generatePrivateKey } from 'viem/accounts'
+    import { Account, Actions, Expiry } from 'viem/tempo'
+    import { client } from './viem.config'
+
+    // 1. Create an access key. // [!code hl]
+    const accessKey = Account.fromP256(generatePrivateKey(), { // [!code hl]
+      access: client.account, // [!code hl]
+    }) // [!code hl]
+
+    // 2. Sign a key authorization. // [!code hl]
+    const keyAuthorization = await Actions.accessKey.signAuthorization(client, { // [!code hl]
+      accessKey, // [!code hl]
+      expiry: Expiry.days(7), // [!code hl]
+      limits: [{ // [!code hl]
+        token: '0x20c0000000000000000000000000000000000001', // [!code hl]
+        limit: parseUnits('100', 6), // [!code hl]
+      }], // [!code hl]
+    }) // [!code hl]
+
+    // 3. Send a transfer with the key authorization. // [!code hl]
+    const { receipt } = await client.token.transferSync({
+      amount: parseUnits('100', 6),
+      to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+      token: '0x20c0000000000000000000000000000000000001',
+      keyAuthorization, // [!code hl]
+    })
+    ```
+
+    ```ts twoslash [viem.config.ts]
+    // [!include ~/snippets/viem.config.ts:setup]
+    ```
+
+    :::
+
+    <div className="h-4" />
+
+    :::info
+    Once you have broadcasted the transaction with `keyAuthorization`, you can reuse the same access key to sign subsequent transactions without the need to pass the key authorization again.
+    :::
+
+  </Tab>
+
+  <Tab title="Wagmi (Tempo Wallet)">
+
+    :::code-group
+
+    ```tsx twoslash [example.tsx]
+    // @noErrors
+    import { Hooks } from 'wagmi/tempo'
+    import { parseUnits } from 'viem'
+
+    function SendPayment() {
+      const { mutate, isPending } = Hooks.token.useTransferSync() // [!code hl]
+
+      return (
+        <button
+          onClick={() =>
+            mutate({ // [!code hl]
+              amount: parseUnits('100', 6), // [!code hl]
+              to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', // [!code hl]
+              token: '0x20c0000000000000000000000000000000000001', // [!code hl]
+            }) // [!code hl]
+          }
+          disabled={isPending}
+        >
+          Send Payment
+        </button>
+      )
+    }
+    ```
+
+    ```ts twoslash [wagmi.config.ts]
+    // @noErrors
+    import { createConfig, http } from 'wagmi'
+    import { tempo } from 'wagmi/chains'
+    import { parseUnits } from 'viem'
+    import { Expiry } from 'accounts'
+    import { tempoWallet } from 'accounts/wagmi'
+
+    export const config = createConfig({
+      chains: [tempo],
+      connectors: [
+        tempoWallet({
+          authorizeAccessKey: () => ({ // [!code hl]
+            // When the key expires // [!code hl]
+            expiry: Expiry.days(7), // [!code hl]
+            // Max spend per token // [!code hl]
+            limits: [{ // [!code hl]
+              token: '0x20c0000000000000000000000000000000000001', // [!code hl]
+              limit: parseUnits('100', 6), // 100 AlphaUSD // [!code hl]
+            }], // [!code hl]
+            // Tokens & functions the key can call // [!code hl]
+            scopes: [{ // [!code hl]
+              target: '0x20c0000000000000000000000000000000000001', // AlphaUSD // [!code hl]
+              selector: 'transfer(address,uint256)', // [!code hl]
+            }], // [!code hl]
+          }), // [!code hl]
+        }),
+      ],
+      transports: { [tempo.id]: http() },
+    })
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Wagmi (WebAuthn)">
+
+    :::code-group
+
+    ```tsx twoslash [example.tsx]
+    // @noErrors
+    import { Hooks } from 'wagmi/tempo'
+    import { parseUnits } from 'viem'
+
+    // Same API: the connector handles access key signing automatically
+    function SendPayment() {
+      const { mutate, isPending } = Hooks.token.useTransferSync() // [!code hl]
+
+      return (
+        <button
+          onClick={() =>
+            mutate({ // [!code hl]
+              amount: parseUnits('100', 6), // [!code hl]
+              to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', // [!code hl]
+              token: '0x20c0000000000000000000000000000000000001', // [!code hl]
+            }) // [!code hl]
+          }
+          disabled={isPending}
+        >
+          Send Payment
+        </button>
+      )
+    }
+    ```
+
+    ```ts twoslash [wagmi.config.ts]
+    // @noErrors
+    import { createConfig, http } from 'wagmi'
+    import { tempo } from 'wagmi/chains'
+    import { parseUnits } from 'viem'
+    import { Expiry } from 'accounts'
+    import { webAuthn } from 'accounts/wagmi'
+
+    export const config = createConfig({
+      chains: [tempo],
+      connectors: [
+        webAuthn({
+          authUrl: '/auth',
+          authorizeAccessKey: () => ({ // [!code hl]
+            // When the key expires // [!code hl]
+            expiry: Expiry.days(7), // [!code hl]
+            // Max spend per token // [!code hl]
+            limits: [{ // [!code hl]
+              token: '0x20c0000000000000000000000000000000000001', // [!code hl]
+              limit: parseUnits('100', 6), // 100 AlphaUSD // [!code hl]
+            }], // [!code hl]
+            // Tokens & functions the key can call // [!code hl]
+            scopes: [{ // [!code hl]
+              target: '0x20c0000000000000000000000000000000000001', // AlphaUSD // [!code hl]
+              selector: 'transfer(address,uint256)', // [!code hl]
+            }], // [!code hl]
+          }), // [!code hl]
+        }),
+      ],
+      transports: { [tempo.id]: http() },
+    })
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Rust">
+
+    :::code-group
+
+    ```rust [example.rs]
+    use alloy::primitives::{address, U256};
+    use alloy::providers::Provider;
+    use alloy::signers::{SignerSync, local::PrivateKeySigner};
+    use alloy::sol_types::SolCall;
+    use tempo_alloy::contracts::precompiles::ITIP20;
+    use tempo_alloy::primitives::transaction::key_authorization::{
+        KeyAuthorization, SignedKeyAuthorization, TokenLimit,
+    };
+    use tempo_alloy::primitives::transaction::tt_signature::{
+        KeychainSignature, PrimitiveSignature, SignatureType, TempoSignature,
+    };
+    use tempo_alloy::rpc::TempoTransactionRequest;
+
+    mod provider;
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = provider::get_provider().await?;
+        let root: PrivateKeySigner = std::env::var("PRIVATE_KEY")?.parse()?;
+
+        let token = address!("0x20c0000000000000000000000000000000000001");
+        let recipient = address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb");
+        let amount = U256::from(100_000_000u64); // 100 AlphaUSD (6 decimals)
+        let chain_id = provider.get_chain_id().await?;
+
+        // 1. Create an access key. // [!code hl]
+        let access_key = PrivateKeySigner::random(); // [!code hl]
+
+        // 2. Sign a key authorization with the root account. // [!code hl]
+        let expiry = std::time::SystemTime::now() // [!code hl]
+            .duration_since(std::time::UNIX_EPOCH)? // [!code hl]
+            .as_secs() + 7 * 24 * 60 * 60; // 7 days // [!code hl]
+
+        let authorization = KeyAuthorization { // [!code hl]
+            chain_id, // [!code hl]
+            key_type: SignatureType::Secp256k1, // [!code hl]
+            key_id: access_key.address(), // [!code hl]
+            expiry: Some(expiry), // [!code hl]
+            limits: Some(vec![TokenLimit { // [!code hl]
+                token, // [!code hl]
+                limit: amount, // [!code hl]
+                period: 0, // [!code hl]
+            }]), // [!code hl]
+            ..Default::default() // [!code hl]
+        }; // [!code hl]
+
+        let sig = root.sign_hash_sync(&authorization.signature_hash())?; // [!code hl]
+        let key_authorization = SignedKeyAuthorization { // [!code hl]
+            authorization, // [!code hl]
+            signature: sig.into(), // [!code hl]
+        }; // [!code hl]
+
+        // 3. Send a transfer with the key authorization. // [!code hl]
+        let call_data = ITIP20::transferCall { // [!code hl]
+            to: recipient, // [!code hl]
+            amount, // [!code hl]
+        }.abi_encode(); // [!code hl]
+
+        let tx = TempoTransactionRequest { // [!code hl]
+            key_authorization: Some(key_authorization), // [!code hl]
+            ..Default::default() // [!code hl]
+        } // [!code hl]
+        .with_to(token) // [!code hl]
+        .with_input(call_data.into()); // [!code hl]
+
+        let receipt = provider // [!code hl]
+            .send_transaction(tx) // [!code hl]
+            .await? // [!code hl]
+            .get_receipt() // [!code hl]
+            .await?; // [!code hl]
+
+        println!("Transfer successful: {:?}", receipt.transaction_hash);
+
+        Ok(())
+    }
+    ```
+
+    ```rust [provider.rs]
+    // [!include ~/snippets/rust-signer-provider.rs:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Cast">
+
+    ```bash
+    # 1. Generate an access key.
+    $ cast wallet new
+    # Address: 0x9f3a7b2c1d4e5f6a8b0c9d2e3f4a5b6c7d8e9f0a
+    # Private key: 0x4c0883a69102937d6231471b5dbb6204fe512961708279f22a3c36f1e24b8e10
+
+    # 2. Authorize the access key on-chain with expiry and limits.
+    $ cast keychain auth \
+      $ACCESS_KEY_ADDRESS \
+      secp256k1 \
+      $(date -v+7d +%s) \ # 7-day expiry
+      --limit 0x20c0000000000000000000000000000000000001:100000000 \
+      --rpc-url $TEMPO_RPC_URL \
+      --private-key $ROOT_PRIVATE_KEY
+
+    # 3. Send a transfer with the access key.
+    $ cast send \
+      0x20c0000000000000000000000000000000000001 \
+      "transfer(address,uint256)" \
+      0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb \
+      100000000 \
+      --rpc-url $TEMPO_RPC_URL \
+      --tempo.access-key $ACCESS_KEY_PRIVATE_KEY \
+      --tempo.root-account $ROOT_ADDRESS
+    ```
+
+  </Tab>
+</Tabs>
+
+### Periodical payments
+
+Use `period` in spending limits to cap how much an access key can spend per time window. The limit resets automatically after each period, making it ideal for subscriptions and recurring billing.
+
+<Tabs stateKey="library">
+  <Tab title="Viem">
+
+    :::code-group
+
+    ```ts twoslash [client.ts]
+    // @noErrors
+    import { parseUnits } from 'viem'
+    import { Actions, Expiry } from 'viem/tempo'
+    import { client } from './viem.config'
+
+    // Sign a key authorization with a periodic spending limit.
+    const keyAuthorization = await Actions.accessKey.signAuthorization(client, {
+      accessKey,
+      expiry: Expiry.days(30),
+      limits: [{
+        token: '0x20c0000000000000000000000000000000000001',
+        limit: parseUnits('10', 6), // 10 AlphaUSD // [!code hl]
+        period: 60 * 60 * 24 * 7, // resets every 7 days // [!code hl]
+      }],
+    })
+    ```
+
+    ```ts twoslash [server.ts]
+    // @noErrors
+    import { parseUnits } from 'viem'
+    import { client } from './viem.config'
+
+    // Charge the user weekly from the server.
+    const { receipt } = await client.token.transferSync({
+      account: accessKey,
+      amount: parseUnits('10', 6),
+      to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+      token: '0x20c0000000000000000000000000000000000001',
+      keyAuthorization,
+    })
+    ```
+
+    ```ts twoslash [viem.config.ts]
+    // [!include ~/snippets/viem.config.ts:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Wagmi (Tempo Wallet)">
+
+    :::code-group
+
+    ```tsx twoslash [client.tsx]
+    // @noErrors
+    import { parseUnits } from 'viem'
+    import { useConnectorClient } from 'wagmi'
+    import { Expiry } from 'accounts'
+
+    function Subscribe() {
+      const { data: client } = useConnectorClient()
+
+      async function handleSubscribe() {
+        await client.request({ // [!code hl]
+          method: 'wallet_authorizeAccessKey', // [!code hl]
+          params: [{ // [!code hl]
+            expiry: Expiry.days(30), // [!code hl]
+            limits: [{ // [!code hl]
+              token: '0x20c0000000000000000000000000000000000001', // [!code hl]
+              limit: parseUnits('10', 6), // 10 AlphaUSD // [!code hl]
+              period: 60 * 60 * 24 * 7, // resets every 7 days // [!code hl]
+            }], // [!code hl]
+            scopes: [{ // [!code hl]
+              target: '0x20c0000000000000000000000000000000000001', // [!code hl]
+              selector: 'transfer(address,uint256)', // [!code hl]
+            }], // [!code hl]
+          }], // [!code hl]
+        }) // [!code hl]
+      }
+
+      return (
+        <button onClick={handleSubscribe}>
+          Subscribe
+        </button>
+      )
+    }
+    ```
+
+    ```ts twoslash [server.ts]
+    // @noErrors
+    import { parseUnits } from 'viem'
+    import { Actions } from 'wagmi/tempo'
+    import { config } from './wagmi.config'
+
+    // Charge the user weekly from the server.
+    const { receipt } = await Actions.token.transferSync(config, {
+      amount: parseUnits('10', 6),
+      to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+      token: '0x20c0000000000000000000000000000000000001',
+    })
+    ```
+
+    ```ts twoslash [wagmi.config.ts]
+    // @noErrors
+    import { createConfig, http } from 'wagmi'
+    import { tempo } from 'wagmi/chains'
+    import { tempoWallet } from 'accounts/wagmi'
+
+    export const config = createConfig({
+      chains: [tempo],
+      connectors: [tempoWallet()],
+      transports: { [tempo.id]: http() },
+    })
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Wagmi (WebAuthn)">
+
+    :::code-group
+
+    ```tsx twoslash [client.tsx]
+    // @noErrors
+    import { parseUnits } from 'viem'
+    import { useConnectorClient } from 'wagmi'
+    import { Expiry } from 'accounts'
+
+    function Subscribe() {
+      const { data: client } = useConnectorClient()
+
+      async function handleSubscribe() {
+        await client.request({ // [!code hl]
+          method: 'wallet_authorizeAccessKey', // [!code hl]
+          params: [{ // [!code hl]
+            expiry: Expiry.days(30), // [!code hl]
+            limits: [{ // [!code hl]
+              token: '0x20c0000000000000000000000000000000000001', // [!code hl]
+              limit: parseUnits('10', 6), // 10 AlphaUSD // [!code hl]
+              period: 60 * 60 * 24 * 7, // resets every 7 days // [!code hl]
+            }], // [!code hl]
+          }], // [!code hl]
+        }) // [!code hl]
+      }
+
+      return (
+        <button onClick={handleSubscribe}>
+          Subscribe
+        </button>
+      )
+    }
+    ```
+
+    ```ts twoslash [server.ts]
+    // @noErrors
+    import { parseUnits } from 'viem'
+    import { Actions } from 'wagmi/tempo'
+    import { config } from './wagmi.config'
+
+    // Charge the user weekly from the server.
+    const { receipt } = await Actions.token.transferSync(config, {
+      amount: parseUnits('10', 6),
+      to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+      token: '0x20c0000000000000000000000000000000000001',
+    })
+    ```
+
+    ```ts twoslash [wagmi.config.ts]
+    // @noErrors
+    import { createConfig, http } from 'wagmi'
+    import { tempo } from 'wagmi/chains'
+    import { webAuthn } from 'accounts/wagmi'
+
+    export const config = createConfig({
+      chains: [tempo],
+      connectors: [webAuthn({ authUrl: '/auth' })],
+      transports: { [tempo.id]: http() },
+    })
+    ```
+
+    :::
+
+  </Tab>
+</Tabs>
+
+### Authorize arbitrary public keys
+
+You can also directly authorize a public key:
+
+<Tabs stateKey="library">
+  <Tab title="Viem">
+
+    :::code-group
+
+    ```ts twoslash [example.ts]
+    // @noErrors
+    import { parseUnits } from 'viem'
+    import { Account, Actions, Expiry } from 'viem/tempo'
+    import { client } from './viem.config'
+
+    // Sign authorization by public key
+    const keyAuthorization = await Actions.accessKey.signAuthorization(client, {
+      accessKey: { // [!code hl]
+        publicKey: '0x...', // [!code hl]
+        // address: '0x...', // or address // [!code hl]
+        type: 'p256', // [!code hl]
+      }, // [!code hl]
+      expiry: Expiry.days(7),
+      limits: [{
+        token: '0x20c0000000000000000000000000000000000001',
+        limit: parseUnits('100', 6),
+      }],
+    })
+    ```
+
+    ```ts twoslash [viem.config.ts]
+    // [!include ~/snippets/viem.config.ts:setup]
+    ```
+
+    :::
+
+  </Tab>
+
+  <Tab title="Wagmi (Tempo Wallet)">
+
+    ```ts twoslash [wagmi.config.ts]
+    // @noErrors
+    import { createConfig, http } from 'wagmi'
+    import { tempo } from 'wagmi/chains'
+    import { parseUnits } from 'viem'
+    import { Expiry } from 'accounts'
+    import { tempoWallet } from 'accounts/wagmi'
+
+    export const config = createConfig({
+      chains: [tempo],
+      connectors: [
+        tempoWallet({
+          authorizeAccessKey: () => ({
+            publicKey: '0x...', // [!code hl]
+            // address: '0x...', // or address // [!code hl]
+            expiry: Expiry.days(7),
+            limits: [{
+              token: '0x20c0000000000000000000000000000000000001',
+              limit: parseUnits('100', 6),
+            }],
+            scopes: [{
+              target: '0x20c0000000000000000000000000000000000001',
+              selector: 'transfer(address,uint256)',
+            }],
+          }),
+        }),
+      ],
+      transports: { [tempo.id]: http() },
+    })
+    ```
+
+  </Tab>
+
+  <Tab title="Wagmi (WebAuthn)">
+
+    ```ts twoslash [wagmi.config.ts]
+    // @noErrors
+    import { createConfig, http } from 'wagmi'
+    import { tempo } from 'wagmi/chains'
+    import { parseUnits } from 'viem'
+    import { Expiry } from 'accounts'
+    import { webAuthn } from 'accounts/wagmi'
+
+    export const config = createConfig({
+      chains: [tempo],
+      connectors: [
+        webAuthn({
+          authUrl: '/auth',
+          authorizeAccessKey: () => ({
+            publicKey: '0x...', // [!code hl]
+            // address: '0x...', // or address // [!code hl]
+            expiry: Expiry.days(7),
+            limits: [{
+              token: '0x20c0000000000000000000000000000000000001',
+              limit: parseUnits('100', 6),
+            }],
+          }),
+        }),
+      ],
+      transports: { [tempo.id]: http() },
+    })
+    ```
+
+  </Tab>
+</Tabs>
+
+## Best practices
+
+### Scope to specific tokens and functions
+Always define `scopes` to restrict which tokens and functions the access key can call. A key scoped to `transfer` on a specific token cannot be used to call other tokens or functions, even if compromised.
+
+### Set appropriate expiry
+Access keys should have a reasonable expiry window. Use `Expiry.days(7)` for interactive sessions or `Expiry.hours(1)` for short-lived operations.
+
+### Use spending limits
+Combine scopes with per-token spending limits for defense in depth. Spending limits cap the total amount a key can transfer, while scopes restrict which tokens it can interact with.
+
+## Learning resources
+
+<Cards>
+  <Card
+    description="Technical specification for the Account Keychain precompile"
+    to="/protocol/transactions/AccountKeychain"
+    icon="lucide:book-open"
+    title="Account Keychain"
+  />
+</Cards>

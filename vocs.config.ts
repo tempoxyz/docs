@@ -101,6 +101,10 @@ export default defineConfig({
                 link: '/guide/use-accounts/embed-passkeys',
               },
               {
+                text: 'Authorize access keys',
+                link: '/guide/use-accounts/authorize-access-keys',
+              },
+              {
                 text: 'Connect to other wallets',
                 link: '/guide/use-accounts/connect-to-wallets',
               },
@@ -185,28 +189,6 @@ export default defineConfig({
               {
                 text: 'Withdraw from a zone',
                 link: '/guide/private-zones/withdraw-from-a-zone',
-              },
-            ],
-          },
-          {
-            text: 'Use Access Keys',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/guide/access-keys',
-              },
-              {
-                text: 'Send a payment',
-                link: '/guide/access-keys/send-a-payment',
-              },
-              {
-                text: 'Set up subscriptions',
-                link: '/guide/access-keys/subscriptions',
-              },
-              {
-                text: 'Revoke access keys',
-                link: '/guide/access-keys/revoke',
               },
             ],
           },
