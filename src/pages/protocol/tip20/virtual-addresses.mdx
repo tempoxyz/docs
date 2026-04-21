@@ -28,6 +28,8 @@ This means:
 - no sweep transaction is needed
 - no separate TIP-20 balance is created for each deposit address
 
+Forwarding happens inside the same TIP-20 precompile call that processes the transfer — there is no second transaction or additional token movement. The only extra cost is a single storage read (SLOAD) to look up the registered master wallet in the virtual-address registry.
+
 ## The mental model
 
 A virtual address is not a second wallet. It is a deposit alias for one canonical wallet.
@@ -102,9 +104,9 @@ The main UI and indexing implication is that a virtual address should be treated
 
 In practice:
 
-- explorers and indexers should understand the two-hop `Transfer` pattern
-- operational tooling should preserve enough of the address to distinguish the `masterId` and `userTag`
-- deposit attribution should key off the virtual address or decoded `userTag`, not off `balanceOf(virtualAddress)`
+- **Explorers and indexers need to handle the two-hop `Transfer` pattern.** Each virtual-address deposit emits two `Transfer` events in a single transaction: `Transfer(sender, virtualAddress, amount)` followed by `Transfer(virtualAddress, masterAddress, amount)`. Indexers must deduplicate these to avoid double-counting the transfer amount. The first event carries the virtual address for deposit attribution; the second shows the actual balance credit to the master.
+- Operational tooling should preserve enough of the address to distinguish the `masterId` and `userTag`.
+- Deposit attribution should key off the virtual address or decoded `userTag`, not off `balanceOf(virtualAddress)`.
 
 ## What this does not do
 
