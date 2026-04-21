@@ -6,13 +6,27 @@ description: Technical specification for the Account Keychain precompile managin
 
 **Address:** `0xAAAAAAAA00000000000000000000000000000000`
 
+:::info[T3 will change this spec]
+The [T3 network upgrade](/protocol/upgrades/t3) will update this specification. The sections below describe the currently active behavior. See [Upcoming changes](#upcoming-changes) for the upcoming deltas.
+:::
+
 ## Overview
 
-The Account Keychain precompile manages authorized Access Keys for accounts, enabling Root Keys (e.g., passkeys) to provision scoped "secondary" Access Keys with expiry timestamps and per-TIP20 token spending limits. 
+The Account Keychain precompile manages authorized Access Keys for accounts, enabling Root Keys (e.g., passkeys) to provision scoped "secondary" Access Keys with expiry timestamps and per-TIP20 token spending limits.
 
 ## Motivation
 
 The Tempo Transaction type unlocks a number of new signature schemes, including WebAuthn (Passkeys). However, for an Account using a Passkey as its Root Key, the sender will subsequently be prompted with passkey prompts for every signature request. This can be a poor user experience for highly interactive or multi-step flows. Additionally, users would also see "Sign In" copy in prompts for signing transactions which is confusing. This proposal introduces the concept of the Root Key being able to provision a (scoped) Access Key that can be used for subsequent transactions, without the need for repetitive end-user prompting.
+
+## Upcoming changes
+
+T3 updates this spec through [TIP-1011](/protocol/tips/tip-1011):
+
+- `TokenLimit` gains an optional `period` for recurring spending limits
+- `authorizeKey(...)` moves to a new ABI with `allowAnyCalls` and `CallScope[]` for call scoping
+- New functions: `setAllowedCalls(...)`, `removeAllowedCalls(...)`, `getAllowedCalls(...)`
+- `getRemainingLimit(...)` returns both `remaining` and `periodEnd`
+- Access-key-signed transactions can no longer create contracts in any configuration. Calling the `CREATE` opcode onchain still works 
 
 ## Concepts
 
@@ -23,7 +37,7 @@ Access Keys are secondary signing keys authorized by an account's Root Key. They
 - **Expiry**: Unix timestamp when the key becomes invalid (0 = never expires, non-zero values must be > current timestamp)
 - **Spending Limits**: Per-TIP20 token limits that deplete as tokens are spent
   - Limits deplete as tokens are spent and can be updated by the Root Key via `updateSpendingLimit()`
-  - Spending limits only apply to TIP20 `transfer()`, `transferWithMemo()`, `approve()`, and `startReward()` calls
+  - Spending limits only apply to TIP20 `transfer()`, `transferWithMemo()`, and `approve()` calls
   - Spending limits only apply when `msg.sender == tx.origin` (direct EOA calls, not contract calls)
   - Native value transfers and `transferFrom()` are NOT limited
 - **Privilege Restrictions**: Cannot authorize new keys or modify their own limits
@@ -35,7 +49,7 @@ The protocol enforces a strict hierarchy at validation time:
 1. **Root Key**: The account's main key (derived from the account address)
    - Can call all precompile functions
    - Has no spending limits
-   
+
 2. **Access Keys**: Secondary authorized keys
    - Cannot call mutable precompile functions (only view functions are allowed)
    - Subject to per-TIP20 token spending limits
