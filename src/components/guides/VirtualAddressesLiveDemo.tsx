@@ -668,7 +668,7 @@ export function VirtualAddressesLiveDemo() {
                 <span className="text-primary">registered wallet:</span>{' '}
                 <span className="inline-flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <span className="break-all font-mono text-[12px] text-primary">{address}</span>
-                  {hasExplorerLink && <ExplorerAccountLink address={address} inline />}
+                  {hasExplorerLink && address && <ExplorerAccountLink address={address} inline />}
                 </span>
               </div>
 

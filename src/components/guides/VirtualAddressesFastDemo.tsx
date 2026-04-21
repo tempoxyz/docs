@@ -83,7 +83,7 @@ export function VirtualAddressesFastDemo() {
 
   const [registration, setRegistration] = React.useState<RegistrationResult | null>(null)
   const [sendResult, setSendResult] = React.useState<SendResult | null>(null)
-  const [userTagInput, setUserTagInput] = React.useState(DEMO_USER_TAG)
+  const [userTagInput, setUserTagInput] = React.useState<string>(DEMO_USER_TAG)
 
   const demoAdmin = React.useMemo(() => mnemonicToAccount(TEST_MNEMONIC), [])
   const demoMaster = React.useMemo(() => mnemonicToAccount(TEST_MNEMONIC, { addressIndex: 1 }), [])
