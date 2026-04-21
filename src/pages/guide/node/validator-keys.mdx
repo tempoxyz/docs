@@ -42,7 +42,7 @@ The ed25519 signing key can be rotated while preserving your validator index and
 
 ## Signing share recovery
 
-If the signing share is lost — for example by deleting `<datadir>/consensus` — the node will automatically recover its share from the network when it restarts.
+If the signing share is lost — for example by deleting `<datadir>/consensus` — the node will recover a new share in the following epochs from the network when it restarts.
 
 ## ValidatorConfig V2 precompile
 
