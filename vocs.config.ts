@@ -1322,6 +1322,11 @@ export default defineConfig({
       destination: '/protocol/exchange/quote-tokens#pathusd',
       status: 301,
     },
+    {
+      source: '/protocol/zones/overview',
+      destination: '/protocol/zones',
+      status: 301,
+    },
   ],
   codeHighlight: {
     langAlias: {
