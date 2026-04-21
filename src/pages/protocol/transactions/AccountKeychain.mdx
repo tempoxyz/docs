@@ -20,15 +20,13 @@ The Tempo Transaction type unlocks a number of new signature schemes, including 
 
 ## Upcoming changes
 
-T3 updates the Account Keychain specification through [TIP-1011](/protocol/tips/tip-1011) in the following ways:
+T3 updates this spec through [TIP-1011](/protocol/tips/tip-1011):
 
-- [TIP-1011](/protocol/tips/tip-1011) extends `TokenLimit` with an optional recurring `period`, so spending limits can be either one-time or periodic.
-- `authorizeKey(...)` moves to the new ABI with `allowAnyCalls` and `allowedCalls`, enabling explicit call scoping during key authorization.
-- New `SelectorRule` and `CallScope` structs define per-target and per-selector allowlists, including recipient-bound rules for supported TIP-20 selectors.
-- New root-key-only functions `setAllowedCalls(...)` and `removeAllowedCalls(...)`, plus a new `getAllowedCalls(...)` view, are added for managing and inspecting call scopes.
-- `getRemainingLimit(...)` changes to return both `remaining` and `periodEnd` so callers can observe periodic reset state.
-- `updateSpendingLimit(...)` resets the remaining amount to `newLimit` but does not change the configured `period` or current `periodEnd`.
-- Access-key-signed transactions can no longer create contracts in any configuration — including direct CREATE calls, factory CREATE, and internal CREATE2. Only root-key-signed transactions may perform contract creation.
+- `TokenLimit` gains an optional `period` for recurring spending limits
+- `authorizeKey(...)` moves to a new ABI with `allowAnyCalls` and `CallScope[]` for call scoping
+- New functions: `setAllowedCalls(...)`, `removeAllowedCalls(...)`, `getAllowedCalls(...)`
+- `getRemainingLimit(...)` returns both `remaining` and `periodEnd`
+- Access-key-signed transactions can no longer create contracts in any configuration
 
 ## Concepts
 
@@ -39,7 +37,7 @@ Access Keys are secondary signing keys authorized by an account's Root Key. They
 - **Expiry**: Unix timestamp when the key becomes invalid (0 = never expires, non-zero values must be > current timestamp)
 - **Spending Limits**: Per-TIP20 token limits that deplete as tokens are spent
   - Limits deplete as tokens are spent and can be updated by the Root Key via `updateSpendingLimit()`
-  - Spending limits only apply to TIP20 `transfer()`, `transferWithMemo()`, `approve()`, and `startReward()` calls
+  - Spending limits only apply to TIP20 `transfer()`, `transferWithMemo()`, and `approve()` calls
   - Spending limits only apply when `msg.sender == tx.origin` (direct EOA calls, not contract calls)
   - Native value transfers and `transferFrom()` are NOT limited
 - **Privilege Restrictions**: Cannot authorize new keys or modify their own limits
