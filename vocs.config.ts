@@ -685,7 +685,7 @@ export default defineConfig({
           },
           {
             text: 'TIPs',
-            link: '/protocol/tips',
+            link: 'https://tips.sh/',
           },
         ],
       },
