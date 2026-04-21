@@ -909,7 +909,7 @@ transactions thereafter can be signed by the access key.
     import { Account, Expiry, P256, Period, tempoActions } from 'viem/tempo'
     import { useConnectorClient } from 'wagmi'
 
-    export function AuthorizeAccessKey() {
+    export function useAuthorizeAccessKey() {
       const { data: connectorClient } = useConnectorClient()
 
       async function authorize() {
@@ -972,7 +972,7 @@ transactions thereafter can be signed by the access key.
     async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let provider = provider::get_provider().await?;
 
-        let root = PrivateKeySigner::from_str("0x...")?;
+        let root: PrivateKeySigner = std::env::var("PRIVATE_KEY")?.parse()?;
         let access_key = PrivateKeySigner::random();
         let alpha_usd = address!("0x20c0000000000000000000000000000000000001");
         let treasury = address!("0xcafebabecafebabecafebabecafebabecafebabe");
