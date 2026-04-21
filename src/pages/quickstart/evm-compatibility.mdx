@@ -53,7 +53,16 @@ Many wallets and applications check a user's "native account balance" before let
 
 This stems from the return value of the `eth_getBalance` RPC method. When a wallet calls this method, it expects a hex string representing the "native token balance", hard-coded to be represented as an 18-decimal place number.
 
-On Tempo, the `eth_getBalance` method returns a hex string representing an extremely large number. Specifically it returns: `0x9612084f0316e0ebd5182f398e5195a51b5ca47667d4c9b26c9b26c9b26c9b2` which is represented in decimals as 4.242424242424242e+75.
+On Tempo, the `eth_getBalance` method returns a JSON-RPC error with a helpful message pointing to documentation:
+
+```json
+{
+  "error": {
+    "code": -32000,
+    "message": "Native balance not used. See docs.tempo.xyz/quickstart/wallet-developers for balance queries."
+  }
+}
+```
 
 Our recommendation to wallets and to applications using this method is to remove this balance check, and to not represent any "native balance" in your user's UI. This will allow users to complete actions without being blocked by balance checks.
 
