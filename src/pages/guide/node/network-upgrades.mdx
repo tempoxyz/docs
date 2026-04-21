@@ -11,6 +11,38 @@ Tempo uses scheduled network upgrades to introduce protocol changes. Each upgrad
 
 For detailed release notes and binaries, see the [Changelog](/changelog).
 
+## Upgrade Cadence
+
+Tempo targets a **monthly network upgrade cadence**. Upgrades bundle protocol changes (TIPs) into named hardforks (T1, T2, T3, …) and follow a fixed rollout process:
+
+1. **Testnet first** — every upgrade activates on the Moderato testnet before mainnet.
+2. **Mainnet follows** — mainnet activation is scheduled **approximately one week** after testnet, giving operators and integrators time to validate.
+3. **Patch releases between upgrades** — security fixes and non-consensus improvements ship as patch releases (e.g. v1.5.1, v1.5.2) and do not require a hardfork.
+
+### How operators are notified
+
+- **Release announcements** are posted to the [Tempo GitHub releases](https://github.com/tempoxyz/tempo/releases) page with full changelogs.
+- **Validator channels** — the Tempo team shares activation timestamps and migration checklists in dedicated operator channels ahead of each upgrade.
+- **This page** is updated with dates, TIP references, and priority badges as soon as an upgrade is scheduled.
+
+### Upgrade priority levels
+
+| Badge | Meaning |
+|-------|---------|
+| <Badge variant="red">Required</Badge> | Consensus-breaking change — nodes **must** upgrade before the activation block or they will fork off the network. |
+| <Badge variant="yellow">Recommended</Badge> | Non-consensus improvement (performance, hardening, bug fixes). Nodes will continue to function without upgrading, but the update is strongly encouraged. |
+| <Badge variant="amber">RPC only</Badge> | Only affects RPC-serving nodes (e.g. security patches for public endpoints). Validators without public RPC exposure can skip. |
+
+### Operator checklist for each upgrade
+
+1. Watch for the release announcement and review the changelog.
+2. Upgrade your **testnet node first** and confirm it syncs past the activation block.
+3. Verify your application or integration works against the upgraded testnet.
+4. Upgrade your **mainnet node** before the mainnet activation timestamp.
+5. Monitor logs after activation to confirm normal operation.
+
+---
+
 ## Node Operator Updates
 
 | Release | Date | Network | Description | Priority |
