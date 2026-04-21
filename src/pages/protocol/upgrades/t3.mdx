@@ -77,11 +77,9 @@ These changes are not breaking — existing integrations continue to work withou
 
 ### Virtual addresses for explorers and indexers
 
-TIP-20 virtual-address forwarding does not introduce a new transfer event. Forwarded deposits show up as two standard `Transfer` events in the same transaction: one hop into the virtual address and one hop from the virtual address to the registered master wallet.
+Each virtual-address deposit emits two `Transfer` events in one transaction: `Transfer(sender, virtualAddress, amount)` then `Transfer(virtualAddress, masterWallet, amount)`. Collapse these into one logical deposit to the master wallet. The virtual address is for attribution only — `balanceOf(virtualAddress)` is always zero.
 
-If your explorer or indexer treats each `Transfer` log as an independent user-facing transfer, forwarded deposits will appear twice: once to the virtual address and once to the master wallet. That inflates transfer counts, shows the wrong effective recipient in transfer/history views, and can mis-credit deposits to the literal virtual address instead of the registered master wallet.
-
-Handle these flows as one logical deposit to the master wallet, using the virtual address only as an attribution alias. Virtual addresses themselves always have a TIP-20 balance of zero.
+See [Virtual addresses for TIP-20 deposits](/protocol/tip20/virtual-addresses) for the full routing model and event sequences.
 
 ## Compatible SDK releases
 
@@ -118,6 +116,4 @@ The Foundry project template for Tempo includes a working example that uses the 
 
 ### TIP-1022: Virtual Addresses for TIP-20 Deposit Forwarding
 
-[TIP-1022](/protocol/tips/tip-1022) lets partners issue per-user deposit addresses that forward TIP-20 deposits to a registered master wallet at the protocol level. Nothing changes unless you adopt virtual addresses, but explorers, indexers, and backends that surface TIP-20 deposit activity should collapse the two-hop forwarding path into one logical deposit to the master wallet. Forwarding applies to recipient-bearing TIP-20 paths, including transfers and mints.
-
-See [Virtual addresses for TIP-20 deposits](/protocol/tip20/virtual-addresses) for the routing model, address layout, and indexing implications.
+[TIP-1022](/protocol/tips/tip-1022) lets partners issue per-user deposit addresses that forward TIP-20 deposits to a registered master wallet at the protocol level. Nothing changes unless you adopt virtual addresses. See [Virtual addresses for TIP-20 deposits](/protocol/tip20/virtual-addresses) for the routing model and integration details.

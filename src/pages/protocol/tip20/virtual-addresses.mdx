@@ -100,13 +100,14 @@ This gives you the accounting benefits of per-customer addresses without managin
 
 ## What this changes for wallets, explorers, and indexers
 
-The main UI and indexing implication is that a virtual address should be treated as a forwarding alias, not as a normal balance-holding account.
+A virtual address is a forwarding alias, not a balance-holding account. Each deposit emits two `Transfer` events in one transaction:
 
-In practice:
+1. `Transfer(sender, virtualAddress, amount)` — attribution hop
+2. `Transfer(virtualAddress, masterAddress, amount)` — forwarding hop
 
-- **Explorers and indexers need to handle the two-hop `Transfer` pattern.** Each virtual-address deposit emits two `Transfer` events in a single transaction: `Transfer(sender, virtualAddress, amount)` followed by `Transfer(virtualAddress, masterAddress, amount)`. Indexers must deduplicate these to avoid double-counting the transfer amount. The first event carries the virtual address for deposit attribution; the second shows the actual balance credit to the master.
-- Operational tooling should preserve enough of the address to distinguish the `masterId` and `userTag`.
-- Deposit attribution should key off the virtual address or decoded `userTag`, not off `balanceOf(virtualAddress)`.
+Collapse these into one logical deposit. Treating them independently will double-count transfers and show misleading balances. Use the `userTag` (trailing 6 bytes of the virtual address) for deposit attribution, not `balanceOf(virtualAddress)` which is always zero.
+
+Wallets and explorers should display enough of the address to distinguish the `masterId` and `userTag`.
 
 ## What this does not do
 
