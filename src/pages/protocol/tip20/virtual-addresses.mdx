@@ -4,6 +4,7 @@ description: Understand how TIP-20 virtual addresses work, why they remove sweep
 ---
 
 import { Cards, Card } from 'vocs'
+import { MermaidDiagram } from '../../../components/MermaidDiagram'
 import { StaticMermaidDiagram } from '../../../components/StaticMermaidDiagram'
 
 # Virtual addresses for TIP-20 deposits
@@ -14,16 +15,26 @@ For exchanges, ramps, custodians, and payment processors, this changes the opera
 
 ## Why this feature exists
 
-Without virtual addresses, per-customer deposit addresses are operationally expensive. Each deposit address becomes a real onchain balance holder. Funds land there first, and then the operator has to sweep those funds  into a central wallet.
+Without virtual addresses, per-customer deposit addresses are operationally expensive. Each deposit address becomes a real onchain balance holder. Funds land there first, and then the operator has to sweep those funds into a central wallet.
 
 With virtual addresses, the customer-facing address is still unique, but it behaves like a routing alias. The protocol resolves it to the registered master wallet during the TIP-20 transfer itself.
 
-<img src="/images/tip20/virtual-addresses-light.png" alt="Without virtual addresses, each customer deposit address holds a separate onchain balance that must be swept to the master wallet. With virtual addresses, TIP-20 forwarding routes deposits directly to the master wallet." className="dark:hidden" />
-<img src="/images/tip20/virtual-addresses-dark.png" alt="Without virtual addresses, each customer deposit address holds a separate onchain balance that must be swept to the master wallet. With virtual addresses, TIP-20 forwarding routes deposits directly to the master wallet." className="hidden dark:block" />
+<StaticMermaidDiagram chart={`flowchart LR
+    subgraph A[Without virtual addresses]
+        D1[Customer deposit address] --> B1[Separate onchain balance]
+        B1 --> S1[Sweep transaction]
+        S1 --> M1[Master wallet]
+    end
+
+    subgraph B[With virtual addresses]
+        D2[Customer virtual address] --> F2[TIP-20 forwarding]
+        F2 --> M2[Master wallet]
+    end
+`} />
 
 This means:
 
-- you keep one deposit address per customer 
+- you keep one deposit address per customer
 - the master wallet receives the balance directly
 - no sweep transaction is needed
 - no separate TIP-20 balance is created for each deposit address
@@ -64,7 +75,7 @@ TIP-20 recognizes a virtual address by the fixed 10-byte middle marker. It then 
 
 When a sender transfers a covered TIP-20 token to a virtual address, the TIP-20 precompile detects the virtual format, looks up the registered master, and credits that master wallet.
 
-<StaticMermaidDiagram chart={`sequenceDiagram
+<MermaidDiagram chart={`sequenceDiagram
     participant Sender
     participant TIP20 as TIP-20
     participant Registry as Virtual registry

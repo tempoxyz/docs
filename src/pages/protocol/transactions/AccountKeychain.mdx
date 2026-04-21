@@ -20,13 +20,15 @@ The Tempo Transaction type unlocks a number of new signature schemes, including 
 
 ## Upcoming changes
 
-T3 updates this spec through [TIP-1011](/protocol/tips/tip-1011):
+T3 updates the Account Keychain specification through [TIP-1011](/protocol/tips/tip-1011) in the following ways:
 
-- `TokenLimit` gains an optional `period` for recurring spending limits
-- `authorizeKey(...)` moves to a new ABI with `allowAnyCalls` and `CallScope[]` for call scoping
-- New functions: `setAllowedCalls(...)`, `removeAllowedCalls(...)`, `getAllowedCalls(...)`
-- `getRemainingLimit(...)` returns both `remaining` and `periodEnd`
-- Access-key-signed transactions can no longer create contracts in any configuration. Calling the `CREATE` opcode onchain still works 
+- [TIP-1011](/protocol/tips/tip-1011) extends `TokenLimit` with an optional recurring `period`, so spending limits can be either one-time or periodic.
+- `authorizeKey(...)` moves to the new ABI with `allowAnyCalls` and `allowedCalls`, enabling explicit call scoping during key authorization.
+- New `SelectorRule` and `CallScope` structs define per-target and per-selector allowlists, including recipient-bound rules for supported TIP-20 selectors.
+- New root-key-only functions `setAllowedCalls(...)` and `removeAllowedCalls(...)`, plus a new `getAllowedCalls(...)` view, are added for managing and inspecting call scopes.
+- `getRemainingLimit(...)` changes to return both `remaining` and `periodEnd` so callers can observe periodic reset state.
+- `updateSpendingLimit(...)` resets the remaining amount to `newLimit` but does not change the configured `period` or current `periodEnd`.
+- Access-key-signed transactions can no longer create contracts in any configuration. Calling the `CREATE` opcode onchain still works.
 
 ## Concepts
 
