@@ -841,6 +841,10 @@ export default defineConfig({
             ],
           },
           {
+            text: 'Upgrade Cadence',
+            link: '/guide/node/upgrade-cadence',
+          },
+          {
             text: 'Network Upgrades and Releases',
             link: '/guide/node/network-upgrades',
           },
