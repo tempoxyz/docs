@@ -60,14 +60,14 @@ Every state transition happens on epoch boundaries. Currently on mainnet and tes
 
 ```mermaid {style: {maxWidth: '360px', margin: '0 auto'}}
 flowchart TD
-    Start(["Add / Rotate in"]) --> A["Syncer — Epoch E"]
+    Start(["Add / Rotate in"]) --> A["Registration — Epoch E"]
     A --> B["Player — Epoch E+1"]
     B --> C["Dealer / Validator — Epoch E+2"]
     C --> D["Voter / Proposer"]
     D --> End(["Deactivate / Rotate out"])
 ```
 
-#### Syncer (epoch E)
+#### Registration (epoch E)
 
 Once your validator is added to the on-chain contract, it is immediately registered on the p2p peer set and starts syncing blocks from the network.
 
@@ -88,7 +88,7 @@ The on-chain contract represents which validators should eventually be members o
 Monitor these metrics to track your validator's state:
 
 ```bash
-# Is your validator connected to other peers (i.e. is it considered a syncer)?
+# Is your validator connected to other peers (i.e. is it registered)?
 # This should be >0 in at most 3 hours after your validator's addition.
 curl -s localhost:8002/metrics | grep consensus_network_spawner_connections
 
