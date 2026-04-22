@@ -46,15 +46,33 @@ If `how_often_dealer` and `how_often_player` are not increasing after 6 hours:
   RUST_LOG=info,tempo_commonware_node::dkg=debug
   ```
 
-## My node's clock appears out of sync
+## My node is rejecting blocks or missing proposals
 
-If you see `parent_ahead_of_local_time` increasing in your metrics, your system clock is drifting behind the network. Tempo validators rely on accurate time for block proposal timestamps.
+If your node logs block validation errors (e.g. "block timestamp is in the future") or you notice missed proposals, a potential root cause is **clock drift**. Check whether `parent_ahead_of_local_time` is increasing in your metrics — if so, your system clock is behind the network.
 
-- Ensure NTP is configured and running:
-  ```bash
-  timedatectl status  # Linux
-  ```
-- Verify your NTP source is reachable and your clock offset is under 500ms.
+To fix:
+
+1. **Check your current sync status:**
+   ```bash
+   timedatectl status
+   ```
+   Confirm `System clock synchronized: yes` and `NTP service: active`.
+
+2. **Install chrony** (if not already installed):
+   ```bash
+   sudo apt install chrony
+   sudo systemctl enable --now chronyd
+   ```
+
+3. **Verify the offset is acceptable:**
+   ```bash
+   chronyc tracking
+   ```
+   The **System time** offset should be under a few milliseconds.
+
+4. **Restart your node** after fixing the clock to clear any cached invalid block state.
+
+See [Time Synchronization](/guide/node/system-requirements#time-synchronization) for full setup details.
 
 ## I accidentally deleted my consensus data directory
 
