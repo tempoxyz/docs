@@ -815,7 +815,7 @@ export default defineConfig({
                 link: '/guide/node/validator',
               },
               {
-                text: 'Initial setup',
+                text: 'Validator Onboarding',
                 link: '/guide/node/validator-setup',
               },
               {
