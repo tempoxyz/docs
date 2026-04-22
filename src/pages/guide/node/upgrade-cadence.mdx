@@ -1,0 +1,67 @@
+---
+title: Upgrade Cadence
+description: How Tempo schedules and communicates network upgrades, including timelines, notification windows, and what to expect as a node operator.
+---
+
+import { Badge } from '../../../components/Badge'
+
+# Upgrade Cadence
+
+Tempo ships protocol upgrades on a **monthly cadence**. Each upgrade bundles one or more protocol changes ([TIPs](/protocol/tips)) into a named hardfork (T1, T2, T3, …).
+
+## Rollout timeline
+
+Every upgrade follows the same two-stage rollout:
+
+| Stage | Lead time | Details |
+|-------|-----------|---------|
+| **Testnet** (Moderato) | Announced at least **3 days** before activation | The upgrade activates on the Moderato testnet first so operators and integrators can validate. |
+| **Mainnet** (Presto) | Announced at least **7 days** before activation | After a successful testnet activation, the same release is scheduled for mainnet — typically one week later. |
+
+Operators should use the window between testnet and mainnet activation to upgrade their testnet node, verify it syncs past the activation block, and confirm their applications work against the new protocol rules.
+
+## Patch releases
+
+Between hardforks, Tempo publishes patch releases (e.g. v1.5.1, v1.5.2) for security fixes, performance improvements, and non-consensus bug fixes. Patch releases do not require a hardfork and can be adopted at your own pace, subject to the priority level.
+
+## Upgrade priority levels
+
+Each release on the [Network Upgrades and Releases](/guide/node/network-upgrades) page carries a priority badge:
+
+| Badge | Meaning |
+|-------|---------|
+| <Badge variant="red">Required</Badge> | Consensus-breaking change — nodes **must** upgrade before the activation block or they will fork off the network. |
+| <Badge variant="yellow">Recommended</Badge> | Non-consensus improvement (performance, hardening, bug fixes). Nodes continue to function without upgrading, but the update is strongly encouraged. |
+| <Badge variant="amber">RPC only</Badge> | Only affects RPC-serving nodes (e.g. security patches for public endpoints). Validators without public RPC exposure can skip. |
+
+## How you will be notified
+
+- **GitHub releases** — every release is published to [tempoxyz/tempo releases](https://github.com/tempoxyz/tempo/releases) with a full changelog.
+- **Operator channels** — the Tempo team shares activation timestamps and migration checklists in dedicated operator channels ahead of each upgrade.
+- **Docs** — the [Network Upgrades and Releases](/guide/node/network-upgrades) page is updated with dates, TIP references, and priority badges as soon as an upgrade is scheduled.
+
+## Operator checklist
+
+:::::steps
+
+### Review the release
+
+Read the changelog and upgrade page to understand what is changing and whether any migration steps are required.
+
+### Upgrade your testnet node
+
+Update your Moderato node to the new release and confirm it syncs past the testnet activation block.
+
+### Validate your integration
+
+Run your application or test suite against the upgraded testnet to catch any breaking changes before mainnet.
+
+### Upgrade your mainnet node
+
+Update your mainnet node **before** the mainnet activation timestamp.
+
+### Monitor after activation
+
+Watch logs and metrics after the activation block to confirm normal operation.
+
+:::::

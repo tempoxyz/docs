@@ -1,0 +1,156 @@
+---
+title: Validator Onboarding
+description: Generate signing keys and run your Tempo validator node for the first time.
+---
+
+# Validator onboarding
+
+:::info
+The active validator set is currently permissioned. If you are interested in becoming a validator, please [get in touch](mailto:partners@tempo.xyz) with the Tempo team.
+:::
+
+This guide walks through registering, generating your signing key, and starting your validator node for the first time. Before proceeding, make sure you have completed [system requirements](/guide/node/system-requirements) and [installation](/guide/node/installation).
+
+## Initial registration
+
+Registering a validator takes three steps:
+
+1. **[Generate a signing keypair](#step-1-generate-a-signing-keypair)** — Create an ed25519 private key and derive the public key.
+2. **[Create the add-validator signature](#step-2-create-the-add-validator-signature)** — Prove ownership of the signing key by producing a signature over your registration details.
+3. **[Submit registration details](#step-3-submit-registration-details)** — Provide the Tempo team with all required values to add your validator on-chain.
+
+### Step 1: Generate a signing keypair
+
+:::warning
+Never share your private signing key. Anyone with access to it can impersonate your validator. The Tempo team will never ask for your private key.
+:::
+
+Generate an ed25519 keypair:
+
+```bash
+tempo consensus generate-private-key --output <path>
+```
+
+Verify the public key:
+
+```bash
+tempo consensus calculate-public-key --private-key <path>
+```
+
+The public key should match the output of the `generate-private-key` command.
+
+### Step 2: Create the add-validator signature
+
+The signature proves ownership of the ed25519 key being registered. Generate it with:
+
+::::code-group
+```bash [Mainnet]
+tempo consensus create-add-validator-signature \
+  --signing-key <PRIVATE_KEY_PATH> \
+  --validator-address <YOUR_VALIDATOR_ADDRESS> \
+  --public-key <YOUR_PUBLIC_KEY> \
+  --ingress <IP:PORT> \
+  --egress <IP> \
+  --fee-recipient <FEE_RECIPIENT_ADDRESS> \
+  --chain-id-from-rpc-url https://rpc.tempo.xyz
+```
+```bash [Testnet]
+tempo consensus create-add-validator-signature \
+  --signing-key <PRIVATE_KEY_PATH> \
+  --validator-address <YOUR_VALIDATOR_ADDRESS> \
+  --public-key <YOUR_PUBLIC_KEY> \
+  --ingress <IP:PORT> \
+  --egress <IP> \
+  --fee-recipient <FEE_RECIPIENT_ADDRESS> \
+  --chain-id-from-rpc-url https://rpc.testnet.tempo.xyz
+```
+::::
+
+### Step 3: Submit registration details
+
+Provide the following values along with the signature to the Tempo team:
+
+| Value | Format | Description |
+|-------|--------|-------------|
+| **Validator address** | Ethereum address (`0x…`) | The control address for your validator. Used to authorize on-chain operations (IP updates, rotation, ownership transfer). |
+| **Public key** | `0x`-prefixed 32-byte hex | Your ed25519 identity key (from [Step 1](#step-1-generate-a-signing-keypair)). |
+| **Ingress** | `IP:port` | The inbound address other validators use to reach your node. Must be unique across all active validators. |
+| **Egress** | `IP` | The outbound IP address your node uses to connect to other validators. |
+| **Fee recipient** | Ethereum address (`0x…`) | The address that receives transaction fees from blocks your validator proposes. If you are not prepared to accept fees, use `0x0000000000000000000000000000000000000000`. |
+| **Signature** | `0x`-prefixed hex | The ed25519 signature proving you control the signing key (from [Step 2](#step-2-create-the-add-validator-signature)). |
+
+Once the Tempo team adds your validator on-chain, it will enter the active set in the [next epoch](/guide/node/validator-status#state-transitions).
+
+## Running the validator
+
+The process for running a validator node is very similar to [running a full node](/guide/node/rpc). 
+
+You should start by downloading the latest snapshot. Downloading the snapshot allows your validator to start participating in consensus much faster.
+
+::::code-group
+```bash [Mainnet]
+tempo download --chain mainnet
+```
+```bash [Testnet]
+tempo download --chain moderato
+```
+::::
+
+Once you've downloaded the snapshot and have been whitelisted on-chain, you can proceed to run the validator node:
+
+::::code-group
+```bash [Mainnet]
+tempo node --datadir <datadir> \
+    --chain mainnet \
+    --consensus.signing-key <path> \
+    --telemetry-url <TELEMETRY_URL>
+```
+```bash [Testnet]
+tempo node --datadir <datadir> \
+    --chain moderato \
+    --consensus.signing-key <path> \
+    --telemetry-url <TELEMETRY_URL>
+```
+::::
+The notable difference between RPC nodes and validator nodes is the omission of the `--follow` argument and the addition of the `--consensus.signing-key` argument.
+
+Once your node is up, it may not start syncing immediately. This is because your node might not be part of the active set. In most cases, your validator will enter the active set in under 6 hours after the on-chain addition of the validator identity.
+
+### Optional flags
+
+| Flag | Description |
+|------|-------------|
+| `--telemetry-url <URL>` | Unified metrics and logs export. See [Telemetry endpoint](#telemetry-endpoint) below for details. **We ask all validators to configure this so we can support troubleshooting.** |
+| `--telemetry-metrics-interval <DURATION>` | Interval for pushing metrics (default: `10s`). |
+| `--consensus.datadir <PATH>` | Store consensus data on a separate volume (e.g., AWS EBS) while keeping execution state on high-performance local disks. Migrate by copying `<datadir>/consensus` to the new location. |
+
+### Telemetry endpoint
+
+The `--telemetry-url` flag enables unified telemetry export. It pushes two types of data to a Tempo-operated metrics backend:
+
+- **Prometheus metrics** — execution-layer (reth) and consensus-layer metrics in Prometheus text format, pushed at a configurable interval (default every 10 seconds).
+- **Structured logs** — operational logs exported via OTLP at `debug` level, covering consensus events, block processing, and sync progress.
+
+The URL must include credentials: `--telemetry-url https://user:pass@metrics.example.com`
+
+#### What is collected
+
+| Category | Examples |
+|----------|---------|
+| Execution metrics | Block processing times, transaction pool size, peer count, sync status, database stats |
+| Consensus metrics | Epoch and view progress, DKG ceremony status, proposal and finalization counts |
+| Operational logs | Consensus state transitions, block proposals, sync progress, error events |
+
+All consensus metrics are namespaced under a `consensus` prefix.
+
+#### What is **not** collected
+
+The telemetry endpoint does **not** collect any ambient information about the host machine. Specifically:
+
+- No hostname, IP address, or machine identifiers
+- No operating system, CPU, memory, or disk information
+- No information about other processes or services running on the machine
+- No file paths or directory structures beyond the node's own data directory references in logs
+- No network topology or firewall configuration
+
+The data is strictly limited to the node's own operational metrics and logs.

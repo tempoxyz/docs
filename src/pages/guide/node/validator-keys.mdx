@@ -1,0 +1,59 @@
+---
+title: Managing validator keys
+description: Generate, rotate, and recover validator signing keys and shares.
+---
+
+# Managing validator keys
+
+Tempo validators use several keys and addresses. This page explains what each one does, how sensitive it is, and how to manage it.
+
+:::warning
+Never share your private signing key. Anyone with access to it can impersonate your validator. The Tempo team will never ask for your private key. Store keys securely and restrict file permissions.
+:::
+
+## Key and address overview
+
+| Key / Address | Type | What it does | Sensitivity | How to change |
+|---|---|---|---|---|
+| **Signing key** | Ed25519 keypair | Identifies your validator in the consensus protocol. Used for DKG participation, block proposals, and voting. | **Critical** — anyone with this key can impersonate your validator. | [Rotate validator identity](/guide/node/validator-lifecycle#rotate-validator-identity) |
+| **Validator operator address** | Ethereum address (`0x…`) | The control address that authorizes on-chain operations: IP updates, key rotation, ownership transfer, and deactivation. | **High** — controls all validator configuration. | [Transfer validator ownership](/guide/node/validator-lifecycle#transfer-validator-ownership) |
+| **Fee recipient** | Ethereum address (`0x…`) | Receives transaction fees from blocks your validator proposes. | **Low** — changing it only redirects future fee revenue, no security impact. | [Update fee recipient](/guide/node/validator-lifecycle#update-the-fee-recipient) |
+| **Signing share** | BLS12-381 key share | A share of the committee's threshold signing key, used to sign block notarizations and finalizations. | **Managed automatically** — updated every DKG ceremony (~3 hours). Lost shares are recovered from the network on restart. | Automatic (see [recovery](#signing-share-recovery)) |
+
+## Generating a signing key
+
+:::warning
+Never share your private signing key. Anyone with access to it can impersonate your validator. The Tempo team will never ask for your private key.
+:::
+
+Generate an ed25519 keypair:
+
+```bash
+tempo consensus generate-private-key --output <path>
+```
+
+Verify the public key:
+
+```bash
+tempo consensus calculate-public-key --private-key <path>
+```
+
+The public key should match the output of the `generate-private-key` command.
+
+## Signing key rotation
+
+The ed25519 signing key can be rotated while preserving your validator index and committee slot. See [Rotate validator identity](/guide/node/validator-lifecycle#rotate-validator-identity) for the full procedure.
+
+## Signing share recovery
+
+If the signing share is lost — for example by deleting `<datadir>/consensus` — the node will recover a new share in the following epochs from the network when it restarts.
+
+## ValidatorConfig V2 precompile
+
+All key and identity operations are executed through the ValidatorConfig V2 precompile ([TIP-1017](/protocol/tips/tip-1017)):
+
+```solidity
+address constant VALIDATOR_CONFIG_V2 = 0xCCCCCCCC00000000000000000000000000000001;
+```
+
+All write operations require either the contract owner or the validator's own address.

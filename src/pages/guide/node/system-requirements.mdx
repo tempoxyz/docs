@@ -43,12 +43,42 @@ These dedicated servers meet or exceed the recommended specs for both RPC and va
 Cloud instances with network-attached storage (e.g., AWS EBS) do not provide sufficient I/O performance. Use dedicated servers or instances with local NVMe storage.
 :::
 
-## Security measures
+## Time Synchronization
 
-We do not recommend using a cloud firewall / NAT gateway as it can introduce additional complexity and performance issues. Instead, we've implemented security measures in the networking layer of the node, including:
-- only accepting connections from trusted IP addresses (active validators on-chain)
-- ratelimiting connections and messages in consensus and execution to prevent abuse
-- only accepting consensus connections from validators that can prove their identity
+Tempo validates that block timestamps are not in the future. If your system clock drifts even slightly, your node may reject valid blocks or produce blocks that other validators reject — leading to consensus errors and missed proposals.
+
+:::warning
+`systemd-timesyncd` (the default on many minimal VMs) is **not sufficient**. Use `chrony` or `ntpd` for reliable sub-millisecond synchronization.
+:::
+
+### Install and enable chrony (recommended)
+
+```bash
+sudo apt install chrony
+sudo systemctl enable --now chronyd
+```
+
+### Verify synchronization
+
+```bash
+chronyc tracking
+```
+
+Check that **System time** offset is under a few milliseconds and **Leap status** is `Normal`. You can also verify with:
+
+```bash
+timedatectl
+```
+
+Confirm `System clock synchronized: yes` and `NTP service: active`.
+
+### Cloud providers
+
+Most cloud providers (AWS, Hetzner, OVH) pre-configure NTP, but minimal VM images may ship without a proper NTP daemon. Always verify that `chrony` or `ntpd` is installed and running after provisioning a new machine.
+
+## Security
+
+For network configuration, key management, release verification, and other security best practices, see the dedicated [Node Security](/guide/node/security) page.
 
 ## Network Tuning
 
