@@ -49,6 +49,19 @@ This walkthrough shows the full flow:
 4. confirm that the balance lands in the registered wallet
 
 <Tabs stateKey="virtual-address-demo-mode">
+  <Tab title="Fast demo">
+
+<div className="h-4" />
+
+Use a docs-managed master with a pre-mined valid salt so you can skip the wait and jump straight to the forwarding flow.
+
+<div className="h-6" />
+
+<Demo.Container name="Virtual addresses" footerVariant={undefined}>
+  <VirtualAddressesFastDemo />
+</Demo.Container>
+
+  </Tab>
   <Tab title="Real registration">
 
 <div className="h-4" />
@@ -65,19 +78,6 @@ Mining the TIP-1022 salt can take 30+ seconds depending on your browser, hardwar
 
 <Demo.Container name="Virtual addresses" footerVariant={undefined}>
   <VirtualAddressesLiveDemo />
-</Demo.Container>
-
-  </Tab>
-  <Tab title="Fast demo">
-
-<div className="h-4" />
-
-Use a docs-managed master with a pre-mined valid salt so you can skip the wait and jump straight to the forwarding flow.
-
-<div className="h-6" />
-
-<Demo.Container name="Virtual addresses" footerVariant={undefined}>
-  <VirtualAddressesFastDemo />
 </Demo.Container>
 
   </Tab>
