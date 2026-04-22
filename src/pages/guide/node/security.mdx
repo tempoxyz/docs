@@ -13,6 +13,7 @@ Your signing key is the most sensitive asset on your validator. Anyone with acce
 
 - **Restrict file permissions** — set `chmod 600` on key files so only the node process user can read them.
 - **Never share your private key** — the Tempo team will never ask for it.
+- **Use different keys for testnet and mainnet** — do not reuse signing keys or operator keys across networks; a testnet compromise should never put your mainnet validator at risk.
 - **Rotate keys periodically** — use [key rotation](/guide/node/validator-lifecycle#rotate-validator-identity) to swap to a new ed25519 key without leaving the committee.
 - **Separate the operator address** — the Ethereum address that controls on-chain operations (IP updates, rotation, ownership transfer) should be a dedicated address, not a general-purpose hot wallet.
 
