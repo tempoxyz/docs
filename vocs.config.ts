@@ -848,15 +848,6 @@ export default defineConfig({
             text: 'Network Upgrades and Releases',
             items: [
               {
-                text: 'Upgrades and Releases',
-                link: '/guide/node/network-upgrades',
-              },
-              {
-                text: 'Upgrade Cadence',
-                link: '/guide/node/upgrade-cadence',
-              },
-            ],
-              {
                 text: 'Upgrade Cadence',
                 link: '/guide/node/upgrade-cadence',
               },
