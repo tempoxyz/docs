@@ -120,7 +120,7 @@ A few things matter in production:
 - virtual forwarding applies only to **TIP-20** transfer and mint paths
 - `balanceOf(virtualAddress)` stays `0`; use events and your own `userTag` mapping for attribution
 - policy checks apply to the **resolved master wallet**, not the literal virtual address
-- Avoid sending virtual addresses to DeFi protocols like lending pools or DEXs — they won't resolve them, and funds may become stuck. Use virtual addresses only for TIP-20 deposits to your master wallet.
+- avoid using virtual addresses in reward protocols (lending pools, DEX rewards, etc) unless explicitly supported, as they can't track or hold funds
 
 ## Learn more
 
