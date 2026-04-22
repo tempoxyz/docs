@@ -841,6 +841,10 @@ export default defineConfig({
             ],
           },
           {
+            text: 'Node Security',
+            link: '/guide/node/security',
+          },
+          {
             text: 'Network Upgrades and Releases',
             items: [
               {
