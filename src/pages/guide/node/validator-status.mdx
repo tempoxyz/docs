@@ -77,27 +77,23 @@ Every state transition happens on epoch boundaries. Currently on mainnet and tes
     state "Exited — Epoch E+2\nFully out of committee" as Exited
 `} />
 
-### Joining
-
-#### Registration (epoch E)
+### Registration (epoch E)
 
 Once your validator is added to the on-chain contract, it is immediately registered on the p2p peer set and starts syncing blocks from the network.
 
-#### Player (epoch E+1)
+### Player (epoch E+1)
 
 Your validator is receiving consensus signing shares from dealers during the DKG ceremony.
 
-#### Dealer / Validator (epoch E+2)
+### Dealer / Validator (epoch E+2)
 
 Your validator is distributing consensus signing shares to other validators during the ceremony. Once your node is fully synced, it will also be able to propose blocks and vote on other validators' proposals.
 
-### Leaving
-
-#### Exiting (epoch E+1)
+### Exiting (epoch E+1 after deactivation)
 
 After deactivation in epoch E, your validator is still a **dealer** (distributing shares) during epoch E+1, but is **no longer a player** (not receiving new shares). It is in the process of being removed from the committee.
 
-#### Exited (epoch E+2)
+### Exited (epoch E+2 after deactivation)
 
 Your validator is fully out of the committee, assuming no DKG failures occurred in E+1. It is safe to shut down the node once `in_committee` is `false`.
 
