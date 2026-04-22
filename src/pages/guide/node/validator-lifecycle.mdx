@@ -154,7 +154,7 @@ The new address must not already be used by another active validator.
 
 ## Deactivate your validator
 
-Deactivate your validator when you want to leave the active set. The validator is only removed from the committee once reaching the end of an epoch where the DKG was successful.
+Deactivate your validator when you want to leave the active set.
 
 ::::code-group
 ```bash [Mainnet]
@@ -169,4 +169,14 @@ tempo consensus deactivate-validator <address/pubkey/index> \
 ```
 ::::
 
-Keep your node running after deactivation. Use [validator lookup](/guide/node/validator-status#look-up-your-validator) to check when your validator is no longer listed — it is safe to shut down the node at that point.
+### Exit timeline
+
+Deactivation is not instant — your validator is phased out over two epochs:
+
+| Epoch | State | What happens |
+|-------|-------|-------------|
+| **E** (deactivation) | Active | Transaction is submitted. Your validator is still fully active for the remainder of this epoch. |
+| **E+1** | Exiting | Your validator is a **dealer** (distributing shares) but **no longer a player** (not receiving new shares). It is in the process of being removed. |
+| **E+2** | Exited | Your validator is fully out of the committee (assuming no DKG failures in E+1). |
+
+Keep your node running until your validator shows `in_committee: false`. Use [validator lookup](/guide/node/validator-status#look-up-your-validator) to check — it is safe to shut down the node at that point.

@@ -74,6 +74,16 @@ After on-chain registration, your validator follows the [state transition timeli
 
 In most cases, your validator will be fully active within 6 hours.
 
+## How long does it take for my validator to exit?
+
+After deactivation, your validator is phased out over two epochs:
+
+1. **Epoch E** — deactivation transaction submitted. Validator remains fully active.
+2. **Epoch E+1** (~3 hours) — still a dealer but no longer a player. In the process of being removed.
+3. **Epoch E+2** (~6 hours) — fully out of the committee (assuming no DKG failures).
+
+Keep your node running until `in_committee: false` — check with [validator lookup](/guide/node/validator-status#look-up-your-validator).
+
 ## Can I register my validator without the Tempo team?
 
 Yes — validator registration is self-service. You generate your keys, create the registration signature, and submit the on-chain transaction yourself. However, please [contact the Tempo team](mailto:partners@tempo.xyz) before registering so we can align on timelines and have awareness of your validator joining the active set.
