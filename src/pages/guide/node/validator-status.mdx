@@ -3,6 +3,8 @@ title: Checking validator status
 description: Understand validator state transitions, check your validator's participation status, and query on-chain status.
 ---
 
+import { StaticMermaidDiagram } from '../../../components/StaticMermaidDiagram'
+
 # Checking validator status
 
 Your validator moves through different states after registration. Understanding these states helps you verify that your node is healthy and participating in consensus.
@@ -58,14 +60,18 @@ Example output:
 
 Every state transition happens on epoch boundaries. Currently on mainnet and testnet, the epoch length is around 3 hours.
 
-```mermaid {style: {maxWidth: '360px', margin: '0 auto'}}
-flowchart TD
-    Start(["Add / Rotate in"]) --> A["Registration — Epoch E"]
-    A --> B["Player — Epoch E+1"]
-    B --> C["Dealer / Validator — Epoch E+2"]
-    C --> D["Voter / Proposer"]
-    D --> End(["Deactivate / Rotate out"])
-```
+<StaticMermaidDiagram chart={`stateDiagram-v2
+    [*] --> Registration: Add / Rotate in
+    Registration --> Player: Epoch boundary
+    Player --> Dealer: Epoch boundary
+    Dealer --> Active: Fully synced
+    Active --> [*]: Deactivate / Rotate out
+
+    state "Registration — Epoch E" as Registration
+    state "Player — Epoch E+1\nReceiving signing shares" as Player
+    state "Dealer — Epoch E+2\nDistributing shares" as Dealer
+    state "Active — Voter & Proposer\nProposing and voting on blocks" as Active
+`} />
 
 #### Registration (epoch E)
 
