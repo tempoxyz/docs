@@ -86,7 +86,26 @@ Keep your node running until `in_committee: false` — check with [validator loo
 
 ## Can I register my validator without the Tempo team?
 
-No — the active validator set is currently permissioned. Only the contract owner can add validators on-chain. You generate your keys and create the registration signature yourself, then provide them to the Tempo team for on-chain submission. [Contact the Tempo team](mailto:partners@tempo.xyz) to get started.
+No — the active validator set is currently permissioned. Only the contract owner can add validators on-chain. To get started, [contact the Tempo team](mailto:partners@tempo.xyz).
+
+The onboarding process:
+
+1. **You** generate your signing key and registration signature ([Steps 1–2](/guide/node/validator-setup#initial-registration)).
+2. **You** provide the required values to the Tempo team ([Step 3](/guide/node/validator-setup#step-3-submit-registration-details)).
+3. **The Tempo team** adds your validator on-chain.
+4. **You** download a snapshot and start your node ([Running the validator](/guide/node/validator-setup#running-the-validator)).
+
+## What can I do without the Tempo team?
+
+Once your validator is registered, most operations are self-service:
+
+- [Rotate your signing key](/guide/node/validator-lifecycle#rotate-validator-identity)
+- [Update IP addresses](/guide/node/validator-lifecycle#update-ip-addresses)
+- [Update your fee recipient](/guide/node/validator-lifecycle#update-the-fee-recipient)
+- [Transfer validator ownership](/guide/node/validator-lifecycle#transfer-validator-ownership)
+- [Deactivate your validator](/guide/node/validator-lifecycle#deactivate-your-validator)
+
+Only **initial registration** and **reactivation** require the Tempo team.
 
 ## How do I check which version I'm running?
 
