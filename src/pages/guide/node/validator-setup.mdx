@@ -17,7 +17,7 @@ Registering a validator takes three steps:
 
 1. **[Generate a signing keypair](#step-1-generate-a-signing-keypair)** — Create an ed25519 private key and derive the public key.
 2. **[Create the add-validator signature](#step-2-create-the-add-validator-signature)** — Prove ownership of the signing key by producing a signature over your registration details.
-3. **[Submit registration details](#step-3-submit-registration-details)** — Provide the required values to register your validator on-chain.
+3. **[Submit registration details](#step-3-submit-registration-details)** — Provide the Tempo team with all required values to add your validator on-chain.
 
 ### Step 1: Generate a signing keypair
 
@@ -69,7 +69,7 @@ tempo consensus create-add-validator-signature \
 ### Step 3: Submit registration details
 
 :::info
-Operators can submit their own registration transaction on-chain. Before registering, please [reach out to the Tempo team](mailto:partners@tempo.xyz) to align on timelines and ensure we have awareness of your validator joining the set.
+The active validator set is permissioned. Only the contract owner can add validators on-chain. Provide the values below to the Tempo team to complete registration.
 :::
 
 Provide the following values along with the signature to the Tempo team:
