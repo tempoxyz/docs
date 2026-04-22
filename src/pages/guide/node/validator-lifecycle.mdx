@@ -173,10 +173,10 @@ tempo consensus deactivate-validator <address/pubkey/index> \
 
 Deactivation is not instant — your validator is phased out over two epochs:
 
-| Epoch | State | What happens |
-|-------|-------|-------------|
-| **E** (deactivation) | Active | Transaction is submitted. Your validator is still fully active for the remainder of this epoch. |
-| **E+1** | Exiting | Your validator is a **dealer** (distributing shares) but **no longer a player** (not receiving new shares). It is in the process of being removed. |
-| **E+2** | Exited | Your validator is fully out of the committee (assuming no DKG failures in E+1). |
+| Epoch | State | `is_dealer` | `is_player` | `in_committee` |
+|-------|-------|:-----------:|:-----------:|:--------------:|
+| **E** (deactivation) | Active | `true` | `true` | `true` |
+| **E+1** | Exiting | `true` | `false` | `true` |
+| **E+2** | Exited | `false` | `false` | `false` |
 
 Keep your node running until your validator shows `in_committee: false`. Use [validator lookup](/guide/node/validator-status#look-up-your-validator) to check — it is safe to shut down the node at that point.
