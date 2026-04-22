@@ -44,6 +44,24 @@ docker run -d --name tempo ghcr.io/tempoxyz/tempo:<version> --version
 docker logs tempo
 ```
 
+## Snapshots
+
+Downloading a snapshot lets your node skip syncing from genesis and start participating much faster. This is recommended for both RPC nodes and validators.
+
+::::code-group
+```bash [Minimal (validators)]
+tempo download --chain mainnet --minimal
+```
+```bash [Full (RPC / dApp backends)]
+tempo download --chain mainnet
+```
+```bash [Archive (indexers / RPC providers)]
+tempo download --chain mainnet --archive
+```
+::::
+
+For testnet, replace `mainnet` with `moderato`.
+
 ## Verifying Releases
 
 All release artifacts are cryptographically signed. We recommend verifying signatures before running any binary.
