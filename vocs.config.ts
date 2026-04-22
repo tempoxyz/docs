@@ -831,7 +831,7 @@ export default defineConfig({
                 link: '/guide/node/validator-keys',
               },
               {
-                text: 'Observing a validator',
+                text: 'Monitoring a validator',
                 link: '/guide/node/validator-monitoring',
               },
               {
@@ -841,12 +841,17 @@ export default defineConfig({
             ],
           },
           {
-            text: 'Upgrade Cadence',
-            link: '/guide/node/upgrade-cadence',
-          },
-          {
             text: 'Network Upgrades and Releases',
-            link: '/guide/node/network-upgrades',
+            items: [
+              {
+                text: 'Upgrade Cadence',
+                link: '/guide/node/upgrade-cadence',
+              },
+              {
+                text: 'Upgrades and Releases',
+                link: '/guide/node/network-upgrades',
+              },
+            ],
           },
           {
             text: 'Changelog',

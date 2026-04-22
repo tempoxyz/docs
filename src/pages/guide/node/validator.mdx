@@ -2,6 +2,8 @@
 description: Overview of running a Tempo validator node.
 ---
 
+import { Cards, Card } from 'vocs'
+
 # Running a validator node
 
 Validator nodes secure Tempo by validating blocks and participating in consensus.
@@ -10,11 +12,46 @@ Validator nodes secure Tempo by validating blocks and participating in consensus
 The active validator set is currently permissioned. If you are interested in becoming a validator, please [get in touch](mailto:partners@tempo.xyz) with the Tempo team. See [Initial setup](/guide/node/validator-setup) for technical details.
 :::
 
-## Guides
+<Cards>
+  <Card
+    description="Register with the Tempo team, generate your signing key, download a snapshot, and start your validator for the first time"
+    to="/guide/node/validator-setup"
+    icon="lucide:rocket"
+    title="Initial Setup"
+  />
 
-- **[Initial setup](/guide/node/validator-setup)** — Register with the Tempo team, generate your signing key, download a snapshot, and start your validator for the first time.
-- **[Checking validator status](/guide/node/validator-status)** — Understand state transitions, check participation via metrics, and query on-chain status.
-- **[Controlling validator lifecycle](/guide/node/validator-lifecycle)** — Start, stop, register, rotate, deactivate, and transfer ownership of your validator.
-- **[Managing validator keys](/guide/node/validator-keys)** — Key hierarchy, generation, rotation, and signing share recovery.
-- **[Observing a validator](/guide/node/validator-monitoring)** — Monitor consensus and execution health, metrics glossary, Grafana dashboards, and log management.
-- **[Troubleshooting and FAQ](/guide/node/validator-troubleshooting)** — Common issues and solutions.
+  <Card
+    description="Understand state transitions, check participation via metrics, and query on-chain status"
+    to="/guide/node/validator-status"
+    icon="lucide:activity"
+    title="Checking Validator Status"
+  />
+
+  <Card
+    description="Start, stop, register, rotate, deactivate, and transfer ownership of your validator"
+    to="/guide/node/validator-lifecycle"
+    icon="lucide:settings"
+    title="Controlling Validator Lifecycle"
+  />
+
+  <Card
+    description="Key hierarchy, generation, rotation, and signing share recovery"
+    to="/guide/node/validator-keys"
+    icon="lucide:key-round"
+    title="Managing Validator Keys"
+  />
+
+  <Card
+    description="Monitor consensus and execution health, metrics glossary, Grafana dashboards, and log management"
+    to="/guide/node/validator-monitoring"
+    icon="lucide:monitor"
+    title="Monitoring a Validator"
+  />
+
+  <Card
+    description="Common issues and solutions"
+    to="/guide/node/validator-troubleshooting"
+    icon="lucide:help-circle"
+    title="Troubleshooting and FAQ"
+  />
+</Cards>
