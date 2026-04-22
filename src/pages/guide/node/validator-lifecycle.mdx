@@ -71,20 +71,18 @@ Rotation preserves your validator index and active validator count. The old entr
 After rotation, your validator goes through the [standard state transitions](/guide/node/validator-status#state-transitions) with the new identity.
 
 :::danger[Do not shut down the old validator immediately]
-After rotation, the rotated-out validator is still a member of the current committee until the next successful DKG ceremony completes. Shutting it down early will degrade network liveness.
+After rotation, the rotated-out validator is still a dealer in the current committee for at least one more epoch. Shutting it down early will degrade network liveness. See the [exit timeline](#exit-timeline) for the full epoch-by-epoch breakdown.
 
-Keep the old validator running and use `validators-info` to monitor its status:
+Keep the old validator running until it shows `in_committee: false`:
 
 ::::code-group
 ```bash [Mainnet]
-tempo consensus validators-info --rpc-url https://rpc.tempo.xyz
+tempo consensus validator <old_pubkey> --rpc-url https://rpc.tempo.xyz
 ```
 ```bash [Testnet]
-tempo consensus validators-info --rpc-url https://rpc.testnet.tempo.xyz
+tempo consensus validator <old_pubkey> --rpc-url https://rpc.testnet.tempo.xyz
 ```
 ::::
-
-Once the old validator shows `in_committee = false`, it is safe to shut down.
 :::
 
 ## Update IP addresses
@@ -155,6 +153,10 @@ The new address must not already be used by another active validator.
 ## Deactivate your validator
 
 Deactivate your validator when you want to leave the active set.
+
+:::warning[Do not shut down your node immediately after deactivating]
+Your validator remains a dealer in the committee for at least one more epoch after deactivation. Shutting it down early will degrade network liveness. See the [exit timeline](#exit-timeline) below.
+:::
 
 ::::code-group
 ```bash [Mainnet]
