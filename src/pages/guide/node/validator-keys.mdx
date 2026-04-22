@@ -9,6 +9,8 @@ Tempo validators use several keys and addresses. This page explains what each on
 
 :::warning
 Never share your private signing key. Anyone with access to it can impersonate your validator. The Tempo team will never ask for your private key. Store keys securely and restrict file permissions.
+
+Use different signing keys and operator keys for testnet and mainnet. A testnet compromise should never put your mainnet validator at risk.
 :::
 
 ## Key and address overview
@@ -24,6 +26,8 @@ Never share your private signing key. Anyone with access to it can impersonate y
 
 :::warning
 Never share your private signing key. Anyone with access to it can impersonate your validator. The Tempo team will never ask for your private key.
+
+Use a different key for each network rather than reusing the same validator identity on testnet and mainnet.
 :::
 
 Generate an ed25519 keypair:
