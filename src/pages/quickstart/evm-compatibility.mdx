@@ -104,7 +104,7 @@ Tempo uses higher gas costs for state-creating operations to prevent state growt
 | New storage slot (SSTORE 0→non-zero) | 250,000 gas | 20,000 gas |
 | Account creation | 250,000 gas | 0 gas |
 | Contract creation per byte | 1,000 gas | 200 gas |
-| Transaction gas cap | 30M gas | 30M gas |
+| Transaction gas cap | 30M gas | 16.78M gas (2²⁴) |
 
 This means transfers to new addresses cost ~300k gas, and contract deployments cost 5-10x more than on Ethereum. Update your `gas_limit` estimates accordingly.
 
