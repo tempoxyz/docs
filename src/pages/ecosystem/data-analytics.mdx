@@ -59,6 +59,18 @@ Get started with the [CoinGecko API](https://docs.coingecko.com/reference/introd
 
 Start indexing Tempo [here](https://goldsky.com/chains/tempo).
 
+## Pellet
+
+[Pellet](https://pelletfi.com) delivers Open-Ledger Intelligence (OLI) for every TIP-20 stablecoin on Tempo — direct on-chain measurement of peg spread vs pathUSD, TIP-403 policy state (allowlist / blocklist / pause), reserve composition with attestation provenance, TIP-20 reward attribution and effective APY, fee-token economics, DEX flow topology, cross-stable flow anomalies, peg-break events, and composite risk scores with explainable sub-scores. Every numeric value is a direct measurement; null means unmeasured and is never inferred as zero.
+
+Fifteen endpoints — fourteen free + one MPP-paid deep briefing — are consumable directly over HTTP, via the [@pelletfi/sdk](https://www.npmjs.com/package/@pelletfi/sdk) TypeScript client, the [@pelletfi/mcp](https://www.npmjs.com/package/@pelletfi/mcp) MCP server, or the [Pellet entry in MPPScan](https://mppscan.com). All stablecoin-scoped endpoints support historical snapshots via `?as_of=<ISO8601 | epoch | relative>`.
+
+Review the [Pellet API documentation](https://pelletfi.com/docs/api) and the [OLI methodology](https://pelletfi.com/docs/oli).
+
+:::tip
+Pellet ships the first pre-trade TIP-403 compliance oracle on Tempo. Agents call `GET /api/v1/tip403/simulate?from=…&to=…&token=…&amount=…` before submitting a transfer to predict whether it would revert under the token's policy — without spending gas on the attempt. Returns a tri-state `willSucceed` (`true` | `false` | `null`) plus policy id, policy type, per-party authorization, and balance verification.
+:::
+
 ## Range
 
 [Range](https://www.range.org) powers the Stablecoin Explorer, which provides a unified view of major stablecoins across 100+ chains. Tempo is fully supported, allowing developers and users to trace stablecoin flows in a way traditional explorers cannot.
