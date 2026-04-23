@@ -3,10 +3,9 @@
 // biome-ignore-all format: snippet
 
 // [!region setup]
-import { tempoWallet } from 'accounts/wagmi'
 import { tempo } from 'viem/chains'
 import { createConfig, http } from 'wagmi'
-import { KeyManager, webAuthn } from 'wagmi/tempo'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet()],
@@ -20,11 +19,10 @@ export const config = createConfig({
 // [!endregion setup]
 
 // [!region withFeePayer]
-import { tempoWallet } from 'accounts/wagmi'
 import { tempo } from 'viem/chains'
 import { withRelay } from 'viem/tempo'
 import { createConfig, http } from 'wagmi'
-import { KeyManager, webAuthn } from 'wagmi/tempo'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [

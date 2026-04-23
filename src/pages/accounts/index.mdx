@@ -91,13 +91,13 @@ Get started with Wagmi by following the [official guide](https://wagmi.sh/react/
 
 ### Configure
 
-After you have set up Wagmi, you can set up the Tempo Accounts SDK by using a Connector from `accounts/wagmi`.
+After you have set up Wagmi, you can configure the Tempo Accounts SDK with `tempoWallet` from `wagmi/connectors` or `webAuthn` from `wagmi/tempo`.
 
 :::code-group
 ```tsx twoslash [Tempo Wallet]
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { tempoWallet } from 'accounts/wagmi' // [!code hl]
+import { tempoWallet } from 'wagmi/connectors' // [!code hl]
 
 export const wagmiConfig = createConfig({
   chains: [tempo],
@@ -110,7 +110,7 @@ export const wagmiConfig = createConfig({
 ```tsx twoslash [Domain-bound Passkeys]
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { webAuthn } from 'accounts/wagmi' // [!code hl]
+import { webAuthn } from 'wagmi/tempo' // [!code hl]
 
 export const wagmiConfig = createConfig({
   chains: [tempo],
