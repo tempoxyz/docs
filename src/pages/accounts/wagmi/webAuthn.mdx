@@ -12,7 +12,7 @@ Creates a Wagmi connector backed by the WebAuthn adapter.
 ```ts
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { webAuthn } from 'accounts/wagmi'
+import { webAuthn } from 'wagmi/tempo'
 
 export const config = createConfig({
   chains: [tempo],
@@ -45,7 +45,7 @@ Cannot be used with `ceremony`.
 ```ts twoslash
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { webAuthn } from 'accounts/wagmi'
+import { webAuthn } from 'wagmi/tempo'
 
 export const config = createConfig({
   chains: [tempo],
@@ -70,7 +70,7 @@ import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
 import { parseUnits } from 'viem'
 import { Expiry } from 'accounts'
-import { webAuthn } from 'accounts/wagmi'
+import { webAuthn } from 'wagmi/tempo'
 
 export const config = createConfig({
   chains: [tempo],
@@ -109,7 +109,7 @@ Cannot be used with `authUrl`.
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
 import { WebAuthnCeremony } from 'accounts'
-import { webAuthn } from 'accounts/wagmi'
+import { webAuthn } from 'wagmi/tempo'
 
 export const config = createConfig({
   chains: [tempo],
@@ -136,7 +136,7 @@ Fee payer configuration for interacting with a service running [`Handler.relay`]
 ```ts twoslash
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { webAuthn } from 'accounts/wagmi'
+import { webAuthn } from 'wagmi/tempo'
 
 export const config = createConfig({
   chains: [tempo],
@@ -160,7 +160,7 @@ Enable [Machine Payment Protocol](https://mpp.dev) support.
 ```ts twoslash
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { webAuthn } from 'accounts/wagmi'
+import { webAuthn } from 'wagmi/tempo'
 
 export const config = createConfig({
   chains: [tempo],
@@ -184,7 +184,7 @@ Use testnet. When `true`, the default chain will be the first testnet chain in `
 ```ts twoslash
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { webAuthn } from 'accounts/wagmi'
+import { webAuthn } from 'wagmi/tempo'
 
 export const config = createConfig({
   chains: [tempo],

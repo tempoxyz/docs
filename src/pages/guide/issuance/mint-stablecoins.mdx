@@ -83,7 +83,7 @@ export function GrantIssuerRole() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { tempoWallet } from 'accounts/wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
@@ -184,7 +184,7 @@ export function MintToken() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { tempoWallet } from 'accounts/wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
@@ -341,7 +341,7 @@ export function BurnToken() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { tempoWallet } from 'accounts/wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],

@@ -1,6 +1,5 @@
 import { QueryClient } from '@tanstack/react-query'
 import { Expiry } from 'accounts'
-import { tempoWallet, webAuthn as webAuthnAccounts } from 'accounts/wagmi'
 import * as React from 'react'
 import { parseUnits } from 'viem'
 import { tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
@@ -14,6 +13,7 @@ import {
   useConnectors,
   webSocket,
 } from 'wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 import { KeyManager, webAuthn } from 'wagmi/tempo'
 import { alphaUsd, betaUsd, pathUsd, thetaUsd } from './components/guides/tokens'
 import { feeToken, moderatoZones } from './lib/private-zones.ts'
@@ -52,7 +52,7 @@ export function getConfig(options: getConfig.Options = {}) {
     connectors: [
       ...(import.meta.env.VITE_E2E === 'true'
         ? [
-            webAuthnAccounts({
+            webAuthn({
               rdns: 'webAuthn',
             }),
           ]
