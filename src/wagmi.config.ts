@@ -14,7 +14,7 @@ import {
   webSocket,
 } from 'wagmi'
 import { tempoWallet } from 'wagmi/connectors'
-import { KeyManager, webAuthn } from 'wagmi/tempo'
+import { webAuthn } from 'wagmi/tempo'
 import { alphaUsd, betaUsd, pathUsd, thetaUsd } from './components/guides/tokens'
 import { feeToken, moderatoZones } from './lib/private-zones.ts'
 
@@ -73,9 +73,15 @@ export function getConfig(options: getConfig.Options = {}) {
               },
             }),
             webAuthn({
-              grantAccessKey: true,
-              keyManager: KeyManager.http('https://keys.tempo.xyz'),
-              rpId,
+              authorizeAccessKey: () => ({
+                expiry: Expiry.days(1),
+                limits: [
+                  { token: pathUsd, limit: parseUnits('500', 6) },
+                  { token: alphaUsd, limit: parseUnits('500', 6) },
+                  { token: betaUsd, limit: parseUnits('500', 6) },
+                  { token: thetaUsd, limit: parseUnits('500', 6) },
+                ],
+              }),
             }),
           ]),
     ],

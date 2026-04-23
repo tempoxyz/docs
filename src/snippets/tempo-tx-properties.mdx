@@ -889,15 +889,15 @@ Post-T3, access keys gain periodic limits and call scoping, and access-key-signe
     
     ```tsx twoslash [example.ts]
     // @noErrors
+    import { Expiry } from 'accounts'
     import { tempo } from 'viem/chains'
-    import { KeyManager, webAuthn } from 'wagmi/tempo'
+    import { webAuthn } from 'wagmi/tempo'
     import { createConfig, http } from 'wagmi'
     
     export const config = createConfig({
       connectors: [
         webAuthn({
-          grantAccessKey: true, // [!code hl]
-          keyManager: KeyManager.localStorage(),
+          authorizeAccessKey: () => ({ expiry: Expiry.days(1) }), // [!code hl]
         }),
       ],
       chains: [tempo],
