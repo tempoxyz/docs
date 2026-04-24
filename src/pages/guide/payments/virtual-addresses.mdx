@@ -49,6 +49,19 @@ This walkthrough shows the full flow:
 4. confirm that the balance lands in the registered wallet
 
 <Tabs stateKey="virtual-address-demo-mode">
+  <Tab title="Fast demo">
+
+<div className="h-4" />
+
+Use a docs-managed master with a pre-mined valid salt so you can skip the wait and jump straight to the forwarding flow.
+
+<div className="h-6" />
+
+<Demo.Container name="Virtual addresses" footerVariant={undefined}>
+  <VirtualAddressesFastDemo />
+</Demo.Container>
+
+  </Tab>
   <Tab title="Real registration">
 
 <div className="h-4" />
@@ -65,19 +78,6 @@ Mining the TIP-1022 salt can take 30+ seconds depending on your browser, hardwar
 
 <Demo.Container name="Virtual addresses" footerVariant={undefined}>
   <VirtualAddressesLiveDemo />
-</Demo.Container>
-
-  </Tab>
-  <Tab title="Fast demo">
-
-<div className="h-4" />
-
-Use a docs-managed master with a pre-mined valid salt so you can skip the wait and jump straight to the forwarding flow.
-
-<div className="h-6" />
-
-<Demo.Container name="Virtual addresses" footerVariant={undefined}>
-  <VirtualAddressesFastDemo />
 </Demo.Container>
 
   </Tab>
@@ -120,7 +120,7 @@ A few things matter in production:
 - virtual forwarding applies only to **TIP-20** transfer and mint paths
 - `balanceOf(virtualAddress)` stays `0`; use events and your own `userTag` mapping for attribution
 - policy checks apply to the **resolved master wallet**, not the literal virtual address
-- protocols that treat addresses literally should reject virtual addresses unless they explicitly support them
+- avoid using virtual addresses in reward protocols (lending pools, DEX rewards, etc) unless explicitly supported, as they can't track or hold funds
 
 ## Learn more
 

@@ -1,0 +1,184 @@
+---
+title: Controlling validator lifecycle
+description: Start, stop, register, rotate, deactivate, and transfer ownership of your Tempo validator.
+---
+
+# Controlling validator lifecycle
+
+This guide covers operational actions for managing a Tempo validator — from initial registration to deactivation.
+
+## Starting and stopping
+
+Use `SIGINT` (Ctrl+C) or `SIGTERM` to gracefully stop the node:
+
+```bash
+# If running directly
+kill -INT <pid>
+
+# If running via systemd
+sudo systemctl stop tempo
+```
+
+The node will finish processing the current block before shutting down. Avoid using `SIGKILL` as it may corrupt the database.
+
+## Resetting your validator's data
+
+:::danger
+**You cannot reset a validator's data and continue with the same identity.** Doing so risks inconsistent voting, which can cause irrecoverable network safety failures.
+:::
+
+If you need to reset your validator's data, you must rotate to a new validator identity. This requires coordinating with the Tempo team to deactivate your old identity and register a new one. Don't hesitate to reach out — even with the Tempo team, this is a routine operation.
+
+:::info
+Self-service data resets are coming soon. Once available, you will be able to rotate to a new identity and reset your data without coordinating with the Tempo team. See [Rotate validator identity](#rotate-validator-identity).
+:::
+
+## Rotate validator identity
+
+The ed25519 key can be changed while keeping your validator index stable. This is useful for key rotation or recovery without leaving and re-joining the committee. [Generate a new signing key](/guide/node/validator-keys#generating-a-signing-key) first.
+
+:::danger[Do not shut down the old validator]
+Unlike Ethereum, you must **keep your old validator running** after rotation. The rotated-out validator is still a dealer in the committee for at least one more epoch. Shutting it down early will degrade network liveness. See the [exit timeline](#exit-timeline) for the full epoch-by-epoch breakdown.
+
+Keep the old validator running until it shows `in_committee: false`:
+
+::::code-group
+```bash [Mainnet]
+tempo consensus validator <old_pubkey> --rpc-url https://rpc.tempo.xyz
+```
+```bash [Testnet]
+tempo consensus validator <old_pubkey> --rpc-url https://rpc.testnet.tempo.xyz
+```
+::::
+:::
+
+The simplest way to rotate is using the `tempo` CLI, which handles signature creation and the on-chain transaction in one step:
+
+::::code-group
+```bash [Mainnet]
+tempo consensus rotate-validator \
+  --validator-address <YOUR_VALIDATOR_ADDRESS> \
+  --public-key <NEW_PUBLIC_KEY> \
+  --ingress <NEW_IP:PORT> \
+  --egress <NEW_IP> \
+  --signing-key <NEW_PRIVATE_KEY_PATH> \
+  --private-key <ETHEREUM_PRIVATE_KEY_PATH> \
+  --rpc-url https://rpc.tempo.xyz
+```
+```bash [Testnet]
+tempo consensus rotate-validator \
+  --validator-address <YOUR_VALIDATOR_ADDRESS> \
+  --public-key <NEW_PUBLIC_KEY> \
+  --ingress <NEW_IP:PORT> \
+  --egress <NEW_IP> \
+  --signing-key <NEW_PRIVATE_KEY_PATH> \
+  --private-key <ETHEREUM_PRIVATE_KEY_PATH> \
+  --rpc-url https://rpc.testnet.tempo.xyz
+```
+::::
+
+If self-service rotation is not yet enabled for your validator, use `tempo consensus create-rotate-validator-signature` to generate the signature and provide it to the Tempo team.
+
+:::info
+Rotation preserves your validator index and active validator count. The old entry is appended to history as deactivated, and the entry at your index is updated in place. You must use a different ingress address (changing the port is sufficient).
+:::
+
+After rotation, your validator goes through the [standard state transitions](/guide/node/validator-status#state-transitions) with the new identity.
+
+## Update IP addresses
+
+If your node's network endpoints change, update them on-chain. The change takes effect at the next finalized block.
+
+::::code-group
+```bash [Mainnet]
+tempo consensus set-validator-ip-address <address/pubkey/index> \
+  --ingress <NEW_IP:NEW_PORT> \
+  --egress <NEW_IP> \
+  --rpc-url https://rpc.tempo.xyz \
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
+```
+```bash [Testnet]
+tempo consensus set-validator-ip-address <address/pubkey/index> \
+  --ingress <NEW_IP:NEW_PORT> \
+  --egress <NEW_IP> \
+  --rpc-url https://rpc.testnet.tempo.xyz \
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
+```
+::::
+
+:::warning
+Ingress addresses must be unique across all active validators. The transaction will revert if another active validator already uses the same `IP:port`.
+:::
+
+## Update the fee recipient
+
+The fee recipient used by your validator when constructing block proposals is managed on-chain. This can be updated and takes effect on the next finalized block.
+
+::::code-group
+```bash [Mainnet]
+tempo consensus set-validator-fee-recipient <address/pubkey/index> \
+  --fee-recipient <ETHEREUM_ADDRESS> \
+  --rpc-url https://rpc.tempo.xyz \
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
+```
+```bash [Testnet]
+tempo consensus set-validator-fee-recipient <address/pubkey/index> \
+  --fee-recipient <ETHEREUM_ADDRESS> \
+  --rpc-url https://rpc.testnet.tempo.xyz \
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
+```
+::::
+
+## Transfer validator ownership
+
+Rebind your validator entry to a new control address:
+
+::::code-group
+```bash [Mainnet]
+tempo consensus transfer-validator-ownership <address/pubkey/index> \
+  --rpc-url https://rpc.tempo.xyz \
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY> \
+  --new-private-key <PATH_TO_NEW_VALIDATOR_PRIVATE_KEY>
+```
+```bash [Testnet]
+tempo consensus transfer-validator-ownership <address/pubkey/index> \
+  --rpc-url https://rpc.testnet.tempo.xyz \
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY> \
+  --new-private-key <PATH_TO_NEW_VALIDATOR_PRIVATE_KEY>
+```
+::::
+
+The new address must not already be used by another active validator.
+
+## Deactivate your validator
+
+Deactivate your validator when you want to leave the active set.
+
+:::warning[Do not shut down your node immediately after deactivating]
+Your validator remains a dealer in the committee for at least one more epoch after deactivation. Shutting it down early will degrade network liveness. See the [exit timeline](#exit-timeline) below.
+:::
+
+::::code-group
+```bash [Mainnet]
+tempo consensus deactivate-validator <address/pubkey/index> \
+  --rpc-url https://rpc.tempo.xyz \
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
+```
+```bash [Testnet]
+tempo consensus deactivate-validator <address/pubkey/index> \
+  --rpc-url https://rpc.testnet.tempo.xyz \
+  --private-key <PATH_TO_VALIDATOR_PRIVATE_KEY>
+```
+::::
+
+### Exit timeline
+
+Deactivation is not instant — your validator is phased out over two epochs:
+
+| Epoch | State | `is_dealer` | `is_player` | `in_committee` |
+|-------|-------|:-----------:|:-----------:|:--------------:|
+| **E** (deactivation) | Active | `true` | `true` | `true` |
+| **E+1** | Exiting | `true` | `false` | `true` |
+| **E+2** | Exited | `false` | `false` | `false` |
+
+Keep your node running until your validator shows `in_committee: false`. Use [validator lookup](/guide/node/validator-status#look-up-your-validator) to check — it is safe to shut down the node at that point.
