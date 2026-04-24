@@ -24,7 +24,7 @@ While the execution environment mirrors Ethereum's, Tempo introduces some differ
     title="Transaction Differences"
   />
   <Card
-    description="VM-level differences including balance opcodes and Solidity compatibility."
+    description="VM-level differences including custom opcodes, balance opcodes, and state creation costs."
     to="#vm-layer-differences"
     icon="lucide:code"
     title="VM Layer Differences"
@@ -93,7 +93,32 @@ If a wallet wants to submit a non-TIP20 transaction without having to submit the
 
 ## VM Layer Differences
 
-At the VM layer, all opcodes are supported out of the box. Due to the lack of a native token, native token balance is always returning zero balances.
+At the VM layer, all standard EVM opcodes are supported out of the box. Tempo also introduces a custom opcode for millisecond-precision timestamps. Due to the lack of a native token, native token balance is always returning zero balances.
+
+### Custom Opcodes
+
+#### `TIMESTAMPMS` (`0x4F`)
+
+Pushes the current block timestamp in **milliseconds** onto the stack. This is a Tempo-specific opcode that provides sub-second precision, compared to the standard `TIMESTAMP` (`0x42`) opcode which only provides second-level granularity.
+
+| Property | Value |
+|----------|-------|
+| Opcode | `0x4F` |
+| Gas cost | 2 |
+| Stack inputs | 0 |
+| Stack output | 1 × `uint256` |
+
+The value is computed as:
+
+```
+TIMESTAMPMS = (TIMESTAMP × 1000) + timestamp_millis_part
+```
+
+Where `timestamp_millis_part` is a sub-second milliseconds field (`0`–`999`) stored in the [Tempo block header](/protocol/blockspace/overview#header-fields).
+
+:::warning
+`TIMESTAMPMS` is available from genesis through the T1B hardfork. It is **removed** at T1C and later — executing `0x4F` on those hardforks will halt with `OpcodeNotFound`.
+:::
 
 ### State Creation Costs
 
