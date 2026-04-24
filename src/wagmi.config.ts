@@ -51,11 +51,12 @@ export function getConfig(options: getConfig.Options = {}) {
     chains: [chain],
     connectors: [
       ...(import.meta.env.VITE_E2E === 'true'
-        ? [
-            webAuthnAccounts({
-              rdns: 'webAuthn',
-            }),
-          ]
+       ? [
+           webAuthnAccounts({
+             keyManager: KeyManager.http('https://keys.tempo.xyz'),
+             rpId,
+           }),
+         ]
         : [
             tempoWallet({
               authorizeAccessKey: () => ({
@@ -124,7 +125,7 @@ export function useTempoWalletConnector() {
   const connectors = useConnectors()
   return React.useMemo(
     // biome-ignore lint/style/noNonNullAssertion: _
-    () => connectors.find((connector) => connector.id === 'xyz.tempo')!,
+    () => connectors.find((c: { id: string }) => c.id === 'xyz.tempo')!,
     [connectors],
   )
 }
@@ -133,7 +134,7 @@ export function useWebAuthnConnector() {
   const connectors = useConnectors()
   return React.useMemo(
     // biome-ignore lint/style/noNonNullAssertion: _
-    () => connectors.find((connector) => connector.id === 'webAuthn')!,
+    () => connectors.find((c: { id: string }) => c.id === 'webAuthn')!,
     [connectors],
   )
 }
