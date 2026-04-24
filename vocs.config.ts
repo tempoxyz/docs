@@ -827,18 +827,47 @@ export default defineConfig({
                 link: '/guide/node/validator',
               },
               {
-                text: 'Operation',
-                link: '/guide/node/operate-validator',
+                text: 'Validator Onboarding',
+                link: '/guide/node/validator-setup',
               },
               {
-                text: 'ValidatorConfig V2',
-                link: '/guide/node/validator-config-v2',
+                text: 'Checking validator status',
+                link: '/guide/node/validator-status',
+              },
+              {
+                text: 'Controlling validator lifecycle',
+                link: '/guide/node/validator-lifecycle',
+              },
+              {
+                text: 'Managing validator keys',
+                link: '/guide/node/validator-keys',
+              },
+              {
+                text: 'Monitoring a validator',
+                link: '/guide/node/validator-monitoring',
+              },
+              {
+                text: 'Troubleshooting and FAQ',
+                link: '/guide/node/validator-troubleshooting',
               },
             ],
           },
           {
+            text: 'Node Security',
+            link: '/guide/node/security',
+          },
+          {
             text: 'Network Upgrades and Releases',
-            link: '/guide/node/network-upgrades',
+            items: [
+              {
+                text: 'Upgrade Cadence',
+                link: '/guide/node/upgrade-cadence',
+              },
+              {
+                text: 'Upgrades and Releases',
+                link: '/guide/node/network-upgrades',
+              },
+            ],
           },
           {
             text: 'Changelog',

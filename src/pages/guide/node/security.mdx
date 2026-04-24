@@ -1,0 +1,53 @@
+---
+title: Node Security
+description: Security best practices for Tempo node operators, covering key management, network configuration, release verification, and data integrity.
+---
+
+# Node Security
+
+This page covers security best practices for Tempo node operators. Following these recommendations helps protect your validator from impersonation, unauthorized access, and operational mistakes.
+
+## Key management
+
+Your signing key is the most sensitive asset on your validator. Anyone with access to it can impersonate your node in consensus.
+
+- **Restrict file permissions** — set `chmod 600` on key files so only the node process user can read them.
+- **Never share your private key** — the Tempo team will never ask for it.
+- **Use different keys for testnet and mainnet** — do not reuse signing keys or operator keys across networks; a testnet compromise should never put your mainnet validator at risk.
+- **Rotate keys periodically** — use [key rotation](/guide/node/validator-lifecycle#rotate-validator-identity) to swap to a new ed25519 key without leaving the committee.
+- **Separate the operator address** — the Ethereum address that controls on-chain operations (IP updates, rotation, ownership transfer) should be a dedicated address, not a general-purpose hot wallet.
+
+See [Managing validator keys](/guide/node/validator-keys) for the full key hierarchy and generation instructions.
+
+## Network configuration
+
+Tempo's networking layer includes built-in protections, making a cloud firewall or NAT gateway unnecessary in most setups. The node:
+
+- Only accepts consensus connections from validators that can prove their identity
+- Only accepts connections from trusted IP addresses (active validators on-chain)
+- Rate-limits connections and messages in both consensus and execution layers
+
+### Recommendations
+
+- **Expose only the required ports** — see [Ports](/guide/node/system-requirements#ports) for which ports need public access vs. internal-only.
+- **Keep ingress addresses unique** — the on-chain contract enforces uniqueness, but verify your registered `IP:port` is correct after infrastructure changes.
+- **Use a dedicated machine** — avoid running other internet-facing services on the same host as your validator.
+
+## Release verification
+
+Always verify release artifacts before running them. Tempo signs all binaries and Docker images — see [Verifying Releases](/guide/node/installation#verifying-releases) for GPG, Cosign, and SHA256 verification instructions.
+
+## Time synchronization
+
+An unsynchronized clock can cause your node to reject valid blocks or produce blocks that other validators reject. Use `chrony` or `ntpd` — not `systemd-timesyncd`. See [Time Synchronization](/guide/node/system-requirements#time-synchronization) for setup instructions.
+
+## Data integrity
+
+- **Never delete the data directory and re-sync with the same signing key** — this risks double-signing and will require [rotating to a new identity](/guide/node/validator-lifecycle#resetting-your-validators-data). Deleting only the `consensus` subdirectory is safe; the signing share will be [automatically recovered](/guide/node/validator-keys#signing-share-recovery).
+- **Back up your signing key** — if the key file is lost and no backup exists, you will need to rotate to a new key and coordinate with the Tempo team.
+
+## Staying up to date
+
+- Subscribe to [Tempo GitHub releases](https://github.com/tempoxyz/tempo/releases) for security patches and upgrade announcements.
+- Review the [Upgrade Cadence](/guide/node/upgrade-cadence) to understand notification timelines.
+- Apply <span style={{color: 'var(--vocs-color_red)'}}>Required</span> upgrades before the activation block — failing to do so will fork your node off the network.

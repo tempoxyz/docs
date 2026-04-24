@@ -57,12 +57,12 @@ function getExplorerHost() {
   return tempoModerato.blockExplorers.default.url
 }
 
-export function ExplorerLink({ hash }: { hash: string }) {
+export function ExplorerLink({ hash, inline = false }: { hash: string; inline?: boolean }) {
   const { trackExternalLinkClick } = usePostHogTracking()
   const url = `${getExplorerHost()}/tx/${hash}`
 
   return (
-    <div className="mt-1">
+    <div className={inline ? 'inline-flex' : 'mt-1'}>
       <a
         href={url}
         target="_blank"
@@ -101,12 +101,15 @@ export function ReceiptHash({ hash }: { hash: string }) {
   )
 }
 
-export function ExplorerAccountLink({ address }: { address: string }) {
+export function ExplorerAccountLink({
+  address,
+  inline = false,
+}: { address: string; inline?: boolean }) {
   const { trackExternalLinkClick } = usePostHogTracking()
-  const url = `${getExplorerHost()}/account/${address}`
+  const url = `${getExplorerHost()}/address/${address}`
 
   return (
-    <div className="mt-1">
+    <div className={inline ? 'inline-flex' : 'mt-1'}>
       <a
         href={url}
         target="_blank"
@@ -456,7 +459,7 @@ export function Step(
         <div className="flex items-center gap-3.5">
           <div
             className={cx(
-              'flex size-7 items-center justify-center rounded-full text-center text-[13px] text-black tabular-nums opacity-40 group-data-[completed=true]:opacity-100 dark:text-white',
+              'shrink-0 flex size-7 items-center justify-center rounded-full text-center text-[13px] text-black tabular-nums opacity-40 group-data-[completed=true]:opacity-100 dark:text-white',
               completed ? 'bg-green3' : 'bg-gray4',
             )}
           >

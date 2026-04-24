@@ -4,8 +4,9 @@ description: Register a virtual-address master, derive deposit addresses offchai
 interactive: true
 ---
 
-import { Card, Cards } from 'vocs'
+import { Card, Cards, Tab, Tabs } from 'vocs'
 import * as Demo from '../../../components/guides/Demo.tsx'
+import { VirtualAddressesFastDemo } from '../../../components/guides/VirtualAddressesFastDemo.tsx'
 import { VirtualAddressesLiveDemo } from '../../../components/guides/VirtualAddressesLiveDemo.tsx'
 import { MermaidDiagram } from '../../../components/MermaidDiagram'
 
@@ -47,9 +48,40 @@ This walkthrough shows the full flow:
 3. send `pathUSD` from a second address to a virtual address derived from that master id
 4. confirm that the balance lands in the registered wallet
 
+<Tabs stateKey="virtual-address-demo-mode">
+  <Tab title="Fast demo">
+
+<div className="h-4" />
+
+Use a docs-managed master with a pre-mined valid salt so you can skip the wait and jump straight to the forwarding flow.
+
+<div className="h-6" />
+
+<Demo.Container name="Virtual addresses" footerVariant={undefined}>
+  <VirtualAddressesFastDemo />
+</Demo.Container>
+
+  </Tab>
+  <Tab title="Real registration">
+
+<div className="h-4" />
+
+Use `VirtualMaster.mineSaltAsync` to register a master id for the passkey account you create in the demo.
+
+<div className="h-4" />
+
+:::info
+Mining the TIP-1022 salt can take 30+ seconds depending on your browser, hardware, and available worker parallelism.
+:::
+
+<div className="h-6" />
+
 <Demo.Container name="Virtual addresses" footerVariant={undefined}>
   <VirtualAddressesLiveDemo />
 </Demo.Container>
+
+  </Tab>
+</Tabs>
 
 ## What to look for
 
@@ -88,7 +120,7 @@ A few things matter in production:
 - virtual forwarding applies only to **TIP-20** transfer and mint paths
 - `balanceOf(virtualAddress)` stays `0`; use events and your own `userTag` mapping for attribution
 - policy checks apply to the **resolved master wallet**, not the literal virtual address
-- protocols that treat addresses literally should reject virtual addresses unless they explicitly support them
+- avoid using virtual addresses in reward protocols (lending pools, DEX rewards, etc) unless explicitly supported, as they can't track or hold funds
 
 ## Learn more
 

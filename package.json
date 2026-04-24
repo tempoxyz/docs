@@ -29,7 +29,7 @@
     "cva": "1.0.0-beta.4",
     "mermaid": "^11.14.0",
     "monaco-editor": "^0.55.1",
-    "ox": "0.14.18",
+    "ox": "0.14.20",
     "posthog-js": "^1.367.0",
     "posthog-node": "^5.29.2",
     "prool": "^0.2.4",
