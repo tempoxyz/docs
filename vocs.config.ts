@@ -101,6 +101,10 @@ export default defineConfig({
                 link: '/guide/use-accounts/embed-passkeys',
               },
               {
+                text: 'Authorize access keys',
+                link: '/guide/use-accounts/authorize-access-keys',
+              },
+              {
                 text: 'Connect to other wallets',
                 link: '/guide/use-accounts/connect-to-wallets',
               },
