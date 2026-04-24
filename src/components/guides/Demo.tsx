@@ -104,7 +104,10 @@ export function ReceiptHash({ hash }: { hash: string }) {
 export function ExplorerAccountLink({
   address,
   inline = false,
-}: { address: string; inline?: boolean }) {
+}: {
+  address: string
+  inline?: boolean
+}) {
   const { trackExternalLinkClick } = usePostHogTracking()
   const url = `${getExplorerHost()}/address/${address}`
 
@@ -459,7 +462,7 @@ export function Step(
         <div className="flex items-center gap-3.5">
           <div
             className={cx(
-              'shrink-0 flex size-7 items-center justify-center rounded-full text-center text-[13px] text-black tabular-nums opacity-40 group-data-[completed=true]:opacity-100 dark:text-white',
+              'flex size-7 shrink-0 items-center justify-center rounded-full text-center text-[13px] text-black tabular-nums opacity-40 group-data-[completed=true]:opacity-100 dark:text-white',
               completed ? 'bg-green3' : 'bg-gray4',
             )}
           >
@@ -605,6 +608,7 @@ export function Button(
   const Element = render ? (p: typeof props) => React.cloneElement(render, p) : 'button'
   return (
     <Element
+      disabled={disabled ? true : undefined}
       className={buttonClassName({
         className,
         disabled,
