@@ -1,0 +1,135 @@
+---
+title: Monitoring a validator
+description: Monitor validator health with metrics, Grafana dashboards, and log management.
+---
+
+# Monitoring a validator
+
+This guide covers how to monitor your Tempo validator's health, diagnose issues, and manage logs.
+
+## Consensus states
+
+### Proposer
+
+Your validator is currently the leader and proposing blocks. Check proposal activity:
+
+```bash
+# Number of blocks your node has built and resolved
+curl -s localhost:9000/metrics | grep reth_payloads_resolved_block
+```
+
+If this counter is increasing, your validator is actively proposing blocks.
+
+### Voter
+
+Your validator is voting on blocks proposed by others (notarization and finalization). This is the most common state.
+
+```bash
+# Inbound voting messages (should increase steadily)
+curl -s localhost:8002/metrics | grep consensus_engine_epoch_manager_simplex_batcher_inbound_messages_total | grep data_0
+```
+
+This counter should increase steadily when your node is participating in consensus.
+
+## Execution states
+
+### Catching up
+
+Your node is syncing historical blocks.
+
+```bash
+# Check sync stage
+curl -s localhost:6060/metrics | grep reth_sync_checkpoint
+```
+
+If `reth_sync_checkpoint` shows stages other than `Finish`, you're still syncing.
+
+### Up to sync
+
+Your node is fully synced and processing new blocks in real-time.
+
+```bash
+# Processed height should match or be close to finalized height
+curl -s localhost:8002/metrics | grep -E "marshal_finalized_height|marshal_processed_height"
+```
+
+Both values should be nearly equal and increasing together.
+
+## Metrics glossary
+
+| Metric Name | Description | When to alert? | Meaning |
+| --- | --- | --- | --- |
+| `consensus_engine_dkg_manager_ceremony_successes_total` | Number of successful DKG ceremonies | Critical when it hasn't increased in 12 hours | Your node has participated in a successful DKG ceremony |
+| `consensus_engine_dkg_manager_ceremony_failures_total` | Number of failed DKG ceremonies | Warning when it increases | Your node has failed to participate in a DKG ceremony |
+| `consensus_engine_dkg_manager_how_often_dealer` | How many times your node has been a dealer (distributing shares) | Warning when it hasn't increased in 6 hours | Your node is distributing signing shares to other validators |
+| `consensus_engine_dkg_manager_how_often_player` | How many times your node has been a player (receiving shares) | Warning when it hasn't increased in 6 hours | Your node is receiving signing shares from dealers |
+| `consensus_engine_marshal_finalized_height` | Latest finalized height your node is aware of | Warning when it hasn't increased in 1 hour, critical when it hasn't increased in 3 hours | Your node is aware of the latest finalized height |
+| `consensus_engine_marshal_processed_height` | Latest height your node has processed | Critical when it hasn't increased in an hour, warning when it's behind finalized height | Your node is processing blocks |
+| `consensus_network_spawner_connections` | Number of active peers on the consensus layer | Warning when it's below the expected validator count, critical when it's 0 | Your node is connected to the consensus layer |
+| `consensus_engine_epoch_manager_simplex_batcher_inbound_messages_total` | Number of inbound messages related to voting on the consensus layer | Warning when it's not increasing and your node is synced | Your node is receiving voting messages from the consensus layer |
+| `consensus_application_parent_ahead_of_local_time` | Number of times the parent block timestamp was ahead of local time | Warning when it increases frequently | Your node's clock may be out of sync — check NTP configuration |
+| `reth_sync_checkpoint` | Current sync progress | Warning on when there are no changes in the `Finish` stage | Your node is syncing with the network |
+| `reth_payloads_resolved_block` | Number of built and resolved payloads | Warning when it hasn't increased in 12 hours | Your node has built and resolved blocks |
+
+## Grafana dashboard
+
+We provide a pre-built Grafana dashboard for monitoring your validator. It visualizes key metrics including node status, sync progress, voting activity, consensus latency, and execution performance.
+
+### Importing the dashboard
+
+1. Download the dashboard JSON from the [Tempo repository](https://github.com/tempoxyz/tempo/blob/main/contrib/grafana/dashboards/validator-health.json)
+
+2. In Grafana, go to **Dashboards → Import**
+
+3. Either paste the JSON content or upload the file
+
+4. Select your Prometheus and Loki datasources when prompted
+
+5. Click **Import**
+
+### Dashboard variables
+
+The dashboard uses these template variables:
+
+| Variable | Description |
+| --- | --- |
+| `datasource` | Prometheus datasource |
+| `loki_ds` | Loki datasource (for log-based panels) |
+| `network_name` | Filter by network/validator job name |
+
+Make sure your Prometheus is scraping metrics from your validator's metrics endpoint (default: `localhost:8002/metrics`).
+
+## Log management
+
+### Parsing logs
+
+Tempo logs include ANSI escape codes for colors. To strip them for grep/awk:
+
+```bash
+# Strip colors when searching
+sudo journalctl -u tempo | sed 's/\x1b\[[0-9;]*m//g' | grep "error"
+
+# Or disable colors at runtime
+RUST_LOG_STYLE=never tempo node ...
+```
+
+If you're using Loki, you can also use the `decolorize` filter to strip colors:
+
+```
+{job="tempo-node"} | decolorize
+```
+
+### Log levels
+
+Control verbosity with `RUST_LOG`:
+
+```bash
+# Default (info)
+RUST_LOG=info
+
+# Debug consensus only
+RUST_LOG=info,tempo_commonware_node::consensus=debug
+
+# Quiet mode (warnings and errors only)
+RUST_LOG=warn
+```

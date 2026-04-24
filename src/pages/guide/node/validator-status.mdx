@@ -1,0 +1,132 @@
+---
+title: Checking validator status
+description: Understand validator state transitions, check your validator's participation status, and query on-chain status.
+---
+
+import { StaticMermaidDiagram } from '../../../components/StaticMermaidDiagram'
+
+# Checking validator status
+
+Your validator moves through different states after registration. Understanding these states helps you verify that your node is healthy and participating in consensus.
+
+## Look up your validator
+
+You can query a single validator by its consensus public key (the ed25519 key generated during [initial setup](/guide/node/validator-setup#step-1-generate-a-signing-keypair) — see also [Managing validator keys](/guide/node/validator-keys#generating-a-signing-key)):
+
+::::code-group
+```bash [Mainnet]
+tempo consensus validator <pubkey> --rpc-url https://rpc.tempo.xyz
+```
+```bash [Testnet]
+tempo consensus validator <pubkey> --rpc-url https://rpc.testnet.tempo.xyz
+```
+::::
+
+Example output:
+
+```json
+{
+  "current_epoch": 18,
+  "current_height": 5733680,
+  "onchain_address": "0x1234567890abcdef1234567890abcdef12345678",
+  "public_key": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
+  "inbound_address": "203.0.113.10:9000",
+  "outbound_address": "203.0.113.10:9001",
+  "fee_recipient": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+  "index": 5,
+  "active": true,
+  "is_dkg_dealer": true,
+  "is_dkg_player": true,
+  "in_committee": true
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `current_epoch` | The epoch at the time of the query |
+| `current_height` | The block height at the time of the query |
+| `onchain_address` | Validator control address |
+| `public_key` | Ed25519 consensus public key (hex) |
+| `inbound_address` | Inbound address (`IP:port`) for incoming connections |
+| `outbound_address` | Outbound IP address for firewall whitelisting |
+| `fee_recipient` | Address that receives block proposal fees |
+| `index` | Index of the validator (constant under rotation) |
+| `active` | Whether the validator is active in the current contract state |
+| `is_dkg_dealer` | Whether the validator is a dealer (distributing shares) in the current epoch |
+| `is_dkg_player` | Whether the validator is a player (receiving shares) in the current epoch |
+| `in_committee` | Whether the validator is in the committee for the current epoch |
+
+## State transitions
+
+Every state transition happens on epoch boundaries. Currently on mainnet and testnet, the epoch length is around 3 hours.
+
+<StaticMermaidDiagram chart={`stateDiagram-v2
+    [*] --> Registration: Add / Rotate in
+    Registration --> Player: Epoch boundary
+    Player --> Dealer: Epoch boundary
+    Dealer --> Active: Fully synced
+    Active --> Exiting: Deactivate / Rotate out
+    Exiting --> Exited: Epoch boundary
+    Exited --> [*]
+
+    state "Registration — Epoch E" as Registration
+    state "Player — Epoch E+1\nReceiving signing shares" as Player
+    state "Dealer — Epoch E+2\nDistributing shares" as Dealer
+    state "Active — Voter & Proposer\nProposing and voting on blocks" as Active
+    state "Exiting — Epoch E+1\nDealer only, no longer a player" as Exiting
+    state "Exited — Epoch E+2\nFully out of committee" as Exited
+`} />
+
+### Registration (epoch E)
+
+Once your validator is added to the on-chain contract, it is immediately registered on the p2p peer set and starts syncing blocks from the network.
+
+### Player (epoch E+1)
+
+Your validator is receiving consensus signing shares from dealers during the DKG ceremony.
+
+### Dealer / Validator (epoch E+2)
+
+Your validator is distributing consensus signing shares to other validators during the ceremony. Once your node is fully synced, it will also be able to propose blocks and vote on other validators' proposals.
+
+### Exiting (epoch E+1 after deactivation)
+
+After deactivation in epoch E, your validator is still a **dealer** (distributing shares) during epoch E+1, but is **no longer a player** (not receiving new shares). It is in the process of being removed from the committee.
+
+### Exited (epoch E+2 after deactivation)
+
+Your validator is fully out of the committee, assuming no DKG failures occurred in E+1. It is safe to shut down the node once `in_committee` is `false`.
+
+:::info
+The on-chain contract represents which validators should eventually be members of the committee, not which ones currently are. Every epoch, the Tempo network performs a distributed key generation ceremony, distributing keys to validators that should be committee members in the next epoch. So adding, deactivating, or rotating validator entries in epoch `E` can only be taken into account for the next DKG ceremony that runs during epoch `E+1`, and take effect in epoch `E+2`.
+:::
+
+## Checking state via metrics
+
+Monitor these metrics to track your validator's state:
+
+```bash
+# Is your validator connected to other peers (i.e. is it registered)?
+# This should be >0 in at most 3 hours after your validator's addition.
+curl -s localhost:8002/metrics | grep consensus_network_spawner_connections
+
+# How many times YOUR node has been a dealer (distributing shares)
+# This metric should be >0 over 6 hours.
+curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_how_often_dealer
+
+# How many times YOUR node has been a player (receiving shares)
+# This metric should be >0 over 6 hours.
+curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_how_often_player
+
+# Successful ceremonies (should increase every ~3 hours)
+curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_ceremony_successes_total
+
+# Failed ceremonies (should stay at 0 or increase rarely)
+curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_ceremony_failures_total
+```
+
+If `how_often_dealer` or `how_often_player` is increasing, your node is actively participating in DKG ceremonies. After your validator has been added to the network, you should alert on these metrics, as they indicate that your validator is actively participating in the network.
+
+If your validator is not connected to other peers, but at least 3 epochs have passed, check that your node is properly configured — e.g. firewall settings are open to other peers. If you have reset your validator's state, your validator might have been blocked due to double-signing a block. In that case, please reach out to the Tempo team — even with the Tempo team, resolving this requires coordinating a new validator identity.
+
+

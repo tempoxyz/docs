@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  protobufjs: '>=7.5.5'
+  tar: '>=7.5.13'
+  dompurify: '>=3.4.0'
+
 patchedDependencies:
   '@braintree/sanitize-url@7.1.2':
     hash: 74e2e7d501bbd370f1be1835a3907a7ab1281616bfb77ec2ed3d7cd014afae59
@@ -34,12 +39,15 @@ importers:
       '@vercel/speed-insights':
         specifier: ^1.3.1
         version: 1.3.1(react@19.2.5)
+      '@wagmi/core':
+        specifier: 0.0.0-canary-20260421205751
+        version: 0.0.0-canary-20260421205751(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.7.2)(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.5))(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))
       abitype:
         specifier: ^1.2.3
         version: 1.2.3(typescript@5.9.3)(zod@4.3.6)
       accounts:
-        specifier: ^0.6.5
-        version: 0.6.7(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@3.4.2(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(ox@0.14.15(typescript@5.9.3)(zod@4.3.6))(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.5))(viem@2.48.0(typescript@5.9.3)(zod@4.3.6)))(express@5.2.1)(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.5))(viem@2.48.0(typescript@5.9.3)(zod@4.3.6))
+        specifier: ^0.7.1
+        version: 0.7.2(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@0.0.0-canary-20260421205751)(express@5.2.1)(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.5))(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))(wagmi@0.0.0-canary-20260421205751)
       cva:
         specifier: 1.0.0-beta.4
         version: 1.0.0-beta.4(typescript@5.9.3)
@@ -50,8 +58,8 @@ importers:
         specifier: ^0.55.1
         version: 0.55.1
       ox:
-        specifier: ~0.14.15
-        version: 0.14.15(typescript@5.9.3)(zod@4.3.6)
+        specifier: 0.14.20
+        version: 0.14.20(typescript@5.9.3)(zod@4.3.6)
       posthog-js:
         specifier: ^1.367.0
         version: 1.367.0
@@ -86,17 +94,17 @@ importers:
         specifier: ^23.0.1
         version: 23.0.1(@svgr/core@8.1.0(typescript@5.9.3))
       viem:
-        specifier: 2.48.0
-        version: 2.48.0(typescript@5.9.3)(zod@4.3.6)
+        specifier: ^2.48.4
+        version: 2.48.4(typescript@5.9.3)(zod@4.3.6)
       vocs:
         specifier: https://pkg.pr.new/wevm/vocs@2fb25c2
-        version: https://pkg.pr.new/wevm/vocs@2fb25c2(@cfworker/json-schema@4.1.1)(@types/react@19.2.14)(mermaid@11.14.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(rollup@4.60.1)(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))(waku@1.0.0-alpha.4(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+        version: https://pkg.pr.new/wevm/vocs@2fb25c2(@cfworker/json-schema@4.1.1)(@types/react@19.2.14)(mermaid@11.14.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(rollup@4.60.1)(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))(waku@1.0.0-alpha.4(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))
       wagmi:
-        specifier: ^3.6.1
-        version: 3.6.1(@tanstack/query-core@5.99.0)(@tanstack/react-query@5.99.0(react@19.2.5))(@types/react@19.2.14)(ox@0.14.15(typescript@5.9.3)(zod@4.3.6))(react@19.2.5)(typescript@5.9.3)(viem@2.48.0(typescript@5.9.3)(zod@4.3.6))
+        specifier: 0.0.0-canary-20260421205751
+        version: 0.0.0-canary-20260421205751(@tanstack/query-core@5.99.0)(@tanstack/react-query@5.99.0(react@19.2.5))(@types/react@19.2.14)(accounts@0.7.2)(react@19.2.5)(typescript@5.9.3)(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))
       waku:
         specifier: 1.0.0-alpha.4
-        version: 1.0.0-alpha.4(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 1.0.0-alpha.4(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -121,7 +129,7 @@ importers:
         version: 7.0.0-dev.20260122.3
       '@vitejs/plugin-react':
         specifier: ^5.2.0
-        version: 5.2.0(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+        version: 5.2.0(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))
       anser:
         specifier: ^2.3.5
         version: 2.3.5
@@ -139,10 +147,10 @@ importers:
         version: 1.6.0(react@19.2.5)
       vite:
         specifier: ^7.3.2
-        version: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
       vite-plugin-mkcert:
         specifier: ^1.17.12
-        version: 1.17.12(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+        version: 1.17.12(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))
 
 packages:
 
@@ -1528,16 +1536,17 @@ packages:
       react-server-dom-webpack:
         optional: true
 
-  '@wagmi/connectors@8.0.1':
-    resolution: {integrity: sha512-Rga0EDdcdUBlKtlUUPdBPAIlaFIkO8q0xcNObN/Q/CloM1zaruSFht1q3IaJKrytIDkncQa9uhHU6/imzysvpQ==}
+  '@wagmi/connectors@0.0.0-canary-20260421205751':
+    resolution: {integrity: sha512-jxZAMcSExry1+7X/B9nUbkw22x5bB/4mcNGKamkUx5HoXqftpQnf1ikKX2MizgkDni2Mr4P+j/NOlK+5d/qZgQ==}
     peerDependencies:
       '@base-org/account': ^2.5.1
       '@coinbase/wallet-sdk': ^4.3.6
       '@metamask/connect-evm': ~0.9.0
       '@safe-global/safe-apps-provider': ~0.18.6
       '@safe-global/safe-apps-sdk': ^9.1.0
-      '@wagmi/core': 3.4.2
+      '@wagmi/core': 0.0.0-canary-20260421205751
       '@walletconnect/ethereum-provider': ^2.21.1
+      accounts: ~0.6.7
       porto: ~0.2.35
       typescript: '>=5.7.3'
       viem: 2.x
@@ -1554,22 +1563,24 @@ packages:
         optional: true
       '@walletconnect/ethereum-provider':
         optional: true
+      accounts:
+        optional: true
       porto:
         optional: true
       typescript:
         optional: true
 
-  '@wagmi/core@3.4.2':
-    resolution: {integrity: sha512-01i0ILBe74G8eairY2AIKC4Atrd00xw7EckZ5luU1ARl/6789UH79wXHwJDkHyktXtjn6QoSoBRW2brtlS8SWg==}
+  '@wagmi/core@0.0.0-canary-20260421205751':
+    resolution: {integrity: sha512-ZKjCkCBY2TcbNFyhl0G/0QNIhPcBDwb1tiVEb3cq3Nq7ig0hHy3YOjL+bREJwUMfzEglqiNRQ/L+OhwCfGNb0Q==}
     peerDependencies:
       '@tanstack/query-core': '>=5.0.0'
-      ox: '>=0.11.1'
+      accounts: ~0.6.7
       typescript: '>=5.7.3'
       viem: 2.x
     peerDependenciesMeta:
       '@tanstack/query-core':
         optional: true
-      ox:
+      accounts:
         optional: true
       typescript:
         optional: true
@@ -1640,15 +1651,16 @@ packages:
     resolution: {integrity: sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng==}
     engines: {node: '>= 0.6'}
 
-  accounts@0.6.7:
-    resolution: {integrity: sha512-bXTyx3AFoe98dnlavPsxp7Uoho+QXNdOeHNdsvzC5pzQ2idgK50yUiBTKXtI7+E8kSvvfzGQR8ZdwfgJS5bJHg==}
+  accounts@0.7.2:
+    resolution: {integrity: sha512-oMsrbfGxMd1mjfLF0j4d9cUYR/N5vadHvh0kwAI9nKchBJjKJde6m/rF8wbeLM5FwYEUnrwrkkwtAP7J7Oxc/w==}
     peerDependencies:
       '@react-native-async-storage/async-storage': ^3.0.2
-      '@wagmi/core': '>=2'
+      '@wagmi/core': '>=3.4.3'
       expo-secure-store: ^55.0.12
       expo-web-browser: ^55.0.13
       react: '>=18'
       viem: '>=2.43.3'
+      wagmi: '>=0.0.0'
     peerDependenciesMeta:
       '@react-native-async-storage/async-storage':
         optional: true
@@ -1661,6 +1673,8 @@ packages:
       react:
         optional: true
       viem:
+        optional: true
+      wagmi:
         optional: true
 
   acorn-import-phases@1.0.4:
@@ -2100,11 +2114,8 @@ packages:
   discontinuous-range@1.0.0:
     resolution: {integrity: sha512-c68LpLbO+7kP/b1Hr1qs8/BJ09F5khZGTxqxZuhzxpmwJKOgRFHJWIb9/KmqnqHhLdO55aOxFH/EGBvUQbL/RQ==}
 
-  dompurify@3.2.7:
-    resolution: {integrity: sha512-WhL/YuveyGXJaerVlMYGWhvQswa7myDG17P7Vu65EWC05o8vfeNbvNf4d/BOvH99+ZW+LlQsc1GDKMa1vNK6dw==}
-
-  dompurify@3.3.3:
-    resolution: {integrity: sha512-Oj6pzI2+RqBfFG+qOaOLbFXLQ90ARpcGG6UePL82bJLtdsa6CYJD7nmiU8MW9nQNOtCHV3lZ/Bzq1X0QYbBZCA==}
+  dompurify@3.4.1:
+    resolution: {integrity: sha512-JahakDAIg1gyOm7dlgWSDjV4n7Ip2PKR55NIT6jrMfIgLFgWo81vdr1/QGqWtFNRqXP9UV71oVePtjqS2ebnPw==}
 
   dot-case@3.0.4:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
@@ -2935,11 +2946,6 @@ packages:
       typescript:
         optional: true
 
-  mkdirp@3.0.1:
-    resolution: {integrity: sha512-+NsyUUAZDmo6YVHzL/stxSu3t9YS1iljliy3BSDrXJ/dkn1KYdmtZODGGjLcc9XLgVVpH4KshHB8XmZgMhaBXg==}
-    engines: {node: '>=10'}
-    hasBin: true
-
   mlly@1.8.2:
     resolution: {integrity: sha512-d+ObxMQFmbt10sretNDytwt85VrbkhhUA/JBGm1MPaWJ65Cl4wOgLaB1NYvJSZ0Ef03MMEU/0xpPMXUIQ29UfA==}
 
@@ -2949,8 +2955,8 @@ packages:
   moo@0.5.3:
     resolution: {integrity: sha512-m2fmM2dDm7GZQsY7KK2cme8agi+AAljILjQnof7p1ZMDe6dQ4bdnSMx0cPppudoeNv5hEFQirN6u+O4fDE0IWA==}
 
-  mppx@0.5.12:
-    resolution: {integrity: sha512-pr6epOYJd8Q6D+MRMc27G48IMh0naAGMMyY1cZYrxMXVwH8PPn1ZaqUwv31svcjOV+UpSrSAe/MP2hRWJ0KQ7A==}
+  mppx@0.5.11:
+    resolution: {integrity: sha512-jV3G7RKGp0ANk7UBcfAeIRgqKDtJUDOCdwtqQKQi6dft9hTOLo5+jfLG7NRIE/1lncbIhxsX+zXhfbi34lgcxA==}
     hasBin: true
     peerDependencies:
       '@modelcontextprotocol/sdk': '>=1.25.0'
@@ -3141,24 +3147,16 @@ packages:
   outvariant@1.4.0:
     resolution: {integrity: sha512-AlWY719RF02ujitly7Kk/0QlV+pXGFDHrHf9O2OKqyqgBieaPOIeuSkL8sRK6j2WK+/ZAURq2kZsY0d8JapUiw==}
 
-  ox@0.14.10:
-    resolution: {integrity: sha512-PYsqEnSP7CrcxISS3uVBtw9yPy2gATAnWNptTI0pMnlrXLTiw0Xw/IIivJVHDFgGvKuRAtBSafhVjs+jis3CVA==}
+  ox@0.14.20:
+    resolution: {integrity: sha512-rby38C3nDn8eQkf29Zgw4hkCZJ64Qqi0zRPWL8ENUQ7JVuoITqrVtwWQgM/He19SCMUEc7hS/Sjw0jIOSLJhOw==}
     peerDependencies:
       typescript: '>=5.4.0'
     peerDependenciesMeta:
       typescript:
         optional: true
 
-  ox@0.14.15:
-    resolution: {integrity: sha512-3TubCmbKen/cuZQzX0qDbOS5lojjdSZ90lqKxWIDWd5siuJ0IJBaTXMYs8eMPLcraqnOwGZazz3apHPGiRCkGQ==}
-    peerDependencies:
-      typescript: '>=5.4.0'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-
-  ox@0.14.17:
-    resolution: {integrity: sha512-jOzNb2Wlfzsr8z/GoCtd1bf6OSRuWuysvbhnHGD+7fV1WRbcBR6B0RYoe3xWnUedF7zp4l5APmS7CzAhUok/lA==}
+  ox@0.14.7:
+    resolution: {integrity: sha512-zSQ/cfBdolj7U4++NAvH7sI+VG0T3pEohITCgcQj8KlawvTDY4vGVhDT64Atsm0d6adWfIYHDpu88iUBMMp+AQ==}
     peerDependencies:
       typescript: '>=5.4.0'
     peerDependenciesMeta:
@@ -3283,8 +3281,8 @@ packages:
   property-information@7.1.0:
     resolution: {integrity: sha512-TwEZ+X+yCJmYfL7TPUOcvBZ4QfoT5YenQiJuX//0th53DE6w0xxLEtfK3iyryQFddXuvkIk51EEgrJQ0WJkOmQ==}
 
-  protobufjs@7.5.4:
-    resolution: {integrity: sha512-CvexbZtbov6jW2eXAvLukXjXUW1TzFaivC46BpWc/3BpcCysb5Vffu+B3XHMm8lVEuy2Mm4XGex8hBSg1yapPg==}
+  protobufjs@8.0.1:
+    resolution: {integrity: sha512-NWWCCscLjs+cOKF/s/XVNFRW7Yih0fdH+9brffR5NZCy8k42yRdl5KlWKMVXuI1vfCoy4o1z80XR/W/QUb3V3w==}
     engines: {node: '>=12.0.0'}
 
   proxy-addr@2.0.7:
@@ -3610,10 +3608,13 @@ packages:
     resolution: {integrity: sha512-1MOpMXuhGzGL5TTCZFItxCc0AARf1EZFQkGqMm7ERKj8+Hgr5oLvJOVFcC+lRmR8hCe2S3jC4T5D7Vg/d7/fhA==}
     engines: {node: '>=6'}
 
-  tar@7.2.0:
-    resolution: {integrity: sha512-hctwP0Nb4AB60bj8WQgRYaMOuJYRAPMGiQUAotms5igN8ppfQM+IvjQ5HcKu1MaZh2Wy2KWVTe563Yj8dfc14w==}
+  tapable@2.3.3:
+    resolution: {integrity: sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==}
+    engines: {node: '>=6'}
+
+  tar@7.5.13:
+    resolution: {integrity: sha512-tOG/7GyXpFevhXVh8jOPJrmtRpOTsYqUIkVdVooZYJS/z8WhfQUX8RJILmeuJNinGAMSu1veBr4asSHFt5/hng==}
     engines: {node: '>=18'}
-    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   terser-webpack-plugin@5.4.0:
     resolution: {integrity: sha512-Bn5vxm48flOIfkdl5CaD2+1CiUVbonWQ3KQPyP7/EuIl9Gbzq/gQFOzaMFUEgVjB1396tcK0SG8XcNJ/2kDH8g==}
@@ -3631,8 +3632,8 @@ packages:
       uglify-js:
         optional: true
 
-  terser@5.46.1:
-    resolution: {integrity: sha512-vzCjQO/rgUuK9sf8VJZvjqiqiHFaZLnOiimmUuOKODxWL8mm/xua7viT7aqX7dgPY60otQjUotzFMmCB4VdmqQ==}
+  terser@5.46.2:
+    resolution: {integrity: sha512-uxfo9fPcSgLDYob/w1FuL0c99MWiJDnv+5qXSQc5+Ki5NjVNsYi66INnMFBjf6uFz6OnX12piJQPF4IpjJTNTw==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -3840,8 +3841,8 @@ packages:
   vfile@6.0.3:
     resolution: {integrity: sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q==}
 
-  viem@2.48.0:
-    resolution: {integrity: sha512-0uLzTAUNKPpY9Cf3OBCPdwClXx9CEHAkoVYnxMPdHt7cRI1DobMso+pHZvU7itD+hFwE4htmp9QfP+5lb+kn0g==}
+  viem@2.48.4:
+    resolution: {integrity: sha512-mReP/rgY2P+WeeRSG4sUvccCLKfyAW1C73Y3KkobAqgzYmVna9qyUMNE44xIUkDtfvRuC33r24UhF4baBYovsg==}
     peerDependencies:
       typescript: '>=5.0.4'
     peerDependenciesMeta:
@@ -3911,7 +3912,7 @@ packages:
         optional: true
 
   vocs@https://pkg.pr.new/wevm/vocs@2fb25c2:
-    resolution: {tarball: https://pkg.pr.new/wevm/vocs@2fb25c2}
+    resolution: {integrity: sha512-ks2EN0bid4JPpFiHH8LDtKn4fRII9HrpyeHmD49VoOmZcgFvK6FAQ5iryi8HeS1f7uZfk/UoFdaPKC0mnR7ebw==, tarball: https://pkg.pr.new/wevm/vocs@2fb25c2}
     version: 0.0.0
     hasBin: true
     peerDependencies:
@@ -3954,8 +3955,8 @@ packages:
   w3c-keyname@2.2.8:
     resolution: {integrity: sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==}
 
-  wagmi@3.6.1:
-    resolution: {integrity: sha512-GhOm/1FIhsendD+VmBknX+zCxYZCcysbraj/A7L7Lszm8+HgTdHj7eF6DrknKVG12NTXYdmM4vni+jHHrdBuaQ==}
+  wagmi@0.0.0-canary-20260421205751:
+    resolution: {integrity: sha512-y2TJVluIRMgFSwGMv77WfiLe66ya0kbuxBmlJAIgptqqdzidSQXxB/x0NqDh0gxqvZR/0Sa0H2GpXbVM7+atMA==}
     peerDependencies:
       '@tanstack/react-query': '>=5.0.0'
       react: '>=18'
@@ -3984,8 +3985,8 @@ packages:
   webauthx@0.1.1:
     resolution: {integrity: sha512-3jiskZl0jiTUoO8r3ySUYItdXNDBpfzxnxPx7XM0giF2dIY7S4KqHVbH04Qglz98nP8RaSV1/+3eDCx1s3WDiQ==}
 
-  webpack-sources@3.3.4:
-    resolution: {integrity: sha512-7tP1PdV4vF+lYPnkMR0jMY5/la2ub5Fc/8VQrrU+lXkiM6C4TjVfGw7iKfyhnTQOsD+6Q/iKw0eFciziRgD58Q==}
+  webpack-sources@3.4.0:
+    resolution: {integrity: sha512-gHwIe1cgBvvfLeu1Yz/dcFpmHfKDVxxyqI+kzqmuxZED81z2ChxpyqPaWcNqigPywhaEke7AjSGga+kxY55gjQ==}
     engines: {node: '>=10.13.0'}
 
   webpack-virtual-modules@0.6.2:
@@ -4711,7 +4712,7 @@ snapshots:
       '@opentelemetry/sdk-logs': 0.208.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-metrics': 2.2.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace-base': 2.2.0(@opentelemetry/api@1.9.1)
-      protobufjs: 7.5.4
+      protobufjs: 8.0.1
 
   '@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.1)':
     dependencies:
@@ -5087,12 +5088,12 @@ snapshots:
       '@tailwindcss/oxide-win32-arm64-msvc': 4.2.2
       '@tailwindcss/oxide-win32-x64-msvc': 4.2.2
 
-  '@tailwindcss/vite@4.2.2(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))':
+  '@tailwindcss/vite@4.2.2(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))':
     dependencies:
       '@tailwindcss/node': 4.2.2
       '@tailwindcss/oxide': 4.2.2
       tailwindcss: 4.2.2
-      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
 
   '@takumi-rs/core-darwin-arm64@0.62.8':
     optional: true
@@ -5394,7 +5395,7 @@ snapshots:
     optionalDependencies:
       react: 19.2.5
 
-  '@vitejs/plugin-react@5.1.2(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))':
+  '@vitejs/plugin-react@5.1.2(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.29.0)
@@ -5402,11 +5403,11 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-beta.53
       '@types/babel__core': 7.20.5
       react-refresh: 0.18.0
-      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-react@5.2.0(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))':
+  '@vitejs/plugin-react@5.2.0(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.29.0)
@@ -5414,11 +5415,11 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-rc.3
       '@types/babel__core': 7.20.5
       react-refresh: 0.18.0
-      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-rsc@0.5.23(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))':
+  '@vitejs/plugin-rsc@0.5.23(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-rc.13
       es-module-lexer: 2.0.0
@@ -5429,27 +5430,44 @@ snapshots:
       srvx: 0.11.15
       strip-literal: 3.1.0
       turbo-stream: 3.2.0
-      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
-      vitefu: 1.1.3(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
+      vitefu: 1.1.3(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))
     optionalDependencies:
       react-server-dom-webpack: 19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1)
 
-  '@wagmi/connectors@8.0.1(@wagmi/core@3.4.2(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(ox@0.14.15(typescript@5.9.3)(zod@4.3.6))(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.5))(viem@2.48.0(typescript@5.9.3)(zod@4.3.6)))(typescript@5.9.3)(viem@2.48.0(typescript@5.9.3)(zod@4.3.6))':
+  '@wagmi/connectors@0.0.0-canary-20260421205751(@wagmi/core@0.0.0-canary-20260421205751)(accounts@0.7.2)(typescript@5.9.3)(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))':
     dependencies:
-      '@wagmi/core': 3.4.2(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(ox@0.14.15(typescript@5.9.3)(zod@4.3.6))(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.5))(viem@2.48.0(typescript@5.9.3)(zod@4.3.6))
-      viem: 2.48.0(typescript@5.9.3)(zod@4.3.6)
+      '@wagmi/core': 0.0.0-canary-20260421205751(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.7.2)(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.5))(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))
+      viem: 2.48.4(typescript@5.9.3)(zod@4.3.6)
     optionalDependencies:
+      accounts: 0.7.2(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@0.0.0-canary-20260421205751)(express@5.2.1)(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.5))(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))(wagmi@0.0.0-canary-20260421205751)
       typescript: 5.9.3
 
-  '@wagmi/core@3.4.2(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(ox@0.14.15(typescript@5.9.3)(zod@4.3.6))(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.5))(viem@2.48.0(typescript@5.9.3)(zod@4.3.6))':
+  '@wagmi/core@0.0.0-canary-20260421205751(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.7.2)(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.5))(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))':
     dependencies:
       eventemitter3: 5.0.1
       mipd: 0.0.7(typescript@5.9.3)
-      viem: 2.48.0(typescript@5.9.3)(zod@4.3.6)
+      viem: 2.48.4(typescript@5.9.3)(zod@4.3.6)
+      zustand: 5.0.0(@types/react@19.2.14)(react@19.2.5)(use-sync-external-store@1.4.0(react@19.2.5))
+    optionalDependencies:
+      '@tanstack/query-core': 5.99.0
+      accounts: 0.7.2(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@0.0.0-canary-20260421205751)(express@5.2.1)(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.5))(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))(wagmi@0.0.0-canary-20260421205751)
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+      - react
+      - use-sync-external-store
+
+  '@wagmi/core@0.0.0-canary-20260421205751(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.7.2)(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.5))(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))':
+    dependencies:
+      eventemitter3: 5.0.1
+      mipd: 0.0.7(typescript@5.9.3)
+      viem: 2.48.4(typescript@5.9.3)(zod@4.3.6)
       zustand: 5.0.0(@types/react@19.2.14)(react@19.2.5)(use-sync-external-store@1.6.0(react@19.2.5))
     optionalDependencies:
       '@tanstack/query-core': 5.99.0
-      ox: 0.14.15(typescript@5.9.3)(zod@4.3.6)
+      accounts: 0.7.2(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@0.0.0-canary-20260421205751)(express@5.2.1)(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.5))(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))(wagmi@0.0.0-canary-20260421205751)
       typescript: 5.9.3
     transitivePeerDependencies:
       - '@types/react'
@@ -5547,20 +5565,21 @@ snapshots:
       mime-types: 3.0.2
       negotiator: 1.0.0
 
-  accounts@0.6.7(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@3.4.2(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(ox@0.14.15(typescript@5.9.3)(zod@4.3.6))(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.5))(viem@2.48.0(typescript@5.9.3)(zod@4.3.6)))(express@5.2.1)(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.5))(viem@2.48.0(typescript@5.9.3)(zod@4.3.6)):
+  accounts@0.7.2(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@0.0.0-canary-20260421205751)(express@5.2.1)(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.5))(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))(wagmi@0.0.0-canary-20260421205751):
     dependencies:
       hono: 4.12.12
       idb-keyval: 6.2.2
       mipd: 0.0.7(typescript@5.9.3)
-      mppx: 0.5.12(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(express@5.2.1)(hono@4.12.12)(typescript@5.9.3)(viem@2.48.0(typescript@5.9.3)(zod@4.3.6))
-      ox: 0.14.15(typescript@5.9.3)(zod@4.3.6)
+      mppx: 0.5.11(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(express@5.2.1)(hono@4.12.12)(typescript@5.9.3)(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))
+      ox: 0.14.20(typescript@5.9.3)(zod@4.3.6)
       webauthx: 0.1.1(typescript@5.9.3)(zod@4.3.6)
       zod: 4.3.6
       zustand: 5.0.12(@types/react@19.2.14)(react@19.2.5)(use-sync-external-store@1.6.0(react@19.2.5))
     optionalDependencies:
-      '@wagmi/core': 3.4.2(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(ox@0.14.15(typescript@5.9.3)(zod@4.3.6))(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.5))(viem@2.48.0(typescript@5.9.3)(zod@4.3.6))
+      '@wagmi/core': 0.0.0-canary-20260421205751(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.7.2)(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.5))(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))
       react: 19.2.5
-      viem: 2.48.0(typescript@5.9.3)(zod@4.3.6)
+      viem: 2.48.4(typescript@5.9.3)(zod@4.3.6)
+      wagmi: 0.0.0-canary-20260421205751(@tanstack/query-core@5.99.0)(@tanstack/react-query@5.99.0(react@19.2.5))(@types/react@19.2.14)(accounts@0.7.2)(react@19.2.5)(typescript@5.9.3)(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))
     transitivePeerDependencies:
       - '@modelcontextprotocol/sdk'
       - '@types/react'
@@ -5985,11 +6004,7 @@ snapshots:
 
   discontinuous-range@1.0.0: {}
 
-  dompurify@3.2.7:
-    optionalDependencies:
-      '@types/trusted-types': 2.0.7
-
-  dompurify@3.3.3:
+  dompurify@3.4.1:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 
@@ -6845,7 +6860,7 @@ snapshots:
       d3-sankey: 0.12.3
       dagre-d3-es: 7.0.14
       dayjs: 1.11.20(patch_hash=47bfcf62e3c84ba85d881815422a02e23f372df46bddb9b022eb3705361fd165)
-      dompurify: 3.3.3
+      dompurify: 3.4.1
       katex: 0.16.45
       khroma: 2.1.0
       lodash-es: 4.18.1
@@ -7160,8 +7175,6 @@ snapshots:
     optionalDependencies:
       typescript: 5.9.3
 
-  mkdirp@3.0.1: {}
-
   mlly@1.8.2:
     dependencies:
       acorn: 8.16.0
@@ -7171,16 +7184,16 @@ snapshots:
 
   monaco-editor@0.55.1:
     dependencies:
-      dompurify: 3.2.7
+      dompurify: 3.4.1
       marked: 14.0.0
 
   moo@0.5.3: {}
 
-  mppx@0.5.12(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(express@5.2.1)(hono@4.12.12)(typescript@5.9.3)(viem@2.48.0(typescript@5.9.3)(zod@4.3.6)):
+  mppx@0.5.11(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(express@5.2.1)(hono@4.12.12)(typescript@5.9.3)(viem@2.48.4(typescript@5.9.3)(zod@4.3.6)):
     dependencies:
       incur: 0.3.25
-      ox: 0.14.10(typescript@5.9.3)(zod@4.3.6)
-      viem: 2.48.0(typescript@5.9.3)(zod@4.3.6)
+      ox: 0.14.7(typescript@5.9.3)(zod@4.3.6)
+      viem: 2.48.4(typescript@5.9.3)(zod@4.3.6)
       zod: 4.3.6
     optionalDependencies:
       '@modelcontextprotocol/sdk': 1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6)
@@ -7255,7 +7268,7 @@ snapshots:
 
   outvariant@1.4.0: {}
 
-  ox@0.14.10(typescript@5.9.3)(zod@4.3.6):
+  ox@0.14.20(typescript@5.9.3)(zod@4.3.6):
     dependencies:
       '@adraffy/ens-normalize': 1.11.1
       '@noble/ciphers': 1.3.0
@@ -7270,22 +7283,7 @@ snapshots:
     transitivePeerDependencies:
       - zod
 
-  ox@0.14.15(typescript@5.9.3)(zod@4.3.6):
-    dependencies:
-      '@adraffy/ens-normalize': 1.11.1
-      '@noble/ciphers': 1.3.0
-      '@noble/curves': 1.9.1
-      '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.7.0
-      '@scure/bip39': 1.6.0
-      abitype: 1.2.3(typescript@5.9.3)(zod@4.3.6)
-      eventemitter3: 5.0.1
-    optionalDependencies:
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - zod
-
-  ox@0.14.17(typescript@5.9.3)(zod@4.3.6):
+  ox@0.14.7(typescript@5.9.3)(zod@4.3.6):
     dependencies:
       '@adraffy/ens-normalize': 1.11.1
       '@noble/ciphers': 1.3.0
@@ -7390,7 +7388,7 @@ snapshots:
       '@posthog/core': 1.25.2
       '@posthog/types': 1.367.0
       core-js: 3.49.0
-      dompurify: 3.3.3
+      dompurify: 3.4.1
       fflate: 0.4.8
       preact: 10.29.1
       query-selector-shadow-dom: 1.0.1
@@ -7413,13 +7411,13 @@ snapshots:
       execa: 9.6.1
       get-port: 7.2.0
       http-proxy: 1.18.1
-      tar: 7.2.0
+      tar: 7.5.13
     transitivePeerDependencies:
       - debug
 
   property-information@7.1.0: {}
 
-  protobufjs@7.5.4:
+  protobufjs@8.0.1:
     dependencies:
       '@protobufjs/aspromise': 1.1.2
       '@protobufjs/base64': 1.1.2
@@ -7487,7 +7485,7 @@ snapshots:
       react: 19.2.5
       react-dom: 19.2.5(react@19.2.5)
       webpack: 5.104.1
-      webpack-sources: 3.3.4
+      webpack-sources: 3.4.0
 
   react@19.2.5: {}
 
@@ -7878,13 +7876,14 @@ snapshots:
 
   tapable@2.3.2: {}
 
-  tar@7.2.0:
+  tapable@2.3.3: {}
+
+  tar@7.5.13:
     dependencies:
       '@isaacs/fs-minipass': 4.0.1
       chownr: 3.0.0
       minipass: 7.1.3
       minizlib: 3.1.0
-      mkdirp: 3.0.1
       yallist: 5.0.0
 
   terser-webpack-plugin@5.4.0(webpack@5.104.1):
@@ -7892,10 +7891,10 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
-      terser: 5.46.1
+      terser: 5.46.2
       webpack: 5.104.1
 
-  terser@5.46.1:
+  terser@5.46.2:
     dependencies:
       '@jridgewell/source-map': 0.3.11
       acorn: 8.16.0
@@ -8107,7 +8106,7 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  viem@2.48.0(typescript@5.9.3)(zod@4.3.6):
+  viem@2.48.4(typescript@5.9.3)(zod@4.3.6):
     dependencies:
       '@noble/curves': 1.9.1
       '@noble/hashes': 1.8.0
@@ -8115,7 +8114,7 @@ snapshots:
       '@scure/bip39': 1.6.0
       abitype: 1.2.3(typescript@5.9.3)(zod@4.3.6)
       isows: 1.0.7(ws@8.18.3)
-      ox: 0.14.17(typescript@5.9.3)(zod@4.3.6)
+      ox: 0.14.20(typescript@5.9.3)(zod@4.3.6)
       ws: 8.18.3
     optionalDependencies:
       typescript: 5.9.3
@@ -8126,19 +8125,19 @@ snapshots:
 
   vite-plugin-arraybuffer@0.1.4: {}
 
-  vite-plugin-mkcert@1.17.12(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)):
+  vite-plugin-mkcert@1.17.12(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)):
     dependencies:
       debug: 4.4.3
       picocolors: 1.1.1
-      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
     transitivePeerDependencies:
       - supports-color
 
-  vite-plugin-wasm@3.6.0(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)):
+  vite-plugin-wasm@3.6.0(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)):
     dependencies:
-      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
 
-  vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
+  vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3):
     dependencies:
       esbuild: 0.27.7
       fdir: 6.5.0(picomatch@4.0.4)
@@ -8151,15 +8150,15 @@ snapshots:
       fsevents: 2.3.3
       jiti: 2.6.1
       lightningcss: 1.32.0
-      terser: 5.46.1
+      terser: 5.46.2
       tsx: 4.21.0
       yaml: 2.8.3
 
-  vitefu@1.1.3(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)):
+  vitefu@1.1.3(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)):
     optionalDependencies:
-      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
 
-  vocs@https://pkg.pr.new/wevm/vocs@2fb25c2(@cfworker/json-schema@4.1.1)(@types/react@19.2.14)(mermaid@11.14.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(rollup@4.60.1)(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))(waku@1.0.0-alpha.4(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)):
+  vocs@https://pkg.pr.new/wevm/vocs@2fb25c2(@cfworker/json-schema@4.1.1)(@types/react@19.2.14)(mermaid@11.14.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(rollup@4.60.1)(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))(waku@1.0.0-alpha.4(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)):
     dependencies:
       '@base-ui/react': 1.3.0(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@codesandbox/sandpack-react': 2.20.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -8179,11 +8178,11 @@ snapshots:
       '@shikijs/types': 3.23.0
       '@svgr/core': 8.1.0(typescript@5.9.3)
       '@svgr/plugin-jsx': 8.1.0(@svgr/core@8.1.0(typescript@5.9.3))
-      '@tailwindcss/vite': 4.2.2(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@tailwindcss/vite': 4.2.2(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))
       '@takumi-rs/image-response': 0.62.8
       '@takumi-rs/wasm': 0.62.8
-      '@vitejs/plugin-react': 5.1.2(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@vitejs/plugin-rsc': 0.5.23(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@vitejs/plugin-react': 5.1.2(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))
+      '@vitejs/plugin-rsc': 0.5.23(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))
       cac: 6.7.14
       cva: class-variance-authority@0.7.1
       debug: 4.4.3
@@ -8229,13 +8228,13 @@ snapshots:
       urlpattern-polyfill: 10.1.0
       vfile: 6.0.3
       vite-plugin-arraybuffer: 0.1.4
-      vite-plugin-wasm: 3.6.0(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      vite-plugin-wasm: 3.6.0(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))
       yaml: 2.8.3
       zod: 4.3.6
     optionalDependencies:
       mermaid: 11.14.0
-      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
-      waku: 1.0.0-alpha.4(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
+      waku: 1.0.0-alpha.4(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - '@remix-run/react'
@@ -8273,14 +8272,14 @@ snapshots:
 
   w3c-keyname@2.2.8: {}
 
-  wagmi@3.6.1(@tanstack/query-core@5.99.0)(@tanstack/react-query@5.99.0(react@19.2.5))(@types/react@19.2.14)(ox@0.14.15(typescript@5.9.3)(zod@4.3.6))(react@19.2.5)(typescript@5.9.3)(viem@2.48.0(typescript@5.9.3)(zod@4.3.6)):
+  wagmi@0.0.0-canary-20260421205751(@tanstack/query-core@5.99.0)(@tanstack/react-query@5.99.0(react@19.2.5))(@types/react@19.2.14)(accounts@0.7.2)(react@19.2.5)(typescript@5.9.3)(viem@2.48.4(typescript@5.9.3)(zod@4.3.6)):
     dependencies:
       '@tanstack/react-query': 5.99.0(react@19.2.5)
-      '@wagmi/connectors': 8.0.1(@wagmi/core@3.4.2(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(ox@0.14.15(typescript@5.9.3)(zod@4.3.6))(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.5))(viem@2.48.0(typescript@5.9.3)(zod@4.3.6)))(typescript@5.9.3)(viem@2.48.0(typescript@5.9.3)(zod@4.3.6))
-      '@wagmi/core': 3.4.2(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(ox@0.14.15(typescript@5.9.3)(zod@4.3.6))(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.5))(viem@2.48.0(typescript@5.9.3)(zod@4.3.6))
+      '@wagmi/connectors': 0.0.0-canary-20260421205751(@wagmi/core@0.0.0-canary-20260421205751)(accounts@0.7.2)(typescript@5.9.3)(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))
+      '@wagmi/core': 0.0.0-canary-20260421205751(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.7.2)(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.5))(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))
       react: 19.2.5
       use-sync-external-store: 1.4.0(react@19.2.5)
-      viem: 2.48.0(typescript@5.9.3)(zod@4.3.6)
+      viem: 2.48.4(typescript@5.9.3)(zod@4.3.6)
     optionalDependencies:
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -8292,15 +8291,15 @@ snapshots:
       - '@tanstack/query-core'
       - '@types/react'
       - '@walletconnect/ethereum-provider'
+      - accounts
       - immer
-      - ox
       - porto
 
-  waku@1.0.0-alpha.4(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
+  waku@1.0.0-alpha.4(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3):
     dependencies:
       '@hono/node-server': 1.19.13(hono@4.12.12)
-      '@vitejs/plugin-react': 5.2.0(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@vitejs/plugin-rsc': 0.5.23(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@vitejs/plugin-react': 5.2.0(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))
+      '@vitejs/plugin-rsc': 0.5.23(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))
       dotenv: 17.4.1
       hono: 4.12.12
       magic-string: 0.30.21
@@ -8309,7 +8308,7 @@ snapshots:
       react-dom: 19.2.5(react@19.2.5)
       react-server-dom-webpack: 19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1)
       rsc-html-stream: 0.0.7
-      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+      vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -8333,12 +8332,12 @@ snapshots:
 
   webauthx@0.1.1(typescript@5.9.3)(zod@4.3.6):
     dependencies:
-      ox: 0.14.15(typescript@5.9.3)(zod@4.3.6)
+      ox: 0.14.20(typescript@5.9.3)(zod@4.3.6)
     transitivePeerDependencies:
       - typescript
       - zod
 
-  webpack-sources@3.3.4: {}
+  webpack-sources@3.4.0: {}
 
   webpack-virtual-modules@0.6.2: {}
 
@@ -8365,10 +8364,10 @@ snapshots:
       mime-types: 2.1.35
       neo-async: 2.6.2
       schema-utils: 4.3.3
-      tapable: 2.3.2
+      tapable: 2.3.3
       terser-webpack-plugin: 5.4.0(webpack@5.104.1)
       watchpack: 2.5.1
-      webpack-sources: 3.3.4
+      webpack-sources: 3.4.0
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild
@@ -8395,6 +8394,12 @@ snapshots:
       zod: 4.3.6
 
   zod@4.3.6: {}
+
+  zustand@5.0.0(@types/react@19.2.14)(react@19.2.5)(use-sync-external-store@1.4.0(react@19.2.5)):
+    optionalDependencies:
+      '@types/react': 19.2.14
+      react: 19.2.5
+      use-sync-external-store: 1.4.0(react@19.2.5)
 
   zustand@5.0.0(@types/react@19.2.14)(react@19.2.5)(use-sync-external-store@1.6.0(react@19.2.5)):
     optionalDependencies:

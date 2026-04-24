@@ -7,6 +7,8 @@ onlyBuiltDependencies:
   - core-js
   - es5-ext
   - esbuild
+
+ignoredBuiltDependencies:
   - protobufjs
 
 minimumReleaseAgeExclude:
@@ -15,6 +17,11 @@ minimumReleaseAgeExclude:
   - incur
   - ox
   - viem
+
+overrides:
+  protobufjs: '>=7.5.5'
+  tar: '>=7.5.13'
+  dompurify: '>=3.4.0'
 
 patchedDependencies:
   '@braintree/sanitize-url@7.1.2': patches/@braintree__sanitize-url@7.1.2.patch

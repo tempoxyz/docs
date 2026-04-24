@@ -54,7 +54,9 @@ test('swap pathUSD from Zone A into betaUSD on Zone B', async ({ page }) => {
     timeout: 120000,
   })
   await expect(
-    page.getByText('Withdraw 25 pathUSD from Zone A, swap it, and route betaUSD into Zone B.').first(),
+    page
+      .getByText('Withdraw 25 pathUSD from Zone A, swap it, and route betaUSD into Zone B.')
+      .first(),
   ).toBeVisible()
 
   await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })
