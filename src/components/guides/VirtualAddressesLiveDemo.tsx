@@ -121,13 +121,7 @@ function PasskeyLogin() {
         className="font-normal text-[14px] -tracking-[2%]"
         onClick={async () => {
           await disconnect.disconnectAsync().catch(() => {})
-          connect.connect({
-            connector,
-            capabilities: {
-              label: 'Tempo Docs',
-              type: 'sign-up',
-            },
-          })
+          connect.connect({ connector })
         }}
         type="button"
       >
