@@ -5,9 +5,7 @@ description: Details and timeline for the T3 network upgrade, including enhanced
 
 # T3 Network Upgrade
 
-T3 will change this spec
-The [T3 network upgrade](https://docs.tempo.xyz/protocol/upgrades/t3) will update this specification. The sections below describe the currently active behavior. See [Upcoming changes](https://docs.tempo.xyz/protocol/tip20/spec#upcoming-changes) for the upcoming deltas.
-:::
+T3 is the next Tempo protocol upgrade. It introduces enhanced access keys, a standard signature verification precompile, and virtual addresses for TIP-20 deposit routing.
 
 ## Timeline
 
@@ -18,7 +16,7 @@ The [T3 network upgrade](https://docs.tempo.xyz/protocol/upgrades/t3) will updat
 
 Partners should upgrade nodes to the T3-compatible release before the Moderato activation timestamp.
 
-Overview
+## Overview
 
 | TIP | What it does | Who should review |
 |-----|-------------|-------------------|
@@ -28,14 +26,16 @@ Overview
 
 ## Breaking changes
 
+These breaking changes only affect access-key integrations. You need to update your integration if you create new access keys, manually encode `key_authorization` or `authorizeKey(...)`, or rely on access-key-signed deployment flows. Existing authorized keys continue to work.
+
 ### Access-key authorization ABI
 
 Integrations that directly call `AccountKeychain.authorizeKey(...)` or manually encode `key_authorization` must migrate to the TIP-1011 format after activation. Legacy calls fail with `LegacyAuthorizeKeySelectorChanged(newSelector: 0x980a6025)`.
 
 - **Before activation:** use the legacy ABI. The TIP-1011 format is not yet valid onchain.
-- **After activation:** use the TIP-1011 format. The legacy ABI stops working.
+- **After activation:** use the TIP-1011 tuple-form ABI. The legacy selector `0x54063a55` stops working.
 
-If you support both pre-T3 and post-T3 networks, branch on network version or activation timestamp.
+If you use an updated SDK, this is mostly a tooling upgrade. If you support both pre-T3 and post-T3 networks, branch on network version or activation timestamp. If you hand-encode calldata, use the exact tuple-form signature from the [Account Keychain precompile spec](/protocol/transactions/AccountKeychain).
 
 ### Access-key contract creation
 

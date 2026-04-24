@@ -290,8 +290,8 @@ cast send <CONTRACT_ADDRESS> 'increment()' \
 # Send with access key (delegated signing):
 # First authorize the key via Account Keychain precompile
 cast send 0xAAAAAAAA00000000000000000000000000000000 \
-  'authorizeKey(address,uint8,uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[])' \
-  $ACCESS_KEY_ADDR 0 1893456000 false "[]" true "[]" \
+  'authorizeKey(address,uint8,(uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[]))' \
+  $ACCESS_KEY_ADDR 0 '(1893456000,false,[],true,[])' \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $ROOT_PRIVATE_KEY
 # Then send using the access key
@@ -301,17 +301,44 @@ cast send <CONTRACT_ADDRESS> 'increment()' \
   --tempo.root-account $ROOT_ADDRESS
 ```
 
-Post-T3, direct `authorizeKey(...)` calls must use the enhanced TIP-1011 ABI shown above. If you need periodic limits or call scopes, fill those arrays instead of passing `[]`.
+#### T2 -> T3 changes
+
+If you are migrating a pre-T3 integration, this is the key change: direct `authorizeKey(...)` calls must switch from the legacy ABI to the tuple-form TIP-1011 ABI shown above. If you need periodic limits or call scopes, fill those arrays instead of passing `[]`. The flattened seven-argument form is not equivalent.
+
+If the access key will be used with passkey or WebAuthn signatures, pass `2` for `SignatureType`. `1` is only for raw P256 signatures.
 
 Post-T3, access-key transactions also cannot create contracts, so use a root key for deployments or other flows that perform `CREATE`.
+
+### Check your `authorizeKey(...)` migration with `cast`
+
+Most users can skip this if they use `cast keychain` below or the tuple-form `cast send` example above. This is mainly for hand-encoded calldata.
+
+```bash
+# Legacy pre-T3 selector:
+cast sig 'authorizeKey(address,uint8,uint64,bool,(address,uint256)[])'
+
+# Incorrect flattened post-T3 form. This is not accepted onchain:
+cast sig 'authorizeKey(address,uint8,uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[])'
+
+# Correct post-T3 tuple-form selector:
+cast sig 'authorizeKey(address,uint8,(uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[]))'
+
+# Build the exact post-T3 calldata locally:
+cast calldata 'authorizeKey(address,uint8,(uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[]))' \
+  $ACCESS_KEY_ADDR 0 '(1893456000,false,[],true,[])'
+```
+
+The expected selectors are `0x54063a55`, `0x203e2736`, and `0x980a6025`.
+
+After T3 activation, the legacy selector reverts with `LegacyAuthorizeKeySelectorChanged(0x980a6025)`. Use the tuple-form `cast send` example above when you are ready to broadcast.
 
 ### Local Development with Anvil
 
 Anvil supports Tempo mode for local testing and forking Tempo networks:
 
 ```bash
-# Start anvil in Tempo mode
-anvil --tempo --hardfork t1
+# Start anvil in Tempo mode with T3 rules
+anvil --tempo --hardfork t3
 
 # Fork a live Tempo network for local testing
 anvil --tempo --fork-url $TEMPO_RPC_URL
@@ -367,36 +394,44 @@ Ledger and Trezor wallets are not yet compatible with any `--tempo.*` option.
 
 `cast keychain` provides a CLI interface to Tempo's [Account Keychain precompile](/protocol/transactions/AccountKeychain).
 
+Prefer this over hand-encoding `authorizeKey(...)` calldata when you are working from the CLI.
+
 :::info
 `cast keychain` only works on Tempo networks.
 :::
 
+#### T2 -> T3 changes
+
+Post-T3, `cast keychain` authorization flows should use a future expiry timestamp, `webauthn` for passkey-backed access keys, optional `TOKEN:AMOUNT:PERIOD_SECONDS` limits for recurring budgets, and `--scope` for target, selector, and recipient restrictions.
+
 ```bash
-# Authorize a new access key (signature types: secp256k1, p256, webauthn; expiry 0 = never):
-cast keychain authorize <KEY_ID> secp256k1 0 \
+# Post-T3, access keys must be authorized with a future expiry timestamp.
+EXPIRY=$(($(date +%s) + 86400))
+
+# Authorize a new access key (signature types: secp256k1, p256, webauthn):
+cast keychain authorize <KEY_ID> secp256k1 $EXPIRY \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
 
 # Authorize with a spending limit (TOKEN:AMOUNT or TOKEN:AMOUNT:PERIOD_SECONDS):
-cast keychain authorize <KEY_ID> secp256k1 0 \
+cast keychain authorize <KEY_ID> secp256k1 $EXPIRY \
   --limit <TOKEN_ADDRESS>:1000000 \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
 
 # Authorize with call scopes (restrict to specific contracts/functions):
-cast keychain authorize <KEY_ID> secp256k1 0 \
+cast keychain authorize <KEY_ID> secp256k1 $EXPIRY \
   --scope <TOKEN_ADDRESS>:transfer,approve \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
 
 # Authorize with call scope restricted to a specific recipient:
-cast keychain authorize <KEY_ID> secp256k1 0 \
+cast keychain authorize <KEY_ID> secp256k1 $EXPIRY \
   --scope <TOKEN_ADDRESS>:transfer@<RECIPIENT_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
 
 # Full example: 24h expiry + spending limit + call scope:
-EXPIRY=$(($(date +%s) + 86400))
 cast keychain authorize <KEY_ID> secp256k1 $EXPIRY \
   --limit <TOKEN_ADDRESS>:1000000 \
   --scope <TOKEN_ADDRESS>:transfer \
@@ -425,11 +460,13 @@ cast keychain remove-scope <KEY_ID> <TARGET_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
 
-# Query key info (read-only):
-cast keychain key-info <ACCOUNT> <KEY_ID> \
+# Query key provisioning status (read-only):
+cast keychain check <ACCOUNT> <KEY_ID> \
   --rpc-url $TEMPO_RPC_URL
 
-# Query remaining spending limit:
-cast keychain remaining-limit <ACCOUNT> <KEY_ID> <TOKEN_ADDRESS> \
+# Query remaining spending limit via the precompile directly:
+cast call 0xAAAAAAAA00000000000000000000000000000000 \
+  'getRemainingLimitWithPeriod(address,address,address)(uint256,uint64)' \
+  <ACCOUNT> <KEY_ID> <TOKEN_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL
 ```
