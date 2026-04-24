@@ -17,6 +17,8 @@ type RootWebAuthnAccountProvider = {
   request: (args: { method: 'eth_accounts' }) => Promise<readonly `0x${string}`[]>
 }
 
+const rootWebAuthnAccountTimeoutMs = 30_000
+
 export function useRootWebAuthnAccount() {
   const { address, connector } = useConnection()
 
@@ -29,7 +31,11 @@ export function useRootWebAuthnAccount() {
 
       const provider = await connector.getProvider()
       if (isRootWebAuthnAccountProvider(provider)) {
-        await waitForProviderAccount(provider, address as `0x${string}`)
+        await waitForProviderAccount(
+          provider,
+          address as `0x${string}`,
+          rootWebAuthnAccountTimeoutMs,
+        )
 
         return provider.getAccount({
           accessKey: false,
@@ -38,12 +44,16 @@ export function useRootWebAuthnAccount() {
         })
       }
 
-      const credential = await waitForStoredCredential(address as `0x${string}`)
+      const credential = await waitForStoredCredential(
+        address as `0x${string}`,
+        rootWebAuthnAccountTimeoutMs,
+      )
       return accountFromCredential(credential)
     },
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
-    retry: false,
+    retry: 2,
+    retryDelay: 500,
     staleTime: Number.POSITIVE_INFINITY,
   })
 }

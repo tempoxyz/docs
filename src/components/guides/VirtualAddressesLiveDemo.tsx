@@ -661,7 +661,9 @@ export function VirtualAddressesLiveDemo() {
                   <span className="break-all font-mono text-[12px] text-primary">
                     {registration.virtualAddress}
                   </span>
-                  {hasExplorerLink && <ExplorerAccountLink address={registration.virtualAddress} inline />}
+                  {hasExplorerLink && (
+                    <ExplorerAccountLink address={registration.virtualAddress} inline />
+                  )}
                 </span>
               </div>
               <div>
@@ -700,9 +702,8 @@ export function VirtualAddressesLiveDemo() {
                   <div className="space-y-1">
                     <span className="text-primary">Transfer events in this receipt</span>
                     <div>
-                      Treat the <span className="font-mono text-primary">sender → virtual</span>{' '}
-                      and <span className="font-mono text-primary">virtual → master</span> pair as
-                      one
+                      Treat the <span className="font-mono text-primary">sender → virtual</span> and{' '}
+                      <span className="font-mono text-primary">virtual → master</span> pair as one
                       logical deposit to the registered wallet. Other transfer logs in the receipt,
                       like fees, are separate.
                     </div>
