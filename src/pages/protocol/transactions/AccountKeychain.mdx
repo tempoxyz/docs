@@ -32,7 +32,7 @@ T3 changes the Account Keychain authorization shape on any network where the upg
 
 - The legacy `authorizeKey(address,uint8,uint64,bool,(address,uint256)[])` entrypoint is no longer accepted after T3 activation. Calls to selector `0x54063a55` revert with `LegacyAuthorizeKeySelectorChanged(0x980a6025)`.
 - `authorizeKey(...)` now takes a `KeyRestrictions` tuple that carries expiry, spending limits, and call scopes.
-- `TokenLimit` now includes `period`, so limits can be one-time or recurring.
+- `TokenLimit` now includes `period`, so limits can be one-time (`period = 0`) or recurring.
 - Access keys can now be scoped to specific targets, selectors, and recipients.
 - The precompile adds `setAllowedCalls(...)`, `removeAllowedCalls(...)`, `getAllowedCalls(...)`, and `getRemainingLimitWithPeriod(...)`.
 - Access-key-signed transactions can no longer create contracts after T3 activation. Use a Root Key for deployment flows.
@@ -51,18 +51,6 @@ selector: 0x980a6025
 
 The T3 call must use the tuple-form signature above. A flattened seven-argument signature is not equivalent. In Foundry, that flattened form hashes to `0x203e2736`, which the precompile rejects as an unknown selector.
 
-### Signature type for passkeys
-
-Use the correct `SignatureType` for the access key you are authorizing:
-
-- `0` = `Secp256k1`
-- `1` = `P256`
-- `2` = `WebAuthn`
-
-If the access key will be used with passkey or WebAuthn signatures, use `2`. `1` is only for raw P256 signatures. Authorizing a passkey key as `P256` can later fail with a signature-type mismatch when the key is used.
-
-For a step-by-step verification flow using `cast`, see the [Foundry guide](/sdk/foundry).
-
 ## Concepts
 
 ### Access Keys
@@ -79,7 +67,7 @@ Access Keys are secondary signing keys authorized by an account's Root Key. They
 
 #### T2 -> T3 changes
 
-At T3, spending limits can recur through `TokenLimit.period`, call scoping becomes a first-class restriction type, and access-key-signed transactions can no longer create contracts after T3 activation.
+At T3, spending limits can recur through `TokenLimit.period`. A `period` of `0` keeps the limit one-time, while a non-zero value makes it recurring. Call scoping also becomes a first-class restriction type, and access-key-signed transactions can no longer create contracts after T3 activation.
 
 ### Authorization Hierarchy
 
