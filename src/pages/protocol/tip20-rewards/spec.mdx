@@ -10,11 +10,11 @@ An opt-in, scalable, pro-rata reward distribution mechanism built into TIP-20 to
 ## Motivation
 Many applications require pro-rata distribution of tokens to existing holders (incentive programs, deterministic inflation, staking rewards). Building this into TIP-20 allows efficient distribution without forcing users to stake tokens elsewhere or requiring distributors to loop over all holders.
 
-## Upcoming changes
+## T3 changes
 
-T3 updates the TIP-20 rewards spec through [TIP-1022](/protocol/tips/tip-1022) in one place:
+T3 updated the TIP-20 rewards spec through [TIP-1022](/protocol/tips/tip-1022) in one place:
 
-- `setRewardRecipient(...)` will reject [TIP-1022](/protocol/tips/tip-1022) virtual addresses. Reward recipients must remain canonical accounts rather than forwarding aliases, because reward assignment is not a TIP-20 forwarding path.
+- `setRewardRecipient(...)` rejects [TIP-1022](/protocol/tips/tip-1022) virtual addresses. Reward recipients must remain canonical accounts rather than forwarding aliases, because reward assignment is not a TIP-20 forwarding path.
 
 ## Specification
 The rewards mechanism allows anyone to distribute token rewards to opted-in holders proportionally based on holdings. Users must opt in to receiving rewards and may delegate rewards to a recipient address.

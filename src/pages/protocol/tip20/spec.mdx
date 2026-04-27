@@ -12,9 +12,9 @@ All major stablecoins today use the ERC-20 token standard. While ERC-20 provides
 TIP-20 extends ERC-20, building these features into precompiled contracts that anyone can permissionlessly deploy on Tempo. This makes token operations much more efficient, allows issuers to quickly set up on Tempo, and simplifies integrations since it ensures standardized behavior across tokens.
 It also enables deeper integration with token-specific Tempo features like paying gas in stablecoins and payment lanes.
 
-## Upcoming changes
+## T3 changes
 
-T3 updates TIP-20 behavior through [TIP-1022](/protocol/tips/tip-1022). All changes below come from TIP-1022:
+T3 updated TIP-20 behavior through [TIP-1022](/protocol/tips/tip-1022). All changes below come from TIP-1022:
 
 - [TIP-1022](/protocol/tips/tip-1022) adds virtual-address recipient resolution for recipient-bearing TIP-20 paths: `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo`.
 - When a TIP-20 operation targets a registered virtual address, the effective recipient becomes the registered master wallet before recipient authorization and mint-recipient checks run.

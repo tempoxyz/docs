@@ -20,9 +20,9 @@ Current accounts are limited to secp256k1 signatures and sequential nonces, crea
 Users cannot leverage modern authentication methods like passkeys, applications face throughput limitations due to sequential nonces. 
 
 
-## Upcoming changes
+## T3 changes
 
-T3 updates the Tempo Transaction spec through [TIP-1011](/protocol/tips/tip-1011) in the following ways:
+T3 updated the Tempo Transaction spec through [TIP-1011](/protocol/tips/tip-1011) in the following ways:
 
 - `KeyAuthorization` expands with the [TIP-1011](/protocol/tips/tip-1011) fields `allowed_calls` and periodic `TokenLimit.period`, adding call scoping and recurring spending limits to access keys.
 - The signed post-T3 key-authorization payload remains `SignedKeyAuthorization { authorization, signature }`, but `authorization` now uses the expanded `KeyAuthorization` shape and new RLP encoding.
