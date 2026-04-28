@@ -40,8 +40,11 @@ jobs:
       - name: Run lychee
         uses: lycheeverse/lychee-action@v2
         with:
+          # README.md is a GitHub-only artifact with pre-existing
+          # broken references (LICENSE files, lockup paths); excluded
+          # from this check. Docs site content lives in src/pages/.
           args: >-
-            'README.md'
+            --root-dir ${{ github.workspace }}
             'src/pages/**/*.{md,mdx}'
             'vocs.config.ts'
           fail: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
