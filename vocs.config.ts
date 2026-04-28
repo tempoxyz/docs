@@ -20,8 +20,7 @@ export default defineConfig({
   //   textColor: 'white',
   // },
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
-  // TODO: Set back to true once tempoxyz/tempo#tip-1011 dead link is fixed
-  checkDeadlinks: 'warn',
+  checkDeadlinks: true,
   editLink: {
     link: 'https://github.com/tempoxyz/docs/edit/main/src/pages/:path',
     text: 'Suggest changes to this page',
