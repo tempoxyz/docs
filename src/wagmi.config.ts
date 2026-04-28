@@ -68,10 +68,10 @@ export function getConfig(options: getConfig.Options = {}) {
               },
             }),
             webAuthn(
-             import.meta.env.VITE_WEBAUTHN_AUTH_URL
-               ? { authUrl: import.meta.env.VITE_WEBAUTHN_AUTH_URL }
-               : undefined,
-           ),
+              import.meta.env.VITE_WEBAUTHN_AUTH_URL
+                ? { authUrl: import.meta.env.VITE_WEBAUTHN_AUTH_URL }
+                : undefined,
+            ),
           ]),
     ],
     multiInjectedProviderDiscovery,
