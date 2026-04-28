@@ -466,10 +466,6 @@ export default defineConfig({
                 link: '/protocol/tip20/virtual-addresses',
               },
               {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/tempo-std/blob/master/src/interfaces/ITIP20.sol',
-              },
-              {
                 text: 'Rust Implementation',
                 link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip20',
               },
@@ -502,10 +498,6 @@ export default defineConfig({
                 link: '/protocol/tip403/spec',
               },
               {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/tempo-std/blob/master/src/interfaces/ITIP403Registry.sol',
-              },
-              {
                 text: 'Rust Implementation',
                 link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip403_registry',
               },
@@ -534,10 +526,6 @@ export default defineConfig({
                   {
                     text: 'Specification',
                     link: '/protocol/fees/spec-fee-amm',
-                  },
-                  {
-                    text: 'Reference Implementation',
-                    link: 'https://github.com/tempoxyz/tempo-std/blob/master/src/interfaces/IFeeManager.sol',
                   },
                   {
                     text: 'Rust Implementation',
@@ -622,10 +610,6 @@ export default defineConfig({
               {
                 text: 'DEX Balance',
                 link: '/protocol/exchange/exchange-balance',
-              },
-              {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/tempo-std/blob/master/src/interfaces/IStablecoinDEX.sol',
               },
               {
                 text: 'Rust Implementation',
