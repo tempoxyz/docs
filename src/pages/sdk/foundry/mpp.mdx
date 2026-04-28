@@ -10,7 +10,7 @@ import { Card, Cards } from 'vocs'
 Foundry includes native MPP support on Tempo. When an RPC endpoint returns `402 Payment Required`, Foundry automatically handles the payment challenge with no wrapper scripts, middleware, or code changes.
 
 :::warning[`tempo-foundry` is deprecated]
-`tempo-foundry` and `foundryup -n tempo` are deprecated. Install upstream Foundry nightly with `foundryup -i nightly`.
+`tempo-foundry` and `foundryup -n tempo` are deprecated. Install upstream Foundry stable with `foundryup`.
 :::
 
 Every Foundry tool works transparently with MPP-gated endpoints:
@@ -51,13 +51,13 @@ curl -fsSL https://tempo.xyz/install | bash
 
 ### Install Foundry
 
-Tempo support now ships in Foundry's nightly:
+Tempo support now ships in Foundry's stable release stream:
 
 ```bash
-foundryup -i nightly
+foundryup
 ```
 
-All standard Foundry commands work as before — MPP activates only when an endpoint returns `402`.
+All standard Foundry commands work as before — MPP activates only when an endpoint returns `402`. At the time of writing, `foundryup` installs `v1.7.0`.
 
 ### Configure your wallet
 
