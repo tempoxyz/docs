@@ -10,12 +10,6 @@ An opt-in, scalable, pro-rata reward distribution mechanism built into TIP-20 to
 ## Motivation
 Many applications require pro-rata distribution of tokens to existing holders (incentive programs, deterministic inflation, staking rewards). Building this into TIP-20 allows efficient distribution without forcing users to stake tokens elsewhere or requiring distributors to loop over all holders.
 
-## T3 changes
-
-T3 updated the TIP-20 rewards spec through [TIP-1022](/protocol/tips/tip-1022) in one place:
-
-- `setRewardRecipient(...)` rejects [TIP-1022](/protocol/tips/tip-1022) virtual addresses. Reward recipients must remain canonical accounts rather than forwarding aliases, because reward assignment is not a TIP-20 forwarding path.
-
 ## Specification
 The rewards mechanism allows anyone to distribute token rewards to opted-in holders proportionally based on holdings. Users must opt in to receiving rewards and may delegate rewards to a recipient address.
 
@@ -63,6 +57,8 @@ Users must call `setRewardRecipient(recipient)` to opt in. When opted in:
 
 Setting recipient to `address(0)` opts out.
 
+`setRewardRecipient(...)` rejects [TIP-1022](/protocol/tips/tip-1022) virtual addresses: reward recipients must remain canonical accounts rather than forwarding aliases, because reward assignment is not a TIP-20 forwarding path.
+
 ## TIP-403 Integration
 All token movements must pass TIP-403 policy checks:
 - `distributeReward`: Validates funder authorization
@@ -73,3 +69,13 @@ All token movements must pass TIP-403 policy checks:
 - `globalRewardPerToken` must monotonically increase
 - `optedInSupply` must equal the sum of balances for all opted-in users
 - All token movements must comply with TIP-403 policies
+
+## T2 → T3 migration
+
+:::info[Migration appendix]
+This section captures changes introduced by the [T3 network upgrade](/protocol/upgrades/t3) for integrators migrating from T2. The spec above is the canonical post-T3 specification; this appendix exists for reference and will be removed in a future docs revision.
+:::
+
+T3 introduced [TIP-1022](/protocol/tips/tip-1022) virtual addresses, which affect TIP-20 rewards in one place:
+
+- `setRewardRecipient(...)` now rejects virtual addresses. Reward recipients must be canonical accounts, not forwarding aliases.

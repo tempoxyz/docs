@@ -12,15 +12,6 @@ All major stablecoins today use the ERC-20 token standard. While ERC-20 provides
 TIP-20 extends ERC-20, building these features into precompiled contracts that anyone can permissionlessly deploy on Tempo. This makes token operations much more efficient, allows issuers to quickly set up on Tempo, and simplifies integrations since it ensures standardized behavior across tokens.
 It also enables deeper integration with token-specific Tempo features like paying gas in stablecoins and payment lanes.
 
-## T3 changes
-
-T3 updated TIP-20 behavior through [TIP-1022](/protocol/tips/tip-1022). All changes below come from TIP-1022:
-
-- [TIP-1022](/protocol/tips/tip-1022) adds virtual-address recipient resolution for recipient-bearing TIP-20 paths: `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo`.
-- When a TIP-20 operation targets a registered virtual address, the effective recipient becomes the registered master wallet before recipient authorization and mint-recipient checks run.
-- Forwarded virtual-address deposits appear as two-hop standard `Transfer` events in the same transaction. Indexers and explorers should collapse that pair into one logical deposit to the resolved master wallet.
-- Virtual addresses are valid TIP-20 recipients on those paths, but they remain forwarding aliases rather than canonical TIP-20 holders. Non-TIP-20 tokens sent to a virtual address do not forward.
-
 ## Specification
 TIP-20 tokens support standard fungible token operations such as transfers, mints, and burns. They also support transfers, mints, and burns with an attached 32-byte memo; a role-based access control system for token administrative operations; and a system for opt-in [reward distribution](/protocol/tip20-rewards/spec).
 
@@ -456,6 +447,11 @@ Reward operations (`distributeReward`, `setRewardRecipient`, `claimRewards`) als
 TIP-20 tokens cannot be sent to other TIP-20 token contract addresses. The implementation uses a `validRecipient` guard that rejects recipients whose address is zero, or has the TIP-20 prefix (`0x20c000000000000000000000`).
 Any attempt to transfer to a TIP-20 token address must revert with `InvalidRecipient`. This prevents accidental token loss by sending funds to token contracts instead of user accounts.
 
+## Virtual Address Recipients
+Recipient-bearing TIP-20 paths — `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo` — resolve [TIP-1022](/protocol/tips/tip-1022) virtual addresses before running recipient authorization and mint-recipient checks. When a recipient `to` is a registered virtual address, the effective recipient becomes the registered master wallet, and authorization, balance updates, and event emission target that master wallet.
+
+Virtual addresses are valid TIP-20 recipients on those paths but remain forwarding aliases rather than canonical TIP-20 holders. Non-TIP-20 tokens sent to a virtual address do not forward. Forwarded deposits appear as two-hop standard `Transfer` events in the same transaction; indexers and explorers should collapse that pair into one logical deposit to the resolved master wallet.
+
 ## Currencies and Quote Tokens
 Each TIP-20 token declares a currency identifier and a corresponding `quoteToken` used for pricing and routing in the Stablecoin DEX. Stablecoin currency identifiers should be [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) three-letter codes representing the underlying fiat currency (e.g., `"USD"`, `"EUR"`, `"GBP"`) — not the token's own symbol. The currency is set at token creation and **cannot be changed afterward**. **Only tokens with `currency == "USD"` are eligible for paying transaction fees.** Tokens with `currency == "USD"` must pair with a USD-denominated TIP-20 token.
 
@@ -607,3 +603,16 @@ interface ITIP20Factory {
 - When `paused` is `true`, no functions that move tokens (`transfer`, `transferFrom`, memo variants, `systemTransferFrom`, `transferFeePreTx`, `distributeReward`, `setRewardRecipient`, `claimRewards`) can succeed.
 - TIP20 tokens cannot be transferred to another TIP20 token contract address.
 - `systemTransferFrom`, `transferFeePreTx`, and `transferFeePostTx` never change `totalSupply()`.
+
+## T2 → T3 migration
+
+:::info[Migration appendix]
+This section captures changes introduced by the [T3 network upgrade](/protocol/upgrades/t3) for integrators migrating from T2. The spec above is the canonical post-T3 specification; this appendix exists for reference and will be removed in a future docs revision.
+:::
+
+T3 introduced [TIP-1022](/protocol/tips/tip-1022) virtual addresses, which affect TIP-20 in the following ways:
+
+- Virtual-address recipient resolution applies to recipient-bearing TIP-20 paths: `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo`. See [Virtual Address Recipients](#virtual-address-recipients).
+- When an operation targets a registered virtual address, the effective recipient becomes the registered master wallet before recipient authorization and mint-recipient checks run.
+- Forwarded virtual-address deposits appear as two-hop standard `Transfer` events in the same transaction. Indexers and explorers should collapse that pair into one logical deposit to the resolved master wallet.
+- Virtual addresses are valid TIP-20 recipients on those paths but remain forwarding aliases rather than canonical TIP-20 holders. Non-TIP-20 tokens sent to a virtual address do not forward.
