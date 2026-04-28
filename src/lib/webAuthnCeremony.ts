@@ -52,7 +52,7 @@ export function keys(options: keys.Options = {}): WebAuthnCeremony.WebAuthnCerem
       const response = await fetch(`${url}/${credential.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential, publicKey }),
+        body: JSON.stringify({ credential: credential.raw, publicKey }),
       })
       if (!response.ok) {
         const { error } = (await response.json().catch(() => ({}))) as { error?: string }
