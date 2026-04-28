@@ -74,8 +74,8 @@ export function SignInButtons() {
               ? ({ capabilities: { method: 'register', name: 'Tempo Docs' } } as const)
               : {
                   capabilities: {
-                    label: 'Tempo Docs',
-                    method: 'register'
+                    method: 'register',
+                    name: 'Tempo Docs',
                   } as never,
                 }),
           })
