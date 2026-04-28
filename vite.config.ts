@@ -101,10 +101,22 @@ function syncTips(): Plugin {
     await Promise.all(
       tipFiles.map(async (file) => {
         let content = await fetch(file.download_url).then((r) => r.text())
-        // Fix dead links in TIPs that reference local paths instead of GitHub URLs
+        // Strip stale Solidity interface links from upstream TIPs. The linked
+        // files are no longer published, so keeping the link would surface dead
+        // references in the docs UI and fail Vocs' dead-link checker.
         content = content.replace(
-          /\(tips\/ref-impls\/src\/interfaces\/(\w+\.sol)\)/g,
-          '(https://github.com/tempoxyz/tempo-std/blob/master/src/interfaces/$1)',
+          /^- \[[^\]]+\.sol\]\(tips\/(?:ref-impls|verify)\/src\/interfaces\/[^)]+\)\n/gm,
+          '',
+        )
+        content = content.replace(
+          /\[([^\]]+\.sol)\]\(tips\/(?:ref-impls|verify)\/src\/interfaces\/[^)]+\)/g,
+          '$1',
+        )
+        // tip-0000 links to `./tip_template.md`, which lives in the tempo
+        // repo but not in the docs site.
+        content = content.replace(
+          /\(\.\/tip_template\.md\)/g,
+          '(https://github.com/tempoxyz/tempo/blob/main/tips/tip_template.md)',
         )
         // Escape angle brackets outside of code blocks/inline code so MDX doesn't
         // treat them as JSX (e.g. `Mapping<B256, bool>` in prose).

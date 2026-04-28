@@ -37,5 +37,5 @@ export function AccountsSignIn() {
 
 function useTempoWalletConnector() {
   const connectors = useConnectors()
-  return connectors.find((c) => c.id === 'xyz.tempo')
+  return connectors.find((c: { id: string }) => c.id === 'xyz.tempo')
 }

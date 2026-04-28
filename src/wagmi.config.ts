@@ -130,7 +130,7 @@ export function useTempoWalletConnector() {
   const connectors = useConnectors()
   return React.useMemo(
     // biome-ignore lint/style/noNonNullAssertion: _
-    () => connectors.find((connector) => connector.id === 'xyz.tempo')!,
+    () => connectors.find((c: { id: string }) => c.id === 'xyz.tempo')!,
     [connectors],
   )
 }
@@ -139,7 +139,7 @@ export function useWebAuthnConnector() {
   const connectors = useConnectors()
   return React.useMemo(
     // biome-ignore lint/style/noNonNullAssertion: _
-    () => connectors.find((connector) => connector.id === 'webAuthn')!,
+    () => connectors.find((c: { id: string }) => c.id === 'webAuthn')!,
     [connectors],
   )
 }

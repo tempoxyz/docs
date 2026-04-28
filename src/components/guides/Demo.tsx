@@ -608,6 +608,7 @@ export function Button(
   const Element = render ? (p: typeof props) => React.cloneElement(render, p) : 'button'
   return (
     <Element
+      disabled={disabled ? true : undefined}
       className={buttonClassName({
         className,
         disabled,

@@ -1,34 +1,55 @@
 ---
-description: Technical specification for the Account Keychain precompile managing access keys with expiry timestamps and per-token spending limits.
+description: Technical specification for the Account Keychain precompile managing access keys with expiry timestamps, spending limits, and post-T3 call-scope restrictions.
 ---
 
 # Account Keychain Precompile
 
 **Address:** `0xAAAAAAAA00000000000000000000000000000000`
 
-:::info[T3 will change this spec]
-The [T3 network upgrade](/protocol/upgrades/t3) will update this specification. The sections below describe the currently active behavior. See [Upcoming changes](#upcoming-changes) for the upcoming deltas.
+:::info[T3 will change this precompile]
+The [T3 network upgrade](/protocol/upgrades/t3) will update this specification. The sections below describe the current T2 behavior and include `T2 -> T3 changes` notes for each section. If you are migrating now, start with [Account keychain post-T3](#account-keychain-post-t3).
 :::
 
 ## Overview
 
 The Account Keychain precompile manages authorized Access Keys for accounts, enabling Root Keys (e.g., passkeys) to provision scoped "secondary" Access Keys with expiry timestamps and per-TIP20 token spending limits.
 
+At T3, `authorizeKey(...)` moves from top-level `expiry`, `enforceLimits`, and `limits` arguments to a `KeyRestrictions` tuple. `TokenLimit` gains `period`, so limits can be one-time or recurring, and access keys can optionally be restricted to specific targets, selectors, and recipients. Access-key-signed transactions also can no longer create contracts after T3 activation.
+
 ## Motivation
 
 The Tempo Transaction type unlocks a number of new signature schemes, including WebAuthn (Passkeys). However, for an Account using a Passkey as its Root Key, the sender will subsequently be prompted with passkey prompts for every signature request. This can be a poor user experience for highly interactive or multi-step flows. Additionally, users would also see "Sign In" copy in prompts for signing transactions which is confusing. This proposal introduces the concept of the Root Key being able to provision a (scoped) Access Key that can be used for subsequent transactions, without the need for repetitive end-user prompting.
 
-## Upcoming changes
+### T2 -> T3 changes
 
-T3 updates the Account Keychain specification through [TIP-1011](/protocol/tips/tip-1011) in the following ways:
+At T2, the main focus is expiry and spending limits. T3 extends the same model to cover recurring budgets and explicit call scoping, which makes access keys more powerful for subscriptions, connected apps, and session-key-style flows.
 
-- [TIP-1011](/protocol/tips/tip-1011) extends `TokenLimit` with an optional recurring `period`, so spending limits can be either one-time or periodic.
-- `authorizeKey(...)` moves to the new ABI with `allowAnyCalls` and `allowedCalls`, enabling explicit call scoping during key authorization.
-- New `SelectorRule` and `CallScope` structs define per-target and per-selector allowlists, including recipient-bound rules for supported TIP-20 selectors.
-- New root-key-only functions `setAllowedCalls(...)` and `removeAllowedCalls(...)`, plus a new `getAllowedCalls(...)` view, are added for managing and inspecting call scopes.
-- `getRemainingLimit(...)` changes to return both `remaining` and `periodEnd` so callers can observe periodic reset state.
-- `updateSpendingLimit(...)` resets the remaining amount to `newLimit` but does not change the configured `period` or current `periodEnd`.
-- Access-key-signed transactions can no longer create contracts in any configuration. Calling the `CREATE` opcode onchain still works.
+## Account keychain post-T3
+
+T3 changes the Account Keychain authorization shape on any network where the upgrade is active. Existing authorized keys continue to work. The breaking change is in how new key authorizations are encoded and what restrictions can now be enforced.
+
+### Migration summary
+
+- The legacy `authorizeKey(address,uint8,uint64,bool,(address,uint256)[])` entrypoint is no longer accepted after T3 activation. Calls to selector `0x54063a55` revert with `LegacyAuthorizeKeySelectorChanged(0x980a6025)`.
+- `authorizeKey(...)` now takes a `KeyRestrictions` tuple that carries expiry, spending limits, and call scopes.
+- `TokenLimit` now includes `period`, so limits can be one-time (`period = 0`) or recurring.
+- Access keys can now be scoped to specific targets, selectors, and recipients.
+- The precompile adds `setAllowedCalls(...)`, `removeAllowedCalls(...)`, `getAllowedCalls(...)`, and `getRemainingLimitWithPeriod(...)`.
+- Access-key-signed transactions can no longer create contracts after T3 activation. Use a Root Key for deployment flows.
+
+### Before and after `authorizeKey(...)`
+
+```text
+T2
+authorizeKey(address,uint8,uint64,bool,(address,uint256)[])
+selector: 0x54063a55
+
+T3
+authorizeKey(address,uint8,(uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[]))
+selector: 0x980a6025
+```
+
+The T3 call must use the tuple-form signature above. A flattened seven-argument signature is not equivalent. In Foundry, that flattened form hashes to `0x203e2736`, which the precompile rejects as an unknown selector.
 
 ## Concepts
 
@@ -44,6 +65,10 @@ Access Keys are secondary signing keys authorized by an account's Root Key. They
   - Native value transfers and `transferFrom()` are NOT limited
 - **Privilege Restrictions**: Cannot authorize new keys or modify their own limits
 
+#### T2 -> T3 changes
+
+At T3, spending limits can recur through `TokenLimit.period`. A `period` of `0` keeps the limit one-time, while a non-zero value makes it recurring. Call scoping also becomes a first-class restriction type, and access-key-signed transactions can no longer create contracts after T3 activation.
+
 ### Authorization Hierarchy
 
 The protocol enforces a strict hierarchy at validation time:
@@ -56,6 +81,10 @@ The protocol enforces a strict hierarchy at validation time:
    - Cannot call mutable precompile functions (only view functions are allowed)
    - Subject to per-TIP20 token spending limits
    - Can have expiry timestamps
+
+#### T2 -> T3 changes
+
+The hierarchy itself does not change. T3 adds new mutable call-scope management functions, and they remain Root-Key-only. Access Keys are also subject to call-scope checks during execution.
 
 ## Storage
 
@@ -72,7 +101,13 @@ The precompile uses a `keyId` (address) to uniquely identify each access key for
 - byte 9: enforce_limits (bool)
 - byte 10: is_revoked (bool)
 
+### T2 -> T3 changes
+
+At T3, `spendingLimits[...]` expands from a single remaining amount into `SpendingLimitState { remaining, max, period, periodEnd }`, and a new `keyScopes[keccak256(account || keyId)]` tree stores target, selector, and recipient allowlists. `transactionKey` remains the same.
+
 ## Interface
+
+### T2 interface
 
 ```solidity
 // SPDX-License-Identifier: MIT
@@ -100,7 +135,7 @@ interface IAccountKeychain {
     struct KeyInfo {
         SignatureType signatureType; // Signature type of the key
         address keyId;               // The key identifier
-        uint64 expiry;               // Unix timestamp when key expires (0 = never)
+        uint64 expiry;               // Unix timestamp when key expires
         bool enforceLimits;          // Whether spending limits are enforced for this key
         bool isRevoked;              // Whether this key has been revoked
     }
@@ -152,7 +187,7 @@ interface IAccountKeychain {
      *      The protocol enforces this restriction by checking transactionKey[msg.sender]
      * @param keyId The key identifier (address) to authorize
      * @param signatureType Signature type of the key (0: Secp256k1, 1: P256, 2: WebAuthn)
-     * @param expiry Unix timestamp when key expires (MUST be > current_timestamp, or 0 for never expires)
+     * @param expiry Unix timestamp when key expires (MUST be > current_timestamp)
      * @param enforceLimits Whether to enforce spending limits for this key
      * @param limits Initial spending limits for tokens (only used if enforceLimits is true)
      */
@@ -223,6 +258,113 @@ interface IAccountKeychain {
 }
 ```
 
+### T2 -> T3 changes
+
+At T3, `TokenLimit` gains `period`, and the interface adds `SelectorRule`, `CallScope`, and `KeyRestrictions`. `authorizeKey(...)` moves from top-level `expiry`, `enforceLimits`, and `limits` arguments to a `KeyRestrictions` tuple, while new Root-Key-only mutation methods (`setAllowedCalls(...)` and `removeAllowedCalls(...)`) and new views (`getRemainingLimitWithPeriod(...)` and `getAllowedCalls(...)`) are added around it. The legacy `getRemainingLimit(...)` selector is dropped at T3, and new T3-specific errors include `InvalidSpendingLimit()`, `ExpiryInPast()`, `SignatureTypeMismatch(uint8,uint8)`, `CallNotAllowed()`, `InvalidCallScope()`, and `LegacyAuthorizeKeySelectorChanged(bytes4)`.
+
+### T3 interface
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.13;
+
+interface IAccountKeychain {
+    enum SignatureType {
+        Secp256k1,
+        P256,
+        WebAuthn
+    }
+
+    struct TokenLimit {
+        address token;
+        uint256 amount;
+        uint64 period;
+    }
+
+    struct SelectorRule {
+        bytes4 selector;
+        address[] recipients;
+    }
+
+    struct CallScope {
+        address target;
+        SelectorRule[] selectorRules;
+    }
+
+    struct KeyRestrictions {
+        uint64 expiry;
+        bool enforceLimits;
+        TokenLimit[] limits;
+        bool allowAnyCalls;
+        CallScope[] allowedCalls;
+    }
+
+    struct KeyInfo {
+        SignatureType signatureType;
+        address keyId;
+        uint64 expiry;
+        bool enforceLimits;
+        bool isRevoked;
+    }
+
+    event KeyAuthorized(address indexed account, address indexed publicKey, uint8 signatureType, uint64 expiry);
+    event KeyRevoked(address indexed account, address indexed publicKey);
+    event SpendingLimitUpdated(address indexed account, address indexed publicKey, address indexed token, uint256 newLimit);
+    event AccessKeySpend(address indexed account, address indexed publicKey, address indexed token, uint256 amount, uint256 remainingLimit);
+
+    error UnauthorizedCaller();
+    error KeyAlreadyExists();
+    error KeyNotFound();
+    error KeyExpired();
+    error SpendingLimitExceeded();
+    error InvalidSpendingLimit();
+    error InvalidSignatureType();
+    error ZeroPublicKey();
+    error ExpiryInPast();
+    error KeyAlreadyRevoked();
+    error SignatureTypeMismatch(uint8 expected, uint8 actual);
+    error CallNotAllowed();
+    error InvalidCallScope();
+    error LegacyAuthorizeKeySelectorChanged(bytes4 newSelector);
+
+    function authorizeKey(
+        address keyId,
+        SignatureType signatureType,
+        KeyRestrictions calldata config
+    ) external;
+
+    function revokeKey(address keyId) external;
+
+    function updateSpendingLimit(
+        address keyId,
+        address token,
+        uint256 newLimit
+    ) external;
+
+    function setAllowedCalls(
+        address keyId,
+        CallScope[] calldata scopes
+    ) external;
+
+    function removeAllowedCalls(address keyId, address target) external;
+
+    function getKey(address account, address keyId) external view returns (KeyInfo memory);
+
+    function getRemainingLimitWithPeriod(
+        address account,
+        address keyId,
+        address token
+    ) external view returns (uint256 remaining, uint64 periodEnd);
+
+    function getAllowedCalls(
+        address account,
+        address keyId
+    ) external view returns (bool isScoped, CallScope[] memory scopes);
+
+    function getTransactionKey() external view returns (address);
+}
+```
+
 ## Behavior
 
 ### Key Authorization
@@ -241,6 +383,10 @@ interface IAccountKeychain {
 - `enforceLimits` determines whether spending limits are enforced for this key
 - `limits` are only processed if `enforceLimits` is `true`
 
+#### T2 -> T3 changes
+
+At T3, the legacy selector is no longer accepted and reverts with `LegacyAuthorizeKeySelectorChanged(newSelector: 0x980a6025)`. `authorizeKey(...)` now takes `KeyRestrictions` instead of top-level `expiry`, `enforceLimits`, and `limits` arguments, `config.expiry` must be greater than the current block timestamp, duplicate token entries are invalid, `allowAnyCalls = false` with `allowedCalls = []` means scoped deny-all, and recipient-constrained selector rules are validated before state is written.
+
 ### Key Revocation
 
 - Marks the key as revoked by setting `isRevoked` to `true` and `expiry` to `0`
@@ -251,6 +397,10 @@ interface IAccountKeychain {
 **Requirements:**
 - MUST be called by Root Key only (verified by checking `transactionKey[msg.sender] == 0`)
 - `keyId` MUST exist (key with `expiry > 0`) (reverts with `KeyNotFound` if not found)
+
+#### T2 -> T3 changes
+
+Revoked keys still behave as inactive for all legacy reads. T3 also treats any stored call-scope and periodic-limit state as inaccessible once the key is revoked, and `getAllowedCalls(...)` returns scoped deny-all for revoked keys.
 
 ### Spending Limit Update
 
@@ -265,6 +415,28 @@ interface IAccountKeychain {
 - `keyId` MUST exist and not be revoked (reverts with `KeyNotFound` or `KeyAlreadyRevoked`)
 - `keyId` MUST not be expired (reverts with `KeyExpired`)
 
+#### T2 -> T3 changes
+
+At T3, `newLimit` resets both `remaining` and `max` while preserving the existing `period` and current `periodEnd`. `newLimit` must also fit within TIP20's `u128` supply range.
+
+### View Behavior
+
+- `getKey(...)` returns key metadata.
+- `getRemainingLimit(...)` returns the remaining amount for a key-token pair.
+- `getTransactionKey()` returns the key used in the current transaction. `address(0)` means the Root Key.
+
+#### T2 -> T3 changes
+
+At T3, callers must switch from `getRemainingLimit(...)` to `getRemainingLimitWithPeriod(...)`. The legacy `getRemainingLimit(...)` selector is dropped, while `getRemainingLimitWithPeriod(...)` returns both effective `remaining` and current `periodEnd`. Missing, revoked, or expired keys return zeroed limit values, and `getAllowedCalls(...)` distinguishes unrestricted keys from scoped deny-all keys by returning `isScoped = true, scopes = []` for missing, revoked, or expired access keys.
+
+### Allowed Call Updates
+
+This behavior does not exist at T2.
+
+#### T2 -> T3 changes
+
+At T3, `setAllowedCalls(...)` creates or replaces one or more target scopes, and `removeAllowedCalls(...)` removes one stored target scope. Empty `selectorRules` means any selector on that target is allowed, while `setAllowedCalls(...)` rejects an empty scope batch, zero targets, duplicate targets, duplicate selectors, duplicate recipients, and invalid recipient-constrained rules.
+
 ## Security Considerations
 
 ### Access Key Storage
@@ -275,6 +447,10 @@ Access Keys should be securely stored to prevent unauthorized access:
 - **Non-Extractable Keys**: Access Keys SHOULD be generated and stored in a non-extractable format to prevent theft. For example, use WebCrypto API with `extractable: false` when generating Keys in web browsers.
 - **Secure Storage**: Private Keys MUST never be stored in plaintext. Private Keys SHOULD be encrypted and stored in a secure manner. For web applications, use browser-native secure storage mechanisms like IndexedDB with non-extractable WebCrypto keys rather than storing raw key material.
 
+#### T2 -> T3 changes
+
+- T3 call scopes make per-app and per-device key isolation more important, because a mis-scoped key may have a broader allowlist than intended.
+
 ### Privilege Escalation Prevention
 
 Access Keys cannot escalate their own privileges because:
@@ -282,6 +458,10 @@ Access Keys cannot escalate their own privileges because:
 2. The protocol sets `transactionKey[account]` during transaction validation to indicate which key signed the transaction
 3. These management functions check that `transactionKey[msg.sender] == 0` (Root Key) before executing
 4. Access Keys cannot bypass this check - transactions will revert with `UnauthorizedCaller`
+
+#### T2 -> T3 changes
+
+The same Root-Key-only restriction applies to `setAllowedCalls(...)` and `removeAllowedCalls(...)`. On T2+ networks, mutable precompile calls also require `msg.sender == tx.origin`, which prevents contract-mediated confused-deputy patterns.
 
 ### Spending Limit Enforcement
 
@@ -295,12 +475,28 @@ Access Keys cannot escalate their own privileges because:
 - Root keys (`keyId == address(0)`) have no spending limits - the function returns immediately
 - Failed limit checks revert the entire transaction with `SpendingLimitExceeded`
 
+#### T2 -> T3 changes
+
+At T3, recurring limits roll over when `current_timestamp >= periodEnd`. Missing, revoked, or expired keys have an effective remaining limit of zero, and `getRemainingLimitWithPeriod(...)` lets callers observe rollover state directly.
+
+### Call Scope Enforcement
+
+This behavior does not exist at T2.
+
+#### T2 -> T3 changes
+
+At T3, call-scope checks run on top-level calls signed by an Access Key. If a key is scoped and a call does not match the stored target, selector, and recipient rules, execution reverts with `CallNotAllowed`, and access-key-signed transactions cannot create contracts after T3 activation.
+
 ### Key Expiry
 
 - Keys with `expiry > 0` are checked against the current timestamp during validation
 - Expired keys cause transaction rejection with `KeyExpired` error (checked via `validate_keychain_authorization()`)
-- `expiry == 0` means the key never expires
+- New authorizations require a future expiry timestamp
 - Expiry is checked as: `current_timestamp >= expiry` (key is expired when current time reaches or exceeds expiry)
+
+#### T2 -> T3 changes
+
+Expired keys return zeroed limit and call-scope reads at T3.
 
 ## Usage Patterns
 
@@ -312,14 +508,26 @@ Access Keys cannot escalate their own privileges because:
 4. Protocol validates Passkey signature on `key_authorization`, sets `transactionKey[account] = 0`, calls `AccountKeychain.authorizeKey()`, then validates Access Key signature
 5. Transaction executes with Access Key's spending limits enforced via internal `verify_and_update_spending()`
 
+#### T2 -> T3 changes
+
+The same flow still applies, but the signed authorization now carries `KeyRestrictions` instead of top-level expiry and limit fields. That lets the same first-use flow provision recurring limits and call scopes.
+
 ### Subsequent Access Key Usage
 
 1. User's Access Key signs the transaction (no `key_authorization` needed)
 2. Protocol validates the Access Key via `validate_keychain_authorization()`, sets `transactionKey[account] = keyId`
 3. Transaction executes with spending limit enforcement via internal `verify_and_update_spending()`
 
+#### T2 -> T3 changes
+
+The same flow still applies, but T3 also enforces call scopes during execution and disallows contract creation from access-key-signed transactions.
+
 ### Root Key Revoking an Access Key
 
 1. User signs Passkey prompt → signs transaction calling `revokeKey(keyId)`
 2. Transaction executes, marking the Access Key as inactive
 3. Future transactions signed by that Access Key will be rejected
+
+#### T2 -> T3 changes
+
+The Root Key can still call `revokeKey(...)`. It can additionally call `updateSpendingLimit(...)`, `setAllowedCalls(...)`, and `removeAllowedCalls(...)` to modify restrictions after authorization, and `updateSpendingLimit(...)` now preserves the token's configured `period` and current `periodEnd`.

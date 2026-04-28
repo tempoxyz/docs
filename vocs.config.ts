@@ -20,8 +20,7 @@ export default defineConfig({
   //   textColor: 'white',
   // },
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
-  // TODO: Set back to true once tempoxyz/tempo#tip-1011 dead link is fixed
-  checkDeadlinks: 'warn',
+  checkDeadlinks: true,
   editLink: {
     link: 'https://github.com/tempoxyz/docs/edit/main/src/pages/:path',
     text: 'Suggest changes to this page',
@@ -99,6 +98,10 @@ export default defineConfig({
               {
                 text: 'Embed domain-bound Passkeys',
                 link: '/guide/use-accounts/embed-passkeys',
+              },
+              {
+                text: 'Authorize access keys',
+                link: '/guide/use-accounts/authorize-access-keys',
               },
               {
                 text: 'Connect to other wallets',
@@ -463,10 +466,6 @@ export default defineConfig({
                 link: '/protocol/tip20/virtual-addresses',
               },
               {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/TIP20.sol',
-              },
-              {
                 text: 'Rust Implementation',
                 link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip20',
               },
@@ -499,10 +498,6 @@ export default defineConfig({
                 link: '/protocol/tip403/spec',
               },
               {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/TIP403Registry.sol',
-              },
-              {
                 text: 'Rust Implementation',
                 link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip403_registry',
               },
@@ -531,10 +526,6 @@ export default defineConfig({
                   {
                     text: 'Specification',
                     link: '/protocol/fees/spec-fee-amm',
-                  },
-                  {
-                    text: 'Reference Implementation',
-                    link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/FeeManager.sol',
                   },
                   {
                     text: 'Rust Implementation',
@@ -621,12 +612,8 @@ export default defineConfig({
                 link: '/protocol/exchange/exchange-balance',
               },
               {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/stablecoinDex.sol',
-              },
-              {
                 text: 'Rust Implementation',
-                link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/stablecoin_exchange',
+                link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/stablecoin_dex',
               },
             ],
           },
@@ -685,7 +672,7 @@ export default defineConfig({
           },
           {
             text: 'TIPs',
-            link: '/protocol/tips',
+            link: 'https://tips.sh/',
           },
         ],
       },
