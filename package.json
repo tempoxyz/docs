@@ -46,6 +46,7 @@
     "vocs": "https://pkg.pr.new/wevm/vocs@2fb25c2",
     "wagmi": "0.0.0-canary-20260421205751",
     "waku": "1.0.0-alpha.4",
+    "webauthx": "~0.1.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {

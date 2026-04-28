@@ -15,6 +15,7 @@ import {
 } from 'wagmi'
 import { tempoWallet, webAuthn } from 'wagmi/tempo'
 import { alphaUsd, betaUsd, pathUsd, thetaUsd } from './components/guides/tokens'
+import * as WebAuthnCeremony from './lib/webAuthnCeremony.ts'
 import { feeToken, moderatoZones } from './lib/private-zones.ts'
 
 const chain =
@@ -67,11 +68,7 @@ export function getConfig(options: getConfig.Options = {}) {
                 url: 'https://sponsor.moderato.tempo.xyz',
               },
             }),
-            webAuthn(
-             import.meta.env.VITE_WEBAUTHN_AUTH_URL
-               ? { authUrl: import.meta.env.VITE_WEBAUTHN_AUTH_URL }
-               : undefined,
-           ),
+            webAuthn({ ceremony: WebAuthnCeremony.keys() }),
           ]),
     ],
     multiInjectedProviderDiscovery,
