@@ -2,7 +2,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import { parseUnits } from 'viem'
-import type { Config as WagmiConfig } from '@wagmi/core'
 import { useConfig, useConnection, useConnectionEffect, useTransaction } from 'wagmi'
 import { Actions, Hooks } from 'wagmi/tempo'
 import { Button, ExplorerLink, FAKE_RECIPIENT, FAKE_RECIPIENT_2, Step } from '../../Demo'
@@ -57,7 +56,7 @@ function TransferResult({ label, state }: { label: string; state: TransferState 
 export function SendParallelPayments(props: DemoStepProps) {
   const { stepNumber, last = false } = props
   const { address } = useConnection()
-  const config = useConfig() as WagmiConfig
+  const config = useConfig()
   const queryClient = useQueryClient()
   const [expanded, setExpanded] = React.useState(false)
 
@@ -82,7 +81,7 @@ export function SendParallelPayments(props: DemoStepProps) {
   })
 
   const sendTransfer = (
-    params: Actions.token.transfer.Parameters<WagmiConfig>,
+    params: Actions.token.transfer.Parameters<typeof config>,
     setTransfer: React.Dispatch<React.SetStateAction<TransferState>>,
   ) => {
     setTransfer({ status: 'pending' })
