@@ -75,7 +75,7 @@ export function SignInButtons() {
               : {
                   capabilities: {
                     label: 'Tempo Docs',
-                    type: 'sign-up',
+                    method: 'register'
                   } as never,
                 }),
           })
@@ -88,17 +88,7 @@ export function SignInButtons() {
         variant="default"
         onClick={async () => {
           await disconnect.disconnectAsync().catch(() => {})
-          connect.connect(
-            isE2E
-              ? { connector }
-              : {
-                  connector,
-                  capabilities: {
-                    label: 'Tempo Docs',
-                    type: 'sign-in',
-                  } as never,
-                },
-          )
+          connect.connect({ connector })
         }}
         type="button"
       >
