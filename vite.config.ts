@@ -101,10 +101,26 @@ function syncTips(): Plugin {
     await Promise.all(
       tipFiles.map(async (file) => {
         let content = await fetch(file.download_url).then((r) => r.text())
-        // Fix dead links in TIPs that reference local paths instead of GitHub URLs
+        // Fix dead links in TIPs that reference paths in the tempoxyz/tempo
+        // repo. These resolve fine on github.com but break Vocs' dead-link
+        // checker, since the files don't exist in the docs site. Rewriting
+        // them here lets us keep `checkDeadlinks: true` without forking
+        // upstream content. Add new patterns as upstream typos appear.
         content = content.replace(
           /\(tips\/ref-impls\/src\/interfaces\/(\w+\.sol)\)/g,
           '(https://github.com/tempoxyz/tempo-std/blob/master/src/interfaces/$1)',
+        )
+        // TIP-1011 references `tips/verify/src/interfaces/...` (upstream typo
+        // of `ref-impls`). Map it to the actual tempoxyz/tempo location.
+        content = content.replace(
+          /\(tips\/verify\/src\/interfaces\/(\w+\.sol)\)/g,
+          '(https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/interfaces/$1)',
+        )
+        // tip-0000 links to `./tip_template.md`, which lives in the tempo
+        // repo but not in the docs site.
+        content = content.replace(
+          /\(\.\/tip_template\.md\)/g,
+          '(https://github.com/tempoxyz/tempo/blob/main/tips/tip_template.md)',
         )
         // Escape angle brackets outside of code blocks/inline code so MDX doesn't
         // treat them as JSX (e.g. `Mapping<B256, bool>` in prose).
