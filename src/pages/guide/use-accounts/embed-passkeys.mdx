@@ -81,7 +81,7 @@ Next, we will need to configure the `webAuthn` connector in our Wagmi config, pa
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { webAuthn } from 'accounts/wagmi' // [!code ++]
+import { webAuthn } from 'wagmi/tempo' // [!code ++]
 
 export const config = createConfig({
   chains: [tempo],
@@ -153,7 +153,7 @@ export function Example() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { webAuthn } from 'accounts/wagmi' // [!code ++]
+import { webAuthn } from 'wagmi/tempo' // [!code ++]
 
 export const config = createConfig({
   chains: [tempo],
@@ -229,7 +229,7 @@ export function Example() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { webAuthn } from 'accounts/wagmi' // [!code ++]
+import { webAuthn } from 'wagmi/tempo' // [!code ++]
 
 export const config = createConfig({
   chains: [tempo],

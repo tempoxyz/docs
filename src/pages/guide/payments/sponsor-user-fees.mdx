@@ -60,9 +60,9 @@ export const POST = handler.fetch // Next.js
 
 ```ts twoslash [Tempo Wallet]
 // @noErrors
-import { tempoWallet } from 'accounts/wagmi'
 import { tempo } from 'viem/chains'
 import { createConfig, http } from 'wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet({
@@ -78,10 +78,10 @@ export const config = createConfig({
 
 ```ts twoslash [WebAuthn]
 // @noErrors
-import { webAuthn } from 'accounts/wagmi'
 import { tempo } from 'viem/chains'
 import { withRelay } from 'viem/tempo'
 import { createConfig, http } from 'wagmi'
+import { webAuthn } from 'wagmi/tempo'
 
 export const config = createConfig({
   connectors: [webAuthn({ authUrl: '/auth' })],

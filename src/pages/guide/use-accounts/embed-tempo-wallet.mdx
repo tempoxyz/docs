@@ -49,7 +49,7 @@ Next, we will configure the `tempoWallet` connector in our Wagmi config.
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { tempoWallet } from 'accounts/wagmi' // [!code ++]
+import { tempoWallet } from 'wagmi/connectors' // [!code ++]
 
 export const config = createConfig({
   chains: [tempo],
@@ -100,7 +100,7 @@ export function Example() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { tempoWallet } from 'accounts/wagmi' // [!code ++]
+import { tempoWallet } from 'wagmi/connectors' // [!code ++]
 
 export const config = createConfig({
   chains: [tempo],
@@ -166,7 +166,7 @@ export function Example() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { tempoWallet } from 'accounts/wagmi' // [!code ++]
+import { tempoWallet } from 'wagmi/connectors' // [!code ++]
 
 export const config = createConfig({
   chains: [tempo],
@@ -248,7 +248,7 @@ The `tempoWallet` connector supports fee sponsorship via a `feePayer` option. Th
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { tempoWallet } from 'accounts/wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],

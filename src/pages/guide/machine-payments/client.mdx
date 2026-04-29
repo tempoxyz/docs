@@ -97,8 +97,8 @@ Mppx.create({
 
 ```ts [config.ts]
 import { createConfig, http } from 'wagmi'
-import { tempoWallet } from 'accounts/wagmi'
 import { tempoModerato } from 'viem/chains'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet()],

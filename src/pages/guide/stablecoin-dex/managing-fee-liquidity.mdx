@@ -61,8 +61,8 @@ function ManageFeeLiquidity() {
 ```ts twoslash [wagmi.config.ts]
 // @noErrors
 import { tempo } from 'viem/chains'
-import { tempoWallet } from 'accounts/wagmi'
 import { createConfig, http } from 'wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet()],
@@ -125,8 +125,8 @@ function ManageFeeLiquidity() {
 ```ts twoslash [wagmi.config.ts]
 // @noErrors
 import { tempo } from 'viem/chains'
-import { tempoWallet } from 'accounts/wagmi'
 import { createConfig, http } from 'wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet()],
@@ -196,8 +196,8 @@ function ManageFeeLiquidity() {
 ```ts twoslash [wagmi.config.ts]
 // @noErrors
 import { tempo } from 'viem/chains'
-import { tempoWallet } from 'accounts/wagmi'
 import { createConfig, http } from 'wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet()],
@@ -279,8 +279,8 @@ function ManageFeeLiquidity() {
 ```ts twoslash [wagmi.config.ts]
 // @noErrors
 import { tempo } from 'viem/chains'
-import { tempoWallet } from 'accounts/wagmi'
 import { createConfig, http } from 'wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet()],
@@ -345,8 +345,8 @@ function MonitorSwaps() {
 ```ts twoslash [wagmi.config.ts]
 // @noErrors
 import { tempo } from 'viem/chains'
-import { tempoWallet } from 'accounts/wagmi'
 import { createConfig, http } from 'wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet()],
@@ -409,8 +409,8 @@ function RebalancePool() {
 ```ts twoslash [wagmi.config.ts]
 // @noErrors
 import { tempo } from 'viem/chains'
-import { tempoWallet } from 'accounts/wagmi'
 import { createConfig, http } from 'wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet()],
