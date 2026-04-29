@@ -46,6 +46,7 @@ export function SignInButtons() {
   const hydrated = useHydrated()
   const connector = useWebAuthnConnector()
   const busy = connect.isPending || disconnect.isPending
+  const isE2E = import.meta.env.VITE_E2E === 'true'
 
   if (!hydrated || !connector)
     return (
@@ -69,7 +70,14 @@ export function SignInButtons() {
           await disconnect.disconnectAsync().catch(() => {})
           connect.connect({
             connector,
-            capabilities: { method: 'register', name: 'Tempo Docs' },
+            ...(isE2E
+              ? ({ capabilities: { method: 'register', name: 'Tempo Docs' } } as const)
+              : {
+                  capabilities: {
+                    method: 'register',
+                    name: 'Tempo Docs',
+                  } as never,
+                }),
           })
         }}
         type="button"
@@ -80,7 +88,7 @@ export function SignInButtons() {
         variant="default"
         onClick={async () => {
           await disconnect.disconnectAsync().catch(() => {})
-          connect.connect({ connector, capabilities: { method: 'login' } })
+          connect.connect({ connector })
         }}
         type="button"
       >

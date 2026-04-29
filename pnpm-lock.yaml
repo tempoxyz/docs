@@ -104,7 +104,10 @@ importers:
         version: 3.6.5(@tanstack/query-core@5.99.0)(@tanstack/react-query@5.99.0(react@19.2.5))(@types/react@19.2.14)(accounts@0.8.2)(react@19.2.5)(typescript@5.9.3)(viem@2.48.4(typescript@5.9.3)(zod@4.3.6))
       waku:
         specifier: 1.0.0-alpha.4
-        version: 1.0.0-alpha.4(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 1.0.0-alpha.4(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.104.1))(react@19.2.5)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
+      webauthx:
+        specifier: ~0.1.1
+        version: 0.1.1(typescript@5.9.3)(zod@4.3.6)
       zod:
         specifier: ^4.3.6
         version: 4.3.6
