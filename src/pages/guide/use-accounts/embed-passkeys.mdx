@@ -133,14 +133,14 @@ export function Example() {
         onClick={() =>
           connect.connect({
             connector,
-            capabilities: { type: 'sign-up' },
+            capabilities: { method: 'register' },
           })
         }
       >
         Sign up
       </button>
 
-      <button onClick={() => connect.connect({ connector, capabilities: { type: 'sign-in' } })}>
+      <button onClick={() => connect.connect({ connector })}>
         Sign in
       </button>
     </div>
@@ -209,14 +209,14 @@ export function Example() {
         onClick={() =>
           connect.connect({
             connector,
-            capabilities: { type: 'sign-up' },
+            capabilities: { method: 'register' },
           })
         }
       >
         Sign up
       </button>
 
-      <button onClick={() => connect.connect({ connector, capabilities: { type: 'sign-in' } })}>
+      <button onClick={() => connect.connect({ connector })}>
         Sign in
       </button>
     </div>
