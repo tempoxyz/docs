@@ -197,7 +197,7 @@ forge script script/Deploy.s.sol \
   --private-key $PRIVATE_KEY
 ```
 
-Use a root key for `forge create`. Post-T3, access keys can sign calls but not deployments.
+Use a root key for `forge create`. Access keys can sign calls but not deployments.
 
 For more verification options including verifying existing contracts and API verification, see [Contract Verification](/quickstart/verify-contracts).
 
@@ -299,36 +299,9 @@ cast send <CONTRACT_ADDRESS> 'increment()' \
   --tempo.root-account $ROOT_ADDRESS
 ```
 
-#### T2 -> T3 changes
-
-If you are migrating a pre-T3 integration, this is the key change: direct `authorizeKey(...)` calls must switch from the legacy ABI to the tuple-form TIP-1011 ABI shown above. If you need periodic limits or call scopes, fill those arrays instead of passing `[]`. The flattened seven-argument form is not equivalent.
-
 If the access key will be used with passkey or WebAuthn signatures, pass `2` for `SignatureType`. `1` is only for raw P256 signatures.
 
-Post-T3, access-key transactions also cannot create contracts, so use a root key for deployments or other flows that perform `CREATE`.
-
-### Check your `authorizeKey(...)` migration with `cast`
-
-Most users can skip this if they use `cast keychain` below or the tuple-form `cast send` example above. This is mainly for hand-encoded calldata.
-
-```bash
-# Legacy pre-T3 selector:
-cast sig 'authorizeKey(address,uint8,uint64,bool,(address,uint256)[])'
-
-# Incorrect flattened post-T3 form. This is not accepted onchain:
-cast sig 'authorizeKey(address,uint8,uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[])'
-
-# Correct post-T3 tuple-form selector:
-cast sig 'authorizeKey(address,uint8,(uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[]))'
-
-# Build the exact post-T3 calldata locally:
-cast calldata 'authorizeKey(address,uint8,(uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[]))' \
-  $ACCESS_KEY_ADDR 0 '(1893456000,false,[],true,[])'
-```
-
-The expected selectors are `0x54063a55`, `0x203e2736`, and `0x980a6025`.
-
-After T3 activation, the legacy selector reverts with `LegacyAuthorizeKeySelectorChanged(0x980a6025)`. Use the tuple-form `cast send` example above when you are ready to broadcast.
+Access-key transactions cannot create contracts, so use a root key for deployments or other flows that perform `CREATE`.
 
 ### Local Development with Anvil
 
@@ -398,12 +371,10 @@ Prefer this over hand-encoding `authorizeKey(...)` calldata when you are working
 `cast keychain` only works on Tempo networks.
 :::
 
-#### T2 -> T3 changes
-
-Post-T3, `cast keychain` authorization flows should use a future expiry timestamp, `webauthn` for passkey-backed access keys, optional `TOKEN:AMOUNT:PERIOD_SECONDS` limits for recurring budgets, and `--scope` for target, selector, and recipient restrictions.
+`cast keychain` authorization takes a future expiry timestamp, `webauthn` for passkey-backed access keys, optional `TOKEN:AMOUNT:PERIOD_SECONDS` limits for recurring budgets, and `--scope` for target, selector, and recipient restrictions.
 
 ```bash
-# Post-T3, access keys must be authorized with a future expiry timestamp.
+# Access keys must be authorized with a future expiry timestamp.
 EXPIRY=$(($(date +%s) + 86400))
 
 # Authorize a new access key (signature types: secp256k1, p256, webauthn):
@@ -468,3 +439,34 @@ cast call 0xAAAAAAAA00000000000000000000000000000000 \
   <ACCOUNT> <KEY_ID> <TOKEN_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL
 ```
+
+## T2 → T3 migration
+
+:::info[Migration appendix]
+This appendix is kept for an integrator cooldown period after the T3 mainnet activation on Apr 27, 2026. It will be removed in a future docs revision.
+:::
+
+If you are migrating a pre-T3 integration, this is the key change: direct `authorizeKey(...)` calls must switch from the legacy ABI to the tuple-form TIP-1011 ABI used in the [`cast send` example above](#interact--debug-with-cast). If you need periodic limits or call scopes, fill those arrays instead of passing `[]`. The flattened seven-argument form is not equivalent.
+
+### Check your `authorizeKey(...)` migration with `cast`
+
+Most users can skip this if they use [`cast keychain`](#cast-keychain) or the tuple-form `cast send` example above. This is mainly for hand-encoded calldata.
+
+```bash
+# Legacy pre-T3 selector:
+cast sig 'authorizeKey(address,uint8,uint64,bool,(address,uint256)[])'
+
+# Incorrect flattened post-T3 form. This is not accepted onchain:
+cast sig 'authorizeKey(address,uint8,uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[])'
+
+# Correct post-T3 tuple-form selector:
+cast sig 'authorizeKey(address,uint8,(uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[]))'
+
+# Build the exact post-T3 calldata locally:
+cast calldata 'authorizeKey(address,uint8,(uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[]))' \
+  $ACCESS_KEY_ADDR 0 '(1893456000,false,[],true,[])'
+```
+
+The expected selectors are `0x54063a55`, `0x203e2736`, and `0x980a6025`.
+
+After T3 activation, the legacy selector reverts with `LegacyAuthorizeKeySelectorChanged(0x980a6025)`. Use the tuple-form `cast send` example above when you are ready to broadcast.
