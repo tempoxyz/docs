@@ -15,7 +15,8 @@
     "bundle:diff": "node --experimental-strip-types scripts/bundle-diff.ts",
     "bundle:save": "node --experimental-strip-types scripts/bundle-diff.ts --save",
     "lighthouse": "node --experimental-strip-types scripts/lighthouse.ts",
-    "lighthouse:mobile": "node --experimental-strip-types scripts/lighthouse.ts --mobile"
+    "lighthouse:mobile": "node --experimental-strip-types scripts/lighthouse.ts --mobile",
+    "og:probe": "node --experimental-strip-types scripts/probe-og.ts"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.102",

@@ -54,6 +54,7 @@ export default defineConfig({
       ecosystem: 'ECOSYSTEM',
       learn: 'LEARN',
       wallet: 'WALLET',
+      accounts: 'ACCOUNTS',
     }
 
     const subsectionMap: Record<string, string> = {
@@ -64,7 +65,7 @@ export default defineConfig({
       'machine-payments': 'MACHINE PAY',
       'tempo-transaction': 'TRANSACTIONS',
       tip20: 'TIP-20',
-      'tip20-rewards': 'TIP-20 REWARDS',
+      'tip20-rewards': 'REWARDS',
       tip403: 'TIP-403',
       fees: 'FEES',
       transactions: 'TRANSACTIONS',
@@ -80,6 +81,14 @@ export default defineConfig({
       stablecoins: 'STABLECOINS',
       'use-cases': 'USE CASES',
       tempo: 'TEMPO',
+      zones: 'ZONES',
+      'private-zones': 'PRIVATE ZONES',
+      upgrades: 'UPGRADES',
+      api: 'API',
+      guides: 'GUIDES',
+      rpc: 'RPC',
+      server: 'SERVER',
+      wagmi: 'WAGMI',
     }
 
     const segments = path.split('/').filter(Boolean)
