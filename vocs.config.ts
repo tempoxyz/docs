@@ -41,10 +41,76 @@ export default defineConfig({
     ],
   },
   baseUrl: baseUrl || undefined,
-  ogImageUrl: (path, { baseUrl } = { baseUrl: '' }) =>
-    path === '/'
-      ? `${baseUrl}/og-docs.png`
-      : `${baseUrl}/api/og?title=%title&description=%description`,
+  ogImageUrl: (path, { baseUrl } = { baseUrl: '' }) => {
+    const landingPaths = ['/', '/learn', '/changelog']
+    if (landingPaths.includes(path)) return `${baseUrl}/og-docs.png`
+
+    const sectionMap: Record<string, string> = {
+      quickstart: 'INTEGRATE',
+      guide: 'BUILD',
+      protocol: 'PROTOCOL',
+      sdk: 'SDKs',
+      cli: 'CLI',
+      ecosystem: 'ECOSYSTEM',
+      learn: 'LEARN',
+      wallet: 'WALLET',
+      accounts: 'ACCOUNTS',
+    }
+
+    const subsectionMap: Record<string, string> = {
+      'use-accounts': 'ACCOUNTS',
+      payments: 'PAYMENTS',
+      issuance: 'ISSUANCE',
+      'stablecoin-dex': 'EXCHANGE',
+      'machine-payments': 'MACHINE PAY',
+      'tempo-transaction': 'TRANSACTIONS',
+      tip20: 'TIP-20',
+      'tip20-rewards': 'REWARDS',
+      tip403: 'TIP-403',
+      fees: 'FEES',
+      transactions: 'TRANSACTIONS',
+      blockspace: 'BLOCKSPACE',
+      exchange: 'DEX',
+      tips: 'TIPS',
+      node: 'NODE',
+      typescript: 'TYPESCRIPT',
+      go: 'GO',
+      foundry: 'FOUNDRY',
+      python: 'PYTHON',
+      rust: 'RUST',
+      stablecoins: 'STABLECOINS',
+      'use-cases': 'USE CASES',
+      tempo: 'TEMPO',
+      zones: 'ZONES',
+      'private-zones': 'PRIVATE ZONES',
+      upgrades: 'UPGRADES',
+      api: 'API',
+      guides: 'GUIDES',
+      rpc: 'RPC',
+      server: 'SERVER',
+      wagmi: 'WAGMI',
+    }
+
+    const segments = path.split('/').filter(Boolean)
+    const firstSeg = segments[0] || ''
+    const secondSeg = segments[1] || ''
+    const section = sectionMap[firstSeg] || firstSeg.toUpperCase().replace(/-/g, ' ')
+    const subsection =
+      segments.length >= 3 && subsectionMap[secondSeg]
+        ? subsectionMap[secondSeg]
+        : segments.length >= 3
+          ? secondSeg.toUpperCase().replace(/-/g, ' ')
+          : ''
+
+    const params = new URLSearchParams({
+      title: '%title',
+      description: '%description',
+      section,
+      ...(subsection ? { subsection } : {}),
+    })
+
+    return `${baseUrl}/api/og?${params.toString()}`
+  },
   // TODO: Change back to file paths (`/lockup-light.svg`, `/lockup-dark.svg`) once password protection is removed
   logoUrl: {
     light:
