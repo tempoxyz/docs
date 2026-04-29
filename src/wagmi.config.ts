@@ -13,11 +13,10 @@ import {
   useConnectors,
   webSocket,
 } from 'wagmi'
-import { tempoWallet } from 'wagmi/connectors'
-import { webAuthn } from 'wagmi/tempo'
+import { tempoWallet, webAuthn } from 'wagmi/tempo'
 import { alphaUsd, betaUsd, pathUsd, thetaUsd } from './components/guides/tokens'
-import { feeToken, moderatoZones } from './lib/private-zones.ts'
 import * as WebAuthnCeremony from './lib/webAuthnCeremony.ts'
+import { feeToken, moderatoZones } from './lib/private-zones.ts'
 
 const chain =
   import.meta.env.VITE_TEMPO_ENV === 'localnet'
@@ -52,11 +51,7 @@ export function getConfig(options: getConfig.Options = {}) {
     chains: [chain],
     connectors: [
       ...(import.meta.env.VITE_E2E === 'true'
-        ? [
-            webAuthn({
-              rdns: 'webAuthn',
-            }),
-          ]
+        ? [webAuthn()]
         : [
             tempoWallet({
               authorizeAccessKey: () => ({
@@ -73,18 +68,7 @@ export function getConfig(options: getConfig.Options = {}) {
                 url: 'https://sponsor.moderato.tempo.xyz',
               },
             }),
-            webAuthn({
-              authorizeAccessKey: () => ({
-                expiry: Expiry.days(1),
-                limits: [
-                  { token: pathUsd, limit: parseUnits('500', 6) },
-                  { token: alphaUsd, limit: parseUnits('500', 6) },
-                  { token: betaUsd, limit: parseUnits('500', 6) },
-                  { token: thetaUsd, limit: parseUnits('500', 6) },
-                ],
-              }),
-              ceremony: WebAuthnCeremony.keys(),
-            }),
+            webAuthn({ ceremony: WebAuthnCeremony.keys() }),
           ]),
     ],
     multiInjectedProviderDiscovery,

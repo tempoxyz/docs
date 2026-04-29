@@ -905,23 +905,45 @@ transactions thereafter can be signed by the access key.
     
     ```tsx twoslash [example.tsx]
     // @noErrors
-    import { Expiry } from 'accounts'
-    import { tempo } from 'viem/chains'
-    import { webAuthn } from 'wagmi/tempo'
-    import { createConfig, http } from 'wagmi'
-    
-    export const config = createConfig({
-      connectors: [
-        webAuthn({
-          authorizeAccessKey: () => ({ expiry: Expiry.days(1) }), // [!code hl]
-        }),
-      ],
-      chains: [tempo],
-      multiInjectedProviderDiscovery: false,
-      transports: {
-        [tempo.id]: http(),
-      },
-    })
+    import { parseUnits } from 'viem'
+    import { Account, Expiry, P256, Period, tempoActions } from 'viem/tempo'
+    import { useConnectorClient } from 'wagmi'
+
+    export function useAuthorizeAccessKey() {
+      const { data: connectorClient } = useConnectorClient()
+
+      async function authorize() {
+        if (!connectorClient) return
+
+        const client = connectorClient.extend(tempoActions())
+        const alphaUsd = '0x20c0000000000000000000000000000000000001'
+        const accessKey = Account.fromP256(P256.randomPrivateKey(), {
+          access: connectorClient.account,
+        })
+
+        const { receipt } = await client.accessKey.authorizeSync({
+          accessKey, // [!code hl]
+          expiry: Expiry.hours(1),
+          limits: [
+            {
+              token: alphaUsd,
+              limit: parseUnits('1000', 6),
+              period: Period.months(1),
+            },
+          ],
+          scopes: [
+            {
+              address: alphaUsd,
+              selector: 'transfer(address,uint256)',
+            },
+          ],
+        })
+
+        return receipt.transactionHash
+      }
+
+      return { authorize }
+    }
     ```
 
   </Tab>
