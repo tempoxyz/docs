@@ -375,9 +375,14 @@ Prefer this over hand-encoding `authorizeKey(...)` calldata when you are working
 
 `cast keychain` authorization takes a future expiry timestamp, `webauthn` for passkey-backed access keys, optional `TOKEN:AMOUNT:PERIOD_SECONDS` limits for recurring budgets, and `--scope` for target, selector, and recipient restrictions.
 
+`cast keychain` sends the Account Keychain ABI directly, so a non-expiring key uses `18446744073709551615` (`type(uint64).max`) as the expiry value. This differs from tx-level `key_authorization`, where a non-expiring key is represented by omitting `expiry`. Do not pass `0`.
+
 ```bash
 # Access keys must be authorized with a future expiry timestamp.
 EXPIRY=$(($(date +%s) + 86400))
+
+# For a non-expiring key via direct precompile ABI / cast keychain, use:
+NEVER_EXPIRES=18446744073709551615
 
 # Authorize a new access key (signature types: secp256k1, p256, webauthn):
 cast keychain authorize <KEY_ID> secp256k1 $EXPIRY \

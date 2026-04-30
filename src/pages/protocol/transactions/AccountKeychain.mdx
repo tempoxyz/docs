@@ -22,7 +22,7 @@ The Tempo Transaction type unlocks a number of new signature schemes, including 
 
 Access Keys are secondary signing keys authorized by an account's Root Key. They can sign transactions on behalf of the account with the following restrictions:
 
-- **Expiry**: Unix timestamp when the key becomes invalid (0 = never expires, non-zero values must be > current timestamp)
+- **Expiry**: Unix timestamp when the key becomes invalid. A non-expiring `key_authorization` omits `expiry` at the transaction RLP layer; the protocol translates that omission to `u64::MAX` before calling the precompile. Direct precompile callers should pass `u64::MAX` for a non-expiring key. Literal `0` is treated as past expiry and rejected.
 - **Spending Limits**: Per-TIP20 token limits that deplete as tokens are spent
   - Limits are one-time (`period = 0`) or recurring (`period > 0`, in seconds). Recurring limits roll over to `max` when `current_timestamp >= periodEnd`.
   - Limits can be updated by the Root Key via `updateSpendingLimit()`. An update resets `remaining` and `max` to `newLimit` but preserves the configured `period` and current `periodEnd`.
@@ -184,7 +184,8 @@ interface IAccountKeychain {
 - `keyId` MUST NOT already be authorized with `expiry > 0` (reverts with `KeyAlreadyExists`)
 - `keyId` MUST NOT have been previously revoked (reverts with `KeyAlreadyRevoked` - prevents replay attacks)
 - `signatureType` MUST be `0` (Secp256k1), `1` (P256), or `2` (WebAuthn) (reverts with `InvalidSignatureType`)
-- `config.expiry` MUST be `0` (never expires) or strictly greater than the current block timestamp (reverts with `ExpiryInPast`)
+- `config.expiry` MUST be strictly greater than the current block timestamp (reverts with `ExpiryInPast`)
+- To authorize a non-expiring key, omit `key_authorization.expiry` in the transaction RLP or pass `u64::MAX` when calling the precompile ABI directly. Do not pass `0`.
 - `enforceLimits` determines whether spending limits are enforced for this key
 - `limits` are only processed if `enforceLimits` is `true`. Duplicate token entries revert with `InvalidSpendingLimit`.
 - Invalid call-scope shapes (zero targets, duplicate targets, duplicate selectors, duplicate recipients, malformed recipient-bound rules) revert with `InvalidCallScope`.
@@ -313,6 +314,7 @@ This section captures changes introduced by the [T3 network upgrade](/protocol/u
 
 - The legacy `authorizeKey(address,uint8,uint64,bool,(address,uint256)[])` entrypoint (selector `0x54063a55`) is no longer accepted. Calls revert with `LegacyAuthorizeKeySelectorChanged(0x980a6025)`.
 - `authorizeKey(...)` now takes a `KeyRestrictions` tuple that bundles expiry, spending limits, and call scopes. The flattened seven-argument form (which hashes to `0x203e2736` in Foundry) is rejected as an unknown selector — the call must use the canonical tuple-form selector `0x980a6025`.
+- A non-expiring key is no longer represented by `expiry = 0`. Omit `key_authorization.expiry` in the transaction RLP, or pass `u64::MAX` when calling `authorizeKey(...)` directly. Literal `0` reverts with `ExpiryInPast`.
 - `TokenLimit` gains a `period` field, so limits can be one-time (`period = 0`) or recurring.
 - Access keys can be scoped to specific targets, selectors, and recipients via `KeyRestrictions.allowAnyCalls` and `KeyRestrictions.allowedCalls`.
 - The precompile adds `setAllowedCalls(...)`, `removeAllowedCalls(...)`, `getAllowedCalls(...)`, and `getRemainingLimitWithPeriod(...)`.

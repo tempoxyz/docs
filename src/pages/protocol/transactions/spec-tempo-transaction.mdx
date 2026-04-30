@@ -61,7 +61,7 @@ pub struct KeyAuthorization {
     chain_id: u64,                              // Chain ID for replay protection (0 = valid on any chain)
     key_type: SignatureType,                    // Type of key: Secp256k1 (0), P256 (1), or WebAuthn (2)
     key_id: Address,                            // Key identifier (address derived from public key)
-    expiry: Option<u64>,                        // Unix timestamp when key expires (None = never expires)
+    expiry: Option<u64>,                        // Unix timestamp when key expires (omit / None for never expires)
     limits: Option<Vec<TokenLimit>>,            // TIP20 spending limits (None = unlimited spending)
     allowed_calls: Option<Vec<CallScope>>,      // Call-scope allowlist (None = unrestricted; Some(empty) = scoped deny-all)
 }
@@ -589,7 +589,7 @@ key_authorization_digest = keccak256(rlp([chain_id, key_type, key_id, expiry?, l
 chain_id = u64 (0 = valid on any chain)
 key_type = 0 (Secp256k1) | 1 (P256) | 2 (WebAuthn)
 key_id = Address (derived from the public key)
-expiry = Option<u64> (unix timestamp, None = never expires, stored as u64::MAX in precompile)
+expiry = Option<u64> (unix timestamp, None = never expires; omitted expiry is translated to u64::MAX when the protocol calls the precompile)
 limits = Option<Vec<[token, limit, period]>> (None = unlimited spending; period = 0 means one-time)
 allowed_calls = Option<Vec<[target, [[selector, [recipient, ...]], ...]]>> (None = unrestricted; Some([]) = scoped deny-all)
 ```
@@ -605,6 +605,12 @@ signed_key_authorization = rlp([chain_id, key_type, key_id, expiry?, limits?, al
 The `signature` is a `PrimitiveSignature` (secp256k1, P256, or WebAuthn) signed by the root key.
 
 Note: `expiry`, `limits`, and `allowed_calls` use RLP trailing field semantics — they can be omitted entirely when None.
+
+:::warning[Expiry encoding]
+For `key_authorization`, a non-expiring key is encoded by omitting `expiry` (`None` / empty RLP field), not by encoding `0`.
+
+Do not hand-encode `expiry = 0` or rely on `Some(0)`. The protocol only treats omitted expiry as "never expires," and translates that omission to `u64::MAX` when materializing the `AccountKeychain.authorizeKey(...)` call.
+:::
 
 Intrinsic gas for `key_authorization` accounts for the storage written for periodic-limit state and call-scope entries. See [TIP-1011](/protocol/tips/tip-1011#intrinsic-gas-for-key-authorization) for slot-counting rules.
 
@@ -641,7 +647,7 @@ When a TempoTransaction is received, the protocol:
 4. **Validates Key Authorization** (for Access Keys)
    - Queries precompile: `getKey(account, keyId)` returns `KeyInfo`
    - Checks key is active (not revoked)
-   - Checks expiry: `current_timestamp < expiry` (or `expiry == 0` for never expires)
+   - Checks expiry: `current_timestamp < expiry`; non-expiring keys are stored with `expiry = u64::MAX`
    - Rejects transaction if validation fails
 
 ##### Authorization Hierarchy Enforcement
@@ -729,7 +735,7 @@ Access-key-signed transactions cannot perform contract creation. Any `CREATE` or
      chain_id: 1,
      key_type: SignatureType.P256,      // 1
      key_id: keyId,                     // address derived from public key
-     expiry: timestamp + 86400,         // 24 hours from now (or 0 for never)
+     expiry: timestamp + 86400,         // 24 hours from now; omit this field for a non-expiring key authorization
      limits: [
        // One-time limit (period = 0)
        { token: USDG_ADDRESS, limit: 1000000000, period: 0 },                  // 1000 USDG (6 decimals), one-time
@@ -1211,6 +1217,7 @@ T3 expanded access keys through [TIP-1011](/protocol/tips/tip-1011) in the follo
 - `KeyAuthorization` gained `allowed_calls` (call-scope allowlist).
 - `TokenLimit` gained `period` (recurring vs. one-time spending limits).
 - The signed payload `SignedKeyAuthorization { authorization, signature }` is unchanged in shape, but `authorization` now uses the expanded `KeyAuthorization` and new RLP encoding. Low-level integrators that manually encode `key_authorization` must branch pre-T3 vs post-T3 — the post-T3 digest and signed payload include `allowed_calls?` in addition to `expiry?` and `limits?`.
+- A non-expiring `key_authorization` omits `expiry` in tx RLP. At the Account Keychain ABI boundary, the protocol translates that omission to `u64::MAX`. Literal `0` is not a valid non-expiring sentinel to rely on.
 - Access-key validation gained two new execution checks: call scopes must pass before execution begins, and access-key-signed transactions may not perform contract creation anywhere in the batch.
 - The Account Keychain precompile ABI changed in lockstep — `authorizeKey(...)` now takes a `KeyRestrictions` tuple, `getRemainingLimit(...)` is replaced by `getRemainingLimitWithPeriod(...)`, and `setAllowedCalls(...)` / `removeAllowedCalls(...)` / `getAllowedCalls(...)` are added. See the [Account Keychain spec](./AccountKeychain) for full details.
 - Intrinsic gas for `key_authorization` accounts for periodic-limit state and call-scope storage. See [TIP-1011](/protocol/tips/tip-1011#intrinsic-gas-for-key-authorization) for the canonical slot-counting rules.
