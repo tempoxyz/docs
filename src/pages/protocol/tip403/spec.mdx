@@ -4,10 +4,6 @@ description: Technical specification for TIP-403, the policy registry system ena
 
 # Overview
 
-:::info[T3 will change this spec]
-The [T3 network upgrade](/protocol/upgrades/t3) will update this specification. The sections below describe the currently active behavior. See [Upcoming changes](#upcoming-changes) for the upcoming deltas.
-:::
-
 ## Abstract
 
 TIP-403 provides a policy registry system that allows TIP-20 tokens to inherit access control and compliance policies. The registry supports two types of policies (whitelist and blacklist) and includes special built-in policies for common use cases. Policies can be shared across multiple tokens, enabling consistent compliance enforcement.
@@ -17,13 +13,6 @@ TIP-403 provides a policy registry system that allows TIP-20 tokens to inherit a
 Token issuers often need to implement compliance policies such as KYC/AML requirements, access control, and risk management. Without a standardized system, each token would need to implement its own policy logic, making policy management more difficult and inconsistent across the ecosystem.
 
 TIP-403 addresses this by providing a centralized registry that tokens can reference for authorization decisions. This enables consistent policy enforcement across multiple tokens and reduces implementation complexity for token issuers.
-
-## Upcoming changes
-
-T3 updates TIP-403 interactions with token recipients through [TIP-1022](/protocol/tips/tip-1022) as follows:
-
-- Policy-configuration functions that accept literal member addresses will reject [TIP-1022](/protocol/tips/tip-1022) virtual addresses.
-- TIP-20 policy checks for virtual-address transfers and mints will run against the resolved master wallet, not the forwarding alias, so policy membership must be configured on the master address.
 
 ---
 
@@ -242,6 +231,8 @@ TIP-20 tokens store the current TIP403 registry policy ID they adhere to in thei
 
 **Policy Changes:** When a token's transfer policy is changed via `changeTransferPolicyId()`, all future transfers are immediately subject to the new policy.
 
+**Virtual addresses:** Policy-configuration functions that accept literal member addresses (`createPolicyWithAccounts`, `modifyPolicyWhitelist`, `modifyPolicyBlacklist`) reject [TIP-1022](/protocol/tips/tip-1022) virtual addresses. TIP-20 policy checks for transfers and mints to a virtual address run against the resolved master wallet rather than the forwarding alias, so policy membership must be configured on the master address.
+
 ### Example Usage
 
 Creating and setting a policy:
@@ -277,3 +268,14 @@ return data.policyType == PolicyType.WHITELIST
 - When policyId = 0, all authorization checks must return false for every address.
 - When policyId = 1, all authorization checks must return true for every address.
 - Only the policy’s current admin may update the admin address for that policy.
+
+# T2 → T3 migration
+
+:::info[Migration appendix]
+This section captures changes introduced by the [T3 network upgrade](/protocol/upgrades/t3) for integrators migrating from T2. The spec above is the canonical post-T3 specification; this appendix exists for reference and will be removed in a future docs revision.
+:::
+
+T3 introduced [TIP-1022](/protocol/tips/tip-1022) virtual addresses, which affect TIP-403 in two places:
+
+- Policy-configuration functions that take literal member addresses (`createPolicyWithAccounts`, `modifyPolicyWhitelist`, `modifyPolicyBlacklist`) now reject virtual addresses.
+- TIP-20 policy checks for virtual-address transfers and mints now run against the resolved master wallet, not the forwarding alias. Policy membership must be configured on the master address.
