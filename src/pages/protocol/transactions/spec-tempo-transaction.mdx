@@ -607,9 +607,11 @@ The `signature` is a `PrimitiveSignature` (secp256k1, P256, or WebAuthn) signed 
 Note: `expiry`, `limits`, and `allowed_calls` use RLP trailing field semantics — they can be omitted entirely when None.
 
 :::warning[Expiry encoding]
-For `key_authorization`, a non-expiring key is encoded by omitting `expiry` (`None` / empty RLP field), not by encoding `0`.
+For `key_authorization`, the canonical non-expiring encoding omits `expiry` (`None`).
 
-Do not hand-encode `expiry = 0` or rely on `Some(0)`. The protocol only treats omitted expiry as "never expires," and translates that omission to `u64::MAX` when materializing the `AccountKeychain.authorizeKey(...)` call.
+There is one decoder nuance: because `KeyAuthorization` uses canonical trailing optional fields, an explicit empty `expiry` placeholder (`0x80`) is also interpreted as `None` when another trailing optional field follows it. But a final `expiry` encoded as zero/empty is rejected, and a literal `0x00` is invalid RLP for this field.
+
+Do not hand-encode `expiry = 0` or rely on `Some(0)` as a sentinel. The supported encoding to target is omission, and the protocol translates omitted expiry to `u64::MAX` when materializing the `AccountKeychain.authorizeKey(...)` call.
 :::
 
 Intrinsic gas for `key_authorization` accounts for the storage written for periodic-limit state and call-scope entries. See [TIP-1011](/protocol/tips/tip-1011#intrinsic-gas-for-key-authorization) for slot-counting rules.
