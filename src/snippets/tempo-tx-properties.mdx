@@ -234,10 +234,6 @@ user's preferred fee token and the validator's preferred token.
 
 </Tabs>
 
-#### T2 -> T3 changes
-
-If you manually encode the Tempo Transaction envelope, rename `authorization_list` to `aa_authorization_list`. The higher-level SDK calls in this section are otherwise unchanged.
-
 :::info
 See a full guide on [paying fees in any stablecoin](/guide/payments/pay-fees-in-any-stablecoin).
 :::
@@ -1254,13 +1250,6 @@ transactions thereafter can be signed by the access key.
     ```
   </Tab>
 </Tabs>
-
-#### T2 -> T3 changes
-
-- `key_authorization` now supports periodic `TokenLimit.period` values and `allowed_calls` call scopes.
-- Prefer T3-aware SDK helpers like `client.accessKey.authorizeSync`, `AccountKeychain.authorize_key`, `keychain.AuthorizeKey`, or `cast keychain authorize` instead of hard-coding the legacy `authorizeKey(...)` ABI.
-- Low-level envelope encoders must rename `authorization_list` to `aa_authorization_list`.
-- Access-key-signed transactions can no longer create contracts. Use the root key for deployments or other flows that execute `CREATE`.
 
 :::info
 Learn more about [Access Keys](/protocol/transactions/spec-tempo-transaction#access-keys).
