@@ -15,6 +15,7 @@ import {
 } from 'wagmi'
 import { tempoWallet, webAuthn } from 'wagmi/tempo'
 import { alphaUsd, betaUsd, pathUsd, thetaUsd } from './components/guides/tokens'
+import * as WebAuthnCeremony from './lib/webAuthnCeremony.ts'
 import { feeToken, moderatoZones } from './lib/private-zones.ts'
 
 const chain =
@@ -50,27 +51,25 @@ export function getConfig(options: getConfig.Options = {}) {
     chains: [chain],
     connectors: [
       ...(import.meta.env.VITE_E2E === 'true'
-       ? [
-           webAuthn(),
-         ]
-       : [
-           tempoWallet({
-             authorizeAccessKey: () => ({
-               expiry: Expiry.days(1),
-               limits: [
-                 { token: pathUsd, limit: parseUnits('500', 6) },
-                 { token: alphaUsd, limit: parseUnits('500', 6) },
-                 { token: betaUsd, limit: parseUnits('500', 6) },
-                 { token: thetaUsd, limit: parseUnits('500', 6) },
-               ],
-             }),
-             feePayer: {
-               precedence: 'user-first',
-               url: 'https://sponsor.moderato.tempo.xyz',
-             },
-           }),
-           webAuthn(),
-         ]),
+        ? [webAuthn()]
+        : [
+            tempoWallet({
+              authorizeAccessKey: () => ({
+                expiry: Expiry.days(1),
+                limits: [
+                  { token: pathUsd, limit: parseUnits('500', 6) },
+                  { token: alphaUsd, limit: parseUnits('500', 6) },
+                  { token: betaUsd, limit: parseUnits('500', 6) },
+                  { token: thetaUsd, limit: parseUnits('500', 6) },
+                ],
+              }),
+              feePayer: {
+                precedence: 'user-first',
+                url: 'https://sponsor.moderato.tempo.xyz',
+              },
+            }),
+            webAuthn({ ceremony: WebAuthnCeremony.keys() }),
+          ]),
     ],
     multiInjectedProviderDiscovery,
     storage: createStorage({

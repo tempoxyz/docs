@@ -12,7 +12,7 @@ Creates a Wagmi connector backed by the Tempo Wallet dialog adapter.
 ```ts
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { tempoWallet } from 'accounts/wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
@@ -39,7 +39,7 @@ import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
 import { parseUnits } from 'viem'
 import { Expiry } from 'accounts'
-import { tempoWallet } from 'accounts/wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
@@ -69,7 +69,7 @@ Dialog to use for the embed app.
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
 import { Dialog } from 'accounts'
-import { tempoWallet } from 'accounts/wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
@@ -96,7 +96,7 @@ Fee payer configuration for interacting with a service running [`Handler.relay`]
 ```ts twoslash
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { tempoWallet } from 'accounts/wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
@@ -119,7 +119,7 @@ URL of the embed app.
 ```ts twoslash
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { tempoWallet } from 'accounts/wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
@@ -142,7 +142,7 @@ Enable [Machine Payment Protocol](https://mpp.dev) support.
 ```ts twoslash
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { tempoWallet } from 'accounts/wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
@@ -165,7 +165,7 @@ Use testnet. When `true`, the default chain will be the first testnet chain in `
 ```ts twoslash
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'wagmi/chains'
-import { tempoWallet } from 'accounts/wagmi'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],

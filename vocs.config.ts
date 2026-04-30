@@ -20,8 +20,7 @@ export default defineConfig({
   //   textColor: 'white',
   // },
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
-  // TODO: Set back to true once tempoxyz/tempo#tip-1011 dead link is fixed
-  checkDeadlinks: 'warn',
+  checkDeadlinks: true,
   editLink: {
     link: 'https://github.com/tempoxyz/docs/edit/main/src/pages/:path',
     text: 'Suggest changes to this page',
@@ -42,10 +41,76 @@ export default defineConfig({
     ],
   },
   baseUrl: baseUrl || undefined,
-  ogImageUrl: (path, { baseUrl } = { baseUrl: '' }) =>
-    path === '/'
-      ? `${baseUrl}/og-docs.png`
-      : `${baseUrl}/api/og?title=%title&description=%description`,
+  ogImageUrl: (path, { baseUrl } = { baseUrl: '' }) => {
+    const landingPaths = ['/', '/learn', '/changelog']
+    if (landingPaths.includes(path)) return `${baseUrl}/og-docs.png`
+
+    const sectionMap: Record<string, string> = {
+      quickstart: 'INTEGRATE',
+      guide: 'BUILD',
+      protocol: 'PROTOCOL',
+      sdk: 'SDKs',
+      cli: 'CLI',
+      ecosystem: 'ECOSYSTEM',
+      learn: 'LEARN',
+      wallet: 'WALLET',
+      accounts: 'ACCOUNTS',
+    }
+
+    const subsectionMap: Record<string, string> = {
+      'use-accounts': 'ACCOUNTS',
+      payments: 'PAYMENTS',
+      issuance: 'ISSUANCE',
+      'stablecoin-dex': 'EXCHANGE',
+      'machine-payments': 'MACHINE PAY',
+      'tempo-transaction': 'TRANSACTIONS',
+      tip20: 'TIP-20',
+      'tip20-rewards': 'REWARDS',
+      tip403: 'TIP-403',
+      fees: 'FEES',
+      transactions: 'TRANSACTIONS',
+      blockspace: 'BLOCKSPACE',
+      exchange: 'DEX',
+      tips: 'TIPS',
+      node: 'NODE',
+      typescript: 'TYPESCRIPT',
+      go: 'GO',
+      foundry: 'FOUNDRY',
+      python: 'PYTHON',
+      rust: 'RUST',
+      stablecoins: 'STABLECOINS',
+      'use-cases': 'USE CASES',
+      tempo: 'TEMPO',
+      zones: 'ZONES',
+      'private-zones': 'PRIVATE ZONES',
+      upgrades: 'UPGRADES',
+      api: 'API',
+      guides: 'GUIDES',
+      rpc: 'RPC',
+      server: 'SERVER',
+      wagmi: 'WAGMI',
+    }
+
+    const segments = path.split('/').filter(Boolean)
+    const firstSeg = segments[0] || ''
+    const secondSeg = segments[1] || ''
+    const section = sectionMap[firstSeg] || firstSeg.toUpperCase().replace(/-/g, ' ')
+    const subsection =
+      segments.length >= 3 && subsectionMap[secondSeg]
+        ? subsectionMap[secondSeg]
+        : segments.length >= 3
+          ? secondSeg.toUpperCase().replace(/-/g, ' ')
+          : ''
+
+    const params = new URLSearchParams({
+      title: '%title',
+      description: '%description',
+      section,
+      ...(subsection ? { subsection } : {}),
+    })
+
+    return `${baseUrl}/api/og?${params.toString()}`
+  },
   // TODO: Change back to file paths (`/lockup-light.svg`, `/lockup-dark.svg`) once password protection is removed
   logoUrl: {
     light:
@@ -467,10 +532,6 @@ export default defineConfig({
                 link: '/protocol/tip20/virtual-addresses',
               },
               {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/TIP20.sol',
-              },
-              {
                 text: 'Rust Implementation',
                 link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip20',
               },
@@ -503,10 +564,6 @@ export default defineConfig({
                 link: '/protocol/tip403/spec',
               },
               {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/TIP403Registry.sol',
-              },
-              {
                 text: 'Rust Implementation',
                 link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip403_registry',
               },
@@ -535,10 +592,6 @@ export default defineConfig({
                   {
                     text: 'Specification',
                     link: '/protocol/fees/spec-fee-amm',
-                  },
-                  {
-                    text: 'Reference Implementation',
-                    link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/FeeManager.sol',
                   },
                   {
                     text: 'Rust Implementation',
@@ -625,12 +678,8 @@ export default defineConfig({
                 link: '/protocol/exchange/exchange-balance',
               },
               {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/stablecoinDex.sol',
-              },
-              {
                 text: 'Rust Implementation',
-                link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/stablecoin_exchange',
+                link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/stablecoin_dex',
               },
             ],
           },

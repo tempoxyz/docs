@@ -6,17 +6,17 @@ description: Build, test, and deploy smart contracts on Tempo using Foundry. Acc
 
 Tempo is supported as a first-class citizen in [Foundry](https://github.com/foundry-rs/foundry): the leading Ethereum development toolkit.
 
-Install the latest nightly to access Tempo's [protocol-level features](/protocol/) in `forge`, `cast`, `anvil`, and `chisel`, and to build, test, and deploy contracts that go [beyond the limits of standard EVM chains](/quickstart/evm-compatibility).
+Install the latest Foundry release to access Tempo's [protocol-level features](/protocol/) in `forge`, `cast`, `anvil`, and `chisel`, and to build, test, and deploy contracts that go [beyond the limits of standard EVM chains](/quickstart/evm-compatibility).
 
 :::warning[`tempo-foundry` is deprecated]
-`tempo-foundry` and `foundryup -n tempo` are deprecated. Switch to upstream Foundry nightly with `foundryup --install nightly`.
+`tempo-foundry` and `foundryup -n tempo` are deprecated. Switch to the latest upstream Foundry release with `foundryup`.
 :::
 
 For general information about Foundry, see the [Foundry documentation](https://getfoundry.sh/).
 
 ## Get started with Foundry
 
-Install the latest Foundry nightly to get Tempo support.
+Install the latest Foundry release to get Tempo support.
 
 :::::steps
 
@@ -28,13 +28,13 @@ If you don't have `foundryup` installed yet:
 curl -L https://foundry.paradigm.xyz | bash
 ```
 
-### Install the latest Foundry nightly
+### Install or update Foundry
 
 ```bash
-foundryup --install nightly
+foundryup
 ```
 
-This installs the latest `nightly` release of [`forge`](https://getfoundry.sh/forge/overview#forge), [`cast`](https://getfoundry.sh/cast/overview#cast), [`anvil`](https://getfoundry.sh/anvil/overview#anvil), and [`chisel`](https://getfoundry.sh/chisel/overview#chisel).
+This installs the latest versioned release of [`forge`](https://getfoundry.sh/forge/overview#forge), [`cast`](https://getfoundry.sh/cast/overview#cast), [`anvil`](https://getfoundry.sh/anvil/overview#anvil), and [`chisel`](https://getfoundry.sh/chisel/overview#chisel).
 
 
 :::tip
@@ -111,13 +111,11 @@ The `[etherscan]` table in `foundry.toml` is for Etherscan-style verifiers, not 
 ### Using `foundry-toolchain` in your CI
 
 Use the [`foundry-toolchain`](https://github.com/foundry-rs/foundry-toolchain) GitHub Action to install Foundry in your CI.
-Tempo support is included in Foundry, so no special configuration is needed.
+Tempo support is included in the latest Foundry release, so no special configuration is needed.
 
 ```yaml
 - name: Install Foundry
   uses: foundry-rs/foundry-toolchain@v1
-  with:
-    version: nightly
 ```
 
 ## Use Foundry for your workflows
