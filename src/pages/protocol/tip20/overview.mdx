@@ -154,21 +154,23 @@ The `currency` field represents the **denomination**, not the token itself — m
 | EURC          | `"EUR"`          | `"EURC"`           |
 
 :::danger[Common Mistake — Non-Vanilla Stablecoins and Crypto-Native Assets]
-The `currency` field identifies the **fiat denomination** of the token, not the token itself or its underlying collateral. This is the most common deployment error — **5+ issuers have had to redeploy their tokens** due to incorrect `currency` values.
+The `currency` field identifies the **fiat denomination** of the token for vanilla stablecoins. For yield-bearing or crypto-native assets, use the **token's own ticker** as the currency. This is the most common deployment error — **5+ issuers have had to redeploy their tokens** due to incorrect `currency` values.
 
-**Yield-bearing stablecoins** (e.g., sUSDe, BUIDL, USDs) that are denominated in USD must still set `currency` to `"USD"` — not to their token symbol. The yield mechanism does not change the denomination.
+**Yield-bearing stablecoins and tokenized assets** (e.g., sUSDe, BUIDL, USDs) should set `currency` to their **own ticker** — not `"USD"`. These tokens are not vanilla stablecoins and should not be treated as interchangeable with USD in DEX routing.
 
-**Crypto-native assets** (e.g., cbBTC, WETH, stETH) that are **not** pegged to a fiat currency should use a **non-ISO-4217 identifier** that describes the asset class (e.g., `"BTC"`, `"ETH"`). Do **not** set `currency` to `"USD"` for a non-USD-denominated asset — doing so will cause incorrect DEX routing and pricing.
+**Crypto-native assets** (e.g., cbBTC, WETH, stETH) should also set `currency` to their **own ticker**. Do **not** set `currency` to `"USD"` for a non-USD-pegged asset.
 
-| Token   | Backing / Peg           | Correct `currency` | Incorrect `currency` | Why                                                    |
+| Token   | Type                    | Correct `currency` | Incorrect `currency` | Why                                                    |
 |---------|-------------------------|---------------------|----------------------|--------------------------------------------------------|
-| sUSDe   | Yield-bearing USD       | `"USD"`             | `"sUSDe"`            | Denominated in USD despite yield mechanics             |
-| BUIDL   | Tokenized T-bills (USD) | `"USD"`             | `"BUIDL"`            | Represents USD-denominated short-duration treasuries   |
-| USDs    | USD savings token       | `"USD"`             | `"USDs"`             | USD-denominated savings product                        |
-| cbBTC   | Wrapped Bitcoin         | `"BTC"`             | `"USD"` or `"cbBTC"` | Not a USD stablecoin — BTC-denominated                |
-| WETH    | Wrapped Ether           | `"ETH"`             | `"USD"` or `"WETH"` | Not a USD stablecoin — ETH-denominated                |
+| USDC    | Vanilla USD stablecoin  | `"USD"`             | `"USDC"`             | 1:1 USD peg — use ISO 4217 fiat code                  |
+| EURC    | Vanilla EUR stablecoin  | `"EUR"`             | `"EURC"`             | 1:1 EUR peg — use ISO 4217 fiat code                  |
+| sUSDe   | Yield-bearing USD       | `"sUSDe"`           | `"USD"`              | Yield-bearing — not a vanilla stablecoin               |
+| BUIDL   | Tokenized T-bills       | `"BUIDL"`           | `"USD"`              | Tokenized treasury product, not a vanilla stablecoin   |
+| USDs    | USD savings token       | `"USDs"`            | `"USD"`              | Yield-bearing savings product                          |
+| cbBTC   | Wrapped Bitcoin         | `"cbBTC"`           | `"USD"` or `"BTC"`   | Crypto-native asset — use token ticker                 |
+| WETH    | Wrapped Ether           | `"WETH"`            | `"USD"` or `"ETH"`   | Crypto-native asset — use token ticker                 |
 
-**Rule of thumb:** ask "what fiat (or base crypto) currency is 1 unit of this token worth?" — that answer is your `currency` value.
+**Rule of thumb:** only vanilla 1:1 fiat-pegged stablecoins use ISO 4217 codes (e.g., `"USD"`, `"EUR"`). Everything else — yield-bearing, tokenized assets, crypto-native — uses its **own ticker** as the `currency`.
 :::
 
 :::warning
