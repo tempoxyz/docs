@@ -1,9 +1,12 @@
 ---
 description: Submit multiple transactions concurrently using Tempo's expiring nonce system under-the-hood.
+interactive: true
 ---
 
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
+import { AddFunds } from '../../../components/guides/steps/payments/AddFunds.tsx'
+import { Connect } from '../../../components/guides/steps/auth/Connect.tsx'
+import { SendParallelPayments } from '../../../components/guides/steps/payments/SendParallelPayments.tsx'
 import * as Token from '../../../components/guides/tokens'
 import { Cards, Card } from 'vocs'
 
@@ -16,9 +19,9 @@ Tempo enables concurrent transaction execution through its [expiring nonce](/gui
 By the end of this guide you will understand how to send parallel payments using expiring nonces under-the-hood.
 
 <Demo.Container name="Send Parallel Payments" footerVariant="balances" tokens={[Token.alphaUsd]}>
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.SendParallelPayments stepNumber={3} />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <SendParallelPayments stepNumber={3} />
 </Demo.Container>
 
 ## Steps

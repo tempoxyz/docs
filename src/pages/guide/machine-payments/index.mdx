@@ -1,19 +1,19 @@
 ---
-title: Machine Payments
-description: Charge for APIs, MCP tools, and digital content using the Machine Payments Protocol (MPP) on Tempo with TIP-20 stablecoins.
+title: Agentic Payments
+description: Make agentic payments using the Machine Payments Protocol (MPP) on Tempo — charge for APIs, MCP tools, and digital content with TIP-20 stablecoins.
 ---
 
 import { Card, Cards } from 'vocs'
 import { MermaidDiagram } from '../../../components/MermaidDiagram'
 import { TerminalDemo } from '../../../components/TerminalDemo'
 
-# Make Machine Payments
+# Make Agentic Payments
 
-The [Machine Payments Protocol](https://mpp.dev) (MPP) adds inline payments to any HTTP endpoint. Clients — apps, agents, or humans — pay as part of their request, and the server verifies payment before returning the response.
+Make agentic payments using the [Machine Payments Protocol](https://mpp.dev) (MPP). MPP adds inline payments to any HTTP endpoint — agents, apps, or humans pay as part of their request, and the server verifies payment before returning the response.
 
 ## Try it out
 
-See the full payment flow in action. The terminal creates an ephemeral wallet, funds it with testnet USDC, and makes a paid request to fetch a photo.
+See the full payment flow in action. The terminal creates an ephemeral wallet, funds it with testnet USDG, and makes a paid request to fetch a photo.
 
 <div style={{ height: 480 }}>
   <TerminalDemo />
@@ -42,7 +42,7 @@ A client requests a paid resource, the server responds with `402` and a `Challen
 
 ## Why Tempo
 
-Tempo's transaction model is explicitly designed for inline payments using MPP:
+Tempo's transaction model is designed for agentic payments using MPP:
 
 - **~500ms finality** — Deterministic confirmation fast enough for synchronous request/response flows
 - **Sub-cent fees** — Low enough for micropayments and per-request billing

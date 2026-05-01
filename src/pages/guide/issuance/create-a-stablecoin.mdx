@@ -1,10 +1,13 @@
 ---
 description: Create your own stablecoin on Tempo using the TIP-20 token standard. Deploy tokens with built-in compliance features and role-based permissions.
+interactive: true
 ---
 
 import { Cards, Card } from 'vocs'
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
+import { AddFunds } from '../../../components/guides/steps/payments/AddFunds.tsx'
+import { Connect } from '../../../components/guides/steps/auth/Connect.tsx'
+import { CreateToken } from '../../../components/guides/steps/issuance/CreateToken.tsx'
 
 # Create a Stablecoin
 
@@ -17,9 +20,9 @@ and integration with Tempo's payment infrastructure.
 By the end of this guide, you will be able to create a stablecoin on Tempo.
 
 <Demo.Container name="Create a Stablecoin" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.CreateToken stepNumber={3} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <CreateToken stepNumber={3} last />
 </Demo.Container>
 
 ## Steps
@@ -43,7 +46,7 @@ as the [default fee token](/quickstart/integrate-tempo#default-fee-token), we wi
 Luckily, the built-in Tempo testnet faucet supports funding accounts with `AlphaUSD`.
 
 <Demo.Container name="Add Funds" footerVariant="balances" showBadge={false}>
-  <Step.AddFunds stepNumber={1} last />
+  <AddFunds stepNumber={1} last />
 </Demo.Container>
 
 :::code-group
@@ -69,13 +72,11 @@ export function AddFunds() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { KeyManager, webAuthn } from 'wagmi/tempo'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn({
-    keyManager: KeyManager.localStorage(),
-  })],
+  connectors: [tempoWallet()],
   transports: {
     [tempo.id]: http(),
   },
@@ -96,8 +97,8 @@ Now that we have some funds to cover the transaction fee in our account, we can 
 Let's create a new component and add some input fields for the **name** and **symbol** of our stablecoin, as shown in the demo.
 
 <Demo.Container name="Create Form">
-  <Step.AddFunds stepNumber={1} />
-  <Step.CreateToken stepNumber={2} last />
+  <AddFunds stepNumber={1} />
+  <CreateToken stepNumber={2} last />
 </Demo.Container>
 
 :::code-group
@@ -130,13 +131,11 @@ export function CreateStablecoin() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { KeyManager, webAuthn } from 'wagmi/tempo'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn({
-    keyManager: KeyManager.localStorage(),
-  })],
+  connectors: [tempoWallet()],
   transports: {
     [tempo.id]: http(),
   },
@@ -156,7 +155,7 @@ The `currency` field is **immutable** after token creation and affects fee payme
 :::
 
 <Demo.Container name="Create Form">
-  <Step.CreateToken stepNumber={1} last />
+  <CreateToken stepNumber={1} last />
 </Demo.Container>
 
 :::code-group
@@ -198,13 +197,11 @@ export function CreateStablecoin() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { KeyManager, webAuthn } from 'wagmi/tempo'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn({
-    keyManager: KeyManager.localStorage(),
-  })],
+  connectors: [tempoWallet()],
   transports: {
     [tempo.id]: http(),
   },
@@ -266,13 +263,11 @@ export function CreateStablecoin() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { KeyManager, webAuthn } from 'wagmi/tempo'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn({
-    keyManager: KeyManager.localStorage(),
-  })],
+  connectors: [tempoWallet()],
   transports: {
     [tempo.id]: http(),
   },

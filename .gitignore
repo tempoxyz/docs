@@ -29,6 +29,15 @@ src/pages.gen.ts
 .env*.local
 src/pages/protocol/tips/tip-*
 
+# Test scratch files
+guides/tmp/
+
+# Bundle analysis
+.bundle-baseline.json
+stats.json
+lighthouse-*.json
+
 # Playwright
 playwright-report/
 test-results/
+.zed

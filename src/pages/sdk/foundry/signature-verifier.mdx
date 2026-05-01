@@ -1,0 +1,141 @@
+---
+title: Signature Verification in Foundry
+description: Verify secp256k1, P256, and WebAuthn signatures in smart contracts using the TIP-1020 SignatureVerifier precompile with Foundry.
+---
+
+# Signature Verification with Foundry
+
+The [TIP-1020](/protocol/tips/tip-1020) `SignatureVerifier` precompile lets contracts verify secp256k1, P256, and WebAuthn signatures through a single interface — no custom verifier contracts needed. This is available after the [T3 network upgrade](/protocol/upgrades/t3).
+
+The Foundry project template for Tempo ships with a working example that demonstrates signature verification in a relayed mail contract. Initialize it with:
+
+```bash
+forge init --template tempo my-project && cd my-project
+```
+
+## How it works
+
+The template's `Mail` contract supports two modes:
+
+1. **Direct** — call `sendMail()` yourself (`msg.sender` is the sender).
+2. **Relayed** — sign a mail off-chain and let anyone deliver it on-chain.
+
+Relayed mode uses the `SignatureVerifier` precompile to verify the sender's signature. Unlike Ethereum's `ecrecover`, the precompile:
+
+- Supports secp256k1, P256, and WebAuthn signature types
+- Reverts on invalid signatures instead of returning `address(0)`
+- Maintains forward compatibility with future Tempo account types
+
+## Contract example
+
+The key pattern is a single `verify()` or `recover()` call on the precompile:
+
+```solidity
+import {StdPrecompiles} from "tempo-std/StdPrecompiles.sol";
+
+// Option 1: verify — returns true/false, reverts on malformed signatures
+require(
+    StdPrecompiles.SIGNATURE_VERIFIER.verify(from, hash, signature),
+    "invalid signature"
+);
+
+// Option 2: recover — returns the signer address, reverts on malformed signatures
+require(
+    StdPrecompiles.SIGNATURE_VERIFIER.recover(hash, signature) == from,
+    "invalid signature"
+);
+```
+
+The full `Mail` contract in the template combines this with a per-sender nonce to prevent replay:
+
+```solidity
+contract Mail {
+    ITIP20 public token;
+    mapping(address => uint256) public nonces;
+
+    /// @notice Send mail on behalf of `from` using their off-chain Tempo signature.
+    function sendMail(
+        address from,
+        address to,
+        string memory message,
+        Attachment memory attachment,
+        bytes calldata signature
+    ) external {
+        bytes32 hash = getDigest(from, to, message, attachment);
+        require(
+            StdPrecompiles.SIGNATURE_VERIFIER.verify(from, hash, signature),
+            "invalid signature"
+        );
+        nonces[from]++;
+        token.transferFromWithMemo(from, to, attachment.amount, attachment.memo);
+        emit MailSent(from, to, message, attachment);
+    }
+
+    function getDigest(address from, address to, string memory message, Attachment memory attachment)
+        public view returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(address(this), block.chainid, from, to, message, attachment, nonces[from])
+        );
+    }
+}
+```
+
+## Testing
+
+The template includes tests for both signature types. Set `hardfork = "tempo:T3"` in inline config or `foundry.toml` to enable the precompile locally:
+
+### secp256k1
+
+```solidity
+/// forge-config: default.hardfork = "tempo:T3"
+contract MailRelayTest is MailTest {
+    uint256 internal constant ALICE_PK = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
+
+    function test_SendMailWithSecp256k1Signature() public {
+        bytes32 digest = mail.getDigest(ALICE, BOB, message, attachment);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(ALICE_PK, digest);
+
+        mail.sendMail(ALICE, BOB, message, attachment, abi.encodePacked(r, s, v));
+        assertEq(mail.nonces(ALICE), 1);
+    }
+}
+```
+
+### P256
+
+```solidity
+uint256 internal constant CAROL_P256_PK = 0x1;
+
+function setUp() public override {
+    super.setUp();
+    (uint256 x, uint256 y) = vm.publicKeyP256(CAROL_P256_PK);
+    carolPubX = bytes32(x);
+    carolPubY = bytes32(y);
+    CAROL = address(uint160(uint256(keccak256(abi.encodePacked(x, y)))));
+}
+
+function test_SendMailWithP256Signature() public {
+    bytes32 digest = mail.getDigest(CAROL, BOB, message, attachment);
+    (bytes32 r, bytes32 s) = vm.signP256(CAROL_P256_PK, digest);
+    s = _normalizeP256S(s); // low-s normalization required by the precompile
+
+    bytes memory sig = abi.encodePacked(carolPubX, carolPubY, r, s);
+    mail.sendMail(CAROL, BOB, message, attachment, sig);
+    assertEq(mail.nonces(CAROL), 1);
+}
+```
+
+## Run the tests
+
+```bash
+forge test -vvv
+```
+
+The secp256k1 and P256 relay tests run against the T3 hardfork automatically via the inline config directive.
+
+## Related
+
+- [TIP-1020: Signature Verification Precompile](/protocol/tips/tip-1020)
+- [T3 Network Upgrade](/protocol/upgrades/t3)
+- [Foundry for Tempo](/sdk/foundry)

@@ -56,13 +56,14 @@ pub struct Call {
 }
 
 // Key authorization for provisioning access keys
-// RLP encoding: [chain_id, key_type, key_id, expiry?, limits?]
+// RLP encoding: [chain_id, key_type, key_id, expiry?, limits?, allowed_calls?]
 pub struct KeyAuthorization {
     chain_id: u64,                              // Chain ID for replay protection (0 = valid on any chain)
     key_type: SignatureType,                    // Type of key: Secp256k1 (0), P256 (1), or WebAuthn (2)
     key_id: Address,                            // Key identifier (address derived from public key)
-    expiry: Option<u64>,                        // Unix timestamp when key expires (None = never expires)
+    expiry: Option<u64>,                        // Unix timestamp when key expires (omit / None for never expires)
     limits: Option<Vec<TokenLimit>>,            // TIP20 spending limits (None = unlimited spending)
+    allowed_calls: Option<Vec<CallScope>>,      // Call-scope allowlist (None = unrestricted; Some(empty) = scoped deny-all)
 }
 
 // Signed key authorization (authorization + root key signature)
@@ -71,10 +72,23 @@ pub struct SignedKeyAuthorization {
     signature: PrimitiveSignature,              // Root key's signature over keccak256(rlp(authorization))
 }
 
-// TIP20 spending limits for access keys
+// TIP20 spending limit for access keys
 pub struct TokenLimit {
     token: Address,                             // TIP20 token address
     limit: U256,                                // Maximum spending amount for this token
+    period: u64,                                // Recurring period in seconds (0 = one-time, non-zero = recurring)
+}
+
+// Call-scope allowlist entry: a target contract and its allowed selector rules
+pub struct CallScope {
+    target: Address,                            // Target contract address
+    selector_rules: Vec<SelectorRule>,          // Allowed selectors on that target (empty = any selector allowed)
+}
+
+// Selector rule: a function selector and optional recipient allowlist (for recipient-bound TIP-20 selectors)
+pub struct SelectorRule {
+    selector: [u8; 4],                          // 4-byte function selector
+    recipients: Vec<Address>,                   // Allowed recipients (empty = any recipient)
 }
 ```
 
@@ -445,7 +459,7 @@ rlp([
 - The `key_authorization` field is truly optional - when `None`, no bytes are encoded (backwards compatible)
 - The `calls` field is a list that must contain at least one Call (empty calls list is invalid)
 - The `sender_signature` field is the final field and contains the TempoSignature bytes (secp256k1, P256, WebAuthn, or Keychain)
-- KeyAuthorization uses RLP trailing field semantics for optional `expiry` and `limits`
+- KeyAuthorization uses RLP trailing field semantics for optional `expiry`, `limits`, and `allowed_calls`
 
 ### WebAuthn Signature Verification
 
@@ -553,9 +567,15 @@ A sender can authorize a key by signing over a "key authorization" item that con
 - **Key ID** (address derived from the public key)
 - **Expiration** timestamp of when the key should expire (optional - None means never expires)
 - TIP20 token **spending limits** for the key (optional - None means unlimited spending):
-  - Limits deplete as tokens are spent
-  - Root key can update limits via `updateSpendingLimit()` without revoking the key
+  - Each limit carries a `period` (0 = one-time, non-zero = recurring in seconds). Recurring limits roll over to `max` when `current_timestamp >= periodEnd`.
+  - Root key can update limits via `updateSpendingLimit()` without revoking the key. Updates reset `remaining` and `max` to `newLimit` while preserving `period` and `periodEnd`.
   - Note: Spending limits only apply to TIP20 token transfers, not ETH or other asset transfers
+- **Call scopes** for the key (optional - None means unrestricted):
+  - Each entry pins a `target` contract and a list of allowed selector rules. An empty selector list on a target means any selector is allowed on that target.
+  - Selector rules can additionally constrain TIP-20 recipient-bearing selectors to a recipient allowlist.
+  - `Some([])` (an empty top-level allowlist) means scoped deny-all.
+
+Access-key-signed transactions cannot perform contract creation. Calls within the batch that would `CREATE` or `CREATE2` (including via factory contracts) are rejected. Use the Root Key for deployment flows.
 
 #### RLP Encoding
 
@@ -564,13 +584,14 @@ A sender can authorize a key by signing over a "key authorization" item that con
 The root key signs over the keccak256 hash of the RLP encoded `KeyAuthorization`:
 
 ```
-key_authorization_digest = keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?]))
+key_authorization_digest = keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?]))
 
 chain_id = u64 (0 = valid on any chain)
 key_type = 0 (Secp256k1) | 1 (P256) | 2 (WebAuthn)
 key_id = Address (derived from the public key)
-expiry = Option<u64> (unix timestamp, None = never expires, stored as u64::MAX in precompile)
-limits = Option<Vec<[token, limit]>> (None = unlimited spending)
+expiry = Option<u64> (unix timestamp, None = never expires; omitted expiry is translated to u64::MAX when the protocol calls the precompile)
+limits = Option<Vec<[token, limit, period]>> (None = unlimited spending; period = 0 means one-time)
+allowed_calls = Option<Vec<[target, [[selector, [recipient, ...]], ...]]>> (None = unrestricted; Some([]) = scoped deny-all)
 ```
 
 **Signed Format:**
@@ -578,12 +599,22 @@ limits = Option<Vec<[token, limit]>> (None = unlimited spending)
 The signed format (`SignedKeyAuthorization`) includes all fields with the `signature` appended:
 
 ```
-signed_key_authorization = rlp([chain_id, key_type, key_id, expiry?, limits?, signature])
+signed_key_authorization = rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, signature])
 ```
 
 The `signature` is a `PrimitiveSignature` (secp256k1, P256, or WebAuthn) signed by the root key.
 
-Note: `expiry` and `limits` use RLP trailing field semantics - they can be omitted entirely when None.
+Note: `expiry`, `limits`, and `allowed_calls` use RLP trailing field semantics — they can be omitted entirely when None.
+
+:::warning[Expiry encoding]
+For `key_authorization`, the canonical non-expiring encoding omits `expiry` (`None`).
+
+There is one decoder nuance: because `KeyAuthorization` uses canonical trailing optional fields, an explicit empty `expiry` placeholder (`0x80`) is also interpreted as `None` when another trailing optional field follows it. But a final `expiry` encoded as zero/empty is rejected, and a literal `0x00` is invalid RLP for this field.
+
+Do not hand-encode `expiry = 0` or rely on `Some(0)` as a sentinel. The supported encoding to target is omission, and the protocol translates omitted expiry to `u64::MAX` when materializing the `AccountKeychain.authorizeKey(...)` call.
+:::
+
+Intrinsic gas for `key_authorization` accounts for the storage written for periodic-limit state and call-scope entries. See [TIP-1011](/protocol/tips/tip-1011#intrinsic-gas-for-key-authorization) for slot-counting rules.
 
 #### Keychain Precompile
 
@@ -606,7 +637,7 @@ When a TempoTransaction is received, the protocol:
 2. **Validates KeyAuthorization** (if present in transaction)
    - The `key_authorization` field in `TempoTransaction` provisions a NEW Access Key
    - Root Key MUST sign:
-     - The `key_authorization` digest: `keccak256(rlp([key_type, key_id, expiry, limits]))`
+     - The `key_authorization` digest: `keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?]))`
    - Access Key (being authorized) CAN sign the same tx which it is authorized in.
    - This enables "authorize and use" in a single transaction
 
@@ -618,7 +649,7 @@ When a TempoTransaction is received, the protocol:
 4. **Validates Key Authorization** (for Access Keys)
    - Queries precompile: `getKey(account, keyId)` returns `KeyInfo`
    - Checks key is active (not revoked)
-   - Checks expiry: `current_timestamp < expiry` (or `expiry == 0` for never expires)
+   - Checks expiry: `current_timestamp < expiry`; non-expiring keys are stored with `expiry = u64::MAX`
    - Rejects transaction if validation fails
 
 ##### Authorization Hierarchy Enforcement
@@ -633,12 +664,13 @@ The protocol enforces a strict two-tier hierarchy:
 
 **Access Keys** (keyId != address(0)):
 - Secondary keys authorized by Root Key
-- CANNOT call mutable precompile functions (`authorizeKey`, `revokeKey`, `updateSpendingLimit`)
+- CANNOT call mutable precompile functions (`authorizeKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`)
 - Precompile functions check: `transactionKey[msg.sender] == 0` before allowing mutations
-- Subject to per-TIP20 token spending limits
+- Subject to per-TIP20 token spending limits and call-scope checks during execution
+- Cannot create contracts (`CREATE` and `CREATE2` are rejected anywhere in the call batch)
 - Can have expiry timestamps
 
-When an Access Key attempts to call `authorizeKey()`, `revokeKey()`, or `updateSpendingLimit()`:
+When an Access Key attempts to call any mutable keychain function:
 1. Transaction executes normally until the precompile call
 2. Precompile checks `getTransactionKey()` returns non-zero (Access Key)
 3. Call reverts with `UnauthorizedCaller` error
@@ -659,19 +691,33 @@ The protocol tracks and enforces spending limits for TIP20 token transfers:
 1. Protocol intercepts `transfer(to, amount)`, `transferWithMemo()`, `approve(spender, amount)`, and `startReward()` calls
 2. For `transfer`/`transferWithMemo`, the full `amount` is checked against the remaining limit
 3. For `approve`, only **increases** in approval (new approval minus previous allowance) are checked and counted against the limit
-4. Queries: `getRemainingLimit(account, keyId, token)`
-5. Checks: relevant amount (transfer amount or approval increase) `<= remaining_limit`
+4. Queries: `getRemainingLimitWithPeriod(account, keyId, token)`, which returns `(remaining, periodEnd)` and reflects any periodic rollover
+5. Checks: relevant amount (transfer amount or approval increase) `<= remaining`
 6. If check fails: reverts with `SpendingLimitExceeded`
 7. If check passes: decrements the limit by the relevant amount
 8. Updates are stored in precompile state
 
 **Root Key Behavior:** Spending limit checks are skipped entirely (no limits apply)
 
+**Recurring Limits:** When a `TokenLimit.period` is non-zero, the limit recurs. `remaining` rolls over to `max` once `current_timestamp >= periodEnd`, and `periodEnd` advances by `period`. Callers observe rollover state via `getRemainingLimitWithPeriod`.
+
 **Limit Updates:**
 - Limits deplete as tokens are spent
 - Root Key can call `updateSpendingLimit(keyId, token, newLimit)` to set new limits
-- Setting a new limit REPLACES the current remaining amount (does not add to it)
-- Limits do not reset automatically (no time-based periods)
+- Setting a new limit REPLACES both `remaining` and `max` with `newLimit`. The configured `period` and current `periodEnd` are preserved.
+
+##### Call Scope Enforcement
+
+When an Access Key has stored call scopes (`allowed_calls` was set at authorization, or `setAllowedCalls(...)` was called later), the protocol enforces them on top-level calls signed by that Access Key:
+
+1. For each call in the batch, look up the matching `(target, selector)` allowlist entry
+2. If the target is not in the allowlist, or the selector is not allowed on that target, revert with `CallNotAllowed`
+3. For recipient-bound TIP-20 selectors (e.g., `transfer`, `transferFrom`, `transferWithMemo`), additionally enforce that the call's recipient is in the rule's recipient allowlist (when non-empty)
+4. Access keys with `allowed_calls = None` are unrestricted; `Some([])` is scoped deny-all
+
+##### Contract Creation Restriction
+
+Access-key-signed transactions cannot perform contract creation. Any `CREATE` or `CREATE2` (including via factory contracts or internal calls) reverts the transaction. Use the Root Key for deployment flows.
 
 ##### Creating and Using KeyAuthorization
 
@@ -688,16 +734,29 @@ The protocol tracks and enforces spending limits for TIP20 token transfers:
    ```typescript
    // Define key parameters
    const keyAuth = {
+     chain_id: 1,
      key_type: SignatureType.P256,      // 1
      key_id: keyId,                     // address derived from public key
-     expiry: timestamp + 86400,         // 24 hours from now (or 0 for never)
+     expiry: timestamp + 86400,         // 24 hours from now; omit this field for a non-expiring key authorization
      limits: [
-       { token: USDC_ADDRESS, amount: 1000000000 }, // 1000 USDC (6 decimals)
-       { token: DAI_ADDRESS, amount: 500000000000000000000 }  // 500 DAI (18 decimals)
+       // One-time limit (period = 0)
+       { token: USDG_ADDRESS, limit: 1000000000, period: 0 },                  // 1000 USDG (6 decimals), one-time
+       // Recurring weekly limit (period = 604800 seconds)
+       { token: DAI_ADDRESS, limit: 500000000000000000000n, period: 604800 }   // 500 DAI / week
+     ],
+     // Optional call scopes — omit for an unrestricted key
+     allowed_calls: [
+       {
+         target: USDG_ADDRESS,
+         selector_rules: [
+           // transfer(address,uint256) restricted to a single recipient
+           { selector: "0xa9059cbb", recipients: [TRUSTED_RECIPIENT] }
+         ]
+       }
      ]
    };
 
-   // Compute digest: keccak256(rlp([key_type, key_id, expiry, limits]))
+   // Compute digest: keccak256(rlp([chain_id, key_type, key_id, expiry, limits, allowed_calls]))
    const authDigest = computeAuthorizationDigest(keyAuth);
    ```
 
@@ -718,10 +777,7 @@ The protocol tracks and enforces spending limits for TIP20 token transfers:
      max_fee_per_gas: 1000000000,
      max_priority_fee_per_gas: 1000000000,
      key_authorization: {
-       key_type: keyAuth.key_type,
-       expiry: keyAuth.expiry,
-       limits: keyAuth.limits,
-       key_id: keyAuth.key_id,
+       authorization: keyAuth,
        signature: rootSignature  // Root Key's signature on authDigest
      },
      // ... other fields
@@ -804,15 +860,15 @@ const tx = {
     value: 0,
     input: encodeCall("updateSpendingLimit", [
       keyId,
-      USDC_ADDRESS,
-      2000000000  // New limit: 2000 USDC
+      USDG_ADDRESS,
+      2000000000  // New limit: 2000 USDG
     ])
   }],
   // ... sign with Root Key
 };
 ```
 
-**Note:** After updating, the remaining limit is set to the `newLimit` value, not added to the current remaining amount.
+**Note:** After updating, both `remaining` and `max` are set to `newLimit`. The configured `period` and current `periodEnd` are preserved.
 
 ##### Querying Key State
 
@@ -821,11 +877,19 @@ Applications can query key information and spending limits:
 ```typescript
 // Check if key is authorized and get info
 const keyInfo = await precompile.getKey(account, keyId);
-// Returns: { signatureType, keyId, expiry }
+// Returns: { signatureType, keyId, expiry, enforceLimits, isRevoked }
 
-// Check remaining spending limit for a token
-const remaining = await precompile.getRemainingLimit(account, keyId, USDC_ADDRESS);
-// Returns: uint256 amount remaining
+// Check remaining spending limit and current period end for a token
+const { remaining, periodEnd } = await precompile.getRemainingLimitWithPeriod(
+  account, keyId, USDG_ADDRESS
+);
+// Returns: (uint256 remaining, uint64 periodEnd). Reflects periodic rollover.
+
+// Inspect call scopes
+const { isScoped, scopes } = await precompile.getAllowedCalls(account, keyId);
+// isScoped = false → key is unrestricted
+// isScoped = true, scopes = [...] → key is scoped to those (target, selector, recipient) entries
+// isScoped = true, scopes = [] → scoped deny-all (also returned for missing/revoked/expired keys)
 
 // Get which key signed current transaction (callable from contracts)
 const currentKey = await precompile.getTransactionKey();
@@ -996,10 +1060,14 @@ def calculate_key_authorization_gas(key_auth: SignedKeyAuthorization) -> uint256
     Args:
         key_auth: SignedKeyAuthorization with fields:
             - signature: PrimitiveSignature (root key's signature)
-            - limits: Optional[List[TokenLimit]]
+            - limits: Optional[List[TokenLimit]]              # each carries a `period`
+            - allowed_calls: Optional[List[CallScope]]        # call-scope allowlist
 
     Returns:
         gas_cost: uint256
+
+    Note: This is a simplified illustration. See TIP-1011 for the canonical
+    slot-counting rules covering periodic-limit state and call-scope storage.
     """
     # Constants - KeyAuthorization pays FULL signature verification costs
     # (not the "additional" costs used for transaction signatures)
@@ -1025,9 +1093,20 @@ def calculate_key_authorization_gas(key_auth: SignedKeyAuthorization) -> uint256
     # Step 3: Overhead buffer
     gas += OVERHEAD_BUFFER  # 5,000
 
-    # Step 4: Per-limit storage cost
+    # Step 4: Per-limit storage cost (each TokenLimit carries period state)
     num_limits = len(key_auth.limits) if key_auth.limits else 0
     gas += num_limits * COLD_SSTORE_SET_GAS  # 22,000 per limit
+
+    # Step 5: Per-call-scope storage cost (target + selector + recipients).
+    # See TIP-1011 for exact slot accounting; this counts one slot per
+    # (target, selector, recipient) triple as a conservative approximation.
+    num_scope_slots = 0
+    if key_auth.allowed_calls:
+        for scope in key_auth.allowed_calls:
+            for rule in scope.selector_rules:
+                # one slot for the (target, selector) entry, plus one per recipient
+                num_scope_slots += 1 + max(len(rule.recipients), 0)
+    gas += num_scope_slots * COLD_SSTORE_SET_GAS
 
     return gas
 
@@ -1128,3 +1207,40 @@ The introduction of 7702 delegated accounts already created complex cross-transa
 Because a single transaction can invalidate multiple others by spending balances of multiple accounts
 
 **Assessment:** While this transaction type introduces additional pre-execution validation costs, all costs are bounded to reasonable limits. The mempool complexity issues around cross-transaction dependencies already exist in Ethereum due to 7702 and accounts with code, making static validation inherently difficult. So the incremental cost from this transaction type is acceptable given these existing constraints.
+
+## T2 → T3 migration
+
+:::info[Migration appendix]
+This section captures changes introduced by the [T3 network upgrade](/protocol/upgrades/t3) for integrators migrating from T2. The spec above is the canonical post-T3 specification; this appendix exists for reference and will be removed in a future docs revision.
+:::
+
+T3 expanded access keys through [TIP-1011](/protocol/tips/tip-1011) in the following ways:
+
+- `KeyAuthorization` gained `allowed_calls` (call-scope allowlist).
+- `TokenLimit` gained `period` (recurring vs. one-time spending limits).
+- The signed payload `SignedKeyAuthorization { authorization, signature }` is unchanged in shape, but `authorization` now uses the expanded `KeyAuthorization` and new RLP encoding. Low-level integrators that manually encode `key_authorization` must branch pre-T3 vs post-T3 — the post-T3 digest and signed payload include `allowed_calls?` in addition to `expiry?` and `limits?`.
+- A non-expiring `key_authorization` omits `expiry` in tx RLP. At the Account Keychain ABI boundary, the protocol translates that omission to `u64::MAX`. Literal `0` is not a valid non-expiring sentinel to rely on.
+- Access-key validation gained two new execution checks: call scopes must pass before execution begins, and access-key-signed transactions may not perform contract creation anywhere in the batch.
+- The Account Keychain precompile ABI changed in lockstep — `authorizeKey(...)` now takes a `KeyRestrictions` tuple, `getRemainingLimit(...)` is replaced by `getRemainingLimitWithPeriod(...)`, and `setAllowedCalls(...)` / `removeAllowedCalls(...)` / `getAllowedCalls(...)` are added. See the [Account Keychain spec](./AccountKeychain) for full details.
+- Intrinsic gas for `key_authorization` accounts for periodic-limit state and call-scope storage. See [TIP-1011](/protocol/tips/tip-1011#intrinsic-gas-for-key-authorization) for the canonical slot-counting rules.
+
+### Pre-T3 KeyAuthorization (reference only)
+
+Before T3, `KeyAuthorization` did not include `allowed_calls`, and `TokenLimit` did not include `period`:
+
+```rust
+pub struct KeyAuthorization {
+    chain_id: u64,
+    key_type: SignatureType,
+    key_id: Address,
+    expiry: Option<u64>,
+    limits: Option<Vec<TokenLimit>>,
+}
+
+pub struct TokenLimit {
+    token: Address,
+    limit: U256,
+}
+```
+
+The pre-T3 digest was `keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?]))` and the signed payload was `rlp([chain_id, key_type, key_id, expiry?, limits?, signature])`.

@@ -3,6 +3,7 @@ import * as path from 'node:path'
 import react from '@vitejs/plugin-react'
 import { Instance } from 'prool'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
+import mkcert from 'vite-plugin-mkcert'
 import { vocs } from 'vocs/vite'
 
 // https://vite.dev/config/
@@ -11,8 +12,16 @@ export default defineConfig(({ mode }) => {
   for (const key of Object.keys(env)) {
     if (!(key in process.env)) process.env[key] = env[key]
   }
+
+  const useHttp = process.env.CI === 'true' || process.env.VITE_USE_HTTP === 'true'
+
   return {
-    plugins: [syncTips(), vocs(), react(), tempoNode()],
+    plugins: [syncTips(), vocs(), react(), ...(useHttp ? [] : [mkcert()]), tempoNode()],
+    server: useHttp
+      ? {
+          host: 'localhost',
+        }
+      : undefined,
   }
 })
 
@@ -92,10 +101,22 @@ function syncTips(): Plugin {
     await Promise.all(
       tipFiles.map(async (file) => {
         let content = await fetch(file.download_url).then((r) => r.text())
-        // Fix dead links in TIPs that reference local paths instead of GitHub URLs
+        // Strip stale Solidity interface links from upstream TIPs. The linked
+        // files are no longer published, so keeping the link would surface dead
+        // references in the docs UI and fail Vocs' dead-link checker.
         content = content.replace(
-          /\(tips\/ref-impls\/src\/interfaces\/(\w+\.sol)\)/g,
-          '(https://github.com/tempoxyz/tempo-std/blob/master/src/interfaces/$1)',
+          /^- \[[^\]]+\.sol\]\(tips\/(?:ref-impls|verify)\/src\/interfaces\/[^)]+\)\n/gm,
+          '',
+        )
+        content = content.replace(
+          /\[([^\]]+\.sol)\]\(tips\/(?:ref-impls|verify)\/src\/interfaces\/[^)]+\)/g,
+          '$1',
+        )
+        // tip-0000 links to `./tip_template.md`, which lives in the tempo
+        // repo but not in the docs site.
+        content = content.replace(
+          /\(\.\/tip_template\.md\)/g,
+          '(https://github.com/tempoxyz/tempo/blob/main/tips/tip_template.md)',
         )
         // Escape angle brackets outside of code blocks/inline code so MDX doesn't
         // treat them as JSX (e.g. `Mapping<B256, bool>` in prose).

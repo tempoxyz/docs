@@ -1,22 +1,26 @@
 ---
-description: Build, test, and deploy smart contracts on Tempo using the Foundry fork. Access protocol-level features with forge and cast tools.
+description: Build, test, and deploy smart contracts on Tempo using Foundry. Access Tempo protocol features with forge, cast, anvil, and chisel.
 ---
 
 # Foundry for Tempo
 
-Tempo builds on top of [Foundry](https://github.com/foundry-rs/foundry): the leading Ethereum development toolkit, through a custom fork that adds first-class support for Tempo.
+Tempo is supported as a first-class citizen in [Foundry](https://github.com/foundry-rs/foundry): the leading Ethereum development toolkit.
 
-This fork extends Foundry with Tempo's [protocol-level features](/protocol/), enabling developers to build, test, and deploy contracts that go [beyond the limits of standard EVM chains](/quickstart/evm-compatibility).
+Install the latest Foundry release to access Tempo's [protocol-level features](/protocol/) in `forge`, `cast`, `anvil`, and `chisel`, and to build, test, and deploy contracts that go [beyond the limits of standard EVM chains](/quickstart/evm-compatibility).
+
+:::warning[`tempo-foundry` is deprecated]
+`tempo-foundry` and `foundryup -n tempo` are deprecated. Switch to the latest upstream Foundry release with `foundryup`.
+:::
 
 For general information about Foundry, see the [Foundry documentation](https://getfoundry.sh/).
 
 ## Get started with Foundry
 
-Tempo's Foundry fork is installed through the standard upstream `foundryup` using the `-n tempo` flag, no separate installer is required.
+Install the latest Foundry release to get Tempo support.
 
-::::steps
+:::::steps
 
-## Install `foundryup`
+### Install `foundryup`
 
 If you don't have `foundryup` installed yet:
 
@@ -24,50 +28,95 @@ If you don't have `foundryup` installed yet:
 curl -L https://foundry.paradigm.xyz | bash
 ```
 
-Or if you already have `foundryup` installed:
+### Install or update Foundry
 
 ```bash
-foundryup --update
+foundryup
 ```
 
-## Install Tempo's Foundry fork
+This installs the latest versioned release of [`forge`](https://getfoundry.sh/forge/overview#forge), [`cast`](https://getfoundry.sh/cast/overview#cast), [`anvil`](https://getfoundry.sh/anvil/overview#anvil), and [`chisel`](https://getfoundry.sh/chisel/overview#chisel).
 
-```bash
-foundryup -n tempo
-```
-
-This will automatically install the latest `nightly` release of all precompiled binaries: [`forge`](https://getfoundry.sh/forge/overview#forge), [`cast`](https://getfoundry.sh/cast/overview#cast), [`anvil`](https://getfoundry.sh/anvil/overview#anvil), and [`chisel`](https://getfoundry.sh/chisel/overview#chisel).
 
 :::tip
 To install a specific version, replace `<TAG_NAME>` with the desired release tag:
+
 ```bash
-foundryup -n tempo -i <TAG_NAME>
+foundryup --install <TAG_NAME>
 ```
 :::
 
-## Verify Installation
+### Create a new Foundry project
 
-```bash
-forge -V
-```
-
-You should see version information include `-tempo`, indicating you are using the Tempo fork.
-
-```bash
-# forge <version>-tempo (<commit> <timestamp>)
-```
-
-## Create a new Foundry project
-
-Initialize a new project with Tempo support:
+Initialize a new Foundry project with the Tempo template:
 
 ```bash
 forge init -n tempo my-project && cd my-project
 ```
 
-Each new project is configured for Tempo out of the box, with [`tempo-std`](https://github.com/tempoxyz/tempo-std), the Tempo standard library installed, containing helpers for Tempo's protocol-level features.
+This gives you a Tempo-ready starter project, including the Tempo `Mail` example template.
 
-::::
+If you're adding Tempo support to an existing Foundry project, install [`tempo-std`](https://github.com/tempoxyz/tempo-std) manually:
+
+```bash
+forge install tempoxyz/tempo-std
+```
+
+:::::
+
+## Configure `foundry.toml`
+
+The Tempo template gives you a working starting point, but it is often useful to make Tempo explicit in `foundry.toml`.
+
+### Configure RPC aliases
+
+Set a default Tempo RPC alias and keep a separate alias for Moderato testnet:
+
+```toml
+[profile.default]
+eth_rpc_url = "tempo"
+
+[rpc_endpoints]
+tempo = "${TEMPO_RPC_URL}"
+moderato = "${TEMPO_TESTNET_RPC_URL}"
+```
+
+With this config, commands that use the default RPC pick up `tempo` automatically, and you can still switch explicitly with `--rpc-url moderato`.
+
+### Activate Tempo features explicitly
+
+For most projects, the most flexible option is to enable Tempo network features directly:
+
+```toml
+[profile.default]
+tempo = true
+```
+
+This network flag, enables Tempo-specific network behavior while still letting Foundry resolve the right semantics from the chain you are targeting.
+
+If you need advanced testing against a specific Tempo hardfork, pin it explicitly in `foundry.toml` or via inline-config:
+
+```toml
+[profile.default]
+hardfork = "tempo:T3"
+```
+
+This is the advanced option when you want local simulation, tests, or scripts to run against a specific Tempo hardfork such as T3. It also infers the Tempo network in Foundry's config layer.
+
+### Verification config
+
+Tempo's contract verifier is Sourcify-compatible. Configure verification with `VERIFIER_URL=https://contracts.tempo.xyz` or `--verifier-url https://contracts.tempo.xyz`.
+
+The `[etherscan]` table in `foundry.toml` is for Etherscan-style verifiers, not Tempo's verifier.
+
+### Using `foundry-toolchain` in your CI
+
+Use the [`foundry-toolchain`](https://github.com/foundry-rs/foundry-toolchain) GitHub Action to install Foundry in your CI.
+Tempo support is included in the latest Foundry release, so no special configuration is needed.
+
+```yaml
+- name: Install Foundry
+  uses: foundry-rs/foundry-toolchain@v1
+```
 
 ## Use Foundry for your workflows
 
@@ -90,12 +139,12 @@ forge script script/Mail.s.sol
 
 ```bash
 # Set environment variables
-export TEMPO_RPC_URL=https://rpc.tempo.xyz
+export TEMPO_RPC_URL=https://rpc.moderato.tempo.xyz
 export VERIFIER_URL=https://contracts.tempo.xyz
 
 # Optional: create a new keypair and request some testnet tokens from the faucet.
 cast wallet new
-cast rpc tempo_fundAddress <YOUR_WALLET_ADDRESS> --rpc-url $TEMPO_RPC_URL
+cast rpc tempo_fundAddress <YOUR_WALLET_ADDRESS> --rpc-url https://rpc.moderato.tempo.xyz
 
 # Run all tests on Tempo's testnet
 forge test
@@ -147,6 +196,8 @@ forge script script/Deploy.s.sol \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
 ```
+
+Use a root key for `forge create`. Access keys can sign calls but not deployments.
 
 For more verification options including verifying existing contracts and API verification, see [Contract Verification](/quickstart/verify-contracts).
 
@@ -237,24 +288,28 @@ cast send <CONTRACT_ADDRESS> 'increment()' \
 # Send with access key (delegated signing):
 # First authorize the key via Account Keychain precompile
 cast send 0xAAAAAAAA00000000000000000000000000000000 \
-  'authorizeKey(address,uint8,uint64,bool,(address,uint256)[])' \
-  $ACCESS_KEY_ADDR 0 1893456000 false "[]" \
+  'authorizeKey(address,uint8,(uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[]))' \
+  $ACCESS_KEY_ADDR 0 '(1893456000,false,[],true,[])' \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $ROOT_PRIVATE_KEY
 # Then send using the access key
 cast send <CONTRACT_ADDRESS> 'increment()' \
   --rpc-url $TEMPO_RPC_URL \
-  --access-key $ACCESS_KEY_PRIVATE_KEY \
-  --root-account $ROOT_ADDRESS
+  --tempo.access-key $ACCESS_KEY_PRIVATE_KEY \
+  --tempo.root-account $ROOT_ADDRESS
 ```
+
+If the access key will be used with passkey or WebAuthn signatures, pass `2` for `SignatureType`. `1` is only for raw P256 signatures.
+
+Access-key transactions cannot create contracts, so use a root key for deployments or other flows that perform `CREATE`.
 
 ### Local Development with Anvil
 
 Anvil supports Tempo mode for local testing and forking Tempo networks:
 
 ```bash
-# Start anvil in Tempo mode
-anvil --tempo --hardfork t1
+# Start anvil in Tempo mode with T3 rules
+anvil --tempo --hardfork t3
 
 # Fork a live Tempo network for local testing
 anvil --tempo --fork-url $TEMPO_RPC_URL
@@ -301,7 +356,122 @@ The following flags are available for `cast` and `forge script` for Tempo-specif
 | `--tempo.valid-after <TIMESTAMP>` | Unix timestamp after which tx can execute | `--tempo.valid-after 1704067100` |
 | `--tempo.sponsor-signature <SIG>` | Pre-signed sponsor signature for gasless transactions | `--tempo.sponsor-signature 0x...` |
 | `--tempo.print-sponsor-hash` | Print fee payer signature hash and exit (for sponsor to sign) | `--tempo.print-sponsor-hash` |
+| `--tempo.access-key <KEY>` | Private key for delegated signing via access key | `--tempo.access-key $ACCESS_KEY_PRIVATE_KEY` |
+| `--tempo.root-account <ADDRESS>` | Root account address when using an access key | `--tempo.root-account $ROOT_ADDRESS` |
 
 Ledger and Trezor wallets are not yet compatible with any `--tempo.*` option.
 
+## cast keychain
 
+`cast keychain` provides a CLI interface to Tempo's [Account Keychain precompile](/protocol/transactions/AccountKeychain).
+
+Prefer this over hand-encoding `authorizeKey(...)` calldata when you are working from the CLI.
+
+:::info
+`cast keychain` only works on Tempo networks.
+:::
+
+`cast keychain` authorization takes a future expiry timestamp, `webauthn` for passkey-backed access keys, optional `TOKEN:AMOUNT:PERIOD_SECONDS` limits for recurring budgets, and `--scope` for target, selector, and recipient restrictions.
+
+`cast keychain` sends the Account Keychain ABI directly, so a non-expiring key uses `18446744073709551615` (`type(uint64).max`) as the expiry value. This differs from tx-level `key_authorization`, where a non-expiring key is represented by omitting `expiry`. Do not pass `0`.
+
+```bash
+# Access keys must be authorized with a future expiry timestamp.
+EXPIRY=$(($(date +%s) + 86400))
+
+# For a non-expiring key via direct precompile ABI / cast keychain, use:
+NEVER_EXPIRES=18446744073709551615
+
+# Authorize a new access key (signature types: secp256k1, p256, webauthn):
+cast keychain authorize <KEY_ID> secp256k1 $EXPIRY \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Authorize with a spending limit (TOKEN:AMOUNT or TOKEN:AMOUNT:PERIOD_SECONDS):
+cast keychain authorize <KEY_ID> secp256k1 $EXPIRY \
+  --limit <TOKEN_ADDRESS>:1000000 \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Authorize with call scopes (restrict to specific contracts/functions):
+cast keychain authorize <KEY_ID> secp256k1 $EXPIRY \
+  --scope <TOKEN_ADDRESS>:transfer,approve \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Authorize with call scope restricted to a specific recipient:
+cast keychain authorize <KEY_ID> secp256k1 $EXPIRY \
+  --scope <TOKEN_ADDRESS>:transfer@<RECIPIENT_ADDRESS> \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Full example: 24h expiry + spending limit + call scope:
+cast keychain authorize <KEY_ID> secp256k1 $EXPIRY \
+  --limit <TOKEN_ADDRESS>:1000000 \
+  --scope <TOKEN_ADDRESS>:transfer \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Revoke an access key (permanent, cannot be re-authorized):
+cast keychain revoke <KEY_ID> \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Update spending limit for a key-token pair:
+cast keychain update-limit <KEY_ID> <TOKEN_ADDRESS> <NEW_LIMIT> \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Replace all call scopes for a key:
+cast keychain set-scope <KEY_ID> \
+  --scope <TOKEN_ADDRESS>:transfer \
+  --scope <CONTRACT_ADDRESS> \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Remove a target contract from allowed call list:
+cast keychain remove-scope <KEY_ID> <TARGET_ADDRESS> \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY
+
+# Query key provisioning status (read-only):
+cast keychain check <ACCOUNT> <KEY_ID> \
+  --rpc-url $TEMPO_RPC_URL
+
+# Query remaining spending limit via the precompile directly:
+cast call 0xAAAAAAAA00000000000000000000000000000000 \
+  'getRemainingLimitWithPeriod(address,address,address)(uint256,uint64)' \
+  <ACCOUNT> <KEY_ID> <TOKEN_ADDRESS> \
+  --rpc-url $TEMPO_RPC_URL
+```
+
+## T2 → T3 migration
+
+:::info[Migration appendix]
+This appendix is kept for an integrator cooldown period after the T3 mainnet activation on Apr 27, 2026. It will be removed in a future docs revision.
+:::
+
+If you are migrating a pre-T3 integration, this is the key change: direct `authorizeKey(...)` calls must switch from the legacy ABI to the tuple-form TIP-1011 ABI used in the [`cast send` example above](#interact--debug-with-cast). If you need periodic limits or call scopes, fill those arrays instead of passing `[]`. The flattened seven-argument form is not equivalent.
+
+### Check your `authorizeKey(...)` migration with `cast`
+
+Most users can skip this if they use [`cast keychain`](#cast-keychain) or the tuple-form `cast send` example above. This is mainly for hand-encoded calldata.
+
+```bash
+# Legacy pre-T3 selector:
+cast sig 'authorizeKey(address,uint8,uint64,bool,(address,uint256)[])'
+
+# Incorrect flattened post-T3 form. This is not accepted onchain:
+cast sig 'authorizeKey(address,uint8,uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[])'
+
+# Correct post-T3 tuple-form selector:
+cast sig 'authorizeKey(address,uint8,(uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[]))'
+
+# Build the exact post-T3 calldata locally:
+cast calldata 'authorizeKey(address,uint8,(uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[]))' \
+  $ACCESS_KEY_ADDR 0 '(1893456000,false,[],true,[])'
+```
+
+The expected selectors are `0x54063a55`, `0x203e2736`, and `0x980a6025`.
+
+After T3 activation, the legacy selector reverts with `LegacyAuthorizeKeySelectorChanged(0x980a6025)`. Use the tuple-form `cast send` example above when you are ready to broadcast.

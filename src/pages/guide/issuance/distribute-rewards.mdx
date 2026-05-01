@@ -1,9 +1,17 @@
 ---
 description: Distribute rewards to token holders using TIP-20's built-in reward mechanism. Allocate tokens proportionally based on holder balances.
+interactive: true
 ---
 
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
+import { AddFunds } from '../../../components/guides/steps/payments/AddFunds.tsx'
+import { ClaimReward } from '../../../components/guides/steps/rewards/ClaimReward.tsx'
+import { Connect } from '../../../components/guides/steps/auth/Connect.tsx'
+import { CreateOrLoadToken } from '../../../components/guides/steps/issuance/CreateOrLoadToken.tsx'
+import { GrantTokenRoles } from '../../../components/guides/steps/issuance/GrantTokenRoles.tsx'
+import { MintToken } from '../../../components/guides/steps/issuance/MintToken.tsx'
+import { OptInToRewards } from '../../../components/guides/steps/rewards/OptInToRewards.tsx'
+import { StartReward } from '../../../components/guides/steps/rewards/StartReward.tsx'
 import { Cards, Card } from 'vocs'
 
 # Distribute Rewards
@@ -17,14 +25,14 @@ Rewards can be distributed by anyone on any TIP-20 token, and claimed by any hol
 Try out the complete rewards flow: create a token, opt in to receive rewards on it, create a reward for yourself, and claim it.
 
 <Demo.Container name="Distribute Rewards" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.CreateOrLoadToken stepNumber={3} />
-  <Step.GrantTokenRoles stepNumber={4} roles={['issuer']} />
-  <Step.MintToken stepNumber={5} />
-  <Step.OptInToRewards stepNumber={6} />
-  <Step.StartReward stepNumber={7} />
-  <Step.ClaimReward stepNumber={8} flowDependencies={['rewardId']} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <CreateOrLoadToken stepNumber={3} />
+  <GrantTokenRoles stepNumber={4} roles={['issuer']} />
+  <MintToken stepNumber={5} />
+  <OptInToRewards stepNumber={6} />
+  <StartReward stepNumber={7} />
+  <ClaimReward stepNumber={8} flowDependencies={['rewardId']} last />
 </Demo.Container>
 
 ## Steps
@@ -77,13 +85,11 @@ export function OptInToRewards() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { KeyManager, webAuthn } from 'wagmi/tempo'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn({
-    keyManager: KeyManager.localStorage(),
-  })],
+  connectors: [tempoWallet()],
   transports: {
     [tempo.id]: http(),
   },
@@ -137,13 +143,11 @@ export function StartReward() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { KeyManager, webAuthn } from 'wagmi/tempo'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn({
-    keyManager: KeyManager.localStorage(),
-  })],
+  connectors: [tempoWallet()],
   transports: {
     [tempo.id]: http(),
   },
@@ -190,13 +194,11 @@ export function ClaimReward() {
 // @noErrors
 import { createConfig, http } from 'wagmi'
 import { tempo } from 'viem/chains'
-import { KeyManager, webAuthn } from 'wagmi/tempo'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [webAuthn({
-    keyManager: KeyManager.localStorage(),
-  })],
+  connectors: [tempoWallet()],
   transports: {
     [tempo.id]: http(),
   },

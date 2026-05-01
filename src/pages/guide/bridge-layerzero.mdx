@@ -1,0 +1,460 @@
+---
+title: Bridge via LayerZero
+description: Bridge tokens to and from Tempo using LayerZero. Covers Stargate pools and standard OFT adapters with cast commands and TypeScript examples.
+---
+
+# Bridge via LayerZero
+
+[LayerZero](https://layerzero.network) is the omnichain messaging protocol that powers token bridging on Tempo. Tokens are bridged using the [OFT (Omnichain Fungible Token)](https://docs.layerzero.network/v2/developers/evm/oft/quickstart) standard - the source chain locks or burns tokens and the destination chain mints the bridged equivalent.
+
+There are two flavors of OFT on Tempo:
+
+- **Stargate** - an application built on LayerZero that manages liquidity pools. Tokens like USDC.e and EURC.e use Stargate's `sendToken()` interface.
+- **Standard OFT** - token issuers (e.g. Tether for USDT0) deploy their own OFT adapters using LayerZero's `send()` interface directly.
+
+Both use the same underlying LayerZero endpoint on Tempo.
+
+## Bridged tokens on Tempo
+
+| Token | Address | Bridge |
+|-------|---------|--------|
+| **USDC.e** (Bridged USDC) | [`0x20C000000000000000000000b9537d11c60E8b50`](https://explore.tempo.xyz/address/0x20C000000000000000000000b9537d11c60E8b50) | Stargate |
+| **EURC.e** (Bridged EURC) | [`0x20c0000000000000000000001621e21F71CF12fb`](https://explore.tempo.xyz/address/0x20c0000000000000000000001621e21F71CF12fb) | Stargate |
+| **USDT0** | [`0x20c00000000000000000000014f22ca97301eb73`](https://explore.tempo.xyz/address/0x20c00000000000000000000014f22ca97301eb73) | OFT |
+| **frxUSD** | [`0x20c0000000000000000000003554d28269e0f3c2`](https://explore.tempo.xyz/address/0x20c0000000000000000000003554d28269e0f3c2) | OFT |
+| **cUSD** | [`0x20c0000000000000000000000520792dcccccccc`](https://explore.tempo.xyz/address/0x20c0000000000000000000000520792dcccccccc) | OFT |
+| **stcUSD** | [`0x20c0000000000000000000008ee4fcff88888888`](https://explore.tempo.xyz/address/0x20c0000000000000000000008ee4fcff88888888) | OFT |
+| **GUSD** | [`0x20c0000000000000000000005c0bac7cef389a11`](https://explore.tempo.xyz/address/0x20c0000000000000000000005c0bac7cef389a11) | OFT |
+| **rUSD** | [`0x20c0000000000000000000007f7ba549dd0251b9`](https://explore.tempo.xyz/address/0x20c0000000000000000000007f7ba549dd0251b9) | OFT |
+| **wsrUSD** | [`0x20c000000000000000000000aeed2ec36a54d0e5`](https://explore.tempo.xyz/address/0x20c000000000000000000000aeed2ec36a54d0e5) | OFT |
+
+See the full token list at [tokenlist.tempo.xyz](https://tokenlist.tempo.xyz/list/4217).
+
+## LayerZero contracts on Tempo
+
+| Contract | Address |
+|----------|---------|
+| **EndpointV2** | [`0x20Bb7C2E2f4e5ca2B4c57060d1aE2615245dCc9C`](https://explore.tempo.xyz/address/0x20Bb7C2E2f4e5ca2B4c57060d1aE2615245dCc9C) |
+| **LZEndpointDollar** | [`0x0cEb237E109eE22374a567c6b09F373C73FA4cBb`](https://explore.tempo.xyz/address/0x0cEb237E109eE22374a567c6b09F373C73FA4cBb) |
+
+Tempo's LayerZero Endpoint ID is **`30410`**.
+
+## Stargate tokens
+
+[Stargate](https://stargate.finance/) manages liquidity pools for USDC.e and EURC.e. Use the Stargate `sendToken()` interface for these tokens.
+
+### Stargate contracts on Tempo
+
+| Token | Stargate OFT Contract |
+|-------|----------------------|
+| **USDC.e** | [`0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392`](https://explore.tempo.xyz/address/0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392) |
+| **EURC.e** | [`0x7753Dc8d4bd48Db599Da21E08b1Ab1D6FDFfdC71`](https://explore.tempo.xyz/address/0x7753Dc8d4bd48Db599Da21E08b1Ab1D6FDFfdC71) |
+
+### Source chain Stargate pools
+
+| Chain | LZ Endpoint ID | Stargate USDC Pool |
+|-------|---------------:|--------------------|
+| Ethereum | `30101` | [`0xc026395860Db2d07ee33e05fE50ed7bD583189C7`](https://etherscan.io/address/0xc026395860Db2d07ee33e05fE50ed7bD583189C7) |
+| Arbitrum | `30110` | [`0xe8CDF27AcD73a434D661C84887215F7598e7d0d3`](https://arbiscan.io/address/0xe8CDF27AcD73a434D661C84887215F7598e7d0d3) |
+| Base | `30184` | [`0x27a16dc786820B16E5c9028b75B99F6f604b5d26`](https://basescan.org/address/0x27a16dc786820B16E5c9028b75B99F6f604b5d26) |
+| Optimism | `30111` | [`0xcE8CcA271Ebc0533920C83d39F417ED6A0abB7D0`](https://optimistic.etherscan.io/address/0xcE8CcA271Ebc0533920C83d39F417ED6A0abB7D0) |
+| Polygon | `30109` | [`0x9Aa02D4Fae7F58b8E8f34c66E756cC734DAc7fe4`](https://polygonscan.com/address/0x9Aa02D4Fae7F58b8E8f34c66E756cC734DAc7fe4) |
+| Avalanche | `30106` | [`0x5634c4a5FEd09819E3c46D86A965Dd9447d86e47`](https://snowtrace.io/address/0x5634c4a5FEd09819E3c46D86A965Dd9447d86e47) |
+
+### Bridge to Tempo via Stargate
+
+#### Using the Stargate app
+
+1. Go to [stargate.finance](https://stargate.finance/)
+2. Select your source chain and token (USDC or EURC)
+3. Set **Tempo** as the destination chain
+4. Enter the amount, approve, and send
+
+#### Using cast (Foundry)
+
+This example bridges USDC from Base to Tempo. Replace addresses for other tokens or source chains.
+
+:::::steps
+
+### Get a quote
+
+```bash
+cast call 0x27a16dc786820B16E5c9028b75B99F6f604b5d26 \
+  'quoteSend((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),bool)((uint256,uint256))' \
+  "(30410,$(cast abi-encode 'f(address)' <TEMPO_WALLET_ADDRESS>),<AMOUNT>,<MIN_AMOUNT>,0x,0x,0x)" \
+  false \
+  --rpc-url https://mainnet.base.org
+```
+
+Take the first returned number as `<NATIVE_FEE>`.
+
+### Approve token on source chain
+
+```bash
+cast send 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 \
+  'approve(address,uint256)' \
+  0x27a16dc786820B16E5c9028b75B99F6f604b5d26 \
+  <AMOUNT> \
+  --rpc-url https://mainnet.base.org \
+  --private-key $PRIVATE_KEY
+```
+
+### Send bridge transaction
+
+```bash
+cast send 0x27a16dc786820B16E5c9028b75B99F6f604b5d26 \
+  'sendToken((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),(uint256,uint256),address)' \
+  "(30410,$(cast abi-encode 'f(address)' <TEMPO_WALLET_ADDRESS>),<AMOUNT>,<MIN_AMOUNT>,0x,0x,0x)" \
+  "(<NATIVE_FEE>,0)" \
+  <SOURCE_ADDRESS> \
+  --value <NATIVE_FEE> \
+  --rpc-url https://mainnet.base.org \
+  --private-key $PRIVATE_KEY
+```
+
+### Verify transaction status
+
+```text
+https://scan.layerzero-api.com/v1/messages/tx/<SOURCE_TX_HASH>
+```
+
+:::::
+
+#### Using TypeScript (viem)
+
+```typescript
+import { createWalletClient, createPublicClient, http, parseUnits, pad } from 'viem'
+import { base } from 'viem/chains'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const account = privateKeyToAccount('0x...')
+
+const walletClient = createWalletClient({
+  account,
+  chain: base,
+  transport: http(),
+})
+
+// Stargate pool on Base
+const stargatePool = '0x27a16dc786820B16E5c9028b75B99F6f604b5d26' as const
+// USDC on Base
+const usdc = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as const
+
+const amount = parseUnits('1', 6) // 1 USDC
+const minAmount = parseUnits('0.99', 6) // 1% slippage tolerance
+
+const sendParam = {
+  dstEid: 30410, // Tempo
+  to: pad(account.address),
+  amountLD: amount,
+  minAmountLD: minAmount,
+  extraOptions: '0x' as const,
+  composeMsg: '0x' as const,
+  oftCmd: '0x' as const, // taxi mode (immediate)
+}
+
+const stargateAbi = [
+  {
+    name: 'quoteSend',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [
+      {
+        name: '_sendParam',
+        type: 'tuple',
+        components: [
+          { name: 'dstEid', type: 'uint32' },
+          { name: 'to', type: 'bytes32' },
+          { name: 'amountLD', type: 'uint256' },
+          { name: 'minAmountLD', type: 'uint256' },
+          { name: 'extraOptions', type: 'bytes' },
+          { name: 'composeMsg', type: 'bytes' },
+          { name: 'oftCmd', type: 'bytes' },
+        ],
+      },
+      { name: '_payInLzToken', type: 'bool' },
+    ],
+    outputs: [
+      {
+        name: 'msgFee',
+        type: 'tuple',
+        components: [
+          { name: 'nativeFee', type: 'uint256' },
+          { name: 'lzTokenFee', type: 'uint256' },
+        ],
+      },
+    ],
+  },
+  {
+    name: 'sendToken',
+    type: 'function',
+    stateMutability: 'payable',
+    inputs: [
+      {
+        name: '_sendParam',
+        type: 'tuple',
+        components: [
+          { name: 'dstEid', type: 'uint32' },
+          { name: 'to', type: 'bytes32' },
+          { name: 'amountLD', type: 'uint256' },
+          { name: 'minAmountLD', type: 'uint256' },
+          { name: 'extraOptions', type: 'bytes' },
+          { name: 'composeMsg', type: 'bytes' },
+          { name: 'oftCmd', type: 'bytes' },
+        ],
+      },
+      {
+        name: '_fee',
+        type: 'tuple',
+        components: [
+          { name: 'nativeFee', type: 'uint256' },
+          { name: 'lzTokenFee', type: 'uint256' },
+        ],
+      },
+      { name: '_refundAddress', type: 'address' },
+    ],
+    outputs: [],
+  },
+] as const
+
+const erc20Abi = [
+  {
+    name: 'approve',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'spender', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    outputs: [{ type: 'bool' }],
+  },
+] as const
+
+// 1. Quote the fee
+const publicClient = createPublicClient({ chain: base, transport: http() })
+
+const msgFee = await publicClient.readContract({
+  address: stargatePool,
+  abi: stargateAbi,
+  functionName: 'quoteSend',
+  args: [sendParam, false],
+})
+
+// 2. Approve token
+await walletClient.writeContract({
+  address: usdc,
+  abi: erc20Abi,
+  functionName: 'approve',
+  args: [stargatePool, amount],
+})
+
+// 3. Send the bridge transaction
+await walletClient.writeContract({
+  address: stargatePool,
+  abi: stargateAbi,
+  functionName: 'sendToken',
+  args: [sendParam, msgFee, account.address],
+  value: msgFee.nativeFee,
+})
+```
+
+### Bridge from Tempo via Stargate
+
+To bridge from Tempo back to another chain, call `sendToken` on the Stargate OFT contract on Tempo. The process is the same - quote, approve, send - but the source contract and destination EID are swapped.
+
+#### Using cast (Foundry)
+
+This example bridges USDC.e from Tempo to Base.
+
+:::::steps
+
+### Quote the fee
+
+```bash
+cast call 0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392 \
+  'quoteSend((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),bool)((uint256,uint256))' \
+  "(30184,$(cast abi-encode 'f(address)' <DESTINATION_ADDRESS>),<AMOUNT>,<MIN_AMOUNT>,0x,0x,0x)" \
+  false \
+  --rpc-url https://rpc.tempo.xyz
+```
+
+Take the first returned number as `<NATIVE_FEE>` (in stablecoin units, not ETH).
+
+### Approve token on Tempo
+
+```bash
+cast send 0x20C000000000000000000000b9537d11c60E8b50 \
+  'approve(address,uint256)' \
+  0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392 \
+  <AMOUNT> \
+  --rpc-url https://rpc.tempo.xyz \
+  --private-key $PRIVATE_KEY
+```
+
+### Send bridge transaction
+
+No `--value` is needed on Tempo - the messaging fee is paid in a TIP-20 stablecoin via [EndpointDollar](#endpointdollar).
+
+```bash
+cast send 0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392 \
+  'sendToken((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),(uint256,uint256),address)' \
+  "(30184,$(cast abi-encode 'f(address)' <DESTINATION_ADDRESS>),<AMOUNT>,<MIN_AMOUNT>,0x,0x,0x)" \
+  "(<NATIVE_FEE>,0)" \
+  <TEMPO_ADDRESS> \
+  --rpc-url https://rpc.tempo.xyz \
+  --private-key $PRIVATE_KEY
+```
+
+### Verify transaction status
+
+```text
+https://scan.layerzero-api.com/v1/messages/tx/<SOURCE_TX_HASH>
+```
+
+:::::
+
+#### Using TypeScript (viem)
+
+```typescript
+import { createWalletClient, createPublicClient, http, parseUnits, pad } from 'viem'
+import { tempo } from 'viem/chains'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const account = privateKeyToAccount('0x...')
+
+const walletClient = createWalletClient({
+  account,
+  chain: tempo,
+  transport: http(),
+})
+
+// Stargate OFT for USDC.e on Tempo
+const stargateOFT = '0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392' as const
+// USDC.e on Tempo
+const usdce = '0x20C000000000000000000000b9537d11c60E8b50' as const
+
+const amount = parseUnits('1', 6) // 1 USDC.e
+const minAmount = parseUnits('0.99', 6) // 1% slippage tolerance
+
+const sendParam = {
+  dstEid: 30184, // Base
+  to: pad(account.address),
+  amountLD: amount,
+  minAmountLD: minAmount,
+  extraOptions: '0x' as const,
+  composeMsg: '0x' as const,
+  oftCmd: '0x' as const, // taxi mode (immediate)
+}
+
+// 1. Quote the fee
+const publicClient = createPublicClient({ chain: tempo, transport: http() })
+
+const msgFee = await publicClient.readContract({
+  address: stargateOFT,
+  abi: stargateAbi, // same ABI as above
+  functionName: 'quoteSend',
+  args: [sendParam, false],
+})
+
+// 2. Approve token
+await walletClient.writeContract({
+  address: usdce,
+  abi: erc20Abi,
+  functionName: 'approve',
+  args: [stargateOFT, amount],
+})
+
+// 3. Send the bridge transaction (no value - fee handled via EndpointDollar)
+await walletClient.writeContract({
+  address: stargateOFT,
+  abi: stargateAbi,
+  functionName: 'sendToken',
+  args: [sendParam, msgFee, account.address],
+})
+```
+
+### Bus vs. Taxi mode
+
+Stargate offers two delivery modes:
+
+| Mode | `oftCmd` | Delivery | Cost |
+|------|----------|----------|------|
+| **Taxi** | `0x` (empty) | Immediate - message sent right away | Higher gas cost |
+| **Bus** | `0x00` (1 byte) | Batched - waits for other passengers | Lower gas cost |
+
+All examples above use taxi mode. To use bus mode, set `oftCmd` to `0x00`:
+
+```bash
+# cast - bus mode
+oftCmd=0x00
+```
+
+```typescript
+// viem - bus mode
+const sendParam = {
+  // ...
+  oftCmd: '0x00' as const, // bus mode
+}
+```
+
+:::warning
+Bus mode is not available on all routes. If a bus route is not configured for your source/destination pair, the transaction will revert. Use taxi mode (`0x`) for guaranteed delivery.
+:::
+
+## Standard OFT tokens
+
+Tokens like USDT0, frxUSD, cUSD, and others are bridged using the standard LayerZero OFT `send()` interface. Each token issuer deploys their own OFT adapter contract. The `send()` interface uses the same `SendParam` struct as Stargate but calls `send()` instead of `sendToken()`.
+
+To bridge a standard OFT token, you need the OFT adapter contract address on the source chain. Refer to the token issuer's documentation for their deployment addresses:
+
+- **USDT0** - [Tether](https://tether.io)
+- **frxUSD** - [Frax](https://docs.frax.com)
+- **cUSD** - [Coinbase](https://docs.cdp.coinbase.com)
+
+The flow is the same as Stargate - quote, approve, send - but you call `send()` on the OFT adapter instead of `sendToken()` on a Stargate pool:
+
+```bash
+# Quote
+cast call <OFT_ADAPTER> \
+  'quoteSend((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),bool)((uint256,uint256))' \
+  "(30410,$(cast abi-encode 'f(address)' <TEMPO_ADDRESS>),<AMOUNT>,<MIN_AMOUNT>,0x,0x,0x)" \
+  false \
+  --rpc-url <SOURCE_RPC>
+
+# Approve
+cast send <TOKEN_ADDRESS> \
+  'approve(address,uint256)' \
+  <OFT_ADAPTER> \
+  <AMOUNT> \
+  --rpc-url <SOURCE_RPC> \
+  --private-key $PRIVATE_KEY
+
+# Send
+cast send <OFT_ADAPTER> \
+  'send((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),(uint256,uint256),address)' \
+  "(30410,$(cast abi-encode 'f(address)' <TEMPO_ADDRESS>),<AMOUNT>,<MIN_AMOUNT>,0x,0x,0x)" \
+  "(<NATIVE_FEE>,0)" \
+  <REFUND_ADDRESS> \
+  --value <NATIVE_FEE> \
+  --rpc-url <SOURCE_RPC> \
+  --private-key $PRIVATE_KEY
+```
+
+## EndpointDollar
+
+Tempo has no native gas token, so there is no `msg.value`. Standard LayerZero endpoints require `msg.value` to pay messaging fees, which doesn't work on Tempo.
+
+**LZEndpointDollar** ([`0x0cEb237E109eE22374a567c6b09F373C73FA4cBb`](https://explore.tempo.xyz/address/0x0cEb237E109eE22374a567c6b09F373C73FA4cBb)) is an adapter contract that routes LayerZero messaging fees through a TIP-20 stablecoin instead of `msg.value`. It wraps the standard `EndpointV2` so that OFT contracts can function on Tempo without modification.
+
+This is transparent for end users:
+
+- **Bridging to Tempo** - fees are paid in native gas on the source chain (ETH, MATIC, AVAX, etc.) as normal.
+- **Bridging from Tempo** - `LZEndpointDollar` automatically deducts the messaging fee from a TIP-20 stablecoin. No `msg.value` is needed.
+- **Developers** don't need to interact with `LZEndpointDollar` directly. The OFT contracts on Tempo handle it internally.
+
+## Further reading
+
+- [LayerZero V2 documentation](https://docs.layerzero.network/v2)
+- [Stargate documentation](https://stargateprotocol.gitbook.io/stargate/v2-developer-docs)
+- [Bridges & Exchanges on Tempo](/ecosystem/bridges)
+- [Getting Funds on Tempo](/guide/getting-funds)

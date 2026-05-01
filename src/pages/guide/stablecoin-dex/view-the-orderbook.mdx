@@ -21,15 +21,18 @@ In this guide, we use [Index Supply](https://www.indexsupply.net) as our indexin
 
 Query the best bid and ask prices to calculate the current spread for a token pair.
 
-Find the highest bid prices (buyers) for AlphaUSD. This query filters out fully filled and cancelled orders, groups by price level (tick), and shows the top 5 bid prices with their total liquidity.
+These examples use the mainnet `USDC.e / pathUSD` orderbook; `pathUSD` is the quote token for `USDC.e` — see [Quote Tokens](/protocol/exchange/quote-tokens).
+
+Find the highest bid prices (buyers) for the `USDC.e / pathUSD` book. This query filters out fully filled and cancelled orders, groups by price level (tick), and shows the top 5 bid prices with their total liquidity.
 
 <IndexSupplyQuery
-  title={'Best Bid Prices for AlphaUSD'}
+  chainId={4217}
+  title={'Best Bid Prices for USDC.e'}
   query={`SELECT
     tick as price,
     SUM(amount) as total_liquidity
   FROM orderplaced
-  WHERE token = '0x20c0000000000000000000000000000000000001'
+  WHERE token = '0x20c000000000000000000000b9537d11c60e8b50'
     AND "isBid" = true
     AND NOT EXISTS (
       SELECT 1 FROM orderfilled
@@ -46,15 +49,16 @@ Find the highest bid prices (buyers) for AlphaUSD. This query filters out fully 
   signatures={["OrderPlaced", "OrderFilled", "OrderCancelled"]}
 />
 
-Find the lowest ask prices (sellers) for AlphaUSD. The spread is the difference between the highest bid and lowest ask price.
+Find the lowest ask prices (sellers) for the `USDC.e / pathUSD` book. The spread is the difference between the highest bid and lowest ask price.
 
 <IndexSupplyQuery
-  title={'Best Ask Prices for AlphaUSD'}
+  chainId={4217}
+  title={'Best Ask Prices for USDC.e'}
   query={`SELECT
     tick as price,
     SUM(amount) as total_liquidity
   FROM orderplaced
-  WHERE token = '0x20c0000000000000000000000000000000000001'
+  WHERE token = '0x20c000000000000000000000b9537d11c60e8b50'
     AND "isBid" = false
     AND NOT EXISTS (
       SELECT 1 FROM orderfilled
@@ -75,17 +79,18 @@ Find the lowest ask prices (sellers) for AlphaUSD. The spread is the difference 
 
 View aggregated liquidity at each price level to understand the orderbook structure.
 
-This query shows all active orders for BetaUSD, including both regular and flip orders.
+This query shows all active orders in the `USDC.e / pathUSD` book, including both regular and flip orders.
 
 <IndexSupplyQuery
-  title={'BetaUSD Order Depth by Price Level'}
+  chainId={4217}
+  title={'USDC.e Order Depth by Price Level'}
   query={`SELECT
     tick as price,
     "isBid" as is_bid,
     COUNT("orderId") as num_orders,
     SUM(amount) as total_amount
   FROM orderplaced
-  WHERE token = '0x20c0000000000000000000000000000000000002'
+  WHERE token = '0x20c000000000000000000000b9537d11c60e8b50'
     AND NOT EXISTS (
       SELECT 1 FROM orderfilled
       WHERE orderfilled."orderId" = orderplaced."orderId"
@@ -107,10 +112,11 @@ This query shows all active orders for BetaUSD, including both regular and flip 
 
 Get detailed information about a specific order including its placement details, fill history, and cancellation status.
 
-This query inspects the details of the most recent order for AlphaUSD. It shows when the order was created, at what price (tick), the order size, whether it's a flip order, and who placed it.
+This query inspects the details of the most recent order in the `USDC.e / pathUSD` book. It shows when the order was created, at what price (tick), the order size, whether it's a flip order, and who placed it.
 
 <IndexSupplyQuery
-  title={'Order Placement Details'}
+  chainId={4217}
+  title={'Order Placement Details for USDC.e'}
   query={`SELECT
     "orderId",
     tick,
@@ -123,7 +129,7 @@ This query inspects the details of the most recent order for AlphaUSD. It shows 
     block_num,
     tx_hash
   FROM orderplaced
-  WHERE token = '0x20c0000000000000000000000000000000000001'
+  WHERE token = '0x20c000000000000000000000b9537d11c60e8b50'
   ORDER BY block_num DESC
   LIMIT 1`}
   signatures={["OrderPlaced"]}
@@ -131,37 +137,41 @@ This query inspects the details of the most recent order for AlphaUSD. It shows 
 
 #### Order fill status
 
-Check if an order has been partially or fully filled. This query shows up to 5 fill events for order number `2`, including the amount filled in each transaction and whether it was a partial fill.
+Check if recent `USDC.e` orders have been partially or fully filled. This query shows up to 5 fill events for the `USDC.e / pathUSD` market, including the amount filled in each transaction and whether it was a partial fill.
 
 <IndexSupplyQuery
-  title={'Order Fill History'}
+  chainId={4217}
+  title={'Order Fill History for USDC.e'}
   query={`SELECT
-    "orderId",
-    "amountFilled",
-    "partialFill",
-    block_num,
-    tx_hash
-  FROM orderfilled
-  WHERE "orderId" = 2
-  ORDER BY block_num DESC
+    ofl."orderId",
+    ofl."amountFilled",
+    ofl."partialFill",
+    ofl.block_num,
+    ofl.tx_hash
+  FROM orderfilled ofl
+  INNER JOIN orderplaced op
+    ON ofl."orderId" = op."orderId"
+  WHERE op.token = '0x20c000000000000000000000b9537d11c60e8b50'
+  ORDER BY ofl.block_num DESC
   LIMIT 5`}
-  signatures={["OrderFilled"]}
+  signatures={["OrderFilled", "OrderPlaced"]}
 />
 
 #### Cancelled orders
 
-Check if an order has been cancelled. This query returns an order for AlphaUSD that was explicitly cancelled by the maker before being fully filled.
+Check if a `USDC.e` order has been cancelled. This query returns a recent order from the `USDC.e / pathUSD` book that was explicitly cancelled by the maker before being fully filled.
 
 <IndexSupplyQuery
-  title={'Order Cancellation Status'}
+  chainId={4217}
+  title={'Order Cancellation Status for USDC.e'}
   query={`SELECT
     oc."orderId",
     oc.block_num,
     oc.tx_hash
   FROM ordercancelled oc
   INNER JOIN orderplaced op ON oc."orderId" = op."orderId"
-  WHERE op.token = '0x20c0000000000000000000000000000000000001'
-  ORDER BY op.block_num DESC
+  WHERE op.token = '0x20c000000000000000000000b9537d11c60e8b50'
+  ORDER BY oc.block_num DESC
   LIMIT 1`}
   signatures={["OrderCancelled", "OrderPlaced"]}
 />
@@ -170,10 +180,11 @@ Check if an order has been cancelled. This query returns an order for AlphaUSD t
 
 View the last prices a token traded at to understand recent market activity.
 
-This query joins order fill events with their corresponding placement details to show the price tick and amount for recent trades.
+This query joins order fill events with their corresponding placement details to show the price tick and amount for recent trades in the `USDC.e / pathUSD` book.
 
 <IndexSupplyQuery
-  title={'Recent Trade Prices for AlphaUSD'}
+  chainId={4217}
+  title={'Recent Trade Prices for USDC.e'}
   query={`SELECT
     ofl.block_num,
     ofl."orderId",
@@ -183,7 +194,7 @@ This query joins order fill events with their corresponding placement details to
   FROM orderfilled ofl
   INNER JOIN orderplaced o
     ON ofl."orderId" = o."orderId"
-  WHERE o.token = '0x20c0000000000000000000000000000000000001'
+  WHERE o.token = '0x20c000000000000000000000b9537d11c60e8b50'
   ORDER BY ofl.block_num DESC
   LIMIT 10`}
   signatures={["OrderFilled", "OrderPlaced"]}

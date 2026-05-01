@@ -1,35 +1,66 @@
 'use client'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
-import { Button, useWebAuthnConnector } from './Demo'
+import { useWebAuthnConnector } from '../../wagmi.config'
+import { Button, useHydrated } from './Demo'
 
 export function EmbedPasskeys() {
   const account = useAccount()
   const connect = useConnect()
-  const connector = useWebAuthnConnector()
   const disconnect = useDisconnect()
+  const hydrated = useHydrated()
+  const connector = useWebAuthnConnector()
+  const busy = connect.isPending || disconnect.isPending
 
-  if (account.address)
+  if (!hydrated || !connector)
     return (
-      <div className="flex items-center gap-2">
-        <Button onClick={() => disconnect.disconnect()} variant="destructive">
-          Sign out
-        </Button>
+      <div>
+        <Button disabled>Loading account</Button>
       </div>
     )
-  if (connect.isPending)
+
+  if (busy)
     return (
       <div>
         <Button disabled>Check prompt</Button>
       </div>
     )
-  if (!connector) return null
+
+  if (account.address)
+    return (
+      <div className="flex items-center gap-2">
+        <Button
+          onClick={() => disconnect.disconnect({ connector: account.connector })}
+          variant="destructive"
+        >
+          Sign out
+        </Button>
+      </div>
+    )
+
   return <SignInButtons />
 }
 
 export function SignInButtons() {
   const connect = useConnect()
-  const connector = useWebAuthnConnector()
   const disconnect = useDisconnect()
+  const hydrated = useHydrated()
+  const connector = useWebAuthnConnector()
+  const busy = connect.isPending || disconnect.isPending
+  const isE2E = import.meta.env.VITE_E2E === 'true'
+
+  if (!hydrated || !connector)
+    return (
+      <div>
+        <Button disabled>Loading account</Button>
+      </div>
+    )
+
+  if (busy)
+    return (
+      <div>
+        <Button disabled>Check prompt</Button>
+      </div>
+    )
 
   return (
     <div className="flex gap-1">
@@ -39,10 +70,14 @@ export function SignInButtons() {
           await disconnect.disconnectAsync().catch(() => {})
           connect.connect({
             connector,
-            capabilities: {
-              label: 'Tempo Docs',
-              type: 'sign-up',
-            },
+            ...(isE2E
+              ? ({ capabilities: { method: 'register', name: 'Tempo Docs' } } as const)
+              : {
+                  capabilities: {
+                    method: 'register',
+                    name: 'Tempo Docs',
+                  } as never,
+                }),
           })
         }}
         type="button"

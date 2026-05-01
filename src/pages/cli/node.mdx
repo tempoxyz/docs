@@ -33,8 +33,12 @@ Flags grouped by function:
 | Flag | Description |
 | --- | --- |
 | `--consensus.signing-key <path>` | Path to validator signing key |
-| `--consensus.fee-recipient <addr>` | Address to receive validator fees |
+| `--consensus.fee-recipient <addr>` | Deprecated validator fee-recipient flag. Migrate to on-chain fee-recipient management via Validator Config V2. |
 | `--consensus.datadir <path>` | Separate volume for consensus data |
+
+:::warning
+`--consensus.fee-recipient` is deprecated as of `v1.5.2` and will be removed in an upcoming release. See [updating the fee recipient](/guide/node/validator-lifecycle#update-the-fee-recipient).
+:::
 
 ### Observability
 

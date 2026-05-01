@@ -212,6 +212,37 @@ interface ITIP20 {
     function setRoleAdmin(bytes32 role, bytes32 adminRole) external;
     
     // =========================================================================
+    //                     EIP-2612 Permit (TIP-1004)
+    // =========================================================================
+
+    /// @notice Approves a spender via an off-chain signature (EIP-2612)
+    /// @param owner The token owner who signed the permit
+    /// @param spender The address being approved
+    /// @param value The allowance amount
+    /// @param deadline The timestamp after which the signature expires
+    /// @param v ECDSA recovery byte (must be 27 or 28; 0/1 is not normalized)
+    /// @param r ECDSA signature component
+    /// @param s ECDSA signature component
+    function permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external;
+
+    /// @notice Returns the current nonce for an owner (incremented on each permit)
+    /// @param owner The address to query
+    /// @return The current nonce
+    function nonces(address owner) external view returns (uint256);
+
+    /// @notice Returns the EIP-712 domain separator for this token
+    /// @return The domain separator hash (computed dynamically using block.chainid)
+    function DOMAIN_SEPARATOR() external view returns (bytes32);
+
+    // =========================================================================
     //                            System Functions
     // =========================================================================
     
@@ -344,6 +375,12 @@ interface ITIP20 {
     /// @notice The token operation is blocked because the contract is currently paused
     error ContractPaused();
 
+    /// @notice The permit signature has expired (block.timestamp > deadline)
+    error PermitExpired();
+
+    /// @notice The recovered signer does not match the permit owner
+    error InvalidSignature();
+
     /// @notice The spender does not have enough allowance for the attempted transfer
     error InsufficientAllowance();
 
@@ -410,6 +447,11 @@ Reward operations (`distributeReward`, `setRewardRecipient`, `claimRewards`) als
 TIP-20 tokens cannot be sent to other TIP-20 token contract addresses. The implementation uses a `validRecipient` guard that rejects recipients whose address is zero, or has the TIP-20 prefix (`0x20c000000000000000000000`).
 Any attempt to transfer to a TIP-20 token address must revert with `InvalidRecipient`. This prevents accidental token loss by sending funds to token contracts instead of user accounts.
 
+## Virtual Address Recipients
+Recipient-bearing TIP-20 paths — `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo` — resolve [TIP-1022](/protocol/tips/tip-1022) virtual addresses before running recipient authorization and mint-recipient checks. When a recipient `to` is a registered virtual address, the effective recipient becomes the registered master wallet, and authorization, balance updates, and event emission target that master wallet.
+
+Virtual addresses are valid TIP-20 recipients on those paths but remain forwarding aliases rather than canonical TIP-20 holders. Non-TIP-20 tokens sent to a virtual address do not forward. Forwarded deposits appear as two-hop standard `Transfer` events in the same transaction; indexers and explorers should collapse that pair into one logical deposit to the resolved master wallet.
+
 ## Currencies and Quote Tokens
 Each TIP-20 token declares a [currency identifier](/protocol/tip20/overview#currency-declaration) and a corresponding `quoteToken` used for pricing and routing in the Stablecoin DEX. The currency is set at token creation and **cannot be changed afterward**. **Only tokens with `currency == "USD"` are eligible for paying transaction fees.** Tokens with `currency == "USD"` must pair with a USD-denominated TIP-20 token.
 
@@ -423,6 +465,11 @@ The implementation must validate that the new quote token is a TIP-20 token, mat
 :::note
 While quote tokens can be changed, choose carefully as the update process requires careful coordination with the DEX.
 :::
+
+## Permit (TIP-1004)
+TIP-20 tokens support [EIP-2612](https://eips.ethereum.org/EIPS/eip-2612) `permit`, added in the [T2 network upgrade](/protocol/upgrades/t2). A token owner signs an EIP-712 typed message off-chain authorizing a spender, and any third party can submit that signature on-chain — combining approve and action into a single transaction without the owner paying gas.
+
+The `DOMAIN_SEPARATOR` is computed dynamically on every call using `block.chainid`, so it remains correct after a chain fork. Each owner has a monotonically increasing `nonce` to prevent replay. Only `v = 27` or `v = 28` is accepted; `v = 0` or `v = 1` is intentionally **not** normalized (see [TIP-1004](/protocol/tips/tip-1004) for rationale).
 
 ## Pause Controls
 Pause controls `pause` and `unpause` govern all transfer operations and reward related flows. When paused, transfers and memo transfers halt, but administrative and configuration functions remain allowed. The `paused()` getter reflects the current state and must be checked by all affected entrypoints.
@@ -556,3 +603,16 @@ interface ITIP20Factory {
 - When `paused` is `true`, no functions that move tokens (`transfer`, `transferFrom`, memo variants, `systemTransferFrom`, `transferFeePreTx`, `distributeReward`, `setRewardRecipient`, `claimRewards`) can succeed.
 - TIP20 tokens cannot be transferred to another TIP20 token contract address.
 - `systemTransferFrom`, `transferFeePreTx`, and `transferFeePostTx` never change `totalSupply()`.
+
+## T2 → T3 migration
+
+:::info[Migration appendix]
+This section captures changes introduced by the [T3 network upgrade](/protocol/upgrades/t3) for integrators migrating from T2. The spec above is the canonical post-T3 specification; this appendix exists for reference and will be removed in a future docs revision.
+:::
+
+T3 introduced [TIP-1022](/protocol/tips/tip-1022) virtual addresses, which affect TIP-20 in the following ways:
+
+- Virtual-address recipient resolution applies to recipient-bearing TIP-20 paths: `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo`. See [Virtual Address Recipients](#virtual-address-recipients).
+- When an operation targets a registered virtual address, the effective recipient becomes the registered master wallet before recipient authorization and mint-recipient checks run.
+- Forwarded virtual-address deposits appear as two-hop standard `Transfer` events in the same transaction. Indexers and explorers should collapse that pair into one logical deposit to the resolved master wallet.
+- Virtual addresses are valid TIP-20 recipients on those paths but remain forwarding aliases rather than canonical TIP-20 holders. Non-TIP-20 tokens sent to a virtual address do not forward.

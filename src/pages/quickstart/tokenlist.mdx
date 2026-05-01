@@ -1,5 +1,6 @@
 ---
 title: Tempo Token List Registry
+interactive: true
 ---
 import { Callout } from 'vocs'
 
@@ -38,13 +39,55 @@ As an example, here's Tempo's tokenlist, fetched from [tokenlist.tempo.xyz/list/
      "symbol": "PiUSD",
      "decimals": 6,
      "chainId": 4217,
-     "address": "0x..."
+     "address": "0x...",
+     "extensions": {
+       "chain": "tempo",
+       "coingeckoId": "pi-usd"
+     }
    }
    ```
 
 3. **Add icon** to `data/<chain_id>/icons/<address>.svg` (lowercase address) in `apps/tokenlist`
 
 4. **Submit PR** with as much information as you think is helpful for review.
+
+
+### Token Extensions
+
+Tokens support optional `extensions` for richer metadata:
+
+| Field | Description |
+|-------|-------------|
+| `chain` | Always `"tempo"` by convention |
+| `coingeckoId` | [CoinGecko](https://www.coingecko.com) identifier for price mapping |
+| `label` | Display label override (used by the Explorer) |
+| `bridgeInfo` | Origin chain and contract info for bridged tokens |
+
+For **bridged tokens**, include `bridgeInfo` so aggregators like DeFi Llama can automatically map to the canonical asset:
+
+```json
+{
+  "extensions": {
+    "chain": "tempo",
+    "coingeckoId": "usd-coin",
+    "bridgeInfo": {
+      "sourceChainId": 1,
+      "sourceAddress": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+    }
+  }
+}
+```
+
+For **native tokens** (e.g., PathUSD), omit `bridgeInfo`:
+
+```json
+{
+  "extensions": {
+    "chain": "tempo",
+    "coingeckoId": "pathusd"
+  }
+}
+```
 
 ### Icon Requirements
 

@@ -18,8 +18,8 @@ test('distribute rewards', async ({ page }) => {
 
   await page.goto('/guide/issuance/distribute-rewards')
 
-  // Step 1: Sign up with passkey
-  const signUpButton = page.getByRole('button', { name: 'Sign up' }).first()
+  // Step 1: Sign in
+  const signUpButton = page.getByRole('button', { name: 'Sign in' }).first()
   await expect(signUpButton).toBeVisible({ timeout: 90000 })
   await signUpButton.click()
 

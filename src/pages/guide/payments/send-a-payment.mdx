@@ -1,9 +1,12 @@
 ---
 description: Send stablecoin payments between accounts on Tempo. Include optional memos for reconciliation and tracking with TypeScript, Rust, or Solidity.
+interactive: true
 ---
 
 import * as Demo from '../../../components/guides/Demo.tsx'
-import * as Step from '../../../components/guides/steps'
+import { AddFunds } from '../../../components/guides/steps/payments/AddFunds.tsx'
+import { Connect } from '../../../components/guides/steps/auth/Connect.tsx'
+import { SendPayment } from '../../../components/guides/steps/payments/SendPayment.tsx'
 import { Cards, Card } from 'vocs'
 import { Tabs, Tab } from 'vocs'
 
@@ -16,9 +19,9 @@ Send stablecoin payments between accounts on Tempo. Payments can include optiona
 By the end of this guide you will be able to send payments on Tempo with an optional memo.
 
 <Demo.Container name="Send a Payment" footerVariant="source" src="tempoxyz/examples/tree/main/examples/payments">
-  <Step.Connect stepNumber={1} />
-  <Step.AddFunds stepNumber={2} />
-  <Step.SendPayment stepNumber={3} last />
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <SendPayment stepNumber={3} last />
 </Demo.Container>
 
 ## Steps
@@ -39,7 +42,7 @@ Before you can send a payment, you need to fund your account. In this guide you 
 The built-in Tempo testnet faucet funds accounts with `AlphaUSD`.
 
 <Demo.Container name="Add Funds" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd]}>
-  <Step.AddFunds stepNumber={1} last />
+  <AddFunds stepNumber={1} last />
 </Demo.Container>
 
 :::code-group
@@ -78,8 +81,8 @@ started quickly. For production, you will need to onramp & fund your account man
 Now that you have `AlphaUSD` you are ready to add logic to send a payment with an optional memo.
 
 <Demo.Container name="Send Payment" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd]}>
-  <Step.AddFunds stepNumber={1} />
-  <Step.SendPayment stepNumber={2} last />
+  <AddFunds stepNumber={1} />
+  <SendPayment stepNumber={2} last />
 </Demo.Container>
 
 :::code-group

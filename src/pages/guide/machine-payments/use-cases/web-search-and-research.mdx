@@ -1,0 +1,72 @@
+---
+title: Pay for Web Search and Research
+description: Let agents search the web, extract content, and crawl pages using MPP services like Parallel, Exa, Brave, and Firecrawl with stablecoin payments.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Pay for web search and research
+
+Give your agents access to web search, content extraction, and multi-hop research — pay per query with stablecoins on Tempo. No API keys, no monthly plans, no usage caps.
+
+## The problem
+
+Agents that research, summarize, or fact-check need reliable web search. But search APIs require developer accounts, billing setups, and API keys for every provider. Rate limits are tied to pricing tiers, and switching between providers means managing multiple integrations.
+
+## How MPP solves it
+
+With MPP, your agent pays per search query or page extraction in a single HTTP request. The agent discovers the price via the `402` Challenge, pays with a stablecoin transfer, and gets results — no signup required. Switch between search providers by changing the URL.
+
+**Tempo Charge** works well here: each search query is an independent request with a known price. The agent signs a TIP-20 transfer, the provider verifies it in ~500ms, and returns the results.
+
+## Available services
+
+| Provider | Capabilities | Service URL |
+|---|---|---|
+| [Parallel](https://parallelmpp.dev) | Web search, page extraction, multi-hop research | `parallelmpp.dev` |
+| [Exa](https://exa.mpp.tempo.xyz) | AI-powered search, content retrieval, answers | `exa.mpp.tempo.xyz` |
+| [Brave](https://brave.mpp.paywithlocus.com) | Web, news, images, videos, AI answers | `brave.mpp.paywithlocus.com` |
+| [Firecrawl](https://firecrawl.mpp.tempo.xyz) | Web scraping, crawling, structured extraction | `firecrawl.mpp.tempo.xyz` |
+| [Diffbot](https://diffbot.mpp.paywithlocus.com) | Article, product, and discussion extraction | `diffbot.mpp.paywithlocus.com` |
+| [Oxylabs](https://oxylabs.mpp.tempo.xyz) | Web scraping with geo-targeting and JS rendering | `oxylabs.mpp.tempo.xyz` |
+
+## Try it
+
+```bash
+# Install Tempo CLI + wallet
+curl -L https://tempo.xyz/install | bash && tempo add request && tempo wallet login
+
+# Search the web via Parallel
+tempo request parallelmpp.dev/search \
+  -d '{"query": "machine payments protocol"}'
+```
+
+## Prompt your agent
+
+```
+Use parallelmpp.dev to search the web via Tempo.
+Pay per query with stablecoins — no API key needed.
+```
+
+## Next steps
+
+<Cards>
+  <Card
+    icon="lucide:credit-card"
+    title="Accept one-time payments"
+    description="Build a payment-gated search API"
+    to="/guide/machine-payments/one-time-payments"
+  />
+  <Card
+    icon="lucide:bot"
+    title="Agent quickstart"
+    description="Set up your agent to discover and pay for services"
+    to="/guide/machine-payments/agent"
+  />
+  <Card
+    icon="lucide:globe"
+    title="Browse all services"
+    description="85+ MPP-enabled services in the directory"
+    to="https://mpp.dev/services"
+  />
+</Cards>

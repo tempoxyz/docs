@@ -12,17 +12,15 @@ const baseUrl = (() => {
 })()
 
 export default defineConfig({
-  banner: {
-    dismissable: false,
-    backgroundColor: '#5B4CDB',
-    content:
-      'Tempo Mainnet is live. [Read our announcement.](https://tempo.xyz/blog/mainnet) →',
-    height: '40px',
-    textColor: 'white',
-  },
+  // banner: {
+  //   dismissable: false,
+  //   backgroundColor: '#5B4CDB',
+  //   content: 'Your announcement here. [Learn more.](https://tempo.xyz) →',
+  //   height: '40px',
+  //   textColor: 'white',
+  // },
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
-  // TODO: Set back to true once tempoxyz/tempo#tip-1011 dead link is fixed
-  checkDeadlinks: 'warn',
+  checkDeadlinks: true,
   editLink: {
     link: 'https://github.com/tempoxyz/docs/edit/main/src/pages/:path',
     text: 'Suggest changes to this page',
@@ -43,10 +41,76 @@ export default defineConfig({
     ],
   },
   baseUrl: baseUrl || undefined,
-  ogImageUrl: (path, { baseUrl } = { baseUrl: '' }) =>
-    path === '/'
-      ? `${baseUrl}/og-docs.png`
-      : `${baseUrl}/api/og?title=%title&description=%description`,
+  ogImageUrl: (path, { baseUrl } = { baseUrl: '' }) => {
+    const landingPaths = ['/', '/learn', '/changelog']
+    if (landingPaths.includes(path)) return `${baseUrl}/og-docs.png`
+
+    const sectionMap: Record<string, string> = {
+      quickstart: 'INTEGRATE',
+      guide: 'BUILD',
+      protocol: 'PROTOCOL',
+      sdk: 'SDKs',
+      cli: 'CLI',
+      ecosystem: 'ECOSYSTEM',
+      learn: 'LEARN',
+      wallet: 'WALLET',
+      accounts: 'ACCOUNTS',
+    }
+
+    const subsectionMap: Record<string, string> = {
+      'use-accounts': 'ACCOUNTS',
+      payments: 'PAYMENTS',
+      issuance: 'ISSUANCE',
+      'stablecoin-dex': 'EXCHANGE',
+      'machine-payments': 'MACHINE PAY',
+      'tempo-transaction': 'TRANSACTIONS',
+      tip20: 'TIP-20',
+      'tip20-rewards': 'REWARDS',
+      tip403: 'TIP-403',
+      fees: 'FEES',
+      transactions: 'TRANSACTIONS',
+      blockspace: 'BLOCKSPACE',
+      exchange: 'DEX',
+      tips: 'TIPS',
+      node: 'NODE',
+      typescript: 'TYPESCRIPT',
+      go: 'GO',
+      foundry: 'FOUNDRY',
+      python: 'PYTHON',
+      rust: 'RUST',
+      stablecoins: 'STABLECOINS',
+      'use-cases': 'USE CASES',
+      tempo: 'TEMPO',
+      zones: 'ZONES',
+      'private-zones': 'PRIVATE ZONES',
+      upgrades: 'UPGRADES',
+      api: 'API',
+      guides: 'GUIDES',
+      rpc: 'RPC',
+      server: 'SERVER',
+      wagmi: 'WAGMI',
+    }
+
+    const segments = path.split('/').filter(Boolean)
+    const firstSeg = segments[0] || ''
+    const secondSeg = segments[1] || ''
+    const section = sectionMap[firstSeg] || firstSeg.toUpperCase().replace(/-/g, ' ')
+    const subsection =
+      segments.length >= 3 && subsectionMap[secondSeg]
+        ? subsectionMap[secondSeg]
+        : segments.length >= 3
+          ? secondSeg.toUpperCase().replace(/-/g, ' ')
+          : ''
+
+    const params = new URLSearchParams({
+      title: '%title',
+      description: '%description',
+      section,
+      ...(subsection ? { subsection } : {}),
+    })
+
+    return `${baseUrl}/api/og?${params.toString()}`
+  },
   // TODO: Change back to file paths (`/lockup-light.svg`, `/lockup-dark.svg`) once password protection is removed
   logoUrl: {
     light:
@@ -94,11 +158,19 @@ export default defineConfig({
                 link: '/guide/use-accounts',
               },
               {
-                text: 'Embed Passkey accounts',
+                text: 'Embed Tempo Wallet',
+                link: '/guide/use-accounts/embed-tempo-wallet',
+              },
+              {
+                text: 'Embed domain-bound Passkeys',
                 link: '/guide/use-accounts/embed-passkeys',
               },
               {
-                text: 'Connect to wallets',
+                text: 'Authorize access keys',
+                link: '/guide/use-accounts/authorize-access-keys',
+              },
+              {
+                text: 'Connect to other wallets',
                 link: '/guide/use-accounts/connect-to-wallets',
               },
               {
@@ -128,6 +200,10 @@ export default defineConfig({
                 link: '/guide/payments/transfer-memos',
               },
               {
+                text: 'Use virtual addresses',
+                link: '/guide/payments/virtual-addresses',
+              },
+              {
                 text: 'Pay fees in any stablecoin',
                 link: '/guide/payments/pay-fees-in-any-stablecoin',
               },
@@ -149,6 +225,40 @@ export default defineConfig({
               //   disabled: true,
               //   link: '/guide/payments/private-payments',
               // },
+            ],
+          },
+          {
+            text: 'Connect to Zones',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/guide/private-zones',
+              },
+              {
+                text: 'Connect to a zone',
+                link: '/guide/private-zones/connect-to-a-zone',
+              },
+              {
+                text: 'Deposit to a zone',
+                link: '/guide/private-zones/deposit-to-a-zone',
+              },
+              {
+                text: 'Send tokens within a zone',
+                link: '/guide/private-zones/send-tokens-within-a-zone',
+              },
+              {
+                text: 'Send tokens across zones',
+                link: '/guide/private-zones/send-tokens-across-zones',
+              },
+              {
+                text: 'Swap across zones',
+                link: '/guide/private-zones/swap-across-zones',
+              },
+              {
+                text: 'Withdraw from a zone',
+                link: '/guide/private-zones/withdraw-from-a-zone',
+              },
             ],
           },
           {
@@ -208,7 +318,7 @@ export default defineConfig({
             ],
           },
           {
-            text: 'Make Machine Payments',
+            text: 'Make Agentic Payments',
             collapsed: true,
             items: [
               {
@@ -238,6 +348,64 @@ export default defineConfig({
               {
                 text: 'Accept streamed payments',
                 link: '/guide/machine-payments/streamed-payments',
+              },
+              {
+                text: 'Use Cases',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Monetize Your API',
+                    link: '/guide/machine-payments/use-cases/monetize-your-api',
+                  },
+                  {
+                    text: 'AI Model Access',
+                    link: '/guide/machine-payments/use-cases/ai-model-access',
+                  },
+                  {
+                    text: 'Web Search & Research',
+                    link: '/guide/machine-payments/use-cases/web-search-and-research',
+                  },
+                  {
+                    text: 'Image & Media Generation',
+                    link: '/guide/machine-payments/use-cases/image-and-media-generation',
+                  },
+                  {
+                    text: 'Browser Automation',
+                    link: '/guide/machine-payments/use-cases/browser-automation',
+                  },
+                  {
+                    text: 'Compute & Code Execution',
+                    link: '/guide/machine-payments/use-cases/compute-and-code-execution',
+                  },
+                  {
+                    text: 'Storage',
+                    link: '/guide/machine-payments/use-cases/storage',
+                  },
+                  {
+                    text: 'Blockchain Data & Analytics',
+                    link: '/guide/machine-payments/use-cases/blockchain-data',
+                  },
+                  {
+                    text: 'Financial & Market Data',
+                    link: '/guide/machine-payments/use-cases/financial-data',
+                  },
+                  {
+                    text: 'Data Enrichment & Leads',
+                    link: '/guide/machine-payments/use-cases/data-enrichment-and-leads',
+                  },
+                  {
+                    text: 'Translation & Language',
+                    link: '/guide/machine-payments/use-cases/translation-and-language',
+                  },
+                  {
+                    text: 'Maps & Location Data',
+                    link: '/guide/machine-payments/use-cases/location-and-maps',
+                  },
+                  {
+                    text: 'Agent-to-Agent Services',
+                    link: '/guide/machine-payments/use-cases/agent-to-agent',
+                  },
+                ],
               },
             ],
           },
@@ -281,6 +449,20 @@ export default defineConfig({
           {
             text: 'Contract Verification',
             link: '/quickstart/verify-contracts',
+          },
+          {
+            text: 'Bridging',
+            collapsed: true,
+            items: [
+              {
+                text: 'Bridge via LayerZero',
+                link: '/guide/bridge-layerzero',
+              },
+              {
+                text: 'Bridge via Relay',
+                link: '/guide/bridge-relay',
+              },
+            ],
           },
           {
             text: 'Ecosystem',
@@ -346,8 +528,8 @@ export default defineConfig({
                 link: '/protocol/tip20/spec',
               },
               {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/TIP20.sol',
+                text: 'Virtual addresses',
+                link: '/protocol/tip20/virtual-addresses',
               },
               {
                 text: 'Rust Implementation',
@@ -382,10 +564,6 @@ export default defineConfig({
                 link: '/protocol/tip403/spec',
               },
               {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/TIP403Registry.sol',
-              },
-              {
                 text: 'Rust Implementation',
                 link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip403_registry',
               },
@@ -414,10 +592,6 @@ export default defineConfig({
                   {
                     text: 'Specification',
                     link: '/protocol/fees/spec-fee-amm',
-                  },
-                  {
-                    text: 'Reference Implementation',
-                    link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/FeeManager.sol',
                   },
                   {
                     text: 'Rust Implementation',
@@ -504,24 +678,77 @@ export default defineConfig({
                 link: '/protocol/exchange/exchange-balance',
               },
               {
-                text: 'Reference Implementation',
-                link: 'https://github.com/tempoxyz/tempo/blob/main/tips/ref-impls/src/stablecoinDex.sol',
+                text: 'Rust Implementation',
+                link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/stablecoin_dex',
+              },
+            ],
+          },
+          {
+            text: 'Tempo Zones',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/protocol/zones',
               },
               {
-                text: 'Rust Implementation',
-                link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/stablecoin_exchange',
+                text: 'Reference',
+                items: [
+                  {
+                    text: 'Architecture',
+                    link: '/protocol/zones/architecture',
+                  },
+                  {
+                    text: 'Accounts',
+                    link: '/protocol/zones/accounts',
+                  },
+                  {
+                    text: 'Bridging',
+                    link: '/protocol/zones/bridging',
+                  },
+                  {
+                    text: 'RPC',
+                    link: '/protocol/zones/rpc',
+                  },
+                  {
+                    text: 'Execution & Gas',
+                    link: '/protocol/zones/execution',
+                  },
+                  {
+                    text: 'Proving',
+                    link: '/protocol/zones/proving',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            text: 'Network Upgrades',
+            collapsed: true,
+            items: [
+              {
+                text: 'T3',
+                link: '/protocol/upgrades/t3',
+              },
+              {
+                text: 'T2 (Active)',
+                link: '/protocol/upgrades/t2',
               },
             ],
           },
           {
             text: 'TIPs',
-            link: '/protocol/tips',
+            link: 'https://tips.sh/',
           },
         ],
       },
       {
         text: 'Tempo Developer Tools',
         items: [
+          {
+            text: 'Accounts SDK',
+            link: '/accounts',
+          },
           {
             text: 'CLI',
             collapsed: true,
@@ -549,6 +776,10 @@ export default defineConfig({
             ],
           },
           {
+            text: 'RPC Reference',
+            link: '/protocol/rpc',
+          },
+          {
             text: 'SDKs',
             collapsed: true,
             items: [
@@ -573,32 +804,6 @@ export default defineConfig({
                     link: 'https://wagmi.sh/tempo',
                   },
                   {
-                    text: 'Server Reference',
-                    items: [
-                      {
-                        text: 'Handlers',
-                        items: [
-                          {
-                            text: 'Overview',
-                            link: '/sdk/typescript/server/handlers',
-                          },
-                          {
-                            text: 'compose',
-                            link: '/sdk/typescript/server/handler.compose',
-                          },
-                          {
-                            text: 'feePayer',
-                            link: '/sdk/typescript/server/handler.feePayer',
-                          },
-                          {
-                            text: 'keyManager',
-                            link: '/sdk/typescript/server/handler.keyManager',
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                  {
                     text: 'Prool Reference',
                     items: [
                       {
@@ -615,7 +820,21 @@ export default defineConfig({
               },
               {
                 text: 'Foundry',
-                link: '/sdk/foundry',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Overview',
+                    link: '/sdk/foundry',
+                  },
+                  {
+                    text: 'Use MPP with Foundry',
+                    link: '/sdk/foundry/mpp',
+                  },
+                  {
+                    text: 'Signature Verification',
+                    link: '/sdk/foundry/signature-verifier',
+                  },
+                ],
               },
               {
                 text: 'Python',
@@ -651,15 +870,53 @@ export default defineConfig({
           },
           {
             text: 'Running a validator',
-            link: '/guide/node/validator',
+            items: [
+              {
+                text: 'Overview',
+                link: '/guide/node/validator',
+              },
+              {
+                text: 'Validator Onboarding',
+                link: '/guide/node/validator-setup',
+              },
+              {
+                text: 'Checking validator status',
+                link: '/guide/node/validator-status',
+              },
+              {
+                text: 'Controlling validator lifecycle',
+                link: '/guide/node/validator-lifecycle',
+              },
+              {
+                text: 'Managing validator keys',
+                link: '/guide/node/validator-keys',
+              },
+              {
+                text: 'Monitoring a validator',
+                link: '/guide/node/validator-monitoring',
+              },
+              {
+                text: 'Troubleshooting and FAQ',
+                link: '/guide/node/validator-troubleshooting',
+              },
+            ],
           },
           {
-            text: 'Operating your validator',
-            link: '/guide/node/operate-validator',
+            text: 'Node Security',
+            link: '/guide/node/security',
           },
           {
             text: 'Network Upgrades and Releases',
-            link: '/guide/node/network-upgrades',
+            items: [
+              {
+                text: 'Upgrade Cadence',
+                link: '/guide/node/upgrade-cadence',
+              },
+              {
+                text: 'Upgrades and Releases',
+                link: '/guide/node/network-upgrades',
+              },
+            ],
           },
           {
             text: 'Changelog',
@@ -689,6 +946,251 @@ export default defineConfig({
       //   ],
       // },
     ],
+    '/accounts': {
+      backLink: true,
+      items: [
+        {
+          text: 'Accounts SDK',
+          items: [
+            {
+              text: 'Getting Started',
+              link: '/accounts',
+            },
+            {
+              text: 'Deploying to Production',
+              link: '/accounts/production',
+            },
+            {
+              text: 'FAQ',
+              link: '/accounts/faq',
+            },
+            {
+              text: 'GitHub',
+              link: 'https://github.com/tempoxyz/accounts',
+            },
+          ],
+        },
+        {
+          text: 'Guides',
+          items: [
+            {
+              text: 'Create & Use Accounts',
+              link: '/guide/use-accounts',
+              external: true,
+            },
+            {
+              text: 'Make Payments',
+              link: '/guide/payments',
+              external: true,
+            },
+            {
+              text: 'Sponsor Fees',
+              link: '/guide/payments/sponsor-user-fees',
+              external: true,
+            },
+            {
+              text: 'Issue Stablecoins',
+              link: '/guide/issuance',
+              external: true,
+            },
+            {
+              text: 'Exchange Stablecoins',
+              link: '/guide/stablecoin-dex',
+              external: true,
+            },
+          ],
+        },
+        {
+          text: 'Core',
+          items: [
+            {
+              text: 'Provider',
+              link: '/accounts/api/provider',
+            },
+            {
+              text: 'Adapters',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/accounts/api/adapters',
+                },
+                {
+                  text: 'dialog / tempoWallet',
+                  link: '/accounts/api/dialog',
+                },
+                {
+                  text: 'webAuthn',
+                  link: '/accounts/api/webAuthn',
+                },
+                {
+                  text: 'local',
+                  link: '/accounts/api/local',
+                },
+              ],
+            },
+            {
+              text: 'Dialog',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/accounts/api/dialogs',
+                },
+                {
+                  text: '.iframe',
+                  link: '/accounts/api/dialog.iframe',
+                },
+                {
+                  text: '.popup',
+                  link: '/accounts/api/dialog.popup',
+                },
+              ],
+            },
+            {
+              text: 'Expiry',
+              link: '/accounts/api/expiry',
+            },
+            {
+              text: 'WebAuthnCeremony',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/accounts/api/webauthnceremony',
+                },
+                {
+                  text: '.from',
+                  link: '/accounts/api/webauthnceremony.from',
+                },
+                {
+                  text: '.server',
+                  link: '/accounts/api/webauthnceremony.server',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          text: 'Wagmi',
+          items: [
+            {
+              text: 'Connectors',
+              collapsed: true,
+              items: [
+                {
+                  text: 'tempoWallet',
+                  link: '/accounts/wagmi/tempoWallet',
+                },
+                {
+                  text: 'webAuthn',
+                  link: '/accounts/wagmi/webAuthn',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          text: 'Server',
+          items: [
+            {
+              text: 'Handlers',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Overview',
+                  link: '/accounts/server',
+                },
+                {
+                  text: '.compose',
+                  link: '/accounts/server/handler.compose',
+                },
+                {
+                  text: '.feePayer',
+                  link: '/accounts/server/handler.feePayer',
+                },
+                {
+                  text: '.relay',
+                  link: '/accounts/server/handler.relay',
+                },
+                {
+                  text: '.webAuthn',
+                  link: '/accounts/server/handler.webAuthn',
+                },
+              ],
+            },
+            {
+              text: 'Kv',
+              link: '/accounts/server/kv',
+            },
+          ],
+        },
+        {
+          text: 'JSON-RPC',
+          items: [
+            {
+              text: 'wallet_connect 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_connect',
+            },
+            {
+              text: 'wallet_disconnect 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_disconnect',
+            },
+            {
+              text: 'wallet_authorizeAccessKey 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_authorizeAccessKey',
+            },
+            {
+              text: 'wallet_revokeAccessKey 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_revokeAccessKey',
+            },
+            {
+              text: 'wallet_getBalances 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_getBalances',
+            },
+            {
+              text: 'wallet_getCapabilities 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_getCapabilities',
+            },
+            {
+              text: 'wallet_getCallsStatus 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_getCallsStatus',
+            },
+            {
+              text: 'wallet_sendCalls 🚧',
+              disabled: true,
+              link: '/accounts/rpc/wallet_sendCalls',
+            },
+            {
+              text: 'eth_sendTransaction 🚧',
+              disabled: true,
+              link: '/accounts/rpc/eth_sendTransaction',
+            },
+            {
+              text: 'eth_sendTransactionSync 🚧',
+              disabled: true,
+              link: '/accounts/rpc/eth_sendTransactionSync',
+            },
+            {
+              text: 'eth_fillTransaction',
+              link: '/accounts/rpc/eth_fillTransaction',
+            },
+            {
+              text: 'personal_sign 🚧',
+              disabled: true,
+              link: '/accounts/rpc/personal_sign',
+            },
+          ],
+        },
+      ],
+    },
     '/learn': [
       {
         text: 'Home',
@@ -767,7 +1269,7 @@ export default defineConfig({
             link: '/learn/tempo/privacy',
           },
           {
-            text: 'Machine Payments',
+            text: 'Agentic Payments',
             link: '/learn/tempo/machine-payments',
           },
         ],
@@ -783,6 +1285,7 @@ export default defineConfig({
 
     { text: 'Ecosystem', link: 'https://tempo.xyz/ecosystem' },
     { text: 'Blog', link: 'https://tempo.xyz/blog' },
+    { text: 'Wallet', link: 'https://wallet.tempo.xyz' },
   ],
   redirects: [
     {
@@ -816,6 +1319,16 @@ export default defineConfig({
       destination: '/quickstart/integrate-tempo',
     },
     {
+      source: '/protocol/zones/overview',
+      destination: '/protocol/zones',
+      status: 301,
+    },
+    {
+      source: '/protocol/zones/privacy',
+      destination: '/protocol/zones/accounts',
+      status: 301,
+    },
+    {
       source: '/protocol/blockspace',
       destination: '/protocol/blockspace/overview',
     },
@@ -837,7 +1350,28 @@ export default defineConfig({
     },
     {
       source: '/sdk/typescript/server',
-      destination: '/sdk/typescript/server/handlers',
+      destination: '/accounts/server',
+      status: 301,
+    },
+    {
+      source: '/sdk/typescript/server/handlers',
+      destination: '/accounts/server',
+      status: 301,
+    },
+    {
+      source: '/sdk/typescript/server/handler.compose',
+      destination: '/accounts/server/handler.compose',
+      status: 301,
+    },
+    {
+      source: '/sdk/typescript/server/handler.feePayer',
+      destination: '/accounts/server/handler.relay',
+      status: 301,
+    },
+    {
+      source: '/sdk/typescript/server/handler.keyManager',
+      destination: '/accounts/server/handler.webAuthn',
+      status: 301,
     },
     {
       source: '/sdk/typescript/prool',
@@ -876,6 +1410,11 @@ export default defineConfig({
     {
       source: '/protocol/exchange/pathUSD',
       destination: '/protocol/exchange/quote-tokens#pathusd',
+      status: 301,
+    },
+    {
+      source: '/protocol/zones/overview',
+      destination: '/protocol/zones',
       status: 301,
     },
   ],

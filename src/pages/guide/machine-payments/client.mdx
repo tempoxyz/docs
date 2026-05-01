@@ -97,11 +97,11 @@ Mppx.create({
 
 ```ts [config.ts]
 import { createConfig, http } from 'wagmi'
-import { webAuthn } from 'wagmi/tempo'
 import { tempoModerato } from 'viem/chains'
+import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
-  connectors: [webAuthn()],
+  connectors: [tempoWallet()],
   chains: [tempoModerato],
   transports: {
     [tempoModerato.id]: http(),

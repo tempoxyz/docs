@@ -46,6 +46,7 @@ To verify a contract that's already deployed, use `forge verify-contract`:
 
 ```bash
 forge verify-contract \
+  --rpc-url $TEMPO_RPC_URL \
   --verifier-url https://contracts.tempo.xyz \
   <CONTRACT_ADDRESS> \
   src/MyContract.sol:MyContract
@@ -232,7 +233,7 @@ View the full API documentation at [contracts.tempo.xyz/docs](https://contracts.
 ## Troubleshooting
 
 :::tip
-If you encounter unexpected failures, you might be running an older version of Foundry/Forge, or you might not be running Tempo's Foundry fork. See the [Foundry setup guide](/sdk/foundry) for installation instructions.
+If you encounter unexpected failures, you might be running an older version of Foundry/Forge. See the [Foundry setup guide](/sdk/foundry) for installation instructions.
 :::
 
 ### Verification Failed

@@ -7,6 +7,16 @@ import { Toaster } from 'sonner'
 import GoogleAnalytics from '../components/GoogleAnalytics'
 import PostHogSetup from '../components/PostHogSetup'
 
+if (typeof window !== 'undefined') {
+  window.addEventListener('vite:preloadError', (event) => {
+    const key = `vite:preloadError:${(event as unknown as CustomEvent).detail?.message}`
+    if (!sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, '1')
+      window.location.reload()
+    }
+  })
+}
+
 export default function Layout(
   props: React.PropsWithChildren<{
     path: string
@@ -28,7 +38,7 @@ export default function Layout(
           },
         }}
       />
-      <SpeedInsights />
+      <SpeedInsights route={props.path} />
       <Analytics />
       <GoogleAnalytics />
       <PostHogSetup />
