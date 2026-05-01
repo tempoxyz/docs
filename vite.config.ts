@@ -118,6 +118,12 @@ function syncTips(): Plugin {
           /\(\.\/tip_template\.md\)/g,
           '(https://github.com/tempoxyz/tempo/blob/main/tips/tip_template.md)',
         )
+        // Rewrite relative inter-TIP links (`./tip-NNNN.md`) to absolute
+        // docs routes so the Vocs dead-link checker resolves them correctly.
+        content = content.replace(
+          /\(\.\/tip-(\d+)\.md\)/g,
+          '(/protocol/tips/tip-$1)',
+        )
         // Escape angle brackets outside of code blocks/inline code so MDX doesn't
         // treat them as JSX (e.g. `Mapping<B256, bool>` in prose).
         content = escapeAngleBrackets(content)
