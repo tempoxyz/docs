@@ -150,8 +150,18 @@ Now that we have some input fields, we need to add some logic to handle the subm
 
 After this step, your users will be able to create a stablecoin by clicking the "Create" button!
 
-:::warning
-We **strongly** recommend that for stablecoins, the `currency` field be set to the [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) three-letter code for the underlying fiat currency (e.g., `"USD"`, `"EUR"`, `"GBP"`) — **not** the token symbol. This value is **immutable** after token creation and affects fee payment eligibility, DEX routing, and quote token pairing. **Only `USD` stablecoins can be used to pay transaction fees on Tempo** — if your stablecoin is USD-denominated, the currency must be set to `"USD"` to be eligible for fee payment.
+:::danger[Critical — `currency` field is immutable]
+The `currency` field must be the [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) three-letter code for the token's **fiat denomination** (e.g., `"USD"`, `"EUR"`, `"GBP"`) — **not** the token symbol. This value **cannot be changed** after creation. A wrong value requires redeploying the token.
+
+**Only `USD` tokens can pay transaction fees on Tempo** — if your token is USD-denominated, `currency` must be `"USD"`.
+
+This applies to **all** USD-denominated tokens, including yield-bearing stablecoins and tokenized assets:
+- sUSDe, BUIDL, USDs → `currency: "USD"` (not `"sUSDe"`, `"BUIDL"`, etc.)
+- USDC, USDT, PYUSD → `currency: "USD"` (not the token symbol)
+
+For crypto-native assets like cbBTC or WETH, use the base asset code (e.g., `"BTC"`, `"ETH"`) — **not** `"USD"`.
+
+See the full [currency field reference](/protocol/tip20/overview#currency-declaration) for detailed examples.
 :::
 
 <Demo.Container name="Create Form">
