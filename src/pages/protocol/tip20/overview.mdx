@@ -153,8 +153,26 @@ The `currency` field represents the **denomination**, not the token itself — m
 | PYUSD         | `"USD"`          | `"PYUSD"`          |
 | EURC          | `"EUR"`          | `"EURC"`           |
 
+:::danger[Common Mistake — Non-Vanilla Stablecoins and Crypto-Native Assets]
+The `currency` field identifies the **fiat denomination** of the token, not the token itself or its underlying collateral. This is the most common deployment error — **5+ issuers have had to redeploy their tokens** due to incorrect `currency` values.
+
+**Yield-bearing stablecoins** (e.g., sUSDe, BUIDL, USDs) that are denominated in USD must still set `currency` to `"USD"` — not to their token symbol. The yield mechanism does not change the denomination.
+
+**Crypto-native assets** (e.g., cbBTC, WETH, stETH) that are **not** pegged to a fiat currency should use a **non-ISO-4217 identifier** that describes the asset class (e.g., `"BTC"`, `"ETH"`). Do **not** set `currency` to `"USD"` for a non-USD-denominated asset — doing so will cause incorrect DEX routing and pricing.
+
+| Token   | Backing / Peg           | Correct `currency` | Incorrect `currency` | Why                                                    |
+|---------|-------------------------|---------------------|----------------------|--------------------------------------------------------|
+| sUSDe   | Yield-bearing USD       | `"USD"`             | `"sUSDe"`            | Denominated in USD despite yield mechanics             |
+| BUIDL   | Tokenized T-bills (USD) | `"USD"`             | `"BUIDL"`            | Represents USD-denominated short-duration treasuries   |
+| USDs    | USD savings token       | `"USD"`             | `"USDs"`             | USD-denominated savings product                        |
+| cbBTC   | Wrapped Bitcoin         | `"BTC"`             | `"USD"` or `"cbBTC"` | Not a USD stablecoin — BTC-denominated                |
+| WETH    | Wrapped Ether           | `"ETH"`             | `"USD"` or `"WETH"` | Not a USD stablecoin — ETH-denominated                |
+
+**Rule of thumb:** ask "what fiat (or base crypto) currency is 1 unit of this token worth?" — that answer is your `currency` value.
+:::
+
 :::warning
-The currency code is **immutable** — it cannot be changed after token creation. An incorrect currency code will affect fee payment eligibility, DEX routing, and quote token pairing.
+The currency code is **immutable** — it cannot be changed after token creation. An incorrect currency code will affect fee payment eligibility, DEX routing, and quote token pairing. **A wrong value requires redeploying the token.**
 :::
 
 ### DEX Quote Tokens
