@@ -1106,6 +1106,10 @@ export default defineConfig({
                   link: '/accounts/server/handler.compose',
                 },
                 {
+                  text: '.exchange',
+                  link: '/accounts/server/handler.exchange',
+                },
+                {
                   text: '.feePayer',
                   link: '/accounts/server/handler.feePayer',
                 },
