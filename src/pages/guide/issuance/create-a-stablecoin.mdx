@@ -151,15 +151,11 @@ Now that we have some input fields, we need to add some logic to handle the subm
 After this step, your users will be able to create a stablecoin by clicking the "Create" button!
 
 :::danger[Critical — `currency` field is immutable]
-The `currency` field must be the [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) three-letter code for the token's **fiat denomination** (e.g., `"USD"`, `"EUR"`, `"GBP"`) — **not** the token symbol. This value **cannot be changed** after creation. A wrong value requires redeploying the token.
+The `currency` value **cannot be changed** after token creation. A wrong value requires redeploying the token.
 
-**Only `USD` tokens can pay transaction fees on Tempo** — if your token is USD-denominated, `currency` must be `"USD"`.
-
-This applies to **all** USD-denominated tokens, including yield-bearing stablecoins and tokenized assets:
-- sUSDe, BUIDL, USDs → `currency: "USD"` (not `"sUSDe"`, `"BUIDL"`, etc.)
-- USDC, USDT, PYUSD → `currency: "USD"` (not the token symbol)
-
-For crypto-native assets like cbBTC or WETH, use the base asset code (e.g., `"BTC"`, `"ETH"`) — **not** `"USD"`.
+- **Vanilla 1:1 fiat stablecoins** (USDC, USDT, PYUSD, EURC): use the [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) fiat code → `"USD"`, `"EUR"`, etc. **Only `USD` tokens can pay transaction fees on Tempo.**
+- **Yield-bearing stablecoins & tokenized assets** (sUSDe, BUIDL, USDs): use the **token's own ticker** → `"sUSDe"`, `"BUIDL"`, `"USDs"`. Do **not** use `"USD"`.
+- **Crypto-native assets** (cbBTC, WETH): use the **token's own ticker** → `"cbBTC"`, `"WETH"`. Do **not** use `"USD"`.
 
 See the full [currency field reference](/protocol/tip20/overview#currency-declaration) for detailed examples.
 :::
