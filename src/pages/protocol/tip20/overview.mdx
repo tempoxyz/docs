@@ -130,28 +130,31 @@ TIP-20 supports an opt-in [reward distribution system](/protocol/tip20-rewards/o
 
 ### Currency Declaration
 
-A TIP-20 token can declare a currency identifier (e.g., `"USD"`, `"EUR"`) that identifies the real-world asset backing the token. This enables proper routing and pricing in Tempo's [Stablecoin DEX](/protocol/exchange). **Only `USD`-denominated stablecoins can be used to pay transaction fees on Tempo.** USD-denominated TIP-20 tokens also serve as quote tokens in the DEX.
+A TIP-20 token can declare a currency identifier that identifies the reference asset whose price the token is designed to track. This enables proper routing and pricing in Tempo's [Stablecoin DEX](/protocol/exchange). Currently, **only `USD`-denominated stablecoins** can be used to pay transaction fees on Tempo or traded on the StablecoinDEX.
 
-Stablecoin currency identifiers should be [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) three-letter currency codes. Common examples include:
+#### General principle
 
-| Code  | Currency               |
-|-------|------------------------|
-| `USD` | United States Dollar   |
-| `EUR` | Euro                   |
-| `GBP` | British Pound Sterling |
-| `JPY` | Japanese Yen           |
-| `SGD` | Singapore Dollar       |
-| `BRL` | Brazilian Real         |
-| `AED` | UAE Dirham             |
+**The `currency` field identifies the reference asset that 1 unit of the token is designed to be worth** — not what the token is called or what it is denominated in. Two tokens that track the same asset should have the same `currency`. When in doubt, consider that the purpose of this field is to determine what assets a token would trade against on a DEX designed for assets that trade within 2% of a 1:1 price.
 
-The `currency` field represents the **denomination**, not the token itself — multiple tokens can share the same currency code:
+#### Guidelines
 
-| Token         | Correct `currency` | Incorrect `currency` |
-|---------------|---------------------|----------------------|
-| USDC          | `"USD"`          | `"USDC"`           |
-| USDT          | `"USD"`          | `"USDT"`          |
-| PYUSD         | `"USD"`          | `"PYUSD"`          |
-| EURC          | `"EUR"`          | `"EURC"`           |
+1. **Tokens that track an asset with an [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) code** — use that code. This includes fiat currencies (`"USD"`, `"EUR"`) as well as commodities (`"XAU"` for gold, `"XAG"` for silver).
+2. **Tokens tracking a non-ISO asset at 1:1** — use the symbol of the reference asset. For example, a bridged WBTC that tracks BTC should use `"BTC"`; a bridged WETH that tracks ETH should use `"ETH"`. Prefer `"BTC"` over `"XBT"`. Use the symbol from the asset's origin chain when there is ambiguity across platforms.
+3. **Tokens denominated in but not pegged to a currency** — do **not** use that currency's code. A tokenized gold product priced in USD should not use `"USD"`, because 1 unit is not designed to be worth 1 USD.
+4. **Tokens with no reference asset** — if a token does not track any external asset (e.g. a governance or utility token), use its own symbol as the currency.
+
+#### Examples
+
+| Token | Tracks | `currency` |
+|-------|--------|------------|
+| USDC | US Dollar | `"USD"` |
+| USDT | US Dollar | `"USD"` |
+| EURC | Euro | `"EUR"` |
+| Bridged WBTC | Bitcoin | `"BTC"` |
+| Bridged stETH | Ether | `"ETH"` |
+| Bridged wstETH | Wrapped staked Ether | `"wstETH"` |
+| Tokenized gold (priced in USD) | Gold | `"XAU"` |
+| Governance token (e.g. UNI) | Itself | `"UNI"` |
 
 :::warning
 The currency code is **immutable** — it cannot be changed after token creation. An incorrect currency code will affect fee payment eligibility, DEX routing, and quote token pairing.

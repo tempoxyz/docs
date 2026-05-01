@@ -453,7 +453,7 @@ Recipient-bearing TIP-20 paths — `transfer`, `transferFrom`, `transferWithMemo
 Virtual addresses are valid TIP-20 recipients on those paths but remain forwarding aliases rather than canonical TIP-20 holders. Non-TIP-20 tokens sent to a virtual address do not forward. Forwarded deposits appear as two-hop standard `Transfer` events in the same transaction; indexers and explorers should collapse that pair into one logical deposit to the resolved master wallet.
 
 ## Currencies and Quote Tokens
-Each TIP-20 token declares a currency identifier and a corresponding `quoteToken` used for pricing and routing in the Stablecoin DEX. Stablecoin currency identifiers should be [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) three-letter codes representing the underlying fiat currency (e.g., `"USD"`, `"EUR"`, `"GBP"`) — not the token's own symbol. The currency is set at token creation and **cannot be changed afterward**. **Only tokens with `currency == "USD"` are eligible for paying transaction fees.** Tokens with `currency == "USD"` must pair with a USD-denominated TIP-20 token.
+Each TIP-20 token declares a [currency identifier](/protocol/tip20/overview#currency-declaration) and a corresponding `quoteToken` used for pricing and routing in the Stablecoin DEX. The currency is set at token creation and **cannot be changed afterward**. **Only tokens with `currency == "USD"` are eligible for paying transaction fees.** Tokens with `currency == "USD"` must pair with a USD-denominated TIP-20 token.
 
 Updating the quote token occurs in two phases:
 1. `setNextQuoteToken` stages a new quote token.
@@ -517,7 +517,7 @@ interface ITIP20Factory {
     /// @notice Creates and deploys a new TIP-20 token
     /// @param name The token's ERC-20 name
     /// @param symbol The token's ERC-20 symbol
-    /// @param currency The token's ISO 4217 currency code (e.g. "USD", "EUR"). Immutable after creation.
+    /// @param currency The token's currency identifier (ISO 4217 code, when available). Immutable after creation. See Currency Declaration (https://docs.tempo.xyz/protocol/tip20/overview#currency-declaration).
     /// @param quoteToken The TIP-20 quote token used for exchange pricing
     /// @param admin The address to receive DEFAULT_ADMIN_ROLE on the new token
     /// @param salt A unique salt for deterministic address derivation
