@@ -102,14 +102,12 @@ export default defineConfig({
           ? secondSeg.toUpperCase().replace(/-/g, ' ')
           : ''
 
-    const params = new URLSearchParams({
-      title: '%title',
-      description: '%description',
+    const extra = new URLSearchParams({
       section,
       ...(subsection ? { subsection } : {}),
-    })
+    }).toString()
 
-    return `${baseUrl}/api/og?${params.toString()}`
+    return `${baseUrl}/api/og?title=%title&description=%description&${extra}`
   },
   // TODO: Change back to file paths (`/lockup-light.svg`, `/lockup-dark.svg`) once password protection is removed
   logoUrl: {
