@@ -2,7 +2,6 @@
 import * as React from 'react'
 import { isAddress, isHash } from 'viem'
 import { tempo } from 'viem/chains'
-import LucideExternalLink from '~icons/lucide/external-link'
 import { Container } from './Container'
 import { Button } from './guides/Demo'
 import { type QueryResponse, runTidxQuery } from './lib/Tidx'
@@ -173,7 +172,7 @@ export function TidxQuery(props: TidxQueryProps) {
   const [signatures, setSignatures] = React.useState<string[]>(resolvedSignatures)
   const [result, setResult] = React.useState<QueryResult | null>(null)
   const [error, setError] = React.useState<string | null>(null)
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [isLoading, startQueryTransition] = React.useTransition()
 
   const selectedSignatureInfos = React.useMemo(() => {
     return signatures
@@ -214,58 +213,40 @@ export function TidxQuery(props: TidxQueryProps) {
     setSignatures(resolvedSignatures)
   }, [resolvedSignatures])
 
-  const handleRunQuery = async () => {
-    const queryToRun = query.trim()
+  const runQuery = React.useCallback(
+    (nextQuery: string) => {
+      const queryToRun = nextQuery.trim()
 
-    if (!queryToRun) {
-      setError('Please enter a SQL query')
-      return
-    }
-
-    setIsLoading(true)
-    setError(null)
-    setResult(null)
-
-    try {
-      const options = {
-        chainId: props.chainId,
-        ...(signatures.length > 0 ? { signatures } : {}),
-      }
-      const queryResult = await runTidxQuery(queryToRun, options)
-      setResult(queryResult)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-      e.preventDefault()
-      const queryToRun = queryRef.current.trim()
       if (!queryToRun) {
         setError('Please enter a SQL query')
         return
       }
 
-      setIsLoading(true)
-      setError(null)
-      setResult(null)
+      startQueryTransition(async () => {
+        setError(null)
+        setResult(null)
 
-      runTidxQuery(queryToRun, {
-        chainId: props.chainId,
-        ...(signatures.length > 0 ? { signatures } : {}),
-      })
-        .then((queryResult) => {
+        try {
+          const options = {
+            chainId: props.chainId,
+            ...(signatures.length > 0 ? { signatures } : {}),
+          }
+          const queryResult = await runTidxQuery(queryToRun, options)
           setResult(queryResult)
-        })
-        .catch((err) => {
+        } catch (err) {
           setError(err instanceof Error ? err.message : 'Unknown error occurred')
-        })
-        .finally(() => {
-          setIsLoading(false)
-        })
+        }
+      })
+    },
+    [props.chainId, signatures],
+  )
+
+  const handleRunQuery = () => runQuery(query)
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault()
+      runQuery(queryRef.current)
     }
   }
 
@@ -284,19 +265,8 @@ export function TidxQuery(props: TidxQueryProps) {
     >
       <div className="space-y-4">
         {props.signatures ? (
-          <div className="space-y-2">
-            <div className="flex items-center gap-1.5 text-[13px] text-gray11">
-              Signatures
-              <a
-                href="https://github.com/tempoxyz/tidx.ts"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray9 transition-colors hover:text-gray11"
-              >
-                <LucideExternalLink className="size-3" />
-              </a>
-            </div>
-            <div className="flex flex-wrap gap-1">
+          <div className="flex w-full items-center space-y-2">
+            <div className="flex w-full flex-wrap gap-1">
               {selectedSignatureInfos.map((sigInfo) => {
                 const isEvent = sigInfo.type === 'event'
                 return (
@@ -309,10 +279,11 @@ export function TidxQuery(props: TidxQueryProps) {
                         isEvent ? 'bg-blue9' : 'bg-purple9'
                       }`}
                     />
-                    <span className="max-w-[300px] truncate text-gray11">{sigInfo.name}</span>
+                    <span className="max-w-75 truncate text-gray11">{sigInfo.name}</span>
                   </div>
                 )
               })}
+              <p className="ml-auto flex items-center gap-1.5 text-[13px] text-gray11">SQL Query</p>
             </div>
           </div>
         ) : (
@@ -320,17 +291,6 @@ export function TidxQuery(props: TidxQueryProps) {
         )}
 
         <div className="space-y-2">
-          <label htmlFor="sql-query" className="flex items-center gap-1.5 text-[13px] text-gray11">
-            SQL Query
-            <a
-              href="https://github.com/tempoxyz/tidx.ts"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray9 transition-colors hover:text-gray11"
-            >
-              <LucideExternalLink className="size-3" />
-            </a>
-          </label>
           <SqlEditor
             value={query}
             onChange={handleQueryChange}

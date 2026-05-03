@@ -17,6 +17,12 @@ export function SignatureSelector(props: SignatureSelectorProps) {
 
   const allSignatures = React.useMemo(() => getAllSignatures(), [])
 
+  const handleClickOutside = React.useEffectEvent((event: MouseEvent) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      setIsOpen(false)
+    }
+  })
+
   const filteredSignatures = React.useMemo(() => {
     let signatures = allSignatures
 
@@ -55,12 +61,6 @@ export function SignatureSelector(props: SignatureSelectorProps) {
 
   React.useEffect(() => {
     if (!isOpen) return
-
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
@@ -115,7 +115,7 @@ export function SignatureSelector(props: SignatureSelectorProps) {
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => !disabled && setIsOpen(true)}
             placeholder={placeholderText}
-            className="h-[34px] w-full rounded-lg border border-gray4 px-3 text-[13px] focus:outline-none focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-8.5 w-full rounded-lg border border-gray4 px-3 text-[13px] focus:outline-none focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-50"
             disabled={disabled}
           />
           {value.length > 0 && !disabled && (
@@ -131,7 +131,7 @@ export function SignatureSelector(props: SignatureSelectorProps) {
       </div>
 
       {isOpen && (
-        <div className="absolute z-10 mt-1 max-h-[400px] w-full overflow-y-auto rounded-lg border border-gray4 bg-gray1 shadow-lg">
+        <div className="absolute z-10 mt-1 max-h-100 w-full overflow-y-auto rounded-lg border border-gray4 bg-gray1 shadow-lg">
           {Object.keys(groupedSignatures).length === 0 ? (
             <div className="px-3 py-4 text-center text-[13px] text-gray9">No signatures found</div>
           ) : (
@@ -159,7 +159,7 @@ export function SignatureSelector(props: SignatureSelectorProps) {
                         {sig.signature}
                       </span>
                       <span
-                        className={`ml-auto flex h-[16px] shrink-0 items-center justify-center rounded px-1.5 text-center font-medium text-[9px] uppercase leading-none tracking-[2%] ${
+                        className={`ml-auto flex h-4 shrink-0 items-center justify-center rounded px-1.5 text-center font-medium text-[9px] uppercase leading-none tracking-[2%] ${
                           sig.type === 'event' ? 'bg-blue3 text-blue9' : 'bg-purple3 text-purple9'
                         }`}
                       >
@@ -219,9 +219,7 @@ export function SignatureSelector(props: SignatureSelectorProps) {
                           isEvent ? 'bg-blue9' : 'bg-purple9'
                         }`}
                       />
-                      <span className="max-w-[300px] truncate text-gray11">
-                        {sigInfo?.name || sig}
-                      </span>
+                      <span className="max-w-75 truncate text-gray11">{sigInfo?.name || sig}</span>
                       {!disabled && (
                         <button
                           type="button"
