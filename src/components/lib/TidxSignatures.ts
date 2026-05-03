@@ -1,26 +1,27 @@
 import type { Abi, AbiEvent, AbiFunction } from 'abitype'
+import type { Tidx } from 'tidx.ts'
 import { Abis } from 'viem/tempo'
 
 export type SignatureInfo = {
-  signature: string
+  signature: Tidx.Signature
   name: string
   contract: string
   type: 'event' | 'function'
 }
 
-function formatEventSignature(event: AbiEvent): string {
+function formatEventSignature(event: AbiEvent): Tidx.Signature {
   const params = event.inputs
     .map((input) => {
       const indexed = input.indexed ? ' indexed' : ''
       return `${input.type}${indexed} ${input.name || ''}`
     })
     .join(', ')
-  return `${event.name}(${params})`
+  return `event ${event.name}(${params})`
 }
 
-function formatFunctionSignature(fn: AbiFunction): string {
+function formatFunctionSignature(fn: AbiFunction): Tidx.Signature {
   const inputs = fn.inputs.map((input) => `${input.type} ${input.name || ''}`).join(', ')
-  return `${fn.name}(${inputs})`
+  return `function ${fn.name}(${inputs})`
 }
 
 function extractSignaturesFromAbi(abi: Abi, contractName: string): SignatureInfo[] {
@@ -64,23 +65,6 @@ export function getAllSignatures(): SignatureInfo[] {
   }
 
   return allSignatures
-}
-
-export function getSignaturesByContract(): Record<string, SignatureInfo[]> {
-  const allSignatures = getAllSignatures()
-  const byContract: Record<string, SignatureInfo[]> = {}
-
-  for (const sig of allSignatures) {
-    if (!byContract[sig.contract]) {
-      byContract[sig.contract] = []
-    }
-    const contractSigs = byContract[sig.contract]
-    if (contractSigs) {
-      contractSigs.push(sig)
-    }
-  }
-
-  return byContract
 }
 
 export function extractParameterNames(signature: string): string[] {

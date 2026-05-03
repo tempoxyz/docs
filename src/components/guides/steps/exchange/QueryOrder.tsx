@@ -11,7 +11,7 @@ export function QueryOrder(props: DemoStepProps) {
   const { stepNumber, last = false } = props
   const { getData } = useDemoContext()
   const [hasQueried, setHasQueried] = React.useState(false)
-  const [isQuerying, setIsQuerying] = React.useState(false)
+  const [isQuerying, startQueryTransition] = React.useTransition()
 
   const orderId = getData('orderId')
 
@@ -27,19 +27,16 @@ export function QueryOrder(props: DemoStepProps) {
   React.useEffect(() => {
     if (!orderId) {
       setHasQueried(false)
-      setIsQuerying(false)
     }
   }, [orderId])
 
-  const active = React.useMemo(() => {
-    return !!orderId
-  }, [orderId])
+  const active = !!orderId
 
-  const handleQuery = async () => {
-    setIsQuerying(true)
-    await refetch()
-    setHasQueried(true)
-    setIsQuerying(false)
+  const handleQuery = () => {
+    startQueryTransition(async () => {
+      await refetch()
+      setHasQueried(true)
+    })
   }
 
   return (
