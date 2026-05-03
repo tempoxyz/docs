@@ -10,24 +10,6 @@ Integrating with Tempo is easy by leveraging services provided by our infrastruc
 
 <Cards>
   <Card
-    description="Move assets to and from Tempo with cross-chain bridges"
-    to="#bridges"
-    icon="lucide:arrow-left-right"
-    title="Bridges"
-  />
-  <Card
-    description="Transaction scanning, threat detection, and compliance infrastructure for Tempo applications"
-    to="#security--compliance"
-    icon="lucide:shield-check"
-    title="Security & Compliance"
-  />
-  <Card
-    description="Move money globally between local currencies and stablecoins. Issue, transfer, and manage stablecoins"
-    to="#orchestration"
-    icon="lucide:workflow"
-    title="Orchestration"
-  />
-  <Card
     description="Query blockchain data with indexers, analytics platforms, and monitoring tools"
     to="#data--analytics"
     icon="lucide:bar-chart"
@@ -40,7 +22,7 @@ Integrating with Tempo is easy by leveraging services provided by our infrastruc
     title="Block Explorers"
   />
   <Card
-    description="Integrate user-friendly wallet experiences directly into your application"
+    description="Embedded, custodial, and non-custodial wallet infrastructure for Tempo"
     to="#wallets"
     icon="lucide:wallet"
     title="Wallets"
@@ -56,6 +38,24 @@ Integrating with Tempo is easy by leveraging services provided by our infrastruc
     to="#node-infrastructure"
     icon="lucide:server"
     title="Node Infrastructure"
+  />
+  <Card
+    description="Move assets to and from Tempo with cross-chain bridges"
+    to="#bridges"
+    icon="lucide:arrow-left-right"
+    title="Bridges"
+  />
+  <Card
+    description="DEX aggregation and swap infrastructure for Tempo"
+    to="#exchange-infrastructure"
+    icon="lucide:repeat"
+    title="Exchange Infrastructure"
+  />
+  <Card
+    description="Financial infrastructure for AI agents on Tempo"
+    to="#agentic-infrastructure"
+    icon="lucide:bot"
+    title="Agentic Infrastructure"
   />
   <Card
     description="Build on Tempo with official SDKs for TypeScript, Go, Foundry, and Rust"
@@ -75,9 +75,15 @@ Bridge assets to Tempo through the [Across app](https://app.across.to/) and expl
 
 ### Bungee
 
-[Bungee](https://bungee.exchange) enables seamless swaps within and between blockchains. Bungee aggregates bridge and DEX liquidity to deliver fast, cost-efficient cross-chain transfers and swaps to and from Tempo — with a simple integration path via widget or API.
+[Bungee](https://bungee.exchange) enables seamless swaps within and between blockchains. Bungee aggregates bridge and DEX liquidity to deliver fast, cost-efficient cross-chain transfers and swaps to and from Tempo, with a simple integration path via widget or API.
 
 Get started with the [Bungee docs](https://docs.bungee.exchange/) or try the [Bungee app](https://bungee.exchange).
+
+### LayerZero
+
+[LayerZero](https://layerzero.network) is an omnichain interoperability protocol that enables secure, low-level message passing between blockchains. Stargate is the global interface for value movement onchain. Within Tempo, Stargate enables native, 1&#58;1 asset transfers into and out of the ecosystem.
+
+Transfer assets to Tempo with [Stargate](https://stargate.finance/).
 
 ### Relay
 
@@ -87,15 +93,15 @@ Bridge to Tempo through the [Relay app](https://relay.link) and explore the [Rel
 
 ### Squid
 
-[Squid](https://www.squidrouter.com) enables cross-chain swaps and bridging in a single transaction. Squid's intent-based routing engine aggregates DEXs, bridges, and market makers to find the optimal path for moving assets to and from Tempo — with sub-second execution and zero fees on stablecoin swaps. Developers can integrate cross-chain functionality via a REST API, TypeScript SDK, or drop-in widget.
+[Squid](https://www.squidrouter.com) provides intent-based cross-chain routing and execution from any token on any supported chain to any token on Tempo. Squid aggregates DEXs, bridges, and market makers to deliver optimal routes with sub-5s execution. Developers can integrate via API, SDK, or widget.
 
-Get started with the [Squid docs](https://docs.squidrouter.com/) or try the [bridge app](https://app.squidrouter.com/).
+Start swapping on the [Squid app](https://app.squidrouter.com/) or explore the [Squid docs](https://docs.squidrouter.com/).
 
 ## Data & Analytics
 
 ### Allium
 
-[Allium](https://www.allium.so) is an enterprise blockchain data platform that delivers real-time, analytics-ready datasets through a unified schema across chains. Developers can fetch wallet, token, and price data in milliseconds without managing infrastructure, decoding raw data, or inferring transactions—making it easy to focus on building Tempo applications.
+[Allium](https://www.allium.so) is an enterprise blockchain data platform that delivers real-time, analytics-ready datasets through a unified schema across chains. Developers can fetch wallet, token, and price data in milliseconds without managing infrastructure, decoding raw data, or inferring transactions, making it easy to focus on building Tempo applications.
 
 Get access to Tempo data through the [Allium App](https://app.allium.so/join), explore the full API in the [Allium docs](https://docs.allium.so/), and browse real examples of production apps built on Allium [here](https://docs.allium.so/api/developer/overview).
 
@@ -119,7 +125,7 @@ Chainlink supports Tempo through:
 
 - **Cross-Chain Interoperability Protocol (CCIP):** A secure interoperability layer for sending messages and value across chains, enabling cross-chain user flows and multi-chain architectures.  
 Explore CCIP in the [Chainlink CCIP docs](https://docs.chain.link/ccip).
-- **Data Streams:** Chainlink Data Streams delivers low-latency market data offchain, which can be verified onchain. This pull-based design gives dApps on-demand access to high-frequency market data backed by decentralized, fault-tolerant, and transparent infrastructure—an improvement over traditional push-based oracles that update only at fixed intervals or price thresholds.  
+- **Data Streams:** Chainlink Data Streams delivers low-latency market data offchain, which can be verified onchain. This pull-based design gives dApps on-demand access to high-frequency market data backed by decentralized, fault-tolerant, and transparent infrastructure (an improvement over traditional push-based oracles that update only at fixed intervals or price thresholds).  
 View the Chainlink Data Stream deployed on Tempo [here](https://explore.tempo.xyz/address/0x72790f9eB82db492a7DDb6d2af22A270Dcc3Db64?tab=contract).
 
 Developers can explore CCIP, Data Streams, and the full Chainlink platform through the [Chainlink Developer Docs](https://docs.chain.link/).
@@ -132,9 +138,11 @@ Get started with the [Codex docs](https://docs.codex.io), explore the API with t
 
 ### CoinGecko
 
-[CoinGecko](https://www.coingecko.com) provides comprehensive cryptocurrency market data, including prices, trading volume, market capitalization, and token metadata. Developers can use the CoinGecko API to access Tempo token data for building dashboards, portfolio trackers, and analytics tools.
+[CoinGecko](https://www.coingecko.com) is the world's largest independent crypto data aggregator. Developers building on Tempo can integrate CoinGecko's unified API to enrich stablecoin applications with real-time price feeds, token metadata, DEX pool activity, and market context. Stablecoins issued on Tempo appear across CoinGecko's market data endpoints and the [GeckoTerminal](https://www.geckoterminal.com) onchain analytics platform.
 
-Get started with the [CoinGecko API](https://docs.coingecko.com/reference/introduction).
+Beyond REST endpoints, CoinGecko data is also accessible through WebSocket streaming, an MCP Server for AI agent integrations, and x402 endpoints for keyless, pay-per-use data access using stablecoin micropayments.
+
+Get started by creating a free [Demo API key](https://www.coingecko.com/en/api) and explore the [API documentation](https://docs.coingecko.com/reference/introduction).
 
 ### Goldsky
 
@@ -147,7 +155,7 @@ Start indexing Tempo [here](https://goldsky.com/chains/tempo).
 
 ### Range
 
-[Range](https://www.range.org) powers the Stablecoin Explorer, which provides a unified view of major stablecoins across 100+ chains. Tempo is fully supported, allowing developers and users to trace stablecoin flows in a way traditional explorers cannot.
+[Range](https://www.range.org) powers the Stablecoin Explorer, which provides a unified view of major stablecoins across chains. Tempo is fully supported, allowing developers and users to trace stablecoin flows in a way traditional explorers cannot.
 
 Range stands out through:
 - **Complete cross-chain visibility**, showing the entire lifecycle of a transfer in one place  
@@ -164,21 +172,17 @@ Explore the available Push data feeds [here](https://app.redstone.finance/push-f
 
 ### SonarX
 
-[SonarX](https://www.sonarx.com) delivers standardized, auditable on-chain data built for institutional confidence and enterprise integration. SonarX provides indexed Tempo data from genesis to tip through instant data shares on Snowflake, Databricks, and BigQuery, as well as real-time streaming and REST APIs — all backed by a robust data quality framework and SOC 2 compliance.
+[SonarX](https://www.sonarx.com) is an institutional-grade blockchain data infrastructure platform trusted by leading financial institutions, custodians, and Web3 teams. SonarX delivers structured, historical, and real-time on-chain data backed by a proprietary Data Quality Framework and SOC 2-certified controls.
 
-Start a trial at [sonarx.com](https://www.sonarx.com/trial) and explore the [SonarX docs](https://docs.sonarx.com/).
+SonarX provides full Tempo coverage from genesis, including a Full Historical Stream Dataset for deep archival analysis and a Real-Time Dataset for live monitoring, payment validation, and trading applications. Data is available via Snowflake, Databricks, BigQuery, Kafka streams, real-time APIs, or custom file drops.
+
+Request a data trial on the [SonarX platform](https://www.sonarx.com/trial) and explore the [SonarX docs](https://docs.sonarx.com/).
 
 ### SQD
 
 [SQD](https://sqd.ai) is a decentralized query engine and high-performance indexing toolkit for extracting and transforming on-chain data. With the Squid SDK, developers can build custom indexers for Tempo that are up to 100x faster than direct RPC indexing, with data served through the SQD Network's decentralized data layer.
 
 Get started with the [SQD docs](https://docs.sqd.ai/) and deploy indexers via [SQD Cloud](https://app.subsquid.io/).
-
-### Zerion
-
-[Zerion](https://zerion.io/api) provides an enterprise-grade wallet data API that delivers portfolio balances, transaction history, DeFi positions, PnL tracking, and real-time webhooks — including Tempo — through a single unified interface. Developers can add comprehensive blockchain data to their applications without running any indexing infrastructure.
-
-Get a free API key from the [Zerion dashboard](https://dashboard.zerion.io/) and explore the [API documentation](https://developers.zerion.io/reference/authentication).
 
 ## Block Explorers
 
@@ -188,7 +192,7 @@ Tempo's official Mainnet block explorer is available at [explore.tempo.xyz](http
 
 ### Tenderly
 
-[Tenderly](https://tenderly.co) delivers full-stack observability, debugging, and simulation tools for Tempo smart contract development and monitoring. With Tenderly you get real-time error tracking, EVM-level tracing, and off-chain transaction simulation — enabling you to catch bugs, analyze reverts, and inspect gas usage before transactions go live.
+[Tenderly](https://tenderly.co) delivers full-stack observability, debugging, and simulation tools for Tempo smart contract development and monitoring. With Tenderly you get real-time error tracking, EVM-level tracing, and off-chain transaction simulation, enabling you to catch bugs, analyze reverts, and inspect gas usage before transactions go live.
 
 You can enable Tempo in the [Tenderly Dashboard](https://dashboard.tenderly.co/) to use its tracing, alerts, and debugging tools with no infrastructure to manage.
 
@@ -233,7 +237,15 @@ You can get started now. Simply [create](https://docs.privy.io/wallets/wallets/c
 Check out the [Tempo + Privy recipe](https://docs.privy.io/recipes/evm/tempo) and Privy's [example](https://github.com/privy-io/examples/tree/main/examples/privy-next-tempo) peer-to-peer payments app that uses Tempo transaction memos.
 :::
 
-### Turnkey
+### Non-Custodial
+
+#### DFNS
+
+[DFNS](https://www.dfns.co) provides programmable key management and wallet-as-a-service infrastructure for Tempo. With DFNS, developers can create and manage wallets, automate signing workflows, and build custom orchestration logic, all backed by distributed MPC key generation and policy-based access controls.
+
+Create an account on the [DFNS dashboard](https://app.dfns.io) and explore the [DFNS docs](https://docs.dfns.co/) to integrate wallets into your Tempo application.
+
+#### Turnkey
 
 [Turnkey](https://www.turnkey.com) provides programmable key management and non-custodial wallet infrastructure for applications that need granular signing policies and automated transaction flows. With Turnkey, developers can securely sign Tempo transactions, automate wallet operations, and build custom logic around how keys are used.
 
@@ -245,6 +257,18 @@ Turnkey also supports sponsor-style workflows, enabling gasless or subsidized tr
 Turnkey has a [`with-tempo`](https://github.com/tkhq/sdk/tree/main/examples/with-tempo) example in their SDK to get you started quickly.
 :::
 
+#### OKX Wallet
+
+[OKX Wallet](https://www.okx.com/web3) is a self-custodial multi-chain wallet with native Tempo support. Users can store, swap, and manage Tempo-based assets, with built-in DEX aggregation, staking, and DApp connectivity.
+
+Get started at [OKX Wallet](https://www.okx.com/web3).
+
+#### Zerion
+
+[Zerion](https://zerion.io/api) provides an enterprise-grade wallet data API that delivers portfolio balances, transaction history, DeFi positions, PnL tracking, and real-time webhooks (including Tempo) through a single unified interface. Developers can add comprehensive blockchain data to their applications without running any indexing infrastructure.
+
+Get a free API key from the [Zerion dashboard](https://dashboard.zerion.io/) and explore the [API documentation](https://developers.zerion.io/reference/authentication).
+
 ### Custodial & Institutional
 
 #### BitGo
@@ -255,9 +279,15 @@ Get started through the [BitGo platform](https://www.bitgo.com) or explore their
 
 #### Fireblocks
 
-[Fireblocks](https://www.fireblocks.com) provides enterprise-grade digital asset infrastructure for custody, transfers, and tokenization. Tempo is supported through Fireblocks' MPC-based signing, policy engine, and transaction API — enabling institutions to securely manage Tempo assets with configurable approval workflows and direct network connectivity.
+[Fireblocks](https://www.fireblocks.com) provides enterprise-grade digital asset infrastructure for custody, transfers, and tokenization. Tempo is supported through Fireblocks' MPC-based signing, policy engine, and transaction API, enabling institutions to securely manage Tempo assets with configurable approval workflows and direct network connectivity.
 
 Access Tempo through the [Fireblocks console](https://console.fireblocks.io/) and explore the [Fireblocks Developer docs](https://developers.fireblocks.com/).
+
+#### Cubist
+
+[Cubist](https://cubist.dev) provides high-performance, institutional-grade infrastructure spanning wallets, tokenization, payments, and private smart contracts. Institutions use Cubist to manage their treasuries, automate internal operations, and programmatically control how digital assets move while delivering cryptographic audit trails for regulators. Developers use Cubist to provision wallets with familiar authentication methods and gas sponsorship for end users and AI agents.
+
+Learn about [Cubist on Tempo](https://cubist.dev) and [request a demo](https://cubist.dev) for more information.
 
 #### Utila
 
@@ -269,7 +299,7 @@ Access Tempo through the [Fireblocks console](https://console.fireblocks.io/) an
 
 ### Pimlico
 
-[Pimlico](https://www.pimlico.io) provides smart account infrastructure for Tempo, including ERC-4337 bundlers and paymasters. With Pimlico, developers can sponsor gas fees, accept ERC-20 tokens for gas, and relay smart account transactions — enabling seamless, gasless onchain experiences for end users.
+[Pimlico](https://www.pimlico.io) provides smart account infrastructure for Tempo, including ERC-4337 bundlers and paymasters. With Pimlico, developers can sponsor gas fees, accept ERC-20 tokens for gas, and relay smart account transactions, enabling seamless, gasless onchain experiences for end users.
 
 Get started on the [Pimlico dashboard](https://dashboard.pimlico.io/) and explore the [Pimlico docs](https://docs.pimlico.io/).
 
@@ -311,7 +341,7 @@ View the Tempo Testnet RPC endpoint in the [Conduit Hub](https://hub.conduit.xyz
 
 ### dRPC
 
-[dRPC](https://drpc.org) provides managed Tempo RPC endpoints through NodeCloud, with smart routing, analytics, key control, and front-end protection across 180+ networks. The platform runs on 40 providers in 8 geoclusters, with a free tier and flat-rate plans starting at $10.
+[dRPC](https://drpc.org) provides managed Tempo RPC endpoints through NodeCloud, with smart routing, analytics, key control, and front-end protection across networks. The platform runs on 40 providers in 8 geoclusters, with a free tier and flat-rate plans starting at $10.
 
 Get started by visiting the [Tempo chain page](https://drpc.org/chainlist/tempo-testnet-rpc), and learn more about NodeCloud on the [dRPC NodeCloud page](https://drpc.org/nodecloud-multichain-rpc-management).
 
@@ -323,9 +353,9 @@ Get started on the [Tempo Chain Page](https://www.quicknode.com/chains/tempo) an
 
 ### Validation Cloud
 
-[Validation Cloud](https://www.validationcloud.io/tempo) provides institutional-grade, full-archive RPC nodes and validator infrastructure for Tempo. With SOC 2 Type II compliance, high performance, and low latency, Validation Cloud is purpose-built for powering real-world payments and stablecoin use cases at scale.
+[Validation Cloud](https://www.validationcloud.io/tempo) provides validators and institutional-grade, full-archive RPC nodes for Tempo. Built for high performance, low latency, and SOC 2 Type II compliance, Validation Cloud is purpose-built for powering real-world payments and stablecoin use cases at scale.
 
-Get started at [validationcloud.io/tempo](https://www.validationcloud.io/tempo).
+Get started on the [Validation Cloud platform](https://www.validationcloud.io/tempo).
 
 ## Security & Compliance
 
@@ -343,7 +373,7 @@ Discover how Hexagate supports Tempo [here](https://www.hexagate.com), or reques
 
 ### Elliptic
 
-[Elliptic](https://www.elliptic.co) provides blockchain analytics and compliance solutions for detecting and preventing financial crime. Elliptic supports Tempo with transaction screening, wallet risk scoring, and regulatory compliance tools — helping platforms meet AML obligations while operating on the Tempo network.
+[Elliptic](https://www.elliptic.co) provides blockchain analytics and compliance solutions for detecting and preventing financial crime. Elliptic supports Tempo with transaction screening, wallet risk scoring, and regulatory compliance tools, helping platforms meet AML obligations while operating on the Tempo network.
 
 Learn more about Elliptic's compliance solutions at [elliptic.co](https://www.elliptic.co) or explore their [developer docs](https://docs.elliptic.co/).
 
@@ -372,6 +402,34 @@ Get started by creating an account [here](https://app.brale.xyz/buy/signup/).
 
 ### Bridge
 
-[Bridge](https://www.bridge.xyz) (a Stripe Company) provides stablecoin orchestration infrastructure for moving money between fiat and crypto rails. Bridge supports Tempo with APIs for issuance, wallets, and cross-border stablecoin transfers — enabling fintechs and platforms to build payment flows that span traditional and onchain systems.
+[Bridge](https://www.bridge.xyz) (a Stripe Company) provides stablecoin orchestration infrastructure for moving money between fiat and crypto rails. Bridge supports Tempo with APIs for issuance, wallets, and cross-border stablecoin transfers, enabling fintechs and platforms to build payment flows that span traditional and onchain systems.
 
 Get started with [Bridge's Tempo Integration Guide](https://apidocs.bridge.xyz/get-started/guides/move-money/tempo-integration-guide#tempo-integration-guide).
+
+## Exchange Infrastructure
+
+### Uniswap
+
+[Uniswap](https://hub.uniswap.org/) is the leading decentralized exchange with over $4T in all-time volume. Any institution, builder or agent can connect to and start building on the most battle tested infrastructure in the space with 99+% uptime, 200ms routing latency, and over 10m assets, all for free.
+
+To get started, create an account and start building on the [Uniswap API platform](https://developers.uniswap.org/dashboard/welcome).
+
+### 0x
+
+[0x](https://0x.org) provides institutional DEX aggregation and smart order routing powered by production-grade execution infrastructure. Access deep liquidity across major DEXs on Tempo with low revert rates, sub-250ms response times, and built-in monetization tools.
+
+Create an account on the [0x Dashboard](https://dashboard.0x.org/create-account) and explore the [0x docs](https://0x.org/docs/0x-swap-api/introduction).
+
+## Agentic Infrastructure
+
+### Sponge
+
+[Sponge](https://paysponge.com) provides financial infrastructure for AI agents, enabling them to hold, send, and swap crypto autonomously on Tempo. With Sponge, developers can give their agents wallets with configurable spending controls, allowlists, and audit logging, along with first-class support for Claude and other AI frameworks via MCP and SDK.
+
+Get started on the [Sponge platform](https://paysponge.com) and explore the [Sponge docs](https://paysponge.com/docs).
+
+### Enact
+
+[Enact](https://www.enact.finance/) provides programmable wallet infrastructure for teams and AI agents that need granular onchain controls. Set your policy once (spending limits, multisig thresholds, approval windows, automation rules) and let agents execute against it autonomously, with every action verifiable onchain. Enact never holds your funds; it enforces the logic you define.
+
+Get started with the [Enact CLI](https://docs.enact.finance/) or the [Enact app](https://app.enact.finance/) to create a self-custodial passkey wallet, add signers, and deploy your first onchain policy.
