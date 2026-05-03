@@ -2,7 +2,7 @@
 description: Inspect Tempo's onchain orderbook using SQL queries. View spreads, order depth, individual orders, and recent trade prices with indexed data.
 ---
 
-import { IndexSupplyQuery } from '../../../components/IndexSupplyQuery'
+import { TidxQuery } from '../../../components/TidxQuery'
 
 
 # View the Orderbook
@@ -13,7 +13,7 @@ Query and inspect the orderbook to see available liquidity, price levels, and in
 
 We recommend using indexed data to query the orderbook for better performance and ease of use. While you can query logs and transactions directly from an RPC node, indexed data providers offer structured SQL interfaces that make complex queries simpler and more efficient.
 
-In this guide, we use [Index Supply](https://www.indexsupply.net) as our indexing provider, but you're free to choose your own indexing solution or query the chain directly based on your needs.
+In this guide, we use Tempo's [tidx](https://github.com/tempoxyz/tidx) indexer for structured SQL access to onchain data.
 
 ## Recipes
 
@@ -23,14 +23,15 @@ Query the best bid and ask prices to calculate the current spread for a token pa
 
 These examples use the mainnet `USDC.e / pathUSD` orderbook; `pathUSD` is the quote token for `USDC.e` — see [Quote Tokens](/protocol/exchange/quote-tokens).
 
-Find the highest bid prices (buyers) for the `USDC.e / pathUSD` book. This query filters out fully filled and cancelled orders, groups by price level (tick), and shows the top 5 bid prices with their total liquidity.
+Find the highest bid prices (buyers) for the `USDC.e / pathUSD` book. This query filters out fully filled and cancelled orders, groups by tick, and shows the top 5 bid levels with their computed price and raw token liquidity.
 
-<IndexSupplyQuery
+<TidxQuery
   chainId={4217}
   title={'Best Bid Prices for USDC.e'}
   query={`SELECT
-    tick as price,
-    SUM(amount) as total_liquidity
+    tick,
+    round((100000 + tick) / 100000.0, 5) as price,
+    SUM(amount) as total_liquidity_raw
   FROM orderplaced
   WHERE token = '0x20c000000000000000000000b9537d11c60e8b50'
     AND "isBid" = true
@@ -43,20 +44,21 @@ Find the highest bid prices (buyers) for the `USDC.e / pathUSD` book. This query
       SELECT 1 FROM ordercancelled
       WHERE ordercancelled."orderId" = orderplaced."orderId"
     )
-  GROUP BY price
-  ORDER BY price DESC
+  GROUP BY tick
+  ORDER BY tick DESC
   LIMIT 5`}
   signatures={["OrderPlaced", "OrderFilled", "OrderCancelled"]}
 />
 
 Find the lowest ask prices (sellers) for the `USDC.e / pathUSD` book. The spread is the difference between the highest bid and lowest ask price.
 
-<IndexSupplyQuery
+<TidxQuery
   chainId={4217}
   title={'Best Ask Prices for USDC.e'}
   query={`SELECT
-    tick as price,
-    SUM(amount) as total_liquidity
+    tick,
+    round((100000 + tick) / 100000.0, 5) as price,
+    SUM(amount) as total_liquidity_raw
   FROM orderplaced
   WHERE token = '0x20c000000000000000000000b9537d11c60e8b50'
     AND "isBid" = false
@@ -69,26 +71,27 @@ Find the lowest ask prices (sellers) for the `USDC.e / pathUSD` book. The spread
       SELECT 1 FROM ordercancelled
       WHERE ordercancelled."orderId" = orderplaced."orderId"
     )
-  GROUP BY price
-  ORDER BY price
+  GROUP BY tick
+  ORDER BY tick
   LIMIT 5`}
   signatures={["OrderPlaced", "OrderFilled", "OrderCancelled"]}
 />
 
 ### Inspect order depth
 
-View aggregated liquidity at each price level to understand the orderbook structure.
+View aggregated liquidity at each tick level to understand the orderbook structure.
 
 This query shows all active orders in the `USDC.e / pathUSD` book, including both regular and flip orders.
 
-<IndexSupplyQuery
+<TidxQuery
   chainId={4217}
   title={'USDC.e Order Depth by Price Level'}
   query={`SELECT
-    tick as price,
+    tick,
+    round((100000 + tick) / 100000.0, 5) as price,
     "isBid" as is_bid,
     COUNT("orderId") as num_orders,
-    SUM(amount) as total_amount
+    SUM(amount) as total_amount_raw
   FROM orderplaced
   WHERE token = '0x20c000000000000000000000b9537d11c60e8b50'
     AND NOT EXISTS (
@@ -100,8 +103,8 @@ This query shows all active orders in the `USDC.e / pathUSD` book, including bot
       SELECT 1 FROM ordercancelled
       WHERE ordercancelled."orderId" = orderplaced."orderId"
     )
-  GROUP BY price, is_bid
-  ORDER BY is_bid DESC, price
+  GROUP BY tick, is_bid
+  ORDER BY is_bid DESC, tick
   LIMIT 50`}
   signatures={["OrderPlaced", "OrderFilled", "OrderCancelled"]}
 />
@@ -112,16 +115,17 @@ This query shows all active orders in the `USDC.e / pathUSD` book, including bot
 
 Get detailed information about a specific order including its placement details, fill history, and cancellation status.
 
-This query inspects the details of the most recent order in the `USDC.e / pathUSD` book. It shows when the order was created, at what price (tick), the order size, whether it's a flip order, and who placed it.
+This query inspects the details of the most recent order in the `USDC.e / pathUSD` book. It shows when the order was created, its tick and computed price, the raw order size, whether it's a flip order, and who placed it.
 
-<IndexSupplyQuery
+<TidxQuery
   chainId={4217}
   title={'Order Placement Details for USDC.e'}
   query={`SELECT
     "orderId",
     tick,
+    round((100000 + tick) / 100000.0, 5) as price,
     "isBid",
-    amount,
+    amount as amount_raw,
     "isFlipOrder",
     "flipTick",
     maker,
@@ -137,14 +141,14 @@ This query inspects the details of the most recent order in the `USDC.e / pathUS
 
 #### Order fill status
 
-Check if recent `USDC.e` orders have been partially or fully filled. This query shows up to 5 fill events for the `USDC.e / pathUSD` market, including the amount filled in each transaction and whether it was a partial fill.
+Check if recent `USDC.e` orders have been partially or fully filled. This query shows up to 5 fill events for the `USDC.e / pathUSD` market, including the raw amount filled in each transaction and whether it was a partial fill.
 
-<IndexSupplyQuery
+<TidxQuery
   chainId={4217}
   title={'Order Fill History for USDC.e'}
   query={`SELECT
     ofl."orderId",
-    ofl."amountFilled",
+    ofl."amountFilled" as amount_filled_raw,
     ofl."partialFill",
     ofl.block_num,
     ofl.tx_hash
@@ -161,7 +165,7 @@ Check if recent `USDC.e` orders have been partially or fully filled. This query 
 
 Check if a `USDC.e` order has been cancelled. This query returns a recent order from the `USDC.e / pathUSD` book that was explicitly cancelled by the maker before being fully filled.
 
-<IndexSupplyQuery
+<TidxQuery
   chainId={4217}
   title={'Order Cancellation Status for USDC.e'}
   query={`SELECT
@@ -178,18 +182,19 @@ Check if a `USDC.e` order has been cancelled. This query returns a recent order 
 
 ### Get recent trade prices
 
-View the last prices a token traded at to understand recent market activity.
+View the last trade ticks and computed prices to understand recent market activity.
 
-This query joins order fill events with their corresponding placement details to show the price tick and amount for recent trades in the `USDC.e / pathUSD` book.
+This query joins order fill events with their corresponding placement details to show the tick, computed price, and raw fill amount for recent trades in the `USDC.e / pathUSD` book.
 
-<IndexSupplyQuery
+<TidxQuery
   chainId={4217}
   title={'Recent Trade Prices for USDC.e'}
   query={`SELECT
     ofl.block_num,
     ofl."orderId",
-    o.tick as price,
-    ofl."amountFilled",
+    o.tick,
+    round((100000 + o.tick) / 100000.0, 5) as price,
+    ofl."amountFilled" as amount_filled_raw,
     o."isBid"
   FROM orderfilled ofl
   INNER JOIN orderplaced o

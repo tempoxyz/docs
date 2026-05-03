@@ -1,6 +1,6 @@
 'use client'
 import * as React from 'react'
-import { getAllSignatures, type SignatureInfo } from './lib/IndexSupplySignatures'
+import { getAllSignatures, type SignatureInfo } from './lib/TidxSignatures'
 
 type SignatureSelectorProps = {
   value: string[]
@@ -194,7 +194,7 @@ export function SignatureSelector(props: SignatureSelectorProps) {
               </div>
               <div className="text-[11px] text-gray10">
                 <a
-                  href="https://www.indexsupply.net/docs#evm-data"
+                  href="https://github.com/tempoxyz/tidx.ts"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-accent hover:underline"
