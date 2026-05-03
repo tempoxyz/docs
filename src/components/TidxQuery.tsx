@@ -2,30 +2,25 @@
 import * as React from 'react'
 import { isAddress, isHash } from 'viem'
 import { tempo } from 'viem/chains'
-import type * as z from 'zod/mini'
 import LucideExternalLink from '~icons/lucide/external-link'
 import { Container } from './Container'
 import { Button } from './guides/Demo'
-import { type responseSchema, runIndexSupplyQuery } from './lib/IndexSupply'
-import { extractParameterNames, getAllSignatures } from './lib/IndexSupplySignatures'
+import { type QueryResponse, runTidxQuery } from './lib/Tidx'
+import { extractParameterNames, getAllSignatures } from './lib/TidxSignatures'
 import { SignatureSelector } from './SignatureSelector'
 import { SqlEditor } from './SqlEditor'
 
-type QueryResult = z.infer<typeof responseSchema>[0]
+type QueryResult = QueryResponse
 
-// Default EVM tables and their columns from IndexSupply
+// Default EVM tables and their columns from tidx.
 const EVM_TABLE_COLUMNS = {
   blocks: [
-    'chain',
     'num',
     'timestamp',
-    'size',
     'gas_limit',
     'gas_used',
-    'nonce',
     'hash',
-    'receipts_root',
-    'state_root',
+    'parent_hash',
     'extra_data',
     'miner',
   ],
@@ -36,7 +31,10 @@ const EVM_TABLE_COLUMNS = {
     'idx',
     'type',
     'gas',
-    'gas_price',
+    'gas_limit',
+    'gas_used',
+    'max_fee_per_gas',
+    'max_priority_fee_per_gas',
     'nonce',
     'hash',
     'from',
@@ -51,22 +49,43 @@ const EVM_TABLE_COLUMNS = {
     'log_idx',
     'tx_hash',
     'address',
-    'topics',
+    'selector',
+    'topic0',
+    'topic1',
+    'topic2',
+    'topic3',
     'data',
+  ],
+  receipts: [
+    'block_num',
+    'block_timestamp',
+    'tx_idx',
+    'tx_hash',
+    'from',
+    'to',
+    'contract_address',
+    'gas_used',
+    'cumulative_gas_used',
+    'effective_gas_price',
+    'status',
+    'fee_payer',
   ],
 } as const
 
-type IndexSupplyQueryProps = {
+type TidxQueryProps = {
   chainId: number
   signatures?: string[]
   query?: string
   title?: string
-  signatureFilter?: 'all' | 'events' | 'functions'
 }
 
 function getExplorerHost() {
   const { VITE_TEMPO_ENV, VITE_EXPLORER_OVERRIDE } = import.meta.env
-  if (VITE_TEMPO_ENV !== 'testnet' && VITE_EXPLORER_OVERRIDE !== undefined) {
+  if (
+    VITE_TEMPO_ENV !== 'testnet' &&
+    VITE_TEMPO_ENV !== 'moderato' &&
+    VITE_EXPLORER_OVERRIDE !== undefined
+  ) {
     return VITE_EXPLORER_OVERRIDE
   }
   return tempo.blockExplorers.default.url
@@ -133,7 +152,7 @@ function renderCellValue(cell: string | number | boolean | null): React.ReactNod
   )
 }
 
-export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
+export function TidxQuery(props: TidxQueryProps) {
   const isReadOnly = props.query !== undefined
 
   const allSignatures = React.useMemo(() => getAllSignatures(), [])
@@ -212,7 +231,7 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
         chainId: props.chainId,
         ...(signatures.length > 0 ? { signatures } : {}),
       }
-      const queryResult = await runIndexSupplyQuery(queryToRun, options)
+      const queryResult = await runTidxQuery(queryToRun, options)
       setResult(queryResult)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error occurred')
@@ -234,7 +253,7 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
       setError(null)
       setResult(null)
 
-      runIndexSupplyQuery(queryToRun, {
+      runTidxQuery(queryToRun, {
         chainId: props.chainId,
         ...(signatures.length > 0 ? { signatures } : {}),
       })
@@ -254,7 +273,7 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
     <Container
       headerLeft={
         <h4 className="font-normal text-[14px] text-gray12 leading-none -tracking-[1%]">
-          {props.title || 'IndexSupply SQL Query'}
+          {props.title || 'tidx SQL Query'}
         </h4>
       }
       headerRight={
@@ -269,7 +288,7 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
             <div className="flex items-center gap-1.5 text-[13px] text-gray11">
               Signatures
               <a
-                href="https://www.indexsupply.net/docs#signatures"
+                href="https://github.com/tempoxyz/tidx.ts"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray9 transition-colors hover:text-gray11"
@@ -297,19 +316,14 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
             </div>
           </div>
         ) : (
-          <SignatureSelector
-            value={signatures}
-            onChange={setSignatures}
-            disabled={isReadOnly}
-            filter={props.signatureFilter}
-          />
+          <SignatureSelector value={signatures} onChange={setSignatures} disabled={isReadOnly} />
         )}
 
         <div className="space-y-2">
           <label htmlFor="sql-query" className="flex items-center gap-1.5 text-[13px] text-gray11">
             SQL Query
             <a
-              href="https://www.indexsupply.net/docs#sql"
+              href="https://github.com/tempoxyz/tidx.ts"
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray9 transition-colors hover:text-gray11"
