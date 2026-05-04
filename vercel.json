@@ -53,6 +53,31 @@
       "source": "/guide/bridge-usdc-relay",
       "destination": "/guide/bridge-relay",
       "permanent": true
+    },
+    {
+      "source": "/learn/stablecoins",
+      "destination": "https://tempo.xyz/learn/what-are-stablecoins",
+      "permanent": true
+    },
+    {
+      "source": "/learn/use-cases/global-payouts",
+      "destination": "https://tempo.xyz/learn/global-payouts",
+      "permanent": true
+    },
+    {
+      "source": "/learn/use-cases/remittances",
+      "destination": "https://tempo.xyz/learn/cross-border-payments",
+      "permanent": true
+    },
+    {
+      "source": "/learn/use-cases/embedded-finance",
+      "destination": "https://tempo.xyz/learn/stablecoin-payments",
+      "permanent": true
+    },
+    {
+      "source": "/learn/use-cases/agentic-commerce",
+      "destination": "https://tempo.xyz/learn/blockchain-payments",
+      "permanent": true
     }
   ],
   "rewrites": [
