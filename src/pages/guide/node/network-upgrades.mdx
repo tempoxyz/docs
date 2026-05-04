@@ -15,6 +15,8 @@ For detailed release notes and binaries, see the [Changelog](/changelog).
 
 | Release | Date | Network | Description | Priority |
 |---------|------|---------|-------------|----------|
+| v1.7.0 (planned) | May 11, 2026 | Moderato + Mainnet | Required for T4; embeds consensus context into the block header to unlock deferred verification (TIP-1031) and bundles T4 bug fixes and security hardening (TIP-1046). | <Badge variant="red">Required</Badge> |
+| [v1.6.0](https://github.com/tempoxyz/tempo/releases/tag/v1.6.0) | Apr 16, 2026 | Moderato + Mainnet | Required for T3; implements enhanced access key permissions with periodic limits and call scoping (TIP-1011), the signature verification precompile (TIP-1020), and virtual addresses for TIP-20 deposit forwarding (TIP-1022). | <Badge variant="red">Required</Badge> |
 | [v1.5.3](https://github.com/tempoxyz/tempo/releases/tag/v1.5.3) | Apr 9, 2026 | Moderato + Mainnet | Patch release that restores OTLP HTTPS telemetry and fixes an epoch-transition consensus race that could incorrectly block straggling peers. Validators that skipped v1.5.2 should upgrade directly to this release. | <Badge variant="yellow">Recommended</Badge> |
 | [v1.5.2](https://github.com/tempoxyz/tempo/releases/tag/v1.5.2) | Apr 8, 2026 | Moderato + Mainnet | Maintenance release with the latest reth update, payload builder and RPC improvements, plus transaction validation and mempool hardening. | <Badge variant="yellow">Recommended</Badge> |
 | [v1.5.1](https://github.com/tempoxyz/tempo/releases/tag/v1.5.1) | Mar 29, 2026 | Moderato + Mainnet | Security patch for RPC endpoints that accept `stateOverride`, including `eth_call` and `debug_traceCall`. This release is required for RPC providers and other public RPC nodes, and low priority for validators. | <Badge variant="amber">RPC only</Badge> |
@@ -29,6 +31,26 @@ For detailed release notes and binaries, see the [Changelog](/changelog).
 :::warning
 `--consensus.fee-recipient` is deprecated as of `v1.5.2` and will be removed in an upcoming release. Validators should migrate fee-recipient management to [update the fee recipient](/guide/node/validator-lifecycle#update-the-fee-recipient).
 :::
+
+---
+
+## T4
+
+| | |
+|---|---|
+| **Scope** | Embed consensus context into the block header to unlock deferred verification, plus T4 bug fixes and security hardening |
+| **TIPs** | [TIP-1031: Embed Consensus Context in the Block Header](/protocol/tips/tip-1031), [TIP-1046: T4 Hardfork Meta TIP](/protocol/tips/tip-1046) |
+| **Details** | [T4 network upgrade](/protocol/upgrades/t4) |
+| **Release** | v1.7.0 (planned, May 11, 2026 16:00 CEST) |
+| **Testnet** | Moderato: May 14, 2026 16:00 CEST (unix: 1778767200) |
+| **Mainnet** | Presto: May 18, 2026 16:00 CEST (unix: 1779112800) |
+| **Priority** | <Badge variant="red">Required</Badge> |
+
+### Who is affected?
+
+All node operators must upgrade before the T4 activation timestamp. TIP-1031 changes how block headers are produced and verified; non-upgraded nodes will have their proposals rejected and will fall out of consensus at activation.
+
+Smart contract developers and integrators are not directly affected by TIP-1031, but should review [TIP-1046](/protocol/tips/tip-1046) for the bundled gas accounting changes and access-key scope validation updates that may affect transaction gas usage post-T4.
 
 ---
 
