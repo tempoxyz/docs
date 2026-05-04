@@ -1,0 +1,207 @@
+---
+title: Account-Level Receive Policies
+description: Understand how TIP-403 account-level receive policies let receivers control which TIP-20 tokens and senders can credit their accounts.
+---
+
+import { Cards, Card } from 'vocs'
+import { MermaidDiagram } from '../../../components/MermaidDiagram'
+import { StaticMermaidDiagram } from '../../../components/StaticMermaidDiagram'
+
+# Account-Level Receive Policies
+
+Account-level receive policies let a receiver control which TIP-20 tokens can credit its account and which senders are allowed to send to it.
+
+This extends TIP-403 from token-level policy into receiver-level policy. Token issuers still control their own transfer policies. A receiver can add inbound rules on top.
+
+:::info[Draft feature]
+Account-level receive policies are specified by TIP-1028. They are not active on Tempo unless enabled by a future network upgrade.
+:::
+
+## Why this feature exists
+
+TIP-403 already lets token issuers decide who can use a token. That solves issuer-side compliance, but it does not let a receiver decide what they are willing to accept.
+
+Some receivers need their own inbound controls:
+
+- a regulated institution may only want funds from approved counterparties
+- an exchange or custodian may only want supported TIP-20 tokens at deposit addresses
+- a payment processor may want unwanted inbounds to be recoverable without reverting the sender's flow
+
+A receive policy gives the receiver that control without making valid TIP-20 transfers and mints fail at the receiver boundary.
+
+## The mental model
+
+A receive policy is an inbound perimeter around an account.
+
+Issuer policy is still checked first. TIP-20 runs the existing token-level TIP-403 and TIP-1015 checks before it evaluates the receiver's policy. If the issuer policy rejects the operation, the call reverts and no receive-policy escrow is created.
+
+After those checks pass, Tempo asks two receiver-side questions before crediting the receiver:
+
+1. Is this token allowed by the receiver's token filter?
+2. Is this sender allowed by the receiver's sender policy?
+
+If both checks pass, the receiver is credited normally. If either check fails, the call still succeeds, but the funds are credited to `ESCROW_ADDRESS` and a blocked receipt is recorded.
+
+<StaticMermaidDiagram chart={`flowchart TD
+    A["TIP-20 transfer or mint"] --> V{"Recipient is virtual?"}
+    V -- "yes" --> R["Resolve master receiver"]
+    V -- "no" --> C["Use literal receiver"]
+    R --> T["Run existing TIP-20 and token-level checks"]
+    C --> T
+    T -- "reject" --> X["Revert"]
+    T -- "allow" --> P["Run receiver policy check"]
+    P -- "allowed" --> D["Credit receiver"]
+    P -- "blocked" --> E["Credit ESCROW_ADDRESS"]
+    E --> B["Record blocked receipt"]
+`} />
+
+This distinction matters: token-level policy failure still reverts. Receiver-level policy failure diverts to escrow.
+
+For transfer-like paths, the sender checked by the receive policy is `from`. For mint paths, the sender checked by the receive policy is `msg.sender`.
+
+## What a receiver configures
+
+Receive policy configuration lives in the TIP-403 registry. Each account can configure:
+
+| Field | Purpose |
+| --- | --- |
+| `senderPolicyId` | TIP-403 policy used to check allowed senders |
+| `tokenFilterId` | token filter used to check allowed TIP-20 tokens |
+| `recoveryContract` | optional contract authorized to claim blocked receipts |
+
+If no receive policy is configured, all TIP-20 transfers and mints are accepted at the receiver-policy layer.
+
+`senderPolicyId` uses existing TIP-403 whitelist and blacklist policies. `COMPOUND` policies are not valid for this field because a receive check only asks whether this sender may credit this receiver.
+
+`tokenFilterId` points to a TIP-403 token filter: an allowlist or denylist of TIP-20 token addresses. Token filters use their own ID space. Built-in filter `0` rejects all tokens, built-in filter `1` allows all tokens, and custom filters start at `2`.
+
+Receive policy evaluation checks the token filter first, then the sender policy. If both would reject, the blocked reason is `TOKEN_FILTER` because that is the first canonical failed check.
+
+## What happens on transfer or mint
+
+TIP-20 applies receive policies only after existing TIP-20 checks and token-level policy checks pass.
+
+<MermaidDiagram chart={`sequenceDiagram
+    participant Sender
+    participant TIP20 as TIP-20
+    participant TIP403 as TIP-403 registry
+    participant Escrow
+    participant Receiver
+
+    Sender->>TIP20: transfer or mint to receiver
+    TIP20->>TIP20: resolve virtual recipient if needed
+    TIP20->>TIP20: run existing TIP-20 checks
+    TIP20->>TIP403: run token-level issuer policy
+    TIP20->>TIP403: validateReceivePolicy(token, sender, receiver)
+    TIP403-->>TIP20: allowed or blocked
+    TIP20->>Receiver: if allowed, credit receiver
+    TIP20->>Escrow: if blocked, store receipt
+    TIP20-->>Sender: success if escrowed
+`} />
+
+For a blocked transfer, the token emits a raw `Transfer(from, ESCROW_ADDRESS, amount)` and then a `TransferBlocked` event.
+
+For a blocked mint, the token emits raw mint events to `ESCROW_ADDRESS` and then a `MintBlocked` event. The receive policy check uses the mint caller as the sender. The receipt's `originator` field is `address(0)`, while the `MintBlocked` event records the mint operator separately.
+
+## Blocked receipts
+
+When a receive policy blocks an inbound, the escrow precompile records one receipt for that transfer or mint.
+
+The blocked balance sits in the TIP-20 token's `balances[ESCROW_ADDRESS]` slot. The escrow precompile stores the amount under a receipt key and does not keep a full receipt struct in persistent state.
+
+The receipt fields are emitted in the blocked event. A claimer supplies those same fields back to the escrow precompile when claiming. That supplied data is the receipt witness: it identifies which receipt to consume, but it does not grant permission to claim it.
+
+A receipt includes enough information to identify the blocked inbound:
+
+- token
+- originator
+- recipient
+- recovery contract
+- reason blocked
+- transfer or mint kind
+- memo
+- timestamp
+- nonce
+
+For virtual-address inbounds, `recipient` is the literal virtual address. The canonical receiver is the resolved master address.
+
+The escrow precompile does not enumerate receipts onchain. Operators and indexers should watch `TransferBlocked` and `MintBlocked` events and persist the receipt fields needed for recovery.
+
+## Claiming blocked funds
+
+A blocked receipt can be claimed by the receiver or by the recovery contract captured when the receipt was created.
+
+<MermaidDiagram chart={`sequenceDiagram
+    participant Claimer
+    participant Escrow
+    participant TIP20 as TIP-20
+    participant Destination
+
+    Claimer->>Escrow: claimBlocked(receipt, to)
+    Escrow->>Escrow: check claimer is receiver or recovery contract
+    Escrow->>Escrow: recompute receipt key
+    Escrow->>Escrow: consume full receipt amount
+    Escrow->>TIP20: release from ESCROW_ADDRESS
+    TIP20->>Destination: credit to
+`} />
+
+There are two claim modes:
+
+- **Claim to receiver:** resumes the original inbound and credits the receiver. It is not rechecked against the receiver's receive policy.
+- **Reroute:** sends the funds to another destination and is treated as a new spend. The destination must pass the relevant token-level and receive-policy checks.
+
+Claims consume whole receipts. Partial claims are not supported. Changing a receiver's `recoveryContract` only affects future receipts; existing receipts remain governed by the recovery contract captured in their key.
+
+## What this changes for operators
+
+Account-level receive policies are mainly an operations and compliance feature.
+
+For a regulated receiver, the normal flow becomes:
+
+1. create or reuse a sender policy
+2. create or reuse a token filter
+3. set the receive policy on the account
+4. index blocked events
+5. review and claim blocked receipts when needed
+
+For exchanges, custodians, embedded wallets, and payment processors, the main product implication is that delivery status has three states:
+
+- failed
+- credited
+- escrowed
+
+A successful TIP-20 call is not always proof that the receiver was credited.
+
+## What this changes for wallets, explorers, and indexers
+
+Wallets, explorers, and indexers should surface escrowed outcomes explicitly.
+
+In practice:
+
+- show when a transfer or mint was credited to `ESCROW_ADDRESS` instead of the intended receiver
+- preserve the blocked receipt fields needed for recovery
+- show the block reason as token-filter failure or sender-policy failure
+- distinguish a claim back to the receiver from a reroute to a different address
+
+## Learn more
+
+<Cards>
+  <Card
+    title="TIP-403 Specification"
+    description="Read the base TIP-403 policy registry specification."
+    to="/protocol/tip403/spec"
+    icon="lucide:file-text"
+  />
+  <Card
+    title="Virtual addresses for TIP-20 deposits"
+    description="Understand how virtual addresses interact with TIP-20 deposit attribution."
+    to="/protocol/tip20/virtual-addresses"
+    icon="lucide:route"
+  />
+  <Card
+    title="TIP-1028 proposal"
+    description="Read the current proposal for account-level receive policies and blocked-inbound escrow."
+    to="https://github.com/tempoxyz/tempo/pull/3791"
+    icon="lucide:file-text"
+  />
+</Cards>
