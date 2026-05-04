@@ -78,6 +78,21 @@
       "source": "/learn/use-cases/agentic-commerce",
       "destination": "https://tempo.xyz/learn/blockchain-payments",
       "permanent": true
+    },
+    {
+      "source": "/learn/use-cases/payroll",
+      "destination": "https://tempo.xyz/learn/stablecoin-payroll",
+      "permanent": true
+    },
+    {
+      "source": "/learn/use-cases/tokenized-deposits",
+      "destination": "https://tempo.xyz/learn/tokenized-deposits",
+      "permanent": true
+    },
+    {
+      "source": "/learn/use-cases/microtransactions",
+      "destination": "https://tempo.xyz/learn/microtransactions",
+      "permanent": true
     }
   ],
   "rewrites": [
