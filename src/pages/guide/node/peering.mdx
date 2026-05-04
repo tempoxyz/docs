@@ -1,0 +1,78 @@
+---
+description: Improve peer discovery and connection reliability for your Tempo node using the bootnodes endpoint, p2p-proxy infrastructure, and dedicated partner nodes.
+---
+
+# Peering
+
+Tempo provides infrastructure to make execution-layer peer discovery fast and reliable. This page covers how to use the dynamic bootnodes endpoint, the p2p-proxy scaling layer, and how partners can request dedicated peering nodes.
+
+## Bootnodes Endpoint
+
+Tempo publishes a curated list of high-quality peers — validators, RPC nodes, and their direct neighbors — through a dynamic HTTP endpoint:
+
+| **Network** | **Endpoint** |
+|-------------|-------------|
+| Mainnet | `https://peers.tempo.xyz` |
+| Testnet | `https://testnet-peers.tempo.xyz` |
+
+To use it, pass the `--tempo.bootnodes-endpoint` flag when starting your node:
+
+```bash
+tempo node \
+  --follow \
+  --tempo.bootnodes-endpoint https://peers.tempo.xyz \
+  --http --http.port 8545 \
+  --http.api eth,net,web3,txpool,trace
+```
+
+For testnet:
+
+```bash
+tempo node \
+  --follow \
+  --chain moderato \
+  --tempo.bootnodes-endpoint https://testnet-peers.tempo.xyz \
+  --http --http.port 8545 \
+  --http.api eth,net,web3,txpool,trace
+```
+
+The endpoint dynamically discovers validators and RPC nodes on the Tempo network, queries their immediate neighbors via `operator_peers`, and returns a synthesized list of up-to-date, high-quality peers. This means you don't need to rely on hardcoded bootnode definitions — as the network grows, the endpoint scales with it.
+
+## P2P Proxy Nodes
+
+To scale the number of available peers in the network, Tempo runs **p2p-proxy** nodes. These are lightweight, stateless nodes that attach 1:1 to existing RPC nodes and can handle a large number of peer connections for syncing. Because they are stateless, they are easy to scale horizontally.
+
+P2p-proxy nodes are included in the bootnodes endpoint automatically — no additional configuration is needed on your end.
+
+## Filtering Irrelevant Peers
+
+Tempo nodes enforce ENR fork ID filtering by default (`--enforce-enr-forkid`). This prevents your node from spending time dialing peers that aren't on the Tempo chain, improving initial sync times and connection quality.
+
+## Dedicated Partner Nodes
+
+For partners who need guaranteed peering reliability — even during periods of high network saturation — Tempo offers dedicated p2p-proxy nodes with discovery disabled, reserved exclusively for partner use.
+
+To request access to dedicated peering nodes, reach out to the Tempo team. Once provided, add the enodes to your node configuration using the `--trusted-peers` flag:
+
+```bash
+tempo node \
+  --follow \
+  --tempo.bootnodes-endpoint https://peers.tempo.xyz \
+  --trusted-peers <enode://...@host:port>,<enode://...@host:port> \
+  --http --http.port 8545 \
+  --http.api eth,net,web3,txpool,trace
+```
+
+## Verifying Peer Connections
+
+After starting your node, verify that it has connected to peers:
+
+```bash
+# Check peer count (should be non-zero)
+cast rpc net_peerCount --rpc-url http://localhost:8545
+```
+
+If your node consistently shows zero peers, ensure that:
+1. The `--tempo.bootnodes-endpoint` flag is set correctly
+2. Your firewall allows outbound TCP connections on the P2P port (default: `30303`)
+3. You are running a recent version of the Tempo node software

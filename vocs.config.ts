@@ -867,6 +867,10 @@ export default defineConfig({
             link: '/guide/node/rpc',
           },
           {
+            text: 'Peering',
+            link: '/guide/node/peering',
+          },
+          {
             text: 'Running a validator',
             items: [
               {
