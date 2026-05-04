@@ -1,0 +1,69 @@
+---
+title: T4 Network Upgrade
+description: Details and timeline for the T4 network upgrade, including consensus context in the block header and bundled bug fixes.
+---
+
+# T4 Network Upgrade
+
+This page summarizes T4 scope, partner impact, and breaking changes.
+
+:::info[T4 is not live yet]
+The features described on this page are scheduled for T4 and are not active on Moderato or Presto yet. They only become live once the T4 activation timestamps are reached.
+:::
+
+## Timeline
+
+| Network | Date | Timestamp |
+|---------|------|-----------|
+| Moderato (testnet) | TBD | `TBD` |
+| Presto (mainnet) | TBD | `TBD` |
+
+Node operators must upgrade to the T4-compatible release (v1.7.0) before the Moderato activation timestamp.
+
+## Overview
+
+T4 is Tempo's next network upgrade. It introduces the following changes:
+- Embedding consensus context into the block header to unlock deferred verification and reduce finalization latency ([TIP-1031](/protocol/tips/tip-1031))
+- A bundle of T4 bug fixes and security hardening covering AccountKeychain scope handling, gas accounting, TIP-20 paused-token enforcement, and subblock metadata system transactions ([TIP-1046](/protocol/tips/tip-1046))
+
+**Action required for node operators:** Upgrade to v1.7.0 before the Moderato activation timestamp. Non-upgraded nodes will fall out of consensus.
+
+## Who is affected?
+
+- All node operators (validators and RPC nodes) must upgrade. TIP-1031 is a breaking change to block header encoding — non-upgraded nodes will have their proposals rejected and fall out of consensus at activation.
+- Tools and indexers that decode `TempoHeader` from raw RLP must handle the new trailing optional `Context` field.
+- Most other integrators do not need code changes.
+
+## Breaking changes
+
+### Block header encoding (TIP-1031)
+
+`TempoHeader` adds an `Option<Context>` field as the **last** field, following Ethereum's trailing-optional pattern (e.g. `base_fee_per_gas`, `blob_gas_used`):
+
+- **Pre-activation:** the field is `None` and is omitted from the RLP stream entirely. Existing block hashes are preserved.
+- **Post-activation:** the field MUST be set on every block beyond genesis and MUST exactly match the context provided by the consensus engine. Mismatched or missing context causes the block to be rejected.
+
+Tools that decode `TempoHeader` from raw RLP outside of Tempo SDKs must update their decoders. Tempo SDKs handle this transparently.
+
+### Subblock metadata (TIP-1046)
+
+Blocks with no subblocks may now omit the metadata system transaction. Builders that explicitly emit an empty subblocks/metadata system transaction will have their blocks rejected post-T4.
+
+## Compatible SDK releases
+
+T4-compatible SDK releases will be listed here as they ship.
+
+## Related docs
+- [Network upgrades and releases](/guide/node/network-upgrades)
+- [TIP-1031: Embed Consensus Context in the Block Header](/protocol/tips/tip-1031)
+- [TIP-1046: T4 Hardfork Meta TIP](/protocol/tips/tip-1046)
+
+## Feature TIPs
+
+### TIP-1031: Embed Consensus Context in the Block Header
+
+[TIP-1031](/protocol/tips/tip-1031) adds an optional `Context` field (epoch, view, parent view, leader) as the last field of `TempoHeader`. This commits consensus metadata to the block hash so Tempo blocks implement Commonware's `CertifiableBlock` trait, enabling deferred verification (optimistic notarization with async background verification) and reduced finalization latency. Pre-activation headers are unchanged; post-activation headers require the field and validators reject mismatched context.
+
+### TIP-1046: T4 Hardfork Meta TIP
+
+[TIP-1046](/protocol/tips/tip-1046) bundles bug fixes and security hardening gated behind T4, including a `cancel_stale_order` recipient authorization check, correct out-of-gas propagation in TIP-20 dispatch, an intrinsic gas surcharge for access-key scope persistence, paused-token enforcement on internal-balance DEX debit paths, pre-charging the static gas portion before cold loads, and pre-validating the full call-scope batch before any storage writes.
