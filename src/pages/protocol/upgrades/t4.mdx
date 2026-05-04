@@ -15,10 +15,10 @@ The features described on this page are scheduled for T4 and are not active on M
 
 | Network | Date | Timestamp |
 |---------|------|-----------|
-| Moderato (testnet) | TBD | `TBD` |
-| Presto (mainnet) | TBD | `TBD` |
+| Moderato (testnet) | May 14, 2026 4pm CEST | `1778767200` |
+| Presto (mainnet) | May 18, 2026 4pm CEST | `1779112800` |
 
-Node operators must upgrade to the T4-compatible release (v1.7.0) before the Moderato activation timestamp.
+Node operators must upgrade to the T4-compatible release (v1.7.0, targeted for May 11, 2026 4pm CEST) before the Moderato activation timestamp.
 
 ## Overview
 
@@ -66,4 +66,4 @@ T4-compatible SDK releases will be listed here as they ship.
 
 ### TIP-1046: T4 Hardfork Meta TIP
 
-[TIP-1046](/protocol/tips/tip-1046) bundles bug fixes and security hardening gated behind T4, including a `cancel_stale_order` recipient authorization check, correct out-of-gas propagation in TIP-20 dispatch, an intrinsic gas surcharge for access-key scope persistence, paused-token enforcement on internal-balance DEX debit paths, pre-charging the static gas portion before cold loads, and pre-validating the full call-scope batch before any storage writes.
+[TIP-1046](/protocol/tips/tip-1046) bundles T4 bug fixes and security hardening. The notable changes for partners are an intrinsic gas surcharge for access-key scope persistence, pre-charging the static gas portion before cold account/storage loads, and the subblock metadata system transaction change covered above. See the TIP for the full list.
