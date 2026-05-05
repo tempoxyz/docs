@@ -1,6 +1,6 @@
 'use client'
 import { useConnect, useConnection, useConnectors, useDisconnect } from 'wagmi'
-import { Button } from './Demo'
+import { Button, TempoMarkBoxed } from './Demo'
 
 export function AccountsSignIn() {
   const account = useConnection()
@@ -29,7 +29,8 @@ export function AccountsSignIn() {
   return (
     <div className="flex gap-1">
       <Button variant="accent" onClick={() => connect.connect({ connector })} type="button">
-        Sign in
+        <TempoMarkBoxed className="size-[14px]" />
+        Sign in with Tempo
       </Button>
     </div>
   )

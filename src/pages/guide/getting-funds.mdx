@@ -1,20 +1,23 @@
 ---
 title: Getting Funds on Tempo
 description: Bridge assets to Tempo, add funds in Tempo Wallet, or use the faucet on testnet.
+interactive: true
 ---
+
+import * as Demo from '../../components/guides/Demo.tsx'
+import { DepositToTempoWallet } from '../../components/guides/steps/wallet/DepositToTempoWallet.tsx'
+import { SignInWithTempo } from '../../components/guides/steps/wallet/SignInWithTempo.tsx'
 
 # Getting Funds on Tempo
 
 ## Tempo Wallet
 
-[Tempo Wallet](https://wallet.tempo.xyz) is Tempo's web-based passkey wallet. You can onramp with fiat or bridge from other chains directly in the app.
+[Tempo Wallet](https://wallet.tempo.xyz) is Tempo's web-based passkey wallet. You can onramp with fiat or bridge from other chains using the flow below.
 
-### In Tempo Wallet
-
-1. Sign up or log in to [Tempo Wallet](https://wallet.tempo.xyz) with your passkey.
-2. Click **Add funds** on the home screen, then choose an option:
-
-<img src="/learn/wallet-add-funds.png" />
+<Demo.Container name="Add Funds" showBadge={false}>
+  <SignInWithTempo stepNumber={1} />
+  <DepositToTempoWallet stepNumber={2} last />
+</Demo.Container>
 
 ### With the CLI
 
