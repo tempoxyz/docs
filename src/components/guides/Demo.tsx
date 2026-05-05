@@ -683,3 +683,25 @@ export declare namespace useCopyToClipboard {
     timeout?: number
   }
 }
+
+/** The Tempo "T" mark inside a square, with the T cut out. Inherits `currentColor`. */
+export function TempoMarkBoxed(props: { className?: string }) {
+  return (
+    // biome-ignore lint/a11y/noSvgWithoutTitle: _
+    <svg
+      aria-hidden
+      className={props.className}
+      fill="currentColor"
+      height="28"
+      role="img"
+      viewBox="0 0 28 28"
+      width="28"
+    >
+      <path
+        clipRule="evenodd"
+        d="M0 0h28v28H0V0Zm12.094 21H8.444L11.827 10.173H7.5L8.444 7H20.5l-.944 3.173H15.46L12.094 21Z"
+        fillRule="evenodd"
+      />
+    </svg>
+  )
+}
