@@ -526,18 +526,28 @@ const handler = Handler.relay({
 
 ### resolveTokens
 
-- **Type:** `(chainId?: number) => readonly Address[]`
-- **Optional**
+- **Type:** `(chainId: number) => readonly Token[] | Promise<readonly Token[]>`
+- **Default:** Fetches `https://tokenlist.tempo.xyz/list/:chainId`
 
-Returns token addresses to check balances for during fee token resolution. The relay checks `balanceOf` for each token and picks the one with the highest balance.
+Resolves the list of tokens to check balances for during fee token resolution. The relay checks `balanceOf` for each token and picks the one with the highest balance.
 
 ```ts twoslash
 import { Handler } from 'accounts/server'
 
 const handler = Handler.relay({
   resolveTokens: (chainId) => [ // [!code focus]
-    '0x20c0000000000000000000000000000000000000', // pathUSD // [!code focus]
-    '0x20c000000000000000000000b9537d11c60e8b50', // USDC.e // [!code focus]
+    { // [!code focus]
+      address: '0x20c0000000000000000000000000000000000000', // [!code focus]
+      decimals: 6, // [!code focus]
+      name: 'pathUSD', // [!code focus]
+      symbol: 'pathUSD', // [!code focus]
+    }, // [!code focus]
+    { // [!code focus]
+      address: '0x20c000000000000000000000b9537d11c60e8b50', // [!code focus]
+      decimals: 6, // [!code focus]
+      name: 'USDC.e', // [!code focus]
+      symbol: 'USDC.e', // [!code focus]
+    }, // [!code focus]
   ], // [!code focus]
 })
 ```
