@@ -46,21 +46,16 @@ docker logs tempo
 
 ## Snapshots
 
-Downloading a snapshot lets your node skip syncing from genesis and start participating much faster. This is recommended for both RPC nodes and validators.
+Downloading a snapshot lets your node skip syncing from genesis and start participating much faster. Use the archive snapshot command for both RPC nodes and validators unless the Tempo team directs you to use a specific snapshot profile.
 
 ::::code-group
-```bash [Minimal (validators)]
-tempo download --chain mainnet --minimal
-```
-```bash [Full (RPC / dApp backends)]
-tempo download --chain mainnet
-```
-```bash [Archive (indexers / RPC providers)]
+```bash [Mainnet]
 tempo download --chain mainnet --archive
 ```
+```bash [Testnet]
+tempo download --chain moderato --archive
+```
 ::::
-
-For testnet, replace `mainnet` with `moderato`. See [snapshots.tempoxyz.dev](https://snapshots.tempoxyz.dev/) for detailed component sizes and download options.
 
 ## Verifying Releases
 
