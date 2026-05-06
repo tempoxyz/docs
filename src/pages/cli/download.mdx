@@ -22,7 +22,6 @@ tempo download [flags]
 | `-u, --url <url>` | Download a specific snapshot URL |
 | `--list` | List available snapshots |
 | `--resumable` | Resume an interrupted download |
-| `--minimal` | Download minimal snapshot (pruned state, suitable for validators) |
 | `--archive` | Download full archive snapshot (suitable for RPC nodes) |
 
 ## Examples
@@ -31,12 +30,6 @@ Download the latest archive snapshot (for RPC nodes):
 
 ```bash
 tempo download --archive
-```
-
-Download the latest minimal snapshot (for validators):
-
-```bash
-tempo download --minimal
 ```
 
 Download a snapshot for a specific chain:

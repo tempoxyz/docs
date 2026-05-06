@@ -49,9 +49,6 @@ docker logs tempo
 Downloading a snapshot lets your node skip syncing from genesis and start participating much faster. This is recommended for both RPC nodes and validators.
 
 ::::code-group
-```bash [Minimal (validators)]
-tempo download --chain mainnet --minimal
-```
 ```bash [Full (RPC / dApp backends)]
 tempo download --chain mainnet
 ```
