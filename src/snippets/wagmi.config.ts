@@ -29,7 +29,7 @@ export const config = createConfig({
     tempoWallet({
       feePayer: {
         precedence: 'user-first',
-        url: 'https://sponsor.moderato.tempo.xyz',
+        url: '/relay',
       },
     }),
   ],
