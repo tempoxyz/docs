@@ -8,19 +8,15 @@ import { IndexSupplyQuery } from '../../components/IndexSupplyQuery'
 
 # Querying Tempo
 
-Tempo is EVM-compatible, so most query patterns you already know work here. There are a handful of differences that will silently produce wrong numbers if you carry over Ethereum assumptions. This page covers them.
+Tempo is EVM-compatible, so most query patterns you already know work here. There are a handful of differences that will silently produce wrong numbers if you carry over Ethereum assumptions.
 
-The interactive examples below run against [Index Supply](https://www.indexsupply.net) on Tempo mainnet — edit the SQL and hit **Run Query** to try variations. The static examples use generic SQL — column and table names will vary by platform.
+The interactive examples run live against [Index Supply](https://www.indexsupply.net) on Tempo mainnet — edit the SQL and hit **Run Query**. Static examples use generic SQL — table and column names will vary by platform.
 
 ## 1. Fees are in USD, not ETH
 
-On Ethereum, gas price is in wei (10⁻¹⁸ ETH). On Tempo, gas price is in **attodollars** (10⁻¹⁸ USD). The result of the fee calculation is USD. There is no native token.
+On Ethereum, gas price is in wei (10⁻¹⁸ ETH). On Tempo, it's in **attodollars** (10⁻¹⁸ USD). The fee calculation result is USD. There is no native token.
 
-The correct formula rounds to the nearest microdollar, which is how fees are actually settled:
-
-```sql
-CEIL(effective_gas_price * gas_used / 1e12) / 1e6
-```
+Round to the nearest microdollar (how fees actually settle):
 
 ```sql
 SELECT date_trunc('day', block_time) AS day,
@@ -36,69 +32,51 @@ Divide token amounts by `1e6`. Using `1e18` gives a result 10¹² times too smal
 
 ## 3. Use Transfer events for volume, not tx.value
 
-`tx.value` is always zero on Tempo. All token movement is captured in `Transfer` events.
-
-The query below sums `Transfer` event amounts for `pathUSD` (the network's reference stablecoin). Adjust the `address` filter or grouping to inspect any TIP-20 token.
+`tx.value` is always zero on Tempo. All token movement is in `Transfer` events.
 
 <IndexSupplyQuery
   chainId={4217}
-  title={'Recent pathUSD Transfer Volume'}
+  title={'Recent pathUSD transfers'}
   signatures={["Transfer"]}
-  query={`SELECT
-    block_num,
-    "from",
-    "to",
-    value
+  query={`SELECT block_num, "from", "to", value
   FROM transfer
   WHERE address = '0x20c0000000000000000000000000000000000000'
   ORDER BY block_num DESC
   LIMIT 10`}
 />
 
-`TransferWithMemo` (used by MPP and others) also emits a standard `Transfer` event. If your platform exposes both, query only `Transfer` — including both double-counts every memo transfer.
+`TransferWithMemo` (used by MPP) also emits a standard `Transfer`. Query only `Transfer` to avoid double-counting.
 
 ## 4. Use COALESCE(fee_payer, from) for attribution
 
-Sponsored transactions populate a separate `fee_payer` field. If you group by `from` to measure who paid fees or sent transactions, sponsored activity gets attributed to the wrong address.
+Sponsored transactions populate a separate `fee_payer` field. Grouping by `from` attributes sponsored activity to the wrong address.
 
 ```sql
 SELECT COALESCE(fee_payer, "from") AS payer,
-       COUNT(*) AS tx_count,
-       SUM(CEIL(effective_gas_price * gas_used / 1e12) / 1e6) AS usd_paid
+       COUNT(*) AS tx_count
 FROM transactions
 GROUP BY 1
-ORDER BY 3 DESC;
+ORDER BY 2 DESC;
 ```
 
-## 5. Exclude system transactions when measuring user activity
+## 5. Exclude system transactions from user metrics
 
-Transactions where `from = 0x0000000000000000000000000000000000000000` are system-level. Include them in raw chain metrics but exclude them when computing things like active addresses, unique senders, or user-initiated volume.
+`from = 0x0000…0000` is system-level. Include in raw chain metrics, exclude when measuring users.
 
-## 6. Compute token supply from Transfer events, not Mint events
+## 6. Compute supply from Transfer events, not Mint events
 
-Genesis mints on Tempo may not emit a `Mint` event. To get accurate supply, derive it from `Transfer` events: mints have `from = 0x0000…0000`, burns have `to = 0x0000…0000`.
+Genesis mints may not emit `Mint`. Derive supply from `Transfer`: mints have `from = 0x0…0`, burns have `to = 0x0…0`. Divide by `1e6` for whole tokens.
 
-The query below derives `pathUSD` total minted, total burned, and live supply directly from `Transfer` events.
-
-<IndexSupplyQuery
-  chainId={4217}
-  title={'pathUSD Supply from Transfer Events'}
-  signatures={["Transfer"]}
-  query={`SELECT
-    SUM(CASE WHEN "from" = '0x0000000000000000000000000000000000000000'
-             THEN value ELSE 0 END) AS total_minted,
-    SUM(CASE WHEN "to" = '0x0000000000000000000000000000000000000000'
-             THEN value ELSE 0 END) AS total_burned,
-    SUM(CASE WHEN "from" = '0x0000000000000000000000000000000000000000'
-             THEN value
-             WHEN "to" = '0x0000000000000000000000000000000000000000'
-             THEN -value
-             ELSE 0 END) AS supply
-  FROM transfer
-  WHERE address = '0x20c0000000000000000000000000000000000000'`}
-/>
-
-Divide each value by `1e6` to convert raw amounts to whole tokens.
+```sql
+SELECT
+  SUM(CASE WHEN "from" = '0x0000000000000000000000000000000000000000'
+           THEN value
+           WHEN "to"   = '0x0000000000000000000000000000000000000000'
+           THEN -value
+           ELSE 0 END) AS supply
+FROM transfer
+WHERE address = '0x20c0000000000000000000000000000000000000';
+```
 
 ## Key addresses
 
@@ -107,24 +85,13 @@ Divide each value by `1e6` to convert raw amounts to whole tokens.
 | FeeManager | `0xfeec000000000000000000000000000000000000` |
 | Stablecoin DEX | `0xdec0000000000000000000000000000000000000` |
 | TIP-20 Factory | `0x20fc000000000000000000000000000000000000` |
-| PathUSD | `0x20c0000000000000000000000000000000000000` |
+| pathUSD | `0x20c0000000000000000000000000000000000000` |
 
 ## Networks
 
-### Mainnet
-
-| | |
-| --- | --- |
-| Chain ID | `4217` |
-| RPC | `https://rpc.tempo.xyz` |
-| Explorer | `https://explore.tempo.xyz` |
-| Tokenlist | `https://tokenlist.tempo.xyz/list/4217` |
-
-### Testnet (Moderato)
-
-| | |
-| --- | --- |
-| Chain ID | `42431` |
-| RPC | `https://rpc.moderato.tempo.xyz` |
-| Explorer | `https://explore.testnet.tempo.xyz` |
-| Tokenlist | `https://tokenlist.tempo.xyz/list/42431` |
+| | Mainnet | Testnet (Moderato) |
+| --- | --- | --- |
+| Chain ID | `4217` | `42431` |
+| RPC | `https://rpc.tempo.xyz` | `https://rpc.moderato.tempo.xyz` |
+| Explorer | `https://explore.tempo.xyz` | `https://explore.testnet.tempo.xyz` |
+| Tokenlist | `https://tokenlist.tempo.xyz/list/4217` | `https://tokenlist.tempo.xyz/list/42431` |
