@@ -124,6 +124,13 @@ function syncTips(): Plugin {
         // Escape angle brackets outside of code blocks/inline code so MDX doesn't
         // treat them as JSX (e.g. `Mapping<B256, bool>` in prose).
         content = escapeAngleBrackets(content)
+        // Quote frontmatter `authors:` values that start with a YAML reserved
+        // character (e.g. `@handle`). Upstream TIPs occasionally include GitHub
+        // handles like `@0xrusowsky`, which break YAML parsing unless quoted.
+        content = content.replace(
+          /^(authors:\s*)([@&*!|>%#`].*)$/m,
+          (_m, prefix, value) => `${prefix}"${value.replace(/"/g, '\\"')}"`,
+        )
         const outputPath = path.join(outputDir, file.name.replace('.md', '.mdx'))
         await fs.writeFile(outputPath, content)
       }),

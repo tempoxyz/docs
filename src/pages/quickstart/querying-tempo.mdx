@@ -1,0 +1,97 @@
+---
+title: Querying Tempo
+description: Write correct analytics queries for Tempo. Covers fee units, TIP-20 decimals, Transfer events, fee_payer attribution, system transactions, and supply.
+showOutline: 1
+---
+
+# Querying Tempo
+
+Tempo is EVM-compatible, so most query patterns you already know work here. There are a handful of differences that will silently produce wrong numbers if you carry over Ethereum assumptions.
+
+Examples use generic SQL — table and column names will vary by platform.
+
+## 1. Fees are in USD, not ETH
+
+On Ethereum, gas price is in wei (10⁻¹⁸ ETH). On Tempo, it's in **attodollars** (10⁻¹⁸ USD). The fee calculation result is USD. There is no native token.
+
+Round to the nearest microdollar (how fees actually settle):
+
+```sql
+SELECT date_trunc('day', block_time) AS day,
+       SUM(CEIL(effective_gas_price * gas_used / 1e12) / 1e6) AS usd_fees
+FROM transactions
+GROUP BY 1
+ORDER BY 1;
+```
+
+## 2. TIP-20 tokens use 6 decimals, not 18
+
+Divide token amounts by `1e6`. Using `1e18` gives a result 10¹² times too small.
+
+## 3. Use Transfer events for volume, not tx.value
+
+`tx.value` is always zero on Tempo. All token movement is in `Transfer` events.
+
+```sql
+SELECT date_trunc('day', block_time) AS day,
+       token_address,
+       SUM(amount) / 1e6 AS volume_usd
+FROM tip20_transfers
+GROUP BY 1, 2
+ORDER BY 1;
+```
+
+`TransferWithMemo` (used by MPP) also emits a standard `Transfer`. Query only `Transfer` to avoid double-counting.
+
+## 4. Use COALESCE(fee_payer, from) for attribution
+
+Sponsored transactions populate a separate `fee_payer` field. Grouping by `from` attributes sponsored activity to the wrong address.
+
+```sql
+SELECT COALESCE(fee_payer, "from") AS payer,
+       COUNT(*) AS tx_count
+FROM transactions
+GROUP BY 1
+ORDER BY 2 DESC;
+```
+
+## 5. Exclude system transactions from user metrics
+
+`from = 0x0000…0000` is system-level. Include in raw chain metrics, exclude when measuring users.
+
+## 6. Compute supply from Transfer events, not Mint events
+
+Genesis mints may not emit `Mint`. Derive supply from `Transfer`: mints have `from = 0x0…0`, burns have `to = 0x0…0`.
+
+```sql
+SELECT
+  SUM(CASE WHEN "from" = '0x0000000000000000000000000000000000000000'
+           THEN amount / 1e6 ELSE 0 END) AS total_minted,
+  SUM(CASE WHEN "to"   = '0x0000000000000000000000000000000000000000'
+           THEN amount / 1e6 ELSE 0 END) AS total_burned,
+  SUM(CASE WHEN "from" = '0x0000000000000000000000000000000000000000'
+           THEN  amount / 1e6
+           WHEN "to"   = '0x0000000000000000000000000000000000000000'
+           THEN -amount / 1e6
+           ELSE 0 END) AS supply
+FROM tip20_transfers
+WHERE token_address = <token>;
+```
+
+## Key addresses
+
+| Contract | Address |
+| --- | --- |
+| FeeManager | `0xfeec000000000000000000000000000000000000` |
+| Stablecoin DEX | `0xdec0000000000000000000000000000000000000` |
+| TIP-20 Factory | `0x20fc000000000000000000000000000000000000` |
+| pathUSD | `0x20c0000000000000000000000000000000000000` |
+
+## Networks
+
+| | Mainnet | Testnet (Moderato) |
+| --- | --- | --- |
+| Chain ID | `4217` | `42431` |
+| RPC | `https://rpc.tempo.xyz` | `https://rpc.moderato.tempo.xyz` |
+| Explorer | `https://explore.tempo.xyz` | `https://explore.testnet.tempo.xyz` |
+| Tokenlist | `https://tokenlist.tempo.xyz/list/4217` | `https://tokenlist.tempo.xyz/list/42431` |

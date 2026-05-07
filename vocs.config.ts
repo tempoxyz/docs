@@ -445,6 +445,10 @@ export default defineConfig({
             link: '/quickstart/wallet-developers',
           },
           {
+            text: 'Querying Tempo',
+            link: '/quickstart/querying-tempo',
+          },
+          {
             text: 'Contract Verification',
             link: '/quickstart/verify-contracts',
           },
