@@ -4,11 +4,13 @@ description: Write correct analytics queries for Tempo. Covers fee units, TIP-20
 showOutline: 1
 ---
 
+import { IndexSupplyQuery } from '../../components/IndexSupplyQuery'
+
 # Querying Tempo
 
 Tempo is EVM-compatible, so most query patterns you already know work here. There are a handful of differences that will silently produce wrong numbers if you carry over Ethereum assumptions. This page covers them.
 
-The examples use generic SQL — column and table names will vary by platform.
+The interactive examples below run against [Index Supply](https://www.indexsupply.net) on Tempo mainnet — edit the SQL and hit **Run Query** to try variations. The static examples use generic SQL — column and table names will vary by platform.
 
 ## 1. Fees are in USD, not ETH
 
@@ -36,14 +38,22 @@ Divide token amounts by `1e6`. Using `1e18` gives a result 10¹² times too smal
 
 `tx.value` is always zero on Tempo. All token movement is captured in `Transfer` events.
 
-```sql
-SELECT date_trunc('day', block_time) AS day,
-       token_address,
-       SUM(amount) / 1e6 AS volume_usd
-FROM tip20_transfers
-GROUP BY 1, 2
-ORDER BY 1;
-```
+The query below sums `Transfer` event amounts for `pathUSD` (the network's reference stablecoin). Adjust the `address` filter or grouping to inspect any TIP-20 token.
+
+<IndexSupplyQuery
+  chainId={4217}
+  title={'Recent pathUSD Transfer Volume'}
+  signatures={["Transfer"]}
+  query={`SELECT
+    block_num,
+    "from",
+    "to",
+    value
+  FROM transfer
+  WHERE address = '0x20c0000000000000000000000000000000000000'
+  ORDER BY block_num DESC
+  LIMIT 10`}
+/>
 
 `TransferWithMemo` (used by MPP and others) also emits a standard `Transfer` event. If your platform exposes both, query only `Transfer` — including both double-counts every memo transfer.
 
@@ -68,20 +78,27 @@ Transactions where `from = 0x0000000000000000000000000000000000000000` are syste
 
 Genesis mints on Tempo may not emit a `Mint` event. To get accurate supply, derive it from `Transfer` events: mints have `from = 0x0000…0000`, burns have `to = 0x0000…0000`.
 
-```sql
-SELECT
-  SUM(CASE WHEN "from" = 0x0000000000000000000000000000000000000000
-           THEN amount / 1e6 ELSE 0 END) AS total_minted,
-  SUM(CASE WHEN "to"   = 0x0000000000000000000000000000000000000000
-           THEN amount / 1e6 ELSE 0 END) AS total_burned,
-  SUM(CASE WHEN "from" = 0x0000000000000000000000000000000000000000
-           THEN  amount / 1e6
-           WHEN "to"   = 0x0000000000000000000000000000000000000000
-           THEN -amount / 1e6
-           ELSE 0 END) AS supply
-FROM tip20_transfers
-WHERE token_address = <token>;
-```
+The query below derives `pathUSD` total minted, total burned, and live supply directly from `Transfer` events.
+
+<IndexSupplyQuery
+  chainId={4217}
+  title={'pathUSD Supply from Transfer Events'}
+  signatures={["Transfer"]}
+  query={`SELECT
+    SUM(CASE WHEN "from" = '0x0000000000000000000000000000000000000000'
+             THEN value ELSE 0 END) AS total_minted,
+    SUM(CASE WHEN "to" = '0x0000000000000000000000000000000000000000'
+             THEN value ELSE 0 END) AS total_burned,
+    SUM(CASE WHEN "from" = '0x0000000000000000000000000000000000000000'
+             THEN value
+             WHEN "to" = '0x0000000000000000000000000000000000000000'
+             THEN -value
+             ELSE 0 END) AS supply
+  FROM transfer
+  WHERE address = '0x20c0000000000000000000000000000000000000'`}
+/>
+
+Divide each value by `1e6` to convert raw amounts to whole tokens.
 
 ## Key addresses
 
