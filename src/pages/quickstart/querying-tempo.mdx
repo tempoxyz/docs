@@ -1,0 +1,113 @@
+---
+title: Querying Tempo
+description: Write correct analytics queries for Tempo. Covers fee units, TIP-20 decimals, Transfer events, fee_payer attribution, system transactions, and supply.
+showOutline: 1
+---
+
+# Querying Tempo
+
+Tempo is EVM-compatible, so most query patterns you already know work here. There are a handful of differences that will silently produce wrong numbers if you carry over Ethereum assumptions. This page covers them.
+
+The examples use generic SQL — column and table names will vary by platform.
+
+## 1. Fees are in USD, not ETH
+
+On Ethereum, gas price is in wei (10⁻¹⁸ ETH). On Tempo, gas price is in **attodollars** (10⁻¹⁸ USD). The result of the fee calculation is USD. There is no native token.
+
+The correct formula rounds to the nearest microdollar, which is how fees are actually settled:
+
+```sql
+CEIL(effective_gas_price * gas_used / 1e12) / 1e6
+```
+
+```sql
+SELECT date_trunc('day', block_time) AS day,
+       SUM(CEIL(effective_gas_price * gas_used / 1e12) / 1e6) AS usd_fees
+FROM transactions
+GROUP BY 1
+ORDER BY 1;
+```
+
+## 2. TIP-20 tokens use 6 decimals, not 18
+
+Divide token amounts by `1e6`. Using `1e18` gives a result 10¹² times too small.
+
+## 3. Use Transfer events for volume, not tx.value
+
+`tx.value` is always zero on Tempo. All token movement is captured in `Transfer` events.
+
+```sql
+SELECT date_trunc('day', block_time) AS day,
+       token_address,
+       SUM(amount) / 1e6 AS volume_usd
+FROM tip20_transfers
+GROUP BY 1, 2
+ORDER BY 1;
+```
+
+`TransferWithMemo` (used by MPP and others) also emits a standard `Transfer` event. If your platform exposes both, query only `Transfer` — including both double-counts every memo transfer.
+
+## 4. Use COALESCE(fee_payer, from) for attribution
+
+Sponsored transactions populate a separate `fee_payer` field. If you group by `from` to measure who paid fees or sent transactions, sponsored activity gets attributed to the wrong address.
+
+```sql
+SELECT COALESCE(fee_payer, "from") AS payer,
+       COUNT(*) AS tx_count,
+       SUM(CEIL(effective_gas_price * gas_used / 1e12) / 1e6) AS usd_paid
+FROM transactions
+GROUP BY 1
+ORDER BY 3 DESC;
+```
+
+## 5. Exclude system transactions when measuring user activity
+
+Transactions where `from = 0x0000000000000000000000000000000000000000` are system-level. Include them in raw chain metrics but exclude them when computing things like active addresses, unique senders, or user-initiated volume.
+
+## 6. Compute token supply from Transfer events, not Mint events
+
+Genesis mints on Tempo may not emit a `Mint` event. To get accurate supply, derive it from `Transfer` events: mints have `from = 0x0000…0000`, burns have `to = 0x0000…0000`.
+
+```sql
+SELECT
+  SUM(CASE WHEN "from" = 0x0000000000000000000000000000000000000000
+           THEN amount / 1e6 ELSE 0 END) AS total_minted,
+  SUM(CASE WHEN "to"   = 0x0000000000000000000000000000000000000000
+           THEN amount / 1e6 ELSE 0 END) AS total_burned,
+  SUM(CASE WHEN "from" = 0x0000000000000000000000000000000000000000
+           THEN  amount / 1e6
+           WHEN "to"   = 0x0000000000000000000000000000000000000000
+           THEN -amount / 1e6
+           ELSE 0 END) AS supply
+FROM tip20_transfers
+WHERE token_address = <token>;
+```
+
+## Key addresses
+
+| Contract | Address |
+| --- | --- |
+| FeeManager | `0xfeec000000000000000000000000000000000000` |
+| Stablecoin DEX | `0xdec0000000000000000000000000000000000000` |
+| TIP-20 Factory | `0x20fc000000000000000000000000000000000000` |
+| PathUSD | `0x20c0000000000000000000000000000000000000` |
+
+## Networks
+
+### Mainnet
+
+| | |
+| --- | --- |
+| Chain ID | `4217` |
+| RPC | `https://rpc.tempo.xyz` |
+| Explorer | `https://explore.tempo.xyz` |
+| Tokenlist | `https://tokenlist.tempo.xyz/list/4217` |
+
+### Testnet (Moderato)
+
+| | |
+| --- | --- |
+| Chain ID | `42431` |
+| RPC | `https://rpc.moderato.tempo.xyz` |
+| Explorer | `https://explore.testnet.tempo.xyz` |
+| Tokenlist | `https://tokenlist.tempo.xyz/list/42431` |
