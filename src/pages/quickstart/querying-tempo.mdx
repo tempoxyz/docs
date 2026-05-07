@@ -38,7 +38,7 @@ Divide token amounts by `1e6`. Using `1e18` gives a result 10¹² times too smal
   chainId={4217}
   title={'Recent pathUSD transfers'}
   signatures={["Transfer"]}
-  query={`SELECT block_num, "from", "to", value
+  query={`SELECT block_num, "from", "to", amount
   FROM transfer
   WHERE address = '0x20c0000000000000000000000000000000000000'
   ORDER BY block_num DESC
@@ -67,16 +67,23 @@ ORDER BY 2 DESC;
 
 Genesis mints may not emit `Mint`. Derive supply from `Transfer`: mints have `from = 0x0…0`, burns have `to = 0x0…0`. Divide by `1e6` for whole tokens.
 
-```sql
-SELECT
-  SUM(CASE WHEN "from" = '0x0000000000000000000000000000000000000000'
-           THEN value
-           WHEN "to"   = '0x0000000000000000000000000000000000000000'
-           THEN -value
-           ELSE 0 END) AS supply
-FROM transfer
-WHERE address = '0x20c0000000000000000000000000000000000000';
-```
+<IndexSupplyQuery
+  chainId={4217}
+  title={'pathUSD supply from Transfer events'}
+  signatures={["Transfer"]}
+  query={`SELECT
+    SUM(CASE WHEN "from" = '0x0000000000000000000000000000000000000000'
+             THEN amount ELSE 0 END) AS total_minted,
+    SUM(CASE WHEN "to" = '0x0000000000000000000000000000000000000000'
+             THEN amount ELSE 0 END) AS total_burned,
+    SUM(CASE WHEN "from" = '0x0000000000000000000000000000000000000000'
+             THEN amount
+             WHEN "to" = '0x0000000000000000000000000000000000000000'
+             THEN -amount
+             ELSE 0 END) AS supply
+  FROM transfer
+  WHERE address = '0x20c0000000000000000000000000000000000000'`}
+/>
 
 ## Key addresses
 
