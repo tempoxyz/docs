@@ -23,7 +23,7 @@ Node operators must upgrade to the T4-compatible release (v1.7.0, targeted for M
 ## Overview
 
 T4 is Tempo's next network upgrade. It introduces the following changes:
-- Embedding consensus context into the block header to unlock deferred verification and reduce finalization latency ([TIP-1031](/protocol/tips/tip-1031))
+- Embedding consensus context into the block header to unlock deferred verification and reduce finalization latency ([TIP-1031](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1031.md))
 - A bundle of T4 bug fixes and security hardening (https://tips.sh/1046)
 
 **Action required for node operators:** Upgrade to v1.7.0 before the Moderato activation timestamp. Non-upgraded nodes will fall out of consensus.
@@ -34,11 +34,11 @@ T4-compatible SDK releases will be listed here as they ship.
 
 ## Related docs
 - [Network upgrades and releases](/guide/node/network-upgrades)
-- [TIP-1031: Embed Consensus Context in the Block Header](/protocol/tips/tip-1031)
-- [TIP-1046: T4 Hardfork Meta TIP](/protocol/tips/tip-1046)
+- [TIP-1031: Embed Consensus Context in the Block Header](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1031.md)
+- [TIP-1046: T4 Hardfork Meta TIP](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1046.md)
 
 ## Feature TIPs
 
 ### TIP-1031: Embed Consensus Context in the Block Header
 
-[TIP-1031](/protocol/tips/tip-1031) adds an optional `Context` field (epoch, view, parent view, leader) as the last field of `TempoHeader`. This commits consensus metadata to the block hash so Tempo blocks implement Commonware's `CertifiableBlock` trait, enabling deferred verification (optimistic notarization with async background verification) and reduced finalization latency. Pre-activation headers are unchanged; post-activation headers require the field and validators reject mismatched context.
+[TIP-1031](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1031.md) adds an optional `Context` field (epoch, view, parent view, leader) as the last field of `TempoHeader`. This commits consensus metadata to the block hash so Tempo blocks implement Commonware's `CertifiableBlock` trait, enabling deferred verification (optimistic notarization with async background verification) and reduced finalization latency. Pre-activation headers are unchanged; post-activation headers require the field and validators reject mismatched context.

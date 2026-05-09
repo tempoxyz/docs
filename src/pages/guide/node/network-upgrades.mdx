@@ -39,7 +39,7 @@ For detailed release notes and binaries, see the [Changelog](/changelog).
 | | |
 |---|---|
 | **Scope** | Embed consensus context into the block header to unlock deferred verification, plus T4 bug fixes and security hardening |
-| **TIPs** | [TIP-1031: Embed Consensus Context in the Block Header](/protocol/tips/tip-1031), [TIP-1046: T4 Hardfork Meta TIP](/protocol/tips/tip-1046) |
+| **TIPs** | [TIP-1031: Embed Consensus Context in the Block Header](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1031.md), [TIP-1046: T4 Hardfork Meta TIP](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1046.md) |
 | **Details** | [T4 network upgrade](/protocol/upgrades/t4) |
 | **Release** | v1.7.0 (targeted for Mon, May 11, 2026 16:00 CEST) |
 | **Testnet** | Moderato: May 14, 2026 16:00 CEST (unix: 1778767200) |
@@ -50,7 +50,7 @@ For detailed release notes and binaries, see the [Changelog](/changelog).
 
 All node operators must upgrade before the T4 activation timestamp. TIP-1031 changes how block headers are produced and verified; non-upgraded nodes will have their proposals rejected and will fall out of consensus at activation.
 
-Smart contract developers and integrators are not directly affected by TIP-1031, but should review [TIP-1046](/protocol/tips/tip-1046) for the bundled gas accounting changes and access-key scope validation updates that may affect transaction gas usage post-T4.
+Smart contract developers and integrators are not directly affected by TIP-1031, but should review [TIP-1046](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1046.md) for the bundled gas accounting changes and access-key scope validation updates that may affect transaction gas usage post-T4.
 
 ---
 
@@ -59,7 +59,7 @@ Smart contract developers and integrators are not directly affected by TIP-1031,
 | | |
 |---|---|
 | **Scope** | Enhanced access keys with periodic limits, call scoping, and an authorization ABI update; signature verification precompile; and virtual addresses for TIP-20 deposit forwarding |
-| **TIPs** | [TIP-1011: Enhanced Access Key Permissions](/protocol/tips/tip-1011), [TIP-1020: Signature Verification Precompile](/protocol/tips/tip-1020), [TIP-1022: Virtual Addresses for TIP-20 Deposit Forwarding](/protocol/tips/tip-1022) |
+| **TIPs** | [TIP-1011: Enhanced Access Key Permissions](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1011.md), [TIP-1020: Signature Verification Precompile](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md), [TIP-1022: Virtual Addresses for TIP-20 Deposit Forwarding](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md) |
 | **Details** | [T3 network upgrade](/protocol/upgrades/t3) |
 | **Release** | [v1.6.0](https://github.com/tempoxyz/tempo/releases/tag/v1.6.0) |
 | **Testnet** | Moderato: Apr 21, 2026 16:00 CEST (unix: 1776780000) |
@@ -75,7 +75,7 @@ See the [T3 network upgrade](/protocol/upgrades/t3) page for breaking changes, m
 | | |
 |---|---|
 | **Scope** | Compound transfer policies, ValidatorConfig V2, and audit-driven bug fixes |
-| **TIPs** | [TIP-1015: Compound Transfer Policies](/protocol/tips/tip-1015), [TIP-1004: Permit for TIP-20](/protocol/tips/tip-1004), [TIP-1017: Validator Config V2](/protocol/tips/tip-1017), [TIP-1036: T2 Hardfork Bug Fixes](/protocol/tips/tip-1036) |
+| **TIPs** | [TIP-1015: Compound Transfer Policies](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1015.md), [TIP-1004: Permit for TIP-20](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1004.md), [TIP-1017: Validator Config V2](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1017.md), [TIP-1036: T2 Hardfork Bug Fixes](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1036.md) |
 | **Release** | v1.5.0 |
 | **Testnet** | Moderato: Mar 26, 2026 16:00 CET (unix: 1774537200) |
 | **Mainnet** | Mar 31, 2026 16:00 CEST (unix: 1774965600) |
@@ -100,7 +100,7 @@ See the [T3 network upgrade](/protocol/upgrades/t3) page for breaking changes, m
 | | |
 |---|---|
 | **Scope** | T1A removes the 16.7M per-transaction gas limit in favor of Tempo's 30M cap; T1B adds keychain precompile gas metering and expiring nonce replay-protection hardening |
-| **TIPs** | T1A: [TIP-1010: Mainnet Gas Parameters](https://docs.tempo.xyz/protocol/tips/tip-1010); T1B: upgrade hardening release |
+| **TIPs** | T1A: [TIP-1010: Mainnet Gas Parameters](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1010.md); T1B: upgrade hardening release |
 | **Release** | [v1.3.1](https://github.com/tempoxyz/tempo/releases/tag/v1.3.1) |
 | **Testnet** | T1A + T1B: Feb 23, 2026 15:00 UTC (unix: 1771858800) |
 | **Mainnet** | T1A: Feb 12, 2026 15:00 UTC (unix: 1770908400); T1B: Feb 23, 2026 15:00 UTC (unix: 1771858800) |
@@ -113,7 +113,7 @@ See the [T3 network upgrade](/protocol/upgrades/t3) page for breaking changes, m
 | | |
 |---|---|
 | **Scope** | Mainnet-ready gas economics, expiring nonces, and security hardening |
-| **TIPs** | [TIP-1000: State Creation Cost Increase](https://docs.tempo.xyz/protocol/tips/tip-1000), [TIP-1009: Expiring Nonces](https://docs.tempo.xyz/protocol/tips/tip-1009), [TIP-1010: Mainnet Gas Parameters](https://docs.tempo.xyz/protocol/tips/tip-1010) |
+| **TIPs** | [TIP-1000: State Creation Cost Increase](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1000.md), [TIP-1009: Expiring Nonces](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1009.md), [TIP-1010: Mainnet Gas Parameters](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1010.md) |
 | **Testnet** | Feb 5, 2026 15:00 UTC (unix: 1770303600) — Release: [v1.1.0](https://github.com/tempoxyz/tempo/releases/tag/v1.1.0) |
 | **Mainnet** | Feb 12, 2026 15:00 UTC (unix: 1770908400) — Release: [v1.1.1](https://github.com/tempoxyz/tempo/releases/tag/v1.1.1) |
 | **Priority** | <Badge variant="red">Required</Badge> |

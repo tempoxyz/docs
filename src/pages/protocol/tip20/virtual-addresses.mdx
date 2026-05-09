@@ -38,7 +38,7 @@ The important idea is simple: the virtual address is for routing and attribution
 
 ## Address format
 
-A virtual address is still a normal 20-byte EVM address. [TIP-1022](/protocol/tips/tip-1022) gives those 20 bytes a specific layout:
+A virtual address is still a normal 20-byte EVM address. [TIP-1022](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md) gives those 20 bytes a specific layout:
 
 ```text
 0x | masterId (4 bytes) | VIRTUAL_MAGIC (10 bytes) | userTag (6 bytes)
@@ -138,7 +138,7 @@ TIP-1022 is deliberately narrow in scope.
 
 ### It only changes TIP-20 deposit paths
 
-Virtual forwarding applies only to the TIP-20 transfer and mint paths defined by [TIP-1022](/protocol/tips/tip-1022). It is not a general EVM alias system.
+Virtual forwarding applies only to the TIP-20 transfer and mint paths defined by [TIP-1022](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md). It is not a general EVM alias system.
 
 ### It does not change ERC-20 contracts deployed on Tempo
 
@@ -160,7 +160,7 @@ Adopting virtual addresses is straightforward conceptually:
 - ongoing operations: derive deposit addresses offchain
 - reconciliation: decode the `userTag` from events and credit the right customer internally
 
-If you want the exact transfer semantics, event shape, and validation rules, read [TIP-1022](/protocol/tips/tip-1022) alongside the [TIP-20 specification](/protocol/tip20/spec).
+If you want the exact transfer semantics, event shape, and validation rules, read [TIP-1022](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md) alongside the [TIP-20 specification](/protocol/tip20/spec).
 
 ## Learn more
 
@@ -174,7 +174,7 @@ If you want the exact transfer semantics, event shape, and validation rules, rea
   <Card
     title="TIP-1022 specification"
     description="Read the full TIP with address derivation, forwarding semantics, and invariants."
-    to="/protocol/tips/tip-1022"
+    to="https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md"
     icon="lucide:file-text"
   />
   <Card

@@ -448,7 +448,7 @@ TIP-20 tokens cannot be sent to other TIP-20 token contract addresses. The imple
 Any attempt to transfer to a TIP-20 token address must revert with `InvalidRecipient`. This prevents accidental token loss by sending funds to token contracts instead of user accounts.
 
 ## Virtual Address Recipients
-Recipient-bearing TIP-20 paths — `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo` — resolve [TIP-1022](/protocol/tips/tip-1022) virtual addresses before running recipient authorization and mint-recipient checks. When a recipient `to` is a registered virtual address, the effective recipient becomes the registered master wallet, and authorization, balance updates, and event emission target that master wallet.
+Recipient-bearing TIP-20 paths — `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo` — resolve [TIP-1022](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md) virtual addresses before running recipient authorization and mint-recipient checks. When a recipient `to` is a registered virtual address, the effective recipient becomes the registered master wallet, and authorization, balance updates, and event emission target that master wallet.
 
 Virtual addresses are valid TIP-20 recipients on those paths but remain forwarding aliases rather than canonical TIP-20 holders. Non-TIP-20 tokens sent to a virtual address do not forward. Forwarded deposits appear as two-hop standard `Transfer` events in the same transaction; indexers and explorers should collapse that pair into one logical deposit to the resolved master wallet.
 
@@ -469,7 +469,7 @@ While quote tokens can be changed, choose carefully as the update process requir
 ## Permit (TIP-1004)
 TIP-20 tokens support [EIP-2612](https://eips.ethereum.org/EIPS/eip-2612) `permit`, added in the [T2 network upgrade](/protocol/upgrades/t2). A token owner signs an EIP-712 typed message off-chain authorizing a spender, and any third party can submit that signature on-chain — combining approve and action into a single transaction without the owner paying gas.
 
-The `DOMAIN_SEPARATOR` is computed dynamically on every call using `block.chainid`, so it remains correct after a chain fork. Each owner has a monotonically increasing `nonce` to prevent replay. Only `v = 27` or `v = 28` is accepted; `v = 0` or `v = 1` is intentionally **not** normalized (see [TIP-1004](/protocol/tips/tip-1004) for rationale).
+The `DOMAIN_SEPARATOR` is computed dynamically on every call using `block.chainid`, so it remains correct after a chain fork. Each owner has a monotonically increasing `nonce` to prevent replay. Only `v = 27` or `v = 28` is accepted; `v = 0` or `v = 1` is intentionally **not** normalized (see [TIP-1004](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1004.md) for rationale).
 
 ## Pause Controls
 Pause controls `pause` and `unpause` govern all transfer operations and reward related flows. When paused, transfers and memo transfers halt, but administrative and configuration functions remain allowed. The `paused()` getter reflects the current state and must be checked by all affected entrypoints.
@@ -610,7 +610,7 @@ interface ITIP20Factory {
 This section captures changes introduced by the [T3 network upgrade](/protocol/upgrades/t3) for integrators migrating from T2. The spec above is the canonical post-T3 specification; this appendix exists for reference and will be removed in a future docs revision.
 :::
 
-T3 introduced [TIP-1022](/protocol/tips/tip-1022) virtual addresses, which affect TIP-20 in the following ways:
+T3 introduced [TIP-1022](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md) virtual addresses, which affect TIP-20 in the following ways:
 
 - Virtual-address recipient resolution applies to recipient-bearing TIP-20 paths: `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo`. See [Virtual Address Recipients](#virtual-address-recipients).
 - When an operation targets a registered virtual address, the effective recipient becomes the registered master wallet before recipient authorization and mint-recipient checks run.

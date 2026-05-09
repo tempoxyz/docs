@@ -1,6 +1,6 @@
 ---
-title: Handlers
-description: Server-side handlers for the Tempo Accounts SDK.
+title: Tempo Accounts Server Handlers
+description: Configure server-side Tempo Accounts SDK handlers for relaying wallet RPC requests, composing backends, and managing WebAuthn ceremonies.
 ---
 
 import { Cards, Card } from 'vocs'
@@ -35,19 +35,19 @@ export const POST = handler.fetch // Next.js
   <Card
     description="Compose multiple handlers into a single handler"
     icon="lucide:layers"
-    to="/accounts/server/compose"
+    to="/accounts/server/handler.compose"
     title="Handler.compose"
   />
   <Card
     description="Proxy RPC requests with sponsorship, auto-swap, and balance diffs"
     icon="lucide:radio"
-    to="/accounts/server/relay"
+    to="/accounts/server/handler.relay"
     title="Handler.relay"
   />
   <Card
     description="Handle WebAuthn credential registration and authentication"
     icon="lucide:fingerprint"
-    to="/accounts/server/webAuthn"
+    to="/accounts/server/handler.webAuthn"
     title="Handler.webAuthn"
   />
 </Cards>

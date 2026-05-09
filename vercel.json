@@ -53,6 +53,46 @@
       "source": "/guide/bridge-usdc-relay",
       "destination": "/guide/bridge-relay",
       "permanent": true
+    },
+    {
+      "source": "/network-upgrades",
+      "destination": "/guide/node/network-upgrades",
+      "permanent": true
+    },
+    {
+      "source": "/AccountKeychain",
+      "destination": "/protocol/transactions/AccountKeychain",
+      "permanent": true
+    },
+    {
+      "source": "/guide/node/validator-config-v2",
+      "destination": "/guide/node/network-upgrades",
+      "permanent": true
+    },
+    {
+      "source": "/accounts/server/compose",
+      "destination": "/accounts/server/handler.compose",
+      "permanent": true
+    },
+    {
+      "source": "/accounts/server/relay",
+      "destination": "/accounts/server/handler.relay",
+      "permanent": true
+    },
+    {
+      "source": "/accounts/server/webAuthn",
+      "destination": "/accounts/server/handler.webAuthn",
+      "permanent": true
+    },
+    {
+      "source": "/tip-:id",
+      "destination": "https://github.com/tempoxyz/tempo/blob/main/tips/tip-:id.md",
+      "permanent": true
+    },
+    {
+      "source": "/protocol/tips/tip-:id",
+      "destination": "https://github.com/tempoxyz/tempo/blob/main/tips/tip-:id.md",
+      "permanent": true
     }
   ],
   "rewrites": [
