@@ -20,9 +20,9 @@ Partners should upgrade nodes to the T3-compatible release before the Moderato a
 
 | TIP | What it does | Who should review |
 |-----|-------------|-------------------|
-| [TIP-1011](/protocol/tips/tip-1011) | Periodic spending limits, call scoping, and a ban on access-key contract creation | Wallets, account SDKs, apps using connected apps or subscriptions |
-| [TIP-1020](/protocol/tips/tip-1020) | Signature verification precompile for secp256k1, P256, and WebAuthn | Smart contract teams, account integrators, wallet SDKs |
-| [TIP-1022](/protocol/tips/tip-1022) | [Virtual addresses](/protocol/tip20/virtual-addresses) for TIP-20 deposit forwarding | Exchanges, ramps, custodians, payment processors, explorers, indexers |
+| [TIP-1011](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1011.md) | Periodic spending limits, call scoping, and a ban on access-key contract creation | Wallets, account SDKs, apps using connected apps or subscriptions |
+| [TIP-1020](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md) | Signature verification precompile for secp256k1, P256, and WebAuthn | Smart contract teams, account integrators, wallet SDKs |
+| [TIP-1022](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md) | [Virtual addresses](/protocol/tip20/virtual-addresses) for TIP-20 deposit forwarding | Exchanges, ramps, custodians, payment processors, explorers, indexers |
 
 ## Breaking changes
 
@@ -61,7 +61,7 @@ See [Virtual addresses for TIP-20 deposits](/protocol/tip20/virtual-addresses) f
 
 ### Signature verification precompile
 
-[TIP-1020](/protocol/tips/tip-1020) is additive — existing verifier setups keep working. Teams that want a standard onchain verification surface can adopt the precompile instead of maintaining custom verifier contracts. See the [Signature Verification with Foundry](/sdk/foundry/signature-verifier) guide.
+[TIP-1020](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md) is additive — existing verifier setups keep working. Teams that want a standard onchain verification surface can adopt the precompile instead of maintaining custom verifier contracts. See the [Signature Verification with Foundry](/sdk/foundry/signature-verifier) guide.
 
 ## Compatible SDK releases
 
@@ -81,5 +81,5 @@ The Accounts SDK and `wallet_authorizeAccessKey` docs still describe the legacy 
 
 ## Related docs
 - [Virtual addresses for TIP-20 deposits](/protocol/tip20/virtual-addresses)
-- [TIP-1022](/protocol/tips/tip-1022)
+- [TIP-1022](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md)
 - Coordinating meta TIP: [tempoxyz/tempo#3273](https://github.com/tempoxyz/tempo/pull/3273)
