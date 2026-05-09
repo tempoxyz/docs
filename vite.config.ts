@@ -5,6 +5,7 @@ import { Instance } from 'prool'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { vocs } from 'vocs/vite'
+import { moderatoZoneRpcUrls } from './src/lib/private-zones.ts'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -15,15 +16,42 @@ export default defineConfig(({ mode }) => {
 
   const useHttp = process.env.CI === 'true' || process.env.VITE_USE_HTTP === 'true'
 
+  const e2eZoneProxy = env.VITE_E2E === 'true' ? getE2EZoneProxy() : undefined
+
   return {
     plugins: [syncTips(), vocs(), react(), ...(useHttp ? [] : [mkcert()]), tempoNode()],
     server: useHttp
       ? {
           host: 'localhost',
+          proxy: e2eZoneProxy,
         }
       : undefined,
   }
 })
+
+function getE2EZoneProxy() {
+  return Object.fromEntries(
+    Object.entries(moderatoZoneRpcUrls).map(([zoneId, rpcUrl]) => {
+      const parsedUrl = new URL(rpcUrl)
+      const authorization = `Basic ${Buffer.from(
+        `${decodeURIComponent(parsedUrl.username)}:${decodeURIComponent(parsedUrl.password)}`,
+      ).toString('base64')}`
+      parsedUrl.username = ''
+      parsedUrl.password = ''
+
+      return [
+        `/__e2e_zone_rpc/${zoneId}`,
+        {
+          changeOrigin: true,
+          headers: { authorization },
+          rewrite: () => '/',
+          secure: true,
+          target: parsedUrl.toString(),
+        },
+      ]
+    }),
+  )
+}
 
 function tempoNode(): Plugin {
   return {

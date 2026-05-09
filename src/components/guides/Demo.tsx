@@ -17,9 +17,9 @@ import LucideWalletCards from '~icons/lucide/wallet-cards'
 import { cva, cx } from '../../../cva.config'
 import { usePostHogTracking } from '../../lib/posthog'
 import {
-  getZoneTransportConfig,
+  getZoneRpcHttpUrl,
+  getZoneRpcTransportConfig,
   moderatoZoneRpcUrls,
-  stripRpcBasicAuth,
 } from '../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../lib/useRootWebAuthnAccount.ts'
 import { useTempoWalletConnector, useWebAuthnConnector } from '../../wagmi.config'
@@ -307,8 +307,8 @@ export namespace Container {
               account: rootWebAuthnAccount,
               chain: zoneModerato(zone),
               transport: zoneHttp(
-                stripRpcBasicAuth(zoneRpcUrl),
-                getZoneTransportConfig(zoneRpcUrl),
+                getZoneRpcHttpUrl(zone, zoneRpcUrl),
+                getZoneRpcTransportConfig(zone, zoneRpcUrl),
               ),
             }).extend(tempoActions()) as unknown as ZoneClientLike)
           : undefined,

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { waitForEnabledAction } from './private-zone-actions'
 
 test('swap pathUSD from Zone A into betaUSD on Zone B', async ({ page }) => {
   test.setTimeout(240000)
@@ -35,18 +36,17 @@ test('swap pathUSD from Zone A into betaUSD on Zone B', async ({ page }) => {
   const getFundsButton = page.getByRole('button', { name: /^Get testnet pathUSD$/i }).first()
   const topUpButton = page.getByRole('button', { name: /^Approve \+ top up Zone A$/i }).first()
 
-  await expect
-    .poll(async () => (await getFundsButton.isVisible()) || (await topUpButton.isVisible()), {
-      timeout: 90000,
-    })
-    .toBe(true)
+  const initialAction = await waitForEnabledAction([
+    { locator: getFundsButton, name: 'fund' },
+    { locator: topUpButton, name: 'top-up' },
+  ])
 
-  if (await getFundsButton.isVisible()) {
-    await getFundsButton.click()
-    await expect(topUpButton).toBeVisible({ timeout: 90000 })
+  if (initialAction.name === 'fund') {
+    await initialAction.locator.click()
+    await expect(topUpButton).toBeEnabled({ timeout: 90000 })
   }
 
-  if (await topUpButton.isVisible()) {
+  if ((await topUpButton.isVisible()) && (await topUpButton.isEnabled())) {
     await topUpButton.click()
   }
 

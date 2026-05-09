@@ -98,6 +98,22 @@ export function getZoneTransportConfig(rpcUrl: string): ZoneTransportConfig | un
   }
 }
 
+export function getZoneRpcHttpUrl(zoneId: number, rpcUrl: string) {
+  const location = (globalThis as { location?: { origin: string } }).location
+
+  if (import.meta.env.VITE_E2E === 'true' && zoneId in moderatoZoneRpcUrls && location) {
+    return `${location.origin}/__e2e_zone_rpc/${zoneId}`
+  }
+
+  return stripRpcBasicAuth(rpcUrl)
+}
+
+export function getZoneRpcTransportConfig(zoneId: number, rpcUrl: string) {
+  if (import.meta.env.VITE_E2E === 'true' && zoneId in moderatoZoneRpcUrls) return undefined
+
+  return getZoneTransportConfig(rpcUrl)
+}
+
 function encodeBase64(value: string) {
   if (typeof globalThis.btoa === 'function') return globalThis.btoa(value)
 
