@@ -75,6 +75,35 @@ function escapeAngleBrackets(source: string): string {
   return result.join('\n')
 }
 
+function quoteTipFrontmatterFields(source: string): string {
+  if (!source.startsWith('---\n')) return source
+
+  return source.replace(/^---\n([\s\S]*?)\n---/, (_, frontmatter: string) => {
+    const fieldsToQuote = new Set(['authors'])
+    const normalized = frontmatter
+      .split('\n')
+      .map((line) => {
+        const match = /^([A-Za-z][\w-]*):\s*(.+)$/.exec(line)
+        if (!match || !fieldsToQuote.has(match[1])) return line
+
+        const value = match[2].trim()
+        if (
+          value.startsWith('"') ||
+          value.startsWith("'") ||
+          value.startsWith('[') ||
+          value.startsWith('{')
+        ) {
+          return line
+        }
+
+        return `${match[1]}: ${JSON.stringify(value)}`
+      })
+      .join('\n')
+
+    return `---\n${normalized}\n---`
+  })
+}
+
 function syncTips(): Plugin {
   const repo = 'tempoxyz/tempo'
   const outputDir = 'src/pages/protocol/tips'
@@ -105,11 +134,7 @@ function syncTips(): Plugin {
         // files are no longer published, so keeping the link would surface dead
         // references in the docs UI and fail Vocs' dead-link checker.
         content = content.replace(
-          /^- \[[^\]]+\.sol\]\(tips\/(?:ref-impls|verify)\/src\/interfaces\/[^)]+\)\n/gm,
-          '',
-        )
-        content = content.replace(
-          /\[([^\]]+\.sol)\]\(tips\/(?:ref-impls|verify)\/src\/interfaces\/[^)]+\)/g,
+          /\[([^\]]+)\]\((?:tips\/)?(?:ref-impls|verify)\/src\/[^)]+\.sol\)/g,
           '$1',
         )
         // tip-0000 links to `./tip_template.md`, which lives in the tempo
@@ -120,7 +145,8 @@ function syncTips(): Plugin {
         )
         // Rewrite inter-TIP links from ./tip-NNNN.md to ./tip-NNNN (synced as .mdx,
         // Vocs resolves extensionless paths).
-        content = content.replace(/\(\.\/tip-(\d+)\.md\)/g, '(./tip-$1)')
+        content = content.replace(/\((?:\.\/)?tip-(\d+)\.md\)/g, '(./tip-$1)')
+        content = quoteTipFrontmatterFields(content)
         // Escape angle brackets outside of code blocks/inline code so MDX doesn't
         // treat them as JSX (e.g. `Mapping<B256, bool>` in prose).
         content = escapeAngleBrackets(content)
@@ -134,6 +160,9 @@ function syncTips(): Plugin {
 
   return {
     name: 'sync-tips',
+    async configResolved() {
+      await sync()
+    },
     async buildStart() {
       await sync()
     },
