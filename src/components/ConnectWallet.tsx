@@ -1,10 +1,24 @@
 'use client'
 import * as React from 'react'
+import { tempo } from 'viem/chains'
 import { useChains, useConnect, useConnection, useConnectors, useSwitchChain } from 'wagmi'
 import { Button, Logout } from './guides/Demo'
 import { filterSupportedInjectedConnectors } from './lib/wallets'
 
-export function ConnectWallet({ showAddChain = true }: { showAddChain?: boolean }) {
+const mainnetParams = {
+  chainId: tempo.id,
+  addEthereumChainParameter: {
+    chainName: tempo.name,
+    nativeCurrency: { name: 'USD', decimals: 18, symbol: 'USD' },
+    rpcUrls: [tempo.rpcUrls.default.http[0]],
+    blockExplorerUrls: ['https://explore.tempo.xyz'],
+  },
+} as const
+
+export function ConnectWallet({
+  showAddChain = true,
+  network = 'testnet',
+}: { showAddChain?: boolean; network?: 'mainnet' | 'testnet' }) {
   const { address, chain, connector } = useConnection()
   const connect = useConnect()
   const connectors = useConnectors()
@@ -14,7 +28,8 @@ export function ConnectWallet({ showAddChain = true }: { showAddChain?: boolean 
   )
   const switchChain = useSwitchChain()
   const chains = useChains()
-  const isSupported = chains.some((c) => c.id === chain?.id)
+  const targetChainId = network === 'mainnet' ? tempo.id : chains[0].id
+  const isSupported = chain?.id === targetChainId || chains.some((c) => c.id === chain?.id)
   if (!injectedConnectors.length)
     return (
       <div className="flex items-center text-[14px] -tracking-[2%]">No browser wallets found.</div>
@@ -39,6 +54,18 @@ export function ConnectWallet({ showAddChain = true }: { showAddChain?: boolean 
         ))}
       </div>
     )
+
+  const switchParams =
+    network === 'mainnet'
+      ? mainnetParams
+      : {
+          chainId: chains[0].id,
+          addEthereumChainParameter: {
+            nativeCurrency: { name: 'USD', decimals: 18, symbol: 'USD' },
+            blockExplorerUrls: ['https://explore.testnet.tempo.xyz'],
+          },
+        }
+
   return (
     <div className="flex flex-col gap-2">
       <Logout />
@@ -46,19 +73,7 @@ export function ConnectWallet({ showAddChain = true }: { showAddChain?: boolean 
         <Button
           className="w-fit"
           variant="accent"
-          onClick={() =>
-            switchChain.switchChain({
-              chainId: chains[0].id,
-              addEthereumChainParameter: {
-                nativeCurrency: {
-                  name: 'USD',
-                  decimals: 18,
-                  symbol: 'USD',
-                },
-                blockExplorerUrls: ['https://explore.tempo.xyz'],
-              },
-            })
-          }
+          onClick={() => switchChain.switchChain(switchParams)}
         >
           Add Tempo to {connector?.name ?? 'Wallet'}
         </Button>
