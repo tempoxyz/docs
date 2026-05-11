@@ -13,7 +13,7 @@ const mainnetParams = {
     rpcUrls: [tempo.rpcUrls.default.http[0]],
     blockExplorerUrls: ['https://explore.tempo.xyz'],
   },
-} as const
+}
 
 export function ConnectWallet({
   showAddChain = true,
@@ -29,7 +29,8 @@ export function ConnectWallet({
   const switchChain = useSwitchChain()
   const chains = useChains()
   const targetChainId = network === 'mainnet' ? tempo.id : chains[0].id
-  const isSupported = chain?.id === targetChainId || chains.some((c) => c.id === chain?.id)
+  const isSupported =
+    network === 'mainnet' ? chain?.id === targetChainId : chains.some((c) => c.id === chain?.id)
   if (!injectedConnectors.length)
     return (
       <div className="flex items-center text-[14px] -tracking-[2%]">No browser wallets found.</div>
