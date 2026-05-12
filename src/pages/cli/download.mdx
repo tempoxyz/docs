@@ -7,6 +7,8 @@ description: Download chain snapshots for faster initial sync of a Tempo node.
 
 Download chain snapshots for faster initial sync. Fetches MDBX state and static files, and generates a `reth.toml` prune config for the target data directory.
 
+By default, `tempo download` downloads a minimal snapshot, which is recommended for validators to save disk space. Use archive snapshots for RPC providers, indexers, and other workloads that need complete historical data.
+
 ## Usage
 
 ```bash
@@ -19,23 +21,30 @@ tempo download [flags]
 | --- | --- |
 | `--chain <network>` | Target network (`mainnet`, `moderato`) |
 | `--datadir <path>` | Data directory for downloaded state |
-| `-u, --url <url>` | Download a specific snapshot URL |
+| `--manifest-url <url>` | Download a specific modular snapshot manifest URL |
 | `--list` | List available snapshots |
 | `--resumable` | Resume an interrupted download |
-| `--archive` | Download an archive snapshot. Recommended for partner validators and RPC nodes. |
+| `--minimal` | Download a minimal snapshot. This is the default and is recommended for validators. |
+| `--archive` | Download an archive snapshot. Recommended for RPC providers and indexers. |
 
 ## Examples
 
-Download the latest recommended mainnet snapshot:
+Download the latest mainnet validator snapshot:
+
+```bash
+tempo download --chain mainnet
+```
+
+Download the latest testnet validator snapshot:
+
+```bash
+tempo download --chain moderato
+```
+
+Download an archive snapshot for an RPC node:
 
 ```bash
 tempo download --chain mainnet --archive
-```
-
-Download the latest recommended testnet snapshot:
-
-```bash
-tempo download --chain moderato --archive
 ```
 
 List available snapshots:
@@ -53,7 +62,9 @@ tempo download --list --chain moderato
 Resume an interrupted download:
 
 ```bash
-tempo download --archive --resumable
+tempo download --resumable
 ```
+
+Use the [snapshots viewer](https://snapshots.tempo.xyz/) to compare snapshot profiles and copy generated commands.
 
 Then start your node with [`tempo node`](/cli/node).
