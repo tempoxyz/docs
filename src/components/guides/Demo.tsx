@@ -622,7 +622,7 @@ export function Button(
 }
 
 const buttonClassName = cva({
-  base: 'relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-normal transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+  base: 'relative inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md font-normal transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:cursor-default disabled:opacity-50',
   defaultVariants: {
     size: 'default',
     variant: 'default',
@@ -635,7 +635,7 @@ const buttonClassName = cva({
       default: 'h-[32px] px-[14px] text-[14px] -tracking-[2%]',
     },
     static: {
-      true: 'pointer-events-none',
+      true: 'pointer-events-none cursor-default',
     },
     variant: {
       accent: 'border bg-invert text-invert dark:border-dashed',
