@@ -31,6 +31,49 @@ As an example, here's Tempo's tokenlist, fetched from [tokenlist.tempo.xyz/list/
 
 ## Adding a New Token
 
+There are two ways to publish token metadata on Tempo:
+
+| | On-chain (`logoURI`) | This registry |
+|---|---|---|
+| Available | T5+ | Today |
+| What you get | Icon readable directly from the token contract | Canonical metadata + icon recognized by tokenlist consumers and the Explorer |
+| Best for | Issuers who only need an icon and want full self-custody of it | Tokens that need `coingeckoId`, `bridgeInfo`, display `label`, or a fallback icon for clients that don't yet read on-chain `logoURI` |
+
+Most issuers will want both: set `logoURI` on-chain so any wallet or explorer can render the icon without registry lookup, and register here for the richer metadata extensions.
+
+### Setting `logoURI` on-chain (T5+)
+
+After the [T5 network upgrade](/protocol/upgrades/t5), every TIP-20 exposes an optional on-chain `logoURI` field ([TIP-1026](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1026.md)). Set it at creation via the new 7-arg `createToken` overload on the factory:
+
+```solidity
+function createToken(
+    string calldata name,
+    string calldata symbol,
+    string calldata currency,
+    address quoteToken,
+    address admin,
+    bytes32 salt,
+    string calldata logoURI
+) external returns (address);
+```
+
+Or update it later on a deployed token via the admin-only setter (requires `DEFAULT_ADMIN_ROLE`):
+
+```solidity
+function setLogoURI(string calldata newLogoURI) external;
+```
+
+Either path emits `LogoURIUpdated(address indexed updater, string newLogoURI)` from the **token's own address** (not the factory) with `updater = msg.sender`. Wallets and explorers can read the current value from any TIP-20 via `logoURI() returns (string memory)`.
+
+**Field rules:**
+
+- String, max 256 bytes — reverts `LogoURITooLong` otherwise
+- If non-empty, must be a syntactically valid URI with a scheme in the allowlist `https`, `http`, `ipfs`, `data` (case-insensitive) — reverts `InvalidLogoURI` otherwise
+- Empty string is valid and clears the field
+- Same SVG / square aspect / minimal-whitespace recommendations as the [Icon Requirements](#icon-requirements) below
+
+### Registering in the tokenlist
+
 1. **Fork** [tempoxyz/tempo-apps](https://github.com/tempoxyz/tempo-apps)
 
 2. **Add token** to `data/<chain_id>/tokenlist.json` in `apps/tokenlist`:

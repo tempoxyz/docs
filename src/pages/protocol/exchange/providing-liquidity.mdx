@@ -79,11 +79,12 @@ function placeFlip(
 **Parameters:**
 - All parameters from `place()`, plus:
 - `flipTick` - The price where the order will flip to when filled
-  - Must be greater than `tick` if `isBid` is true
-  - Must be less than `tick` if `isBid` is false
+  - Must be greater than or equal to `tick` if `isBid` is true
+  - Must be less than or equal to `tick` if `isBid` is false
+  - `flipTick == tick` is allowed after the [T5 network upgrade](/protocol/upgrades/t5) ([TIP-1030](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1030.md)) — useful for pegged pairs where you want to buy and sell at the same tick
 
 **Returns:**
-- `orderId` - Unique identifier for this flip order
+- `orderId` - Unique identifier for this flip order. The same `orderId` is reused across every flip of the order's lifetime ([TIP-1056](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1056.md))
 
 **Example: Place a flip order providing liquidity on both sides**
 ```solidity
@@ -99,13 +100,22 @@ uint128 orderId = exchange.placeFlip(
 
 When this order is completely filled:
 1. You buy 1000 USDG at $0.9990
-2. A new order automatically sells 1000 USDG at $1.0010
-3. When that fills, it flips back to a bid at $0.9990
+2. The same order is rewritten in place to sell 1000 USDG at $1.0010 — the `orderId` does not change, and an `OrderFlipped` event is emitted (not `OrderPlaced`)
+3. When that side fills, the order flips back to a bid at $0.9990 — again, same `orderId`, another `OrderFlipped` event
 4. This continues indefinitely, earning the spread each time
 
 :::info
 Flip orders act like a liquidity pool position, automatically providing liquidity on both sides of the market as they're filled back and forth.
 :::
+
+#### Tracking flip orders
+
+Indexers, analytics, and order-tracking UIs should follow a flip order by its persistent `orderId`:
+
+- **Before T5:** each fill emitted `OrderFilled` followed by `OrderPlaced` for the new opposite-side order with a freshly allocated `orderId`. One logical flip strategy looked like a chain of unrelated orders that had to be stitched together off-chain.
+- **After T5:** each fill emits `OrderFilled` followed by `OrderFlipped(orderId, newSide, newTick, ...)`. The `orderId` is unchanged, no new id is allocated, and `nextOrderId` does not advance.
+
+If your indexer currently keys order state by `(orderId)` and assumes each `orderId` represents a single side, update it to handle `OrderFlipped` and let a single `orderId` change side and tick over its lifetime. See the [compatibility section of TIP-1056](https://tips.sh/1056#compatibility) for migration guidance.
 
 ## Understanding Ticks
 
@@ -152,7 +162,7 @@ Orders follow a specific lifecycle:
 2. **Filling**: As market orders execute against your order:
    - Your order fills partially or completely
    - Proceeds are credited to your DEX balance
-   - If a flip order fills completely, a new order is immediately created on the opposite side
+   - If a flip order fills completely, the same order is rewritten in place on the opposite side, keeping its `orderId` and emitting `OrderFlipped` (after the [T5 network upgrade](/protocol/upgrades/t5); pre-T5, a new order with a new `orderId` was created and `OrderPlaced` was emitted)
 
 ## Cancelling Orders
 
