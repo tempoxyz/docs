@@ -8,6 +8,10 @@ These are the minimum and recommended system requirements for running a validato
 It is likely, that the nodes will not require as much resources at the beginning of the chain,
 but we still highly recommend to follow the recommended specifications. This will allow for future growth and scalability.
 
+:::danger[Storage requirement]
+Validators must run on local NVMe / direct-attached storage. Network-attached volumes (EBS, GCP Persistent Disk, Azure Managed Disk, NAS, SAN) are **not supported**.
+:::
+
 Consensus state can live on a lower performance volume (for example, EBS), but execution state needs NVMe storage.
 If you want to separate them, use `--datadir` for execution data and `--consensus.datadir` for consensus data.
 
