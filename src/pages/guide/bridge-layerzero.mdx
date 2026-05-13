@@ -260,7 +260,9 @@ await walletClient.writeContract({
 
 ### Bridge from Tempo via Stargate
 
-To bridge from Tempo back to another chain, call `sendToken` on the Stargate OFT contract on Tempo. The process is the same - quote, approve, send - but the source contract and destination EID are swapped.
+To bridge from Tempo back to another chain, call `sendToken` on the Stargate OFT contract on Tempo. The process is similar to bridging in - quote, approve, send - but includes additional steps to prepare the messaging fee.
+
+Because Tempo has no native gas token, LayerZero messaging fees are paid in a TIP-20 stablecoin via [LZEndpointDollar](#endpointdollar). Before sending a bridge transaction, you must wrap your USDC.e into an LZD (LayerZero Dollar) token that the endpoint can consume as a fee. This involves approving USDC.e to the LZD wrapper contract, wrapping it, and then approving the resulting LZD to the Stargate pool.
 
 #### Using cast (Foundry)
 
@@ -279,6 +281,46 @@ cast call 0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392 \
 ```
 
 Take the first returned number as `<NATIVE_FEE>` (in stablecoin units, not ETH).
+
+### Approve USDC.e to the LZD wrapper
+
+Approve the `LZEndpointDollar` wrapper contract to spend `<NATIVE_FEE>` of your USDC.e. This is the amount needed to cover the LayerZero messaging fee.
+
+```bash
+cast send 0x20C000000000000000000000b9537d11c60E8b50 \
+  "approve(address,uint256)" \
+  0x0cEb237E109eE22374a567c6b09F373C73FA4cBb \
+  <NATIVE_FEE> \
+  --rpc-url https://rpc.tempo.xyz \
+  --private-key $PRIVATE_KEY
+```
+
+### Wrap USDC.e into LZD
+
+Wrap your USDC.e into the LZD token so it can be used as a messaging fee by the LayerZero endpoint.
+
+```bash
+cast send 0x0cEb237E109eE22374a567c6b09F373C73FA4cBb \
+  "wrap(address,address,uint256)" \
+  0x20C000000000000000000000b9537d11c60E8b50 \
+  <WALLET_ADDRESS> \
+  <NATIVE_FEE> \
+  --rpc-url https://rpc.tempo.xyz \
+  --private-key $PRIVATE_KEY
+```
+
+### Approve LZD to Stargate
+
+Approve the Stargate OFT contract to spend your LZD so it can pay the messaging fee when sending.
+
+```bash
+cast send 0x0cEb237E109eE22374a567c6b09F373C73FA4cBb \
+  "approve(address,uint256)" \
+  0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392 \
+  <NATIVE_FEE> \
+  --rpc-url https://rpc.tempo.xyz \
+  --private-key $PRIVATE_KEY
+```
 
 ### Approve token on Tempo
 
@@ -332,6 +374,8 @@ const walletClient = createWalletClient({
 const stargateOFT = '0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392' as const
 // USDC.e on Tempo
 const usdce = '0x20C000000000000000000000b9537d11c60E8b50' as const
+// LZEndpointDollar wrapper
+const lzd = '0x0cEb237E109eE22374a567c6b09F373C73FA4cBb' as const
 
 const amount = parseUnits('1', 6) // 1 USDC.e
 const minAmount = parseUnits('0.99', 6) // 1% slippage tolerance
@@ -346,6 +390,20 @@ const sendParam = {
   oftCmd: '0x' as const, // taxi mode (immediate)
 }
 
+const wrapAbi = [
+  {
+    name: 'wrap',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'token', type: 'address' },
+      { name: 'to', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    outputs: [],
+  },
+] as const
+
 // 1. Quote the fee
 const publicClient = createPublicClient({ chain: tempo, transport: http() })
 
@@ -356,7 +414,31 @@ const msgFee = await publicClient.readContract({
   args: [sendParam, false],
 })
 
-// 2. Approve token
+// 2. Approve USDC.e to LZD wrapper (for the messaging fee)
+await walletClient.writeContract({
+  address: usdce,
+  abi: erc20Abi,
+  functionName: 'approve',
+  args: [lzd, msgFee.nativeFee],
+})
+
+// 3. Wrap USDC.e into LZD
+await walletClient.writeContract({
+  address: lzd,
+  abi: wrapAbi,
+  functionName: 'wrap',
+  args: [usdce, account.address, msgFee.nativeFee],
+})
+
+// 4. Approve LZD to Stargate (for the messaging fee)
+await walletClient.writeContract({
+  address: lzd,
+  abi: erc20Abi,
+  functionName: 'approve',
+  args: [stargateOFT, msgFee.nativeFee],
+})
+
+// 5. Approve USDC.e to Stargate (for the bridge amount)
 await walletClient.writeContract({
   address: usdce,
   abi: erc20Abi,
@@ -364,7 +446,7 @@ await walletClient.writeContract({
   args: [stargateOFT, amount],
 })
 
-// 3. Send the bridge transaction (no value - fee handled via EndpointDollar)
+// 6. Send the bridge transaction (no value - fee handled via EndpointDollar)
 await walletClient.writeContract({
   address: stargateOFT,
   abi: stargateAbi,
