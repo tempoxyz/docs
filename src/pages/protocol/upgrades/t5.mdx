@@ -31,6 +31,7 @@ T5 introduces the following changes:
 - An optional on-chain `logoURI` field for TIP-20 tokens ([TIP-1026](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1026.md))
 - An Implicit Approvals List enabling listed precompiles to pull TIP-20 tokens without a prior approval ([TIP-1035](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1035.md))
 - A witness digest field in key authorizations to bind one signature to an application challenge ([TIP-1053](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1053.md))
+- Defense-in-depth rejection of contract creation and EIP-7702 delegations that would land at a TIP-20-prefixed address ([TIP-1047](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1047.md))
 
 **Action required for node operators:** Upgrade to v1.8.0 before the Moderato activation timestamp. Non-upgraded nodes will fall out of consensus.
 
@@ -79,6 +80,7 @@ T5-compatible SDK releases will be listed here as they ship.
 - [TIP-1034: Enshrined TIP-20 Escrow Channel](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1034.md)
 - [TIP-1035: Implicit Approvals List](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1035.md)
 - [TIP-1045: Payment Lane Classification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1045.md)
+- [TIP-1047: Revert Code Creation at TIP-20 Prefix Addresses](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1047.md)
 - [TIP-1053: Witness Digest in Key Authorizations](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1053.md)
 - [TIP-1056: Keep Order IDs Across Flips](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1056.md)
 - [TIP-1057: T5 Hardfork Meta TIP](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1057.md)
@@ -121,6 +123,10 @@ As a precompile, escrow uses protocol-native capabilities directly:
 ### TIP-1026: Optional logoURI Field in TIP-20
 
 [TIP-1026](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1026.md) adds an optional `logoURI` string field (256-byte cap) to TIP-20 tokens, admin-mutable via `setLogoURI`. Wallets and explorers can read token icons on-chain instead of relying on an off-chain token list. Token issuers can publish their official logo with the token, and any wallet or explorer can render it without a centralized list registration.
+
+### TIP-1047: Revert Code Creation at TIP-20 Prefix Addresses
+
+[TIP-1047](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1047.md) adds a protocol-level guard that rejects any `CREATE`, `CREATE2`, or EIP-7702 set-code authorization whose resulting or delegated-to address falls within the TIP-20 reserved prefix range (`0x20C000000000000000000000`). Without this rule, an attacker could theoretically place arbitrary bytecode at a prefix-matching address, causing it to pass the system's `is_tip20_prefix` checks (used in precompile routing, fee-token validation, the stablecoin DEX, and transaction classification) despite not being a legitimate TIP-20 token. Finding a matching address requires ~2^96 hash-collision work, so this is a fail-closed defense-in-depth measure. Rejected `CREATE`s consume base opcode gas but do not bump the caller's nonce or execute init-code, and invalid EIP-7702 entries are silently skipped. Smart-contract developers and tooling that deploy deterministically (e.g., `CREATE2` factories) should be aware that deployment can now revert in this new edge case, though it is cryptographically impractical to trigger by accident.
 
 ### TIP-1053: Witness Digest in Key Authorizations
 
