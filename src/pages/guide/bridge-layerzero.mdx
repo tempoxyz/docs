@@ -61,7 +61,7 @@ Tempo's LayerZero Endpoint ID is **`30410`**.
 | Polygon | `30109` | [`0x9Aa02D4Fae7F58b8E8f34c66E756cC734DAc7fe4`](https://polygonscan.com/address/0x9Aa02D4Fae7F58b8E8f34c66E756cC734DAc7fe4) |
 | Avalanche | `30106` | [`0x5634c4a5FEd09819E3c46D86A965Dd9447d86e47`](https://snowtrace.io/address/0x5634c4a5FEd09819E3c46D86A965Dd9447d86e47) |
 
-### Bridge to Tempo via Stargate
+## Bridge to Tempo
 
 #### Using the Stargate app
 
@@ -258,7 +258,7 @@ await walletClient.writeContract({
 })
 ```
 
-### Bridge from Tempo via Stargate
+## Bridge from Tempo
 
 To bridge from Tempo back to another chain, call `sendToken` on the Stargate OFT contract on Tempo. The process is similar to bridging in - quote, approve, send - but includes additional steps to prepare the messaging fee.
 
