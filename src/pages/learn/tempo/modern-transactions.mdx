@@ -16,7 +16,7 @@ Tempo Transactions are built into the protocol so developers don't need custom s
 
 Payment processors and platforms often need to send thousands of payments at once (e.g., payroll runs, merchant settlements, customer refunds). Tempo supports batch transactions where multiple operations execute atomically in a single transaction.
 
-This unlocks high-volume use cases: orchestrators can submit thousands of payouts as a single operation, rather than submitting them one-by-one and tracking individual success or failure. If any operation in the batch fails, the entire batch reverts, ensuring atomic execution across all payments. This is critical for payment operators who need guaranteed settlement guarantees for their workflows.
+This unlocks high-volume use cases: orchestrators can submit thousands of payouts as a single operation, rather than submitting them one-by-one and tracking individual success or failure. If any operation in the batch fails, the entire batch reverts, ensuring atomic execution across all payments. This is critical for payment operators who need deterministic settlement outcomes for their workflows.
 
 ## Fee Sponsorship
 

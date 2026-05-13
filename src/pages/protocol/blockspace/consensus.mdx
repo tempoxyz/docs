@@ -13,7 +13,7 @@ Tempo uses Simplex Consensus, implemented by [Commonware](https://www.commonware
 
 ### Block Production
 
-Blocks are produced approximately every 600ms under normal network conditions (500ms builder loop plus network latency and block validation). Proposer selection uses a VRF (Verifiable Random Function) for random leader election, providing DoS protection and MEV resistance. Once a block is finalized, it cannot be reverted.
+Blocks are produced approximately every 600ms under normal network conditions (500ms builder loop plus network latency and block validation). Proposer selection uses a VRF (Verifiable Random Function) for unpredictable leader election, providing denial-of-service protection and MEV resistance. Once a block is finalized, it cannot be reverted.
 
 ### Deterministic Finality
 

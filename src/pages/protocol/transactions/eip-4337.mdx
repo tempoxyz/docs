@@ -22,7 +22,7 @@ Tempo Transactions provide these capabilities at the protocol level.
 
 ### Fee Sponsorship
 
-EIP-4337 requires deploying a Paymaster contract, funding it with ETH, and running or paying for bundler infrastructure. The Paymaster validates sponsorship requests and the bundler aggregates UserOperations.
+EIP-4337 requires deploying a Paymaster contract, funding it with ETH, and running or paying for bundler infrastructure. The Paymaster validates each sponsorship request onchain, and the bundler aggregates UserOperations into a single transaction before submitting them to the EntryPoint contract.
 
 Tempo Transactions include a `fee_payer_signature` field directly in the transaction. A sponsor signs the transaction to agree to pay fees. The protocol validates both signatures and deducts fees from the sponsor. No contracts or infrastructure are required. See the [fee sponsorship guide](/guide/payments/sponsor-user-fees) for implementation details.
 

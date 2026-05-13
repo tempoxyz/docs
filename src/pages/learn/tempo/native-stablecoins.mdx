@@ -10,7 +10,7 @@ Tempo extends the [ERC-20 standard](https://ethereum.org/en/developers/docs/stan
 
 ## Predictable Payment Throughput
 
-Tempo has dedicated payment lanes: reserved blockspace for payment transactions (specifically, TIP-20 token transfers) that other applications cannot consume. Payments have guaranteed blockspace reserved at the protocol level and don't compete with other traffic like NFT mints, liquidations, or high-frequency contract calls.
+Tempo has dedicated payment lanes: reserved blockspace exclusively for payment transactions (specifically, TIP-20 token transfers) that other applications cannot consume. Payments are guaranteed this reserved blockspace at the protocol level and never compete with other traffic like NFT mints, liquidations, or high-frequency contract calls.
 
 Even if there are extremely popular applications on the chain competing for blockspace, payroll runs or customer disbursements execute predictably. Fees stay low and stable even when other network activity spikes, with a target of one-tenth of a cent per payment transaction. For payment processors, that means no "downtime" from congestion, and predictable economics for high-volume flows.
 
