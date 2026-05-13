@@ -17,9 +17,9 @@ import LucideWalletCards from '~icons/lucide/wallet-cards'
 import { cva, cx } from '../../../cva.config'
 import { usePostHogTracking } from '../../lib/posthog'
 import {
-  getZoneTransportConfig,
+  getZoneRpcHttpUrl,
+  getZoneRpcTransportConfig,
   moderatoZoneRpcUrls,
-  stripRpcBasicAuth,
 } from '../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../lib/useRootWebAuthnAccount.ts'
 import { useTempoWalletConnector, useWebAuthnConnector } from '../../wagmi.config'
@@ -307,8 +307,8 @@ export namespace Container {
               account: rootWebAuthnAccount,
               chain: zoneModerato(zone),
               transport: zoneHttp(
-                stripRpcBasicAuth(zoneRpcUrl),
-                getZoneTransportConfig(zoneRpcUrl),
+                getZoneRpcHttpUrl(zone, zoneRpcUrl),
+                getZoneRpcTransportConfig(zone, zoneRpcUrl),
               ),
             }).extend(tempoActions()) as unknown as ZoneClientLike)
           : undefined,
@@ -622,7 +622,7 @@ export function Button(
 }
 
 const buttonClassName = cva({
-  base: 'relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-normal transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+  base: 'relative inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md font-normal transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:cursor-default disabled:opacity-50',
   defaultVariants: {
     size: 'default',
     variant: 'default',
@@ -635,7 +635,7 @@ const buttonClassName = cva({
       default: 'h-[32px] px-[14px] text-[14px] -tracking-[2%]',
     },
     static: {
-      true: 'pointer-events-none',
+      true: 'pointer-events-none cursor-default',
     },
     variant: {
       accent: 'border bg-invert text-invert dark:border-dashed',
@@ -682,4 +682,26 @@ export declare namespace useCopyToClipboard {
   type Props = {
     timeout?: number
   }
+}
+
+/** The Tempo "T" mark inside a square, with the T cut out. Inherits `currentColor`. */
+export function TempoMarkBoxed(props: { className?: string }) {
+  return (
+    // biome-ignore lint/a11y/noSvgWithoutTitle: _
+    <svg
+      aria-hidden
+      className={props.className}
+      fill="currentColor"
+      height="28"
+      role="img"
+      viewBox="0 0 28 28"
+      width="28"
+    >
+      <path
+        clipRule="evenodd"
+        d="M0 0h28v28H0V0Zm12.094 21H8.444L11.827 10.173H7.5L8.444 7H20.5l-.944 3.173H15.46L12.094 21Z"
+        fillRule="evenodd"
+      />
+    </svg>
+  )
 }

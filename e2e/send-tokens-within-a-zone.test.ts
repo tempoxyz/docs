@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { waitForEnabledAction } from './private-zone-actions'
 
 test('prepare zone balance and send tokens within Zone A', async ({ page }) => {
   test.setTimeout(180000)
@@ -35,18 +36,17 @@ test('prepare zone balance and send tokens within Zone A', async ({ page }) => {
   const getFundsButton = page.getByRole('button', { name: /^Get testnet pathUSD$/i }).first()
   const topUpButton = page.getByRole('button', { name: /^Approve \+ top up Zone A$/i }).first()
 
-  await expect
-    .poll(async () => (await getFundsButton.isVisible()) || (await topUpButton.isVisible()), {
-      timeout: 90000,
-    })
-    .toBe(true)
+  const initialAction = await waitForEnabledAction([
+    { locator: getFundsButton, name: 'fund' },
+    { locator: topUpButton, name: 'top-up' },
+  ])
 
-  if (await getFundsButton.isVisible()) {
-    await getFundsButton.click()
-    await expect(topUpButton).toBeVisible({ timeout: 90000 })
+  if (initialAction.name === 'fund') {
+    await initialAction.locator.click()
+    await expect(topUpButton).toBeEnabled({ timeout: 90000 })
   }
 
-  if (await topUpButton.isVisible()) await topUpButton.click()
+  if ((await topUpButton.isVisible()) && (await topUpButton.isEnabled())) await topUpButton.click()
   await expect(page.getByRole('link', { name: 'View receipt' }).first()).toBeVisible({
     timeout: 120000,
   })

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { waitForEnabledAction } from './private-zone-actions'
 
 test('prepare zone access and deposit to Zone A', async ({ page }) => {
   test.setTimeout(180000)
@@ -35,9 +36,14 @@ test('prepare zone access and deposit to Zone A', async ({ page }) => {
   const getFundsButton = page.getByRole('button', { name: /^Get testnet pathUSD$/i }).first()
   const depositButton = page.getByRole('button', { name: /^Deposit 100 pathUSD$/i }).first()
 
-  if (await getFundsButton.isVisible()) {
-    await getFundsButton.click()
-    await expect(depositButton).toBeVisible({ timeout: 90000 })
+  const initialAction = await waitForEnabledAction([
+    { locator: getFundsButton, name: 'fund' },
+    { locator: depositButton, name: 'deposit' },
+  ])
+
+  if (initialAction.name === 'fund') {
+    await initialAction.locator.click()
+    await expect(depositButton).toBeEnabled({ timeout: 90000 })
   }
 
   await depositButton.click()

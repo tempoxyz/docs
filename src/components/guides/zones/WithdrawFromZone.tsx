@@ -7,10 +7,10 @@ import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
 import { useConnection, useConnectorClient, usePublicClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import {
-  getZoneTransportConfig,
+  getZoneRpcHttpUrl,
+  getZoneRpcTransportConfig,
   moderatoZoneRpcUrls,
   publicSettlementLookbackBlocks,
-  stripRpcBasicAuth,
   zoneRpcSyncTimeout,
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
@@ -110,8 +110,8 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
             account: rootWebAuthnAccount,
             chain: zoneModerato(ZONE_ID),
             transport: zoneHttp(
-              stripRpcBasicAuth(moderatoZoneRpcUrls[ZONE_ID]),
-              getZoneTransportConfig(moderatoZoneRpcUrls[ZONE_ID]),
+              getZoneRpcHttpUrl(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]),
+              getZoneRpcTransportConfig(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]),
             ),
           }).extend(tempoActions()) as unknown as ZoneClientLike)
         : undefined,

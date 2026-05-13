@@ -2,7 +2,7 @@ import { QueryClient } from '@tanstack/react-query'
 import { Expiry } from 'accounts'
 import * as React from 'react'
 import { parseUnits } from 'viem'
-import { tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
+import { tempo, tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
 import { withRelay } from 'viem/tempo'
 import {
   type CreateConfigParameters,
@@ -15,8 +15,8 @@ import {
 } from 'wagmi'
 import { tempoWallet, webAuthn } from 'wagmi/tempo'
 import { alphaUsd, betaUsd, pathUsd, thetaUsd } from './components/guides/tokens'
-import * as WebAuthnCeremony from './lib/webAuthnCeremony.ts'
 import { feeToken, moderatoZones } from './lib/private-zones.ts'
+import * as WebAuthnCeremony from './lib/webAuthnCeremony.ts'
 
 const chain =
   import.meta.env.VITE_TEMPO_ENV === 'localnet'
@@ -48,7 +48,7 @@ export function getConfig(options: getConfig.Options = {}) {
     batch: {
       multicall: false,
     },
-    chains: [chain],
+    chains: [chain, tempo],
     connectors: [
       ...(import.meta.env.VITE_E2E === 'true'
         ? [webAuthn()]
@@ -97,6 +97,7 @@ export function getConfig(options: getConfig.Options = {}) {
         http('https://sponsor.devnet.tempo.xyz'),
         { policy: 'sign-only' },
       ),
+      [tempo.id]: http(tempo.rpcUrls.default.http[0]),
       [tempoLocalnet.id]: http(undefined, { batch: true }),
     },
   })

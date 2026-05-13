@@ -22,27 +22,20 @@ tempo download [flags]
 | `-u, --url <url>` | Download a specific snapshot URL |
 | `--list` | List available snapshots |
 | `--resumable` | Resume an interrupted download |
-| `--minimal` | Download minimal snapshot (pruned state, suitable for validators) |
-| `--archive` | Download full archive snapshot (suitable for RPC nodes) |
+| `--archive` | Download an archive snapshot. Recommended for partner validators and RPC nodes. |
 
 ## Examples
 
-Download the latest archive snapshot (for RPC nodes):
+Download the latest recommended mainnet snapshot:
 
 ```bash
-tempo download --archive
+tempo download --chain mainnet --archive
 ```
 
-Download the latest minimal snapshot (for validators):
+Download the latest recommended testnet snapshot:
 
 ```bash
-tempo download --minimal
-```
-
-Download a snapshot for a specific chain:
-
-```bash
-tempo download --archive --chain moderato
+tempo download --chain moderato --archive
 ```
 
 List available snapshots:
