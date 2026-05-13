@@ -226,7 +226,7 @@ export default defineConfig({
             ],
           },
           {
-            text: 'Connect to Zones',
+            text: 'Private Transactions',
             collapsed: true,
             items: [
               {
