@@ -101,3 +101,42 @@ A token that gets added to the tokenlist will atuomatically reflect in the Explo
 </Callout>
 
 [Full OpenAPI Spec →](https://tokenlist.tempo.xyz/docs)
+
+## T4 → T5 migration
+
+:::info[Migration appendix]
+This section captures changes scheduled for the [T5 network upgrade](/protocol/upgrades/t5) for token issuers. The body above describes the current (pre-T5) flow; once T5 activates on Moderato and Presto, this page will be expanded to cover the on-chain `logoURI` path canonically and this appendix will be removed in a future docs revision.
+:::
+
+T5 introduces an optional on-chain `logoURI` field on every TIP-20 token via [TIP-1026](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1026.md). After activation, token issuers can publish their official icon directly on the token contract, and any wallet or explorer can read it without going through this registry.
+
+### New surface area
+
+- `logoURI()` view on every TIP-20 — wallets and explorers can read the current value directly.
+- `setLogoURI(string newLogoURI)` admin-only setter (requires `DEFAULT_ADMIN_ROLE`).
+- A new 7-arg `createToken` overload on the factory that accepts a `logoURI` at creation:
+
+  ```solidity
+  function createToken(
+      string calldata name,
+      string calldata symbol,
+      string calldata currency,
+      address quoteToken,
+      address admin,
+      bytes32 salt,
+      string calldata logoURI
+  ) external returns (address);
+  ```
+
+  The previous overload is unchanged.
+- `LogoURIUpdated(address indexed updater, string newLogoURI)` event, emitted from the **token's own address** (not the factory) with `updater = msg.sender`.
+
+### Field rules
+
+- String, max 256 bytes — reverts `LogoURITooLong` otherwise
+- If non-empty, must be a syntactically valid URI with a scheme in the allowlist `https`, `http`, `ipfs`, `data` (case-insensitive) — reverts `InvalidLogoURI` otherwise
+- Empty string is valid and clears the field
+
+### Relationship to this registry
+
+After T5, most issuers will want both: set `logoURI` on-chain so any wallet or explorer can render the icon without registry lookup, and continue to register here for the richer metadata extensions (`coingeckoId`, `bridgeInfo`, display `label`) and as a fallback icon for clients that don't yet read on-chain `logoURI`.

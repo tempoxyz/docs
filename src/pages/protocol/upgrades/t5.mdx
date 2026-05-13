@@ -36,11 +36,7 @@ T5 introduces the following changes:
 
 ## Integration changes
 
-Most of T5 is additive. The notes below cover behaviors that integrators, indexers, and tooling should pick up before activation.
-
-### TIP-20 escrow channels move to a precompile (TIP-1034)
-
-The application-level escrow contract is replaced by a native precompile with a stable protocol-level interface. MPP and any other integrations that today interact with the Solidity escrow contract should migrate to the new precompile ABI; monitoring and metrics should be repointed at the precompile.
+Most of T5 is additive. The notes below cover behaviors that integrators, indexers, and tooling should pick up before activation. The TIP-1034 escrow precompile is internal to MPP and has no external integration impact.
 
 ### Payment lane selector allow-list (TIP-1045)
 
@@ -52,7 +48,7 @@ Anything that classifies transactions as "payments" (indexers, explorers, paymen
 
 ### Persistent order IDs across flips (TIP-1056)
 
-Flipped orders keep the same `orderId` and emit a new `OrderFlipped` event instead of `OrderPlaced`. Indexers should handle `OrderFlipped` and stop expecting a new `orderId` per flip. Frontends and SDKs surfacing order status should display the persistent ID. Updated DEX flip-order docs are coming after testnet activation; see the [compatibility section of TIP-1056](https://tips.sh/1056#compatibility) in the meantime.
+Flipped orders keep the same `orderId` and emit a new `OrderFlipped` event instead of `OrderPlaced`. Indexers should handle `OrderFlipped` and stop expecting a new `orderId` per flip. Frontends and SDKs surfacing order status should display the persistent ID. See the [T4 → T5 migration appendix on the Providing Liquidity page](/protocol/exchange/providing-liquidity#t4--t5-migration) and the [compatibility section of TIP-1056](https://tips.sh/1056#compatibility).
 
 ### Optional `logoURI` in TIP-20 (TIP-1026)
 
@@ -65,7 +61,7 @@ Tokens without `logoURI` continue to work. New surface area:
 
 `logoURI` is validated on-chain: max 256 bytes (reverts `LogoURITooLong`), and if non-empty must be a syntactically valid URI with a scheme in the allowlist `https`, `http`, `ipfs`, `data` (case-insensitive). Otherwise reverts `InvalidLogoURI`. Empty string is valid and clears the field.
 
-Updated token onboarding guidance for issuers is coming after testnet activation.
+See the [T4 → T5 migration appendix on the Token List page](/quickstart/tokenlist#t4--t5-migration) for issuer guidance.
 
 ### Witness digest in key authorizations (TIP-1053)
 

@@ -176,3 +176,27 @@ Cancellations execute immediately, and any unfilled portion of your order is ref
 You can only cancel your own orders. Attempting to cancel another user's order will revert.
 :::
 
+## T4 → T5 migration
+
+:::info[Migration appendix]
+This section captures changes scheduled for the [T5 network upgrade](/protocol/upgrades/t5) for DEX integrators. The body above describes the current (pre-T5) behavior; once T5 activates on Moderato and Presto, this page will be rewritten to describe post-T5 behavior canonically and this appendix will be removed in a future docs revision.
+:::
+
+T5 introduces two DEX changes that affect flip orders:
+
+### TIP-1030: same-tick flip orders
+
+[TIP-1030](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1030.md) relaxes `placeFlip` so `flipTick == tick` is allowed — useful for pegged pairs where you want to buy and sell at the same tick. Pre-T5, `flipTick` had to be strictly greater than `tick` for bids and strictly less than `tick` for asks; post-T5, equality is permitted on either side. No breaking change, but downstream code that asserts `flipTick != tick` will stop holding.
+
+### TIP-1056: persistent order IDs across flips
+
+[TIP-1056](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1056.md) keeps the same `orderId` across flips. Pre-T5, a fully filled flip order emitted `OrderFilled` followed by `OrderPlaced` for the new opposite-side order with a freshly allocated `orderId`. Post-T5, the same order is rewritten in place: it emits `OrderFilled` followed by `OrderFlipped(orderId, newSide, newTick, ...)`, and `nextOrderId` does not advance.
+
+Indexers, analytics, and order-tracking UIs should:
+
+- Handle the new `OrderFlipped` event and stop expecting a new `orderId` per flip
+- Key order state by `(orderId)` and let a single `orderId` change side and tick over its lifetime
+- Surface the persistent ID in user-facing order status
+
+See the [compatibility section of TIP-1056](https://tips.sh/1056#compatibility) for migration guidance.
+
