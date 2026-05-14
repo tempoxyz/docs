@@ -7,7 +7,7 @@ import { Cards, Card } from 'vocs'
 
 # Wallet Developer Guide
 
-Tempo is EVM-compatible, so standard transactions work out of the box. However, Tempo has [no native gas token](/quickstart/evm-compatibility#handling-eth-native-token-balance-checks), which means wallet behaviors like balance display and gas quoting need adjustment regardless of which transaction type you use.
+Tempo is EVM-compatible, so standard transactions work out of the box. However, Tempo has [no native gas token](/quickstart/evm-compatibility#handling-eth-native-token-balance-checks), which means wallet behaviors like balance display and gas quoting need adjustment.
 
 To deliver the best experience for your users, integrate [Tempo Transactions](/guide/tempo-transaction) — a protocol-native [EIP-2718](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2718.md) transaction type (type byte `0x76`) that provides fee token selection, fee sponsorship, call batching, concurrent nonces, passkey signing, and scheduled execution — without requiring a bundler, paymaster, or third-party vendor.
 
