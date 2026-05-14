@@ -1,19 +1,56 @@
 ---
-description: Integrate Tempo into your wallet. Handle fee tokens, configure gas display, and deliver enhanced stablecoin payment experiences for users.
+description: Integrate Tempo into your wallet. Use Tempo Transactions for fee token selection, fee sponsorship, batching, and concurrent execution.
 showOutline: 1
 ---
 
 import { Cards, Card } from 'vocs'
 
-# Wallet Integration Guide
+# Wallet Developer Guide
 
-Because there is [no native token on Tempo](/quickstart/evm-compatibility#handling-eth-native-token-balance-checks) and transaction fees are paid directly in stablecoins, wallets need specific UI and logic adjustments to support the network. Follow this guide if your wallet logic and/or interfaces are dependent on the existence of a native token.
+Tempo is EVM-compatible — standard Ethereum transactions are supported, and most of your existing EVM integration will work. However, because Tempo has [no native gas token](/quickstart/evm-compatibility#handling-eth-native-token-balance-checks), some wallet behaviors like balance display and gas quoting need adjustment regardless of which transaction type you use.
 
-As part of supporting Tempo in your wallet, you can also deliver an enhanced experience for your users by integrating [Tempo Transactions](/guide/tempo-transaction). Common use cases include enabling a gasless transactions for your users, letting your users decide what token to use for fees, and more.
+To deliver the best experience for your users, integrate [Tempo Transactions](/guide/tempo-transaction) — a protocol-native [EIP-2718](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2718.md) transaction type (type byte `0x76`) that provides fee token selection, fee sponsorship, call batching, concurrent nonces, passkey signing, and scheduled execution — without requiring a bundler, paymaster, or third-party vendor.
+
+[SDKs](/guide/tempo-transaction#integration-guides) are available for TypeScript, Rust, Go, Python, and Foundry. Integration typically takes less than an hour.
 
 ## Steps
 
 ::::steps
+
+### Integrate Tempo Transactions
+
+Replace your wallet's transaction construction with Tempo Transactions. The minimum change is switching from a type-2 (EIP-1559) envelope to a type-`0x76` Tempo Transaction envelope using one of the [Tempo SDKs](/guide/tempo-transaction#integration-guides).
+
+:::code-group
+
+```ts twoslash [example.ts]
+// @noErrors
+import { client } from './viem.config'
+import { parseUnits } from 'viem'
+
+// Sends a Tempo Transaction (type 0x76)
+const { receipt } = await client.token.transferSync({
+  amount: parseUnits('100', 6),
+  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+  token: '0x20c0000000000000000000000000000000000001',
+})
+```
+
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
+// [!include ~/snippets/viem.config.ts:setup]
+```
+
+:::
+
+:::tip
+With Tempo Transactions, you can also:
+- Set the fee token for your users' transactions ([guide](/guide/payments/pay-fees-in-any-stablecoin))
+- Sponsor transaction fees for your users ([guide](/guide/payments/sponsor-user-fees))
+- Send concurrent transactions with independent nonces ([guide](/guide/payments/send-parallel-transactions))
+- Batch multiple calls into a single atomic transaction ([guide](/guide/use-accounts/batch-transactions))
+- Sign with passkeys and P256 keys ([guide](/guide/use-accounts/webauthn-p256-signatures))
+- Use expiring nonces for cheaper transactions that don't require nonce tracking ([guide](/guide/tempo-transaction#expiring-nonces))
+:::
 
 ### Handle the absence of a native token
 
@@ -29,19 +66,20 @@ In testnet, `eth_getBalance` [returns a large placeholder value](/quickstart/evm
 // @noErrors
 import { client } from './viem.config'
 
-const userFeeToken = await client.fee.getUserToken({ 
-  account: '0x...' 
+const userFeeToken = await client.fee.getUserToken({
+  account: '0x...'
 })
 
-const balance = await client.token.getBalance({ 
+const balance = await client.token.getBalance({
   account: '0x...',
-  token: userFeeToken.address 
+  token: userFeeToken.address
 })
 ```
 
 ```ts twoslash [viem.config.ts] filename="viem.config.ts"
 // [!include ~/snippets/viem.config.ts:setup]
 ```
+
 :::
 
 ### Configure native currency symbol
@@ -58,6 +96,43 @@ As a wallet developer, you can set the fee token for your user at the account le
 If you don't, Tempo uses a cascading fee token selection algorithm to determine the fee token for a transaction – learn more about [Fee Token Preferences](/protocol/fees/spec-fee#fee-token-preferences).
 :::
 
+### Add fee token selection to your UI
+
+Your wallet should provide a way for users to choose which stablecoin they pay fees in. This can be a dropdown in the transaction confirmation screen or a setting in account preferences.
+
+To set the fee token on a per-transaction basis, pass the `feeToken` parameter when submitting a Tempo Transaction:
+
+:::code-group
+
+```ts twoslash [example.ts]
+// @noErrors
+import { client } from './viem.config'
+import { parseUnits } from 'viem'
+
+const { receipt } = await client.token.transferSync({
+  amount: parseUnits('100', 6),
+  feeToken: '0x20c0000000000000000000000000000000000002', // [!code hl]
+  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+  token: '0x20c0000000000000000000000000000000000001',
+})
+```
+
+```ts twoslash [viem.config.ts] filename="viem.config.ts"
+// [!include ~/snippets/viem.config.ts:setup]
+```
+
+:::
+
+To set a persistent default so users don't need to select on every transaction, use `setUserToken`:
+
+```ts
+await client.fee.setUserTokenSync({
+  token: '0x20c0000000000000000000000000000000000001',
+})
+```
+
+See [Fee Token Preferences](/protocol/fees/spec-fee#fee-token-preferences) for the full cascading resolution order.
+
 ### Display token and network assets
 
 Tempo provides a public tokenlist service that hosts token and network assets. You can pull these assets from our public tokenlist service to display in your UI.
@@ -65,17 +140,11 @@ Tempo provides a public tokenlist service that hosts token and network assets. Y
 - **GitHub**: [tempoxyz/tempo-apps/apps/tokenlist](https://github.com/tempoxyz/tempo-apps/tree/main/apps/tokenlist)
 - **Tokenlist JSON**: [tempoxyz.github.io/tempo-apps/42431/tokenlist.json](https://tempoxyz.github.io/tempo-apps/42431/tokenlist.json)
 
-### Integrate Tempo Transactions
-
-We strongly recommend using [Tempo Transactions](/guide/tempo-transaction) if you control transaction submission. We have [SDKs and guides](/guide/tempo-transaction#integration-guides) available to get you integrated in less than an hour!
-
-:::tip
-Use Tempo Transactions to
-- Set the fee token used for your users' transactions ([guide](/guide/payments/pay-fees-in-any-stablecoin))
-- Sponsor transaction fees for your users ([guide](/guide/payments/sponsor-user-fees))
-- Send concurrent transactions with independent nonces ([guide](/guide/payments/send-parallel-transactions))
-:::
 ::::
+
+## Already using EIP-7702 or EIP-4337?
+
+If you've integrated a third-party account abstraction provider for batching, sponsorship, or smart accounts, Tempo Transactions provide these features natively at the protocol level. See the [feature comparison](/protocol/transactions/eip-7702#feature-comparison) for details.
 
 ## Recipes
 
@@ -86,8 +155,8 @@ Retrieve the user's configured fee token preference:
 ```ts
 import { getUserToken } from 'viem/tempo'
 
-const feeToken = await client.fee.getUserToken({ 
-  account: userAddress 
+const feeToken = await client.fee.getUserToken({
+  account: userAddress
 })
 ```
 
@@ -100,9 +169,9 @@ Check a user's balance for a specific token:
 ```ts
 import { getBalance } from 'viem/tempo'
 
-const balance = await client.token.getBalance({ 
+const balance = await client.token.getBalance({
   account: userAddress,
-  token: tokenAddress 
+  token: tokenAddress
 })
 ```
 
@@ -110,13 +179,13 @@ See [`getBalance`](https://viem.sh/tempo/actions/token.getBalance) for full docu
 
 ### Set user fee token
 
-Set the user's default fee token preference. This will be used for all transactions unless a different fee token is specified at the transaction level. 
+Set the user's default fee token preference. This will be used for all transactions unless a different fee token is specified at the transaction level.
 
 ```ts
 import { setUserToken } from 'viem/tempo'
 
-await client.fee.setUserTokenSync({ 
-  token: '0x20c0000000000000000000000000000000000001', 
+await client.fee.setUserTokenSync({
+  token: '0x20c0000000000000000000000000000000000001',
 })
 ```
 
@@ -126,27 +195,30 @@ See [`setUserToken`](https://viem.sh/tempo/actions/fee.setUserToken) for full do
 
 Before launching Tempo support, ensure your wallet:
 
+- [ ] Integrates Tempo Transactions for transaction submission
 - [ ] Checks fee token balance instead of native balance
 - [ ] Hides or removes native balance display for Tempo
 - [ ] Displays `USD` as the currency symbol for gas
 - [ ] Quotes gas prices in the user's fee token
+- [ ] Provides fee token selection in the UI (dropdown or account setting)
 - [ ] Pulls token/network assets from Tempo's tokenlist
-- [ ] (Recommended) Integrates Tempo Transactions for enhanced UX
+- [ ] (Recommended) Sponsors fees for your users via [fee sponsorship](/guide/payments/sponsor-user-fees)
+- [ ] (Recommended) Uses [expiring nonces](/guide/tempo-transaction#expiring-nonces) for lower-cost transactions that don't require nonce management
 
 ## Learning Resources
 
 <Cards>
   <Card
-    description="Learn how fee token preferences work in the protocol"
-    icon="lucide:file-text"
-    title="Fee Token Preferences"
-    to="/protocol/fees/spec-fee#fee-token-preferences"
-  />
-  <Card
     description="Integrate Tempo Transactions for full control over transaction parameters"
     icon="lucide:coins"
     title="Tempo Transactions"
     to="/guide/tempo-transaction"
+  />
+  <Card
+    description="Learn how fee token preferences work in the protocol"
+    icon="lucide:file-text"
+    title="Fee Token Preferences"
+    to="/protocol/fees/spec-fee#fee-token-preferences"
   />
   <Card
     description="Sponsor user fees to enable feeless transaction experiences in your application"
@@ -155,10 +227,15 @@ Before launching Tempo support, ensure your wallet:
     to="/guide/payments/sponsor-user-fees"
   />
   <Card
+    description="How Tempo Transactions compare to EIP-7702 delegation"
+    icon="lucide:git-compare"
+    title="EIP-7702 Comparison"
+    to="/protocol/transactions/eip-7702"
+  />
+  <Card
     description="Pay fees in any supported stablecoin"
     icon="lucide:wallet"
     title="Pay Fees in Any Stablecoin"
     to="/guide/payments/pay-fees-in-any-stablecoin"
   />
 </Cards>
-
