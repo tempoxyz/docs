@@ -32,12 +32,15 @@ See the full token list at [tokenlist.tempo.xyz](https://tokenlist.tempo.xyz/lis
 
 ## LayerZero contracts on Tempo
 
-| Contract | Address |
-|----------|---------|
-| **EndpointV2** | [`0x20Bb7C2E2f4e5ca2B4c57060d1aE2615245dCc9C`](https://explore.tempo.xyz/address/0x20Bb7C2E2f4e5ca2B4c57060d1aE2615245dCc9C) |
-| **LZEndpointDollar** | [`0x0cEb237E109eE22374a567c6b09F373C73FA4cBb`](https://explore.tempo.xyz/address/0x0cEb237E109eE22374a567c6b09F373C73FA4cBb) |
+| Contract | Address | Purpose |
+|----------|---------|---------|
+| **EndpointV2** | [`0x20Bb7C2E2f4e5ca2B4c57060d1aE2615245dCc9C`](https://explore.tempo.xyz/address/0x20Bb7C2E2f4e5ca2B4c57060d1aE2615245dCc9C) | Standard LayerZero endpoint |
+| **LZEndpointDollar** | [`0x0cEb237E109eE22374a567c6b09F373C73FA4cBb`](https://explore.tempo.xyz/address/0x0cEb237E109eE22374a567c6b09F373C73FA4cBb) | Routes messaging fees through a stablecoin (no `msg.value` on Tempo). See [EndpointDollar](#endpointdollar). |
+| **TempoOFTWrapper** | [`0xbb95daF376cd63F258d7c37a4eFe57c10055E8E0`](https://explore.tempo.xyz/address/0xbb95daF376cd63F258d7c37a4eFe57c10055E8E0) | Bundles wrap, approve, and send into one transaction for outbound bridging. See [Bridge from Tempo](#bridge-from-tempo). |
 
 Tempo's LayerZero Endpoint ID is **`30410`**.
+
+Accepted fee tokens for `LZEndpointDollar`: `USDC.e`, `USDT0`, `pathUSD` (whitelisted 6-decimal stablecoins).
 
 ## Stargate tokens
 
