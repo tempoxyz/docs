@@ -528,8 +528,10 @@ Tempo has no native gas token, so there is no `msg.value`. Standard LayerZero en
 
 **LZEndpointDollar** ([`0x0cEb237E109eE22374a567c6b09F373C73FA4cBb`](https://explore.tempo.xyz/address/0x0cEb237E109eE22374a567c6b09F373C73FA4cBb)) is an adapter contract that routes LayerZero messaging fees through a TIP-20 stablecoin instead of `msg.value`. It wraps the standard `EndpointV2` so that OFT contracts can function on Tempo without modification.
 
-- **Bridging to Tempo** - fees are paid in native gas on the source chain (ETH, MATIC, AVAX, etc.) as normal.
-- **Bridging from Tempo** - `LZEndpointDollar` deducts the messaging fee from a TIP-20 stablecoin. No `msg.value` is needed. See [Bridge from Tempo via Stargate](#bridge-from-tempo-via-stargate) for the wrapping steps required to prepare the fee token.
+How fees flow:
+
+- **Bridging to Tempo** - fees are paid in native gas on the source chain (ETH, MATIC, AVAX, etc.) as normal. No interaction with `LZEndpointDollar` is required.
+- **Bridging from Tempo** - `LZEndpointDollar` deducts the messaging fee from an LZD token (a wrapped TIP-20 stablecoin) instead of `msg.value`. Before calling `sendToken` / `send`, you must wrap USDC.e into LZD and approve LZD to the OFT contract. See [Bridge from Tempo](#bridge-from-tempo) for the exact steps.
 
 ## Further reading
 
