@@ -308,6 +308,14 @@ console.log('Quote Token:', metadata?.quoteToken) // returns `pathUSD` address
 
 ### Flip order
 
+:::info[Coming with T5]
+The [T5 network upgrade](/protocol/upgrades/t5) changes flip-order behavior in two ways:
+- `flipTick == tick` becomes valid ([TIP-1030](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1030.md))
+- A filled flip order keeps the same `orderId` and emits a new `OrderFlipped` event instead of a fresh `OrderPlaced` ([TIP-1056](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1056.md))
+
+Until T5 activates, the behavior described below still applies. Developers updating indexers, SDKs, or contract code should see the [T4 → T5 migration appendix](/protocol/exchange/providing-liquidity#t4--t5-migration) on the Providing Liquidity spec page.
+:::
+
 Flip orders automatically switch between buy and sell sides when filled, providing continuous liquidity. Use viem's [`dex.placeFlip`](https://viem.sh/tempo/actions/dex.placeFlip) to create a flip order call.
 
 :::code-group
