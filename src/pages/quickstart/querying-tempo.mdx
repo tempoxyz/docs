@@ -4,11 +4,13 @@ description: Write correct analytics queries for Tempo. Covers fee units, TIP-20
 showOutline: 1
 ---
 
+import { IndexSupplyQuery } from '../../components/IndexSupplyQuery'
+
 # Querying Tempo
 
 Tempo is EVM-compatible, so most query patterns you already know work here. There are a handful of differences that will silently produce wrong numbers if you carry over Ethereum assumptions.
 
-Examples use generic SQL — table and column names will vary by platform.
+These examples use [Index Supply](https://www.indexsupply.net) as the indexing provider. Each query runs against Tempo mainnet (chain 4217) — click **Run Query** to execute live.
 
 ## 1. Fees are in USD, not ETH
 
@@ -16,13 +18,19 @@ On Ethereum, gas price is in wei (10⁻¹⁸ ETH). On Tempo, it's in **attodolla
 
 Round to the nearest microdollar (how fees actually settle):
 
-```sql
-SELECT date_trunc('day', block_time) AS day,
-       SUM(CEIL(effective_gas_price * gas_used / 1e12) / 1e6) AS usd_fees
-FROM transactions
-GROUP BY 1
-ORDER BY 1;
-```
+<IndexSupplyQuery
+  chainId={4217}
+  title={'Daily USD Fees'}
+  query={`SELECT
+    num / 100000 * 100000 AS block_range,
+    COUNT(*) AS tx_count,
+    SUM(gas_price * gas / 1e18) AS usd_fees
+  FROM txs
+  WHERE chain = 4217
+  GROUP BY block_range
+  ORDER BY block_range DESC
+  LIMIT 10`}
+/>
 
 ## 2. TIP-20 tokens use 6 decimals, not 18
 
@@ -32,14 +40,22 @@ Divide token amounts by `1e6`. Using `1e18` gives a result 10¹² times too smal
 
 `tx.value` is always zero on Tempo. All token movement is in `Transfer` events.
 
-```sql
-SELECT date_trunc('day', block_time) AS day,
-       token_address,
-       SUM(amount) / 1e6 AS volume_usd
-FROM tip20_transfers
-GROUP BY 1, 2
-ORDER BY 1;
-```
+<IndexSupplyQuery
+  chainId={4217}
+  title={'Recent TIP-20 Transfers'}
+  query={`SELECT
+    block_num,
+    "from",
+    "to",
+    value / 1e6 AS amount,
+    address AS token_address,
+    tx_hash
+  FROM transfer
+  WHERE chain = 4217
+  ORDER BY block_num DESC
+  LIMIT 10`}
+  signatures={["Transfer"]}
+/>
 
 `TransferWithMemo` (used by MPP) also emits a standard `Transfer`. Query only `Transfer` to avoid double-counting.
 
@@ -55,6 +71,10 @@ GROUP BY 1
 ORDER BY 2 DESC;
 ```
 
+:::note
+The `fee_payer` column is available on platforms like Dune that decode Tempo-specific fields. In Index Supply's base `txs` table, use `"from"` for sender attribution.
+:::
+
 ## 5. Exclude system transactions from user metrics
 
 `from = 0x0000…0000` is system-level. Include in raw chain metrics, exclude when measuring users.
@@ -63,20 +83,24 @@ ORDER BY 2 DESC;
 
 Genesis mints may not emit `Mint`. Derive supply from `Transfer`: mints have `from = 0x0…0`, burns have `to = 0x0…0`.
 
-```sql
-SELECT
-  SUM(CASE WHEN "from" = '0x0000000000000000000000000000000000000000'
-           THEN amount / 1e6 ELSE 0 END) AS total_minted,
-  SUM(CASE WHEN "to"   = '0x0000000000000000000000000000000000000000'
-           THEN amount / 1e6 ELSE 0 END) AS total_burned,
-  SUM(CASE WHEN "from" = '0x0000000000000000000000000000000000000000'
-           THEN  amount / 1e6
-           WHEN "to"   = '0x0000000000000000000000000000000000000000'
-           THEN -amount / 1e6
-           ELSE 0 END) AS supply
-FROM tip20_transfers
-WHERE token_address = <token>;
-```
+<IndexSupplyQuery
+  chainId={4217}
+  title={'Token Supply from Transfers'}
+  query={`SELECT
+    address AS token_address,
+    SUM(CASE WHEN "from" = '0x0000000000000000000000000000000000000000'
+             THEN  value / 1e6 ELSE 0 END) AS total_minted,
+    SUM(CASE WHEN "to"   = '0x0000000000000000000000000000000000000000'
+             THEN  value / 1e6 ELSE 0 END) AS total_burned
+  FROM transfer
+  WHERE chain = 4217
+    AND ("from" = '0x0000000000000000000000000000000000000000'
+      OR "to"   = '0x0000000000000000000000000000000000000000')
+  GROUP BY token_address
+  ORDER BY total_minted DESC
+  LIMIT 10`}
+  signatures={["Transfer"]}
+/>
 
 ## Key addresses
 
