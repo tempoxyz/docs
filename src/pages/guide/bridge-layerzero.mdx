@@ -260,23 +260,11 @@ await walletClient.writeContract({
 
 ## Bridge from Tempo
 
-To bridge from Tempo back to another chain, call `sendToken` on the Stargate OFT contract on Tempo. The process is similar to bridging in - quote, approve, send - but includes additional steps to prepare the messaging fee.
-
-Because Tempo has no native gas token, LayerZero messaging fees are paid in a whitelisted stablecoin via [LZEndpointDollar](#endpointdollar). The fee token must be `USDC.e`, `USDT0`, or `pathUSD`. There are two ways to send: the **TempoOFTWrapper** (recommended, 2 transactions) or the **manual flow** (5 transactions). Both produce identical on-chain results.
-
-### Recommended: TempoOFTWrapper
-
-The [`TempoOFTWrapper`](https://docs.layerzero.network/v2/developers/tempo/how-to/support-ofts-and-oapps) bundles wrapping, approvals, and sending into a single transaction.
-
-| Contract | Address |
-|----------|---------|
-| **TempoOFTWrapper** | [`0xbb95daF376cd63F258d7c37a4eFe57c10055E8E0`](https://explore.tempo.xyz/address/0xbb95daF376cd63F258d7c37a4eFe57c10055E8E0) |
-
-`sendOFT` atomically wraps the fee portion of your stablecoin into LZD, approves LZD to the OFT, and calls `send()`. If the re-quoted fee at execution time exceeds `maxNativeFee`, the entire transaction reverts.
+Use [`TempoOFTWrapper`](https://explore.tempo.xyz/address/0xbb95daF376cd63F258d7c37a4eFe57c10055E8E0) (`0xbb95daF376cd63F258d7c37a4eFe57c10055E8E0`). It pulls your stablecoin, wraps the fee portion into LZD, and calls `send()` on the OFT in a single transaction. Pay fees in `USDC.e`, `USDT0`, or `pathUSD`.
 
 #### Using cast (Foundry)
 
-This example bridges USDC.e from Tempo to Base, paying fees in USDC.e.
+This example bridges USDC.e from Tempo to Base.
 
 :::::steps
 
@@ -290,22 +278,21 @@ cast call 0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392 \
   --rpc-url https://rpc.tempo.xyz
 ```
 
-Take the first returned number as `<NATIVE_FEE>` (in stablecoin units, not ETH).
+The first returned number is `<NATIVE_FEE>` in stablecoin units.
 
-### Approve the fee token to the wrapper
-
-When the bridge token and fee token are the same (both USDC.e here), approve `<AMOUNT> + <NATIVE_FEE>` in a single call. If they differ (e.g., bridging EURC.e but paying fees in USDC.e), approve each separately.
+### Approve USDC.e to the wrapper
 
 ```bash
 cast send 0x20C000000000000000000000b9537d11c60E8b50 \
   'approve(address,uint256)' \
   0xbb95daF376cd63F258d7c37a4eFe57c10055E8E0 \
   $((<AMOUNT> + <NATIVE_FEE>)) \
-  --rpc-url https://rpc.tempo.xyz \
-  --private-key $PRIVATE_KEY
+  --rpc-url https://rpc.tempo.xyz --private-key $PRIVATE_KEY
 ```
 
-### Send via the wrapper
+One approval covers both the bridge amount and the fee since they share the same token. Use a max approval if you bridge frequently.
+
+### Send
 
 ```bash
 cast send 0xbb95daF376cd63F258d7c37a4eFe57c10055E8E0 \
@@ -314,42 +301,30 @@ cast send 0xbb95daF376cd63F258d7c37a4eFe57c10055E8E0 \
   0x20C000000000000000000000b9537d11c60E8b50 \
   "(30184,$(cast abi-encode 'f(address)' <DESTINATION_ADDRESS>),<AMOUNT>,<MIN_AMOUNT>,0x,0x,0x)" \
   <NATIVE_FEE> \
-  --rpc-url https://rpc.tempo.xyz \
-  --private-key $PRIVATE_KEY
+  --rpc-url https://rpc.tempo.xyz --private-key $PRIVATE_KEY
 ```
 
-The fourth argument is `maxNativeFee` - the maximum messaging fee you accept. The call reverts if the re-quoted fee at execution exceeds this value.
-
-### Verify transaction status
-
-```text
-https://scan.layerzero-api.com/v1/messages/tx/<SOURCE_TX_HASH>
-```
+`<NATIVE_FEE>` here is `maxNativeFee` — the call reverts if the fee at execution exceeds this. Track delivery at `https://scan.layerzero-api.com/v1/messages/tx/<TX_HASH>`.
 
 :::::
 
 #### Using TypeScript (viem)
 
 ```typescript
-import { createWalletClient, createPublicClient, http, parseUnits, pad } from 'viem'
+import { createWalletClient, createPublicClient, http, parseUnits, pad, parseAbi } from 'viem'
 import { tempo } from 'viem/chains'
 import { privateKeyToAccount } from 'viem/accounts'
 
 const account = privateKeyToAccount('0x...')
-
 const walletClient = createWalletClient({ account, chain: tempo, transport: http() })
 const publicClient = createPublicClient({ chain: tempo, transport: http() })
 
-// Stargate OFT for USDC.e on Tempo
-const stargateOFT = '0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392' as const
-// USDC.e on Tempo (bridge token + fee token)
+const oft = '0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392' as const // Stargate USDC.e
 const usdce = '0x20C000000000000000000000b9537d11c60E8b50' as const
-// TempoOFTWrapper
 const wrapper = '0xbb95daF376cd63F258d7c37a4eFe57c10055E8E0' as const
 
-const amount = parseUnits('1', 6) // 1 USDC.e
-const minAmount = parseUnits('0.99', 6) // 1% slippage tolerance
-
+const amount = parseUnits('1', 6)
+const minAmount = parseUnits('0.99', 6)
 const sendParam = {
   dstEid: 30184, // Base
   to: pad(account.address),
@@ -360,96 +335,31 @@ const sendParam = {
   oftCmd: '0x' as const,
 }
 
-const wrapperAbi = [
-  {
-    name: 'sendOFT',
-    type: 'function',
-    stateMutability: 'nonpayable',
-    inputs: [
-      { name: 'oft', type: 'address' },
-      { name: 'feeToken', type: 'address' },
-      {
-        name: 'sendParam',
-        type: 'tuple',
-        components: [
-          { name: 'dstEid', type: 'uint32' },
-          { name: 'to', type: 'bytes32' },
-          { name: 'amountLD', type: 'uint256' },
-          { name: 'minAmountLD', type: 'uint256' },
-          { name: 'extraOptions', type: 'bytes' },
-          { name: 'composeMsg', type: 'bytes' },
-          { name: 'oftCmd', type: 'bytes' },
-        ],
-      },
-      { name: 'maxNativeFee', type: 'uint256' },
-    ],
-    outputs: [
-      {
-        name: 'msgReceipt',
-        type: 'tuple',
-        components: [
-          { name: 'guid', type: 'bytes32' },
-          { name: 'nonce', type: 'uint64' },
-          {
-            name: 'fee',
-            type: 'tuple',
-            components: [
-              { name: 'nativeFee', type: 'uint256' },
-              { name: 'lzTokenFee', type: 'uint256' },
-            ],
-          },
-        ],
-      },
-      {
-        name: 'oftReceipt',
-        type: 'tuple',
-        components: [
-          { name: 'amountSentLD', type: 'uint256' },
-          { name: 'amountReceivedLD', type: 'uint256' },
-        ],
-      },
-    ],
-  },
-] as const
+const wrapperAbi = parseAbi([
+  'function sendOFT(address oft, address feeToken, (uint32 dstEid, bytes32 to, uint256 amountLD, uint256 minAmountLD, bytes extraOptions, bytes composeMsg, bytes oftCmd) sendParam, uint256 maxNativeFee)',
+])
 
-// 1. Quote the fee
+// 1. Quote
 const msgFee = await publicClient.readContract({
-  address: stargateOFT,
-  abi: stargateAbi, // same ABI as the manual flow
-  functionName: 'quoteSend',
-  args: [sendParam, false],
+  address: oft, abi: stargateAbi, functionName: 'quoteSend', args: [sendParam, false],
 })
 
-// 2. Approve USDC.e to the wrapper (bridge amount + messaging fee)
+// 2. Approve USDC.e to wrapper (bridge amount + fee)
 await walletClient.writeContract({
-  address: usdce,
-  abi: erc20Abi,
-  functionName: 'approve',
+  address: usdce, abi: erc20Abi, functionName: 'approve',
   args: [wrapper, amount + msgFee.nativeFee],
 })
 
-// 3. Send via wrapper (atomic wrap + approve + send)
+// 3. Send (wrap + approve + send happen atomically inside)
 await walletClient.writeContract({
-  address: wrapper,
-  abi: wrapperAbi,
-  functionName: 'sendOFT',
-  args: [stargateOFT, usdce, sendParam, msgFee.nativeFee],
+  address: wrapper, abi: wrapperAbi, functionName: 'sendOFT',
+  args: [oft, usdce, sendParam, msgFee.nativeFee],
 })
 ```
 
 :::warning
-**Do not use the wrapper for compose messages where the composer refunds the original sender.** The wrapper becomes `msg.sender` for the OFT call, so refunds are sent to the wrapper address - not the user - and funds will be permanently lost. Use the manual flow below for those cases.
+**Do not use the wrapper for compose messages that refund `msg.sender`.** Refunds go to the wrapper, not your wallet, and are lost. For that case call the OFT directly — see [LayerZero's direct flow](https://docs.layerzero.network/v2/developers/tempo/how-to/support-ofts-and-oapps#direct-flow-1-view-call-5-transactions).
 :::
-
-:::tip
-You can preflight `sendOFT` with `eth_call` to obtain `oftReceipt.amountSentLD` before sending the live transaction, which is useful for avoiding dust on amounts near the Stargate minimum.
-:::
-
-### Manual flow (advanced)
-
-The wrapper covers all standard bridging. The only case that requires calling the OFT directly is **compose messages where the destination composer refunds the original sender** — the wrapper becomes `msg.sender`, so refunds would go to the wrapper and be lost.
-
-If you need that, follow the LayerZero direct-flow reference: [Direct flow (5 transactions) in LZ docs](https://docs.layerzero.network/v2/developers/tempo/how-to/support-ofts-and-oapps#direct-flow-1-view-call-5-transactions). The sequence is `quote` → `approve(USDC.e → LZD)` → `wrap` → `approve(LZD → OFT)` → `approve(USDC.e → OFT)` → `send{value: 0}`.
 
 ### Bus vs. Taxi mode
 
