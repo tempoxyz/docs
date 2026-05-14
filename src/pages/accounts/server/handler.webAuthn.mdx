@@ -49,24 +49,6 @@ export const POST = handler.fetch // Next.js
 
 ## Parameters
 
-### challengeTtl
-
-- **Type:** `number`
-- **Default:** `300` (5 minutes)
-
-Maximum age of a challenge in seconds before it expires.
-
-```ts twoslash
-import { Handler, Kv } from 'accounts/server'
-
-const handler = Handler.webAuthn({
-  kv: Kv.memory(),
-  origin: 'https://example.com',
-  rpId: 'example.com',
-  challengeTtl: 600, // [!code focus]
-})
-```
-
 ### kv
 
 - **Type:** [`Kv`](/accounts/server/kv)
@@ -173,5 +155,26 @@ const handler = Handler.webAuthn({
   kv: Kv.memory(),
   origin: 'https://example.com',
   rpId: 'example.com', // [!code focus]
+})
+```
+
+### ttl
+
+- **Type:** `{ challenge?: number; session?: number }`
+- **Default:** `{ challenge: 300, session: 86400 }`
+
+TTLs in seconds for challenges (5 minutes) and sessions (24 hours).
+
+```ts twoslash
+import { Handler, Kv } from 'accounts/server'
+
+const handler = Handler.webAuthn({
+  kv: Kv.memory(),
+  origin: 'https://example.com',
+  rpId: 'example.com',
+  ttl: { // [!code focus]
+    challenge: 600, // [!code focus]
+    session: 3600, // [!code focus]
+  }, // [!code focus]
 })
 ```
