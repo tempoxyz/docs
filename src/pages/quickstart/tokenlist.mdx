@@ -31,6 +31,12 @@ As an example, here's Tempo's tokenlist, fetched from [tokenlist.tempo.xyz/list/
 
 ## Adding a New Token
 
+:::info[Coming with T5]
+The [T5 network upgrade](/protocol/upgrades/t5) introduces an optional on-chain `logoURI` field on every TIP-20 token ([TIP-1026](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1026.md)). After activation, token issuers can publish their official icon directly on the token contract, and any wallet or explorer can render it without going through this registry. Most issuers will still want to register here for richer metadata extensions (`coingeckoId`, `bridgeInfo`, display `label`) and as a fallback icon for clients that don't yet read on-chain `logoURI`.
+
+Until T5 activates, the registry flow described below is the only path. Token issuers and tooling preparing for T5 should see the [T4 → T5 migration appendix](#t4--t5-migration) below.
+:::
+
 1. **Fork** [tempoxyz/tempo-apps](https://github.com/tempoxyz/tempo-apps)
 
 2. **Add token** to `data/<chain_id>/tokenlist.json` in `apps/tokenlist`:
@@ -105,16 +111,25 @@ A token that gets added to the tokenlist will atuomatically reflect in the Explo
 ## T4 → T5 migration
 
 :::info[Migration appendix]
-This section captures changes scheduled for the [T5 network upgrade](/protocol/upgrades/t5) for token issuers. The body above describes the current (pre-T5) flow; once T5 activates on Moderato and Presto, this page will be expanded to cover the on-chain `logoURI` path canonically and this appendix will be removed in a future docs revision.
+This section is for token issuers and tooling preparing for the [T5 network upgrade](/protocol/upgrades/t5). For a summary of what changes, see the [Coming with T5 callout](#adding-a-new-token) above. Once T5 activates on Moderato and Presto, the body of this page will be expanded to cover the on-chain `logoURI` path canonically and this appendix will be removed in a future docs revision.
 :::
 
-T5 introduces an optional on-chain `logoURI` field on every TIP-20 token via [TIP-1026](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1026.md). After activation, token issuers can publish their official icon directly on the token contract, and any wallet or explorer can read it without going through this registry.
+### Action items
 
-### New surface area
+**Token issuers:**
 
-- `logoURI()` view on every TIP-20 — wallets and explorers can read the current value directly.
-- `setLogoURI(string newLogoURI)` admin-only setter (requires `DEFAULT_ADMIN_ROLE`).
-- A new 7-arg `createToken` overload on the factory that accepts a `logoURI` at creation:
+- After T5 activates, set `logoURI` at creation via the new 7-arg `createToken` factory overload, or update an existing token via `setLogoURI(string)` (requires `DEFAULT_ADMIN_ROLE`)
+- Keep `logoURI` within 256 bytes; if non-empty, use a scheme from the allowlist `https`, `http`, `ipfs`, `data` (case-insensitive). Otherwise the call reverts with `LogoURITooLong` or `InvalidLogoURI`
+- Continue to register the token in this list if you want `coingeckoId`, `bridgeInfo`, display `label`, or a fallback icon for clients that don't yet read on-chain `logoURI`
+
+**Wallets, explorers, and indexers:**
+
+- Read `logoURI()` from each TIP-20 contract and prefer it over the registry icon when present
+- Subscribe to `LogoURIUpdated(address indexed updater, string newLogoURI)`. The event is emitted from the token's own address (not the factory) — including when a token is deployed via the new `createToken` overload with a non-empty `logoURI`
+
+**Token-deploying tooling:**
+
+- Add support for the new 7-arg `createToken` factory overload:
 
   ```solidity
   function createToken(
@@ -129,14 +144,3 @@ T5 introduces an optional on-chain `logoURI` field on every TIP-20 token via [TI
   ```
 
   The previous overload is unchanged.
-- `LogoURIUpdated(address indexed updater, string newLogoURI)` event, emitted from the **token's own address** (not the factory) with `updater = msg.sender`.
-
-### Field rules
-
-- String, max 256 bytes — reverts `LogoURITooLong` otherwise
-- If non-empty, must be a syntactically valid URI with a scheme in the allowlist `https`, `http`, `ipfs`, `data` (case-insensitive) — reverts `InvalidLogoURI` otherwise
-- Empty string is valid and clears the field
-
-### Relationship to this registry
-
-After T5, most issuers will want both: set `logoURI` on-chain so any wallet or explorer can render the icon without registry lookup, and continue to register here for the richer metadata extensions (`coingeckoId`, `bridgeInfo`, display `label`) and as a fallback icon for clients that don't yet read on-chain `logoURI`.
