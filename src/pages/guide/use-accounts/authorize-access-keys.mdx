@@ -15,6 +15,10 @@ import { Tabs, Tab } from 'vocs'
 
 Send stablecoin payments using an access key: a secondary signing key that lets you transact without repeated passkey prompts. Access keys can be scoped with spending limits and expiry for security.
 
+:::info[Coming with T5]
+After the [T5 network upgrade](/protocol/upgrades/t5), `key_authorization` gains an optional `witness: bytes32` field ([TIP-1053](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1053.md)). "Sign-In with Tempo" style apps can derive a 32-byte witness from their challenge and include it in the access-key authorization, so a single user signature both authorizes the access key and binds to the app's challenge — replacing the current two-prompt flow. No breaking change; existing flows continue to work unchanged.
+:::
+
 ## Demo
 
 By the end of this guide you will be able to send payments on Tempo using an access key. Notice that no passkey prompt appears when sending a payment.

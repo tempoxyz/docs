@@ -17,6 +17,13 @@ TIP-20 tokens support standard fungible token operations such as transfers, mint
 
 
 ## TIP20
+
+:::info[Coming with T5]
+The [T5 network upgrade](/protocol/upgrades/t5) adds two TIP-20-related changes:
+- An optional on-chain `logoURI` field on every TIP-20, with `logoURI()` view, `setLogoURI(string)` admin setter, `LogoURIUpdated` event, and a new 7-arg `createToken` factory overload ([TIP-1026](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1026.md)). See the [token onboarding migration appendix](/quickstart/tokenlist#t4--t5-migration) for issuer guidance.
+- An Implicit Approvals List of native precompiles (StablecoinDEX, FeeAMM, etc.) that may pull TIP-20 tokens via an internal `system_transfer_from(from, to, amount)` without a prior `approve` ([TIP-1035](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1035.md)). Standard `approve`, `permit`, `allowance`, and `transferFrom` behavior is unchanged.
+:::
+
 The core TIP-20 contract exposes standard ERC-20 functions for balances, allowances, transfers, and delegated transfers, and also adds:
 - 32-byte memo support on transfers, mints, and burns.
 - A `TIP20Roles` module for permissioned actions like issuing, pausing, unpausing, and burning blocked balances.

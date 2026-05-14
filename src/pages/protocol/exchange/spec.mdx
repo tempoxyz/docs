@@ -34,6 +34,14 @@ The contract maintains per‑user, per‑token internal balances. Order placemen
 
 #### Flip orders
 
+:::info[Coming with T5]
+The [T5 network upgrade](/protocol/upgrades/t5) changes flip-order behavior in two ways:
+- `flipTick == tick` becomes valid ([TIP-1030](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1030.md))
+- A filled flip order keeps the same `orderId` and emits a new `OrderFlipped` event instead of a fresh `OrderPlaced` ([TIP-1056](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1056.md))
+
+Until T5 activates, the behavior described below still applies. Indexers, SDKs, and contract code should see the [T4 → T5 migration appendix](/protocol/exchange/providing-liquidity#t4--t5-migration) on the Providing Liquidity page.
+:::
+
 A flip order behaves like a normal resting order until it is fully filled. When filled, the exchange places a new order for the same maker on the opposite side at a configured `flipTick` (which must be greater than `tick` for bids and less for asks). This enables passive liquidity with flexible strategies.
 
 When a flip order flips, it draws escrow exclusively from the maker's internal exchange balance. Unlike initial order placement, the exchange does not fall back to `transferFrom` if the internal balance is insufficient—the flip simply does not occur. This ensures that flip execution is self-contained and does not require additional token approvals or external balance checks at fill time.

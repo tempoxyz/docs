@@ -4,6 +4,10 @@ description: Technical specification for the Fee AMM enabling automatic stableco
 
 # Fee AMM Specification
 
+:::info[Coming with T5]
+The [T5 network upgrade](/protocol/upgrades/t5) introduces multihop FeeAMM routing ([TIP-1033](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1033.md)). Validators can support payout tokens that don't have direct liquidity for every fee-token / payout-token pair — one fee conversion can route through two pools instead of one. The fixed-rate swap mechanism described below is unchanged for direct pairs; the new behavior is purely additive at the routing layer. FeeAMM LPs and rebalancers should be aware that one fee conversion may now reserve and consume liquidity from two pools.
+:::
+
 ## Abstract
 
 This specification defines a system of one-way Automated Market Makers (AMMs) designed to facilitate gas fee payments from a user using one stablecoin (the `userToken`) to a validator who prefers a different stablecoin (the `validatorToken`). Each AMM handles fee swaps from a `userToken` to a `validatorToken` at one price (0.9970 `validatorToken` per `userToken`), and allows rebalancing in the other direction at another fixed price (1.0015 `userToken` per `validatorToken`).
