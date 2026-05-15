@@ -729,7 +729,7 @@ export default defineConfig({
                 link: '/protocol/upgrades/t5',
               },
               {
-                text: 'T4 (Active)',
+                text: 'T4',
                 link: '/protocol/upgrades/t4',
               },
               {
