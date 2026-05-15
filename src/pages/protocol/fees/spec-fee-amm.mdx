@@ -5,7 +5,7 @@ description: Technical specification for the Fee AMM enabling automatic stableco
 # Fee AMM Specification
 
 :::info[Coming with T5]
-The [T5 network upgrade](/protocol/upgrades/t5) introduces multihop FeeAMM routing ([TIP-1033](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1033.md)). Validators can support payout tokens that don't have direct liquidity for every fee-token / payout-token pair — one fee conversion can route through two pools instead of one. The fixed-rate swap mechanism described below is unchanged for direct pairs; the new behavior is purely additive at the routing layer. FeeAMM LPs and rebalancers should be aware that one fee conversion may now reserve and consume liquidity from two pools.
+The [T5 network upgrade](/protocol/upgrades/t5) introduces two-hop FeeAMM routing ([TIP-1033](https://tips.sh/1033)). If there is insufficient liquidity on the direct pool between the user's fee token and the validator token, the FeeAMM then considers routing from the user's fee token to that token's quote token to the validator's token. As a result, post-T5 fee conversion may now reserve and consume liquidity from two pools.
 :::
 
 ## Abstract
