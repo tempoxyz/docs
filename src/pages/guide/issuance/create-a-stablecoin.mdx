@@ -16,7 +16,7 @@ TIP-20 tokens are designed specifically for payments with built-in compliance fe
 and integration with Tempo's payment infrastructure.
 
 :::info[Coming with T5]
-After the [T5 network upgrade](/protocol/upgrades/t5), the TIP-20 factory exposes a new 7-arg `createToken` overload that accepts an on-chain `logoURI` at creation ([TIP-1026](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1026.md)). Wallets and explorers can read the icon directly from the token contract via `logoURI()`, without going through the [tokenlist registry](/quickstart/tokenlist). The previous `createToken` overload is unchanged. See the [token onboarding migration appendix](/quickstart/tokenlist#t4--t5-migration) for issuer guidance.
+After the [T5 network upgrade](/protocol/upgrades/t5), the TIP-20 factory exposes a new 7-arg `createToken` overload that accepts an on-chain `logoURI` at creation ([TIP-1026](https://tips.sh/1026)). Wallets and explorers can read the icon directly from the token contract via `logoURI()`, without going through the [tokenlist registry](/quickstart/tokenlist). The previous `createToken` overload is unchanged. See the [Optional logoURI in TIP-20 section of the T5 page](/protocol/upgrades/t5#optional-logouri-in-tip-20-tip-1026) for the full surface area.
 :::
 
 ## Demo
