@@ -10,7 +10,9 @@ import { IndexSupplyQuery } from '../../../components/IndexSupplyQuery'
 Query and inspect the orderbook to see available liquidity, price levels, and individual orders on Tempo's Stablecoin DEX.
 
 :::info[Coming with T5]
-After the [T5 network upgrade](/protocol/upgrades/t5), filled flip orders no longer emit a fresh `OrderPlaced` with a new `orderId`. Instead, the same `orderId` is rewritten in place and a new `OrderFlipped(orderId, newSide, newTick, ...)` event is emitted ([TIP-1056](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1056.md)). The recipes below currently key off `OrderPlaced` / `OrderFilled` / `OrderCancelled`; indexers will need to subscribe to `OrderFlipped` and stop assuming a new `orderId` per flip. See the [T4 → T5 migration appendix](/protocol/exchange/providing-liquidity#t4--t5-migration) for the full action list.
+After the [T5 network upgrade](/protocol/upgrades/t5), flip orders keep the same `orderId` when they flip. A fully filled flip order emits `OrderFilled`, then re-enters the book under the same `orderId` with an `OrderFlipped` event instead of a new `OrderPlaced` event.
+
+The SQL recipes below are pre-T5 examples. They currently treat any full `OrderFilled` as the end of an order and only read active liquidity from `OrderPlaced`, so they will miss flipped orders after T5. Post-T5 indexers should read `OrderFlipped` as the latest active state for that `orderId`, including its new side, tick, and flip tick. See the [T4 → T5 migration appendix](/protocol/exchange/providing-liquidity#t4--t5-migration) for the full action list.
 :::
 
 ## Recommended Approach
