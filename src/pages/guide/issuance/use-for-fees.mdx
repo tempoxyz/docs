@@ -39,6 +39,10 @@ First, create and mint your stablecoin by following the [Create a Stablecoin](/g
 
 ### Add fee pool liquidity
 
+:::info[Coming with T5]
+After the [T5 network upgrade](/protocol/upgrades/t5), the FeeAMM supports multihop routing ([TIP-1033](https://tips.sh/1033)). Issuers no longer need to provision a pool against every validator payout token — pairing your token against a single liquid quote (e.g., `pathUSD`) is enough, and multihop routing connects it to any validator payout token that has its own `pathUSD` pool. Until T5 activates, the per-validator-token setup described below still applies.
+:::
+
 Before users can pay fees with your token, you need to provide liquidity in the Fee AMM between your token and each of the tokens accepted by validators.
 
 To determine which validator tokens are needed, sample recent blocks and check the miner's preferred fee token using `getValidatorToken` on the FeeManager contract. For example, on Moderato testnet, validators accept fees in pathUSD and AlphaUSD. On mainnet, this token mix is different and subject to change.

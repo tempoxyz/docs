@@ -36,7 +36,11 @@ T5 introduces the following changes:
 
 ## Integration changes
 
-Most of T5 is additive. The notes below cover behaviors that integrators, indexers, and tooling should pick up before activation. The TIP-1034 escrow precompile is internal to MPP and has no external integration impact.
+Most of T5 is additive. The notes below cover behaviors that integrators, indexers, and tooling should pick up before activation.
+
+### Enshrined TIP-20 escrow channel (TIP-1034)
+
+Not a breaking change at the contract level — the existing application-level MPP escrow contract continues to work after T5. To migrate to the new precompile path, MPP libraries need to be upgraded to versions that target the precompile; new releases will be linked under [Compatible SDK releases](#compatible-sdk-releases) once published. Tooling that monitors or interacts with MPP escrow should be aware of both surfaces during the transition.
 
 ### Payment lane selector allow-list (TIP-1045)
 
@@ -97,6 +101,8 @@ As a precompile, escrow uses protocol-native capabilities directly:
 ### TIP-1033: Multihop FeeAMM Routing
 
 [TIP-1033](https://tips.sh/1033) lets validators support more payout tokens without requiring direct liquidity for every fee-token / payout-token pair. Before T5, validator onboarding had a direct-liquidity requirement for every supported token; as more stablecoins and TIP-20s come to Tempo, we want users to pay fees in many tokens while validators choose the token they receive. FeeAMM LPs and rebalancers should be aware that one fee conversion can now reserve and consume liquidity from two pools instead of one.
+
+For new token issuers this means fee-pool liquidity setup is simpler: instead of provisioning a pool against every validator payout token, an issuer can pair their token against a single liquid quote (e.g., `pathUSD`) and let multihop routing connect it to any validator payout token that has its own pathUSD pool.
 
 ### TIP-1035: Implicit Approvals List
 
