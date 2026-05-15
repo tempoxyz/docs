@@ -65,6 +65,8 @@ Tokens without `logoURI` continue to work. New surface area:
 
 `logoURI` is validated on-chain: max 256 bytes (reverts `LogoURITooLong`), and if non-empty must be a syntactically valid URI with a scheme in the allowlist `https`, `http`, `ipfs`, `data` (case-insensitive). Otherwise reverts `InvalidLogoURI`. Empty string is valid and clears the field.
 
+We recommend pointing `logoURI` at an SVG icon — non-SVG icons render poorly across wallets and explorers (see [tokenlist Icon Requirements](/quickstart/tokenlist#icon-requirements)).
+
 ### Witness digest in key authorizations (TIP-1053)
 
 `key_authorization` gains an optional `witness: bytes32` field. The protocol includes the witness in the signing hash and emits it when the key authorization is registered, but otherwise treats it as opaque and application-defined. No breaking change; tooling should start populating and reading the new field.
