@@ -29,7 +29,7 @@ Enable gasless transactions by sponsoring transaction fees for your users. Tempo
 ### Set up the fee payer service
 
 :::tip
-Tempo provides a public testnet fee payer service at `https://sponsor.moderato.tempo.xyz` that you can use for development and testing. If you want to run your own, follow the instructions below.
+For development and testing, point `feePayer` at your local relay endpoint (e.g. `/relay`). All transactions will be sponsored automatically.
 :::
 
 You can stand up a minimal fee payer service using the [`Handler.relay`](/accounts/server/handler.relay) handler provided by the [Tempo Accounts SDK](/accounts). To sponsor transactions, you need a funded account that will act as the fee payer.
@@ -66,7 +66,7 @@ import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet({
-    feePayer: 'https://sponsor.moderato.tempo.xyz', // [!code focus]
+    feePayer: '/relay', // [!code focus]
   })],
   chains: [tempo],
   multiInjectedProviderDiscovery: false,
@@ -90,7 +90,7 @@ export const config = createConfig({
   transports: {
     [tempo.id]: withRelay( // [!code focus]
       http(), // [!code focus]
-      http('https://sponsor.moderato.tempo.xyz'), // [!code focus]
+      http('/relay'), // [!code focus]
     ), // [!code focus]
   },
 })
@@ -98,65 +98,12 @@ export const config = createConfig({
 
 :::
 
-### Sponsor your user's transactions
+### Send a sponsored transaction
 
-Now transactions will be sponsored by your relay. For more details on how to send a transaction, see the [Send a payment](/guide/payments/send-a-payment) guide.
+That's it — all transactions sent through this config will be automatically sponsored by your relay. No additional code is needed on the client side. For more details on how to send a transaction, see the [Send a payment](/guide/payments/send-a-payment) guide.
 
 :::info
-You can also build your own fee paying service. See [Build your own fee paying service](#build-your-own-fee-paying-service) below.
-:::
-
-:::code-group
-
-```tsx twoslash [SendSponsoredPayment.tsx] filename="SendSponsoredPayment.tsx"
-import { Hooks } from 'wagmi/tempo'
-import { parseUnits } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
-
-// @noErrors
-function SendSponsoredPayment() {
-  const sponsorAccount = privateKeyToAccount('0x...')
-  const sendPayment = Hooks.token.useTransferSync() // [!code hl]
-  const metadata = Hooks.token.useGetMetadata({
-    token: alphaUsd,
-  })
-
-  return (
-    <form onSubmit={
-      (event) => {
-        event.preventDefault()
-        const formData = new FormData(event.target as HTMLFormElement)
-
-        const recipient = (formData.get('recipient') ||
-          '0x0000000000000000000000000000000000000000') as `0x${string}`
-
-        sendPayment.mutate({ // [!code hl]
-          amount: parseUnits('100', metadata.data.decimals), // [!code hl]
-          feePayer: sponsorAccount, // [!code focus]
-          to: recipient, // [!code hl]
-          token: alphaUsd, // [!code hl]
-        }) // [!code hl]
-      }
-    }>
-      <div>
-        <label htmlFor="recipient"> Recipient address </label>
-        <input type="text" placeholder="0x..." />
-      </div>
-      <button type="submit" disabled={sendPayment.isPending}>
-        Send Payment
-      </button>
-    </form>
-  )
-}
-```
-
-```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
-// @noErrors
-// [!include ~/snippets/wagmi.config.ts:withFeePayer]
-```
-
+You can also build your own fee paying service for more control. See [Build your own fee paying service](#build-your-own-fee-paying-service) below.
 :::
 
 ### Next Steps
