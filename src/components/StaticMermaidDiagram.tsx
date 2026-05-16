@@ -79,7 +79,9 @@ export function StaticMermaidDiagram({ chart }: { chart: string }) {
         el.innerHTML = svg
         const svgEl = el.querySelector('svg')
         if (svgEl) {
-          svgEl.style.maxWidth = '100%'
+          svgEl.removeAttribute('width')
+          svgEl.removeAttribute('height')
+          svgEl.style.width = '100%'
           svgEl.style.height = 'auto'
           svgEl.style.display = 'block'
           svgEl.style.margin = '0 auto'
