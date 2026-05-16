@@ -562,6 +562,10 @@ export default defineConfig({
                 link: '/protocol/tip403/spec',
               },
               {
+                text: 'Account-Level Receive Policies',
+                link: '/protocol/tip403/account-level-receive-policies',
+              },
+              {
                 text: 'Rust Implementation',
                 link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip403_registry',
               },

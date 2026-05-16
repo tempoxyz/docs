@@ -1,5 +1,5 @@
 ---
-description: Learn how TIP-403 enables TIP-20 tokens to enforce access control through a shared policy registry with whitelist and blacklist support.
+description: Learn how TIP-403 lets issuers and receivers reuse shared allowlist and blocklist policies.
 ---
 
 import { Cards, Card } from 'vocs'
@@ -8,7 +8,7 @@ import { Cards, Card } from 'vocs'
 
 ## What is TIP-403?
 
-TIP-403 is Tempo's policy registry system that enables TIP-20 tokens to enforce access control. Instead of each token implementing its own logic, TIP-403 provides a registry where policies can be created once and shared across multiple tokens.
+TIP-403 is Tempo's shared policy registry. Token issuers use it to control who can use a token. Account-level receive policies extend the same registry so a receiver can say which tokens it accepts and which addresses can send to it.
 
 ## Links
 
@@ -18,6 +18,12 @@ TIP-403 is Tempo's policy registry system that enables TIP-20 tokens to enforce 
     to="/protocol/tip403/spec"
     icon="lucide:file-text"
     title="TIP-403 Specification"
+  />
+  <Card
+    description="Let an account say which TIP-20 tokens and senders it accepts."
+    to="/protocol/tip403/account-level-receive-policies"
+    icon="lucide:shield-check"
+    title="Account-Level Receive Policies"
   />
   <Card
     description="Manage your stablecoin's permissions, supply, and compliance settings"

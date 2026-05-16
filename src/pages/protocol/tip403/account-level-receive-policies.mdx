@@ -1,0 +1,162 @@
+---
+title: Account-Level Receive Policies
+description: Let Tempo accounts choose which TIP-20 tokens they receive and which addresses may send to them.
+---
+
+import { Cards, Card } from 'vocs'
+import { StaticMermaidDiagram } from '../../../components/StaticMermaidDiagram'
+
+# Account-Level Receive Policies
+
+Account-level receive policies give any account on Tempo a way to specify:
+
+- which TIP-20 tokens it wants to receive
+- which addresses can send tokens to it
+
+The sender still starts a normal stablecoin transfer or mint. If the receiver accepts that token and sender, the funds are credited normally. If the receiver does not accept them, the funds are held at a universal holding account instead of credited to the receiver, and Tempo records a receipt in the holding account for that specific blocked transfer or mint. The receiver's policy determines who is eligible to claim the funds corresponding to that specific receipt. 
+
+:::info[Draft feature]
+Account-level receive policies are in the design phase and will not be active on Tempo until enabled by a future network upgrade.
+:::
+
+## Use cases
+
+Receive policies are useful when the receiver needs to control what can land in its wallet.
+
+Examples:
+
+- a fintech or embedded wallet can prevent internal wallets or customer wallets from holding unsupported tokens
+- a regulated institution can accept funds only from approved counterparties
+- a stablecoin orchestrator can prevent users from sending the wrong token to a deposit address
+- an exchange, custodian, or payment processor can send unsupported deposits to a recovery flow instead of losing them or reverting the whole transaction
+
+## Setting a policy
+
+A receiver configures three things:
+
+| Setting | What it controls |
+| --- | --- |
+| Tokens | an allowlist or blocklist of [TIP-20](/protocol/tip20/spec) tokens the account can receive |
+| Senders | an allowlist or blocklist of addresses that can send to the account |
+| Recovery authority | who can move funds if a send is blocked |
+
+The receiver sets the recovery authority in advance as part of its receive policy. It applies to future blocked sends.
+
+If an account has no receive policy, it accepts all TIP-20 transfers and mints at this layer.
+
+The token list and sender list are normal [TIP-403](/protocol/tip403/spec) policies. Options include reject all, allow all, or a custom policy that blocklists/ allowlists a set of tokens / addresses.
+
+The recovery authority can be:
+
+| Recovery authority | Who can claim blocked funds |
+| --- | --- |
+| Receiver | the intended receiver |
+| Originator | the address that started the transfer or mint |
+| Third party | a configured address or contract chosen by the receiver |
+
+These settings are readable before sending a transaction, so wallets and integrations can warn users when a send is likely to be held.
+
+## Stablecoin transfers and mints
+
+When a user sends or mints a TIP-20 token to a receiver, Tempo handles it in this order:
+
+1. Tempo checks the normal token rules: balance, allowance, pause status where applicable, and the token issuer's [TIP-403](/protocol/tip403/spec) / TIP-1015 policy.
+2. If those checks fail, the transaction reverts. This is the same behavior as today.
+3. If those checks pass, Tempo checks the receiver's policy.
+4. If the receiver accepts the token and sender, the receiver is credited normally.
+5. If the receiver does not accept the token or sender, the transaction can still succeed, but the funds are credited to the holding contract and a blocked receipt is recorded.
+
+<StaticMermaidDiagram chart={`flowchart TD
+    A["Sender starts transfer or mint"] --> B["Run normal token checks"]
+    B -- "fail" --> X["Revert"]
+    B -- "pass" --> C{"Receiver accepts token and sender?"}
+    C -- "yes" --> D["Credit receiver"]
+    C -- "no" --> E["Credit holding contract"]
+    E --> F["Record blocked receipt"]
+`} />
+
+This means a successful TIP-20 call can have two different outcomes: the receiver was credited, or the funds were held under the receiver's pre-set recovery authority.
+
+For transfers, the sender checked by the receive policy is the `from` address. For `transferFrom`, that is the token owner in `from`, not necessarily the spender who submitted the transaction. For mints, the sender checked by the receive policy is the mint caller.
+
+:::info[Virtual Addresses]
+For [TIP-1022 virtual addresses](/protocol/tip20/virtual-addresses), the policy is checked on the resolved master account. If the send is blocked, the receipt still records the original virtual address for attribution.
+:::
+
+## Blocked funds
+
+There is a special holding contract for all blocked transfers and mints. The holding contract does not decide who should receive the funds. The receiver's policy, set before the send happens, decides who is allowed to claim them later.
+
+Each blocked transfer or mint gets its own receipt. A receipt is a record of that specific blocked transfer or mint. It contains the details needed to identify the transfer and determine who is authorized to claim the funds:
+
+- token and amount
+- originator
+- intended receiver
+- recovery authority
+- whether the token or sender check blocked the send
+- whether the operation was a transfer or mint
+- memo, timestamp, and nonce
+
+The receipt details are emitted in `TransferBlocked` or `MintBlocked` events. Claimers and indexers should store those event fields to facilitate later claims. 
+
+## Claiming blocked funds
+
+To claim blocked funds, the authorized party supplies the receipt details and a destination address. The holding contract checks the receipt against the receiver's pre-set recovery authority, verifies that the caller is allowed to claim it, consumes the full receipt, and releases the funds.
+
+<StaticMermaidDiagram chart={`flowchart TD
+    A["Claimer supplies receipt and destination"] --> B{"Caller is authorized?"}
+    B -- "no" --> X["Revert"]
+    B -- "yes" --> C["Consume receipt"]
+    C --> D{"Destination is original receiver?"}
+    D -- "yes, and claimer is receiver or selected third party" --> E["Resume to receiver"]
+    D -- "otherwise" --> F["Reroute to destination"]
+`} />
+
+There are two outcomes:
+
+- **Resume:** funds go to the original receiver. This is used when the receiver, or the receiver's selected third party, claims back to the receiver.
+- **Reroute:** funds go somewhere else. Originator-authorized claims are always reroutes, even if the destination is the original receiver.
+
+Claims consume whole receipts, partial claims are not supported. If a receiver changes its recovery authority, the change only affects future blocked receipts. Existing receipts keep the recovery authority they were created with.
+
+## What operators and integrators should show
+
+Wallets, explorers, and indexers should treat held sends as their own delivery state.
+
+For a receiver or integrator, the operating flow is:
+
+1. decide which tokens and senders the account should accept
+2. create or reuse the TIP-403 policies for those lists
+3. choose who can recover blocked funds
+4. set the receive policy on the account, or on the master account for virtual-address deposit flows
+5. index blocked events and store the receipt fields
+6. review and claim blocked receipts when needed
+
+In user interfaces, distinguish:
+
+- **failed:** the normal token checks failed and the transaction reverted
+- **credited:** the receiver accepted the send and received the funds
+- **held:** the transaction succeeded, but the receiver's policy blocked the funds from being credited
+
+## Learn more
+
+<Cards>
+  <Card
+    title="TIP-403 Specification"
+    description="Read the base TIP-403 policy registry specification."
+    to="/protocol/tip403/spec"
+    icon="lucide:file-text"
+  />
+  <Card
+    title="Virtual addresses for TIP-20 deposits"
+    description="Understand how virtual addresses interact with TIP-20 deposit attribution."
+    to="/protocol/tip20/virtual-addresses"
+    icon="lucide:route"
+  />
+  <Card
+    title="TIP-1028 proposal"
+    description="Read the current proposal for account-level receive policies and blocked funds."
+    to="https://github.com/tempoxyz/tempo/pull/3791"
+    icon="lucide:file-text"
+  />
+</Cards>
