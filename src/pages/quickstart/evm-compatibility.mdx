@@ -115,6 +115,18 @@ This means transfers to new addresses cost ~300k gas, and contract deployments c
 | **`BALANCE` and `SELFBALANCE`** | Will always return 0 | Use TIP-20 `balanceOf` instead |
 | **`CALLVALUE`** | Will always return 0 | There is no alternative |
 
+### Native Value Transfers
+
+Tempo does not support native ETH value transfers. Any transaction with a non-zero `value` field is **rejected** at the transaction pool level — it will not be executed.
+
+This has several implications for smart contract developers:
+
+- **`receive()` functions will never be triggered**, since they require `msg.value > 0` with empty calldata.
+- **`payable` modifiers have no effect** — `msg.value` is always 0.
+- **Contracts that depend on `msg.value` for payment logic** (e.g., WETH `deposit()`) will not work as expected.
+
+If your contract needs to accept payments, use [TIP-20](/protocol/tip20/overview) token transfers (e.g., `transferFrom`) instead of relying on `msg.value`.
+
 :::info
 We are exploring transaction level introspection for Tempo Transactions, with an ability to declare things like `tx.fee_token` and `tx.fee_payer` in Solidity.
 :::
