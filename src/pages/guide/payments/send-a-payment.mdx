@@ -1003,7 +1003,7 @@ Send multiple payments in a single transaction using batch transactions:
 When you send a payment, the token contract emits events:
 
 - **Transfer**: Standard ERC-20 transfer event
-- **TransferWithMemo**: Additional event with memo (if using `transferWithMemo`)
+- **TransferWithMemo**: Additional event emitted automatically when a `memo` is passed to `token.transfer`
 
 You can filter these events to track payments in your off-chain systems.
 
