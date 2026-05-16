@@ -2,30 +2,24 @@
 import * as React from 'react'
 import { isAddress, isHash } from 'viem'
 import { tempo } from 'viem/chains'
-import type * as z from 'zod/mini'
-import LucideExternalLink from '~icons/lucide/external-link'
 import { Container } from './Container'
 import { Button } from './guides/Demo'
-import { type responseSchema, runIndexSupplyQuery } from './lib/IndexSupply'
-import { extractParameterNames, getAllSignatures } from './lib/IndexSupplySignatures'
+import { type QueryResponse, runTidxQuery } from './lib/Tidx'
+import { extractParameterNames, getAllSignatures } from './lib/TidxSignatures'
 import { SignatureSelector } from './SignatureSelector'
 import { SqlEditor } from './SqlEditor'
 
-type QueryResult = z.infer<typeof responseSchema>[0]
+type QueryResult = QueryResponse
 
-// Default EVM tables and their columns from IndexSupply
+// Default EVM tables and their columns from tidx.
 const EVM_TABLE_COLUMNS = {
   blocks: [
-    'chain',
     'num',
     'timestamp',
-    'size',
     'gas_limit',
     'gas_used',
-    'nonce',
     'hash',
-    'receipts_root',
-    'state_root',
+    'parent_hash',
     'extra_data',
     'miner',
   ],
@@ -36,7 +30,10 @@ const EVM_TABLE_COLUMNS = {
     'idx',
     'type',
     'gas',
-    'gas_price',
+    'gas_limit',
+    'gas_used',
+    'max_fee_per_gas',
+    'max_priority_fee_per_gas',
     'nonce',
     'hash',
     'from',
@@ -51,22 +48,43 @@ const EVM_TABLE_COLUMNS = {
     'log_idx',
     'tx_hash',
     'address',
-    'topics',
+    'selector',
+    'topic0',
+    'topic1',
+    'topic2',
+    'topic3',
     'data',
+  ],
+  receipts: [
+    'block_num',
+    'block_timestamp',
+    'tx_idx',
+    'tx_hash',
+    'from',
+    'to',
+    'contract_address',
+    'gas_used',
+    'cumulative_gas_used',
+    'effective_gas_price',
+    'status',
+    'fee_payer',
   ],
 } as const
 
-type IndexSupplyQueryProps = {
+type TidxQueryProps = {
   chainId: number
   signatures?: string[]
   query?: string
   title?: string
-  signatureFilter?: 'all' | 'events' | 'functions'
 }
 
 function getExplorerHost() {
   const { VITE_TEMPO_ENV, VITE_EXPLORER_OVERRIDE } = import.meta.env
-  if (VITE_TEMPO_ENV !== 'testnet' && VITE_EXPLORER_OVERRIDE !== undefined) {
+  if (
+    VITE_TEMPO_ENV !== 'testnet' &&
+    VITE_TEMPO_ENV !== 'moderato' &&
+    VITE_EXPLORER_OVERRIDE !== undefined
+  ) {
     return VITE_EXPLORER_OVERRIDE
   }
   return tempo.blockExplorers.default.url
@@ -133,7 +151,7 @@ function renderCellValue(cell: string | number | boolean | null): React.ReactNod
   )
 }
 
-export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
+export function TidxQuery(props: TidxQueryProps) {
   const isReadOnly = props.query !== undefined
 
   const allSignatures = React.useMemo(() => getAllSignatures(), [])
@@ -154,7 +172,7 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
   const [signatures, setSignatures] = React.useState<string[]>(resolvedSignatures)
   const [result, setResult] = React.useState<QueryResult | null>(null)
   const [error, setError] = React.useState<string | null>(null)
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [isLoading, startQueryTransition] = React.useTransition()
 
   const selectedSignatureInfos = React.useMemo(() => {
     return signatures
@@ -195,58 +213,40 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
     setSignatures(resolvedSignatures)
   }, [resolvedSignatures])
 
-  const handleRunQuery = async () => {
-    const queryToRun = query.trim()
+  const runQuery = React.useCallback(
+    (nextQuery: string) => {
+      const queryToRun = nextQuery.trim()
 
-    if (!queryToRun) {
-      setError('Please enter a SQL query')
-      return
-    }
-
-    setIsLoading(true)
-    setError(null)
-    setResult(null)
-
-    try {
-      const options = {
-        chainId: props.chainId,
-        ...(signatures.length > 0 ? { signatures } : {}),
-      }
-      const queryResult = await runIndexSupplyQuery(queryToRun, options)
-      setResult(queryResult)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-      e.preventDefault()
-      const queryToRun = queryRef.current.trim()
       if (!queryToRun) {
         setError('Please enter a SQL query')
         return
       }
 
-      setIsLoading(true)
-      setError(null)
-      setResult(null)
+      startQueryTransition(async () => {
+        setError(null)
+        setResult(null)
 
-      runIndexSupplyQuery(queryToRun, {
-        chainId: props.chainId,
-        ...(signatures.length > 0 ? { signatures } : {}),
-      })
-        .then((queryResult) => {
+        try {
+          const options = {
+            chainId: props.chainId,
+            ...(signatures.length > 0 ? { signatures } : {}),
+          }
+          const queryResult = await runTidxQuery(queryToRun, options)
           setResult(queryResult)
-        })
-        .catch((err) => {
+        } catch (err) {
           setError(err instanceof Error ? err.message : 'Unknown error occurred')
-        })
-        .finally(() => {
-          setIsLoading(false)
-        })
+        }
+      })
+    },
+    [props.chainId, signatures],
+  )
+
+  const handleRunQuery = () => runQuery(query)
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault()
+      runQuery(queryRef.current)
     }
   }
 
@@ -254,7 +254,7 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
     <Container
       headerLeft={
         <h4 className="font-normal text-[14px] text-gray12 leading-none -tracking-[1%]">
-          {props.title || 'IndexSupply SQL Query'}
+          {props.title || 'tidx SQL Query'}
         </h4>
       }
       headerRight={
@@ -265,19 +265,8 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
     >
       <div className="space-y-4">
         {props.signatures ? (
-          <div className="space-y-2">
-            <div className="flex items-center gap-1.5 text-[13px] text-gray11">
-              Signatures
-              <a
-                href="https://www.indexsupply.net/docs#signatures"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray9 transition-colors hover:text-gray11"
-              >
-                <LucideExternalLink className="size-3" />
-              </a>
-            </div>
-            <div className="flex flex-wrap gap-1">
+          <div className="flex w-full items-center space-y-2">
+            <div className="flex w-full flex-wrap gap-1">
               {selectedSignatureInfos.map((sigInfo) => {
                 const isEvent = sigInfo.type === 'event'
                 return (
@@ -290,33 +279,18 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
                         isEvent ? 'bg-blue9' : 'bg-purple9'
                       }`}
                     />
-                    <span className="max-w-[300px] truncate text-gray11">{sigInfo.name}</span>
+                    <span className="max-w-75 truncate text-gray11">{sigInfo.name}</span>
                   </div>
                 )
               })}
+              <p className="ml-auto flex items-center gap-1.5 text-[13px] text-gray11">SQL Query</p>
             </div>
           </div>
         ) : (
-          <SignatureSelector
-            value={signatures}
-            onChange={setSignatures}
-            disabled={isReadOnly}
-            filter={props.signatureFilter}
-          />
+          <SignatureSelector value={signatures} onChange={setSignatures} disabled={isReadOnly} />
         )}
 
         <div className="space-y-2">
-          <label htmlFor="sql-query" className="flex items-center gap-1.5 text-[13px] text-gray11">
-            SQL Query
-            <a
-              href="https://www.indexsupply.net/docs#sql"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray9 transition-colors hover:text-gray11"
-            >
-              <LucideExternalLink className="size-3" />
-            </a>
-          </label>
           <SqlEditor
             value={query}
             onChange={handleQueryChange}

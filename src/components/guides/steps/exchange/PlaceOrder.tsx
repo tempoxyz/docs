@@ -73,7 +73,7 @@ export function PlaceOrder(props: DemoStepProps) {
           variant={active ? (sendCalls.isSuccess ? 'default' : 'accent') : 'default'}
           disabled={!active}
           onClick={() => {
-            sendCalls.sendCallsSync({
+            sendCalls.mutate({
               calls,
             })
           }}
