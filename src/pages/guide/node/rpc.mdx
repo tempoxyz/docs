@@ -17,6 +17,7 @@ tempo download --archive
 # Run node
 tempo node \
   --follow \
+  --tempo.bootnodes-endpoint https://peers.tempo.xyz \
   --http --http.port 8545 \
   --http.api eth,net,web3,txpool,trace
 ```
@@ -43,6 +44,7 @@ WorkingDirectory=$HOME/tempo
 ExecStart=/usr/local/bin/tempo node \\
   --datadir <datadir> \\
   --follow \\
+  --tempo.bootnodes-endpoint https://peers.tempo.xyz \\
   --http \\
   --http.addr 0.0.0.0 \\
   --http.port 8545 \\
