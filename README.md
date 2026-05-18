@@ -43,9 +43,12 @@ See [`SECURITY.md`](https://github.com/tempoxyz/docs?tab=security-ov-file).
 
 ## License
 
-Licensed under either of [Apache License](./LICENSE-APACHE), Version
-2.0 or [MIT License](./LICENSE-MIT) at your option.
+Licensed under either of:
+- [Apache License 2.0](https://github.com/tempoxyz/docs/blob/main/LICENSE-APACHE) 
+- [MIT License](https://github.com/tempoxyz/docs/blob/main/LICENSE-MIT)
 
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in these crates by you, as defined in the Apache-2.0 license,
-shall be dual licensed as above, without any additional terms or conditions.
+at your option.
+
+## Additional Docs
+- [AGENTS.md](AGENTS.md) — Documentation tooling and agent setup
+- [SKILL.md](SKILL.md) — Skill and page guidelines
