@@ -85,14 +85,14 @@ Once the Tempo team adds your validator on-chain, it will enter the active set i
 
 The process for running a validator node is very similar to [running a full node](/guide/node/rpc).
 
-You should start by downloading the latest snapshot. Downloading the snapshot allows your validator to start participating in consensus much faster.
+You should start by downloading the latest snapshot. By default, `tempo download` downloads a minimal snapshot, which allows your validator to start participating in consensus much faster while avoiding archive data that validators do not need.
 
 ::::code-group
 ```bash [Mainnet]
-tempo download --chain mainnet --archive
+tempo download --chain mainnet
 ```
 ```bash [Testnet]
-tempo download --chain moderato --archive
+tempo download --chain moderato
 ```
 ::::
 
