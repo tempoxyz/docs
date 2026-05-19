@@ -725,19 +725,19 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
-                text: 'T5',
+                text: 'T5 (Next)',
                 link: '/protocol/upgrades/t5',
               },
               {
-                text: 'T4 (Active)',
+                text: 'T4 (Latest)',
                 link: '/protocol/upgrades/t4',
               },
               {
-                text: 'T3 (Active)',
+                text: 'T3',
                 link: '/protocol/upgrades/t3',
               },
               {
-                text: 'T2 (Active)',
+                text: 'T2',
                 link: '/protocol/upgrades/t2',
               },
             ],
