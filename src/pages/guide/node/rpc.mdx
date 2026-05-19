@@ -25,6 +25,20 @@ An RPC node running in follow mode is a **full node**. It fetches blocks from a 
 
 By default, RPC nodes run in archive mode, meaning they do not prune historical state.
 
+## Certified Follow mode
+
+Soon to be the default, the follower can be configured to run without trusting the RPC endpoint. In order for this to work, the endpoint must serve consensus rpcs that the follower can use to validate peered execution state. The public endpoint for the Moderato testnet supports these rpcs
+
+```
+tempo node \
+  --follow \
+  --follow.experimental.certify
+  --http --http.port 8545 \
+  --http.api eth,net,web3,txpool,trace
+```
+
+If following against a custom endpoint, it must serve the consensus rpcs (default true for validator nodes). RPC nodes running with `--follow.experimental.certify` will serve these rpcs.
+
 ## Example Systemd Service
 
 ```bash /dev/null/systemd.sh#L1-55
