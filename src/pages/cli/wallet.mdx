@@ -122,7 +122,7 @@ The [Machine Payments Protocol](https://mpp.dev/overview) (MPP) lets any HTTP en
 
 ## Manage payment sessions
 
-When you use [pay-as-you-go](/guide/machine-payments/pay-as-you-go) services, MPP opens a [session](https://mpp.dev/payment-methods/tempo/session) — a payment channel where your wallet deposits funds into an escrow contract, then pays per request using signed [vouchers](https://mpp.dev/protocol/credentials) off-chain. This avoids an on-chain transaction for every request, giving sub-100ms latency and near-zero per-request fees.
+When you use [pay-as-you-go](/guide/machine-payments/pay-as-you-go) services, MPP opens a [session](https://mpp.dev/payment-methods/tempo/session) — a payment channel where your wallet deposits funds into a reserve contract, then pays per request using signed [vouchers](https://mpp.dev/protocol/credentials) off-chain. This avoids an on-chain transaction for every request, giving sub-100ms latency and near-zero per-request fees.
 
 The CLI tracks session state locally:
 

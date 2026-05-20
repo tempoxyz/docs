@@ -1,11 +1,11 @@
 ---
 title: T5 Network Upgrade
-description: Details and timeline for the T5 network upgrade, including the enshrined TIP-20 escrow channel precompile, DEX improvements, multihop FeeAMM routing, and more.
+description: Details and timeline for the T5 network upgrade, including the enshrined TIP-20 reserve channel precompile, DEX improvements, multihop FeeAMM routing, and more.
 ---
 
 # T5 Network Upgrade
 
-T5 is Tempo's next network upgrade. It introduces an enshrined TIP-20 escrow channel precompile for MPP and similar session-based payment flows, payment lane classification in consensus, DEX improvements (same-tick flip orders and persistent order IDs across flips), multihop FeeAMM routing, an on-chain `logoURI` field for TIP-20 tokens, an Implicit Approvals List for gas-efficient internal transfers, and a witness digest binding for one-signature key authorization flows.
+T5 is Tempo's next network upgrade. It introduces an enshrined TIP-20 reserve channel precompile for MPP and similar session-based payment flows, payment lane classification in consensus, DEX improvements (same-tick flip orders and persistent order IDs across flips), multihop FeeAMM routing, an on-chain `logoURI` field for TIP-20 tokens, an Implicit Approvals List for gas-efficient internal transfers, and a witness digest binding for one-signature key authorization flows.
 
 :::info[T5 is not live yet]
 The features described on this page are scheduled for T5 and are not active on Moderato or Presto yet. They only become live once the T5 activation timestamps are reached.
@@ -23,7 +23,7 @@ Node operators must upgrade to the T5-compatible release (v1.8.0, targeted for M
 ## Overview
 
 T5 introduces the following changes:
-- An enshrined TIP-20 escrow channel precompile for MPP and other session-based payment flows ([TIP-1034](https://tips.sh/1034))
+- An enshrined TIP-20 reserve channel precompile for MPP and other session-based payment flows ([TIP-1034](https://tips.sh/1034))
 - Consensus-level classification of payment-lane-eligible transactions ([TIP-1045](https://tips.sh/1045))
 - Same-tick flip orders on the DEX ([TIP-1030](https://tips.sh/1030))
 - Persistent order IDs across flips ([TIP-1056](https://tips.sh/1056))
@@ -38,13 +38,13 @@ T5 introduces the following changes:
 
 Most of T5 is additive. The notes below cover behaviors that integrators, indexers, and tooling should pick up before activation.
 
-### Enshrined TIP-20 escrow channel (TIP-1034)
+### Enshrined TIP-20 reserve channel (TIP-1034)
 
-Not a breaking change at the contract level — the existing application-level MPP escrow contract continues to work after T5. The new precompile lives at [`0x4D50500000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x4D50500000000000000000000000000000000000) (ASCII `MPP`). To migrate to the precompile path, MPP libraries need to be upgraded to versions that target it; new releases will be linked under [Compatible SDK releases](#compatible-sdk-releases) once published. Tooling that monitors or interacts with MPP escrow should be aware of both surfaces during the transition.
+Not a breaking change at the contract level — the existing application-level MPP reserve contract continues to work after T5. The new precompile lives at [`0x4D50500000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x4D50500000000000000000000000000000000000) (ASCII `MPP`). To migrate to the precompile path, MPP libraries need to be upgraded to versions that target it; new releases will be linked under [Compatible SDK releases](#compatible-sdk-releases) once published. Tooling that monitors or interacts with MPP reserve should be aware of both surfaces during the transition.
 
 ### Payment lane selector allow-list (TIP-1045)
 
-Anything that classifies transactions as "payments" (indexers, explorers, payment processors) should pick up the new selector allow-list. The list covers TIP-20 calls and the new `TIP20ChannelEscrow` precompile (TIP-1034).
+Anything that classifies transactions as "payments" (indexers, explorers, payment processors) should pick up the new selector allow-list. The list covers TIP-20 calls and the new `TIP20ChannelReserve` precompile (TIP-1034).
 
 ### Same-tick flip orders (TIP-1030)
 
@@ -77,20 +77,20 @@ T5-compatible SDK releases will be listed here as they ship.
 
 ## Feature TIPs
 
-### TIP-1034: Enshrined TIP-20 Escrow Channel
+### TIP-1034: Enshrined TIP-20 Reserve Channel
 
-[TIP-1034](https://tips.sh/1034) moves TIP-20 payment-channel escrow from an application-level Solidity contract into the protocol as a precompile, giving Tempo a native, canonical payment-channel primitive for MPP and other high-frequency payment apps.
+[TIP-1034](https://tips.sh/1034) moves TIP-20 payment-channel reserve from an application-level Solidity contract into the protocol as a precompile, giving Tempo a native, canonical payment-channel primitive for MPP and other high-frequency payment apps.
 
-As a precompile, escrow uses protocol-native capabilities directly:
+As a precompile, reserve uses protocol-native capabilities directly:
 
 - **Simpler open/top-up flow:** channels can be opened or topped up in one transaction.
 - **Cleaner channel identity:** channel IDs are derived from the transaction's replay-protected context hash, instead of requiring transaction-context access to be exposed to Solidity.
 - **Reduced storage and lower cost:** immutable channel details live in calldata and `ChannelOpened` logs; the precompile stores only mutable channel state on-chain.
-- **Stable integration surface:** one canonical protocol-level escrow interface, while internals can improve in future upgrades without changing the public API.
+- **Stable integration surface:** one canonical protocol-level reserve interface, while internals can improve in future upgrades without changing the public API.
 
 ### TIP-1045: Payment Lane Classification
 
-[TIP-1045](https://tips.sh/1045) adds consensus rules that classify which transactions are eligible for the payment lane via a calldata selector allow-list enforced at the T5 hardfork. The allow-list covers TIP-20 calls and the new `TIP20ChannelEscrow` precompile (TIP-1034), so escrow-channel transactions are first-class payment-lane traffic. This was previously a builder-level, locally-subjective policy; T5 enshrines it in consensus.
+[TIP-1045](https://tips.sh/1045) adds consensus rules that classify which transactions are eligible for the payment lane via a calldata selector allow-list enforced at the T5 hardfork. The allow-list covers TIP-20 calls and the new `TIP20ChannelReserve` precompile (TIP-1034), so reserve-channel transactions are first-class payment-lane traffic. This was previously a builder-level, locally-subjective policy; T5 enshrines it in consensus.
 
 ### TIP-1030: Allow Same-Tick Flip Orders
 

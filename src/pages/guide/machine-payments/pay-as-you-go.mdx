@@ -37,7 +37,7 @@ Unlike [one-time payments](/guide/machine-payments/one-time-payments), sessions 
     Tempo-->>Client: Refund remaining deposit
 `} />
 
-1. **Open** — Client deposits funds into an on-chain escrow contract, creating a payment channel
+1. **Open** — Client deposits funds into an on-chain reserve contract, creating a payment channel
 2. **Session** — Client signs EIP-712 vouchers with increasing cumulative amounts as service is consumed
 3. **Top up** — If the channel runs low, the client deposits additional tokens without closing the channel
 4. **Close** — Either party closes the channel, settling the final balance on-chain and refunding unused deposit
@@ -189,7 +189,7 @@ $ npx mppx http://localhost:3000/api/sessions/photo
 
 ## Client setup
 
-When using sessions from a client, set `maxDeposit` to enable automatic channel management. This is the maximum amount of tokens the client locks into the payment channel's escrow contract. Any unspent deposit is refunded when the channel closes.
+When using sessions from a client, set `maxDeposit` to enable automatic channel management. This is the maximum amount of tokens the client locks into the payment channel's reserve contract. Any unspent deposit is refunded when the channel closes.
 
 ```ts
 import { Mppx, tempo } from 'mppx/client'

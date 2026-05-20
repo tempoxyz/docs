@@ -41,7 +41,7 @@ Streamed payments extend [pay-as-you-go sessions](/guide/machine-payments/pay-as
     Tempo-->>Client: Refund remaining deposit
 `} />
 
-1. **Open** — Client deposits funds into an on-chain escrow contract, creating a payment channel
+1. **Open** — Client deposits funds into an on-chain reserve contract, creating a payment channel
 2. **Stream** — Server streams SSE events, calling `stream.charge()` per token to increment the voucher amount
 3. **Top up** — If the channel runs low mid-stream, the server emits a `payment-need-voucher` event and the client automatically signs a new voucher
 4. **Close** — Either party closes the channel, settling the final balance on-chain and refunding unused deposit

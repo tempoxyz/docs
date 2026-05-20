@@ -53,7 +53,7 @@ Give your agent a wallet and it can transact autonomously across the internet:
 
 Sessions let an agent authorize spending once, then make many payments without a separate on-chain transaction for each one.
 
-When an agent opens a session, it deposits funds into escrow. As the agent consumes resources (an API call, a model inference, a data query), payments stream continuously via signed vouchers off-chain. The server periodically settles the accumulated vouchers on-chain.
+When an agent opens a session, it deposits funds into reserve. As the agent consumes resources (an API call, a model inference, a data query), payments stream continuously via signed vouchers off-chain. The server periodically settles the accumulated vouchers on-chain.
 
 Thousands of small transactions collapse into a single settlement. True pay-per-use at internet scale.
 
