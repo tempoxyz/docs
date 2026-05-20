@@ -42,6 +42,10 @@ Choose the snapshot profile that matches the validator's migration state:
 
 When replacing snapshot data in an existing data directory, add `--force` after selecting the correct profile. This clears old snapshot files while preserving `discovery-secret` and `known-peers.json`.
 
+:::note[Unsure which profile to use?]
+If you are unsure which pruning configuration your validator is running, reach out to the Tempo team before replacing snapshot data. To check it yourself, inspect the node startup logs for the `Loaded storage settings` line and its `pruning_mode` field. Use `--minimal` only when `pruning_mode` is `minimal`; otherwise use `--archive` until the Tempo team confirms your validator has migrated.
+:::
+
 ## Examples
 
 Open the interactive selector for mainnet:

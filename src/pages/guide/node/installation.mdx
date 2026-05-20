@@ -75,6 +75,10 @@ Use [snapshots.tempo.xyz](https://snapshots.tempo.xyz/) to compare snapshot prof
 When replacing snapshot data in an existing data directory, add `--force` after selecting the right profile. `--force` overwrites snapshot data but preserves `discovery-secret` and `known-peers.json`.
 :::
 
+:::note[Unsure which profile to use?]
+If you are unsure which pruning configuration your validator is running, reach out to the Tempo team before replacing snapshot data. To check it yourself, inspect the node startup logs for the `Loaded storage settings` line and its `pruning_mode` field. Use Minimal only when `pruning_mode` is `minimal`; otherwise use Archive until the Tempo team confirms your validator has migrated.
+:::
+
 ## Verifying Releases
 
 All release artifacts are cryptographically signed. We recommend verifying signatures before running any binary.

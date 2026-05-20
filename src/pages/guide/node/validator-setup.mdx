@@ -104,6 +104,8 @@ tempo download --chain moderato --archive
 
 If you are replacing snapshot data in an existing data directory, add `--force` after the profile flag. This clears old snapshot files while preserving `discovery-secret` and `known-peers.json`.
 
+If you are unsure which pruning configuration your validator is running, reach out to the Tempo team before replacing snapshot data. To check it yourself, inspect the node startup logs for the `Loaded storage settings` line and its `pruning_mode` field. Use `--minimal` only when `pruning_mode` is `minimal`; otherwise use `--archive` until the Tempo team confirms your validator has migrated.
+
 Once you've downloaded the snapshot and have been whitelisted on-chain, you can proceed to run the validator node:
 
 ::::code-group
