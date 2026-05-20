@@ -33,7 +33,13 @@ By default, RPC nodes run in archive mode, meaning they do not prune historical 
 
 Soon to be the default, the follower can be configured to run without trusting the RPC endpoint. In order for this to work, the endpoint must serve consensus rpcs that the follower can use to validate peered execution state.
 
-**NOTE**: Only the Moderato testnet supports running a follower in this mode
+<Callout type="info">
+Trustless RPC nodes are supported in release 1.7.1 and onward.
+</Callout>
+
+<Callout type="info">
+2nd order RPC nodes, which follow other RPC nodes instead of validators, are currently only supported on the Moderato testnet.
+</Callout>
 
 ```bash
 tempo node \
