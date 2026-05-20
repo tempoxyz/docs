@@ -35,6 +35,12 @@ tempo download [flags]
 
 Validators should use the minimal snapshot profile, even if the previous validator data directory used a different snapshot profile.
 
+### What is Minimal Mode?
+
+Minimal Mode is a Reth storage profile for nodes that need to follow the chain and serve recent state, such as validators. It keeps disk usage low by pruning older historical data. If the node serves historical RPC, indexing, archive, or tracing workloads, use `--archive` instead.
+
+See Reth's [Minimal Storage Mode](https://reth.rs/run/storage/minimal/) docs for the storage trade-offs.
+
 To migrate or replace a mainnet validator snapshot, run:
 
 ```bash

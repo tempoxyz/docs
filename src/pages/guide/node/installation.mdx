@@ -51,6 +51,12 @@ Downloading a snapshot lets your node skip syncing from genesis and start partic
 - Validators should use `--minimal`.
 - RPC providers, indexers, and other workloads that need complete historical data should use `--archive`.
 
+### What is Minimal Mode?
+
+Minimal Mode is a Reth storage profile for nodes that need to follow the chain and serve recent state, such as validators. It keeps disk usage low by pruning older historical data. If the node serves historical RPC, indexing, archive, or tracing workloads, use `--archive` instead.
+
+See Reth's [Minimal Storage Mode](https://reth.rs/run/storage/minimal/) docs for the storage trade-offs.
+
 ::::code-group
 ```bash [Validator mainnet]
 tempo download --chain mainnet --minimal
