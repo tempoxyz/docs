@@ -46,14 +46,20 @@ docker logs tempo
 
 ## Snapshots
 
-Downloading a snapshot lets your node skip syncing from genesis and start participating much faster. By default, `tempo download` downloads a minimal snapshot, which is recommended for validators to save disk space. RPC providers, indexers, and other workloads that need complete historical data should use archive snapshots.
+Downloading a snapshot lets your node skip syncing from genesis and start participating much faster. By default, `tempo download` opens an interactive component selector. Validators that have migrated to minimal snapshots should use Minimal. Validators that have not migrated yet should use Archive, as should RPC providers, indexers, and other workloads that need complete historical data.
 
 ::::code-group
-```bash [Validator mainnet]
-tempo download --chain mainnet
+```bash [Migrated mainnet]
+tempo download --chain mainnet --minimal
 ```
-```bash [Validator testnet]
-tempo download --chain moderato
+```bash [Migrated testnet]
+tempo download --chain moderato --minimal
+```
+```bash [Not migrated mainnet]
+tempo download --chain mainnet --archive
+```
+```bash [Not migrated testnet]
+tempo download --chain moderato --archive
 ```
 ```bash [Archive mainnet]
 tempo download --chain mainnet --archive
@@ -63,7 +69,11 @@ tempo download --chain moderato --archive
 ```
 ::::
 
-Use [snapshots.tempo.xyz](https://snapshots.tempo.xyz/) to compare minimal and archive sizes or copy generated `tempo download` commands.
+Use [snapshots.tempo.xyz](https://snapshots.tempo.xyz/) to compare snapshot profiles or copy generated `tempo download` commands.
+
+:::note[Replacing existing snapshot data]
+When replacing snapshot data in an existing data directory, add `--force` after selecting the right profile. `--force` overwrites snapshot data but preserves `discovery-secret` and `known-peers.json`.
+:::
 
 ## Verifying Releases
 
