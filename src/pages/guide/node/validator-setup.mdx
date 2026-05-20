@@ -85,26 +85,20 @@ Once the Tempo team adds your validator on-chain, it will enter the active set i
 
 The process for running a validator node is very similar to [running a full node](/guide/node/rpc).
 
-You should start by downloading the latest snapshot. If your validator has migrated to minimal snapshots, use Minimal. If it has not migrated yet, use Archive until that migration is complete.
+You should start by downloading the latest snapshot. Validators should use `--minimal` when migrating to minimal snapshots, and should keep using `--minimal` for future validator replacements.
 
 ::::code-group
-```bash [Migrated mainnet]
+```bash [Mainnet]
 tempo download --chain mainnet --minimal
 ```
-```bash [Migrated testnet]
+```bash [Testnet]
 tempo download --chain moderato --minimal
-```
-```bash [Not migrated mainnet]
-tempo download --chain mainnet --archive
-```
-```bash [Not migrated testnet]
-tempo download --chain moderato --archive
 ```
 ::::
 
 If you are replacing snapshot data in an existing data directory, add `--force` after the profile flag. This clears old snapshot files while preserving `discovery-secret` and `known-peers.json`.
 
-If you are unsure which pruning configuration your validator is running, reach out to the Tempo team before replacing snapshot data. To check it yourself, inspect the node startup logs for the `Loaded storage settings` line and its `pruning_mode` field. Use `--minimal` only when `pruning_mode` is `minimal`; otherwise use `--archive` until the Tempo team confirms your validator has migrated.
+If you are unsure which pruning configuration your validator is running, reach out to the Tempo team before replacing snapshot data. To check whether an existing validator is already migrated, inspect the node startup logs for the `Loaded storage settings` line and its `pruning_mode` field. If `pruning_mode` is `minimal`, no action is needed unless you are replacing the node.
 
 Once you've downloaded the snapshot and have been whitelisted on-chain, you can proceed to run the validator node:
 

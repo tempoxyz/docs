@@ -7,7 +7,7 @@ description: Download chain snapshots for faster initial sync of a Tempo node.
 
 Download chain snapshots for faster initial sync. Fetches MDBX state and static files, and generates a `reth.toml` prune config for the target data directory.
 
-By default, `tempo download` opens an interactive component selector. The selector starts on the Minimal preset, which is recommended for validators that have migrated to minimal snapshots. Validators that have not migrated yet should use Archive, as should RPC providers, indexers, and other workloads that need complete historical data.
+Running `tempo download` without a snapshot profile opens an interactive component selector. Passing a profile flag such as `--minimal` or `--archive` skips the selector. Validators should use `--minimal` for migrations and future replacements. RPC providers, indexers, and other workloads that need complete historical data should use `--archive`.
 
 ## Usage
 
@@ -25,45 +25,34 @@ tempo download [flags]
 | `--manifest-url <url>` | Download a specific modular snapshot manifest URL |
 | `--list` | List available snapshots |
 | `--resumable[=<bool>]` | Download to disk before extraction so interrupted downloads can resume. Enabled by default. |
-| `--minimal` | Download the minimal component set. Use this for validators that have migrated to minimal snapshots. |
+| `--minimal` | Download the minimal component set without opening the interactive selector. Use this for validator migrations and future validator replacements. |
 | `--full` | Download the full node component set. |
-| `--archive`, `--all` | Download all available components. Recommended for RPC providers and indexers. |
+| `--archive`, `--all` | Download all available components without opening the interactive selector. Recommended for RPC providers and indexers. |
 | `-y, --non-interactive` | Skip the interactive selector and download the minimal component set unless explicit component flags are provided. |
 | `--force` | Overwrite existing snapshot data while preserving `discovery-secret` and `known-peers.json`. |
 
 ## Validator Migration Guidance
 
-Choose the snapshot profile that matches the validator's migration state:
-
-| Validator state | Snapshot profile |
-| --- | --- |
-| Already migrated to minimal snapshots | Use Minimal with `--minimal`, or accept the Minimal preset in the interactive selector. |
-| Not migrated to minimal snapshots yet | Use Archive with `--archive` until the migration is complete. |
+Validators should use `--minimal` when migrating to minimal snapshots, and should keep using `--minimal` for future validator replacements. RPC providers, indexers, and other workloads that need complete historical data should use `--archive`.
 
 When replacing snapshot data in an existing data directory, add `--force` after selecting the correct profile. This clears old snapshot files while preserving `discovery-secret` and `known-peers.json`.
 
 :::note[Unsure which profile to use?]
-If you are unsure which pruning configuration your validator is running, reach out to the Tempo team before replacing snapshot data. To check it yourself, inspect the node startup logs for the `Loaded storage settings` line and its `pruning_mode` field. Use `--minimal` only when `pruning_mode` is `minimal`; otherwise use `--archive` until the Tempo team confirms your validator has migrated.
+If you are unsure which pruning configuration your validator is running, reach out to the Tempo team before replacing snapshot data. To check whether an existing validator is already migrated, inspect the node startup logs for the `Loaded storage settings` line and its `pruning_mode` field. If `pruning_mode` is `minimal`, no action is needed unless you are replacing the node.
 :::
 
 ## Examples
 
-Open the interactive selector for mainnet:
+Download the latest recommended mainnet snapshot:
 
 ```bash
 tempo download --chain mainnet
 ```
 
-Download a minimal mainnet validator snapshot after migration:
+Migrate or replace a mainnet validator snapshot:
 
 ```bash
-tempo download --chain mainnet --minimal
-```
-
-Download an archive mainnet validator snapshot before migration:
-
-```bash
-tempo download --chain mainnet --archive
+tempo download --chain mainnet --minimal --force
 ```
 
 Download an archive snapshot for an RPC node:
@@ -72,10 +61,10 @@ Download an archive snapshot for an RPC node:
 tempo download --chain mainnet --archive
 ```
 
-Replace existing snapshot data after choosing the correct profile:
+Migrate or replace a testnet validator snapshot:
 
 ```bash
-tempo download --chain mainnet --minimal --force
+tempo download --chain moderato --minimal --force
 ```
 
 List available snapshots:

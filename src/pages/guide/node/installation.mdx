@@ -46,20 +46,14 @@ docker logs tempo
 
 ## Snapshots
 
-Downloading a snapshot lets your node skip syncing from genesis and start participating much faster. By default, `tempo download` opens an interactive component selector. Validators that have migrated to minimal snapshots should use Minimal. Validators that have not migrated yet should use Archive, as should RPC providers, indexers, and other workloads that need complete historical data.
+Downloading a snapshot lets your node skip syncing from genesis and start participating much faster. Validators should use `--minimal` when migrating to minimal snapshots, and should keep using `--minimal` for future validator replacements. RPC providers, indexers, and other workloads that need complete historical data should use `--archive`.
 
 ::::code-group
-```bash [Migrated mainnet]
+```bash [Validator mainnet]
 tempo download --chain mainnet --minimal
 ```
-```bash [Migrated testnet]
+```bash [Validator testnet]
 tempo download --chain moderato --minimal
-```
-```bash [Not migrated mainnet]
-tempo download --chain mainnet --archive
-```
-```bash [Not migrated testnet]
-tempo download --chain moderato --archive
 ```
 ```bash [Archive mainnet]
 tempo download --chain mainnet --archive
@@ -76,7 +70,7 @@ When replacing snapshot data in an existing data directory, add `--force` after 
 :::
 
 :::note[Unsure which profile to use?]
-If you are unsure which pruning configuration your validator is running, reach out to the Tempo team before replacing snapshot data. To check it yourself, inspect the node startup logs for the `Loaded storage settings` line and its `pruning_mode` field. Use Minimal only when `pruning_mode` is `minimal`; otherwise use Archive until the Tempo team confirms your validator has migrated.
+If you are unsure which pruning configuration your validator is running, reach out to the Tempo team before replacing snapshot data. To check whether an existing validator is already migrated, inspect the node startup logs for the `Loaded storage settings` line and its `pruning_mode` field. If `pruning_mode` is `minimal`, no action is needed unless you are replacing the node.
 :::
 
 ## Verifying Releases
