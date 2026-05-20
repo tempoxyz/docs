@@ -7,7 +7,7 @@ description: Download chain snapshots for faster initial sync of a Tempo node.
 
 Download chain snapshots for faster initial sync. Fetches MDBX state and static files, and generates a `reth.toml` prune config for the target data directory.
 
-Running `tempo download` without a snapshot profile opens an interactive component selector. Passing a profile flag such as `--minimal` or `--archive` skips the selector. Validators should use `--minimal` for migrations and future replacements. RPC providers, indexers, and other workloads that need complete historical data should use `--archive`.
+Running `tempo download` without a snapshot profile opens an interactive component selector. Passing a profile flag such as `--minimal` or `--archive` skips the selector. Validators should use `--minimal`. RPC providers, indexers, and other workloads that need complete historical data should use `--archive`.
 
 ## Usage
 
@@ -33,7 +33,7 @@ tempo download [flags]
 
 ## Validator Migration Guidance
 
-Validators should use `--minimal` when migrating to minimal snapshots, and should keep using `--minimal` for future validator replacements. RPC providers, indexers, and other workloads that need complete historical data should use `--archive`.
+Validators should use `--minimal` when migrating to minimal snapshots, and should keep using `--minimal` for future validator replacements.
 
 When replacing snapshot data in an existing data directory, add `--force` after selecting the correct profile. This clears old snapshot files while preserving `discovery-secret` and `known-peers.json`.
 
@@ -43,7 +43,7 @@ If you are unsure which pruning configuration your validator is running, reach o
 
 ## Examples
 
-Download the latest recommended mainnet snapshot:
+Open the interactive selector for mainnet:
 
 ```bash
 tempo download --chain mainnet
@@ -55,16 +55,16 @@ Migrate or replace a mainnet validator snapshot:
 tempo download --chain mainnet --minimal --force
 ```
 
-Download an archive snapshot for an RPC node:
-
-```bash
-tempo download --chain mainnet --archive
-```
-
 Migrate or replace a testnet validator snapshot:
 
 ```bash
 tempo download --chain moderato --minimal --force
+```
+
+Download an archive snapshot for an RPC node:
+
+```bash
+tempo download --chain mainnet --archive
 ```
 
 List available snapshots:
@@ -79,7 +79,7 @@ List available snapshots for a specific chain:
 tempo download --list --chain moderato
 ```
 
-Disable resumable downloads and stream archives directly into extraction:
+If the data directory has limited free disk space, disable resumable downloads and stream the snapshot directly into extraction:
 
 ```bash
 tempo download --chain mainnet --minimal --resumable=false
