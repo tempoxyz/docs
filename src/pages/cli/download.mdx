@@ -25,7 +25,7 @@ tempo download [flags]
 | `--manifest-url <url>` | Download a specific modular snapshot manifest URL |
 | `--list` | List available snapshots |
 | `--resumable[=<bool>]` | Download to disk before extraction so interrupted downloads can resume. Enabled by default. |
-| `--minimal` | Download the minimal component set without opening the interactive selector. Use this for validator migrations and future validator replacements. |
+| `--minimal` | Download the minimal component set without opening the interactive selector. Validators should use this profile. |
 | `--full` | Download the full node component set. |
 | `--archive`, `--all` | Download all available components without opening the interactive selector. Recommended for RPC providers and indexers. |
 | `-y, --non-interactive` | Skip the interactive selector and download the minimal component set unless explicit component flags are provided. |
@@ -33,12 +33,24 @@ tempo download [flags]
 
 ## Validator Migration Guidance
 
-Validators should use `--minimal` when migrating to minimal snapshots, and should keep using `--minimal` for future validator replacements.
+Validators should use the minimal snapshot profile, even if the previous validator data directory used a different snapshot profile.
 
-When replacing snapshot data in an existing data directory, add `--force` after selecting the correct profile. This clears old snapshot files while preserving `discovery-secret` and `known-peers.json`.
+To migrate or replace a mainnet validator snapshot, run:
+
+```bash
+tempo download --chain mainnet --minimal --force
+```
+
+To migrate or replace a testnet validator snapshot, run:
+
+```bash
+tempo download --chain moderato --minimal --force
+```
+
+`--force` clears old snapshot files in the target data directory while preserving `discovery-secret` and `known-peers.json`.
 
 :::note[Unsure which profile to use?]
-If you are unsure which pruning configuration your validator is running, reach out to the Tempo team before replacing snapshot data. To check whether an existing validator is already migrated, inspect the node startup logs for the `Loaded storage settings` line and its `pruning_mode` field. If `pruning_mode` is `minimal`, no action is needed unless you are replacing the node.
+If you are unsure which pruning configuration your validator is running, reach out to the Tempo team before replacing snapshot data.
 :::
 
 ## Examples
@@ -47,18 +59,6 @@ Open the interactive selector for mainnet:
 
 ```bash
 tempo download --chain mainnet
-```
-
-Migrate or replace a mainnet validator snapshot:
-
-```bash
-tempo download --chain mainnet --minimal --force
-```
-
-Migrate or replace a testnet validator snapshot:
-
-```bash
-tempo download --chain moderato --minimal --force
 ```
 
 Download an archive snapshot for an RPC node:
