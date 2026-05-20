@@ -10,6 +10,10 @@ RPC nodes provide API access to the Tempo network without participating in conse
 
 ## Quick Start
 
+<Callout type="info">
+Trusted (uncertified) RPC nodes will be deprecated. To run without trusting the RPC endpoint, use [Trustless RPC Nodes](#trustless-rpc-nodes).
+</Callout>
+
 ```bash /dev/null/quickstart.sh#L1-15
 # Download snapshot (this will help you sync much faster)
 tempo download --archive
@@ -25,7 +29,7 @@ An RPC node running in follow mode is a **full node**. It fetches blocks from a 
 
 By default, RPC nodes run in archive mode, meaning they do not prune historical state.
 
-## Certified Follow Mode
+### Trustless RPC Nodes
 
 Soon to be the default, the follower can be configured to run without trusting the RPC endpoint. In order for this to work, the endpoint must serve consensus rpcs that the follower can use to validate peered execution state.
 
