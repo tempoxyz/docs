@@ -10,6 +10,10 @@ RPC nodes provide API access to the Tempo network without participating in conse
 
 ## Quick Start
 
+<Callout type="info">
+Trusted (uncertified) RPC nodes will be deprecated. To run without trusting the RPC endpoint, use [Trustless RPC Nodes](#trustless-rpc-nodes).
+</Callout>
+
 ```bash /dev/null/quickstart.sh#L1-15
 # Download snapshot (this will help you sync much faster)
 tempo download --chain mainnet --archive
@@ -24,6 +28,22 @@ tempo node \
 An RPC node running in follow mode is a **full node**. It fetches blocks from a trusted RPC endpoint, executes every transaction locally through the EVM, validates each block after execution, and stores complete block data with full state. The only trust assumption is block ordering: your node trusts the RPC endpoint to provide the correct sequence of blocks. All execution and validation happens locally on your machine.
 
 By default, RPC nodes run in archive mode, meaning they do not prune historical state.
+
+### Trustless RPC Nodes
+
+<Callout type="info">
+Trustless RPC nodes are supported in release 1.7.1 and onward. 2nd order RPC nodes, which follow other RPC nodes instead of validators, are currently only supported on the Moderato testnet.
+</Callout>
+
+RPC nodes can verify certificates before executing blocks by suppling the `--follow.experimental.certify` flag:
+
+```bash
+tempo node \
+  --follow \
+  --follow.experimental.certify \
+  --http --http.port 8545 \
+  --http.api eth,net,web3,txpool,trace
+```
 
 ## Example Systemd Service
 
