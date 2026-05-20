@@ -31,7 +31,7 @@ By default, RPC nodes run in archive mode, meaning they do not prune historical 
 
 ### Trustless RPC Nodes
 
-The follower can be configured to run without trusting the RPC endpoint. In order for this to work, the endpoint must serve consensus rpcs that the follower can use to validate peered execution state.
+RPC nodes can verify certificates before executing blocks.
 
 <Callout type="info">
 Trustless RPC nodes are supported in release 1.7.1 and onward. 2nd order RPC nodes, which follow other RPC nodes instead of validators, are currently only supported on the Moderato testnet.
@@ -44,8 +44,6 @@ tempo node \
   --http --http.port 8545 \
   --http.api eth,net,web3,txpool,trace
 ```
-
-If following against a custom endpoint, it must serve the consensus rpcs (default true for validator nodes). RPC nodes can only follow certified from other RPC nodes running in the same configuration.
 
 ## Example Systemd Service
 
