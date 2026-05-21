@@ -5,13 +5,13 @@ description: Promote a follower into a Tempo validator.
 
 # Validator failover
 
-This runbook covers a warm failover where a follower is promoted into a validator. A follower running in certified mode stores the same consensus finalization data used to boostrap the validator. 
+This runbook covers a warm failover where a follower is promoted into a validator. A follower running in certified mode stores the same consensus finalization data used to bootstrap the validator.
 
 :::danger[Prevent double-signing]
 Only one node may run with a validator signing key at a time. Before promoting the follower, fence the old validator. Do not start the replacement while the old validator can still sign.
 :::
 
-## Prepare a standby follower
+## Prepare a follower
 
 :::::steps
 
@@ -28,16 +28,15 @@ tempo node --datadir <datadir> \
   --follow \
   --follow.experimental.certify \
   --http --http.port 8545 \
-  --http.api eth,net,web3,txpool,trace,consensus \
+  --http.api eth,net,web3,txpool,trace,consensus
 ```
-
 ```bash [Mainnet]
 tempo node --datadir <datadir> \
   --chain mainnet \
   --follow <WS_URL> \
   --follow.experimental.certify \
   --http --http.port 8545 \
-  --http.api eth,net,web3,txpool,trace,consensus \
+  --http.api eth,net,web3,txpool,trace,consensus
 ```
 ::::
 
@@ -84,12 +83,15 @@ sudo systemctl stop tempo-follower
 
 If the follower is not managed by systemd, send `SIGINT` or `SIGTERM` and wait for the process to exit.
 
-### Start the standby in validator mode
+### Restart the standby in validator mode
 
 Restart the same data directory without `--follow` or `--follow.experimental.certify`, and add the validator signing key.
 
+Use the same consensus signing key as the validator you are failing over from. This procedure moves an existing validator identity to the standby; it does not rotate the identity. To use a different signing key,
+the validator's onchain configuration must be rotated. Follow the [rotate the validator identity](/guide/node/validator-lifecycle#rotate-validator-identity) procedure.
+
 ::::code-group
-```bash
+```bash [Mainnet]
 tempo node --datadir <datadir> \
   --chain mainnet \
   --consensus.signing-key <PRIVATE_KEY_PATH> \
@@ -98,9 +100,18 @@ tempo node --datadir <datadir> \
   --http.api eth,net,web3,txpool,trace,consensus \
   --telemetry-url <TELEMETRY_URL>
 ```
+```bash [Testnet]
+tempo node --datadir <datadir> \
+  --chain testnet \
+  --consensus.signing-key <PRIVATE_KEY_PATH> \
+  --consensus.listen-address 0.0.0.0:<REGISTERED_INGRESS_PORT> \
+  --http --http.port 8545 \
+  --http.api eth,net,web3,txpool,trace,consensus \
+  --telemetry-url <TELEMETRY_URL>
+```
 ::::
 
-Do not delete or resync the data directory during failover. The certified follower's consensus data is what allows the node to restart as a validator without a fresh bootstrap.
+Do not delete or resync the data directory during failover. The follower's datadir contains the necessary consensus and execution state that allows the node to restart as a validator without a fresh bootstrap.
 
 ### Verify validator participation
 
