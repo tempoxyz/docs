@@ -32,10 +32,12 @@ By default, RPC nodes run in archive mode, meaning they do not prune historical 
 ### Trustless RPC Nodes
 
 <Callout type="info">
-Trustless RPC nodes are supported in release 1.7.1 and onward. 2nd order RPC nodes, which follow other RPC nodes instead of validators, are currently only supported on the Moderato testnet.
+Trustless RPC nodes are supported in release 1.7.1 and onward. Second-order RPC nodes, which follow other RPC nodes instead of validators, are currently only supported on the Moderato testnet.
 </Callout>
 
-RPC nodes can verify certificates before executing blocks by suppling the `--follow.experimental.certify` flag:
+By default, a following RPC node trusts its upstream RPC endpoint for block ordering. Trustless RPC mode reduces that trust assumption by requiring consensus finalization certificates from the upstream before accepting followed blocks. Those certificates prove the data is backed by a validator quorum, not just the upstream node's local view of the chain.
+
+Enable certificate verification with the `--follow.experimental.certify` flag:
 
 ```bash
 tempo node \
@@ -44,6 +46,8 @@ tempo node \
   --http --http.port 8545 \
   --http.api eth,net,web3,txpool,trace
 ```
+
+The upstream must serve consensus finalization certificates. For RPC-to-RPC following, follow a validator-backed RPC node or another RPC node that is already serving certified consensus data.
 
 ## Example Systemd Service
 
