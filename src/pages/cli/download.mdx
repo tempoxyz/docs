@@ -35,11 +35,22 @@ tempo download [flags]
 
 Validators should use the minimal snapshot profile, even if the previous validator data directory used a different snapshot profile.
 
+Migrating from minimal v1 to minimal v2 reduces validator snapshot size approximately as follows:
+
+| Network | Before | After |
+| --- | ---: | ---: |
+| Mainnet | 26 GB | 10 GB |
+| Moderato testnet | 250 GB | 100 GB |
+
 ### What is Minimal Mode?
 
 Minimal Mode is a Reth storage profile for nodes that need to follow the chain and serve recent state, such as validators. It keeps disk usage low by pruning older historical data. If the node serves historical RPC, indexing, archive, or tracing workloads, use `--archive` instead.
 
 See Reth's [Minimal Storage Mode](https://reth.rs/run/storage/minimal/) docs for the storage trade-offs.
+
+### Am I Running a Minimal Node?
+
+To check whether an existing validator has already migrated, inspect the node startup logs for the `Loaded storage settings` line and its `pruning_mode` field. If `pruning_mode` is `minimal`, no migration is needed unless you are replacing the node. If you are unsure which configuration your validator is running, reach out to the Tempo team before replacing snapshot data.
 
 To migrate or replace a mainnet validator snapshot, run:
 
