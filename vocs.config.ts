@@ -1430,6 +1430,7 @@ export default defineConfig({
     },
   },
   twoslash: {
+    checkOnly: true,
     twoslashOptions: {
       compilerOptions: {
         // ModuleResolutionKind.Bundler = 100
