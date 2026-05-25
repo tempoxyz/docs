@@ -5,7 +5,11 @@ description: Details and timeline for the T3 network upgrade, including enhanced
 
 # T3 Network Upgrade
 
-T3 is the next Tempo protocol upgrade. It introduces enhanced access keys, a standard signature verification precompile, and virtual addresses for TIP-20 deposit routing.
+T3 introduced enhanced access keys, a standard signature verification precompile, and virtual addresses for TIP-20 deposit routing.
+
+:::info[T3 status]
+T3 is active on both Moderato (testnet) and Presto (mainnet).
+:::
 
 ## Timeline
 
@@ -14,15 +18,15 @@ T3 is the next Tempo protocol upgrade. It introduces enhanced access keys, a sta
 | Moderato (testnet) | April 21, 2026 4pm CEST | `1776780000` |
 | Presto (mainnet) | April 27, 2026 4pm CEST | `1777298400` |
 
-Partners should upgrade nodes to the T3-compatible release before the Moderato activation timestamp.
+Node operators needed to upgrade to the T3-compatible release before the Moderato activation timestamp.
 
 ## Overview
 
 | TIP | What it does | Who should review |
 |-----|-------------|-------------------|
-| [TIP-1011](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1011.md) | Periodic spending limits, call scoping, and a ban on access-key contract creation | Wallets, account SDKs, apps using connected apps or subscriptions |
-| [TIP-1020](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md) | Signature verification precompile for secp256k1, P256, and WebAuthn | Smart contract teams, account integrators, wallet SDKs |
-| [TIP-1022](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md) | [Virtual addresses](/protocol/tip20/virtual-addresses) for TIP-20 deposit forwarding | Exchanges, ramps, custodians, payment processors, explorers, indexers |
+| [TIP-1011](https://tips.sh/1011) | Periodic spending limits, call scoping, and a ban on access-key contract creation | Wallets, account SDKs, apps using connected apps or subscriptions |
+| [TIP-1020](https://tips.sh/1020) | Signature verification precompile for secp256k1, P256, and WebAuthn | Smart contract teams, account integrators, wallet SDKs |
+| [TIP-1022](https://tips.sh/1022) | [Virtual addresses](/protocol/tip20/virtual-addresses) for TIP-20 deposit forwarding | Exchanges, ramps, custodians, payment processors, explorers, indexers |
 
 ## Breaking changes
 
@@ -30,16 +34,13 @@ These breaking changes only affect access-key integrations. You need to update y
 
 ### Access-key authorization ABI
 
-Integrations that directly call `AccountKeychain.authorizeKey(...)` or manually encode `key_authorization` must migrate to the TIP-1011 format after activation. Legacy calls fail with `LegacyAuthorizeKeySelectorChanged(newSelector: 0x980a6025)`.
+Integrations that directly call `AccountKeychain.authorizeKey(...)` or manually encode `key_authorization` must use the TIP-1011 tuple-form ABI. The legacy selector `0x54063a55` no longer works — legacy calls fail with `LegacyAuthorizeKeySelectorChanged(newSelector: 0x980a6025)`.
 
-- **Before activation:** use the legacy ABI. The TIP-1011 format is not yet valid onchain.
-- **After activation:** use the TIP-1011 tuple-form ABI. The legacy selector `0x54063a55` stops working.
-
-If you use an updated SDK, this is mostly a tooling upgrade. If you support both pre-T3 and post-T3 networks, branch on network version or activation timestamp. If you hand-encode calldata, use the exact tuple-form signature from the [Account Keychain precompile spec](/protocol/transactions/AccountKeychain).
+If you use an updated SDK, this is mostly a tooling upgrade. If you hand-encode calldata, use the exact tuple-form signature from the [Account Keychain precompile spec](/protocol/transactions/AccountKeychain).
 
 ### Access-key contract creation
 
-Post-T3, access-key-signed transactions can no longer create contracts in any configuration — including direct CREATE, factory CREATE, and internal CREATE2. Move those flows to a root key path.
+Access-key-signed transactions can no longer create contracts in any configuration — including direct CREATE, factory CREATE, and internal CREATE2. Move those flows to a root key path.
 
 ### Migration checklist
 
@@ -47,9 +48,9 @@ Post-T3, access-key-signed transactions can no longer create contracts in any co
 - Regenerate contract bindings or replace handcrafted encoders for `authorizeKey(...)`
 - Move any access-key contract-creation flows to a root key path
 - If you adopt virtual addresses, collapse the two-hop `Transfer` pair into one logical deposit to the registered master wallet rather than treating the virtual address hop as a separate transfer
-- Test key creation, key rotation, and recovery flows on Moderato after T3 activates
+- Test key creation, key rotation, and recovery flows on Moderato
 
-Most integrators only need to upgrade tooling. Existing authorized access keys keep working.
+Most integrators only needed to upgrade tooling. Existing authorized access keys keep working.
 
 ## Supporting new features
 
@@ -61,7 +62,7 @@ See [Virtual addresses for TIP-20 deposits](/protocol/tip20/virtual-addresses) f
 
 ### Signature verification precompile
 
-[TIP-1020](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md) is additive — existing verifier setups keep working. Teams that want a standard onchain verification surface can adopt the precompile instead of maintaining custom verifier contracts. See the [Signature Verification with Foundry](/sdk/foundry/signature-verifier) guide.
+[TIP-1020](https://tips.sh/1020) is additive — existing verifier setups keep working. Teams that want a standard onchain verification surface can adopt the precompile instead of maintaining custom verifier contracts. See the [Signature Verification with Foundry](/sdk/foundry/signature-verifier) guide.
 
 ## Compatible SDK releases
 
@@ -75,11 +76,7 @@ Tempo's broader tooling ecosystem is available in [Developer tools](/quickstart/
 | [Python](https://github.com/tempoxyz/pytempo) | [`0.5.0`](https://github.com/tempoxyz/pytempo/releases/tag/pytempo%400.5.0) |
 | [Foundry](https://github.com/foundry-rs/foundry) | [`v1.7.0`](https://github.com/foundry-rs/foundry/releases/tag/v1.7.0) |
 
-:::note[Current SDK caveat]
-The Accounts SDK and `wallet_authorizeAccessKey` docs still describe the legacy pre-T3 access-key shape. Until their T3 support lands, use the protocol specs and the T3-compatible SDK releases above for the post-T3 `authorizeKey(...)` ABI.
-:::
-
 ## Related docs
 - [Virtual addresses for TIP-20 deposits](/protocol/tip20/virtual-addresses)
-- [TIP-1022](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md)
+- [TIP-1022](https://tips.sh/1022)
 - Coordinating meta TIP: [tempoxyz/tempo#3273](https://github.com/tempoxyz/tempo/pull/3273)
