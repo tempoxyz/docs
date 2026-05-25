@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * MDX page wrapper — wraps every MDX page rendered by Vocs.
+ * MDX page wrapper: wraps every MDX page rendered by Vocs.
  *
  * ## Conditional Providers
  *
@@ -20,18 +20,19 @@
  *
  * ## Frontmatter flags
  *
- * - `interactive` — loads the Wagmi/QueryClient provider tree. Required for
+ * - `interactive` loads the Wagmi/QueryClient provider tree. Required for
  *   any page that uses wallet hooks, Demo components, or guide steps.
- * - `mipd` — enables Multi Injected Provider Discovery (auto-detects browser
+ * - `mipd` enables Multi Injected Provider Discovery (auto-detects browser
  *   extension wallets like MetaMask). Implies `interactive`. Only needed on
  *   pages where users connect external wallets.
  */
 
-import type React from 'react'
+import { lazy, type ReactNode, Suspense } from 'react'
 import { Layout, MdxPageContext } from 'vocs'
-import Providers from '../components/Providers'
 
-export default function MDXWrapper({ children }: { children: React.ReactNode }) {
+const Providers = lazy(() => import('../components/Providers'))
+
+export default function MDXWrapper({ children }: { children: ReactNode }) {
   const context = MdxPageContext.use()
   const frontmatter = context.frontmatter as Record<string, unknown> | undefined
   const needsProviders = Boolean(frontmatter?.interactive || frontmatter?.mipd)
@@ -39,7 +40,9 @@ export default function MDXWrapper({ children }: { children: React.ReactNode }) 
   return (
     <Layout>
       {needsProviders ? (
-        <Providers mipd={frontmatter?.mipd as boolean | undefined}>{children}</Providers>
+        <Suspense fallback={null}>
+          <Providers mipd={frontmatter?.mipd as boolean | undefined}>{children}</Providers>
+        </Suspense>
       ) : (
         children
       )}

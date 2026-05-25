@@ -109,8 +109,6 @@ export namespace getConfig {
 
 export type Config = ReturnType<typeof getConfig>
 
-export const config = getConfig()
-
 export const queryClient = new QueryClient()
 
 export function useTempoWalletConnector() {

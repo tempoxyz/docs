@@ -3,8 +3,8 @@
 import { useQuery } from '@tanstack/react-query'
 import type { WebAuthnP256 } from 'viem/tempo'
 import { Account } from 'viem/tempo'
-import { useConnection } from 'wagmi'
-import { config, webAuthnRpId } from '../wagmi.config.ts'
+import { useConfig, useConnection } from 'wagmi'
+import { webAuthnRpId } from '../wagmi.config.ts'
 
 type RootWebAuthnAccount = ReturnType<typeof Account.fromWebAuthnP256>
 type RootWebAuthnCredential = WebAuthnP256.P256Credential
@@ -20,6 +20,7 @@ type RootWebAuthnAccountProvider = {
 const rootWebAuthnAccountTimeoutMs = 30_000
 
 export function useRootWebAuthnAccount() {
+  const config = useConfig()
   const { address, connector } = useConnection()
 
   return useQuery({
@@ -45,6 +46,7 @@ export function useRootWebAuthnAccount() {
       }
 
       const credential = await waitForStoredCredential(
+        config,
         address as `0x${string}`,
         rootWebAuthnAccountTimeoutMs,
       )
@@ -92,6 +94,7 @@ async function waitForProviderAccount(
 }
 
 async function waitForStoredCredential(
+  config: ReturnType<typeof useConfig>,
   address: `0x${string}`,
   timeoutMs = 5_000,
 ): Promise<RootWebAuthnCredential> {
