@@ -1,11 +1,17 @@
 'use client'
 
-import { Analytics } from '@vercel/analytics/react'
-import { SpeedInsights } from '@vercel/speed-insights/react'
-import type React from 'react'
-import { Toaster } from 'sonner'
-import GoogleAnalytics from '../components/GoogleAnalytics'
-import PostHogSetup from '../components/PostHogSetup'
+import { lazy, type PropsWithChildren, Suspense } from 'react'
+import { usePageSettled } from '../lib/pageSettled'
+
+const Analytics = lazy(() =>
+  import('@vercel/analytics/react').then((module) => ({ default: module.Analytics })),
+)
+const SpeedInsights = lazy(() =>
+  import('@vercel/speed-insights/react').then((module) => ({ default: module.SpeedInsights })),
+)
+const Toaster = lazy(() => import('sonner').then((module) => ({ default: module.Toaster })))
+const GoogleAnalytics = lazy(() => import('../components/GoogleAnalytics'))
+const PostHogSetup = lazy(() => import('../components/PostHogSetup'))
 
 if (typeof window !== 'undefined') {
   window.addEventListener('vite:preloadError', (event) => {
@@ -18,30 +24,41 @@ if (typeof window !== 'undefined') {
 }
 
 export default function Layout(
-  props: React.PropsWithChildren<{
+  props: PropsWithChildren<{
     path: string
-    frontmatter?: { mipd?: boolean }
+    frontmatter?: { interactive?: boolean; mipd?: boolean }
   }>,
 ) {
+  const pageSettled = usePageSettled()
+  const needsToaster = Boolean(props.frontmatter?.interactive || props.frontmatter?.mipd)
+
   return (
     <>
       {props.children}
-      <Toaster
-        className="z-42069 select-none"
-        expand={false}
-        position="bottom-right"
-        swipeDirections={['right', 'left', 'top', 'bottom']}
-        theme="light"
-        toastOptions={{
-          style: {
-            borderRadius: '1.5rem',
-          },
-        }}
-      />
-      <SpeedInsights route={props.path} />
-      <Analytics />
-      <GoogleAnalytics />
-      <PostHogSetup />
+      <Suspense fallback={null}>
+        {needsToaster && (
+          <Toaster
+            className="z-42069 select-none"
+            expand={false}
+            position="bottom-right"
+            swipeDirections={['right', 'left', 'top', 'bottom']}
+            theme="light"
+            toastOptions={{
+              style: {
+                borderRadius: '1.5rem',
+              },
+            }}
+          />
+        )}
+        {pageSettled && (
+          <>
+            <SpeedInsights route={props.path} />
+            <Analytics />
+            <GoogleAnalytics />
+            <PostHogSetup />
+          </>
+        )}
+      </Suspense>
     </>
   )
 }

@@ -1,6 +1,5 @@
 'use client'
 
-import posthog from 'posthog-js'
 import { useEffect } from 'react'
 
 function PostHogInitializer() {
@@ -10,7 +9,9 @@ function PostHogInitializer() {
 
     if (!posthogKey || !posthogHost) return
 
-    const init = () => {
+    const init = async () => {
+      const { default: posthog } = await import('posthog-js')
+
       posthog.init(posthogKey, {
         api_host: '/ingest',
         ui_host: posthogHost,
@@ -28,10 +29,12 @@ function PostHogInitializer() {
     }
 
     if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(init)
-    } else {
-      setTimeout(init, 1)
+      const idleId = window.requestIdleCallback(init, { timeout: 2_000 })
+      return () => window.cancelIdleCallback(idleId)
     }
+
+    const timeoutId = globalThis.setTimeout(init, 1)
+    return () => globalThis.clearTimeout(timeoutId)
   }, [])
 
   return null
