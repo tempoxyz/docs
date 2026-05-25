@@ -107,7 +107,7 @@ index c44d3e250b534f41d6947b224e8af8f5d76cc359..e0cbb47c909820d32048aa175f6fc3a7
 +{"version":3,"file":"Link.d.ts","sourceRoot":"","sources":["../../src/react/Link.tsx"],"names":[],"mappings":"AAGA,OAAO,EAAa,IAAI,IAAI,QAAQ,EAAE,MAAM,MAAM,CAAA;AAsDlD,wBAAgB,IAAI,CAAC,KAAK,EAAE,IAAI,CAAC,KAAK,2CAuBrC;AAED,yBAAiB,IAAI,CAAC;IACpB,KAAY,KAAK,GAAG,KAAK,CAAC,cAAc,CAAC,OAAO,QAAQ,CAAC,CAAA;CAC1D"}
 \ No newline at end of file
 diff --git a/dist/react/Link.js b/dist/react/Link.js
-index d70d5ca7debf0766d78276d62d7925e2a72b5b3c..730062e01544917b67b237c81ec513b46a37c7f0 100644
+index d70d5ca7debf0766d78276d62d7925e2a72b5b3c..5bcb27626d710633997dd4019ae05e87ab93e296 100644
 --- a/dist/react/Link.js
 +++ b/dist/react/Link.js
 @@ -1,14 +1,62 @@
@@ -116,7 +116,7 @@ index d70d5ca7debf0766d78276d62d7925e2a72b5b3c..730062e01544917b67b237c81ec513b4
 +import { useEffect, useState } from 'react';
  import { useRouter, Link as WakuLink } from 'waku';
  import * as Path from '../internal/path.js';
-+const viewportPrefetchDelayMs = 4_000;
++const viewportPrefetchDelayMs = 2_000;
 +let viewportPrefetchReady = false;
 +let viewportPrefetchScheduled = false;
 +const viewportPrefetchListeners = new Set();
@@ -335,7 +335,7 @@ index b54a1d032e8bcfa60295217f9b1a1395c8920620..1b5c2a28414a9b79e145ff603e21e28e
  }
  
 diff --git a/src/react/Link.tsx b/src/react/Link.tsx
-index 693388efe03232cd3b0c0fe888c4e7e300a8e81d..4a1c70e292bc43d82ee6f6204f772ca10d68869c 100644
+index 693388efe03232cd3b0c0fe888c4e7e300a8e81d..c9680b2290a952e04241e3408bef563f1eb70b95 100644
 --- a/src/react/Link.tsx
 +++ b/src/react/Link.tsx
 @@ -1,11 +1,69 @@
@@ -345,7 +345,7 @@ index 693388efe03232cd3b0c0fe888c4e7e300a8e81d..4a1c70e292bc43d82ee6f6204f772ca1
  import { useRouter, Link as WakuLink } from 'waku'
  import * as Path from '../internal/path.js'
  
-+const viewportPrefetchDelayMs = 4_000
++const viewportPrefetchDelayMs = 2_000
 +
 +let viewportPrefetchReady = false
 +let viewportPrefetchScheduled = false
