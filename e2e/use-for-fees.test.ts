@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { getDemoStep } from './helpers'
 
 test('use stablecoin for fees', async ({ page }) => {
   test.setTimeout(240000)
@@ -55,23 +56,25 @@ test('use stablecoin for fees', async ({ page }) => {
   })
 
   // Step 4: Grant issuer role
-  const grantEnterDetails = page.getByRole('button', { name: 'Enter details' }).first()
+  const grantStep = getDemoStep(page, 'Grant issuer role on FeeTestUSD.')
+  const grantEnterDetails = grantStep.getByRole('button', { name: 'Enter details' })
   await expect(grantEnterDetails).toBeVisible()
   await grantEnterDetails.click()
 
-  const grantButton = page.getByRole('button', { name: 'Grant' }).first()
+  const grantButton = grantStep.getByRole('button', { name: 'Grant' })
   await grantButton.click()
 
   await expect(page.getByRole('link', { name: 'View receipt' }).nth(1)).toBeVisible({
     timeout: 90000,
   })
 
-  // Step 5: Mint tokens (after grant completes, Enter details button is the first visible one)
-  const mintEnterDetails = page.getByRole('button', { name: 'Enter details' }).first()
+  // Step 5: Mint tokens
+  const mintStep = getDemoStep(page, 'Mint 100 FeeTestUSD to yourself.')
+  const mintEnterDetails = mintStep.getByRole('button', { name: 'Enter details' })
   await expect(mintEnterDetails).toBeVisible()
   await mintEnterDetails.click()
 
-  const mintButton = page.getByRole('button', { name: 'Mint' }).first()
+  const mintButton = mintStep.getByRole('button', { name: 'Mint' })
   await mintButton.click()
 
   await expect(page.getByRole('link', { name: 'View receipt' }).nth(2)).toBeVisible({
@@ -87,12 +90,13 @@ test('use stablecoin for fees', async ({ page }) => {
     timeout: 90000,
   })
 
-  // Step 7: Send payment using token as fee (now the only Enter details button visible)
-  const payEnterDetails = page.getByRole('button', { name: 'Enter details' }).first()
+  // Step 7: Send payment using token as fee
+  const payStep = getDemoStep(page, 'Send 100 AlphaUSD and pay fees in FeeTestUSD.')
+  const payEnterDetails = payStep.getByRole('button', { name: 'Enter details' })
   await expect(payEnterDetails).toBeVisible()
   await payEnterDetails.click()
 
-  const sendButton = page.getByRole('button', { name: 'Send' }).first()
+  const sendButton = payStep.getByRole('button', { name: 'Send' })
   await expect(sendButton).toBeVisible()
   await sendButton.click()
 
