@@ -8,17 +8,17 @@ description: Details and timeline for the T5 network upgrade, including the ensh
 T5 is Tempo's next network upgrade. It introduces an enshrined TIP-20 escrow channel precompile for MPP and similar session-based payment flows, payment lane classification in consensus, DEX improvements (same-tick flip orders and persistent order IDs across flips), multihop FeeAMM routing, an on-chain `logoURI` field for TIP-20 tokens, an Implicit Approvals List for gas-efficient internal transfers, and a witness digest binding for one-signature key authorization flows.
 
 :::info[T5 status]
-T5 is not yet active on Moderato or Presto. The features described on this page become live at the activation timestamps below.
+T5 is not yet active on testnet or mainnet. The features described on this page become live at the activation timestamps below.
 :::
 
 ## Timeline
 
 | Network | Date | Timestamp |
 |---------|------|-----------|
-| Moderato (testnet) | June 3, 2026 | TBD |
-| Presto (mainnet) | June 9, 2026 | TBD |
+| Testnet | June 3, 2026 | TBD |
+| Mainnet | June 9, 2026 | TBD |
 
-Node operators must upgrade to the T5-compatible release (v1.8.0, targeted for May 27, 2026) before the Moderato activation timestamp.
+Node operators must upgrade to the T5-compatible release (v1.8.0, targeted for May 27, 2026) before the testnet activation timestamp.
 
 ## Overview
 
@@ -32,7 +32,7 @@ T5 introduces the following changes:
 - An Implicit Approvals List enabling listed precompiles to pull TIP-20 tokens without a prior approval ([TIP-1035](https://tips.sh/1035))
 - A witness digest field in key authorizations to bind one signature to an application challenge ([TIP-1053](https://tips.sh/1053))
 
-**Action required for node operators:** Upgrade to v1.8.0 before the Moderato activation timestamp. Non-upgraded nodes will fall out of consensus.
+**Action required for node operators:** Upgrade to v1.8.0 before the testnet activation timestamp. Non-upgraded nodes will fall out of consensus.
 
 ## Integration changes
 
