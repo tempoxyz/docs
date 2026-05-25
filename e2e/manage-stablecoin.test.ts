@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { getDemoStep } from './helpers'
 
 test('manage stablecoin - grant and revoke roles', async ({ page }) => {
   test.setTimeout(180000)
@@ -55,11 +56,12 @@ test('manage stablecoin - grant and revoke roles', async ({ page }) => {
   })
 
   // Step 4: Grant issuer role
-  const grantEnterDetails = page.getByRole('button', { name: 'Enter details' }).first()
+  const grantStep = getDemoStep(page, 'Grant issuer role on ManageTestUSD.')
+  const grantEnterDetails = grantStep.getByRole('button', { name: 'Enter details' })
   await expect(grantEnterDetails).toBeVisible()
   await grantEnterDetails.click()
 
-  const grantButton = page.getByRole('button', { name: 'Grant' }).first()
+  const grantButton = grantStep.getByRole('button', { name: 'Grant' })
   await expect(grantButton).toBeVisible()
   await grantButton.click()
 
@@ -67,12 +69,13 @@ test('manage stablecoin - grant and revoke roles', async ({ page }) => {
     timeout: 90000,
   })
 
-  // Step 5: Revoke issuer role (now the first visible Enter details)
-  const revokeEnterDetails = page.getByRole('button', { name: 'Enter details' }).first()
+  // Step 5: Revoke issuer role
+  const revokeStep = getDemoStep(page, 'Revoke issuer role on ManageTestUSD.')
+  const revokeEnterDetails = revokeStep.getByRole('button', { name: 'Enter details' })
   await expect(revokeEnterDetails).toBeVisible()
   await revokeEnterDetails.click()
 
-  const revokeButton = page.getByRole('button', { name: 'Revoke' }).first()
+  const revokeButton = revokeStep.getByRole('button', { name: 'Revoke' })
   await expect(revokeButton).toBeVisible()
   await revokeButton.click()
 

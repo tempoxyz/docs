@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { getDemoStep } from './helpers'
 
 test('mint stablecoins', async ({ page }) => {
   test.setTimeout(180000)
@@ -56,11 +57,12 @@ test('mint stablecoins', async ({ page }) => {
   })
 
   // Step 4: Grant issuer role - click "Enter details" then "Grant"
-  const grantEnterDetails = page.getByRole('button', { name: 'Enter details' }).first()
+  const grantStep = getDemoStep(page, 'Grant issuer role on MintTestUSD.')
+  const grantEnterDetails = grantStep.getByRole('button', { name: 'Enter details' })
   await expect(grantEnterDetails).toBeVisible()
   await grantEnterDetails.click()
 
-  const grantButton = page.getByRole('button', { name: 'Grant' }).first()
+  const grantButton = grantStep.getByRole('button', { name: 'Grant' })
   await expect(grantButton).toBeVisible()
   await grantButton.click()
 
@@ -69,12 +71,13 @@ test('mint stablecoins', async ({ page }) => {
     timeout: 90000,
   })
 
-  // Step 5: Mint tokens - click "Enter details" then "Mint" (now the first visible Enter details)
-  const mintEnterDetails = page.getByRole('button', { name: 'Enter details' }).first()
+  // Step 5: Mint tokens - click "Enter details" then "Mint"
+  const mintStep = getDemoStep(page, 'Mint 100 MintTestUSD to yourself.')
+  const mintEnterDetails = mintStep.getByRole('button', { name: 'Enter details' })
   await expect(mintEnterDetails).toBeVisible()
   await mintEnterDetails.click()
 
-  const mintButton = page.getByRole('button', { name: 'Mint' }).first()
+  const mintButton = mintStep.getByRole('button', { name: 'Mint' })
   await expect(mintButton).toBeVisible()
   await mintButton.click()
 

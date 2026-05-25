@@ -1,6 +1,9 @@
 strictDepBuilds: true
 blockExoticSubdeps: false
 trustPolicy: no-downgrade
+trustPolicyExclude:
+  - reselect@5.1.1
+  - semver@6.3.1
 minimumReleaseAge: 1440
 
 onlyBuiltDependencies:
@@ -17,6 +20,10 @@ minimumReleaseAgeExclude:
   - incur
   - ox
   - viem
+  - vocs
+  - '@vocs/twoslash-rust'
+  - '@vocs/twoslash-rust-darwin-arm64'
+  - '@vocs/twoslash-rust-linux-x64-gnu'
 
 overrides:
   protobufjs: '>=7.5.5'

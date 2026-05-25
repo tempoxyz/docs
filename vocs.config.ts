@@ -28,6 +28,7 @@ export default defineConfig({
   title: 'Tempo',
   titleTemplate: '%s ⋅ Tempo',
   description: 'Documentation for the Tempo network and protocol specifications',
+  renderStrategy: 'partial-static',
   feedback: createFeedbackAdapter(),
   mcp: {
     enabled: true,
