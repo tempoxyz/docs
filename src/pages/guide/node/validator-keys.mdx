@@ -59,7 +59,7 @@ The verification key should match the output of the `generate-signing-key` comma
 
 ### Why FIFOs and not env vars
 
-`--secret` accepts any filesystem path. The `tempo node` binary does not place extra restrictions on where it reads the secret from, so a regular file works, but a FIFO or process-substitution path is preferred.
+`--secret` accepts any filesystem path. The `tempo node` binary does not place extra restrictions on where it reads the secret from, so a regular file works, but a named pipe (FIFO) or process-substitution path is preferred. A FIFO is a special filesystem entry used to pass data between processes; it has a path, but the bytes written to it are streamed through the kernel rather than stored as regular file contents.
 
 Use FIFOs so the encryption key is streamed to `tempo` at the moment it is needed without putting the key in the process environment. Environment variables are visible to child processes and can be exposed through process inspection, crash dumps, shell history, or service-manager diagnostics. A FIFO keeps the secret out of argv and env, avoids writing it to disk, and lets an external secret manager provide the value just in time. Once `tempo` reads from the FIFO, the secret is consumed and does not remain in the FIFO, unlike a regular file.
 
