@@ -30,19 +30,54 @@ Never share your private signing key. Anyone with access to it can impersonate y
 Use a different key for each network rather than reusing the same validator identity on testnet and mainnet.
 :::
 
-Generate an ed25519 keypair:
+Generate an encrypted ed25519 keypair. The `--secret` argument points to a file-like input that contains the encryption key:
 
 ```bash
-tempo consensus generate-private-key --output <path>
+tempo consensus generate-signing-key \
+  --output <SIGNING_KEY_PATH> \
+  --secret <ENCRYPTION_KEY_FIFO>
 ```
 
 Verify the public key:
 
 ```bash
-tempo consensus calculate-public-key --private-key <path>
+tempo consensus show-verification-key \
+  --private-key <SIGNING_KEY_PATH> \
+  --secret <ENCRYPTION_KEY_FIFO>
 ```
 
-The public key should match the output of the `generate-private-key` command.
+The verification key should match the output of the `generate-signing-key` command.
+
+### Encryption key input
+
+`--secret` accepts any filesystem path, but use a FIFO (named pipe) or shell process substitution rather than a regular file:
+
+```bash
+mkfifo /run/tempo/consensus-secret
+printf '%s' '<ENCRYPTION_KEY>' > /run/tempo/consensus-secret &
+tempo consensus generate-signing-key \
+  --output <SIGNING_KEY_PATH> \
+  --secret /run/tempo/consensus-secret
+```
+
+With shell process substitution:
+
+```bash
+tempo consensus generate-signing-key \
+  --output <SIGNING_KEY_PATH> \
+  --secret <(printf '%s' '<ENCRYPTION_KEY>')
+```
+
+Use FIFOs so the encryption key is streamed to `tempo` at the moment it is needed without putting the key in the process environment. Environment variables are visible to child processes and can be exposed through process inspection, crash dumps, shell history, or service-manager diagnostics. A FIFO keeps the secret out of argv and env, avoids writing it to disk, and lets an external secret manager provide the value just in time.
+
+To encrypt an existing unencrypted signing key:
+
+```bash
+tempo consensus encrypt-signing-key \
+  --input <OLD_SIGNING_KEY_PATH> \
+  --output <ENCRYPTED_SIGNING_KEY_PATH> \
+  --secret <ENCRYPTION_KEY_FIFO>
+```
 
 ## Signing key rotation
 
