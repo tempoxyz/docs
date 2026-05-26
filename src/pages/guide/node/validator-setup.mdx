@@ -25,11 +25,7 @@ Registering a validator takes three steps:
 Never share your private signing key. Anyone with access to it can impersonate your validator. The Tempo team will never ask for your private key.
 :::
 
-:::info
-Use a FIFO or process-substitution path for `--secret` and `--consensus.secret`. This keeps the encryption key out of environment variables and command-line arguments, and lets `tempo` consume it once without leaving it in a regular file. See [Why FIFOs and not env vars](/guide/node/validator-keys#why-fifos-and-not-env-vars).
-:::
-
-Generate an encrypted ed25519 keypair. `--secret` points to a FIFO or another file-like path that provides the encryption key:
+Generate an encrypted ed25519 keypair. The `--secret` argument points to a file-like input that contains the encryption key. Prefer a named pipe (FIFO) or shell process substitution for this path: a FIFO lets one process stream bytes directly to another process without storing those bytes as a regular file, and it keeps the secret out of environment variables and command-line arguments. See [Why FIFOs and not env vars](/guide/node/validator-keys#why-fifos-and-not-env-vars).
 
 ```bash
 mkfifo /run/tempo/consensus-secret
