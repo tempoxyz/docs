@@ -142,6 +142,10 @@ export default defineConfig({
         link: '/guide/using-tempo-with-ai',
       },
       {
+        text: 'AI Tool Directory',
+        link: '/guide/ai-tool-directory',
+      },
+      {
         text: 'Build on Tempo',
         items: [
           {

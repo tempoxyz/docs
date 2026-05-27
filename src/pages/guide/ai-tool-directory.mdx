@@ -1,0 +1,69 @@
+---
+title: AI Tool Directory
+description: Discover the service integrations available to Tempo AI agents, how to list enabled tools, and which tools cover observability, data, CRM, docs, and more.
+---
+
+# AI Tool Directory
+
+Tempo AI agents can use tool integrations for external services once the deployment has the required API key or OAuth connection. Use the directory below to see common tool categories, then ask your agent to list the tools enabled in your environment.
+
+## Discover enabled tools
+
+Tool availability is deployment-specific. To see the live list in a Centaur sandbox, run:
+
+```bash
+call tools
+```
+
+To inspect a tool's methods and required parameters, run:
+
+```bash
+call discover <tool>
+```
+
+For example:
+
+```bash
+call discover grafana
+call discover alchemy
+call discover linear
+```
+
+## Common tools
+
+| Category | Tools | What agents can do |
+|---|---|---|
+| Observability | Grafana, VictoriaLogs, VictoriaMetrics, Tempo observability, ValScope | Query logs and metrics, inspect dashboards, review alerts, debug validator and service health |
+| Blockchain data | Alchemy, Etherscan, Dune, Allium, Arkham, Nansen, DeBank | Read transactions, balances, transfers, token metadata, contract data, and onchain analytics |
+| Market data | CoinGecko, Coin Metrics, CoinDesk, Messari, The Block, Token Terminal, Tokenomist | Pull token prices, protocol metrics, market history, unlocks, and crypto news |
+| Product analytics | PostHog, Google Analytics | Run product analytics queries, pageview analysis, event breakdowns, and traffic reports |
+| Work tracking | Linear, Notion, Pylon | Search issues and docs, create or update work items, read customer support context |
+| Communication | Slack, Gmail, Google Calendar, Telegram, Zulip | Search messages, gather thread context, draft replies, send approved messages, and manage calendar events |
+| Documents | Google Drive, Google Docs, Google Sheets, Google Slides, Granola, DocSend | Search, read, create, update, export, and summarize documents, sheets, slides, notes, and shared files |
+| CRM and GTM | Attio, Ashby, Harmonic, Crunchbase, SimilarWeb, Sensor Tower | Read company, contact, hiring, fundraising, traffic, and market context |
+| Governance and policy | Snapshot, Tally, Karma, Congress.gov, Federal Register, OpenFEC | Research governance proposals, delegates, regulation, legislation, and public filings |
+| Media and generation | Chart, Nano Banana, Veo, Transcriber, PaperBanana | Render charts, generate images or video, transcribe audio, and create academic diagrams |
+
+## Frequently requested integrations
+
+| Tool | Status |
+|---|---|
+| Grafana | Available in Centaur deployments that configure Grafana credentials |
+| Alchemy | Available in Centaur deployments that configure Alchemy credentials |
+| Dune | Available in Centaur deployments that configure Dune credentials |
+| Etherscan | Available in Centaur deployments that configure Etherscan credentials |
+| CoinGecko | Available in Centaur deployments that configure CoinGecko credentials |
+| Linear | Available in Centaur deployments that configure Linear credentials |
+| Notion | Available in Centaur deployments that configure Notion credentials |
+| Sentry | Not listed by default; add a custom tool if your deployment needs it |
+| CloudWatch | Not listed by default; add a custom tool if your deployment needs it |
+
+## Add a tool
+
+If a service is missing, add a tool integration that exposes the smallest useful set of methods for an agent. A good first version usually includes:
+
+- Read-only discovery methods, such as `list_projects`, `search`, or `health`.
+- Focused getters for canonical records, such as `get_issue`, `get_dashboard`, or `get_transaction`.
+- Mutating methods only when the service action is safe to perform from an agent workflow.
+
+After the tool is deployed, agents can discover it with `call tools` and inspect its interface with `call discover <tool>`.
