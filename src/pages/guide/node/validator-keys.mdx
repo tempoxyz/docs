@@ -77,6 +77,12 @@ tempo consensus show-verification-key \
 
 After the verification key matches the old signing key's public key, update `--consensus.signing-key` to point at the encrypted file and start `tempo node` with `--consensus.secret <ENCRYPTION_KEY_FIFO>`.
 
+Once the encrypted key is verified and backed up, delete the old unencrypted key file. On Linux, you can use `shred` to overwrite and remove the file:
+
+```bash
+shred --remove --zero <OLD_SIGNING_KEY_PATH>
+```
+
 ### Why FIFOs and not env vars
 
 `--secret` accepts any filesystem path. The `tempo node` binary does not place extra restrictions on where it reads the secret from, so a regular file works, but a named pipe (FIFO) or process-substitution path is preferred. A FIFO is a special filesystem entry used to pass data between processes; it has a path, but the bytes written to it are streamed through the kernel rather than stored as regular file contents.
