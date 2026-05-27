@@ -50,6 +50,14 @@ Tempo's LayerZero Endpoint ID is **`30410`**.
 | **USDC.e** | [`0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392`](https://explore.tempo.xyz/address/0x8c76e2F6C5ceDA9AA7772e7efF30280226c44392) |
 | **EURC.e** | [`0x7753Dc8d4bd48Db599Da21E08b1Ab1D6FDFfdC71`](https://explore.tempo.xyz/address/0x7753Dc8d4bd48Db599Da21E08b1Ab1D6FDFfdC71) |
 
+These are the contracts users call to bridge tokens. They are not the
+authoritative contracts for Stargate v2 message security configuration.
+To inspect the live DVN setup for Stargate routes, resolve the chain's
+`TokenMessaging` OApp from Stargate metadata and read the LayerZero
+EndpointV2 config for that OApp. On Tempo, the Stargate v2
+`TokenMessaging` OApp is
+[`0x19Ff94Fe4C93D546e4DB3E1FB124D45366B0b9F5`](https://explore.tempo.xyz/address/0x19Ff94Fe4C93D546e4DB3E1FB124D45366B0b9F5).
+
 ### Source chain Stargate pools
 
 | Chain | LZ Endpoint ID | Stargate USDC Pool |
