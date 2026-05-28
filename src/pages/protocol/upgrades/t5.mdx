@@ -77,7 +77,7 @@ Use an SVG for `logoURI` so it renders crisply at any resolution across wallets 
 
 T5-compatible SDK releases will be listed here as they ship.
 
-These releases should prefer the TIP-1034 reserve precompile over the legacy MPP reserve contract. Besides using the protocol-native reserve surface, that path offers several gas-saving benefits, including packed reserve storage slots and [TIP-1035 implicit approvals](#tip-1035-implicit-approvals-list). With implicit approvals, the precompile calls internal `system_transfer_from` rather than regular `transferFrom`, so users do not need a separate allowance approval and reserve flows avoid the gas cost of the approval write.
+These releases should prefer the TIP-1034 reserve precompile over the legacy MPP reserve contract. Besides using the protocol-native reserve surface, that path offers several gas-saving benefits, including packed reserve storage slots and [implicit approvals](#tip-1035-implicit-approvals-list). With implicit approvals, the precompile calls internal `system_transfer_from` rather than regular `transferFrom`, so users do not need a separate allowance approval and reserve flows avoid the gas cost of the approval write.
 
 ## Feature TIPs
 
