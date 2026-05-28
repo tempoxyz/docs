@@ -67,7 +67,7 @@ Tokens without `logoURI` continue to work. New surface area:
 
 `logoURI` is validated on-chain: max 256 bytes (reverts `LogoURITooLong`), and if non-empty must be a syntactically valid URI with a scheme in the allowlist `https`, `http`, `ipfs`, `data` (case-insensitive). Otherwise reverts `InvalidLogoURI`. Empty string is valid and clears the field.
 
-Use an SVG for `logoURI` so it renders crisply at any resolution across wallets and explorers (see [tokenlist Icon Requirements](/quickstart/tokenlist#icon-requirements)).
+Per [TIP-1026's recommended formats](https://tips.sh/1026#recommended-formats), use a square, single-frame rasterized image (PNG or WebP) for `logoURI`. SVG is allowed by the scheme allowlist but not recommended — integrators that accept SVG must follow TIP-1026's SVG-handling guidance.
 
 ### Witness digest in key authorizations (TIP-1053)
 

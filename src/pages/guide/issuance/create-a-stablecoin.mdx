@@ -16,7 +16,7 @@ TIP-20 tokens are designed specifically for payments with built-in compliance fe
 and integration with Tempo's payment infrastructure.
 
 :::info[Coming with T5]
-After the [T5 network upgrade](/protocol/upgrades/t5), the TIP-20 factory exposes a new 7-arg `createToken` overload that accepts an on-chain `logoURI` at creation ([TIP-1026](https://tips.sh/1026)). Wallets and explorers can read the icon directly from the token contract via `logoURI()`, without going through the [tokenlist registry](/quickstart/tokenlist). The previous `createToken` overload is unchanged. Use an SVG for `logoURI` so it renders crisply at any resolution across wallets and explorers (see [tokenlist Icon Requirements](/quickstart/tokenlist#icon-requirements)). See the [Optional logoURI in TIP-20 section of the T5 page](/protocol/upgrades/t5#optional-logouri-in-tip-20-tip-1026) for the full surface area.
+After the [T5 network upgrade](/protocol/upgrades/t5), the TIP-20 factory exposes a new 7-arg `createToken` overload that accepts an on-chain `logoURI` at creation ([TIP-1026](https://tips.sh/1026)). Wallets and explorers can read the icon directly from the token contract via `logoURI()`, without going through the [tokenlist registry](/quickstart/tokenlist). The previous `createToken` overload is unchanged. Per [TIP-1026's recommended formats](https://tips.sh/1026#recommended-formats), use a square, single-frame rasterized image (PNG or WebP) for `logoURI`. SVG is allowed by the scheme allowlist but not recommended. See the [Optional logoURI in TIP-20 section of the T5 page](/protocol/upgrades/t5#optional-logouri-in-tip-20-tip-1026) for the full surface area.
 :::
 
 ## Demo
