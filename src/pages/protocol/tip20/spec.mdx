@@ -604,3 +604,78 @@ interface ITIP20Factory {
 - TIP20 tokens cannot be transferred to another TIP20 token contract address.
 - `systemTransferFrom`, `transferFeePreTx`, and `transferFeePostTx` never change `totalSupply()`.
 
+## T4 → T5 migration
+
+:::info[Migration appendix]
+This section captures TIP-20 changes shipping with the [T5 network upgrade](/protocol/upgrades/t5). Until T5 activates on testnet and mainnet, the spec above remains canonical. After T5 activation, the items below will be folded into the body and this appendix will be removed.
+:::
+
+T5 introduces three additions that affect the TIP-20 surface:
+
+### TIP-1026: optional on-chain `logoURI`
+
+Adds an optional `logoURI` string (256-byte cap) to every TIP-20, admin-mutable via `setLogoURI`. Tokens without a `logoURI` continue to work; the field is empty by default.
+
+New surface area on `ITIP20`:
+
+```solidity
+/// @notice Returns the on-chain logo URI for this token (empty if unset)
+function logoURI() external view returns (string memory);
+
+/// @notice Updates the logo URI (requires DEFAULT_ADMIN_ROLE)
+/// @param newLogoURI The new logo URI (max 256 bytes; empty string clears the field)
+/// @dev If non-empty, MUST be a syntactically valid URI with a scheme in the
+///      allowlist {https, http, ipfs, data} (case-insensitive).
+///      Reverts LogoURITooLong if length > 256 bytes.
+///      Reverts InvalidLogoURI if the scheme is not in the allowlist or the URI is malformed.
+function setLogoURI(string calldata newLogoURI) external;
+
+/// @notice Emitted when the logo URI changes
+/// @param updater The address that updated the logo URI (msg.sender)
+/// @param newLogoURI The new logo URI value
+event LogoURIUpdated(address indexed updater, string newLogoURI);
+
+/// @notice The provided logoURI exceeds the 256-byte cap
+error LogoURITooLong();
+
+/// @notice The provided logoURI is malformed or uses a scheme outside the allowlist
+error InvalidLogoURI();
+```
+
+The `TIP20Factory` gains a 7-arg `createToken` overload that accepts an initial `logoURI`. When non-empty, the new token emits `LogoURIUpdated(msg.sender, logoURI)` from its own address at creation time. The existing 6-arg overload is unchanged.
+
+```solidity
+/// @notice Creates and deploys a new TIP-20 token with an initial logoURI
+/// @dev Identical to the 6-arg overload, but additionally sets logoURI at creation.
+///      Validation rules for logoURI are the same as setLogoURI (256-byte cap,
+///      allowlisted schemes, syntactically valid URI). Empty string is valid and
+///      leaves logoURI unset (no LogoURIUpdated event emitted).
+function createToken(
+    string memory name,
+    string memory symbol,
+    string memory currency,
+    address quoteToken,
+    address admin,
+    bytes32 salt,
+    string memory logoURI
+) external returns (address token);
+```
+
+Per [TIP-1026's recommended formats](https://tips.sh/1026#recommended-formats), use a square, single-frame rasterized image (PNG or WebP) for `logoURI`. SVG is allowed by the scheme allowlist but not recommended — integrators that accept SVG must follow TIP-1026's SVG-handling guidance.
+
+### TIP-1035: implicit approvals for listed precompiles
+
+T5 introduces an Implicit Approval List of precompiles that may pull TIP-20 tokens without a prior `approve`. Listed precompiles call the internal `system_transfer_from(from, to, amount)` entrypoint, which:
+
+- Is **not** part of the public TIP-20 ABI and is **not** callable by external contracts or EOAs.
+- Skips allowance checks and the allowance storage write.
+- Still enforces balance checks, TIP-403 transfer policies, and AccountKeychain spending limits.
+- Emits the standard TIP-20 `Transfer` event.
+
+This generalizes the existing system-only path (previously documented as `systemTransferFrom`, `transferFeePreTx`, `transferFeePostTx`) to a hardfork-gated allow-list of precompiles — initially the StablecoinDEX, FeeAMM, and the new `TIP20ChannelReserve` precompile. Normal `approve`, `permit`, `allowance`, and `transferFrom` behavior is unchanged.
+
+### TIP-1034: `TIP20ChannelReserve` precompile cross-reference
+
+T5 ships an enshrined TIP-20 payment-channel reserve precompile at [`0x4D50500000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x4D50500000000000000000000000000000000000) (ASCII `MPP`). Channel reserve is a TIP-20 consumer rather than a change to the TIP-20 contract itself — it pulls funds via the implicit-approval path described above and emits standard `Transfer` events from the host TIP-20.
+
+See the [Enshrined TIP-20 reserve channel section of the T5 page](/protocol/upgrades/t5#enshrined-tip-20-reserve-channel-tip-1034) for the channel lifecycle, channel ID derivation, and event surface.

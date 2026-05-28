@@ -4,6 +4,10 @@ description: Technical specification for Tempo payment lanes ensuring dedicated 
 
 # Payment Lane Specification
 
+:::info[Coming with T5]
+The [T5 network upgrade](/protocol/upgrades/t5) replaces the pre-T5 TIP-20 prefix-only consensus classifier with TIP-1045's allow-listed call shapes ([TIP-1045](https://tips.sh/1045)). The allow-list covers TIP-20 calls and the new `TIP20ChannelReserve` precompile ([TIP-1034](https://tips.sh/1034)), so payment-channel reserve transactions become first-class payment-lane traffic. Indexers, explorers, and payment processors that classify "payments" should pick up the new selector list before activation. Until T5 activates, the prefix-based classification described below still applies.
+:::
+
 ## Abstract
 
 This specification introduces a second consensus gas constraint for **non-payment** transactions. Transactions are classified as either payments or non-payments based solely on their transaction data, without requiring any access to blockchain state. For a block to be valid, total `gas_used` by the block must be less than the `gas_limit`. Non-payment transactions executed in the proposer's lane (i.e. before the gas incentive section) must consume at most `general_gas_limit`, a new field added to the header. Once that budget is exhausted, additional inclusion is constrained by the remaining shared gas budget.

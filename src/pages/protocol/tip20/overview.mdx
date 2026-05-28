@@ -6,6 +6,15 @@ import { Cards, Card } from 'vocs'
 
 # TIP-20 Token Standard
 
+:::info[Coming with T5]
+The [T5 network upgrade](/protocol/upgrades/t5) adds three TIP-20 features:
+- An optional on-chain `logoURI` field on every token so wallets and explorers can render the official icon without an off-chain registry ([TIP-1026](https://tips.sh/1026))
+- An Implicit Approvals List that lets the StablecoinDEX, FeeAMM, and the new payment-channel reserve precompile pull TIP-20 tokens without a prior `approve` transaction ([TIP-1035](https://tips.sh/1035))
+- An enshrined `TIP20ChannelReserve` precompile at `0x4D505000…0000` for MPP and other session-based payment flows ([TIP-1034](https://tips.sh/1034))
+
+Existing tokens continue to work unchanged. See the [T4 → T5 migration appendix on the TIP-20 spec](/protocol/tip20/spec#t4--t5-migration) for the full ABI surface.
+:::
+
 TIP-20 is Tempo's native token standard for stablecoins and payment tokens. TIP-20 is designed for stablecoin payments, and is the foundation for many token-related functions on Tempo including transaction fees, payment lanes, DEX quote tokens, and optimized routing for DEX liquidity on Tempo.
 
 All TIP-20 tokens are created by interacting with the [TIP-20 Factory contract](/protocol/tip20/spec#tip20factory), calling the `createToken` function. If you're issuing a stablecoin on Tempo, we **strongly recommend** using the TIP-20 standard. Learn more about the benefits, or follow the guide on issuance [here](/guide/issuance).
