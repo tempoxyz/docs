@@ -70,12 +70,3 @@ All token movements must pass TIP-403 policy checks:
 - `optedInSupply` must equal the sum of balances for all opted-in users
 - All token movements must comply with TIP-403 policies
 
-## T2 → T3 migration
-
-:::info[Migration appendix]
-This section captures changes introduced by the [T3 network upgrade](/protocol/upgrades/t3) for integrators migrating from T2. The spec above is the canonical post-T3 specification; this appendix exists for reference and will be removed in a future docs revision.
-:::
-
-T3 introduced [TIP-1022](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md) virtual addresses, which affect TIP-20 rewards in one place:
-
-- `setRewardRecipient(...)` now rejects virtual addresses. Reward recipients must be canonical accounts, not forwarding aliases.

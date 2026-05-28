@@ -604,15 +604,3 @@ interface ITIP20Factory {
 - TIP20 tokens cannot be transferred to another TIP20 token contract address.
 - `systemTransferFrom`, `transferFeePreTx`, and `transferFeePostTx` never change `totalSupply()`.
 
-## T2 → T3 migration
-
-:::info[Migration appendix]
-This section captures changes introduced by the [T3 network upgrade](/protocol/upgrades/t3) for integrators migrating from T2. The spec above is the canonical post-T3 specification; this appendix exists for reference and will be removed in a future docs revision.
-:::
-
-T3 introduced [TIP-1022](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md) virtual addresses, which affect TIP-20 in the following ways:
-
-- Virtual-address recipient resolution applies to recipient-bearing TIP-20 paths: `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo`. See [Virtual Address Recipients](#virtual-address-recipients).
-- When an operation targets a registered virtual address, the effective recipient becomes the registered master wallet before recipient authorization and mint-recipient checks run.
-- Forwarded virtual-address deposits appear as two-hop standard `Transfer` events in the same transaction. Indexers and explorers should collapse that pair into one logical deposit to the resolved master wallet.
-- Virtual addresses are valid TIP-20 recipients on those paths but remain forwarding aliases rather than canonical TIP-20 holders. Non-TIP-20 tokens sent to a virtual address do not forward.

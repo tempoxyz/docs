@@ -269,13 +269,3 @@ return data.policyType == PolicyType.WHITELIST
 - When policyId = 1, all authorization checks must return true for every address.
 - Only the policy’s current admin may update the admin address for that policy.
 
-# T2 → T3 migration
-
-:::info[Migration appendix]
-This section captures changes introduced by the [T3 network upgrade](/protocol/upgrades/t3) for integrators migrating from T2. The spec above is the canonical post-T3 specification; this appendix exists for reference and will be removed in a future docs revision.
-:::
-
-T3 introduced [TIP-1022](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md) virtual addresses, which affect TIP-403 in two places:
-
-- Policy-configuration functions that take literal member addresses (`createPolicyWithAccounts`, `modifyPolicyWhitelist`, `modifyPolicyBlacklist`) now reject virtual addresses.
-- TIP-20 policy checks for virtual-address transfers and mints now run against the resolved master wallet, not the forwarding alias. Policy membership must be configured on the master address.
