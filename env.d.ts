@@ -6,7 +6,8 @@ interface EnvironmentVariables {
   readonly VITE_POSTHOG_HOST: string
   readonly VITE_TEMPO_ENV: 'localnet' | 'devnet' | 'moderato'
 
-  readonly INDEXSUPPLY_API_KEY: string
+  readonly TIDX_BASIC_AUTH: string
+  readonly TIDX_URL: string
   readonly SLACK_FEEDBACK_WEBHOOK: string
 
   readonly VERCEL_URL: string
