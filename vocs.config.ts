@@ -457,6 +457,10 @@ export default defineConfig({
                 link: '/guide/bridge-layerzero',
               },
               {
+                text: 'Bridge via Bungee',
+                link: '/guide/bridge-bungee',
+              },
+              {
                 text: 'Bridge via Relay',
                 link: '/guide/bridge-relay',
               },
