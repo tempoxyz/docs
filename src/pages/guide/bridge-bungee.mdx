@@ -38,10 +38,12 @@ The list of supported chains, tokens, and routes changes over time as Bungee add
 
 | Token | Address | Decimals |
 |-------|---------|---------:|
-| **USDC.e** (Bridged USDC) | [`0x20c000000000000000000000b9537d11c60e8b50`](https://explore.tempo.xyz/address/0x20c000000000000000000000b9537d11c60e8b50) | 6 |
-| **pathUSD** | [`0x20c0000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x20c0000000000000000000000000000000000000) | 6 |
+| **pathUSD** | [`0x20C0000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x20C0000000000000000000000000000000000000) | 6 |
+| **USDT0** | [`0x20C00000000000000000000014f22CA97301EB73`](https://explore.tempo.xyz/address/0x20C00000000000000000000014f22CA97301EB73) | 6 |
+| **USDC.E** (Bridged USDC) | [`0x20C000000000000000000000b9537d11c60E8b50`](https://explore.tempo.xyz/address/0x20C000000000000000000000b9537d11c60E8b50) | 6 |
+| **EURAU** (AllUnity EUR) | [`0x20c0000000000000000000009A4a4b17E0Dc6651`](https://explore.tempo.xyz/address/0x20c0000000000000000000009A4a4b17E0Dc6651) | 6 |
 
-For wallet funding and most Bungee-to-Tempo flows, route to **USDC.e** on Tempo. Use the token list endpoint for the latest output token availability.
+For wallet funding and most Bungee-to-Tempo flows, route to **USDC.E** on Tempo. Use the token list endpoint for the latest output token availability, and request a quote to confirm route availability for your origin token and amount.
 
 :::note
 Bungee may use the native token sentinel `0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee` for chain-currency entries in API responses. For API requests, prefer the exact token address returned by Bungee's token list or quote response for the route you are building.
