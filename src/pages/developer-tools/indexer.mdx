@@ -52,13 +52,13 @@ curl -G "https://indexer.tempo.xyz/query" \
   --data-urlencode "chainId=4217" \
   --data-urlencode "engine=clickhouse" \
   --data-urlencode "signature=Transfer(address,address,uint256)" \
-  --data-urlencode 'sql=SELECT "from", "to", value, block_num, tx_hash FROM Transfer ORDER BY block_num DESC LIMIT 5'
+  --data-urlencode 'sql=SELECT arg0 AS from_address, arg1 AS to_address, arg2 AS value, block_num, tx_hash FROM Transfer ORDER BY block_num DESC LIMIT 5'
 ```
 
-### Status
+### Health check
 
 ```bash
-curl "https://indexer.tempo.xyz/status"
+curl "https://indexer.tempo.xyz/health"
 ```
 
 ## Interactive example
@@ -72,7 +72,6 @@ Run live SQL against the hosted indexer.
 | Endpoint | Description |
 | --- | --- |
 | `GET /health` | Health check |
-| `GET /status` | Sync status for indexed chains |
 | `GET /query` | Execute a read-only SQL query |
 | `GET /views?chainId=` | List ClickHouse materialized views |
 | `GET /views/{name}?chainId=` | Get materialized view details |
@@ -110,7 +109,7 @@ TIDX writes chain data into two stores:
 - **PostgreSQL** for point lookups such as a single block, transaction, or address range.
 - **ClickHouse** for analytical queries such as aggregates, holder lists, and large scans.
 
-The `/query` endpoint accepts SQL and can expose decoded events on demand through the `signature` query parameter. For example, passing `Transfer(address,address,uint256)` creates a virtual `Transfer` table for that query.
+The `/query` endpoint accepts SQL and can expose decoded events on demand through the `signature` query parameter. For example, passing `Transfer(address,address,uint256)` creates a virtual `Transfer` table with decoded arguments such as `arg0`, `arg1`, and `arg2` for that query.
 
 TIDX also maintains ClickHouse materialized tables for expensive common reads, such as token balances, token holders, supply, approvals, and address activity.
 

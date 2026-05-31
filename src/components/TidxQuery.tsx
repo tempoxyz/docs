@@ -76,7 +76,7 @@ LIMIT 5`,
     network: 'mainnet',
     engine: 'clickhouse',
     signature: 'Transfer(address,address,uint256)',
-    sql: `SELECT "from", "to", value, block_num, tx_hash
+    sql: `SELECT arg0 AS from_address, arg1 AS to_address, arg2 AS value, block_num, tx_hash
 FROM Transfer
 ORDER BY block_num DESC
 LIMIT 5`,
