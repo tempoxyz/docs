@@ -9,6 +9,10 @@ description: Deprecated — use Handler.relay with feePayer option instead.
 `Handler.feePayer` has been deprecated. Use [`Handler.relay`](/accounts/server/handler.relay) with the [`feePayer`](/accounts/server/handler.relay#feepayer) option instead.
 :::
 
+:::tip
+Looking for Tempo-hosted sponsorship endpoints? See [Hosted Fee Payer](/developer-tools/fee-payer). Use [`Handler.relay`](/accounts/server/handler.relay) when you need to run your own fee payer service.
+:::
+
 ## Migration
 
 Replace `Handler.feePayer` calls with `Handler.relay` and nest the `account` under `feePayer`:

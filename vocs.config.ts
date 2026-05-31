@@ -757,6 +757,16 @@ export default defineConfig({
         text: 'Tempo Developer Tools',
         items: [
           {
+            text: 'Hosted Services',
+            collapsed: true,
+            items: [
+              {
+                text: 'Hosted Fee Payer',
+                link: '/developer-tools/fee-payer',
+              },
+            ],
+          },
+          {
             text: 'Accounts SDK',
             link: '/accounts',
           },
