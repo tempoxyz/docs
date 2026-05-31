@@ -761,7 +761,7 @@ export default defineConfig({
             link: '/accounts',
           },
           {
-            text: 'Indexer (TIDX)',
+            text: 'Indexer (`tidx`)',
             link: '/developer-tools/indexer',
           },
           {

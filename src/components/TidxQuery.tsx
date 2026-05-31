@@ -159,7 +159,9 @@ export function TidxQuery() {
   return (
     <Container
       headerLeft={
-        <h4 className="font-normal text-[14px] text-gray12 leading-none">Hosted TIDX Query</h4>
+        <h4 className="font-normal text-[14px] text-gray12 leading-none">
+          Hosted <code>tidx</code> Query
+        </h4>
       }
       headerRight={
         <button
