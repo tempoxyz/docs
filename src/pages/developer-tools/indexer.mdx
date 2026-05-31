@@ -1,0 +1,138 @@
+---
+title: Indexer (TIDX)
+description: Query Tempo blocks, transactions, logs, token balances, and decoded events through Tempo's hosted TIDX indexer.
+interactive: true
+---
+
+import { Card, Cards } from 'vocs'
+import { TidxQuery } from '../../components/TidxQuery'
+
+# Indexer (TIDX)
+
+Tempo provides a free indexing service built on [TIDX](https://github.com/tempoxyz/tidx). It exposes structured Tempo chain data over SQL, with PostgreSQL for point lookups and ClickHouse for analytics queries.
+
+Use it when you need block, transaction, log, token, holder, or decoded event data without running your own indexing pipeline.
+
+## Hosted endpoints
+
+The public hosted endpoints are unauthenticated, read-only, and CORS-enabled.
+
+| Network | URL | Chain ID |
+| --- | --- | --- |
+| Mainnet | `https://indexer.tempo.xyz` | `4217` |
+| Testnet | `https://indexer.testnet.tempo.xyz` | `42431` |
+
+### Rate limits
+
+The public hosted endpoints are rate-limited. Responses include `X-Ratelimit-Limit`, `X-Ratelimit-Remaining`, and `X-Ratelimit-Reset` headers.
+
+Clients should keep queries bounded, include explicit `LIMIT` clauses, avoid polling expensive aggregates, and back off when remaining quota is low.
+
+## Using in production
+
+The free hosted TIDX endpoints are useful for prototyping, demos, scripts, and low-volume reads. They do not currently come with uptime, latency, support, or data freshness SLAs.
+
+For production systems that need stronger guarantees, dedicated support, custom schemas, or predictable low-cost indexing at scale, use an indexing partner from the [Data & Analytics partners page](/ecosystem/data-analytics).
+
+## Query TIDX
+
+### Latest blocks
+
+```bash
+curl -G "https://indexer.tempo.xyz/query" \
+  --data-urlencode "chainId=4217" \
+  --data-urlencode "engine=clickhouse" \
+  --data-urlencode "sql=SELECT num, hash, timestamp FROM blocks ORDER BY num DESC LIMIT 5"
+```
+
+### Decoded events
+
+```bash
+curl -G "https://indexer.tempo.xyz/query" \
+  --data-urlencode "chainId=4217" \
+  --data-urlencode "engine=clickhouse" \
+  --data-urlencode "signature=Transfer(address,address,uint256)" \
+  --data-urlencode 'sql=SELECT "from", "to", value, block_num, tx_hash FROM Transfer ORDER BY block_num DESC LIMIT 5'
+```
+
+### Status
+
+```bash
+curl "https://indexer.tempo.xyz/status"
+```
+
+## Interactive example
+
+Run live SQL against the hosted indexer.
+
+<TidxQuery />
+
+## API reference
+
+| Endpoint | Description |
+| --- | --- |
+| `GET /health` | Health check |
+| `GET /status` | Sync status for indexed chains |
+| `GET /query` | Execute a read-only SQL query |
+| `GET /views?chainId=` | List ClickHouse materialized views |
+| `GET /views/{name}?chainId=` | Get materialized view details |
+
+`/query` accepts these parameters:
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `chainId` | yes | `4217` for mainnet or `42431` for testnet |
+| `sql` | yes | Read-only SQL query |
+| `engine` | no | `postgres` or `clickhouse` |
+| `signature` | no | Event signature for decoded event tables |
+| `live` | no | Enables SSE streaming for PostgreSQL queries |
+
+:::info
+Creating or deleting materialized views is only available from trusted infrastructure. Use the hosted endpoints for read-only queries, or run your own TIDX instance when you need custom view management.
+:::
+
+## Run your own indexer
+
+The [TIDX repository](https://github.com/tempoxyz/tidx) includes Docker, source build, configuration, CLI, schema, and materialized view docs.
+
+```bash
+git clone https://github.com/tempoxyz/tidx
+cd tidx
+docker run -v $(pwd)/config.toml:/config.toml ghcr.io/tempoxyz/tidx up
+```
+
+See the [TIDX README](https://github.com/tempoxyz/tidx) for the full setup guide and CLI reference.
+
+## How it works
+
+TIDX writes chain data into two stores:
+
+- **PostgreSQL** for point lookups such as a single block, transaction, or address range.
+- **ClickHouse** for analytical queries such as aggregates, holder lists, and large scans.
+
+The `/query` endpoint accepts SQL and can expose decoded events on demand through the `signature` query parameter. For example, passing `Transfer(address,address,uint256)` creates a virtual `Transfer` table for that query.
+
+TIDX also maintains ClickHouse materialized tables for expensive common reads, such as token balances, token holders, supply, approvals, and address activity.
+
+## Next steps
+
+<Cards>
+  <Card
+    icon="lucide:search"
+    title="Tempo Explorer"
+    description="Inspect blocks, transactions, accounts, and token activity."
+    to="https://explore.tempo.xyz"
+  />
+  <Card
+    icon="lucide:plug"
+    title="Connection details"
+    description="Find RPC URLs, chain IDs, explorers, and network metadata."
+    to="/quickstart/connection-details"
+  />
+  <Card
+    icon="lucide:package"
+    title="SDKs"
+    description="Build Tempo apps with TypeScript, Go, Rust, Python, and Foundry."
+    to="/sdk"
+  />
+</Cards>
