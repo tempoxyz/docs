@@ -761,6 +761,10 @@ export default defineConfig({
             link: '/accounts',
           },
           {
+            text: 'Indexer (TIDX)',
+            link: '/developer-tools/indexer',
+          },
+          {
             text: 'CLI',
             collapsed: true,
             items: [
