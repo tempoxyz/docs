@@ -33,7 +33,7 @@ export function TokenListDemo() {
             target="_blank"
             rel="noopener noreferrer"
             className="flex h-full min-w-0 items-center gap-2 rounded-lg border border-gray4 p-2 text-content no-underline transition-colors hover:bg-gray2"
-            href={`https://tokenlist.tempo.xyz/asset/4217/${token.address}`}
+            href={`https://explore.tempo.xyz/address/${token.address}`}
           >
             <img src={token.logoURI} alt={token.name} className="size-7 shrink-0" />
             <span className="min-w-0 truncate font-medium text-sm">{token.name}</span>
