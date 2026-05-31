@@ -34,12 +34,6 @@ Requests within the public rate limit are free. When a client exceeds the free q
 
 Use an MPP-capable client, such as `tempo request`, for paid overflow traffic. Plain `curl` and browser requests can use the free quota, but they will not automatically pay a `402 Payment Required` challenge.
 
-## Using in production
-
-The hosted `tidx` endpoints are useful for prototyping, demos, scripts, and low-volume reads. Free requests and MPP paid overflow access do not currently come with uptime, latency, support, or data freshness SLAs.
-
-For production systems that need stronger guarantees, dedicated support, custom schemas, or predictable low-cost indexing at scale, use an indexing partner from the [Data & Analytics partners page](/ecosystem/data-analytics).
-
 ## Query `tidx`
 
 ### Latest blocks
