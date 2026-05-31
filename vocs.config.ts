@@ -53,6 +53,7 @@ export default defineConfig({
       sdk: 'SDKs',
       cli: 'CLI',
       ecosystem: 'ECOSYSTEM',
+      'hosted-services': 'HOSTED SERVICES',
       learn: 'LEARN',
       wallet: 'WALLET',
       accounts: 'ACCOUNTS',
@@ -758,21 +759,24 @@ export default defineConfig({
         items: [
           {
             text: 'Hosted Services',
-            collapsed: true,
             items: [
+              {
+                text: 'Overview',
+                link: '/hosted-services',
+              },
               {
                 text: 'Hosted Fee Payer',
                 link: '/developer-tools/fee-payer',
+              },
+              {
+                text: 'Indexer (tidx)',
+                link: '/developer-tools/indexer',
               },
             ],
           },
           {
             text: 'Accounts SDK',
             link: '/accounts',
-          },
-          {
-            text: 'Indexer (tidx)',
-            link: '/developer-tools/indexer',
           },
           {
             text: 'CLI',
