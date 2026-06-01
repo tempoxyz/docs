@@ -12,8 +12,9 @@ export default defineConfig(({ mode }) => {
     if (!(key in process.env)) process.env[key] = env[key]
   }
 
+  const isE2E = process.env.VITE_E2E === 'true' || env.VITE_E2E === 'true'
   const useHttp = process.env.CI === 'true' || process.env.VITE_USE_HTTP === 'true'
-  const e2eZoneProxy = env.VITE_E2E === 'true' ? getE2EZoneProxy() : undefined
+  const e2eZoneProxy = isE2E ? getE2EZoneProxy() : undefined
 
   return {
     plugins: [vocs(), react(), ...(useHttp ? [] : [mkcert()]), tempoNode()],
