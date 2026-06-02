@@ -47,9 +47,9 @@
     "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",
     "viem": "^2.48.8",
-    "vocs": "2.0.0-rc.2",
+    "vocs": "2.0.10",
     "wagmi": "3.6.14",
-    "waku": "1.0.0-beta.0",
+    "waku": "^1.0.0-beta.0",
     "webauthx": "~0.1.1",
     "zod": "^4.3.6"
   },
@@ -65,7 +65,7 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "use-sync-external-store": "^1.6.0",
-    "vite": "^8.0.14",
+    "vite": "^8.0.16",
     "vite-plugin-mkcert": "^1.17.12"
   },
   "devEngines": {

@@ -21,6 +21,7 @@ minimumReleaseAgeExclude:
   - ox
   - viem
   - vocs
+  - vite
   - '@vocs/twoslash-rust'
   - '@vocs/twoslash-rust-darwin-arm64'
   - '@vocs/twoslash-rust-linux-x64-gnu'
