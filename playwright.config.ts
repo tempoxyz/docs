@@ -8,7 +8,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 1 : 1, // Retry once due to testnet flakiness
-  workers: isCI ? 4 : undefined,
+  workers: isCI ? 1 : undefined,
   timeout: 180000, // 3 min default timeout for testnet transactions
   reporter: 'html',
   use: {
@@ -23,7 +23,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: isCI ? 'VITE_E2E=true VITE_USE_HTTP=true pnpm run dev' : 'pnpm run dev 2>/dev/null',
+    command: isCI
+      ? 'NODE_OPTIONS="--max-old-space-size=4096 --import tsx" VITE_E2E=true VITE_USE_HTTP=true vite'
+      : 'pnpm run dev 2>/dev/null',
     url: webServerUrl,
     ignoreHTTPSErrors: true,
     reuseExistingServer: !isCI,
