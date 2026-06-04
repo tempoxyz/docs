@@ -175,6 +175,16 @@ interface IAccountKeychain {
 The [T5 network upgrade](/protocol/upgrades/t5) adds an optional `witness: bytes32` field to `key_authorization` ([TIP-1053](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1053.md)). The protocol includes the witness in the signing hash and emits it when the key authorization is registered, but otherwise treats it as opaque and application-defined. This lets one signature both authorize an access key and bind to an application challenge — collapsing the two-prompt flow that "Sign-In with Tempo" style apps use today into a single signature. No breaking change; tooling should start populating and reading the new field after activation.
 :::
 
+:::info[Coming with T6 — SDK encoders/decoders]
+The [T6 network upgrade](/protocol/upgrades/t6) adds **admin access keys** ([TIP-1049](https://tips.sh/1049)). For partners maintaining transaction tooling, the wire-level change is two new trailing optional fields on the `KeyAuthorization` RLP payload:
+
+```text
+rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?])
+```
+
+SDK encoders/decoders and hardware-wallet firmware that strictly check field count MUST handle the new optionals before T6. The packed `AuthorizedKey` slot also gains an `is_admin` byte at offset 11. The existing `KeyAuthorized` event is **unchanged**; an additional `AdminKeyAuthorized` event is emitted alongside it when `is_admin == true`, so existing indexers continue to work without changes. Provisioning admin keys uses a new `authorizeAdminKey(keyId, signatureType, witness)` function on this precompile. See the [TIP-1049 section of the T6 page](/protocol/upgrades/t6#admin-access-keys-tip-1049) for the full surface.
+:::
+
 - Creates a new key entry with the specified `signatureType`, `config.expiry`, `config.enforceLimits`, and `isRevoked` set to `false`
 - If `enforceLimits` is `true`, initializes spending limits for each specified token. Each `TokenLimit` carries a `period` (0 = one-time, non-zero = recurring in seconds).
 - If `allowAnyCalls` is `false`, stores the `allowedCalls` allowlist in `keyScopes`. `allowAnyCalls = false` with `allowedCalls = []` means scoped deny-all.

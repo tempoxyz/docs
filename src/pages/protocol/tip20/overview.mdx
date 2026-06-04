@@ -15,6 +15,16 @@ The [T5 network upgrade](/protocol/upgrades/t5) adds three TIP-20 features:
 Existing tokens continue to work unchanged. See the [T4 → T5 migration appendix on the TIP-20 spec](/protocol/tip20/spec#t4--t5-migration) for the full ABI surface.
 :::
 
+:::warning[Breaking change with T6 — raw TIP-20 storage reads]
+After the [T6 network upgrade](/protocol/upgrades/t6), each value in the TIP-20 `balance` mapping is reinterpreted as a packed user-state word (low 128 bits = balance, upper 128 bits = cache fields) per [TIP-1065](https://tips.sh/1065). `balanceOf(account)` and the standard TIP-20 events are **unchanged** — code that uses them is unaffected. Tooling that reads balance slots directly via `eth_getStorageAt` (snapshot tools, market makers, custody reconciliation) MUST mask the low 128 bits after T6:
+
+```ts
+balance = BigInt(slot) & ((1n << 128n) - 1n)
+```
+
+See the [T5 → T6 migration appendix on the TIP-20 spec](/protocol/tip20/spec#t5--t6-migration) for the full storage layout.
+:::
+
 TIP-20 is Tempo's native token standard for stablecoins and payment tokens. TIP-20 is designed for stablecoin payments, and is the foundation for many token-related functions on Tempo including transaction fees, payment lanes, DEX quote tokens, and optimized routing for DEX liquidity on Tempo.
 
 All TIP-20 tokens are created by interacting with the [TIP-20 Factory contract](/protocol/tip20/spec#tip20factory), calling the `createToken` function. If you're issuing a stablecoin on Tempo, we **strongly recommend** using the TIP-20 standard. Learn more about the benefits, or follow the guide on issuance [here](/guide/issuance).

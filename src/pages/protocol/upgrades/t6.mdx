@@ -1,0 +1,141 @@
+---
+title: T6 Network Upgrade
+description: Details and scope for the T6 network upgrade, including account-level receive policies, admin access keys, discounted pure payment transfers, and packed TIP-20 user state.
+---
+
+# T6 Network Upgrade
+
+T6 is Tempo's next network upgrade after T5. It introduces account-level TIP-20 receive policies with a new `ReceivePolicyGuard` recovery precompile, admin access keys that can manage other keys on behalf of an account, an 8 Bn-attodollars-per-gas discount on simple TIP-20 payment and redemption transactions, and packed TIP-20 user state that reuses the unused upper 128 bits of each balance slot to cache reward-opt-in flags.
+
+:::info[T6 status]
+T6 is not yet active on testnet or mainnet. The features described on this page become live at the activation timestamps below.
+:::
+
+## Timeline
+
+| Network | Date | Timestamp |
+|---------|------|-----------|
+| Testnet | TBD | TBD |
+| Mainnet | TBD | TBD |
+
+Node operators must upgrade to the T6-compatible release before the testnet activation timestamp.
+
+## Overview
+
+T6 introduces the following changes:
+- Account-level receive policies with a `ReceivePolicyGuard` recovery precompile for blocked TIP-20 transfers and mints ([TIP-1028](https://tips.sh/1028))
+- An `admin` flag on access keys plus stateful `verifyKeychain` / `verifyKeychainAdmin` helpers on the TIP-1020 SignatureVerifier ([TIP-1049](https://tips.sh/1049))
+- A discounted gas price for simple TIP-20 payment and redemption transactions on the payment lane ([TIP-1059](https://tips.sh/1059))
+- Repurposing TIP-20 `balance` mapping slots as packed user state, with the first cache field for reward opt-in ([TIP-1065](https://tips.sh/1065))
+
+## Integration changes
+
+Most of T6 is additive. The notes below cover behaviors that integrators, indexers, wallets, and partner infrastructure should pick up before activation.
+
+### Account-level receive policies (TIP-1028)
+
+Receivers can declare which TIP-20 tokens they accept and which senders may send those tokens to them. Both controls live on the TIP-403 precompile as a per-address policy, set via `setReceivePolicy(...)` and enforced via `validateReceivePolicy(...)`. The token's existing TIP-403 policy still runs first and still reverts on failure.
+
+When a receive policy blocks an inbound `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `systemTransferFrom`, `mint`, or `mintWithMemo`, **the call still succeeds** and delivery is redirected to a new precompile, `ReceivePolicyGuard`, at `RECEIVE_POLICY_GUARD_ADDRESS`. The guard records a receipt for the blocked transfer that the receiver-designated recovery authority (either the originator or a recovery address picked by the receiver) can claim later.
+
+Notes for integrators:
+
+- Senders observing a successful `Transfer` event from the host TIP-20 to `RECEIVE_POLICY_GUARD_ADDRESS` should not assume the receiver was credited. Wallets and accounting systems must read the guard receipt to track funds that were redirected.
+- Blocked-transfer receipts are **not enumerable on chain**. Wallets and dashboards that want to surface claimable funds to users rely entirely on indexers listening for the `TransferBlocked` event emitted by `ReceivePolicyGuard`.
+- TIP-1022 virtual addresses are resolved to the master address before any receive-policy check; receipts are recorded against the master while preserving the original `to` for attribution.
+- `approve`, `permit`, and `burn` are unaffected, and fee deposits and refunds (`transfer_fee_pre_tx` / `transfer_fee_post_tx`) are unaffected.
+
+### Admin access keys (TIP-1049)
+
+The `AuthorizedKey` packed storage slot gains a new `is_admin` boolean at byte 11. Admin access keys can authorize and revoke other access keys for the account without needing a transaction from the root EOA, which unlocks cross-device passkey provisioning and on-chain "the root key or an admin key of account X signed this" checks.
+
+Notes for integrators:
+
+- Admin keys MUST NOT carry spending limits, call scopes, or expiry. Authorizations that combine `admin = true` with non-default `enforceLimits`, `allowedCalls`, or `expiry` are rejected.
+- A new `authorizeAdminKey(keyId, signatureType, witness)` function on `AccountKeychain` provisions admin keys. The existing `KeyAuthorized` event is unchanged; a new `AdminKeyAuthorized(account, publicKey)` event is emitted **alongside** it when `admin = true`. Indexers can keep decoding `KeyAuthorized` unchanged and additionally subscribe to `AdminKeyAuthorized` to track admin status.
+- The TIP-1020 `SignatureVerifier` gains two stateful keychain helpers:
+  - `verifyKeychain(account, digest, sig)` — true if `sig` was produced by an active access key of `account`.
+  - `verifyKeychainAdmin(account, digest, sig)` — true if `sig` was produced by `account`'s root EOA key or by an active admin access key.
+
+  Both methods compose recovery with key-status lookups, so external contracts no longer need to combine raw signature recovery with their own key state checks.
+- The RLP `KeyAuthorization` encoding gains an optional trailing `is_admin` flag and `account` field in the signed payload. SDK encoders/decoders (viem, ox, tempo-ts, ethers, web3.py, tempo-alloy) and hardware-wallet firmware must update in lockstep to produce or accept admin authorizations.
+- `verifyKeychainAdmin` does **not** bind the `account` argument into the signed `digest`. Callers MUST include a replay domain (e.g., chain ID, contract address, account address) in whatever they hash into `digest` to prevent cross-account replay against the same key.
+
+### Discounted pure payment transfers (TIP-1059)
+
+A narrow class of payment transactions settles at **12 billion attodollars per gas** instead of the normal **20 billion attodollars per gas** — an 8 Bn-attodollars-per-gas discount applied via the existing post-execution refund path.
+
+A transaction is eligible only if all of the following hold:
+
+1. It is already classified as a payment-lane transaction under [TIP-1045](https://tips.sh/1045).
+2. Every user call is one of `transfer`, `transferWithMemo`, `transferFrom`, `transferFromWithMemo`, `burn`, or `burnWithMemo` on a TIP-20. For account-abstraction (type `0x76`) transactions, every call in `calls` must individually be a TIP-20 payment.
+3. The transaction's authorized gas limit is at most the TIP-1000 new-state-write cost — **250,000 gas at T6**. This prevents transactions that authorize enough gas to create new state from receiving the discount.
+
+Approvals, mints, contract execution, mixed batches, and any transaction with a gas limit above the cap pay the normal base fee.
+
+Notes for integrators:
+
+- Wallets MUST continue to authorize the **normal base fee** (`max_fee_per_gas >= 20 Bn`). The discount is applied post-execution. Transactions that authorize less than the normal base fee are not eligible for inclusion at all.
+- Eligibility is determined from transaction shape and gas limit, not from post-execution `gas_used`. A transaction with `gas_limit > 250,000` does not receive the discount even if it ultimately uses less.
+- RPC and wallet UIs SHOULD surface the discounted settlement price for eligible payment shapes, while still authorizing the normal base fee for reliable inclusion.
+- This TIP has a hard dependency on the T5 payment lane ([TIP-1045](https://tips.sh/1045)). Any transaction that is not payment-lane-eligible is also not discount-eligible.
+
+### Packed TIP-20 user state (TIP-1065)
+
+Each value in the TIP-20 `balance` mapping is reinterpreted at T6 activation as a packed user-state word:
+
+| Bits | Size | Field |
+|---|---:|---|
+| `0..127` | 128 | `balance` |
+| `128..129` | 2 | `rewardFlag` (`0` = Uninitialized, `1` = OptedOut, `2` = OptedIn) |
+| `130..255` | 126 | reserved, MUST be zero |
+
+This is a **storage-layout change**, not a migration: every valid TIP-20 balance already fits in 128 bits because total supply is capped at `uint128::MAX`, so existing slots default to their previous balance with `rewardFlag == Uninitialized`. The public `balanceOf(account)` and other TIP-20 interfaces are unchanged.
+
+:::warning[Action required for partners reading raw TIP-20 storage]
+Any partner reading TIP-20 balance slots directly via `eth_getStorageAt` — market makers, indexers, custody reconciliation, snapshot tools — MUST mask the low 128 bits of the slot to recover the balance after T6 activation:
+
+```ts
+balance = BigInt(slot) & ((1n << 128n) - 1n)
+```
+
+Tools that crossed the T6 activation boundary while reading raw storage will otherwise see balances inflated by cache bits as `rewardFlag` gets populated. The supported, version-stable read path is `balanceOf(account)` and the standard TIP-20 events — code that uses those interfaces is unaffected.
+:::
+
+Beyond the read-path note above, the change is internal: balance-changing paths (transfers, mints, fee refunds, reward claims) avoid up to several `SLOAD`s and mapping-key `keccak256`s per participant by reading the cached `rewardFlag` instead of separate reward-info storage. See the [TIP-1065 transfer accounting table](https://tips.sh/1065#transfer-storage-accounting) for per-path savings.
+
+## Compatible SDK releases
+
+T6-compatible SDK releases will be listed here as they ship.
+
+## Feature TIPs
+
+### TIP-1028: Account-Level Receive Policies
+
+[TIP-1028](https://tips.sh/1028) extends [TIP-403](/protocol/tip403/spec) with per-address receive policies that let a receiver control which TIP-20 tokens they accept and who can send those tokens to them. When an inbound transfer or mint is blocked by a receive policy, delivery is redirected to a new protocol precompile, `ReceivePolicyGuard`, where it is recorded as a receipt and can be claimed later by the originator or by a recovery address designated by the receiver. The token's TIP-403 policy still runs first and still reverts on failure; only receive-policy failures redirect.
+
+This addresses two practical receiver-side problems:
+
+- A regulated entity may want to accept only KYC'ed senders without those senders' transactions reverting.
+- Orchestrators and exchanges may want to accept only specific tokens at deposit addresses to prevent unrecoverable funds without locking up the sender.
+
+### TIP-1049: Admin Access Keys
+
+[TIP-1049](https://tips.sh/1049) adds an `admin` boolean to the [AccountKeychain](/protocol/transactions/AccountKeychain) `AuthorizedKey` packed slot. Admin access keys can authorize and revoke other access keys on behalf of the account — fixing two problems that subordinate-only access keys could not solve:
+
+- **Cross-device key management.** A user with a passkey on their phone can now authorize a second passkey on their laptop without a transaction from the root EOA key.
+- **Onchain admin/keychain signature verification.** Contracts that want to gate actions on "the root key or an admin key of account X signed this" (e.g., ERC-1271-style flows) get a canonical primitive via the new `verifyKeychain` and `verifyKeychainAdmin` methods on the [TIP-1020](https://tips.sh/1020) `SignatureVerifier`, which combine recovery with key-status lookups.
+
+Admin keys MUST NOT carry spending limits, call scopes, or expiry; combining `admin = true` with any of those is rejected at authorization time.
+
+### TIP-1059: Discounted Pure Payment Transfers
+
+[TIP-1059](https://tips.sh/1059) carves out a lower settlement price for the simplest payment shapes: TIP-20 `transfer`, `transferWithMemo`, `transferFrom`, `transferFromWithMemo`, `burn`, and `burnWithMemo` calls that satisfy the [TIP-1045](/protocol/blockspace/payment-lane-specification) payment-lane rules and authorize at most the TIP-1000 new-state-write gas cost (250,000 gas at T6). Eligible transactions settle at 12 Bn attodollars per gas instead of the normal 20 Bn, with the difference refunded through the existing gas refund path. Wallets continue to authorize the normal base fee for reliable inclusion.
+
+The discount is intentionally narrow and complements the base fee rather than replacing it: the chain still prices arbitrary execution and state-creating transactions at the normal base fee for spam resistance, while everyday payment and redemption transactions get a payment-UX-friendly settlement price.
+
+### TIP-1065: TIP-20 Packed User State
+
+[TIP-1065](https://tips.sh/1065) reinterprets each TIP-20 `balance` mapping slot as a packed user-state word — `balance` in the low 128 bits, a 2-bit `rewardFlag` cache in bits 128–129, and 126 reserved bits. The change is performance-driven: TIP-20 already allocates one storage slot per holder, and TIP-20 total supply is capped at `uint128::MAX`, so the upper 128 bits were unused. Caching reward opt-in state next to the balance lets transfer, mint, fee-refund, and reward-claim paths avoid up to several `SLOAD`s and mapping-key `keccak256`s per participant — significant savings on common balance-changing paths.
+
+Existing balances reinterpret in place at T6 activation with `rewardFlag == Uninitialized`; no migration is required. Public interfaces (`balanceOf`, `Transfer`, etc.) are unchanged, but tools reading slots directly via `eth_getStorageAt` must mask the low 128 bits — see the integration-changes warning above.

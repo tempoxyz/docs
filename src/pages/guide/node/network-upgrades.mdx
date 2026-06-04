@@ -35,6 +35,31 @@ For detailed release notes and binaries, see the [Changelog](/changelog).
 
 ---
 
+## T6
+
+| | |
+|---|---|
+| **Scope** | Account-level TIP-20 receive policies with a `ReceivePolicyGuard` recovery precompile; admin access keys and stateful `verifyKeychain`/`verifyKeychainAdmin` on the TIP-1020 SignatureVerifier; an 8 Bn-attodollars-per-gas discount on simple TIP-20 payment and redemption transactions; and packed TIP-20 user state that caches reward opt-in next to the balance |
+| **TIPs** | [TIP-1028: Address-Level Receive Policies](https://tips.sh/1028), [TIP-1049: Admin Access Keys](https://tips.sh/1049), [TIP-1059: Discounted Pure Payment Transfers](https://tips.sh/1059), [TIP-1065: TIP-20 Packed User State](https://tips.sh/1065) |
+| **Details** | [T6 network upgrade](/protocol/upgrades/t6) |
+| **Release** | TBD |
+| **Testnet** | TBD |
+| **Mainnet** | TBD |
+| **Priority** | <Badge variant="red">Required</Badge> |
+
+### Who is affected?
+
+All node operators need to upgrade before the T6 activation timestamp. Non-upgraded nodes will fall out of consensus once T6 activates.
+
+Integrators, indexers, wallets, explorers, and SDK maintainers should review the [T6 network upgrade](/protocol/upgrades/t6) page for the post-T6 surfaces and migration notes. In particular:
+
+- Anything reading raw TIP-20 storage via `eth_getStorageAt` must mask the low 128 bits of `balance` slots after T6 ([TIP-1065](https://tips.sh/1065)).
+- Payment processors, exchanges, and reconciliation systems that mark TIP-20 transfers delivered from transaction success alone must verify the actual `Transfer` recipient and index the new `TransferBlocked` event from `ReceivePolicyGuard` — once receivers start opting in to receive policies ([TIP-1028](https://tips.sh/1028)), an inbound transfer can be redirected to the guard while the sender's transaction still succeeds.
+- Wallets MUST continue to authorize the normal base fee on payment transactions; the [TIP-1059](https://tips.sh/1059) discount is applied post-execution.
+- SDK encoders/decoders (viem, ox, tempo-ts, ethers, web3.py, tempo-alloy) and hardware-wallet firmware must update to recognize the optional trailing `is_admin` / `account` fields in `KeyAuthorization` ([TIP-1049](https://tips.sh/1049)).
+
+---
+
 ## T5
 
 | | |
