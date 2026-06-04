@@ -731,7 +731,7 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
-                text: 'T5 (Next)',
+                text: 'T5',
                 link: '/protocol/upgrades/t5',
               },
               {
