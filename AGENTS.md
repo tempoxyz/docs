@@ -49,6 +49,10 @@ Content for step 2.
 
 See https://mpp.dev/guides/multiple-payment-methods for a reference example.
 
+## Ecosystem Pages
+
+When adding or moving ecosystem partners, keep partner entries alphabetized by partner name within each category page under `src/pages/ecosystem/` and within the mirrored category sections in `src/pages/quickstart/developer-tools.mdx`.
+
 ## Project Structure
 
 - `src/pages/` - MDX documentation pages
