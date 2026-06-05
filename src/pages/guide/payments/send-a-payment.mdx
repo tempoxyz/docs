@@ -15,9 +15,12 @@ import { Tabs, Tab } from 'vocs'
 Send stablecoin payments between accounts on Tempo. Payments can include optional memos for reconciliation and tracking.
 
 :::warning[Coming with T6 — confirm delivery, not just transaction success]
-After the [T6 network upgrade](/protocol/upgrades/t6), a TIP-20 `transfer` / `transferFrom` can succeed even if the intended receiver is **not credited** — when the receiver has opted in to an account-level receive policy ([TIP-1028](https://tips.sh/1028)) that blocks the inbound call. In that case the token emits `Transfer(..., RECEIVE_POLICY_GUARD_ADDRESS, amount)` and the new `ReceivePolicyGuard` precompile emits a `TransferBlocked` event with the data needed to claim the funds later.
+After the [T6 network upgrade](/protocol/upgrades/t6), a blocked TIP-20 `transfer` / `transferFrom` still succeeds, but credits `RECEIVE_POLICY_GUARD_ADDRESS` instead of the intended receiver.
 
-If your app marks payments, withdrawals, or deposits complete from transaction success alone, also verify the `Transfer` recipient is the intended receiver (or its TIP-1022 master) and subscribe to `TransferBlocked` to surface redirected funds. Blocked receipts are not enumerable on chain — indexers are the only way to discover them.
+- Before marking a payment, withdrawal, or deposit delivered, confirm the `Transfer` recipient is the intended receiver or its TIP-1022 master.
+- Index `ReceivePolicyGuard.TransferBlocked` so redirected funds can be surfaced and claimed later.
+
+See [account-level receive policies on the T6 upgrade page](/protocol/upgrades/t6#account-level-receive-policies-tip-1028).
 :::
 
 ## Demo
