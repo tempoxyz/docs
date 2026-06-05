@@ -47,8 +47,6 @@ When a receive policy blocks an inbound `transfer`, `transferFrom`, `transferWit
 
 The `AuthorizedKey` packed storage slot gains a new `is_admin` boolean at byte 11. Admin access keys can authorize and revoke other access keys for the account without needing a transaction from the root EOA, which unlocks cross-device passkey provisioning and on-chain "the root key or an admin key of account X signed this" checks.
 
-Notes for integrators:
-
 - Admin keys MUST NOT carry spending limits, call scopes, or expiry. Authorizations that combine `admin = true` with non-default `enforceLimits`, `allowedCalls`, or `expiry` are rejected.
 - A new `authorizeAdminKey(keyId, signatureType, witness)` function on `AccountKeychain` provisions admin keys. The existing `KeyAuthorized` event is unchanged; a new `AdminKeyAuthorized(account, publicKey)` event is emitted **alongside** it when `admin = true`. Indexers can keep decoding `KeyAuthorized` unchanged and additionally subscribe to `AdminKeyAuthorized` to track admin status.
 - The TIP-1020 `SignatureVerifier` gains two stateful keychain helpers:
