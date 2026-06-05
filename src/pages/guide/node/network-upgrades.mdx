@@ -51,12 +51,7 @@ For detailed release notes and binaries, see the [Changelog](/changelog).
 
 All node operators need to upgrade before the T6 activation timestamp. Non-upgraded nodes will fall out of consensus once T6 activates.
 
-Integrators, indexers, wallets, explorers, and SDK maintainers should review the [T6 network upgrade](/protocol/upgrades/t6) page for the post-T6 surfaces and migration notes. In particular:
-
-- Anything reading raw TIP-20 storage via `eth_getStorageAt` must mask the low 128 bits of `balance` slots after T6 ([TIP-1065](https://tips.sh/1065)).
-- Payment processors, exchanges, and reconciliation systems that mark TIP-20 transfers delivered from transaction success alone must verify the actual `Transfer` recipient and index the new `TransferBlocked` event from `ReceivePolicyGuard` — once receivers start opting in to receive policies ([TIP-1028](https://tips.sh/1028)), an inbound transfer can be redirected to the guard while the sender's transaction still succeeds.
-- Wallets MUST continue to authorize the normal base fee on payment transactions; the [TIP-1059](https://tips.sh/1059) discount is applied post-execution.
-- SDK encoders/decoders (viem, ox, tempo-ts, ethers, web3.py, tempo-alloy) and hardware-wallet firmware must update to recognize the optional trailing `is_admin` / `account` fields in `KeyAuthorization` ([TIP-1049](https://tips.sh/1049)).
+Integrators, indexers, wallets, explorers, and SDK maintainers should review the [T6 network upgrade](/protocol/upgrades/t6) page for the post-T6 surfaces and migration notes.
 
 ---
 
