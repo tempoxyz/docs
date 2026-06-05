@@ -694,8 +694,6 @@ The TIP-20 `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo
 
 If the receive policy blocks the operation, **the call still succeeds**. Delivery is redirected to a new `ReceivePolicyGuard` precompile at `RECEIVE_POLICY_GUARD_ADDRESS`, which records a receipt for the transfer or mint. The originator or a recovery address designated by the receiver can later claim the recorded amount from the guard.
 
-Notes on the TIP-20 surface:
-
 - The token's existing TIP-403 policy is checked first and continues to revert on failure. Only receive-policy failures redirect.
 - The host TIP-20 emits its standard `Transfer` event to `RECEIVE_POLICY_GUARD_ADDRESS` on a redirected transfer; the guard separately emits a `TransferBlocked` event with the information needed to claim the receipt. Blocked receipts are not enumerable on chain — indexers must subscribe to `TransferBlocked` to surface claimable funds.
 - TIP-1022 virtual addresses are resolved to the master address before any receive-policy check. Receipts are recorded against the master while preserving the original `to` for attribution.
