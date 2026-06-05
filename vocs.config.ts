@@ -776,7 +776,7 @@ export default defineConfig({
           },
           {
             text: 'Accounts SDK',
-            link: '/accounts',
+            link: 'https://accounts.tempo.xyz/docs',
           },
           {
             text: 'CLI',
@@ -1379,27 +1379,37 @@ export default defineConfig({
     },
     {
       source: '/sdk/typescript/server',
-      destination: '/accounts/server',
+      destination: 'https://accounts.tempo.xyz/docs/server',
       status: 301,
     },
     {
       source: '/sdk/typescript/server/handlers',
-      destination: '/accounts/server',
+      destination: 'https://accounts.tempo.xyz/docs/server',
       status: 301,
     },
     {
       source: '/sdk/typescript/server/handler.compose',
-      destination: '/accounts/server/handler.compose',
+      destination: 'https://accounts.tempo.xyz/docs/server/handler.compose',
       status: 301,
     },
     {
       source: '/sdk/typescript/server/handler.feePayer',
-      destination: '/accounts/server/handler.relay',
+      destination: 'https://accounts.tempo.xyz/docs/server/handler.relay',
       status: 301,
     },
     {
       source: '/sdk/typescript/server/handler.keyManager',
-      destination: '/accounts/server/handler.webAuthn',
+      destination: 'https://accounts.tempo.xyz/docs/server/handler.webAuthn',
+      status: 301,
+    },
+    {
+      source: '/accounts',
+      destination: 'https://accounts.tempo.xyz/docs',
+      status: 301,
+    },
+    {
+      source: '/accounts/:path*',
+      destination: 'https://accounts.tempo.xyz/docs/:path*',
       status: 301,
     },
     {
