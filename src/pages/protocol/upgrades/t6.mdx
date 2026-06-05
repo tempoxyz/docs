@@ -69,8 +69,6 @@ A transaction is eligible only if all of the following hold:
 
 Approvals, mints, contract execution, mixed batches, and any transaction with a gas limit above the cap pay the normal base fee.
 
-Notes for integrators:
-
 - Wallets MUST continue to authorize the **normal base fee** (`max_fee_per_gas >= 20 Bn`). The discount is applied post-execution. Transactions that authorize less than the normal base fee are not eligible for inclusion at all.
 - Eligibility is determined from transaction shape and gas limit, not from post-execution `gas_used`. A transaction with `gas_limit > 250,000` does not receive the discount even if it ultimately uses less.
 - RPC and wallet UIs SHOULD surface the discounted settlement price for eligible payment shapes, while still authorizing the normal base fee for reliable inclusion.
