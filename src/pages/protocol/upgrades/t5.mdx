@@ -5,10 +5,10 @@ description: Details and timeline for the T5 network upgrade, including the ensh
 
 # T5 Network Upgrade
 
-T5 is Tempo's next network upgrade. It introduces an enshrined TIP-20 reserve channel precompile for MPP and similar session-based payment flows (cutting channel-open gas by up to 72% versus the legacy MPP contract), payment lane classification in consensus, DEX improvements (same-tick flip orders and persistent order IDs across flips), multihop FeeAMM routing, an on-chain `logoURI` field for TIP-20 tokens, an Implicit Approvals List for gas-efficient internal transfers, and a witness digest binding for one-signature key authorization flows.
+T5 is Tempo's latest network upgrade. It introduces an enshrined TIP-20 reserve channel precompile for MPP and similar session-based payment flows (cutting channel-open gas by up to 72% versus the legacy MPP contract), payment lane classification in consensus, DEX improvements (same-tick flip orders and persistent order IDs across flips), multihop FeeAMM routing, an on-chain `logoURI` field for TIP-20 tokens, an Implicit Approvals List for gas-efficient internal transfers, and a witness digest binding for one-signature key authorization flows.
 
 :::info[T5 status]
-T5 is not yet active on testnet or mainnet. The features described on this page become live at the activation timestamps below.
+T5 is live on testnet and is not yet active on mainnet. The features described on this page are active on testnet and become live on mainnet at the activation timestamp below.
 :::
 
 ## Timeline
@@ -18,7 +18,7 @@ T5 is not yet active on testnet or mainnet. The features described on this page 
 | Testnet | June 3, 2026 4pm CEST | 1780495200 |
 | Mainnet | June 9, 2026 4pm CEST | 1781013600 |
 
-Node operators must upgrade to the T5-compatible release (v1.8.0) before the testnet activation timestamp.
+Mainnet node operators must upgrade to the T5-compatible release (v1.8.0) before the mainnet activation timestamp.
 
 ## Overview
 
@@ -34,7 +34,7 @@ T5 introduces the following changes:
 
 ## Integration changes
 
-Most of T5 is additive. The notes below cover behaviors that integrators, indexers, and tooling should pick up before activation.
+Most of T5 is additive. The notes below cover behaviors that integrators, indexers, and tooling should pick up before mainnet activation.
 
 ### Enshrined TIP-20 reserve channel (TIP-1034)
 
