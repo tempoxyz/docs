@@ -11,6 +11,10 @@ import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
+type FaucetReceipt = {
+  transactionHash: `0x${string}`
+}
+
 export function AddFundsToOthers(props: DemoStepProps) {
   const { stepNumber = 2, last = false } = props
   const { address } = useConnection()
@@ -43,16 +47,26 @@ export function AddFundsToOthers(props: DemoStepProps) {
   }, [blockNumber])
   const client = useClient()
   const fundAccount = useMutation({
-    async mutationFn() {
+    async mutationFn(): Promise<FaucetReceipt[]> {
       if (!isValidTarget) throw new Error('valid target address not found')
-      if (!client) throw new Error('client not found')
 
-      let receipts = null
-      if (import.meta.env.VITE_TEMPO_ENV !== 'localnet')
-        receipts = await Actions.faucet.fundSync(client as unknown as Client<Transport, Chain>, {
-          account: targetAddress as Address,
+      let receipts: FaucetReceipt[]
+      if (import.meta.env.VITE_TEMPO_ENV !== 'localnet') {
+        const response = await fetch('/api/faucet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address: targetAddress }),
         })
-      else {
+        const result = (await response.json()) as {
+          data?: { hash: `0x${string}` }[] | null
+          error?: string | null
+        }
+        if (!response.ok || result.error) {
+          throw new Error(result.error ?? `Faucet request failed with ${response.status}`)
+        }
+        receipts = (result.data ?? []).map(({ hash }) => ({ transactionHash: hash }))
+      } else {
+        if (!client) throw new Error('client not found')
         const result = await Actions.token.transferSync(
           client as unknown as Client<Transport, Chain>,
           {
