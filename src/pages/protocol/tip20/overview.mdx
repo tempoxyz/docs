@@ -18,7 +18,7 @@ Existing tokens continue to work unchanged. See the [T4 → T5 migration appendi
 :::info[Coming with T6]
 The [T6 network upgrade](/protocol/upgrades/t6) adds account-level receive policies for TIP-20 transfers and mints ([TIP-1028](https://tips.sh/1028)). A receiver can choose which tokens and senders they accept, helping wallets and deposit addresses avoid unsupported assets, unwanted counterparties, and wrong-token deposits. If a receive policy blocks delivery, the transfer or mint still succeeds, but funds are redirected to `ReceivePolicyGuard` so they can be claimed later.
 
-See [Receive Policies](https://tempo.xyz/receive-policies) for a high-level overview, or the [T5 → T6 migration appendix on the TIP-20 spec](/protocol/tip20/spec#t5--t6-migration) for the TIP-20 surface area.
+See the [T5 → T6 migration appendix on the TIP-20 spec](/protocol/tip20/spec#t5--t6-migration) for the TIP-20 surface area.
 :::
 
 TIP-20 is Tempo's native token standard for stablecoins and payment tokens. TIP-20 is designed for stablecoin payments, and is the foundation for many token-related functions on Tempo including transaction fees, payment lanes, DEX quote tokens, and optimized routing for DEX liquidity on Tempo.

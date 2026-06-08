@@ -35,9 +35,7 @@ T6 is mostly additive. The notes below cover behaviors that integrators, indexer
 
 Receivers can declare which TIP-20 tokens they accept and which senders may send those tokens to them. Both controls live on the TIP-403 precompile as a per-address policy, set via `setReceivePolicy(...)` and enforced via `validateReceivePolicy(...)`. The token's existing TIP-403 policy still runs first and still reverts on failure.
 
-This gives wallets, fintechs, orchestrators, and exchanges receiver-side control without requiring every token issuer or application to build custom allowlist logic. For example, an internal treasury wallet can avoid receiving unsupported assets, and a deposit wallet can accept only the stablecoin it is meant to handle.
-
-For a high-level overview of the feature, see [Receive Policies](https://tempo.xyz/receive-policies).
+This gives wallets, fintechs, orchestrators, and exchanges receiver-side control without requiring every token issuer or application to build custom allowlist logic. For example, an internal treasury wallet can reject unsupported assets, and a deposit wallet can accept only the stablecoin it is meant to handle.
 
 When a receive policy blocks an inbound `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `systemTransferFrom`, `mint`, or `mintWithMemo`, **the call still succeeds** and delivery is redirected to a new precompile, `ReceivePolicyGuard`, at `RECEIVE_POLICY_GUARD_ADDRESS`. The guard records a receipt for the blocked transfer that the receiver-designated recovery authority (either the originator or a recovery address picked by the receiver) can claim later.
 
@@ -75,7 +73,7 @@ This addresses practical receiver-side problems:
 - A regulated entity may want to accept only approved counterparties or block known-risk counterparties.
 - Fintechs may want to prevent internal wallets or customer wallets from holding unsupported or undesirable tokens.
 - Orchestrators and exchanges may want deposit addresses to accept only the tokens they support, reducing wrong-token deposit mistakes.
-- Wallets and support teams get a recovery path for blocked transfers instead of treating every policy mismatch as an unrecoverable delivery problem.
+- Wallets and support teams can surface blocked transfers for later recovery instead of treating every policy mismatch as an unrecoverable delivery problem.
 
 ### TIP-1049: Admin Access Keys
 
