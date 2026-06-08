@@ -5,22 +5,20 @@ description: Details and scope for the T6 network upgrade, including account-lev
 
 # T6 Network Upgrade
 
-T6 is Tempo's next network upgrade after T5. Its scope is limited to the audited TIPs that are ready to ship: account-level TIP-20 receive policies with a new `ReceivePolicyGuard` recovery precompile, and admin access keys that can manage other keys on behalf of an account.
+T6 is Tempo's next network upgrade after T5. It introduces account-level TIP-20 receive policies with a new `ReceivePolicyGuard` recovery precompile, and admin access keys that can manage other keys on behalf of an account.
 
 :::info[T6 status]
-All TIPs in the T6 scope have been audited. The release candidate is planned for internal rollout during the week of June 8, 2026, and the T6 release is planned for Monday, June 15, 2026. T6 is not yet active on testnet or mainnet; activation timestamps remain TBD.
+T6 is not yet active on testnet or mainnet. The features described on this page become live at the activation timestamps below.
 :::
 
 ## Timeline
 
-| Milestone | Date |
-|---------|------|
-| Internal release candidate | Week of June 8, 2026 |
-| T6 release | Monday, June 15, 2026 |
-| Testnet activation | TBD |
-| Mainnet activation | TBD |
+| Network | Date | Timestamp |
+|---------|------|-----------|
+| Testnet | TBD | TBD |
+| Mainnet | TBD | TBD |
 
-Node operators must upgrade to the T6-compatible release before the activation timestamp for their network.
+Node operators must upgrade to the T6-compatible release before the testnet activation timestamp.
 
 ## Overview
 
@@ -28,15 +26,6 @@ T6 includes the following changes:
 
 - Account-level receive policies with a `ReceivePolicyGuard` recovery precompile for blocked TIP-20 transfers and mints ([TIP-1028](https://tips.sh/1028))
 - An `admin` flag on access keys plus stateful `verifyKeychain` / `verifyKeychainAdmin` helpers on the TIP-1020 SignatureVerifier ([TIP-1049](https://tips.sh/1049))
-
-New TIPs outside this audited scope are targeted for T7 so T6 can keep moving with the finalized work.
-
-## Scope updates
-
-The following items were previously discussed for T6 but are no longer part of this release:
-
-- [TIP-1059: Discounted Pure Payment Transfers](https://tips.sh/1059) has been deprioritized in favor of [TIP-1067: Dynamic Base Fee](https://tips.sh/1067). TIP-1067 targets the same payment-cost goal, keeping TIP-20 transfers below 0.1 cent, and TIP-1067 together with [TIP-1060](https://tips.sh/1060) is now the preferred path for handling payment fees and state-cost pressure.
-- [TIP-1065: TIP-20 Packed User State](https://tips.sh/1065) has been removed from T6. Its performance goal will instead be addressed by removing TIP-20 rewards in later work. TIP-20 rewards has not seen enough customer usage to justify keeping the mechanism as-is; the intent is to revisit a better rewards design when there is a clearer use case.
 
 ## Integration changes
 
