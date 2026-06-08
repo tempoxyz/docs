@@ -37,6 +37,8 @@ Receivers can declare which TIP-20 tokens they accept and which senders may send
 
 This gives wallets, fintechs, orchestrators, and exchanges receiver-side control without requiring every token issuer or application to build custom allowlist logic. For example, an internal treasury wallet can avoid receiving unsupported assets, and a deposit wallet can accept only the stablecoin it is meant to handle.
 
+For a high-level overview of the feature, see [Receive Policies](https://tempo.xyz/receive-policies).
+
 When a receive policy blocks an inbound `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `systemTransferFrom`, `mint`, or `mintWithMemo`, **the call still succeeds** and delivery is redirected to a new precompile, `ReceivePolicyGuard`, at `RECEIVE_POLICY_GUARD_ADDRESS`. The guard records a receipt for the blocked transfer that the receiver-designated recovery authority (either the originator or a recovery address picked by the receiver) can claim later.
 
 - Senders observing a successful `Transfer` event from the host TIP-20 to `RECEIVE_POLICY_GUARD_ADDRESS` should not assume the receiver was credited. Wallets and accounting systems must read the guard receipt to track funds that were redirected.
