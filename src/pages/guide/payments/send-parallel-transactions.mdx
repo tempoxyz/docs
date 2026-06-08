@@ -12,7 +12,7 @@ import { Cards, Card } from 'vocs'
 
 # Send Parallel Transactions
 
-Tempo enables concurrent transaction execution through its [expiring nonce](/guide/tempo-transaction#expiring-nonces) system. Unlike traditional sequential nonces that require transactions to be processed one at a time, expiring nonces allow multiple transactions to be submitted simultaneously without nonce conflicts. Each transaction uses an independent nonce that automatically expires after a set time window, enabling true parallel execution.
+Tempo enables concurrent transaction execution through its [expiring nonce](/protocol/transactions/expiring-nonces) system. Unlike traditional sequential nonces that require transactions to be processed one at a time, expiring nonces allow multiple transactions to be submitted simultaneously without nonce conflicts. Each transaction uses an independent nonce that automatically expires after a set time window, enabling true parallel execution.
 
 ## Demo
 
@@ -37,7 +37,7 @@ Ensure that you have set up your project with Wagmi and integrated accounts by f
 
 ### Send concurrent transactions with nonce keys
 
-To send multiple transactions in parallel, simply batch them together. [Expiring nonces](/guide/tempo-transaction#expiring-nonces) are attached to each transaction automatically.
+To send multiple transactions in parallel, simply batch them together. [Expiring nonces](/protocol/transactions/expiring-nonces) are attached to each transaction automatically.
 
 :::code-group
 
@@ -82,7 +82,7 @@ console.log('Transaction 2:', receipt2.transactionHash) // [!code focus]
 <Cards>
   <Card
     description="Learn more about expiring nonces that power concurrent transactions."
-    to="/guide/tempo-transaction#expiring-nonces"
+    to="/protocol/transactions/expiring-nonces"
     icon="lucide:timer"
     title="Expiring Nonces"
   />

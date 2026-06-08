@@ -614,6 +614,10 @@ export default defineConfig({
                 link: '/protocol/transactions',
               },
               {
+                text: 'Expiring Nonces',
+                link: '/protocol/transactions/expiring-nonces',
+              },
+              {
                 text: 'Specification',
                 link: '/protocol/transactions/spec-tempo-transaction',
               },
