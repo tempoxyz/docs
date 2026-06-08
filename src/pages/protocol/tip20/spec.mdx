@@ -686,7 +686,7 @@ See the [Enshrined TIP-20 reserve channel section of the T5 page](/protocol/upgr
 This section captures TIP-20 changes shipping with the [T6 network upgrade](/protocol/upgrades/t6). Until T6 activates on testnet and mainnet, the spec above remains canonical. After T6 activation, the items below will be folded into the body and this appendix will be removed.
 :::
 
-T6 introduces two changes that affect the TIP-20 surface:
+T6 introduces one change that affects the TIP-20 transfer and mint surface:
 
 ### TIP-1028: account-level receive policies
 
@@ -700,31 +700,3 @@ If the receive policy blocks the operation, **the call still succeeds**. Deliver
 - `approve`, `permit`, and `burn` are not affected. Fee deposits and refunds via `transfer_fee_pre_tx` and `transfer_fee_post_tx` are not affected. TIP-20 internal balances and reward flows are not affected.
 
 See [TIP-1028](https://tips.sh/1028) for the full specification, including the `ReceivePolicyGuard` claim interface and recovery-authority rules.
-
-### TIP-1065: packed user-state slot
-
-Each value in the TIP-20 `balance` mapping is reinterpreted as a packed user-state word:
-
-| Bits | Size | Field |
-|---|---:|---|
-| `0..127` | 128 | `balance` |
-| `128..129` | 2 | `rewardFlag` (`0` = Uninitialized, `1` = OptedOut, `2` = OptedIn) |
-| `130..255` | 126 | reserved, MUST be zero |
-
-`balanceOf(account)` returns only the low 128-bit `balance`. The packed cache fields are not exposed through any external interface. Total supply is already capped at `uint128::MAX`, so every valid TIP-20 balance fits in the low 128 bits and no migration is required — existing slots default to their previous balance with `rewardFlag == Uninitialized`.
-
-:::warning[Action required for partners reading raw TIP-20 storage]
-Anything reading TIP-20 balance slots directly via `eth_getStorageAt` (market makers, indexers, custody reconciliation, snapshot tools) MUST mask the low 128 bits of the slot to recover the balance after T6:
-
-```ts
-balance = BigInt(slot) & ((1n << 128n) - 1n)
-```
-
-Tools that read raw storage across the T6 activation boundary without masking will see inflated balances once `rewardFlag` gets populated. The supported, version-stable read path is `balanceOf(account)` and the standard TIP-20 events — code that uses those interfaces is unaffected.
-:::
-
-`rewardRecipient(account)` remains the source of truth for reward opt-in; the cached `rewardFlag` MUST always agree with it. `setRewardRecipient(recipient)` updates both. An `Uninitialized` cache value means the implementation reads `rewardRecipient(account)` and derives effective reward state from it. Once initialized, `rewardFlag` never returns to `Uninitialized`.
-
-Storage accounting for the packed slot follows the slot's actual zero/nonzero transition under [TIP-1000](https://tips.sh/1000). In particular, creating a cache-only slot (balance becomes zero but a cache field stays nonzero) is a nonzero-to-nonzero write and does not receive a nonzero-to-zero refund.
-
-See [TIP-1065](https://tips.sh/1065) for the full specification, including transfer storage accounting and the rules for future cache fields in the reserved bits.
