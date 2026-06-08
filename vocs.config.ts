@@ -53,6 +53,7 @@ export default defineConfig({
       sdk: 'SDKs',
       cli: 'CLI',
       ecosystem: 'ECOSYSTEM',
+      'hosted-services': 'HOSTED SERVICES',
       learn: 'LEARN',
       wallet: 'WALLET',
       accounts: 'ACCOUNTS',
@@ -458,6 +459,10 @@ export default defineConfig({
                 link: '/guide/bridge-layerzero',
               },
               {
+                text: 'Bridge via Bungee',
+                link: '/guide/bridge-bungee',
+              },
+              {
                 text: 'Bridge via Relay',
                 link: '/guide/bridge-relay',
               },
@@ -726,7 +731,7 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
-                text: 'T5 (Next)',
+                text: 'T5',
                 link: '/protocol/upgrades/t5',
               },
               {
@@ -753,8 +758,25 @@ export default defineConfig({
         text: 'Tempo Developer Tools',
         items: [
           {
+            text: 'Hosted Services',
+            items: [
+              {
+                text: 'Overview',
+                link: '/hosted-services',
+              },
+              {
+                text: 'Hosted Fee Payer',
+                link: '/developer-tools/fee-payer',
+              },
+              {
+                text: 'Indexer (tidx)',
+                link: '/developer-tools/indexer',
+              },
+            ],
+          },
+          {
             text: 'Accounts SDK',
-            link: '/accounts',
+            link: 'https://accounts.tempo.xyz/docs',
           },
           {
             text: 'CLI',
@@ -1357,27 +1379,37 @@ export default defineConfig({
     },
     {
       source: '/sdk/typescript/server',
-      destination: '/accounts/server',
+      destination: 'https://accounts.tempo.xyz/docs/server',
       status: 301,
     },
     {
       source: '/sdk/typescript/server/handlers',
-      destination: '/accounts/server',
+      destination: 'https://accounts.tempo.xyz/docs/server',
       status: 301,
     },
     {
       source: '/sdk/typescript/server/handler.compose',
-      destination: '/accounts/server/handler.compose',
+      destination: 'https://accounts.tempo.xyz/docs/server/handler.compose',
       status: 301,
     },
     {
       source: '/sdk/typescript/server/handler.feePayer',
-      destination: '/accounts/server/handler.relay',
+      destination: 'https://accounts.tempo.xyz/docs/server/handler.relay',
       status: 301,
     },
     {
       source: '/sdk/typescript/server/handler.keyManager',
-      destination: '/accounts/server/handler.webAuthn',
+      destination: 'https://accounts.tempo.xyz/docs/server/handler.webAuthn',
+      status: 301,
+    },
+    {
+      source: '/accounts',
+      destination: 'https://accounts.tempo.xyz/docs',
+      status: 301,
+    },
+    {
+      source: '/accounts/:path*',
+      destination: 'https://accounts.tempo.xyz/docs/:path*',
       status: 301,
     },
     {

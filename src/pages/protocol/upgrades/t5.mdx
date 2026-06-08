@@ -5,20 +5,20 @@ description: Details and timeline for the T5 network upgrade, including the ensh
 
 # T5 Network Upgrade
 
-T5 is Tempo's next network upgrade. It introduces an enshrined TIP-20 reserve channel precompile for MPP and similar session-based payment flows, payment lane classification in consensus, DEX improvements (same-tick flip orders and persistent order IDs across flips), multihop FeeAMM routing, an on-chain `logoURI` field for TIP-20 tokens, an Implicit Approvals List for gas-efficient internal transfers, and a witness digest binding for one-signature key authorization flows.
+T5 is Tempo's latest network upgrade. It introduces an enshrined TIP-20 reserve channel precompile for MPP and similar session-based payment flows (cutting channel-open gas by up to 72% versus the legacy MPP contract), payment lane classification in consensus, DEX improvements (same-tick flip orders and persistent order IDs across flips), multihop FeeAMM routing, an on-chain `logoURI` field for TIP-20 tokens, an Implicit Approvals List for gas-efficient internal transfers, and a witness digest binding for one-signature key authorization flows.
 
 :::info[T5 status]
-T5 is not yet active on testnet or mainnet. The features described on this page become live at the activation timestamps below.
+T5 is live on testnet and is not yet active on mainnet. The features described on this page are active on testnet and become live on mainnet at the activation timestamp below.
 :::
 
 ## Timeline
 
 | Network | Date | Timestamp |
 |---------|------|-----------|
-| Testnet | June 3, 2026 | TBD |
-| Mainnet | June 9, 2026 | TBD |
+| Testnet | June 3, 2026 4pm CEST | 1780495200 |
+| Mainnet | June 9, 2026 4pm CEST | 1781013600 |
 
-Node operators must upgrade to the T5-compatible release (v1.8.0, targeted for May 27, 2026) before the testnet activation timestamp.
+Mainnet node operators must upgrade to the T5-compatible release (v1.8.0) before the mainnet activation timestamp.
 
 ## Overview
 
@@ -32,15 +32,17 @@ T5 introduces the following changes:
 - An Implicit Approvals List enabling listed precompiles to pull TIP-20 tokens without a prior approval ([TIP-1035](https://tips.sh/1035))
 - A witness digest field in key authorizations to bind one signature to an application challenge ([TIP-1053](https://tips.sh/1053))
 
-**Action required for node operators:** Upgrade to v1.8.0 before the testnet activation timestamp. Non-upgraded nodes will fall out of consensus.
-
 ## Integration changes
 
-Most of T5 is additive. The notes below cover behaviors that integrators, indexers, and tooling should pick up before activation.
+Most of T5 is additive. The notes below cover behaviors that integrators, indexers, and tooling should pick up before mainnet activation.
 
 ### Enshrined TIP-20 reserve channel (TIP-1034)
 
 Not a breaking change at the contract level — the existing application-level MPP reserve contract continues to work after T5. The new precompile lives at [`0x4D50500000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x4D50500000000000000000000000000000000000) (ASCII `MPP`). To migrate to the precompile path, MPP libraries need to be upgraded to versions that target it; new releases will be linked under [Compatible SDK releases](#compatible-sdk-releases) once published. Tooling that monitors or interacts with MPP reserve should be aware of both surfaces during the transition.
+
+Migrating to the precompile cuts measured gas by ~72% for opening a channel against an existing reserve balance, ~39% for a first-time reserve open, and 13–26% across close and top-up operations. See the full [gas comparison](#gas-comparison) below.
+
+SDKs that target the precompile also benefit from extra gas savings thanks to [implicit approvals](#tip-1035-implicit-approvals-list): the channel reserve can pull TIP-20 tokens with the internal `system_transfer_from` path instead of a public `transferFrom`, avoiding the separate approval transaction and allowance storage write.
 
 ### Payment lane selector allow-list (TIP-1045)
 
@@ -65,7 +67,7 @@ Tokens without `logoURI` continue to work. New surface area:
 
 `logoURI` is validated on-chain: max 256 bytes (reverts `LogoURITooLong`), and if non-empty must be a syntactically valid URI with a scheme in the allowlist `https`, `http`, `ipfs`, `data` (case-insensitive). Otherwise reverts `InvalidLogoURI`. Empty string is valid and clears the field.
 
-Use an SVG for `logoURI` so it renders crisply at any resolution across wallets and explorers (see [tokenlist Icon Requirements](/quickstart/tokenlist#icon-requirements)).
+Per [TIP-1026's recommended formats](https://tips.sh/1026#recommended-formats), use a square, single-frame rasterized image (PNG or WebP) for `logoURI`. SVG is allowed by the scheme allowlist but not recommended — integrators that accept SVG must follow TIP-1026's SVG-handling guidance.
 
 ### Witness digest in key authorizations (TIP-1053)
 
@@ -74,6 +76,8 @@ Use an SVG for `logoURI` so it renders crisply at any resolution across wallets 
 ## Compatible SDK releases
 
 T5-compatible SDK releases will be listed here as they ship.
+
+These releases should prefer the TIP-1034 reserve precompile over the legacy MPP reserve contract. Besides using the protocol-native reserve surface, that path offers several gas-saving benefits, including packed reserve storage slots and [implicit approvals](#tip-1035-implicit-approvals-list). With implicit approvals, the precompile calls internal `system_transfer_from` rather than regular `transferFrom`, so users do not need a separate allowance approval and reserve flows avoid the gas cost of the approval write.
 
 ## Feature TIPs
 
@@ -87,6 +91,20 @@ As a precompile, reserve uses protocol-native capabilities directly:
 - **Cleaner channel identity:** channel IDs are derived from the transaction's replay-protected context hash, instead of requiring transaction-context access to be exposed to Solidity.
 - **Reduced storage and lower cost:** immutable channel details live in calldata and `ChannelOpened` logs; the precompile stores only mutable channel state on-chain.
 - **Stable integration surface:** one canonical protocol-level reserve interface, while internals can improve in future upgrades without changing the public API.
+
+#### Gas comparison
+
+Measured gas usage for the enshrined reserve precompile versus the legacy MPP reserve contract:
+
+| Operation | Legacy contract | Enshrined reserve precompile | Gas reduction |
+|---|---:|---:|---:|
+| Open channel, existing reserve balance | 1,055,229 | 294,425 | 72% |
+| Open channel, first reserve balance | 1,302,429 | 791,625 | 39% |
+| Close existing channel | 85,118 | 62,913 | 26% |
+| Top up existing channel | 53,724 | 46,805 | 13% |
+| Top up and cancel close request | 58,785 | 48,680 | 17% |
+
+These numbers cover only the channel operation itself. Under the legacy path, first-time users also had to send a separate `approve` transaction before opening a channel; with the precompile on the [Implicit Approvals List (TIP-1035)](#tip-1035-implicit-approvals-list), that round-trip and the allowance storage write are eliminated, so end-to-end savings for new users are larger than the per-call numbers above. Snapshots are reproducible from [`crates/node/tests/it/gas/legacy_stream_channel_contract.rs`](https://github.com/tempoxyz/tempo/blob/main/crates/node/tests/it/gas/legacy_stream_channel_contract.rs) and [`crates/node/tests/it/gas/tip20_channel_reserve.rs`](https://github.com/tempoxyz/tempo/blob/main/crates/node/tests/it/gas/tip20_channel_reserve.rs) in `tempoxyz/tempo`.
 
 ### TIP-1045: Payment Lane Classification
 

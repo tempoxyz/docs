@@ -1,0 +1,151 @@
+---
+title: Hosted Fee Payer
+description: Sponsor Tempo transaction fees with Tempo's hosted fee payer endpoints for testnet development and approved mainnet integrations.
+---
+
+import { Cards, Card } from 'vocs'
+
+# Hosted Fee Payer
+
+Tempo Labs provides hosted fee payer endpoints for applications that want to sponsor Tempo transaction fees without running fee payer infrastructure.
+
+## Hosted endpoints
+
+The hosted endpoints are JSON-RPC relays backed by [`Handler.relay`](/accounts/server/handler.relay). They are CORS-enabled and return standard JSON-RPC responses.
+
+| Network | URL | Chain ID | Access |
+| --- | --- | --- | --- |
+| Mainnet | `https://sponsor.tempo.xyz/tp_<api_key>` | `4217` | Approved integrations with an API key |
+| Testnet | `https://sponsor.moderato.tempo.xyz` | `42431` | Public development and testing |
+
+### Rate limits and policy
+
+Hosted fee payer endpoints are rate-limited and may reject requests that fall outside the configured sponsorship policy.
+
+Clients should avoid retry loops, back off after errors, and treat sponsorship as conditional. If sponsorship is rejected, the client should either let the user pay their own fee or retry through an application-owned fee payer.
+
+### Pricing and access
+
+The public testnet fee payer is free for development and testing.
+
+Mainnet hosted fee payer access is intended for approved integrations and partner programs. Use `https://sponsor.tempo.xyz/tp_<api_key>` after your integration has been approved and you have been provided an API key. For production use outside the hosted policy, contact Tempo or run your own fee payer with [`Handler.relay`](/accounts/server/handler.relay).
+
+## Using in production
+
+Run your own fee payer when you need:
+
+- Custom allowlists, rate limits, or per-user sponsorship rules
+- Dedicated funding, accounting, or reconciliation
+- Full control over availability, latency, and operational policy
+- Sponsorship for traffic that is not covered by Tempo's hosted policy
+
+See [Sponsor User Fees](/guide/payments/sponsor-user-fees) to deploy your own fee payer service.
+
+## Configure clients
+
+### Tempo Wallet
+
+```ts twoslash [wagmi.config.ts]
+import { tempoModerato } from 'viem/chains'
+import { createConfig, http } from 'wagmi'
+import { tempoWallet } from 'wagmi/connectors'
+
+export const config = createConfig({
+  connectors: [
+    tempoWallet({
+      feePayer: 'https://sponsor.moderato.tempo.xyz',
+    }),
+  ],
+  chains: [tempoModerato],
+  transports: {
+    [tempoModerato.id]: http(),
+  },
+})
+```
+
+### WebAuthn or custom transports
+
+Use [`withRelay`](https://viem.sh/tempo/transports/withRelay) to route transaction fill and sponsorship requests through the hosted fee payer.
+
+```ts twoslash [wagmi.config.ts]
+import { tempoModerato } from 'viem/chains'
+import { withRelay } from 'viem/tempo'
+import { createConfig, http } from 'wagmi'
+import { webAuthn } from 'wagmi/tempo'
+
+export const config = createConfig({
+  connectors: [webAuthn({ authUrl: '/auth' })],
+  chains: [tempoModerato],
+  transports: {
+    [tempoModerato.id]: withRelay(
+      http(),
+      http('https://sponsor.moderato.tempo.xyz'),
+    ),
+  },
+})
+```
+
+For mainnet, replace the testnet URL with `https://sponsor.tempo.xyz/tp_<api_key>` after your integration has been approved and you have been provided an API key.
+
+## Query the fee payer
+
+### Chain ID
+
+```bash
+curl -X POST "https://sponsor.moderato.tempo.xyz" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}'
+```
+
+### Fill a sponsored transaction
+
+`eth_fillTransaction` returns a filled Tempo transaction plus metadata describing whether the request is sponsored.
+
+```bash
+curl -X POST "https://sponsor.moderato.tempo.xyz" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "eth_fillTransaction",
+    "params": [{
+      "from": "0x0000000000000000000000000000000000000001",
+      "calls": [{
+        "to": "0x20c0000000000000000000000000000000000000",
+        "data": "0x70a08231000000000000000000000000000000000000000000000000000000000000dead"
+      }]
+    }]
+  }'
+```
+
+A sponsored response includes `capabilities.sponsored: true` and sponsor metadata.
+
+## API reference
+
+| Method | Description |
+| --- | --- |
+| `eth_chainId` | Returns the chain ID served by the endpoint |
+| `eth_fillTransaction` | Fills transaction fields and returns sponsorship metadata |
+| `eth_signRawTransaction` | Adds the fee payer signature and returns the dual-signed raw transaction |
+| `eth_sendRawTransaction` | Adds the fee payer signature and broadcasts the transaction |
+| `eth_sendRawTransactionSync` | Adds the fee payer signature, broadcasts the transaction, and waits for a receipt |
+
+:::info
+Fee sponsorship requires a Tempo Transaction. The sender signs with sponsorship enabled, then the fee payer counter-signs with `feePayerSignature`.
+:::
+
+## How it works
+
+Tempo Transactions support native fee sponsorship through a separate fee payer signature. The user signs the transaction first, leaving fee token selection to the fee payer. The hosted fee payer validates the request, chooses the fee token, signs the fee payer payload, and either returns the completed transaction or broadcasts it depending on the JSON-RPC method.
+
+No paymaster contract, bundler, or EntryPoint contract is required.
+
+## Next steps
+
+<Cards>
+  <Card icon="lucide:wallet" title="Sponsor User Fees" description="Build gasless payment flows and deploy your own fee payer service." to="/guide/payments/sponsor-user-fees" />
+
+  <Card icon="lucide:server" title="Handler.relay" description="Run a custom relay with fee payer sponsorship and validation policy." to="/accounts/server/handler.relay" />
+
+  <Card icon="lucide:file-code" title="Tempo Transaction Spec" description="Read the fee payer signature details in the transaction spec." to="/protocol/transactions/spec-tempo-transaction#fee-payer-signature-details" />
+</Cards>

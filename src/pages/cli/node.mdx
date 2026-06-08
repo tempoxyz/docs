@@ -33,6 +33,7 @@ Flags grouped by function:
 | Flag | Description |
 | --- | --- |
 | `--consensus.signing-key <path>` | Path to validator signing key |
+| `--consensus.secret <path>` | Path to the secret used to decrypt an encrypted validator signing key. Prefer a named pipe (FIFO) or shell process substitution. |
 | `--consensus.fee-recipient <addr>` | Deprecated validator fee-recipient flag. Migrate to on-chain fee-recipient management via Validator Config V2. |
 | `--consensus.datadir <path>` | Separate volume for consensus data |
 
@@ -65,6 +66,7 @@ Start a validator:
 tempo node --datadir /data/tempo \
   --chain mainnet \
   --consensus.signing-key /etc/tempo/key \
+  --consensus.secret /run/tempo/consensus-secret \
   --consensus.fee-recipient 0x...
 ```
 

@@ -1208,39 +1208,3 @@ Because a single transaction can invalidate multiple others by spending balances
 
 **Assessment:** While this transaction type introduces additional pre-execution validation costs, all costs are bounded to reasonable limits. The mempool complexity issues around cross-transaction dependencies already exist in Ethereum due to 7702 and accounts with code, making static validation inherently difficult. So the incremental cost from this transaction type is acceptable given these existing constraints.
 
-## T2 → T3 migration
-
-:::info[Migration appendix]
-This section captures changes introduced by the [T3 network upgrade](/protocol/upgrades/t3) for integrators migrating from T2. The spec above is the canonical post-T3 specification; this appendix exists for reference and will be removed in a future docs revision.
-:::
-
-T3 expanded access keys through [TIP-1011](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1011.md) in the following ways:
-
-- `KeyAuthorization` gained `allowed_calls` (call-scope allowlist).
-- `TokenLimit` gained `period` (recurring vs. one-time spending limits).
-- The signed payload `SignedKeyAuthorization { authorization, signature }` is unchanged in shape, but `authorization` now uses the expanded `KeyAuthorization` and new RLP encoding. Low-level integrators that manually encode `key_authorization` must branch pre-T3 vs post-T3 — the post-T3 digest and signed payload include `allowed_calls?` in addition to `expiry?` and `limits?`.
-- A non-expiring `key_authorization` omits `expiry` in tx RLP. At the Account Keychain ABI boundary, the protocol translates that omission to `u64::MAX`. Literal `0` is not a valid non-expiring sentinel to rely on.
-- Access-key validation gained two new execution checks: call scopes must pass before execution begins, and access-key-signed transactions may not perform contract creation anywhere in the batch.
-- The Account Keychain precompile ABI changed in lockstep — `authorizeKey(...)` now takes a `KeyRestrictions` tuple, `getRemainingLimit(...)` is replaced by `getRemainingLimitWithPeriod(...)`, and `setAllowedCalls(...)` / `removeAllowedCalls(...)` / `getAllowedCalls(...)` are added. See the [Account Keychain spec](./AccountKeychain) for full details.
-- Intrinsic gas for `key_authorization` accounts for periodic-limit state and call-scope storage. See [TIP-1011](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1011.md#intrinsic-gas-for-key-authorization) for the canonical slot-counting rules.
-
-### Pre-T3 KeyAuthorization (reference only)
-
-Before T3, `KeyAuthorization` did not include `allowed_calls`, and `TokenLimit` did not include `period`:
-
-```rust
-pub struct KeyAuthorization {
-    chain_id: u64,
-    key_type: SignatureType,
-    key_id: Address,
-    expiry: Option<u64>,
-    limits: Option<Vec<TokenLimit>>,
-}
-
-pub struct TokenLimit {
-    token: Address,
-    limit: U256,
-}
-```
-
-The pre-T3 digest was `keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?]))` and the signed payload was `rlp([chain_id, key_type, key_id, expiry?, limits?, signature])`.

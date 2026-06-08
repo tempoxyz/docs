@@ -1,0 +1,266 @@
+---
+title: Bridge via Bungee
+description: Bridge tokens to and from Tempo using Bungee. Covers Bungee Link, deposit quotes, transaction execution, status tracking, and Tempo-specific caveats.
+---
+
+# Bridge via Bungee
+
+[Bungee](https://www.bungee.exchange/) is a cross-chain routing protocol built by the [SOCKET](https://docs.socket.tech/) team. For Tempo, the recommended integration path is Bungee Deposit: request a quote, execute the returned source-chain transaction, and track the request until Bungee delivers funds on the destination chain.
+
+Tempo's Bungee chain ID is **`4217`**.
+
+## How Bungee Deposit works
+
+Bungee has Auto and Manual routing modes for general cross-chain swaps, but Tempo routes are exposed through the deposit flow. Each quote returns a concrete `deposit.txData` transaction and `deposit.requestHash` status identifier.
+
+The flow is:
+
+1. Request a quote with `enableDepositAddress=true` and a `refundAddress`.
+2. Read `result.deposit` from the quote response.
+3. Submit `deposit.txData`, or present `deposit.depositData` for a user-driven transfer.
+4. Poll `/api/v1/bungee/status` with `deposit.requestHash`.
+
+Query the Bungee supported chains API to confirm current Tempo route support:
+
+```bash
+curl "https://public-backend.bungee.exchange/api/v1/supported-chains"
+```
+
+Query Tempo tokens from Bungee's token list when building token selectors:
+
+```bash
+curl "https://public-backend.bungee.exchange/api/v1/tokens/list?chainIds=4217&list=full"
+```
+
+The list of supported chains, tokens, and routes changes over time as Bungee adds routes. Always check the API for the latest availability.
+
+## Common tokens
+
+| Token | Address | Decimals |
+|-------|---------|---------:|
+| **pathUSD** | [`0x20C0000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x20C0000000000000000000000000000000000000) | 6 |
+| **USDT0** | [`0x20C00000000000000000000014f22CA97301EB73`](https://explore.tempo.xyz/address/0x20C00000000000000000000014f22CA97301EB73) | 6 |
+| **USDC.E** (Bridged USDC) | [`0x20C000000000000000000000b9537d11c60E8b50`](https://explore.tempo.xyz/address/0x20C000000000000000000000b9537d11c60E8b50) | 6 |
+| **EURAU** (AllUnity EUR) | [`0x20c0000000000000000000009A4a4b17E0Dc6651`](https://explore.tempo.xyz/address/0x20c0000000000000000000009A4a4b17E0Dc6651) | 6 |
+
+For wallet funding and most Bungee-to-Tempo flows, route to **USDC.E** on Tempo. Use the token list endpoint for the latest output token availability, and request a quote to confirm route availability for your origin token and amount.
+
+:::note
+Bungee may use the native token sentinel `0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee` for chain-currency entries in API responses. For API requests, prefer the exact token address returned by Bungee's token list or quote response for the route you are building.
+:::
+
+## API endpoints
+
+Use the public endpoint for testing and request production access from Bungee for higher limits.
+
+| Purpose | Endpoint |
+|---------|----------|
+| Quote | `GET https://public-backend.bungee.exchange/api/v1/bungee/quote` |
+| Status | `GET https://public-backend.bungee.exchange/api/v1/bungee/status` |
+| Supported chains | `GET https://public-backend.bungee.exchange/api/v1/supported-chains` |
+| Token list | `GET https://public-backend.bungee.exchange/api/v1/tokens/list` |
+
+:::info
+Bungee returns a `server-req-id` response header. Log it alongside quote and status errors so Bungee support can trace requests.
+:::
+
+## Bridge to Tempo
+
+### Using the Bungee app
+
+Open the [Bungee app](https://www.bungee.exchange/) and select Tempo as the destination chain.
+
+You can also preselect a route with Bungee Link. This example starts from USDC on Base and sets USDC.e on Tempo as the output token:
+
+```text
+https://bungee.exchange/?originChainId=8453&inputToken=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&destinationChainId=4217&outputToken=0x20c000000000000000000000b9537d11c60e8b50
+```
+
+### Using curl + cast (Foundry)
+
+This example bridges USDC from Base to USDC.e on Tempo. Replace addresses, chain IDs, and amounts for other routes.
+
+:::::steps
+
+### Get a deposit quote
+
+Replace `<SOURCE_ADDRESS>` with the wallet sending funds on the origin chain, `<TEMPO_WALLET_ADDRESS>` with the recipient on Tempo, and `<AMOUNT>` with the source token amount in base units.
+
+```bash
+curl -G "https://public-backend.bungee.exchange/api/v1/bungee/quote" \
+  --data-urlencode "originChainId=8453" \
+  --data-urlencode "destinationChainId=4217" \
+  --data-urlencode "inputToken=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913" \
+  --data-urlencode "outputToken=0x20c000000000000000000000b9537d11c60e8b50" \
+  --data-urlencode "inputAmount=<AMOUNT>" \
+  --data-urlencode "receiverAddress=<TEMPO_WALLET_ADDRESS>" \
+  --data-urlencode "refundAddress=<SOURCE_ADDRESS>" \
+  --data-urlencode "enableDepositAddress=true"
+```
+
+Save:
+
+- `result.deposit.requestHash` for status tracking
+- `result.deposit.txData.to`
+- `result.deposit.txData.data`
+- `result.deposit.txData.value`
+
+### Submit the source-chain transaction
+
+Use the `txData` fields from the quote response. For USDC on Base, `value` is usually `0`.
+
+```bash
+cast send <TX_TO> \
+  <TX_DATA> \
+  --value <TX_VALUE> \
+  --rpc-url https://mainnet.base.org \
+  --private-key $PRIVATE_KEY
+```
+
+If you are building a UI instead of submitting the transaction programmatically, show the user `result.deposit.depositData.address`, `token`, `amount`, and `chainId` exactly as returned.
+
+### Track status
+
+```bash
+curl "https://public-backend.bungee.exchange/api/v1/bungee/status?requestHash=<REQUEST_HASH>"
+```
+
+Status codes `3` (`FULFILLED`) and `4` (`SETTLED`) are successful terminal states. Status codes `5` (`EXPIRED`), `6` (`CANCELLED`), and `7` (`REFUNDED`) are failure terminal states.
+
+:::::
+
+## Bridge from Tempo
+
+To bridge from Tempo to another chain, swap the origin and destination in the quote request.
+
+:::::steps
+
+### Get a deposit quote
+
+This example bridges USDC.e from Tempo to USDC on Base.
+
+```bash
+curl -G "https://public-backend.bungee.exchange/api/v1/bungee/quote" \
+  --data-urlencode "originChainId=4217" \
+  --data-urlencode "destinationChainId=8453" \
+  --data-urlencode "inputToken=0x20c000000000000000000000b9537d11c60e8b50" \
+  --data-urlencode "outputToken=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913" \
+  --data-urlencode "inputAmount=<AMOUNT>" \
+  --data-urlencode "receiverAddress=<DESTINATION_ADDRESS>" \
+  --data-urlencode "refundAddress=<TEMPO_WALLET_ADDRESS>" \
+  --data-urlencode "enableDepositAddress=true"
+```
+
+When Tempo is the origin chain, the response can include `result.deposit.depositData.memo`. If you use `deposit.depositData` for a manual transfer UI, show the memo and require the user to include it. If you submit `deposit.txData`, the calldata already includes the routing data Bungee needs.
+
+### Submit the Tempo transaction
+
+Use the `to`, `data`, and `value` fields from `result.deposit.txData`:
+
+```bash
+cast send <TX_TO> \
+  <TX_DATA> \
+  --rpc-url https://rpc.tempo.xyz \
+  --private-key $PRIVATE_KEY
+```
+
+:::info
+Tempo has no native gas token, so Bungee transactions from Tempo normally use `value=0`. Transaction fees are paid in the account's configured fee token. If the bridge spends the same token selected for fees, leave enough balance to pay gas.
+:::
+
+### Track status
+
+```bash
+curl "https://public-backend.bungee.exchange/api/v1/bungee/status?requestHash=<REQUEST_HASH>"
+```
+
+:::::
+
+## Using TypeScript (viem)
+
+```typescript
+import { createPublicClient, createWalletClient, http } from 'viem'
+import { base } from 'viem/chains'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const BUNGEE_API_BASE_URL = 'https://public-backend.bungee.exchange'
+const account = privateKeyToAccount('0x...')
+
+const walletClient = createWalletClient({
+  account,
+  chain: base,
+  transport: http(),
+})
+
+const publicClient = createPublicClient({
+  chain: base,
+  transport: http(),
+})
+
+const quoteParams = new URLSearchParams({
+  originChainId: '8453',
+  destinationChainId: '4217',
+  inputToken: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+  outputToken: '0x20c000000000000000000000b9537d11c60e8b50',
+  inputAmount: '1000000',
+  receiverAddress: account.address,
+  refundAddress: account.address,
+  enableDepositAddress: 'true',
+})
+
+const quoteRes = await fetch(`${BUNGEE_API_BASE_URL}/api/v1/bungee/quote?${quoteParams}`)
+const quote = await quoteRes.json()
+
+if (!quote.success) {
+  throw new Error(`Bungee quote failed: ${quote.message}`)
+}
+
+const deposit = quote.result.deposit
+if (!deposit?.txData || !deposit?.requestHash) {
+  throw new Error('Bungee did not return deposit transaction data')
+}
+
+const hash = await walletClient.sendTransaction({
+  to: deposit.txData.to,
+  data: deposit.txData.data,
+  value: BigInt(deposit.txData.value ?? '0'),
+})
+
+await publicClient.waitForTransactionReceipt({ hash })
+
+while (true) {
+  const statusRes = await fetch(
+    `${BUNGEE_API_BASE_URL}/api/v1/bungee/status?requestHash=${deposit.requestHash}`
+  )
+  const statusJson = await statusRes.json()
+  const status = statusJson.result?.[0]
+  const code = status?.bungeeStatusCode
+
+  if (code === 3 || code === 4) {
+    console.log('Bridge complete:', status.destinationData?.txHash)
+    break
+  }
+  if (code === 5 || code === 6 || code === 7) {
+    throw new Error(`Bungee request failed with status code ${code}`)
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, 10_000))
+}
+```
+
+## Production checklist
+
+- Request production API access from Bungee and keep API keys server-side.
+- Persist `requestHash` immediately after quote generation.
+- Preserve `server-req-id` from quote and status responses for support.
+- Validate `depositData.address`, `token`, `amount`, `chainId`, and `memo` before displaying transfer instructions.
+- Use `requestHash` for Bungee status checks, not the source transaction hash.
+- Show users terminal failures (`EXPIRED`, `CANCELLED`, `REFUNDED`) and retry guidance.
+
+## Further reading
+
+- [Bungee Deposit flow](https://docs.bungee.exchange/integrate/integration-guides/deposit)
+- [Bungee API reference](https://docs.bungee.exchange/api-reference)
+- [Bungee Link](https://docs.bungee.exchange/integrate/bungee-link)
+- [SOCKET Protocol documentation](https://docs.socket.tech/)
+- [Getting Funds on Tempo](/guide/getting-funds)

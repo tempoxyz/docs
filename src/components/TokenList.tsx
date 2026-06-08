@@ -2,6 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query'
 
+const TOKEN_PREVIEW_LIMIT = 12
+
 export function TokenListDemo() {
   const tokenList = useQuery({
     queryKey: ['tokenList', 4217],
@@ -21,18 +23,20 @@ export function TokenListDemo() {
     },
   })
 
+  const tokens = tokenList.data?.slice(0, TOKEN_PREVIEW_LIMIT)
+
   return (
-    <ul className="flex list-none flex-col justify-center gap-3">
-      {tokenList.data?.map((token) => (
+    <ul className="grid list-none grid-cols-2 gap-2 sm:grid-cols-3">
+      {tokens?.map((token) => (
         <li key={token.address} title={token.address}>
           <a
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-content"
-            href={`https://tokenlist.tempo.xyz/asset/4217/${token.address}`}
+            className="flex h-full min-w-0 items-center gap-2 rounded-lg border border-gray4 p-2 text-content no-underline transition-colors hover:bg-gray2"
+            href={`https://explore.tempo.xyz/address/${token.address}`}
           >
-            <img src={token.logoURI} alt={token.name} className="size-7.5" />
-            <span className="font-medium text-xl tracking-wider">{token.name}</span>
+            <img src={token.logoURI} alt={token.name} className="size-7 shrink-0" />
+            <span className="min-w-0 truncate font-medium text-sm">{token.name}</span>
           </a>
         </li>
       ))}

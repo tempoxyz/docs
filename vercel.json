@@ -71,17 +71,27 @@
     },
     {
       "source": "/accounts/server/compose",
-      "destination": "/accounts/server/handler.compose",
+      "destination": "https://accounts.tempo.xyz/docs/server/handler.compose",
       "permanent": true
     },
     {
       "source": "/accounts/server/relay",
-      "destination": "/accounts/server/handler.relay",
+      "destination": "https://accounts.tempo.xyz/docs/server/handler.relay",
       "permanent": true
     },
     {
       "source": "/accounts/server/webAuthn",
-      "destination": "/accounts/server/handler.webAuthn",
+      "destination": "https://accounts.tempo.xyz/docs/server/handler.webAuthn",
+      "permanent": true
+    },
+    {
+      "source": "/accounts",
+      "destination": "https://accounts.tempo.xyz/docs",
+      "permanent": true
+    },
+    {
+      "source": "/accounts/:path*",
+      "destination": "https://accounts.tempo.xyz/docs/:path*",
       "permanent": true
     },
     {

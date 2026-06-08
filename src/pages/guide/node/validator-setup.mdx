@@ -15,7 +15,7 @@ This guide walks through registering, generating your signing key, and starting 
 
 Registering a validator takes three steps:
 
-1. **[Generate a signing keypair](#step-1-generate-a-signing-keypair)** — Create an ed25519 private key and derive the public key.
+1. **[Generate a signing keypair](#step-1-generate-a-signing-keypair)** — Create an encrypted ed25519 private key and derive the public key.
 2. **[Create the add-validator signature](#step-2-create-the-add-validator-signature)** — Prove ownership of the signing key by producing a signature over your registration details.
 3. **[Submit registration details](#step-3-submit-registration-details)** — Provide the Tempo team with all required values to add your validator on-chain.
 
@@ -25,19 +25,28 @@ Registering a validator takes three steps:
 Never share your private signing key. Anyone with access to it can impersonate your validator. The Tempo team will never ask for your private key.
 :::
 
-Generate an ed25519 keypair:
+Generate an encrypted ed25519 keypair. The `--secret` argument points to a file-like input that contains the encryption key. Prefer a named pipe (FIFO) or shell process substitution for this path: a FIFO lets one process stream bytes directly to another process without storing those bytes as a regular file, and it keeps the secret out of environment variables and command-line arguments. See [Why FIFOs and not env vars](/guide/node/validator-keys#why-fifos-and-not-env-vars).
 
 ```bash
-tempo consensus generate-private-key --output <path>
+mkfifo /run/tempo/consensus-secret
+<ENCRYPTION_KEY_CMD> > /run/tempo/consensus-secret &
+tempo consensus generate-signing-key \
+  --output <SIGNING_KEY_PATH> \
+  --secret /run/tempo/consensus-secret
 ```
 
 Verify the public key:
 
 ```bash
-tempo consensus calculate-public-key --private-key <path>
+<ENCRYPTION_KEY_CMD> > /run/tempo/consensus-secret &
+tempo consensus show-verification-key \
+  --private-key <SIGNING_KEY_PATH> \
+  --secret /run/tempo/consensus-secret
 ```
 
-The public key should match the output of the `generate-private-key` command.
+The public key should match the output of the `generate-signing-key` command.
+
+`<ENCRYPTION_KEY_CMD>` should be a command that retrieves the encryption key from your KMS or secret manager and writes the raw secret to stdout.
 
 ### Step 2: Create the add-validator signature
 
@@ -107,16 +116,18 @@ Once you've downloaded the snapshot and have been whitelisted on-chain, you can 
 tempo node --datadir <datadir> \
     --chain mainnet \
     --consensus.signing-key <path> \
+    --consensus.secret <ENCRYPTION_KEY_FIFO> \
     --telemetry-url <TELEMETRY_URL>
 ```
 ```bash [Testnet]
 tempo node --datadir <datadir> \
     --chain moderato \
     --consensus.signing-key <path> \
+    --consensus.secret <ENCRYPTION_KEY_FIFO> \
     --telemetry-url <TELEMETRY_URL>
 ```
 ::::
-The notable difference between RPC nodes and validator nodes is the omission of the `--follow` argument and the addition of the `--consensus.signing-key` argument.
+The notable difference between RPC nodes and validator nodes is the omission of the `--follow` argument and the addition of the `--consensus.signing-key` argument. If the signing key is encrypted, provide the encryption key with `--consensus.secret`.
 
 Once your node is up, it may not start syncing immediately. This is because your node might not be part of the active set. In most cases, your validator will enter the active set in under 6 hours after the on-chain addition of the validator identity.
 
@@ -127,6 +138,7 @@ Once your node is up, it may not start syncing immediately. This is because your
 | `--telemetry-url <URL>` | Unified metrics and logs export. See [Telemetry endpoint](#telemetry-endpoint) below for details. **We ask all validators to configure this so we can support troubleshooting.** |
 | `--telemetry-metrics-interval <DURATION>` | Interval for pushing metrics (default: `10s`). |
 | `--consensus.datadir <PATH>` | Store consensus data on a separate volume (e.g., AWS EBS) while keeping execution state on high-performance local disks. Migrate by copying `<datadir>/consensus` to the new location. |
+| `--consensus.secret <PATH>` | Read the encrypted signing-key secret from a FIFO, process-substitution path, or regular file. Prefer FIFO or process substitution so the secret is streamed just in time and kept out of the process environment. |
 
 ### Telemetry endpoint
 
