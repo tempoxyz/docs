@@ -35,6 +35,8 @@ T6 is mostly additive. The notes below cover behaviors that integrators, indexer
 
 Receivers can declare which TIP-20 tokens they accept and which senders may send those tokens to them. Both controls live on the TIP-403 precompile as a per-address policy, set via `setReceivePolicy(...)` and enforced via `validateReceivePolicy(...)`. The token's existing TIP-403 policy still runs first and still reverts on failure.
 
+This gives wallets, fintechs, orchestrators, and exchanges receiver-side control without requiring every token issuer or application to build custom allowlist logic. For example, an internal treasury wallet can avoid receiving unsupported assets, and a deposit wallet can accept only the stablecoin it is meant to handle.
+
 When a receive policy blocks an inbound `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `systemTransferFrom`, `mint`, or `mintWithMemo`, **the call still succeeds** and delivery is redirected to a new precompile, `ReceivePolicyGuard`, at `RECEIVE_POLICY_GUARD_ADDRESS`. The guard records a receipt for the blocked transfer that the receiver-designated recovery authority (either the originator or a recovery address picked by the receiver) can claim later.
 
 - Senders observing a successful `Transfer` event from the host TIP-20 to `RECEIVE_POLICY_GUARD_ADDRESS` should not assume the receiver was credited. Wallets and accounting systems must read the guard receipt to track funds that were redirected.
@@ -66,10 +68,12 @@ T6-compatible SDK releases will be listed here as they ship.
 
 [TIP-1028](https://tips.sh/1028) extends [TIP-403](/protocol/tip403/spec) with per-address receive policies that let a receiver control which TIP-20 tokens they accept and who can send those tokens to them. When an inbound transfer or mint is blocked by a receive policy, delivery is redirected to a new protocol precompile, `ReceivePolicyGuard`, where it is recorded as a receipt and can be claimed later by the originator or by a recovery address designated by the receiver. The token's TIP-403 policy still runs first and still reverts on failure; only receive-policy failures redirect.
 
-This addresses two practical receiver-side problems:
+This addresses practical receiver-side problems:
 
-- A regulated entity may want to accept only KYC'ed senders without those senders' transactions reverting.
-- Orchestrators and exchanges may want to accept only specific tokens at deposit addresses to prevent unrecoverable funds without locking up the sender.
+- A regulated entity may want to accept only approved counterparties or block known-risk counterparties.
+- Fintechs may want to prevent internal wallets or customer wallets from holding unsupported or undesirable tokens.
+- Orchestrators and exchanges may want deposit addresses to accept only the tokens they support, reducing wrong-token deposit mistakes.
+- Wallets and support teams get a recovery path for blocked transfers instead of treating every policy mismatch as an unrecoverable delivery problem.
 
 ### TIP-1049: Admin Access Keys
 
