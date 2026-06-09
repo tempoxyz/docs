@@ -5,7 +5,7 @@ description: Partner-focused overview and integration notes for the T6 network u
 
 # T6 Network Upgrade
 
-T6 gives partners more control over account safety and user key management. It adds account-level receive policies so wallets, fintechs, exchanges, custodians, and orchestrators can prevent unwanted TIP-20 deposits before they reach a user account, and it adds admin access keys so users and apps can manage passkeys and delegated keys without relying on the root wallet for every change.
+T6 gives partners more control over account safety and user key management. It adds account-level receive policies so users can prevent unwanted TIP-20 deposits to their account, and it adds admin access keys so users and apps can manage passkeys and delegated keys without relying on the root wallet for every change.
 
 :::info[T6 status]
 T6 is not yet active on testnet or mainnet. The features described on this page become live at the activation timestamps below.
@@ -24,41 +24,37 @@ Node operators must upgrade to the T6-compatible release before the testnet acti
 
 T6 focuses on two partner needs:
 
-- **Safer receiving flows.** Accounts can define what they are willing to receive, which helps prevent wrong-token deposits, unsupported assets, and unwanted counterparty flows.
+- **Safer receiving flows.** Accounts can define what tokens they are willing to receive, and which addresses they are willing to receive from. This is especially useful for accountable receivers: institutions, exchanges, custodians, on/off-ramps, etc. who need to prevent deposits of unsupported or undesirable tokens, and/or control over what counterparties they receive from.  
 - **Better key management.** Admin access keys make passkey onboarding, device recovery, delegated access, and account-controlled signing flows easier to build.
 
 Both features are designed to improve user experience without requiring partners to replace their current account model. Existing TIP-20 behavior and existing non-admin access keys continue to work, while partners can adopt the new controls where they add value.
 
-This is especially useful for accountable receivers: institutions, exchanges, custodians, on/off-ramps, embedded-wallet providers, and payout systems that need to know whether an inbound transfer was credited, redirected for review, or failed.
 
 ## Features
 
 ### Account-level receive policies
 
-Receive policies let an account specify which TIP-20 tokens it wants to receive and which addresses can send tokens to it. This is useful for partner wallets, exchanges, custodians, on/off-ramps, payment processors, and treasury systems that need to keep unsupported or unwanted assets out of user balances.
+Receive policies let an account specify which TIP-20 tokens it wants to receive and which addresses can send tokens to it. This is useful for users such as exchanges, custodians, on/off-ramps, payment processors, and treasury systems that need to keep unsupported or unwanted assets out of user balances, or limit who can send to it. 
 
-The sender still starts a normal stablecoin transfer or mint. If the receiver accepts that token and sender, the funds are credited normally. If the receiver does not accept them, the funds are held in `ReceivePolicyGuard` and a receipt records enough context for later recovery. That means partners can offer a clearer recovery path for blocked transfers while still protecting the receiving account.
-
-Practical benefits:
-
-- Deposit addresses can accept only the assets they are meant to handle.
-- Wallets can help users avoid receiving unsupported or unwanted tokens.
-- Regulated or risk-managed accounts can restrict accepted senders.
-- Embedded-wallet and wallet-as-a-service providers can expose receive policies as business controls for their customers.
-- Payout systems can treat redirected funds as a first-class delivery state instead of assuming a successful transfer means the receiver was credited.
-- Support teams can surface blocked transfers for recovery instead of treating every mismatch as a lost deposit.
-
-For users and operators, the journey is simple: set the receive policy, monitor whether each inbound transfer was credited or redirected, then claim or reroute redirected funds through the recovery path.
-
-Try the [receive policies demo](https://tempo.xyz/receive-policies) to see the credited, held, and recovery flow.
-
-A receiver configures three things:
+An account wishing to opt-in to having a receive policy configures three things:
 
 | Setting | What it controls |
 |---------|------------------|
 | Tokens | An allowlist or blocklist of TIP-20 tokens the account can receive |
 | Senders | An allowlist or blocklist of addresses that can send to the account |
 | Recovery authority | Who can move funds if a send is held |
+
+A sender still starts a normal stablecoin transfer or mint and does not need to be aware of the policy. If the receiver's policy accepts that token and sender, the funds are credited normally. If the receiver's policy does not accept them, the funds are held in a new protocol precompile, `ReceivePolicyGuard`, and a receipt records enough context for later recovery. That means partners can offer a clearer recovery path for blocked transfers while still protecting the receiving account.
+
+Practical benefits:
+
+- Deposit addresses can accept only the assets they are meant to handle.
+- Wallets can help users avoid receiving unsupported or unwanted tokens (e.g., memecoins).
+- Regulated or risk-managed accounts can restrict accepted senders.
+- Embedded-wallet and wallet-as-a-service providers can expose receive policies as business controls for their customers.
+- Support teams can surface blocked transfers for recovery instead of treating every mismatch as a lost deposit.
+
+Try the [receive policies demo](https://tempo.xyz/receive-policies) to see the credited, held, and recovery flow.
 
 Read the technical specification at [TIP-1028](https://tips.sh/1028).
 
