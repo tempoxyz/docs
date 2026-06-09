@@ -1,0 +1,134 @@
+---
+title: T6 Network Upgrade
+description: Partner-focused overview and integration notes for the T6 network upgrade, including account-level receive policies and admin access keys.
+---
+
+# T6 Network Upgrade
+
+T6 gives partners more control over account safety and user key management. It adds account-level receive policies so users can prevent unwanted TIP-20 deposits to their account, and it adds admin access keys so users and apps can manage passkeys and delegated keys without relying on the root wallet for every change.
+
+:::info[T6 status]
+T6 is not yet active on testnet or mainnet. The features described on this page become live at the activation timestamps below.
+:::
+
+## Timeline
+
+| Network | Date | Timestamp |
+|---------|------|-----------|
+| Testnet | June 18, 2026 4pm CEST | 1781791200 |
+| Mainnet | June 23, 2026 4pm CEST | 1782223200 |
+
+Node operators must upgrade to the T6-compatible release before the testnet activation timestamp.
+
+## Overview
+
+T6 focuses on two partner needs:
+
+- **Safer receiving flows.** Accounts can define what tokens they are willing to receive, and which addresses they are willing to receive from. This is especially useful for accountable receivers: institutions, exchanges, custodians, on/off-ramps, etc. who need to prevent deposits of unsupported or undesirable tokens, and/or control over what counterparties they receive from.  
+- **Better key management.** Admin access keys make passkey onboarding, device recovery, delegated access, and account-controlled signing flows easier to build.
+
+Both features are designed to improve user experience without requiring partners to replace their current account model. Existing TIP-20 behavior and existing non-admin access keys continue to work, while partners can adopt the new controls where they add value.
+
+
+## Features
+
+### Account-level receive policies
+
+Receive policies let an account specify which TIP-20 tokens it wants to receive and which addresses can send tokens to it. This is useful for users such as exchanges, custodians, on/off-ramps, payment processors, and treasury systems that need to keep unsupported or unwanted assets out of user balances, or limit who can send to it. 
+
+An account wishing to opt-in to having a receive policy configures three things:
+
+| Setting | What it controls |
+|---------|------------------|
+| Tokens | An allowlist or blocklist of TIP-20 tokens the account can receive |
+| Senders | An allowlist or blocklist of addresses that can send to the account |
+| Recovery authority | Who can move funds if a send is held |
+
+A sender still starts a normal stablecoin transfer or mint and does not need to be aware of the policy. If the receiver's policy accepts that token and sender, the funds are credited normally. If the receiver's policy does not accept them, the funds are held in a new protocol precompile, `ReceivePolicyGuard`, and a receipt records enough context for later recovery. That means partners can offer a clearer recovery path for blocked transfers while still protecting the receiving account.
+
+Practical benefits:
+
+- Deposit addresses can accept only the assets they are meant to handle.
+- Wallets can help users avoid receiving unsupported or unwanted tokens (e.g., memecoins).
+- Regulated or risk-managed accounts can restrict accepted senders.
+- Embedded-wallet and wallet-as-a-service providers can expose receive policies as business controls for their customers.
+- Support teams can surface blocked transfers for recovery instead of treating every mismatch as a lost deposit.
+
+Try the [receive policies demo](https://tempo.xyz/receive-policies) to see the credited, held, and recovery flow.
+
+Read the technical specification at [TIP-1028](https://tips.sh/1028).
+
+### Admin access keys
+
+Admin access keys let an account delegate key management without requiring the root wallet for every key-management action. This helps partners build smoother passkey and delegated-access flows while keeping key management tied to the user's account.
+
+Practical benefits:
+
+- A user can add a new device or passkey from an existing admin key.
+- Wallets and wallet-as-a-service providers can show a clear distinction between root keys, admin keys, and limited access keys.
+- Apps can support account-controlled admin signing checks onchain.
+- Recovery and delegated-access flows can reduce dependence on the root EOA.
+- Contracts can use canonical keychain verification through `verifyKeychain` and `verifyKeychainAdmin`.
+
+Admin keys are only for key management and admin verification. They can authorize and revoke other keys, but they cannot carry spending limits, call scopes, or expiry settings.
+
+Read the technical specification at [TIP-1049](https://tips.sh/1049).
+
+## Compatible SDK releases
+
+T6-compatible SDK releases will be listed here as they ship.
+
+## What operators and integrators should know
+
+T6 is mostly additive. Integrators, indexers, wallets, and partner infrastructure should review the notes below before activation.
+
+### For receive policies
+
+Wallets, explorers, and indexers should treat held sends as their own delivery state.
+
+In user interfaces, distinguish:
+
+- **Failed:** the normal token checks failed and the transaction reverted.
+- **Credited:** the receiver accepted the send and received the funds.
+- **Held:** the transaction succeeded, but the receiver's policy held the funds for recovery instead of crediting the receiver.
+
+For receivers and integrators, the operating flow is:
+
+1. Decide which tokens and senders the account should accept.
+2. Choose who can recover held funds.
+3. Set the receive policy on the account, or on the master account for virtual-address deposit flows.
+4. Warn users before sends that are likely to be held.
+5. Index blocked events and store the receipt fields.
+6. Review, claim, or reroute held receipts when needed.
+
+- Receive policies are configured on the TIP-403 precompile with `setReceivePolicy(...)` and enforced through `validateReceivePolicy(...)`. The token's existing TIP-403 policy still runs first and still reverts on failure.
+- Blocked inbound `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `systemTransferFrom`, `mint`, and `mintWithMemo` calls still succeed, but delivery is redirected to `ReceivePolicyGuard` at `RECEIVE_POLICY_GUARD_ADDRESS`.
+- Senders observing a successful `Transfer` event from the host TIP-20 to `RECEIVE_POLICY_GUARD_ADDRESS` should not assume the receiver was credited. Wallets and accounting systems should read the guard receipt to track redirected funds.
+- Blocked-transfer receipts are not enumerable onchain. Wallets and dashboards that surface claimable funds need indexers that listen for the `TransferBlocked` event emitted by `ReceivePolicyGuard`.
+- TIP-1022 virtual addresses are resolved to the master address before any receive-policy check. Receipts are recorded against the master while preserving the original `to` for attribution.
+- `approve`, `permit`, and `burn` are unaffected. Fee deposits and refunds (`transfer_fee_pre_tx` / `transfer_fee_post_tx`) are also unaffected.
+
+### For admin access keys
+
+Wallets, account dashboards, SDKs, and contracts should show admin keys as a distinct account-management role.
+
+In user interfaces, distinguish:
+
+- **Root key:** the account's root EOA key.
+- **Admin key:** an access key that can manage other keys and satisfy admin verification checks.
+- **Limited access key:** an access key scoped to spending limits, allowed calls, or expiry.
+
+For account and app integrators, the operating flow is:
+
+1. Show whether each key can manage other keys.
+2. Make admin-key creation and revocation visible in account activity.
+3. Avoid presenting admin keys as spending-limited keys; they are for key management, not scoped spending.
+4. Use `verifyKeychainAdmin` when a contract needs "root key or admin key of this account signed this" semantics.
+5. Domain-separate any digest passed to `verifyKeychainAdmin` with context such as chain ID, contract address, and account address.
+
+- The `AuthorizedKey` packed storage slot gains a new `is_admin` boolean at byte 11.
+- Admin keys cannot carry spending limits, call scopes, or expiry. Authorizations that combine `admin = true` with non-default `enforceLimits`, `allowedCalls`, or `expiry` are rejected.
+- `AccountKeychain` adds `authorizeAdminKey(keyId, signatureType, witness)` for provisioning admin keys. The existing `KeyAuthorized` event is unchanged, and a new `AdminKeyAuthorized(account, publicKey)` event is emitted alongside it when `admin = true`.
+- TIP-1020 `SignatureVerifier` adds `verifyKeychain(account, digest, sig)` and `verifyKeychainAdmin(account, digest, sig)`. These methods combine signature recovery with key-status checks.
+- The RLP `KeyAuthorization` encoding gains an optional trailing `is_admin` flag and `account` field in the signed payload. SDK encoders and decoders should update in lockstep.
+- `verifyKeychainAdmin` does not bind the `account` argument into the signed `digest`. Callers should include a replay domain, such as chain ID, contract address, and account address, in the digest they ask users or keys to sign.
