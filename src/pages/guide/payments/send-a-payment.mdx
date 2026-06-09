@@ -14,6 +14,15 @@ import { Tabs, Tab } from 'vocs'
 
 Send stablecoin payments between accounts on Tempo. Payments can include optional memos for reconciliation and tracking.
 
+:::warning[Coming with T6 — confirm delivery, not just transaction success]
+After the [T6 network upgrade](/protocol/upgrades/t6), a blocked TIP-20 `transfer` / `transferFrom` still succeeds, but credits `RECEIVE_POLICY_GUARD_ADDRESS` instead of the intended receiver.
+
+- Before marking a payment, withdrawal, or deposit delivered, confirm the `Transfer` recipient is the intended receiver or its TIP-1022 master.
+- Index `ReceivePolicyGuard.TransferBlocked` so redirected funds can be surfaced and claimed later.
+
+See [account-level receive policies on the T6 upgrade page](/protocol/upgrades/t6#account-level-receive-policies-tip-1028).
+:::
+
 ## Demo
 
 By the end of this guide you will be able to send payments on Tempo with an optional memo.
