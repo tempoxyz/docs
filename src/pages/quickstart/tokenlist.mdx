@@ -31,10 +31,10 @@ As an example, here's Tempo's tokenlist, fetched from [tokenlist.tempo.xyz/list/
 
 ## Adding a New Token
 
-:::info[Coming with T5]
-The [T5 network upgrade](/protocol/upgrades/t5) introduces an optional on-chain `logoURI` field on every TIP-20 token ([TIP-1026](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1026.md)). After activation, token issuers can publish their official icon directly on the token contract, and any wallet or explorer can render it without going through this registry. Most issuers will still want to register here for richer metadata extensions (`coingeckoId`, `bridgeInfo`, display `label`) and as a fallback icon for clients that don't yet read on-chain `logoURI`.
+:::info[Changed with T5]
+The [T5 network upgrade](/protocol/upgrades/t5) introduced an optional on-chain `logoURI` field on every TIP-20 token ([TIP-1026](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1026.md)). Token issuers can publish their official icon directly on the token contract, and any wallet or explorer can render it without going through this registry. Most issuers will still want to register here for richer metadata extensions (`coingeckoId`, `bridgeInfo`, display `label`) and as a fallback icon for clients that don't yet read on-chain `logoURI`.
 
-Until T5 activates, the registry flow described below is the only path. For the on-chain `logoURI` surface area shipping with T5, see the [Optional logoURI in TIP-20 section of the T5 page](/protocol/upgrades/t5#optional-logouri-in-tip-20-tip-1026).
+Token issuers can now use on-chain `logoURI` for official icons. The registry flow below is still useful for richer metadata extensions (`coingeckoId`, `bridgeInfo`, display `label`) and as a fallback for clients that do not read on-chain `logoURI`. See the [Optional logoURI in TIP-20 section of the T5 page](/protocol/upgrades/t5#optional-logouri-in-tip-20-tip-1026).
 :::
 
 1. **Fork** [tempoxyz/tempo-apps](https://github.com/tempoxyz/tempo-apps)

@@ -4,8 +4,8 @@ description: Technical specification for the Fee AMM enabling automatic stableco
 
 # Fee AMM Specification
 
-:::info[Coming with T5]
-The [T5 network upgrade](/protocol/upgrades/t5) introduces two-hop FeeAMM routing ([TIP-1033](https://tips.sh/1033)). If there is insufficient liquidity on the direct pool between the user's fee token and the validator token, the FeeAMM then considers routing from the user's fee token to that token's quote token to the validator's token. As a result, post-T5 fee conversion may now reserve and consume liquidity from two pools.
+:::info[Changed with T5]
+The [T5 network upgrade](/protocol/upgrades/t5) introduced two-hop FeeAMM routing ([TIP-1033](https://tips.sh/1033)). If there is insufficient liquidity on the direct pool between the user's fee token and the validator token, the FeeAMM then considers routing from the user's fee token to that token's quote token to the validator's token. As a result, fee conversion may now reserve and consume liquidity from two pools.
 :::
 
 ## Abstract

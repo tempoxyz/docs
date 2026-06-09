@@ -64,12 +64,10 @@ uint128 orderId = exchange.place(
 
 ### Flip Orders
 
-:::info[Coming with T5]
-The [T5 network upgrade](/protocol/upgrades/t5) changes flip-order behavior in two ways:
+:::info[Changed with T5]
+The [T5 network upgrade](/protocol/upgrades/t5) changed flip-order behavior in two ways:
 - `flipTick == tick` becomes valid ([TIP-1030](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1030.md))
 - A filled flip order keeps the same `orderId` and emits a new `OrderFlipped` event instead of a fresh `OrderPlaced` ([TIP-1056](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1056.md))
-
-Until T5 activates, the behavior described below still applies. Developers updating indexers, SDKs, or contract code should see the [T4 → T5 migration appendix](#t4--t5-migration) below.
 :::
 
 Special orders that automatically reverse to the opposite side when completely filled, creating perpetual liquidity similar to an automated market maker pool.
@@ -87,8 +85,9 @@ function placeFlip(
 **Parameters:**
 - All parameters from `place()`, plus:
 - `flipTick` - The price where the order will flip to when filled
-  - Must be greater than `tick` if `isBid` is true
-  - Must be less than `tick` if `isBid` is false
+  - May equal `tick`
+  - Otherwise, commonly greater than `tick` if `isBid` is true
+  - Otherwise, commonly less than `tick` if `isBid` is false
 
 **Returns:**
 - `orderId` - Unique identifier for this flip order
@@ -107,7 +106,7 @@ uint128 orderId = exchange.placeFlip(
 
 When this order is completely filled:
 1. You buy 1000 USDG at $0.9990
-2. A new order automatically sells 1000 USDG at $1.0010
+2. The same order ID automatically rests as an ask for 1000 USDG at $1.0010 and emits `OrderFlipped`
 3. When that fills, it flips back to a bid at $0.9990
 4. This continues indefinitely, earning the spread each time
 
@@ -184,10 +183,10 @@ Cancellations execute immediately, and any unfilled portion of your order is ref
 You can only cancel your own orders. Attempting to cancel another user's order will revert.
 :::
 
-## T4 → T5 migration
+## T5 integration notes
 
 :::info[Migration appendix]
-This section is for DEX integrators preparing for the [T5 network upgrade](/protocol/upgrades/t5). For a summary of what changes, see the [Coming with T5 callout](#flip-orders) under Flip Orders. Once T5 activates on Testnet (Moderato) and Mainnet (Presto), the body of this page will be rewritten to describe post-T5 behavior canonically and this appendix will be removed in a future docs revision.
+This section captures post-T5 integration details for DEX integrators. See the [T5 network upgrade](/protocol/upgrades/t5) page for the upgrade summary.
 :::
 
 ### Action items for integrators
@@ -205,7 +204,6 @@ This section is for DEX integrators preparing for the [T5 network upgrade](/prot
 **Smart contracts and tooling:**
 
 - Drop any assertion that `flipTick != tick`
-- If you support both pre-T5 and post-T5 networks, branch on the network version or activation timestamp
+- If you support historical pre-T5 data and current post-T5 data, branch on the network version or activation timestamp
 
 See the [compatibility section of TIP-1056](https://tips.sh/1056#compatibility) for additional migration guidance.
-

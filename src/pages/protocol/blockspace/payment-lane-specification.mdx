@@ -4,8 +4,8 @@ description: Technical specification for Tempo payment lanes ensuring dedicated 
 
 # Payment Lane Specification
 
-:::info[Coming with T5]
-The [T5 network upgrade](/protocol/upgrades/t5) replaces the pre-T5 TIP-20 prefix-only consensus classifier with TIP-1045's allow-listed call shapes ([TIP-1045](https://tips.sh/1045)). The allow-list covers TIP-20 calls and the new `TIP20ChannelReserve` precompile ([TIP-1034](https://tips.sh/1034)), so payment-channel reserve transactions become first-class payment-lane traffic. Indexers, explorers, and payment processors that classify "payments" should pick up the new selector list before activation. Until T5 activates, the prefix-based classification described below still applies.
+:::info[Changed with T5]
+The [T5 network upgrade](/protocol/upgrades/t5) replaces the pre-T5 TIP-20 prefix-only consensus classifier with TIP-1045's allow-listed call shapes ([TIP-1045](https://tips.sh/1045)). The allow-list covers TIP-20 calls and the new `TIP20ChannelReserve` precompile ([TIP-1034](https://tips.sh/1034)), so payment-channel reserve transactions become first-class payment-lane traffic. Indexers, explorers, and payment processors that classify "payments" should use the T5 selector list instead of the pre-T5 prefix-only classifier.
 :::
 
 ## Abstract

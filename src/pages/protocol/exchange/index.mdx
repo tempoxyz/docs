@@ -12,8 +12,8 @@ The exchange operates as a singleton precompiled contract at address `0xdec00000
 
 Trading pairs are determined by each token's quote token. All TIP-20 tokens specify a quote token for trading on the exchange. See [Quote Tokens](/protocol/exchange/quote-tokens) for more information on quote token selection and the optional [pathUSD](/protocol/exchange/quote-tokens#pathusd) stablecoin. See the [Stablecoin DEX Specification](/protocol/exchange/spec) for detailed information on the exchange structure.
 
-:::info[Coming with T5]
-The [T5 network upgrade](/protocol/upgrades/t5) changes flip-order behavior: `flipTick == tick` becomes valid ([TIP-1030](https://tips.sh/1030)), and a filled flip order keeps the same `orderId` and emits a new `OrderFlipped` event instead of a fresh `OrderPlaced` ([TIP-1056](https://tips.sh/1056)). See the [T4 → T5 migration appendix](/protocol/exchange/providing-liquidity#t4--t5-migration) on the Providing Liquidity page.
+:::info[Changed with T5]
+The [T5 network upgrade](/protocol/upgrades/t5) changed flip-order behavior: `flipTick == tick` is valid ([TIP-1030](https://tips.sh/1030)), and a filled flip order keeps the same `orderId` and emits a new `OrderFlipped` event instead of a fresh `OrderPlaced` ([TIP-1056](https://tips.sh/1056)). See the [T5 integration notes](/protocol/exchange/providing-liquidity#t5-integration-notes) on the Providing Liquidity page.
 
 T5 also adds the StablecoinDEX to the [Implicit Approvals List](/protocol/upgrades/t5#tip-1035-implicit-approvals-list) ([TIP-1035](https://tips.sh/1035)), so users no longer need to pre-approve the DEX before placing orders or swapping — saving a wallet prompt and the gas cost of an allowance write.
 :::

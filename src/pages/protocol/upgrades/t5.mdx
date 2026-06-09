@@ -54,7 +54,7 @@ Anything that classifies transactions as "payments" (indexers, explorers, paymen
 
 ### Persistent order IDs across flips (TIP-1056)
 
-Flipped orders keep the same `orderId` and emit a new `OrderFlipped` event instead of `OrderPlaced`. Indexers should handle `OrderFlipped` and stop expecting a new `orderId` per flip. Frontends and SDKs surfacing order status should display the persistent ID. See the [T4 → T5 migration appendix on the Providing Liquidity page](/protocol/exchange/providing-liquidity#t4--t5-migration) and the [compatibility section of TIP-1056](https://tips.sh/1056#compatibility).
+Flipped orders keep the same `orderId` and emit a new `OrderFlipped` event instead of `OrderPlaced`. Indexers should handle `OrderFlipped` and stop expecting a new `orderId` per flip. Frontends and SDKs surfacing order status should display the persistent ID. See the [T5 integration notes on the Providing Liquidity page](/protocol/exchange/providing-liquidity#t5-integration-notes) and the [compatibility section of TIP-1056](https://tips.sh/1056#compatibility).
 
 ### Optional `logoURI` in TIP-20 (TIP-1026)
 
