@@ -64,12 +64,6 @@ uint128 orderId = exchange.place(
 
 ### Flip Orders
 
-:::info[Changed with T5]
-The [T5 network upgrade](/protocol/upgrades/t5) changed flip-order behavior in two ways:
-- `flipTick == tick` becomes valid ([TIP-1030](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1030.md))
-- A filled flip order keeps the same `orderId` and emits a new `OrderFlipped` event instead of a fresh `OrderPlaced` ([TIP-1056](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1056.md))
-:::
-
 Special orders that automatically reverse to the opposite side when completely filled, creating perpetual liquidity similar to an automated market maker pool.
 
 ```solidity
@@ -85,9 +79,8 @@ function placeFlip(
 **Parameters:**
 - All parameters from `place()`, plus:
 - `flipTick` - The price where the order will flip to when filled
-  - May equal `tick`
-  - Otherwise, commonly greater than `tick` if `isBid` is true
-  - Otherwise, commonly less than `tick` if `isBid` is false
+  - Must be greater than or equal to `tick` if `isBid` is true
+  - Must be less than or equal to `tick` if `isBid` is false
 
 **Returns:**
 - `orderId` - Unique identifier for this flip order
@@ -159,7 +152,7 @@ Orders follow a specific lifecycle:
 2. **Filling**: As market orders execute against your order:
    - Your order fills partially or completely
    - Proceeds are credited to your DEX balance
-   - If a flip order fills completely, a new order is immediately created on the opposite side
+   - If a flip order fills completely, the same `orderId` is immediately rewritten on the opposite side and an `OrderFlipped` event is emitted
 
 ## Cancelling Orders
 
@@ -183,19 +176,13 @@ Cancellations execute immediately, and any unfilled portion of your order is ref
 You can only cancel your own orders. Attempting to cancel another user's order will revert.
 :::
 
-## T5 integration notes
-
-:::info[Migration appendix]
-This section captures post-T5 integration details for DEX integrators. See the [T5 network upgrade](/protocol/upgrades/t5) page for the upgrade summary.
-:::
-
-### Action items for integrators
+## Flip-order indexing
 
 **Indexers and analytics:**
 
-- Subscribe to the new `OrderFlipped(orderId, newSide, newTick, ...)` event on the DEX
-- Stop expecting a freshly allocated `orderId` after each flip; key order state by `(orderId)` and let it change side and tick over its lifetime
-- Stop expecting `nextOrderId` to advance per flip
+- Subscribe to the `OrderFlipped(orderId, newSide, newTick, ...)` event on the DEX
+- Key order state by `orderId` and let it change side and tick over its lifetime
+- Do not expect `nextOrderId` to advance per flip
 
 **Frontends and SDKs:**
 
@@ -203,7 +190,6 @@ This section captures post-T5 integration details for DEX integrators. See the [
 
 **Smart contracts and tooling:**
 
-- Drop any assertion that `flipTick != tick`
-- If you support historical pre-T5 data and current post-T5 data, branch on the network version or activation timestamp
+- Do not assert that `flipTick != tick`; same-tick flips are valid
 
 See the [compatibility section of TIP-1056](https://tips.sh/1056#compatibility) for additional migration guidance.

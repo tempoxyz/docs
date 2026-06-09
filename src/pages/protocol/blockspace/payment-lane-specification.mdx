@@ -4,10 +4,6 @@ description: Technical specification for Tempo payment lanes ensuring dedicated 
 
 # Payment Lane Specification
 
-:::info[Changed with T5]
-The [T5 network upgrade](/protocol/upgrades/t5) replaces the pre-T5 TIP-20 prefix-only consensus classifier with TIP-1045's allow-listed call shapes ([TIP-1045](https://tips.sh/1045)). The allow-list covers TIP-20 calls and the new `TIP20ChannelReserve` precompile ([TIP-1034](https://tips.sh/1034)), so payment-channel reserve transactions become first-class payment-lane traffic. Indexers, explorers, and payment processors that classify "payments" should use the T5 selector list instead of the pre-T5 prefix-only classifier.
-:::
-
 ## Abstract
 
 This specification introduces a second consensus gas constraint for **non-payment** transactions. Transactions are classified as either payments or non-payments based solely on their transaction data, without requiring any access to blockchain state. For a block to be valid, total `gas_used` by the block must be less than the `gas_limit`. Non-payment transactions executed in the proposer's lane (i.e. before the gas incentive section) must consume at most `general_gas_limit`, a new field added to the header. Once that budget is exhausted, additional inclusion is constrained by the remaining shared gas budget.
@@ -34,14 +30,14 @@ Non-payment transactions in the proposer's lane can only fill up to `general_gas
 
 A transaction is classified as a **payment transaction** when:
 
-  1.  the recipient address (`tx.to`) starts with the TIP-20 payment prefix `0x20c0000000000000000000000000`, or,
-  2. for TempoTransactions, every entry in `tx.calls` targets an address starting with the TIP-20 payment prefix `0x20c0000000000000000000000000`.
+1. Every call in the transaction matches an allow-listed payment call shape.
+2. The transaction `access_list` is empty.
+3. The transaction `authorization_list` and `tempo_authorization_list` are empty.
+4. If `key_authorization` is present, `len(rlp(key_authorization)) <= 1024` bytes.
 
 This classification is performed entirely on the transaction payload, no account state is consulted.
 
-:::info
-Later upgrades may enable other kinds of transactions to be classified as payment transactions as well.
-:::
+The payment call allow-list includes TIP-20 payment and mint/burn/approval calls, plus the `TIP20ChannelReserve` payment-channel precompile calls. Calls with unrecognized selectors, malformed ABI encoding, disallowed targets, non-empty auxiliary payloads, or dynamic calldata above the allow-list size bound are classified as non-payment transactions. See [TIP-1045](https://tips.sh/1045) for the complete selector table and ABI constraints.
 
 ### 2. Ordering of Transactions
 

@@ -4,10 +4,6 @@ description: Technical specification for the Fee AMM enabling automatic stableco
 
 # Fee AMM Specification
 
-:::info[Changed with T5]
-The [T5 network upgrade](/protocol/upgrades/t5) introduced two-hop FeeAMM routing ([TIP-1033](https://tips.sh/1033)). If there is insufficient liquidity on the direct pool between the user's fee token and the validator token, the FeeAMM then considers routing from the user's fee token to that token's quote token to the validator's token. As a result, fee conversion may now reserve and consume liquidity from two pools.
-:::
-
 ## Abstract
 
 This specification defines a system of one-way Automated Market Makers (AMMs) designed to facilitate gas fee payments from a user using one stablecoin (the `userToken`) to a validator who prefers a different stablecoin (the `validatorToken`). Each AMM handles fee swaps from a `userToken` to a `validatorToken` at one price (0.9970 `validatorToken` per `userToken`), and allows rebalancing in the other direction at another fixed price (1.0015 `userToken` per `validatorToken`).
@@ -203,6 +199,7 @@ Returns the amount of accumulated fees for a validator and specific token that c
 - **Purpose**: Convert tokens paid by users as fees to tokens preferred by validators
 - **Settlement**: Immediate during transaction execution
 - **Access**: Protocol only
+- **Routing**: If the direct `userToken → validatorToken` pool has insufficient liquidity, the Fee AMM tries one two-hop route through `userToken.quoteToken()`. Both hops must have sufficient liquidity. The validator receives `floor(floor(actualSpending × 9970 / 10000) × 9970 / 10000)` on the two-hop path.
 
 #### Rebalancing Swaps
 - **Rate**: Fixed at n=0.9985 (swapper receives 1 of the user token for every 0.9985 that they put in of the validator's preferred token)

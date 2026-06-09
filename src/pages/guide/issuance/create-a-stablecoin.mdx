@@ -15,10 +15,6 @@ Create your own stablecoin on Tempo using the [TIP-20 token standard](/protocol/
 TIP-20 tokens are designed specifically for payments with built-in compliance features, role-based permissions, 
 and integration with Tempo's payment infrastructure.
 
-:::info[Changed with T5]
-The [T5 network upgrade](/protocol/upgrades/t5) added a 7-arg `createToken` overload that accepts an on-chain `logoURI` at creation ([TIP-1026](https://tips.sh/1026)). Wallets and explorers can read the icon directly from the token contract via `logoURI()`, without going through the [tokenlist registry](/quickstart/tokenlist). The previous `createToken` overload is unchanged. Per [TIP-1026's recommended formats](https://tips.sh/1026#recommended-formats), use a square, single-frame rasterized image (PNG or WebP) for `logoURI`. SVG is allowed by the scheme allowlist but not recommended. See the [Optional logoURI in TIP-20 section of the T5 page](/protocol/upgrades/t5#optional-on-chain-logouri) for the full surface area.
-:::
-
 ## Demo
 
 By the end of this guide, you will be able to create a stablecoin on Tempo.
