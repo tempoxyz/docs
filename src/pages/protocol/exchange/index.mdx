@@ -15,7 +15,7 @@ Trading pairs are determined by each token's quote token. All TIP-20 tokens spec
 :::info[Changed with T5]
 The [T5 network upgrade](/protocol/upgrades/t5) changed flip-order behavior: `flipTick == tick` is valid ([TIP-1030](https://tips.sh/1030)), and a filled flip order keeps the same `orderId` and emits a new `OrderFlipped` event instead of a fresh `OrderPlaced` ([TIP-1056](https://tips.sh/1056)). See the [T5 integration notes](/protocol/exchange/providing-liquidity#t5-integration-notes) on the Providing Liquidity page.
 
-T5 also adds the StablecoinDEX to the [Implicit Approvals List](/protocol/upgrades/t5#tip-1035-implicit-approvals-list) ([TIP-1035](https://tips.sh/1035)), so users no longer need to pre-approve the DEX before placing orders or swapping — saving a wallet prompt and the gas cost of an allowance write.
+T5 also added the StablecoinDEX to the [Implicit Approvals List](/protocol/upgrades/t5#implicit-approvals) ([TIP-1035](https://tips.sh/1035)), so users no longer need to pre-approve the DEX before placing orders or swapping — saving a wallet prompt and the gas cost of an allowance write.
 :::
 
 The exchange supports three types of orders, each with different execution behavior:
