@@ -22,12 +22,13 @@ Mainnet node operators needed to upgrade to the T5-compatible release (v1.8.0) b
 
 ## Overview
 
-T5 focuses on four integration areas:
+T5 focuses on four integration areas, plus a storage correctness fix:
 
 - **Cheaper payment sessions.** The `TIP20ChannelReserve` precompile gives MPP and other session-based payment apps a protocol-native reserve path.
 - **Clearer DEX state.** Flip orders can use the same tick on both sides and keep the same `orderId` after each flip.
 - **Simpler fee-token liquidity.** FeeAMM routing can use two hops, so issuers usually do not need a direct pool against every validator payout token.
 - **Better token and key metadata.** TIP-20 tokens can expose an on-chain `logoURI`, listed precompiles can pull TIP-20 tokens without a separate approval, and key authorizations can include an app-defined witness digest.
+- **Storage correctness fix.** Shrinking writes to dynamic precompile storage clear their stale tail slots at the hardfork boundary ([TIP-1057](https://tips.sh/1057)).
 
 Most T5 changes are additive: existing TIP-20 tokens, MPP contracts, and non-flip DEX flows continue to work.
 
@@ -97,6 +98,14 @@ Read the technical specification at [TIP-1035](https://tips.sh/1035).
 `key_authorization` now supports an optional `witness: bytes32` field. Apps can bind one key-authorization signature to an application challenge, which removes the need for a separate challenge signature in login or delegated-access flows.
 
 Read the technical specification at [TIP-1053](https://tips.sh/1053).
+
+### Storage correctness fix
+
+T5 gates one precompile storage fix at the hardfork boundary. Overwriting a `Vec`, `String`, or `Bytes` value with a shorter one used to leave the trailing slots populated, so reads past the new length returned stale data. T5 clears those slots on shrinking writes.
+
+This changes storage state and gas at the activation boundary, but no public ABI changes and no integrator action is required.
+
+Read the technical specification at [TIP-1057](https://tips.sh/1057).
 
 ## Compatible SDK releases
 
