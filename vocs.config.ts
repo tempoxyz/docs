@@ -1290,6 +1290,10 @@ export default defineConfig({
             link: '/learn/tempo/native-stablecoins',
           },
           {
+            text: 'Receive Policies',
+            link: '/learn/tempo/receive-policies',
+          },
+          {
             text: 'Modern Transactions',
             link: '/learn/tempo/modern-transactions',
           },
