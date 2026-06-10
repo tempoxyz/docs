@@ -735,11 +735,11 @@ export default defineConfig({
                 link: '/protocol/upgrades/t6',
               },
               {
-                text: 'T5',
+                text: 'T5 (Latest)',
                 link: '/protocol/upgrades/t5',
               },
               {
-                text: 'T4 (Latest)',
+                text: 'T4',
                 link: '/protocol/upgrades/t4',
               },
               {
