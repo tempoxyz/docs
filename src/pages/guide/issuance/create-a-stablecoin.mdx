@@ -15,10 +15,6 @@ Create your own stablecoin on Tempo using the [TIP-20 token standard](/protocol/
 TIP-20 tokens are designed specifically for payments with built-in compliance features, role-based permissions, 
 and integration with Tempo's payment infrastructure.
 
-:::info[Set a token logo at creation]
-The TIP-20 factory exposes a 7-arg `createToken` overload that accepts an on-chain `logoURI` at creation ([TIP-1026](https://tips.sh/1026)). Wallets and explorers can then read the icon directly from the token contract via `logoURI()`, without going through the [tokenlist registry](/quickstart/tokenlist). Per [TIP-1026's recommended formats](https://tips.sh/1026#recommended-formats), use a square, single-frame rasterized image (PNG or WebP); SVG is allowed by the scheme allowlist but not recommended. See [Optional on-chain logoURI](/protocol/upgrades/t5#optional-on-chain-logouri).
-:::
-
 ## Demo
 
 By the end of this guide, you will be able to create a stablecoin on Tempo.
@@ -153,6 +149,8 @@ export const config = createConfig({
 Now that we have some input fields, we need to add some logic to handle the submission of the form to create the stablecoin.
 
 After this step, your users will be able to create a stablecoin by clicking the "Create" button!
+
+Tokens can also carry an optional on-chain `logoURI` ([TIP-1026](https://tips.sh/1026)) that wallets and explorers read directly from the token contract. It's set on the token contract and is independent of this creation flow; for the recommended format, use a square, rasterized PNG or WebP (max 256 bytes; `https`, `http`, `ipfs`, or `data` scheme).
 
 :::warning
 The `currency` field is **immutable** after token creation and affects fee payment eligibility, DEX routing, and quote token pairing. See [Currency Declaration](/protocol/tip20/overview#currency-declaration) for guidelines on choosing the right value. **Only `USD` stablecoins can be used to pay transaction fees on Tempo.**

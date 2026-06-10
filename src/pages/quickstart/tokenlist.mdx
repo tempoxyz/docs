@@ -31,10 +31,6 @@ As an example, here's Tempo's tokenlist, fetched from [tokenlist.tempo.xyz/list/
 
 ## Adding a New Token
 
-:::info[On-chain logoURI]
-TIP-20 tokens can also expose an optional on-chain `logoURI` field ([TIP-1026](https://tips.sh/1026), shipped in T5) that wallets and explorers read directly from the token contract. Most issuers still register here for richer metadata extensions (`coingeckoId`, `bridgeInfo`, display `label`) and as a fallback icon for clients that don't read on-chain `logoURI`. See [Optional on-chain logoURI](/protocol/upgrades/t5#optional-on-chain-logouri).
-:::
-
 1. **Fork** [tempoxyz/tempo-apps](https://github.com/tempoxyz/tempo-apps)
 
 2. **Add token** to `data/<chain_id>/tokenlist.json` in `apps/tokenlist`:
@@ -53,6 +49,8 @@ TIP-20 tokens can also expose an optional on-chain `logoURI` field ([TIP-1026](h
    ```
 
 3. **Add icon** to `data/<chain_id>/icons/<address>.svg` (lowercase address) in `apps/tokenlist`
+
+   Separately, TIP-20 tokens can also carry an optional on-chain `logoURI` ([TIP-1026](https://tips.sh/1026)) that wallets and explorers read directly from the token contract. Because that icon is fetched from an untrusted source, TIP-1026 recommends a square, rasterized PNG or WebP (max 256 bytes; `https`, `http`, `ipfs`, or `data` scheme). Setting it is optional and independent of this PR — registering here still adds richer metadata (`coingeckoId`, `bridgeInfo`, display `label`) and a fallback icon for clients that don't read on-chain `logoURI`.
 
 4. **Submit PR** with as much information as you think is helpful for review.
 
@@ -96,12 +94,12 @@ For **native tokens** (e.g., PathUSD), omit `bridgeInfo`:
 
 ### Icon Requirements
 
-- Format: SVG (required for this curated registry; the on-chain `logoURI` field instead recommends rasterized PNG/WebP — see [TIP-1026](https://tips.sh/1026#recommended-formats))
+- Format: SVG
 - Address filename must be lowercase (e.g., `0xabcd...1234.svg`)
 - Recommended: square aspect ratio, minimal whitespace
 
 <Callout type="info">
-A token that gets added to the tokenlist will atuomatically reflect in the Explorer in the next deployment.
+A token that gets added to the tokenlist will automatically reflect in the Explorer in the next deployment.
 </Callout>
 
 [Full OpenAPI Spec →](https://tokenlist.tempo.xyz/docs)

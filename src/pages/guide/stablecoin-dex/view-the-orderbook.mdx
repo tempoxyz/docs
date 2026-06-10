@@ -7,6 +7,10 @@ import { IndexSupplyQuery } from '../../../components/IndexSupplyQuery'
 
 # View the Orderbook
 
+:::warning[Recipes being updated]
+These SQL recipes don't yet account for [flip orders](/protocol/exchange/providing-liquidity#flip-order-indexing), which keep the same `orderId` and re-list via `OrderFlipped` when filled — results may omit or misreport flipped orders. Updated queries are in progress.
+:::
+
 Query and inspect the orderbook to see available liquidity, price levels, and individual orders on Tempo's Stablecoin DEX.
 
 ## Recommended Approach
