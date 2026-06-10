@@ -17,24 +17,23 @@ Try the [receive policies demo](https://tempo.xyz/receive-policies) to see credi
 
 ## Why receiving needs policy
 
-On most blockchains, an address can receive almost any compatible token. That flexibility is useful, but it creates operational problems for payment and financial applications:
+On most blockchains, an address can send a compatible token to any other address without the recipient's permission. That flexibility is useful, but it creates operational problems for payment and financial applications:
 
 - A customer deposit address may receive a token that the platform does not support.
 - A treasury or settlement wallet may receive funds from an address it is not allowed to interact with.
 - A stablecoin orchestrator may need to prevent users from sending one issuer's token to a deposit address meant for another asset.
 - A support team may need a clear way to identify, review, and recover funds that should not have landed in a user's balance.
 
-Receive policies move those controls to the account level. Instead of only letting token issuers decide who can send or receive a token, the receiver can also define what it is willing to accept.
+Receive policies provide a means to express for receivers to express such preferences at account level. Instead of only letting token issuers decide who can send or receive a token, a user can also define what it is willing to accept and from whom.
 
 ## What a receive policy controls
 
-An account-level receive policy can define:
+An account-level receive policy has three parts:
 
 - **Tokens**: an allowlist or blocklist of TIP-20 tokens the account can receive.
 - **Senders**: an allowlist or blocklist of addresses that can send to the account.
-- **Recovery authority**: who is allowed to move funds when an inbound send is held instead of credited.
+- **Recovery authority**: who is allowed to move funds when an inbound send is held instead of credited. This could be the sender (default), the receiver, or a designated third-party address or smart contract.
 
-All three pieces matter. The token and sender rules decide whether the account accepts an inbound transfer or mint. The recovery authority defines what happens when the account does not accept it.
 
 ## How inbound sends work
 
@@ -46,17 +45,7 @@ If those checks fail, the transaction reverts as usual. If they pass, Tempo chec
 - **Policy accepts the token and sender**: the transfer or mint is credited normally.
 - **Policy rejects the token or sender**: the transfer or mint can succeed, but the funds are held for recovery instead of being credited to the receiver.
 
-That held state is the key difference. A blocked inbound send does not have to become a confusing lost-deposit incident. The protocol records the details needed to review and recover the funds later, including the token, amount, sender, intended receiver, and reason the send was held.
-
-## Credited, held, and recovered
-
-Receive policies make inbound payment status more explicit:
-
-- **Credited** means the receiver accepted the token and sender, and the funds landed in the receiver's balance.
-- **Held** means the transaction succeeded, but the receiver's policy prevented the funds from being credited.
-- **Recovered** means the designated recovery authority moved held funds to an approved destination.
-
-The recovery authority is chosen by the receiver's policy. This could be the sender (default), the receiver, or a designated third-party address or smart contract.
+That held state is the key difference. The protocol records the details needed to review and recover the funds later, including the token, amount, sender, intended receiver, and reason the send was held.
 
 ## Common use cases
 
@@ -77,10 +66,6 @@ Receivers can limit inbound funds to known assets or known counterparties. That 
 Platforms that route between stablecoins can reduce user error by preventing sends to deposit addresses that are not meant to receive a particular asset.
 
 ## What builders should plan for
-
-Applications that expose receive policies should make the policy visible before a user sends funds. A good user experience should help senders understand whether a token and destination are likely to be credited or held.
-
-For receiver-side operations, dashboards and support tools should treat held sends as their own delivery state. They are not the same as failed transactions, because the transaction can succeed while delivery is redirected for recovery.
 
 Builders should plan to:
 
