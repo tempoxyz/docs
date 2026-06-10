@@ -1306,6 +1306,10 @@ export default defineConfig({
             link: '/learn/tempo/privacy',
           },
           {
+            text: 'Account-Level Receive Policies',
+            link: '/learn/tempo/account-level-receive-policies',
+          },
+          {
             text: 'Agentic Payments',
             link: '/learn/tempo/machine-payments',
           },

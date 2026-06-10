@@ -1,0 +1,75 @@
+---
+description: Learn how Tempo account-level receive policies help wallets and deposit addresses control which TIP-20 tokens and senders they accept.
+---
+
+import { Cards, Card } from 'vocs'
+
+# Account-Level Receive Policies
+
+Account-level receive policies give a receiver control over which TIP-20 tokens and senders can deliver funds to their account. They are designed for wallets, exchanges, payment processors, and deposit-address systems that need to prevent unsupported assets, unwanted counterparties, or wrong-token deposits from landing in an account by default.
+
+Receive policies are introduced by [TIP-1028](https://tips.sh/1028) as part of the [T6 network upgrade](/protocol/upgrades/t6). The policy belongs to the receiving account, not the token issuer, and is enforced during TIP-20 transfers and mints after the token's existing TIP-403 transfer-policy check.
+
+## Why Receive Policies Matter
+
+Stablecoin applications often need to control both sides of a payment. Token issuers can use transfer policies to decide who may send or receive a particular token, but the receiving account may have its own operational rules:
+
+- A wallet may only support a curated set of tokens.
+- An exchange deposit address may only accept one token or one asset network.
+- A merchant account may want to block payments from specific counterparties.
+- A compliance program may need account-level controls that are independent of issuer policy.
+
+Without account-level controls, an unwanted transfer can still reach the receiver if the token itself allows it. Receive policies move that control to the account that receives the funds.
+
+## How It Works
+
+When a TIP-20 transfer or mint targets an account with a receive policy, Tempo validates the policy against three values:
+
+- **Token**: the TIP-20 token being delivered.
+- **Sender**: the account sending the transfer, or the minter for mint operations.
+- **Receiver**: the account that owns the receive policy.
+
+The check runs after the token's TIP-403 transfer policy. If the TIP-403 policy fails, the transfer or mint still reverts. If only the receiver's policy blocks delivery, the call succeeds but funds are redirected to `ReceivePolicyGuard` instead of being delivered to the receiver.
+
+## Blocked Funds Are Claimable
+
+Receive policies are not meant to burn or strand funds. When delivery is blocked, `ReceivePolicyGuard` records a receipt for the transfer or mint. The originator or a recovery address designated by the receiver can later claim the recorded amount from the guard.
+
+For indexers and wallet UIs, the important difference is event flow:
+
+- The host TIP-20 token emits its standard `Transfer` event to `ReceivePolicyGuard` on a redirected transfer.
+- `ReceivePolicyGuard` emits a `TransferBlocked` event with the details needed to surface claimable funds.
+- Blocked receipts are not enumerable onchain, so applications should index `TransferBlocked` events.
+
+## Virtual Addresses
+
+Tempo virtual addresses resolve to the master wallet before receive-policy checks run. A deposit sent to a virtual address is evaluated against the master wallet's receive policy, and any blocked receipt is recorded against the master while preserving the original destination for attribution.
+
+This keeps deposit-address systems consistent: policy configuration belongs to the wallet that ultimately controls the funds, while the original virtual address can still be shown in product flows, support tooling, and reconciliation.
+
+## What Is Not Affected
+
+Receive policies only affect TIP-20 delivery flows. They do not change `approve`, `permit`, or `burn`. They also do not apply to fee deposits and refunds through the fee system, TIP-20 internal balances, or reward flows.
+
+## Learn More
+
+<Cards>
+  <Card
+    description="Read the migration appendix that defines the TIP-20 surface area for account-level receive policies."
+    to="/protocol/tip20/spec#t5--t6-migration"
+    icon="lucide:file-code"
+    title="TIP-20 Spec"
+  />
+  <Card
+    description="Understand how issuer-managed transfer policies differ from receiver-managed receive policies."
+    to="/protocol/tip403/overview"
+    icon="lucide:shield-check"
+    title="TIP-403 Policy Registry"
+  />
+  <Card
+    description="See how Tempo virtual addresses resolve before receive-policy checks."
+    to="/protocol/tip20/virtual-addresses"
+    icon="lucide:route"
+    title="Virtual Addresses"
+  />
+</Cards>
