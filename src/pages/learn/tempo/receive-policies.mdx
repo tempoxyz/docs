@@ -56,7 +56,7 @@ Receive policies make inbound payment status more explicit:
 - **Held** means the transaction succeeded, but the receiver's policy prevented the funds from being credited.
 - **Recovered** means the designated recovery authority moved held funds to an approved destination.
 
-The recovery authority is chosen by the receiver's policy. Depending on the use case, held funds can be controlled by the receiver, returned through a sender-controlled path, or routed through a third-party address or smart contract.
+The recovery authority is chosen by the receiver's policy. This could be the sender (default), the receiver, or a designated third-party address or smart contract.
 
 ## Common use cases
 
