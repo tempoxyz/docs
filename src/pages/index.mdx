@@ -6,13 +6,15 @@ import { Cards, Card } from 'vocs'
 
 # Tempo [Documentation, integration guides, and protocol specifications]
 
-## Welcome to Tempo! 
+## About Tempo
 
-Tempo is a general-purpose blockchain optimized for payments. Tempo is designed to be a low-cost, high-throughput blockchain with user and developer features that we believe should be core to a modern payment system.
+Tempo is a general-purpose blockchain optimized for payments. It provides stablecoin-denominated transaction fees, ~500ms finality, batch transactions, fee sponsorship, and passkey-based authentication as protocol features — enshrined in the chain rather than added through app-specific infrastructure.
 
-Tempo was designed in close collaboration with an exceptional group of [design partners](https://tempo.xyz/ecosystem) who are helping to validate the system against real payment workloads.
+Tempo targets the Osaka EVM hard fork, so standard Ethereum tooling works with only a [small number of documented differences](/quickstart/evm-compatibility). The Tempo client is open source under the Apache license, built on the [Reth](https://reth.rs/) SDK, and anyone can [run a node](/guide/node) or sync the chain.
 
-These docs cover everything from creating a wallet to building payment systems on Tempo.
+These docs cover the main tasks required to build on Tempo: connecting to the network, creating and using accounts, sending payments, issuing stablecoins, integrating machine payments, reading protocol specifications, and running a node. Several guides are interactive — you can connect a wallet and execute transactions directly from the documentation.
+
+## Get started
 
 <Cards>
   <Card
@@ -52,3 +54,29 @@ These docs cover everything from creating a wallet to building payment systems o
     icon="lucide:book-open"
   />
 </Cards>
+
+## Tempo-specific features
+
+Tempo was designed for stablecoin payment workloads, in close collaboration with [design partners](https://tempo.xyz/ecosystem) who are validating the system against production-style payment flows.
+
+### Native stablecoin support
+
+Tempo's [TIP-20](/protocol/tip20/overview) token standard extends ERC-20 with payment-specific features: dedicated payment lanes that isolate payment traffic from general-purpose contract activity, [transfer memos](/guide/payments/transfer-memos) for reconciliation, and [built-in compliance controls](/protocol/tip20/overview#compliance) for regulated issuers. Transaction fees are denominated in USD stablecoins — there is no volatile gas token. Users and validators transact entirely in the stablecoins they already hold, and the protocol handles conversion automatically through Tempo's [enshrined DEX](/protocol/exchange).
+
+### Accounts and transactions
+
+Tempo supports [batch transactions](/guide/payments/send-parallel-transactions) where multiple operations execute atomically, [fee sponsorship](/guide/payments/sponsor-user-fees) so applications can cover gas on behalf of users, [scheduled payments](/guide/use-accounts/scheduled-transactions) with protocol-enforced time windows, and [passkey authentication](/guide/use-accounts/embed-passkeys) through WebAuthn. These are protocol features, not add-ons — they work with any Tempo account without deploying custom contracts. See [Tempo Transactions](/learn/tempo/modern-transactions) for the full specification.
+
+### Agentic payments
+
+Tempo supports the [Machine Payments Protocol](https://mpp.dev) (MPP), an open standard for inline HTTP payments. Agents and applications pay per-request using stablecoins, with ~500ms settlement fast enough for synchronous request/response flows. Sub-cent fees make per-request billing practical. See the [agentic payments guide](/guide/machine-payments) for integration details.
+
+### Privacy
+
+[Tempo Zones](/guide/private-zones) provide compliant balance and transfer privacy for regulated payment flows. A zone is a private EVM-compatible chain that runs in parallel to Tempo Mainnet, with seamless cross-zone transfers. All activity within a zone is invisible to the public chain. See [Privacy on Tempo](/learn/tempo/privacy) for the design.
+
+## What these docs cover
+
+[**Quickstart**](/quickstart/integrate-tempo) pages cover network configuration, RPC endpoints, chain IDs, and EVM compatibility notes. [**Guides**](/guide/getting-funds) walk through account creation, wallet integration, payments, fee sponsorship, stablecoin issuance, exchange integration, and machine payments. [**Protocol**](/protocol) pages describe Tempo-specific standards including TIP-20, transaction formats, fee behavior, zones, and blockspace allocation. [**SDK**](/sdk) pages document the TypeScript (via [Viem](https://viem.sh/tempo) and [Wagmi](https://wagmi.sh)), [Go](/sdk/go), [Python](/sdk/python), and [Foundry](/sdk/foundry) integrations.
+
+If you are evaluating Tempo, start with the [integration guide](/quickstart/integrate-tempo) and the [EVM compatibility notes](/quickstart/evm-compatibility). If you are building an application, the [payments](/guide/payments), [accounts](/guide/use-accounts), and [machine payments](/guide/machine-payments) guides are the fastest path. If you need to understand the system at a lower level, the [protocol specification](/protocol) and [node documentation](/guide/node) describe how the chain behaves and how to run the software.
