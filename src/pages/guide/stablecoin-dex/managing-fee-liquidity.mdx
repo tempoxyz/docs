@@ -16,11 +16,9 @@ import { MintFeeAmmLiquidity } from '../../../components/guides/steps/amm/MintFe
 
 The Fee AMM converts transaction fees between stablecoins when users pay in a different token than the validator prefers. This guide shows you how to add and remove liquidity to enable fee conversions.
 
-Browse current pool reserves and route availability in the [FeeAMM explorer view](https://explore.tempo.xyz/fee-amm).
+The Fee AMM also supports multihop routing ([TIP-1033](https://tips.sh/1033)): one fee conversion can route through two pools when a direct pair between the user's fee token and the validator's payout token doesn't exist or has insufficient liquidity. The pool mechanics for adding and removing liquidity are the same either way, but a single conversion may reserve and consume liquidity from two pools you provide to instead of one.
 
-:::info[Coming with T5]
-After the [T5 network upgrade](/protocol/upgrades/t5), the Fee AMM supports multihop routing ([TIP-1033](https://tips.sh/1033)) — one fee conversion can route through two pools when a direct pair between the user's fee token and the validator's payout token doesn't exist or has insufficient liquidity for the user's transaction. Pool mechanics for adding and removing liquidity are unchanged, but a single fee conversion may now reserve and consume reserves from two pools you provide liquidity to instead of one.
-:::
+Browse current pool reserves and route availability in the [FeeAMM explorer view](https://explore.tempo.xyz/fee-amm).
 
 <Demo.Container name="Manage Fee Liquidity" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
   <Connect stepNumber={1} />

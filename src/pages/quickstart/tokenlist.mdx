@@ -31,12 +31,6 @@ As an example, here's Tempo's tokenlist, fetched from [tokenlist.tempo.xyz/list/
 
 ## Adding a New Token
 
-:::info[Coming with T5]
-The [T5 network upgrade](/protocol/upgrades/t5) introduces an optional on-chain `logoURI` field on every TIP-20 token ([TIP-1026](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1026.md)). After activation, token issuers can publish their official icon directly on the token contract, and any wallet or explorer can render it without going through this registry. Most issuers will still want to register here for richer metadata extensions (`coingeckoId`, `bridgeInfo`, display `label`) and as a fallback icon for clients that don't yet read on-chain `logoURI`.
-
-Until T5 activates, the registry flow described below is the only path. For the on-chain `logoURI` surface area shipping with T5, see the [Optional logoURI in TIP-20 section of the T5 page](/protocol/upgrades/t5#optional-logouri-in-tip-20-tip-1026).
-:::
-
 1. **Fork** [tempoxyz/tempo-apps](https://github.com/tempoxyz/tempo-apps)
 
 2. **Add token** to `data/<chain_id>/tokenlist.json` in `apps/tokenlist`:
@@ -55,6 +49,8 @@ Until T5 activates, the registry flow described below is the only path. For the 
    ```
 
 3. **Add icon** to `data/<chain_id>/icons/<address>.svg` (lowercase address) in `apps/tokenlist`
+
+   Separately, TIP-20 tokens can also carry an optional on-chain `logoURI` ([TIP-1026](https://tips.sh/1026)) that wallets and explorers read directly from the token contract. Because that icon is fetched from an untrusted source, TIP-1026 recommends a square, rasterized PNG or WebP (max 256 bytes; `https`, `http`, `ipfs`, or `data` scheme). Setting it is optional and independent of this PR — registering here still adds richer metadata (`coingeckoId`, `bridgeInfo`, display `label`) and a fallback icon for clients that don't read on-chain `logoURI`.
 
 4. **Submit PR** with as much information as you think is helpful for review.
 
@@ -100,10 +96,10 @@ For **native tokens** (e.g., PathUSD), omit `bridgeInfo`:
 
 - Format: SVG
 - Address filename must be lowercase (e.g., `0xabcd...1234.svg`)
-- Recommended: square aspect ratio, minimal whitespace 1Code has comments. Press enter to view.
+- Recommended: square aspect ratio, minimal whitespace
 
 <Callout type="info">
-A token that gets added to the tokenlist will atuomatically reflect in the Explorer in the next deployment.
+A token that gets added to the tokenlist will automatically reflect in the Explorer in the next deployment.
 </Callout>
 
 [Full OpenAPI Spec →](https://tokenlist.tempo.xyz/docs)

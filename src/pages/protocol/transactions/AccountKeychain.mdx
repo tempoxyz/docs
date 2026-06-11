@@ -171,9 +171,7 @@ interface IAccountKeychain {
 
 ### Key Authorization
 
-:::info[Coming with T5]
-The [T5 network upgrade](/protocol/upgrades/t5) adds an optional `witness: bytes32` field to `key_authorization` ([TIP-1053](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1053.md)). The protocol includes the witness in the signing hash and emits it when the key authorization is registered, but otherwise treats it as opaque and application-defined. This lets one signature both authorize an access key and bind to an application challenge — collapsing the two-prompt flow that "Sign-In with Tempo" style apps use today into a single signature. No breaking change; tooling should start populating and reading the new field after activation.
-:::
+- `key_authorization` includes an optional trailing `witness: bytes32` field. When present, the witness is included in the signing hash, checked against the account's burned-witness set, and emitted when the key authorization is registered. The protocol otherwise treats it as opaque and application-defined, so apps can bind a single access-key authorization signature to an offchain challenge.
 
 :::info[Coming with T6 — SDK encoders/decoders]
 The [T6 network upgrade](/protocol/upgrades/t6) adds **admin access keys** ([TIP-1049](https://tips.sh/1049)). For partners maintaining transaction tooling, the wire-level change is two new trailing optional fields on the `KeyAuthorization` RLP payload:
@@ -317,4 +315,3 @@ Access Keys cannot escalate their own privileges because:
 1. User signs Passkey prompt → signs transaction calling `revokeKey(keyId)`, `updateSpendingLimit(...)`, `setAllowedCalls(...)`, or `removeAllowedCalls(...)`
 2. Transaction executes, marking the Access Key as inactive or updating its restrictions
 3. Future transactions signed by that Access Key are rejected (after revocation) or evaluated against the updated restrictions
-

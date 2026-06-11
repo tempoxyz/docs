@@ -7,13 +7,11 @@ import { IndexSupplyQuery } from '../../../components/IndexSupplyQuery'
 
 # View the Orderbook
 
-Query and inspect the orderbook to see available liquidity, price levels, and individual orders on Tempo's Stablecoin DEX.
-
-:::info[Coming with T5]
-After the [T5 network upgrade](/protocol/upgrades/t5), flip orders keep the same `orderId` when they flip. A fully filled flip order emits `OrderFilled`, then re-enters the book under the same `orderId` with an `OrderFlipped` event instead of a new `OrderPlaced` event.
-
-The SQL recipes below are pre-T5 examples. They currently treat any full `OrderFilled` as the end of an order and only read active liquidity from `OrderPlaced`, so they will miss flipped orders after T5. Post-T5 indexers should read `OrderFlipped` as the latest active state for that `orderId`, including its new side, tick, and flip tick. See the [T4 → T5 migration appendix](/protocol/exchange/providing-liquidity#t4--t5-migration) for the full action list.
+:::warning[Recipes being updated]
+These SQL recipes don't yet account for [flip orders](/protocol/exchange/providing-liquidity#flip-order-indexing), which keep the same `orderId` and re-list via `OrderFlipped` when filled — results may omit or misreport flipped orders. Updated queries are in progress.
 :::
+
+Query and inspect the orderbook to see available liquidity, price levels, and individual orders on Tempo's Stablecoin DEX.
 
 ## Recommended Approach
 
