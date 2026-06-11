@@ -731,6 +731,10 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
+                text: 'T7 (Planned)',
+                link: '/protocol/upgrades/t7',
+              },
+              {
                 text: 'T6 (Next)',
                 link: '/protocol/upgrades/t6',
               },
@@ -1284,6 +1288,10 @@ export default defineConfig({
           {
             text: 'Native Stablecoins',
             link: '/learn/tempo/native-stablecoins',
+          },
+          {
+            text: 'Receive Policies',
+            link: '/learn/tempo/receive-policies',
           },
           {
             text: 'Modern Transactions',

@@ -30,6 +30,14 @@ The public testnet fee payer is free for development and testing.
 
 Mainnet hosted fee payer access is intended for approved integrations and partner programs. Use `https://sponsor.tempo.xyz/tp_<api_key>` after your integration has been approved and you have been provided an API key. For production use outside the hosted policy, contact Tempo or run your own fee payer with [`Handler.relay`](/accounts/server/handler.relay).
 
+When provided an API key, you can directly pass it in the request path in order to sponsor requests.
+
+```ts
+const feePayerUrl = `https://sponsor.tempo.xyz/${feePayerToken}`
+```
+
+Do not send the fee payer token as a bearer token or another request header. The hosted fee payer authenticates the key from the path segment.
+
 ## Using in production
 
 Run your own fee payer when you need:
@@ -46,19 +54,19 @@ See [Sponsor User Fees](/guide/payments/sponsor-user-fees) to deploy your own fe
 ### Tempo Wallet
 
 ```ts twoslash [wagmi.config.ts]
-import { tempoModerato } from 'viem/chains'
+import { tempo } from 'viem/chains'
 import { createConfig, http } from 'wagmi'
 import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [
     tempoWallet({
-      feePayer: 'https://sponsor.moderato.tempo.xyz',
+      feePayer: 'https://sponsor.tempo.xyz/tp_<api_key>',
     }),
   ],
-  chains: [tempoModerato],
+  chains: [tempo],
   transports: {
-    [tempoModerato.id]: http(),
+    [tempo.id]: http(),
   },
 })
 ```
@@ -68,31 +76,31 @@ export const config = createConfig({
 Use [`withRelay`](https://viem.sh/tempo/transports/withRelay) to route transaction fill and sponsorship requests through the hosted fee payer.
 
 ```ts twoslash [wagmi.config.ts]
-import { tempoModerato } from 'viem/chains'
+import { tempo } from 'viem/chains'
 import { withRelay } from 'viem/tempo'
 import { createConfig, http } from 'wagmi'
 import { webAuthn } from 'wagmi/tempo'
 
 export const config = createConfig({
   connectors: [webAuthn({ authUrl: '/auth' })],
-  chains: [tempoModerato],
+  chains: [tempo],
   transports: {
-    [tempoModerato.id]: withRelay(
+    [tempo.id]: withRelay(
       http(),
-      http('https://sponsor.moderato.tempo.xyz'),
+      http('https://sponsor.tempo.xyz/tp_<api_key>'),
     ),
   },
 })
 ```
 
-For mainnet, replace the testnet URL with `https://sponsor.tempo.xyz/tp_<api_key>` after your integration has been approved and you have been provided an API key.
+For testnet development, use `https://sponsor.moderato.tempo.xyz` without an API key.
 
 ## Query the fee payer
 
 ### Chain ID
 
 ```bash
-curl -X POST "https://sponsor.moderato.tempo.xyz" \
+curl -X POST "https://sponsor.tempo.xyz/tp_<api_key>" \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}'
 ```
@@ -102,7 +110,7 @@ curl -X POST "https://sponsor.moderato.tempo.xyz" \
 `eth_fillTransaction` returns a filled Tempo transaction plus metadata describing whether the request is sponsored.
 
 ```bash
-curl -X POST "https://sponsor.moderato.tempo.xyz" \
+curl -X POST "https://sponsor.tempo.xyz/tp_<api_key>" \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
