@@ -25,6 +25,37 @@ By the end of this guide you will be able to send payments on Tempo using an acc
   <SendPayment stepNumber={3} last />
 </Demo.Container>
 
+To turn this into a login flow, ask your server for a single-use challenge before connect, derive a 32-byte `witness`, and include it in the same access-key authorization. The user approves one passkey prompt, and the signed authorization can be verified by your server before the app uses the access key.
+
+```ts twoslash [login.ts]
+// @noErrors
+import { keccak256, parseUnits, stringToBytes } from 'viem'
+import { Expiry } from 'accounts'
+
+const challenge = await fetch('/api/login/challenge').then((res) => res.text())
+
+const witness = keccak256(
+  stringToBytes(`tempo-login:${window.location.origin}:${challenge}`),
+)
+
+const authorizeAccessKey = {
+  expiry: Expiry.days(7),
+  limits: [{
+    token: '0x20c0000000000000000000000000000000000001',
+    limit: parseUnits('100', 6), // 100 AlphaUSD
+  }],
+  scopes: [{
+    target: '0x20c0000000000000000000000000000000000001',
+    selector: 'transfer(address,uint256)',
+  }],
+  witness,
+}
+```
+
+If you are signing the authorization directly with Viem, pass the same `witness` to `accessKey.authorize` or `accessKey.signAuthorization`.
+
+Your server should verify that the returned key authorization was signed by the expected account, contains the expected `witness`, and matches the expiry, limits, and scopes your app requested. The protocol treats `witness` as opaque `bytes32`, so include your app origin or domain in the witness preimage and make the underlying challenge single-use.
+
 ## Steps
 
 ::::steps
