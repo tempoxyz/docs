@@ -127,6 +127,6 @@ curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_ceremony_fail
 
 If `how_often_dealer` or `how_often_player` is increasing, your node is actively participating in DKG ceremonies. After your validator has been added to the network, you should alert on these metrics, as they indicate that your validator is actively participating in the network.
 
-If your validator is not connected to other peers, but at least 3 epochs have passed, check that your node is properly configured — e.g. firewall settings are open to other peers. If you have reset your validator's state, your validator might have been blocked due to double-signing a block. In that case, please reach out to the Tempo team — even with the Tempo team, resolving this requires coordinating a new validator identity.
+If your validator is not connected to other peers, but at least 3 epochs have passed, check that your node is properly configured — e.g. firewall settings are open to other peers. If you have reset your validator's state, your validator might have been blocked due to double-signing a block. In that case, please [reach out to the Tempo team](mailto:partners@tempo.xyz) — even with the Tempo team, resolving this requires coordinating a new validator identity.
 
 
