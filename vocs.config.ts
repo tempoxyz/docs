@@ -497,6 +497,10 @@ export default defineConfig({
                 link: '/ecosystem/smart-contract-libraries',
               },
               {
+                text: 'DeFi',
+                link: '/ecosystem/defi',
+              },
+              {
                 text: 'Node Infrastructure',
                 link: '/ecosystem/node-infrastructure',
               },
