@@ -9,6 +9,8 @@ Creates an iframe dialog that embeds the auth app in a `<dialog>` element. This 
 
 Falls back to a popup on Safari (which does not support WebAuthn in cross-origin iframes) and insecure (HTTP) origins.
 
+Because Safari uses the popup fallback, open the wallet directly from the user's tap. Avoid `await`ing config fetches, dynamic imports, or other setup before calling `provider.request({ method: 'wallet_connect' })`; preload that work before rendering the button. See [`Dialog.popup`](/accounts/api/dialog.popup#mobile-safari-popup-blocking) for the recommended handler pattern.
+
 ## Usage
 
 ```ts

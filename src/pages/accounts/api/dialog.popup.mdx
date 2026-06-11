@@ -7,6 +7,47 @@ description: Open the Tempo Wallet auth UI in a popup window.
 
 Opens the auth app in a new browser window. Used as the default on Safari and insecure (HTTP) origins.
 
+## Mobile Safari popup blocking
+
+Mobile Safari blocks popups unless they open directly from the user's tap. Preload the Accounts SDK, provider, and any app configuration before the user taps a connect or payment button. In the tap handler, call the wallet request immediately, then continue the rest of your flow after the wallet responds.
+
+```tsx
+function ConnectButton({ provider }: { provider: Provider }) {
+  return (
+    <button
+      onClick={async () => {
+        const result = await provider.request({ method: 'wallet_connect' })
+        await continueAfterConnect(result)
+      }}
+    >
+      Connect
+    </button>
+  )
+}
+```
+
+Do not fetch config, dynamically import the SDK, or check app state before opening the wallet inside the tap handler. If preload has not finished, show a loading state and ask the user to tap again.
+
+```tsx
+function ConnectButton({ providerReady }: { providerReady: boolean }) {
+  return (
+    <button
+      onClick={async () => {
+        if (!providerReady) {
+          setMessage('Tempo Wallet is still loading. Tap again in a moment.')
+          return
+        }
+
+        const result = await provider.request({ method: 'wallet_connect' })
+        await continueAfterConnect(result)
+      }}
+    >
+      Connect
+    </button>
+  )
+}
+```
+
 ## Usage
 
 ```ts
