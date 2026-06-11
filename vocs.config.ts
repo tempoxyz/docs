@@ -431,7 +431,7 @@ export default defineConfig({
             link: '/quickstart/faucet',
           },
           {
-            text: 'EVM Differences',
+            text: 'EVM Compatibility',
             link: '/quickstart/evm-compatibility',
           },
           {
