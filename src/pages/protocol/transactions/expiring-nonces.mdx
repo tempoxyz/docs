@@ -1,0 +1,99 @@
+---
+title: Expiring Nonces
+description: Use Tempo expiring nonces to submit time-bounded transactions without managing sequential account nonces.
+---
+
+import { Cards, Card } from 'vocs'
+
+# Expiring Nonces
+
+Expiring nonces let Tempo Transactions use time-bounded replay protection instead of a sequential account nonce. They are useful when you need to submit independent transactions concurrently, recover cleanly from dropped transactions, or operate relayers that should not coordinate one global nonce stream.
+
+When a transaction uses an expiring nonce, Tempo identifies the transaction by its hash and accepts it only until its `validBefore` timestamp. After the validity window closes, the transaction cannot be included and the nonce entry can be evicted from protocol storage.
+
+## When to use expiring nonces
+
+Use expiring nonces for:
+
+- Parallel user actions where one delayed transaction should not block another.
+- Gasless or meta-transaction flows where relayers submit transactions for many users.
+- Short-lived automated actions that should fail closed if they are not included quickly.
+- Access-key flows where the signature should only be usable for a narrow time window.
+
+Use regular sequential nonces or 2D nonce keys when you need strict ordering within a transaction stream.
+
+## Transaction fields
+
+Set the Tempo Transaction nonce fields as follows:
+
+| Field | Value |
+| --- | --- |
+| `nonceKey` | `uint256.max` |
+| `nonce` | `0` |
+| `validBefore` | Unix timestamp in seconds, within the next 30 seconds |
+
+The transaction is valid only while `block.timestamp < validBefore`. Transactions with a `validBefore` timestamp in the past, too close to the current block timestamp, or more than 30 seconds in the future are rejected.
+
+## Foundry example
+
+Use `--tempo.expiring-nonce` and set `--tempo.valid-before` to a timestamp inside the 30-second validity window:
+
+```bash
+VALID_BEFORE=$(($(date +%s) + 25))
+
+cast send <CONTRACT_ADDRESS> 'increment()' \
+  --rpc-url $TEMPO_RPC_URL \
+  --private-key $PRIVATE_KEY \
+  --tempo.expiring-nonce \
+  --tempo.valid-before $VALID_BEFORE
+```
+
+For local testing, the same flags work with Anvil in Tempo mode:
+
+```bash
+anvil --tempo --hardfork t3
+
+VALID_BEFORE=$(($(date +%s) + 25))
+
+cast send <CONTRACT_ADDRESS> 'increment()' \
+  --rpc-url http://127.0.0.1:8545 \
+  --private-key $PRIVATE_KEY \
+  --tempo.expiring-nonce \
+  --tempo.valid-before $VALID_BEFORE
+```
+
+## Replay protection
+
+Tempo records the transaction hash with its expiry timestamp. If the same transaction hash is seen again before the expiry timestamp, it is rejected as a replay. After expiry, the entry is no longer valid and can be removed from the fixed-size expiring nonce buffer.
+
+This means expiring nonces do not create a permanent account-level nonce queue. Each transaction stands on its own, and independent transactions can be sent at the same time.
+
+## Practical guidance
+
+- Pick a `validBefore` value close to the current time. `now + 20` to `now + 25` seconds leaves enough room for normal submission without hitting the 30-second upper bound.
+- Rebuild and re-sign a transaction if the validity window expires before inclusion.
+- Do not reuse the exact same signed transaction during its validity window; the protocol treats that as a replay.
+- Keep using ordered nonce streams for workflows where transaction B must execute only after transaction A.
+
+## Related docs
+
+<Cards>
+  <Card
+    description="Submit multiple independent transactions concurrently with SDK helpers."
+    to="/guide/payments/send-parallel-transactions"
+    icon="lucide:zap"
+    title="Send Parallel Transactions"
+  />
+  <Card
+    description="Read the full transaction type and nonce field specification."
+    to="/protocol/transactions/spec-tempo-transaction"
+    icon="lucide:file-code"
+    title="Tempo Transaction Spec"
+  />
+  <Card
+    description="Read the protocol proposal for expiring nonces."
+    to="https://tips.sh/1009"
+    icon="lucide:scroll-text"
+    title="TIP-1009"
+  />
+</Cards>

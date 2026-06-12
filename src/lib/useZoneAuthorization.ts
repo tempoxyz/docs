@@ -1,17 +1,19 @@
 'use client'
 
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Hex } from 'viem'
 import { Storage as ZoneStorage } from 'viem/tempo'
 
 const zoneAuthorizationInfoTimeoutMs = 5_000
 
+type ZoneAuthorizationInfo = {
+  account: Hex
+  expiresAt: bigint
+}
+
 export type ZoneAuthClientLike = {
   zone: {
-    getAuthorizationTokenInfo: () => Promise<{
-      account: Hex
-      expiresAt: bigint
-    }>
+    getAuthorizationTokenInfo: () => Promise<ZoneAuthorizationInfo>
     signAuthorizationToken: () => Promise<{
       authentication: {
         expiresAt: number
@@ -29,6 +31,7 @@ export function useZoneAuthorization(parameters: {
   zoneClient: ZoneAuthClientLike | undefined
 }) {
   const { address, chainId, queryKey, zoneClient } = parameters
+  const queryClient = useQueryClient()
 
   const statusQuery = useQuery({
     enabled: Boolean(address && zoneClient),
@@ -66,7 +69,13 @@ export function useZoneAuthorization(parameters: {
 
         return info
       } catch (error) {
-        if (!isZoneAuthorizationError(error)) throw error
+        if (!isZoneAuthorizationClearError(error)) {
+          if (isZoneAuthorizationUnavailableError(error)) {
+            return queryClient.getQueryData<ZoneAuthorizationInfo>(queryKey) ?? null
+          }
+
+          throw error
+        }
 
         await storage.removeItem(chainStorageKey)
         if (accountToken) await storage.removeItem(accountStorageKey)
@@ -85,8 +94,22 @@ export function useZoneAuthorization(parameters: {
 
       return zoneClient.zone.signAuthorizationToken()
     },
-    onSuccess: async () => {
-      await statusQuery.refetch()
+    onSuccess: async (result) => {
+      if (address) {
+        await queryClient.cancelQueries({ queryKey })
+
+        const storage = ZoneStorage.defaultStorage()
+        const lowerAddress = address.toLowerCase()
+        await Promise.all([
+          storage.setItem(`auth:${lowerAddress}:${chainId}`, result.token),
+          storage.setItem(`auth:token:${chainId}`, result.token),
+        ])
+
+        queryClient.setQueryData(queryKey, {
+          account: address,
+          expiresAt: BigInt(result.authentication.expiresAt),
+        })
+      }
     },
   })
 
@@ -109,20 +132,27 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
         reject(error)
       }, timeoutMs)
 
-      promise.finally(() => clearTimeout(timeout))
+      promise.then(
+        () => clearTimeout(timeout),
+        () => clearTimeout(timeout),
+      )
     }),
   ])
 }
 
-function isZoneAuthorizationError(error: unknown) {
+function isZoneAuthorizationClearError(error: unknown) {
   const status = getErrorStatus(error)
   if (status === 401 || status === 403) return true
 
+  const message = getErrorMessage(error)
+  return /authorization token/i.test(message)
+}
+
+function isZoneAuthorizationUnavailableError(error: unknown) {
   const name = getErrorName(error)
   if (name === 'HttpRequestError' || name === 'TimeoutError') return true
 
-  const message = getErrorMessage(error)
-  return /authorization token/i.test(message)
+  return false
 }
 
 function getErrorMessage(error: unknown) {
