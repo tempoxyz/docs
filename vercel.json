@@ -147,6 +147,14 @@
   ],
   "rewrites": [
     {
+      "source": "/docs",
+      "destination": "/"
+    },
+    {
+      "source": "/docs/:path(.*)",
+      "destination": "/:path"
+    },
+    {
       "source": "/ingest/static/:path(.*)",
       "destination": "https://us-assets.i.posthog.com/static/:path"
     },
