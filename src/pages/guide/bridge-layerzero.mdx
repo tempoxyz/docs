@@ -14,6 +14,22 @@ There are two flavors of OFT on Tempo:
 
 Both use the same underlying LayerZero endpoint on Tempo.
 
+## USDC.e and native USDC
+
+USDC.e is the bridged representation of USDC on Tempo. It is backed 1:1 by native USDC in Stargate liquidity infrastructure.
+
+When USDC is bridged to Tempo through Stargate, native USDC is deposited into a Stargate pool and the equivalent amount of USDC.e is minted on Tempo. When USDC.e is bridged out, USDC.e is burned on Tempo and USDC is released through Stargate.
+
+The zero-transfer-fee path is between Tempo and Ethereum:
+
+| Route | Asset received | Stargate transfer fee |
+|-------|----------------|----------------------:|
+| Ethereum to Tempo | USDC.e on Tempo | 0 bps |
+| Tempo to Ethereum | Native USDC on Ethereum | 0 bps |
+| Tempo to or from other chains | Route-dependent | Quote before execution |
+
+Routes between Tempo and other chains can carry standard Stargate route fees. If an integrator needs native USDC on another chain, the preferred settlement path is to bridge USDC.e from Tempo to native USDC on Ethereum, then move USDC onward using CCTP or another supported route. The [LayerZero Value Transfer API](https://docs.layerzero.network/v2/developers/value-transfer-api/overview) can help discover and execute available routes.
+
 ## Bridged tokens on Tempo
 
 | Token | Address | Bridge |
