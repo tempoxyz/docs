@@ -5,7 +5,7 @@ import type { Chain, Client, Transport } from 'viem'
 import { parseUnits } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
 import { Actions } from 'viem/tempo'
-import { useBlockNumber, useClient, useConnection } from 'wagmi'
+import { useBlockNumber, useClient, useConnections } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { Button, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
@@ -13,10 +13,12 @@ import type { DemoStepProps } from '../types'
 
 export function AddFundsToWallet(props: DemoStepProps) {
   const { stepNumber = 2, last = false } = props
-  const { address, connector } = useConnection()
-  const hasNonWebAuthnWallet = Boolean(
-    address && connector?.id !== 'webAuthn' && connector?.id !== 'xyz.tempo',
+  const connections = useConnections()
+  const walletConnection = connections.find(
+    (c) => c.connector.id !== 'webAuthn' && c.connector.id !== 'xyz.tempo',
   )
+  const address = walletConnection?.accounts[0]
+  const hasNonWebAuthnWallet = Boolean(address)
   const queryClient = useQueryClient()
 
   const { data: balance, refetch: balanceRefetch } = Hooks.token.useGetBalance({
