@@ -19,6 +19,7 @@ export default defineConfig({
   //   height: '40px',
   //   textColor: 'white',
   // },
+  basePath: '/docs',
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
   checkDeadlinks: true,
   editLink: {
