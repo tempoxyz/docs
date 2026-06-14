@@ -1,12 +1,12 @@
 ---
-description: Technical specification for TIP-403, the policy registry system enabling whitelist and blacklist access control for TIP-20 tokens on Tempo.
+description: Technical specification for the Tempo Policy Registry (TIP-403), enabling whitelist and blacklist access control for TIP-20 tokens on Tempo.
 ---
 
-# Overview
+# Tempo Policy Registry (TIP-403) Specification
 
 ## Abstract
 
-TIP-403 provides a policy registry system that allows TIP-20 tokens to inherit access control and compliance policies. The registry supports two types of policies (whitelist and blacklist) and includes special built-in policies for common use cases. Policies can be shared across multiple tokens, enabling consistent compliance enforcement.
+The Tempo Policy Registry (TIP-403) allows TIP-20 tokens to inherit access control and compliance policies. The registry supports two types of policies (whitelist and blacklist) and includes special built-in policies for common use cases. Policies can be shared across multiple tokens, enabling consistent compliance enforcement.
 
 ## Motivation
 
@@ -223,7 +223,7 @@ interface ITIP403Registry {
 }
 ```
 
-## Usage with TIP-20 Tokens
+## Usage with Tempo Tokens
 
 TIP-20 tokens store the current TIP403 registry policy ID they adhere to in their storage. On any token transfer, they perform a TIP-403 policy check by calling `isAuthorized()` for both sender and recipient addresses. The policy to use for the token can only be set by the admin of the token.
 
@@ -268,4 +268,3 @@ return data.policyType == PolicyType.WHITELIST
 - When policyId = 0, all authorization checks must return false for every address.
 - When policyId = 1, all authorization checks must return true for every address.
 - Only the policy’s current admin may update the admin address for that policy.
-

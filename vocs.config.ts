@@ -520,7 +520,7 @@ export default defineConfig({
             link: '/protocol',
           },
           {
-            text: 'TIP-20 Tokens',
+            text: 'Tempo Tokens (TIP-20)',
             collapsed: true,
             items: [
               {
@@ -542,7 +542,7 @@ export default defineConfig({
             ],
           },
           {
-            text: 'TIP-20 Rewards',
+            text: 'Tempo Token Rewards',
             collapsed: true,
             items: [
               {
@@ -556,7 +556,7 @@ export default defineConfig({
             ],
           },
           {
-            text: 'TIP-403 Policies',
+            text: 'Tempo Policies (TIP-403)',
             collapsed: true,
             items: [
               {
