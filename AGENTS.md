@@ -29,6 +29,13 @@ Vocs-powered documentation site for Tempo protocol.
 - **Config**: `vocs.config.tsx` sets `baseUrl`, `ogImageUrl` (with `%title` and `%description` template variables), and `titleTemplate`
 - All pages automatically get proper `<title>`, `<meta description>`, Open Graph, and Twitter Card tags from frontmatter
 
+## Protocol Concept Naming
+
+- Use literal concept names in user-facing docs. Add the TIP number in parentheses only in the sidebar and when first introducing a concept if it helps disambiguate.
+- Use `Tempo Tokens (TIP-20)` in sidebar/first-introduction contexts; use `Tempo Tokens` after that.
+- Use `Tempo Token Rewards` in sidebar, concept introductions, and rewards-specific resource cards. Do not append `(TIP-20)`.
+- Keep raw TIP references for technical/spec contexts, e.g. `TIP-20 ABI`, `TIP-403 policy check`, or links titled `TIP-20 Specification`.
+
 ## Numbered Steps
 
 When writing step-by-step instructions in guides, use the `:::::steps` container directive instead of manual `### Step 1`, `#### Step 2` headings. Each step is a `###` heading inside the container. The steps are auto-numbered by the renderer.
