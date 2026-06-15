@@ -29,7 +29,7 @@ tempo consensus validators-info --rpc-url https://rpc.testnet.tempo.xyz
 
 ## My node is not connecting to peers
 
-If `consensus_network_spawner_connections` remains at `0` for more than 3 hours after your validator was added on-chain:
+If `consensus_engine_peer_manager_peers` remains at `0` for more than 3 hours after your validator was added on-chain:
 
 - Verify your firewall allows inbound connections on the ingress port you registered.
 - Verify your egress IP matches the one registered on-chain — check with `tempo consensus validator <pubkey> --rpc-url https://rpc.tempo.xyz`.
