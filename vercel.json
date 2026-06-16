@@ -143,6 +143,11 @@
       "source": "/learn/use-cases/microtransactions",
       "destination": "https://tempo.xyz/learn/microtransactions",
       "permanent": true
+    },
+    {
+      "source": "/docs",
+      "destination": "/docs/",
+      "permanent": false
     }
   ],
   "rewrites": [
