@@ -2,11 +2,11 @@
 
 Agent and editor integration metadata for Tempo.
 
-This directory contains the plugin payloads and skills referenced by the root-level AI marketplace manifests.
+This directory contains the plugin payloads and skills referenced by the AI marketplace manifests.
 
-Root-level manifests:
+Marketplace manifests:
 
-- `marketplace.json` for the `codex` marketplace
+- `.agents/plugins/marketplace.json` for the `docs` Codex marketplace
 - `.claude-plugin/marketplace.json` for the `claude` marketplace
 
 ## Remote MCP
@@ -21,7 +21,7 @@ The current server exposes docs search, page discovery, and cleaned page reads. 
 
 ## Codex
 
-The Codex plugin lives in `plugins/tempo`.
+The Codex plugin lives in `ai/plugins/tempo`.
 
 ## Claude
 
