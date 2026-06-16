@@ -1,0 +1,20 @@
+{
+  "name": "docs",
+  "interface": {
+    "displayName": "Tempo"
+  },
+  "plugins": [
+    {
+      "name": "tempo",
+      "source": {
+        "source": "local",
+        "path": "./ai/plugins/tempo"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

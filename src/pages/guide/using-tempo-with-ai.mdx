@@ -1,44 +1,106 @@
 ---
-title: Using Tempo with AI
-description: Give your AI coding agent Tempo documentation context and a wallet for autonomous transactions.
+title: Developing with LLMs
+description: Give your AI coding agent Tempo documentation context with skills, Markdown pages, and MCP.
 ---
 
-import { Cards, Card } from 'vocs'
+import { Tabs, Tab } from 'vocs'
+import { DocsLinkButton } from '../../components/DocsLinkButton.tsx'
 
-# Using Tempo with AI
+# Developing with LLMs
 
-<Cards>
-  <Card
-    description="Give your agent a wallet with spend controls to discover and pay for services on demand."
-    to="#tempo-wallet"
-    icon="lucide:wallet"
-    title="Tempo Wallet"
-  />
-  <Card
-    description="Feed your agent Tempo docs via skills, llms.txt, Markdown pages, and MCP."
-    to="#tempo-docs"
-    icon="lucide:blocks"
-    title="Tempo Docs"
-  />
-</Cards>
+## Connect to Tempo's MCP server
 
-## Tempo Wallet
+The Tempo MCP server gives agents programmatic access to Tempo documentation and related developer resources.
 
-The [Tempo CLI](/cli) gives agents a wallet with built-in spend controls and service discovery. Agents use [`tempo wallet`](/cli/wallet) to manage keys and balances, and [`tempo request`](/cli/request) to pay for services on demand.
+<Tabs stateKey="tempo-mcp-client">
+  <Tab title="Cursor">
 
-Paste this into your agent to set up a Tempo Wallet:
+<DocsLinkButton href="cursor://anysphere.cursor-deeplink/mcp/install?name=tempo&config=eyJ1cmwiOiJodHRwczovL21jcC50ZW1wby54eXoifQ%3D%3D">Install in Cursor</DocsLinkButton>
 
-:::code-group
-```bash [Claude Code]
-claude -p "Read https://tempo.xyz/SKILL.md and set up Tempo Wallet"
+To open Cursor and automatically add the Tempo MCP server, click install. Alternatively, add the following to your `~/.cursor/mcp.json` file. To learn more, see the Cursor [documentation](https://docs.cursor.com/context/model-context-protocol).
+
+```json
+{
+  "mcpServers": {
+    "tempo": {
+      "url": "https://mcp.tempo.xyz"
+    }
+  }
+}
 ```
-```bash [Amp]
-amp --execute "Read https://tempo.xyz/SKILL.md and set up Tempo Wallet"
+
+  </Tab>
+  <Tab title="VS Code">
+
+<DocsLinkButton href="https://vscode.dev/redirect/mcp/install?name=tempo&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fmcp.tempo.xyz%22%7D">Install in VS Code</DocsLinkButton>
+
+To open VS Code and automatically add the Tempo MCP server, click install. Alternatively, add the following to your `.vscode/mcp.json` file in your workspace. To learn more, see the VS Code [documentation](https://code.visualstudio.com/docs/copilot/chat/mcp-servers).
+
+```json
+{
+  "servers": {
+    "tempo": {
+      "type": "http",
+      "url": "https://mcp.tempo.xyz"
+    }
+  }
+}
 ```
-```bash [Codex CLI]
-codex exec "Read https://tempo.xyz/SKILL.md and set up Tempo Wallet"
+
+  </Tab>
+  <Tab title="Codex">
+
+To add Tempo MCP to Codex, run the following command.
+
+```bash
+codex mcp add tempo --url https://mcp.tempo.xyz
 ```
-:::
+
+  </Tab>
+  <Tab title="Claude Code">
+
+To add Tempo MCP to Claude Code, run the following command. To learn more, see the Claude Code [documentation](https://docs.anthropic.com/en/docs/claude-code/mcp).
+
+```bash
+claude mcp add --transport http tempo https://mcp.tempo.xyz
+```
+
+  </Tab>
+  <Tab title="Other">
+
+MCP is an open protocol supported by many clients. Use the server URL below with HTTP transport in any MCP-compatible client.
+
+```text
+https://mcp.tempo.xyz
+```
+
+<br />
+
+  </Tab>
+</Tabs>
+
+## Install Tempo plugins
+
+The MCP server above works on its own. Plugin bundles package that MCP server with Tempo skills and editor metadata so agents can install Tempo as a single integration.
+
+<Tabs stateKey="tempo-plugin-install">
+  <Tab title="Codex">
+
+```bash
+codex plugin marketplace add tempoxyz/docs
+codex plugin add tempo@docs
+```
+
+  </Tab>
+  <Tab title="Claude Code">
+
+```bash
+claude plugin marketplace add tempoxyz/docs
+claude plugin install tempo@claude
+```
+
+  </Tab>
+</Tabs>
 
 ## Tempo Docs
 
@@ -66,31 +128,3 @@ For LLM consumption, two [`llms.txt`](https://llmstxt.org/) files are served at 
 |---|---|
 | [`/llms.txt`](https://docs.tempo.xyz/llms.txt) | Concise index of all pages with titles and descriptions |
 | [`/llms-full.txt`](https://docs.tempo.xyz/llms-full.txt) | Complete documentation in a single file |
-
-### MCP server
-
-The docs include a built-in [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for programmatic navigation of documentation and source code.
-
-:::code-group
-```bash [Claude Code]
-claude mcp add --transport http tempo https://docs.tempo.xyz/api/mcp
-```
-```bash [Codex CLI]
-codex mcp add tempo --url https://docs.tempo.xyz/api/mcp
-```
-```bash [Amp]
-amp mcp add tempo https://docs.tempo.xyz/api/mcp
-```
-:::
-
-Or configure manually:
-
-```json
-{
-  "mcpServers": {
-    "tempo-docs": {
-      "url": "https://docs.tempo.xyz/api/mcp"
-    }
-  }
-}
-```

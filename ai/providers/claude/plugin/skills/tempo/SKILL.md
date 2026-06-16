@@ -1,0 +1,1 @@
+../../../../../plugins/tempo/skills/tempo/SKILL.md

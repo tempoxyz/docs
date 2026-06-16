@@ -33,7 +33,7 @@ download_og "Issue Stablecoins" "BUILD" "" "build--issuance"
 download_og "Exchange Stablecoins" "BUILD" "" "build--stablecoin-dex"
 download_og "Make Machine Payments" "BUILD" "" "build--machine-payments"
 download_og "Use Tempo Transactions" "BUILD" "" "build--tempo-transaction"
-download_og "Using Tempo with AI" "BUILD" "" "build--ai"
+download_og "Developing with LLMs" "BUILD" "" "build--ai"
 
 download_og "Overview" "INTEGRATE" "" "integrate--overview"
 download_og "Connect to the Network" "INTEGRATE" "" "integrate--connection-details"

@@ -1,0 +1,19 @@
+{
+  "name": "claude",
+  "metadata": {
+    "description": "Tempo Claude Code plugin marketplace."
+  },
+  "owner": {
+    "name": "Tempo",
+    "email": "support@tempo.xyz"
+  },
+  "plugins": [
+    {
+      "name": "tempo",
+      "description": "Tempo MCP and skills for Tempo docs, developer workflows, wallet, and MPP payments.",
+      "source": "./ai/providers/claude/plugin",
+      "category": "development",
+      "homepage": "https://docs.tempo.xyz/guide/using-tempo-with-ai"
+    }
+  ]
+}

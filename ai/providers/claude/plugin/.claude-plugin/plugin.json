@@ -1,0 +1,13 @@
+{
+  "name": "tempo",
+  "description": "Tempo development plugin for Claude",
+  "version": "0.1.0",
+  "author": {
+    "name": "Tempo",
+    "url": "https://tempo.xyz"
+  },
+  "homepage": "https://docs.tempo.xyz",
+  "repository": "https://github.com/tempoxyz/docs",
+  "license": "MIT",
+  "keywords": ["tempo", "stablecoins", "mcp", "payments", "mpp"]
+}

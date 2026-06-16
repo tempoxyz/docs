@@ -139,7 +139,7 @@ export default defineConfig({
         link: '/',
       },
       {
-        text: 'Using Tempo with AI',
+        text: 'Developing with LLMs',
         link: '/guide/using-tempo-with-ai',
       },
       {
