@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { waitForEnabledAction } from './private-zone-actions'
+import { authorizeAndWaitForEnabledAction } from './private-zone-actions'
 
 test.describe.configure({ retries: 0, timeout: 120000 })
 
@@ -31,17 +31,17 @@ test('prepare zone balance and withdraw from Zone A', async ({ page }) => {
   const authorizeButton = page
     .getByRole('button', { name: /^Authoriz(?:e|ing) Zone A reads$/i })
     .first()
-  await expect(authorizeButton).toBeVisible({ timeout: 30000 })
-  await expect(authorizeButton).toBeEnabled({ timeout: 90000 })
-  await authorizeButton.click()
 
   const getFundsButton = page.getByRole('button', { name: /^Get testnet pathUSD$/i }).first()
   const topUpButton = page.getByRole('button', { name: /^Approve \+ top up Zone A$/i }).first()
 
-  const initialAction = await waitForEnabledAction([
-    { locator: getFundsButton, name: 'fund' },
-    { locator: topUpButton, name: 'top-up' },
-  ])
+  const initialAction = await authorizeAndWaitForEnabledAction(
+    { locator: authorizeButton, name: 'authorize' },
+    [
+      { locator: getFundsButton, name: 'fund' },
+      { locator: topUpButton, name: 'top-up' },
+    ],
+  )
 
   if (initialAction.name === 'fund') {
     await initialAction.locator.click()
