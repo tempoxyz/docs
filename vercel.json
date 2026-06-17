@@ -154,5 +154,16 @@
       "source": "/ingest/:path(.*)",
       "destination": "https://us.i.posthog.com/:path"
     }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains"
+        }
+      ]
+    }
   ]
 }
