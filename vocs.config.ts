@@ -731,15 +731,18 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
-                text: 'T7 (Planned)',
+                text: 'T7',
+                badge: { text: 'Planned', variant: 'note' },
                 link: '/protocol/upgrades/t7',
               },
               {
-                text: 'T6 (Next)',
+                text: 'T6',
+                badge: { text: 'Next', variant: 'note' },
                 link: '/protocol/upgrades/t6',
               },
               {
-                text: 'T5 (Latest)',
+                text: 'T5',
+                badge: { text: 'Latest', variant: 'info' },
                 link: '/protocol/upgrades/t5',
               },
               {
