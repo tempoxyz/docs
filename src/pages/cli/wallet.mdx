@@ -120,6 +120,8 @@ tempo wallet services <id>
 
 The [Machine Payments Protocol](https://mpp.dev/overview) (MPP) lets any HTTP endpoint accept payments inline. The service directory indexes MPP-registered providers — each entry shows endpoint URLs, HTTP methods, pricing, and request schemas. Use it to find the right URL and payload for [`tempo request`](/cli/request).
 
+Agents that support MCP can also use the read-only services MCP server at `https://mpp.dev/mcp/services`. See [Discover MPP services](/guide/machine-payments/discover-services) for MCP setup, JSON-RPC examples, and the public catalog API.
+
 ## Manage payment sessions
 
 When you use [pay-as-you-go](/guide/machine-payments/pay-as-you-go) services, MPP opens a [session](https://mpp.dev/payment-methods/tempo/session) — a payment channel where your wallet deposits funds into a reserve contract, then pays per request using signed [vouchers](https://mpp.dev/protocol/credentials) off-chain. This avoids an on-chain transaction for every request, giving sub-100ms latency and near-zero per-request fees.

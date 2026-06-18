@@ -334,6 +334,10 @@ export default defineConfig({
                 link: '/guide/machine-payments/agent',
               },
               {
+                text: 'Discover MPP services',
+                link: '/guide/machine-payments/discover-services',
+              },
+              {
                 text: 'Server quickstart',
                 link: '/guide/machine-payments/server',
               },
