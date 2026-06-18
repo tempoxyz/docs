@@ -8,40 +8,45 @@ description: Technical specification for the Account Keychain precompile managin
 
 ## Overview
 
-The Account Keychain precompile manages authorized Access Keys for accounts, enabling Root Keys (e.g., passkeys) to provision scoped "secondary" Access Keys with expiry timestamps, recurring or one-time per-TIP20 token spending limits, and explicit call scopes that restrict which targets, selectors, and recipients an Access Key may invoke.
+The Account Keychain precompile manages authorized Access Keys for accounts, enabling Root Keys (e.g., passkeys) and admin access keys to provision secondary keys. Limited access keys can have expiry timestamps, recurring or one-time per-TIP20 token spending limits, and explicit call scopes that restrict which targets, selectors, and recipients an Access Key may invoke.
 
-`authorizeKey(...)` takes a `KeyRestrictions` tuple that bundles expiry, spending limits, and call scopes. Access-key-signed transactions cannot create contracts; use a Root Key for deployment flows.
+`authorizeKey(...)` takes a `KeyRestrictions` tuple that bundles expiry, spending limits, and call scopes. `authorizeAdminKey(...)` provisions an admin key for account key management. Access-key-signed transactions cannot create contracts; use a Root Key for deployment flows.
 
 ## Motivation
 
-The Tempo Transaction type unlocks a number of new signature schemes, including WebAuthn (Passkeys). However, for an Account using a Passkey as its Root Key, the sender will subsequently be prompted with passkey prompts for every signature request. This can be a poor user experience for highly interactive or multi-step flows. Additionally, users would also see "Sign In" copy in prompts for signing transactions which is confusing. This proposal introduces the concept of the Root Key being able to provision a (scoped) Access Key that can be used for subsequent transactions, without the need for repetitive end-user prompting. Recurring spending budgets and explicit call scoping make these keys suitable for subscriptions, connected apps, and session-key-style flows.
+The Tempo Transaction type unlocks a number of new signature schemes, including WebAuthn (Passkeys). However, for an Account using a Passkey as its Root Key, the sender will subsequently be prompted with passkey prompts for every signature request. This can be a poor user experience for highly interactive or multi-step flows. Additionally, users would also see "Sign In" copy in prompts for signing transactions which is confusing. This proposal introduces the concept of the Root Key being able to provision a scoped Access Key that can be used for subsequent transactions, without the need for repetitive end-user prompting. T6 extends this model with admin access keys for key management. Recurring spending budgets and explicit call scoping make limited keys suitable for subscriptions, connected apps, and session-key-style flows.
 
 ## Concepts
 
 ### Access Keys
 
-Access Keys are secondary signing keys authorized by an account's Root Key. They can sign transactions on behalf of the account with the following restrictions:
+Access Keys are secondary signing keys authorized by an account's Root Key or an admin key. Limited access keys can sign transactions on behalf of the account with the following restrictions:
 
 - **Expiry**: Unix timestamp when the key becomes invalid. A non-expiring `key_authorization` omits `expiry` at the transaction RLP layer; the protocol translates that omission to `u64::MAX` before calling the precompile. Direct precompile callers should pass `u64::MAX` for a non-expiring key. Literal `0` is treated as past expiry and rejected.
 - **Spending Limits**: Per-TIP20 token limits that deplete as tokens are spent
   - Limits are one-time (`period = 0`) or recurring (`period > 0`, in seconds). Recurring limits roll over to `max` when `current_timestamp >= periodEnd`.
-  - Limits can be updated by the Root Key via `updateSpendingLimit()`. An update resets `remaining` and `max` to `newLimit` but preserves the configured `period` and current `periodEnd`.
+  - Limits can be updated by the Root Key or an active admin access key via `updateSpendingLimit()`. An update resets `remaining` and `max` to `newLimit` but preserves the configured `period` and current `periodEnd`.
   - Spending limits only apply to TIP20 `transfer()`, `transferWithMemo()`, and `approve()` calls
   - Spending limits only apply when `msg.sender == tx.origin` (direct EOA calls, not contract calls)
   - Native value transfers and `transferFrom()` are NOT limited
 - **Call Scopes**: An Access Key is either unrestricted (`allowAnyCalls = true`) or restricted to an explicit allowlist of `(target, selector, recipients)` tuples. An empty allowlist with `allowAnyCalls = false` means scoped deny-all.
 - **No Contract Creation**: Access-key-signed transactions cannot perform `CREATE` or `CREATE2`, including via factory contracts. Use a Root Key for deployments.
-- **Privilege Restrictions**: Cannot authorize new keys or modify their own limits or scopes.
+- **Privilege Restrictions**: Limited access keys cannot authorize new keys or modify their own limits or scopes. Admin access keys can manage keys, but cannot carry spending limits, call scopes, or expiry.
 
 ### Authorization Hierarchy
 
 The protocol enforces a strict hierarchy at validation time:
 
 1. **Root Key**: The account's main key (derived from the account address)
-   - Can call all precompile functions, including the Root-Key-only mutators (`authorizeKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`)
+   - Can call all precompile functions, including the key-management mutators (`authorizeKey`, `authorizeAdminKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`)
    - Has no spending limits or call-scope restrictions
 
-2. **Access Keys**: Secondary authorized keys
+2. **Admin Access Keys**: Secondary authorized keys for account administration
+   - Can call key-management mutators, including `authorizeKey`, `authorizeAdminKey`, and `revokeKey`
+   - Cannot carry spending limits, call scopes, or expiry
+   - Cannot create contracts
+
+3. **Limited Access Keys**: Secondary authorized keys for scoped transactions
    - Cannot call mutable precompile functions (only view functions are allowed)
    - Subject to per-TIP20 token spending limits
    - Subject to call-scope checks during execution
@@ -53,7 +58,7 @@ The protocol enforces a strict hierarchy at validation time:
 The precompile uses a `keyId` (address) to uniquely identify each access key for an account.
 
 **Storage Mappings:**
-- `keys[account][keyId]` → Packed `AuthorizedKey` struct (signature type, expiry, enforce_limits, is_revoked)
+- `keys[account][keyId]` → Packed `AuthorizedKey` struct (signature type, expiry, enforce_limits, is_revoked, is_admin)
 - `spendingLimits[keccak256(account || keyId)][token]` → `SpendingLimitState { remaining, max, period, periodEnd }`
 - `keyScopes[keccak256(account || keyId)]` → Tree of `(target, selector, recipients)` allowlists used during call-scope checks
 - `transactionKey` → Transient storage for the key ID that signed the current transaction (slot 0)
@@ -63,6 +68,7 @@ The precompile uses a `keyId` (address) to uniquely identify each access key for
 - bytes 1-8: expiry (u64, little-endian)
 - byte 9: enforce_limits (bool)
 - byte 10: is_revoked (bool)
+- byte 11: is_admin (bool)
 
 ## Interface
 
@@ -110,6 +116,7 @@ interface IAccountKeychain {
     }
 
     event KeyAuthorized(address indexed account, address indexed publicKey, uint8 signatureType, uint64 expiry);
+    event AdminKeyAuthorized(address indexed account, address indexed publicKey);
     event KeyRevoked(address indexed account, address indexed publicKey);
     event SpendingLimitUpdated(address indexed account, address indexed publicKey, address indexed token, uint256 newLimit);
     event AccessKeySpend(address indexed account, address indexed publicKey, address indexed token, uint256 amount, uint256 remainingLimit);
@@ -127,6 +134,7 @@ interface IAccountKeychain {
     error SignatureTypeMismatch(uint8 expected, uint8 actual);
     error CallNotAllowed();
     error InvalidCallScope();
+    error InvalidKeyId();
     error LegacyAuthorizeKeySelectorChanged(bytes4 newSelector);
 
     function authorizeKey(
@@ -136,6 +144,12 @@ interface IAccountKeychain {
     ) external;
 
     function revokeKey(address keyId) external;
+
+    function authorizeAdminKey(
+        address keyId,
+        SignatureType signatureType,
+        bytes32 witness
+    ) external;
 
     function updateSpendingLimit(
         address keyId,
@@ -163,6 +177,8 @@ interface IAccountKeychain {
         address keyId
     ) external view returns (bool isScoped, CallScope[] memory scopes);
 
+    function isAdminKey(address account, address keyId) external view returns (bool);
+
     function getTransactionKey() external view returns (address);
 }
 ```
@@ -173,14 +189,14 @@ interface IAccountKeychain {
 
 - `key_authorization` includes an optional trailing `witness: bytes32` field. When present, the witness is included in the signing hash, checked against the account's burned-witness set, and emitted when the key authorization is registered. The protocol otherwise treats it as opaque and application-defined, so apps can bind a single access-key authorization signature to an offchain challenge.
 
-:::info[Coming with T6 — SDK encoders/decoders]
+:::info[T6 testnet behavior — SDK encoders/decoders]
 The [T6 network upgrade](/protocol/upgrades/t6) adds **admin access keys** ([TIP-1049](https://tips.sh/1049)). For partners maintaining transaction tooling, the wire-level change is two new trailing optional fields on the `KeyAuthorization` RLP payload:
 
 ```text
 rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?])
 ```
 
-SDK encoders/decoders and hardware-wallet firmware that strictly check field count MUST handle the new optionals before T6. The packed `AuthorizedKey` slot also gains an `is_admin` byte at offset 11. The existing `KeyAuthorized` event is **unchanged**; an additional `AdminKeyAuthorized` event is emitted alongside it when `is_admin == true`, so existing indexers continue to work without changes. Provisioning admin keys uses a new `authorizeAdminKey(keyId, signatureType, witness)` function on this precompile. See the [TIP-1049 section of the T6 page](/protocol/upgrades/t6#admin-access-keys-tip-1049) for the full surface.
+SDK encoders/decoders and hardware-wallet firmware that strictly check field count MUST handle the new optionals before using T6 networks. The packed `AuthorizedKey` slot also gains an `is_admin` byte at offset 11. The existing `KeyAuthorized` event is **unchanged**; an additional `AdminKeyAuthorized` event is emitted alongside it when `is_admin == true`, so existing indexers continue to work without changes. Provisioning admin keys uses `authorizeAdminKey(keyId, signatureType, witness)`. See the [admin access keys section of the T6 page](/protocol/upgrades/t6#admin-access-keys) for the full surface.
 :::
 
 - Creates a new key entry with the specified `signatureType`, `config.expiry`, `config.enforceLimits`, and `isRevoked` set to `false`
@@ -190,7 +206,7 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 - Emits `KeyAuthorized` event
 
 **Requirements:**
-- MUST be called by Root Key only (verified by checking `transactionKey[msg.sender] == 0`)
+- MUST be called by the Root Key or an active admin access key
 - MUST be invoked via the canonical selector `0x980a6025` (the `(address,uint8,(uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[]))` shape). Other selectors revert.
 - `keyId` MUST NOT be `address(0)` (reverts with `ZeroPublicKey`)
 - `keyId` MUST NOT already be authorized with `expiry > 0` (reverts with `KeyAlreadyExists`)
@@ -202,6 +218,21 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 - `limits` are only processed if `enforceLimits` is `true`. Duplicate token entries revert with `InvalidSpendingLimit`.
 - Invalid call-scope shapes (zero targets, duplicate targets, duplicate selectors, duplicate recipients, malformed recipient-bound rules) revert with `InvalidCallScope`.
 
+### Admin Key Authorization
+
+- Creates a new key entry with `is_admin = true`.
+- Emits the existing `KeyAuthorized` event and the additional `AdminKeyAuthorized` event.
+- Burns the provided `witness` for replay protection. `bytes32(0)` is valid.
+- Admin keys can authorize and revoke keys, including other admin keys.
+- Admin keys cannot carry expiry, spending limits, or call scopes.
+
+**Requirements:**
+- MUST be called by the Root Key or an active admin access key.
+- `keyId` MUST NOT be the account address (reverts with `InvalidKeyId`).
+- `keyId` MUST NOT already be authorized (reverts with `KeyAlreadyExists`).
+- `keyId` MUST NOT have been previously revoked (reverts with `KeyAlreadyRevoked`).
+- `signatureType` MUST be `0` (Secp256k1), `1` (P256), or `2` (WebAuthn) (reverts with `InvalidSignatureType`).
+
 ### Key Revocation
 
 - Marks the key as revoked by setting `isRevoked` to `true` and `expiry` to `0`
@@ -211,22 +242,23 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 - Emits `KeyRevoked` event
 
 **Requirements:**
-- MUST be called by Root Key only (verified by checking `transactionKey[msg.sender] == 0`)
+- MUST be called by the Root Key or an active admin access key
 - `keyId` MUST exist (key with `expiry > 0`) (reverts with `KeyNotFound` if not found)
 
 ### Spending Limit Update
 
 - Updates the spending limit for a specific token on an authorized key
-- Allows Root Key to modify limits without revoking and re-authorizing the key
+- Allows the Root Key or an active admin access key to modify limits without revoking and re-authorizing the key
 - If the key had unlimited spending (`enforceLimits == false`), enables limits
 - Sets both `remaining` and `max` to `newLimit`. The configured `period` and current `periodEnd` are preserved.
 - `newLimit` MUST fit within TIP20's `u128` supply range.
 - Emits `SpendingLimitUpdated` event
 
 **Requirements:**
-- MUST be called by Root Key only (verified by checking `transactionKey[msg.sender] == 0`)
+- MUST be called by the Root Key or an active admin access key
 - `keyId` MUST exist and not be revoked (reverts with `KeyNotFound` or `KeyAlreadyRevoked`)
 - `keyId` MUST not be expired (reverts with `KeyExpired`)
+- `keyId` MUST not be an admin access key, because admin keys do not carry spending limits (reverts with `InvalidKeyId`)
 
 ### Allowed Call Updates
 
@@ -236,14 +268,16 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 - `setAllowedCalls(...)` rejects an empty scope batch, zero targets, duplicate targets, duplicate selectors, duplicate recipients, and invalid recipient-constrained rules (reverts with `InvalidCallScope`).
 
 **Requirements:**
-- MUST be called by Root Key only (verified by checking `transactionKey[msg.sender] == 0`)
+- MUST be called by the Root Key or an active admin access key
 - `keyId` MUST exist and not be revoked
+- `keyId` MUST not be an admin access key, because admin keys do not carry call scopes (reverts with `InvalidKeyId`)
 
 ### View Behavior
 
 - `getKey(...)` returns key metadata.
 - `getRemainingLimitWithPeriod(...)` returns the effective `remaining` amount and current `periodEnd` for a key-token pair, accounting for periodic rollover.
 - `getAllowedCalls(...)` returns `(isScoped, scopes)`. Unrestricted keys return `isScoped = false`. Scoped keys return `isScoped = true` with their `CallScope[]`. Missing, revoked, or expired access keys return `isScoped = true, scopes = []` (scoped deny-all).
+- `isAdminKey(...)` returns `true` for the Root Key and for active, non-revoked, non-expired admin access keys.
 - `getTransactionKey()` returns the key used in the current transaction. `address(0)` means the Root Key.
 - Missing, revoked, or expired keys return zeroed limit values.
 
@@ -259,12 +293,12 @@ Access Keys should be securely stored to prevent unauthorized access. Call scope
 
 ### Privilege Escalation Prevention
 
-Access Keys cannot escalate their own privileges because:
-1. Management functions (`authorizeKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`) are restricted to Root Key transactions
+Limited access keys cannot escalate their own privileges because:
+1. Management functions (`authorizeKey`, `authorizeAdminKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`) are restricted to Root Key or active admin-key transactions
 2. The protocol sets `transactionKey[account]` during transaction validation to indicate which key signed the transaction
-3. These management functions check that `transactionKey[msg.sender] == 0` (Root Key) before executing
+3. These management functions check that the caller is the Root Key or an active admin key before executing
 4. Mutable precompile calls also require `msg.sender == tx.origin`, which prevents contract-mediated confused-deputy patterns
-5. Access Keys cannot bypass these checks - transactions will revert with `UnauthorizedCaller`
+5. Limited access keys cannot bypass these checks - transactions will revert with `UnauthorizedCaller`
 
 ### Spending Limit Enforcement
 
@@ -310,8 +344,8 @@ Access Keys cannot escalate their own privileges because:
 2. Protocol validates the Access Key via `validate_keychain_authorization()`, sets `transactionKey[account] = keyId`
 3. Transaction executes with spending limit enforcement via internal `verify_and_update_spending()` and call-scope enforcement. Contract creation is rejected.
 
-### Root Key Revoking or Updating an Access Key
+### Root Key or Admin Key Revoking or Updating an Access Key
 
-1. User signs Passkey prompt → signs transaction calling `revokeKey(keyId)`, `updateSpendingLimit(...)`, `setAllowedCalls(...)`, or `removeAllowedCalls(...)`
+1. User signs with the Root Key or an active admin key → signs transaction calling `revokeKey(keyId)`, `updateSpendingLimit(...)`, `setAllowedCalls(...)`, or `removeAllowedCalls(...)`
 2. Transaction executes, marking the Access Key as inactive or updating its restrictions
 3. Future transactions signed by that Access Key are rejected (after revocation) or evaluated against the updated restrictions
