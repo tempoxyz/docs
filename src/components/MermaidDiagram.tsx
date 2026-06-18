@@ -950,7 +950,9 @@ export function MermaidDiagram({ chart }: { chart: string }) {
       el.innerHTML = render(lo, th)
       const svg = el.querySelector('svg')
       if (!svg) return
-      svg.style.maxWidth = '100%'
+      svg.removeAttribute('width')
+      svg.removeAttribute('height')
+      svg.style.width = '100%'
       svg.style.height = 'auto'
       svg.style.display = 'block'
       svg.style.margin = '0 auto'
