@@ -1,0 +1,170 @@
+---
+title: Discover MPP services
+description: Find paid APIs your agents can call with MPP using the mpp.dev directory, public catalog API, and read-only MCP server.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Discover MPP services
+
+MPP service discovery helps agents find paid APIs before they make a request. Use it to search the catalog, compare payment offers, inspect endpoint metadata, and choose a service that matches the task.
+
+Discovery is advisory. The runtime `402 Payment Required` challenge from the service is always the authoritative source of current payment terms.
+
+## Discovery surfaces
+
+| Surface | URL | Use it for |
+| --- | --- | --- |
+| Web directory | [`https://mpp.dev/services`](https://mpp.dev/services) | Browse live services and inspect categories, providers, endpoints, and examples. |
+| Public catalog API | [`https://mpp.dev/api/services`](https://mpp.dev/api/services) | Fetch the JSON catalog directly from scripts, CLIs, or agents. |
+| MCP server | [`https://mpp.dev/mcp/services`](https://mpp.dev/mcp/services) | Let an MCP-capable agent search services, inspect offers, and fetch OpenAPI summaries. |
+
+The MCP server is read-only. It does not register services, execute payments, sign transactions, or proxy paid API calls.
+
+## Agent workflow
+
+::::steps
+
+### Search for candidate services
+
+Ask the services MCP server for APIs that match the task. Agents can filter by query, category, payment method, integration type, and status.
+
+```json
+{
+  "name": "search_services",
+  "arguments": {
+    "query": "web search",
+    "category": "search",
+    "method": "tempo",
+    "limit": 10
+  }
+}
+```
+
+### Inspect payment offers
+
+Use endpoint-level offers to understand the payment method, amount, currency, recipient, unit type, and whether pricing is dynamic.
+
+```json
+{
+  "name": "get_offers",
+  "arguments": {
+    "service": "agentmail"
+  }
+}
+```
+
+### Inspect the API shape
+
+Fetch an advisory OpenAPI summary or registry-derived endpoint view before constructing a request.
+
+```json
+{
+  "name": "get_openapi",
+  "arguments": {
+    "service": "agentmail"
+  }
+}
+```
+
+### Make the paid request
+
+Call the service directly with an MPP-capable client such as [`tempo request`](/cli/request). The service returns a `402` challenge if payment is required, and the client pays and retries.
+
+```bash
+tempo request -X POST \
+  --json '{"prompt":"a sunset over the ocean"}' \
+  https://fal.mpp.tempo.xyz/fal-ai/flux/dev
+```
+
+::::
+
+## Connect over MCP
+
+Use the Streamable HTTP endpoint:
+
+```text
+https://mpp.dev/mcp/services
+```
+
+Generic MCP client config:
+
+```json
+{
+  "mcpServers": {
+    "mpp-services": {
+      "url": "https://mpp.dev/mcp/services"
+    }
+  }
+}
+```
+
+JSON-RPC initialize request:
+
+```bash
+curl https://mpp.dev/mcp/services \
+  -H 'content-type: application/json' \
+  -H 'accept: application/json, text/event-stream' \
+  --data '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "protocolVersion": "2025-06-18",
+      "capabilities": {},
+      "clientInfo": { "name": "my-agent", "version": "1.0.0" }
+    }
+  }'
+```
+
+List available tools:
+
+```bash
+npx @modelcontextprotocol/inspector \
+  --cli https://mpp.dev/mcp/services \
+  --transport http \
+  --method tools/list
+```
+
+## MCP tools
+
+| Tool | Purpose |
+| --- | --- |
+| `list_services` | List catalog services with id, name, URL, categories, integration, status, and description. |
+| `search_services` | Search services by text query and exact filters. |
+| `search_offers` | Search endpoint-level payment offers by task, method, currency, amount, recipient, and category. |
+| `get_facets` | Discover valid filter values and counts before narrowing a search. |
+| `get_services_by_recipient` | Identify services that publish offers for a payment recipient. |
+| `get_catalog_status` | Inspect catalog version, source URL, cache age, refresh time, and service count. |
+| `get_service` | Fetch the full service record by id or name. |
+| `get_offers` | Fetch payment offers for one service, optionally filtered by route. |
+| `get_openapi` | Fetch a live OpenAPI summary when available, otherwise return the registry endpoint view. |
+
+## Choosing a discovery surface
+
+Use the web directory when a human is exploring the catalog. Use the public API when you are building your own service browser or CLI. Use the MCP server when an agent needs tool-callable discovery inside its planning loop.
+
+For execution, call services directly with [`tempo request`](/cli/request), the [MPP client quickstart](/guide/machine-payments/client), or another MPP-capable client. Discovery narrows the choice; the service's runtime `402` challenge confirms the exact payment terms.
+
+## Next steps
+
+<Cards>
+  <Card
+    icon="lucide:bot"
+    title="Agent quickstart"
+    description="Use the Tempo CLI to discover services, preview costs, and make paid requests"
+    to="/guide/machine-payments/agent"
+  />
+  <Card
+    icon="lucide:terminal"
+    title="tempo request"
+    description="Make HTTP requests that handle MPP payment automatically"
+    to="/cli/request"
+  />
+  <Card
+    icon="lucide:book-open"
+    title="MPP discovery docs"
+    description="Serve and aggregate OpenAPI discovery documents"
+    to="https://mpp.dev/advanced/discovery"
+  />
+</Cards>
