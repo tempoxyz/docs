@@ -147,6 +147,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/mcp",
+      "destination": "https://mcp.tempo.xyz"
+    },
+    {
       "source": "/ingest/static/:path(.*)",
       "destination": "https://us-assets.i.posthog.com/static/:path"
     },

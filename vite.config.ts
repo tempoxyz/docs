@@ -15,15 +15,22 @@ export default defineConfig(({ mode }) => {
   const isE2E = process.env.VITE_E2E === 'true' || env.VITE_E2E === 'true'
   const useHttp = process.env.CI === 'true' || process.env.VITE_USE_HTTP === 'true'
   const e2eZoneProxy = isE2E ? getE2EZoneProxy() : undefined
+  const proxy = {
+    '/api/mcp': {
+      changeOrigin: true,
+      rewrite: () => '/',
+      secure: true,
+      target: 'https://mcp.tempo.xyz',
+    },
+    ...e2eZoneProxy,
+  }
 
   return {
     plugins: [vocs(), react(), ...(useHttp ? [] : [mkcert()]), tempoNode()],
-    server: useHttp
-      ? {
-          host: 'localhost',
-          proxy: e2eZoneProxy,
-        }
-      : undefined,
+    server: {
+      ...(useHttp ? { host: 'localhost' } : {}),
+      proxy,
+    },
   }
 })
 

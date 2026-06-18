@@ -1,10 +1,12 @@
 ---
 title: Developing with LLMs
 description: Give your AI coding agent Tempo documentation context with skills, Markdown pages, and MCP.
+interactive: true
 ---
 
 import { Tabs, Tab } from 'vocs'
 import { DocsLinkButton } from '../../components/DocsLinkButton.tsx'
+import { TempoMcpExplorer } from '../../components/TempoMcpExplorer.tsx'
 
 # Developing with LLMs
 
@@ -111,6 +113,20 @@ amp mcp add --transport http tempo https://mcp.tempo.xyz
 </Tabs>
 
 </div>
+
+## MCP tools
+
+The MCP endpoint exposes these tools to connected agents:
+
+| Tool | Purpose | Required arguments |
+| --- | --- | --- |
+| `search` | Search docs. | `query` |
+| `find_pages` | Find matching page URLs from a source index. | `source`, `query` |
+| `read_page` | Read one cleaned documentation page. | `source` plus `path` or `url` |
+
+### Try the MCP server
+
+<TempoMcpExplorer />
 
 ## Install Tempo plugins
 
