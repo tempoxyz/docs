@@ -91,16 +91,9 @@ For most projects, the most flexible option is to enable Tempo network features 
 tempo = true
 ```
 
-This network flag, enables Tempo-specific network behavior while still letting Foundry resolve the right semantics from the chain you are targeting.
+This network flag enables Tempo-specific network behavior while still letting Foundry resolve the right semantics from the chain you are targeting.
 
-If you need advanced testing against a specific Tempo hardfork, pin it explicitly in `foundry.toml` or via inline-config:
-
-```toml
-[profile.default]
-hardfork = "tempo:T3"
-```
-
-This is the advanced option when you want local simulation, tests, or scripts to run against a specific Tempo hardfork such as T3. It also infers the Tempo network in Foundry's config layer.
+If you need advanced testing against historical network behavior, pin a specific Tempo hardfork explicitly in `foundry.toml` or via inline config. Most projects should avoid hardfork pinning so local tests track the current Tempo rules for the network they target.
 
 ### Verification config
 
@@ -308,8 +301,8 @@ Access-key transactions cannot create contracts, so use a root key for deploymen
 Anvil supports Tempo mode for local testing and forking Tempo networks:
 
 ```bash
-# Start anvil in Tempo mode with T3 rules
-anvil --tempo --hardfork t3
+# Start anvil in Tempo mode
+anvil --tempo
 
 # Fork a live Tempo network for local testing
 anvil --tempo --fork-url $TEMPO_RPC_URL
@@ -444,4 +437,3 @@ cast call 0xAAAAAAAA00000000000000000000000000000000 \
   <ACCOUNT> <KEY_ID> <TOKEN_ADDRESS> \
   --rpc-url $TEMPO_RPC_URL
 ```
-
