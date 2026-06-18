@@ -668,7 +668,7 @@ interface ITIP20Factory {
 ## T5 → T6 migration
 
 :::info[Migration appendix]
-This section captures TIP-20 changes shipping with the [T6 network upgrade](/protocol/upgrades/t6). Until T6 activates on testnet and mainnet, the spec above remains canonical. After T6 activation, the items below will be folded into the body and this appendix will be removed.
+This section captures TIP-20 changes introduced by the [T6 network upgrade](/protocol/upgrades/t6). These changes are live on testnet as of June 18, 2026 4pm CEST and are scheduled for mainnet activation on June 23, 2026 4pm CEST. After mainnet activation, the items below will be folded into the body and this appendix will be removed.
 :::
 
 T6 introduces one change that affects the TIP-20 transfer and mint surface:
@@ -677,10 +677,10 @@ T6 introduces one change that affects the TIP-20 transfer and mint surface:
 
 The TIP-20 `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `systemTransferFrom`, `mint`, and `mintWithMemo` flows gain a receive-policy check after the existing TIP-403 transfer-policy check. The receive policy is owned by the receiver and configured on the TIP-403 precompile via a new `setReceivePolicy(...)` function; it is enforced via `validateReceivePolicy(token, sender, receiver)`. For `transfer`/`transferFrom`/memo variants/`systemTransferFrom`, the sender for policy purposes is the `from` argument; for `mint`/`mintWithMemo` it is `msg.sender`.
 
-If the receive policy blocks the operation, **the call still succeeds**. Delivery is redirected to a new `ReceivePolicyGuard` precompile at `RECEIVE_POLICY_GUARD_ADDRESS`, which records a receipt for the transfer or mint. The originator or a recovery address designated by the receiver can later claim the recorded amount from the guard.
+If the receive policy blocks the operation, **the call still succeeds**. Delivery is redirected to a new `ReceivePolicyGuard` precompile at `0xB10C000000000000000000000000000000000000`, which records a receipt for the transfer or mint. The originator or a recovery address designated by the receiver can later claim the recorded amount from the guard.
 
 - The token's existing TIP-403 policy is checked first and continues to revert on failure. Only receive-policy failures redirect.
-- The host TIP-20 emits its standard `Transfer` event to `RECEIVE_POLICY_GUARD_ADDRESS` on a redirected transfer; the guard separately emits a `TransferBlocked` event with the information needed to claim the receipt. Blocked receipts are not enumerable on chain — indexers must subscribe to `TransferBlocked` to surface claimable funds.
+- The host TIP-20 emits its standard `Transfer` event to `0xB10C000000000000000000000000000000000000` on a redirected transfer; the guard separately emits a `TransferBlocked` event with the information needed to claim the receipt. Blocked receipts are not enumerable on chain — indexers must subscribe to `TransferBlocked` to surface claimable funds.
 - TIP-1022 virtual addresses are resolved to the master address before any receive-policy check. Receipts are recorded against the master while preserving the original `to` for attribution.
 - `approve`, `permit`, and `burn` are not affected. Fee deposits and refunds via `transfer_fee_pre_tx` and `transfer_fee_post_tx` are not affected. TIP-20 internal balances and reward flows are not affected.
 

@@ -737,7 +737,7 @@ export default defineConfig({
               },
               {
                 text: 'T6',
-                badge: { text: 'Next', variant: 'note' },
+                badge: { text: 'Testnet', variant: 'info' },
                 link: '/protocol/upgrades/t6',
               },
               {

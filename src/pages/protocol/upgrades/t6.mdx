@@ -8,7 +8,7 @@ description: Partner-focused overview and integration notes for the T6 network u
 T6 gives partners more control over account safety and user key management. It adds account-level receive policies so users can prevent unwanted TIP-20 deposits to their account, and it adds admin access keys so users and apps can manage passkeys and delegated keys without relying on the root wallet for every change.
 
 :::info[T6 status]
-T6 is not yet active on testnet or mainnet. The features described on this page become live at the activation timestamps below.
+T6 is live on testnet as of June 18, 2026 4pm CEST. Mainnet activation is scheduled for June 23, 2026 4pm CEST.
 :::
 
 ## Timeline
@@ -18,7 +18,7 @@ T6 is not yet active on testnet or mainnet. The features described on this page 
 | Testnet | June 18, 2026 4pm CEST | 1781791200 |
 | Mainnet | June 23, 2026 4pm CEST | 1782223200 |
 
-Node operators must upgrade to the T6-compatible release before the testnet activation timestamp.
+Testnet node operators must run the T6-compatible release to stay synced past the activation timestamp. Mainnet node operators must upgrade before the mainnet activation timestamp.
 
 ## Overview
 
@@ -74,13 +74,18 @@ Admin keys are only for key management and admin verification. They can authoriz
 
 Read the technical specification at [TIP-1049](https://tips.sh/1049).
 
-## Compatible SDK releases
+## Compatible releases
 
-T6-compatible SDK releases will be listed here as they ship.
+The following releases support the T6 feature set:
+
+| Ecosystem | T6-compatible releases |
+|-----------|------------------------|
+| Node operators | [`v1.9.0`](https://github.com/tempoxyz/tempo/releases/tag/v1.9.0) |
+| Rust | `tempo-alloy@1.9.0`, `tempo-primitives@1.9.0`, `tempo-contracts@1.9.0`, `tempo-chainspec@1.9.0` |
 
 ## What operators and integrators should know
 
-T6 is mostly additive. Integrators, indexers, wallets, and partner infrastructure should review the notes below before activation.
+T6 is mostly additive. Integrators, indexers, wallets, and partner infrastructure should review the notes below while testing on testnet and before mainnet activation.
 
 ### For receive policies
 
@@ -102,8 +107,8 @@ For receivers and integrators, the operating flow is:
 6. Review, claim, or reroute held receipts when needed.
 
 - Receive policies are configured on the TIP-403 precompile with `setReceivePolicy(...)` and enforced through `validateReceivePolicy(...)`. The token's existing TIP-403 policy still runs first and still reverts on failure.
-- Blocked inbound `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `systemTransferFrom`, `mint`, and `mintWithMemo` calls still succeed, but delivery is redirected to `ReceivePolicyGuard` at `RECEIVE_POLICY_GUARD_ADDRESS`.
-- Senders observing a successful `Transfer` event from the host TIP-20 to `RECEIVE_POLICY_GUARD_ADDRESS` should not assume the receiver was credited. Wallets and accounting systems should read the guard receipt to track redirected funds.
+- Blocked inbound `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `systemTransferFrom`, `mint`, and `mintWithMemo` calls still succeed, but delivery is redirected to `ReceivePolicyGuard` at `0xB10C000000000000000000000000000000000000`.
+- Senders observing a successful `Transfer` event from the host TIP-20 to `0xB10C000000000000000000000000000000000000` should not assume the receiver was credited. Wallets and accounting systems should read the guard receipt to track redirected funds.
 - Blocked-transfer receipts are not enumerable onchain. Wallets and dashboards that surface claimable funds need indexers that listen for the `TransferBlocked` event emitted by `ReceivePolicyGuard`.
 - TIP-1022 virtual addresses are resolved to the master address before any receive-policy check. Receipts are recorded against the master while preserving the original `to` for attribution.
 - `approve`, `permit`, and `burn` are unaffected. Fee deposits and refunds (`transfer_fee_pre_tx` / `transfer_fee_post_tx`) are also unaffected.

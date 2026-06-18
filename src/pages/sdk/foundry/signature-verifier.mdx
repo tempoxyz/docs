@@ -26,6 +26,10 @@ Relayed mode uses the `SignatureVerifier` precompile to verify the sender's sign
 - Reverts on invalid signatures instead of returning `address(0)`
 - Maintains forward compatibility with future Tempo account types
 
+:::info[T6 keychain verification]
+On T6 networks, `SignatureVerifier` also exposes `verifyKeychain(account, digest, signature)` and `verifyKeychainAdmin(account, digest, signature)` for contracts that need to check whether a signature came from an active access key, root key, or admin key for an account. Include chain ID, contract address, and account address in the digest you ask users or keys to sign.
+:::
+
 ## Contract example
 
 The key pattern is a single `verify()` or `recover()` call on the precompile:
@@ -138,4 +142,5 @@ The secp256k1 and P256 relay tests run against the T3 hardfork automatically via
 
 - [TIP-1020: Signature Verification Precompile](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md)
 - [T3 Network Upgrade](/protocol/upgrades/t3)
+- [T6 Network Upgrade](/protocol/upgrades/t6)
 - [Foundry for Tempo](/sdk/foundry)
