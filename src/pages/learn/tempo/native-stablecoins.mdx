@@ -4,7 +4,7 @@ description: Tempo's stablecoin token standard with payment lanes, stable fees, 
 
 import { Cards, Card } from 'vocs'
 
-# TIP-20 Tokens [Tempo's native stablecoin token standard]
+# Tempo Tokens (TIP-20) [Tempo's native stablecoin token standard]
 
 Tempo extends the [ERC-20 standard](https://ethereum.org/en/developers/docs/standards/tokens/erc-20/) used on EVM chains (Ethereum, Base, Arbitrum) with additional features, and enshrines them in protocol as the TIP-20 contract suite. These features are purpose-built for payment use cases at scale.
 
@@ -38,7 +38,7 @@ See stablecoin reconciliation in practice: [Global payouts](/learn/use-cases/glo
 
 Stablecoin (and other regulated asset) issuers operate under regulatory requirements. They need to enforce whitelists (only approved addresses can transact) or blacklists (sanctioned addresses cannot transact). 
 
-Tempo provides a shared compliance infrastructure through the TIP-403 Policy Registry. An issuer can thus create a single policy with their compliance rules, and multiple tokens they issue can adopt that policy. When the compliance manager updates the policy, all tokens using it automatically enforce the new rules, unlike traditional blockchains where an issuer must update each contract one-by-one.
+Tempo provides a shared compliance infrastructure through the Tempo Policy Registry (TIP-403). An issuer can thus create a single policy with their compliance rules, and multiple tokens they issue can adopt that policy. When the compliance manager updates the policy, all tokens using it automatically enforce the new rules, unlike traditional blockchains where an issuer must update each contract one-by-one.
 
 ## Built-in Stable Asset DEX
 
@@ -91,7 +91,7 @@ TIP-20 supports short onchain memos for common references (invoice ID, customer 
 
 ### How should issuers handle compliance updates?
 
-Use the TIP-403 Policy Registry so multiple tokens can share a policy and inherit updates automatically, rather than updating each token contract individually.
+Use the Tempo Policy Registry (TIP-403) so multiple tokens can share a policy and inherit updates automatically, rather than updating each token contract individually.
 
 ## Infrastructure Partners
 

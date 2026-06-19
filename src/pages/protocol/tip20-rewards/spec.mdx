@@ -1,8 +1,8 @@
 ---
-description: Technical specification for the TIP-20 reward distribution system using reward-per-token accumulator pattern for scalable pro-rata rewards.
+description: Technical specification for Tempo Token Rewards using reward-per-token accumulator pattern for scalable pro-rata rewards.
 ---
 
-# TIP-20 Rewards Distribution
+# Tempo Token Rewards Specification
 
 ## Abstract
 An opt-in, scalable, pro-rata reward distribution mechanism built into TIP-20 tokens. The system uses a "reward-per-token" accumulator pattern to distribute rewards proportionally to opted-in holders without requiring staking or per-holder iteration. Rewards are distributed instantly; time-based streaming distributions are planned for a future upgrade.
@@ -13,7 +13,7 @@ Many applications require pro-rata distribution of tokens to existing holders (i
 ## Specification
 The rewards mechanism allows anyone to distribute token rewards to opted-in holders proportionally based on holdings. Users must opt in to receiving rewards and may delegate rewards to a recipient address.
 
-## TIP-20 Rewards Functions
+## Tempo Token Rewards Functions
 These functions are part of the [ITIP20](/protocol/tip20/spec) interface:
 
 ```solidity
@@ -69,4 +69,3 @@ All token movements must pass TIP-403 policy checks:
 - `globalRewardPerToken` must monotonically increase
 - `optedInSupply` must equal the sum of balances for all opted-in users
 - All token movements must comply with TIP-403 policies
-

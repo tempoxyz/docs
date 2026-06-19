@@ -1,0 +1,31 @@
+{
+  "name": "tempo",
+  "version": "0.1.0",
+  "description": "Tempo MCP and skills for Tempo docs, developer workflows, wallet, and MPP payments.",
+  "author": {
+    "name": "Tempo",
+    "url": "https://tempo.xyz"
+  },
+  "homepage": "https://docs.tempo.xyz/guide/using-tempo-with-ai",
+  "repository": "https://github.com/tempoxyz/docs",
+  "license": "MIT",
+  "keywords": ["tempo", "mcp", "payments", "wallet", "stablecoins", "mpp"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Tempo",
+    "shortDescription": "Tempo MCP, docs, wallet, and MPP payments.",
+    "longDescription": "Use Tempo MCP from Codex to search Tempo documentation, plus Tempo skills for developer workflows, wallet setup, service discovery, and MPP paid requests.",
+    "developerName": "Tempo",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Write"],
+    "websiteURL": "https://tempo.xyz",
+    "defaultPrompt": [
+      "Build a Tempo app that sends stablecoin payments.",
+      "Add Tempo Wallet and passkey accounts to this app.",
+      "Integrate MPP payments into a Tempo API or agent."
+    ],
+    "screenshots": [],
+    "brandColor": "#000000"
+  }
+}

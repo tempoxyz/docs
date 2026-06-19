@@ -109,9 +109,13 @@ Read the technical specification at [TIP-1057](https://tips.sh/1057).
 
 ## Compatible SDK releases
 
-T5-compatible SDK releases will be listed here as they ship.
+The following releases support the full T5 feature set. New integrations should prefer the `TIP20ChannelReserve` precompile over the legacy MPP reserve contract.
 
-These releases should prefer the `TIP20ChannelReserve` precompile over the legacy MPP reserve contract for new integrations.
+| Ecosystem  | T5-compatible releases |
+| ---------- | ---------------------- |
+| TypeScript | [`mppx@0.7.0`](https://github.com/wevm/mppx/releases/tag/mppx%400.7.0), [`viem@2.52.2`](https://github.com/wevm/viem/releases/tag/viem%402.52.2), [`accounts@0.14.9`](https://github.com/tempoxyz/accounts/releases/tag/accounts%400.14.9) |
+| Rust       | [`tempo-alloy@1.8.0`](https://github.com/tempoxyz/tempo/releases/tag/tempo-alloy%401.8.0), [`tempo-primitives@1.8.0`](https://github.com/tempoxyz/tempo/releases/tag/tempo-primitives%401.8.0), [`tempo-contracts@1.8.0`](https://github.com/tempoxyz/tempo/releases/tag/tempo-contracts%401.8.0) |
+| Foundry    | [nightly](https://getfoundry.sh) (T5 hardfork-aware decoding) |
 
 ## What operators and integrators should know
 

@@ -140,7 +140,7 @@ export default defineConfig({
         link: '/',
       },
       {
-        text: 'Using Tempo with AI',
+        text: 'Developing with LLMs',
         link: '/guide/using-tempo-with-ai',
       },
       {
@@ -335,6 +335,10 @@ export default defineConfig({
                 link: '/guide/machine-payments/agent',
               },
               {
+                text: 'Discover MPP services',
+                link: '/guide/machine-payments/discover-services',
+              },
+              {
                 text: 'Server quickstart',
                 link: '/guide/machine-payments/server',
               },
@@ -521,7 +525,7 @@ export default defineConfig({
             link: '/protocol',
           },
           {
-            text: 'TIP-20 Tokens',
+            text: 'Tempo Tokens (TIP-20)',
             collapsed: true,
             items: [
               {
@@ -543,7 +547,7 @@ export default defineConfig({
             ],
           },
           {
-            text: 'TIP-20 Rewards',
+            text: 'Tempo Token Rewards',
             collapsed: true,
             items: [
               {
@@ -557,7 +561,7 @@ export default defineConfig({
             ],
           },
           {
-            text: 'TIP-403 Policies',
+            text: 'Tempo Policies (TIP-403)',
             collapsed: true,
             items: [
               {
@@ -732,15 +736,18 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
-                text: 'T7 (Planned)',
+                text: 'T7',
+                badge: { text: 'Planned', variant: 'note' },
                 link: '/protocol/upgrades/t7',
               },
               {
-                text: 'T6 (Next)',
+                text: 'T6',
+                badge: { text: 'Testnet', variant: 'info' },
                 link: '/protocol/upgrades/t6',
               },
               {
-                text: 'T5 (Latest)',
+                text: 'T5',
+                badge: { text: 'Latest', variant: 'info' },
                 link: '/protocol/upgrades/t5',
               },
               {

@@ -430,6 +430,10 @@
   min-height: 200px;
 }
 
+[data-v-sidebar] a[data-v-sidebar-item][href$="/protocol/upgrades/t7"] [data-v-sidebar-item-badge] {
+  background: var(--color-gray4);
+}
+
 /* ---------------------------------------------------------------------------
  * Terminal theme — scoped color variables for the embedded terminal demo.
  * --------------------------------------------------------------------------- */

@@ -139,14 +139,14 @@ If the top-level call of a transaction is to one of the following functions on a
 
 then that TIP-20 token is used as the user's fee token for that transaction (unless there is a preference specified at the [transaction](#transaction-level) or [account](#account-level) level).
 
-For [Tempo transactions](/protocol/transactions/spec-tempo-transaction), this rule applies only if _all_ top-level calls are to the same TIP-20 contract, and each such call is to one of the functions listed above, with `fee_payer == tx.origin`.
+For [Tempo Transactions](/protocol/transactions/spec-tempo-transaction), this rule applies only if _all_ top-level calls are to the same TIP-20 contract, and each such call is to one of the functions listed above, with `fee_payer == tx.origin`.
 
 
 ### Stablecoin DEX contract
 
 If the top-level call of a transaction is to the [Stablecoin DEX](/protocol/exchange/spec) contract, the function being called is either `swapExactAmountIn` or `swapExactAmountOut`, and the `tokenIn` argument to that function is the address of a TIP-20 token for which the currency is USD, then the `tokenIn` argument is used as the user's fee token for the transaction (unless there is a preference specified at the [transaction](#transaction-level) or [account](#account-level) level).
 
-For [Tempo transactions](/protocol/transactions/spec-tempo-transaction), this rule applies only if there is only one top-level call in the transaction.
+For [Tempo Transactions](/protocol/transactions/spec-tempo-transaction), this rule applies only if there is only one top-level call in the transaction.
 
 ### pathUSD
 
@@ -271,4 +271,3 @@ The fee conversion process adds minimal overhead to transactions:
 - **Block settlement**: Amortized across all transactions in the block
 
 For complete technical specifications on the Fee AMM mechanism, see the [Fee AMM Protocol Specification](/protocol/fees/spec-fee-amm).
-

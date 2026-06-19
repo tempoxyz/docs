@@ -100,16 +100,25 @@ export function useZoneAuthorization(parameters: {
 }
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
+  let timeout: ReturnType<typeof setTimeout>
+
   return Promise.race([
-    promise,
+    promise.then(
+      (value) => {
+        clearTimeout(timeout)
+        return value
+      },
+      (error) => {
+        clearTimeout(timeout)
+        throw error
+      },
+    ),
     new Promise<never>((_, reject) => {
-      const timeout = setTimeout(() => {
+      timeout = setTimeout(() => {
         const error = new Error('zone authorization info request timed out')
         error.name = 'TimeoutError'
         reject(error)
       }, timeoutMs)
-
-      promise.finally(() => clearTimeout(timeout))
     }),
   ])
 }

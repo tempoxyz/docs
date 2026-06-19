@@ -10,6 +10,7 @@
     "check": "biome check --write --unsafe .",
     "check:types": "tsgo --project tsconfig.json --noEmit",
     "preview": "node dist/preview.js",
+    "test": "vitest run --dir src",
     "test:e2e": "playwright test",
     "bundle:analyze": "node --experimental-strip-types scripts/bundle-diff.ts --skip-build",
     "bundle:diff": "node --experimental-strip-types scripts/bundle-diff.ts",
@@ -31,6 +32,7 @@
     "abitype": "^1.2.3",
     "accounts": "^0.10.7",
     "cva": "1.0.0-beta.4",
+    "hono": "^4.12.26",
     "mermaid": "^11.14.0",
     "monaco-editor": "^0.55.1",
     "ox": "0.14.20",
@@ -66,7 +68,8 @@
     "typescript": "^5.9.3",
     "use-sync-external-store": "^1.6.0",
     "vite": "^8.0.16",
-    "vite-plugin-mkcert": "^1.17.12"
+    "vite-plugin-mkcert": "^1.17.12",
+    "vitest": "^4.1.9"
   },
   "devEngines": {
     "runtime": {
