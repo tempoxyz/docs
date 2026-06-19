@@ -19,6 +19,14 @@ https://mcp.tempo.xyz
 
 The current server exposes docs search, page discovery, and cleaned page reads. Wallet and paid-request workflows are handled by the `tempo-wallet` skill using the Tempo CLI.
 
+Feedback from MCP clients should be sent to the shared docs ingress:
+
+```txt
+POST https://docs.tempo.xyz/api/feedback
+```
+
+Use `source: "mcp"` plus a short `message`, and include `toolName`, `relatedResource`, or `client` when available.
+
 ## Codex
 
 The Codex plugin lives in `ai/plugins/tempo`.

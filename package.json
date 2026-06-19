@@ -11,6 +11,7 @@
     "check:types": "tsgo --project tsconfig.json --noEmit",
     "preview": "node dist/preview.js",
     "test:e2e": "playwright test",
+    "test:feedback": "tsx scripts/test-feedback.ts",
     "bundle:analyze": "node --experimental-strip-types scripts/bundle-diff.ts --skip-build",
     "bundle:diff": "node --experimental-strip-types scripts/bundle-diff.ts",
     "bundle:save": "node --experimental-strip-types scripts/bundle-diff.ts --save",
