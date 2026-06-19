@@ -524,7 +524,7 @@ export default defineConfig({
             link: '/protocol',
           },
           {
-            text: 'Tempo Tokens (TIP-20)',
+            text: 'TIP-20 Tokens',
             collapsed: true,
             items: [
               {

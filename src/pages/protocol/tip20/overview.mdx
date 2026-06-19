@@ -1,12 +1,12 @@
 ---
-description: Tempo Tokens (TIP-20) are Tempo's native token standard for stablecoins with built-in fee payment, payment lanes, transfer memos, and compliance policies.
+description: TIP-20 tokens are Tempo's native token standard for stablecoins with built-in fee payment, payment lanes, transfer memos, and compliance policies.
 ---
 
 import { Cards, Card } from 'vocs'
 
-# Tempo Tokens (TIP-20)
+# TIP-20 Tokens
 
-Tempo Tokens (TIP-20) are Tempo's native token standard for stablecoins and payment tokens. They are designed for stablecoin payments, and are the foundation for many token-related functions on Tempo including transaction fees, payment lanes, DEX quote tokens, optimized routing for DEX liquidity, optional on-chain token `logoURI` metadata, implicit approvals for listed precompiles, and enshrined payment-channel reserve flows.
+TIP-20 tokens are Tempo's native token standard for stablecoins and payment tokens. They are designed for stablecoin payments, and are the foundation for many token-related functions on Tempo including transaction fees, payment lanes, DEX quote tokens, optimized routing for DEX liquidity, optional on-chain token `logoURI` metadata, implicit approvals for listed precompiles, and enshrined payment-channel reserve flows.
 
 :::info[Live on testnet with T6]
 The [T6 network upgrade](/protocol/upgrades/t6) adds account-level receive policies for TIP-20 transfers and mints ([TIP-1028](https://tips.sh/1028)). A receiver can choose which tokens and senders they accept, helping wallets and deposit addresses avoid unsupported assets, unwanted counterparties, and wrong-token deposits. If a receive policy blocks delivery, the transfer or mint still succeeds, but funds are redirected to `ReceivePolicyGuard` so they can be claimed later.
@@ -16,7 +16,7 @@ See the [T5 → T6 migration appendix on the TIP-20 spec](/protocol/tip20/spec#t
 
 All TIP-20 tokens are created by interacting with the [TIP-20 Factory contract](/protocol/tip20/spec#tip20factory), calling the `createToken` function. If you're issuing a stablecoin on Tempo, we **strongly recommend** using the TIP-20 standard. Learn more about the benefits, or follow the guide on issuance [here](/guide/issuance).
 
-## Benefits & Features of Tempo Tokens
+## Benefits & Features of TIP-20 Tokens
 
 Below are some of the key benefits and features of TIP-20 tokens:
 

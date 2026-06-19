@@ -223,7 +223,7 @@ interface ITIP403Registry {
 }
 ```
 
-## Usage with Tempo Tokens
+## Usage with TIP-20 Tokens
 
 TIP-20 tokens store the current TIP403 registry policy ID they adhere to in their storage. On any token transfer, they perform a TIP-403 policy check by calling `isAuthorized()` for both sender and recipient addresses. The policy to use for the token can only be set by the admin of the token.
 
