@@ -1,3 +1,4 @@
+import { Feedback } from 'vocs/config'
 import { z } from 'zod'
 
 const maxBodyBytes = 16 * 1024
@@ -126,49 +127,12 @@ export class FeedbackError extends Error {
 }
 
 async function sendSlackFeedback(feedback: NormalizedFeedback): Promise<boolean> {
-  const webhookUrl = process.env.SLACK_FEEDBACK_WEBHOOK
-  if (!webhookUrl) return false
-
-  const response = await fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ blocks: slackBlocks(feedback) }),
-  })
-  return response.ok
-}
-
-function slackBlocks(feedback: NormalizedFeedback) {
-  const fields = compact([
-    field('Source', feedback.source),
-    field('Sentiment', feedback.sentiment),
-    field('Time', new Date(feedback.timestamp).toLocaleString()),
-    feedback.path && field('Path', feedback.path),
-    feedback.pageUrl && field('Page', `<${feedback.pageUrl}|${feedback.pageUrl}>`, false),
-    feedback.category && field('Category', feedback.category),
-    feedback.toolName && field('Tool', feedback.toolName),
-    feedback.client && field('Client', feedback.client),
-    feedback.requestId && field('Request ID', feedback.requestId),
-  ])
-
-  return compact([
-    {
-      type: 'header',
-      text: { type: 'plain_text', text: `${slackIcon(feedback.sentiment)} Feedback`, emoji: true },
-    },
-    { type: 'section', fields },
-    feedback.message && {
-      type: 'section',
-      text: { type: 'mrkdwn', text: `*Message:*\n${slackEscape(feedback.message)}` },
-    },
-    feedback.relatedResource && {
-      type: 'context',
-      elements: [{ type: 'mrkdwn', text: `Related: ${slackEscape(feedback.relatedResource)}` }],
-    },
-  ])
-}
-
-function field(title: string, value: string, shouldEscape = true) {
-  return { type: 'mrkdwn', text: `*${title}:*\n${shouldEscape ? slackEscape(value) : value}` }
+  try {
+    await Feedback.slack().submit(toVocsFeedback(feedback))
+    return Boolean(process.env.SLACK_FEEDBACK_WEBHOOK)
+  } catch {
+    return false
+  }
 }
 
 function cleanText(value: string | undefined, maxLength: number) {
@@ -217,21 +181,39 @@ function sentimentFromHelpful(helpful: boolean | undefined) {
   return 'neutral'
 }
 
-function slackEscape(value: string) {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/@/g, '@\u200B')
-    .replace(/#/g, '#\u200B')
-}
+function toVocsFeedback(feedback: NormalizedFeedback) {
+  if (feedback.source === 'docs') {
+    return {
+      helpful: feedback.helpful ?? feedback.sentiment === 'positive',
+      category: feedback.category,
+      message: feedback.message,
+      pageUrl: feedback.pageUrl ?? urlFromPath(feedback.path),
+      timestamp: feedback.timestamp,
+    }
+  }
 
-function slackIcon(sentiment: NormalizedFeedback['sentiment']) {
-  if (sentiment === 'positive') return ':thumbsup:'
-  if (sentiment === 'negative') return ':thumbsdown:'
-  return ':speech_balloon:'
+  return {
+    helpful: feedback.sentiment === 'positive',
+    category: compact(['MCP feedback', feedback.toolName && `tool: ${feedback.toolName}`]).join(
+      ' | ',
+    ),
+    message: compact([
+      feedback.message,
+      feedback.relatedResource && `Resource: ${feedback.relatedResource}`,
+      feedback.client && `Client: ${feedback.client}`,
+      feedback.requestId && `Request ID: ${feedback.requestId}`,
+    ]).join('\n'),
+    pageUrl: feedback.pageUrl ?? urlFromPath(feedback.path ?? feedback.relatedResource),
+    timestamp: feedback.timestamp,
+  }
 }
 
 function compact<T>(values: Array<T | false | undefined>): T[] {
   return values.filter(Boolean) as T[]
+}
+
+function urlFromPath(path: string | undefined) {
+  if (!path) return 'https://docs.tempo.xyz/'
+  if (URL.canParse(path)) return path
+  return new URL(path.startsWith('/') ? path : `/${path}`, 'https://docs.tempo.xyz').toString()
 }
