@@ -1,14 +1,14 @@
 ---
-description: Learn how Tempo differs from Ethereum. Understand wallet behavior, fee token selection, VM layer changes, and fast finality consensus.
+description: Tempo is a payments-first Layer 1 that runs the EVM. Learn what works out of the box and the behaviors that differ by design — USD gas, fee tokens, and fast finality.
 ---
 
 import { Cards, Card } from 'vocs'
 
-# EVM Differences
+# EVM Compatibility
 
-Tempo is fully compatible with the Ethereum Virtual Machine (EVM), targeting the **Osaka** EVM hard fork. Developers can deploy and interact with smart contracts using the same tools, languages, and frameworks they use on Ethereum, such as Solidity, Foundry, and Hardhat. All Ethereum JSON-RPC methods work out of the box. 
+Tempo is a payments-first Layer 1 that runs the Ethereum Virtual Machine (EVM) as its execution engine, targeting the **Osaka** hard fork. You can deploy and interact with smart contracts using the same languages and tools you use on Ethereum — Solidity, Foundry, and Hardhat — and standard JSON-RPC methods work out of the box.
 
-While the execution environment mirrors Ethereum's, Tempo introduces some differences optimized for payments, described below.
+Tempo is its own chain, not an Ethereum network. It has its own consensus, sub-second deterministic finality, and — most importantly for payments — no native gas token. Gas is denominated in USD and paid in stablecoins. The sections below cover the behaviors that differ from Ethereum by design, and how to build with them.
 
 <Cards>
   <Card
@@ -39,7 +39,7 @@ While the execution environment mirrors Ethereum's, Tempo introduces some differ
 
 ## Wallet Differences
 
-By default, all existing functionality will work for EVM-compatible wallets, with only a few quirks. For developers of wallets, we strongly encourage you to implement support for Tempo Transactions over regular EVM transactions. See the [transaction differences](#transaction-differences) for more.
+EVM-compatible wallets work with Tempo out of the box. Because Tempo has no native gas token, a few behaviors differ by design, covered below. For the best experience, we strongly encourage wallet developers to implement support for Tempo Transactions over regular EVM transactions. See the [transaction differences](#transaction-differences) for more.
 
 :::tip
 If you are building a wallet, read our [guide for wallet developers](/quickstart/wallet-developers).
@@ -47,9 +47,9 @@ If you are building a wallet, read our [guide for wallet developers](/quickstart
 
 ### Handling ETH (native token) Balance Checks
 
-Remember that on Tempo, there is no native gas token.
+On Tempo, gas is denominated in USD and paid in stablecoins. There is no native gas token, by design.
 
-Many wallets and applications check a user's "native account balance" before letting them complete some action. In this scenario, you might see an error message like "Insufficient balance".
+Many wallets and applications check a user's "native account balance" before letting them complete some action. Because Tempo has no native token, you might see an error message like "Insufficient balance".
 
 This stems from the return value of the `eth_getBalance` RPC method. When a wallet calls this method, it expects a hex string representing the "native token balance", hard-coded to be represented as an 18-decimal place number.
 
@@ -93,7 +93,7 @@ If a wallet wants to submit a non-TIP20 transaction without having to submit the
 
 ## VM Layer Differences
 
-At the VM layer, all opcodes are supported out of the box. Due to the lack of a native token, native token balance is always returning zero balances.
+At the VM layer, all opcodes are supported out of the box. Because Tempo has no native token, opcodes that read a native balance return zero. Tempo also prices state creation differently from Ethereum to keep payments cheap and protect against state growth. Both are deliberate design choices, detailed below.
 
 ### State Creation Costs
 

@@ -9,7 +9,7 @@ import { ConnectWallet } from '../../components/ConnectWallet.tsx'
 
 # Connect to the Network
 
-You can connect with Tempo like you would with any other EVM chain.
+Tempo is its own Layer 1, and you connect to it using standard EVM tooling and wallets.
 
 ## Connect using a Browser Wallet
 
@@ -18,7 +18,7 @@ Click on your browser wallet below to automatically connect it to the Tempo netw
 <ConnectWallet network="mainnet" />
 
 :::warning
-Note that on some wallets, you might see an unusually high "balance". This is because, historically, blockchain wallets have always assumed that a blockchain has a "native gas token". On Tempo, there is no native gas token, and so the value shown is a placeholder. See [EVM Differences](/quickstart/evm-compatibility#handling-eth-balance-checks) for more information on this quirk.
+On Tempo, gas is denominated in USD and paid in stablecoins — there is no native gas token. Because most wallets assume every chain has one, some may display a placeholder "balance". This is expected. See [EVM compatibility](/quickstart/evm-compatibility#handling-eth-balance-checks) for details.
 :::
 
 ## Connect via CLI
