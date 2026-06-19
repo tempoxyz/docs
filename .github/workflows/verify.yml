@@ -102,6 +102,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build app for E2E
+        run: pnpm run build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: --max-old-space-size=4096
+          VITE_E2E: "true"
+          VITE_USE_HTTP: "true"
+
       - name: Run Playwright tests
         run: pnpm run test:e2e --shard=${{ matrix.shard }}/3
 

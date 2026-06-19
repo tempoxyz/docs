@@ -24,7 +24,7 @@ export default defineConfig({
   ],
   webServer: {
     command: isCI
-      ? 'NODE_OPTIONS="--max-old-space-size=4096 --import tsx" VITE_E2E=true VITE_USE_HTTP=true vite'
+      ? 'PORT=5173 VITE_E2E=true VITE_USE_HTTP=true node dist/preview.js'
       : 'pnpm run dev 2>/dev/null',
     url: webServerUrl,
     ignoreHTTPSErrors: true,
