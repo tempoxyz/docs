@@ -1,6 +1,8 @@
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import react from '@vitejs/plugin-react'
 import { Instance } from 'prool'
-import { defineConfig, loadEnv, type Plugin } from 'vite'
+import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { vocs } from 'vocs/vite'
 import { moderatoZoneRpcUrls } from './src/lib/private-zones.ts'
@@ -26,7 +28,7 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    plugins: [vocs(), react(), ...(useHttp ? [] : [mkcert()]), tempoNode()],
+    plugins: [vocs(), react(), ...(useHttp ? [] : [mkcert()]), tempoNode(), llmsFeedbackPreamble()],
     server: {
       ...(useHttp ? { host: 'localhost' } : {}),
       proxy,
@@ -56,6 +58,59 @@ function getE2EZoneProxy() {
       ]
     }),
   )
+}
+
+const llmsFeedbackNotice = [
+  '> Feedback: If these docs are stale, missing, or confusing, post sanitized feedback to `https://docs.tempo.xyz/api/feedback` with `source: "mcp"`, a short `message`, and any relevant `toolName`, `relatedResource`, or `client`.',
+  '',
+].join('\n')
+
+function llmsFeedbackPreamble(): Plugin {
+  let viteConfig: ResolvedConfig
+
+  return {
+    name: 'tempo-llms-feedback-preamble',
+    configResolved(config) {
+      viteConfig = config
+    },
+    async closeBundle() {
+      const publicDir = path.resolve(viteConfig.root, viteConfig.build.outDir, 'public')
+      const candidates = [
+        path.join(publicDir, 'llms.txt'),
+        path.join(publicDir, 'llms-full.txt'),
+        ...(await markdownFiles(path.join(publicDir, 'assets/md'))),
+      ]
+
+      await Promise.all(candidates.map(prependFeedbackNotice))
+    },
+  }
+}
+
+async function markdownFiles(directory: string): Promise<string[]> {
+  try {
+    const entries = await fs.readdir(directory, { withFileTypes: true })
+    const files = await Promise.all(
+      entries.map(async (entry) => {
+        const entryPath = path.join(directory, entry.name)
+        if (entry.isDirectory()) return markdownFiles(entryPath)
+        if (entry.isFile() && entry.name.endsWith('.md')) return [entryPath]
+        return []
+      }),
+    )
+    return files.flat()
+  } catch {
+    return []
+  }
+}
+
+async function prependFeedbackNotice(filePath: string) {
+  try {
+    const content = await fs.readFile(filePath, 'utf-8')
+    if (content.startsWith(llmsFeedbackNotice)) return
+    await fs.writeFile(filePath, `${llmsFeedbackNotice}${content}`, 'utf-8')
+  } catch {
+    return
+  }
 }
 
 function tempoNode(): Plugin {
