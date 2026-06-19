@@ -1,6 +1,7 @@
 'use client'
 
 import { lazy, type PropsWithChildren, Suspense } from 'react'
+import DocsHeader from '../components/DocsHeader'
 import { usePageSettled } from '../lib/pageSettled'
 
 const Analytics = lazy(() =>
@@ -34,6 +35,7 @@ export default function Layout(
 
   return (
     <>
+      <DocsHeader />
       {props.children}
       <Suspense fallback={null}>
         {needsToaster && (

@@ -16,7 +16,12 @@ test('virtual addresses guide signs in and starts master registration', async ({
   })
 
   try {
-    await page.goto('/guide/use-accounts/embed-passkeys')
+    await page.goto('/docs/guide/payments/virtual-addresses')
+
+    await expect(
+      page.getByRole('heading', { name: 'Use virtual addresses for deposits' }),
+    ).toBeVisible()
+    await page.getByRole('tab', { name: 'Real registration' }).click()
 
     const passkeySignUpButton = page.getByRole('button', { name: 'Sign up' }).first()
     await expect(passkeySignUpButton).toBeVisible({ timeout: 90000 })
@@ -26,12 +31,6 @@ test('virtual addresses guide signs in and starts master registration', async ({
       timeout: 30000,
     })
 
-    await page.goto('/guide/payments/virtual-addresses')
-
-    await expect(
-      page.getByRole('heading', { name: 'Use virtual addresses for deposits' }),
-    ).toBeVisible()
-    await page.getByRole('tab', { name: 'Real registration' }).click()
     await expect(page.getByRole('button', { name: 'Sign out' }).first()).toBeVisible({
       timeout: 30000,
     })

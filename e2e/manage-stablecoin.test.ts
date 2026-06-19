@@ -17,7 +17,7 @@ test('manage stablecoin - grant and revoke roles', async ({ page }) => {
     },
   })
 
-  await page.goto('/guide/issuance/manage-stablecoin')
+  await page.goto('/docs/guide/issuance/manage-stablecoin')
 
   // Step 1: Sign in
   const signUpButton = page.getByRole('button', { name: 'Sign in' }).first()

@@ -1,4 +1,5 @@
 import { QueryClient } from '@tanstack/react-query'
+import { tempoWallet, webAuthn } from '@wagmi/core/tempo'
 import { Expiry } from 'accounts'
 import * as React from 'react'
 import { parseUnits } from 'viem'
@@ -13,17 +14,17 @@ import {
   useConnectors,
   webSocket,
 } from 'wagmi'
-import { tempoWallet, webAuthn } from 'wagmi/tempo'
 import { alphaUsd, betaUsd, pathUsd, thetaUsd } from './components/guides/tokens'
-import { feeToken, moderatoZones } from './lib/private-zones.ts'
 import * as WebAuthnCeremony from './lib/webAuthnCeremony.ts'
+
+const feeToken = '0x20c0000000000000000000000000000000000001' as const
 
 const chain =
   import.meta.env.VITE_TEMPO_ENV === 'localnet'
     ? tempoLocalnet.extend({ feeToken })
     : import.meta.env.VITE_TEMPO_ENV === 'devnet'
       ? tempoDevnet.extend({ feeToken })
-      : tempoModerato.extend({ feeToken, zones: moderatoZones })
+      : tempoModerato.extend({ feeToken })
 
 const rpId = (() => {
   const hostname = globalThis.location?.hostname
@@ -72,7 +73,7 @@ export function getConfig(options: getConfig.Options = {}) {
           ]),
     ],
     multiInjectedProviderDiscovery,
-    storage: createStorage({
+    storage: createStorage<Record<string, unknown>>({
       storage: typeof window !== 'undefined' ? localStorage : undefined,
       key: 'tempo-docs',
     }),

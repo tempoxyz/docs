@@ -6,7 +6,7 @@
   "packageManager": "pnpm@10.28.1",
   "scripts": {
     "dev": "NODE_OPTIONS='--import tsx' vite",
-    "build": "tsgo --build && vite build",
+    "build": "tsgo --build && vite build && vite build --config vite.marketing.config.ts",
     "check": "biome check --write --unsafe .",
     "check:types": "tsgo --project tsconfig.json --noEmit",
     "preview": "node dist/preview.js",
@@ -48,7 +48,7 @@
     "tailwindcss": "^4.2.2",
     "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",
-    "viem": "^2.48.8",
+    "viem": "^2.52.2",
     "vocs": "2.0.10",
     "wagmi": "3.6.14",
     "waku": "^1.0.0-beta.0",
@@ -66,7 +66,6 @@
     "anser": "^2.3.5",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "use-sync-external-store": "^1.6.0",
     "vite": "^8.0.16",
     "vite-plugin-mkcert": "^1.17.12",
     "vitest": "^4.1.9"

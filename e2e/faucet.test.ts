@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 test('fund an address via faucet', async ({ page }) => {
   test.setTimeout(120000)
 
-  await page.goto('/quickstart/faucet')
+  await page.goto('/docs/quickstart/faucet')
 
   // Switch to "Fund an address" tab
   const tab = page.getByRole('tab', { name: 'Fund an address' })

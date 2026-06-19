@@ -1,0 +1,204 @@
+---
+description: TIP-20 tokens are Tempo's native token standard for stablecoins with built-in fee payment, payment lanes, transfer memos, and compliance policies.
+---
+
+import { Cards, Card } from 'vocs'
+
+# TIP-20 Tokens
+
+TIP-20 tokens are Tempo's native token standard for stablecoins and payment tokens. They are designed for stablecoin payments, and are the foundation for many token-related functions on Tempo including transaction fees, payment lanes, DEX quote tokens, optimized routing for DEX liquidity, optional on-chain token `logoURI` metadata, implicit approvals for listed precompiles, and enshrined payment-channel reserve flows.
+
+:::info[Live on testnet with T6]
+The [T6 network upgrade](/docs/protocol/upgrades/t6) adds account-level receive policies for TIP-20 transfers and mints ([TIP-1028](https://tips.sh/1028)). A receiver can choose which tokens and senders they accept, helping wallets and deposit addresses avoid unsupported assets, unwanted counterparties, and wrong-token deposits. If a receive policy blocks delivery, the transfer or mint still succeeds, but funds are redirected to `ReceivePolicyGuard` so they can be claimed later.
+
+See the [T5 → T6 migration appendix on the TIP-20 spec](/docs/protocol/tip20/spec#t5--t6-migration) for the TIP-20 surface area.
+:::
+
+All TIP-20 tokens are created by interacting with the [TIP-20 Factory contract](/docs/protocol/tip20/spec#tip20factory), calling the `createToken` function. If you're issuing a stablecoin on Tempo, we **strongly recommend** using the TIP-20 standard. Learn more about the benefits, or follow the guide on issuance [here](/docs/guide/issuance).
+
+## Benefits & Features of TIP-20 Tokens
+
+Below are some of the key benefits and features of TIP-20 tokens:
+
+### Payments
+
+<Cards>
+  <Card
+    description="Only TIP-20 tokens can be used to pay for transaction fees on Tempo."
+    to="#pay-fees-in-any-stablecoin"
+    icon="lucide:wallet"
+    title="Pay for Blockchain Transaction Fees"
+  />
+  <Card
+    description="TIP-20 tokens have dedicated blockspace from all other transactions, ensuring predictable payment fees."
+    to="#get-predictable-payment-fees"
+    icon="lucide:route"
+    title="Get Predictable Payment Fees"
+  />
+  <Card
+    description="Attach 32-byte memos to transfers for payment references, invoice IDs, or transaction notes."
+    to="#transfer-memos"
+    icon="lucide:message-square"
+    title="Transfer Memos"
+  />
+  <Card
+    description="Opt-in reward distribution system for issuing rewards to token holders."
+    to="#reward-distribution"
+    icon="lucide:gift"
+    title="Reward Distribution"
+  />
+</Cards>
+
+### Exchange
+
+<Cards>
+  <Card
+    description="Declare currency identifiers (e.g., USD, EUR) for proper routing and pricing in the Stablecoin DEX."
+    to="#currency-declaration"
+    icon="lucide:banknote"
+    title="Currency Declaration"
+  />
+  <Card
+    description="TIP-20 tokens can serve as quote tokens in Tempo's DEX for trading pairs and liquidity pools."
+    to="#dex-quote-tokens"
+    icon="lucide:arrow-left-right"
+    title="DEX Quote Tokens"
+  />
+</Cards>
+
+### Compliance & Controls
+
+<Cards>
+  <Card
+    description="Set access control roles for minting, burning, pausing, and administrative operations."
+    to="#role-based-access-control-rbac"
+    icon="lucide:shield"
+    title="Built-in Role-Based Access Control"
+  />
+  <Card
+    description="Enforce compliance with whitelist and blacklist policies via the Tempo Policy Registry (TIP-403)."
+    to="#tempo-policy-registry-tip-403"
+    icon="lucide:file-check"
+    title="Enforce Transfer Policies"
+  />
+  <Card
+    description="Supply caps, pause/unpause controls, and 32-byte transfer memos for payment references."
+    to="#operational-controls"
+    icon="lucide:settings"
+    title="Operational Controls"
+  />
+</Cards>
+
+### Pay Fees in Any Stablecoin
+
+Any USD-denominated TIP-20 token can be used to pay transaction fees on Tempo.
+
+The [Fee AMM](/docs/protocol/fees/spec-fee-amm) automatically converts your token to the validator's preferred fee token, eliminating the need for users to hold a separate gas token. This feature works natively: no additional infrastructure or integration required.
+
+Full specification of this feature can be found in the [Payment Lanes Specification](/docs/protocol/blockspace/payment-lane-specification).
+
+### Get Predictable Payment Fees
+
+Tempo has dedicated payment lanes: reserved blockspace for payment TIP-20 transactions that other applications cannot consume. Even if there are extremely popular applications on the chain competing for blockspace, payroll runs or customer disbursements execute predictably. Learn more about the [payments lane](/docs/protocol/blockspace/payment-lane-specification).
+
+### Role-Based Access Control (RBAC)
+
+TIP-20 includes a built-in [RBAC system](/docs/protocol/tip403/spec#tip-20-token-roles) that separates administrative responsibilities:
+
+- **ISSUER_ROLE**: Grants permission to mint and burn tokens, enabling controlled token issuance
+- **PAUSE_ROLE** / **UNPAUSE_ROLE**: Allows pausing and unpausing token transfers for emergency controls
+- **BURN_BLOCKED_ROLE**: Permits burning tokens from blocked addresses (e.g., for compliance actions)
+
+Roles can be granted, revoked, and delegated without custom contract changes. This enables issuers to separate operational roles (e.g., who can mint) from administrative roles (e.g., who can pause). Learn more in the [TIP-20 specification](/docs/protocol/tip20/spec#roles).
+
+### Tempo Policy Registry (TIP-403)
+
+TIP-20 tokens integrate with the [Tempo Policy Registry (TIP-403)](/docs/protocol/tip403/overview) to enforce compliance policies. Each token can reference a policy that controls who can send and receive tokens:
+
+- **Whitelist policies**: Only addresses in the whitelist can transfer tokens
+- **Blacklist policies**: Addresses in the blacklist are blocked from transferring tokens
+
+Policies can be shared across multiple tokens, enabling consistent compliance enforcement across your token ecosystem. See the [TIP-403 specification](/docs/protocol/tip403/spec) for details.
+
+### Operational Controls
+
+TIP-20 tokens can set **supply caps**, which allow you to set a maximum token supply to control issuance. 
+
+TIP-20 tokens also have **pause/unpause** commands, which provide emergency controls to halt transfers when needed. 
+
+### Transfer Memos
+
+**Transfer memos** enable you to attach 32-byte memos to transfers for payment references, invoice IDs, or transaction notes.
+
+### Reward Distribution
+
+TIP-20 supports an opt-in [reward distribution system](/docs/protocol/tip20-rewards/overview) that allows issuers to distribute rewards to token holders. Rewards can be claimed by holders or automatically forwarded to designated recipient addresses.
+
+### Currency Declaration
+
+A TIP-20 token can declare a currency identifier that identifies the reference asset whose price the token is designed to track. This enables proper routing and pricing in Tempo's [Stablecoin DEX](/docs/protocol/exchange). Currently, **only `USD`-denominated stablecoins** can be used to pay transaction fees on Tempo or traded on the StablecoinDEX.
+
+#### General principle
+
+**The `currency` field identifies the reference asset that 1 unit of the token is designed to be worth** — not what the token is called or what it is denominated in. Two tokens that track the same asset should have the same `currency`. When in doubt, consider that the purpose of this field is to determine what assets a token would trade against on a DEX designed for assets that trade within 2% of a 1:1 price.
+
+#### Guidelines
+
+1. **Tokens that track an asset with an [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) code** — use that code. This includes fiat currencies (`"USD"`, `"EUR"`) as well as commodities (`"XAU"` for gold, `"XAG"` for silver).
+2. **Tokens tracking a non-ISO asset at 1:1** — use the symbol of the reference asset. For example, a bridged WBTC that tracks BTC should use `"BTC"`; a bridged WETH that tracks ETH should use `"ETH"`. Prefer `"BTC"` over `"XBT"`. Use the symbol from the asset's origin chain when there is ambiguity across platforms.
+3. **Tokens denominated in but not pegged to a currency** — do **not** use that currency's code. A tokenized gold product priced in USD should not use `"USD"`, because 1 unit is not designed to be worth 1 USD.
+4. **Tokens with no reference asset** — if a token does not track any external asset (e.g. a governance or utility token), use its own symbol as the currency.
+
+#### Examples
+
+| Token | Tracks | `currency` |
+|-------|--------|------------|
+| USDC | US Dollar | `"USD"` |
+| USDT | US Dollar | `"USD"` |
+| EURC | Euro | `"EUR"` |
+| Bridged WBTC | Bitcoin | `"BTC"` |
+| Bridged stETH | Ether | `"ETH"` |
+| Bridged wstETH | Wrapped staked Ether | `"wstETH"` |
+| Tokenized gold (priced in USD) | Gold | `"XAU"` |
+| Governance token (e.g. UNI) | Itself | `"UNI"` |
+
+:::warning
+The currency code is **immutable** — it cannot be changed after token creation. An incorrect currency code will affect fee payment eligibility, DEX routing, and quote token pairing.
+:::
+
+### DEX Quote Tokens
+
+TIP-20 tokens can serve as quote tokens in Tempo's decentralized exchange (DEX). When creating trading pairs on the [Stablecoin DEX](/docs/protocol/exchange), TIP-20 tokens function as the quote currency against which other tokens are priced and traded.
+
+This enables efficient stablecoin-to-stablecoin trading and provides optimized routing for liquidity. For example, a USDG TIP-20 token can be paired with other stablecoins, allowing traders to swap between different USD-denominated tokens with minimal slippage through concentrated liquidity pools.
+
+By using TIP-20 tokens as quote tokens, the DEX benefits from the same payment-optimized features like deterministic addresses, currency identifiers, and compliance policies, ensuring secure and efficient exchange operations.
+
+## Additional Links
+
+<Cards>
+  <Card
+    description="Learn how TIP-20 works and its features"
+    to="/docs/protocol/tip20/spec"
+    icon="lucide:file-text"
+    title="TIP-20 Specification"
+  />
+  <Card
+    description="Send and receive payments using stablecoins on Tempo"
+    to="/docs/guide/payments"
+    icon="lucide:send"
+    title="Guide: Make Payments"
+  />
+  <Card
+    description="Generate one deposit address per customer without sweep transactions"
+    to="/docs/protocol/tip20/virtual-addresses"
+    icon="lucide:route"
+    title="Virtual Addresses"
+  />
+  <Card
+    description="Create and manage your own stablecoin on Tempo"
+    to="/docs/guide/issuance"
+    icon="lucide:rocket"
+    title="Guide: Issue Stablecoins"
+  />
+</Cards>

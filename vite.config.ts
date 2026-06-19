@@ -4,8 +4,8 @@ import react from '@vitejs/plugin-react'
 import { Instance } from 'prool'
 import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
+import Icons from 'unplugin-icons/vite'
 import { vocs } from 'vocs/vite'
-import { moderatoZoneRpcUrls } from './src/lib/private-zones.ts'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -14,9 +14,7 @@ export default defineConfig(({ mode }) => {
     if (!(key in process.env)) process.env[key] = env[key]
   }
 
-  const isE2E = process.env.VITE_E2E === 'true' || env.VITE_E2E === 'true'
   const useHttp = process.env.CI === 'true' || process.env.VITE_USE_HTTP === 'true'
-  const e2eZoneProxy = isE2E ? getE2EZoneProxy() : undefined
   const proxy = {
     '/api/mcp': {
       changeOrigin: true,
@@ -24,11 +22,36 @@ export default defineConfig(({ mode }) => {
       secure: true,
       target: 'https://mcp.tempo.xyz',
     },
-    ...e2eZoneProxy,
   }
 
   return {
-    plugins: [vocs(), react(), ...(useHttp ? [] : [mkcert()]), tempoNode(), llmsFeedbackPreamble()],
+    plugins: [
+      marketingPages(),
+      crossAppPrefetch(),
+      vocs(),
+      Icons({ compiler: 'jsx', jsx: 'react' }),
+      react(),
+      ...(useHttp ? [] : [mkcert()]),
+      tempoNode(),
+      llmsFeedbackPreamble(),
+    ],
+    resolve: {
+      alias: [
+        {
+          find: 'next/image',
+          replacement: path.resolve(process.cwd(), 'src/marketing/next-shims.tsx'),
+        },
+        {
+          find: 'next/link',
+          replacement: path.resolve(process.cwd(), 'src/marketing/next-shims.tsx'),
+        },
+        {
+          find: 'next/navigation',
+          replacement: path.resolve(process.cwd(), 'src/marketing/next-shims.tsx'),
+        },
+        { find: 'next', replacement: path.resolve(process.cwd(), 'src/marketing/next-shims.tsx') },
+      ],
+    },
     server: {
       ...(useHttp ? { host: 'localhost' } : {}),
       proxy,
@@ -36,28 +59,50 @@ export default defineConfig(({ mode }) => {
   }
 })
 
-function getE2EZoneProxy() {
-  return Object.fromEntries(
-    Object.entries(moderatoZoneRpcUrls).map(([zoneId, rpcUrl]) => {
-      const parsedUrl = new URL(rpcUrl)
-      const authorization = `Basic ${Buffer.from(
-        `${decodeURIComponent(parsedUrl.username)}:${decodeURIComponent(parsedUrl.password)}`,
-      ).toString('base64')}`
-      parsedUrl.username = ''
-      parsedUrl.password = ''
+const marketingRoutes = ['/', '/build', '/diagrams', '/performance']
 
-      return [
-        `/__e2e_zone_rpc/${zoneId}`,
-        {
-          changeOrigin: true,
-          headers: { authorization },
-          rewrite: () => '/',
-          secure: true,
-          target: parsedUrl.toString(),
-        },
-      ]
-    }),
+function isMarketingPath(pathname: string) {
+  const normalized = pathname.replace(/\/$/, '') || '/'
+  return (
+    marketingRoutes.includes(normalized) || normalized.startsWith('/build/')
   )
+}
+
+async function marketingHtml() {
+  const html = await fs.readFile(path.resolve(process.cwd(), 'src/marketing/index.html'), 'utf-8')
+  return html.replace('src="./main.tsx"', 'src="/src/marketing/main.tsx"')
+}
+
+function marketingPages(): Plugin {
+  return {
+    name: 'tempo-marketing-pages',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        if (!req.url) return next()
+        const url = new URL(req.url, 'http://localhost')
+        if (!isMarketingPath(url.pathname)) return next()
+
+        const html = await server.transformIndexHtml(url.pathname, await marketingHtml())
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'text/html')
+        res.end(html)
+      })
+    },
+  }
+}
+
+function crossAppPrefetch(): Plugin {
+  return {
+    name: 'tempo-cross-app-prefetch',
+    enforce: 'post',
+    transformIndexHtml(html, context) {
+      const pathname = context.path?.replace(/\/$/, '') || '/'
+      const href = pathname === '/docs' || pathname.startsWith('/docs/') ? '/' : '/docs'
+      const prefetchLink = `<link href="${href}" rel="prefetch" as="document" />`
+      if (html.includes(`href="${href}" rel="prefetch"`)) return html
+      return html.replace('</head>', `  ${prefetchLink}\n  </head>`)
+    },
+  }
 }
 
 const llmsFeedbackNotice = [

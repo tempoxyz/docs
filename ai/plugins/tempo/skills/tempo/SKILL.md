@@ -23,9 +23,9 @@ verify them from docs before writing code.
 | User is building... | Start with |
 |---|---|
 | A new Tempo app or network setup | `/quickstart/integrate-tempo`, `/quickstart/connection-details`, `/sdk` |
-| Account or wallet UX | `/guide/use-accounts`, `/accounts`, `/quickstart/wallet-developers` |
+| Wallet UX | `/quickstart/wallet-developers`, `/quickstart/connection-details`, `/sdk` |
 | Stablecoin payments | `/guide/payments`, especially send, accept, virtual addresses, memos, fees, sponsorship, and parallel transactions |
-| Sponsored or gasless transactions | `/guide/payments/sponsor-user-fees`, `/developer-tools/fee-payer`, `/accounts/server/handler.relay` |
+| Sponsored or gasless transactions | `/guide/payments/sponsor-user-fees`, `/developer-tools/fee-payer` |
 | MPP or paid APIs | `/guide/machine-payments`, then `/guide/machine-payments/client`, `/server`, or `/agent` |
 | Agent-paid service calls | Use the `tempo-wallet` skill for wallet login, service discovery, and `tempo request` |
 | Hosted indexer queries | `/developer-tools/indexer` |
@@ -57,11 +57,11 @@ code. Use the docs page’s linked examples when available.
 
 ## Useful Docs
 
-- Getting started: `https://docs.tempo.xyz/quickstart/integrate-tempo`
-- Connection details: `https://docs.tempo.xyz/quickstart/connection-details`
-- Accounts: `https://docs.tempo.xyz/guide/use-accounts`
-- Payments: `https://docs.tempo.xyz/guide/payments`
-- Machine payments: `https://docs.tempo.xyz/guide/machine-payments`
-- Hosted services: `https://docs.tempo.xyz/hosted-services`
-- SDKs: `https://docs.tempo.xyz/sdk`
-- Protocol specs: `https://docs.tempo.xyz/protocol`
+- Getting started: `https://docs.tempo.xyz/docs/quickstart/integrate-tempo`
+- Connection details: `https://docs.tempo.xyz/docs/quickstart/connection-details`
+- Wallet: `https://docs.tempo.xyz/docs/wallet`
+- Payments: `https://docs.tempo.xyz/docs/guide/payments`
+- Machine payments: `https://docs.tempo.xyz/docs/guide/machine-payments`
+- Hosted services: `https://docs.tempo.xyz/docs/hosted-services`
+- SDKs: `https://docs.tempo.xyz/docs/sdk`
+- Protocol specs: `https://docs.tempo.xyz/docs/protocol`

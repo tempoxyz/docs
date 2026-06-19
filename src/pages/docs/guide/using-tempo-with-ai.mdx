@@ -1,0 +1,187 @@
+---
+title: Developing with LLMs
+description: Give your AI coding agent Tempo documentation context with skills, Markdown pages, and MCP.
+interactive: true
+---
+
+import { Tabs, Tab } from 'vocs'
+import { DocsLinkButton } from '../../../components/DocsLinkButton.tsx'
+import { TempoMcpExplorer } from '../../../components/TempoMcpExplorer.tsx'
+
+# Developing with LLMs
+
+## Connect to Tempo's MCP server
+
+The Tempo MCP server gives agents programmatic access to Tempo documentation and related developer resources.
+
+<style>{`
+  .tempo-mcp-tabs [role='tab']:nth-child(1)::before,
+  .tempo-mcp-tabs [role='tab']:nth-child(2)::before,
+  .tempo-mcp-tabs [role='tab']:nth-child(3)::before {
+    content: '';
+    width: 1em;
+    height: 1em;
+    margin-right: 0.375rem;
+    display: inline-block;
+    background-color: currentColor;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    -webkit-mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+  }
+
+  .tempo-mcp-tabs [role='tab']:nth-child(1)::before {
+    mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%22currentColor%22%20d%3D%22m4.714%2015.956l4.718-2.648l.079-.23l-.08-.128h-.23l-.79-.048l-2.695-.073l-2.337-.097l-2.265-.122l-.57-.121l-.535-.704l.055-.353l.48-.321l.685.06l1.518.104l2.277.157l1.651.098l2.447.255h.389l.054-.158l-.133-.097l-.103-.098l-2.356-1.596l-2.55-1.688l-1.336-.972l-.722-.491L2%206.223l-.158-1.008l.656-.722l.88.06l.224.061l.893.686l1.906%201.476l2.49%201.833l.364.304l.146-.104l.018-.072l-.164-.274l-1.354-2.446l-1.445-2.49l-.644-1.032l-.17-.619a3%203%200%200%201-.103-.729L6.287.133L6.7%200l.995.134l.42.364l.619%201.415L9.735%204.14l1.555%203.03l.455.898l.243.832l.09.255h.159V9.01l.127-1.706l.237-2.095l.23-2.695l.08-.76l.376-.91l.747-.492l.583.28l.48.685l-.067.444l-.286%201.851l-.558%202.903l-.365%201.942h.213l.243-.242l.983-1.306l1.652-2.064l.728-.82l.85-.904l.547-.431h1.032l.759%201.129l-.34%201.166l-1.063%201.347l-.88%201.142l-1.263%201.7l-.79%201.36l.074.11l.188-.02l2.853-.606l1.542-.28l1.84-.315l.832.388l.09.395l-.327.807l-1.967.486l-2.307.462l-3.436.813l-.043.03l.049.061l1.548.146l.662.036h1.62l3.018.225l.79.522l.473.638l-.08.485l-1.213.62l-1.64-.389l-3.825-.91l-1.31-.329h-.183v.11l1.093%201.068l2.003%201.81l2.508%202.33l.127.578l-.321.455l-.34-.049l-2.204-1.657l-.85-.747l-1.925-1.62h-.127v.17l.443.649l2.343%203.521l.122%201.08l-.17.353l-.607.213l-.668-.122l-1.372-1.924l-1.415-2.168l-1.141-1.943l-.14.08l-.674%207.254l-.316.37l-.728.28l-.607-.461l-.322-.747l.322-1.476l.388-1.924l.316-1.53l.285-1.9l.17-.632l-.012-.042l-.14.018l-1.432%201.967l-2.18%202.945l-1.724%201.845l-.413.164l-.716-.37l.066-.662l.401-.589l2.386-3.036l1.439-1.882l.929-1.086l-.006-.158h-.055L4.138%2018.56l-1.13.146l-.485-.456l.06-.746l.231-.243l1.907-1.312Z%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%22currentColor%22%20d%3D%22m4.714%2015.956l4.718-2.648l.079-.23l-.08-.128h-.23l-.79-.048l-2.695-.073l-2.337-.097l-2.265-.122l-.57-.121l-.535-.704l.055-.353l.48-.321l.685.06l1.518.104l2.277.157l1.651.098l2.447.255h.389l.054-.158l-.133-.097l-.103-.098l-2.356-1.596l-2.55-1.688l-1.336-.972l-.722-.491L2%206.223l-.158-1.008l.656-.722l.88.06l.224.061l.893.686l1.906%201.476l2.49%201.833l.364.304l.146-.104l.018-.072l-.164-.274l-1.354-2.446l-1.445-2.49l-.644-1.032l-.17-.619a3%203%200%200%201-.103-.729L6.287.133L6.7%200l.995.134l.42.364l.619%201.415L9.735%204.14l1.555%203.03l.455.898l.243.832l.09.255h.159V9.01l.127-1.706l.237-2.095l.23-2.695l.08-.76l.376-.91l.747-.492l.583.28l.48.685l-.067.444l-.286%201.851l-.558%202.903l-.365%201.942h.213l.243-.242l.983-1.306l1.652-2.064l.728-.82l.85-.904l.547-.431h1.032l.759%201.129l-.34%201.166l-1.063%201.347l-.88%201.142l-1.263%201.7l-.79%201.36l.074.11l.188-.02l2.853-.606l1.542-.28l1.84-.315l.832.388l.09.395l-.327.807l-1.967.486l-2.307.462l-3.436.813l-.043.03l.049.061l1.548.146l.662.036h1.62l3.018.225l.79.522l.473.638l-.08.485l-1.213.62l-1.64-.389l-3.825-.91l-1.31-.329h-.183v.11l1.093%201.068l2.003%201.81l2.508%202.33l.127.578l-.321.455l-.34-.049l-2.204-1.657l-.85-.747l-1.925-1.62h-.127v.17l.443.649l2.343%203.521l.122%201.08l-.17.353l-.607.213l-.668-.122l-1.372-1.924l-1.415-2.168l-1.141-1.943l-.14.08l-.674%207.254l-.316.37l-.728.28l-.607-.461l-.322-.747l.322-1.476l.388-1.924l.316-1.53l.285-1.9l.17-.632l-.012-.042l-.14.018l-1.432%201.967l-2.18%202.945l-1.724%201.845l-.413.164l-.716-.37l.066-.662l.401-.589l2.386-3.036l1.439-1.882l.929-1.086l-.006-.158h-.055L4.138%2018.56l-1.13.146l-.485-.456l.06-.746l.231-.243l1.907-1.312Z%22%2F%3E%3C%2Fsvg%3E");
+  }
+
+  .tempo-mcp-tabs [role='tab']:nth-child(2)::before {
+    mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%22currentColor%22%20d%3D%22M22.282%209.821a6%206%200%200%200-.516-4.91a6.05%206.05%200%200%200-6.51-2.9A6.065%206.065%200%200%200%204.981%204.18a6%206%200%200%200-3.998%202.9a6.05%206.05%200%200%200%20.743%207.097a5.98%205.98%200%200%200%20.51%204.911a6.05%206.05%200%200%200%206.515%202.9A6%206%200%200%200%2013.26%2024a6.06%206.06%200%200%200%205.772-4.206a6%206%200%200%200%203.997-2.9a6.06%206.06%200%200%200-.747-7.073M13.26%2022.43a4.48%204.48%200%200%201-2.876-1.04l.141-.081l4.779-2.758a.8.8%200%200%200%20.392-.681v-6.737l2.02%201.168a.07.07%200%200%201%20.038.052v5.583a4.504%204.504%200%200%201-4.494%204.494M3.6%2018.304a4.47%204.47%200%200%201-.535-3.014l.142.085l4.783%202.759a.77.77%200%200%200%20.78%200l5.843-3.369v2.332a.08.08%200%200%201-.033.062L9.74%2019.95a4.5%204.5%200%200%201-6.14-1.646M2.34%207.896a4.5%204.5%200%200%201%202.366-1.973V11.6a.77.77%200%200%200%20.388.677l5.815%203.354l-2.02%201.168a.08.08%200%200%201-.071%200l-4.83-2.786A4.504%204.504%200%200%201%202.34%207.872zm16.597%203.855l-5.833-3.387L15.119%207.2a.08.08%200%200%201%20.071%200l4.83%202.791a4.494%204.494%200%200%201-.676%208.105v-5.678a.79.79%200%200%200-.407-.667m2.01-3.023l-.141-.085l-4.774-2.782a.78.78%200%200%200-.785%200L9.409%209.23V6.897a.07.07%200%200%201%20.028-.061l4.83-2.787a4.5%204.5%200%200%201%206.68%204.66zm-12.64%204.135l-2.02-1.164a.08.08%200%200%201-.038-.057V6.075a4.5%204.5%200%200%201%207.375-3.453l-.142.08L8.704%205.46a.8.8%200%200%200-.393.681zm1.097-2.365l2.602-1.5l2.607%201.5v2.999l-2.597%201.5l-2.607-1.5Z%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%22currentColor%22%20d%3D%22M22.282%209.821a6%206%200%200%200-.516-4.91a6.05%206.05%200%200%200-6.51-2.9A6.065%206.065%200%200%200%204.981%204.18a6%206%200%200%200-3.998%202.9a6.05%206.05%200%200%200%20.743%207.097a5.98%205.98%200%200%200%20.51%204.911a6.05%206.05%200%200%200%206.515%202.9A6%206%200%200%200%2013.26%2024a6.06%206.06%200%200%200%205.772-4.206a6%206%200%200%200%203.997-2.9a6.06%206.06%200%200%200-.747-7.073M13.26%2022.43a4.48%204.48%200%200%201-2.876-1.04l.141-.081l4.779-2.758a.8.8%200%200%200%20.392-.681v-6.737l2.02%201.168a.07.07%200%200%201%20.038.052v5.583a4.504%204.504%200%200%201-4.494%204.494M3.6%2018.304a4.47%204.47%200%200%201-.535-3.014l.142.085l4.783%202.759a.77.77%200%200%200%20.78%200l5.843-3.369v2.332a.08.08%200%200%201-.033.062L9.74%2019.95a4.5%204.5%200%200%201-6.14-1.646M2.34%207.896a4.5%204.5%200%200%201%202.366-1.973V11.6a.77.77%200%200%200%20.388.677l5.815%203.354l-2.02%201.168a.08.08%200%200%201-.071%200l-4.83-2.786A4.504%204.504%200%200%201%202.34%207.872zm16.597%203.855l-5.833-3.387L15.119%207.2a.08.08%200%200%201%20.071%200l4.83%202.791a4.494%204.494%200%200%201-.676%208.105v-5.678a.79.79%200%200%200-.407-.667m2.01-3.023l-.141-.085l-4.774-2.782a.78.78%200%200%200-.785%200L9.409%209.23V6.897a.07.07%200%200%201%20.028-.061l4.83-2.787a4.5%204.5%200%200%201%206.68%204.66zm-12.64%204.135l-2.02-1.164a.08.08%200%200%201-.038-.057V6.075a4.5%204.5%200%200%201%207.375-3.453l-.142.08L8.704%205.46a.8.8%200%200%200-.393.681zm1.097-2.365l2.602-1.5l2.607%201.5v2.999l-2.597%201.5l-2.607-1.5Z%22%2F%3E%3C%2Fsvg%3E");
+  }
+
+  .tempo-mcp-tabs [role='tab']:nth-child(3)::before {
+    mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%22currentColor%22%20d%3D%22M11.503.131L1.891%205.678a.84.84%200%200%200-.42.726v11.188c0%20.3.162.575.42.724l9.609%205.55a1%201%200%200%200%20.998%200l9.61-5.55a.84.84%200%200%200%20.42-.724V6.404a.84.84%200%200%200-.42-.726L12.497.131a1.01%201.01%200%200%200-.996%200M2.657%206.338h18.55c.263%200%20.43.287.297.515L12.23%2022.918c-.062.107-.229.064-.229-.06V12.335a.59.59%200%200%200-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%22currentColor%22%20d%3D%22M11.503.131L1.891%205.678a.84.84%200%200%200-.42.726v11.188c0%20.3.162.575.42.724l9.609%205.55a1%201%200%200%200%20.998%200l9.61-5.55a.84.84%200%200%200%20.42-.724V6.404a.84.84%200%200%200-.42-.726L12.497.131a1.01%201.01%200%200%200-.996%200M2.657%206.338h18.55c.263%200%20.43.287.297.515L12.23%2022.918c-.062.107-.229.064-.229-.06V12.335a.59.59%200%200%200-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23%22%2F%3E%3C%2Fsvg%3E");
+  }
+
+  .tempo-cursor-config {
+    margin-top: 1rem;
+  }
+`}</style>
+
+<div className="tempo-mcp-tabs">
+
+<Tabs stateKey="tempo-mcp-client">
+  <Tab title="Claude">
+
+```bash
+claude mcp add --transport http tempo https://mcp.tempo.xyz
+```
+
+  </Tab>
+  <Tab title="Codex">
+
+```bash
+codex mcp add tempo --url https://mcp.tempo.xyz
+```
+
+  </Tab>
+  <Tab title="Cursor">
+
+<DocsLinkButton className="my-0 mb-4" href="cursor://anysphere.cursor-deeplink/mcp/install?name=tempo&config=eyJ1cmwiOiJodHRwczovL21jcC50ZW1wby54eXoifQ%3D%3D">Install in Cursor</DocsLinkButton>
+
+To open Cursor and automatically add the Tempo MCP server, click install. Alternatively, add the following to your `~/.cursor/mcp.json` file. To learn more, see the Cursor [documentation](https://docs.cursor.com/context/model-context-protocol).
+
+<div className="tempo-cursor-config">
+
+```json
+{
+  "mcpServers": {
+    "tempo": {
+      "url": "https://mcp.tempo.xyz"
+    }
+  }
+}
+```
+
+</div>
+
+  </Tab>
+  <Tab title="Amp">
+
+```bash
+amp mcp add --transport http tempo https://mcp.tempo.xyz
+```
+
+  </Tab>
+  <Tab title="Manual">
+
+```json
+{
+  "mcpServers": {
+    "tempo": {
+      "url": "https://mcp.tempo.xyz"
+    }
+  }
+}
+```
+
+  </Tab>
+</Tabs>
+
+</div>
+
+## MCP tools
+
+The MCP endpoint exposes these tools to connected agents:
+
+| Tool | Purpose | Required arguments |
+| --- | --- | --- |
+| `search` | Search docs. | `query` |
+| `find_pages` | Find matching page URLs from a source index. | `source`, `query` |
+| `read_page` | Read one cleaned documentation page. | `source` plus `path` or `url` |
+
+### MCP feedback
+
+MCP clients can also post feedback directly to `https://docs.tempo.xyz/api/feedback`:
+
+```json
+{
+  "source": "mcp",
+  "sentiment": "negative",
+  "message": "The read_page result for /guide/payments is missing fee-token setup.",
+  "toolName": "read_page",
+  "relatedResource": "/guide/payments",
+  "client": "codex"
+}
+```
+
+### Try the MCP server
+
+<TempoMcpExplorer />
+
+## Install Tempo plugins
+
+The Tempo plugin installs a complete agent integration: the Tempo MCP server, workflow skills for using Tempo APIs and docs, and editor metadata that helps agents discover the right Tempo tools without manual setup.
+
+:::code-group
+```bash [Codex]
+codex plugin marketplace add tempoxyz/docs
+codex plugin add tempo@docs
+```
+
+```bash [Claude]
+claude plugin marketplace add tempoxyz/docs
+claude plugin install tempo@claude
+```
+:::
+
+## Tempo Docs
+
+### Docs skill
+
+Install the Tempo Docs skill to give AI coding agents access to Tempo documentation, source code via MCP, and examples:
+
+```bash
+npx skills add tempoxyz/docs
+```
+
+Once installed, the agent uses it automatically when relevant tasks are detected.
+
+### Read docs as Markdown
+
+Every page on this site is available as plain Markdown — append `.md` to any URL:
+
+```
+https://docs.tempo.xyz/docs/quickstart/integrate-tempo.md
+```
+
+For LLM consumption, two [`llms.txt`](https://llmstxt.org/) files are served at the root:
+
+| URL | Contents |
+| --- | --- |
+| [`/llms.txt`](https://docs.tempo.xyz/llms.txt) | Concise index of all pages with titles and descriptions |
+| [`/llms-full.txt`](https://docs.tempo.xyz/llms-full.txt) | Complete documentation in a single file |
