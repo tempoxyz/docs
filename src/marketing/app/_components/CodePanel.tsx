@@ -1,3 +1,5 @@
+// biome-ignore-all lint/a11y/noSvgWithoutTitle: Copy-state SVGs are decorative inside labelled buttons.
+
 'use client'
 
 import { useState } from 'react'
@@ -38,13 +40,22 @@ const KEYWORDS = new Set([
 type Token = { text: string; color?: string; start: number }
 type TokenRun = Token & { boxed: boolean }
 
+function uniqueKey(base: string, counts: Map<string, number>) {
+  const count = counts.get(base) ?? 0
+  counts.set(base, count + 1)
+  return count === 0 ? base : `${base}:${count}`
+}
+
 // Lightweight TS tokenizer — good enough for short, controlled snippets.
 function tokenize(line: string): Token[] {
   const tokens: Token[] = []
   const re =
     /(\/\/[^\n]*)|(`[^`]*`|"[^"]*"|'[^']*')|(\b\d[\d_]*n?\b)|([A-Za-z_$][\w$]*)|(\s+)|([^\s])/g
   let match: RegExpExecArray | null
-  while ((match = re.exec(line)) !== null) {
+  while (true) {
+    match = re.exec(line)
+    if (match === null) break
+
     const [text, comment, str, num, ident, ws, punct] = match
     const start = match.index
     if (comment) tokens.push({ text, color: COLOR.comment, start })
@@ -104,9 +115,12 @@ function splitTokenByHighlights(token: Token, ranges: [number, number][]): Token
 }
 
 function renderCode(code: string[], highlight?: string[]) {
-  return code.map((line, i) => {
+  const lineCounts = new Map<string, number>()
+
+  return code.map((line) => {
+    const lineKey = uniqueKey(line || 'blank-line', lineCounts)
     const tokens = tokenize(line)
-    if (tokens.length === 0) return <div key={i}>{'\u00A0'}</div>
+    if (tokens.length === 0) return <div key={lineKey}>{'\u00A0'}</div>
 
     const ranges = highlight?.length ? highlightRanges(line, highlight) : []
     // Group adjacent tokens that share the same highlight state so each run of
@@ -121,22 +135,27 @@ function renderCode(code: string[], highlight?: string[]) {
     }
 
     return (
-      <div key={i}>
-        {groups.map((group, gi) => {
-          const inner = group.toks.map((tok, j) => (
-            <span key={j} style={tok.color ? { color: tok.color } : undefined}>
+      <div key={lineKey}>
+        {groups.map((group) => {
+          const groupStart = group.toks[0]?.start ?? 0
+          const groupKey = `${group.boxed ? 'boxed' : 'plain'}:${groupStart}`
+          const inner = group.toks.map((tok) => (
+            <span
+              key={`${tok.start}:${tok.text}`}
+              style={tok.color ? { color: tok.color } : undefined}
+            >
               {tok.text}
             </span>
           ))
           return group.boxed ? (
             <span
-              key={gi}
+              key={groupKey}
               className="-mx-1 -my-0.5 rounded-[4px] bg-white/[0.07] px-1 py-0.5 ring-1 ring-white/10"
             >
               {inner}
             </span>
           ) : (
-            <span key={gi}>{inner}</span>
+            <span key={groupKey}>{inner}</span>
           )
         })}
       </div>

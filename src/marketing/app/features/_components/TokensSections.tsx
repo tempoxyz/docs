@@ -216,7 +216,7 @@ const virtualAddressCodeVariants: CodeVariant[] = [
     lang: 'Attribute',
     code: [
       '// The trailing 6 bytes are your routing key',
-      'const userTag = `0x${virtualAddress.slice(-12)}`;',
+      `const userTag = \`0x\${virtualAddress.slice(-12)}\`;`,
       '',
       'await db.deposits.create({',
       '  data: {',

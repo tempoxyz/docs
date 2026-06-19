@@ -39,6 +39,27 @@ interface PageResult {
   tti: number
 }
 
+type LighthouseAudit = {
+  numericValue?: number
+}
+
+type LighthouseReport = {
+  runtimeError?: {
+    code?: string
+    message: string
+  }
+  categories?: {
+    performance?: {
+      score?: number
+    }
+  }
+  audits?: Record<string, LighthouseAudit>
+}
+
+type ExecError = Error & {
+  stderr?: Buffer | string
+}
+
 function parseArgs(argv: string[]) {
   const args = argv.slice(2)
   const flags = {
@@ -78,7 +99,7 @@ function parseArgs(argv: string[]) {
 
 const LH_OUTPUT = '/tmp/lighthouse-result.json'
 
-function runLighthouse(url: string, mobile: boolean): any | null {
+function runLighthouse(url: string, mobile: boolean): LighthouseReport | null {
   const preset = mobile ? 'perf' : 'desktop'
   // Run npx from /tmp to avoid devEngines conflicts in the docs package.json
   // Use --output-path to avoid pipe truncation on large JSON output
@@ -92,7 +113,7 @@ function runLighthouse(url: string, mobile: boolean): any | null {
       cwd: '/tmp',
     })
     const raw = readFileSync(LH_OUTPUT, 'utf-8')
-    const report = JSON.parse(raw)
+    const report = JSON.parse(raw) as LighthouseReport
 
     // Check for runtime errors (e.g., page returned 500)
     if (report.runtimeError?.code) {
@@ -104,7 +125,7 @@ function runLighthouse(url: string, mobile: boolean): any | null {
   } catch (err) {
     console.error(`  ✗ Lighthouse failed for ${url}`)
     if (err instanceof Error) {
-      const stderr = (err as any).stderr?.toString() || ''
+      const stderr = (err as ExecError).stderr?.toString() || ''
       const meaningful = stderr
         .split('\n')
         .filter((l: string) => !l.includes('npm warn') && l.trim())
@@ -116,7 +137,7 @@ function runLighthouse(url: string, mobile: boolean): any | null {
   }
 }
 
-function extractMetrics(report: any, page: string): PageResult {
+function extractMetrics(report: LighthouseReport, page: string): PageResult {
   const score = Math.round((report.categories?.performance?.score ?? 0) * 100)
   const audits = report.audits ?? {}
 

@@ -1,3 +1,5 @@
+// biome-ignore-all lint/a11y/noSvgWithoutTitle: The chart SVG is paired with visible axes, labels, and tooltip text.
+
 'use client'
 
 import { useEffect, useState } from 'react'

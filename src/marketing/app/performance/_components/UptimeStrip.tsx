@@ -1,3 +1,5 @@
+// biome-ignore-all lint/a11y/noSvgWithoutTitle: The availability strip is decorative and backed by adjacent status text.
+
 'use client'
 
 import { useEffect, useState } from 'react'

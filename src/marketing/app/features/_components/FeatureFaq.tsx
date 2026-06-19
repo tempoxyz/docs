@@ -84,12 +84,12 @@ export default function FeatureFaq({
                   >
                     <div className="overflow-hidden">
                       <p className="font-sans text-[16px] text-white/50 leading-[1.55] tracking-[0]">
-                        {item.answer.map((part, partIndex) =>
+                        {item.answer.map((part) =>
                           typeof part === 'string' ? (
-                            <Fragment key={partIndex}>{part}</Fragment>
+                            <Fragment key={part}>{part}</Fragment>
                           ) : (
                             <a
-                              key={`${part.href}-${partIndex}`}
+                              key={part.href}
                               href={part.href}
                               target="_blank"
                               rel="noopener noreferrer"

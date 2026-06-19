@@ -1,3 +1,6 @@
+// biome-ignore-all lint/a11y/noSvgWithoutTitle: Section charts are decorative summaries with adjacent text labels.
+// biome-ignore-all lint/suspicious/noArrayIndexKey: The uptime sparkline is a fixed static strip with no item state.
+
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { linePath } from '../performance/_lib/chart'

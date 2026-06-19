@@ -49,8 +49,8 @@ type ImageProps = ImgHTMLAttributes<HTMLImageElement> & {
   fill?: boolean
 }
 
-export function Image({ priority: _priority, fill: _fill, ...props }: ImageProps) {
-  return <img {...props} />
+export function Image({ priority: _priority, fill: _fill, alt, ...props }: ImageProps) {
+  return <img alt={alt} {...props} />
 }
 
 export function usePathname() {

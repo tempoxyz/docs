@@ -99,7 +99,7 @@ function MarketingApp() {
     }
     const timeoutId = globalThis.setTimeout(() => setAnalyticsReady(true), 1)
     return () => globalThis.clearTimeout(timeoutId)
-  }, [route])
+  }, [])
 
   useEffect(() => {
     prefetchPath('/docs')
@@ -139,4 +139,10 @@ function MarketingApp() {
   )
 }
 
-createRoot(document.getElementById('root')!).render(<MarketingApp />)
+const rootElement = document.getElementById('root')
+
+if (!rootElement) {
+  throw new Error('Marketing root element was not found')
+}
+
+createRoot(rootElement).render(<MarketingApp />)

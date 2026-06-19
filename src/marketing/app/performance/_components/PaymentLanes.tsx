@@ -1,3 +1,5 @@
+// biome-ignore-all lint/a11y/noSvgWithoutTitle: The chart SVG is decorative and described by nearby labels.
+
 'use client'
 
 import { useEffect, useState } from 'react'

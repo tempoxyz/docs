@@ -1,3 +1,5 @@
+// biome-ignore-all lint/a11y/noSvgWithoutTitle: Mega-menu glyphs are decorative and paired with visible menu labels.
+
 import type { ReactNode } from 'react'
 
 // Shared stroke style for the mega-menu glyphs. 24px viewbox to match

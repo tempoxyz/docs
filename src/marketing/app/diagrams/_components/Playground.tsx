@@ -346,6 +346,7 @@ export default function Playground() {
               </div>
             </div>
             <div className="overflow-x-auto border border-line">
+              {/* biome-ignore lint/security/noDangerouslySetInnerHtml: Playground previews render static SVG strings generated in this component. */}
               <div dangerouslySetInnerHTML={{ __html: preview.svg }} />
             </div>
             <details>

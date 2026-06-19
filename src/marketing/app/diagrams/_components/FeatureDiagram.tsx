@@ -1,3 +1,6 @@
+// biome-ignore-all lint/a11y/noSvgWithoutTitle: Feature diagrams are labelled by surrounding page content and exported visually.
+// biome-ignore-all lint/suspicious/noArrayIndexKey: Static SVG diagram geometry uses positional keys for repeated primitives.
+
 import { PALETTE } from '../../_components/palette'
 import {
   type BatchSpec,

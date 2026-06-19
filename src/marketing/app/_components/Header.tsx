@@ -1,3 +1,6 @@
+// biome-ignore-all lint/a11y/noSvgWithoutTitle: Header SVGs are decorative icons paired with labels or button text.
+// biome-ignore-all lint/a11y/noStaticElementInteractions: The dropdown surface tracks hover/focus while child controls keep semantic roles.
+
 'use client'
 
 import Link from 'next/link'

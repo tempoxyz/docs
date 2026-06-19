@@ -2,9 +2,9 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import react from '@vitejs/plugin-react'
 import { Instance } from 'prool'
+import Icons from 'unplugin-icons/vite'
 import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
-import Icons from 'unplugin-icons/vite'
 import { vocs } from 'vocs/vite'
 
 // https://vite.dev/config/
@@ -63,9 +63,7 @@ const marketingRoutes = ['/', '/build', '/diagrams', '/performance']
 
 function isMarketingPath(pathname: string) {
   const normalized = pathname.replace(/\/$/, '') || '/'
-  return (
-    marketingRoutes.includes(normalized) || normalized.startsWith('/build/')
-  )
+  return marketingRoutes.includes(normalized) || normalized.startsWith('/build/')
 }
 
 async function marketingHtml() {

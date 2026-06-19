@@ -1,3 +1,6 @@
+// biome-ignore-all lint/a11y/noSvgWithoutTitle: Theme glyphs are decorative inside labelled radio buttons.
+// biome-ignore-all lint/a11y/useSemanticElements: Segmented theme buttons expose radio state while applying changes immediately.
+
 'use client'
 
 import type { ReactNode } from 'react'
