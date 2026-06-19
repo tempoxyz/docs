@@ -7,11 +7,6 @@ interface EnvironmentVariables {
   readonly VITE_TEMPO_ENV: 'localnet' | 'devnet' | 'moderato'
 
   readonly INDEXSUPPLY_API_KEY: string
-  readonly FEEDBACK_DOCS_SLACK_WEBHOOK_URL: string
-  readonly FEEDBACK_MCP_SLACK_WEBHOOK_URL: string
-  readonly FEEDBACK_SLACK_WEBHOOK_URL: string
-  readonly POSTHOG_HOST: string
-  readonly POSTHOG_KEY: string
   readonly SLACK_FEEDBACK_WEBHOOK: string
 
   readonly VERCEL_URL: string

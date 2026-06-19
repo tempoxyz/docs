@@ -21,7 +21,7 @@ const feedbackInputSchema = z
     requestId: z.string().optional(),
     timestamp: z.string().optional(),
   })
-  .passthrough()
+  .strict()
 
 export type FeedbackInput = z.input<typeof feedbackInputSchema>
 
@@ -29,6 +29,7 @@ export type NormalizedFeedback = {
   id: string
   source: 'docs' | 'mcp'
   sentiment: 'positive' | 'negative' | 'neutral'
+  timestamp: string
   helpful?: boolean | undefined
   category?: string | undefined
   message?: string | undefined
@@ -38,39 +39,23 @@ export type NormalizedFeedback = {
   relatedResource?: string | undefined
   client?: string | undefined
   requestId?: string | undefined
-  timestamp: string
-}
-
-type FeedbackContext = {
-  headers?: Headers | undefined
-}
-
-type FeedbackDestinationResult = {
-  destination: 'slack' | 'posthog'
-  ok: boolean
-  status?: number | undefined
 }
 
 export type SubmitFeedbackResult = {
   feedback: NormalizedFeedback
   delivered: boolean
-  destinations: FeedbackDestinationResult[]
 }
 
 export async function parseFeedbackRequest(request: Request): Promise<FeedbackInput> {
   const contentLength = Number(request.headers.get('content-length') ?? 0)
   if (contentLength > maxBodyBytes) throw new FeedbackError('Request body too large', 413)
 
-  let text: string
-  try {
-    text = await request.text()
-  } catch {
+  const text = await request.text().catch(() => {
     throw new FeedbackError('Could not read request body', 400)
-  }
+  })
 
-  if (new TextEncoder().encode(text).byteLength > maxBodyBytes) {
+  if (new TextEncoder().encode(text).byteLength > maxBodyBytes)
     throw new FeedbackError('Request body too large', 413)
-  }
 
   try {
     return JSON.parse(text) as FeedbackInput
@@ -79,24 +64,10 @@ export async function parseFeedbackRequest(request: Request): Promise<FeedbackIn
   }
 }
 
-export async function submitFeedback(
-  input: FeedbackInput,
-  context: FeedbackContext = {},
-): Promise<SubmitFeedbackResult> {
+export async function submitFeedback(input: FeedbackInput): Promise<SubmitFeedbackResult> {
   const feedback = normalizeFeedback(input)
-
-  const destinationPromises = [sendSlackFeedback(feedback), sendPostHogFeedback(feedback, context)]
-  const settled = await Promise.allSettled(destinationPromises)
-  const destinations = settled.flatMap((result) => {
-    if (result.status === 'fulfilled') return result.value
-    return []
-  })
-
-  return {
-    feedback,
-    delivered: destinations.some((destination) => destination.ok),
-    destinations,
-  }
+  const delivered = await sendSlackFeedback(feedback)
+  return { feedback, delivered }
 }
 
 export function normalizeFeedback(input: FeedbackInput): NormalizedFeedback {
@@ -105,45 +76,32 @@ export function normalizeFeedback(input: FeedbackInput): NormalizedFeedback {
 
   const data = parsed.data
   const source = data.source ?? (typeof data.helpful === 'boolean' ? 'docs' : 'mcp')
-  const message = cleanText(data.message, maxMessageLength)
-  const category = cleanText(data.category, maxShortLength)
   const pageUrl = cleanUrl(data.pageUrl)
-  const path = cleanPath(data.path ?? getPathFromUrl(pageUrl))
-  const toolName = cleanText(data.toolName ?? data.relatedTool, maxShortLength)
-  const relatedResource = cleanText(data.relatedResource, maxUrlLength)
-  const client = cleanText(data.client, maxShortLength)
-  const requestId = cleanText(data.requestId, maxShortLength)
-
-  if (source === 'docs' && typeof data.helpful !== 'boolean') {
-    throw new FeedbackError('Docs feedback requires helpful', 400)
-  }
-
-  if (source === 'mcp' && !message && !category) {
-    throw new FeedbackError('MCP feedback requires message or category', 400)
-  }
-
-  if (source === 'docs' && !pageUrl && !path) {
-    throw new FeedbackError('Docs feedback requires pageUrl or path', 400)
-  }
-
-  const sentiment = data.sentiment ?? getSentiment(data.helpful)
-  const timestamp = normalizeTimestamp(data.timestamp)
-
-  return {
+  const path = cleanPath(data.path ?? pathFromUrl(pageUrl))
+  const feedback = {
     id: `fb_${Date.now().toString(36)}_${crypto.randomUUID()}`,
     source,
-    sentiment,
+    sentiment: data.sentiment ?? sentimentFromHelpful(data.helpful),
+    timestamp: normalizeTimestamp(data.timestamp),
     helpful: data.helpful,
-    category,
-    message,
+    category: cleanText(data.category, maxShortLength),
+    message: cleanText(data.message, maxMessageLength),
     pageUrl,
     path,
-    toolName,
-    relatedResource,
-    client,
-    requestId,
-    timestamp,
-  }
+    toolName: cleanText(data.toolName ?? data.relatedTool, maxShortLength),
+    relatedResource: cleanText(data.relatedResource, maxUrlLength),
+    client: cleanText(data.client, maxShortLength),
+    requestId: cleanText(data.requestId, maxShortLength),
+  } satisfies NormalizedFeedback
+
+  if (feedback.source === 'docs' && typeof feedback.helpful !== 'boolean')
+    throw new FeedbackError('Docs feedback requires helpful', 400)
+  if (feedback.source === 'docs' && !feedback.pageUrl && !feedback.path)
+    throw new FeedbackError('Docs feedback requires pageUrl or path', 400)
+  if (feedback.source === 'mcp' && !feedback.message && !feedback.category)
+    throw new FeedbackError('MCP feedback requires message or category', 400)
+
+  return feedback
 }
 
 export function redactSecrets(value: string): string {
@@ -157,172 +115,60 @@ export function redactSecrets(value: string): string {
     )
 }
 
-export function slackEscape(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/@/g, '@\u200B')
-    .replace(/#/g, '#\u200B')
-}
-
 export class FeedbackError extends Error {
-  readonly status: number
-
-  constructor(message: string, status: number) {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
     super(message)
     this.name = 'FeedbackError'
-    this.status = status
   }
 }
 
-async function sendSlackFeedback(
-  feedback: NormalizedFeedback,
-): Promise<FeedbackDestinationResult[]> {
-  const webhookUrl = getSlackWebhookUrl(feedback.source)
-  if (!webhookUrl) return []
+async function sendSlackFeedback(feedback: NormalizedFeedback): Promise<boolean> {
+  const webhookUrl = process.env.SLACK_FEEDBACK_WEBHOOK
+  if (!webhookUrl) return false
 
   const response = await fetch(webhookUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ blocks: slackBlocks(feedback) }),
   })
-
-  return [{ destination: 'slack', ok: response.ok, status: response.status }]
-}
-
-async function sendPostHogFeedback(
-  feedback: NormalizedFeedback,
-  context: FeedbackContext,
-): Promise<FeedbackDestinationResult[]> {
-  const apiKey = process.env.POSTHOG_KEY || process.env.VITE_POSTHOG_KEY
-  if (!apiKey) return []
-
-  const host =
-    process.env.POSTHOG_HOST || process.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com'
-  const events = [
-    'feedback_submitted',
-    `feedback_${feedback.source}_submitted`,
-    ...(feedback.source === 'docs' && typeof feedback.helpful === 'boolean'
-      ? [feedback.helpful ? 'docs_feedback_helpful' : 'docs_feedback_not_helpful']
-      : []),
-  ]
-
-  const ip = context.headers?.get('x-forwarded-for')?.split(',')[0]?.trim()
-  const properties = {
-    site: 'docs',
-    feedback_id: feedback.id,
-    feedback_source: feedback.source,
-    feedback_sentiment: feedback.sentiment,
-    feedback_helpful: feedback.helpful,
-    feedback_category: feedback.category,
-    feedback_message: feedback.message,
-    feedback_page_url: feedback.pageUrl,
-    page_path: feedback.path,
-    feedback_tool_name: feedback.toolName,
-    feedback_related_resource: feedback.relatedResource,
-    feedback_client: feedback.client,
-    feedback_request_id: feedback.requestId,
-    $ip: ip,
-  }
-
-  const responses = await Promise.all(
-    events.map((event) =>
-      fetch(`${host}/capture/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          api_key: apiKey,
-          event,
-          distinct_id: `${feedback.source}_${feedback.id}`,
-          properties,
-          timestamp: feedback.timestamp,
-        }),
-      }),
-    ),
-  )
-
-  return responses.map((response) => ({
-    destination: 'posthog' as const,
-    ok: response.ok,
-    status: response.status,
-  }))
+  return response.ok
 }
 
 function slackBlocks(feedback: NormalizedFeedback) {
-  const icon =
-    feedback.sentiment === 'positive'
-      ? ':thumbsup:'
-      : feedback.sentiment === 'negative'
-        ? ':thumbsdown:'
-        : ':speech_balloon:'
-  const title = `${icon} ${feedback.source.toUpperCase()} Feedback`
-  const fields = [
+  const fields = compact([
     field('Source', feedback.source),
     field('Sentiment', feedback.sentiment),
     field('Time', new Date(feedback.timestamp).toLocaleString()),
-  ]
+    feedback.path && field('Path', feedback.path),
+    feedback.pageUrl && field('Page', `<${feedback.pageUrl}|${feedback.pageUrl}>`, false),
+    feedback.category && field('Category', feedback.category),
+    feedback.toolName && field('Tool', feedback.toolName),
+    feedback.client && field('Client', feedback.client),
+    feedback.requestId && field('Request ID', feedback.requestId),
+  ])
 
-  if (feedback.path) fields.push(field('Path', feedback.path))
-  if (feedback.pageUrl)
-    fields.push(field('Page', `<${feedback.pageUrl}|${feedback.pageUrl}>`, false))
-  if (feedback.category) fields.push(field('Category', feedback.category))
-  if (feedback.toolName) fields.push(field('Tool', feedback.toolName))
-  if (feedback.client) fields.push(field('Client', feedback.client))
-  if (feedback.requestId) fields.push(field('Request ID', feedback.requestId))
-
-  const blocks: object[] = [
+  return compact([
     {
       type: 'header',
-      text: { type: 'plain_text', text: title, emoji: true },
+      text: { type: 'plain_text', text: `${slackIcon(feedback.sentiment)} Feedback`, emoji: true },
     },
-    {
+    { type: 'section', fields },
+    feedback.message && {
       type: 'section',
-      fields,
+      text: { type: 'mrkdwn', text: `*Message:*\n${slackEscape(feedback.message)}` },
     },
-  ]
-
-  if (feedback.message) {
-    blocks.push({
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `*Message:*\n${slackEscape(feedback.message)}`,
-      },
-    })
-  }
-
-  if (feedback.relatedResource) {
-    blocks.push({
+    feedback.relatedResource && {
       type: 'context',
       elements: [{ type: 'mrkdwn', text: `Related: ${slackEscape(feedback.relatedResource)}` }],
-    })
-  }
-
-  return blocks
+    },
+  ])
 }
 
 function field(title: string, value: string, shouldEscape = true) {
-  return {
-    type: 'mrkdwn',
-    text: `*${title}:*\n${shouldEscape ? slackEscape(value) : value}`,
-  }
-}
-
-function getSlackWebhookUrl(source: 'docs' | 'mcp') {
-  if (source === 'mcp') {
-    return (
-      process.env.FEEDBACK_MCP_SLACK_WEBHOOK_URL ||
-      process.env.FEEDBACK_SLACK_WEBHOOK_URL ||
-      process.env.SLACK_FEEDBACK_WEBHOOK
-    )
-  }
-
-  return (
-    process.env.FEEDBACK_DOCS_SLACK_WEBHOOK_URL ||
-    process.env.FEEDBACK_SLACK_WEBHOOK_URL ||
-    process.env.SLACK_FEEDBACK_WEBHOOK
-  )
+  return { type: 'mrkdwn', text: `*${title}:*\n${shouldEscape ? slackEscape(value) : value}` }
 }
 
 function cleanText(value: string | undefined, maxLength: number) {
@@ -334,8 +180,7 @@ function cleanText(value: string | undefined, maxLength: number) {
 function cleanPath(value: string | undefined) {
   const cleaned = cleanText(value, 512)
   if (!cleaned) return undefined
-  if (!cleaned.startsWith('/')) return `/${cleaned}`
-  return cleaned
+  return cleaned.startsWith('/') ? cleaned : `/${cleaned}`
 }
 
 function cleanUrl(value: string | undefined) {
@@ -344,7 +189,7 @@ function cleanUrl(value: string | undefined) {
 
   try {
     const url = new URL(cleaned)
-    if (!['http:', 'https:'].includes(url.protocol)) return undefined
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return undefined
     url.hash = ''
     return url.toString()
   } catch {
@@ -352,7 +197,7 @@ function cleanUrl(value: string | undefined) {
   }
 }
 
-function getPathFromUrl(value: string | undefined) {
+function pathFromUrl(value: string | undefined) {
   if (!value) return undefined
   try {
     return new URL(value).pathname
@@ -361,15 +206,32 @@ function getPathFromUrl(value: string | undefined) {
   }
 }
 
-function getSentiment(helpful: boolean | undefined) {
+function normalizeTimestamp(value: string | undefined) {
+  const date = value ? new Date(value) : new Date()
+  return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString()
+}
+
+function sentimentFromHelpful(helpful: boolean | undefined) {
   if (helpful === true) return 'positive'
   if (helpful === false) return 'negative'
   return 'neutral'
 }
 
-function normalizeTimestamp(value: string | undefined) {
-  if (!value) return new Date().toISOString()
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return new Date().toISOString()
-  return date.toISOString()
+function slackEscape(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/@/g, '@\u200B')
+    .replace(/#/g, '#\u200B')
+}
+
+function slackIcon(sentiment: NormalizedFeedback['sentiment']) {
+  if (sentiment === 'positive') return ':thumbsup:'
+  if (sentiment === 'negative') return ':thumbsdown:'
+  return ':speech_balloon:'
+}
+
+function compact<T>(values: Array<T | false | undefined>): T[] {
+  return values.filter(Boolean) as T[]
 }
