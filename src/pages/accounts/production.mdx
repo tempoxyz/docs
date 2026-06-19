@@ -13,6 +13,10 @@ To enable the `iframe` dialog on all browsers in production, ensure your website
 
 Without this, the `iframe` dialog will fallback to a popup on browsers that do not support the [IntersectionObserver v2 API](https://web.dev/articles/intersectionobserver-v2).
 
+## Mobile Safari
+
+Safari uses the popup fallback because WebAuthn is not supported in cross-origin iframes. Make sure the wallet request opens immediately from the user's tap: preload the Accounts SDK, provider, and configuration before the tap, then call `provider.request({ method: 'wallet_connect' })` as the first async wallet step in the tap handler. If preload is not ready, show a loading or retry state instead of doing setup and opening the popup later.
+
 ## Content Security Policy
 
 If you've deployed a Content Security Policy, ensure that you have the Tempo Accounts SDK configured with your CSPs.
