@@ -174,7 +174,7 @@ export default function PerformancePage() {
             <Section
               id="settlement"
               title="Guaranteed settlement in half a second."
-              note="The moment a payment is included in a block, it's settled. No reorgs, no waiting out confirmations, no probabilistic guessing. Tempo's consensus finalizes every block in about 500 ms."
+              note="The moment a payment is included in a block, it's settled in less than 500ms. No reorgs, no waiting out confirmations, no probabilistic guessing."
             >
               <SettlementStream runs={runs} />
             </Section>

@@ -40,7 +40,7 @@ type PrimitiveGroup = {
 
 const feeItems: TransactionPrimitive[] = [
   {
-    title: 'Fees are payable in stablecoins',
+    title: 'Pay fees in stablecoins',
     desc: 'Users can pay blockchain fees using any stablecoin they choose.',
     href: '/docs/guide/payments/pay-fees-in-any-stablecoin',
     panelTitle: 'fee-token.ts',

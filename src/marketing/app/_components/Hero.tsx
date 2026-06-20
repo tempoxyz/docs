@@ -27,12 +27,12 @@ const HERO_ACTIONS = [
 
 const HERO_PATHS = [
   {
-    title: 'Tokens built for stablecoins',
+    title: 'Stablecoin-native tokens',
     desc: 'Stablecoins are first-class on Tempo, with TIP-20 and payments-first features.',
     href: featurePath('tokens'),
   },
   {
-    title: 'Transactions for payments',
+    title: 'Transaction flows designed for payments',
     desc: 'Batching, fee sponsorship, scheduling, and parallel transactions are built in.',
     href: featurePath('transactions'),
   },
@@ -95,7 +95,7 @@ export default function Hero() {
                   <ArrowUpRight className="size-5 shrink-0 text-white/30 transition-colors group-hover:text-foreground" />
                 </span>
                 <span className="mt-7 block">
-                  <span className="block whitespace-nowrap font-sans text-[18px] text-foreground leading-[1.15] tracking-[0] sm:text-[20px] lg:text-[21px] xl:text-[22px]">
+                  <span className="block text-wrap font-sans text-[18px] text-foreground leading-[1.15] tracking-[0] sm:text-[20px] lg:text-[21px] xl:text-[22px]">
                     {path.title}
                   </span>
                   <span className="mt-3 line-clamp-2 block font-sans text-[15px] text-foreground-secondary leading-[1.4] tracking-[0] transition-colors group-hover:text-foreground">

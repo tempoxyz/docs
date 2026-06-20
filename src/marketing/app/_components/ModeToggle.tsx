@@ -10,8 +10,8 @@ export default function ModeToggle({
   setMode: (mode: ShowcaseMode) => void
 }) {
   const labels = {
-    visual: 'VISUALS',
-    code: 'CODE',
+    visual: 'Diagram',
+    code: 'Code',
   } satisfies Record<ShowcaseMode, string>
 
   return (

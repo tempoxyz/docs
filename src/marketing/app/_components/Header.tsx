@@ -91,7 +91,7 @@ const developersMenu: MegaMenuData = {
       items: [
         {
           label: 'MPP',
-          desc: 'Paid requests & agentic payments',
+          desc: 'Open protocol for agentic payments',
           href: 'https://mpp.dev/',
           icon: <McpIcon />,
         },
@@ -184,7 +184,7 @@ function CloseIcon() {
   )
 }
 
-function RobotIcon() {
+function GearIcon() {
   return (
     <svg
       width="15"
@@ -198,10 +198,8 @@ function RobotIcon() {
       aria-hidden
       className="shrink-0"
     >
-      <rect x="5" y="9.5" width="14" height="10" rx="2" />
-      <path d="M12 9.5V6" />
-      <circle cx="12" cy="4.5" r="1.2" />
-      <path d="M9.5 13.5v2M14.5 13.5v2" />
+      <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+      <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2.1 2.1 0 1 1-2.97 2.97l-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21a2.1 2.1 0 1 1-4.2 0v-.09a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06a2.1 2.1 0 1 1-2.97-2.97l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2.1 2.1 0 1 1 0-4.2h.09A1.7 1.7 0 0 0 4.6 8.74a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2.1 2.1 0 1 1 2.97-2.97l.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 10.14 2.7V2.6a2.1 2.1 0 1 1 4.2 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06a2.1 2.1 0 1 1 2.97 2.97l-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.03h.09a2.1 2.1 0 1 1 0 4.2h-.09A1.7 1.7 0 0 0 19.4 15Z" />
     </svg>
   )
 }
@@ -604,7 +602,7 @@ export default function Header() {
             onBlur={scheduleClose}
             className="flex h-9 items-center gap-2 rounded-[4px] border border-line px-4 font-sans text-[14px] text-foreground tracking-[0] transition-colors hover:bg-white/[0.04]"
           >
-            <RobotIcon />
+            <GearIcon />
             For agents
             <svg
               width="12"

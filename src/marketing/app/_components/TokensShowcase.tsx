@@ -282,7 +282,7 @@ export default function TokensShowcase({
         <EdgeMarkers wideOnly />
         <div className="flex flex-col justify-center bg-surface-shell p-7 lg:w-1/2 lg:p-12">
           <h2 className="max-w-[520px] font-sans text-[clamp(1.5rem,5vw,2.5rem)] text-foreground leading-[1.1] tracking-[-0.02em] antialiased">
-            Tokens built for stablecoins.
+            Stablecoin-native tokens.
           </h2>
           <div className="-mx-7 mt-8 border-line border-y lg:-mx-12">
             {rows.map((row, i) => (
