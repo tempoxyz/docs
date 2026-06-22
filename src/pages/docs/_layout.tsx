@@ -2,6 +2,7 @@
 
 import { lazy, type PropsWithChildren, Suspense } from 'react'
 import DocsHeader from '../../components/DocsHeader'
+import DocsSidebarDrawer from '../../components/DocsSidebarDrawer'
 import { usePageSettled } from '../../lib/pageSettled'
 
 const Analytics = lazy(() =>
@@ -36,6 +37,7 @@ export default function DocsLayout(
   return (
     <>
       <DocsHeader />
+      <DocsSidebarDrawer />
       {props.children}
       <Suspense fallback={null}>
         {needsToaster && (

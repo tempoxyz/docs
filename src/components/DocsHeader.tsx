@@ -41,7 +41,7 @@ function pathMatches(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
-function usePathname() {
+export function usePathname() {
   const [pathname, setPathname] = useState('/')
 
   useLayoutEffect(() => {
@@ -684,7 +684,7 @@ type SidebarNode = {
 // The docs sidebar is configured in vocs.config.ts (keyed by path). Resolve the
 // entry that best matches the current path so the mobile menu mirrors the
 // desktop sidebar.
-function resolveSidebarItems(sidebar: unknown, pathname: string): SidebarNode[] {
+export function resolveSidebarItems(sidebar: unknown, pathname: string): SidebarNode[] {
   if (!sidebar) return []
   if (Array.isArray(sidebar)) return sidebar as SidebarNode[]
   if (typeof sidebar !== 'object') return []
@@ -742,7 +742,7 @@ function SidebarLeaf({
   )
 }
 
-function SidebarNodes({
+export function SidebarNodes({
   nodes,
   pathname,
   depth,
