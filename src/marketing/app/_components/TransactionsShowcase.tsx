@@ -90,14 +90,9 @@ function VisualMock({ active }: { active: Row }) {
   )
 }
 
-export default function TransactionsShowcase({
-  mode,
-  setMode,
-}: {
-  mode: ShowcaseMode
-  setMode: (mode: ShowcaseMode) => void
-}) {
+export default function TransactionsShowcase() {
   const [active, setActive] = useState(0)
+  const [mode, setMode] = useState<ShowcaseMode>('visual')
   const selectRow = (index: number) => {
     if (index !== active) {
       setActive(index)
