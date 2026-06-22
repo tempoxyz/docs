@@ -2,6 +2,7 @@
 
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useConfig } from 'vocs'
+import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 
 type MegaLink = {
   label: string
@@ -525,9 +526,21 @@ function CheckIcon() {
 }
 
 const mcpCommands = [
-  { label: 'Claude', prefix: 'claude mcp add --transport http tempo ' },
-  { label: 'Codex', prefix: 'codex mcp add tempo --url ' },
-  { label: 'Amp', prefix: 'amp mcp add --transport http tempo ' },
+  {
+    label: 'Claude',
+    logo: <ClaudeLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    prefix: 'claude mcp add --transport http tempo ',
+  },
+  {
+    label: 'Codex',
+    logo: <CodexLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    prefix: 'codex mcp add tempo --url ',
+  },
+  {
+    label: 'Amp',
+    logo: <AmpLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    prefix: 'amp mcp add --transport http tempo ',
+  },
 ]
 
 function AgentMenuItem(props: {
@@ -617,13 +630,14 @@ function AgentsPanel({
                       setActiveCommandIndex(index)
                       setCopied(false)
                     }}
-                    className={`rounded-[4px] px-2.5 py-1.5 font-sans text-[12px] tracking-[0] transition-colors ${
+                    className={`inline-flex items-center gap-1.5 rounded-[4px] px-2.5 py-1.5 font-sans text-[12px] tracking-[0] transition-colors ${
                       active
                         ? 'bg-foreground/[0.06] text-foreground'
                         : 'text-foreground/40 hover:bg-foreground/[0.03] hover:text-foreground/70'
                     }`}
                   >
-                    {item.label}
+                    {item.logo}
+                    <span>{item.label}</span>
                   </button>
                 )
               })}
