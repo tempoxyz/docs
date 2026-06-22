@@ -127,7 +127,7 @@ export default function TpsTrendChart({
                 x={xAt(i)}
                 y={height - 8}
                 textAnchor={i === 0 ? 'start' : i === last ? 'end' : 'middle'}
-                className="fill-white/45 font-sans text-[12px]"
+                className="fill-foreground/45 font-sans text-[12px]"
               >
                 {r.dateLabel}
               </text>

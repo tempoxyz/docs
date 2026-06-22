@@ -1,6 +1,7 @@
 'use client'
 
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useConfig } from 'vocs'
 
 type MegaLink = {
   label: string
@@ -668,6 +669,156 @@ function megaLinks(data: MegaMenuData) {
   return data.columns.flatMap((column) => column.items)
 }
 
+type SidebarNode = {
+  text?: string
+  link?: string
+  collapsed?: boolean
+  items?: SidebarNode[]
+}
+
+// The docs sidebar is configured in vocs.config.ts (keyed by path). Resolve the
+// entry that best matches the current path so the mobile menu mirrors the
+// desktop sidebar.
+function resolveSidebarItems(sidebar: unknown, pathname: string): SidebarNode[] {
+  if (!sidebar) return []
+  if (Array.isArray(sidebar)) return sidebar as SidebarNode[]
+  if (typeof sidebar !== 'object') return []
+
+  const entries = sidebar as Record<string, SidebarNode[] | { items?: SidebarNode[] }>
+  let bestKey: string | null = null
+  for (const key of Object.keys(entries)) {
+    if (pathname === key || pathname.startsWith(key === '/' ? '/' : `${key}/`)) {
+      if (bestKey === null || key.length > bestKey.length) bestKey = key
+    }
+  }
+  const entry = entries[bestKey ?? '/docs'] ?? Object.values(entries)[0]
+  if (!entry) return []
+  return Array.isArray(entry) ? entry : (entry.items ?? [])
+}
+
+// Vocs treats a sidebar link as active only on an exact path match (ignoring
+// trailing slashes), so an index link like `/docs` doesn't light up on every
+// sub-page.
+function pathIsExact(pathname: string, link: string) {
+  return pathname.replace(/\/+$/, '') === link.replace(/\/+$/, '')
+}
+
+function nodeContainsActive(node: SidebarNode, pathname: string): boolean {
+  if (node.link && pathIsExact(pathname, node.link)) return true
+  return Boolean(node.items?.some((child) => nodeContainsActive(child, pathname)))
+}
+
+function SidebarLeaf({
+  node,
+  pathname,
+  depth,
+  onNavigate,
+}: {
+  node: SidebarNode
+  pathname: string
+  depth: number
+  onNavigate: () => void
+}) {
+  const active = node.link ? pathIsExact(pathname, node.link) : false
+  const external = node.link ? isExternal(node.link) : false
+  return (
+    <Anchor
+      href={node.link ?? '#'}
+      onClick={onNavigate}
+      style={{ paddingLeft: depth > 1 ? `${(depth - 1) * 12}px` : undefined }}
+      className={`flex items-center gap-1.5 py-2 font-sans text-[15px] tracking-[0] transition-colors ${
+        active ? 'text-foreground' : 'text-foreground/50 hover:text-foreground'
+      }`}
+    >
+      {active ? <ActiveSquare activeKey={pathname} /> : null}
+      {node.text}
+      {external ? <ArrowUpRight className="mt-0.5 size-3" /> : null}
+    </Anchor>
+  )
+}
+
+function SidebarNodes({
+  nodes,
+  pathname,
+  depth,
+  onNavigate,
+}: {
+  nodes: SidebarNode[]
+  pathname: string
+  depth: number
+  onNavigate: () => void
+}) {
+  return (
+    <>
+      {nodes.map((node, i) => {
+        const key = `${node.text ?? node.link ?? 'node'}-${i}`
+        const hasChildren = Array.isArray(node.items) && node.items.length > 0
+
+        // Leaf link.
+        if (!hasChildren) {
+          return (
+            <SidebarLeaf
+              key={key}
+              node={node}
+              pathname={pathname}
+              depth={depth}
+              onNavigate={onNavigate}
+            />
+          )
+        }
+
+        // Non-collapsible section (e.g. "Build on Tempo"): a heading + children.
+        if (node.collapsed === undefined) {
+          return (
+            <div key={key} className={depth === 0 ? 'mt-5 first:mt-0' : 'mt-2'}>
+              <p className="py-2 font-sans text-[15px] text-foreground tracking-[0]">{node.text}</p>
+              <SidebarNodes
+                nodes={node.items ?? []}
+                pathname={pathname}
+                depth={depth + 1}
+                onNavigate={onNavigate}
+              />
+            </div>
+          )
+        }
+
+        // Collapsible subgroup (e.g. "Make Payments"): expandable disclosure.
+        const open = !node.collapsed || nodeContainsActive(node, pathname)
+        return (
+          <details
+            key={key}
+            open={open}
+            className="group/sb"
+            style={{ paddingLeft: depth > 1 ? `${(depth - 1) * 12}px` : undefined }}
+          >
+            <summary className="flex cursor-pointer list-none items-center justify-between py-2 font-sans text-[15px] text-foreground/50 tracking-[0] transition-colors hover:text-foreground [&::-webkit-details-marker]:hidden">
+              {node.text}
+              <Chevron open={false} />
+            </summary>
+            <SidebarNodes
+              nodes={node.items ?? []}
+              pathname={pathname}
+              depth={depth + 1}
+              onNavigate={onNavigate}
+            />
+          </details>
+        )
+      })}
+    </>
+  )
+}
+
+function DocsSidebarNav({ pathname, onNavigate }: { pathname: string; onNavigate: () => void }) {
+  const config = useConfig()
+  const items = resolveSidebarItems(config?.sidebar, pathname)
+  if (items.length === 0) return null
+  return (
+    <div className="flex flex-col border-line border-t pt-2 pb-1">
+      <SidebarNodes nodes={items} pathname={pathname} depth={0} onNavigate={onNavigate} />
+    </div>
+  )
+}
+
 export default function DocsHeader() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
@@ -920,7 +1071,7 @@ export default function DocsHeader() {
             : 'pointer-events-none -translate-y-2 opacity-0'
         }`}
       >
-        <div className="flex w-full flex-col border-line border-x border-b bg-background px-5 pb-5">
+        <div className="flex max-h-[calc(100dvh-var(--vocs-spacing-topNav,65px))] w-full flex-col overflow-y-auto border-line border-x border-b bg-background px-5 pb-5">
           {menu.map((item) => {
             const active = isActiveMenuItem(pathname, item)
             return item.mega ? (
@@ -987,6 +1138,7 @@ export default function DocsHeader() {
               </div>
             </div>
           </div>
+          <DocsSidebarNav pathname={pathname} onNavigate={close} />
         </div>
       </div>
     </header>

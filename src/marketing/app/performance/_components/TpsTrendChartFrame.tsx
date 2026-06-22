@@ -46,7 +46,7 @@ export function TpsChartGrid({
               x={pad.l - 10}
               y={yAt(t) + 4}
               textAnchor="end"
-              className="fill-white/35 font-mono text-[11px]"
+              className="fill-foreground/35 font-mono text-[11px]"
             >
               {Math.round(t / 1000)}K
             </text>

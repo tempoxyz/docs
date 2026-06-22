@@ -85,7 +85,7 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
           <text
             x={PAD.l + 12}
             y={PAD.t + 18}
-            className="fill-white/35 font-mono text-[10px] tracking-wider"
+            className="fill-foreground/35 font-mono text-[10px] tracking-wider"
           >
             GENERAL BLOCKSPACE · SHARED LOAD
           </text>
@@ -140,7 +140,7 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
                 x={mobile ? endX - 12 : endX + 12}
                 y={mobile ? PAD.t + 18 : loadEndY + 4}
                 textAnchor={mobile ? 'end' : 'start'}
-                className="fill-white/40 font-mono text-[11px] motion-reduce:transition-none"
+                className="fill-foreground/40 font-mono text-[11px] motion-reduce:transition-none"
                 style={{
                   opacity: drawn ? 1 : 0,
                   transition: `opacity 250ms ease-out ${DRAW_MS}ms`,

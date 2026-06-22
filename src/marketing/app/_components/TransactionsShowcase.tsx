@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { Fragment, useState } from 'react'
 import FeatureDiagram from '../diagrams/_components/FeatureDiagram'
 import type { FeatureDiagramSpec } from '../diagrams/_lib/featureDiagram'
@@ -115,12 +114,13 @@ export default function TransactionsShowcase({
           </h2>
           <div className="-mx-7 mt-8 border-line border-y lg:-mx-12">
             {rows.map((row, i) => (
-              <Link
+              <button
                 key={row.title}
-                href={row.href}
+                type="button"
                 onMouseEnter={() => selectRow(i)}
                 onFocus={() => selectRow(i)}
                 onClick={() => selectRow(i)}
+                aria-pressed={active === i}
                 className={`group flex w-full items-start justify-between gap-6 border-line border-b px-7 py-5 text-left last:border-b-0 lg:px-12 ${
                   active === i ? 'text-foreground' : 'text-foreground/55 hover:text-foreground/80'
                 }`}
@@ -137,7 +137,7 @@ export default function TransactionsShowcase({
                   aria-hidden
                   className={`mt-1.5 size-2 shrink-0 ${active === i ? 'bg-foreground' : 'bg-foreground/25'}`}
                 />
-              </Link>
+              </button>
             ))}
           </div>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-2.5 lg:justify-start">
