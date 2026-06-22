@@ -6,6 +6,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type ReactNode, useLayoutEffect, useRef, useState } from 'react'
+import { AmpLogo, ClaudeLogo, CodexLogo } from '../../../components/AgentLogos'
 import { featurePath } from '../_lib/featurePaths'
 import { TEMPO_SDK_DOCS_URL } from '../_lib/links'
 import ArrowUpRight from './ArrowUpRight'
@@ -227,9 +228,21 @@ function Chevron({ open }: { open: boolean }) {
 
 // The server URL is appended at render time so it can be color-highlighted.
 const mcpCommands = [
-  { label: 'Claude', prefix: 'claude mcp add --transport http tempo ' },
-  { label: 'Codex', prefix: 'codex mcp add tempo --url ' },
-  { label: 'Amp', prefix: 'amp mcp add --transport http tempo ' },
+  {
+    label: 'Claude',
+    logo: <ClaudeLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    prefix: 'claude mcp add --transport http tempo ',
+  },
+  {
+    label: 'Codex',
+    logo: <CodexLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    prefix: 'codex mcp add tempo --url ',
+  },
+  {
+    label: 'Amp',
+    logo: <AmpLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    prefix: 'amp mcp add --transport http tempo ',
+  },
 ]
 
 function CopyIcon() {
@@ -366,13 +379,14 @@ function AgentsPanel({
                       setActiveCommandIndex(index)
                       setCopied(false)
                     }}
-                    className={`rounded-[4px] px-2.5 py-1.5 font-sans text-[12px] tracking-[0] transition-colors ${
+                    className={`inline-flex items-center gap-1.5 rounded-[4px] px-2.5 py-1.5 font-sans text-[12px] tracking-[0] transition-colors ${
                       active
                         ? 'bg-foreground/[0.06] text-foreground'
                         : 'text-foreground/40 hover:bg-foreground/[0.03] hover:text-foreground/70'
                     }`}
                   >
-                    {item.label}
+                    {item.logo}
+                    <span>{item.label}</span>
                   </button>
                 )
               })}
