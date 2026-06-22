@@ -634,9 +634,14 @@ function AgentsPanel({
               aria-label="Copy Tempo MCP install command"
               className="group/copy flex min-h-[48px] w-full items-start gap-3 rounded-[4px] bg-foreground/[0.035] px-3 py-2.5 text-left transition-colors hover:bg-foreground/[0.06]"
             >
-              <code className="min-w-0 flex-1 whitespace-normal break-words font-mono text-[12px] text-foreground leading-[1.55]">
-                {activeCommand.prefix}
-                <span className="text-foreground/65">{TEMPO_MCP_URL}</span>
+              <code className="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)] gap-2 whitespace-normal break-words font-mono text-[12px] text-foreground leading-[1.55]">
+                <span aria-hidden="true" className="select-none text-foreground/35">
+                  $
+                </span>
+                <span className="min-w-0">
+                  {activeCommand.prefix}
+                  <span className="text-foreground/65">{TEMPO_MCP_URL}</span>
+                </span>
               </code>
               <span
                 className={`mt-1 shrink-0 transition-colors ${copied ? 'text-foreground' : 'text-foreground/35 group-hover/copy:text-foreground/70'}`}
