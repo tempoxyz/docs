@@ -55,7 +55,7 @@ export default function Hero() {
         className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-[0%] from-surface-shell via-[50%] via-surface-shell/95 to-[100%] to-transparent"
       />
       <Reveal className="mx-auto flex w-full max-w-[860px] flex-col items-center text-center">
-        <h1 className="max-w-[820px] font-sans text-[42px] text-foreground leading-[1.05] tracking-[0] antialiased sm:text-[56px] lg:text-[68px]">
+        <h1 className="max-w-[820px] font-sans text-[42px] text-foreground leading-[1.05] tracking-[-0.02em] antialiased sm:text-[56px] lg:text-[68px]">
           Engineered for payments from the ground up
         </h1>
         <p className="mt-5 max-w-[640px] font-sans text-[16px] text-foreground-secondary leading-[1.5] tracking-[0] lg:text-[18px]">
