@@ -245,6 +245,21 @@ const mcpCommands = [
   },
 ]
 
+const pluginCommands = [
+  {
+    label: 'Codex',
+    logo: <CodexLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    command: 'codex plugin marketplace add tempoxyz/docs\ncodex plugin add tempo@docs',
+  },
+  {
+    label: 'Claude',
+    logo: <ClaudeLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    command: 'claude plugin marketplace add tempoxyz/docs\nclaude plugin install tempo@claude',
+  },
+]
+
+const docsSkillCommand = 'npx skills add tempoxyz/docs'
+
 function CopyIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
@@ -281,42 +296,117 @@ function CheckIcon() {
   )
 }
 
-function AgentMenuItem({
+function CommandTabs({
+  commands,
+  activeIndex,
+  onSelect,
+}: {
+  commands: { label: string; logo: ReactNode }[]
+  activeIndex: number
+  onSelect: (index: number) => void
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {commands.map((item, index) => {
+        const active = index === activeIndex
+        return (
+          <button
+            key={item.label}
+            type="button"
+            onClick={() => onSelect(index)}
+            className={`inline-flex items-center gap-1.5 rounded-[4px] px-2.5 py-1.5 font-sans text-[12px] tracking-[0] transition-colors ${
+              active
+                ? 'bg-foreground/[0.06] text-foreground'
+                : 'text-foreground/40 hover:bg-foreground/[0.03] hover:text-foreground/70'
+            }`}
+          >
+            {item.logo}
+            <span>{item.label}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+function CommandSnippet({
+  command,
+  copyLabel,
+  copied,
+  onCopy,
+  children,
+}: {
+  command: string
+  copyLabel: string
+  copied: boolean
+  onCopy: (command: string) => void
+  children?: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onCopy(command)}
+      aria-label={copyLabel}
+      className="group/copy flex min-h-[48px] w-full items-start gap-3 rounded-[4px] bg-foreground/[0.035] px-3 py-2.5 text-left transition-colors hover:bg-foreground/[0.06]"
+    >
+      <code className="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)] gap-2 whitespace-pre-wrap break-words font-mono text-[12px] text-foreground leading-[1.55]">
+        <span aria-hidden="true" className="select-none text-foreground/35">
+          $
+        </span>
+        <span className="min-w-0">{children ?? command}</span>
+      </code>
+      <span
+        className={`mt-1 shrink-0 transition-colors ${
+          copied ? 'text-foreground' : 'text-foreground/35 group-hover/copy:text-foreground/70'
+        }`}
+      >
+        {copied ? <CheckIcon /> : <CopyIcon />}
+      </span>
+    </button>
+  )
+}
+
+function AgentCommandSection({
   href,
   label,
   desc,
   icon,
   onClick,
+  children,
 }: {
   href: string
   label: string
   desc: string
   icon: ReactNode
   onClick?: () => void
+  children?: ReactNode
 }) {
   const external = isExternal(href)
 
   return (
-    <a
-      href={href}
-      target={external ? '_blank' : undefined}
-      rel={external ? 'noopener noreferrer' : undefined}
-      onClick={onClick}
-      className="group/item relative flex items-start gap-3 rounded-[4px] px-3 py-2.5 transition-colors hover:bg-foreground/[0.04]"
-    >
-      {external ? (
-        <ArrowUpRight className="absolute top-2.5 right-3 size-3 text-foreground/35 transition-colors group-hover/item:text-foreground/60" />
-      ) : null}
-      <span className="grid size-[34px] shrink-0 place-items-center bg-surface-input text-foreground">
-        {icon}
-      </span>
-      <span className="flex min-w-0 flex-col gap-0.5">
-        <span className="font-sans text-[14px] text-foreground tracking-[0]">{label}</span>
-        <span className="font-sans text-[13px] text-foreground/45 leading-[1.4] tracking-[0]">
-          {desc}
+    <div className="group/item rounded-[4px] px-3 py-2.5 transition-colors hover:bg-foreground/[0.04]">
+      <div className="flex items-start gap-3">
+        <span className="grid size-[34px] shrink-0 place-items-center bg-surface-input text-foreground">
+          {icon}
         </span>
-      </span>
-    </a>
+        <a
+          href={href}
+          target={external ? '_blank' : undefined}
+          rel={external ? 'noopener noreferrer' : undefined}
+          onClick={onClick}
+          className="relative flex min-w-0 flex-col gap-0.5 pr-5"
+        >
+          {external ? (
+            <ArrowUpRight className="absolute top-0.5 right-0 size-3 text-foreground/35 transition-colors group-hover/item:text-foreground/60" />
+          ) : null}
+          <span className="font-sans text-[14px] text-foreground tracking-[0]">{label}</span>
+          <span className="font-sans text-[13px] text-foreground/45 leading-[1.4] tracking-[0]">
+            {desc}
+          </span>
+        </a>
+      </div>
+      {children ? <div className="mt-3 ml-[52px] space-y-3">{children}</div> : null}
+    </div>
   )
 }
 
@@ -328,15 +418,19 @@ function AgentsPanel({
   onNavigate?: () => void
 }) {
   const desktop = variant === 'desktop'
-  const [activeCommandIndex, setActiveCommandIndex] = useState(0)
-  const [copied, setCopied] = useState(false)
-  const activeCommand = mcpCommands[activeCommandIndex]
+  const [activeMcpCommandIndex, setActiveMcpCommandIndex] = useState(0)
+  const [activePluginCommandIndex, setActivePluginCommandIndex] = useState(0)
+  const [copiedCommandKey, setCopiedCommandKey] = useState<string | null>(null)
+  const activeMcpCommand = mcpCommands[activeMcpCommandIndex]
+  const activePluginCommand = pluginCommands[activePluginCommandIndex]
 
-  const copyCommand = async () => {
+  const copyCommand = async (key: string, command: string) => {
     try {
-      await navigator.clipboard.writeText(activeCommand.prefix + TEMPO_MCP_URL)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
+      await navigator.clipboard.writeText(command)
+      setCopiedCommandKey(key)
+      setTimeout(() => {
+        setCopiedCommandKey((current) => (current === key ? null : current))
+      }, 1500)
     } catch {
       // Clipboard unavailable (e.g. insecure context) — fail silently.
     }
@@ -368,71 +462,62 @@ function AgentsPanel({
 
           {/* Config block hangs under the item's text column (icon 40px + gap 12px). */}
           <div className="mt-3 ml-[52px] space-y-3">
-            <div className="flex flex-wrap gap-1.5">
-              {mcpCommands.map((item, index) => {
-                const active = index === activeCommandIndex
-                return (
-                  <button
-                    key={item.label}
-                    type="button"
-                    onClick={() => {
-                      setActiveCommandIndex(index)
-                      setCopied(false)
-                    }}
-                    className={`inline-flex items-center gap-1.5 rounded-[4px] px-2.5 py-1.5 font-sans text-[12px] tracking-[0] transition-colors ${
-                      active
-                        ? 'bg-foreground/[0.06] text-foreground'
-                        : 'text-foreground/40 hover:bg-foreground/[0.03] hover:text-foreground/70'
-                    }`}
-                  >
-                    {item.logo}
-                    <span>{item.label}</span>
-                  </button>
-                )
-              })}
-            </div>
+            <CommandTabs
+              commands={mcpCommands}
+              activeIndex={activeMcpCommandIndex}
+              onSelect={(index) => {
+                setActiveMcpCommandIndex(index)
+                setCopiedCommandKey(null)
+              }}
+            />
 
-            <button
-              type="button"
-              onClick={copyCommand}
-              aria-label="Copy Tempo MCP install command"
-              className="group/copy flex min-h-[48px] w-full items-start gap-3 rounded-[4px] bg-foreground/[0.035] px-3 py-2.5 text-left transition-colors hover:bg-foreground/[0.06]"
+            <CommandSnippet
+              command={activeMcpCommand.prefix + TEMPO_MCP_URL}
+              copyLabel="Copy Tempo MCP install command"
+              copied={copiedCommandKey === 'mcp'}
+              onCopy={(command) => copyCommand('mcp', command)}
             >
-              <code className="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)] gap-2 whitespace-normal break-words font-mono text-[12px] text-foreground leading-[1.55]">
-                <span aria-hidden="true" className="select-none text-foreground/35">
-                  $
-                </span>
-                <span className="min-w-0">
-                  {activeCommand.prefix}
-                  <span className="text-foreground/65">{TEMPO_MCP_URL}</span>
-                </span>
-              </code>
-              <span
-                className={`mt-1 shrink-0 transition-colors ${
-                  copied
-                    ? 'text-foreground'
-                    : 'text-foreground/35 group-hover/copy:text-foreground/70'
-                }`}
-              >
-                {copied ? <CheckIcon /> : <CopyIcon />}
-              </span>
-            </button>
+              {activeMcpCommand.prefix}
+              <span className="text-foreground/65">{TEMPO_MCP_URL}</span>
+            </CommandSnippet>
           </div>
         </div>
-        <AgentMenuItem
+        <AgentCommandSection
           href={TEMPO_PLUGIN_URL}
           label="Tempo plugin"
           desc="Install MCP, workflow skills, and editor metadata"
           icon={<TerminalIcon />}
           onClick={onNavigate}
-        />
-        <AgentMenuItem
+        >
+          <CommandTabs
+            commands={pluginCommands}
+            activeIndex={activePluginCommandIndex}
+            onSelect={(index) => {
+              setActivePluginCommandIndex(index)
+              setCopiedCommandKey(null)
+            }}
+          />
+          <CommandSnippet
+            command={activePluginCommand.command}
+            copyLabel="Copy Tempo plugin install commands"
+            copied={copiedCommandKey === 'plugin'}
+            onCopy={(command) => copyCommand('plugin', command)}
+          />
+        </AgentCommandSection>
+        <AgentCommandSection
           href={TEMPO_DOCS_SKILL_URL}
           label="Tempo Docs skill"
           desc="Add docs, examples, and source context"
           icon={<DocsIcon />}
           onClick={onNavigate}
-        />
+        >
+          <CommandSnippet
+            command={docsSkillCommand}
+            copyLabel="Copy Tempo Docs skill install command"
+            copied={copiedCommandKey === 'docs-skill'}
+            onCopy={(command) => copyCommand('docs-skill', command)}
+          />
+        </AgentCommandSection>
       </div>
     </div>
   )
