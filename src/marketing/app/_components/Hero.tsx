@@ -25,6 +25,8 @@ const HERO_ACTIONS = [
   },
 ] as const
 
+const [primaryAction, ...secondaryActions] = HERO_ACTIONS
+
 const HERO_PATHS = [
   {
     title: 'Stablecoin-native tokens',
@@ -62,13 +64,27 @@ export default function Hero() {
         </p>
         <nav
           aria-label="Get started with Tempo"
-          className="mt-9 flex w-full max-w-[560px] flex-col items-stretch justify-center gap-2.5 sm:w-auto sm:max-w-none sm:flex-row"
+          className="mt-9 flex w-full max-w-[420px] flex-col gap-2.5 sm:max-w-none sm:flex-row sm:justify-center"
         >
-          {HERO_ACTIONS.map((link) => (
-            <Button key={link.label} href={link.href} variant={link.variant} className="h-12 px-6">
-              {link.label}
-            </Button>
-          ))}
+          <Button
+            href={primaryAction.href}
+            variant={primaryAction.variant}
+            className="h-12 w-full px-6 sm:w-auto"
+          >
+            {primaryAction.label}
+          </Button>
+          <div className="grid grid-cols-2 gap-2.5 sm:contents">
+            {secondaryActions.map((link) => (
+              <Button
+                key={link.label}
+                href={link.href}
+                variant={link.variant}
+                className="h-12 w-full px-6 sm:w-auto"
+              >
+                {link.label}
+              </Button>
+            ))}
+          </div>
         </nav>
       </Reveal>
       <nav

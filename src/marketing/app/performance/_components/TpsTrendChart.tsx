@@ -7,10 +7,11 @@ import { linePath, scaleLinear, ticks } from '../_lib/chart'
 import { fmtInt, type PerfRun } from '../_lib/runs'
 import ChartTooltip from './ChartTooltip'
 import {
-  TPS_CHART_PAD as PAD,
   TPS_CHART_DEFAULT_DOMAIN,
   TPS_CHART_DEFAULT_TICKS,
+  TPS_CHART_MOBILE_BP,
   TpsChartGrid,
+  tpsChartPad,
 } from './TpsTrendChartFrame'
 import useMeasure from './useMeasure'
 
@@ -68,6 +69,8 @@ export default function TpsTrendChart({
 
   if (runs.length < 2) return null
 
+  const PAD = tpsChartPad(width)
+  const mobile = width > 0 && width < TPS_CHART_MOBILE_BP
   const n = runs.length
   const values = runs.map((r) => r.settledTps)
   const min = Math.min(...values)
@@ -174,20 +177,23 @@ export default function TpsTrendChart({
             />
           ))}
 
-          {/* Latest value, always on display at the line's end (fades in with
-              the final dot, dims while a hover comparison is open). */}
-          <text
-            x={points[last][0] + 14}
-            y={points[last][1] + 4}
-            fill="var(--performance-tps-end)"
-            className="font-mono text-[11px] motion-reduce:transition-none"
-            style={{
-              opacity: intro ? 1 : 0,
-              transition: 'opacity 250ms ease-out',
-            }}
-          >
-            {fmtInt(runs[last].settledTps)}
-          </text>
+          {/* Latest value, pinned beside the line's end on desktop (fades in
+              with the final dot, dims while a hover comparison is open). Hidden
+              on mobile, where the gutter is collapsed so the line goes wide. */}
+          {mobile ? null : (
+            <text
+              x={points[last][0] + 14}
+              y={points[last][1] + 4}
+              fill="var(--performance-tps-end)"
+              className="font-mono text-[11px] motion-reduce:transition-none"
+              style={{
+                opacity: intro ? 1 : 0,
+                transition: 'opacity 250ms ease-out',
+              }}
+            >
+              {fmtInt(runs[last].settledTps)}
+            </text>
+          )}
 
           <rect
             x="0"

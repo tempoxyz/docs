@@ -763,7 +763,7 @@ export default function Header() {
                 target={external ? '_blank' : undefined}
                 rel={external ? 'noopener noreferrer' : undefined}
                 onClick={close}
-                className="flex items-start gap-1.5 border-line border-t py-4 font-sans text-[16px] text-foreground tracking-[0]"
+                className="flex items-center gap-1.5 border-line border-t py-4 font-sans text-[16px] text-foreground tracking-[0]"
               >
                 {active ? <ActiveSquare activeKey={pathname} /> : null}
                 {item.label}

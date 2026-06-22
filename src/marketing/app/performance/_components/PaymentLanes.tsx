@@ -13,8 +13,10 @@ import useMeasure from './useMeasure'
 // payment lane below has tiny sub-cent fee movement, with pulses flowing along it.
 
 // No y-axis on this chart, so the bands run flush to the container's left
-// edge; the right padding is the lane for the pinned end labels.
+// edge; the right padding is the lane for the pinned end labels. On mobile that
+// lane is collapsed and the end values move into the zone header rows instead.
 const PAD = { l: 0, r: 150, t: 20, b: 24 }
+const MOBILE_BP = 480
 const H = 300
 const DIVIDER = 190
 const FEE_Y = (DIVIDER + H - PAD.b) / 2 + 6
@@ -45,7 +47,9 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
     return () => io.disconnect()
   }, [ref, drawn])
 
-  const endX = Math.max(width - PAD.r, PAD.l + 1)
+  const mobile = width > 0 && width < MOBILE_BP
+  const padR = mobile ? 12 : PAD.r
+  const endX = Math.max(width - padR, PAD.l + 1)
 
   // Real settled TPS per nightly run, scaled into the general blockspace zone.
   const values = runs.map((r) => r.settledTps)
@@ -133,8 +137,9 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
                 }}
               />
               <text
-                x={endX + 12}
-                y={loadEndY + 4}
+                x={mobile ? endX - 12 : endX + 12}
+                y={mobile ? PAD.t + 18 : loadEndY + 4}
+                textAnchor={mobile ? 'end' : 'start'}
                 className="fill-white/40 font-mono text-[11px] motion-reduce:transition-none"
                 style={{
                   opacity: drawn ? 1 : 0,
@@ -175,8 +180,9 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
             strokeWidth="2"
           />
           <text
-            x={endX + 12}
-            y={feeEndY + 4}
+            x={mobile ? endX - 12 : endX + 12}
+            y={mobile ? DIVIDER + 20 : feeEndY + 4}
+            textAnchor={mobile ? 'end' : 'start'}
             fill="var(--indicator-green)"
             className="font-mono text-[11px]"
           >

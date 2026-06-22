@@ -42,6 +42,12 @@ export default function FeaturePage({ params }: { params: FeatureParams }) {
   // The dedicated page has room for the full capability set.
   const items = [...feature.items, ...(feature.extraItems ?? [])]
 
+  const heroActions = feature.heroActions ?? [
+    { label: feature.readLabel, href: feature.readHref, primary: true },
+  ]
+  const primaryAction = heroActions.find((a) => a.primary) ?? heroActions[0]
+  const secondaryActions = heroActions.filter((a) => a !== primaryAction)
+
   const page = (
     <main className="min-h-screen w-full bg-surface-page">
       <div className="mx-auto w-full max-w-7xl border-line border-x bg-surface-shell">
@@ -56,26 +62,29 @@ export default function FeaturePage({ params }: { params: FeatureParams }) {
             <p className="mt-5 max-w-[560px] text-balance font-sans text-[16px] text-foreground/50 leading-[1.5] tracking-[0] lg:text-[18px]">
               {feature.description}
             </p>
-            <div className="mt-9 flex flex-col items-stretch gap-2.5 sm:flex-row sm:items-center">
-              {(
-                feature.heroActions ?? [
-                  {
-                    label: feature.readLabel,
-                    href: feature.readHref,
-                    primary: true,
-                  },
-                ]
-              ).map((action) => (
-                <Button
-                  key={action.label}
-                  href={action.href}
-                  variant={action.primary ? 'primary' : 'secondary'}
-                  arrow={!action.primary}
-                  className="h-12 px-6"
-                >
-                  {action.label}
-                </Button>
-              ))}
+            <div className="mt-9 flex w-full max-w-[420px] flex-col gap-2.5 sm:max-w-none sm:flex-row sm:items-center sm:justify-center">
+              <Button
+                href={primaryAction.href}
+                variant="primary"
+                className="h-12 w-full px-6 sm:w-auto"
+              >
+                {primaryAction.label}
+              </Button>
+              {secondaryActions.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2.5 sm:contents">
+                  {secondaryActions.map((action) => (
+                    <Button
+                      key={action.label}
+                      href={action.href}
+                      variant="secondary"
+                      arrow
+                      className="h-12 w-full px-4 sm:w-auto sm:px-6"
+                    >
+                      {action.label}
+                    </Button>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </Reveal>
         </section>
