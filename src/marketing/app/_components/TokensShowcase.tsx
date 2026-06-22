@@ -11,9 +11,9 @@ import ModeToggle, { type ShowcaseMode } from './ModeToggle'
 import { panelFadeClass } from './panelFade'
 import Reveal from './Reveal'
 
-const VISUAL_HEIGHT = 'h-[400px] lg:h-[424px]'
+const VISUAL_HEIGHT = 'lg:h-[424px]'
 const CODE_HEIGHT = 'max-h-[390px]'
-const DIAGRAM_CONTAINER = 'min-h-[360px] p-6 lg:min-h-0 lg:p-10'
+const DIAGRAM_CONTAINER = 'p-6 lg:min-h-0 lg:p-10'
 const SHOWCASE_HEIGHT = 'lg:min-h-[560px]'
 
 type Row = {

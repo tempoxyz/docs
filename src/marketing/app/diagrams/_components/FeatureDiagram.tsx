@@ -1709,7 +1709,7 @@ export default function FeatureDiagram({
   return (
     <div
       className={`relative flex h-full items-center justify-center overflow-hidden bg-surface-shell ${
-        compact ? 'p-3' : (containerClassName ?? 'min-h-[360px] p-6 lg:min-h-[520px] lg:p-10')
+        compact ? 'p-3' : (containerClassName ?? 'p-6 lg:min-h-[520px] lg:p-10')
       }`}
     >
       <svg
@@ -1718,7 +1718,7 @@ export default function FeatureDiagram({
         className={
           compact
             ? 'block h-auto w-full'
-            : `h-full min-h-[260px] w-full max-w-[560px] ${hideSmallCaptions ? 'feature-diagram-hide-small-captions' : ''}`
+            : `block h-auto w-full max-w-[560px] lg:h-full lg:min-h-[260px] ${hideSmallCaptions ? 'feature-diagram-hide-small-captions' : ''}`
         }
         preserveAspectRatio="xMidYMid meet"
       >

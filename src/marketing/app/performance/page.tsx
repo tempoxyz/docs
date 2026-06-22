@@ -125,13 +125,15 @@ function HeroChartUnavailable() {
 function HeroStatsSkeleton() {
   return (
     <Reveal>
-      <div className="grid grid-cols-2 border-line border-b lg:grid-cols-3">
+      <div className="grid grid-cols-3 border-line border-b">
         {HERO_STAT_LABELS.map((label, i) => (
           <div
             key={label}
-            className={`px-5 py-6 lg:px-8 ${i > 0 ? 'border-line border-l max-lg:odd:border-l-0 max-lg:[&:nth-child(n+3)]:border-t' : ''}`}
+            className={`px-3 py-6 sm:px-5 lg:px-8 ${i > 0 ? 'border-line border-l' : ''}`}
           >
-            <p className="font-sans text-[15px] text-foreground tracking-[0]">{label}</p>
+            <p className="min-h-[2.75em] font-sans text-[15px] text-foreground leading-snug tracking-[0]">
+              {label}
+            </p>
             <SkeletonBlock className="mt-3 h-8 w-28" />
           </div>
         ))}
@@ -314,7 +316,7 @@ export default function PerformancePage() {
           ) : hasRuns ? (
             <Reveal delay={150} className="mt-16">
               <TpsTrendChart runs={runs} />
-              <div className="mt-5 text-center">
+              <div className="mt-10 text-center">
                 <p className="font-sans text-[20px] text-foreground leading-tight tracking-[0]">
                   Transactions per second
                 </p>
@@ -333,13 +335,15 @@ export default function PerformancePage() {
           <HeroStatsSkeleton />
         ) : heroStats.length > 0 ? (
           <Reveal>
-            <div className="grid grid-cols-2 border-line border-b lg:grid-cols-3">
+            <div className="grid grid-cols-3 border-line border-b">
               {heroStats.map((stat, i) => (
                 <div
                   key={stat.label}
-                  className={`px-5 py-6 lg:px-8 ${i > 0 ? 'border-line border-l max-lg:odd:border-l-0 max-lg:[&:nth-child(n+3)]:border-t' : ''}`}
+                  className={`px-3 py-6 sm:px-5 lg:px-8 ${i > 0 ? 'border-line border-l' : ''}`}
                 >
-                  <p className="font-sans text-[15px] text-foreground tracking-[0]">{stat.label}</p>
+                  <p className="min-h-[2.75em] font-sans text-[15px] text-foreground leading-snug tracking-[0]">
+                    {stat.label}
+                  </p>
                   <p className="mt-2 font-sans text-[24px] text-foreground tracking-[-0.01em] lg:text-[28px]">
                     {stat.value}
                   </p>

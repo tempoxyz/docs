@@ -653,14 +653,14 @@ function StorySection({ story, index }: { story: Story; index: number }) {
             />
           </div>
 
-          <div className="relative min-h-[420px] lg:min-h-[620px]">
+          <div className="relative lg:min-h-[620px]">
             <div className="absolute right-5 bottom-5 z-20 lg:right-8 lg:bottom-8">
               <ModeToggle mode={mode} setMode={setMode} />
             </div>
-            <div className="grid min-h-[420px] lg:absolute lg:inset-0 lg:min-h-0">
+            <div className="grid grid-cols-1 lg:absolute lg:inset-0 lg:min-h-0">
               <div
                 inert={mode !== 'visual'}
-                className={`grid min-h-[420px] lg:h-full lg:min-h-0 ${mode === 'visual' ? '[grid-area:1/1]' : 'hidden'}`}
+                className={`grid lg:h-full lg:min-h-0 ${mode === 'visual' ? '[grid-area:1/1]' : 'hidden'}`}
               >
                 <FeatureDiagram spec={panelSpec} />
               </div>

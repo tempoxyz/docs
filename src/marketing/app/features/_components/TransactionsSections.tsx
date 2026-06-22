@@ -322,14 +322,14 @@ function AccessKeysSection() {
         <EdgeMarkers wideOnly />
         {/* Alternated layout: visual on the left, content on the right. */}
         <div className="grid border-line border-b lg:grid-cols-2">
-          <div className="relative min-h-[520px] border-line border-b lg:min-h-0 lg:border-r lg:border-b-0">
+          <div className="relative border-line border-b lg:min-h-0 lg:border-r lg:border-b-0">
             <div className="absolute right-5 bottom-5 z-20 lg:right-8 lg:bottom-8">
               <ModeToggle mode={mode} setMode={setMode} />
             </div>
-            <div className="grid min-h-[520px] lg:absolute lg:inset-0 lg:min-h-0">
+            <div className="grid grid-cols-1 lg:absolute lg:inset-0 lg:min-h-0">
               <div
                 inert={mode !== 'visual'}
-                className={`grid min-h-[520px] lg:h-full lg:min-h-0 ${mode === 'visual' ? '[grid-area:1/1]' : 'hidden'}`}
+                className={`grid lg:h-full lg:min-h-0 ${mode === 'visual' ? '[grid-area:1/1]' : 'hidden'}`}
               >
                 <FeatureDiagram spec={accessKeysSpec} />
               </div>
@@ -465,16 +465,16 @@ function PrimitiveGroupSection({ group, index }: { group: PrimitiveGroup; index:
             ))}
           </ul>
 
-          <div className="relative min-h-[460px] lg:min-h-[520px]">
+          <div className="relative lg:min-h-[520px]">
             <div className="absolute right-5 bottom-5 z-20 lg:right-8 lg:bottom-8">
               <ModeToggle mode={mode} setMode={setMode} />
             </div>
-            <div className="grid min-h-[460px] lg:absolute lg:inset-0 lg:min-h-0">
+            <div className="grid grid-cols-1 lg:absolute lg:inset-0 lg:min-h-0">
               {group.items.map((item, i) => (
                 <Fragment key={item.title}>
                   <div
                     inert={!(i === active && mode === 'visual')}
-                    className={`grid min-h-[460px] lg:h-full lg:min-h-0 ${i === active && mode === 'visual' ? '[grid-area:1/1]' : 'hidden'}`}
+                    className={`grid lg:h-full lg:min-h-0 ${i === active && mode === 'visual' ? '[grid-area:1/1]' : 'hidden'}`}
                   >
                     <FeatureDiagram spec={item.spec} />
                   </div>
