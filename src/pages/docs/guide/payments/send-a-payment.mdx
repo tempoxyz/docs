@@ -14,7 +14,7 @@ import { Tabs, Tab } from 'vocs'
 
 Send stablecoin payments between accounts on Tempo. Payments can include optional memos for reconciliation and tracking.
 
-:::warning[T6 testnet behavior — confirm delivery, not just transaction success]
+:::warning[Confirm delivery, not just transaction success]
 On T6 networks, a blocked TIP-20 `transfer` / `transferFrom` still succeeds, but credits `ReceivePolicyGuard` at `0xB10C000000000000000000000000000000000000` instead of the intended receiver.
 
 - Before marking a payment, withdrawal, or deposit delivered, confirm the `Transfer` recipient is the intended receiver or its TIP-1022 master.

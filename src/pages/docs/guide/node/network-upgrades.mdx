@@ -17,7 +17,7 @@ For detailed release notes and binaries, see the [Changelog](/docs/changelog).
 |---------|------|---------|-------------|----------|
 | v1.10.0 (planned) | Planned: Jun 25, 2026 | Testnet + Mainnet | Required for T7; expected to include gas credits for expiring work, dynamic base fee behavior, and removal of TIP-20 rewards. Release notes and binaries will be linked once published. | <Badge variant="red">Required</Badge> |
 | v1.9.1 (planned) | Planned: Jun 18, 2026 | Testnet + Mainnet | Planned patch release. Release notes and binaries will be linked once the draft is published. | TBD |
-| [v1.9.0](https://github.com/tempoxyz/tempo/releases/tag/v1.9.0) | Jun 15, 2026 | Testnet + Mainnet | Required for T6; adds account-level receive policies for safer TIP-20 deposits and admin access keys for smoother passkey, device, and delegated-key management. Testnet operators must run this release to stay synced after the June 18, 2026 activation; mainnet operators must upgrade before June 23, 2026 at 4pm CEST (unix: 1782223200). | <Badge variant="red">Required</Badge> |
+| [v1.9.0](https://github.com/tempoxyz/tempo/releases/tag/v1.9.0) | Jun 15, 2026 | Testnet + Mainnet | Required for T6; adds account-level receive policies for safer TIP-20 deposits and admin access keys for smoother passkey, device, and delegated-key management. Operators were required to run this release before the T6 activation timestamp on each network. | <Badge variant="red">Required</Badge> |
 | [v1.8.2](https://github.com/tempoxyz/tempo/releases/tag/v1.8.2) | Jun 8, 2026 | Testnet + Mainnet | High-priority patch release that fixes a `--minimal` node issue when requesting historical blocks through the commonware marshal interface. | <Badge variant="yellow">Recommended</Badge> |
 | [v1.8.1](https://github.com/tempoxyz/tempo/releases/tag/v1.8.1) | Jun 1, 2026 | Testnet + Mainnet | Required for T5; reverts builder prewarming and execution cache sharing defaults from v1.8.0 to avoid stale-state validation errors while retaining T5 compatibility. | <Badge variant="red">Required</Badge> |
 | [v1.8.0](https://github.com/tempoxyz/tempo/releases/tag/v1.8.0) | May 28, 2026 | Testnet + Mainnet | Required for T5; introduces the enshrined TIP-20 reserve channel precompile, payment lane classification, DEX flip-order improvements, multihop FeeAMM routing, optional on-chain TIP-20 `logoURI`, implicit approvals, and key authorization witnesses. Operators should use v1.8.2 for the latest patch fixes. | <Badge variant="red">Required</Badge> |
@@ -66,7 +66,7 @@ T7 is planned for v1.10.0, with release publication planned for June 25, 2026. R
 
 ### Who is affected?
 
-Testnet operators must run v1.9.0 to stay synced after the T6 activation timestamp. Mainnet operators need to upgrade before the mainnet activation timestamp. Non-upgraded nodes will fall out of consensus once T6 activates on their network.
+Node operators were required to run v1.9.0 before the T6 activation timestamp on each network. Non-upgraded nodes fall out of consensus once T6 activates on their network.
 
 Integrators, indexers, wallets, explorers, and SDK maintainers should review the [T6 network upgrade](/docs/protocol/upgrades/t6) page for feature benefits and integration notes.
 
