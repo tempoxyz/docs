@@ -166,6 +166,10 @@ export default defineConfig({
                 link: '/docs/guide/payments/accept-a-payment',
               },
               {
+                text: 'Configure receive policies',
+                link: '/docs/guide/payments/configure-receive-policies',
+              },
+              {
                 text: 'Attach a transfer memo',
                 link: '/docs/guide/payments/transfer-memos',
               },
@@ -540,6 +544,10 @@ export default defineConfig({
               {
                 text: 'Specification',
                 link: '/docs/protocol/tip403/spec',
+              },
+              {
+                text: 'Receive Policies',
+                link: '/docs/protocol/tip403/receive-policies',
               },
               {
                 text: 'Rust Implementation',
