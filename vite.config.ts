@@ -6,6 +6,7 @@ import Icons from 'unplugin-icons/vite'
 import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { vocs } from 'vocs/vite'
+import { blogPostsPlugin } from './src/marketing/blogPlugin'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -26,6 +27,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
+      blogPostsPlugin(),
       marketingPages(),
       vocs(),
       Icons({ compiler: 'jsx', jsx: 'react' }),
@@ -58,11 +60,19 @@ export default defineConfig(({ mode }) => {
   }
 })
 
-const marketingRoutes = ['/', '/build', '/diagrams', '/performance']
+const marketingRoutes = ['/', '/build', '/blog', '/diagrams', '/performance']
 
 function isMarketingPath(pathname: string) {
   const normalized = pathname.replace(/\/$/, '') || '/'
-  return marketingRoutes.includes(normalized) || normalized.startsWith('/build/')
+  // Let requests for actual files (e.g. /blog/foo.svg) fall through to Vite's
+  // static asset serving instead of returning the marketing SPA shell.
+  const lastSegment = normalized.split('/').pop() ?? ''
+  if (lastSegment.includes('.')) return false
+  return (
+    marketingRoutes.includes(normalized) ||
+    normalized.startsWith('/build/') ||
+    normalized.startsWith('/blog/')
+  )
 }
 
 async function marketingHtml() {
