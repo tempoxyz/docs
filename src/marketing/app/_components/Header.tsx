@@ -5,8 +5,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { type ReactNode, useLayoutEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AmpLogo, ClaudeLogo, CodexLogo } from '../../../components/AgentLogos'
+import { docsSearchUrl } from '../../../lib/docs-search'
 import { featurePath } from '../_lib/featurePaths'
 import { TEMPO_SDK_DOCS_URL } from '../_lib/links'
 import ArrowUpRight from './ArrowUpRight'
@@ -171,6 +172,34 @@ function MenuIcon() {
       <path d="M3 7h14M3 13h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
+}
+
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className={`shrink-0 ${className ?? ''}`}
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
+  )
+}
+
+// The marketing SPA has no Vocs search runtime, so its search affordance just
+// navigates to the docs, which open the search dialog on arrival (see
+// lib/docs-search and DocsHeader).
+function goToDocsSearch() {
+  if (typeof window === 'undefined') return
+  window.location.assign(docsSearchUrl())
 }
 
 function CloseIcon() {
@@ -603,6 +632,19 @@ export default function Header() {
     }
   }, [open])
 
+  // Cmd/Ctrl+K opens search from anywhere on the marketing site (parity with
+  // the docs). There's no in-page search here, so navigate to the docs search.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        goToDocsSearch()
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   const dropdowns: { key: string; panel: ReactNode }[] = [
     ...menu.flatMap((item) =>
       item.mega ? [{ key: item.label, panel: <MegaMenu data={item.mega} /> }] : [],
@@ -617,7 +659,7 @@ export default function Header() {
 
   return (
     <header ref={headerRef} className="relative z-20 border-line border-b">
-      <nav ref={navRef} className="flex items-center justify-between px-5 py-4">
+      <nav ref={navRef} className="relative flex items-center justify-between px-5 py-4">
         <Link
           href="/"
           onClick={close}
@@ -628,7 +670,7 @@ export default function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <ul className="hidden items-center gap-16 lg:flex">
+        <ul className="hidden items-center gap-16 lg:absolute lg:top-1/2 lg:left-1/2 lg:flex lg:-translate-x-1/2 lg:-translate-y-1/2">
           {menu.map((item) => {
             const external = isExternal(item.href)
             const active = isActiveMenuItem(pathname, item)
@@ -700,6 +742,18 @@ export default function Header() {
         </ul>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <a
+            href={docsSearchUrl()}
+            aria-label="Search documentation"
+            aria-keyshortcuts="Meta+K Control+K"
+            className="flex h-9 items-center gap-2 rounded-[4px] border border-line px-4 font-sans text-[14px] text-foreground/60 tracking-[0] transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
+          >
+            <SearchIcon />
+            Search
+            <kbd className="ml-1 rounded-[3px] border border-line px-1.5 py-0.5 font-sans text-[11px] text-foreground/45">
+              ⌘K
+            </kbd>
+          </a>
           <button
             ref={(el) => {
               if (el) triggerRefs.current.set('For agents', el)
@@ -737,16 +791,26 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          aria-label={open ? 'Close menu' : 'Open menu'}
-          aria-expanded={open}
-          className="grid size-8 place-items-center text-foreground lg:hidden"
-        >
-          {open ? <CloseIcon /> : <MenuIcon />}
-        </button>
+        {/* Mobile actions */}
+        <div className="flex items-center gap-1 lg:hidden">
+          <a
+            href={docsSearchUrl()}
+            aria-label="Search documentation"
+            aria-keyshortcuts="Meta+K Control+K"
+            className="grid size-8 place-items-center text-foreground"
+          >
+            <SearchIcon className="size-[18px]" />
+          </a>
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
+            className="grid size-8 place-items-center text-foreground"
+          >
+            {open ? <CloseIcon /> : <MenuIcon />}
+          </button>
+        </div>
       </nav>
 
       {/* Desktop dropdowns: one shared surface that slides & resizes between
