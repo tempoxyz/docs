@@ -19,7 +19,7 @@ For the full protocol flow, claim rules, burn rules, and event signatures, see t
 
 Configure a receive policy when an address should reject some incoming TIP-20 tokens or some incoming senders without making the sender's TIP-20 call fail.
 
-The specification gives two examples:
+For example, receive policies are useful when:
 
 - a regulated entity that only wants to receive from addresses held by individuals it has KYC'ed
 - an orchestrator or exchange that only wants specific tokens sent to its deposit addresses
@@ -109,9 +109,9 @@ Index these events to track policy changes and receipt lifecycle:
 
 `TransferBlocked.receipt` is the ABI-encoded receipt witness. The spec requires that this receipt be directly usable as the `receipt` argument to `balanceOf`, `claim`, and `burnBlockedReceipt`.
 
-## Claim or burn receipts
+## Claim blocked receipts
 
-A claim consumes one full receipt and releases the full amount to one destination. Partial claims are not supported.
+A claim is the normal recovery path for blocked transfers or mints. It consumes one full receipt and releases the full amount to one destination. Partial claims are not supported.
 
 Only the authorized claimer may call `claim(...)`:
 
@@ -120,11 +120,17 @@ Only the authorized claimer may call `claim(...)`:
 
 Changing a receiver's recovery authority does not change who can claim older receipts.
 
+Claim paths have additional policy checks. See the [protocol overview](/docs/protocol/tip403/receive-policies#claims) before implementing recovery flows.
+
+## Burn blocked receipts
+
+Burning is an issuer-only path for blocked receipts.
+
 `burnBlockedReceipt(...)` consumes one full receipt and burns the stored amount from `ReceivePolicyGuard`.
 
 The caller must hold `BURN_BLOCKED_ROLE` for the token. A receipt is burnable only when its policy subject is currently unauthorized as a sender under the token's TIP-403 policy.
 
-Claim paths and burn eligibility have additional policy checks. See the [protocol overview](/docs/protocol/tip403/receive-policies#claims) before implementing recovery flows.
+Burn eligibility has additional policy checks. See the [protocol overview](/docs/protocol/tip403/receive-policies#burns) before implementing issuer burn flows.
 
 ## Virtual-address behavior
 
