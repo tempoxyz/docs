@@ -7,7 +7,9 @@ import { Card, Cards } from 'vocs'
 
 # Configure Receive Policies
 
-Receive policies let a receiver define which [TIP-20](/docs/protocol/tip20/overview) tokens it accepts and which senders may send those tokens to it. This guide summarizes the builder-facing behavior from [TIP-1028](https://tips.sh/1028).
+Receive policies let a receiver define which [TIP-20](/docs/protocol/tip20/overview) tokens it accepts and which senders may send those tokens to it.
+
+This page is intentionally about the builder flow rather than the full spec. It covers when to configure a policy, what happens when delivery is blocked, and what operators need to watch.
 
 If a receive policy blocks an inbound transfer or mint, the TIP-20 call still succeeds. The funds are credited to `ReceivePolicyGuard` instead of the receiver, and `ReceivePolicyGuard` records a receipt that can be claimed later by the configured recovery authority.
 
@@ -138,7 +140,7 @@ If `to` is a TIP-1022 virtual address, it is resolved to its master address befo
 
 If resolution fails, the operation reverts as before. If the transfer or mint is blocked, the receipt is recorded for the master address and preserves the original `to` for attribution.
 
-## Related
+## Learn more
 
 <Cards>
   <Card
