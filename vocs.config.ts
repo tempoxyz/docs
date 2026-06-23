@@ -258,6 +258,40 @@ export default defineConfig({
             ],
           },
           {
+            text: 'Private Zones',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/docs/guide/private-zones',
+              },
+              {
+                text: 'Connect to a zone',
+                link: '/docs/guide/private-zones/connect-to-a-zone',
+              },
+              {
+                text: 'Deposit to a zone',
+                link: '/docs/guide/private-zones/deposit-to-a-zone',
+              },
+              {
+                text: 'Send tokens within a zone',
+                link: '/docs/guide/private-zones/send-tokens-within-a-zone',
+              },
+              {
+                text: 'Send tokens across zones',
+                link: '/docs/guide/private-zones/send-tokens-across-zones',
+              },
+              {
+                text: 'Swap across zones',
+                link: '/docs/guide/private-zones/swap-across-zones',
+              },
+              {
+                text: 'Withdraw from a zone',
+                link: '/docs/guide/private-zones/withdraw-from-a-zone',
+              },
+            ],
+          },
+          {
             text: 'Make Agentic Payments',
             collapsed: true,
             items: [
@@ -636,22 +670,55 @@ export default defineConfig({
             ],
           },
           {
+            text: 'Zones',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/docs/protocol/zones',
+              },
+              {
+                text: 'Architecture',
+                link: '/docs/protocol/zones/architecture',
+              },
+              {
+                text: 'Accounts',
+                link: '/docs/protocol/zones/accounts',
+              },
+              {
+                text: 'Bridging',
+                link: '/docs/protocol/zones/bridging',
+              },
+              {
+                text: 'RPC',
+                link: '/docs/protocol/zones/rpc',
+              },
+              {
+                text: 'Execution and gas',
+                link: '/docs/protocol/zones/execution',
+              },
+              {
+                text: 'Proving',
+                link: '/docs/protocol/zones/proving',
+              },
+            ],
+          },
+          {
             text: 'Network Upgrades',
             collapsed: true,
             items: [
               {
                 text: 'T7',
-                badge: { text: 'Planned', variant: 'note' },
+                badge: { text: 'Next', variant: 'note' },
                 link: '/docs/protocol/upgrades/t7',
               },
               {
                 text: 'T6',
-                badge: { text: 'Testnet', variant: 'info' },
+                badge: { text: 'Latest', variant: 'info' },
                 link: '/docs/protocol/upgrades/t6',
               },
               {
                 text: 'T5',
-                badge: { text: 'Latest', variant: 'info' },
                 link: '/docs/protocol/upgrades/t5',
               },
               {
