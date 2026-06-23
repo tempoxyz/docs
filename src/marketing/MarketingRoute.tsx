@@ -60,24 +60,28 @@ function prefetchPath(href: string) {
   document.head.appendChild(link)
 }
 
-function applyRouteMetadata(route: string) {
-  const metadata = routeMetadata[route] ?? routeMetadata['/']
-  document.title = metadata.title
-  document.querySelector('meta[name="description"]')?.setAttribute('content', metadata.description)
+type RouteMetadata = { title: string; description: string }
+
+function applyRouteMetadata(route: string, metadata?: RouteMetadata) {
+  const resolved = metadata ?? routeMetadata[route] ?? routeMetadata['/']
+  document.title = resolved.title
+  document.querySelector('meta[name="description"]')?.setAttribute('content', resolved.description)
 }
 
 export default function MarketingRoute({
   children,
   route,
+  metadata,
 }: {
   children: ReactNode
-  route: keyof typeof routeMetadata
+  route: string
+  metadata?: RouteMetadata
 }) {
   const [analyticsReady, setAnalyticsReady] = useState(false)
 
   useEffect(() => {
-    applyRouteMetadata(route)
-  }, [route])
+    applyRouteMetadata(route, metadata)
+  }, [route, metadata])
 
   useEffect(() => {
     if ('requestIdleCallback' in window) {
