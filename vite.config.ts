@@ -65,6 +65,10 @@ const marketingRoutes = ['/', '/build', '/blog', '/diagrams', '/performance']
 
 function isMarketingPath(pathname: string) {
   const normalized = pathname.replace(/\/$/, '') || '/'
+  // Let requests for actual files (e.g. /blog/foo.svg) fall through to Vite's
+  // static asset serving instead of returning the marketing SPA shell.
+  const lastSegment = normalized.split('/').pop() ?? ''
+  if (lastSegment.includes('.')) return false
   return (
     marketingRoutes.includes(normalized) ||
     normalized.startsWith('/build/') ||
