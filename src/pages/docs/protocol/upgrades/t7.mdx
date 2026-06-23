@@ -1,46 +1,99 @@
 ---
 title: T7 Network Upgrade
-description: Planned overview for the T7 network upgrade, including gas credits, dynamic base fee behavior, and removal of TIP-20 rewards.
+description: Partner-focused overview and rollout dates for the T7 network upgrade, including gas credits, dynamic base fee behavior, and removal of TIP-20 rewards.
 ---
 
 # T7 Network Upgrade
 
-T7 is a planned network upgrade focused on lowering fees for work that is expected to expire, lowering the base fee when gas usage is below the target threshold, and removing TIP-20 rewards.
+T7 gives partners a clearer fee model for high-volume payment and exchange flows. It adds gas credits for temporary protocol work, makes the base fee move down when network usage is below the target threshold, and removes TIP-20 rewards.
 
 :::info[T7 status]
-T7 is planned for v1.10.0, with release publication planned for June 25, 2026. The scope and rollout dates may change before activation.
+T7 is planned for v1.10.0. Pre-release rollout is planned for June 25, 2026, the partner release is planned for June 29, 2026, testnet rollout is planned for July 2, 2026, and mainnet rollout is planned for July 9, 2026.
 :::
 
 ## Timeline
 
 | Milestone | Date |
 |-----------|------|
-| Release | Planned: June 25, 2026 |
-| Testnet | Planned: June 30, 2026 |
-| Mainnet | Planned: July 6, 2026 |
+| Cut pre-release and rollout | June 25, 2026 |
+| Cut release and share with partners | June 29, 2026 |
+| Testnet rollout | July 2, 2026 |
+| Mainnet rollout | July 9, 2026 |
 
-Node operator upgrade guidance will be linked when v1.10.0 is available.
+Node operator upgrade guidance will be linked when v1.10.0 is available. Operators should be ready to run the T7-compatible release before the activation timestamp on each network.
 
-## Planned scope
+## Overview
 
-### Lower fees for things we know will expire
+T7 focuses on three partner needs:
 
-T7 plans to introduce gas credits for protocol surfaces where temporary work is expected to expire.
+- **Lower fees for expiring work.** Gas credits reduce fees for protocol work that is expected to expire, including DEX and MPP flows.
+- **A more responsive base fee.** Dynamic base fee behavior lowers the base fee when gas usage is below the target threshold.
+- **A simpler TIP-20 model.** Removing TIP-20 rewards simplifies reward-related accounting and user-facing balances.
+
+These changes are designed to make costs easier to reason about for partners building high-throughput payment, liquidity, and exchange experiences. Gas credits and dynamic base fee behavior affect fee calculations, while existing TIP-20 transfer behavior continues to work.
+
+## Features
+
+### Gas credits for expiring work
+
+Gas credits lower fees for protocol surfaces where temporary work is expected to expire. This helps reduce the cost of flows where the network can account for temporary state separately from long-lived state.
 
 | TIP | Scope |
 |-----|-------|
 | [TIP-1060: Gas Credits Primitive](https://tips.sh/1060) | Core gas credits primitive |
 | [TIP-1064: Gas Credits for DEX](https://tips.sh/1064) | Gas credits for DEX flows |
-| [TIP-1066: Gas Credits for MPP](https://tips.sh/1066) | Gas credits for MPP flows; stretch goal |
+| [TIP-1066: Gas Credits for MPP](https://tips.sh/1066) | Gas credits for MPP flows |
 
-### Lowering the base fee when gas is below certain threshold
+### Dynamic base fee
+
+Dynamic base fee behavior lets the base fee move down when gas usage is below the target threshold. This gives wallets, apps, and infrastructure a fee model that can respond to lower network usage instead of assuming a fixed base fee.
 
 | TIP | Scope |
 |-----|-------|
 | [TIP-1067: Dynamic Base Fee](https://tips.sh/1067-1) | Dynamic base fee behavior |
 
-### Remove TIP-20 Rewards
+### Remove TIP-20 rewards
+
+T7 removes TIP-20 rewards so partners do not need to model new reward accrual after the upgrade. Historical rewards data should remain separate from post-T7 payment and balance reporting.
 
 | TIP | Scope |
 |-----|-------|
 | [TIP-1075: Remove TIP-20 Rewards](https://github.com/tempoxyz/tempo/pull/5380) | Remove TIP-20 rewards |
+
+## Compatible releases
+
+The following release is planned to support the T7 feature set:
+
+| Ecosystem | T7-compatible releases |
+|-----------|------------------------|
+| Node operators | `v1.10.0` (planned) |
+
+Release notes, binaries, and package versions will be linked when v1.10.0 is available.
+
+## What operators and integrators should know
+
+T7 changes fee and reward behavior. Node operators, integrators, indexers, wallets, and partner infrastructure should review the notes below before testnet and mainnet rollout.
+
+### For gas credits
+
+Partners using DEX or MPP flows should review fee assumptions once the T7-compatible release is available.
+
+- Gas credits are included for the core primitive, DEX flows, and MPP flows.
+- Wallets and apps that estimate fees should validate their fee displays against T7 behavior on testnet.
+- Indexers and analytics systems should keep pre-T7 fee assumptions separate from post-T7 fee data.
+
+### For dynamic base fee
+
+Wallets, SDKs, and infrastructure should read the current base fee from the network instead of assuming one fixed value.
+
+- Fee estimators should be tested on testnet after T7 rollout.
+- User interfaces should show the current estimated fee at send time.
+- Monitoring should track base fee movement before mainnet rollout.
+
+### For TIP-20 rewards removal
+
+Apps that show TIP-20 reward information should stop presenting new reward accrual after T7 activates.
+
+- Wallets and dashboards should separate historical rewards from post-T7 balances.
+- Accounting and reporting systems should check whether any reward-specific assumptions remain.
+- Partner support teams should be ready to explain that TIP-20 transfers continue to work while reward accrual is removed.
