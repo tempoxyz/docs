@@ -5,7 +5,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { type ReactNode, useLayoutEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AmpLogo, ClaudeLogo, CodexLogo } from '../../../components/AgentLogos'
 import { featurePath } from '../_lib/featurePaths'
 import { TEMPO_SDK_DOCS_URL } from '../_lib/links'
@@ -21,6 +21,7 @@ import {
   TransactionsIcon,
   WalletIcon,
 } from './menuIcons'
+import SearchDialog from './SearchDialog'
 import TempoLogo from './TempoLogo'
 
 const protocolMenu: MegaMenuData = {
@@ -169,6 +170,26 @@ function MenuIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
       <path d="M3 7h14M3 13h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className={`shrink-0 ${className ?? ''}`}
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m21 21-4.3-4.3" />
     </svg>
   )
 }
@@ -527,6 +548,7 @@ function AgentsPanel({
 export default function Header() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
   // The mobile menu is a fixed overlay anchored just below the nav bar, so we
   // track the bar's height to offset it (and keep it correct across resizes).
@@ -603,6 +625,19 @@ export default function Header() {
     }
   }, [open])
 
+  // Cmd/Ctrl+K toggles the in-page search dialog from anywhere on the marketing
+  // site (parity with the docs).
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setSearchOpen((s) => !s)
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   const dropdowns: { key: string; panel: ReactNode }[] = [
     ...menu.flatMap((item) =>
       item.mega ? [{ key: item.label, panel: <MegaMenu data={item.mega} /> }] : [],
@@ -617,7 +652,7 @@ export default function Header() {
 
   return (
     <header ref={headerRef} className="relative z-20 border-line border-b">
-      <nav ref={navRef} className="flex items-center justify-between px-5 py-4">
+      <nav ref={navRef} className="relative flex items-center justify-between px-5 py-4">
         <Link
           href="/"
           onClick={close}
@@ -628,7 +663,7 @@ export default function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <ul className="hidden items-center gap-16 lg:flex">
+        <ul className="hidden items-center gap-16 lg:absolute lg:top-1/2 lg:left-1/2 lg:flex lg:-translate-x-1/2 lg:-translate-y-1/2">
           {menu.map((item) => {
             const external = isExternal(item.href)
             const active = isActiveMenuItem(pathname, item)
@@ -701,6 +736,16 @@ export default function Header() {
 
         <div className="hidden items-center gap-3 lg:flex">
           <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            aria-label="Search documentation"
+            aria-keyshortcuts="Meta+K Control+K"
+            title="Search documentation (⌘K)"
+            className="grid size-9 place-items-center rounded-[4px] border border-line text-foreground/60 transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
+          >
+            <SearchIcon />
+          </button>
+          <button
             ref={(el) => {
               if (el) triggerRefs.current.set('For agents', el)
               else triggerRefs.current.delete('For agents')
@@ -737,16 +782,30 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          aria-label={open ? 'Close menu' : 'Open menu'}
-          aria-expanded={open}
-          className="grid size-8 place-items-center text-foreground lg:hidden"
-        >
-          {open ? <CloseIcon /> : <MenuIcon />}
-        </button>
+        {/* Mobile actions */}
+        <div className="flex items-center gap-1 lg:hidden">
+          <button
+            type="button"
+            onClick={() => {
+              close()
+              setSearchOpen(true)
+            }}
+            aria-label="Search documentation"
+            aria-keyshortcuts="Meta+K Control+K"
+            className="grid size-8 place-items-center text-foreground"
+          >
+            <SearchIcon className="size-[18px]" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
+            className="grid size-8 place-items-center text-foreground"
+          >
+            {open ? <CloseIcon /> : <MenuIcon />}
+          </button>
+        </div>
       </nav>
 
       {/* Desktop dropdowns: one shared surface that slides & resizes between
@@ -902,6 +961,8 @@ export default function Header() {
           </div>
         </div>
       </div>
+
+      <SearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   )
 }

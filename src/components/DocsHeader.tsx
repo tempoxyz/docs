@@ -2,6 +2,7 @@
 
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useConfig } from 'vocs'
+import { DOCS_SEARCH_PARAM } from '../lib/docs-search'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 
 type MegaLink = {
@@ -339,6 +340,7 @@ const menu: MenuItem[] = [
   { label: 'Build', href: '/#protocol', mega: protocolMenu },
   { label: 'Resources', href: `${DOCS_BASE_PATH}/guide`, mega: developersMenu },
   { label: 'Performance', href: '/performance' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Docs', href: DOCS_BASE_PATH },
 ]
 
@@ -457,8 +459,12 @@ function SearchIcon({ className }: { className?: string }) {
 // importing that internal, unexported component, we re-expose the affordance by
 // dispatching the same shortcut Vocs already handles. See src/pages/_root.css
 // where the gutter is hidden, and node_modules/vocs Search.tsx for the listener.
-function openDocsSearch() {
-  if (typeof document === 'undefined') return
+//
+// Returns true when Vocs handled the shortcut (it calls `preventDefault`, so
+// `dispatchEvent` returns false). The shortcut *toggles* the dialog, so callers
+// must only dispatch once per intended open.
+function dispatchDocsSearchShortcut() {
+  if (typeof document === 'undefined') return false
   const event = new KeyboardEvent('keydown', {
     key: 'k',
     code: 'KeyK',
@@ -468,12 +474,30 @@ function openDocsSearch() {
     metaKey: true,
     ctrlKey: true,
   })
-  const handled = !document.dispatchEvent(event)
-  if (!handled && import.meta.env.DEV) {
+  return !document.dispatchEvent(event)
+}
+
+function openDocsSearch() {
+  if (!dispatchDocsSearchShortcut() && import.meta.env.DEV) {
     console.warn(
       'Vocs search did not handle Cmd/Ctrl+K. Verify the hidden Vocs top-nav search is still mounted (showTopNav/showSearch).',
     )
   }
+}
+
+// Used when arriving from the marketing site via `?search` (see lib/docs-search):
+// the Vocs Search instance may not have attached its keydown listener yet on the
+// first paint, so retry across a few frames until the dialog opens. We stop on
+// the first success to avoid the toggle re-closing it.
+function openDocsSearchWhenReady(attempt = 0) {
+  if (dispatchDocsSearchShortcut()) return
+  if (attempt >= 30) {
+    if (import.meta.env.DEV) {
+      console.warn('Vocs search did not open after navigation; the search instance never mounted.')
+    }
+    return
+  }
+  requestAnimationFrame(() => openDocsSearchWhenReady(attempt + 1))
 }
 
 function CloseIcon() {
@@ -1033,12 +1057,29 @@ export default function DocsHeader() {
     warmMarketingApp()
   }, [])
 
+  // Open the search dialog when arriving from the marketing site's search CTA
+  // (which navigates to `/docs?search=1`). Strip the param so refresh/back
+  // doesn't reopen it.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (!params.has(DOCS_SEARCH_PARAM)) return
+    params.delete(DOCS_SEARCH_PARAM)
+    const query = params.toString()
+    window.history.replaceState(
+      {},
+      '',
+      `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`,
+    )
+    openDocsSearchWhenReady()
+  }, [])
+
   return (
     <header className="docs-site-header fixed top-0 right-0 left-0 z-[60] bg-background">
       <div className="w-full border-line border-x bg-surface-shell">
         <nav
           ref={headerRef}
-          className="flex items-center justify-between border-line border-b px-5 py-4"
+          className="relative flex items-center justify-between border-line border-b px-5 py-4"
         >
           <a
             href="/"
@@ -1051,7 +1092,7 @@ export default function DocsHeader() {
             <TempoLogo className="h-[18px] w-[80px]" />
           </a>
 
-          <ul className="hidden items-center gap-16 lg:flex">
+          <ul className="hidden items-center gap-16 lg:absolute lg:top-1/2 lg:left-1/2 lg:flex lg:-translate-x-1/2 lg:-translate-y-1/2">
             {menu.map((item) => {
               const active = isActiveMenuItem(pathname, item)
               const triggerContent = (

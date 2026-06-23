@@ -40,11 +40,21 @@ export type RenderedPost = {
 // Markdown → HTML with Shiki syntax highlighting. Vesper is the closest
 // built-in theme to the site's muted dark palette; the pre background is
 // overridden to the surface token in CSS.
+// `@shikijs/rehype` uses a process-wide singleton highlighter whose `langAlias`
+// is fixed by the *first* caller. Vocs registers `sol -> solidity` for the docs;
+// if this blog processor initializes the singleton first (e.g. the homepage
+// renders the blog before docs), it must register the same alias and a fallback,
+// otherwise docs pages with ```sol fences crash with "Language `sol` is not
+// included in this bundle".
 const processor = unified()
   .use(remarkParse)
   .use(remarkGfm)
   .use(remarkRehype)
-  .use(rehypeShiki, { theme: 'vesper' })
+  .use(rehypeShiki, {
+    theme: 'vesper',
+    langAlias: { sol: 'solidity' },
+    fallbackLanguage: 'plaintext',
+  })
   .use(rehypeStringify)
 
 // Minimal frontmatter parser for our simple schema (quoted strings, an

@@ -6,6 +6,7 @@ import Icons from 'unplugin-icons/vite'
 import { defineConfig, type Plugin } from 'vite'
 import { type CategorySlug, categoryBySlug } from './src/marketing/app/blog/_lib/categories'
 import { blogPostsPlugin, loadRenderedPosts } from './src/marketing/blogPlugin'
+import { marketingSearchIndexPlugin } from './src/marketing/searchIndexPlugin'
 import {
   absoluteUrl,
   blogPostJsonLd,
@@ -227,6 +228,7 @@ export default defineConfig({
   publicDir: path.resolve(process.cwd(), 'public'),
   plugins: [
     blogPostsPlugin(),
+    marketingSearchIndexPlugin({ source: 'dist' }),
     tailwindcss(),
     Icons({ compiler: 'jsx', jsx: 'react' }),
     react(),

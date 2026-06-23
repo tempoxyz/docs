@@ -66,6 +66,9 @@ importers:
       mermaid:
         specifier: ^11.14.0
         version: 11.14.0
+      minisearch:
+        specifier: 7.2.0
+        version: 7.2.0
       monaco-editor:
         specifier: ^0.55.1
         version: 0.55.1
