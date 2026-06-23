@@ -495,9 +495,9 @@
   color-scheme: dark;
 
   --font-hbset: "HBSet";
-  --font-pilat-book: "Pilat";
+  --font-pilat-book: "Pilat", ui-sans-serif, system-ui, sans-serif;
   --font-jetbrains-mono: "JetBrains Mono";
-  --vocs-font-family: var(--font-pilat-book), ui-sans-serif, system-ui, sans-serif;
+  --vocs-font-family: var(--font-pilat-book);
   --vocs-font-family-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 
   --color-background: #111111;
@@ -763,7 +763,7 @@ html {
 
 body {
   user-select: text;
-  font-family: var(--font-pilat-book), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-pilat-book);
 }
 
 :where(
