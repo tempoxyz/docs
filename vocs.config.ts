@@ -633,17 +633,16 @@ export default defineConfig({
             items: [
               {
                 text: 'T7',
-                badge: { text: 'Planned', variant: 'note' },
+                badge: { text: 'Next', variant: 'note' },
                 link: '/docs/protocol/upgrades/t7',
               },
               {
                 text: 'T6',
-                badge: { text: 'Testnet', variant: 'info' },
+                badge: { text: 'Latest', variant: 'info' },
                 link: '/docs/protocol/upgrades/t6',
               },
               {
                 text: 'T5',
-                badge: { text: 'Latest', variant: 'info' },
                 link: '/docs/protocol/upgrades/t5',
               },
               {
