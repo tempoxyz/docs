@@ -228,7 +228,7 @@ export default defineConfig({
   publicDir: path.resolve(process.cwd(), 'public'),
   plugins: [
     blogPostsPlugin(),
-    marketingSearchIndexPlugin(),
+    marketingSearchIndexPlugin({ source: 'dist' }),
     tailwindcss(),
     Icons({ compiler: 'jsx', jsx: 'react' }),
     react(),

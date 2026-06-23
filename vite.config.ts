@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       blogPostsPlugin(),
-      marketingSearchIndexPlugin(),
+      marketingSearchIndexPlugin({ source: 'vocs' }),
       marketingPages(),
       vocs(),
       Icons({ compiler: 'jsx', jsx: 'react' }),

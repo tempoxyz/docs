@@ -24,8 +24,3 @@ interface ImportMetaEnv extends EnvironmentVariables {}
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
-
-declare module 'virtual:marketing/search-index' {
-  /** Returns the serialized MiniSearch index JSON for the docs search. */
-  export function getSearchIndex(): Promise<string>
-}
