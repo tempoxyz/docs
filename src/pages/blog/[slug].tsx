@@ -3,8 +3,8 @@ import { type CategorySlug, categoryBySlug } from '../../marketing/app/blog/_lib
 import BlogPostRoute from '../../marketing/BlogPostRoute'
 import {
   absoluteUrl,
+  blogOgImageUrl,
   blogPostJsonLd,
-  ogImageUrl,
   type PostSeo,
   resolveBaseUrl,
 } from '../../marketing/seo'
@@ -20,6 +20,8 @@ const postBySlug = new Map<string, PostSeo>(
       slug: post.slug,
       title: post.title,
       excerpt: post.excerpt,
+      metaTitle: post.metaTitle,
+      metaDescription: post.metaDescription,
       date: post.date,
       category: post.category as CategorySlug,
     },
@@ -38,10 +40,10 @@ export default function Page({ slug }: { slug: string }) {
   const base = resolveBaseUrl()
   const post = postBySlug.get(slug)
 
-  const title = post ? `${post.title} — Tempo Developers` : BLOG_TITLE
-  const description = post?.excerpt ?? BLOG_DESCRIPTION
+  const title = post?.metaTitle ?? BLOG_TITLE
+  const description = post?.metaDescription ?? BLOG_DESCRIPTION
   const canonical = absoluteUrl(base, post ? `/blog/${slug}` : '/blog')
-  const ogImage = ogImageUrl(base, { title, description, section: 'BLOG' })
+  const ogImage = post ? blogOgImageUrl(base, post) : ''
 
   return (
     <>
@@ -50,13 +52,7 @@ export default function Page({ slug }: { slug: string }) {
       {base ? <link rel="canonical" href={canonical} /> : null}
       <meta property="og:type" content={post ? 'article' : 'website'} />
       <meta property="og:url" content={canonical} />
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
-      <meta property="og:image" content={ogImage} />
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
-      <meta property="twitter:image" content={ogImage} />
       {post ? <meta property="article:published_time" content={post.date} /> : null}
       {post ? (
         <meta property="article:section" content={categoryBySlug(post.category).label} />

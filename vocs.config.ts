@@ -47,6 +47,9 @@ export default defineConfig({
     const docsPath = path.replace(/^\/docs(?=\/|$)/, '') || '/'
     const landingPaths = ['/', '/changelog']
     if (landingPaths.includes(docsPath)) return `${urlBase}/og-docs.png`
+    if (docsPath === '/blog' || docsPath.startsWith('/blog/')) {
+      return `${urlBase}/api/og?title=%title&description=%description&section=BLOG&eyebrow=DEV+BLOG`
+    }
 
     const sectionMap: Record<string, string> = {
       quickstart: 'INTEGRATE',

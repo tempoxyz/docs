@@ -70,6 +70,7 @@ function balanceLines(text: string, fontSize: number): string[] {
 export default async function handler(request: Request) {
   const url = new URL(request.url)
   const title = url.searchParams.get('title') || 'Tempo'
+  const eyebrow = url.searchParams.get('eyebrow') || 'DOCS'
   const section = url.searchParams.get('section') || ''
   const subsection = url.searchParams.get('subsection') || ''
 
@@ -141,7 +142,7 @@ export default async function handler(request: Request) {
                   color: '#3D3D3D',
                 }}
               >
-                DOCS
+                {eyebrow}
               </div>
               <div
                 style={{

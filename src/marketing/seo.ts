@@ -9,6 +9,8 @@ export type PostSeo = {
   slug: string
   title: string // raw post title (no " — Tempo Developers" suffix)
   excerpt: string
+  metaTitle: string
+  metaDescription: string
   date: string // YYYY-MM-DD
   category: CategorySlug
 }
@@ -33,10 +35,22 @@ export function absoluteUrl(base: string, pathname: string): string {
 
 export function ogImageUrl(
   base: string,
-  params: { title: string; description: string; section: string },
+  params: { title: string; description: string; section: string; eyebrow?: string },
 ): string {
   const query = new URLSearchParams(params).toString()
   return absoluteUrl(base, `/api/og?${query}`)
+}
+
+export function blogOgImageUrl(
+  base: string,
+  post: Pick<PostSeo, 'title' | 'metaDescription'>,
+): string {
+  return ogImageUrl(base, {
+    title: post.title,
+    description: post.metaDescription,
+    section: 'BLOG',
+    eyebrow: 'DEV BLOG',
+  })
 }
 
 // schema.org BlogPosting payload for a post, serialized for a
@@ -52,8 +66,8 @@ export function blogPostJsonLd(base: string, post: PostSeo, ogImage: string): st
   return JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
-    headline: post.title,
-    description: post.excerpt,
+    headline: post.metaTitle || post.title,
+    description: post.metaDescription || post.excerpt,
     datePublished: post.date,
     dateModified: post.date,
     image: ogImage,

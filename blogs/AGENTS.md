@@ -12,13 +12,15 @@ To keep a post as a draft (written but not published), move it into the `drafts/
 ---
 title: "Tuning Reth for payments: how we hit 21,200 TPS"
 excerpt: "One or two sentences shown on the index and as the post's lede."
+metaTitle: "Tuning Reth for payments: how we hit 21,200 TPS" # optional SEO title
+metaDescription: "Custom search and social preview copy." # optional SEO description
 date: 2026-06-02
 category: technical # network-upgrades | events | technical | case-studies
 featured: true # optional — pins the post to the hero card on /blog
 ---
 ```
 
-`category` must be one of the four slugs above (the build fails loudly otherwise). At most one post should be `featured`; if none is, the newest post takes the hero card.
+`category` must be one of the four slugs above (the build fails loudly otherwise). `metaTitle` and `metaDescription` override the browser, OpenGraph, Twitter, and JSON-LD metadata. Blog OpenGraph images are generated dynamically from the post title with the `DEV BLOG` label. At most one post should be `featured`; if none is, the newest post takes the hero card.
 
 ## Body
 

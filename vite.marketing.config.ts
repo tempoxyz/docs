@@ -8,6 +8,7 @@ import { type CategorySlug, categoryBySlug } from './src/marketing/app/blog/_lib
 import { blogPostsPlugin, loadRenderedPosts } from './src/marketing/blogPlugin'
 import {
   absoluteUrl,
+  blogOgImageUrl,
   blogPostJsonLd,
   ogImageUrl,
   type PostSeo,
@@ -66,13 +67,15 @@ async function marketingRouteCopiesForBuild() {
   blogPostByRoute.clear()
   for (const post of posts) {
     blogRouteMetadata.set(`blog/${post.slug}`, {
-      title: `${post.title} — Tempo Developers`,
-      description: post.excerpt,
+      title: post.metaTitle,
+      description: post.metaDescription,
     })
     blogPostByRoute.set(`blog/${post.slug}`, {
       slug: post.slug,
       title: post.title,
       excerpt: post.excerpt,
+      metaTitle: post.metaTitle,
+      metaDescription: post.metaDescription,
       date: post.date,
       category: post.category as CategorySlug,
     })
@@ -209,6 +212,9 @@ function applyMarketingMetadata(html: string, route: string) {
 }
 
 function marketingOgImage(route: string, metadata: { title: string; description: string }) {
+  const post = blogPostByRoute.get(route)
+  if (post) return blogOgImageUrl(siteBaseUrl, post)
+
   const sections: Record<string, string> = {
     performance: 'PERFORMANCE',
     diagrams: 'DIAGRAMS',
@@ -219,6 +225,7 @@ function marketingOgImage(route: string, metadata: { title: string; description:
     title: metadata.title,
     description: metadata.description,
     section,
+    eyebrow: route.startsWith('blog') ? 'DEV BLOG' : undefined,
   })
 }
 

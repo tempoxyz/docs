@@ -9,8 +9,9 @@ import { unified } from 'unified'
 import type { Plugin } from 'vite'
 
 // Blog content lives as dev-managed markdown files in /blogs at the repo root.
-// Frontmatter schema: title, excerpt, date (YYYY-MM-DD), category, and an
-// optional `featured: true` to pin a post to the hero card.
+// Frontmatter schema: title, excerpt, date (YYYY-MM-DD), category, optional
+// metaTitle/metaDescription SEO overrides, and an optional `featured: true` to
+// pin a post to the hero card.
 //
 // Markdown is rendered to HTML here, in Node, at build/dev time, so the heavy
 // markdown + Shiki toolchain never ships to the client bundle. The rendered
@@ -31,6 +32,8 @@ export type RenderedPost = {
   slug: string
   title: string
   excerpt: string
+  metaTitle: string
+  metaDescription: string
   date: string
   category: string
   featured: boolean
@@ -92,6 +95,8 @@ async function renderPost(filename: string): Promise<RenderedPost> {
     slug,
     title: data.title,
     excerpt: data.excerpt,
+    metaTitle: data.metaTitle || `${data.title} — Tempo Developers`,
+    metaDescription: data.metaDescription || data.excerpt,
     date: data.date,
     category: data.category,
     featured: data.featured === 'true',
