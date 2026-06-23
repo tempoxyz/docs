@@ -30,7 +30,7 @@ export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
             className={`h-9 whitespace-nowrap border px-4 font-sans text-[13px] tracking-[0] transition-colors ${
               active === filter.slug
                 ? 'border-foreground bg-foreground text-background'
-                : 'border-line-strong text-white/50 hover:border-white/40 hover:text-white'
+                : 'border-line-strong text-foreground/50 hover:border-foreground/40 hover:text-foreground'
             }`}
           >
             {filter.label}
@@ -47,7 +47,7 @@ export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
                 className="group flex flex-col gap-2.5 border-line border-b px-5 py-6 transition-colors hover:bg-surface-block lg:px-8"
               >
                 <span className="flex flex-wrap items-center gap-3">
-                  <span className="whitespace-nowrap border border-line-strong px-2.5 py-[3px] font-mono text-[11px] text-white/50 uppercase tracking-[0.02em]">
+                  <span className="whitespace-nowrap border border-line-strong px-2.5 py-[3px] font-mono text-[11px] text-foreground/50 uppercase tracking-[0.02em]">
                     {categoryBySlug(post.category).badge}
                   </span>
                   {isNew(post.date) && (
@@ -59,7 +59,7 @@ export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
                     {post.title}
                   </span>
                 </span>
-                <span className="max-w-[640px] font-sans text-[14px] text-white/50 leading-[1.5] tracking-[0] transition-colors group-hover:text-white/70">
+                <span className="max-w-[640px] font-sans text-[14px] text-foreground/50 leading-[1.5] tracking-[0] transition-colors group-hover:text-foreground/70">
                   {post.excerpt}
                 </span>
               </Link>

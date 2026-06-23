@@ -1,15 +1,15 @@
 <svg width="840" height="320" viewBox="0 0 840 320" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, 'JetBrains Mono', monospace">
-  <rect width="840" height="320" fill="#0e0e0e"/>
+  <rect class="dgm-bg" width="840" height="320"/>
 
-  <text x="40" y="44" font-size="13" letter-spacing="0.04em" fill="rgba(255,255,255,0.85)">RECEIVE POLICY: THREE DELIVERY STATES</text>
-  <text x="40" y="64" font-size="11" fill="rgba(255,255,255,0.4)">WHAT AN INTEGRATOR MUST MODEL</text>
+  <text x="40" y="44" font-size="13" letter-spacing="0.04em" fill="currentColor" fill-opacity="0.85">RECEIVE POLICY: THREE DELIVERY STATES</text>
+  <text x="40" y="64" font-size="11" fill="currentColor" fill-opacity="0.4">WHAT AN INTEGRATOR MUST MODEL</text>
 
   <!-- inbound transfer -->
-  <rect x="40" y="166" width="150" height="44" fill="#1c1c1c" stroke="#2e2e2e"/>
-  <text x="115" y="192" font-size="11" fill="rgba(255,255,255,0.6)" text-anchor="middle">INBOUND TRANSFER</text>
+  <rect class="dgm-box" x="40" y="166" width="150" height="44"/>
+  <text x="115" y="192" font-size="11" fill="currentColor" fill-opacity="0.6" text-anchor="middle">INBOUND TRANSFER</text>
 
   <!-- connectors -->
-  <g stroke="#2e2e2e">
+  <g class="dgm-line">
     <line x1="190" y1="188" x2="300" y2="188"/>
     <line x1="300" y1="124" x2="300" y2="252"/>
     <line x1="300" y1="124" x2="380" y2="124"/>
@@ -18,18 +18,18 @@
   </g>
 
   <!-- failed -->
-  <rect x="380" y="102" width="120" height="44" fill="#1c1c1c" stroke="#2e2e2e"/>
-  <text x="440" y="128" font-size="11" fill="rgba(255,255,255,0.6)" text-anchor="middle">FAILED</text>
-  <text x="516" y="128" font-size="11" fill="rgba(255,255,255,0.4)">token checks revert, no transfer</text>
+  <rect class="dgm-box" x="380" y="102" width="120" height="44"/>
+  <text x="440" y="128" font-size="11" fill="currentColor" fill-opacity="0.6" text-anchor="middle">FAILED</text>
+  <text x="516" y="128" font-size="11" fill="currentColor" fill-opacity="0.4">token checks revert, no transfer</text>
 
   <!-- credited -->
-  <rect x="380" y="166" width="120" height="44" fill="#1c1c1c" stroke="#2e2e2e"/>
-  <text x="440" y="192" font-size="11" fill="rgba(255,255,255,0.6)" text-anchor="middle">CREDITED</text>
-  <text x="516" y="192" font-size="11" fill="rgba(255,255,255,0.4)">receiver accepts, funds arrive</text>
+  <rect class="dgm-box" x="380" y="166" width="120" height="44"/>
+  <text x="440" y="192" font-size="11" fill="currentColor" fill-opacity="0.6" text-anchor="middle">CREDITED</text>
+  <text x="516" y="192" font-size="11" fill="currentColor" fill-opacity="0.4">receiver accepts, funds arrive</text>
 
   <!-- held (the new state) -->
-  <rect x="380" y="230" width="120" height="44" fill="#143810" stroke="#65ff54"/>
-  <text x="440" y="256" font-size="11" fill="#65ff54" text-anchor="middle">HELD</text>
-  <text x="516" y="247" font-size="11" fill="rgba(255,255,255,0.55)">held by ReceivePolicyGuard</text>
-  <text x="516" y="263" font-size="11" fill="rgba(255,255,255,0.55)">recoverable by the chosen authority</text>
+  <rect class="dgm-accent-box" x="380" y="230" width="120" height="44"/>
+  <text class="dgm-accent" x="440" y="256" font-size="11" text-anchor="middle">HELD</text>
+  <text x="516" y="247" font-size="11" fill="currentColor" fill-opacity="0.55">held by ReceivePolicyGuard</text>
+  <text x="516" y="263" font-size="11" fill="currentColor" fill-opacity="0.55">recoverable by the chosen authority</text>
 </svg>

@@ -1,17 +1,17 @@
 <svg width="840" height="420" viewBox="0 0 840 420" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, 'JetBrains Mono', monospace">
-  <rect width="840" height="420" fill="#0e0e0e"/>
+  <rect class="dgm-bg" width="840" height="420"/>
 
-  <text x="40" y="44" font-size="13" letter-spacing="0.04em" fill="rgba(255,255,255,0.85)">SUSTAINED TPS BY RELEASE</text>
-  <text x="40" y="64" font-size="11" fill="rgba(255,255,255,0.4)">LIVE NETWORK, CONTINUOUS LOAD — PERF.TEMPO.XYZ</text>
+  <text x="40" y="44" font-size="13" letter-spacing="0.04em" fill="currentColor" fill-opacity="0.85">SUSTAINED TPS BY RELEASE</text>
+  <text x="40" y="64" font-size="11" fill="currentColor" fill-opacity="0.4">LIVE NETWORK, CONTINUOUS LOAD — PERF.TEMPO.XYZ</text>
 
   <!-- gridlines -->
-  <g stroke="#181818">
+  <g class="dgm-line-soft">
     <line x1="40" y1="120" x2="800" y2="120"/>
     <line x1="40" y1="180" x2="800" y2="180"/>
     <line x1="40" y1="240" x2="800" y2="240"/>
     <line x1="40" y1="300" x2="800" y2="300"/>
   </g>
-  <g font-size="10" fill="rgba(255,255,255,0.3)">
+  <g font-size="10" fill="currentColor" fill-opacity="0.3">
     <text x="40" y="113">20K</text>
     <text x="40" y="173">15K</text>
     <text x="40" y="233">10K</text>
@@ -19,27 +19,27 @@
   </g>
 
   <!-- baseline -->
-  <line x1="40" y1="360" x2="800" y2="360" stroke="#2e2e2e"/>
+  <line class="dgm-line" x1="40" y1="360" x2="800" y2="360"/>
 
   <!-- bars: 12px = 1K TPS, baseline y=360 -->
   <g>
-    <rect x="120" y="255.6" width="96" height="104.4" fill="#1c1c1c" stroke="#2e2e2e"/>
-    <text x="168" y="243" font-size="11" fill="rgba(255,255,255,0.45)" text-anchor="middle">8,700</text>
-    <text x="168" y="382" font-size="11" fill="rgba(255,255,255,0.4)" text-anchor="middle">v1.5</text>
+    <rect class="dgm-box" x="120" y="255.6" width="96" height="104.4"/>
+    <text x="168" y="243" font-size="11" fill="currentColor" fill-opacity="0.45" text-anchor="middle">8,700</text>
+    <text x="168" y="382" font-size="11" fill="currentColor" fill-opacity="0.4" text-anchor="middle">v1.5</text>
   </g>
   <g>
-    <rect x="284" y="206.4" width="96" height="153.6" fill="#1c1c1c" stroke="#2e2e2e"/>
-    <text x="332" y="194" font-size="11" fill="rgba(255,255,255,0.45)" text-anchor="middle">12,800</text>
-    <text x="332" y="382" font-size="11" fill="rgba(255,255,255,0.4)" text-anchor="middle">v1.6</text>
+    <rect class="dgm-box" x="284" y="206.4" width="96" height="153.6"/>
+    <text x="332" y="194" font-size="11" fill="currentColor" fill-opacity="0.45" text-anchor="middle">12,800</text>
+    <text x="332" y="382" font-size="11" fill="currentColor" fill-opacity="0.4" text-anchor="middle">v1.6</text>
   </g>
   <g>
-    <rect x="448" y="156" width="96" height="204" fill="#1c1c1c" stroke="#2e2e2e"/>
-    <text x="496" y="144" font-size="11" fill="rgba(255,255,255,0.45)" text-anchor="middle">17,000</text>
-    <text x="496" y="382" font-size="11" fill="rgba(255,255,255,0.4)" text-anchor="middle">v1.7</text>
+    <rect class="dgm-box" x="448" y="156" width="96" height="204"/>
+    <text x="496" y="144" font-size="11" fill="currentColor" fill-opacity="0.45" text-anchor="middle">17,000</text>
+    <text x="496" y="382" font-size="11" fill="currentColor" fill-opacity="0.4" text-anchor="middle">v1.7</text>
   </g>
   <g>
-    <rect x="612" y="105.6" width="96" height="254.4" fill="#143810" stroke="#65ff54"/>
-    <text x="660" y="93" font-size="11" fill="#65ff54" text-anchor="middle">21,200</text>
-    <text x="660" y="382" font-size="11" fill="rgba(255,255,255,0.7)" text-anchor="middle">v1.8</text>
+    <rect class="dgm-accent-box" x="612" y="105.6" width="96" height="254.4"/>
+    <text class="dgm-accent" x="660" y="93" font-size="11" text-anchor="middle">21,200</text>
+    <text x="660" y="382" font-size="11" fill="currentColor" fill-opacity="0.7" text-anchor="middle">v1.8</text>
   </g>
 </svg>

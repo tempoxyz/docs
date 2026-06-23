@@ -36,10 +36,10 @@ export default function BlogPage() {
               <h1 className="max-w-[480px] font-sans text-[clamp(1.75rem,4vw,2.5rem)] text-foreground leading-[1.15] tracking-[-0.02em] antialiased">
                 {featured.title}
               </h1>
-              <p className="max-w-[480px] font-sans text-[15px] text-white/50 leading-[1.55] tracking-[0]">
+              <p className="max-w-[480px] font-sans text-[15px] text-foreground/50 leading-[1.55] tracking-[0]">
                 {featured.excerpt}
               </p>
-              <p className="flex flex-wrap items-center gap-3 font-mono text-[12px] text-white/40 uppercase tracking-[0.02em]">
+              <p className="flex flex-wrap items-center gap-3 font-mono text-[12px] text-foreground/40 uppercase tracking-[0.02em]">
                 {formatDate(featured.date)}
                 {isNew(featured.date) && (
                   <span className="whitespace-nowrap border border-indicator-green px-2.5 py-[3px] text-[11px] text-indicator-green">

@@ -16,9 +16,9 @@ export default function BlogSection() {
         <h2 className="font-sans text-[clamp(2rem,6vw,3rem)] text-foreground leading-[1.1] tracking-[-0.02em] antialiased">
           Dive deeper into Tempo&apos;s engineering
         </h2>
-        <p className="mt-6 max-w-[560px] font-sans text-[16px] text-white/50 leading-[1.4] tracking-[0] lg:text-[20px]">
+        <p className="mt-6 max-w-[560px] font-sans text-[16px] text-foreground/50 leading-[1.4] tracking-[0] lg:text-[20px]">
           Engineering deep dives, network upgrades, events, and case studies{' '}
-          <span className="text-white">from the team building Tempo.</span>
+          <span className="text-foreground">from the team building Tempo.</span>
         </p>
       </Reveal>
 
@@ -34,10 +34,10 @@ export default function BlogSection() {
             <h3 className="max-w-[480px] font-sans text-[clamp(1.5rem,3.5vw,2.125rem)] text-foreground leading-[1.15] tracking-[-0.02em] antialiased">
               {featured.title}
             </h3>
-            <p className="max-w-[480px] font-sans text-[15px] text-white/50 leading-[1.55] tracking-[0]">
+            <p className="max-w-[480px] font-sans text-[15px] text-foreground/50 leading-[1.55] tracking-[0]">
               {featured.excerpt}
             </p>
-            <p className="font-mono text-[12px] text-white/40 uppercase tracking-[0.02em]">
+            <p className="font-mono text-[12px] text-foreground/40 uppercase tracking-[0.02em]">
               {formatDate(featured.date)}
             </p>
           </div>
@@ -58,7 +58,7 @@ export default function BlogSection() {
                     {post.title}
                   </span>
                   <span className="flex flex-wrap items-center gap-3">
-                    <span className="whitespace-nowrap font-mono text-[12px] text-white/40 uppercase tracking-[0.02em]">
+                    <span className="whitespace-nowrap font-mono text-[12px] text-foreground/40 uppercase tracking-[0.02em]">
                       {formatDate(post.date)}
                     </span>
                   </span>

@@ -20,6 +20,25 @@ const VIRTUAL_ID = 'virtual:blog-posts'
 const RESOLVED_VIRTUAL_ID = `\0${VIRTUAL_ID}`
 
 const BLOGS_DIR = path.resolve(process.cwd(), 'blogs')
+const PUBLIC_DIR = path.resolve(process.cwd(), 'public')
+
+// Inline local SVG diagrams (`![alt](/blog/foo.svg)`) into the HTML so they can
+// follow the active theme via CSS custom properties; SVGs loaded through an
+// `<img>` tag are isolated from the page's theme tokens. Photos (jpg/png) and
+// remote images are left as-is.
+function inlineSvgImages(html: string): string {
+  return html.replace(/<img\b[^>]*?>/g, (tag) => {
+    const src = /\ssrc="([^"]+)"/.exec(tag)?.[1]
+    if (!src || !src.startsWith('/') || !src.endsWith('.svg')) return tag
+
+    const filePath = path.join(PUBLIC_DIR, src)
+    if (!fs.existsSync(filePath)) return tag
+
+    const alt = (/\salt="([^"]*)"/.exec(tag)?.[1] ?? '').replace(/"/g, '&quot;')
+    const svg = fs.readFileSync(filePath, 'utf8').trim()
+    return svg.replace(/<svg\b/, `<svg class="blog-diagram" role="img" aria-label="${alt}"`)
+  })
+}
 
 const CATEGORY_SLUGS = ['network-upgrades', 'events', 'technical', 'case-studies']
 
@@ -96,7 +115,7 @@ async function renderPost(filename: string): Promise<RenderedPost> {
     )
   }
 
-  const html = String(await processor.process(content))
+  const html = inlineSvgImages(String(await processor.process(content)))
 
   return {
     slug,
@@ -137,9 +156,13 @@ export function blogPostsPlugin(): Plugin {
       return `export const posts = ${JSON.stringify(posts)}`
     },
     configureServer(server) {
+      const BLOG_ASSETS_DIR = path.join(PUBLIC_DIR, 'blog')
       server.watcher.add(BLOGS_DIR)
+      server.watcher.add(BLOG_ASSETS_DIR)
       const invalidate = (file: string) => {
-        if (!file.startsWith(BLOGS_DIR)) return
+        // Posts are rendered with their referenced SVGs inlined, so a change to
+        // either the markdown or a /blog asset must drop the cache.
+        if (!file.startsWith(BLOGS_DIR) && !file.startsWith(BLOG_ASSETS_DIR)) return
         cache = null
         const mod = server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID)
         if (mod) {

@@ -1,32 +1,32 @@
 <svg width="840" height="300" viewBox="0 0 840 300" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, 'JetBrains Mono', monospace">
-  <rect width="840" height="300" fill="#0e0e0e"/>
+  <rect class="dgm-bg" width="840" height="300"/>
 
-  <text x="40" y="44" font-size="13" letter-spacing="0.04em" fill="rgba(255,255,255,0.85)">ACCOUNT KEY ROLES</text>
-  <text x="40" y="64" font-size="11" fill="rgba(255,255,255,0.4)">T6 SEPARATES OWNERSHIP FROM KEY ADMINISTRATION</text>
+  <text x="40" y="44" font-size="13" letter-spacing="0.04em" fill="currentColor" fill-opacity="0.85">ACCOUNT KEY ROLES</text>
+  <text x="40" y="64" font-size="11" fill="currentColor" fill-opacity="0.4">T6 SEPARATES OWNERSHIP FROM KEY ADMINISTRATION</text>
 
   <!-- root key -->
-  <rect x="40" y="110" width="233" height="120" fill="#1c1c1c" stroke="#2e2e2e"/>
-  <text x="156" y="150" font-size="12" fill="rgba(255,255,255,0.7)" text-anchor="middle">ROOT KEY</text>
-  <text x="156" y="180" font-size="11" fill="rgba(255,255,255,0.45)" text-anchor="middle">owns the account</text>
-  <text x="156" y="200" font-size="11" fill="rgba(255,255,255,0.45)" text-anchor="middle">stays protected</text>
+  <rect class="dgm-box" x="40" y="110" width="233" height="120"/>
+  <text x="156" y="150" font-size="12" fill="currentColor" fill-opacity="0.7" text-anchor="middle">ROOT KEY</text>
+  <text x="156" y="180" font-size="11" fill="currentColor" fill-opacity="0.45" text-anchor="middle">owns the account</text>
+  <text x="156" y="200" font-size="11" fill="currentColor" fill-opacity="0.45" text-anchor="middle">stays protected</text>
 
   <!-- admin key (the new role) -->
-  <rect x="303" y="110" width="234" height="120" fill="#143810" stroke="#65ff54"/>
-  <text x="420" y="150" font-size="12" fill="#65ff54" text-anchor="middle">ADMIN KEY</text>
-  <text x="420" y="180" font-size="11" fill="rgba(255,255,255,0.55)" text-anchor="middle">authorizes + revokes</text>
-  <text x="420" y="200" font-size="11" fill="rgba(255,255,255,0.55)" text-anchor="middle">other keys</text>
+  <rect class="dgm-accent-box" x="303" y="110" width="234" height="120"/>
+  <text class="dgm-accent" x="420" y="150" font-size="12" text-anchor="middle">ADMIN KEY</text>
+  <text x="420" y="180" font-size="11" fill="currentColor" fill-opacity="0.55" text-anchor="middle">authorizes + revokes</text>
+  <text x="420" y="200" font-size="11" fill="currentColor" fill-opacity="0.55" text-anchor="middle">other keys</text>
 
   <!-- limited key -->
-  <rect x="567" y="110" width="233" height="120" fill="#1c1c1c" stroke="#2e2e2e"/>
-  <text x="683" y="150" font-size="12" fill="rgba(255,255,255,0.7)" text-anchor="middle">LIMITED KEY</text>
-  <text x="683" y="180" font-size="11" fill="rgba(255,255,255,0.45)" text-anchor="middle">spend limits, call</text>
-  <text x="683" y="200" font-size="11" fill="rgba(255,255,255,0.45)" text-anchor="middle">scopes, expiry</text>
+  <rect class="dgm-box" x="567" y="110" width="233" height="120"/>
+  <text x="683" y="150" font-size="12" fill="currentColor" fill-opacity="0.7" text-anchor="middle">LIMITED KEY</text>
+  <text x="683" y="180" font-size="11" fill="currentColor" fill-opacity="0.45" text-anchor="middle">spend limits, call</text>
+  <text x="683" y="200" font-size="11" fill="currentColor" fill-opacity="0.45" text-anchor="middle">scopes, expiry</text>
 
   <!-- admin manages operational keys -->
-  <g stroke="#65ff54">
+  <g class="dgm-accent-line">
     <line x1="420" y1="230" x2="420" y2="252"/>
     <line x1="420" y1="252" x2="684" y2="252"/>
     <line x1="684" y1="252" x2="684" y2="230"/>
   </g>
-  <text x="552" y="247" font-size="10" fill="#65ff54" text-anchor="middle">MANAGES KEYS</text>
+  <text class="dgm-accent" x="552" y="247" font-size="10" text-anchor="middle">MANAGES KEYS</text>
 </svg>
