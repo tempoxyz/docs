@@ -8,8 +8,8 @@ import { type CategorySlug, categoryBySlug } from './src/marketing/app/blog/_lib
 import { blogPostsPlugin, loadRenderedPosts } from './src/marketing/blogPlugin'
 import {
   absoluteUrl,
+  blogOgImageUrl,
   blogPostJsonLd,
-  blogThumbnailUrl,
   ogImageUrl,
   type PostSeo,
   resolveBaseUrl,
@@ -29,7 +29,6 @@ const staticRouteCopies = [
 // Per-post metadata for the blog post routes, populated from the rendered
 // markdown so each static copy gets the right title/description/OG.
 const blogRouteMetadata = new Map<string, { title: string; description: string }>()
-const blogRouteOgImage = new Map<string, string>()
 // Raw post data per blog route (keyed `blog/<slug>`), used to emit article
 // OpenGraph tags and JSON-LD structured data for each post.
 const blogPostByRoute = new Map<string, PostSeo>()
@@ -58,7 +57,6 @@ function marketingRouteCopies(): Plugin {
           await fs.writeFile(path.join(routeDir, 'index.html'), applyMarketingMetadata(html, route))
         }),
       )
-      await writeBlogThumbnails(root)
     },
   }
 }
@@ -66,14 +64,12 @@ function marketingRouteCopies(): Plugin {
 async function marketingRouteCopiesForBuild() {
   const posts = await loadRenderedPosts()
   blogRouteMetadata.clear()
-  blogRouteOgImage.clear()
   blogPostByRoute.clear()
   for (const post of posts) {
     blogRouteMetadata.set(`blog/${post.slug}`, {
       title: post.metaTitle,
       description: post.metaDescription,
     })
-    blogRouteOgImage.set(`blog/${post.slug}`, blogThumbnailUrl(siteBaseUrl, post))
     blogPostByRoute.set(`blog/${post.slug}`, {
       slug: post.slug,
       title: post.title,
@@ -82,7 +78,6 @@ async function marketingRouteCopiesForBuild() {
       metaDescription: post.metaDescription,
       date: post.date,
       category: post.category as CategorySlug,
-      thumbnail: post.thumbnail,
     })
   }
   return [...staticRouteCopies, ...posts.map((post) => `blog/${post.slug}`)]
@@ -217,8 +212,8 @@ function applyMarketingMetadata(html: string, route: string) {
 }
 
 function marketingOgImage(route: string, metadata: { title: string; description: string }) {
-  const blogImage = blogRouteOgImage.get(route)
-  if (blogImage) return blogImage
+  const post = blogPostByRoute.get(route)
+  if (post) return blogOgImageUrl(siteBaseUrl, post)
 
   const sections: Record<string, string> = {
     performance: 'PERFORMANCE',
@@ -232,68 +227,6 @@ function marketingOgImage(route: string, metadata: { title: string; description:
     section,
     eyebrow: route.startsWith('blog') ? 'DEV BLOG' : undefined,
   })
-}
-
-async function writeBlogThumbnails(root: string) {
-  const posts = await loadRenderedPosts()
-  await Promise.all(
-    posts.map(async (post) => {
-      const target = path.join(root, post.thumbnail.replace(/^\//, ''))
-      await fs.mkdir(path.dirname(target), { recursive: true })
-      await fs.writeFile(target, renderBlogThumbnailSvg(post.title), 'utf-8')
-    }),
-  )
-}
-
-function renderBlogThumbnailSvg(title: string) {
-  const lines = balanceSvgLines(title)
-  const firstY = lines.length === 1 ? 345 : lines.length === 2 ? 305 : 270
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="${escapeHtmlAttribute(
-    title,
-  )}">
-  <rect width="1200" height="630" fill="#f3f3f3"/>
-  <path d="M0 0h1200v630H0z" fill="#f3f3f3"/>
-  <path d="M74 94h1052M74 536h1052M146 64v502M1054 64v502" stroke="#d9d9d9" stroke-width="1"/>
-  <g transform="translate(460 56)">
-    <rect width="280" height="50" rx="7" fill="#f3f3f3" stroke="rgba(0,0,0,.22)"/>
-    <rect x="101" y="4" width="175" height="42" rx="5" fill="#e7e7e7"/>
-    <text x="24" y="32" font-family="Arial, sans-serif" font-size="20" letter-spacing=".08em" fill="#3d3d3d">DEV</text>
-    <text x="124" y="32" font-family="Arial, sans-serif" font-size="20" letter-spacing=".08em" fill="#3d3d3d">BLOG</text>
-  </g>
-  <g text-anchor="middle" font-family="Georgia, serif" font-size="78" font-weight="400" letter-spacing="-.04em" fill="#050505">
-${lines
-  .map(
-    (line, index) => `    <text x="600" y="${firstY + index * 86}">${escapeHtmlText(line)}</text>`,
-  )
-  .join('\n')}
-  </g>
-  <path d="M590 574h-9.203l8.53-26.136h-10.909l2.379-7.66h30.393l-2.379 7.66h-10.326L590 574Z" fill="#050505"/>
-</svg>
-`
-}
-
-function balanceSvgLines(text: string) {
-  const words = text.split(/\s+/).filter(Boolean)
-  if (words.length <= 3) return [text]
-  const maxChars = 26
-  const lines: string[] = []
-  let current = ''
-  for (const word of words) {
-    const next = current ? `${current} ${word}` : word
-    if (next.length > maxChars && current) {
-      lines.push(current)
-      current = word
-    } else {
-      current = next
-    }
-  }
-  if (current) lines.push(current)
-  if (lines.length <= 3) return lines
-  return [lines[0], lines.slice(1, -1).join(' '), lines.at(-1) as string]
-}
-
-function escapeHtmlText(value: string) {
-  return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 }
 
 export default defineConfig({

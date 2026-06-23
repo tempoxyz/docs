@@ -13,7 +13,6 @@ export type PostSeo = {
   metaDescription: string
   date: string // YYYY-MM-DD
   category: CategorySlug
-  thumbnail: string
 }
 
 // Mirrors the baseUrl resolution in vocs.config.ts so canonical and OG URLs are
@@ -42,8 +41,16 @@ export function ogImageUrl(
   return absoluteUrl(base, `/api/og?${query}`)
 }
 
-export function blogThumbnailUrl(base: string, post: Pick<PostSeo, 'slug' | 'thumbnail'>): string {
-  return absoluteUrl(base, post.thumbnail || `/blog/thumbnails/${post.slug}.svg`)
+export function blogOgImageUrl(
+  base: string,
+  post: Pick<PostSeo, 'title' | 'metaDescription'>,
+): string {
+  return ogImageUrl(base, {
+    title: post.title,
+    description: post.metaDescription,
+    section: 'BLOG',
+    eyebrow: 'DEV BLOG',
+  })
 }
 
 // schema.org BlogPosting payload for a post, serialized for a

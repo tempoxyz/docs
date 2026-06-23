@@ -3,8 +3,8 @@ import { type CategorySlug, categoryBySlug } from '../../marketing/app/blog/_lib
 import BlogPostRoute from '../../marketing/BlogPostRoute'
 import {
   absoluteUrl,
+  blogOgImageUrl,
   blogPostJsonLd,
-  blogThumbnailUrl,
   ogImageUrl,
   type PostSeo,
   resolveBaseUrl,
@@ -25,7 +25,6 @@ const postBySlug = new Map<string, PostSeo>(
       metaDescription: post.metaDescription,
       date: post.date,
       category: post.category as CategorySlug,
-      thumbnail: post.thumbnail,
     },
   ]),
 )
@@ -46,7 +45,7 @@ export default function Page({ slug }: { slug: string }) {
   const description = post?.metaDescription ?? BLOG_DESCRIPTION
   const canonical = absoluteUrl(base, post ? `/blog/${slug}` : '/blog')
   const ogImage = post
-    ? blogThumbnailUrl(base, post)
+    ? blogOgImageUrl(base, post)
     : ogImageUrl(base, { title, description, section: 'BLOG', eyebrow: 'DEV BLOG' })
 
   return (

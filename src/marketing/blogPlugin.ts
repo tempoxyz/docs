@@ -37,7 +37,6 @@ export type RenderedPost = {
   date: string
   category: string
   featured: boolean
-  thumbnail: string
   html: string
 }
 
@@ -101,7 +100,6 @@ async function renderPost(filename: string): Promise<RenderedPost> {
     date: data.date,
     category: data.category,
     featured: data.featured === 'true',
-    thumbnail: data.thumbnail || `/blog/thumbnails/${slug}.svg`,
     html,
   }
 }

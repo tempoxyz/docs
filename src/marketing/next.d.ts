@@ -12,7 +12,6 @@ declare module 'virtual:blog-posts' {
     date: string
     category: string
     featured: boolean
-    thumbnail: string
     html: string
   }[]
 }
