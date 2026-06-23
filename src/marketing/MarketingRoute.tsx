@@ -43,6 +43,8 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
 }
 
 const prefetchedPaths = new Set<string>()
+const ANALYTICS_DELAY_MS = 15_000
+const ANALYTICS_IDLE_TIMEOUT_MS = 20_000
 
 function prefetchPath(href: string) {
   if (!href.startsWith('/') || prefetchedPaths.has(href)) return
@@ -53,6 +55,22 @@ function prefetchPath(href: string) {
   link.href = href
   link.as = 'document'
   document.head.appendChild(link)
+}
+
+function scheduleIdleAnalytics(callback: () => void) {
+  let idleId: number | undefined
+  const timeoutId = globalThis.setTimeout(() => {
+    if ('requestIdleCallback' in window) {
+      idleId = window.requestIdleCallback(callback, { timeout: ANALYTICS_IDLE_TIMEOUT_MS })
+    } else {
+      callback()
+    }
+  }, ANALYTICS_DELAY_MS)
+
+  return () => {
+    globalThis.clearTimeout(timeoutId)
+    if (idleId !== undefined) window.cancelIdleCallback(idleId)
+  }
 }
 
 function applyRouteMetadata(route: string) {
@@ -75,17 +93,10 @@ export default function MarketingRoute({
   }, [route])
 
   useEffect(() => {
-    if ('requestIdleCallback' in window) {
-      const idleId = window.requestIdleCallback(() => setAnalyticsReady(true), { timeout: 2_000 })
-      return () => window.cancelIdleCallback(idleId)
-    }
-    const timeoutId = globalThis.setTimeout(() => setAnalyticsReady(true), 1)
-    return () => globalThis.clearTimeout(timeoutId)
+    return scheduleIdleAnalytics(() => setAnalyticsReady(true))
   }, [])
 
   useEffect(() => {
-    prefetchPath('/docs')
-
     const prefetchAnchor = (event: Event) => {
       const target = event.target
       if (!(target instanceof Element)) return

@@ -617,7 +617,12 @@ export default function Header() {
   return (
     <header ref={headerRef} className="relative z-20 border-line border-b">
       <nav ref={navRef} className="flex items-center justify-between px-5 py-4">
-        <Link href="/" onClick={close} className="group flex items-center gap-3">
+        <Link
+          href="/"
+          onClick={close}
+          aria-label="Tempo home"
+          className="group flex items-center gap-3"
+        >
           <TempoLogo className="h-[18px] w-[80px] text-foreground" />
         </Link>
 

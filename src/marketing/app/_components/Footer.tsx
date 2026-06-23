@@ -102,10 +102,10 @@ export default function Footer() {
       <Reveal>
         <div className="grid gap-12 px-5 py-12 lg:grid-cols-[minmax(220px,1fr)_2fr] lg:gap-16 lg:px-8 lg:py-16">
           <div className="flex max-w-[320px] flex-col gap-4">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/" aria-label="Tempo home" className="flex items-center gap-2">
               <TempoLogo className="h-[18px] w-[80px] text-foreground" />
             </Link>
-            <p className="font-sans text-[15px] text-foreground/45 leading-[1.6] tracking-[0]">
+            <p className="font-sans text-[15px] text-foreground/55 leading-[1.6] tracking-[0]">
               Stablecoin payments infrastructure for developers, apps, and agents building on Tempo.
             </p>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-[14px] text-foreground/50 tracking-[0]">

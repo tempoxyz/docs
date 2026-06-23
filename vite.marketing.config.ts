@@ -25,10 +25,7 @@ function marketingRouteCopies(): Plugin {
         await fs.writeFile(rootHtml, nested)
         return nested
       })
-      const marketingHtml = applyMarketingMetadata(
-        injectHeadTags(html, ['<link href="/docs" rel="prefetch" as="document" />']),
-        '/',
-      )
+      const marketingHtml = applyMarketingMetadata(html, '/')
       await fs.writeFile(rootHtml, marketingHtml)
 
       await Promise.all(
@@ -152,14 +149,9 @@ function marketingOgImage(route: string, metadata: { title: string; description:
   }).toString()}`
 }
 
-function injectHeadTags(html: string, tags: string[]) {
-  const missing = tags.filter((tag) => !html.includes(tag))
-  if (missing.length === 0) return html
-  return html.replace('</head>', `  ${missing.join('\n  ')}\n  </head>`)
-}
-
 export default defineConfig({
   root: 'src/marketing',
+  publicDir: path.resolve(process.cwd(), 'public'),
   plugins: [
     tailwindcss(),
     Icons({ compiler: 'jsx', jsx: 'react' }),
