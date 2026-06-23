@@ -83,6 +83,7 @@ const columns: FooterColumn[] = [
   {
     header: 'Resources',
     links: [
+      { label: 'Blog', href: '/blog' },
       { label: 'Performance', href: '/performance' },
       { label: 'Open source', href: '/#open-source' },
       { label: 'Contact', href: CONTACT_URL },

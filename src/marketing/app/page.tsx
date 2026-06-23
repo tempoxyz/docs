@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import BlogSection from './_components/BlogSection'
 import Footer from './_components/Footer'
 import Header from './_components/Header'
 import Hero from './_components/Hero'
@@ -35,6 +36,9 @@ export default function Home() {
         </div>
         <div id="open-source" className="mt-[140px] scroll-mt-12">
           <OpenSourceSection />
+        </div>
+        <div id="blog" className="mt-[140px] scroll-mt-12">
+          <BlogSection />
         </div>
         <Footer />
       </div>

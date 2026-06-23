@@ -40,6 +40,11 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
     title: 'Tempo Diagrams',
     description: 'A playground for Tempo diagrams, product visuals, and house-style SVG exports.',
   },
+  '/blog': {
+    title: 'Blog — Tempo Developers',
+    description:
+      'Engineering deep dives, network upgrades, events, and case studies from the Tempo team.',
+  },
 }
 
 const prefetchedPaths = new Set<string>()

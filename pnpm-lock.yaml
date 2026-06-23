@@ -30,6 +30,9 @@ importers:
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@shikijs/rehype':
+        specifier: ^3.23.0
+        version: 3.23.0
       '@takumi-rs/image-response':
         specifier: 0.62.8
         version: 0.62.8
@@ -87,6 +90,21 @@ importers:
       react-server-dom-webpack:
         specifier: ~19.2.6
         version: 19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7))
+      rehype-stringify:
+        specifier: ^10.0.1
+        version: 10.0.1
+      remark-gfm:
+        specifier: ^4.0.1
+        version: 4.0.1
+      remark-parse:
+        specifier: ^11.0.0
+        version: 11.0.0
+      remark-rehype:
+        specifier: ^11.1.2
+        version: 11.1.2
+      shiki:
+        specifier: ^3.23.0
+        version: 3.23.0
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -99,6 +117,9 @@ importers:
       tailwindcss:
         specifier: ^4.2.2
         version: 4.2.2
+      unified:
+        specifier: ^11.0.5
+        version: 11.0.5
       unplugin-auto-import:
         specifier: ^21.0.0
         version: 21.0.0

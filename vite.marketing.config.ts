@@ -4,14 +4,20 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import Icons from 'unplugin-icons/vite'
 import { defineConfig, type Plugin } from 'vite'
+import { blogPostsPlugin, loadRenderedPosts } from './src/marketing/blogPlugin'
 
 const staticRouteCopies = [
   'build',
   'build/tempo-transactions',
   'build/tip20-tokens',
+  'blog',
   'diagrams',
   'performance',
 ]
+
+// Per-post metadata for the blog post routes, populated from the rendered
+// markdown so each static copy gets the right title/description/OG.
+const blogRouteMetadata = new Map<string, { title: string; description: string }>()
 
 function marketingRouteCopies(): Plugin {
   return {
@@ -46,7 +52,15 @@ function marketingRouteCopies(): Plugin {
 }
 
 async function marketingRouteCopiesForBuild() {
-  return staticRouteCopies
+  const posts = await loadRenderedPosts()
+  blogRouteMetadata.clear()
+  for (const post of posts) {
+    blogRouteMetadata.set(`blog/${post.slug}`, {
+      title: `${post.title} — Tempo Developers`,
+      description: post.excerpt,
+    })
+  }
+  return [...staticRouteCopies, ...posts.map((post) => `blog/${post.slug}`)]
 }
 
 const routeMetadata: Record<string, { title: string; description: string }> = {
@@ -78,6 +92,11 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
     title: 'Tempo Diagrams',
     description: 'A playground for Tempo diagrams, product visuals, and house-style SVG exports.',
   },
+  blog: {
+    title: 'Blog — Tempo Developers',
+    description:
+      'Engineering deep dives, network upgrades, events, and case studies from the Tempo team.',
+  },
 }
 
 function titleCaseRoute(route: string) {
@@ -93,6 +112,7 @@ function titleCaseRoute(route: string) {
 
 function marketingMetadata(route: string) {
   return (
+    blogRouteMetadata.get(route) ??
     routeMetadata[route] ?? {
       title: `${titleCaseRoute(route)} ⋅ Tempo`,
       description: 'Build payment products on Tempo with stablecoins and predictable settlement.',
@@ -143,8 +163,9 @@ function marketingOgImage(route: string, metadata: { title: string; description:
   const sections: Record<string, string> = {
     performance: 'PERFORMANCE',
     diagrams: 'DIAGRAMS',
+    blog: 'BLOG',
   }
-  const section = sections[route] || 'BUILD'
+  const section = route.startsWith('blog/') ? 'BLOG' : sections[route] || 'BUILD'
   return `/api/og?${new URLSearchParams({
     title: metadata.title,
     description: metadata.description,
@@ -161,6 +182,7 @@ function injectHeadTags(html: string, tags: string[]) {
 export default defineConfig({
   root: 'src/marketing',
   plugins: [
+    blogPostsPlugin(),
     tailwindcss(),
     Icons({ compiler: 'jsx', jsx: 'react' }),
     react(),

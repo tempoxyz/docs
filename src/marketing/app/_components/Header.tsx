@@ -156,6 +156,7 @@ const menu: MenuItem[] = [
   { label: 'Build', href: '/#protocol', mega: protocolMenu },
   { label: 'Resources', href: '/docs', mega: developersMenu },
   { label: 'Performance', href: '/performance' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Docs', href: '/docs' },
 ]
 
