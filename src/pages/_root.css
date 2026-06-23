@@ -109,11 +109,11 @@
   }
 
   [data-v-sidebar-curtain] {
-    background: linear-gradient(to top, transparent, var(--vocs-background-color-primary));
+    display: none;
   }
 
   [data-v-sidebar-footer-curtain] {
-    background: linear-gradient(to bottom, transparent, var(--vocs-background-color-primary));
+    display: none;
   }
 
   [data-layout][data-v-sidebar] > [data-v-main] {
@@ -126,7 +126,6 @@
       );
       background: var(--vocs-background-color-primary);
       border-right: 1px solid var(--vocs-border-color-primary);
-      min-height: 100vh;
       min-height: 100dvh;
     }
 
@@ -152,6 +151,11 @@
       margin-left: auto;
       margin-right: auto;
     }
+  }
+
+  [data-v-sidebar] a[data-v-sidebar-item][data-active] {
+    background: transparent;
+    color: var(--vocs-text-color-primary);
   }
 
   [data-v-ask-ai-container] {
