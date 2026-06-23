@@ -7,7 +7,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AmpLogo, ClaudeLogo, CodexLogo } from '../../../components/AgentLogos'
-import { docsSearchUrl } from '../../../lib/docs-search'
 import { featurePath } from '../_lib/featurePaths'
 import { TEMPO_SDK_DOCS_URL } from '../_lib/links'
 import ArrowUpRight from './ArrowUpRight'
@@ -22,6 +21,7 @@ import {
   TransactionsIcon,
   WalletIcon,
 } from './menuIcons'
+import SearchDialog from './SearchDialog'
 import TempoLogo from './TempoLogo'
 
 const protocolMenu: MegaMenuData = {
@@ -192,14 +192,6 @@ function SearchIcon({ className }: { className?: string }) {
       <path d="m21 21-4.3-4.3" />
     </svg>
   )
-}
-
-// The marketing SPA has no Vocs search runtime, so its search affordance just
-// navigates to the docs, which open the search dialog on arrival (see
-// lib/docs-search and DocsHeader).
-function goToDocsSearch() {
-  if (typeof window === 'undefined') return
-  window.location.assign(docsSearchUrl())
 }
 
 function CloseIcon() {
@@ -556,6 +548,7 @@ function AgentsPanel({
 export default function Header() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
   // The mobile menu is a fixed overlay anchored just below the nav bar, so we
   // track the bar's height to offset it (and keep it correct across resizes).
@@ -632,13 +625,13 @@ export default function Header() {
     }
   }, [open])
 
-  // Cmd/Ctrl+K opens search from anywhere on the marketing site (parity with
-  // the docs). There's no in-page search here, so navigate to the docs search.
+  // Cmd/Ctrl+K toggles the in-page search dialog from anywhere on the marketing
+  // site (parity with the docs).
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault()
-        goToDocsSearch()
+        setSearchOpen((s) => !s)
       }
     }
     document.addEventListener('keydown', onKeyDown)
@@ -742,15 +735,16 @@ export default function Header() {
         </ul>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <a
-            href={docsSearchUrl()}
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
             aria-label="Search documentation"
             aria-keyshortcuts="Meta+K Control+K"
             title="Search documentation (⌘K)"
             className="grid size-9 place-items-center rounded-[4px] border border-line text-foreground/60 transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
           >
             <SearchIcon />
-          </a>
+          </button>
           <button
             ref={(el) => {
               if (el) triggerRefs.current.set('For agents', el)
@@ -790,14 +784,18 @@ export default function Header() {
 
         {/* Mobile actions */}
         <div className="flex items-center gap-1 lg:hidden">
-          <a
-            href={docsSearchUrl()}
+          <button
+            type="button"
+            onClick={() => {
+              close()
+              setSearchOpen(true)
+            }}
             aria-label="Search documentation"
             aria-keyshortcuts="Meta+K Control+K"
             className="grid size-8 place-items-center text-foreground"
           >
             <SearchIcon className="size-[18px]" />
-          </a>
+          </button>
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
@@ -963,6 +961,8 @@ export default function Header() {
           </div>
         </div>
       </div>
+
+      <SearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   )
 }
