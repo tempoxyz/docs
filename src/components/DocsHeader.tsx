@@ -430,6 +430,52 @@ function MenuIcon() {
   )
 }
 
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    // biome-ignore lint/a11y/noSvgWithoutTitle: Button provides the accessible label.
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className={`shrink-0 ${className ?? ''}`}
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
+  )
+}
+
+// The custom DocsHeader replaces Vocs' default top nav, whose hidden
+// `[data-v-gutter-top]` container still mounts Vocs' built-in `<Search />`
+// (it owns a global Cmd/Ctrl+K listener and the search dialog). Rather than
+// importing that internal, unexported component, we re-expose the affordance by
+// dispatching the same shortcut Vocs already handles. See src/pages/_root.css
+// where the gutter is hidden, and node_modules/vocs Search.tsx for the listener.
+function openDocsSearch() {
+  if (typeof document === 'undefined') return
+  const event = new KeyboardEvent('keydown', {
+    key: 'k',
+    code: 'KeyK',
+    bubbles: true,
+    cancelable: true,
+    // Vocs checks `metaKey || ctrlKey`, so set both and skip platform detection.
+    metaKey: true,
+    ctrlKey: true,
+  })
+  const handled = !document.dispatchEvent(event)
+  if (!handled && import.meta.env.DEV) {
+    console.warn(
+      'Vocs search did not handle Cmd/Ctrl+K. Verify the hidden Vocs top-nav search is still mounted (showTopNav/showSearch).',
+    )
+  }
+}
+
 function CloseIcon() {
   return (
     // biome-ignore lint/a11y/noSvgWithoutTitle: Button provides the accessible label.
@@ -976,6 +1022,13 @@ export default function DocsHeader() {
     setExpanded(null)
   }
 
+  const openSearch = () => {
+    cancelClose()
+    setActiveMenu(null)
+    close()
+    openDocsSearch()
+  }
+
   useEffect(() => {
     warmMarketingApp()
   }, [])
@@ -1067,6 +1120,19 @@ export default function DocsHeader() {
 
           <div className="hidden items-center gap-3 lg:flex">
             <button
+              type="button"
+              onClick={openSearch}
+              aria-label="Search documentation"
+              aria-keyshortcuts="Meta+K Control+K"
+              className="flex h-9 items-center gap-2 rounded-[4px] border border-line px-4 font-sans text-[14px] text-foreground/60 tracking-[0] transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
+            >
+              <SearchIcon />
+              Search
+              <kbd className="ml-1 rounded-[3px] border border-line px-1.5 py-0.5 font-sans text-[11px] text-foreground/45">
+                ⌘K
+              </kbd>
+            </button>
+            <button
               ref={(element) => {
                 if (element) triggerRefs.current.set('For agents', element)
                 else triggerRefs.current.delete('For agents')
@@ -1102,15 +1168,26 @@ export default function DocsHeader() {
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setOpen((value) => !value)}
-            aria-label={open ? 'Close menu' : 'Open menu'}
-            aria-expanded={open}
-            className="grid size-8 place-items-center text-foreground lg:hidden"
-          >
-            {open ? <CloseIcon /> : <MenuIcon />}
-          </button>
+          <div className="flex items-center gap-1 lg:hidden">
+            <button
+              type="button"
+              onClick={openSearch}
+              aria-label="Search documentation"
+              aria-keyshortcuts="Meta+K Control+K"
+              className="grid size-8 place-items-center text-foreground"
+            >
+              <SearchIcon className="size-[18px]" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setOpen((value) => !value)}
+              aria-label={open ? 'Close menu' : 'Open menu'}
+              aria-expanded={open}
+              className="grid size-8 place-items-center text-foreground"
+            >
+              {open ? <CloseIcon /> : <MenuIcon />}
+            </button>
+          </div>
         </nav>
       </div>
 
