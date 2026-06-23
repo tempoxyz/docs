@@ -746,13 +746,10 @@ export default function Header() {
             href={docsSearchUrl()}
             aria-label="Search documentation"
             aria-keyshortcuts="Meta+K Control+K"
-            className="flex h-9 items-center gap-2 rounded-[4px] border border-line px-4 font-sans text-[14px] text-foreground/60 tracking-[0] transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
+            title="Search documentation (⌘K)"
+            className="grid size-9 place-items-center rounded-[4px] border border-line text-foreground/60 transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
           >
             <SearchIcon />
-            Search
-            <kbd className="ml-1 rounded-[3px] border border-line px-1.5 py-0.5 font-sans text-[11px] text-foreground/45">
-              ⌘K
-            </kbd>
           </a>
           <button
             ref={(el) => {
