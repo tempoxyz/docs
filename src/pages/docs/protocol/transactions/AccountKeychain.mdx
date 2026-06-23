@@ -189,14 +189,14 @@ interface IAccountKeychain {
 
 - `key_authorization` includes an optional trailing `witness: bytes32` field. When present, the witness is included in the signing hash, checked against the account's burned-witness set, and emitted when the key authorization is registered. The protocol otherwise treats it as opaque and application-defined, so apps can bind a single access-key authorization signature to an offchain challenge.
 
-:::info[T6 testnet behavior — SDK encoders/decoders]
-The [T6 network upgrade](/docs/protocol/upgrades/t6) adds **admin access keys** ([TIP-1049](https://tips.sh/1049)). For partners maintaining transaction tooling, the wire-level change is two new trailing optional fields on the `KeyAuthorization` RLP payload:
+:::info[T6 behavior — SDK encoders/decoders]
+The [T6 network upgrade](/docs/protocol/upgrades/t6) added **admin access keys** ([TIP-1049](https://tips.sh/1049)). For partners maintaining transaction tooling, the wire-level change is two new trailing optional fields on the `KeyAuthorization` RLP payload:
 
 ```text
 rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?])
 ```
 
-SDK encoders/decoders and hardware-wallet firmware that strictly check field count MUST handle the new optionals before using T6 networks. The packed `AuthorizedKey` slot also gains an `is_admin` byte at offset 11. The existing `KeyAuthorized` event is **unchanged**; an additional `AdminKeyAuthorized` event is emitted alongside it when `is_admin == true`, so existing indexers continue to work without changes. Provisioning admin keys uses `authorizeAdminKey(keyId, signatureType, witness)`. See the [admin access keys section of the T6 page](/docs/protocol/upgrades/t6#admin-access-keys) for the full surface.
+SDK encoders/decoders and hardware-wallet firmware that strictly check field count MUST handle the new optionals on T6 networks. The packed `AuthorizedKey` slot also gains an `is_admin` byte at offset 11. The existing `KeyAuthorized` event is **unchanged**; an additional `AdminKeyAuthorized` event is emitted alongside it when `is_admin == true`, so existing indexers continue to work without changes. Provisioning admin keys uses `authorizeAdminKey(keyId, signatureType, witness)`. See the [admin access keys section of the T6 page](/docs/protocol/upgrades/t6#admin-access-keys) for the full surface.
 :::
 
 - Creates a new key entry with the specified `signatureType`, `config.expiry`, `config.enforceLimits`, and `isRevoked` set to `false`

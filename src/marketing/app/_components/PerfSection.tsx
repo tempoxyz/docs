@@ -235,7 +235,7 @@ export default function PerfSection({ stats, runs }: { stats: Stat[]; runs: Perf
           Pushing the frontier of blockchain performance.
         </h2>
         <Button href={PERFORMANCE_PAGE} arrow className="mt-9">
-          Learn more
+          Explore performance
         </Button>
       </Reveal>
 

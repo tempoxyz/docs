@@ -26,7 +26,7 @@ export default function ModeToggle({
             className={`h-8 border-line border-r px-3 font-mono text-[10px] uppercase tracking-[0.12em] transition-colors last:border-r-0 ${
               mode === option
                 ? 'bg-surface-card-elev text-foreground'
-                : 'text-foreground/40 hover:bg-surface-block hover:text-foreground/70'
+                : 'text-foreground/55 hover:bg-surface-block hover:text-foreground/70'
             }`}
           >
             {labels[option]}

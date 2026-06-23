@@ -295,7 +295,7 @@ export default function TokensShowcase() {
                   <span className="block font-sans text-[20px] leading-[1.2] tracking-[0]">
                     {row.title}
                   </span>
-                  <span className="mt-2 block max-w-[560px] font-sans text-[14px] text-foreground/40 leading-[1.45] tracking-[0] group-hover:text-foreground/50">
+                  <span className="mt-2 block max-w-[560px] font-sans text-[14px] text-foreground/55 leading-[1.45] tracking-[0] group-hover:text-foreground/65">
                     {row.desc}
                   </span>
                 </span>

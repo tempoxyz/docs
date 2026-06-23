@@ -29,7 +29,6 @@ export default defineConfig(({ mode }) => {
     plugins: [
       blogPostsPlugin(),
       marketingPages(),
-      crossAppPrefetch(),
       vocs(),
       Icons({ compiler: 'jsx', jsx: 'react' }),
       react(),
@@ -95,20 +94,6 @@ function marketingPages(): Plugin {
         res.setHeader('Content-Type', 'text/html')
         res.end(html)
       })
-    },
-  }
-}
-
-function crossAppPrefetch(): Plugin {
-  return {
-    name: 'tempo-cross-app-prefetch',
-    enforce: 'post',
-    transformIndexHtml(html, context) {
-      const pathname = context.path?.replace(/\/$/, '') || '/'
-      const href = pathname === '/docs' || pathname.startsWith('/docs/') ? '/' : '/docs'
-      const prefetchLink = `<link href="${href}" rel="prefetch" as="document" />`
-      if (html.includes(`href="${href}" rel="prefetch"`)) return html
-      return html.replace('</head>', `  ${prefetchLink}\n  </head>`)
     },
   }
 }

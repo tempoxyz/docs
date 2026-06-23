@@ -1,11 +1,7 @@
 import { ImageResponse } from '@takumi-rs/image-response/wasm'
-// @ts-expect-error -- vite arraybuffer import
 import wasmModule from '@takumi-rs/wasm/takumi_wasm_bg.wasm?arraybuffer'
-// @ts-expect-error -- vite arraybuffer import
 import hbSetFont from './fonts/HBSet-Light.otf?arraybuffer'
-// @ts-expect-error -- vite arraybuffer import
 import pilatFont from './fonts/Pilat-Regular.otf?arraybuffer'
-// @ts-expect-error -- vite arraybuffer import
 import bgImageBuf from './og-bg.png?arraybuffer'
 
 function getTitleFontSize(_title: string): number {
