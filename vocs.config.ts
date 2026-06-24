@@ -6,8 +6,9 @@ import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 const baseUrl = (() => {
   if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') return ''
   if (URL.canParse(process.env.VITE_BASE_URL)) return process.env.VITE_BASE_URL.replace(/\/$/, '')
+  if (process.env.VERCEL_ENV === 'production') return 'https://docs.tempo.xyz'
   const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
-  if (process.env.VERCEL_ENV === 'production' && productionUrl) return `https://${productionUrl}`
+  if (productionUrl) return `https://${productionUrl}`
   return ''
 })()
 

@@ -216,8 +216,9 @@ function marketingOgImage(route: string, metadata: { title: string; description:
     blog: 'BLOG',
   }
   const section = route.startsWith('blog/') ? 'BLOG' : sections[route] || 'BUILD'
+  const title = route === 'performance' ? 'Performance' : metadata.title
   return ogImageUrl(siteBaseUrl, {
-    title: metadata.title,
+    title,
     description: metadata.description,
     section,
   })
