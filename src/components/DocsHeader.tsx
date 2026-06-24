@@ -2,6 +2,7 @@
 
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useConfig } from 'vocs'
+import { DOCS_SEARCH_PARAM } from '../lib/docs-search'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 
 type MegaLink = {
@@ -339,6 +340,7 @@ const menu: MenuItem[] = [
   { label: 'Build', href: '/#protocol', mega: protocolMenu },
   { label: 'Resources', href: `${DOCS_BASE_PATH}/guide`, mega: developersMenu },
   { label: 'Performance', href: '/performance' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Docs', href: DOCS_BASE_PATH },
 ]
 
@@ -428,6 +430,74 @@ function MenuIcon() {
       <path d="M3 7h14M3 13h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
+}
+
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    // biome-ignore lint/a11y/noSvgWithoutTitle: Button provides the accessible label.
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className={`shrink-0 ${className ?? ''}`}
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
+  )
+}
+
+// The custom DocsHeader replaces Vocs' default top nav, whose hidden
+// `[data-v-gutter-top]` container still mounts Vocs' built-in `<Search />`
+// (it owns a global Cmd/Ctrl+K listener and the search dialog). Rather than
+// importing that internal, unexported component, we re-expose the affordance by
+// dispatching the same shortcut Vocs already handles. See src/pages/_root.css
+// where the gutter is hidden, and node_modules/vocs Search.tsx for the listener.
+//
+// Returns true when Vocs handled the shortcut (it calls `preventDefault`, so
+// `dispatchEvent` returns false). The shortcut *toggles* the dialog, so callers
+// must only dispatch once per intended open.
+function dispatchDocsSearchShortcut() {
+  if (typeof document === 'undefined') return false
+  const event = new KeyboardEvent('keydown', {
+    key: 'k',
+    code: 'KeyK',
+    bubbles: true,
+    cancelable: true,
+    // Vocs checks `metaKey || ctrlKey`, so set both and skip platform detection.
+    metaKey: true,
+    ctrlKey: true,
+  })
+  return !document.dispatchEvent(event)
+}
+
+function openDocsSearch() {
+  if (!dispatchDocsSearchShortcut() && import.meta.env.DEV) {
+    console.warn(
+      'Vocs search did not handle Cmd/Ctrl+K. Verify the hidden Vocs top-nav search is still mounted (showTopNav/showSearch).',
+    )
+  }
+}
+
+// Used when arriving from the marketing site via `?search` (see lib/docs-search):
+// the Vocs Search instance may not have attached its keydown listener yet on the
+// first paint, so retry across a few frames until the dialog opens. We stop on
+// the first success to avoid the toggle re-closing it.
+function openDocsSearchWhenReady(attempt = 0) {
+  if (dispatchDocsSearchShortcut()) return
+  if (attempt >= 30) {
+    if (import.meta.env.DEV) {
+      console.warn('Vocs search did not open after navigation; the search instance never mounted.')
+    }
+    return
+  }
+  requestAnimationFrame(() => openDocsSearchWhenReady(attempt + 1))
 }
 
 function CloseIcon() {
@@ -918,6 +988,7 @@ export default function DocsHeader() {
   const pathname = usePathname()
   const config = useConfig()
   const docsSidebarItems = resolveSidebarItems(config?.sidebar, pathname)
+  const showApiLogo = pathname === '/api' || pathname.startsWith('/api/')
   const [open, setOpen] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
@@ -976,8 +1047,32 @@ export default function DocsHeader() {
     setExpanded(null)
   }
 
+  const openSearch = () => {
+    cancelClose()
+    setActiveMenu(null)
+    close()
+    openDocsSearch()
+  }
+
   useEffect(() => {
     warmMarketingApp()
+  }, [])
+
+  // Open the search dialog when arriving from the marketing site's search CTA
+  // (which navigates to `/docs?search=1`). Strip the param so refresh/back
+  // doesn't reopen it.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (!params.has(DOCS_SEARCH_PARAM)) return
+    params.delete(DOCS_SEARCH_PARAM)
+    const query = params.toString()
+    window.history.replaceState(
+      {},
+      '',
+      `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`,
+    )
+    openDocsSearchWhenReady()
   }, [])
 
   return (
@@ -985,7 +1080,7 @@ export default function DocsHeader() {
       <div className="w-full border-line border-x bg-surface-shell">
         <nav
           ref={headerRef}
-          className="flex items-center justify-between border-line border-b px-5 py-4"
+          className="relative flex items-center justify-between border-line border-b px-5 py-4"
         >
           <a
             href="/"
@@ -995,10 +1090,22 @@ export default function DocsHeader() {
             className="group flex h-9 items-center text-foreground"
             aria-label="Tempo home"
           >
-            <TempoLogo className="h-[18px] w-[80px]" />
+            {showApiLogo ? (
+              <span className="flex items-center gap-2">
+                <TempoLogo className="h-[18px] w-[80px]" />
+                <span
+                  aria-hidden
+                  className="flex h-[18px] items-center bg-[#2b2b2b] px-[5px] font-mono text-[12px] text-[#b2b2b2] leading-none tracking-[0]"
+                >
+                  API
+                </span>
+              </span>
+            ) : (
+              <TempoLogo className="h-[18px] w-[80px]" />
+            )}
           </a>
 
-          <ul className="hidden items-center gap-16 lg:flex">
+          <ul className="hidden items-center gap-16 lg:absolute lg:top-1/2 lg:left-1/2 lg:flex lg:-translate-x-1/2 lg:-translate-y-1/2">
             {menu.map((item) => {
               const active = isActiveMenuItem(pathname, item)
               const triggerContent = (
@@ -1067,6 +1174,19 @@ export default function DocsHeader() {
 
           <div className="hidden items-center gap-3 lg:flex">
             <button
+              type="button"
+              onClick={openSearch}
+              aria-label="Search documentation"
+              aria-keyshortcuts="Meta+K Control+K"
+              className="flex h-9 items-center gap-2 rounded-[4px] border border-line px-4 font-sans text-[14px] text-foreground/60 tracking-[0] transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
+            >
+              <SearchIcon />
+              Search
+              <kbd className="ml-1 rounded-[3px] border border-line px-1.5 py-0.5 font-sans text-[11px] text-foreground/45">
+                ⌘K
+              </kbd>
+            </button>
+            <button
               ref={(element) => {
                 if (element) triggerRefs.current.set('For agents', element)
                 else triggerRefs.current.delete('For agents')
@@ -1102,15 +1222,26 @@ export default function DocsHeader() {
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setOpen((value) => !value)}
-            aria-label={open ? 'Close menu' : 'Open menu'}
-            aria-expanded={open}
-            className="grid size-8 place-items-center text-foreground lg:hidden"
-          >
-            {open ? <CloseIcon /> : <MenuIcon />}
-          </button>
+          <div className="flex items-center gap-1 lg:hidden">
+            <button
+              type="button"
+              onClick={openSearch}
+              aria-label="Search documentation"
+              aria-keyshortcuts="Meta+K Control+K"
+              className="grid size-8 place-items-center text-foreground"
+            >
+              <SearchIcon className="size-[18px]" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setOpen((value) => !value)}
+              aria-label={open ? 'Close menu' : 'Open menu'}
+              aria-expanded={open}
+              className="grid size-8 place-items-center text-foreground"
+            >
+              {open ? <CloseIcon /> : <MenuIcon />}
+            </button>
+          </div>
         </nav>
       </div>
 

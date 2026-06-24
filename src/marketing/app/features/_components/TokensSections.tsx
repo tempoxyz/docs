@@ -163,8 +163,8 @@ const feeTokenSpec: FeatureDiagramSpec = {
 const paymentLaneSpec: FeatureDiagramSpec = {
   kind: 'blockspace',
   payments: [
-    { accent: 3, label: 'PAYMENT', detail: 'FEE $0.001' },
-    { accent: 1, label: 'PAYOUT', detail: 'FEE $0.001' },
+    { accent: 3, label: 'PAYMENT', detail: '<$0.001 average fee' },
+    { accent: 1, label: 'PAYOUT', detail: '<$0.001 average fee' },
   ],
   general: { accent: 0, label: 'AIRDROP / TRADE', detail: 'FEE $0.01' },
   paymentLaneLabel: 'PAYMENT BLOCKSPACE',

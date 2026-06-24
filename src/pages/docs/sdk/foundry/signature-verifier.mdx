@@ -5,7 +5,7 @@ description: Verify secp256k1, P256, and WebAuthn signatures in smart contracts 
 
 # Signature Verification with Foundry
 
-The [TIP-1020](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md) `SignatureVerifier` precompile lets contracts verify secp256k1, P256, and WebAuthn signatures through a single interface — no custom verifier contracts needed. This is available after the [T3 network upgrade](/docs/protocol/upgrades/t3).
+The [TIP-1020](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md) `SignatureVerifier` precompile is available on Tempo. It lets contracts verify secp256k1, P256, and WebAuthn signatures through a single interface — no custom verifier contracts needed.
 
 The Foundry project template for Tempo ships with a working example that demonstrates signature verification in a relayed mail contract. Initialize it with:
 
@@ -87,12 +87,16 @@ contract Mail {
 
 ## Testing
 
-The template includes tests for both signature types. Set `hardfork = "tempo:T3"` in inline config or `foundry.toml` to enable the precompile locally:
+The template includes tests for both signature types. Tempo support is enabled by the template's Foundry config. If you copy this pattern into an existing project, make sure `foundry.toml` enables Tempo mode:
+
+```toml
+[profile.default]
+tempo = true
+```
 
 ### secp256k1
 
 ```solidity
-/// forge-config: default.hardfork = "tempo:T3"
 contract MailRelayTest is MailTest {
     uint256 internal constant ALICE_PK = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
 
@@ -136,11 +140,10 @@ function test_SendMailWithP256Signature() public {
 forge test -vvv
 ```
 
-The secp256k1 and P256 relay tests run against the T3 hardfork automatically via the inline config directive.
+The secp256k1 and P256 relay tests use Tempo mode through the template's Foundry config.
 
 ## Related
 
 - [TIP-1020: Signature Verification Precompile](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md)
-- [T3 Network Upgrade](/docs/protocol/upgrades/t3)
 - [T6 Network Upgrade](/docs/protocol/upgrades/t6)
 - [Foundry for Tempo](/docs/sdk/foundry)

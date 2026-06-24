@@ -1,19 +1,9 @@
-strictDepBuilds: true
 blockExoticSubdeps: false
-trustPolicy: no-downgrade
-trustPolicyExclude:
-  - reselect@5.1.1
-  - semver@6.3.1
-minimumReleaseAge: 1440
-
-onlyBuiltDependencies:
-  - core-js
-  - es5-ext
-  - esbuild
-  - vue-demi
 
 ignoredBuiltDependencies:
   - protobufjs
+
+minimumReleaseAge: 1440
 
 minimumReleaseAgeExclude:
   - accounts
@@ -27,11 +17,25 @@ minimumReleaseAgeExclude:
   - '@vocs/twoslash-rust-darwin-arm64'
   - '@vocs/twoslash-rust-linux-x64-gnu'
 
+onlyBuiltDependencies:
+  - core-js
+  - es5-ext
+  - esbuild
+  - vue-demi
+
 overrides:
+  dompurify: '>=3.4.0'
   protobufjs: '>=7.5.5'
   tar: '>=7.5.13'
-  dompurify: '>=3.4.0'
 
 patchedDependencies:
   '@braintree/sanitize-url@7.1.2': patches/@braintree__sanitize-url@7.1.2.patch
   dayjs@1.11.20: patches/dayjs@1.11.20.patch
+
+strictDepBuilds: true
+
+trustPolicy: no-downgrade
+
+trustPolicyExclude:
+  - reselect@5.1.1
+  - semver@6.3.1

@@ -2,6 +2,23 @@ declare module 'next' {
   export type Metadata = Record<string, unknown>
 }
 
+declare module 'virtual:blog-posts' {
+  export const posts: {
+    slug: string
+    title: string
+    excerpt: string
+    date: string
+    category: string
+    featured: boolean
+    html: string
+  }[]
+}
+
+declare module 'virtual:marketing/search-index' {
+  /** Returns the serialized MiniSearch index JSON for the docs search. */
+  export function getSearchIndex(): Promise<string>
+}
+
 declare module 'next/link' {
   export { default } from './next-shims'
 }

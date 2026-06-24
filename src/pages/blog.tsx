@@ -1,12 +1,12 @@
 'use client'
 
-import DiagramsPage from '../marketing/DiagramsPage'
+import BlogPage from '../marketing/app/blog/page'
 import MarketingRoute from '../marketing/MarketingRoute'
 
 export default function Page() {
   return (
-    <MarketingRoute route="/diagrams">
-      <DiagramsPage />
+    <MarketingRoute route="/blog">
+      <BlogPage />
     </MarketingRoute>
   )
 }

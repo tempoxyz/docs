@@ -14,7 +14,8 @@ import Header from './app/_components/Header'
 import TpsTrendChartFrame from './app/performance/_components/TpsTrendChartFrame'
 import HomePage from './HomePage'
 
-const loadDiagramsPage = () => import('./DiagramsPage')
+const loadBlogPage = () => import('./app/blog/page')
+const loadBlogPostPage = () => import('./app/blog/[slug]/page')
 const loadFeaturePage = () => import('./FeaturePage')
 const loadPerformancePage = () => import('./PerformancePage')
 
@@ -27,8 +28,9 @@ const SpeedInsights = lazy(() =>
 const GoogleAnalytics = lazy(() => import('../components/GoogleAnalytics'))
 const PostHogSetup = lazy(() => import('../components/PostHogSetup'))
 const PerformancePage = lazy(loadPerformancePage)
-const DiagramsPage = lazy(loadDiagramsPage)
 const FeaturePage = lazy(loadFeaturePage)
+const BlogPage = lazy(loadBlogPage)
+const BlogPostPage = lazy(loadBlogPostPage)
 
 function currentRoute() {
   return normalizeRoutePath(window.location.pathname)
@@ -76,7 +78,7 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
       'The only blockchain designed for payments. Sub-second transactions, sub-cent fees.',
   },
   '/build': {
-    title: 'Tempo',
+    title: 'Build on Tempo',
     description:
       'Build payment products on Tempo with stablecoins, fast settlement, and predictable fees.',
   },
@@ -90,13 +92,14 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
       'Stablecoin-first Tempo Tokens for payments, fees, memos, policies, and liquidity.',
   },
   '/performance': {
-    title: 'Tempo Performance',
+    title: 'Performance',
     description:
       'Nightly benchmarks on Tempo throughput, block times, execution rates, and uptime.',
   },
-  '/diagrams': {
-    title: 'Tempo Diagrams',
-    description: 'A playground for Tempo diagrams, product visuals, and house-style SVG exports.',
+  '/blog': {
+    title: 'Blog',
+    description:
+      'Engineering deep dives, network upgrades, events, and case studies from the Tempo team.',
   },
 }
 
@@ -142,7 +145,8 @@ function RouteFallback({ route }: { route: string }) {
 }
 
 function isMarketingRoute(pathname: string) {
-  return normalizeRoutePath(pathname) in routeMetadata
+  const route = normalizeRoutePath(pathname)
+  return route in routeMetadata || route.startsWith('/blog/')
 }
 
 function preloadRoute(pathname: string) {
@@ -151,8 +155,10 @@ function preloadRoute(pathname: string) {
     void loadFeaturePage()
   } else if (route === '/performance') {
     void loadPerformancePage()
-  } else if (route === '/diagrams') {
-    void loadDiagramsPage()
+  } else if (route === '/blog') {
+    void loadBlogPage()
+  } else if (route.startsWith('/blog/')) {
+    void loadBlogPostPage()
   }
 }
 
@@ -166,6 +172,7 @@ function idFromHash(hash: string) {
 
 function metadataForRoute(path: string) {
   if (routeMetadata[path]) return routeMetadata[path]
+  if (path.startsWith('/blog/')) return routeMetadata['/blog']
   return routeMetadata['/']
 }
 
@@ -180,7 +187,9 @@ function renderRoute(path: string): ReactNode {
   if (path === '/build/tempo-transactions') return <FeaturePage params={{ slug: 'transactions' }} />
   if (path === '/build/tip20-tokens') return <FeaturePage params={{ slug: 'tokens' }} />
   if (path === '/performance') return <PerformancePage />
-  if (path === '/diagrams') return <DiagramsPage />
+  if (path === '/blog') return <BlogPage />
+  if (path.startsWith('/blog/'))
+    return <BlogPostPage params={{ slug: path.slice('/blog/'.length) }} />
   return <HomePage />
 }
 

@@ -18,7 +18,7 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
       'The only blockchain designed for payments. Sub-second transactions, sub-cent fees.',
   },
   '/build': {
-    title: 'Tempo',
+    title: 'Build on Tempo',
     description:
       'Build payment products on Tempo with stablecoins, fast settlement, and predictable fees.',
   },
@@ -32,13 +32,14 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
       'Stablecoin-first Tempo Tokens for payments, fees, memos, policies, and liquidity.',
   },
   '/performance': {
-    title: 'Tempo Performance',
+    title: 'Performance',
     description:
       'Nightly benchmarks on Tempo throughput, block times, execution rates, and uptime.',
   },
-  '/diagrams': {
-    title: 'Tempo Diagrams',
-    description: 'A playground for Tempo diagrams, product visuals, and house-style SVG exports.',
+  '/blog': {
+    title: 'Blog',
+    description:
+      'Engineering deep dives, network upgrades, events, and case studies from the Tempo team.',
   },
 }
 
@@ -57,6 +58,8 @@ function prefetchPath(href: string) {
   document.head.appendChild(link)
 }
 
+type RouteMetadata = { title: string; description: string }
+
 function scheduleIdleAnalytics(callback: () => void) {
   let idleId: number | undefined
   const timeoutId = globalThis.setTimeout(() => {
@@ -73,24 +76,26 @@ function scheduleIdleAnalytics(callback: () => void) {
   }
 }
 
-function applyRouteMetadata(route: string) {
-  const metadata = routeMetadata[route] ?? routeMetadata['/']
-  document.title = metadata.title
-  document.querySelector('meta[name="description"]')?.setAttribute('content', metadata.description)
+function applyRouteMetadata(route: string, metadata?: RouteMetadata) {
+  const resolved = metadata ?? routeMetadata[route] ?? routeMetadata['/']
+  document.title = resolved.title
+  document.querySelector('meta[name="description"]')?.setAttribute('content', resolved.description)
 }
 
 export default function MarketingRoute({
   children,
   route,
+  metadata,
 }: {
   children: ReactNode
-  route: keyof typeof routeMetadata
+  route: string
+  metadata?: RouteMetadata
 }) {
   const [analyticsReady, setAnalyticsReady] = useState(false)
 
   useEffect(() => {
-    applyRouteMetadata(route)
-  }, [route])
+    applyRouteMetadata(route, metadata)
+  }, [route, metadata])
 
   useEffect(() => {
     return scheduleIdleAnalytics(() => setAnalyticsReady(true))

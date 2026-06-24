@@ -5,9 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  dompurify: '>=3.4.0'
   protobufjs: '>=7.5.5'
   tar: '>=7.5.13'
-  dompurify: '>=3.4.0'
 
 patchedDependencies:
   '@braintree/sanitize-url@7.1.2':
@@ -30,6 +30,9 @@ importers:
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@shikijs/rehype':
+        specifier: ^3.23.0
+        version: 3.23.0
       '@takumi-rs/image-response':
         specifier: 0.62.8
         version: 0.62.8
@@ -47,13 +50,13 @@ importers:
         version: 1.3.1(react@19.2.6)(vue@3.5.38(typescript@5.9.3))
       '@wagmi/core':
         specifier: 3.4.11
-        version: 3.4.11(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))
+        version: 3.4.11(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))
       abitype:
         specifier: ^1.2.3
         version: 1.2.3(typescript@5.9.3)(zod@4.3.6)
       accounts:
         specifier: ^0.10.7
-        version: 0.10.7(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@3.4.11)(express@5.2.1)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))(wagmi@3.6.14)
+        version: 0.10.7(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@3.4.11)(express@5.2.1)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))(wagmi@3.6.14)
       cva:
         specifier: 1.0.0-beta.4
         version: 1.0.0-beta.4(typescript@5.9.3)
@@ -63,6 +66,9 @@ importers:
       mermaid:
         specifier: ^11.14.0
         version: 11.14.0
+      minisearch:
+        specifier: 7.2.0
+        version: 7.2.0
       monaco-editor:
         specifier: ^0.55.1
         version: 0.55.1
@@ -87,6 +93,21 @@ importers:
       react-server-dom-webpack:
         specifier: ~19.2.6
         version: 19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7))
+      rehype-stringify:
+        specifier: ^10.0.1
+        version: 10.0.1
+      remark-gfm:
+        specifier: ^4.0.1
+        version: 4.0.1
+      remark-parse:
+        specifier: ^11.0.0
+        version: 11.0.0
+      remark-rehype:
+        specifier: ^11.1.2
+        version: 11.1.2
+      shiki:
+        specifier: ^3.23.0
+        version: 3.23.0
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -99,6 +120,9 @@ importers:
       tailwindcss:
         specifier: ^4.2.2
         version: 4.2.2
+      unified:
+        specifier: ^11.0.5
+        version: 11.0.5
       unplugin-auto-import:
         specifier: ^21.0.0
         version: 21.0.0(@vueuse/core@13.9.0(vue@3.5.38(typescript@5.9.3)))
@@ -106,14 +130,14 @@ importers:
         specifier: ^23.0.1
         version: 23.0.1(@svgr/core@8.1.0(typescript@5.9.3))(@vue/compiler-sfc@3.5.38)
       viem:
-        specifier: ^2.52.2
-        version: 2.52.2(typescript@5.9.3)(zod@4.3.6)
+        specifier: ^2.53.1
+        version: 2.53.1(typescript@5.9.3)(zod@4.3.6)
       vocs:
-        specifier: 2.1.1
-        version: 2.1.1(@cfworker/json-schema@4.1.1)(@types/react@19.2.14)(@vue/compiler-sfc@3.5.38)(change-case@5.4.4)(idb-keyval@6.2.2)(mermaid@11.14.0)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(rollup@4.60.1)(typescript@5.9.3)(vite@8.0.16(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(waku@1.0.0-beta.0(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
+        specifier: 2.1.9
+        version: 2.1.9(@cfworker/json-schema@4.1.1)(@types/react@19.2.14)(@vue/compiler-sfc@3.5.38)(change-case@5.4.4)(idb-keyval@6.2.2)(mermaid@11.14.0)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(rollup@4.60.1)(typescript@5.9.3)(vite@8.0.16(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(waku@1.0.0-beta.0(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
       wagmi:
         specifier: 3.6.14
-        version: 3.6.14(@tanstack/query-core@5.99.0)(@tanstack/react-query@5.99.0(react@19.2.6))(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))
+        version: 3.6.14(@tanstack/query-core@5.99.0)(@tanstack/react-query@5.99.0(react@19.2.6))(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))
       waku:
         specifier: ^1.0.0-beta.0
         version: 1.0.0-beta.0(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0)
@@ -4579,8 +4603,8 @@ packages:
   vfile@6.0.3:
     resolution: {integrity: sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q==}
 
-  viem@2.52.2:
-    resolution: {integrity: sha512-HSU12p5aD/kAPZfrlbCUqdiP4P/c6hQ9AhfTS51VbLUQIjkWd1d5EjrCx/SCxZ0zhZVRn4Iv5X5WDqXPG8Ubew==}
+  viem@2.53.1:
+    resolution: {integrity: sha512-FhfJ/SW73CVosiyVLmIMVgKDRKYV1AGCLzZoHYvmNayyVff63Qi1ocPCk59LqC/cNw244RbBJjHnmxqXkE7NpA==}
     peerDependencies:
       typescript: '>=5.0.4'
     peerDependenciesMeta:
@@ -4693,8 +4717,8 @@ packages:
       jsdom:
         optional: true
 
-  vocs@2.1.1:
-    resolution: {integrity: sha512-YQ1RKxcqZ0iG/cTrTj3J8z2oQ5gB0g3ax1hodmfIXRdeiMyv67+R9dKmwF9wG47e0s9rxoqZWCUxeOMhgIHk9g==}
+  vocs@2.1.9:
+    resolution: {integrity: sha512-mB2RncVKrg13s/0ciYUTddgJJ/fvbXCb0Tb6HRymz0aEOSyhyjDkYa3C2Z1OUz/VhrvH9CHkNM6cMkWWu9xijQ==}
     hasBin: true
     peerDependencies:
       '@vocs/twoslash-rust': ^0.1.0
@@ -6837,23 +6861,23 @@ snapshots:
     dependencies:
       vue: 3.5.38(typescript@5.9.3)
 
-  '@wagmi/connectors@8.0.13(@wagmi/core@3.4.11)(accounts@0.10.7)(typescript@5.9.3)(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))':
+  '@wagmi/connectors@8.0.13(@wagmi/core@3.4.11)(accounts@0.10.7)(typescript@5.9.3)(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))':
     dependencies:
-      '@wagmi/core': 3.4.11(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))
-      viem: 2.52.2(typescript@5.9.3)(zod@4.3.6)
+      '@wagmi/core': 3.4.11(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))
+      viem: 2.53.1(typescript@5.9.3)(zod@4.3.6)
     optionalDependencies:
-      accounts: 0.10.7(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@3.4.11)(express@5.2.1)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))(wagmi@3.6.14)
+      accounts: 0.10.7(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@3.4.11)(express@5.2.1)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))(wagmi@3.6.14)
       typescript: 5.9.3
 
-  '@wagmi/core@3.4.11(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.6))(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))':
+  '@wagmi/core@3.4.11(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.6))(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))':
     dependencies:
       eventemitter3: 5.0.1
       mipd: 0.0.7(typescript@5.9.3)
-      viem: 2.52.2(typescript@5.9.3)(zod@4.3.6)
+      viem: 2.53.1(typescript@5.9.3)(zod@4.3.6)
       zustand: 5.0.0(@types/react@19.2.14)(react@19.2.6)(use-sync-external-store@1.4.0(react@19.2.6))
     optionalDependencies:
       '@tanstack/query-core': 5.99.0
-      accounts: 0.10.7(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@3.4.11)(express@5.2.1)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))(wagmi@3.6.14)
+      accounts: 0.10.7(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@3.4.11)(express@5.2.1)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))(wagmi@3.6.14)
       typescript: 5.9.3
     transitivePeerDependencies:
       - '@types/react'
@@ -6861,15 +6885,15 @@ snapshots:
       - react
       - use-sync-external-store
 
-  '@wagmi/core@3.4.11(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))':
+  '@wagmi/core@3.4.11(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))':
     dependencies:
       eventemitter3: 5.0.1
       mipd: 0.0.7(typescript@5.9.3)
-      viem: 2.52.2(typescript@5.9.3)(zod@4.3.6)
+      viem: 2.53.1(typescript@5.9.3)(zod@4.3.6)
       zustand: 5.0.0(@types/react@19.2.14)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))
     optionalDependencies:
       '@tanstack/query-core': 5.99.0
-      accounts: 0.10.7(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@3.4.11)(express@5.2.1)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))(wagmi@3.6.14)
+      accounts: 0.10.7(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@3.4.11)(express@5.2.1)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))(wagmi@3.6.14)
       typescript: 5.9.3
     transitivePeerDependencies:
       - '@types/react'
@@ -6972,21 +6996,21 @@ snapshots:
       mime-types: 3.0.2
       negotiator: 1.0.0
 
-  accounts@0.10.7(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@3.4.11)(express@5.2.1)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))(wagmi@3.6.14):
+  accounts@0.10.7(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(@types/react@19.2.14)(@wagmi/core@3.4.11)(express@5.2.1)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))(wagmi@3.6.14):
     dependencies:
       hono: 4.12.26
       idb-keyval: 6.2.2
       mipd: 0.0.7(typescript@5.9.3)
-      mppx: 0.6.20(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(express@5.2.1)(hono@4.12.26)(typescript@5.9.3)(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))
+      mppx: 0.6.20(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(express@5.2.1)(hono@4.12.26)(typescript@5.9.3)(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))
       ox: 0.14.20(typescript@5.9.3)(zod@4.3.6)
       webauthx: 0.1.1(typescript@5.9.3)(zod@4.3.6)
       zod: 4.3.6
       zustand: 5.0.12(@types/react@19.2.14)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))
     optionalDependencies:
-      '@wagmi/core': 3.4.11(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))
+      '@wagmi/core': 3.4.11(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.6))(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))
       react: 19.2.6
-      viem: 2.52.2(typescript@5.9.3)(zod@4.3.6)
-      wagmi: 3.6.14(@tanstack/query-core@5.99.0)(@tanstack/react-query@5.99.0(react@19.2.6))(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))
+      viem: 2.53.1(typescript@5.9.3)(zod@4.3.6)
+      wagmi: 3.6.14(@tanstack/query-core@5.99.0)(@tanstack/react-query@5.99.0(react@19.2.6))(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))
     transitivePeerDependencies:
       - '@modelcontextprotocol/sdk'
       - '@types/react'
@@ -8045,7 +8069,7 @@ snapshots:
       '@toon-format/toon': 2.1.0
       tokenx: 1.3.0
       yaml: 2.9.0
-      zod: 4.3.6
+      zod: 4.4.3
 
   inherits@2.0.4: {}
 
@@ -8798,11 +8822,11 @@ snapshots:
 
   moo@0.5.3: {}
 
-  mppx@0.6.20(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(express@5.2.1)(hono@4.12.26)(typescript@5.9.3)(viem@2.52.2(typescript@5.9.3)(zod@4.3.6)):
+  mppx@0.6.20(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(express@5.2.1)(hono@4.12.26)(typescript@5.9.3)(viem@2.53.1(typescript@5.9.3)(zod@4.3.6)):
     dependencies:
       incur: 0.4.5
       ox: 0.14.20(typescript@5.9.3)(zod@4.4.3)
-      viem: 2.52.2(typescript@5.9.3)(zod@4.3.6)
+      viem: 2.53.1(typescript@5.9.3)(zod@4.3.6)
       zod: 4.4.3
     optionalDependencies:
       '@modelcontextprotocol/sdk': 1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6)
@@ -9878,7 +9902,7 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  viem@2.52.2(typescript@5.9.3)(zod@4.3.6):
+  viem@2.53.1(typescript@5.9.3)(zod@4.3.6):
     dependencies:
       '@noble/curves': 1.9.1
       '@noble/hashes': 1.8.0
@@ -9957,7 +9981,7 @@ snapshots:
     transitivePeerDependencies:
       - msw
 
-  vocs@2.1.1(@cfworker/json-schema@4.1.1)(@types/react@19.2.14)(@vue/compiler-sfc@3.5.38)(change-case@5.4.4)(idb-keyval@6.2.2)(mermaid@11.14.0)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(rollup@4.60.1)(typescript@5.9.3)(vite@8.0.16(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(waku@1.0.0-beta.0(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0)):
+  vocs@2.1.9(@cfworker/json-schema@4.1.1)(@types/react@19.2.14)(@vue/compiler-sfc@3.5.38)(change-case@5.4.4)(idb-keyval@6.2.2)(mermaid@11.14.0)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(rollup@4.60.1)(typescript@5.9.3)(vite@8.0.16(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(waku@1.0.0-beta.0(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0)):
     dependencies:
       '@base-ui/react': 1.6.0(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@codesandbox/sandpack-react': 2.20.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -10111,14 +10135,14 @@ snapshots:
 
   w3c-keyname@2.2.8: {}
 
-  wagmi@3.6.14(@tanstack/query-core@5.99.0)(@tanstack/react-query@5.99.0(react@19.2.6))(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(viem@2.52.2(typescript@5.9.3)(zod@4.3.6)):
+  wagmi@3.6.14(@tanstack/query-core@5.99.0)(@tanstack/react-query@5.99.0(react@19.2.6))(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(viem@2.53.1(typescript@5.9.3)(zod@4.3.6)):
     dependencies:
       '@tanstack/react-query': 5.99.0(react@19.2.6)
-      '@wagmi/connectors': 8.0.13(@wagmi/core@3.4.11)(accounts@0.10.7)(typescript@5.9.3)(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))
-      '@wagmi/core': 3.4.11(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.6))(viem@2.52.2(typescript@5.9.3)(zod@4.3.6))
+      '@wagmi/connectors': 8.0.13(@wagmi/core@3.4.11)(accounts@0.10.7)(typescript@5.9.3)(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))
+      '@wagmi/core': 3.4.11(@tanstack/query-core@5.99.0)(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.6))(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))
       react: 19.2.6
       use-sync-external-store: 1.4.0(react@19.2.6)
-      viem: 2.52.2(typescript@5.9.3)(zod@4.3.6)
+      viem: 2.53.1(typescript@5.9.3)(zod@4.3.6)
     optionalDependencies:
       typescript: 5.9.3
     transitivePeerDependencies:

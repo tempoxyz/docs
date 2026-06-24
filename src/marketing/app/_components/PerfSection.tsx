@@ -212,8 +212,8 @@ export default function PerfSection({ stats, runs }: { stats: Stat[]; runs: Perf
     {
       href: `${PERFORMANCE_PAGE}#fees`,
       label: 'Predictably low fees',
-      value: '$0.001',
-      desc: 'Base network fee for a standard stablecoin transfer.',
+      value: '<$0.001',
+      desc: 'Average fee for standard stablecoin transfers.',
       spark: hasFeed ? <LaneSpark runs={runs} /> : null,
       className: 'sm:border-r lg:col-span-3',
     },

@@ -13,7 +13,7 @@ import UptimeStrip from './_components/UptimeStrip'
 import { fetchPerfRuns, fmtInt, type PerfRun } from './_lib/runs'
 
 export const metadata: Metadata = {
-  title: 'Performance — Tempo Developers',
+  title: 'Performance',
   description:
     'Nightly benchmarks on a live Tempo network: throughput, block times, and execution rates, published as raw runs.',
 }
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 const STATUS_PAGE_URL = 'https://status.tempo.xyz'
 const PERF_DASHBOARD_URL = 'https://perf.tempo.xyz/'
 const DAY_MS = 24 * 60 * 60 * 1000
-const HERO_STAT_LABELS = ['Transactions per second', 'Avg block time', 'Base fee']
+const HERO_STAT_LABELS = ['Transactions per second', 'Avg block time', 'Average fee']
 const SETTLEMENT_SKELETON_CELLS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 const UPTIME_SKELETON_BARS = Array.from({ length: 90 }, (_, i) => `bar-${i}`)
 const prefetchedRuns = typeof window !== 'undefined' ? fetchPerfRuns() : null
@@ -224,7 +224,7 @@ function PerformanceSectionsSkeleton() {
       <Section
         id="settlement"
         title="Guaranteed settlement in half a second."
-        note="The moment a payment is included in a block, it's settled in less than 500ms. No reorgs, no waiting out confirmations, no probabilistic guessing."
+        note="Tempo gives payments final settlement in about half a second. Once a payment lands in a finalized block, it can be treated as settled."
       >
         <SettlementStreamSkeleton />
       </Section>
@@ -292,8 +292,8 @@ export default function PerformancePage() {
           value: `${fmtInt(latest.blockTimeMs)} ms`,
         },
         {
-          label: 'Base fee',
-          value: '$0.001',
+          label: 'Average fee',
+          value: '<$0.001',
         },
       ]
     : []
@@ -360,7 +360,7 @@ export default function PerformancePage() {
             <Section
               id="settlement"
               title="Guaranteed settlement in half a second."
-              note="The moment a payment is included in a block, it's settled in less than 500ms. No reorgs, no waiting out confirmations, no probabilistic guessing."
+              note="Tempo gives payments final settlement in about half a second. Once a payment lands in a finalized block, it can be treated as settled."
             >
               <SettlementStream runs={runs} />
             </Section>
