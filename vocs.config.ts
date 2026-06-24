@@ -127,6 +127,10 @@ export default defineConfig({
             link: '/api/conventions',
           },
           {
+            text: 'Transactions & Transfers',
+            link: '/api/transactions-and-transfers',
+          },
+          {
             text: 'JSON-RPC API',
             link: '/api/json-rpc',
           },
