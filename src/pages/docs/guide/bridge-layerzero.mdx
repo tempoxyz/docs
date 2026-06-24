@@ -382,16 +382,14 @@ https://scan.layerzero-api.com/v1/messages/tx/<SOURCE_TX_HASH>
 #### Using TypeScript (viem)
 
 ```typescript
-import { createWalletClient, createPublicClient, http, parseUnits, pad } from 'viem'
-import { tempo } from 'viem/chains'
+import { parseUnits, pad } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
+import { createClient } from 'viem/tempo'
 
 const account = privateKeyToAccount('0x...')
 
-const walletClient = createWalletClient({
+const client = createClient({
   account,
-  chain: tempo,
-  transport: http(),
 })
 
 // Stargate OFT for USDC.e on Tempo
@@ -429,9 +427,7 @@ const wrapAbi = [
 ] as const
 
 // 1. Quote the fee
-const publicClient = createPublicClient({ chain: tempo, transport: http() })
-
-const msgFee = await publicClient.readContract({
+const msgFee = await client.readContract({
   address: stargateOFT,
   abi: stargateAbi, // same ABI as above
   functionName: 'quoteSend',
@@ -439,7 +435,7 @@ const msgFee = await publicClient.readContract({
 })
 
 // 2. Approve USDC.e to LZD wrapper (for the messaging fee)
-await walletClient.writeContract({
+await client.writeContract({
   address: usdce,
   abi: erc20Abi,
   functionName: 'approve',
@@ -447,7 +443,7 @@ await walletClient.writeContract({
 })
 
 // 3. Wrap USDC.e into LZD
-await walletClient.writeContract({
+await client.writeContract({
   address: lzd,
   abi: wrapAbi,
   functionName: 'wrap',
@@ -455,7 +451,7 @@ await walletClient.writeContract({
 })
 
 // 4. Approve LZD to Stargate (for the messaging fee)
-await walletClient.writeContract({
+await client.writeContract({
   address: lzd,
   abi: erc20Abi,
   functionName: 'approve',
@@ -463,7 +459,7 @@ await walletClient.writeContract({
 })
 
 // 5. Approve USDC.e to Stargate (for the bridge amount)
-await walletClient.writeContract({
+await client.writeContract({
   address: usdce,
   abi: erc20Abi,
   functionName: 'approve',
@@ -471,7 +467,7 @@ await walletClient.writeContract({
 })
 
 // 6. Send the bridge transaction (no value - fee handled via EndpointDollar)
-await walletClient.writeContract({
+await client.writeContract({
   address: stargateOFT,
   abi: stargateAbi,
   functionName: 'sendToken',

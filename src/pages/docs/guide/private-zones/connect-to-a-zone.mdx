@@ -18,12 +18,12 @@ Account-scoped zone RPC methods require an `X-Authorization-Token` header signed
 Use `zoneModerato(...)` from `viem/tempo/zones` so the client has the correct chain metadata for the zone you want to reach.
 
 ```ts
-import { createPublicClient } from 'viem'
+import { createClient } from 'viem/tempo'
 import { http, zoneModerato } from 'viem/tempo/zones'
 
 const rpcUrl = 'https://rpc-zone-a.testnet.tempo.xyz'
 
-const zoneClient = createPublicClient({
+const zoneClient = createClient({
   chain: zoneModerato(6),
   transport: http(rpcUrl),
 })
