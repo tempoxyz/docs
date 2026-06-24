@@ -18,6 +18,7 @@ import {
 const VISUAL_HEIGHT = 'lg:h-[424px]'
 const CODE_HEIGHT = 'max-h-[390px]'
 const DIAGRAM_CONTAINER = 'p-6 lg:min-h-0 lg:p-10'
+const PANEL_HEIGHT = 'min-h-[454px]'
 const SHOWCASE_HEIGHT = 'lg:min-h-[560px]'
 
 type Row = {
@@ -149,7 +150,7 @@ export default function TransactionsShowcase() {
           <div className="absolute top-6 right-6 z-20 lg:top-8 lg:right-10">
             <ModeToggle mode={mode} setMode={setMode} />
           </div>
-          <div className="grid w-full max-w-[560px] grid-cols-1">
+          <div className={`grid w-full max-w-[560px] grid-cols-1 ${PANEL_HEIGHT}`}>
             {rows.map((row, i) => (
               <Fragment key={row.title}>
                 <div
