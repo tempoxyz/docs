@@ -214,6 +214,19 @@ function WalletIcon() {
   )
 }
 
+function FaucetIcon() {
+  return (
+    <Glyph>
+      <path d="M7 8h7a3 3 0 0 1 3 3v1" />
+      <path d="M7 5v6" />
+      <path d="M4 5h6" />
+      <path d="M15 12h4" />
+      <path d="M17 12v2.5" />
+      <path d="M17 18.5s-2-1.7-2-3a2 2 0 0 1 4 0c0 1.3-2 3-2 3Z" />
+    </Glyph>
+  )
+}
+
 function ApiIcon() {
   return (
     <Glyph>
@@ -290,6 +303,12 @@ const developersMenu: MegaMenuData = {
           desc: 'Guides, references & quickstart',
           href: DOCS_BASE_PATH,
           icon: <DocsIcon />,
+        },
+        {
+          label: 'Faucet',
+          desc: 'Get testnet funds for development',
+          href: `${DOCS_BASE_PATH}/quickstart/faucet`,
+          icon: <FaucetIcon />,
         },
       ],
     },
@@ -1095,7 +1114,7 @@ export default function DocsHeader() {
                 <TempoLogo className="h-[18px] w-[80px]" />
                 <span
                   aria-hidden
-                  className="flex h-[18px] items-center bg-[#2b2b2b] px-[5px] font-mono text-[12px] text-[#b2b2b2] leading-none tracking-[0]"
+                  className="flex h-[18px] items-center bg-[#2b2b2b] px-[5px] font-mono text-[#b2b2b2] text-[12px] leading-none tracking-[0]"
                 >
                   API
                 </span>
