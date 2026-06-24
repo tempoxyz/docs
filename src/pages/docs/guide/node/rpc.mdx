@@ -11,7 +11,7 @@ RPC nodes provide API access to the Tempo network without participating in conse
 ## Quick Start
 
 <Callout type="info">
-Trusted (uncertified) RPC nodes will be deprecated. To run without trusting the RPC endpoint, use [Trustless RPC Nodes](#trustless-rpc-nodes).
+Following RPC nodes verify consensus finalization certificates by default. This lets the node reject followed blocks that are not backed by a validator quorum.
 </Callout>
 
 ```bash /dev/null/quickstart.sh#L1-15
@@ -25,29 +25,38 @@ tempo node \
   --http.api eth,net,web3,txpool,trace
 ```
 
-An RPC node running in follow mode is a **full node**. It fetches blocks from a trusted RPC endpoint, executes every transaction locally through the EVM, validates each block after execution, and stores complete block data with full state. The only trust assumption is block ordering: your node trusts the RPC endpoint to provide the correct sequence of blocks. All execution and validation happens locally on your machine.
+An RPC node running in follow mode is a **full node**. It fetches blocks from an upstream RPC endpoint, verifies consensus finalization certificates for followed blocks by default, executes every transaction locally through the EVM, validates each block after execution, and stores complete block data with full state. All execution and validation happens locally on your machine.
 
 By default, RPC nodes run in archive mode, meaning they do not prune historical state.
 
-### Trustless RPC Nodes
+### Certified Follower Nodes
 
 <Callout type="info">
-Trustless RPC nodes are supported in release 1.7.1 and onward. RPC-to-RPC following is currently only supported on Moderato testnet.
+Certified follower nodes are the default for RPC nodes running with `--follow`.
 </Callout>
 
-By default, a following RPC node trusts its upstream RPC endpoint for block ordering. Trustless RPC mode reduces that trust assumption by requiring consensus finalization certificates from the upstream before accepting followed blocks. Those certificates prove the data is backed by a validator quorum, not just the upstream node's local view of the chain.
+Following RPC nodes require consensus finalization certificates from the upstream before accepting followed blocks. Those certificates prove the data is backed by a validator quorum, not just the upstream node's local view of the chain.
 
-Enable certificate verification with the `--follow.experimental.certify` flag:
+No additional flag is required:
 
 ```bash
 tempo node \
   --follow \
-  --follow.experimental.certify \
   --http --http.port 8545 \
   --http.api eth,net,web3,txpool,trace
 ```
 
 The upstream must serve consensus finalization certificates. For RPC-to-RPC following, follow a validator-backed RPC node or another RPC node that is already serving certified consensus data.
+
+You can opt out of certificate verification with `--follow.nocertify`, but this is not recommended because the node will trust the upstream RPC endpoint's local view of followed blocks:
+
+```bash
+tempo node \
+  --follow \
+  --follow.nocertify \
+  --http --http.port 8545 \
+  --http.api eth,net,web3,txpool,trace
+```
 
 ## Example Systemd Service
 
