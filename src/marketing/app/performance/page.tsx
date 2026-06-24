@@ -13,7 +13,7 @@ import UptimeStrip from './_components/UptimeStrip'
 import { fetchPerfRuns, fmtInt, type PerfRun } from './_lib/runs'
 
 export const metadata: Metadata = {
-  title: 'Performance — Tempo Developers',
+  title: 'Performance',
   description:
     'Nightly benchmarks on a live Tempo network: throughput, block times, and execution rates, published as raw runs.',
 }
