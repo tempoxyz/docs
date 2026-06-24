@@ -16,6 +16,7 @@ import { cva, cx } from '../../../cva.config'
 import { usePostHogTracking } from '../../lib/posthog'
 import { useTempoWalletConnector, useWebAuthnConnector } from '../../wagmi.config'
 import { Container as ParentContainer } from '../Container'
+import { isFundableWalletConnector } from '../lib/wallets'
 import { alphaUsd } from './tokens'
 
 export { alphaUsd, betaUsd, pathUsd, thetaUsd } from './tokens'
@@ -155,8 +156,9 @@ export function Container(
     }
 
     if (source === 'wallet') {
-      const walletConnection = connections.find(
-        (c) => c.connector.id !== 'webAuthn' && c.connector.id !== 'xyz.tempo',
+      const includeWebAuthn = import.meta.env.VITE_E2E === 'true'
+      const walletConnection = connections.find((c) =>
+        isFundableWalletConnector(c.connector, { includeWebAuthn }),
       )
       return walletConnection?.accounts[0]
     }

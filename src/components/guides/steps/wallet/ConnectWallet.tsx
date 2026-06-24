@@ -11,19 +11,20 @@ import {
 } from 'wagmi'
 import LucideCheck from '~icons/lucide/check'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
-import { filterSupportedInjectedConnectors } from '../../../lib/wallets'
+import { filterSupportedInjectedConnectors, isFundableWalletConnector } from '../../../lib/wallets'
 import { Button, Step, StringFormatter, useCopyToClipboard } from '../../Demo'
 import type { DemoStepProps } from '../types'
 
 export function ConnectWallet(props: DemoStepProps) {
   const { stepNumber = 1 } = props
+  const isE2E = import.meta.env.VITE_E2E === 'true'
   const { chain, connector } = useConnection()
   const connections = useConnections()
   const connect = useConnect()
   const disconnect = useDisconnect()
   const connectors = useConnectors()
   const injectedConnectors = React.useMemo(
-    () => filterSupportedInjectedConnectors(connectors),
+    () => filterSupportedInjectedConnectors(connectors, { includeWebAuthn: isE2E }),
     [connectors],
   )
   const switchChain = useSwitchChain()
@@ -31,7 +32,9 @@ export function ConnectWallet(props: DemoStepProps) {
   const isSupported = chains.some((c) => c.id === chain?.id)
   const [copied, copyToClipboard] = useCopyToClipboard()
 
-  const walletConnection = connections.find((c) => c.connector.id !== 'webAuthn')
+  const walletConnection = connections.find((c) =>
+    isFundableWalletConnector(c.connector, { includeWebAuthn: isE2E }),
+  )
   const walletAddress = walletConnection?.accounts[0]
   const walletConnector = walletConnection?.connector
   const hasNonWebAuthnWallet = Boolean(walletAddress)
@@ -55,7 +58,14 @@ export function ConnectWallet(props: DemoStepProps) {
               variant="default"
               className="flex items-center gap-1.5"
               key={conn.id}
-              onClick={() => connect.connect({ connector: conn })}
+              onClick={() =>
+                connect.connect({
+                  connector: conn,
+                  ...(isE2E && conn.id === 'webAuthn'
+                    ? { capabilities: { method: 'register' as const, name: 'Tempo Docs' } }
+                    : {}),
+                })
+              }
             >
               {conn.icon ? <img className="size-5" src={conn.icon} alt={conn.name} /> : <div />}
               {conn.name}

@@ -7,15 +7,17 @@ import { mnemonicToAccount } from 'viem/accounts'
 import { Actions } from 'viem/tempo'
 import { useBlockNumber, useClient, useConnections } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
+import { isFundableWalletConnector } from '../../../lib/wallets'
 import { Button, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
 export function AddFundsToWallet(props: DemoStepProps) {
   const { stepNumber = 2, last = false } = props
+  const isE2E = import.meta.env.VITE_E2E === 'true'
   const connections = useConnections()
-  const walletConnection = connections.find(
-    (c) => c.connector.id !== 'webAuthn' && c.connector.id !== 'xyz.tempo',
+  const walletConnection = connections.find((c) =>
+    isFundableWalletConnector(c.connector, { includeWebAuthn: isE2E }),
   )
   const address = walletConnection?.accounts[0]
   const hasNonWebAuthnWallet = Boolean(address)
