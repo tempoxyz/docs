@@ -62,7 +62,7 @@ export default defineConfig(({ mode }) => {
   }
 })
 
-const marketingRoutes = ['/', '/build', '/blog', '/diagrams', '/performance']
+const marketingRoutes = ['/', '/build', '/blog', '/performance']
 
 function isMarketingPath(pathname: string) {
   const normalized = pathname.replace(/\/$/, '') || '/'

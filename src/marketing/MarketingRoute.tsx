@@ -36,10 +36,6 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
     description:
       'Nightly benchmarks on Tempo throughput, block times, execution rates, and uptime.',
   },
-  '/diagrams': {
-    title: 'Diagrams',
-    description: 'A playground for Tempo diagrams, product visuals, and house-style SVG exports.',
-  },
   '/blog': {
     title: 'Blog',
     description:
