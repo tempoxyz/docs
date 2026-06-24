@@ -17,6 +17,11 @@ test('fund an address via faucet', async ({ page }) => {
   // Click "Add funds" button
   await page.getByRole('button', { name: 'Add funds' }).click()
 
-  // Confirm "View receipt" link is visible
-  await expect(page.getByRole('link', { name: 'View receipt' })).toBeVisible({ timeout: 90000 })
+  // Confirm the explorer link resolves to the funded account's transfers
+  const transfersLink = page.getByRole('link', { name: 'View transfers' })
+  await expect(transfersLink).toBeVisible({ timeout: 90000 })
+  await expect(transfersLink).toHaveAttribute(
+    'href',
+    'https://explore.testnet.tempo.xyz/address/0xbeefcafe54750903ac1c8909323af7beb21ea2cb?tab=transfers',
+  )
 })

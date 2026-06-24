@@ -89,12 +89,16 @@ export function ReceiptHash({ hash }: { hash: string }) {
 export function ExplorerAccountLink({
   address,
   inline = false,
+  label = 'View account',
+  tab,
 }: {
   address: string
   inline?: boolean
+  label?: string
+  tab?: string
 }) {
   const { trackExternalLinkClick } = usePostHogTracking()
-  const url = `${getExplorerHost()}/address/${address}`
+  const url = `${getExplorerHost()}/address/${address}${tab ? `?tab=${tab}` : ''}`
 
   return (
     <div className={inline ? 'inline-flex' : 'mt-1'}>
@@ -103,9 +107,9 @@ export function ExplorerAccountLink({
         target="_blank"
         rel="noreferrer"
         className="flex items-center gap-1 text-[13px] text-accent -tracking-[1%] hover:underline"
-        onClick={() => trackExternalLinkClick(url, 'View account')}
+        onClick={() => trackExternalLinkClick(url, label)}
       >
-        View account
+        {label}
         <LucideExternalLink className="size-3" />
       </a>
     </div>
