@@ -22,7 +22,6 @@ const staticRouteCopies = [
   'build/tempo-transactions',
   'build/tip20-tokens',
   'blog',
-  'diagrams',
   'performance',
 ]
 
@@ -105,10 +104,6 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
     title: 'Performance',
     description:
       'Nightly benchmarks on Tempo throughput, block times, execution rates, and uptime.',
-  },
-  diagrams: {
-    title: 'Diagrams',
-    description: 'A playground for Tempo diagrams, product visuals, and house-style SVG exports.',
   },
   blog: {
     title: 'Blog',
@@ -212,7 +207,6 @@ function applyMarketingMetadata(html: string, route: string) {
 function marketingOgImage(route: string, metadata: { title: string; description: string }) {
   const sections: Record<string, string> = {
     performance: 'PERFORMANCE',
-    diagrams: 'DIAGRAMS',
     blog: 'BLOG',
   }
   const section = route.startsWith('blog/') ? 'BLOG' : sections[route] || 'BUILD'

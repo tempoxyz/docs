@@ -5,6 +5,8 @@
 
 import { type CategorySlug, categoryBySlug } from './app/blog/_lib/categories'
 
+const OG_IMAGE_VERSION = '2'
+
 export type PostSeo = {
   slug: string
   title: string // raw post title (no " — Tempo Developers" suffix)
@@ -36,7 +38,7 @@ export function ogImageUrl(
   base: string,
   params: { title: string; description: string; section: string },
 ): string {
-  const query = new URLSearchParams(params).toString()
+  const query = new URLSearchParams({ ...params, v: OG_IMAGE_VERSION }).toString()
   return absoluteUrl(base, `/api/og?${query}`)
 }
 

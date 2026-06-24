@@ -105,6 +105,7 @@ export default defineConfig({
     const extra = new URLSearchParams({
       section,
       ...(subsection ? { subsection } : {}),
+      v: '2',
     }).toString()
 
     return `${urlBase}/api/og?title=%title&description=%description&${extra}`

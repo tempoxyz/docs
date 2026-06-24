@@ -16,7 +16,6 @@ import HomePage from './HomePage'
 
 const loadBlogPage = () => import('./app/blog/page')
 const loadBlogPostPage = () => import('./app/blog/[slug]/page')
-const loadDiagramsPage = () => import('./DiagramsPage')
 const loadFeaturePage = () => import('./FeaturePage')
 const loadPerformancePage = () => import('./PerformancePage')
 
@@ -29,7 +28,6 @@ const SpeedInsights = lazy(() =>
 const GoogleAnalytics = lazy(() => import('../components/GoogleAnalytics'))
 const PostHogSetup = lazy(() => import('../components/PostHogSetup'))
 const PerformancePage = lazy(loadPerformancePage)
-const DiagramsPage = lazy(loadDiagramsPage)
 const FeaturePage = lazy(loadFeaturePage)
 const BlogPage = lazy(loadBlogPage)
 const BlogPostPage = lazy(loadBlogPostPage)
@@ -98,10 +96,6 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
     description:
       'Nightly benchmarks on Tempo throughput, block times, execution rates, and uptime.',
   },
-  '/diagrams': {
-    title: 'Diagrams',
-    description: 'A playground for Tempo diagrams, product visuals, and house-style SVG exports.',
-  },
   '/blog': {
     title: 'Blog',
     description:
@@ -161,8 +155,6 @@ function preloadRoute(pathname: string) {
     void loadFeaturePage()
   } else if (route === '/performance') {
     void loadPerformancePage()
-  } else if (route === '/diagrams') {
-    void loadDiagramsPage()
   } else if (route === '/blog') {
     void loadBlogPage()
   } else if (route.startsWith('/blog/')) {
@@ -195,7 +187,6 @@ function renderRoute(path: string): ReactNode {
   if (path === '/build/tempo-transactions') return <FeaturePage params={{ slug: 'transactions' }} />
   if (path === '/build/tip20-tokens') return <FeaturePage params={{ slug: 'tokens' }} />
   if (path === '/performance') return <PerformancePage />
-  if (path === '/diagrams') return <DiagramsPage />
   if (path === '/blog') return <BlogPage />
   if (path.startsWith('/blog/'))
     return <BlogPostPage params={{ slug: path.slice('/blog/'.length) }} />
