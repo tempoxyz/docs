@@ -15,6 +15,7 @@ import {
   ApiIcon,
   DocsIcon,
   ExplorerIcon,
+  FaucetIcon,
   McpIcon,
   TerminalIcon,
   TokensIcon,
@@ -73,6 +74,12 @@ const developersMenu: MegaMenuData = {
           desc: 'A Tempo-first wallet for your agents',
           href: 'https://wallet.tempo.xyz',
           icon: <WalletIcon />,
+        },
+        {
+          label: 'Faucet',
+          desc: 'Get testnet tokens for development',
+          href: '/docs/quickstart/faucet',
+          icon: <FaucetIcon />,
         },
         {
           label: 'TIDX',

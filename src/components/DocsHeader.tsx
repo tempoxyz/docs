@@ -214,6 +214,15 @@ function WalletIcon() {
   )
 }
 
+function FaucetIcon() {
+  return (
+    <Glyph>
+      <path d="M12 3.5c3.5 4.3 5.3 7.2 5.3 10a5.3 5.3 0 0 1-10.6 0c0-2.8 1.8-5.7 5.3-10Z" />
+      <path d="M10 16.5c1.5 1 3.5.5 4.4-1" />
+    </Glyph>
+  )
+}
+
 function ApiIcon() {
   return (
     <Glyph>
@@ -301,6 +310,12 @@ const developersMenu: MegaMenuData = {
           desc: 'A Tempo-first wallet for your agents',
           href: 'https://wallet.tempo.xyz',
           icon: <WalletIcon />,
+        },
+        {
+          label: 'Faucet',
+          desc: 'Get testnet tokens for development',
+          href: `${DOCS_BASE_PATH}/quickstart/faucet`,
+          icon: <FaucetIcon />,
         },
         {
           label: 'TIDX',
