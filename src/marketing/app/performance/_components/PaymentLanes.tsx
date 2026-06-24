@@ -186,7 +186,7 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
             fill="var(--indicator-green)"
             className="font-mono text-[11px]"
           >
-            $0.001 base fee
+            &lt;$0.001 average fee
           </text>
         </svg>
       ) : null}
