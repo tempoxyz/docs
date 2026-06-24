@@ -32,7 +32,7 @@ Vocs-powered documentation site for Tempo protocol.
 ## Protocol Concept Naming
 
 - Use literal concept names in user-facing docs. Add the TIP number in parentheses only in the sidebar and when first introducing a concept if it helps disambiguate.
-- Use `Tempo Tokens (TIP-20)` in sidebar/first-introduction contexts; use `Tempo Tokens` after that.
+- Use `TIP-20 Tokens` for sidebar labels, page titles, headings, and first-introduction contexts; use `TIP-20 tokens` in sentence-case prose after that.
 - Use `Tempo Token Rewards` in sidebar, concept introductions, and rewards-specific resource cards. Do not append `(TIP-20)`.
 - Keep raw TIP references for technical/spec contexts, e.g. `TIP-20 ABI`, `TIP-403 policy check`, or links titled `TIP-20 Specification`.
 

@@ -6,7 +6,7 @@
     "name": "Tempo",
     "url": "https://tempo.xyz"
   },
-  "homepage": "https://docs.tempo.xyz/guide/using-tempo-with-ai",
+  "homepage": "https://docs.tempo.xyz/docs/guide/using-tempo-with-ai",
   "repository": "https://github.com/tempoxyz/docs",
   "license": "MIT",
   "keywords": ["tempo", "mcp", "payments", "wallet", "stablecoins", "mpp"],

@@ -61,8 +61,6 @@ const subsectionMap: Record<string, string> = {
   stablecoins: 'STABLECOINS',
   'use-cases': 'USE CASES',
   tempo: 'TEMPO',
-  zones: 'ZONES',
-  'private-zones': 'PRIVATE ZONES',
   upgrades: 'UPGRADES',
   api: 'API',
   guides: 'GUIDES',

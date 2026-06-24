@@ -1,9 +1,13 @@
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import react from '@vitejs/plugin-react'
 import { Instance } from 'prool'
-import { defineConfig, loadEnv, type Plugin } from 'vite'
+import Icons from 'unplugin-icons/vite'
+import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { vocs } from 'vocs/vite'
-import { moderatoZoneRpcUrls } from './src/lib/private-zones.ts'
+import { blogPostsPlugin } from './src/marketing/blogPlugin'
+import { marketingSearchIndexPlugin } from './src/marketing/searchIndexPlugin'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -12,43 +16,141 @@ export default defineConfig(({ mode }) => {
     if (!(key in process.env)) process.env[key] = env[key]
   }
 
-  const isE2E = process.env.VITE_E2E === 'true' || env.VITE_E2E === 'true'
   const useHttp = process.env.CI === 'true' || process.env.VITE_USE_HTTP === 'true'
-  const e2eZoneProxy = isE2E ? getE2EZoneProxy() : undefined
+  const proxy = {
+    '/api/mcp': {
+      changeOrigin: true,
+      rewrite: () => '/',
+      secure: true,
+      target: 'https://mcp.tempo.xyz',
+    },
+  }
 
   return {
-    plugins: [vocs(), react(), ...(useHttp ? [] : [mkcert()]), tempoNode()],
-    server: useHttp
-      ? {
-          host: 'localhost',
-          proxy: e2eZoneProxy,
-        }
-      : undefined,
+    plugins: [
+      blogPostsPlugin(),
+      marketingSearchIndexPlugin({ source: 'vocs' }),
+      marketingPages(),
+      vocs(),
+      Icons({ compiler: 'jsx', jsx: 'react' }),
+      react(),
+      ...(useHttp ? [] : [mkcert()]),
+      tempoNode(),
+      llmsFeedbackPreamble(),
+    ],
+    resolve: {
+      alias: [
+        {
+          find: 'next/image',
+          replacement: path.resolve(process.cwd(), 'src/marketing/next-shims.tsx'),
+        },
+        {
+          find: 'next/link',
+          replacement: path.resolve(process.cwd(), 'src/marketing/next-shims.tsx'),
+        },
+        {
+          find: 'next/navigation',
+          replacement: path.resolve(process.cwd(), 'src/marketing/next-shims.tsx'),
+        },
+        { find: 'next', replacement: path.resolve(process.cwd(), 'src/marketing/next-shims.tsx') },
+      ],
+    },
+    server: {
+      ...(useHttp ? { host: 'localhost' } : {}),
+      proxy,
+    },
   }
 })
 
-function getE2EZoneProxy() {
-  return Object.fromEntries(
-    Object.entries(moderatoZoneRpcUrls).map(([zoneId, rpcUrl]) => {
-      const parsedUrl = new URL(rpcUrl)
-      const authorization = `Basic ${Buffer.from(
-        `${decodeURIComponent(parsedUrl.username)}:${decodeURIComponent(parsedUrl.password)}`,
-      ).toString('base64')}`
-      parsedUrl.username = ''
-      parsedUrl.password = ''
+const marketingRoutes = ['/', '/build', '/blog', '/performance']
 
-      return [
-        `/__e2e_zone_rpc/${zoneId}`,
-        {
-          changeOrigin: true,
-          headers: { authorization },
-          rewrite: () => '/',
-          secure: true,
-          target: parsedUrl.toString(),
-        },
-      ]
-    }),
+function isMarketingPath(pathname: string) {
+  const normalized = pathname.replace(/\/$/, '') || '/'
+  // Let requests for actual files (e.g. /blog/foo.svg) fall through to Vite's
+  // static asset serving instead of returning the marketing SPA shell.
+  const lastSegment = normalized.split('/').pop() ?? ''
+  if (lastSegment.includes('.')) return false
+  return (
+    marketingRoutes.includes(normalized) ||
+    normalized.startsWith('/build/') ||
+    normalized.startsWith('/blog/')
   )
+}
+
+async function marketingHtml() {
+  const html = await fs.readFile(path.resolve(process.cwd(), 'src/marketing/index.html'), 'utf-8')
+  return html.replace('src="./main.tsx"', 'src="/src/marketing/main.tsx"')
+}
+
+function marketingPages(): Plugin {
+  return {
+    name: 'tempo-marketing-pages',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        if (!req.url) return next()
+        const url = new URL(req.url, 'http://localhost')
+        if (!isMarketingPath(url.pathname)) return next()
+
+        const html = await server.transformIndexHtml(url.pathname, await marketingHtml())
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'text/html')
+        res.end(html)
+      })
+    },
+  }
+}
+
+const llmsFeedbackNotice = [
+  '> Feedback: If these docs are stale, missing, or confusing, post sanitized feedback to `https://docs.tempo.xyz/api/feedback` with `source: "mcp"`, a short `message`, and any relevant `toolName`, `relatedResource`, or `client`.',
+  '',
+].join('\n')
+
+function llmsFeedbackPreamble(): Plugin {
+  let viteConfig: ResolvedConfig
+
+  return {
+    name: 'tempo-llms-feedback-preamble',
+    configResolved(config) {
+      viteConfig = config
+    },
+    async closeBundle() {
+      const publicDir = path.resolve(viteConfig.root, viteConfig.build.outDir, 'public')
+      const candidates = [
+        path.join(publicDir, 'llms.txt'),
+        path.join(publicDir, 'llms-full.txt'),
+        ...(await markdownFiles(path.join(publicDir, 'assets/md'))),
+      ]
+
+      await Promise.all(candidates.map(prependFeedbackNotice))
+    },
+  }
+}
+
+async function markdownFiles(directory: string): Promise<string[]> {
+  try {
+    const entries = await fs.readdir(directory, { withFileTypes: true })
+    const files = await Promise.all(
+      entries.map(async (entry) => {
+        const entryPath = path.join(directory, entry.name)
+        if (entry.isDirectory()) return markdownFiles(entryPath)
+        if (entry.isFile() && entry.name.endsWith('.md')) return [entryPath]
+        return []
+      }),
+    )
+    return files.flat()
+  } catch {
+    return []
+  }
+}
+
+async function prependFeedbackNotice(filePath: string) {
+  try {
+    const content = await fs.readFile(filePath, 'utf-8')
+    if (content.startsWith(llmsFeedbackNotice)) return
+    await fs.writeFile(filePath, `${llmsFeedbackNotice}${content}`, 'utf-8')
+  } catch {
+    return
+  }
 }
 
 function tempoNode(): Plugin {

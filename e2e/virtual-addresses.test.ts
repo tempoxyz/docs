@@ -1,7 +1,34 @@
-import { expect, test } from '@playwright/test'
+import { expect, type Locator, type Page, test } from '@playwright/test'
+
+async function openVirtualAddressesGuide(page: Page): Promise<Locator> {
+  let lastError: unknown
+
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      await page.goto('/docs/guide/payments/virtual-addresses', { waitUntil: 'domcontentloaded' })
+
+      await expect(
+        page.getByRole('heading', { name: 'Use virtual addresses for deposits' }),
+      ).toBeVisible({ timeout: 30000 })
+
+      const realRegistrationTab = page.getByRole('tab', { name: 'Real registration' })
+      await expect(realRegistrationTab).toBeVisible({ timeout: 30000 })
+      return realRegistrationTab
+    } catch (error) {
+      lastError = error
+
+      if (attempt === 3) throw error
+
+      // Vite can briefly serve SSR while client chunks are still re-optimizing in CI.
+      await page.waitForTimeout(1000)
+    }
+  }
+
+  throw lastError
+}
 
 test('virtual addresses guide signs in and starts master registration', async ({ page }) => {
-  test.setTimeout(150000)
+  test.setTimeout(240000)
 
   const client = await page.context().newCDPSession(page)
   await client.send('WebAuthn.enable')
@@ -16,7 +43,8 @@ test('virtual addresses guide signs in and starts master registration', async ({
   })
 
   try {
-    await page.goto('/guide/use-accounts/embed-passkeys')
+    const realRegistrationTab = await openVirtualAddressesGuide(page)
+    await realRegistrationTab.click()
 
     const passkeySignUpButton = page.getByRole('button', { name: 'Sign up' }).first()
     await expect(passkeySignUpButton).toBeVisible({ timeout: 90000 })
@@ -26,12 +54,6 @@ test('virtual addresses guide signs in and starts master registration', async ({
       timeout: 30000,
     })
 
-    await page.goto('/guide/payments/virtual-addresses')
-
-    await expect(
-      page.getByRole('heading', { name: 'Use virtual addresses for deposits' }),
-    ).toBeVisible()
-    await page.getByRole('tab', { name: 'Real registration' }).click()
     await expect(page.getByRole('button', { name: 'Sign out' }).first()).toBeVisible({
       timeout: 30000,
     })

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 
-function PostHogInitializer() {
+function PostHogInitializer({ site }: { site: string }) {
   useEffect(() => {
     const posthogKey = import.meta.env.VITE_POSTHOG_KEY
     const posthogHost = import.meta.env.VITE_POSTHOG_HOST
@@ -25,7 +25,7 @@ function PostHogInitializer() {
           },
         },
       })
-      posthog.register({ site: 'docs' })
+      posthog.register({ site })
     }
 
     if ('requestIdleCallback' in window) {
@@ -35,16 +35,16 @@ function PostHogInitializer() {
 
     const timeoutId = globalThis.setTimeout(init, 1)
     return () => globalThis.clearTimeout(timeoutId)
-  }, [])
+  }, [site])
 
   return null
 }
 
-export default function PostHogSetup() {
+export default function PostHogSetup({ site = 'docs' }: { site?: string }) {
   const posthogKey = import.meta.env.VITE_POSTHOG_KEY
   const posthogHost = import.meta.env.VITE_POSTHOG_HOST
 
   if (!posthogKey || !posthogHost) return null
 
-  return <PostHogInitializer />
+  return <PostHogInitializer site={site} />
 }

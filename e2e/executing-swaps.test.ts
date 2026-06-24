@@ -16,7 +16,7 @@ test('executing swaps', async ({ page }) => {
     },
   })
 
-  await page.goto('/guide/stablecoin-dex/executing-swaps')
+  await page.goto('/docs/guide/stablecoin-dex/executing-swaps')
 
   // Step 1: Sign in
   const signUpButton = page.getByRole('button', { name: 'Sign in' }).first()

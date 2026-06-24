@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 368 366">
+  <defs>
+    <mask id="am">
+      <rect width="368" height="366" fill="#fff"/>
+      <g fill="#000" stroke="#000" stroke-width="8" stroke-linejoin="round">
+        <polygon points="109,68.6 66.6,149 151.4,149"/>
+        <polygon points="230.8,215 204.5,261.5 230.8,308 283.2,308 309.5,261.5 283.2,215"/>
+      </g>
+      <rect x="212" y="61" width="90" height="90" rx="10" fill="#000"/>
+      <circle cx="107.5" cy="262" r="52.5" fill="#000"/>
+    </mask>
+  </defs>
+  <rect width="368" height="366" fill="#000" mask="url(#am)"/>
+</svg>

@@ -98,6 +98,7 @@ function PasskeyLogin() {
   const connect = useConnect()
   const disconnect = useDisconnect()
   const connector = useWebAuthnConnector()
+  const isE2E = import.meta.env.VITE_E2E === 'true'
 
   return connect.isPending ? (
     <Button disabled variant="default" type="button">
@@ -110,7 +111,10 @@ function PasskeyLogin() {
         className="font-normal text-[14px] -tracking-[2%]"
         onClick={async () => {
           await disconnect.disconnectAsync().catch(() => {})
-          connect.connect({ connector })
+          connect.connect({
+            connector,
+            ...(isE2E ? { capabilities: { method: 'register' as const, name: 'Tempo Docs' } } : {}),
+          })
         }}
         type="button"
       >
@@ -121,7 +125,10 @@ function PasskeyLogin() {
         className="font-normal text-[14px] -tracking-[2%]"
         onClick={async () => {
           await disconnect.disconnectAsync().catch(() => {})
-          connect.connect({ connector })
+          connect.connect({
+            connector,
+            ...(isE2E ? { capabilities: { method: 'register' as const, name: 'Tempo Docs' } } : {}),
+          })
         }}
         type="button"
       >

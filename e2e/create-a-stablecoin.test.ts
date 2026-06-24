@@ -16,7 +16,7 @@ test('create a stablecoin', async ({ page }) => {
     },
   })
 
-  await page.goto('/guide/issuance/create-a-stablecoin')
+  await page.goto('/docs/guide/issuance/create-a-stablecoin')
 
   // Step 1: Sign in
   const signUpButton = page.getByRole('button', { name: 'Sign in' }).first()

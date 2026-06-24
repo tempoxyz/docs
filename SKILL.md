@@ -31,6 +31,8 @@ Use these tools for structured exploration:
 | `mcp__tempo_mcp__get_file_tree` | Get recursive file tree |
 | `mcp__tempo_mcp__search_source` | Search source code |
 
+If a user reports stale, missing, or confusing Tempo docs while using MCP context, send sanitized feedback to `https://docs.tempo.xyz/api/feedback` with `source: "mcp"`, `message`, and any relevant `toolName` or `relatedResource`.
+
 ## Available Sources
 
 - `tempoxyz/tempo` – Tempo node (Rust)

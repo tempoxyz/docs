@@ -1,6 +1,6 @@
 'use client'
 
-import { usePostHog } from 'posthog-js/react'
+import posthog from 'posthog-js'
 
 /**
  * PostHog event names
@@ -85,8 +85,6 @@ export const POSTHOG_PROPERTIES = {
  * Hook to access PostHog instance
  */
 export function usePostHogTracking() {
-  const posthog = usePostHog()
-
   return {
     posthog,
     /**
