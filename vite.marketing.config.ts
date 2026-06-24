@@ -67,7 +67,7 @@ async function marketingRouteCopiesForBuild() {
   blogPostByRoute.clear()
   for (const post of posts) {
     blogRouteMetadata.set(`blog/${post.slug}`, {
-      title: `${post.title} — Tempo Developers`,
+      title: post.title,
       description: post.excerpt,
     })
     blogPostByRoute.set(`blog/${post.slug}`, {
@@ -88,7 +88,7 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
       'The only blockchain designed for payments. Sub-second transactions, sub-cent fees.',
   },
   build: {
-    title: 'Tempo',
+    title: 'Build on Tempo',
     description:
       'Build payment products on Tempo with stablecoins, fast settlement, and predictable fees.',
   },
@@ -102,16 +102,16 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
       'Stablecoin-first Tempo Tokens for payments, fees, memos, policies, and liquidity.',
   },
   performance: {
-    title: 'Tempo Performance',
+    title: 'Performance',
     description:
       'Nightly benchmarks on Tempo throughput, block times, execution rates, and uptime.',
   },
   diagrams: {
-    title: 'Tempo Diagrams',
+    title: 'Diagrams',
     description: 'A playground for Tempo diagrams, product visuals, and house-style SVG exports.',
   },
   blog: {
-    title: 'Blog — Tempo Developers',
+    title: 'Blog',
     description:
       'Engineering deep dives, network upgrades, events, and case studies from the Tempo team.',
   },
@@ -216,9 +216,8 @@ function marketingOgImage(route: string, metadata: { title: string; description:
     blog: 'BLOG',
   }
   const section = route.startsWith('blog/') ? 'BLOG' : sections[route] || 'BUILD'
-  const title = route === 'performance' ? 'Performance' : metadata.title
   return ogImageUrl(siteBaseUrl, {
-    title,
+    title: metadata.title,
     description: metadata.description,
     section,
   })

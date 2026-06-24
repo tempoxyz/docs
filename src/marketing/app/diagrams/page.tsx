@@ -5,7 +5,7 @@ import FeatureDiagramGallery from './_components/FeatureDiagramGallery'
 import Playground from './_components/Playground'
 
 export const metadata: Metadata = {
-  title: 'Diagram playground — Tempo Developers',
+  title: 'Diagrams',
   description:
     "Internal playground for Tempo's diagram language, including feature diagrams and static SVG exports.",
 }

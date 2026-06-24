@@ -9,7 +9,7 @@ import {
   resolveBaseUrl,
 } from '../../marketing/seo'
 
-const BLOG_TITLE = 'Blog — Tempo Developers'
+const BLOG_TITLE = 'Blog'
 const BLOG_DESCRIPTION =
   'Engineering deep dives, network upgrades, events, and case studies from the Tempo team.'
 
@@ -38,7 +38,7 @@ export default function Page({ slug }: { slug: string }) {
   const base = resolveBaseUrl()
   const post = postBySlug.get(slug)
 
-  const title = post ? `${post.title} — Tempo Developers` : BLOG_TITLE
+  const title = post ? post.title : BLOG_TITLE
   const description = post?.excerpt ?? BLOG_DESCRIPTION
   const canonical = absoluteUrl(base, post ? `/blog/${slug}` : '/blog')
   const ogImage = ogImageUrl(base, { title, description, section: 'BLOG' })
