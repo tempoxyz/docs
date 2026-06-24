@@ -8,6 +8,10 @@ import { Cards, Card } from 'vocs'
 
 The Fee AMM (Automated Market Maker) is a dedicated system for converting transaction fees between different stablecoins. It enables users to pay fees in any supported stablecoin while allowing validators to receive fees in their preferred token.
 
+:::info
+**Fee AMM vs. Exchange** — these are two different systems. The Fee AMM is protocol-driven: it converts transaction-fee payments into validators' preferred tokens at a fixed price, and only the protocol (and arbitrageurs rebalancing it) swaps against it — it is not a trading venue. For user-facing stablecoin trading (swaps, orders, prices, orderbook), use the [Exchange](/docs/protocol/exchange). See [Fee AMM vs. Exchange](#fee-amm-vs-exchange) below.
+:::
+
 ## How It Works
 
 When a user pays fees in a stablecoin that differs from the validator's preference, the Fee AMM automatically converts the payment:
@@ -17,6 +21,21 @@ When a user pays fees in a stablecoin that differs from the validator's preferen
 - **Liquidity providers earn**: 0.003 (0.3%) as fees
 
 This conversion happens automatically at the end of each block through batched swaps, preventing MEV attacks like sandwiching.
+
+## Fee AMM vs. Exchange
+
+Tempo has two stablecoin-swapping systems that are easy to confuse. They serve different purposes:
+
+| | [Exchange (DEX)](/docs/protocol/exchange) | Fee AMM |
+|---|---|---|
+| **Purpose** | User-facing stablecoin trading | Converting transaction fees into validators' preferred tokens |
+| **Who initiates swaps** | Users and apps | The protocol, automatically (plus arbitrageurs rebalancing) |
+| **Pricing** | Market-driven orderbook (price-time priority) | Fixed conversion price |
+| **Liquidity** | Limit and flip orders resting in the orderbook | LP deposits into per-pair fee pools |
+| **Contract** | Stablecoin DEX precompile (`0xdec0…0000`) | `FeeManager` precompile (`0xfeec…0000`) |
+| **Use it for** | Swaps, prices, orderbook depth, fills | Letting users pay fees in any stablecoin |
+
+If you want to **trade** stablecoins or read market data, use the [Exchange](/docs/protocol/exchange). If you want to **enable fee payments** in your stablecoin or provide fee-conversion liquidity, you're in the right place — continue below.
 
 ## Learn More
 

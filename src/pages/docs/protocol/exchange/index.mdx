@@ -10,6 +10,10 @@ Tempo features an enshrined decentralized exchange (DEX) designed specifically f
 
 The exchange operates as a singleton precompiled contract at address `0xdec0000000000000000000000000000000000000`. It maintains an orderbook with separate queues for each price tick, using price-time priority for order matching.
 
+:::info
+**Exchange vs. Fee AMM** — these are two different systems. The Exchange is the user-facing market: you (or your app) trade stablecoins at market prices via swaps and orders against an orderbook. The [Fee AMM](/docs/protocol/fees/fee-amm) is protocol fee-conversion liquidity: it converts users' transaction-fee payments into validators' preferred tokens at a fixed price through protocol-driven swaps, and is not a trading venue. See [Exchange vs. Fee AMM](#exchange-vs-fee-amm) below.
+:::
+
 Trading pairs are determined by each token's quote token. All TIP-20 tokens specify a quote token for trading on the exchange. See [Quote Tokens](/docs/protocol/exchange/quote-tokens) for more information on quote token selection and the optional [pathUSD](/docs/protocol/exchange/quote-tokens#pathusd) stablecoin. See the [Stablecoin DEX Specification](/docs/protocol/exchange/spec) for detailed information on the exchange structure.
 
 The exchange supports three types of orders, each with different execution behavior:
@@ -21,6 +25,21 @@ The exchange supports three types of orders, each with different execution behav
 | [**Market Orders**](/docs/protocol/exchange/executing-swaps#swap-functions) | Execute immediately against the best available orders in the book (via swap functions). Swaps and cancellations execute immediately within the transaction. |
 
 For the complete execution mechanics, see the [Stablecoin DEX Specification](/docs/protocol/exchange/spec).
+
+## Exchange vs. Fee AMM
+
+Tempo has two stablecoin-swapping systems that are easy to confuse. They serve different purposes:
+
+| | Exchange (DEX) | [Fee AMM](/docs/protocol/fees/fee-amm) |
+|---|---|---|
+| **Purpose** | User-facing stablecoin trading | Converting transaction fees into validators' preferred tokens |
+| **Who initiates swaps** | Users and apps | The protocol, automatically (plus arbitrageurs rebalancing) |
+| **Pricing** | Market-driven orderbook (price-time priority) | Fixed conversion price |
+| **Liquidity** | Limit and flip orders resting in the orderbook | LP deposits into per-pair fee pools |
+| **Contract** | Stablecoin DEX precompile (`0xdec0…0000`) | `FeeManager` precompile (`0xfeec…0000`) |
+| **Use it for** | Swaps, prices, orderbook depth, fills | Letting users pay fees in any stablecoin |
+
+If you want to **trade** stablecoins or read market data (pairs, swaps, orders, prices), use the Exchange. If you want to **enable fee payments** in your stablecoin or provide fee-conversion liquidity, see the [Fee AMM](/docs/protocol/fees/fee-amm).
 
 To get started with the exchange, explore these guides:
 
