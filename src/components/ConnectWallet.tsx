@@ -18,7 +18,10 @@ const mainnetParams = {
 export function ConnectWallet({
   showAddChain = true,
   network = 'testnet',
-}: { showAddChain?: boolean; network?: 'mainnet' | 'testnet' }) {
+}: {
+  showAddChain?: boolean
+  network?: 'mainnet' | 'testnet'
+}) {
   const { address, chain, connector } = useConnection()
   const connect = useConnect()
   const connectors = useConnectors()

@@ -17,7 +17,7 @@ test('send a payment', async ({ page }) => {
     },
   })
 
-  await page.goto('/guide/payments/send-a-payment')
+  await page.goto('/docs/guide/payments/send-a-payment')
 
   // Step 1: Sign in
   const signUpButton = page.getByRole('button', { name: 'Sign in' }).first()

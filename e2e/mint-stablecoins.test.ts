@@ -17,7 +17,7 @@ test('mint stablecoins', async ({ page }) => {
     },
   })
 
-  await page.goto('/guide/issuance/mint-stablecoins')
+  await page.goto('/docs/guide/issuance/mint-stablecoins')
 
   // Step 1: Sign in
   const signUpButton = page.getByRole('button', { name: 'Sign in' }).first()

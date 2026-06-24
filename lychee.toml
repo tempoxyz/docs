@@ -33,8 +33,6 @@ exclude = [
   "^https?://([a-z0-9-]+\\.)*example\\.(com|org|net)",
   # SVG xmlns reference, not a real link.
   "^http://www\\.w3\\.org/2000/svg$",
-  # Vocs/Vercel route template, not a literal URL.
-  "^https://accounts\\.tempo\\.xyz/docs/:path\\*?$",
 ]
 
 # Reuse cached results across runs.

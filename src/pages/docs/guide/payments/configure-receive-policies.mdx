@@ -1,0 +1,170 @@
+---
+title: Configure Receive Policies
+description: Configure receive policies for TIP-20 payments by choosing sender rules, token filters, and recovery authority for blocked receipts.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Configure Receive Policies
+
+Receive policies let a receiver define which [TIP-20](/docs/protocol/tip20/overview) tokens it accepts and which senders may send those tokens to it.
+
+This page is intentionally about the builder flow rather than the full spec. It covers when to configure a policy, what happens when delivery is blocked, and what operators need to watch.
+
+If a receive policy blocks an inbound transfer or mint, the TIP-20 call still succeeds. The funds are credited to `ReceivePolicyGuard` instead of the receiver, and `ReceivePolicyGuard` records a receipt that can be claimed later by the configured recovery authority.
+
+The token's [TIP-403](/docs/protocol/tip403/spec) policy checks still run first and still revert on failure. Only a receive-policy failure redirects delivery to `ReceivePolicyGuard`.
+
+For the full protocol flow, claim rules, burn rules, and event signatures, see the [Receive Policies protocol overview](/docs/protocol/tip403/receive-policies).
+
+## When to configure a receive policy
+
+Configure a receive policy when an address should reject some incoming TIP-20 tokens or some incoming senders.
+
+For example, receive policies are useful when:
+
+- a regulated entity that only wants to receive from addresses held by individuals it has KYC'ed
+- an orchestrator or exchange that only wants specific tokens sent to its deposit addresses
+
+## Know the behavior
+
+If an address has no receive policy, all transfers and mints are allowed by the receive-policy layer.
+
+| Result | Transaction result | Where the funds go |
+|---|---|---|
+| Token-level checks fail | The call reverts | Funds are not delivered |
+| Receive policy allows | The call succeeds | Receiver is credited normally |
+| Receive policy blocks | The call succeeds | `ReceivePolicyGuard` is credited and records a receipt |
+
+The receive-policy check applies to `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `systemTransferFrom`, `mint`, and `mintWithMemo`.
+
+It does not apply to `approve`, `permit`, or `burn`. It also does not affect fee deposits or refunds through `transfer_fee_pre_tx` or `transfer_fee_post_tx`, TIP-20 rewards, or internal balances.
+
+For `transferFrom`, the spender's allowance is consumed even when the receiver's policy blocks delivery, because the funds still move out of the `from` account.
+
+## Configure the policy
+
+:::::steps
+
+### Create or choose a sender policy
+
+A receive policy uses `senderPolicyId` to decide which senders are allowed. The sender policy can be:
+
+- built-in policy `0`, which rejects all
+- built-in policy `1`, which allows all
+- an existing simple TIP-403 `WHITELIST` or `BLACKLIST` policy
+- a newly created simple TIP-403 `WHITELIST` or `BLACKLIST` policy
+
+`COMPOUND` policies are not valid for `senderPolicyId`.
+
+### Create or choose a token filter
+
+A receive policy uses `tokenFilterId` to decide which TIP-20 tokens are allowed. Token filters use existing TIP-403 policy data and membership sets, where members are interpreted as TIP-20 token addresses.
+
+The token filter can use built-in policy `0`, built-in policy `1`, or a simple TIP-403 `WHITELIST` or `BLACKLIST` policy. `COMPOUND` policies are not valid for `tokenFilterId`.
+
+Receive policies do not add a dedicated token-filter interface. Token filters are managed through the existing TIP-403 policy interface.
+
+### Choose a recovery authority
+
+The recovery authority controls who may claim receipts for future blocked transfers or mints:
+
+| Recovery authority | Who can claim |
+|---|---|
+| `address(0)` | the originator of the transfer or mint |
+| the receiver's address | the receiver |
+| another nonzero address | that address |
+
+Changing the recovery authority affects future receipts only. Existing receipts keep the recovery authority captured when they were created.
+
+Nonzero recovery authorities cannot be `ReceivePolicyGuard`, [TIP-1022](https://tips.sh/1022) virtual addresses, or system precompile addresses that cannot initiate calls.
+
+### Set the receive policy
+
+Call `setReceivePolicy(senderPolicyId, tokenFilterId, recoveryAuthority)` from the address being configured.
+
+If the receiver is using TIP-1022 virtual addresses, configure the policy on the resolved master address. A virtual address must not call `setReceivePolicy(...)`.
+
+:::::
+
+## Monitor blocked receipts
+
+`ReceivePolicyGuard` lives at `0xB10C000000000000000000000000000000000000`.
+
+When delivery is blocked, the token balance is credited to that address. `ReceivePolicyGuard` stores a keyed amount for the blocked receipt. The receipt includes the token, recovery authority, originator, recipient, timestamp, nonce, blocked reason, inbound kind, and memo.
+
+`ReceivePolicyGuard` does not enumerate receipts onchain. Claimers need the receipt bytes, usually by indexing `TransferBlocked` events.
+
+The regular TIP-20 events still happen:
+
+- a blocked transfer emits the regular `Transfer` event with `ReceivePolicyGuard` as the recipient, then `TransferBlocked(...)`
+- a blocked mint emits the regular `Transfer` and `Mint` events with `ReceivePolicyGuard` as the recipient, then `TransferBlocked(...)`
+
+Index these events to track policy changes and receipt lifecycle:
+
+| Event | Purpose |
+|---|---|
+| `ReceivePolicyUpdated` | A receive policy changed for an address |
+| `TransferBlocked` | A transfer or mint was blocked and a receipt was created |
+| `ReceiptClaimed` | A receipt was consumed and funds were released |
+| `ReceiptBurned` | A receipt was consumed and funds were burned |
+
+`TransferBlocked.receipt` is the ABI-encoded receipt witness. The spec requires that this receipt be directly usable as the `receipt` argument to `balanceOf`, `claim`, and `burnBlockedReceipt`.
+
+## Claim blocked receipts
+
+A claim is the normal recovery path for blocked transfers or mints. It consumes one full receipt and releases the full amount to one destination. Partial claims are not supported.
+
+Only the authorized claimer may call `claim(...)`:
+
+- if the receipt's `recoveryAuthority` is `address(0)`, only the receipt's `originator` may claim
+- otherwise, only the receipt's nonzero `recoveryAuthority` may claim
+
+Changing a receiver's recovery authority does not change who can claim older receipts.
+
+Claim paths have additional policy checks. See the [protocol overview](/docs/protocol/tip403/receive-policies#claims) before implementing recovery flows.
+
+## Burn blocked receipts
+
+Burning is an issuer-only path for blocked receipts.
+
+`burnBlockedReceipt(...)` consumes one full receipt and burns the stored amount from `ReceivePolicyGuard`.
+
+The caller must hold `BURN_BLOCKED_ROLE` for the token. A receipt is burnable only when its policy subject is currently unauthorized as a sender under the token's TIP-403 policy.
+
+Burn eligibility has additional policy checks. See the [protocol overview](/docs/protocol/tip403/receive-policies#burns) before implementing issuer burn flows.
+
+## Virtual-address behavior
+
+If `to` is a TIP-1022 virtual address, it is resolved to its master address before checks run. Receive-policy checks use the master address.
+
+If resolution fails, the operation reverts as before. If the transfer or mint is blocked, the receipt is recorded for the master address and preserves the original `to` for attribution.
+
+## Learn more
+
+<Cards>
+  <Card
+    title="TIP-1028"
+    description="The approved specification for address-level receive policies."
+    to="https://tips.sh/1028"
+    icon="lucide:file-text"
+  />
+  <Card
+    title="Protocol Overview"
+    description="Technical reference for receive-policy evaluation, guard receipts, claims, and events."
+    to="/docs/protocol/tip403/receive-policies"
+    icon="lucide:file-code"
+  />
+  <Card
+    title="Accept a Payment"
+    description="Verify incoming payments and listen for transfer events."
+    to="/docs/guide/payments/accept-a-payment"
+    icon="lucide:handshake"
+  />
+  <Card
+    title="Use Virtual Addresses"
+    description="Understand how TIP-1022 virtual addresses affect deposit attribution."
+    to="/docs/guide/payments/virtual-addresses"
+    icon="lucide:route"
+  />
+</Cards>

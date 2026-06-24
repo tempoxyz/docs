@@ -1,0 +1,126 @@
+---
+title: Errors
+description: How the Tempo API signals errors, including HTTP status codes, the error envelope, and the full catalog of machine-readable error codes.
+---
+
+# Errors
+
+The Tempo API uses conventional HTTP status codes to indicate the result of a request:
+
+- **`2xx`**: the request succeeded.
+- **`4xx`**: the request failed given the information provided (for example, a missing parameter or an unknown resource).
+- **`5xx`**: something went wrong on Tempo's side.
+
+## Error Response
+
+Every error returns the same JSON envelope:
+
+```json
+{
+  "error": {
+    "code": "token_not_found",
+    "message": "No token exists at the given address.",
+    "details": [
+      { "message": "Check the address and try again.", "path": ["param", "token"] }
+    ]
+  },
+  "requestId": "0a1b2c3d-4e5f-6071-8293-a4b5c6d7e8f9"
+}
+```
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `error.code` | string | A short, stable, machine-readable code. Branch on this. |
+| `error.message` | string | A human-readable explanation. May change without notice. |
+| `error.details` | array | Present on validation errors. Each entry has a `message` and a `path` into your request, such as `["query", "limit"]`. |
+| `requestId` | string | The request's `tempo-request-id`. Include it when contacting support. |
+
+:::info
+Branch on `error.code`, never on `error.message`. Codes are stable; messages are human-readable text and may change at any time. New codes may be added within an existing category. See the [Versioning Policy](/api/versioning-policy).
+:::
+
+## 400: Bad Request
+
+The request was malformed or contained invalid data. Validation errors include a `details` array pointing at the offending fields.
+
+| Code | Meaning |
+| --- | --- |
+| `query_invalid` | A query parameter is missing or invalid. |
+| `param_invalid` | A path parameter is invalid. |
+| `body_invalid` | The request body is missing fields or malformed. |
+| `address_invalid` | An account address is not a valid `0x` 20-byte address. |
+| `token_invalid` | A token address is not a valid TIP-20 token address. |
+| `symbol_invalid` | A token symbol is invalid. |
+| `pair_invalid` | A trading pair is invalid. |
+| `pair_id_invalid` | A pair identifier is invalid. |
+| `transaction_invalid` | A transaction hash or parameter is invalid. |
+| `order_invalid` | An order identifier or parameter is invalid. |
+| `block_invalid` | A block number or hash is invalid. |
+| `chain_id_invalid` | `chainId` is not a known alias or numeric chain id. |
+| `chain_id_unsupported` | `chainId` is valid but not served by this deployment. |
+| `url_invalid` | A supplied URL (such as a webhook target) is invalid. |
+| `api_key_malformed` | The API key token is malformed. |
+
+## 401: Unauthorized
+
+Authentication failed or is required. See [Authentication](/api/authentication).
+
+| Code | Meaning |
+| --- | --- |
+| `api_key_missing` | The endpoint requires a key and none was supplied. |
+| `api_key_invalid` | The API key is not recognized, or has been revoked. |
+| `unauthorized` | The request is not properly authenticated. |
+
+## 402: Payment Required
+
+The request exceeded the anonymous quota and carried no valid payment. This response is **protocol-native**, not the JSON error envelope: read the `WWW-Authenticate` header for the challenge, settle it, and retry with an `Authorization: Payment` credential. See [paying per request with MPP](/api/authentication).
+
+## 403: Forbidden
+
+The credential is valid but not permitted to perform the request.
+
+| Code | Meaning |
+| --- | --- |
+| `api_key_forbidden` | The API key is missing a [scope](/api/authentication) required by this endpoint. |
+| `limit_exceeded` | A resource limit was reached (for example, the maximum number of webhooks). |
+
+## 404: Not Found
+
+The requested resource does not exist, or is not available on the selected chain.
+
+| Code | Meaning |
+| --- | --- |
+| `not_found` | The route or resource does not exist. |
+| `token_not_found` | No token exists at the given address. |
+| `token_logo_not_found` | No logo is available for the token. |
+| `block_not_found` | No block matches the request. |
+| `transaction_not_found` | No transaction matches the hash. |
+| `receipt_not_found` | No receipt is available for the transaction. |
+| `order_not_found` | No order matches the request. |
+| `pair_not_found` | No trading pair matches the request. |
+| `verified_token_not_found` | The token is not on the verified list. |
+| `webhook_not_found` | No webhook matches the id. |
+| `delivery_not_found` | No webhook delivery matches the id. |
+| `webhooks_not_enabled` | Webhooks are not enabled on this deployment. |
+
+## 429: Too Many Requests
+
+You exceeded the rate limit. The response carries a `Retry-After` header. See [Rate Limits](/api/rate-limits).
+
+| Code | Meaning |
+| --- | --- |
+| `rate_limit_exceeded` | The request exceeded the quota for its window. |
+| `payment_required` | The request was over quota on an endpoint where payment is accepted but none was supplied. |
+
+## 5xx: Server Errors
+
+Something went wrong on Tempo's side. These are transient. Retry with [exponential backoff](/api/rate-limits#retry-with-backoff).
+
+| Status | Code | Meaning |
+| --- | --- | --- |
+| `500` | `internal_error` | An unexpected error occurred. |
+| `502` | `upstream_error` | An upstream node or indexer failed to respond. |
+
+:::warning
+For non-idempotent requests (such as `POST`), a `5xx` response does not guarantee the operation failed; it may have succeeded on the backend. Treat the outcome as **unknown** and reconcile state before blindly retrying. Read requests (`GET`) are always safe to retry.
+:::

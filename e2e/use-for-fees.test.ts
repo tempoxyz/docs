@@ -17,7 +17,7 @@ test('use stablecoin for fees', async ({ page }) => {
     },
   })
 
-  await page.goto('/guide/issuance/use-for-fees')
+  await page.goto('/docs/guide/issuance/use-for-fees')
 
   // Step 1: Sign in
   const signUpButton = page.getByRole('button', { name: 'Sign in' }).first()

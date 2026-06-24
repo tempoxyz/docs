@@ -1,0 +1,47 @@
+---
+title: T4 Network Upgrade
+description: Details and timeline for the T4 network upgrade, including consensus context in the block header and bundled bug fixes.
+---
+
+# T4 Network Upgrade
+
+This page summarizes T4 scope.
+
+:::info[T4 status]
+T4 is active on both testnet and mainnet.
+:::
+
+## Timeline
+
+| Network | Date | Timestamp |
+|---------|------|-----------|
+| Testnet | May 14, 2026 4pm CEST | `1778767200` |
+| Mainnet | May 18, 2026 4pm CEST | `1779112800` |
+
+Node operators needed to upgrade to the T4-compatible release (v1.7.0, released May 11, 2026 4pm CEST) before the testnet activation timestamp.
+
+## Overview
+
+T4 introduced the following changes:
+- Embedding consensus context into the block header to unlock deferred verification and reduce finalization latency ([TIP-1031](https://tips.sh/1031))
+- A bundle of bug fixes and security hardening ([TIP-1046](https://tips.sh/1046))
+
+## Compatible SDK releases
+
+| SDK | T4-compatible release |
+|-----|-----------------------|
+| [Rust](https://github.com/tempoxyz/tempo) | [`tempo-alloy@1.7.0`](https://github.com/tempoxyz/tempo/releases/tag/tempo-alloy%401.7.0), [`tempo-primitives@1.7.0`](https://github.com/tempoxyz/tempo/releases/tag/tempo-primitives%401.7.0), [`tempo-contracts@1.7.0`](https://github.com/tempoxyz/tempo/releases/tag/tempo-contracts%401.7.0) |
+| [Foundry](https://github.com/foundry-rs/foundry) | nightly (T4 hardfork-aware decoding) |
+
+See [Developer tools](/docs/quickstart/developer-tools) for the broader SDK ecosystem.
+
+## Related docs
+- [Network upgrades and releases](/docs/guide/node/network-upgrades)
+- [TIP-1031: Embed Consensus Context in the Block Header](https://tips.sh/1031)
+- [TIP-1046: T4 Hardfork Meta TIP](https://tips.sh/1046)
+
+## Feature TIPs
+
+### TIP-1031: Embed Consensus Context in the Block Header
+
+[TIP-1031](https://tips.sh/1031) added an optional `Context` field (epoch, view, parent view, leader) as the last field of `TempoHeader`. This commits consensus metadata to the block hash so Tempo blocks implement Commonware's `CertifiableBlock` trait, enabling deferred verification (optimistic notarization with async background verification) and reduced finalization latency. Pre-T4 headers are unchanged; post-T4 headers require the field, and validators reject mismatched context.

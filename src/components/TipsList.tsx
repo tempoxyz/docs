@@ -1,7 +1,7 @@
 import { Link } from 'vocs'
 import FileText from '~icons/lucide/file-text'
 
-const modules = import.meta.glob('../pages/protocol/tips/tip-*.mdx', {
+const modules = import.meta.glob('../pages/docs/protocol/tips/tip-*.mdx', {
   eager: true,
 }) as Record<
   string,

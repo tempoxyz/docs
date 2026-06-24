@@ -14,6 +14,8 @@ type TransferState = {
   error?: string
 }
 
+type FirstArgument<T> = T extends (arg: infer Arg, ...args: never[]) => unknown ? Arg : never
+
 function TransferResult({ label, state }: { label: string; state: TransferState }) {
   const { data: transaction } = useTransaction({
     hash: state.hash as `0x${string}` | undefined,
@@ -81,12 +83,19 @@ export function SendParallelPayments(props: DemoStepProps) {
   })
 
   const sendTransfer = (
-    params: Actions.token.transfer.Parameters<typeof config>,
+    params: {
+      amount: bigint
+      to: `0x${string}`
+      token: typeof alphaUsd
+      nonceKey: bigint
+      nonce: number
+    },
     setTransfer: React.Dispatch<React.SetStateAction<TransferState>>,
   ) => {
     setTransfer({ status: 'pending' })
+    const actionConfig = config as FirstArgument<typeof Actions.token.transfer>
     Actions.token
-      .transfer(config, params)
+      .transfer(actionConfig, params)
       .then((hash) => {
         setTransfer({ status: 'success', hash })
         queryClient.refetchQueries({ queryKey: ['getBalance'] })
@@ -99,10 +108,11 @@ export function SendParallelPayments(props: DemoStepProps) {
 
   const handleSendParallel = async () => {
     if (!address) return
+    const actionConfig = config as FirstArgument<typeof Actions.nonce.getNonce>
 
     const [nonce1, nonce2] = await Promise.all([
-      Actions.nonce.getNonce(config, { account: address, nonceKey: 1n }),
-      Actions.nonce.getNonce(config, { account: address, nonceKey: 2n }),
+      Actions.nonce.getNonce(actionConfig, { account: address, nonceKey: 1n }),
+      Actions.nonce.getNonce(actionConfig, { account: address, nonceKey: 2n }),
     ])
 
     // Send both transfers without blocking

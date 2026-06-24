@@ -1,0 +1,34 @@
+---
+description: Learn how TIP-403 enables TIP-20 tokens to enforce access control through a shared policy registry with whitelist and blacklist support.
+---
+
+import { Cards, Card } from 'vocs'
+
+# Tempo Policy Registry (TIP-403)
+
+## What is the Tempo Policy Registry?
+
+The Tempo Policy Registry (TIP-403) enables TIP-20 tokens to enforce access control. Instead of each token implementing its own logic, the registry lets policies be created once and shared across multiple tokens.
+
+## Links
+
+<Cards>
+  <Card
+    description="Learn how TIP-403 works and its features"
+    to="/docs/protocol/tip403/spec"
+    icon="lucide:file-text"
+    title="TIP-403 Specification"
+  />
+  <Card
+    description="Manage your stablecoin's permissions, supply, and compliance settings"
+    to="/docs/guide/issuance/manage-stablecoin"
+    icon="lucide:settings"
+    title="Guide: Manage Your Stablecoin"
+  />
+  <Card
+    description="Rust implementation in the Tempo client"
+    to="https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip403_registry"
+    icon="lucide:file-text"
+    title="Rust Implementation"
+  />
+</Cards>

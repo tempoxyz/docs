@@ -8,7 +8,7 @@
           "value": "faucet.tempo.xyz"
         }
       ],
-      "destination": "https://docs.tempo.xyz/quickstart/faucet",
+      "destination": "https://docs.tempo.xyz/docs/quickstart/faucet",
       "permanent": false
     },
     {
@@ -19,7 +19,7 @@
           "value": "faucet.tempo.xyz"
         }
       ],
-      "destination": "https://docs.tempo.xyz/quickstart/faucet",
+      "destination": "https://docs.tempo.xyz/docs/quickstart/faucet",
       "permanent": false
     },
     {
@@ -30,7 +30,7 @@
           "value": "bridge.tempo.xyz"
         }
       ],
-      "destination": "https://docs.tempo.xyz/guide/getting-funds",
+      "destination": "https://docs.tempo.xyz/docs/guide/getting-funds",
       "permanent": false
     },
     {
@@ -41,57 +41,42 @@
           "value": "bridge.tempo.xyz"
         }
       ],
-      "destination": "https://docs.tempo.xyz/guide/getting-funds",
+      "destination": "https://docs.tempo.xyz/docs/guide/getting-funds",
       "permanent": false
     },
     {
-      "source": "/guide/bridge-usdc-stargate",
-      "destination": "/guide/bridge-layerzero",
-      "permanent": true
-    },
-    {
-      "source": "/guide/bridge-usdc-relay",
-      "destination": "/guide/bridge-relay",
-      "permanent": true
-    },
-    {
-      "source": "/network-upgrades",
-      "destination": "/guide/node/network-upgrades",
-      "permanent": true
-    },
-    {
-      "source": "/AccountKeychain",
-      "destination": "/protocol/transactions/AccountKeychain",
-      "permanent": true
-    },
-    {
-      "source": "/guide/node/validator-config-v2",
-      "destination": "/guide/node/network-upgrades",
-      "permanent": true
-    },
-    {
-      "source": "/accounts/server/compose",
-      "destination": "https://accounts.tempo.xyz/docs/server/handler.compose",
-      "permanent": true
-    },
-    {
-      "source": "/accounts/server/relay",
-      "destination": "https://accounts.tempo.xyz/docs/server/handler.relay",
-      "permanent": true
-    },
-    {
-      "source": "/accounts/server/webAuthn",
-      "destination": "https://accounts.tempo.xyz/docs/server/handler.webAuthn",
-      "permanent": true
-    },
-    {
       "source": "/accounts",
-      "destination": "https://accounts.tempo.xyz/docs",
+      "destination": "https://accounts.tempo.xyz",
       "permanent": true
     },
     {
       "source": "/accounts/:path*",
-      "destination": "https://accounts.tempo.xyz/docs/:path*",
+      "destination": "https://accounts.tempo.xyz/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/guide/bridge-usdc-stargate",
+      "destination": "/docs/guide/bridge-layerzero",
+      "permanent": true
+    },
+    {
+      "source": "/guide/bridge-usdc-relay",
+      "destination": "/docs/guide/bridge-relay",
+      "permanent": true
+    },
+    {
+      "source": "/network-upgrades",
+      "destination": "/docs/guide/node/network-upgrades",
+      "permanent": true
+    },
+    {
+      "source": "/AccountKeychain",
+      "destination": "/docs/protocol/transactions/AccountKeychain",
+      "permanent": true
+    },
+    {
+      "source": "/guide/node/validator-config-v2",
+      "destination": "/docs/guide/node/network-upgrades",
       "permanent": true
     },
     {
@@ -105,51 +90,122 @@
       "permanent": true
     },
     {
-      "source": "/learn/stablecoins",
-      "destination": "https://tempo.xyz/learn/what-are-stablecoins",
+      "source": "/guide",
+      "destination": "/docs/guide",
       "permanent": true
     },
     {
-      "source": "/learn/use-cases/global-payouts",
-      "destination": "https://tempo.xyz/learn/global-payouts",
+      "source": "/guide/:path*",
+      "destination": "/docs/guide/:path*",
       "permanent": true
     },
     {
-      "source": "/learn/use-cases/remittances",
-      "destination": "https://tempo.xyz/learn/cross-border-payments",
+      "source": "/quickstart",
+      "destination": "/docs/quickstart",
       "permanent": true
     },
     {
-      "source": "/learn/use-cases/embedded-finance",
-      "destination": "https://tempo.xyz/learn/stablecoin-payments",
+      "source": "/quickstart/:path*",
+      "destination": "/docs/quickstart/:path*",
       "permanent": true
     },
     {
-      "source": "/learn/use-cases/agentic-commerce",
-      "destination": "https://tempo.xyz/learn/blockchain-payments",
+      "source": "/protocol",
+      "destination": "/docs/protocol",
       "permanent": true
     },
     {
-      "source": "/learn/use-cases/payroll",
-      "destination": "https://tempo.xyz/learn/stablecoin-payroll",
+      "source": "/protocol/:path*",
+      "destination": "/docs/protocol/:path*",
       "permanent": true
     },
     {
-      "source": "/learn/use-cases/tokenized-deposits",
-      "destination": "https://tempo.xyz/learn/tokenized-deposits",
+      "source": "/sdk",
+      "destination": "/docs/sdk",
       "permanent": true
     },
     {
-      "source": "/learn/use-cases/microtransactions",
-      "destination": "https://tempo.xyz/learn/microtransactions",
+      "source": "/sdk/:path*",
+      "destination": "/docs/sdk/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/cli",
+      "destination": "/docs/cli",
+      "permanent": true
+    },
+    {
+      "source": "/cli/:path*",
+      "destination": "/docs/cli/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/wallet",
+      "destination": "/docs/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/wallet/:path*",
+      "destination": "/docs/wallet/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/ecosystem",
+      "destination": "/docs/ecosystem",
+      "permanent": true
+    },
+    {
+      "source": "/ecosystem/:path*",
+      "destination": "/docs/ecosystem/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/developer-tools",
+      "destination": "/docs/ecosystem",
+      "permanent": true
+    },
+    {
+      "source": "/developer-tools/:path*",
+      "destination": "/docs/developer-tools/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/hosted-services",
+      "destination": "/docs/hosted-services",
+      "permanent": true
+    },
+    {
+      "source": "/hosted-services/:path*",
+      "destination": "/docs/hosted-services/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/changelog",
+      "destination": "/docs/changelog",
+      "permanent": true
+    },
+    {
+      "source": "/learn/partners",
+      "destination": "/docs/partners",
+      "permanent": true
+    },
+    {
+      "source": "/docs/learn/partners",
+      "destination": "/docs/partners",
+      "permanent": true
+    },
+    {
+      "source": "/docs/guide/using-tempo-with-ai/partners",
+      "destination": "/docs/partners",
+      "permanent": true
+    },
+    {
+      "source": "/build/partners",
+      "destination": "/docs/partners",
       "permanent": true
     }
   ],
   "rewrites": [
-    {
-      "source": "/api/mcp",
-      "destination": "https://mcp.tempo.xyz"
-    },
     {
       "source": "/ingest/static/:path(.*)",
       "destination": "https://us-assets.i.posthog.com/static/:path"

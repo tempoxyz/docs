@@ -1,0 +1,125 @@
+---
+title: Managing validator keys
+description: Generate, rotate, and recover validator signing keys and shares.
+---
+
+# Managing validator keys
+
+Tempo validators use several keys and addresses. This page explains what each one does, how sensitive it is, and how to manage it.
+
+:::warning
+Never share your private signing key. Anyone with access to it can impersonate your validator. The Tempo team will never ask for your private key. Store keys securely and restrict file permissions.
+
+Use different signing keys and operator keys for testnet and mainnet. A testnet compromise should never put your mainnet validator at risk.
+:::
+
+## Key and address overview
+
+| Key / Address | Type | What it does | Sensitivity | How to change |
+|---|---|---|---|---|
+| **Signing key** | Ed25519 keypair | Identifies your validator in the consensus protocol. Used for DKG participation, block proposals, and voting. | **Critical** — anyone with this key can impersonate your validator. | [Rotate validator identity](/docs/guide/node/validator-lifecycle#rotate-validator-identity) |
+| **Validator operator address** | Ethereum address (`0x…`) | The control address that authorizes on-chain operations: IP updates, key rotation, ownership transfer, and deactivation. | **High** — controls all validator configuration. | [Transfer validator ownership](/docs/guide/node/validator-lifecycle#transfer-validator-ownership) |
+| **Fee recipient** | Ethereum address (`0x…`) | Receives transaction fees from blocks your validator proposes. | **Low** — changing it only redirects future fee revenue, no security impact. | [Update fee recipient](/docs/guide/node/validator-lifecycle#update-the-fee-recipient) |
+| **Signing share** | BLS12-381 key share | A share of the committee's threshold signing key, used to sign block notarizations and finalizations. | **Managed automatically** — updated every DKG ceremony (~3 hours). Lost shares are recovered from the network on restart. | Automatic (see [recovery](#signing-share-recovery)) |
+
+## Generating a signing key
+
+:::warning
+Never share your private signing key. Anyone with access to it can impersonate your validator. The Tempo team will never ask for your private key.
+
+Use a different key for each network rather than reusing the same validator identity on testnet and mainnet.
+:::
+
+Generate an encrypted ed25519 keypair. The `--secret` argument points to a file-like input that contains the encryption key. Prefer a named pipe (FIFO) or shell process substitution for this path: a FIFO lets one process stream bytes directly to another process without storing those bytes as a regular file, and it keeps the secret out of environment variables and command-line arguments. See [Why FIFOs and not env vars](#why-fifos-and-not-env-vars).
+
+```bash
+mkfifo /run/tempo/consensus-secret
+<ENCRYPTION_KEY_CMD> > /run/tempo/consensus-secret &
+tempo consensus generate-signing-key \
+  --output <SIGNING_KEY_PATH> \
+  --secret /run/tempo/consensus-secret
+```
+
+Verify the public key:
+
+```bash
+<ENCRYPTION_KEY_CMD> > /run/tempo/consensus-secret &
+tempo consensus show-verification-key \
+  --private-key <SIGNING_KEY_PATH> \
+  --secret /run/tempo/consensus-secret
+```
+
+The verification key should match the output of the `generate-signing-key` command.
+
+`<ENCRYPTION_KEY_CMD>` should be a command that retrieves the encryption key from your KMS or secret manager and writes the raw secret to stdout.
+
+### Encrypting an existing signing key
+
+If you already have an unencrypted ed25519 signing key, encrypt it with `tempo consensus encrypt-signing-key`. The command reads the existing plaintext key, reads the encryption key from `--secret`, and writes a new encrypted key file.
+
+```bash
+tempo consensus encrypt-signing-key \
+  --input <OLD_SIGNING_KEY_PATH> \
+  --output <ENCRYPTED_SIGNING_KEY_PATH> \
+  --secret <(<ENCRYPTION_KEY_CMD>)
+```
+
+Verify the encrypted key before replacing the old file:
+
+```bash
+tempo consensus show-verification-key \
+  --private-key <ENCRYPTED_SIGNING_KEY_PATH> \
+  --secret <(<ENCRYPTION_KEY_CMD>)
+```
+
+After the verification key matches the old signing key's public key, update `--consensus.signing-key` to point at the encrypted file and start `tempo node` with `--consensus.secret <ENCRYPTION_KEY_PATH>`.
+
+Once the encrypted key is verified and backed up, delete the old unencrypted key file. On Linux, you can use `shred` to overwrite and remove the file:
+
+```bash
+shred --remove --zero <OLD_SIGNING_KEY_PATH>
+```
+
+### Why FIFOs and not env vars
+
+`--secret` accepts any filesystem path. The `tempo node` binary does not place extra restrictions on where it reads the secret from, so a regular file works, but a named pipe (FIFO) or process-substitution path is preferred. A FIFO is a special filesystem entry used to pass data between processes; it has a path, but the bytes written to it are streamed through the kernel rather than stored as regular file contents.
+
+Use a FIFO so the encryption key is provided to `tempo` only when it is needed, without putting the key in the process environment or command-line arguments. Environment variables can be inherited by child processes and may be exposed through process inspection, crash dumps, shell history, or service-manager diagnostics. A FIFO also avoids leaving the secret behind in a regular file, though the producing command and `tempo` may still hold the value briefly in process memory while handling it.
+
+:::warning
+The `printf` example below is only a demonstration of how a FIFO works. Do not put production encryption keys directly in shell commands, shell history, scripts, or environment variables.
+:::
+
+```bash
+mkfifo /run/tempo/consensus-secret
+printf '%s' '<ENCRYPTION_KEY>' > /run/tempo/consensus-secret &
+tempo consensus show-verification-key \
+  --private-key <SIGNING_KEY_PATH> \
+  --secret /run/tempo/consensus-secret
+```
+
+With shell process substitution and a KMS-backed secret command:
+
+```bash
+tempo consensus generate-signing-key \
+  --output <SIGNING_KEY_PATH> \
+  --secret <(<ENCRYPTION_KEY_CMD>)
+```
+
+## Signing key rotation
+
+The ed25519 signing key can be rotated while preserving your validator index and committee slot. See [Rotate validator identity](/docs/guide/node/validator-lifecycle#rotate-validator-identity) for the full procedure.
+
+## Signing share recovery
+
+If the signing share is lost — for example by deleting `<datadir>/consensus` — the node will recover a new share in the following epochs from the network when it restarts.
+
+## ValidatorConfig V2 precompile
+
+All key and identity operations are executed through the ValidatorConfig V2 precompile ([TIP-1017](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1017.md)):
+
+```solidity
+address constant VALIDATOR_CONFIG_V2 = 0xCCCCCCCC00000000000000000000000000000001;
+```
+
+All write operations require either the contract owner or the validator's own address.

@@ -1,0 +1,73 @@
+---
+description: Build blockchain apps with Tempo using Viem and Wagmi. Send transactions, manage tokens, and integrate AMM pools with TypeScript.
+---
+
+import { Cards, Card } from 'vocs'
+
+# TypeScript SDKs
+
+Tempo distributes TypeScript SDKs for:
+- [Viem](https://viem.sh): TypeScript interface for EVM blockchains
+- [Wagmi](https://wagmi.sh): React Hooks (and reactive primitives) for EVM blockchains
+
+The Tempo extensions cover common chain operations such as querying state, sending Tempo Transactions, and managing tokens and AMM pools.
+
+<Cards>
+  <Card
+    description="Set up a Viem client to interact with Tempo"
+    to="https://viem.sh/tempo"
+    icon="lucide:workflow"
+    title="Viem Setup"
+  />
+  <Card
+    description="Set up a Wagmi configuration with Tempo"
+    to="https://wagmi.sh/tempo"
+    icon="lucide:workflow"
+    title="Wagmi Setup"
+  />
+</Cards>
+
+:::tip
+
+**When should I use Wagmi vs. Viem?**
+
+- **Viem** is best suited for **libraries, tooling, servers, scripting, etc** – a low-level and stateless interface for the EVM
+- **Wagmi** is best suited for **applications & wallets** – a high-level and stateful interface for the EVM (React Hooks, Vanilla JS, etc)
+
+:::
+
+## Viem
+
+The T3-compatible `viem` release includes the updated access-key ABI, including periodic limits and call scoping. See the [T3 network upgrade](/docs/protocol/upgrades/t3) for migration details.
+
+<Cards>
+  <Card
+    description="Viem Actions for querying data, sending transactions, managing tokens & AMM pools, and more"
+    to="https://viem.sh/tempo/actions"
+    icon="lucide:workflow"
+    title="Actions"
+  />
+</Cards>
+
+## Wagmi
+
+<Cards>
+  <Card
+    description="Wagmi React Hooks for building apps on Tempo"
+    to="https://wagmi.sh/tempo/hooks"
+    icon="lucide:network"
+    title="Hooks"
+  />
+  <Card
+    description="Wagmi Connectors for connecting between wallets, apps, and Tempo"
+    to="https://wagmi.sh/tempo/connectors"
+    icon="lucide:square-stack"
+    title="Connectors"
+  />
+  <Card
+    description="Wagmi Actions for querying data, sending transactions, managing tokens & AMM pools, and more"
+    to="https://wagmi.sh/tempo/actions"
+    icon="lucide:workflow"
+    title="Actions"
+  />
+</Cards>

@@ -1,0 +1,89 @@
+---
+title: Authentication
+description: Authenticate Tempo API requests with production or sandbox API keys, or pay per request with MPP.
+---
+
+# Authentication
+
+The Tempo API supports three ways to authenticate a request, so you can start without credentials and add authentication as your needs grow:
+
+| Method | Credential | Use for |
+| --- | --- | --- |
+| **Public** | None | Trying the API and low-volume reads, within a per-IP [rate limit](/api/rate-limits). |
+| **MPP** | `Authorization: Payment <credential>` | Paying per request without a key, or continuing past a rate limit. |
+| **API key** | `Authorization: Bearer tempo:sk:...` | Authenticating as your account for higher, dedicated quotas. |
+
+Most read endpoints are open to **public** (anonymous) callers, so no credential is required to get started. To raise your throughput, pay per request with [MPP](#mpp-paying-per-request) or send an **API key**. Some endpoints, such as webhook management, require a key.
+
+:::info
+API keys are only available on request. [Contact us](https://tempo.xyz/contact/) to learn more.
+:::
+
+## API Keys
+
+Every key belongs to one of two environments, **production** or **sandbox**, that determine which chains the key may access. A key's environment is fixed when it is provisioned, and its token carries an environment-specific prefix so a leaked key is recognizable at a glance:
+
+- Production: `tempo:sk:...`
+- Sandbox: `tempo_sandbox:sk:...`
+
+### Production vs. Sandbox
+
+| Property | Production | Sandbox |
+| --- | --- | --- |
+| Token prefix | `tempo:sk:...` | `tempo_sandbox:sk:...` |
+| Chains | Any chain, including mainnet and non-mainnet | Non-mainnet only, such as testnet |
+| Default chain | The request's `chainId`, or mainnet if omitted | Testnet when `chainId` is omitted |
+| Use for | Live integrations and real data | Building and testing without touching mainnet |
+
+Both environments grant the same scopes and quotas. The only difference is the set of chains a key may read.
+
+### Authenticating
+
+Send the token in either header:
+
+```http
+Authorization: Bearer tempo:sk:...
+```
+
+```http
+tempo-api-key: tempo:sk:...
+```
+
+Select the chain with the `chainId` query parameter, which accepts `mainnet`, `testnet`, or a numeric chain id. It defaults to `mainnet`:
+
+```bash
+curl 'https://api.tempo.xyz/v1/blocks?chainId=testnet' \
+  --header 'Authorization: Bearer tempo_sandbox:sk:...'
+```
+
+### Behaviors
+
+- **Production keys** work on any chain. A request that omits `chainId` targets mainnet.
+- **Sandbox keys** are restricted to non-mainnet chains.
+- A sandbox request that omits `chainId` is steered to **testnet**, so a sandbox key works without passing the parameter.
+- An explicit non-mainnet `chainId`, such as `testnet`, is used as-is.
+- An explicit mainnet `chainId` makes the sandbox key unusable for that request. Rather than failing, the key is ignored and the request falls through to the anonymous public policy, subject to the lower public rate limit.
+- **The plaintext token is shown only once**, at provision time. Store it securely; it cannot be revealed again. If you lose it, revoke the key and provision a new one.
+- At rest, only a hash of the token is stored. Tokens are redacted from logs and error output.
+
+## MPP (Paying per Request)
+
+Endpoints that permit anonymous access also accept [MPP](https://mpp.dev), a pay-per-request payment protocol, as an alternative to an API key. Use it to call those endpoints without a key, or to keep going once you exceed a rate limit.
+
+Endpoints that require a key, such as webhook management, do not offer MPP.
+
+Within quota these endpoints are free for keyed and anonymous callers alike. When a request that carries no payment exceeds the rate limit, the API answers with `402 Payment Required` instead of `429`. The `402` is protocol-native, not the JSON error envelope: the challenge rides the `WWW-Authenticate` header.
+
+1. Read the challenge from the `WWW-Authenticate` header on the `402` response.
+2. Settle it with an [MPP client](https://mpp.dev/quickstart/client), then retry the request with an `Authorization: Payment` credential.
+3. The successful paid response carries a `Payment-Receipt` header.
+
+```http
+Authorization: Payment <credential>
+```
+
+Attach the `Authorization: Payment` header up front to pay for a call without first consuming quota.
+
+:::info
+`Authorization: Payment` (MPP) and `Authorization: Bearer` (API key) are distinct credentials. A Bearer API key is never treated as payment. Payment challenges and paid responses are never cached.
+:::

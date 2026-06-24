@@ -16,7 +16,7 @@ test('providing liquidity - place and query order', async ({ page }) => {
     },
   })
 
-  await page.goto('/guide/stablecoin-dex/providing-liquidity')
+  await page.goto('/docs/guide/stablecoin-dex/providing-liquidity')
 
   // Step 1: Sign in
   const signUpButton = page.getByRole('button', { name: 'Sign in' }).first()
