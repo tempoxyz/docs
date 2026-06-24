@@ -80,14 +80,6 @@ Partners using DEX or MPP flows should review fee assumptions once the T7-compat
 - Wallets and apps that estimate fees should validate their fee displays against T7 behavior on testnet.
 - Indexers and analytics systems should keep pre-T7 fee assumptions separate from post-T7 fee data.
 
-### For dynamic base fee
-
-Wallets, SDKs, and infrastructure should read the current base fee from the network instead of assuming one fixed value.
-
-- Fee estimators should be tested on testnet after T7 rollout.
-- User interfaces should show the current estimated fee at send time.
-- Monitoring should track base fee movement before mainnet rollout.
-
 ### For TIP-20 rewards removal
 
 Apps that show TIP-20 reward information should stop presenting new reward accrual after T7 activates.
