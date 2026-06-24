@@ -294,10 +294,6 @@ export default defineConfig({
                 link: '/docs/guide/stablecoin-dex/executing-swaps',
               },
               {
-                text: 'View the orderbook',
-                link: '/docs/guide/stablecoin-dex/view-the-orderbook',
-              },
-              {
                 text: 'Providing liquidity',
                 link: '/docs/guide/stablecoin-dex/providing-liquidity',
               },
