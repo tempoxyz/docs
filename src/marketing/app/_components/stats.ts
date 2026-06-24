@@ -27,9 +27,9 @@ export const stats: Stat[] = [
   },
   {
     category: 'Cost',
-    title: '0.001 USD base fee',
+    title: '<$0.001 average fee',
     caption: 'Built for payment volumes where every fraction of a cent matters.',
-    small: { label: 'COST', value: '0.001 USD base fee' },
+    small: { label: 'COST', value: '<$0.001 average fee' },
     main: { label: 'COST TO SPONSOR 10M USERS', value: '$1.8M' },
     tickerLabel: 'to sponsor 10M users',
   },
