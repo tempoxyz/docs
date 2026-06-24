@@ -255,21 +255,13 @@ curl "https://api.relay.link/intents/status/v3?requestId=<REQUEST_ID>"
 ### Using TypeScript (viem)
 
 ```typescript
-import { createWalletClient, createPublicClient, http } from 'viem'
-import { tempo } from 'viem/chains'
 import { privateKeyToAccount } from 'viem/accounts'
+import { createClient } from 'viem/tempo'
 
 const account = privateKeyToAccount('0x...')
 
-const walletClient = createWalletClient({
+const client = createClient({
   account,
-  chain: tempo,
-  transport: http(),
-})
-
-const publicClient = createPublicClient({
-  chain: tempo,
-  transport: http(),
 })
 
 // 1. Get a quote from Relay (Tempo -> Base)
@@ -293,13 +285,13 @@ const quote = await quoteRes.json()
 for (const step of quote.steps) {
   for (const item of step.items) {
     if (step.kind === 'transaction') {
-      const hash = await walletClient.sendTransaction({
+      const hash = await client.sendTransaction({
         to: item.data.to,
         data: item.data.data,
         value: BigInt(item.data.value || '0'),
       })
 
-      await publicClient.waitForTransactionReceipt({ hash })
+      await client.waitForTransactionReceipt({ hash })
     }
   }
 }

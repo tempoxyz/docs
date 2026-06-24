@@ -37,11 +37,9 @@ Use the Tempo JSON-RPC API with command-line tools, TypeScript clients, React ho
     <div className="h-4" />
 
     ```ts [example.ts]
-    import { createPublicClient, http } from 'viem'
-    import { tempo } from 'viem/chains'
+    import { createClient, http } from 'viem/tempo'
 
-    const client = createPublicClient({
-      chain: tempo,
+    const client = createClient({
       transport: http('https://api.tempo.xyz/rpc'), // [!code focus]
     })
 

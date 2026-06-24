@@ -174,13 +174,12 @@ The SDKs handle this automatically. Here's how each SDK manages the dual-signing
 
     ```ts twoslash
     // @noErrors
-    import { createClient, http, parseUnits } from 'viem'
+    import { parseUnits } from 'viem'
     import { privateKeyToAccount } from 'viem/accounts'
-    import { tempoModerato } from 'viem/chains'
+    import { createClient } from 'viem/tempo'
 
     const client = createClient({
-      chain: tempoModerato,
-      transport: http(),
+      testnet: true,
     })
 
     const senderAccount = privateKeyToAccount('0x...')
