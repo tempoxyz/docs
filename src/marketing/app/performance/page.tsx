@@ -224,7 +224,7 @@ function PerformanceSectionsSkeleton() {
       <Section
         id="settlement"
         title="Guaranteed settlement in half a second."
-        note="The moment a payment is included in a block, it's settled in less than 500ms. No reorgs, no waiting out confirmations, no probabilistic guessing."
+        note="Tempo gives payments final settlement in about half a second. Once a payment lands in a finalized block, it can be treated as settled."
       >
         <SettlementStreamSkeleton />
       </Section>
@@ -360,7 +360,7 @@ export default function PerformancePage() {
             <Section
               id="settlement"
               title="Guaranteed settlement in half a second."
-              note="The moment a payment is included in a block, it's settled in less than 500ms. No reorgs, no waiting out confirmations, no probabilistic guessing."
+              note="Tempo gives payments final settlement in about half a second. Once a payment lands in a finalized block, it can be treated as settled."
             >
               <SettlementStream runs={runs} />
             </Section>
