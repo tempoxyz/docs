@@ -770,7 +770,7 @@ Access-key-signed transactions cannot perform contract creation. Any `CREATE` or
      ]
    };
 
-   // Compute digest: keccak256(rlp([chain_id, key_type, key_id, expiry, limits, allowed_calls]))
+   // Compute digest: keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?]))
    const authDigest = computeAuthorizationDigest(keyAuth);
    ```
 
