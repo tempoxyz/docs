@@ -1,0 +1,109 @@
+---
+title: JSON-RPC API
+description: The Tempo API exposes a JSON-RPC entrypoint for raw chain access from Viem, Wagmi, and Rust.
+---
+
+import { OpenApi, Tabs, Tab } from 'vocs'
+
+# JSON-RPC API
+
+The Tempo API exposes a **JSON-RPC entrypoint** for raw, node-level chain access alongside its REST and Indexer surfaces. Through it, Tempo nodes serve all standard [Ethereum JSON-RPC methods](https://ethereum.org/developers/docs/apis/json-rpc/) (`eth_`, `net_`, `web3_`, `txpool_`, `trace_`, `debug_`) plus Tempo-specific namespaces for fork scheduling, consensus data, and node administration.
+
+Point any Ethereum-compatible client at the hosted entrypoint, or [run your own node](/docs/guide/node/rpc):
+
+| Chain | RPC URL |
+|---------|---------|
+| Mainnet | `https://api.tempo.xyz/rpc` |
+| Testnet | `https://api.tempo.xyz/rpc/testnet` |
+
+## Connecting via Tools
+
+Use the Tempo JSON-RPC API with command-line tools, TypeScript clients, React hooks, or Rust providers.
+
+<Tabs stateKey="json-rpc-library">
+  <Tab title="Cast">
+    [Cast](https://www.getfoundry.sh/reference/cast/cast) is Foundry's command-line tool that includes tools to call JSON-RPC methods and inspect chain state from a terminal.
+
+    <div className="h-4" />
+
+    ```bash [Terminal]
+    cast block-number --rpc-url https://api.tempo.xyz/rpc # [!code focus]
+    ```
+  </Tab>
+
+  <Tab title="Viem">
+    [Viem](https://viem.sh/docs/clients/public) is a TypeScript client for Ethereum-compatible JSON-RPC APIs, useful for server-side scripts and app logic.
+
+    <div className="h-4" />
+
+    ```ts [example.ts]
+    import { createPublicClient, http } from 'viem'
+    import { tempo } from 'viem/chains'
+
+    const client = createPublicClient({
+      chain: tempo,
+      transport: http('https://api.tempo.xyz/rpc'), // [!code focus]
+    })
+
+    const blockNumber = await client.getBlockNumber() // [!code focus]
+    ```
+  </Tab>
+
+  <Tab title="Wagmi">
+    [Wagmi](https://wagmi.sh/react/api/createConfig) provides React hooks and configuration helpers on top of Viem clients.
+
+    <div className="h-4" />
+
+    :::code-group
+
+    ```ts [wagmi.config.ts]
+    import { createConfig, http } from 'wagmi'
+    import { tempo } from 'viem/chains'
+
+    export const config = createConfig({
+      chains: [tempo],
+      transports: {
+        [tempo.id]: http('https://api.tempo.xyz/rpc'), // [!code focus]
+      },
+    })
+    ```
+
+    ```tsx [BlockNumber.tsx]
+    import { useBlockNumber } from 'wagmi'
+
+    export function BlockNumber() {
+      const blockNumber = useBlockNumber() // [!code focus]
+      return <span>{blockNumber.data?.toString()}</span> // [!code focus]
+    }
+    ```
+
+    :::
+  </Tab>
+
+  <Tab title="Rust">
+    [Alloy](https://docs.rs/alloy-provider) is a Rust toolkit for Ethereum-compatible chains, including providers for JSON-RPC calls.
+
+    <div className="h-4" />
+
+    ```rs [example.rs]
+    use alloy::providers::{Provider, ProviderBuilder};
+    use tempo_alloy::TempoNetwork;
+
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
+            .connect("https://api.tempo.xyz/rpc") // [!code focus]
+            .await?;
+
+        let block_number = provider.get_block_number().await?; // [!code focus]
+        println!("Latest block: {block_number}"); // [!code focus]
+
+        Ok(())
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Endpoints
+
+<OpenApi.Endpoints path="/api" resource="rpc" />

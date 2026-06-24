@@ -1,0 +1,106 @@
+---
+title: Tempo API
+description: Explore Tempo API endpoints and RPC methods for account activity, balances, blocks, tokens, transfers, and chain data.
+---
+
+import { Cards, Card, OpenApi } from 'vocs'
+
+# Tempo API
+
+Use the Tempo API for indexed chain data, readable account activity, token metadata, balances, transfers, transaction receipts, and RPC methods.
+
+## Getting Started
+
+Every endpoint is served over HTTPS from `https://api.tempo.xyz` under the `/v1` prefix. Most read endpoints are public, so you can make your first request without any credentials:
+
+```bash
+curl 'https://api.tempo.xyz/v1/blocks'
+```
+
+The same base URL and credentials give you access to three surfaces:
+
+- [**REST API**](#api-endpoints): typed endpoints for indexed chain data such as blocks, transactions, tokens, balances, transfers, and receipts.
+
+  ```bash
+  curl 'https://api.tempo.xyz/v1/addresses/0x.../balances'
+  ```
+
+- [**JSON-RPC API**](/api/json-rpc): a node-level RPC entrypoint for raw chain access.
+
+  ```bash
+  curl 'https://api.tempo.xyz/rpc' \
+    --data '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}'
+  ```
+
+- [**Indexer API**](/api/indexer-api): a SQL-over-HTTP entrypoint for read-only queries against indexed chain data.
+
+  ```bash
+  curl --get 'https://api.tempo.xyz/v1/indexer/query' \
+    --data-urlencode 'chainId=mainnet' \
+    --data-urlencode 'sql=SELECT num, hash FROM blocks ORDER BY num DESC LIMIT 10'
+  ```
+
+There are three ways to authenticate, depending on the throughput you need:
+
+| Method | How | Limit |
+| --- | --- | --- |
+| Public | No credentials | 20 requests / minute per IP |
+| [MPP](/api/authentication#mpp-paying-per-request) | `Authorization: Payment <credential>` | Pay per request, no key required |
+| [API key](/api/authentication) | `Authorization: Bearer tempo:sk:...` | Higher, dedicated quota per key |
+
+Public access lets you try the API and serve low-volume reads, and [MPP](/api/authentication#mpp-paying-per-request) lets you pay per request without a key. For higher, dedicated quotas, use an API key.
+
+:::info
+API keys are only available on request. [Contact us](https://tempo.xyz/contact/) to learn more.
+:::
+
+## Example
+
+Check out an endpoint below and click "Try" to run it directly against the API. For example, fetch the token balances for an address:
+
+<OpenApi.Playground operationId="getAddressBalances" hideQueryParams />
+
+## API Endpoints
+
+<OpenApi.Endpoints path="/api" />
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Authentication"
+    description="Use production and sandbox API keys, or pay per request with MPP."
+    to="/api/authentication"
+    icon="lucide:key-round"
+  />
+  <Card
+    title="Conventions"
+    description="Shared formatting for identifiers, amounts, timestamps, errors, and rate limits."
+    to="/api/conventions"
+    icon="lucide:ruler"
+  />
+  <Card
+    title="Pagination"
+    description="Page through list endpoints with cursors, page numbers, and optional total counts."
+    to="/api/pagination"
+    icon="lucide:list-ordered"
+  />
+  <Card
+    title="Rate Limits"
+    description="Per-minute quotas, RateLimit-* headers, and retry best practices."
+    to="/api/rate-limits"
+    icon="lucide:gauge"
+  />
+  <Card
+    title="Errors"
+    description="HTTP status codes, the error envelope, and the full error code catalog."
+    to="/api/errors"
+    icon="lucide:triangle-alert"
+  />
+  <Card
+    title="Versioning Policy"
+    description="Understand compatible changes, breaking changes, deprecations, and sunsets."
+    to="/api/versioning-policy"
+    icon="lucide:git-branch"
+  />
+</Cards>

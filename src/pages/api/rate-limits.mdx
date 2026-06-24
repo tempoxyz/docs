@@ -1,0 +1,100 @@
+---
+title: Rate Limits
+description: How the Tempo API rate limits requests, the headers it returns, and best practices for staying within quota.
+---
+
+# Rate Limits
+
+The Tempo API enforces rate limits to ensure fair usage and system stability. Limits are counted in **fixed one-minute windows**, and every response reports your current quota in `RateLimit-*` headers.
+
+## Quota Structure
+
+Each request consumes from one quota bucket, chosen by how the request is authenticated:
+
+| Caller | Bucket | Default limit |
+| --- | --- | --- |
+| API key | Per key, per [scope](/api/authentication) | 100 requests / minute |
+| Anonymous | Per client IP | 20 requests / minute |
+
+- **API key requests** are counted per key *and* per scope. Each endpoint draws from the bucket for the scope it requires (such as `data:read`), so traffic to one scope does not exhaust another.
+- **Anonymous requests** — endpoints that allow access without a key — are counted per client IP at a lower limit.
+
+:::info
+Default limits are a starting point and may be raised for a given key. The authoritative limit for any request is always the value in its `RateLimit-Limit` response header — read the headers rather than hardcoding a number.
+:::
+
+## Response Headers
+
+Every rate-limited response carries your current quota:
+
+```http
+RateLimit-Limit: 100
+RateLimit-Remaining: 97
+RateLimit-Reset: 1735689600
+RateLimit-Scope: data:read
+```
+
+| Header | Description |
+| --- | --- |
+| `RateLimit-Limit` | Requests allowed in the current window. |
+| `RateLimit-Remaining` | Requests remaining in the current window. |
+| `RateLimit-Reset` | Unix timestamp (seconds) when the window resets and the count returns to the full limit. |
+| `RateLimit-Scope` | The scope bucket the request was counted against. Present on API-key requests. |
+
+## Exceeding the Limit
+
+When you exceed the limit, the API responds with `429 Too Many Requests` and a `Retry-After` header giving the number of seconds to wait before retrying:
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 12
+```
+
+```json
+{
+  "error": {
+    "code": "rate_limit_exceeded",
+    "message": "Rate limit exceeded"
+  },
+  "requestId": "0a1b2c3d-4e5f-6071-8293-a4b5c6d7e8f9"
+}
+```
+
+:::info
+On endpoints that allow anonymous access, an over-quota request can instead be answered with `402 Payment Required`, letting you pay per request with MPP rather than wait. See [Authentication](/api/authentication) for details.
+:::
+
+## Best Practices
+
+### Respect the headers
+
+Read `RateLimit-Remaining` and `RateLimit-Reset` to pace your requests, and pause until `RateLimit-Reset` when `RateLimit-Remaining` reaches `0` rather than retrying blindly.
+
+### Retry with backoff
+
+When you receive a `429`, wait for the duration in `Retry-After`, then retry with exponential backoff and jitter for repeated failures:
+
+```typescript
+async function withRetry<T>(fn: () => Promise<Response>): Promise<Response> {
+  let attempt = 0
+  while (true) {
+    const response = await fn()
+    if (response.status !== 429) return response
+
+    const retryAfter = Number(response.headers.get('Retry-After') ?? 1)
+    const backoff = Math.min(retryAfter, 2 ** attempt) * 1000
+    await new Promise((resolve) => setTimeout(resolve, backoff))
+    attempt++
+  }
+}
+```
+
+### Cache and paginate
+
+- Cache responses for read-heavy data that does not need to be real-time.
+- Use [pagination](/api/pagination) with a large `limit` to fetch more per request instead of issuing many small calls.
+- Request only the fields you need with `include`, so expensive computations run only when required.
+
+### Authenticate
+
+Anonymous traffic is held to the lower IP-based limit. Send an [API key](/api/authentication) to get a per-key, per-scope quota, and request a higher limit if your workload needs it.

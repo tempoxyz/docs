@@ -1,0 +1,154 @@
+---
+title: Pagination
+description: Page through Tempo API list endpoints with cursors, page numbers, and optional total counts.
+---
+
+# Pagination
+
+Tempo list endpoints share one pagination contract. Use **cursor** pagination for stable traversal and deep reads. Use **page** pagination only when an endpoint supports it and you need a shallow, page-numbered UI.
+
+## Modes
+
+| Mode | Parameters | Use for | Notes |
+| --- | --- | --- | --- |
+| Cursor | `limit`, `cursor` | Deep traversal, bulk reads, live feeds | Canonical. Omit `cursor` on the first request, then pass each `nextCursor` back verbatim. |
+| Page | `limit`, `page` | Shallow, page-numbered UIs | Optional. `page` is 1-indexed and `page × limit` must be at most `10,000`. |
+
+Cursor pagination anchors traversal to a row position, so the next cursor continues from exactly where the previous page ended, even when new rows arrive at the head of a feed between requests.
+
+Page pagination is positional. If new rows arrive at the head of a feed, items can shift across page boundaries, which can duplicate or skip results. Some endpoints support cursor pagination only.
+
+:::warning
+Do not send `cursor` and `page` together. The request fails with a `422` validation error.
+:::
+
+## Request Parameters
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `limit` | integer | `10` | Items per page. Must be between `5` and `200`. |
+| `cursor` | string | none | Opaque cursor from the previous response's `nextCursor`. Omit on the first request. Mutually exclusive with `page`. |
+| `page` | integer | none | 1-indexed positional page number. `page=1` is the head page. Mutually exclusive with `cursor`. `page × limit` must be at most `10,000`. |
+| `include` | string | none | Comma-separated include flags. Send `include=totalCount` to add `meta.totalCount` and `meta.totalCountCapped` to the response. |
+
+## Response Envelope
+
+List endpoints return a common envelope:
+
+```json
+{
+  "data": [ /* items for this page */ ],
+  "nextCursor": "WzIzNDU2Nzg5LDBd",
+  "meta": {
+    "totalCount": 42,
+    "totalCountCapped": false
+  }
+}
+```
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `data` | array | Items for this page. |
+| `nextCursor` | string or `null` | Cursor for the next page. Pass it back as the `cursor` query parameter. `null` means you have reached the end of the list. |
+| `meta.totalCount` | integer | Present only when you request `include=totalCount`. Exact when `meta.totalCountCapped` is `false`; a lower bound when `true`. |
+| `meta.totalCountCapped` | boolean | Present only when you request `include=totalCount`. `true` means the count hit the `10,000` cap. |
+
+:::warning
+`nextCursor === null` is the only end-of-list signal. Do not stop because `data` is shorter than `limit`, because `data` is empty, or because of `totalCount`.
+:::
+
+## Cursor Pagination
+
+Fetch the first page without a cursor:
+
+```bash
+curl 'https://api.tempo.xyz/v1/tokens?limit=100' \
+  --header 'Authorization: Bearer tempo:sk:...'
+```
+
+The response includes `nextCursor` when another page is available:
+
+```json
+{
+  "data": [ /* items for this page */ ],
+  "nextCursor": "WzIzNDU2Nzg5LDBd",
+  "meta": {}
+}
+```
+
+Fetch the next page by passing that value back as `cursor`:
+
+```bash
+curl --get 'https://api.tempo.xyz/v1/tokens' \
+  --data-urlencode 'limit=100' \
+  --data-urlencode 'cursor=WzIzNDU2Nzg5LDBd' \
+  --header 'Authorization: Bearer tempo:sk:...'
+```
+
+Keep going until `nextCursor` is `null`:
+
+```json
+{
+  "data": [ /* final page items */ ],
+  "nextCursor": null,
+  "meta": {}
+}
+```
+
+:::info
+Cursors are opaque. Store and pass them back exactly as received; do not decode, parse, shorten, or construct them. Their format and length may change without notice.
+
+If a cursor is malformed or forged, the request starts again from the head instead of returning an error.
+:::
+
+## Page Pagination
+
+Use `page` only for shallow, page-numbered interfaces:
+
+```bash
+curl 'https://api.tempo.xyz/v1/tokens?limit=25&page=2' \
+  --header 'Authorization: Bearer tempo:sk:...'
+```
+
+`page` is 1-indexed:
+
+- `page=1` returns the head page.
+- `page=2` returns the next positional page.
+- `page × limit` must be at most `10,000`.
+
+For anything deeper than `10,000` rows, use cursor pagination. Some endpoints support cursor pagination only — this is common when each returned item is derived from a variable number of underlying rows, which makes positional page boundaries unstable.
+
+## Counting Results
+
+Counts are optional. Request them with `include=totalCount`:
+
+```bash
+curl 'https://api.tempo.xyz/v1/tokens?limit=50&include=totalCount' \
+  --header 'Authorization: Bearer tempo:sk:...'
+```
+
+The count is computed by a capped subquery up to `10,000` matched rows:
+
+```json
+{
+  "data": [ /* items for this page */ ],
+  "nextCursor": "WzIzNDU2Nzg5LDBd",
+  "meta": {
+    "totalCount": 10000,
+    "totalCountCapped": true
+  }
+}
+```
+
+- When `meta.totalCountCapped` is `false`, `meta.totalCount` is exact.
+- When `meta.totalCountCapped` is `true`, `meta.totalCount` is a lower bound: there are at least that many matches.
+- Counts are independent of pagination. Use `nextCursor`, not `totalCount`, to decide whether to request another page.
+
+## Best Practices
+
+- Prefer cursor pagination for integrations, sync jobs, exports, and live feeds.
+- Use the largest `limit` your workload can handle, up to `200`, to reduce round trips.
+- Persist `nextCursor` if you need to resume traversal later.
+- Pass cursors back verbatim, and URL-encode them when placing them in a query string.
+- Stop only when `nextCursor` is `null`.
+- Use page pagination only for shallow UI navigation where duplicate or skipped rows on a live feed are acceptable.

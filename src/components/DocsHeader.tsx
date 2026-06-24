@@ -918,6 +918,7 @@ export default function DocsHeader() {
   const pathname = usePathname()
   const config = useConfig()
   const docsSidebarItems = resolveSidebarItems(config?.sidebar, pathname)
+  const showApiLogo = pathname === '/api' || pathname.startsWith('/api/')
   const [open, setOpen] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
@@ -995,7 +996,19 @@ export default function DocsHeader() {
             className="group flex h-9 items-center text-foreground"
             aria-label="Tempo home"
           >
-            <TempoLogo className="h-[18px] w-[80px]" />
+            {showApiLogo ? (
+              <span className="flex items-center gap-2">
+                <TempoLogo className="h-[18px] w-[80px]" />
+                <span
+                  aria-hidden
+                  className="flex h-[18px] items-center bg-[#2b2b2b] px-[5px] font-mono text-[12px] text-[#b2b2b2] leading-none tracking-[0]"
+                >
+                  API
+                </span>
+              </span>
+            ) : (
+              <TempoLogo className="h-[18px] w-[80px]" />
+            )}
           </a>
 
           <ul className="hidden items-center gap-16 lg:flex">

@@ -144,6 +144,48 @@
     }
   }
 
+  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
+      [data-v-openapi]:not([data-v-openapi-landing])
+    )
+    > [data-v-main] {
+    @media (width >= 1376px) {
+      padding-right: 0;
+    }
+  }
+
+  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
+      [data-v-openapi]:not([data-v-openapi-landing])
+    )
+    > [data-v-gutter-right] {
+    @media (width >= 1376px) {
+      display: none;
+    }
+  }
+
+  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
+      [data-v-openapi]:not([data-v-openapi-landing])
+    )
+    [data-v-openapi-header],
+  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
+      [data-v-openapi]:not([data-v-openapi-landing])
+    )
+    [data-v-openapi-description] {
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+    text-align: left;
+  }
+
+  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
+      [data-v-openapi]:not([data-v-openapi-landing])
+    )
+    [data-v-openapi]
+    [data-v-content] {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
   [data-v-sidebar] [data-v-content],
   [data-v-sidebar] [data-v-footer] {
     background: transparent;
@@ -1136,6 +1178,17 @@ body {
 
 .data-v-mermaid-container {
   min-height: 200px;
+}
+
+/* ---------------------------------------------------------------------------
+ * API Overview — the `<OpenApi.Endpoints>` accordion is a static reference
+ * list here, so suppress the interactive hover highlight on category triggers
+ * and endpoint rows.
+ * --------------------------------------------------------------------------- */
+
+[data-v-openapi-overview] [data-v-openapi-disclosure-trigger]:hover,
+[data-v-openapi-overview] [data-v-openapi-overview-endpoint]:hover {
+  background-color: transparent;
 }
 
 [data-v-sidebar] a[data-v-sidebar-item][href$="/protocol/upgrades/t7"] [data-v-sidebar-item-badge] {

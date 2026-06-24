@@ -1,0 +1,63 @@
+---
+title: Versioning Policy
+description: Learn how Tempo API versions, breaking changes, deprecations, and sunset notices work.
+---
+
+# Versioning Policy
+
+The Tempo API evolves without breaking existing integrations whenever practical. This page explains how the API is versioned, what we consider a breaking change, and how changes are communicated.
+
+:::info
+The Tempo API is versioned by URL path. The current stable version is served under the `/v1` prefix, such as `/v1/tokens`. Breaking changes ship as a new prefix, such as `/v2` or `/v3`. Each prior version stays available for its deprecation window so you can migrate on your own schedule.
+:::
+
+## Where This Policy Does Not Apply
+
+This policy covers the versioned REST API under `/v1`. It does **not** apply to the following endpoint, which follows an external specification and is versioned independently of the Tempo API:
+
+| Endpoint | Description |
+| --- | --- |
+| `/rpc` | The Ethereum JSON-RPC interface, which tracks the upstream JSON-RPC and node specifications. |
+
+## Backward-Compatible Changes
+
+These changes are released continuously and **do not** require you to change your integration or select a new version:
+
+- Adding a new endpoint, resource, or response.
+- Adding new optional request query parameters, headers, or body fields.
+- Adding new fields, objects, or headers to an existing response.
+- Adding new values to an open-ended enum or `status` field.
+- Adding new error `code`s within an existing documented category.
+- Changing human-readable text, such as descriptions or error `message`s, without changing the machine-readable `code` or its meaning.
+- Fixing behavior to match the documented API.
+- Changing the format or length of opaque identifiers, hashes, and cursors. Treat them as opaque strings.
+- Adding or adjusting `RateLimit-*` headers.
+
+## Breaking Changes
+
+A breaking change is any change that could require a correctly implemented client to change code to keep working as documented. Breaking changes are introduced behind an explicit version with a migration path. Examples:
+
+- Removing or renaming an endpoint, request parameter, or response field.
+- Changing the type, format, nullability, or meaning of an existing field.
+- Making a previously optional request parameter required.
+- Changing authentication, pagination, or the documented status code or error shape for an existing condition.
+- Rejecting requests that were previously valid under the documented API.
+
+:::warning
+We may make immediate changes without the usual notice when required to address security, abuse, data-integrity, legal, or chain-safety issues. We document these as soon as practical.
+:::
+
+## Deprecation and Sunset
+
+We will not deprecate a stable endpoint or version until a replacement is available and documented with a migration path. Deprecated endpoints are marked `deprecated: true` in this OpenAPI document and return standard signaling headers:
+
+```http
+Deprecation: true
+Sunset: Wed, 15 Jan 2027 00:00:00 GMT
+Link: <https://docs.tempo.xyz/api/versioning-policy>; rel="deprecation"
+```
+
+## Communicating Changes
+
+- All breaking changes and meaningful additions are recorded in the changelog with affected endpoints, migration notes, and any sunset date.
+- Deprecated operations and fields are flagged in this OpenAPI document.

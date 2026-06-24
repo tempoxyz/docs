@@ -49,7 +49,7 @@
     "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",
     "viem": "^2.52.2",
-    "vocs": "2.1.1",
+    "vocs": "2.1.8",
     "wagmi": "3.6.14",
     "waku": "^1.0.0-beta.0",
     "webauthx": "~0.1.1",
