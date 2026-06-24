@@ -37,7 +37,7 @@ describe('faucet API', () => {
 
   it('rejects invalid JSON', async () => {
     const response = await POST(
-      new Request('https://tempo.xyz/docs/api/faucet', {
+      new Request('https://tempo.xyz/developers/docs/api/faucet', {
         method: 'POST',
         body: '{',
       }),
@@ -87,7 +87,7 @@ describe('faucet API', () => {
 })
 
 function jsonRequest(body: unknown) {
-  return new Request('https://tempo.xyz/docs/api/faucet', {
+  return new Request('https://tempo.xyz/developers/docs/api/faucet', {
     method: 'POST',
     body: JSON.stringify(body),
     headers: {
@@ -98,7 +98,7 @@ function jsonRequest(body: unknown) {
 }
 
 function requestWithOrigin(origin: string) {
-  return new Request('https://tempo.xyz/docs/api/faucet', {
+  return new Request('https://tempo.xyz/developers/docs/api/faucet', {
     method: 'OPTIONS',
     headers: { origin },
   })
