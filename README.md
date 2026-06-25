@@ -17,7 +17,7 @@
 
 This repository contains documentation for the Tempo blockchain, including the Protocol Specifications, Litepaper, and Getting Started guides.
 
-[developers.tempo.xyz](https://tempo.xyz/developers)
+[docs.tempo.xyz](https://docs.tempo.xyz)
 
 ## Usage
 

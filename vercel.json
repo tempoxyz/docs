@@ -8,7 +8,7 @@
           "value": "faucet.tempo.xyz"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/quickstart/faucet",
+      "destination": "https://docs.tempo.xyz/docs/quickstart/faucet",
       "permanent": false
     },
     {
@@ -19,7 +19,7 @@
           "value": "faucet.tempo.xyz"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/quickstart/faucet",
+      "destination": "https://docs.tempo.xyz/docs/quickstart/faucet",
       "permanent": false
     },
     {
@@ -30,7 +30,7 @@
           "value": "bridge.tempo.xyz"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/getting-funds",
+      "destination": "https://docs.tempo.xyz/docs/guide/getting-funds",
       "permanent": false
     },
     {
@@ -41,63 +41,8 @@
           "value": "bridge.tempo.xyz"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/getting-funds",
+      "destination": "https://docs.tempo.xyz/docs/guide/getting-funds",
       "permanent": false
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "developers.tempo.xyz"
-        }
-      ],
-      "destination": "https://tempo.xyz/developers",
-      "permanent": true
-    },
-    {
-      "source": "/docs",
-      "has": [
-        {
-          "type": "host",
-          "value": "developers.tempo.xyz"
-        }
-      ],
-      "destination": "https://tempo.xyz/developers/docs",
-      "permanent": true
-    },
-    {
-      "source": "/docs/",
-      "has": [
-        {
-          "type": "host",
-          "value": "developers.tempo.xyz"
-        }
-      ],
-      "destination": "https://tempo.xyz/developers/docs",
-      "permanent": true
-    },
-    {
-      "source": "/docs/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "developers.tempo.xyz"
-        }
-      ],
-      "destination": "https://tempo.xyz/developers/docs/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "developers.tempo.xyz"
-        }
-      ],
-      "destination": "https://tempo.xyz/developers/:path*",
-      "permanent": true
     },
     {
       "source": "/accounts",

@@ -11,8 +11,8 @@ Skill for navigating Tempo documentation and source code.
 
 Before using MCP tools, try fetching context directly:
 
-- **llms.txt** – Concise index of all pages: `https://tempo.xyz/developers/llms.txt`
-- **Markdown pages** – Append `.md` to any page URL (e.g. `https://tempo.xyz/developers/quickstart/integrate-tempo.md`)
+- **llms.txt** – Concise index of all pages: `https://docs.tempo.xyz/llms.txt`
+- **Markdown pages** – Append `.md` to any page URL (e.g. `https://docs.tempo.xyz/quickstart/integrate-tempo.md`)
 
 Use `read_web_page` to fetch these when you need broad context or a quick answer.
 
@@ -31,7 +31,7 @@ Use these tools for structured exploration:
 | `mcp__tempo_mcp__get_file_tree` | Get recursive file tree |
 | `mcp__tempo_mcp__search_source` | Search source code |
 
-If a user reports stale, missing, or confusing Tempo docs while using MCP context, send sanitized feedback to `https://tempo.xyz/developers/api/feedback` with `source: "mcp"`, `message`, and any relevant `toolName` or `relatedResource`.
+If a user reports stale, missing, or confusing Tempo docs while using MCP context, send sanitized feedback to `https://docs.tempo.xyz/api/feedback` with `source: "mcp"`, `message`, and any relevant `toolName` or `relatedResource`.
 
 ## Available Sources
 
@@ -44,7 +44,7 @@ If a user reports stale, missing, or confusing Tempo docs while using MCP contex
 
 ## Workflow
 
-1. **Quick lookup**: Use `read_web_page` on `https://tempo.xyz/developers/llms.txt` for an overview, or fetch a specific page as Markdown
+1. **Quick lookup**: Use `read_web_page` on `https://docs.tempo.xyz/llms.txt` for an overview, or fetch a specific page as Markdown
 2. **Search docs**: Use `mcp__tempo_mcp__search_docs` to find relevant pages
 3. **Read pages**: Use `mcp__tempo_mcp__read_page` with the page path
 4. **Explore source**: Use `mcp__tempo_mcp__search_source` or `mcp__tempo_mcp__get_file_tree` to find implementations
