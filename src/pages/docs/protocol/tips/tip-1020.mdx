@@ -54,7 +54,7 @@ interface ISignatureVerifier {
 
 ### Signature Encoding
 
-Signatures MUST be encoded using the same format as [Tempo Transaction signatures](https://tempo.xyz/developers/docs/protocol/transactions/spec-tempo-transaction#signature-types):
+Signatures MUST be encoded using the same format as [Tempo Transaction signatures](https://docs.tempo.xyz/docs/protocol/transactions/spec-tempo-transaction#signature-types):
 
 | Type | Format | Length |
 |------|--------|--------|
@@ -64,7 +64,7 @@ Signatures MUST be encoded using the same format as [Tempo Transaction signature
 
 ### Verification Logic
 
-The precompile MUST use the same verification logic as Tempo transaction signature validation. See the [Tempo Transaction Signature Validation spec](https://tempo.xyz/developers/docs/protocol/transactions/spec-tempo-transaction#signature-validation) for details.
+The precompile MUST use the same verification logic as Tempo transaction signature validation. See the [Tempo Transaction Signature Validation spec](https://docs.tempo.xyz/docs/protocol/transactions/spec-tempo-transaction#signature-validation) for details.
 
 #### Keychain Signature Rejection
 
@@ -86,7 +86,7 @@ The precompile MUST enforce strict size limits on the `signature` argument **bef
 
 The precompile MUST charge gas and verify sufficient gas is available **before** performing any cryptographic verification. The precompile MUST revert with out-of-gas if the call has insufficient gas for the signature type.
 
-All calls pay the standard Tempo precompile calldata cost of 6 gas per 32-byte word (rounded up) on the full ABI-encoded input, consistent with all other Tempo precompiles. The verification gas per signature type is in-line with the [Tempo Transaction Signature Gas Schedule](https://tempo.xyz/developers/docs/protocol/transactions/spec-tempo-transaction#signature-verification-gas-schedule):
+All calls pay the standard Tempo precompile calldata cost of 6 gas per 32-byte word (rounded up) on the full ABI-encoded input, consistent with all other Tempo precompiles. The verification gas per signature type is in-line with the [Tempo Transaction Signature Gas Schedule](https://docs.tempo.xyz/docs/protocol/transactions/spec-tempo-transaction#signature-verification-gas-schedule):
 
 | Type | Verification Gas |
 |------|-----------------|

@@ -213,8 +213,7 @@ function compact<T>(values: Array<T | false | undefined>): T[] {
 }
 
 function urlFromPath(path: string | undefined) {
-  if (!path) return 'https://tempo.xyz/developers/'
+  if (!path) return 'https://docs.tempo.xyz/'
   if (URL.canParse(path)) return path
-  const relativePath = path.replace(/^\/+/, '')
-  return new URL(relativePath, 'https://tempo.xyz/developers/').toString()
+  return new URL(path.startsWith('/') ? path : `/${path}`, 'https://docs.tempo.xyz').toString()
 }
