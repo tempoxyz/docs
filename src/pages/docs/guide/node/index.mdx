@@ -1,48 +1,93 @@
 ---
-description: Run your own Tempo node for direct network access. Set up RPC nodes for API access or validator nodes to participate in consensus.
+title: Run a Tempo Node
+description: Run Tempo node infrastructure for RPC access, validator operations, system requirements, installation, monitoring, security, upgrades, and release operations.
 ---
 
 import { Cards, Card } from 'vocs'
 
-# Tempo Node
+# Run a Tempo Node
 
-Running a Tempo node allows you to interact with the network directly, providing your own RPC access or contributing to network infrastructure. Nodes provide JSON-RPC API access for applications, explorers, and wallets but do not participate in consensus.
+Run Tempo infrastructure when you need direct network access, dedicated RPC capacity, validator operations, or lower-level visibility into network behavior.
 
-## Supported Platforms
+Most teams should start with an RPC node. Validator operation requires coordination with the Tempo team and is documented separately from the RPC path.
 
-Prebuilt binaries are available for:
-- **Linux** (x86_64 and ARM64) - requires glibc ≥ 2.38
-- **macOS** (ARM64)
-
-## Getting Started
+## RPC Node Path
 
 <Cards>
   <Card
-    description="Hardware and software requirements for running a node"
+    title="System Requirements"
+    description="Hardware, operating system, and runtime requirements for Tempo node software."
     to="/docs/guide/node/system-requirements"
     icon="lucide:hard-drive"
-    title="System Requirements"
   />
   <Card
-    description="Download and install the Tempo node software"
+    title="Installation"
+    description="Download, install, and prepare the Tempo node binary for supported platforms."
     to="/docs/guide/node/installation"
     icon="lucide:download"
-    title="Installation"
   />
   <Card
-    description="Configure and run a full RPC node"
+    title="Run an RPC Node"
+    description="Configure and run a node that serves JSON-RPC traffic for apps, explorers, and wallets."
     to="/docs/guide/node/rpc"
-    icon="lucide:play"
-    title="Running an RPC Node"
+    icon="lucide:server"
   />
   <Card
-    description="Upcoming and past network upgrades and important releases"
-    to="/docs/guide/node/network-upgrades"
-    icon="lucide:arrow-up-circle"
-    title="Network Upgrades and Releases"
+    title="Node Security"
+    description="Harden node operations, network exposure, key handling, and runtime configuration."
+    to="/docs/guide/node/security"
+    icon="lucide:shield"
   />
 </Cards>
 
-:::info
-Validator onboarding requires coordination with the Tempo team. Reach out to us if you are interested.
-:::
+## Validator Operations
+
+<Cards>
+  <Card
+    title="Validator Overview"
+    description="Understand validator responsibilities and the operational path before onboarding."
+    to="/docs/guide/node/validator"
+    icon="lucide:badge-check"
+  />
+  <Card
+    title="Validator Onboarding"
+    description="Set up validator software and prepare to participate in coordinated network operations."
+    to="/docs/guide/node/validator-setup"
+    icon="lucide:clipboard-check"
+  />
+  <Card
+    title="Monitoring"
+    description="Monitor validator health, status, failover, and lifecycle operations."
+    to="/docs/guide/node/validator-monitoring"
+    icon="lucide:activity"
+  />
+  <Card
+    title="Troubleshooting"
+    description="Debug validator issues, common failure modes, and operational questions."
+    to="/docs/guide/node/validator-troubleshooting"
+    icon="lucide:wrench"
+  />
+</Cards>
+
+## Releases
+
+<Cards>
+  <Card
+    title="Upgrade Cadence"
+    description="Understand how Tempo node upgrades are planned, communicated, and rolled out."
+    to="/docs/guide/node/upgrade-cadence"
+    icon="lucide:calendar-clock"
+  />
+  <Card
+    title="Network Upgrades"
+    description="Track upgrade instructions, release notes, and node operator actions."
+    to="/docs/guide/node/network-upgrades"
+    icon="lucide:arrow-up-circle"
+  />
+  <Card
+    title="Changelog"
+    description="Review recent changes relevant to node operators and protocol users."
+    to="/docs/changelog"
+    icon="lucide:list-tree"
+  />
+</Cards>

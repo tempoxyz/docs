@@ -112,47 +112,43 @@ export default defineConfig({
   },
   openapi: [
     {
-      path: '/docs/api',
-      spec: 'https://api.tempo.xyz/openapi.json',
+      path: '/api',
+      spec: './openapi-preview.json',
       sidebar: {
-        collapsed: true,
+        collapsed: false,
         backLink: false,
         intro: [
           {
             text: 'Authentication',
-            link: '/docs/api/authentication',
+            link: '/api/authentication',
           },
           {
             text: 'Conventions',
-            link: '/docs/api/conventions',
-          },
-          {
-            text: 'Transactions & Transfers',
-            link: '/docs/api/transactions-and-transfers',
+            link: '/api/conventions',
           },
           {
             text: 'JSON-RPC API',
-            link: '/docs/api/json-rpc',
+            link: '/api/json-rpc',
           },
           {
             text: 'Indexer API',
-            link: '/docs/api/indexer-api',
+            link: '/api/indexer-api',
           },
           {
             text: 'Pagination',
-            link: '/docs/api/pagination',
+            link: '/api/pagination',
           },
           {
             text: 'Rate Limits',
-            link: '/docs/api/rate-limits',
+            link: '/api/rate-limits',
           },
           {
             text: 'Errors',
-            link: '/docs/api/errors',
+            link: '/api/errors',
           },
           {
             text: 'Versioning Policy',
-            link: '/docs/api/versioning-policy',
+            link: '/api/versioning-policy',
           },
         ],
       },
@@ -178,14 +174,14 @@ export default defineConfig({
       link: 'https://twitter.com/tempo',
     },
   ],
-  sidebar: {
-    '/docs': [
+  sidebar: (() => {
+    const docsSidebar = [
       {
-        text: 'Home',
+        text: 'Get Started',
         link: '/docs',
       },
       {
-        text: 'Developing with LLMs',
+        text: 'AI',
         link: '/docs/guide/using-tempo-with-ai',
       },
       {
@@ -196,12 +192,16 @@ export default defineConfig({
         text: 'Build on Tempo',
         items: [
           {
+            text: 'Overview',
+            link: '/docs/build',
+          },
+          {
             text: 'Getting Funds on Tempo',
             link: '/docs/guide/getting-funds',
           },
           {
             text: 'Make Payments',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -253,7 +253,7 @@ export default defineConfig({
           },
           {
             text: 'Issue Stablecoins',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -283,7 +283,7 @@ export default defineConfig({
           },
           {
             text: 'Exchange Stablecoins',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -305,7 +305,7 @@ export default defineConfig({
           },
           {
             text: 'Private Zones',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -339,7 +339,7 @@ export default defineConfig({
           },
           {
             text: 'Make Agentic Payments',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -375,7 +375,7 @@ export default defineConfig({
               },
               {
                 text: 'Use Cases',
-                collapsed: true,
+                collapsed: false,
                 items: [
                   {
                     text: 'Monetize Your API',
@@ -476,7 +476,7 @@ export default defineConfig({
           },
           {
             text: 'Bridging',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Bridge via LayerZero',
@@ -494,7 +494,7 @@ export default defineConfig({
           },
           {
             text: 'Ecosystem',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -537,7 +537,7 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Tempo Protocol Specs',
+        text: 'Tempo Protocol',
         items: [
           {
             text: 'Overview',
@@ -545,7 +545,7 @@ export default defineConfig({
           },
           {
             text: 'TIP-20 Tokens',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -567,7 +567,7 @@ export default defineConfig({
           },
           {
             text: 'Tempo Token Rewards',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -581,7 +581,7 @@ export default defineConfig({
           },
           {
             text: 'Tempo Policies (TIP-403)',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -603,7 +603,7 @@ export default defineConfig({
           },
           {
             text: 'Fees',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -615,7 +615,7 @@ export default defineConfig({
               },
               {
                 text: 'Fee AMM',
-                collapsed: true,
+                collapsed: false,
                 items: [
                   {
                     text: 'Overview',
@@ -635,7 +635,7 @@ export default defineConfig({
           },
           {
             text: 'Tempo Transactions',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -665,7 +665,7 @@ export default defineConfig({
           },
           {
             text: 'Blockspace',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -683,7 +683,7 @@ export default defineConfig({
           },
           {
             text: 'Stablecoin DEX',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -717,7 +717,7 @@ export default defineConfig({
           },
           {
             text: 'Zones',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -751,7 +751,7 @@ export default defineConfig({
           },
           {
             text: 'Network Upgrades',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'T7',
@@ -788,11 +788,15 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Tempo Developer Tools',
+        text: 'Tools & SDKs',
         items: [
           {
+            text: 'Overview',
+            link: '/docs/tools',
+          },
+          {
             text: 'Hosted Services',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -810,7 +814,7 @@ export default defineConfig({
           },
           {
             text: 'CLI',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -836,7 +840,7 @@ export default defineConfig({
           },
           {
             text: 'Tempo Wallet',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -862,7 +866,7 @@ export default defineConfig({
           },
           {
             text: 'SDKs',
-            collapsed: true,
+            collapsed: false,
             items: [
               {
                 text: 'Overview',
@@ -870,7 +874,7 @@ export default defineConfig({
               },
               {
                 text: 'TypeScript',
-                collapsed: true,
+                collapsed: false,
                 items: [
                   {
                     text: 'Overview',
@@ -901,7 +905,7 @@ export default defineConfig({
               },
               {
                 text: 'Foundry',
-                collapsed: true,
+                collapsed: false,
                 items: [
                   {
                     text: 'Overview',
@@ -931,7 +935,6 @@ export default defineConfig({
       },
       {
         text: 'Run a Tempo Node',
-        collapsed: true,
         items: [
           {
             text: 'Overview',
@@ -1030,8 +1033,68 @@ export default defineConfig({
       //     },
       //   ],
       // },
-    ],
-  },
+    ]
+
+    const section = (text: string) => {
+      const item = docsSidebar.find((item) => item.text === text)
+      return item ? [item] : []
+    }
+
+    const docsHomeSidebar = [
+      {
+        text: 'First Steps',
+        items: [
+          { text: 'Connect to Tempo', link: '/docs/quickstart/integrate-tempo' },
+          { text: 'Get Funds', link: '/docs/guide/getting-funds' },
+          { text: 'Send a Payment', link: '/docs/guide/payments' },
+          { text: 'Use Tempo Transactions', link: '/docs/guide/tempo-transaction' },
+          { text: 'Issue a Stablecoin', link: '/docs/guide/issuance' },
+        ],
+      },
+      {
+        text: 'Resources',
+        items: [
+          { text: 'Tools & SDKs', link: '/docs/tools' },
+          { text: 'Tempo Protocol', link: '/docs/protocol' },
+          { text: 'Run a Tempo Node', link: '/docs/guide/node' },
+          { text: 'Use Tempo with AI', link: '/docs/guide/using-tempo-with-ai' },
+          { text: 'Partners', link: '/docs/partners' },
+        ],
+      },
+    ]
+    const buildSidebar = section('Build on Tempo')
+    const integrateSidebar = section('Integrate Tempo')
+    const specsSidebar = section('Tempo Protocol')
+    const developerToolsSidebar = section('Tools & SDKs')
+    const nodeSidebar = section('Run a Tempo Node')
+
+    return {
+      '/docs': docsHomeSidebar,
+      '/docs/build': buildSidebar,
+      '/docs/guide/getting-funds': buildSidebar,
+      '/docs/guide/payments': buildSidebar,
+      '/docs/guide/issuance': buildSidebar,
+      '/docs/guide/stablecoin-dex': buildSidebar,
+      '/docs/guide/private-zones': buildSidebar,
+      '/docs/guide/machine-payments': buildSidebar,
+      '/docs/quickstart': integrateSidebar,
+      '/docs/guide/tempo-transaction': integrateSidebar,
+      '/docs/guide/bridge-layerzero': integrateSidebar,
+      '/docs/guide/bridge-bungee': integrateSidebar,
+      '/docs/guide/bridge-relay': integrateSidebar,
+      '/docs/ecosystem': integrateSidebar,
+      '/docs/protocol': specsSidebar,
+      '/docs/tools': developerToolsSidebar,
+      '/docs/hosted-services': developerToolsSidebar,
+      '/docs/developer-tools': developerToolsSidebar,
+      '/docs/cli': developerToolsSidebar,
+      '/docs/protocol/rpc': developerToolsSidebar,
+      '/docs/sdk': developerToolsSidebar,
+      '/docs/wallet': developerToolsSidebar,
+      '/docs/guide/node': nodeSidebar,
+      '/docs/changelog': nodeSidebar,
+    }
+  })(),
   topNav: [
     {
       text: 'Docs',
@@ -1042,116 +1105,6 @@ export default defineConfig({
     { text: 'Wallet', link: 'https://wallet.tempo.xyz' },
   ],
   redirects: [
-    {
-      source: '/api',
-      destination: '/docs/api',
-      status: 301,
-    },
-    {
-      source: '/api/authentication',
-      destination: '/docs/api/authentication',
-      status: 301,
-    },
-    {
-      source: '/api/conventions',
-      destination: '/docs/api/conventions',
-      status: 301,
-    },
-    {
-      source: '/api/json-rpc',
-      destination: '/docs/api/json-rpc',
-      status: 301,
-    },
-    {
-      source: '/api/indexer-api',
-      destination: '/docs/api/indexer-api',
-      status: 301,
-    },
-    {
-      source: '/api/pagination',
-      destination: '/docs/api/pagination',
-      status: 301,
-    },
-    {
-      source: '/api/rate-limits',
-      destination: '/docs/api/rate-limits',
-      status: 301,
-    },
-    {
-      source: '/api/errors',
-      destination: '/docs/api/errors',
-      status: 301,
-    },
-    {
-      source: '/api/versioning-policy',
-      destination: '/docs/api/versioning-policy',
-      status: 301,
-    },
-    {
-      source: '/api/transactions-and-transfers',
-      destination: '/docs/api/transactions-and-transfers',
-      status: 301,
-    },
-    {
-      source: '/api/activities',
-      destination: '/docs/api/activities',
-      status: 301,
-    },
-    {
-      source: '/api/balances',
-      destination: '/docs/api/balances',
-      status: 301,
-    },
-    {
-      source: '/api/blocks',
-      destination: '/docs/api/blocks',
-      status: 301,
-    },
-    {
-      source: '/api/exchange',
-      destination: '/docs/api/exchange',
-      status: 301,
-    },
-    {
-      source: '/api/fee-amm',
-      destination: '/docs/api/fee-amm',
-      status: 301,
-    },
-    {
-      source: '/api/tokens',
-      destination: '/docs/api/tokens',
-      status: 301,
-    },
-    {
-      source: '/api/transactions',
-      destination: '/docs/api/transactions',
-      status: 301,
-    },
-    {
-      source: '/api/transfers',
-      destination: '/docs/api/transfers',
-      status: 301,
-    },
-    {
-      source: '/api/verified-tokens',
-      destination: '/docs/api/verified-tokens',
-      status: 301,
-    },
-    {
-      source: '/api/indexer',
-      destination: '/docs/api/indexer',
-      status: 301,
-    },
-    {
-      source: '/api/rpc',
-      destination: '/docs/api/rpc',
-      status: 301,
-    },
-    {
-      source: '/api/coingecko',
-      destination: '/docs/api/coingecko',
-      status: 301,
-    },
     {
       source: '/docs/documentation/protocol/:path*',
       destination: '/docs/protocol/:path*',

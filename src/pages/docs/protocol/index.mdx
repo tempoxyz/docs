@@ -1,70 +1,87 @@
 ---
-description: Technical specifications and reference documentation for the Tempo blockchain protocol, purpose-built for global payments at scale.
+title: Tempo Protocol
+description: Read Tempo protocol references for tokens, policies, fees, transactions, blockspace, exchange, zones, network upgrades, TIP specs, and implementation details.
 ---
 
 import { Cards, Card } from 'vocs'
 
 # Tempo Protocol
 
-Tempo is a blockchain protocol purpose-built for global payments. Rather than being a general-purpose platform, Tempo makes deliberate technical choices optimized for payments at scale.
+Use this section when you need the technical reference for Tempo itself. These pages are written for implementers, auditors, wallet teams, infrastructure operators, and anyone building against protocol-level behavior rather than a single product workflow.
 
-This section provides details on the Tempo Protocol specifications, and serves as a technical reference for protocol implementers, auditors, and core contributors building on Tempo. 
+If you are building an app, start with the guides in **Build on Tempo** and come here when you need exact semantics, ABI details, or protocol rationale.
 
-## Protocol Components
+## Core Primitives
 
 <Cards>
   <Card
-    description="Core token standard with native stablecoin features and policy registry integration"
+    title="TIP-20 Tokens"
+    description="Stablecoin-native token behavior, metadata, fees, memos, policies, and liquidity routing."
     to="/docs/protocol/tip20/overview"
     icon="lucide:coins"
-    title="TIP-20 Tokens"
   />
   <Card
-    description="Reward distribution system for token holders with automated yield mechanisms"
-    to="/docs/protocol/tip20-rewards/overview"
-    icon="lucide:gift"
-    title="Tempo Token Rewards"
-  />
-  <Card
-    description="Policy registry system for compliance, access control, and token governance"
+    title="Tempo Policies"
+    description="TIP-403 policy checks, receive policies, access controls, and registry behavior."
     to="/docs/protocol/tip403/overview"
-    icon="lucide:shield"
-    title="Tempo Policies (TIP-403)"
-  />
-  <Card
-    description="Receiver-side token and sender filters for inbound TIP-20 transfers and mints"
-    to="/docs/protocol/tip403/receive-policies"
     icon="lucide:shield-check"
-    title="Receive Policies"
   />
   <Card
-    description="Multi-token fee payment system with AMM for stablecoin conversion"
-    to="/docs/protocol/fees"
-    icon="lucide:wallet"
     title="Fees"
+    description="Stablecoin fee payment, fee accounting, and the fee AMM used for conversion."
+    to="/docs/protocol/fees"
+    icon="lucide:badge-dollar-sign"
   />
   <Card
-    description="EIP-2718 transaction type with native passkeys, batching, scheduling, and fee sponsorship"
+    title="Tempo Transactions"
+    description="Tempo transaction type, batching, scheduling, fee sponsorship, and account keychains."
     to="/docs/protocol/transactions"
     icon="lucide:layers"
-    title="Tempo Transactions"
   />
+</Cards>
+
+## Network Systems
+
+<Cards>
   <Card
-    description="Block format and payment lanes for optimized throughput"
-    to="/docs/protocol/blockspace/overview"
-    icon="lucide:layout"
     title="Blockspace"
+    description="Consensus, finality, block format, payment lanes, and throughput-oriented protocol design."
+    to="/docs/protocol/blockspace/overview"
+    icon="lucide:layout-dashboard"
   />
   <Card
-    description="Enshrined stablecoin DEX for stablecoin interoperability"
+    title="Stablecoin DEX"
+    description="Enshrined stablecoin exchange, quote tokens, swaps, liquidity, and exchange balances."
     to="/docs/protocol/exchange"
     icon="lucide:arrow-left-right"
-    title="Stablecoin DEX"
   />
   <Card
-    description="View the full Tempo protocol source code and implementation"
+    title="Zones"
+    description="Private zone architecture, accounts, bridging, RPC, execution, gas, and proving."
+    to="/docs/protocol/zones"
+    icon="lucide:scan"
+  />
+  <Card
+    title="Network Upgrades"
+    description="Track upgrade specifications, migration notes, and release-level protocol changes."
+    to="/docs/protocol/upgrades/t7"
+    icon="lucide:arrow-up-circle"
+  />
+</Cards>
+
+## Specifications
+
+<Cards>
+  <Card
+    title="TIPs"
+    description="Browse Tempo Improvement Proposals for standards, process changes, and protocol history."
+    to="/docs/protocol/tips"
+    icon="lucide:file-text"
+  />
+  <Card
+    title="GitHub Repository"
+    description="Read the Tempo source implementation and follow protocol development in the open."
     to="https://github.com/tempoxyz/tempo"
     icon="lucide:github"
-    title="GitHub Repository"
   />
 </Cards>

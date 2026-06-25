@@ -1,76 +1,88 @@
 ---
-description: Build on Tempo Testnet. Connect to the network, explore SDKs, and follow guides for payments, stablecoin issuance, and exchange.
+title: Integrate Tempo
+description: Connect apps and wallets to Tempo with network configuration, faucet funding, EVM compatibility notes, bridges, verification, and ecosystem resources.
 interactive: true
 ---
 
-import * as Demo from '../../../components/guides/Demo.tsx'
-import { ConnectWallet } from '../../../components/ConnectWallet.tsx'
 import { Cards, Card } from 'vocs'
 
 # Integrate Tempo
 
-Tempo is fully compatible with the Ethereum Virtual Machine (EVM), targeting the **Osaka** EVM hard fork. So, everything you'd expect to work with Ethereum works on Tempo, with only a few exceptions which we detail on the [EVM Differences](/docs/quickstart/evm-compatibility) page. 
+Use this section when you are connecting an existing app, wallet, contract, bridge, or infrastructure service to Tempo. These pages cover the practical edges of integration: chain configuration, RPC endpoints, faucet funding, wallet support, EVM compatibility, predeploys, contract verification, and ecosystem resources.
 
+Tempo is EVM-compatible and targets the **Osaka** EVM hard fork. Most Ethereum tooling works as expected, with Tempo-specific differences documented where they matter.
+
+## First Connection
 
 <Cards>
   <Card
     icon="lucide:network"
     title="Connect to the Network"
-    description="Learn how to connect to the Tempo Testnet with your wallet or programmatically."
+    description="Add Tempo chain configuration, RPC endpoints, explorer links, and wallet connection details."
     to="/docs/quickstart/connection-details"
   />
   <Card
+    icon="lucide:droplets"
+    title="Get Testnet Faucet Funds"
+    description="Fund test wallets so you can deploy contracts, send payments, and exercise integration flows."
+    to="/docs/quickstart/faucet"
+  />
+  <Card
+    icon="lucide:badge-check"
+    title="Verify Contracts"
+    description="Verify deployed contracts and make them easier to inspect, debug, and share."
+    to="/docs/quickstart/verify-contracts"
+  />
+</Cards>
+
+## App and Wallet Integration
+
+<Cards>
+  <Card
     icon="lucide:wallet"
-    title="Integrate Wallet Support"
-    description="Support Tempo in your wallet with fee sponsorship and native stablecoins."
+    title="Wallet Developers"
+    description="Support Tempo in wallets with stablecoin-native fees, chain metadata, and transaction behavior."
     to="/docs/quickstart/wallet-developers"
   />
+  <Card
+    icon="lucide:code-2"
+    title="EVM Differences"
+    description="Understand the Tempo-specific behavior that differs from default Ethereum assumptions."
+    to="/docs/quickstart/evm-compatibility"
+  />
+  <Card
+    icon="lucide:boxes"
+    title="Predeployed Contracts"
+    description="Find Tempo predeploys and system contracts used by integrations and protocol features."
+    to="/docs/quickstart/predeployed-contracts"
+  />
+  <Card
+    icon="lucide:list"
+    title="Token List Registry"
+    description="Use Tempo token lists to discover supported assets and present stablecoins correctly."
+    to="/docs/quickstart/tokenlist"
+  />
 </Cards>
 
-## Start Building
-
-The guides below will help you get a sense for what is possible to do with Tempo. All of the guides below are fully-featured Tempo applications themselves, built with the [Tempo SDKs](/docs/sdk).
+## Interoperability
 
 <Cards>
   <Card
-    icon="lucide:send"
-    title="Make Payments"
-    description="Send and receive stablecoin payments with flexible fee options and sponsorship capabilities"
-    to="/docs/guide/payments"
+    icon="lucide:bridge"
+    title="Bridge via LayerZero"
+    description="Bridge supported assets to and from Tempo using LayerZero."
+    to="/docs/guide/bridge-layerzero"
   />
   <Card
-    icon="lucide:coins"
-    title="Issue Stablecoins"
-    description="Create and manage your own stablecoin with built-in compliance features"
-    to="/docs/guide/issuance"
+    icon="lucide:route"
+    title="Bridge via Relay"
+    description="Use Relay to move assets between Tempo and other supported networks."
+    to="/docs/guide/bridge-relay"
   />
   <Card
-    icon="lucide:arrow-left-right"
-    title="Exchange Stablecoins"
-    description="Trade between stablecoins on Tempo's enshrined decentralized exchange"
-    to="/docs/guide/stablecoin-dex"
+    icon="lucide:network"
+    title="Ecosystem"
+    description="Find bridges, wallets, analytics, infrastructure, compliance, and orchestration partners."
+    to="/docs/ecosystem"
   />
 </Cards>
-
-## Go Deeper
-
-The Tempo source code is fully open-source and available on [GitHub](https://github.com/tempoxyz).
-
-If you're interested in learning more about how Tempo works under the hood, feel free to explore the codebase directly, run a node for yourself, or refer to the protocol specifications for a deeper understanding. 
-
-<Cards>
-  <Card
-    icon="lucide:server"
-    title="Run a Tempo Node"
-    description="System requirements, installation and usage instructions for running a Tempo node."
-    to="/docs/guide/node"
-  />
-  <Card
-    icon="lucide:book-open"
-    title="Protocol Specifications"
-    description="Technical specifications for tokens, fees, transactions, and protocol components."
-    to="/docs/protocol"
-  />
-</Cards>
-
-We welcome contributions from the community to help improve and expand the project.

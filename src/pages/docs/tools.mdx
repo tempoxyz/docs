@@ -1,0 +1,70 @@
+---
+title: Tools & SDKs
+description: Find Tempo SDKs, CLI commands, hosted services, wallet docs, RPC references, and indexer tools for building, testing, and operating production integrations.
+---
+
+import { Cards, Card } from 'vocs'
+
+# Tools & SDKs
+
+Use this section when you need the implementation surface for Tempo: libraries, command-line tools, managed services, wallet integration, RPC references, and query access to network data.
+
+If you are integrating a product, start with the TypeScript SDKs and hosted services. If you are operating infrastructure or debugging low-level behavior, start with the CLI and RPC reference.
+
+## Developer Surfaces
+
+<Cards>
+  <Card
+    title="SDKs"
+    description="Use TypeScript, Go, Foundry, Python, and Rust tooling for Tempo applications."
+    to="/docs/sdk"
+    icon="lucide:package"
+  />
+  <Card
+    title="CLI"
+    description="Manage wallets, make requests, download binaries, and run node-related commands."
+    to="/docs/cli"
+    icon="lucide:terminal"
+  />
+  <Card
+    title="Hosted Services"
+    description="Use managed Tempo services for fee sponsorship and indexer-backed data access."
+    to="/docs/hosted-services"
+    icon="lucide:cloud"
+  />
+  <Card
+    title="Tempo Wallet"
+    description="Integrate the Tempo Wallet, recipes, references, and agent-oriented wallet flows."
+    to="/docs/wallet"
+    icon="lucide:wallet"
+  />
+</Cards>
+
+## References and Data
+
+<Cards>
+  <Card
+    title="JSON-RPC Reference"
+    description="Browse Tempo RPC methods, request shapes, and protocol-level API behavior."
+    to="/docs/protocol/rpc"
+    icon="lucide:braces"
+  />
+  <Card
+    title="Indexer (tidx)"
+    description="Query Tempo blocks, transactions, logs, token balances, and decoded events through SQL."
+    to="/docs/developer-tools/indexer"
+    icon="lucide:database"
+  />
+  <Card
+    title="Hosted Fee Payer"
+    description="Sponsor Tempo transaction fees through hosted JSON-RPC relay endpoints."
+    to="/docs/developer-tools/fee-payer"
+    icon="lucide:badge-dollar-sign"
+  />
+  <Card
+    title="Use Tempo with AI"
+    description="Install MCP, plugins, and docs context so coding agents can work with Tempo accurately."
+    to="/docs/guide/using-tempo-with-ai"
+    icon="lucide:bot"
+  />
+</Cards>
