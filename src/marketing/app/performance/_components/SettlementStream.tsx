@@ -7,8 +7,9 @@ import useMeasure from './useMeasure'
 // The settlement story as a live conveyor of finalized blocks. The live feed
 // (and its heartbeat release cadence) lives in `useFinalizedBlocks`. Since
 // finalized heads are already settled, every cell is an observed settlement —
-// the stream is a steady heartbeat of real blocks. It deliberately shows no
-// block-time number; the "Avg block time" figure lives in the hero stat above.
+// the stream is a steady heartbeat of real blocks. The block-time readout is
+// the benchmark figure from the perf API (same source as the hero stat), so
+// the two always agree and no live-measured number is shown.
 
 const TEMPO_EXPLORER_BLOCK_URL = 'https://explore.tempo.xyz/block'
 
@@ -19,7 +20,13 @@ const STEP = CELL + GAP
 const TRACK_TOP = (H - CELL) / 2
 const TRACK_H = CELL + 24 // cells plus their height labels
 
-export default function SettlementStream() {
+type SettlementStreamProps = {
+  // Average block time from the benchmark API (latest nightly run), shared with
+  // the hero stat so the two never disagree.
+  blockTimeMs?: number
+}
+
+export default function SettlementStream({ blockTimeMs }: SettlementStreamProps) {
   const { ref, width } = useMeasure<HTMLDivElement>()
   const { blocks, isLive } = useFinalizedBlocks()
 
@@ -100,6 +107,28 @@ export default function SettlementStream() {
             {/* Mask the oldest block's exit at the track's left edge. */}
             <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-surface-shell to-transparent" />
           </div>
+
+          {/* Benchmark avg block time, bracketing a single block interval. Same
+              perf-API figure as the hero stat — not a live measurement. */}
+          {blockTimeMs != null ? (
+            <>
+              <div
+                className="absolute flex items-center"
+                style={{ right: CELL / 2, width: STEP, top: TRACK_TOP + TRACK_H + 6 }}
+              >
+                <span className="h-2 w-px bg-foreground/25" />
+                <span className="h-px flex-1 bg-foreground/25" />
+                <span className="h-2 w-px bg-foreground/25" />
+              </div>
+              <p
+                className="absolute text-center font-mono text-[9px] text-foreground/35 leading-tight"
+                style={{ right: CELL / 2 - 24, width: STEP + 48, top: TRACK_TOP + TRACK_H + 16 }}
+              >
+                <span className="block text-foreground/30 tracking-wider">AVG BLOCK TIME</span>
+                <span className="text-foreground/45">{Math.round(blockTimeMs)} MS</span>
+              </p>
+            </>
+          ) : null}
         </div>
       ) : null}
     </div>
