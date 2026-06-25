@@ -2,6 +2,11 @@ import type { Connector } from 'wagmi'
 
 const UNSUPPORTED_WALLET_IDS = new Set(['app.phantom'])
 const UNSUPPORTED_WALLET_NAMES = new Set(['Phantom'])
+const TEMPO_MANAGED_WALLET_IDS = new Set(['webAuthn', 'xyz.tempo'])
+
+export function isBrowserWalletConnectorId(connectorId: string) {
+  return !TEMPO_MANAGED_WALLET_IDS.has(connectorId)
+}
 
 export function filterSupportedInjectedConnectors(
   connectors: readonly Connector[],
@@ -9,7 +14,7 @@ export function filterSupportedInjectedConnectors(
 ) {
   const seen = new Set<string>()
   return connectors.filter((connector) => {
-    if (connector.id === 'webAuthn' && !options.includeWebAuthn) return false
+    if (!isFundableWalletConnector(connector, options)) return false
     if (UNSUPPORTED_WALLET_IDS.has(connector.id)) return false
     if (UNSUPPORTED_WALLET_NAMES.has(connector.name)) return false
     if (seen.has(connector.id)) return false
@@ -22,5 +27,6 @@ export function isFundableWalletConnector(
   connector: Pick<Connector, 'id'>,
   options: { includeWebAuthn?: boolean } = {},
 ) {
-  return connector.id !== 'webAuthn' || options.includeWebAuthn === true
+  if (connector.id === 'webAuthn') return options.includeWebAuthn === true
+  return isBrowserWalletConnectorId(connector.id)
 }
