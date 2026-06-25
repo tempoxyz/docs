@@ -38,5 +38,3 @@ A transaction that calls a contract might emit several transfers (for example, a
 | **Endpoint** | [`/v1/transactions`](/api/transactions) | [`/v1/transfers`](/api/transfers) |
 | **Use it for** | Inspecting submitted transactions, fees, and status | Tracking who received which tokens, and reconciling balances |
 | **Key link** | Its hash appears on every transfer it produced | `transactionHash` points back to its transaction |
-
-If you want to know **what was requested** — the call, its fees, and whether it succeeded — use [Transactions](/api/transactions). If you want to know **what tokens actually moved**, use [Transfers](/api/transfers).
