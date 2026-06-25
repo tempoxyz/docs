@@ -112,43 +112,47 @@ export default defineConfig({
   },
   openapi: [
     {
-      path: '/api',
-      spec: './openapi-preview.json',
+      path: '/docs/api',
+      spec: 'https://api.tempo.xyz/openapi.json',
       sidebar: {
-        collapsed: false,
+        collapsed: true,
         backLink: false,
         intro: [
           {
             text: 'Authentication',
-            link: '/api/authentication',
+            link: '/docs/api/authentication',
           },
           {
             text: 'Conventions',
-            link: '/api/conventions',
+            link: '/docs/api/conventions',
+          },
+          {
+            text: 'Transactions & Transfers',
+            link: '/docs/api/transactions-and-transfers',
           },
           {
             text: 'JSON-RPC API',
-            link: '/api/json-rpc',
+            link: '/docs/api/json-rpc',
           },
           {
             text: 'Indexer API',
-            link: '/api/indexer-api',
+            link: '/docs/api/indexer-api',
           },
           {
             text: 'Pagination',
-            link: '/api/pagination',
+            link: '/docs/api/pagination',
           },
           {
             text: 'Rate Limits',
-            link: '/api/rate-limits',
+            link: '/docs/api/rate-limits',
           },
           {
             text: 'Errors',
-            link: '/api/errors',
+            link: '/docs/api/errors',
           },
           {
             text: 'Versioning Policy',
-            link: '/api/versioning-policy',
+            link: '/docs/api/versioning-policy',
           },
         ],
       },

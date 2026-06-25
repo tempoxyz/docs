@@ -55,7 +55,7 @@ const sectionNavItems: SectionNavItem[] = [
     label: 'Tools & SDKs',
     href: '/docs/tools',
     matches: [
-      '/api',
+      '/docs/api',
       '/docs/cli',
       '/docs/developer-tools',
       '/docs/hosted-services',
