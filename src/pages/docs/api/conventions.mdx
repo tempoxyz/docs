@@ -7,7 +7,7 @@ description: Formatting standards and shared patterns used across the Tempo API 
 
 The Tempo API follows consistent formatting rules for identifiers, amounts, timestamps, and shared query parameters. This page is a quick reference for the patterns you'll encounter on every endpoint.
 
-For authentication and pagination, see the dedicated [Authentication](/api/authentication) and [Pagination](/api/pagination) pages.
+For authentication and pagination, see the dedicated [Authentication](/docs/api/authentication) and [Pagination](/docs/api/pagination) pages.
 
 ## Base URL
 
@@ -17,7 +17,7 @@ The Tempo API is served from a single base URL, with endpoints versioned under t
 https://api.tempo.xyz/v1
 ```
 
-For example: `https://api.tempo.xyz/v1/tokens`. See the [Versioning Policy](/api/versioning-policy) for how versions, breaking changes, and deprecations work.
+For example: `https://api.tempo.xyz/v1/tokens`. See the [Versioning Policy](/docs/api/versioning-policy) for how versions, breaking changes, and deprecations work.
 
 ## Chains
 
@@ -33,7 +33,7 @@ curl 'https://api.tempo.xyz/v1/blocks?chainId=testnet' \
   --header 'Authorization: Bearer tempo:sk:...'
 ```
 
-`chainId` defaults to `mainnet` when omitted. A sandbox API key steers an omitted `chainId` to `testnet` — see [Authentication](/api/authentication) for how key environments interact with chain selection.
+`chainId` defaults to `mainnet` when omitted. A sandbox API key steers an omitted `chainId` to `testnet` — see [Authentication](/docs/api/authentication) for how key environments interact with chain selection.
 
 ## Identifiers
 
@@ -94,8 +94,8 @@ tempo-request-id: 0a1b2c3d-4e5f-6071-8293-a4b5c6d7e8f9
 
 ## Errors
 
-Errors use a single, consistent envelope with a conventional HTTP status code and a stable, machine-readable `error.code` you branch on. See [Errors](/api/errors) for the envelope and the full code catalog.
+Errors use a single, consistent envelope with a conventional HTTP status code and a stable, machine-readable `error.code` you branch on. See [Errors](/docs/api/errors) for the envelope and the full code catalog.
 
 ## Rate Limits
 
-Every response carries standard `RateLimit-*` headers, and requests that exceed quota receive `429 Too Many Requests` with a `Retry-After` header. See [Rate Limits](/api/rate-limits) for the full model and best practices.
+Every response carries standard `RateLimit-*` headers, and requests that exceed quota receive `429 Too Many Requests` with a `Retry-After` header. See [Rate Limits](/docs/api/rate-limits) for the full model and best practices.

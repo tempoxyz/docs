@@ -9,7 +9,7 @@ The Tempo API supports three ways to authenticate a request, so you can start wi
 
 | Method | Credential | Use for |
 | --- | --- | --- |
-| **Public** | None | Trying the API and low-volume reads, within a per-IP [rate limit](/api/rate-limits). |
+| **Public** | None | Trying the API and low-volume reads, within a per-IP [rate limit](/docs/api/rate-limits). |
 | **MPP** | `Authorization: Payment <credential>` | Paying per request without a key, or continuing past a rate limit. |
 | **API key** | `Authorization: Bearer tempo:sk:...` | Authenticating as your account for higher, dedicated quotas. |
 

@@ -8,12 +8,12 @@ description: Understand the Tempo API model for transactions and transfers.
 Transactions and transfers are the two most common resources in the Tempo API, and they are easy to confuse. They describe different things: a **transaction** is what a user submits to the chain, while a **transfer** is a token movement that results from executing one.
 
 :::info
-**Transactions vs. transfers** — a transaction is what a user *submits*; transfers are what *happens* when it executes. One transaction can produce zero, one, or many token transfers. Use [`/v1/transactions`](/api/transactions) to inspect submitted transactions and their outcomes, and [`/v1/transfers`](/api/transfers) to list the token movements that resulted.
+**Transactions vs. transfers** — a transaction is what a user *submits*; transfers are what *happens* when it executes. One transaction can produce zero, one, or many token transfers. Use [`/v1/transactions`](/docs/api/transactions) to inspect submitted transactions and their outcomes, and [`/v1/transfers`](/docs/api/transfers) to list the token movements that resulted.
 :::
 
 ## The model
 
-- A **transaction** is what a user submits to Tempo: a signed envelope that moves value or calls a contract. It may produce zero, one, or many token transfers. Query [`/v1/transfers`](/api/transfers) to list the token movements it caused.
+- A **transaction** is what a user submits to Tempo: a signed envelope that moves value or calls a contract. It may produce zero, one, or many token transfers. Query [`/v1/transfers`](/docs/api/transfers) to list the token movements it caused.
 - A **transfer** is an effect of transaction execution: a TIP-20 token moved from one account to another. Multiple transfers can come from a single transaction, and some transactions produce no transfers at all.
 
 A transaction that calls a contract might emit several transfers (for example, a swap that moves tokens in and out), exactly one (a simple payment), or none (a contract call that updates state without moving tokens). Each transfer carries the `transactionHash` of the transaction that produced it, so you can always trace a movement back to the transaction that caused it.
@@ -35,6 +35,6 @@ A transaction that calls a contract might emit several transfers (for example, a
 | --- | --- | --- |
 | **What it is** | Something a user submits to the chain | A token movement caused by execution |
 | **Cardinality** | One per submission | Zero, one, or many per transaction |
-| **Endpoint** | [`/v1/transactions`](/api/transactions) | [`/v1/transfers`](/api/transfers) |
+| **Endpoint** | [`/v1/transactions`](/docs/api/transactions) | [`/v1/transfers`](/docs/api/transfers) |
 | **Use it for** | Inspecting submitted transactions, fees, and status | Tracking who received which tokens, and reconciling balances |
 | **Key link** | Its hash appears on every transfer it produced | `transactionHash` points back to its transaction |

@@ -36,7 +36,7 @@ Every error returns the same JSON envelope:
 | `requestId` | string | The request's `tempo-request-id`. Include it when contacting support. |
 
 :::info
-Branch on `error.code`, never on `error.message`. Codes are stable; messages are human-readable text and may change at any time. New codes may be added within an existing category. See the [Versioning Policy](/api/versioning-policy).
+Branch on `error.code`, never on `error.message`. Codes are stable; messages are human-readable text and may change at any time. New codes may be added within an existing category. See the [Versioning Policy](/docs/api/versioning-policy).
 :::
 
 ## 400: Bad Request
@@ -63,7 +63,7 @@ The request was malformed or contained invalid data. Validation errors include a
 
 ## 401: Unauthorized
 
-Authentication failed or is required. See [Authentication](/api/authentication).
+Authentication failed or is required. See [Authentication](/docs/api/authentication).
 
 | Code | Meaning |
 | --- | --- |
@@ -73,7 +73,7 @@ Authentication failed or is required. See [Authentication](/api/authentication).
 
 ## 402: Payment Required
 
-The request exceeded the anonymous quota and carried no valid payment. This response is **protocol-native**, not the JSON error envelope: read the `WWW-Authenticate` header for the challenge, settle it, and retry with an `Authorization: Payment` credential. See [paying per request with MPP](/api/authentication).
+The request exceeded the anonymous quota and carried no valid payment. This response is **protocol-native**, not the JSON error envelope: read the `WWW-Authenticate` header for the challenge, settle it, and retry with an `Authorization: Payment` credential. See [paying per request with MPP](/docs/api/authentication).
 
 ## 403: Forbidden
 
@@ -81,7 +81,7 @@ The credential is valid but not permitted to perform the request.
 
 | Code | Meaning |
 | --- | --- |
-| `api_key_forbidden` | The API key is missing a [scope](/api/authentication) required by this endpoint. |
+| `api_key_forbidden` | The API key is missing a [scope](/docs/api/authentication) required by this endpoint. |
 | `limit_exceeded` | A resource limit was reached (for example, the maximum number of webhooks). |
 
 ## 404: Not Found
@@ -105,7 +105,7 @@ The requested resource does not exist, or is not available on the selected chain
 
 ## 429: Too Many Requests
 
-You exceeded the rate limit. The response carries a `Retry-After` header. See [Rate Limits](/api/rate-limits).
+You exceeded the rate limit. The response carries a `Retry-After` header. See [Rate Limits](/docs/api/rate-limits).
 
 | Code | Meaning |
 | --- | --- |
@@ -114,7 +114,7 @@ You exceeded the rate limit. The response carries a `Retry-After` header. See [R
 
 ## 5xx: Server Errors
 
-Something went wrong on Tempo's side. These are transient. Retry with [exponential backoff](/api/rate-limits#retry-with-backoff).
+Something went wrong on Tempo's side. These are transient. Retry with [exponential backoff](/docs/api/rate-limits#retry-with-backoff).
 
 | Status | Code | Meaning |
 | --- | --- | --- |

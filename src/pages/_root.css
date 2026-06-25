@@ -129,60 +129,13 @@
       min-height: 100dvh;
     }
 
+    @media (1280px <= width < 1376px) {
+      padding-right: var(--tempo-docs-outline-width);
+    }
+
     @media (width >= 1376px) {
       padding-right: var(--tempo-docs-outline-width);
     }
-  }
-
-  [data-v-gutter-right] {
-    @media (width >= 1376px) {
-      right: max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5));
-      width: var(--tempo-docs-outline-width);
-      background: var(--vocs-background-color-primary);
-      border-right: 1px solid var(--vocs-border-color-primary);
-    }
-  }
-
-  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
-      [data-v-openapi]:not([data-v-openapi-landing])
-    )
-    > [data-v-main] {
-    @media (width >= 1376px) {
-      padding-right: 0;
-    }
-  }
-
-  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
-      [data-v-openapi]:not([data-v-openapi-landing])
-    )
-    > [data-v-gutter-right] {
-    @media (width >= 1376px) {
-      display: none;
-    }
-  }
-
-  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
-      [data-v-openapi]:not([data-v-openapi-landing])
-    )
-    [data-v-openapi-header],
-  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
-      [data-v-openapi]:not([data-v-openapi-landing])
-    )
-    [data-v-openapi-description] {
-    width: 100%;
-    max-width: none;
-    margin-left: 0;
-    margin-right: 0;
-    text-align: left;
-  }
-
-  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
-      [data-v-openapi]:not([data-v-openapi-landing])
-    )
-    [data-v-openapi]
-    [data-v-content] {
-    margin-left: 0;
-    margin-right: 0;
   }
 
   [data-v-sidebar] [data-v-content],
@@ -193,6 +146,101 @@
       margin-left: auto;
       margin-right: auto;
     }
+  }
+
+  /* Vocs renders OpenAPI guide/landing pages with `content.width = full`,
+     while regular docs prose is centered. Bring single-column full-width pages
+     back to the same readable measure, but leave generated reference pages wide. */
+  [data-layout][data-v-sidebar][data-v-content-width="full"]:not(
+      :has([data-v-openapi]:not([data-v-openapi-landing]))
+    )
+    > [data-v-main]
+    > [data-v-content],
+  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
+      > [data-v-main] > [data-v-content] > [data-v-openapi-landing]
+    )
+    > [data-v-main]
+    > [data-v-content] {
+    @media (width >= 1376px) {
+      width: min(100%, var(--vocs-spacing-content));
+      max-width: var(--vocs-spacing-content);
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  [data-v-gutter-right] {
+    @media (1280px <= width < 1376px) {
+      right: auto;
+      left: calc(100vw - var(--tempo-docs-outline-width));
+      inset-inline-start: calc(100vw - var(--tempo-docs-outline-width));
+      inset-inline-end: auto;
+      display: flex;
+      width: var(--tempo-docs-outline-width);
+      background: var(--vocs-background-color-primary);
+      border-right: 1px solid var(--vocs-border-color-primary);
+    }
+
+    @media (width >= 1376px) {
+      right: max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5));
+      width: var(--tempo-docs-outline-width);
+      background: var(--vocs-background-color-primary);
+      border-right: 1px solid var(--vocs-border-color-primary);
+    }
+  }
+
+  /* Generated OpenAPI category/reference pages are intentionally wide: the
+     request/response UI needs the room, and the generated sidebar already
+     provides operation navigation, so the regular right outline is hidden. */
+  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
+      [data-v-openapi]:not([data-v-openapi-landing])
+    ):not(:has(> [data-v-main] > [data-v-content] > [data-v-openapi-landing]))
+    > [data-v-main] {
+    @media (1280px <= width < 1376px) {
+      padding-right: 0;
+    }
+
+    @media (width >= 1376px) {
+      padding-right: 0;
+    }
+  }
+
+  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
+      [data-v-openapi]:not([data-v-openapi-landing])
+    ):not(:has(> [data-v-main] > [data-v-content] > [data-v-openapi-landing]))
+    > [data-v-main]
+    > [data-v-gutter-right] {
+    @media (1280px <= width < 1376px) {
+      display: none;
+    }
+
+    @media (width >= 1376px) {
+      display: none;
+    }
+  }
+
+  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
+      [data-v-openapi]:not([data-v-openapi-landing])
+    ):not(:has(> [data-v-main] > [data-v-content] > [data-v-openapi-landing]))
+    [data-v-openapi-header],
+  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
+      [data-v-openapi]:not([data-v-openapi-landing])
+    ):not(:has(> [data-v-main] > [data-v-content] > [data-v-openapi-landing]))
+    [data-v-openapi-description] {
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+    text-align: left;
+  }
+
+  [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
+      [data-v-openapi]:not([data-v-openapi-landing])
+    ):not(:has(> [data-v-main] > [data-v-content] > [data-v-openapi-landing]))
+    [data-v-openapi]
+    [data-v-content] {
+    margin-left: 0;
+    margin-right: 0;
   }
 
   [data-v-sidebar] a[data-v-sidebar-item][data-active] {
@@ -219,11 +267,54 @@
 }
 
 @layer vocs_utilities {
+  @media (1280px <= width < 1376px) {
+    [data-layout][data-v-sidebar] > [data-v-main] > [data-v-outline-mobile] {
+      display: none;
+    }
+
+    /* In Vocs 2.1.x the right outline is mounted inside `<main>`, not beside it.
+       Pin it to the same shell edge as normal docs pages. */
+    [data-layout][data-v-sidebar] > [data-v-main] > [data-v-gutter-right] {
+      right: auto;
+      left: calc(100vw - var(--tempo-docs-outline-width));
+      inset-inline-start: calc(100vw - var(--tempo-docs-outline-width));
+      inset-inline-end: auto;
+      display: flex;
+      width: var(--tempo-docs-outline-width);
+    }
+
+    [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
+        [data-v-openapi]:not([data-v-openapi-landing])
+      ):not(:has(> [data-v-main] > [data-v-content] > [data-v-openapi-landing]))
+      > [data-v-main]
+      > [data-v-gutter-right] {
+      display: none;
+    }
+  }
+
   @media (width >= 1376px) {
     [data-v-ask-ai-container] > button {
       min-width: 0;
       width: 100%;
       max-width: 100%;
+    }
+
+    /* In Vocs 2.1.x the right outline is mounted inside `<main>`, not beside it.
+       Pin it to the same shell edge as normal docs pages. */
+    [data-layout][data-v-sidebar] > [data-v-main] > [data-v-gutter-right] {
+      right: auto;
+      left: calc(100vw - var(--tempo-docs-outline-width));
+      inset-inline-start: calc(100vw - var(--tempo-docs-outline-width));
+      inset-inline-end: auto;
+      width: var(--tempo-docs-outline-width);
+    }
+
+    [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
+        [data-v-openapi]:not([data-v-openapi-landing])
+      ):not(:has(> [data-v-main] > [data-v-content] > [data-v-openapi-landing]))
+      > [data-v-main]
+      > [data-v-gutter-right] {
+      display: none;
     }
   }
 }

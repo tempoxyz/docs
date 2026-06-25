@@ -29,14 +29,14 @@ The same base URL and credentials give you access to three surfaces:
   curl 'https://api.tempo.xyz/v1/addresses/0x.../balances'
   ```
 
-- [**JSON-RPC API**](/api/json-rpc): a node-level RPC entrypoint for raw chain access.
+- [**JSON-RPC API**](/docs/api/json-rpc): a node-level RPC entrypoint for raw chain access.
 
   ```bash
   curl 'https://api.tempo.xyz/rpc' \
     --data '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}'
   ```
 
-- [**Indexer API**](/api/indexer-api): a SQL-over-HTTP entrypoint for read-only queries against indexed chain data.
+- [**Indexer API**](/docs/api/indexer-api): a SQL-over-HTTP entrypoint for read-only queries against indexed chain data.
 
   ```bash
   curl --get 'https://api.tempo.xyz/v1/indexer/query' \
@@ -49,10 +49,10 @@ There are three ways to authenticate, depending on the throughput you need:
 | Method | How | Limit |
 | --- | --- | --- |
 | Public | No credentials | 20 requests / minute per IP |
-| [MPP](/api/authentication#mpp-paying-per-request) | `Authorization: Payment <credential>` | Pay per request, no key required |
-| [API key](/api/authentication) | `Authorization: Bearer tempo:sk:...` | Higher, dedicated quota per key |
+| [MPP](/docs/api/authentication#mpp-paying-per-request) | `Authorization: Payment <credential>` | Pay per request, no key required |
+| [API key](/docs/api/authentication) | `Authorization: Bearer tempo:sk:...` | Higher, dedicated quota per key |
 
-Public access lets you try the API and serve low-volume reads, and [MPP](/api/authentication#mpp-paying-per-request) lets you pay per request without a key. For higher, dedicated quotas, use an API key.
+Public access lets you try the API and serve low-volume reads, and [MPP](/docs/api/authentication#mpp-paying-per-request) lets you pay per request without a key. For higher, dedicated quotas, use an API key.
 
 :::info
 API keys are only available on request. [Contact us](https://tempo.xyz/contact/) to learn more.
@@ -66,7 +66,7 @@ Check out an endpoint below and click "Try" to run it directly against the API. 
 
 ## API Endpoints
 
-<OpenApi.Endpoints path="/api" />
+<OpenApi.Endpoints path="/docs/api" />
 
 ## Next Steps
 
@@ -74,37 +74,37 @@ Check out an endpoint below and click "Try" to run it directly against the API. 
   <Card
     title="Authentication"
     description="Use production and sandbox API keys, or pay per request with MPP."
-    to="/api/authentication"
+    to="/docs/api/authentication"
     icon="lucide:key-round"
   />
   <Card
     title="Conventions"
     description="Shared formatting for identifiers, amounts, timestamps, errors, and rate limits."
-    to="/api/conventions"
+    to="/docs/api/conventions"
     icon="lucide:ruler"
   />
   <Card
     title="Pagination"
     description="Page through list endpoints with cursors, page numbers, and optional total counts."
-    to="/api/pagination"
+    to="/docs/api/pagination"
     icon="lucide:list-ordered"
   />
   <Card
     title="Rate Limits"
     description="Per-minute quotas, RateLimit-* headers, and retry best practices."
-    to="/api/rate-limits"
+    to="/docs/api/rate-limits"
     icon="lucide:gauge"
   />
   <Card
     title="Errors"
     description="HTTP status codes, the error envelope, and the full error code catalog."
-    to="/api/errors"
+    to="/docs/api/errors"
     icon="lucide:triangle-alert"
   />
   <Card
     title="Versioning Policy"
     description="Understand compatible changes, breaking changes, deprecations, and sunsets."
-    to="/api/versioning-policy"
+    to="/docs/api/versioning-policy"
     icon="lucide:git-branch"
   />
 </Cards>

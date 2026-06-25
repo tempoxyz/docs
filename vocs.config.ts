@@ -112,7 +112,7 @@ export default defineConfig({
   },
   openapi: [
     {
-      path: '/api',
+      path: '/docs/api',
       spec: 'https://api.tempo.xyz/openapi.json',
       sidebar: {
         collapsed: true,
@@ -120,39 +120,39 @@ export default defineConfig({
         intro: [
           {
             text: 'Authentication',
-            link: '/api/authentication',
+            link: '/docs/api/authentication',
           },
           {
             text: 'Conventions',
-            link: '/api/conventions',
+            link: '/docs/api/conventions',
           },
           {
             text: 'Transactions & Transfers',
-            link: '/api/transactions-and-transfers',
+            link: '/docs/api/transactions-and-transfers',
           },
           {
             text: 'JSON-RPC API',
-            link: '/api/json-rpc',
+            link: '/docs/api/json-rpc',
           },
           {
             text: 'Indexer API',
-            link: '/api/indexer-api',
+            link: '/docs/api/indexer-api',
           },
           {
             text: 'Pagination',
-            link: '/api/pagination',
+            link: '/docs/api/pagination',
           },
           {
             text: 'Rate Limits',
-            link: '/api/rate-limits',
+            link: '/docs/api/rate-limits',
           },
           {
             text: 'Errors',
-            link: '/api/errors',
+            link: '/docs/api/errors',
           },
           {
             text: 'Versioning Policy',
-            link: '/api/versioning-policy',
+            link: '/docs/api/versioning-policy',
           },
         ],
       },
@@ -1042,6 +1042,116 @@ export default defineConfig({
     { text: 'Wallet', link: 'https://wallet.tempo.xyz' },
   ],
   redirects: [
+    {
+      source: '/api',
+      destination: '/docs/api',
+      status: 301,
+    },
+    {
+      source: '/api/authentication',
+      destination: '/docs/api/authentication',
+      status: 301,
+    },
+    {
+      source: '/api/conventions',
+      destination: '/docs/api/conventions',
+      status: 301,
+    },
+    {
+      source: '/api/json-rpc',
+      destination: '/docs/api/json-rpc',
+      status: 301,
+    },
+    {
+      source: '/api/indexer-api',
+      destination: '/docs/api/indexer-api',
+      status: 301,
+    },
+    {
+      source: '/api/pagination',
+      destination: '/docs/api/pagination',
+      status: 301,
+    },
+    {
+      source: '/api/rate-limits',
+      destination: '/docs/api/rate-limits',
+      status: 301,
+    },
+    {
+      source: '/api/errors',
+      destination: '/docs/api/errors',
+      status: 301,
+    },
+    {
+      source: '/api/versioning-policy',
+      destination: '/docs/api/versioning-policy',
+      status: 301,
+    },
+    {
+      source: '/api/transactions-and-transfers',
+      destination: '/docs/api/transactions-and-transfers',
+      status: 301,
+    },
+    {
+      source: '/api/activities',
+      destination: '/docs/api/activities',
+      status: 301,
+    },
+    {
+      source: '/api/balances',
+      destination: '/docs/api/balances',
+      status: 301,
+    },
+    {
+      source: '/api/blocks',
+      destination: '/docs/api/blocks',
+      status: 301,
+    },
+    {
+      source: '/api/exchange',
+      destination: '/docs/api/exchange',
+      status: 301,
+    },
+    {
+      source: '/api/fee-amm',
+      destination: '/docs/api/fee-amm',
+      status: 301,
+    },
+    {
+      source: '/api/tokens',
+      destination: '/docs/api/tokens',
+      status: 301,
+    },
+    {
+      source: '/api/transactions',
+      destination: '/docs/api/transactions',
+      status: 301,
+    },
+    {
+      source: '/api/transfers',
+      destination: '/docs/api/transfers',
+      status: 301,
+    },
+    {
+      source: '/api/verified-tokens',
+      destination: '/docs/api/verified-tokens',
+      status: 301,
+    },
+    {
+      source: '/api/indexer',
+      destination: '/docs/api/indexer',
+      status: 301,
+    },
+    {
+      source: '/api/rpc',
+      destination: '/docs/api/rpc',
+      status: 301,
+    },
+    {
+      source: '/api/coingecko',
+      destination: '/docs/api/coingecko',
+      status: 301,
+    },
     {
       source: '/docs/documentation/protocol/:path*',
       destination: '/docs/protocol/:path*',

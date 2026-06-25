@@ -5,10 +5,10 @@ description: The Tempo API exposes an Indexer entrypoint for read-only SQL over 
 
 # Indexer API
 
-The Tempo API exposes an **Indexer entrypoint** for read-only SQL over chain data alongside its REST and JSON-RPC surfaces. It is backed by [`tidx`](https://github.com/tempoxyz/tidx), Tempo's hosted chain indexer, which continuously follows Tempo, stores raw blocks, transactions, logs, and receipts, and pre-computes analytics tables — then exposes everything as queryable SQL. Reach it at [`GET /v1/indexer/query`](/api/indexer) to read indexed chain data without running your own pipeline.
+The Tempo API exposes an **Indexer entrypoint** for read-only SQL over chain data alongside its REST and JSON-RPC surfaces. It is backed by [`tidx`](https://github.com/tempoxyz/tidx), Tempo's hosted chain indexer, which continuously follows Tempo, stores raw blocks, transactions, logs, and receipts, and pre-computes analytics tables — then exposes everything as queryable SQL. Reach it at [`GET /v1/indexer/query`](/docs/api/indexer) to read indexed chain data without running your own pipeline.
 
 :::info
-This page explains what the indexer is and how it's organized. For the request/response contract of the API endpoint, see the [indexer query reference](/api/indexer). For the full table schema, an interactive query console, and self-hosting, see the [Indexer guide](/docs/developer-tools/indexer).
+This page explains what the indexer is and how it's organized. For the request/response contract of the API endpoint, see the [indexer query reference](/docs/api/indexer). For the full table schema, an interactive query console, and self-hosting, see the [Indexer guide](/docs/developer-tools/indexer).
 :::
 
 ## Architecture
@@ -69,11 +69,11 @@ The typed REST endpoints (tokens, balances, activity, exchanges) are the stable,
 There are two ways to read decoded event data:
 
 - **Pre-decoded tables** — common events are decoded at insert time into ClickHouse tables such as `token_transfers` (`Transfer`), `token_approvals` (`Approval`), and the DEX tables. Prefer these when available.
-- **Query-time decoding** — pass a `signature` parameter and the indexer exposes the matching `logs` as a virtual table named after the event, so you can select its arguments directly. This works on either engine. See the [indexer query reference](/api/indexer).
+- **Query-time decoding** — pass a `signature` parameter and the indexer exposes the matching `logs` as a virtual table named after the event, so you can select its arguments directly. This works on either engine. See the [indexer query reference](/docs/api/indexer).
 
 ## Querying
 
-Run read-only `SELECT` queries through [`GET /v1/indexer/query`](/api/indexer), optionally streaming live as new blocks arrive over Server-Sent Events. Requests share the same [authentication](/api/authentication), [rate limits](/api/rate-limits), and `RateLimit-*` headers as the rest of the API. See the [indexer query reference](/api/indexer) for parameters, response shape, live streaming, and errors.
+Run read-only `SELECT` queries through [`GET /v1/indexer/query`](/docs/api/indexer), optionally streaming live as new blocks arrive over Server-Sent Events. Requests share the same [authentication](/docs/api/authentication), [rate limits](/docs/api/rate-limits), and `RateLimit-*` headers as the rest of the API. See the [indexer query reference](/docs/api/indexer) for parameters, response shape, live streaming, and errors.
 
 ## Self-hosting
 
