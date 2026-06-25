@@ -61,10 +61,10 @@ export function usePathname() {
 }
 
 function isActiveMenuItem(pathname: string, item: MenuItem) {
-  if (item.label === 'Build') return pathname === '/' || pathname.startsWith('/build')
+  if (item.label === 'Build') return pathname.startsWith('/build')
   if (item.label === 'Resources')
     return pathname === '/docs/sdk' || pathname.startsWith('/docs/sdk/')
-  if (item.label === 'Docs') return pathMatches(pathname, DOCS_BASE_PATH)
+  if (item.label === 'Docs') return pathname === '/docs' || pathname.startsWith('/docs/')
   return !isExternal(item.href) && pathMatches(pathname, item.href)
 }
 
@@ -916,9 +916,11 @@ function SidebarLeaf({
     <Anchor
       href={node.link ?? '#'}
       onClick={onNavigate}
-      style={{ paddingLeft: depth > 1 ? `${(depth - 1) * 12}px` : undefined }}
-      className={`flex items-center gap-1.5 py-2 font-sans text-[15px] tracking-[0] transition-colors ${
-        active ? 'text-foreground' : 'text-foreground/50 hover:text-foreground'
+      style={{ paddingLeft: depth > 1 ? `${(depth - 1) * 12 + 8}px` : undefined }}
+      className={`-mx-2 flex min-h-8 items-center gap-2 rounded-[6px] px-2 py-1 font-sans text-[14px] tracking-[0] transition-colors ${
+        active
+          ? 'font-medium text-foreground hover:bg-foreground/[0.04]'
+          : 'text-foreground/55 hover:bg-foreground/[0.04] hover:text-foreground'
       }`}
     >
       {active ? <ActiveSquare activeKey={pathname} /> : null}
@@ -961,14 +963,24 @@ export function SidebarNodes({
         // Non-collapsible section (e.g. "Build on Tempo"): a heading + children.
         if (node.collapsed === undefined) {
           return (
-            <div key={key} className={depth === 0 ? 'mt-5 first:mt-0' : 'mt-2'}>
-              <p className="py-2 font-sans text-[15px] text-foreground tracking-[0]">{node.text}</p>
-              <SidebarNodes
-                nodes={node.items ?? []}
-                pathname={pathname}
-                depth={depth + 1}
-                onNavigate={onNavigate}
-              />
+            <div key={key} className={depth === 0 ? 'mt-5 first:mt-0' : 'mt-3'}>
+              <p className="-mx-2 px-2 pb-2 font-normal font-sans text-[13px] text-foreground/40 leading-[1.3] tracking-[0]">
+                {node.text}
+              </p>
+              <div
+                className={
+                  depth > 0
+                    ? 'ml-2 flex flex-col gap-0 border-line border-l pl-3'
+                    : 'flex flex-col gap-0'
+                }
+              >
+                <SidebarNodes
+                  nodes={node.items ?? []}
+                  pathname={pathname}
+                  depth={depth + 1}
+                  onNavigate={onNavigate}
+                />
+              </div>
             </div>
           )
         }
@@ -979,19 +991,21 @@ export function SidebarNodes({
           <details
             key={key}
             open={open}
-            className="group/sb"
+            className="group/sb mt-1"
             style={{ paddingLeft: depth > 1 ? `${(depth - 1) * 12}px` : undefined }}
           >
-            <summary className="flex cursor-pointer list-none items-center justify-between py-2 font-sans text-[15px] text-foreground/50 tracking-[0] transition-colors hover:text-foreground [&::-webkit-details-marker]:hidden">
+            <summary className="-mx-2 flex min-h-8 cursor-pointer list-none items-center justify-between rounded-[6px] px-2 py-1 font-sans text-[14px] text-foreground/65 tracking-[0] transition-colors hover:bg-foreground/[0.04] hover:text-foreground [&::-webkit-details-marker]:hidden">
               {node.text}
-              <Chevron open={false} />
+              <Chevron open={open} />
             </summary>
-            <SidebarNodes
-              nodes={node.items ?? []}
-              pathname={pathname}
-              depth={depth + 1}
-              onNavigate={onNavigate}
-            />
+            <div className="mt-1 ml-2 flex flex-col gap-0 border-line border-l pl-3">
+              <SidebarNodes
+                nodes={node.items ?? []}
+                pathname={pathname}
+                depth={depth + 1}
+                onNavigate={onNavigate}
+              />
+            </div>
           </details>
         )
       })}
@@ -1094,113 +1108,49 @@ export default function DocsHeader() {
       <div className="w-full border-line border-x bg-surface-shell">
         <nav
           ref={headerRef}
-          className="relative flex items-center justify-between border-line border-b px-5 py-4"
+          className="relative grid h-[var(--tempo-docs-primary-nav-height)] grid-cols-[1fr_auto] items-center gap-3 border-line border-b px-4 lg:grid-cols-[minmax(0,1fr)_minmax(300px,460px)_minmax(0,1fr)] lg:px-5"
         >
           <a
             href="/"
             onClick={close}
             onFocus={warmMarketingApp}
             onPointerEnter={warmMarketingApp}
-            className="group flex h-9 items-center text-foreground"
+            className="group flex h-9 min-w-0 items-center text-foreground"
             aria-label="Tempo home"
           >
             <TempoLogo className="h-[18px] w-[80px]" />
           </a>
 
-          <ul className="hidden items-center gap-16 lg:absolute lg:top-1/2 lg:left-1/2 lg:flex lg:-translate-x-1/2 lg:-translate-y-1/2">
-            {menu.map((item) => {
-              const active = isActiveMenuItem(pathname, item)
-              const triggerContent = (
-                <>
-                  {active ? (
-                    <span className="absolute top-1/2 -left-[17px] -translate-y-1/2">
-                      <ActiveSquare activeKey={pathname} />
-                    </span>
-                  ) : null}
-                  {item.label}
-                  {item.mega ? (
-                    // biome-ignore lint/a11y/noSvgWithoutTitle: Decorative disclosure icon; button exposes expanded state.
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      aria-hidden
-                      className={`shrink-0 text-foreground/40 transition-transform duration-200 ease-out ${activeMenu === item.label ? 'rotate-180' : ''}`}
-                    >
-                      <path
-                        d="M4 6l4 4 4-4"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  ) : null}
-                </>
-              )
-
-              return (
-                <li
-                  key={item.label}
-                  onMouseEnter={item.mega ? () => openMenu(item.label) : scheduleClose}
-                  onMouseLeave={item.mega ? scheduleClose : undefined}
-                >
-                  {item.mega ? (
-                    <button
-                      ref={(element) => {
-                        if (element) triggerRefs.current.set(item.label, element)
-                        else triggerRefs.current.delete(item.label)
-                      }}
-                      type="button"
-                      aria-haspopup="true"
-                      aria-expanded={activeMenu === item.label}
-                      onFocus={() => openMenu(item.label)}
-                      onBlur={scheduleClose}
-                      className="relative flex items-center gap-1.5 font-sans text-[14px] text-foreground tracking-[0] transition-opacity hover:opacity-70"
-                    >
-                      {triggerContent}
-                    </button>
-                  ) : (
-                    <Anchor
-                      href={item.href}
-                      className="relative flex items-center gap-1.5 font-sans text-[14px] text-foreground tracking-[0] transition-opacity hover:opacity-70"
-                    >
-                      {triggerContent}
-                    </Anchor>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
-
-          <div className="hidden items-center gap-3 lg:flex">
-            <button
-              type="button"
-              onClick={openSearch}
-              aria-label="Search documentation"
-              aria-keyshortcuts="Meta+K Control+K"
-              className="flex h-9 items-center gap-2 rounded-[4px] border border-line px-4 font-sans text-[14px] text-foreground/60 tracking-[0] transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
-            >
+          <button
+            type="button"
+            onClick={openSearch}
+            aria-label="Search documentation"
+            aria-keyshortcuts="Meta+K Control+K"
+            className="hidden h-10 min-w-0 items-center justify-between gap-3 rounded-[6px] border border-line bg-background px-3.5 font-sans text-[14px] text-foreground/55 tracking-[0] shadow-[0_1px_1px_rgba(0,0,0,0.03)] transition-colors hover:bg-foreground/[0.025] hover:text-foreground lg:flex"
+          >
+            <span className="flex min-w-0 items-center gap-2">
               <SearchIcon />
-              Search
-              <kbd className="ml-1 rounded-[3px] border border-line px-1.5 py-0.5 font-sans text-[11px] text-foreground/45">
-                ⌘K
-              </kbd>
-            </button>
+              <span className="truncate">Search docs...</span>
+            </span>
+            <kbd className="shrink-0 rounded-[4px] border border-line bg-surface-input px-1.5 py-0.5 font-sans text-[11px] text-foreground/45">
+              ⌘K
+            </kbd>
+          </button>
+
+          <div className="hidden items-center justify-end gap-5 lg:flex">
             <button
               ref={(element) => {
                 if (element) triggerRefs.current.set('For agents', element)
                 else triggerRefs.current.delete('For agents')
               }}
               type="button"
-              aria-haspopup="true"
+              aria-haspopup="dialog"
               aria-expanded={activeMenu === 'For agents'}
               onMouseEnter={() => openMenu('For agents')}
               onMouseLeave={scheduleClose}
               onFocus={() => openMenu('For agents')}
               onBlur={scheduleClose}
-              className="flex h-9 items-center gap-2 rounded-[4px] border border-line px-4 font-sans text-[14px] text-foreground tracking-[0] transition-colors hover:bg-foreground/[0.04]"
+              className="flex h-9 items-center gap-2 rounded-[6px] border border-line px-3.5 font-sans text-[14px] text-foreground/75 tracking-[0] transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
             >
               <GearIcon />
               For agents
@@ -1301,7 +1251,7 @@ export default function DocsHeader() {
             : 'pointer-events-none -translate-y-2 opacity-0'
         }`}
       >
-        <div className="flex h-[calc(100dvh-var(--vocs-spacing-topNav,65px))] w-full flex-col overflow-y-auto border-line border-x border-b bg-background px-5 pb-5">
+        <div className="flex h-[calc(100dvh-var(--tempo-docs-primary-nav-height,65px))] w-full flex-col overflow-y-auto border-line border-x border-b bg-background px-5 pb-5">
           {menu.map((item) => {
             const active = isActiveMenuItem(pathname, item)
             // The "Docs" item is the entry point to the docs sidebar: on docs

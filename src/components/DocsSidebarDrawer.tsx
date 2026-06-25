@@ -30,7 +30,6 @@ export default function DocsSidebarDrawer() {
       if (!row || span) return Boolean(span)
       span = document.createElement('span')
       span.dataset.docsSidebarToggle = ''
-      span.style.display = 'inline-flex'
       span.style.marginRight = '0.5rem'
       row.prepend(span)
       setHost(span)
@@ -85,7 +84,7 @@ export default function DocsSidebarDrawer() {
           onClick={() => setOpen((value) => !value)}
           aria-label="Open docs navigation"
           aria-expanded={open}
-          className="flex items-center gap-1.5 font-sans text-foreground/70 transition-colors hover:text-foreground"
+          className="flex items-center gap-1.5 font-sans text-foreground/70 transition-colors hover:text-foreground min-[1080px]:hidden"
         >
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden>
             <title>Docs navigation</title>
@@ -106,7 +105,7 @@ export default function DocsSidebarDrawer() {
     <>
       {toggle}
       <div
-        className={`fixed inset-0 z-[60] lg:hidden ${open ? '' : 'pointer-events-none'}`}
+        className={`fixed inset-0 z-[60] min-[1080px]:hidden ${open ? '' : 'pointer-events-none'}`}
         aria-hidden={!open}
       >
         {/* Backdrop */}
