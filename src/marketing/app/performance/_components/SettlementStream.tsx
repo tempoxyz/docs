@@ -1,16 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { MAX_BLOCKS, type StreamBlock } from './useFinalizedBlocks'
+import { MAX_BLOCKS, useFinalizedBlocks } from './useFinalizedBlocks'
 import useMeasure from './useMeasure'
 
 // The settlement story as a live conveyor of finalized blocks. The live feed
-// (and its heartbeat release cadence) lives in `useFinalizedBlocks` so this
-// stays a presentational view fed by the same data as the hero "Avg block
-// time" stat — the two can never disagree. Since finalized heads are already
-// settled, every cell is an observed settlement; the per-block interval is
-// only rolled up into the single labelled average below the track, not shown
-// per cell, so it can't be mistaken for a different number.
+// (and its heartbeat release cadence) lives in `useFinalizedBlocks`. Since
+// finalized heads are already settled, every cell is an observed settlement —
+// the stream is a steady heartbeat of real blocks. It deliberately shows no
+// block-time number; the "Avg block time" figure lives in the hero stat above.
 
 const TEMPO_EXPLORER_BLOCK_URL = 'https://explore.tempo.xyz/block'
 
@@ -21,20 +19,9 @@ const STEP = CELL + GAP
 const TRACK_TOP = (H - CELL) / 2
 const TRACK_H = CELL + 24 // cells plus their height labels
 
-type SettlementStreamProps = {
-  blocks: StreamBlock[]
-  isLive: boolean
-  avgIntervalMs: number | null
-  fallbackBlockTimeMs?: number
-}
-
-export default function SettlementStream({
-  blocks,
-  isLive,
-  avgIntervalMs,
-  fallbackBlockTimeMs,
-}: SettlementStreamProps) {
+export default function SettlementStream() {
   const { ref, width } = useMeasure<HTMLDivElement>()
+  const { blocks, isLive } = useFinalizedBlocks()
 
   const [reducedMotion] = useState(
     () =>
@@ -47,11 +34,6 @@ export default function SettlementStream({
   const visible = Math.min(Math.max(Math.ceil(width / STEP) + 1, 3), MAX_BLOCKS)
   const shown = blocks.slice(-visible)
   const last = shown.length - 1
-
-  // Prefer the live observed average; fall back to the benchmark block time
-  // until enough finalized blocks have streamed in to measure it.
-  const blockTimeMs = avgIntervalMs ?? fallbackBlockTimeMs ?? null
-  const isEstimate = avgIntervalMs === null
 
   return (
     <div ref={ref} className="relative w-full" style={{ height: H }}>
@@ -118,29 +100,6 @@ export default function SettlementStream({
             {/* Mask the oldest block's exit at the track's left edge. */}
             <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-surface-shell to-transparent" />
           </div>
-
-          {/* Rolling average block time, bracketing a single block interval and
-              measured from the same finalized feed as the hero stat. */}
-          <div
-            className="absolute flex items-center"
-            style={{ right: CELL / 2, width: STEP, top: TRACK_TOP + TRACK_H + 6 }}
-          >
-            <span className="h-2 w-px bg-foreground/25" />
-            <span className="h-px flex-1 bg-foreground/25" />
-            <span className="h-2 w-px bg-foreground/25" />
-          </div>
-          {blockTimeMs !== null ? (
-            <p
-              className="absolute text-center font-mono text-[9px] text-foreground/35 leading-tight"
-              style={{ right: CELL / 2 - 24, width: STEP + 48, top: TRACK_TOP + TRACK_H + 16 }}
-            >
-              <span className="block text-foreground/30 tracking-wider">AVG BLOCK TIME</span>
-              <span className="text-foreground/45">
-                {isEstimate ? '~' : ''}
-                {blockTimeMs} MS
-              </span>
-            </p>
-          ) : null}
         </div>
       ) : null}
     </div>

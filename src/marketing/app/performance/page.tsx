@@ -10,7 +10,6 @@ import SettlementStream from './_components/SettlementStream'
 import TpsTrendChart from './_components/TpsTrendChart'
 import TpsTrendChartFrame from './_components/TpsTrendChartFrame'
 import UptimeStrip from './_components/UptimeStrip'
-import { useFinalizedBlocks } from './_components/useFinalizedBlocks'
 import { fetchPerfRuns, fmtInt, type PerfRun } from './_lib/runs'
 
 export const metadata: Metadata = {
@@ -258,14 +257,8 @@ export default function PerformancePage() {
     }
   }, [])
 
-  const { blocks, isLive, avgIntervalMs } = useFinalizedBlocks()
-
   const latest = runs[runs.length - 1]
   const hasRuns = runs.length >= 2
-
-  // Prefer the live observed block time; fall back to the benchmark figure
-  // until enough finalized blocks have streamed in to measure it.
-  const blockTimeMs = avgIntervalMs ?? latest?.blockTimeMs ?? null
 
   const heroStats = latest
     ? [
@@ -275,7 +268,7 @@ export default function PerformancePage() {
         },
         {
           label: 'Avg block time',
-          value: blockTimeMs !== null ? `${fmtInt(blockTimeMs)} ms` : '—',
+          value: `${fmtInt(latest.blockTimeMs)} ms`,
         },
         {
           label: 'Average fee',
@@ -348,12 +341,7 @@ export default function PerformancePage() {
               title="Guaranteed settlement in half a second."
               note="Tempo gives payments final settlement in about half a second. Once a payment lands in a finalized block, it can be treated as settled."
             >
-              <SettlementStream
-                blocks={blocks}
-                isLive={isLive}
-                avgIntervalMs={avgIntervalMs}
-                fallbackBlockTimeMs={latest?.blockTimeMs}
-              />
+              <SettlementStream />
             </Section>
 
             {/* Payment lanes: the protocol feature behind the flat fee line. */}
