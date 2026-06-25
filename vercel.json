@@ -49,17 +49,6 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
-        }
-      ],
-      "destination": "https://tempo.xyz/developers",
-      "permanent": true
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
           "value": "developers.tempo.xyz"
         }
       ],
@@ -71,29 +60,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
-        }
-      ],
-      "destination": "https://tempo.xyz/developers/docs",
-      "permanent": true
-    },
-    {
-      "source": "/docs",
-      "has": [
-        {
-          "type": "host",
           "value": "developers.tempo.xyz"
-        }
-      ],
-      "destination": "https://tempo.xyz/developers/docs",
-      "permanent": true
-    },
-    {
-      "source": "/docs/",
-      "has": [
-        {
-          "type": "host",
-          "value": "docs.tempo.xyz"
         }
       ],
       "destination": "https://tempo.xyz/developers/docs",
@@ -115,32 +82,10 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
-        }
-      ],
-      "destination": "https://tempo.xyz/developers/docs/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/docs/:path*",
-      "has": [
-        {
-          "type": "host",
           "value": "developers.tempo.xyz"
         }
       ],
       "destination": "https://tempo.xyz/developers/docs/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "docs.tempo.xyz"
-        }
-      ],
-      "destination": "https://tempo.xyz/developers/:path*",
       "permanent": true
     },
     {
