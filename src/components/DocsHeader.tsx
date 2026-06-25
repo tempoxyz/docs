@@ -61,7 +61,7 @@ export function usePathname() {
 }
 
 function isActiveMenuItem(pathname: string, item: MenuItem) {
-  if (item.label === 'Build') return pathname === '/' || pathname.startsWith('/build')
+  if (item.label === 'Build') return pathname.startsWith('/build')
   if (item.label === 'Resources')
     return pathname === '/docs/sdk' || pathname.startsWith('/docs/sdk/')
   if (item.label === 'Docs') return pathname === '/docs' || pathname.startsWith('/docs/')
@@ -1095,7 +1095,7 @@ export default function DocsHeader() {
       <div className="w-full border-line border-x bg-surface-shell">
         <nav
           ref={headerRef}
-          className="relative flex items-center justify-between border-line border-b px-5 py-4"
+          className="relative flex h-[var(--tempo-docs-primary-nav-height)] items-center justify-between border-line border-b px-5"
         >
           <a
             href="/"
@@ -1110,7 +1110,7 @@ export default function DocsHeader() {
                 <TempoLogo className="h-[18px] w-[80px]" />
                 <span
                   aria-hidden
-                  className="flex h-[18px] items-center bg-[#2b2b2b] px-[5px] font-mono text-[12px] text-[#b2b2b2] leading-none tracking-[0]"
+                  className="flex h-[18px] items-center bg-[#2b2b2b] px-[5px] font-mono text-[#b2b2b2] text-[12px] leading-none tracking-[0]"
                 >
                   API
                 </span>
@@ -1314,7 +1314,7 @@ export default function DocsHeader() {
             : 'pointer-events-none -translate-y-2 opacity-0'
         }`}
       >
-        <div className="flex h-[calc(100dvh-var(--vocs-spacing-topNav,65px))] w-full flex-col overflow-y-auto border-line border-x border-b bg-background px-5 pb-5">
+        <div className="flex h-[calc(100dvh-var(--tempo-docs-primary-nav-height,65px))] w-full flex-col overflow-y-auto border-line border-x border-b bg-background px-5 pb-5">
           {menu.map((item) => {
             const active = isActiveMenuItem(pathname, item)
             // The "Docs" item is the entry point to the docs sidebar: on docs

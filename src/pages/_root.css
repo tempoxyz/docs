@@ -61,9 +61,14 @@
 @layer utilities {
   :root {
     --tempo-docs-outline-width: 280px;
+    --tempo-docs-primary-nav-height: 65px;
+    --tempo-docs-section-nav-height: 44px;
     --tempo-docs-shell-width: 100%;
     --tempo-docs-sidebar-width: 280px;
-    --vocs-spacing-topNav: 65px;
+    --vocs-spacing-topNav: calc(
+      var(--tempo-docs-primary-nav-height) +
+      var(--tempo-docs-section-nav-height)
+    );
   }
 
   html,
@@ -71,6 +76,22 @@
     background: var(--vocs-background-color-primary);
     color: var(--vocs-text-color-primary);
     font-family: var(--font-pilat-book), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .docs-section-nav {
+    position: fixed;
+    top: var(--tempo-docs-primary-nav-height);
+    right: 0;
+    left: 0;
+    z-index: 50;
+
+    @media (width >= 1080px) {
+      right: max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5));
+      left: calc(
+        max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5)) +
+        var(--tempo-docs-sidebar-width)
+      );
+    }
   }
 
   [data-v-gutter-top],
@@ -86,6 +107,7 @@
     @media (width >= 1080px) {
       left: max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5));
       width: var(--tempo-docs-sidebar-width);
+      padding-top: var(--tempo-docs-primary-nav-height);
       justify-content: flex-start;
       background: var(--vocs-background-color-primary);
       border-right: 1px solid var(--vocs-border-color-primary);
