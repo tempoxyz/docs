@@ -127,7 +127,7 @@ export default defineConfig({
             link: '/api/conventions',
           },
           {
-            text: 'Transactions, Transfers & Receipts',
+            text: 'Transactions & Transfers',
             link: '/api/transactions-and-transfers',
           },
           {
