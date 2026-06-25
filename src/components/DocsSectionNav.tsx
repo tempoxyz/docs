@@ -184,35 +184,7 @@ export default function DocsSectionNav() {
             padding-top: var(--vocs-spacing-topNav) !important;
           }
         }
-
-        .docs-header-github-link {
-          display: none;
-        }
-
-        @media (width >= 1280px) {
-          .docs-header-github-link {
-            position: fixed;
-            top: 0;
-            right: 150px;
-            z-index: 80;
-            display: flex;
-            height: var(--tempo-docs-primary-nav-height);
-            align-items: center;
-            color: color-mix(in srgb, var(--foreground) 65%, transparent);
-            font-family: var(--font-pilat-book), ui-sans-serif, system-ui, sans-serif;
-            font-size: 14px;
-            letter-spacing: 0;
-            transition: color 150ms ease;
-          }
-
-          .docs-header-github-link:hover {
-            color: var(--foreground);
-          }
-        }
       `}</style>
-      <a className="docs-header-github-link" href="https://github.com/tempoxyz">
-        GitHub
-      </a>
       <div className="docs-section-nav border-line border-x border-b bg-surface-shell">
         <nav
           ref={navRef}
