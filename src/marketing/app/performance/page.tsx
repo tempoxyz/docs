@@ -10,6 +10,7 @@ import SettlementStream from './_components/SettlementStream'
 import TpsTrendChart from './_components/TpsTrendChart'
 import TpsTrendChartFrame from './_components/TpsTrendChartFrame'
 import UptimeStrip from './_components/UptimeStrip'
+import { useFinalizedBlocks } from './_components/useFinalizedBlocks'
 import { fetchPerfRuns, fmtInt, type PerfRun } from './_lib/runs'
 
 export const metadata: Metadata = {
@@ -20,32 +21,10 @@ export const metadata: Metadata = {
 
 const STATUS_PAGE_URL = 'https://status.tempo.xyz'
 const PERF_DASHBOARD_URL = 'https://perf.tempo.xyz/'
-const DAY_MS = 24 * 60 * 60 * 1000
 const HERO_STAT_LABELS = ['Transactions per second', 'Avg block time', 'Average fee']
 const SETTLEMENT_SKELETON_CELLS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 const UPTIME_SKELETON_BARS = Array.from({ length: 90 }, (_, i) => `bar-${i}`)
 const prefetchedRuns = typeof window !== 'undefined' ? fetchPerfRuns() : null
-
-function formatChartRange(startedAt: string, endedAt: string) {
-  const start = new Date(startedAt)
-  const end = new Date(endedAt)
-  const daySpan = Math.max(1, Math.round((end.getTime() - start.getTime()) / DAY_MS))
-  const startLabel = start.toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-  })
-  const endLabel = end.toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'UTC',
-  })
-
-  return `Benchmark runs · Past ${daySpan} ${
-    daySpan === 1 ? 'day' : 'days'
-  } · ${startLabel} - ${endLabel} UTC`
-}
 
 // Aggregate state ("operational", "downtime", …) from the BetterStack status
 // page's public JSON; null when unreachable so the uptime strip falls back to
@@ -148,9 +127,11 @@ function SettlementStreamSkeleton() {
       <SkeletonBlock className="absolute top-[26px] right-0 h-3 w-24" />
       <div className="absolute top-[58px] right-0 flex gap-[14px]">
         {SETTLEMENT_SKELETON_CELLS.map((cell) => (
-          <div key={cell} className="size-16 border border-line-strong bg-surface-panel">
-            <SkeletonBlock className="mx-auto mt-5 h-2 w-8" />
-            <SkeletonBlock className="mx-auto mt-3 h-2 w-10" />
+          <div
+            key={cell}
+            className="flex size-16 items-center justify-center border border-line-strong bg-surface-panel"
+          >
+            <SkeletonBlock className="size-4 rounded-full" />
           </div>
         ))}
       </div>
@@ -232,7 +213,7 @@ function PerformanceSectionsSkeleton() {
       <Section
         id="fees"
         title="A dedicated lane for payments."
-        note="Tempo reserves blockspace for payments, so trading spikes, airdrops, and other unrelated network activity do not set the price for ordinary transfers. Payments stay prioritized in their own lane, with fees that remain predictably low under load."
+        note="Tempo gives payment transactions reserved blockspace with a separate consensus gas limit, so spikes in other activity cannot crowd them out. Fees are fixed, not congestion-priced: a TIP-20 transfer stays under $0.001 regardless of network load."
       >
         <PaymentLanesSkeleton />
         <SkeletonBlock className="mt-10 h-10 w-56" />
@@ -277,9 +258,14 @@ export default function PerformancePage() {
     }
   }, [])
 
+  const { blocks, isLive, avgIntervalMs } = useFinalizedBlocks()
+
   const latest = runs[runs.length - 1]
   const hasRuns = runs.length >= 2
-  const chartRange = latest && runs[0] ? formatChartRange(runs[0].startedAt, latest.startedAt) : ''
+
+  // Prefer the live observed block time; fall back to the benchmark figure
+  // until enough finalized blocks have streamed in to measure it.
+  const blockTimeMs = avgIntervalMs ?? latest?.blockTimeMs ?? null
 
   const heroStats = latest
     ? [
@@ -289,7 +275,7 @@ export default function PerformancePage() {
         },
         {
           label: 'Avg block time',
-          value: `${fmtInt(latest.blockTimeMs)} ms`,
+          value: blockTimeMs !== null ? `${fmtInt(blockTimeMs)} ms` : '—',
         },
         {
           label: 'Average fee',
@@ -321,7 +307,7 @@ export default function PerformancePage() {
                   Transactions per second
                 </p>
                 <p className="mt-1 font-sans text-[14px] text-foreground/45 leading-[1.4]">
-                  {chartRange}
+                  Nightly benchmark runs
                 </p>
               </div>
             </Reveal>
@@ -362,14 +348,19 @@ export default function PerformancePage() {
               title="Guaranteed settlement in half a second."
               note="Tempo gives payments final settlement in about half a second. Once a payment lands in a finalized block, it can be treated as settled."
             >
-              <SettlementStream runs={runs} />
+              <SettlementStream
+                blocks={blocks}
+                isLive={isLive}
+                avgIntervalMs={avgIntervalMs}
+                fallbackBlockTimeMs={latest?.blockTimeMs}
+              />
             </Section>
 
             {/* Payment lanes: the protocol feature behind the flat fee line. */}
             <Section
               id="fees"
               title="A dedicated lane for payments."
-              note="Tempo reserves blockspace for payments, so trading spikes, airdrops, and other unrelated network activity do not set the price for ordinary transfers. Payments stay prioritized in their own lane, with fees that remain predictably low under load."
+              note="Tempo gives payment transactions reserved blockspace with a separate consensus gas limit, so spikes in other activity cannot crowd them out. Fees are fixed, not congestion-priced: a TIP-20 transfer stays under $0.001 regardless of network load."
             >
               <PaymentLanes runs={runs} />
               <Button
