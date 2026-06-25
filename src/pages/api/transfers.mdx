@@ -10,7 +10,7 @@ import { OpenApi } from 'vocs'
 A transfer is an effect of executing a [transaction](/api/transactions): a TIP-20 token moved from one account to another, optionally with a payment memo. Multiple transfers can come from one transaction, and some transactions produce none; each transfer links back to its transaction via `transactionHash`.
 
 :::info
-**New to the model?** See [Transactions & Transfers](/api/transactions-and-transfers) for how a transfer relates to the transaction that produced it.
+See [Transactions & Transfers](/api/transactions-and-transfers) for how a transfer relates to the transaction that produced it.
 :::
 
 <OpenApi.Endpoints path="/api" resource="transfers" />
