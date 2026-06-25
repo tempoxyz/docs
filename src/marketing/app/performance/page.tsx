@@ -341,7 +341,7 @@ export default function PerformancePage() {
               title="Guaranteed settlement in half a second."
               note="Tempo gives payments final settlement in about half a second. Once a payment lands in a finalized block, it can be treated as settled."
             >
-              <SettlementStream blockTimeMs={latest?.blockTimeMs} />
+              <SettlementStream />
             </Section>
 
             {/* Payment lanes: the protocol feature behind the flat fee line. */}

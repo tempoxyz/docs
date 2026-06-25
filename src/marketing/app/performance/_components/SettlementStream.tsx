@@ -8,8 +8,7 @@ import useMeasure from './useMeasure'
 // (and its heartbeat release cadence) lives in `useFinalizedBlocks`. Since
 // finalized heads are already settled, every cell is an observed settlement —
 // the stream is a steady heartbeat of real blocks. The block-time readout is
-// the benchmark figure from the perf API (same source as the hero stat), so
-// the two always agree and no live-measured number is shown.
+// the live observed average, measured from the finalized feed.
 
 const TEMPO_EXPLORER_BLOCK_URL = 'https://explore.tempo.xyz/block'
 
@@ -20,15 +19,9 @@ const STEP = CELL + GAP
 const TRACK_TOP = (H - CELL) / 2
 const TRACK_H = CELL + 24 // cells plus their height labels
 
-type SettlementStreamProps = {
-  // Average block time from the benchmark API (latest nightly run), shared with
-  // the hero stat so the two never disagree.
-  blockTimeMs?: number
-}
-
-export default function SettlementStream({ blockTimeMs }: SettlementStreamProps) {
+export default function SettlementStream() {
   const { ref, width } = useMeasure<HTMLDivElement>()
-  const { blocks, isLive } = useFinalizedBlocks()
+  const { blocks, isLive, avgIntervalMs } = useFinalizedBlocks()
 
   const [reducedMotion] = useState(
     () =>
@@ -108,9 +101,9 @@ export default function SettlementStream({ blockTimeMs }: SettlementStreamProps)
             <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-surface-shell to-transparent" />
           </div>
 
-          {/* Benchmark avg block time, bracketing a single block interval. Same
-              perf-API figure as the hero stat — not a live measurement. */}
-          {blockTimeMs != null ? (
+          {/* Live observed avg block time, bracketing a single block interval,
+              measured from the finalized feed. */}
+          {avgIntervalMs != null ? (
             <>
               <div
                 className="absolute flex items-center"
@@ -125,7 +118,7 @@ export default function SettlementStream({ blockTimeMs }: SettlementStreamProps)
                 style={{ right: CELL / 2 - 24, width: STEP + 48, top: TRACK_TOP + TRACK_H + 16 }}
               >
                 <span className="block text-foreground/30 tracking-wider">AVG BLOCK TIME</span>
-                <span className="text-foreground/45">{Math.round(blockTimeMs)} MS</span>
+                <span className="text-foreground/45">{avgIntervalMs} MS</span>
               </p>
             </>
           ) : null}
