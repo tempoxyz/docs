@@ -22,7 +22,7 @@ The current server exposes docs search, page discovery, and cleaned page reads. 
 Feedback from MCP clients should be sent to the shared docs ingress:
 
 ```txt
-POST https://docs.tempo.xyz/api/feedback
+POST https://tempo.xyz/developers/api/feedback
 ```
 
 Use `source: "mcp"` plus a short `message`, and include `toolName`, `relatedResource`, or `client` when available.
