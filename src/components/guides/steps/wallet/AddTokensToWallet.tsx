@@ -1,7 +1,7 @@
 'use client'
 import * as React from 'react'
 import { useConnections, useWatchAsset } from 'wagmi'
-import { isFundableWalletConnector } from '../../../lib/wallets'
+import { isBrowserWalletConnectorId } from '../../../lib/wallets'
 import { Button, Step } from '../../Demo'
 import { alphaUsd, betaUsd, pathUsd, thetaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -58,11 +58,8 @@ function AddTokenButton(props: {
 
 export function AddTokensToWallet(props: DemoStepProps) {
   const { stepNumber = 3, last = false } = props
-  const isE2E = import.meta.env.VITE_E2E === 'true'
   const connections = useConnections()
-  const walletConnection = connections.find((c) =>
-    isFundableWalletConnector(c.connector, { includeWebAuthn: isE2E }),
-  )
+  const walletConnection = connections.find((c) => isBrowserWalletConnectorId(c.connector.id))
   const hasNonWebAuthnWallet = Boolean(walletConnection?.accounts[0])
 
   const [addedTokens, setAddedTokens] = React.useState<Set<string>>(new Set())

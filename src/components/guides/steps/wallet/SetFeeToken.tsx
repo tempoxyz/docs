@@ -3,7 +3,7 @@ import * as React from 'react'
 import { type Address, isAddress } from 'viem'
 import { useChainId, useConfig, useConnections } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
-import { isFundableWalletConnector } from '../../../lib/wallets'
+import { isBrowserWalletConnectorId } from '../../../lib/wallets'
 import { Button, ExplorerLink, Step, StringFormatter } from '../../Demo'
 import { alphaUsd, betaUsd, thetaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -27,11 +27,8 @@ const DEFAULT_FEE_TOKEN_OPTION = FEE_TOKEN_OPTIONS[0]
 
 export function SetFeeToken(props: DemoStepProps) {
   const { stepNumber = 1 } = props
-  const isE2E = import.meta.env.VITE_E2E === 'true'
   const connections = useConnections()
-  const walletConnection = connections.find((c) =>
-    isFundableWalletConnector(c.connector, { includeWebAuthn: isE2E }),
-  )
+  const walletConnection = connections.find((c) => isBrowserWalletConnectorId(c.connector.id))
   const address = walletConnection?.accounts[0]
   const hasNonWebAuthnWallet = Boolean(address)
   const chainId = useChainId()

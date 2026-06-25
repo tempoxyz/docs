@@ -50,7 +50,7 @@ test('fund a connected passkey wallet via faucet', async ({ page }) => {
 
     const connectStep = page
       .locator('[data-active][data-completed]')
-      .filter({ hasText: 'Connect your browser wallet.' })
+      .filter({ hasText: 'Connect your wallet.' })
       .first()
     const connectButton = connectStep.getByRole('button').first()
     await expect(connectButton).toBeVisible({ timeout: 30000 })

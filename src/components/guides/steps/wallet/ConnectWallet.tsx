@@ -1,6 +1,7 @@
 'use client'
 import * as React from 'react'
 import {
+  type Connector,
   useChains,
   useConnect,
   useConnections,
@@ -10,7 +11,10 @@ import {
 } from 'wagmi'
 import LucideCheck from '~icons/lucide/check'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
-import { filterSupportedInjectedConnectors, isFundableWalletConnector } from '../../../lib/wallets'
+import {
+  filterSupportedFundableWalletConnectors,
+  isFundableWalletConnector,
+} from '../../../lib/wallets'
 import { Button, Step, StringFormatter, useCopyToClipboard } from '../../Demo'
 import type { DemoStepProps } from '../types'
 
@@ -21,8 +25,9 @@ export function ConnectWallet(props: DemoStepProps) {
   const connect = useConnect()
   const disconnect = useDisconnect()
   const connectors = useConnectors()
-  const injectedConnectors = React.useMemo(
-    () => filterSupportedInjectedConnectors(connectors, { includeWebAuthn: isE2E }),
+  const [connectError, setConnectError] = React.useState<Error | null>(null)
+  const fundableConnectors = React.useMemo(
+    () => filterSupportedFundableWalletConnectors(connectors, { includeWebAuthn: isE2E }),
     [connectors],
   )
   const switchChain = useSwitchChain()
@@ -39,31 +44,40 @@ export function ConnectWallet(props: DemoStepProps) {
   const active = !hasNonWebAuthnWallet || !isSupported
   const completed = hasNonWebAuthnWallet && isSupported
 
+  const handleConnect = React.useCallback(
+    async (connector: Connector) => {
+      setConnectError(null)
+      try {
+        await disconnect.disconnectAsync().catch(() => {})
+        await connect.connectAsync({
+          connector,
+          ...(isE2E && connector.id === 'webAuthn'
+            ? { capabilities: { method: 'register' as const, name: 'Tempo Docs' } }
+            : {}),
+        })
+      } catch (error) {
+        setConnectError(error instanceof Error ? error : new Error('Failed to connect wallet.'))
+      }
+    },
+    [connect.connectAsync, disconnect.disconnectAsync],
+  )
+
   const actions = React.useMemo(() => {
-    if (!injectedConnectors.length) {
-      return (
-        <div className="flex items-center text-[14px] -tracking-[2%]">
-          No browser wallets found.
-        </div>
-      )
+    if (!fundableConnectors.length) {
+      return <div className="flex items-center text-[14px] -tracking-[2%]">No wallets found.</div>
     }
 
     if (!hasNonWebAuthnWallet) {
       return (
         <div className="flex flex-wrap justify-center gap-2">
-          {injectedConnectors.map((conn) => (
+          {fundableConnectors.map((conn) => (
             <Button
               variant="default"
               className="flex items-center gap-1.5"
               key={conn.id}
-              onClick={() =>
-                connect.connect({
-                  connector: conn,
-                  ...(isE2E && conn.id === 'webAuthn'
-                    ? { capabilities: { method: 'register' as const, name: 'Tempo Docs' } }
-                    : {}),
-                })
-              }
+              disabled={connect.isPending}
+              onClick={() => void handleConnect(conn)}
+              type="button"
             >
               {conn.icon ? <img className="size-5" src={conn.icon} alt={conn.name} /> : <div />}
               {conn.name}
@@ -127,27 +141,29 @@ export function ConnectWallet(props: DemoStepProps) {
       </div>
     )
   }, [
-    injectedConnectors,
+    fundableConnectors,
     hasNonWebAuthnWallet,
     walletAddress,
     walletConnector,
     copied,
     copyToClipboard,
     disconnect,
-    connect,
+    connect.isPending,
+    handleConnect,
     isSupported,
     switchChain,
     chains,
   ])
 
-  const stackConnectors = injectedConnectors.length > 2
+  const stackConnectors = fundableConnectors.length > 2
 
   return (
     <Step
       active={active}
       completed={completed}
+      error={connectError ?? connect.error}
       number={stepNumber}
-      title="Connect your browser wallet."
+      title="Connect your wallet."
       actions={!stackConnectors && actions}
     >
       {stackConnectors && actions}
