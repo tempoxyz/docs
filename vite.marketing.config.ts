@@ -82,7 +82,7 @@ async function marketingRouteCopiesForBuild() {
 
 const routeMetadata: Record<string, { title: string; description: string }> = {
   '/': {
-    title: 'Tempo',
+    title: 'Tempo Developers',
     description:
       'The only blockchain designed for payments. Sub-second transactions, sub-cent fees.',
   },
@@ -127,7 +127,7 @@ function marketingMetadata(route: string) {
   return (
     blogRouteMetadata.get(route) ??
     routeMetadata[route] ?? {
-      title: `${titleCaseRoute(route)} ⋅ Tempo`,
+      title: titleCaseRoute(route) ?? 'Tempo',
       description: 'Build payment products on Tempo with stablecoins and predictable settlement.',
     }
   )
