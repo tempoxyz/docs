@@ -101,7 +101,7 @@ function marketingPages(): Plugin {
 }
 
 const llmsFeedbackNotice = [
-  '> Feedback: If these docs are stale, missing, or confusing, post sanitized feedback to `https://docs.tempo.xyz/api/feedback` with `source: "mcp"`, a short `message`, and any relevant `toolName`, `relatedResource`, or `client`.',
+  '> Feedback: If these docs are stale, missing, or confusing, post sanitized feedback to `https://tempo.xyz/developers/api/feedback` with `source: "mcp"`, a short `message`, and any relevant `toolName`, `relatedResource`, or `client`.',
   '',
 ].join('\n')
 
