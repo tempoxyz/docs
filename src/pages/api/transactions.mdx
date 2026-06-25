@@ -7,7 +7,7 @@ import { OpenApi } from 'vocs'
 
 # Transactions
 
-A transaction is what you submit to Tempo: a signed envelope that moves value or calls a contract. One transaction can produce zero, one, or many token [transfers](/api/transfers), and exactly one receipt once it is mined. Request `include=receipt` to embed the execution outcome, or read receipts with `GET /v1/receipts`.
+A transaction is what a user submits to Tempo: a signed envelope that moves value or calls a contract. One transaction can produce zero, one, or many token [transfers](/api/transfers), and exactly one receipt once it is mined. Request `include=receipt` to embed the execution outcome, or read receipts with `GET /v1/receipts`.
 
 :::info
 **New to the model?** See [Transactions, Transfers & Receipts](/api/transactions-and-transfers) for how a transaction relates to the transfers and receipt it produces.

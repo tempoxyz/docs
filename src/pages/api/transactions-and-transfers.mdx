@@ -5,15 +5,15 @@ description: Understand the Tempo API model for transactions and transfers.
 
 # Transactions, Transfers & Receipts
 
-Transactions, transfers, and receipts are the most common resources in the Tempo API, and they are easy to confuse. They describe different things: a **transaction** is what you submit to the chain, a **transfer** is a token movement that results from executing it, and a **receipt** is the record of that execution.
+Transactions, transfers, and receipts are the most common resources in the Tempo API, and they are easy to confuse. They describe different things: a **transaction** is what a user submits to the chain, a **transfer** is a token movement that results from executing it, and a **receipt** is the record of that execution.
 
 :::info
-**At a glance** — a transaction is what you *submit*; transfers and a receipt are what *happens* when it executes. One transaction can produce zero, one, or many token transfers, and exactly one receipt once it is mined. Use [`/v1/transactions`](/api/transactions) to inspect submitted transactions (add `include=receipt` for the outcome), and [`/v1/transfers`](/api/transfers) to list the token movements that resulted.
+**At a glance** — a transaction is what a user *submits*; transfers and a receipt are what *happens* when it executes. One transaction can produce zero, one, or many token transfers, and exactly one receipt once it is mined. Use [`/v1/transactions`](/api/transactions) to inspect submitted transactions (add `include=receipt` for the outcome), and [`/v1/transfers`](/api/transfers) to list the token movements that resulted.
 :::
 
 ## The model
 
-- A **transaction** is what you submit to Tempo: a signed envelope that moves value or calls a contract. It may produce zero, one, or many token transfers. Request `include=receipt` to see the execution outcome, or query [`/v1/transfers`](/api/transfers) to list the token movements it caused.
+- A **transaction** is what a user submits to Tempo: a signed envelope that moves value or calls a contract. It may produce zero, one, or many token transfers. Request `include=receipt` to see the execution outcome, or query [`/v1/transfers`](/api/transfers) to list the token movements it caused.
 - A **transfer** is an effect of transaction execution: a TIP-20 token moved from one account to another. Multiple transfers can come from a single transaction, and some transactions produce no transfers at all.
 - A **receipt** is the record of a transaction's execution: its success or failure, what it cost, and the event logs it emitted. There is exactly one receipt per mined transaction.
 
@@ -22,7 +22,7 @@ A transaction that calls a contract might emit several transfers (for example, a
 ```text
 ╭───────────────────────╮      produces 0..N       ╭───────────────────────╮
 │      Transaction      │ ───────────────────────▶ │       Transfer        │
-│   (what you submit)   │                          │ (observed token move) │
+│ (what a user submits) │                          │ (observed token move) │
 ╰───────────────────────╯                          ╰───────────────────────╯
             │                                                  │
             │ include=receipt                                  │ transactionHash
@@ -49,7 +49,7 @@ A pending transaction has no receipt yet — it appears once the transaction is 
 
 | | Transaction | Transfer | Receipt |
 | --- | --- | --- | --- |
-| **What it is** | Something you submit to the chain | A token movement caused by execution | The record of a transaction's execution |
+| **What it is** | Something a user submits to the chain | A token movement caused by execution | The record of a transaction's execution |
 | **Cardinality** | One per submission | Zero, one, or many per transaction | Exactly one per mined transaction |
 | **Endpoint** | [`/v1/transactions`](/api/transactions) | [`/v1/transfers`](/api/transfers) | `/v1/receipts` ([Transactions](/api/transactions)) |
 | **Use it for** | Inspecting submitted transactions, fees, and status | Tracking who received which tokens, and reconciling balances | Checking success/failure, gas, fees, and emitted logs |
