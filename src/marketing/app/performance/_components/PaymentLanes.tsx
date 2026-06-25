@@ -7,10 +7,16 @@ import { linePath, scaleLinear } from '../_lib/chart'
 import { fmtInt, type PerfRun } from '../_lib/runs'
 import useMeasure from './useMeasure'
 
-// The payment-lanes story, told with real data: the chart is split into two
-// always-visible bands. General blockspace carries the actual settled-TPS
-// series from the nightly feed (tens of thousands of TPS); the dedicated
-// payment lane below has tiny sub-cent fee movement, with pulses flowing along it.
+// The payment-lanes story: the chart is split into two always-visible bands to
+// show that payments ride in reserved blockspace. The top band carries the real
+// settled-TPS series from the nightly feed — general network load that rises and
+// falls. The bottom band is the dedicated payment lane, drawn as a steady
+// reserved rail with transfer pulses flowing along it: payments keep moving no
+// matter how busy the rest of the network gets.
+//
+// Tempo fees are a fixed base fee (not congestion-priced), so this chart
+// deliberately shows NO fee curve — a flat-vs-volatile fee comparison would
+// wrongly imply a dynamic, load-based fee market that Tempo does not have.
 
 // No y-axis on this chart, so the bands run flush to the container's left
 // edge; the right padding is the lane for the pinned end labels. On mobile that
@@ -19,7 +25,7 @@ const PAD = { l: 0, r: 150, t: 20, b: 24 }
 const MOBILE_BP = 480
 const H = 300
 const DIVIDER = 190
-const FEE_Y = (DIVIDER + H - PAD.b) / 2 + 6
+const LANE_Y = (DIVIDER + H - PAD.b) / 2 + 6
 const DRAW_MS = 900
 
 export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
@@ -60,14 +66,12 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
   const yAt = scaleLinear([min * 0.92, max * 1.08], [DIVIDER - 14, PAD.t + 34])
   const loadPts = values.map((v, i) => [xAt(i), yAt(v)] as [number, number])
   const loadEndY = hasData ? loadPts[loadPts.length - 1][1] : 0
-  const feePointCount = Math.max(values.length, 16)
-  const feeXAt = scaleLinear([0, feePointCount - 1], [PAD.l, endX])
-  const feePts = Array.from(
-    { length: feePointCount },
-    (_, i) =>
-      [feeXAt(i), FEE_Y + Math.sin(i * 1.7) * 1.15 + Math.sin(i * 0.55) * 0.55] as [number, number],
-  )
-  const feeEndY = feePts[feePts.length - 1]?.[1] ?? FEE_Y
+  // The payment lane is a steady reserved rail — a straight line, not a data
+  // series — with pulses flowing along it to show payments always moving.
+  const lanePts: [number, number][] = [
+    [PAD.l, LANE_Y],
+    [endX, LANE_Y],
+  ]
 
   return (
     <div ref={ref} className="relative w-full" style={{ height: H }}>
@@ -87,7 +91,7 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
             y={PAD.t + 18}
             className="fill-foreground/35 font-mono text-[10px] tracking-wider"
           >
-            GENERAL BLOCKSPACE · SHARED LOAD
+            NETWORK LOAD · NIGHTLY TPS
           </text>
 
           {/* Dedicated payment lane zone. */}
@@ -106,7 +110,7 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
             fillOpacity="0.8"
             className="font-mono text-[10px] tracking-wider"
           >
-            DEDICATED PAYMENT LANE
+            DEDICATED PAYMENT LANE · RESERVED BLOCKSPACE
           </text>
 
           <line
@@ -146,14 +150,16 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
                   transition: `opacity 250ms ease-out ${DRAW_MS}ms`,
                 }}
               >
-                {fmtInt(values[values.length - 1])} TPS load
+                {fmtInt(values[values.length - 1])} TPS
               </text>
             </>
           ) : null}
 
-          {/* The fee line: near-flat, with micro fluctuations and pulses flowing along the lane. */}
+          {/* The reserved payment-lane rail: a steady green line with transfer
+              pulses flowing along it. Not a measured series — it represents the
+              guaranteed blockspace that keeps payments moving under any load. */}
           <path
-            d={linePath(feePts)}
+            d={linePath(lanePts)}
             fill="none"
             stroke="var(--indicator-green)"
             strokeWidth="2"
@@ -161,7 +167,7 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
             strokeLinecap="round"
           />
           <path
-            d={linePath(feePts)}
+            d={linePath(lanePts)}
             fill="none"
             stroke="#ffffff"
             strokeOpacity="0.55"
@@ -171,22 +177,14 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
             strokeLinejoin="round"
             className="lane-flow motion-reduce:animate-none"
           />
-          <circle
-            cx={endX}
-            cy={feeEndY}
-            r="3.5"
-            fill="var(--indicator-green)"
-            stroke="var(--surface-page)"
-            strokeWidth="2"
-          />
           <text
             x={mobile ? endX - 12 : endX + 12}
-            y={mobile ? DIVIDER + 20 : feeEndY + 4}
+            y={mobile ? DIVIDER + 20 : LANE_Y + 4}
             textAnchor={mobile ? 'end' : 'start'}
             fill="var(--indicator-green)"
             className="font-mono text-[11px]"
           >
-            &lt;$0.001 average fee
+            payments keep flowing
           </text>
         </svg>
       ) : null}

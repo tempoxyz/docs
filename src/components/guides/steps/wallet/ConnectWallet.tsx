@@ -3,7 +3,6 @@ import * as React from 'react'
 import {
   useChains,
   useConnect,
-  useConnection,
   useConnections,
   useConnectors,
   useDisconnect,
@@ -18,7 +17,6 @@ import type { DemoStepProps } from '../types'
 export function ConnectWallet(props: DemoStepProps) {
   const { stepNumber = 1 } = props
   const isE2E = import.meta.env.VITE_E2E === 'true'
-  const { chain, connector } = useConnection()
   const connections = useConnections()
   const connect = useConnect()
   const disconnect = useDisconnect()
@@ -29,7 +27,6 @@ export function ConnectWallet(props: DemoStepProps) {
   )
   const switchChain = useSwitchChain()
   const chains = useChains()
-  const isSupported = chains.some((c) => c.id === chain?.id)
   const [copied, copyToClipboard] = useCopyToClipboard()
 
   const walletConnection = connections.find((c) =>
@@ -37,6 +34,7 @@ export function ConnectWallet(props: DemoStepProps) {
   )
   const walletAddress = walletConnection?.accounts[0]
   const walletConnector = walletConnection?.connector
+  const isSupported = chains.some((c) => c.id === walletConnection?.chainId)
   const hasNonWebAuthnWallet = Boolean(walletAddress)
   const active = !hasNonWebAuthnWallet || !isSupported
   const completed = hasNonWebAuthnWallet && isSupported
@@ -118,12 +116,12 @@ export function ConnectWallet(props: DemoStepProps) {
               })
             }
           >
-            Add Tempo to {connector?.name ?? 'Wallet'}
+            Add Tempo to {walletConnector?.name ?? 'Wallet'}
           </Button>
         )}
         {switchChain.isSuccess && (
           <div className="flex items-center font-normal text-[14px] -tracking-[2%]">
-            Added Tempo to {connector?.name ?? 'Wallet'}!
+            Added Tempo to {walletConnector?.name ?? 'Wallet'}!
           </div>
         )}
       </div>
@@ -136,7 +134,6 @@ export function ConnectWallet(props: DemoStepProps) {
     copied,
     copyToClipboard,
     disconnect,
-    connector,
     connect,
     isSupported,
     switchChain,

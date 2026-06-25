@@ -13,7 +13,7 @@ Each request consumes from one quota bucket, chosen by how the request is authen
 
 | Caller | Bucket | Default limit |
 | --- | --- | --- |
-| API key | Per key, per [scope](/api/authentication) | 100 requests / minute |
+| API key | Per key, per [scope](/docs/api/authentication) | 100 requests / minute |
 | Anonymous | Per client IP | 20 requests / minute |
 
 - **API key requests** are counted per key *and* per scope. Each endpoint draws from the bucket for the scope it requires (such as `data:read`), so traffic to one scope does not exhaust another.
@@ -61,7 +61,7 @@ Retry-After: 12
 ```
 
 :::info
-On endpoints that allow anonymous access, an over-quota request can instead be answered with `402 Payment Required`, letting you pay per request with MPP rather than wait. See [Authentication](/api/authentication) for details.
+On endpoints that allow anonymous access, an over-quota request can instead be answered with `402 Payment Required`, letting you pay per request with MPP rather than wait. See [Authentication](/docs/api/authentication) for details.
 :::
 
 ## Best Practices
@@ -92,9 +92,9 @@ async function withRetry<T>(fn: () => Promise<Response>): Promise<Response> {
 ### Cache and paginate
 
 - Cache responses for read-heavy data that does not need to be real-time.
-- Use [pagination](/api/pagination) with a large `limit` to fetch more per request instead of issuing many small calls.
+- Use [pagination](/docs/api/pagination) with a large `limit` to fetch more per request instead of issuing many small calls.
 - Request only the fields you need with `include`, so expensive computations run only when required.
 
 ### Authenticate
 
-Anonymous traffic is held to the lower IP-based limit. Send an [API key](/api/authentication) to get a per-key, per-scope quota, and request a higher limit if your workload needs it.
+Anonymous traffic is held to the lower IP-based limit. Send an [API key](/docs/api/authentication) to get a per-key, per-scope quota, and request a higher limit if your workload needs it.
