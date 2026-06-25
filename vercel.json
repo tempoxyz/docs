@@ -100,6 +100,26 @@
       "permanent": true
     },
     {
+      "source": "/",
+      "destination": "/developers",
+      "permanent": false
+    },
+    {
+      "source": "/docs",
+      "destination": "/developers/docs",
+      "permanent": false
+    },
+    {
+      "source": "/docs/",
+      "destination": "/developers/docs",
+      "permanent": false
+    },
+    {
+      "source": "/docs/:path*",
+      "destination": "/developers/docs/:path*",
+      "permanent": false
+    },
+    {
       "source": "/accounts",
       "destination": "https://accounts.tempo.xyz",
       "permanent": true
