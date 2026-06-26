@@ -274,15 +274,11 @@
   "rewrites": [
     {
       "source": "/developers",
-      "destination": "/docs"
+      "destination": "/developers/docs"
     },
     {
       "source": "/developers/",
-      "destination": "/docs"
-    },
-    {
-      "source": "/developers/:path*",
-      "destination": "/:path*"
+      "destination": "/developers/docs"
     },
     {
       "source": "/ingest/static/:path(.*)",

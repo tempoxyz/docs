@@ -6,7 +6,7 @@
   "packageManager": "pnpm@10.28.1",
   "scripts": {
     "dev": "NODE_OPTIONS='--import tsx' vite",
-    "build": "tsgo --build && vite build && vite build --config vite.marketing.config.ts",
+    "build": "tsgo --build && vite build && vite build --config vite.marketing.config.ts && node --experimental-strip-types scripts/materialize-base-path.ts",
     "check": "biome check --write --unsafe .",
     "check:types": "tsgo --project tsconfig.json --noEmit",
     "preview": "node dist/preview.js",
