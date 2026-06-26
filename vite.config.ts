@@ -27,6 +27,7 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
+    base: '/developers',
     plugins: [
       blogPostsPlugin(),
       marketingSearchIndexPlugin({ source: 'vocs' }),
