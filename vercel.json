@@ -207,6 +207,14 @@
   ],
   "rewrites": [
     {
+      "source": "/developers",
+      "destination": "/"
+    },
+    {
+      "source": "/developers/:path*",
+      "destination": "/:path*"
+    },
+    {
       "source": "/ingest/static/:path(.*)",
       "destination": "https://us-assets.i.posthog.com/static/:path"
     },
