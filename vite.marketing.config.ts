@@ -60,7 +60,36 @@ function marketingRouteCopies(): Plugin {
           await fs.writeFile(path.join(routeDir, 'index.html'), applyMarketingMetadata(html, route))
         }),
       )
+      await mirrorVocsOutputForDevelopersBase(root)
     },
+  }
+}
+
+async function mirrorVocsOutputForDevelopersBase(root: string) {
+  const developersRoot = path.join(root, DOCS_BASE_PATH.slice(1))
+  await fs.mkdir(developersRoot, { recursive: true })
+
+  await Promise.all(
+    ['assets', 'docs', 'RSC'].map(async (directory) => {
+      const source = path.join(root, directory)
+      const destination = path.join(developersRoot, directory)
+      try {
+        await fs.cp(source, destination, { recursive: true, force: true })
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+      }
+    }),
+  )
+
+  await copyIfExists(path.join(root, 'assets', 'md', 'docs.md'), path.join(root, 'assets', 'md', 'developers', 'docs.md'))
+  await copyIfExists(path.join(root, 'assets', 'md', 'docs'), path.join(root, 'assets', 'md', 'developers', 'docs'))
+}
+
+async function copyIfExists(source: string, destination: string) {
+  try {
+    await fs.cp(source, destination, { recursive: true, force: true })
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
   }
 }
 

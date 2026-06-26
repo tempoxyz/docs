@@ -21,7 +21,7 @@ export default defineConfig({
   //   textColor: 'white',
   // },
   changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
-  checkDeadlinks: true,
+  checkDeadlinks: process.env.TEMPO_SKIP_DEADLINKS === 'true' ? false : true,
   editLink: {
     link: 'https://github.com/tempoxyz/docs/edit/main/src/pages/:path',
     text: 'Suggest changes to this page',
@@ -114,7 +114,7 @@ export default defineConfig({
   openapi: [
     {
       path: '/docs/api',
-      spec: 'https://api.tempo.xyz/openapi.json',
+      spec: process.env.TEMPO_OPENAPI_SPEC ?? 'https://api.tempo.xyz/openapi.json',
       sidebar: {
         collapsed: true,
         backLink: false,
