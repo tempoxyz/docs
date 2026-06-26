@@ -27,7 +27,7 @@ tempo node \
 
 An RPC node running in follow mode is a **full node**. It first verifies consensus finalization certificates from the upstream before accepting followed blocks. Those certificates prove the data is backed by a validator quorum, not just the upstream node's local view of the chain. After verification, it fetches blocks from the upstream RPC endpoint, executes every transaction locally through the EVM, validates each block after execution, and stores complete block data with full state. All execution and validation happens locally on your machine.
 
-By default, RPC nodes run in archive mode, meaning they do not prune historical state.
+By default, RPC nodes run in archive mode, meaning they do not prune historical state. Any pruning default defines the minimal window of synchrony for which Tempo guarantees that nodes can sync to the network.
 
 The upstream must serve consensus finalization certificates. For RPC-to-RPC following, follow a validator-backed RPC node or another RPC node that is already serving certified consensus data.
 
