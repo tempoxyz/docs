@@ -127,40 +127,6 @@ export default function DocsSectionNav() {
             gap: 20px !important;
           }
 
-          body:has(.docs-section-nav) nav:has(> a[aria-label='Tempo home']) > div > button:first-child {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            display: flex !important;
-            width: min(460px, calc(100vw - 560px));
-            min-width: 300px;
-            height: 40px;
-            transform: translate(-50%, -50%);
-            justify-content: space-between;
-            border-radius: 6px;
-            background: var(--background);
-            padding-inline: 14px;
-            color: color-mix(in srgb, var(--foreground) 55%, transparent);
-            font-size: 0 !important;
-            box-shadow: 0 1px 1px rgb(0 0 0 / 0.03);
-          }
-
-          body:has(.docs-section-nav) nav:has(> a[aria-label='Tempo home']) > div > button:first-child::after {
-            content: 'Search docs...';
-            order: 1;
-            margin-right: auto;
-            font-size: 14px;
-          }
-
-          body:has(.docs-section-nav) nav:has(> a[aria-label='Tempo home']) > div > button:first-child svg {
-            order: 0;
-          }
-
-          body:has(.docs-section-nav) nav:has(> a[aria-label='Tempo home']) > div > button:first-child kbd {
-            order: 2;
-            background: var(--surface-input);
-            font-size: 11px !important;
-          }
         }
 
         @media (width >= 1080px) {
