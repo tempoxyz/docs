@@ -31,6 +31,7 @@ export default defineConfig(({ mode }) => {
       blogPostsPlugin(),
       marketingSearchIndexPlugin({ source: 'vocs' }),
       marketingPages(),
+      developersProxyRouteNormalization(),
       vocs(),
       Icons({ compiler: 'jsx', jsx: 'react' }),
       react(),
@@ -63,6 +64,42 @@ export default defineConfig(({ mode }) => {
 })
 
 const marketingRoutes = ['/', '/build', '/blog', '/performance']
+
+function developersProxyRouteNormalization(): Plugin {
+  return {
+    name: 'tempo-developers-proxy-route-normalization',
+    enforce: 'post',
+    transform(code, id) {
+      if (id !== '\0virtual:vite-rsc-waku/client-entry') return
+
+      return code
+        .replace(
+          "import { Router } from 'waku/router/client';",
+          "import { Router, unstable_parseRoute } from 'waku/router/client';",
+        )
+        .replace(
+          'const rootElement = createElement(StrictMode, null, createElement(Router));',
+          `const normalizeDevelopersRoute = (route) => {
+  if (route.path === '/developers') return { ...route, path: '/' };
+  if (route.path.startsWith('/developers/')) {
+    return { ...route, path: route.path.slice('/developers'.length) || '/' };
+  }
+  return route;
+};
+
+const initialRoute = normalizeDevelopersRoute(unstable_parseRoute(new URL(window.location.href)));
+const rootElement = createElement(
+  StrictMode,
+  null,
+  createElement(Router, {
+    initialRoute,
+    unstable_routeInterceptor: normalizeDevelopersRoute,
+  }),
+);`,
+        )
+    },
+  }
+}
 
 function isMarketingPath(pathname: string) {
   const normalized = pathname.replace(/\/$/, '') || '/'
