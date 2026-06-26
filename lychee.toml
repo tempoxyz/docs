@@ -31,8 +31,6 @@ exclude = [
   "^https?://0\\.0\\.0\\.0",
   "^https?://\\[::1\\]",
   "^https?://([a-z0-9-]+\\.)*example\\.(com|org|net)",
-  # Future canonical docs URL. It becomes live after the main-site proxy PR lands.
-  "^https://tempo\\.xyz/developers/?$",
   # SVG xmlns reference, not a real link.
   "^http://www\\.w3\\.org/2000/svg$",
 ]
