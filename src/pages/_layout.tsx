@@ -38,6 +38,7 @@ export default function Layout(
         type="font/woff2"
         crossOrigin="anonymous"
       />
+      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static bootstrap must run before the RSC client bundle. */}
       <script dangerouslySetInnerHTML={{ __html: normalizeProxiedRscFetch }} />
       {props.children}
     </>
