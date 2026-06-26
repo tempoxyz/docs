@@ -19,7 +19,8 @@ const PostHogSetup = lazy(() => import('../../components/PostHogSetup'))
 if (typeof window !== 'undefined') {
   const originalFetch = window.fetch.bind(window)
   window.fetch = (input, init) => {
-    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+    const url =
+      typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
     const rewritten = url
       .replace(/\/RSC\/R\/developers\.txt(?=($|\?))/, '/RSC/R/%2F.txt')
       .replace(/\/RSC\/R\/developers\//, '/RSC/R/')
