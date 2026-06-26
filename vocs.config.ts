@@ -43,6 +43,7 @@ export default defineConfig({
     ],
   },
   baseUrl: baseUrl || undefined,
+  basePath: '/developers',
   ogImageUrl: (path, options = {}) => {
     const urlBase = options.baseUrl?.replace(/\/$/, '') ?? ''
     const docsPath = path.replace(/^\/docs(?=\/|$)/, '') || '/'
