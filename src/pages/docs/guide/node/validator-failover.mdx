@@ -19,14 +19,13 @@ Only one node may run with a validator signing key at a time. Before promoting t
 
 Use a dedicated data directory for the follower. The upstream must be a validator or RPC node that exposes the `consensus` RPCs.
 
-Trustless RPC-to-RPC following is currently only supported on Moderato testnet. If following on Mainnet, follow against the existing validator. See more about [trustless rpc nodes](/docs/guide/node/rpc#trustless-rpc-nodes).
+Trustless RPC-to-RPC following is currently only supported on Moderato testnet. If following on Mainnet, follow against the existing validator. See more about [running an RPC node](/docs/guide/node/rpc).
 
 ::::code-group
 ```bash [Testnet]
 tempo node --datadir <datadir> \
   --chain testnet \
   --follow <WS_URL> \
-  --follow.experimental.certify \
   --http --http.port 8545 \
   --http.api eth,net,web3,txpool,trace,consensus
 ```
@@ -34,7 +33,6 @@ tempo node --datadir <datadir> \
 tempo node --datadir <datadir> \
   --chain mainnet \
   --follow <WS_URL> \
-  --follow.experimental.certify \
   --http --http.port 8545 \
   --http.api eth,net,web3,txpool,trace,consensus
 ```
@@ -85,7 +83,7 @@ If the follower is not managed by systemd, send `SIGINT` or `SIGTERM` and wait f
 
 ### Restart the standby in validator mode
 
-Restart the same data directory without `--follow` or `--follow.experimental.certify`, and add the validator signing key.
+Restart the same data directory without `--follow`, and add the validator signing key.
 
 Use the same consensus signing key as the validator you are failing over from. This procedure moves an existing validator identity to the standby; it does not rotate the identity. To use a different signing key,
 the validator's onchain configuration must be rotated. Follow the [rotate the validator identity](/docs/guide/node/validator-lifecycle#rotate-validator-identity) procedure.
