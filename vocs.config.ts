@@ -6,7 +6,7 @@ import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 const baseUrl = (() => {
   if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') return ''
   if (URL.canParse(process.env.VITE_BASE_URL)) return process.env.VITE_BASE_URL.replace(/\/$/, '')
-  if (process.env.VERCEL_ENV === 'production') return 'https://docs.tempo.xyz'
+  if (process.env.VERCEL_ENV === 'production') return 'https://tempo.xyz'
   const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
   if (productionUrl) return `https://${productionUrl}`
   return ''
@@ -43,6 +43,7 @@ export default defineConfig({
     ],
   },
   baseUrl: baseUrl || undefined,
+  basePath: '/developers',
   ogImageUrl: (path, options = {}) => {
     const urlBase = options.baseUrl?.replace(/\/$/, '') ?? ''
     const docsPath = path.replace(/^\/docs(?=\/|$)/, '') || '/'

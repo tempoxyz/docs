@@ -5,6 +5,28 @@
       "has": [
         {
           "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers",
+      "permanent": true
+    },
+    {
+      "source": "/:path((?!developers(?:/|$)|assets(?:/|$)|RSC(?:/|$)|fonts(?:/|$)|images(?:/|$)|stickers(?:/|$)|api/og(?:/|$)|icon-|og-).*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/:path",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
           "value": "faucet.tempo.xyz"
         }
       ],
