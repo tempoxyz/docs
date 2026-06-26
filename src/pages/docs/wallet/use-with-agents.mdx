@@ -1,13 +1,13 @@
 ---
 title: Use Tempo Wallet CLI with Agents
-description: Connect Tempo Wallet CLI to your agent and understand the built-in features that make agent-driven paid requests reliable and safe.
+description: Connect Tempo Wallet CLI to AI agents for MPP service discovery, payment previews, spend caps, credits, and paid HTTP requests.
 ---
 
 # Use with Agents
 
 ## Quickstart
 
-Paste this into your agent to set up Tempo Wallet:
+Paste this into your agent to set up Tempo Wallet CLI:
 
 
 
@@ -25,7 +25,7 @@ codex exec "Read https://tempo.xyz/SKILL.md and set up tempo"
 
 ## Auto-installed Skills
 
-When you run the setup prompt, your agent installs Tempo's built-in skills automatically — no manual skill wiring required.
+When you run the setup prompt, your agent installs Tempo's built-in skills automatically. No manual skill wiring required.
 
 - `tempo-wallet`: gives your agent wallet-aware capabilities like readiness checks, balances, service discovery, and session/funding actions.
 - `tempo-request`: gives your agent paid HTTP request capabilities with payment preview (`--dry-run`) and execution support.
@@ -36,8 +36,28 @@ This works in supported skill-enabled agents including **Claude Code**, **Amp**,
 
 1. **TOON output mode (`-t` / `--toon-output`)** gives compact, machine-readable, token-efficient output so agent tooling can parse command responses reliably.
 2. **Built-in service discovery** (`tempo wallet services`) lets agents search providers, inspect endpoint details, and use verified method/path metadata instead of guessing URLs or payload shapes.
-3. **`--dry-run` payment previews** let agents validate endpoint reachability, request shape, and expected payment cost before committing funds, which reduces failed paid calls in multi-step workflows.
-4. **Scoped access keys and spend controls** let you enforce spending limits per key so agents can only spend within defined budgets, which contains risk if a prompt, endpoint choice, or loop goes wrong.
+3. **`--dry-run` payment previews** let agents validate endpoint reachability, request shape, and expected payment cost before committing funds.
+4. **`--max-spend` and scoped access keys** let you enforce budgets per request and per key.
+5. **MPP Credits support** lets agents pay eligible one-time charges from a separate credits balance after checking `tempo wallet -t whoami --credits`.
+
+## Agent Pattern
+
+```bash
+tempo wallet -t whoami
+tempo wallet -t services --search <query>
+tempo wallet -t services <SERVICE_ID>
+tempo request -t --dry-run --max-spend 1.00 -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
+tempo request -t --max-spend 1.00 -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
+```
+
+For credit-eligible one-time charges:
+
+```bash
+tempo wallet -t whoami --credits
+headers="$(mktemp)"
+tempo request -t --dry-run -D "$headers" -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
+tempo wallet -t transfer --credits --dry-run --mpp-challenge-file "$headers"
+```
 
 ## Troubleshooting
 

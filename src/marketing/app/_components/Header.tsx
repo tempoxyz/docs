@@ -70,8 +70,8 @@ const developersMenu: MegaMenuData = {
       title: 'Tools',
       items: [
         {
-          label: 'Wallet',
-          desc: 'A Tempo-first wallet for your agents',
+          label: 'Tempo Wallet',
+          desc: 'A Tempo-first wallet',
           href: 'https://wallet.tempo.xyz',
           icon: <WalletIcon />,
         },
@@ -92,6 +92,12 @@ const developersMenu: MegaMenuData = {
           desc: 'Search blocks, txs & tokens',
           href: 'https://explorer.tempo.xyz',
           icon: <ExplorerIcon />,
+        },
+        {
+          label: 'Wallet CLI',
+          desc: 'Use Tempo Wallet from the command line for agents',
+          href: '/docs/cli/wallet',
+          icon: <TerminalIcon />,
         },
       ],
     },

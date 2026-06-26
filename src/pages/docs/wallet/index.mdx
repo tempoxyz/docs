@@ -1,13 +1,13 @@
 ---
-title: Tempo CLI
-description: A terminal client for Tempo wallet management, service discovery, and paid HTTP requests via the Machine Payments Protocol.
+title: Tempo Wallet CLI
+description: Use Tempo Wallet CLI from the command line for wallet management, MPP service discovery, paid requests, and AI agent workflows.
 ---
 
-# Tempo CLI
+# Tempo Wallet CLI
 
-The `tempo` CLI is a terminal client for Tempo. It has two command families:
+Tempo Wallet CLI is the command-line way to use Tempo Wallet from scripts, terminals, and AI agents. It has two command families:
 
-- **`tempo wallet`**: manages your onchain identity: authentication, key management, balances, funding, and transfers. It also provides a service directory for discovering [MPP](https://mpp.dev)-compatible endpoints and their request schemas.
+- **`tempo wallet`**: manages your onchain identity: authentication, key management, balances, funding, transfers, MPP Credits, service discovery, and payment sessions. It also provides a service directory for discovering [MPP](https://mpp.dev)-compatible endpoints and their request schemas.
 - **`tempo request`**: a curl-like HTTP client that handles [Machine Payments Protocol](https://mpp.dev) negotiation automatically. It sends your request, intercepts `402 Payment Required` challenges, signs and submits the payment onchain, then retries with the credential, all in a single command.
 
 Together they let you browse paid APIs, preview costs, and execute paid requests from a terminal, script, or AI agent without writing any integration code.
@@ -22,10 +22,12 @@ curl -fsSL https://tempo.xyz/install | bash
 
 ```bash
 tempo wallet login
+tempo wallet login --no-browser
 tempo wallet whoami
+tempo wallet whoami --credits
 ```
 
-`login` opens a browser flow that creates or connects a Tempo wallet. `whoami` confirms readiness, prints your address, and shows token balances.
+`login` opens a browser flow that creates or connects a Tempo Wallet. Use `--no-browser` on remote hosts. `whoami` confirms readiness, prints your address, and shows token balances. `whoami --credits` shows MPP Credits separately from token balances.
 
 ## Discover and call a paid API
 
@@ -47,12 +49,15 @@ tempo request -X POST \
   https://fal.mpp.tempo.xyz/fal-ai/flux/dev
 ```
 
+Always build request URLs from `tempo wallet services <SERVICE_ID>` output. Service entries include URLs, methods, pricing, request schemas, and credit support when available.
+
 ## Scripting and agents
 
-The CLI is designed for non-interactive use. Two features matter here:
+Tempo Wallet CLI is designed for non-interactive use. Three features matter here:
 
-- **`-t` (TOON output)**: compact, machine-readable output that minimizes token usage when consumed by an LLM or parsed by a script.
+- **`-t` ([TOON](https://toonformat.dev/) output)**: compact, machine-readable output that minimizes token usage when consumed by an LLM or parsed by a script.
 - **`--dry-run`**: previews the payment cost and validates the request shape without spending funds. Useful for agents that need to confirm cost before committing.
+- **`--max-spend`**: caps paid `tempo request` workflows so an agent cannot exceed a caller-provided budget.
 
 To set up an AI agent (Claude Code, Amp, Codex) with wallet and request capabilities:
 
@@ -72,4 +77,5 @@ This installs `tempo-wallet` and `tempo-request` skills automatically. The agent
 
 ## Next
 
-- [Reference](/docs/wallet/reference): complete command and flag reference
+- [Wallet CLI](/docs/cli/wallet): canonical docs and command reference
+- [Reference](/docs/wallet/reference): legacy command reference
