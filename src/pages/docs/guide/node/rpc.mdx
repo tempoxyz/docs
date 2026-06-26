@@ -25,7 +25,7 @@ tempo node \
   --http.api eth,net,web3,txpool,trace
 ```
 
-An RPC node running in follow mode is a **full node**. It fetches blocks from an upstream RPC endpoint, executes every transaction locally through the EVM, validates each block after execution, and stores complete block data with full state. By default, it also verifies consensus finalization certificates from the upstream before accepting followed blocks. Those certificates prove the data is backed by a validator quorum, not just the upstream node's local view of the chain. All execution and validation happens locally on your machine.
+An RPC node running in follow mode is a **full node**. It first verifies consensus finalization certificates from the upstream before accepting followed blocks. Those certificates prove the data is backed by a validator quorum, not just the upstream node's local view of the chain. After verification, it fetches blocks from the upstream RPC endpoint, executes every transaction locally through the EVM, validates each block after execution, and stores complete block data with full state. All execution and validation happens locally on your machine.
 
 By default, RPC nodes run in archive mode, meaning they do not prune historical state.
 
