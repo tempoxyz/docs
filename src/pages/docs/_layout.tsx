@@ -22,7 +22,7 @@ if (typeof window !== 'undefined') {
     const url =
       typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
     const rewritten = url
-      .replace(/\/RSC\/R\/developers\.txt(?=($|\?))/, '/RSC/R/%2F.txt')
+      .replace(/\/RSC\/R\/developers\.txt(?=($|\?))/, '/RSC/R/_root.txt')
       .replace(/\/RSC\/R\/developers\//, '/RSC/R/')
 
     if (rewritten === url) return originalFetch(input, init)
