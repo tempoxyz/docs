@@ -17,26 +17,15 @@ Only one node may run with a validator signing key at a time. Before promoting t
 
 ### Run the follower
 
-Use a dedicated data directory for the follower. The upstream must be a validator or RPC node that exposes the `consensus` RPCs.
+Use a dedicated data directory for the follower. Trustless RPC-to-RPC following is the default, and the upstream must be a validator or RPC node that exposes the `consensus` RPCs. If following a validator, the upstream validator must also expose WebSockets with `--ws`.
 
-Trustless RPC-to-RPC following is currently only supported on Moderato testnet. If following on Mainnet, follow against the existing validator. See more about [running an RPC node](/docs/guide/node/rpc).
-
-::::code-group
-```bash [Testnet]
+```bash
 tempo node --datadir <datadir> \
-  --chain testnet \
-  --follow <WS_URL> \
+  --chain <CHAIN> \
+  --follow ws://example.url:8546 \
   --http --http.port 8545 \
   --http.api eth,net,web3,txpool,trace,consensus
 ```
-```bash [Mainnet]
-tempo node --datadir <datadir> \
-  --chain mainnet \
-  --follow <WS_URL> \
-  --http --http.port 8545 \
-  --http.api eth,net,web3,txpool,trace,consensus
-```
-::::
 
 Do not pass `--consensus.signing-key` while the standby is running as a follower. The standby is syncing certified consensus state, not participating in consensus.
 
