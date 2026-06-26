@@ -122,6 +122,7 @@ function llmsFeedbackPreamble(): Plugin {
       ]
 
       await Promise.all(candidates.map(prependFeedbackNotice))
+      await removeTemplateRoutesFromSitemap(path.join(publicDir, 'sitemap.xml'))
     },
   }
 }
@@ -148,6 +149,19 @@ async function prependFeedbackNotice(filePath: string) {
     const content = await fs.readFile(filePath, 'utf-8')
     if (content.startsWith(llmsFeedbackNotice)) return
     await fs.writeFile(filePath, `${llmsFeedbackNotice}${content}`, 'utf-8')
+  } catch {
+    return
+  }
+}
+
+async function removeTemplateRoutesFromSitemap(filePath: string) {
+  try {
+    const content = await fs.readFile(filePath, 'utf-8')
+    const filtered = content.replaceAll(
+      /<url>\s*<loc>[^<]*\/\[[^\]]+\][^<]*<\/loc>[\s\S]*?<\/url>\s*/g,
+      '',
+    )
+    if (filtered !== content) await fs.writeFile(filePath, filtered, 'utf-8')
   } catch {
     return
   }
