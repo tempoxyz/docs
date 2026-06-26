@@ -5,6 +5,17 @@
       "has": [
         {
           "type": "host",
+          "value": "tempo-docs-git-revert-573-revert-572-revert-571-86f156-tempoxyz.vercel.app"
+        }
+      ],
+      "destination": "/developers/",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
           "value": "faucet.tempo.xyz"
         }
       ],
