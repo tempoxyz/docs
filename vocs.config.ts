@@ -12,9 +12,6 @@ const baseUrl = (() => {
   return ''
 })()
 
-const basePath =
-  process.env.VITE_BASE_PATH || (process.env.VERCEL_ENV === 'preview' ? '/developers' : '/')
-
 export default defineConfig({
   // banner: {
   //   dismissable: false,
@@ -45,7 +42,6 @@ export default defineConfig({
       McpSource.github({ repo: 'tempoxyz/tempo-ts' }),
     ],
   },
-  basePath,
   baseUrl: baseUrl || undefined,
   ogImageUrl: (path, options = {}) => {
     const urlBase = options.baseUrl?.replace(/\/$/, '') ?? ''
