@@ -825,7 +825,7 @@ export default defineConfig({
                 link: '/docs/cli',
               },
               {
-                text: 'Wallet',
+                text: 'Wallet CLI',
                 link: '/docs/cli/wallet',
               },
               {
@@ -1197,6 +1197,61 @@ export default defineConfig({
     {
       source: '/docs/protocol/exchange/pathUSD',
       destination: '/docs/protocol/exchange/quote-tokens#pathusd',
+      status: 301,
+    },
+    {
+      source: '/wallet',
+      destination: '/docs/cli/wallet',
+      status: 301,
+    },
+    {
+      source: '/wallet/reference',
+      destination: '/docs/cli/wallet',
+      status: 301,
+    },
+    {
+      source: '/wallet/:path*',
+      destination: '/docs/cli/wallet',
+      status: 301,
+    },
+    {
+      source: '/cli/reference',
+      destination: '/docs/cli/wallet',
+      status: 301,
+    },
+    {
+      source: '/cli/wallet',
+      destination: '/docs/cli/wallet',
+      status: 301,
+    },
+    {
+      source: '/cli/:path*',
+      destination: '/docs/cli/:path*',
+      status: 301,
+    },
+    {
+      source: '/sdk/typescript/prool',
+      destination: '/docs/sdk/typescript/prool/setup',
+      status: 301,
+    },
+    {
+      source: '/guide/use-accounts/fee-sponsorship',
+      destination: '/docs/guide/payments/sponsor-user-fees',
+      status: 301,
+    },
+    {
+      source: '/quickstart/tip20',
+      destination: '/docs/protocol/tip20/overview',
+      status: 301,
+    },
+    {
+      source: '/protocol/exchange/pathUSD',
+      destination: '/docs/protocol/exchange/quote-tokens#pathusd',
+      status: 301,
+    },
+    {
+      source: '/protocol/zones/overview',
+      destination: '/docs/protocol/zones',
       status: 301,
     },
   ],
