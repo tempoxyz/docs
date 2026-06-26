@@ -45,11 +45,6 @@
       "permanent": false
     },
     {
-      "source": "/",
-      "destination": "/developers",
-      "permanent": false
-    },
-    {
       "source": "/accounts",
       "destination": "https://accounts.tempo.xyz",
       "permanent": true
