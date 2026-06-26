@@ -211,6 +211,10 @@
       "destination": "/docs"
     },
     {
+      "source": "/developers/",
+      "destination": "/docs/"
+    },
+    {
       "source": "/developers/assets/:path*",
       "destination": "/assets/:path*"
     },
