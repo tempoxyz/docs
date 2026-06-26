@@ -25,7 +25,7 @@ describe('normalizeFeedback', () => {
       helpful: false,
       category: ' Missing information ',
       message: ' Needs  more detail about token setup. ',
-      pageUrl: 'https://docs.tempo.xyz/docs/guide/payments#send',
+      pageUrl: 'https://tempo.xyz/developers/docs/guide/payments#send',
       timestamp: '2026-06-19T12:00:00.000Z',
     })
 
@@ -34,7 +34,7 @@ describe('normalizeFeedback', () => {
       sentiment: 'negative',
       category: 'Missing information',
       message: 'Needs more detail about token setup.',
-      pageUrl: 'https://docs.tempo.xyz/docs/guide/payments',
+      pageUrl: 'https://tempo.xyz/developers/docs/guide/payments',
       path: '/guide/payments',
       timestamp: '2026-06-19T12:00:00.000Z',
     })
@@ -64,8 +64,8 @@ describe('normalizeFeedback', () => {
   })
 
   it('requires docs helpful value', () => {
-    expect(() => normalizeFeedback({ source: 'docs', pageUrl: 'https://docs.tempo.xyz' })).toThrow(
-      FeedbackError,
-    )
+    expect(() =>
+      normalizeFeedback({ source: 'docs', pageUrl: 'https://tempo.xyz/developers' }),
+    ).toThrow(FeedbackError)
   })
 })

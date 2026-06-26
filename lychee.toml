@@ -9,7 +9,7 @@ timeout = 20
 retry_wait_time = 2
 
 # Some hosts (Twitter, LinkedIn, Cloudflare-protected sites) reject the default UA.
-user_agent = "Mozilla/5.0 (compatible; tempo-docs-link-checker/1.0; +https://docs.tempo.xyz)"
+user_agent = "Mozilla/5.0 (compatible; tempo-docs-link-checker/1.0; +https://tempo.xyz/developers)"
 
 # Auth-walled or rate-limited statuses are still "reachable".
 accept = ["200..=299", "401", "403", "429"]

@@ -14,7 +14,7 @@ description: >
 
 Use this skill to build applications on Tempo. Prefer Tempo docs from the
 hosted MCP server first; if MCP is unavailable, read the relevant page from
-`https://docs.tempo.xyz` or append `.md` to the docs URL. Do not guess current
+`https://tempo.xyz/developers` or append `.md` to the docs URL. Do not guess current
 RPC URLs, contract addresses, chain IDs, package APIs, or protocol details;
 verify them from docs before writing code.
 
@@ -57,11 +57,11 @@ code. Use the docs page’s linked examples when available.
 
 ## Useful Docs
 
-- Getting started: `https://docs.tempo.xyz/docs/quickstart/integrate-tempo`
-- Connection details: `https://docs.tempo.xyz/docs/quickstart/connection-details`
-- Wallet: `https://docs.tempo.xyz/docs/wallet`
-- Payments: `https://docs.tempo.xyz/docs/guide/payments`
-- Machine payments: `https://docs.tempo.xyz/docs/guide/machine-payments`
-- Hosted services: `https://docs.tempo.xyz/docs/hosted-services`
-- SDKs: `https://docs.tempo.xyz/docs/sdk`
-- Protocol specs: `https://docs.tempo.xyz/docs/protocol`
+- Getting started: `https://tempo.xyz/developers/docs/quickstart/integrate-tempo`
+- Connection details: `https://tempo.xyz/developers/docs/quickstart/connection-details`
+- Wallet: `https://tempo.xyz/developers/docs/wallet`
+- Payments: `https://tempo.xyz/developers/docs/guide/payments`
+- Machine payments: `https://tempo.xyz/developers/docs/guide/machine-payments`
+- Hosted services: `https://tempo.xyz/developers/docs/hosted-services`
+- SDKs: `https://tempo.xyz/developers/docs/sdk`
+- Protocol specs: `https://tempo.xyz/developers/docs/protocol`

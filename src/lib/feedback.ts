@@ -144,7 +144,8 @@ function cleanText(value: string | undefined, maxLength: number) {
 function cleanPath(value: string | undefined) {
   const cleaned = cleanText(value, 512)
   if (!cleaned) return undefined
-  return cleaned.startsWith('/') ? cleaned : `/${cleaned}`
+  const path = cleaned.startsWith('/') ? cleaned : `/${cleaned}`
+  return path.replace(/^\/developers(?=\/|$)/, '').replace(/^\/docs(?=\/|$)/, '') || '/'
 }
 
 function cleanUrl(value: string | undefined) {
@@ -213,7 +214,10 @@ function compact<T>(values: Array<T | false | undefined>): T[] {
 }
 
 function urlFromPath(path: string | undefined) {
-  if (!path) return 'https://docs.tempo.xyz/'
+  if (!path) return 'https://tempo.xyz/developers/'
   if (URL.canParse(path)) return path
-  return new URL(path.startsWith('/') ? path : `/${path}`, 'https://docs.tempo.xyz').toString()
+  return new URL(
+    path.startsWith('/') ? path : `/${path}`,
+    'https://tempo.xyz/developers',
+  ).toString()
 }
