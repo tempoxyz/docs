@@ -1,0 +1,132 @@
+import { expect, test } from '@playwright/test'
+import {
+  classifyDocsRequest,
+  type DocsRequestAgentKind,
+  type DocsRequestMatchSource,
+  type DocsRequestSurface,
+} from '../src/lib/docs-request-classifier'
+
+type ClassificationCase = {
+  name: string
+  input: Parameters<typeof classifyDocsRequest>[0]
+  expected: {
+    agent_family?: string
+    agent_kind?: DocsRequestAgentKind
+    match_source: DocsRequestMatchSource
+    shouldTrack: boolean
+    surface: DocsRequestSurface
+  }
+}
+
+const cases: ClassificationCase[] = [
+  {
+    name: 'OpenAI search crawler',
+    input: { path: '/guide/payments', userAgent: 'Mozilla/5.0; OAI-SearchBot/1.0' },
+    expected: {
+      agent_family: 'openai',
+      agent_kind: 'search',
+      match_source: 'official_ua',
+      shouldTrack: true,
+      surface: 'docs',
+    },
+  },
+  {
+    name: 'Anthropic user fetcher',
+    input: { path: '/guide/payments.md', userAgent: 'Claude-User/1.0' },
+    expected: {
+      agent_family: 'anthropic',
+      agent_kind: 'user_fetch',
+      match_source: 'official_ua',
+      shouldTrack: true,
+      surface: 'markdown',
+    },
+  },
+  {
+    name: 'Perplexity crawler',
+    input: { path: '/llms-full.txt', userAgent: 'PerplexityBot/1.0' },
+    expected: {
+      agent_family: 'perplexity',
+      agent_kind: 'crawler',
+      match_source: 'official_ua',
+      shouldTrack: true,
+      surface: 'llms',
+    },
+  },
+  {
+    name: 'Google crawler',
+    input: { path: '/.well-known/ai-plugin.json', userAgent: 'Google-CloudVertexBot' },
+    expected: {
+      agent_family: 'google',
+      agent_kind: 'crawler',
+      match_source: 'official_ua',
+      shouldTrack: true,
+      surface: 'well_known',
+    },
+  },
+  {
+    name: 'Claude Code MCP client',
+    input: { path: '/api/mcp', userAgent: 'claude-code/1.0.0 (cli)' },
+    expected: {
+      agent_family: 'anthropic',
+      agent_kind: 'developer_tool',
+      match_source: 'managed_list',
+      shouldTrack: true,
+      surface: 'mcp',
+    },
+  },
+  {
+    name: 'Codex MCP client',
+    input: { path: '/api/mcp', userAgent: 'codex-mcp-client/0.1.0' },
+    expected: {
+      agent_family: 'openai',
+      agent_kind: 'developer_tool',
+      match_source: 'managed_list',
+      shouldTrack: true,
+      surface: 'mcp',
+    },
+  },
+  {
+    name: 'AI referrer',
+    input: { path: '/guide/payments', referer: 'https://chatgpt.com/c/abc' },
+    expected: {
+      agent_kind: 'unknown_ai',
+      match_source: 'ai_referrer',
+      shouldTrack: true,
+      surface: 'docs',
+    },
+  },
+  {
+    name: 'MCP surface with unknown user agent',
+    input: { path: '/api/mcp', userAgent: 'UnknownAgent/1.0' },
+    expected: {
+      match_source: 'agent_surface',
+      shouldTrack: true,
+      surface: 'mcp',
+    },
+  },
+  {
+    name: 'skill surface with unknown user agent',
+    input: { path: '/SKILL.md', userAgent: 'curl/8.0' },
+    expected: {
+      match_source: 'agent_surface',
+      shouldTrack: true,
+      surface: 'skill',
+    },
+  },
+  {
+    name: 'normal human docs page',
+    input: { path: '/guide/payments', userAgent: 'Mozilla/5.0' },
+    expected: {
+      agent_kind: 'human',
+      match_source: 'none',
+      shouldTrack: false,
+      surface: 'docs',
+    },
+  },
+]
+
+for (const item of cases) {
+  test(`classifies docs request: ${item.name}`, () => {
+    expect(classifyDocsRequest(item.input)).toMatchObject(item.expected)
+  })
+}
