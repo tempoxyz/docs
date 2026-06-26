@@ -93,6 +93,8 @@ Below are some of the key benefits and features of TIP-20 tokens:
 
 Any USD-denominated TIP-20 token can be used to pay transaction fees on Tempo.
 
+Non-USD TIP-20 tokens can still be issued and used for token transfers, role-based operations, transfer policies, memos, and other TIP-20 functionality. They are not transaction fee tokens today.
+
 The [Fee AMM](/docs/protocol/fees/spec-fee-amm) automatically converts your token to the validator's preferred fee token, eliminating the need for users to hold a separate gas token. This feature works natively: no additional infrastructure or integration required.
 
 Full specification of this feature can be found in the [Payment Lanes Specification](/docs/protocol/blockspace/payment-lane-specification).
@@ -142,6 +144,8 @@ A TIP-20 token can declare a currency identifier that identifies the reference a
 
 **The `currency` field identifies the reference asset that 1 unit of the token is designed to be worth** — not what the token is called or what it is denominated in. Two tokens that track the same asset should have the same `currency`. When in doubt, consider that the purpose of this field is to determine what assets a token would trade against on a DEX designed for assets that trade within 2% of a 1:1 price.
 
+Do not set `currency` to `"USD"` to gain fee eligibility or DEX support unless the token actually tracks the US dollar. A token that tracks another fiat currency should use that currency's ISO 4217 code even though non-USD tokens are not fee tokens or tradable on the native DEX today.
+
 #### Guidelines
 
 1. **Tokens that track an asset with an [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) code** — use that code. This includes fiat currencies (`"USD"`, `"EUR"`) as well as commodities (`"XAU"` for gold, `"XAG"` for silver).
@@ -170,7 +174,9 @@ The currency code is **immutable** — it cannot be changed after token creation
 
 TIP-20 tokens can serve as quote tokens in Tempo's decentralized exchange (DEX). When creating trading pairs on the [Stablecoin DEX](/docs/protocol/exchange), TIP-20 tokens function as the quote currency against which other tokens are priced and traded.
 
-This enables efficient stablecoin-to-stablecoin trading and provides optimized routing for liquidity. For example, a USDG TIP-20 token can be paired with other stablecoins, allowing traders to swap between different USD-denominated tokens with minimal slippage through concentrated liquidity pools.
+This currently enables efficient USD stablecoin-to-stablecoin trading and provides optimized routing for liquidity. For example, a USDG TIP-20 token can be paired with other stablecoins, allowing traders to swap between different USD-denominated tokens with minimal slippage through concentrated liquidity pools.
+
+Non-USD TIP-20 tokens also have `quoteToken` metadata, but current native DEX pair creation and swaps only support USD-denominated tokens. See [Quote Tokens](/docs/protocol/exchange/quote-tokens) for the current quote-token rules.
 
 By using TIP-20 tokens as quote tokens, the DEX benefits from the same payment-optimized features like deterministic addresses, currency identifiers, and compliance policies, ensuring secure and efficient exchange operations.
 

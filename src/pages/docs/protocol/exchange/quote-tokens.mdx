@@ -1,5 +1,5 @@
 ---
-description: Quote tokens determine trading pairs on Tempo's DEX. Each TIP-20 specifies a quote token, with pathUSD available as an optional neutral choice.
+description: Quote tokens determine trading pairs on Tempo's DEX. Each TIP-20 specifies a quote token, with pathUSD available as an optional neutral USD choice.
 ---
 
 # Quote Tokens
@@ -16,9 +16,9 @@ pathUSD is issued by Bridge and is backed 1:1 by high-quality USD-denominated re
 
 ### Why pathUSD?
 
-Tempo is designed to be neutral across stablecoin issuers. Rather than defaulting to any single issuer's stablecoin as the quote token, pathUSD provides a neutral option that any token can pair against on Tempo's DEX. This ensures that no single stablecoin issuer has a privileged position in Tempo's liquidity graph and guarantees stablecoin interoperability.
+Tempo is designed to be neutral across stablecoin issuers. Rather than defaulting to any single issuer's stablecoin as the quote token, pathUSD provides a neutral option that any USD token can pair against on Tempo's DEX. This ensures that no single stablecoin issuer has a privileged position in Tempo's liquidity graph and guarantees stablecoin interoperability.
 
-pathUSD is not meant to compete as a consumer-facing stablecoin. Use of pathUSD is optional, and tokens are able to list any other token as their quote token if they choose. pathUSD can also be accepted as a fee token by validators.
+pathUSD is not meant to compete as a consumer-facing stablecoin. Use of pathUSD is optional, and USD tokens are able to list any other USD token as their quote token if they choose. pathUSD can also be accepted as a fee token by validators.
 
 ### Contract
 
@@ -51,6 +51,16 @@ TIP20 token = factory.createToken(
 This means:
 - Your token trades against pathUSD on the exchange.
 - Users can swap between your token and other USD stablecoins that also use pathUSD, or ones connected by a multi-hop path.
+
+### Non-USD Stablecoins
+
+Non-USD TIP-20 tokens also specify `quoteToken()` metadata at issuance. The quote token must be a deployed TIP-20, but current native DEX support is USD-only:
+
+- A `USD` token must choose a `USD` quote token.
+- A non-`USD` token can choose any deployed TIP-20 quote token.
+- Setting a quote token for a non-`USD` token does not create a native DEX FX market or enable same-currency non-USD trading today.
+
+Local-currency issuers can still deploy TIP-20 tokens, mint and burn supply, transfer with memos, and use roles and transfer policies. Choose a deployed TIP-20 that represents your current pricing or routing plan; changing it later requires the TIP-20 quote-token update flow.
 
 ### Tree Structure
 

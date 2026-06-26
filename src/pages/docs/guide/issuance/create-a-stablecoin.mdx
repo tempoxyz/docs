@@ -157,6 +157,32 @@ Tokens can also carry an optional on-chain `logoURI` ([TIP-1026](https://tips.sh
 The `currency` field is **immutable** after token creation and affects fee payment eligibility, DEX routing, and quote token pairing. See [Currency Declaration](/docs/protocol/tip20/overview#currency-declaration) for guidelines on choosing the right value. **Only `USD` stablecoins can be used to pay transaction fees on Tempo.**
 :::
 
+#### Choose currency and quote token
+
+Set `currency` to the reference asset the token tracks, not to the token symbol. For fiat-backed stablecoins, use the ISO 4217 code such as `USD`, `EUR`, `BRL`, or `MXN`. Do not set `currency: 'USD'` unless 1 token is intended to track 1 US dollar.
+
+The SDK defaults `quoteToken` to [`pathUSD`](/docs/protocol/exchange/quote-tokens#pathusd) (`0x20c0000000000000000000000000000000000000`) when omitted. If you override `quoteToken`, it must be an already deployed TIP-20.
+
+| Token you are issuing | Quote token | Factory behavior | Tempo behavior today |
+| --- | --- | --- | --- |
+| `USD` stablecoin | Deployed `USD` TIP-20, such as `pathUSD` | Deploys | Eligible for fee payment; native DEX routing is supported when liquidity exists |
+| `USD` stablecoin | Deployed non-`USD` TIP-20 | Reverts with `InvalidQuoteToken` | Not applicable |
+| Non-`USD` stablecoin | Any deployed TIP-20 | Deploys | Minting, transfers, roles, policies, and memos work; not eligible for fee payment; native DEX trading is not supported today |
+| Any token | Undeployed or non-TIP-20 address | Reverts with `InvalidQuoteToken` | Not applicable |
+
+If you override the SDK default, verify the quote token before deploying:
+
+```bash
+export RPC_URL=https://rpc.moderato.tempo.xyz
+export TIP20_FACTORY=0x20fc000000000000000000000000000000000000
+export QUOTE_TOKEN=0x20c0000000000000000000000000000000000000
+
+cast call $TIP20_FACTORY "isTIP20(address)(bool)" $QUOTE_TOKEN --rpc-url $RPC_URL
+cast call $QUOTE_TOKEN "currency()(string)" --rpc-url $RPC_URL
+```
+
+For a `USD` token, the quote token's `currency()` must return `USD`. For a local-currency token, the quote token selection records your intended pricing/routing metadata, but it does not enable native DEX FX trading today.
+
 <Demo.Container name="Create Form">
   <CreateToken stepNumber={1} last />
 </Demo.Container>
