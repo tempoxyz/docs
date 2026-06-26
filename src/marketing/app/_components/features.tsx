@@ -272,7 +272,7 @@ export const features: Feature[] = [
     heroActions: [
       {
         label: 'Create a stablecoin',
-        href: '/docs/guide/issuance/create-a-stablecoin',
+        href: '/developers/docs/guide/issuance/create-a-stablecoin',
         primary: true,
       },
       {
