@@ -31,6 +31,7 @@ export default defineConfig(({ mode }) => {
       blogPostsPlugin(),
       marketingSearchIndexPlugin({ source: 'vocs' }),
       marketingPages(),
+      developersProxyRouteNormalization(),
       vocs(),
       Icons({ compiler: 'jsx', jsx: 'react' }),
       react(),
@@ -63,6 +64,101 @@ export default defineConfig(({ mode }) => {
 })
 
 const marketingRoutes = ['/', '/build', '/blog', '/performance']
+
+function developersProxyRouteNormalization(): Plugin {
+  return {
+    name: 'tempo-developers-proxy-route-normalization',
+    enforce: 'post',
+    transform(code, id) {
+      if (id !== '\0virtual:vite-rsc-waku/client-entry') return
+
+      return code
+        .replace(
+          "import { Router } from 'waku/router/client';",
+          "import { Router, unstable_parseRoute } from 'waku/router/client';",
+        )
+        .replace(
+          'const rootElement = createElement(StrictMode, null, createElement(Router));',
+          `const developersPrefix = '/developers';
+const shouldUseDevelopersPrefix = () => window.location.pathname === developersPrefix || window.location.pathname.startsWith(developersPrefix + '/');
+const publicDevelopersPath = (path) => {
+  if (path === '/') return developersPrefix;
+  if (path.startsWith(developersPrefix + '/')) return path;
+  return developersPrefix + path;
+};
+const normalizeDevelopersRoute = (route) => {
+  if (route.path === '/developers') return { ...route, path: '/' };
+  if (route.path.startsWith('/developers/')) {
+    return { ...route, path: route.path.slice('/developers'.length) || '/' };
+  }
+  return route;
+};
+const getUnprefixedInternalLink = (event) => {
+  if (!shouldUseDevelopersPrefix()) return;
+  const link = event.target instanceof Element ? event.target.closest('a[href^="/"]') : null;
+  if (!(link instanceof HTMLAnchorElement)) return;
+  const href = link.getAttribute('href');
+  if (!href || href.startsWith('//') || href.startsWith(developersPrefix + '/')) return;
+  if (href.startsWith('/assets/') || href.startsWith('/fonts/') || href.startsWith('/RSC/')) return;
+  return { link, href };
+};
+const originalFetch = window.fetch.bind(window);
+window.fetch = async (input, init) => {
+  const response = await originalFetch(input, init);
+  if (!shouldUseDevelopersPrefix()) return response;
+  const requestUrl = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+  if (!requestUrl.includes('/RSC/')) return response;
+  const clone = response.clone();
+  const contentType = clone.headers.get('content-type') || '';
+  if (!contentType.includes('text/plain')) return response;
+  const text = await clone.text();
+  const normalized = text
+    .replaceAll('route:/developers/', 'route:/')
+    .replaceAll('route:/developers"', 'route:/"')
+    .replaceAll('route:/developers,', 'route:/,')
+    .replaceAll('route:/developers\\n', 'route:/\\n');
+  if (normalized === text) return response;
+  return new Response(normalized, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+};
+document.addEventListener(
+  'click',
+  (event) => {
+    const target = getUnprefixedInternalLink(event);
+    if (!target) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    window.location.assign(publicDevelopersPath(target.href));
+  },
+  true,
+);
+for (const eventName of ['pointerover', 'mouseover']) {
+  document.addEventListener(
+    eventName,
+    (event) => {
+      if (!getUnprefixedInternalLink(event)) return;
+      event.stopImmediatePropagation();
+    },
+    true,
+  );
+}
+
+const initialRoute = normalizeDevelopersRoute(unstable_parseRoute(new URL(window.location.href)));
+const rootElement = createElement(
+  StrictMode,
+  null,
+  createElement(Router, {
+    initialRoute,
+    unstable_routeInterceptor: normalizeDevelopersRoute,
+  }),
+);`,
+        )
+    },
+  }
+}
 
 function isMarketingPath(pathname: string) {
   const normalized = pathname.replace(/\/$/, '') || '/'

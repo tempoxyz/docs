@@ -17,6 +17,20 @@ const GoogleAnalytics = lazy(() => import('../../components/GoogleAnalytics'))
 const PostHogSetup = lazy(() => import('../../components/PostHogSetup'))
 
 if (typeof window !== 'undefined') {
+  const originalFetch = window.fetch.bind(window)
+  window.fetch = (input, init) => {
+    const url =
+      typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+    const rewritten = url
+      .replace(/\/RSC\/R\/developers\.txt(?=($|\?))/, '/RSC/R/_root.txt')
+      .replace(/\/RSC\/R\/developers\//, '/RSC/R/')
+
+    if (rewritten === url) return originalFetch(input, init)
+    if (typeof input === 'string' || input instanceof URL) return originalFetch(rewritten, init)
+
+    return originalFetch(new Request(rewritten, input), init)
+  }
+
   window.addEventListener('vite:preloadError', (event) => {
     const key = `vite:preloadError:${(event as unknown as CustomEvent).detail?.message}`
     if (!sessionStorage.getItem(key)) {
