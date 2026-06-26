@@ -1,76 +1,62 @@
 /**
- * Middleware for tracking AI crawlers server-side.
+ * Server-side tracking for machine-readable docs requests.
  *
- * AI crawlers (GPTBot, ClaudeBot, etc.) don't execute JavaScript,
- * so they're invisible to PostHog's client-side tracking.
- * This middleware runs server-side on every request to capture them.
+ * Crawlers and agent clients do not run browser analytics, so this captures
+ * only high-signal docs consumption paths and official crawler user agents.
  */
 import type { MiddlewareHandler } from 'vocs/server'
+import { classifyDocsRequest } from '../lib/docs-request-classifier'
 
-const AI_CRAWLERS = [
-  'GPTBot',
-  'OAI-SearchBot',
-  'ChatGPT-User',
-  'anthropic-ai',
-  'ClaudeBot',
-  'claude-web',
-  'PerplexityBot',
-  'Perplexity-User',
-  'Google-Extended',
-  'Googlebot',
-  'Bingbot',
-  'Amazonbot',
-  'Applebot',
-  'Applebot-Extended',
-  'FacebookBot',
-  'meta-externalagent',
-  'LinkedInBot',
-  'Bytespider',
-  'DuckAssistBot',
-  'cohere-ai',
-  'AI2Bot',
-  'CCBot',
-  'Diffbot',
-  'omgili',
-  'Timpibot',
-  'YouBot',
-  'MistralAI-User',
-  'GoogleAgent-Mariner',
-]
-
-export default function test(): MiddlewareHandler {
+export default function posthog(): MiddlewareHandler {
   return async (c, next) => {
-    const ua = c.req.header('user-agent') || ''
-    const matchedCrawler = AI_CRAWLERS.find((crawler) => ua.includes(crawler))
-    if (!matchedCrawler) return next()
-
+    const startedAt = performance.now()
     const url = new URL(c.req.url)
+    const userAgent = c.req.header('user-agent') || ''
+    const referer = c.req.header('referer') || c.req.header('referrer')
+    const classification = classifyDocsRequest({
+      path: url.pathname,
+      referer,
+      userAgent,
+    })
+
+    await next()
+
+    if (!classification.shouldTrack) return
+
     const posthogKey = import.meta.env.VITE_POSTHOG_KEY
     const posthogHost = import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com'
 
-    if (!posthogKey) return next()
-
-    const ip = c.req.header('x-forwarded-for')?.split(',')[0]?.trim()
+    if (!posthogKey) return
 
     const event = {
       api_key: posthogKey,
-      event: 'crawler_pageview',
-      distinct_id: `crawler_${matchedCrawler}`,
+      distinct_id: getDistinctId(classification),
+      event: 'docs_request',
       properties: {
-        crawler_name: matchedCrawler,
-        user_agent: ua,
+        site: 'docs',
         path: url.pathname,
-        $current_url: c.req.url,
-        $ip: ip,
+        method: c.req.method,
+        status: c.res.status,
+        duration_ms: Math.round(performance.now() - startedAt),
+        surface: classification.surface,
+        agent_family: classification.agent_family,
+        agent_kind: classification.agent_kind,
+        match_source: classification.match_source,
+        referer_host: classification.referer_host,
+        user_agent: userAgent || undefined,
       },
     }
 
     fetch(`${posthogHost}/capture/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(event),
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
     }).catch(() => {})
-
-    await next()
   }
+}
+
+function getDistinctId(classification: ReturnType<typeof classifyDocsRequest>) {
+  if (classification.agent_family)
+    return `docs:${classification.agent_family}:${classification.agent_kind ?? 'unknown'}`
+  return `docs:${classification.match_source}:${classification.surface}`
 }
