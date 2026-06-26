@@ -1,26 +1,4 @@
 {
-  "rewrites": [
-    {
-      "source": "/developers",
-      "has": [
-        {
-          "type": "host",
-          "value": "tempo-docs-git-revert-573-revert-572-revert-571-86f156-tempoxyz.vercel.app"
-        }
-      ],
-      "destination": "/"
-    },
-    {
-      "source": "/developers/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "tempo-docs-git-revert-573-revert-572-revert-571-86f156-tempoxyz.vercel.app"
-        }
-      ],
-      "destination": "/:path*"
-    }
-  ],
   "redirects": [
     {
       "source": "/",
@@ -294,6 +272,26 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/developers",
+      "has": [
+        {
+          "type": "host",
+          "value": "tempo-docs-git-revert-573-revert-572-revert-571-86f156-tempoxyz.vercel.app"
+        }
+      ],
+      "destination": "/"
+    },
+    {
+      "source": "/developers/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "tempo-docs-git-revert-573-revert-572-revert-571-86f156-tempoxyz.vercel.app"
+        }
+      ],
+      "destination": "/:path*"
+    },
     {
       "source": "/ingest/static/:path(.*)",
       "destination": "https://us-assets.i.posthog.com/static/:path"

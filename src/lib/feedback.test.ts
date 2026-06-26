@@ -64,8 +64,8 @@ describe('normalizeFeedback', () => {
   })
 
   it('requires docs helpful value', () => {
-    expect(() => normalizeFeedback({ source: 'docs', pageUrl: 'https://tempo.xyz/developers/docs' })).toThrow(
-      FeedbackError,
-    )
+    expect(() =>
+      normalizeFeedback({ source: 'docs', pageUrl: 'https://tempo.xyz/developers/docs' }),
+    ).toThrow(FeedbackError)
   })
 })
