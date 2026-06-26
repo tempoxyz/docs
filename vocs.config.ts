@@ -953,7 +953,7 @@ export default defineConfig({
             link: '/docs/guide/node/installation',
           },
           {
-            text: 'Running an RPC Node',
+            text: 'Running RPC and Standby Nodes',
             link: '/docs/guide/node/rpc',
           },
           {
