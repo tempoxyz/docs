@@ -8,7 +8,7 @@
           "value": "tempo-docs-git-revert-573-revert-572-revert-571-86f156-tempoxyz.vercel.app"
         }
       ],
-      "destination": "/developers/",
+      "destination": "/developers/docs",
       "permanent": false
     },
     {
@@ -274,22 +274,14 @@
   "rewrites": [
     {
       "source": "/developers",
-      "has": [
-        {
-          "type": "host",
-          "value": "tempo-docs-git-revert-573-revert-572-revert-571-86f156-tempoxyz.vercel.app"
-        }
-      ],
-      "destination": "/"
+      "destination": "/docs"
+    },
+    {
+      "source": "/developers/",
+      "destination": "/docs"
     },
     {
       "source": "/developers/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "tempo-docs-git-revert-573-revert-572-revert-571-86f156-tempoxyz.vercel.app"
-        }
-      ],
       "destination": "/:path*"
     },
     {
