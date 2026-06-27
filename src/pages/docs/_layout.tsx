@@ -2,7 +2,6 @@
 
 import { lazy, type PropsWithChildren, Suspense } from 'react'
 import DocsHeader from '../../components/DocsHeader'
-import DocsJsonLd from '../../components/DocsJsonLd'
 import DocsSectionNav from '../../components/DocsSectionNav'
 import DocsSidebarDrawer from '../../components/DocsSidebarDrawer'
 import { usePageSettled } from '../../lib/pageSettled'
@@ -42,7 +41,7 @@ if (typeof window !== 'undefined') {
 
 export default function DocsLayout(
   props: PropsWithChildren<{
-    path?: string
+    path: string
     frontmatter?: { interactive?: boolean; mipd?: boolean }
   }>,
 ) {
@@ -51,7 +50,6 @@ export default function DocsLayout(
 
   return (
     <>
-      <DocsJsonLd path={props.path} />
       <DocsHeader />
       <DocsSectionNav />
       <DocsSidebarDrawer />
