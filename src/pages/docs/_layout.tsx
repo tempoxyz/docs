@@ -42,7 +42,7 @@ if (typeof window !== 'undefined') {
 
 export default function DocsLayout(
   props: PropsWithChildren<{
-    path: string
+    path?: string
     frontmatter?: { interactive?: boolean; mipd?: boolean }
   }>,
 ) {
