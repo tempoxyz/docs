@@ -21,8 +21,9 @@ const tempoKnowsAbout = [
 const description =
   'Tempo is a payments-first Layer 1 blockchain incubated by Stripe and Paradigm. Tempo documentation covers stablecoin payments, global payouts, agentic payments, APIs, wallets, and protocol specifications.'
 
-export default function DocsJsonLd(props: { path: string }) {
-  const pathname = props.path.startsWith('/') ? props.path : `/${props.path}`
+export default function DocsJsonLd(props: { path?: string }) {
+  const path = props.path || '/docs'
+  const pathname = path.startsWith('/') ? path : `/${path}`
   const url = `https://docs.tempo.xyz${pathname}`
   const schema = {
     '@context': 'https://schema.org',
