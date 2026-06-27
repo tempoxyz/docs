@@ -25,6 +25,8 @@ import {
 import SearchDialog from './SearchDialog'
 import TempoLogo from './TempoLogo'
 
+const TEMPO_DOCS_URL = 'https://docs.tempo.xyz/docs'
+
 const protocolMenu: MegaMenuData = {
   variant: 'vertical',
   columns: [
@@ -61,7 +63,7 @@ const developersMenu: MegaMenuData = {
         {
           label: 'Docs',
           desc: 'Guides, references & quickstart',
-          href: '/docs',
+          href: TEMPO_DOCS_URL,
           icon: <DocsIcon />,
         },
       ],
@@ -171,7 +173,7 @@ const menu: MenuItem[] = [
   { label: 'Resources', href: '/docs', mega: developersMenu },
   { label: 'Performance', href: '/performance' },
   { label: 'Blog', href: '/blog' },
-  { label: 'Docs', href: '/docs' },
+  { label: 'Docs', href: TEMPO_DOCS_URL },
 ]
 
 // Flatten a mega menu into its leaf links for the mobile accordion.
