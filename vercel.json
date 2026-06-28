@@ -5,6 +5,50 @@
       "has": [
         {
           "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers",
+      "permanent": true
+    },
+    {
+      "source": "/developers",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers",
+      "permanent": true
+    },
+    {
+      "source": "/developers/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
           "value": "faucet.tempo.xyz"
         }
       ],

@@ -14,12 +14,40 @@ const vercelConfig = JSON.parse(
 ) as { redirects: Redirect[] }
 
 const redirects = vercelConfig.redirects.filter((redirect) => !redirect.has)
+const hostRedirects = vercelConfig.redirects.filter((redirect) =>
+  Array.isArray(redirect.has)
+    ? redirect.has.some(
+        (condition) =>
+          typeof condition === 'object' &&
+          condition !== null &&
+          'type' in condition &&
+          'value' in condition &&
+          condition.type === 'host' &&
+          condition.value === 'docs.tempo.xyz',
+      )
+    : false,
+)
 
 function findRedirect(source: string) {
   return redirects.find((redirect) => redirect.source === source)
 }
 
 describe('docs routing redirects', () => {
+  it.each([
+    ['/', 'https://tempo.xyz/developers'],
+    ['/developers', 'https://tempo.xyz/developers'],
+    ['/developers/:path*', 'https://tempo.xyz/developers/:path*'],
+    ['/:path*', 'https://tempo.xyz/developers/:path*'],
+  ])('redirects docs.tempo.xyz%s to %s', (source, destination) => {
+    expect(hostRedirects).toContainEqual(
+      expect.objectContaining({
+        source,
+        destination,
+        permanent: true,
+      }),
+    )
+  })
+
   it.each([
     ['/tools', '/docs/tools'],
     ['/tools/:path*', '/docs/tools/:path*'],
