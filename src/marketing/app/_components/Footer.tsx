@@ -20,7 +20,7 @@ const footerLinkClassName =
 const CONTACT_URL = 'https://tempo.xyz/contact'
 const GITHUB_URL = 'https://github.com/tempoxyz'
 const X_URL = 'https://twitter.com/tempo'
-const TEMPO_DOCS_URL = 'https://docs.tempo.xyz/docs'
+const TEMPO_DOCS_URL = 'https://tempo.xyz/developers/docs/'
 
 function FooterLinkItem({ link }: { link: FooterLink }) {
   return link.href.startsWith('/') ? (
