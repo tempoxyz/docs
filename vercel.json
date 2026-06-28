@@ -55,6 +55,71 @@
       "permanent": true
     },
     {
+      "source": "/api",
+      "destination": "/docs/api",
+      "permanent": true
+    },
+    {
+      "source": "/api/authentication",
+      "destination": "/docs/api/authentication",
+      "permanent": true
+    },
+    {
+      "source": "/api/conventions",
+      "destination": "/docs/api/conventions",
+      "permanent": true
+    },
+    {
+      "source": "/api/errors",
+      "destination": "/docs/api/errors",
+      "permanent": true
+    },
+    {
+      "source": "/api/indexer",
+      "destination": "/docs/api/indexer",
+      "permanent": true
+    },
+    {
+      "source": "/api/indexer-api",
+      "destination": "/docs/api/indexer-api",
+      "permanent": true
+    },
+    {
+      "source": "/api/json-rpc",
+      "destination": "/docs/api/json-rpc",
+      "permanent": true
+    },
+    {
+      "source": "/api/pagination",
+      "destination": "/docs/api/pagination",
+      "permanent": true
+    },
+    {
+      "source": "/api/rate-limits",
+      "destination": "/docs/api/rate-limits",
+      "permanent": true
+    },
+    {
+      "source": "/api/transactions",
+      "destination": "/docs/api/transactions",
+      "permanent": true
+    },
+    {
+      "source": "/api/transactions-and-transfers",
+      "destination": "/docs/api/transactions-and-transfers",
+      "permanent": true
+    },
+    {
+      "source": "/api/transfers",
+      "destination": "/docs/api/transfers",
+      "permanent": true
+    },
+    {
+      "source": "/api/versioning-policy",
+      "destination": "/docs/api/versioning-policy",
+      "permanent": true
+    },
+    {
       "source": "/guide/bridge-usdc-stargate",
       "destination": "/docs/guide/bridge-layerzero",
       "permanent": true
@@ -150,6 +215,16 @@
       "permanent": true
     },
     {
+      "source": "/tools",
+      "destination": "/docs/tools",
+      "permanent": true
+    },
+    {
+      "source": "/tools/:path*",
+      "destination": "/docs/tools/:path*",
+      "permanent": true
+    },
+    {
       "source": "/ecosystem",
       "destination": "/docs/ecosystem",
       "permanent": true
@@ -182,6 +257,11 @@
     {
       "source": "/changelog",
       "destination": "/docs/changelog",
+      "permanent": true
+    },
+    {
+      "source": "/partners",
+      "destination": "/docs/partners",
       "permanent": true
     },
     {
