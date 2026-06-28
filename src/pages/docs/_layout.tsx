@@ -5,6 +5,7 @@ import DocsHeader from '../../components/DocsHeader'
 import DocsSectionNav from '../../components/DocsSectionNav'
 import DocsSidebarDrawer from '../../components/DocsSidebarDrawer'
 import { usePageSettled } from '../../lib/pageSettled'
+import { normalizeRscFetchUrl } from '../../lib/rsc-route-normalization'
 
 const Analytics = lazy(() =>
   import('@vercel/analytics/react').then((module) => ({ default: module.Analytics })),
@@ -21,9 +22,7 @@ if (typeof window !== 'undefined') {
   window.fetch = (input, init) => {
     const url =
       typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
-    const rewritten = url
-      .replace(/\/RSC\/R\/developers\.txt(?=($|\?))/, '/RSC/R/_root.txt')
-      .replace(/\/RSC\/R\/developers\//, '/RSC/R/')
+    const rewritten = normalizeRscFetchUrl(url, window.location.href, window.location.origin)
 
     if (rewritten === url) return originalFetch(input, init)
     if (typeof input === 'string' || input instanceof URL) return originalFetch(rewritten, init)

@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from 'react'
 
-const normalizeProxiedRscFetch = `
+export const normalizeProxiedRscFetch = `
 (() => {
   if (window.__tempoNormalizeProxiedRscFetch) return;
   window.__tempoNormalizeProxiedRscFetch = true;
@@ -11,9 +11,17 @@ const normalizeProxiedRscFetch = `
       : input instanceof URL
         ? input.toString()
         : input.url;
-    const rewritten = url
-      .replace(/\\/RSC\\/R\\/developers\\.txt(?=($|\\?))/, '/RSC/R/_root.txt')
-      .replace(/\\/RSC\\/R\\/developers\\//, '/RSC/R/');
+    const requestUrl = new URL(url, window.location.href);
+    let rewritten = url;
+    if (requestUrl.pathname.startsWith('/RSC/R/')) {
+      const pathname = requestUrl.pathname
+        .replace(/\\/RSC\\/R\\/developers\\.txt$/, '/RSC/R/_root.txt')
+        .replace(/\\/RSC\\/R\\/developers\\//, '/RSC/R/');
+      rewritten = new URL(
+        pathname + requestUrl.search + requestUrl.hash,
+        window.location.origin,
+      ).toString();
+    }
 
     if (rewritten === url) return originalFetch(input, init);
     if (typeof input === 'string' || input instanceof URL) return originalFetch(rewritten, init);
