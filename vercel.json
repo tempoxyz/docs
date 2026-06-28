@@ -207,6 +207,22 @@
   ],
   "rewrites": [
     {
+      "source": "/developers/RSC/R/developers.txt",
+      "destination": "/developers/RSC/R/_root.txt"
+    },
+    {
+      "source": "/developers/RSC/R/developers/:path(.*)",
+      "destination": "/developers/RSC/R/:path"
+    },
+    {
+      "source": "/RSC/R/developers.txt",
+      "destination": "/RSC/R/_root.txt"
+    },
+    {
+      "source": "/RSC/R/developers/:path(.*)",
+      "destination": "/RSC/R/:path"
+    },
+    {
       "source": "/ingest/static/:path(.*)",
       "destination": "https://us-assets.i.posthog.com/static/:path"
     },
