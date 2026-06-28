@@ -5,6 +5,7 @@ import DocsHeader from '../../components/DocsHeader'
 import DocsSectionNav from '../../components/DocsSectionNav'
 import DocsSidebarDrawer from '../../components/DocsSidebarDrawer'
 import { usePageSettled } from '../../lib/pageSettled'
+import { normalizeRscFetchUrl } from '../../lib/rsc-route-normalization'
 
 const Analytics = lazy(() =>
   import('@vercel/analytics/react').then((module) => ({ default: module.Analytics })),
@@ -17,6 +18,18 @@ const GoogleAnalytics = lazy(() => import('../../components/GoogleAnalytics'))
 const PostHogSetup = lazy(() => import('../../components/PostHogSetup'))
 
 if (typeof window !== 'undefined') {
+  const originalFetch = window.fetch.bind(window)
+  window.fetch = (input, init) => {
+    const url =
+      typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+    const rewritten = normalizeRscFetchUrl(url, window.location.href, window.location.origin)
+
+    if (rewritten === url) return originalFetch(input, init)
+    if (typeof input === 'string' || input instanceof URL) return originalFetch(rewritten, init)
+
+    return originalFetch(new Request(rewritten, input), init)
+  }
+
   window.addEventListener('vite:preloadError', (event) => {
     const key = `vite:preloadError:${(event as unknown as CustomEvent).detail?.message}`
     if (!sessionStorage.getItem(key)) {
