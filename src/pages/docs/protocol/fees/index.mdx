@@ -13,7 +13,7 @@ For a stablecoin to be accepted, it must be USD-denominated, issued as a native 
 Tempo currently uses a fixed base fee (rather than a variable base fee as in EIP-1559), set so that a TIP-20 transfer costs less than $0.001. All fees accrue to the validator who proposes the block.
 
 :::info[Dynamic base fee]
-A dynamic base fee can fall when block gas usage is below target and rise back to the cap when the network is busy. See the [T7 network upgrade](/docs/protocol/upgrades/t7) and [dynamic base fee proposal](https://tips.sh/1067-1).
+A dynamic base fee can fall when block gas usage is below target and rise back to the cap when the network is busy. For a 50,000 gas transfer, the base-fee ceiling moves from about $0.001 to a T7 cap of about $0.0006, with a quiet-period floor around $0.00003. See the [T7 network upgrade](/docs/protocol/upgrades/t7) and [dynamic base fee proposal](https://tips.sh/1067-1).
 :::
 
 ## Learn More
