@@ -86,6 +86,53 @@ const cases: ClassificationCase[] = [
     },
   },
   {
+    name: 'Axios docs page request',
+    input: { path: '/docs/api/authentication', userAgent: 'axios/1.7.9' },
+    expected: {
+      agent_family: 'http_client',
+      agent_kind: 'developer_tool',
+      match_source: 'managed_list',
+      shouldTrack: true,
+      surface: 'docs',
+    },
+  },
+  {
+    name: 'Got markdown request',
+    input: {
+      path: '/docs/api/authentication.md',
+      userAgent: 'got (https://github.com/sindresorhus/got)',
+    },
+    expected: {
+      agent_family: 'http_client',
+      agent_kind: 'developer_tool',
+      match_source: 'managed_list',
+      shouldTrack: true,
+      surface: 'markdown',
+    },
+  },
+  {
+    name: 'Python Requests docs page request',
+    input: { path: '/docs/guide/payments/send-a-payment', userAgent: 'python-requests/2.32.3' },
+    expected: {
+      agent_family: 'http_client',
+      agent_kind: 'developer_tool',
+      match_source: 'managed_list',
+      shouldTrack: true,
+      surface: 'docs',
+    },
+  },
+  {
+    name: 'Go HTTP client llms request',
+    input: { path: '/llms.txt', userAgent: 'Go-http-client/2.0' },
+    expected: {
+      agent_family: 'http_client',
+      agent_kind: 'developer_tool',
+      match_source: 'managed_list',
+      shouldTrack: true,
+      surface: 'llms',
+    },
+  },
+  {
     name: 'AI referrer',
     input: { path: '/guide/payments', referer: 'https://chatgpt.com/c/abc' },
     expected: {
@@ -105,17 +152,45 @@ const cases: ClassificationCase[] = [
     },
   },
   {
-    name: 'skill surface with unknown user agent',
+    name: 'skill surface with curl client',
     input: { path: '/SKILL.md', userAgent: 'curl/8.0' },
     expected: {
-      match_source: 'agent_surface',
+      agent_family: 'http_client',
+      agent_kind: 'developer_tool',
+      match_source: 'managed_list',
       shouldTrack: true,
       surface: 'skill',
     },
   },
   {
+    name: 'unknown non-browser docs page request',
+    input: { path: '/docs/api/authentication', userAgent: 'CustomFetcher/0.1' },
+    expected: {
+      agent_family: 'unknown_client',
+      agent_kind: 'unknown_ai',
+      match_source: 'unknown_ua',
+      shouldTrack: true,
+      surface: 'docs',
+    },
+  },
+  {
+    name: 'missing user agent docs page request',
+    input: { path: '/docs/api/authentication' },
+    expected: {
+      agent_family: 'unknown_client',
+      agent_kind: 'unknown_ai',
+      match_source: 'unknown_ua',
+      shouldTrack: true,
+      surface: 'docs',
+    },
+  },
+  {
     name: 'normal human docs page',
-    input: { path: '/guide/payments', userAgent: 'Mozilla/5.0' },
+    input: {
+      path: '/guide/payments',
+      userAgent:
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0 Safari/537.36',
+    },
     expected: {
       agent_kind: 'human',
       match_source: 'none',
