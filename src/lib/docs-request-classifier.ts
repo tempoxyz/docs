@@ -37,6 +37,8 @@ export type DocsRequestMatchSource =
   | 'ai_referrer'
   /** Unknown client requested a machine-readable agent surface. */
   | 'agent_surface'
+  /** Unknown user agent without a known attribution rule. */
+  | 'unknown_ua'
   /** No server-side agent signal matched. */
   | 'none'
 
@@ -92,6 +94,22 @@ const MANAGED_CLIENT_USER_AGENT_RULES: readonly UserAgentRule[] = [
   { token: 'codex-mcp-client/', agent_family: 'openai', agent_kind: 'developer_tool' },
   /** Common Codex MCP workaround UA set manually via http_headers. */
   { token: 'codex-mcp/', agent_family: 'openai', agent_kind: 'developer_tool' },
+  /** Common JavaScript HTTP client used by local agents and scripts. */
+  { token: 'axios/', agent_family: 'http_client', agent_kind: 'developer_tool' },
+  /** Node.js fetch-like HTTP client used by local agents and scripts. */
+  { token: 'node-fetch/', agent_family: 'http_client', agent_kind: 'developer_tool' },
+  /** Node.js HTTP client used by local agents and scripts. */
+  { token: 'got/', agent_family: 'http_client', agent_kind: 'developer_tool' },
+  /** Node.js HTTP client used by local agents and scripts. */
+  { token: 'got ', agent_family: 'http_client', agent_kind: 'developer_tool' },
+  /** CLI HTTP client often used by agents and docs-ingestion scripts. */
+  { token: 'curl/', agent_family: 'http_client', agent_kind: 'developer_tool' },
+  /** Python HTTP client often used by agents and docs-ingestion scripts. */
+  { token: 'python-requests/', agent_family: 'http_client', agent_kind: 'developer_tool' },
+  /** Python HTTP client often used by async agents and docs-ingestion scripts. */
+  { token: 'aiohttp/', agent_family: 'http_client', agent_kind: 'developer_tool' },
+  /** Go default HTTP client used by command-line tooling and agents. */
+  { token: 'Go-http-client/', agent_family: 'http_client', agent_kind: 'developer_tool' },
 ]
 
 /** AI product hosts that can refer humans into the docs after an answer/citation. */
@@ -149,6 +167,17 @@ export function classifyDocsRequest(input: {
     }
   }
 
+  if (surface === 'docs' && isUnknownUserAgent(input.userAgent)) {
+    return {
+      agent_family: 'unknown_client',
+      agent_kind: 'unknown_ai',
+      match_source: 'unknown_ua',
+      referer_host: refererHost,
+      surface,
+      shouldTrack: true,
+    }
+  }
+
   return {
     agent_kind: 'human',
     match_source: 'none',
@@ -188,6 +217,10 @@ function matchUserAgent(userAgent = '') {
   )
 
   if (managedRule) return formatUserAgentMatch(managedRule, 'managed_list')
+}
+
+function isUnknownUserAgent(userAgent = '') {
+  return !userAgent.toLowerCase().includes('mozilla/5.0')
 }
 
 function formatUserAgentMatch(rule: UserAgentRule, matchSource: 'official_ua' | 'managed_list') {
