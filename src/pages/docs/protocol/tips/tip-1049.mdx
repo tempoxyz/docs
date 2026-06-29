@@ -1,0 +1,164 @@
+---
+id: TIP-1049
+title: Admin Access Keys
+description: Introduces a privileged admin key tier that can manage other keys on an account but cannot carry spending limits, call scopes, or expiry.
+authors: Tempo Team
+status: Implemented
+related: TIP-1011, TIP-1020
+protocolVersion: T6
+---
+
+# TIP-1049: Admin Access Keys
+
+## Abstract
+
+Adds an **admin key** tier to the AccountKeychain. Admin keys share the key-management privileges of the root key — they can authorize, revoke, and promote other keys — but they cannot carry spending limits, call scopes, or expiry. This makes it practical to delegate account administration (e.g. to a guardian device or a recovery service) without granting unrestricted signing authority over arbitrary calls.
+
+---
+
+# Specification
+
+## Activation
+
+Admin key support activates at the T6 hardfork.
+
+## Authorizing an admin key
+
+```solidity
+function authorizeAdminKey(
+    address keyId,
+    SignatureType signatureType,
+    bytes32 witness
+) external;
+```
+
+Constraints:
+
+- `keyId` cannot be the account address itself.
+- `keyId` cannot already be authorized (active or revoked) on the account.
+- `signatureType` must be `0` (secp256k1), `1` (P256), or `2` (WebAuthn).
+- The `witness` is burned for replay protection. `bytes32(0)` is a valid witness.
+
+On success, two events are emitted:
+
+```solidity
+/// Existing event — unchanged
+event KeyAuthorized(
+    address indexed account,
+    address indexed publicKey,
+    SignatureType signatureType,
+    uint64 expiry,
+    bytes32 spendingLimitsBitmask,
+    bytes32 allowedCallsBitmask
+);
+
+/// New event added by TIP-1049
+event AdminKeyAuthorized(
+    address indexed account,
+    address indexed publicKey
+);
+```
+
+## Checking admin status
+
+```solidity
+function isAdminKey(address account, address keyId) external view returns (bool);
+```
+
+Returns `true` for:
+
+- The account's **root key** (always admin).
+- Any active, non-revoked key that was authorized as an admin key.
+
+Returns `false` for revoked keys and ordinary (non-admin) active keys.
+
+## Admin key capabilities
+
+| Action | Admin key |
+|---|---|
+| `authorizeKey` | Yes |
+| `authorizeAdminKey` | Yes |
+| `revokeKey` | Yes |
+| Carry `expiry` | No |
+| Carry spending limits | No |
+| Carry call scopes | No |
+| Deploy contracts | No |
+
+Admin keys always have the widest call and spending authority (equivalent to root key) and cannot be narrowed.
+
+## Storage layout
+
+The `AuthorizedKey` slot is a 32-byte value with the following byte layout:
+
+| Byte(s) | Field |
+|---|---|
+| 0 | `signature_type` |
+| 1–8 | `expiry` (always `0` for admin keys) |
+| 9 | `enforce_limits` (always `0` for admin keys) |
+| 10 | `is_revoked` |
+| **11** | **`is_admin`** |
+| 12–31 | Reserved |
+
+## RLP encoding
+
+The keychain transaction RLP field list is:
+
+```
+rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?])
+```
+
+`is_admin` and `account` are trailing optional fields introduced by TIP-1049. Existing decoders that treat the list as fixed-length will ignore them.
+
+## Keychain signature verification (T6)
+
+TIP-1049 adds two new entry points to the [TIP-1020](https://tips.sh/1020) `SignatureVerifier` precompile at `0x5165300000000000000000000000000000000000`:
+
+```solidity
+/// Accepts a signature from any active key (root, admin, or limited).
+function verifyKeychain(
+    address account,
+    bytes32 digest,
+    bytes calldata signature
+) external view returns (bool);
+
+/// Accepts a signature only from the root key or an active admin key.
+function verifyKeychainAdmin(
+    address account,
+    bytes32 digest,
+    bytes calldata signature
+) external view returns (bool);
+```
+
+Both functions revert on malformed signatures. Callers **must** include chain ID, contract address, and account address in the digest to prevent cross-domain replay.
+
+Example digest construction:
+
+```solidity
+bytes32 digest = keccak256(
+    abi.encode(
+        block.chainid,
+        address(this),  // contract address
+        account,        // key owner
+        nonces[account]++,
+        payload
+    )
+);
+require(
+    StdPrecompiles.SIGNATURE_VERIFIER.verifyKeychainAdmin(account, digest, sig),
+    "not an admin key"
+);
+```
+
+---
+
+# Invariants
+
+1. **Admin keys cannot be narrowed** — an admin key always acts with root-equivalent call and spending authority. The `enforce_limits`, `expiry`, and scope fields in its storage slot are always zero and are ignored.
+
+2. **`isAdminKey` includes root** — the root key is always considered an admin key. Callers do not need to special-case root vs. admin.
+
+3. **Witness is burned** — re-submitting the same `(keyId, witness)` pair reverts even if the key was later revoked. Use a fresh witness for each authorization.
+
+4. **Revocation applies to admin keys** — `revokeKey` works on admin keys. After revocation, `isAdminKey` returns `false` and `verifyKeychainAdmin` rejects signatures from the revoked key.
+
+5. **`KeyAuthorized` fields for admin keys** — `expiry`, `spendingLimitsBitmask`, and `allowedCallsBitmask` are all zero in the `KeyAuthorized` event for admin keys. Indexers should use the co-emitted `AdminKeyAuthorized` event to distinguish admin authorizations.
