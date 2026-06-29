@@ -119,7 +119,7 @@ export function T7BenchmarkVisual() {
             </p>
           </div>
           <BeforeAfterRow label="Same maker after cancel" before={2_075_413} after={868_756} />
-          <BeforeAfterRow label="Same maker after full fill" before={1_828_213} after={621_456} />
+          <BeforeAfterRow label="Same maker after filled order" before={1_828_213} after={621_456} />
         </section>
       </div>
     </Container>

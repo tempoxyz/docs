@@ -107,7 +107,7 @@ The DEX benchmark shows why user-level accounting can matter. Fresh order placem
 | Repeat order path | Before | After | Gas saved |
 |---|---:|---:|---:|
 | Same maker after cancel | 2,075,413 | 868,756 | 1,206,657 (-58.1%) |
-| Same maker after full fill | 1,828,213 | 621,456 | 1,206,757 (-66.0%) |
+| Same maker after filled order | 1,828,213 | 621,456 | 1,206,757 (-66.0%) |
 
 The cancellation or fill step does a little extra accounting to remember which maker earned the reusable order-storage benefit. The payoff appears when that same maker places a later eligible order.
 

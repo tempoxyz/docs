@@ -79,7 +79,7 @@ export function StorageSavingsSummary() {
             </p>
           </div>
           <BeforeAfterRow label="After cancel" before={2_075_413} after={868_756} />
-          <BeforeAfterRow label="After full fill" before={1_828_213} after={621_456} />
+          <BeforeAfterRow label="After filled order" before={1_828_213} after={621_456} />
         </section>
 
         <section className="space-y-3">
