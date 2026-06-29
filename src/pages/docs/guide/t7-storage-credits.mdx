@@ -1,10 +1,9 @@
 ---
 title: Storage Savings to Benefit Your Users
 description: Learn how shared contracts can use storage savings to benefit the users who earned them.
-interactive: true
 ---
 
-import { StorageSavingsExplorer } from '../../../components/StorageSavingsExplorer'
+import { StorageSavingsSummary } from '../../../components/StorageSavingsSummary'
 
 # Storage Savings to Benefit Your Users
 
@@ -16,26 +15,18 @@ For partners, the important question is not just "can my contract earn a storage
 Storage credits are part of the T7 network upgrade: testnet rollout is planned for July 2, 2026, and mainnet rollout is planned for July 9, 2026. See the [T7 network upgrade](/docs/protocol/upgrades/t7) for the full scope and release details.
 :::
 
-## DEX benchmark example
+## DEX savings example
 
-The DEX benchmark shows why user-level allocation matters. Fresh order placement stays effectively unchanged, while same-maker reuse becomes much cheaper in the measured lifecycle.
+The DEX benchmark shows why user-level allocation matters. Fresh order placement stays effectively unchanged, while repeat orders from a maker who already earned savings become much cheaper.
 
-| Flow | Before | After | Gas change |
+<StorageSavingsSummary />
+
+| Repeat order path | Before | After | Gas saved |
 |---|---:|---:|---:|
-| Fresh place bid | 2,595,385 | 2,604,066 | +8,681 (+0.3%) |
-| Fresh place ask | 2,348,185 | 2,356,766 | +8,581 (+0.4%) |
-| Cancel bid, earn reusable savings | 304,741 | 361,184 | +56,443 (+18.5%) |
-| **Same maker reuses savings after cancel** | **2,075,413** | **868,756** | **1,206,657 gas saved (-58.1%)** |
-| Full fill, earn reusable savings | 384,497 | 436,040 | +51,543 (+13.4%) |
-| **Same maker reuses savings after full fill** | **1,828,213** | **621,456** | **1,206,757 gas saved (-66.0%)** |
+| Same maker after cancel | 2,075,413 | 868,756 | 1,206,657 (-58.1%) |
+| Same maker after full fill | 1,828,213 | 621,456 | 1,206,757 (-66.0%) |
 
-Fresh wallet flows are effectively unchanged. The credit-earning steps cost more because the DEX records who earned the reusable savings. The benefit appears when the same maker later places another eligible order: the repeat order is about 1.21M gas cheaper.
-
-## Explore the savings pattern
-
-<StorageSavingsExplorer />
-
-The explorer uses the StablecoinDEX T7 benchmark numbers because that is the clearest example today. Use it to understand the pattern, then benchmark the specific partner flow before making claims for a bridge, vault, routing contract, or other shared system.
+The cancellation or fill step does a little extra accounting to remember who earned the reusable savings. The payoff appears when that same maker places a later eligible order.
 
 ## How storage credits work
 

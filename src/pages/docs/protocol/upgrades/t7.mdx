@@ -3,6 +3,8 @@ title: T7 Network Upgrade
 description: Partner-focused overview and rollout dates for the T7 network upgrade, including storage savings, payment-channel savings, dynamic base fee behavior, and TIP-20 rewards deprecation.
 ---
 
+import { T7BenchmarkVisual } from '../../../../components/T7BenchmarkVisual'
+
 # T7 Network Upgrade
 
 T7 makes repeated onchain workflows cheaper and gives partners a clearer fee story for payment and exchange flows. It adds storage savings for DEX order state and TIP-20 payment-channel state, lets the base fee move down when network usage is low, and deprecates new TIP-20 rewards activity.
@@ -117,6 +119,8 @@ Apps that show reward information should keep already-accrued rewards separate f
 ## Benchmark highlights
 
 The [v1.10.1 release notes](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1) include the headline gas benchmarks below. Treat these as protocol-level benchmarks: they show where T7 lowers base fees and storage-related costs, while partner-specific flows should still be tested end to end.
+
+<T7BenchmarkVisual />
 
 | Area | T6 / before | T7 / after | What changes |
 |------|-------------|------------|--------------|
