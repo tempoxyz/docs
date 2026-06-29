@@ -35,7 +35,7 @@ Fresh wallet flows are effectively unchanged. The credit-earning steps cost more
 
 <StorageSavingsExplorer />
 
-The explorer uses the merged StablecoinDEX benchmark numbers because that is the clearest verified example today. Use it to understand the pattern, then benchmark the specific partner flow before making claims for a bridge, vault, routing contract, or other shared system.
+The explorer uses the StablecoinDEX T7 benchmark numbers because that is the clearest example today. Use it to understand the pattern, then benchmark the specific partner flow before making claims for a bridge, vault, routing contract, or other shared system.
 
 ## How storage credits work
 
@@ -132,7 +132,7 @@ When deciding whether a contract can benefit from storage credits, check:
 6. Are there shared internal accounting slots that should not be credited to any one user?
 7. Do gas estimates differ between first-time usage and repeated usage?
 8. Do benchmarks include cross-user cases to make sure credits do not leak?
-9. Are the numbers from a merged benchmark or a partner-specific test, rather than a draft confidence check?
+9. Are the numbers from this DEX example or a partner-specific test, rather than an early confidence check?
 
 ## What not to assume
 
@@ -153,4 +153,4 @@ Do not assume:
 - [Stablecoin DEX Specification](/docs/protocol/exchange/spec)
 - [Contract storage credits proposal (TIP-1060)](https://tips.sh/1060)
 - [StablecoinDEX order storage credits proposal (TIP-1064)](https://tips.sh/1064)
-- [Merged DEX benchmark](https://github.com/tempoxyz/tempo/pull/5903)
+- [v1.10.1 release notes](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1)

@@ -96,9 +96,8 @@ export function StorageSavingsExplorer() {
       }
       footer={
         <span>
-          Uses the merged DEX benchmark in{' '}
-          <a href="https://github.com/tempoxyz/tempo/pull/5903">tempoxyz/tempo#5903</a>. These
-          numbers are for the StablecoinDEX benchmark only.
+          Uses the StablecoinDEX T7 benchmark numbers. These numbers are for the StablecoinDEX
+          benchmark only.
         </span>
       }
     >

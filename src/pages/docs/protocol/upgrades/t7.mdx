@@ -38,7 +38,7 @@ These changes make costs easier to reason about for partners building high-throu
 
 | Partner impact | What changes |
 |----------------|--------------|
-| Active DEX makers can pay much less on repeat order placement | In the merged DEX benchmark, same-maker reuse is about 1.21M gas cheaper after a cancel or full fill. |
+| Active DEX makers can pay much less on repeat order placement | In the T7 DEX benchmark, same-maker reuse is about 1.21M gas cheaper after a cancel or full fill. |
 | Returning users can benefit without first-time flows getting worse | Fresh DEX order placement changes by less than 0.5% in the measured bid and ask flows. |
 | Apps can avoid random gas discounts | Shared contracts can track which user earned credits and spend them only for that same user. |
 | MPP sessions can get cheaper over repeated channel lifecycles | In the release benchmark, channel-reserve open calls are 72.1% lower for the open-existing path and 39.2% lower for the open-first path. |
@@ -128,7 +128,7 @@ The [v1.10.1 release notes](https://github.com/tempoxyz/tempo/releases/tag/v1.10
 
 ### DEX order reuse
 
-For DEX order flows, fresh order placement is effectively unchanged while same-maker credit reuse is about 1.21M gas cheaper in the merged benchmark.
+For DEX order flows, fresh order placement is effectively unchanged while same-maker credit reuse is about 1.21M gas cheaper in the T7 benchmark.
 
 | DEX flow | Before | After | Gas change |
 |----------|-------:|------:|-------:|
