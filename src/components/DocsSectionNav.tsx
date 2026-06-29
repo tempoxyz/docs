@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { useRouter } from 'waku'
 
 type SectionNavItem = {
-  id: 'overview' | 'build' | 'integrate' | 'protocol' | 'tools' | 'node'
+  id: 'overview' | 'build' | 'integrate' | 'protocol' | 'tools' | 'api' | 'node'
   label: string
   href: string
   matches: string[]
@@ -55,7 +55,6 @@ const sectionNavItems: SectionNavItem[] = [
     label: 'Tools & SDKs',
     href: '/docs/tools',
     matches: [
-      '/docs/api',
       '/docs/cli',
       '/docs/developer-tools',
       '/docs/hosted-services',
@@ -64,6 +63,12 @@ const sectionNavItems: SectionNavItem[] = [
       '/docs/tools',
       '/docs/wallet',
     ],
+  },
+  {
+    id: 'api',
+    label: 'API',
+    href: '/docs/api',
+    matches: ['/docs/api'],
   },
   {
     id: 'node',
