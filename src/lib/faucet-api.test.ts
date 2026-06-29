@@ -70,10 +70,12 @@ describe('faucet API', () => {
   })
 
   it('allows docs and Vercel origins for CORS', async () => {
-    const docsResponse = await OPTIONS(requestWithOrigin('https://tempo.xyz'))
+    const tempoResponse = await OPTIONS(requestWithOrigin('https://tempo.xyz'))
+    const docsResponse = await OPTIONS(requestWithOrigin('https://docs.tempo.xyz'))
     const vercelResponse = await OPTIONS(requestWithOrigin('https://docs-git-branch.vercel.app'))
 
-    expect(docsResponse.headers.get('Access-Control-Allow-Origin')).toBe('https://tempo.xyz')
+    expect(tempoResponse.headers.get('Access-Control-Allow-Origin')).toBe('https://tempo.xyz')
+    expect(docsResponse.headers.get('Access-Control-Allow-Origin')).toBe('https://docs.tempo.xyz')
     expect(vercelResponse.headers.get('Access-Control-Allow-Origin')).toBe(
       'https://docs-git-branch.vercel.app',
     )
@@ -81,8 +83,10 @@ describe('faucet API', () => {
 
   it('does not allow arbitrary CORS origins', async () => {
     const response = await OPTIONS(requestWithOrigin('https://example.com'))
+    const prefixResponse = await OPTIONS(requestWithOrigin('https://tempo.xyz.example.com'))
 
     expect(response.headers.get('Access-Control-Allow-Origin')).toBeNull()
+    expect(prefixResponse.headers.get('Access-Control-Allow-Origin')).toBeNull()
   })
 })
 
