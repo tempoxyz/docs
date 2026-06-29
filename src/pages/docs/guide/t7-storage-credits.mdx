@@ -1,13 +1,13 @@
 ---
-title: Storage Credits for Repeat Workflows
+title: Storage Credits for Repeated Workflows
 description: Learn how storage credits lower repeat storage costs, how Refund mode works by default, and when to attribute savings to specific users.
 ---
 
 import { StorageSavingsSummary } from '../../../components/StorageSavingsSummary'
 
-# Storage Credits for Repeat Workflows
+# Storage Credits for Repeated Workflows
 
-Storage credits make repeat storage workflows cheaper. Products can pass those savings to users through lower transaction costs, or explicitly attribute them to the users who earned them. They are useful for repeated business flows like DEX orders: placing an order creates storage, canceling or filling the order clears it, and the same maker may place another order later.
+Storage credits make repeated storage workflows cheaper. Products can pass those savings to users through lower transaction costs, or explicitly attribute them to the users who earned them. They are useful for repeated business flows like DEX orders: placing an order creates storage, canceling or filling the order clears it, and the same maker may place another order later.
 
 T7 keeps fresh storage expensive enough to discourage state-growth spam, while letting contracts reuse value from storage they clear. By default, contracts benefit automatically. If your product needs the savings to follow a specific user, maker, payer, or account, you can add user-level accounting on top.
 
