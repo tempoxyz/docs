@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { developersPath } from '../_lib/developersPaths'
 import FeaturedVisual from '../blog/_components/FeaturedVisual'
 import { formatDate } from '../blog/_lib/categories'
 import { getAllPosts, getFeaturedPost } from '../blog/_lib/posts'
@@ -24,7 +25,7 @@ export default function BlogSection() {
 
       <Reveal className="mt-16">
         <Link
-          href={`/blog/${featured.slug}`}
+          href={developersPath(`/blog/${featured.slug}`)}
           className="group grid border border-line transition-colors hover:bg-surface-block lg:grid-cols-2"
         >
           <div className="relative h-[200px] overflow-hidden border-line border-b lg:order-2 lg:h-auto lg:min-h-[280px] lg:border-b-0 lg:border-l">
@@ -51,7 +52,7 @@ export default function BlogSection() {
             <li key={post.slug}>
               <Reveal delay={i * 50}>
                 <Link
-                  href={`/blog/${post.slug}`}
+                  href={developersPath(`/blog/${post.slug}`)}
                   className="group flex flex-col gap-2 border-line border-b px-5 py-5 transition-colors hover:bg-surface-block lg:flex-row lg:items-center lg:justify-between lg:gap-12 lg:px-8"
                 >
                   <span className="font-sans text-[16px] text-foreground tracking-[0] transition-colors">
@@ -69,7 +70,7 @@ export default function BlogSection() {
         </ul>
         <Reveal>
           <Link
-            href="/blog"
+            href={developersPath('/blog')}
             className="flex items-center justify-center border-line border-b px-5 py-5 font-sans text-[16px] text-foreground tracking-[0] transition-colors hover:bg-surface-block lg:px-8"
           >
             View all blogs

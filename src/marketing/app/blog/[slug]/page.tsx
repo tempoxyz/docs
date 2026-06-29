@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Footer from '../../_components/Footer'
 import Header from '../../_components/Header'
 import Reveal from '../../_components/Reveal'
+import { developersPath } from '../../_lib/developersPaths'
 import { categoryBySlug, formatDate, isNew } from '../_lib/categories'
 import { getPost } from '../_lib/posts'
 
@@ -18,7 +19,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               Post not found
             </h1>
             <Link
-              href="/blog"
+              href={developersPath('/blog')}
               className="font-mono text-[12px] text-foreground/40 uppercase tracking-[0.02em] transition-colors hover:text-foreground"
             >
               ← Blog
@@ -38,7 +39,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         <article className="mx-auto w-full max-w-[760px] px-5 pt-14 lg:pt-20">
           <Reveal>
             <Link
-              href="/blog"
+              href={developersPath('/blog')}
               className="font-mono text-[12px] text-foreground/40 uppercase tracking-[0.02em] transition-colors hover:text-foreground"
             >
               ← Blog

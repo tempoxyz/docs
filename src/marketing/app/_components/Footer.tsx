@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import SimpleIconsGithub from '~icons/simple-icons/github'
 import SimpleIconsX from '~icons/simple-icons/x'
+import { developersPath } from '../_lib/developersPaths'
 import { featurePath } from '../_lib/featurePaths'
 import { TEMPO_SDK_DOCS_URL } from '../_lib/links'
 import EdgeMarkers from './EdgeMarkers'
@@ -72,21 +73,21 @@ const columns: FooterColumn[] = [
     links: [
       {
         label: 'Tempo Docs skill',
-        href: '/docs/guide/using-tempo-with-ai#docs-skill',
+        href: `${developersPath('/docs/guide/using-tempo-with-ai')}#docs-skill`,
       },
-      { label: 'Tempo MCP server', href: 'https://mcp.tempo.xyz' },
+      { label: 'Tempo MCP server', href: developersPath('/docs/guide/using-tempo-with-ai') },
       {
         label: 'Setup docs',
-        href: '/docs/guide/using-tempo-with-ai',
+        href: developersPath('/docs/guide/using-tempo-with-ai'),
       },
     ],
   },
   {
     header: 'Resources',
     links: [
-      { label: 'Blog', href: '/blog' },
-      { label: 'Performance', href: '/performance' },
-      { label: 'Open source', href: '/#open-source' },
+      { label: 'Blog', href: developersPath('/blog') },
+      { label: 'Performance', href: developersPath('/performance') },
+      { label: 'Open source', href: `${developersPath('/')}#open-source` },
       { label: 'Contact', href: CONTACT_URL },
     ],
   },

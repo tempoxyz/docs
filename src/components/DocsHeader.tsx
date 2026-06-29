@@ -17,6 +17,7 @@ type MegaMenuData = { columns: MegaColumn[]; variant?: 'columns' | 'vertical' }
 type MenuItem = { label: string; href: string; mega?: MegaMenuData }
 
 const DOCS_BASE_PATH = '/docs'
+const DEVELOPERS_BASE_PATH = '/developers'
 const TEMPO_AI_GUIDE_URL = `${DOCS_BASE_PATH}/guide/using-tempo-with-ai`
 const TEMPO_DOCS_SKILL_URL = `${TEMPO_AI_GUIDE_URL}#docs-skill`
 const TEMPO_PLUGIN_URL = `${TEMPO_AI_GUIDE_URL}#install-tempo-plugins`
@@ -25,10 +26,10 @@ const TEMPO_SDK_DOCS_URL = `${DOCS_BASE_PATH}/sdk`
 
 function featurePath(slug: string) {
   const featurePaths: Record<string, string> = {
-    transactions: '/build/tempo-transactions',
-    tokens: '/build/tip20-tokens',
+    transactions: `${DEVELOPERS_BASE_PATH}/build/tempo-transactions`,
+    tokens: `${DEVELOPERS_BASE_PATH}/build/tip20-tokens`,
   }
-  return featurePaths[slug] ?? '/build'
+  return featurePaths[slug] ?? DEVELOPERS_BASE_PATH
 }
 
 function isExternal(href: string) {
@@ -358,10 +359,10 @@ const developersMenu: MegaMenuData = {
 }
 
 const menu: MenuItem[] = [
-  { label: 'Build', href: '/#protocol', mega: protocolMenu },
+  { label: 'Build', href: `${DEVELOPERS_BASE_PATH}#protocol`, mega: protocolMenu },
   { label: 'Resources', href: `${DOCS_BASE_PATH}/guide`, mega: developersMenu },
-  { label: 'Performance', href: '/performance' },
-  { label: 'Blog', href: '/blog' },
+  { label: 'Performance', href: `${DEVELOPERS_BASE_PATH}/performance` },
+  { label: 'Blog', href: `${DEVELOPERS_BASE_PATH}/blog` },
   { label: 'Docs', href: DOCS_BASE_PATH },
 ]
 

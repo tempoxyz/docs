@@ -3,6 +3,7 @@
 
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { developersPath } from '../_lib/developersPaths'
 import { linePath } from '../performance/_lib/chart'
 import type { PerfRun } from '../performance/_lib/runs'
 import ArrowUpRight from './ArrowUpRight'
@@ -12,7 +13,7 @@ import { PALETTE } from './palette'
 import Reveal from './Reveal'
 import type { Stat } from './stats'
 
-const PERFORMANCE_PAGE = '/performance'
+const PERFORMANCE_PAGE = developersPath('/performance')
 
 // Sparkline points in a fixed 0–100 viewBox (8% vertical padding). Rendered
 // with preserveAspectRatio="none" + non-scaling strokes, so the same path

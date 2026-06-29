@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AmpLogo, ClaudeLogo, CodexLogo } from '../../../components/AgentLogos'
+import { developersPath } from '../_lib/developersPaths'
 import { featurePath } from '../_lib/featurePaths'
 import { TEMPO_SDK_DOCS_URL } from '../_lib/links'
 import ArrowUpRight from './ArrowUpRight'
@@ -123,7 +124,7 @@ const developersMenu: MegaMenuData = {
   ],
 }
 
-const TEMPO_AI_GUIDE_URL = '/docs/guide/using-tempo-with-ai'
+const TEMPO_AI_GUIDE_URL = developersPath('/docs/guide/using-tempo-with-ai')
 const TEMPO_DOCS_SKILL_URL = `${TEMPO_AI_GUIDE_URL}#docs-skill`
 const TEMPO_PLUGIN_URL = `${TEMPO_AI_GUIDE_URL}#install-tempo-plugins`
 const TEMPO_MCP_URL = 'https://mcp.tempo.xyz'
@@ -169,10 +170,10 @@ function ActiveSquare({ activeKey }: { activeKey: string }) {
 }
 
 const menu: MenuItem[] = [
-  { label: 'Build', href: '/#protocol', mega: protocolMenu },
-  { label: 'Resources', href: '/docs', mega: developersMenu },
-  { label: 'Performance', href: '/performance' },
-  { label: 'Blog', href: '/blog' },
+  { label: 'Build', href: `${developersPath('/')}#protocol`, mega: protocolMenu },
+  { label: 'Resources', href: developersPath('/docs'), mega: developersMenu },
+  { label: 'Performance', href: developersPath('/performance') },
+  { label: 'Blog', href: developersPath('/blog') },
   { label: 'Docs', href: TEMPO_DOCS_URL },
 ]
 

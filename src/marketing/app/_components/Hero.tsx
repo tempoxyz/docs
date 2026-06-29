@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { developersPath } from '../_lib/developersPaths'
 import { featurePath } from '../_lib/featurePaths'
 import ArrowUpRight from './ArrowUpRight'
 import Button from './Button'
@@ -41,7 +42,7 @@ const HERO_PATHS = [
   {
     title: 'Performance at scale',
     desc: 'Throughput that pushes the frontier, with predictably low fees at scale.',
-    href: '/performance',
+    href: developersPath('/performance'),
   },
 ] as const
 

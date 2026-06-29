@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Footer from '../_components/Footer'
 import Header from '../_components/Header'
 import Reveal from '../_components/Reveal'
+import { developersPath } from '../_lib/developersPaths'
 import FeaturedVisual from './_components/FeaturedVisual'
 import PostExplorer from './_components/PostExplorer'
 import { formatDate, isNew } from './_lib/categories'
@@ -26,7 +27,7 @@ export default function BlogPage() {
 
         <Reveal className="px-5 pt-10 lg:px-8">
           <Link
-            href={`/blog/${featured.slug}`}
+            href={developersPath(`/blog/${featured.slug}`)}
             className="group grid border border-line transition-colors hover:bg-surface-block lg:grid-cols-2"
           >
             <div className="relative h-[220px] overflow-hidden border-line border-b lg:order-2 lg:h-auto lg:min-h-[320px] lg:border-b-0 lg:border-l">

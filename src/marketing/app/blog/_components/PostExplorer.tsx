@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import Reveal from '../../_components/Reveal'
+import { developersPath } from '../../_lib/developersPaths'
 import { categories, categoryBySlug, isNew, type PostMeta } from '../_lib/categories'
 
 const filters = [{ slug: 'all' as const, label: 'All' }, ...categories]
@@ -43,7 +44,7 @@ export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
           <li key={post.slug}>
             <Reveal delay={Math.min(i, 6) * 40}>
               <Link
-                href={`/blog/${post.slug}`}
+                href={developersPath(`/blog/${post.slug}`)}
                 className="group flex flex-col gap-2.5 border-line border-b px-5 py-6 transition-colors hover:bg-surface-block lg:px-8"
               >
                 <span className="flex flex-wrap items-center gap-3">
