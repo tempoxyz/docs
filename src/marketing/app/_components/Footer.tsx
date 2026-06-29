@@ -21,7 +21,6 @@ const footerLinkClassName =
 const CONTACT_URL = 'https://tempo.xyz/contact'
 const GITHUB_URL = 'https://github.com/tempoxyz'
 const X_URL = 'https://twitter.com/tempo'
-const TEMPO_DOCS_URL = 'https://docs.tempo.xyz/docs'
 
 function FooterLinkItem({ link }: { link: FooterLink }) {
   return link.href.startsWith('/') ? (
@@ -46,7 +45,7 @@ const columns: FooterColumn[] = [
   {
     header: 'Documentation',
     links: [
-      { label: 'Docs', href: TEMPO_DOCS_URL },
+      { label: 'Docs', href: '/docs' },
       { label: 'Payments guide', href: '/docs/guide/payments' },
       { label: 'Token issuance', href: '/docs/guide/issuance' },
     ],
