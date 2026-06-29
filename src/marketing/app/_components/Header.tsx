@@ -26,7 +26,7 @@ import {
 import SearchDialog from './SearchDialog'
 import TempoLogo from './TempoLogo'
 
-const TEMPO_DOCS_URL = 'https://docs.tempo.xyz/docs'
+const TEMPO_DOCS_URL = '/docs'
 
 const protocolMenu: MegaMenuData = {
   variant: 'vertical',
