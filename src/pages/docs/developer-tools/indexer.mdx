@@ -13,7 +13,7 @@ For developers building on Tempo, Tempo Labs provides a free indexing service bu
 
 Use it when you need block, transaction, log, token, holder, or decoded event data without running your own indexing pipeline.
 
-## Hosted endpoints
+## Hosted `tidx` endpoints
 
 The public hosted endpoints are unauthenticated, read-only, and CORS-enabled.
 
@@ -22,21 +22,21 @@ The public hosted endpoints are unauthenticated, read-only, and CORS-enabled.
 | Mainnet | `https://indexer.tempo.xyz` | `4217` |
 | Testnet | `https://indexer.testnet.tempo.xyz` | `42431` |
 
-### Rate limits
+### Hosted `tidx` rate limits
 
 The public hosted endpoints are rate-limited. Responses include `X-Ratelimit-Limit`, `X-Ratelimit-Remaining`, and `X-Ratelimit-Reset` headers.
 
 Clients should keep queries bounded, include explicit `LIMIT` clauses, avoid polling expensive aggregates, and back off when remaining quota is low.
 
-### Pricing
+### Hosted `tidx` pricing
 
 Requests within the public rate limit are free. When a client exceeds the free quota, the hosted indexer returns an MPP challenge for paid overflow access at `$0.001` per request.
 
 Use an MPP-capable client, such as `tempo request`, for paid overflow traffic. Plain `curl` and browser requests can use the free quota, but they will not automatically pay a `402 Payment Required` challenge.
 
-## Query `tidx`
+## Query Tempo data with `tidx`
 
-### Latest blocks
+### Latest Tempo blocks
 
 ```bash
 curl -G "https://indexer.tempo.xyz/query" \
@@ -45,7 +45,7 @@ curl -G "https://indexer.tempo.xyz/query" \
   --data-urlencode "sql=SELECT num, hash, timestamp FROM blocks ORDER BY num DESC LIMIT 5"
 ```
 
-### Decoded events
+### Decoded Tempo events
 
 ```bash
 curl -G "https://indexer.tempo.xyz/query" \
@@ -55,19 +55,19 @@ curl -G "https://indexer.tempo.xyz/query" \
   --data-urlencode 'sql=SELECT arg0 AS from_address, arg1 AS to_address, arg2 AS value, block_num, tx_hash FROM Transfer ORDER BY block_num DESC LIMIT 5'
 ```
 
-### Health check
+### `tidx` health check
 
 ```bash
 curl "https://indexer.tempo.xyz/health"
 ```
 
-## Interactive example
+## Interactive `tidx` SQL example
 
 Run live SQL against the hosted indexer.
 
 <TidxQuery />
 
-## API reference
+## `tidx` API reference
 
 | Endpoint | Description |
 | --- | --- |
@@ -90,7 +90,7 @@ Run live SQL against the hosted indexer.
 Creating or deleting materialized views is only available from trusted infrastructure. Use the hosted endpoints for read-only queries, or run your own `tidx` instance when you need custom view management.
 :::
 
-## Run your own indexer
+## Run your own Tempo indexer
 
 The [`tidx` repository](https://github.com/tempoxyz/tidx) includes Docker, source build, configuration, CLI, schema, and materialized view docs.
 
@@ -102,7 +102,7 @@ docker run -v $(pwd)/config.toml:/config.toml ghcr.io/tempoxyz/tidx up
 
 See the [`tidx` README](https://github.com/tempoxyz/tidx) for the full setup guide and CLI reference.
 
-## How it works
+## How `tidx` indexes Tempo data
 
 `tidx` writes chain data into two stores:
 
@@ -113,7 +113,7 @@ The `/query` endpoint accepts SQL and can expose decoded events on demand throug
 
 `tidx` also maintains ClickHouse materialized tables for expensive common reads, such as token balances, token holders, supply, approvals, and address activity.
 
-## Next steps
+## Next steps for Tempo indexing
 
 <Cards>
   <Card

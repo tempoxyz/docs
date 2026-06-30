@@ -1,4 +1,5 @@
 ---
+title: Send Parallel Transactions
 description: Submit multiple transactions concurrently using Tempo's expiring nonce system under-the-hood.
 interactive: true
 ---
@@ -14,7 +15,7 @@ import { Cards, Card } from 'vocs'
 
 Tempo enables concurrent transaction execution through its [expiring nonce](/docs/guide/tempo-transaction#expiring-nonces) system. Unlike traditional sequential nonces that require transactions to be processed one at a time, expiring nonces allow multiple transactions to be submitted simultaneously without nonce conflicts. Each transaction uses an independent nonce that automatically expires after a set time window, enabling true parallel execution.
 
-## Demo
+## Parallel transaction demo
 
 By the end of this guide you will understand how to send parallel payments using expiring nonces under-the-hood.
 
@@ -24,11 +25,11 @@ By the end of this guide you will understand how to send parallel payments using
   <SendParallelPayments stepNumber={3} />
 </Demo.Container>
 
-## Steps
+## Parallel transaction implementation steps
 
 ::::steps
 
-### Set up Wagmi
+### Set up Wagmi for parallel transactions
 
 Ensure that you have set up your project with Wagmi, a Tempo chain config, and a wallet connector:
 
@@ -78,7 +79,7 @@ console.log('Transaction 2:', receipt2.transactionHash) // [!code focus]
 
 ::::
 
-## Learning Resources
+## Parallel transaction learning resources
 
 <Cards>
   <Card

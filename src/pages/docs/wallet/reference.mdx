@@ -9,7 +9,7 @@ description: Complete reference for Tempo Wallet CLI, tempo wallet, tempo reques
 
 Manages your onchain identity and provides service discovery for [MPP](https://mpp.dev) endpoints.
 
-### Auth
+### Wallet auth commands
 
 | Command | Description |
 | --- | --- |
@@ -20,7 +20,7 @@ Manages your onchain identity and provides service discovery for [MPP](https://m
 | `tempo wallet whoami` | Print readiness, address, balances, and key state |
 | `tempo wallet whoami --credits` | Show MPP Credits balance |
 
-### Keys
+### Wallet key commands
 
 Each wallet can have multiple access keys with independent spending limits. This is how you constrain what an agent or script can spend.
 
@@ -30,7 +30,7 @@ Each wallet can have multiple access keys with independent spending limits. This
 | `tempo wallet revoke <access-key> --dry-run` | Preview access-key revocation |
 | `tempo wallet revoke <access-key>` | Revoke an access key |
 
-### Funds
+### Wallet funding commands
 
 | Command | Description |
 | --- | --- |
@@ -41,7 +41,7 @@ Each wallet can have multiple access keys with independent spending limits. This
 | `tempo wallet transfer <amount> <token> <to> --dry-run` | Preview a token transfer |
 | `tempo wallet transfer --credits --mpp-challenge-file <file>` | Pay a captured MPP challenge with credits |
 
-### Services
+### Wallet service commands
 
 The service directory indexes [MPP](https://mpp.dev)-registered providers. Each service entry includes endpoint URLs, HTTP methods, pricing, request schemas, payment mode, and credit support when available.
 
@@ -51,7 +51,7 @@ The service directory indexes [MPP](https://mpp.dev)-registered providers. Each 
 | `tempo wallet services --search <query>` | Filter services by keyword |
 | `tempo wallet services <id>` | Show a service's endpoints, methods, and request schemas |
 
-### Sessions
+### Wallet session commands
 
 Sessions are the local state for [pay-as-you-go](/docs/guide/machine-payments/pay-as-you-go) payment channels. Tempo Wallet CLI tracks them locally and can reconcile against onchain state.
 
@@ -84,7 +84,7 @@ A curl-like HTTP client that handles [MPP](https://mpp.dev) payment negotiation 
 | `tempo request <url> -H 'Header: Value'` | Add a custom header |
 | `tempo request -D <file> <url>` | Write response headers to a file |
 
-## Global flags
+## Tempo Wallet global flags
 
 | Flag | Scope | Description |
 | --- | --- | --- |
@@ -95,7 +95,7 @@ A curl-like HTTP client that handles [MPP](https://mpp.dev) payment negotiation 
 | `--describe` | supported commands | Output command schema as JSON for programmatic tooling |
 | `--schema` | supported built-in setup commands | Output command schema for programmatic tooling |
 
-## Source
+## Tempo Wallet source
 
 - Repository: [`tempoxyz/wallet-cli`](https://github.com/tempoxyz/wallet-cli)
 - Full help: `tempo wallet --help`, `tempo request --help`

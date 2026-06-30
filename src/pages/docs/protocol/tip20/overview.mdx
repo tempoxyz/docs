@@ -1,4 +1,5 @@
 ---
+title: TIP-20 Tokens
 description: TIP-20 tokens are Tempo's native token standard for stablecoins with built-in fee payment, payment lanes, transfer memos, and compliance policies.
 ---
 
@@ -149,7 +150,7 @@ A TIP-20 token can declare a currency identifier that identifies the reference a
 3. **Tokens denominated in but not pegged to a currency** — do **not** use that currency's code. A tokenized gold product priced in USD should not use `"USD"`, because 1 unit is not designed to be worth 1 USD.
 4. **Tokens with no reference asset** — if a token does not track any external asset (e.g. a governance or utility token), use its own symbol as the currency.
 
-#### Examples
+#### Currency declaration examples
 
 | Token | Tracks | `currency` |
 |-------|--------|------------|

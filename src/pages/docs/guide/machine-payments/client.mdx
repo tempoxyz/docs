@@ -11,7 +11,7 @@ Polyfill `fetch` to handle `402` responses. Your existing code works unchanged â
 
 ::::steps
 
-### Install dependencies
+### Install MPP client dependencies
 
 :::code-group
 ```bash [npm]
@@ -25,7 +25,7 @@ bun add mppx viem
 ```
 :::
 
-### Define an account
+### Define the MPP payer account
 
 ```ts
 import { privateKeyToAccount } from 'viem/accounts'
@@ -37,7 +37,7 @@ const account = privateKeyToAccount('0xabcâ€¦123')
 With Tempo, you can also use passkey or WebCrypto signing.
 :::
 
-### Create payment handler
+### Create the MPP payment handler
 
 Call `Mppx.create` at startup. This polyfills `fetch` to automatically handle `402` payment challenges.
 
@@ -65,7 +65,7 @@ const response = await mppx.fetch('https://api.example.com/resource')
 ```
 :::
 
-### Request protected resources
+### Request MPP-protected resources
 
 Use `fetch`. Payment happens when a server returns `402`.
 
@@ -75,9 +75,9 @@ const response = await fetch('https://api.example.com/resource')
 
 ::::
 
-## Learn more
+## Advanced MPP client patterns
 
-### Wagmi
+### Use MPP with Wagmi
 
 You can inject a [Wagmi](https://wagmi.sh) connector into Mppx by passing the `getConnectorClient` function.
 
@@ -111,7 +111,7 @@ export const config = createConfig({
 
 :::
 
-### Per-request accounts
+### Use per-request payer accounts
 
 Pass accounts on individual requests instead of at setup:
 
@@ -131,7 +131,7 @@ const response = await mppx.fetch('https://api.example.com/resource', {
 })
 ```
 
-### Manual payment handling
+### Handle MPP payments manually
 
 Use `Mppx.create` for full control over the payment flow:
 
@@ -161,7 +161,7 @@ if (response.status === 402) {
 }
 ```
 
-### Payment receipts
+### Read MPP payment receipts
 
 On success, the server returns a `Payment-Receipt` header:
 
@@ -178,7 +178,7 @@ console.log(receipt.reference)
 // 0xtx789abc...
 ```
 
-## Next steps
+## Next steps for MPP clients
 
 <Cards>
   <Card

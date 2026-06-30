@@ -1,4 +1,5 @@
 ---
+title: Manage Your Stablecoin
 description: Configure stablecoin permissions, supply limits, and compliance policies. Grant roles, set transfer policies, and control pause/unpause functionality.
 interactive: true
 ---
@@ -23,19 +24,19 @@ Configure your stablecoin's permissions, supply limits, and compliance policies 
 
 TIP-20 tokens use a role-based access control system that allows you to delegate different administrative functions to different addresses. For detailed information about the role system, see the [TIP-20 specification](/docs/protocol/tip20/spec#role-based-access-control).
 
-## Steps
+## Stablecoin management steps
 
 In this guide, we'll walk through how to assign and check the **`issuer`** role, but the process is identical for other roles like `pause`, `unpause`, `burnBlocked`, and `defaultAdmin`.
 
 ::::steps
 
-### Setup
+### Set up stablecoin management
 
 Before you can manage roles on your stablecoin, you need to create one. Follow the [Create a Stablecoin](/docs/guide/issuance/create-a-stablecoin) guide to deploy your token.
 
 Once you've created your token, you can proceed to grant roles to specific addresses.
 
-### Grant Roles to an Address
+### Grant stablecoin roles to an address
 
 Assign roles to specific addresses to delegate token management capabilities.
 
@@ -98,7 +99,7 @@ export const config = createConfig({
 
 :::
 
-### Check if an Address Has a Role
+### Check stablecoin roles for an address
 
 Use `hasRole` to verify whether an address has been granted a specific role.
 
@@ -175,7 +176,7 @@ export const config = createConfig({
 
 :::
 
-### Revoke the Issuer Role
+### Revoke the stablecoin issuer role
 
 Revoke roles from addresses when you need to remove their permissions.
 
@@ -288,13 +289,13 @@ export const config = createConfig({
 
 ::::
 
-## Recipes
+## Stablecoin management recipes
 
-### Set the Token Logo
+### Set the stablecoin logo
 
 Set or update the token's on-chain `logoURI` so wallets and explorers can read the icon directly from the token contract via `logoURI()`. This requires the **`DEFAULT_ADMIN_ROLE`** and is done by calling `setLogoURI(string newLogoURI)` on the token ([TIP-1026](https://tips.sh/1026)). For the recommended format, use a square, rasterized PNG or WebP (max 256 bytes; `https`, `http`, `ipfs`, or `data` scheme).
 
-### Set Supply Cap
+### Set the stablecoin supply cap
 
 Limit the maximum total supply of your token. Setting supply caps requires the **`DEFAULT_ADMIN_ROLE`**. The new cap cannot be less than the current total supply.
 
@@ -359,7 +360,7 @@ export const config = createConfig({
 
 :::
 
-### Configure Transfer Policies
+### Configure stablecoin transfer policies
 
 Control who can send and receive your stablecoin for compliance and regulatory requirements. Setting transfer policies requires the **`DEFAULT_ADMIN_ROLE`**.
 
@@ -466,7 +467,7 @@ export const config = createConfig({
 
 :::
 
-### Pause and Unpause Token Transfers
+### Pause and unpause stablecoin transfers
 
 Temporarily halt all token transfers during emergency situations or maintenance windows. Pausing transfers requires the **`PAUSE_ROLE`**. Unpausing transfers requires the **`UNPAUSE_ROLE`**.
 
@@ -544,7 +545,7 @@ export const config = createConfig({
 
 :::
 
-### Using the Burn Blocked Role
+### Use the stablecoin burn-blocked role
 
 The Burn Blocked role allows your team to burn tokens from blocked or frozen addresses. This is useful for regulatory compliance when you need to remove tokens from addresses that violate terms of service or legal requirements.
 
@@ -616,21 +617,21 @@ export const config = createConfig({
 
 :::
 
-## Best Practices
+## Stablecoin management best practices
 
-### Role Separation
+### Stablecoin role separation
 
 Use different addresses for different roles to enhance security. For example, assign the issuer role to your treasury address for minting, and the pause role to your security team for emergency controls.
 
-### Event Monitoring
+### Stablecoin event monitoring
 
 Monitor onchain events for role changes, mints, burns, and administrative actions to maintain visibility into token operations and detect unauthorized activities.
 
-### Emergency Procedures
+### Stablecoin emergency procedures
 
 Ensure pause and unpause roles are assigned to trusted addresses and that your team has documented procedures for responding to security incidents requiring token transfers to be halted.
 
-## Learning Resources
+## Stablecoin management learning resources
 
 <Cards>
   <Card

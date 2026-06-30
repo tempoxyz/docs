@@ -13,7 +13,7 @@ Use the Tempo API for indexed chain data, readable account activity, token metad
 The Tempo API is under active development. Endpoints are not yet stable and may change without notice.
 :::
 
-## Getting Started
+## Start with the Tempo API
 
 Every endpoint is served over HTTPS from `https://api.tempo.xyz` under the `/v1` prefix. Most read endpoints are public, so you can make your first request without any credentials:
 
@@ -23,7 +23,7 @@ curl 'https://api.tempo.xyz/v1/blocks'
 
 The same base URL and credentials give you access to three surfaces:
 
-- [**REST API**](#api-endpoints): typed endpoints for indexed chain data such as blocks, transactions, tokens, balances, transfers, and receipts.
+- [**REST API**](#tempo-rest-api-endpoints): typed endpoints for indexed chain data such as blocks, transactions, tokens, balances, transfers, and receipts.
 
   ```bash
   curl 'https://api.tempo.xyz/v1/addresses/0x.../balances'
@@ -58,17 +58,17 @@ Public access lets you try the API and serve low-volume reads, and [MPP](/docs/a
 API keys are only available on request. [Contact us](https://tempo.xyz/contact/) to learn more.
 :::
 
-## Example
+## Try a Tempo API request
 
 Check out an endpoint below and click "Try" to run it directly against the API. For example, fetch the token balances for an address:
 
 <OpenApi.Playground operationId="getAddressBalances" hideQueryParams />
 
-## API Endpoints
+## Tempo REST API endpoints
 
 <OpenApi.Endpoints path="/docs/api" />
 
-## Next Steps
+## Next API integration steps
 
 <Cards>
   <Card

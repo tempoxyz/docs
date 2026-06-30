@@ -1,4 +1,5 @@
 ---
+title: Accept a Payment
 description: Accept stablecoin payments in your application. Verify transactions, listen for transfer events, and reconcile payments using memos.
 interactive: true
 ---
@@ -13,7 +14,7 @@ import { Tabs, Tab } from 'vocs'
 
 Accept stablecoin payments in your application. Learn how to receive payments, verify transactions, and reconcile payments using memos.
 
-## Receiving Payments
+## Receive stablecoin payments
 
 Payments are automatically credited to the recipient's address when a transfer is executed. You don't need to do anything special to "accept" a payment, it happens automatically onchain.
 
@@ -24,11 +25,11 @@ In this basic receiving demo you can see the balances update after you add funds
   <AddFunds stepNumber={2} last />
 </Demo.Container>
 
-## Verifying Payments
+## Verify stablecoin payments
 
 Check if a payment has been received by querying the token balance or listening for transfer events:
 
-### Check Balance
+### Check receiver token balance
 
 <Tabs stateKey="library">
   <Tab title="Viem">
@@ -179,7 +180,7 @@ Check if a payment has been received by querying the token balance or listening 
   </Tab>
 </Tabs>
 
-### Listen for Transfer Events
+### Listen for TIP-20 transfer events
 
 <Tabs stateKey="library">
   <Tab title="Viem">
@@ -613,7 +614,7 @@ const { receipt } = await client.dex.sellSync({
 })
 ```
 
-## Next Steps
+## Next steps for accepting payments
 
 - **[Send a payment](/docs/guide/payments/send-a-payment)** to learn how to send payments
 - Learn more about [Exchange](/docs/guide/stablecoin-dex) for cross-stablecoin payments

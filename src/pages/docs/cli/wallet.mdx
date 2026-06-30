@@ -13,13 +13,13 @@ Tempo Wallet CLI is the command-line way to use [Tempo Wallet](https://wallet.te
   <Card
     title="Download"
     description="Install the Tempo launcher and wallet extensions"
-    to="#download"
+    to="#download-the-tempo-wallet-cli"
     icon="lucide:download"
   />
   <Card
     title="Authenticate"
     description="Connect to your Tempo Wallet"
-    to="#authenticate"
+    to="#authenticate-with-tempo-wallet-cli"
     icon="lucide:log-in"
   />
   <Card
@@ -37,7 +37,7 @@ Tempo Wallet CLI is the command-line way to use [Tempo Wallet](https://wallet.te
   <Card
     title="Add Funds"
     description="Fund your wallet or transfer tokens"
-    to="#add-funds"
+    to="#add-wallet-funds"
     icon="lucide:plus-circle"
   />
   <Card
@@ -54,7 +54,7 @@ Tempo Wallet CLI is the command-line way to use [Tempo Wallet](https://wallet.te
   />
 </Cards>
 
-## Download
+## Download the Tempo Wallet CLI
 
 ```bash
 curl -fsSL https://tempo.xyz/install | bash
@@ -62,7 +62,7 @@ curl -fsSL https://tempo.xyz/install | bash
 
 The launcher manages `tempo wallet` and `tempo request` extensions. To update later, run `tempoup`. Verify with `tempo --version`.
 
-## Authenticate
+## Authenticate with Tempo Wallet CLI
 
 ```bash
 tempo wallet login
@@ -115,7 +115,7 @@ tempo wallet revoke <ACCESS_KEY_ADDRESS>
 
 Each wallet can have multiple access keys with independent spending limits. Use scoped keys to constrain what an agent or script can spend, and revoke keys that are stale or no longer needed.
 
-## Add funds
+## Add wallet funds
 
 ```bash
 tempo wallet fund
@@ -197,9 +197,9 @@ tempo wallet -t transfer --credits --dry-run --mpp-challenge-file "$headers"
 tempo wallet -t transfer --credits --mpp-challenge-file "$headers"
 ```
 
-## Command reference
+## Tempo Wallet CLI command reference
 
-### Authentication
+### Wallet authentication commands
 
 | Command | Description |
 | --- | --- |
@@ -210,7 +210,7 @@ tempo wallet -t transfer --credits --mpp-challenge-file "$headers"
 | `tempo wallet whoami` | Print readiness, address, balances, and key state |
 | `tempo wallet whoami --credits` | Print MPP Credits balance |
 
-### Keys
+### Wallet key commands
 
 | Command | Description |
 | --- | --- |
@@ -218,7 +218,7 @@ tempo wallet -t transfer --credits --mpp-challenge-file "$headers"
 | `tempo wallet revoke <access-key> --dry-run` | Preview access-key revocation |
 | `tempo wallet revoke <access-key>` | Revoke an access key |
 
-### Funds
+### Wallet funding commands
 
 | Command | Description |
 | --- | --- |
@@ -228,7 +228,7 @@ tempo wallet -t transfer --credits --mpp-challenge-file "$headers"
 | `tempo wallet transfer <amount> <token> <to>` | Transfer tokens to another address |
 | `tempo wallet transfer --credits --mpp-challenge-file <file>` | Pay an MPP challenge with credits |
 
-### Services
+### Wallet service discovery commands
 
 | Command | Description |
 | --- | --- |
@@ -236,7 +236,7 @@ tempo wallet -t transfer --credits --mpp-challenge-file "$headers"
 | `tempo wallet services --search <query>` | Filter services by keyword |
 | `tempo wallet services <id>` | Show endpoints, methods, and request schemas |
 
-### Sessions
+### Wallet session commands
 
 | Command | Description |
 | --- | --- |
@@ -246,14 +246,14 @@ tempo wallet -t transfer --credits --mpp-challenge-file "$headers"
 | `tempo wallet sessions close --orphaned` | Close sessions whose counterparty is unreachable |
 | `tempo wallet sessions close --finalize` | Finalize channels pending close |
 
-### Advanced
+### Advanced wallet commands
 
 | Command | Description |
 | --- | --- |
 | `tempo wallet debug` | Collect debug info for support |
 | `tempo wallet completions <shell>` | Generate shell completions |
 
-## Learn more
+## Learn more about Tempo Wallet CLI
 
 <Cards>
   <Card

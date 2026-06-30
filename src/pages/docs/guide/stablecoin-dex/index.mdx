@@ -1,4 +1,5 @@
 ---
+title: Exchange Stablecoins
 description: Trade between stablecoins on Tempo's enshrined DEX. Execute swaps, provide liquidity, and query the onchain orderbook for optimal pricing.
 ---
 
@@ -6,28 +7,37 @@ import { Cards, Card } from 'vocs'
 
 # Exchange Stablecoins
 
-Trade between stablecoins on Tempo's enshrined decentralized exchange (DEX). The DEX enables optimal pricing for cross-stablecoin payments while minimizing chain load.
+Trade between stablecoins on Tempo's enshrined decentralized exchange (DEX). Start with quote-token behavior, then execute swaps, provide liquidity, or manage the fee-liquidity path for a stablecoin.
+
+## Stablecoin Exchange Paths
 
 <Cards>
   <Card
-    description="Learn about pathUSD, the root quote token that powers stablecoin interoperability"
+    description="Learn about pathUSD, the root quote token that powers stablecoin interoperability."
     to="/docs/protocol/exchange/quote-tokens#pathusd"
     icon="lucide:coins"
-    title="pathUSD"
+    title="Understand pathUSD"
   />
 
   <Card
-    description="Execute swaps between stablecoins"
+    description="Execute swaps between stablecoins."
     to="/docs/guide/stablecoin-dex/executing-swaps"
     icon="lucide:arrow-left-right"
-    title="Executing Swaps"
+    title="Execute Stablecoin Swaps"
   />
 
   <Card
-    description="Provide liquidity by placing limit orders or flip orders in the orderbook"
+    description="Provide liquidity by placing limit orders or flip orders in the orderbook."
     to="/docs/guide/stablecoin-dex/providing-liquidity"
     icon="lucide:droplet"
-    title="Providing Liquidity"
+    title="Provide Stablecoin Liquidity"
+  />
+
+  <Card
+    description="Keep fee pools balanced so users can pay transaction fees with your stablecoin."
+    to="/docs/guide/stablecoin-dex/managing-fee-liquidity"
+    icon="lucide:badge-dollar-sign"
+    title="Manage Fee Liquidity"
   />
 
 </Cards>

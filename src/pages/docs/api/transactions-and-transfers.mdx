@@ -11,7 +11,7 @@ Transactions and transfers are the two most common resources in the Tempo API, a
 **Transactions vs. transfers** — a transaction is what a user *submits*; transfers are what *happens* when it executes. One transaction can produce zero, one, or many token transfers. Use [`/v1/transactions`](/docs/api/transactions) to inspect submitted transactions and their outcomes, and [`/v1/transfers`](/docs/api/transfers) to list the token movements that resulted.
 :::
 
-## The model
+## Tempo transaction and transfer model
 
 - A **transaction** is what a user submits to Tempo: a signed envelope that moves value or calls a contract. It may produce zero, one, or many token transfers. Query [`/v1/transfers`](/docs/api/transfers) to list the token movements it caused.
 - A **transfer** is an effect of transaction execution: a TIP-20 token moved from one account to another. Multiple transfers can come from a single transaction, and some transactions produce no transfers at all.
@@ -29,7 +29,7 @@ A transaction that calls a contract might emit several transfers (for example, a
                                                   resolves back to its transaction
 ```
 
-## When to use which
+## When to use transactions or transfers
 
 | | Transaction | Transfer |
 | --- | --- | --- |

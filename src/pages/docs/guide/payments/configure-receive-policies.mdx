@@ -26,7 +26,7 @@ For example, receive policies are useful when:
 - a regulated entity that only wants to receive from addresses held by individuals it has KYC'ed
 - an orchestrator or exchange that only wants specific tokens sent to its deposit addresses
 
-## Know the behavior
+## Understand receive policy behavior
 
 If an address has no receive policy, all transfers and mints are allowed by the receive-policy layer.
 
@@ -140,7 +140,7 @@ If `to` is a TIP-1022 virtual address, it is resolved to its master address befo
 
 If resolution fails, the operation reverts as before. If the transfer or mint is blocked, the receipt is recorded for the master address and preserves the original `to` for attribution.
 
-## Learn more
+## Learn more about receive policies
 
 <Cards>
   <Card

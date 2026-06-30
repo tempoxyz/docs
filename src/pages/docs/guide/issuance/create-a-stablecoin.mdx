@@ -1,4 +1,5 @@
 ---
+title: Create a Stablecoin
 description: Create your own stablecoin on Tempo using TIP-20 tokens. Deploy tokens with built-in compliance features and role-based permissions.
 interactive: true
 ---
@@ -15,7 +16,7 @@ Create your own stablecoin on Tempo using [TIP-20 Tokens](/docs/protocol/tip20/o
 TIP-20 tokens are designed specifically for payments with built-in compliance features, role-based permissions,
 and integration with Tempo's payment infrastructure.
 
-## Demo
+## Stablecoin creation demo
 
 By the end of this guide, you will be able to create a stablecoin on Tempo.
 
@@ -25,11 +26,11 @@ By the end of this guide, you will be able to create a stablecoin on Tempo.
   <CreateToken stepNumber={3} last />
 </Demo.Container>
 
-## Steps
+## Stablecoin creation steps
 
 ::::steps
 
-### Set up Wagmi
+### Set up Wagmi for stablecoin creation
 
 Ensure that you have set up your project with Wagmi, a Tempo chain config, and a wallet connector:
 
@@ -37,7 +38,7 @@ Ensure that you have set up your project with Wagmi, a Tempo chain config, and a
 - [TypeScript SDK](/docs/sdk/typescript)
 - [Wallet integration](/docs/quickstart/wallet-developers)
 
-### Add testnet funds¹
+### Add testnet funds for deployment¹
 
 Before we send off a transaction to deploy our stablecoin to the Tempo testnet, we need to make sure our account is funded with a stablecoin to cover the transaction fee. 
 
@@ -91,7 +92,7 @@ export const config = createConfig({
 started quickly. For production, you will need to onramp & fund your account manually.
 :::
 
-### Add form fields
+### Add stablecoin form fields
 
 Now that we have some funds to cover the transaction fee in our account, we can create a stablecoin.
 
@@ -145,7 +146,7 @@ export const config = createConfig({
 
 :::
 
-### Add submission logic
+### Add stablecoin deployment logic
 
 Now that we have some input fields, we need to add some logic to handle the submission of the form to create the stablecoin.
 
@@ -213,7 +214,7 @@ export const config = createConfig({
 
 :::
 
-### Add success state
+### Add stablecoin creation success state
 
 Now that users can submit the form and create a stablecoin, let's add a basic success state to display 
 the name of the stablecoin and a link to the transaction receipt.
@@ -279,18 +280,18 @@ export const config = createConfig({
 
 :::
 
-### Next steps
+### Next steps after creating a stablecoin
 
 Now that you have created your first stablecoin, you can now:
 - [Add your token to the Token List](/docs/quickstart/tokenlist#adding-a-new-token) so it appears in wallets, explorers, and other apps on Tempo
-- learn the [Best Practices](#best-practices) below
+- learn the [Best Practices](#stablecoin-creation-best-practices) below
 - follow a guide on how to [mint](/docs/guide/issuance/mint-stablecoins) and [more](/docs/guide/issuance/manage-stablecoin) with your stablecoin.
 
 ::::
 
-## Best Practices
+## Stablecoin creation best practices
 
-### Loading State
+### Stablecoin creation loading state
 
 When the user is creating a stablecoin, we should show loading state to indicate that the process is happening.
 
@@ -305,7 +306,7 @@ We can use the `isPending` property from the `useCreateSync` hook to show pendin
 </button>
 ```
 
-### Error Handling
+### Stablecoin creation error handling
 
 If an error unexpectedly occurs, we should display an error message to the user.
 
@@ -323,7 +324,7 @@ export function CreateStablecoin() {
 }
 ```
 
-## Learning Resources
+## Stablecoin creation learning resources
 
 <Cards>
   <Card

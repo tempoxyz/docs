@@ -194,7 +194,7 @@ The MCP server only helps with discovery and planning. The target service's runt
 
 ::::
 
-## Example recipes
+## MPP service discovery example recipes
 
 | Agent task | Start with | Then call |
 | --- | --- | --- |
@@ -204,7 +204,7 @@ The MCP server only helps with discovery and planning. The target service's runt
 | Map a `402` recipient back to services | `get_services_by_recipient` | `get_offers` and `get_service` for the matching provider |
 | Build custom catalog analytics | `get_facets` and `get_catalog_status` | Fetch [`https://mpp.dev/api/services`](https://mpp.dev/api/services) directly |
 
-## Agent prompts
+## Agent prompts for MPP discovery
 
 Give your agent a task and tell it to use the services MCP server first:
 
@@ -227,7 +227,7 @@ services, why each matched, whether pricing is fixed or dynamic, and the next MC
 tool call you would make before constructing the HTTP request.
 ```
 
-## MCP tools
+## MCP tools for MPP service discovery
 
 | Tool | Purpose |
 | --- | --- |
@@ -249,7 +249,7 @@ Use the web directory when a human is exploring the catalog. Use the public API 
 
 For execution, call services directly with [`tempo request`](/docs/cli/request), the [MPP client quickstart](/docs/guide/machine-payments/client), or another MPP-capable client. Discovery narrows the choice; the service's runtime `402` challenge confirms the exact payment terms.
 
-## Next steps
+## Next steps for MPP service discovery
 
 <Cards>
   <Card

@@ -9,15 +9,15 @@ import { Card, Cards } from 'vocs'
 
 Let your agents enrich contacts, find emails, profile companies, and search LinkedIn — pay per lookup with stablecoins on Tempo. No API keys, no monthly minimums, no seat-based pricing.
 
-## The problem
+## The data enrichment payment problem
 
 Sales and marketing data APIs charge monthly subscriptions with per-seat pricing, even when usage is sporadic. An agent that enriches 50 leads one week and zero the next still pays the same monthly fee. Each provider requires its own account, API key, and billing setup.
 
-## How MPP solves it
+## How MPP enables paid data enrichment
 
 With MPP, your agent pays per enrichment request. Look up a company, enrich a contact, verify an email — each operation is a single paid HTTP request. No contracts, no minimums, no wasted spend during quiet periods.
 
-## Available services
+## Data enrichment services you can pay for
 
 | Provider | Capabilities | Service URL |
 |---|---|---|
@@ -28,7 +28,7 @@ With MPP, your agent pays per enrichment request. Look up a company, enrich a co
 | [Email Reputation](https://abstract-email-reputation.mpp.paywithlocus.com) | Email reputation and risk scoring | `abstract-email-reputation.mpp.paywithlocus.com` |
 | [BuiltWith](https://builtwith.mpp.paywithlocus.com) | Technology profiling for 100M+ websites | `builtwith.mpp.paywithlocus.com` |
 
-## Try it
+## Try Apollo with Tempo payments
 
 ```bash
 # Install Tempo CLI + wallet
@@ -39,14 +39,14 @@ tempo request apollo.mpp.paywithlocus.com/v1/organizations/enrich \
   -d '{"domain": "tempo.xyz"}'
 ```
 
-## Prompt your agent
+## Prompt your agent to buy lead enrichment
 
 ```
 Use apollo.mpp.paywithlocus.com to enrich company data via Tempo.
 Pay per lookup with stablecoins — no API key needed.
 ```
 
-## Next steps
+## Next steps for data enrichment payments
 
 <Cards>
   <Card

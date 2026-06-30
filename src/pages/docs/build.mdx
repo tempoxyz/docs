@@ -7,11 +7,11 @@ import { Cards, Card } from 'vocs'
 
 # Build on Tempo
 
-Use this section when you are designing payment experiences or payment infrastructure on Tempo. The guides here focus on what your product should do: move stablecoins, issue assets, exchange liquidity, isolate activity in private zones, or let agents pay for services.
+Use this section when you are designing payment experiences or payment infrastructure on Tempo. The guides here focus on what your product needs to do: move stablecoins, issue assets, exchange liquidity, isolate activity in private zones, or let agents pay for services.
 
 Start with **Make Payments** if you are not sure where to begin. It covers the core transfer flow and introduces the payment primitives used throughout the rest of the docs.
 
-## Payment Workflows
+## Core Build Paths
 
 <Cards>
   <Card
@@ -33,20 +33,20 @@ Start with **Make Payments** if you are not sure where to begin. It covers the c
     icon="lucide:arrow-left-right"
   />
   <Card
-    title="Private Zones"
-    description="Connect to zones, deposit funds, send tokens privately, bridge, swap, and withdraw."
-    to="/docs/guide/private-zones"
-    icon="lucide:lock-keyhole"
-  />
-  <Card
     title="Agentic Payments"
     description="Accept one-time, pay-as-you-go, and streamed payments through the Machine Payments Protocol."
     to="/docs/guide/machine-payments"
     icon="lucide:bot"
   />
+  <Card
+    title="Private Zones"
+    description="Connect to zones, deposit funds, send tokens privately, bridge, swap, and withdraw."
+    to="/docs/guide/private-zones"
+    icon="lucide:lock-keyhole"
+  />
 </Cards>
 
-## Before You Ship
+## Production Essentials
 
 <Cards>
   <Card
@@ -62,15 +62,21 @@ Start with **Make Payments** if you are not sure where to begin. It covers the c
     icon="lucide:layers"
   />
   <Card
-    title="Configure Receive Policies"
-    description="Control which tokens and senders an account can receive for TIP-20 transfers."
-    to="/docs/guide/payments/configure-receive-policies"
-    icon="lucide:shield-check"
-  />
-  <Card
     title="Pay Fees in Any Stablecoin"
     description="Use Tempo's fee system to pay transaction fees with supported stablecoins."
     to="/docs/guide/payments/pay-fees-in-any-stablecoin"
     icon="lucide:badge-dollar-sign"
+  />
+  <Card
+    title="Sponsor User Fees"
+    description="Let your app or service pay transaction fees on behalf of users."
+    to="/docs/guide/payments/sponsor-user-fees"
+    icon="lucide:heart-handshake"
+  />
+  <Card
+    title="Configure Receive Policies"
+    description="Control which tokens and senders an account can receive for TIP-20 transfers."
+    to="/docs/guide/payments/configure-receive-policies"
+    icon="lucide:shield-check"
   />
 </Cards>

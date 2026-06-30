@@ -1,4 +1,5 @@
 ---
+title: Fee AMM Overview
 description: Understand how the Fee AMM automatically converts transaction fees between stablecoins, enabling users to pay in any supported token.
 ---
 
@@ -12,7 +13,7 @@ The Fee AMM (Automated Market Maker) is a dedicated system for converting transa
 **Fee AMM vs. Exchange** — these are two different systems. The Fee AMM is protocol-driven: it converts transaction-fee payments into validators' preferred tokens at a fixed price, and only the protocol (and arbitrageurs rebalancing it) swaps against it — it is not a trading venue. For user-facing stablecoin trading (swaps, orders, prices, orderbook), use the [Exchange](/docs/protocol/exchange). See [Fee AMM vs. Exchange](#fee-amm-vs-exchange) below.
 :::
 
-## How It Works
+## How the Fee AMM converts stablecoin fees
 
 When a user pays fees in a stablecoin that differs from the validator's preference, the Fee AMM automatically converts the payment:
 
@@ -37,7 +38,7 @@ Tempo has two stablecoin-swapping systems that are easy to confuse. They serve d
 
 If you want to **trade** stablecoins or read market data, use the [Exchange](/docs/protocol/exchange). If you want to **enable fee payments** in your stablecoin or provide fee-conversion liquidity, you're in the right place — continue below.
 
-## Learn More
+## Learn more about fee conversion
 
 <Cards>
   <Card

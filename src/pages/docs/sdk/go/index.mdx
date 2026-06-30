@@ -1,8 +1,9 @@
 ---
+title: Go SDK
 description: Build blockchain apps with the Tempo Go SDK. Send transactions, batch calls, and handle fee sponsorship with idiomatic Go code.
 ---
 
-# Go
+# Go SDK
 
 Tempo distributes a Go SDK for building application clients. The SDK provides packages for RPC communication, transaction signing, and key management.
 
@@ -11,7 +12,7 @@ The Tempo Go SDK can be used to perform common operations with the chain, such a
 
 ::::steps
 
-## Install
+## Install the Go SDK
 
 To install the Tempo Go SDK:
 
@@ -23,7 +24,7 @@ go get github.com/tempoxyz/tempo-go@v0.3.0
 The SDK requires Go 1.21 or higher.
 :::
 
-## Create an RPC Client
+## Create a Go RPC client
 
 To interact with Tempo, first create an RPC client connected to a Tempo node:
 
@@ -54,7 +55,7 @@ c := client.New("https://rpc.tempo.xyz",
 )
 ```
 
-## Create a Signer
+## Create a Go transaction signer
 
 Create a signer to sign transactions. The signer manages your private key and generates signatures:
 
@@ -77,7 +78,7 @@ func main() {
 }
 ```
 
-## Send a Transaction
+## Send a Tempo transaction with Go
 
 Build and send a transaction using the builder pattern:
 
@@ -122,9 +123,9 @@ func main() {
 
 ::::
 
-## Examples
+## Go SDK examples
 
-### Read Chain Data
+### Read chain data with Go
 
 Query the blockchain for basic information:
 
@@ -138,7 +139,7 @@ nonce, _ := c.GetTransactionCount(ctx, "0x742d35Cc6634C0532925a3b844Bc9e7595f0bE
 fmt.Printf("Block: %d, Chain: %d, Nonce: %d\n", blockNum, chainID, nonce)
 ```
 
-### Token Transfer
+### Send a token transfer with Go
 
 Send a TIP-20 token transfer using go-ethereum's ABI encoding:
 
@@ -161,7 +162,7 @@ tx := transaction.NewBuilder(big.NewInt(4217)).
     Build()
 ```
 
-### Transfer with Memo
+### Send a memo transfer with Go
 
 Include a memo for payment reconciliation:
 
@@ -184,7 +185,7 @@ tx := transaction.NewBuilder(big.NewInt(4217)).
     Build()
 ```
 
-### Batch Multiple Calls
+### Batch multiple calls with Go
 
 Execute multiple operations atomically in a single transaction:
 
@@ -233,7 +234,7 @@ go func() { c.SendRawTransaction(ctx, serialize(tx1)) }()
 go func() { c.SendRawTransaction(ctx, serialize(tx2)) }()
 ```
 
-### Fee Sponsorship
+### Fee sponsorship with Go
 
 Have another account pay for transaction fees:
 
@@ -251,7 +252,7 @@ transaction.SignTransaction(tx, userSigner)
 transaction.AddFeePayerSignature(tx, feePayerSigner)
 ```
 
-### Transaction Validity Window
+### Transaction validity windows in Go
 
 Set a time window during which the transaction is valid:
 
@@ -269,7 +270,7 @@ tx := transaction.NewBuilder(big.NewInt(4217)).
     Build()
 ```
 
-### Batch RPC Requests
+### Batch RPC requests with Go
 
 Send multiple RPC calls efficiently in a single HTTP request:
 
@@ -285,7 +286,7 @@ for _, resp := range responses {
 }
 ```
 
-## Account Keychain
+## Account Keychain in the Go SDK
 
 The `keychain` package provides typed helpers for Tempo's [Account Keychain precompile](/docs/protocol/transactions/AccountKeychain), enabling access key management and signing directly from Go.
 
@@ -373,7 +374,7 @@ func main() {
 }
 ```
 
-### Signing with an Access Key
+### Sign with an access key in Go
 
 Use `keychain.SignWithAccessKey` to sign a transaction as an access key holder:
 
@@ -394,7 +395,7 @@ serialized, _ := transaction.Serialize(tx, nil)
 hash, _ := c.SendRawTransaction(ctx, serialized)
 ```
 
-### Query Remaining Spending Limit
+### Query remaining spending limits with Go
 
 ```go [query_limit.go]
 calldata := keychain.EncodeGetRemainingLimitCalldata(
@@ -407,7 +408,7 @@ remaining := keychain.ParseRemainingLimitResult(result)
 fmt.Printf("Remaining: %s\n", remaining.String())
 ```
 
-## Packages
+## Go SDK packages
 
 | Package | Description |
 | --- | --- |
@@ -416,7 +417,7 @@ fmt.Printf("Remaining: %s\n", remaining.String())
 | `signer` | Key management and signature generation |
 | `keychain` | Account Keychain precompile: access key management and signing |
 
-## Next Steps
+## Next steps for the Go SDK
 
 After setting up the Go SDK, you can:
 

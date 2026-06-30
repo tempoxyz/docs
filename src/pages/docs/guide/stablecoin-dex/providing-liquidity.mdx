@@ -1,4 +1,5 @@
 ---
+title: Providing Liquidity
 description: Place limit and flip orders to provide liquidity on the Stablecoin DEX orderbook. Learn to manage orders and set prices using ticks.
 interactive: true
 ---
@@ -18,7 +19,7 @@ Add liquidity for a token pair by placing orders on the Stablecoin DEX. You can 
 
 In this guide you will learn how to place buy and sell orders to provide liquidity on the Stablecoin DEX orderbook.
 
-## Demo
+## Liquidity provider demo
 
 <Demo.Container name="Place an Order" footerVariant="source" src="tempoxyz/examples/tree/main/examples/exchange">
   <Connect stepNumber={1} />
@@ -27,15 +28,15 @@ In this guide you will learn how to place buy and sell orders to provide liquidi
   <QueryOrder stepNumber={4} last />
 </Demo.Container>
 
-## Steps
+## Liquidity provider steps
 
 ::::steps
 
-### Set up your client
+### Set up your liquidity client
 
 Ensure that you have set up your client by following the [guide](/docs/sdk/typescript).
 
-### Approve spend
+### Approve stablecoin spend
 
 To place an order, you need to approve the Stablecoin DEX contract to spend the order's "spend" token.
 
@@ -91,7 +92,7 @@ function ApproveSpend(props: { orderType: 'buy' | 'sell' }) {
 :::
 
 
-### Place order
+### Place a liquidity order
 
 Once the spend is approved, you can place an order by calling the `place` action on the Stablecoin DEX.
 
@@ -151,7 +152,7 @@ function PlaceOrder(props: { orderType: 'buy' | 'sell' }) {
 
 :::
 
-### View order details
+### View liquidity order details
 
 After placing an order, you can query its details to see the current state, including the amount filled and remaining using [`Hooks.dex.useOrder`](https://wagmi.sh/tempo/hooks/dex.useOrder).
 
@@ -191,9 +192,9 @@ For more details on querying orders, see the [`Hooks.dex.useOrder`](https://wagm
 
 ::::
 
-## Recipes
+## Liquidity provider recipes
 
-### Cancel order
+### Cancel a liquidity order
 
 Cancel an order using its order ID.
 
@@ -272,7 +273,7 @@ function ManageOrder() {
 
 :::
 
-### Determining quote token
+### Determine the quote token
 Each token has a designated quote token that it trades against on the DEX. For most stablecoins, this will be `pathUSD`.
 
 Use the `token.useGetMetadata` hook to retrieve a token's quote token.
@@ -306,7 +307,7 @@ console.log('Quote Token:', metadata?.quoteToken) // returns `pathUSD` address
 ```
 :::
 
-### Flip order
+### Place a flip order
 
 Flip orders automatically switch between buy and sell sides when filled, providing continuous liquidity. Use viem's [`dex.placeFlip`](https://viem.sh/tempo/actions/dex.placeFlip) to create a flip order call.
 
@@ -397,12 +398,12 @@ const sellCall = Actions.dex.place.call({ // [!code hl]
 
 For more details including tick precision, limits, and calculation examples, see [Understanding Ticks](/docs/protocol/exchange/providing-liquidity#understanding-ticks).
 
-## Best practices
+## Liquidity provider best practices
 
-### Batch calls
+### Batch liquidity calls
 You can batch the calls to approve spend and place the order in a single transaction for efficiency. See the [Tempo Transactions guide](/docs/guide/tempo-transaction) for more details.
 
-## Learning resources
+## Liquidity learning resources
 
 <Cards>
   <Card

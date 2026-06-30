@@ -1,4 +1,5 @@
 ---
+title: Account Keychain Precompile
 description: Technical specification for the Account Keychain precompile managing access keys with expiry timestamps, spending limits, and call-scope restrictions.
 ---
 
@@ -6,7 +7,7 @@ description: Technical specification for the Account Keychain precompile managin
 
 **Address:** `0xAAAAAAAA00000000000000000000000000000000`
 
-## Overview
+## Account Keychain overview
 
 The Account Keychain precompile manages authorized Access Keys for accounts, enabling Root Keys (e.g., passkeys) and admin access keys to provision secondary keys. Limited access keys can have expiry timestamps, recurring or one-time per-TIP20 token spending limits, and explicit call scopes that restrict which targets, selectors, and recipients an Access Key may invoke.
 

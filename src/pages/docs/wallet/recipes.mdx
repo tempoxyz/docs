@@ -3,9 +3,9 @@ title: Tempo Wallet CLI Recipes
 description: Use Tempo Wallet CLI recipes for agent setup, MPP service discovery, paid requests, credits, sessions, funding, and transfers.
 ---
 
-# Recipes
+# Tempo Wallet Recipes
 
-## Core Flow
+## Tempo Wallet core flow
 
 ```bash
 tempo wallet -t whoami
@@ -16,7 +16,7 @@ tempo request --dry-run <SERVICE_ENDPOINT_URL> --json '{"input":"hello"}'
 tempo request --max-spend 1.00 <SERVICE_ENDPOINT_URL> --json '{"input":"hello"}'
 ```
 
-## Wallet Operations
+## Tempo Wallet operations
 
 ```bash
 # Wallet readiness and balances
@@ -46,7 +46,7 @@ tempo wallet -t keys
 
 Use access-key spending limits and `tempo request --max-spend` for agent workflows. Credits are separate from token balances and only work with eligible one-time MPP charges.
 
-## Service Discovery
+## Tempo Wallet service discovery
 
 ```bash
 # Search services by keyword
@@ -60,7 +60,7 @@ Tip: copy endpoint URL, method, and payload shape directly from service details.
 
 Service details also show pricing, payment mode, and whether `supportsCredits: true` is available.
 
-## Request Execution
+## Tempo Wallet request execution
 
 Preview before paying:
 
@@ -83,7 +83,7 @@ tempo wallet -t transfer --credits --dry-run --mpp-challenge-file "$headers"
 tempo wallet -t transfer --credits --mpp-challenge-file "$headers"
 ```
 
-## Session Management
+## Tempo Wallet session management
 
 ```bash
 # List sessions
@@ -104,7 +104,7 @@ tempo wallet sessions close --finalize
 
 Sessions are MPP payment channels used by pay-as-you-go services. One-time charges may use direct token payment or MPP Credits when the service supports credits.
 
-## Agent and Script Mode
+## Tempo Wallet agent and script mode
 
 Use TOON output (`-t`) when command output is consumed by agents or scripts.
 
@@ -115,7 +115,7 @@ tempo wallet -t services <SERVICE_ID>
 tempo request -t --dry-run --max-spend 1.00 <SERVICE_ENDPOINT_URL> --json '{"input":"hello"}'
 ```
 
-## Failure Recovery Shortcuts
+## Tempo Wallet failure recovery shortcuts
 
 ```bash
 # Wallet not ready / auth missing
@@ -141,7 +141,7 @@ tempo wallet fund --credits
 
 If issues persist, continue with [Troubleshooting](/docs/cli/wallet).
 
-## End-to-End Script Pattern
+## Tempo Wallet end-to-end script pattern
 
 ```bash
 # 1) Ensure wallet is ready
@@ -157,7 +157,7 @@ tempo request --dry-run <SERVICE_ENDPOINT_URL> --json '{"input":"hello"}'
 tempo request --max-spend 1.00 <SERVICE_ENDPOINT_URL> --json '{"input":"hello"}'
 ```
 
-## See Also
+## Related Tempo Wallet docs
 
 1. [Reference](/docs/wallet/reference)
 2. [Wallet CLI Reference](/docs/cli/wallet)

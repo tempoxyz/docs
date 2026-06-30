@@ -9,15 +9,15 @@ import { Card, Cards } from 'vocs'
 
 Let your agents run headless browser sessions, solve CAPTCHAs, and scrape web pages with geo-targeting — pay per task with stablecoins on Tempo. No API keys, no browser infrastructure to manage.
 
-## The problem
+## The browser automation payment problem
 
 Browser automation at scale requires managing headless browser infrastructure, proxy networks, and CAPTCHA-solving services — each with separate accounts, API keys, and billing. Agents that need to interact with the web face a fragmented stack of tools, each requiring its own integration.
 
-## How MPP solves it
+## How MPP enables paid browser automation
 
 With MPP, your agent pays per browser session, per page scrape, or per CAPTCHA solve using stablecoins on Tempo. The agent sends a request, the service returns its price via a `402` Challenge, the agent pays, and the work is done. No infrastructure setup, no API key management.
 
-## Available services
+## Browser automation services you can pay for
 
 | Provider | Capabilities | Service URL |
 |---|---|---|
@@ -27,7 +27,7 @@ With MPP, your agent pays per browser session, per page scrape, or per CAPTCHA s
 | Firecrawl | Web crawling and structured data extraction | `firecrawl.mpp.tempo.xyz` |
 | [Diffbot](https://diffbot.mpp.paywithlocus.com) | Article, product, and discussion extraction | `diffbot.mpp.paywithlocus.com` |
 
-## Try it
+## Try Oxylabs with Tempo payments
 
 ```bash
 # Install Tempo CLI + wallet
@@ -38,14 +38,14 @@ tempo request oxylabs.mpp.tempo.xyz/v1/queries \
   -d '{"source": "universal", "url": "https://example.com"}'
 ```
 
-## Prompt your agent
+## Prompt your agent to buy browser automation
 
 ```
 Use mpp.browserbase.com to run headless browser sessions via Tempo.
 Pay per session with stablecoins — no account needed.
 ```
 
-## Next steps
+## Next steps for browser automation payments
 
 <Cards>
   <Card

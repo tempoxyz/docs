@@ -3,11 +3,11 @@ title: Pagination
 description: Page through Tempo API list endpoints with cursors, page numbers, and optional total counts.
 ---
 
-# Pagination
+# API Pagination
 
 Tempo list endpoints share one pagination contract. Use **cursor** pagination for stable traversal and deep reads. Use **page** pagination only when an endpoint supports it and you need a shallow, page-numbered UI.
 
-## Modes
+## Tempo API pagination modes
 
 | Mode | Parameters | Use for | Notes |
 | --- | --- | --- | --- |
@@ -22,7 +22,7 @@ Page pagination is positional. If new rows arrive at the head of a feed, items c
 Do not send `cursor` and `page` together. The request fails with a `422` validation error.
 :::
 
-## Request Parameters
+## Pagination request parameters
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -31,7 +31,7 @@ Do not send `cursor` and `page` together. The request fails with a `422` validat
 | `page` | integer | none | 1-indexed positional page number. `page=1` is the head page. Mutually exclusive with `cursor`. `page × limit` must be at most `10,000`. |
 | `include` | string | none | Comma-separated include flags. Send `include=totalCount` to add `meta.totalCount` and `meta.totalCountCapped` to the response. |
 
-## Response Envelope
+## Pagination response envelope
 
 List endpoints return a common envelope:
 
@@ -57,7 +57,7 @@ List endpoints return a common envelope:
 `nextCursor === null` is the only end-of-list signal. Do not stop because `data` is shorter than `limit`, because `data` is empty, or because of `totalCount`.
 :::
 
-## Cursor Pagination
+## Cursor pagination for Tempo API lists
 
 Fetch the first page without a cursor:
 
@@ -101,7 +101,7 @@ Cursors are opaque. Store and pass them back exactly as received; do not decode,
 If a cursor is malformed or forged, the request starts again from the head instead of returning an error.
 :::
 
-## Page Pagination
+## Page pagination for shallow Tempo API lists
 
 Use `page` only for shallow, page-numbered interfaces:
 
@@ -118,7 +118,7 @@ curl 'https://api.tempo.xyz/v1/tokens?limit=25&page=2' \
 
 For anything deeper than `10,000` rows, use cursor pagination. Some endpoints support cursor pagination only — this is common when each returned item is derived from a variable number of underlying rows, which makes positional page boundaries unstable.
 
-## Counting Results
+## Count results in paginated responses
 
 Counts are optional. Request them with `include=totalCount`:
 
@@ -144,7 +144,7 @@ The count is computed by a capped subquery up to `10,000` matched rows:
 - When `meta.totalCountCapped` is `true`, `meta.totalCount` is a lower bound: there are at least that many matches.
 - Counts are independent of pagination. Use `nextCursor`, not `totalCount`, to decide whether to request another page.
 
-## Best Practices
+## Pagination best practices for Tempo API clients
 
 - Prefer cursor pagination for integrations, sync jobs, exports, and live feeds.
 - Use the largest `limit` your workload can handle, up to `200`, to reduce round trips.

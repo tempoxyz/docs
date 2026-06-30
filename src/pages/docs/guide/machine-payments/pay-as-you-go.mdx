@@ -14,7 +14,7 @@ Build a payment-gated photo gallery API that charges $0.01 per photo using `mppx
 Unlike [one-time payments](/docs/guide/machine-payments/one-time-payments), sessions open a payment channel once and use off-chain vouchers for each subsequent request — vouchers are processed in pure CPU-bound signature checks, not bottlenecked by blockchain throughput.
 :::
 
-## How sessions work
+## How pay-as-you-go sessions work
 
 <MermaidDiagram chart={`sequenceDiagram
     participant Client
@@ -42,11 +42,11 @@ Unlike [one-time payments](/docs/guide/machine-payments/one-time-payments), sess
 3. **Top up** — If the channel runs low, the client deposits additional tokens without closing the channel
 4. **Close** — Either party closes the channel, settling the final balance on-chain and refunding unused deposit
 
-## Server setup
+## Pay-as-you-go server setup
 
 ::::steps
 
-### Install dependencies
+### Install pay-as-you-go dependencies
 
 :::code-group
 ```bash [npm]
@@ -60,7 +60,7 @@ bun add mppx viem
 ```
 :::
 
-### Set up `Mppx` instance
+### Set up an `Mppx` session instance
 
 Set up an `Mppx` instance with the `tempo` method.
 
@@ -78,7 +78,7 @@ const mppx = Mppx.create({
 })
 ```
 
-### Add a session-gated route
+### Add a pay-as-you-go route
 
 Add payment verification using `mppx.session` as route middleware. The handler only runs after payment is verified.
 
@@ -175,7 +175,7 @@ Bun.serve({
 
 :::
 
-### Test the endpoint
+### Test the pay-as-you-go endpoint
 
 ```bash
 # Create account funded with testnet tokens
@@ -187,7 +187,7 @@ $ npx mppx http://localhost:3000/api/sessions/photo
 
 ::::
 
-## Client setup
+## Pay-as-you-go client setup
 
 When using sessions from a client, set `maxDeposit` to enable automatic channel management. This is the maximum amount of tokens the client locks into the payment channel's reserve contract. Any unspent deposit is refunded when the channel closes.
 
@@ -212,7 +212,7 @@ const res = await fetch('http://localhost:3000/api/sessions/photo')
 - The client handles the full session lifecycle automatically: channel open, voucher signing, and retry after `402` responses.
 - If the server sets `suggestedDeposit`, the client uses `min(suggestedDeposit, maxDeposit)`.
 
-## Next steps
+## Next steps for pay-as-you-go payments
 
 <Cards>
   <Card

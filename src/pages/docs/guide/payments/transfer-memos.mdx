@@ -1,4 +1,5 @@
 ---
+title: Attach a Transfer Memo
 interactive: true
 description: Attach 32-byte reference memos to TIP-20 transfers for payment reconciliation, invoice matching, and exchange deposit tracking on Tempo.
 ---
@@ -13,7 +14,7 @@ import { SendPaymentWithMemo } from '../../../../components/guides/steps/payment
 
 Attach 32-byte references to [TIP-20](/docs/protocol/tip20/overview) transfers for payment reconciliation. Use memos to link onchain transactions to your internal records—customer IDs, invoice numbers, or any identifier that helps you match payments to your database.
 
-## Demo
+## Transfer memo demo
 
 <Demo.Container name="Transfer with Memo" footerVariant="source" src="tempoxyz/examples/tree/main/examples/payments">
   <Connect stepNumber={1} />
@@ -21,11 +22,11 @@ Attach 32-byte references to [TIP-20](/docs/protocol/tip20/overview) transfers f
   <SendPaymentWithMemo stepNumber={3} last />
 </Demo.Container>
 
-## Steps
+## Transfer memo implementation steps
 
 ::::steps
 
-### Set up your project
+### Set up your project for transfer memos
 
 Ensure you have Wagmi configured with Tempo:
 
@@ -113,7 +114,7 @@ export function WatchMemos({ depositAddress }: { depositAddress: `0x${string}` }
 
 ::::
 
-## Recipes
+## Transfer memo recipes
 
 ### Exchange deposit reconciliation
 
@@ -170,7 +171,7 @@ await Actions.token.transferSync(walletClient, {
 })
 ```
 
-## Best Practices
+## Transfer memo best practices
 
 ### Use consistent memo formats
 
@@ -194,7 +195,7 @@ const logs = await client.getLogs({
 })
 ```
 
-## Learning Resources
+## Transfer memo learning resources
 
 <Cards>
   <Card

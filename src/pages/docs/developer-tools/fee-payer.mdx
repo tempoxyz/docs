@@ -9,7 +9,7 @@ import { Cards, Card } from 'vocs'
 
 Tempo Labs provides hosted fee payer endpoints for applications that want to sponsor Tempo transaction fees without running fee payer infrastructure.
 
-## Hosted endpoints
+## Hosted fee payer endpoints
 
 The hosted endpoints are JSON-RPC relays that fill, sponsor, and broadcast Tempo Transactions. They are CORS-enabled and return standard JSON-RPC responses.
 
@@ -18,13 +18,13 @@ The hosted endpoints are JSON-RPC relays that fill, sponsor, and broadcast Tempo
 | Mainnet | `https://sponsor.tempo.xyz/tp_<api_key>` | `4217` | Approved integrations with an API key |
 | Testnet | `https://sponsor.moderato.tempo.xyz` | `42431` | Public development and testing |
 
-### Rate limits and policy
+### Hosted fee payer rate limits and policy
 
 Hosted fee payer endpoints are rate-limited and may reject requests that fall outside the configured sponsorship policy.
 
 Clients should avoid retry loops, back off after errors, and treat sponsorship as conditional. If sponsorship is rejected, the client should either let the user pay their own fee or retry through an application-owned fee payer.
 
-### Pricing and access
+### Hosted fee payer pricing and access
 
 The public testnet fee payer is free for development and testing.
 
@@ -38,7 +38,7 @@ const feePayerUrl = `https://sponsor.tempo.xyz/${feePayerToken}`
 
 Do not send the fee payer token as a bearer token or another request header. The hosted fee payer authenticates the key from the path segment.
 
-## Using in production
+## Use a fee payer in production
 
 Run your own fee payer when you need:
 
@@ -49,9 +49,9 @@ Run your own fee payer when you need:
 
 See [Sponsor User Fees](/docs/guide/payments/sponsor-user-fees) to deploy your own fee payer service.
 
-## Configure clients
+## Configure clients for hosted fee sponsorship
 
-### Tempo Wallet
+### Tempo Wallet fee sponsorship
 
 ```ts twoslash [wagmi.config.ts]
 import { tempo } from 'viem/chains'
@@ -71,7 +71,7 @@ export const config = createConfig({
 })
 ```
 
-### WebAuthn or custom transports
+### WebAuthn or custom fee payer transports
 
 Use [`withRelay`](https://viem.sh/tempo/transports/withRelay) to route transaction fill and sponsorship requests through the hosted fee payer.
 
@@ -95,9 +95,9 @@ export const config = createConfig({
 
 For testnet development, use `https://sponsor.moderato.tempo.xyz` without an API key.
 
-## Query the fee payer
+## Query the hosted fee payer
 
-### Chain ID
+### Query the fee payer chain ID
 
 ```bash
 curl -X POST "https://sponsor.tempo.xyz/tp_<api_key>" \
@@ -105,7 +105,7 @@ curl -X POST "https://sponsor.tempo.xyz/tp_<api_key>" \
   -d '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}'
 ```
 
-### Fill a sponsored transaction
+### Fill a sponsored Tempo transaction
 
 `eth_fillTransaction` returns a filled Tempo transaction plus metadata describing whether the request is sponsored.
 
@@ -128,7 +128,7 @@ curl -X POST "https://sponsor.tempo.xyz/tp_<api_key>" \
 
 A sponsored response includes `capabilities.sponsored: true` and sponsor metadata.
 
-## API reference
+## Hosted fee payer API reference
 
 | Method | Description |
 | --- | --- |
@@ -142,13 +142,13 @@ A sponsored response includes `capabilities.sponsored: true` and sponsor metadat
 Fee sponsorship requires a Tempo Transaction. The sender signs with sponsorship enabled, then the fee payer counter-signs with `feePayerSignature`.
 :::
 
-## How it works
+## How hosted fee sponsorship works
 
 Tempo Transactions support native fee sponsorship through a separate fee payer signature. The user signs the transaction first, leaving fee token selection to the fee payer. The hosted fee payer validates the request, chooses the fee token, signs the fee payer payload, and either returns the completed transaction or broadcasts it depending on the JSON-RPC method.
 
 No paymaster contract, bundler, or EntryPoint contract is required.
 
-## Next steps
+## Next steps for fee sponsorship
 
 <Cards>
   <Card icon="lucide:wallet" title="Sponsor User Fees" description="Build gasless payment flows and deploy your own fee payer service." to="/docs/guide/payments/sponsor-user-fees" />

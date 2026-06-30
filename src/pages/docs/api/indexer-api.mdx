@@ -11,7 +11,7 @@ The Tempo API exposes an **Indexer entrypoint** for read-only SQL over chain dat
 This page explains what the indexer is and how it's organized. For the request/response contract of the API endpoint, see the [indexer query reference](/docs/api/indexer). For the full table schema, an interactive query console, and self-hosting, see the [Indexer guide](/docs/developer-tools/indexer).
 :::
 
-## Architecture
+## Indexer API architecture
 
 `tidx` writes the same chain data into two stores and routes each query to the right one:
 
@@ -40,7 +40,7 @@ The sync engine runs two jobs concurrently: a **realtime** loop that follows the
                   GET /v1/indexer/query
 ```
 
-## What it indexes
+## Tempo data the indexer API covers
 
 Every Tempo block is decoded into a set of **base tables**, available in both stores:
 
@@ -51,7 +51,7 @@ Every Tempo block is decoded into a set of **base tables**, available in both st
 | `logs` | EVM logs: block, log index, transaction hash, emitting contract, topics, data. |
 | `receipts` | Receipts: status, gas used, effective gas price, contract address, fee payer. |
 
-## Analytics tables
+## Indexer API analytics tables
 
 With `engine=clickhouse`, the indexer additionally exposes pre-computed tables maintained from the base data. These exist so common reads are sort-key seeks instead of full scans:
 
@@ -64,17 +64,17 @@ With `engine=clickhouse`, the indexer additionally exposes pre-computed tables m
 The typed REST endpoints (tokens, balances, activity, exchanges) are the stable, supported interface for these common reads. Query the analytics tables directly when you need custom SQL the REST endpoints don't cover.
 :::
 
-## Decoded events
+## Indexer API decoded events
 
 There are two ways to read decoded event data:
 
 - **Pre-decoded tables** — common events are decoded at insert time into ClickHouse tables such as `token_transfers` (`Transfer`), `token_approvals` (`Approval`), and the DEX tables. Prefer these when available.
 - **Query-time decoding** — pass a `signature` parameter and the indexer exposes the matching `logs` as a virtual table named after the event, so you can select its arguments directly. This works on either engine. See the [indexer query reference](/docs/api/indexer).
 
-## Querying
+## Querying the Indexer API
 
 Run read-only `SELECT` queries through [`GET /v1/indexer/query`](/docs/api/indexer), optionally streaming live as new blocks arrive over Server-Sent Events. Requests share the same [authentication](/docs/api/authentication), [rate limits](/docs/api/rate-limits), and `RateLimit-*` headers as the rest of the API. See the [indexer query reference](/docs/api/indexer) for parameters, response shape, live streaming, and errors.
 
-## Self-hosting
+## Self-hosting the indexer API
 
 `tidx` is open source and can run from Docker or source against your own PostgreSQL (and optional ClickHouse). See the [repository](https://github.com/tempoxyz/tidx) and the [Indexer guide](/docs/developer-tools/indexer) for configuration and deployment.

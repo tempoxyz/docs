@@ -1,4 +1,5 @@
 ---
+title: Mint Stablecoins
 description: Mint new tokens to increase your stablecoin's total supply. Grant the issuer role and create tokens with optional memos for tracking.
 interactive: true
 ---
@@ -16,17 +17,17 @@ import { Cards, Card } from 'vocs'
 
 Create new tokens by minting them to a specified address. Minting increases the total supply of your stablecoin.
 
-## Steps
+## Stablecoin minting steps
 
 ::::steps
 
-### Create a Stablecoin
+### Create the stablecoin to mint
 
 Before you can mint tokens, you need to create a stablecoin. Follow the [Create a Stablecoin](/docs/guide/issuance/create-a-stablecoin) guide to deploy your token.
 
 Once you've created your token, you can proceed to grant the issuer role and mint tokens.
 
-### Grant the Issuer Role
+### Grant the stablecoin issuer role
 
 Assign the issuer role to the address that will mint tokens. Minting requires the **`ISSUER_ROLE`**.
 
@@ -96,7 +97,7 @@ export const config = createConfig({
 
 :::
 
-### Mint Tokens to a Recipient
+### Mint stablecoins to a recipient
 
 Now that the issuer role is granted, you can mint tokens to any address.
 
@@ -260,9 +261,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ::::
 
-## Recipes
+## Stablecoin minting recipes
 
-### Burning Stablecoins
+### Burn stablecoins
 
 To decrease supply, you can burn tokens from your own balance. Burning requires the **`ISSUER_ROLE`** and sufficient balance in the caller's account.
 
@@ -407,9 +408,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 :::
 
-## Best Practices
+## Stablecoin minting best practices
 
-### Monitor Supply Caps
+### Monitor stablecoin supply caps
 
 If your token has a supply cap set, any `mint()` or `mintWithMemo()` call that would exceed the cap will revert with `SupplyCapExceeded()`. You must either:
 - Burn tokens to reduce total supply below the cap
@@ -418,11 +419,11 @@ If your token has a supply cap set, any `mint()` or `mintWithMemo()` call that w
 
 Use [`getMetadata`](https://viem.sh/tempo/actions/token.getMetadata) to check your token's total supply before minting.
 
-### Role Separation
+### Separate stablecoin roles
 
 Assign the issuer role to dedicated treasury or minting addresses separate from your admin address. This enhances security by limiting the privileges of any single address.
 
-## Learning Resources
+## Stablecoin minting learning resources
 
 <Cards>
   <Card

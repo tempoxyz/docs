@@ -1,4 +1,5 @@
 ---
+title: Stablecoin Payments
 description: Send and receive stablecoin payments on Tempo. Integrate payments with flexible fee options, sponsorship capabilities, and parallel transactions.
 ---
 
@@ -6,60 +7,66 @@ import { Cards, Card } from 'vocs'
 
 # Stablecoin Payments
 
-Send and receive payments using stablecoins on Tempo. Learn how to integrate payments into your application with flexible fee options and sponsorship capabilities.
+Send and receive payments using stablecoins on Tempo. Start with core payment flows, then add reconciliation, receive controls, fee preferences, sponsorship, and higher-throughput transaction patterns.
+
+## Core Payment Flows
 
 <Cards>
   <Card
-    description="Send stablecoin payments between accounts with optional memos for reconciliation"
+    description="Send stablecoin payments between accounts with optional memos for reconciliation."
     to="/docs/guide/payments/send-a-payment"
     icon="lucide:send"
     title="Send a Payment"
   />
 
   <Card
-    description="Accept payments from users and integrate payment flows into your application"
+    description="Accept payments from users and integrate payment flows into your application."
     to="/docs/guide/payments/accept-a-payment"
     icon="lucide:handshake"
     title="Accept a Payment"
   />
 
   <Card
-    description="Filter inbound TIP-20 transfers and mints by token and sender, then handle blocked receipts"
-    to="/docs/guide/payments/configure-receive-policies"
-    icon="lucide:shield-check"
-    title="Configure Receive Policies"
-  />
-
-  <Card
-    description="Attach 32-byte references to TIP-20 transfers for payment reconciliation"
+    description="Attach 32-byte references to TIP-20 transfers for payment reconciliation."
     to="/docs/guide/payments/transfer-memos"
     icon="lucide:file-text"
     title="Attach a Transfer Memo"
   />
 
   <Card
-    description="Generate one TIP-20 deposit address per customer without sweep transactions"
+    description="Generate one TIP-20 deposit address per customer without sweep transactions."
     to="/docs/guide/payments/virtual-addresses"
     icon="lucide:route"
     title="Use Virtual Addresses"
   />
+</Cards>
+
+## Payment Controls
+
+<Cards>
+  <Card
+    description="Filter inbound TIP-20 transfers and mints by token and sender, then handle blocked receipts."
+    to="/docs/guide/payments/configure-receive-policies"
+    icon="lucide:shield-check"
+    title="Configure Receive Policies"
+  />
 
   <Card
-    description="Configure users to pay transaction fees in any supported stablecoin"
+    description="Configure users to pay transaction fees in any supported stablecoin."
     to="/docs/guide/payments/pay-fees-in-any-stablecoin"
     icon="lucide:circle-dollar-sign"
     title="Pay Fees in Any Stablecoin"
   />
 
   <Card
-    description="Sponsor transaction fees for your users to enable gasless transactions"
+    description="Sponsor transaction fees for your users to enable gasless transactions."
     to="/docs/guide/payments/sponsor-user-fees"
     icon="lucide:heart-handshake"
     title="Sponsor User Fees"
   />
 
   <Card
-    description="Submit multiple transactions in parallel using nonce keys"
+    description="Submit multiple transactions in parallel using nonce keys."
     to="/docs/guide/payments/send-parallel-transactions"
     icon="lucide:git-branch"
     title="Send Parallel Transactions"

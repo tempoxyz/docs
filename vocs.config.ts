@@ -1093,17 +1093,25 @@ export default defineConfig({
 
     const docsHomeSidebar = [
       {
-        text: 'First Steps',
+        text: 'Start Here',
         items: [
           { text: 'Connect to Tempo', link: '/docs/quickstart/integrate-tempo' },
           { text: 'Get Funds', link: '/docs/guide/getting-funds' },
-          { text: 'Send a Payment', link: '/docs/guide/payments' },
-          { text: 'Use Tempo Transactions', link: '/docs/guide/tempo-transaction' },
-          { text: 'Issue a Stablecoin', link: '/docs/guide/issuance' },
+          { text: 'Send Your First Payment', link: '/docs/guide/payments/send-a-payment' },
         ],
       },
       {
-        text: 'Resources',
+        text: 'Build Paths',
+        items: [
+          { text: 'Stablecoin Payments', link: '/docs/guide/payments' },
+          { text: 'Issue Stablecoins', link: '/docs/guide/issuance' },
+          { text: 'Exchange Stablecoins', link: '/docs/guide/stablecoin-dex' },
+          { text: 'Agentic Payments', link: '/docs/guide/machine-payments' },
+          { text: 'Private Zones', link: '/docs/guide/private-zones' },
+        ],
+      },
+      {
+        text: 'Reference and Operations',
         items: [
           { text: 'Tools & SDKs', link: '/docs/tools' },
           { text: 'Tempo Protocol', link: '/docs/protocol' },

@@ -1,8 +1,9 @@
 ---
+title: Rust SDK
 description: Build blockchain apps with the Tempo Rust SDK using Alloy. Query chains, send transactions, and manage tokens with type-safe Rust code.
 ---
 
-# Rust
+# Rust SDK
 
 Tempo distributes a Rust SDK in the form of an [Alloy](https://alloy.rs) crate. Alloy is a popular Rust crate for interacting with EVM-compatible blockchains.
 
@@ -10,7 +11,7 @@ The Tempo Alloy crate can be used to perform common operations with the chain, s
 
 ::::steps
 
-## Install
+## Install the Rust SDK
 
 To install the Tempo extension, you will need to install [Alloy](https://alloy.rs) and Tempo:
 
@@ -23,7 +24,7 @@ cargo add tempo-alloy --git https://github.com/tempoxyz/tempo --tag v1.4.2
 We use [`tokio`](https://tokio.rs) in this example, but you can use any async runtime.
 :::
 
-## Configure A Provider
+## Configure a Rust provider
 
 To use the Tempo extension crate, you will need to create a [`Provider`] using the [`TempoNetwork`](https://tempoxyz.github.io/tempo/tempo_alloy/struct.TempoNetwork.html). This will enable the usage of Tempo specific types on the [`Provider`] instance.
 
@@ -46,7 +47,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-## Use Actions
+## Use Tempo actions in Rust
 
 Now we are ready to use the provider to interact with the network. We can use the provider to send transactions, read data, and more.
 

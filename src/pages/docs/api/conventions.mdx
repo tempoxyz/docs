@@ -3,13 +3,13 @@ title: Conventions
 description: Formatting standards and shared patterns used across the Tempo API — base URL, chains, identifiers, amounts, timestamps, request IDs, errors, and rate limits.
 ---
 
-# Conventions
+# API Conventions
 
 The Tempo API follows consistent formatting rules for identifiers, amounts, timestamps, and shared query parameters. This page is a quick reference for the patterns you'll encounter on every endpoint.
 
 For authentication and pagination, see the dedicated [Authentication](/docs/api/authentication) and [Pagination](/docs/api/pagination) pages.
 
-## Base URL
+## Tempo API base URL
 
 The Tempo API is served from a single base URL, with endpoints versioned under the `/v1` prefix:
 
@@ -19,7 +19,7 @@ https://api.tempo.xyz/v1
 
 For example: `https://api.tempo.xyz/v1/tokens`. See the [Versioning Policy](/docs/api/versioning-policy) for how versions, breaking changes, and deprecations work.
 
-## Chains
+## Chain identifiers
 
 Tempo runs multiple chains. Select one per request with the `chainId` query parameter, which accepts a chain alias or a numeric chain id:
 
@@ -35,7 +35,7 @@ curl 'https://api.tempo.xyz/v1/blocks?chainId=testnet' \
 
 `chainId` defaults to `mainnet` when omitted. A sandbox API key steers an omitted `chainId` to `testnet` — see [Authentication](/docs/api/authentication) for how key environments interact with chain selection.
 
-## Identifiers
+## Resource identifiers
 
 On-chain identifiers are `0x`-prefixed lowercase hex strings. They are returned in lowercase, and are accepted case-insensitively on input.
 
@@ -49,7 +49,7 @@ On-chain identifiers are `0x`-prefixed lowercase hex strings. They are returned 
 Treat identifiers as opaque strings. Always compare them in lowercase, since the API normalizes them to lowercase on output.
 :::
 
-## Amounts
+## Token amount formats
 
 Token amounts are returned as **decimal strings in the token's smallest unit**, never as numbers. This preserves full precision for large values that exceed the range of a JSON number.
 
@@ -67,7 +67,7 @@ Never parse amounts into floating-point numbers. JSON floats lose precision for 
 
 Raw EVM quantities (such as gas values) use a `0x`-prefixed hexadecimal integer instead, for example `0x1a` (which is `26`).
 
-## Timestamps
+## API timestamp formats
 
 All datetime fields are returned in UTC, formatted as ISO 8601 with a `Z` suffix:
 
@@ -77,14 +77,14 @@ YYYY-MM-DDTHH:MM:SSZ
 
 For example: `2024-01-01T00:00:00Z`. Date-range query parameters accept the same ISO 8601 format.
 
-## Query Parameters
+## API query parameters
 
 A few conventions are shared by query parameters across endpoints:
 
 - **Booleans** are the literal strings `true` or `false` (for example, `?verified=true`).
 - **Opt-in fields** are requested with a comma-separated `include` parameter (for example, `?include=token,totalCount`). Expensive fields are computed only when you ask for them. The available values differ per endpoint and are documented on each operation.
 
-## Request IDs
+## API request IDs
 
 Every response carries a `tempo-request-id` header that uniquely identifies the request. Error responses also echo it as `requestId` in the body. Include this value when contacting support so a request can be traced.
 
@@ -92,10 +92,10 @@ Every response carries a `tempo-request-id` header that uniquely identifies the 
 tempo-request-id: 0a1b2c3d-4e5f-6071-8293-a4b5c6d7e8f9
 ```
 
-## Errors
+## API error conventions
 
 Errors use a single, consistent envelope with a conventional HTTP status code and a stable, machine-readable `error.code` you branch on. See [Errors](/docs/api/errors) for the envelope and the full code catalog.
 
-## Rate Limits
+## API rate-limit conventions
 
 Every response carries standard `RateLimit-*` headers, and requests that exceed quota receive `429 Too Many Requests` with a `Retry-After` header. See [Rate Limits](/docs/api/rate-limits) for the full model and best practices.

@@ -1,4 +1,5 @@
 ---
+title: Providing Liquidity
 description: Provide liquidity on Tempo's DEX using limit orders and flip orders. Earn spreads while facilitating stablecoin trades with price-time priority.
 ---
 
@@ -10,7 +11,7 @@ When your orders are filled, you earn the spread between bid and ask prices whil
 
 You can only place orders on pairs between a token and its designated quote token. All TIP-20 tokens specify a quote token for trading pairs. [pathUSD](/docs/protocol/exchange/quote-tokens#pathusd) can be used as a simple choice for a quote token.
 
-## Overview
+## Orderbook liquidity overview
 
 The DEX uses an onchain orderbook where you can place orders at specific price ticks. Orders are matched using price-time priority, meaning better-priced orders fill first, and within the same price, earlier orders fill first.
 

@@ -3,9 +3,9 @@ title: Use Tempo Wallet CLI with Agents
 description: Connect Tempo Wallet CLI to AI agents for MPP service discovery, payment previews, spend caps, credits, and paid HTTP requests.
 ---
 
-# Use with Agents
+# Use Tempo Wallet CLI with Agents
 
-## Quickstart
+## Agent wallet quickstart
 
 Paste this into your agent to set up Tempo Wallet CLI:
 
@@ -23,7 +23,7 @@ codex exec "Read https://tempo.xyz/SKILL.md and set up tempo"
 ```
 :::
 
-## Auto-installed Skills
+## Auto-installed Tempo wallet skills
 
 When you run the setup prompt, your agent installs Tempo's built-in skills automatically. No manual skill wiring required.
 
@@ -32,7 +32,7 @@ When you run the setup prompt, your agent installs Tempo's built-in skills autom
 
 This works in supported skill-enabled agents including **Claude Code**, **Amp**, **Codex**, and similar environments.
 
-## Agent-Ready by Design
+## Tempo Wallet is agent-ready by design
 
 1. **TOON output mode (`-t` / `--toon-output`)** gives compact, machine-readable, token-efficient output so agent tooling can parse command responses reliably.
 2. **Built-in service discovery** (`tempo wallet services`) lets agents search providers, inspect endpoint details, and use verified method/path metadata instead of guessing URLs or payload shapes.
@@ -40,7 +40,7 @@ This works in supported skill-enabled agents including **Claude Code**, **Amp**,
 4. **`--max-spend` and scoped access keys** let you enforce budgets per request and per key.
 5. **MPP Credits support** lets agents pay eligible one-time charges from a separate credits balance after checking `tempo wallet -t whoami --credits`.
 
-## Agent Pattern
+## Tempo Wallet agent pattern
 
 ```bash
 tempo wallet -t whoami
@@ -59,6 +59,6 @@ tempo request -t --dry-run -D "$headers" -X POST --json '{"input":"hello"}' <SER
 tempo wallet -t transfer --credits --dry-run --mpp-challenge-file "$headers"
 ```
 
-## Troubleshooting
+## Troubleshoot agent wallet flows
 
 If agent runs fail, continue with [Troubleshooting](/docs/cli/wallet).

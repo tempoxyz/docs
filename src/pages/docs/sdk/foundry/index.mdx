@@ -1,4 +1,5 @@
 ---
+title: Foundry for Tempo
 description: Build, test, and deploy smart contracts on Tempo using Foundry. Access Tempo protocol features with forge, cast, anvil, and chisel.
 ---
 
@@ -20,7 +21,7 @@ Install the latest Foundry release to get Tempo support.
 
 :::::steps
 
-### Install `foundryup`
+### Install `foundryup` for Tempo
 
 If you don't have `foundryup` installed yet:
 
@@ -63,11 +64,11 @@ forge install tempoxyz/tempo-std
 
 :::::
 
-## Configure `foundry.toml`
+## Configure `foundry.toml` for Tempo
 
 The Tempo template gives you a working starting point, but it is often useful to make Tempo explicit in `foundry.toml`.
 
-### Configure RPC aliases
+### Configure Tempo RPC aliases
 
 Set a default Tempo RPC alias and keep a separate alias for Moderato testnet:
 
@@ -95,13 +96,13 @@ This network flag enables Tempo-specific network behavior while still letting Fo
 
 If you need advanced testing against historical network behavior, pin a specific Tempo hardfork explicitly in `foundry.toml` or via inline config. Most projects should avoid hardfork pinning so local tests track the current Tempo rules for the network they target.
 
-### Verification config
+### Configure Tempo contract verification
 
 Tempo's contract verifier is Sourcify-compatible. Configure verification with `VERIFIER_URL=https://contracts.tempo.xyz` or `--verifier-url https://contracts.tempo.xyz`.
 
 The `[etherscan]` table in `foundry.toml` is for Etherscan-style verifiers, not Tempo's verifier.
 
-### Using `foundry-toolchain` in your CI
+### Use `foundry-toolchain` in Tempo CI
 
 Use the [`foundry-toolchain`](https://github.com/foundry-rs/foundry-toolchain) GitHub Action to install Foundry in your CI.
 Tempo support is included in the latest Foundry release, so no special configuration is needed.
@@ -111,11 +112,11 @@ Tempo support is included in the latest Foundry release, so no special configura
   uses: foundry-rs/foundry-toolchain@v1
 ```
 
-## Use Foundry for your workflows
+## Use Foundry for Tempo workflows
 
 All standard Foundry commands are supported out of the box.
 
-### Test & deploy with `forge` locally
+### Test and deploy Tempo contracts locally with `forge`
 
 ```bash
 # Build your contracts
@@ -128,7 +129,7 @@ forge test
 forge script script/Mail.s.sol
 ```
 
-### Test & deploy with `forge` on Tempo Testnet
+### Test and deploy with `forge` on Tempo Testnet
 
 ```bash
 # Set environment variables
@@ -202,7 +203,7 @@ For more verification options including verifying existing contracts and API ver
 - **Silent failures**: Calling a non-existent function without a fallback succeeds silently
 :::
 
-### Interact & debug with `cast`
+### Interact and debug Tempo contracts with `cast`
 
 ```bash
 # Check that your contract is deployed:
@@ -296,7 +297,7 @@ If the access key will be used with passkey or WebAuthn signatures, pass `2` for
 
 Access-key transactions cannot create contracts, so use a root key for deployments or other flows that perform `CREATE`.
 
-### Local Development with Anvil
+### Local Tempo development with Anvil
 
 Anvil supports Tempo mode for local testing and forking Tempo networks:
 
@@ -336,7 +337,7 @@ cast batch-send \
   --private-key $PRIVATE_KEY
 ```
 
-## Tempo-Specific CLI Flags
+## Tempo-specific Foundry CLI flags
 
 The following flags are available for `cast` and `forge script` for Tempo-specific features:
 
@@ -354,7 +355,7 @@ The following flags are available for `cast` and `forge script` for Tempo-specif
 
 Ledger and Trezor wallets are not yet compatible with any `--tempo.*` option.
 
-## cast keychain
+## `cast keychain` for Tempo access keys
 
 `cast keychain` provides a CLI interface to Tempo's [Account Keychain precompile](/docs/protocol/transactions/AccountKeychain).
 

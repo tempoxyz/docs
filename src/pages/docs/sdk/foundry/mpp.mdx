@@ -20,7 +20,7 @@ Every Foundry tool works transparently with MPP-gated endpoints:
 - **`anvil`** — local forks of paid endpoints
 - **`chisel`** — interactive REPL sessions
 
-## How it works
+## How MPP works with Foundry
 
 When you point any Foundry tool at an MPP-gated RPC URL, the built-in transport intercepts `402` responses and resolves them using MPP's [session flow](/docs/guide/machine-payments/pay-as-you-go):
 
@@ -36,7 +36,7 @@ When you point any Foundry tool at an MPP-gated RPC URL, the built-in transport 
 Channel reuse means the first call to an MPP endpoint has roughly one confirmation of overhead (~500ms on Tempo), but all subsequent calls add near-zero latency.
 :::
 
-## Setup
+## Foundry MPP setup
 
 :::note
 Some endpoints use a one-shot `charge` intent instead of session-based channels. Foundry handles both — charge payments sign a single TIP-20 transfer without opening a channel.
@@ -83,9 +83,9 @@ cast block-number --rpc-url https://rpc.mpp.tempo.xyz
 
 :::::
 
-## Examples
+## Foundry MPP examples
 
-### cast
+### MPP requests with `cast`
 
 Query chain state through a paid endpoint:
 
@@ -99,7 +99,7 @@ cast call 0x20c0000000000000000000000000000000000000 \
   --rpc-url https://rpc.mpp.tempo.xyz
 ```
 
-### forge script
+### MPP requests in `forge script`
 
 Run deployment or read scripts against a paid endpoint:
 
@@ -122,7 +122,7 @@ contract ReadBlock is Script {
 forge script script/ReadBlock.s.sol --rpc-url https://rpc.mpp.tempo.xyz
 ```
 
-### forge test with forks
+### MPP requests in forked `forge test`
 
 Fork a paid endpoint in tests using `vm.createSelectFork`:
 
@@ -146,7 +146,7 @@ contract MppForkTest is Test {
 forge test --match-test test_fork_via_mpp -vvv
 ```
 
-### anvil
+### MPP requests with Anvil
 
 Fork a paid endpoint locally. Local RPC calls stay local, but any upstream fetches Anvil makes to the fork URL go through MPP:
 
@@ -154,7 +154,7 @@ Fork a paid endpoint locally. Local RPC calls stay local, but any upstream fetch
 anvil --fork-url https://rpc.mpp.tempo.xyz
 ```
 
-### chisel
+### MPP requests with Chisel
 
 Interactive REPL against a paid endpoint:
 
@@ -169,9 +169,9 @@ Type: uint256
 └ Decimal: 1234567
 ```
 
-## Configuration
+## Foundry MPP configuration
 
-### Deposit amount
+### MPP deposit amount
 
 Set the fallback deposit amount used when the server does not suggest one:
 
@@ -182,7 +182,7 @@ cast block-number --rpc-url https://rpc.mpp.tempo.xyz
 
 The deposit determines how many RPC calls you can make before the channel needs a top-up. When a channel is exhausted, Foundry automatically tops it up.
 
-### Key discovery
+### MPP key discovery
 
 Foundry discovers MPP signing keys in this order:
 
@@ -198,13 +198,13 @@ Foundry needs a usable inline private key — entries without one are skipped.
 
 When the server offers multiple chains or currencies, Foundry picks the first key that matches both the chain ID and currency from the challenge.
 
-### Channel persistence
+### MPP channel persistence
 
 Open channels are saved to `$TEMPO_HOME/foundry/channels.json` (default `~/.tempo/foundry/channels.json`). This allows channel reuse across process invocations — you won't re-open a channel every time you run `cast` or `forge`.
 
 Channels are automatically evicted when fully spent or closed. If the server restarts and returns `410 Gone`, Foundry clears stale local state and opens a fresh channel on the next request.
 
-## Testnet
+## Tempo MPP testnet workflow
 
 Use the Moderato testnet MPP endpoint for development:
 
@@ -217,11 +217,11 @@ cast block-number --rpc-url https://rpc.mpp.tempo.xyz
 
 Fund your testnet wallet with `tempo wallet fund` before making requests.
 
-### Gas sponsorship
+### MPP gas sponsorship
 
 Some MPP endpoints sponsor gas fees on behalf of the caller. When the server's challenge includes a `feePayer` flag, Foundry delegates gas payment to the server, so no native balance is needed for gas.
 
-## Troubleshooting
+## Troubleshoot MPP with Foundry
 
 | Error | Cause | Fix |
 |---|---|---|
@@ -230,7 +230,7 @@ Some MPP endpoints sponsor gas fees on behalf of the caller. When the server's c
 | `410 Gone` | Stale local channel state | Re-run the command — Foundry clears stale state and opens a fresh channel |
 | `access key does not exist` | Signing key not yet provisioned on-chain | Foundry retries automatically with a key provisioning bundle — no action needed |
 
-## Next steps
+## Next steps for MPP with Foundry
 
 <Cards>
   <Card

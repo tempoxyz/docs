@@ -26,7 +26,7 @@ Not all methods listed below are available on public endpoints. Method availabil
 | `consensus_subscribe` | Validator nodes over WebSocket only |
 | `admin_validatorKey` | Self-hosted nodes with `admin` API enabled |
 
-## `tempo_` namespace
+## Tempo-specific `tempo_` namespace
 
 ### `tempo_forkSchedule`
 
@@ -88,7 +88,7 @@ cast rpc tempo_fundAddress 0xYOUR_ADDRESS \
   --rpc-url https://rpc.moderato.tempo.xyz
 ```
 
-## `consensus_` namespace
+## Tempo consensus `consensus_` namespace
 
 Available on validator nodes only. Provides real-time consensus state for explorers, bridges, and indexers.
 
@@ -200,7 +200,7 @@ cast rpc consensus_getIdentityTransitionProof null null --rpc-url <VALIDATOR_RPC
 cast rpc consensus_getIdentityTransitionProof null true --rpc-url <VALIDATOR_RPC>
 ```
 
-## `admin_` namespace
+## Tempo admin `admin_` namespace
 
 Requires the `admin` API to be enabled on a self-hosted node (`--http.api admin`).
 
@@ -216,7 +216,7 @@ Returns the node's ed25519 validator public key if configured, or `null` for non
 cast rpc admin_validatorKey --rpc-url http://localhost:8545
 ```
 
-## Modified `eth_` methods
+## Tempo-modified `eth_` methods
 
 Tempo is fully [EVM compatible](/docs/quickstart/evm-compatibility), but the following standard methods behave differently due to the lack of a native gas token:
 

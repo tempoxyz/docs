@@ -1,4 +1,5 @@
 ---
+title: Send a Payment
 description: Send stablecoin payments between accounts on Tempo. Include optional memos for reconciliation and tracking with TypeScript, Rust, or Solidity.
 interactive: true
 ---
@@ -23,7 +24,7 @@ On post-T6 networks, a blocked TIP-20 `transfer` / `transferFrom` still succeeds
 See [Configure Receive Policies](/docs/guide/payments/configure-receive-policies).
 :::
 
-## Demo
+## Send payment demo
 
 By the end of this guide you will be able to send payments on Tempo with an optional memo.
 
@@ -33,11 +34,11 @@ By the end of this guide you will be able to send payments on Tempo with an opti
   <SendPayment stepNumber={3} last />
 </Demo.Container>
 
-## Steps
+## Send payment implementation steps
 
 ::::steps
 
-### Set up Wagmi
+### Set up Wagmi for Tempo payments
 
 Ensure that you have set up your project with Wagmi, a Tempo chain config, and a wallet connector:
 
@@ -45,7 +46,7 @@ Ensure that you have set up your project with Wagmi, a Tempo chain config, and a
 - [TypeScript SDK](/docs/sdk/typescript)
 - [Wallet integration](/docs/quickstart/wallet-developers)
 
-### Add testnet funds¹
+### Add testnet stablecoin funds¹
 
 Before you can send a payment, you need to fund your account. In this guide you will be sending `AlphaUSD` (`0x20c000…0001`).
 
@@ -86,7 +87,7 @@ function AddFunds() {
 started quickly. For production, you will need to onramp & fund your account manually.
 :::
 
-### Add send payment logic
+### Add TIP-20 transfer logic
 
 Now that you have `AlphaUSD` you are ready to add logic to send a payment with an optional memo.
 
@@ -149,7 +150,7 @@ function SendPaymentWithMemo() {
 
 :::
 
-### Display receipt
+### Display the payment receipt
 
 Now that you can send a payment, you can display the transaction receipt on success.
 
@@ -183,7 +184,7 @@ function SendPaymentWithMemo() {
 
 :::
 
-### Next steps
+### Next steps after sending a payment
 
 Now that you have made a payment you can
 - **[Accept a payment](/docs/guide/payments/accept-a-payment)** to receive payments in your application
@@ -191,9 +192,9 @@ Now that you have made a payment you can
 - Send a payment [with a specific fee token](/docs/guide/payments/pay-fees-in-any-stablecoin)
 :::: 
 
-## Recipes
+## Stablecoin payment recipes
 
-### Basic transfer
+### Basic TIP-20 transfer
 
 Send a payment using the standard `transfer` function:
 
@@ -1008,7 +1009,7 @@ Send multiple payments in a single transaction using batch transactions:
   </Tab>
 </Tabs>
 
-### Payment events
+### Index payment events
 
 When you send a payment, the token contract emits events:
 
@@ -1017,14 +1018,14 @@ When you send a payment, the token contract emits events:
 
 You can filter these events to track payments in your off-chain systems.
 
-## Best practices
+## Stablecoin payment best practices
 
-### Loading state
+### Payment loading states
 Users should see a loading state when the payment is being processed.
 
 You can use the `isPending` property from the `useTransferSync` hook to show pending state to the user.
 
-### Error handling
+### Payment error handling
 If an error unexpectedly occurs, you can display an error message to the user by using the `error` property from the `useTransferSync` hook.
 
 ```tsx
@@ -1042,7 +1043,7 @@ function SendPayment() {
 }
 ```
 
-## Learning resources
+## Stablecoin payment learning resources
 
 <Cards>
   <Card

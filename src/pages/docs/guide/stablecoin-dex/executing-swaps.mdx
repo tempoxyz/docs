@@ -1,4 +1,5 @@
 ---
+title: Executing Swaps
 description: Learn to execute instant stablecoin swaps on Tempo's DEX. Get price quotes, set slippage protection, and batch approvals with swaps.
 interactive: true
 ---
@@ -22,11 +23,11 @@ By the end of this guide you will be able to execute swaps, get price quotes, an
 </Demo.Container>
 
 
-## Steps
+## Swap implementation steps
 
 ::::steps
 
-### Set up your client
+### Set up your swap client
 
 Ensure that you have set up your client by following the [guide](/docs/sdk/typescript).
 
@@ -156,7 +157,7 @@ function Sell() {
 
 :::
 
-### Approve Spend
+### Approve stablecoin spend
 
 To execute a swap, you need to approve the Stablecoin DEX contract to spend the token you're using to fund the swap.
 
@@ -382,7 +383,7 @@ function Sell() {
 
 ::::
 
-## Recipes
+## Stablecoin swap recipes
 
 ### Handling insufficient liquidity
 
@@ -421,7 +422,7 @@ function Swap() {
 }
 ```
 
-## Best Practices
+## Stablecoin swap best practices
 
 ### Always get quotes before swapping
 
@@ -431,7 +432,7 @@ Query the expected price before executing a swap to ensure you're getting a fair
 
 Use `minAmountOut` or `maxAmountIn` to protect against unfavorable price movements between quoting and execution.
 
-## Learning Resources
+## Stablecoin swap learning resources
 
 <Cards>
   <Card

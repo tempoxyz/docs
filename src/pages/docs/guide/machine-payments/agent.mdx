@@ -11,13 +11,13 @@ The `tempo` CLI handles `402 Payment Required` responses the same way the client
 
 ::::steps
 
-### Install the CLI
+### Install the Tempo CLI
 
 ```bash
 curl -fsSL https://tempo.xyz/install | bash
 ```
 
-### Log in
+### Log in to Tempo Wallet
 
 ```bash
 tempo wallet login
@@ -30,7 +30,7 @@ tempo wallet whoami
 If your balance is zero, run `tempo wallet fund` before making requests.
 :::
 
-### Discover services
+### Discover MPP services
 
 ```bash
 tempo wallet services --search ai
@@ -41,7 +41,7 @@ The service directory shows endpoint URLs, HTTP methods, pricing, and request sc
 
 For MCP-capable agents, see [Discover MPP services](/docs/guide/machine-payments/discover-services) to connect the read-only services MCP server at `https://mpp.dev/mcp/services`.
 
-### Preview cost
+### Preview the MPP request cost
 
 ```bash
 tempo request --dry-run -X POST \
@@ -51,7 +51,7 @@ tempo request --dry-run -X POST \
 
 `--dry-run` validates the request and shows the payment cost without spending.
 
-### Make a paid request
+### Make an MPP paid request
 
 ```bash
 tempo request -X POST \
@@ -81,7 +81,7 @@ Read https://tempo.xyz/SKILL.md and set up tempo
 
 Once installed, the agent can discover services, preview costs, and make paid requests within scoped spending limits.
 
-## Next steps
+## Next steps for agentic payments
 
 <Cards>
   <Card

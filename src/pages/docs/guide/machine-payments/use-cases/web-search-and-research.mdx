@@ -9,17 +9,17 @@ import { Card, Cards } from 'vocs'
 
 Give your agents access to web search, content extraction, and multi-hop research — pay per query with stablecoins on Tempo. No API keys, no monthly plans, no usage caps.
 
-## The problem
+## The web search payment problem
 
 Agents that research, summarize, or fact-check need reliable web search. But search APIs require developer accounts, billing setups, and API keys for every provider. Rate limits are tied to pricing tiers, and switching between providers means managing multiple integrations.
 
-## How MPP solves it
+## How MPP enables paid web research
 
 With MPP, your agent pays per search query or page extraction in a single HTTP request. The agent discovers the price via the `402` Challenge, pays with a stablecoin transfer, and gets results — no signup required. Switch between search providers by changing the URL.
 
 **Tempo Charge** works well here: each search query is an independent request with a known price. The agent signs a TIP-20 transfer, the provider verifies it in ~500ms, and returns the results.
 
-## Available services
+## Web research services you can pay for
 
 | Provider | Capabilities | Service URL |
 |---|---|---|
@@ -30,7 +30,7 @@ With MPP, your agent pays per search query or page extraction in a single HTTP r
 | [Diffbot](https://diffbot.mpp.paywithlocus.com) | Article, product, and discussion extraction | `diffbot.mpp.paywithlocus.com` |
 | Oxylabs | Web scraping with geo-targeting and JS rendering | `oxylabs.mpp.tempo.xyz` |
 
-## Try it
+## Try Parallel with Tempo payments
 
 ```bash
 # Install Tempo CLI + wallet
@@ -41,14 +41,14 @@ tempo request parallelmpp.dev/search \
   -d '{"query": "machine payments protocol"}'
 ```
 
-## Prompt your agent
+## Prompt your agent to buy web research
 
 ```
 Use parallelmpp.dev to search the web via Tempo.
 Pay per query with stablecoins — no API key needed.
 ```
 
-## Next steps
+## Next steps for web research payments
 
 <Cards>
   <Card

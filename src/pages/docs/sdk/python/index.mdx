@@ -1,8 +1,9 @@
 ---
+title: Python SDK
 description: Build blockchain apps with the Tempo Python SDK. Send transactions, batch calls, and handle fee sponsorship using web3.py.
 ---
 
-# Python
+# Python SDK
 
 Tempo distributes a Python SDK as a [web3.py](https://web3py.readthedocs.io/) extension. The SDK adds native support for Tempo Transactions, including call batching, fee sponsorship, and access key management.
 
@@ -10,7 +11,7 @@ The Tempo Python SDK can be used to perform common operations with the chain, su
 
 ::::steps
 
-## Install
+## Install the Python SDK
 
 To install the Tempo Python SDK:
 
@@ -22,7 +23,7 @@ pip install pytempo
 The SDK requires Python 3.9 or higher and web3.py 7.0+.
 :::
 
-## Create a Client
+## Create a Python client
 
 To interact with Tempo, create a web3.py client connected to a Tempo node:
 
@@ -35,7 +36,7 @@ block_number = w3.eth.block_number
 print(f"Connected to Tempo at block {block_number}")
 ```
 
-## Send a Transaction
+## Send a Tempo transaction with Python
 
 Build and send a transaction using the `TempoTransaction` class:
 
@@ -68,9 +69,9 @@ print(f"Transaction hash: {tx_hash.hex()}")
 
 ::::
 
-## Examples
+## Python SDK examples
 
-### Token Transfer
+### Send a token transfer with Python
 
 Send a TIP-20 token transfer using pytempo's typed contract helpers:
 
@@ -93,7 +94,7 @@ tx = TempoTransaction.create(
 )
 ```
 
-### Pay Fees in a Stablecoin
+### Pay fees in a stablecoin with Python
 
 Use a TIP-20 token to pay for transaction fees instead of the native token:
 
@@ -114,7 +115,7 @@ tx = TempoTransaction.create(
 )
 ```
 
-### Batch Multiple Calls
+### Batch multiple calls with Python
 
 Execute multiple operations atomically in a single transaction:
 
@@ -173,7 +174,7 @@ w3.eth.send_raw_transaction(signed_tx1.encode())
 w3.eth.send_raw_transaction(signed_tx2.encode())
 ```
 
-### Fee Sponsorship
+### Fee sponsorship with Python
 
 Have another account pay for transaction fees:
 
@@ -193,7 +194,7 @@ final_tx = signed_by_user.sign(fee_payer_private_key, for_fee_payer=True) # [!co
 w3.eth.send_raw_transaction(final_tx.encode())
 ```
 
-### Transaction Validity Window
+### Transaction validity windows in Python
 
 Set a time window during which the transaction is valid:
 
@@ -214,7 +215,7 @@ tx = TempoTransaction.create(
 )
 ```
 
-## Account Keychain
+## Account Keychain in the Python SDK
 
 The `AccountKeychain` class provides typed helpers for Tempo's [Account Keychain precompile](/docs/protocol/transactions/AccountKeychain), enabling access key management directly from Python.
 
@@ -327,7 +328,7 @@ remaining = AccountKeychain.get_remaining_limit(
 print(f"Remaining: {remaining}")
 ```
 
-### Signing with an Access Key
+### Sign with an access key in Python
 
 Use `sign_access_key` to sign a transaction as an access key holder:
 
@@ -350,7 +351,7 @@ signed_tx = tx.sign_access_key( # [!code hl]
 tx_hash = w3.eth.send_raw_transaction(signed_tx.encode())
 ```
 
-## Next Steps
+## Next steps for the Python SDK
 
 After setting up the Python SDK, you can:
 

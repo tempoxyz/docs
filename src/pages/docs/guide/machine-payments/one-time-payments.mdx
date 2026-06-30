@@ -9,11 +9,11 @@ import { Card, Cards } from 'vocs'
 
 Build a payment-gated API that charges $0.01 per request using `mppx`. The server returns a random photo from [Picsum](https://picsum.photos) behind a paywall.
 
-## Server setup
+## One-time payment server setup
 
 ::::steps
 
-### Install dependencies
+### Install one-time payment dependencies
 
 :::code-group
 ```bash [npm]
@@ -27,7 +27,7 @@ bun add mppx viem
 ```
 :::
 
-### Set up `Mppx` instance
+### Set up an `Mppx` charge instance
 
 Set up an `Mppx` instance with the `tempo` method.
 
@@ -45,7 +45,7 @@ const mppx = Mppx.create({
 })
 ```
 
-### Add a payment-gated route
+### Add a one-time payment route
 
 Add payment verification using `mppx.charge` as route middleware. The handler only runs after payment is verified.
 
@@ -142,7 +142,7 @@ Bun.serve({
 
 :::
 
-### Test the endpoint
+### Test the one-time payment endpoint
 
 ```bash
 # Create account funded with testnet tokens
@@ -154,7 +154,7 @@ $ npx mppx http://localhost:3000/api/photo
 
 ::::
 
-## Next steps
+## Next steps for one-time payments
 
 <Cards>
   <Card

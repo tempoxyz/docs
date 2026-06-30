@@ -13,7 +13,7 @@ The Foundry project template for Tempo ships with a working example that demonst
 forge init --template tempo my-project && cd my-project
 ```
 
-## How it works
+## How signature verification works in Foundry
 
 The template's `Mail` contract supports two modes:
 
@@ -85,7 +85,7 @@ contract Mail {
 }
 ```
 
-## Testing
+## Test signature verification in Foundry
 
 The template includes tests for both signature types. Tempo support is enabled by the template's Foundry config. If you copy this pattern into an existing project, make sure `foundry.toml` enables Tempo mode:
 
@@ -142,7 +142,7 @@ forge test -vvv
 
 The secp256k1 and P256 relay tests use Tempo mode through the template's Foundry config.
 
-## Related
+## Related signature verification docs
 
 - [TIP-1020: Signature Verification Precompile](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md)
 - [T6 Network Upgrade](/docs/protocol/upgrades/t6)

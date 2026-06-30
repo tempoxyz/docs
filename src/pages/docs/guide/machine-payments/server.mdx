@@ -9,7 +9,7 @@ import { Card, Cards } from 'vocs'
 
 Plug MPP into any server framework to accept payments for protected resources. Use `mppx` middleware for your framework, or call `mppx/server` directly with the Fetch API.
 
-## Framework middleware
+## MPP server framework middleware
 
 Use the framework-specific middleware from `mppx` to integrate payment into your server. Each middleware handles the `402` challenge/credential flow and attaches receipts automatically.
 
@@ -83,7 +83,7 @@ mppx.charge({
 ```
 :::
 
-## Manual mode
+## Manual MPP server mode
 
 If you prefer full control over the payment flow, use `mppx/server` directly with the Fetch API.
 
@@ -112,7 +112,7 @@ export async function handler(request: Request) {
 `currency` is the TIP-20 token contract address — [`0x20c0…`](https://explore.tempo.xyz/address/0x20c0000000000000000000000000000000000000?live=false) is PathUSD on Tempo. `recipient` is the address that receives payment. See the [Tempo payment method](https://mpp.dev/payment-methods/tempo) for supported tokens.
 :::
 
-## Realm
+## MPP payment realm
 
 The `realm` identifies your server in payment challenges and on-chain attribution. By default, mppx auto-detects it from environment variables (`HOSTNAME`, `VERCEL_URL`, etc.), but this can produce incorrect values in containerized environments where `HOSTNAME` is set to an internal identifier (e.g. a Kubernetes pod name).
 
@@ -130,7 +130,7 @@ const mppx = Mppx.create({
 
 You can also set the `MPP_REALM` environment variable instead of passing it in code.
 
-## Push & pull modes
+## MPP push and pull modes
 
 Tempo charges support two transaction submission modes, determined by the client:
 
@@ -139,7 +139,7 @@ Tempo charges support two transaction submission modes, determined by the client
 
 Your server handles both modes automatically — no configuration required. The server inspects the credential payload type (`transaction` for pull, `hash` for push) and verifies accordingly.
 
-### Fee sponsorship
+### MPP fee sponsorship
 
 To sponsor gas fees for pull-mode clients, pass a `feePayer` account to `tempo()`:
 
@@ -158,7 +158,7 @@ const mppx = Mppx.create({
 
 When a pull-mode client submits a signed transaction, the server co-signs with the fee payer account before broadcasting. Push-mode clients pay their own gas, so `feePayer` is ignored for those requests.
 
-## Testing your server
+## Test your MPP server
 
 After your server is running, test it with the `mppx` CLI:
 
@@ -174,7 +174,7 @@ $ npx mppx <your-server>/resource
 Use `npx mppx --inspect` to debug your server's Challenge response without making any payments.
 :::
 
-## Next steps
+## Next steps for MPP servers
 
 <Cards>
   <Card

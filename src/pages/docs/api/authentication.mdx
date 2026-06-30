@@ -3,7 +3,7 @@ title: Authentication
 description: Authenticate Tempo API requests with production or sandbox API keys, or pay per request with MPP.
 ---
 
-# Authentication
+# API Authentication
 
 The Tempo API supports three ways to authenticate a request, so you can start without credentials and add authentication as your needs grow:
 
@@ -26,7 +26,7 @@ Every key belongs to one of two environments, **production** or **sandbox**, tha
 - Production: `tempo:sk:...`
 - Sandbox: `tempo_sandbox:sk:...`
 
-### Production vs. Sandbox
+### Production and sandbox API keys
 
 | Property | Production | Sandbox |
 | --- | --- | --- |
@@ -37,7 +37,7 @@ Every key belongs to one of two environments, **production** or **sandbox**, tha
 
 Both environments grant the same scopes and quotas. The only difference is the set of chains a key may read.
 
-### Authenticating
+### Authenticate API requests
 
 Send the token in either header:
 
@@ -56,7 +56,7 @@ curl 'https://api.tempo.xyz/v1/blocks?chainId=testnet' \
   --header 'Authorization: Bearer tempo_sandbox:sk:...'
 ```
 
-### Behaviors
+### API authentication behaviors
 
 - **Production keys** work on any chain. A request that omits `chainId` targets mainnet.
 - **Sandbox keys** are restricted to non-mainnet chains.

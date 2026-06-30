@@ -3,7 +3,7 @@ title: Errors
 description: How the Tempo API signals errors, including HTTP status codes, the error envelope, and the full catalog of machine-readable error codes.
 ---
 
-# Errors
+# API Errors
 
 The Tempo API uses conventional HTTP status codes to indicate the result of a request:
 
@@ -11,7 +11,7 @@ The Tempo API uses conventional HTTP status codes to indicate the result of a re
 - **`4xx`**: the request failed given the information provided (for example, a missing parameter or an unknown resource).
 - **`5xx`**: something went wrong on Tempo's side.
 
-## Error Response
+## API error response format
 
 Every error returns the same JSON envelope:
 
@@ -112,9 +112,9 @@ You exceeded the rate limit. The response carries a `Retry-After` header. See [R
 | `rate_limit_exceeded` | The request exceeded the quota for its window. |
 | `payment_required` | The request was over quota on an endpoint where payment is accepted but none was supplied. |
 
-## 5xx: Server Errors
+## 5xx: Tempo server errors
 
-Something went wrong on Tempo's side. These are transient. Retry with [exponential backoff](/docs/api/rate-limits#retry-with-backoff).
+Something went wrong on Tempo's side. These are transient. Retry with [exponential backoff](/docs/api/rate-limits#retry-rate-limited-requests-with-backoff).
 
 | Status | Code | Meaning |
 | --- | --- | --- |

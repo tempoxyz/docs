@@ -1,4 +1,5 @@
 ---
+title: Use Your Stablecoin for Fees
 description: Enable users to pay transaction fees using your stablecoin. Add fee pool liquidity and integrate with Tempo's flexible fee payment system.
 interactive: true
 ---
@@ -17,7 +18,7 @@ import { PayWithIssuedToken } from '../../../../components/guides/steps/payments
 
 Enable users to pay transaction fees using your stablecoin. Tempo supports flexible fee payment options, allowing users to pay fees in any stablecoin they hold.
 
-## Demo
+## Fee-token stablecoin demo
 
 <Demo.Container name="Use Your Stablecoin for Fees" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
   <Connect stepNumber={1} />
@@ -29,15 +30,15 @@ Enable users to pay transaction fees using your stablecoin. Tempo supports flexi
   <PayWithIssuedToken stepNumber={7} last />
 </Demo.Container>
 
-## Steps
+## Fee-token stablecoin setup steps
 
 ::::steps
 
-### Create your stablecoin
+### Create your fee-token stablecoin
 
 First, create and mint your stablecoin by following the [Create a Stablecoin](/docs/guide/issuance/create-a-stablecoin) guide.
 
-### Add fee pool liquidity
+### Add Fee AMM liquidity
 
 Before users can pay fees with your token, you need to provide liquidity in the Fee AMM between your token and a liquid quote token, or directly against validator payout tokens where you want explicit direct-route coverage.
 
@@ -117,7 +118,7 @@ require(reserveValidator > 0, "No liquidity available for fee conversion");
 
 If the pool has no liquidity (`reserveValidatorToken == 0`), you'll need to add liquidity to the fee pool before users can pay fees with your token. See the [Create a Stablecoin](/docs/guide/issuance/create-a-stablecoin) guide for instructions on minting fee AMM liquidity.
 
-### Send payment with your token as fee
+### Send a payment using your stablecoin as the fee token
 
 Your users can send payments using your issued stablecoin as the fee token:
 
@@ -283,7 +284,7 @@ Users can set your stablecoin as their default fee token at the account level, o
 
 ::::
 
-## How It Works
+## How stablecoin fee payments work
 
 When users pay transaction fees with your stablecoin, Tempo's fee system automatically handles the conversion if validators prefer a different token. The [Fee AMM](/docs/protocol/fees/spec-fee-amm) ensures seamless fee payments across all supported stablecoins.
 
@@ -294,13 +295,13 @@ Users can select your stablecoin as their fee token through:
 
 Learn more about [how users pay fees in different stablecoins](/docs/guide/payments/pay-fees-in-any-stablecoin) and the complete [fee token preference hierarchy](/docs/protocol/fees/spec-fee#fee-token-preferences).
 
-## Benefits
+## Benefits of stablecoin fee tokens
 
 - **User convenience**: Users can pay fees with the same token they're using
 - **Liquidity**: Encourages users to hold your stablecoin
 - **Flexibility**: Works seamlessly with Tempo's fee system
 
-## Best Practices
+## Stablecoin fee-token best practices
 
 ### Monitor pool liquidity
 
@@ -320,7 +321,7 @@ Before promoting fee payments with your token, thoroughly test the flow on testn
 3. Execute test transactions with various gas costs
 4. Monitor that fee conversions work correctly
 
-## Next Steps
+## Next steps for stablecoin fee tokens
 
 <Cards>
   <Card

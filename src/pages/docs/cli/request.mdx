@@ -11,7 +11,7 @@ A curl-compatible HTTP client that handles [Machine Payments Protocol](https://m
 
 Requires [`tempo wallet login`](/docs/cli/wallet) first. Use [`tempo wallet services`](/docs/cli/wallet#discover-services) before calling paid endpoints so agents and scripts use registered URLs, methods, pricing, and request schemas instead of guessing.
 
-## Usage
+## `tempo request` usage
 
 | Command | Description |
 | --- | --- |
@@ -21,7 +21,7 @@ Requires [`tempo wallet login`](/docs/cli/wallet) first. Use [`tempo wallet serv
 | `tempo request -X POST <url> --json '{...}'` | Send a JSON body |
 | `tempo request <url> -H 'Header: Value'` | Add a custom header |
 
-## Flags
+## `tempo request` flags
 
 | Flag | Description |
 | --- | --- |
@@ -33,7 +33,7 @@ Requires [`tempo wallet login`](/docs/cli/wallet) first. Use [`tempo wallet serv
 | `-D <file>` / `--dump-header <file>` | Write response headers, useful for inspecting MPP challenges |
 | `-t` / `--toon-output` | Compact machine-readable output for scripts and agents |
 
-## Examples
+## `tempo request` examples
 
 Preview cost before paying:
 
@@ -62,7 +62,7 @@ tempo request -t --dry-run -D "$headers" -X POST \
 
 Discover the right URL and request schema first with [`tempo wallet services`](/docs/cli/wallet#discover-services).
 
-## Learn more
+## Learn more about paid Tempo requests
 
 <Cards>
   <Card

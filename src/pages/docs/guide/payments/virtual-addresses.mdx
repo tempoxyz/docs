@@ -16,7 +16,7 @@ Virtual addresses let you issue a distinct deposit address for each customer wit
 
 This page is intentionally about the operator flow rather than the spec. In preview environments the demo may run against pre-release infrastructure, but the flow is the same one operators will use on public testnet.
 
-## What happens
+## How virtual address deposits work
 
 <MermaidDiagram chart={`sequenceDiagram
     participant Sender
@@ -39,7 +39,7 @@ The important behavior is:
 - the **master wallet** receives the balance
 - the virtual address still appears in events, so you can attribute the deposit correctly
 
-## Live demo
+## Virtual address live demo
 
 This walkthrough shows the full flow:
 
@@ -83,7 +83,7 @@ Mining the TIP-1022 salt can take 30+ seconds depending on your browser, hardwar
   </Tab>
 </Tabs>
 
-## What to look for
+## What to verify in virtual address deposits
 
 When the demo succeeds, you should see all of the following:
 
@@ -122,7 +122,7 @@ A few things matter in production:
 - policy checks apply to the **resolved master wallet**, not the literal virtual address
 - avoid using virtual addresses in reward protocols (lending pools, DEX rewards, etc) unless explicitly supported, as they can't track or hold funds
 
-## Learn more
+## Learn more about TIP-20 virtual addresses
 
 <Cards>
   <Card

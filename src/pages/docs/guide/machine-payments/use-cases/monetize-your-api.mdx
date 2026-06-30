@@ -9,11 +9,11 @@ import { Card, Cards } from 'vocs'
 
 Accept stablecoin payments for any HTTP endpoint. No signup flows, no billing accounts, no API key management. Your users — agents, apps, or humans — pay per request with stablecoins on Tempo, and you get paid instantly.
 
-## The problem
+## The API monetization problem
 
 Monetizing an API today means building a billing system: user registration, API key provisioning, usage metering, invoicing, and payment collection. For most developers, the billing infrastructure is harder to build than the API itself. Stripe and similar tools help, but still require account creation and credit card onboarding from every customer.
 
-## How MPP solves it
+## How MPP adds agentic API payments
 
 With MPP, you add a few lines of code to your HTTP endpoint and it becomes payment-gated. The server returns a `402` Challenge with the price, the client pays with a stablecoin transfer, and the server delivers the response with a `Receipt`. Settlement happens in ~500ms on Tempo.
 
@@ -21,11 +21,11 @@ With MPP, you add a few lines of code to your HTTP endpoint and it becomes payme
 - **Tempo Charge** — One-time payment per request. Best for single API calls, content access, or discrete operations.
 - **Tempo Session** — Continuous pay-as-you-go via payment channels. Best for LLM APIs, metered services, or streamed responses.
 
-## Get started in 5 minutes
+## Add API payments in 5 minutes
 
 ::::steps
 
-### Install the SDK
+### Install the MPP SDK
 
 :::code-group
 ```bash [npm]
@@ -39,7 +39,7 @@ bun add mppx viem
 ```
 :::
 
-### Add payment gating
+### Add MPP payment gating
 
 ```ts
 import { Mppx, tempo } from 'mppx/server'
@@ -64,7 +64,7 @@ export async function handler(request: Request) {
 }
 ```
 
-### Test it
+### Test the paid API
 
 ```bash
 npx mppx account create
@@ -81,7 +81,7 @@ npx mppx http://localhost:3000/api/endpoint
 - **Fee sponsorship** — Cover gas fees for your customers so they only need stablecoins
 - **Any stablecoin** — Accept pathUSD, USDC.e, or any TIP-20 token
 
-## Next steps
+## Next steps for API monetization
 
 <Cards>
   <Card

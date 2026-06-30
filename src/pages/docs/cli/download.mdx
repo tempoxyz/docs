@@ -9,13 +9,13 @@ Download chain snapshots for faster initial sync. Fetches MDBX state and static 
 
 Running `tempo download` without a snapshot profile opens an interactive component selector. Passing a profile flag such as `--minimal` or `--archive` skips the selector. Validators should use `--minimal`. RPC providers, indexers, and other workloads that need complete historical data should use `--archive`.
 
-## Usage
+## `tempo download` usage
 
 ```bash
 tempo download [flags]
 ```
 
-## Flags
+## `tempo download` flags
 
 | Flag | Description |
 | --- | --- |
@@ -70,7 +70,7 @@ tempo download --chain moderato --minimal --force
 If you are unsure which pruning configuration your validator is running, reach out to the Tempo team before replacing snapshot data.
 :::
 
-## Examples
+## `tempo download` examples
 
 Open the interactive selector for mainnet:
 
