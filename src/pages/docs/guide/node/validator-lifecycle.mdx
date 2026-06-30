@@ -33,7 +33,11 @@ If you need to reset your validator's data, you must rotate to a new validator i
 Self-service data resets are coming soon. Once available, you will be able to rotate to a new identity and reset your data without coordinating with the Tempo team. See [Rotate validator identity](#rotate-validator-identity).
 :::
 
-## Rotate validator identity
+## Managing your validator
+
+The lifecycle commands below submit ValidatorConfig transactions. The transaction signer must control the validator operator address or contract owner address, but it does not need to be a plaintext EOA key. Use the CLI signer backend that matches your custody setup; see [validator operator address custody](/docs/guide/node/validator-keys#validator-operator-address-custody).
+
+### Rotate validator identity
 
 The ed25519 key can be changed while keeping your validator index stable. This is useful for key rotation or recovery without leaving and re-joining the committee. [Generate a new signing key](/docs/guide/node/validator-keys#generating-a-signing-key) first.
 
@@ -52,7 +56,7 @@ tempo consensus validator <old_pubkey> --rpc-url https://rpc.testnet.tempo.xyz
 ::::
 :::
 
-The simplest way to rotate is using the `tempo` CLI, which handles signature creation and the on-chain transaction in one step. The transaction signer can be a local wallet key, hardware wallet, or remote KMS signer; see [validator operator address custody](/docs/guide/node/validator-keys#validator-operator-address-custody).
+The simplest way to rotate is using the `tempo` CLI, which handles signature creation and the on-chain transaction in one step.
 
 ::::code-group
 ```bash [Mainnet]
@@ -62,7 +66,6 @@ tempo consensus rotate-validator \
   --ingress <NEW_IP:PORT> \
   --egress <NEW_IP> \
   --signing-key <NEW_PRIVATE_KEY_PATH> \
-  --wallet-key <ETHEREUM_WALLET_KEY_PATH> \
   --rpc-url https://rpc.tempo.xyz
 ```
 ```bash [Testnet]
@@ -72,12 +75,9 @@ tempo consensus rotate-validator \
   --ingress <NEW_IP:PORT> \
   --egress <NEW_IP> \
   --signing-key <NEW_PRIVATE_KEY_PATH> \
-  --ledger \
   --rpc-url https://rpc.testnet.tempo.xyz
 ```
 ::::
-
-Replace `--wallet-key ...` or `--ledger` with `--trezor`, `--aws`, or `--gcp` when using another supported signer backend.
 
 If self-service rotation is not yet enabled for your validator, use `tempo consensus create-rotate-validator-signature` to generate the signature and provide it to the Tempo team.
 
@@ -87,7 +87,7 @@ Rotation preserves your validator index and active validator count. The old entr
 
 After rotation, your validator goes through the [standard state transitions](/docs/guide/node/validator-status#state-transitions) with the new identity.
 
-## Update IP addresses
+### Update IP addresses
 
 If your node's network endpoints change, update them on-chain. The change takes effect at the next finalized block.
 
@@ -96,25 +96,21 @@ If your node's network endpoints change, update them on-chain. The change takes 
 tempo consensus set-validator-ip-address <address/pubkey/index> \
   --ingress <NEW_IP:NEW_PORT> \
   --egress <NEW_IP> \
-  --rpc-url https://rpc.tempo.xyz \
-  --wallet-key <PATH_TO_VALIDATOR_WALLET_KEY>
+  --rpc-url https://rpc.tempo.xyz
 ```
 ```bash [Testnet]
 tempo consensus set-validator-ip-address <address/pubkey/index> \
   --ingress <NEW_IP:NEW_PORT> \
   --egress <NEW_IP> \
-  --rpc-url https://rpc.testnet.tempo.xyz \
-  --aws
+  --rpc-url https://rpc.testnet.tempo.xyz
 ```
 ::::
-
-Replace the signer flag with `--ledger`, `--trezor`, `--aws`, `--gcp`, or `--wallet-key <PATH>` depending on how the validator operator address is custodied.
 
 :::warning
 Ingress addresses must be unique across all active validators. The transaction will revert if another active validator already uses the same `IP:port`.
 :::
 
-## Update the fee recipient
+### Update the fee recipient
 
 The fee recipient used by your validator when constructing block proposals is managed on-chain. This can be updated and takes effect on the next finalized block.
 
@@ -122,20 +118,16 @@ The fee recipient used by your validator when constructing block proposals is ma
 ```bash [Mainnet]
 tempo consensus set-validator-fee-recipient <address/pubkey/index> \
   --fee-recipient <ETHEREUM_ADDRESS> \
-  --rpc-url https://rpc.tempo.xyz \
-  --wallet-key <PATH_TO_VALIDATOR_WALLET_KEY>
+  --rpc-url https://rpc.tempo.xyz
 ```
 ```bash [Testnet]
 tempo consensus set-validator-fee-recipient <address/pubkey/index> \
   --fee-recipient <ETHEREUM_ADDRESS> \
-  --rpc-url https://rpc.testnet.tempo.xyz \
-  --gcp
+  --rpc-url https://rpc.testnet.tempo.xyz
 ```
 ::::
 
-The same signer flags are supported here as for rotation and IP updates.
-
-## Transfer validator ownership
+### Transfer validator ownership
 
 Rebind your validator entry to a new control address:
 
@@ -143,20 +135,18 @@ Rebind your validator entry to a new control address:
 ```bash [Mainnet]
 tempo consensus transfer-validator-ownership <address/pubkey/index> \
   --rpc-url https://rpc.tempo.xyz \
-  --wallet-key <PATH_TO_VALIDATOR_WALLET_KEY> \
   --new-private-key <PATH_TO_NEW_VALIDATOR_PRIVATE_KEY>
 ```
 ```bash [Testnet]
 tempo consensus transfer-validator-ownership <address/pubkey/index> \
   --rpc-url https://rpc.testnet.tempo.xyz \
-  --ledger \
   --new-private-key <PATH_TO_NEW_VALIDATOR_PRIVATE_KEY>
 ```
 ::::
 
-The transaction signer for the current operator address can use any supported CLI signer backend. The `--new-private-key` argument is used to derive the replacement operator address, and that new address must not already be used by another active validator.
+The `--new-private-key` argument is used to derive the replacement operator address. That new address must not already be used by another active validator.
 
-## Deactivate your validator
+### Deactivate your validator
 
 Deactivate your validator when you want to leave the active set.
 
@@ -167,19 +157,15 @@ Your validator remains a dealer in the committee for at least one more epoch aft
 ::::code-group
 ```bash [Mainnet]
 tempo consensus deactivate-validator <address/pubkey/index> \
-  --rpc-url https://rpc.tempo.xyz \
-  --wallet-key <PATH_TO_VALIDATOR_WALLET_KEY>
+  --rpc-url https://rpc.tempo.xyz
 ```
 ```bash [Testnet]
 tempo consensus deactivate-validator <address/pubkey/index> \
-  --rpc-url https://rpc.testnet.tempo.xyz \
-  --trezor
+  --rpc-url https://rpc.testnet.tempo.xyz
 ```
 ::::
 
-Use the signer backend that controls the validator operator address.
-
-### Exit timeline
+#### Exit timeline
 
 Deactivation is not instant — your validator is phased out over two epochs:
 
