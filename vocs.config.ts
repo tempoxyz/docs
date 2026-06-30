@@ -90,6 +90,12 @@ export default defineConfig({
     ],
   },
   baseUrl: baseUrl || undefined,
+  // Vercel owns trailing-slash canonicalization for this deployment (docs are
+  // served under the `/developers` prefix). Letting Vocs also emit a
+  // trailing-slash redirect caused an infinite redirect loop, since its
+  // redirect Location drops the `/developers` prefix. Normalize internally
+  // instead. See https://github.com/wevm/vocs/pull/547
+  trailingSlashRedirect: false,
   ogImageUrl: (path, options = {}) => {
     const urlBase = options.baseUrl?.replace(/\/$/, '') ?? ''
     const docsPath = path.replace(/^\/docs(?=\/|$)/, '') || '/'
