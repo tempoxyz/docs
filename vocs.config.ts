@@ -12,8 +12,8 @@ const baseUrl = (() => {
   return ''
 })()
 
-const searchIndexFields = ['title', 'titles', 'subtitle', 'path', 'excerpt', 'text']
-const searchBoost = { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 2, text: 2 }
+const searchIndexFields = ['title', 'titles', 'subtitle', 'path', 'excerpt']
+const searchBoost = { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 3 }
 
 function extractSearchField(document: Record<string, unknown>, fieldName: string) {
   if (fieldName === 'path') {
@@ -26,7 +26,7 @@ function extractSearchField(document: Record<string, unknown>, fieldName: string
     return String(document.text ?? '')
       .trim()
       .split(/\s+/)
-      .slice(0, 80)
+      .slice(0, 24)
       .join(' ')
   }
   return document[fieldName]
@@ -72,8 +72,8 @@ export default defineConfig({
     },
     query: {
       combineWith: 'OR',
-      fuzzy: 0.2,
-      prefix: true,
+      fuzzy: 0.1,
+      prefix: false,
       boost: searchBoost,
       boostDocument: boostSearchDocument,
     },

@@ -15,6 +15,7 @@ export type SearchVariant = {
 }
 
 const productionBoost = { title: 4, subtitle: 3, text: 2, category: 1, titles: 1 }
+const tunedProductionBoost = { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 3 }
 const excerptPathTextBoost = { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 2, text: 2 }
 const pathHeavyBoost = { title: 7, subtitle: 3, titles: 2, path: 6, excerpt: 1, text: 1 }
 const balancedPathTextBoost = { title: 5, subtitle: 3, titles: 2, path: 3, text: 2 }
@@ -60,7 +61,7 @@ export const variants: SearchVariant[] = [
   {
     name: 'production-baseline',
     description: 'Current Vocs 2.2.1 path/excerpt production settings.',
-    fields: ['title', 'titles', 'subtitle', 'path', 'excerpt', 'text'],
+    fields: ['title', 'titles', 'subtitle', 'path', 'excerpt'],
     storeFields: [
       'category',
       'href',
@@ -72,12 +73,12 @@ export const variants: SearchVariant[] = [
       'type',
     ],
     derivedFields: ['path', 'excerpt'],
-    excerptWords: 80,
+    excerptWords: 24,
     searchOptions: {
       combineWith: 'OR',
-      fuzzy: 0.2,
-      prefix: true,
-      boost: excerptPathTextBoost,
+      fuzzy: 0.1,
+      prefix: false,
+      boost: tunedProductionBoost,
       boostDocument,
     },
   },

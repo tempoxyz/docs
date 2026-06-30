@@ -3,7 +3,7 @@ import MiniSearch, { type Options, type SearchOptions } from 'minisearch'
 
 // Mirrors the search config in vocs.config.ts so the marketing search loads the
 // same serialized index that the docs search dialog uses.
-const searchFields = ['title', 'titles', 'subtitle', 'path', 'excerpt', 'text']
+const searchFields = ['title', 'titles', 'subtitle', 'path', 'excerpt']
 const storeFields = [
   'category',
   'excerpt',
@@ -56,9 +56,9 @@ function tokenize(text: string): string[] {
 
 const searchOptions: SearchOptions = {
   combineWith: 'OR',
-  fuzzy: 0.2,
-  prefix: true,
-  boost: { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 2, text: 2 },
+  fuzzy: 0.1,
+  prefix: false,
+  boost: { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 3 },
   boostDocument: (_id, _term, storedFields) => {
     const priority = (storedFields?.searchPriority as number | undefined) ?? 1
     const href = storedFields?.href as string | undefined
