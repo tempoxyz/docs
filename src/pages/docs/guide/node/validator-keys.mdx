@@ -122,13 +122,13 @@ The validator operator address is an Ethereum address, but it does not need to b
 | AWS KMS | `--aws` | Requires `AWS_KMS_KEY_ID` and AWS credentials in the environment |
 | GCP KMS | `--gcp` | Requires `GCP_PROJECT_ID`, `GCP_LOCATION`, `GCP_KEY_RING`, `GCP_KEY_NAME`, and `GCP_KEY_VERSION` |
 
-Use these signer flags for CLI commands that submit ValidatorConfig transactions, including rotation, IP updates, fee-recipient updates, deactivation, and ownership transfer.
+Use these signer flags for CLI commands that submit transactions to the validator contract, including rotation, IP updates, fee-recipient updates, deactivation, and ownership transfer.
 
 :::info
 The validator identity signature and the transaction signer are different:
 
 - The ed25519 consensus signing key proves ownership of the validator public key during registration and rotation.
-- The Ethereum transaction signer controls the validator operator address or contract owner address. It can be backed by a hardware wallet or remote KMS.
+- The Ethereum transaction signer controls the validator operator address. It can be backed by a hardware wallet or remote KMS.
 :::
 
 ## Signing share recovery
@@ -143,4 +143,4 @@ All key and identity operations are executed through the ValidatorConfig V2 prec
 address constant VALIDATOR_CONFIG_V2 = 0xCCCCCCCC00000000000000000000000000000001;
 ```
 
-All write operations require either the contract owner or the validator's own address.
+Public validator write operations require the validator operator address.

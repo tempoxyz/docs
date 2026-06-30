@@ -35,7 +35,7 @@ Self-service data resets are coming soon. Once available, you will be able to ro
 
 ## Managing your validator
 
-The lifecycle commands below submit ValidatorConfig transactions. The transaction signer must control the validator operator address or contract owner address, but it does not need to be a plaintext EOA key. Use the CLI signer backend that matches your custody setup; see [validator operator address custody](/docs/guide/node/validator-keys#validator-operator-address-custody).
+The lifecycle commands below submit transactions to the validator contract. The transaction signer must control the validator operator address, but it does not need to be a plaintext EOA key. Use the CLI signer backend that matches your custody setup; see [validator operator address custody](/docs/guide/node/validator-keys#validator-operator-address-custody).
 
 ### Rotate validator identity
 
@@ -55,8 +55,6 @@ tempo consensus validator <old_pubkey> --rpc-url https://rpc.testnet.tempo.xyz
 ```
 ::::
 :::
-
-The simplest way to rotate is using the `tempo` CLI, which handles signature creation and the on-chain transaction in one step.
 
 ::::code-group
 ```bash [Mainnet]
