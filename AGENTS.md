@@ -29,6 +29,57 @@ Vocs-powered documentation site for Tempo protocol.
 - **Config**: `vocs.config.tsx` sets `baseUrl`, `ogImageUrl` (with `%title` and `%description` template variables), and `titleTemplate`
 - All pages automatically get proper `<title>`, `<meta description>`, Open Graph, and Twitter Card tags from frontmatter
 
+## Page Structure
+
+- Start every page with a specific `#` title and required SEO frontmatter.
+- Follow the title with a concise overview paragraph that states what the page helps the reader do or understand.
+- Use task-, product-, API-, command-, or protocol-specific `##` headings.
+- Put procedural steps in `:::::steps` containers instead of manual numbered headings.
+- Use examples only when they are tied to a concrete tool, workflow, API, or command.
+- End guide and reference pages with specific next steps or related docs when useful.
+
+## Heading Specificity
+
+Write headings for topical relevance and AI extraction. Avoid standalone generic H2/H3 headings such as:
+
+- `Overview`
+- `Usage`
+- `Parameters`
+- `Returns`
+- `Examples`
+- `Setup`
+- `Configuration`
+- `Reference`
+- `Request`
+- `Response`
+- `Errors`
+- `Best Practices`
+- `Next Steps`
+
+Prefer headings that include the page topic, API, command, protocol, or user task:
+
+- `Tempo API pagination modes`
+- `` `tempo request` examples ``
+- `Hosted fee payer API reference`
+- `T7 upgrade overview`
+- `Foundry MPP configuration`
+- `Indexer API error response format`
+
+When renaming an existing heading, preserve deep links with an explicit anchor:
+
+```mdx
+## Tempo API pagination modes {#modes}
+```
+
+Exceptions are allowed for generated or standards-format pages, such as TIP sections with required titles (`Abstract`, `Motivation`, `Specification`, `Test Cases`). Keep exceptions narrow.
+
+Before finishing docs changes, scan changed Markdown files for generic H2s and rename any new or touched matches:
+
+```bash
+git diff --name-only -- '*.md' '*.mdx' \
+  | xargs rg -n '^## +(Overview|Usage|Parameters|Returns?|Examples|Setup|Configuration|Reference|Request|Response|Errors|Best Practices|Next Steps)( +\{#[^}]+\})?$'
+```
+
 ## Protocol Concept Naming
 
 - Use literal concept names in user-facing docs. Add the TIP number in parentheses only in the sidebar and when first introducing a concept if it helps disambiguate.
