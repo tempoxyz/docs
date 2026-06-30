@@ -12,6 +12,39 @@ const baseUrl = (() => {
   return ''
 })()
 
+const searchIndexFields = ['title', 'titles', 'subtitle', 'path', 'excerpt', 'text']
+const searchBoost = { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 2, text: 2 }
+
+function extractSearchField(document: Record<string, unknown>, fieldName: string) {
+  if (fieldName === 'path') {
+    return String(document.href ?? '')
+      .split('#')[0]
+      .replace(/^\/docs\//, '/')
+      .replaceAll('/', ' ')
+  }
+  if (fieldName === 'excerpt') {
+    return String(document.text ?? '')
+      .trim()
+      .split(/\s+/)
+      .slice(0, 80)
+      .join(' ')
+  }
+  return document[fieldName]
+}
+
+function boostSearchDocument(
+  _documentId: unknown,
+  _term: string,
+  storedFields?: Record<string, unknown>,
+) {
+  const priority = (storedFields?.searchPriority as number | undefined) ?? 1
+  const href = storedFields?.href as string | undefined
+  const segments = href ? href.split('/').filter(Boolean).length : 1
+  const depth = href?.startsWith('/docs/') ? Math.max(segments - 1, 1) : segments
+  const docsBoost = href?.startsWith('/docs/') ? 1.5 : 1
+  return priority * (1 / Math.max(depth, 1)) * docsBoost
+}
+
 export default defineConfig({
   // banner: {
   //   dismissable: false,
@@ -33,40 +66,16 @@ export default defineConfig({
   feedback: createFeedbackAdapter(),
   search: {
     index: {
-      fields: ['title', 'titles', 'subtitle', 'path', 'excerpt', 'text'],
+      fields: searchIndexFields,
       storeFields: ['path', 'excerpt'],
-      extractField(document: Record<string, unknown>, fieldName: string) {
-        if (fieldName === 'path') {
-          return String(document.href ?? '')
-            .split('#')[0]
-            .replace(/^\/docs\//, '/')
-            .replaceAll('/', ' ')
-        }
-        if (fieldName === 'excerpt') {
-          return String(document.text ?? '')
-            .trim()
-            .split(/\s+/)
-            .slice(0, 80)
-            .join(' ')
-        }
-        return document[fieldName]
-      },
+      extractField: extractSearchField,
     },
     query: {
       combineWith: 'OR',
       fuzzy: 0.2,
       prefix: true,
-      boost: { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 2, text: 2 },
-      boostDocument(_documentId, _term, storedFields) {
-        const priority = (storedFields?.searchPriority as number | undefined) ?? 1
-        const href = storedFields?.href as string | undefined
-        const isDocsPath = href?.startsWith('/docs/') ?? false
-        const segments = href ? href.split('/').filter(Boolean).length : 1
-        const depth = isDocsPath ? Math.max(segments - 1, 1) : segments
-        const depthBoost = 1 / Math.max(depth, 1)
-        const docsBoost = isDocsPath ? 1.5 : 1
-        return priority * depthBoost * docsBoost
-      },
+      boost: searchBoost,
+      boostDocument: boostSearchDocument,
     },
   },
   mcp: {
