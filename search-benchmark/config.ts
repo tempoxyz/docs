@@ -36,8 +36,8 @@ export function boostDocument(
 
 export const variants: SearchVariant[] = [
   {
-    name: 'production-baseline',
-    description: 'Current unpatched Vocs production settings.',
+    name: 'legacy-vocs-baseline',
+    description: 'Previous unconfigured Vocs production settings.',
     fields: ['category', 'subtitle', 'text', 'title', 'titles'],
     storeFields: [
       'category',
@@ -58,9 +58,32 @@ export const variants: SearchVariant[] = [
     },
   },
   {
+    name: 'production-baseline',
+    description: 'Current Vocs 2.2.1 path/excerpt production settings.',
+    fields: ['title', 'titles', 'subtitle', 'path', 'excerpt', 'text'],
+    storeFields: [
+      'category',
+      'href',
+      'searchPriority',
+      'subtitle',
+      'text',
+      'title',
+      'titles',
+      'type',
+    ],
+    derivedFields: ['path', 'excerpt'],
+    excerptWords: 80,
+    searchOptions: {
+      combineWith: 'OR',
+      fuzzy: 0.2,
+      prefix: true,
+      boost: excerptPathTextBoost,
+      boostDocument,
+    },
+  },
+  {
     name: 'path-excerpt-text-or-fallback',
-    description:
-      'Candidate upstream Vocs config: exact path/excerpt/text search with OR fuzzy fallback.',
+    description: 'Candidate future config: exact path/excerpt/text search with OR fuzzy fallback.',
     fields: ['title', 'titles', 'subtitle', 'path', 'excerpt', 'text'],
     storeFields: [
       'category',

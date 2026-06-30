@@ -1,14 +1,14 @@
 import { getSearchIndex } from 'virtual:marketing/search-index'
 import MiniSearch, { type Options, type SearchOptions } from 'minisearch'
 
-// The fields, store fields and tokenizer below mirror Vocs' internal search
-// config (vocs/dist/internal/search.client.js) so the index that Vocs builds is
-// queried here exactly as it is inside the docs app. Vocs doesn't export these,
-// so they're duplicated and must be kept in sync.
-const searchFields = ['category', 'subtitle', 'text', 'title', 'titles']
+// Mirrors the search config in vocs.config.ts so the marketing search loads the
+// same serialized index that the docs search dialog uses.
+const searchFields = ['title', 'titles', 'subtitle', 'path', 'excerpt', 'text']
 const storeFields = [
   'category',
+  'excerpt',
   'href',
+  'path',
   'searchPriority',
   'subtitle',
   'text',
@@ -24,6 +24,8 @@ export type SearchResult = {
   titles: string[]
   text: string
   category?: string
+  excerpt?: string
+  path?: string
   type: 'page' | 'section' | 'nav'
   searchPriority?: number
   terms?: string[]
@@ -52,18 +54,15 @@ function tokenize(text: string): string[] {
   return tokens.filter((w) => w.length > 0)
 }
 
-// Mirrors Vocs' resolved default `search` options (vocs/dist/internal/config.js)
-// so ranking matches the docs search dialog.
 const searchOptions: SearchOptions = {
-  combineWith: 'AND',
+  combineWith: 'OR',
   fuzzy: 0.2,
   prefix: true,
-  boost: { title: 4, subtitle: 3, text: 2, category: 1, titles: 1 },
+  boost: { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 2, text: 2 },
   boostDocument: (_id, _term, storedFields) => {
     const priority = (storedFields?.searchPriority as number | undefined) ?? 1
     const href = storedFields?.href as string | undefined
     const isDocsPath = href?.startsWith('/docs/') ?? false
-    // Treat /docs/ as root for depth calculation (subtract 1).
     const segments = href ? href.split('/').filter(Boolean).length : 1
     const depth = isDocsPath ? Math.max(segments - 1, 1) : segments
     const depthBoost = 1 / Math.max(depth, 1)

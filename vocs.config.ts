@@ -31,6 +31,44 @@ export default defineConfig({
   description: 'Documentation for the Tempo network and protocol specifications',
   renderStrategy: 'partial-static',
   feedback: createFeedbackAdapter(),
+  search: {
+    index: {
+      fields: ['title', 'titles', 'subtitle', 'path', 'excerpt', 'text'],
+      storeFields: ['path', 'excerpt'],
+      extractField(document: Record<string, unknown>, fieldName: string) {
+        if (fieldName === 'path') {
+          return String(document.href ?? '')
+            .split('#')[0]
+            .replace(/^\/docs\//, '/')
+            .replaceAll('/', ' ')
+        }
+        if (fieldName === 'excerpt') {
+          return String(document.text ?? '')
+            .trim()
+            .split(/\s+/)
+            .slice(0, 80)
+            .join(' ')
+        }
+        return document[fieldName]
+      },
+    },
+    query: {
+      combineWith: 'OR',
+      fuzzy: 0.2,
+      prefix: true,
+      boost: { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 2, text: 2 },
+      boostDocument(_documentId, _term, storedFields) {
+        const priority = (storedFields?.searchPriority as number | undefined) ?? 1
+        const href = storedFields?.href as string | undefined
+        const isDocsPath = href?.startsWith('/docs/') ?? false
+        const segments = href ? href.split('/').filter(Boolean).length : 1
+        const depth = isDocsPath ? Math.max(segments - 1, 1) : segments
+        const depthBoost = 1 / Math.max(depth, 1)
+        const docsBoost = isDocsPath ? 1.5 : 1
+        return priority * depthBoost * docsBoost
+      },
+    },
+  },
   mcp: {
     enabled: true,
     sources: [

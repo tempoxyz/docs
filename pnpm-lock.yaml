@@ -133,8 +133,8 @@ importers:
         specifier: ^2.53.1
         version: 2.53.1(typescript@5.9.3)(zod@4.3.6)
       vocs:
-        specifier: 2.1.9
-        version: 2.1.9(@cfworker/json-schema@4.1.1)(@types/react@19.2.14)(@vue/compiler-sfc@3.5.38)(change-case@5.4.4)(idb-keyval@6.2.2)(mermaid@11.14.0)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(rollup@4.60.1)(typescript@5.9.3)(vite@8.0.16(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(waku@1.0.0-beta.0(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
+        specifier: 2.2.1
+        version: 2.2.1(@cfworker/json-schema@4.1.1)(@types/react@19.2.14)(@vue/compiler-sfc@3.5.38)(change-case@5.4.4)(idb-keyval@6.2.2)(mermaid@11.14.0)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(rollup@4.60.1)(typescript@5.9.3)(vite@8.0.16(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(waku@1.0.0-beta.0(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
       wagmi:
         specifier: 3.6.14
         version: 3.6.14(@tanstack/query-core@5.99.0)(@tanstack/react-query@5.99.0(react@19.2.6))(@types/react@19.2.14)(accounts@0.10.7)(react@19.2.6)(typescript@5.9.3)(viem@2.53.1(typescript@5.9.3)(zod@4.3.6))
@@ -4717,8 +4717,8 @@ packages:
       jsdom:
         optional: true
 
-  vocs@2.1.9:
-    resolution: {integrity: sha512-mB2RncVKrg13s/0ciYUTddgJJ/fvbXCb0Tb6HRymz0aEOSyhyjDkYa3C2Z1OUz/VhrvH9CHkNM6cMkWWu9xijQ==}
+  vocs@2.2.1:
+    resolution: {integrity: sha512-naPotNSOk6l9UHqE75Yn5cMN/BmAmwDl5QnE4TVZ46XdhGd+oSEDw7SmiMdHV/sI5qmH1PlAtPLVAwtVUKNSXQ==}
     hasBin: true
     peerDependencies:
       '@vocs/twoslash-rust': ^0.1.0
@@ -9981,7 +9981,7 @@ snapshots:
     transitivePeerDependencies:
       - msw
 
-  vocs@2.1.9(@cfworker/json-schema@4.1.1)(@types/react@19.2.14)(@vue/compiler-sfc@3.5.38)(change-case@5.4.4)(idb-keyval@6.2.2)(mermaid@11.14.0)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(rollup@4.60.1)(typescript@5.9.3)(vite@8.0.16(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(waku@1.0.0-beta.0(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0)):
+  vocs@2.2.1(@cfworker/json-schema@4.1.1)(@types/react@19.2.14)(@vue/compiler-sfc@3.5.38)(change-case@5.4.4)(idb-keyval@6.2.2)(mermaid@11.14.0)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(rollup@4.60.1)(typescript@5.9.3)(vite@8.0.16(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(waku@1.0.0-beta.0(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.104.1(esbuild@0.27.7)))(react@19.2.6)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0)):
     dependencies:
       '@base-ui/react': 1.6.0(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@codesandbox/sandpack-react': 2.20.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
