@@ -18,7 +18,7 @@ Use different signing keys and operator keys for testnet and mainnet. A testnet 
 | Key / Address | Type | What it does | Sensitivity | How to change |
 |---|---|---|---|---|
 | **Signing key** | Ed25519 keypair | Identifies your validator in the consensus protocol. Used for DKG participation, block proposals, and voting. | **Critical** — anyone with this key can impersonate your validator. | [Rotate validator identity](/docs/guide/node/validator-lifecycle#rotate-validator-identity) |
-| **Validator operator address** | Ethereum address (`0x…`) | The control address that authorizes on-chain operations: IP updates, key rotation, ownership transfer, and deactivation. | **High** — controls all validator configuration. | [Transfer validator ownership](/docs/guide/node/validator-lifecycle#transfer-validator-ownership) |
+| **Validator operator address** | Ethereum address (`0x…`) | The control address that authorizes on-chain operations: IP updates, fee-recipient updates, key rotation, ownership transfer, and deactivation. | **High** — controls all validator configuration. | [Transfer validator ownership](/docs/guide/node/validator-lifecycle#transfer-validator-ownership) |
 | **Fee recipient** | Ethereum address (`0x…`) | Receives transaction fees from blocks your validator proposes. | **Low** — changing it only redirects future fee revenue, no security impact. | [Update fee recipient](/docs/guide/node/validator-lifecycle#update-the-fee-recipient) |
 | **Signing share** | BLS12-381 key share | A share of the committee's threshold signing key, used to sign block notarizations and finalizations. | **Managed automatically** — updated every DKG ceremony (~3 hours). Lost shares are recovered from the network on restart. | Automatic (see [recovery](#signing-share-recovery)) |
 
@@ -109,6 +109,27 @@ tempo consensus generate-signing-key \
 ## Signing key rotation
 
 The ed25519 signing key can be rotated while preserving your validator index and committee slot. See [Rotate validator identity](/docs/guide/node/validator-lifecycle#rotate-validator-identity) for the full procedure.
+
+## Validator operator address custody
+
+The validator operator address is an Ethereum address, but it does not need to be controlled by a plaintext EOA private key. The Tempo CLI can submit validator on-chain operations with a local wallet key, a hardware wallet, or a remote KMS signer.
+
+| Signer | CLI flag | Notes |
+|---|---|---|
+| Local wallet key file | `--wallet-key <PATH>` | Use only where local key custody is appropriate |
+| Ledger | `--ledger` | Uses the first Ledger Live account |
+| Trezor | `--trezor` | Uses the first Trezor Live account |
+| AWS KMS | `--aws` | Requires `AWS_KMS_KEY_ID` and AWS credentials in the environment |
+| GCP KMS | `--gcp` | Requires `GCP_PROJECT_ID`, `GCP_LOCATION`, `GCP_KEY_RING`, `GCP_KEY_NAME`, and `GCP_KEY_VERSION` |
+
+Use these signer flags for CLI commands that submit ValidatorConfig transactions, including rotation, IP updates, fee-recipient updates, deactivation, and ownership transfer.
+
+:::info
+The validator identity signature and the transaction signer are different:
+
+- The ed25519 consensus signing key proves ownership of the validator public key during registration and rotation.
+- The Ethereum transaction signer controls the validator operator address or contract owner address. It can be backed by a hardware wallet or remote KMS.
+:::
 
 ## Signing share recovery
 
