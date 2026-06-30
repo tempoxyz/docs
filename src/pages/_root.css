@@ -145,6 +145,53 @@
     border-top: 1px solid var(--vocs-border-color-primary);
   }
 
+  aside[data-v][data-v-callout] {
+    --tempo-callout-accent: var(--vocs-text-color-muted);
+
+    background: color-mix(
+      in srgb,
+      var(--tempo-callout-accent) 10%,
+      var(--vocs-background-color-surface)
+    );
+    border-color: color-mix(in srgb, var(--tempo-callout-accent) 28%, transparent);
+    color: var(--vocs-text-color-primary);
+  }
+
+  aside[data-v][data-v-callout][data-v-context="info"] {
+    --tempo-callout-accent: var(--info);
+  }
+
+  aside[data-v][data-v-callout][data-v-context="tip"] {
+    --tempo-callout-accent: var(--vocs-color-iris);
+  }
+
+  aside[data-v][data-v-callout][data-v-context="warning"] {
+    --tempo-callout-accent: var(--warning);
+  }
+
+  aside[data-v][data-v-callout][data-v-context="danger"] {
+    --tempo-callout-accent: var(--negative);
+  }
+
+  aside[data-v][data-v-callout][data-v-context="success"] {
+    --tempo-callout-accent: var(--positive);
+  }
+
+  aside[data-v][data-v-callout] p[data-v],
+  aside[data-v][data-v-callout] li[data-v],
+  aside[data-v][data-v-callout] a[data-v],
+  aside[data-v][data-v-callout] code[data-v] {
+    color: var(--vocs-text-color-primary);
+  }
+
+  aside[data-v][data-v-callout] li::marker {
+    color: var(--vocs-text-color-primary);
+  }
+
+  aside[data-v][data-v-callout] > [data-v-callout-icon] {
+    color: var(--tempo-callout-accent);
+  }
+
   [data-docs-sidebar-toggle] {
     display: inline-flex;
 
