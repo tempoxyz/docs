@@ -1,46 +1,85 @@
 # Tempo Documentation (docs-next)
 
-Vocs-powered documentation site for Tempo protocol.
+Vocs-powered documentation site for Tempo protocol. Use this guidance when creating or updating Tempo docs.
+
+## Working Model
+
+- Be concise, practical, and opinionated. Lead with the recommended path.
+- Follow nearby pages before inventing new structure, components, or wording.
+- Do not make protocol, API, chain, fee, or token claims without checking repo source docs first.
+- Prefer small, scoped docs changes that preserve existing URLs, anchors, and sidebar organization.
+
+## Source of Truth
+
+Use repo-local sources first:
+
+- `vocs.config.ts` - navigation, sidebar labels, redirects, SEO config
+- `src/pages/docs/protocol/` - protocol and technical references
+- `src/pages/protocol/tips/` - Tempo Improvement Proposals
+- `src/pages/docs/api/` - hosted API and RPC docs
+- `src/pages/docs/guide/` - product workflows and integration guides
+- `src/snippets/` - shared MDX snippets and reusable reference content
+- `src/components/` - custom React/MDX components and interactive guide surfaces
+
+When documenting MPP concepts on Tempo, cross-check the relevant MPP docs or SDK references. Keep MPP protocol facts aligned with MPP, but write the page around the Tempo user journey.
 
 ## Commands
 
-- `bun run dev` - Start development server
-- `bun run build` - Build for production
-- `bun run check` - Run typecheck
+Use `pnpm`.
 
-## Adding a New Page
+- `pnpm dev` - start development server
+- `pnpm build` - typecheck and build docs plus marketing site
+- `pnpm check` - run Biome format/lint with fixes
+- `pnpm check:types` - run TypeScript check
+- `pnpm test` - run Vitest tests
+- `pnpm test:e2e` - run Playwright tests
+- `pnpm preview` - preview the production build
 
-1. Create `.mdx` file in appropriate `pages/` subdirectory (match URL path to file path)
-2. **Add SEO frontmatter** at the top of the file (required):
+Before finishing docs-only changes, run at least `pnpm check:types` when practical. Run `pnpm build` for config, component, routing, sidebar, or MDX structure changes. Run targeted tests for changed interactive components.
+
+## Project Structure
+
+- `src/pages/` - Vocs file-based routes
+- `src/pages/docs/` - main docs site
+- `src/pages/protocol/tips/` - TIP pages read by `TipsList`
+- `src/components/` - custom React components for docs and guides
+- `src/snippets/` - shared MDX content
+- `api/` - Vercel serverless functions, including OG image generation
+- `public/` - static assets
+- `vocs.config.ts` - Vocs config, sidebar, nav, SEO, redirects
+- `vercel.json` - Vercel deployment config
+
+## Adding or Moving Pages
+
+1. Create a `.mdx` file in the matching route path under `src/pages/`.
+2. Add required SEO frontmatter:
+
    ```yaml
    ---
-   title: Page Title Here
-   description: A concise 150-160 character description for search engines and social sharing.
+   title: Page Title
+   description: Concise active-voice description for search and social previews.
    ---
    ```
-   - **title**: Concise, descriptive page title (used in `<title>` and OG tags)
-   - **description**: 150-160 characters, active voice, describes what the page covers
-3. Add entry to sidebar in `vocs.config.tsx`
-4. Run `bun run dev` to verify, then `bun run check` before committing
 
-## SEO Configuration
+3. Add the page to `vocs.config.ts` sidebar when it should be discoverable.
+4. Preserve old deep links with explicit anchors when renaming headings:
 
-- **Dynamic OG images**: Generated via `/api/og.tsx` using title and description from frontmatter
-- **Config**: `vocs.config.tsx` sets `baseUrl`, `ogImageUrl` (with `%title` and `%description` template variables), and `titleTemplate`
-- All pages automatically get proper `<title>`, `<meta description>`, Open Graph, and Twitter Card tags from frontmatter
+   ```mdx
+   ## Tempo API pagination modes {#modes}
+   ```
+
+5. Verify with `pnpm check:types` and `pnpm build` when navigation, imports, MDX syntax, or components changed.
 
 ## Page Structure
 
-- Start every page with a specific `#` title and required SEO frontmatter.
-- Follow the title with a concise overview paragraph that states what the page helps the reader do or understand.
-- Use task-, product-, API-, command-, or protocol-specific `##` headings.
-- Put procedural steps in `:::::steps` containers instead of manual numbered headings.
-- Use examples only when they are tied to a concrete tool, workflow, API, or command.
-- End guide and reference pages with specific next steps or related docs when useful.
+Start every page with:
 
-## Heading Specificity
+- SEO frontmatter
+- import statements, if needed
+- one specific `#` title
+- one concise paragraph explaining what the page helps the reader do
 
-Write headings for topical relevance and AI extraction. Avoid standalone generic H2/H3 headings such as:
+Use topic-specific `##` headings. Avoid standalone generic H2s:
 
 - `Overview`
 - `Usage`
@@ -56,7 +95,7 @@ Write headings for topical relevance and AI extraction. Avoid standalone generic
 - `Best Practices`
 - `Next Steps`
 
-Prefer headings that include the page topic, API, command, protocol, or user task:
+Prefer headings that name the product, API, command, protocol, or task:
 
 - `Tempo API pagination modes`
 - `` `tempo request` examples ``
@@ -65,31 +104,18 @@ Prefer headings that include the page topic, API, command, protocol, or user tas
 - `Foundry MPP configuration`
 - `Indexer API error response format`
 
-When renaming an existing heading, preserve deep links with an explicit anchor:
+Exceptions are allowed for standards-format pages, especially TIP sections with required names such as `Abstract`, `Motivation`, `Specification`, and `Test Cases`.
 
-```mdx
-## Tempo API pagination modes {#modes}
-```
-
-Exceptions are allowed for generated or standards-format pages, such as TIP sections with required titles (`Abstract`, `Motivation`, `Specification`, `Test Cases`). Keep exceptions narrow.
-
-Before finishing docs changes, scan changed Markdown files for generic H2s and rename any new or touched matches:
+Before finishing docs changes, scan changed Markdown files for generic H2s:
 
 ```bash
 git diff --name-only -- '*.md' '*.mdx' \
   | xargs rg -n '^## +(Overview|Usage|Parameters|Returns?|Examples|Setup|Configuration|Reference|Request|Response|Errors|Best Practices|Next Steps)( +\{#[^}]+\})?$'
 ```
 
-## Protocol Concept Naming
+## Procedural Guides
 
-- Use literal concept names in user-facing docs. Add the TIP number in parentheses only in the sidebar and when first introducing a concept if it helps disambiguate.
-- Use `TIP-20 Tokens` for sidebar labels, page titles, headings, and first-introduction contexts; use `TIP-20 tokens` in sentence-case prose after that.
-- Use `Tempo Token Rewards` in sidebar, concept introductions, and rewards-specific resource cards. Do not append `(TIP-20)`.
-- Keep raw TIP references for technical/spec contexts, e.g. `TIP-20 ABI`, `TIP-403 policy check`, or links titled `TIP-20 Specification`.
-
-## Numbered Steps
-
-When writing step-by-step instructions in guides, use the `:::::steps` container directive instead of manual `### Step 1`, `#### Step 2` headings. Each step is a `###` heading inside the container. The steps are auto-numbered by the renderer.
+Use `:::::steps` containers for procedures instead of manual numbered headings:
 
 ```mdx
 :::::steps
@@ -105,20 +131,61 @@ Content for step 2.
 :::::
 ```
 
-See https://mpp.dev/guides/multiple-payment-methods for a reference example.
+Each step should be actionable and concrete. Keep long conceptual background outside the steps block.
 
-## Project Structure
+## Writing Style
 
-- `src/pages/` - MDX documentation pages
-- `src/components/` - React components
-- `api/` - Vercel serverless functions (OG image generation)
-- `public/` - Static assets
-- `vocs.config.ts` - Vocs configuration (sidebar, nav, SEO)
-- `vercel.json` - Vercel deployment config (redirects, rewrites)
+- Use active voice, present tense, and second person.
+- Lead with the recommended path, then place alternatives under an advanced or reference section.
+- Keep intro paragraphs short. Avoid repeating sidebar or page titles.
+- Use sentence case for headings unless the product or protocol term requires capitalization.
+- Use code font for commands, file paths, parameters, status codes, object names, and literal values.
+- Use concrete nouns. Avoid vague labels like "things", "stuff", "various", and "etc." when a specific list is possible.
+- Avoid filler such as "simply", "just", "easy", "obviously", and "seamlessly".
+- Avoid future tense for behavior that is already true. Prefer "The server returns..." over "The server will return...".
+- Do not use humor, exclamation points, rhetorical questions, or marketing claims that are not backed by the docs.
+- Use "stablecoins" for Tempo payment assets unless discussing broader cryptocurrency categories.
 
-## TIPs (Tempo Improvement Proposals)
+## Protocol Concept Naming
 
-TIPs are stored in `src/pages/protocol/tips/` with YAML frontmatter:
+- Use literal concept names in user-facing docs.
+- Use `TIP-20 Tokens` for sidebar labels, page titles, headings, and first-introduction contexts.
+- Use `TIP-20 tokens` in sentence-case prose after introduction.
+- Use `Tempo Token Rewards` in sidebar, concept introductions, and rewards-specific resource cards. Do not append `(TIP-20)`.
+- Keep raw TIP references for technical/spec contexts, such as `TIP-20 ABI`, `TIP-403 policy check`, and links titled `TIP-20 Specification`.
+- Add the TIP number in parentheses only when it helps disambiguate.
+
+## Vocs and MDX Patterns
+
+- Use Vocs components already present in nearby pages: `Cards`, `Card`, `Tabs`, `Tab`, `Callout`, and `OpenApi`.
+- Use `Cards` for related docs and navigation clusters, not for ordinary paragraphs.
+- Use `::::code-group` for language, package-manager, or comparable code variants.
+- Tag code fences with a language.
+- Use `bash` for terminal commands and include commands exactly as users run them.
+- Use imported interactive guide components only on pages that need them.
+- Add `interactive: true` frontmatter for pages using wallet hooks, guide demos, or provider-dependent components.
+
+## SEO and Social Text
+
+- Every page needs `title` and `description` frontmatter.
+- Keep `title` concise and specific.
+- Keep `description` active, concrete, and useful for search/social previews.
+- Do not start descriptions with "This page".
+- Do not restate the title in the description; add context or outcome.
+- Dynamic OG images are generated by `/api/og.tsx` using frontmatter and `vocs.config.ts`.
+
+## Examples and Code
+
+- Examples must be tied to a real tool, workflow, API, command, or protocol detail.
+- Prefer runnable, copyable examples over illustrative fragments.
+- Keep code examples realistic and internally consistent on a single page.
+- Check dependency availability in `package.json` before using libraries in examples or components.
+- Check addresses, chain IDs, performance numbers, limits, fees, and response shapes against source docs or code before adding them.
+- If an example depends on testnet, mainnet, sandbox keys, or hosted services, say so near the example.
+
+## TIP Pages
+
+TIPs live in `src/pages/protocol/tips/` with YAML frontmatter:
 
 ```yaml
 ---
@@ -131,4 +198,16 @@ authors:
 ---
 ```
 
-The `TipsList` component automatically reads TIPs via `import.meta.glob` and displays them sorted by number.
+`TipsList` reads TIP frontmatter via `import.meta.glob` and sorts by TIP number. Keep TIP pages standards-shaped unless the existing TIP format says otherwise.
+
+## Blog Notes
+
+Blog-specific instructions live in `blogs/AGENTS.md`. Read that file before editing posts, blog assets, diagrams, or drafts.
+
+## Final Checks
+
+- Confirm changed pages have required frontmatter.
+- Confirm sidebar entries match moved or new pages.
+- Confirm renamed headings preserve important anchors.
+- Run the generic-heading scan for touched Markdown/MDX files.
+- Run the most relevant validation command for the change size.
