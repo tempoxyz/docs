@@ -37,6 +37,23 @@ function findHostRedirect(source: string, host: string) {
   )
 }
 
+function findHostRedirectIndex(source: string, host: string) {
+  return vercelConfig.redirects.findIndex(
+    (redirect) =>
+      redirect.source === source &&
+      Array.isArray(redirect.has) &&
+      redirect.has.some(
+        (condition) =>
+          typeof condition === 'object' &&
+          condition !== null &&
+          'type' in condition &&
+          'value' in condition &&
+          condition.type === 'host' &&
+          condition.value === host,
+      ),
+  )
+}
+
 describe('docs routing redirects', () => {
   it.each([
     ['/', 'https://tempo.xyz/developers'],
@@ -49,6 +66,40 @@ describe('docs routing redirects', () => {
       destination,
       permanent: true,
     })
+  })
+
+  it.each([
+    ['/guide/bridge-usdc-stargate', 'https://tempo.xyz/developers/docs/guide/bridge-layerzero'],
+    ['/guide/bridge-usdc-relay', 'https://tempo.xyz/developers/docs/guide/bridge-relay'],
+    [
+      '/guide/node/validator-config-v2',
+      'https://tempo.xyz/developers/docs/guide/node/network-upgrades',
+    ],
+    ['/AccountKeychain', 'https://tempo.xyz/developers/docs/protocol/transactions/AccountKeychain'],
+    ['/developer-tools', 'https://tempo.xyz/developers/docs/ecosystem'],
+    ['/learn/partners', 'https://tempo.xyz/developers/docs/partners'],
+    ['/docs/learn/partners', 'https://tempo.xyz/developers/docs/partners'],
+    ['/docs/guide/using-tempo-with-ai/partners', 'https://tempo.xyz/developers/docs/partners'],
+    ['/build/partners', 'https://tempo.xyz/developers/docs/partners'],
+    ['/network-upgrades', 'https://tempo.xyz/developers/docs/guide/node/network-upgrades'],
+    [
+      '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|hosted-services|changelog|partners)',
+      'https://tempo.xyz/developers/docs/:section',
+    ],
+    [
+      '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools|hosted-services)/:path*',
+      'https://tempo.xyz/developers/docs/:section/:path*',
+    ],
+  ])('redirects legacy docs host %s to %s before the host catch-all', (source, destination) => {
+    expect(findHostRedirect(source, 'docs.tempo.xyz')).toMatchObject({
+      source,
+      destination,
+      permanent: true,
+    })
+
+    expect(findHostRedirectIndex(source, 'docs.tempo.xyz')).toBeLessThan(
+      findHostRedirectIndex('/:path*', 'docs.tempo.xyz'),
+    )
   })
 
   it.each([

@@ -34,6 +34,138 @@
       "permanent": true
     },
     {
+      "source": "/guide/bridge-usdc-stargate",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/guide/bridge-layerzero",
+      "permanent": true
+    },
+    {
+      "source": "/guide/bridge-usdc-relay",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/guide/bridge-relay",
+      "permanent": true
+    },
+    {
+      "source": "/guide/node/validator-config-v2",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/guide/node/network-upgrades",
+      "permanent": true
+    },
+    {
+      "source": "/AccountKeychain",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/protocol/transactions/AccountKeychain",
+      "permanent": true
+    },
+    {
+      "source": "/developer-tools",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/ecosystem",
+      "permanent": true
+    },
+    {
+      "source": "/learn/partners",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/partners",
+      "permanent": true
+    },
+    {
+      "source": "/docs/learn/partners",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/partners",
+      "permanent": true
+    },
+    {
+      "source": "/docs/guide/using-tempo-with-ai/partners",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/partners",
+      "permanent": true
+    },
+    {
+      "source": "/build/partners",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/partners",
+      "permanent": true
+    },
+    {
+      "source": "/network-upgrades",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/guide/node/network-upgrades",
+      "permanent": true
+    },
+    {
+      "source": "/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|hosted-services|changelog|partners)",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/:section",
+      "permanent": true
+    },
+    {
+      "source": "/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools|hosted-services)/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/:section/:path*",
+      "permanent": true
+    },
+    {
       "source": "/:path*",
       "has": [
         {
