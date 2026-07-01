@@ -47,6 +47,25 @@ Use the Tempo JSON-RPC API with command-line tools, TypeScript clients, React ho
     ```
   </Tab>
 
+  <Tab title="Typed Client">
+    The [Tempo API Typed Client](/docs/api/typed-client) is Tempo's typed API client for TypeScript. Use it when you want one client for Tempo REST endpoints and the JSON-RPC passthrough, with typed route parameters, status narrowing, and Tempo API error envelopes.
+
+    <div className="h-4" />
+
+    ```ts [example.ts]
+    import { Client } from 'tapimo'
+
+    const client = Client.create({ apiKey: process.env.TEMPO_API_KEY })
+
+    const response = await client.rpc[':chain{mainnet|testnet|[0-9]+}?'].$post({
+      param: { chain: 'testnet' }, // [!code focus]
+      json: { jsonrpc: '2.0', id: 1, method: 'eth_blockNumber', params: [] }, // [!code focus]
+    })
+
+    const body = await response.json() // [!code focus]
+    ```
+  </Tab>
+
   <Tab title="Wagmi">
     [Wagmi](https://wagmi.sh/react/api/createConfig) provides React hooks and configuration helpers on top of Viem clients.
 
