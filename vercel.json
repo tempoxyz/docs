@@ -463,6 +463,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/mcp",
+      "destination": "https://mcp.tempo.xyz/"
+    },
+    {
       "source": "/developers/RSC/R/developers.txt",
       "destination": "/developers/RSC/R/_root.txt"
     },
