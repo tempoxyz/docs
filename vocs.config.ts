@@ -202,6 +202,10 @@ export default defineConfig({
             text: 'Versioning Policy',
             link: '/docs/api/versioning-policy',
           },
+          {
+            text: 'Typed Client',
+            link: '/docs/api/typed-client',
+          },
         ],
       },
     },

@@ -1,0 +1,161 @@
+---
+title: Tempo API Typed Client
+description: Use the Tempo API Typed Client to call REST and JSON-RPC endpoints with autocomplete, API key headers, status narrowing, and error handling in TypeScript.
+---
+
+# Tempo API Typed Client
+
+Use the Tempo API Typed Client for endpoint autocomplete and API-key/header configuration across Tempo API HTTPS endpoints, including the JSON-RPC passthrough at `https://api.tempo.xyz/rpc`.
+
+The client is generated from the same Hono app that serves the API. That gives TypeScript autocomplete for routes, parameter names, request bodies, HTTP status codes, response bodies, and error envelopes.
+
+## Install the Tempo API package
+
+```bash [Terminal]
+pnpm add tapimo
+```
+
+## Create a typed Tempo API client
+
+```ts twoslash [client.ts]
+// @noErrors
+import { Client } from 'tapimo'
+
+const client = Client.create({
+  // API key sugar for the canonical `tempo-api-key` header.
+  apiKey: 'tempo_api_key',
+  // Override the API URL. Defaults to `Client.defaultUrl`.
+  url: 'https://api.tempo.xyz',
+  // Or pass custom headers directly.
+  headers: { authorization: 'Bearer tempo_api_key' },
+})
+```
+
+`Client.create()` also accepts Hono client options such as a custom `fetch` implementation. If you pass `apiKey`, the client merges it into the request headers as `tempo-api-key`.
+
+## Make type-safe Tempo API requests
+
+Requests are end-to-end type-safe across params, statuses, response bodies, and errors. For example, `GET /v1/tokens/:token` narrows the response body from the HTTP status:
+
+```ts twoslash [tokens.ts]
+// @noErrors
+import { Client } from 'tapimo'
+
+const client = Client.create()
+
+const response = await client.v1.tokens[':token'].$get({
+  param: { token: '0x20c0000000000000000000000000000000000000' },
+})
+
+// Narrow responses by status.
+if (response.status !== 200) {
+  response.status
+  //       ^? (property) status: 400 | 401 | 402 | 403 | 404 | 429 | 502
+
+  if (response.status === 404) {
+    const json = await response.json()
+    //    ^? const json: { error: { code: "token_not_found"; message: string; ... }; requestId: string }
+    json.error.code
+    //         ^? (property) code: "token_not_found"
+  } else if (response.status === 402) {
+    const challenge = await response.text()
+    //    ^? const challenge: string
+    // Handle the payment challenge from `WWW-Authenticate`.
+  } else {
+    const json = await response.json()
+    //    ^? const json: { error: { code: "query_invalid" | "api_key_invalid" | "upstream_error" | ...; ... }; requestId: string }
+    // Handle validation, auth, rate-limit, or upstream errors.
+  }
+
+  throw new Error('Request failed')
+}
+
+response.status
+//       ^? (property) status: 200
+const token = await response.json()
+//    ^? const token: { address: Hex.Hex; currency: string; decimals: number; name: string; ... }
+token.symbol
+//    ^? (property) symbol: string
+```
+
+## Call Tempo JSON-RPC through the Typed Client
+
+The Typed Client exposes the raw JSON-RPC passthrough as a typed route under `client.rpc`. The route key includes Hono's path pattern because the chain selector is optional:
+
+```ts twoslash [rpc.ts]
+// @noErrors
+import { Client } from 'tapimo'
+
+const client = Client.create({ apiKey: 'tempo_api_key' })
+
+const response = await client.rpc[':chain{mainnet|testnet|[0-9]+}?'].$post({
+  // Use `undefined` for `/rpc`, or pass `mainnet`, `testnet`, or a numeric chain id.
+  param: { chain: 'testnet' },
+  json: {
+    jsonrpc: '2.0',
+    id: 1,
+    method: 'eth_blockNumber',
+    params: [],
+  },
+})
+
+if (response.status !== 200) {
+  const error = await response.json()
+  throw new Error(error.error.message)
+}
+
+const body = await response.json()
+
+if (!Array.isArray(body) && body.error) {
+  throw new Error(body.error.message)
+}
+
+const blockNumber = Array.isArray(body) ? body[0]?.result : body.result
+//    ^? const blockNumber: unknown
+```
+
+Chain selectors map to these hosted endpoints:
+
+| `chain` value | Hosted RPC path |
+| --- | --- |
+| `undefined` | `https://api.tempo.xyz/rpc` |
+| `'mainnet'` | `https://api.tempo.xyz/rpc/mainnet` |
+| `'testnet'` | `https://api.tempo.xyz/rpc/testnet` |
+| `'4217'` | `https://api.tempo.xyz/rpc/4217` |
+
+## Send batch JSON-RPC requests through the Typed Client
+
+The JSON-RPC body type accepts one request or an array of requests. The client narrows the success body to the same single-or-batch response union:
+
+```ts twoslash [batch-rpc.ts]
+// @noErrors
+import { Client } from 'tapimo'
+
+const client = Client.create()
+
+const response = await client.rpc[':chain{mainnet|testnet|[0-9]+}?'].$post({
+  param: { chain: undefined },
+  json: [
+    { jsonrpc: '2.0', id: 1, method: 'eth_chainId', params: [] },
+    { jsonrpc: '2.0', id: 2, method: 'eth_blockNumber', params: [] },
+  ],
+})
+
+if (response.status === 200) {
+  const results = await response.json()
+  // results is typed as one JSON-RPC response or an array of JSON-RPC responses.
+}
+```
+
+## Understand Typed Client RPC boundaries
+
+The Typed Client types the HTTP and JSON-RPC envelope around raw RPC calls:
+
+- the `/rpc`, `/rpc/mainnet`, `/rpc/testnet`, and `/rpc/:chainId` route shape
+- the JSON-RPC request envelope (`jsonrpc`, `id`, `method`, and `params`)
+- single-request and batch-request response envelopes
+- non-200 Tempo API error envelopes and status-code narrowing
+
+The Typed Client does not type every JSON-RPC method's `params` and `result` fields. Those stay `unknown` because the passthrough accepts the full Ethereum JSON-RPC surface and Tempo-specific methods. Use [Viem](/docs/api/json-rpc#connect-to-tempo-json-rpc-with-tools) when you want method-level TypeScript types for common chain reads and writes.
+
+Continue with the [Tempo API reference](/docs/api) for endpoint-specific fields and the [JSON-RPC API](/docs/api/json-rpc) for RPC endpoint details.
