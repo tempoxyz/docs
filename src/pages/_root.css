@@ -1420,6 +1420,7 @@ body {
   box-shadow: none;
 }
 
+[data-v-sidebar] a[data-v-sidebar-item][href$="/protocol/upgrades/t8"] [data-v-sidebar-item-badge],
 [data-v-sidebar] a[data-v-sidebar-item][href$="/protocol/upgrades/t7"] [data-v-sidebar-item-badge] {
   background: var(--color-gray4);
 }

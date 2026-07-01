@@ -1,0 +1,131 @@
+---
+title: T8 Network Upgrade
+description: Planned T8 network upgrade overview covering native multisig accounts, current committee state, FeeAMM policy behavior, and DEX order storage.
+---
+
+# T8 Network Upgrade
+
+T8 is a planned network upgrade focused on native multisig accounts, clearer validator committee reads, FeeAMM policy behavior, and DEX order storage. It is expected to improve partner and operator ergonomics across account tooling, validator tooling, FeeAMM integrations, and DEX infrastructure.
+
+:::info[T8 status]
+T8 is planned. The planned release date is July 19, 2026.
+:::
+
+## Timeline
+
+| Milestone | Planned date |
+|-----------|--------------|
+| Planned release date | July 19, 2026 |
+| Testnet rollout | July 23, 2026 |
+| Mainnet rollout | July 29, 2026 |
+
+Node operators should wait for the T8 release announcement, then upgrade before the activation timestamp on each network. Exact activation timestamps will be added when the release is cut.
+
+## Overview
+
+T8 focuses on four partner needs:
+
+- **Native multisig accounts.** Teams can use accounts controlled by multiple owners, with owner weights and a threshold for transaction approval.
+- **Canonical current committee reads.** Contracts and offchain tools can query the committee that consensus is actually using for the current epoch.
+- **Cleaner fee collection behavior.** Fee collection avoids a redundant FeeManager policy check while public AMM actions remain covered by TIP-403 controls.
+- **More compact DEX order storage.** New DEX orders use a versioned storage layout, while existing orders remain readable.
+
+These changes are mostly infrastructure-facing. Wallets, relayers, indexers, validators, DEX frontends, token issuers, and FeeAMM tooling should review the notes below before the testnet rollout.
+
+## Features
+
+### Native multisig accounts
+
+Native multisig accounts let teams, treasuries, validators, and institutional operators use a Tempo account that cannot be controlled by one private key alone.
+
+T8 adds a native multisig account type. In plain terms, a multisig account has an owner list, a weight for each owner, and a threshold that must be met before the account can send a transaction. The new design:
+
+- supports flat M-of-N setups by giving every owner weight `1` and setting the threshold to `M`;
+- supports weighted setups, where some owners can count more than others;
+- derives a stable account address from the initial owner config and a caller-chosen salt; and
+- keeps the normal transaction payload shape unchanged by carrying multisig approval data inside the signature.
+
+The first transaction from a native multisig account bootstraps the account config. After that, transactions from the account must use the multisig signature path and satisfy the current owner threshold.
+
+Read the technical specification at [TIP-1061](https://tips.sh/1061-1).
+
+### Current committee state
+
+T8 adds execution-layer state for the current effective validator committee. In plain terms, this is the committee that consensus is actually using for the current epoch, based on the DKG outcome.
+
+This matters because `ValidatorConfigV2.getActiveValidators()` returns the configured validator registry, not necessarily the committee currently active in consensus. Registry changes can happen before they become part of the effective committee, and a failed DKG round can leave the prior committee in place.
+
+The new `getCommitteeMembers()` query gives contracts and offchain tools a canonical source for current committee membership, without requiring them to reconstruct it from consensus data or epoch-boundary block data.
+
+Read the technical specification at [TIP-1070](https://github.com/tempoxyz/tempo/pull/5215).
+
+### FeeAMM TIP-403 policy exemptions
+
+The FeeAMM and FeeManager help users pay transaction fees in one token while validators receive another. T8 adjusts where TIP-403 policy checks happen in that flow.
+
+During protocol fee collection, the FeeManager address is no longer checked as a TIP-403 recipient. The fee payer is still checked as an authorized sender. This keeps fee collection simpler for block builders and avoids repeating a policy check on every transaction.
+
+Public AMM operations remain policy-controlled. `mint`, `burn`, `rebalanceSwap`, and `distributeFees` continue to enforce TIP-403, and `mint` / `burn` gain extra checks that tie authorization to the liquidity provider across the lifecycle of a pool position.
+
+Token issuers still control whether their token participates in FeeAMM liquidity by authorizing the FeeManager address where required.
+
+Read the technical specification at [TIP-1042](https://github.com/tempoxyz/tempo/pull/3425).
+
+### Versioned DEX order storage
+
+T8 introduces a versioned Stablecoin DEX order storage layout. Existing orders stay in the legacy layout and remain readable. New orders use the versioned layout, which stores the same active order state with fewer storage slots.
+
+The public `getOrder(uint128)` shape stays compatible. Indexers that reconstruct DEX state from events should not need to change for this storage layout. Tools that read raw DEX storage directly must decode orders by version.
+
+Read the technical specification at [TIP-1062](https://tips.sh/1062).
+
+## Compatible releases
+
+The T8-compatible release is not published yet.
+
+| Ecosystem | T8-compatible releases |
+|-----------|------------------------|
+| Node operators | Planned for July 19, 2026; exact version TBD |
+
+Release notes and binaries will be linked here when the T8 release is cut.
+
+## What operators and integrators should know
+
+T8 is a hardfork upgrade. Node operators, integrators, indexers, wallets, relayers, token issuers, DEX frontends, and partner infrastructure should review the notes below before testnet and mainnet rollout.
+
+### For node operators
+
+- Watch for the T8 release planned for July 19, 2026.
+- Upgrade testnet nodes before the planned July 23, 2026 rollout.
+- Upgrade mainnet nodes before the planned July 29, 2026 rollout.
+- Treat the exact activation timestamps from the release announcement as the source of truth.
+
+### For wallets, custody tools, and transaction builders
+
+- Native multisig accounts use a new multisig signature type.
+- A multisig account address is derived from its initial owner config and salt.
+- The first transaction from a native multisig account must include the initial multisig config.
+- Later transactions must be authorized by owner signatures whose configured weights meet the threshold.
+- Native multisig accounts do not support access keys.
+
+### For validators, monitoring, and contracts
+
+- Use `getCommitteeMembers()` when you need the committee consensus is using now.
+- Keep using `ValidatorConfigV2` when you need the configured validator registry.
+- Do not treat `getActiveValidators()` as the current effective committee.
+- After activation, wait for the first epoch-boundary committee update before relying on the new query.
+
+### For FeeAMM, token issuer, and validator tooling
+
+- Fee collection no longer checks the FeeManager address as a TIP-403 recipient.
+- The fee payer is still checked as an authorized sender.
+- AMM actions remain policy-controlled.
+- `mint` and `burn` have extra checks that prevent blocked accounts from using liquidity positions to bypass token policies.
+- If a token does not authorize the FeeManager where required, some fees or liquidity flows may be unavailable or stranded; validator and issuer tooling should surface that clearly.
+
+### For DEX frontends and indexers
+
+- Event-driven order indexing should continue to work.
+- `getOrder(uint128)` remains ABI-compatible.
+- Raw storage readers must support both legacy version `0` orders and new version `1` orders.
+- Mixed-version order lists are expected, so storage tooling should update each order according to that order's own version.
