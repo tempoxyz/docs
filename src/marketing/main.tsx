@@ -99,7 +99,7 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
   '/blog': {
     title: 'Blog',
     description:
-      'Engineering deep dives, network upgrades, events, and case studies from the Tempo team.',
+      'Announcements, engineering deep dives, network upgrades, events, and case studies from the Tempo team.',
   },
 }
 

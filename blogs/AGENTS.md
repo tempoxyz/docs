@@ -13,12 +13,12 @@ To keep a post as a draft (written but not published), move it into the `drafts/
 title: "Tuning Reth for payments: how we hit 21,200 TPS"
 excerpt: "One or two sentences shown on the index and as the post's lede."
 date: 2026-06-02
-category: technical # network-upgrades | events | technical | case-studies
+category: technical # announcements | network-upgrades | events | technical | case-studies
 featured: true # optional — pins the post to the hero card on /blog
 ---
 ```
 
-`category` must be one of the four slugs above (the build fails loudly otherwise). At most one post should be `featured`; if none is, the newest post takes the hero card.
+`category` must be one of the five slugs above (the build fails loudly otherwise). At most one post should be `featured`; if none is, the newest post takes the hero card.
 
 ## Body
 

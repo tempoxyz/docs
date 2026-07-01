@@ -2,6 +2,7 @@
 // Kept free of node/build imports so client components can use it directly.
 
 export const categories = [
+  { slug: 'announcements', label: 'Announcements', badge: 'announcement' },
   { slug: 'network-upgrades', label: 'Network upgrades', badge: 'network upgrade' },
   { slug: 'events', label: 'Events', badge: 'events' },
   { slug: 'technical', label: 'Technical posts', badge: 'technical' },

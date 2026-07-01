@@ -40,7 +40,7 @@ function inlineSvgImages(html: string): string {
   })
 }
 
-const CATEGORY_SLUGS = ['network-upgrades', 'events', 'technical', 'case-studies']
+const CATEGORY_SLUGS = ['announcements', 'network-upgrades', 'events', 'technical', 'case-studies']
 
 // ALL-CAPS markdown files (AGENTS.md, DIAGRAMS.md, …) are documentation for
 // authors, not posts.

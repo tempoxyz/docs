@@ -11,7 +11,7 @@ import {
 
 const BLOG_TITLE = 'Blog'
 const BLOG_DESCRIPTION =
-  'Engineering deep dives, network upgrades, events, and case studies from the Tempo team.'
+  'Announcements, engineering deep dives, network upgrades, events, and case studies from the Tempo team.'
 
 const postBySlug = new Map<string, PostSeo>(
   posts.map((post) => [
