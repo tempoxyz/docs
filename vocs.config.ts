@@ -1,4 +1,4 @@
-import { Changelog, defineConfig, McpSource } from 'vocs/config'
+import { Changelog, defineConfig, Embedding, McpSource, Reranker, Retriever } from 'vocs/config'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 
 // Only set baseUrl in production — Vocs injects a <base> tag from this value,
@@ -64,6 +64,21 @@ export default defineConfig({
   description: 'Documentation for the Tempo network and protocol specifications',
   renderStrategy: 'partial-static',
   feedback: createFeedbackAdapter(),
+  ai: {
+    retriever: process.env.CLOUDFLARE_API_TOKEN
+      ? Retriever.local({
+          embedding: Embedding.cloudflare(),
+          hybrid: true,
+          reranker: Reranker.cloudflare(),
+          sources: [
+            { url: 'https://viem.sh/llms.txt', label: 'viem' },
+            { url: 'https://wagmi.sh/llms.txt', label: 'wagmi' },
+            { url: 'https://mpp.dev/llms.txt', label: 'mpp' },
+            { url: 'https://accounts.tempo.xyz/llms.txt', label: 'accounts' },
+          ],
+        })
+      : undefined,
+  },
   search: {
     index: {
       fields: searchIndexFields,

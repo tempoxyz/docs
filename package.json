@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@10.28.1",
   "scripts": {
-    "dev": "NODE_OPTIONS='--import tsx' vite",
+    "dev": "node --env-file-if-exists=.env --import=tsx node_modules/vite/bin/vite.js",
     "build": "tsgo --build && vite build && vite build --config vite.marketing.config.ts",
     "check": "biome check --write --unsafe .",
     "check:types": "tsgo --project tsconfig.json --noEmit",
@@ -58,7 +58,7 @@
     "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",
     "viem": "^2.53.1",
-    "vocs": "^2.2.5",
+    "vocs": "^2.3.0",
     "wagmi": "3.6.14",
     "waku": "^1.0.0-beta.0",
     "webauthx": "~0.1.1",
