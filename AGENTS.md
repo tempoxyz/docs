@@ -15,7 +15,7 @@ Use repo-local sources first:
 
 - `vocs.config.ts` - navigation, sidebar labels, redirects, SEO config
 - `src/pages/docs/protocol/` - protocol and technical references
-- `src/pages/protocol/tips/` - Tempo Improvement Proposals
+- `src/pages/docs/protocol/tips/` - Tempo Improvement Proposals
 - `src/pages/docs/api/` - hosted API and RPC docs
 - `src/pages/docs/guide/` - product workflows and integration guides
 - `src/snippets/` - shared MDX snippets and reusable reference content
@@ -41,7 +41,7 @@ Before finishing docs-only changes, run at least `pnpm check:types` when practic
 
 - `src/pages/` - Vocs file-based routes
 - `src/pages/docs/` - main docs site
-- `src/pages/protocol/tips/` - TIP pages read by `TipsList`
+- `src/pages/docs/protocol/tips/` - TIP pages read by `TipsList`
 - `src/components/` - custom React components for docs and guides
 - `src/snippets/` - shared MDX content
 - `api/` - Vercel serverless functions, including OG image generation
@@ -185,7 +185,7 @@ Each step should be actionable and concrete. Keep long conceptual background out
 
 ## TIP Pages
 
-TIPs live in `src/pages/protocol/tips/` with YAML frontmatter:
+TIPs live in `src/pages/docs/protocol/tips/` with YAML frontmatter:
 
 ```yaml
 ---
