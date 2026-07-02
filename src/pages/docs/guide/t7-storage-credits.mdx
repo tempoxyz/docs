@@ -39,7 +39,7 @@ That first-come, first-served behavior is why some products build their own attr
 
 ## Storage creation benchmark
 
-The [v1.10.1 release benchmark](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1) shows why this primitive matters. In T6, the TIP-1000 storage creation component cost `250,000` gas. In T7, that component is split into a `5,000` gas residual cost plus a `245,000` gas creditable portion that one storage credit can offset.
+The [v1.10.1 release benchmark](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1) shows why this primitive matters. Before T7, the storage creation component cost `250,000` gas due to TIP-1000. In T7, that component is split into a `5,000` gas residual cost plus a `245,000` gas creditable portion that one storage credit can offset.
 
 | Storage creation path | T6 | T7 | What it means |
 |---|---:|---:|---|
