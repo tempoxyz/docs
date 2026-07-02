@@ -68,6 +68,12 @@ export default defineConfig({
     retriever: process.env.CLOUDFLARE_API_TOKEN
       ? Retriever.local({
           embedding: Embedding.cloudflare(),
+          // Production pages are served behind the tempo.xyz `/developers`
+          // proxy; the default origin-relative endpoint escapes the prefix.
+          endpoint:
+            process.env.VERCEL_ENV === 'production'
+              ? 'https://tempo.xyz/developers/api/search'
+              : undefined,
           hybrid: true,
           reranker: Reranker.cloudflare(),
           sources: [
