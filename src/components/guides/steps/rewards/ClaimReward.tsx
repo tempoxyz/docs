@@ -1,7 +1,7 @@
 'use client'
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { useConnection, useConnectionEffect } from 'wagmi'
+import { useConnection, useConnectionEffect, useWaitForTransactionReceipt } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
@@ -27,13 +27,22 @@ export function ClaimReward(props: DemoStepProps) {
     token: tokenAddress,
   })
 
-  const claim = Hooks.reward.useClaimSync({
-    mutation: {
-      onSettled() {
-        queryClient.refetchQueries({ queryKey: ['getBalance'] })
-      },
-    },
+  const claim = Hooks.reward.useClaim()
+  const receipt = useWaitForTransactionReceipt({
+    hash: claim.data,
   })
+
+  React.useEffect(() => {
+    if (!receipt.data) return
+    queryClient.refetchQueries({ queryKey: ['getBalance'] })
+  }, [queryClient, receipt.data])
+
+  const isSuccess = Boolean(receipt.data)
+  const isConfirming = Boolean(claim.data && !receipt.data && !receipt.error)
+  const isPending = claim.isPending || isConfirming
+  const error = claim.error ?? receipt.error
+
+  const txHash = receipt.data?.transactionHash ?? claim.data
 
   useConnectionEffect({
     onDisconnect() {
@@ -49,18 +58,18 @@ export function ClaimReward(props: DemoStepProps) {
       address && balance && balance > 0n && tokenAddress && flowDependenciesMet,
     )
     if (last) return activeWithBalance
-    return activeWithBalance && !claim.isSuccess
-  }, [address, balance, tokenAddress, flowDependenciesMet, claim.isSuccess, last])
+    return activeWithBalance && !isSuccess
+  }, [address, balance, tokenAddress, flowDependenciesMet, isSuccess, last])
 
   return (
     <Step
       active={active}
-      completed={claim.isSuccess}
+      completed={isSuccess}
       number={stepNumber}
       title="Claim your rewards."
-      error={claim.error}
+      error={error}
       actions={
-        claim.isSuccess ? (
+        isSuccess ? (
           <Button
             variant="default"
             onClick={() => setExpanded(!expanded)}
@@ -72,7 +81,7 @@ export function ClaimReward(props: DemoStepProps) {
         ) : (
           <Button
             variant={active ? 'accent' : 'default'}
-            disabled={!active || claim.isPending}
+            disabled={!active || isPending}
             onClick={() => {
               if (!tokenAddress) return
               claim.mutate({
@@ -81,18 +90,18 @@ export function ClaimReward(props: DemoStepProps) {
               })
             }}
           >
-            {claim.isPending ? 'Claiming...' : 'Claim'}
+            {isPending ? 'Claiming...' : 'Claim'}
           </Button>
         )
       }
     >
-      {claim.data && expanded && (
+      {txHash && isSuccess && expanded && (
         <div className="ml-6 flex flex-col gap-3 py-4">
           <div className="border-gray4 border-s-2 ps-5">
             <div className="text-[13px] text-gray9 -tracking-[2%]">
               Successfully claimed {REWARD_AMOUNT} {metadata?.name ?? 'token'}.
             </div>
-            <ExplorerLink hash={claim.data.receipt.transactionHash} />
+            <ExplorerLink hash={txHash} />
           </div>
         </div>
       )}

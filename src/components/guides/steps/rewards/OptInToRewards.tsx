@@ -11,7 +11,7 @@ import type { DemoStepProps } from '../types'
 export function OptInToRewards(props: DemoStepProps) {
   const { stepNumber, last = false } = props
   const { address } = useConnection()
-  const { getData } = useDemoContext()
+  const { getData, setData } = useDemoContext()
   const queryClient = useQueryClient()
   const tokenAddress = getData('tokenAddress')
 
@@ -33,8 +33,9 @@ export function OptInToRewards(props: DemoStepProps) {
 
   React.useEffect(() => {
     if (!receipt.data) return
+    setData('rewardOptedIn', true)
     queryClient.refetchQueries({ queryKey: ['getUserRewardInfo'] })
-  }, [queryClient, receipt.data])
+  }, [queryClient, receipt.data, setData])
 
   const isSuccess = Boolean(receipt.data)
   const isConfirming = Boolean(setRecipient.data && !receipt.data && !receipt.error)

@@ -2,7 +2,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import { parseUnits } from 'viem'
-import { useConnection, useConnectionEffect } from 'wagmi'
+import { useConnection, useConnectionEffect, useWaitForTransactionReceipt } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
@@ -16,6 +16,7 @@ export function StartReward(props: DemoStepProps) {
   const { getData, setData } = useDemoContext()
   const queryClient = useQueryClient()
   const tokenAddress = getData('tokenAddress')
+  const rewardOptedIn = getData('rewardOptedIn')
 
   const [expanded, setExpanded] = React.useState(true)
 
@@ -33,17 +34,24 @@ export function StartReward(props: DemoStepProps) {
     account: address,
   })
 
-  const start = Hooks.reward.useDistributeSync({
-    mutation: {
-      onSuccess() {
-        setData('rewardId', 1n)
-      },
-      onSettled() {
-        queryClient.refetchQueries({ queryKey: ['getUserRewardInfo'] })
-        queryClient.refetchQueries({ queryKey: ['getBalance'] })
-      },
-    },
+  const start = Hooks.reward.useDistribute()
+  const receipt = useWaitForTransactionReceipt({
+    hash: start.data,
   })
+
+  React.useEffect(() => {
+    if (!receipt.data) return
+    setData('rewardId', 1n)
+    queryClient.refetchQueries({ queryKey: ['getUserRewardInfo'] })
+    queryClient.refetchQueries({ queryKey: ['getBalance'] })
+  }, [queryClient, receipt.data, setData])
+
+  const isSuccess = Boolean(receipt.data)
+  const isConfirming = Boolean(start.data && !receipt.data && !receipt.error)
+  const isPending = start.isPending || isConfirming
+  const error = start.error ?? receipt.error
+
+  const txHash = receipt.data?.transactionHash ?? start.data
 
   useConnectionEffect({
     onDisconnect() {
@@ -59,22 +67,21 @@ export function StartReward(props: DemoStepProps) {
         balance > 0n &&
         tokenAddress &&
         metadata &&
-        !!rewardInfo &&
-        rewardInfo.rewardRecipient !== REWARD_RECIPIENT_UNSET,
+        (rewardOptedIn || (!!rewardInfo && rewardInfo.rewardRecipient !== REWARD_RECIPIENT_UNSET)),
     )
     if (last) return activeWithBalance
-    return activeWithBalance && !start.isSuccess
-  }, [address, balance, tokenAddress, metadata, start.isSuccess, last, rewardInfo])
+    return activeWithBalance && !isSuccess
+  }, [address, balance, tokenAddress, metadata, rewardOptedIn, rewardInfo, last, isSuccess])
 
   return (
     <Step
       active={active}
-      completed={start.isSuccess}
+      completed={isSuccess}
       number={stepNumber}
       title={`Start a reward of ${REWARD_AMOUNT} ${metadata?.name || 'tokens'}.`}
-      error={start.error}
+      error={error}
       actions={
-        start.isSuccess ? (
+        isSuccess ? (
           <Button
             variant="default"
             onClick={() => setExpanded(!expanded)}
@@ -86,7 +93,7 @@ export function StartReward(props: DemoStepProps) {
         ) : (
           <Button
             variant={active ? 'accent' : 'default'}
-            disabled={!active || start.isPending || !metadata}
+            disabled={!active || isPending || !metadata}
             onClick={() => {
               if (!tokenAddress || !metadata) return
               start.mutate({
@@ -96,18 +103,18 @@ export function StartReward(props: DemoStepProps) {
               })
             }}
           >
-            {start.isPending ? 'Starting...' : 'Start Reward'}
+            {isPending ? 'Starting...' : 'Start Reward'}
           </Button>
         )
       }
     >
-      {start.data && expanded && (
+      {txHash && isSuccess && expanded && (
         <div className="ml-6 flex flex-col gap-3 py-4">
           <div className="border-gray4 border-s-2 ps-5">
             <div className="text-[13px] text-gray9 -tracking-[2%]">
               Successfully started reward distribution.
             </div>
-            <ExplorerLink hash={start.data.receipt.transactionHash} />
+            <ExplorerLink hash={txHash} />
           </div>
         </div>
       )}
