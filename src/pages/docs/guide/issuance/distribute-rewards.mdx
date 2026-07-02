@@ -17,6 +17,10 @@ import { Cards, Card } from 'vocs'
 
 # Distribute Rewards
 
+:::warning[Rewards deprecation planned]
+This change is planned for testnet on July 2, 2026 and mainnet on July 9, 2026. After activation, new Tempo Token Rewards opt-ins and distributions become no-ops. Already-accrued rewards remain claimable through the existing `claimRewards()` flow. See the [T7 network upgrade](/docs/protocol/upgrades/t7) for the full timeline and scope.
+:::
+
 Distribute rewards to token holders using TIP-20's built-in reward distribution mechanism. Rewards allow parties to incentivize holders of a token by distributing tokens proportionally based on their balance.
 
 Rewards can be distributed by anyone on any TIP-20 token, and claimed by any holder who has opted in. This guide covers both the reward distributor and token holder use cases. While the demo below uses a token you create, the same principles apply to any token.

@@ -14,6 +14,19 @@ Build a payment-gated photo gallery API that charges $0.01 per photo using `mppx
 Unlike [one-time payments](/docs/guide/machine-payments/one-time-payments), sessions open a payment channel once and use off-chain vouchers for each subsequent request — vouchers are processed in pure CPU-bound signature checks, not bottlenecked by blockchain throughput.
 :::
 
+:::info[T7 payment-channel savings]
+The [T7 network upgrade](/docs/protocol/upgrades/t7) adds payer-scoped storage credits for MPP payment channels. When a payer closes or withdraws a finished channel, the reserve records a channel storage credit for that payer. If the same payer opens another channel later, that payer reuses the credit. Other payers cannot spend it.
+:::
+
+In the [v1.10.1 release benchmark](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1), channel-reserve open calls are lower after T7:
+
+| Channel reserve path | T6 | T7 | Gas change |
+|----------------------|---:|---:|-----------:|
+| Open existing | 1,055,229 | 294,425 | -760,804 (-72.1%) |
+| Open first | 1,302,429 | 791,625 | -510,804 (-39.2%) |
+
+These are call-level gas numbers and exclude separate approval gas. They matter most for session services where the same payer opens, closes or withdraws, and later opens channels again.
+
 ## How pay-as-you-go sessions work
 
 <MermaidDiagram chart={`sequenceDiagram

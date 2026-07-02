@@ -46,6 +46,7 @@ Tempo's transaction model is designed for agentic payments using MPP:
 
 - **~500ms finality** — Deterministic confirmation fast enough for synchronous request/response flows
 - **Sub-cent fees** — Low enough for micropayments and per-request billing
+- **Lower repeated channel lifecycle costs** — T7 adds payer-scoped storage credits for MPP payment channels. In the [v1.10.1 release benchmark](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1), channel-reserve open calls are 72.1% lower for the open-existing path and 39.2% lower for the open-first path.
 - **Fee sponsorship** — Servers can cover gas on behalf of clients so they only need stablecoins
 - **2D and expiring nonces** — Parallel nonce lanes prevent payment transactions from blocking other account activity
 - **High throughput** — Supports the on-chain settlement volume that payment channels generate at scale

@@ -408,6 +408,10 @@ export default defineConfig({
                 text: 'Withdraw from a zone',
                 link: '/docs/guide/private-zones/withdraw-from-a-zone',
               },
+              {
+                text: 'Storage savings to benefit your users',
+                link: '/docs/guide/t7-storage-credits',
+              },
             ],
           },
           {
