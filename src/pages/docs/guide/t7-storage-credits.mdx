@@ -1,15 +1,17 @@
 ---
 title: Storage Credits for Repeated Workflows
-description: Learn how storage credits lower repeat storage costs, how Refund mode works by default, and when to attribute savings to specific users.
+description: Learn how storage credits lower repeat storage costs, how Refund mode works by default, and when apps should build attribution logic.
 ---
 
 import { StorageSavingsSummary } from '../../../components/StorageSavingsSummary'
 
 # Storage Credits for Repeated Workflows
 
-Storage credits make repeated storage workflows cheaper. Products can pass those savings to users through lower transaction costs, or explicitly attribute them to the users who earned them. They are useful for repeated business flows like DEX orders: placing an order creates storage, canceling or filling the order clears it, and the same maker may place another order later.
+Storage credits make repeated storage workflows cheaper. They are useful for repeat business flows like DEX orders: placing an order creates storage, canceling or filling the order clears it, and the same maker may place another order later.
 
-T7 keeps fresh storage expensive enough to discourage state-growth spam, while letting contracts reuse value from storage they clear. By default, contracts benefit automatically. If your product needs the savings to follow a specific user, maker, payer, or account, you can add user-level accounting on top.
+At the protocol layer, a storage credit belongs to the account that owns the storage, usually the contract. It does not know which user, maker, or payer caused the storage to be cleared. If a product wants the savings to follow that user later, the product needs its own attribution logic.
+
+T7 keeps fresh storage expensive enough to discourage state-growth spam, while letting contracts reuse value from storage they clear. By default, contracts benefit automatically. App-level attribution is only needed when the product wants to control which user receives the later savings.
 
 :::info[Feature status]
 Storage credits are part of the T7 network upgrade: testnet rollout is planned for July 2, 2026, and mainnet rollout is planned for July 9, 2026. See the [T7 network upgrade](/docs/protocol/upgrades/t7) for the full scope and release details.
@@ -19,12 +21,7 @@ Storage credits are part of the T7 network upgrade: testnet rollout is planned f
 
 Each account has a protocol-maintained storage credit balance. A credit is not a token, cannot be transferred, and can only offset storage creation by the same account that earned it.
 
-The balance changes when that account's storage slots move between empty and non-empty:
-
-| Storage transition | What happens |
-|---|---|
-| Nonzero to zero | The account deletes storage and earns one storage credit |
-| Zero to nonzero | The account creates storage; one available credit can offset the creditable portion of that creation, depending on the account's storage creation mode |
+When one of that account's storage slots changes from nonzero to zero, the account earns one storage credit. Later, when the same account changes a storage slot from zero to nonzero, one available credit can offset the creditable portion of that new storage write. How and when the credit is applied depends on the account's storage creation mode.
 
 A credit is tied to the storage-owning account, not to the transaction sender or the user whose action triggered the write. The same rule applies whether the account is a smart contract, precompile, or EOA, though contracts are the common case for application storage.
 
@@ -34,18 +31,11 @@ One credit can offset most of the storage-creation cost for one new slot. For co
 
 Contracts do not need to call the storage credits precompile to benefit from storage credits. Every account starts each transaction in `Refund` mode.
 
-In `Refund` mode, storage creations pay upfront. At the end of the transaction, the protocol matches eligible creations with available credits for the same contract, consumes those credits, and applies the gas refund.
+In `Refund` mode, storage creations pay upfront during execution. At the end of the transaction, the protocol looks for eligible storage creations and available credits owned by the same account, consumes matched credits, and applies the gas refund.
 
-| Action | `Refund` mode behavior |
-|---|---|
-| Contract deletes one of its own storage slots | The contract earns a protocol storage credit |
-| Contract creates storage later | The creation pays upfront during execution |
-| End-of-transaction settlement | Available credits can be consumed to refund matched creations |
-| Contract has no user-level accounting | Credits are spent first-come, first-served by later storage creations |
+This default mode is usually enough when a contract simply wants lower net cost for repeated storage churn. It is not user-aware: whichever eligible storage creation happens next can consume an available credit, regardless of which user caused the earlier storage deletion.
 
-This default mode is usually enough when the contract simply wants lower net cost for repeated storage churn. It is not user-aware: whichever eligible storage creation happens next can consume an available credit, regardless of which user caused the earlier storage deletion.
-
-That first-come, first-served behavior is why explicit user-level attribution can be useful for products that want savings to follow a specific user.
+That first-come, first-served behavior is why some products build their own attribution logic. The protocol supplies the account-level credit; the app decides whether it also needs to remember which user should benefit from that credit later.
 
 ## Storage creation benchmark
 
@@ -57,9 +47,9 @@ The [v1.10.1 release benchmark](https://github.com/tempoxyz/tempo/releases/tag/v
 
 Storage creation is not free, and a contract still has to earn credits first. But for workflows that repeatedly create, clear, and recreate temporary state, T7 lets the contract reuse much more of the value from cleared storage.
 
-## Why user-level accounting can be useful
+## Why app-level attribution can be useful
 
-Protocol storage credits lower the contract's cost, but they do not answer the product question of which user should receive the benefit.
+Protocol storage credits lower the contract's cost, but the protocol only tracks the storage-owning account. It does not answer the product question of which user should receive the benefit.
 
 For example:
 
@@ -71,18 +61,18 @@ For example:
 
 That may be fine for some products. For the StablecoinDEX, the intended behavior is different: if Alice's order lifecycle created the reusable storage benefit, Alice should be able to use that benefit when she places a later order.
 
-Use user-level accounting when all of these are true:
+Build app-level attribution logic when all of these are true:
 
 1. Deleted storage is clearly attributable to one user, maker, payer, or account.
-2. That same user is expected to create similar storage again later.
+2. That same user is expected to create storage again later.
 3. You want the savings to follow that user instead of going to whichever eligible action happens next.
 4. The contract can distinguish user-attributed storage from internal accounting storage.
 
 ### StablecoinDEX pattern
 
-[TIP-1064](https://tips.sh/1064) adds user-level reusable storage accounting for StablecoinDEX order storage.
+[TIP-1064](https://tips.sh/1064) adds StablecoinDEX-specific reusable storage accounting for order storage.
 
-The DEX keeps a dedicated state variable, `dex_storage_credits`, to track reusable order-storage credits per user. This is not the same as the TIP-1060 protocol credit balance. The protocol balance belongs to the DEX contract; `dex_storage_credits` is the DEX's user-facing record of which maker should receive the benefit.
+The DEX keeps a dedicated state variable, `dex_storage_credits`, to track reusable order-storage credits per user. This is app-level bookkeeping, not a second protocol balance. The protocol balance belongs to the DEX contract; `dex_storage_credits` is the DEX's record of which maker should receive the benefit.
 
 To enforce that attribution, DEX transactions preserve protocol credits by default and only spend them deliberately for attributed writes:
 
@@ -100,7 +90,7 @@ The key idea is simple: TIP-1060 gives the DEX the raw storage credit, while TIP
 
 ### DEX savings example
 
-The DEX benchmark shows why user-level accounting can matter. Fresh order placement stays effectively unchanged, while repeat orders from a maker who already earned DEX storage credits become much cheaper.
+The DEX benchmark shows why app-level attribution can matter. Fresh order placement stays effectively unchanged, while repeat orders from a maker who already earned DEX storage credits become much cheaper.
 
 <StorageSavingsSummary />
 
@@ -113,7 +103,7 @@ The cancellation or fill step does a little extra accounting to remember which m
 
 ### Prevent cross-user leakage
 
-User-level accounting prevents one user's storage benefit from being spent by another user.
+App-level attribution prevents one user's storage benefit from being spent by another user.
 
 | Case | Expected behavior |
 |---|---|
@@ -125,7 +115,7 @@ The DEX benchmark includes cross-user isolation tests to prove this behavior, bu
 
 ## Partner checklist
 
-When deciding whether default storage credits are enough or whether you should add user-level accounting, check:
+When deciding whether default storage credits are enough or whether your contract should track attribution, check:
 
 1. Does the contract create storage during the user flow?
 2. Does the contract later clear that storage?

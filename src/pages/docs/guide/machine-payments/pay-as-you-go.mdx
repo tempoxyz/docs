@@ -15,7 +15,7 @@ Unlike [one-time payments](/docs/guide/machine-payments/one-time-payments), sess
 :::
 
 :::info[T7 payment-channel savings]
-The [T7 network upgrade](/docs/protocol/upgrades/t7) adds payer-scoped storage credits for MPP payment channels. When a payer closes or withdraws a finished channel, the reserve can record a channel storage credit for that payer. If the same payer opens another channel later, that payer can reuse the credit. Other payers cannot spend it.
+The [T7 network upgrade](/docs/protocol/upgrades/t7) adds payer-scoped storage credits for MPP payment channels. When a payer closes or withdraws a finished channel, the reserve records a channel storage credit for that payer. If the same payer opens another channel later, that payer reuses the credit. Other payers cannot spend it.
 :::
 
 In the [v1.10.1 release benchmark](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1), channel-reserve open calls are lower after T7:
