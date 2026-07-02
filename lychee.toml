@@ -33,6 +33,8 @@ exclude = [
   "^https?://([a-z0-9-]+\\.)*example\\.(com|org|net)",
   # SVG xmlns reference, not a real link.
   "^http://www\\.w3\\.org/2000/svg$",
+  # POST-only AI search endpoint referenced in vocs.config.ts.
+  "^https://tempo\\.xyz/developers/api/search$",
 ]
 
 # Reuse cached results across runs.
