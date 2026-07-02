@@ -58,8 +58,6 @@ This is not a blanket gas discount. It matters most when a workflow has a natura
 
 The StablecoinDEX uses the same storage-credit idea but adds maker-level accounting. If a maker cancels or fully fills an eligible order, the DEX can keep the reusable order-storage savings attached to that maker. When the same maker places a later eligible order, the DEX can apply those savings.
 
-Read [Storage Credits for Repeated Workflows](/docs/guide/t7-storage-credits) for the allocation pattern, storage credit modes, and DEX benchmark.
-
 ### Payer-scoped payment-channel savings
 
 T7 applies the storage-credit pattern to MPP payment channels through the `TIP20ChannelReserve` precompile. When a payer closes or withdraws a finished channel, the reserve records a channel storage credit for that payer. When the same payer opens a later channel, the reserve uses that payer's credit.
