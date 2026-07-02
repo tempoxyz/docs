@@ -87,7 +87,7 @@ export function extractParameterNames(signature: string): string[] {
   // Extract parameters from signature like
   // "Transfer(address indexed from, address indexed to, uint256 amount)"
   const match = signature.match(/\((.*)\)/)
-  if (!match || !match[1]) return []
+  if (!match?.[1]) return []
 
   const paramsString = match[1]
   const params = paramsString.split(',').map((p) => p.trim())

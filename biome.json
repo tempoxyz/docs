@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.1/schema.json",
   "assist": {
     "actions": {
       "source": {
@@ -34,7 +34,13 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
+      "correctness": {
+        "useExhaustiveDependencies": "off"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "off"
+      },
       "nursery": {
         "useSortedClasses": {
           "level": "warn",
@@ -60,6 +66,16 @@
   },
   "overrides": [
     {
+      "includes": ["public/**/*.svg"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noSvgWithoutTitle": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["vocs.config.ts"],
       "linter": {
         "rules": {
@@ -73,7 +89,7 @@
       "includes": ["env.d.ts"],
       "linter": {
         "rules": {
-          "recommended": true,
+          "preset": "recommended",
           "correctness": {
             "noUnusedVariables": "off"
           }

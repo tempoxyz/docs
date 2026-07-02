@@ -82,7 +82,7 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
         ) : (
           <Button
             variant={
-              !!tokenAddress && !!hasRole && !hasSufficientBalance
+              tokenAddress && hasRole && !hasSufficientBalance
                 ? mint.isSuccess
                   ? 'default'
                   : 'accent'

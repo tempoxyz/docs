@@ -177,7 +177,7 @@ export function Container(
       )
     if (props.footerVariant === 'source') return <Container.SourceFooter src={props.src} />
     return null
-  }, [props, balanceAddress])
+  }, [props, balanceAddress, Container])
 
   return (
     <ParentContainer
