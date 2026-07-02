@@ -7,7 +7,7 @@ import { T7BenchmarkVisual } from '../../../../components/T7BenchmarkVisual'
 
 # T7 Network Upgrade
 
-T7 makes repeated onchain workflows cheaper . It adds storage savings for DEX order state and TIP-20 payment-channel state, lets the base fee move down when network usage is low, and deprecates new TIP-20 rewards activity.
+T7 makes repeated onchain workflows cheaper. It adds storage savings for DEX order state and TIP-20 payment-channel state, lets the base fee move down when network usage is low, and deprecates new TIP-20 rewards activity.
 
 Apps with repeat contract workflows can pass meaningful gas savings to returning users, MPP sessions can reuse channel-state savings for the same payer, and all users can benefit from lower base fees during quieter network periods.
 
@@ -62,7 +62,7 @@ Read [Storage Credits for Repeated Workflows](/docs/guide/t7-storage-credits) fo
 
 ### Payer-scoped payment-channel savings
 
-T7 applies the storage-credit pattern to MPP payment channels through the `TIP20ChannelReserve` precompile. When a payer closes or withdraws a finished channel, the reserve can record a channel storage credit for that payer. When the same payer opens a later channel, the reserve can use that payer's credit.
+T7 applies the storage-credit pattern to MPP payment channels through the `TIP20ChannelReserve` precompile. When a payer closes or withdraws a finished channel, the reserve records a channel storage credit for that payer. When the same payer opens a later channel, the reserve uses that payer's credit.
 
 This keeps channel savings attached to the payer who earned them. A different payer cannot spend another payer's channel credit.
 
