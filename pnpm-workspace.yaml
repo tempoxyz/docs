@@ -14,6 +14,7 @@ minimumReleaseAgeExclude:
   - vocs
   - vite
   - tapimo
+  - es-module-lexer
   - '@vocs/twoslash-rust'
   - '@vocs/twoslash-rust-darwin-arm64'
   - '@vocs/twoslash-rust-linux-x64-gnu'
