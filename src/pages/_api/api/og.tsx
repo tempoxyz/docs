@@ -223,6 +223,10 @@ export default async function handler(request: Request) {
         module: wasmModule,
         width: 1200,
         height: 657,
+        // Explicit PNG: some social crawlers (notably Facebook) don't render
+        // WebP og:images, and takumi's default format has changed across
+        // versions.
+        format: 'png',
         fonts: [
           { name: 'HBSet', data: hbSetFont, weight: 300, style: 'normal' as const },
           { name: 'Pilat', data: pilatFont, weight: 400, style: 'normal' as const },

@@ -7,6 +7,11 @@ updates:
       interval: weekly
     cooldown:
       default-days: 7
+    # @takumi-rs >= 1.x crashes the Vercel Node lambda (process exit 128,
+    # empty /api/og responses) while working locally. Pinned to 0.62.8 until
+    # a newer release is verified against a production deployment.
+    ignore:
+      - dependency-name: "@takumi-rs/*"
     groups:
       production:
         dependency-type: production
