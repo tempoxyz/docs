@@ -2,6 +2,7 @@
 
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useConfig } from 'vocs'
+import { useRouter } from 'waku'
 import { DOCS_SEARCH_PARAM } from '../lib/docs-search'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 
@@ -36,8 +37,13 @@ function isExternal(href: string) {
   return !href.startsWith('/') && !href.startsWith('#')
 }
 
-function normalizePath(pathname: string) {
-  return pathname || '/'
+export function normalizeDocsPath(pathname: string) {
+  const path = pathname || '/'
+  if (path === DEVELOPERS_BASE_PATH) return '/'
+  if (path.startsWith(`${DEVELOPERS_BASE_PATH}/`)) {
+    return path.slice(DEVELOPERS_BASE_PATH.length) || '/'
+  }
+  return path
 }
 
 function pathMatches(pathname: string, href: string) {
@@ -45,10 +51,11 @@ function pathMatches(pathname: string, href: string) {
 }
 
 export function usePathname() {
-  const [pathname, setPathname] = useState('/')
+  const { path } = useRouter()
+  const [pathname, setPathname] = useState(() => normalizeDocsPath(path ?? '/'))
 
   useLayoutEffect(() => {
-    const update = () => setPathname(normalizePath(window.location.pathname))
+    const update = () => setPathname(normalizeDocsPath(window.location.pathname))
     update()
     window.addEventListener('popstate', update)
     window.addEventListener('hashchange', update)
@@ -57,6 +64,10 @@ export function usePathname() {
       window.removeEventListener('hashchange', update)
     }
   }, [])
+
+  useEffect(() => {
+    if (path) setPathname(normalizeDocsPath(path))
+  }, [path])
 
   return pathname
 }
@@ -882,10 +893,11 @@ export function resolveSidebarItems(sidebar: unknown, pathname: string): Sidebar
   if (Array.isArray(sidebar)) return sidebar as SidebarNode[]
   if (typeof sidebar !== 'object') return []
 
+  const path = normalizeDocsPath(pathname)
   const entries = sidebar as Record<string, SidebarNode[] | { items?: SidebarNode[] }>
   let bestKey: string | null = null
   for (const key of Object.keys(entries)) {
-    if (pathname === key || pathname.startsWith(key === '/' ? '/' : `${key}/`)) {
+    if (path === key || path.startsWith(key === '/' ? '/' : `${key}/`)) {
       if (bestKey === null || key.length > bestKey.length) bestKey = key
     }
   }
