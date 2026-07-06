@@ -1,4 +1,3 @@
-import type { Metadata } from 'next'
 import { type ReactNode, useEffect, useState } from 'react'
 import ArrowUpRight from '../_components/ArrowUpRight'
 import Button from '../_components/Button'
@@ -11,12 +10,6 @@ import TpsTrendChart from './_components/TpsTrendChart'
 import TpsTrendChartFrame from './_components/TpsTrendChartFrame'
 import UptimeStrip from './_components/UptimeStrip'
 import { fetchPerfRuns, fmtInt, type PerfRun } from './_lib/runs'
-
-export const metadata: Metadata = {
-  title: 'Performance',
-  description:
-    'Nightly benchmarks on a live Tempo network: throughput, block times, and execution rates, published as raw runs.',
-}
 
 const STATUS_PAGE_URL = 'https://status.tempo.xyz'
 const PERF_DASHBOARD_URL = 'https://perf.tempo.xyz/'

@@ -13,6 +13,7 @@ import '../pages/_root.css'
 import Header from './app/_components/Header'
 import TpsTrendChartFrame from './app/performance/_components/TpsTrendChartFrame'
 import HomePage from './HomePage'
+import { routeMetadata } from './routeMetadata'
 
 const loadBlogPage = () => import('./app/blog/page')
 const loadBlogPostPage = () => import('./app/blog/[slug]/page')
@@ -69,38 +70,6 @@ function scheduleIdleAnalytics(callback: () => void) {
     globalThis.clearTimeout(timeoutId)
     if (idleId !== undefined) window.cancelIdleCallback(idleId)
   }
-}
-
-const routeMetadata: Record<string, { title: string; description: string }> = {
-  '/': {
-    title: 'Tempo',
-    description:
-      'The only blockchain designed for payments. Sub-second transactions, sub-cent fees.',
-  },
-  '/build': {
-    title: 'Build on Tempo',
-    description:
-      'Build payment products on Tempo with stablecoins, fast settlement, and predictable fees.',
-  },
-  '/build/tempo-transactions': {
-    title: 'Tempo Transactions',
-    description: 'Batch, sponsor, schedule, and parallelize payments with Tempo Transactions.',
-  },
-  '/build/tip20-tokens': {
-    title: 'TIP-20 Tokens',
-    description:
-      'Stablecoin-first Tempo Tokens for payments, fees, memos, policies, and liquidity.',
-  },
-  '/performance': {
-    title: 'Performance',
-    description:
-      'Nightly benchmarks on Tempo throughput, block times, execution rates, and uptime.',
-  },
-  '/blog': {
-    title: 'Blog',
-    description:
-      'Engineering deep dives, network upgrades, events, and case studies from the Tempo team.',
-  },
 }
 
 function FallbackSkeleton({ className }: { className: string }) {

@@ -6,7 +6,7 @@
   "packageManager": "pnpm@10.28.1",
   "scripts": {
     "dev": "node --env-file-if-exists=.env --import=tsx node_modules/vite/bin/vite.js",
-    "build": "tsgo --build && vite build && vite build --config vite.marketing.config.ts",
+    "build": "tsgo --build && vite build",
     "check": "biome check --write --unsafe .",
     "check:types": "tsgo --project tsconfig.json --noEmit",
     "preview": "node dist/preview.js",

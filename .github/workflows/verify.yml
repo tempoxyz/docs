@@ -47,6 +47,9 @@ jobs:
       - name: Check types
         run: pnpm run check:types
 
+      - name: Test
+        run: pnpm run test
+
       - name: Build
         run: pnpm run build
         env:

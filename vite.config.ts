@@ -7,7 +7,6 @@ import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { vocs } from 'vocs/vite'
 import { blogPostsPlugin } from './src/marketing/blogPlugin'
-import { marketingSearchIndexPlugin } from './src/marketing/searchIndexPlugin'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -29,7 +28,6 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       blogPostsPlugin(),
-      marketingSearchIndexPlugin({ source: 'vocs' }),
       marketingPages(),
       developersProxyRouteNormalization(),
       vocs(),

@@ -1,6 +1,8 @@
 'use client'
 
 import { lazy, type ReactNode, Suspense, useEffect, useState } from 'react'
+import PageHead from '../components/PageHead'
+import { type RouteMetadata, routeMetadata } from './routeMetadata'
 
 const Analytics = lazy(() =>
   import('@vercel/analytics/react').then((module) => ({ default: module.Analytics })),
@@ -10,38 +12,6 @@ const SpeedInsights = lazy(() =>
 )
 const GoogleAnalytics = lazy(() => import('../components/GoogleAnalytics'))
 const PostHogSetup = lazy(() => import('../components/PostHogSetup'))
-
-const routeMetadata: Record<string, { title: string; description: string }> = {
-  '/': {
-    title: 'Tempo',
-    description:
-      'The only blockchain designed for payments. Sub-second transactions, sub-cent fees.',
-  },
-  '/build': {
-    title: 'Build on Tempo',
-    description:
-      'Build payment products on Tempo with stablecoins, fast settlement, and predictable fees.',
-  },
-  '/build/tempo-transactions': {
-    title: 'Tempo Transactions',
-    description: 'Batch, sponsor, schedule, and parallelize payments with Tempo Transactions.',
-  },
-  '/build/tip20-tokens': {
-    title: 'TIP-20 Tokens',
-    description:
-      'Stablecoin-first Tempo Tokens for payments, fees, memos, policies, and liquidity.',
-  },
-  '/performance': {
-    title: 'Performance',
-    description:
-      'Nightly benchmarks on Tempo throughput, block times, execution rates, and uptime.',
-  },
-  '/blog': {
-    title: 'Blog',
-    description:
-      'Engineering deep dives, network upgrades, events, and case studies from the Tempo team.',
-  },
-}
 
 const prefetchedPaths = new Set<string>()
 const ANALYTICS_DELAY_MS = 15_000
@@ -57,8 +27,6 @@ function prefetchPath(href: string) {
   link.as = 'document'
   document.head.appendChild(link)
 }
-
-type RouteMetadata = { title: string; description: string }
 
 function scheduleIdleAnalytics(callback: () => void) {
   let idleId: number | undefined
@@ -76,26 +44,36 @@ function scheduleIdleAnalytics(callback: () => void) {
   }
 }
 
-function applyRouteMetadata(route: string, metadata?: RouteMetadata) {
-  const resolved = metadata ?? routeMetadata[route] ?? routeMetadata['/']
-  document.title = resolved.title
-  document.querySelector('meta[name="description"]')?.setAttribute('content', resolved.description)
+// Fallback for routes missing from the metadata map, so a forgotten entry
+// yields a page-derived title instead of silently reusing the homepage copy.
+function fallbackMetadata(route: string): RouteMetadata {
+  const name = route
+    .split('/')
+    .filter(Boolean)
+    .pop()
+    ?.split('-')
+    .map((word) => (word[0]?.toUpperCase() ?? '') + word.slice(1))
+    .join(' ')
+  return {
+    title: name || 'Tempo',
+    description: 'Build payment products on Tempo with stablecoins and predictable settlement.',
+  }
 }
 
 export default function MarketingRoute({
   children,
   route,
   metadata,
+  head,
 }: {
   children: ReactNode
   route: string
   metadata?: RouteMetadata
+  /** Extra head tags rendered after the page `<Head>` (e.g. article metadata). */
+  head?: ReactNode
 }) {
   const [analyticsReady, setAnalyticsReady] = useState(false)
-
-  useEffect(() => {
-    applyRouteMetadata(route, metadata)
-  }, [route, metadata])
+  const resolvedMetadata = metadata ?? routeMetadata[route] ?? fallbackMetadata(route)
 
   useEffect(() => {
     return scheduleIdleAnalytics(() => setAnalyticsReady(true))
@@ -121,6 +99,9 @@ export default function MarketingRoute({
 
   return (
     <>
+      <PageHead title={resolvedMetadata.title} description={resolvedMetadata.description}>
+        {head}
+      </PageHead>
       {children}
       {analyticsReady && (
         <Suspense fallback={null}>

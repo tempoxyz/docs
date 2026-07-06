@@ -1,4 +1,4 @@
-import { getSearchIndex } from 'virtual:marketing/search-index'
+import { getSearchIndex } from 'virtual:vocs/search-index'
 import MiniSearch, { type Options, type SearchOptions } from 'minisearch'
 
 // Mirrors the search config in vocs.config.ts so the marketing search loads the

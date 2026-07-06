@@ -1,11 +1,9 @@
-// Shared, isomorphic SEO helpers for the marketing/blog surface. Used both by
-// the Vite marketing build (Node, see vite.marketing.config.ts) and by the
+// Shared, isomorphic SEO helpers for the marketing/blog surface, used by the
 // Waku static blog-post route (src/pages/blog/[slug].tsx). Keep this free of
 // node-only imports so it can run in either context.
 
+import { OG_IMAGE_VERSION } from '../lib/og-sections'
 import { type CategorySlug, categoryBySlug } from './app/blog/_lib/categories'
-
-const OG_IMAGE_VERSION = '2'
 
 export type PostSeo = {
   slug: string
@@ -34,11 +32,14 @@ export function absoluteUrl(base: string, pathname: string): string {
   return base ? `${base}${normalized}` : normalized
 }
 
-export function ogImageUrl(
-  base: string,
-  params: { title: string; description: string; section: string },
-): string {
-  const query = new URLSearchParams({ ...params, v: OG_IMAGE_VERSION }).toString()
+// The renderer only reads `title`, `section`, and `subsection` — keep the
+// query minimal so URLs stay stable and cache keys stay small. Encodes with
+// encodeURIComponent (spaces as %20, not '+') so URLs are byte-identical to
+// the ones vocs' <Head> produces from the vocs.config.ts template — the CDN
+// caches OG images by URL, and JSON-LD must reference the same resource as
+// the page's og:image.
+export function ogImageUrl(base: string, params: { title: string; section: string }): string {
+  const query = `title=${encodeURIComponent(params.title)}&section=${encodeURIComponent(params.section)}&v=${OG_IMAGE_VERSION}`
   return absoluteUrl(base, `/api/og?${query}`)
 }
 

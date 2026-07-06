@@ -14,11 +14,6 @@ declare module 'virtual:blog-posts' {
   }[]
 }
 
-declare module 'virtual:marketing/search-index' {
-  /** Returns the serialized MiniSearch index JSON for the docs search. */
-  export function getSearchIndex(): Promise<string>
-}
-
 declare module 'next/link' {
   export { default } from './next-shims'
 }

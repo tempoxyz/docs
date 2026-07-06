@@ -1,4 +1,3 @@
-import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Button from '../../_components/Button'
 import CodePanel from '../../_components/CodePanel'
@@ -12,17 +11,6 @@ import TransactionsSections from '../_components/TransactionsSections'
 
 export function generateStaticParams() {
   return features.map((feature) => ({ slug: feature.slug }))
-}
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>
-}): Promise<Metadata> {
-  const { slug } = await params
-  const feature = features.find((f) => f.slug === slug)
-  if (!feature) return {}
-  return { title: `${feature.title} — Tempo Developers` }
 }
 
 type FeatureParams = { slug: string } | Promise<{ slug: string }>

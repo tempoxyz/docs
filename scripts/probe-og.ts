@@ -16,64 +16,29 @@
  *   VITE_USE_HTTP=true pnpm dev --port 5181
  *   PREVIEW_URL=http://localhost:5181 pnpm og:probe
  *
- * Keep the maps below in sync with vocs.config.ts.
+ * Section maps are imported from src/lib/og-sections.ts — the same module
+ * vocs.config.ts uses — so the probe can't drift from the site config.
  */
 
 import { readdirSync, statSync, writeFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
+import {
+  ogLandingPaths,
+  ogSectionMap as sectionMap,
+  ogSubsectionMap as subsectionMap,
+} from '../src/lib/og-sections.ts'
 
 const PREVIEW = process.env.PREVIEW_URL ?? 'https://tempo-docs-k6tznt1fw-tempoxyz.vercel.app'
 const PAGES_DIR = 'src/pages'
 
-const sectionMap: Record<string, string> = {
-  quickstart: 'INTEGRATE',
-  guide: 'BUILD',
-  protocol: 'PROTOCOL',
-  sdk: 'SDKs',
-  cli: 'CLI',
-  ecosystem: 'ECOSYSTEM',
-  learn: 'LEARN',
-  wallet: 'WALLET',
-  accounts: 'ACCOUNTS',
-}
-
-const subsectionMap: Record<string, string> = {
-  'use-accounts': 'ACCOUNTS',
-  payments: 'PAYMENTS',
-  issuance: 'ISSUANCE',
-  'stablecoin-dex': 'EXCHANGE',
-  'machine-payments': 'MACHINE PAY',
-  'tempo-transaction': 'TRANSACTIONS',
-  tip20: 'TIP-20',
-  'tip20-rewards': 'REWARDS',
-  tip403: 'TIP-403',
-  fees: 'FEES',
-  transactions: 'TRANSACTIONS',
-  blockspace: 'BLOCKSPACE',
-  exchange: 'DEX',
-  tips: 'TIPS',
-  node: 'NODE',
-  typescript: 'TYPESCRIPT',
-  go: 'GO',
-  foundry: 'FOUNDRY',
-  python: 'PYTHON',
-  rust: 'RUST',
-  stablecoins: 'STABLECOINS',
-  'use-cases': 'USE CASES',
-  tempo: 'TEMPO',
-  upgrades: 'UPGRADES',
-  api: 'API',
-  guides: 'GUIDES',
-  rpc: 'RPC',
-  server: 'SERVER',
-  wagmi: 'WAGMI',
-}
-
-const LANDING = new Set(['/', '/learn', '/changelog'])
+const LANDING = new Set(ogLandingPaths)
 
 function deriveOgParams(path: string) {
-  if (LANDING.has(path)) return { kind: 'static' as const, url: '/og-docs.png' }
-  const segments = path.split('/').filter(Boolean)
+  // Mirror vocs.config.ts: routes live under /docs but the OG section is
+  // derived from the path with that prefix stripped.
+  const docsPath = path.replace(/^\/docs(?=\/|$)/, '') || '/'
+  if (LANDING.has(docsPath)) return { kind: 'static' as const, url: '/og-docs.png' }
+  const segments = docsPath.split('/').filter(Boolean)
   const firstSeg = segments[0] || ''
   const secondSeg = segments[1] || ''
   const sectionMapped = firstSeg in sectionMap
@@ -221,7 +186,6 @@ for (const b of sample) {
   i++
   const params = new URLSearchParams({
     title: 'Sample Title For OG Verification',
-    description: 'Probe',
     section: b.section,
     ...(b.subsection ? { subsection: b.subsection } : {}),
   })
@@ -255,7 +219,6 @@ const edge = [
 for (const e of edge) {
   const params = new URLSearchParams({
     title: e.title,
-    description: 'edge',
     section: 'PROTOCOL',
     subsection: 'TIPS',
   })

@@ -25,4 +25,4 @@ Allow: /
 User-agent: Applebot
 Allow: /
 
-Sitemap: https://docs.tempo.xyz/sitemap.xml
+Sitemap: https://tempo.xyz/developers/sitemap.xml

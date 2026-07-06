@@ -128,9 +128,8 @@ async function renderPost(filename: string): Promise<RenderedPost> {
   }
 }
 
-// Reads + renders every post, newest first. Used by the virtual module and by
-// the marketing static-route generator.
-export async function loadRenderedPosts(): Promise<RenderedPost[]> {
+// Reads + renders every post, newest first.
+async function loadRenderedPosts(): Promise<RenderedPost[]> {
   const filenames = fs.readdirSync(BLOGS_DIR).filter((f) => f.endsWith('.md') && !DOC_FILE.test(f))
 
   const posts = await Promise.all(filenames.map(renderPost))

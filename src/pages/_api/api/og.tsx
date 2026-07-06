@@ -227,6 +227,9 @@ export default async function handler(request: Request) {
           { name: 'HBSet', data: hbSetFont, weight: 300, style: 'normal' as const },
           { name: 'Pilat', data: pilatFont, weight: 400, style: 'normal' as const },
         ],
+        // The image is a pure function of the query string (`v` busts on
+        // design changes), so let the CDN cache it indefinitely.
+        headers: { 'Cache-Control': 'public, max-age=31536000, immutable' },
       },
     )
   } catch (error) {

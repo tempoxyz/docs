@@ -112,6 +112,10 @@ export default defineConfig({
   },
   baseUrl: baseUrl || undefined,
   trailingSlashRedirect: false,
+  // NOTE: this function is serialized to source and re-evaluated at runtime,
+  // so it must stay self-contained (no references to module-scope values).
+  // src/lib/og-sections.ts mirrors these maps for scripts/probe-og.ts, and
+  // src/lib/og-sections.test.ts fails if the two drift.
   ogImageUrl: (path, options = {}) => {
     const urlBase = options.baseUrl?.replace(/\/$/, '') ?? ''
     const docsPath = path.replace(/^\/docs(?=\/|$)/, '') || '/'
@@ -119,45 +123,47 @@ export default defineConfig({
     if (landingPaths.includes(docsPath)) return `${urlBase}/og-docs.png`
 
     const sectionMap: Record<string, string> = {
-      quickstart: 'INTEGRATE',
-      guide: 'BUILD',
-      protocol: 'PROTOCOL',
-      sdk: 'SDKs',
+      api: 'API',
+      blog: 'BLOG',
+      build: 'BUILD',
       cli: 'CLI',
+      'developer-tools': 'DEVELOPER TOOLS',
       ecosystem: 'ECOSYSTEM',
+      guide: 'BUILD',
       'hosted-services': 'HOSTED SERVICES',
+      partners: 'PARTNERS',
+      performance: 'PERFORMANCE',
+      protocol: 'PROTOCOL',
+      quickstart: 'INTEGRATE',
+      sdk: 'SDKs',
+      tools: 'TOOLS',
       wallet: 'WALLET',
     }
 
     const subsectionMap: Record<string, string> = {
-      payments: 'PAYMENTS',
+      blockspace: 'BLOCKSPACE',
+      exchange: 'DEX',
+      fees: 'FEES',
+      foundry: 'FOUNDRY',
+      go: 'GO',
       issuance: 'ISSUANCE',
-      'stablecoin-dex': 'EXCHANGE',
       'machine-payments': 'MACHINE PAY',
+      node: 'NODE',
+      payments: 'PAYMENTS',
+      'private-zones': 'ZONES',
+      python: 'PYTHON',
+      rpc: 'RPC',
+      rust: 'RUST',
+      'stablecoin-dex': 'EXCHANGE',
       'tempo-transaction': 'TRANSACTIONS',
       tip20: 'TIP-20',
       'tip20-rewards': 'REWARDS',
       tip403: 'TIP-403',
-      fees: 'FEES',
-      transactions: 'TRANSACTIONS',
-      blockspace: 'BLOCKSPACE',
-      exchange: 'DEX',
       tips: 'TIPS',
-      node: 'NODE',
+      transactions: 'TRANSACTIONS',
       typescript: 'TYPESCRIPT',
-      go: 'GO',
-      foundry: 'FOUNDRY',
-      python: 'PYTHON',
-      rust: 'RUST',
-      stablecoins: 'STABLECOINS',
-      'use-cases': 'USE CASES',
-      tempo: 'TEMPO',
       upgrades: 'UPGRADES',
-      api: 'API',
-      guides: 'GUIDES',
-      rpc: 'RPC',
-      server: 'SERVER',
-      wagmi: 'WAGMI',
+      zones: 'ZONES',
     }
 
     const segments = docsPath.split('/').filter(Boolean)
@@ -177,7 +183,7 @@ export default defineConfig({
       v: '2',
     }).toString()
 
-    return `${urlBase}/api/og?title=%title&description=%description&${extra}`
+    return `${urlBase}/api/og?title=%title&${extra}`
   },
   openapi: [
     {
