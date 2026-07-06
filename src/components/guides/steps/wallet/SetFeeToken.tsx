@@ -61,7 +61,7 @@ export function SetFeeToken(props: DemoStepProps) {
   const isFeeTokenValid = selectedOption.value !== 'other' || isAddress(customFeeToken)
   const defaultChainId = chainId ?? config?.chains?.[0]?.id
 
-  const hasBalance = Boolean(balance && balance > 0n)
+  const hasBalance = Boolean(balance && balance.amount > 0n)
   const hasUserToken = Boolean(userToken.data?.address)
 
   const canSubmit = Boolean(

@@ -61,7 +61,7 @@ export function BurnToken(props: DemoStepProps) {
   }
 
   const hasSufficientBalance =
-    balance && metadata && balance >= parseUnits('100', metadata.decimals)
+    balance && metadata && balance.amount >= parseUnits('100', metadata.decimals)
   const canBurn = !!tokenAddress && !!hasRole && hasSufficientBalance
 
   return (

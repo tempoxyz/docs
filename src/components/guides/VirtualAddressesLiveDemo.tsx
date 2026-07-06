@@ -322,7 +322,7 @@ export function VirtualAddressesLiveDemo() {
           })
           .catch(() => {})
 
-        if (target === address && feeBalance && feeBalance > parseUnits('10', 6)) return
+        if (target === address && feeBalance && feeBalance.amount > parseUnits('10', 6)) return
 
         await Actions.token.transferSync(adminClient, {
           account: demoAdmin,

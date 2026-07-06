@@ -64,7 +64,7 @@ export function StartReward(props: DemoStepProps) {
     const activeWithBalance = Boolean(
       address &&
         balance &&
-        balance > 0n &&
+        balance.amount > 0n &&
         tokenAddress &&
         metadata &&
         (rewardOptedIn || (!!rewardInfo && rewardInfo.rewardRecipient !== REWARD_RECIPIENT_UNSET)),

@@ -52,7 +52,7 @@ export function OptInToRewards(props: DemoStepProps) {
   })
 
   const active = React.useMemo(() => {
-    const activeWithBalance = Boolean(address && balance && balance > 0n && tokenAddress)
+    const activeWithBalance = Boolean(address && balance && balance.amount > 0n && tokenAddress)
     if (last) return activeWithBalance
     return activeWithBalance && !isSuccess
   }, [address, balance, tokenAddress, isSuccess, last])

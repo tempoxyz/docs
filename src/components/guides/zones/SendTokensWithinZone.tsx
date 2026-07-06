@@ -25,7 +25,10 @@ const ZONE_GAS_BUFFER = parseUnits('1', 6)
 
 type ZoneClientLike = {
   token: {
-    getBalance: (parameters: { account: Hex; token: Hex }) => Promise<bigint>
+    getBalance: (parameters: {
+      account: Hex
+      token: Hex
+    }) => Promise<{ amount: bigint; decimals: number; formatted: string }>
   }
   zone: ZoneAuthClientLike['zone']
 }
@@ -104,10 +107,11 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     queryFn: async () => {
       if (!zoneClient) throw new Error('zone client not ready')
 
-      return zoneClient.token.getBalance({
+      const { amount } = await zoneClient.token.getBalance({
         account: address,
         token: pathUsd,
       })
+      return amount
     },
     staleTime: 30_000,
   })
@@ -162,7 +166,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       if (!zoneClient) throw new Error('zone client not ready')
       if (!rootWebAuthnAccount) throw new Error('root account not ready')
 
-      const currentZoneBalance = await zoneClient.token.getBalance({
+      const { amount: currentZoneBalance } = await zoneClient.token.getBalance({
         account: address,
         token: pathUsd,
       })
@@ -196,10 +200,11 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     queryFn: async () => {
       if (!zoneClient) throw new Error('zone client not ready')
 
-      return zoneClient.token.getBalance({
+      const { amount } = await zoneClient.token.getBalance({
         account: address,
         token: pathUsd,
       })
+      return amount
     },
     refetchInterval: (query) => {
       if (query.state.error) return false
@@ -219,7 +224,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     retry: false,
   })
 
-  const hasRootBalance = Boolean(rootBalance && rootBalance > 0n)
+  const hasRootBalance = Boolean(rootBalance && rootBalance.amount > 0n)
   const topUpReceipt = topUpMutation.data?.receipt
   const expectedMaxZoneBalance = transferMutation.data?.startingZoneBalance
     ? transferMutation.data.startingZoneBalance - TRANSFER_AMOUNT

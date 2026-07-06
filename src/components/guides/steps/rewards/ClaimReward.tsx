@@ -55,7 +55,7 @@ export function ClaimReward(props: DemoStepProps) {
 
   const active = React.useMemo(() => {
     const activeWithBalance = Boolean(
-      address && balance && balance > 0n && tokenAddress && flowDependenciesMet,
+      address && balance && balance.amount > 0n && tokenAddress && flowDependenciesMet,
     )
     if (last) return activeWithBalance
     return activeWithBalance && !isSuccess

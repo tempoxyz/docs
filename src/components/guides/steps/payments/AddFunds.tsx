@@ -21,7 +21,7 @@ export function AddFunds(props: DemoStepProps) {
   })
   const { data: blockNumber } = useBlockNumber({
     query: {
-      enabled: Boolean(address && (!balance || balance < 0)),
+      enabled: Boolean(address && (!balance || balance.amount < 0)),
       refetchInterval: 1_500,
     },
   })
@@ -67,7 +67,7 @@ export function AddFunds(props: DemoStepProps) {
 
   const actions = React.useMemo(() => {
     if (showLogin) return <Login />
-    if (balance && balance > 0n)
+    if (balance && balance.amount > 0n)
       return (
         <Button
           disabled={fundAccount.isPending}
@@ -95,7 +95,7 @@ export function AddFunds(props: DemoStepProps) {
   return (
     <Step
       active={active}
-      completed={Boolean(address && balance && balance > 0n)}
+      completed={Boolean(address && balance && balance.amount > 0n)}
       actions={actions}
       error={fundAccount.error}
       number={stepNumber}
