@@ -8,17 +8,17 @@ description: Partner-focused overview and rollout dates for the T7 network upgra
 T7 gives partners a clearer fee model for high-volume payment and exchange flows. It adds storage credits for reusable DEX order and TIP-20 channel state, makes the base fee move down when network usage is below the target threshold, and deprecates new TIP-20 rewards.
 
 :::info[T7 status]
-Release [v1.10.1](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1) is required for T7. See the [Network Upgrades and Releases table](/docs/guide/node/network-upgrades#node-operator-updates) for the current node-operator release status.
+T7 is live on testnet. Mainnet rollout is planned for July 9, 2026. Release [v1.10.1](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1) is required for T7; see the [Network Upgrades and Releases table](/docs/guide/node/network-upgrades#node-operator-updates) for the current node-operator release status.
 :::
 
 ## Timeline
 
 | Milestone | Date |
 |-----------|------|
-| Testnet rollout | July 2, 2026 |
-| Mainnet rollout | July 9, 2026 |
+| Testnet rollout | Live: July 2, 2026 |
+| Mainnet rollout | Planned: July 9, 2026 |
 
-Node operators should upgrade to [v1.10.1](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1) before the activation timestamp on each network.
+Node operators should run [v1.10.1](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1) for T7. Testnet operators should already be upgraded; mainnet operators should upgrade before the mainnet activation timestamp.
 
 ## Overview
 
@@ -70,11 +70,11 @@ Release notes and binaries are available in the [v1.10.1 release](https://github
 
 ## What operators and integrators should know
 
-T7 changes fee and reward behavior. Node operators, integrators, indexers, wallets, and partner infrastructure should review the notes below before testnet and mainnet rollout.
+T7 changes fee and reward behavior. Node operators, integrators, indexers, wallets, and partner infrastructure should review the notes below while validating testnet behavior and before mainnet rollout.
 
 ### For storage credits
 
-Partners using DEX or TIP-20 channel flows should review fee assumptions once the T7-compatible release is available.
+Partners using DEX or TIP-20 channel flows should review fee assumptions against testnet behavior before mainnet rollout.
 
 - Storage credits are included for the core primitive, DEX order storage, and TIP-20 channel storage.
 - Wallets and apps that estimate fees should validate their fee displays against T7 behavior on testnet.
