@@ -16,7 +16,9 @@ describe('docs asset paths', () => {
     const unprefixedImages = files.flatMap((file) => {
       const text = fs.readFileSync(file, 'utf8')
       const markdownImages = [...text.matchAll(/!\[[^\]]*\]\(\/(?!developers\/)[^)]+\)/g)]
-      const htmlImages = [...text.matchAll(/<img\b[^>]*\bsrc=["']\/(?!developers\/)[^"']+["'][^>]*>/g)]
+      const htmlImages = [
+        ...text.matchAll(/<img\b[^>]*\bsrc=["']\/(?!developers\/)[^"']+["'][^>]*>/g),
+      ]
       return [...markdownImages, ...htmlImages].map((match) => `${file}:${match[0]}`)
     })
 

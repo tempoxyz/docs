@@ -61,7 +61,8 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
     })
   }
 
-  const hasSufficientBalance = balance && metadata && balance >= parseUnits('90', metadata.decimals)
+  const hasSufficientBalance =
+    balance && metadata && balance.amount >= parseUnits('90', metadata.decimals)
 
   return (
     <Step
@@ -82,7 +83,7 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
         ) : (
           <Button
             variant={
-              !!tokenAddress && !!hasRole && !hasSufficientBalance
+              tokenAddress && hasRole && !hasSufficientBalance
                 ? mint.isSuccess
                   ? 'default'
                   : 'accent'

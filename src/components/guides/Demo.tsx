@@ -2,7 +2,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import type { VariantProps } from 'cva'
 import * as React from 'react'
-import { type Address, type BaseError, formatUnits } from 'viem'
+import type { Address, BaseError } from 'viem'
 import { tempoModerato } from 'viem/chains'
 import { useAccount, useConnect, useConnections, useDisconnect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
@@ -177,7 +177,7 @@ export function Container(
       )
     if (props.footerVariant === 'source') return <Container.SourceFooter src={props.src} />
     return null
-  }, [props, balanceAddress])
+  }, [props, balanceAddress, Container])
 
   return (
     <ParentContainer
@@ -261,7 +261,7 @@ export namespace Container {
           <span />
         ) : (
           <span className="flex gap-1">
-            <span className="text-gray10">{formatUnits(balance ?? 0n, metadata.decimals)}</span>
+            <span className="text-gray10">{balance.formatted}</span>
             {metadata.symbol}
           </span>
         )}

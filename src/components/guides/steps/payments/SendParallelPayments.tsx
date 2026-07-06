@@ -146,7 +146,7 @@ export function SendParallelPayments(props: DemoStepProps) {
   return (
     <Step
       active={
-        Boolean(address && balance && balance >= parseUnits('100', 6)) &&
+        Boolean(address && balance && balance.amount >= parseUnits('100', 6)) &&
         (last ? true : !bothSucceeded)
       }
       completed={bothSucceeded}
@@ -163,13 +163,13 @@ export function SendParallelPayments(props: DemoStepProps) {
         ) : (
           <Button
             variant={
-              address && balance && balance >= parseUnits('100', 6)
+              address && balance && balance.amount >= parseUnits('100', 6)
                 ? bothSucceeded
                   ? 'default'
                   : 'accent'
                 : 'default'
             }
-            disabled={!(address && balance && balance >= parseUnits('100', 6))}
+            disabled={!(address && balance && balance.amount >= parseUnits('100', 6))}
             onClick={() => setExpanded(true)}
             type="button"
             className="font-normal text-[14px] -tracking-[2%]"
@@ -220,9 +220,13 @@ export function SendParallelPayments(props: DemoStepProps) {
               <div className="flex items-start">
                 <Button
                   variant={
-                    address && balance && balance >= parseUnits('100', 6) ? 'accent' : 'default'
+                    address && balance && balance.amount >= parseUnits('100', 6)
+                      ? 'accent'
+                      : 'default'
                   }
-                  disabled={!(address && balance && balance >= parseUnits('100', 6)) || isSending}
+                  disabled={
+                    !(address && balance && balance.amount >= parseUnits('100', 6)) || isSending
+                  }
                   onClick={handleSendParallel}
                   type="button"
                   className="font-normal text-[14px] -tracking-[2%]"

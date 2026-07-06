@@ -1,6 +1,6 @@
 'use client'
 import * as React from 'react'
-import { formatUnits, isAddress, pad, parseUnits, stringToHex } from 'viem'
+import { isAddress, pad, parseUnits, stringToHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
@@ -48,7 +48,7 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
   }
 
   const active = React.useMemo(() => {
-    return Boolean(address && userBalance && userBalance > 0n)
+    return Boolean(address && userBalance && userBalance.amount > 0n)
   }, [address, userBalance])
 
   return (
@@ -87,7 +87,7 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-gray10">Payment Token: AlphaUSD</span>
-                  <span className="text-gray12">balance: {formatUnits(userBalance ?? 0n, 6)}</span>
+                  <span className="text-gray12">balance: {userBalance?.formatted ?? '0'}</span>
                 </div>
               </div>
               <div className="mt-2 border-gray4 border-t pt-2 text-[12px] text-gray9">

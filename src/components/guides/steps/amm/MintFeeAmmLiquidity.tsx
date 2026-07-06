@@ -98,7 +98,7 @@ export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance?: bo
   }, [address, tokenAddress, pathUsdMinted, alphaUsdMinted, mintFeeLiquidity])
 
   const active = React.useMemo(() => {
-    const balanceCheck = waitForBalance ? Boolean(tokenBalance && tokenBalance > 0n) : true
+    const balanceCheck = waitForBalance ? Boolean(tokenBalance && tokenBalance.amount > 0n) : true
     return Boolean(address && tokenAddress && balanceCheck)
   }, [address, tokenAddress, tokenBalance, waitForBalance])
 

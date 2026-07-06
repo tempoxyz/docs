@@ -11,6 +11,7 @@ export interface DemoData {
   transferId: string
   policyId: bigint
   orderId: bigint
+  rewardOptedIn: boolean
   rewardId: bigint
 }
 

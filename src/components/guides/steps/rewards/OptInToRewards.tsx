@@ -1,7 +1,7 @@
 'use client'
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { useConnection, useConnectionEffect } from 'wagmi'
+import { useConnection, useConnectionEffect, useWaitForTransactionReceipt } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
@@ -11,7 +11,7 @@ import type { DemoStepProps } from '../types'
 export function OptInToRewards(props: DemoStepProps) {
   const { stepNumber, last = false } = props
   const { address } = useConnection()
-  const { getData } = useDemoContext()
+  const { getData, setData } = useDemoContext()
   const queryClient = useQueryClient()
   const tokenAddress = getData('tokenAddress')
 
@@ -26,13 +26,23 @@ export function OptInToRewards(props: DemoStepProps) {
     token: tokenAddress,
   })
 
-  const setRecipient = Hooks.reward.useSetRecipientSync({
-    mutation: {
-      onSettled() {
-        queryClient.refetchQueries({ queryKey: ['getUserRewardInfo'] })
-      },
-    },
+  const setRecipient = Hooks.reward.useSetRecipient()
+  const receipt = useWaitForTransactionReceipt({
+    hash: setRecipient.data,
   })
+
+  React.useEffect(() => {
+    if (!receipt.data) return
+    setData('rewardOptedIn', true)
+    queryClient.refetchQueries({ queryKey: ['getUserRewardInfo'] })
+  }, [queryClient, receipt.data, setData])
+
+  const isSuccess = Boolean(receipt.data)
+  const isConfirming = Boolean(setRecipient.data && !receipt.data && !receipt.error)
+  const isPending = setRecipient.isPending || isConfirming
+  const error = setRecipient.error ?? receipt.error
+
+  const txHash = receipt.data?.transactionHash ?? setRecipient.data
 
   useConnectionEffect({
     onDisconnect() {
@@ -42,20 +52,20 @@ export function OptInToRewards(props: DemoStepProps) {
   })
 
   const active = React.useMemo(() => {
-    const activeWithBalance = Boolean(address && balance && balance > 0n && tokenAddress)
+    const activeWithBalance = Boolean(address && balance && balance.amount > 0n && tokenAddress)
     if (last) return activeWithBalance
-    return activeWithBalance && !setRecipient.isSuccess
-  }, [address, balance, tokenAddress, setRecipient.isSuccess, last])
+    return activeWithBalance && !isSuccess
+  }, [address, balance, tokenAddress, isSuccess, last])
 
   return (
     <Step
       active={active}
-      completed={setRecipient.isSuccess}
+      completed={isSuccess}
       number={stepNumber}
       title={`Opt in to receive ${metadata?.name || 'token'} rewards.`}
-      error={setRecipient.error}
+      error={error}
       actions={
-        setRecipient.isSuccess ? (
+        isSuccess ? (
           <Button
             variant="default"
             onClick={() => setExpanded(!expanded)}
@@ -67,7 +77,7 @@ export function OptInToRewards(props: DemoStepProps) {
         ) : (
           <Button
             variant={active ? 'accent' : 'default'}
-            disabled={!active || setRecipient.isPending}
+            disabled={!active || isPending}
             onClick={() => {
               if (!address || !tokenAddress) return
               setRecipient.mutate({
@@ -77,18 +87,18 @@ export function OptInToRewards(props: DemoStepProps) {
               })
             }}
           >
-            {setRecipient.isPending ? 'Opting in...' : 'Opt In'}
+            {isPending ? 'Opting in...' : 'Opt In'}
           </Button>
         )
       }
     >
-      {setRecipient.data && expanded && (
+      {txHash && isSuccess && expanded && (
         <div className="ml-6 flex flex-col gap-3 py-4">
           <div className="border-gray4 border-s-2 ps-5">
             <div className="text-[13px] text-gray9 -tracking-[2%]">
               Successfully opted in to rewards.
             </div>
-            <ExplorerLink hash={setRecipient.data.receipt.transactionHash} />
+            <ExplorerLink hash={txHash} />
           </div>
         </div>
       )}

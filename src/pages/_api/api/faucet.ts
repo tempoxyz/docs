@@ -64,8 +64,7 @@ function cors(origin: string | null): Record<string, string> {
     'Access-Control-Allow-Headers': 'Content-Type, x-api-token',
   }
 
-  if (origin && allowedOrigins.includes(origin))
-    headers['Access-Control-Allow-Origin'] = origin
+  if (origin && allowedOrigins.includes(origin)) headers['Access-Control-Allow-Origin'] = origin
 
   return headers
 }

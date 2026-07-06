@@ -40,7 +40,7 @@ export function CreateToken(props: DemoStepProps) {
     if (showLogin) return true
 
     // If this is the last step has to be logged in and funded.
-    const activeWithBalance = Boolean(address && balance && balance > 0n)
+    const activeWithBalance = Boolean(address && balance && balance.amount > 0n)
     if (last) return activeWithBalance
 
     // If this is an intermediate step, also needs to not have succeeded

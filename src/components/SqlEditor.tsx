@@ -166,7 +166,7 @@ export function SqlEditor(props: SqlEditorProps) {
           const editorData = editorCompletionsMap.get(modelUri)
 
           // Return empty suggestions if no data or editor is read-only
-          if (!editorData || !editorData.completions || editorData.readOnly) {
+          if (!editorData?.completions || editorData.readOnly) {
             return { suggestions }
           }
 

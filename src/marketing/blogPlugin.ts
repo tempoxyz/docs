@@ -29,7 +29,7 @@ const PUBLIC_DIR = path.resolve(process.cwd(), 'public')
 function inlineSvgImages(html: string): string {
   return html.replace(/<img\b[^>]*?>/g, (tag) => {
     const src = /\ssrc="([^"]+)"/.exec(tag)?.[1]
-    if (!src || !src.startsWith('/') || !src.endsWith('.svg')) return tag
+    if (!src?.startsWith('/') || !src.endsWith('.svg')) return tag
 
     const filePath = path.join(PUBLIC_DIR, src)
     if (!fs.existsSync(filePath)) return tag

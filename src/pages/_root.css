@@ -3,12 +3,14 @@
 @source "./";
 @source "../marketing";
 
-@custom-variant dark (&:where(
+@custom-variant dark (
+  &:where(
     [data-vocs-theme="dark"],
     [data-vocs-theme="dark"] *,
     [style*="color-scheme: dark"],
     [style*="color-scheme: dark"] *
-  ));
+  )
+);
 
 @font-face {
   font-family: "Pilat";
@@ -1032,14 +1034,14 @@ body {
 }
 
 :where(
-    a[href],
-    button:not(:disabled),
-    summary,
-    [role="button"],
-    input[type="button"],
-    input[type="submit"],
-    input[type="reset"]
-  ) {
+  a[href],
+  button:not(:disabled),
+  summary,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"]
+) {
   cursor: pointer;
 }
 

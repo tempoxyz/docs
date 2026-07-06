@@ -1,4 +1,4 @@
-import { Changelog, defineConfig, McpSource } from 'vocs/config'
+import { Changelog, defineConfig, Embedding, McpSource, Reranker, Retriever } from 'vocs/config'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 
 // Only set baseUrl in production — Vocs injects a <base> tag from this value,
@@ -64,6 +64,27 @@ export default defineConfig({
   description: 'Documentation for the Tempo network and protocol specifications',
   renderStrategy: 'partial-static',
   feedback: createFeedbackAdapter(),
+  ai: {
+    retriever: process.env.CLOUDFLARE_API_TOKEN
+      ? Retriever.local({
+          embedding: Embedding.cloudflare(),
+          // Production pages are served behind the tempo.xyz `/developers`
+          // proxy; the default origin-relative endpoint escapes the prefix.
+          endpoint:
+            process.env.VERCEL_ENV === 'production'
+              ? 'https://tempo.xyz/developers/api/search'
+              : undefined,
+          hybrid: true,
+          reranker: Reranker.cloudflare(),
+          sources: [
+            { url: 'https://viem.sh/llms.txt', label: 'viem' },
+            { url: 'https://wagmi.sh/llms.txt', label: 'wagmi' },
+            { url: 'https://mpp.dev/llms.txt', label: 'mpp' },
+            { url: 'https://accounts.tempo.xyz/llms.txt', label: 'accounts' },
+          ],
+        })
+      : undefined,
+  },
   search: {
     index: {
       fields: searchIndexFields,
@@ -162,9 +183,11 @@ export default defineConfig({
     {
       path: '/docs/api',
       spec: 'https://api.tempo.xyz/openapi.json',
+      exclude: ['Platform API'],
       sidebar: {
-        collapsed: true,
         backLink: false,
+        collapsed: true,
+        flatten: ['Data API'],
         intro: [
           {
             text: 'Authentication',
@@ -201,6 +224,10 @@ export default defineConfig({
           {
             text: 'Versioning Policy',
             link: '/docs/api/versioning-policy',
+          },
+          {
+            text: 'Typed Client',
+            link: '/docs/api/typed-client',
           },
         ],
       },

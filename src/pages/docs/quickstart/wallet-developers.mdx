@@ -172,6 +172,7 @@ const balance = await client.token.getBalance({
   account: userAddress,
   token: tokenAddress
 })
+// ^? { amount: bigint; decimals: number; formatted: string }
 ```
 
 See [`getBalance`](https://viem.sh/tempo/actions/token.getBalance) for full documentation.
