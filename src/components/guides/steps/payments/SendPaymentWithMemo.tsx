@@ -102,7 +102,9 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
 
   return (
     <Step
-      active={Boolean(address && balance && balance > 0n) && (last ? true : !sendPayment.isSuccess)}
+      active={
+        Boolean(address && balance && balance.amount > 0n) && (last ? true : !sendPayment.isSuccess)
+      }
       completed={sendPayment.isSuccess}
       actions={
         expanded ? (
@@ -117,13 +119,13 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
         ) : (
           <Button
             variant={
-              address && balance && balance > 0n
+              address && balance && balance.amount > 0n
                 ? sendPayment.isSuccess
                   ? 'default'
                   : 'accent'
                 : 'default'
             }
-            disabled={!(address && balance && balance > 0n)}
+            disabled={!(address && balance && balance.amount > 0n)}
             onClick={() => setExpanded(true)}
             type="button"
             className="font-normal text-[14px] -tracking-[2%]"
@@ -175,7 +177,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
                   variant={
                     address &&
                     balance &&
-                    balance > 0n &&
+                    balance.amount > 0n &&
                     isValidRecipient &&
                     !memoError &&
                     memo.trim()
@@ -183,8 +185,13 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
                       : 'default'
                   }
                   disabled={
-                    !(address && balance && balance > 0n && isValidRecipient && memo.trim()) ||
-                    !!memoError
+                    !(
+                      address &&
+                      balance &&
+                      balance.amount > 0n &&
+                      isValidRecipient &&
+                      memo.trim()
+                    ) || !!memoError
                   }
                   onClick={handleTransfer}
                   type="button"

@@ -32,7 +32,7 @@ export function AddFundsToWallet(props: DemoStepProps) {
   })
   const { data: blockNumber } = useBlockNumber({
     query: {
-      enabled: Boolean(hasNonWebAuthnWallet && (!balance || balance < 0)),
+      enabled: Boolean(hasNonWebAuthnWallet && (!balance || balance.amount < 0)),
       refetchInterval: 1_500,
     },
   })
@@ -72,7 +72,7 @@ export function AddFundsToWallet(props: DemoStepProps) {
   }, [hasNonWebAuthnWallet, balance, last])
 
   const actions = React.useMemo(() => {
-    if (balance && balance > 0n)
+    if (balance && balance.amount > 0n)
       return (
         <Button
           disabled={!hasNonWebAuthnWallet || fundAccount.isPending}
@@ -100,7 +100,7 @@ export function AddFundsToWallet(props: DemoStepProps) {
   return (
     <Step
       active={active}
-      completed={Boolean(hasNonWebAuthnWallet && balance && balance > 0n)}
+      completed={Boolean(hasNonWebAuthnWallet && balance && balance.amount > 0n)}
       actions={actions}
       error={fundAccount.error}
       number={stepNumber}

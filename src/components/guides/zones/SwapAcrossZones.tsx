@@ -69,8 +69,15 @@ const targetDepositEvent = parseAbiItem(
 
 type ZoneClientLike = {
   token: {
-    getAllowance: (parameters: { account: Hex; spender: Hex; token: Hex }) => Promise<bigint>
-    getBalance: (parameters: { account: Hex; token: Hex }) => Promise<bigint>
+    getAllowance: (parameters: {
+      account: Hex
+      spender: Hex
+      token: Hex
+    }) => Promise<{ amount: bigint; decimals: number; formatted: string }>
+    getBalance: (parameters: {
+      account: Hex
+      token: Hex
+    }) => Promise<{ amount: bigint; decimals: number; formatted: string }>
   }
   zone: {
     getAuthorizationTokenInfo: ZoneAuthClientLike['zone']['getAuthorizationTokenInfo']
@@ -179,10 +186,11 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     queryFn: async () => {
       if (!sourceZoneClient) throw new Error('Zone A client not ready')
 
-      return sourceZoneClient.token.getBalance({
+      const { amount } = await sourceZoneClient.token.getBalance({
         account: address,
         token: pathUsd,
       })
+      return amount
     },
     staleTime: 30_000,
   })
@@ -322,7 +330,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       if (!rootWebAuthnAccount) throw new Error('root account not ready')
       if (!swapPrereqsQuery.data) throw new Error('Swap prerequisites are not ready')
 
-      const currentSourceBalance = await sourceZoneClient.token.getBalance({
+      const { amount: currentSourceBalance } = await sourceZoneClient.token.getBalance({
         account: address,
         token: pathUsd,
       })
@@ -433,10 +441,11 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     queryFn: async () => {
       if (!targetZoneClient) throw new Error('Zone B client not ready')
 
-      return targetZoneClient.token.getBalance({
+      const { amount } = await targetZoneClient.token.getBalance({
         account: address,
         token: betaUsd,
       })
+      return amount
     },
     staleTime: 30_000,
     refetchOnReconnect: false,
@@ -444,7 +453,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     retry: false,
   })
 
-  const hasRootBalance = Boolean(rootBalance && rootBalance > 0n)
+  const hasRootBalance = Boolean(rootBalance && rootBalance.amount > 0n)
   const topUpReceipt = topUpMutation.data?.receipt
   const routedSwapReceipt = swapMutation.data?.receipt
   const settlementTxHash = settlementQuery.data?.txHash

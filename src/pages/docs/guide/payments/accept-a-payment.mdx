@@ -40,11 +40,11 @@ Check if a payment has been received by querying the token balance or listening 
     import { client } from './viem.config'
 
     const balance = await client.token.getBalance({
+      account: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
       token: '0x20c0000000000000000000000000000000000001', // AlphaUSD
-      address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
     })
 
-    console.log('Balance:', balance)
+    console.log('Balance:', balance.formatted)
     ```
 
     ```ts [viem.config.ts]

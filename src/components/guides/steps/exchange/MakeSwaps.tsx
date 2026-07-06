@@ -33,8 +33,8 @@ export function MakeSwaps({ stepNumber, last = false }: DemoStepProps) {
   const active = React.useMemo(() => {
     return (
       !!address &&
-      (alphaUsdBalance || 0n) > parseUnits('11', alphaUsdMetadata?.decimals || 6) &&
-      (betaUsdBalance || 0n) > parseUnits('11', betaUsdMetadata?.decimals || 6)
+      (alphaUsdBalance?.amount ?? 0n) > parseUnits('11', alphaUsdMetadata?.decimals || 6) &&
+      (betaUsdBalance?.amount ?? 0n) > parseUnits('11', betaUsdMetadata?.decimals || 6)
     )
   }, [
     address,
