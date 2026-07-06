@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import vocsConfig from '../../vocs.config'
 import { OG_IMAGE_VERSION, ogLandingPaths, ogSectionMap, ogSubsectionMap } from './og-sections'
 
 // vocs.config.ts's `ogImageUrl` is serialized to source and re-evaluated at
@@ -7,6 +6,11 @@ import { OG_IMAGE_VERSION, ogLandingPaths, ogSectionMap, ogSubsectionMap } from 
 // inline copy instead. This suite fails when the two drift, in either
 // direction: behaviorally (every og-sections entry must be honored) and by
 // parsing the serialized function source (no extra inline entries).
+//
+// The config is imported with a computed specifier so the type-checker does
+// not pull vocs.config.ts (which belongs to no tsconfig project and has its
+// own looser typing) into the strict app program; vitest resolves it fine.
+const vocsConfig = (await import(`${'../../vocs.config'}`)).default
 
 const ogImageUrl = vocsConfig.ogImageUrl as (path: string, options?: { baseUrl?: string }) => string
 
