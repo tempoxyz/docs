@@ -5,6 +5,7 @@ import { fromHex, isAddress, pad, parseUnits, stringToHex } from 'viem'
 import { Abis } from 'viem/tempo'
 import { useConnection, useConnectionEffect, useWatchContractEvent } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
+import { baseUnits } from '../../amount'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -102,7 +103,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
 
   return (
     <Step
-      active={Boolean(address && balance && balance > 0n) && (last ? true : !sendPayment.isSuccess)}
+      active={Boolean(address && baseUnits(balance) > 0n) && (last ? true : !sendPayment.isSuccess)}
       completed={sendPayment.isSuccess}
       actions={
         expanded ? (
@@ -117,13 +118,13 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
         ) : (
           <Button
             variant={
-              address && balance && balance > 0n
+              address && baseUnits(balance) > 0n
                 ? sendPayment.isSuccess
                   ? 'default'
                   : 'accent'
                 : 'default'
             }
-            disabled={!(address && balance && balance > 0n)}
+            disabled={!(address && baseUnits(balance) > 0n)}
             onClick={() => setExpanded(true)}
             type="button"
             className="font-normal text-[14px] -tracking-[2%]"
@@ -175,7 +176,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
                   variant={
                     address &&
                     balance &&
-                    balance > 0n &&
+                    baseUnits(balance) > 0n &&
                     isValidRecipient &&
                     !memoError &&
                     memo.trim()
@@ -183,7 +184,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
                       : 'default'
                   }
                   disabled={
-                    !(address && balance && balance > 0n && isValidRecipient && memo.trim()) ||
+                    !(address && baseUnits(balance) > 0n && isValidRecipient && memo.trim()) ||
                     !!memoError
                   }
                   onClick={handleTransfer}

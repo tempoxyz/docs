@@ -4,6 +4,7 @@ import * as React from 'react'
 import { useConnection, useConnectionEffect, useWaitForTransactionReceipt } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
+import { baseUnits } from '../../amount'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -52,7 +53,7 @@ export function OptInToRewards(props: DemoStepProps) {
   })
 
   const active = React.useMemo(() => {
-    const activeWithBalance = Boolean(address && balance && balance > 0n && tokenAddress)
+    const activeWithBalance = Boolean(address && baseUnits(balance) > 0n && tokenAddress)
     if (last) return activeWithBalance
     return activeWithBalance && !isSuccess
   }, [address, balance, tokenAddress, isSuccess, last])

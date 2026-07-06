@@ -21,6 +21,7 @@ import { Abis, Actions, tempoActions, withFeePayer } from 'viem/tempo'
 import { useClient, useConnect, useConnection, useDisconnect, useWriteContract } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useWebAuthnConnector } from '../../wagmi.config'
+import { baseUnits } from './amount'
 import { Button, ExplorerAccountLink, ExplorerLink, Logout, Step, StringFormatter } from './Demo'
 import { alphaUsd, pathUsd } from './tokens'
 
@@ -322,7 +323,7 @@ export function VirtualAddressesLiveDemo() {
           })
           .catch(() => {})
 
-        if (target === address && feeBalance && feeBalance > parseUnits('10', 6)) return
+        if (target === address && feeBalance && baseUnits(feeBalance) > parseUnits('10', 6)) return
 
         await Actions.token.transferSync(adminClient, {
           account: demoAdmin,
@@ -340,7 +341,7 @@ export function VirtualAddressesLiveDemo() {
       const balances = await Promise.all(
         requiredTokens.map((token) => getTokenBalance(target, token)),
       )
-      if (balances.every((balance) => balance > 0n)) return
+      if (balances.every((balance) => baseUnits(balance) > 0n)) return
 
       await Actions.faucet.fund(client as unknown as Client<Transport, Chain>, {
         account: target,

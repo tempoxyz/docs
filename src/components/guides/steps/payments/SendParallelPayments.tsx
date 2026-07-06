@@ -4,6 +4,7 @@ import * as React from 'react'
 import { parseUnits } from 'viem'
 import { useConfig, useConnection, useConnectionEffect, useTransaction } from 'wagmi'
 import { Actions, Hooks } from 'wagmi/tempo'
+import { baseUnits } from '../../amount'
 import { Button, ExplorerLink, FAKE_RECIPIENT, FAKE_RECIPIENT_2, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -146,7 +147,7 @@ export function SendParallelPayments(props: DemoStepProps) {
   return (
     <Step
       active={
-        Boolean(address && balance && balance >= parseUnits('100', 6)) &&
+        Boolean(address && baseUnits(balance) >= parseUnits('100', 6)) &&
         (last ? true : !bothSucceeded)
       }
       completed={bothSucceeded}
@@ -163,13 +164,13 @@ export function SendParallelPayments(props: DemoStepProps) {
         ) : (
           <Button
             variant={
-              address && balance && balance >= parseUnits('100', 6)
+              address && baseUnits(balance) >= parseUnits('100', 6)
                 ? bothSucceeded
                   ? 'default'
                   : 'accent'
                 : 'default'
             }
-            disabled={!(address && balance && balance >= parseUnits('100', 6))}
+            disabled={!(address && baseUnits(balance) >= parseUnits('100', 6))}
             onClick={() => setExpanded(true)}
             type="button"
             className="font-normal text-[14px] -tracking-[2%]"
@@ -220,9 +221,9 @@ export function SendParallelPayments(props: DemoStepProps) {
               <div className="flex items-start">
                 <Button
                   variant={
-                    address && balance && balance >= parseUnits('100', 6) ? 'accent' : 'default'
+                    address && baseUnits(balance) >= parseUnits('100', 6) ? 'accent' : 'default'
                   }
-                  disabled={!(address && balance && balance >= parseUnits('100', 6)) || isSending}
+                  disabled={!(address && baseUnits(balance) >= parseUnits('100', 6)) || isSending}
                   onClick={handleSendParallel}
                   type="button"
                   className="font-normal text-[14px] -tracking-[2%]"

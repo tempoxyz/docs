@@ -7,6 +7,7 @@ import { mnemonicToAccount } from 'viem/accounts'
 import { Actions } from 'viem/tempo'
 import { useBlockNumber, useClient, useConnection } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
+import { baseUnits } from '../../amount'
 import { Button, ExplorerAccountLink, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -33,7 +34,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
   })
   const { data: blockNumber } = useBlockNumber({
     query: {
-      enabled: Boolean(address && (!balance || balance < 0)),
+      enabled: Boolean(address && (!balance || baseUnits(balance) < 0)),
       refetchInterval: 1_500,
     },
   })
@@ -81,7 +82,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
   }, [fundAccount.isSuccess, last])
 
   const actions = React.useMemo(() => {
-    if (balance && balance > 0n && fundAccount.isSuccess)
+    if (baseUnits(balance) > 0n && fundAccount.isSuccess)
       return (
         <Button
           disabled={!isValidTarget || fundAccount.isPending}

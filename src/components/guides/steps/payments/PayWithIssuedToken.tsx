@@ -4,6 +4,7 @@ import { formatUnits, isAddress, pad, parseUnits, stringToHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
+import { baseUnits } from '../../amount'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -76,11 +77,11 @@ export function PayWithIssuedToken(props: DemoStepProps) {
     return Boolean(
       address &&
         alphaBalance &&
-        alphaBalance > 0n &&
+        baseUnits(alphaBalance) > 0n &&
         feeTokenBalance &&
-        feeTokenBalance > 0n &&
+        baseUnits(feeTokenBalance) > 0n &&
         pool &&
-        pool.reserveValidatorToken > 0n,
+        baseUnits(pool.reserveValidatorToken) > 0n,
     )
   }, [address, alphaBalance, feeTokenBalance, pool])
 
@@ -121,14 +122,16 @@ export function PayWithIssuedToken(props: DemoStepProps) {
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-gray10">Payment Token: AlphaUSD</span>
-                  <span className="text-gray12">balance: {formatUnits(alphaBalance ?? 0n, 6)}</span>
+                  <span className="text-gray12">
+                    balance: {formatUnits(baseUnits(alphaBalance), 6)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-gray10">
                     {`Fee Token: ${feeTokenMetadata ? feeTokenMetadata.name : ''}`}
                   </span>
                   <span className="text-gray12">
-                    balance: {formatUnits(feeTokenBalance ?? 0n, 6)}
+                    balance: {formatUnits(baseUnits(feeTokenBalance), 6)}
                   </span>
                 </div>
               </div>

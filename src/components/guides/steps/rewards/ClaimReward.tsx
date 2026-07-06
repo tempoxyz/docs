@@ -4,6 +4,7 @@ import * as React from 'react'
 import { useConnection, useConnectionEffect, useWaitForTransactionReceipt } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
+import { baseUnits } from '../../amount'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -55,7 +56,7 @@ export function ClaimReward(props: DemoStepProps) {
 
   const active = React.useMemo(() => {
     const activeWithBalance = Boolean(
-      address && balance && balance > 0n && tokenAddress && flowDependenciesMet,
+      address && baseUnits(balance) > 0n && tokenAddress && flowDependenciesMet,
     )
     if (last) return activeWithBalance
     return activeWithBalance && !isSuccess

@@ -3,6 +3,7 @@ import * as React from 'react'
 import { parseUnits } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
+import { baseUnits } from '../../amount'
 
 import { Step } from '../../Demo'
 import { alphaUsd, betaUsd } from '../../tokens'
@@ -33,8 +34,8 @@ export function MakeSwaps({ stepNumber, last = false }: DemoStepProps) {
   const active = React.useMemo(() => {
     return (
       !!address &&
-      (alphaUsdBalance || 0n) > parseUnits('11', alphaUsdMetadata?.decimals || 6) &&
-      (betaUsdBalance || 0n) > parseUnits('11', betaUsdMetadata?.decimals || 6)
+      baseUnits(alphaUsdBalance) > parseUnits('11', alphaUsdMetadata?.decimals || 6) &&
+      baseUnits(betaUsdBalance) > parseUnits('11', betaUsdMetadata?.decimals || 6)
     )
   }, [
     address,

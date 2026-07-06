@@ -19,6 +19,7 @@ import {
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
+import { baseUnits } from '../amount'
 import { Button, ExplorerLink, Logout, ReceiptHash, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { pathUsd } from '../tokens'
@@ -385,7 +386,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     retry: false,
   })
 
-  const hasRootBalance = Boolean(rootBalance && rootBalance > 0n)
+  const hasRootBalance = Boolean(baseUnits(rootBalance) > 0n)
   const topUpReceipt = topUpMutation.data?.receipt
   const routedSendReceipt = sendMutation.data?.receipt
   const settlementTxHash = settlementQuery.data?.txHash

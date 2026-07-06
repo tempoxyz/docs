@@ -7,6 +7,7 @@ import { Hooks } from 'wagmi/tempo'
 import LucideCheck from '~icons/lucide/check'
 import LucideCircle from '~icons/lucide/circle'
 import { useDemoContext } from '../../../DemoContext'
+import { baseUnits } from '../../amount'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd, pathUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -98,7 +99,7 @@ export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance?: bo
   }, [address, tokenAddress, pathUsdMinted, alphaUsdMinted, mintFeeLiquidity])
 
   const active = React.useMemo(() => {
-    const balanceCheck = waitForBalance ? Boolean(tokenBalance && tokenBalance > 0n) : true
+    const balanceCheck = waitForBalance ? Boolean(baseUnits(tokenBalance) > 0n) : true
     return Boolean(address && tokenAddress && balanceCheck)
   }, [address, tokenAddress, tokenBalance, waitForBalance])
 

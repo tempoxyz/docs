@@ -5,6 +5,7 @@ import { pad, parseUnits, stringToHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
+import { baseUnits } from '../../amount'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -61,7 +62,7 @@ export function BurnToken(props: DemoStepProps) {
   }
 
   const hasSufficientBalance =
-    balance && metadata && balance >= parseUnits('100', metadata.decimals)
+    balance && metadata && baseUnits(balance) >= parseUnits('100', metadata.decimals)
   const canBurn = !!tokenAddress && !!hasRole && hasSufficientBalance
 
   return (

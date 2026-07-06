@@ -4,6 +4,7 @@ import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { cx } from '../../../../../cva.config'
 import { useDemoContext } from '../../../DemoContext'
+import { baseUnits } from '../../amount'
 import { Button, ExplorerLink, Login, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -40,7 +41,7 @@ export function CreateToken(props: DemoStepProps) {
     if (showLogin) return true
 
     // If this is the last step has to be logged in and funded.
-    const activeWithBalance = Boolean(address && balance && balance > 0n)
+    const activeWithBalance = Boolean(address && baseUnits(balance) > 0n)
     if (last) return activeWithBalance
 
     // If this is an intermediate step, also needs to not have succeeded

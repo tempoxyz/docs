@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { type Log, parseUnits } from 'viem'
 import { Actions, Addresses } from 'viem/tempo'
-import { useConnection, useConnectionEffect, useSendCallsSync } from 'wagmi'
+import { useClient, useConnection, useConnectionEffect, useSendCallsSync } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
@@ -12,6 +12,7 @@ import type { DemoStepProps } from '../types'
 export function PlaceOrder(props: DemoStepProps) {
   const { stepNumber, last = false } = props
   const { address } = useConnection()
+  const client = useClient()
   const { setData, clearData, getData } = useDemoContext()
 
   const orderId = getData('orderId')
@@ -46,19 +47,21 @@ export function PlaceOrder(props: DemoStepProps) {
 
   const amount = parseUnits('100', metadata?.decimals || 6)
 
-  const calls = [
-    Actions.token.approve.call({
-      spender: Addresses.stablecoinDex,
-      amount,
-      token: pathUsd,
-    }),
-    Actions.dex.place.call({
-      amount,
-      tick: 0,
-      token: alphaUsd,
-      type: 'buy',
-    }),
-  ]
+  const calls = client
+    ? [
+        Actions.token.approve.call(client as never, {
+          spender: Addresses.stablecoinDex,
+          amount,
+          token: pathUsd,
+        }),
+        Actions.dex.place.call({
+          amount,
+          tick: 0,
+          token: alphaUsd,
+          type: 'buy',
+        }),
+      ]
+    : []
 
   const active = React.useMemo(() => {
     return !!address && !orderId
@@ -71,7 +74,7 @@ export function PlaceOrder(props: DemoStepProps) {
       actions={
         <Button
           variant={active ? (sendCalls.isSuccess ? 'default' : 'accent') : 'default'}
-          disabled={!active}
+          disabled={!active || !client}
           onClick={() => {
             sendCalls.sendCallsSync({
               calls,

@@ -17,6 +17,7 @@ import { usePostHogTracking } from '../../lib/posthog'
 import { useTempoWalletConnector, useWebAuthnConnector } from '../../wagmi.config'
 import { Container as ParentContainer } from '../Container'
 import { isFundableWalletConnector } from '../lib/wallets'
+import { baseUnits } from './amount'
 import { alphaUsd } from './tokens'
 
 export { alphaUsd, betaUsd, pathUsd, thetaUsd } from './tokens'
@@ -261,7 +262,9 @@ export namespace Container {
           <span />
         ) : (
           <span className="flex gap-1">
-            <span className="text-gray10">{formatUnits(balance ?? 0n, metadata.decimals)}</span>
+            <span className="text-gray10">
+              {formatUnits(baseUnits(balance), metadata.decimals)}
+            </span>
             {metadata.symbol}
           </span>
         )}

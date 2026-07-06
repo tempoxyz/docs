@@ -5,6 +5,7 @@ import { parseUnits } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
+import { baseUnits } from '../../amount'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -48,7 +49,7 @@ export function BurnFeeAmmLiquidity(props: DemoStepProps) {
   })
 
   const hasSufficientBalance =
-    lpBalance && lpBalance >= parseUnits('10', validatorMetadata?.decimals || 6)
+    baseUnits(lpBalance) >= parseUnits('10', validatorMetadata?.decimals || 6)
   const active = React.useMemo(() => {
     return Boolean(address && tokenAddress && hasSufficientBalance)
   }, [address, tokenAddress, hasSufficientBalance])

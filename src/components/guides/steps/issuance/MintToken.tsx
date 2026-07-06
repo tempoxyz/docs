@@ -5,6 +5,7 @@ import { type Address, pad, parseUnits, stringToHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
+import { baseUnits } from '../../amount'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -61,7 +62,8 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
     })
   }
 
-  const hasSufficientBalance = balance && metadata && balance >= parseUnits('90', metadata.decimals)
+  const hasSufficientBalance =
+    balance && metadata && baseUnits(balance) >= parseUnits('90', metadata.decimals)
 
   return (
     <Step

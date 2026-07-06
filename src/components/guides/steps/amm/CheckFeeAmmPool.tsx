@@ -4,6 +4,7 @@ import { formatUnits } from 'viem'
 import { useConnection } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
+import { baseUnits } from '../../amount'
 import { Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -36,7 +37,7 @@ export function CheckFeeAmmPool(props: DemoStepProps) {
   })
 
   const active = React.useMemo(() => {
-    return Boolean(address && tokenAddress && pool && lpBalance && lpBalance > 0n)
+    return Boolean(address && tokenAddress && pool && baseUnits(lpBalance) > 0n)
   }, [address, tokenAddress, pool, lpBalance])
 
   return (

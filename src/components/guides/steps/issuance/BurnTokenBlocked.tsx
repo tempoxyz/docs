@@ -5,6 +5,7 @@ import { parseUnits } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
+import { baseUnits } from '../../amount'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -59,7 +60,9 @@ export function BurnTokenBlocked(props: DemoStepProps) {
   }
 
   const hasSufficientBalance =
-    recipientBalance && metadata && recipientBalance >= parseUnits('100', metadata.decimals)
+    recipientBalance &&
+    metadata &&
+    baseUnits(recipientBalance) >= parseUnits('100', metadata.decimals)
 
   const active = React.useMemo(() => {
     return Boolean(

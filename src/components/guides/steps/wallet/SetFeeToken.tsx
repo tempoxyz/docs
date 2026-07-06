@@ -4,6 +4,7 @@ import { type Address, isAddress } from 'viem'
 import { useChainId, useConfig, useConnections } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { isBrowserWalletConnectorId } from '../../../lib/wallets'
+import { baseUnits } from '../../amount'
 import { Button, ExplorerLink, Step, StringFormatter } from '../../Demo'
 import { alphaUsd, betaUsd, thetaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -61,7 +62,7 @@ export function SetFeeToken(props: DemoStepProps) {
   const isFeeTokenValid = selectedOption.value !== 'other' || isAddress(customFeeToken)
   const defaultChainId = chainId ?? config?.chains?.[0]?.id
 
-  const hasBalance = Boolean(balance && balance > 0n)
+  const hasBalance = Boolean(baseUnits(balance) > 0n)
   const hasUserToken = Boolean(userToken.data?.address)
 
   const canSubmit = Boolean(

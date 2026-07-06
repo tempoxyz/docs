@@ -3,6 +3,7 @@ import * as React from 'react'
 import { isAddress, pad, parseUnits, stringToHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
+import { baseUnits } from '../../amount'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -61,7 +62,7 @@ export function SendPayment(props: DemoStepProps) {
 
   return (
     <Step
-      active={Boolean(address && balance && balance > 0n) && (last ? true : !sendPayment.isSuccess)}
+      active={Boolean(address && baseUnits(balance) > 0n) && (last ? true : !sendPayment.isSuccess)}
       completed={sendPayment.isSuccess}
       actions={
         expanded ? (
@@ -76,13 +77,13 @@ export function SendPayment(props: DemoStepProps) {
         ) : (
           <Button
             variant={
-              address && balance && balance > 0n
+              address && baseUnits(balance) > 0n
                 ? sendPayment.isSuccess
                   ? 'default'
                   : 'accent'
                 : 'default'
             }
-            disabled={!(address && balance && balance > 0n)}
+            disabled={!(address && baseUnits(balance) > 0n)}
             onClick={() => setExpanded(true)}
             type="button"
             className="font-normal text-[14px] -tracking-[2%]"
@@ -130,11 +131,11 @@ export function SendPayment(props: DemoStepProps) {
               </div>
               <Button
                 variant={
-                  address && balance && balance > 0n && isValidRecipient && !memoError
+                  address && baseUnits(balance) > 0n && isValidRecipient && !memoError
                     ? 'accent'
                     : 'default'
                 }
-                disabled={!(address && balance && balance > 0n && isValidRecipient) || !!memoError}
+                disabled={!(address && baseUnits(balance) > 0n && isValidRecipient) || !!memoError}
                 onClick={handleTransfer}
                 type="button"
                 className="font-normal text-[14px] -tracking-[2%]"

@@ -1,7 +1,7 @@
 'use client'
 import { formatUnits, parseUnits } from 'viem'
 import { Actions, Addresses } from 'viem/tempo'
-import { useConnection, useConnectionEffect, useSendCallsSync } from 'wagmi'
+import { useClient, useConnection, useConnectionEffect, useSendCallsSync } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 
 import { Button, ExplorerLink } from '../../Demo'
@@ -9,6 +9,7 @@ import { alphaUsd, betaUsd } from '../../tokens'
 
 export function SellSwap({ onSuccess }: { onSuccess?: () => void }) {
   const { address } = useConnection()
+  const client = useClient()
 
   const { data: tokenInMetadata } = Hooks.token.useGetMetadata({
     token: alphaUsd,
@@ -49,19 +50,21 @@ export function SellSwap({ onSuccess }: { onSuccess?: () => void }) {
     },
   })
 
-  const calls = [
-    Actions.token.approve.call({
-      spender: Addresses.stablecoinDex,
-      amount,
-      token: alphaUsd,
-    }),
-    Actions.dex.sell.call({
-      amountIn: amount,
-      minAmountOut,
-      tokenIn: alphaUsd,
-      tokenOut: betaUsd,
-    }),
-  ]
+  const calls = client
+    ? [
+        Actions.token.approve.call(client as never, {
+          spender: Addresses.stablecoinDex,
+          amount,
+          token: alphaUsd,
+        }),
+        Actions.dex.sell.call({
+          amountIn: amount,
+          minAmountOut,
+          tokenIn: alphaUsd,
+          tokenOut: betaUsd,
+        }),
+      ]
+    : []
 
   return (
     <div className="flex flex-col gap-3">
@@ -69,7 +72,7 @@ export function SellSwap({ onSuccess }: { onSuccess?: () => void }) {
         <h3 className="font-semibold text-sm">Sell 10 AlphaUSD for BetaUSD</h3>
         <Button
           variant={sendCalls.isSuccess ? 'default' : 'accent'}
-          disabled={!address}
+          disabled={!address || !client}
           onClick={() => {
             sendCalls.sendCallsSync({
               calls,
