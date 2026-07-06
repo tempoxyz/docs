@@ -183,9 +183,11 @@ export default defineConfig({
     {
       path: '/docs/api',
       spec: 'https://api.tempo.xyz/openapi.json',
+      exclude: ['Platform API'],
       sidebar: {
-        collapsed: true,
         backLink: false,
+        collapsed: true,
+        flatten: ['Data API'],
         intro: [
           {
             text: 'Authentication',
