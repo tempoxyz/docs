@@ -1,21 +1,21 @@
 ---
 title: T8 Network Upgrade
-description: Planned T8 network upgrade overview covering current committee state, FeeAMM policy behavior, and DEX order storage.
+description: T8 network upgrade overview covering current committee state, FeeAMM policy behavior, and DEX order storage.
 ---
 
 # T8 Network Upgrade
 
-T8 is a planned network upgrade focused on clearer validator committee reads, FeeAMM policy behavior, and DEX order storage.
+T8 focuses on clearer validator committee reads, FeeAMM policy behavior, and DEX order storage.
 
 :::info[T8 status]
-T8 is planned. The planned release date is July 19, 2026.
+Release target: July 19, 2026.
 :::
 
 ## Timeline
 
-| Milestone | Planned date |
-|-----------|--------------|
-| Planned release date | July 19, 2026 |
+| Milestone | Date |
+|-----------|------|
+| Release target | July 19, 2026 |
 | Testnet rollout | July 23, 2026 |
 | Mainnet rollout | July 29, 2026 |
 
@@ -23,12 +23,11 @@ Node operators should wait for the T8 release announcement, then upgrade before 
 
 ## Overview
 
-T8 focuses on four infrastructure-facing changes:
+T8 focuses on three infrastructure-facing changes:
 
 - **Canonical current committee reads.** Contracts and offchain tools can query the committee that consensus is actually using for the current epoch.
 - **Cleaner fee collection behavior.** Fee collection avoids a redundant FeeManager policy check while public AMM actions remain policy-controlled.
-- **More compact DEX order storage.** New DEX orders use a versioned storage layout, while existing orders remain readable.
-- **DEX V2Order support.** The Stablecoin DEX adds support for a compact V2Order layout.
+- **DEX order storage updates.** New DEX orders use versioned storage, existing orders remain readable, and the Stablecoin DEX supports the compact V2Order layout.
 
 ## Features
 
@@ -54,17 +53,15 @@ Token issuers still control whether their token participates in FeeAMM liquidity
 
 Read the specification [here](https://tips.sh/1042).
 
-### Versioned DEX order storage
+### DEX order storage
 
 T8 introduces a versioned Stablecoin DEX order storage layout. Existing orders stay in the legacy layout and remain readable. New orders use the versioned layout, which stores the same active order state with fewer storage slots.
 
 The public `getOrder(uint128)` shape stays compatible. Indexers that reconstruct DEX state from events should not need to change for this storage layout. Tools that read raw DEX storage directly must decode orders by version.
 
-Read the specification [here](https://tips.sh/1062).
+The Stablecoin DEX also supports a compact V2Order layout. V2Order stores an orderbook index instead of repeating the full book key on each order.
 
-### DEX V2Order support
-
-T8 adds support for a compact Stablecoin DEX V2Order layout. The layout stores an orderbook index instead of repeating the full book key on each order.
+Read the versioned order storage specification [here](https://tips.sh/1062).
 
 ## Compatible releases
 
@@ -72,9 +69,9 @@ The T8-compatible release is not published yet.
 
 | Ecosystem | T8-compatible releases |
 |-----------|------------------------|
-| Node operators | v1.10.2 planned for July 19, 2026 |
+| Node operators | v1.11.0 target release on July 19, 2026 |
 
-Release notes and binaries will be linked here when v1.10.2 is cut.
+Release notes and binaries will be linked here when v1.11.0 is cut.
 
 ## Integration impact
 
