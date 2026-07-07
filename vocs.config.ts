@@ -5,7 +5,8 @@ import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 // which causes all links to resolve to the absolute URL on preview deployments.
 const baseUrl = (() => {
   if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') return ''
-  if (URL.canParse(process.env.VITE_BASE_URL)) return process.env.VITE_BASE_URL.replace(/\/$/, '')
+  const viteBaseUrl = process.env.VITE_BASE_URL
+  if (viteBaseUrl && URL.canParse(viteBaseUrl)) return viteBaseUrl.replace(/\/$/, '')
   if (process.env.VERCEL_ENV === 'production') return 'https://tempo.xyz/developers'
   const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
   if (productionUrl) return `https://${productionUrl}`
@@ -855,12 +856,12 @@ export default defineConfig({
             items: [
               {
                 text: 'T7',
-                badge: { text: 'Next', variant: 'note' },
+                badge: { text: 'Next', variant: 'note' as const },
                 link: '/docs/protocol/upgrades/t7',
               },
               {
                 text: 'T6',
-                badge: { text: 'Latest', variant: 'info' },
+                badge: { text: 'Latest', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t6',
               },
               {
@@ -1369,13 +1370,6 @@ export default defineConfig({
       compilerOptions: {
         // ModuleResolutionKind.Bundler = 100
         moduleResolution: 100,
-      },
-    },
-  },
-  markdown: {
-    code: {
-      langAlias: {
-        sol: 'solidity',
       },
     },
   },

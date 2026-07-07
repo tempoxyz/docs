@@ -36,8 +36,12 @@ describe('vocs.config docs SEO controls', () => {
   })
 
   test('omits sitemap lastmod for docs pages only', () => {
-    expect(vocsConfig.sitemap).not.toBe(false)
-    const lastmod = vocsConfig.sitemap?.lastmod
+    const sitemap = vocsConfig.sitemap
+
+    expect(sitemap).not.toBe(false)
+    if (!sitemap) return
+
+    const lastmod = sitemap.lastmod
 
     expect(typeof lastmod).toBe('function')
     if (typeof lastmod !== 'function') return
