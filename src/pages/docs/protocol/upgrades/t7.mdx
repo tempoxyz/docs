@@ -40,7 +40,7 @@ These changes make costs easier to reason about for partners building high-throu
 |----------------|--------------|
 | Active DEX makers can benefit on repeat order placement | Maker-attributed storage credits let reusable order-storage savings stay attached to the maker who earned them. |
 | Apps can avoid random gas discounts | Shared contracts can track which user earned credits and spend them only for that same user. |
-| MPP sessions can get cheaper over repeated channel lifecycles | In the release benchmark, channel-reserve open calls are 72.1% lower for the open-existing path and 39.2% lower for the open-first path. |
+| MPP sessions can get cheaper over repeated channel lifecycles | The credited reopen path, `open_new_channel_with_storage_credit`, is 60,225 gas in the channel-reserve gas snapshot. |
 | All integrators get a simpler low-fee story | The new base fee cap is 40% lower than today's fixed base fee, and quiet periods can be up to 20x cheaper than the cap. |
 
 ## Features
@@ -63,12 +63,11 @@ This keeps channel savings attached to the payer who earned them. A different pa
 
 For MPP partners, the benefit is focused on repeated session lifecycles. Per-request vouchers already stay off-chain; T7 can lower the net onchain lifecycle cost when a close or withdraw is followed by a later open from the same payer.
 
-The release benchmark reports the channel-reserve open paths below. These are call-level gas numbers and exclude separate approval gas.
+The channel-reserve gas snapshot for the credited reopen path is below.
 
-| Channel reserve path | T6 | T7 | Gas change |
-|----------------------|---:|---:|-----------:|
-| Open existing | 1,055,229 | 294,425 | -760,804 (-72.1%) |
-| Open first | 1,302,429 | 791,625 | -510,804 (-39.2%) |
+| Channel reserve snapshot | T7 gas |
+|--------------------------|-------:|
+| `open_new_channel_with_storage_credit` | 60,225 |
 
 Read [Accept pay-as-you-go payments](/docs/guide/machine-payments/pay-as-you-go) for the MPP session flow.
 
@@ -99,7 +98,6 @@ Apps that show reward information should keep already-accrued rewards separate f
 | User-attributed DEX savings | The DEX can keep reusable order-storage credits attached to the maker who earned them | [TIP-1064: StablecoinDEX Order Storage Credits](https://tips.sh/1064) |
 | Payer-scoped payment-channel savings | MPP channel credits stay attached to the payer who earned them and can be reused by that payer on a later channel open | [TIP-1066: TIP-20 Channel Storage Credits](https://tips.sh/1066) |
 | Dynamic base fee | The base fee can move within a bounded range instead of staying fixed | [TIP-1067: Dynamic Base Fee](https://tips.sh/1067) |
-| Tempo Token Rewards cleanup | New reward opt-ins and distributions stop, while already-accrued rewards remain claimable | TIP-1075: Deprecate TIP-20 Rewards |
 
 ## Partner benefits
 
@@ -121,8 +119,7 @@ The [v1.10.1 release notes](https://github.com/tempoxyz/tempo/releases/tag/v1.10
 |------|-------------|------------|--------------|
 | Base-fee ceiling for a 50,000 gas transfer | $0.001 | Cap $0.0006; quiet-period floor $0.00003 | The cap is 40% lower, and the floor is 20x below the cap. |
 | Credited storage creation (`SSTORE 0 -> x`) | 250,000 gas | 5,000 residual + up to 245,000 creditable gas | When credits are available, most of the storage-creation cost can be offset. |
-| Channel reserve open-existing path | 1,055,229 gas | 294,425 gas | 760,804 gas lower (-72.1%). |
-| Channel reserve open-first path | 1,302,429 gas | 791,625 gas | 510,804 gas lower (-39.2%). |
+| Credited channel reopen (`open_new_channel_with_storage_credit`) | n/a | 60,225 gas | Payer-scoped credit path for repeated MPP sessions. |
 | Observed transfer-like costs before T7 | Average $0.0037857 and median $0.0011855 across 1,000 transactions; average $0.0008975 and median $0.0007657 across 598 steady-state transfers | T7 lowers the per-gas component through the new cap and floor | Useful baseline context, not a post-T7 production average. |
 
 ## Compatible releases
