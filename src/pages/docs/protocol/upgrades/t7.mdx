@@ -139,8 +139,6 @@ Release notes and binaries are available in the [v1.10.1 release](https://github
 
 ### For storage savings
 
-Partners using DEX or TIP-20 channel flows should review fee assumptions against testnet behavior before mainnet rollout.
-
 - Storage credits are included for the core primitive, DEX order storage, and TIP-20 channel storage.
 - Shared contracts should avoid global credit pools when savings should stay attached to a specific user, maker, payer, or account.
 
@@ -157,5 +155,3 @@ Wallets, checkout flows, and infrastructure that display fees should expect the 
 Apps that show TIP-20 reward information should stop presenting new rewards as accruing from post-T7 reward distributions.
 
 - Wallets and dashboards should separate already-accrued rewards from post-T7 balances.
-- Accounting and reporting systems should check whether any reward-specific assumptions remain.
-- Partner support teams should be ready to explain that TIP-20 transfers and claims for already-accrued rewards continue to work, while new reward opt-ins and distributions are deprecated.
