@@ -17,9 +17,13 @@ import { Cards, Card } from 'vocs'
 
 # Distribute Rewards
 
-Distribute rewards to token holders using TIP-20's built-in reward distribution mechanism. Rewards allow parties to incentivize holders of a token by distributing tokens proportionally based on their balance.
+This guide documents TIP-20's built-in reward distribution mechanism for existing integrations and already-accrued rewards.
 
-Rewards can be distributed by anyone on any TIP-20 token, and claimed by any holder who has opted in. This guide covers both the reward distributor and token holder use cases. While the demo below uses a token you create, the same principles apply to any token.
+:::warning[Deprecated in T7]
+Do not build new rewards flows on this surface. The [T7 network upgrade](/docs/protocol/upgrades/t7) deprecates new TIP-20 reward opt-ins and reward distributions; already-accrued rewards remain claimable.
+:::
+
+Before T7, rewards could be distributed by anyone on any TIP-20 token, and claimed by any holder who had opted in. The demo below is kept as reference material for existing integrations.
 
 ## Rewards distribution demo
 
