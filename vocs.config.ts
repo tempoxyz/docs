@@ -60,10 +60,19 @@ export default defineConfig({
     text: 'Suggest changes to this page',
   },
   title: 'Tempo',
-  titleTemplate: '%s ⋅ Tempo',
+  titleTemplate: (path, { siteTitle }) => {
+    if (path === '/docs') return `${siteTitle} %s ⋅ Tempo Docs`
+    if (path === '/docs' || path.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
+    return '%s ⋅ Tempo'
+  },
   description: 'Documentation for the Tempo network and protocol specifications',
   renderStrategy: 'partial-static',
   feedback: createFeedbackAdapter(),
+  head: {
+    meta: {
+      articleModifiedTime: (path) => !(path === '/docs' || path.startsWith('/docs/')),
+    },
+  },
   ai: {
     retriever: process.env.CLOUDFLARE_API_TOKEN
       ? Retriever.local({
@@ -97,6 +106,12 @@ export default defineConfig({
       prefix: false,
       boost: searchBoost,
       boostDocument: boostSearchDocument,
+    },
+  },
+  sitemap: {
+    lastmod: (path, { lastmod }) => {
+      if (path === '/docs' || path.startsWith('/docs/')) return false
+      return lastmod
     },
   },
   mcp: {
