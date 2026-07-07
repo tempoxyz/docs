@@ -40,7 +40,7 @@ This matters because `ValidatorConfigV2.getActiveValidators()` returns the confi
 
 The new `getCommitteeMembers()` query gives contracts and offchain tools a canonical source for current committee membership, without requiring them to reconstruct it from consensus data or epoch-boundary block data.
 
-Read the specification [here](https://github.com/tempoxyz/tempo/pull/5215).
+Read the specification [here](https://tips.sh/1070).
 
 ### FeeAMM policy exemptions
 
@@ -52,7 +52,7 @@ Public AMM operations remain policy-controlled. `mint`, `burn`, `rebalanceSwap`,
 
 Token issuers still control whether their token participates in FeeAMM liquidity by authorizing the FeeManager address where required.
 
-Read the specification [here](https://github.com/tempoxyz/tempo/pull/6604).
+Read the specification [here](https://tips.sh/1042).
 
 ### Versioned DEX order storage
 
@@ -60,7 +60,7 @@ T8 introduces a versioned Stablecoin DEX order storage layout. Existing orders s
 
 The public `getOrder(uint128)` shape stays compatible. Indexers that reconstruct DEX state from events should not need to change for this storage layout. Tools that read raw DEX storage directly must decode orders by version.
 
-Read the specification [here](https://github.com/tempoxyz/tempo/pull/4075).
+Read the specification [here](https://tips.sh/1062).
 
 ### DEX V2Order support
 
