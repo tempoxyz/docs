@@ -5,6 +5,10 @@ description: Technical specification for Tempo Token Rewards using reward-per-to
 
 # Tempo Token Rewards Specification
 
+:::warning[Deprecated in T7]
+Do not build new rewards flows on this surface. The [T7 network upgrade](/docs/protocol/upgrades/t7) deprecates new TIP-20 reward opt-ins and reward distributions; already-accrued rewards remain claimable.
+:::
+
 ## Abstract
 An opt-in, scalable, pro-rata reward distribution mechanism built into TIP-20 tokens. The system uses a "reward-per-token" accumulator pattern to distribute rewards proportionally to opted-in holders without requiring staking or per-holder iteration. Rewards are distributed instantly; time-based streaming distributions are planned for a future upgrade.
 
