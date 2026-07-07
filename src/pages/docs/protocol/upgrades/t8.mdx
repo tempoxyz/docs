@@ -1,0 +1,113 @@
+---
+title: T8 Network Upgrade
+description: Planned T8 network upgrade overview covering current committee state, FeeAMM policy behavior, and DEX order storage.
+---
+
+# T8 Network Upgrade
+
+T8 is a planned network upgrade focused on clearer validator committee reads, FeeAMM policy behavior, and DEX order storage.
+
+:::info[T8 status]
+T8 is planned. The planned release date is July 19, 2026.
+:::
+
+## Timeline
+
+| Milestone | Planned date |
+|-----------|--------------|
+| Planned release date | July 19, 2026 |
+| Testnet rollout | July 23, 2026 |
+| Mainnet rollout | July 29, 2026 |
+
+Node operators should wait for the T8 release announcement, then upgrade before the activation timestamp on each network. Exact activation timestamps will be added when the release is cut.
+
+## Overview
+
+T8 focuses on four infrastructure-facing changes:
+
+- **Canonical current committee reads.** Contracts and offchain tools can query the committee that consensus is actually using for the current epoch.
+- **Cleaner fee collection behavior.** Fee collection avoids a redundant FeeManager policy check while public AMM actions remain policy-controlled.
+- **More compact DEX order storage.** New DEX orders use a versioned storage layout, while existing orders remain readable.
+- **DEX V2Order support.** The Stablecoin DEX adds support for a compact V2Order layout.
+
+## Features
+
+### Current committee state
+
+T8 adds execution-layer state for the current effective validator committee. In plain terms, this is the committee that consensus is actually using for the current epoch, based on the DKG outcome.
+
+This matters because `ValidatorConfigV2.getActiveValidators()` returns the configured validator registry, not necessarily the committee currently active in consensus. Registry changes can happen before they become part of the effective committee, and a failed DKG round can leave the prior committee in place.
+
+The new `getCommitteeMembers()` query gives contracts and offchain tools a canonical source for current committee membership, without requiring them to reconstruct it from consensus data or epoch-boundary block data.
+
+Read the specification [here](https://github.com/tempoxyz/tempo/pull/5215). Read the implementation [here](https://github.com/tempoxyz/tempo/pull/6209).
+
+### FeeAMM policy exemptions
+
+The FeeAMM and FeeManager help users pay transaction fees in one token while validators receive another. T8 adjusts where token policy checks happen in that flow.
+
+During protocol fee collection, the FeeManager address is no longer checked as the recipient. The fee payer is still checked as an authorized sender. This keeps fee collection simpler for block builders and avoids repeating a recipient check on every transaction.
+
+Public AMM operations remain policy-controlled. `mint`, `burn`, `rebalanceSwap`, and `distributeFees` continue to enforce the relevant token policies, and `mint` / `burn` gain extra checks that tie authorization to the liquidity provider across the lifecycle of a pool position.
+
+Token issuers still control whether their token participates in FeeAMM liquidity by authorizing the FeeManager address where required.
+
+Read the specification [here](https://github.com/tempoxyz/tempo/pull/6604). Read the implementation [here](https://github.com/tempoxyz/tempo/pull/6605).
+
+### Versioned DEX order storage
+
+T8 introduces a versioned Stablecoin DEX order storage layout. Existing orders stay in the legacy layout and remain readable. New orders use the versioned layout, which stores the same active order state with fewer storage slots.
+
+The public `getOrder(uint128)` shape stays compatible. Indexers that reconstruct DEX state from events should not need to change for this storage layout. Tools that read raw DEX storage directly must decode orders by version.
+
+Read the specification [here](https://github.com/tempoxyz/tempo/pull/4075). Read the implementation [here](https://github.com/tempoxyz/tempo/pull/6546).
+
+### DEX V2Order support
+
+T8 adds support for a compact Stablecoin DEX V2Order layout. The implementation stores an orderbook index instead of repeating the full book key on each order.
+
+Read the implementation [here](https://github.com/tempoxyz/tempo/pull/6691).
+
+## Compatible releases
+
+The T8-compatible release is not published yet.
+
+| Ecosystem | T8-compatible releases |
+|-----------|------------------------|
+| Node operators | v1.10.2 planned for July 19, 2026 |
+
+Release notes and binaries will be linked here when v1.10.2 is cut.
+
+## What operators and integrators should know
+
+T8 is a hardfork upgrade. Node operators should watch for the planned release and activation details before updating testnet and mainnet nodes. Teams that depend on committee reads, FeeAMM behavior, or DEX order data should review the relevant notes before rollout.
+
+### For node operators
+
+- Watch for the T8 release planned for July 19, 2026.
+- Upgrade testnet nodes before the planned July 23, 2026 rollout.
+- Upgrade mainnet nodes before the planned July 29, 2026 rollout.
+- Treat the exact activation timestamps from the release announcement as the source of truth.
+
+### For validators, monitoring, and contracts
+
+- Use `getCommitteeMembers()` when you need the committee consensus is using now.
+- Keep using `ValidatorConfigV2` when you need the configured validator registry.
+- Do not treat `getActiveValidators()` as the current effective committee.
+- After activation, wait for the first epoch-boundary committee update before relying on the new query.
+
+### For FeeAMM, token issuer, and validator tooling
+
+- Fee collection no longer checks the FeeManager address as the recipient.
+- The fee payer is still checked as an authorized sender.
+- AMM actions remain policy-controlled.
+- `mint` and `burn` have extra checks that prevent blocked accounts from using liquidity positions to bypass token policies.
+- If a token does not authorize the FeeManager where required, some fees or liquidity flows may be unavailable or stranded; validator and issuer tooling should surface that clearly.
+
+### For DEX frontends and indexers
+
+- Event-driven order indexing should continue to work.
+- `getOrder(uint128)` remains ABI-compatible.
+- Raw storage readers must support both legacy version `0` orders and new version `1` orders.
+- Mixed-version order lists are expected, so storage tooling should update each order according to that order's own version.
+- Tooling that reads raw DEX storage should also account for V2Order support.
