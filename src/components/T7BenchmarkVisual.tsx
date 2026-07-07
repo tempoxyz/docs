@@ -8,18 +8,6 @@ function formatGas(value: number) {
   return `${numberFormat.format(value)} gas`
 }
 
-function formatPercent(value: number) {
-  return `${value.toFixed(1)}%`
-}
-
-function reduction(before: number, after: number) {
-  return ((before - after) / before) * 100
-}
-
-function barWidth(value: number, max: number) {
-  return `${Math.max((value / max) * 100, 3)}%`
-}
-
 function BaseFeeRow(props: {
   label: string
   value: string
@@ -42,36 +30,15 @@ function BaseFeeRow(props: {
   )
 }
 
-function BeforeAfterRow(props: { label: string; before: number; after: number; unit?: 'gas' }) {
-  const saved = props.before - props.after
-
+function GasSnapshotRow(props: { label: string; value: number }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <span className="font-medium text-gray12 text-sm">{props.label}</span>
-        <span className="text-[13px] text-gray11">
-          {formatGas(saved)} lower ({formatPercent(reduction(props.before, props.after))})
-        </span>
+        <strong className="text-gray12 text-sm tabular-nums">{formatGas(props.value)}</strong>
       </div>
-
-      <div className="space-y-1.5">
-        <div className="grid grid-cols-[3.25rem_1fr_auto] items-center gap-2 text-[13px]">
-          <span className="text-gray10">Before</span>
-          <div className="h-2.5 overflow-hidden rounded bg-gray3" aria-hidden="true">
-            <div className="h-full rounded bg-gray7" style={{ width: '100%' }} />
-          </div>
-          <span className="text-gray11 tabular-nums">{formatGas(props.before)}</span>
-        </div>
-        <div className="grid grid-cols-[3.25rem_1fr_auto] items-center gap-2 text-[13px]">
-          <span className="text-gray10">After</span>
-          <div className="h-2.5 overflow-hidden rounded bg-gray3" aria-hidden="true">
-            <div
-              className="h-full rounded bg-accent"
-              style={{ width: barWidth(props.after, props.before) }}
-            />
-          </div>
-          <span className="text-gray11 tabular-nums">{formatGas(props.after)}</span>
-        </div>
+      <div className="h-2.5 overflow-hidden rounded bg-gray3" aria-hidden="true">
+        <div className="h-full rounded bg-accent" style={{ width: '18%' }} />
       </div>
     </div>
   )
@@ -104,13 +71,11 @@ export function T7BenchmarkVisual() {
           <div>
             <h5 className="m-0 font-medium text-[14px] text-gray12">Payment channels</h5>
             <p className="m-0 mt-1 text-gray11 text-sm">
-              Repeated channel opens can reuse payer-scoped savings.
+              Credited reopen path for payer-scoped channel savings.
             </p>
           </div>
-          <BeforeAfterRow label="Open existing channel" before={1_055_229} after={294_425} />
-          <BeforeAfterRow label="Open first channel" before={1_302_429} after={791_625} />
+          <GasSnapshotRow label="Open new channel with storage credit" value={60_225} />
         </section>
-
       </div>
     </Container>
   )
