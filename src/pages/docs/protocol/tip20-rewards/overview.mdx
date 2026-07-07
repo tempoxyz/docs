@@ -9,7 +9,11 @@ import { Cards, Card } from 'vocs'
 
 Tempo Token Rewards is a built-in mechanism that allows for efficient distribution of rewards to opted-in token holders proportional to their holdings, while maintaining low gas costs at scale and complying with [TIP-403 transfer policies](/docs/protocol/tip403/spec).
 
-Traditional reward mechanisms require tokens to be staked in separate contracts, which fragments user holdings and adds complexity to wallet implementations. Tempo Token Rewards solves this by:
+:::warning[Deprecated in T7]
+Do not build new rewards flows on this surface. The [T7 network upgrade](/docs/protocol/upgrades/t7) deprecates new TIP-20 reward opt-ins and reward distributions; already-accrued rewards remain claimable.
+:::
+
+Traditional reward mechanisms require tokens to be staked in separate contracts, which fragments user holdings and adds complexity to wallet implementations. Before deprecation, Tempo Token Rewards solved this by:
 
 - **Built-in Distribution**: Rewards are integrated directly into the token contract, no separate staking required
 - **Opt-in Participation**: Users choose whether to participate by setting a reward recipient
