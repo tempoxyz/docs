@@ -217,6 +217,7 @@ function llmsFeedbackPreamble(): Plugin {
 
       await Promise.all(candidates.map(prependFeedbackNotice))
       await removeTemplateRoutesFromSitemap(path.join(publicDir, 'sitemap.xml'))
+      await removeDocsLastmodFromSitemap(path.join(publicDir, 'sitemap.xml'))
     },
   }
 }
@@ -254,6 +255,19 @@ async function removeTemplateRoutesFromSitemap(filePath: string) {
     const filtered = content.replaceAll(
       /<url>\s*<loc>[^<]*\/\[[^\]]+\][^<]*<\/loc>[\s\S]*?<\/url>\s*/g,
       '',
+    )
+    if (filtered !== content) await fs.writeFile(filePath, filtered, 'utf-8')
+  } catch {
+    return
+  }
+}
+
+async function removeDocsLastmodFromSitemap(filePath: string) {
+  try {
+    const content = await fs.readFile(filePath, 'utf-8')
+    const filtered = content.replace(
+      /<url>([\s\S]*?<loc>[^<]*\/docs(?:\/[^<]*)?<\/loc>[\s\S]*?)<\/url>/g,
+      (entry) => entry.replace(/\s*<lastmod>[^<]*<\/lastmod>/g, ''),
     )
     if (filtered !== content) await fs.writeFile(filePath, filtered, 'utf-8')
   } catch {
