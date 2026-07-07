@@ -67,8 +67,15 @@ const cases: {
     ogImageIncludes: 'section=PERFORMANCE',
   },
   {
+    path: '/docs',
+    title: 'Tempo Documentation ⋅ Tempo Docs',
+    ogTitle: 'Tempo Documentation',
+    descriptionIncludes: 'Tempo docs for integration paths',
+    ogImageIncludes: '/og-docs.png',
+  },
+  {
     path: '/docs/guide/payments/send-a-payment',
-    title: 'Send a Payment ⋅ Tempo',
+    title: 'Send a Payment ⋅ Tempo Docs',
     ogTitle: 'Send a Payment',
     descriptionIncludes: 'stablecoin payments between accounts',
     ogImageIncludes: 'subsection=PAYMENTS',
@@ -85,6 +92,11 @@ for (const c of cases) {
     expect(metaContent(head, 'og:description')).toContain(c.descriptionIncludes)
     expect(metaContent(head, 'og:image')).toContain(c.ogImageIncludes)
     expect(metaContent(head, 'twitter:title')).toBe(c.ogTitle)
+
+    if (c.path.startsWith('/docs')) {
+      expect(metaContent(head, 'article:published_time')).toBeUndefined()
+      expect(metaContent(head, 'article:modified_time')).toBeUndefined()
+    }
   })
 }
 
