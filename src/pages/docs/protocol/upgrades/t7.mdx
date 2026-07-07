@@ -22,8 +22,6 @@ T7 is live on testnet. Mainnet rollout is planned for July 9, 2026. Release [v1.
 | Testnet rollout | Live: July 2, 2026 |
 | Mainnet rollout | Planned: July 9, 2026 |
 
-Node operators should run [v1.10.1](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1) for T7. Testnet operators should already be upgraded; mainnet operators should upgrade before the mainnet activation timestamp.
-
 ## Overview
 
 T7 focuses on five partner-facing changes:
@@ -100,8 +98,8 @@ Apps that show reward information should keep already-accrued rewards separate f
 | Reusable storage savings | Contracts can earn credits when they clear eligible storage and use those credits to lower later storage-creation gas | [TIP-1060: Storage Credits](https://tips.sh/1060) |
 | User-attributed DEX savings | The DEX can keep reusable order-storage credits attached to the maker who earned them | [TIP-1064: StablecoinDEX Order Storage Credits](https://tips.sh/1064) |
 | Payer-scoped payment-channel savings | MPP channel credits stay attached to the payer who earned them and can be reused by that payer on a later channel open | [TIP-1066: TIP-20 Channel Storage Credits](https://tips.sh/1066) |
-| Dynamic base fee | The base fee can move within a bounded range instead of staying fixed | [TIP-1067: Dynamic Base Fee](https://tips.sh/1067-1) |
-| Tempo Token Rewards cleanup | New reward opt-ins and distributions stop, while already-accrued rewards remain claimable | [TIP-1075: Deprecate TIP-20 Rewards](https://github.com/tempoxyz/tempo/pull/5380) |
+| Dynamic base fee | The base fee can move within a bounded range instead of staying fixed | [TIP-1067: Dynamic Base Fee](https://tips.sh/1067) |
+| Tempo Token Rewards cleanup | New reward opt-ins and distributions stop, while already-accrued rewards remain claimable | TIP-1075: Deprecate TIP-20 Rewards |
 
 ## Partner benefits
 
@@ -137,17 +135,13 @@ The following release supports the T7 feature set:
 
 Release notes and binaries are available in the [v1.10.1 release](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1).
 
-## What operators and integrators should know
-
-T7 changes fee and reward behavior. Node operators, integrators, indexers, wallets, and partner infrastructure should review the notes below while validating testnet behavior and before mainnet rollout.
+## Integration impact
 
 ### For storage savings
 
 Partners using DEX or TIP-20 channel flows should review fee assumptions against testnet behavior before mainnet rollout.
 
 - Storage credits are included for the core primitive, DEX order storage, and TIP-20 channel storage.
-- Wallets and apps that estimate fees should validate their fee displays against T7 behavior on testnet.
-- Indexers and analytics systems should keep pre-T7 fee assumptions separate from post-T7 fee data.
 - Shared contracts should avoid global credit pools when savings should stay attached to a specific user, maker, payer, or account.
 
 ### For dynamic fees
