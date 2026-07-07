@@ -61,9 +61,10 @@ export default defineConfig({
     text: 'Suggest changes to this page',
   },
   title: 'Tempo Docs',
-  titleTemplate: (path) => {
+  titleTemplate: (path, { title }) => {
     if (path === '/docs') return 'Tempo %s ⋅ Tempo Docs'
     if (path === '/docs' || path.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
+    if (title?.includes('Tempo')) return undefined
     return '%s ⋅ Tempo'
   },
   description: 'Documentation for the Tempo network and protocol specifications',

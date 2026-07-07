@@ -26,6 +26,8 @@ describe('vocs.config docs SEO controls', () => {
     expect(titleFor('/docs/protocol/transactions', 'Tempo Transactions')).toBe(
       'Tempo Transactions ⋅ Tempo Docs',
     )
+    expect(titleFor('/', 'Tempo')).toBe('Tempo')
+    expect(titleFor('/build/tempo-transactions', 'Tempo Transactions')).toBe('Tempo Transactions')
     expect(titleFor('/blog', 'Blog')).toBe('Blog ⋅ Tempo')
   })
 
