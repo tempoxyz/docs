@@ -18,14 +18,13 @@ Unlike [one-time payments](/docs/guide/machine-payments/one-time-payments), sess
 The [T7 network upgrade](/docs/protocol/upgrades/t7) adds payer-scoped storage credits for MPP payment channels. When a payer closes or withdraws a finished channel, the reserve records a channel storage credit for that payer. If the same payer opens another channel later, that payer reuses the credit. Other payers cannot spend it.
 :::
 
-In the [v1.10.1 release benchmark](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1), channel-reserve open calls are lower after T7:
+The channel-reserve gas snapshot for the credited reopen path is:
 
-| Channel reserve path | T6 | T7 | Gas change |
-|----------------------|---:|---:|-----------:|
-| Open existing | 1,055,229 | 294,425 | -760,804 (-72.1%) |
-| Open first | 1,302,429 | 791,625 | -510,804 (-39.2%) |
+| Channel reserve snapshot | T7 gas |
+|--------------------------|-------:|
+| `open_new_channel_with_storage_credit` | 60,225 |
 
-These are call-level gas numbers and exclude separate approval gas. They matter most for session services where the same payer opens, closes or withdraws, and later opens channels again.
+This is a call-level gas number and excludes separate approval gas. It matters most for session services where the same payer opens, closes or withdraws, and later opens channels again.
 
 ## How pay-as-you-go sessions work
 
