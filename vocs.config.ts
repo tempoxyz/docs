@@ -60,9 +60,9 @@ export default defineConfig({
     link: 'https://github.com/tempoxyz/docs/edit/main/src/pages/:path',
     text: 'Suggest changes to this page',
   },
-  title: 'Tempo',
-  titleTemplate: (path, { siteTitle }) => {
-    if (path === '/docs') return `${siteTitle} %s ⋅ Tempo Docs`
+  title: 'Tempo Docs',
+  titleTemplate: (path) => {
+    if (path === '/docs') return 'Tempo %s ⋅ Tempo Docs'
     if (path === '/docs' || path.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
     return '%s ⋅ Tempo'
   },

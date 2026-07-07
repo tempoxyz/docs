@@ -12,7 +12,8 @@ function titleFor(path: string, title: string) {
         })
       : vocsConfig.titleTemplate
 
-  return template?.replace('%s', title) ?? title
+  const resolvedTemplate = title.includes(vocsConfig.title) ? undefined : template
+  return resolvedTemplate?.replace('%s', title) ?? title
 }
 
 describe('vocs.config docs SEO controls', () => {
@@ -20,6 +21,10 @@ describe('vocs.config docs SEO controls', () => {
     expect(titleFor('/docs', 'Documentation')).toBe('Tempo Documentation ⋅ Tempo Docs')
     expect(titleFor('/docs/guide/payments/send-a-payment', 'Send a Payment')).toBe(
       'Send a Payment ⋅ Tempo Docs',
+    )
+    expect(titleFor('/docs/api', 'Tempo API')).toBe('Tempo API ⋅ Tempo Docs')
+    expect(titleFor('/docs/protocol/transactions', 'Tempo Transactions')).toBe(
+      'Tempo Transactions ⋅ Tempo Docs',
     )
     expect(titleFor('/blog', 'Blog')).toBe('Blog ⋅ Tempo')
   })
