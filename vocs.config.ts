@@ -70,10 +70,10 @@ export default defineConfig({
   description: 'Documentation for the Tempo network and protocol specifications',
   renderStrategy: 'partial-static',
   feedback: createFeedbackAdapter(),
-  head: {
-    meta: {
-      articleModifiedTime: (path) => !(path === '/docs' || path.startsWith('/docs/')),
-    },
+  head(path) {
+    if (path === '/docs' || path.startsWith('/docs/'))
+      return { meta: { articleModifiedTime: false } }
+    return undefined
   },
   ai: {
     retriever: process.env.CLOUDFLARE_API_TOKEN
