@@ -7,6 +7,10 @@ import { Cards, Card } from 'vocs'
 
 # Tempo Token Rewards
 
+:::warning[Tempo Token Rewards deprecation]
+T7 is live on testnet and planned for mainnet on July 9, 2026. After T7 activation on each network, new Tempo Token Rewards opt-ins and distributions are no-ops. Already-accrued rewards remain claimable through the existing `claimRewards()` flow.
+:::
+
 Tempo Token Rewards is a built-in mechanism that allows for efficient distribution of rewards to opted-in token holders proportional to their holdings, while maintaining low gas costs at scale and complying with [TIP-403 transfer policies](/docs/protocol/tip403/spec).
 
 Traditional reward mechanisms require tokens to be staked in separate contracts, which fragments user holdings and adds complexity to wallet implementations. Tempo Token Rewards solves this by:
