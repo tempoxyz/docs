@@ -32,14 +32,16 @@ describe('vocs.config docs SEO controls', () => {
   })
 
   test('omits article modified metadata for docs pages only', () => {
-    const articleModifiedTime = vocsConfig.head?.meta?.articleModifiedTime
+    const head = vocsConfig.head
 
-    expect(typeof articleModifiedTime).toBe('function')
-    if (typeof articleModifiedTime !== 'function') return
+    expect(typeof head).toBe('function')
+    if (typeof head !== 'function') return
 
-    expect(articleModifiedTime('/docs', {})).toBe(false)
-    expect(articleModifiedTime('/docs/guide/payments/send-a-payment', {})).toBe(false)
-    expect(articleModifiedTime('/blog/stablecoins-as-a-platform', {})).toBe(true)
+    expect(head('/docs', {})).toEqual({ meta: { articleModifiedTime: false } })
+    expect(head('/docs/guide/payments/send-a-payment', {})).toEqual({
+      meta: { articleModifiedTime: false },
+    })
+    expect(head('/blog/stablecoins-as-a-platform', {})).toBeUndefined()
   })
 
   test('omits sitemap lastmod for docs pages only', () => {
