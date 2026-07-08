@@ -11,7 +11,11 @@ Tempo has no native token. Instead, transaction fees—including both gas fees a
 
 For a stablecoin to be accepted, it must be USD-denominated, issued as a native TIP-20 contract, and have sufficient liquidity on the native Fee AMM.
 
-Tempo uses a fixed base fee (rather than a variable base fee as in EIP-1559), set so that a TIP-20 transfer costs less than $0.001. All fees accrue to the validator who proposes the block.
+Tempo currently uses a fixed base fee (rather than a variable base fee as in EIP-1559), set so that a TIP-20 transfer costs less than $0.001. All fees accrue to the validator who proposes the block.
+
+:::info[Dynamic base fee]
+The T7 network upgrade introduces a dynamic base fee. It can fall when block gas usage is below target and rise back to the cap when the network is busy. For a 50,000 gas transfer, the base-fee ceiling moves from about $0.001 to a T7 cap of about $0.0006, with a quiet-period floor around $0.00003. See the [T7 network upgrade](/docs/protocol/upgrades/t7) and [dynamic base fee proposal](https://tips.sh/1067-1).
+:::
 
 For pool mechanics, swaps, liquidity accounting, and fee-token conversion rules, see the [Fee AMM specification](/docs/protocol/fees/spec-fee-amm).
 
