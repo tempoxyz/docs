@@ -8,23 +8,13 @@ import { MermaidDiagram } from '../../../../components/MermaidDiagram'
 
 # Accept pay-as-you-go payments
 
-Build a payment-gated photo gallery API that charges $0.01 per photo using `mppx` sessions. The server returns random photos from [Picsum](https://picsum.photos) behind a paywall.
+Use pay-as-you-go sessions when a customer should pay a small amount each time they use an API or service, without sending an on-chain transaction for every request.
+
+This guide uses a simple photo API as the example: the client opens one `mppx` session, then pays $0.01 each time it asks for a photo. `mppx` is the library that manages the MPP session; [Picsum](https://picsum.photos) only supplies sample images for the demo.
 
 :::info
-Unlike [one-time payments](/docs/guide/machine-payments/one-time-payments), sessions open a payment channel once and use off-chain vouchers for each subsequent request — vouchers are processed in pure CPU-bound signature checks, not bottlenecked by blockchain throughput.
+Unlike [one-time payments](/docs/guide/machine-payments/one-time-payments), a session opens a payment channel once. Each later request is paid with a signed voucher that the server verifies off-chain.
 :::
-
-:::info[T7 payment-channel savings]
-The [T7 network upgrade](/docs/protocol/upgrades/t7) adds payer-scoped storage credits for MPP payment channels. When a payer closes or withdraws a finished channel, the reserve records a channel storage credit for that payer. If the same payer opens another channel later, that payer reuses the credit. Other payers cannot spend it.
-:::
-
-The channel-reserve gas snapshot for the credited reopen path is:
-
-| Channel reserve snapshot | T7 gas |
-|--------------------------|-------:|
-| `open_new_channel_with_storage_credit` | 60,225 |
-
-This is a call-level gas number and excludes separate approval gas. It matters most for session services where the same payer opens, closes or withdraws, and later opens channels again.
 
 ## How pay-as-you-go sessions work
 
@@ -53,6 +43,18 @@ This is a call-level gas number and excludes separate approval gas. It matters m
 2. **Session** — Client signs EIP-712 vouchers with increasing cumulative amounts as service is consumed
 3. **Top up** — If the channel runs low, the client deposits additional tokens without closing the channel
 4. **Close** — Either party closes the channel, settling the final balance on-chain and refunding unused deposit
+
+:::info[T7 payment-channel savings]
+The [T7 network upgrade](/docs/protocol/upgrades/t7) can make repeated sessions cheaper for the same payer. When a payer closes or withdraws a finished channel, Tempo records a channel storage credit for that payer. If the same payer opens another channel later, Tempo can use that payer's credit. Other payers cannot use it.
+:::
+
+The channel-reserve gas snapshot for the credited reopen path is:
+
+| Channel reserve snapshot | T7 gas |
+|--------------------------|-------:|
+| `open_new_channel_with_storage_credit` | 60,225 |
+
+This is a call-level gas number and excludes separate approval gas. It matters most for session services where the same payer opens, closes or withdraws, and later opens channels again.
 
 ## Pay-as-you-go server setup
 

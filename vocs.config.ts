@@ -174,7 +174,6 @@ export default defineConfig({
       'stablecoin-dex': 'EXCHANGE',
       'tempo-transaction': 'TRANSACTIONS',
       tip20: 'TIP-20',
-      'tip20-rewards': 'REWARDS',
       tip403: 'TIP-403',
       tips: 'TIPS',
       transactions: 'TRANSACTIONS',
@@ -372,10 +371,6 @@ export default defineConfig({
               {
                 text: 'Use your stablecoin for fees',
                 link: '/docs/guide/issuance/use-for-fees',
-              },
-              {
-                text: 'Distribute rewards',
-                link: '/docs/guide/issuance/distribute-rewards',
               },
               {
                 text: 'Manage your stablecoin',
@@ -668,20 +663,6 @@ export default defineConfig({
             ],
           },
           {
-            text: 'Tempo Token Rewards',
-            collapsed: false,
-            items: [
-              {
-                text: 'Overview',
-                link: '/docs/protocol/tip20-rewards/overview',
-              },
-              {
-                text: 'Specification',
-                link: '/docs/protocol/tip20-rewards/spec',
-              },
-            ],
-          },
-          {
             text: 'Tempo Policies (TIP-403)',
             collapsed: false,
             items: [
@@ -862,12 +843,11 @@ export default defineConfig({
               },
               {
                 text: 'T7',
-                badge: { text: 'Next', variant: 'note' as const },
+                badge: { text: 'Latest', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t7',
               },
               {
                 text: 'T6',
-                badge: { text: 'Latest', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t6',
               },
               {
@@ -1265,7 +1245,15 @@ export default defineConfig({
     },
     {
       source: '/docs/protocol/tip20-rewards',
-      destination: '/docs/protocol/tip20-rewards/overview',
+      destination: '/docs/protocol/upgrades/t7#deprecate-tip-20-rewards',
+    },
+    {
+      source: '/docs/protocol/tip20-rewards/:path*',
+      destination: '/docs/protocol/upgrades/t7#deprecate-tip-20-rewards',
+    },
+    {
+      source: '/docs/guide/issuance/distribute-rewards',
+      destination: '/docs/protocol/upgrades/t7#deprecate-tip-20-rewards',
     },
     {
       source: '/docs/protocol/tip403',
