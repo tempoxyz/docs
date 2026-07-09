@@ -16,9 +16,9 @@ type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
 
 const prefetchedPaths = new Set<string>()
 
-function prefetchPath(href: string) {
+function prefetchPath(href: unknown) {
   if (typeof document === 'undefined') return
-  if (!href.startsWith('/') || prefetchedPaths.has(href)) return
+  if (typeof href !== 'string' || !href.startsWith('/') || prefetchedPaths.has(href)) return
   prefetchedPaths.add(href)
 
   const link = document.createElement('link')
@@ -28,7 +28,8 @@ function prefetchPath(href: string) {
   document.head.appendChild(link)
 }
 
-function isClientRoutedBlogHref(href: string) {
+function isClientRoutedBlogHref(href: unknown) {
+  if (typeof href !== 'string') return false
   return (
     href === '/blog' ||
     href.startsWith('/blog/') ||
