@@ -1,0 +1,42 @@
+<svg width="840" height="517" viewBox="0 0 520 320" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="var(--font-jetbrains-mono), ui-monospace, monospace">
+  <rect width="520" height="320" fill="var(--surface-shell)"/>
+
+  <text x="24" y="34" font-size="10.5" fill="var(--foreground)" opacity="0.9" letter-spacing="0.16em">DYNAMIC BASE FEE RANGE</text>
+  <text x="24" y="52" font-size="7.8" fill="var(--foreground)" opacity="0.42" letter-spacing="0.14em">50K GAS TIP-20 TRANSFER COST</text>
+
+  <g opacity="0.55" stroke="var(--line-strong)">
+    <line x1="54" y1="86" x2="420" y2="86"/>
+    <line x1="54" y1="166" x2="420" y2="166"/>
+    <line x1="54" y1="248" x2="420" y2="248"/>
+  </g>
+  <text x="24" y="90" font-size="7.2" fill="var(--foreground)" opacity="0.36" letter-spacing="0.12em">TODAY</text>
+  <text x="24" y="252" font-size="7.2" fill="var(--foreground)" opacity="0.36" letter-spacing="0.12em">FLOOR</text>
+
+  <g opacity="0.58">
+    <text x="109" y="88" font-size="8.8" fill="var(--foreground)" opacity="0.48" letter-spacing="0.08em" text-anchor="middle">$0.001</text>
+    <rect x="70" y="100" width="78" height="148" fill="var(--surface-block)" stroke="var(--line-strong)"/>
+    <text x="109" y="271" font-size="8.2" fill="var(--foreground)" opacity="0.68" letter-spacing="0.12em" text-anchor="middle">TODAY</text>
+    <text x="109" y="287" font-size="6.8" fill="var(--foreground)" opacity="0.38" letter-spacing="0.1em" text-anchor="middle">FIXED FEE</text>
+  </g>
+
+  <g>
+    <text x="229" y="147.2" font-size="8.8" fill="#58b88a" opacity="0.92" letter-spacing="0.08em" text-anchor="middle">$0.0006</text>
+    <rect x="190" y="159.2" width="78" height="88.8" fill="#58b88a" opacity="0.22" stroke="#58b88a"/>
+    <rect x="190" y="159.2" width="78" height="4" fill="#58b88a"/>
+    <text x="229" y="271" font-size="8.2" fill="var(--foreground)" opacity="0.68" letter-spacing="0.12em" text-anchor="middle">T7 CAP</text>
+    <text x="229" y="287" font-size="6.8" fill="var(--foreground)" opacity="0.38" letter-spacing="0.1em" text-anchor="middle">40% LOWER</text>
+  </g>
+
+  <g>
+    <text x="349" y="231.56" font-size="8.8" fill="#cde769" opacity="0.92" letter-spacing="0.08em" text-anchor="middle">$0.00003</text>
+    <rect x="310" y="243.56" width="78" height="4.44" fill="#cde769" opacity="0.22" stroke="#cde769"/>
+    <rect x="310" y="243.56" width="78" height="4" fill="#cde769"/>
+    <text x="349" y="271" font-size="8.2" fill="var(--foreground)" opacity="0.68" letter-spacing="0.12em" text-anchor="middle">T7 FLOOR</text>
+    <text x="349" y="287" font-size="6.8" fill="var(--foreground)" opacity="0.38" letter-spacing="0.1em" text-anchor="middle">20X BELOW CAP</text>
+  </g>
+
+  <path d="M436 159.2V243.56" stroke="#58b88a" stroke-width="2"/>
+  <line x1="424" y1="159.2" x2="448" y2="159.2" stroke="#58b88a" stroke-width="2"/>
+  <line x1="424" y1="243.56" x2="448" y2="243.56" stroke="#58b88a" stroke-width="2"/>
+  <text x="400" y="145.2" font-size="7.6" fill="#58b88a" opacity="0.85" letter-spacing="0.14em" text-anchor="middle">BOUNDED RANGE</text>
+</svg>
