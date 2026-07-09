@@ -1,4 +1,11 @@
-import type { AnchorHTMLAttributes, ImgHTMLAttributes, ReactNode } from 'react'
+import {
+  type AnchorHTMLAttributes,
+  type ImgHTMLAttributes,
+  type ReactNode,
+  useContext,
+} from 'react'
+import { Link as WakuLink } from 'waku'
+import { unstable_RouterContext as WakuRouterContext } from 'waku/router/client'
 
 export type Metadata = Record<string, unknown>
 
@@ -21,7 +28,37 @@ function prefetchPath(href: string) {
   document.head.appendChild(link)
 }
 
+function isClientRoutedBlogHref(href: string) {
+  return (
+    href === '/blog' ||
+    href.startsWith('/blog/') ||
+    href === '/developers/blog' ||
+    href.startsWith('/developers/blog/')
+  )
+}
+
 export default function Link({ href, children, onFocus, onPointerEnter, ...props }: LinkProps) {
+  const router = useContext(WakuRouterContext)
+
+  if (router && isClientRoutedBlogHref(href)) {
+    return (
+      <WakuLink
+        {...props}
+        to={href}
+        onFocus={(event) => {
+          prefetchPath(href)
+          onFocus?.(event)
+        }}
+        onPointerEnter={(event) => {
+          prefetchPath(href)
+          onPointerEnter?.(event)
+        }}
+      >
+        {children}
+      </WakuLink>
+    )
+  }
+
   return (
     <a
       {...props}
