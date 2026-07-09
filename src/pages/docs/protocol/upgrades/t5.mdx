@@ -28,7 +28,7 @@ T5 focuses on four integration areas, plus a storage correctness fix:
 - **Clearer DEX state.** Flip orders can use the same tick on both sides and keep the same `orderId` after each flip.
 - **Simpler fee-token liquidity.** FeeAMM routing can use two hops, so issuers usually do not need a direct pool against every validator payout token.
 - **Better token and key metadata.** TIP-20 tokens can expose an on-chain `logoURI`, listed precompiles can pull TIP-20 tokens without a separate approval, and key authorizations can include an app-defined witness digest.
-- **Storage correctness fix.** Shrinking writes to dynamic precompile storage clear their stale tail slots at the hardfork boundary ([TIP-1057](https://tips.sh/1057)).
+- **Storage correctness fix.** Shrinking writes to dynamic precompile storage clear their stale tail slots at the T5 hardfork boundary.
 
 Most T5 changes are additive: existing TIP-20 tokens, MPP contracts, and non-flip DEX flows continue to work.
 
@@ -50,13 +50,13 @@ Measured gas savings versus the legacy reserve contract:
 
 These numbers cover only the channel operation itself. Under the legacy path, first-time users also had to send a separate `approve` transaction before opening a channel. With the precompile on the Implicit Approvals List, that approval round trip and allowance storage write are removed.
 
-Read the technical specification at [TIP-1034](https://tips.sh/1034).
+Read the [technical specification](https://tips.sh/1034).
 
 ### Payment lane classification
 
 T5 moved payment-lane eligibility from local builder policy into consensus. The allow-list covers TIP-20 calls and the new `TIP20ChannelReserve` precompile, so reserve-channel transactions are classified consistently across the network.
 
-Read the technical specification at [TIP-1045](https://tips.sh/1045).
+Read the [technical specification](https://tips.sh/1045).
 
 ### DEX flip-order improvements
 
@@ -67,7 +67,7 @@ The upgrade changed flip orders in two ways:
 
 This makes a market-making strategy easier to track over time. Indexers should treat `OrderFlipped` as the latest active state for that `orderId`.
 
-Read the technical specifications at [TIP-1030](https://tips.sh/1030) and [TIP-1056](https://tips.sh/1056).
+Read the technical specifications for [same-tick flip orders](https://tips.sh/1030) and [keeping order IDs across flips](https://tips.sh/1056).
 
 ### Multihop FeeAMM routing
 
@@ -75,7 +75,7 @@ FeeAMM can now route through two pools when there is no usable direct pool betwe
 
 For token issuers, this usually means pairing against one liquid quote token, such as `pathUSD`, instead of provisioning direct pools against every validator payout token.
 
-Read the technical specification at [TIP-1033](https://tips.sh/1033).
+Read the [technical specification](https://tips.sh/1033).
 
 ### Optional on-chain logoURI
 
@@ -83,7 +83,7 @@ TIP-20 tokens can expose an optional `logoURI` field. Wallets and explorers can 
 
 The field is capped at 256 bytes, and non-empty values must use an allowed URI scheme: `https`, `http`, `ipfs`, or `data`.
 
-Read the technical specification at [TIP-1026](https://tips.sh/1026).
+Read the [technical specification](https://tips.sh/1026).
 
 ### Implicit approvals
 
@@ -91,13 +91,13 @@ Listed protocol precompiles can pull TIP-20 tokens without a prior `approve`. Th
 
 The internal transfer path is not part of the public TIP-20 ABI and cannot be called by EOAs or external contracts. It still enforces balance checks, TIP-403 transfer policies, AccountKeychain spending limits, and emits the standard TIP-20 `Transfer` event.
 
-Read the technical specification at [TIP-1035](https://tips.sh/1035).
+Read the [technical specification](https://tips.sh/1035).
 
 ### Witness digest in key authorizations
 
 `key_authorization` now supports an optional `witness: bytes32` field. Apps can bind one key-authorization signature to an application challenge, which removes the need for a separate challenge signature in login or delegated-access flows.
 
-Read the technical specification at [TIP-1053](https://tips.sh/1053).
+Read the [technical specification](https://tips.sh/1053).
 
 ### Storage correctness fix
 
@@ -105,7 +105,7 @@ T5 gates one precompile storage fix at the hardfork boundary. Overwriting a `Vec
 
 This changes storage state and gas at the activation boundary, but no public ABI changes and no integrator action is required.
 
-Read the technical specification at [TIP-1057](https://tips.sh/1057).
+Read the [technical specification](https://tips.sh/1057).
 
 ## Compatible SDK releases
 

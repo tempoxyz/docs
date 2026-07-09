@@ -251,7 +251,7 @@ export function VirtualAddressesLiveDemo() {
           start: randomHex(32),
         })
 
-        if (!result) throw new Error('Unable to find a valid TIP-1022 salt.')
+        if (!result) throw new Error('Unable to find a valid virtual-address salt.')
 
         setMinerState({
           status: 'found',
@@ -597,7 +597,7 @@ export function VirtualAddressesLiveDemo() {
               </div>
               <div className="col-span-full">
                 `VirtualMaster.mineSaltAsync` is searching for the 32-bit proof-of-work required by
-                TIP-1022 using parallel workers when the browser supports them.
+                creating a virtual address, using parallel workers when the browser supports them.
               </div>
             </div>
           ) : minerState.status === 'found' ? (

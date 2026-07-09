@@ -152,7 +152,7 @@ Now that we have some input fields, we need to add some logic to handle the subm
 
 After this step, your users will be able to create a stablecoin by clicking the "Create" button!
 
-Tokens can also carry an optional on-chain `logoURI` ([TIP-1026](https://tips.sh/1026)) that wallets and explorers read directly from the token contract. It's set on the token contract and is independent of this creation flow; for the recommended format, use a square, rasterized PNG or WebP (max 256 bytes; `https`, `http`, `ipfs`, or `data` scheme).
+Tokens can also carry an optional on-chain [`logoURI`](/docs/protocol/tip20/spec#logo-uri) that wallets and explorers read directly from the token contract. It's set on the token contract and is independent of this creation flow; for the recommended format, use a square, rasterized PNG or WebP (max 256 bytes; `https`, `http`, `ipfs`, or `data` scheme).
 
 :::warning
 The `currency` field is **immutable** after token creation and affects fee payment eligibility, DEX routing, and quote token pairing. See [Currency Declaration](/docs/protocol/tip20/overview#currency-declaration) for guidelines on choosing the right value. **Only `USD` stablecoins can be used to pay transaction fees on Tempo.**

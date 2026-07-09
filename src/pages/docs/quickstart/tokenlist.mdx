@@ -50,7 +50,7 @@ As an example, here's Tempo's tokenlist, fetched from [tokenlist.tempo.xyz/list/
 
 3. **Add icon** to `data/<chain_id>/icons/<address>.svg` (lowercase address) in `apps/tokenlist`
 
-   Separately, TIP-20 tokens can also carry an optional on-chain `logoURI` ([TIP-1026](https://tips.sh/1026)) that wallets and explorers read directly from the token contract. Because that icon is fetched from an untrusted source, TIP-1026 recommends a square, rasterized PNG or WebP (max 256 bytes; `https`, `http`, `ipfs`, or `data` scheme). Setting it is optional and independent of this PR — registering here still adds richer metadata (`coingeckoId`, `bridgeInfo`, display `label`) and a fallback icon for clients that don't read on-chain `logoURI`.
+   Separately, TIP-20 tokens can also carry an optional on-chain [`logoURI`](/docs/protocol/tip20/spec#logo-uri) that wallets and explorers read directly from the token contract. The Logo URI specification recommends a square, rasterized PNG or WebP (max 256 bytes; `https`, `http`, `ipfs`, or `data` scheme) because clients fetch the icon from an untrusted source. Setting it is optional and independent of this PR — registering here still adds richer metadata (`coingeckoId`, `bridgeInfo`, display `label`) and a fallback icon for clients that don't read on-chain `logoURI`.
 
 4. **Submit PR** with as much information as you think is helpful for review.
 

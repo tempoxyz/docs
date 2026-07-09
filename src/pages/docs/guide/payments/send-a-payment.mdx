@@ -18,7 +18,7 @@ Send stablecoin payments between accounts on Tempo. Payments can include optiona
 :::warning[Confirm delivery, not just transaction success]
 On post-T6 networks, a blocked TIP-20 `transfer` / `transferFrom` still succeeds, but credits `ReceivePolicyGuard` at `0xB10C000000000000000000000000000000000000` instead of the intended receiver.
 
-- Before marking a payment, withdrawal, or deposit delivered, confirm the `Transfer` recipient is the intended receiver or its TIP-1022 master.
+- Before marking a payment, withdrawal, or deposit delivered, confirm the `Transfer` recipient is the intended receiver or the master wallet for its virtual address.
 - Index `ReceivePolicyGuard.TransferBlocked` so redirected funds can be surfaced and claimed later.
 
 See [Configure Receive Policies](/docs/guide/payments/configure-receive-policies).

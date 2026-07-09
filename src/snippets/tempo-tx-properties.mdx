@@ -1548,7 +1548,7 @@ In **Viem** and **Wagmi**, expiring nonces are handled automatically.
 
 ### Expiring Nonces
 
-[TIP-1009](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1009.md) introduces expiring nonces: transactions automatically expire if not executed within a specified time window. 
+The [expiring nonces specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1009.md) defines transactions that automatically expire if they are not executed within a specified time window.
 
 **Benefits:**
 - No nonce tracking required
@@ -2076,7 +2076,7 @@ For cases requiring ordered sequences within a key, Tempo's **2D nonce system** 
 </Tabs>
 
 :::warning
-**Reuse nonce keys instead of generating random ones.** Creating a new nonce key incurs a state creation cost that increases with the number of active keys (see [TIP-1000](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1000.md)). For most applications, using a small set of sequential nonce keys (e.g., `1n`, `2n`, `3n`) is sufficient and much more cost-effective than generating random nonce keys for each transaction.
+**Reuse nonce keys instead of generating random ones.** Creating a new nonce key incurs a state creation cost that increases with the number of active keys (see [State creation costs](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1000.md)). For most applications, using a small set of sequential nonce keys (e.g., `1n`, `2n`, `3n`) is sufficient and much more cost-effective than generating random nonce keys for each transaction.
 :::
 
 ### Scheduled Transactions

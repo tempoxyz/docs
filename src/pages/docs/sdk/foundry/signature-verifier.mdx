@@ -1,11 +1,11 @@
 ---
 title: Signature Verification in Foundry
-description: Verify secp256k1, P256, and WebAuthn signatures in smart contracts using the TIP-1020 SignatureVerifier precompile with Foundry.
+description: Verify secp256k1, P256, and WebAuthn signatures in smart contracts using the SignatureVerifier precompile with Foundry.
 ---
 
 # Signature Verification with Foundry
 
-The [TIP-1020](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md) `SignatureVerifier` precompile is available on Tempo. It lets contracts verify secp256k1, P256, and WebAuthn signatures through a single interface — no custom verifier contracts needed.
+The [`SignatureVerifier` precompile](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md) is available on Tempo. It provides signature verification for secp256k1, P256, and WebAuthn through a single interface — no custom verifier contracts needed.
 
 The Foundry project template for Tempo ships with a working example that demonstrates signature verification in a relayed mail contract. Initialize it with:
 
@@ -144,6 +144,6 @@ The secp256k1 and P256 relay tests use Tempo mode through the template's Foundry
 
 ## Related signature verification docs
 
-- [TIP-1020: Signature Verification Precompile](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md)
+- [Signature verification specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md)
 - [T6 Network Upgrade](/docs/protocol/upgrades/t6)
 - [Foundry for Tempo](/docs/sdk/foundry)

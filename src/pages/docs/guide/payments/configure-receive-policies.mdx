@@ -77,13 +77,13 @@ The recovery authority controls who may claim receipts for future blocked transf
 
 Changing the recovery authority affects future receipts only. Existing receipts keep the recovery authority captured when they were created.
 
-Nonzero recovery authorities cannot be `ReceivePolicyGuard`, [TIP-1022](https://tips.sh/1022) virtual addresses, or system precompile addresses that cannot initiate calls.
+Nonzero recovery authorities cannot be `ReceivePolicyGuard`, [virtual addresses](/docs/protocol/tip20/virtual-addresses), or system precompile addresses that cannot initiate calls.
 
 ### Set the receive policy
 
 Call `setReceivePolicy(senderPolicyId, tokenFilterId, recoveryAuthority)` from the address being configured.
 
-If the receiver is using TIP-1022 virtual addresses, configure the policy on the resolved master address. A virtual address must not call `setReceivePolicy(...)`.
+If the receiver is using virtual addresses, configure the policy on the resolved master address. A virtual address must not call `setReceivePolicy(...)`.
 
 :::::
 
@@ -136,7 +136,7 @@ Burn eligibility has additional policy checks. See the [protocol overview](/docs
 
 ## Virtual-address behavior
 
-If `to` is a TIP-1022 virtual address, it is resolved to its master address before checks run. Receive-policy checks use the master address.
+If `to` is a virtual address, it is resolved to its master address before checks run. Receive-policy checks use the master address.
 
 If resolution fails, the operation reverts as before. If the transfer or mint is blocked, the receipt is recorded for the master address and preserves the original `to` for attribution.
 
@@ -144,7 +144,7 @@ If resolution fails, the operation reverts as before. If the transfer or mint is
 
 <Cards>
   <Card
-    title="TIP-1028"
+    title="Receive policies specification"
     description="The approved specification for address-level receive policies."
     to="https://tips.sh/1028"
     icon="lucide:file-text"
@@ -163,7 +163,7 @@ If resolution fails, the operation reverts as before. If the transfer or mint is
   />
   <Card
     title="Use Virtual Addresses"
-    description="Understand how TIP-1022 virtual addresses affect deposit attribution."
+    description="Understand how virtual addresses affect deposit attribution."
     to="/docs/guide/payments/virtual-addresses"
     icon="lucide:route"
   />
