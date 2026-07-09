@@ -8,10 +8,12 @@ import { MermaidDiagram } from '../../../../components/MermaidDiagram'
 
 # Accept pay-as-you-go payments
 
-Build a payment-gated photo gallery API that charges $0.01 per photo using `mppx` sessions. The server returns random photos from [Picsum](https://picsum.photos) behind a paywall.
+Use pay-as-you-go sessions when a customer should pay a small amount each time they use an API or service, without sending an on-chain transaction for every request.
+
+This guide uses a simple photo API as the example: the client opens one `mppx` session, then pays $0.01 each time it asks for a photo. `mppx` is the library that manages the MPP session; [Picsum](https://picsum.photos) only supplies sample images for the demo.
 
 :::info
-Unlike [one-time payments](/docs/guide/machine-payments/one-time-payments), sessions open a payment channel once and use off-chain vouchers for each subsequent request — vouchers are processed in pure CPU-bound signature checks, not bottlenecked by blockchain throughput.
+Unlike [one-time payments](/docs/guide/machine-payments/one-time-payments), a session opens a payment channel once. Each later request is paid with a signed voucher that the server verifies off-chain.
 :::
 
 :::info[T7 payment-channel savings]
