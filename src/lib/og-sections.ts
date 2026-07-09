@@ -51,7 +51,6 @@ export const ogSubsectionMap: Record<string, string> = {
   'stablecoin-dex': 'EXCHANGE',
   'tempo-transaction': 'TRANSACTIONS',
   tip20: 'TIP-20',
-  'tip20-rewards': 'REWARDS',
   tip403: 'TIP-403',
   tips: 'TIPS',
   transactions: 'TRANSACTIONS',
