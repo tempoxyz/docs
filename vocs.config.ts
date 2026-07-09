@@ -857,12 +857,11 @@ export default defineConfig({
             items: [
               {
                 text: 'T7',
-                badge: { text: 'Next', variant: 'note' as const },
+                badge: { text: 'Latest', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t7',
               },
               {
                 text: 'T6',
-                badge: { text: 'Latest', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t6',
               },
               {
