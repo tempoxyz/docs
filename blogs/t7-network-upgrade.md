@@ -55,10 +55,10 @@ See the [v1.10.1 release](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1
 ## Resources
 
 - [T7 upgrade docs](/docs/protocol/upgrades/t7)
-- [TIP-1067: Dynamic Base Fee](https://tips.sh/1067)
-- [TIP-1060: Storage Credits](https://tips.sh/1060)
-- [TIP-1064: StablecoinDEX Order Storage Credits](https://tips.sh/1064)
-- [TIP-1066: TIP-20 Channel Storage Credits](https://tips.sh/1066)
+- [Dynamic base fee](https://tips.sh/1067)
+- [Storage credits](https://tips.sh/1060)
+- [StablecoinDEX order storage credits](https://tips.sh/1064)
+- [TIP-20 channel storage credits](https://tips.sh/1066)
 - [Accept pay-as-you-go payments](/docs/guide/machine-payments/pay-as-you-go)
 - [v1.10.1 release](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1)
 - [Tempo on GitHub](https://github.com/tempoxyz)
