@@ -13,7 +13,7 @@ T7 replaces Tempo's fixed base fee with a bounded dynamic base fee. The new cap 
 
 ![A diagram comparing today's fixed fee, the T7 cap, and the T7 floor for a 50,000 gas TIP-20 transfer.](/blog/t7-dynamic-base-fee-range.svg)
 
-*T7 keeps a hard cap on the base fee while allowing lower fees during quiet periods.*
+*T7 keeps a hard cap on the base fee while allowing lower fees during off-peak periods.*
 
 As an example, the typical gas for a TIP-20 token transfer between two existing users (~50,000 gas) now costs about $0.0006 at the new cap and about $0.00003 at the quiet-period floor, compared to $0.001 today. At the floor, that transfer is therefore about 33x cheaper than today's fixed fee.
 
