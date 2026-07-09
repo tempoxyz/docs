@@ -185,8 +185,7 @@ export const features: Feature[] = [
         <span className="text-foreground">fees</span>,{' '}
         <span className="text-foreground">memos</span>,{' '}
         <span className="text-foreground">lanes</span>,{' '}
-        <span className="text-foreground">policies</span>,{' '}
-        <span className="text-foreground">rewards</span>, and{' '}
+        <span className="text-foreground">policies</span>, and{' '}
         <span className="text-foreground">issuer controls</span>.
       </>
     ),
