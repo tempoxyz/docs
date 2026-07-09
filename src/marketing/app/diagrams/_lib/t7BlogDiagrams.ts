@@ -30,7 +30,7 @@ export const t7DynamicBaseFeeRangeSpec: FeatureDiagramSpec = {
   ],
   rangeAccent: 2,
   rangeLabel: 'BOUNDED RANGE',
-  caption: 'THE CAP STAYS HARD. QUIET PERIODS CAN PRICE LOWER.',
+  caption: '',
 }
 
 export const t7DynamicBaseFeeResponseSpec: FeatureDiagramSpec = {
@@ -80,5 +80,5 @@ export const t7DynamicBaseFeeResponseSpec: FeatureDiagramSpec = {
       usageRatio: 1,
     },
   ],
-  caption: 'LOW BLOCK USAGE PULLS FEES DOWN. BUSIER BLOCKS MOVE FEES BACK UP.',
+  caption: '',
 }

@@ -1204,9 +1204,11 @@ function FeeRangeShape({ spec }: { spec: FeeRangeSpec }) {
       >
         {spec.rangeLabel}
       </Label>
-      <Label x={260} y={310} size={7.6} tracking={0.14} opacity={0.48} anchor="middle">
-        {spec.caption}
-      </Label>
+      {spec.caption && (
+        <Label x={260} y={310} size={7.6} tracking={0.14} opacity={0.48} anchor="middle">
+          {spec.caption}
+        </Label>
+      )}
     </>
   )
 }
@@ -1339,9 +1341,11 @@ function FeeResponseShape({ spec }: { spec: FeeResponseSpec }) {
           </g>
         )
       })}
-      <Label x={260} y={314} size={7.6} tracking={0.14} opacity={0.48} anchor="middle">
-        {spec.caption}
-      </Label>
+      {spec.caption && (
+        <Label x={260} y={314} size={7.6} tracking={0.14} opacity={0.48} anchor="middle">
+          {spec.caption}
+        </Label>
+      )}
     </>
   )
 }

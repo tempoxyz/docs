@@ -39,6 +39,4 @@
   <line x1="424" y1="159.2" x2="448" y2="159.2" stroke="#58b88a" stroke-width="2"/>
   <line x1="424" y1="243.56" x2="448" y2="243.56" stroke="#58b88a" stroke-width="2"/>
   <text x="400" y="145.2" font-size="7.6" fill="#58b88a" opacity="0.85" letter-spacing="0.14em" text-anchor="middle">BOUNDED RANGE</text>
-
-  <text x="260" y="310" font-size="7.6" fill="var(--foreground)" opacity="0.48" letter-spacing="0.14em" text-anchor="middle">THE CAP STAYS HARD. QUIET PERIODS CAN PRICE LOWER.</text>
 </svg>

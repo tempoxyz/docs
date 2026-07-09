@@ -62,6 +62,4 @@
     <rect x="445" y="244" width="22" height="3" fill="#5d88ff"/>
     <text x="456" y="304" font-size="6.6" fill="var(--foreground)" opacity="0.54" letter-spacing="0.1em" text-anchor="middle">FULL</text>
   </g>
-
-  <text x="260" y="314" font-size="7.6" fill="var(--foreground)" opacity="0.48" letter-spacing="0.14em" text-anchor="middle">LOW BLOCK USAGE PULLS FEES DOWN. BUSIER BLOCKS MOVE FEES BACK UP.</text>
 </svg>
