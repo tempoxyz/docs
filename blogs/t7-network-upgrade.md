@@ -62,7 +62,7 @@ For the MPP session flow, see [Accept pay-as-you-go payments](/docs/guide/machin
 
 ## What integrators should know
 
-T7 went live on testnet on July 2 and rolls out to mainnet on July 9. Node operators should run the [v1.10.1 release](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1) to stay in sync with mainnet. The full set of changes and gas benchmarks are in the release notes, and the current node-operator release status is in the [Network Upgrades and Releases table](/docs/guide/node/network-upgrades#node-operator-updates).
+T7 went live on testnet on July 2 and mainnet on July 9. Node operators should run the [v1.10.1 release](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1) to stay in sync with mainnet. The full set of changes and gas benchmarks are in the release notes, and the current node-operator release status is in the [Network Upgrades and Releases table](/docs/guide/node/network-upgrades#node-operator-updates).
 
 For contract developers, the main opportunity is to identify workflows with temporary state and decide how storage-credit savings should be allocated: per user, payer, maker, or account. Avoid global credit pools in shared contracts when savings should stay attached to the party who earned them.
 
