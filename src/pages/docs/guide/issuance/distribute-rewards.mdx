@@ -1,6 +1,6 @@
 ---
-title: Distribute Rewards
-description: Distribute rewards to token holders using TIP-20's built-in reward mechanism. Allocate tokens proportionally based on holder balances.
+title: Legacy Token Rewards
+description: Understand deprecated Tempo Token Rewards behavior and claim already-accrued rewards after T7.
 interactive: true
 ---
 
@@ -15,21 +15,21 @@ import { OptInToRewards } from '../../../../components/guides/steps/rewards/OptI
 import { StartReward } from '../../../../components/guides/steps/rewards/StartReward.tsx'
 import { Cards, Card } from 'vocs'
 
-# Distribute Rewards
+# Legacy Token Rewards
 
-:::warning[Rewards deprecation planned]
-This change is planned for testnet on July 2, 2026 and mainnet on July 9, 2026. After activation, new Tempo Token Rewards opt-ins and distributions become no-ops. Already-accrued rewards remain claimable through the existing `claimRewards()` flow. See the [T7 network upgrade](/docs/protocol/upgrades/t7) for the full timeline and scope.
+:::warning[Rewards deprecated]
+T7 is active on testnet and mainnet. New Tempo Token Rewards opt-ins and distributions are no-ops. Already-accrued rewards remain claimable through the existing `claimRewards()` flow.
 :::
 
-Distribute rewards to token holders using TIP-20's built-in reward distribution mechanism. Rewards allow parties to incentivize holders of a token by distributing tokens proportionally based on their balance.
+Tempo Token Rewards is deprecated. This page is retained for legacy integrations and for claiming already-accrued rewards.
 
-Rewards can be distributed by anyone on any TIP-20 token, and claimed by any holder who has opted in. This guide covers both the reward distributor and token holder use cases. While the demo below uses a token you create, the same principles apply to any token.
+Before T7, rewards could be distributed by anyone on any TIP-20 token and claimed by holders who had opted in. After T7, new opt-ins and distributions are no-ops; claiming already-accrued rewards remains supported.
 
-## Rewards distribution demo
+## Legacy rewards demo
 
-Try out the complete rewards flow: create a token, opt in to receive rewards on it, create a reward for yourself, and claim it.
+The historical flow below shows the legacy rewards surface. New opt-in and distribution calls are no-ops after T7, but the claim step remains relevant for already-accrued rewards.
 
-<Demo.Container name="Distribute Rewards" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
+<Demo.Container name="Legacy Rewards" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
   <Connect stepNumber={1} />
   <AddFunds stepNumber={2} />
   <CreateOrLoadToken stepNumber={3} />
@@ -46,11 +46,11 @@ Try out the complete rewards flow: create a token, opt in to receive rewards on 
 
 ### [Optional] Create a reward token
 
-If you would like to distribute rewards on a token you have created, follow the [Create a Stablecoin](/docs/guide/issuance/create-a-stablecoin) guide to deploy your token.
+The legacy examples assume a token you have created. Follow the [Create a Stablecoin](/docs/guide/issuance/create-a-stablecoin) guide for the current token creation flow.
 
-### Tell users to opt in to rewards
+### Legacy: tell users to opt in to rewards
 
-Token holders must opt in to receive rewards by setting their reward recipient address. This is typically set to their own address.
+Before T7, token holders opted in to receive rewards by setting their reward recipient address. After T7, this call is a no-op for new opt-ins.
 
 :::code-group
 
@@ -103,9 +103,9 @@ export const config = createConfig({
 
 :::
 
-### Make a stablecoin reward distribution
+### Legacy: make a stablecoin reward distribution
 
-Anyone can make a reward distribution that allocates tokens to all opted-in holders proportionally based on their balance.
+Before T7, anyone could make a reward distribution that allocated tokens to all opted-in holders proportionally based on their balance. After T7, new distribution calls are no-ops.
 
 :::code-group
 
@@ -216,9 +216,9 @@ export const config = createConfig({
 
 ## Rewards distribution recipes
 
-### Watch for new reward distributions
+### Legacy: watch for reward distribution events
 
-Use `useWatchRewardDistributed` to listen for new reward distributions on a token. This is useful for updating your UI when a reward is distributed.
+Use `useWatchRewardDistributed` to listen for historical reward distribution events on a token. New reward distributions are no-ops after T7.
 
 ```tsx twoslash
 import { Hooks } from 'wagmi/tempo'
@@ -241,7 +241,7 @@ function WatchRewards() {
 
 ### Watch for reward opt-ins
 
-Use `useWatchRewardRecipientSet` to listen for when users opt in to rewards by setting their recipient address. This is useful for tracking opt-in activity.
+Use `useWatchRewardRecipientSet` to listen for historical reward opt-in activity. New reward opt-ins are no-ops after T7.
 
 ```tsx twoslash
 import { Hooks } from 'wagmi/tempo'
@@ -266,13 +266,13 @@ function WatchOptIns() {
 
 <Cards>
   <Card
-    description="See the TIP-20 rewards spec"
+    description="Read the legacy TIP-20 rewards spec"
     to="/docs/protocol/tip20-rewards/spec"
     icon="lucide:file-text"
     title="Tempo Token Rewards Spec"
   />
   <Card
-    description="Read an overview of TIP-20 rewards"
+    description="Read an overview of deprecated TIP-20 rewards"
     to="/docs/protocol/tip20-rewards/overview"
     icon="lucide:book-open"
     title="Tempo Token Rewards Overview"

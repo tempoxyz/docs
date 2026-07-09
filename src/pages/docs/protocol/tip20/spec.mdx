@@ -1,20 +1,20 @@
 ---
 title: TIP-20 Tokens Specification
-description: Technical specification for TIP-20 tokens, the optimized token standard extending ERC-20 with memos, rewards distribution, and policy integration.
+description: Technical specification for TIP-20 tokens, the optimized token standard extending ERC-20 with memos, legacy rewards behavior, and policy integration.
 ---
 
 # TIP-20 Tokens Specification
 
 ## Abstract
-TIP-20 tokens are a suite of precompiles that provide a built-in optimized token implementation in the core protocol. They extend the ERC-20 token standard with built-in functionality like memo fields and reward distribution.
+TIP-20 tokens are a suite of precompiles that provide a built-in optimized token implementation in the core protocol. They extend the ERC-20 token standard with built-in functionality like memo fields, legacy rewards behavior, and transfer policies.
 
 ## Motivation
-All major stablecoins today use the ERC-20 token standard. While ERC-20 provides a solid foundation for fungible tokens, it lacks features critical for stablecoin issuers today such as memos, transfer policies, and rewards distribution. Additionally, since each ERC-20 token has its own implementation, integrators can't depend on consistent behavior across tokens.
+All major stablecoins today use the ERC-20 token standard. While ERC-20 provides a solid foundation for fungible tokens, it lacks features critical for stablecoin issuers today such as memos and transfer policies. Additionally, since each ERC-20 token has its own implementation, integrators can't depend on consistent behavior across tokens.
 TIP-20 extends ERC-20, building these features into precompiled contracts that anyone can permissionlessly deploy on Tempo. This makes token operations much more efficient, allows issuers to quickly set up on Tempo, and simplifies integrations since it ensures standardized behavior across tokens.
 It also enables deeper integration with token-specific Tempo features like paying gas in stablecoins and payment lanes.
 
 ## Specification
-TIP-20 tokens support standard fungible token operations such as transfers, mints, and burns. They also support transfers, mints, and burns with an attached 32-byte memo; a role-based access control system for token administrative operations; and a system for opt-in [reward distribution](/docs/protocol/tip20-rewards/spec).
+TIP-20 tokens support standard fungible token operations such as transfers, mints, and burns. They also support transfers, mints, and burns with an attached 32-byte memo; a role-based access control system for token administrative operations; and a legacy [reward distribution](/docs/protocol/tip20-rewards/spec) claim path for already-accrued rewards.
 
 
 ## TIP20
@@ -531,8 +531,8 @@ This generalizes the system-only path described above (`systemTransferFrom`, `tr
 ### Payment-channel reserve (TIP-1034)
 The enshrined `TIP20ChannelReserve` precompile at [`0x4D50500000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x4D50500000000000000000000000000000000000) (ASCII `MPP`) is a TIP-20 consumer rather than a change to the TIP-20 contract itself — it pulls funds via the implicit-approval path above and emits standard `Transfer` events from the host TIP-20. See the [enshrined TIP-20 reserve channel section of the T5 page](/docs/protocol/upgrades/t5#enshrined-tip-20-reserve-channel) for the channel lifecycle, channel ID derivation, and event surface.
 
-## Token Rewards Distribution
-See [rewards distribution](/docs/protocol/tip20-rewards/spec) for more information.
+## Legacy Token Rewards Distribution
+TIP-20 rewards are deprecated after T7. New reward opt-ins and distributions are no-ops, while already-accrued rewards remain claimable. See [rewards distribution](/docs/protocol/tip20-rewards/spec) for the legacy behavior and claim path.
 
 ## TIP20Factory
 The `TIP20Factory` contract is the canonical entrypoint for creating new TIP-20 tokens on Tempo. The factory derives deterministic deployment addresses using a caller-provided salt, combined with the caller's address, under a fixed 12-byte TIP-20 prefix. This ensures that every TIP-20 token exists at a predictable, collision-free address. The `TIP20Factory` precompile is deployed at `0x20Fc000000000000000000000000000000000000`.

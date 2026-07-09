@@ -1,22 +1,22 @@
 ---
 title: Tempo Token Rewards Specification
-description: Technical specification for Tempo Token Rewards using reward-per-token accumulator pattern for scalable pro-rata rewards.
+description: Legacy technical specification for Tempo Token Rewards and the claim path for already-accrued rewards after T7.
 ---
 
 # Tempo Token Rewards Specification
 
-:::warning[Tempo Token Rewards cleanup planned]
-This change is planned for testnet on July 2, 2026 and mainnet on July 9, 2026. After activation, new reward opt-ins and new reward distributions become no-ops. Already-accrued rewards remain claimable through the existing `claimRewards()` flow. See the [T7 network upgrade](/docs/protocol/upgrades/t7) for the full timeline and scope.
+:::warning[Tempo Token Rewards deprecation]
+T7 is active on testnet and mainnet. New reward opt-ins and new reward distributions are no-ops. Already-accrued rewards remain claimable through the existing `claimRewards()` flow.
 :::
 
 ## Abstract
-An opt-in, scalable, pro-rata reward distribution mechanism built into TIP-20 tokens. The system uses a "reward-per-token" accumulator pattern to distribute rewards proportionally to opted-in holders without requiring staking or per-holder iteration. Rewards are distributed instantly; time-based streaming distributions are planned for a future upgrade.
+This specification documents the legacy opt-in, scalable, pro-rata reward distribution mechanism built into TIP-20 tokens. The system uses a "reward-per-token" accumulator pattern to distribute rewards proportionally to opted-in holders without requiring staking or per-holder iteration. After T7, new opt-ins and new distributions are no-ops, while already-accrued rewards remain claimable.
 
 ## Motivation
-Many applications require pro-rata distribution of tokens to existing holders (incentive programs, deterministic inflation, staking rewards). Building this into TIP-20 allows efficient distribution without forcing users to stake tokens elsewhere or requiring distributors to loop over all holders.
+Many applications required pro-rata distribution of tokens to existing holders (incentive programs, deterministic inflation, staking rewards). Building this into TIP-20 allowed efficient distribution without forcing users to stake tokens elsewhere or requiring distributors to loop over all holders.
 
 ## Specification
-The rewards mechanism allows anyone to distribute token rewards to opted-in holders proportionally based on holdings. Users must opt in to receiving rewards and may delegate rewards to a recipient address.
+The legacy rewards mechanism allowed anyone to distribute token rewards to opted-in holders proportionally based on holdings. Users opted in to receiving rewards and could delegate rewards to a recipient address. After T7, new opt-ins and distributions are no-ops; `claimRewards()` remains available for already-accrued rewards.
 
 ## Tempo Token Rewards Functions
 These functions are part of the [ITIP20](/docs/protocol/tip20/spec) interface:

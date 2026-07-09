@@ -1,6 +1,6 @@
 ---
 title: Tempo Token Rewards
-description: Built-in reward distribution mechanism for TIP-20 tokens enabling efficient, opt-in proportional rewards to token holders at scale.
+description: Legacy TIP-20 reward distribution behavior and the claim path for already-accrued rewards after T7.
 ---
 
 import { Cards, Card } from 'vocs'
@@ -8,33 +8,33 @@ import { Cards, Card } from 'vocs'
 # Tempo Token Rewards
 
 :::warning[Tempo Token Rewards deprecation]
-T7 is live on testnet and planned for mainnet on July 9, 2026. After T7 activation on each network, new Tempo Token Rewards opt-ins and distributions are no-ops. Already-accrued rewards remain claimable through the existing `claimRewards()` flow.
+T7 is active on testnet and mainnet. New Tempo Token Rewards opt-ins and distributions are no-ops. Already-accrued rewards remain claimable through the existing `claimRewards()` flow.
 :::
 
-Tempo Token Rewards is a built-in mechanism that allows for efficient distribution of rewards to opted-in token holders proportional to their holdings, while maintaining low gas costs at scale and complying with [TIP-403 transfer policies](/docs/protocol/tip403/spec).
+Tempo Token Rewards is a legacy built-in mechanism for distributing rewards to opted-in token holders proportional to their holdings, while maintaining low gas costs at scale and complying with [TIP-403 transfer policies](/docs/protocol/tip403/spec).
 
-Traditional reward mechanisms require tokens to be staked in separate contracts, which fragments user holdings and adds complexity to wallet implementations. Tempo Token Rewards solves this by:
+Before T7, Tempo Token Rewards solved this without requiring tokens to be staked in separate contracts:
 
-- **Built-in Distribution**: Rewards are integrated directly into the token contract, no separate staking required
-- **Opt-in Participation**: Users choose whether to participate by setting a reward recipient
-- **Proportional Distribution**: Rewards accrue based on token holdings automatically
-- **Instant Rewards**: Distribute rewards immediately to opted-in holders
+- **Built-in Distribution**: Rewards were integrated directly into the token contract, no separate staking required
+- **Opt-in Participation**: Users chose whether to participate by setting a reward recipient
+- **Proportional Distribution**: Rewards accrued based on token holdings automatically
+- **Instant Rewards**: Distributions applied immediately to opted-in holders
 - **Efficient at Scale**: Constant-time updates regardless of the number of token holders
-- **Policy Compliant**: All reward transfers respect TIP-403 transfer policies
+- **Policy Compliant**: Reward transfers respected TIP-403 transfer policies
 
 ## Links
 
 <Cards>
   <Card
-    description="Complete technical specification for rewards distribution"
+    description="Legacy technical reference for rewards distribution"
     to="/docs/protocol/tip20-rewards/spec"
     icon="lucide:file-text"
     title="Rewards Specification"
   />
   <Card
-    description="Distribute rewards to token holders"
+    description="Understand legacy rewards flows and claim already-accrued rewards"
     to="/docs/guide/issuance/distribute-rewards"
     icon="lucide:trending-up"
-    title="Guide: Distribute Rewards"
+    title="Guide: Legacy Rewards"
   />
 </Cards>

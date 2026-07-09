@@ -43,10 +43,10 @@ Below are some of the key benefits and features of TIP-20 tokens:
     title="Transfer Memos"
   />
   <Card
-    description="Opt-in reward distribution system for issuing rewards to token holders."
+    description="Deprecated reward distribution behavior and claim path for already-accrued rewards."
     to="#reward-distribution"
     icon="lucide:gift"
-    title="Reward Distribution"
+    title="Legacy Rewards"
   />
 </Cards>
 
@@ -131,9 +131,9 @@ TIP-20 tokens also have **pause/unpause** commands, which provide emergency cont
 
 **Transfer memos** enable you to attach 32-byte memos to transfers for payment references, invoice IDs, or transaction notes.
 
-### Reward Distribution
+### Legacy Reward Distribution
 
-TIP-20 supports an opt-in [reward distribution system](/docs/protocol/tip20-rewards/overview) that allows issuers to distribute rewards to token holders. Rewards can be claimed by holders or automatically forwarded to designated recipient addresses.
+TIP-20 rewards are deprecated after T7. New opt-ins and distributions are no-ops, while already-accrued rewards remain claimable. See [Tempo Token Rewards](/docs/protocol/tip20-rewards/overview) for the legacy behavior and claim path.
 
 ### Currency Declaration
 

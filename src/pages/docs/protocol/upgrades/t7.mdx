@@ -1,6 +1,6 @@
 ---
 title: T7 Network Upgrade
-description: Partner-focused overview and rollout dates for the T7 network upgrade, including storage savings, payment-channel savings, dynamic base fee behavior, and TIP-20 rewards deprecation.
+description: Partner-focused overview and activation status for the T7 network upgrade, including storage savings, payment-channel savings, dynamic base fee behavior, and TIP-20 rewards deprecation.
 ---
 
 import { T7BenchmarkVisual } from '../../../../components/T7BenchmarkVisual'
@@ -12,7 +12,7 @@ T7 makes repeated onchain workflows cheaper. It adds storage savings for DEX ord
 Apps with repeat contract workflows can pass meaningful gas savings to returning users, MPP sessions can reuse channel-state savings for the same payer, and all users can benefit from lower base fees during quieter network periods.
 
 :::info[T7 status]
-T7 is live on testnet. Mainnet rollout is planned for July 9, 2026. Release [v1.10.1](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1) is required for T7; see the [Network Upgrades and Releases table](/docs/guide/node/network-upgrades#node-operator-updates) for the current node-operator release status.
+T7 is active on testnet and mainnet. Release [v1.10.1](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1) is required for T7; see the [Network Upgrades and Releases table](/docs/guide/node/network-upgrades#node-operator-updates) for the current node-operator release status.
 :::
 
 ## Timeline
@@ -20,7 +20,7 @@ T7 is live on testnet. Mainnet rollout is planned for July 9, 2026. Release [v1.
 | Milestone | Date |
 |-----------|------|
 | Testnet rollout | Live: July 2, 2026 |
-| Mainnet rollout | Planned: July 9, 2026 |
+| Mainnet rollout | Live: July 9, 2026 |
 
 ## Overview
 
@@ -41,7 +41,7 @@ These changes make costs easier to reason about for partners building high-throu
 | Active DEX makers can benefit on repeat order placement | Maker-attributed storage credits let reusable order-storage savings stay attached to the maker who earned them. |
 | Apps can avoid random gas discounts | Shared contracts can track which user earned credits and spend them only for that same user. |
 | MPP sessions can get cheaper over repeated channel lifecycles | The credited reopen path, `open_new_channel_with_storage_credit`, is 60,225 gas in the channel-reserve gas snapshot. |
-| All integrators get a simpler low-fee story | The new base fee cap is 40% lower than today's fixed base fee, and quiet periods can be up to 20x cheaper than the cap. |
+| All integrators get a simpler low-fee story | The T7 base fee cap is 40% lower than the pre-T7 fixed base fee, and quiet periods can be up to 20x cheaper than the cap. |
 
 ## Features
 
@@ -73,16 +73,16 @@ Read [Accept pay-as-you-go payments](/docs/guide/machine-payments/pay-as-you-go)
 
 ### Dynamic base fee
 
-T7 replaces the fixed base fee with a bounded dynamic base fee. The new cap is 40% lower than the current fixed fee. When block gas usage is below target, the base fee can fall toward a floor that is one twentieth of the cap.
+T7 replaces the fixed base fee with a bounded dynamic base fee. The cap is 40% lower than the pre-T7 fixed fee. When block gas usage is below target, the base fee can fall toward a floor that is one twentieth of the cap.
 
 For a simple fee example, a 50,000 gas transfer costs about $0.0006 at the new cap and about $0.00003 at the floor.
 
-| Example transaction | Today's fixed fee | T7 cap | T7 quiet-period floor |
+| Example transaction | Pre-T7 fixed fee | T7 cap | T7 quiet-period floor |
 |---------------------|------------------:|-------:|----------------------:|
 | 50,000 gas transfer | $0.0010 | $0.0006 | $0.00003 |
 | 1,000,000 gas transaction | $0.0200 | $0.0120 | $0.0006 |
 
-At the quiet-period floor, the same transaction is 20x cheaper than the T7 cap and about 33x cheaper than today's fixed fee. The base fee starts at the cap at activation and moves with block usage.
+At the quiet-period floor, the same transaction is 20x cheaper than the T7 cap and about 33x cheaper than the pre-T7 fixed fee. After activation, the base fee moves with block usage within the T7 cap and floor.
 
 ### Deprecate TIP-20 rewards
 
@@ -144,8 +144,8 @@ Release notes and binaries are available in the [v1.10.1 release](https://github
 
 Wallets, checkout flows, and infrastructure that display fees should expect the base fee to move instead of staying fixed.
 
-- The base fee starts at the cap at activation.
-- Fees can fall when block gas usage is below target.
+- Fees can fall when block gas usage is below target and rise back toward the cap when usage increases.
+- Fee estimators should handle movement between the floor and cap.
 - Fee analytics should compare pre-T7 fixed-fee periods separately from post-T7 dynamic-fee periods.
 
 ### For TIP-20 rewards deprecation
