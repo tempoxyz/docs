@@ -1,0 +1,39 @@
+<svg width="840" height="517" viewBox="0 0 520 320" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="var(--font-jetbrains-mono), ui-monospace, monospace">
+  <rect width="520" height="320" fill="var(--surface-shell)"/>
+
+  <text x="24" y="34" font-size="10.5" fill="var(--foreground)" opacity="0.9" letter-spacing="0.16em">CREDITS STAY WITH THEIR OWNER</text>
+  <text x="24" y="52" font-size="7.8" fill="var(--foreground)" opacity="0.42" letter-spacing="0.14em">SHARED CONTRACTS CAN TRACK CREDITS PER MAKER OR PAYER</text>
+
+  <rect x="24" y="112" width="112" height="54" fill="#58b88a" opacity="0.16" stroke="#58b88a"/>
+  <text x="80" y="135" font-size="8.8" fill="#58b88a" opacity="0.96" letter-spacing="0.12em" text-anchor="middle">MAKER A</text>
+  <text x="80" y="152" font-size="6.4" fill="#58b88a" opacity="0.72" letter-spacing="0.1em" text-anchor="middle">CLEARS ORDER</text>
+
+  <rect x="24" y="214" width="112" height="54" fill="var(--surface-block)" stroke="var(--line-strong)"/>
+  <text x="80" y="237" font-size="8.8" fill="var(--foreground)" opacity="0.78" letter-spacing="0.12em" text-anchor="middle">MAKER B</text>
+  <text x="80" y="254" font-size="6.4" fill="var(--foreground)" opacity="0.4" letter-spacing="0.1em" text-anchor="middle">PLACES ORDER</text>
+
+  <rect x="384" y="112" width="112" height="54" fill="#58b88a" opacity="0.16" stroke="#58b88a"/>
+  <text x="440" y="135" font-size="8.8" fill="#58b88a" opacity="0.96" letter-spacing="0.12em" text-anchor="middle">NEXT ORDER</text>
+  <text x="440" y="152" font-size="6.4" fill="#58b88a" opacity="0.72" letter-spacing="0.1em" text-anchor="middle">98% OFFSET</text>
+
+  <rect x="384" y="214" width="112" height="54" fill="var(--surface-block)" stroke="var(--line-strong)"/>
+  <text x="440" y="237" font-size="8.8" fill="var(--foreground)" opacity="0.78" letter-spacing="0.12em" text-anchor="middle">NEW ORDER</text>
+  <text x="440" y="254" font-size="6.4" fill="var(--foreground)" opacity="0.4" letter-spacing="0.1em" text-anchor="middle">FULL COST</text>
+
+  <rect x="174" y="92" width="172" height="142" fill="var(--surface-block)" stroke="var(--line-strong)"/>
+  <text x="192" y="119" font-size="8.8" fill="var(--foreground)" opacity="0.84" letter-spacing="0.12em">SHARED CONTRACT</text>
+  <text x="192" y="136" font-size="6.5" fill="var(--foreground)" opacity="0.4" letter-spacing="0.12em">CREDITS PER USER</text>
+  <line x1="192" y1="150" x2="328" y2="150" stroke="var(--line-strong)"/>
+  <rect x="192" y="168" width="136" height="34" fill="#58b88a" opacity="0.16" stroke="#58b88a"/>
+  <text x="260" y="189" font-size="8.4" fill="#58b88a" opacity="0.92" letter-spacing="0.13em" text-anchor="middle">A CREDIT</text>
+
+  <path class="diagram-flow" d="M136 139H174" stroke="#58b88a" stroke-width="2" fill="none"/>
+  <path class="diagram-flow" d="M346 139H384" stroke="#58b88a" stroke-width="2" fill="none"/>
+  <text x="154" y="126" font-size="6.2" fill="#58b88a" opacity="0.72" letter-spacing="0.1em" text-anchor="middle">EARNS</text>
+  <text x="365" y="126" font-size="6.2" fill="#58b88a" opacity="0.72" letter-spacing="0.1em" text-anchor="middle">USES OWN</text>
+
+  <line x1="136" y1="241" x2="384" y2="241" stroke="var(--line-strong)" stroke-width="2" stroke-dasharray="4 4" opacity="0.68"/>
+  <line x1="254" y1="235" x2="266" y2="247" stroke="var(--foreground)" stroke-width="1.5" opacity="0.48"/>
+  <line x1="266" y1="235" x2="254" y2="247" stroke="var(--foreground)" stroke-width="1.5" opacity="0.48"/>
+  <text x="260" y="263" font-size="6.1" fill="var(--foreground)" opacity="0.42" letter-spacing="0.1em" text-anchor="middle">NOT SHAREABLE</text>
+</svg>

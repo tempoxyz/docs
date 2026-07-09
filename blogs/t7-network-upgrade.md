@@ -31,6 +31,10 @@ Many payment and liquidity workflows follow the same lifecycle: create state, cl
 
 Storage credits change that. When a contract clears eligible storage, it earns a credit, and when it later creates eligible storage, the credit offsets roughly 98% of the cost.
 
+![A diagram showing a contract creating, clearing, then recreating eligible storage, using a storage credit to offset the next storage creation cost.](/blog/t7-storage-credit-cycle.svg)
+
+*Storage credits reduce the cost of the next eligible storage creation in the same contract.*
+
 The savings are targeted rather than a blanket gas discount: they apply where a workflow repeatedly creates and clears temporary state. For apps with repeat contract workflows, this means meaningful gas savings can be passed to returning users.
 
 Read the specification for [storage credits](https://tips.sh/1060).
@@ -38,6 +42,10 @@ Read the specification for [storage credits](https://tips.sh/1060).
 ## Per-user credits for DEX orders and payment channels
 
 Shared contracts introduce an attribution problem. If a contract earns credits from many users' activity, the next storage write spends those credits regardless of who earned them, and the savings land on the wrong users. T7 solves this with per-user accounting in the two places where the lifecycle pattern shows up most: credits stay with the user who earned them.
+
+![A diagram showing a shared contract keeping a storage credit with Maker A, so Maker B cannot use it and Maker A receives the offset on the next order.](/blog/t7-storage-credit-attribution.svg)
+
+*Shared contracts can allocate storage-credit savings to the maker, payer, or account that earned them.*
 
 On the StablecoinDEX, credits are tracked per maker. When a maker cancels or fully fills an eligible order, the savings stay attached to that maker and apply the next time they place an eligible order. Active makers pay less on repeat order placement, and no one can spend savings another maker earned.
 

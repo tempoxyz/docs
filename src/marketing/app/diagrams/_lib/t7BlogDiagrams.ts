@@ -82,3 +82,54 @@ export const t7DynamicBaseFeeResponseSpec: FeatureDiagramSpec = {
   ],
   caption: '',
 }
+
+export const t7StorageCreditCycleSpec: FeatureDiagramSpec = {
+  kind: 'storageCreditCycle',
+  title: 'STORAGE CREDITS REUSE LIFECYCLE SAVINGS',
+  subtitle: 'CLEAR ELIGIBLE STATE, THEN REDUCE THE NEXT ELIGIBLE WRITE',
+  create: {
+    label: 'CREATE',
+    detail: 'ELIGIBLE STATE',
+  },
+  clear: {
+    label: 'CLEAR',
+    detail: 'ELIGIBLE STATE',
+  },
+  credit: {
+    label: 'STORAGE CREDIT',
+    detail: 'EARNED',
+  },
+  reuse: {
+    label: 'CREATE AGAIN',
+    detail: '98% COST OFFSET',
+  },
+  sameContractLabel: 'SAME CONTRACT',
+  caption: '',
+}
+
+export const t7StorageCreditAttributionSpec: FeatureDiagramSpec = {
+  kind: 'storageCreditAttribution',
+  title: 'CREDITS STAY WITH THEIR OWNER',
+  subtitle: 'SHARED CONTRACTS CAN TRACK CREDITS PER MAKER OR PAYER',
+  owner: {
+    label: 'MAKER A',
+    detail: 'CLEARS ORDER',
+  },
+  other: {
+    label: 'MAKER B',
+    detail: 'PLACES ORDER',
+  },
+  ledgerLabel: 'SHARED CONTRACT',
+  ledgerDetail: 'CREDITS PER USER',
+  creditLabel: 'A CREDIT',
+  reuse: {
+    label: 'NEXT ORDER',
+    detail: '98% OFFSET',
+  },
+  otherOutcome: {
+    label: 'NEW ORDER',
+    detail: 'FULL COST',
+  },
+  blockedLabel: 'NOT SHAREABLE',
+  caption: '',
+}
