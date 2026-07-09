@@ -86,7 +86,6 @@ download_og "Send Parallel Transactions" "BUILD" "PAYMENTS" "build--payments--pa
 download_og "Create a Stablecoin" "BUILD" "ISSUANCE" "build--issuance--create"
 download_og "Mint Stablecoins" "BUILD" "ISSUANCE" "build--issuance--mint"
 download_og "Use Your Stablecoin for Fees" "BUILD" "ISSUANCE" "build--issuance--use-for-fees"
-download_og "Distribute Rewards" "BUILD" "ISSUANCE" "build--issuance--distribute-rewards"
 download_og "Manage Your Stablecoin" "BUILD" "ISSUANCE" "build--issuance--manage"
 
 download_og "Managing Fee Liquidity" "BUILD" "EXCHANGE" "build--exchange--fee-liquidity"
@@ -103,7 +102,6 @@ download_og "Accept Streamed Payments" "BUILD" "MACHINE PAY" "build--machine-pay
 
 download_og "Specification" "PROTOCOL" "TIP-20" "protocol--tip20--spec"
 download_og "Overview" "PROTOCOL" "TIP-20" "protocol--tip20--overview"
-download_og "Specification" "PROTOCOL" "TIP-20 REWARDS" "protocol--tip20-rewards--spec"
 download_og "Specification" "PROTOCOL" "TIP-403" "protocol--tip403--spec"
 download_og "Specification" "PROTOCOL" "FEES" "protocol--fees--spec"
 download_og "Fee AMM" "PROTOCOL" "FEES" "protocol--fees--fee-amm"
