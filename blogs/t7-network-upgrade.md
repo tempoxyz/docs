@@ -11,7 +11,15 @@ category: network-upgrades
 
 T7 replaces Tempo's fixed base fee with a bounded dynamic base fee. The new cap is 40% lower than the current fixed fee, and when block gas usage is below target, the fee can fall toward a floor set at one twentieth of the cap. The fee never exceeds the cap, so integrators keep a hard ceiling on per-transaction costs while gaining the upside of cheaper quiet periods.
 
+![A diagram comparing today's fixed fee, the T7 cap, and the T7 floor for a 50,000 gas TIP-20 transfer.](/blog/t7-dynamic-base-fee-range.svg)
+
+*T7 keeps a hard cap on the base fee while allowing lower fees during quiet periods.*
+
 As an example, the typical gas for a TIP-20 token transfer between two existing users (~50,000 gas) now costs about $0.0006 at the new cap and about $0.00003 at the quiet-period floor, compared to $0.001 today. At the floor, that transfer is therefore about 33x cheaper than today's fixed fee.
+
+![A diagram showing the base fee falling when block usage is below target and rising back toward the cap as usage increases.](/blog/t7-dynamic-base-fee-response.svg)
+
+*The cap and floor are fixed bounds. The live base fee moves inside that range as block usage changes.*
 
 The base fee starts at the cap at activation and moves with block usage. For wallets, checkout flows, and infrastructure that display fees, this means expecting the base fee to move rather than stay fixed, and comparing pre-T7 fixed-fee periods separately from post-T7 dynamic-fee periods in fee analytics.
 

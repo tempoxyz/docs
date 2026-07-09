@@ -11,6 +11,8 @@ import {
   type FeatureDiagramSpec,
   type FeeAmmSpec,
   type FeeAmmToken,
+  type FeeRangeSpec,
+  type FeeResponseSpec,
   type ForwardSpec,
   type GateSpec,
   type HubSpec,
@@ -27,6 +29,7 @@ const markPath =
   'M5.03996 14.8395H1.03534L4.74694 3.36361H0L1.03534 0H14.2604L13.225 3.36361H8.73202L5.03996 14.8395Z'
 
 const color = (accent: number) => PALETTE[accent % PALETTE.length]
+const clamp01 = (value: number) => Math.min(Math.max(value, 0), 1)
 
 function NodeCard({
   x,
@@ -1071,6 +1074,278 @@ function FeeAmmShape({ spec }: { spec: FeeAmmSpec }) {
   )
 }
 
+// ── fee range ───────────────────────────────────────────────────────────────
+// T7's base fee is bounded: the cap is lower than the previous fixed fee, and
+// the live base fee can fall toward the floor when the network is quiet.
+const FR_CHART_X = 54
+const FR_CHART_TOP = 86
+const FR_BASE_Y = 248
+const FR_BAR_MAX_H = 148
+const FR_BAR_W = 78
+const FR_BAR_START_X = 70
+const FR_BAR_STEP = 120
+function FeeRangeShape({ spec }: { spec: FeeRangeSpec }) {
+  const pointForRatio = (ratio: number) => FR_BASE_Y - FR_BAR_MAX_H * clamp01(ratio)
+  const capY = pointForRatio(spec.markers[1]?.ratio ?? 0.6)
+  const floorY = pointForRatio(spec.markers[2]?.ratio ?? 0.03)
+  const rangeX = 436
+  return (
+    <>
+      <Label x={24} y={34} size={10.5} tracking={0.16} opacity={0.9}>
+        {spec.title}
+      </Label>
+      <Label x={24} y={52} size={7.8} tracking={0.14} opacity={0.42}>
+        {spec.subtitle}
+      </Label>
+
+      <g opacity="0.55">
+        <line
+          x1={FR_CHART_X}
+          y1={FR_CHART_TOP}
+          x2="420"
+          y2={FR_CHART_TOP}
+          stroke="var(--line-strong)"
+        />
+        <line x1={FR_CHART_X} y1={166} x2="420" y2={166} stroke="var(--line-strong)" />
+        <line x1={FR_CHART_X} y1={FR_BASE_Y} x2="420" y2={FR_BASE_Y} stroke="var(--line-strong)" />
+      </g>
+      <Label x={24} y={FR_CHART_TOP + 4} size={7.2} tracking={0.12} opacity={0.36}>
+        TODAY
+      </Label>
+      <Label x={24} y={FR_BASE_Y + 4} size={7.2} tracking={0.12} opacity={0.36}>
+        FLOOR
+      </Label>
+
+      {spec.markers.map((marker, i) => {
+        const x = FR_BAR_START_X + i * FR_BAR_STEP
+        const h = Math.max(4, FR_BAR_MAX_H * clamp01(marker.ratio))
+        const y = FR_BASE_Y - h
+        const cx = x + FR_BAR_W / 2
+        const fill = marker.muted ? 'var(--surface-block)' : color(marker.accent)
+        return (
+          <g key={marker.label} opacity={marker.muted ? 0.58 : 1}>
+            <Label
+              x={cx}
+              y={y - 12}
+              size={8.8}
+              tracking={0.08}
+              opacity={marker.muted ? 0.48 : 0.92}
+              fill={marker.muted ? 'var(--foreground)' : color(marker.accent)}
+              anchor="middle"
+            >
+              {marker.value}
+            </Label>
+            <rect
+              x={x}
+              y={y}
+              width={FR_BAR_W}
+              height={h}
+              fill={fill}
+              opacity={marker.muted ? 1 : 0.22}
+              stroke={marker.muted ? 'var(--line-strong)' : color(marker.accent)}
+            />
+            {!marker.muted && (
+              <rect x={x} y={y} width={FR_BAR_W} height="4" fill={color(marker.accent)} />
+            )}
+            <Label
+              x={cx}
+              y={FR_BASE_Y + 23}
+              size={8.2}
+              tracking={0.12}
+              opacity={0.68}
+              anchor="middle"
+            >
+              {marker.label}
+            </Label>
+            <Label
+              x={cx}
+              y={FR_BASE_Y + 39}
+              size={6.8}
+              tracking={0.1}
+              opacity={0.38}
+              anchor="middle"
+            >
+              {marker.detail}
+            </Label>
+          </g>
+        )
+      })}
+
+      <path
+        d={`M${rangeX} ${capY}V${floorY}`}
+        stroke={color(spec.rangeAccent)}
+        strokeWidth="2"
+        fill="none"
+      />
+      <line
+        x1={rangeX - 12}
+        y1={capY}
+        x2={rangeX + 12}
+        y2={capY}
+        stroke={color(spec.rangeAccent)}
+        strokeWidth="2"
+      />
+      <line
+        x1={rangeX - 12}
+        y1={floorY}
+        x2={rangeX + 12}
+        y2={floorY}
+        stroke={color(spec.rangeAccent)}
+        strokeWidth="2"
+      />
+      <Label
+        x={400}
+        y={capY - 14}
+        size={7.6}
+        tracking={0.14}
+        opacity={0.85}
+        fill={color(spec.rangeAccent)}
+        anchor="middle"
+      >
+        {spec.rangeLabel}
+      </Label>
+      <Label x={260} y={310} size={7.6} tracking={0.14} opacity={0.48} anchor="middle">
+        {spec.caption}
+      </Label>
+    </>
+  )
+}
+
+// ── fee response ────────────────────────────────────────────────────────────
+// Block usage controls the live base fee inside the bounded T7 range. Low usage
+// pushes the fee lower; rising usage moves it back toward the cap.
+const FEE_RESP_X = 58
+const FEE_RESP_W = 398
+const FEE_RESP_CAP_Y = 100
+const FEE_RESP_FLOOR_Y = 226
+function FeeResponseShape({ spec }: { spec: FeeResponseSpec }) {
+  const steps = spec.steps
+  const points = steps.map((step, i) => {
+    const x = FEE_RESP_X + (FEE_RESP_W * i) / Math.max(1, steps.length - 1)
+    const y = FEE_RESP_CAP_Y + (1 - clamp01(step.feeRatio)) * (FEE_RESP_FLOOR_Y - FEE_RESP_CAP_Y)
+    return { ...step, x, y }
+  })
+  const feePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x} ${p.y}`).join('')
+  const usageBaseY = 286
+  const usageTargetY = usageBaseY - 24
+  return (
+    <>
+      <Label x={24} y={34} size={10.5} tracking={0.16} opacity={0.9}>
+        {spec.title}
+      </Label>
+      <Label x={24} y={52} size={7.8} tracking={0.14} opacity={0.42}>
+        {spec.subtitle}
+      </Label>
+      <Label x={174} y={76} size={7.3} tracking={0.17} opacity={0.48} anchor="middle">
+        {spec.quietLabel}
+      </Label>
+      <Label x={370} y={76} size={7.3} tracking={0.17} opacity={0.48} anchor="middle">
+        {spec.busyLabel}
+      </Label>
+
+      <line
+        x1={FEE_RESP_X}
+        y1={FEE_RESP_CAP_Y}
+        x2={FEE_RESP_X + FEE_RESP_W}
+        y2={FEE_RESP_CAP_Y}
+        stroke="var(--line-strong)"
+      />
+      <line
+        x1={FEE_RESP_X}
+        y1={FEE_RESP_FLOOR_Y}
+        x2={FEE_RESP_X + FEE_RESP_W}
+        y2={FEE_RESP_FLOOR_Y}
+        stroke="var(--line-strong)"
+        strokeDasharray="4 4"
+        opacity="0.65"
+      />
+      <Label x={24} y={FEE_RESP_CAP_Y + 4} size={7.2} tracking={0.12} opacity={0.38}>
+        {spec.capLabel}
+      </Label>
+      <Label x={24} y={FEE_RESP_FLOOR_Y + 4} size={7.2} tracking={0.12} opacity={0.38}>
+        {spec.floorLabel}
+      </Label>
+
+      <path
+        className="diagram-flow"
+        d={feePath}
+        stroke={color(spec.accent)}
+        strokeWidth="2.5"
+        fill="none"
+      />
+      {points.map((point) => (
+        <g key={point.label}>
+          <circle cx={point.x} cy={point.y} r="4" fill={color(point.accent)} />
+          <Label
+            x={point.x}
+            y={point.y - 13}
+            size={6.6}
+            tracking={0.12}
+            opacity={0.55}
+            anchor="middle"
+          >
+            {point.detail}
+          </Label>
+        </g>
+      ))}
+
+      <line
+        x1={FEE_RESP_X}
+        y1={usageTargetY}
+        x2={FEE_RESP_X + FEE_RESP_W}
+        y2={usageTargetY}
+        stroke="var(--line-strong)"
+        strokeDasharray="3 3"
+        opacity="0.45"
+      />
+      <Label
+        x={FEE_RESP_X + FEE_RESP_W + 10}
+        y={usageTargetY + 3}
+        size={6.7}
+        tracking={0.12}
+        opacity={0.36}
+      >
+        {spec.targetLabel}
+      </Label>
+      {points.map((point) => {
+        const h = 6 + clamp01(point.usageRatio) * 36
+        return (
+          <g key={`u${point.label}`}>
+            <rect
+              x={point.x - 11}
+              y={usageBaseY - h}
+              width="22"
+              height={h}
+              fill={color(point.accent)}
+              opacity="0.2"
+            />
+            <rect
+              x={point.x - 11}
+              y={usageBaseY - h}
+              width="22"
+              height="3"
+              fill={color(point.accent)}
+            />
+            <Label
+              x={point.x}
+              y={usageBaseY + 18}
+              size={6.6}
+              tracking={0.1}
+              opacity={0.54}
+              anchor="middle"
+            >
+              {point.label}
+            </Label>
+          </g>
+        )
+      })}
+      <Label x={260} y={314} size={7.6} tracking={0.14} opacity={0.48} anchor="middle">
+        {spec.caption}
+      </Label>
+    </>
+  )
+}
+
 // ── sponsor ──────────────────────────────────────────────────────────────────
 // Fee sponsorship. The app signs the user's transaction as fee payer, the user
 // sends it, and Tempo executes the action while debiting the fee payer balance.
@@ -1748,6 +2023,10 @@ export default function FeatureDiagram({
           <BlockspaceShape spec={spec} />
         ) : spec.kind === 'feeamm' ? (
           <FeeAmmShape spec={spec} />
+        ) : spec.kind === 'feeRange' ? (
+          <FeeRangeShape spec={spec} />
+        ) : spec.kind === 'feeResponse' ? (
+          <FeeResponseShape spec={spec} />
         ) : spec.kind === 'sponsor' ? (
           <SponsorShape spec={spec} />
         ) : spec.kind === 'batch' ? (

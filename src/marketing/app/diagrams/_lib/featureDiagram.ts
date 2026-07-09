@@ -165,6 +165,55 @@ export type FeeAmmSpec = {
   validator: FeeAmmParty
 }
 
+// Dynamic base fee range. A fixed pre-upgrade fee is compared with the T7 cap
+// and floor for the same transaction shape, showing that the base fee now moves
+// inside a bounded range rather than sitting at one value.
+export type FeeRangeMarker = {
+  accent: number
+  label: string
+  value: string
+  detail: string
+  // Relative to the pre-upgrade fixed fee. 1 means "today's fee", 0.6 is the T7
+  // cap, 0.03 is the quiet-period floor in the T7 blog example.
+  ratio: number
+  muted?: boolean
+}
+
+export type FeeRangeSpec = {
+  kind: 'feeRange'
+  title: string
+  subtitle: string
+  markers: FeeRangeMarker[]
+  rangeAccent: number
+  rangeLabel: string
+  caption: string
+}
+
+// Dynamic base fee response. Block usage samples drive a fee path between the
+// configured cap and floor, making the feedback loop visible without implying
+// that the cap itself moves.
+export type FeeResponseStep = {
+  accent: number
+  label: string
+  detail: string
+  feeRatio: number
+  usageRatio: number
+}
+
+export type FeeResponseSpec = {
+  kind: 'feeResponse'
+  title: string
+  subtitle: string
+  capLabel: string
+  floorLabel: string
+  targetLabel: string
+  quietLabel: string
+  busyLabel: string
+  accent: number
+  steps: FeeResponseStep[]
+  caption: string
+}
+
 // Fee sponsorship. A single Tempo Transaction can carry a fee-payer signature
 // from the app. The user sends the transaction, Tempo executes the action, and
 // the protocol debits the fee from the fee payer balance.
@@ -266,6 +315,8 @@ export type FeatureDiagramSpec =
   | NoncesSpec
   | BlockspaceSpec
   | FeeAmmSpec
+  | FeeRangeSpec
+  | FeeResponseSpec
   | SponsorSpec
   | BatchSpec
   | MemoSpec
