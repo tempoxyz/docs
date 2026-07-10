@@ -23,6 +23,10 @@ import {
   type NoncesSpec,
   rowCenters,
   type SponsorSpec,
+  type StorageCreditAttributionParty,
+  type StorageCreditAttributionSpec,
+  type StorageCreditCycleItem,
+  type StorageCreditCycleSpec,
 } from '../_lib/featureDiagram'
 
 const markPath =
@@ -1350,6 +1354,390 @@ function FeeResponseShape({ spec }: { spec: FeeResponseSpec }) {
   )
 }
 
+// ── storage credits ─────────────────────────────────────────────────────────
+// A storage credit follows the natural lifecycle of temporary state: create,
+// clear, then create again. The green route marks the credit-funded write.
+const SC_CYCLE_BOX_Y = 136
+const SC_CYCLE_BOX_W = 112
+const SC_CYCLE_BOX_H = 64
+const SC_CYCLE_CREATE_X = 40
+const SC_CYCLE_CLEAR_X = 204
+const SC_CYCLE_REUSE_X = 368
+const SC_CYCLE_CREDIT_X = 196
+const SC_CYCLE_CREDIT_Y = 236
+const SC_CYCLE_CREDIT_W = 136
+const SC_CYCLE_CREDIT_H = 28
+function StorageCreditCycleBox({
+  x,
+  item,
+  accent = false,
+}: {
+  x: number
+  item: StorageCreditCycleItem
+  accent?: boolean
+}) {
+  return (
+    <g>
+      <rect
+        x={x}
+        y={SC_CYCLE_BOX_Y}
+        width={SC_CYCLE_BOX_W}
+        height={SC_CYCLE_BOX_H}
+        fill={accent ? color(2) : 'var(--surface-block)'}
+        opacity={accent ? 0.16 : 1}
+        stroke={accent ? color(2) : 'var(--line-strong)'}
+      />
+      <Label
+        x={x + SC_CYCLE_BOX_W / 2}
+        y={SC_CYCLE_BOX_Y + 28}
+        size={9.2}
+        tracking={0.12}
+        opacity={accent ? 0.96 : 0.78}
+        fill={accent ? color(2) : 'var(--foreground)'}
+        anchor="middle"
+      >
+        {item.label}
+      </Label>
+      <Label
+        x={x + SC_CYCLE_BOX_W / 2}
+        y={SC_CYCLE_BOX_Y + 47}
+        size={6.7}
+        tracking={0.11}
+        opacity={accent ? 0.72 : 0.4}
+        fill={accent ? color(2) : 'var(--foreground)'}
+        anchor="middle"
+      >
+        {item.detail}
+      </Label>
+    </g>
+  )
+}
+
+function StorageCreditCycleShape({ spec }: { spec: StorageCreditCycleSpec }) {
+  const boxMidY = SC_CYCLE_BOX_Y + SC_CYCLE_BOX_H / 2
+  return (
+    <>
+      <Label x={24} y={34} size={10.5} tracking={0.16} opacity={0.9}>
+        {spec.title}
+      </Label>
+      <Label x={24} y={52} size={7.8} tracking={0.14} opacity={0.42}>
+        {spec.subtitle}
+      </Label>
+
+      <StorageCreditCycleBox x={SC_CYCLE_CREATE_X} item={spec.create} />
+      <StorageCreditCycleBox x={SC_CYCLE_CLEAR_X} item={spec.clear} />
+      <StorageCreditCycleBox x={SC_CYCLE_REUSE_X} item={spec.reuse} accent />
+
+      <line
+        x1={SC_CYCLE_CREATE_X + SC_CYCLE_BOX_W}
+        y1={boxMidY}
+        x2={SC_CYCLE_CLEAR_X}
+        y2={boxMidY}
+        stroke="var(--line-strong)"
+        strokeWidth="2"
+      />
+      <Label x={184} y={boxMidY - 14} size={6.5} tracking={0.11} opacity={0.38} anchor="middle">
+        THEN
+      </Label>
+
+      <path
+        className="diagram-flow"
+        d={`M${SC_CYCLE_CLEAR_X + SC_CYCLE_BOX_W / 2} ${SC_CYCLE_BOX_Y + SC_CYCLE_BOX_H}V${SC_CYCLE_CREDIT_Y}`}
+        stroke={color(2)}
+        strokeWidth="2"
+        fill="none"
+      />
+      <rect
+        x={SC_CYCLE_CREDIT_X}
+        y={SC_CYCLE_CREDIT_Y}
+        width={SC_CYCLE_CREDIT_W}
+        height={SC_CYCLE_CREDIT_H}
+        fill={color(2)}
+        opacity="0.16"
+        stroke={color(2)}
+      />
+      <Label
+        x={SC_CYCLE_CREDIT_X + SC_CYCLE_CREDIT_W / 2}
+        y={SC_CYCLE_CREDIT_Y + 12}
+        size={7.5}
+        tracking={0.14}
+        opacity={0.92}
+        fill={color(2)}
+        anchor="middle"
+      >
+        {spec.credit.label}
+      </Label>
+      <Label
+        x={SC_CYCLE_CREDIT_X + SC_CYCLE_CREDIT_W / 2}
+        y={SC_CYCLE_CREDIT_Y + 22}
+        size={6.2}
+        tracking={0.12}
+        opacity={0.64}
+        fill={color(2)}
+        anchor="middle"
+      >
+        {spec.credit.detail}
+      </Label>
+      <path
+        className="diagram-flow"
+        d={`M${SC_CYCLE_CREDIT_X + SC_CYCLE_CREDIT_W} ${SC_CYCLE_CREDIT_Y + SC_CYCLE_CREDIT_H / 2}C352 ${SC_CYCLE_CREDIT_Y + SC_CYCLE_CREDIT_H / 2} 348 ${boxMidY} ${SC_CYCLE_REUSE_X} ${boxMidY}`}
+        stroke={color(2)}
+        strokeWidth="2"
+        fill="none"
+      />
+      <Label
+        x={352}
+        y={boxMidY + 35}
+        size={6.5}
+        tracking={0.11}
+        opacity={0.72}
+        fill={color(2)}
+        anchor="middle"
+      >
+        REUSE
+      </Label>
+      <Label x={260} y={294} size={6.8} tracking={0.16} opacity={0.4} anchor="middle">
+        {spec.sameContractLabel}
+      </Label>
+      {spec.caption && (
+        <Label x={260} y={312} size={7.6} tracking={0.14} opacity={0.48} anchor="middle">
+          {spec.caption}
+        </Label>
+      )}
+    </>
+  )
+}
+
+// A shared contract keeps the reusable credit with the participant who earned
+// it, so one maker or payer cannot spend another participant's savings.
+const SC_ATTR_CARD_W = 112
+const SC_ATTR_CARD_H = 54
+const SC_ATTR_LEFT_X = 24
+const SC_ATTR_RIGHT_X = 384
+const SC_ATTR_OWNER_Y = 112
+const SC_ATTR_OTHER_Y = 214
+const SC_ATTR_LEDGER_X = 174
+const SC_ATTR_LEDGER_Y = 92
+const SC_ATTR_LEDGER_W = 172
+const SC_ATTR_LEDGER_H = 142
+function StorageCreditAttributionCard({
+  x,
+  y,
+  item,
+  accent = false,
+}: {
+  x: number
+  y: number
+  item: StorageCreditCycleItem | StorageCreditAttributionParty
+  accent?: boolean
+}) {
+  return (
+    <g>
+      <rect
+        x={x}
+        y={y}
+        width={SC_ATTR_CARD_W}
+        height={SC_ATTR_CARD_H}
+        fill={accent ? color(2) : 'var(--surface-block)'}
+        opacity={accent ? 0.16 : 1}
+        stroke={accent ? color(2) : 'var(--line-strong)'}
+      />
+      <Label
+        x={x + SC_ATTR_CARD_W / 2}
+        y={y + 23}
+        size={8.8}
+        tracking={0.12}
+        opacity={accent ? 0.96 : 0.78}
+        fill={accent ? color(2) : 'var(--foreground)'}
+        anchor="middle"
+      >
+        {item.label}
+      </Label>
+      <Label
+        x={x + SC_ATTR_CARD_W / 2}
+        y={y + 40}
+        size={6.4}
+        tracking={0.1}
+        opacity={accent ? 0.72 : 0.4}
+        fill={accent ? color(2) : 'var(--foreground)'}
+        anchor="middle"
+      >
+        {item.detail}
+      </Label>
+    </g>
+  )
+}
+
+function StorageCreditAttributionShape({ spec }: { spec: StorageCreditAttributionSpec }) {
+  const ownerMidY = SC_ATTR_OWNER_Y + SC_ATTR_CARD_H / 2
+  const otherMidY = SC_ATTR_OTHER_Y + SC_ATTR_CARD_H / 2
+  const ledgerRight = SC_ATTR_LEDGER_X + SC_ATTR_LEDGER_W
+  return (
+    <>
+      <Label x={24} y={34} size={10.5} tracking={0.16} opacity={0.9}>
+        {spec.title}
+      </Label>
+      <Label x={24} y={52} size={7.8} tracking={0.14} opacity={0.42}>
+        {spec.subtitle}
+      </Label>
+
+      <StorageCreditAttributionCard
+        x={SC_ATTR_LEFT_X}
+        y={SC_ATTR_OWNER_Y}
+        item={spec.owner}
+        accent
+      />
+      <StorageCreditAttributionCard x={SC_ATTR_LEFT_X} y={SC_ATTR_OTHER_Y} item={spec.other} />
+      <StorageCreditAttributionCard
+        x={SC_ATTR_RIGHT_X}
+        y={SC_ATTR_OWNER_Y}
+        item={spec.reuse}
+        accent
+      />
+      <StorageCreditAttributionCard
+        x={SC_ATTR_RIGHT_X}
+        y={SC_ATTR_OTHER_Y}
+        item={spec.otherOutcome}
+      />
+
+      <rect
+        x={SC_ATTR_LEDGER_X}
+        y={SC_ATTR_LEDGER_Y}
+        width={SC_ATTR_LEDGER_W}
+        height={SC_ATTR_LEDGER_H}
+        fill="var(--surface-block)"
+        stroke="var(--line-strong)"
+      />
+      <Label
+        x={SC_ATTR_LEDGER_X + 18}
+        y={SC_ATTR_LEDGER_Y + 27}
+        size={8.8}
+        tracking={0.12}
+        opacity={0.84}
+      >
+        {spec.ledgerLabel}
+      </Label>
+      <Label
+        x={SC_ATTR_LEDGER_X + 18}
+        y={SC_ATTR_LEDGER_Y + 44}
+        size={6.5}
+        tracking={0.12}
+        opacity={0.4}
+      >
+        {spec.ledgerDetail}
+      </Label>
+      <line
+        x1={SC_ATTR_LEDGER_X + 18}
+        y1={SC_ATTR_LEDGER_Y + 58}
+        x2={ledgerRight - 18}
+        y2={SC_ATTR_LEDGER_Y + 58}
+        stroke="var(--line-strong)"
+      />
+      <rect
+        x={SC_ATTR_LEDGER_X + 18}
+        y={SC_ATTR_LEDGER_Y + 76}
+        width={SC_ATTR_LEDGER_W - 36}
+        height="34"
+        fill={color(2)}
+        opacity="0.16"
+        stroke={color(2)}
+      />
+      <Label
+        x={SC_ATTR_LEDGER_X + SC_ATTR_LEDGER_W / 2}
+        y={SC_ATTR_LEDGER_Y + 97}
+        size={8.4}
+        tracking={0.13}
+        opacity={0.92}
+        fill={color(2)}
+        anchor="middle"
+      >
+        {spec.creditLabel}
+      </Label>
+
+      <path
+        className="diagram-flow"
+        d={`M${SC_ATTR_LEFT_X + SC_ATTR_CARD_W} ${ownerMidY}H${SC_ATTR_LEDGER_X}`}
+        stroke={color(2)}
+        strokeWidth="2"
+        fill="none"
+      />
+      <path
+        className="diagram-flow"
+        d={`M${ledgerRight} ${ownerMidY}H${SC_ATTR_RIGHT_X}`}
+        stroke={color(2)}
+        strokeWidth="2"
+        fill="none"
+      />
+      <Label
+        x={154}
+        y={ownerMidY - 13}
+        size={6.2}
+        tracking={0.1}
+        opacity={0.72}
+        fill={color(2)}
+        anchor="middle"
+      >
+        EARNS
+      </Label>
+      <Label
+        x={365}
+        y={ownerMidY - 13}
+        size={6.2}
+        tracking={0.1}
+        opacity={0.72}
+        fill={color(2)}
+        anchor="middle"
+      >
+        USES OWN
+      </Label>
+
+      <line
+        x1={SC_ATTR_LEFT_X + SC_ATTR_CARD_W}
+        y1={otherMidY}
+        x2={SC_ATTR_RIGHT_X}
+        y2={otherMidY}
+        stroke="var(--line-strong)"
+        strokeWidth="2"
+        strokeDasharray="4 4"
+        opacity="0.68"
+      />
+      <line
+        x1={SC_ATTR_LEDGER_X + SC_ATTR_LEDGER_W / 2 - 6}
+        y1={otherMidY - 6}
+        x2={SC_ATTR_LEDGER_X + SC_ATTR_LEDGER_W / 2 + 6}
+        y2={otherMidY + 6}
+        stroke="var(--foreground)"
+        strokeWidth="1.5"
+        opacity="0.48"
+      />
+      <line
+        x1={SC_ATTR_LEDGER_X + SC_ATTR_LEDGER_W / 2 + 6}
+        y1={otherMidY - 6}
+        x2={SC_ATTR_LEDGER_X + SC_ATTR_LEDGER_W / 2 - 6}
+        y2={otherMidY + 6}
+        stroke="var(--foreground)"
+        strokeWidth="1.5"
+        opacity="0.48"
+      />
+      <Label
+        x={SC_ATTR_LEDGER_X + SC_ATTR_LEDGER_W / 2}
+        y={otherMidY + 22}
+        size={6.1}
+        tracking={0.1}
+        opacity={0.42}
+        anchor="middle"
+      >
+        {spec.blockedLabel}
+      </Label>
+      {spec.caption && (
+        <Label x={260} y={310} size={7.6} tracking={0.14} opacity={0.48} anchor="middle">
+          {spec.caption}
+        </Label>
+      )}
+    </>
+  )
+}
+
 // ── sponsor ──────────────────────────────────────────────────────────────────
 // Fee sponsorship. The app signs the user's transaction as fee payer, the user
 // sends it, and Tempo executes the action while debiting the fee payer balance.
@@ -2031,6 +2419,10 @@ export default function FeatureDiagram({
           <FeeRangeShape spec={spec} />
         ) : spec.kind === 'feeResponse' ? (
           <FeeResponseShape spec={spec} />
+        ) : spec.kind === 'storageCreditCycle' ? (
+          <StorageCreditCycleShape spec={spec} />
+        ) : spec.kind === 'storageCreditAttribution' ? (
+          <StorageCreditAttributionShape spec={spec} />
         ) : spec.kind === 'sponsor' ? (
           <SponsorShape spec={spec} />
         ) : spec.kind === 'batch' ? (

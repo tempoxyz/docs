@@ -214,6 +214,47 @@ export type FeeResponseSpec = {
   caption: string
 }
 
+// Storage credits. Clearing eligible state earns a credit for the same
+// contract, which can offset most of the next eligible storage creation.
+export type StorageCreditCycleItem = {
+  label: string
+  detail: string
+}
+
+export type StorageCreditCycleSpec = {
+  kind: 'storageCreditCycle'
+  title: string
+  subtitle: string
+  create: StorageCreditCycleItem
+  clear: StorageCreditCycleItem
+  credit: StorageCreditCycleItem
+  reuse: StorageCreditCycleItem
+  sameContractLabel: string
+  caption: string
+}
+
+// Shared contracts can maintain a separate balance for every participant, so
+// a credit cannot be spent by the next user to interact with the contract.
+export type StorageCreditAttributionParty = {
+  label: string
+  detail: string
+}
+
+export type StorageCreditAttributionSpec = {
+  kind: 'storageCreditAttribution'
+  title: string
+  subtitle: string
+  owner: StorageCreditAttributionParty
+  other: StorageCreditAttributionParty
+  ledgerLabel: string
+  ledgerDetail: string
+  creditLabel: string
+  reuse: StorageCreditCycleItem
+  otherOutcome: StorageCreditCycleItem
+  blockedLabel: string
+  caption: string
+}
+
 // Fee sponsorship. A single Tempo Transaction can carry a fee-payer signature
 // from the app. The user sends the transaction, Tempo executes the action, and
 // the protocol debits the fee from the fee payer balance.
@@ -317,6 +358,8 @@ export type FeatureDiagramSpec =
   | FeeAmmSpec
   | FeeRangeSpec
   | FeeResponseSpec
+  | StorageCreditCycleSpec
+  | StorageCreditAttributionSpec
   | SponsorSpec
   | BatchSpec
   | MemoSpec
