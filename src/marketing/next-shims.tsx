@@ -1,24 +1,17 @@
-import {
-  type AnchorHTMLAttributes,
-  type ImgHTMLAttributes,
-  type ReactNode,
-  useContext,
-} from 'react'
-import { Link as WakuLink } from 'waku'
-import { unstable_RouterContext as WakuRouterContext } from 'waku/router/client'
+import type { AnchorHTMLAttributes, ImgHTMLAttributes, ReactNode } from 'react'
 
 export type Metadata = Record<string, unknown>
 
 type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
-  href?: string
+  href: string
   children?: ReactNode
 }
 
 const prefetchedPaths = new Set<string>()
 
-function prefetchPath(href: unknown) {
+function prefetchPath(href: string) {
   if (typeof document === 'undefined') return
-  if (typeof href !== 'string' || !href.startsWith('/') || prefetchedPaths.has(href)) return
+  if (!href.startsWith('/') || prefetchedPaths.has(href)) return
   prefetchedPaths.add(href)
 
   const link = document.createElement('link')
@@ -28,39 +21,7 @@ function prefetchPath(href: unknown) {
   document.head.appendChild(link)
 }
 
-export function isClientRoutedBlogHref(href: unknown): href is string {
-  if (typeof href !== 'string') return false
-
-  return (
-    href === '/blog' ||
-    href.startsWith('/blog/') ||
-    href === '/developers/blog' ||
-    href.startsWith('/developers/blog/')
-  )
-}
-
 export default function Link({ href, children, onFocus, onPointerEnter, ...props }: LinkProps) {
-  const router = useContext(WakuRouterContext)
-
-  if (router && isClientRoutedBlogHref(href)) {
-    return (
-      <WakuLink
-        {...props}
-        to={href}
-        onFocus={(event) => {
-          prefetchPath(href)
-          onFocus?.(event)
-        }}
-        onPointerEnter={(event) => {
-          prefetchPath(href)
-          onPointerEnter?.(event)
-        }}
-      >
-        {children}
-      </WakuLink>
-    )
-  }
-
   return (
     <a
       {...props}
