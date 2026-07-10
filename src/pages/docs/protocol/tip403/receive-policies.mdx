@@ -8,7 +8,7 @@ import { MermaidDiagram } from '../../../../components/MermaidDiagram'
 
 # Receive Policies
 
-Receive policies let a receiver control which [TIP-20](/docs/protocol/tip20/overview) tokens it accepts and which senders may send those tokens to it. This page summarizes the protocol behavior from [TIP-1028](https://tips.sh/1028).
+Receive policies let a receiver control which [TIP-20](/docs/protocol/tip20/overview) tokens it accepts and which senders may send those tokens to it. This page summarizes the protocol behavior from the [specification](https://tips.sh/1028).
 
 When a receive policy blocks an inbound TIP-20 transfer or mint, the call still succeeds. Delivery is redirected to `ReceivePolicyGuard`, and the guard records a receipt for that blocked transfer or mint. The token's [TIP-403](/docs/protocol/tip403/spec) policy checks still run first and still revert on failure.
 
@@ -76,7 +76,7 @@ The recovery authority controls who can claim future blocked receipts:
 | receiver address | the receiver |
 | another nonzero address | that address |
 
-Nonzero recovery authorities must not be `ReceivePolicyGuard`, [TIP-1022](https://tips.sh/1022) virtual addresses, or system precompile addresses that cannot initiate calls. A virtual address must not call `setReceivePolicy(...)`; configure the resolved master address instead.
+Nonzero recovery authorities must not be `ReceivePolicyGuard`, [virtual addresses](/docs/protocol/tip20/virtual-addresses), or system precompile addresses that cannot initiate calls. A virtual address must not call `setReceivePolicy(...)`; configure the resolved master address instead.
 
 If no receive policy is set, all transfers and mints are allowed by the receive-policy layer.
 
@@ -126,7 +126,7 @@ A claim resumes the original inbound when `recoveryAuthority != address(0)` and 
 
 A resume claim does not recheck the receiver's receive policy. It still requires the receiver to be currently authorized under the token's TIP-403 policy as the destination of the release.
 
-For blocked TIP-1022 transfers to a virtual address, the receiver is the resolved master, so a resume releases directly to the master.
+For blocked transfers to a virtual address, the receiver is the resolved master, so a resume releases directly to the master.
 
 ### Reroute claims
 
@@ -135,7 +135,7 @@ All other claims are reroutes, including every originator-authorized claim.
 A reroute must:
 
 - reject `to == ReceivePolicyGuard`
-- resolve `to` if it is a TIP-1022 virtual address, or revert if resolution fails
+- resolve `to` if it is a virtual address, or revert if resolution fails
 - require the policy subject to be authorized as a sender under the token's TIP-403 policy
 - require the resolved destination to be authorized as a recipient under the token's TIP-403 policy
 - require the resolved destination's receive policy to accept the policy subject as sender
@@ -207,7 +207,7 @@ event ReceiptBurned(
 
 <Cards>
   <Card
-    title="TIP-1028"
+    title="Receive policies specification"
     description="Approved specification for address-level receive policies."
     to="https://tips.sh/1028"
     icon="lucide:file-text"

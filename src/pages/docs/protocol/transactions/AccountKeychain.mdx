@@ -191,7 +191,7 @@ interface IAccountKeychain {
 - `key_authorization` includes an optional trailing `witness: bytes32` field. When present, the witness is included in the signing hash, checked against the account's burned-witness set, and emitted when the key authorization is registered. The protocol otherwise treats it as opaque and application-defined, so apps can bind a single access-key authorization signature to an offchain challenge.
 
 :::info[T6 behavior — SDK encoders/decoders]
-The [T6 network upgrade](/docs/protocol/upgrades/t6) added **admin access keys** ([TIP-1049](https://tips.sh/1049)). For partners maintaining transaction tooling, the wire-level change is two new trailing optional fields on the `KeyAuthorization` RLP payload:
+The [T6 network upgrade](/docs/protocol/upgrades/t6) added [admin access keys](/docs/protocol/upgrades/t6#admin-access-keys). For partners maintaining transaction tooling, the wire-level change is two new trailing optional fields on the `KeyAuthorization` RLP payload:
 
 ```text
 rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?])

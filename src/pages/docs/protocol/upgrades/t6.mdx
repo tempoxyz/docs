@@ -56,7 +56,7 @@ Practical benefits:
 
 Try the [receive policies demo](https://tempo.xyz/receive-policies) to see the credited, held, and recovery flow.
 
-Read the technical specification at [TIP-1028](https://tips.sh/1028).
+Read the [technical specification](https://tips.sh/1028).
 
 ### Admin access keys
 
@@ -72,7 +72,7 @@ Practical benefits:
 
 Admin keys are only for key management and admin verification. They can authorize and revoke other keys, but they cannot carry spending limits, call scopes, or expiry settings.
 
-Read the technical specification at [TIP-1049](https://tips.sh/1049).
+Read the [technical specification](https://tips.sh/1049).
 
 ## Compatible releases
 
@@ -110,7 +110,7 @@ For receivers and integrators, the operating flow is:
 - Blocked inbound `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `systemTransferFrom`, `mint`, and `mintWithMemo` calls still succeed, but delivery is redirected to `ReceivePolicyGuard` at `0xB10C000000000000000000000000000000000000`.
 - Senders observing a successful `Transfer` event from the host TIP-20 to `0xB10C000000000000000000000000000000000000` should not assume the receiver was credited. Wallets and accounting systems should read the guard receipt to track redirected funds.
 - Blocked-transfer receipts are not enumerable onchain. Wallets and dashboards that surface claimable funds need indexers that listen for the `TransferBlocked` event emitted by `ReceivePolicyGuard`.
-- TIP-1022 virtual addresses are resolved to the master address before any receive-policy check. Receipts are recorded against the master while preserving the original `to` for attribution.
+- Virtual addresses are resolved to the master address before any receive-policy check. Receipts are recorded against the master while preserving the original `to` for attribution.
 - `approve`, `permit`, and `burn` are unaffected. Fee deposits and refunds (`transfer_fee_pre_tx` / `transfer_fee_post_tx`) are also unaffected.
 
 ### For admin access keys
@@ -134,6 +134,6 @@ For account and app integrators, the operating flow is:
 - The `AuthorizedKey` packed storage slot gains a new `is_admin` boolean at byte 11.
 - Admin keys cannot carry spending limits, call scopes, or expiry. Authorizations that combine `admin = true` with non-default `enforceLimits`, `allowedCalls`, or `expiry` are rejected.
 - `AccountKeychain` adds `authorizeAdminKey(keyId, signatureType, witness)` for provisioning admin keys. The existing `KeyAuthorized` event is unchanged, and a new `AdminKeyAuthorized(account, publicKey)` event is emitted alongside it when `admin = true`.
-- TIP-1020 `SignatureVerifier` adds `verifyKeychain(account, digest, sig)` and `verifyKeychainAdmin(account, digest, sig)`. These methods combine signature recovery with key-status checks.
+- Signature verification through `SignatureVerifier` adds `verifyKeychain(account, digest, sig)` and `verifyKeychainAdmin(account, digest, sig)`. These methods combine signature recovery with key-status checks.
 - The RLP `KeyAuthorization` encoding gains an optional trailing `is_admin` flag and `account` field in the signed payload. SDK encoders and decoders should update in lockstep.
 - `verifyKeychainAdmin` does not bind the `account` argument into the signed `digest`. Callers should include a replay domain, such as chain ID, contract address, and account address, in the digest they ask users or keys to sign.

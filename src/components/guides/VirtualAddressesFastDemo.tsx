@@ -500,13 +500,13 @@ export function VirtualAddressesFastDemo() {
             </div>
           ) : registerMutation.isPending ? (
             <div className="mt-2 text-[13px] text-gray9 -tracking-[1%]">
-              This tab skips live mining and submits a pre-mined valid TIP-1022 salt for a
-              docs-managed wallet so you can get to the forwarding flow immediately.
+              This tab skips live mining and submits a pre-mined salt for a valid virtual address
+              and docs-managed wallet so you can get to the forwarding flow immediately.
             </div>
           ) : (
             <div className="mt-2 text-[13px] text-gray9 -tracking-[1%]">
               Click <span className="text-primary">Prepare demo master</span> to use a shared
-              docs-managed wallet with pre-mined valid TIP-1022 salt.
+              docs-managed wallet with a pre-mined salt for a valid virtual address.
             </div>
           )}
         </div>

@@ -232,7 +232,7 @@ TIP-20 tokens store the current TIP403 registry policy ID they adhere to in thei
 
 **Policy Changes:** When a token's transfer policy is changed via `changeTransferPolicyId()`, all future transfers are immediately subject to the new policy.
 
-**Virtual addresses:** Policy-configuration functions that accept literal member addresses (`createPolicyWithAccounts`, `modifyPolicyWhitelist`, `modifyPolicyBlacklist`) reject [TIP-1022](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md) virtual addresses. TIP-20 policy checks for transfers and mints to a virtual address run against the resolved master wallet rather than the forwarding alias, so policy membership must be configured on the master address.
+**Virtual addresses:** Policy-configuration functions that accept literal member addresses (`createPolicyWithAccounts`, `modifyPolicyWhitelist`, `modifyPolicyBlacklist`) reject [virtual addresses](/docs/protocol/tip20/virtual-addresses). TIP-20 policy checks for transfers and mints to a virtual address run against the resolved master wallet rather than the forwarding alias, so policy membership must be configured on the master address.
 
 ### Example Usage
 

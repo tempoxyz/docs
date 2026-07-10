@@ -24,9 +24,9 @@ Node operators needed to upgrade to the T3-compatible release before the testnet
 
 | TIP | What it does | Who should review |
 |-----|-------------|-------------------|
-| [TIP-1011](https://tips.sh/1011) | Periodic spending limits, call scoping, and a ban on access-key contract creation | Wallets, account SDKs, apps using connected apps or subscriptions |
-| [TIP-1020](https://tips.sh/1020) | Signature verification precompile for secp256k1, P256, and WebAuthn | Smart contract teams, account integrators, wallet SDKs |
-| [TIP-1022](https://tips.sh/1022) | [Virtual addresses](/docs/protocol/tip20/virtual-addresses) for TIP-20 deposit forwarding | Exchanges, ramps, custodians, payment processors, explorers, indexers |
+| [Enhanced access key permissions](https://tips.sh/1011) | Periodic spending limits, call scoping, and a ban on access-key contract creation | Wallets, account SDKs, apps using connected apps or subscriptions |
+| [Signature verification](https://tips.sh/1020) | Signature verification precompile for secp256k1, P256, and WebAuthn | Smart contract teams, account integrators, wallet SDKs |
+| [Virtual addresses](https://tips.sh/1022) | [Virtual addresses](/docs/protocol/tip20/virtual-addresses) for TIP-20 deposit forwarding | Exchanges, ramps, custodians, payment processors, explorers, indexers |
 
 ## Breaking changes
 
@@ -34,7 +34,7 @@ These breaking changes only affect access-key integrations. You need to update y
 
 ### Access-key authorization ABI
 
-Integrations that directly call `AccountKeychain.authorizeKey(...)` or manually encode `key_authorization` must use the TIP-1011 tuple-form ABI. The legacy selector `0x54063a55` no longer works — legacy calls fail with `LegacyAuthorizeKeySelectorChanged(newSelector: 0x980a6025)`.
+Integrations that directly call `AccountKeychain.authorizeKey(...)` or manually encode `key_authorization` must use the tuple-form ABI for enhanced access key permissions. The legacy selector `0x54063a55` no longer works — legacy calls fail with `LegacyAuthorizeKeySelectorChanged(newSelector: 0x980a6025)`.
 
 If you use an updated SDK, this is mostly a tooling upgrade. If you hand-encode calldata, use the exact tuple-form signature from the [Account Keychain precompile spec](/docs/protocol/transactions/AccountKeychain).
 
@@ -62,7 +62,7 @@ See [Virtual addresses for TIP-20 deposits](/docs/protocol/tip20/virtual-address
 
 ### Signature verification precompile
 
-[TIP-1020](https://tips.sh/1020) is additive — existing verifier setups keep working. Teams that want a standard onchain verification surface can adopt the precompile instead of maintaining custom verifier contracts. See the [Signature Verification with Foundry](/docs/sdk/foundry/signature-verifier) guide.
+Signature verification is additive — existing verifier setups keep working. Teams that want a standard onchain verification surface can adopt the precompile instead of maintaining custom verifier contracts. See the [Signature Verification with Foundry](/docs/sdk/foundry/signature-verifier) guide or read the [technical specification](https://tips.sh/1020).
 
 ## Compatible SDK releases
 
@@ -78,5 +78,5 @@ Tempo's broader tooling ecosystem is available in [Developer tools](/docs/quicks
 
 ## Related docs
 - [Virtual addresses for TIP-20 deposits](/docs/protocol/tip20/virtual-addresses)
-- [TIP-1022](https://tips.sh/1022)
+- [Virtual addresses](https://tips.sh/1022)
 - Coordinating meta TIP: [tempoxyz/tempo#3273](https://github.com/tempoxyz/tempo/pull/3273)

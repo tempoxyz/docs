@@ -38,7 +38,7 @@ A transaction is classified as a **payment transaction** when:
 
 This classification is performed entirely on the transaction payload, no account state is consulted.
 
-The payment call allow-list includes TIP-20 payment and mint/burn/approval calls, plus the `TIP20ChannelReserve` payment-channel precompile calls. Calls with unrecognized selectors, malformed ABI encoding, disallowed targets, non-empty auxiliary payloads, or dynamic calldata above the allow-list size bound are classified as non-payment transactions. See [TIP-1045](https://tips.sh/1045) for the complete selector table and ABI constraints.
+The payment call allow-list includes TIP-20 payment and mint/burn/approval calls, plus the `TIP20ChannelReserve` payment-channel precompile calls. Calls with unrecognized selectors, malformed ABI encoding, disallowed targets, non-empty auxiliary payloads, or dynamic calldata above the allow-list size bound are classified as non-payment transactions. See the [payment lane classification specification](https://tips.sh/1045) for the complete selector table and ABI constraints.
 
 ### 2. Ordering of Transactions
 

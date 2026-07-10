@@ -17,8 +17,8 @@ const prefetchedPaths = new Set<string>()
 const ANALYTICS_DELAY_MS = 15_000
 const ANALYTICS_IDLE_TIMEOUT_MS = 20_000
 
-function prefetchPath(href: string) {
-  if (!href.startsWith('/') || prefetchedPaths.has(href)) return
+function prefetchPath(href: unknown) {
+  if (typeof href !== 'string' || !href.startsWith('/') || prefetchedPaths.has(href)) return
   prefetchedPaths.add(href)
 
   const link = document.createElement('link')

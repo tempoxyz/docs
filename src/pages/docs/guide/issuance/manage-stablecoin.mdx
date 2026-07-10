@@ -293,7 +293,7 @@ export const config = createConfig({
 
 ### Set the stablecoin logo
 
-Set or update the token's on-chain `logoURI` so wallets and explorers can read the icon directly from the token contract via `logoURI()`. This requires the **`DEFAULT_ADMIN_ROLE`** and is done by calling `setLogoURI(string newLogoURI)` on the token ([TIP-1026](https://tips.sh/1026)). For the recommended format, use a square, rasterized PNG or WebP (max 256 bytes; `https`, `http`, `ipfs`, or `data` scheme).
+Set or update the token's on-chain [`logoURI`](/docs/protocol/tip20/spec#logo-uri) so wallets and explorers can read the icon directly from the token contract via `logoURI()`. This requires the **`DEFAULT_ADMIN_ROLE`** and is done by calling `setLogoURI(string newLogoURI)` on the token. For the recommended format, use a square, rasterized PNG or WebP (max 256 bytes; `https`, `http`, `ipfs`, or `data` scheme).
 
 ### Set the stablecoin supply cap
 

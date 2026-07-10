@@ -623,7 +623,7 @@ There is one decoder nuance: because `KeyAuthorization` uses canonical trailing 
 Do not hand-encode `expiry = 0` or rely on `Some(0)` as a sentinel. The supported encoding to target is omission, and the protocol translates omitted expiry to `u64::MAX` when materializing the `AccountKeychain.authorizeKey(...)` call.
 :::
 
-Intrinsic gas for `key_authorization` accounts for the storage written for periodic-limit state and call-scope entries. See [TIP-1011](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1011.md#intrinsic-gas-for-key-authorization) for slot-counting rules.
+Intrinsic gas for `key_authorization` accounts for the storage written for periodic-limit state and call-scope entries. See the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1011.md#intrinsic-gas-for-key-authorization) for slot-counting rules.
 
 #### Keychain Precompile
 
@@ -1081,7 +1081,7 @@ def calculate_key_authorization_gas(key_auth: SignedKeyAuthorization) -> uint256
     Returns:
         gas_cost: uint256
 
-    Note: This is a simplified illustration. See TIP-1011 for the canonical
+    Note: This is a simplified illustration. See the enhanced access key permissions specification for the canonical
     slot-counting rules covering periodic-limit state and call-scope storage.
     """
     # Constants - KeyAuthorization pays FULL signature verification costs
@@ -1113,7 +1113,7 @@ def calculate_key_authorization_gas(key_auth: SignedKeyAuthorization) -> uint256
     gas += num_limits * COLD_SSTORE_SET_GAS  # 22,000 per limit
 
     # Step 5: Per-call-scope storage cost (target + selector + recipients).
-    # See TIP-1011 for exact slot accounting; this counts one slot per
+    # See the enhanced access key permissions specification for exact slot accounting; this counts one slot per
     # (target, selector, recipient) triple as a conservative approximation.
     num_scope_slots = 0
     if key_auth.allowed_calls:

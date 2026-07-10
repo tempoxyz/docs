@@ -23,16 +23,16 @@ Node operators needed to upgrade to the T2-compatible release before the testnet
 ## Overview
 
 T2 built on T1 and introduced the following features:
-- Compound transfer policies ([TIP-1015](https://tips.sh/1015))
-- Permit support for TIP-20 tokens ([TIP-1004](https://tips.sh/1004))
-- A new Validator Config V2 precompile ([TIP-1017](https://tips.sh/1017))
-- Security improvements ([TIP-1036](https://tips.sh/1036))
+- [Compound transfer policies](https://tips.sh/1015)
+- [Permit](https://tips.sh/1004) support for TIP-20 tokens
+- A new [Validator Config V2](https://tips.sh/1017) precompile
+- [T2 network upgrade](https://tips.sh/1036) security improvements
 
 ## Feature TIPs
 
-### TIP-1015: Compound Transfer Policies
+### Compound transfer policies
 
-**Spec:** [TIP-1015](https://tips.sh/1015)
+Read the [technical specification](https://tips.sh/1015).
 
 **TLDR:** Extended TIP-403 policies so token issuers can set different authorization rules for senders, recipients, and mint recipients. Previously a single policy applied to both sides of a transfer.
 
@@ -42,9 +42,9 @@ T2 built on T1 and introduced the following features:
 - If you integrate with TIP-403 policies: new `isAuthorizedSender()`, `isAuthorizedRecipient()`, and `isAuthorizedMintRecipient()` functions are available. The existing `isAuthorized()` still works (returns `senderCheck && recipientCheck`).
 - If you issue TIP-20 tokens: you can now create compound policies for use cases like vendor credits, directional KYC, or asymmetric compliance.
 
-### TIP-1017: Validator Config V2
+### Validator Config V2
 
-**Spec:** [TIP-1017](https://tips.sh/1017)
+Read the [technical specification](https://tips.sh/1017).
 
 **Operator guide:** [Controlling validator lifecycle](/docs/guide/node/validator-lifecycle)
 
@@ -56,9 +56,9 @@ T2 built on T1 and introduced the following features:
 - **Node operators:** Node operators didn't need to take action for the migration itself. Operators can now self-service IP updates, key rotation, and ownership transfers.
 - **Minimal nodes for validators:** Validator V2 unlocks minimal nodes for validators. Previously, validators had to keep ~64,000 blocks of history to reconstruct validator sets, requiring hundreds of GB of storage. V2 removes that requirement, letting validators query the set from the latest state only.
 
-### TIP-1004: Permit for TIP-20
+### Permit for TIP-20
 
-**Spec:** [TIP-1004](https://tips.sh/1004)
+Read the [technical specification](https://tips.sh/1004).
 
 **TLDR:** Added EIP-2612 compatible `permit()` to all TIP-20 tokens, enabling gasless approvals via off-chain signatures.
 
@@ -69,4 +69,4 @@ T2 built on T1 and introduced the following features:
 
 ### Meta TIP: Security Improvements
 
-[TIP-1036: T2 Hardfork Improvements](https://tips.sh/1036)
+Read the [technical specification](https://tips.sh/1036).
