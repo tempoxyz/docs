@@ -3,14 +3,9 @@ title: Tempo Improvement Proposals
 description: Tempo Improvement Proposals live at tips.sh.
 ---
 
-import { useEffect } from 'react'
-
-export function TipsRedirect() {
-  useEffect(() => {
-    window.location.replace('https://tips.sh/')
-  }, [])
-
-  return null
-}
-
-<TipsRedirect />
+<meta httpEquiv="refresh" content="0;url=https://tips.sh/" />
+<script
+  dangerouslySetInnerHTML={{
+    __html: "globalThis.location.replace('https://tips.sh/')",
+  }}
+/>
