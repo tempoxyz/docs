@@ -18,6 +18,7 @@ import {
   ExplorerIcon,
   FaucetIcon,
   McpIcon,
+  PoliciesIcon,
   TerminalIcon,
   TokensIcon,
   TransactionsIcon,
@@ -32,8 +33,14 @@ const protocolMenu: MegaMenuData = {
   variant: 'vertical',
   columns: [
     {
-      title: 'Transactions',
+      title: 'Protocol',
       items: [
+        {
+          label: 'Tempo Accounts',
+          desc: 'Account model for keys, permissions, and policies',
+          href: developersPath('/docs/protocol/accounts'),
+          icon: <PoliciesIcon />,
+        },
         {
           label: 'Tempo Transactions',
           desc: 'Flexible transactions for batching, fee sponsorship, scheduling, and more',

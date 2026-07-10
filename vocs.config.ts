@@ -62,8 +62,9 @@ export default defineConfig({
   },
   title: 'Tempo Docs',
   titleTemplate: (path, { title }) => {
-    if (path === '/docs') return 'Tempo %s ⋅ Tempo Docs'
-    if (path === '/docs' || path.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
+    const pagePath = typeof path === 'string' ? path : '/'
+    if (pagePath === '/docs') return 'Tempo %s ⋅ Tempo Docs'
+    if (pagePath === '/docs' || pagePath.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
     if (title?.includes('Tempo')) return undefined
     return '%s ⋅ Tempo'
   },
@@ -71,7 +72,8 @@ export default defineConfig({
   renderStrategy: 'partial-static',
   feedback: createFeedbackAdapter(),
   head(path) {
-    if (path === '/docs' || path.startsWith('/docs/'))
+    const pagePath = typeof path === 'string' ? path : '/'
+    if (pagePath === '/docs' || pagePath.startsWith('/docs/'))
       return { meta: { articleModifiedTime: false } }
     return undefined
   },
@@ -112,7 +114,8 @@ export default defineConfig({
   },
   sitemap: {
     lastmod: (path, { lastmod }) => {
-      if (path === '/docs' || path.startsWith('/docs/')) return false
+      const pagePath = typeof path === 'string' ? path : '/'
+      if (pagePath === '/docs' || pagePath.startsWith('/docs/')) return false
       return lastmod
     },
   },
@@ -135,7 +138,7 @@ export default defineConfig({
   // src/lib/og-sections.test.ts fails if the two drift.
   ogImageUrl: (path, options = {}) => {
     const urlBase = options.baseUrl?.replace(/\/$/, '') ?? ''
-    const docsPath = path.replace(/^\/docs(?=\/|$)/, '') || '/'
+    const docsPath = String(path ?? '').replace(/^\/docs(?=\/|$)/, '') || '/'
     const landingPaths = ['/', '/changelog']
     if (landingPaths.includes(docsPath)) return `${urlBase}/og-docs.png`
 
@@ -158,6 +161,7 @@ export default defineConfig({
     }
 
     const subsectionMap: Record<string, string> = {
+      accounts: 'ACCOUNTS',
       blockspace: 'BLOCKSPACE',
       exchange: 'DEX',
       fees: 'FEES',
@@ -641,6 +645,10 @@ export default defineConfig({
             link: '/docs/protocol',
           },
           {
+            text: 'Tempo Accounts',
+            link: '/docs/protocol/accounts',
+          },
+          {
             text: 'TIP-20 Tokens',
             collapsed: false,
             items: [
@@ -838,7 +846,7 @@ export default defineConfig({
             items: [
               {
                 text: 'T8',
-                badge: { text: 'Planned', variant: 'note' },
+                badge: { text: 'Planned', variant: 'note' as const },
                 link: '/docs/protocol/upgrades/t8',
               },
               {
