@@ -85,10 +85,9 @@ const publicDevelopersPath = (path) => {
   return developersPrefix + path;
 };
 const normalizeDevelopersRoute = (route) => {
-  const routePath = typeof route.path === 'string' ? route.path : '/';
-  if (routePath === '/developers') return { ...route, path: '/' };
-  if (routePath.startsWith('/developers/')) {
-    return { ...route, path: routePath.slice('/developers'.length) || '/' };
+  if (route.path === '/developers') return { ...route, path: '/' };
+  if (route.path.startsWith('/developers/')) {
+    return { ...route, path: route.path.slice('/developers'.length) || '/' };
   }
   return route;
 };
