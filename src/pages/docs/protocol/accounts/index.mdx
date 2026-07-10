@@ -23,6 +23,7 @@ These protocol features define account behavior:
 | Account Keychain | `keys[account][keyId]`, spending limits, call scopes, and authorization witnesses | Delegated keys for devices, apps, agents, sessions, and recovery workflows                 |
 | Fee preferences  | `feeToken` on the transaction or a stored fee token preference for the fee payer  | Which supported stablecoin pays transaction fees                                           |
 | Receive policies | Per address sender policy, token filter, and recovery authority                   | Which inbound TIP-20 transfers or mints the account accepts                                |
+| Virtual addresses | Master wallet registration and derived TIP-20 recipient addresses                 | Deposit attribution and TIP-20 forwarding to the registered account                        |
 
 ## Key model
 
@@ -38,39 +39,27 @@ The [Account Keychain precompile](/docs/protocol/transactions/AccountKeychain) s
 
 <Cards>
   <Card
-    title="Account Keychain"
-    description="Read the access key, admin key, spending limit, and call scope specification."
-    to="/docs/protocol/transactions/AccountKeychain"
-    icon="lucide:key-round"
-  />
-  <Card
-    title="Tempo Transactions"
-    description="Use the transaction type that carries passkey signatures, access key authorization, batching, sponsorship, and concurrent nonces."
-    to="/docs/protocol/transactions"
-    icon="lucide:layers"
+    title="Virtual Addresses"
+    description="Understand TIP-20 deposit forwarding, master wallet registration, and virtual recipient addresses."
+    to="/docs/protocol/tip20/virtual-addresses"
+    icon="lucide:route"
   />
   <Card
     title="Receive Policies"
-    description="Configure rules for which TIP-20 tokens and senders an address accepts."
+    description="Review address receive rules, token filters, sender policies, and blocked receipt behavior."
     to="/docs/protocol/tip403/receive-policies"
     icon="lucide:shield-check"
   />
   <Card
-    title="Tempo Wallet"
-    description="Use Tempo Wallet and the CLI for Tempo native account flows, demos, agents, and scripts."
-    to="/docs/wallet"
-    icon="lucide:wallet"
+    title="Access Keys"
+    description="See how Tempo Transactions authorize secondary signing keys for account operations."
+    to="/docs/protocol/transactions#access-keys"
+    icon="lucide:key"
   />
   <Card
-    title="Wallet Providers"
-    description="Find embedded, custodial, institutional, self custodial, and agentic wallet providers for production applications."
-    to="/docs/ecosystem/wallets"
-    icon="lucide:building-2"
-  />
-  <Card
-    title="Private Zone Accounts"
-    description="Learn how account scoped private balances, allowances, and authorization work inside Tempo Zones."
-    to="/docs/protocol/zones/accounts"
-    icon="lucide:scan"
+    title="Account Keychain Precompile"
+    description="Read the ABI, storage, spending limit, call scope, and revocation specification."
+    to="/docs/protocol/transactions/AccountKeychain"
+    icon="lucide:key-round"
   />
 </Cards>

@@ -305,6 +305,24 @@ export default defineConfig({
             link: '/docs/guide/getting-funds',
           },
           {
+            text: 'Manage Accounts',
+            collapsed: false,
+            items: [
+              {
+                text: 'Overview',
+                link: '/docs/guide/accounts',
+              },
+              {
+                text: 'Configure receive policies',
+                link: '/docs/guide/payments/configure-receive-policies',
+              },
+              {
+                text: 'Use virtual addresses',
+                link: '/docs/guide/payments/virtual-addresses',
+              },
+            ],
+          },
+          {
             text: 'Make Payments',
             collapsed: false,
             items: [
@@ -321,16 +339,8 @@ export default defineConfig({
                 link: '/docs/guide/payments/accept-a-payment',
               },
               {
-                text: 'Configure receive policies',
-                link: '/docs/guide/payments/configure-receive-policies',
-              },
-              {
                 text: 'Attach a transfer memo',
                 link: '/docs/guide/payments/transfer-memos',
-              },
-              {
-                text: 'Use virtual addresses',
-                link: '/docs/guide/payments/virtual-addresses',
               },
               {
                 text: 'Pay fees in any stablecoin',
@@ -1175,6 +1185,7 @@ export default defineConfig({
       '/docs': docsHomeSidebar,
       '/docs/build': buildSidebar,
       '/docs/guide/getting-funds': buildSidebar,
+      '/docs/guide/accounts': buildSidebar,
       '/docs/guide/payments': buildSidebar,
       '/docs/guide/issuance': buildSidebar,
       '/docs/guide/stablecoin-dex': buildSidebar,
