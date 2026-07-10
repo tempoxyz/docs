@@ -10,7 +10,7 @@ import { unstable_RouterContext as WakuRouterContext } from 'waku/router/client'
 export type Metadata = Record<string, unknown>
 
 type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
-  href: string
+  href?: string
   children?: ReactNode
 }
 
@@ -28,8 +28,9 @@ function prefetchPath(href: unknown) {
   document.head.appendChild(link)
 }
 
-function isClientRoutedBlogHref(href: unknown) {
+export function isClientRoutedBlogHref(href: unknown): href is string {
   if (typeof href !== 'string') return false
+
   return (
     href === '/blog' ||
     href.startsWith('/blog/') ||
