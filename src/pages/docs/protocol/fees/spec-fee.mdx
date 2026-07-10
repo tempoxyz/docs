@@ -25,9 +25,9 @@ Attodollars provide sufficient precision for low-fee transactions. Since TIP-20 
 
 ### Base Fee Model
 
-Tempo uses a fixed base fee rather than the dynamic base fee mechanism specified in EIP-1559. The base fee is set such that a TIP-20 transfer costs less than $0.001.
+Tempo uses a bounded dynamic base fee. The base fee can fall when block gas usage is below target and rise back toward the cap when usage increases. The cap is set such that a TIP-20 transfer costs about $0.0006, with a quiet-period floor around $0.00003.
 
-The fixed base fee combined with USD-denominated payment provides predictable unit economics. Applications can budget for transaction costs without exposure to fee volatility or native token price fluctuations.
+The bounded base fee combined with USD-denominated payment provides predictable unit economics. Applications can budget for transaction costs without exposure to native token price fluctuations.
 
 Congestion is managed through:
 
@@ -173,15 +173,16 @@ If validators have not specified a fee token preference, the protocol falls back
 
 ## Gas Parameters
 
-As of [TIP-1010](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1010.md), Tempo uses the following mainnet gas parameters:
+As of T7, Tempo uses the following mainnet gas parameters:
 
 | Parameter | Value |
 |-----------|-------|
-| Base fee | 20 billion attodollars per gas (`2 × 10^10`) |
+| Base fee cap | 12 billion attodollars per gas (`1.2 × 10^10`) |
+| Base fee floor | 600 million attodollars per gas (`6 × 10^8`) |
 | Total block gas limit | 500M gas |
 | General gas limit | 30M gas/block |
 
-A standard TIP-20 transfer (~50,000 gas) costs approximately 1,000 microdollars (0.1 cent / $0.001) at the base fee.
+A standard TIP-20 transfer (~50,000 gas) costs approximately 600 microdollars ($0.0006) at the cap and approximately 30 microdollars ($0.00003) at the floor.
 
 ### Removing validator preference
 

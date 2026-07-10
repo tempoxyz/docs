@@ -1,20 +1,20 @@
 ---
 title: TIP-20 Tokens Specification
-description: Technical specification for TIP-20 tokens, the optimized token standard extending ERC-20 with memos, rewards distribution, and policy integration.
+description: Technical specification for TIP-20 tokens, the optimized token standard extending ERC-20 with memos and policy integration.
 ---
 
 # TIP-20 Tokens Specification
 
 ## Abstract
-TIP-20 tokens are a suite of precompiles that provide a built-in optimized token implementation in the core protocol. They extend the ERC-20 token standard with built-in functionality like memo fields and reward distribution.
+TIP-20 tokens are a suite of precompiles that provide a built-in optimized token implementation in the core protocol. They extend the ERC-20 token standard with built-in functionality like memo fields and transfer policies.
 
 ## Motivation
-All major stablecoins today use the ERC-20 token standard. While ERC-20 provides a solid foundation for fungible tokens, it lacks features critical for stablecoin issuers today such as memos, transfer policies, and rewards distribution. Additionally, since each ERC-20 token has its own implementation, integrators can't depend on consistent behavior across tokens.
+All major stablecoins today use the ERC-20 token standard. While ERC-20 provides a solid foundation for fungible tokens, it lacks features critical for stablecoin issuers today such as memos and transfer policies. Additionally, since each ERC-20 token has its own implementation, integrators can't depend on consistent behavior across tokens.
 TIP-20 extends ERC-20, building these features into precompiled contracts that anyone can permissionlessly deploy on Tempo. This makes token operations much more efficient, allows issuers to quickly set up on Tempo, and simplifies integrations since it ensures standardized behavior across tokens.
 It also enables deeper integration with token-specific Tempo features like paying gas in stablecoins and payment lanes.
 
 ## Specification
-TIP-20 tokens support standard fungible token operations such as transfers, mints, and burns. They also support transfers, mints, and burns with an attached 32-byte memo; a role-based access control system for token administrative operations; and a system for opt-in [reward distribution](/docs/protocol/tip20-rewards/spec).
+TIP-20 tokens support standard fungible token operations such as transfers, mints, and burns. They also support transfers, mints, and burns with an attached 32-byte memo and a role-based access control system for token administrative operations.
 
 
 ## TIP20
@@ -317,18 +317,6 @@ interface ITIP20 {
     /// @param newQuoteToken The new quote token that has been set
     event QuoteTokenUpdate(address indexed updater, ITIP20 indexed newQuoteToken);
 
-    /// @notice Emitted when a holder sets or updates their reward recipient address
-    /// @param holder The token holder configuring the recipient
-    /// @param recipient The address that will receive claimed rewards
-    event RewardRecipientSet(address indexed holder, address indexed recipient);
-
-    /// @notice Emitted when a reward distribution is scheduled
-    /// @param funder The account funding the reward distribution
-    /// @param amount The total amount of tokens allocated to the reward
-    event RewardDistributed(
-        address indexed funder,
-        uint256 amount,
-    );
 
     /// @notice Emitted when the token's supply cap is updated
     /// @param updater The account that updated the supply cap
@@ -426,8 +414,6 @@ interface ITIP20 {
     /// @notice The new supply cap is invalid, for example lower than the current total supply
     error InvalidSupplyCap();
 
-    /// @notice A rewards operation was attempted when no opted-in supply exists
-    error NoOptedInSupply();
 
     /// @notice The configured transfer policy denies authorization for the sender or recipient
     error PolicyForbids();
@@ -464,7 +450,6 @@ Internally, this is implemented via a `transferAuthorized` modifier that:
 - Calls `TIP403_REGISTRY.isAuthorized(transferPolicyId, to)` for the recipient.
 
 Both checks must return `true`, otherwise the call reverts with `PolicyForbids`.
-Reward operations (`distributeReward`, `setRewardRecipient`, `claimRewards`) also perform the same TIP-403 authorization checks before moving any funds.
 
 ## Invalid Recipient Protection
 TIP-20 tokens cannot be sent to other TIP-20 token contract addresses. The implementation uses a `validRecipient` guard that rejects recipients whose address is zero, or has the TIP-20 prefix (`0x20c000000000000000000000`).
@@ -502,7 +487,7 @@ The admin (`DEFAULT_ADMIN_ROLE`) sets or clears it via `setLogoURI(string newLog
 Per [TIP-1026's recommended formats](https://tips.sh/1026#recommended-formats), use a square, single-frame rasterized image (PNG or WebP). SVG is allowed by the scheme allowlist but not recommended — integrators that accept SVG must follow TIP-1026's SVG-handling guidance.
 
 ## Pause Controls
-Pause controls `pause` and `unpause` govern all transfer operations and reward related flows. When paused, transfers and memo transfers halt, but administrative and configuration functions remain allowed. The `paused()` getter reflects the current state and must be checked by all affected entrypoints.
+Pause controls `pause` and `unpause` govern token movement. When paused, transfers and memo transfers halt, but administrative and configuration functions remain allowed. The `paused()` getter reflects the current state and must be checked by all affected entrypoints.
 
 ## TIP-20 Roles
 TIP-20 uses a role-based authorization system. The main roles are:
@@ -521,7 +506,7 @@ System level functions `systemTransferFrom`, `transferFeePreTx`, and `transferFe
 ### Implicit approvals for listed precompiles (TIP-1035)
 An Implicit Approval List names the precompiles that may pull TIP-20 tokens without a prior `approve`. Listed precompiles call the internal `system_transfer_from(from, to, amount)` entrypoint, which:
 
-- Is **not** part of the public TIP-20 ABI and is **not** callable by external contracts or EOAs.
+- Is **not** part of the public TIP-20 ABI and **not** callable by external contracts or EOAs.
 - Skips allowance checks and the allowance storage write.
 - Still enforces balance checks, TIP-403 transfer policies, and AccountKeychain spending limits.
 - Emits the standard TIP-20 `Transfer` event.
@@ -531,8 +516,6 @@ This generalizes the system-only path described above (`systemTransferFrom`, `tr
 ### Payment-channel reserve (TIP-1034)
 The enshrined `TIP20ChannelReserve` precompile at [`0x4D50500000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x4D50500000000000000000000000000000000000) (ASCII `MPP`) is a TIP-20 consumer rather than a change to the TIP-20 contract itself — it pulls funds via the implicit-approval path above and emits standard `Transfer` events from the host TIP-20. See the [enshrined TIP-20 reserve channel section of the T5 page](/docs/protocol/upgrades/t5#enshrined-tip-20-reserve-channel) for the channel lifecycle, channel ID derivation, and event surface.
 
-## Token Rewards Distribution
-See [rewards distribution](/docs/protocol/tip20-rewards/spec) for more information.
 
 ## TIP20Factory
 The `TIP20Factory` contract is the canonical entrypoint for creating new TIP-20 tokens on Tempo. The factory derives deterministic deployment addresses using a caller-provided salt, combined with the caller's address, under a fixed 12-byte TIP-20 prefix. This ensures that every TIP-20 token exists at a predictable, collision-free address. The `TIP20Factory` precompile is deployed at `0x20Fc000000000000000000000000000000000000`.
@@ -661,7 +644,7 @@ interface ITIP20Factory {
 ## Invariants
 - `totalSupply()` must always equal to the sum of all `balanceOf(account)` over all accounts.
 - `totalSupply()` must always be `<= supplyCap` 
-- When `paused` is `true`, no functions that move tokens (`transfer`, `transferFrom`, memo variants, `systemTransferFrom`, `transferFeePreTx`, `distributeReward`, `setRewardRecipient`, `claimRewards`) can succeed.
+- When `paused` is `true`, no functions that move tokens (`transfer`, `transferFrom`, memo variants, `systemTransferFrom`, `transferFeePreTx`) can succeed.
 - TIP20 tokens cannot be transferred to another TIP20 token contract address.
 - `systemTransferFrom`, `transferFeePreTx`, and `transferFeePostTx` never change `totalSupply()`.
 - `bytes(logoURI()).length` must always be `<= 256`.

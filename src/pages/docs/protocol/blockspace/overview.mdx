@@ -32,12 +32,11 @@ pub struct Header {
 ### Block body
 The block body in Tempo retains the canonical Ethereum block body structure, with the addition of system transactions. Transactions are ordered in the following sections:
 
-1. Start-of-block system transaction(s) (must begin with the rewards registry call).
+1. Start-of-block system transaction(s).
 2. Proposer lane transactions, subject to `general_gas_limit` on non-payment transactions.
 3. Remaining transactions that consume the shared gas budget.
 4. Protocol-defined end-of-block system transactions, when required.
 
 ### System transactions
 
-A valid tempo block must contain the following system transaction:
-  - **Rewards Registry (start-of-block)** — must be the first transaction in the block body; refreshes validator rewards metadata before user transactions begin.  Detailed specification [here](/docs/protocol/tip20-rewards/spec).
+A valid Tempo block must include any required protocol-defined system transactions in the expected order before and after user transactions.

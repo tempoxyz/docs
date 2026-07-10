@@ -10,15 +10,15 @@ import { unstable_RouterContext as WakuRouterContext } from 'waku/router/client'
 export type Metadata = Record<string, unknown>
 
 type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
-  href: string
+  href?: string
   children?: ReactNode
 }
 
 const prefetchedPaths = new Set<string>()
 
-function prefetchPath(href: string) {
+function prefetchPath(href: unknown) {
   if (typeof document === 'undefined') return
-  if (!href.startsWith('/') || prefetchedPaths.has(href)) return
+  if (typeof href !== 'string' || !href.startsWith('/') || prefetchedPaths.has(href)) return
   prefetchedPaths.add(href)
 
   const link = document.createElement('link')
@@ -28,7 +28,9 @@ function prefetchPath(href: string) {
   document.head.appendChild(link)
 }
 
-function isClientRoutedBlogHref(href: string) {
+export function isClientRoutedBlogHref(href: unknown): href is string {
+  if (typeof href !== 'string') return false
+
   return (
     href === '/blog' ||
     href.startsWith('/blog/') ||
