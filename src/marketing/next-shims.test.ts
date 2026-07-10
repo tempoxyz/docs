@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isClientRoutedBlogHref } from './next-shims'
+import { isClientRoutedBlogHref, normalizeMarketingPathname } from './next-shims'
 
 describe('isClientRoutedBlogHref', () => {
   it.each([
@@ -20,5 +20,18 @@ describe('isClientRoutedBlogHref', () => {
     '/developers/blog/t7-network-upgrade',
   ])('recognizes %s as a client-routed blog path', (href) => {
     expect(isClientRoutedBlogHref(href)).toBe(true)
+  })
+})
+
+describe('normalizeMarketingPathname', () => {
+  it.each([
+    ['/developers', '/'],
+    ['/developers/', '/'],
+    ['/developers/build', '/build'],
+    ['/developers/blog/t7-network-upgrade', '/blog/t7-network-upgrade'],
+    ['/', '/'],
+    ['/blog', '/blog'],
+  ])('normalizes %s to %s', (pathname, expected) => {
+    expect(normalizeMarketingPathname(pathname)).toBe(expected)
   })
 })

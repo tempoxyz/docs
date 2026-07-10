@@ -92,8 +92,14 @@ export function Image({ priority: _priority, fill: _fill, alt, ...props }: Image
   return <img alt={alt} {...props} />
 }
 
+export function normalizeMarketingPathname(pathname: string) {
+  if (pathname === '/developers') return '/'
+  if (pathname.startsWith('/developers/')) return pathname.slice('/developers'.length)
+  return pathname
+}
+
 export function usePathname() {
-  return typeof window === 'undefined' ? '/' : window.location.pathname
+  return typeof window === 'undefined' ? '/' : normalizeMarketingPathname(window.location.pathname)
 }
 
 export function notFound(): never {
