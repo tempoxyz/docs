@@ -118,8 +118,16 @@ function PostHogInitializer({ site }: { site: string }) {
           capture_copied_text: false,
         },
         mask_all_text: true,
+        mask_all_element_attributes: true,
         session_recording: {
           maskAllInputs: true,
+          maskTextSelector:
+            'input, textarea, select, [contenteditable="true"], [data-ph-sensitive]',
+          blockSelector: '[data-ph-sensitive]',
+          recordHeaders: false,
+          recordBody: false,
+          captureCanvas: { recordCanvas: false },
+          collectFonts: false,
         },
         enable_recording_console_log: false,
         before_send: sanitizePostHogCapture,

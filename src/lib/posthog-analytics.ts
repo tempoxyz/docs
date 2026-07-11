@@ -79,6 +79,8 @@ export function sanitizeAnalyticsUrl(value: string) {
   const input = value.trim()
   if (!input) return input
 
+  if (/^(?:mailto|tel):/i.test(input)) return input.replace(/:.*/, ':')
+
   const isAbsolute = /^[a-z][a-z\d+.-]*:\/\//i.test(input)
   const isProtocolRelative = input.startsWith('//')
   const isRelativeUrl = input.startsWith('/') || input.startsWith('?') || input.startsWith('#')
@@ -99,10 +101,11 @@ export function sanitizeAnalyticsUrl(value: string) {
         continue
       }
 
-      const values = url.searchParams.getAll(name)
+      const values = url.searchParams
+        .getAll(name)
+        .filter((item) => item.length <= maxCampaignValueLength && !item.includes('@'))
       url.searchParams.delete(name)
-      for (const item of values)
-        url.searchParams.append(name, item.slice(0, maxCampaignValueLength))
+      for (const item of values) url.searchParams.append(name, item)
     }
 
     if (isAbsolute || isProtocolRelative) return url.toString()

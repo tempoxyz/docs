@@ -28,6 +28,16 @@ describe('sanitizeAnalyticsUrl', () => {
   it('leaves non-URL labels unchanged', () => {
     expect(sanitizeAnalyticsUrl('accept payments')).toBe('accept payments')
   })
+
+  it('removes contact destinations and unsafe campaign values', () => {
+    expect(sanitizeAnalyticsUrl('mailto:person@example.com')).toBe('mailto:')
+    expect(sanitizeAnalyticsUrl('tel:+15555555555')).toBe('tel:')
+    expect(
+      sanitizeAnalyticsUrl(
+        '/docs?utm_source=person%40example.com&utm_campaign=enterprise&query=private',
+      ),
+    ).toBe('/docs?utm_campaign=enterprise')
+  })
 })
 
 describe('sanitizePostHogCapture', () => {
