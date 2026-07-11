@@ -5,7 +5,8 @@ import { captureDocsEvent } from './posthog'
 export const FAUCET_ACTIVATION_EXPERIMENT_KEY = 'faucet-first-payment-handoff-v1'
 export const FAUCET_ACTIVATION_JOURNEY_VERSION = 'v1'
 export const FAUCET_ACTIVATION_STORAGE_KEY = 'tempo:faucet-activation:v1'
-export const FAUCET_ACTIVATION_TTL_MS = 24 * 60 * 60 * 1_000
+export const FAUCET_ACTIVATION_PRIMARY_WINDOW_MS = 24 * 60 * 60 * 1_000
+export const FAUCET_ACTIVATION_TTL_MS = 7 * FAUCET_ACTIVATION_PRIMARY_WINDOW_MS
 
 export const DEVELOPER_ACTIVATION_EVENTS = {
   FAUCET_VIEWED: 'faucet_viewed',
@@ -17,7 +18,7 @@ export const DEVELOPER_ACTIVATION_EVENTS = {
   TESTNET_PAYMENT_FAILED: 'testnet_payment_failed',
 } as const
 
-export type FaucetActivationVariant = 'control' | 'guided_handoff'
+export type FaucetActivationVariant = 'control' | 'guided_handoff' | 'unassigned'
 export type FaucetClaimMethod = 'address_form' | 'connected_wallet'
 export type ActivationFailureCategory =
   | 'receive_policy_redirect'
@@ -34,6 +35,8 @@ export type TimeSinceClaimBucket =
   | '5_to_30m'
   | '30m_to_2h'
   | '2_to_24h'
+  | '1_to_3d'
+  | '3_to_7d'
   | 'unknown'
 
 type DeveloperActivationEventProperties = {
@@ -44,6 +47,7 @@ type DeveloperActivationEventProperties = {
   faucet_claim_succeeded: {
     claim_duration_bucket: ClaimDurationBucket
     claim_method: FaucetClaimMethod
+    journey_persisted: boolean
     receipt_count: number
   }
   faucet_claim_failed: {
@@ -90,7 +94,23 @@ export function captureDeveloperActivationEvent<
 export function resolveFaucetActivationVariant(
   featureFlag: boolean | string | undefined,
 ): FaucetActivationVariant {
-  return featureFlag === true || featureFlag === 'guided_handoff' ? 'guided_handoff' : 'control'
+  if (featureFlag === 'guided_handoff') return 'guided_handoff'
+  if (featureFlag === 'control') return 'control'
+  return 'unassigned'
+}
+
+export function resolveFaucetActivationAssignment({
+  errorsLoading = false,
+  featureFlag,
+  locked,
+}: {
+  errorsLoading?: boolean
+  featureFlag: boolean | string | undefined
+  locked: boolean
+}): Exclude<FaucetActivationVariant, 'unassigned'> | null {
+  if (locked || errorsLoading) return null
+  const variant = resolveFaucetActivationVariant(featureFlag)
+  return variant === 'unassigned' ? null : variant
 }
 
 export function bucketClaimDuration(durationMs: number | undefined): ClaimDurationBucket {
@@ -107,7 +127,9 @@ export function bucketTimeSinceClaim(durationMs: number | undefined): TimeSinceC
   if (durationMs < 5 * 60_000) return '1_to_5m'
   if (durationMs < 30 * 60_000) return '5_to_30m'
   if (durationMs < 2 * 60 * 60_000) return '30m_to_2h'
-  if (durationMs <= FAUCET_ACTIVATION_TTL_MS) return '2_to_24h'
+  if (durationMs <= FAUCET_ACTIVATION_PRIMARY_WINDOW_MS) return '2_to_24h'
+  if (durationMs < 3 * FAUCET_ACTIVATION_PRIMARY_WINDOW_MS) return '1_to_3d'
+  if (durationMs <= FAUCET_ACTIVATION_TTL_MS) return '3_to_7d'
   return 'unknown'
 }
 
@@ -172,8 +194,12 @@ function isFaucetActivationJourney(value: unknown): value is FaucetActivationJou
   return (
     journey.version === 1 &&
     typeof journey.claimedAt === 'number' &&
+    Number.isFinite(journey.claimedAt) &&
+    journey.claimedAt >= 0 &&
     (journey.claimMethod === 'address_form' || journey.claimMethod === 'connected_wallet') &&
-    (journey.experimentVariant === 'control' || journey.experimentVariant === 'guided_handoff') &&
+    (journey.experimentVariant === 'control' ||
+      journey.experimentVariant === 'guided_handoff' ||
+      journey.experimentVariant === 'unassigned') &&
     typeof journey.handoffClicked === 'boolean' &&
     typeof journey.quickstartTracked === 'boolean'
   )
@@ -192,6 +218,14 @@ export function writeFaucetActivationJourney(
   }
 }
 
+function removeFaucetActivationJourney(storage: ActivationStorage) {
+  try {
+    storage.removeItem(FAUCET_ACTIVATION_STORAGE_KEY)
+  } catch {
+    // Storage may be readable but not writable in restricted browser contexts.
+  }
+}
+
 export function startFaucetActivationJourney(
   claimMethod: FaucetClaimMethod,
   experimentVariant: FaucetActivationVariant,
@@ -206,8 +240,10 @@ export function startFaucetActivationJourney(
     handoffClicked: false,
     quickstartTracked: false,
   }
-  writeFaucetActivationJourney(journey, storage)
-  return journey
+  return {
+    journey,
+    persisted: writeFaucetActivationJourney(journey, storage),
+  }
 }
 
 export function readFaucetActivationJourney(
@@ -225,12 +261,12 @@ export function readFaucetActivationJourney(
       journey.claimedAt > now ||
       now - journey.claimedAt > FAUCET_ACTIVATION_TTL_MS
     ) {
-      storage.removeItem(FAUCET_ACTIVATION_STORAGE_KEY)
+      removeFaucetActivationJourney(storage)
       return null
     }
     return journey
   } catch {
-    storage.removeItem(FAUCET_ACTIVATION_STORAGE_KEY)
+    removeFaucetActivationJourney(storage)
     return null
   }
 }

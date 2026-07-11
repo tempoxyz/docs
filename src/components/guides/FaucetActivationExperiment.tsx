@@ -9,7 +9,7 @@ import {
   type FaucetActivationVariant,
   type FaucetClaimMethod,
   readFaucetActivationJourney,
-  resolveFaucetActivationVariant,
+  resolveFaucetActivationAssignment,
   startFaucetActivationJourney,
   trackDeveloperActivationQuickstart,
   updateFaucetActivationJourney,
@@ -29,7 +29,7 @@ const emptyContext: FaucetActivationContextValue = {
   claimStarted: () => {},
   claimSucceeded: () => {},
   hasSuccessfulClaim: false,
-  variant: 'control',
+  variant: 'unassigned',
 }
 
 const FaucetActivationContext = React.createContext<FaucetActivationContextValue>(emptyContext)
@@ -40,9 +40,9 @@ export function useFaucetActivation() {
 
 export function FaucetActivationProvider({ children }: React.PropsWithChildren) {
   const e2eVariant = import.meta.env.VITE_E2E === 'true' ? ('guided_handoff' as const) : null
-  const [variant, setVariant] = React.useState<FaucetActivationVariant>(e2eVariant ?? 'control')
+  const [variant, setVariant] = React.useState<FaucetActivationVariant>(e2eVariant ?? 'unassigned')
   const [hasSuccessfulClaim, setHasSuccessfulClaim] = React.useState(false)
-  const variantRef = React.useRef<FaucetActivationVariant>(e2eVariant ?? 'control')
+  const variantRef = React.useRef<FaucetActivationVariant>(e2eVariant ?? 'unassigned')
   const variantLockedRef = React.useRef(Boolean(e2eVariant))
   const viewedRef = React.useRef(false)
   const claimStartedAtRef = React.useRef<Partial<Record<FaucetClaimMethod, number>>>({})
@@ -73,11 +73,14 @@ export function FaucetActivationProvider({ children }: React.PropsWithChildren) 
     const unsubscribeReady = onPostHogReady((posthog) => {
       unsubscribeFeatureFlags?.()
       unsubscribeFeatureFlags = posthog.onFeatureFlags((_flags, _variants, context) => {
-        if (variantLockedRef.current) return
-        const assignedVariant = context.errorsLoading
-          ? 'control'
-          : resolveFaucetActivationVariant(posthog.getFeatureFlag(FAUCET_ACTIVATION_EXPERIMENT_KEY))
+        const assignedVariant = resolveFaucetActivationAssignment({
+          errorsLoading: context?.errorsLoading,
+          featureFlag: posthog.getFeatureFlag(FAUCET_ACTIVATION_EXPERIMENT_KEY),
+          locked: variantLockedRef.current,
+        })
+        if (!assignedVariant) return
         variantRef.current = assignedVariant
+        variantLockedRef.current = true
         setVariant(assignedVariant)
         trackView(assignedVariant)
       })
@@ -106,14 +109,15 @@ export function FaucetActivationProvider({ children }: React.PropsWithChildren) 
     const now = Date.now()
     const assignedVariant = variantRef.current
     const startedAt = claimStartedAtRef.current[method]
+    const { persisted } = startFaucetActivationJourney(method, assignedVariant, now)
     captureDeveloperActivationEvent('faucet_claim_succeeded', assignedVariant, {
       claim_duration_bucket: bucketClaimDuration(
         startedAt === undefined ? undefined : now - startedAt,
       ),
       claim_method: method,
+      journey_persisted: persisted,
       receipt_count: receiptCount,
     })
-    startFaucetActivationJourney(method, assignedVariant, now)
     setHasSuccessfulClaim(true)
   }, [])
 

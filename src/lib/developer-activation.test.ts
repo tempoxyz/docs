@@ -5,11 +5,13 @@ import {
   bucketClaimDuration,
   bucketTimeSinceClaim,
   categorizeActivationFailure,
+  FAUCET_ACTIVATION_PRIMARY_WINDOW_MS,
   FAUCET_ACTIVATION_STORAGE_KEY,
   FAUCET_ACTIVATION_TTL_MS,
   FaucetReceiptError,
   isDeliveredTestnetPayment,
   readFaucetActivationJourney,
+  resolveFaucetActivationAssignment,
   resolveFaucetActivationVariant,
   startFaucetActivationJourney,
   trackDeveloperActivationPaymentSucceeded,
@@ -28,12 +30,40 @@ function memoryStorage(): ActivationStorage & { values: Map<string, string> } {
 }
 
 describe('faucet activation experiment', () => {
-  it('uses control unless the guided variant is explicitly assigned', () => {
-    expect(resolveFaucetActivationVariant(undefined)).toBe('control')
-    expect(resolveFaucetActivationVariant(false)).toBe('control')
+  it('accepts only explicit multivariate assignments', () => {
+    expect(resolveFaucetActivationVariant(undefined)).toBe('unassigned')
+    expect(resolveFaucetActivationVariant(false)).toBe('unassigned')
+    expect(resolveFaucetActivationVariant(true)).toBe('unassigned')
     expect(resolveFaucetActivationVariant('control')).toBe('control')
-    expect(resolveFaucetActivationVariant(true)).toBe('guided_handoff')
     expect(resolveFaucetActivationVariant('guided_handoff')).toBe('guided_handoff')
+  })
+
+  it('locks the first valid assignment and ignores loading failures or refreshes', () => {
+    expect(
+      resolveFaucetActivationAssignment({
+        featureFlag: 'guided_handoff',
+        locked: false,
+      }),
+    ).toBe('guided_handoff')
+    expect(
+      resolveFaucetActivationAssignment({
+        errorsLoading: true,
+        featureFlag: 'guided_handoff',
+        locked: false,
+      }),
+    ).toBeNull()
+    expect(
+      resolveFaucetActivationAssignment({
+        featureFlag: undefined,
+        locked: false,
+      }),
+    ).toBeNull()
+    expect(
+      resolveFaucetActivationAssignment({
+        featureFlag: 'guided_handoff',
+        locked: true,
+      }),
+    ).toBeNull()
   })
 
   it('buckets claim and conversion timing without retaining exact durations', () => {
@@ -48,6 +78,10 @@ describe('faucet activation experiment', () => {
     expect(bucketTimeSinceClaim(5 * 60_000)).toBe('5_to_30m')
     expect(bucketTimeSinceClaim(30 * 60_000)).toBe('30m_to_2h')
     expect(bucketTimeSinceClaim(2 * 60 * 60_000)).toBe('2_to_24h')
+    expect(bucketTimeSinceClaim(FAUCET_ACTIVATION_PRIMARY_WINDOW_MS)).toBe('2_to_24h')
+    expect(bucketTimeSinceClaim(FAUCET_ACTIVATION_PRIMARY_WINDOW_MS + 1)).toBe('1_to_3d')
+    expect(bucketTimeSinceClaim(3 * FAUCET_ACTIVATION_PRIMARY_WINDOW_MS)).toBe('3_to_7d')
+    expect(bucketTimeSinceClaim(FAUCET_ACTIVATION_TTL_MS)).toBe('3_to_7d')
     expect(bucketTimeSinceClaim(FAUCET_ACTIVATION_TTL_MS + 1)).toBe('unknown')
   })
 
@@ -92,7 +126,9 @@ describe('faucet activation journey storage', () => {
   it('stores only scope-limited journey state and updates safe booleans', () => {
     const storage = memoryStorage()
     const now = 1_000_000
-    startFaucetActivationJourney('connected_wallet', 'guided_handoff', now, storage)
+    const started = startFaucetActivationJourney('connected_wallet', 'guided_handoff', now, storage)
+
+    expect(started.persisted).toBe(true)
 
     expect(JSON.parse(storage.values.get(FAUCET_ACTIVATION_STORAGE_KEY) ?? '{}')).toEqual({
       version: 1,
@@ -117,7 +153,7 @@ describe('faucet activation journey storage', () => {
     })
   })
 
-  it('expires and removes a claim after 24 hours', () => {
+  it('retains a claim for the seven-day repeat-payment window', () => {
     const storage = memoryStorage()
     const now = 1_000_000
     startFaucetActivationJourney('address_form', 'control', now, storage)
@@ -127,6 +163,16 @@ describe('faucet activation journey storage', () => {
     expect(storage.values.has(FAUCET_ACTIVATION_STORAGE_KEY)).toBe(false)
   })
 
+  it('preserves an unassigned journey without treating it as a control exposure', () => {
+    const storage = memoryStorage()
+    const now = 1_000_000
+    startFaucetActivationJourney('address_form', 'unassigned', now, storage)
+
+    expect(readFaucetActivationJourney(now, storage)).toMatchObject({
+      experimentVariant: 'unassigned',
+    })
+  })
+
   it('rejects malformed or future journey state', () => {
     const storage = memoryStorage()
     storage.setItem(FAUCET_ACTIVATION_STORAGE_KEY, '{')
@@ -134,5 +180,22 @@ describe('faucet activation journey storage', () => {
 
     startFaucetActivationJourney('address_form', 'control', 2_000, storage)
     expect(readFaucetActivationJourney(1_999, storage)).toBeNull()
+  })
+
+  it('contains storage write and cleanup failures', () => {
+    const restrictedStorage: ActivationStorage = {
+      getItem: () => '{',
+      removeItem: () => {
+        throw new Error('blocked')
+      },
+      setItem: () => {
+        throw new Error('blocked')
+      },
+    }
+
+    expect(
+      startFaucetActivationJourney('address_form', 'control', 1_000, restrictedStorage).persisted,
+    ).toBe(false)
+    expect(readFaucetActivationJourney(1_000, restrictedStorage)).toBeNull()
   })
 })
