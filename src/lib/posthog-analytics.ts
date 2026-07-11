@@ -36,10 +36,16 @@ const blockedPropertyNames = new Set([
   'command_text',
   'email',
   'feedback_message',
+  'memo',
   'password',
   'phone',
   'private_key',
+  'recipient_address',
   'search_query',
+  'sender_address',
+  'transaction_hash',
+  'tx_hash',
+  'wallet_address',
 ])
 
 const maxCampaignValueLength = 256
@@ -49,6 +55,16 @@ const sensitivePathSegmentPatterns = [
   /^[a-f\d]{8}-[a-f\d]{4}-[1-5][a-f\d]{3}-[89ab][a-f\d]{3}-[a-f\d]{12}$/i,
 ]
 
+const productionAnalyticsHosts = new Set([
+  'developers.tempo.xyz',
+  'docs.tempo.xyz',
+  'mainnet.docs.tempo.xyz',
+  'tempo.xyz',
+  'www.tempo.xyz',
+])
+
+export const DEFAULT_ANALYTICS_RELEASE = 'docs_growth_v1'
+
 export type AnalyticsPageType =
   | 'developer_blog'
   | 'developer_feature'
@@ -57,10 +73,37 @@ export type AnalyticsPageType =
   | 'docs'
   | 'other'
 
+export type AnalyticsConversionIntent = 'contact' | 'developer' | 'none'
+export type AnalyticsDestinationKind = 'external' | 'internal'
+
 export type StrategicCta = {
   ctaId: string
+  ctaType: string
+  destination: string
   destinationCategory: string
-  conversionIntent?: string | undefined
+  destinationHost: string
+  destinationKind: AnalyticsDestinationKind
+  destinationPath: string
+  conversionIntent: AnalyticsConversionIntent
+  conversionDetail?: string | undefined
+}
+
+export function isProductionAnalyticsHost(hostname: string) {
+  return productionAnalyticsHosts.has(hostname.trim().toLowerCase().replace(/\.$/, ''))
+}
+
+export function getAnalyticsRuntimeProperties(site: string, release = DEFAULT_ANALYTICS_RELEASE) {
+  const safeRelease = /^[a-z\d][a-z\d._-]{0,63}$/i.test(release)
+    ? release
+    : DEFAULT_ANALYTICS_RELEASE
+
+  return {
+    site,
+    surface: site,
+    tempo_app_id: site,
+    client_type: 'browser',
+    release: safeRelease,
+  }
 }
 
 function shouldKeepQueryParameter(name: string) {
@@ -133,14 +176,16 @@ export function sanitizeAnalyticsUrl(value: string) {
 
   if (/^(?:mailto|tel):/i.test(input)) return input.replace(/:.*/, ':')
 
-  const isAbsolute = /^[a-z][a-z\d+.-]*:\/\//i.test(input)
+  const hasScheme = /^[a-z][a-z\d+.-]*:/i.test(input)
+  const isAbsolute = /^https?:\/\//i.test(input)
   const isProtocolRelative = input.startsWith('//')
   const isRelativeUrl = input.startsWith('/') || input.startsWith('?') || input.startsWith('#')
+  if (hasScheme && !isAbsolute) return ''
   if (!isAbsolute && !isProtocolRelative && !isRelativeUrl) return value
 
   try {
     const url = new URL(input, 'https://tempo.xyz')
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') return value
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return ''
 
     url.username = ''
     url.password = ''
@@ -165,7 +210,20 @@ export function sanitizeAnalyticsUrl(value: string) {
     if (isAbsolute || isProtocolRelative) return url.toString()
     return `${url.pathname}${url.search}`
   } catch {
-    return value
+    return ''
+  }
+}
+
+export function sanitizeAnalyticsPath(value: string) {
+  const input = value.trim()
+  if (!input) return input
+
+  try {
+    const url = new URL(input, 'https://tempo.xyz')
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return ''
+    return redactSensitivePathSegments(url.pathname)
+  } catch {
+    return ''
   }
 }
 
@@ -181,10 +239,37 @@ function isUrlProperty(name: string) {
   )
 }
 
+function isPathProperty(name: string) {
+  const normalized = name.toLowerCase()
+  return normalized === 'path' || normalized.endsWith('_path') || normalized.endsWith('pathname')
+}
+
+function sanitizeHeatmapData(value: unknown) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined
+
+  const sanitized: Record<string, unknown> = {}
+  for (const [rawUrl, points] of Object.entries(value as Record<string, unknown>)) {
+    const safeUrl = sanitizeAnalyticsUrl(rawUrl)
+    if (!safeUrl || !/^https?:\/\//i.test(safeUrl)) continue
+
+    const safePoints = sanitizePropertyValue('$heatmap_points', points)
+    const existing = sanitized[safeUrl]
+    sanitized[safeUrl] =
+      Array.isArray(existing) && Array.isArray(safePoints)
+        ? [...existing, ...safePoints]
+        : safePoints
+  }
+
+  return sanitized
+}
+
 function sanitizePropertyValue(name: string, value: unknown): unknown {
-  if (blockedPropertyNames.has(name.toLowerCase())) return undefined
+  const normalizedName = name.toLowerCase().replace(/^\$+/, '')
+  if (blockedPropertyNames.has(normalizedName)) return undefined
+  if (name === '$heatmap_data') return sanitizeHeatmapData(value)
   const campaignKind = campaignPropertyKind(name)
   if (campaignKind) return sanitizeCampaignValue(campaignKind, value)
+  if (typeof value === 'string' && isPathProperty(name)) return sanitizeAnalyticsPath(value)
   if (typeof value === 'string' && isUrlProperty(name)) return sanitizeAnalyticsUrl(value)
   if (Array.isArray(value))
     return value
@@ -211,7 +296,7 @@ export function sanitizePostHogCapture(capture: CaptureResult | null): CaptureRe
 
   return {
     ...capture,
-    properties: sanitizePropertyRecord(capture.properties as Record<string, unknown>),
+    properties: sanitizePropertyRecord((capture.properties ?? {}) as Record<string, unknown>),
     $set: capture.$set
       ? sanitizePropertyRecord(capture.$set as Record<string, unknown>)
       : undefined,
@@ -244,7 +329,32 @@ export function getAnalyticsPageSection(pathname: string) {
   return path.split('/')[1] || 'home'
 }
 
-function contactIntent(pathname: string) {
+export function getAnalyticsPageContext(pathname: string, title = '') {
+  const pagePath = sanitizeAnalyticsPath(normalizeAnalyticsPath(pathname)) || '/'
+  return {
+    page_path: pagePath,
+    page_type: classifyAnalyticsPage(pagePath),
+    page_section: getAnalyticsPageSection(pagePath),
+    page_title: title.trim().slice(0, 240),
+  }
+}
+
+export function enrichPostHogCapture(
+  capture: CaptureResult | null,
+  pathname: string,
+  title = '',
+): CaptureResult | null {
+  if (!capture) return null
+  return {
+    ...capture,
+    properties: {
+      ...getAnalyticsPageContext(pathname, title),
+      ...(capture.properties ?? {}),
+    },
+  } as CaptureResult
+}
+
+function contactConversionDetail(pathname: string) {
   const path = normalizeAnalyticsPath(pathname)
   if (path === '/docs/api' || path.startsWith('/docs/api/')) return 'api_access'
   if (path.includes('/zones')) return 'zones_design_partner'
@@ -253,55 +363,132 @@ function contactIntent(pathname: string) {
   return 'general_contact'
 }
 
+function normalizeAnalyticsHostname(hostname: string) {
+  return hostname.toLowerCase().replace(/^www\./, '')
+}
+
+function buildStrategicCta(
+  url: URL,
+  properties: {
+    ctaId: string
+    destinationCategory: string
+    conversionIntent: AnalyticsConversionIntent
+    conversionDetail?: string | undefined
+  },
+): StrategicCta {
+  const destinationHost = normalizeAnalyticsHostname(url.hostname)
+  return {
+    ...properties,
+    ctaType: properties.ctaId,
+    destination: sanitizeAnalyticsUrl(url.toString()),
+    destinationHost,
+    destinationKind: isProductionAnalyticsHost(url.hostname) ? 'internal' : 'external',
+    destinationPath: sanitizeAnalyticsPath(normalizeAnalyticsPath(url.pathname)),
+  }
+}
+
 /** Returns stable metadata only for destinations worth treating as funnel CTAs. */
 export function classifyStrategicCta(href: string, currentPathname: string): StrategicCta | null {
   try {
     const url = new URL(href, 'https://tempo.xyz')
-    const hostname = url.hostname.toLowerCase().replace(/^www\./, '')
+    const hostname = normalizeAnalyticsHostname(url.hostname)
     const path = normalizeAnalyticsPath(url.pathname)
+    const isDocsSurfaceHost = isProductionAnalyticsHost(url.hostname)
 
     if (hostname === 'tempo.xyz' && /^\/contact\/?$/.test(url.pathname)) {
-      const conversionIntent = contactIntent(currentPathname)
-      return {
-        ctaId: `contact_${conversionIntent}`,
+      const conversionDetail = contactConversionDetail(currentPathname)
+      return buildStrategicCta(url, {
+        ctaId: `contact_${conversionDetail}`,
         destinationCategory: 'contact',
-        conversionIntent,
-      }
+        conversionIntent: 'contact',
+        conversionDetail,
+      })
     }
 
     if (hostname === 'wallet.tempo.xyz')
-      return { ctaId: 'tempo_wallet', destinationCategory: 'wallet' }
-    if (hostname === 'faucet.tempo.xyz' || path === '/docs/quickstart/faucet')
-      return { ctaId: 'tempo_faucet', destinationCategory: 'faucet' }
+      return buildStrategicCta(url, {
+        ctaId: 'tempo_wallet',
+        destinationCategory: 'wallet',
+        conversionIntent: 'developer',
+        conversionDetail: 'wallet',
+      })
+    if (
+      hostname === 'faucet.tempo.xyz' ||
+      (isDocsSurfaceHost && path === '/docs/quickstart/faucet')
+    )
+      return buildStrategicCta(url, {
+        ctaId: 'tempo_faucet',
+        destinationCategory: 'faucet',
+        conversionIntent: 'developer',
+        conversionDetail: 'faucet',
+      })
     if (hostname === 'explorer.tempo.xyz')
-      return { ctaId: 'tempo_explorer', destinationCategory: 'explorer' }
+      return buildStrategicCta(url, {
+        ctaId: 'tempo_explorer',
+        destinationCategory: 'explorer',
+        conversionIntent: 'developer',
+        conversionDetail: 'explorer',
+      })
     if (hostname === 'github.com' && url.pathname.toLowerCase().startsWith('/tempoxyz'))
-      return { ctaId: 'tempo_github', destinationCategory: 'source' }
-    if (hostname === 'mpp.dev') return { ctaId: 'mpp_docs', destinationCategory: 'mpp' }
+      return buildStrategicCta(url, {
+        ctaId: 'tempo_github',
+        destinationCategory: 'source',
+        conversionIntent: 'developer',
+        conversionDetail: 'source',
+      })
+    if (hostname === 'mpp.dev')
+      return buildStrategicCta(url, {
+        ctaId: 'mpp_docs',
+        destinationCategory: 'mpp',
+        conversionIntent: 'developer',
+        conversionDetail: 'mpp',
+      })
 
-    const strategicDocsPaths: Record<string, StrategicCta> = {
+    const strategicDocsPaths: Record<
+      string,
+      Pick<StrategicCta, 'ctaId' | 'destinationCategory' | 'conversionIntent' | 'conversionDetail'>
+    > = {
       '/docs/guide/machine-payments': {
         ctaId: 'machine_payments_guide',
         destinationCategory: 'guide',
+        conversionIntent: 'developer',
+        conversionDetail: 'machine_payments_guide',
       },
       '/docs/guide/payments/accept-a-payment': {
         ctaId: 'accept_payments_guide',
         destinationCategory: 'guide',
+        conversionIntent: 'developer',
+        conversionDetail: 'accept_payments_guide',
+      },
+      '/docs/guide/payments/send-a-payment': {
+        ctaId: 'send_first_payment_guide',
+        destinationCategory: 'guide',
+        conversionIntent: 'developer',
+        conversionDetail: 'send_first_payment_guide',
       },
       '/docs/guide/using-tempo-with-ai': {
         ctaId: 'tempo_ai_guide',
         destinationCategory: 'agent_setup',
+        conversionIntent: 'developer',
+        conversionDetail: 'tempo_ai_guide',
       },
       '/docs/quickstart/integrate-tempo': {
         ctaId: 'integrate_tempo',
         destinationCategory: 'get_started',
+        conversionIntent: 'developer',
+        conversionDetail: 'integrate_tempo',
       },
     }
     const strategicDocsCta = strategicDocsPaths[path]
-    if (hostname === 'tempo.xyz' && strategicDocsCta) return strategicDocsCta
+    if (isDocsSurfaceHost && strategicDocsCta) return buildStrategicCta(url, strategicDocsCta)
 
     if (hostname === 'tempo.xyz' && path === '/') {
-      return { ctaId: 'tempo_marketing_site', destinationCategory: 'marketing' }
+      return buildStrategicCta(url, {
+        ctaId: 'tempo_marketing_site',
+        destinationCategory: 'marketing',
+        conversionIntent: 'none',
+        conversionDetail: 'marketing_site',
+      })
     }
 
     return null

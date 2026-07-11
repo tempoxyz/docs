@@ -1,9 +1,12 @@
 'use client'
 
 import {
-  classifyAnalyticsPage,
-  getAnalyticsPageSection,
+  classifyStrategicCta,
+  getAnalyticsPageContext,
+  isProductionAnalyticsHost,
   normalizeAnalyticsPath,
+  type StrategicCta,
+  sanitizeAnalyticsPath,
   sanitizeAnalyticsUrl,
 } from './posthog-analytics'
 
@@ -37,7 +40,18 @@ export const POSTHOG_PROPERTIES = {
   LINK_TEXT: 'link_text',
   BUTTON_TEXT: 'button_text',
   BUTTON_VARIANT: 'button_variant',
+  CTA_ID: 'cta_id',
+  CTA_TYPE: 'cta_type',
+  DESTINATION: 'destination',
+  DESTINATION_CATEGORY: 'destination_category',
+  DESTINATION_HOST: 'destination_host',
+  DESTINATION_KIND: 'destination_kind',
+  DESTINATION_PATH: 'destination_path',
+  CONVERSION_DETAIL: 'conversion_detail',
+  CONVERSION_INTENT: 'conversion_intent',
   EXTERNAL_DOMAIN: 'external_domain',
+  EVENT_FAMILY: 'event_family',
+  LOCATION: 'location',
   CODE_LANGUAGE: 'code_language',
   COPY_TYPE: 'copy_type',
   COPY_SOURCE: 'copy_source',
@@ -65,14 +79,10 @@ let posthogClient: PostHogClient | null = null
 
 function currentPageContext(): EventProperties {
   if (typeof window === 'undefined') return {}
-
-  const pagePath = normalizeAnalyticsPath(window.location.pathname)
-  return {
-    [POSTHOG_PROPERTIES.PAGE_PATH]: pagePath,
-    [POSTHOG_PROPERTIES.PAGE_TYPE]: classifyAnalyticsPage(pagePath),
-    [POSTHOG_PROPERTIES.PAGE_SECTION]: getAnalyticsPageSection(pagePath),
-    [POSTHOG_PROPERTIES.PAGE_TITLE]: typeof document === 'undefined' ? undefined : document.title,
-  }
+  return getAnalyticsPageContext(
+    window.location.pathname,
+    typeof document === 'undefined' ? '' : document.title,
+  )
 }
 
 export function captureDocsEvent(event: string, properties: EventProperties = {}) {
@@ -88,7 +98,7 @@ export function captureDocsEvent(event: string, properties: EventProperties = {}
   pendingEvents.push({ event, properties: payload })
 }
 
-/** Called after PostHog has registered the human site context. */
+/** Called after PostHog has registered the browser surface context. */
 export function markPostHogReady(client: PostHogClient) {
   posthogClient = client
   posthogReady = true
@@ -129,15 +139,25 @@ export function trackDocsCopyCode(properties: {
   })
 }
 
-export function trackDocsCtaClick(properties: {
-  ctaId: string
-  destinationCategory: string
-  conversionIntent?: string | undefined
-}) {
+export function trackDocsCtaClick(
+  properties: StrategicCta & {
+    ctaText?: string | undefined
+    location: string
+  },
+) {
   captureDocsEvent(POSTHOG_EVENTS.CTA_CLICK, {
-    cta_id: properties.ctaId,
-    destination_category: properties.destinationCategory,
-    conversion_intent: properties.conversionIntent,
+    [POSTHOG_PROPERTIES.EVENT_FAMILY]: 'cta_click',
+    [POSTHOG_PROPERTIES.CTA_ID]: properties.ctaId,
+    [POSTHOG_PROPERTIES.CTA_TYPE]: properties.ctaType,
+    [POSTHOG_PROPERTIES.BUTTON_TEXT]: safeLinkLabel(properties.ctaText),
+    [POSTHOG_PROPERTIES.DESTINATION]: properties.destination,
+    [POSTHOG_PROPERTIES.LOCATION]: properties.location,
+    [POSTHOG_PROPERTIES.DESTINATION_PATH]: properties.destinationPath,
+    [POSTHOG_PROPERTIES.DESTINATION_HOST]: properties.destinationHost,
+    [POSTHOG_PROPERTIES.DESTINATION_KIND]: properties.destinationKind,
+    [POSTHOG_PROPERTIES.DESTINATION_CATEGORY]: properties.destinationCategory,
+    [POSTHOG_PROPERTIES.CONVERSION_INTENT]: properties.conversionIntent,
+    [POSTHOG_PROPERTIES.CONVERSION_DETAIL]: properties.conversionDetail,
   })
 }
 
@@ -188,9 +208,46 @@ export function usePostHogTracking() {
     },
 
     trackCTAClick: (ctaText: string, destination?: string) => {
+      const classified = destination
+        ? classifyStrategicCta(destination, window.location.pathname)
+        : null
+      if (classified) {
+        trackDocsCtaClick({
+          ...classified,
+          ctaText,
+          location: 'interactive_demo',
+        })
+        return
+      }
+
+      let destinationPath: string | undefined
+      let destinationHost: string | undefined
+      let destinationKind: 'external' | 'internal' | undefined
+      if (destination) {
+        try {
+          const url = new URL(destination, window.location.origin)
+          destinationPath = sanitizeAnalyticsPath(normalizeAnalyticsPath(url.pathname))
+          destinationHost = url.hostname.toLowerCase().replace(/^www\./, '')
+          destinationKind = isProductionAnalyticsHost(url.hostname) ? 'internal' : 'external'
+        } catch {
+          // Keep the generic CTA event without destination metadata.
+        }
+      }
+
       captureDocsEvent(POSTHOG_EVENTS.CTA_CLICK, {
+        [POSTHOG_PROPERTIES.EVENT_FAMILY]: 'cta_click',
+        [POSTHOG_PROPERTIES.CTA_ID]: 'interactive_demo_cta',
+        [POSTHOG_PROPERTIES.CTA_TYPE]: 'interactive_demo',
         [POSTHOG_PROPERTIES.BUTTON_TEXT]: safeLinkLabel(ctaText),
-        [POSTHOG_PROPERTIES.LINK_URL]: destination ? sanitizeAnalyticsUrl(destination) : undefined,
+        [POSTHOG_PROPERTIES.DESTINATION]: destination
+          ? sanitizeAnalyticsUrl(destination)
+          : undefined,
+        [POSTHOG_PROPERTIES.LOCATION]: 'interactive_demo',
+        [POSTHOG_PROPERTIES.DESTINATION_PATH]: destinationPath,
+        [POSTHOG_PROPERTIES.DESTINATION_HOST]: destinationHost,
+        [POSTHOG_PROPERTIES.DESTINATION_KIND]: destinationKind,
+        [POSTHOG_PROPERTIES.DESTINATION_CATEGORY]: 'other',
+        [POSTHOG_PROPERTIES.CONVERSION_INTENT]: 'none',
       })
     },
 

@@ -9,7 +9,11 @@ import {
 } from '../lib/posthog'
 import {
   classifyStrategicCta,
+  DEFAULT_ANALYTICS_RELEASE,
+  enrichPostHogCapture,
+  getAnalyticsRuntimeProperties,
   hasUnsafeAnalyticsQuery,
+  isProductionAnalyticsHost,
   sanitizeAnalyticsUrl,
   sanitizePostHogCapture,
 } from '../lib/posthog-analytics'
@@ -18,6 +22,13 @@ const POSTHOG_UI_HOST = 'https://us.posthog.com'
 
 function eventTargetElement(event: Event) {
   return event.target instanceof Element ? event.target : null
+}
+
+function ctaLocation(anchor: HTMLAnchorElement) {
+  if (anchor.closest('header, nav')) return 'nav'
+  if (anchor.closest('footer')) return 'footer'
+  if (anchor.closest('aside')) return 'sidebar'
+  return 'content'
 }
 
 function codeLanguage(button: HTMLButtonElement) {
@@ -80,19 +91,23 @@ function PostHogInitializer({ site }: { site: string }) {
   useEffect(() => {
     const posthogKey = import.meta.env.VITE_POSTHOG_KEY
     if (!posthogKey) return
+    if (!isProductionAnalyticsHost(window.location.hostname)) return
+
+    const analyticsRelease =
+      import.meta.env.VITE_ANALYTICS_RELEASE?.trim() || DEFAULT_ANALYTICS_RELEASE
 
     let cancelled = false
     const initializePostHog = async () => {
       const { default: posthog } = await import('posthog-js')
       if (cancelled) return
 
-      const registerHumanContext = () => {
-        posthog.register({ site, traffic_type: 'human' })
+      const registerBrowserContext = () => {
+        posthog.register(getAnalyticsRuntimeProperties(site, analyticsRelease))
         markPostHogReady(posthog)
       }
 
       if (posthog.__loaded) {
-        registerHumanContext()
+        registerBrowserContext()
         return
       }
 
@@ -154,10 +169,13 @@ function PostHogInitializer({ site }: { site: string }) {
         },
         disable_session_recording: hasUnsafeAnalyticsQuery(window.location.href),
         enable_recording_console_log: false,
-        before_send: sanitizePostHogCapture,
+        before_send: (capture) =>
+          sanitizePostHogCapture(
+            enrichPostHogCapture(capture, window.location.pathname, document.title),
+          ),
         capture_exceptions: true,
         debug: import.meta.env.MODE === 'development',
-        loaded: registerHumanContext,
+        loaded: registerBrowserContext,
       })
     }
     void initializePostHog()
@@ -188,7 +206,12 @@ function PostHogInitializer({ site }: { site: string }) {
         if (captureSearchResult(anchor)) return
 
         const cta = classifyStrategicCta(anchor.href, window.location.pathname)
-        if (cta) trackDocsCtaClick(cta)
+        if (cta)
+          trackDocsCtaClick({
+            ...cta,
+            ctaText: anchor.textContent ?? undefined,
+            location: ctaLocation(anchor),
+          })
       }
 
       const button = target.closest<HTMLButtonElement>('button')
