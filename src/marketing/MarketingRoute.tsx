@@ -2,7 +2,6 @@
 
 import { lazy, type ReactNode, Suspense, useEffect, useState } from 'react'
 import PageHead from '../components/PageHead'
-import PostHogSetup from '../components/PostHogSetup'
 import { type RouteMetadata, routeMetadata } from './routeMetadata'
 
 const Analytics = lazy(() =>
@@ -12,6 +11,7 @@ const SpeedInsights = lazy(() =>
   import('@vercel/speed-insights/react').then((module) => ({ default: module.SpeedInsights })),
 )
 const GoogleAnalytics = lazy(() => import('../components/GoogleAnalytics'))
+const PostHogSetup = lazy(() => import('../components/PostHogSetup'))
 
 const prefetchedPaths = new Set<string>()
 const ANALYTICS_DELAY_MS = 15_000
@@ -73,11 +73,14 @@ export default function MarketingRoute({
   head?: ReactNode
 }) {
   const [analyticsReady, setAnalyticsReady] = useState(false)
+  const [postHogReady, setPostHogReady] = useState(false)
   const resolvedMetadata = metadata ?? routeMetadata[route] ?? fallbackMetadata(route)
 
   useEffect(() => {
     return scheduleIdleAnalytics(() => setAnalyticsReady(true))
   }, [])
+
+  useEffect(() => setPostHogReady(true), [])
 
   useEffect(() => {
     const prefetchAnchor = (event: Event) => {
@@ -102,7 +105,11 @@ export default function MarketingRoute({
       <PageHead title={resolvedMetadata.title} description={resolvedMetadata.description}>
         {head}
       </PageHead>
-      <PostHogSetup site="developers" />
+      {postHogReady && (
+        <Suspense fallback={null}>
+          <PostHogSetup site="developers" />
+        </Suspense>
+      )}
       {children}
       {analyticsReady && (
         <Suspense fallback={null}>

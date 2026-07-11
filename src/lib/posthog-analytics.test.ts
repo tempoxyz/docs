@@ -4,6 +4,7 @@ import {
   classifyAnalyticsPage,
   classifyStrategicCta,
   getAnalyticsPageSection,
+  hasUnsafeAnalyticsQuery,
   sanitizeAnalyticsUrl,
   sanitizePostHogCapture,
 } from './posthog-analytics'
@@ -14,7 +15,7 @@ describe('sanitizeAnalyticsUrl', () => {
       sanitizeAnalyticsUrl(
         '/developers/docs/api?utm_source=chatgpt&gclid=abc123&email=juan%40example.com#token',
       ),
-    ).toBe('/developers/docs/api?utm_source=chatgpt&gclid=abc123')
+    ).toBe('/developers/docs/api?utm_source=chatgpt&gclid=present')
   })
 
   it('removes URL credentials and redacts blockchain identifiers', () => {
@@ -37,6 +38,15 @@ describe('sanitizeAnalyticsUrl', () => {
         '/docs?utm_source=person%40example.com&utm_campaign=enterprise&query=private',
       ),
     ).toBe('/docs?utm_campaign=enterprise')
+    expect(sanitizeAnalyticsUrl('/docs?gclid=secret-click-id')).toBe('/docs?gclid=present')
+  })
+
+  it('detects URLs that must not be included in session replay', () => {
+    expect(hasUnsafeAnalyticsQuery('/docs?utm_source=chatgpt')).toBe(false)
+    expect(hasUnsafeAnalyticsQuery('/docs?utm_source=person%40example.com')).toBe(true)
+    expect(hasUnsafeAnalyticsQuery('/docs?utm_email=juan')).toBe(true)
+    expect(hasUnsafeAnalyticsQuery('/docs?gclid=raw-click-id')).toBe(true)
+    expect(hasUnsafeAnalyticsQuery('/docs?query=customer-secret')).toBe(true)
   })
 })
 
@@ -48,6 +58,8 @@ describe('sanitizePostHogCapture', () => {
         command_text: 'pnpm secret-command',
         search_query: 'customer api key',
         $current_url: 'https://tempo.xyz/docs?utm_source=perplexity&token=secret#section',
+        $session_entry_utm_source: 'person@example.com',
+        $gclid: 'raw-click-id',
         $elements: [
           {
             attr__href: '/docs/api?utm_campaign=launch&api_key=secret#authentication',
@@ -59,6 +71,7 @@ describe('sanitizePostHogCapture', () => {
     const sanitized = sanitizePostHogCapture(capture)
     expect(sanitized?.properties).toEqual({
       $current_url: 'https://tempo.xyz/docs?utm_source=perplexity',
+      $gclid: 'present',
       $elements: [{ attr__href: '/docs/api?utm_campaign=launch' }],
     })
   })

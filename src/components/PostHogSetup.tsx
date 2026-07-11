@@ -1,6 +1,5 @@
 'use client'
 
-import posthog from 'posthog-js'
 import { useEffect } from 'react'
 import {
   markPostHogReady,
@@ -8,7 +7,12 @@ import {
   trackDocsCtaClick,
   trackDocsSearchResultClick,
 } from '../lib/posthog'
-import { classifyStrategicCta, sanitizePostHogCapture } from '../lib/posthog-analytics'
+import {
+  classifyStrategicCta,
+  hasUnsafeAnalyticsQuery,
+  sanitizeAnalyticsUrl,
+  sanitizePostHogCapture,
+} from '../lib/posthog-analytics'
 
 const POSTHOG_UI_HOST = 'https://us.posthog.com'
 
@@ -77,14 +81,21 @@ function PostHogInitializer({ site }: { site: string }) {
     const posthogKey = import.meta.env.VITE_POSTHOG_KEY
     if (!posthogKey) return
 
-    const registerHumanContext = () => {
-      posthog.register({ site, traffic_type: 'human' })
-      markPostHogReady()
-    }
+    let cancelled = false
+    const initializePostHog = async () => {
+      const { default: posthog } = await import('posthog-js')
+      if (cancelled) return
 
-    if (posthog.__loaded) {
-      registerHumanContext()
-    } else {
+      const registerHumanContext = () => {
+        posthog.register({ site, traffic_type: 'human' })
+        markPostHogReady(posthog)
+      }
+
+      if (posthog.__loaded) {
+        registerHumanContext()
+        return
+      }
+
       posthog.init(posthogKey, {
         api_host: '/ingest',
         ui_host: POSTHOG_UI_HOST,
@@ -128,7 +139,20 @@ function PostHogInitializer({ site }: { site: string }) {
           recordBody: false,
           captureCanvas: { recordCanvas: false },
           collectFonts: false,
+          maskCapturedNetworkRequestFn: (request) => {
+            const name = sanitizeAnalyticsUrl(request.name)
+            if (!name) return undefined
+            return {
+              ...request,
+              name,
+              requestHeaders: undefined,
+              requestBody: undefined,
+              responseHeaders: undefined,
+              responseBody: undefined,
+            }
+          },
         },
+        disable_session_recording: hasUnsafeAnalyticsQuery(window.location.href),
         enable_recording_console_log: false,
         before_send: sanitizePostHogCapture,
         capture_exceptions: true,
@@ -136,6 +160,7 @@ function PostHogInitializer({ site }: { site: string }) {
         loaded: registerHumanContext,
       })
     }
+    void initializePostHog()
 
     let lastSearchSelection = ''
     let lastSearchSelectionAt = 0
@@ -189,11 +214,12 @@ function PostHogInitializer({ site }: { site: string }) {
       if (anchor) captureSearchResult(anchor)
     }
 
-    document.addEventListener('click', handleClick, true)
-    document.addEventListener('keydown', handleKeyDown, true)
+    window.addEventListener('click', handleClick, true)
+    window.addEventListener('keydown', handleKeyDown, true)
     return () => {
-      document.removeEventListener('click', handleClick, true)
-      document.removeEventListener('keydown', handleKeyDown, true)
+      cancelled = true
+      window.removeEventListener('click', handleClick, true)
+      window.removeEventListener('keydown', handleKeyDown, true)
     }
   }, [site])
 

@@ -1,6 +1,5 @@
 'use client'
 
-import posthog from 'posthog-js'
 import {
   classifyAnalyticsPage,
   getAnalyticsPageSection,
@@ -57,10 +56,12 @@ export const POSTHOG_PROPERTIES = {
 
 type EventProperties = Record<string, unknown>
 type PendingEvent = { event: string; properties: EventProperties }
+type PostHogClient = typeof import('posthog-js')['default']
 
 const pendingEvents: PendingEvent[] = []
 const maxPendingEvents = 50
 let posthogReady = false
+let posthogClient: PostHogClient | null = null
 
 function currentPageContext(): EventProperties {
   if (typeof window === 'undefined') return {}
@@ -78,8 +79,8 @@ export function captureDocsEvent(event: string, properties: EventProperties = {}
   if (typeof window === 'undefined') return
 
   const payload = { ...currentPageContext(), ...properties }
-  if (posthogReady && posthog.__loaded) {
-    posthog.capture(event, payload)
+  if (posthogReady && posthogClient?.__loaded) {
+    posthogClient.capture(event, payload)
     return
   }
 
@@ -88,10 +89,11 @@ export function captureDocsEvent(event: string, properties: EventProperties = {}
 }
 
 /** Called after PostHog has registered the human site context. */
-export function markPostHogReady() {
+export function markPostHogReady(client: PostHogClient) {
+  posthogClient = client
   posthogReady = true
   for (const pending of pendingEvents.splice(0)) {
-    posthog.capture(pending.event, pending.properties)
+    posthogClient.capture(pending.event, pending.properties)
   }
 }
 
@@ -145,7 +147,7 @@ function safeLinkLabel(value?: string) {
 
 export function usePostHogTracking() {
   return {
-    posthog,
+    posthog: posthogClient,
     trackPageView: (path: string, title?: string) => {
       captureDocsEvent(POSTHOG_EVENTS.PAGE_VIEW, {
         [POSTHOG_PROPERTIES.PAGE_PATH]: normalizeAnalyticsPath(path),

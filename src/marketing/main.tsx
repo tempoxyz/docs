@@ -10,7 +10,6 @@ import {
 } from 'react'
 import { createRoot } from 'react-dom/client'
 import '../pages/_root.css'
-import PostHogSetup from '../components/PostHogSetup'
 import Header from './app/_components/Header'
 import TpsTrendChartFrame from './app/performance/_components/TpsTrendChartFrame'
 import HomePage from './HomePage'
@@ -28,6 +27,7 @@ const SpeedInsights = lazy(() =>
   import('@vercel/speed-insights/react').then((module) => ({ default: module.SpeedInsights })),
 )
 const GoogleAnalytics = lazy(() => import('../components/GoogleAnalytics'))
+const PostHogSetup = lazy(() => import('../components/PostHogSetup'))
 const PerformancePage = lazy(loadPerformancePage)
 const FeaturePage = lazy(loadFeaturePage)
 const BlogPage = lazy(loadBlogPage)
@@ -165,6 +165,7 @@ function renderRoute(path: string): ReactNode {
 function MarketingApp() {
   const [route, setRoute] = useState(currentRoute)
   const [analyticsReady, setAnalyticsReady] = useState(false)
+  const [postHogReady, setPostHogReady] = useState(false)
   const routeRef = useRef(route)
   const pendingScrollRef = useRef<string | null>(null)
 
@@ -192,6 +193,8 @@ function MarketingApp() {
     setAnalyticsReady(false)
     return scheduleIdleAnalytics(() => setAnalyticsReady(true))
   }, [])
+
+  useEffect(() => setPostHogReady(true), [])
 
   useEffect(() => {
     const update = () => {
@@ -251,7 +254,11 @@ function MarketingApp() {
 
   return (
     <>
-      <PostHogSetup site="developers" />
+      {postHogReady && (
+        <Suspense fallback={null}>
+          <PostHogSetup site="developers" />
+        </Suspense>
+      )}
       <Suspense fallback={<RouteFallback route={route} />}>{renderRoute(route)}</Suspense>
       {analyticsReady && (
         <Suspense fallback={null}>

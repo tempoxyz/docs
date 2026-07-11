@@ -1,11 +1,10 @@
 'use client'
 
-import { lazy, type PropsWithChildren, Suspense } from 'react'
+import { lazy, type PropsWithChildren, Suspense, useEffect, useState } from 'react'
 import DocsHeader from '../../components/DocsHeader'
 import DocsJsonLd from '../../components/DocsJsonLd'
 import DocsSectionNav from '../../components/DocsSectionNav'
 import DocsSidebarDrawer from '../../components/DocsSidebarDrawer'
-import PostHogSetup from '../../components/PostHogSetup'
 import { usePageSettled } from '../../lib/pageSettled'
 import { normalizeRscFetchUrl } from '../../lib/rsc-route-normalization'
 
@@ -17,6 +16,7 @@ const SpeedInsights = lazy(() =>
 )
 const Toaster = lazy(() => import('sonner').then((module) => ({ default: module.Toaster })))
 const GoogleAnalytics = lazy(() => import('../../components/GoogleAnalytics'))
+const PostHogSetup = lazy(() => import('../../components/PostHogSetup'))
 
 if (typeof window !== 'undefined') {
   const originalFetch = window.fetch.bind(window)
@@ -47,17 +47,20 @@ export default function DocsLayout(
   }>,
 ) {
   const pageSettled = usePageSettled()
+  const [postHogReady, setPostHogReady] = useState(false)
   const needsToaster = Boolean(props.frontmatter?.interactive || props.frontmatter?.mipd)
+
+  useEffect(() => setPostHogReady(true), [])
 
   return (
     <>
       <DocsJsonLd path={props.path} />
-      <PostHogSetup />
       <DocsHeader />
       <DocsSectionNav />
       <DocsSidebarDrawer />
       {props.children}
       <Suspense fallback={null}>
+        {postHogReady && <PostHogSetup />}
         {needsToaster && (
           <Toaster
             className="z-42069 select-none"

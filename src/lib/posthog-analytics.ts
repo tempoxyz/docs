@@ -15,6 +15,20 @@ const campaignQueryParameters = new Set([
   'wbraid',
 ])
 
+const utmQueryParameters = new Set([
+  'utm_campaign',
+  'utm_content',
+  'utm_creative_format',
+  'utm_id',
+  'utm_marketing_tactic',
+  'utm_medium',
+  'utm_source',
+  'utm_source_platform',
+  'utm_term',
+])
+
+const safeCampaignValuePattern = /^[a-z\d][a-z\d._~+-]{0,127}$/i
+
 const blockedPropertyNames = new Set([
   'api_key',
   'authorization',
@@ -51,7 +65,45 @@ export type StrategicCta = {
 
 function shouldKeepQueryParameter(name: string) {
   const normalized = name.toLowerCase()
-  return normalized.startsWith('utm_') || campaignQueryParameters.has(normalized)
+  return utmQueryParameters.has(normalized) || campaignQueryParameters.has(normalized)
+}
+
+function campaignPropertyKind(name: string) {
+  const normalized = name.toLowerCase().replace(/^\$+/, '')
+  if (
+    /(?:^|_)utm_(?:source|medium|campaign|term|content|id|source_platform|creative_format|marketing_tactic)$/.test(
+      normalized,
+    )
+  )
+    return 'campaign'
+  if (
+    [...campaignQueryParameters].some(
+      (parameter) => normalized === parameter || normalized.endsWith(`_${parameter}`),
+    )
+  )
+    return 'click_id'
+  return null
+}
+
+function sanitizeCampaignValue(kind: 'campaign' | 'click_id', value: unknown) {
+  if (typeof value !== 'string' || !value) return undefined
+  if (kind === 'click_id') return 'present'
+  return safeCampaignValuePattern.test(value) ? value : undefined
+}
+
+export function hasUnsafeAnalyticsQuery(value: string) {
+  try {
+    const url = new URL(value, 'https://tempo.xyz')
+    for (const [name, campaignValue] of url.searchParams.entries()) {
+      const normalized = name.toLowerCase()
+      if (campaignQueryParameters.has(normalized)) return true
+      if (!utmQueryParameters.has(normalized)) return true
+      if (!sanitizeCampaignValue('campaign', campaignValue)) return true
+    }
+    return false
+  } catch {
+    return true
+  }
 }
 
 function redactSensitivePathSegments(pathname: string) {
@@ -95,17 +147,19 @@ export function sanitizeAnalyticsUrl(value: string) {
     url.hash = ''
     url.pathname = redactSensitivePathSegments(url.pathname)
 
-    for (const name of [...url.searchParams.keys()]) {
+    for (const name of [...new Set(url.searchParams.keys())]) {
       if (!shouldKeepQueryParameter(name)) {
         url.searchParams.delete(name)
         continue
       }
 
-      const values = url.searchParams
-        .getAll(name)
-        .filter((item) => item.length <= maxCampaignValueLength && !item.includes('@'))
+      const kind = utmQueryParameters.has(name.toLowerCase()) ? 'campaign' : 'click_id'
+      const values = url.searchParams.getAll(name)
       url.searchParams.delete(name)
-      for (const item of values) url.searchParams.append(name, item)
+      for (const item of values) {
+        const sanitized = sanitizeCampaignValue(kind, item.slice(0, maxCampaignValueLength))
+        if (sanitized) url.searchParams.append(name, sanitized)
+      }
     }
 
     if (isAbsolute || isProtocolRelative) return url.toString()
@@ -129,6 +183,8 @@ function isUrlProperty(name: string) {
 
 function sanitizePropertyValue(name: string, value: unknown): unknown {
   if (blockedPropertyNames.has(name.toLowerCase())) return undefined
+  const campaignKind = campaignPropertyKind(name)
+  if (campaignKind) return sanitizeCampaignValue(campaignKind, value)
   if (typeof value === 'string' && isUrlProperty(name)) return sanitizeAnalyticsUrl(value)
   if (Array.isArray(value))
     return value
