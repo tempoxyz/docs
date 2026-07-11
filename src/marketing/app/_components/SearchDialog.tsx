@@ -4,6 +4,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { trackDocsSearchResultClick } from '../../../lib/posthog'
 import { loadSearchIndex, type SearchResult, searchDocs } from '../../search'
 
 function SearchIcon() {
@@ -175,10 +176,17 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
   const go = useCallback(
     (result: SearchResult | undefined) => {
       if (!result) return
+      const resultUrl = new URL(result.href, window.location.origin)
+      trackDocsSearchResultClick({
+        queryLength: query.trim().length,
+        resultPath: resultUrl.pathname,
+        resultRank: Math.max(results.indexOf(result) + 1, 0),
+        resultType: result.type,
+      })
       onClose()
       window.location.assign(result.href)
     },
-    [onClose],
+    [onClose, query, results],
   )
 
   const handleKeyDown = useCallback(

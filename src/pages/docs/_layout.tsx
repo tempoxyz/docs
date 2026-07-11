@@ -5,6 +5,7 @@ import DocsHeader from '../../components/DocsHeader'
 import DocsJsonLd from '../../components/DocsJsonLd'
 import DocsSectionNav from '../../components/DocsSectionNav'
 import DocsSidebarDrawer from '../../components/DocsSidebarDrawer'
+import PostHogSetup from '../../components/PostHogSetup'
 import { usePageSettled } from '../../lib/pageSettled'
 import { normalizeRscFetchUrl } from '../../lib/rsc-route-normalization'
 
@@ -16,7 +17,6 @@ const SpeedInsights = lazy(() =>
 )
 const Toaster = lazy(() => import('sonner').then((module) => ({ default: module.Toaster })))
 const GoogleAnalytics = lazy(() => import('../../components/GoogleAnalytics'))
-const PostHogSetup = lazy(() => import('../../components/PostHogSetup'))
 
 if (typeof window !== 'undefined') {
   const originalFetch = window.fetch.bind(window)
@@ -52,6 +52,7 @@ export default function DocsLayout(
   return (
     <>
       <DocsJsonLd path={props.path} />
+      <PostHogSetup />
       <DocsHeader />
       <DocsSectionNav />
       <DocsSidebarDrawer />
@@ -76,7 +77,6 @@ export default function DocsLayout(
             <SpeedInsights route={props.path} />
             <Analytics />
             <GoogleAnalytics />
-            <PostHogSetup />
           </>
         )}
       </Suspense>

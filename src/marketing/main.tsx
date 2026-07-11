@@ -10,6 +10,7 @@ import {
 } from 'react'
 import { createRoot } from 'react-dom/client'
 import '../pages/_root.css'
+import PostHogSetup from '../components/PostHogSetup'
 import Header from './app/_components/Header'
 import TpsTrendChartFrame from './app/performance/_components/TpsTrendChartFrame'
 import HomePage from './HomePage'
@@ -27,7 +28,6 @@ const SpeedInsights = lazy(() =>
   import('@vercel/speed-insights/react').then((module) => ({ default: module.SpeedInsights })),
 )
 const GoogleAnalytics = lazy(() => import('../components/GoogleAnalytics'))
-const PostHogSetup = lazy(() => import('../components/PostHogSetup'))
 const PerformancePage = lazy(loadPerformancePage)
 const FeaturePage = lazy(loadFeaturePage)
 const BlogPage = lazy(loadBlogPage)
@@ -251,13 +251,13 @@ function MarketingApp() {
 
   return (
     <>
+      <PostHogSetup site="developers" />
       <Suspense fallback={<RouteFallback route={route} />}>{renderRoute(route)}</Suspense>
       {analyticsReady && (
         <Suspense fallback={null}>
           <SpeedInsights route={route} />
           <Analytics />
           <GoogleAnalytics />
-          <PostHogSetup site="developers" />
         </Suspense>
       )}
     </>

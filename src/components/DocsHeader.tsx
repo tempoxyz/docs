@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 're
 import { useConfig } from 'vocs'
 import { useRouter } from 'waku'
 import { DOCS_SEARCH_PARAM } from '../lib/docs-search'
+import { trackDocsSearchOpened } from '../lib/posthog'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 
 type MegaLink = {
@@ -1098,11 +1099,24 @@ export default function DocsHeader() {
     cancelClose()
     setActiveMenu(null)
     close()
+    trackDocsSearchOpened('header')
     openDocsSearch()
   }
 
   useEffect(() => {
     warmMarketingApp()
+  }, [])
+
+  useEffect(() => {
+    const trackKeyboardSearch = (event: KeyboardEvent) => {
+      if (!event.isTrusted) return
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        trackDocsSearchOpened('keyboard')
+      }
+    }
+
+    document.addEventListener('keydown', trackKeyboardSearch)
+    return () => document.removeEventListener('keydown', trackKeyboardSearch)
   }, [])
 
   // Open the search dialog when arriving from the marketing site's search CTA
@@ -1119,6 +1133,7 @@ export default function DocsHeader() {
       '',
       `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`,
     )
+    trackDocsSearchOpened('marketing')
     openDocsSearchWhenReady()
   }, [])
 
