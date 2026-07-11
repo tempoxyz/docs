@@ -5,7 +5,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers",
@@ -16,7 +16,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers",
@@ -27,7 +27,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers/:path*",
@@ -38,7 +38,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers/docs/guide/bridge-layerzero",
@@ -49,7 +49,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers/docs/guide/bridge-relay",
@@ -60,7 +60,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers/docs/guide/node/network-upgrades",
@@ -71,7 +71,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers/docs/protocol/transactions/AccountKeychain",
@@ -82,7 +82,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers/docs/ecosystem",
@@ -93,7 +93,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers/docs/partners",
@@ -104,7 +104,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers/docs/partners",
@@ -115,7 +115,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers/docs/partners",
@@ -126,7 +126,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers/docs/partners",
@@ -137,7 +137,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers/docs/guide/node/network-upgrades",
@@ -148,7 +148,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers/docs/:section",
@@ -159,7 +159,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers/docs/:section/:path*",
@@ -170,7 +170,7 @@
       "has": [
         {
           "type": "host",
-          "value": "docs.tempo.xyz"
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.xyz/developers/:path*",
