@@ -1,6 +1,7 @@
 'use client'
 
 import { lazy, type ReactNode, Suspense, useEffect, useState } from 'react'
+import MarketingJsonLd from '../components/MarketingJsonLd'
 import PageHead from '../components/PageHead'
 import { type RouteMetadata, routeMetadata } from './routeMetadata'
 
@@ -100,6 +101,11 @@ export default function MarketingRoute({
   return (
     <>
       <PageHead title={resolvedMetadata.title} description={resolvedMetadata.description}>
+        <MarketingJsonLd
+          route={route}
+          title={resolvedMetadata.title}
+          description={resolvedMetadata.description}
+        />
         {head}
       </PageHead>
       {children}

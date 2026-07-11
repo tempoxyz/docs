@@ -1,82 +1,71 @@
 import { useRouter } from 'vocs'
-
-const tempoSameAs = [
-  'https://x.com/tempo',
-  'https://twitter.com/tempo',
-  'https://github.com/tempoxyz',
-  'https://www.linkedin.com/company/tempoxyz',
-  'https://www.crunchbase.com/organization/tempo-87e4',
-]
-
-const tempoKnowsAbout = [
-  'stablecoin payments',
-  'cross-border payments',
-  'global payouts',
-  'agentic payments',
-  'machine payments',
-  'enterprise settlement',
-  'payment blockchains',
-  'Layer 1 blockchain',
-  'stablecoin infrastructure',
-]
-
-const description =
-  'Tempo is a payments-first Layer 1 blockchain incubated by Stripe and Paradigm. Tempo documentation covers stablecoin payments, global payouts, agentic payments, APIs, wallets, and protocol specifications.'
+import {
+  canonicalDevelopersUrl,
+  serializeJsonLd,
+  TEMPO_ENTITY_DESCRIPTION,
+  TEMPO_ORGANIZATION_ID,
+  TEMPO_WEBSITE_ID,
+  tempoOrganizationSchema,
+  tempoWebsiteSchema,
+} from '../lib/tempo-entity'
 
 type DocsJsonLdOptions = {
   path?: string
+  title?: string
+  description?: string
 }
 
 export function createDocsJsonLdSchema(options: DocsJsonLdOptions = {}) {
-  const path = options.path || '/docs'
-  const pathname = path.startsWith('/') ? path : `/${path}`
-  const url = `https://docs.tempo.xyz${pathname}`
+  const url = canonicalDevelopersUrl(options.path || '/docs')
+  const title = options.title || titleFromPath(options.path || '/docs')
+  const description = options.description || TEMPO_ENTITY_DESCRIPTION
 
   return {
     '@context': 'https://schema.org',
     '@graph': [
+      tempoOrganizationSchema(),
+      tempoWebsiteSchema(),
       {
-        '@type': 'Organization',
-        '@id': 'https://tempo.xyz/#organization',
-        name: 'Tempo',
-        url: 'https://tempo.xyz',
-        description,
-        sameAs: tempoSameAs,
-        knowsAbout: tempoKnowsAbout,
-      },
-      {
-        '@type': 'WebSite',
-        '@id': 'https://docs.tempo.xyz/#website',
-        name: 'Tempo Docs',
-        url: 'https://docs.tempo.xyz',
-        description,
-        publisher: { '@id': 'https://tempo.xyz/#organization' },
-      },
-      {
-        '@type': 'TechArticle',
+        '@type': ['WebPage', 'TechArticle'],
         '@id': url,
         url,
-        headline: 'Tempo documentation',
+        name: title,
+        headline: title,
         description,
-        isPartOf: { '@id': 'https://docs.tempo.xyz/#website' },
-        about: { '@id': 'https://tempo.xyz/#organization' },
-        publisher: { '@id': 'https://tempo.xyz/#organization' },
+        isPartOf: { '@id': TEMPO_WEBSITE_ID },
+        about: { '@id': TEMPO_ORGANIZATION_ID },
+        publisher: { '@id': TEMPO_ORGANIZATION_ID },
       },
     ],
   }
 }
 
-export function serializeJsonLd(schema: unknown) {
-  return JSON.stringify(schema)
-    .replace(/</g, '\\u003c')
-    .replace(/>/g, '\\u003e')
-    .replace(/&/g, '\\u0026')
+function titleFromPath(path: string) {
+  const segment = path.split('/').filter(Boolean).at(-1)
+  if (!segment || segment === 'docs') return 'Tempo documentation'
+
+  const labels: Record<string, string> = {
+    api: 'Tempo API',
+    cli: 'Tempo CLI',
+    rpc: 'RPC',
+    sdk: 'Tempo SDKs',
+    tip20: 'TIP-20',
+    tip403: 'TIP-403',
+  }
+  if (labels[segment]) return labels[segment]
+
+  return segment
+    .split('-')
+    .map((word, index) => (index === 0 ? `${word[0]?.toUpperCase() ?? ''}${word.slice(1)}` : word))
+    .join(' ')
 }
 
-export default function DocsJsonLd(props: { path?: string }) {
+export default function DocsJsonLd(props: { path?: string; title?: string; description?: string }) {
   const { path } = useRouter()
   const schema = createDocsJsonLdSchema({
     path: props.path ?? path,
+    title: props.title,
+    description: props.description,
   })
 
   return (

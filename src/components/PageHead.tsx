@@ -29,6 +29,7 @@ export default function PageHead({
   return (
     <MdxPageContextProvider frontmatter={{ title, description }}>
       <Head />
+      <meta property="og:site_name" content="Tempo" />
       <meta property="og:image:alt" content={title} />
       {children}
     </MdxPageContextProvider>
