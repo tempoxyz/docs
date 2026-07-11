@@ -7,7 +7,9 @@ import { mnemonicToAccount } from 'viem/accounts'
 import { Actions } from 'viem/tempo'
 import { useBlockNumber, useClient, useConnection } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
+import { assertSuccessfulFaucetReceipts } from '../../../../lib/developer-activation'
 import { Button, ExplorerAccountLink, Step } from '../../Demo'
+import { useFaucetActivation } from '../../FaucetActivationExperiment'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
@@ -15,6 +17,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
   const { stepNumber = 2, last = false } = props
   const { address } = useConnection()
   const queryClient = useQueryClient()
+  const activation = useFaucetActivation()
   const [fundAddress, setFundAddress] = React.useState<string | undefined>(undefined)
 
   // Initialize fundAddress with connected wallet address (only once)
@@ -37,7 +40,6 @@ export function AddFundsToOthers(props: DemoStepProps) {
       refetchInterval: 1_500,
     },
   })
-  // biome-ignore lint/correctness/useExhaustiveDependencies: _
   React.useEffect(() => {
     balanceRefetch()
   }, [blockNumber])
@@ -47,7 +49,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
       if (!isValidTarget) throw new Error('valid target address not found')
       if (!client) throw new Error('client not found')
 
-      let receipts = null
+      let receipts: readonly { status?: string }[]
       if (import.meta.env.VITE_TEMPO_ENV !== 'localnet')
         receipts = await Actions.faucet.fundSync(client as unknown as Client<Transport, Chain>, {
           account: targetAddress as Address,
@@ -66,11 +68,23 @@ export function AddFundsToOthers(props: DemoStepProps) {
         )
         receipts = [result.receipt]
       }
+      assertSuccessfulFaucetReceipts(receipts)
       await new Promise((resolve) => setTimeout(resolve, 400))
       queryClient.refetchQueries({ queryKey: ['getBalance'] })
       return receipts
     },
+    onSuccess(receipts) {
+      activation.claimSucceeded('address_form', receipts.length)
+    },
+    onError(error) {
+      activation.claimFailed('address_form', error)
+    },
   })
+
+  const claimFunds = React.useCallback(() => {
+    activation.claimStarted('address_form')
+    fundAccount.mutate()
+  }, [activation, fundAccount.mutate])
 
   const active = React.useMemo(() => {
     // If this is the last step, simply has to be logged in
@@ -87,7 +101,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
           disabled={!isValidTarget || fundAccount.isPending}
           variant="default"
           className="font-normal text-[14px] -tracking-[2%]"
-          onClick={() => fundAccount.mutate()}
+          onClick={claimFunds}
           type="button"
         >
           {fundAccount.isPending ? 'Adding funds' : 'Add more funds'}
@@ -99,7 +113,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
         variant={isValidTarget ? 'accent' : 'default'}
         className="font-normal text-[14px] -tracking-[2%]"
         type="button"
-        onClick={() => fundAccount.mutate()}
+        onClick={claimFunds}
       >
         {fundAccount.isPending ? 'Adding funds' : 'Add funds'}
       </Button>
@@ -109,7 +123,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
     balance,
     fundAccount.isPending,
     fundAccount.isSuccess,
-    fundAccount.mutate,
+    claimFunds,
     fundAccount,
   ])
 

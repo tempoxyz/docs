@@ -71,8 +71,10 @@ export const POSTHOG_PROPERTIES = {
 type EventProperties = Record<string, unknown>
 type PendingEvent = { event: string; properties: EventProperties }
 type PostHogClient = typeof import('posthog-js')['default']
+type PostHogReadyListener = (client: PostHogClient) => void
 
 const pendingEvents: PendingEvent[] = []
+const posthogReadyListeners = new Set<PostHogReadyListener>()
 const maxPendingEvents = 50
 let posthogReady = false
 let posthogClient: PostHogClient | null = null
@@ -104,6 +106,15 @@ export function markPostHogReady(client: PostHogClient) {
   posthogReady = true
   for (const pending of pendingEvents.splice(0)) {
     posthogClient.capture(pending.event, pending.properties)
+  }
+  for (const listener of posthogReadyListeners) listener(client)
+}
+
+export function onPostHogReady(listener: PostHogReadyListener) {
+  posthogReadyListeners.add(listener)
+  if (posthogReady && posthogClient?.__loaded) listener(posthogClient)
+  return () => {
+    posthogReadyListeners.delete(listener)
   }
 }
 

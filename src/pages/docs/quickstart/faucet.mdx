@@ -11,6 +11,7 @@ import { AddFundsToWallet } from '../../../components/guides/steps/wallet/AddFun
 import { AddTokensToWallet } from '../../../components/guides/steps/wallet/AddTokensToWallet.tsx'
 import { ConnectWallet } from '../../../components/guides/steps/wallet/ConnectWallet.tsx'
 import { SetFeeToken } from '../../../components/guides/steps/wallet/SetFeeToken.tsx'
+import { FaucetActivationHandoff, FaucetActivationProvider } from '../../../components/guides/FaucetActivationExperiment.tsx'
 import * as Token from '../../../components/guides/tokens'
 import { Tabs, Tab } from 'vocs'
 
@@ -19,6 +20,7 @@ import { Tabs, Tab } from 'vocs'
 
 Get test stablecoins on Tempo testnet.
 
+<FaucetActivationProvider>
 <Tabs>
   <Tab title="Fund an address">
 
@@ -84,6 +86,8 @@ Replace `<YOUR_ADDRESS>` with your wallet address.
 
   </Tab>
 </Tabs>
+<FaucetActivationHandoff />
+</FaucetActivationProvider>
 
 The faucet funds the following assets.
 

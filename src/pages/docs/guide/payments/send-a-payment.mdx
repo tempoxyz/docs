@@ -8,12 +8,15 @@ import * as Demo from '../../../../components/guides/Demo.tsx'
 import { AddFunds } from '../../../../components/guides/steps/payments/AddFunds.tsx'
 import { Connect } from '../../../../components/guides/steps/auth/Connect.tsx'
 import { SendPayment } from '../../../../components/guides/steps/payments/SendPayment.tsx'
+import { DeveloperActivationQuickstartTracker } from '../../../../components/guides/FaucetActivationExperiment.tsx'
 import { Cards, Card } from 'vocs'
 import { Tabs, Tab } from 'vocs'
 
 # Send a Payment
 
 Send stablecoin payments between accounts on Tempo. Payments can include optional memos for reconciliation and tracking.
+
+<DeveloperActivationQuickstartTracker />
 
 :::warning[Confirm delivery, not just transaction success]
 On post-T6 networks, a blocked TIP-20 `transfer` / `transferFrom` still succeeds, but credits `ReceivePolicyGuard` at `0xB10C000000000000000000000000000000000000` instead of the intended receiver.

@@ -3,6 +3,12 @@ import * as React from 'react'
 import { isAddress, pad, parseUnits, stringToHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
+import {
+  categorizeActivationFailure,
+  isDeliveredTestnetPayment,
+  trackDeveloperActivationPaymentFailed,
+  trackDeveloperActivationPaymentSucceeded,
+} from '../../../../lib/developer-activation'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
@@ -20,6 +26,16 @@ export function SendPayment(props: DemoStepProps) {
   })
   const sendPayment = Hooks.token.useTransferSync({
     mutation: {
+      onSuccess(result, variables) {
+        if (isDeliveredTestnetPayment(result, variables.to)) {
+          trackDeveloperActivationPaymentSucceeded()
+          return
+        }
+        trackDeveloperActivationPaymentFailed('receive_policy_redirect')
+      },
+      onError(error) {
+        trackDeveloperActivationPaymentFailed(categorizeActivationFailure(error))
+      },
       onSettled() {
         balanceRefetch()
       },
