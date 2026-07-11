@@ -40,9 +40,9 @@ const cases: {
 }[] = [
   {
     path: '/',
-    title: 'Tempo',
-    ogTitle: 'Tempo',
-    descriptionIncludes: 'blockchain designed for payments',
+    title: 'Tempo developers',
+    ogTitle: 'Tempo developers',
+    descriptionIncludes: 'payments-first Layer 1 blockchain',
     ogImageIncludes: '/og-docs.png',
   },
   {
