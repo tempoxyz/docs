@@ -7,8 +7,10 @@ import { mnemonicToAccount } from 'viem/accounts'
 import { Actions } from 'viem/tempo'
 import { useBlockNumber, useClient, useConnections } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
+import { assertSuccessfulFaucetReceipts } from '../../../../lib/developer-activation'
 import { isFundableWalletConnector } from '../../../lib/wallets'
 import { Button, Step } from '../../Demo'
+import { useFaucetActivation } from '../../FaucetActivationExperiment'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
@@ -22,6 +24,7 @@ export function AddFundsToWallet(props: DemoStepProps) {
   const address = walletConnection?.accounts[0]
   const hasNonWebAuthnWallet = Boolean(address)
   const queryClient = useQueryClient()
+  const activation = useFaucetActivation()
 
   const { data: balance, refetch: balanceRefetch } = Hooks.token.useGetBalance({
     account: address,
@@ -36,7 +39,6 @@ export function AddFundsToWallet(props: DemoStepProps) {
       refetchInterval: 1_500,
     },
   })
-  // biome-ignore lint/correctness/useExhaustiveDependencies: _
   React.useEffect(() => {
     balanceRefetch()
   }, [blockNumber])
@@ -46,22 +48,42 @@ export function AddFundsToWallet(props: DemoStepProps) {
       if (!address) throw new Error('account.address not found')
       if (!client) throw new Error('client not found')
 
+      let receipts: readonly { status?: string }[]
       if (import.meta.env.VITE_TEMPO_ENV !== 'localnet')
-        await Actions.faucet.fundSync(client as unknown as Client<Transport, Chain>, {
+        receipts = await Actions.faucet.fundSync(client as unknown as Client<Transport, Chain>, {
           account: address,
         })
       else {
-        await Actions.token.transferSync(client as unknown as Client<Transport, Chain>, {
-          account: mnemonicToAccount('test test test test test test test test test test test junk'),
-          amount: parseUnits('10000', 6),
-          to: address,
-          token: alphaUsd,
-        })
+        const result = await Actions.token.transferSync(
+          client as unknown as Client<Transport, Chain>,
+          {
+            account: mnemonicToAccount(
+              'test test test test test test test test test test test junk',
+            ),
+            amount: parseUnits('10000', 6),
+            to: address,
+            token: alphaUsd,
+          },
+        )
+        receipts = [result.receipt]
       }
+      assertSuccessfulFaucetReceipts(receipts)
       await new Promise((resolve) => setTimeout(resolve, 400))
       queryClient.refetchQueries({ queryKey: ['getBalance'] })
+      return receipts
+    },
+    onSuccess(receipts) {
+      activation.claimSucceeded('connected_wallet', receipts.length)
+    },
+    onError(error) {
+      activation.claimFailed('connected_wallet', error)
     },
   })
+
+  const claimFunds = React.useCallback(() => {
+    activation.claimStarted('connected_wallet')
+    fundAccount.mutate()
+  }, [activation, fundAccount.mutate])
 
   const active = React.useMemo(() => {
     // If this is the last step, simply has to have a non-webauthn wallet
@@ -78,7 +100,7 @@ export function AddFundsToWallet(props: DemoStepProps) {
           disabled={!hasNonWebAuthnWallet || fundAccount.isPending}
           variant="default"
           className="font-normal text-[14px] -tracking-[2%]"
-          onClick={() => fundAccount.mutate()}
+          onClick={claimFunds}
           type="button"
         >
           {fundAccount.isPending ? 'Adding funds' : 'Add more funds'}
@@ -90,12 +112,12 @@ export function AddFundsToWallet(props: DemoStepProps) {
         variant={hasNonWebAuthnWallet ? 'accent' : 'default'}
         className="font-normal text-[14px] -tracking-[2%]"
         type="button"
-        onClick={() => fundAccount.mutate()}
+        onClick={claimFunds}
       >
         {fundAccount.isPending ? 'Adding funds' : 'Add funds'}
       </Button>
     )
-  }, [hasNonWebAuthnWallet, balance, fundAccount.isPending, fundAccount.mutate, fundAccount])
+  }, [hasNonWebAuthnWallet, balance, fundAccount.isPending, claimFunds, fundAccount])
 
   return (
     <Step

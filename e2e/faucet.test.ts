@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { getDemoStep } from './helpers'
 
 test('fund an address via faucet', async ({ page }) => {
   test.setTimeout(120000)
@@ -26,8 +27,8 @@ test('fund an address via faucet', async ({ page }) => {
   )
 })
 
-test('fund a connected passkey wallet via faucet', async ({ page }) => {
-  test.setTimeout(240000)
+test('fund a connected passkey wallet and send a first payment', async ({ page }) => {
+  test.setTimeout(300000)
 
   const client = await page.context().newCDPSession(page)
   await client.send('WebAuthn.enable')
@@ -72,6 +73,20 @@ test('fund a connected passkey wallet via faucet', async ({ page }) => {
 
     await expect(addFundsStep.getByRole('button', { name: 'Add more funds' })).toBeVisible({
       timeout: 120000,
+    })
+
+    const handoff = page.getByRole('link', { name: 'Send your first testnet payment' })
+    await expect(handoff).toBeVisible()
+    await handoff.click()
+    await expect(page).toHaveURL(/\/docs\/guide\/payments\/send-a-payment#send-payment-demo$/)
+
+    const sendPaymentStep = getDemoStep(page, 'Send 100 AlphaUSD to a recipient.')
+    const enterDetailsButton = sendPaymentStep.getByRole('button', { name: 'Enter details' })
+    await expect(enterDetailsButton).toBeEnabled({ timeout: 90000 })
+    await enterDetailsButton.click()
+    await sendPaymentStep.getByRole('button', { name: 'Send' }).click()
+    await expect(sendPaymentStep.getByRole('link', { name: 'View receipt' })).toBeVisible({
+      timeout: 90000,
     })
   } finally {
     await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId }).catch(() => {})
