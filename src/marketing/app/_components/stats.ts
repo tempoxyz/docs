@@ -57,10 +57,9 @@ export function statValue(stat: Stat): string {
   return stat.main.unit ? `${stat.main.value} ${stat.main.unit}` : stat.main.value
 }
 
-// Nightly TIP-20 benchmark runs. PR-preview deployment for now — swap for the
-// production URL when it lands.
+// Latest nightly default TIP-20 benchmark run from the production perf API.
 const PERF_API_URL =
-  'https://pr-77-tempo-apps-internal-perf-public.tempo-dev.workers.dev/api/perf/runs?feed=nightly&limit=1&scenario_id=tip20-50k'
+  'https://perf.tempo.xyz/api/perf/runs?feed=nightly&limit=1&scenario_id=default-50k'
 
 type PerfRuns = {
   runs?: {
