@@ -63,7 +63,7 @@ export default defineConfig({
   title: 'Tempo Docs',
   titleTemplate: (path, { title }) => {
     if (path === '/docs') return 'Tempo %s ⋅ Tempo Docs'
-    if (path === '/docs' || path.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
+    if (path.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
     if (title?.includes('Tempo')) return undefined
     return '%s ⋅ Tempo'
   },
