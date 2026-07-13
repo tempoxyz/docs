@@ -21,8 +21,6 @@ describe('developersPath', () => {
 
     expect(developersPath('/')).toBe('/developers')
     expect(developersPath('/docs')).toBe('/developers/docs')
-    expect(developersPath('/build/tempo-transactions')).toBe(
-      '/developers/build/tempo-transactions',
-    )
+    expect(developersPath('/build/tempo-transactions')).toBe('/developers/build/tempo-transactions')
   })
 })

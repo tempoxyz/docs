@@ -143,22 +143,21 @@ function AccountModelDiagram() {
           </div>
           <div className="grid grid-cols-2 divide-x divide-line">
             <div className="px-4 py-4">
-              <div className="font-mono text-[10px] text-foreground/35 tracking-[0.12em]">
-                SIG
-              </div>
+              <div className="font-mono text-[10px] text-foreground/35 tracking-[0.12em]">SIG</div>
               <div className="mt-1 text-[14px] text-foreground/70">P256</div>
             </div>
             <div className="px-4 py-4">
-              <div className="font-mono text-[10px] text-foreground/35 tracking-[0.12em]">
-                FEE
-              </div>
+              <div className="font-mono text-[10px] text-foreground/35 tracking-[0.12em]">FEE</div>
               <div className="mt-1 text-[14px] text-foreground/70">USDC</div>
             </div>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {nodes.map((node) => (
-            <div key={node.label} className="border border-line bg-surface-shell px-3 py-3 shadow-lg">
+            <div
+              key={node.label}
+              className="border border-line bg-surface-shell px-3 py-3 shadow-lg"
+            >
               <div className="font-mono text-[9px] text-foreground/40 tracking-[0.12em]">
                 {node.detail}
               </div>
@@ -170,7 +169,13 @@ function AccountModelDiagram() {
         </div>
       </div>
 
-      <svg aria-hidden className="absolute inset-0 hidden size-full lg:block" viewBox="0 0 760 560">
+      <svg
+        aria-labelledby="accounts-model-lines-title"
+        className="absolute inset-0 hidden size-full lg:block"
+        role="img"
+        viewBox="0 0 760 560"
+      >
+        <title id="accounts-model-lines-title">Account model relationships</title>
         <path
           d="M190 116 C290 116 310 252 380 252"
           fill="none"
@@ -215,14 +220,10 @@ function AccountModelDiagram() {
         />
       </svg>
 
-      <div className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 hidden w-[210px] border border-foreground/20 bg-surface-shell shadow-2xl lg:block">
+      <div className="absolute top-1/2 left-1/2 hidden w-[210px] -translate-x-1/2 -translate-y-1/2 border border-foreground/20 bg-surface-shell shadow-2xl lg:block">
         <div className="border-line border-b px-5 py-4">
-          <div className="font-mono text-[11px] text-foreground/45 tracking-[0.12em]">
-            ACCOUNT
-          </div>
-          <div className="mt-1 font-sans text-[24px] text-foreground tracking-[0]">
-            0xA11c...09
-          </div>
+          <div className="font-mono text-[11px] text-foreground/45 tracking-[0.12em]">ACCOUNT</div>
+          <div className="mt-1 font-sans text-[24px] text-foreground tracking-[0]">0xA11c...09</div>
         </div>
         <div className="grid grid-cols-2 divide-x divide-line">
           <div className="px-4 py-4">
@@ -290,9 +291,7 @@ function CapabilitySection() {
     <section id="capabilities" className="scroll-mt-12 border-line border-t">
       <Reveal className="grid border-line border-b lg:grid-cols-[0.82fr_1.18fr]">
         <div className="border-line border-b px-5 py-14 lg:border-r lg:border-b-0 lg:px-12 lg:py-20">
-          <p className="font-mono text-[12px] text-foreground/35 tracking-[0.16em]">
-            CAPABILITIES
-          </p>
+          <p className="font-mono text-[12px] text-foreground/35 tracking-[0.16em]">CAPABILITIES</p>
           <h2 className="mt-4 max-w-[460px] text-balance font-sans text-[clamp(2rem,6vw,3rem)] text-foreground leading-[1.08] tracking-[-0.03em] antialiased">
             Account primitives for payment products.
           </h2>
