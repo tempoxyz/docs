@@ -15,6 +15,11 @@ export const routeMetadata: Record<string, RouteMetadata> = {
     description:
       'Build payment products on Tempo with stablecoins, fast settlement, and predictable fees.',
   },
+  '/build/tempo-accounts': {
+    title: 'Tempo Accounts',
+    description:
+      'Account infrastructure for passkeys, scoped keys, receive controls, and deposit attribution.',
+  },
   '/build/tempo-transactions': {
     title: 'Tempo Transactions',
     description: 'Batch, sponsor, schedule, and parallelize payments with Tempo Transactions.',

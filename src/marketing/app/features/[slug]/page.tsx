@@ -6,6 +6,7 @@ import { features } from '../../_components/features'
 import Header from '../../_components/Header'
 import HeroDots from '../../_components/HeroDots'
 import Reveal from '../../_components/Reveal'
+import AccountsSections from '../_components/AccountsSections'
 import TokensSections from '../_components/TokensSections'
 import TransactionsSections from '../_components/TransactionsSections'
 
@@ -80,7 +81,9 @@ export default function FeaturePage({ params }: { params: FeatureParams }) {
         {/* Every snippet expanded — no select-to-reveal on the dedicated page.
             Rows run full-bleed so their borders meet the shell's side borders;
             the content is inset to match the section intros. */}
-        {feature.slug === 'transactions' ? (
+        {feature.slug === 'accounts' ? (
+          <AccountsSections />
+        ) : feature.slug === 'transactions' ? (
           <TransactionsSections />
         ) : feature.slug === 'tokens' ? (
           <TokensSections />

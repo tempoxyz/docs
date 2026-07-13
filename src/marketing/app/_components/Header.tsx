@@ -38,7 +38,7 @@ const protocolMenu: MegaMenuData = {
         {
           label: 'Tempo Accounts',
           desc: 'Account model for keys, permissions, and policies',
-          href: '/docs/protocol/accounts',
+          href: featurePath('accounts'),
           icon: <PoliciesIcon />,
         },
         {
