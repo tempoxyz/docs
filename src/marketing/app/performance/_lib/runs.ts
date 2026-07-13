@@ -3,7 +3,7 @@
 // this module fetches the whole feed for the /performance charts.
 
 const PERF_API_URL =
-  'https://perf.tempo.xyz/api/perf/runs?feed=nightly&limit=100&scenario_id=default-50k'
+  'https://perf.tempo.xyz/api/perf/runs?feed=nightly&limit=100&scenario_id=tip20-50k'
 
 type ApiRun = {
   id?: string

@@ -59,7 +59,7 @@ export function statValue(stat: Stat): string {
 
 // Latest nightly default TIP-20 benchmark run from the production perf API.
 const PERF_API_URL =
-  'https://perf.tempo.xyz/api/perf/runs?feed=nightly&limit=1&scenario_id=default-50k'
+  'https://perf.tempo.xyz/api/perf/runs?feed=nightly&limit=1&scenario_id=tip20-50k'
 
 type PerfRuns = {
   runs?: {
