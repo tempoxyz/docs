@@ -100,27 +100,6 @@ curl --get "https://api.tempo.xyz/v1/indexer/query" \
   --data-urlencode 'sql=SELECT "from", "to", value, block_num, tx_hash FROM Transfer ORDER BY block_num DESC LIMIT 5'
 ```
 
-## Query Tempo data with `tidx`
-
-<span id="latest-tempo-blocks" />
-
-Query the latest blocks directly from the mainnet endpoint:
-
-```bash
-curl -G "https://indexer.tempo.xyz/query" \
-  --data-urlencode "chainId=4217" \
-  --data-urlencode "engine=clickhouse" \
-  --data-urlencode "sql=SELECT num, hash, timestamp FROM blocks ORDER BY num DESC LIMIT 5"
-```
-
-<span id="tidx-health-check" />
-
-Check the hosted service health:
-
-```bash
-curl "https://indexer.tempo.xyz/health"
-```
-
 ## Interactive `tidx` SQL example
 
 Run live SQL against the public hosted indexer.
