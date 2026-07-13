@@ -81,17 +81,19 @@ describe('docs routing redirects', () => {
       ['/developer-tools', 'https://tempo.xyz/developers/docs/ecosystem'],
       ['/developer-tools/fee-payer', 'https://tempo.xyz/developers/docs/api/fee-payer'],
       ['/developer-tools/indexer', 'https://tempo.xyz/developers/docs/api/indexer-api'],
+      ['/hosted-services', 'https://tempo.xyz/developers/docs/api'],
+      ['/hosted-services/:path*', 'https://tempo.xyz/developers/docs/api'],
       ['/learn/partners', 'https://tempo.xyz/developers/docs/partners'],
       ['/docs/learn/partners', 'https://tempo.xyz/developers/docs/partners'],
       ['/docs/guide/using-tempo-with-ai/partners', 'https://tempo.xyz/developers/docs/partners'],
       ['/build/partners', 'https://tempo.xyz/developers/docs/partners'],
       ['/network-upgrades', 'https://tempo.xyz/developers/docs/guide/node/network-upgrades'],
       [
-        '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|hosted-services|changelog|partners)',
+        '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|changelog|partners)',
         'https://tempo.xyz/developers/docs/:section',
       ],
       [
-        '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools|hosted-services)/:path*',
+        '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools)/:path*',
         'https://tempo.xyz/developers/docs/:section/:path*',
       ],
     ])('redirects legacy route %s to %s before the host catch-all', (source, destination) => {
@@ -136,6 +138,8 @@ describe('docs routing redirects', () => {
     ['/api/versioning-policy', '/docs/api/versioning-policy'],
     ['/developer-tools/fee-payer', '/docs/api/fee-payer'],
     ['/developer-tools/indexer', '/docs/api/indexer-api'],
+    ['/hosted-services', '/docs/api'],
+    ['/hosted-services/:path*', '/docs/api'],
   ])('redirects %s to %s', (source, destination) => {
     expect(findRedirect(source)).toMatchObject({
       source,

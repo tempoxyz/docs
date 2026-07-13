@@ -57,7 +57,6 @@ const sectionNavItems: SectionNavItem[] = [
     matches: [
       '/docs/cli',
       '/docs/developer-tools',
-      '/docs/hosted-services',
       '/docs/protocol/rpc',
       '/docs/sdk',
       '/docs/tools',

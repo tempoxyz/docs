@@ -166,7 +166,29 @@
       "permanent": true
     },
     {
-      "source": "/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|hosted-services|changelog|partners)",
+      "source": "/hosted-services",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/api",
+      "permanent": true
+    },
+    {
+      "source": "/hosted-services/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/api",
+      "permanent": true
+    },
+    {
+      "source": "/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|changelog|partners)",
       "has": [
         {
           "type": "host",
@@ -177,7 +199,7 @@
       "permanent": true
     },
     {
-      "source": "/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools|hosted-services)/:path*",
+      "source": "/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools)/:path*",
       "has": [
         {
           "type": "host",
@@ -459,12 +481,12 @@
     },
     {
       "source": "/hosted-services",
-      "destination": "/docs/hosted-services",
+      "destination": "/docs/api",
       "permanent": true
     },
     {
       "source": "/hosted-services/:path*",
-      "destination": "/docs/hosted-services/:path*",
+      "destination": "/docs/api",
       "permanent": true
     },
     {

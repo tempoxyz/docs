@@ -147,7 +147,6 @@ export default defineConfig({
       'developer-tools': 'DEVELOPER TOOLS',
       ecosystem: 'ECOSYSTEM',
       guide: 'BUILD',
-      'hosted-services': 'HOSTED SERVICES',
       partners: 'PARTNERS',
       performance: 'PERFORMANCE',
       protocol: 'PROTOCOL',
@@ -886,10 +885,6 @@ export default defineConfig({
             link: '/docs/tools',
           },
           {
-            text: 'Hosted Services',
-            link: '/docs/hosted-services',
-          },
-          {
             text: 'CLI',
             collapsed: false,
             items: [
@@ -1170,7 +1165,6 @@ export default defineConfig({
       '/docs/ecosystem': integrateSidebar,
       '/docs/protocol': specsSidebar,
       '/docs/tools': developerToolsSidebar,
-      '/docs/hosted-services': developerToolsSidebar,
       '/docs/developer-tools': developerToolsSidebar,
       '/docs/cli': developerToolsSidebar,
       '/docs/protocol/rpc': developerToolsSidebar,
@@ -1217,6 +1211,16 @@ export default defineConfig({
     {
       source: '/docs/developer-tools/indexer',
       destination: '/docs/api/indexer-api',
+      status: 301,
+    },
+    {
+      source: '/docs/hosted-services',
+      destination: '/docs/api',
+      status: 301,
+    },
+    {
+      source: '/docs/hosted-services/:path*',
+      destination: '/docs/api',
       status: 301,
     },
     {
