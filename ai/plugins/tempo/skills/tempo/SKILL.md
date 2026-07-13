@@ -28,7 +28,7 @@ verify them from docs before writing code.
 | Sponsored or gasless transactions | `/guide/payments/sponsor-user-fees`, `/api/fee-payer` |
 | MPP or paid APIs | `/guide/machine-payments`, then `/guide/machine-payments/client`, `/server`, or `/agent` |
 | Agent-paid service calls | Use the `tempo-wallet` skill for wallet login, service discovery, and `tempo request` |
-| Hosted indexer queries | `/developer-tools/indexer` |
+| Hosted indexer queries | `/api/indexer-api` |
 | Stablecoin issuance | `/guide/issuance`, `/protocol/tip20/overview`, `/protocol/tip20/spec` |
 | Stablecoin DEX swaps or liquidity | `/guide/stablecoin-dex`, `/protocol/exchange` |
 | Contract deployment or verification | `/quickstart/verify-contracts` |

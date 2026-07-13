@@ -54,7 +54,7 @@ const columns: FooterColumn[] = [
     header: 'Tools',
     links: [
       { label: 'Tempo CLI', href: '/docs/wallet' },
-      { label: 'TIDX', href: '/docs/developer-tools/indexer' },
+      { label: 'TIDX', href: '/docs/api/indexer-api' },
       { label: 'Tempo Explorer', href: 'https://explorer.tempo.xyz' },
       { label: 'Tempo Faucet', href: 'https://faucet.tempo.xyz' },
     ],

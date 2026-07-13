@@ -887,17 +887,7 @@ export default defineConfig({
           },
           {
             text: 'Hosted Services',
-            collapsed: false,
-            items: [
-              {
-                text: 'Overview',
-                link: '/docs/hosted-services',
-              },
-              {
-                text: 'Indexer (tidx)',
-                link: '/docs/developer-tools/indexer',
-              },
-            ],
+            link: '/docs/hosted-services',
           },
           {
             text: 'CLI',
@@ -1222,6 +1212,11 @@ export default defineConfig({
     {
       source: '/docs/developer-tools/fee-payer',
       destination: '/docs/api/fee-payer',
+      status: 301,
+    },
+    {
+      source: '/docs/developer-tools/indexer',
+      destination: '/docs/api/indexer-api',
       status: 301,
     },
     {

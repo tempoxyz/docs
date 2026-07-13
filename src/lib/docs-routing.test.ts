@@ -80,6 +80,7 @@ describe('docs routing redirects', () => {
       ],
       ['/developer-tools', 'https://tempo.xyz/developers/docs/ecosystem'],
       ['/developer-tools/fee-payer', 'https://tempo.xyz/developers/docs/api/fee-payer'],
+      ['/developer-tools/indexer', 'https://tempo.xyz/developers/docs/api/indexer-api'],
       ['/learn/partners', 'https://tempo.xyz/developers/docs/partners'],
       ['/docs/learn/partners', 'https://tempo.xyz/developers/docs/partners'],
       ['/docs/guide/using-tempo-with-ai/partners', 'https://tempo.xyz/developers/docs/partners'],
@@ -134,6 +135,7 @@ describe('docs routing redirects', () => {
     ['/api/transfers', '/docs/api/transfers'],
     ['/api/versioning-policy', '/docs/api/versioning-policy'],
     ['/developer-tools/fee-payer', '/docs/api/fee-payer'],
+    ['/developer-tools/indexer', '/docs/api/indexer-api'],
   ])('redirects %s to %s', (source, destination) => {
     expect(findRedirect(source)).toMatchObject({
       source,

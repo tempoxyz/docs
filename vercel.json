@@ -100,6 +100,17 @@
       "permanent": true
     },
     {
+      "source": "/developer-tools/indexer",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/api/indexer-api",
+      "permanent": true
+    },
+    {
       "source": "/learn/partners",
       "has": [
         {
@@ -434,6 +445,11 @@
     {
       "source": "/developer-tools/fee-payer",
       "destination": "/docs/api/fee-payer",
+      "permanent": true
+    },
+    {
+      "source": "/developer-tools/indexer",
+      "destination": "/docs/api/indexer-api",
       "permanent": true
     },
     {
