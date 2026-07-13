@@ -656,7 +656,7 @@ export default defineConfig({
           },
           {
             text: 'Tempo Accounts',
-            link: '/docs/protocol/accounts',
+            link: '/docs/guide/accounts',
           },
           {
             text: 'TIP-20 Tokens',
