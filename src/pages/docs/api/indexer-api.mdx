@@ -108,35 +108,6 @@ Run live SQL against the public hosted indexer.
 
 <TidxQuery />
 
-## `tidx` API reference
-
-| Endpoint | Description |
-| --- | --- |
-| `GET /health` | Check service health. |
-| `GET /status` | Read sync status for all configured chains. |
-| `GET /query` | Execute a read-only SQL query. |
-| `GET /views?chainId=` | List ClickHouse materialized views. |
-| `GET /views/{name}?chainId=` | Read materialized view details. |
-
-`/query` accepts these parameters:
-
-| Parameter | Required | Description |
-| --- | --- | --- |
-| `chainId` | yes | `4217` for mainnet or `42431` for testnet. |
-| `sql` | yes | Read-only SQL query. |
-| `engine` | no | `postgres` or `clickhouse`. |
-| `source` | no | `postgres`, `clickhouse`, or the default `postgres-clickhouse` tiered source. |
-| `signature` | no | Event signature for a decoded event table. |
-| `live` | no | Enable SSE streaming for PostgreSQL queries. |
-| `limit` | no | Maximum rows to return, from `1` to `10,000`. Defaults to `10,000`. |
-| `timeout_ms` | no | Query timeout from `100` to `30,000` milliseconds. Defaults to `5,000`. |
-
-:::info
-Creating or deleting materialized views is only available from trusted infrastructure. Use the hosted endpoints for read-only queries, or run your own `tidx` instance when you need custom view management.
-:::
-
-<span id="self-hosting-the-indexer-api" />
-
 ## Run your own Tempo indexer
 
 The [`tidx` repository](https://github.com/tempoxyz/tidx) includes Docker, source build, configuration, CLI, schema, and materialized view documentation.
