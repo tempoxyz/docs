@@ -21,7 +21,6 @@ Send a `GET` request to the Tempo API with a network and SQL query:
 
 ```bash
 curl --get "https://api.tempo.xyz/v1/indexer/query" \
-  --data-urlencode "chainId=mainnet" \
   --data-urlencode "sql=SELECT num, hash, timestamp FROM blocks ORDER BY num DESC LIMIT 5"
 ```
 
@@ -97,7 +96,6 @@ For example, query decoded `Transfer` events through the Tempo API:
 
 ```bash
 curl --get "https://api.tempo.xyz/v1/indexer/query" \
-  --data-urlencode "chainId=mainnet" \
   --data-urlencode "engine=clickhouse" \
   --data-urlencode "signature=Transfer(address indexed from, address indexed to, uint256 value)" \
   --data-urlencode 'sql=SELECT "from", "to", value, block_num, tx_hash FROM Transfer ORDER BY block_num DESC LIMIT 5'
