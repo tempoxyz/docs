@@ -228,6 +228,10 @@ export default defineConfig({
             link: '/docs/api/json-rpc',
           },
           {
+            text: 'Fee Payer API',
+            link: '/docs/api/fee-payer',
+          },
+          {
             text: 'Indexer API',
             link: '/docs/api/indexer-api',
           },

@@ -37,9 +37,9 @@ Use Tempo's [hosted fee payer endpoints](/docs/developer-tools/fee-payer) for te
 Tempo provides a public testnet fee payer service at `https://sponsor.moderato.tempo.xyz` that you can use for development and testing. See [Hosted Fee Payer](/docs/developer-tools/fee-payer) for endpoint details, or follow the instructions below to run your own.
 :::
 
-To sponsor transactions with your own infrastructure, run a JSON-RPC relay that validates incoming requests, fills Tempo Transactions, signs the fee payer payload, and broadcasts approved transactions. The fee payer account must be funded with the stablecoin it will use for fees.
+To sponsor transactions with your own infrastructure, run a JSON-RPC fee payer relay that validates incoming requests, fills Tempo Transactions, and signs approved sponsorships. The fee payer account must be funded with the stablecoin it will use for fees.
 
-Your relay should expose the same core JSON-RPC methods described in the [Hosted Fee Payer API reference](/docs/developer-tools/fee-payer#hosted-fee-payer-api-reference), then apply your own sponsorship policy before signing.
+Use [`Handler.relay`](https://accounts.tempo.xyz/docs/server/handler.relay) to expose `eth_fillTransaction` and apply your sponsorship policy before signing. See the [Fee Payer API](/docs/api/fee-payer) for the viem client setup.
 
 ### Configure your client to use the fee payer service
 

@@ -1,0 +1,104 @@
+---
+title: Fee Payer API
+description: Cover Tempo transaction fees for your users with fee sponsorship.
+---
+
+import { Cards, Card } from 'vocs'
+
+# Fee Payer API
+
+Use the Fee Payer API to cover transaction fees for your users.
+
+## How the Fee Payer API works
+
+A fee payer pays the fee for a transaction sent by another account. Use one to cover transaction costs for your users.
+
+The sender authorizes the transaction, and the fee payer separately authorizes the fee. When you prepare a transaction, request sponsorship from a fee payer endpoint. The service applies its policy, fills the required fields, and reports whether the request was sponsored.
+
+The Tempo API provides a hosted fee payer endpoint for sponsored transactions. Authenticate with a [Tempo API key](/docs/api/authentication), then use the Relay API as your relay-enriched RPC URL:
+
+```text
+https://api.tempo.xyz/rpc/relay
+```
+
+## Get Started
+
+:::::steps
+
+### Sign into the Tempo Console
+
+Open the [Tempo Console](https://console.tempo.xyz) and select **Sign in with Tempo**.
+
+### Set up Organization
+
+Create an organization and project.
+
+### Set up Billing
+
+For this testnet example, switch to **Sandbox mode** (located in the top-left organization picker), then open **Billing** and add a payment method.
+
+:::info
+For production, keep the Console in the production environment and do not switch to **Sandbox mode**.
+:::
+
+### Get an API Key
+
+Open **API Keys**, select **New key**, choose your project, and create the key. Copy it when prompted; it is shown only once.
+
+### Sponsor Transaction Fees
+
+Configure Viem's [`withRelay`](https://viem.sh/tempo/transports/withRelay) transport with a default RPC transport and the Tempo API relay endpoint. Add your Tempo API key to the relay transport, then set `feePayer: true` when sending a transaction to request sponsorship.
+
+:::info
+For production, do not switch to **Sandbox mode**. Remove `testnet: true` and replace the sandbox API key with a production API key (`tempo:sk:...`).
+:::
+
+```ts twoslash [example.ts]
+import { Account, createClient, http, withRelay } from 'viem/tempo'
+
+const client = createClient({
+  account: Account.fromSecp256k1('0x...'),
+  testnet: true,
+  transport: withRelay( // [!code focus]
+    http(), // default transport // [!code focus]
+    http('https://api.tempo.xyz/rpc/relay', { // [!code focus]
+      fetchOptions: { // [!code focus]
+        headers: { // [!code focus]
+          Authorization: 'Bearer tempo_sandbox:sk:...', // [!code focus]
+        }, // [!code focus]
+      }, // [!code focus]
+    }), // relay transport // [!code focus]
+  ), // [!code focus]
+})
+
+const receipt = await client.sendTransactionSync({
+  data: '0xdeadbeef',
+  feePayer: true, // [!code focus]
+  to: '0xcafebabecafebabecafebabecafebabecafebabe',
+})
+```
+
+:::::
+
+## Learn more
+
+<Cards>
+  <Card
+    title="Viem Fee Sponsorship"
+    description="Use a local account or fee payer endpoint to sponsor transaction fees with Viem."
+    to="https://viem.sh/tempo/guides/sponsor-fees"
+    icon="lucide:square-function"
+  />
+  <Card
+    title="Tempo API Authentication"
+    description="Authenticate fee payer requests with a production or sandbox API key."
+    to="/docs/api/authentication"
+    icon="lucide:key-round"
+  />
+  <Card
+    title="Sponsor User Fees"
+    description="Learn how Tempo fee sponsorship works across supported SDKs."
+    to="/docs/guide/payments/sponsor-user-fees"
+    icon="lucide:hand-coins"
+  />
+</Cards>
