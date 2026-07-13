@@ -7,7 +7,7 @@ import { Cards, Card, OpenApi } from 'vocs'
 
 # Tempo API
 
-Use the Tempo API for indexed chain data, readable account activity, token metadata, balances, transfers, transaction receipts, and RPC methods.
+Use the Tempo API for indexed chain data, readable account activity, token metadata, balances, transfers, transaction receipts, RPC methods, and fee sponsorship.
 
 :::warning
 The Tempo API is under active development. Endpoints are not yet stable and may change without notice.
@@ -21,7 +21,7 @@ Every endpoint is served over HTTPS from `https://api.tempo.xyz` under the `/v1`
 curl 'https://api.tempo.xyz/v1/blocks'
 ```
 
-The same base URL and credentials give you access to three surfaces:
+The same base URL and credentials give you access to four surfaces:
 
 - [**REST API**](#tempo-rest-api-endpoints): typed endpoints for indexed chain data such as blocks, transactions, tokens, balances, transfers, and receipts.
 
@@ -34,6 +34,12 @@ The same base URL and credentials give you access to three surfaces:
   ```bash
   curl 'https://api.tempo.xyz/rpc' \
     --data '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}'
+  ```
+
+- [**Fee Payer API**](/docs/api/fee-payer): a hosted relay for filling, sponsoring, and broadcasting Tempo Transactions.
+
+  ```text
+  https://api.tempo.xyz/rpc/relay
   ```
 
 - [**Indexer API**](/docs/api/indexer-api): a SQL-over-HTTP entrypoint for read-only queries against indexed chain data.
@@ -55,7 +61,7 @@ There are three ways to authenticate, depending on the throughput you need:
 Public access lets you try the API and serve low-volume reads, and [MPP](/docs/api/authentication#mpp-paying-per-request) lets you pay per request without a key. For higher, dedicated quotas, use an API key.
 
 :::info
-API keys are only available on request. [Contact us](https://tempo.xyz/contact/) to learn more.
+Create production and sandbox API keys in the [Tempo Console](https://console.tempo.xyz).
 :::
 
 ## Try a Tempo API request

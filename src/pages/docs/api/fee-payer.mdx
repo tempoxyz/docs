@@ -9,17 +9,25 @@ import { Cards, Card } from 'vocs'
 
 Use the Fee Payer API to cover transaction fees for your users.
 
+<span id="how-hosted-fee-sponsorship-works" />
+
 ## How the Fee Payer API works
 
 A fee payer pays the fee for a transaction sent by another account. Use one to cover transaction costs for your users.
 
 The sender authorizes the transaction, and the fee payer separately authorizes the fee. When you prepare a transaction, request sponsorship from a fee payer endpoint. The service applies its policy, fills the required fields, and reports whether the request was sponsored.
 
-The Tempo API provides a hosted fee payer endpoint for sponsored transactions. Authenticate with a [Tempo API key](/docs/api/authentication), then use the Relay API as your relay-enriched RPC URL:
+Tempo supports this flow natively, so you do not need a paymaster contract, bundler, or EntryPoint contract.
+
+<span id="hosted-fee-payer-endpoints" />
+
+The Tempo API provides a hosted JSON-RPC relay that fills, sponsors, and broadcasts Tempo Transactions. Authenticate with a [Tempo API key](/docs/api/authentication), then use the Relay API as your relay-enriched RPC URL:
 
 ```text
 https://api.tempo.xyz/rpc/relay
 ```
+
+<span id="configure-clients-for-hosted-fee-sponsorship" />
 
 ## Get Started
 
@@ -38,7 +46,7 @@ Create an organization and project.
 For this testnet example, switch to **Sandbox mode** (located in the top-left organization picker), then open **Billing** and add a payment method.
 
 :::info
-For production, keep the Console in the production environment and do not switch to **Sandbox mode**.
+For production, keep the Console in the production environment and do not switch to **Sandbox mode**. Production fee sponsorship requires active billing.
 :::
 
 ### Get an API Key
@@ -80,6 +88,31 @@ const receipt = await client.sendTransactionSync({
 
 :::::
 
+## Public testnet fee payer
+
+For demos and testnet development without an API key, use Tempo's public fee payer endpoint:
+
+```text
+https://sponsor.moderato.tempo.xyz
+```
+
+Use the Relay API above for authenticated sandbox and production integrations.
+
+<span id="use-a-fee-payer-in-production" />
+
+## When to run your own fee payer
+
+Run your own fee payer service when you need:
+
+- Custom allowlists, rate limits, or per-user sponsorship rules
+- Dedicated funding, accounting, or reconciliation
+- Full control over availability, latency, and operational policy
+- Sponsorship for traffic outside Tempo's hosted policy
+
+See [Sponsor User Fees](/docs/guide/payments/sponsor-user-fees) to set up and connect your own fee payer service.
+
+<span id="next-steps-for-fee-sponsorship" />
+
 ## Learn more
 
 <Cards>
@@ -100,5 +133,11 @@ const receipt = await client.sendTransactionSync({
     description="Learn how Tempo fee sponsorship works across supported SDKs."
     to="/docs/guide/payments/sponsor-user-fees"
     icon="lucide:hand-coins"
+  />
+  <Card
+    title="Tempo Transaction Spec"
+    description="Read the fee payer signature details in the Tempo Transaction specification."
+    to="/docs/protocol/transactions/spec-tempo-transaction#fee-payer-signature-details"
+    icon="lucide:file-code"
   />
 </Cards>

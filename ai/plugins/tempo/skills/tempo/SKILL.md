@@ -25,7 +25,7 @@ verify them from docs before writing code.
 | A new Tempo app or network setup | `/quickstart/integrate-tempo`, `/quickstart/connection-details`, `/sdk` |
 | Wallet UX | `/quickstart/wallet-developers`, `/quickstart/connection-details`, `/sdk` |
 | Stablecoin payments | `/guide/payments`, especially send, accept, virtual addresses, memos, fees, sponsorship, and parallel transactions |
-| Sponsored or gasless transactions | `/guide/payments/sponsor-user-fees`, `/developer-tools/fee-payer` |
+| Sponsored or gasless transactions | `/guide/payments/sponsor-user-fees`, `/api/fee-payer` |
 | MPP or paid APIs | `/guide/machine-payments`, then `/guide/machine-payments/client`, `/server`, or `/agent` |
 | Agent-paid service calls | Use the `tempo-wallet` skill for wallet login, service discovery, and `tempo request` |
 | Hosted indexer queries | `/developer-tools/indexer` |

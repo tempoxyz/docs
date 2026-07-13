@@ -89,6 +89,17 @@
       "permanent": true
     },
     {
+      "source": "/developer-tools/fee-payer",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
+      "permanent": true
+    },
+    {
       "source": "/learn/partners",
       "has": [
         {
@@ -266,6 +277,11 @@
       "permanent": true
     },
     {
+      "source": "/api/fee-payer",
+      "destination": "/docs/api/fee-payer",
+      "permanent": true
+    },
+    {
       "source": "/api/pagination",
       "destination": "/docs/api/pagination",
       "permanent": true
@@ -413,6 +429,11 @@
     {
       "source": "/developer-tools",
       "destination": "/docs/ecosystem",
+      "permanent": true
+    },
+    {
+      "source": "/developer-tools/fee-payer",
+      "destination": "/docs/api/fee-payer",
       "permanent": true
     },
     {

@@ -79,6 +79,7 @@ describe('docs routing redirects', () => {
         'https://tempo.xyz/developers/docs/protocol/transactions/AccountKeychain',
       ],
       ['/developer-tools', 'https://tempo.xyz/developers/docs/ecosystem'],
+      ['/developer-tools/fee-payer', 'https://tempo.xyz/developers/docs/api/fee-payer'],
       ['/learn/partners', 'https://tempo.xyz/developers/docs/partners'],
       ['/docs/learn/partners', 'https://tempo.xyz/developers/docs/partners'],
       ['/docs/guide/using-tempo-with-ai/partners', 'https://tempo.xyz/developers/docs/partners'],
@@ -124,6 +125,7 @@ describe('docs routing redirects', () => {
     ['/api/errors', '/docs/api/errors'],
     ['/api/indexer', '/docs/api/indexer'],
     ['/api/indexer-api', '/docs/api/indexer-api'],
+    ['/api/fee-payer', '/docs/api/fee-payer'],
     ['/api/json-rpc', '/docs/api/json-rpc'],
     ['/api/pagination', '/docs/api/pagination'],
     ['/api/rate-limits', '/docs/api/rate-limits'],
@@ -131,6 +133,7 @@ describe('docs routing redirects', () => {
     ['/api/transactions-and-transfers', '/docs/api/transactions-and-transfers'],
     ['/api/transfers', '/docs/api/transfers'],
     ['/api/versioning-policy', '/docs/api/versioning-policy'],
+    ['/developer-tools/fee-payer', '/docs/api/fee-payer'],
   ])('redirects %s to %s', (source, destination) => {
     expect(findRedirect(source)).toMatchObject({
       source,

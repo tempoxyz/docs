@@ -894,10 +894,6 @@ export default defineConfig({
                 link: '/docs/hosted-services',
               },
               {
-                text: 'Hosted Fee Payer',
-                link: '/docs/developer-tools/fee-payer',
-              },
-              {
                 text: 'Indexer (tidx)',
                 link: '/docs/developer-tools/indexer',
               },
@@ -1221,6 +1217,11 @@ export default defineConfig({
     {
       source: '/docs/developer-tools',
       destination: '/docs/ecosystem',
+      status: 301,
+    },
+    {
+      source: '/docs/developer-tools/fee-payer',
+      destination: '/docs/api/fee-payer',
       status: 301,
     },
     {

@@ -15,8 +15,8 @@ import PublicTestnetSponsorTip from '../../../../snippets/public-testnet-sponsor
 
 Enable gasless transactions by sponsoring transaction fees for your users. Tempo's native fee sponsorship allows applications to pay fees on behalf of users, improving UX and removing friction from payment flows.
 
-:::tip[Hosted fee payer]
-Use Tempo's [hosted fee payer endpoints](/docs/developer-tools/fee-payer) for testnet development or approved mainnet integrations. Run your own fee payer when you need custom sponsorship policy, accounting, or operational control.
+:::tip[Fee Payer API]
+Use the [Fee Payer API](/docs/api/fee-payer) for authenticated sandbox and production sponsorship. Run your own fee payer when you need custom sponsorship policy, accounting, or operational control.
 :::
 
 ## Fee sponsorship demo
@@ -32,10 +32,6 @@ Use Tempo's [hosted fee payer endpoints](/docs/developer-tools/fee-payer) for te
 ::::steps
 
 ### Set up the fee payer service
-
-:::tip
-Tempo provides a public testnet fee payer service at `https://sponsor.moderato.tempo.xyz` that you can use for development and testing. See [Hosted Fee Payer](/docs/developer-tools/fee-payer) for endpoint details, or follow the instructions below to run your own.
-:::
 
 To sponsor transactions with your own infrastructure, run a JSON-RPC fee payer relay that validates incoming requests, fills Tempo Transactions, and signs approved sponsorships. The fee payer account must be funded with the stablecoin it will use for fees.
 
