@@ -21,10 +21,10 @@ Tempo supports this flow natively, so you do not need a paymaster contract, bund
 
 <span id="hosted-fee-payer-endpoints" />
 
-The Tempo API provides a hosted JSON-RPC relay that fills, sponsors, and broadcasts Tempo Transactions. Authenticate with a [Tempo API key](/docs/api/authentication), then use the Relay API as your relay-enriched RPC URL:
+The Tempo API provides a hosted JSON-RPC relay that fills, sponsors, and broadcasts Tempo Transactions. Authenticate with a [Tempo API key](/docs/api/authentication), then use the Fee Payer API as your sponsorship RPC URL:
 
 ```text
-https://api.tempo.xyz/rpc/relay
+https://api.tempo.xyz/rpc/sponsor
 ```
 
 <span id="configure-clients-for-hosted-fee-sponsorship" />
@@ -55,7 +55,7 @@ Open **API Keys**, select **New key**, choose your project, and create the key. 
 
 ### Sponsor Transaction Fees
 
-Configure Viem's [`withRelay`](https://viem.sh/tempo/transports/withRelay) transport with a default RPC transport and the Tempo API relay endpoint. Add your Tempo API key to the relay transport, then set `feePayer: true` when sending a transaction to request sponsorship.
+Configure Viem's [`withRelay`](https://viem.sh/tempo/transports/withRelay) transport with a default RPC transport and the Tempo API sponsorship endpoint. Add your Tempo API key to the relay transport, then set `feePayer: true` when sending a transaction to request sponsorship.
 
 :::info
 For production, do not switch to **Sandbox mode**. Remove `testnet: true` and replace the sandbox API key with a production API key (`tempo:sk:...`).
@@ -69,7 +69,7 @@ const client = createClient({
   testnet: true,
   transport: withRelay( // [!code focus]
     http(), // default transport // [!code focus]
-    http('https://api.tempo.xyz/rpc/relay', { // [!code focus]
+    http('https://api.tempo.xyz/rpc/sponsor', { // [!code focus]
       fetchOptions: { // [!code focus]
         headers: { // [!code focus]
           Authorization: 'Bearer tempo_sandbox:sk:...', // [!code focus]
@@ -96,7 +96,7 @@ For demos and testnet development without an API key, use Tempo's public fee pay
 https://sponsor.moderato.tempo.xyz
 ```
 
-Use the Relay API above for authenticated sandbox and production integrations.
+Use the Fee Payer API above for authenticated sandbox and production integrations.
 
 <span id="use-a-fee-payer-in-production" />
 
