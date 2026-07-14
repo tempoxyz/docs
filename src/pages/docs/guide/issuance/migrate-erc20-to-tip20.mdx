@@ -50,7 +50,7 @@ Use this guide if your current token uses:
     Note over Issuer,Token: One-time token deployment
     Issuer->>Factory: createToken(name, symbol, currency, quoteToken, admin, salt, logoURI)
     Factory-->>Token: Create native TIP-20 token
-    Factory-->>Admin: Grant token admin role
+    Factory->>Token: Grant DEFAULT_ADMIN_ROLE to Admin
 
     Note over Admin,Operator: One-time or occasional role setup
     Admin->>Token: grantRole(ISSUER_ROLE, Operator)
