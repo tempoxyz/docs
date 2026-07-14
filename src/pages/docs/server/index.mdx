@@ -1,13 +1,13 @@
 ---
-title: Server Handlers
-description: Run framework-agnostic Tempo Accounts SDK handlers for wallet RPC relaying and other server-side protocol operations.
+title: Server Utilities
+description: Run framework-agnostic utilities for server-side protocol operations.
 ---
 
 import { Cards, Card } from 'vocs'
 
-# Server Handlers
+# Server Utilities
 
-Server handlers run on your backend when a Tempo Accounts operation needs trusted server-side logic. Each handler works with frameworks that support either:
+Server utilities are distributed through the Tempo API library, [`tapimo`](https://npm.im/tapimo). They work with frameworks that support either:
 
 - The [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) through `handler.fetch`
 - The [Node.js `RequestListener` API](https://nodejs.org/api/http.html#http_class_http_serverrequestlistener) through `handler.listener`
@@ -19,10 +19,18 @@ Create a handler once, then expose it through your server framework:
 ```ts twoslash
 // @noErrors
 import { createServer } from 'node:http'
-import { Handler } from 'accounts/server'
+import { Handler } from 'tapimo'
+import { createClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
+import { tempo } from 'viem/tempo/chains'
+
+const client = createClient({
+  chain: tempo,
+  transport: http(),
+})
 
 const handler = Handler.relay({
+  getClient: () => client,
   feePayer: {
     account: privateKeyToAccount('0x...'),
   },
@@ -38,25 +46,13 @@ export const GET = handler.fetch            // Next.js
 export const POST = handler.fetch           // Next.js
 ```
 
-## Available Tempo Accounts handlers
+## Handlers
 
 <Cards>
   <Card
     description="Proxy wallet RPC requests with fee sponsorship, automatic swaps, and simulation metadata."
     icon="lucide:radio"
-    to="/docs/server/handler.relay"
+    to="/docs/server/relay-handler"
     title="Relay & Fee Payer Handler"
-  />
-  <Card
-    description="Mount multiple Tempo Accounts handlers behind one server entrypoint."
-    icon="lucide:layers"
-    to="https://accounts.tempo.xyz/docs/server/handler.compose"
-    title="Handler.compose"
-  />
-  <Card
-    description="Handle WebAuthn credential registration and authentication on your backend."
-    icon="lucide:fingerprint"
-    to="https://accounts.tempo.xyz/docs/server/handler.webAuthn"
-    title="Handler.webAuthn"
   />
 </Cards>

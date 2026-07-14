@@ -933,7 +933,7 @@ export default defineConfig({
             ],
           },
           {
-            text: 'Server Handlers',
+            text: 'Server Utilities',
             collapsed: false,
             items: [
               {
@@ -942,7 +942,7 @@ export default defineConfig({
               },
               {
                 text: 'Relay & Fee Payer Handler',
-                link: '/docs/server/handler.relay',
+                link: '/docs/server/relay-handler',
               },
             ],
           },

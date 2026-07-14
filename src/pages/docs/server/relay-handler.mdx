@@ -14,17 +14,26 @@ Use `Handler.relay` to proxy wallet RPC requests through your backend. The handl
 Create the handler, then expose either its Fetch API or Node.js listener entrypoint:
 
 ```ts twoslash
-import { Handler } from 'accounts/server'
+import { Handler } from 'tapimo'
+import { createClient, http } from 'viem'
+import { tempo } from 'viem/tempo/chains'
 
-const handler = Handler.relay()
+const client = createClient({ chain: tempo, transport: http() })
+
+const handler = Handler.relay({
+  getClient: () => client,
+})
 ```
 
 ```ts twoslash
 // @noErrors
 import { createServer } from 'node:http'
-import { Handler } from 'accounts/server'
+import { Handler } from 'tapimo'
+import { createClient, http } from 'viem'
+import { tempo } from 'viem/tempo/chains'
 
-const handler = Handler.relay()
+const client = createClient({ chain: tempo, transport: http() })
+const handler = Handler.relay({ getClient: () => client })
 // ---cut---
 createServer(handler.listener)              // Node.js
 Bun.serve({ fetch: handler.fetch })         // Bun
@@ -83,17 +92,22 @@ export const POST = handler.fetch           // Next.js
 
 Set [`feePayer`](#feepayer) to have the relay sign the fee payer payload for approved transactions. Add [`feePayer.validate`](#feepayervalidate) when your sponsorship policy should accept only specific senders or transactions. If validation rejects a request, the relay fills it again for self-payment.
 
+The configured fee payer also handles approved `eth_signRawTransaction`, `eth_sendRawTransaction`, and `eth_sendRawTransactionSync` requests.
+
 :::code-group
 
 ```ts twoslash [server.ts]
 import { createServer } from 'node:http'
-import { Handler } from 'accounts/server'
-import { isAddressEqual } from 'viem'
+import { Handler } from 'tapimo'
+import { createClient, http, isAddressEqual } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
+import { tempo } from 'viem/tempo/chains'
 
+const client = createClient({ chain: tempo, transport: http() })
 const blockedAddress = '0x000000000000000000000000000000000000dead'
 // ---cut---
 const handler = Handler.relay({
+  getClient: () => client,
   feePayer: {
     account: privateKeyToAccount('0x...'),
     name: 'My App',
@@ -153,9 +167,14 @@ Enable this behavior with [`autoSwap`](#autoswap) or [`features: 'all'`](#featur
 :::code-group
 
 ```ts twoslash [server.ts]
-import { Handler } from 'accounts/server'
+import { Handler } from 'tapimo'
+import { createClient, http } from 'viem'
+import { tempo } from 'viem/tempo/chains'
+
+const client = createClient({ chain: tempo, transport: http() })
 
 const handler = Handler.relay({
+  getClient: () => client,
   autoSwap: { slippage: 0.05 },
 })
 ```
@@ -193,22 +212,31 @@ result.capabilities.autoSwap
 
 ### Fee-token selection
 
-For sponsored requests, the relay uses `feePayer.feeToken`, then the request's explicit `feeToken`, then the first configured token for the chain. It does not inspect the sender's balances because the sponsor pays the fee.
+For sponsored requests, the relay uses `feePayer.feeToken`, then the request's explicit `feeToken`, then the first candidate returned by [`resolveTokens`](#resolvetokens). It does not inspect the sender's balances because the sponsor pays the fee.
 
 For self-paid requests with fee-token resolution enabled, the relay selects a token in this order:
 
 1. Use the request's explicit `feeToken`.
-2. Use the account's onchain preference when the account has a balance. The relay caches this lookup for about 60 seconds.
+2. Use the account's onchain preference when the account has a balance. When [`cache`](#cache) is configured, the relay caches this lookup for about 60 seconds.
 3. Choose the highest-balance token returned by [`resolveTokens`](#resolvetokens). The relay also considers TIP-20 tokens called by the transaction.
-4. Fall back to the first configured token for the chain when no candidate has a positive balance.
+4. Fall back to the first candidate returned by `resolveTokens` when no candidate has a positive balance.
 
-Set `features: 'all'` to enable automatic fee-token resolution with the default token list:
+Set `features: 'all'` to enable fee-token resolution. Provide `resolveTokens` to add candidate tokens; self-paid fills also consider TIP-20 call targets.
 
 ```ts twoslash
-import { Handler } from 'accounts/server'
+import { Handler } from 'tapimo'
+import { createClient, http } from 'viem'
+import { tempo } from 'viem/tempo/chains'
+
+const client = createClient({ chain: tempo, transport: http() })
 
 const handler = Handler.relay({
+  getClient: () => client,
   features: 'all', // [!code focus]
+  resolveTokens: () => [ // [!code focus]
+    '0x20c0000000000000000000000000000000000000', // [!code focus]
+    '0x20c000000000000000000000b9537d11c60e8b50', // [!code focus]
+  ], // [!code focus]
 })
 ```
 
@@ -216,7 +244,7 @@ const handler = Handler.relay({
 
 ### Balance diffs
 
-Set `features: 'all'` to simulate filled transactions and return per-account token changes in `capabilities.balanceDiffs`:
+Set `features: 'all'` to simulate filled transactions and return token changes for the transaction sender in `capabilities.balanceDiffs`:
 
 ```ts [response.ts]
 result.capabilities.balanceDiffs
@@ -291,12 +319,17 @@ result.capabilities.requireFunds
 
 ### Enable all enrichment features
 
-By default, the relay enables only the features you configure directly. Use `features: 'all'` to enable fee-token resolution, automatic swaps, balance simulation, and fee estimates together:
+By default, the relay enables only the features you configure directly. Use `features: 'all'` to enable fee-token resolution, automatic swaps, balance simulation, and fee estimates together. This does not enable sponsorship; configure [`feePayer`](#feepayer) separately.
 
 ```ts twoslash
-import { Handler } from 'accounts/server'
+import { Handler } from 'tapimo'
+import { createClient, http } from 'viem'
+import { tempo } from 'viem/tempo/chains'
+
+const client = createClient({ chain: tempo, transport: http() })
 
 const handler = Handler.relay({
+  getClient: () => client,
   features: 'all', // [!code focus]
 })
 ```
@@ -304,6 +337,28 @@ const handler = Handler.relay({
 This adds network requests for token balances and simulation, so enable the complete feature set only when your application uses the returned metadata.
 
 ## API Reference
+
+<span id="getclient" />
+
+### `getClient`
+
+- **Type:** `(chainId?: number) => Client`
+- **Required**
+
+Resolves the Viem client for a chain. The relay calls it without an argument for the default client and with the request's resolved chain ID when available.
+
+```ts twoslash
+import { Handler } from 'tapimo'
+import { createClient, http } from 'viem'
+import { tempo } from 'viem/tempo/chains'
+
+const client = createClient({ chain: tempo, transport: http() })
+const getClient = () => client // [!code focus]
+
+const handler = Handler.relay({ getClient })
+```
+
+The remaining examples reuse this `getClient` callback.
 
 <span id="autoswap" />
 
@@ -314,10 +369,9 @@ This adds network requests for token balances and simulation, so enable the comp
 
 Controls Stablecoin DEX swaps for insufficient balances. An options object enables automatic swaps. Set it to `false` to disable them when `features: 'all'` is enabled.
 
-```ts twoslash
-import { Handler } from 'accounts/server'
-
+```ts
 const handler = Handler.relay({
+  getClient,
   autoSwap: { slippage: 0.02 }, // [!code focus]
 })
 ```
@@ -331,41 +385,6 @@ const handler = Handler.relay({
 
 Sets the maximum swap slippage. The relay calculates `maxAmountIn` from the token deficit and this percentage.
 
-<span id="cachettl" />
-
-### `cacheTtl`
-
-- **Type:** `number`
-- **Default:** `600` seconds
-
-Sets how long the relay caches [`resolveTokens`](#resolvetokens) results in [`kv`](#kv).
-
-```ts twoslash
-import { Handler } from 'accounts/server'
-
-const handler = Handler.relay({
-  cacheTtl: 60, // [!code focus]
-})
-```
-
-<span id="chains" />
-
-### `chains`
-
-- **Type:** `readonly [Chain, ...Chain[]]`
-- **Default:** `[tempo, tempoModerato, tempoDevnet]`
-
-Lists the supported chains. The relay chooses a client from the `chainId` in each transaction.
-
-```ts twoslash
-import { Handler } from 'accounts/server'
-import { tempo } from 'viem/tempo/chains'
-
-const handler = Handler.relay({
-  chains: [tempo], // [!code focus]
-})
-```
-
 <span id="features" />
 
 ### `features`
@@ -373,12 +392,11 @@ const handler = Handler.relay({
 - **Type:** `'all'`
 - **Optional**
 
-Set this to `'all'` to enable fee-token resolution, automatic swaps, balance diffs, and fee estimates. When omitted, the relay enables only features configured through options such as `feePayer` and `autoSwap`.
+Set this to `'all'` to enable fee-token resolution, automatic swaps, balance diffs, and fee estimates. Configure `resolveTokens` to provide fee-token candidates and `feePayer` to enable sponsorship.
 
-```ts twoslash
-import { Handler } from 'accounts/server'
-
+```ts
 const handler = Handler.relay({
+  getClient,
   features: 'all', // [!code focus]
 })
 ```
@@ -392,11 +410,12 @@ const handler = Handler.relay({
 
 Configures transaction sponsorship. When present, the relay can sign the filled transaction's `feePayerSignature`.
 
-```ts twoslash
-import { Handler } from 'accounts/server'
+```ts
+import { Handler } from 'tapimo'
 import { privateKeyToAccount } from 'viem/accounts'
 
 const handler = Handler.relay({
+  getClient,
   feePayer: { // [!code focus]
     account: privateKeyToAccount('0x...'), // [!code focus]
     feeToken: '0x20c0000000000000000000000000000000000001', // [!code focus]
@@ -424,6 +443,15 @@ The local account that signs fee payer payloads.
 
 The token the sponsor prefers to use for fees. This value overrides the transaction sender's requested `feeToken` during sponsorship.
 
+<span id="feepayeronsponsored" />
+
+#### `feePayer.onSponsored`
+
+- **Type:** `(event: SponsoredEvent) => void | Promise<void>`
+- **Optional**
+
+Runs after fee-payer signing and before the relay returns or broadcasts the transaction. The awaited event includes the chain ID, method, sender, signing payload, serialized transaction, and transaction hash when available.
+
 <span id="feepayername" />
 
 #### `feePayer.name`
@@ -446,19 +474,20 @@ A sponsor URL returned in response metadata.
 
 #### `feePayer.validate`
 
-- **Type:** `(request: Transaction.TransactionRequest) => boolean | Promise<boolean>`
+- **Type:** `(request: TransactionRequest & { chainId?: number | Hex }) => Validation | Promise<Validation>`
 - **Optional**
 
-Approves or rejects sponsorship for a filled Tempo transaction. Return `false` to reject sponsorship and refill the transaction for self-payment. When omitted, the configured fee payer sponsors every eligible request.
+Approves or rejects sponsorship for a Tempo transaction. Return `false` or a named refusal reason to reject sponsorship. Named reasons are `billing_past_due`, `billing_required`, `fee_token_unsupported`, `spend_limit_exceeded`, and `tx_fee_limit_exceeded`. When omitted, the configured fee payer sponsors every eligible request.
 
-```ts twoslash
-import { Handler } from 'accounts/server'
+```ts
+import { Handler } from 'tapimo'
 import { isAddressEqual } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
 const allowedSender = '0x000000000000000000000000000000000000dead'
 
 const handler = Handler.relay({
+  getClient,
   feePayer: {
     account: privateKeyToAccount('0x...'),
     validate: (request) => // [!code focus]
@@ -467,21 +496,39 @@ const handler = Handler.relay({
 })
 ```
 
-<span id="kv" />
+<span id="multisig" />
 
-### `kv`
+### `multisig`
 
-- **Type:** [`Kv`](https://accounts.tempo.xyz/docs/server/kv)
-- **Default:** `Kv.memory()`
+- **Type:** `Multisig.Options`
+- **Optional**
 
-Stores cached token lists and account fee-token preferences. Use a shared adapter such as `Kv.cloudflare` when multiple handler instances need the same cache.
+Collects native multisig approvals and broadcasts after the configured threshold is reached. Provide an enumerable state store; use a shared store with atomic compare-and-swap in production.
 
-```ts twoslash
-// @noErrors
-import { Handler, Kv } from 'accounts/server'
+```ts
+import { Handler, Store } from 'tapimo'
 
 const handler = Handler.relay({
-  kv: Kv.cloudflare(env.KV), // [!code focus]
+  getClient,
+  multisig: { store: Store.memory() }, // [!code focus]
+})
+```
+
+<span id="cache" />
+
+### `cache`
+
+- **Type:** `Store.Store`
+- **Optional**
+
+Caches TIP-20 metadata and account fee-token preferences. When omitted, the relay reads this data upstream on every fill.
+
+```ts
+import { Handler, Store } from 'tapimo'
+
+const handler = Handler.relay({
+  getClient,
+  cache: Store.memory(), // [!code focus]
 })
 ```
 
@@ -494,10 +541,9 @@ const handler = Handler.relay({
 
 Runs before the relay handles each request. Use it for logging, rate limits, or request-level validation.
 
-```ts twoslash
-import { Handler } from 'accounts/server'
-
+```ts
 const handler = Handler.relay({
+  getClient,
   onRequest: async (request) => { // [!code focus]
     console.log('Processing request:', request.method) // [!code focus]
   }, // [!code focus]
@@ -513,10 +559,9 @@ const handler = Handler.relay({
 
 Sets the route where the handler accepts requests.
 
-```ts twoslash
-import { Handler } from 'accounts/server'
-
+```ts
 const handler = Handler.relay({
+  getClient,
   path: '/relay', // [!code focus]
 })
 ```
@@ -527,51 +572,18 @@ When you use [`Provider.relay`](https://accounts.tempo.xyz/docs/api/provider#rel
 
 ### `resolveTokens`
 
-- **Type:** `(chainId: number) => readonly Token[] | Promise<readonly Token[]>`
-- **Default:** Fetches `https://tokenlist.tempo.xyz/list/:chainId`
+- **Type:** `(chainId: number) => readonly Address[] | Promise<readonly Address[]>`
+- **Optional**
 
-Returns the tokens considered during fee-token resolution. The relay reads the account's balance for each token and prefers the highest positive balance after checking the account's onchain preference.
+Returns candidate token addresses for fee-token resolution. The relay reads the account's balance for each token and prefers the highest positive balance after checking the account's onchain preference. Omitting this option disables configured candidate resolution.
 
-```ts twoslash
-// @noErrors
-import { Handler } from 'accounts/server'
-
+```ts
 const handler = Handler.relay({
+  getClient,
   resolveTokens: () => [ // [!code focus]
-    { // [!code focus]
-      address: '0x20c0000000000000000000000000000000000000', // [!code focus]
-      decimals: 6, // [!code focus]
-      name: 'pathUSD', // [!code focus]
-      symbol: 'pathUSD', // [!code focus]
-    }, // [!code focus]
-    { // [!code focus]
-      address: '0x20c000000000000000000000b9537d11c60e8b50', // [!code focus]
-      decimals: 6, // [!code focus]
-      name: 'USDC.e', // [!code focus]
-      symbol: 'USDC.e', // [!code focus]
-    }, // [!code focus]
+    '0x20c0000000000000000000000000000000000000', // [!code focus]
+    '0x20c000000000000000000000b9537d11c60e8b50', // [!code focus]
   ], // [!code focus]
-})
-```
-
-<span id="transports" />
-
-### `transports`
-
-- **Type:** `Record<number, Transport>`
-- **Default:** `http()` for each configured chain
-
-Provides a Viem transport for each supported chain ID.
-
-```ts twoslash
-import { http } from 'viem'
-import { Handler } from 'accounts/server'
-import { tempo } from 'viem/tempo/chains'
-
-const handler = Handler.relay({
-  transports: { // [!code focus]
-    [tempo.id]: http('https://rpc.tempo.xyz'), // [!code focus]
-  }, // [!code focus]
 })
 ```
 
@@ -579,10 +591,10 @@ const handler = Handler.relay({
 
 ### `cors`
 
-- **Type:** `boolean | Cors`
+- **Type:** `boolean | Handler.from.Cors`
 - **Default:** `true`
 
-Configures CORS headers for every response. This option is inherited from the base [handler options](https://accounts.tempo.xyz/docs/server/handler.compose#optionscors).
+Configures CORS headers for every response. This option is inherited from `Handler.from`.
 
 <span id="headers" />
 
@@ -591,4 +603,4 @@ Configures CORS headers for every response. This option is inherited from the ba
 - **Type:** `Headers | Record<string, string>`
 - **Optional**
 
-Adds headers to every response. This option is inherited from the base [handler options](https://accounts.tempo.xyz/docs/server/handler.compose#optionsheaders).
+Adds headers to every response. This option is inherited from `Handler.from`.
