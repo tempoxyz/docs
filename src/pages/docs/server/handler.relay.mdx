@@ -303,7 +303,7 @@ const handler = Handler.relay({
 
 This adds network requests for token balances and simulation, so enable the complete feature set only when your application uses the returned metadata.
 
-## Relay handler options
+## API Reference
 
 <span id="autoswap" />
 
@@ -592,86 +592,3 @@ Configures CORS headers for every response. This option is inherited from the ba
 - **Optional**
 
 Adds headers to every response. This option is inherited from the base [handler options](https://accounts.tempo.xyz/docs/server/handler.compose#optionsheaders).
-
-## Relay JSON-RPC request fields
-
-The relay accepts JSON-RPC `eth_fillTransaction` requests. It reads these wallet-level fields from the first parameter object in addition to the standard transaction fields:
-
-- `from` (`Address`): identifies the sender for fee-token resolution and sponsorship policy checks.
-- `feeToken` (`Address`): requests a specific fee token. A configured `feePayer.feeToken` takes precedence during sponsorship.
-- `feePayer` (`string | boolean`):
-  - A public HTTPS URL forwards the fill to that external fee payer and returns its sponsor metadata. The handler rejects non-HTTPS, localhost, and private hosts by default.
-  - `false` opts out of sponsorship for the request.
-  - `true` or an omitted value uses the handler's configured `feePayer`, when present.
-- `capabilities.balanceDiffs` (`boolean`, default `true`): set this to `false` to skip balance simulation while retaining fee estimation when simulation features are enabled.
-- `capabilities.errors` (`boolean`): set this to `true` to receive a structured `capabilities.error` instead of a JSON-RPC error when filling fails.
-
-## Relay JSON-RPC response
-
-The relay returns the filled transaction and a `capabilities` object containing the enrichment metadata available for that request:
-
-```ts
-type Sponsor = {
-  address: Address
-  name?: string
-  url?: string
-}
-
-type Response = {
-  sponsor?: Sponsor
-  capabilities: {
-    balanceDiffs?: Record<Address, BalanceDiff[]>
-    fee?: {
-      amount: Hex
-      decimals: number
-      formatted: string
-      symbol: string
-    }
-    autoSwap?: {
-      calls: readonly { to: Address; data: Hex }[]
-      maxIn: SwapAmount
-      minOut: SwapAmount
-      slippage: number
-    }
-    error?: {
-      abiItem?: AbiItem
-      data?: Hex
-      errorName: string
-      message: string
-    }
-    requireFunds?: {
-      amount: Hex
-      decimals: number
-      formatted: string
-      token: Address
-      symbol: string
-    }
-    sponsor?: Sponsor
-    sponsored: boolean
-  }
-  tx: {
-    // Other filled transaction fields.
-    feeToken?: Address
-  }
-}
-
-type BalanceDiff = {
-  address: Address
-  decimals: number
-  direction: 'incoming' | 'outgoing'
-  formatted: string
-  name: string
-  recipients: readonly Address[]
-  symbol: string
-  value: Hex
-}
-
-type SwapAmount = {
-  decimals: number
-  formatted: string
-  name: string
-  symbol: string
-  token: Address
-  value: Hex
-}
-```
