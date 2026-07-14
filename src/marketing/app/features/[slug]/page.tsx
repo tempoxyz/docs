@@ -43,7 +43,13 @@ export default function FeaturePage({ params }: { params: FeatureParams }) {
         <Header />
 
         <section className="relative isolate px-5 py-28 lg:py-36">
-          <HeroDots plus={feature.slug === 'transactions' || feature.slug === 'tokens'} />
+          <HeroDots
+            plus={
+              feature.slug === 'accounts' ||
+              feature.slug === 'transactions' ||
+              feature.slug === 'tokens'
+            }
+          />
           <Reveal className="flex flex-col items-center text-center">
             <h1 className="text-balance font-sans text-[clamp(2.5rem,7vw,3.5rem)] text-foreground leading-[1.05] tracking-[-0.03em] antialiased">
               {feature.title}
