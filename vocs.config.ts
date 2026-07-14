@@ -960,15 +960,6 @@ export default defineConfig({
                     text: 'Wagmi Reference',
                     link: 'https://wagmi.sh/tempo',
                   },
-                  {
-                    text: 'Prool Reference',
-                    items: [
-                      {
-                        text: 'Setup',
-                        link: '/docs/sdk/typescript/prool/setup',
-                      },
-                    ],
-                  },
                 ],
               },
               {
