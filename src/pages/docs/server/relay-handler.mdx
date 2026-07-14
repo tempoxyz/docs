@@ -95,7 +95,8 @@ The configured fee payer also handles approved `eth_signRawTransaction`, `eth_se
 
 :::code-group
 
-```ts [server.ts]
+```ts twoslash [server.ts]
+// @noErrors
 import { createServer } from 'node:http'
 import { Handler } from 'tapimo'
 import { isAddressEqual } from 'viem'
