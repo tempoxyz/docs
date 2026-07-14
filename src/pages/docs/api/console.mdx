@@ -1,0 +1,99 @@
+---
+title: Using Tempo API Console
+description: Use Tempo API Console to create projects and API keys, switch environments, monitor usage, configure billing, and manage organization access in one place.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Using Tempo API Console
+
+[Tempo API Console](https://console.tempo.xyz) is the control UI for your Tempo API account. Use it to organize integrations, issue credentials, monitor API usage and sponsored transactions, configure billing, and manage access to your organization.
+
+## How the console is organized
+
+| Resource | What it controls |
+| --- | --- |
+| **Organization** | The team, projects, billing settings, and aggregate usage for a company or group. |
+| **Project** | An app or integration and the API keys attributed to it. |
+| **Environment** | Separate production and sandbox credentials, usage, and billing state. |
+| **API key** | A project-scoped credential with selected permissions for calling Tempo APIs. |
+
+Most console pages show information across the organization. Use the project filter where available to narrow a page to one integration.
+
+## Set up your first project
+
+:::::steps
+
+### Sign in to Tempo API Console
+
+Open [console.tempo.xyz](https://console.tempo.xyz) and sign in. If you have access to more than one organization, choose the organization you want to configure from the organization menu.
+
+### Create a project
+
+Select **Projects**, then **New project**. Enter a name that identifies the app or integration using the API, then select **Create project**.
+
+Projects hold API keys and provide an attribution boundary for usage. Create separate projects when you need to track or revoke integrations independently.
+
+### Start in sandbox
+
+Open the organization menu and select **Switch to sandbox**. The amber banner confirms that the console is showing sandbox state.
+
+Sandbox API keys are restricted to non-mainnet chains and default to testnet. Production and sandbox credentials, usage, and billing state are separate.
+
+### Create an API key
+
+Select **API Keys**, then **New key**. Choose the project, give the key a descriptive name, and review its scopes before selecting **Create key**.
+
+The console selects the available self-service scopes by default. If you clear every scope, the key is created without access to any scoped API.
+
+### Copy the API key
+
+Copy the plaintext token when the console reveals it and store it in your secret manager. The token is shown only once and cannot be recovered later.
+
+Never commit an API key to source control or place it in browser-delivered code. If you lose a token, create a replacement and revoke the old key.
+
+### Make a test request
+
+Replace the placeholder below with the sandbox key you just created:
+
+```bash
+curl 'https://api.tempo.xyz/v1/blocks' \
+  --header 'Authorization: Bearer tempo_sandbox:sk:...'
+```
+
+A sandbox key automatically targets testnet when the request does not specify `chainId`. See [API authentication](/docs/api/authentication) for other headers and chain-selection behavior.
+
+### Review usage
+
+Select **Usage** and choose your project from the filter. The page reports request volume, errors, sponsored transactions, high-volume routes, and usage by API key for the selected environment.
+
+:::::
+
+## Continue configuring the console
+
+<Cards>
+  <Card
+    title="Projects and environments"
+    description="Organize integrations and keep sandbox activity separate from production."
+    to="/docs/api/console/projects-and-environments"
+    icon="lucide:layout-grid"
+  />
+  <Card
+    title="API keys"
+    description="Create, store, rotate, and revoke project credentials."
+    to="/docs/api/console/api-keys"
+    icon="lucide:key-round"
+  />
+  <Card
+    title="Usage and billing"
+    description="Monitor requests and sponsorship, then configure payment methods and limits."
+    to="/docs/api/console/usage-and-billing"
+    icon="lucide:chart-line"
+  />
+  <Card
+    title="Teams and access"
+    description="Invite members and manage organization roles."
+    to="/docs/api/console/team"
+    icon="lucide:users"
+  />
+</Cards>

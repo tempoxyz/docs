@@ -1,0 +1,68 @@
+---
+title: Projects and Environments
+description: Organize Tempo API integrations into projects and keep production credentials, usage, billing, and sponsored transactions separate from sandbox activity.
+---
+
+# Projects and Environments
+
+Projects identify the apps and integrations using your Tempo API organization. Environments separate production activity from sandbox testing without requiring a second organization.
+
+## Work with projects
+
+Each API key belongs to one project. Project attribution lets you filter API keys and usage, and it gives you a boundary for rotating or revoking an integration's credentials.
+
+### Create a project
+
+:::::steps
+
+### Open Projects
+
+Select **Projects** in [Tempo API Console](https://console.tempo.xyz), then select **New project**.
+
+### Name the project
+
+Enter a name that identifies the app, service, or integration. Prefer names such as `checkout-service` or `treasury-dashboard` over environment names, because one project can have separate sandbox and production keys.
+
+### Finish creating the project
+
+Select **Create project**. The project is now available when creating an API key and filtering organization usage.
+
+:::::
+
+To rename or delete a project, open its actions menu and select **Settings**. Deleting a project permanently deletes its API keys, so migrate callers to another project before confirming the deletion.
+
+## Switch environments
+
+Open the organization menu and select **Switch to sandbox** or **Switch to production**. An amber banner remains visible while sandbox is active.
+
+The selected environment applies to the API Keys, Usage, and Billing pages:
+
+| Console state | Production | Sandbox |
+| --- | --- | --- |
+| Key prefix | `tempo:sk:...` | `tempo_sandbox:sk:...` |
+| Supported chains | Any chain, including mainnet | Non-mainnet chains only |
+| Default chain | Mainnet | Testnet |
+| Usage | Production requests and sponsorship | Sandbox requests and sponsorship |
+| Billing | Production billing state and limits | Separate sandbox billing state and limits |
+
+Projects are shared across both environments. A project can have production keys, sandbox keys, or both.
+
+:::info
+Switching the console environment changes which keys, usage, and billing state you see. It does not convert an existing key to another environment.
+:::
+
+## Choose an environment for a request
+
+Use sandbox while developing and testing an integration. Move to production by creating a production key, updating your secret configuration, and testing the integration against the intended chain.
+
+The API determines a key's environment from its token. See [production and sandbox API keys](/docs/api/authentication#production-and-sandbox-api-keys) for chain-selection rules.
+
+## Filter organization pages by project
+
+API Keys and Usage are organization-wide by default. Use their project filter to narrow the page:
+
+- **API Keys** shows credentials belonging to the selected project and environment.
+- **Usage** shows request and sponsorship activity attributed to the selected project and environment.
+- **Billing** remains organization-wide and environment-specific.
+
+Unknown or removed project filters fall back to the organization-wide view.

@@ -1,0 +1,74 @@
+---
+title: Usage and Billing
+description: Monitor Tempo API requests and sponsored transactions, add payment methods, and configure organization spend limits and per-transaction sponsorship caps.
+---
+
+# Usage and Billing
+
+Tempo API Console reports API activity and manages billing for fee sponsorship. Usage and billing are organization-wide, with separate state for production and sandbox.
+
+## Review API usage
+
+Select **Usage** to inspect activity in the selected environment. Use the project selector to show all projects or one project.
+
+The page includes:
+
+- **Request volume:** total and failed API calls in the selected window.
+- **Sponsorship:** sponsored transaction counts and committed fees.
+- **Routes:** the API routes receiving the most requests.
+- **API keys:** request volume attributed to each credential.
+
+Use these views to find unexpected errors, identify high-volume routes, and confirm that a newly deployed key is receiving traffic.
+
+:::info
+Changing the console environment changes the usage dataset. Sandbox activity does not appear in production usage, and production activity does not appear in sandbox usage.
+:::
+
+## Add a payment method
+
+Only organization owners can manage billing.
+
+:::::steps
+
+### Choose the environment
+
+Switch to the production or sandbox environment whose billing state you want to configure.
+
+### Open Billing
+
+Select **Billing**, then find **Payment methods**.
+
+### Add the payment method
+
+Select **Add payment method** and complete the hosted Stripe checkout. After returning to the console, the billing page may refresh briefly while the payment method is confirmed.
+
+### Confirm billing status
+
+Check that the payment method appears and that the page reports **Active** billing. A **Past due** or **Canceled** status requires attention before billable services can continue normally.
+
+:::::
+
+When a payment method already exists, owners can select **Manage** to open the hosted billing portal. Other members must contact an organization owner.
+
+## Configure spend limits
+
+The Billing page provides two organization-level controls for the selected environment:
+
+- **Current spend:** billable API usage in the current billing period and an optional monthly spend limit.
+- **Sponsorship limit:** the maximum transaction fee the API may sponsor for one transaction.
+
+Owners can set, edit, or remove these limits. A sponsorship request must remain within both the organization controls and any platform limits enforced by Tempo.
+
+:::warning
+Production fee sponsorship requires an active billing source. A spend or sponsorship limit does not activate billing on its own.
+:::
+
+## Investigate unexpected usage
+
+1. Confirm that the console is showing the correct environment.
+2. Open **Usage** and filter to the affected project.
+3. Compare the **Routes** and **API keys** sections to find the source.
+4. Revoke a credential if its traffic is unexpected.
+5. Review the Billing page and adjust spend or sponsorship limits if needed.
+
+See [API rate limits](/docs/api/rate-limits) for request quotas and response headers. For sponsored transaction integration, follow the [fee sponsorship guide](https://viem.sh/tempo/guides/sponsor-fees#sponsor-via-a-relay).
