@@ -248,7 +248,7 @@ export default function CodePanel({
   if (inline) {
     return (
       <div
-        className={`code-scroll min-h-0 flex-1 overflow-auto bg-surface-block p-4 ${
+        className={`code-scroll min-h-0 w-full min-w-0 flex-1 overflow-auto bg-surface-block p-4 ${
           bare ? '' : 'border border-line'
         }`}
       >

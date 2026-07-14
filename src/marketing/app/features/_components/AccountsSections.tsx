@@ -225,10 +225,10 @@ const ACCOUNT_FAQS: FaqItem[] = [
 
 function AccessKeyDiagram() {
   return (
-    <div className="relative min-h-[520px] overflow-hidden border-line border-t bg-surface-shell lg:min-h-[560px] lg:border-t-0 lg:border-l">
+    <div className="relative grid gap-4 overflow-hidden border-line border-t bg-surface-shell p-5 pb-20 lg:block lg:min-h-[560px] lg:border-t-0 lg:border-l lg:p-0">
       <svg
         aria-labelledby="accounts-access-lines-title"
-        className="absolute inset-0 z-0 size-full text-foreground"
+        className="absolute inset-0 z-0 hidden size-full text-foreground lg:block"
         role="img"
         viewBox="0 0 720 520"
       >
@@ -262,7 +262,7 @@ function AccessKeyDiagram() {
         />
       </svg>
 
-      <div className="absolute top-1/2 left-[6%] z-10 w-[170px] -translate-y-1/2 border border-foreground/14 bg-surface-shell px-5 py-5">
+      <div className="relative z-10 w-full border border-foreground/14 bg-surface-shell px-5 py-5 lg:absolute lg:top-1/2 lg:left-[6%] lg:w-[170px] lg:-translate-y-1/2">
         <span aria-hidden className="block h-1 w-10 bg-[#73A0FF]" />
         <div className="mt-5 font-mono text-[12px] text-foreground tracking-[0.28em]">ACCOUNT</div>
         <div className="mt-2 font-mono text-[10px] text-foreground/35 tracking-[0.22em]">
@@ -270,7 +270,7 @@ function AccessKeyDiagram() {
         </div>
       </div>
 
-      <div className="absolute top-[15%] right-[8%] z-10 w-[250px] border border-foreground/18 bg-surface-shell px-5 py-4">
+      <div className="relative z-10 w-full border border-foreground/18 bg-surface-shell px-5 py-4 lg:absolute lg:top-[15%] lg:right-[8%] lg:w-[250px]">
         <div className="font-mono text-[12px] text-foreground tracking-[0.28em]">APP KEY</div>
         <div className="mt-4 h-1.5 bg-foreground/8">
           <div className="h-full w-[56%] bg-[#C084FC]" />
@@ -280,7 +280,7 @@ function AccessKeyDiagram() {
         </div>
       </div>
 
-      <div className="absolute top-[39%] right-[8%] z-10 w-[250px] border border-foreground/18 bg-surface-shell px-5 py-4">
+      <div className="relative z-10 w-full border border-foreground/18 bg-surface-shell px-5 py-4 lg:absolute lg:top-[39%] lg:right-[8%] lg:w-[250px]">
         <div className="font-mono text-[12px] text-foreground tracking-[0.28em]">AGENT KEY</div>
         <div className="mt-4 h-1.5 bg-foreground/8">
           <div className="h-full w-[36%] bg-[#6EE7B7]" />
@@ -290,7 +290,7 @@ function AccessKeyDiagram() {
         </div>
       </div>
 
-      <div className="absolute right-[8%] bottom-[16%] z-10 w-[250px] border border-foreground/10 bg-surface-shell px-5 py-4 opacity-42">
+      <div className="relative z-10 w-full border border-foreground/10 bg-surface-shell px-5 py-4 opacity-42 lg:absolute lg:right-[8%] lg:bottom-[16%] lg:w-[250px]">
         <div className="font-mono text-[12px] text-foreground tracking-[0.28em]">OLD KEY</div>
         <div className="mt-4 h-1.5 bg-foreground/8" />
         <div className="mt-3 font-mono text-[10px] text-foreground/35 tracking-[0.17em]">
@@ -298,7 +298,7 @@ function AccessKeyDiagram() {
         </div>
       </div>
 
-      <div className="absolute top-[58%] left-[33%] z-10 flex items-center gap-2">
+      <div className="absolute top-[58%] left-[33%] z-10 hidden items-center gap-2 lg:flex">
         <span className="font-mono text-[10px] text-foreground/35 tracking-[0.2em]">REVOKED</span>
         <span aria-hidden className="text-[30px] text-foreground/45 leading-none">
           ×
@@ -335,14 +335,14 @@ function AccessKeysPanel() {
 
 function KeyTypesDiagram() {
   return (
-    <div className="relative min-h-[460px] overflow-hidden border-line border-t lg:min-h-[540px] lg:border-t-0 lg:border-l">
+    <div className="relative grid gap-4 overflow-hidden border-line border-t p-5 lg:block lg:min-h-[540px] lg:border-t-0 lg:border-l lg:p-0">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-35 [background-image:linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:48px_48px]"
+        className="pointer-events-none absolute inset-0 hidden opacity-35 [background-image:linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:48px_48px] lg:block"
       />
       <svg
         aria-labelledby="accounts-key-types-title"
-        className="absolute inset-0 z-0 size-full text-foreground"
+        className="absolute inset-0 z-0 hidden size-full text-foreground lg:block"
         role="img"
         viewBox="0 0 720 520"
       >
@@ -373,18 +373,18 @@ function KeyTypesDiagram() {
           className="text-[#6EE7B7]/70"
         />
       </svg>
-      <div className="absolute top-1/2 right-[8%] z-10 w-[230px] -translate-y-1/2 border border-foreground/22 bg-surface-shell px-5 py-5 shadow-[0_18px_70px_rgba(0,0,0,0.22)]">
+      <div className="relative z-10 w-full border border-foreground/22 bg-surface-shell px-5 py-5 shadow-[0_18px_70px_rgba(0,0,0,0.12)] lg:absolute lg:top-1/2 lg:right-[8%] lg:w-[230px] lg:-translate-y-1/2 lg:shadow-[0_18px_70px_rgba(0,0,0,0.22)]">
         <div className="font-mono text-[11px] text-foreground/45 tracking-[0.26em]">ACCOUNT</div>
         <div className="mt-2 font-sans text-[26px] text-foreground tracking-[0]">0xA11c...09</div>
       </div>
       {[
-        ['ROOT KEY', 'FULL CONTROL', 'top-[13%] left-[7%]', 'bg-[#73A0FF]'],
-        ['PASSKEY', 'USER DEVICE', 'top-[40%] left-[7%]', 'bg-[#C084FC]'],
-        ['RECOVERY', 'BACKUP PATH', 'bottom-[13%] left-[7%]', 'bg-[#6EE7B7]'],
+        ['ROOT KEY', 'FULL CONTROL', 'lg:top-[13%] lg:left-[7%]', 'bg-[#73A0FF]'],
+        ['PASSKEY', 'USER DEVICE', 'lg:top-[40%] lg:left-[7%]', 'bg-[#C084FC]'],
+        ['RECOVERY', 'BACKUP PATH', 'lg:bottom-[13%] lg:left-[7%]', 'bg-[#6EE7B7]'],
       ].map(([label, detail, position, accent]) => (
         <div
           key={label}
-          className={`absolute z-10 w-[200px] border border-foreground/14 bg-surface-shell px-4 py-4 ${position}`}
+          className={`relative z-10 w-full border border-foreground/14 bg-surface-shell px-4 py-4 lg:absolute lg:w-[200px] ${position}`}
         >
           <span aria-hidden className={`block h-1 w-10 ${accent}`} />
           <div className="mt-5 font-mono text-[10px] text-foreground/38 tracking-[0.24em]">
@@ -402,10 +402,10 @@ function KeyTypesDiagram() {
 
 function PoliciesDiagram() {
   return (
-    <div className="relative min-h-[520px] overflow-hidden border-line border-t bg-surface-shell lg:min-h-[560px] lg:border-t-0 lg:border-l">
+    <div className="relative grid gap-4 overflow-hidden border-line border-t bg-surface-shell p-5 pb-20 lg:block lg:min-h-[560px] lg:border-t-0 lg:border-l lg:p-0">
       <svg
         aria-labelledby="accounts-policy-lines-title"
-        className="absolute inset-0 z-0 size-full text-foreground"
+        className="absolute inset-0 z-0 hidden size-full text-foreground lg:block"
         role="img"
         viewBox="0 0 720 520"
       >
@@ -447,7 +447,7 @@ function PoliciesDiagram() {
         />
       </svg>
 
-      <div className="absolute top-[15%] left-[5%] z-10 w-[245px] border border-foreground/14 bg-surface-shell px-5 py-4">
+      <div className="relative z-10 w-full border border-foreground/14 bg-surface-shell px-5 py-4 lg:absolute lg:top-[15%] lg:left-[5%] lg:w-[245px]">
         <div className="font-mono text-[11px] text-foreground tracking-[0.28em]">
           ALLOWED HOLDER
         </div>
@@ -456,7 +456,7 @@ function PoliciesDiagram() {
         </div>
       </div>
 
-      <div className="absolute top-[39%] left-[5%] z-10 w-[245px] border border-foreground/18 bg-surface-shell px-5 py-4">
+      <div className="relative z-10 w-full border border-foreground/18 bg-surface-shell px-5 py-4 lg:absolute lg:top-[39%] lg:left-[5%] lg:w-[245px]">
         <div className="font-mono text-[11px] text-foreground tracking-[0.28em]">
           APPROVED TRANSFER
         </div>
@@ -465,7 +465,7 @@ function PoliciesDiagram() {
         </div>
       </div>
 
-      <div className="absolute bottom-[15%] left-[5%] z-10 w-[245px] border border-foreground/10 bg-surface-shell px-5 py-4 opacity-42">
+      <div className="relative z-10 w-full border border-foreground/10 bg-surface-shell px-5 py-4 opacity-42 lg:absolute lg:bottom-[15%] lg:left-[5%] lg:w-[245px]">
         <div className="font-mono text-[11px] text-foreground tracking-[0.28em]">
           BLOCKED ADDRESS
         </div>
@@ -474,18 +474,18 @@ function PoliciesDiagram() {
         </div>
       </div>
 
-      <div className="absolute top-[8%] left-[33%] z-10 font-mono text-[10px] text-foreground/35 tracking-[0.2em]">
+      <div className="absolute top-[8%] left-[33%] z-10 hidden font-mono text-[10px] text-foreground/35 tracking-[0.2em] lg:block">
         POLICY CHECK
       </div>
 
-      <div className="absolute top-[56%] left-[32%] z-10 flex items-center gap-2">
+      <div className="absolute top-[56%] left-[32%] z-10 hidden items-center gap-2 lg:flex">
         <span aria-hidden className="text-[30px] text-foreground/45 leading-none">
           ×
         </span>
         <span className="font-mono text-[10px] text-foreground/35 tracking-[0.2em]">BLOCKED</span>
       </div>
 
-      <div className="absolute top-[30%] right-[9%] z-10 w-[175px] border border-foreground/18 bg-surface-shell px-5 py-5">
+      <div className="relative z-10 w-full border border-foreground/18 bg-surface-shell px-5 py-5 lg:absolute lg:top-[30%] lg:right-[9%] lg:w-[175px]">
         <span aria-hidden className="block h-1 w-10 bg-[#73A0FF]" />
         <div className="mt-5 font-mono text-[12px] text-foreground tracking-[0.28em]">TOKEN</div>
         <div className="mt-3 font-mono text-[10px] text-foreground/35 tracking-[0.17em]">
@@ -523,14 +523,14 @@ function ReceivePoliciesPanel() {
 
 function VirtualAddressDiagram() {
   return (
-    <div className="relative min-h-[460px] overflow-hidden border-line border-t lg:min-h-[540px] lg:border-t-0 lg:border-l">
+    <div className="relative grid gap-4 overflow-hidden border-line border-t p-5 lg:block lg:min-h-[540px] lg:border-t-0 lg:border-l lg:p-0">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-35 [background-image:linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:48px_48px]"
+        className="pointer-events-none absolute inset-0 hidden opacity-35 [background-image:linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:48px_48px] lg:block"
       />
       <svg
         aria-labelledby="accounts-virtual-address-title"
-        className="absolute inset-0 z-0 size-full text-foreground"
+        className="absolute inset-0 z-0 hidden size-full text-foreground lg:block"
         role="img"
         viewBox="0 0 720 520"
       >
@@ -566,19 +566,19 @@ function VirtualAddressDiagram() {
         />
       </svg>
       {[
-        ['INV-1042', 'DEPOSIT ALIAS', 'top-[18%] left-[8%]'],
-        ['USER-83', 'CUSTOMER TAG', 'top-[45%] left-[8%]'],
-        ['PAYOUT-7', 'ROUTING KEY', 'bottom-[18%] left-[8%]'],
+        ['INV-1042', 'DEPOSIT ALIAS', 'lg:top-[18%] lg:left-[8%]'],
+        ['USER-83', 'CUSTOMER TAG', 'lg:top-[45%] lg:left-[8%]'],
+        ['PAYOUT-7', 'ROUTING KEY', 'lg:bottom-[18%] lg:left-[8%]'],
       ].map(([label, detail, position]) => (
         <div
           key={label}
-          className={`absolute z-10 w-[170px] border border-foreground/14 bg-surface-shell px-4 py-4 ${position}`}
+          className={`relative z-10 w-full border border-foreground/14 bg-surface-shell px-4 py-4 lg:absolute lg:w-[170px] ${position}`}
         >
           <div className="font-mono text-[10px] text-foreground/38 tracking-[0.24em]">{detail}</div>
           <div className="mt-2 font-sans text-[16px] text-foreground tracking-[0]">{label}</div>
         </div>
       ))}
-      <div className="absolute top-1/2 right-[9%] z-10 w-[230px] -translate-y-1/2 border border-foreground/22 bg-surface-shell px-5 py-5 shadow-[0_18px_70px_rgba(0,0,0,0.22)]">
+      <div className="relative z-10 w-full border border-foreground/22 bg-surface-shell px-5 py-5 shadow-[0_18px_70px_rgba(0,0,0,0.12)] lg:absolute lg:top-1/2 lg:right-[9%] lg:w-[230px] lg:-translate-y-1/2 lg:shadow-[0_18px_70px_rgba(0,0,0,0.22)]">
         <div className="font-mono text-[11px] text-foreground/40 tracking-[0.26em]">
           MASTER ACCOUNT
         </div>
@@ -632,17 +632,8 @@ function AccountFeatureSection({ feature, index }: { feature: AccountFeature; in
       <Reveal className="relative border-line border-y">
         <EdgeMarkers wideOnly />
         <div className="grid lg:grid-cols-2">
-          {visualFirst ? (
-            <>
-              {diagram}
-              {copy}
-            </>
-          ) : (
-            <>
-              {copy}
-              {diagram}
-            </>
-          )}
+          <div className={`order-1 ${visualFirst ? 'lg:order-2' : 'lg:order-1'}`}>{copy}</div>
+          <div className={`order-2 ${visualFirst ? 'lg:order-1' : 'lg:order-2'}`}>{diagram}</div>
         </div>
         <div className="grid border-line border-t sm:grid-cols-3">
           {feature.points.map((point) => (
