@@ -211,6 +211,32 @@ export default defineConfig({
         flatten: ['Data API'],
         intro: [
           {
+            text: 'API Console',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/docs/api/console',
+              },
+              {
+                text: 'Projects & Environments',
+                link: '/docs/api/console/projects-and-environments',
+              },
+              {
+                text: 'API Keys',
+                link: '/docs/api/console/api-keys',
+              },
+              {
+                text: 'Usage & Billing',
+                link: '/docs/api/console/usage-and-billing',
+              },
+              {
+                text: 'Teams & Access',
+                link: '/docs/api/console/team',
+              },
+            ],
+          },
+          {
             text: 'Authentication',
             link: '/docs/api/authentication',
           },
