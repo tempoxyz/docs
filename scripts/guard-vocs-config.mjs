@@ -6,8 +6,8 @@ const original = config
 
 config = config
   .replace(
-    "  titleTemplate: (path, { title }) => {\n    if (path === '/docs') return 'Tempo %s ⋅ Tempo Docs'\n    if (path === '/docs' || path.startsWith('/docs/')) return '%s ⋅ Tempo Docs'",
-    "  titleTemplate: (path, { title }) => {\n    const pagePath = typeof path === 'string' ? path : '/'\n    if (pagePath === '/docs') return 'Tempo %s ⋅ Tempo Docs'\n    if (pagePath === '/docs' || pagePath.startsWith('/docs/')) return '%s ⋅ Tempo Docs'",
+    "  titleTemplate: (path, { title }) => {\n    if (path === '/docs') return 'Tempo %s ⋅ Tempo Docs'\n    if (path.startsWith('/docs/')) return '%s ⋅ Tempo Docs'",
+    "  titleTemplate: (path, { title }) => {\n    const pagePath = typeof path === 'string' ? path : '/'\n    if (pagePath === '/docs') return 'Tempo %s ⋅ Tempo Docs'\n    if (pagePath.startsWith('/docs/')) return '%s ⋅ Tempo Docs'",
   )
   .replace(
     "  head(path) {\n    if (path === '/docs' || path.startsWith('/docs/'))",

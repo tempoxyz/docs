@@ -1,0 +1,51 @@
+---
+title: Server Utilities
+description: Run framework-agnostic utilities for server-side protocol operations.
+---
+
+import { Cards, Card } from 'vocs'
+
+# Server Utilities
+
+Server utilities are distributed through the Tempo API library, [`tapimo`](https://npm.im/tapimo). They work with frameworks that support either:
+
+- The [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) through `handler.fetch`
+- The [Node.js `RequestListener` API](https://nodejs.org/api/http.html#http_class_http_serverrequestlistener) through `handler.listener`
+
+## Connect a handler to your server
+
+Create a handler once, then expose it through your server framework:
+
+```ts twoslash
+// @noErrors
+import { createServer } from 'node:http'
+import { Handler } from 'tapimo'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const handler = Handler.relay({
+  apiKey: process.env.TEMPO_API_KEY,
+  feePayer: {
+    account: privateKeyToAccount('0x...'),
+  },
+})
+
+createServer(handler.listener)              // Node.js
+Bun.serve({ fetch: handler.fetch })         // Bun
+Deno.serve(handler.fetch)                   // Deno
+app.all('*', c => handler.fetch(c.request)) // Elysia
+app.use(handler.listener)                   // Express
+app.use(c => handler.fetch(c.req.raw))      // Hono
+export const GET = handler.fetch            // Next.js
+export const POST = handler.fetch           // Next.js
+```
+
+## Handlers
+
+<Cards>
+  <Card
+    description="Proxy RPC requests with fee sponsorship, automatic swaps, and simulation metadata."
+    icon="lucide:radio"
+    to="/docs/server/relay-handler"
+    title="Relay & Fee Payer Handler"
+  />
+</Cards>

@@ -53,14 +53,6 @@ ORDER BY num DESC
 LIMIT 5`,
   },
   {
-    name: 'Block count',
-    description: 'Run a simple aggregate over the blocks table.',
-    network: 'mainnet',
-    engine: 'clickhouse',
-    sql: `SELECT count() AS block_count
-FROM blocks`,
-  },
-  {
     name: 'Recent transactions',
     description: 'Inspect recent testnet transactions.',
     network: 'testnet',
@@ -75,8 +67,8 @@ LIMIT 5`,
     description: 'Use a signature to query decoded event logs.',
     network: 'mainnet',
     engine: 'clickhouse',
-    signature: 'Transfer(address,address,uint256)',
-    sql: `SELECT arg0 AS from_address, arg1 AS to_address, arg2 AS value, block_num, tx_hash
+    signature: 'Transfer(address indexed from, address indexed to, uint256 value)',
+    sql: `SELECT "from", "to", value, block_num, tx_hash
 FROM Transfer
 ORDER BY block_num DESC
 LIMIT 5`,
@@ -160,7 +152,7 @@ export function TidxQuery() {
     <Container
       headerLeft={
         <h4 className="font-normal text-[14px] text-gray12 leading-none">
-          Hosted <code>tidx</code> Query
+          Public <code>tidx</code> Query
         </h4>
       }
       headerRight={
@@ -224,7 +216,7 @@ export function TidxQuery() {
           <input
             value={signature}
             onChange={(event) => setSignature(event.target.value)}
-            placeholder="Transfer(address,address,uint256)"
+            placeholder="Transfer(address indexed from, address indexed to, uint256 value)"
             className="w-full rounded-md border border-gray6 bg-gray1 px-3 py-2 font-mono text-gray12"
           />
         </label>
