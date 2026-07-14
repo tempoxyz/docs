@@ -933,6 +933,20 @@ export default defineConfig({
             ],
           },
           {
+            text: 'Server Handlers',
+            collapsed: false,
+            items: [
+              {
+                text: 'Overview',
+                link: '/docs/server',
+              },
+              {
+                text: 'Relay & Fee Payer Handler',
+                link: '/docs/server/handler.relay',
+              },
+            ],
+          },
+          {
             text: 'RPC Reference',
             link: '/docs/protocol/rpc',
           },
@@ -1160,6 +1174,7 @@ export default defineConfig({
       '/docs/cli': developerToolsSidebar,
       '/docs/protocol/rpc': developerToolsSidebar,
       '/docs/sdk': developerToolsSidebar,
+      '/docs/server': developerToolsSidebar,
       '/docs/wallet': developerToolsSidebar,
       '/docs/guide/node': nodeSidebar,
       '/docs/changelog': nodeSidebar,

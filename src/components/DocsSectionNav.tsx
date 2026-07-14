@@ -59,6 +59,7 @@ const sectionNavItems: SectionNavItem[] = [
       '/docs/developer-tools',
       '/docs/protocol/rpc',
       '/docs/sdk',
+      '/docs/server',
       '/docs/tools',
       '/docs/wallet',
     ],
