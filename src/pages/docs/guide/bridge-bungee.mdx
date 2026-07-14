@@ -7,6 +7,8 @@ description: Bridge tokens to and from Tempo using Bungee. Covers Bungee Link, d
 
 [Bungee](https://www.bungee.exchange/) is a cross-chain routing protocol built by the [SOCKET](https://docs.socket.tech/) team. For Tempo, the recommended integration path is Bungee Deposit: request a quote, execute the returned source-chain transaction, and track the request until Bungee delivers funds on the destination chain.
 
+If you are bringing an existing ERC-20 to Tempo, first decide whether to preserve it as the canonical asset behind a bridge adapter or migrate issuance to native TIP-20. See [Migrate an ERC-20 to TIP-20](/docs/guide/issuance/migrate-erc20-to-tip20).
+
 Tempo's Bungee chain ID is **`4217`**.
 
 ## How Bungee Deposit works

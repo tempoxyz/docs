@@ -1,0 +1,382 @@
+---
+title: Migrate an ERC-20 to TIP-20
+description: Map an existing OpenZeppelin ERC-20 architecture to native TIP-20 issuance, bridging, lifecycle management, roles, burns, decimals, and TIP-403 policies.
+---
+
+import { MermaidDiagram } from '../../../../components/MermaidDiagram'
+
+# Migrate an ERC-20 to TIP-20
+
+Choose how to bring an OpenZeppelin-based ERC-20 to Tempo, then map its deployment, roles, burn flow, decimals, custom logic, and compliance controls to a native TIP-20 token.
+
+Quick choice:
+
+- New asset: deploy a native TIP-20.
+- Existing canonical asset: use a bridge adapter.
+- Full migration: retire or lock legacy supply, then mint TIP-20.
+- Custom issuance/redemption: use an external lifecycle manager.
+
+Use this guide if your current token uses:
+
+- `ERC20` or `ERC20Upgradeable`
+- `AccessControl` or `AccessControlEnumerable`
+- `Pausable`
+- `Burnable`
+- `ERC20Wrapper`
+- A proxy pattern such as UUPS or Transparent Proxy
+- A manager, minter, bridge, or tokenization engine around the token
+
+## 1. Choose your Tempo path
+
+| Path | Use when | Tempo pattern |
+|---|---|---|
+| Native TIP-20 launch | New issuance on Tempo | Deploy TIP-20 through `TIP20Factory` |
+| ERC-20 migration | Existing supply should move to Tempo | Burn or retire ERC-20 supply, then mint TIP-20 |
+| Bridge adapter | ERC-20 remains canonical on another chain | Lock or burn ERC-20, then mint TIP-20 on Tempo through a bridge adapter |
+| Lifecycle manager | Issuance has subscriptions, redemptions, caps, or oracle pricing | Keep business logic outside TIP-20, grant the manager scoped `ISSUER_ROLE` |
+
+## 2. Review the recommended deployment flow
+
+<MermaidDiagram chart={`sequenceDiagram
+    participant Issuer as Issuer ops
+    participant Admin as TIP-20 admin wallet
+    participant Factory as TIP20Factory
+    participant Token as Native TIP-20 token
+    participant Operator as Issuer wallet / manager / adapter
+    participant PolicyAdmin as Simple-policy admin / sync signer
+    participant Registry as TIP-403 registry
+    participant Vault as Treasury or customer vault
+
+    Note over Issuer,Token: One-time token deployment
+    Issuer->>Factory: createToken(name, symbol, currency, quoteToken, admin, salt, logoURI)
+    Factory-->>Token: Create native TIP-20 token
+    Factory-->>Admin: Grant token admin role
+
+    Note over Admin,Operator: One-time or occasional role setup
+    Admin->>Token: grantRole(ISSUER_ROLE, Operator)
+    Admin->>Token: grantRole(PAUSE_ROLE, pause wallet)
+    Admin->>Token: grantRole(UNPAUSE_ROLE, unpause wallet)
+
+    opt Compliance required
+        Note over PolicyAdmin,Token: One-time policy setup and attachment
+        PolicyAdmin->>Registry: Create or select policy
+        Admin->>Token: changeTransferPolicyId(policyId)
+
+        Note over PolicyAdmin,Registry: Ongoing compliance maintenance
+        PolicyAdmin->>Registry: Add, remove, allow, or block wallets
+    end
+
+    Note over Operator,Vault: Ongoing issuance operations
+    Operator->>Token: mint(Vault, amount)
+    Token->>Token: Check ISSUER_ROLE, pause state, and supply cap
+    Token->>Registry: Authorize Vault as mint recipient
+    Token-->>Vault: TIP-20 balance increases`} />
+
+## 3. Complete the implementation checklist
+
+Before production deployment, confirm:
+
+- TIP-20 token is deployed through `TIP20Factory`.
+- Token name, symbol, currency, quote token, and logo are correct.
+- Admin address is controlled by the issuer or approved operator.
+- `ISSUER_ROLE` is granted only to the intended issuer wallet, manager, or bridge adapter.
+- Native role queries use `hasRole(account, role)`, and each role's administrator is confirmed with `getRoleAdmin(role)`.
+- `PAUSE_ROLE` and `UNPAUSE_ROLE` are assigned.
+- Supply cap is set if required.
+- Transfer policy is configured if compliance is required.
+- If using a compound policy, sender, recipient, and mint-recipient checks are tested independently.
+- Existing ERC-20 supply is burned, locked, or reconciled if this is a migration or bridge.
+- Decimal conversion is tested.
+- Mint and burn flows are tested.
+- Mint tests cover the supply cap, paused state, and TIP-403 mint-recipient authorization.
+- Pause tests confirm that transfers, minting, normal burns, and `burnBlocked` are blocked while role and configuration administration remain available.
+- Transfer and transferFrom are tested.
+- Custody and treasury wallets are funded and labeled.
+- Tokenlist and explorer metadata are ready.
+- The issuer has an operational runbook for role changes, pausing, minting, burning, and reconciliation.
+
+## 4. Inspect the current ERC-20
+
+Before deploying on Tempo, identify the current token architecture.
+
+| Item | What to check |
+|---|---|
+| Token address | Current ERC-20 or proxy address |
+| Implementation | Proxy implementation, if upgradeable |
+| Metadata | `name`, `symbol`, `decimals` |
+| Supply | `totalSupply`, current holder or treasury vault |
+| Roles | Admin, minter, burner, pauser, upgrader |
+| Mint flow | Who can create supply and through what contract |
+| Burn flow | Who can destroy supply and whether `burnFrom` is used |
+| Pause flow | Who can pause and unpause |
+| Compliance | Allowlist, blocklist, sanctions, KYC, transfer hooks |
+| Bridge | Source adapter, destination adapter, replay protection |
+| Oracle | NAV, FX, redemption price, or yield calculation |
+
+## 5. Map OpenZeppelin patterns to TIP-20
+
+Map by capability, not by contract name.
+
+| OpenZeppelin pattern | Common behavior | Tempo mapping |
+|---|---|---|
+| `ERC20` / `ERC20Upgradeable` | Core transfer and allowance surface | Native TIP-20 transfer and allowance surface |
+| `IERC20Metadata` | `name`, `symbol`, `decimals` | Set name, symbol, and currency at TIP-20 creation |
+| `AccessControl` | Role-based permissions | TIP-20 native roles |
+| `Pausable` | Pause state and pause checks | `PAUSE_ROLE` and `UNPAUSE_ROLE` |
+| `ERC20Burnable` | `burn` and often `burnFrom` | An `ISSUER_ROLE` holder can burn only its own TIP-20 balance; use pull-then-burn for user funds |
+| `ERC20Wrapper` | Deposit underlying ERC-20, mint wrapped ERC-20 | Use an external adapter that mints TIP-20 |
+| Proxy upgrade pattern | Upgradeable implementation and storage | Not portable to TIP-20 |
+
+## 6. Map roles
+
+| Current role or control | Tempo role |
+|---|---|
+| `DEFAULT_ADMIN_ROLE` or owner | TIP-20 `DEFAULT_ADMIN_ROLE` for role and configuration administration; grant `ISSUER_ROLE` separately for minting |
+| `MINTER_ROLE` | `ISSUER_ROLE` |
+| `BURNER_ROLE` | `ISSUER_ROLE` for normal burns |
+| `PAUSER_ROLE` | `PAUSE_ROLE` plus `UNPAUSE_ROLE` |
+| Compliance admin | TIP-403 simple-policy admin |
+| Bridge operator | Bridge adapter with scoped `ISSUER_ROLE` |
+| Lifecycle manager | Manager contract with scoped `ISSUER_ROLE` |
+
+Important: `Pausable` does not define who can pause. That authority usually comes from `AccessControl`, `Ownable`, or a custom manager. On TIP-20, pause and unpause are separate permissions.
+
+## 7. Handle burn semantics
+
+OpenZeppelin-style ERC-20 tokens may expose:
+
+```solidity
+burn(amount)
+burnFrom(account, amount)
+```
+
+An `ISSUER_ROLE` holder can burn only its own TIP-20 balance. TIP-20 does not give the issuer a general `burnFrom(user, amount)` path. If your current flow uses `burnFrom`, replace it with a manager-mediated pull-then-burn flow.
+
+```text
+transferFrom(user, managerOrBridgeAdapter, amount)
+managerOrBridgeAdapter burns its own TIP-20 balance
+```
+
+In practice, `managerOrBridgeAdapter` means:
+
+| Flow | Contract that pulls and burns |
+|---|---|
+| Native redemption | Lifecycle manager |
+| Bridge out of Tempo | Bridge adapter |
+| Migration burn | Migration adapter or issuer-controlled burn contract |
+| Simple issuer operation | Issuer wallet for admin-only mint/burn operations, not user-facing redemption |
+
+For bridge or redemption flows, the lifecycle manager or bridge adapter should hold `ISSUER_ROLE`.
+
+Do not treat `BURN_BLOCKED_ROLE` as a general redemption role. Use it only for blocked-account or compliance recovery flows.
+
+## 8. Handle decimals
+
+OpenZeppelin ERC-20 tokens commonly use 18 decimals unless overridden. TIP-20 uses 6 decimals.
+
+Before migration or integration:
+
+- Define the conversion rule.
+- Decide how to handle dust.
+- Update bridge and migration scripts.
+- Update reporting and accounting.
+- Confirm wallet and explorer display.
+- Test mint, burn, transfer, and reconciliation in smallest units.
+
+Example:
+
+```text
+1.000000 TIP-20 unit = 1 token
+1 TIP-20 token = 1,000,000 base units
+```
+
+## 9. Move custom logic outside the token
+
+TIP-20 is native. Do not port custom ERC-20 methods into the token.
+
+| Current custom logic | Tempo location |
+|---|---|
+| Transfer hooks | TIP-403 policy, maintained by an issuer compliance sync service |
+| Allowlist or blocklist | TIP-403 simple or compound policy |
+| Sanctions checks | TIP-403 policy, maintained by an issuer compliance sync service |
+| Subscription flow | Lifecycle manager |
+| Redemption flow | Lifecycle manager |
+| Fee logic | Lifecycle manager |
+| Rate limits | Lifecycle manager |
+| Oracle pricing | External oracle or manager-facing oracle |
+| Bridge accounting | Bridge adapter |
+
+## 10. Map compliance hooks to TIP-403
+
+Many issuer ERC-20s enforce compliance inside token transfer hooks such as `_beforeTokenTransfer` or `_update`.
+
+Common checks include:
+
+- allowlisted sender
+- allowlisted recipient
+- blocked sender or recipient
+- sanctions screening
+- KYC or identity registry membership
+- transfer-agent or operator eligibility
+
+On Tempo, keep the token native and move transfer eligibility into TIP-403 policy.
+
+A TIP-20 token points to one `transferPolicyId`. Do not model compliance as attaching both an allowlist policy and a blocklist policy directly to the token. Use a simple whitelist or blacklist when one rule applies across token movement. Use a compound policy when sender, recipient, and mint-recipient rules need to differ.
+
+### Simple vs compound policies
+
+| Policy type | Use when |
+|---|---|
+| Simple whitelist | The same allowlist applies to all token movement checks |
+| Simple blacklist | The same blocklist applies to all token movement checks |
+| Compound policy | Sender, recipient, and mint-recipient rules need to differ |
+
+For simple whitelist or blacklist policies, the flow is shorter: create the simple policy, update its wallet entries, and set the token's `transferPolicyId` to that simple policy ID. Use a compound policy only when sender, recipient, and mint-recipient rules need to differ.
+
+A compound policy references three simple policies:
+
+| Compound policy component | Used for |
+|---|---|
+| `senderPolicyId` | Transfer senders and blocked-account burn eligibility |
+| `recipientPolicyId` | Transfer recipients |
+| `mintRecipientPolicyId` | Mint recipients |
+
+For compound policies, the TIP-20 admin attaches the compound policy initially:
+
+```text
+TIP20.changeTransferPolicyId(compoundPolicyId)
+```
+
+The TIP-20 admin can later change `transferPolicyId` to another policy. Day to day, the issuer updates the underlying simple policies as wallets become allowed, blocked, or ineligible.
+
+### Separate policy and token responsibilities
+
+Each TIP-403 simple policy has one admin address. A compliance sync service must operate through that address; the service is not a parallel native authority.
+
+| Responsibility | Owner |
+|---|---|
+| Select which policy the token uses | TIP-20 admin |
+| Maintain allowlist, blocklist, KYC, or sanctions entries | Simple-policy admin address, which may be operated by a compliance sync service |
+| Mint and burn normal supply | Issuer wallet, lifecycle manager, or bridge adapter with `ISSUER_ROLE` |
+| Pause or unpause token operations | `PAUSE_ROLE` / `UNPAUSE_ROLE` holders |
+
+### Follow the compliance flow
+
+<MermaidDiagram chart={`sequenceDiagram
+    participant Compliance as Issuer compliance system
+    participant Updater as Simple-policy admin / sync signer
+    participant Registry as TIP-403 registry
+    participant Admin as TIP-20 admin
+    participant Token as Native TIP-20 token
+    participant Issuer as Issuer / lifecycle manager
+    participant Sender
+    participant Recipient
+
+    Note over Updater,Registry: One-time policy setup
+    Updater->>Registry: Create sender policy
+    Updater->>Registry: Create recipient policy
+    Updater->>Registry: Create mint recipient policy
+    Updater->>Registry: Create compound policy(senderPolicyId, recipientPolicyId, mintRecipientPolicyId)
+
+    Note over Admin,Token: One-time policy attachment
+    Admin->>Token: changeTransferPolicyId(compoundPolicyId)
+
+    Note over Compliance,Registry: Ongoing compliance maintenance
+    Compliance->>Updater: Wallet eligibility changes
+    Updater->>Registry: Update simple policy entries
+
+    Note over Sender,Recipient: Ongoing transfer checks
+    Sender->>Token: transfer(Recipient, amount)
+    Token->>Registry: Check senderPolicyId for Sender
+    Token->>Registry: Check recipientPolicyId for Recipient
+    Registry-->>Token: allow or reject
+    Token-->>Recipient: Balance increases if allowed
+
+    Note over Issuer,Recipient: Ongoing mint checks
+    Issuer->>Token: mint(Recipient, amount)
+    Token->>Token: Check ISSUER_ROLE, not paused, and totalSupply + amount <= supplyCap
+    Token->>Registry: Check mintRecipientPolicyId for Recipient
+    Registry-->>Token: allow or reject`} />
+
+Minting succeeds only when the caller holds `ISSUER_ROLE`, the token is not paused, the resulting supply does not exceed the supply cap, and TIP-403 authorizes the mint recipient.
+
+### Handle burn and redemption
+
+Normal burn and redemption are not a separate TIP-403 policy attachment.
+
+For normal redemption:
+
+```text
+user approves lifecycle manager or bridge adapter
+manager pulls tokens with transferFrom
+manager burns its own TIP-20 balance using ISSUER_ROLE
+```
+
+For blocked-account recovery:
+
+```text
+BURN_BLOCKED_ROLE can use burnBlocked(...)
+```
+
+`burnBlocked` is a special compliance path. It should not be treated as the normal redemption or bridge burn path.
+
+### Map ERC-20 compliance patterns
+
+| Current ERC-20 compliance pattern | Tempo mapping |
+|---|---|
+| `_beforeTokenTransfer` allowlist check | Simple whitelist or compound policy component |
+| `_update` allowlist check | Simple whitelist or compound policy component |
+| Blocklist check | Simple blacklist or compound policy component |
+| Sanctions-list contract | Simple blacklist maintained by issuer compliance sync service |
+| Identity or KYC registry | Simple whitelist maintained by issuer compliance sync service |
+| Different sender and recipient rules | Compound policy |
+| Mint recipient eligibility | Compound policy `mintRecipientPolicyId` |
+| Operator or spender compliance | Lifecycle manager or bridge adapter check |
+| Compliance admin | TIP-403 simple-policy admin |
+
+## 11. Avoid incompatible ERC-20 assumptions
+
+- Do not deploy a custom ERC-20 when the target is native TIP-20.
+- Do not assume proxy storage or upgrade logic carries over.
+- Do not grant issuer permissions to broad operational wallets without a reason.
+- Use TIP-20's native role-query methods; do not assume OpenZeppelin argument ordering.
+- Do not map `burnFrom` directly. Use a lifecycle manager or bridge adapter that pulls tokens with `transferFrom`, then burns its own TIP-20 balance.
+- Do not ignore 18-to-6 decimal conversion.
+- Do not put compliance or subscription logic inside the token.
+
+## 12. Consult the operational reference
+
+### Query and administer native roles
+
+TIP-20 exposes native methods for querying and administering roles:
+
+```solidity
+hasRole(address account, bytes32 role)
+getRoleAdmin(bytes32 role)
+setRoleAdmin(bytes32 role, bytes32 adminRole)
+```
+
+Unlike OpenZeppelin's `hasRole(role, account)`, TIP-20's `hasRole` takes the account first: `hasRole(account, role)`.
+
+`DEFAULT_ADMIN_ROLE` is `bytes32(0)`. Multiple accounts may hold it. It governs role and token administration, but it does not itself permit minting; an account or contract must hold `ISSUER_ROLE` to mint.
+
+Initially, every role is governed by `DEFAULT_ADMIN_ROLE`. `setRoleAdmin(role, adminRole)` can later change which role is authorized to grant and revoke that role. Use `getRoleAdmin(role)` to inspect the current relationship before changing role assignments.
+
+### Apply pause semantics
+
+Since the T3 upgrade, a paused TIP-20 blocks:
+
+- transfers
+- minting
+- normal burns
+- `burnBlocked`
+
+Administration remains available while paused.
+
+`transferFeePreTx` and `transferFeePostTx` are system-only entrypoints used by Tempo protocol precompiles, not issuer-callable operations. As a protocol invariant, `transferFeePreTx` respects pause while `transferFeePostTx` remains available so fee settlement can complete.
+
+## Related references
+
+- [OpenZeppelin ERC-20 contracts](https://docs.openzeppelin.com/contracts/5.x/api/token/erc20)
+- [OpenZeppelin access control](https://docs.openzeppelin.com/contracts/5.x/access-control)
+- [TIP-20 tokens specification](/docs/protocol/tip20/spec)

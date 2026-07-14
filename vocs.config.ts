@@ -365,6 +365,10 @@ export default defineConfig({
                 link: '/docs/guide/issuance/create-a-stablecoin',
               },
               {
+                text: 'Migrate an ERC-20 to TIP-20',
+                link: '/docs/guide/issuance/migrate-erc20-to-tip20',
+              },
+              {
                 text: 'Mint stablecoins',
                 link: '/docs/guide/issuance/mint-stablecoins',
               },
