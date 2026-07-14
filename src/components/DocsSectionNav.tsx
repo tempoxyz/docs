@@ -66,7 +66,7 @@ const sectionNavItems: SectionNavItem[] = [
   },
   {
     id: 'api',
-    label: 'API',
+    label: 'Tempo API',
     href: '/docs/api',
     matches: ['/docs/api'],
   },
