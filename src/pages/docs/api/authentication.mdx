@@ -15,10 +15,6 @@ The Tempo API supports three ways to authenticate a request, so you can start wi
 
 Most read endpoints are open to **public** (anonymous) callers, so no credential is required to get started. To raise your throughput, pay per request with [MPP](#mpp-paying-per-request) or send an **API key**. Some endpoints, such as webhook management, require a key.
 
-:::info
-API keys are only available on request. [Contact us](https://tempo.xyz/contact/) to learn more.
-:::
-
 ## API Keys
 
 Every key belongs to one of two environments, **production** or **sandbox**, that determine which chains the key may access. A key's environment is fixed when it is provisioned, and its token carries an environment-specific prefix so a leaked key is recognizable at a glance:
