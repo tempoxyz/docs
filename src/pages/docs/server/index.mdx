@@ -20,17 +20,10 @@ Create a handler once, then expose it through your server framework:
 // @noErrors
 import { createServer } from 'node:http'
 import { Handler } from 'tapimo'
-import { createClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { tempo } from 'viem/tempo/chains'
-
-const client = createClient({
-  chain: tempo,
-  transport: http(),
-})
 
 const handler = Handler.relay({
-  getClient: () => client,
+  apiKey: process.env.TEMPO_API_KEY,
   feePayer: {
     account: privateKeyToAccount('0x...'),
   },

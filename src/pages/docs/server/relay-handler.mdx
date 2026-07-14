@@ -1,39 +1,38 @@
 ---
 title: Relay & Fee Payer Handler
-description: Enrich Tempo wallet RPC requests with fee sponsorship, fee-token selection, simulation metadata, and automatic stablecoin swaps.
+description: Enrich Tempo RPC requests with fee sponsorship, fee-token selection, simulation metadata, and automatic stablecoin swaps.
 ---
 
 import { Cards, Card } from 'vocs'
 
 # Relay & Fee Payer Handler
 
-Use `Handler.relay` to proxy wallet RPC requests through your backend. The handler can enrich `eth_fillTransaction` with conditional fee sponsorship, fee-token selection, balance simulation, fee estimates, and automatic Stablecoin DEX swaps.
+Use `Handler.relay` to proxy RPC requests through your backend. The handler can enrich `eth_fillTransaction` with conditional fee sponsorship, fee-token selection, balance simulation, fee estimates, and automatic Stablecoin DEX swaps.
 
 ## Create a relay handler
 
-Create the handler, then expose either its Fetch API or Node.js listener entrypoint:
+Create the handler with an optional [Tempo API key](/docs/api/authentication), then expose either its Fetch API or Node.js listener entrypoint:
 
-```ts twoslash
+```ts
 import { Handler } from 'tapimo'
-import { createClient, http } from 'viem'
-import { tempo } from 'viem/tempo/chains'
-
-const client = createClient({ chain: tempo, transport: http() })
 
 const handler = Handler.relay({
-  getClient: () => client,
+  apiKey: process.env.TEMPO_API_KEY,
 })
 ```
+
+By default, the relay configures Viem clients for Tempo mainnet and testnet and loads fee-token candidates from the [Tempo API verified-token list](/docs/api/verified-tokens#gettokenlist). Pass `apiKey` to authenticate the built-in RPC and verified-token requests. When you omit it, the clients use each chain's default Viem transport and the verified-token request is unauthenticated.
+
+:::info
+The built-in client defaults to mainnet when a request does not specify a chain. Use testnet chain ID `42431` with Sandbox API keys.
+:::
 
 ```ts twoslash
 // @noErrors
 import { createServer } from 'node:http'
 import { Handler } from 'tapimo'
-import { createClient, http } from 'viem'
-import { tempo } from 'viem/tempo/chains'
 
-const client = createClient({ chain: tempo, transport: http() })
-const handler = Handler.relay({ getClient: () => client })
+const handler = Handler.relay({ apiKey: process.env.TEMPO_API_KEY })
 // ---cut---
 createServer(handler.listener)              // Node.js
 Bun.serve({ fetch: handler.fetch })         // Bun
@@ -96,18 +95,16 @@ The configured fee payer also handles approved `eth_signRawTransaction`, `eth_se
 
 :::code-group
 
-```ts twoslash [server.ts]
+```ts [server.ts]
 import { createServer } from 'node:http'
 import { Handler } from 'tapimo'
-import { createClient, http, isAddressEqual } from 'viem'
+import { isAddressEqual } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { tempo } from 'viem/tempo/chains'
 
-const client = createClient({ chain: tempo, transport: http() })
 const blockedAddress = '0x000000000000000000000000000000000000dead'
 // ---cut---
 const handler = Handler.relay({
-  getClient: () => client,
+  apiKey: process.env.TEMPO_API_KEY,
   feePayer: {
     account: privateKeyToAccount('0x...'),
     name: 'My App',
@@ -166,15 +163,11 @@ Enable this behavior with [`autoSwap`](#autoswap) or [`features: 'all'`](#featur
 
 :::code-group
 
-```ts twoslash [server.ts]
+```ts [server.ts]
 import { Handler } from 'tapimo'
-import { createClient, http } from 'viem'
-import { tempo } from 'viem/tempo/chains'
-
-const client = createClient({ chain: tempo, transport: http() })
 
 const handler = Handler.relay({
-  getClient: () => client,
+  apiKey: process.env.TEMPO_API_KEY,
   autoSwap: { slippage: 0.05 },
 })
 ```
@@ -212,31 +205,23 @@ result.capabilities.autoSwap
 
 ### Fee-token selection
 
-For sponsored requests, the relay uses `feePayer.feeToken`, then the request's explicit `feeToken`, then the first candidate returned by [`resolveTokens`](#resolvetokens). It does not inspect the sender's balances because the sponsor pays the fee.
+For sponsored requests, `feePayer.feeToken` takes precedence over the request's explicit `feeToken`. If neither is set, the relay and upstream fill resolve a token from the available candidates. The relay does not inspect the sender's balances because the sponsor pays the fee.
 
 For self-paid requests with fee-token resolution enabled, the relay selects a token in this order:
 
 1. Use the request's explicit `feeToken`.
 2. Use the account's onchain preference when the account has a balance. When [`cache`](#cache) is configured, the relay caches this lookup for about 60 seconds.
 3. Choose the highest-balance token returned by [`resolveTokens`](#resolvetokens). The relay also considers TIP-20 tokens called by the transaction.
-4. Fall back to the first candidate returned by `resolveTokens` when no candidate has a positive balance.
+4. Leave `feeToken` unset for the upstream fill when no candidate has a positive balance.
 
-Set `features: 'all'` to enable fee-token resolution. Provide `resolveTokens` to add candidate tokens; self-paid fills also consider TIP-20 call targets.
+Set `features: 'all'` to enable fee-token resolution with the Tempo API verified-token list for mainnet and testnet. Passing `resolveTokens` also enables fee-token resolution and replaces these candidates. Self-paid fills also consider TIP-20 call targets.
 
-```ts twoslash
+```ts
 import { Handler } from 'tapimo'
-import { createClient, http } from 'viem'
-import { tempo } from 'viem/tempo/chains'
-
-const client = createClient({ chain: tempo, transport: http() })
 
 const handler = Handler.relay({
-  getClient: () => client,
+  apiKey: process.env.TEMPO_API_KEY,
   features: 'all', // [!code focus]
-  resolveTokens: () => [ // [!code focus]
-    '0x20c0000000000000000000000000000000000000', // [!code focus]
-    '0x20c000000000000000000000b9537d11c60e8b50', // [!code focus]
-  ], // [!code focus]
 })
 ```
 
@@ -321,15 +306,11 @@ result.capabilities.requireFunds
 
 By default, the relay enables only the features you configure directly. Use `features: 'all'` to enable fee-token resolution, automatic swaps, balance simulation, and fee estimates together. This does not enable sponsorship; configure [`feePayer`](#feepayer) separately.
 
-```ts twoslash
+```ts
 import { Handler } from 'tapimo'
-import { createClient, http } from 'viem'
-import { tempo } from 'viem/tempo/chains'
-
-const client = createClient({ chain: tempo, transport: http() })
 
 const handler = Handler.relay({
-  getClient: () => client,
+  apiKey: process.env.TEMPO_API_KEY,
   features: 'all', // [!code focus]
 })
 ```
@@ -338,27 +319,48 @@ This adds network requests for token balances and simulation, so enable the comp
 
 ## API Reference
 
+<span id="apikey" />
+
+### `apiKey`
+
+- **Type:** `string`
+- **Optional**
+
+Routes the built-in mainnet and testnet clients through the Tempo API and authenticates verified-token requests. When you omit it, the clients use each chain's default Viem transport and verified-token requests are unauthenticated.
+
+```ts
+const handler = Handler.relay({
+  apiKey: process.env.TEMPO_API_KEY, // [!code focus]
+})
+```
+
 <span id="getclient" />
 
 ### `getClient`
 
 - **Type:** `(chainId?: number) => Client`
-- **Required**
+- **Optional**
 
-Resolves the Viem client for a chain. The relay calls it without an argument for the default client and with the request's resolved chain ID when available.
+Overrides the built-in Viem clients for Tempo mainnet and testnet. With `apiKey`, the built-in clients use the Tempo API; without one, they use each chain's default Viem transport. Provide `getClient` for custom transports or additional chains. The relay calls it without an argument for the default client and with the request's resolved chain ID when available.
 
 ```ts twoslash
 import { Handler } from 'tapimo'
 import { createClient, http } from 'viem'
-import { tempo } from 'viem/tempo/chains'
+import { tempoMainnet, tempoTestnet } from 'viem/tempo/chains'
 
-const client = createClient({ chain: tempo, transport: http() })
-const getClient = () => client // [!code focus]
+const mainnetClient = createClient({ chain: tempoMainnet, transport: http() })
+const testnetClient = createClient({ chain: tempoTestnet, transport: http() })
+
+const getClient = (chainId: number = tempoMainnet.id) => { // [!code focus]
+  if (chainId === tempoMainnet.id) return mainnetClient // [!code focus]
+  if (chainId === tempoTestnet.id) return testnetClient // [!code focus]
+  throw new Error(`Unsupported chain: ${chainId}`) // [!code focus]
+} // [!code focus]
 
 const handler = Handler.relay({ getClient })
 ```
 
-The remaining examples reuse this `getClient` callback.
+When you provide `getClient`, `apiKey` does not change the custom clients' transports. It still authenticates the built-in verified-token resolver unless you also provide `resolveTokens`.
 
 <span id="autoswap" />
 
@@ -371,7 +373,6 @@ Controls Stablecoin DEX swaps for insufficient balances. An options object enabl
 
 ```ts
 const handler = Handler.relay({
-  getClient,
   autoSwap: { slippage: 0.02 }, // [!code focus]
 })
 ```
@@ -392,11 +393,10 @@ Sets the maximum swap slippage. The relay calculates `maxAmountIn` from the toke
 - **Type:** `'all'`
 - **Optional**
 
-Set this to `'all'` to enable fee-token resolution, automatic swaps, balance diffs, and fee estimates. Configure `resolveTokens` to provide fee-token candidates and `feePayer` to enable sponsorship.
+Set this to `'all'` to enable fee-token resolution, automatic swaps, balance diffs, and fee estimates. Fee-token candidates come from the Tempo API verified-token list by default. Passing `resolveTokens` also enables fee-token resolution and replaces the default candidates. Configure `feePayer` separately to enable sponsorship.
 
 ```ts
 const handler = Handler.relay({
-  getClient,
   features: 'all', // [!code focus]
 })
 ```
@@ -415,7 +415,6 @@ import { Handler } from 'tapimo'
 import { privateKeyToAccount } from 'viem/accounts'
 
 const handler = Handler.relay({
-  getClient,
   feePayer: { // [!code focus]
     account: privateKeyToAccount('0x...'), // [!code focus]
     feeToken: '0x20c0000000000000000000000000000000000001', // [!code focus]
@@ -487,7 +486,6 @@ import { privateKeyToAccount } from 'viem/accounts'
 const allowedSender = '0x000000000000000000000000000000000000dead'
 
 const handler = Handler.relay({
-  getClient,
   feePayer: {
     account: privateKeyToAccount('0x...'),
     validate: (request) => // [!code focus]
@@ -509,7 +507,6 @@ Collects native multisig approvals and broadcasts after the configured threshold
 import { Handler, Store } from 'tapimo'
 
 const handler = Handler.relay({
-  getClient,
   multisig: { store: Store.memory() }, // [!code focus]
 })
 ```
@@ -527,7 +524,6 @@ Caches TIP-20 metadata and account fee-token preferences. When omitted, the rela
 import { Handler, Store } from 'tapimo'
 
 const handler = Handler.relay({
-  getClient,
   cache: Store.memory(), // [!code focus]
 })
 ```
@@ -543,7 +539,6 @@ Runs before the relay handles each request. Use it for logging, rate limits, or 
 
 ```ts
 const handler = Handler.relay({
-  getClient,
   onRequest: async (request) => { // [!code focus]
     console.log('Processing request:', request.method) // [!code focus]
   }, // [!code focus]
@@ -561,7 +556,6 @@ Sets the route where the handler accepts requests.
 
 ```ts
 const handler = Handler.relay({
-  getClient,
   path: '/relay', // [!code focus]
 })
 ```
@@ -575,17 +569,18 @@ When you use [`Provider.relay`](https://accounts.tempo.xyz/docs/api/provider#rel
 - **Type:** `(chainId: number) => readonly Address[] | Promise<readonly Address[]>`
 - **Optional**
 
-Returns candidate token addresses for fee-token resolution. The relay reads the account's balance for each token and prefers the highest positive balance after checking the account's onchain preference. Omitting this option disables configured candidate resolution.
+Returns candidate token addresses for fee-token resolution. By default, the relay loads the [Tempo API verified-token list](/docs/api/verified-tokens#gettokenlist) for mainnet and testnet. Pass a resolver to replace these candidates. For additional chains, provide both `getClient` and `resolveTokens`.
 
 ```ts
 const handler = Handler.relay({
-  getClient,
   resolveTokens: () => [ // [!code focus]
     '0x20c0000000000000000000000000000000000000', // [!code focus]
     '0x20c000000000000000000000b9537d11c60e8b50', // [!code focus]
   ], // [!code focus]
 })
 ```
+
+A custom resolver replaces only token lookup. `apiKey` still configures the built-in RPC clients.
 
 <span id="cors" />
 
