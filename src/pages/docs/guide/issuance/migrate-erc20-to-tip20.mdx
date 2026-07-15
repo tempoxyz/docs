@@ -298,6 +298,18 @@ Minting succeeds only when the caller holds `ISSUER_ROLE`, the token is not paus
 
 The recipient can also configure an account-level receive policy, which the issuer does not control. If that policy blocks a transfer or mint, the call succeeds but delivery is redirected to `ReceivePolicyGuard` as a claimable receipt. Issuers should monitor this outcome when reconciling mints and transfers. See [Receive policies](/docs/protocol/tip403/receive-policies).
 
+### Handle burn and redemption
+
+Normal burn and redemption are not a separate TIP-403 policy attachment.
+
+For blocked-account recovery:
+
+```text
+BURN_BLOCKED_ROLE can use burnBlocked(...)
+```
+
+`burnBlocked` is a special compliance path. It should not be treated as the normal redemption or bridge burn path.
+
 ### Map ERC-20 compliance patterns
 
 | Current ERC-20 compliance pattern | Tempo mapping |
