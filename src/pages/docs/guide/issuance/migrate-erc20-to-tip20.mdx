@@ -146,7 +146,7 @@ Map by capability, not by contract name.
 | `IERC20Metadata` | `name`, `symbol`, `decimals` | Set name, symbol, and currency at TIP-20 creation |
 | `AccessControl` | Role-based permissions | TIP-20 native roles |
 | `Pausable` | Pause state and pause checks | `PAUSE_ROLE` and `UNPAUSE_ROLE` |
-| `ERC20Burnable` | `burn` and often `burnFrom` | An `ISSUER_ROLE` holder can burn only its own TIP-20 balance; use pull-then-burn for user funds |
+| `ERC20Burnable` | `burn` and often `burnFrom` | An `ISSUER_ROLE` holder can burn only its own TIP-20 balance; TIP-20 does not expose `burnFrom` |
 | `ERC20Wrapper` | Deposit underlying ERC-20, mint wrapped ERC-20 | Use an external adapter that mints TIP-20 |
 | Proxy upgrade pattern | Upgradeable implementation and storage | Not portable to TIP-20 |
 
@@ -166,38 +166,7 @@ Important: `Pausable` does not define who can pause. That authority usually come
 
 `ISSUER_ROLE` is not natively scoped by amount, destination, or operation. If an issuer needs those limits, its wallet, manager, or adapter must enforce them before calling TIP-20.
 
-## 7. Handle burn semantics
-
-OpenZeppelin-style ERC-20 tokens may expose:
-
-```solidity
-burn(amount)
-burnFrom(account, amount)
-```
-
-An `ISSUER_ROLE` holder can burn only its own TIP-20 balance. TIP-20 does not give the issuer a general `burnFrom(user, amount)` path. If your current flow uses `burnFrom`, replace it with a manager-mediated pull-then-burn flow.
-
-```text
-transferFrom(user, managerOrBridgeAdapter, amount)
-managerOrBridgeAdapter burns its own TIP-20 balance
-```
-
-The pull and burn can be atomic in one adapter transaction, but the adapter temporarily takes custody of the tokens between the two calls. Confirm that this custody model is acceptable for the issuer's legal and regulatory requirements.
-
-In practice, `managerOrBridgeAdapter` means:
-
-| Flow | Contract that pulls and burns |
-|---|---|
-| Native redemption | Lifecycle manager |
-| Bridge out of Tempo | Bridge adapter |
-| Migration burn | Migration adapter or issuer-controlled burn contract |
-| Simple issuer operation | Issuer wallet for admin-only mint/burn operations, not user-facing redemption |
-
-For bridge or redemption flows, the lifecycle manager or bridge adapter should hold `ISSUER_ROLE`.
-
-Do not treat `BURN_BLOCKED_ROLE` as a general redemption role. Use it only for blocked-account or compliance recovery flows.
-
-## 8. Handle decimals
+## 7. Handle decimals
 
 OpenZeppelin ERC-20 tokens commonly use 18 decimals unless overridden. TIP-20 uses 6 decimals.
 
@@ -217,7 +186,7 @@ Example:
 1 TIP-20 token = 1,000,000 base units
 ```
 
-## 9. Move custom logic outside the token
+## 8. Move custom logic outside the token
 
 TIP-20 is native. Do not port custom ERC-20 methods into the token.
 
@@ -233,7 +202,7 @@ TIP-20 is native. Do not port custom ERC-20 methods into the token.
 | Oracle pricing | External oracle or manager-facing oracle |
 | Bridge accounting | Bridge adapter |
 
-## 10. Map compliance hooks to TIP-403
+## 9. Map compliance hooks to TIP-403
 
 Many issuer ERC-20s enforce compliance inside token transfer hooks such as `_beforeTokenTransfer` or `_update`.
 
@@ -329,26 +298,6 @@ Minting succeeds only when the caller holds `ISSUER_ROLE`, the token is not paus
 
 The recipient can also configure an account-level receive policy, which the issuer does not control. If that policy blocks a transfer or mint, the call succeeds but delivery is redirected to `ReceivePolicyGuard` as a claimable receipt. Issuers should monitor this outcome when reconciling mints and transfers. See [Receive policies](/docs/protocol/tip403/receive-policies).
 
-### Handle burn and redemption
-
-Normal burn and redemption are not a separate TIP-403 policy attachment.
-
-For normal redemption:
-
-```text
-user approves lifecycle manager or bridge adapter
-manager pulls tokens with transferFrom
-manager burns its own TIP-20 balance using ISSUER_ROLE
-```
-
-For blocked-account recovery:
-
-```text
-BURN_BLOCKED_ROLE can use burnBlocked(...)
-```
-
-`burnBlocked` is a special compliance path. It should not be treated as the normal redemption or bridge burn path.
-
 ### Map ERC-20 compliance patterns
 
 | Current ERC-20 compliance pattern | Tempo mapping |
@@ -363,17 +312,16 @@ BURN_BLOCKED_ROLE can use burnBlocked(...)
 | Operator or spender compliance | Lifecycle manager or bridge adapter check |
 | Compliance admin | TIP-403 simple-policy admin |
 
-## 11. Avoid incompatible ERC-20 assumptions
+## 10. Avoid incompatible ERC-20 assumptions
 
 - Do not deploy a custom ERC-20 when the target is native TIP-20.
 - Do not assume proxy storage or upgrade logic carries over.
 - Do not grant issuer permissions to broad operational wallets without a reason.
 - Use TIP-20's native role-query methods; do not assume OpenZeppelin argument ordering.
-- Do not map `burnFrom` directly. Use a lifecycle manager or bridge adapter that pulls tokens with `transferFrom`, then burns its own TIP-20 balance.
 - Do not ignore 18-to-6 decimal conversion.
 - Do not put compliance or subscription logic inside the token.
 
-## 12. Consult the operational reference
+## 11. Consult the operational reference
 
 ### Query and administer native roles
 
