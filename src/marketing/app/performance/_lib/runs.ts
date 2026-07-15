@@ -2,8 +2,11 @@
 // fetchStats() (app/_components/stats.ts) overlays only the latest run;
 // this module fetches the whole feed for the /performance charts.
 
-const PERF_API_URL =
-  'https://pr-77-tempo-apps-internal-perf-public.tempo-dev.workers.dev/api/perf/runs?feed=nightly&limit=100'
+const PERF_API_URL = 'https://perf.tempo.xyz/api/perf/runs?feed=nightly&limit=100'
+
+const DEFAULT_SCENARIO_FROM = '2026-07-13'
+const DEFAULT_SCENARIO_ID = 'tip20-50k'
+const TIP20_SCENARIO_UNTIL = '2026-07-10'
 
 type ApiRun = {
   id?: string
@@ -56,6 +59,18 @@ const timeLabel = (iso: string) =>
     timeZone: 'UTC',
   })} UTC`
 
+function isNightlyScenario(run: ApiRun): boolean {
+  const startedAt = run.startedAt
+  const scenarioId = run.scenario?.id
+  if (!startedAt || !scenarioId) return false
+
+  if (startedAt >= DEFAULT_SCENARIO_FROM) {
+    return scenarioId === DEFAULT_SCENARIO_ID
+  }
+
+  return startedAt < TIP20_SCENARIO_UNTIL && scenarioId.startsWith('tip20-')
+}
+
 // Oldest → newest (the API returns newest first). Empty array when the API
 // is down or the shape changes; callers render a fallback notice.
 export async function fetchPerfRuns(): Promise<PerfRun[]> {
@@ -64,8 +79,9 @@ export async function fetchPerfRuns(): Promise<PerfRun[]> {
     if (!res.ok) return []
     const data = (await res.json()) as { runs?: ApiRun[] }
     return (data.runs ?? [])
-      .filter((r): r is Required<Pick<ApiRun, 'startedAt' | 'metrics'>> & ApiRun =>
-        Boolean(r.startedAt && r.metrics?.settledTps),
+      .filter(
+        (r): r is Required<Pick<ApiRun, 'startedAt' | 'metrics'>> & ApiRun =>
+          Boolean(r.startedAt && r.metrics?.settledTps) && isNightlyScenario(r),
       )
       .map((r) => ({
         id: r.id ?? r.startedAt,
