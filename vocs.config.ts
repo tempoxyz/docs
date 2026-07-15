@@ -320,6 +320,14 @@ export default defineConfig({
                 text: 'Use virtual addresses',
                 link: '/docs/guide/payments/virtual-addresses',
               },
+              {
+                text: 'Use access keys',
+                link: '/docs/guide/accounts/use-access-keys',
+              },
+              {
+                text: 'Account keychain precompile',
+                link: '/docs/guide/accounts/account-keychain-precompile',
+              },
             ],
           },
           {
@@ -656,7 +664,7 @@ export default defineConfig({
           },
           {
             text: 'Tempo Accounts',
-            link: '/docs/guide/accounts',
+            link: '/docs/protocol/accounts',
           },
           {
             text: 'TIP-20 Tokens',
