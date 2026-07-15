@@ -1,15 +1,15 @@
 ---
 title: Tools & SDKs
-description: Find Tempo SDKs, CLI commands, hosted services, wallet docs, RPC references, and indexer tools for building, testing, and operating production integrations.
+description: Find Tempo SDKs, CLI commands, API docs, wallet docs, RPC references, and indexer tools for building, testing, and operating production integrations.
 ---
 
 import { Cards, Card } from 'vocs'
 
 # Tools & SDKs
 
-Use this section when you need the implementation surface for Tempo: libraries, command-line tools, managed services, wallet integration, RPC references, and query access to network data.
+Use this section when you need the implementation surface for Tempo: libraries, command-line tools, APIs, wallet integration, RPC references, and query access to network data.
 
-If you are integrating a product, start with the TypeScript SDKs and hosted services. If you are operating infrastructure or debugging low-level behavior, start with the CLI and RPC reference.
+If you are integrating a product, start with the TypeScript SDKs and Tempo API. If you are operating infrastructure or debugging low-level behavior, start with the CLI and RPC reference.
 
 ## Build with SDKs
 
@@ -27,9 +27,9 @@ If you are integrating a product, start with the TypeScript SDKs and hosted serv
     icon="lucide:terminal"
   />
   <Card
-    title="Hosted Services"
-    description="Use managed Tempo services for fee sponsorship and indexer-backed data access."
-    to="/docs/hosted-services"
+    title="Tempo API"
+    description="Use JSON-RPC, fee sponsorship, and indexed data through the Tempo API."
+    to="/docs/api"
     icon="lucide:cloud"
   />
   <Card
@@ -50,15 +50,15 @@ If you are integrating a product, start with the TypeScript SDKs and hosted serv
     icon="lucide:braces"
   />
   <Card
-    title="Tempo Indexer (tidx)"
+    title="Indexer API"
     description="Query Tempo blocks, transactions, logs, token balances, and decoded events through SQL."
-    to="/docs/developer-tools/indexer"
+    to="/docs/api/indexer-api"
     icon="lucide:database"
   />
   <Card
-    title="Hosted Fee Payer"
-    description="Sponsor Tempo transaction fees through hosted JSON-RPC relay endpoints."
-    to="/docs/developer-tools/fee-payer"
+    title="Fee Payer API"
+    description="Sponsor Tempo transaction fees through the hosted Relay API."
+    to="/docs/api/fee-payer"
     icon="lucide:badge-dollar-sign"
   />
   <Card

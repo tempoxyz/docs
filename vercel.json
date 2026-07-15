@@ -89,6 +89,28 @@
       "permanent": true
     },
     {
+      "source": "/developer-tools/fee-payer",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
+      "permanent": true
+    },
+    {
+      "source": "/developer-tools/indexer",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/api/indexer-api",
+      "permanent": true
+    },
+    {
       "source": "/learn/partners",
       "has": [
         {
@@ -144,7 +166,29 @@
       "permanent": true
     },
     {
-      "source": "/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|hosted-services|changelog|partners)",
+      "source": "/hosted-services",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/api",
+      "permanent": true
+    },
+    {
+      "source": "/hosted-services/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/api",
+      "permanent": true
+    },
+    {
+      "source": "/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|changelog|partners)",
       "has": [
         {
           "type": "host",
@@ -155,7 +199,7 @@
       "permanent": true
     },
     {
-      "source": "/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools|hosted-services)/:path*",
+      "source": "/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools)/:path*",
       "has": [
         {
           "type": "host",
@@ -263,6 +307,11 @@
     {
       "source": "/api/json-rpc",
       "destination": "/docs/api/json-rpc",
+      "permanent": true
+    },
+    {
+      "source": "/api/fee-payer",
+      "destination": "/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -416,18 +465,28 @@
       "permanent": true
     },
     {
+      "source": "/developer-tools/fee-payer",
+      "destination": "/docs/api/fee-payer",
+      "permanent": true
+    },
+    {
+      "source": "/developer-tools/indexer",
+      "destination": "/docs/api/indexer-api",
+      "permanent": true
+    },
+    {
       "source": "/developer-tools/:path*",
       "destination": "/docs/developer-tools/:path*",
       "permanent": true
     },
     {
       "source": "/hosted-services",
-      "destination": "/docs/hosted-services",
+      "destination": "/docs/api",
       "permanent": true
     },
     {
       "source": "/hosted-services/:path*",
-      "destination": "/docs/hosted-services/:path*",
+      "destination": "/docs/api",
       "permanent": true
     },
     {

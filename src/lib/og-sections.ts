@@ -23,7 +23,6 @@ export const ogSectionMap: Record<string, string> = {
   'developer-tools': 'DEVELOPER TOOLS',
   ecosystem: 'ECOSYSTEM',
   guide: 'BUILD',
-  'hosted-services': 'HOSTED SERVICES',
   partners: 'PARTNERS',
   performance: 'PERFORMANCE',
   protocol: 'PROTOCOL',

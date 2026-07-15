@@ -150,7 +150,6 @@ export default defineConfig({
       'developer-tools': 'DEVELOPER TOOLS',
       ecosystem: 'ECOSYSTEM',
       guide: 'BUILD',
-      'hosted-services': 'HOSTED SERVICES',
       partners: 'PARTNERS',
       performance: 'PERFORMANCE',
       protocol: 'PROTOCOL',
@@ -209,12 +208,38 @@ export default defineConfig({
     {
       path: '/docs/api',
       spec: 'https://api.tempo.xyz/openapi.json',
-      exclude: ['Platform API'],
+      exclude: ['Management API'],
       sidebar: {
         backLink: false,
         collapsed: true,
         flatten: ['Data API'],
         intro: [
+          {
+            text: 'API Console',
+            collapsed: true,
+            items: [
+              {
+                text: 'Overview',
+                link: '/docs/api/console',
+              },
+              {
+                text: 'Projects & Environments',
+                link: '/docs/api/console/projects-and-environments',
+              },
+              {
+                text: 'API Keys',
+                link: '/docs/api/console/api-keys',
+              },
+              {
+                text: 'Usage & Billing',
+                link: '/docs/api/console/usage-and-billing',
+              },
+              {
+                text: 'Teams & Access',
+                link: '/docs/api/console/team',
+              },
+            ],
+          },
           {
             text: 'Authentication',
             link: '/docs/api/authentication',
@@ -230,6 +255,10 @@ export default defineConfig({
           {
             text: 'JSON-RPC API',
             link: '/docs/api/json-rpc',
+          },
+          {
+            text: 'Fee Payer API',
+            link: '/docs/api/fee-payer',
           },
           {
             text: 'Indexer API',
@@ -904,24 +933,6 @@ export default defineConfig({
             link: '/docs/tools',
           },
           {
-            text: 'Hosted Services',
-            collapsed: false,
-            items: [
-              {
-                text: 'Overview',
-                link: '/docs/hosted-services',
-              },
-              {
-                text: 'Hosted Fee Payer',
-                link: '/docs/developer-tools/fee-payer',
-              },
-              {
-                text: 'Indexer (tidx)',
-                link: '/docs/developer-tools/indexer',
-              },
-            ],
-          },
-          {
             text: 'CLI',
             collapsed: false,
             items: [
@@ -970,6 +981,20 @@ export default defineConfig({
             ],
           },
           {
+            text: 'Server Utilities',
+            collapsed: false,
+            items: [
+              {
+                text: 'Overview',
+                link: '/docs/server',
+              },
+              {
+                text: 'Relay & Fee Payer Handler',
+                link: '/docs/server/relay-handler',
+              },
+            ],
+          },
+          {
             text: 'RPC Reference',
             link: '/docs/protocol/rpc',
           },
@@ -996,15 +1021,6 @@ export default defineConfig({
                   {
                     text: 'Wagmi Reference',
                     link: 'https://wagmi.sh/tempo',
-                  },
-                  {
-                    text: 'Prool Reference',
-                    items: [
-                      {
-                        text: 'Setup',
-                        link: '/docs/sdk/typescript/prool/setup',
-                      },
-                    ],
                   },
                 ],
               },
@@ -1203,11 +1219,11 @@ export default defineConfig({
       '/docs/ecosystem': integrateSidebar,
       '/docs/protocol': specsSidebar,
       '/docs/tools': developerToolsSidebar,
-      '/docs/hosted-services': developerToolsSidebar,
       '/docs/developer-tools': developerToolsSidebar,
       '/docs/cli': developerToolsSidebar,
       '/docs/protocol/rpc': developerToolsSidebar,
       '/docs/sdk': developerToolsSidebar,
+      '/docs/server': developerToolsSidebar,
       '/docs/wallet': developerToolsSidebar,
       '/docs/guide/node': nodeSidebar,
       '/docs/changelog': nodeSidebar,
@@ -1240,6 +1256,26 @@ export default defineConfig({
     {
       source: '/docs/developer-tools',
       destination: '/docs/ecosystem',
+      status: 301,
+    },
+    {
+      source: '/docs/developer-tools/fee-payer',
+      destination: '/docs/api/fee-payer',
+      status: 301,
+    },
+    {
+      source: '/docs/developer-tools/indexer',
+      destination: '/docs/api/indexer-api',
+      status: 301,
+    },
+    {
+      source: '/docs/hosted-services',
+      destination: '/docs/api',
+      status: 301,
+    },
+    {
+      source: '/docs/hosted-services/:path*',
+      destination: '/docs/api',
       status: 301,
     },
     {

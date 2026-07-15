@@ -332,7 +332,7 @@ const developersMenu: MegaMenuData = {
         {
           label: 'TIDX',
           desc: 'Raw indexer queries & event streams',
-          href: `${DOCS_BASE_PATH}/developer-tools/indexer`,
+          href: `${DOCS_BASE_PATH}/api/indexer-api`,
           icon: <ApiIcon />,
         },
         {
