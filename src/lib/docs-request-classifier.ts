@@ -192,6 +192,10 @@ function classifySurface(path: string): DocsRequestSurface {
 
   if (pathname === '/llms.txt' || pathname === '/llms-full.txt') return 'llms'
   if (pathname === '/api/mcp' || pathname.startsWith('/api/mcp/')) return 'mcp'
+  // Every other /api/* route (og, feedback, faucet, index-supply, ...) is an
+  // application endpoint, not a docs surface. Without this, isDocsPage() treats
+  // extensionless paths like /api/og as 'docs' and mislabels their traffic.
+  if (pathname === '/api' || pathname.startsWith('/api/')) return 'other'
   if (pathname === '/skill.md') return 'skill'
   if (pathname.startsWith('/.well-known/')) return 'well_known'
   if (pathname.endsWith('.md')) return 'markdown'
