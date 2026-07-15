@@ -324,10 +324,6 @@ export default defineConfig({
                 text: 'Use access keys',
                 link: '/docs/guide/accounts/use-access-keys',
               },
-              {
-                text: 'Account keychain precompile',
-                link: '/docs/guide/accounts/account-keychain-precompile',
-              },
             ],
           },
           {

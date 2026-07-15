@@ -120,11 +120,11 @@ export const features: Feature[] = [
         primary: true,
       },
       {
-        label: 'Access keys',
-        href: '/docs/guide/tempo-transaction#access-keys',
+        label: 'Use access keys',
+        href: '/docs/guide/accounts/use-access-keys',
       },
       {
-        label: 'Receive policies',
+        label: 'Configure receive policies',
         href: '/docs/guide/payments/configure-receive-policies',
       },
     ],

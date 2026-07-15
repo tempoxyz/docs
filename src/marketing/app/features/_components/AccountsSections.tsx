@@ -80,9 +80,9 @@ const accountFeatures: AccountFeature[] = [
     id: 'key-types',
     kicker: 'KEY TYPES',
     title: 'Flexible auth without changing the address.',
-    desc: 'Tempo accounts keep ordinary EVM addresses while adding native signing paths for root keys, passkeys, recovery, and app-owned infrastructure.',
+    desc: 'Tempo accounts keep ordinary EVM addresses while adding native signing paths for root keys, passkeys, admin access keys, and app-owned infrastructure.',
     href: '/docs/guide/accounts',
-    cta: 'Account guide',
+    cta: 'Read the account guide',
     diagram: 'keys',
     points: [
       {
@@ -93,14 +93,14 @@ const accountFeatures: AccountFeature[] = [
       },
       {
         title: 'Passkeys',
-        desc: 'Use device-native signing for wallet UX and recovery flows.',
+        desc: 'Use device-native signing for passwordless wallet experiences.',
         href: '/docs/guide/accounts',
         accent: 'bg-[#C084FC]',
       },
       {
-        title: 'Privacy by default',
-        desc: 'Use aliases and delegated keys without exposing every operational relationship.',
-        href: '/docs/guide/payments/virtual-addresses',
+        title: 'Admin access keys',
+        desc: 'Let a previously authorized device add or revoke account keys.',
+        href: '/docs/guide/accounts/use-access-keys',
         accent: 'bg-[#6EE7B7]',
       },
     ],
@@ -110,8 +110,8 @@ const accountFeatures: AccountFeature[] = [
     kicker: 'ACCESS KEYS',
     title: 'Delegate only the permissions a product needs.',
     desc: 'Access keys let wallets, apps, and agents sign constrained actions with expiry, revocation, and periodic spend limits enforced before execution.',
-    href: '/docs/guide/tempo-transaction#access-keys',
-    cta: 'Access keys',
+    href: '/docs/guide/accounts/use-access-keys',
+    cta: 'Use access keys',
     diagram: 'access',
     points: [
       {
@@ -140,7 +140,7 @@ const accountFeatures: AccountFeature[] = [
     title: 'Use TIP-403 policies at the account boundary.',
     desc: 'Receive policies give accounts token, sender, and content controls for inbound transfers, deposits, and recovery-sensitive flows.',
     href: '/docs/guide/payments/configure-receive-policies',
-    cta: 'Receive policies',
+    cta: 'Configure receive policies',
     diagram: 'policies',
     points: [
       {
@@ -169,7 +169,7 @@ const accountFeatures: AccountFeature[] = [
     title: 'Private deposit attribution without new accounts.',
     desc: 'Virtual addresses let products issue per-customer or per-invoice deposit addresses while funds resolve back to the master account.',
     href: '/docs/guide/payments/virtual-addresses',
-    cta: 'Virtual addresses',
+    cta: 'Use virtual addresses',
     diagram: 'virtual',
     points: [
       {
@@ -346,7 +346,7 @@ function KeyTypesDiagram() {
         role="img"
         viewBox="0 0 720 520"
       >
-        <title id="accounts-key-types-title">Root, passkey, and recovery auth paths</title>
+        <title id="accounts-key-types-title">Root, passkey, and admin access key paths</title>
         <path
           d="M286 136 C356 136 390 206 452 244"
           fill="none"
@@ -380,7 +380,7 @@ function KeyTypesDiagram() {
       {[
         ['ROOT KEY', 'FULL CONTROL', 'lg:top-[13%] lg:left-[7%]', 'bg-[#73A0FF]'],
         ['PASSKEY', 'USER DEVICE', 'lg:top-[40%] lg:left-[7%]', 'bg-[#C084FC]'],
-        ['RECOVERY', 'BACKUP PATH', 'lg:bottom-[13%] lg:left-[7%]', 'bg-[#6EE7B7]'],
+        ['ADMIN KEY', 'KEY MANAGEMENT', 'lg:bottom-[13%] lg:left-[7%]', 'bg-[#6EE7B7]'],
       ].map(([label, detail, position, accent]) => (
         <div
           key={label}

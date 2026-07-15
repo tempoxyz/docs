@@ -1,6 +1,6 @@
 ---
 title: Use Access Keys
-description: Use scoped access keys to sign for a Tempo account without repeated root-key prompts, with expiry, spending limits, call restrictions, and revocation.
+description: Use and manage scoped access keys for routine app, device, agent, and session transactions, with guidance for permissions, storage, and key lifecycle.
 ---
 
 import { Cards, Card } from 'vocs'
@@ -9,49 +9,32 @@ import { Cards, Card } from 'vocs'
 
 Access keys are secondary signing keys authorized by a Tempo account. They let an app, device, agent, or session submit transactions without asking the account's root key to approve every action.
 
-Use a limited access key for routine transactions. Give it only the permissions it needs, then keep the root key or an admin access key for account administration.
+Use a limited access key for routine transactions and give it only the permissions the product needs.
 
-## Choose the key type
+## Decide when to use an access key
 
-Tempo accounts have three levels of signing authority:
+Access keys are a good fit for:
 
-| Key | Use it for | Restrictions |
-|---|---|---|
-| Root key | Initial authorization, recovery, and unrestricted account control | None |
-| Admin access key | Provisioning and revoking keys from another trusted device or recovery flow | Cannot have expiry, spending limits, or call scopes |
-| Limited access key | Payments, connected apps, agents, subscriptions, and sessions | Can have expiry, per-token limits, and call scopes |
+- Connected apps that need to submit transactions after the user connects
+- Devices that should not hold the account's root key
+- Agents, subscriptions, and sessions with a narrow set of permissions
 
-Most applications should provision a limited access key after the user connects. Use an admin key only when the product needs delegated key management.
+## Configure it for the product
 
-## Set the restrictions
-
-Treat every limited access key as a capability. Configure all three controls deliberately:
-
-- **Expiry** sets when the key stops being valid. Prefer short-lived keys for sessions and connected apps.
-- **Spending limits** cap how much of each TIP-20 token the key may spend. Limits can be one-time or recurring.
-- **Call scopes** restrict the contracts, functions, and optional recipients the key may call.
-
-An unrestricted key has no call allowlist. A scoped key with an empty allowlist is deny-all. Access-key-signed transactions cannot create contracts, even when the key is otherwise unrestricted.
-
-:::warning
-TIP-20 spending limits cover `transfer`, `transferWithMemo`, and increases made through `approve`. They do not limit native value, NFTs, or a direct `transferFrom` call. Use call scopes as well as spending limits when a key must be tightly constrained.
-:::
-
-## Authorize and use the key
-
-The first transaction can carry both a root-key-signed `keyAuthorization` and the access-key signature. Tempo registers the key, validates its restrictions, and then executes the transaction without requiring a separate setup transaction.
-
-After that first use, the access key signs subsequent Tempo Transactions directly. The protocol looks up the key for the account and enforces its expiry, spending limits, and call scopes during validation and execution.
-
-Use the [Account Keychain precompile guide](/docs/guide/accounts/account-keychain-precompile) when you need to authorize a key in a dedicated transaction, update its restrictions, inspect its remaining allowance, or revoke it.
-
-## Operate access keys safely
-
-- Generate a separate key for each app and device. Do not share one access key across clients.
+- Generate a separate key for each app and device instead of sharing one key across clients.
+- Prefer short-lived keys for sessions and connected apps.
+- Set spending limits around the product's expected transaction size and frequency.
+- Restrict calls to the targets, actions, and recipients the product needs.
 - Store browser keys as non-extractable WebCrypto keys rather than raw private-key material.
-- Index `KeyAuthorized`, `AdminKeyAuthorized`, `KeyRevoked`, and `SpendingLimitUpdated` events for account-management state.
-- Revoke a key when a device is lost or an integration is disconnected. A revoked key ID cannot be authorized again for the same account.
-- Use the root key for contract deployment; access-key-signed transactions cannot use `CREATE` or `CREATE2`.
+
+## Manage the key lifecycle
+
+- Authorize the key after the user connects, either during its first transaction or in a separate account-management action.
+- Show the key's purpose, expiry, and permissions in the account interface.
+- Update permissions when the product's needs change.
+- Revoke keys for disconnected apps and retired devices.
+
+Use an SDK for these workflows rather than encoding Account Keychain calls directly. Read the [Account Keychain Precompile specification](/docs/protocol/transactions/AccountKeychain) for the authorization model, exact restriction semantics, ABI, validation behavior, and security considerations.
 
 ## Implement access keys
 
@@ -63,13 +46,19 @@ Use the [Account Keychain precompile guide](/docs/guide/accounts/account-keychai
     icon="lucide:blocks"
   />
   <Card
-    title="Tempo Transactions"
-    description="Understand how key authorization and access-key signatures are carried in a transaction."
-    to="/docs/guide/tempo-transaction#access-keys"
-    icon="lucide:layers"
+    title="Rust SDK"
+    description="Build account and transaction flows with Tempo Alloy's keychain helpers."
+    to="/docs/sdk/rust"
+    icon="simple-icons:rust"
   />
   <Card
-    title="Account Keychain Specification"
+    title="Foundry"
+    description="Use cast keychain to authorize, inspect, update, and revoke keys."
+    to="/docs/sdk/foundry#cast-keychain-for-tempo-access-keys"
+    icon="simple-icons:foundry"
+  />
+  <Card
+    title="Read the Protocol Specification"
     description="Read the complete authorization, storage, validation, and security rules."
     to="/docs/protocol/transactions/AccountKeychain"
     icon="lucide:file-code"
