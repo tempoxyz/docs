@@ -85,6 +85,14 @@ describe('docs routing redirects', () => {
       ['/hosted-services/:path*', 'https://tempo.xyz/developers/docs/api'],
       ['/learn/partners', 'https://tempo.xyz/developers/docs/partners'],
       ['/docs/learn/partners', 'https://tempo.xyz/developers/docs/partners'],
+      [
+        '/docs/learn/tempo/receive-policies',
+        'https://tempo.xyz/developers/docs/protocol/tip403/receive-policies',
+      ],
+      [
+        '/learn/tempo/receive-policies',
+        'https://tempo.xyz/developers/docs/protocol/tip403/receive-policies',
+      ],
       ['/docs/guide/using-tempo-with-ai/partners', 'https://tempo.xyz/developers/docs/partners'],
       ['/build/partners', 'https://tempo.xyz/developers/docs/partners'],
       ['/network-upgrades', 'https://tempo.xyz/developers/docs/guide/node/network-upgrades'],
@@ -140,6 +148,8 @@ describe('docs routing redirects', () => {
     ['/developer-tools/indexer', '/docs/api/indexer-api'],
     ['/hosted-services', '/docs/api'],
     ['/hosted-services/:path*', '/docs/api'],
+    ['/docs/learn/tempo/receive-policies', '/docs/protocol/tip403/receive-policies'],
+    ['/learn/tempo/receive-policies', '/docs/protocol/tip403/receive-policies'],
   ])('redirects %s to %s', (source, destination) => {
     expect(findRedirect(source)).toMatchObject({
       source,

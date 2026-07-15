@@ -133,6 +133,28 @@
       "permanent": true
     },
     {
+      "source": "/docs/learn/tempo/receive-policies",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/protocol/tip403/receive-policies",
+      "permanent": true
+    },
+    {
+      "source": "/learn/tempo/receive-policies",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.tempo.xyz"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/protocol/tip403/receive-policies",
+      "permanent": true
+    },
+    {
       "source": "/docs/guide/using-tempo-with-ai/partners",
       "has": [
         {
@@ -507,6 +529,16 @@
     {
       "source": "/docs/learn/partners",
       "destination": "/docs/partners",
+      "permanent": true
+    },
+    {
+      "source": "/docs/learn/tempo/receive-policies",
+      "destination": "/docs/protocol/tip403/receive-policies",
+      "permanent": true
+    },
+    {
+      "source": "/learn/tempo/receive-policies",
+      "destination": "/docs/protocol/tip403/receive-policies",
       "permanent": true
     },
     {

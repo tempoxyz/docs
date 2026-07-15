@@ -1301,6 +1301,16 @@ export default defineConfig({
       status: 301,
     },
     {
+      source: '/docs/learn/tempo/receive-policies',
+      destination: '/docs/protocol/tip403/receive-policies',
+      status: 301,
+    },
+    {
+      source: '/learn/tempo/receive-policies',
+      destination: '/docs/protocol/tip403/receive-policies',
+      status: 301,
+    },
+    {
       source: '/learn/partners',
       destination: '/docs/partners',
       status: 301,
