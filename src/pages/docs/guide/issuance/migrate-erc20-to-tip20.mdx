@@ -33,7 +33,7 @@ Use this guide if your current token uses:
 | Native TIP-20 launch | New issuance on Tempo | Deploy TIP-20 through `TIP20Factory` |
 | ERC-20 migration | Existing supply should move to Tempo | Burn or retire ERC-20 supply, then mint TIP-20 |
 | Bridge adapter | ERC-20 remains canonical on another chain | Lock or burn ERC-20, then mint TIP-20 on Tempo through a bridge adapter |
-| Lifecycle manager | Issuance has subscriptions, redemptions, caps, or oracle pricing | Keep business logic outside TIP-20, grant the manager scoped `ISSUER_ROLE` |
+| Lifecycle manager | Issuance has subscriptions, redemptions, caps, or oracle pricing | Keep business logic outside TIP-20 and grant the manager `ISSUER_ROLE`; enforce limits in the manager |
 
 ## 2. Review the recommended deployment flow
 
@@ -47,10 +47,20 @@ Use this guide if your current token uses:
     participant Registry as TIP-403 registry
     participant Vault as Treasury or customer vault
 
+    opt Compliance required
+        Note over PolicyAdmin,Registry: Prepare policy before token deployment
+        PolicyAdmin->>Registry: Create or select policy
+    end
+
     Note over Issuer,Token: One-time token deployment
     Issuer->>Factory: createToken(name, symbol, currency, quoteToken, admin, salt, logoURI)
     Factory-->>Token: Create native TIP-20 token
     Factory->>Token: Grant DEFAULT_ADMIN_ROLE to Admin
+
+    opt Compliance required
+        Note over Admin,Token: Attach the prepared policy before token operations
+        Admin->>Token: changeTransferPolicyId(policyId)
+    end
 
     Note over Admin,Operator: One-time or occasional role setup
     Admin->>Token: grantRole(ISSUER_ROLE, Operator)
@@ -58,10 +68,6 @@ Use this guide if your current token uses:
     Admin->>Token: grantRole(UNPAUSE_ROLE, unpause wallet)
 
     opt Compliance required
-        Note over PolicyAdmin,Token: One-time policy setup and attachment
-        PolicyAdmin->>Registry: Create or select policy
-        Admin->>Token: changeTransferPolicyId(policyId)
-
         Note over PolicyAdmin,Registry: Ongoing compliance maintenance
         PolicyAdmin->>Registry: Add, remove, allow, or block wallets
     end
@@ -71,6 +77,8 @@ Use this guide if your current token uses:
     Token->>Token: Check ISSUER_ROLE, pause state, and supply cap
     Token->>Registry: Authorize Vault as mint recipient
     Token-->>Vault: TIP-20 balance increases`} />
+
+`TIP20Factory.createToken` does not accept a policy ID. If compliance is required, prepare the policy first, deploy the token, and attach the policy before minting or transferring. A new TIP-20 otherwise starts on the always-allow policy.
 
 ## 3. Complete the implementation checklist
 
@@ -82,7 +90,7 @@ Before production deployment, confirm:
 - `ISSUER_ROLE` is granted only to the intended issuer wallet, manager, or bridge adapter.
 - Native role queries use `hasRole(account, role)`, and each role's administrator is confirmed with `getRoleAdmin(role)`.
 - `PAUSE_ROLE` and `UNPAUSE_ROLE` are assigned.
-- Supply cap is set if required.
+- Supply cap is set deliberately. Every TIP-20 starts at `type(uint128).max`; prefer the lowest practical cap and increase it as issuance grows.
 - Transfer policy is configured if compliance is required.
 - If using a compound policy, sender, recipient, and mint-recipient checks are tested independently.
 - Existing ERC-20 supply is burned, locked, or reconciled if this is a migration or bridge.
@@ -94,6 +102,21 @@ Before production deployment, confirm:
 - Custody and treasury wallets are funded and labeled.
 - Tokenlist and explorer metadata are ready.
 - The issuer has an operational runbook for role changes, pausing, minting, burning, and reconciliation.
+
+### Review mutable and immutable settings
+
+| Setting | Initial value | Can it change? |
+|---|---|---|
+| Token address | Deterministically derived from factory caller and salt | No |
+| Name and symbol | Set at creation | No |
+| Decimals | `6` | No |
+| Currency | Set at creation | No |
+| Supply cap | `type(uint128).max` | Yes, but not below current total supply |
+| Quote token | Set at creation | Yes, through the staged quote-token update flow |
+| Transfer policy | Always-allow policy (`1`) | Yes, by the TIP-20 admin |
+| Logo URI | Set or left empty at creation | Yes, by the TIP-20 admin |
+| Roles and role administrators | Admin receives `DEFAULT_ADMIN_ROLE` | Yes |
+| Pause state | Unpaused | Yes, through `PAUSE_ROLE` and `UNPAUSE_ROLE` |
 
 ## 4. Inspect the current ERC-20
 
@@ -136,10 +159,12 @@ Map by capability, not by contract name.
 | `BURNER_ROLE` | `ISSUER_ROLE` for normal burns |
 | `PAUSER_ROLE` | `PAUSE_ROLE` plus `UNPAUSE_ROLE` |
 | Compliance admin | TIP-403 simple-policy admin |
-| Bridge operator | Bridge adapter with scoped `ISSUER_ROLE` |
-| Lifecycle manager | Manager contract with scoped `ISSUER_ROLE` |
+| Bridge operator | Bridge adapter with `ISSUER_ROLE`; enforce limits in the adapter |
+| Lifecycle manager | Manager contract with `ISSUER_ROLE`; enforce limits in the manager |
 
 Important: `Pausable` does not define who can pause. That authority usually comes from `AccessControl`, `Ownable`, or a custom manager. On TIP-20, pause and unpause are separate permissions.
+
+`ISSUER_ROLE` is not natively scoped by amount, destination, or operation. If an issuer needs those limits, its wallet, manager, or adapter must enforce them before calling TIP-20.
 
 ## 7. Handle burn semantics
 
@@ -156,6 +181,8 @@ An `ISSUER_ROLE` holder can burn only its own TIP-20 balance. TIP-20 does not gi
 transferFrom(user, managerOrBridgeAdapter, amount)
 managerOrBridgeAdapter burns its own TIP-20 balance
 ```
+
+The pull and burn can be atomic in one adapter transaction, but the adapter temporarily takes custody of the tokens between the two calls. Confirm that this custody model is acceptable for the issuer's legal and regulatory requirements.
 
 In practice, `managerOrBridgeAdapter` means:
 
@@ -227,8 +254,8 @@ A TIP-20 token points to one `transferPolicyId`. Do not model compliance as atta
 
 | Policy type | Use when |
 |---|---|
-| Simple whitelist | The same allowlist applies to all token movement checks |
-| Simple blacklist | The same blocklist applies to all token movement checks |
+| Simple whitelist | The same allowlist applies to transfer-sender, transfer-recipient, and mint-recipient checks |
+| Simple blacklist | The same blocklist applies to transfer-sender, transfer-recipient, and mint-recipient checks |
 | Compound policy | Sender, recipient, and mint-recipient rules need to differ |
 
 For simple whitelist or blacklist policies, the flow is shorter: create the simple policy, update its wallet entries, and set the token's `transferPolicyId` to that simple policy ID. Use a compound policy only when sender, recipient, and mint-recipient rules need to differ.
@@ -299,6 +326,8 @@ Each TIP-403 simple policy has one admin address. A compliance sync service must
     Registry-->>Token: allow or reject`} />
 
 Minting succeeds only when the caller holds `ISSUER_ROLE`, the token is not paused, the resulting supply does not exceed the supply cap, and TIP-403 authorizes the mint recipient.
+
+The recipient can also configure an account-level receive policy, which the issuer does not control. If that policy blocks a transfer or mint, the call succeeds but delivery is redirected to `ReceivePolicyGuard` as a claimable receipt. Issuers should monitor this outcome when reconciling mints and transfers. See [Receive policies](/docs/protocol/tip403/receive-policies).
 
 ### Handle burn and redemption
 
