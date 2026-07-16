@@ -15,11 +15,11 @@ You need at least one project before creating a key.
 
 ### Choose the environment
 
-Open the organization menu in [Tempo API Console](https://console.tempo.xyz) and switch to **Sandbox** or **Production**. Check for the amber sandbox banner before continuing.
+Open [**API Keys** in Tempo API Console](https://console.tempo.xyz/?to=/:organization/api-keys), then open the organization menu and switch to **Sandbox** or **Production**. Check for the amber sandbox banner before continuing.
 
 ### Open the new-key form
 
-Select **API Keys**, then **New key**.
+Open the [**production new-key form**](https://console.tempo.xyz/?to=/:organization/api-keys/new) or [**sandbox new-key form**](https://console.tempo.xyz/?to=/:organization/api-keys/new%3Fenv%3Dsandbox) in Tempo API Console.
 
 ### Choose a project and name
 
@@ -74,11 +74,11 @@ Replace the old token in the integration's secret configuration and deploy or re
 
 ### Verify the replacement
 
-Make a request with the new key and check the project's **Usage** page. Confirm that requests are attributed to the replacement key.
+Make a request with the new key and check [**Usage** in Tempo API Console](https://console.tempo.xyz/?to=/:organization/usage). Filter to the project and confirm that requests are attributed to the replacement key.
 
 ### Revoke the old key
 
-Return to **API Keys**, open the old key's actions menu, select **Revoke key**, and confirm. Requests using that token stop authenticating.
+Return to [**API Keys** in Tempo API Console](https://console.tempo.xyz/?to=/:organization/api-keys), open the old key's actions menu, select **Revoke key**, and confirm. Requests using that token stop authenticating.
 
 :::::
 
