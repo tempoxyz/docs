@@ -1241,13 +1241,43 @@ export default defineConfig({
       status: 301,
     },
     {
+      source: '/developers/docs/developer-tools/fee-payer',
+      destination: '/developers/docs/api/fee-payer',
+      status: 301,
+    },
+    {
+      source: '/developers/docs/developer-tools/fee-payer/',
+      destination: '/developers/docs/api/fee-payer',
+      status: 301,
+    },
+    {
       source: '/docs/developer-tools/indexer',
       destination: '/docs/api/indexer-api',
       status: 301,
     },
     {
+      source: '/developers/docs/developer-tools/indexer',
+      destination: '/developers/docs/api/indexer-api',
+      status: 301,
+    },
+    {
+      source: '/developers/docs/developer-tools/indexer/',
+      destination: '/developers/docs/api/indexer-api',
+      status: 301,
+    },
+    {
       source: '/docs/hosted-services',
       destination: '/docs/api',
+      status: 301,
+    },
+    {
+      source: '/developers/docs/hosted-services',
+      destination: '/developers/docs/api',
+      status: 301,
+    },
+    {
+      source: '/developers/docs/hosted-services/',
+      destination: '/developers/docs/api',
       status: 301,
     },
     {
