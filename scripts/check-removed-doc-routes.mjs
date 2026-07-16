@@ -51,9 +51,13 @@ if (process.env.DOCS_REMOVAL_OK === 'true') {
   process.exit(0)
 }
 
-console.error(
+const message =
   'Removed docs routes need a Vocs redirect:\n' +
-    missingRedirects.map((route) => '- ' + route).join('\n') +
-    '\n\nAdd redirects, or apply the docs-removal-ok label to explicitly acknowledge the intentional break.',
+  missingRedirects.map((route) => '- ' + route).join('\n') +
+  '\n\nAdd redirects, or apply the docs-removal-ok label to explicitly acknowledge the intentional break.'
+
+console.error(
+  `::error title=Removed docs route requires redirect::${message.replace(/\n/g, '%0A')}`,
 )
+console.error(message)
 process.exit(1)
