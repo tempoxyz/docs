@@ -30,23 +30,23 @@ Most console pages show information across the organization. Use the project fil
 
 ### Sign in to Tempo API Console
 
-Open [console.tempo.xyz](https://console.tempo.xyz) and sign in. If you have access to more than one organization, choose the organization you want to configure from the organization menu.
+Open [console.tempo.xyz](https://console.tempo.xyz/?to=/:organization/projects) and sign in. If you have access to more than one organization, choose the organization you want to configure from the organization menu.
 
 ### Create a project
 
-Select **Projects**, then **New project**. Enter a name that identifies the app or integration using the API, then select **Create project**.
+Select [**Projects**](https://console.tempo.xyz/?to=/:organization/projects), then [**New project**](https://console.tempo.xyz/?to=/:organization/new). Enter a name that identifies the app or integration using the API, then select **Create project**.
 
 Projects hold API keys and provide an attribution boundary for usage. Create separate projects when you need to track or revoke integrations independently.
 
 ### Start in sandbox
 
-Open the organization menu and select **Switch to sandbox**. The amber banner confirms that the console is showing sandbox state.
+Open the organization menu and select [**Switch to sandbox**](https://console.tempo.xyz/?to=/:organization/projects%3Fenv%3Dsandbox). The amber banner confirms that the console is showing sandbox state.
 
 Sandbox API keys are restricted to non-mainnet chains and default to testnet. Production and sandbox credentials, usage, and billing state are separate.
 
 ### Create an API key
 
-Select **API Keys**, then **New key**. Choose the project, give the key a descriptive name, and review its scopes before selecting **Create key**.
+Select [**API Keys**](https://console.tempo.xyz/?to=/:organization/api-keys%3Fenv%3Dsandbox), then [**New key**](https://console.tempo.xyz/?to=/:organization/api-keys/new%3Fenv%3Dsandbox). Choose the project, give the key a descriptive name, and review its scopes before selecting **Create key**.
 
 The console selects the available self-service scopes by default. If you clear every scope, the key is created without access to any scoped API.
 
@@ -69,7 +69,7 @@ A sandbox key automatically targets testnet when the request does not specify `c
 
 ### Review usage
 
-Select **Usage** and choose your project from the filter. The page reports request volume, errors, sponsored transactions, high-volume routes, and usage by API key for the selected environment.
+Select [**Usage**](https://console.tempo.xyz/?to=/:organization/usage%3Fenv%3Dsandbox) and choose your project from the filter. The page reports request volume, errors, sponsored transactions, high-volume routes, and usage by API key for the selected environment.
 
 :::::
 
