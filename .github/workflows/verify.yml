@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   workflow_dispatch:
 
 permissions: {}
@@ -18,12 +19,36 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+      issues: write
+      pull-requests: read
 
     steps:
       - name: Clone repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+          fetch-depth: 0
+
+      - name: Check removed docs routes
+        id: removed-doc-routes
+        if: github.event_name == 'pull_request'
+        run: node scripts/check-removed-doc-routes.mjs
+        env:
+          DOCS_ROUTE_GUARD_BASE: ${{ github.event.pull_request.base.sha }}
+          DOCS_REMOVAL_OK: ${{ contains(github.event.pull_request.labels.*.name, 'docs-removal-ok') }}
+
+      - name: Explain removed docs route failure
+        if: ${{ failure() && steps.removed-doc-routes.outcome == 'failure' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100" \
+            --jq '.[] | select(.body | contains("<!-- docs-route-guard -->")) | .id' | grep -q .; then
+            exit 0
+          fi
+
+          gh pr comment "$PR_NUMBER" --body $'<!-- docs-route-guard -->\nA removed docs page is missing a Vocs redirect. Add a redirect in `vocs.config.ts`, or apply the `docs-removal-ok` label to explicitly acknowledge the intentional URL removal. Applying or removing the label reruns this check.'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
