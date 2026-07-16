@@ -243,10 +243,9 @@
     }
   }
 
-  /* Keep overview pages centered even when they embed an API playground. */
   [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
       [data-v-openapi]:not([data-v-openapi-landing])
-    ):not(:has([data-v-openapi-overview]))
+    )
     > [data-v-main] {
     @media (width >= 1376px) {
       padding-right: 0;
@@ -255,7 +254,7 @@
 
   [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
       [data-v-openapi]:not([data-v-openapi-landing])
-    ):not(:has([data-v-openapi-overview]))
+    )
     > [data-v-gutter-right] {
     @media (width >= 1376px) {
       display: none;
@@ -264,11 +263,11 @@
 
   [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
       [data-v-openapi]:not([data-v-openapi-landing])
-    ):not(:has([data-v-openapi-overview]))
+    )
     [data-v-openapi-header],
   [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
       [data-v-openapi]:not([data-v-openapi-landing])
-    ):not(:has([data-v-openapi-overview]))
+    )
     [data-v-openapi-description] {
     width: 100%;
     max-width: none;
@@ -279,29 +278,11 @@
 
   [data-layout][data-v-sidebar][data-v-content-width="full"]:has(
       [data-v-openapi]:not([data-v-openapi-landing])
-    ):not(:has([data-v-openapi-overview]))
+    )
     [data-v-openapi]
     [data-v-content] {
     margin-left: 0;
     margin-right: 0;
-  }
-
-  [data-layout][data-v-sidebar][data-v-content-width="full"]:has([data-v-openapi-overview])
-    > [data-v-main]
-    > [data-v-content] {
-    @media (width >= 1376px) {
-      max-width: var(--vocs-spacing-content);
-      margin-left: auto;
-      margin-right: auto;
-    }
-  }
-
-  [data-layout][data-v-sidebar][data-v-content-width="full"]:has([data-v-openapi-overview])
-    [data-v-gutter-right] {
-    @media (width >= 1376px) {
-      right: max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5)) !important;
-      left: auto !important;
-    }
   }
 
   [data-v-sidebar-container] [data-v-sidebar] {
