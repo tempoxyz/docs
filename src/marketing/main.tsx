@@ -153,6 +153,7 @@ function applyRouteMetadata(path: string) {
 
 function renderRoute(path: string): ReactNode {
   if (path === '/' || path === '/build') return <HomePage />
+  if (path === '/build/tempo-accounts') return <FeaturePage params={{ slug: 'accounts' }} />
   if (path === '/build/tempo-transactions') return <FeaturePage params={{ slug: 'transactions' }} />
   if (path === '/build/tip20-tokens') return <FeaturePage params={{ slug: 'tokens' }} />
   if (path === '/performance') return <PerformancePage />

@@ -1,6 +1,6 @@
 ---
 title: Rust SDK
-description: Build blockchain apps with the Tempo Rust SDK using Alloy. Query chains, send transactions, and manage tokens with type-safe Rust code.
+description: Build Tempo apps with the Rust SDK and Alloy. Configure providers, query the chain, send Tempo Transactions, and construct Account Keychain calls.
 ---
 
 # Rust SDK
@@ -70,5 +70,51 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 See the Alloy [documentation](https://alloy.rs) or the [`Provider`] docs for more examples.
 
 [`Provider`]: https://docs.rs/alloy/latest/alloy/providers/trait.Provider.html
+
+## Build Account Keychain calls
+
+Use `tempo-alloy` keychain helpers to construct calls for authorizing, updating, and revoking access keys. Include the returned `Call` values in a root-key- or admin-key-signed Tempo Transaction.
+
+```rs [keychain.rs]
+use alloy::primitives::{Address, U256};
+use tempo_alloy::{
+    primitives::{SignatureType, transaction::{Call, TokenLimit}},
+    provider::{
+        KeyRestrictions,
+        keychain::{authorize_key, revoke_key, update_spending_limit},
+    },
+};
+
+fn build_keychain_calls(
+    access_key: Address,
+    token: Address,
+    expiry: u64,
+) -> (Call, Call, Call) {
+    let restrictions = KeyRestrictions::default()
+        .with_expiry(expiry)
+        .with_limits(vec![TokenLimit {
+            token,
+            limit: U256::from(500_000_000u64),
+            period: 0,
+        }]);
+
+    let authorize_call = authorize_key(
+        access_key,
+        SignatureType::P256,
+        restrictions,
+    );
+
+    let update_limit_call = update_spending_limit(
+        access_key,
+        token,
+        U256::from(1_000_000_000u64),
+    );
+
+    let revoke_call = revoke_key(access_key);
+    (authorize_call, update_limit_call, revoke_call)
+}
+```
+
+See [Use Access Keys](/docs/guide/accounts/use-access-keys) for the builder workflow and the [Account Keychain Precompile specification](/docs/protocol/transactions/AccountKeychain) for exact authorization and validation behavior.
 
 ::::

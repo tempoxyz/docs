@@ -1,0 +1,65 @@
+---
+title: Tempo Accounts
+description: Understand Tempo Accounts as the account, key, permission, and policy primitives that wallets and applications compose.
+---
+
+import { Cards, Card } from "vocs";
+
+# Tempo Accounts
+
+A Tempo account is the address that sends transactions, receives TIP-20 tokens, pays fees, and authorizes keys on Tempo.
+
+Tempo accounts use ordinary EVM addresses. Tempo adds native rules for keys, fee token preferences, nonces, and receive policies through precompiles and transaction validation, rather than requiring each account to be a smart contract.
+
+## Account model
+
+These protocol features define account behavior:
+
+| Feature          | Account state                                                                     | What it controls                                                                           |
+| ---------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Address          | The 20-byte EVM address used as `caller`, `sender`, `receiver`, or `feePayer`     | Where funds are received, which account submits a transaction, and which account pays fees |
+| Signatures       | secp256k1, P256, or WebAuthn signature type                                       | How the account authorizes Tempo Transactions                                              |
+| Nonces           | `nonceKey` and `nonce` on the Tempo Transaction                                   | Replay protection and parallel transaction lanes                                           |
+| Account Keychain | `keys[account][keyId]`, spending limits, call scopes, and authorization witnesses | Delegated keys for devices, apps, agents, sessions, device replacement, and key management |
+| Fee preferences  | `feeToken` on the transaction or a stored fee token preference for the fee payer  | Which supported stablecoin pays transaction fees                                           |
+| Receive policies | Per address sender policy, token filter, and recovery authority                   | Which inbound TIP-20 transfers or mints the account accepts                                |
+| Virtual addresses | Master wallet registration and derived TIP-20 recipient addresses                 | Deposit attribution and TIP-20 forwarding to the registered account                        |
+
+## Key model
+
+Tempo accounts have a small authorization hierarchy:
+
+1. **Root keys** have full control of the account and can authorize or revoke other keys.
+2. **Admin access keys** can manage account keys, including adding or revoking keys from another trusted device.
+3. **Limited access keys** can transact only within their configured restrictions, making them useful for connected apps, agents, subscriptions, and session key style flows.
+
+The [Account Keychain precompile](/docs/protocol/transactions/AccountKeychain) stores authorized keys and enforces expiry, revocation, spending limits, and call scopes at the protocol layer. Tempo Transactions can also carry a `keyAuthorization` payload that registers a new key before the transaction signature is verified.
+
+## Related account docs
+
+<Cards>
+  <Card
+    title="Virtual Addresses"
+    description="Understand TIP-20 deposit forwarding, master wallet registration, and virtual recipient addresses."
+    to="/docs/protocol/tip20/virtual-addresses"
+    icon="lucide:route"
+  />
+  <Card
+    title="Receive Policies"
+    description="Review address receive rules, token filters, sender policies, and blocked receipt behavior."
+    to="/docs/protocol/tip403/receive-policies"
+    icon="lucide:shield-check"
+  />
+  <Card
+    title="Access Keys"
+    description="See how Tempo Transactions authorize secondary signing keys for account operations."
+    to="/docs/protocol/transactions#access-keys"
+    icon="lucide:key"
+  />
+  <Card
+    title="Account Keychain Precompile"
+    description="Read the ABI, storage, spending limit, call scope, and revocation specification."
+    to="/docs/protocol/transactions/AccountKeychain"
+    icon="lucide:key-round"
+  />
+</Cards>

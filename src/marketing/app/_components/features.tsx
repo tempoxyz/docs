@@ -30,11 +30,105 @@ export type Feature = {
 }
 
 const featurePrecedence: Record<string, number> = {
-  tokens: 0,
-  transactions: 1,
+  accounts: 0,
+  tokens: 1,
+  transactions: 2,
 }
 
 export const features: Feature[] = [
+  {
+    slug: 'accounts',
+    title: 'Tempo Accounts',
+    description: (
+      <>
+        Account infrastructure for <span className="text-foreground">passkeys</span>,{' '}
+        <span className="text-foreground">scoped keys</span>,{' '}
+        <span className="text-foreground">receive controls</span>, and{' '}
+        <span className="text-foreground">deposit attribution</span>.
+      </>
+    ),
+    items: [
+      {
+        label: 'Root keys and passkeys',
+        desc: 'Use modern account signing without wrapping every account in a contract.',
+        code: [
+          'import { Account } from "viem/tempo";',
+          '',
+          '// A Tempo account can be controlled by root keys',
+          '// including passkey-backed signing schemes.',
+          'const account = Account.fromWebAuthnCredential({',
+          '  id: credential.id,',
+          '  publicKey: credential.publicKey,',
+          '});',
+        ],
+        highlight: ['Account.fromWebAuthnCredential'],
+      },
+      {
+        label: 'Scoped access keys',
+        desc: 'Delegate limited signing to apps, agents, sessions, or devices.',
+        code: [
+          'import { Account, Actions, Expiry } from "viem/tempo";',
+          '',
+          'const accessKey = Account.fromP256(sessionKey, {',
+          '  access: rootAccount,',
+          '});',
+          '',
+          'await Actions.accessKey.signAuthorization(client, {',
+          '  accessKey,',
+          '  expiry: Expiry.days(7),',
+          '  spendingLimit: { token: usdc, amount: 100_000_000n },',
+          '});',
+        ],
+        highlight: ['accessKey', 'Expiry.days(7)', 'spendingLimit'],
+      },
+      {
+        label: 'Virtual addresses',
+        desc: 'Attribute deposits per customer without creating new state accounts.',
+        code: [
+          'import { getVirtualAddress } from "viem/tempo";',
+          '',
+          'const depositAddress = getVirtualAddress({',
+          '  master: treasuryAccount,',
+          '  salt: customerId,',
+          '});',
+          '',
+          '// Incoming TIP-20 funds resolve to treasuryAccount',
+          '// while preserving customer-level attribution.',
+        ],
+        highlight: ['getVirtualAddress', 'treasuryAccount', 'customerId'],
+      },
+      {
+        label: 'Receive policies',
+        desc: 'Control which tokens and senders can deliver funds to an account.',
+        code: [
+          'await client.receivePolicy.setPolicy({',
+          '  account: merchant,',
+          '  acceptedTokens: [usdc, usdt],',
+          '  allowedSenders: [processor],',
+          '  recovery: complianceOps,',
+          '});',
+        ],
+        highlight: ['acceptedTokens', 'allowedSenders', 'recovery'],
+      },
+    ],
+    readLabel: 'Read account docs',
+    readHref: '/docs/guide/accounts',
+    heroActions: [
+      {
+        label: 'Create and manage accounts',
+        href: '/docs/guide/accounts',
+        primary: true,
+      },
+      {
+        label: 'Use access keys',
+        href: '/docs/guide/accounts/use-access-keys',
+      },
+      {
+        label: 'Configure receive policies',
+        href: '/docs/guide/payments/configure-receive-policies',
+      },
+    ],
+  },
   {
     slug: 'transactions',
     title: 'Tempo Transactions',

@@ -34,6 +34,7 @@ export const ogSectionMap: Record<string, string> = {
 
 /** Second path segment → subsection label (only applied to 3+ segment routes). */
 export const ogSubsectionMap: Record<string, string> = {
+  accounts: 'ACCOUNTS',
   blockspace: 'BLOCKSPACE',
   exchange: 'DEX',
   fees: 'FEES',

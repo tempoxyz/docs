@@ -42,7 +42,7 @@ export default function CodeWindow({
 
   return (
     <div
-      className={`flex min-h-0 ${heightClassName} flex-col overflow-hidden rounded-lg border border-line bg-surface-block shadow-2xl`}
+      className={`flex min-h-0 w-full min-w-0 ${heightClassName} flex-col overflow-hidden rounded-lg border border-line bg-surface-block shadow-2xl`}
     >
       <div className="relative flex items-center gap-2 border-line border-b bg-surface-panel px-4 py-3">
         <span aria-hidden className="size-3 shrink-0 rounded-full bg-[#FF5F57]" />
@@ -71,13 +71,13 @@ export default function CodeWindow({
           ))}
         </div>
       ) : null}
-      <div className="grid min-h-0 flex-1">
+      <div className="grid min-h-0 min-w-0 flex-1">
         {panels.map((panel, index) => (
           <div
             key={panel.lang}
             inert={active !== panel}
             aria-hidden={active !== panel}
-            className={`flex min-h-0 bg-surface-block [grid-area:1/1] ${
+            className={`flex min-h-0 min-w-0 bg-surface-block [grid-area:1/1] ${
               index === activePanelIndex ? '' : 'invisible'
             }`}
           >

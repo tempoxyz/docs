@@ -62,8 +62,9 @@ export default defineConfig({
   },
   title: 'Tempo Docs',
   titleTemplate: (path, { title }) => {
-    if (path === '/docs') return 'Tempo %s ⋅ Tempo Docs'
-    if (path.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
+    const pagePath = typeof path === 'string' ? path : '/'
+    if (pagePath === '/docs') return 'Tempo %s ⋅ Tempo Docs'
+    if (pagePath === '/docs' || pagePath.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
     if (title?.includes('Tempo')) return undefined
     return '%s ⋅ Tempo'
   },
@@ -71,7 +72,8 @@ export default defineConfig({
   renderStrategy: 'partial-static',
   feedback: createFeedbackAdapter(),
   head(path) {
-    if (path === '/docs' || path.startsWith('/docs/'))
+    const pagePath = typeof path === 'string' ? path : '/'
+    if (pagePath === '/docs' || pagePath.startsWith('/docs/'))
       return { meta: { articleModifiedTime: false } }
     return undefined
   },
@@ -112,7 +114,8 @@ export default defineConfig({
   },
   sitemap: {
     lastmod: (path, { lastmod }) => {
-      if (path === '/docs' || path.startsWith('/docs/')) return false
+      const pagePath = typeof path === 'string' ? path : '/'
+      if (pagePath === '/docs' || pagePath.startsWith('/docs/')) return false
       return lastmod
     },
   },
@@ -135,7 +138,7 @@ export default defineConfig({
   // src/lib/og-sections.test.ts fails if the two drift.
   ogImageUrl: (path, options = {}) => {
     const urlBase = options.baseUrl?.replace(/\/$/, '') ?? ''
-    const docsPath = path.replace(/^\/docs(?=\/|$)/, '') || '/'
+    const docsPath = String(path ?? '').replace(/^\/docs(?=\/|$)/, '') || '/'
     const landingPaths = ['/', '/changelog']
     if (landingPaths.includes(docsPath)) return `${urlBase}/og-docs.png`
 
@@ -157,6 +160,7 @@ export default defineConfig({
     }
 
     const subsectionMap: Record<string, string> = {
+      accounts: 'ACCOUNTS',
       blockspace: 'BLOCKSPACE',
       exchange: 'DEX',
       fees: 'FEES',
@@ -330,6 +334,28 @@ export default defineConfig({
             link: '/docs/guide/getting-funds',
           },
           {
+            text: 'Manage Accounts',
+            collapsed: false,
+            items: [
+              {
+                text: 'Overview',
+                link: '/docs/guide/accounts',
+              },
+              {
+                text: 'Configure receive policies',
+                link: '/docs/guide/payments/configure-receive-policies',
+              },
+              {
+                text: 'Use virtual addresses',
+                link: '/docs/guide/payments/virtual-addresses',
+              },
+              {
+                text: 'Use access keys',
+                link: '/docs/guide/accounts/use-access-keys',
+              },
+            ],
+          },
+          {
             text: 'Make Payments',
             collapsed: false,
             items: [
@@ -346,16 +372,8 @@ export default defineConfig({
                 link: '/docs/guide/payments/accept-a-payment',
               },
               {
-                text: 'Configure receive policies',
-                link: '/docs/guide/payments/configure-receive-policies',
-              },
-              {
                 text: 'Attach a transfer memo',
                 link: '/docs/guide/payments/transfer-memos',
-              },
-              {
-                text: 'Use virtual addresses',
-                link: '/docs/guide/payments/virtual-addresses',
               },
               {
                 text: 'Pay fees in any stablecoin',
@@ -670,6 +688,10 @@ export default defineConfig({
             link: '/docs/protocol',
           },
           {
+            text: 'Tempo Accounts',
+            link: '/docs/protocol/accounts',
+          },
+          {
             text: 'TIP-20 Tokens',
             collapsed: false,
             items: [
@@ -867,7 +889,7 @@ export default defineConfig({
             items: [
               {
                 text: 'T8',
-                badge: { text: 'Planned', variant: 'note' },
+                badge: { text: 'Planned', variant: 'note' as const },
                 link: '/docs/protocol/upgrades/t8',
               },
               {
@@ -1183,6 +1205,7 @@ export default defineConfig({
       '/docs': docsHomeSidebar,
       '/docs/build': buildSidebar,
       '/docs/guide/getting-funds': buildSidebar,
+      '/docs/guide/accounts': buildSidebar,
       '/docs/guide/payments': buildSidebar,
       '/docs/guide/issuance': buildSidebar,
       '/docs/guide/stablecoin-dex': buildSidebar,

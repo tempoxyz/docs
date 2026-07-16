@@ -38,6 +38,7 @@ const columns: FooterColumn[] = [
   {
     header: 'Protocol',
     links: [
+      { label: 'Accounts', href: featurePath('accounts') },
       { label: 'Transactions', href: featurePath('transactions') },
       { label: 'TIP-20 tokens', href: featurePath('tokens') },
     ],

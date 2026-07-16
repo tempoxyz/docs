@@ -1,0 +1,66 @@
+---
+title: Use Access Keys
+description: Use and manage scoped access keys for routine app, device, agent, and session transactions, with guidance for permissions, storage, and key lifecycle.
+---
+
+import { Cards, Card } from 'vocs'
+
+# Use Access Keys
+
+Access keys are secondary signing keys authorized by a Tempo account. They let an app, device, agent, or session submit transactions without asking the account's root key to approve every action.
+
+Use a limited access key for routine transactions and give it only the permissions the product needs.
+
+## Decide when to use an access key
+
+Access keys are a good fit for:
+
+- Connected apps that need to submit transactions after the user connects
+- Devices that should not hold the account's root key
+- Agents, subscriptions, and sessions with a narrow set of permissions
+
+## Configure it for the product
+
+- Generate a separate key for each app and device instead of sharing one key across clients.
+- Prefer short-lived keys for sessions and connected apps.
+- Set spending limits around the product's expected transaction size and frequency.
+- Restrict calls to the targets, actions, and recipients the product needs.
+- Store browser keys as non-extractable WebCrypto keys rather than raw private-key material.
+
+## Manage the key lifecycle
+
+- Authorize the key after the user connects, either during its first transaction or in a separate account-management action.
+- Show the key's purpose, expiry, and permissions in the account interface.
+- Update permissions when the product's needs change.
+- Revoke keys for disconnected apps and retired devices.
+
+Use an SDK for these workflows rather than encoding Account Keychain calls directly. Read the [Account Keychain Precompile specification](/docs/protocol/transactions/AccountKeychain) for the authorization model, exact restriction semantics, ABI, validation behavior, and security considerations.
+
+## Implement access keys
+
+<Cards>
+  <Card
+    title="TypeScript SDK"
+    description="Build account and transaction flows with Tempo's TypeScript tooling."
+    to="/docs/sdk/typescript"
+    icon="lucide:blocks"
+  />
+  <Card
+    title="Rust SDK"
+    description="Build account and transaction flows with Tempo Alloy's keychain helpers."
+    to="/docs/sdk/rust"
+    icon="simple-icons:rust"
+  />
+  <Card
+    title="Foundry"
+    description="Use cast keychain to authorize, inspect, update, and revoke keys."
+    to="/docs/sdk/foundry#cast-keychain-for-tempo-access-keys"
+    icon="simple-icons:foundry"
+  />
+  <Card
+    title="Read the Protocol Specification"
+    description="Read the complete authorization, storage, validation, and security rules."
+    to="/docs/protocol/transactions/AccountKeychain"
+    icon="lucide:file-code"
+  />
+</Cards>

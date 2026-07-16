@@ -1,0 +1,33 @@
+---
+title: Manage Accounts
+description: Configure Tempo accounts with receive policies, virtual addresses, access keys, and protocol account controls.
+---
+
+import { Cards, Card } from "vocs";
+
+# Manage Accounts
+
+Manage accounts on Tempo. Start with receive controls and deposit attribution, then add access keys for delegated signing and account key management.
+
+See [Tempo Accounts](/docs/protocol/accounts) for the protocol model behind these flows.
+
+<Cards>
+  <Card
+    title="Configure Receive Policies"
+    description="Filter inbound TIP-20 transfers and mints by token and sender, then handle blocked receipts."
+    to="/docs/guide/payments/configure-receive-policies"
+    icon="lucide:shield-check"
+  />
+  <Card
+    title="Use Virtual Addresses"
+    description="Generate one TIP-20 deposit address per customer without sweep transactions."
+    to="/docs/guide/payments/virtual-addresses"
+    icon="lucide:route"
+  />
+  <Card
+    title="Use Access Keys"
+    description="Configure, authorize, inspect, update, and revoke scoped keys for apps, devices, agents, and sessions."
+    to="/docs/guide/accounts/use-access-keys"
+    icon="lucide:key"
+  />
+</Cards>
