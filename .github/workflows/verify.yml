@@ -48,7 +48,8 @@ jobs:
             exit 0
           fi
 
-          gh pr comment "$PR_NUMBER" --body $'<!-- docs-route-guard -->\nA removed docs page is missing a Vocs redirect. Add a redirect in `vocs.config.ts`, or apply the `docs-removal-ok` label to explicitly acknowledge the intentional URL removal. Applying or removing the label reruns this check.'
+          gh api --method POST "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+            -f body=$'<!-- docs-route-guard -->\nA removed docs page is missing a Vocs redirect. Add a redirect in `vocs.config.ts`, or apply the `docs-removal-ok` label to explicitly acknowledge the intentional URL removal. Applying or removing the label reruns this check.'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
