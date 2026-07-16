@@ -460,6 +460,21 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/developer-tools/fee-payer",
+      "destination": "/developers/docs/api/fee-payer",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/developer-tools/indexer",
+      "destination": "/developers/docs/api/indexer-api",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/hosted-services",
+      "destination": "/developers/docs/api",
+      "permanent": true
+    },
+    {
       "source": "/developer-tools",
       "destination": "/docs/ecosystem",
       "permanent": true
