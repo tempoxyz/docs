@@ -34,6 +34,39 @@
       "permanent": true
     },
     {
+      "source": "/docs/developer-tools/fee-payer",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
+      "permanent": true
+    },
+    {
+      "source": "/docs/developer-tools/indexer",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/api/indexer-api",
+      "permanent": true
+    },
+    {
+      "source": "/docs/hosted-services",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/api",
+      "permanent": true
+    },
+    {
       "source": "/guide/bridge-usdc-stargate",
       "has": [
         {
