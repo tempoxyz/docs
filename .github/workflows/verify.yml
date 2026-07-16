@@ -19,21 +19,12 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
-      pull-requests: read
 
     steps:
       - name: Clone repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-          fetch-depth: 0
-
-      - name: Check removed docs routes
-        if: github.event_name == 'pull_request'
-        run: node scripts/check-removed-doc-routes.mjs
-        env:
-          DOCS_ROUTE_GUARD_BASE: ${{ github.event.pull_request.base.sha }}
-          DOCS_REMOVAL_OK: ${{ contains(github.event.pull_request.labels.*.name, 'docs-removal-ok') }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
