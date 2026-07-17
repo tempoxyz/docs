@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AmpLogo, ClaudeLogo, CodexLogo } from '../../../components/AgentLogos'
+import { trackDocsSearchOpened } from '../../../lib/posthog'
 import { developersPath } from '../_lib/developersPaths'
 import { featurePath } from '../_lib/featurePaths'
 import { TEMPO_SDK_DOCS_URL } from '../_lib/links'
@@ -647,12 +648,13 @@ export default function Header() {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault()
-        setSearchOpen((s) => !s)
+        if (!searchOpen) trackDocsSearchOpened('keyboard')
+        setSearchOpen(!searchOpen)
       }
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [])
+  }, [searchOpen])
 
   const dropdowns: { key: string; panel: ReactNode }[] = [
     ...menu.flatMap((item) =>
@@ -753,7 +755,10 @@ export default function Header() {
         <div className="hidden items-center gap-3 lg:flex">
           <button
             type="button"
-            onClick={() => setSearchOpen(true)}
+            onClick={() => {
+              trackDocsSearchOpened('header')
+              setSearchOpen(true)
+            }}
             aria-label="Search documentation"
             aria-keyshortcuts="Meta+K Control+K"
             title="Search documentation (⌘K)"
@@ -804,6 +809,7 @@ export default function Header() {
             type="button"
             onClick={() => {
               close()
+              trackDocsSearchOpened('header')
               setSearchOpen(true)
             }}
             aria-label="Search documentation"

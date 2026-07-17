@@ -1,6 +1,6 @@
 'use client'
 
-import { lazy, type PropsWithChildren, Suspense } from 'react'
+import { lazy, type PropsWithChildren, Suspense, useEffect, useState } from 'react'
 import DocsHeader from '../../components/DocsHeader'
 import DocsJsonLd from '../../components/DocsJsonLd'
 import DocsSectionNav from '../../components/DocsSectionNav'
@@ -47,7 +47,10 @@ export default function DocsLayout(
   }>,
 ) {
   const pageSettled = usePageSettled()
+  const [postHogReady, setPostHogReady] = useState(false)
   const needsToaster = Boolean(props.frontmatter?.interactive || props.frontmatter?.mipd)
+
+  useEffect(() => setPostHogReady(true), [])
 
   return (
     <>
@@ -57,6 +60,7 @@ export default function DocsLayout(
       <DocsSidebarDrawer />
       {props.children}
       <Suspense fallback={null}>
+        {postHogReady && <PostHogSetup />}
         {needsToaster && (
           <Toaster
             className="z-42069 select-none"
@@ -76,7 +80,6 @@ export default function DocsLayout(
             <SpeedInsights route={props.path} />
             <Analytics />
             <GoogleAnalytics />
-            <PostHogSetup />
           </>
         )}
       </Suspense>

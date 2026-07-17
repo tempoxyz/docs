@@ -165,6 +165,7 @@ function renderRoute(path: string): ReactNode {
 function MarketingApp() {
   const [route, setRoute] = useState(currentRoute)
   const [analyticsReady, setAnalyticsReady] = useState(false)
+  const [postHogReady, setPostHogReady] = useState(false)
   const routeRef = useRef(route)
   const pendingScrollRef = useRef<string | null>(null)
 
@@ -192,6 +193,8 @@ function MarketingApp() {
     setAnalyticsReady(false)
     return scheduleIdleAnalytics(() => setAnalyticsReady(true))
   }, [])
+
+  useEffect(() => setPostHogReady(true), [])
 
   useEffect(() => {
     const update = () => {
@@ -251,13 +254,17 @@ function MarketingApp() {
 
   return (
     <>
+      {postHogReady && (
+        <Suspense fallback={null}>
+          <PostHogSetup site="developers" />
+        </Suspense>
+      )}
       <Suspense fallback={<RouteFallback route={route} />}>{renderRoute(route)}</Suspense>
       {analyticsReady && (
         <Suspense fallback={null}>
           <SpeedInsights route={route} />
           <Analytics />
           <GoogleAnalytics />
-          <PostHogSetup site="developers" />
         </Suspense>
       )}
     </>

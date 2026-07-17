@@ -74,11 +74,14 @@ export default function MarketingRoute({
   head?: ReactNode
 }) {
   const [analyticsReady, setAnalyticsReady] = useState(false)
+  const [postHogReady, setPostHogReady] = useState(false)
   const resolvedMetadata = metadata ?? routeMetadata[route] ?? fallbackMetadata(route)
 
   useEffect(() => {
     return scheduleIdleAnalytics(() => setAnalyticsReady(true))
   }, [])
+
+  useEffect(() => setPostHogReady(true), [])
 
   useEffect(() => {
     const prefetchAnchor = (event: Event) => {
@@ -108,13 +111,17 @@ export default function MarketingRoute({
         />
         {head}
       </PageHead>
+      {postHogReady && (
+        <Suspense fallback={null}>
+          <PostHogSetup site="developers" />
+        </Suspense>
+      )}
       {children}
       {analyticsReady && (
         <Suspense fallback={null}>
           <SpeedInsights route={route} />
           <Analytics />
           <GoogleAnalytics />
-          <PostHogSetup site="developers" />
         </Suspense>
       )}
     </>
