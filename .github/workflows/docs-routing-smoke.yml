@@ -1,0 +1,52 @@
+name: Docs routing smoke
+
+on:
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+    inputs:
+      canonical_origin:
+        description: Canonical Tempo origin to test
+        required: true
+        default: https://tempo.xyz
+      legacy_origin:
+        description: Legacy docs origin to test
+        required: true
+        default: https://docs.tempo.xyz
+
+permissions: {}
+
+jobs:
+  smoke:
+    name: Production redirect contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      DOCS_ROUTING_SMOKE_CANONICAL_ORIGIN: ${{ inputs.canonical_origin || 'https://tempo.xyz' }}
+      DOCS_ROUTING_SMOKE_LEGACY_ORIGIN: ${{ inputs.legacy_origin || 'https://docs.tempo.xyz' }}
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+        with:
+          run_install: false
+          version: 10.28.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: 24.12.0
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify deployed routing
+        run: pnpm test:routing:smoke

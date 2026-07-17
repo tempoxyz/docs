@@ -2,6 +2,12 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import vocsConfig from '../../vocs.config'
+import {
+  canonicalDevelopersOrigin,
+  docsRouteDestination,
+  legacyDocsHostRoutes,
+  proxiedLegacyDocsRoutes,
+} from './docs-routing'
 
 type Redirect = {
   source: string
@@ -14,18 +20,6 @@ type VocsRedirect = {
   source: string
   destination: string
 }
-
-// tempo.xyz preserves `/developers` while proxying to this deployment. Vocs only
-// sees its native `/docs` routes, so each legacy redirect must also exist at the
-// proxy mount or the static router can return a 404 before Vocs runs.
-const proxiedLegacyRedirects = [
-  ['/docs/quickstart/developer-tools', '/docs/ecosystem'],
-  ['/docs/developer-tools', '/docs/ecosystem'],
-  ['/docs/developer-tools/fee-payer', '/docs/api/fee-payer'],
-  ['/docs/developer-tools/indexer', '/docs/api/indexer-api'],
-  ['/docs/hosted-services', '/docs/api'],
-  ['/docs/hosted-services/:path*', '/docs/api'],
-] as const
 
 const vercelConfig = JSON.parse(
   fs.readFileSync(path.join(process.cwd(), 'vercel.json'), 'utf-8'),
@@ -72,37 +66,44 @@ function findHostRedirectIndex(source: string, host: string) {
 }
 
 describe('docs routing redirects', () => {
+  it('keeps proxied route destinations inside the public mount in production', () => {
+    expect(docsRouteDestination('/docs/api', 'production')).toBe(
+      `${canonicalDevelopersOrigin}/docs/api`,
+    )
+    expect(docsRouteDestination('/docs/api', 'preview')).toBe('/docs/api')
+  })
+
   it('normalizes trailing slashes before static route handling', () => {
     expect(vercelConfig.trailingSlash).toBe(false)
   })
 
   describe('proxied legacy documentation routes', () => {
-    it.each(proxiedLegacyRedirects)(
-      'mirrors %s at the /developers mount',
-      (source, destination) => {
-        const proxySource = `/developers${source}`
-        const proxyDestination = `/developers${destination}`
-        const matchingProxyRedirects = redirects.filter(
-          (redirect) => redirect.source === proxySource,
-        )
+    it.each(proxiedLegacyDocsRoutes)('mirrors $source at the /developers mount', ({
+      source,
+      destination,
+    }) => {
+      const proxySource = `/developers${source}`
+      const proxyDestination = `/developers${destination}`
+      const matchingProxyRedirects = redirects.filter((redirect) => redirect.source === proxySource)
 
-        expect(
-          vocsRedirects.some(
-            (redirect) => redirect.source === source && redirect.destination === destination,
-          ),
-        ).toBe(true)
-        expect(matchingProxyRedirects).toEqual([
-          expect.objectContaining({
-            source: proxySource,
-            destination: proxyDestination,
-            permanent: true,
-          }),
-        ])
-      },
-    )
+      expect(
+        vocsRedirects.some(
+          (redirect) =>
+            redirect.source === source &&
+            redirect.destination === docsRouteDestination(destination),
+        ),
+      ).toBe(true)
+      expect(matchingProxyRedirects).toEqual([
+        expect.objectContaining({
+          source: proxySource,
+          destination: proxyDestination,
+          permanent: true,
+        }),
+      ])
+    })
 
     it('uses canonical no-slash proxy sources and destinations', () => {
-      for (const [source, destination] of proxiedLegacyRedirects) {
+      for (const { source, destination } of proxiedLegacyDocsRoutes) {
         const redirect = findRedirect(`/developers${source}`)
 
         expect(redirect?.source).not.toMatch(/\/$/)
@@ -126,42 +127,32 @@ describe('docs routing redirects', () => {
       })
     })
 
-    it.each([
-      ['/guide/bridge-usdc-stargate', 'https://tempo.xyz/developers/docs/guide/bridge-layerzero'],
-      ['/guide/bridge-usdc-relay', 'https://tempo.xyz/developers/docs/guide/bridge-relay'],
-      [
-        '/guide/node/validator-config-v2',
-        'https://tempo.xyz/developers/docs/guide/node/network-upgrades',
-      ],
-      [
-        '/AccountKeychain',
-        'https://tempo.xyz/developers/docs/protocol/transactions/AccountKeychain',
-      ],
-      ['/developer-tools', 'https://tempo.xyz/developers/docs/ecosystem'],
-      ['/developer-tools/fee-payer', 'https://tempo.xyz/developers/docs/api/fee-payer'],
-      ['/developer-tools/indexer', 'https://tempo.xyz/developers/docs/api/indexer-api'],
-      ['/hosted-services', 'https://tempo.xyz/developers/docs/api'],
-      ['/hosted-services/:path*', 'https://tempo.xyz/developers/docs/api'],
-      ['/learn/partners', 'https://tempo.xyz/developers/docs/partners'],
-      ['/docs/learn/partners', 'https://tempo.xyz/developers/docs/partners'],
-      ['/docs/guide/using-tempo-with-ai/partners', 'https://tempo.xyz/developers/docs/partners'],
-      ['/build/partners', 'https://tempo.xyz/developers/docs/partners'],
-      ['/network-upgrades', 'https://tempo.xyz/developers/docs/guide/node/network-upgrades'],
-      [
-        '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|changelog|partners)',
-        'https://tempo.xyz/developers/docs/:section',
-      ],
-      [
-        '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools)/:path*',
-        'https://tempo.xyz/developers/docs/:section/:path*',
-      ],
-    ])('redirects legacy route %s to %s before the host catch-all', (source, destination) => {
+    it.each(legacyDocsHostRoutes)('redirects $source to $destination before the host catch-all', ({
+      source,
+      destination,
+    }) => {
       expect(findHostRedirect(source, host)).toMatchObject({
         source,
         destination,
         permanent: true,
       })
 
+      expect(findHostRedirectIndex(source, host)).toBeLessThan(
+        findHostRedirectIndex('/:path*', host),
+      )
+    })
+
+    it.each([
+      [
+        '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|changelog|partners)',
+        `${canonicalDevelopersOrigin}/docs/:section`,
+      ],
+      [
+        '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools)/:path*',
+        `${canonicalDevelopersOrigin}/docs/:section/:path*`,
+      ],
+    ])('redirects legacy section %s to %s before the host catch-all', (source, destination) => {
+      expect(findHostRedirect(source, host)).toMatchObject({ source, destination, permanent: true })
       expect(findHostRedirectIndex(source, host)).toBeLessThan(
         findHostRedirectIndex('/:path*', host),
       )

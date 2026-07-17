@@ -1,4 +1,5 @@
 import { Changelog, defineConfig, Embedding, McpSource, Reranker, Retriever } from 'vocs/config'
+import { docsRouteDestination, proxiedLegacyDocsRoutes } from './src/lib/docs-routing'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 
 // Only set baseUrl in production — Vocs injects a <base> tag from this value,
@@ -62,8 +63,9 @@ export default defineConfig({
   },
   title: 'Tempo Docs',
   titleTemplate: (path, { title }) => {
-    if (path === '/docs') return 'Tempo %s ⋅ Tempo Docs'
-    if (path.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
+    const pagePath = typeof path === 'string' ? path : '/'
+    if (pagePath === '/docs') return 'Tempo %s ⋅ Tempo Docs'
+    if (pagePath.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
     if (title?.includes('Tempo')) return undefined
     return '%s ⋅ Tempo'
   },
@@ -71,7 +73,8 @@ export default defineConfig({
   renderStrategy: 'partial-static',
   feedback: createFeedbackAdapter(),
   head(path) {
-    if (path === '/docs' || path.startsWith('/docs/'))
+    const pagePath = typeof path === 'string' ? path : '/'
+    if (pagePath === '/docs' || pagePath.startsWith('/docs/'))
       return { meta: { articleModifiedTime: false } }
     return undefined
   },
@@ -112,7 +115,8 @@ export default defineConfig({
   },
   sitemap: {
     lastmod: (path, { lastmod }) => {
-      if (path === '/docs' || path.startsWith('/docs/')) return false
+      const pagePath = typeof path === 'string' ? path : '/'
+      if (pagePath === '/docs' || pagePath.startsWith('/docs/')) return false
       return lastmod
     },
   },
@@ -135,7 +139,7 @@ export default defineConfig({
   // src/lib/og-sections.test.ts fails if the two drift.
   ogImageUrl: (path, options = {}) => {
     const urlBase = options.baseUrl?.replace(/\/$/, '') ?? ''
-    const docsPath = path.replace(/^\/docs(?=\/|$)/, '') || '/'
+    const docsPath = String(path ?? '').replace(/^\/docs(?=\/|$)/, '') || '/'
     const landingPaths = ['/', '/changelog']
     if (landingPaths.includes(docsPath)) return `${urlBase}/og-docs.png`
 
@@ -866,7 +870,7 @@ export default defineConfig({
             items: [
               {
                 text: 'T8',
-                badge: { text: 'Planned', variant: 'note' },
+                badge: { text: 'Planned', variant: 'note' as const },
                 link: '/docs/protocol/upgrades/t8',
               },
               {
@@ -1215,8 +1219,13 @@ export default defineConfig({
     { text: 'Wallet', link: 'https://wallet.tempo.xyz' },
   ],
   redirects: [
-    // Keep proxied `/developers` developer-tools and hosted-services equivalents
-    // in vercel.json synchronized; the static router runs before Vocs at that mount.
+    // Vercel mirrors these at `/developers` because the static router runs before
+    // Vocs at that proxy mount. The route contract and tests keep them aligned.
+    ...proxiedLegacyDocsRoutes.map((redirect) => ({
+      ...redirect,
+      destination: docsRouteDestination(redirect.destination),
+      status: 301,
+    })),
     {
       source: '/docs/documentation/protocol/:path*',
       destination: '/docs/protocol/:path*',
@@ -1224,36 +1233,6 @@ export default defineConfig({
     {
       source: '/docs/stablecoin-exchange/:path*',
       destination: '/docs/guide/stablecoin-dex/:path*',
-      status: 301,
-    },
-    {
-      source: '/docs/quickstart/developer-tools',
-      destination: '/docs/ecosystem',
-      status: 301,
-    },
-    {
-      source: '/docs/developer-tools',
-      destination: '/docs/ecosystem',
-      status: 301,
-    },
-    {
-      source: '/docs/developer-tools/fee-payer',
-      destination: '/docs/api/fee-payer',
-      status: 301,
-    },
-    {
-      source: '/docs/developer-tools/indexer',
-      destination: '/docs/api/indexer-api',
-      status: 301,
-    },
-    {
-      source: '/docs/hosted-services',
-      destination: '/docs/api',
-      status: 301,
-    },
-    {
-      source: '/docs/hosted-services/:path*',
-      destination: '/docs/api',
       status: 301,
     },
     {
