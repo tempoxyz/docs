@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
+import vocsConfig from '../../vocs.config'
 
 type Redirect = {
   source: string
@@ -9,12 +10,30 @@ type Redirect = {
   has?: unknown
 }
 
+type VocsRedirect = {
+  source: string
+  destination: string
+}
+
+// tempo.xyz preserves `/developers` while proxying to this deployment. Vocs only
+// sees its native `/docs` routes, so each legacy redirect must also exist at the
+// proxy mount or the static router can return a 404 before Vocs runs.
+const proxiedLegacyRedirects = [
+  ['/docs/quickstart/developer-tools', '/docs/ecosystem'],
+  ['/docs/developer-tools', '/docs/ecosystem'],
+  ['/docs/developer-tools/fee-payer', '/docs/api/fee-payer'],
+  ['/docs/developer-tools/indexer', '/docs/api/indexer-api'],
+  ['/docs/hosted-services', '/docs/api'],
+  ['/docs/hosted-services/:path*', '/docs/api'],
+] as const
+
 const vercelConfig = JSON.parse(
   fs.readFileSync(path.join(process.cwd(), 'vercel.json'), 'utf-8'),
-) as { redirects: Redirect[] }
+) as { redirects: Redirect[]; trailingSlash?: boolean }
 
 const redirects = vercelConfig.redirects.filter((redirect) => !redirect.has)
 const hostRedirects = vercelConfig.redirects.filter((redirect) => redirect.has)
+const vocsRedirects = vocsConfig.redirects as VocsRedirect[]
 
 function findRedirect(source: string) {
   return redirects.find((redirect) => redirect.source === source)
@@ -53,6 +72,46 @@ function findHostRedirectIndex(source: string, host: string) {
 }
 
 describe('docs routing redirects', () => {
+  it('normalizes trailing slashes before static route handling', () => {
+    expect(vercelConfig.trailingSlash).toBe(false)
+  })
+
+  describe('proxied legacy documentation routes', () => {
+    it.each(proxiedLegacyRedirects)(
+      'mirrors %s at the /developers mount',
+      (source, destination) => {
+        const proxySource = `/developers${source}`
+        const proxyDestination = `/developers${destination}`
+        const matchingProxyRedirects = redirects.filter(
+          (redirect) => redirect.source === proxySource,
+        )
+
+        expect(
+          vocsRedirects.some(
+            (redirect) => redirect.source === source && redirect.destination === destination,
+          ),
+        ).toBe(true)
+        expect(matchingProxyRedirects).toEqual([
+          expect.objectContaining({
+            source: proxySource,
+            destination: proxyDestination,
+            permanent: true,
+          }),
+        ])
+      },
+    )
+
+    it('uses canonical no-slash proxy sources and destinations', () => {
+      for (const [source, destination] of proxiedLegacyRedirects) {
+        const redirect = findRedirect(`/developers${source}`)
+
+        expect(redirect?.source).not.toMatch(/\/$/)
+        expect(redirect?.destination).toBe(`/developers${destination}`)
+        expect(redirect?.destination).not.toMatch(/\/$/)
+      }
+    })
+  })
+
   describe.each(['docs.tempo.xyz', 'next.docs.tempo.xyz'])('canonical redirects for %s', (host) => {
     it.each([
       ['/', 'https://tempo.xyz/developers'],
@@ -136,9 +195,12 @@ describe('docs routing redirects', () => {
     ['/api/transactions-and-transfers', '/docs/api/transactions-and-transfers'],
     ['/api/transfers', '/docs/api/transfers'],
     ['/api/versioning-policy', '/docs/api/versioning-policy'],
-    ['/developers/docs/developer-tools/fee-payer/', '/developers/docs/api/fee-payer'],
-    ['/developers/docs/developer-tools/indexer/', '/developers/docs/api/indexer-api'],
-    ['/developers/docs/hosted-services/', '/developers/docs/api'],
+    ['/developers/docs/quickstart/developer-tools', '/developers/docs/ecosystem'],
+    ['/developers/docs/developer-tools', '/developers/docs/ecosystem'],
+    ['/developers/docs/developer-tools/fee-payer', '/developers/docs/api/fee-payer'],
+    ['/developers/docs/developer-tools/indexer', '/developers/docs/api/indexer-api'],
+    ['/developers/docs/hosted-services', '/developers/docs/api'],
+    ['/developers/docs/hosted-services/:path*', '/developers/docs/api'],
     ['/developer-tools/fee-payer', '/docs/api/fee-payer'],
     ['/developer-tools/indexer', '/docs/api/indexer-api'],
     ['/hosted-services', '/docs/api'],

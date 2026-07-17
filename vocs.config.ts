@@ -1215,6 +1215,8 @@ export default defineConfig({
     { text: 'Wallet', link: 'https://wallet.tempo.xyz' },
   ],
   redirects: [
+    // Keep proxied `/developers` developer-tools and hosted-services equivalents
+    // in vercel.json synchronized; the static router runs before Vocs at that mount.
     {
       source: '/docs/documentation/protocol/:path*',
       destination: '/docs/protocol/:path*',
