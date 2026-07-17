@@ -1,4 +1,5 @@
 {
+  "trailingSlash": false,
   "redirects": [
     {
       "source": "/",
@@ -460,17 +461,32 @@
       "permanent": true
     },
     {
-      "source": "/developers/docs/developer-tools/fee-payer/",
+      "source": "/developers/docs/quickstart/developer-tools",
+      "destination": "/developers/docs/ecosystem",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/developer-tools",
+      "destination": "/developers/docs/ecosystem",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/developer-tools/fee-payer",
       "destination": "/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
-      "source": "/developers/docs/developer-tools/indexer/",
+      "source": "/developers/docs/developer-tools/indexer",
       "destination": "/developers/docs/api/indexer-api",
       "permanent": true
     },
     {
-      "source": "/developers/docs/hosted-services/",
+      "source": "/developers/docs/hosted-services",
+      "destination": "/developers/docs/api",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/hosted-services/:path*",
       "destination": "/developers/docs/api",
       "permanent": true
     },
