@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { POSTHOG_REPLAY_PRIVACY_CONFIG } from '../lib/posthog-privacy'
 
 function PostHogInitializer({ site }: { site: string }) {
   useEffect(() => {
@@ -18,12 +19,7 @@ function PostHogInitializer({ site }: { site: string }) {
         defaults: '2025-11-30',
         capture_exceptions: true,
         debug: import.meta.env.MODE === 'development',
-        session_recording: {
-          maskAllInputs: false,
-          maskInputOptions: {
-            password: true,
-          },
-        },
+        ...POSTHOG_REPLAY_PRIVACY_CONFIG,
       })
       posthog.register({ site })
     }
