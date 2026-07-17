@@ -64,3 +64,5 @@ for (const testCase of routingSmokeCases.legacy) await checkCase(legacyOrigin, t
 console.log(
   `Validated ${routingSmokeCases.canonical.length + routingSmokeCases.legacy.length} deployed routing cases.`,
 )
+
+process.exit(0)
