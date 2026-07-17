@@ -118,6 +118,25 @@ Before production deployment, confirm:
 | Roles and role administrators | Admin receives `DEFAULT_ADMIN_ROLE` | Yes |
 | Pause state | Unpaused | Yes, through `PAUSE_ROLE` and `UNPAUSE_ROLE` |
 
+### Choose the currency by unit-price behavior
+
+Set `currency` to the asset or unit of account that **one token unit is designed to remain approximately 1:1 with**. The deciding question is how the price of one token unit behaves, not whether the token generates yield.
+
+| Token behavior | Example | `currency` |
+|---|---|---|
+| USD stablecoin that remains near $1 | USDC | `USD` |
+| Rebasing USD yield token whose balance grows while each unit remains near $1 | Rebasing USD yield token | `USD` |
+| Wrapped token that remains 1:1 with BTC | WBTC or cbBTC | `BTC` |
+| Accumulating token whose balance stays fixed while its redemption value rises | PRIME or cbETH | Its own asset identifier, such as `PRIME` or `cbETH` |
+| Non-rebasing wrapper around a rebasing asset | Wrapped yield token | Its own asset identifier, unless one wrapper unit remains near 1:1 with the underlying denomination |
+
+Do not set `currency = USD` merely because an accumulating token is USD-backed or reports its value in USD. Classifying a TIP-20 as USD makes it eligible for infrastructure designed for near-par USD assets:
+
+- The [Fee AMM](/docs/protocol/fees/spec-fee-amm) converts between a user's fee token and a validator's preferred fee token at fixed near-par rates. If one token unit is worth more than $1, that conversion would misprice it.
+- The [Stablecoin DEX](/docs/protocol/exchange) is market-priced, but it is designed for USD-classified pairs and currently limits orders to a ±2% range around parity. An accumulating token can move outside that range as its redemption value grows.
+
+Because `currency` is immutable, confirm the token's unit-price behavior before deployment. See [Currency Declaration](/docs/protocol/tip20/overview#currency-declaration) for the full selection rules.
+
 ## 4. Inspect the current ERC-20
 
 Before deploying on Tempo, identify the current token architecture.
