@@ -236,7 +236,7 @@ Common checks include:
 
 On Tempo, keep the token native and move transfer eligibility into TIP-403 policy.
 
-A TIP-20 token points to one `transferPolicyId`. Do not model compliance as attaching both an allowlist policy and a blocklist policy directly to the token. Use a simple whitelist or blacklist when one rule applies across token movement. Use a compound policy when sender, recipient, and mint-recipient rules need to differ.
+A TIP-20 token points to one `transferPolicyId`. Do not model compliance as attaching both an allowlist policy and a blocklist policy directly to the token. Use a simple whitelist or blacklist when the same rule applies to transfer senders, transfer recipients, and mint recipients. Use a compound policy when those three rules need to differ.
 
 ### Simple vs compound policies
 
