@@ -204,7 +204,6 @@ export default defineConfig({
     {
       path: '/docs/api',
       spec: 'https://api.tempo.xyz/openapi.json',
-      exclude: ['Management API'],
       sidebar: {
         backLink: false,
         collapsed: true,
