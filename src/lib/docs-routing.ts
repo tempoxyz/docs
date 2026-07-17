@@ -15,7 +15,6 @@ export function docsRouteDestination(destination: string, environment = process.
 // host. Keep the mappings here so tests and deployed smoke checks share one
 // contract.
 export const proxiedLegacyDocsRoutes = [
-  { source: '/docs/quickstart/developer-tools', destination: '/docs/ecosystem' },
   { source: '/docs/developer-tools', destination: '/docs/ecosystem' },
   { source: '/docs/developer-tools/fee-payer', destination: '/docs/api/fee-payer' },
   { source: '/docs/developer-tools/indexer', destination: '/docs/api/indexer-api' },
@@ -68,11 +67,7 @@ export const routingSmokeCases = {
   canonical: [
     { path: '/developers', expectedStatus: 200 },
     { path: '/developers/docs/quickstart/integrate-tempo', expectedStatus: 200 },
-    {
-      path: '/developers/docs/quickstart/developer-tools',
-      expectedLocation: `${canonicalDevelopersOrigin}/docs/ecosystem`,
-      expectedFinalStatus: 200,
-    },
+    { path: '/developers/docs/quickstart/developer-tools', expectedStatus: 200 },
     {
       path: '/developers/docs/hosted-services',
       expectedLocation: `${canonicalDevelopersOrigin}/docs/api`,
