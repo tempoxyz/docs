@@ -12,6 +12,8 @@ describe('MarketingJsonLd', () => {
       description: 'Developer resources for Tempo.',
     })
     const page = schema['@graph'].find((entry) => entry['@type'] === 'WebPage')
+    const website = schema['@graph'].find((entry) => entry['@type'] === 'WebSite')
+    const organization = schema['@graph'].find((entry) => entry['@type'] === 'Corporation')
 
     expect(page).toMatchObject({
       '@id': url,
@@ -22,5 +24,7 @@ describe('MarketingJsonLd', () => {
       about: { '@id': 'https://tempo.xyz/#organization' },
       publisher: { '@id': 'https://tempo.xyz/#organization' },
     })
+    expect(website).not.toHaveProperty('alternateName')
+    expect(organization).not.toHaveProperty('alternateName')
   })
 })
