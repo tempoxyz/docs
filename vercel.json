@@ -276,6 +276,16 @@
       "permanent": true
     },
     {
+      "source": "/developers/:section(guide|protocol)/:path*",
+      "destination": "/developers/docs/:section/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/developers/learn",
+      "destination": "/developers/docs",
+      "permanent": true
+    },
+    {
       "source": "/api",
       "destination": "/docs/api",
       "permanent": true

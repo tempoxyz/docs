@@ -172,6 +172,8 @@ describe('docs routing redirects', () => {
     ['/tools', '/docs/tools'],
     ['/tools/:path*', '/docs/tools/:path*'],
     ['/partners', '/docs/partners'],
+    ['/developers/:section(guide|protocol)/:path*', '/developers/docs/:section/:path*'],
+    ['/developers/learn', '/developers/docs'],
     ['/api', '/docs/api'],
     ['/api/authentication', '/docs/api/authentication'],
     ['/api/conventions', '/docs/api/conventions'],
