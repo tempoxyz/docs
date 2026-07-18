@@ -28,6 +28,8 @@ const vercelConfig = JSON.parse(
 const redirects = vercelConfig.redirects.filter((redirect) => !redirect.has)
 const hostRedirects = vercelConfig.redirects.filter((redirect) => redirect.has)
 const vocsRedirects = vocsConfig.redirects as VocsRedirect[]
+const legacySectionPathSource =
+  '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools)/:path*'
 
 function findRedirect(source: string) {
   return redirects.find((redirect) => redirect.source === source)
@@ -65,12 +67,20 @@ function findHostRedirectIndex(source: string, host: string) {
   )
 }
 
+function developersProxyDestination(destination: string) {
+  if (URL.canParse(destination)) return destination
+  return `/developers${destination}`
+}
+
 describe('docs routing redirects', () => {
   it('keeps proxied route destinations inside the public mount in production', () => {
     expect(docsRouteDestination('/docs/api', 'production')).toBe(
       `${canonicalDevelopersOrigin}/docs/api`,
     )
     expect(docsRouteDestination('/docs/api', 'preview')).toBe('/docs/api')
+    expect(docsRouteDestination('https://tempo.xyz/learn/stablecoin-payroll/', 'production')).toBe(
+      'https://tempo.xyz/learn/stablecoin-payroll/',
+    )
   })
 
   it('normalizes trailing slashes before static route handling', () => {
@@ -83,7 +93,6 @@ describe('docs routing redirects', () => {
       destination,
     }) => {
       const proxySource = `/developers${source}`
-      const proxyDestination = `/developers${destination}`
       const matchingProxyRedirects = redirects.filter((redirect) => redirect.source === proxySource)
 
       expect(
@@ -96,7 +105,7 @@ describe('docs routing redirects', () => {
       expect(matchingProxyRedirects).toEqual([
         expect.objectContaining({
           source: proxySource,
-          destination: proxyDestination,
+          destination: developersProxyDestination(destination),
           permanent: true,
         }),
       ])
@@ -107,8 +116,8 @@ describe('docs routing redirects', () => {
         const redirect = findRedirect(`/developers${source}`)
 
         expect(redirect?.source).not.toMatch(/\/$/)
-        expect(redirect?.destination).toBe(`/developers${destination}`)
-        expect(redirect?.destination).not.toMatch(/\/$/)
+        expect(redirect?.destination).toBe(developersProxyDestination(destination))
+        if (!URL.canParse(destination)) expect(redirect?.destination).not.toMatch(/\/$/)
       }
     })
   })
@@ -127,7 +136,7 @@ describe('docs routing redirects', () => {
       })
     })
 
-    it.each(legacyDocsHostRoutes)('redirects $source to $destination before the host catch-all', ({
+    it.each(legacyDocsHostRoutes)('redirects $source to $destination before broad host rules', ({
       source,
       destination,
     }) => {
@@ -137,6 +146,9 @@ describe('docs routing redirects', () => {
         permanent: true,
       })
 
+      expect(findHostRedirectIndex(source, host)).toBeLessThan(
+        findHostRedirectIndex(legacySectionPathSource, host),
+      )
       expect(findHostRedirectIndex(source, host)).toBeLessThan(
         findHostRedirectIndex('/:path*', host),
       )
