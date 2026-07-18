@@ -2,6 +2,21 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/developers/docs/protocol/tips",
+      "destination": "https://tips.sh/",
+      "permanent": true
+    },
+    {
+      "source": "/docs/protocol/tips",
+      "destination": "https://tips.sh/",
+      "permanent": true
+    },
+    {
+      "source": "/protocol/tips",
+      "destination": "https://tips.sh/",
+      "permanent": true
+    },
+    {
       "source": "/",
       "has": [
         {

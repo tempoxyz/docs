@@ -6,6 +6,7 @@ import Icons from 'unplugin-icons/vite'
 import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { vocs } from 'vocs/vite'
+import { canonicalizeGeneratedDeveloperLinks } from './src/lib/canonical-developer-links'
 import { finalizeSitemap } from './src/lib/sitemap'
 import { blogPostsPlugin, getBlogPostSlugs } from './src/marketing/blogPlugin'
 
@@ -212,16 +213,30 @@ function llmsFeedbackPreamble(): Plugin {
     configResolved(config) {
       viteConfig = config
     },
-    async closeBundle() {
-      const publicDir = path.resolve(viteConfig.root, viteConfig.build.outDir, 'public')
-      const candidates = [
-        path.join(publicDir, 'llms.txt'),
-        path.join(publicDir, 'llms-full.txt'),
-        ...(await markdownFiles(path.join(publicDir, 'assets/md'))),
-      ]
+    // Waku writes static HTML and RSC payloads during buildApp, after the
+    // environment closeBundle hooks have already finished.
+    buildApp: {
+      order: 'post',
+      async handler() {
+        const publicDir = path.resolve(viteConfig.root, viteConfig.build.outDir, 'public')
+        const candidates = [
+          path.join(publicDir, 'llms.txt'),
+          path.join(publicDir, 'llms-full.txt'),
+          ...(await markdownFiles(path.join(publicDir, 'assets/md'))),
+        ]
 
-      await Promise.all(candidates.map(prependFeedbackNotice))
-      await finalizeGeneratedSitemap(path.join(publicDir, 'sitemap.xml'))
+        await Promise.all(candidates.map(prependFeedbackNotice))
+        if (process.env.VERCEL_ENV === 'production') {
+          const generatedPages = [
+            ...(await filesWithExtension(publicDir, '.html')),
+            ...(await filesWithExtension(path.join(publicDir, 'RSC'), '.txt')),
+          ]
+          await Promise.all(
+            [...new Set([...candidates, ...generatedPages])].map(canonicalizeGeneratedLinksInFile),
+          )
+        }
+        await finalizeGeneratedSitemap(path.join(publicDir, 'sitemap.xml'))
+      },
     },
   }
 }
@@ -243,11 +258,38 @@ async function markdownFiles(directory: string): Promise<string[]> {
   }
 }
 
+async function filesWithExtension(directory: string, extension: string): Promise<string[]> {
+  try {
+    const entries = await fs.readdir(directory, { withFileTypes: true })
+    const files = await Promise.all(
+      entries.map(async (entry) => {
+        const entryPath = path.join(directory, entry.name)
+        if (entry.isDirectory()) return filesWithExtension(entryPath, extension)
+        if (entry.isFile() && entry.name.endsWith(extension)) return [entryPath]
+        return []
+      }),
+    )
+    return files.flat()
+  } catch {
+    return []
+  }
+}
+
 async function prependFeedbackNotice(filePath: string) {
   try {
     const content = await fs.readFile(filePath, 'utf-8')
     if (content.startsWith(llmsFeedbackNotice)) return
     await fs.writeFile(filePath, `${llmsFeedbackNotice}${content}`, 'utf-8')
+  } catch {
+    return
+  }
+}
+
+async function canonicalizeGeneratedLinksInFile(filePath: string) {
+  try {
+    const content = await fs.readFile(filePath, 'utf-8')
+    const canonical = canonicalizeGeneratedDeveloperLinks(content)
+    if (canonical !== content) await fs.writeFile(filePath, canonical, 'utf-8')
   } catch {
     return
   }
