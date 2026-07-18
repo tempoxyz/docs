@@ -189,6 +189,237 @@
       "permanent": true
     },
     {
+      "source": "/guide/use-accounts/add-funds",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/guide/getting-funds",
+      "permanent": true
+    },
+    {
+      "source": "/guide/use-accounts/authorize-access-keys",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/guide/tempo-transaction#access-keys",
+      "permanent": true
+    },
+    {
+      "source": "/guide/use-accounts/batch-transactions",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/guide/tempo-transaction#batch-calls",
+      "permanent": true
+    },
+    {
+      "source": "/guide/use-accounts/fee-sponsorship",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/guide/payments/sponsor-user-fees",
+      "permanent": true
+    },
+    {
+      "source": "/guide/use-accounts/scheduled-transactions",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/guide/tempo-transaction#scheduled-transactions",
+      "permanent": true
+    },
+    {
+      "source": "/guide/use-accounts/webauthn-p256-signatures",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/protocol/transactions/spec-tempo-transaction#signature-types",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/typescript/server",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/server",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/typescript/server/handlers",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/server",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/typescript/server/handler.feePayer",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/server/relay-handler#feepayer",
+      "permanent": true
+    },
+    {
+      "source": "/accounts/server",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/server",
+      "permanent": true
+    },
+    {
+      "source": "/accounts/server/handler.feePayer",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/server/relay-handler#feepayer",
+      "permanent": true
+    },
+    {
+      "source": "/accounts/server/handler.relay",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/server/relay-handler",
+      "permanent": true
+    },
+    {
+      "source": "/learn/tempo/receive-policies",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/guide/payments/configure-receive-policies",
+      "permanent": true
+    },
+    {
+      "source": "/learn/use-cases/agentic-commerce",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/learn/blockchain-payments/",
+      "permanent": true
+    },
+    {
+      "source": "/learn/use-cases/embedded-finance",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/learn/stablecoin-payments/",
+      "permanent": true
+    },
+    {
+      "source": "/learn/use-cases/global-payouts",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/learn/global-payouts/",
+      "permanent": true
+    },
+    {
+      "source": "/learn/use-cases/microtransactions",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/learn/microtransactions/",
+      "permanent": true
+    },
+    {
+      "source": "/learn/use-cases/payroll",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/learn/stablecoin-payroll/",
+      "permanent": true
+    },
+    {
+      "source": "/learn/use-cases/remittances",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/learn/cross-border-payments/",
+      "permanent": true
+    },
+    {
+      "source": "/learn/use-cases/tokenized-deposits",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/learn/tokenized-deposits/",
+      "permanent": true
+    },
+    {
+      "source": "/protocol/tips/tip-1028",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tips.sh/1028",
+      "permanent": true
+    },
+    {
       "source": "/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|changelog|partners)",
       "has": [
         {
@@ -488,6 +719,111 @@
     {
       "source": "/developers/docs/hosted-services/:path*",
       "destination": "/developers/docs/api",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/use-accounts/add-funds",
+      "destination": "/developers/docs/guide/getting-funds",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/use-accounts/authorize-access-keys",
+      "destination": "/developers/docs/guide/tempo-transaction#access-keys",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/use-accounts/batch-transactions",
+      "destination": "/developers/docs/guide/tempo-transaction#batch-calls",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/use-accounts/fee-sponsorship",
+      "destination": "/developers/docs/guide/payments/sponsor-user-fees",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/use-accounts/scheduled-transactions",
+      "destination": "/developers/docs/guide/tempo-transaction#scheduled-transactions",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/use-accounts/webauthn-p256-signatures",
+      "destination": "/developers/docs/protocol/transactions/spec-tempo-transaction#signature-types",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/sdk/typescript/server",
+      "destination": "/developers/docs/server",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/sdk/typescript/server/handlers",
+      "destination": "/developers/docs/server",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/sdk/typescript/server/handler.feePayer",
+      "destination": "/developers/docs/server/relay-handler#feepayer",
+      "permanent": true
+    },
+    {
+      "source": "/developers/accounts/server",
+      "destination": "/developers/docs/server",
+      "permanent": true
+    },
+    {
+      "source": "/developers/accounts/server/handler.feePayer",
+      "destination": "/developers/docs/server/relay-handler#feepayer",
+      "permanent": true
+    },
+    {
+      "source": "/developers/accounts/server/handler.relay",
+      "destination": "/developers/docs/server/relay-handler",
+      "permanent": true
+    },
+    {
+      "source": "/developers/learn/tempo/receive-policies",
+      "destination": "/developers/docs/guide/payments/configure-receive-policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/learn/use-cases/agentic-commerce",
+      "destination": "https://tempo.xyz/learn/blockchain-payments/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/learn/use-cases/embedded-finance",
+      "destination": "https://tempo.xyz/learn/stablecoin-payments/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/learn/use-cases/global-payouts",
+      "destination": "https://tempo.xyz/learn/global-payouts/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/learn/use-cases/microtransactions",
+      "destination": "https://tempo.xyz/learn/microtransactions/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/learn/use-cases/payroll",
+      "destination": "https://tempo.xyz/learn/stablecoin-payroll/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/learn/use-cases/remittances",
+      "destination": "https://tempo.xyz/learn/cross-border-payments/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/learn/use-cases/tokenized-deposits",
+      "destination": "https://tempo.xyz/learn/tokenized-deposits/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/protocol/tips/tip-1028",
+      "destination": "https://tips.sh/1028",
       "permanent": true
     },
     {

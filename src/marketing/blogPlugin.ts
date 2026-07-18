@@ -46,6 +46,17 @@ const CATEGORY_SLUGS = ['network-upgrades', 'events', 'technical', 'case-studies
 // authors, not posts.
 const DOC_FILE = /^[A-Z0-9_-]+\.md$/
 
+function getBlogPostFilenames(): string[] {
+  return fs
+    .readdirSync(BLOGS_DIR)
+    .filter((filename) => filename.endsWith('.md') && !DOC_FILE.test(filename))
+    .sort((a, b) => a.localeCompare(b))
+}
+
+export function getBlogPostSlugs(): string[] {
+  return getBlogPostFilenames().map((filename) => filename.replace(/\.md$/, ''))
+}
+
 export type RenderedPost = {
   slug: string
   title: string
@@ -130,7 +141,7 @@ async function renderPost(filename: string): Promise<RenderedPost> {
 
 // Reads + renders every post, newest first.
 async function loadRenderedPosts(): Promise<RenderedPost[]> {
-  const filenames = fs.readdirSync(BLOGS_DIR).filter((f) => f.endsWith('.md') && !DOC_FILE.test(f))
+  const filenames = getBlogPostFilenames()
 
   const posts = await Promise.all(filenames.map(renderPost))
   return posts.sort((a, b) => b.date.localeCompare(a.date))

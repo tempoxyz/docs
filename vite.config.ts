@@ -6,7 +6,8 @@ import Icons from 'unplugin-icons/vite'
 import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { vocs } from 'vocs/vite'
-import { blogPostsPlugin } from './src/marketing/blogPlugin'
+import { finalizeSitemap } from './src/lib/sitemap'
+import { blogPostsPlugin, getBlogPostSlugs } from './src/marketing/blogPlugin'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -220,7 +221,7 @@ function llmsFeedbackPreamble(): Plugin {
       ]
 
       await Promise.all(candidates.map(prependFeedbackNotice))
-      await removeTemplateRoutesFromSitemap(path.join(publicDir, 'sitemap.xml'))
+      await finalizeGeneratedSitemap(path.join(publicDir, 'sitemap.xml'))
     },
   }
 }
@@ -252,16 +253,14 @@ async function prependFeedbackNotice(filePath: string) {
   }
 }
 
-async function removeTemplateRoutesFromSitemap(filePath: string) {
+async function finalizeGeneratedSitemap(filePath: string) {
   try {
     const content = await fs.readFile(filePath, 'utf-8')
-    const filtered = content.replaceAll(
-      /<url>\s*<loc>[^<]*\/\[[^\]]+\][^<]*<\/loc>[\s\S]*?<\/url>\s*/g,
-      '',
-    )
-    if (filtered !== content) await fs.writeFile(filePath, filtered, 'utf-8')
-  } catch {
-    return
+    const finalized = finalizeSitemap(content, getBlogPostSlugs())
+    if (finalized !== content) await fs.writeFile(filePath, finalized, 'utf-8')
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return
+    throw error
   }
 }
 
