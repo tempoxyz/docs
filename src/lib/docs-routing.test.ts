@@ -35,6 +35,10 @@ function findRedirect(source: string) {
   return redirects.find((redirect) => redirect.source === source)
 }
 
+function findRedirectIndex(source: string) {
+  return vercelConfig.redirects.findIndex((redirect) => !redirect.has && redirect.source === source)
+}
+
 function matchesHostCondition(redirect: Redirect, host: string) {
   return (
     Array.isArray(redirect.has) &&
@@ -119,6 +123,20 @@ describe('docs routing redirects', () => {
         expect(redirect?.destination).toBe(developersProxyDestination(destination))
         if (!URL.canParse(destination)) expect(redirect?.destination).not.toMatch(/\/$/)
       }
+    })
+
+    it.each(
+      proxiedLegacyDocsRoutes.filter(({ source }) => source.startsWith('/accounts/')),
+    )('redirects mounted $source before the Accounts product catch-all', ({
+      source,
+      destination,
+    }) => {
+      expect(findRedirect(source)).toMatchObject({
+        source,
+        destination: docsRouteDestination(destination, 'production'),
+        permanent: true,
+      })
+      expect(findRedirectIndex(source)).toBeLessThan(findRedirectIndex('/accounts/:path*'))
     })
   })
 

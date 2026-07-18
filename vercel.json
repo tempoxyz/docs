@@ -497,6 +497,21 @@
       "permanent": false
     },
     {
+      "source": "/accounts/server",
+      "destination": "https://tempo.xyz/developers/docs/server",
+      "permanent": true
+    },
+    {
+      "source": "/accounts/server/handler.feePayer",
+      "destination": "https://tempo.xyz/developers/docs/server/relay-handler#feepayer",
+      "permanent": true
+    },
+    {
+      "source": "/accounts/server/handler.relay",
+      "destination": "https://tempo.xyz/developers/docs/server/relay-handler",
+      "permanent": true
+    },
+    {
       "source": "/accounts",
       "destination": "https://accounts.tempo.xyz",
       "permanent": true
