@@ -4,6 +4,11 @@ export const normalizeProxiedRscFetch = `
 (() => {
   if (window.__tempoNormalizeProxiedRscFetch) return;
   window.__tempoNormalizeProxiedRscFetch = true;
+  if (window.location.hostname === 'docs.tempo.xyz') {
+    const suffix = window.location.pathname === '/' ? '' : window.location.pathname;
+    window.location.replace('https://tempo.xyz/developers' + suffix + window.location.search + window.location.hash);
+    return;
+  }
   const originalFetch = window.fetch.bind(window);
   window.fetch = (input, init) => {
     const url = typeof input === 'string'
