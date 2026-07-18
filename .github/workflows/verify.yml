@@ -56,6 +56,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max-old-space-size=4096
+          VERCEL_ENV: production
+
+      - name: Check generated public links
+        run: node scripts/check-generated-public-links.mjs
 
   ci-gate:
     name: CI Gate

@@ -253,8 +253,9 @@ async function markdownFiles(directory: string): Promise<string[]> {
       }),
     )
     return files.flat()
-  } catch {
-    return []
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []
+    throw error
   }
 }
 
@@ -270,8 +271,9 @@ async function filesWithExtension(directory: string, extension: string): Promise
       }),
     )
     return files.flat()
-  } catch {
-    return []
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []
+    throw error
   }
 }
 
@@ -280,8 +282,9 @@ async function prependFeedbackNotice(filePath: string) {
     const content = await fs.readFile(filePath, 'utf-8')
     if (content.startsWith(llmsFeedbackNotice)) return
     await fs.writeFile(filePath, `${llmsFeedbackNotice}${content}`, 'utf-8')
-  } catch {
-    return
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return
+    throw error
   }
 }
 
@@ -290,8 +293,9 @@ async function canonicalizeGeneratedLinksInFile(filePath: string) {
     const content = await fs.readFile(filePath, 'utf-8')
     const canonical = canonicalizeGeneratedDeveloperLinks(content)
     if (canonical !== content) await fs.writeFile(filePath, canonical, 'utf-8')
-  } catch {
-    return
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return
+    throw error
   }
 }
 
