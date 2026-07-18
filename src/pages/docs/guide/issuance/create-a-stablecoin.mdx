@@ -158,6 +158,12 @@ Tokens can also carry an optional on-chain [`logoURI`](/docs/protocol/tip20/spec
 The `currency` field is **immutable** after token creation and affects fee payment eligibility, DEX routing, and quote token pairing. See [Currency Declaration](/docs/protocol/tip20/overview#currency-declaration) for guidelines on choosing the right value. **Only `USD` stablecoins can be used to pay transaction fees on Tempo.**
 :::
 
+#### Issuing non-USD stablecoins
+
+Set `currency` to the reference asset the token tracks, not to the token symbol. For fiat-backed stablecoins, use the ISO 4217 code such as `USD`, `EUR`, `BRL`, or `MXN`; do not use `USD` unless 1 token is intended to track 1 US dollar.
+
+The SDK defaults `quoteToken` to [`pathUSD`](/docs/protocol/exchange/quote-tokens#pathusd). If you override it, use an already deployed TIP-20. `USD` tokens must use a `USD` quote token; non-`USD` TIP-20s can be issued with any deployed TIP-20 quote token, but they are not fee tokens and are not supported by native DEX trading today.
+
 <Demo.Container name="Create Form">
   <CreateToken stepNumber={1} last />
 </Demo.Container>
