@@ -49,19 +49,19 @@ describe('DocsJsonLd', () => {
     expect(website).toMatchObject({
       '@id': 'https://tempo.xyz/#website',
       name: 'Tempo',
-      alternateName: ['Tempo Blockchain', 'tempo.xyz'],
       url: 'https://tempo.xyz',
     })
+    expect(website).not.toHaveProperty('alternateName')
     expect(organization).toMatchObject({
       '@id': 'https://tempo.xyz/#organization',
       name: 'Tempo',
-      alternateName: ['Tempo Blockchain', 'tempo.xyz'],
       sameAs: expect.arrayContaining([
         'https://www.linkedin.com/company/tempo',
         'https://www.crunchbase.com/organization/tempo-24b7',
         'https://www.wikidata.org/wiki/Q140472934',
       ]),
     })
+    expect(organization).not.toHaveProperty('alternateName')
   })
 
   it.each([

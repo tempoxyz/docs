@@ -6,8 +6,6 @@ export const TEMPO_WEBSITE_ID = `${TEMPO_ORIGIN}/#website`
 export const TEMPO_ENTITY_DESCRIPTION =
   'Tempo is a payments-first Layer 1 blockchain incubated by Stripe and Paradigm. Tempo is built for stablecoin payments, global payouts, agentic payments, and enterprise settlement.'
 
-export const TEMPO_ALTERNATE_NAMES = ['Tempo Blockchain', 'tempo.xyz']
-
 export const TEMPO_SAME_AS = [
   'https://x.com/tempo',
   'https://twitter.com/tempo',
@@ -39,7 +37,6 @@ export function tempoOrganizationSchema() {
     '@type': 'Corporation',
     '@id': TEMPO_ORGANIZATION_ID,
     name: 'Tempo',
-    alternateName: TEMPO_ALTERNATE_NAMES,
     url: TEMPO_ORIGIN,
     logo: {
       '@type': 'ImageObject',
@@ -60,7 +57,6 @@ export function tempoWebsiteSchema() {
     '@type': 'WebSite',
     '@id': TEMPO_WEBSITE_ID,
     name: 'Tempo',
-    alternateName: TEMPO_ALTERNATE_NAMES,
     url: TEMPO_ORIGIN,
     description: TEMPO_ENTITY_DESCRIPTION,
     publisher: { '@id': TEMPO_ORGANIZATION_ID },
