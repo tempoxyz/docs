@@ -87,6 +87,37 @@ describe('docs routing redirects', () => {
     expect(vercelConfig.trailingSlash).toBe(false)
   })
 
+  describe('TIP index', () => {
+    it.each([
+      '/developers/docs/protocol/tips',
+      '/docs/protocol/tips',
+      '/protocol/tips',
+    ])('redirects %s to tips.sh at the edge', (source) => {
+      expect(findRedirect(source)).toMatchObject({
+        source,
+        destination: 'https://tips.sh/',
+        permanent: true,
+      })
+    })
+
+    it('does not generate a static meta-refresh page', () => {
+      expect(
+        fs.existsSync(path.join(process.cwd(), 'src/pages/docs/protocol/tips/index.mdx')),
+      ).toBe(false)
+    })
+
+    it('evaluates the exact redirects before legacy docs-host catch-alls', () => {
+      const firstTipRedirect = vercelConfig.redirects.findIndex(
+        (redirect) => redirect.source === '/developers/docs/protocol/tips' && !redirect.has,
+      )
+
+      for (const host of ['docs.tempo.xyz', 'next.docs.tempo.xyz']) {
+        expect(firstTipRedirect).toBeLessThan(findHostRedirectIndex('/developers/:path*', host))
+        expect(firstTipRedirect).toBeLessThan(findHostRedirectIndex('/:path*', host))
+      }
+    })
+  })
+
   describe('proxied legacy documentation routes', () => {
     it.each(proxiedLegacyDocsRoutes)('mirrors $source at the /developers mount', ({
       source,

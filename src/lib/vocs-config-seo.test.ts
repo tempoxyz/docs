@@ -60,4 +60,11 @@ describe('vocs.config docs SEO controls', () => {
     expect(lastmod('/docs/guide/payments/send-a-payment', context)).toBe(false)
     expect(lastmod('/blog/stablecoins-as-a-platform', context)).toBe('2026-07-07')
   })
+
+  test('links the TIP index directly to tips.sh', () => {
+    const sidebar = JSON.stringify(vocsConfig.sidebar)
+
+    expect(sidebar).toContain('https://tips.sh/')
+    expect(sidebar).not.toContain('"/docs/protocol/tips"')
+  })
 })

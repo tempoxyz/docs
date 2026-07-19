@@ -5,6 +5,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { loadSearchIndex, type SearchResult, searchDocs } from '../../search'
+import { developersPath } from '../_lib/developersPaths'
+
+export function searchResultHref(href: string): string {
+  return developersPath(href)
+}
 
 function SearchIcon() {
   return (
@@ -176,7 +181,7 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
     (result: SearchResult | undefined) => {
       if (!result) return
       onClose()
-      window.location.assign(result.href)
+      window.location.assign(searchResultHref(result.href))
     },
     [onClose],
   )

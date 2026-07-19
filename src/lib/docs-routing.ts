@@ -93,6 +93,10 @@ export const proxiedLegacyDocsRoutes = [
     destination: 'https://tempo.xyz/learn/tokenized-deposits/',
   },
   {
+    source: '/docs/protocol/tips',
+    destination: 'https://tips.sh/',
+  },
+  {
     source: '/docs/protocol/tips/tip-1028',
     destination: 'https://tips.sh/1028',
   },

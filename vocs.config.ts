@@ -902,7 +902,7 @@ export default defineConfig({
           },
           {
             text: 'TIPs',
-            link: '/docs/protocol/tips',
+            link: 'https://tips.sh/',
           },
         ],
       },

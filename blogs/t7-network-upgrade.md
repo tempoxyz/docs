@@ -78,4 +78,4 @@ See the [v1.10.1 release](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1
 - [Accept pay-as-you-go payments](/docs/guide/machine-payments/pay-as-you-go)
 - [v1.10.1 release](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1)
 - [Tempo on GitHub](https://github.com/tempoxyz)
-- [All TIPs](/docs/protocol/tips)
+- [All TIPs](https://tips.sh/)
