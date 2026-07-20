@@ -7,8 +7,7 @@ import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { vocs } from 'vocs/vite'
 import { canonicalizeGeneratedDeveloperLinks } from './src/lib/canonical-developer-links'
-import { finalizeSitemap } from './src/lib/sitemap'
-import { blogPostsPlugin, getBlogPostSlugs } from './src/marketing/blogPlugin'
+import { blogPostsPlugin } from './src/marketing/blogPlugin'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -235,7 +234,6 @@ function llmsFeedbackPreamble(): Plugin {
             [...new Set([...candidates, ...generatedPages])].map(canonicalizeGeneratedLinksInFile),
           )
         }
-        await finalizeGeneratedSitemap(path.join(publicDir, 'sitemap.xml'))
       },
     },
   }
@@ -293,17 +291,6 @@ async function canonicalizeGeneratedLinksInFile(filePath: string) {
     const content = await fs.readFile(filePath, 'utf-8')
     const canonical = canonicalizeGeneratedDeveloperLinks(content)
     if (canonical !== content) await fs.writeFile(filePath, canonical, 'utf-8')
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return
-    throw error
-  }
-}
-
-async function finalizeGeneratedSitemap(filePath: string) {
-  try {
-    const content = await fs.readFile(filePath, 'utf-8')
-    const finalized = finalizeSitemap(content, getBlogPostSlugs())
-    if (finalized !== content) await fs.writeFile(filePath, finalized, 'utf-8')
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return
     throw error
