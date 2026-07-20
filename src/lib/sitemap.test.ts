@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { finalizeSitemap } from './sitemap'
+import { finalizeSitemap, shouldIncludeInSitemap } from './sitemap'
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -44,5 +44,14 @@ describe('finalizeSitemap', () => {
     const result = finalizeSitemap(withoutBlogTemplate, ['t6'])
 
     expect(result).toContain('<loc>https://tempo.xyz/developers/blog/t6</loc>')
+  })
+})
+
+describe('shouldIncludeInSitemap', () => {
+  it('keeps concrete routes and excludes dynamic route templates', () => {
+    expect(shouldIncludeInSitemap('/blog/t7-network-upgrade')).toBe(true)
+    expect(shouldIncludeInSitemap('/docs/guide/payments')).toBe(true)
+    expect(shouldIncludeInSitemap('/blog/[slug]')).toBe(false)
+    expect(shouldIncludeInSitemap('/examples/[id]/details')).toBe(false)
   })
 })

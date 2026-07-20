@@ -1,6 +1,7 @@
 import { Changelog, defineConfig, Embedding, McpSource, Reranker, Retriever } from 'vocs/config'
 import { docsRouteDestination, proxiedLegacyDocsRoutes } from './src/lib/docs-routing'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
+import { shouldIncludeInSitemap } from './src/lib/sitemap'
 
 // Only set baseUrl in production — Vocs injects a <base> tag from this value,
 // which causes all links to resolve to the absolute URL on preview deployments.
@@ -114,6 +115,7 @@ export default defineConfig({
     },
   },
   sitemap: {
+    include: shouldIncludeInSitemap,
     lastmod: (path, { lastmod }) => {
       const pagePath = typeof path === 'string' ? path : '/'
       if (pagePath === '/docs' || pagePath.startsWith('/docs/')) return false
