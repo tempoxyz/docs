@@ -1,6 +1,10 @@
 const TEMPLATE_URL_PATTERN = /<url>\s*<loc>([^<]*\/\[[^\]]+\][^<]*)<\/loc>[\s\S]*?<\/url>\s*/g
 const LOCATION_PATTERN = /<loc>([^<]+)<\/loc>/g
 
+export function shouldIncludeInSitemap(path: string): boolean {
+  return !/\/\[[^\]]+\](?:\/|$)/.test(path)
+}
+
 export function finalizeSitemap(sitemap: string, blogPostSlugs: readonly string[]): string {
   let blogBaseUrl: string | undefined
 
