@@ -9,8 +9,8 @@ import { unified } from 'unified'
 import type { Plugin } from 'vite'
 
 // Blog content lives as dev-managed markdown files in /blogs at the repo root.
-// Frontmatter schema: title, excerpt, date (YYYY-MM-DD), category, and an
-// optional `featured: true` to pin a post to the hero card.
+// Frontmatter schema: title, excerpt, date (YYYY-MM-DD), category, optional
+// authors, and an optional `featured: true` to pin a post to the hero card.
 //
 // Markdown is rendered to HTML here, in Node, at build/dev time, so the heavy
 // markdown + Shiki toolchain never ships to the client bundle. The rendered
@@ -52,6 +52,7 @@ export type RenderedPost = {
   excerpt: string
   date: string
   category: string
+  authors: string
   featured: boolean
   html: string
 }
@@ -123,6 +124,7 @@ async function renderPost(filename: string): Promise<RenderedPost> {
     excerpt: data.excerpt,
     date: data.date,
     category: data.category,
+    authors: data.authors ?? '',
     featured: data.featured === 'true',
     html,
   }
