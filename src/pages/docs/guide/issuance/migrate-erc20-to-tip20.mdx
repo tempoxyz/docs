@@ -3,7 +3,7 @@ title: Migrate an ERC-20 to TIP-20
 description: Map an existing OpenZeppelin ERC-20 architecture to native TIP-20 issuance, bridging, lifecycle management, roles, burns, decimals, and TIP-403 policies.
 ---
 
-import { MermaidDiagram } from '../../../../components/MermaidDiagram'
+import { StaticMermaidDiagram } from '../../../../components/StaticMermaidDiagram'
 
 # Migrate an ERC-20 to TIP-20
 
@@ -37,7 +37,7 @@ Use this guide if your current token uses:
 
 ## 2. Review the recommended deployment flow
 
-<MermaidDiagram chart={`sequenceDiagram
+<StaticMermaidDiagram chart={`sequenceDiagram
     participant Issuer as Issuer ops
     participant Admin as TIP-20 admin wallet
     participant Factory as TIP20Factory
@@ -277,7 +277,7 @@ Each TIP-403 simple policy has one admin address. A compliance sync service must
 
 ### Follow the compliance flow
 
-<MermaidDiagram chart={`sequenceDiagram
+<StaticMermaidDiagram chart={`sequenceDiagram
     participant Compliance as Issuer compliance system
     participant Updater as Simple-policy admin / sync signer
     participant Registry as TIP-403 registry
