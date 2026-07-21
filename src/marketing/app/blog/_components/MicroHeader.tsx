@@ -397,16 +397,23 @@ export default function MicroHeader({ title, links }: { title: string; links: Mi
           }}
         />
 
-        {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="blog-micro-segment"
-            onMouseEnter={moveWash}
-          >
-            {link.label}
-          </Link>
-        ))}
+        <span
+          className="blog-micro-title"
+          data-shown={expanded || undefined}
+          aria-hidden={expanded ? undefined : true}
+        >
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="blog-micro-segment"
+              tabIndex={expanded ? undefined : -1}
+              onMouseEnter={moveWash}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </span>
 
         {readMinutes > 0 && (
           <span className="blog-micro-readtime-slot" data-shown={readTimeShown || undefined}>
@@ -443,7 +450,7 @@ export default function MicroHeader({ title, links }: { title: string; links: Mi
           </button>
         </span>
 
-        <span className="blog-micro-title" data-shown={expanded || undefined}>
+        <span className="blog-micro-title" data-shown>
           <span className="blog-micro-crumbs" data-direction={direction}>
             {previousSection && (
               <>
