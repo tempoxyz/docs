@@ -1,0 +1,368 @@
+.blog-micro-header {
+  --blog-micro-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  position: fixed;
+  bottom: 14px;
+  left: 50%;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  max-width: calc(100vw - 32px);
+  padding: 0 6px;
+  transform: translateX(-50%);
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-shell) 84%, transparent);
+  box-shadow:
+    0 12px 32px rgb(0 0 0 / 28%),
+    0 3px 10px rgb(0 0 0 / 20%);
+  color: var(--foreground);
+  font-family: var(--font-pilat-book), ui-sans-serif, system-ui, sans-serif;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.blog-micro-segment {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: none;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: color-mix(in srgb, var(--foreground) 78%, transparent);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 200ms ease,
+    transform 160ms var(--blog-micro-ease);
+}
+
+.blog-micro-segment:hover {
+  color: var(--foreground);
+}
+
+.blog-micro-segment:active {
+  transform: scale(0.96);
+}
+
+.blog-micro-segment:focus-visible,
+.blog-micro-menu button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--foreground) 55%, transparent);
+  outline-offset: 1px;
+}
+
+.blog-micro-wash {
+  position: absolute;
+  top: calc(50% - 14px);
+  left: -1px;
+  height: 28px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.blog-micro-title {
+  display: inline-block;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  white-space: nowrap;
+  transition:
+    max-width 320ms var(--blog-micro-ease),
+    opacity 220ms ease;
+}
+
+.blog-micro-title[data-shown] {
+  max-width: min(620px, 62vw);
+  opacity: 1;
+}
+
+.blog-micro-top {
+  padding: 0 10px;
+  color: color-mix(in srgb, var(--foreground) 48%, transparent);
+}
+
+.blog-micro-crumbs {
+  display: flex;
+  align-items: center;
+}
+
+.blog-micro-crumb {
+  overflow: hidden;
+}
+
+.blog-micro-crumb-side {
+  display: block;
+  max-width: 130px;
+  padding: 0 8px;
+  overflow: hidden;
+  color: color-mix(in srgb, var(--foreground) 42%, transparent);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition:
+    max-width 280ms var(--blog-micro-ease),
+    color 200ms ease;
+}
+
+.blog-micro-crumb-side:hover {
+  color: color-mix(in srgb, var(--foreground) 76%, transparent);
+}
+
+.blog-micro-crumb-current {
+  max-width: min(280px, 34vw);
+  color: color-mix(in srgb, var(--foreground) 80%, transparent);
+  font-weight: 600;
+  transition:
+    max-width 280ms var(--blog-micro-ease),
+    transform 160ms var(--blog-micro-ease);
+}
+
+.blog-micro-chevron {
+  flex: none;
+  margin-left: 7px;
+  color: color-mix(in srgb, var(--foreground) 42%, transparent);
+  transition: transform 200ms var(--blog-micro-ease);
+}
+
+.blog-micro-crumb-current[aria-expanded="true"] .blog-micro-chevron {
+  transform: rotate(180deg);
+}
+
+.blog-micro-crumb-separator {
+  flex: none;
+  color: color-mix(in srgb, var(--foreground) 30%, transparent);
+}
+
+.blog-micro-live-label,
+.blog-micro-label-swap {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  animation: blog-micro-label-swap 320ms var(--blog-micro-ease);
+}
+
+.blog-micro-crumbs[data-direction="1"] {
+  --blog-micro-swap-x: 32px;
+}
+
+.blog-micro-crumbs[data-direction="-1"] {
+  --blog-micro-swap-x: -32px;
+}
+
+@keyframes blog-micro-label-swap {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translate(var(--blog-micro-swap-x, 0), 2px);
+  }
+}
+
+.blog-micro-readtime-slot {
+  order: 1;
+  display: inline-flex;
+  align-items: center;
+  max-width: 0;
+  overflow: hidden;
+  transition: max-width 420ms var(--blog-micro-ease);
+}
+
+.blog-micro-readtime-slot[data-shown] {
+  max-width: 72px;
+}
+
+.blog-micro-segment.blog-micro-readtime {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  color: color-mix(in srgb, var(--foreground) 76%, transparent);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: default;
+  opacity: 0;
+  transform: scale(0.9);
+  transition:
+    opacity 300ms ease,
+    transform 420ms var(--blog-micro-ease);
+}
+
+.blog-micro-readtime-slot[data-shown] .blog-micro-readtime {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.blog-micro-segment.blog-micro-readtime:active {
+  transform: scale(1);
+}
+
+.blog-micro-readtime-number {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.blog-micro-readtime-ring {
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.blog-micro-menu {
+  position: fixed;
+  bottom: 64px;
+  left: 50%;
+  z-index: 59;
+  display: flex;
+  flex-direction: column;
+  min-width: 250px;
+  max-width: min(360px, calc(100vw - 32px));
+  max-height: min(420px, 62vh);
+  padding: 6px;
+  overflow-y: auto;
+  transform: translateX(-50%);
+  transform-origin: bottom center;
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--surface-shell) 90%, transparent);
+  box-shadow: 0 18px 46px rgb(0 0 0 / 28%);
+  font-family: var(--font-pilat-book), ui-sans-serif, system-ui, sans-serif;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  animation: blog-micro-menu-in 200ms var(--blog-micro-ease);
+}
+
+@keyframes blog-micro-menu-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px) scale(0.97);
+  }
+}
+
+.blog-micro-menu button {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 13px;
+  background: none;
+  color: color-mix(in srgb, var(--foreground) 76%, transparent);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.blog-micro-menu button:hover,
+.blog-micro-menu button:focus-visible {
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+  color: var(--foreground);
+}
+
+.blog-micro-menu button[data-active] {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.blog-micro-menu-tick {
+  flex: none;
+  width: 14px;
+  height: 2px;
+  background: color-mix(in srgb, var(--foreground) 25%, transparent);
+  transition: background-color 150ms ease;
+}
+
+.blog-micro-menu button[data-active] .blog-micro-menu-tick {
+  background: var(--foreground);
+}
+
+.blog-micro-menu-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.blog-prose h2 {
+  scroll-margin-top: 24px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .blog-micro-crumb-side:hover {
+    max-width: 340px;
+  }
+
+  .blog-micro-crumb-current:hover {
+    max-width: min(460px, 50vw);
+  }
+}
+
+@media (max-width: 900px) {
+  .blog-micro-crumb-side,
+  .blog-micro-crumb-separator {
+    display: none;
+  }
+
+  .blog-micro-title[data-shown] {
+    max-width: min(420px, 58vw);
+  }
+
+  .blog-micro-crumb-current {
+    max-width: min(250px, 43vw);
+  }
+}
+
+@media (max-width: 540px) {
+  .blog-micro-header {
+    bottom: max(10px, env(safe-area-inset-bottom));
+    max-width: calc(100vw - 20px);
+  }
+
+  .blog-micro-title[data-shown] {
+    max-width: 58vw;
+  }
+
+  .blog-micro-top {
+    padding: 0 8px;
+  }
+
+  .blog-micro-crumb-current {
+    max-width: 42vw;
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .blog-micro-menu {
+    bottom: calc(max(10px, env(safe-area-inset-bottom)) + 50px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blog-micro-title,
+  .blog-micro-readtime-slot,
+  .blog-micro-header .blog-micro-readtime-slot .blog-micro-readtime,
+  .blog-micro-crumb-side,
+  .blog-micro-crumb-current {
+    transition: none;
+  }
+
+  .blog-micro-live-label,
+  .blog-micro-label-swap,
+  .blog-micro-menu {
+    animation: none;
+  }
+}

@@ -3,6 +3,7 @@ import Footer from '../../_components/Footer'
 import Header from '../../_components/Header'
 import Reveal from '../../_components/Reveal'
 import { developersPath } from '../../_lib/developersPaths'
+import MicroHeader from '../_components/MicroHeader'
 import { categoryBySlug, formatDate, isNew } from '../_lib/categories'
 import { getPost } from '../_lib/posts'
 
@@ -35,8 +36,12 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     <main className="min-h-screen w-full bg-surface-page">
       <div className="mx-auto w-full max-w-7xl border-line border-x bg-surface-shell">
         <Header />
+        <MicroHeader
+          title={post.title}
+          links={[{ href: developersPath('/blog'), label: 'Blog' }]}
+        />
 
-        <article className="mx-auto w-full max-w-[760px] px-5 pt-14 lg:pt-20">
+        <article className="mx-auto w-full max-w-[760px] px-5 pt-14 lg:pt-20" data-blog-article>
           <Reveal>
             <Link
               href={developersPath('/blog')}
@@ -64,7 +69,10 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               )}
             </div>
 
-            <h1 className="mt-5 font-sans text-[clamp(2rem,5vw,3rem)] text-foreground leading-[1.1] tracking-[-0.02em] antialiased">
+            <h1
+              className="mt-5 font-sans text-[clamp(2rem,5vw,3rem)] text-foreground leading-[1.1] tracking-[-0.02em] antialiased"
+              data-blog-title
+            >
               {post.title}
             </h1>
 
@@ -77,7 +85,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               HTML at build time, so raw HTML injection here is trusted. */}
           <Reveal delay={100} className="blog-prose mt-12 border-line border-t pt-10">
             {/* biome-ignore lint/security/noDangerouslySetInnerHtml: trusted build-time markdown */}
-            <div dangerouslySetInnerHTML={{ __html: post.html }} />
+            <div data-blog-content dangerouslySetInnerHTML={{ __html: post.html }} />
           </Reveal>
         </article>
 
