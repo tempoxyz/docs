@@ -11,6 +11,7 @@ export type PostSeo = {
   excerpt: string
   date: string // YYYY-MM-DD
   category: CategorySlug
+  authors: string
 }
 
 // Mirrors the baseUrl resolution in vocs.config.ts so canonical and OG URLs are
@@ -53,6 +54,11 @@ export function blogPostJsonLd(base: string, post: PostSeo, ogImage: string): st
     url: base || 'https://tempo.xyz',
     logo: { '@type': 'ImageObject', url: absoluteUrl(base, '/icon-dark.png') },
   }
+  const authors = post.authors
+    .split('/')
+    .map((name) => name.trim())
+    .filter(Boolean)
+    .map((name) => ({ '@type': 'Person', name }))
   return JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -64,7 +70,7 @@ export function blogPostJsonLd(base: string, post: PostSeo, ogImage: string): st
     url,
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
     articleSection: categoryBySlug(post.category).label,
-    author: publisher,
+    author: authors.length ? authors : publisher,
     publisher,
   })
 }

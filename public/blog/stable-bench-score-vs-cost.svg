@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="600" viewBox="0 0 980 700" fill="none" font-family="ui-monospace, 'JetBrains Mono', monospace" role="img" aria-labelledby="title desc">
+  <title id="title">Stable Bench score / cost</title>
+  <desc id="desc">Aggregate Stable Bench score and cost. Solid lines are documentation-only runs; dotted lines are runs with the Tempo MCP server.</desc>
+  <style>
+    .page { fill: var(--diagram-bg, transparent); } .ink { fill: currentColor; } .muted { fill: currentColor; opacity: .4; }
+    .subtitle, .axis-label, .tick, .key, .point-label { font: 400 12px ui-monospace, 'JetBrains Mono', monospace; }
+    .axis { stroke: var(--diagram-line, currentColor); stroke-width: 1; } .grid { stroke: var(--diagram-line-soft, currentColor); stroke-width: 1; }
+    .leader { stroke: var(--diagram-line, currentColor); stroke-width: 1; opacity: .6; } .claude { stroke: currentColor; fill: currentColor; opacity: .8; }
+    .label-background { fill: var(--diagram-bg, transparent); } .gpt { stroke: currentColor; fill: currentColor; opacity: .45; }
+    .docs { fill: none; stroke-width: 2.25; } .mcp { fill: none; stroke: var(--diagram-accent, currentColor); stroke-width: 2.25; stroke-dasharray: 1 6; stroke-linecap: round; opacity: 1; }
+    .line-point { stroke: var(--diagram-bg, currentColor); stroke-width: 2; } .dot { stroke-width: 2; }
+  </style>
+  <rect class="page" width="980" height="700"/>
+
+  <line x1="90" y1="610" x2="900" y2="610" class="axis"/>
+  <line x1="90" y1="80" x2="90" y2="610" class="axis"/>
+  <g class="grid"><line x1="90" y1="610" x2="900" y2="610"/><line x1="90" y1="483.8" x2="900" y2="483.8"/><line x1="90" y1="357.6" x2="900" y2="357.6"/><line x1="90" y1="231.4" x2="900" y2="231.4"/><line x1="90" y1="105.2" x2="900" y2="105.2"/></g>
+  <g class="tick muted"><text x="55" y="614">0.00</text><text x="55" y="487.8">0.25</text><text x="55" y="361.6">0.50</text><text x="55" y="235.4">0.75</text><text x="55" y="109.2">1.00</text><text x="86" y="632">$0</text><text x="233.3" y="632">$10</text><text x="380.5" y="632">$20</text><text x="527.8" y="632">$30</text><text x="675.1" y="632">$40</text><text x="822.4" y="632">$50</text></g>
+  <text x="495" y="670" text-anchor="middle" class="axis-label ink">AGGREGATE COST (USD)</text>
+  <text transform="translate(23 385) rotate(-90)" text-anchor="middle" class="axis-label ink">STABLE BENCH SCORE</text>
+  <path d="M267.4 479.1 C411.5 479.1 555.6 123.9 699.6 123.9 C731.9 123.9 764.2 105.2 796.5 105.2 C816.1 105.2 835.7 105.2 855.3 105.2" class="claude docs"/>
+  <path d="M233.9 385.7 C368 385.7 502.2 105.2 636.3 105.2 C637.6 105.2 638.8 123.9 640 123.9 C700.6 123.9 761.3 105.2 821.9 105.2" class="claude mcp"/>
+  <path d="M200.7 142.6 C235.2 142.6 269.6 105.2 304.1 105.2 C309.8 105.2 315.6 105.2 321.3 105.2 C379.3 105.2 437.4 105.2 495.4 105.2" class="gpt docs"/>
+  <path d="M184.7 105.2 C221.6 105.2 258.5 123.9 295.5 123.9 C298.5 123.9 301.5 105.2 304.6 105.2 C369.8 105.2 435 123.9 500.3 123.9" class="gpt mcp"/>
+  <g class="claude line-point"><circle cx="855.3" cy="105.2" r="5.5"/><circle cx="267.4" cy="479.1" r="5.5"/><circle cx="699.6" cy="123.9" r="5.5"/><circle cx="796.5" cy="105.2" r="5.5"/><circle cx="821.9" cy="105.2" r="5.5"/><circle cx="233.9" cy="385.7" r="5.5"/><circle cx="640" cy="123.9" r="5.5"/><circle cx="636.3" cy="105.2" r="5.5"/></g>
+  <g class="gpt line-point"><circle cx="304.1" cy="105.2" r="5.5"/><circle cx="200.7" cy="142.6" r="5.5"/><circle cx="495.4" cy="105.2" r="5.5"/><circle cx="321.3" cy="105.2" r="5.5"/><circle cx="295.5" cy="123.9" r="5.5"/><circle cx="184.7" cy="105.2" r="5.5"/><circle cx="500.3" cy="123.9" r="5.5"/><circle cx="304.6" cy="105.2" r="5.5"/></g>
+  <g class="leader"><line x1="184.7" y1="105.2" x2="190" y2="83"/><line x1="200.7" y1="142.6" x2="206" y2="120"/><line x1="233.9" y1="385.7" x2="239" y2="363"/><line x1="267.4" y1="479.1" x2="273" y2="457"/><line x1="295.5" y1="123.9" x2="301" y2="139"/><line x1="304.1" y1="105.2" x2="326" y2="61"/><line x1="304.6" y1="105.2" x2="298" y2="83"/><line x1="321.3" y1="105.2" x2="327" y2="175"/><line x1="495.4" y1="105.2" x2="501" y2="83"/><line x1="500.3" y1="123.9" x2="506" y2="139"/><line x1="636.3" y1="105.2" x2="642" y2="83"/><line x1="640" y1="123.9" x2="646" y2="139"/><line x1="699.6" y1="123.9" x2="705" y2="175"/><line x1="796.5" y1="105.2" x2="802" y2="83"/><line x1="821.9" y1="105.2" x2="827" y2="121"/><line x1="855.3" y1="105.2" x2="849" y2="157"/></g>
+  <g class="label-background"><rect x="191" y="74" width="60" height="17"/><rect x="207" y="111" width="60" height="17"/><rect x="240" y="354" width="69" height="17"/><rect x="274" y="448" width="69" height="17"/><rect x="302" y="136" width="62" height="17"/><rect x="327" y="52" width="62" height="17"/><rect x="256" y="74" width="68" height="17"/><rect x="328" y="172" width="68" height="17"/><rect x="502" y="74" width="53" height="17"/><rect x="507" y="136" width="53" height="17"/><rect x="643" y="74" width="62" height="17"/><rect x="647" y="136" width="62" height="17"/><rect x="706" y="172" width="62" height="17"/><rect x="803" y="74" width="62" height="17"/><rect x="828" y="118" width="55" height="17"/><rect x="793" y="154" width="55" height="17"/></g>
+  <g class="point-label ink"><text x="194" y="87">GPT LUNA</text><text x="210" y="124">GPT LUNA</text><text x="243" y="367">HAIKU 4.5</text><text x="277" y="461">HAIKU 4.5</text><text x="305" y="149">GPT MINI</text><text x="330" y="65">GPT MINI</text><text x="259" y="87">GPT TERRA</text><text x="331" y="185">GPT TERRA</text><text x="505" y="87">GPT SOL</text><text x="510" y="149">GPT SOL</text><text x="646" y="87">SONNET 5</text><text x="650" y="149">OPUS 4.8</text><text x="709" y="185">OPUS 4.8</text><text x="806" y="87">SONNET 5</text><text x="831" y="131">FABLE 5</text><text x="796" y="167">FABLE 5</text></g>
+  <g class="key"><line x1="650" y1="578" x2="680" y2="578" class="axis docs"/><text x="688" y="582" class="ink">DOCS</text><line x1="762" y1="578" x2="792" y2="578" class="mcp"/><text x="800" y="582" class="ink">MCP</text></g>
+</svg>

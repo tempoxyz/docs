@@ -9,6 +9,7 @@ declare module 'virtual:blog-posts' {
     excerpt: string
     date: string
     category: string
+    authors: string
     featured: boolean
     html: string
   }[]

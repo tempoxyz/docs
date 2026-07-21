@@ -17,6 +17,7 @@ export type PostMeta = {
   excerpt: string
   date: string
   category: CategorySlug
+  authors: string
   featured: boolean
 }
 

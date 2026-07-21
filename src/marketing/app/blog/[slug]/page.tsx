@@ -52,6 +52,11 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               <span className="font-mono text-[12px] text-foreground/40 uppercase tracking-[0.02em]">
                 {formatDate(post.date)}
               </span>
+              {post.authors && (
+                <span className="font-mono text-[12px] text-foreground/40 uppercase tracking-[0.02em]">
+                  By {post.authors}
+                </span>
+              )}
               {isNew(post.date) && (
                 <span className="whitespace-nowrap border border-indicator-green px-2.5 py-[3px] font-mono text-[11px] text-indicator-green uppercase tracking-[0.02em]">
                   New
