@@ -40,7 +40,7 @@ export const goldenCases = [
 ] as const
 
 const apiDir = new URL('../src/pages/_api/api/', import.meta.url)
-const outputDir = new URL('../src/pages/_api/api/__goldens__/', import.meta.url)
+const outputDir = new URL('../src/lib/og-goldens/', import.meta.url)
 
 async function asset(path: string): Promise<ArrayBuffer> {
   const bytes = await readFile(new URL(path, apiDir))

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { layoutTitle } from './og-layout'
+import { layoutTitle } from '../pages/_api/api/og-layout'
 
 describe('layoutTitle', () => {
   test.each([
