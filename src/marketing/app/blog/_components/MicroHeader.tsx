@@ -72,8 +72,8 @@ function ProgressRing({
     <svg className={className} width={boxWidth} height={boxHeight} style={style} aria-hidden="true">
       <defs>
         <linearGradient id={`${uid}-ink`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#b87333" />
-          <stop offset="100%" stopColor="#4682b4" />
+          <stop offset="0%" stopColor="var(--vocs-color-accent)" stopOpacity={0.42} />
+          <stop offset="100%" stopColor="var(--vocs-color-accent)" />
         </linearGradient>
         <filter id={`${uid}-glow`} x="-60%" y="-60%" width="220%" height="220%">
           <feGaussianBlur stdDeviation={glow} />
