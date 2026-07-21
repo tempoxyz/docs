@@ -7,9 +7,9 @@
  * Cache-buster appended to /api/og URLs — bump when the OG image design
  * changes. The generated images are served with a year-long immutable
  * Cache-Control, so a design change *must* bump this. vocs.config.ts carries
- * an inline copy (`v: '2'`) that og-sections.test.ts keeps in sync.
+ * an inline copy (`v: '3'`) that og-sections.test.ts keeps in sync.
  */
-export const OG_IMAGE_VERSION = '2'
+export const OG_IMAGE_VERSION = '3'
 
 /** Routes (after stripping the `/docs` prefix) that use the static landing image. */
 export const ogLandingPaths = ['/', '/changelog']

@@ -3,69 +3,7 @@ import wasmModule from '@takumi-rs/wasm/takumi_wasm_bg.wasm?arraybuffer'
 import hbSetFont from './fonts/HBSet-Light.otf?arraybuffer'
 import pilatFont from './fonts/Pilat-Regular.otf?arraybuffer'
 import bgImageBuf from './og-bg.png?arraybuffer'
-
-function getTitleFontSize(_title: string): number {
-  return 105
-}
-
-/**
- * Split title into balanced lines so no single word is orphaned.
- * Finds the word-boundary split closest to the midpoint of the string.
- */
-function balanceLines(text: string, fontSize: number): string[] {
-  const words = text.split(' ')
-  if (words.length <= 2) return [text]
-
-  const maxWidth = 960
-  const avgCharWidth = fontSize * 0.58
-  const charsPerLine = Math.floor(maxWidth / avgCharWidth)
-
-  if (text.length <= charsPerLine) return [text]
-
-  const needsThreeLines = text.length > charsPerLine * 2
-
-  if (needsThreeLines) {
-    const target = text.length / 3
-    let bestI = 0
-    let bestJ = 1
-    let bestScore = Number.POSITIVE_INFINITY
-    for (let i = 0; i < words.length - 2; i++) {
-      const line1 = words.slice(0, i + 1).join(' ')
-      for (let j = i + 1; j < words.length - 1; j++) {
-        const line2 = words.slice(i + 1, j + 1).join(' ')
-        const line3 = words.slice(j + 1).join(' ')
-        const score =
-          Math.abs(line1.length - target) +
-          Math.abs(line2.length - target) +
-          Math.abs(line3.length - target)
-        if (score < bestScore) {
-          bestScore = score
-          bestI = i
-          bestJ = j
-        }
-      }
-    }
-    return [
-      words.slice(0, bestI + 1).join(' '),
-      words.slice(bestI + 1, bestJ + 1).join(' '),
-      words.slice(bestJ + 1).join(' '),
-    ]
-  }
-
-  let bestSplit = 0
-  let bestDiff = Number.POSITIVE_INFINITY
-  for (let i = 0; i < words.length - 1; i++) {
-    const left = words.slice(0, i + 1).join(' ')
-    const right = words.slice(i + 1).join(' ')
-    const diff = Math.abs(left.length - right.length)
-    if (diff < bestDiff) {
-      bestDiff = diff
-      bestSplit = i
-    }
-  }
-
-  return [words.slice(0, bestSplit + 1).join(' '), words.slice(bestSplit + 1).join(' ')]
-}
+import { layoutTitle } from './og-layout'
 
 export default async function handler(request: Request) {
   const url = new URL(request.url)
@@ -75,7 +13,7 @@ export default async function handler(request: Request) {
 
   const hasSubsection = !!subsection
 
-  const fontSize = getTitleFontSize(title)
+  const { lines, fontSize } = layoutTitle(title)
 
   const bgBytes = new Uint8Array(bgImageBuf)
   let bgBinary = ''
@@ -186,7 +124,7 @@ export default async function handler(request: Request) {
             padding: '0 40px',
           }}
         >
-          {balanceLines(title, fontSize).map((line) => (
+          {lines.map((line) => (
             <div
               key={line}
               style={{
