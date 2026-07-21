@@ -9,7 +9,11 @@ let sitemap: string
 try {
   sitemap = await fs.readFile(sitemapPath, 'utf-8')
 } catch (error) {
-  if (process.env.VITE_E2E === 'true' && (error as NodeJS.ErrnoException).code === 'ENOENT') {
+  const isMissingSitemap = (error as NodeJS.ErrnoException).code === 'ENOENT'
+  const canSkipMissingSitemap =
+    process.env.VITE_E2E === 'true' || process.env.VERCEL_ENV !== 'production'
+
+  if (isMissingSitemap && canSkipMissingSitemap) {
     process.exit(0)
   }
   throw error
