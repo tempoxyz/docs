@@ -127,6 +127,14 @@
     transform 160ms var(--blog-micro-ease);
 }
 
+.blog-micro-post-title {
+  cursor: default;
+}
+
+.blog-micro-post-title:active {
+  transform: none;
+}
+
 .blog-micro-chevron {
   flex: none;
   margin-left: 7px;

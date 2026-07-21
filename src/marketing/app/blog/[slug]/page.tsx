@@ -36,10 +36,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     <main className="min-h-screen w-full bg-surface-page">
       <div className="mx-auto w-full max-w-7xl border-line border-x bg-surface-shell">
         <Header />
-        <MicroHeader
-          title={post.title}
-          links={[{ href: developersPath('/blog'), label: 'Blog' }]}
-        />
+        <MicroHeader title={post.title} />
 
         <article className="mx-auto w-full max-w-[760px] px-5 pt-14 lg:pt-20" data-blog-article>
           <Reveal>

@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import {
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
@@ -10,11 +9,6 @@ import {
   useState,
 } from 'react'
 import './MicroHeader.css'
-
-type MicroHeaderLink = {
-  href: string
-  label: string
-}
 
 type Section = {
   id: string
@@ -110,7 +104,7 @@ function ProgressRing({
  * It tracks the article's H2 sections and keeps reading progress available
  * after the primary site navigation has scrolled away.
  */
-export default function MicroHeader({ title, links }: { title: string; links: MicroHeaderLink[] }) {
+export default function MicroHeader({ title }: { title: string }) {
   const ringId = useId().replace(/:/g, '')
   const [expanded, setExpanded] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -398,21 +392,10 @@ export default function MicroHeader({ title, links }: { title: string; links: Mi
         />
 
         <span
-          className="blog-micro-title"
-          data-shown={expanded || undefined}
-          aria-hidden={expanded ? undefined : true}
+          className="blog-micro-segment blog-micro-crumb blog-micro-crumb-current blog-micro-post-title"
+          title={title}
         >
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="blog-micro-segment"
-              tabIndex={expanded ? undefined : -1}
-              onMouseEnter={moveWash}
-            >
-              {link.label}
-            </Link>
-          ))}
+          <span className="blog-micro-live-label">{title}</span>
         </span>
 
         {readMinutes > 0 && (
@@ -450,7 +433,7 @@ export default function MicroHeader({ title, links }: { title: string; links: Mi
           </button>
         </span>
 
-        <span className="blog-micro-title" data-shown>
+        <span className="blog-micro-title" data-shown={activeIndex >= 0 || undefined}>
           <span className="blog-micro-crumbs" data-direction={direction}>
             {previousSection && (
               <>
