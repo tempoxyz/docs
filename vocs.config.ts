@@ -199,7 +199,7 @@ export default defineConfig({
     const extra = new URLSearchParams({
       section,
       ...(subsection ? { subsection } : {}),
-      v: '2',
+      v: '3',
     }).toString()
 
     return `${urlBase}/api/og?title=%title&${extra}`
