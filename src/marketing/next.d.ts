@@ -14,6 +14,16 @@ declare module 'virtual:blog-posts' {
   }[]
 }
 
+declare module 'virtual:blog-search-documents' {
+  export const documents: {
+    slug: string
+    title: string
+    excerpt: string
+    category: string
+    searchText: string
+  }[]
+}
+
 declare module 'next/link' {
   export { default } from './next-shims'
 }
