@@ -1,13 +1,13 @@
 ---
 title: Tempo Policy Registry (TIP-403) Specification
-description: Technical specification for the Tempo Policy Registry (TIP-403), enabling whitelist and blacklist access control for TIP-20 tokens on Tempo.
+description: Technical specification for the Tempo Policy Registry (TIP-403), enabling whitelist, blacklist, and compound access control for TIP-20 tokens on Tempo.
 ---
 
 # Tempo Policy Registry (TIP-403) Specification
 
 ## Abstract
 
-The Tempo Policy Registry (TIP-403) allows TIP-20 tokens to inherit access control and compliance policies. The registry supports two types of policies (whitelist and blacklist) and includes special built-in policies for common use cases. Policies can be shared across multiple tokens, enabling consistent compliance enforcement.
+The Tempo Policy Registry (TIP-403) allows TIP-20 tokens to inherit access control and compliance policies. The registry supports whitelist, blacklist, and compound policies, and includes special built-in policies for common use cases. Policies can be shared across multiple tokens, enabling consistent compliance enforcement.
 
 ## Motivation
 
@@ -19,7 +19,7 @@ TIP-403 addresses this by providing a centralized registry that tokens can refer
 
 # Specification
 
-The TIP-403 registry stores policies that TIP-20 tokens check against on any token transfer. Policies are associated with a unique `policyId`, can either be a blacklist or a whitelist policy, and contain a list of addresses. This list of addresses can be updated by the policy `admin`.
+The TIP-403 registry stores policies that TIP-20 tokens check against on token transfers and mints. Policies are associated with a unique `policyId`. A policy can be a whitelist, blacklist, or compound policy. Whitelist and blacklist policies contain a list of addresses that can be updated by the policy `admin`. Compound policies reference three simple policies: one for transfer senders, one for transfer recipients, and one for mint recipients.
 
 The TIP403Registry is deployed at address `0x403c000000000000000000000000000000000000`.
 
@@ -33,17 +33,18 @@ The `policyIdCounter` starts at `2` and increments with each new policy creation
 
 ## Policy Types
 
-TIP-403 supports two policy types:
+TIP-403 supports three policy types:
 
 * **Whitelist Policies:** Only addresses in the whitelist can transfer tokens. All other addresses are blocked
 * **Blacklist Policies:** Addresses in the blacklist are blocked from transferring tokens. All other addresses can transfer
+* **Compound Policies:** A policy that references separate simple policies for sender, recipient, and mint-recipient checks. Compound policy references are immutable once created, but the referenced simple policies remain mutable by their admins
 
 ## Storage and State
 
 The registry maintains the following state:
 
 - `policyIdCounter`: Starts at `2`, increments with each new policy creation. Returns the next policy ID that will be assigned.
-- `policyData`: Mapping from `policyId` to `PolicyData` struct containing policy type and admin address.
+- `policyRecords`: Internal mapping from `policyId` to `PolicyRecord` struct containing base policy data and optional compound policy data.
 - `policySet`: Internal mapping from `policyId` to address to boolean, tracking which addresses are in each policy's set.
 
 ## Interface Definition
@@ -58,12 +59,19 @@ interface ITIP403Registry {
 
     enum PolicyType {
         WHITELIST,
-        BLACKLIST
+        BLACKLIST,
+        COMPOUND
     }
 
     struct PolicyData {
         PolicyType policyType;
         address admin;
+    }
+
+    struct CompoundPolicyData {
+        uint64 senderPolicyId;
+        uint64 recipientPolicyId;
+        uint64 mintRecipientPolicyId;
     }
 
     // =========================================================================
@@ -93,6 +101,20 @@ interface ITIP403Registry {
         address admin,
         PolicyType policyType,
         address[] calldata accounts
+    ) external returns (uint64 newPolicyId);
+
+    /// @notice Creates a new compound policy from existing simple policies
+    /// @param senderPolicyId Policy ID checked for transfer senders
+    /// @param recipientPolicyId Policy ID checked for transfer recipients
+    /// @param mintRecipientPolicyId Policy ID checked for mint recipients
+    /// @return newPolicyId ID of the newly created compound policy
+    /// @dev All three referenced policies must exist and must be simple whitelist or blacklist policies.
+    /// Compound policy references cannot be changed after creation.
+    /// Emits CompoundPolicyCreated.
+    function createCompoundPolicy(
+        uint64 senderPolicyId,
+        uint64 recipientPolicyId,
+        uint64 mintRecipientPolicyId
     ) external returns (uint64 newPolicyId);
 
     // =========================================================================
@@ -144,7 +166,29 @@ interface ITIP403Registry {
     /// For policyId = 1 (always-allow): Always returns true
     /// For whitelist policies: Returns true if address is in the whitelist, false otherwise
     /// For blacklist policies: Returns true if address is NOT in the blacklist, false if it is
+    /// For compound policies: Returns isAuthorizedSender(policyId, user) && isAuthorizedRecipient(policyId, user)
     function isAuthorized(uint64 policyId, address user) external view returns (bool);
+
+    /// @notice Returns whether the user is authorized as a transfer sender under the policy
+    /// @param policyId Policy ID to check against
+    /// @param user Address to check
+    /// @return True if authorized to send, false otherwise
+    /// @dev For simple policies, equivalent to isAuthorized(). For compound policies, checks senderPolicyId.
+    function isAuthorizedSender(uint64 policyId, address user) external view returns (bool);
+
+    /// @notice Returns whether the user is authorized as a transfer recipient under the policy
+    /// @param policyId Policy ID to check against
+    /// @param user Address to check
+    /// @return True if authorized to receive transfers, false otherwise
+    /// @dev For simple policies, equivalent to isAuthorized(). For compound policies, checks recipientPolicyId.
+    function isAuthorizedRecipient(uint64 policyId, address user) external view returns (bool);
+
+    /// @notice Returns whether the user is authorized as a mint recipient under the policy
+    /// @param policyId Policy ID to check against
+    /// @param user Address to check
+    /// @return True if authorized to receive mints, false otherwise
+    /// @dev For simple policies, equivalent to isAuthorized(). For compound policies, checks mintRecipientPolicyId.
+    function isAuthorizedMintRecipient(uint64 policyId, address user) external view returns (bool);
 
     /// @notice Returns the next policy ID that will be assigned to a newly created policy
     /// @return The current policyIdCounter value
@@ -163,6 +207,18 @@ interface ITIP403Registry {
     /// @return policyType Type of the policy (whitelist or blacklist)
     /// @return admin Admin address of the policy
     function policyData(uint64 policyId) external view returns (PolicyType policyType, address admin);
+
+    /// @notice Returns the constituent policy IDs for a compound policy
+    /// @param policyId ID of the compound policy to query
+    /// @return senderPolicyId Policy ID for sender checks
+    /// @return recipientPolicyId Policy ID for recipient checks
+    /// @return mintRecipientPolicyId Policy ID for mint recipient checks
+    /// @dev Reverts if policyId is not a compound policy
+    function compoundPolicyData(uint64 policyId) external view returns (
+        uint64 senderPolicyId,
+        uint64 recipientPolicyId,
+        uint64 mintRecipientPolicyId
+    );
 
     // =========================================================================
     //                                Events
@@ -212,6 +268,20 @@ interface ITIP403Registry {
         bool restricted
     );
 
+    /// @notice Emitted when a compound policy is created
+    /// @param policyId ID of the newly created compound policy
+    /// @param creator Address that created the compound policy
+    /// @param senderPolicyId Policy ID for sender checks
+    /// @param recipientPolicyId Policy ID for recipient checks
+    /// @param mintRecipientPolicyId Policy ID for mint recipient checks
+    event CompoundPolicyCreated(
+        uint64 indexed policyId,
+        address indexed creator,
+        uint64 senderPolicyId,
+        uint64 recipientPolicyId,
+        uint64 mintRecipientPolicyId
+    );
+
     // =========================================================================
     //                                Errors
     // =========================================================================
@@ -221,12 +291,18 @@ interface ITIP403Registry {
 
     /// @notice Wrong policy type for the operation
     error IncompatiblePolicyType();
+
+    /// @notice The referenced policy does not exist
+    error PolicyNotFound();
+
+    /// @notice The referenced policy is not a simple whitelist or blacklist policy
+    error PolicyNotSimple();
 }
 ```
 
 ## Usage with TIP-20 Tokens
 
-TIP-20 tokens store the current TIP403 registry policy ID they adhere to in their storage. On any token transfer, they perform a TIP-403 policy check by calling `isAuthorized()` for both sender and recipient addresses. The policy to use for the token can only be set by the admin of the token.
+TIP-20 tokens store the current TIP403 registry policy ID they adhere to in their storage. On transfers, they perform TIP-403 sender and recipient checks by calling `isAuthorizedSender()` for the sender and `isAuthorizedRecipient()` for the recipient. On mints, they call `isAuthorizedMintRecipient()` for the mint recipient. The policy to use for the token can only be set by the admin of the token.
 
 **Default Policy:** New tokens start with `transferPolicyId = 1` (always-allow policy).
 
@@ -251,9 +327,25 @@ tip403Registry.modifyPolicyWhitelist(policyId, authorizedUser, true);
 token.changeTransferPolicyId(policyId);
 ```
 
+Creating and setting a compound policy:
+
+```solidity
+uint64 senderPolicyId = tip403Registry.createPolicy(admin, PolicyType.BLACKLIST);
+uint64 recipientPolicyId = tip403Registry.createPolicy(admin, PolicyType.WHITELIST);
+uint64 mintRecipientPolicyId = 1; // always-allow
+
+uint64 compoundPolicyId = tip403Registry.createCompoundPolicy(
+    senderPolicyId,
+    recipientPolicyId,
+    mintRecipientPolicyId
+);
+
+token.changeTransferPolicyId(compoundPolicyId);
+```
+
 ## Authorization Logic
 
-The `isAuthorized()` function implements the following logic:
+The simple-policy authorization logic is:
 
 ```solidity
 if (policyId < 2) {
@@ -265,7 +357,42 @@ return data.policyType == PolicyType.WHITELIST
     : !policySet[policyId][user];
 ```
 
+Role-specific authorization delegates to the corresponding sub-policy for compound policies and falls back to simple-policy authorization for whitelist and blacklist policies:
+
+```solidity
+function isAuthorizedSender(uint64 policyId, address user) returns (bool) {
+    PolicyRecord storage record = policyRecords[policyId];
+    if (record.base.policyType == PolicyType.COMPOUND) {
+        return isAuthorized(record.compound.senderPolicyId, user);
+    }
+    return isAuthorized(policyId, user);
+}
+
+function isAuthorizedRecipient(uint64 policyId, address user) returns (bool) {
+    PolicyRecord storage record = policyRecords[policyId];
+    if (record.base.policyType == PolicyType.COMPOUND) {
+        return isAuthorized(record.compound.recipientPolicyId, user);
+    }
+    return isAuthorized(policyId, user);
+}
+
+function isAuthorizedMintRecipient(uint64 policyId, address user) returns (bool) {
+    PolicyRecord storage record = policyRecords[policyId];
+    if (record.base.policyType == PolicyType.COMPOUND) {
+        return isAuthorized(record.compound.mintRecipientPolicyId, user);
+    }
+    return isAuthorized(policyId, user);
+}
+
+function isAuthorized(uint64 policyId, address user) returns (bool) {
+    return isAuthorizedSender(policyId, user) && isAuthorizedRecipient(policyId, user);
+}
+```
+
 # Invariants
 - When policyId = 0, all authorization checks must return false for every address.
 - When policyId = 1, all authorization checks must return true for every address.
 - Only the policy’s current admin may update the admin address for that policy.
+- Compound policies must reference existing simple policies only.
+- Compound policy references cannot be changed after creation.
+- For simple policies, `isAuthorizedSender()`, `isAuthorizedRecipient()`, and `isAuthorizedMintRecipient()` must match `isAuthorized()`.
