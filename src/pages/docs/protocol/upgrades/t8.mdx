@@ -1,33 +1,34 @@
 ---
 title: T8 Network Upgrade
-description: T8 network upgrade overview covering current committee state, FeeAMM policy behavior, and DEX order storage.
+description: T8 network upgrade overview covering current committee state, FeeAMM policy behavior, DEX order storage, and the final TIP-20 rewards shutdown.
 ---
 
 # T8 Network Upgrade
 
-T8 focuses on clearer validator committee reads, FeeAMM policy behavior, and DEX order storage.
+T8 focuses on clearer validator committee reads, FeeAMM policy behavior, DEX order storage, and the final TIP-20 rewards shutdown.
 
 :::info[T8 status]
-Release target: July 22, 2026.
+Release [v1.11.0](https://github.com/tempoxyz/tempo/releases/tag/v1.11.0) is published and required for T8. T8 is scheduled for testnet on July 27, 2026 and mainnet on July 30, 2026.
 :::
 
 ## Timeline
 
-| Milestone | Date |
-|-----------|------|
-| Release target | July 22, 2026 |
-| Testnet rollout | July 27, 2026 |
-| Mainnet rollout | July 30, 2026 |
+| Milestone | Date | Timestamp |
+|-----------|------|-----------|
+| Release published | July 22, 2026 | - |
+| Testnet activation | July 27, 2026 16:00 CEST (14:00 UTC) | 1785160800 |
+| Mainnet activation | July 30, 2026 16:00 CEST (14:00 UTC) | 1785420000 |
 
-Node operators should wait for the T8 release announcement, then upgrade before the activation timestamp on each network. Exact activation timestamps will be added when the release is cut.
+Node operators should run [v1.11.0](https://github.com/tempoxyz/tempo/releases/tag/v1.11.0) before the activation timestamp on each network. Nodes that are not updated before activation will fall out of sync.
 
 ## Overview
 
-T8 focuses on three infrastructure-facing changes:
+T8 focuses on four infrastructure-facing changes:
 
 - **Canonical current committee reads.** Contracts and offchain tools can query the committee that consensus is actually using for the current epoch.
 - **Cleaner fee collection behavior.** Fee collection avoids a redundant FeeManager policy check while public AMM actions remain policy-controlled.
 - **DEX order storage updates.** New DEX orders use versioned storage, existing orders remain readable, and the Stablecoin DEX supports the compact V2Order layout.
+- **Rewards cleanup.** T8 completes the TIP-20 rewards shutdown that began in T7. Settled rewards remain claimable, but ordinary balance changes no longer checkpoint rewards after T8.
 
 ## Features
 
@@ -61,17 +62,28 @@ The public `getOrder(uint128)` shape stays compatible. Indexers that reconstruct
 
 The Stablecoin DEX also supports a compact V2Order layout. V2Order stores an orderbook index instead of repeating the full book key on each order.
 
+For raw-storage tooling, the main savings are structural: version-1 order records reduce active order storage from six slots to four, and version-2 indexed order records reduce indexed orders from four slots to three.
+
 Read the versioned order storage specification [here](https://tips.sh/1062).
+
+### TIP-20 rewards final shutdown
+
+T8 completes the reward shutdown that started in T7. After T8 activation, ordinary balance-changing paths such as transfers, mints, burns, and fee refunds stop checkpointing reward accumulators.
+
+Rewards that were settled before T8 remain claimable. Lazy rewards that were not checkpointed before activation are forfeited, so rewards integrations should not rely on a post-T8 transfer or balance change to settle older lazy accruals.
+
+Read the rewards deprecation specification [here](https://tips.sh/1075).
 
 ## Compatible releases
 
-The T8-compatible release is not published yet.
+The T8-compatible release is published.
 
 | Ecosystem | T8-compatible releases |
 |-----------|------------------------|
-| Node operators | v1.11.0 target release on July 22, 2026 |
+| Node operators | [v1.11.0](https://github.com/tempoxyz/tempo/releases/tag/v1.11.0) |
+| Rust SDK crates | `tempo-alloy@1.10.1`, `tempo-primitives@1.10.1`, `tempo-contracts@1.10.1`, `tempo-chainspec@1.10.1`, `tempo-hardfork@1.10.1` |
 
-Release notes and binaries will be linked here when v1.11.0 is cut.
+Release notes and binaries are available in the [v1.11.0 release](https://github.com/tempoxyz/tempo/releases/tag/v1.11.0).
 
 ## Integration impact
 
@@ -94,6 +106,12 @@ Release notes and binaries will be linked here when v1.11.0 is cut.
 
 - Event-driven order indexing should continue to work.
 - `getOrder(uint128)` remains ABI-compatible.
-- Raw storage readers must support both legacy version `0` orders and new version `1` orders.
+- Raw storage readers must support legacy version `0` orders, compact version `1` orders, and indexed version `2` orders.
 - Mixed-version order lists are expected, so storage tooling should update each order according to that order's own version.
-- Tooling that reads raw DEX storage should also account for V2Order support.
+- Existing orderbooks are not automatically scanned or migrated to indexed storage. They continue writing version-1 orders until offchain migration tooling supplies the verified index through `setBookIndex(uint32)`.
+
+### For TIP-20 rewards integrations
+
+- Rewards settled before T8 remain claimable.
+- Ordinary balance changes stop checkpointing reward accumulators after T8.
+- Do not rely on a post-T8 transfer, mint, burn, or fee refund to settle older lazy rewards.
