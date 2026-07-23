@@ -42,10 +42,9 @@ export function EmbedPasskeys() {
 
 export function SignInButtons() {
   const connect = useConnect()
-  const disconnect = useDisconnect()
   const hydrated = useHydrated()
   const connector = useWebAuthnConnector()
-  const busy = connect.isPending || disconnect.isPending
+  const busy = connect.isPending
   const isE2E = import.meta.env.VITE_E2E === 'true'
 
   if (!hydrated || !connector)
@@ -66,8 +65,8 @@ export function SignInButtons() {
     <div className="flex gap-1">
       <Button
         variant="accent"
-        onClick={async () => {
-          await disconnect.disconnectAsync().catch(() => {})
+        onClick={() => {
+          // Start WebAuthn synchronously so the browser preserves transient user activation.
           connect.connect({
             connector,
             ...(isE2E
@@ -86,8 +85,8 @@ export function SignInButtons() {
       </Button>
       <Button
         variant="default"
-        onClick={async () => {
-          await disconnect.disconnectAsync().catch(() => {})
+        onClick={() => {
+          // Start WebAuthn synchronously so the browser preserves transient user activation.
           connect.connect({ connector })
         }}
         type="button"
