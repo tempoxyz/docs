@@ -16,6 +16,23 @@ const baseUrl = (() => {
 
 const searchIndexFields = ['title', 'titles', 'subtitle', 'path', 'excerpt']
 const searchBoost = { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 3 }
+const tempoChangelog = Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' })
+
+const changelog = Changelog.from({
+  ...tempoChangelog,
+  async fetch(options) {
+    const releases = await tempoChangelog.fetch(options)
+    return releases.map((release) => ({
+      ...release,
+      // GitHub-generated release notes use HTML disclosures. Markdown output cannot retain
+      // them, so preserve their content as a heading instead.
+      body: release.body
+        .replace(/<details\b[^>]*>/gi, '')
+        .replace(/<\/details>/gi, '')
+        .replace(/<summary\b[^>]*>([\s\S]*?)<\/summary>/gi, '\n\n#### $1\n\n'),
+    }))
+  },
+})
 
 function extractSearchField(document: Record<string, unknown>, fieldName: string) {
   if (fieldName === 'path') {
@@ -55,7 +72,7 @@ export default defineConfig({
   //   height: '40px',
   //   textColor: 'white',
   // },
-  changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
+  changelog,
   checkDeadlinks: true,
   editLink: {
     link: 'https://github.com/tempoxyz/docs/edit/main/src/pages/:path',
