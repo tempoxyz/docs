@@ -98,13 +98,13 @@ Tempo has dedicated payment lanes: reserved blockspace for payment TIP-20 transa
 
 ### Role-Based Access Control (RBAC)
 
-TIP-20 includes a built-in [RBAC system](/docs/protocol/tip403/spec#tip-20-token-roles) that separates administrative responsibilities:
+TIP-20 includes a built-in [RBAC system](/docs/protocol/tip20/spec#tip-20-roles) that separates administrative responsibilities:
 
 - **ISSUER_ROLE**: Grants permission to mint and burn tokens, enabling controlled token issuance
 - **PAUSE_ROLE** / **UNPAUSE_ROLE**: Allows pausing and unpausing token transfers for emergency controls
 - **BURN_BLOCKED_ROLE**: Permits burning tokens from blocked addresses (e.g., for compliance actions)
 
-Roles can be granted, revoked, and delegated without custom contract changes. This enables issuers to separate operational roles (e.g., who can mint) from administrative roles (e.g., who can pause). Learn more in the [TIP-20 specification](/docs/protocol/tip20/spec#roles).
+Roles can be granted, revoked, and delegated without custom contract changes. This enables issuers to separate operational roles (e.g., who can mint) from administrative roles (e.g., who can pause). Learn more in the [TIP-20 specification](/docs/protocol/tip20/spec#tip-20-roles).
 
 ### Tempo Policy Registry (TIP-403)
 
