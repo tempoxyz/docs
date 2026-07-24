@@ -59,7 +59,7 @@ if (unresolvedIncludes.length > 0) {
 const generatedComponents = new Set()
 for (const file of generatedFiles) {
   const content = await readFile(file, 'utf8')
-  const parseableContent = file === llmsFile ? content.replaceAll(/<!--[\s\S]*?-->/g, '') : content
+  const parseableContent = maskHtmlComments(content)
   const tree = unified().use(remarkParse).use(remarkMdx).parse(parseableContent)
   visit(tree, (node) => {
     if (node.type !== 'mdxJsxFlowElement' && node.type !== 'mdxJsxTextElement') return
@@ -75,6 +75,22 @@ if (generatedComponents.size > 0) {
 }
 
 console.log('Markdown output audit passed (no unresolved component types or includes).')
+
+function maskHtmlComments(content) {
+  const ranges = []
+  const tree = unified().use(remarkParse).parse(content)
+  visit(tree, (node) => {
+    if (node.type !== 'html' || !/^<!--[\s\S]*-->$/.test(node.value?.trim() ?? '')) return
+    const start = node.position?.start.offset
+    const end = node.position?.end.offset
+    if (start !== undefined && end !== undefined) ranges.push({ end, start })
+  })
+
+  let output = content
+  for (const { end, start } of ranges.reverse())
+    output = `${output.slice(0, start)}${output.slice(start, end).replace(/[^\r\n]/g, ' ')}${output.slice(end)}`
+  return output
+}
 
 function visit(node, callback) {
   callback(node)
