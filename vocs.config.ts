@@ -1,6 +1,7 @@
 import { Changelog, defineConfig, Embedding, McpSource, Reranker, Retriever } from 'vocs/config'
 import { docsRouteDestination, proxiedLegacyDocsRoutes } from './src/lib/docs-routing'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
+import { plainMarkdownComponents } from './src/lib/markdown-output'
 
 // Only set baseUrl in production — Vocs injects a <base> tag from this value,
 // which causes all links to resolve to the absolute URL on preview deployments.
@@ -147,6 +148,9 @@ export default defineConfig({
       McpSource.github({ repo: 'wevm/wagmi' }),
       McpSource.github({ repo: 'tempoxyz/tempo-ts' }),
     ],
+  },
+  markdown: {
+    outputRemarkPlugins: [plainMarkdownComponents],
   },
   baseUrl: baseUrl || undefined,
   trailingSlashRedirect: false,
