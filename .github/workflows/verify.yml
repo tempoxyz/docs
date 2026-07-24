@@ -51,15 +51,15 @@ jobs:
       - name: Test
         run: pnpm run test
 
-      - name: Audit Markdown components
-        run: pnpm run check:markdown
-
       - name: Build
         run: pnpm run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max-old-space-size=4096
           VERCEL_ENV: production
+
+      - name: Audit Markdown components
+        run: pnpm run check:markdown
 
       - name: Check generated public links
         run: node scripts/check-generated-public-links.mjs
