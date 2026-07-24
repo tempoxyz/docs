@@ -83,12 +83,14 @@ Status: <Badge variant="red">Required</Badge>
     const output = await render(`
 <OpenApi.Playground operationId="getAddressBalances" hideQueryParams />
 <OpenApi.Endpoints path="/docs/api" resource="rpc" />
+<OpenApi.Endpoints path="/docs/api" />
 <TempoMcpExplorer />
 `)
 
     expect(output).toContain('Interactive API example for `getAddressBalances`.')
     expect(output).toContain('[Tempo OpenAPI specification](https://api.tempo.xyz/openapi.json)')
     expect(output).toContain('Tempo JSON-RPC endpoints')
+    expect(output).toContain('Tempo REST API endpoints')
     expect(output).toContain('Use the interactive web page to try the Tempo MCP server.')
     expect(output).not.toMatch(/<\/?[A-Z]/)
   })
@@ -134,10 +136,35 @@ Status: <Badge variant="red">Required</Badge>
     await expect(
       render(`
 <Demo.Container name="Example">
-  <CustomStep>Important instructions</CustomStep>
+  <Connect>Important instructions</Connect>
 </Demo.Container>
 `),
     ).rejects.toThrow('children must be self-closing components')
+  })
+
+  test('rejects unknown demo step components', async () => {
+    await expect(
+      render(`
+<Demo.Container name="Example">
+  <Danger amount="100" />
+</Demo.Container>
+`),
+    ).rejects.toThrow('does not support Danger')
+  })
+
+  test.each([
+    [
+      'Card description',
+      '<Card title="Quickstart" to="/docs/quickstart" description={description} />',
+      'Card requires a static description attribute when provided',
+    ],
+    [
+      'OpenAPI resource',
+      '<OpenApi.Endpoints path="/docs/api" resource={resource} />',
+      'OpenApi.Endpoints requires a static resource attribute when provided',
+    ],
+  ])('rejects a dynamic meaningful optional %s', async (_name, source, message) => {
+    await expect(render(source)).rejects.toThrow(message)
   })
 
   test.each([

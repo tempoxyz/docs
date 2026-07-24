@@ -52,6 +52,50 @@ const interactiveDescriptions: Record<string, string> = {
   TokenListDemo: 'The interactive web page displays the current Tempo token list.',
 }
 
+const demoStepLabels: Record<string, string> = {
+  AddFunds: 'Add funds',
+  AddFundsToOthers: 'Add funds to others',
+  AddFundsToWallet: 'Add funds to wallet',
+  AddTokensToWallet: 'Add tokens to wallet',
+  ApproveSpend: 'Approve spend',
+  BurnFeeAmmLiquidity: 'Burn fee AMM liquidity',
+  BurnToken: 'Burn token',
+  BurnTokenBlocked: 'Burn token blocked',
+  CancelOrder: 'Cancel order',
+  CheckFeeAmmPool: 'Check fee AMM pool',
+  Connect: 'Connect',
+  ConnectWallet: 'Connect wallet',
+  CreateOrLoadToken: 'Create or load token',
+  CreateToken: 'Create token',
+  CreateTokenPolicy: 'Create token policy',
+  DepositToTempoWallet: 'Deposit to tempo wallet',
+  DepositToZone: 'Deposit to zone',
+  GrantTokenRoles: 'Grant token roles',
+  LinkTokenPolicy: 'Link token policy',
+  MakeSwaps: 'Make swaps',
+  MintFeeAmmLiquidity: 'Mint fee AMM liquidity',
+  MintToken: 'Mint token',
+  PauseUnpauseTransfers: 'Pause unpause transfers',
+  PayWithFeeToken: 'Pay with fee token',
+  PayWithIssuedToken: 'Pay with issued token',
+  PlaceOrder: 'Place order',
+  QueryOrder: 'Query order',
+  RevokeTokenRoles: 'Revoke token roles',
+  SendParallelPayments: 'Send parallel payments',
+  SendPayment: 'Send payment',
+  SendPaymentWithMemo: 'Send payment with memo',
+  SendRelayerSponsoredPayment: 'Send relayer sponsored payment',
+  SendTokensAcrossZones: 'Send tokens across zones',
+  SendTokensWithinZone: 'Send tokens within zone',
+  SetFeeToken: 'Set fee token',
+  SetSupplyCap: 'Set supply cap',
+  SignInWithTempo: 'Sign in with tempo',
+  SwapAcrossZones: 'Swap across zones',
+  VirtualAddressesFastDemo: 'Virtual addresses fast demo',
+  VirtualAddressesLiveDemo: 'Virtual addresses live demo',
+  WithdrawFromZone: 'Withdraw from zone',
+}
+
 /**
  * Replaces visual MDX components with useful plain Markdown in Vocs' generated `.md` files and
  * `llms-full.txt`. The rendered website keeps the original interactive components.
@@ -156,7 +200,7 @@ function renderCards(
 
 function cardContent(node: MarkdownNode): MarkdownNode[] {
   const title = requiredStringAttribute(node, 'title')
-  const description = stringAttribute(node, 'description')
+  const description = optionalStaticStringAttribute(node, 'description')
   const destination = requiredStringAttribute(node, 'to')
   const label = link(title, destination)
   return description ? [label, text(` — ${description}`)] : [label]
@@ -197,7 +241,12 @@ function renderDemo(node: MarkdownNode): MarkdownNode[] {
       throw new TypeError(
         'Demo.Container children must be self-closing components for Markdown output.',
       )
-    return humanizeComponentName(child.name ?? '')
+    const label = demoStepLabels[child.name ?? '']
+    if (!label)
+      throw new TypeError(
+        `Demo.Container does not support ${child.name ?? 'this component'} in Markdown output.`,
+      )
+    return label
   })
 
   const output: MarkdownNode[] = [
@@ -279,7 +328,7 @@ function renderOpenApi(node: MarkdownNode): MarkdownNode[] {
   }
 
   requiredStringAttribute(node, 'path')
-  const resource = stringAttribute(node, 'resource')
+  const resource = optionalStaticStringAttribute(node, 'resource')
   return [
     paragraph([
       text(resource === 'rpc' ? 'Tempo JSON-RPC endpoints' : 'Tempo REST API endpoints'),
@@ -295,6 +344,18 @@ function stringAttribute(node: MarkdownNode, name: string) {
     (attribute) => attribute.type === 'mdxJsxAttribute' && attribute.name === name,
   )?.value
   return typeof value === 'string' ? value : undefined
+}
+
+function optionalStaticStringAttribute(node: MarkdownNode, name: string) {
+  const attribute = node.attributes?.find(
+    (candidate) => candidate.type === 'mdxJsxAttribute' && candidate.name === name,
+  )
+  if (!attribute) return undefined
+  if (typeof attribute.value !== 'string')
+    throw new TypeError(
+      `${node.name ?? 'Component'} requires a static ${name} attribute when provided for Markdown output.`,
+    )
+  return attribute.value
 }
 
 function requiredStringAttribute(node: MarkdownNode, name: string) {
@@ -426,19 +487,6 @@ function isLayoutElement(node: MarkdownNode) {
       attribute.type === 'mdxJsxAttribute' &&
       (attribute.name === 'className' || attribute.name === 'style'),
   )
-}
-
-function humanizeComponentName(name: string) {
-  const label = name
-    .replaceAll('.', ' ')
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2')
-    .toLowerCase()
-  return label
-    .replace(/^./, (character) => character.toUpperCase())
-    .replace(/\bamm\b/g, 'AMM')
-    .replace(/\bmcp\b/g, 'MCP')
-    .replace(/\brpc\b/g, 'RPC')
 }
 
 function plainText(nodes: MarkdownNode[]): string {
