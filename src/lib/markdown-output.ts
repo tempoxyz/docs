@@ -41,6 +41,7 @@ type MarkdownNode = {
 }
 
 const openApiSpecUrl = 'https://api.tempo.xyz/openapi.json'
+const presentationOnlyElements = new Set(['meta', 'script', 'style', 'title'])
 
 const interactiveDescriptions: Record<string, string> = {
   ConnectWallet: 'Connect a wallet in the interactive web page.',
@@ -131,12 +132,15 @@ function rewriteNode(
   headingDepth: number,
   getSnippet: (fileName: string) => string | undefined,
 ): MarkdownNode[] {
+  if (node.type === 'mdxjsEsm') return []
+
   if (node.type !== 'mdxJsxFlowElement' && node.type !== 'mdxJsxTextElement') {
     if (node.type === 'code' && node.value) node.value = inlineCodeSnippets(node.value, getSnippet)
     rewriteChildren(node, headingDepth, getSnippet)
     return [node]
   }
 
+  if (node.name && presentationOnlyElements.has(node.name)) return []
   if (node.name === 'Cards') return renderCards(node, headingDepth, getSnippet)
   if (node.name === 'Card') return [paragraph(cardContent(node))]
   if (node.name === 'Tabs') return renderTabs(node, headingDepth, getSnippet)
@@ -152,7 +156,6 @@ function rewriteNode(
   if (node.name && interactiveDescriptions[node.name])
     return [paragraph([text(interactiveDescriptions[node.name])])]
 
-  if (node.name === 'title') return []
   if (isLayoutElement(node)) {
     rewriteChildren(node, headingDepth, getSnippet)
     return node.children ?? []

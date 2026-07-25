@@ -57,24 +57,43 @@ if (unresolvedIncludes.length > 0) {
 }
 
 const generatedComponents = new Set()
+const generatedEsmFiles = new Set()
+const generatedExpressions = new Set()
+const generatedPresentationElements = []
 for (const file of generatedFiles) {
   const content = await readFile(file, 'utf8')
   const parseableContent = maskHtmlComments(content)
   const tree = unified().use(remarkParse).use(remarkMdx).parse(parseableContent)
   visit(tree, (node) => {
+    if (node.type === 'mdxjsEsm') generatedEsmFiles.add(file)
+    if (node.type === 'mdxFlowExpression' || node.type === 'mdxTextExpression')
+      generatedExpressions.add(file)
     if (node.type !== 'mdxJsxFlowElement' && node.type !== 'mdxJsxTextElement') return
+    if (/^(?:meta|script|style|title)$/.test(node.name ?? ''))
+      generatedPresentationElements.push({ file, name: node.name })
     if (!/^[A-Z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)*$/.test(node.name ?? '')) return
     generatedComponents.add(node.name)
   })
 }
 
-if (generatedComponents.size > 0) {
-  console.error('Generated Markdown component audit failed.')
+if (
+  generatedComponents.size > 0 ||
+  generatedEsmFiles.size > 0 ||
+  generatedExpressions.size > 0 ||
+  generatedPresentationElements.length > 0
+) {
+  console.error('Generated Markdown syntax audit failed.')
   for (const name of generatedComponents) console.error(`- ${name}: unresolved component`)
+  for (const file of generatedEsmFiles) console.error(`- ${file}: executable import or export`)
+  for (const file of generatedExpressions) console.error(`- ${file}: executable expression`)
+  for (const { file, name } of generatedPresentationElements)
+    console.error(`- ${file}: presentation-only <${name}> element`)
   process.exit(1)
 }
 
-console.log('Markdown output audit passed (no unresolved component types or includes).')
+console.log(
+  'Markdown output audit passed (no unresolved components, includes, executable MDX, or presentation-only elements).',
+)
 
 function maskHtmlComments(content) {
   const ranges = []

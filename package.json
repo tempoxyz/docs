@@ -64,7 +64,7 @@
     "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",
     "viem": "^2.54.6",
-    "vocs": "https://pkg.pr.new/wevm/vocs/vocs@e1a70dc00507fade986b2f9b033f26906d037748",
+    "vocs": "https://pkg.pr.new/wevm/vocs/vocs@1258ed866d15a876cd409a21ca6cc99c0601f605",
     "wagmi": "3.6.20",
     "waku": "^1.0.0-beta.6",
     "webauthx": "~0.1.2",

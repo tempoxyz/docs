@@ -95,6 +95,57 @@ Status: <Badge variant="red">Required</Badge>
     expect(output).not.toMatch(/<\/?[A-Z]/)
   })
 
+  test('removes executable and presentation-only MDX without dropping later content', async () => {
+    const output = await render(`
+import { Demo } from './Demo'
+export const data = [{ label: 'Example' }]
+
+<style>{\`
+  .tabs { display: flex }
+\`}</style>
+<script>{\`window.example = true\`}</script>
+<meta name="robots" content="index" />
+<title>Browser title</title>
+
+# Agent guide
+
+The machine-readable content remains available.
+
+| URL | Contents |
+| --- | --- |
+| /llms.txt | Documentation index |
+`)
+
+    expect(output).not.toContain('import { Demo }')
+    expect(output).not.toContain('export const data')
+    expect(output).not.toContain('.tabs')
+    expect(output).not.toMatch(/<(?:meta|script|style|title)\b/)
+    expect(output).toContain('# Agent guide')
+    expect(output).toContain('The machine-readable content remains available.')
+    expect(output).toContain('/llms.txt')
+    expect(output).toContain('Documentation index')
+  })
+
+  test('keeps MDX-like syntax inside fenced examples', async () => {
+    const output = await render(`
+\`\`\`mdx
+import { Demo } from './Demo'
+export const data = [{ label: 'Example' }]
+<style>{styles}</style>
+<script>{setup}</script>
+<meta name="robots" content="index" />
+<title>Browser title</title>
+\`\`\`
+`)
+
+    expect(output).toContain("import { Demo } from './Demo'")
+    expect(output).toContain("export const data = [{ label: 'Example' }]")
+    expect(output).toContain('<style>{styles}</style>')
+    expect(output).toContain('<script>{setup}</script>')
+    expect(output).toContain('<meta name="robots" content="index" />')
+    expect(output).toContain('<title>Browser title</title>')
+  })
+
   test('expands code includes and removes region markers', async () => {
     const output = await render(`
 \`\`\`ts
