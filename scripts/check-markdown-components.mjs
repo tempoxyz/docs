@@ -42,11 +42,19 @@ if (files.length === 0)
 
 const llmsFile = resolve('dist/public/llms-full.txt')
 const generatedFiles = [...files, llmsFile]
+const hiddenChangelogFallbacks = []
 const unresolvedIncludes = []
 for (const file of generatedFiles) {
   const content = await readFile(file, 'utf8')
+  if (hasHiddenChangelogFallback(content)) hiddenChangelogFallbacks.push(file)
   const count = content.match(/\[!include /g)?.length ?? 0
   if (count > 0) unresolvedIncludes.push({ count, file })
+}
+
+if (hiddenChangelogFallbacks.length > 0) {
+  console.error('Generated Markdown changelog fallback audit failed.')
+  for (const file of hiddenChangelogFallbacks) console.error(`- ${file}: hidden changelog fallback`)
+  process.exit(1)
 }
 
 if (unresolvedIncludes.length > 0) {
@@ -94,6 +102,16 @@ if (
 console.log(
   'Markdown output audit passed (no unresolved components, includes, executable MDX, or presentation-only elements).',
 )
+
+function hasHiddenChangelogFallback(content) {
+  let found = false
+  const tree = unified().use(remarkParse).parse(content)
+  visit(tree, (node) => {
+    if (node.type === 'html' && node.value?.trim() === '<!-- changelog unavailable -->')
+      found = true
+  })
+  return found
+}
 
 function maskHtmlComments(content) {
   const ranges = []

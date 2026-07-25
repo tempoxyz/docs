@@ -42,6 +42,7 @@ type MarkdownNode = {
 
 const openApiSpecUrl = 'https://api.tempo.xyz/openapi.json'
 const presentationOnlyElements = new Set(['meta', 'script', 'style', 'title'])
+const tempoReleasesUrl = 'https://github.com/tempoxyz/tempo/releases'
 
 const interactiveDescriptions: Record<string, string> = {
   ConnectWallet: 'Connect a wallet in the interactive web page.',
@@ -133,6 +134,13 @@ function rewriteNode(
   getSnippet: (fileName: string) => string | undefined,
 ): MarkdownNode[] {
   if (node.type === 'mdxjsEsm') return []
+  if (node.type === 'html' && node.value?.trim() === '<!-- changelog unavailable -->')
+    return [
+      paragraph([
+        text('Release notes could not be loaded. '),
+        link('View Tempo releases on GitHub.', tempoReleasesUrl),
+      ]),
+    ]
 
   if (node.type !== 'mdxJsxFlowElement' && node.type !== 'mdxJsxTextElement') {
     if (node.type === 'code' && node.value) node.value = inlineCodeSnippets(node.value, getSnippet)

@@ -146,6 +146,27 @@ export const data = [{ label: 'Example' }]
     expect(output).toContain('<title>Browser title</title>')
   })
 
+  test('turns an unavailable changelog into a visible release link', async () => {
+    const output = await renderMarkdown(`
+# Changelog
+
+<!-- changelog unavailable -->
+`)
+
+    expect(output).toContain('Release notes could not be loaded.')
+    expect(output).toContain(
+      '[View Tempo releases on GitHub.](https://github.com/tempoxyz/tempo/releases)',
+    )
+    expect(output).not.toContain('<!-- changelog unavailable -->')
+
+    const example = await renderMarkdown(`
+\`\`\`md
+<!-- changelog unavailable -->
+\`\`\`
+`)
+    expect(example).toContain('<!-- changelog unavailable -->')
+  })
+
   test('expands code includes and removes region markers', async () => {
     const output = await render(`
 \`\`\`ts
@@ -237,6 +258,16 @@ async function render(source: string) {
     await unified()
       .use(remarkParse)
       .use(remarkMdx)
+      .use(plainMarkdownComponents)
+      .use(remarkStringify)
+      .process(source),
+  )
+}
+
+async function renderMarkdown(source: string) {
+  return String(
+    await unified()
+      .use(remarkParse)
       .use(plainMarkdownComponents)
       .use(remarkStringify)
       .process(source),
