@@ -723,8 +723,7 @@ Send multiple payments in a single transaction using batch transactions:
       }), // [!code hl]
     })) // [!code hl]
 
-    const hash = await client.sendTransaction({ calls }) // [!code hl]
-    console.log(hash)
+    await client.sendTransaction({ calls }) // [!code hl]
     ```
 
     ```ts twoslash [viem.config.ts]
@@ -1002,7 +1001,7 @@ Send multiple payments in a single transaction using batch transactions:
   </Tab>
 </Tabs>
 
-Passing `calls` creates one all-or-nothing Tempo transaction. `sendTransaction` returns its hash immediately; use `sendTransactionSync` when you need the receipt. Use `sendCalls` or `sendCallsSync` for connected-wallet batch requests.
+Pass every encoded call together so Tempo executes all transfers in one all-or-nothing transaction. A loop or `Promise.all` sends separate transactions.
 
 ### Index payment events
 
