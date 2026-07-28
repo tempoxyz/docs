@@ -4,7 +4,7 @@
 
 const PERF_API_URL = 'https://perf.tempo.xyz/api/perf/runs?feed=nightly&limit=100'
 
-const PUBLIC_SCENARIO_FROM = '2026-07-22'
+const PUBLIC_SCENARIO_FROM = '2026-07-23'
 const PUBLIC_SCENARIO_ID = 'public'
 const TIP20_50K_SCENARIO_FROM = '2026-07-13'
 const TIP20_50K_SCENARIO_ID = 'tip20-50k'
