@@ -23,6 +23,18 @@ describe('vocs.config docs SEO controls', () => {
       'Send a Payment ⋅ Tempo Docs',
     )
     expect(titleFor('/docs/api', 'Tempo API')).toBe('Tempo API ⋅ Tempo Docs')
+    expect(titleFor('/docs/api/authentication', 'Authentication')).toBe(
+      'Authentication ⋅ Tempo Docs',
+    )
+    expect(titleFor('/docs/api/json-rpc', 'Tempo JSON-RPC API: Endpoints & Methods')).toBe(
+      'Tempo JSON-RPC API: Endpoints & Methods ⋅ Tempo Docs',
+    )
+    expect(
+      titleFor('/docs/api/indexer-api', 'Tempo Indexer API: Query Blockchain Data with SQL'),
+    ).toBe('Tempo Indexer API: Query Blockchain Data with SQL ⋅ Tempo Docs')
+    expect(titleFor('/docs/api/fee-payer', 'Tempo Fee Payer API: Sponsor Transaction Fees')).toBe(
+      'Tempo Fee Payer API: Sponsor Transaction Fees ⋅ Tempo Docs',
+    )
     expect(titleFor('/docs/protocol/transactions', 'Tempo Transactions')).toBe(
       'Tempo Transactions ⋅ Tempo Docs',
     )

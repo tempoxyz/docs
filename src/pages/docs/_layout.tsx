@@ -43,7 +43,12 @@ if (typeof window !== 'undefined') {
 export default function DocsLayout(
   props: PropsWithChildren<{
     path?: string
-    frontmatter?: { interactive?: boolean; mipd?: boolean }
+    frontmatter?: {
+      description?: string
+      interactive?: boolean
+      mipd?: boolean
+      title?: string
+    }
   }>,
 ) {
   const pageSettled = usePageSettled()
@@ -51,7 +56,11 @@ export default function DocsLayout(
 
   return (
     <>
-      <DocsJsonLd path={props.path} />
+      <DocsJsonLd
+        description={props.frontmatter?.description}
+        path={props.path}
+        title={props.frontmatter?.title}
+      />
       <DocsHeader />
       <DocsSectionNav />
       <DocsSidebarDrawer />
