@@ -1,15 +1,18 @@
-const publicDevelopersPath = '/developers/docs'
+const publicDevelopersUrl = 'https://tempo.xyz/developers/docs'
 
 /**
  * Rewrites generated public link targets without changing Vocs' internal route
  * values. The docs app routes at `/docs` internally, but production is mounted
- * at `/developers`, so a bare href otherwise takes an unnecessary 308 hop.
+ * on a different origin path, so a root-relative href otherwise takes a 308 hop.
  */
 export function canonicalizeGeneratedDeveloperLinks(content: string) {
   return content
-    .replace(/href=(["'])\/docs(?=\/|[#?]|\1)/g, `href=$1${publicDevelopersPath}`)
-    .replace(/to=(["'])\/docs(?=\/|[#?]|\1)/g, `to=$1${publicDevelopersPath}`)
-    .replace(/"href":"\/docs(?=\/|[#?]|")/g, `"href":"${publicDevelopersPath}`)
-    .replace(/\\"href\\":\\"\/docs(?=\/|[#?]|\\")/g, `\\"href\\":\\"${publicDevelopersPath}`)
-    .replace(/\]\(\/docs(?=\/|[#?]|\))/g, `](${publicDevelopersPath}`)
+    .replace(/href=(["'])(?:\/developers)?\/docs(?=\/|[#?]|\1)/g, `href=$1${publicDevelopersUrl}`)
+    .replace(/to=(["'])(?:\/developers)?\/docs(?=\/|[#?]|\1)/g, `to=$1${publicDevelopersUrl}`)
+    .replace(/"href":"(?:\/developers)?\/docs(?=\/|[#?]|")/g, `"href":"${publicDevelopersUrl}`)
+    .replace(
+      /\\"href\\":\\"(?:\/developers)?\/docs(?=\/|[#?]|\\")/g,
+      `\\"href\\":\\"${publicDevelopersUrl}`,
+    )
+    .replace(/\]\((?:\/developers)?\/docs(?=\/|[#?]|\))/g, `](${publicDevelopersUrl}`)
 }

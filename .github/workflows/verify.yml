@@ -58,11 +58,11 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=4096
           VERCEL_ENV: production
 
-      - name: Audit generated Markdown
-        run: pnpm run check:markdown
-
       - name: Check generated public links
         run: node scripts/check-generated-public-links.mjs
+
+      - name: Audit generated Markdown
+        run: pnpm run check:markdown
 
   ci-gate:
     name: CI Gate

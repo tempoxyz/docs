@@ -23,19 +23,20 @@ const llmsFiles = ['llms.txt', 'llms-full.txt'].map((file) => path.join(publicDi
 
 const attributeLink = {
   label: 'HTML or JSX link attribute',
-  pattern: /\b(?:href|to)=(?:\\?["'])\/docs(?=\/|[#?]|\\?["'])/g,
+  pattern: /\b(?:href|to)=(?:\\?["'])(?:\/developers)?\/docs(?=\/|[#?]|\\?["'])/g,
 }
 const serializedHref = {
   label: 'serialized href',
-  pattern: /(?:\\?["'])href(?:\\?["'])\s*:\s*(?:\\?["'])\/docs(?=\/|[#?]|\\?["'])/g,
+  pattern:
+    /(?:\\?["'])href(?:\\?["'])\s*:\s*(?:\\?["'])(?:\/developers)?\/docs(?=\/|[#?]|\\?["'])/g,
 }
 const markdownLink = {
   label: 'Markdown link',
-  pattern: /\]\(\s*\/docs(?=\/|[#?]|\s|\))/g,
+  pattern: /\]\(\s*(?:\/developers)?\/docs(?=\/|[#?]|\s|\))/g,
 }
 const markdownReference = {
   label: 'Markdown reference link',
-  pattern: /^\s*\[[^\]]+\]:\s*<?\/docs(?=\/|[#?]|>?(?:\s|$))/gm,
+  pattern: /^\s*\[[^\]]+\]:\s*<?(?:\/developers)?\/docs(?=\/|[#?]|>?(?:\s|$))/gm,
 }
 
 const candidateGroups = [
@@ -61,7 +62,7 @@ for (const { files, patterns } of candidateGroups) {
 }
 
 if (failures.length > 0) {
-  console.error('Generated public artifacts contain uncanonicalized /docs link targets:')
+  console.error('Generated public artifacts contain root-relative docs link targets:')
   console.error(
     failures
       .slice(0, 50)
