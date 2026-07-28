@@ -135,22 +135,24 @@ await Actions.token.transferSync(walletClient, {
 
 ### Payroll batch payments
 
-Batch multiple payments in a single Tempo transaction with employee IDs in each memo for clear accounting records.
+Start with the [Viem batch payment setup](/docs/guide/payments/send-a-payment#batch-payment-transactions), then encode `transferWithMemo` for each employee ID.
 
 ```ts
 import { Abis } from 'viem/tempo'
 import { encodeFunctionData, parseUnits, stringToHex, pad } from 'viem'
+import { client } from './viem.config'
 
 const calls = employees.map(emp => ({
   to: tokenAddress,
   data: encodeFunctionData({
-    abi: Abis.TIP20,
+    abi: Abis.tip20,
     functionName: 'transferWithMemo',
     args: [emp.wallet, parseUnits(emp.salary, 6), pad(stringToHex(emp.id), { size: 32 })]
   })
 }))
 
-await walletClient.sendCalls({ calls })
+const receipt = await client.sendTransactionSync({ calls })
+console.log(receipt.transactionHash)
 ```
 
 ### Refund address in memo

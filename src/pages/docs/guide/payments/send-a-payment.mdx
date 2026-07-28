@@ -708,34 +708,30 @@ Send multiple payments in a single transaction using batch transactions:
     import { Abis } from 'viem/tempo'
     import { client } from './viem.config'
 
-    const tokenABI = Abis.tip20
-    const recipient1 = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb'
-    const recipient2 = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
+    const token = '0x20c0000000000000000000000000000000000001'
+    const recipients = [
+      '0x742d35cc6634c0532925a3b844bc9e7595f0bebb',
+      '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
+    ] as const
+    const amount = parseUnits('100', 6)
 
-    const calls = [ // [!code hl]
-      { // [!code hl]
-        to: '0x20c0000000000000000000000000000000000001', // [!code hl]
-        data: encodeFunctionData({ // [!code hl]
-          abi: tokenABI, // [!code hl]
-          functionName: 'transfer', // [!code hl]
-          args: [recipient1, parseUnits('100', 6)], // [!code hl]
-        }), // [!code hl]
-      }, // [!code hl]
-      { // [!code hl]
-        to: '0x20c0000000000000000000000000000000000001', // [!code hl]
-        data: encodeFunctionData({ // [!code hl]
-          abi: tokenABI, // [!code hl]
-          functionName: 'transfer', // [!code hl]
-          args: [recipient2, parseUnits('50', 6)], // [!code hl]
-        }), // [!code hl]
-      }, // [!code hl]
-    ] // [!code hl]
+    await client.faucet.fundSync({ account: client.account })
 
-    const hash = await client.sendTransaction({ calls })
+    const calls = recipients.map((to) => ({ // [!code hl]
+      to: token, // [!code hl]
+      data: encodeFunctionData({ // [!code hl]
+        abi: Abis.tip20, // [!code hl]
+        functionName: 'transfer', // [!code hl]
+        args: [to, amount], // [!code hl]
+      }), // [!code hl]
+    })) // [!code hl]
+
+    const receipt = await client.sendTransactionSync({ calls }) // [!code hl]
+    console.log(receipt.transactionHash)
     ```
 
     ```ts twoslash [viem.config.ts]
-    // [!include ~/snippets/viem.config.ts:setup]
+    // [!include ~/snippets/viem.config.ts:moderato]
     ```
 
     :::
@@ -1008,6 +1004,8 @@ Send multiple payments in a single transaction using batch transactions:
 
   </Tab>
 </Tabs>
+
+`sendTransactionSync` puts every call in one all-or-nothing Tempo transaction and returns its receipt. `sendCalls` is for wallet requests; a loop or `Promise.all` sends separate transactions.
 
 ### Index payment events
 
