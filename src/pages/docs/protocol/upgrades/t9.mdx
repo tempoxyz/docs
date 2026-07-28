@@ -31,16 +31,6 @@ T9 focuses on two changes that are needed for the first zone rollout:
 
 The practical effect is that zones become easier to reason about. A zone is created through one protocol entry point, gets a predictable portal account, and can check token transfer rules from one registry.
 
-## Who T9 affects
-
-| Partner type | What changes |
-|--------------|--------------|
-| Zone builders and operators | Create zones through the native ZoneFactory. Each zone gets a predictable portal account for Tempo-side zone activity. |
-| Token issuers and token admins | Tokens used by zones need an explicit TIP-403 policy binding. Tokens that are not used by zones keep working without immediate migration. |
-| Wallets, explorers, and indexers | Existing TIP-20 policy reads continue to work, but zone-aware tooling should recognize ZonePortal accounts and TIP-403 token-policy bindings. |
-| Apps not using zones | No immediate integration change unless the app's tokens, users, or workflows are enabled on a zone. |
-| Node operators | Upgrade before activation so nodes stay in sync. |
-
 ## Features
 
 ### ZoneFactory for zone creation
