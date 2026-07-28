@@ -151,8 +151,8 @@ const calls = employees.map(emp => ({
   })
 }))
 
-const receipt = await client.sendTransactionSync({ calls })
-console.log(receipt.transactionHash)
+const hash = await client.sendTransaction({ calls })
+console.log(hash)
 ```
 
 ### Refund address in memo

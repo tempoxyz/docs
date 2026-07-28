@@ -708,16 +708,13 @@ Send multiple payments in a single transaction using batch transactions:
     import { Abis } from 'viem/tempo'
     import { client } from './viem.config'
 
-    const token = '0x20c0000000000000000000000000000000000001'
-    const recipients = [
-      '0x742d35cc6634c0532925a3b844bc9e7595f0bebb',
-      '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
+    const token = '0x20c0000000000000000000000000000000000001' as const
+    const payments = [
+      { to: '0x742d35cc6634c0532925a3b844bc9e7595f0bebb', amount: parseUnits('100', 6) },
+      { to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8', amount: parseUnits('50', 6) },
     ] as const
-    const amount = parseUnits('100', 6)
 
-    await client.faucet.fundSync({ account: client.account })
-
-    const calls = recipients.map((to) => ({ // [!code hl]
+    const calls = payments.map(({ to, amount }) => ({ // [!code hl]
       to: token, // [!code hl]
       data: encodeFunctionData({ // [!code hl]
         abi: Abis.tip20, // [!code hl]
@@ -726,12 +723,12 @@ Send multiple payments in a single transaction using batch transactions:
       }), // [!code hl]
     })) // [!code hl]
 
-    const receipt = await client.sendTransactionSync({ calls }) // [!code hl]
-    console.log(receipt.transactionHash)
+    const hash = await client.sendTransaction({ calls }) // [!code hl]
+    console.log(hash)
     ```
 
     ```ts twoslash [viem.config.ts]
-    // [!include ~/snippets/viem.config.ts:moderato]
+    // [!include ~/snippets/viem.config.ts:setup]
     ```
 
     :::
@@ -1005,7 +1002,7 @@ Send multiple payments in a single transaction using batch transactions:
   </Tab>
 </Tabs>
 
-`sendTransactionSync` puts every call in one all-or-nothing Tempo transaction and returns its receipt. `sendCalls` is for wallet requests; a loop or `Promise.all` sends separate transactions.
+Passing `calls` creates one all-or-nothing Tempo transaction. `sendTransaction` returns its hash immediately; use `sendTransactionSync` when you need the receipt. Use `sendCalls` or `sendCallsSync` for connected-wallet batch requests.
 
 ### Index payment events
 
