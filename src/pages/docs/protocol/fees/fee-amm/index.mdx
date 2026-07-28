@@ -21,7 +21,7 @@ When a user pays fees in a stablecoin that differs from the validator's preferen
 - **Validator receives**: 0.9970 of their preferred stablecoin
 - **Liquidity providers earn**: 0.003 (0.3%) as fees
 
-This conversion happens automatically at the end of each block through batched swaps, preventing MEV attacks like sandwiching.
+This conversion happens immediately during transaction execution at a fixed price, preventing MEV attacks like sandwiching.
 
 ## Fee AMM vs. Exchange
 

@@ -89,24 +89,12 @@ Executes rebalancing swaps from `validatorToken` to `userToken` at fixed rate of
 function mint(
     address userToken,
     address validatorToken,
-    uint256 amountUserToken,
     uint256 amountValidatorToken,
     address to
 ) external returns (uint256 liquidity)
 ```
 
-Adds liquidity to a pool with both tokens. First provider sets initial reserves and must burn `MIN_LIQUIDITY` tokens. Subsequent providers must provide proportional amounts. Receives fungible LP tokens representing pro-rata share of pool reserves.
-
-```solidity
-function mint(
-    address userToken,
-    address validatorToken,
-    uint256 amountValidatorToken,
-    address to
-) external returns (uint256 liquidity)
-```
-
-Single-sided liquidity provision with validator token only. Treats the deposit as equivalent to performing a hypothetical `rebalanceSwap` first at rate `n = 0.9985` until the ratio of reserves match, then minting liquidity by depositing both. Formula: `liquidity = amountValidatorToken * _totalSupply / (V + n * U)`, where `n = N / SCALE`. Rounds down to avoid over-issuing LP tokens. Updates reserves by increasing only `validatorToken` by `amountValidatorToken`. Emits `Mint` event with `amountUserToken = 0`.
+Adds validator-token liquidity to a pool. A new pool mints `amountValidatorToken / 2 - MIN_LIQUIDITY` and locks `MIN_LIQUIDITY`. Later deposits mint `amountValidatorToken * _totalSupply / (V + n * U)`, where `n = N / SCALE`. Rounds down, updates the validator-token reserve, and emits `Mint`.
 
 ```solidity
 function burn(
@@ -127,7 +115,7 @@ function executeFeeSwap(
 ) internal returns (uint256 amountOut)
 ```
 
-Executes a fee swap immediately. Calculates `amountOut = (amountIn * M) / SCALE`. Only executed by the protocol during transaction execution. Emits `FeeSwap` event. Note: `FeeSwap` events are not emitted for immediate swaps.
+Executes a fee swap immediately. Calculates `amountOut = (amountIn * M) / SCALE`. Only executed by the protocol during transaction execution. No event is emitted for this internal swap.
 
 ```solidity
 function checkSufficientLiquidity(
@@ -143,7 +131,7 @@ Verifies sufficient validator token reserves for the fee swap. Calculates `maxAm
 
 Tempo introduces a precompiled contract, the `FeeManager`, at the address `0xfeec000000000000000000000000000000000000`.
 
-The `FeeManager` is a singleton contract that implements all the functions of the Fee AMM for every pool. It handles the collection and refunding of fees during each transaction, executes fee swaps immediately, stores fee token preferences for users and validators, and accumulates fees for validators to claim via `distributeFees()`.
+The `FeeManager` is a singleton contract that implements all the functions of the Fee AMM for every pool. It handles the collection and refunding of fees during each transaction, executes fee swaps immediately, stores fee token preferences for users and validators, and accumulates fees for validators to claim via `distributeFees(validator, token)`.
 
 ##### Key Functions
 
@@ -190,7 +178,7 @@ Allows anyone to trigger distribution of accumulated fees for a specific token t
 function collectedFees(address validator, address token) external view returns (uint256)
 ```
 
-Returns the amount of accumulated fees for a validator and specific token that can be claimed via `distributeFees()`.
+Returns the amount of accumulated fees for a validator and specific token that can be claimed via `distributeFees(validator, token)`.
 
 ### Swap Mechanisms
 
@@ -229,7 +217,7 @@ Returns the amount of accumulated fees for a validator and specific token that c
      - Accumulates swapped fees for the validator
 
 3. **Fee Distribution**:
-   - Validators (or anyone) can call `distributeFees(validator)` at any time to transfer accumulated fees to the validator
+   - Validators (or anyone) can call `distributeFees(validator, token)` at any time to transfer accumulated fees to the validator
 
 ### Events
 
@@ -240,21 +228,15 @@ event RebalanceSwap(
     address indexed swapper,
     uint256 amountIn,
     uint256 amountOut
-)
-event FeeSwap(
-    address indexed userToken,
-    address indexed validatorToken,
-    uint256 amountIn,
-    uint256 amountOut
-)
+);
 event Mint(
-    address indexed sender,
+    address sender,
+    address indexed to,
     address indexed userToken,
     address indexed validatorToken,
-    uint256 amountUserToken,
     uint256 amountValidatorToken,
     uint256 liquidity
-)
+);
 event Burn(
     address indexed sender,
     address indexed userToken,
@@ -263,9 +245,14 @@ event Burn(
     uint256 amountValidatorToken,
     uint256 liquidity,
     address to
-)
-event UserTokenSet(address indexed user, address indexed token)
-event ValidatorTokenSet(address indexed validator, address indexed token)
+);
+event UserTokenSet(address indexed user, address indexed token);
+event ValidatorTokenSet(address indexed validator, address indexed token);
+event FeesDistributed(
+    address indexed validator,
+    address indexed token,
+    uint256 amount
+);
 ```
 
 `Transfer` events are emitted as usual for transactions, with the exception of paying gas fees via TIP20 tokens. For fee payments, a single `Transfer` event is emitted post execution to represent the actual fee amount consumed (i.e. `gasUsed * gasPrice`).

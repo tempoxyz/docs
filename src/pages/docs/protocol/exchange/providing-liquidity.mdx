@@ -47,23 +47,23 @@ function place(
 
 **Example: Place a bid to buy 1000 USDG at $0.9990**
 ```solidity
-// tick = (0.9990 - 1) * 100_000 = -10
+// tick = (0.9990 - 1) * 100_000 = -100
 uint128 orderId = exchange.place(
     USDG_ADDRESS,
     1000e6,      // Amount: 1000 USDG
     true,        // isBid: buying USDG
-    -10          // tick: price = $0.9990
+    -100         // tick: price = $0.9990
 );
 ```
 
 **Example: Place an ask to sell 1000 USDG at $1.0010**
 ```solidity
-// tick = (1.0010 - 1) * 100_000 = 10
+// tick = (1.0010 - 1) * 100_000 = 100
 uint128 orderId = exchange.place(
     USDG_ADDRESS,
     1000e6,      // Amount: 1000 USDG
     false,       // isBid: selling USDG
-    10           // tick: price = $1.0010
+    100          // tick: price = $1.0010
 );
 ```
 
@@ -97,8 +97,8 @@ uint128 orderId = exchange.placeFlip(
     USDG_ADDRESS,
     1000e6,      // Amount: 1000 USDG
     true,        // isBid: start as a buy order
-    -10,         // tick: buy at $0.9990
-    10           // flipTick: sell at $1.0010 after filled
+    -100,        // tick: buy at $0.9990
+    100          // flipTick: sell at $1.0010 after filled
 );
 ```
 

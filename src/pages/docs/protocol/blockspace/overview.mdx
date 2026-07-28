@@ -17,15 +17,17 @@ Tempo blocks extend the Ethereum block format in multiple ways: there are new he
 
 ### Header fields
 Tempo extends an Ethereum header with three extra scalars.
-```rust title="Header struct"
-pub struct Header {
+```rust title="TempoHeader struct"
+pub struct TempoHeader {
     pub general_gas_limit: u64,
     pub shared_gas_limit: u64,
     pub timestamp_millis_part: u64,
     pub inner: Header,
+    pub consensus_context: Option<TempoConsensusContext>,
 }
 ```
 - `inner` is the canonical Ethereum header (parent_hash, state_root, gas_limit, etc.).
+- `consensus_context` is optional consensus metadata and is absent on older blocks.
 - `general_gas_limit` and `shared_gas_limit` partition the canonical `gas_limit` for payment and non-payment capacity (see [payment lane specification](/docs/protocol/blockspace/payment-lane-specification)).
 - `timestamp_millis_part` stores the sub‑second component; the full timestamp is `inner.timestamp * 1000 + timestamp_millis_part` .
 

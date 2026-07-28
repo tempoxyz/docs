@@ -225,7 +225,7 @@ After execution, the `FeeManager`:
 
 - Calculates the actual fee owed based on gas used
 - Refunds any unused tokens to the user
-- Queues the actual fee amount for conversion (if needed)
+- Converts the actual fee amount if needed
 
 #### 5. Fee swap execution
 
@@ -233,7 +233,7 @@ If the user's fee token differs from the validator's preferred token, the fee sw
 
 If the user's fee token matches the validator's preference, no conversion is needed.
 
-Fees accumulate in the FeeManager contract. Validators can claim their accumulated fees at any time by calling `distributeFees()`.
+Fees accumulate in the FeeManager contract. Validators can claim a token's accumulated fees at any time by calling `distributeFees(validator, token)`.
 
 ### Fee swap mechanics
 
@@ -260,7 +260,7 @@ Here's a complete example of the fee lifecycle:
 6. The FeeManager refunds 0.2 USDG to Alice
 7. The Fee AMM immediately swaps 0.8 USDG → 0.7976 USDT (0.8 × 0.9970)
 8. The 0.7976 USDT is added to the validator's accumulated fees
-9. Validator calls `distributeFees()` to claim their accumulated fees
+9. Validator calls `distributeFees(validator, token)` to claim their accumulated fees
 10. Liquidity providers earn 0.0024 USDT from the 0.3% fee
 
 ### Gas costs

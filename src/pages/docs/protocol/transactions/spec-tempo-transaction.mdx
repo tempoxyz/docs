@@ -526,7 +526,7 @@ def verify_webauthn(tx_hash: bytes32, signature: bytes, require_uv: bool) -> boo
 
     # 4. Compute message hash
     clientDataHash = sha256(clientDataJSON)
-    messageHash = sha256(authenticatorData || clientDataHash)
+    messageHash = sha256(authenticatorData + clientDataHash)
 
     # 5. Verify P256 signature
     return p256_verify(messageHash, r, s, pubKeyX, pubKeyY)
