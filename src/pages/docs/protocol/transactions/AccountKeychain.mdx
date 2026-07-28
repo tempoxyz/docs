@@ -11,7 +11,7 @@ description: Technical specification for the Account Keychain precompile managin
 
 The Account Keychain precompile manages authorized Access Keys for accounts, enabling Root Keys (e.g., passkeys) and admin access keys to provision secondary keys. Limited access keys can have expiry timestamps, recurring or one-time per-TIP20 token spending limits, and explicit call scopes that restrict which targets, selectors, and recipients an Access Key may invoke.
 
-`authorizeKey(...)` takes a `KeyRestrictions` tuple that bundles expiry, spending limits, and call scopes. `authorizeAdminKey(...)` provisions an admin key for account key management. Access-key-signed transactions cannot create contracts; use a Root Key for deployment flows.
+`authorizeKey(...)` takes a `KeyRestrictions` tuple that bundles expiry, spending limits, and call scopes. `authorizeAdminKey(...)` provisions an admin key for account key management. Access-key-signed transactions cannot use a top-level `Create` call.
 
 ## Motivation
 
@@ -31,7 +31,7 @@ Access Keys are secondary signing keys authorized by an account's Root Key or an
   - Spending limits only apply when `msg.sender == tx.origin` (direct EOA calls, not contract calls)
   - Native value transfers and `transferFrom()` are NOT limited
 - **Call Scopes**: An Access Key is either unrestricted (`allowAnyCalls = true`) or restricted to an explicit allowlist of `(target, selector, recipients)` tuples. An empty allowlist with `allowAnyCalls = false` means scoped deny-all.
-- **No Contract Creation**: Access-key-signed transactions cannot perform `CREATE` or `CREATE2`, including via factory contracts. Use a Root Key for deployments.
+- **No Top-Level Creation**: Access-key-signed transactions cannot use a top-level `Create` call. Contracts they call may still use `CREATE` or `CREATE2`.
 - **Privilege Restrictions**: Limited access keys cannot authorize new keys or modify their own limits or scopes. Admin access keys can manage keys, but cannot carry spending limits, call scopes, or expiry.
 
 ### Authorization Hierarchy
@@ -45,13 +45,13 @@ The protocol enforces a strict hierarchy at validation time:
 2. **Admin Access Keys**: Secondary authorized keys for account administration
    - Can call key-management mutators, including `authorizeKey`, `authorizeAdminKey`, and `revokeKey`
    - Cannot carry spending limits, call scopes, or expiry
-   - Cannot create contracts
+   - Cannot use a top-level `Create` call
 
 3. **Limited Access Keys**: Secondary authorized keys for scoped transactions
    - Cannot call mutable precompile functions (only view functions are allowed)
    - Subject to per-TIP20 token spending limits
    - Subject to call-scope checks during execution
-   - Cannot create contracts
+   - Cannot use a top-level `Create` call
    - Can have expiry timestamps
 
 ## Storage
@@ -319,7 +319,7 @@ Limited access keys cannot escalate their own privileges because:
 
 - Call-scope checks run on top-level calls signed by an Access Key.
 - If a key is scoped and a call does not match the stored target, selector, and recipient rules, execution reverts with `CallNotAllowed`.
-- Access-key-signed transactions cannot create contracts in any configuration — including direct `CREATE`, factory `CREATE`, and internal `CREATE2`. Only Root-Key-signed transactions may perform contract creation.
+- Access-key-signed transactions cannot use a top-level `Create` call. Contract creation inside a called contract is not rejected solely because it uses `CREATE` or `CREATE2`.
 
 ### Key Expiry
 
@@ -343,7 +343,7 @@ Limited access keys cannot escalate their own privileges because:
 
 1. User's Access Key signs the transaction (no `key_authorization` needed)
 2. Protocol validates the Access Key via `validate_keychain_authorization()`, sets `transactionKey[account] = keyId`
-3. Transaction executes with spending limit enforcement via internal `verify_and_update_spending()` and call-scope enforcement. Contract creation is rejected.
+3. Transaction executes with spending limit enforcement via internal `verify_and_update_spending()` and call-scope enforcement. A top-level `Create` call is rejected.
 
 ### Root Key or Admin Key Revoking or Updating an Access Key
 

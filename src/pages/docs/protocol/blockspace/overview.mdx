@@ -1,6 +1,6 @@
 ---
 title: Blockspace Overview
-description: Technical specification for Tempo block structure including header fields, payment lanes, and system transaction ordering.
+description: Technical specification for Tempo block structure including header fields and payment-lane gas accounting.
 ---
 
 # Blockspace Overview
@@ -11,7 +11,7 @@ This specification defines the structure of valid blocks in the Tempo blockchain
 
 ## Motivation
 
-Tempo blocks extend the Ethereum block format in multiple ways: there are new header fields to account for payment lanes and shared gas accounting, and system transactions are added to the block body for the fee AMM and other protocol operations. This specification contains all the modifications to the block format.
+Tempo blocks extend the Ethereum block format with header fields for payment-lane gas accounting, sub-second timestamps, and optional consensus context.
 
 ## Specification
 
@@ -28,17 +28,9 @@ pub struct TempoHeader {
 ```
 - `inner` is the canonical Ethereum header (parent_hash, state_root, gas_limit, etc.).
 - `consensus_context` is optional consensus metadata and is absent on older blocks.
-- `general_gas_limit` and `shared_gas_limit` partition the canonical `gas_limit` for payment and non-payment capacity (see [payment lane specification](/docs/protocol/blockspace/payment-lane-specification)).
+- `general_gas_limit` and `shared_gas_limit` are lane-specific execution limits. The canonical `inner.gas_limit` remains a separate block-wide limit (see [payment lane specification](/docs/protocol/blockspace/payment-lane-specification)).
 - `timestamp_millis_part` stores the sub‑second component; the full timestamp is `inner.timestamp * 1000 + timestamp_millis_part` .
 
 ### Block body
-The block body in Tempo retains the canonical Ethereum block body structure, with the addition of system transactions. Transactions are ordered in the following sections:
 
-1. Start-of-block system transaction(s).
-2. Proposer lane transactions, subject to `general_gas_limit` on non-payment transactions.
-3. Remaining transactions that consume the shared gas budget.
-4. Protocol-defined end-of-block system transactions, when required.
-
-### System transactions
-
-A valid Tempo block must include any required protocol-defined system transactions in the expected order before and after user transactions.
+The block body retains the canonical Ethereum structure. User transactions are admitted and ordered under Tempo's payment-lane rules. Under the T4 and later rules, blocks do not require separate start-of-block or Fee AMM system transactions.

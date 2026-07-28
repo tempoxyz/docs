@@ -43,10 +43,10 @@ pub struct TempoTransaction {
     // Optional features
     fee_token: Option<Address>,                 // Optional fee token preference
     fee_payer_signature: Option<Signature>,     // Sponsored transactions (secp256k1 only)
-    valid_before: Option<u64>,                  // Transaction expiration timestamp (seconds)
-    valid_after: Option<u64>,                   // Transaction can only be included after this timestamp (seconds)
+    valid_before: Option<NonZeroU64>,           // Transaction expiration timestamp (seconds)
+    valid_after: Option<NonZeroU64>,            // Transaction can only be included after this timestamp (seconds)
     key_authorization: Option<SignedKeyAuthorization>, // Access key authorization (optional)
-    aa_authorization_list: Vec<TempoSignedAuthorization>, // EIP-7702 style authorizations with AA signatures
+    tempo_authorization_list: Vec<TempoSignedAuthorization>, // EIP-7702 style authorizations with AA signatures
 }
 
 // Call structure for batching
@@ -59,14 +59,14 @@ pub struct Call {
 // Key authorization for provisioning access keys
 // RLP encoding: [chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?]
 pub struct KeyAuthorization {
-    chain_id: u64,                              // Chain ID for replay protection (0 = valid on any chain)
+    chain_id: u64,                              // Must match the current chain after T1C
     key_type: SignatureType,                    // Type of key: Secp256k1 (0), P256 (1), or WebAuthn (2)
     key_id: Address,                            // Key identifier (address derived from public key)
-    expiry: Option<u64>,                        // Unix timestamp when key expires (omit / None for never expires)
+    expiry: Option<NonZeroU64>,                 // Unix timestamp when key expires (omit / None for never expires)
     limits: Option<Vec<TokenLimit>>,            // TIP20 spending limits (None = unlimited spending)
     allowed_calls: Option<Vec<CallScope>>,      // Call-scope allowlist (None = unrestricted; Some(empty) = scoped deny-all)
     witness: Option<B256>,                      // App-defined witness digest for replay protection
-    is_admin: Option<bool>,                     // true to provision an admin access key
+    is_admin: bool,                             // true to provision an admin access key
     account: Option<Address>,                   // Target account for admin-signed authorizations
 }
 
@@ -127,7 +127,7 @@ pub struct P256SignatureWithPreHash {
 Note: Some P256 implementers (like Web Crypto) require the digests to be pre-hashed before verification.
 If `pre_hash` is set to `true`, then before verification: `digest = sha256(digest)`.
 
-#### WebAuthn (Variable length, max 2KB)
+#### WebAuthn (Variable length, max 2,049 encoded bytes)
 ```rust
 pub struct WebAuthnSignature {
     typeId: u8,                 // 0x02
@@ -138,18 +138,18 @@ pub struct WebAuthnSignature {
     pub_key_y: B256             // 32 bytes
 }
 ```
-**Format**: Type identifier `0x02` + variable webauthn_data + 128 bytes (r, s, pub_key_x, pub_key_y). Total length: variable (minimum 129 bytes, maximum 2049 bytes). The `typeId` is a wire format prefix prepended during encoding. Parse by working backwards: last 128 bytes are r, s, pub_key_x, pub_key_y.
+**Format**: Type identifier `0x02` + variable webauthn_data + 128 bytes (r, s, pub_key_x, pub_key_y). Verification requires at least 198 encoded bytes and caps the total at 2,049 bytes including the prefix. The `typeId` is a wire format prefix prepended during encoding. Parse by working backwards: last 128 bytes are r, s, pub_key_x, pub_key_y.
 
-#### Keychain (Variable length)
+#### Keychain V2 (Variable length)
 ```rust
 pub struct KeychainSignature {
-    typeId: u8,                     // 0x03
+    typeId: u8,                     // 0x04
     user_address: Address,          // 20 bytes - root account address
     signature: PrimitiveSignature   // Inner signature (Secp256k1, P256, or WebAuthn)
 }
 ```
-**Format**: Type identifier `0x03` + user_address (20 bytes) + inner signature. The `typeId` is a wire format prefix prepended during encoding.
-**Purpose**: Allows an access key to sign on behalf of a root account. The handler validates that `user_address` has authorized the access key in the AccountKeychain precompile.
+**Format**: Type identifier `0x04` + user_address (20 bytes) + inner signature. The inner signature signs `keccak256(0x04 || transaction_signature_hash || user_address)`, which binds it to the account.
+**Purpose**: Allows an access key to sign on behalf of a root account. The handler validates that `user_address` has authorized the access key in the AccountKeychain precompile. The legacy `0x03` format did not bind the account address and is rejected after the T1C upgrade.
 
 ### Address Derivation
 
@@ -174,7 +174,7 @@ function deriveAddressFromP256(bytes32 pubKeyX, bytes32 pubKeyY) public pure ret
 
 ### Tempo Authorization List
 
-The `aa_authorization_list` field enables EIP-7702 style delegation with support for all three AA signature types (secp256k1, P256, and WebAuthn), not just secp256k1.
+The `tempo_authorization_list` field enables EIP-7702 style delegation with support for all three AA signature types (secp256k1, P256, and WebAuthn), not just secp256k1. Its JSON field name is `aaAuthorizationList`.
 
 #### Structure
 ```rust
@@ -190,7 +190,7 @@ Each authorization in the list:
 - Follows EIP-7702 semantics for delegation and execution
 
 #### Validation
-- Cannot have `Create` calls when `aa_authorization_list` is non-empty (follows EIP-7702 semantics)
+- Cannot have `Create` calls when `tempo_authorization_list` is non-empty (follows EIP-7702 semantics)
 - Authority address is recovered from the signature and matched against the authorization
 
 ### Parallelizable Nonces
@@ -254,18 +254,7 @@ contract Nonce is INonce {
 
 #### Gas Schedule
 
-For transactions using nonce keys:
-
-1. **Protocol nonce (key 0)**: No additional gas cost
-   - Uses the standard account nonce stored in account state
-
-2. **Existing user key (nonce > 0)**: Add 5,000 gas to base cost
-   - Rationale: Cold SLOAD (2,100) + warm SSTORE reset (2,900)
-
-3. **New user key (nonce == 0)**: Add 22,100 gas to base cost
-   - Rationale: Cold SLOAD (2,100) + SSTORE set for 0 → non-zero (20,000)
-
-We specify the complete gas schedule in more detail in the [gas costs section](#gas-costs)
+Nonce gas depends on the active protocol upgrade. On T2 and later, an existing 2D nonce key adds 5,200 gas. On T1 and later, a non-expiring transaction with `nonce == 0` adds a total 250,000-gas account-creation charge. The expiring-nonce mode takes a separate 13,000-gas branch instead. See [Gas Costs](#gas-costs) for the current summary.
 
 ### Transaction Validation
 
@@ -273,8 +262,8 @@ We specify the complete gas schedule in more detail in the [gas costs section](#
 1. Determine type from signature format:
    - 65 bytes (no type identifier) = secp256k1
    - First byte `0x01` + 129 bytes = P256 (total 130 bytes)
-   - First byte `0x02` + variable data = WebAuthn (total 129-2049 bytes)
-   - First byte `0x03` + 20 bytes + inner signature = Keychain
+   - First byte `0x02` + 128-2,048 bytes = WebAuthn (decoder range 129-2,049 bytes; verification also requires at least 198 bytes and valid client data)
+   - First byte `0x04` + 20 bytes + inner signature = Keychain V2
    - Otherwise invalid
 2. Apply appropriate verification:
    - secp256k1: Standard `ecrecover`
@@ -323,7 +312,9 @@ sender_hash = keccak256(0x76 || rlp([
     valid_before,
     valid_after,
     0x80,  // fee_token encoded as EMPTY (skipped)
-    0x00   // placeholder byte for fee_payer_signature
+    0x00,  // placeholder byte for fee_payer_signature
+    tempo_authorization_list,
+    key_authorization? // omitted when absent
 ]))
 
 // When no fee_payer_signature:
@@ -339,7 +330,9 @@ sender_hash = keccak256(0x76 || rlp([
     valid_before,
     valid_after,
     fee_token,  // fee_token is INCLUDED
-    0x80        // empty for no fee_payer_signature
+    0x80,       // empty for no fee_payer_signature
+    tempo_authorization_list,
+    key_authorization? // omitted when absent
 ]))
 ```
 
@@ -364,9 +357,10 @@ fee_payer_hash = keccak256(0x78 || rlp([  // Note: 0x78 magic byte
     nonce,
     valid_before,
     valid_after,
-    fee_token,      // fee_token ALWAYS included
-    sender_address  // 20-byte sender address
-    key_authorization,
+    fee_token,                // fee_token ALWAYS included
+    sender_address,           // 20-byte sender address
+    tempo_authorization_list,
+    key_authorization?        // omitted when absent
 ]))
 ```
 
@@ -435,7 +429,7 @@ The transaction is RLP encoded as follows:
     valid_after,             // 0x80 if None
     fee_token,               // 0x80 if None
     fee_payer_signature,     // 0x80 if None, RLP list [v, r, s] if Some
-    aa_authorization_list,   // EIP-7702 style authorization list with AA signatures
+    tempo_authorization_list, // EIP-7702 style authorization list with AA signatures
     key_authorization?,      // Only encoded if present (backwards compatible)
     sender_signature         // TempoSignature bytes (secp256k1, P256, WebAuthn, or Keychain)
 ])
@@ -446,33 +440,39 @@ The transaction is RLP encoded as follows:
 rlp([to, value, input])
 ```
 
-**Key Authorization Encoding:**
+**Signed Key Authorization Encoding:**
 ```
 rlp([
-    chain_id,
-    key_type,
-    key_id,
-    expiry?,         // Optional trailing field (omitted or 0x80 if None)
-    limits?,         // Optional trailing field (omitted or 0x80 if None)
-    signature        // PrimitiveSignature bytes
+    rlp([
+        chain_id,
+        key_type,
+        key_id,
+        expiry?,
+        limits?,
+        allowed_calls?,
+        witness?,
+        is_admin?,
+        account?
+    ]),
+    primitive_signature
 ])
 ```
 
 **Notes:**
-- Optional fields encode as `0x80` (EMPTY_STRING_CODE) when `None`
+- Fixed-position optional transaction fields encode as `0x80` (EMPTY_STRING_CODE) when `None`
 - The `key_authorization` field is truly optional - when `None`, no bytes are encoded (backwards compatible)
 - The `calls` field is a list that must contain at least one Call (empty calls list is invalid)
 - The `sender_signature` field is the final field and contains the TempoSignature bytes (secp256k1, P256, WebAuthn, or Keychain)
-- KeyAuthorization uses RLP trailing field semantics for optional `expiry`, `limits`, `allowed_calls`, `witness`, `is_admin`, and `account`
+- KeyAuthorization uses canonical trailing RLP fields: absent values at the end are omitted, while `0x80` placeholders preserve positions before a later field
 
 ### WebAuthn Signature Verification
 
-WebAuthn verification follows the [Daimo P256 verifier approach](https://github.com/daimo-eth/p256-verifier/blob/master/src/WebAuthn.sol).
+Tempo parses the WebAuthn assertion data and verifies its P256 signature.
 
 #### Signature Format
 
-```
-signature = authenticatorData || clientDataJSON || r (32) || s (32) || pubKeyX (32) || pubKeyY (32)
+```text
+signature = 0x02 || authenticatorData (37) || clientDataJSON || r (32) || s (32) || pubKeyX (32) || pubKeyY (32)
 ```
 
 Parse by working backwards:
@@ -480,64 +480,70 @@ Parse by working backwards:
 - Previous 32 bytes: `pubKeyX`
 - Previous 32 bytes: `s`
 - Previous 32 bytes: `r`
-- Remaining bytes: `authenticatorData || clientDataJSON` (requires parsing to split)
+- Remaining bytes after the `0x02` prefix: 37-byte `authenticatorData` followed by `clientDataJSON`
 
-#### Authenticator Data Structure (minimum 37 bytes)
+#### Authenticator Data Structure (37 bytes)
 
-```
+```text
 Bytes 0-31:   rpIdHash (32 bytes)
 Byte 32:      flags (1 byte)
-              - Bit 0 (0x01): User Presence (UP) - must be set
+              - Bit 0 (0x01): User Presence (UP)
+              - Bit 2 (0x04): User Verification (UV)
 Bytes 33-36:  signCount (4 bytes)
 ```
 
 #### Verification Steps
 
 ```python
-def verify_webauthn(tx_hash: bytes32, signature: bytes, require_uv: bool) -> bool:
-    # 1. Parse signature
-    pubKeyY = signature[-32:]
-    pubKeyX = signature[-64:-32]
+import base64
+import json
+from hashlib import sha256
+
+def verify_webauthn(tx_hash: bytes, signature: bytes) -> bool:
+    if not 198 <= len(signature) <= 2_049 or signature[0] != 0x02:
+        return False
+
+    pub_key_y = signature[-32:]
+    pub_key_x = signature[-64:-32]
     s = signature[-96:-64]
     r = signature[-128:-96]
-    webauthn_data = signature[:-128]
-
-    # Parse authenticatorData and clientDataJSON
-    # Minimum authenticatorData is 37 bytes
-    # Simple approach: try to decode clientDataJSON from different split points
-    authenticatorData, clientDataJSON = split_webauthn_data(webauthn_data)
-
-    # 2. Validate authenticator data
-    if len(authenticatorData) < 37:
+    webauthn_data = signature[1:-128]
+    if len(webauthn_data) <= 37:
         return False
 
-    flags = authenticatorData[32]
-    if not (flags & 0x01):  # UP bit must be set
+    authenticator_data = webauthn_data[:37]
+    client_data_json = webauthn_data[37:]
+    flags = authenticator_data[32]
+
+    if not flags & (0x01 | 0x04):  # UP or UV
+        return False
+    if flags & (0x40 | 0x80):      # AT and ED are unsupported
         return False
 
-    # 3. Validate client data JSON
-    if not contains(clientDataJSON, '"type":"webauthn.get"'):
+    try:
+        client_data = json.loads(client_data_json)
+        assertion_type = client_data["type"]
+        challenge = client_data["challenge"]
+    except (KeyError, TypeError, UnicodeError, ValueError):
         return False
 
-    challenge_b64url = base64url_encode(tx_hash)
-    challenge_property = '"challenge":"' + challenge_b64url + '"'
-    if not contains(clientDataJSON, challenge_property):
+    if assertion_type != "webauthn.get":
+        return False
+    expected_challenge = base64.urlsafe_b64encode(tx_hash).rstrip(b"=").decode("ascii")
+    if challenge != expected_challenge:
         return False
 
-    # 4. Compute message hash
-    clientDataHash = sha256(clientDataJSON)
-    messageHash = sha256(authenticatorData + clientDataHash)
-
-    # 5. Verify P256 signature
-    return p256_verify(messageHash, r, s, pubKeyX, pubKeyY)
+    client_data_hash = sha256(client_data_json).digest()
+    message_hash = sha256(authenticator_data + client_data_hash).digest()
+    return p256_verify(message_hash, r, s, pub_key_x, pub_key_y)
 ```
 
 #### What We Verify
 
-- Authenticator data minimum length (37 bytes)
-- User Presence (UP) flag is set
-- `"type":"webauthn.get"` in clientDataJSON
-- Challenge matches tx_hash (Base64URL encoded)
+- Authenticator data is exactly 37 bytes; AT and ED flags are rejected
+- User Presence (UP) or User Verification (UV) is set
+- Parsed `clientDataJSON.type` equals `webauthn.get`
+- Parsed challenge equals the transaction hash encoded as Base64URL without padding
 - P256 signature validity
 
 #### What We Skip
@@ -547,15 +553,7 @@ def verify_webauthn(tx_hash: bytes32, signature: bytes, require_uv: bool) -> boo
 - Signature counter (anti-cloning left to application layer)
 - Backup flags (account policy decision)
 
-#### Parsing authenticatorData and clientDataJSON
-
-Since authenticatorData has variable length, finding the split point requires:
-1. Check if AT flag (bit 6) is set at byte 32
-2. If not set, authenticatorData is exactly 37 bytes
-3. If set, need to parse CBOR credential data (complex, see implementation)
-4. Everything after authenticatorData is clientDataJSON (valid UTF-8 JSON)
-
-**Simplified approach:** For TempoTransactions, wallets should send minimal authenticatorData (37 bytes, no AT/ED flags) to minimize gas costs and simplify parsing.
+Tempo does not support attested credential data or WebAuthn extensions in transaction signatures, so the split is always after byte 37.
 
 ### Access Keys
 
@@ -566,7 +564,7 @@ be able to sign transactions on the sender's behalf without inducing another pas
 More information about Access Keys can be found in the [Account Keychain Specification](./AccountKeychain).
 
 A sender can authorize a key by signing over a "key authorization" item that contains the following information:
-- **Chain ID** for replay protection (0 = valid on any chain)
+- **Chain ID** for replay protection (must match the current chain after T1C; `0` was a wildcard only before T1C)
 - **Key type** (Secp256k1, P256, or WebAuthn)
 - **Key ID** (address derived from the public key)
 - **Expiration** timestamp of when the key should expire (optional - None means never expires)
@@ -579,7 +577,7 @@ A sender can authorize a key by signing over a "key authorization" item that con
   - Selector rules can additionally constrain TIP-20 recipient-bearing selectors to a recipient allowlist.
   - `Some([])` (an empty top-level allowlist) means scoped deny-all.
 
-Access-key-signed transactions cannot perform contract creation. Calls within the batch that would `CREATE` or `CREATE2` (including via factory contracts) are rejected. Use the Root Key for deployment flows.
+Access-key-signed transactions cannot use a top-level `Create` call. A contract called by the transaction may still use `CREATE` or `CREATE2`.
 
 #### RLP Encoding
 
@@ -590,30 +588,33 @@ The root key or an active admin access key signs over the keccak256 hash of the 
 ```
 key_authorization_digest = keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?]))
 
-chain_id = u64 (0 = valid on any chain)
+chain_id = u64 (must match the current chain after T1C)
 key_type = 0 (Secp256k1) | 1 (P256) | 2 (WebAuthn)
 key_id = Address (derived from the public key)
-expiry = Option<u64> (unix timestamp, None = never expires; omitted expiry is translated to u64::MAX when the protocol calls the precompile)
+expiry = Option<NonZeroU64> (unix timestamp, None = never expires; omitted expiry is translated to u64::MAX when the protocol calls the precompile)
 limits = Option<Vec<[token, limit, period]>> (None = unlimited spending; period = 0 means one-time)
 allowed_calls = Option<Vec<[target, [[selector, [recipient, ...]], ...]]>> (None = unrestricted; Some([]) = scoped deny-all)
 witness = Option<bytes32> (app-defined witness digest)
-is_admin = Option<bool> (true provisions an admin access key)
+is_admin = bool (true provisions an admin access key; false is omitted from trailing RLP)
 account = Option<Address> (required when an admin access key signs the authorization)
 ```
 
 **Signed Format:**
 
-The signed format (`SignedKeyAuthorization`) includes all fields with the `signature` appended:
+The signed format (`SignedKeyAuthorization`) is an outer two-item RLP list containing the authorization and its signature:
 
 ```
-signed_key_authorization = rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?, signature])
+signed_key_authorization = rlp([
+    rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?]),
+    primitive_signature
+])
 ```
 
 The `signature` is a `PrimitiveSignature` (secp256k1, P256, or WebAuthn) signed by the root key or an active admin access key.
 
-Note: `expiry`, `limits`, `allowed_calls`, `witness`, `is_admin`, and `account` use RLP trailing field semantics — they can be omitted entirely when None.
+Note: `expiry`, `limits`, `allowed_calls`, `witness`, the `is_admin` marker, and `account` use canonical trailing RLP semantics. Trailing absent values are omitted; an absent value before a later field uses `0x80`. The `is_admin` marker is absent for `false` and encoded as `1` for `true`.
 
-When `is_admin` is `true`, `expiry`, `limits`, and `allowed_calls` must be omitted or empty because admin keys are only for key management. When an admin access key signs the authorization, `account` must be present and must equal the account being modified.
+When `is_admin` is `true`, `expiry`, `limits`, and `allowed_calls` must all be absent (`None`) because admin keys are only for key management. When an admin access key signs the authorization, `account` must be present and must equal the account being modified.
 
 :::warning[Expiry encoding]
 For `key_authorization`, the canonical non-expiring encoding omits `expiry` (`None`).
@@ -676,13 +677,13 @@ The protocol enforces a strict three-role hierarchy:
 - Secondary keys authorized by the Root Key or another active admin access key
 - Can call key-management mutators (`authorizeKey`, `authorizeAdminKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`)
 - Cannot carry spending limits, call scopes, or expiry
-- Cannot create contracts (`CREATE` and `CREATE2` are rejected anywhere in the call batch)
+- Cannot use a top-level `Create` call
 
 **Limited Access Keys** (keyId != address(0), `is_admin = false`):
 - Secondary keys authorized by the Root Key or an active admin access key
 - CANNOT call mutable precompile functions (`authorizeKey`, `authorizeAdminKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`)
 - Subject to per-TIP20 token spending limits and call-scope checks during execution
-- Cannot create contracts (`CREATE` and `CREATE2` are rejected anywhere in the call batch)
+- Cannot use a top-level `Create` call
 - Can have expiry timestamps
 
 When a limited Access Key attempts to call any mutable keychain function:
@@ -695,7 +696,7 @@ When a limited Access Key attempts to call any mutable keychain function:
 
 The protocol tracks and enforces spending limits for TIP20 token transfers:
 
-**Scope:** Only TIP20 `transfer()`, `transferWithMemo()`, `approve()`, and `startReward()` calls are tracked
+**Scope:** TIP20 `transfer()`, `transferWithMemo()`, and `approve()` calls are tracked
 - Spending limits only apply when `msg.sender == tx.origin` (direct EOA calls)
 - When a contract makes transfers on behalf of the user, spending limits do NOT apply (e.g., `transferFrom()`)
 - Native value transfers are NOT limited
@@ -703,7 +704,7 @@ The protocol tracks and enforces spending limits for TIP20 token transfers:
 - Other asset types are NOT limited
 
 **Tracking:** During transaction execution, when an Access Key's transaction directly calls TIP20 methods:
-1. Protocol intercepts `transfer(to, amount)`, `transferWithMemo()`, `approve(spender, amount)`, and `startReward()` calls
+1. Protocol intercepts `transfer(to, amount)`, `transferWithMemo()`, and `approve(spender, amount)` calls
 2. For `transfer`/`transferWithMemo`, the full `amount` is checked against the remaining limit
 3. For `approve`, only **increases** in approval (new approval minus previous allowance) are checked and counted against the limit
 4. Queries: `getRemainingLimitWithPeriod(account, keyId, token)`, which returns `(remaining, periodEnd)` and reflects any periodic rollover
@@ -732,7 +733,7 @@ When an Access Key has stored call scopes (`allowed_calls` was set at authorizat
 
 ##### Contract Creation Restriction
 
-Access-key-signed transactions cannot perform contract creation. Any `CREATE` or `CREATE2` (including via factory contracts or internal calls) reverts the transaction. Use the Root Key for deployment flows.
+Access-key-signed transactions cannot use a top-level `Create` call. Contract creation performed inside a called contract is not rejected solely because it uses `CREATE` or `CREATE2`.
 
 ##### Creating and Using KeyAuthorization
 
@@ -749,15 +750,15 @@ Access-key-signed transactions cannot perform contract creation. Any `CREATE` or
    ```typescript
    // Define key parameters
    const keyAuth = {
-     chain_id: 1,
+     chain_id: 4217,
      key_type: SignatureType.P256,      // 1
      key_id: keyId,                     // address derived from public key
      expiry: timestamp + 86400,         // 24 hours from now; omit this field for a non-expiring key authorization
      limits: [
        // One-time limit (period = 0)
-       { token: USDG_ADDRESS, limit: 1000000000, period: 0 },                  // 1000 USDG (6 decimals), one-time
+       { token: USDG_ADDRESS, limit: 1_000_000_000n, period: 0 },              // 1000 USDG (6 decimals), one-time
        // Recurring weekly limit (period = 604800 seconds)
-       { token: DAI_ADDRESS, limit: 500000000000000000000n, period: 604800 }   // 500 DAI / week
+       { token: USDT_ADDRESS, limit: 500_000_000n, period: 604800 }            // 500 USDT (6 decimals) / week
      ],
      // Optional call scopes — omit for an unrestricted key
      allowed_calls: [
@@ -784,13 +785,10 @@ Access-key-signed transactions cannot perform contract creation. Any `CREATE` or
 4. **Build TempoTransaction**
    ```typescript
    const tx = {
-     chain_id: 1,
+     chain_id: 4217,
      nonce: await getNonce(account),
      nonce_key: 0,
      calls: [{ to: recipient, value: 0, input: "0x" }],
-     gas_limit: 200000,
-     max_fee_per_gas: 1000000000,
-     max_priority_fee_per_gas: 1000000000,
      key_authorization: {
        authorization: keyAuth,
        signature: rootSignature  // Root Key's signature on authDigest
@@ -803,15 +801,11 @@ Access-key-signed transactions cannot perform contract creation. Any `CREATE` or
    ```typescript
    // Sign transaction with the NEW Access Key being authorized
    const txHash = computeTxSignatureHash(tx);
-   const accessSignature = await signWithAccessKey(txHash, accessKey);
-
-   // Wrap in Keychain signature
-   const finalSignature = {
-     Keychain: {
-       user_address: account,
-       signature: { P256: accessSignature }  // or Secp256k1
-     }
-   };
+   const keychainHash = computeKeychainV2Hash(txHash, account);
+   // keychainHash = keccak256(0x04 || txHash || account)
+   const accessSignature = await signWithAccessKey(keychainHash, accessKey);
+   const finalSignature = encodeKeychainV2(account, accessSignature);
+   // 0x04 || account || encoded primitive signature
    ```
 
 6. **Submit Transaction**
@@ -825,7 +819,7 @@ Access-key-signed transactions cannot perform contract creation. Any `CREATE` or
 ```typescript
 // Access Key is already authorized, just sign transactions directly
 const tx = {
-  chain_id: 1,
+  chain_id: 4217,
   nonce: await getNonce(account),
   calls: [{ to: recipient, value: 0, input: calldata }],
   key_authorization: null,  // No authorization needed
@@ -833,14 +827,9 @@ const tx = {
 };
 
 const txHash = computeTxSignatureHash(tx);
-const accessSignature = await signWithAccessKey(txHash, accessKey);
-
-const finalSignature = {
-  Keychain: {
-    user_address: account,
-    signature: { P256: accessSignature }
-  }
-};
+const keychainHash = computeKeychainV2Hash(txHash, account);
+const accessSignature = await signWithAccessKey(keychainHash, accessKey);
+const finalSignature = encodeKeychainV2(account, accessSignature);
 
 // Submit - protocol validates key is authorized and not expired
 ```
@@ -852,7 +841,7 @@ const finalSignature = {
 ```typescript
 // Must be signed by the Root Key or an active admin key
 const tx = {
-  chain_id: 1,
+  chain_id: 4217,
   nonce: await getNonce(account),
   calls: [{
     to: ACCOUNT_KEYCHAIN_ADDRESS,
@@ -868,7 +857,7 @@ const tx = {
 ```typescript
 // Must be signed by the Root Key or an active admin key
 const tx = {
-  chain_id: 1,
+  chain_id: 4217,
   nonce: await getNonce(account),
   calls: [{
     to: ACCOUNT_KEYCHAIN_ADDRESS,
@@ -914,279 +903,45 @@ const currentKey = await precompile.getTransactionKey();
 
 ## Rationale
 
-### Signature Type Detection by Length
-Using signature length for type detection avoids adding explicit type fields while maintaining deterministic parsing. The chosen lengths (65, 129, variable) are naturally distinct.
+### Signature Type Detection
 
-### Linear Gas Scaling for Nonce Keys
-The progressive pricing model prevents state bloat while keeping initial keys affordable. The 20,000 gas increment approximates the long-term state cost of maintaining each additional nonce mapping.
+Secp256k1 is the only unprefixed signature format and is detected by its exact 65-byte length. P256, WebAuthn, and Keychain signatures use the type prefixes described above.
 
-### No Nonce Expiry
-Avoiding expiry simplifies the protocol and prevents edge cases where in-flight transactions become invalid. Wallets handle nonce key allocation to prevent conflicts.
+### Fork-Aware Gas Pricing
+
+Intrinsic gas is derived from the active protocol upgrade and the transaction's actual fields. This keeps state-creation, signature, calldata, call, and authorization costs aligned with execution instead of relying on one fixed total.
+
+### Nonce Expiration
+
+Ordinary protocol and 2D nonce sequences do not expire. Tempo also has an expiring-nonce mode for short-lived transactions: set `nonce_key = U256::MAX`, `nonce = 0`, and `valid_before` so `block.timestamp < valid_before <= block.timestamp + 30`.
 
 ### Backwards Compatibility
 
-This spec introduces a new transaction type and does not modify existing transaction processing. Legacy transactions continue to work unchanged. We special case `nonce key = 0` (also referred to as the protocol nonce key) to maintain compatibility with existing nonce behavior.
+This spec introduces a new transaction type and does not modify existing transaction processing. Legacy transactions continue to work unchanged. We special case `nonce_key = 0` (the protocol nonce key) to maintain existing nonce behavior.
 
 ## Gas Costs
 
-### Signature Verification Gas Schedule
+Tempo computes intrinsic gas from the active fork's gas table, transaction shape, signatures, calldata, access list, calls, and authorizations. Applications should estimate gas through the RPC instead of hard-coding a total.
 
-Different signature types incur different base transaction costs to reflect their computational complexity:
+Current signature additions beyond the base transaction stipend are:
 
-| Signature Type | Base Gas Cost | Calculation | Rationale |
-|----------------|---------------|-------------|-----------|
-| **secp256k1** | 21,000 | Standard | Includes 3,000 gas for ecrecover precompile |
-| **P256** | 26,000 | 21,000 + 5,000 | Base 21k + additional 5k for P256 verification |
-| **WebAuthn** | 26,000 + variable data cost | 26,000 + (calldata gas for clientDataJSON) | Base P256 cost plus variable cost for clientDataJSON based on size |
-| **Keychain** | Inner signature + 3,000 | primitive_sig_cost + 3,000 | Inner signature cost + key validation overhead (2,100 SLOAD + 900 buffer) |
+| Signature | Additional gas |
+| --- | ---: |
+| secp256k1 | 0 |
+| P256 | 5,000 |
+| WebAuthn | 5,000 plus calldata pricing for `webauthn_data` |
+| Keychain | Inner-signature cost plus 3,000 |
 
-**Rationale:**
-- The base 21,000 gas for standard transactions already includes the cost of secp256k1 signature verification via ecrecover (3,000 gas)
-- [EIP 7951](https://eips.ethereum.org/EIPS/eip-7951) sets P256 verification cost at 6,900 gas. We add 1,100 gas to account for the additional 65 bytes of signature size (129 bytes total vs 64 bytes for secp256k1), giving 8,000 gas total. Since the base 21k already includes 3,000 gas for ecrecover (which P256 doesn't use), the net additional cost is 8,000 - 3,000 = **5,000 gas**.
-- WebAuthn signatures require additional computation to parse and validate the clientDataJSON structure. We cap the total signature size at 2kb. The signature is also  charged using the same gas schedule as calldata (16 gas per non-zero byte, 4 gas per zero byte) to prevent the use of this signature space from spam.
-- Keychain signatures wrap a primitive signature and are used by access keys. They add 3,000 gas to cover key validation during transaction validation (cold SLOAD to verify key exists + processing overhead).
-- Individual per-signature-type gas costs allow us to add more advanced verification methods in the future like multisigs, which could have dynamic gas pricing.
+Current nonce additions are:
 
-### Nonce Key Gas Schedule
+| Nonce mode | Additional gas |
+| --- | ---: |
+| Protocol nonce with `nonce > 0` | 0 |
+| Existing 2D nonce key on T2+ | 5,200 |
+| Non-expiring Tempo transaction with `nonce == 0` on T1+ | 250,000 total |
+| Expiring nonce mode (`nonce_key = U256::MAX`, `nonce = 0`) | 13,000 instead of the nonce-zero charge |
 
-Transactions using parallelizable nonces incur additional costs based on the nonce key usage pattern:
-
-#### Case 1: Protocol Nonce (Key 0)
-- **Additional Cost:** 0 gas
-- **Total:** 21,000 gas (base transaction cost)
-- **Rationale:** Maintains backward compatibility with existing transaction flow
-
-#### Case 2: Existing User Nonce Key (nonce > 0)
-- **Additional Cost:** 5,000 gas
-- **Total:** 26,000 gas
-- **Rationale:** Cold SLOAD (2,100) + warm SSTORE reset (2,900) for incrementing an existing nonce
-
-#### Case 3: New User Nonce Key (nonce == 0)
-- **Additional Cost:** 22,100 gas
-- **Total:** 43,100 gas
-- **Rationale:** Cold SLOAD (2,100) + SSTORE set (20,000) for writing to a new storage slot
-
-**Rationale for Fixed Pricing:**
-1. **Simplicity:** Fixed costs based on actual EVM storage operations are straightforward to reason about
-2. **Storage Pattern Alignment:** Costs directly mirror EVM cold SSTORE costs for new vs existing slots
-3. **State Growth:** Creating new nonce keys incurs the higher cost naturally through SSTORE set pricing
-
-### Key Authorization Gas Schedule
-
-When a transaction includes a `key_authorization` field to provision a new access key, additional intrinsic gas is charged to cover signature verification and storage operations. This gas is charged **before execution** as part of the transaction's intrinsic gas cost.
-
-#### Gas Components
-
-| Component | Gas Cost | Notes |
-|-----------|----------|-------|
-| **Signature verification** | 3,000 (secp256k1) / 8,000 (P256) / 8,000 + calldata (WebAuthn) | Verifying the root/admin key's signature on the authorization |
-| **Key storage** | 22,000 | Cold SSTORE to store new key (0→non-zero) |
-| **Overhead buffer** | 5,000 | Buffer for event emission, storage reads, and other overhead |
-| **Per spending limit** | 22,000 each | Cold SSTORE per token limit (0→non-zero) |
-
-**Signature verification rationale:** KeyAuthorization requires an *additional* signature verification beyond the transaction signature. Unlike the transaction signature (where ecrecover cost is included in the base 21k), KeyAuthorization must pay the full verification cost:
-- **secp256k1**: 3,000 gas (ecrecover precompile cost)
-- **P256**: 8,000 gas (6,900 from EIP-7951 + 1,100 for signature size). Note: the transaction signature schedule charges only 5,000 additional gas for P256 because it subtracts the 3,000 ecrecover "savings" already in base 21k. KeyAuthorization pays the full 8,000.
-- **WebAuthn**: 8,000 + calldata gas for webauthn_data
-
-#### Gas Formula
-
-```
-KEY_AUTH_BASE_GAS = 30,000  # For secp256k1 signature (3,000 + 22,000 + 5,000)
-KEY_AUTH_BASE_GAS = 35,000  # For P256 signature (5,000 + 3,000 + 22,000 + 5,000)
-KEY_AUTH_BASE_GAS = 35,000 + webauthn_calldata_gas  # For WebAuthn signature
-
-PER_LIMIT_GAS = 22,000  # Per spending limit entry
-
-total_key_auth_gas = KEY_AUTH_BASE_GAS + (num_limits * PER_LIMIT_GAS)
-```
-
-#### Examples
-
-| Configuration | Gas Cost | Calculation |
-|--------------|----------|-------------|
-| secp256k1, no limits | 30,000 | Base only |
-| secp256k1, 1 limit | 52,000 | 30,000 + 22,000 |
-| secp256k1, 3 limits | 96,000 | 30,000 + (3 × 22,000) |
-| P256, no limits | 35,000 | Base with P256 verification |
-| P256, 2 limits | 79,000 | 35,000 + (2 × 22,000) |
-
-#### Rationale
-
-1. **Pre-execution charging**: KeyAuthorization is validated and executed during transaction validation (before the EVM runs), so its gas must be included in intrinsic gas
-2. **Storage cost alignment**: The 22,000 gas per storage slot approximates EVM cold SSTORE costs for new slots
-3. **DoS prevention**: Progressive cost based on number of limits prevents abuse through excessive limit creation
-
-### Reference Pseudocode
-```python
-def calculate_calldata_gas(data: bytes) -> uint256:
-    """
-    Calculate gas cost for calldata based on zero and non-zero bytes
-
-    Args:
-        data: bytes to calculate cost for
-
-    Returns:
-        gas_cost: uint256
-    """
-    CALLDATA_ZERO_BYTE_GAS = 4
-    CALLDATA_NONZERO_BYTE_GAS = 16
-
-    gas = 0
-    for byte in data:
-        if byte == 0:
-            gas += CALLDATA_ZERO_BYTE_GAS
-        else:
-            gas += CALLDATA_NONZERO_BYTE_GAS
-
-    return gas
-
-
-def calculate_signature_verification_gas(signature: PrimitiveSignature) -> uint256:
-    """
-    Calculate gas cost for verifying a primitive signature.
-
-    Returns the ADDITIONAL gas beyond the base 21k transaction cost.
-    - secp256k1: 0 (already included in base 21k via ecrecover)
-    - P256: 5,000 (8,000 full cost - 3,000 ecrecover already in base 21k)
-    - WebAuthn: 5,000 + calldata gas for webauthn_data
-    """
-    # P256 full verification cost is 8,000 (6,900 from EIP-7951 + 1,100 for signature size)
-    # But base 21k already includes 3,000 for ecrecover, so additional cost is 5,000
-    P256_ADDITIONAL_GAS = 5_000
-
-    if signature.type == Secp256k1:
-        return 0  # Already included in base 21k
-    elif signature.type == P256:
-        return P256_ADDITIONAL_GAS
-    elif signature.type == WebAuthn:
-        webauthn_data_gas = calculate_calldata_gas(signature.webauthn_data)
-        return P256_ADDITIONAL_GAS + webauthn_data_gas
-    else:
-        revert("Invalid signature type")
-
-
-def calculate_key_authorization_gas(key_auth: SignedKeyAuthorization) -> uint256:
-    """
-    Calculate the intrinsic gas cost for a KeyAuthorization.
-
-    This is charged BEFORE execution as part of transaction validation.
-
-    Args:
-        key_auth: SignedKeyAuthorization with fields:
-            - signature: PrimitiveSignature (root/admin key's signature)
-            - limits: Optional[List[TokenLimit]]              # each carries a `period`
-            - allowed_calls: Optional[List[CallScope]]        # call-scope allowlist
-
-    Returns:
-        gas_cost: uint256
-
-    Note: This is a simplified illustration. See the enhanced access key permissions specification for the canonical
-    slot-counting rules covering periodic-limit state and call-scope storage.
-    """
-    # Constants - KeyAuthorization pays FULL signature verification costs
-    # (not the "additional" costs used for transaction signatures)
-    ECRECOVER_GAS = 3_000   # Full ecrecover cost
-    P256_FULL_GAS = 8_000   # Full P256 cost (6,900 + 1,100)
-    COLD_SSTORE_SET_GAS = 22_000  # Storage cost for new slot
-    OVERHEAD_BUFFER = 5_000  # Buffer for event emission, storage reads, etc.
-
-    gas = 0
-
-    # Step 1: Signature verification cost (full cost, not additional)
-    if key_auth.signature.type == Secp256k1:
-        gas += ECRECOVER_GAS  # 3,000
-    elif key_auth.signature.type == P256:
-        gas += P256_FULL_GAS  # 8,000
-    elif key_auth.signature.type == WebAuthn:
-        webauthn_data_gas = calculate_calldata_gas(key_auth.signature.webauthn_data)
-        gas += P256_FULL_GAS + webauthn_data_gas  # 8,000 + calldata
-
-    # Step 2: Key storage
-    gas += COLD_SSTORE_SET_GAS  # 22,000 - store new key (0 → non-zero)
-
-    # Step 3: Overhead buffer
-    gas += OVERHEAD_BUFFER  # 5,000
-
-    # Step 4: Per-limit storage cost (each TokenLimit carries period state)
-    num_limits = len(key_auth.limits) if key_auth.limits else 0
-    gas += num_limits * COLD_SSTORE_SET_GAS  # 22,000 per limit
-
-    # Step 5: Per-call-scope storage cost (target + selector + recipients).
-    # See the enhanced access key permissions specification for exact slot accounting; this counts one slot per
-    # (target, selector, recipient) triple as a conservative approximation.
-    num_scope_slots = 0
-    if key_auth.allowed_calls:
-        for scope in key_auth.allowed_calls:
-            for rule in scope.selector_rules:
-                # one slot for the (target, selector) entry, plus one per recipient
-                num_scope_slots += 1 + max(len(rule.recipients), 0)
-    gas += num_scope_slots * COLD_SSTORE_SET_GAS
-
-    return gas
-
-
-def calculate_tempo_tx_base_gas(tx):
-    """
-    Calculate the base gas cost for a TempoTransaction
-
-    Args:
-        tx: TempoTransaction object with fields:
-            - signature: TempoSignature (variable length)
-            - nonce_key: uint192
-            - nonce: uint64
-            - sender_address: address
-            - key_authorization: Optional[SignedKeyAuthorization]
-
-    Returns:
-        total_gas: uint256
-    """
-
-    # Constants
-    BASE_TX_GAS = 21_000
-    EXISTING_NONCE_KEY_GAS = 5_000   # Cold SLOAD (2,100) + warm SSTORE reset (2,900)
-    NEW_NONCE_KEY_GAS = 22_100       # Cold SLOAD (2,100) + SSTORE set (20,000)
-    KEYCHAIN_VALIDATION_GAS = 3_000  # 2,100 SLOAD + 900 processing buffer
-
-    # Step 1: Determine signature verification cost
-    # For Keychain signatures, use the inner primitive signature
-    if tx.signature.type == Keychain:
-        inner_sig = tx.signature.inner_signature
-    else:
-        inner_sig = tx.signature
-
-    signature_gas = BASE_TX_GAS + calculate_signature_verification_gas(inner_sig)
-
-    # Add keychain validation overhead if using access key
-    if tx.signature.type == Keychain:
-        signature_gas += KEYCHAIN_VALIDATION_GAS
-
-    # Step 2: Calculate nonce key cost
-    if tx.nonce_key == 0:
-        # Protocol nonce (backward compatible)
-        nonce_gas = 0
-    else:
-        # User nonce key
-        current_nonce = get_nonce(tx.sender_address, tx.nonce_key)
-
-        if current_nonce > 0:
-            # Existing nonce key - cold SLOAD + warm SSTORE reset
-            nonce_gas = EXISTING_NONCE_KEY_GAS
-        else:
-            # New nonce key - cold SLOAD + SSTORE set
-            nonce_gas = NEW_NONCE_KEY_GAS
-
-    # Step 3: Calculate key authorization cost (if present)
-    if tx.key_authorization is not None:
-        key_auth_gas = calculate_key_authorization_gas(tx.key_authorization)
-    else:
-        key_auth_gas = 0
-
-    # Step 4: Calculate total base gas
-    total_gas = signature_gas + nonce_gas + key_auth_gas
-
-    return total_gas
-```
+A `key_authorization` has no single fixed total. Its intrinsic gas includes its signature check and the storage touched by the key, spending limits, call scopes, witness, and admin settings under the active fork. See [TIP-1000](/docs/protocol/tips/tip-1000), [TIP-1009](/docs/protocol/tips/tip-1009), [TIP-1011](/docs/protocol/tips/tip-1011), and [TIP-1016](/docs/protocol/tips/tip-1016).
 
 ## Security Considerations
 
@@ -1203,12 +958,12 @@ This transaction type impacts all three areas:
 
 #### Signature Verification Impact
 - **P256 signatures**: Fixed computational cost similar to ecrecover.
-- **WebAuthn signatures**: Variable cost due to clientDataJSON parsing, but **capped at 2KB total signature size** to prevent abuse
+- **WebAuthn signatures**: Variable cost due to clientDataJSON parsing, but the encoded payload after its type prefix is capped at 2KB
 - **Mitigation**: All signature types have bounded computational costs that are in the same ballpark as standard ecrecover.
 
 #### Nonce Verification Impact
-- **2D nonce lookup**: Requires additional storage read from nonce precompile
-- **Cost**: Equivalent to a cold SLOAD (~2,100 gas worth of free computation)
+- **2D and expiring nonces**: Require bounded storage reads and writes in the nonce precompile
+- **Cost**: Reflected in the intrinsic gas additions described above
 - **Mitigation**: Cost is bounded to a manageable value.
 
 #### Fee Payer Impact
@@ -1218,7 +973,6 @@ This transaction type impacts all three areas:
 
 #### Comparison to Ethereum
 
-The introduction of 7702 delegated accounts already created complex cross-transaction dependencies in the mempool, which prevents any static pool checks from being useful.
-Because a single transaction can invalidate multiple others by spending balances of multiple accounts
+EIP-7702 delegated accounts already create cross-transaction dependencies in the mempool because one transaction can invalidate others by spending balances from multiple accounts.
 
 **Assessment:** While this transaction type introduces additional pre-execution validation costs, all costs are bounded to reasonable limits. The mempool complexity issues around cross-transaction dependencies already exist in Ethereum due to 7702 and accounts with code, making static validation inherently difficult. So the incremental cost from this transaction type is acceptable given these existing constraints.

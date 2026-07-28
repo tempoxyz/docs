@@ -117,15 +117,7 @@ function executeFeeSwap(
 
 Executes a fee swap immediately. Calculates `amountOut = (amountIn * M) / SCALE`. Only executed by the protocol during transaction execution. No event is emitted for this internal swap.
 
-```solidity
-function checkSufficientLiquidity(
-    address userToken,
-    address validatorToken,
-    uint256 maxAmount
-) internal view
-```
-
-Verifies sufficient validator token reserves for the fee swap. Calculates `maxAmountOut = (maxAmount * M) / SCALE`. Reverts if insufficient liquidity.
+Before execution, the protocol's internal route planner checks whether the direct pool or the supported two-hop route has enough validator-token liquidity. This route-planning hook is not part of the public FeeManager ABI.
 
 #### 2. FeeManager Contract
 
@@ -147,26 +139,7 @@ function setValidatorToken(address token) external
 
 Sets the fee token preference for the caller (validator). Requires token to be a USD TIP-20 token. Cannot be called during a block built by that validator. Emits `ValidatorTokenSet` event. Access: Direct calls only (not via delegatecall).
 
-```solidity
-function collectFeePreTx(
-    address user,
-    address userToken,
-    uint256 maxAmount
-) external
-```
-
-Called by the protocol before transaction execution. The fee token (`userToken`) is determined by the protocol before calling using logic that considers: explicit tx fee token, setUserToken calls, stored user preference, tx.to if TIP-20. Reserves AMM liquidity if user token differs from validator token. Collects maximum possible fee from user. Access: Protocol only (`msg.sender == address(0)`).
-
-```solidity
-function collectFeePostTx(
-    address user,
-    uint256 maxAmount,
-    uint256 actualUsed,
-    address userToken
-) external
-```
-
-Called by the protocol after transaction execution. The validator token and fee recipient are inferred from `block.coinbase`. Calculates refund amount: `refundAmount = maxAmount - actualUsed`. Refunds unused tokens to user. If user token differs from validator token, executes the fee swap immediately and accumulates the output for the validator. Access: Protocol only (`msg.sender == address(0)`).
+Fee collection runs through internal pre- and post-transaction protocol hooks. They reserve liquidity, collect the fee, refund the unused amount, execute any conversion, and credit the validator. They are not callable Solidity functions in the public FeeManager ABI.
 
 ```solidity
 function distributeFees(address validator, address token) external
@@ -201,20 +174,17 @@ Returns the amount of accumulated fees for a validator and specific token that c
 
 1. **Pre-Transaction**:
    - Protocol determines user's fee token using logic that considers: explicit tx fee token, setUserToken calls, stored user preference, tx.to if TIP-20
-   - Protocol calculates maximum gas needed (`maxAmount = gasLimit * maxFeePerGas`)
-   - `FeeManager.collectFeePreTx(user, userToken, maxAmount)` is called:
-     - If user token differs from validator token, checks AMM has sufficient liquidity via `checkSufficientLiquidity()`
-     - Collects maximum fee from user using `transferFeePreTx()`
+   - For EIP-1559 and Tempo transactions, `maximumGasPrice = maxFeePerGas` and `effectiveGasPrice = min(maxFeePerGas, baseFeePerGas + maxPriorityFeePerGas)`; legacy transactions use `gasPrice` for both
+   - Protocol checks the payer can cover `ceil(gasLimit × maximumGasPrice / 10^12)`
+   - Protocol collects `ceil(gasLimit × effectiveGasPrice / 10^12)` units of the user's fee token
+   - If conversion is needed, the internal route planner reserves each hop's output liquidity using `floor(amountIn × 9970 / 10000)`
    - If any check fails (insufficient balance, insufficient liquidity), transaction is invalid
 
 2. **Post-Transaction**:
-   - Calculate actual gas used (`actualUsed = gasUsed * gasPrice`)
-   - `FeeManager.collectFeePostTx(user, maxAmount, actualUsed, userToken)` is called:
-     - Validator token and fee recipient are inferred from `block.coinbase`
-     - Calculates refund: `refundAmount = maxAmount - actualUsed`
-     - Refunds unused tokens to user via `transferFeePostTx()`
-     - If user token differs from validator token and `actualUsed > 0`, executes fee swap immediately via `executeFeeSwap()`
-     - Accumulates swapped fees for the validator
+   - Protocol calculates `actualFee = ceil(max(gasUsed - gasReservoir, 0) × effectiveGasPrice / 10^12)`
+   - Refunds the collected amount minus `actualFee`
+   - If the user's token differs from the validator's token and `actualFee > 0`, executes the planned fee swap immediately
+   - Accumulates the resulting fees for the validator
 
 3. **Fee Distribution**:
    - Validators (or anyone) can call `distributeFees(validator, token)` at any time to transfer accumulated fees to the validator
@@ -255,7 +225,7 @@ event FeesDistributed(
 );
 ```
 
-`Transfer` events are emitted as usual for transactions, with the exception of paying gas fees via TIP20 tokens. For fee payments, a single `Transfer` event is emitted post execution to represent the actual fee amount consumed (i.e. `gasUsed * gasPrice`).
+`Transfer` events are emitted as usual for transactions, with the exception of paying gas fees via TIP20 tokens. For fee payments, a single `Transfer` event is emitted after execution for the actual six-decimal token amount charged.
 
 ### Gas
 

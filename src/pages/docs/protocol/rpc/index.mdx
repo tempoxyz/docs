@@ -54,23 +54,6 @@ Each `ForkInfo`:
 cast rpc tempo_forkSchedule --rpc-url https://rpc.tempo.xyz
 ```
 
-**Example response:**
-
-```json
-{
-  "schedule": [
-    { "name": "T0", "activationTime": 0, "active": true, "forkId": "0xfde57c3e" },
-    { "name": "T1", "activationTime": 1770908400, "active": true, "forkId": "0x9e6fe384" },
-    { "name": "T1A", "activationTime": 1770908400, "active": true, "forkId": "0x9e6fe384" },
-    { "name": "T1B", "activationTime": 1771858800, "active": true, "forkId": "0x73a4f670" },
-    { "name": "T1C", "activationTime": 1773327600, "active": true, "forkId": "0x2a3ee80d" },
-    { "name": "T2", "activationTime": 1774965600, "active": true, "forkId": "0x471a451c" },
-    { "name": "T3", "activationTime": 1777298400, "active": true, "forkId": "0xd2087b77" }
-  ],
-  "active": "T3"
-}
-```
-
 ### `tempo_fundAddress`
 
 Available on faucet-enabled testnet endpoints only. Mints test stablecoins to the given address. On the public Moderato testnet endpoint, this currently mints pathUSD, AlphaUSD, BetaUSD, and ThetaUSD.
@@ -102,7 +85,7 @@ Get a finalized block by height or latest.
 |------|------|-------------|
 | `query` | `"latest"` or `{"height": number}` | Which finalization to retrieve |
 
-**Returns:** `CertifiedBlock | null`
+**Returns:** `CertifiedBlock`. If the requested finalization is unavailable, the node returns an RPC error rather than `null`.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -122,7 +105,7 @@ cast rpc consensus_getFinalization '{"height": 1000000}' --rpc-url <VALIDATOR_RP
 
 ### `consensus_getLatest`
 
-Returns the current consensus state snapshot: the latest finalized block and the latest notarized block (if not yet finalized).
+Returns the current consensus state snapshot.
 
 **Parameters:** None.
 
@@ -131,7 +114,7 @@ Returns the current consensus state snapshot: the latest finalized block and the
 | Field | Type | Description |
 |-------|------|-------------|
 | `finalized` | `CertifiedBlock \| null` | Latest finalized block |
-| `notarized` | `CertifiedBlock \| null` | Latest notarized block (if ahead of finalized) |
+| `notarized` | `null` | Reserved compatibility field; current nodes do not track a separate notarized block |
 
 ```bash
 cast rpc consensus_getLatest --rpc-url <VALIDATOR_RPC>
@@ -139,15 +122,13 @@ cast rpc consensus_getLatest --rpc-url <VALIDATOR_RPC>
 
 ### `consensus_subscribe` / `consensus_unsubscribe`
 
-WebSocket-only subscription to consensus events. Emits events when blocks are notarized, finalized, or views are nullified.
+WebSocket-only subscription to finalized-block events.
 
 **Event types:**
 
 | Type | Fields | Description |
 |------|--------|-------------|
-| `notarized` | `epoch`, `view`, `digest`, `certificate`, `block`, `seen` | A block was notarized |
 | `finalized` | `epoch`, `view`, `digest`, `certificate`, `block`, `seen` | A block was finalized |
-| `nullified` | `epoch`, `view`, `seen` | A view was nullified (no block produced) |
 
 The `seen` field is a Unix timestamp in milliseconds.
 
@@ -163,41 +144,6 @@ The `seen` field is a Unix timestamp in milliseconds.
   "block": { /* full block fields */ },
   "seen": 1775134536000
 }
-```
-
-### `consensus_getIdentityTransitionProof`
-
-Returns DKG (Distributed Key Generation) identity transition proofs. Useful for light client verification and bridge implementations.
-
-**Parameters:**
-
-| Name | Type | Description |
-|------|------|-------------|
-| `from_epoch` | `number \| null` | Epoch to search from (defaults to latest finalized) |
-| `full` | `boolean \| null` | If `true`, return all transitions back to genesis; if `false` (default), only the most recent |
-
-**Returns:**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `identity` | `string` | Hex-encoded BLS public key at the requested epoch |
-| `transitions` | `IdentityTransition[]` | Transitions ordered newest to oldest |
-
-Each `IdentityTransition`:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `transitionEpoch` | `number` | Epoch where the DKG ceremony occurred |
-| `oldIdentity` | `string` | BLS public key before the transition |
-| `newIdentity` | `string` | BLS public key after the transition |
-| `proof` | `object` | Block header + finalization certificate. Omitted for genesis (epoch 0) |
-
-```bash
-# Most recent transition
-cast rpc consensus_getIdentityTransitionProof null null --rpc-url <VALIDATOR_RPC>
-
-# Full chain back to genesis
-cast rpc consensus_getIdentityTransitionProof null true --rpc-url <VALIDATOR_RPC>
 ```
 
 ## Tempo admin `admin_` namespace

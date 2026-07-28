@@ -19,7 +19,7 @@ In determining *which* token a user pays fees in, we want to maximize customizab
 
 ## Fee units
 
-Fees in the `max_base_fee_per_gas` and `max_fee_per_gas` fields of transactions, as well as in the block's `base_fee_per_gas` field, are specified in **attodollars** (10^-18 USD) per gas. Since TIP-20 tokens have 6 decimal places — where 1 token unit = 1 **microdollar** (10^-6 USD) — the fee for a transaction can be calculated as `ceil(base_fee * gas_used / 10^12)`.
+Fees in legacy transactions' `gas_price`, EIP-1559 and Tempo transactions' `max_fee_per_gas` and `max_priority_fee_per_gas`, and the block's `base_fee_per_gas` are specified in **attodollars** (10^-18 USD) per gas. TIP-20 tokens use 6 decimal places, so the protocol converts attodollars to token units by dividing by `10^12` and rounding up.
 
 Attodollars provide sufficient precision for low-fee transactions. Since TIP-20 tokens have only 6 decimal places (microdollars), expressing fees directly in token units per gas would not provide enough precision for transactions with very low gas costs. By using attodollars (10^-18 USD) and dividing by 10^12 to convert to microdollars, the protocol ensures that even small fee amounts can be accurately represented and calculated.
 
@@ -35,7 +35,7 @@ Congestion is managed through:
 - **Priority fees**: The `max_priority_fee_per_gas` field allows transactions to bid for faster inclusion during periods of high demand.
 - **Block gas limits**: Standard per-block gas limits constrain total computation per block.
 
-The payment lane mechanism ensures that payment transactions are not crowded out by other network activity. General network congestion from non-payment use cases cannot affect payment throughput or fees, providing the consistency that payment applications require.
+The payment lane mechanism reserves capacity so payment transactions are not crowded out by general computation. The base fee is still block-wide and can respond to total gas use.
 
 ## Fee payment
 
@@ -43,18 +43,19 @@ Before the execution of each transaction, the protocol takes the following steps
 
 * Determine the [`fee_payer`](#fee-payer) of the transaction.
 * Determine the `fee_token` of the transaction, according to the [rules for fee token preferences](#fee-token-preferences). If the fee token cannot be determined, the transaction is invalid.
-* Compute the `max_fee` of the transaction as `gas_limit * gas_price`.
-* Deduct `max_fee` from the `fee_payer`'s balance of `fee_token`. If `fee_payer` does not have sufficient balance in `fee_token`, the transaction is invalid.
-* Reserve `max_fee` of liquidity on the [fee AMM](/docs/protocol/fees/spec-fee-amm) between the `fee_token` and the validator's preferred fee token. If there is insufficient liquidity, the transaction is invalid.
+* Set `maximum_gas_price` to `max_fee_per_gas` for EIP-1559 and Tempo transactions, or `gas_price` for legacy transactions.
+* Check that the `fee_payer` can cover `ceil(gas_limit × maximum_gas_price / 10^12)` token units.
+* Set `effective_gas_price` to `min(max_fee_per_gas, base_fee_per_gas + max_priority_fee_per_gas)` for EIP-1559 and Tempo transactions, or `gas_price` for legacy transactions.
+* Collect `ceil(gas_limit × effective_gas_price / 10^12)` units of the payer's token. If conversion is needed, reserve the output-side [fee AMM](/docs/protocol/fees/spec-fee-amm) liquidity for the selected route. If the payer lacks funds or the route lacks liquidity, the transaction is invalid.
 
 After the execution of each transaction:
 
-* Compute the `refund_amount` as `(gas_limit - gas_used) * gas_price`.
-* Credit the `fee_payer`'s address with `refund_amount` of `fee_token`.
-* Log a `Transfer` event from the user to the [fee manager contract](/docs/protocol/fees/spec-fee-amm) for the net amount of the fee payment.
+* Compute the actual fee as `ceil(max(gas_used - gas_reservoir, 0) × effective_gas_price / 10^12)`.
+* Refund the difference between the collected amount and the actual fee to the `fee_payer`.
+* Log a `Transfer` event from the `fee_payer` to the [fee manager contract](/docs/protocol/fees/spec-fee-amm) for the net amount of the fee payment.
 
 :::info[Atomic fee handling]
-The protocol executes the max fee deduction and refund atomically. If insufficient liquidity is encountered at any point during fee calculation (for example, if a previous transaction by the same sender in the same block exhausted the fee token reserves), the entire transaction reverts.
+The protocol executes fee pre-collection and refund atomically. If insufficient liquidity is encountered at any point during fee calculation (for example, if a previous transaction by the same sender in the same block exhausted the fee token reserves), the entire transaction reverts.
 :::
 
 ## Fee payer
@@ -99,14 +100,14 @@ The protocol checks for token preferences in five ways, with this order of prece
 
 1. Transaction (set by the `fee_token` field of the transaction)
 2. Account (set on the FeeManager contract by the `fee_payer` of the transaction)
-3. TIP-20 contract (if the transaction is calling `transfer`, `transferWithMemo`, or `startReward` on a TIP-20 token contract, the transaction uses that token as its fee token)
+3. TIP-20 contract (if the transaction is calling `transfer` or `transferWithMemo` on a TIP-20 token contract, the transaction uses that token as its fee token)
 4. Stablecoin DEX (for certain swap calls, the transaction uses the `tokenIn` argument as its fee token)
 5. PathUSD (as a fallback)
 
 The protocol checks preferences at each of these levels, stopping at the first one at which a preference is specified. At that level, the protocol performs the following checks. If any of the checks fail, the transaction is invalid (without looking at any further levels):
 
 * The token must be a TIP-20 token whose currency is USD.
-* The user must have sufficient balance in that token to pay the `gasLimit` on the transaction at the transaction's `gasPrice`.
+* The user must have sufficient balance in that token to cover `ceil(gasLimit × maximumGasPrice / 10^12)`, using the transaction-type-specific maximum gas price defined above.
 * There must be sufficient liquidity on the [fee AMM](/docs/protocol/fees/spec-fee-amm), as discussed in that specification.
 
 If no preference is specified at the transaction, account, or contract level, the protocol falls back to [pathUSD](#pathusd).
@@ -135,7 +136,6 @@ If the top-level call of a transaction is to one of the following functions on a
 
 * `transfer(address to, uint256 amount)`
 * `transferWithMemo(address to, uint256 amount, bytes32 memo)`
-* `startReward(uint256 amount, uint32 seconds_)`
 
 then that TIP-20 token is used as the user's fee token for that transaction (unless there is a preference specified at the [transaction](#transaction-level) or [account](#account-level) level).
 
@@ -165,11 +165,9 @@ To set their preference, validators call the `setValidatorToken` function on the
 feeManager.setValidatorToken(preferredTokenAddress);
 ```
 
-After setting a validator token preference, all fees collected in blocks the validator proposes will be automatically converted to the chosen token (if needed) and transferred to the validator's account.
+After setting a validator token preference, fees collected in blocks the validator proposes are converted to the chosen token when needed and added to the validator's accumulated balance. The balance is transferred only when `distributeFees(validator, token)` is called.
 
-On the Moderato testnet, validators currently expect alphaUSD (one of the tokens distributed by the faucet) as their fee token.
-
-If validators have not specified a fee token preference, the protocol falls back to expecting pathUSD as their fee token.
+An unset validator preference falls back to pathUSD. A configured preference can be changed to another valid USD TIP-20, but cannot be cleared with the zero address.
 
 ## Gas Parameters
 
@@ -183,15 +181,6 @@ As of T7, Tempo uses the following mainnet gas parameters:
 | General gas limit | 30M gas/block |
 
 A standard TIP-20 transfer (~50,000 gas) costs approximately 600 microdollars ($0.0006) at the cap and approximately 30 microdollars ($0.00003) at the floor.
-
-### Removing validator preference
-
-To remove a validator token preference, set it to the zero address:
-
-```solidity
-// Remove validator token preference
-feeManager.setValidatorToken(address(0));
-```
 
 ## Fee lifecycle
 
@@ -207,7 +196,7 @@ The transaction is submitted with the fee token determined by the preference hie
 
 #### 2. Pre-transaction collection
 
-Before the transaction executes, the `FeeManager` contract collects the maximum possible fee amount from the user:
+Before the transaction executes, the `FeeManager` pre-collects the amount reserved at the effective gas price:
 
 - Verifies the user has sufficient balance in their chosen fee token
 - Checks if the Fee AMM has enough liquidity (if conversion is needed)
@@ -229,7 +218,7 @@ After execution, the `FeeManager`:
 
 #### 5. Fee swap execution
 
-If the user's fee token differs from the validator's preferred token, the fee swap executes immediately during the post-transaction step at a fixed rate of **0.9970** (validator receives 0.9970 of their token per 1.0 user token paid).
+If the user's fee token differs from the validator's preferred token, the fee swap executes immediately during the post-transaction step. A direct pool applies the fixed rate **0.9970** once. A two-hop route through the user's quote token applies the rate once per hop.
 
 If the user's fee token matches the validator's preference, no conversion is needed.
 
@@ -237,16 +226,18 @@ Fees accumulate in the FeeManager contract. Validators can claim a token's accum
 
 ### Fee swap mechanics
 
-Fee swaps always execute at a fixed rate of **0.9970**:
+Each fee-swap hop applies a fixed multiplier of **0.9970** with integer rounding:
 
 ```
-validatorTokenOut = userTokenIn × 0.9970
+amountOut = floor(amountIn × 9970 / 10000)
 ```
 
-This means:
+For a direct pool, this means:
 - User pays 1.0 USDG for fees
 - Validator receives 0.9970 USDT (if that's their preferred token)
 - The 0.003 (0.3%) difference goes to liquidity providers as a fee
+
+A two-hop route applies the rate twice and returns `floor(floor(userTokenIn × 9970 / 10000) × 9970 / 10000)` in the validator token.
 
 ### Example flow
 
@@ -258,17 +249,13 @@ Here's a complete example of the fee lifecycle:
 4. The FeeManager collects 1.0 USDG from Alice before execution
 5. Transaction executes and uses 0.8 USDG worth of gas
 6. The FeeManager refunds 0.2 USDG to Alice
-7. The Fee AMM immediately swaps 0.8 USDG → 0.7976 USDT (0.8 × 0.9970)
+7. A direct USDG/USDT Fee AMM pool immediately swaps 0.8 USDG → 0.7976 USDT (0.8 × 0.9970)
 8. The 0.7976 USDT is added to the validator's accumulated fees
 9. Validator calls `distributeFees(validator, token)` to claim their accumulated fees
 10. Liquidity providers earn 0.0024 USDT from the 0.3% fee
 
 ### Gas costs
 
-The fee conversion process adds minimal overhead to transactions:
-
-- **Pre-transaction**: ~5,000 gas for balance and liquidity checks
-- **Post-transaction**: ~3,000 gas for refund and queue operations
-- **Block settlement**: Amortized across all transactions in the block
+Fee collection and conversion do not consume user transaction gas. Conversion and validator crediting happen during each transaction's post-execution step.
 
 For complete technical specifications on the Fee AMM mechanism, see the [Fee AMM Protocol Specification](/docs/protocol/fees/spec-fee-amm).

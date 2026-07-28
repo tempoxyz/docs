@@ -9,7 +9,7 @@ Provide liquidity to the DEX by placing limit orders or flip orders in the oncha
 
 When your orders are filled, you earn the spread between bid and ask prices while helping facilitate trades for other users.
 
-You can only place orders on pairs between a token and its designated quote token. All TIP-20 tokens specify a quote token for trading pairs. [pathUSD](/docs/protocol/exchange/quote-tokens#pathusd) can be used as a simple choice for a quote token.
+You can only place orders on pairs between a token and its designated quote token. Every user-created TIP-20 has a designated TIP-20 quote token. [pathUSD](/docs/protocol/exchange/quote-tokens#pathusd) is the root quote token and is the exception: its own quote-token field is the zero address.
 
 ## Orderbook liquidity overview
 
@@ -40,7 +40,7 @@ function place(
 - `token` - The token address you're trading (must trade against its quote token)
 - `amount` - The amount of the token denominated in `token`
 - `isBid` - `true` for a buy order, `false` for a sell order
-- `tick` - The price tick: `(price - 1) * 100_000` where price is in quote token per token
+- `tick` - The price tick: `(price - 1) * 100_000` where price is in quote token per token. Orders must use ticks divisible by `10`.
 
 **Returns:**
 - `orderId` - Unique identifier for this order
@@ -114,7 +114,7 @@ Flip orders act like a liquidity pool position, automatically providing liquidit
 
 ## Understanding Ticks
 
-Prices are specified using ticks with 0.1 basis point (0.001%) precision:
+Prices use 0.1-basis-point tick units. Orders must be placed on 10-tick boundaries, so usable prices are 1 basis point (0.01%) apart:
 
 **Tick Formula:** `tick = (price - 1) × 100_000`
 
@@ -185,7 +185,7 @@ You can only cancel your own orders. Attempting to cancel another user's order w
 
 **Indexers and analytics:**
 
-- Subscribe to the `OrderFlipped(orderId, newSide, newTick, ...)` event on the DEX
+- Subscribe to `OrderFlipped(orderId, maker, token, amount, isBid, tick, flipTick)` on the DEX
 - Key order state by `orderId` and let it change side and tick over its lifetime
 - Do not expect `nextOrderId` to advance per flip
 

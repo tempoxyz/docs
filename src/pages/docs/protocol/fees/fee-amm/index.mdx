@@ -15,13 +15,13 @@ The Fee AMM (Automated Market Maker) is a dedicated system for converting transa
 
 ## How the Fee AMM converts stablecoin fees
 
-When a user pays fees in a stablecoin that differs from the validator's preference, the Fee AMM automatically converts the payment:
+When a direct pool can convert the user's fee token into the validator's preferred token, one fee-swap hop applies:
 
 - **User pays**: 1.0 of their chosen stablecoin
 - **Validator receives**: 0.9970 of their preferred stablecoin
 - **Liquidity providers earn**: 0.003 (0.3%) as fees
 
-This conversion happens immediately during transaction execution at a fixed price, preventing MEV attacks like sandwiching.
+If a direct pool lacks liquidity, the protocol can route through the user's quote token. That route applies the `0.9970` rate once per hop. Conversion happens immediately during transaction execution at fixed prices, preventing MEV attacks like sandwiching.
 
 ## Fee AMM vs. Exchange
 
