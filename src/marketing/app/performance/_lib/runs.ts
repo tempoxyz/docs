@@ -4,8 +4,10 @@
 
 const PERF_API_URL = 'https://perf.tempo.xyz/api/perf/runs?feed=nightly&limit=100'
 
-const DEFAULT_SCENARIO_FROM = '2026-07-13'
-const DEFAULT_SCENARIO_ID = 'tip20-50k'
+const PUBLIC_SCENARIO_FROM = '2026-07-22'
+const PUBLIC_SCENARIO_ID = 'public'
+const TIP20_50K_SCENARIO_FROM = '2026-07-13'
+const TIP20_50K_SCENARIO_ID = 'tip20-50k'
 const TIP20_SCENARIO_UNTIL = '2026-07-10'
 
 type ApiRun = {
@@ -64,8 +66,12 @@ function isNightlyScenario(run: ApiRun): boolean {
   const scenarioId = run.scenario?.id
   if (!startedAt || !scenarioId) return false
 
-  if (startedAt >= DEFAULT_SCENARIO_FROM) {
-    return scenarioId === DEFAULT_SCENARIO_ID
+  if (startedAt >= PUBLIC_SCENARIO_FROM) {
+    return scenarioId === PUBLIC_SCENARIO_ID
+  }
+
+  if (startedAt >= TIP20_50K_SCENARIO_FROM) {
+    return scenarioId === TIP20_50K_SCENARIO_ID
   }
 
   return startedAt < TIP20_SCENARIO_UNTIL && scenarioId.startsWith('tip20-')

@@ -58,8 +58,7 @@ export function statValue(stat: Stat): string {
 }
 
 // Latest run from the current nightly benchmark preset.
-const PERF_API_URL =
-  'https://perf.tempo.xyz/api/perf/runs?feed=nightly&limit=1&scenario_id=tip20-50k'
+const PERF_API_URL = 'https://perf.tempo.xyz/api/perf/runs?feed=nightly&limit=1&scenario_id=public'
 
 type PerfRuns = {
   runs?: {
