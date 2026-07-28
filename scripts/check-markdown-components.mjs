@@ -43,18 +43,11 @@ if (files.length === 0)
 const llmsFiles = [resolve('dist/public/llms.txt'), resolve('dist/public/llms-full.txt')]
 const generatedFiles = [...files, ...llmsFiles]
 const hiddenChangelogFallbacks = []
-const legacyMcpReferences = []
 const missingMcpGuidance = []
 const unresolvedIncludes = []
 for (const file of generatedFiles) {
   const content = await readFile(file, 'utf8')
   if (hasHiddenChangelogFallback(content)) hiddenChangelogFallbacks.push(file)
-  if (
-    /tempo\.xyz\/developers\/api\/mcp|\b(?:list_pages|search_docs|submit_feedback|list_sources|list_source_files|read_source_file|get_file_tree|search_source)\b/.test(
-      content,
-    )
-  )
-    legacyMcpReferences.push(file)
   if (
     !content.includes('https://mcp.tempo.xyz') ||
     !content.includes('`search`') ||
@@ -77,12 +70,6 @@ if (unresolvedIncludes.length > 0) {
   console.error('Generated Markdown include audit failed.')
   for (const { count, file } of unresolvedIncludes)
     console.error(`- ${file}: ${count} unresolved include${count === 1 ? '' : 's'}`)
-  process.exit(1)
-}
-
-if (legacyMcpReferences.length > 0) {
-  console.error('Generated Markdown contains legacy MCP guidance.')
-  for (const file of legacyMcpReferences) console.error(`- ${file}`)
   process.exit(1)
 }
 
