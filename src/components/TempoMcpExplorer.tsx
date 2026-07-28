@@ -6,7 +6,7 @@ import LucidePlay from '~icons/lucide/play'
 import LucideRotateCcw from '~icons/lucide/rotate-ccw'
 import { Container } from './Container'
 
-const MCP_ENDPOINT = '/api/mcp'
+const MCP_ENDPOINT = 'https://mcp.tempo.xyz'
 const DEFAULT_SOURCE = 'tempo'
 
 const TOOLS = [

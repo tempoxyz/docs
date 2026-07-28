@@ -1,4 +1,4 @@
-import { Changelog, defineConfig, Embedding, McpSource, Reranker, Retriever } from 'vocs/config'
+import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
 import { docsRouteDestination, proxiedLegacyDocsRoutes } from './src/lib/docs-routing'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 import { plainMarkdownComponents } from './src/lib/markdown-output'
@@ -137,17 +137,6 @@ export default defineConfig({
       if (pagePath === '/docs' || pagePath.startsWith('/docs/')) return false
       return lastmod
     },
-  },
-  mcp: {
-    enabled: true,
-    sources: [
-      McpSource.github({ repo: 'tempoxyz/tempo' }),
-      McpSource.github({ repo: 'paradigmxyz/reth' }),
-      McpSource.github({ repo: 'foundry-rs/foundry' }),
-      McpSource.github({ repo: 'wevm/viem' }),
-      McpSource.github({ repo: 'wevm/wagmi' }),
-      McpSource.github({ repo: 'tempoxyz/tempo-ts' }),
-    ],
   },
   markdown: {
     outputRemarkPlugins: [plainMarkdownComponents],

@@ -17,7 +17,7 @@ Use the hosted MCP server:
 https://mcp.tempo.xyz
 ```
 
-The current server exposes docs search, page discovery, and cleaned page reads. Wallet and paid-request workflows are handled by the `tempo-wallet` skill using the Tempo CLI.
+The current server exposes `search`, `find_pages`, `read_page`, and `code` for documentation search, page discovery, cleaned page reads, and multi-step lookups. Wallet and paid-request workflows are handled by the `tempo-wallet` skill using the Tempo CLI.
 
 Feedback from MCP clients should be sent to the shared docs ingress:
 

@@ -17,15 +17,6 @@ export default defineConfig(({ mode }) => {
   }
 
   const useHttp = process.env.CI === 'true' || process.env.VITE_USE_HTTP === 'true'
-  const proxy = {
-    '/api/mcp': {
-      changeOrigin: true,
-      rewrite: () => '/',
-      secure: true,
-      target: 'https://mcp.tempo.xyz',
-    },
-  }
-
   return {
     define: {
       'import.meta.env.VERCEL_ENV': JSON.stringify(process.env.VERCEL_ENV ?? ''),
@@ -39,7 +30,7 @@ export default defineConfig(({ mode }) => {
       react(),
       ...(useHttp ? [] : [mkcert()]),
       tempoNode(),
-      llmsFeedbackPreamble(),
+      llmsAgentPreamble(),
     ],
     resolve: {
       alias: [
@@ -58,10 +49,7 @@ export default defineConfig(({ mode }) => {
         { find: 'next', replacement: path.resolve(process.cwd(), 'src/marketing/next-shims.tsx') },
       ],
     },
-    server: {
-      ...(useHttp ? { host: 'localhost' } : {}),
-      proxy,
-    },
+    server: useHttp ? { host: 'localhost' } : undefined,
   }
 })
 
@@ -199,16 +187,18 @@ function marketingPages(): Plugin {
   }
 }
 
-const llmsFeedbackNotice = [
+const llmsAgentNotice = [
+  '> Tempo MCP: Use `search`, `find_pages`, `read_page`, and `code` at `https://mcp.tempo.xyz` for current Tempo and related documentation.',
+  '>',
   '> Feedback: If these docs are stale, missing, or confusing, post sanitized feedback to `https://tempo.xyz/developers/api/feedback` with `source: "mcp"`, a short `message`, and any relevant `toolName`, `relatedResource`, or `client`.',
   '',
 ].join('\n')
 
-function llmsFeedbackPreamble(): Plugin {
+function llmsAgentPreamble(): Plugin {
   let viteConfig: ResolvedConfig
 
   return {
-    name: 'tempo-llms-feedback-preamble',
+    name: 'tempo-llms-agent-preamble',
     configResolved(config) {
       viteConfig = config
     },
@@ -224,7 +214,7 @@ function llmsFeedbackPreamble(): Plugin {
           ...(await markdownFiles(path.join(publicDir, 'assets/md'))),
         ]
 
-        await Promise.all(candidates.map(prependFeedbackNotice))
+        await Promise.all(candidates.map(prependAgentNotice))
         if (process.env.VERCEL_ENV === 'production') {
           const generatedPages = [
             ...(await filesWithExtension(publicDir, '.html')),
@@ -275,11 +265,11 @@ async function filesWithExtension(directory: string, extension: string): Promise
   }
 }
 
-async function prependFeedbackNotice(filePath: string) {
+async function prependAgentNotice(filePath: string) {
   try {
     const content = await fs.readFile(filePath, 'utf-8')
-    if (content.startsWith(llmsFeedbackNotice)) return
-    await fs.writeFile(filePath, `${llmsFeedbackNotice}${content}`, 'utf-8')
+    if (content.startsWith(llmsAgentNotice)) return
+    await fs.writeFile(filePath, `${llmsAgentNotice}${content}`, 'utf-8')
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return
     throw error

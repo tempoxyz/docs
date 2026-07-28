@@ -1,6 +1,6 @@
 ---
 title: Use Tempo with AI
-description: Connect AI coding agents to Tempo docs, source context, MCP tools, Markdown pages, plugins, workflow skills, and feedback loops for accurate development.
+description: Connect AI coding agents to Tempo docs, MCP tools, Markdown pages, plugins, workflow skills, and feedback loops for accurate development.
 interactive: true
 ---
 
@@ -12,7 +12,7 @@ import { TempoMcpExplorer } from '../../../components/TempoMcpExplorer.tsx'
 
 Tempo publishes documentation, Markdown pages, MCP tools, and agent plugins so AI coding agents can work with Tempo using current project context instead of guesses.
 
-Use this page when you want Claude, Codex, Cursor, Amp, or another MCP-compatible client to search Tempo docs, read source-linked references, and install reusable Tempo workflows.
+Use this page when you want Claude, Codex, Cursor, Amp, or another MCP-compatible client to search Tempo and related documentation, read complete pages, and install reusable Tempo workflows.
 
 ## Connect to Tempo's MCP server
 
@@ -127,6 +127,7 @@ The MCP endpoint exposes these tools to connected agents:
 | `search` | Search docs. | `query` |
 | `find_pages` | Find matching page URLs from a source index. | `source`, `query` |
 | `read_page` | Read one cleaned documentation page. | `source` plus `path` or `url` |
+| `code` | Run multi-step documentation lookups. | `code` |
 
 ### MCP feedback
 
@@ -167,7 +168,7 @@ claude plugin install tempo@claude
 
 ### Docs skill
 
-Install the Tempo Docs skill to give AI coding agents access to Tempo documentation, source code via MCP, and examples:
+Install the Tempo Docs skill to give AI coding agents access to Tempo documentation, related documentation sources, and examples:
 
 ```bash
 npx skills add tempoxyz/docs

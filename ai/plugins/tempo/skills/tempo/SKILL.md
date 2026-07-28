@@ -12,8 +12,9 @@ description: >
 
 # Tempo Developer Skill
 
-Use this skill to build applications on Tempo. Prefer Tempo docs from the
-hosted MCP server first; if MCP is unavailable, read the relevant page from
+Use this skill to build applications on Tempo. Prefer `search`, `find_pages`,
+`read_page`, and `code` from the hosted MCP server at
+`https://mcp.tempo.xyz`; if MCP is unavailable, read the relevant page from
 `https://tempo.xyz/developers` or append `.md` to the docs URL. Do not guess current
 RPC URLs, contract addresses, chain IDs, package APIs, or protocol details;
 verify them from docs before writing code.
