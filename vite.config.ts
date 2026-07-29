@@ -218,12 +218,25 @@ function llmsAgentPreamble(): Plugin {
         await Promise.all(candidates.map(prependAgentNotice))
         if (process.env.VERCEL_ENV === 'production') {
           const publicDevelopersUrl = `${resolveBaseUrl()}/docs`
-          const generatedPages = [
-            ...(await filesWithExtension(publicDir, '.html')),
-            ...(await filesWithExtension(path.join(publicDir, 'RSC'), '.txt')),
+          // Vocs copies `dist/public` before post-order buildApp hooks run, so rewrite
+          // both the source artifacts and the Vercel deployment copy.
+          const publicDirectories = [
+            publicDir,
+            path.resolve(viteConfig.root, '.vercel/output/static'),
           ]
+          const generatedFiles = (
+            await Promise.all(
+              publicDirectories.map(async (directory) => [
+                path.join(directory, 'llms.txt'),
+                path.join(directory, 'llms-full.txt'),
+                ...(await markdownFiles(path.join(directory, 'assets/md'))),
+                ...(await filesWithExtension(directory, '.html')),
+                ...(await filesWithExtension(path.join(directory, 'RSC'), '.txt')),
+              ]),
+            )
+          ).flat()
           await Promise.all(
-            [...new Set([...candidates, ...generatedPages])].map((filePath) =>
+            [...new Set(generatedFiles)].map((filePath) =>
               canonicalizeGeneratedLinksInFile(filePath, publicDevelopersUrl),
             ),
           )

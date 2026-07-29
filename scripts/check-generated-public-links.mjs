@@ -1,7 +1,10 @@
 import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-const publicDir = path.resolve(process.cwd(), 'dist/public')
+const publicOutputs = [
+  { label: 'Vite', directory: path.resolve(process.cwd(), 'dist/public') },
+  { label: 'Vercel', directory: path.resolve(process.cwd(), '.vercel/output/static') },
+]
 
 async function filesWithExtension(directory, extension) {
   const entries = await readdir(directory, { withFileTypes: true })
@@ -15,11 +18,6 @@ async function filesWithExtension(directory, extension) {
   )
   return files.flat()
 }
-
-const htmlFiles = await filesWithExtension(publicDir, '.html')
-const rscFiles = await filesWithExtension(path.join(publicDir, 'RSC'), '.txt')
-const markdownFiles = await filesWithExtension(path.join(publicDir, 'assets/md'), '.md')
-const llmsFiles = ['llms.txt', 'llms-full.txt'].map((file) => path.join(publicDir, file))
 
 const attributeLink = {
   label: 'HTML or JSX link attribute',
@@ -39,16 +37,54 @@ const markdownReference = {
   pattern: /^\s*\[[^\]]+\]:\s*<?(?:\/developers)?\/docs(?=\/|[#?]|>?(?:\s|$))/gm,
 }
 
-const candidateGroups = [
-  { files: htmlFiles, patterns: [attributeLink, serializedHref] },
-  { files: rscFiles, patterns: [attributeLink, serializedHref] },
-  {
-    files: [...markdownFiles, ...llmsFiles],
-    patterns: [attributeLink, serializedHref, markdownLink, markdownReference],
-  },
-]
+const outputArtifacts = await Promise.all(
+  publicOutputs.map(async (output) => {
+    const htmlFiles = await filesWithExtension(output.directory, '.html')
+    const rscFiles = await filesWithExtension(path.join(output.directory, 'RSC'), '.txt')
+    const markdownFiles = await filesWithExtension(path.join(output.directory, 'assets/md'), '.md')
+    const llmsFiles = ['llms.txt', 'llms-full.txt'].map((file) => path.join(output.directory, file))
+
+    return { ...output, htmlFiles, rscFiles, markdownFiles, llmsFiles }
+  }),
+)
+
+const candidateGroups = outputArtifacts.flatMap(
+  ({ htmlFiles, rscFiles, markdownFiles, llmsFiles }) => [
+    { files: htmlFiles, patterns: [attributeLink, serializedHref] },
+    { files: rscFiles, patterns: [attributeLink, serializedHref] },
+    {
+      files: [...markdownFiles, ...llmsFiles],
+      patterns: [attributeLink, serializedHref, markdownLink, markdownReference],
+    },
+  ],
+)
 
 const failures = []
+const canonicalApiPrefix = 'https://tempo.xyz/developers/docs/api/'
+for (const { label, directory, htmlFiles, rscFiles, markdownFiles } of outputArtifacts) {
+  for (const [artifact, files] of [
+    ['HTML', htmlFiles],
+    ['RSC', rscFiles],
+    ['Markdown', markdownFiles],
+  ]) {
+    if (files.length === 0) failures.push(`${label} output has no generated ${artifact} artifacts`)
+  }
+
+  for (const relativePath of [
+    'docs/api/index.html',
+    'RSC/R/docs/api.txt',
+    'assets/md/docs/api.md',
+  ]) {
+    const file = path.join(directory, relativePath)
+    const content = await readFile(file, 'utf8')
+    if (!content.includes(canonicalApiPrefix)) {
+      failures.push(
+        `${path.relative(process.cwd(), file)} does not contain canonical Tempo API links`,
+      )
+    }
+  }
+}
+
 for (const { files, patterns } of candidateGroups) {
   for (const file of files) {
     const content = await readFile(file, 'utf8')
@@ -62,7 +98,7 @@ for (const { files, patterns } of candidateGroups) {
 }
 
 if (failures.length > 0) {
-  console.error('Generated public artifacts contain root-relative docs link targets:')
+  console.error('Generated public artifact link audit failed:')
   console.error(
     failures
       .slice(0, 50)
@@ -73,6 +109,9 @@ if (failures.length > 0) {
   process.exit(1)
 }
 
-console.log(
-  `Generated public link audit passed (${htmlFiles.length} HTML, ${rscFiles.length} RSC, ${markdownFiles.length} Markdown, ${llmsFiles.length} LLM files).`,
-)
+console.log('Generated public link audit passed:')
+for (const { label, htmlFiles, rscFiles, markdownFiles, llmsFiles } of outputArtifacts) {
+  console.log(
+    `- ${label}: ${htmlFiles.length} HTML, ${rscFiles.length} RSC, ${markdownFiles.length} Markdown, ${llmsFiles.length} LLM files`,
+  )
+}
