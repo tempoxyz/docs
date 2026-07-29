@@ -67,7 +67,7 @@ test('renders generated OpenAPI page semantics into JSON-LD', async ({ request }
   expect(articles[0]).toMatchObject({
     name: 'Activities · Tempo API',
     headline: 'Activities · Tempo API',
+    description: 'A readable feed of what an account did onchain.',
   })
-  expect(articles[0]).not.toHaveProperty('description')
   expect(nodesByType(nodes, 'BreadcrumbList')).toHaveLength(1)
 })
