@@ -74,8 +74,11 @@ export default defineConfig({
     text: 'Suggest changes to this page',
   },
   title: 'Tempo Docs',
-  titleTemplate: (path, { title }) => {
+  titleTemplate: (path, { frontmatter, title }) => {
     const pagePath = typeof path === 'string' ? path : '/'
+    const seoTitle =
+      typeof frontmatter?.seoTitle === 'string' ? frontmatter.seoTitle.trim() : undefined
+    if (seoTitle) return seoTitle
     if (pagePath === '/docs') return 'Tempo %s ⋅ Tempo Docs'
     if (pagePath.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
     if (title?.includes('Tempo')) return undefined

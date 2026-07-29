@@ -1,9 +1,10 @@
 ---
-title: Conventions
+title: "Tempo API conventions and base URL"
+seoTitle: "API Conventions & Base URL | Tempo Docs"
 description: Formatting standards and shared patterns used across the Tempo API — base URL, chains, identifiers, amounts, timestamps, request IDs, errors, and rate limits.
 ---
 
-# API Conventions
+# Tempo API conventions and base URL
 
 The Tempo API follows consistent formatting rules for identifiers, amounts, timestamps, and shared query parameters. This page is a quick reference for the patterns you'll encounter on every endpoint.
 
@@ -99,3 +100,5 @@ Errors use a single, consistent envelope with a conventional HTTP status code an
 ## API rate-limit conventions
 
 Every response carries standard `RateLimit-*` headers, and requests that exceed quota receive `429 Too Many Requests` with a `Retry-After` header. See [Rate Limits](/docs/api/rate-limits) for the full model and best practices.
+
+<title>API Conventions & Base URL | Tempo Docs</title>

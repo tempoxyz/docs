@@ -68,17 +68,31 @@ const cases: {
   },
   {
     path: '/docs',
-    title: 'Tempo Documentation ⋅ Tempo Docs',
-    ogTitle: 'Tempo Documentation',
+    title: 'Tempo Developer Docs: APIs, SDKs &amp; Guides',
+    ogTitle: 'Tempo developer documentation',
     descriptionIncludes: 'Tempo docs for integration paths',
     ogImageIncludes: '/og-docs.png',
   },
   {
     path: '/docs/guide/payments/send-a-payment',
-    title: 'Send a Payment ⋅ Tempo Docs',
-    ogTitle: 'Send a Payment',
+    title: 'Send a Stablecoin Payment on Tempo | Docs',
+    ogTitle: 'How to send a stablecoin payment on Tempo',
     descriptionIncludes: 'stablecoin payments between accounts',
     ogImageIncludes: 'subsection=PAYMENTS',
+  },
+  {
+    path: '/docs/api',
+    title: 'Start with the Tempo API | Tempo Docs',
+    ogTitle: 'Tempo API',
+    descriptionIncludes: 'official Tempo blockchain API',
+    ogImageIncludes: 'section=API',
+  },
+  {
+    path: '/docs/api/console',
+    title: 'How to Use the Tempo API Console | Docs',
+    ogTitle: 'Using the Tempo API Console',
+    descriptionIncludes: 'create projects and API keys',
+    ogImageIncludes: 'section=API',
   },
 ]
 

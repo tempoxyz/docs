@@ -1,9 +1,10 @@
 ---
-title: Rate Limits
+title: "Tempo API rate limits and quota structure"
+seoTitle: "API Rate Limits & Quota Structure | Docs"
 description: How the Tempo API rate limits requests, the headers it returns, and best practices for staying within quota.
 ---
 
-# API Rate Limits
+# Tempo API rate limits and quota structure
 
 The Tempo API enforces rate limits to ensure fair usage and system stability. Limits are counted in **fixed one-minute windows**, and every response reports your current quota in `RateLimit-*` headers.
 
@@ -98,3 +99,5 @@ async function withRetry<T>(fn: () => Promise<Response>): Promise<Response> {
 ### Authenticate for higher API quotas
 
 Anonymous traffic is held to the lower IP-based limit. Send an [API key](/docs/api/authentication) to get a per-key, per-scope quota, and request a higher limit if your workload needs it.
+
+<title>API Rate Limits & Quota Structure | Docs</title>

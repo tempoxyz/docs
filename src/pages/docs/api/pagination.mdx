@@ -1,9 +1,10 @@
 ---
-title: Pagination
+title: "Tempo API pagination: two modes explained"
+seoTitle: "API Pagination Modes | Tempo Docs"
 description: Page through Tempo API list endpoints with cursors, page numbers, and optional total counts.
 ---
 
-# API Pagination
+# Tempo API pagination: two modes explained
 
 Tempo list endpoints share one pagination contract. Use **cursor** pagination for stable traversal and deep reads. Use **page** pagination only when an endpoint supports it and you need a shallow, page-numbered UI.
 
@@ -152,3 +153,5 @@ The count is computed by a capped subquery up to `10,000` matched rows:
 - Pass cursors back verbatim, and URL-encode them when placing them in a query string.
 - Stop only when `nextCursor` is `null`.
 - Use page pagination only for shallow UI navigation where duplicate or skipped rows on a live feed are acceptable.
+
+<title>API Pagination Modes | Tempo Docs</title>

@@ -1,9 +1,10 @@
 ---
-title: Errors
+title: "Tempo API errors and response format"
+seoTitle: "API Errors & Response Format | Docs"
 description: How the Tempo API signals errors, including HTTP status codes, the error envelope, and the full catalog of machine-readable error codes.
 ---
 
-# API Errors
+# Tempo API errors and response format
 
 The Tempo API uses conventional HTTP status codes to indicate the result of a request:
 
@@ -124,3 +125,5 @@ Something went wrong on Tempo's side. These are transient. Retry with [exponenti
 :::warning
 For non-idempotent requests (such as `POST`), a `5xx` response does not guarantee the operation failed; it may have succeeded on the backend. Treat the outcome as **unknown** and reconcile state before blindly retrying. Read requests (`GET`) are always safe to retry.
 :::
+
+<title>API Errors & Response Format | Docs</title>

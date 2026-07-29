@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'vitest'
 import vocsConfig from '../../vocs.config'
 
-function titleFor(path: string, title: string) {
+function titleFor(path: string, title: string, seoTitle?: string) {
   expect(typeof vocsConfig.titleTemplate).toBe('function')
   const template =
     typeof vocsConfig.titleTemplate === 'function'
       ? vocsConfig.titleTemplate(path, {
-          frontmatter: { title },
+          frontmatter: { seoTitle, title },
           siteTitle: vocsConfig.title,
           title,
         })
@@ -17,6 +17,23 @@ function titleFor(path: string, title: string) {
 }
 
 describe('vocs.config docs SEO controls', () => {
+  test('uses exact authored SEO titles without changing page titles', () => {
+    expect(
+      titleFor(
+        '/docs/guide/payments/send-a-payment',
+        'How to send a stablecoin payment on Tempo',
+        'Send a Stablecoin Payment on Tempo | Docs',
+      ),
+    ).toBe('Send a Stablecoin Payment on Tempo | Docs')
+    expect(
+      titleFor(
+        '/docs',
+        'Tempo developer documentation',
+        'Tempo Developer Docs: APIs, SDKs & Guides',
+      ),
+    ).toBe('Tempo Developer Docs: APIs, SDKs & Guides')
+  })
+
   test('uses Tempo Docs title suffix for docs pages', () => {
     expect(titleFor('/docs', 'Documentation')).toBe('Tempo Documentation ⋅ Tempo Docs')
     expect(titleFor('/docs/guide/payments/send-a-payment', 'Send a Payment')).toBe(
