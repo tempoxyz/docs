@@ -286,6 +286,10 @@ export default defineConfig({
             text: 'Typed Client',
             link: '/docs/api/typed-client',
           },
+          {
+            text: 'FAQ',
+            link: '/docs/api/faq',
+          },
         ],
       },
     },

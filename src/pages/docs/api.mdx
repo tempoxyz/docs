@@ -68,34 +68,12 @@ Create production and sandbox API keys in [Tempo API Console](https://console.te
 
 ## Common Tempo API workflows
 
-- **Track and reconcile a stablecoin payment.** Look up the [transaction and receipt](/docs/api/transactions), then inspect its [transfers](/docs/api/transfers) to confirm the token movement. Use [webhooks](/docs/api/webhooks) when your backend needs signed event callbacks.
+- **Track and reconcile a stablecoin payment.** Look up the [transaction and receipt](/docs/api/transactions), then inspect its [transaction activities](/docs/api/activities#list-transaction-activities) to confirm the token movement. Use [webhooks](/docs/api/webhooks) when your backend needs signed event callbacks.
 - **Monitor an account.** Read [balances](/docs/api/balances) and [activity](/docs/api/activities) to build payment history, treasury, or account views.
 - **Fund and exchange stablecoins.** Compare [funding quotes](/docs/api/funding) across supported chains and providers; the Funding API does not execute the transfer. Use [exchange quotes](/docs/api/exchange) to prepare unsigned approval and swap calls for you to sign and submit.
 - **Sponsor transaction fees.** Use the [Fee Payer API](/docs/api/fee-payer) to apply sponsorship policy and fill, sponsor, and broadcast user transactions.
 - **Query custom payment data.** Use the [Indexer API](/docs/api/indexer-api) for read-only SQL across indexed blocks, transactions, receipts, logs, transfers, and exchange data.
 - **Prepare a production integration.** Create projects and keys in [Tempo API Console](/docs/api/console), then review [authentication](/docs/api/authentication), [rate limits](/docs/api/rate-limits), and [errors](/docs/api/errors).
-
-## Tempo API FAQ
-
-### What is the Tempo API?
-
-The Tempo API is Tempo's official hosted integration surface for stablecoin products. It provides indexed data, signed webhooks, funding and exchange quotes, fee sponsorship, read-only SQL, and JSON-RPC access without requiring you to operate the underlying infrastructure.
-
-### How is the Tempo API different from Tempo RPC?
-
-The Tempo API combines higher-level hosted services for indexed data, webhooks, quotes, sponsorship, and SQL. Tempo RPC is the lower-level [JSON-RPC interface](/docs/api/json-rpc) for querying chain state, calling contracts and precompiles, and submitting signed transactions. Use RPC when an Ethereum-compatible client needs direct chain access.
-
-### What is the Tempo API base URL?
-
-The API host is `https://api.tempo.xyz`. REST endpoints use the `/v1` prefix, hosted mainnet RPC uses `/rpc`, and hosted testnet RPC uses `/rpc/testnet`.
-
-### Do I need a Tempo API key?
-
-Most read endpoints work without credentials at the public rate limit. Use [MPP or an API key](/docs/api/authentication) for more throughput; webhook management requires an API key.
-
-### How do I monitor a stablecoin payment?
-
-Read the [transaction and receipt](/docs/api/transactions) to follow execution, then read its [transfers](/docs/api/transfers) to identify the stablecoin movement. Configure [webhooks](/docs/api/webhooks) for signed callbacks instead of polling, and review delivery history when you need to audit an attempt.
 
 ## Try a Tempo API request
 
@@ -148,6 +126,12 @@ Check out an endpoint below and click "Try" to run it directly against the API. 
     description="HTTP status codes, the error envelope, and the full error code catalog."
     to="/docs/api/errors"
     icon="lucide:triangle-alert"
+  />
+  <Card
+    title="Tempo API FAQ"
+    description="Answers about API surfaces, credentials, payment monitoring, funding, and exchange quotes."
+    to="/docs/api/faq"
+    icon="lucide:circle-help"
   />
   <Card
     title="Versioning Policy"

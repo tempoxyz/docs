@@ -1,0 +1,40 @@
+---
+title: Tempo API FAQ
+description: Answers to common Tempo API questions about hosted services, RPC, authentication, webhooks, funding, exchange quotes, and API endpoints.
+---
+
+# Tempo API FAQ
+
+Use these answers to choose the right Tempo API surface and understand what each hosted service does. For parameters, responses, and errors, use the [Tempo REST API reference](/docs/api#tempo-rest-api-endpoints).
+
+## What is the Tempo API?
+
+The Tempo API is Tempo's official hosted integration surface for stablecoin products. It provides indexed data, signed webhooks, funding and exchange quotes, fee sponsorship, read-only SQL, and JSON-RPC access without requiring you to operate the underlying infrastructure.
+
+## How is the Tempo API different from Tempo RPC?
+
+The Tempo API combines higher-level hosted services for indexed data, webhooks, quotes, sponsorship, and SQL. Tempo RPC is the lower-level [JSON-RPC interface](/docs/api/json-rpc) for querying chain state, calling contracts and precompiles, and submitting signed transactions. Use RPC when an Ethereum-compatible client needs direct chain access.
+
+## What is the Tempo API base URL?
+
+The API host is `https://api.tempo.xyz`. REST endpoints use the `/v1` prefix, hosted mainnet RPC uses `/rpc`, and hosted testnet RPC uses `/rpc/testnet`.
+
+## Do I need a Tempo API key?
+
+Most read endpoints work without credentials at the public rate limit. Use [MPP or an API key](/docs/api/authentication) for more throughput; webhook management requires an API key.
+
+## How do I monitor a stablecoin payment?
+
+Read the [transaction and receipt](/docs/api/transactions) to follow execution, then inspect its [transaction activities](/docs/api/activities#list-transaction-activities) to identify the stablecoin movement. Configure [webhooks](/docs/api/webhooks) for signed callbacks instead of polling, and review delivery history when you need to audit an attempt.
+
+## Does the Tempo Funding API execute a transfer?
+
+No. The [Funding API](/docs/api/funding) compares live quotes across supported chains and providers, but it does not execute a transfer. Execute the chosen transfer separately.
+
+## Does the Tempo Exchange API submit a transaction?
+
+No. The [Exchange API](/docs/api/exchange) creates a priced preview on Tempo's native stablecoin DEX and returns unsigned approval and swap calls. Sign and submit the returned calls to complete the exchange.
+
+## Where do I manage Tempo API projects and keys?
+
+Use [Tempo API Console](/docs/api/console) to create projects and environments, issue API keys, monitor usage, and configure billing. Console access is currently invite-only.
