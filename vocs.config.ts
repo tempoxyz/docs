@@ -883,6 +883,11 @@ export default defineConfig({
             collapsed: false,
             items: [
               {
+                text: 'T9',
+                badge: { text: 'Planned', variant: 'note' as const },
+                link: '/docs/protocol/upgrades/t9',
+              },
+              {
                 text: 'T8',
                 badge: { text: 'Planned', variant: 'note' as const },
                 link: '/docs/protocol/upgrades/t8',
