@@ -1,13 +1,13 @@
 ---
 title: T9 Network Upgrade
-description: T9 prepares Tempo for protocol-managed Zones with native ZoneFactory creation and predictable zone portals.
+description: T9 adds TIP-403 registry support for TIP-20 token policy bindings and targeted migration for existing tokens.
 ---
 
 # T9 Network Upgrade
 
-T9 prepares Tempo for protocol-managed Zones. It adds the native ZoneFactory used to create zones and gives every zone a predictable Tempo-side portal account.
+T9 updates how Tempo records the transfer policy used by TIP-20 tokens. It lets TIP-403 store the active policy for a token, so policy-aware tooling can read that answer from the registry when it needs to.
 
-For ecosystem partners, T9 matters most if you plan to operate a zone, support zone deposits or withdrawals, or index zone activity.
+For ecosystem partners, T9 matters most if you issue TIP-20 tokens, maintain wallets or indexers that read token policy state, or build flows that need a registry-backed answer for token policy checks.
 
 :::info[T9 status]
 T9 is not scheduled yet. The T9-compatible release, testnet activation time, and mainnet activation time are TBD.
@@ -24,54 +24,37 @@ Node operators should run the T9-compatible release before the activation timest
 
 ## Overview
 
-T9 focuses on one protocol change needed for the first zone rollout:
+T9 focuses on one protocol change:
 
-- **Protocol-managed zone creation.** Tempo gets one native ZoneFactory for creating zones and recording their portal accounts.
+- **TIP-20 policy IDs in TIP-403.** TIP-403 can store which transfer policy a TIP-20 token is currently using.
 
-A zone is created through one protocol entry point, gets a predictable portal account, and appears in one canonical registry.
+This keeps token policy information in one registry when a flow needs that stronger guarantee. Existing tokens keep working even if they have not been migrated yet.
 
 ## Features
 
-### ZoneFactory for zone creation
+### Token policy lookup in TIP-403
 
-T9 adds the native ZoneFactory. This is the protocol entry point for creating a zone.
+TIP-403 already stores transfer policy data. T9 also lets TIP-403 store the active transfer policy ID for a TIP-20 token.
 
-When a zone is created, the factory assigns a zone ID, creates the zone's portal account, records the zone metadata, and emits the creation event. This gives Tempo one canonical zone registry instead of relying on a separately deployed factory contract.
+In plain terms, this gives contracts and offchain tools a registry-backed way to ask: "Which transfer policy is this token using?"
 
-For the first T9 launch, zone creation is permissioned. Only the configured factory owner can create zones. This keeps the initial rollout controlled while the Zones stack is being introduced. A future network upgrade can make zone creation open.
+New TIP-20 tokens write this TIP-403 binding when they are created. After T9, token policy changes also update the TIP-403 binding.
 
-Read the specification [here](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1091.md).
+Read the specification [here](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1092.md).
 
-### Predictable portal accounts
+### Existing tokens keep working
 
-Every zone gets a predictable ZonePortal account. The portal is the zone's Tempo-side entry point for deposits, withdrawals, settlements, and other zone operations.
+Existing TIP-20 tokens do not all need to move at activation. If a token has not been migrated, normal token behavior can still use the token's existing local policy ID.
 
-The address is derived from the zone ID, so developers and partner tools do not need to track an ordinary deployment address. Zone ID `1` maps to:
+The difference is for flows that specifically need the policy answer to come from TIP-403. Those flows should require the TIP-403 binding to exist before using that token.
 
-```text
-0x5AD0000000000000000000000000000000000001
-```
+### Targeted migration
 
-Contracts and offchain tools should use `isZonePortal(address)` when they need to check whether an address is a valid zone portal.
+T9 adds a targeted migration path for existing TIP-20 tokens that need a TIP-403 binding.
 
-Portal accounts keep stable addresses and independent state. The shared portal logic is installed by the network upgrade, and future logic changes must also go through a network upgrade.
+The migration copies the token's current local policy ID into TIP-403. It does not choose a new policy or change the token's rules; it only registers the policy the token is already using.
 
-### Zone setup inputs
-
-Each zone starts with a small set of configuration choices:
-
-- the initial token
-- the zone admin
-- the sequencer set and settlement threshold
-- account-access settings
-- callback-gateway settings
-- an RPC URL
-
-The sequencer set can contain up to 8 addresses. The threshold says how many sequencers must sign a settlement for it to be accepted. For example, a threshold of 3 with 5 sequencers means any 3 of those 5 sequencers can approve the settlement.
-
-The initial token has to satisfy the policy requirements enforced by the factory. This keeps zone creation from succeeding with a token the zone cannot safely use.
-
-Zone admins also choose whether account access and callback gateways start open or restricted. If a restricted setting starts with an empty role list, that access is denied until the admin adds roles or changes the setting.
+This means teams can migrate the tokens they need instead of forcing every historical token into the registry at once.
 
 ## Compatible releases
 
@@ -89,20 +72,19 @@ Release notes and binaries will be linked here when the T9-compatible release is
 ### For node operators
 
 - Upgrade to the T9-compatible node release before activation.
-- T9 installs the native ZoneFactory and shared zone runtimes at activation.
+- T9 adds TIP-403 registry support for TIP-20 token policy bindings.
 - Nodes that do not include T9 support will fall out of sync after activation.
 
-### For zone operators and zone tooling
+### For TIP-20 issuers and token admins
 
-- Create zones through the native ZoneFactory.
-- Use `isZonePortal(address)` when checking whether an address is a valid zone portal.
-- Keep sequencer sets to at most 8 addresses.
-- Confirm the initial token meets the factory's policy requirements before creating the zone.
-- Choose account-access and callback-gateway settings carefully at zone creation, because empty restricted role lists deny access.
+- New TIP-20 tokens write their TIP-403 policy binding during creation.
+- Existing tokens keep working if they are not migrated.
+- Existing tokens should be migrated when a flow needs their policy ID to be available from TIP-403.
+- After activation, policy changes update the active policy in TIP-403.
 
 ### For SDKs, indexers, and low-level tooling
 
-- Track zones through the native ZoneFactory registry and `ZoneCreated` events.
-- Use `isZonePortal(address)` instead of reproducing the portal address check.
-- Treat ZonePortal addresses as stable. Future portal logic changes must go through a network upgrade without changing portal addresses.
-- Apps that do not create zones or interact with zone portals do not need an immediate integration change for T9.
+- Existing token policy reads can keep using the current TIP-20 API when they only need the effective policy ID.
+- Tooling that needs a registry-backed token-to-policy answer should read TIP-403.
+- Migration tooling should migrate only the tokens that need a TIP-403 binding.
+- Apps that do not read or enforce TIP-20 policy state do not need an immediate integration change for T9.
