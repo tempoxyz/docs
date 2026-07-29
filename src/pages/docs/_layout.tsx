@@ -43,6 +43,7 @@ if (typeof window !== 'undefined') {
 export default function DocsLayout(
   props: PropsWithChildren<{
     path?: string
+    // This downstream consumer takes effect when the separately tracked Vocs OpenAPI frontmatter update is adopted.
     frontmatter?: {
       description?: string
       interactive?: boolean

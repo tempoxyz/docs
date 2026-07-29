@@ -23,6 +23,15 @@ describe('vocs.config docs SEO controls', () => {
       'Send a Payment ⋅ Tempo Docs',
     )
     expect(titleFor('/docs/api', 'Tempo API')).toBe('Tempo API ⋅ Tempo Docs')
+    expect(titleFor('/docs/protocol/transactions', 'Tempo Transactions')).toBe(
+      'Tempo Transactions ⋅ Tempo Docs',
+    )
+    expect(titleFor('/', 'Tempo')).toBe('Tempo')
+    expect(titleFor('/build/tempo-transactions', 'Tempo Transactions')).toBe('Tempo Transactions')
+    expect(titleFor('/blog', 'Blog')).toBe('Blog ⋅ Tempo')
+  })
+
+  test('formats authored API titles when Vocs supplies routed metadata', () => {
     expect(titleFor('/docs/api/authentication', 'Authentication')).toBe(
       'Authentication ⋅ Tempo Docs',
     )
@@ -35,12 +44,6 @@ describe('vocs.config docs SEO controls', () => {
     expect(titleFor('/docs/api/fee-payer', 'Tempo Fee Payer API: Sponsor Transaction Fees')).toBe(
       'Tempo Fee Payer API: Sponsor Transaction Fees ⋅ Tempo Docs',
     )
-    expect(titleFor('/docs/protocol/transactions', 'Tempo Transactions')).toBe(
-      'Tempo Transactions ⋅ Tempo Docs',
-    )
-    expect(titleFor('/', 'Tempo')).toBe('Tempo')
-    expect(titleFor('/build/tempo-transactions', 'Tempo Transactions')).toBe('Tempo Transactions')
-    expect(titleFor('/blog', 'Blog')).toBe('Blog ⋅ Tempo')
   })
 
   test('omits article modified metadata for docs pages only', () => {
