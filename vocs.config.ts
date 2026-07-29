@@ -125,11 +125,8 @@ export default defineConfig({
     },
   },
   sitemap: {
-    lastmod: (path, { lastmod }) => {
-      const pagePath = typeof path === 'string' ? path : '/'
-      if (pagePath === '/docs' || pagePath.startsWith('/docs/')) return false
-      return lastmod
-    },
+    include: (path) => !path.split('/').some((segment) => /^\[.*\]$/.test(segment)),
+    lastmod: (_path, { filePath, lastmod }) => (/\.mdx?$/.test(filePath) ? lastmod : false),
   },
   markdown: {
     outputRemarkPlugins: [plainMarkdownComponents],

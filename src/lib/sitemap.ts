@@ -1,9 +1,14 @@
 const TEMPLATE_URL_PATTERN = /<url>\s*<loc>([^<]*\/\[[^\]]+\][^<]*)<\/loc>[\s\S]*?<\/url>\s*/g
 const LOCATION_PATTERN = /<loc>([^<]+)<\/loc>/g
 
+export type BlogSitemapEntry = {
+  slug: string
+  lastmod?: string
+}
+
 export function finalizeSitemap(
   sitemap: string,
-  blogPostSlugs: readonly string[],
+  blogPosts: readonly BlogSitemapEntry[],
   openApiRouteSlugs: readonly string[] = [],
 ): string {
   let blogBaseUrl: string | undefined
@@ -25,14 +30,16 @@ export function finalizeSitemap(
     if (blogIndexUrl) blogBaseUrl = `${blogIndexUrl.replace(/\/$/, '')}/`
   }
 
-  const uniqueBlogSlugs = [...new Set(blogPostSlugs)].sort((a, b) => a.localeCompare(b))
+  const uniqueBlogPosts = [
+    ...new Map(blogPosts.map((post) => [post.slug, post] as const)).values(),
+  ].sort((a, b) => a.slug.localeCompare(b.slug))
   const uniqueOpenApiSlugs = [...new Set(openApiRouteSlugs)].sort((a, b) => a.localeCompare(b))
-  if (uniqueBlogSlugs.length === 0 && uniqueOpenApiSlugs.length === 0) return withoutTemplates
+  if (uniqueBlogPosts.length === 0 && uniqueOpenApiSlugs.length === 0) return withoutTemplates
   if (!withoutTemplates.includes('</urlset>')) {
     throw new Error('Could not find the sitemap urlset closing tag')
   }
 
-  const locations: string[] = []
+  const entries: { lastmod?: string; location: string }[] = []
 
   if (uniqueOpenApiSlugs.length > 0) {
     const openApiIndexUrl = Array.from(existingLocations).find((location) =>
@@ -42,21 +49,37 @@ export function finalizeSitemap(
       throw new Error('Could not resolve the OpenAPI base URL from the sitemap')
     }
     const openApiBaseUrl = `${openApiIndexUrl.replace(/\/$/, '')}/`
-    locations.push(
-      ...uniqueOpenApiSlugs.map((slug) => `${openApiBaseUrl}${encodeURIComponent(slug)}`),
+    entries.push(
+      ...uniqueOpenApiSlugs.map((slug) => ({
+        location: `${openApiBaseUrl}${encodeURIComponent(slug)}`,
+      })),
     )
   }
 
-  if (uniqueBlogSlugs.length > 0) {
+  if (uniqueBlogPosts.length > 0) {
     if (!blogBaseUrl) throw new Error('Could not resolve the blog base URL from the sitemap')
-    locations.push(...uniqueBlogSlugs.map((slug) => `${blogBaseUrl}${encodeURIComponent(slug)}`))
+    entries.push(
+      ...uniqueBlogPosts.map(({ slug, lastmod }) => ({
+        location: `${blogBaseUrl}${encodeURIComponent(slug)}`,
+        lastmod,
+      })),
+    )
   }
 
-  const entries = locations
-    .filter((location) => !existingLocations.has(location))
-    .map((location) => `  <url>\n    <loc>${location}</loc>\n  </url>`)
+  const newEntries = entries
+    .filter(({ location }) => !existingLocations.has(location))
+    .map(({ location, lastmod }) =>
+      [
+        '  <url>',
+        `    <loc>${location}</loc>`,
+        lastmod ? `    <lastmod>${lastmod}</lastmod>` : undefined,
+        '  </url>',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+    )
 
-  if (entries.length === 0) return withoutTemplates
+  if (newEntries.length === 0) return withoutTemplates
 
-  return withoutTemplates.replace('</urlset>', `${entries.join('\n')}\n</urlset>`)
+  return withoutTemplates.replace('</urlset>', `${newEntries.join('\n')}\n</urlset>`)
 }
