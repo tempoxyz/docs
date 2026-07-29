@@ -1,6 +1,7 @@
 import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
 import { resolveBaseUrl } from './src/lib/base-url'
 import { docsRouteDestination, proxiedLegacyDocsRoutes } from './src/lib/docs-routing'
+import { docsStructuredDataHead } from './src/lib/docs-structured-data'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 import { plainMarkdownComponents } from './src/lib/markdown-output'
 
@@ -83,12 +84,8 @@ export default defineConfig({
   description: 'Documentation for the Tempo network and protocol specifications',
   renderStrategy: 'partial-static',
   feedback: createFeedbackAdapter(),
-  head(path) {
-    const pagePath = typeof path === 'string' ? path : '/'
-    if (pagePath === '/docs' || pagePath.startsWith('/docs/'))
-      return { meta: { articleModifiedTime: false } }
-    return undefined
-  },
+  head: docsStructuredDataHead,
+  jsonLd: false,
   ai: {
     retriever: process.env.CLOUDFLARE_API_TOKEN
       ? Retriever.local({

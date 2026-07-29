@@ -52,11 +52,15 @@ describe('vocs.config docs SEO controls', () => {
     expect(typeof head).toBe('function')
     if (typeof head !== 'function') return
 
-    expect(head('/docs', {})).toEqual({ meta: { articleModifiedTime: false } })
-    expect(head('/docs/guide/payments/send-a-payment', {})).toEqual({
+    expect(head('/docs', {})).toMatchObject({ meta: { articleModifiedTime: false } })
+    expect(head('/docs/guide/payments/send-a-payment', {})).toMatchObject({
       meta: { articleModifiedTime: false },
     })
     expect(head('/blog/stablecoins-as-a-platform', {})).toBeUndefined()
+  })
+
+  test('disables Vocs JSON-LD in favor of the context-aware docs graph', () => {
+    expect(vocsConfig.jsonLd).toBe(false)
   })
 
   test('omits sitemap lastmod for docs pages only', () => {
