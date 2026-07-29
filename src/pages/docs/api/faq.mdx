@@ -15,10 +15,6 @@ The Tempo API is Tempo's official hosted integration surface for stablecoin prod
 
 The Tempo API combines higher-level hosted services for indexed data, webhooks, quotes, sponsorship, and SQL. Tempo RPC is the lower-level [JSON-RPC interface](/docs/api/json-rpc) for querying chain state, calling contracts and precompiles, and submitting signed transactions. Use RPC when an Ethereum-compatible client needs direct chain access.
 
-## What is the Tempo API base URL?
-
-The API host is `https://api.tempo.xyz`. REST endpoints use the `/v1` prefix, hosted mainnet RPC uses `/rpc`, and hosted testnet RPC uses `/rpc/testnet`.
-
 ## Do I need a Tempo API key?
 
 Most read endpoints work without credentials at the public rate limit. Use [MPP or an API key](/docs/api/authentication) for more throughput; webhook management requires an API key.
