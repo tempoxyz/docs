@@ -1416,6 +1416,14 @@ body {
   background-color: transparent;
 }
 
+@media not all and (width >= 748px) {
+  [data-v-openapi-overview] {
+    /* Defer below-fold layout while preserving the measured collapsed height. */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 2350px;
+  }
+}
+
 [data-v-sidebar][data-v-sidebar] a[data-v-sidebar-item][data-active]:not(:hover) {
   background: transparent;
   background-color: transparent;
