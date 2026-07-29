@@ -25,32 +25,34 @@ curl 'https://api.tempo.xyz/v1/blocks'
 
 The same base URL and credentials give you access to four surfaces:
 
-- [**REST API**](#tempo-rest-api-endpoints): typed endpoints for indexed chain data such as blocks, transactions, tokens, balances, transfers, and receipts.
+<Cards>
+  <Card
+    title="REST API"
+    description="Read indexed blocks, transactions, tokens, balances, transfers, receipts, and account activity."
+    to="/docs/api/reference"
+    icon="lucide:braces"
+  />
+  <Card
+    title="JSON-RPC API"
+    description="Call standard Ethereum methods and Tempo-specific namespaces for node-level chain access."
+    to="/docs/api/json-rpc"
+    icon="lucide:radio-tower"
+  />
+  <Card
+    title="Fee Payer API"
+    description="Fill, sponsor, and broadcast Tempo Transactions through a hosted relay."
+    to="/docs/api/fee-payer"
+    icon="lucide:badge-dollar-sign"
+  />
+  <Card
+    title="Indexer API"
+    description="Run read-only SQL queries against Tempo's indexed blockchain data."
+    to="/docs/api/indexer-api"
+    icon="lucide:database"
+  />
+</Cards>
 
-  ```bash
-  curl 'https://api.tempo.xyz/v1/addresses/0x.../balances'
-  ```
-
-- [**JSON-RPC API**](/docs/api/json-rpc): a node-level RPC entrypoint for raw chain access.
-
-  ```bash
-  curl 'https://api.tempo.xyz/rpc' \
-    --data '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}'
-  ```
-
-- [**Fee Payer API**](/docs/api/fee-payer): a hosted relay for filling, sponsoring, and broadcasting Tempo Transactions.
-
-  ```text
-  https://api.tempo.xyz/rpc/sponsor
-  ```
-
-- [**Indexer API**](/docs/api/indexer-api): a SQL-over-HTTP entrypoint for read-only queries against indexed chain data.
-
-  ```bash
-  curl --get 'https://api.tempo.xyz/v1/indexer/query' \
-    --data-urlencode 'chainId=mainnet' \
-    --data-urlencode 'sql=SELECT num, hash FROM blocks ORDER BY num DESC LIMIT 10'
-  ```
+## Choose Tempo API access
 
 There are three ways to authenticate, depending on the throughput you need:
 
@@ -81,11 +83,12 @@ Check out an endpoint below and click "Try" to run it directly against the API. 
 
 <OpenApi.Playground operationId="getAddressBalances" hideQueryParams />
 
-## Tempo REST API endpoints
+<span id="tempo-rest-api-endpoints" />
 
-<OpenApi.Endpoints path="/docs/api" />
+## Tempo REST API reference
 
-{/* OpenAPI hoists its own title; keep the docs suffix last in head dedupe. */}
+Browse the [complete Tempo API reference](/docs/api/reference) to find every API group and endpoint.
+
 <title>Tempo API ⋅ Tempo Docs</title>
 
 ## Next API integration steps

@@ -1,6 +1,7 @@
 import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
 import { resolveBaseUrl } from './src/lib/base-url'
 import { docsRouteDestination, proxiedLegacyDocsRoutes } from './src/lib/docs-routing'
+import { docsStructuredDataHead } from './src/lib/docs-structured-data'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 import { plainMarkdownComponents } from './src/lib/markdown-output'
 
@@ -83,12 +84,8 @@ export default defineConfig({
   description: 'Documentation for the Tempo network and protocol specifications',
   renderStrategy: 'partial-static',
   feedback: createFeedbackAdapter(),
-  head(path) {
-    const pagePath = typeof path === 'string' ? path : '/'
-    if (pagePath === '/docs' || pagePath.startsWith('/docs/'))
-      return { meta: { articleModifiedTime: false } }
-    return undefined
-  },
+  head: docsStructuredDataHead,
+  jsonLd: false,
   ai: {
     retriever: process.env.CLOUDFLARE_API_TOKEN
       ? Retriever.local({
@@ -125,11 +122,8 @@ export default defineConfig({
     },
   },
   sitemap: {
-    lastmod: (path, { lastmod }) => {
-      const pagePath = typeof path === 'string' ? path : '/'
-      if (pagePath === '/docs' || pagePath.startsWith('/docs/')) return false
-      return lastmod
-    },
+    include: (path) => !path.split('/').some((segment) => /^\[.*\]$/.test(segment)),
+    lastmod: (_path, { filePath, lastmod }) => (/\.mdx?$/.test(filePath) ? lastmod : false),
   },
   markdown: {
     outputRemarkPlugins: [plainMarkdownComponents],
@@ -283,12 +277,16 @@ export default defineConfig({
             link: '/docs/api/versioning-policy',
           },
           {
-            text: 'Typed Client',
+            text: 'TypeScript',
             link: '/docs/api/typed-client',
           },
           {
             text: 'FAQ',
             link: '/docs/api/faq',
+          },
+          {
+            text: 'Reference',
+            link: '/docs/api/reference',
           },
         ],
       },
