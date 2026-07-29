@@ -44,7 +44,7 @@ console.log(
   `Validated ${canonicalApiUrls.length} canonical API routes in ${path.relative(process.cwd(), sitemapPath)}.`,
 )
 
-async function findRouteIndexFiles(directory) {
+async function findRouteIndexFiles(directory: string): Promise<string[]> {
   const entries = await fs.readdir(directory, { withFileTypes: true })
   const files = await Promise.all(
     entries.map(async (entry) => {

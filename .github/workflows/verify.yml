@@ -102,7 +102,7 @@ jobs:
           VERCEL_ENV: production
 
       - name: Check sitemap coverage
-        run: node scripts/check-vercel-sitemap.mjs
+        run: node --experimental-strip-types scripts/check-vercel-sitemap.ts
 
   ci-gate:
     name: CI Gate
