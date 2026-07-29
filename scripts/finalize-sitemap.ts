@@ -63,7 +63,7 @@ const openApiRouteSlugs = await fs
 
 const wroteDistSitemap = await writeFinalizedSitemap(distSitemapPath, blogPosts, openApiRouteSlugs)
 
-await writeFinalizedSitemap(vercelSitemapPath, blogPosts)
+await writeFinalizedSitemap(vercelSitemapPath, blogPosts, openApiRouteSlugs)
 
 if (wroteDistSitemap) process.exit(0)
 
