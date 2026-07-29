@@ -9,8 +9,8 @@ import { unified } from 'unified'
 import type { Plugin } from 'vite'
 
 // Blog content lives as dev-managed markdown files in /blogs at the repo root.
-// Frontmatter schema: title, excerpt, date (YYYY-MM-DD), category, and an
-// optional `featured: true` to pin a post to the hero card.
+// Frontmatter schema: title, excerpt, date (YYYY-MM-DD), category, optional
+// authors, and an optional `featured: true` to pin a post to the hero card.
 //
 // Markdown is rendered to HTML here, in Node, at build/dev time, so the heavy
 // markdown + Shiki toolchain never ships to the client bundle. The rendered
@@ -18,6 +18,8 @@ import type { Plugin } from 'vite'
 
 const VIRTUAL_ID = 'virtual:blog-posts'
 const RESOLVED_VIRTUAL_ID = `\0${VIRTUAL_ID}`
+const SEARCH_VIRTUAL_ID = 'virtual:blog-search-documents'
+const RESOLVED_SEARCH_VIRTUAL_ID = `\0${SEARCH_VIRTUAL_ID}`
 
 const BLOGS_DIR = path.resolve(process.cwd(), 'blogs')
 const PUBLIC_DIR = path.resolve(process.cwd(), 'public')
@@ -63,8 +65,13 @@ export type RenderedPost = {
   excerpt: string
   date: string
   category: string
+  authors: string
   featured: boolean
   html: string
+}
+
+type SearchablePost = RenderedPost & {
+  searchText: string
 }
 
 // Markdown → HTML with Shiki syntax highlighting. Vesper is the closest
@@ -114,7 +121,7 @@ function parseFrontmatter(raw: string): { data: Record<string, string>; content:
   return { data, content: match[2] }
 }
 
-async function renderPost(filename: string): Promise<RenderedPost> {
+async function renderPost(filename: string): Promise<SearchablePost> {
   const slug = filename.replace(/\.md$/, '')
   const raw = fs.readFileSync(path.join(BLOGS_DIR, filename), 'utf8')
   const { data, content } = parseFrontmatter(raw)
@@ -134,13 +141,15 @@ async function renderPost(filename: string): Promise<RenderedPost> {
     excerpt: data.excerpt,
     date: data.date,
     category: data.category,
+    authors: data.authors ?? '',
     featured: data.featured === 'true',
     html,
+    searchText: content,
   }
 }
 
 // Reads + renders every post, newest first.
-async function loadRenderedPosts(): Promise<RenderedPost[]> {
+async function loadRenderedPosts(): Promise<SearchablePost[]> {
   const filenames = getBlogPostFilenames()
 
   const posts = await Promise.all(filenames.map(renderPost))
@@ -159,11 +168,25 @@ export function blogPostsPlugin(): Plugin {
     name: 'tempo-blog-posts',
     resolveId(id) {
       if (id === VIRTUAL_ID) return RESOLVED_VIRTUAL_ID
+      if (id === SEARCH_VIRTUAL_ID) return RESOLVED_SEARCH_VIRTUAL_ID
     },
     async load(id) {
-      if (id !== RESOLVED_VIRTUAL_ID) return
+      if (id !== RESOLVED_VIRTUAL_ID && id !== RESOLVED_SEARCH_VIRTUAL_ID) return
       const posts = await getPosts()
-      return `export const posts = ${JSON.stringify(posts)}`
+      if (id === RESOLVED_SEARCH_VIRTUAL_ID) {
+        return `export const documents = ${JSON.stringify(
+          posts.map(({ slug, title, excerpt, category, searchText }) => ({
+            slug,
+            title,
+            excerpt,
+            category,
+            searchText,
+          })),
+        )}`
+      }
+      return `export const posts = ${JSON.stringify(
+        posts.map(({ searchText: _searchText, ...post }) => post),
+      )}`
     },
     configureServer(server) {
       const BLOG_ASSETS_DIR = path.join(PUBLIC_DIR, 'blog')
@@ -177,8 +200,10 @@ export function blogPostsPlugin(): Plugin {
         const mod = server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID)
         if (mod) {
           server.moduleGraph.invalidateModule(mod)
-          server.ws.send({ type: 'full-reload' })
         }
+        const searchMod = server.moduleGraph.getModuleById(RESOLVED_SEARCH_VIRTUAL_ID)
+        if (searchMod) server.moduleGraph.invalidateModule(searchMod)
+        if (mod || searchMod) server.ws.send({ type: 'full-reload' })
       }
       server.watcher.on('add', invalidate)
       server.watcher.on('change', invalidate)

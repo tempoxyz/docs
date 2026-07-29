@@ -61,6 +61,9 @@ jobs:
       - name: Check generated public links
         run: node scripts/check-generated-public-links.mjs
 
+      - name: Audit generated Markdown
+        run: pnpm run check:markdown
+
   ci-gate:
     name: CI Gate
     if: always()

@@ -1,0 +1,58 @@
+<svg width="840" height="390" viewBox="0 0 840 390" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, 'JetBrains Mono', monospace">
+  <style>
+    .dgm-bg { fill: transparent; }
+    .dgm-box, .dgm-accent-box { fill: none; stroke: currentColor; }
+    .dgm-line { stroke: currentColor; }
+    .dgm-accent { fill: currentColor; }
+  </style>
+  <rect class="dgm-bg" width="840" height="390"/>
+  <text x="40" y="44" font-size="13" letter-spacing="0.04em" fill="currentColor" fill-opacity="0.85">ISOLATED EVALUATION HARNESS</text>
+  <text x="40" y="64" font-size="11" fill="currentColor" fill-opacity="0.4">ONLY DECLARED ARTIFACTS AND LOGS CROSS THE ENVIRONMENT BOUNDARY</text>
+
+  <rect class="dgm-box" x="130" y="140" width="220" height="80" stroke-width="2"/>
+  <text x="240" y="172" font-size="11" fill="currentColor" fill-opacity="0.7" text-anchor="middle">EVALUATION</text>
+  <text x="240" y="191" font-size="11" fill="currentColor" fill-opacity="0.7" text-anchor="middle">ENVIRONMENT</text>
+
+  <rect class="dgm-box" x="500" y="140" width="220" height="80" stroke-width="2"/>
+  <text x="610" y="172" font-size="11" fill="currentColor" fill-opacity="0.7" text-anchor="middle">VERIFICATION</text>
+  <text x="610" y="191" font-size="11" fill="currentColor" fill-opacity="0.7" text-anchor="middle">ENVIRONMENT</text>
+
+  <rect class="dgm-accent-box" x="310" y="305" width="220" height="52" stroke-width="2"/>
+  <text class="dgm-accent" x="420" y="337" font-size="11" text-anchor="middle">TEMPO</text>
+
+  <g class="dgm-line" stroke-dasharray="7 7" stroke-width="2">
+    <line x1="40" y1="166" x2="112" y2="166"/>
+    <line x1="40" y1="198" x2="112" y2="198"/>
+    <line x1="368" y1="166" x2="482" y2="166"/>
+    <line x1="368" y1="198" x2="482" y2="198"/>
+    <line x1="738" y1="182" x2="780" y2="182"/>
+    <path d="M165 126V112C165 70 315 70 315 112V126"/>
+    <line x1="610" y1="86" x2="610" y2="122"/>
+    <path d="M240 238V258C240 268 292 268 292 278V286"/>
+    <path d="M548 286V278C548 268 610 268 610 258V238"/>
+  </g>
+
+  <g class="dgm-line">
+    <polygon points="120,166 110,161 110,171"/>
+    <polygon points="120,198 110,193 110,203"/>
+    <polygon points="490,166 480,161 480,171"/>
+    <polygon points="490,198 480,193 480,203"/>
+    <polygon points="790,182 780,177 780,187"/>
+    <polygon points="315,136 310,126 320,126"/>
+    <polygon points="610,130 605,120 615,120"/>
+    <polygon points="292,294 287,284 297,284"/>
+    <polygon points="610,230 605,240 615,240"/>
+  </g>
+
+  <g font-size="10" fill="currentColor" fill-opacity="0.5">
+    <text x="76" y="163" text-anchor="middle">PROMPT</text>
+    <text x="76" y="219" text-anchor="middle">TOOLS</text>
+    <text x="425" y="163" text-anchor="middle">CODE ARTIFACTS</text>
+    <text x="425" y="219" text-anchor="middle">LOGS</text>
+    <text x="758" y="179" text-anchor="middle">FINAL SCORES</text>
+    <text x="240" y="101" text-anchor="middle">AGENTIC LOOP</text>
+    <text x="626" y="103" text-anchor="start">VERIFICATION CRITERIA</text>
+    <text x="272" y="255" text-anchor="middle">WRITE</text>
+    <text x="552" y="255" text-anchor="middle">READ</text>
+  </g>
+</svg>

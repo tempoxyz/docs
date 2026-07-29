@@ -9,8 +9,19 @@ declare module 'virtual:blog-posts' {
     excerpt: string
     date: string
     category: string
+    authors: string
     featured: boolean
     html: string
+  }[]
+}
+
+declare module 'virtual:blog-search-documents' {
+  export const documents: {
+    slug: string
+    title: string
+    excerpt: string
+    category: string
+    searchText: string
   }[]
 }
 

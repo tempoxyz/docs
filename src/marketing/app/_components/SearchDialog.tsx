@@ -226,7 +226,7 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
     if (!query.trim()) {
       return (
         <div className="px-4 py-10 text-center font-sans text-[14px] text-foreground/45">
-          Start typing to search the docs…
+          Start typing to search docs and blog posts…
         </div>
       )
     }
@@ -280,7 +280,7 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
             aria-autocomplete="list"
             autoComplete="off"
             spellCheck={false}
-            placeholder="Search documentation…"
+            placeholder="Search docs and blog posts…"
             value={query}
             onChange={(event) => runQuery(event.target.value)}
             className="flex-1 bg-transparent font-sans text-[15px] text-foreground tracking-[0] outline-none placeholder:text-foreground/40"

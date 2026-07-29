@@ -1,11 +1,13 @@
 ---
-title: JSON-RPC API
-description: The Tempo API exposes a JSON-RPC entrypoint for raw chain access from Viem, Wagmi, and Rust.
+title: "Tempo JSON-RPC API: Endpoints & Methods"
+description: Connect to Tempo JSON-RPC from Viem, Wagmi, Foundry, or Rust for standard Ethereum methods and Tempo-specific blockchain access.
 ---
 
 import { OpenApi, Tabs, Tab } from 'vocs'
 
-# JSON-RPC API
+<span id="json-rpc-api" />
+
+# Tempo JSON-RPC API
 
 The Tempo API exposes a **JSON-RPC entrypoint** for raw, node-level chain access alongside its REST and Indexer surfaces. Through it, Tempo nodes serve all standard [Ethereum JSON-RPC methods](https://ethereum.org/developers/docs/apis/json-rpc/) (`eth_`, `net_`, `web3_`, `txpool_`, `trace_`, `debug_`) plus Tempo-specific namespaces for fork scheduling, consensus data, and node administration.
 

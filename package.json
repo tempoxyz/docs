@@ -8,6 +8,7 @@
     "dev": "node --env-file-if-exists=.env --import=tsx node_modules/vite/bin/vite.js",
     "build": "node scripts/guard-vocs-config.mjs && pnpm run check:types && vite build && node --experimental-strip-types scripts/finalize-sitemap.ts",
     "check": "biome check --write --unsafe .",
+    "check:markdown": "node scripts/check-markdown-components.mjs",
     "check:types": "tsgo --project tsconfig.json --noEmit",
     "preview": "node dist/preview.js",
     "search:benchmark": "bun search-benchmark/run.ts",
@@ -19,7 +20,9 @@
     "bundle:save": "node --experimental-strip-types scripts/bundle-diff.ts --save",
     "lighthouse": "node --experimental-strip-types scripts/lighthouse.ts",
     "lighthouse:mobile": "node --experimental-strip-types scripts/lighthouse.ts --mobile",
-    "og:probe": "node --experimental-strip-types scripts/probe-og.ts"
+    "og:probe": "node --experimental-strip-types scripts/probe-og.ts",
+    "og:goldens": "tsx scripts/render-og-goldens.tsx",
+    "og:goldens:check": "tsx scripts/render-og-goldens.tsx --check"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.114",
@@ -48,6 +51,7 @@
     "react-server-dom-webpack": "~19.2.7",
     "rehype-stringify": "^10.0.1",
     "remark-gfm": "^4.0.1",
+    "remark-mdx": "^3.1.1",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.3.0",
@@ -60,7 +64,7 @@
     "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",
     "viem": "^2.54.6",
-    "vocs": "^2.6.0",
+    "vocs": "https://pkg.pr.new/wevm/vocs/vocs@1258ed866d15a876cd409a21ca6cc99c0601f605",
     "wagmi": "3.6.20",
     "waku": "^1.0.0-beta.6",
     "webauthx": "~0.1.2",
@@ -76,6 +80,7 @@
     "@typescript/native-preview": "7.0.0-dev.20260624.1",
     "@vitejs/plugin-react": "^6.0.3",
     "anser": "^2.3.5",
+    "remark-stringify": "^11.0.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
     "vite": "^8.1.0",

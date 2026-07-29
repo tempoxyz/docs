@@ -1,13 +1,13 @@
 ---
 title: Tempo API
-description: Explore Tempo API endpoints and RPC methods for account activity, balances, blocks, tokens, transfers, and chain data.
+description: Build stablecoin payment apps with the official Tempo blockchain API for account activity, webhooks, funding, exchange quotes, fee sponsorship, and indexed SQL.
 ---
 
 import { Cards, Card, OpenApi } from 'vocs'
 
 # Tempo API
 
-Use the Tempo API for indexed chain data, readable account activity, token metadata, balances, transfers, transaction receipts, RPC methods, and fee sponsorship.
+The Tempo API is the official Tempo blockchain API for stablecoin payment applications. Use it to read account and transaction activity, manage webhooks and integrations, quote funding and exchanges, sponsor fees, run indexed SQL, and call Tempo over JSON-RPC.
 
 :::warning
 The Tempo API is under active development. Endpoints are not yet stable and may change without notice.
@@ -20,6 +20,8 @@ Every endpoint is served over HTTPS from `https://api.tempo.xyz` under the `/v1`
 ```bash
 curl 'https://api.tempo.xyz/v1/blocks'
 ```
+
+## Choose a Tempo API surface
 
 The same base URL and credentials give you access to four surfaces:
 

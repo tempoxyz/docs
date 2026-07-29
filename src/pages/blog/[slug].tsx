@@ -13,6 +13,7 @@ const postBySlug = new Map<string, PostSeo>(
       excerpt: post.excerpt,
       date: post.date,
       category: post.category as CategorySlug,
+      authors: post.authors,
     },
   ]),
 )

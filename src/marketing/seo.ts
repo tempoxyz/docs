@@ -5,26 +5,15 @@
 import { OG_IMAGE_VERSION } from '../lib/og-sections'
 import { type CategorySlug, categoryBySlug } from './app/blog/_lib/categories'
 
+export { resolveBaseUrl } from '../lib/base-url'
+
 export type PostSeo = {
   slug: string
   title: string // raw post title (no " — Tempo Developers" suffix)
   excerpt: string
   date: string // YYYY-MM-DD
   category: CategorySlug
-}
-
-// Mirrors the baseUrl resolution in vocs.config.ts so canonical and OG URLs are
-// absolute in production and gracefully relative on preview/local builds
-// (returning '' there, just like the docs site, to avoid leaking preview URLs).
-export function resolveBaseUrl(): string {
-  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') return ''
-  if (URL.canParse(process.env.VITE_BASE_URL ?? '')) {
-    return (process.env.VITE_BASE_URL as string).replace(/\/$/, '')
-  }
-  if (process.env.VERCEL_ENV === 'production') return 'https://tempo.xyz/developers'
-  const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
-  if (productionUrl) return `https://${productionUrl}`
-  return ''
+  authors: string
 }
 
 export function absoluteUrl(base: string, pathname: string): string {
@@ -53,6 +42,11 @@ export function blogPostJsonLd(base: string, post: PostSeo, ogImage: string): st
     url: base || 'https://tempo.xyz',
     logo: { '@type': 'ImageObject', url: absoluteUrl(base, '/icon-dark.png') },
   }
+  const authors = post.authors
+    .split('/')
+    .map((name) => name.trim())
+    .filter(Boolean)
+    .map((name) => ({ '@type': 'Person', name }))
   return JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -64,7 +58,7 @@ export function blogPostJsonLd(base: string, post: PostSeo, ogImage: string): st
     url,
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
     articleSection: categoryBySlug(post.category).label,
-    author: publisher,
+    author: authors.length ? authors : publisher,
     publisher,
   })
 }

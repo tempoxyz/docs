@@ -1,22 +1,33 @@
-import { Changelog, defineConfig, Embedding, McpSource, Reranker, Retriever } from 'vocs/config'
+import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
+import { resolveBaseUrl } from './src/lib/base-url'
 import { docsRouteDestination, proxiedLegacyDocsRoutes } from './src/lib/docs-routing'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
+import { plainMarkdownComponents } from './src/lib/markdown-output'
 import { shouldIncludeInSitemap } from './src/lib/sitemap'
 
 // Only set baseUrl in production — Vocs injects a <base> tag from this value,
 // which causes all links to resolve to the absolute URL on preview deployments.
-const baseUrl = (() => {
-  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') return ''
-  const viteBaseUrl = process.env.VITE_BASE_URL
-  if (viteBaseUrl && URL.canParse(viteBaseUrl)) return viteBaseUrl.replace(/\/$/, '')
-  if (process.env.VERCEL_ENV === 'production') return 'https://tempo.xyz/developers'
-  const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
-  if (productionUrl) return `https://${productionUrl}`
-  return ''
-})()
+const baseUrl = resolveBaseUrl()
 
 const searchIndexFields = ['title', 'titles', 'subtitle', 'path', 'excerpt']
 const searchBoost = { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 3 }
+const tempoChangelog = Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' })
+
+const changelog = Changelog.from({
+  ...tempoChangelog,
+  async fetch(options) {
+    const releases = await tempoChangelog.fetch(options)
+    return releases.map((release) => ({
+      ...release,
+      // GitHub-generated release notes use HTML disclosures. Markdown output cannot retain
+      // them, so preserve their content as a heading instead.
+      body: release.body
+        .replace(/<details\b[^>]*>/gi, '')
+        .replace(/<\/details>/gi, '')
+        .replace(/<summary\b[^>]*>([\s\S]*?)<\/summary>/gi, '\n\n#### $1\n\n'),
+    }))
+  },
+})
 
 function extractSearchField(document: Record<string, unknown>, fieldName: string) {
   if (fieldName === 'path') {
@@ -56,7 +67,7 @@ export default defineConfig({
   //   height: '40px',
   //   textColor: 'white',
   // },
-  changelog: Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
+  changelog,
   checkDeadlinks: true,
   editLink: {
     link: 'https://github.com/tempoxyz/docs/edit/main/src/pages/:path',
@@ -122,16 +133,8 @@ export default defineConfig({
       return lastmod
     },
   },
-  mcp: {
-    enabled: true,
-    sources: [
-      McpSource.github({ repo: 'tempoxyz/tempo' }),
-      McpSource.github({ repo: 'paradigmxyz/reth' }),
-      McpSource.github({ repo: 'foundry-rs/foundry' }),
-      McpSource.github({ repo: 'wevm/viem' }),
-      McpSource.github({ repo: 'wevm/wagmi' }),
-      McpSource.github({ repo: 'tempoxyz/tempo-ts' }),
-    ],
+  markdown: {
+    outputRemarkPlugins: [plainMarkdownComponents],
   },
   baseUrl: baseUrl || undefined,
   trailingSlashRedirect: false,
@@ -201,7 +204,7 @@ export default defineConfig({
     const extra = new URLSearchParams({
       section,
       ...(subsection ? { subsection } : {}),
-      v: '2',
+      v: '3',
     }).toString()
 
     return `${urlBase}/api/og?title=%title&${extra}`
@@ -876,7 +879,7 @@ export default defineConfig({
             items: [
               {
                 text: 'T8',
-                badge: { text: 'Planned', variant: 'note' as const },
+                badge: { text: 'Testnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t8',
               },
               {

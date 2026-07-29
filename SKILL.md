@@ -5,47 +5,38 @@ description: Answer Tempo blockchain questions using official documentation. Use
 
 # Tempo Docs
 
-Skill for navigating Tempo documentation and source code.
+Skill for navigating Tempo documentation.
 
-## Quick Context
+## MCP server
 
-Before using MCP tools, try fetching context directly:
+Use the hosted MCP server at `https://mcp.tempo.xyz` first. It exposes these tools:
+
+| Tool | Description |
+| --- | --- |
+| `search` | Search Tempo and related documentation |
+| `find_pages` | Find matching page URLs from a source index |
+| `read_page` | Read one cleaned documentation page |
+| `code` | Run multi-step documentation lookups |
+
+If a user reports stale, missing, or confusing Tempo docs while using MCP context, send sanitized feedback to `https://tempo.xyz/developers/api/feedback` with `source: "mcp"`, `message`, and any relevant `toolName` or `relatedResource`.
+
+## Direct fallbacks
+
+If MCP is unavailable, fetch context directly:
 
 - **llms.txt** – Concise index of all pages: `https://tempo.xyz/developers/llms.txt`
 - **Markdown pages** – Append `.md` to any page URL (e.g. `https://tempo.xyz/developers/quickstart/integrate-tempo.md`)
 
 Use `read_web_page` to fetch these when you need broad context or a quick answer.
 
-## MCP Tools
+## Documentation sources
 
-Use these tools for structured exploration:
-
-| Tool | Description |
-| --- | --- |
-| `mcp__tempo_mcp__list_pages` | List all documentation pages |
-| `mcp__tempo_mcp__read_page` | Read a specific documentation page |
-| `mcp__tempo_mcp__search_docs` | Search documentation |
-| `mcp__tempo_mcp__list_sources` | List available source repositories |
-| `mcp__tempo_mcp__list_source_files` | List files in a directory |
-| `mcp__tempo_mcp__read_source_file` | Read a source code file |
-| `mcp__tempo_mcp__get_file_tree` | Get recursive file tree |
-| `mcp__tempo_mcp__search_source` | Search source code |
-
-If a user reports stale, missing, or confusing Tempo docs while using MCP context, send sanitized feedback to `https://tempo.xyz/developers/api/feedback` with `source: "mcp"`, `message`, and any relevant `toolName` or `relatedResource`.
-
-## Available Sources
-
-- `tempoxyz/tempo` – Tempo node (Rust)
-- `tempoxyz/tempo-ts` – TypeScript SDK
-- `paradigmxyz/reth` – Reth Ethereum client
-- `foundry-rs/foundry` – Foundry toolkit
-- `wevm/viem` – TypeScript Ethereum interface
-- `wevm/wagmi` – React hooks for Ethereum
+The MCP server searches Tempo, Viem, Wagmi, Vocs, MPP, Tempo Accounts, TIPs, and Regen documentation. Use the repository's own code tools when you need exact source files.
 
 ## Workflow
 
-1. **Quick lookup**: Use `read_web_page` on `https://tempo.xyz/developers/llms.txt` for an overview, or fetch a specific page as Markdown
-2. **Search docs**: Use `mcp__tempo_mcp__search_docs` to find relevant pages
-3. **Read pages**: Use `mcp__tempo_mcp__read_page` with the page path
-4. **Explore source**: Use `mcp__tempo_mcp__search_source` or `mcp__tempo_mcp__get_file_tree` to find implementations
-5. **Read code**: Use `mcp__tempo_mcp__read_source_file` to examine specific files
+1. **Search docs**: Use `search` to find relevant context
+2. **Find pages**: Use `find_pages` when you need canonical page URLs
+3. **Read pages**: Use `read_page` with the returned source and path or URL
+4. **Combine lookups**: Use `code` for multi-step documentation queries
+5. **Fallback**: If MCP is unavailable, read `llms.txt` or fetch a specific page as Markdown
