@@ -32,8 +32,8 @@ describe('vocs.config docs SEO controls', () => {
   })
 
   test('formats authored API titles when Vocs supplies routed metadata', () => {
-    expect(titleFor('/docs/api/authentication', 'Authentication')).toBe(
-      'Authentication ⋅ Tempo Docs',
+    expect(titleFor('/docs/api/authentication', 'Tempo API Authentication: API Keys & MPP')).toBe(
+      'Tempo API Authentication: API Keys & MPP ⋅ Tempo Docs',
     )
     expect(titleFor('/docs/api/json-rpc', 'Tempo JSON-RPC API: Endpoints & Methods')).toBe(
       'Tempo JSON-RPC API: Endpoints & Methods ⋅ Tempo Docs',
