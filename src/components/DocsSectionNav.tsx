@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useRouter } from 'waku'
+import { Link, useRouter } from 'waku'
 
 type SectionNavItem = {
   id: 'overview' | 'build' | 'integrate' | 'protocol' | 'tools' | 'api' | 'node'
@@ -156,11 +156,13 @@ export default function DocsSectionNav() {
               const active = isActive(pathname, item)
               return (
                 <li key={item.id}>
-                  <a
+                  <Link
                     ref={(element) => {
                       if (active) activeLinkRef.current = element
                     }}
-                    href={item.href}
+                    to={item.href}
+                    unstable_prefetchOnEnter
+                    unstable_prefetchOnView
                     aria-current={active ? 'page' : undefined}
                     className={`flex h-full items-center border-b-2 pt-0.5 font-normal font-sans text-[14px] tracking-[0] transition-colors ${
                       active
@@ -169,7 +171,7 @@ export default function DocsSectionNav() {
                     }`}
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 </li>
               )
             })}

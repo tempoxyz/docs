@@ -2,7 +2,7 @@
 
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useConfig } from 'vocs'
-import { useRouter } from 'waku'
+import { useRouter, Link as WakuLink } from 'waku'
 import { DOCS_SEARCH_PARAM } from '../lib/docs-search'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 
@@ -27,10 +27,10 @@ const TEMPO_SDK_DOCS_URL = `${DOCS_BASE_PATH}/sdk`
 
 function featurePath(slug: string) {
   const featurePaths: Record<string, string> = {
-    transactions: `${DEVELOPERS_BASE_PATH}/build/tempo-transactions`,
-    tokens: `${DEVELOPERS_BASE_PATH}/build/tip20-tokens`,
+    transactions: '/build/tempo-transactions',
+    tokens: '/build/tip20-tokens',
   }
-  return featurePaths[slug] ?? DEVELOPERS_BASE_PATH
+  return featurePaths[slug] ?? '/'
 }
 
 function isExternal(href: string) {
@@ -80,13 +80,7 @@ function isActiveMenuItem(pathname: string, item: MenuItem) {
   return !isExternal(item.href) && pathMatches(pathname, item.href)
 }
 
-function Anchor({
-  href,
-  children,
-  onFocus,
-  onPointerEnter,
-  ...props
-}: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
+function Anchor({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
   if (!href) return <a {...props}>{children}</a>
   if (isExternal(href)) {
     return (
@@ -96,20 +90,9 @@ function Anchor({
     )
   }
   return (
-    <a
-      {...props}
-      href={href}
-      onFocus={(event) => {
-        prefetchPath(href)
-        onFocus?.(event)
-      }}
-      onPointerEnter={(event) => {
-        prefetchPath(href)
-        onPointerEnter?.(event)
-      }}
-    >
+    <WakuLink {...props} to={href} unstable_prefetchOnEnter unstable_prefetchOnView>
       {children}
-    </a>
+    </WakuLink>
   )
 }
 
@@ -370,10 +353,10 @@ const developersMenu: MegaMenuData = {
 }
 
 const menu: MenuItem[] = [
-  { label: 'Build', href: `${DEVELOPERS_BASE_PATH}#protocol`, mega: protocolMenu },
+  { label: 'Build', href: '/#protocol', mega: protocolMenu },
   { label: 'Resources', href: `${DOCS_BASE_PATH}/guide`, mega: developersMenu },
-  { label: 'Performance', href: `${DEVELOPERS_BASE_PATH}/performance` },
-  { label: 'Blog', href: `${DEVELOPERS_BASE_PATH}/blog` },
+  { label: 'Performance', href: '/performance' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Docs', href: DOCS_BASE_PATH },
 ]
 
@@ -746,10 +729,8 @@ function AgentCommandSection(props: {
         <span className="grid size-[34px] shrink-0 place-items-center bg-surface-input text-foreground">
           {icon}
         </span>
-        <a
+        <Anchor
           href={href}
-          target={external ? '_blank' : undefined}
-          rel={external ? 'noopener noreferrer' : undefined}
           onClick={onClick}
           className="relative flex min-w-0 flex-col gap-0.5 pr-5"
         >
@@ -760,7 +741,7 @@ function AgentCommandSection(props: {
           <span className="font-sans text-[13px] text-foreground/45 leading-[1.4] tracking-[0]">
             {desc}
           </span>
-        </a>
+        </Anchor>
       </div>
       {children ? <div className="mt-3 ml-[52px] space-y-3">{children}</div> : null}
     </div>
