@@ -23,12 +23,20 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 
 describe('finalizeSitemap', () => {
   it('replaces the blog template with canonical post URLs and removes other templates', () => {
-    const result = finalizeSitemap(sitemap, ['t7-network-upgrade', 't6'])
+    const result = finalizeSitemap(sitemap, [
+      { slug: 't7-network-upgrade' },
+      { slug: 't6', lastmod: '2026-07-19' },
+    ])
 
     expect(result).toContain('<loc>https://tempo.xyz/developers/blog/t6</loc>')
     expect(result).toContain('<loc>https://tempo.xyz/developers/blog/t7-network-upgrade</loc>')
     expect(result.indexOf('/blog/t6')).toBeLessThan(result.indexOf('/blog/t7-network-upgrade'))
-    expect(result).not.toMatch(/<loc>https:\/\/tempo\.xyz\/developers\/blog\/t6<\/loc>\s*<lastmod>/)
+    expect(result).toMatch(
+      /<loc>https:\/\/tempo\.xyz\/developers\/blog\/t6<\/loc>\s*<lastmod>2026-07-19<\/lastmod>/,
+    )
+    expect(result).not.toMatch(
+      /<loc>https:\/\/tempo\.xyz\/developers\/blog\/t7-network-upgrade<\/loc>\s*<lastmod>/,
+    )
     expect(result).not.toContain('[slug]')
     expect(result).not.toContain('[id]')
   })
@@ -38,7 +46,7 @@ describe('finalizeSitemap', () => {
       '</urlset>',
       '  <url>\n    <loc>https://tempo.xyz/developers/blog/t6</loc>\n  </url>\n</urlset>',
     )
-    const result = finalizeSitemap(withExistingPost, ['t6'])
+    const result = finalizeSitemap(withExistingPost, [{ slug: 't6', lastmod: '2026-07-19' }])
 
     expect(result.match(/<loc>https:\/\/tempo\.xyz\/developers\/blog\/t6<\/loc>/g)).toHaveLength(1)
   })
@@ -48,7 +56,7 @@ describe('finalizeSitemap', () => {
       / {2}<url>\n {4}<loc>https:\/\/tempo\.xyz\/developers\/blog\/\[slug\]<\/loc>\n {4}<lastmod>2026-07-18<\/lastmod>\n {2}<\/url>\n/,
       '',
     )
-    const result = finalizeSitemap(withoutBlogTemplate, ['t6'])
+    const result = finalizeSitemap(withoutBlogTemplate, [{ slug: 't6' }])
 
     expect(result).toContain('<loc>https://tempo.xyz/developers/blog/t6</loc>')
   })

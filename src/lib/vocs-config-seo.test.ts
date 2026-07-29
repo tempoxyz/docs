@@ -52,14 +52,36 @@ describe('vocs.config docs SEO controls', () => {
     expect(typeof head).toBe('function')
     if (typeof head !== 'function') return
 
-    expect(head('/docs', {})).toEqual({ meta: { articleModifiedTime: false } })
-    expect(head('/docs/guide/payments/send-a-payment', {})).toEqual({
+    expect(head('/docs', {})).toMatchObject({ meta: { articleModifiedTime: false } })
+    expect(head('/docs/guide/payments/send-a-payment', {})).toMatchObject({
       meta: { articleModifiedTime: false },
     })
     expect(head('/blog/stablecoins-as-a-platform', {})).toBeUndefined()
   })
 
-  test('omits sitemap lastmod for docs pages only', () => {
+  test('excludes route templates from the sitemap', () => {
+    const sitemap = vocsConfig.sitemap
+
+    expect(sitemap).not.toBe(false)
+    if (!sitemap) return
+
+    const include = sitemap.include
+
+    expect(typeof include).toBe('function')
+    if (typeof include !== 'function') return
+
+    const context = { filePath: 'blog/[slug].tsx' }
+    expect(include('/blog/[slug]', context)).toBe(false)
+    expect(include('/example/[id]/details', context)).toBe(false)
+    expect(include('/example/[[...slug]]', context)).toBe(false)
+    expect(include('/blog/stablecoins-as-a-platform', context)).toBe(true)
+  })
+
+  test('disables Vocs JSON-LD in favor of the context-aware docs graph', () => {
+    expect(vocsConfig.jsonLd).toBe(false)
+  })
+
+  test('uses sitemap lastmod only for authored Markdown', () => {
     const sitemap = vocsConfig.sitemap
 
     expect(sitemap).not.toBe(false)
@@ -70,10 +92,16 @@ describe('vocs.config docs SEO controls', () => {
     expect(typeof lastmod).toBe('function')
     if (typeof lastmod !== 'function') return
 
-    const context = { filePath: 'docs/index.mdx', lastmod: '2026-07-07' }
-    expect(lastmod('/docs', context)).toBe(false)
-    expect(lastmod('/docs/guide/payments/send-a-payment', context)).toBe(false)
-    expect(lastmod('/blog/stablecoins-as-a-platform', context)).toBe('2026-07-07')
+    expect(lastmod('/docs', { filePath: 'docs/index.mdx', lastmod: '2026-07-07' })).toBe(
+      '2026-07-07',
+    )
+    expect(
+      lastmod('/docs/api/authentication', {
+        filePath: 'docs/api/authentication.mdx',
+        lastmod: '2026-07-08',
+      }),
+    ).toBe('2026-07-08')
+    expect(lastmod('/blog', { filePath: 'blog.tsx', lastmod: '2026-07-09' })).toBe(false)
   })
 
   test('links the TIP index directly to tips.sh', () => {
