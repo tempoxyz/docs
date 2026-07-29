@@ -6,6 +6,7 @@ import Icons from 'unplugin-icons/vite'
 import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { vocs } from 'vocs/vite'
+import { graphiteRelatedDocsPlugin } from './scripts/graphite-related-docs-plugin'
 import { resolveBaseUrl } from './src/lib/base-url'
 import { canonicalizeGeneratedDeveloperLinks } from './src/lib/canonical-developer-links'
 import { blogPostsPlugin } from './src/marketing/blogPlugin'
@@ -26,6 +27,7 @@ export default defineConfig(({ mode }) => {
       blogPostsPlugin(),
       marketingPages(),
       developersProxyBasePath(),
+      graphiteRelatedDocsPlugin(),
       vocs(),
       Icons({ compiler: 'jsx', jsx: 'react' }),
       react(),
