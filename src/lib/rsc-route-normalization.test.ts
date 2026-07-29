@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { normalizeProxiedRscFetch } from '../pages/_layout'
 import { normalizeRscFetchUrl } from './rsc-route-normalization'
 
@@ -39,6 +39,33 @@ describe('normalizeRscFetchUrl', () => {
 })
 
 describe('normalizeProxiedRscFetch', () => {
+  it('normalizes the exact developers mount before Waku initializes', () => {
+    const replaceState = vi.fn()
+    Object.defineProperty(globalThis, 'window', {
+      configurable: true,
+      value: {
+        __tempoNormalizeProxiedRscFetch: false,
+        fetch: vi.fn(),
+        history: { replaceState, state: { key: 'value' } },
+        location: {
+          hash: '#start',
+          hostname: 'tempo.xyz',
+          href: 'https://tempo.xyz/developers?tab=docs#start',
+          origin: 'https://tempo.xyz',
+          pathname: '/developers',
+          search: '?tab=docs',
+        },
+      },
+    })
+
+    try {
+      Function(normalizeProxiedRscFetch)()
+      expect(replaceState).toHaveBeenCalledWith({ key: 'value' }, '', '/developers/?tab=docs#start')
+    } finally {
+      Reflect.deleteProperty(globalThis, 'window')
+    }
+  })
+
   it.each([
     [
       'rewrites cross-origin RSC requests to the current origin',

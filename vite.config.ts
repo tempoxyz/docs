@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       blogPostsPlugin(),
       marketingPages(),
-      developersProxyClientBasePath(),
+      developersProxyBasePath(),
       vocs(),
       Icons({ compiler: 'jsx', jsx: 'react' }),
       react(),
@@ -56,18 +56,20 @@ export default defineConfig(({ mode }) => {
 
 const marketingRoutes = ['/', '/build', '/blog', '/performance']
 
-function developersProxyClientBasePath(): Plugin {
+function developersProxyBasePath(): Plugin {
   return {
-    name: 'tempo-developers-proxy-client-base-path',
+    name: 'tempo-developers-proxy-base-path',
     enforce: 'post',
     configEnvironment(name) {
-      if (name !== 'client' || process.env.VERCEL_ENV !== 'production') return
+      if (process.env.VERCEL_ENV !== 'production') return
       // tempo.xyz strips /developers before requests reach Waku.
-      // Other production hosts serve the same unprefixed routes directly.
+      // Production SSR targets that canonical mount; clients on other hosts stay unprefixed.
       return {
         define: {
           'import.meta.env.WAKU_CONFIG_BASE_PATH':
-            "(window.location.hostname === 'tempo.xyz' ? '/developers/' : '/')",
+            name === 'client'
+              ? "(window.location.hostname === 'tempo.xyz' ? '/developers/' : '/')"
+              : JSON.stringify('/developers/'),
         },
       }
     },

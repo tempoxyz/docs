@@ -2,6 +2,17 @@ import type { PropsWithChildren } from 'react'
 
 export const normalizeProxiedRscFetch = `
 (() => {
+  if (
+    window.location.hostname === 'tempo.xyz' &&
+    window.location.pathname === '/developers'
+  ) {
+    window.history.replaceState(
+      window.history.state,
+      '',
+      window.location.pathname + '/' + window.location.search + window.location.hash,
+    );
+  }
+
   if (window.__tempoNormalizeProxiedRscFetch) return;
   window.__tempoNormalizeProxiedRscFetch = true;
   const originalFetch = window.fetch.bind(window);
