@@ -52,8 +52,8 @@ describe('vocs.config docs SEO controls', () => {
     expect(typeof head).toBe('function')
     if (typeof head !== 'function') return
 
-    expect(head('/docs', {})).toEqual({ meta: { articleModifiedTime: false } })
-    expect(head('/docs/guide/payments/send-a-payment', {})).toEqual({
+    expect(head('/docs', {})).toMatchObject({ meta: { articleModifiedTime: false } })
+    expect(head('/docs/guide/payments/send-a-payment', {})).toMatchObject({
       meta: { articleModifiedTime: false },
     })
     expect(head('/blog/stablecoins-as-a-platform', {})).toBeUndefined()
@@ -75,6 +75,10 @@ describe('vocs.config docs SEO controls', () => {
     expect(include('/example/[id]/details', context)).toBe(false)
     expect(include('/example/[[...slug]]', context)).toBe(false)
     expect(include('/blog/stablecoins-as-a-platform', context)).toBe(true)
+  })
+
+  test('disables Vocs JSON-LD in favor of the context-aware docs graph', () => {
+    expect(vocsConfig.jsonLd).toBe(false)
   })
 
   test('uses sitemap lastmod only for authored Markdown', () => {
