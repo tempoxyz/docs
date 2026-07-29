@@ -1,19 +1,12 @@
 import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
+import { resolveBaseUrl } from './src/lib/base-url'
 import { docsRouteDestination, proxiedLegacyDocsRoutes } from './src/lib/docs-routing'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 import { plainMarkdownComponents } from './src/lib/markdown-output'
 
 // Only set baseUrl in production — Vocs injects a <base> tag from this value,
 // which causes all links to resolve to the absolute URL on preview deployments.
-const baseUrl = (() => {
-  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') return ''
-  const viteBaseUrl = process.env.VITE_BASE_URL
-  if (viteBaseUrl && URL.canParse(viteBaseUrl)) return viteBaseUrl.replace(/\/$/, '')
-  if (process.env.VERCEL_ENV === 'production') return 'https://tempo.xyz/developers'
-  const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
-  if (productionUrl) return `https://${productionUrl}`
-  return ''
-})()
+const baseUrl = resolveBaseUrl()
 
 const searchIndexFields = ['title', 'titles', 'subtitle', 'path', 'excerpt']
 const searchBoost = { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 3 }

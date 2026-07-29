@@ -6,6 +6,7 @@ import Icons from 'unplugin-icons/vite'
 import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { vocs } from 'vocs/vite'
+import { resolveBaseUrl } from './src/lib/base-url'
 import { canonicalizeGeneratedDeveloperLinks } from './src/lib/canonical-developer-links'
 import { blogPostsPlugin } from './src/marketing/blogPlugin'
 
@@ -216,12 +217,15 @@ function llmsAgentPreamble(): Plugin {
 
         await Promise.all(candidates.map(prependAgentNotice))
         if (process.env.VERCEL_ENV === 'production') {
+          const publicDevelopersUrl = `${resolveBaseUrl()}/docs`
           const generatedPages = [
             ...(await filesWithExtension(publicDir, '.html')),
             ...(await filesWithExtension(path.join(publicDir, 'RSC'), '.txt')),
           ]
           await Promise.all(
-            [...new Set([...candidates, ...generatedPages])].map(canonicalizeGeneratedLinksInFile),
+            [...new Set([...candidates, ...generatedPages])].map((filePath) =>
+              canonicalizeGeneratedLinksInFile(filePath, publicDevelopersUrl),
+            ),
           )
         }
       },
@@ -276,10 +280,10 @@ async function prependAgentNotice(filePath: string) {
   }
 }
 
-async function canonicalizeGeneratedLinksInFile(filePath: string) {
+async function canonicalizeGeneratedLinksInFile(filePath: string, publicDevelopersUrl: string) {
   try {
     const content = await fs.readFile(filePath, 'utf-8')
-    const canonical = canonicalizeGeneratedDeveloperLinks(content)
+    const canonical = canonicalizeGeneratedDeveloperLinks(content, publicDevelopersUrl)
     if (canonical !== content) await fs.writeFile(filePath, canonical, 'utf-8')
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return
