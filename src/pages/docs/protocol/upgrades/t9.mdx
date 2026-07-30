@@ -1,16 +1,16 @@
 ---
 title: T9 Network Upgrade
-description: T9 adds TIP-403 registry support for TIP-20 token policy bindings and targeted migration for existing tokens.
+description: T9 records TIP-20 token policy bindings in TIP-403 and adds a migration path for existing tokens.
 ---
 
 # T9 Network Upgrade
 
-T9 updates how Tempo records the transfer policy used by TIP-20 tokens. It lets TIP-403 store the active policy for a token, so policy-aware tooling can read that answer from the registry when it needs to.
+T9 records each TIP-20 token's active transfer policy in TIP-403. This gives apps, indexers, and other tooling a single place to check which policy a token is using.
 
-For ecosystem partners, T9 matters most if you issue TIP-20 tokens, maintain wallets or indexers that read token policy state, or build flows that need a registry-backed answer for token policy checks.
+For most partners, T9 is only relevant if you issue TIP-20 tokens, run tooling that reads token policy state, or build flows that depend on TIP-403 policy checks.
 
 :::info[T9 status]
-The T9-compatible release, v1.12.0, is targeted for August 3, 2026. Testnet activation is scheduled for August 5, 2026, and mainnet activation is scheduled for August 10, 2026.
+v1.12.0 is targeted for August 3, 2026. Testnet activation is scheduled for August 5, 2026, and mainnet activation is scheduled for August 10, 2026.
 :::
 
 ## Timeline
@@ -21,65 +21,57 @@ The T9-compatible release, v1.12.0, is targeted for August 3, 2026. Testnet acti
 | Testnet activation | August 5, 2026 | TBD |
 | Mainnet activation | August 10, 2026 | TBD |
 
-Node operators should run the T9-compatible release before the activation timestamp on each network. Nodes that are not updated before activation will fall out of sync.
+Node operators should plan to upgrade to v1.12.0 before the activation time for each network.
 
 ## Overview
 
-T9 focuses on one protocol change:
+T9 has one protocol change:
 
-- **TIP-20 policy IDs in TIP-403.** TIP-403 can store which transfer policy a TIP-20 token is currently using.
+- **TIP-20 policy IDs in TIP-403.** TIP-403 can record which transfer policy a TIP-20 token is currently using.
 
-This keeps token policy information in one registry when a flow needs that stronger guarantee. Existing tokens keep working even if they have not been migrated yet.
+That gives apps and tooling a standard place to read token policy state when they need the TIP-403 view.
 
-## Features
+## What changes
 
 ### Token policy lookup in TIP-403
 
-TIP-403 already stores transfer policy data. T9 also lets TIP-403 store the active transfer policy ID for a TIP-20 token.
+TIP-403 already stores transfer policy data. With T9, it can also record which transfer policy a TIP-20 token is using.
 
-In plain terms, this gives contracts and offchain tools a registry-backed way to ask: "Which transfer policy is this token using?"
+New TIP-20 tokens write this binding when they are created. Policy changes after T9 keep the binding up to date.
 
-New TIP-20 tokens write this TIP-403 binding when they are created. After T9, token policy changes also update the TIP-403 binding.
-
-Read the specification [here](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1092.md).
+Read the [TIP-1092 specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1092.md).
 
 ### Existing tokens keep working
 
-Existing TIP-20 tokens do not all need to move at activation. If a token has not been migrated, normal token behavior can still use the token's existing local policy ID.
+Existing TIP-20 tokens do not need to be migrated at activation. They keep using their local policy ID unless a team chooses to register that token in TIP-403.
 
-The difference is for flows that specifically need the policy answer to come from TIP-403. Those flows should require the TIP-403 binding to exist before using that token.
+Teams should migrate a token when their app or tooling needs the policy ID to be available from TIP-403.
 
 ### Targeted migration
 
-T9 adds a targeted migration path for existing TIP-20 tokens that need a TIP-403 binding.
-
-The migration copies the token's current local policy ID into TIP-403. It does not choose a new policy or change the token's rules; it only registers the policy the token is already using.
-
-This means teams can migrate the tokens they need instead of forcing every historical token into the registry at once.
+T9 adds a migration path for individual existing TIP-20 tokens. The migration copies the token's current local policy ID into TIP-403. It does not change the token's policy or rules, and it can be run only for the tokens that need the TIP-403 binding.
 
 ## Compatible releases
 
-The T9-compatible node release, v1.12.0, is targeted for August 3, 2026. Release details are not published yet.
+v1.12.0 is targeted for August 3, 2026. Release notes and binaries will be linked here when they are available.
 
 | Ecosystem | T9-compatible releases |
 |-----------|------------------------|
 | Node operators | v1.12.0 (targeted for August 3, 2026) |
 | Rust SDK crates | TBD |
 
-Release notes and binaries will be linked here when the T9-compatible release is published.
-
 ## Integration impact
 
 ### For TIP-20 issuers and token admins
 
-- New TIP-20 tokens write their TIP-403 policy binding during creation.
+- New TIP-20 tokens write their TIP-403 policy binding when they are created.
 - Existing tokens keep working if they are not migrated.
-- Existing tokens should be migrated when a flow needs their policy ID to be available from TIP-403.
-- After activation, policy changes update the active policy in TIP-403.
+- Migrate an existing token when a flow needs to read its policy ID from TIP-403.
+- After activation, policy updates keep the TIP-403 binding up to date.
 
-### For SDKs, indexers, and low-level tooling
+### For SDKs, indexers, and tooling
 
-- Existing token policy reads can keep using the current TIP-20 API when they only need the effective policy ID.
-- Tooling that needs a registry-backed token-to-policy answer should read TIP-403.
-- Migration tooling should migrate only the tokens that need a TIP-403 binding.
-- Apps that do not read or enforce TIP-20 policy state do not need an immediate integration change for T9.
+- Existing token policy reads can keep using the current TIP-20 API when they only need the token's effective policy ID.
+- Use TIP-403 when your tooling needs the registry view of token policy state.
+- Migration tooling should operate on the specific tokens that need a TIP-403 binding.
+- Apps that do not read or enforce TIP-20 policy state do not need an immediate change for T9.
