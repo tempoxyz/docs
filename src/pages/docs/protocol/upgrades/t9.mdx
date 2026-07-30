@@ -31,7 +31,7 @@ T9 has one protocol change:
 
 - **TIP-20 policy IDs in TIP-403.** TIP-403 can record which transfer policy a TIP-20 token is currently using.
 
-That gives zones and tooling a standard place to read token policy state when they need the TIP-403 view.
+That gives zones and tooling a standard place to read token policy state when they need the TIP-403 view. For zones, this means a ZonePortal can check the TIP-403 binding before enabling a token instead of relying on token-local state.
 
 ## What changes
 
@@ -46,6 +46,8 @@ Read the [TIP-1092 specification](https://github.com/tempoxyz/tempo/blob/main/ti
 ### Targeted migration
 
 T9 adds a migration path for individual existing TIP-20 tokens. The migration copies the token's current local policy ID into TIP-403. It does not change the token's policy or rules, and it can be run only for the tokens that need the TIP-403 binding.
+
+For zone enablement, ZonePortal checks whether the token already has a TIP-403 binding. If it is missing, ZonePortal migrates that token, checks again, and rejects the token if the binding is still missing.
 
 ## Compatible release
 
