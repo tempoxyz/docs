@@ -33,6 +33,10 @@ T9 has one protocol change:
 
 That registry binding is required for zone token enablement and useful for tooling that needs the TIP-403 view. For zones, a ZonePortal can check the TIP-403 binding before enabling a token instead of relying on token-local state.
 
+### Why this matters for zones
+
+Tempo Zones keep balances, transfers, and account relationships private. At the same time, tokens in a zone still need to follow the issuer's transfer policy. T9 gives zones a registry-backed way to prove which policy applies to each token before that token is enabled in the zone.
+
 ## What changes
 
 ### Token policy lookup in TIP-403
@@ -41,7 +45,7 @@ TIP-403 already stores transfer policy data. With T9, it can also record which t
 
 New TIP-20 tokens write this binding when they are created. Policy changes after T9 keep the binding up to date. Existing tokens only need targeted migration when they need to be enabled in a zone, used by a provable contract flow, or read by tooling that needs their policy ID to be available from TIP-403.
 
-Read the [TIP-1092 specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1092.md).
+Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1092.md).
 
 ### Targeted migration
 
