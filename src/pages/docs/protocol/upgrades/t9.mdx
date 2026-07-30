@@ -5,9 +5,9 @@ description: T9 records TIP-20 token policy bindings in TIP-403 and adds a migra
 
 # T9 Network Upgrade
 
-T9 records each TIP-20 token's active transfer policy in TIP-403. This gives zones, provable contract flows, apps, indexers, and other tooling a single place to check which policy a token is using.
+T9 records each TIP-20 token's active transfer policy in TIP-403. This is necessary for [Tempo Zones](/docs/protocol/zones#tempo-zones-are-private): zones keep balances, transfers, and account relationships private, but they still need a provable way to know which issuer policy applies to a token. The same registry binding also gives provable contract flows, apps, indexers, and other tooling a single place to check which policy a token is using.
 
-In simpler terms, T9 makes the answer to "which transfer rules apply to this token?" available from TIP-403 when that answer needs to be proved or checked from registry state.
+In simpler terms, T9 moves the answer to "which transfer rules apply to this token?" into TIP-403, where it can be checked from registry state.
 
 For most partners, T9 is only relevant if you issue TIP-20 tokens, run tooling that reads token policy state, or build zone/provable contract flows that depend on TIP-403 policy checks.
 
@@ -31,7 +31,7 @@ T9 has one protocol change:
 
 - **TIP-20 policy IDs in TIP-403.** TIP-403 can record which transfer policy a TIP-20 token is currently using.
 
-That gives zones and tooling a standard place to read token policy state when they need the TIP-403 view. For zones, this means a ZonePortal can check the TIP-403 binding before enabling a token instead of relying on token-local state.
+That registry binding is required for zone token enablement and useful for tooling that needs the TIP-403 view. For zones, a ZonePortal can check the TIP-403 binding before enabling a token instead of relying on token-local state.
 
 ## What changes
 
@@ -39,7 +39,7 @@ That gives zones and tooling a standard place to read token policy state when th
 
 TIP-403 already stores transfer policy data. With T9, it can also record which transfer policy a TIP-20 token is using.
 
-New TIP-20 tokens write this binding when they are created. Policy changes after T9 keep the binding up to date. Existing tokens only need targeted migration when a zone, provable contract flow, or tooling path needs their policy ID to be available from TIP-403.
+New TIP-20 tokens write this binding when they are created. Policy changes after T9 keep the binding up to date. Existing tokens only need targeted migration when they need to be enabled in a zone, used by a provable contract flow, or read by tooling that needs their policy ID to be available from TIP-403.
 
 Read the [TIP-1092 specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1092.md).
 
@@ -57,13 +57,13 @@ v1.12.0 is targeted for August 3, 2026. Release notes and binaries will be linke
 
 ### For TIP-20 issuers and token admins
 
-- Migrate an existing token when a zone, provable contract flow, or tooling path needs to read its policy ID from TIP-403.
+- Migrate an existing token when it needs to be enabled in a zone, used by a provable contract flow, or read by tooling that needs its policy ID from TIP-403.
 - After activation, policy updates write the TIP-403 binding for the updated token.
 
 ### For zones, provable contract flows, and tooling
 
+- Treat the TIP-403 binding as required before enabling a token in a zone or using it in a provable contract flow.
 - Use TIP-403 when your flow needs the registry view of token policy state.
-- Require the TIP-403 binding before enabling or using a token in a zone or provable contract flow.
 - If the binding is missing, migrate the specific token and verify that TIP-403 has the binding before continuing.
 
 ### For migration tooling
