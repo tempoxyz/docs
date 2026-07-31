@@ -67,6 +67,12 @@ const developersMenu: MegaMenuData = {
           href: TEMPO_DOCS_URL,
           icon: <DocsIcon />,
         },
+        {
+          label: 'Tempo API',
+          desc: 'Hosted APIs for payments',
+          href: '/docs/api',
+          icon: <ApiIcon />,
+        },
       ],
     },
     {
