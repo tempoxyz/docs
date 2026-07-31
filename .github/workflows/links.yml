@@ -30,6 +30,11 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: 24.12.0
+
       - name: Restore lychee cache
         uses: actions/cache@v4
         with:
@@ -44,8 +49,9 @@ jobs:
           # broken references (LICENSE files, lockup paths); excluded
           # from this check. Docs site content lives in src/pages/.
           args: >-
-            --root-dir ${{ github.workspace }}
-            'src/pages/**/*.{md,mdx}'
+            --preprocess scripts/filter-external-links.ts
+            'src/pages/**/*.md'
+            'src/pages/**/*.mdx'
             'vocs.config.ts'
           fail: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
           token: ${{ secrets.GITHUB_TOKEN }}
