@@ -6,13 +6,9 @@ import { Head, MdxPageContextProvider } from 'vocs'
 /**
  * Per-page head tags for non-MDX (marketing/blog) pages.
  *
- * Vocs renders a site-generic `<Head>` in the document root, then dedupes head
- * tags in the prerendered HTML keeping the last occurrence of each identity.
- * MDX pages win that dedupe by rendering a second `<Head>` from the page
- * subtree (with frontmatter in context), which hoists into `<head>` after the
- * generic one. This component gives `.tsx` pages the same mechanism — raw
- * `<meta>` tags rendered directly by a page hoist *before* the generic head
- * and lose the dedupe instead.
+ * MDX routes get one route-aware `<Head>` from their layout. This component
+ * gives `.tsx` routes the same single per-page owner with their metadata in
+ * context.
  *
  * `children` render after `<Head>` so they can override tags it emits (e.g.
  * `og:type`) as well as add new ones.

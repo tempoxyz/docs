@@ -23,7 +23,7 @@ By embedding the context into the header, Tempo blocks can implement the require
 
 ---
 
-# Specification
+## Specification
 
 When activated, a new field, `Option<Context>` is added as the **last** field of `TempoHeader`, which must be set on every subsequent block containing consensus metadata. The field follows the trailing‑optional pattern used by Ethereum's fork‑activated header fields (e.g. `base_fee_per_gas`, `blob_gas_used`): when `None`, it is omitted entirely from the RLP stream, preserving existing block hashes for pre‑activation headers.
 
@@ -45,7 +45,7 @@ The `Context` adds 3 fields: 3 `u64` values and 1 `B256` value, totaling 56 byte
 
 **Compact (DB)**: The `reth_codecs::Compact` representation is comparable, using bitflag‑compressed integer widths.
 
-## Block Production
+### Block Production
 
 When activated the proposals must:
 
@@ -54,7 +54,7 @@ When activated the proposals must:
 
 If not activated, the context field **MUST** be `None`.
 
-## Block Verification
+### Block Verification
 
 During `Automaton::verify()` step:
 
@@ -64,13 +64,13 @@ During `Automaton::verify()` step:
 
 Important to note the immediate switch to `Deferred` is __not strictly required__. For example a validator can choose an implementation that preserves synchronous verification. This validator simply does not contribute to the reduced latency in forming the notarization certificate.
 
-## Genesis Block
+### Genesis Block
 
 The Genesis block MUST have the consensus context set to `None`.
 
 ---
 
-# Invariants
+## Invariants
 
 1. **Context presence**: Every block beyond genesis when activated has a set `Context`.
 

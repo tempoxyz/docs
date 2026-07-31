@@ -66,14 +66,14 @@ Thus, only the contract owner could change or deactivate entries.
 - Public keys remain reserved forever (even after deactivation)
 - Addresses are unique among current validators but can be reassigned via `transferValidatorOwnership`
 
-# Specification
+## Specification
 
-## Precompile Address
+### Precompile Address
 ```solidity
 address constant VALIDATOR_CONFIG_V2_ADDRESS = 0xCCCCCCCC00000000000000000000000000000001;
 ```
 
-## Interface
+### Interface
 
 ```solidity
 // SPDX-License-Identifier: MIT
@@ -274,7 +274,7 @@ interface IValidatorConfigV2 {
 }
 ```
 
-## Overview
+### Overview
 
 - Migration incrementally reads and copies validator entries from V1 into V2.
 - During migration, the consensus layer continues reading V1 until `initializeIfMigrated()` completes.
@@ -283,7 +283,7 @@ interface IValidatorConfigV2 {
 - Validator `index` is stable for the lifetime of an entry.
 - Writes for post-migration operations are gated by `isInitialized()`.
 
-## State Model
+### State Model
 
 V2 stores validators in one append-only array, with lookup indexes by address and public key.
 
@@ -292,31 +292,31 @@ V2 stores validators in one append-only array, with lookup indexes by address an
 - `index`: immutable array position assigned at creation.
 - `initialized`: one-way migration flag toggled by `initializeIfMigrated()`.
 
-### Fee Recipient Separation
+#### Fee Recipient Separation
 
 Each validator entry includes a `feeRecipient` that can differ from the validator's control address. This enables operators to route protocol fees to a dedicated treasury wallet, while retaining a separate validator or treasury-ops multisig for operational calls. This separation reduces blast radius during key compromise: operational key exposure does not cause historically collected fees held by the custody wallet to be lost.
 
-## Operation Semantics
+### Operation Semantics
 
-### Lifecycle Operations
+#### Lifecycle Operations
 
 - `addValidator`: appends a new active entry after validation and signature verification.
 - `deactivateValidator`: marks an existing active entry as deactivated at current block height.
 - `rotateValidator`: to keep `index` stable, this updates the active entry in place and appends the entry to be deactivated. Active validator count is unchanged.
 
-### Network And Ownership Operations
+#### Network And Ownership Operations
 
 - `setIpAddresses`: updates ingress and egress for an active validator, enforcing address format and ingress uniqueness among active entries.
 - `setFeeRecipient`: updates the destination address that receives network fees from block proposing.
 - `transferValidatorOwnership`: rebinds a validator entry to a new address provided the address is not used by another active entry.
 
-### Migration And Phase-Gating Operations
+#### Migration And Phase-Gating Operations
 
 - `migrateValidator`: copies one V1 entry into V2 in descending index order.
 - `initializeIfMigrated`: switches V2 to initialized state after all V1 indices have been processed.
 - Mutators are phase-gated: migration mutators are blocked after init, and post-init mutators are blocked before init.
 
-### Input Validation And Safety Checks
+#### Input Validation And Safety Checks
 
 ValidatorConfig V2 enforces the following checks:
 
@@ -326,7 +326,7 @@ ValidatorConfig V2 enforces the following checks:
 4. `egress` must be a valid IP.
 5. `addValidator` and `rotateValidator` require a signature from the Ed25519 key being installed.
 
-### Ed25519 Signature Verification
+#### Ed25519 Signature Verification
 
 When adding or rotating a validator, the caller must provide an Ed25519 signature proving ownership of the public key.
 
@@ -359,15 +359,15 @@ rotateValidatorMessage = keccak256(
 
 The Ed25519 signature is computed over the operation-specific message with the namespace parameter (see commonware's [signing scheme](https://github.com/commonwarexyz/monorepo/blob/abb883b4a8b42b362d4003b510bd644361eb3953/cryptography/src/ed25519/scheme.rs#L38-L40) and [union format](https://github.com/commonwarexyz/monorepo/blob/abb883b4a8b42b362d4003b510bd644361eb3953/utils/src/lib.rs#L166-L174)).
 
-## Compatibility And Upgrade Behavior
+### Compatibility And Upgrade Behavior
 
-### Changes From V1
+#### Changes From V1
 
 1. V2 preserves append-only history with irreversible deactivation instead of mutable active/inactive toggling.
 2. V2 enforces stronger input checks in the precompile, including signature-backed key ownership.
 3. V2 keeps validator index stable across lifecycle operations.
 
-### Consensus Layer Read Behavior
+#### Consensus Layer Read Behavior
 
 The Consensus Layer checks `v2.isInitialized()` to determine which contract to read:
 
@@ -376,7 +376,7 @@ The Consensus Layer checks `v2.isInitialized()` to determine which contract to r
 
 This read switch is implemented in CL logic. V2 does not proxy reads to V1.
 
-## Consensus Layer Integration
+### Consensus Layer Integration
 
 **IP address changes**: `setIpAddresses` is expected to take effect in CL peer configuration on the next finalized block.
 
@@ -385,7 +385,7 @@ This read switch is implemented in CL logic. V2 does not proxy reads to V1.
 
 **Fee recipients**: Fee recipients are included now to be used in the future in a not yet determined hardfork.
 
-### DKG Player Selection
+#### DKG Player Selection
 
 The consensus layer determines DKG players for epoch `E+1` by reading state at `boundary(E) - 1` and filtering:
 
@@ -398,27 +398,27 @@ players(E+1) = validators.filter(v =>
 
 This enables node recovery and late joining without historical account state. 
 
-## Migration from V1
+### Migration from V1
 
 On networks that start directly with V2 (no V1 state), `initializeIfMigrated` can be called immediately when the V1 validator count is zero.
 
 Because `SSTORE` cost is high under TIP-1000, migration is done one validator at a time to reduce out-of-gas risk on large sets.
 
-### Full Migration Steps
+#### Full Migration Steps
 
 1. At fork activation, the V2 precompile goes live. However, CL continues reading from the V1 precompile.
 2. The owner calls `migrateValidator(n-1)` with `n` being the validator count in the V1 precompile.
 3. On the first migration call, V2 copies owner from V1 if unset and snapshots the V1 validator count, then continues in descending index order. The snapshotted count is used for all subsequent index validation to prevent V1 mutations from breaking migration ordering.
 4. After all indices are processed, owner calls `initializeIfMigrated()`, which flips `initialized` and activates CL reads from V2.
 
-### Migration Edge Cases
+#### Migration Edge Cases
 
 1. **Validator goes offline during migration**: admin deactivates the validator in V1. If that index has already been migrated the admin will also deactivates it in V2.
 2. **Invalid V1 entry encountered**: the index is still marked as processed (migrated, overwritten, or skipped by implementation rules) so global completion is not blocked.
 3. **Zero validators in V1**: The migration flow requires at least 1 validator to be in the V1 precompile.
 4. **Validator count overflow**: We use uint8s to cache the number of V1 validators and the number of skipped V1 validators. V1 currently has 14 validators, so a limit of 255 is sufficient.
 
-### Permitted Calls During Migration
+#### Permitted Calls During Migration
 
 | Contract | Caller | Allowed calls |
 | --- | --- | --- |
@@ -427,34 +427,34 @@ Because `SSTORE` cost is high under TIP-1000, migration is done one validator at
 | V2 (post-init) | any | `migrateValidator` and `initializeIfMigrated` are blocked |
 | V1 (during migration window) | owner and validators | all V1 calls remain available (subject to V1 authorization and key ownership assumptions) |
 
-# Security
+## Security
 
-## Considerations
+### Considerations
 
 - **Migration timing**: migration and `initializeIfMigrated()` should complete before an epoch boundary to avoid DKG disruption.
 - **Pre-migration validation**: admins should run a validation script against V1 state to detect entries that would fail V2 checks.
 - **State parity before init**: admins should verify V1/V2 state consistency before finalizing with `initializeIfMigrated()`.
 - **Signature domain separation**: signatures for `addValidator` and `rotateValidator` are bound to chain ID, precompile address, namespace, validator address, and endpoint payload.
 
-## Race And Griefing Risks
+### Race And Griefing Risks
 
 - Stable `index` values prevent races between concurrent state-changing calls.
 - Append-only history and permissionless rotation require query paths that remain safe as history grows.
 
-## Testing Requirements
+### Testing Requirements
 
 Unit tests should cover all control-flow branches in added functions, including initialization gating, migration completion checks, and index-based query behavior under large validator sets.
 
-## Invariants
+### Invariants
 
-### Identity and Uniqueness
+#### Identity and Uniqueness
 
 1. **Unique active addresses**: No two active validators share the same `validatorAddress`. Deactivated addresses may be reused.
 2. **Unique public keys**: No two validators (including deactivated) share the same `publicKey`.
 3. **Ingress uniqueness across active validators**: In `getActiveValidators()`, no two validators share the same ingress `<IP>:<port>`.
 4. **Valid public keys**: All validators must have valid ed25519 `publicKey`s.
 
-### Lifecycle and Storage Behavior
+#### Lifecycle and Storage Behavior
 
 1. **Append-only validator array**: `validatorsArray` length can only increase.
 2. **Entry index immutability**: Once a validator entry is created at index `i`, that entry can never move to another index. A previously deactivated operator may later be re-added as a new entry at a different index.
@@ -463,7 +463,7 @@ Unit tests should cover all control-flow branches in added functions, including 
 5. **Rotation preserves active cardinality**: A successful `rotateValidator` call does not change `getActiveValidators().length`.
 6. **Deactivation decrements active cardinality by one**: A successful `deactivateValidator` call decreases `getActiveValidators().length` by exactly one.
 
-### Query Correctness
+#### Query Correctness
 
 1. **Full-set reconstruction by index**: Reading `validatorByIndex(i)` for all `i` in `0..validatorCount()-1` must reconstruct exactly the ordered validator set.
 2. **Validator activity consistency**: Filtering the reconstructed validator set by `deactivatedAtHeight == 0` must produce exactly `getActiveValidators()` (same members, order not important).
@@ -471,7 +471,7 @@ Unit tests should cover all control-flow branches in added functions, including 
 4. **Public-key round-trip for all entries**: For any `i < validatorCount()`, `validatorByPublicKey(validatorByIndex(i).publicKey).index == i`.
 5. **Index round-trip for all entries**: For any `i < validatorCount()`, `validatorByIndex(i).index == i`.
 
-### Migration and Initialization
+#### Migration and Initialization
 
 1. **Initialization phase gating**: Before initialization, post-init mutators are blocked; after initialization, migration mutators are blocked.
 2. **Initialized once**: The `initialized` flag can only transition from `false` to `true`, never back.

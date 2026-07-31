@@ -22,9 +22,9 @@ CREATE and CREATE2 addresses are downstream of keccak; EIP-7702 authority addres
 
 ---
 
-# Specification
+## Specification
 
-## CREATE and CREATE2
+### CREATE and CREATE2
 
 Before setting up a create frame, compute the would-be contract address:
 
@@ -33,13 +33,13 @@ Before setting up a create frame, compute the would-be contract address:
 
 If `is_tip20_prefix(address)` is true, revert the opcode. The caller's nonce is not bumped, no value is transferred, and no init-code is executed. Base opcode gas is consumed; init-code gas is not.
 
-## EIP-7702 Authorizations
+### EIP-7702 Authorizations
 
 When processing EIP-7702 authorization lists, if `is_tip20_prefix(authority)` is true for a recovered authority address, skip the entry. The delegation is not applied.
 
 ---
 
-# Invariants
+## Invariants
 
 1. **No new code at TIP-20 addresses**: No CREATE/CREATE2 produces a contract where `is_tip20_prefix` returns true. Applies to all depths (top-level and nested creates).
 
@@ -53,4 +53,3 @@ When processing EIP-7702 authorization lists, if `is_tip20_prefix(authority)` is
 - CREATE where the computed address has a TIP-20 prefix reverts with nonce unchanged.
 - EIP-7702 authorization with a TIP-20-prefixed authority is skipped.
 - Normal CREATE/CREATE2 producing non-TIP-20 addresses is unaffected.
-

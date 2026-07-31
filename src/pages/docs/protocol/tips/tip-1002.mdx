@@ -30,16 +30,16 @@ Currently, `placeFlip` requires `flipTick` to be strictly on the opposite side o
 
 ---
 
-# Specification
+## Specification
 
-## Modified behavior
+### Modified behavior
 
 The `place` and `placeFlip` functions (including the `bookKey` overloads from TIP-1001) are modified to check for crossing before accepting an order:
 
 - **For bids**: Revert if `tick > best_ask_tick` (when `best_ask_tick` exists)
 - **For asks**: Revert if `tick < best_bid_tick` (when `best_bid_tick` exists)
 
-### Same-tick orders
+#### Same-tick orders
 
 Orders at the same tick as the best order on the opposite side are **allowed**. This means:
 
@@ -48,7 +48,7 @@ Orders at the same tick as the best order on the opposite side are **allowed**. 
 
 While this is non-standard behavior for most order books (which would immediately match same-tick orders), it is intentionally permitted to support flip orders that flip to the same tick (see below).
 
-## Same-tick flip orders
+### Same-tick flip orders
 
 The `placeFlip` validation is relaxed to allow `flipTick == tick`:
 
@@ -57,26 +57,26 @@ The `placeFlip` validation is relaxed to allow `flipTick == tick`:
 
 This enables use cases like instant token convertibility, where an issuer places flip orders on both sides at the same tick to create a stable two-sided market that automatically replenishes when orders are filled.
 
-## Interaction with TIP-1001
+### Interaction with TIP-1001
 
 If TIP-1001 is accepted, the crossing check only applies when the pair is **active**—that is, when the pair's quote token equals the base token's current `quoteToken()`.
 
 For pairs created via `createNextPair` (where the quote token is the base token's `nextQuoteToken()`), the crossing check is skipped. This allows orders to accumulate freely during "place-only mode" before the quote token update is finalized. Such orders would likely be arbitraged nearly instantly once the pair launches, but this prevents someone from causing a denial-of-service to one side of the book by placing an extremely aggressive order on the other side.
 
-## New error
+### New error
 
 ```solidity
 /// @notice The order would cross existing orders on the opposite side
 error ORDER_WOULD_CROSS();
 ```
 
-## Events
+### Events
 
 No new events.
 
 ---
 
-# Invariants
+## Invariants
 
 - On active pairs, `best_bid_tick <= best_ask_tick` after any successful `place` or `placeFlip` call
 - On inactive pairs (per TIP-1001), no crossing check is enforced

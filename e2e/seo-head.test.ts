@@ -31,6 +31,10 @@ function metaContent(head: string, selector: string) {
   return match?.[1] ?? attrFirst?.[1]
 }
 
+function titleElements(head: string) {
+  return head.match(/<title(?:\s[^>]*)?>[\s\S]*?<\/title>/gi) ?? []
+}
+
 const cases: {
   path: string
   title: string
@@ -100,7 +104,9 @@ for (const c of cases) {
   test(`prerendered head for ${c.path}`, async ({ request }) => {
     const head = await fetchHead(request, c.path)
 
-    expect(head).toContain(`<title>${c.title}</title>`)
+    expect(titleElements(head), `${c.path} should have one exact document title`).toEqual([
+      `<title>${c.title}</title>`,
+    ])
     expect(metaContent(head, 'og:title')).toBe(c.ogTitle)
     expect(metaContent(head, 'description')).toContain(c.descriptionIncludes)
     expect(metaContent(head, 'og:description')).toContain(c.descriptionIncludes)

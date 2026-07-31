@@ -27,9 +27,9 @@ Compound policies enable these use cases while maintaining backward compatibilit
 
 ---
 
-# Specification
+## Specification
 
-## Policy Types
+### Policy Types
 
 TIP-403 currently supports two policy types: `WHITELIST` and `BLACKLIST`. This TIP adds a third type:
 
@@ -41,7 +41,7 @@ enum PolicyType {
 }
 ```
 
-## Compound Policy Structure
+### Compound Policy Structure
 
 A compound policy references three existing simple policies by their policy IDs:
 
@@ -55,7 +55,7 @@ struct CompoundPolicyData {
 
 All three referenced policies MUST be simple policies (WHITELIST or BLACKLIST), not compound policies. This prevents circular references and unbounded recursion.
 
-## Storage Layout
+### Storage Layout
 
 Policy data is stored in a unified `PolicyRecord` struct that contains both base policy data and compound policy data:
 
@@ -87,7 +87,7 @@ For a given policy ID, storage locations are:
 
 This unified layout requires only **1 keccak computation + 2 SLOADs** for compound policy authorization, compared to 2 keccak computations with separate mappings.
 
-## Interface Additions
+### Interface Additions
 
 The TIP403Registry interface is extended with the following:
 
@@ -188,9 +188,9 @@ interface ITIP403Registry {
 }
 ```
 
-## Authorization Logic
+### Authorization Logic
 
-### isAuthorizedSender
+#### isAuthorizedSender
 
 ```solidity
 function isAuthorizedSender(uint64 policyId, address user) external view returns (bool) {
@@ -205,7 +205,7 @@ function isAuthorizedSender(uint64 policyId, address user) external view returns
 }
 ```
 
-### isAuthorizedRecipient
+#### isAuthorizedRecipient
 
 ```solidity
 function isAuthorizedRecipient(uint64 policyId, address user) external view returns (bool) {
@@ -220,7 +220,7 @@ function isAuthorizedRecipient(uint64 policyId, address user) external view retu
 }
 ```
 
-### isAuthorizedMintRecipient
+#### isAuthorizedMintRecipient
 
 ```solidity
 function isAuthorizedMintRecipient(uint64 policyId, address user) external view returns (bool) {
@@ -235,7 +235,7 @@ function isAuthorizedMintRecipient(uint64 policyId, address user) external view 
 }
 ```
 
-### isAuthorized (updated)
+#### isAuthorized (updated)
 
 The existing `isAuthorized` function is updated to check both sender and recipient authorization:
 
@@ -247,11 +247,11 @@ function isAuthorized(uint64 policyId, address user) external view returns (bool
 
 This maintains backward compatibility: for simple policies both functions return the same result, so `isAuthorized` behaves identically to before. For compound policies, `isAuthorized` returns true only if the user is authorized as both sender and recipient.
 
-## Required Code Changes
+### Required Code Changes
 
 This TIP requires exactly 6 replacements of `isAuthorized` calls:
 
-### Direct Replacements
+#### Direct Replacements
 
 | Location | Current | Replace With |
 |----------|---------|--------------|
@@ -260,7 +260,7 @@ This TIP requires exactly 6 replacements of `isAuthorized` calls:
 | DEX `cancelStaleOrder` | `isAuthorized(maker)` | `isAuthorizedSender(maker)` |
 | Fee payer `can_fee_payer_transfer` | `isAuthorized(fee_payer)` | `isAuthorizedSender(fee_payer)` |
 
-### Core Authorization Logic
+#### Core Authorization Logic
 
 | Location | Current | Replace With |
 |----------|---------|--------------|
@@ -273,11 +273,11 @@ All other call sites use `ensureTransferAuthorized(from, to)` which delegates to
 - **TIP-20 Rewards**: `distributeReward`, `setRewardRecipient`, `claimRewards`
 - **Stablecoin DEX**: `decrementBalanceOrTransferFrom`, `placeLimitOrder`, `swapExactAmountIn`
 
-## TIP-20 Integration
+### TIP-20 Integration
 
 TIP-20 tokens MUST be updated to use the new sender/recipient authorization functions:
 
-### Transfer Authorization (isTransferAuthorized)
+#### Transfer Authorization (isTransferAuthorized)
 
 ```solidity
 function isTransferAuthorized(address from, address to) internal view returns (bool) {
@@ -290,7 +290,7 @@ function isTransferAuthorized(address from, address to) internal view returns (b
 }
 ```
 
-### Mint Operations
+#### Mint Operations
 
 Mint operations check the mint recipient policy:
 
@@ -303,7 +303,7 @@ function _mint(address to, uint256 amount) internal {
 }
 ```
 
-### Burn Blocked Operations
+#### Burn Blocked Operations
 
 The `burnBlocked` function checks sender authorization to verify the address is blocked:
 
@@ -319,9 +319,9 @@ function burnBlocked(address from, uint256 amount) external {
 }
 ```
 
-## Stablecoin DEX Integration
+### Stablecoin DEX Integration
 
-### Cancel Stale Order
+#### Cancel Stale Order
 
 The `cancelStaleOrder` function checks sender authorization on the token escrowed by the maker, since if the order is filled, the maker will have to send that token:
 
@@ -340,7 +340,7 @@ function cancelStaleOrder(uint128 orderId) external {
 }
 ```
 
-## Mutability
+### Mutability
 
 Compound policies are **structurally immutable** once created — their constituent policy ID references cannot be changed, and they have no admin. However, the referenced simple policies remain independently mutable by their respective admins. Modifications to a referenced simple policy's whitelist or blacklist will immediately affect the authorization behavior of any compound policy that references it.
 
@@ -351,7 +351,7 @@ To change which simple policies a compound policy references, token issuers must
 
 To modify authorization behavior without changing the compound policy itself, the admin of a referenced simple policy can modify that simple policy's whitelist or blacklist directly.
 
-## Backward Compatibility
+### Backward Compatibility
 
 This TIP is fully backward compatible:
 
@@ -361,7 +361,7 @@ This TIP is fully backward compatible:
 
 ---
 
-# Invariants
+## Invariants
 
 1. **Simple Policy Constraint**: All three policy IDs in a compound policy MUST reference simple policies (WHITELIST or BLACKLIST). Compound policies cannot reference other compound policies.
 
@@ -377,7 +377,7 @@ This TIP is fully backward compatible:
 
 7. **Non-existent Policy Revert**: All authorization functions (`isAuthorized`, `isAuthorizedSender`, `isAuthorizedRecipient`, `isAuthorizedMintRecipient`) MUST revert with `PolicyNotFound()` when called with a policy ID that does not exist. Built-in policies (0 and 1) always exist and are exempt from this check.
 
-## Test Cases
+### Test Cases
 
 1. **Simple policy equivalence**: Verify that for simple policies, all four authorization functions return the same result.
 

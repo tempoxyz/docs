@@ -27,9 +27,9 @@ The `burnAt` function provides this capability with appropriate access controls 
 
 ---
 
-# Specification
+## Specification
 
-## New Role
+### New Role
 
 A new role constant is added to TIP-20:
 
@@ -39,7 +39,7 @@ bytes32 public constant BURN_AT_ROLE = keccak256("BURN_AT_ROLE");
 
 This role is administered by the `DEFAULT_ADMIN_ROLE` (same as other TIP-20 roles).
 
-## New Event
+### New Event
 
 ```solidity
 /// @notice Emitted when tokens are burned from any account.
@@ -48,7 +48,7 @@ This role is administered by the `DEFAULT_ADMIN_ROLE` (same as other TIP-20 role
 event BurnAt(address indexed from, uint256 amount);
 ```
 
-## New Function
+### New Function
 
 ```solidity
 /// @notice Burns tokens from any account.
@@ -58,7 +58,7 @@ event BurnAt(address indexed from, uint256 amount);
 function burnAt(address from, uint256 amount) external;
 ```
 
-### Behavior
+#### Behavior
 
 1. **Access Control**: Reverts with `Unauthorized` if caller does not have `BURN_AT_ROLE`
 2. **Protected Addresses**: Reverts with `ProtectedAddress` if `from` is:
@@ -72,7 +72,7 @@ function burnAt(address from, uint256 amount) external;
    - Updates reward accounting if `from` is opted into rewards
 6. **Events**: Emits `Transfer(from, address(0), amount)` and `BurnAt(from, amount)`
 
-### Interface Addition
+#### Interface Addition
 
 The `ITIP20` interface is extended with:
 
@@ -87,7 +87,7 @@ function BURN_AT_ROLE() external view returns (bytes32);
 function burnAt(address from, uint256 amount) external;
 ```
 
-# Invariants
+## Invariants
 
 1. **Role Required**: `burnAt` must always revert if caller lacks `BURN_AT_ROLE`
 2. **Protected Addresses**: `burnAt` must never succeed when `from` is a protected precompile address
@@ -102,7 +102,7 @@ function burnAt(address from, uint256 amount) external;
    - Any previously accrued `rewardBalance` remains claimable
 6. **Policy Independence**: `burnAt` must succeed regardless of transfer policy status of `from`
 
-## Test Cases
+### Test Cases
 
 The test suite must verify:
 

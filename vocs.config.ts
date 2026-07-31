@@ -3,6 +3,7 @@ import { resolveBaseUrl } from './src/lib/base-url'
 import { docsRouteDestination, proxiedLegacyDocsRoutes } from './src/lib/docs-routing'
 import { docsStructuredDataHead } from './src/lib/docs-structured-data'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
+import { demoteMarkdownHeadings } from './src/lib/markdown-headings'
 import { plainMarkdownComponents } from './src/lib/markdown-output'
 
 // Only set baseUrl in production — Vocs injects a <base> tag from this value,
@@ -17,15 +18,21 @@ const changelog = Changelog.from({
   ...tempoChangelog,
   async fetch(options) {
     const releases = await tempoChangelog.fetch(options)
-    return releases.map((release) => ({
-      ...release,
+    return releases.map((release) => {
       // GitHub-generated release notes use HTML disclosures. Markdown output cannot retain
       // them, so preserve their content as a heading instead.
-      body: release.body
+      const body = release.body
         .replace(/<details\b[^>]*>/gi, '')
         .replace(/<\/details>/gi, '')
-        .replace(/<summary\b[^>]*>([\s\S]*?)<\/summary>/gi, '\n\n#### $1\n\n'),
-    }))
+        .replace(/<summary\b[^>]*>([\s\S]*?)<\/summary>/gi, '\n\n#### $1\n\n')
+
+      return {
+        ...release,
+        // The changelog page owns the only H1. Release titles render as H2, so shift body
+        // headings down one level while preserving the release note's relative hierarchy.
+        body: demoteMarkdownHeadings(Changelog.stripDuplicateTitle({ body, title: release.title })),
+      }
+    })
   },
 })
 

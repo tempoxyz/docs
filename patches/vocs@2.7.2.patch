@@ -1,0 +1,368 @@
+diff --git a/dist/react/Head.d.ts b/dist/react/Head.d.ts
+index 8ad0e7d1635b9ca6b13ef2fb4ac9dd1ca9b6fbff..0131bb7f9ccff37b90550a98e7e47d3e69f3ea66 100644
+--- a/dist/react/Head.d.ts
++++ b/dist/react/Head.d.ts
+@@ -3,6 +3,7 @@ export declare function Head(props: Head.Props): import("react/jsx-runtime").JSX
+ export declare namespace Head {
+     type Props = {
+         includeJsonLd?: boolean | undefined;
++        includeTitle?: boolean | undefined;
+     };
+ }
+ export declare function resolveTitleTemplate(config: Pick<Config.Config, 'title' | 'titleTemplate'>, path: string, title: string | undefined, frontmatter: Config.Frontmatter | undefined): string | undefined;
+diff --git a/dist/react/Head.js b/dist/react/Head.js
+index 9c7425584c057838cf328fcbff9b64005122268a..c219650a597c1a21db65c64c4410b6c7de967e44 100644
+--- a/dist/react/Head.js
++++ b/dist/react/Head.js
+@@ -6,7 +6,7 @@ import * as JsonLd from './json-ld.js';
+ import * as MdxPageContext from './MdxPageContext.js';
+ import { useConfig } from './useConfig.js';
+ export function Head(props) {
+-    const { includeJsonLd = true } = props;
++    const { includeJsonLd = true, includeTitle = true } = props;
+     const config = useConfig();
+     const { path: pathname } = useRouter();
+     const { frontmatter } = MdxPageContext.use();
+@@ -90,7 +90,7 @@ export function Head(props) {
+                 // biome-ignore lint/security/noDangerouslySetInnerHtml: blocking script to prevent FOUC
+                 dangerouslySetInnerHTML: {
+                     __html: `(function(){try{var e=document.documentElement;var s=function(t){e.setAttribute('data-vocs-theme',t);e.style.colorScheme=t};var t=localStorage.getItem('vocs-theme');if(t==='light'||t==='dark'){s(t)}else if(window.matchMedia('(prefers-color-scheme:dark)').matches){s('dark')}else if(window.matchMedia('(prefers-color-scheme:light)').matches){s('light')}else{s('dark')}}catch(e){}})()`,
+-                } })), _jsx("meta", { name: "color-scheme", content: colorScheme }), !disabled && (_jsxs(_Fragment, { children: [fullTitle && _jsx("title", { children: fullTitle }, "title"), base && _jsx("base", { href: base }), canonical && _jsx("link", { rel: "canonical", href: canonical }), icons && iconUrl && typeof iconUrl === 'string' && (_jsx("link", { rel: "icon", href: iconUrl, type: getIconType(iconUrl) })), icons && iconUrl && typeof iconUrl !== 'string' && (_jsx("link", { rel: "icon", href: iconUrl.light, type: getIconType(iconUrl.light) })), icons && iconUrl && typeof iconUrl !== 'string' && (_jsx("link", { rel: "icon", href: iconUrl.dark, type: getIconType(iconUrl.dark), media: "(prefers-color-scheme: dark)" })), metaTags.map((tag, index) => {
++                } })), _jsx("meta", { name: "color-scheme", content: colorScheme }), !disabled && (_jsxs(_Fragment, { children: [includeTitle && fullTitle && _jsx("title", { children: fullTitle }, "title"), base && _jsx("base", { href: base }), canonical && _jsx("link", { rel: "canonical", href: canonical }), icons && iconUrl && typeof iconUrl === 'string' && (_jsx("link", { rel: "icon", href: iconUrl, type: getIconType(iconUrl) })), icons && iconUrl && typeof iconUrl !== 'string' && (_jsx("link", { rel: "icon", href: iconUrl.light, type: getIconType(iconUrl.light) })), icons && iconUrl && typeof iconUrl !== 'string' && (_jsx("link", { rel: "icon", href: iconUrl.dark, type: getIconType(iconUrl.dark), media: "(prefers-color-scheme: dark)" })), metaTags.map((tag, index) => {
+                         const { charset: charSet, content, 'http-equiv': httpEquiv, media, name, property, } = tag;
+                         return (_jsx("meta", { charSet: charSet, httpEquiv: httpEquiv, name: name, property: property, content: content != null ? String(content) : undefined, media: media }, `${name ?? property ?? httpEquiv ?? charSet}-${index}`));
+                     }), jsonLd && (_jsx("script", { type: "application/ld+json",
+diff --git a/dist/react/Layout.d.ts b/dist/react/Layout.d.ts
+index 05018ae8161c97a55f2a20a9d43336d09b743dd1..ceb3eccc4b72bf23495ee73984f573321d6add7d 100644
+--- a/dist/react/Layout.d.ts
++++ b/dist/react/Layout.d.ts
+@@ -3,6 +3,7 @@ export declare namespace Layout {
+     type Props = {
+         children: React.ReactNode;
+         includeJsonLd?: boolean | undefined;
++        includeTitle?: boolean | undefined;
+     };
+ }
+ //# sourceMappingURL=Layout.d.ts.map
+diff --git a/dist/react/Layout.js b/dist/react/Layout.js
+index dd8f3a8162c7c39e4fb39b58cc2cdca86cdfd01b..4d95f74ad43abafedb9828b74af25f64c517c68a 100644
+--- a/dist/react/Layout.js
++++ b/dist/react/Layout.js
+@@ -2,7 +2,7 @@ import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-run
+ import { Head } from './Head.js';
+ import * as Layout_client from './Layout.client.js';
+ export function Layout(props) {
+-    const { children, includeJsonLd } = props;
+-    return (_jsxs(_Fragment, { children: [_jsx(Head, { includeJsonLd: includeJsonLd }), _jsx(Layout_client.Main, { children: children })] }));
++    const { children, includeJsonLd, includeTitle } = props;
++    return (_jsxs(_Fragment, { children: [_jsx(Head, { includeJsonLd: includeJsonLd, includeTitle: includeTitle }), _jsx(Layout_client.Main, { children: children })] }));
+ }
+ //# sourceMappingURL=Layout.js.map
+diff --git a/dist/react/Root.js b/dist/react/Root.js
+index 641cee118919e649fc5d977bcfc3f4e62b003007..ca0c37a66be101dca6a311fea394592f21bdb95e 100644
+--- a/dist/react/Root.js
++++ b/dist/react/Root.js
+@@ -3,13 +3,12 @@ import { config } from 'virtual:vocs/config';
+ import groupIconsStylesUrl from 'virtual:vocs/group-icons.css?url';
+ import userStylesUrl from 'virtual:vocs/user-styles';
+ import stylesUrl from '../styles/index.css?url';
+-import { Head } from './Head.js';
+ import { Root_client } from './Root.client.js';
+ import { ScrollRestoration } from './ScrollRestoration.js';
+ export async function Root({ children }) {
+     const { colorScheme, accentColor } = config;
+     return (_jsxs("html", { "data-vocs": true, ...(colorScheme === 'light' || colorScheme === 'dark'
+             ? { 'data-vocs-theme': colorScheme }
+-            : {}), lang: "en", style: { colorScheme, '--vocs-color-accent': accentColor }, suppressHydrationWarning: true, children: [_jsxs("head", { children: [_jsx("link", { rel: "stylesheet", href: stylesUrl }), userStylesUrl && _jsx("link", { rel: "stylesheet", href: userStylesUrl }), groupIconsStylesUrl && _jsx("link", { rel: "stylesheet", href: groupIconsStylesUrl }), _jsx(Head, { includeJsonLd: false })] }), _jsxs("body", { "data-version": "1.0", children: [_jsx(Root_client, { children: children }), _jsx(ScrollRestoration, {})] })] }));
++            : {}), lang: "en", style: { colorScheme, '--vocs-color-accent': accentColor }, suppressHydrationWarning: true, children: [_jsxs("head", { children: [_jsx("link", { rel: "stylesheet", href: stylesUrl }), userStylesUrl && _jsx("link", { rel: "stylesheet", href: userStylesUrl }), groupIconsStylesUrl && _jsx("link", { rel: "stylesheet", href: groupIconsStylesUrl })] }), _jsxs("body", { "data-version": "1.0", children: [_jsx(Root_client, { children: children }), _jsx(ScrollRestoration, {})] })] }));
+ }
+ //# sourceMappingURL=Root.js.map
+diff --git a/dist/react/internal/NotFound.js b/dist/react/internal/NotFound.js
+index b189ea50873a5ef76bf044003476bf4660e9e245..c6c80e0ecde6655ea8fdda0f60e07aef0c237824 100644
+--- a/dist/react/internal/NotFound.js
++++ b/dist/react/internal/NotFound.js
+@@ -1,8 +1,9 @@
+-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
++import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
++import { config } from 'virtual:vocs/config';
+ import { Link } from 'waku';
+ import LucideFileQuestion from '~icons/lucide/file-question';
+ import LucideHome from '~icons/lucide/home';
+ export function NotFound() {
+-    return (_jsxs("div", { className: "vocs:flex vocs:flex-col vocs:items-center vocs:justify-center vocs:min-h-[60vh] vocs:px-6 vocs:py-16 vocs:text-center", "data-v-not-found": true, children: [_jsx("div", { className: "vocs:flex vocs:items-center vocs:justify-center vocs:size-20 vocs:rounded-full vocs:bg-surface vocs:border vocs:border-primary vocs:text-secondary vocs:mb-6", "data-v-not-found-icon": true, children: _jsx(LucideFileQuestion, { className: "vocs:size-10" }) }), _jsx("h1", { className: "vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3", "data-v-not-found-title": true, children: "Page not found" }), _jsx("p", { className: "vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8", "data-v-not-found-description": true, children: "The page you're looking for doesn't exist or has been moved." }), _jsxs(Link, { className: "vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted", "data-v-not-found-link": true, to: "/", children: [_jsx(LucideHome, { className: "vocs:size-4 vocs:text-secondary" }), "Back to home"] })] }));
++    return (_jsxs(_Fragment, { children: [_jsx("title", { children: `Page not found ⋅ ${config.title}` }), _jsx("meta", { name: "robots", content: "noindex, nofollow" }), _jsxs("div", { className: "vocs:flex vocs:flex-col vocs:items-center vocs:justify-center vocs:min-h-[60vh] vocs:px-6 vocs:py-16 vocs:text-center", "data-v-not-found": true, children: [_jsx("div", { className: "vocs:flex vocs:items-center vocs:justify-center vocs:size-20 vocs:rounded-full vocs:bg-surface vocs:border vocs:border-primary vocs:text-secondary vocs:mb-6", "data-v-not-found-icon": true, children: _jsx(LucideFileQuestion, { className: "vocs:size-10" }) }), _jsx("h1", { className: "vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3", "data-v-not-found-title": true, children: "Page not found" }), _jsx("p", { className: "vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8", "data-v-not-found-description": true, children: "The page you're looking for doesn't exist or has been moved." }), _jsxs(Link, { className: "vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted", "data-v-not-found-link": true, to: "/", children: [_jsx(LucideHome, { className: "vocs:size-4 vocs:text-secondary" }), "Back to home"] })] })] }));
+ }
+ //# sourceMappingURL=NotFound.js.map
+diff --git a/dist/react/internal/openapi/OpenApiPage.js b/dist/react/internal/openapi/OpenApiPage.js
+index 06cc466393643245bf0dfcc0c946e013c717a75c..e5b39e12c9e2017238a9744412943e2ea489e2fb 100644
+--- a/dist/react/internal/openapi/OpenApiPage.js
++++ b/dist/react/internal/openapi/OpenApiPage.js
+@@ -21,7 +21,7 @@ function OpenApiLayout(props) {
+             ...props.frontmatter,
+             content: { ...props.frontmatter?.content, width: props.width ?? 'full' },
+             outline: props.outline ?? true,
+-        }, children: _jsx(Layout, { includeJsonLd: false, children: props.children }) }));
++        }, children: _jsxs(Layout, { includeJsonLd: false, includeTitle: !props.documentTitle, children: [props.documentTitle ? _jsx("title", { children: props.documentTitle }) : null, props.children] }) }));
+ }
+ /**
+  * Renders a consumer-authored "guide" page (a normal MDX page mounted under an
+@@ -44,7 +44,7 @@ function OpenApiLayout(props) {
+ export function OpenApiGuide(props) {
+     const title = props.title ?? props.frontmatter?.title;
+     const description = props.description ?? props.frontmatter?.description;
+-    return (_jsxs(OpenApiLayout, { frontmatter: { ...props.frontmatter, description, title }, width: "full", children: [title ? _jsx("title", { children: title }) : null, _jsxs("div", { "data-v-openapi-guide": true, children: [props.header && title ? (_jsxs("header", { "data-v-openapi-header": true, children: [_jsxs("h1", { "data-v": true, "data-v-openapi-h1": true, id: props.id, children: [title, props.id ? _jsx(HeadingAnchor, { id: props.id }) : null] }), description ? _jsx(Prose, { markdown: description, attr: "description" }) : null] })) : null, props.children] })] }));
++    return (_jsx(OpenApiLayout, { documentTitle: resolveDocumentTitle(props.frontmatter, title), frontmatter: { ...props.frontmatter, description, title }, width: "full", children: _jsxs("div", { "data-v-openapi-guide": true, children: [props.header && title ? (_jsxs("header", { "data-v-openapi-header": true, children: [_jsxs("h1", { "data-v": true, "data-v-openapi-h1": true, id: props.id, children: [title, props.id ? _jsx(HeadingAnchor, { id: props.id }) : null] }), description ? _jsx(Prose, { markdown: description, attr: "description" }) : null] })) : null, props.children] }) }));
+ }
+ /**
+  * Renders an isolated, auto-generated OpenAPI reference section (Vite/RSC site
+@@ -73,10 +73,14 @@ export function OpenApiPage(props) {
+             return (_jsx(OpenApiLayout, { frontmatter: props.frontmatter, children: _jsxs("p", { children: ["No category \u201C", props.group, "\u201D exists in the API mounted at ", props.mount, "."] }) }));
+         const description = props.frontmatter?.description ?? group.description;
+         const title = props.title ?? props.frontmatter?.title ?? `${group.name} · ${ir.info.title}`;
+-        return (_jsxs(OpenApiLayout, { frontmatter: { ...props.frontmatter, description, title }, outline: false, children: [_jsx("title", { children: title }), _jsx(PlaygroundProvider, { mount: ir.path, children: _jsx(ReferenceGroup, { ir: ir, group: group, intro: props.intro, modelSource: props.inlineSchemaModels ? undefined : schemaModelSource(ir.path, group.id) }) })] }));
++        return (_jsx(OpenApiLayout, { documentTitle: resolveDocumentTitle(props.frontmatter, title), frontmatter: { ...props.frontmatter, description, title }, outline: false, children: _jsx(PlaygroundProvider, { mount: ir.path, children: _jsx(ReferenceGroup, { ir: ir, group: group, intro: props.intro, modelSource: props.inlineSchemaModels ? undefined : schemaModelSource(ir.path, group.id) }) }) }));
+     }
+     // Overview / landing page.
+     const title = props.title ?? props.frontmatter?.title ?? ir.info.title;
+-    return (_jsxs(OpenApiLayout, { frontmatter: { ...props.frontmatter, title }, width: "full", children: [_jsx("title", { children: title }), _jsx(ReferenceOverview, { ir: ir, intro: props.intro, endpoints: props.endpoints ? _jsx(Endpoints, { path: ir.path || undefined }) : undefined })] }));
++    return (_jsx(OpenApiLayout, { documentTitle: resolveDocumentTitle(props.frontmatter, title), frontmatter: { ...props.frontmatter, title }, width: "full", children: _jsx(ReferenceOverview, { ir: ir, intro: props.intro, endpoints: props.endpoints ? _jsx(Endpoints, { path: ir.path || undefined }) : undefined }) }));
++}
++function resolveDocumentTitle(frontmatter, fallback) {
++    const seoTitle = typeof frontmatter?.seoTitle === 'string' ? frontmatter.seoTitle.trim() : '';
++    return seoTitle || fallback;
+ }
+ //# sourceMappingURL=OpenApiPage.js.map
+diff --git a/src/react/Head.tsx b/src/react/Head.tsx
+index e7b51ed6d9642a903399dc0d18253a0f3cc955e8..004c4722f97ab7a9db4f0c876ca19b3fa9b97eab 100644
+--- a/src/react/Head.tsx
++++ b/src/react/Head.tsx
+@@ -9,7 +9,7 @@ import * as MdxPageContext from './MdxPageContext.js'
+ import { useConfig } from './useConfig.js'
+
+ export function Head(props: Head.Props) {
+-  const { includeJsonLd = true } = props
++  const { includeJsonLd = true, includeTitle = true } = props
+   const config = useConfig()
+   const { path: pathname } = useRouter()
+   const { frontmatter } = MdxPageContext.use()
+@@ -122,7 +122,7 @@ export function Head(props: Head.Props) {
+       {!disabled && (
+         <>
+           {/* Title */}
+-          {fullTitle && <title key="title">{fullTitle}</title>}
++          {includeTitle && fullTitle && <title key="title">{fullTitle}</title>}
+
+           {/* Base URL */}
+           {base && <base href={base} />}
+@@ -225,6 +225,7 @@ export function Head(props: Head.Props) {
+ export declare namespace Head {
+   export type Props = {
+     includeJsonLd?: boolean | undefined
++    includeTitle?: boolean | undefined
+   }
+ }
+
+diff --git a/src/react/Layout.tsx b/src/react/Layout.tsx
+index ca77c7aeca381f65af6d7a73f6a79d61890adcb3..4c8fbb9d3ef6566c4c1f7ff1f80cf8d8705ed7d7 100644
+--- a/src/react/Layout.tsx
++++ b/src/react/Layout.tsx
+@@ -2,10 +2,10 @@ import { Head } from './Head.js'
+ import * as Layout_client from './Layout.client.js'
+
+ export function Layout(props: Layout.Props) {
+-  const { children, includeJsonLd } = props
++  const { children, includeJsonLd, includeTitle } = props
+   return (
+     <>
+-      <Head includeJsonLd={includeJsonLd} />
++      <Head includeJsonLd={includeJsonLd} includeTitle={includeTitle} />
+       <Layout_client.Main>{children}</Layout_client.Main>
+     </>
+   )
+@@ -15,5 +15,6 @@ export namespace Layout {
+   export type Props = {
+     children: React.ReactNode
+     includeJsonLd?: boolean | undefined
++    includeTitle?: boolean | undefined
+   }
+ }
+diff --git a/src/react/Root.tsx b/src/react/Root.tsx
+index e65e8dfcd6c18b996166a57fdb896791532a769d..91c84df982fb44c95a337cdb7ca298bbffc7d600 100644
+--- a/src/react/Root.tsx
++++ b/src/react/Root.tsx
+@@ -2,7 +2,6 @@ import { config } from 'virtual:vocs/config'
+ import groupIconsStylesUrl from 'virtual:vocs/group-icons.css?url'
+ import userStylesUrl from 'virtual:vocs/user-styles'
+ import stylesUrl from '../styles/index.css?url'
+-import { Head } from './Head.js'
+ import { Root_client } from './Root.client.js'
+ import { ScrollRestoration } from './ScrollRestoration.js'
+
+@@ -22,7 +21,6 @@ export async function Root({ children }: { children: React.ReactNode }) {
+         <link rel="stylesheet" href={stylesUrl} />
+         {userStylesUrl && <link rel="stylesheet" href={userStylesUrl} />}
+         {groupIconsStylesUrl && <link rel="stylesheet" href={groupIconsStylesUrl} />}
+-        <Head includeJsonLd={false} />
+       </head>
+       <body data-version="1.0">
+         <Root_client>{children}</Root_client>
+diff --git a/src/react/internal/NotFound.tsx b/src/react/internal/NotFound.tsx
+index ccbf3ac5dbb4218fb4d6943a87e8bbb5f2a2c3e3..409c67cd99bf6e16588a1fbe5e0ed82a5cc4dd60 100644
+--- a/src/react/internal/NotFound.tsx
++++ b/src/react/internal/NotFound.tsx
+@@ -1,43 +1,48 @@
++import { config } from 'virtual:vocs/config'
+ import { Link } from 'waku'
+ import LucideFileQuestion from '~icons/lucide/file-question'
+ import LucideHome from '~icons/lucide/home'
+
+ export function NotFound() {
+   return (
+-    <div
+-      className="vocs:flex vocs:flex-col vocs:items-center vocs:justify-center vocs:min-h-[60vh] vocs:px-6 vocs:py-16 vocs:text-center"
+-      data-v-not-found
+-    >
++    <>
++      <title>{`Page not found ⋅ ${config.title}`}</title>
++      <meta name="robots" content="noindex, nofollow" />
+       <div
+-        className="vocs:flex vocs:items-center vocs:justify-center vocs:size-20 vocs:rounded-full vocs:bg-surface vocs:border vocs:border-primary vocs:text-secondary vocs:mb-6"
+-        data-v-not-found-icon
++        className="vocs:flex vocs:flex-col vocs:items-center vocs:justify-center vocs:min-h-[60vh] vocs:px-6 vocs:py-16 vocs:text-center"
++        data-v-not-found
+       >
+-        <LucideFileQuestion className="vocs:size-10" />
+-      </div>
++        <div
++          className="vocs:flex vocs:items-center vocs:justify-center vocs:size-20 vocs:rounded-full vocs:bg-surface vocs:border vocs:border-primary vocs:text-secondary vocs:mb-6"
++          data-v-not-found-icon
++        >
++          <LucideFileQuestion className="vocs:size-10" />
++        </div>
+
+-      <h1
+-        className="vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3"
+-        data-v-not-found-title
+-      >
+-        Page not found
+-      </h1>
++        <h1
++          className="vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3"
++          data-v-not-found-title
++        >
++          Page not found
++        </h1>
+
+-      <p
+-        className="vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8"
+-        data-v-not-found-description
+-      >
+-        The page you're looking for doesn't exist or has been moved.
+-      </p>
++        <p
++          className="vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8"
++          data-v-not-found-description
++        >
++          The page you're looking for doesn't exist or has been moved.
++        </p>
+
+-      <Link
+-        className="vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted"
+-        data-v-not-found-link
+-        to="/"
+-      >
+-        <LucideHome className="vocs:size-4 vocs:text-secondary" />
+-        Back to home
+-      </Link>
+-    </div>
++        <Link
++          className="vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted"
++          data-v-not-found-link
++          to="/"
++        >
++          <LucideHome className="vocs:size-4 vocs:text-secondary" />
++          Back to home
++        </Link>
++      </div>
++    </>
+   )
+ }
+
+diff --git a/src/react/internal/openapi/OpenApiPage.tsx b/src/react/internal/openapi/OpenApiPage.tsx
+index 939c937581ec434975aee43e7284c6c2d48add93..4622655fa2c046435180c35f012b6a3160837b66 100644
+--- a/src/react/internal/openapi/OpenApiPage.tsx
++++ b/src/react/internal/openapi/OpenApiPage.tsx
+@@ -20,6 +20,7 @@ import { Prose, ReferenceGroup, ReferenceOverview } from './Reference.js'
+  */
+ function OpenApiLayout(props: {
+   children: React.ReactNode
++  documentTitle?: string | undefined
+   frontmatter?: Frontmatter | undefined
+   outline?: boolean | undefined
+   width?: 'default' | 'full'
+@@ -32,7 +33,10 @@ function OpenApiLayout(props: {
+         outline: props.outline ?? true,
+       }}
+     >
+-      <Layout includeJsonLd={false}>{props.children}</Layout>
++      <Layout includeJsonLd={false} includeTitle={!props.documentTitle}>
++        {props.documentTitle ? <title>{props.documentTitle}</title> : null}
++        {props.children}
++      </Layout>
+     </MdxPageContext.Provider>
+   )
+ }
+@@ -60,8 +64,11 @@ export function OpenApiGuide(props: OpenApiGuide.Props) {
+   const description = props.description ?? props.frontmatter?.description
+
+   return (
+-    <OpenApiLayout frontmatter={{ ...props.frontmatter, description, title }} width="full">
+-      {title ? <title>{title}</title> : null}
++    <OpenApiLayout
++      documentTitle={resolveDocumentTitle(props.frontmatter, title)}
++      frontmatter={{ ...props.frontmatter, description, title }}
++      width="full"
++    >
+       <div data-v-openapi-guide>
+         {props.header && title ? (
+           <header data-v-openapi-header>
+@@ -140,8 +147,11 @@ export function OpenApiPage(props: OpenApiPage.Props) {
+     const title = props.title ?? props.frontmatter?.title ?? `${group.name} · ${ir.info.title}`
+
+     return (
+-      <OpenApiLayout frontmatter={{ ...props.frontmatter, description, title }} outline={false}>
+-        <title>{title}</title>
++      <OpenApiLayout
++        documentTitle={resolveDocumentTitle(props.frontmatter, title)}
++        frontmatter={{ ...props.frontmatter, description, title }}
++        outline={false}
++      >
+         <PlaygroundProvider mount={ir.path}>
+           <ReferenceGroup
+             ir={ir}
+@@ -160,8 +170,11 @@ export function OpenApiPage(props: OpenApiPage.Props) {
+   const title = props.title ?? props.frontmatter?.title ?? ir.info.title
+
+   return (
+-    <OpenApiLayout frontmatter={{ ...props.frontmatter, title }} width="full">
+-      <title>{title}</title>
++    <OpenApiLayout
++      documentTitle={resolveDocumentTitle(props.frontmatter, title)}
++      frontmatter={{ ...props.frontmatter, title }}
++      width="full"
++    >
+       <ReferenceOverview
+         ir={ir}
+         intro={props.intro}
+@@ -171,6 +184,11 @@ export function OpenApiPage(props: OpenApiPage.Props) {
+   )
+ }
+
++function resolveDocumentTitle(frontmatter: Frontmatter | undefined, fallback: string | undefined) {
++  const seoTitle = typeof frontmatter?.seoTitle === 'string' ? frontmatter.seoTitle.trim() : ''
++  return seoTitle || fallback
++}
++
+ export declare namespace OpenApiPage {
+   type Props = {
+     /** Mount path identifying which spec to render (e.g. `/api`). */
