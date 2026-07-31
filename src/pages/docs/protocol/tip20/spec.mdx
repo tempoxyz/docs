@@ -534,7 +534,7 @@ When creating a token, the factory performs several checks to guarantee consiste
   `transferPolicyId = 1`, `supplyCap = type(uint128).max`, `paused = false`, and `totalSupply = 0`.
 - The provided `admin` address receives `DEFAULT_ADMIN_ROLE`, enabling it to manage roles and token configurations.
 
-The factory provides two `createToken` overloads: the original 6-argument form, and a 7-argument form that additionally sets an initial [`logoURI`](#logo-uri-tip-1026) at creation (validated with the same rules as `setLogoURI`). The 6-argument overload is unchanged.
+The factory provides two `createToken` overloads: the original 6-argument form, and a 7-argument form that additionally sets an initial [`logoURI`](#logo-uri) at creation (validated with the same rules as `setLogoURI`). The 6-argument overload is unchanged.
 
 The complete `TIP20Factory` interface is defined below:
 
