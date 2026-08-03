@@ -894,12 +894,11 @@ export default defineConfig({
               },
               {
                 text: 'T8',
-                badge: { text: 'Testnet', variant: 'info' as const },
+                badge: { text: 'Latest', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t8',
               },
               {
                 text: 'T7',
-                badge: { text: 'Latest', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t7',
               },
               {
