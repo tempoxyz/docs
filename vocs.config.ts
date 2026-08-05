@@ -9,6 +9,7 @@ import { plainMarkdownComponents } from './src/lib/markdown-output'
 // Only set baseUrl in production — Vocs injects a <base> tag from this value,
 // which causes all links to resolve to the absolute URL on preview deployments.
 const baseUrl = resolveBaseUrl()
+const openApiSpecUrl = process.env.OPENAPI_SPEC_URL ?? 'https://api.tempo.xyz/openapi.json'
 
 const searchIndexFields = ['title', 'titles', 'subtitle', 'path', 'excerpt']
 const searchBoost = { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 3 }
@@ -214,7 +215,7 @@ export default defineConfig({
   openapi: [
     {
       path: '/docs/api',
-      spec: 'https://api.tempo.xyz/openapi.json',
+      spec: openApiSpecUrl,
       sidebar: {
         backLink: false,
         collapsed: true,
