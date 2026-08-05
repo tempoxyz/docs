@@ -217,7 +217,7 @@ export default defineConfig({
       spec: 'https://api.tempo.xyz/openapi.json',
       sidebar: {
         backLink: false,
-        collapsed: true,
+        collapsed: false,
         intro: [
           {
             text: 'API Console',
