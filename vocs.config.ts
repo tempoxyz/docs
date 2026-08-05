@@ -218,7 +218,6 @@ export default defineConfig({
       sidebar: {
         backLink: false,
         collapsed: true,
-        flatten: ['Data API'],
         intro: [
           {
             text: 'API Console',
