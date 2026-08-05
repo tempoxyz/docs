@@ -62,10 +62,15 @@ describe('finalizeSitemap', () => {
   })
 
   it('adds generated OpenAPI routes without lastmod in stable order', () => {
-    const result = finalizeSitemap(sitemap, [], ['billing', 'activities', 'billing'])
+    const result = finalizeSitemap(
+      sitemap,
+      [],
+      ['billing', 'activities', 'funding/quotes', 'billing'],
+    )
 
     expect(result).toContain('<loc>https://tempo.xyz/developers/docs/api/activities</loc>')
     expect(result).toContain('<loc>https://tempo.xyz/developers/docs/api/billing</loc>')
+    expect(result).toContain('<loc>https://tempo.xyz/developers/docs/api/funding/quotes</loc>')
     expect(result.indexOf('/api/activities')).toBeLessThan(result.indexOf('/api/billing'))
     expect(result).not.toMatch(
       /<loc>https:\/\/tempo\.xyz\/developers\/docs\/api\/(?:activities|billing)<\/loc>\s*<lastmod>/,

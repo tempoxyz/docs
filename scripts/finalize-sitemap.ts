@@ -8,6 +8,20 @@ const distSitemapPath = path.resolve('dist/public/sitemap.xml')
 const vercelSitemapPath = path.resolve('.vercel/output/static/sitemap.xml')
 const openApiMarkdownPath = path.resolve('dist/public/assets/md/docs/api')
 
+async function findMarkdownRouteSlugs(directory: string, root = directory): Promise<string[]> {
+  const entries = await fs.readdir(directory, { withFileTypes: true })
+  const slugs = await Promise.all(
+    entries.map(async (entry) => {
+      const entryPath = path.join(directory, entry.name)
+      if (entry.isDirectory()) return findMarkdownRouteSlugs(entryPath, root)
+      if (!entry.isFile() || !entry.name.endsWith('.md')) return []
+      const relativePath = path.relative(root, entryPath).slice(0, -'.md'.length)
+      return [relativePath.split(path.sep).join('/')]
+    }),
+  )
+  return slugs.flat()
+}
+
 function getGitLastmod(filePath: string): string | undefined {
   try {
     const timestamp = execFileSync('git', ['log', '-1', '--format=%cI', '--', filePath], {
@@ -49,17 +63,12 @@ const blogPosts = getBlogPostSlugs().map((slug) => ({
   lastmod: getGitLastmod(`blogs/${slug}.md`),
 }))
 
-const openApiRouteSlugs = await fs
-  .readdir(openApiMarkdownPath, { withFileTypes: true })
-  .then((entries) =>
-    entries
-      .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
-      .map((entry) => entry.name.slice(0, -'.md'.length)),
-  )
-  .catch((error: NodeJS.ErrnoException) => {
+const openApiRouteSlugs = await findMarkdownRouteSlugs(openApiMarkdownPath).catch(
+  (error: NodeJS.ErrnoException) => {
     if (error.code === 'ENOENT') return []
     throw error
-  })
+  },
+)
 
 const wroteDistSitemap = await writeFinalizedSitemap(distSitemapPath, blogPosts, openApiRouteSlugs)
 
