@@ -15,8 +15,7 @@ import {
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
-import { Button, ExplorerLink, Logout, Step } from '../Demo'
-import { SignInButtons } from '../EmbedPasskeys'
+import { Button, ExplorerLink, Login, Logout, Step } from '../Demo'
 import { pathUsd } from '../tokens'
 import { useStickyStepCompletion } from './useStickyStepCompletion.ts'
 
@@ -74,7 +73,7 @@ export function WithdrawFromZone() {
       <Step
         active={!connected}
         completed={connected}
-        actions={connected ? <Logout /> : <SignInButtons />}
+        actions={connected ? <Logout /> : <Login />}
         error={undefined}
         number={1}
         title="Create or use a passkey account on the public chain."
