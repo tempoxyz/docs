@@ -1,0 +1,131 @@
+---
+title: Fee estimator methodology
+description: How the tempo.xyz transaction fee estimator turns gas figures and the TIP-1010 base fee into USD costs, including the /api/fee-estimate JSON contract.
+---
+
+# Fee estimator methodology
+
+The [transaction fee estimator](https://tempo.xyz/tools/fee-estimator/) on tempo.xyz estimates what a transaction costs on Tempo in USD. This page documents the fee formula, the gas figures and their provenance, the live base fee refresh, and the public `/api/fee-estimate` endpoint. A markdown mirror of the tool is available at [tempo.xyz/tools/fee-estimator.md](https://tempo.xyz/tools/fee-estimator.md).
+
+## What the fee estimator computes
+
+The estimator prices three operations in network fees:
+
+- A single TIP-20 transfer.
+- A TIP-20 transfer with memo.
+- A batch of `N` TIP-20 transfers, with `N` clamped to 1 through 10,000.
+
+It also converts between attodollars, microdollars, and US dollars. Without JavaScript, the page shows figures computed at the documented base fee. With JavaScript, it refreshes the base fee from a live `eth_gasPrice` query against `https://rpc.tempo.xyz` and labels the source and fetch time.
+
+The result is the network fee for including and executing the transaction. Per the [fee specification](/docs/protocol/fees/spec-fee), the protocol deducts the maximum fee up front and refunds unused gas after execution, so the amount shown reflects the gas the transaction actually uses. Fees are paid directly in a supported USD-denominated stablecoin; Tempo has no native token.
+
+## Fee formula and units
+
+The estimator uses the formula from the [fee specification](/docs/protocol/fees/spec-fee):
+
+```
+fee = ceil(base_fee × gas_used ÷ 10^12) microdollars
+```
+
+`base_fee` is denominated in attodollars (10^-18 USD) per gas, and one microdollar (10^-6 USD) equals one TIP-20 token unit.
+
+| Unit | Relationship |
+| --- | --- |
+| 1 microdollar | `10^12` attodollars, or one TIP-20 token unit (TIP-20 tokens have 6 decimal places) |
+| 1 US dollar | 1,000,000 microdollars, or `10^18` attodollars |
+| Fee for one TIP-20 transfer | `10^15` attodollars = 1,000 microdollars = $0.001 |
+
+Tempo quotes per-gas prices in attodollars because they are far smaller than stablecoins can represent: the smallest unit of a 6-decimal TIP-20 token is one microdollar, while the base fee is $0.00000002 per gas. When a transaction settles, the protocol converts the total fee back to token units by dividing by `10^12` and rounding up.
+
+## Base fee provenance
+
+The static base fee is 20 billion attodollars per gas (`2 × 10^10`), from the [TIP-1010](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1010.md) gas parameters listed in the [fee specification](/docs/protocol/fees/spec-fee). Tempo cross-checked this value against a live `eth_gasPrice` query on `rpc.tempo.xyz` (which returned `0x4a817c800`) on July 5, 2026.
+
+Tempo currently uses a fixed base fee rather than a variable base fee as in EIP-1559, so the base cost of a transaction does not float with demand. Approximately 94% of blockspace is reserved for payment transactions, and an optional priority fee lets a transaction bid for faster inclusion during periods of high demand. Priority fees are excluded from the estimate.
+
+:::info[Dynamic base fee in T7]
+The [T7 network upgrade](/docs/protocol/upgrades/t7) introduces a dynamic base fee that can fall when block gas usage is below target. The estimator and the API prefer the live RPC value over the static TIP-1010 fallback, so they track the network as fee parameters change.
+:::
+
+## Gas figures and their provenance
+
+| Operation | Gas used | Provenance |
+| --- | --- | --- |
+| TIP-20 transfer | ~50,000 | Documented. The fee specification states that a standard TIP-20 transfer (~50,000 gas) costs approximately 1,000 microdollars at the base fee. |
+| TIP-20 transfer with memo | ~51,000 | Estimate. `transferWithMemo` emits one additional event carrying a fixed 32-byte memo. Tempo publishes no separate gas figure for it, so the estimator adds a small allowance to the documented transfer cost. |
+| Batch of `N` transfers | `N × 50,000` | Conservative estimate. Batched Tempo Transactions share per-transaction overhead, so actual gas per transfer is typically somewhat lower. Very large payout runs may span multiple transactions; the estimate scales linearly either way. |
+
+## What the fee estimate excludes
+
+The estimate covers Tempo network fees only:
+
+- Optional priority fees.
+- On-ramp and off-ramp costs, which vary by provider.
+- FX costs for currency conversion.
+
+For context, the tool compares the network fee against Chase's published Additional Banking Services and Fees schedule (effective June 14, 2026): $25 for an online domestic wire, $35 banker-assisted domestic, $40 for a consumer online USD international wire, and $50 banker-assisted international. A wire fee is the bank's end-to-end price for the transfer, while the Tempo figure is the on-chain network fee alone.
+
+## Fee estimate API
+
+The same estimate is available as a public JSON endpoint. The endpoint fetches the live base fee (`eth_gasPrice`) from the public Tempo RPC server-side with a 3-second timeout and falls back to the documented TIP-1010 value when the RPC is unreachable.
+
+```bash
+curl "https://tempo.xyz/api/fee-estimate/?operation=batch&count=250"
+```
+
+### Fee estimate request parameters
+
+| Parameter | Values | Behavior |
+| --- | --- | --- |
+| `operation` | `transfer`, `memo`, `batch` | Defaults to `transfer`. Unknown values return HTTP `400` with an `error` field. |
+| `count` | `1` to `10000` | Batch only; ignored for other operations. Clamped into range; defaults to `1`. |
+
+### Fee estimate response fields
+
+```json
+{
+  "operation": "batch",
+  "count": 250,
+  "gasUsed": 12500000,
+  "gasNote": "Conservative estimate at N x 50,000 gas. Batched Tempo Transactions share per-transaction overhead, so actual gas per transfer is typically somewhat lower.",
+  "basefeeAttodollars": "20000000000",
+  "feeMicrodollars": "250000",
+  "feeUsd": 0.25,
+  "formula": "ceil(base_fee_attodollars * gas_used / 10^12) microdollars",
+  "source": "live eth_gasPrice from https://rpc.tempo.xyz",
+  "timestamp": "2026-07-05T00:00:00.000Z",
+  "docs": "https://tempo.xyz/developers/docs/protocol/fees/spec-fee"
+}
+```
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `operation` | string | Operation that was priced. |
+| `count` | number | Effective transfer count after clamping. |
+| `gasUsed` | number | Total gas for the operation. |
+| `gasNote` | string | Provenance note for the gas figure (documented versus estimated). |
+| `basefeeAttodollars` | string | Base fee used, in attodollars per gas. Serialized as a string to preserve integer precision. |
+| `feeMicrodollars` | string | Total fee in microdollars (TIP-20 token units), serialized as a string. |
+| `feeUsd` | number | Total fee in US dollars. |
+| `formula` | string | The fee formula applied. |
+| `source` | string | Either the live `eth_gasPrice` from `https://rpc.tempo.xyz` or the static TIP-1010 value with its check date. |
+| `timestamp` | string | ISO 8601 time the response was generated. |
+| `docs` | string | Link to the fee specification. |
+
+### Fee estimate caching and CORS
+
+Responses set `Cache-Control: public, max-age=60, s-maxage=300`; short caching is safe because the base fee is set at the protocol level. Responses also set `Access-Control-Allow-Origin: *`, so wallets, docs, and tutorials can call the endpoint directly from a browser.
+
+## Fee data refresh cadence
+
+- The page and the API prefer the live `eth_gasPrice` value at request time, so estimates track the network automatically.
+- The static fallback (20 billion attodollars per gas) and the gas figures were checked against TIP-1010, the fee specification, and the live RPC on July 5, 2026. Re-check them quarterly and at each network upgrade; the T7 upgrade changes the base fee model.
+- The bank wire comparison uses Chase's schedule effective June 14, 2026. Re-check when the bank publishes a new schedule.
+
+## Fee estimator sources
+
+- [Tempo fee specification](/docs/protocol/fees/spec-fee) (fee formula, units, gas per TIP-20 transfer, payment lane allocation)
+- [Transaction fees documentation](/docs/protocol/fees) (fee model, supported fee tokens)
+- [TIP-1010](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1010.md) (base fee gas parameters)
+- Tempo public RPC, `https://rpc.tempo.xyz` (live `eth_gasPrice`)
+- [Chase, Additional Banking Services and Fees schedule](https://www.chase.com/content/dam/chase-ux/documents/personal/checking/ABSF-en.pdf) (wire fee comparison, effective June 14, 2026)
