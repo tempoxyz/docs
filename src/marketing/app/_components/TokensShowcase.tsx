@@ -310,7 +310,7 @@ export default function TokensShowcase() {
             <Button href="/docs/protocol/tip20/overview" variant="primary">
               Explore TIP-20
             </Button>
-            <Button href="/docs/guide/issuance/create-a-stablecoin" arrow>
+            <Button href="/developers/docs/guide/issuance/create-a-stablecoin" arrow>
               Create a stablecoin
             </Button>
           </div>
