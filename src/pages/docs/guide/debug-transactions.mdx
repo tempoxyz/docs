@@ -8,6 +8,14 @@ description: Simulate a Tempo transaction before submitting it, then inspect exe
 
 Use the [Tempo transaction debugger](https://explore.tempo.xyz/simulate) to test a transaction against current Mainnet state without broadcasting it. Simulate a transaction to diagnose reverts or verify a contract interaction.
 
+:::info[What simulations show]
+- **Gas flame graphs** show which calls consume the most gas.
+- **State changes** show how balances and contract storage would change.
+- **Event logs** show the events the transaction would emit.
+- **Call traces** show the transaction's execution path across contracts.
+- **Revert errors** identify the call and error that caused a failure.
+:::
+
 ## Run a transaction simulation
 
 :::::steps
