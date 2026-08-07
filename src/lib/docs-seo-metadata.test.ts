@@ -89,7 +89,7 @@ describe('docs SEO metadata', () => {
           /^seoTitle:/m.test(source) && path.relative(docsRoot, file) !== 'api/reference.mdx',
       )
 
-    expect(auditedPages).toHaveLength(106)
+    expect(auditedPages).toHaveLength(107)
 
     for (const { file, source } of auditedPages) {
       const title = frontmatterString(source, 'title')

@@ -600,6 +600,10 @@ export default defineConfig({
             link: '/docs/guide/tempo-transaction',
           },
           {
+            text: 'Debug Transactions',
+            link: '/docs/guide/debug-transactions',
+          },
+          {
             text: 'Get Testnet Faucet Funds',
             link: '/docs/quickstart/faucet',
           },
@@ -1216,6 +1220,7 @@ export default defineConfig({
       '/docs/guide/machine-payments': buildSidebar,
       '/docs/quickstart': integrateSidebar,
       '/docs/guide/tempo-transaction': integrateSidebar,
+      '/docs/guide/debug-transactions': integrateSidebar,
       '/docs/guide/bridge-layerzero': integrateSidebar,
       '/docs/guide/bridge-bungee': integrateSidebar,
       '/docs/guide/bridge-relay': integrateSidebar,
