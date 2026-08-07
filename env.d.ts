@@ -24,3 +24,10 @@ interface ImportMetaEnv extends EnvironmentVariables {}
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+declare module 'virtual:graphite-related-docs' {
+  import type { RelatedDocsManifest } from './src/lib/graphite-related-docs'
+
+  const manifest: RelatedDocsManifest
+  export default manifest
+}
