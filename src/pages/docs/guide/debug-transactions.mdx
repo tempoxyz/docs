@@ -6,36 +6,26 @@ description: Simulate a Tempo transaction before submitting it, then inspect exe
 
 # Simulate and debug Tempo transactions
 
-Use the [Tempo transaction debugger](https://explore.tempo.xyz/simulate) to test a transaction against current Mainnet state without broadcasting it. The simulation shows what the transaction would do, which helps you diagnose reverts and verify contract interactions before signing.
+Use the [Tempo transaction debugger](https://explore.tempo.xyz/simulate) to test a transaction against current Mainnet state without broadcasting it. Simulate a transaction to diagnose reverts or verify a contract interaction.
 
 ## Run a transaction simulation
 
 :::::steps
 
-### Open the transaction debugger
+### Enter the transaction
 
-Go to [explore.tempo.xyz/simulate](https://explore.tempo.xyz/simulate).
-
-### Enter the transaction request
-
-Provide the sender, recipient, value, and calldata your application would submit. Use `0` for value when the call does not transfer value.
+Open [explore.tempo.xyz/simulate](https://explore.tempo.xyz/simulate), then provide the sender, recipient, value, and calldata.
 
 ### Simulate the transaction
 
-Run the simulation. The debugger executes the request against current chain state without submitting it to Tempo.
+Run the simulation against current chain state.
 
 ### Inspect the execution
 
-Review the decoded calls, balance changes, events, execution trace, gas use, and any revert details. Confirm that the addresses, token amounts, and contract calls match the intended result before you broadcast the transaction.
+Review the decoded calls, balance changes, events, execution trace, gas use, and any revert details.
 
 :::::
 
 ## Diagnose a failed transaction
 
-Start with the first reverted call in the execution trace. Its decoded error or return data usually identifies the contract and condition that rejected the transaction. Then check balance changes and events to verify which operations ran before the revert.
-
-If you need a local or command-line workflow, use [`cast run`](/docs/sdk/foundry#interact-and-debug-tempo-contracts-with-cast) to replay a transaction by hash against a Tempo RPC endpoint.
-
-## Protect sensitive transaction data
-
-Simulations do not broadcast transactions, but the request is sent to the debugger service. Do not enter private keys, signatures, secrets, or confidential calldata. A transaction simulation only reflects chain state at the time it runs, so state-dependent results can change before submission.
+Start with the first reverted call in the execution trace. Its decoded error or return data usually identifies the contract and condition that rejected the transaction.
