@@ -18,7 +18,7 @@ Use the hosted MCP server at `https://mcp.tempo.xyz` first. It exposes these too
 | `read_page` | Read one cleaned documentation page |
 | `code` | Run multi-step documentation lookups |
 
-If a user reports stale, missing, or confusing Tempo docs while using MCP context, send sanitized feedback to `https://tempo.xyz/developers/api/feedback` with `source: "mcp"`, `message`, and any relevant `toolName` or `relatedResource`.
+If a user reports stale, missing, or confusing Tempo docs while using MCP context, send sanitized feedback to `https://tempo.xyz/developers/api/feedback` with `source: "mcp"`, sentiment, client `message`, and any relevant `toolName` or `relatedResource`.
 
 ## Direct fallbacks
 
