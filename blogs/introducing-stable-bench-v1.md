@@ -6,13 +6,13 @@ category: technical
 authors: "Parv Ahuja / Brendan Ryan"
 ---
 
-*`stable-bench-v1` measures whether coding agents can build stablecoin applications on Tempo using public documentation and tools. It gives us a repeatable way to understand how agents use our developer surface and where it needs to improve.*
+*[`stable-bench-v1`](https://github.com/tempoxyz/tempo-evals) measures whether coding agents can build stablecoin applications on Tempo using public documentation and tools. It gives us a repeatable way to understand how agents use our developer surface and where it needs to improve.*
 
 Since the start of 2026 we have observed a marked change in interaction patterns with Tempo’s developer documentation. While in the past, developers may have read through multiple guides or clicked through interactive examples to understand how Tempo works, increasingly our primary entrypoint is a developer directly prompting `claude`, `codex` or another coding agent to do research and development on their behalf -- sometimes never even opening the docs themselves!
 
 On an average day in July, agents drive over 70% of our documentation traffic. While we eagerly adopted best practices like automatic markdown conversion and `llms.txt`, we previously lacked visibility into whether these changes improved the agent experience.
 
-To address this, we built `stable-bench-v1`, an agent evaluation suite that measures:
+To address this, we built [`stable-bench-v1`](https://github.com/tempoxyz/tempo-evals), an agent evaluation suite that measures:
 
 - **Efficacy:** Can an agent produce a working integration?
 - **Quality:** Does the integration use current Tempo primitives and follow best practices?
@@ -24,7 +24,7 @@ The benchmark simulates integration sessions and records concrete scores and tra
 
 Most coding benchmarks run in a sandboxed environment and end on some deterministic output or completion of a test suite – two paradigms which are easy to test and have scaled well. With Tempo, we can go one step further allowing agents to actually interact with a live or sandboxed Tempo environment and write programs which have measurable side-effects.
 
-`stable-bench-v1` packages each scenario as a versioned task with four parts:
+[`stable-bench-v1`](https://github.com/tempoxyz/tempo-evals) packages each scenario as a versioned task with four parts:
 
 - **Instruction:** A developer's request to the agent.
 - **Environment:** The runtime, credentials, documentation, and tools the agent can use.
@@ -72,7 +72,7 @@ To address this, we shipped a novel extension to our eval environment which runs
 
 ## Early results
 
-Early `stable-bench-v1` runs show how different agents interact with our documentation:
+Early [`stable-bench-v1`](https://github.com/tempoxyz/tempo-evals) runs show how different agents interact with our documentation:
 
 - Frontier models (GPT 5.6, Claude Fable, and Claude Opus) produce high-quality implementations that nearly saturate the benchmark, but their token usage and turn counts vary widely.
 - Smaller models such as Claude Haiku often struggle to produce working, high-quality integrations. They hallucinate concepts and write manual shims over legacy libraries.
@@ -84,15 +84,15 @@ We report public benchmark results for Claude and Codex because they account for
 
 ## What comes next
 
-We are actively using `stable-bench-v1` to shape our understanding of our developer experience and best practices for documentation. Using this as a baseline we are excited to ship:
+We are actively using [`stable-bench-v1`](https://github.com/tempoxyz/tempo-evals) to shape our understanding of our developer experience and best practices for documentation. Using this as a baseline we are excited to ship:
 
 - Continuous benchmarks that catch documentation regressions as coding agents improve and we update our documentation.
-- Auto-research loops that ingest `stable-bench-v1` traces and automatically improve Tempo documentation and MCP surfaces.
+- Auto-research loops that ingest [`stable-bench-v1`](https://github.com/tempoxyz/tempo-evals) traces and automatically improve Tempo documentation and MCP surfaces.
 - Additional benchmarks that use open models and harnesses, such as Kimi and OpenCode.
 
 ## An invite for collaboration
 
-`stable-bench-v1` is open source today, alongside a suite of other evals in the [tempo-evals](https://github.com/tempoxyz/tempo-evals) repository. We welcome contributions from the ML research community, collaborators working on developer documentation, and any other eval practitioners.
+[`stable-bench-v1`](https://github.com/tempoxyz/tempo-evals) is open source today, alongside a suite of other evals in the [tempo-evals](https://github.com/tempoxyz/tempo-evals) repository. We welcome contributions from the ML research community, collaborators working on developer documentation, and any other eval practitioners.
 
 ## References
 
