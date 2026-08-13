@@ -326,7 +326,7 @@ const STORIES: Story[] = [
     spec: feeTokenSpec,
     ctas: [
       { label: 'Explore TIP-20', href: '/docs/protocol/tip20/overview', primary: true },
-      { label: 'Issue a token', href: '/docs/guide/issuance/create-a-stablecoin' },
+      { label: 'Issue a token', href: '/developers/docs/guide/issuance/create-a-stablecoin' },
     ],
     panelTitle: 'fee-token.ts',
     variants: feeTokenCodeVariants,
