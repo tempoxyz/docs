@@ -77,4 +77,8 @@ describe('vocs.config ogImageUrl stays in sync with src/lib/og-sections', () => 
   it('omits the unused description param', () => {
     expect(ogImageUrl('/guide/payments/send-a-payment')).not.toContain('description')
   })
+
+  it('uses a clean all-caps title for the blog index thumbnail', () => {
+    expect(param(ogImageUrl('/blog'), 'title')).toBe('BLOG')
+  })
 })

@@ -210,7 +210,12 @@ export default defineConfig({
       v: '3',
     }).toString()
 
-    return `${urlBase}/api/og?title=%title&${extra}`
+    // The HBSet display font's mixed-case "Blog" wordmark has awkward
+    // spacing at OG scale. Keep the page title sentence-cased, but use the
+    // cleaner all-caps treatment in the blog index thumbnail.
+    const imageTitle = docsPath === '/blog' ? 'BLOG' : '%title'
+
+    return `${urlBase}/api/og?title=${imageTitle}&${extra}`
   },
   openapi: [
     {

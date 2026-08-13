@@ -7,6 +7,7 @@ import { OgImage } from '../src/pages/_api/api/og-image'
 
 export const goldenCases = [
   { name: 'short-title', title: 'Tempo', section: 'BUILD', subsection: '' },
+  { name: 'blog-index-title', title: 'BLOG', section: 'BLOG', subsection: '' },
   {
     name: 'two-line-title',
     title: 'Introducing stable-bench-v1',
