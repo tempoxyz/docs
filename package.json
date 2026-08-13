@@ -64,7 +64,7 @@
     "unified": "^11.0.5",
     "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",
-    "viem": "^2.54.6",
+    "viem": "https://pkg.pr.new/viem@729d59eb43b6d92461346d1d733af0d84f67386c",
     "vocs": "2.8.5",
     "wagmi": "3.6.20",
     "waku": "^1.0.0-beta.6",
