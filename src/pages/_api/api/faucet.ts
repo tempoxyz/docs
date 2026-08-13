@@ -53,18 +53,36 @@ async function fund(address: `0x${string}`, headers: Record<string, string>): Pr
   }
 }
 
+function isAllowedPreviewOrigin(origin: string): boolean {
+  try {
+    const { hostname, protocol } = new URL(origin)
+    if (protocol !== 'https:') return false
+    // Hostname suffix — not substring — so attacker.example containing
+    // "vercel.app" in the path/host cannot spoof preview CORS.
+    return (
+      hostname === 'tempo.xyz' ||
+      hostname.endsWith('.tempo.xyz') ||
+      hostname.endsWith('.vercel.app')
+    )
+  } catch {
+    return false
+  }
+}
+
 function cors(origin: string | null): Record<string, string> {
-  const allowedOrigins = ['https://tempo.xyz', 'https://docs.tempo.xyz']
-
-  if (origin?.includes('vercel.app')) allowedOrigins.push(origin)
-  if (process.env.NODE_ENV === 'development') allowedOrigins.push('http://localhost:5173')
-
   const headers: Record<string, string> = {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, x-api-token',
   }
 
-  if (origin && allowedOrigins.includes(origin)) headers['Access-Control-Allow-Origin'] = origin
+  if (process.env.NODE_ENV === 'development' && origin === 'http://localhost:5173') {
+    headers['Access-Control-Allow-Origin'] = origin
+    return headers
+  }
+
+  if (origin && isAllowedPreviewOrigin(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin
+  }
 
   return headers
 }
