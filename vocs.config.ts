@@ -259,6 +259,10 @@ export default defineConfig({
             link: '/docs/api/transactions-and-transfers',
           },
           {
+            text: 'Activity Feeds',
+            link: '/docs/api/activity-feeds',
+          },
+          {
             text: 'JSON-RPC API',
             link: '/docs/api/json-rpc',
           },

@@ -1,0 +1,57 @@
+---
+title: "Build an activity feed"
+seoTitle: "Tempo API Activity Feeds | Tempo Docs"
+description: Build account and transaction history with classified asset deposits, share redemptions, transfers, swaps, and other Tempo activity.
+---
+
+# Build an activity feed
+
+Use the Tempo API activity endpoints to turn transaction logs into entries suitable for account history, reconciliation, and status displays.
+
+## Choose an activity endpoint
+
+Use [`GET /v1/addresses/{address}/activities`](/docs/api/activities#list-address-activities) for a paginated account feed. Use [`GET /v1/transactions/{transactionHash}/activities`](/docs/api/activities#list-transaction-activities) when you already know the transaction and need its classified effects.
+
+Each entry includes a stable `id`, `transactionHash`, `timestamp`, `type`, `title`, `perspective`, and type-specific `data`. Set `logs=true` when you also need every raw transaction log. Unknown transactions include their logs automatically.
+
+## Asset and share activity types
+
+Vault and router transactions produce the following activity types:
+
+| Type | Display meaning | Key data |
+| --- | --- | --- |
+| `assets-deposited` | Assets were deposited into a vault | `assets`, `shares`, `caller`, `receiver`, `vault` |
+| `assets-withdrawn` | An exact asset amount was withdrawn | `assets`, `sharesBurned`, `caller`, `receiver`, `vault` |
+| `private-assets-deposited` | Private assets were deposited through a router | `inputAmount`, `inputToken`, `assets`, `shares`, `actionId`, `zoneDepositHash` |
+| `private-shares-redeemed` | Shares were privately redeemed through a router | `shares`, `assets`, `outputAmount`, `outputToken`, `actionId`, `zoneDepositHash` |
+| `shares-deposited` | Venue shares were deposited into a vault | `requestedVenueShares`, `receivedEngineShares`, `shares`, `caller`, `receiver`, `vault` |
+| `shares-redeemed` | Shares were redeemed for assets | `shares`, `assets`, `caller`, `receiver`, `vault` |
+| `shares-redemption-cancelled` | A pending share redemption was cancelled | `requestId`, `shares`, `receiver`, `vault`, `status` |
+| `shares-redemption-finalized` | A pending share redemption completed | `requestId`, `shares`, `asset`, `assets`, `receiver`, `vault`, `status` |
+| `shares-redemption-requested` | An asynchronous share redemption started | `requestId`, `shares`, `requester`, `receiver`, `vault`, `status` |
+
+Amounts use decimal strings in the token or share unit's smallest denomination. Addresses and hashes are lowercase hexadecimal strings.
+
+## Track asynchronous redemptions
+
+Match `shares-redemption-requested`, `shares-redemption-finalized`, and `shares-redemption-cancelled` entries by `requestId`. Use `status` to render the lifecycle state:
+
+- `pending` for a requested redemption
+- `completed` for a finalized redemption
+- `cancelled` for a cancelled redemption
+
+The feed keeps each lifecycle transition as a separate entry. This preserves the transaction hash and timestamp for every state change.
+
+## Handle private router activity
+
+A private router transaction also emits underlying public vault events. The API returns only `private-assets-deposited` or `private-shares-redeemed` for that transaction, preventing duplicate feed entries.
+
+Private entries include the router's `actionId` and `zoneDepositHash`. Use these fields to correlate the public router action with the corresponding private-zone operation.
+
+## Render account history
+
+Use `title` for the default row label and `timestamp` for ordering. Use `perspective` to distinguish transactions the account initiated from activity initiated by another account.
+
+For redemptions and deposits, show both `assets` and `shares` when space allows. This makes the exchange between vault assets and shares explicit. Preserve `requestId` in detail views so support and reconciliation workflows can trace asynchronous redemptions.
+
+Follow `nextCursor` until it is `null`. Do not construct or modify cursors; pass the returned value to the next request unchanged.
