@@ -125,7 +125,7 @@ index 06cc466393643245bf0dfcc0c946e013c717a75c..e5b39e12c9e2017238a9744412943e2e
      // Overview / landing page.
      const title = props.title ?? props.frontmatter?.title ?? ir.info.title;
 -    return (_jsxs(OpenApiLayout, { frontmatter: { ...props.frontmatter, title }, width: "full", children: [_jsx("title", { children: title }), _jsx(ReferenceOverview, { ir: ir, intro: props.intro, endpoints: props.endpoints ? _jsx(Endpoints, { path: ir.path || undefined }) : undefined })] }));
-+    return (_jsx(OpenApiLayout, { documentTitle: resolveDocumentTitle(props.frontmatter, title), frontmatter: { ...props.frontmatter, title }, width: "full", children: _jsx(ReferenceOverview, { ir: ir, intro: props.intro, endpoints: props.endpoints ? _jsx(Endpoints, { path: ir.path || undefined }) : undefined }) }));
++    return (_jsx(OpenApiLayout, { documentTitle: resolveDocumentTitle(props.frontmatter, title), frontmatter: { ...props.frontmatter, title }, width: "default", children: _jsx(ReferenceOverview, { ir: ir, intro: props.intro, endpoints: props.endpoints ? _jsx(Endpoints, { path: ir.path || undefined }) : undefined }) }));
 +}
 +function resolveDocumentTitle(frontmatter, fallback) {
 +    const seoTitle = typeof frontmatter?.seoTitle === 'string' ? frontmatter.seoTitle.trim() : '';
@@ -349,7 +349,7 @@ index 939c937581ec434975aee43e7284c6c2d48add93..4622655fa2c046435180c35f012b6a31
 +    <OpenApiLayout
 +      documentTitle={resolveDocumentTitle(props.frontmatter, title)}
 +      frontmatter={{ ...props.frontmatter, title }}
-+      width="full"
++      width="default"
 +    >
        <ReferenceOverview
          ir={ir}
