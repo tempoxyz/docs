@@ -62,13 +62,3 @@ At activation, T10 installs the factory and three shared runtimes atomically:
 | `ZonePortal` implementation | `0x5AD1000000000000000000000000000000000000` |
 | Zone verifier | `0x5a56000000000000000000000000000000000000` |
 | Zone messenger | `0x5A4d000000000000000000000000000000000000` |
-
-## Integration impact
-
-### For zone operators and applications
-
-- Create zones through the native `ZoneFactory` address.
-- Budget at least 15,000,000 gas for `createZone`.
-- Ensure the initial TIP-20 token has a TIP-403 policy binding.
-- Read the created portal address from factory state or `ZoneCreated` rather than predicting deployment addresses.
-- Use `isZonePortal` when validating whether an address is a registered portal.
