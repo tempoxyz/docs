@@ -1,0 +1,87 @@
+---
+title: T10 Network Upgrade
+description: T10 enshrines ZoneFactory and installs canonical ZonePortal runtimes for native zone creation.
+---
+
+# T10 Network Upgrade
+
+T10 makes zone creation a native Tempo protocol operation. It enshrines `ZoneFactory`, assigns each zone a deterministic `ZonePortal` address, and installs canonical shared runtimes for portals, verification, and messaging.
+
+For most partners, T10 matters if you operate a node, create Tempo Zones, or integrate directly with `ZoneFactory` and `ZonePortal`.
+
+:::info[T10 status]
+T10 is scheduled for testnet on August 20, 2026 at 14:00 UTC and mainnet on August 21, 2026 at 14:00 UTC. The forthcoming v1.13.0 release is required; see the [Network Upgrades and Releases table](/docs/guide/node/network-upgrades#node-operator-updates) for the current node-operator release status.
+:::
+
+## Timeline
+
+| Network | Date | Unix timestamp |
+|---------|------|----------------|
+| Testnet | August 20, 2026 at 14:00 UTC | `1787234400` |
+| Mainnet | August 21, 2026 at 14:00 UTC | `1787320800` |
+
+Node operators must run v1.13.0 before T10 activates on their network to stay synced.
+
+## T10 upgrade overview
+
+T10 introduces three related protocol changes:
+
+- **Native zone creation.** `ZoneFactory` becomes a precompile at `0x5AF2000000000000000000000000000000000000`.
+- **Deterministic zone portals.** Every new zone receives a `ZonePortal` account whose address encodes its zone ID.
+- **Protocol-managed shared runtimes.** The hardfork installs canonical portal, verifier, and messenger runtimes at reserved addresses.
+
+Read the [TIP-1091 specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1091.md).
+
+## Native `ZoneFactory`
+
+Zone creation moves from a separately deployed factory contract into the Tempo protocol. The native factory retains the canonical registry behavior, including sequential zone IDs, `zones`, `nextZoneId`, `isZonePortal`, and the `ZoneCreated` event.
+
+The initial T10 rollout is permissioned. Only the factory owner can call `createZone`; a later hardfork can open zone creation. A successful `createZone` call consumes at least 15,000,000 gas.
+
+An initial TIP-20 token must have an explicit [TIP-403 policy binding](/docs/protocol/upgrades/t9) before the factory can create a zone with it.
+
+## Deterministic `ZonePortal` accounts
+
+Each zone receives a portal at a reserved vanity address. The high 12 bytes are the fixed prefix `0x5AD000000000000000000000`, and the low 8 bytes contain the zone ID in big-endian form. For example, zone ID `1` maps to:
+
+```text
+0x5AD0000000000000000000000000000000000001
+```
+
+Use `ZoneFactory.isZonePortal(address)` to validate portal addresses instead of reproducing the prefix and zone-ID checks in application code.
+
+Each portal is an ERC-1167 proxy to a shared, protocol-managed implementation. Portals keep independent state while using the same canonical logic.
+
+## Protocol-managed Zone runtimes
+
+At activation, T10 installs the factory and three shared runtimes atomically:
+
+| Component | Address |
+|-----------|---------|
+| `ZoneFactory` | `0x5AF2000000000000000000000000000000000000` |
+| `ZonePortal` implementation | `0x5AD1000000000000000000000000000000000000` |
+| Zone verifier | `0x5a56000000000000000000000000000000000000` |
+| Zone messenger | `0x5A4d000000000000000000000000000000000000` |
+
+The factory owner cannot replace these runtimes. Any future runtime replacement requires another hardfork. Because every portal delegates to the shared implementation address, a future replacement upgrades all existing portals and must preserve their storage layout.
+
+## Integration impact
+
+### For node operators
+
+- Upgrade to v1.13.0 before activation on each network.
+- Nodes that do not upgrade fall out of consensus when T10 activates.
+
+### For zone operators and applications
+
+- Create zones through the native `ZoneFactory` address.
+- Budget at least 15,000,000 gas for `createZone`.
+- Ensure the initial TIP-20 token has a TIP-403 policy binding.
+- Read the created portal address from factory state or `ZoneCreated` rather than predicting deployment addresses.
+- Use `isZonePortal` when validating whether an address is a registered portal.
+
+### For indexers and infrastructure
+
+- Index the native factory at its reserved address.
+- Continue consuming `ZoneCreated` and the canonical factory registry.
+- Treat portal accounts as ERC-1167 proxies with independent storage and a shared implementation.
