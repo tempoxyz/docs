@@ -1,12 +1,13 @@
 ---
-title: Wallet Developer Guide
+title: "Integrating wallet support for Tempo"
+seoTitle: "Wallet Developer Guide | Tempo Docs"
 description: Integrate Tempo into your wallet. Use Tempo Transactions for fee token selection, fee sponsorship, batching, and concurrent execution.
 showOutline: 1
 ---
 
 import { Cards, Card } from 'vocs'
 
-# Wallet Developer Guide
+# Integrating wallet support for Tempo
 
 Tempo is EVM-compatible, so standard transactions work out of the box. However, Tempo has [no native gas token](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks), which means wallet behaviors like balance display and gas quoting need adjustment.
 
@@ -137,7 +138,7 @@ See [Fee Token Preferences](/docs/protocol/fees/spec-fee#fee-token-preferences) 
 Tempo provides a public tokenlist service that hosts token and network assets. You can pull these assets from our public tokenlist service to display in your UI.
 
 - **GitHub**: [tempoxyz/tempo-apps/apps/tokenlist](https://github.com/tempoxyz/tempo-apps/tree/main/apps/tokenlist)
-- **Tokenlist JSON**: [tempoxyz.github.io/tempo-apps/42431/tokenlist.json](https://tempoxyz.github.io/tempo-apps/42431/tokenlist.json)
+- **Tokenlist JSON**: [tokenlist.tempo.xyz/list/42431](https://tokenlist.tempo.xyz/list/42431)
 
 ::::
 

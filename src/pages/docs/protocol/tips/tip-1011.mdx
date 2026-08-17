@@ -54,16 +54,16 @@ This TIP intentionally adds a narrow calldata rule (first ABI `address` argument
 
 ---
 
-# Specification
+## Specification
 
-## Extended Data Structures
+### Extended Data Structures
 
 Conventions used in this section:
 
 1. Protocol/RLP structs are written with Rust-like `Option<...>` notation.
 2. Solidity ABI structs are listed separately where ABI cannot directly represent protocol `Option` semantics.
 
-### TokenLimit
+#### TokenLimit
 
 **Current:**
 
@@ -102,7 +102,7 @@ Initialization and persistence:
 3. `period > 0` initializes `remainingInPeriod = limit` and `periodEnd = authorize_time + period`.
 4. For a given `(account,key,token)`, there is exactly one active `TokenLimit`; duplicate token entries in a single authorization MUST be rejected.
 
-### CallScope
+#### CallScope
 
 Call scoping uses explicit vectors in the protocol model:
 
@@ -135,7 +135,7 @@ Solidity ABI and protocol semantics match directly:
 
 In the Solidity precompile API, omitting a target scope blocks that target; `selectorRules = []` does not.
 
-### SelectorRule
+#### SelectorRule
 
 ```text
 SelectorRule {
@@ -195,7 +195,7 @@ Examples:
 6. `{ target: tokenX, selector_rules: [{selector: 0xa9059cbb, recipients: [0xA, 0xB]}] }`: allow `transfer` only when `to` is in `{0xA, 0xB}`.
 7. Distinct target scopes are independent: allowing selector `s` on target `A` never allows selector `s` on target `B`.
 
-### KeyAuthorization
+#### KeyAuthorization
 
 Existing fields remain, with a trailing optional call-scope field:
 
@@ -210,9 +210,9 @@ KeyAuthorization {
 }
 ```
 
-## Interface Changes
+### Interface Changes
 
-### Events
+#### Events
 
 ```solidity
 /// @notice Emitted when an access key spends tokens against a spending limit
@@ -232,7 +232,7 @@ event AccessKeySpend(
 
 This event MUST be emitted whenever an access-key transaction deducts from a spending limit (one-time or periodic).
 
-### IAccountKeychain.sol
+#### IAccountKeychain.sol
 
 ```solidity
 /// @notice Authorizes a key with enhanced permissions
@@ -289,9 +289,9 @@ function getRemainingLimit(
 3. `isScoped = true, calls = [c1, ...]`: scoped key with the listed allowlist.
 4. Missing, revoked, or expired access keys return `isScoped = true, calls = []`.
 
-## Semantic Behavior
+### Semantic Behavior
 
-### Periodic Limit Reset Logic
+#### Periodic Limit Reset Logic
 
 On each spend attempt for `(account, key, token)`:
 
@@ -309,7 +309,7 @@ On each spend attempt for `(account, key, token)`:
 4. MUST NOT change `periodEnd`.
 5. Therefore changing `period` requires re-authorizing the key (or removing and recreating that token limit entry).
 
-### Call Validation Logic
+#### Call Validation Logic
 
 Call-scope checks use map lookups keyed by `(account_key, target, selector)` plus optional selector-level recipient allowlists.
 
@@ -318,7 +318,7 @@ Scoped-call validation is performed in a metered pre-execution phase after trans
 If any call fails scoped-call validation, the transaction execution MUST fail atomically before any user call in the batch begins.
 
 
-#### Access-Key Contract Creation Ban
+##### Access-Key Contract Creation Ban
 
 If a transaction is signed with an access key (`key != Address::ZERO`), contract creation MUST be rejected as an invalid transaction in all configurations.
 
@@ -330,7 +330,7 @@ This ban applies regardless of:
 
 Only the root key (`key == Address::ZERO`) may submit contract-creation calls; this is not a global create ban.
 
-#### Single Call Validation
+##### Single Call Validation
 
 For each call:
 
@@ -346,7 +346,7 @@ For each call:
 10. For a selector rule with a non-empty `recipients` list, if calldata is shorter than `4 + 32` bytes, implementations MUST fail execution before the first user call begins.
 11. For a selector rule with a non-empty `recipients` list, implementations MUST enforce canonical ABI `address` encoding for argument `0` (upper 12 bytes zero) before membership check; otherwise implementations MUST fail execution before the first user call begins.
 
-#### Batch Validation
+##### Batch Validation
 
 For AA transactions with multiple calls, each call MUST be validated independently in the metered pre-execution phase before execution of the first user call begins.
 
@@ -356,7 +356,7 @@ If any call fails scope validation:
 2. No user call in the batch may execute.
 3. The failure MUST be reported as an execution failure rather than as an invalid transaction.
 
-### Root-Controlled Scope Updates
+#### Root-Controlled Scope Updates
 
 `setAllowedCalls` MUST be root-key-only and MUST apply create-or-replace semantics per target.
 
@@ -379,7 +379,7 @@ Rationale for rule 2 (`removeAllowedCalls` disables a target scope):
 1. This avoids unbounded gas from deletion-time slot iteration.
 2. Prior selector rows may remain in state, but the removed target scope no longer participates in matching.
 
-### Interaction Rules
+#### Interaction Rules
 
 1. Keys may mix one-time and periodic token limits.
 2. Spending limits and call scopes are independent checks; both must pass.
@@ -395,7 +395,7 @@ Wallet UX recommendation (non-consensus):
 
 1. Wallets SHOULD default to scoped keys (non-empty `selectorRules`) and require explicit user opt-in for unrestricted target scopes (`selectorRules = []`).
 
-## Gas And Complexity Bounds
+### Gas And Complexity Bounds
 
 This TIP only specifies the additional intrinsic gas delta for call scopes in handler-side `key_authorization` charging.
 
@@ -429,7 +429,7 @@ scope_slots = 0                    if allowed_calls is None
 
 Justification for `1 + 3*S + 3*K + C + 2*W`: `1` stores restricted mode, each target scope materializes as three set writes, each selector rule materializes as three set writes, each constrained selector writes one recipient-set length slot, and each recipient writes two set-membership slots.
 
-### Rounded Helper Overhead
+#### Rounded Helper Overhead
 
 Implementations may also charge a small rounded helper overhead for scoped-key authorization bookkeeping that is not captured by raw storage-row counts alone.
 
@@ -452,9 +452,9 @@ Bounds:
 
 No additional flat gas is specified here for precompile methods (`setAllowedCalls`, `getAllowedCalls`, etc.); those are charged by normal EVM metering at execution time.
 
-## Encoding
+### Encoding
 
-### Signing Format
+#### Signing Format
 
 Authorization digest format:
 
@@ -477,7 +477,7 @@ RLP safety note:
 1. Implementations MUST use canonical RLP encoding for all fields.
 2. The signed payload is a typed RLP list; distinct field tuples produce distinct canonical encodings (no cross-field preimage ambiguity under canonical RLP).
 
-### Transaction Authorization RLP
+#### Transaction Authorization RLP
 
 ```text
 KeyAuthorization := RLP([
@@ -525,7 +525,7 @@ Optional encoding rules:
 
 ---
 
-## Precompile Storage Changes
+### Precompile Storage Changes
 
 Current layout:
 
@@ -554,7 +554,7 @@ Absent target or selector entries represent disabled inner scopes; implementatio
 
 Implementations MAY maintain additional internal indexes or equivalent layouts so long as semantics remain unchanged.
 
-## Hardfork-Gated Features
+### Hardfork-Gated Features
 
 The following MUST be fork-gated:
 
@@ -577,7 +577,7 @@ Pre-fork blocks MUST replay with pre-fork semantics to preserve state roots.
 
 ---
 
-# Invariants
+## Invariants
 
 1. `periodEnd` is monotonic and never set to the past.
 2. `remainingInPeriod <= limit` after any operation.
@@ -590,7 +590,7 @@ Pre-fork blocks MUST replay with pre-fork semantics to preserve state roots.
 9. Selector rules with recipient allowlists are valid only for TIP-20 targets and only for the fixed constrained selector set.
 10. For recipient-allowlisted rules, calldata argument `0` must be a canonically encoded ABI address and must be in the configured recipient set.
 11. In the Solidity ABI, `selectorRules[i].recipients = []` means that selector has no recipient restriction.
-## Test Cases
+### Test Cases
 
 1. Periodic reset after elapsed period.
 2. No rollover of unused periodic allowance.
@@ -619,10 +619,10 @@ Pre-fork blocks MUST replay with pre-fork semantics to preserve state roots.
 27. Reject duplicate recipients within a selector rule.
 28. Reject key authorization when selector rules with recipient allowlists are used on a non-TIP-20 target.
 
-## References
+### References
 
 - [AccountKeychain docs](https://tempo.xyz/developers/docs/protocol/transactions/AccountKeychain)
 - [Tempo Transactions](https://tempo.xyz/developers/docs/guide/tempo-transaction)
-- [IAccountKeychain.sol](https://github.com/tempoxyz/tempo/blob/main/tips/verify/src/interfaces/IAccountKeychain.sol)
+- [IAccountKeychain.sol](https://github.com/tempoxyz/tempo-std/blob/master/src/interfaces/IAccountKeychain.sol)
 - [GitHub Issue #1865](https://github.com/tempoxyz/tempo/issues/1865) - Periodic spending limits
 - [GitHub Issue #1491](https://github.com/tempoxyz/tempo/issues/1491) - Destination address scoping

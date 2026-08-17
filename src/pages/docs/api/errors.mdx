@@ -1,9 +1,10 @@
 ---
-title: Errors
+title: "Tempo API errors and response format"
+seoTitle: "API Errors & Response Format | Docs"
 description: How the Tempo API signals errors, including HTTP status codes, the error envelope, and the full catalog of machine-readable error codes.
 ---
 
-# API Errors
+# Tempo API errors and response format
 
 The Tempo API uses conventional HTTP status codes to indicate the result of a request:
 
@@ -82,6 +83,7 @@ The credential is valid but not permitted to perform the request.
 | Code | Meaning |
 | --- | --- |
 | `api_key_forbidden` | The API key is missing a [scope](/docs/api/authentication) required by this endpoint. |
+| `api_key_ip_forbidden` | The API key has an IP allowlist, but the trusted client IP is missing or does not match it. |
 | `limit_exceeded` | A resource limit was reached (for example, the maximum number of webhooks). |
 
 ## 404: Not Found

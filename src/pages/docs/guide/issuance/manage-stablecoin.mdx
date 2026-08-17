@@ -1,5 +1,6 @@
 ---
-title: Manage Your Stablecoin
+title: "Managing your TIP-20 stablecoin"
+seoTitle: "Manage Your TIP-20 Stablecoin | Docs"
 description: Configure stablecoin permissions, supply limits, and compliance policies. Grant roles, set transfer policies, and control pause/unpause functionality.
 interactive: true
 ---
@@ -18,11 +19,11 @@ import { RevokeTokenRoles } from '../../../../components/guides/steps/issuance/R
 import { SetSupplyCap } from '../../../../components/guides/steps/issuance/SetSupplyCap.tsx'
 import { Cards, Card } from 'vocs'
 
-# Manage Your Stablecoin
+# Managing your TIP-20 stablecoin
 
 Configure your stablecoin's permissions, supply limits, and compliance policies after deployment. This guide covers granting roles to manage token operations, setting supply caps, configuring transfer policies, and controlling token transfers through pause/unpause functionality.
 
-TIP-20 tokens use a role-based access control system that allows you to delegate different administrative functions to different addresses. For detailed information about the role system, see the [TIP-20 specification](/docs/protocol/tip20/spec#role-based-access-control).
+TIP-20 tokens use a role-based access control system that allows you to delegate different administrative functions to different addresses. For detailed information about the role system, see the [TIP-20 specification](/docs/protocol/tip20/spec#tip-20-roles).
 
 ## Stablecoin management steps
 
@@ -638,7 +639,7 @@ Ensure pause and unpause roles are assigned to trusted addresses and that your t
 <Cards>
   <Card
     description="Learn about the role-based access control system and all available roles"
-    to="/docs/protocol/tip20/spec#role-based-access-control"
+    to="/docs/protocol/tip20/spec#tip-20-roles"
     icon="lucide:shield"
     title="Role-Based Access Control"
   />

@@ -3,11 +3,13 @@ import { resolveBaseUrl } from './src/lib/base-url'
 import { docsRouteDestination, proxiedLegacyDocsRoutes } from './src/lib/docs-routing'
 import { docsStructuredDataHead } from './src/lib/docs-structured-data'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
+import { demoteMarkdownHeadings } from './src/lib/markdown-headings'
 import { plainMarkdownComponents } from './src/lib/markdown-output'
 
 // Only set baseUrl in production — Vocs injects a <base> tag from this value,
 // which causes all links to resolve to the absolute URL on preview deployments.
 const baseUrl = resolveBaseUrl()
+const openApiSpecUrl = process.env.OPENAPI_SPEC_URL ?? 'https://api.tempo.xyz/openapi.json'
 
 const searchIndexFields = ['title', 'titles', 'subtitle', 'path', 'excerpt']
 const searchBoost = { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 3 }
@@ -17,15 +19,21 @@ const changelog = Changelog.from({
   ...tempoChangelog,
   async fetch(options) {
     const releases = await tempoChangelog.fetch(options)
-    return releases.map((release) => ({
-      ...release,
+    return releases.map((release) => {
       // GitHub-generated release notes use HTML disclosures. Markdown output cannot retain
       // them, so preserve their content as a heading instead.
-      body: release.body
+      const body = release.body
         .replace(/<details\b[^>]*>/gi, '')
         .replace(/<\/details>/gi, '')
-        .replace(/<summary\b[^>]*>([\s\S]*?)<\/summary>/gi, '\n\n#### $1\n\n'),
-    }))
+        .replace(/<summary\b[^>]*>([\s\S]*?)<\/summary>/gi, '\n\n#### $1\n\n')
+
+      return {
+        ...release,
+        // The changelog page owns the only H1. Release titles render as H2, so shift body
+        // headings down one level while preserving the release note's relative hierarchy.
+        body: demoteMarkdownHeadings(Changelog.stripDuplicateTitle({ body, title: release.title })),
+      }
+    })
   },
 })
 
@@ -74,8 +82,11 @@ export default defineConfig({
     text: 'Suggest changes to this page',
   },
   title: 'Tempo Docs',
-  titleTemplate: (path, { title }) => {
+  titleTemplate: (path, { frontmatter, title }) => {
     const pagePath = typeof path === 'string' ? path : '/'
+    const seoTitle =
+      typeof frontmatter?.seoTitle === 'string' ? frontmatter.seoTitle.trim() : undefined
+    if (seoTitle) return seoTitle
     if (pagePath === '/docs') return 'Tempo %s ⋅ Tempo Docs'
     if (pagePath.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
     if (title?.includes('Tempo')) return undefined
@@ -199,16 +210,20 @@ export default defineConfig({
       v: '3',
     }).toString()
 
-    return `${urlBase}/api/og?title=%title&${extra}`
+    // The HBSet display font's mixed-case "Blog" wordmark has awkward
+    // spacing at OG scale. Keep the page title sentence-cased, but use the
+    // cleaner all-caps treatment in the blog index thumbnail.
+    const imageTitle = docsPath === '/blog' ? 'BLOG' : '%title'
+
+    return `${urlBase}/api/og?title=${imageTitle}&${extra}`
   },
   openapi: [
     {
       path: '/docs/api',
-      spec: 'https://api.tempo.xyz/openapi.json',
+      spec: openApiSpecUrl,
       sidebar: {
         backLink: false,
         collapsed: true,
-        flatten: ['Data API'],
         intro: [
           {
             text: 'API Console',
@@ -289,6 +304,7 @@ export default defineConfig({
             link: '/docs/api/reference',
           },
         ],
+        tagGroupsCollapsed: false,
       },
     },
   ],
@@ -878,13 +894,21 @@ export default defineConfig({
             collapsed: false,
             items: [
               {
+                text: 'T10',
+                badge: { text: 'Planned', variant: 'note' as const },
+                link: '/docs/protocol/upgrades/t10',
+              },
+              {
+                text: 'T9',
+                badge: { text: 'Latest', variant: 'info' as const },
+                link: '/docs/protocol/upgrades/t9',
+              },
+              {
                 text: 'T8',
-                badge: { text: 'Testnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t8',
               },
               {
                 text: 'T7',
-                badge: { text: 'Latest', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t7',
               },
               {

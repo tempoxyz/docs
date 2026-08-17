@@ -51,7 +51,7 @@ export function finalizeSitemap(
     const openApiBaseUrl = `${openApiIndexUrl.replace(/\/$/, '')}/`
     entries.push(
       ...uniqueOpenApiSlugs.map((slug) => ({
-        location: `${openApiBaseUrl}${encodeURIComponent(slug)}`,
+        location: `${openApiBaseUrl}${slug.split('/').map(encodeURIComponent).join('/')}`,
       })),
     )
   }

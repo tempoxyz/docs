@@ -68,6 +68,12 @@ curl 'https://api.tempo.xyz/v1/blocks?chainId=testnet' \
 - **The plaintext token is shown only once**, at provision time. Store it securely; it cannot be revealed again. If you lose it, revoke the key and provision a new one.
 - At rest, only a hash of the token is stored. Tokens are redacted from logs and error output.
 
+### IP-restricted API keys
+
+An API key can carry an allowlist of exact IPv4 or IPv6 addresses and CIDR ranges. When the list is non-empty, Tempo accepts the key only when the trusted client IP matches at least one entry. A missing or nonmatching client IP returns `403` with `api_key_ip_forbidden`.
+
+An omitted or empty allowlist leaves the key unrestricted. Updates are eventually consistent and may take a minute or more to propagate globally. See [Restrict an API key by IP address](/docs/api/console/api-keys#restrict-an-api-key-by-ip-address) for management examples and safe rollout guidance.
+
 ## MPP (Paying per Request)
 
 Endpoints that permit anonymous access also accept [MPP](https://mpp.dev), a pay-per-request payment protocol, as an alternative to an API key. Use it to call those endpoints without a key, or to keep going once you exceed a rate limit.

@@ -26,9 +26,9 @@ Expiring nonces solve these problems by using time-based validity instead of seq
 
 ---
 
-# Specification
+## Specification
 
-## Nonce Key
+### Nonce Key
 
 Expiring nonce transactions use a reserved nonce key:
 
@@ -38,7 +38,7 @@ TEMPO_EXPIRING_NONCE_KEY = uint256.max (2^256 - 1)
 
 When a Tempo transaction specifies `nonceKey = uint256.max`, the protocol treats it as an expiring nonce transaction.
 
-## Transaction Fields
+### Transaction Fields
 
 Expiring nonce transactions require:
 
@@ -48,7 +48,7 @@ Expiring nonce transactions require:
 | `nonce` | `uint64` | Must be `0` (unused, validated for consistency) |
 | `validBefore` | `uint64` | Unix timestamp (seconds) after which the transaction is invalid |
 
-## Validity Window
+### Validity Window
 
 The `validBefore` timestamp must satisfy:
 
@@ -62,11 +62,11 @@ Where:
 
 Transactions with `validBefore` in the past or more than 30 seconds in the future are rejected.
 
-## Replay Protection
+### Replay Protection
 
 Replay protection uses a **circular buffer** data structure in the Nonce precompile:
 
-### Storage Layout
+#### Storage Layout
 
 ```solidity
 contract Nonce {
@@ -80,7 +80,7 @@ contract Nonce {
 }
 ```
 
-### Circular Buffer Design
+#### Circular Buffer Design
 
 The circular buffer has a fixed capacity:
 
@@ -90,7 +90,7 @@ EXPIRING_NONCE_SET_CAPACITY = 300,000
 
 This capacity is sized for 10,000 TPS × 30 seconds = 300,000 transactions, ensuring entries expire before being overwritten.
 
-### Algorithm
+#### Algorithm
 
 When processing an expiring nonce transaction:
 
@@ -114,7 +114,7 @@ When processing an expiring nonce transaction:
 
 7. **Advance pointer**: Write `expiringNonceRingPtr = ptr + 1`
 
-### Pseudocode
+#### Pseudocode
 
 ```solidity
 function checkAndMarkExpiringNonce(
@@ -150,7 +150,7 @@ function checkAndMarkExpiringNonce(
 }
 ```
 
-## Gas Costs
+### Gas Costs
 
 The intrinsic gas cost for expiring nonce transactions includes:
 
@@ -173,7 +173,7 @@ EXPIRING_NONCE_GAS = 2 * COLD_SLOAD_COST + WARM_SLOAD_COST + 3 * WARM_SSTORE_RES
 - Expiring nonce data is ephemeral: evicted within 30 seconds, fixed-size buffer (300k entries)
 - No permanent state growth, so the 20k penalty doesn't apply
 
-## Transaction Pool Validation
+### Transaction Pool Validation
 
 The transaction pool performs preliminary validation:
 
@@ -186,28 +186,28 @@ The transaction pool performs preliminary validation:
 
 Transactions failing these checks are rejected before entering the pool.
 
-## Interaction with Other Features
+### Interaction with Other Features
 
-### 2D Nonces
+#### 2D Nonces
 
 Expiring nonces and 2D nonces are mutually exclusive:
 - `nonceKey = 0`: Protocol nonce (standard sequential)
 - `nonceKey = 1..uint256.max-1`: 2D nonce keys
 - `nonceKey = uint256.max`: Expiring nonce mode
 
-### Access Keys (Keychain)
+#### Access Keys (Keychain)
 
 Expiring nonces work with access key signatures. The `validBefore` provides an additional security boundary—even if an access key is compromised, transactions signed with it become invalid after the expiry window.
 
-### Fee Tokens
+#### Fee Tokens
 
 Expiring nonce transactions pay fees in TIP-20 fee tokens like any other Tempo transaction.
 
 ---
 
-# Invariants
+## Invariants
 
-## Must Hold
+### Must Hold
 
 | ID | Invariant | Description |
 |----|-----------|-------------|
@@ -219,7 +219,7 @@ Expiring nonce transactions pay fees in TIP-20 fee tokens like any other Tempo t
 | **E6** | No nonce mutation | Expiring nonce txs do not increment protocol nonce or any 2D nonce |
 | **E7** | Concurrent independence | Multiple expiring nonce txs from same sender can execute in same block |
 
-## Invariant Tests
+### Invariant Tests
 
 These invariants are tested in the Foundry invariant test suite (`TempoTransactionInvariant.t.sol`):
 
@@ -234,7 +234,7 @@ These invariants are tested in the Foundry invariant test suite (`TempoTransacti
 | `handler_expiringNonceNoNonceMutation` | E6 | Protocol and 2D nonces unchanged after execution |
 | `handler_expiringNonceConcurrent` | E7 | Multiple concurrent txs from same sender succeed |
 
-## Test Cases
+### Test Cases
 
 1. **Basic flow**: Submit transaction, verify execution, attempt replay (should fail)
 
@@ -260,11 +260,11 @@ These invariants are tested in the Foundry invariant test suite (`TempoTransacti
 
 ---
 
-# Benchmark Results
+## Benchmark Results
 
 Benchmarks were run to measure state savings from expiring nonces compared to 2D nonces.
 
-## Key Findings
+### Key Findings
 
 | Metric | Value |
 |--------|-------|
@@ -272,7 +272,7 @@ Benchmarks were run to measure state savings from expiring nonces compared to 2D
 | Circular buffer capacity | 300,000 entries |
 | Buffer fills at 5k TPS | ~60 seconds |
 
-## Controlled Benchmark (100k transactions at 5k TPS)
+### Controlled Benchmark (100k transactions at 5k TPS)
 
 | Nonce Type | Final DB Size | Transactions |
 |------------|---------------|--------------|
@@ -282,7 +282,7 @@ Benchmarks were run to measure state savings from expiring nonces compared to 2D
 
 The ~107 bytes per transaction overhead includes MPT node overhead, MDBX metadata, and RLP encoding.
 
-## Scaling Projections
+### Scaling Projections
 
 | TPS | Daily Transactions | Daily State Savings |
 |-----|-------------------|---------------------|
@@ -293,9 +293,9 @@ After the circular buffer fills, expiring nonces maintain constant storage while
 
 ---
 
-# Open Questions
+## Open Questions
 
-## Safety Check for Buffer Eviction
+### Safety Check for Buffer Eviction
 
 The current implementation includes a safety check that reads `expiringNonceSeen[oldHash]` before evicting an entry from the ring buffer. This check verifies the entry is actually expired before overwriting.
 
@@ -316,7 +316,7 @@ The current implementation includes a safety check that reads `expiringNonceSeen
 2. Removed entirely, trusting the capacity sizing?
 3. Kept and fully charged (add 2,100 gas to `EXPIRING_NONCE_GAS`)?
 
-## Buffer Capacity Sizing
+### Buffer Capacity Sizing
 
 The current capacity of 300,000 assumes:
 - Maximum 10,000 TPS sustained
@@ -324,7 +324,7 @@ The current capacity of 300,000 assumes:
 
 **Question**: Should the capacity be configurable per-chain or hardcoded? What happens if TPS requirements increase significantly?
 
-## Transaction Hash Computation
+### Transaction Hash Computation
 
 The transaction hash used for replay protection must be computed before signature recovery.
 

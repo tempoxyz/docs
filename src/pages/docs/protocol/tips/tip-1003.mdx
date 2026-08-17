@@ -22,9 +22,9 @@ Traditional exchanges allow users to specify a client order ID (called `ClOrdID`
 
 ---
 
-# Specification
+## Specification
 
-## New storage
+### New storage
 
 A new mapping tracks active client order IDs per user:
 
@@ -32,7 +32,7 @@ A new mapping tracks active client order IDs per user:
 mapping(address user => mapping(uint128 clientOrderId => uint128 orderId)) public clientOrderIds;
 ```
 
-## Modified functions
+### Modified functions
 
 All order placement functions gain an optional `clientOrderId` parameter:
 
@@ -88,7 +88,7 @@ function placeFlip(
 ) external returns (uint128 orderId);
 ```
 
-## New functions
+### New functions
 
 ```solidity
 /// @notice Cancels an order by its client order ID
@@ -102,9 +102,9 @@ function cancelByClientOrderId(uint128 clientOrderId) external;
 function getOrderByClientOrderId(address user, uint128 clientOrderId) external view returns (uint128 orderId);
 ```
 
-## Behavior
+### Behavior
 
-### Placing orders with clientOrderId
+#### Placing orders with clientOrderId
 
 When `clientOrderId` is non-zero:
 
@@ -114,13 +114,13 @@ When `clientOrderId` is non-zero:
 
 When `clientOrderId` is zero, no client order ID tracking occurs.
 
-### Uniqueness and reuse
+#### Uniqueness and reuse
 
 A `clientOrderId` must be unique among a user's **active orders**. Once an order is filled or cancelled, its `clientOrderId` can be reused. This matches the standard FIX protocol behavior where `ClOrdID` uniqueness is required only for working orders.
 
 When an order reaches a terminal state (filled or cancelled), the `clientOrderIds` mapping entry is cleared.
 
-### Flip orders
+#### Flip orders
 
 When a flip order is filled and creates a new order on the opposite side:
 
@@ -130,11 +130,11 @@ When a flip order is filled and creates a new order on the opposite side:
 
 If the original order had no `clientOrderId` (was zero), the flipped order also has no `clientOrderId`.
 
-### Cancellation
+#### Cancellation
 
 `cancelByClientOrderId(clientOrderId)` looks up `clientOrderIds[msg.sender][clientOrderId]` and cancels that order. It reverts if no active order exists for that `clientOrderId`.
 
-## New event
+### New event
 
 ```solidity
 /// @notice Emitted when an order is placed (V2 with clientOrderId)
@@ -154,7 +154,7 @@ event OrderPlacedV2(
 
 `OrderPlacedV2` is identical to `OrderPlaced` but adds the `clientOrderId` field. When an order is placed, only `OrderPlacedV2` is emitted (not both events).
 
-## New errors
+### New errors
 
 ```solidity
 /// @notice The client order ID is already in use by an active order
@@ -166,7 +166,7 @@ error CLIENT_ORDER_ID_NOT_FOUND();
 
 ---
 
-# Invariants
+## Invariants
 
 - A non-zero `clientOrderId` maps to at most one active order per user
 - `clientOrderIds[user][clientOrderId]` is cleared when the order is filled or cancelled

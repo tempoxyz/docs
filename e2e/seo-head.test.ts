@@ -31,6 +31,10 @@ function metaContent(head: string, selector: string) {
   return match?.[1] ?? attrFirst?.[1]
 }
 
+function titleElements(head: string) {
+  return head.match(/<title(?:\s[^>]*)?>[\s\S]*?<\/title>/gi) ?? []
+}
+
 const cases: {
   path: string
   title: string
@@ -68,17 +72,31 @@ const cases: {
   },
   {
     path: '/docs',
-    title: 'Tempo Documentation ⋅ Tempo Docs',
-    ogTitle: 'Tempo Documentation',
+    title: 'Tempo Developer Docs: APIs, SDKs &amp; Guides',
+    ogTitle: 'Tempo developer documentation',
     descriptionIncludes: 'Tempo docs for integration paths',
     ogImageIncludes: '/og-docs.png',
   },
   {
     path: '/docs/guide/payments/send-a-payment',
-    title: 'Send a Payment ⋅ Tempo Docs',
-    ogTitle: 'Send a Payment',
+    title: 'Send a Stablecoin Payment on Tempo | Docs',
+    ogTitle: 'How to send a stablecoin payment on Tempo',
     descriptionIncludes: 'stablecoin payments between accounts',
     ogImageIncludes: 'subsection=PAYMENTS',
+  },
+  {
+    path: '/docs/api',
+    title: 'Start with the Tempo API | Tempo Docs',
+    ogTitle: 'Tempo API',
+    descriptionIncludes: 'official Tempo blockchain API',
+    ogImageIncludes: 'section=API',
+  },
+  {
+    path: '/docs/api/console',
+    title: 'How to Use the Tempo API Console | Docs',
+    ogTitle: 'Using the Tempo API Console',
+    descriptionIncludes: 'create projects and API keys',
+    ogImageIncludes: 'section=API',
   },
 ]
 
@@ -86,7 +104,9 @@ for (const c of cases) {
   test(`prerendered head for ${c.path}`, async ({ request }) => {
     const head = await fetchHead(request, c.path)
 
-    expect(head).toContain(`<title>${c.title}</title>`)
+    expect(titleElements(head), `${c.path} should have one exact document title`).toEqual([
+      `<title>${c.title}</title>`,
+    ])
     expect(metaContent(head, 'og:title')).toBe(c.ogTitle)
     expect(metaContent(head, 'description')).toContain(c.descriptionIncludes)
     expect(metaContent(head, 'og:description')).toContain(c.descriptionIncludes)

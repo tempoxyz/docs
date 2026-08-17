@@ -57,6 +57,7 @@ Before finishing docs-only changes, run at least `pnpm check:types` when practic
    ```yaml
    ---
    title: Page Title
+   seoTitle: Search-specific title | Tempo Docs
    description: Concise active-voice description for search and social previews.
    ---
    ```
@@ -168,6 +169,7 @@ Each step should be actionable and concrete. Keep long conceptual background out
 ## SEO and Social Text
 
 - Every page needs `title` and `description` frontmatter.
+- Use optional `seoTitle` frontmatter when the exact browser title should differ from the visible H1. The Vocs title template emits it verbatim, while social metadata, structured data, search, and generated AI files continue to use `title`.
 - Keep `title` concise and specific.
 - Keep `description` active, concrete, and useful for search/social previews.
 - Do not start descriptions with "This page".

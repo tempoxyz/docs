@@ -27,9 +27,9 @@ This capability was requested by a partner. It could be useful for contracts tha
 
 ---
 
-# Specification
+## Specification
 
-## New Function
+### New Function
 
 The following function is added to the `IFeeManager` interface:
 
@@ -46,13 +46,13 @@ interface IFeeManager {
 }
 ```
 
-## Behavior
+### Behavior
 
-### Fee Token Resolution
+#### Fee Token Resolution
 
-The fee token returned by `getFeeToken()` is the same token that was resolved by the protocol during transaction validation, following the [fee token preference rules](/docs/protocol/fees/spec-fee#fee-token-resolution).
+The fee token returned by `getFeeToken()` is the same token that was resolved by the protocol during transaction validation, following the [fee token preference rules](/docs/protocol/fees/spec-fee#fee-token-preferences).
 
-### Storage
+#### Storage
 
 The fee token is stored in **transient storage** (EIP-1153) within the FeeManager precompile. This means:
 
@@ -60,15 +60,15 @@ The fee token is stored in **transient storage** (EIP-1153) within the FeeManage
 - No persistent storage writes occur, minimizing gas costs
 - The value is consistent across all calls within a transaction (including internal calls and subcalls)
 
-### Timing
+#### Timing
 
 The fee token is set by the protocol in the `validate_against_state_and_deduct_caller` handler phase, before any user code executes. This ensures the value is available throughout the entire transaction execution.
 
-### Gas Cost
+#### Gas Cost
 
 Reading the fee token costs the standard warm transient storage read cost (100 gas for TLOAD). This is the cost of calling `getFeeToken()` itself; callers should account for additional gas used by the CALL opcode to invoke the precompile.
 
-### Edge Cases
+#### Edge Cases
 
 | Scenario | Return Value |
 |----------|--------------|
@@ -78,7 +78,7 @@ Reading the fee token costs the standard warm transient storage read cost (100 g
 
 The only case where `address(0)` is returned is in simulation contexts (e.g., `eth_call`) where the protocol handler does not execute.
 
-## Example Usage
+### Example Usage
 
 ```solidity
 import { IFeeManager } from "./interfaces/IFeeManager.sol";
@@ -101,7 +101,7 @@ contract FeeTokenAware {
 }
 ```
 
-## Interface Addition
+### Interface Addition
 
 The following function is added to `IFeeManager`:
 
@@ -113,7 +113,7 @@ function getFeeToken() external view returns (address);
 
 ---
 
-# Invariants
+## Invariants
 
 - `getFeeToken()` must return a consistent value across all calls within the same transaction
 - `getFeeToken()` must return `address(0)` in simulation contexts (e.g., `eth_call`) where no transaction handler runs
@@ -121,7 +121,7 @@ function getFeeToken() external view returns (address);
 - The fee token returned must match the token used for actual fee deduction in `collectFeePreTx` and `collectFeePostTx`
 - Reading the fee token must not modify any state (view function)
 
-## Test Cases
+### Test Cases
 
 The test suite must cover:
 

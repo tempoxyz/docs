@@ -1,5 +1,6 @@
 ---
-title: Providing Liquidity
+title: "How to provide liquidity on the Tempo DEX"
+seoTitle: "Providing Liquidity on the Tempo DEX | Docs"
 description: Place limit and flip orders to provide liquidity on the Stablecoin DEX orderbook. Learn to manage orders and set prices using ticks.
 interactive: true
 ---
@@ -13,7 +14,7 @@ import { Connect } from '../../../../components/guides/steps/auth/Connect.tsx'
 import { PlaceOrder } from '../../../../components/guides/steps/exchange/PlaceOrder.tsx'
 import { QueryOrder } from '../../../../components/guides/steps/exchange/QueryOrder.tsx'
 
-# Providing Liquidity
+# How to provide liquidity on the Tempo DEX
 
 Add liquidity for a token pair by placing orders on the Stablecoin DEX. You can provide liquidity on the `buy` or `sell` side of the orderbook, with `limit` or `flip` orders. To learn more about order types see the [documentation on order types](/docs/protocol/exchange/providing-liquidity#order-types).
 
@@ -198,7 +199,7 @@ For more details on querying orders, see the [`Hooks.dex.useOrder`](https://wagm
 
 Cancel an order using its order ID.
 
-When you cancel an order, any remaining funds are credited to your exchange balance (not directly to your wallet). To move funds back to your wallet, you can [withdraw them to your wallet](/docs/protocol/exchange/exchange-balance#withdrawing-funds).
+When you cancel an order, any remaining funds are credited to your exchange balance (not directly to your wallet). To move funds back to your wallet, you can [withdraw them to your wallet](/docs/protocol/exchange/exchange-balance#withdrawing-from-the-dex).
 
 <Demo.Container name="Place and Cancel an Order" footerVariant="source" src="tempoxyz/examples/tree/main/examples/exchange">
   <Connect stepNumber={1} />

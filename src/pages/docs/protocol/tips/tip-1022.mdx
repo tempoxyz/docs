@@ -24,9 +24,9 @@ This TIP introduces **virtual addresses**: a reserved 20-byte address format tha
 
 ---
 
-# Specification
+## Specification
 
-## Address Layout
+### Address Layout
 
 Virtual addresses are standard 20-byte EVM addresses with the following reserved format:
 
@@ -41,13 +41,13 @@ Virtual addresses are standard 20-byte EVM addresses with the following reserved
 | **VIRTUAL_MAGIC** | 10 | Fixed magic value `0xFDFDFDFDFDFDFDFDFDFD`. Identifies the address as virtual. |
 | **userTag** | 6 | Opaque per-user identifier derived offchain by the operator. 48 bits support ~2.8×10^14 unique deposit addresses per master. |
 
-### Why This Layout?
+#### Why This Layout?
 
 TIP-1022 intentionally places the 10-byte magic sequence in the **middle** of the address instead of at the beginning. This preserves more visually useful bytes at the front and back of the address for operators and users comparing deposit addresses in wallets, explorers, etc.
 
 The 4-byte `masterId` is kept short to preserve room for a large `userTag`, while the 10-byte magic keeps the format highly unlikely to appear accidentally. The security implications of this tradeoff are discussed in **Security Considerations**.
 
-## Conformance and Scope
+### Conformance and Scope
 
 TIP-1022 applies only to TIP-20 precompile recipient resolution for the entrypoints listed in **Transfer Path Modification**.
 
@@ -57,7 +57,7 @@ Non-TIP-20 token transfers (e.g. ERC-20 contracts deployed on Tempo) to virtual 
 
 `setRewardRecipient` is **not** a TIP-20 transfer-path operation and is therefore not subject to TIP-1022 recipient resolution. Implementations MUST reject virtual addresses when setting reward recipients so that rewards remain tied to canonical accounts rather than aliases.
 
-## Reserved Virtual Address Format
+### Reserved Virtual Address Format
 
 Any address whose bytes `[4:14]` equal `VIRTUAL_MAGIC` is treated as a virtual address by the TIP-20 precompile.
 
@@ -69,13 +69,13 @@ If a TIP-20 transfer targets such an address:
 
 The literal virtual address never accumulates TIP-20 balance through standard TIP-20 transfer paths.
 
-### Reserved Address Space
+#### Reserved Address Space
 
 Addresses matching the virtual-address format occupy a reserved TIP-20 recipient namespace. A user who happens to control an EOA or contract whose address matches this format can still exist on Tempo and can still originate ordinary EVM transactions. However, TIP-20 transfers to such an address will follow TIP-1022 recipient resolution semantics rather than crediting the literal address.
 
 Users who control such an address SHOULD NOT use it as a normal account on Tempo.
 
-## Master ID Derivation
+### Master ID Derivation
 
 The `masterId` is deterministic and derived from the registration hash computed during `registerVirtualMaster()`:
 
@@ -88,13 +88,13 @@ The first 4 bytes of `registrationHash` are consumed by the proof-of-work check 
 
 The salt is a `bytes32` value chosen by the caller. Callers MUST grind the salt to satisfy the 32-bit proof-of-work requirement. The resulting `masterId` is permanently bound to the registration address.
 
-### Why `masterId` Registrations Are Immutable
+#### Why `masterId` Registrations Are Immutable
 
 TIP-1022 intentionally does not provide a mechanism to rotate or update the master address bound to a `masterId`. Allowing rotation would interact poorly with TIP-403 policies: a blacklisted master could rotate to a fresh address and resume receiving deposits, requiring policy enforcement to track `masterId`s in addition to addresses. Operators who need to change their underlying key material can register their `masterId` to an upgradeable proxy contract or multisig, allowing the controlling keys to be rotated at the contract layer without any protocol-level change. Finally, any rotation mechanism would require a timelock or similar delay to prevent an attacker who compromises a master key from silently redirecting deposits before the legitimate owner can respond — complexity that is better handled by the operator's own key management infrastructure.
 
 In the event of a `masterId` collision (two `(address, salt)` pairs mapping to the same 4-byte `masterId`), the second registration reverts with `MasterIdCollision`. The caller can retry with a different valid salt. The probability of such a collision (and the resulting need to regrind another salt) is less than 0.1% even if 4 million masterId's have already been registered. 
 
-## Registration Proof of Work
+### Registration Proof of Work
 
 Registration requires a 32-bit proof of work to make **targeted collisions against a chosen `masterId`** computationally expensive.
 
@@ -115,13 +115,13 @@ This requires the caller to grind ~2^32 salt values to find a valid registration
 
 This proof of work is intended to make it expensive for an attacker who sees a pending registration transaction to compute a different `(attackerAddress, salt)` pair that lands on the same `masterId` and gets mined first. With a 4-byte `masterId` and a 32-bit proof-of-work requirement, that targeted attack costs ~2^64 work.
 
-## User Tag Derivation (Offchain)
+### User Tag Derivation (Offchain)
 
 The `userTag` is an opaque 6-byte value generated offchain by the operator. The protocol does not interpret or validate it — all values including `0x000000000000` are valid. It exists solely so the operator can attribute deposits to specific users via the two-hop `Transfer` events described below.
 
 Operators maintain their own internal mapping `{internalUserId -> virtualAddress}`. No onchain transaction is needed to create a new deposit address.
 
-## Worked Example
+### Worked Example
 
 An exchange with master address `0xABCD...1234` registers with a salt that satisfies the 32-bit PoW:
 
@@ -136,7 +136,7 @@ Virtual address = 0x07A3B1C2  FDFDFDFDFDFDFDFDFDFD  D4E5A7C3F19E
                   masterId     magic (10)           userTag (6)
 ```
 
-## Registry Precompile
+### Registry Precompile
 
 Virtual address resolution requires a registry that maps `masterId -> masterAddress`. This is managed through a new precompile deployed at `0xFDC0000000000000000000000000000000000000`.
 
@@ -153,7 +153,7 @@ A **valid master address** MUST satisfy TIP-20 recipient safety constraints:
 - MUST NOT itself match the virtual-address format (`VIRTUAL_MAGIC` at bytes `[4:14]`)
 - MUST NOT be a TIP-20 token address (`0x20c000....` at bytes `[0:12]`)
 
-### Registry Storage Layout
+#### Registry Storage Layout
 
 Each `masterId` maps to a single 32-byte storage slot:
 
@@ -174,7 +174,7 @@ Here `REGISTRY_SLOT` means the storage slot of the `mapping(bytes4 => bytes32)` 
 
 This layout packs all metadata for a `masterId` into a single storage slot, enabling one SLOAD during transfer-path resolution.
 
-### Interface
+#### Interface
 
 ```solidity
 interface IAddressRegistry {
@@ -243,14 +243,14 @@ interface IAddressRegistry {
 }
 ```
 
-### Constants
+#### Constants
 
 | Name | Value | Description |
 |------|-------|-------------|
 | `VIRTUAL_MAGIC` | `0xFDFDFDFDFDFDFDFDFDFD` | 10-byte magic value identifying virtual addresses |
 | `REGISTRY_ADDRESS` | `0xFDC0000000000000000000000000000000000000` | Precompile address for the virtual-address registry |
 
-## Transfer Path Modification
+### Transfer Path Modification
 
 The following existing TIP-20 entrypoints are modified to resolve the `to` (recipient) address before crediting:
 
@@ -264,7 +264,7 @@ The following existing TIP-20 entrypoints are modified to resolve the `to` (reci
 
 The `from` address on `transferFrom`, `transferFromWithMemo`, and `systemTransferFrom` is **not** affected by TIP-1022 resolution.
 
-### Resolution Logic
+#### Resolution Logic
 
 ```text
 function resolveRecipient(to: address) -> address:
@@ -281,7 +281,7 @@ function resolveRecipient(to: address) -> address:
     return master
 ```
 
-### Standard Transfer Entrypoints
+#### Standard Transfer Entrypoints
 
 For `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, and `systemTransferFrom`:
 
@@ -293,7 +293,7 @@ For `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, and 
 
 If any step reverts, the enclosing TIP-20 operation MUST revert atomically with no balance changes and no events.
 
-### Mint Entrypoints
+#### Mint Entrypoints
 
 For `mint` and `mintWithMemo`:
 
@@ -304,7 +304,7 @@ For `mint` and `mintWithMemo`:
 
 If any step reverts, the enclosing TIP-20 operation MUST revert atomically with no balance changes and no events.
 
-### Authorization Semantics
+#### Authorization Semantics
 
 TIP-1022 does not introduce new authorization logic in TIP-403 itself. Instead, TIP-20 transfer and mint logic MUST resolve virtual recipient addresses before invoking the existing TIP-403 / TIP-1015 checks.
 
@@ -319,13 +319,13 @@ This preserves view/execution symmetry with the TIP-20 authorization path define
 
 Contracts or integrators that need explicit resolution behavior outside the TIP-20 transfer path MAY call `resolveRecipient` on the registry.
 
-## Event Emission
+### Event Emission
 
 TIP-1022 does **not** introduce new transfer-path events. The registry precompile emits `MasterRegistered`, but forwarding itself is represented using **two-hop standard `Transfer` events**: one hop showing funds arriving at the virtual address, and a second hop showing funds moving from the virtual address to the resolved master. Using standard `Transfer` events (rather than a new event type) preserves compatibility with existing indexers, block explorers, and wallets that already understand TIP-20 / ERC-20 `Transfer` events — no custom integration is required to track virtual address deposits.
 
 For transfers where the recipient is **not** a virtual address, event emission is unchanged from standard TIP-20 behavior — a single `Transfer(sender, to, amount)`.
 
-### Deposit Forwarding (Inbound)
+#### Deposit Forwarding (Inbound)
 
 When a transfer targets a virtual address (`to` is virtual), the precompile MUST emit two `Transfer` events in sequence:
 
@@ -336,7 +336,7 @@ The actual balance change is applied only to `masterAddress`. The virtual addres
 
 Indexers that need deposit attribution SHOULD watch for pairs of `Transfer` events within the same transaction where the intermediate address matches the virtual-address format. The `userTag` can then be extracted from the virtual address to identify the depositor.
 
-### Entrypoint-Specific Event Ordering
+#### Entrypoint-Specific Event Ordering
 
 - `transfer`, `transferFrom`, `systemTransferFrom`:
   1. `Transfer(sender, virtualAddress, amount)`
@@ -358,11 +358,11 @@ Indexers that need deposit attribution SHOULD watch for pairs of `Transfer` even
   3. `Mint(virtualAddress, amount)`
   4. `Transfer(virtualAddress, masterAddress, amount)`
 
-## Self-Forwarding
+### Self-Forwarding
 
 If the registered master sends tokens to one of its own virtual addresses, the transfer resolves back to the master, effectively a transfer to self. The standard TIP-20 self-transfer semantics apply (no net balance change). The two-hop `Transfer` events are still emitted: `Transfer(master, virtualAddress, amount)` followed by `Transfer(virtualAddress, master, amount)`. Indexers SHOULD NOT interpret this as net inflow when `from == masterAddress` in the first hop.
 
-## Interaction with TIP-403
+### Interaction with TIP-403
 
 Virtual address resolution happens **before** TIP-403 / TIP-1015 authorization checks. Policy evaluation uses the resolved `masterAddress`, not the literal virtual address.
 
@@ -370,7 +370,7 @@ Virtual address resolution happens **before** TIP-403 / TIP-1015 authorization c
 - If the **sender** is not authorized to send the token, the transfer reverts.
 - Policies configured on individual virtual addresses are ignored by the TIP-20 transfer path because virtual addresses have no independent canonical TIP-20 balance.
 
-### Rejection of Virtual Addresses in Policy Operations
+#### Rejection of Virtual Addresses in Policy Operations
 
 TIP-403 operations that accept addresses as policy members MUST reject virtual addresses rather than accepting them silently.
 
@@ -378,14 +378,14 @@ Implementations SHOULD use a clear, informative error indicating that virtual ad
 
 Rejecting these operations avoids the footgun where an operator configures policy on the virtual alias they see in logs or explorers instead of on the resolved master address that actually holds the funds.
 
-## Interaction with Account-Level Features
+### Interaction with Account-Level Features
 
 - **`balanceOf(virtualAddress)`**: Always returns 0. Virtual addresses do not hold balances.
 - **Nonce / transaction origination**: A contract or EOA whose address matches the virtual-address format can still exist and can still originate ordinary EVM transactions. TIP-1022 resolution applies only to the `to` field in TIP-20 precompile calls, not to transaction senders.
 
-## Security Considerations
+### Security Considerations
 
-### 4-Byte `masterId` and 32-Bit Registration PoW
+#### 4-Byte `masterId` and 32-Bit Registration PoW
 
 A 4-byte `masterId` would be too small if its security relied only on raw namespace size. TIP-1022 does **not** rely on that. Instead, security comes from the combination of:
 
@@ -405,7 +405,7 @@ That targeted attack costs roughly 2^64 work. Further, because registration requ
 
 This does not eliminate the residual collision-risk entirely, but it substantially reduces the practical chance that an operator incorrectly believes they control a master ID that was actually registered first by an attacker.
 
-### Why the Magic Bytes Are in the Middle
+#### Why the Magic Bytes Are in the Middle
 
 The middle `VIRTUAL_MAGIC` layout is a deliberate usability tradeoff:
 
@@ -415,13 +415,13 @@ The middle `VIRTUAL_MAGIC` layout is a deliberate usability tradeoff:
 
 This improves address comparison in UIs while still keeping a large reserved pattern that is highly unlikely to appear accidentally. We believe this layout is superior to the other permutations in terms of the prospect of address poisoning attacks (see below).
 
-### Contracts and EOAs Matching the Virtual Format
+#### Contracts and EOAs Matching the Virtual Format
 
 A sufficiently resourced adversary could, in principle, grind a CREATE2 deployment or private key so that a contract or EOA lands at an address matching the virtual-address format in a `masterID` controlled by the adversary. We view this as unlikely in practice because the address must match a 10-byte fixed magic value in the middle of the address, while targeted theft of a specific registered namespace also requires colliding the 4-byte `masterId` under the registration proof-of-work design (i.e., 14 bytes totally). 
 
 A stronger global reservation mechanism for problematic address ranges may still be desirable in the future. 
 
-### Policy Configuration on Virtual Addresses
+#### Policy Configuration on Virtual Addresses
 
 Virtual addresses are forwarding aliases, not canonical TIP-20 holders. Using them directly in policy configuration is misleading and dangerous because the TIP-20 transfer path evaluates policies against the resolved master address.
 
@@ -429,41 +429,41 @@ Accordingly, TIP-403 configuration operations SHOULD reject virtual addresses wi
 
 ---
 
-## Risks and Limitations
+### Risks and Limitations
 
-### Address Poisoning and UI Confusion
+#### Address Poisoning and UI Confusion
 
 TIP-1022 still introduces a recognizable structured address format. Wallets, block explorers, and operational tooling that truncate addresses SHOULD display enough of the address to distinguish both the `masterId` and the `userTag`; ideally they SHOULD show the full address.
 
 
-### Non-TIP-20 Token Loss
+#### Non-TIP-20 Token Loss
 
 TIP-1022 forwarding applies exclusively to TIP-20 precompile operations. Non-TIP-20 tokens (e.g. ERC-20 contracts deployed on Tempo) transferred to a virtual address are credited to the literal virtual address by the ERC-20 contract and are irrecoverable: no recovery mechanism is defined here.
 
 This risk is mitigated by the strong incentives for token issuers to use TIP-20 on Tempo (gas-payment eligibility, access to the payment lane, and policy support), but it remains a limitation of this design.
 
-### Non-TIP-20 Protocol Positions Minted to Virtual Addresses
+#### Non-TIP-20 Protocol Positions Minted to Virtual Addresses
 TIP-1022 changes only the TIP-20 transfer and mint entrypoints listed in this document. It does not change other protocol logic that accepts an address parameter and records ownership against that literal address.
 
 This creates an edge case for protocols that mint LP shares, receipt tokens, or other redeemable positions to a user-supplied to address. If such a protocol later requires the recorded holder address to burn, redeem, or withdraw, a position minted to a virtual address can become stranded even though the corresponding master account controls that virtual namespace. The Fee AMM is one example of this pattern: LP shares minted can be mited to a virtual address, but are then permanently unburnable since `burn` checks that `msg_sender==lp_address`.
 
 In short, virtual-address forwarding is only defined for the TIP-20 paths enumerated by TIP-1022; other protocols remain literal-address systems unless they explicitly say otherwise.
 
-### Externally-Triggerable Revert on Unregistered Virtual Addresses
+#### Externally-Triggerable Revert on Unregistered Virtual Addresses
 
 TIP-1022 introduces a recipient-dependent revert: if the `to` address matches the virtual-address format but its `masterId` is not registered, the transfer reverts with `VirtualAddressUnregistered`. This is the first TIP-20 revert condition that an untrusted recipient address can induce — prior to TIP-1022, transfers could only revert due to sender-side conditions (insufficient balance, authorization failure).
 
 Contracts that perform batch transfers in a single transaction (e.g. payroll, airdrop, or distribution contracts) SHOULD validate recipient addresses before execution or wrap individual transfers in try/catch to prevent a single unregistered virtual address from reverting the entire batch.
 
-### Contracts and EOAs at virtual addresses 
+#### Contracts and EOAs at virtual addresses
 
 It is theoretically possible to deploy a contract or control an EOA whose address matches `VIRTUAL_MAGIC`, including by grinding CREATE2 salts or private keys. Such addresses can still exist and originate ordinary EVM transactions, but we consider this unlikely in practice because targeting the 10-byte `VIRTUAL_MAGIC` requires roughly 2^80 work, with additional cost for targeted collisions against registered virtual namespaces.
 
 ---
 
-# Invariants
+## Invariants
 
-## Core Invariants
+### Core Invariants
 
 1. **No fund loss**: A TIP-20 transfer to a virtual address MUST either credit the registered master's balance by exactly the transfer amount, or revert. Funds MUST NOT be credited to the virtual address itself or lost.
 

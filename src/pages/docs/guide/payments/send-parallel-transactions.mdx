@@ -1,5 +1,6 @@
 ---
-title: Send Parallel Transactions
+title: "Send parallel transactions using expiring nonces"
+seoTitle: "Parallel Transactions with Expiring Nonces | Docs"
 description: Submit multiple transactions concurrently using Tempo's expiring nonce system under-the-hood.
 interactive: true
 ---
@@ -11,7 +12,7 @@ import { SendParallelPayments } from '../../../../components/guides/steps/paymen
 import * as Token from '../../../../components/guides/tokens'
 import { Cards, Card } from 'vocs'
 
-# Send Parallel Transactions
+# Send parallel transactions using expiring nonces
 
 Tempo enables concurrent transaction execution through its [expiring nonce](/docs/guide/tempo-transaction#expiring-nonces) system. Unlike traditional sequential nonces that require transactions to be processed one at a time, expiring nonces allow multiple transactions to be submitted simultaneously without nonce conflicts. Each transaction uses an independent nonce that automatically expires after a set time window, enabling true parallel execution.
 

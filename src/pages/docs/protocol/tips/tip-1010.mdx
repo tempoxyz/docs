@@ -27,9 +27,9 @@ The parameters defined in this TIP represent the initial mainnet configuration a
 
 ---
 
-# Specification
+## Specification
 
-## Base Fee
+### Base Fee
 
 **Value**: `2 × 10^10` attodollars (20 billion attodollars per gas)
 
@@ -42,7 +42,7 @@ The parameters defined in this TIP represent the initial mainnet configuration a
 
 **Note**: The base fee is fixed per protocol version and does not adjust dynamically based on block utilization. Unlike EIP-1559, there is no in-protocol mechanism that raises or lowers the base fee in response to congestion. Changes to the base fee require a hardfork upgrade.
 
-## Block Gas Limit
+### Block Gas Limit
 
 **Value**: 500,000,000 gas per block (total block gas limit)
 
@@ -65,7 +65,7 @@ The parameters defined in this TIP represent the initial mainnet configuration a
 - Only transactions qualifying for the payment lane (simple TIP-20 transfers, memos, etc.) may exceed the `general_gas_limit`
 - Complex contract interactions use the general gas limit instead
 
-## Main Transaction Gas Limit
+### Main Transaction Gas Limit
 
 **Value**: 30,000,000 gas per block (`general_gas_limit`)
 
@@ -82,7 +82,7 @@ The parameters defined in this TIP represent the initial mainnet configuration a
 **Transactions exceeding 16,000,000 gas are not recommended.** The elevated gas limits (30M) exist solely to accommodate maximum-sized contract deployments under TIP-1000 state creation costs. Applications should not rely on transactions consuming more than 16M gas for normal operations. When storage pricing is moved to a separate mechanism (e.g., storage rent or state expiry), the transaction gas cap is expected to return to 16,000,000 gas.
 :::
 
-## Transaction Gas Cap
+### Transaction Gas Cap
 
 **Value**: 30,000,000 gas per transaction
 
@@ -96,7 +96,7 @@ The parameters defined in this TIP represent the initial mainnet configuration a
   - Contract code storage (TIP-1000): `24,576 bytes × 1,000 gas/byte = 24,576,000 gas`
   - **Total**: ~25,600,000-25,900,000 gas (fits within 30M limit)
 
-## Gas Schedule Summary
+### Gas Schedule Summary
 
 | Parameter | Value | Purpose |
 |-----------|-------|---------|
@@ -107,16 +107,16 @@ The parameters defined in this TIP represent the initial mainnet configuration a
 | General gas limit | 30,000,000 gas/block | Cap for non-payment transactions |
 | Transaction gas cap | 30,000,000 gas | Allow max-size contract deployment |
 
-## Economic Analysis
+### Economic Analysis
 
-### Fee Revenue Projections
+#### Fee Revenue Projections
 
 At full payment lane utilization:
 - 10,000 transfers per block × 1,000 microdollars = 10,000,000 microdollars ($10) per block
 - At 2 blocks/second: $20/second
 - Daily: ~$1,728,000 in base fees from payment lane alone
 
-### Cost Per Operation
+#### Cost Per Operation
 
 | Operation | Gas Cost | USD Cost (at target base fee) |
 |-----------|----------|-------------------------------|
@@ -128,7 +128,7 @@ At full payment lane utilization:
 
 ---
 
-# Invariants
+## Invariants
 
 1. **Base Fee Invariant**: The base fee is fixed at `2 × 10^10` attodollars per protocol version and can only be changed via a hardfork upgrade. At the current base fee, a TIP-20 transfer (50,000 gas) MUST cost approximately 0.1 cent (1,000 microdollars).
 
@@ -143,7 +143,7 @@ At full payment lane utilization:
    - Total gas used by non-payment (general) transactions exceeds the general gas limit (30M)
    - Total gas used by validator subblock transactions exceeds the shared gas limit (50M)
 
-## Implementation Notes
+### Implementation Notes
 
 These parameters are configured at the chainspec level and applied during block validation. Future adjustments may be made through:
 
@@ -151,7 +151,7 @@ These parameters are configured at the chainspec level and applied during block 
 2. Governance proposals (if on-chain governance is implemented)
 3. Emergency response procedures (for critical security issues)
 
-## Test Cases
+### Test Cases
 
 1. **Base fee targeting**: Verify that at equilibrium, TIP-20 transfers cost approximately 0.1 cent (1,000 microdollars)
 2. **Payment lane capacity**: Verify that 10,000 TIP-20 transfers can be included in a single block

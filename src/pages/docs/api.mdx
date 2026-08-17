@@ -1,5 +1,6 @@
 ---
-title: Tempo API
+title: "Tempo API"
+seoTitle: "Start with the Tempo API | Tempo Docs"
 description: Build stablecoin payment apps with the official Tempo blockchain API for account activity, webhooks, funding, exchange quotes, fee sponsorship, and indexed SQL.
 ---
 
@@ -72,7 +73,7 @@ Create production and sandbox API keys in [Tempo API Console](https://console.te
 
 - **Track and reconcile a stablecoin payment.** Look up the [transaction and receipt](/docs/api/transactions), then inspect its [transaction activities](/docs/api/activities#list-transaction-activities) to confirm the token movement. Use [webhooks](/docs/api/webhooks) when your backend needs signed event callbacks.
 - **Monitor an account.** Read [balances](/docs/api/balances) and [activity](/docs/api/activities) to build payment history, treasury, or account views.
-- **Fund and exchange stablecoins.** Compare [funding quotes](/docs/api/funding) across supported chains and providers; the Funding API does not execute the transfer. Use [exchange quotes](/docs/api/exchange) to prepare unsigned approval and swap calls for you to sign and submit.
+- **Fund and exchange stablecoins.** Compare [funding quotes](/docs/api/funding/quotes) across supported chains and providers, then [create a transfer](/docs/api/funding/transfers) or [create a reusable deposit address](/docs/api/funding/deposit-addresses). Use [exchange quotes](/docs/api/exchange) to prepare unsigned approval and swap calls for you to sign and submit.
 - **Sponsor transaction fees.** Use the [Fee Payer API](/docs/api/fee-payer) to apply sponsorship policy and fill, sponsor, and broadcast user transactions.
 - **Query custom payment data.** Use the [Indexer API](/docs/api/indexer-api) for read-only SQL across indexed blocks, transactions, receipts, logs, transfers, and exchange data.
 - **Prepare a production integration.** Create projects and keys in [Tempo API Console](/docs/api/console), then review [authentication](/docs/api/authentication), [rate limits](/docs/api/rate-limits), and [errors](/docs/api/errors).
@@ -89,7 +90,6 @@ Check out an endpoint below and click "Try" to run it directly against the API. 
 
 Browse the [complete Tempo API reference](/docs/api/reference) to find every API group and endpoint.
 
-<title>Tempo API ⋅ Tempo Docs</title>
 
 ## Next API integration steps
 

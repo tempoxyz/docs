@@ -1,11 +1,12 @@
 ---
-title: tempo request
+title: "tempo request: CLI command reference"
+seoTitle: "tempo request: CLI Reference | Docs"
 description: Make curl-compatible HTTP requests that automatically negotiate Machine Payments Protocol payments.
 ---
 
 import { Cards, Card } from 'vocs'
 
-# `tempo request`
+# `tempo request`: CLI command reference
 
 A curl-compatible HTTP client that handles [Machine Payments Protocol](https://mpp.dev/overview) negotiation transparently. When a server responds with [`402 Payment Required`](https://mpp.dev/protocol/http-402), `tempo request` reads the [challenge](https://mpp.dev/protocol/challenges), signs and submits the payment onchain, then retries with the [credential](https://mpp.dev/protocol/credentials) in one command.
 

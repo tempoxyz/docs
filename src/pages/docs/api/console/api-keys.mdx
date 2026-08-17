@@ -1,9 +1,10 @@
 ---
-title: Manage API Keys
+title: "How to create and manage API keys"
+seoTitle: "Create & Manage API Keys | Tempo Docs"
 description: Create project-scoped Tempo API keys, select permissions, store tokens securely, authenticate requests, and safely rotate or revoke credentials when needed.
 ---
 
-# Manage API Keys
+# How to create and manage API keys
 
 API keys authenticate an integration and attribute its usage to a project. Every key is fixed to the production or sandbox environment in which it was created.
 
@@ -57,6 +58,40 @@ const client = Client.create({
 ```
 
 Keep the key in a server-side environment variable or secret manager. Do not expose it in frontend code, logs, support messages, or source control.
+
+## Restrict an API key by IP address
+
+Use an IP allowlist for server-side integrations with stable egress addresses. Tempo accepts exact IPv4 and IPv6 addresses or CIDR ranges.
+
+Set `allowedIps` when creating a key through the management API:
+
+```http
+POST /v1/orgs/{orgId}/projects/{projectId}/api-keys
+Content-Type: application/json
+
+{
+  "name": "production-worker",
+  "scopes": ["data:read"],
+  "allowedIps": ["203.0.113.7", "2001:db8::/32"]
+}
+```
+
+Replace an existing key's complete allowlist with `PATCH`:
+
+```http
+PATCH /v1/orgs/{orgId}/projects/{projectId}/api-keys/{keyId}
+Content-Type: application/json
+
+{
+  "allowedIps": ["198.51.100.0/24"]
+}
+```
+
+An omitted or empty `allowedIps` list means unrestricted access. Send `{ "allowedIps": [] }` to remove an existing restriction. Each list supports up to 100 entries.
+
+Requests from an address outside the allowlist, or without a trusted client IP, fail with `403 api_key_ip_forbidden`. Allowlist changes are eventually consistent and may take a minute or more to propagate globally. During an egress migration, add both the old and new ranges, wait for propagation, then remove the old range.
+
+See the [Tempo API reference](/docs/api/reference) for complete request and response schemas.
 
 ## Rotate an API key
 

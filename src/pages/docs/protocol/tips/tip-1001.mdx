@@ -20,9 +20,9 @@ By allowing pair creation against `nextQuoteToken()`, this change allows users a
 
 ---
 
-# Specification
+## Specification
 
-## New functions
+### New functions
 
 Add the following functions to the Stablecoin DEX interface:
 
@@ -57,9 +57,9 @@ function place(bytes32 bookKey, address token, uint128 amount, bool isBid, int16
 function placeFlip(bytes32 bookKey, address token, uint128 amount, bool isBid, int16 tick, int16 flipTick, bool internalBalanceOnly) external returns (uint128 orderId);
 ```
 
-## Behavior
+### Behavior
 
-### Pair creation
+#### Pair creation
 
 `createNextPair(base)` creates a pair between `base` and `base.nextQuoteToken()`. The function:
 
@@ -69,7 +69,7 @@ function placeFlip(bytes32 bookKey, address token, uint128 amount, bool isBid, i
 4. Creates the pair using the same mechanism as `createPair`
 5. Emits `PairCreated(key, base, nextQuoteToken)`
 
-### Place-only mode
+#### Place-only mode
 
 Once the pair exists, it supports the full order lifecycle:
 
@@ -81,7 +81,7 @@ The new `place` and `placeFlip` overloads are required because the existing func
 
 Swap functions (`swapExactAmountIn`, `swapExactAmountOut`) and quote functions (`quoteSwapExactAmountIn`, `quoteSwapExactAmountOut`) do not route through this pair because routing uses `quoteToken()` to find paths between tokens.
 
-### After quote token update
+#### After quote token update
 
 When the token issuer calls `completeQuoteTokenUpdate()`:
 
@@ -92,20 +92,20 @@ When the token issuer calls `completeQuoteTokenUpdate()`:
 
 The old pair (against the previous quote token) remains but will no longer be used for routing swaps involving this base token. Orders on it can be canceled using their ID.
 
-## New error
+### New error
 
 ```solidity
 /// @notice The base token has no next quote token staged
 error NO_NEXT_QUOTE_TOKEN();
 ```
 
-## Events
+### Events
 
 No new events. The existing `PairCreated` event is emitted by `createNextPair`, and the existing `OrderPlaced` event is emitted by the `place` and `placeFlip` overloads. 
 
 ---
 
-# Invariants
+## Invariants
 
 - A pair created via `createNextPair` must be identical to one created via `createPair` once `completeQuoteTokenUpdate` is called
 - `createNextPair` must revert if `nextQuoteToken()` returns `address(0)`

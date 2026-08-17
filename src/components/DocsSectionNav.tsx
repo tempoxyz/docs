@@ -45,12 +45,6 @@ const sectionNavItems: SectionNavItem[] = [
     ],
   },
   {
-    id: 'protocol',
-    label: 'Tempo Protocol',
-    href: '/docs/protocol',
-    matches: ['/docs/protocol'],
-  },
-  {
     id: 'tools',
     label: 'Tools & SDKs',
     href: '/docs/tools',
@@ -69,6 +63,12 @@ const sectionNavItems: SectionNavItem[] = [
     label: 'Tempo API',
     href: '/docs/api',
     matches: ['/docs/api'],
+  },
+  {
+    id: 'protocol',
+    label: 'Tempo Protocol',
+    href: '/docs/protocol',
+    matches: ['/docs/protocol'],
   },
   {
     id: 'node',

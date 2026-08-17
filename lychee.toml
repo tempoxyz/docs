@@ -35,6 +35,14 @@ exclude = [
   "^http://www\\.w3\\.org/2000/svg$",
   # POST-only AI search endpoint referenced in vocs.config.ts.
   "^https://tempo\\.xyz/developers/api/search$",
+  # MPP service roots expose paid API routes rather than browser landing pages.
+  "^https://[a-z0-9-]+\\.mpp\\.paywithlocus\\.com/?$",
+  # Verified app pages that reject automated link-check requests.
+  "^https://dashboard\\.pimlico\\.io/?$",
+  "^https://docs\\.elliptic\\.co/?$",
+  "^https://hub\\.conduit\\.xyz/tempo-testnet/?$",
+  # Temporary upstream error on the published TIP page.
+  "^https://tips\\.sh/1066/?$",
 ]
 
 # Reuse cached results across runs.

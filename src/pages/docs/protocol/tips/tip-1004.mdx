@@ -36,9 +36,9 @@ Adding a function for `transferWithAuthorization`, which we are also considering
 
 ---
 
-# Specification
+## Specification
 
-## New functions
+### New functions
 
 The following functions are added to the TIP-20 interface:
 
@@ -89,11 +89,11 @@ interface ITIP20Permit {
 }
 ```
 
-## EIP-712 Typed Data
+### EIP-712 Typed Data
 
 The permit signature must conform to EIP-712 typed structured data signing. The domain and message types are defined as follows:
 
-### Domain Separator
+#### Domain Separator
 
 The domain separator is computed using the following parameters:
 
@@ -114,7 +114,7 @@ bytes32 DOMAIN_SEPARATOR = keccak256(abi.encode(
 ));
 ```
 
-### Permit Typehash
+#### Permit Typehash
 
 The permit message type is:
 
@@ -124,7 +124,7 @@ bytes32 constant PERMIT_TYPEHASH = keccak256(
 );
 ```
 
-### Signature Construction
+#### Signature Construction
 
 To create a valid permit signature, the signer must sign the following EIP-712 digest:
 
@@ -147,28 +147,28 @@ bytes32 digest = keccak256(abi.encodePacked(
 
 The signature `(v, r, s)` must be produced by signing `digest` with the private key of `owner`.
 
-## Behavior
+### Behavior
 
-### Nonces
+#### Nonces
 
 Each address has an associated nonce that:
 - Starts at `0` for all addresses
 - Increments by `1` each time a permit is successfully executed for that address
 - Must be included in the permit signature to prevent replay attacks
 
-### Deadline
+#### Deadline
 
 The `deadline` parameter is a Unix timestamp. The permit is only valid if `block.timestamp <= deadline`. This allows signers to limit the validity window of their permits.
 
-### Pause State
+#### Pause State
 
 The `permit()` function follows the same pause behavior as `approve()`. Since setting an allowance does not move tokens, `permit()` is allowed to execute even when the token is paused.
 
-### TIP-403 Transfer Policy
+#### TIP-403 Transfer Policy
 
 The `permit()` function does not perform TIP-403 authorization checks, consistent with the behavior of `approve()`. Transfer policy checks are only enforced when tokens are actually transferred.
 
-### Signature Validation
+#### Signature Validation
 
 The implementation must:
 1. Verify that `block.timestamp <= deadline`, otherwise revert with `PermitExpired`
@@ -184,7 +184,7 @@ The implementation must:
 
 &gt; **Note**: The nonce is included in the signed digest, so nonce verification is implicit in signature validation — if the wrong nonce was signed, `ecrecover` will return a different address.
 
-## New errors
+### New errors
 
 ```solidity
 /// @notice The permit signature has expired (block.timestamp > deadline)
@@ -194,13 +194,13 @@ error PermitExpired();
 error InvalidSignature();
 ```
 
-## New events
+### New events
 
 None. Successful permit execution emits the existing `Approval` event from TIP-20.
 
 ---
 
-# Invariants
+## Invariants
 
 - `nonces(owner)` must only ever increase, never decrease
 - `nonces(owner)` must increment by exactly 1 on each successful `permit()` call for that owner
@@ -210,7 +210,7 @@ None. Successful permit execution emits the existing `Approval` event from TIP-2
 - After a successful `permit(owner, spender, value, ...)`, `allowance(owner, spender)` must equal `value`
 - `DOMAIN_SEPARATOR()` must be computed dynamically and reflect the current `block.chainid`
 
-## Test Cases
+### Test Cases
 
 The test suite must cover:
 

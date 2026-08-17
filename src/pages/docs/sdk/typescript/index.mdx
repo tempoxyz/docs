@@ -1,11 +1,12 @@
 ---
-title: TypeScript SDKs
+title: "TypeScript SDKs: Viem extension and Account SDK"
+seoTitle: "TypeScript SDKs: Viem & Account SDK | Docs"
 description: Build blockchain apps with Tempo using Viem and Wagmi. Send transactions, manage tokens, and integrate AMM pools with TypeScript.
 ---
 
 import { Cards, Card } from 'vocs'
 
-# TypeScript SDKs
+# TypeScript SDKs: Viem extension and Account SDK
 
 Tempo distributes TypeScript SDKs for:
 - [Viem](https://viem.sh): TypeScript interface for EVM blockchains
@@ -41,7 +42,7 @@ The Tempo extensions cover common chain operations such as querying state, sendi
 
 Use Viem for Node.js scripts, servers, and other headless applications.
 
-### Create a testnet client
+### Connect to Tempo Testnet and send a stablecoin
 
 Install Viem:
 
@@ -49,21 +50,57 @@ Install Viem:
 npm install viem
 ```
 
-Connect to Tempo Testnet and use the [faucet](/docs/quickstart/faucet) to fund the account with test tokens.
+Connect to Tempo Testnet, fund an account, read its pathUSD balance, and send a confirmed transfer.
 
 ```ts twoslash [testnet.ts] filename="testnet.ts"
 // [!include ~/snippets/node-viem-quickstart.ts:testnet]
 ```
 
 :::warning
-This example is testnet-only. For mainnet, use a separately funded mainnet account, omit `testnet: true`, and remove the faucet call.
+This example is testnet-only. For mainnet, use a funded mainnet account and token, omit `testnet: true`, and remove the faucet call.
 :::
 
-Tempo actions are grouped by feature under namespaces such as `client.token`, `client.policy`, `client.fee`, `client.dex`, `client.accessKey`, and `client.receivePolicy`. See the [Viem Actions reference](https://viem.sh/tempo/actions) for the full list.
+`balance` includes the amount in base units, the token's decimals, and a formatted value. `transferSync` waits for the transaction to be included; `receipt.transactionHash` identifies the transaction.
 
-The T3-compatible `viem` release includes the updated access-key ABI, including periodic limits and call scoping. See the [T3 network upgrade](/docs/protocol/upgrades/t3) for migration details.
+The same client includes standard Viem methods such as `getBlockNumber`, `getTransaction`, `getTransactionReceipt`, `getLogs`, `readContract`, and `simulateContract`.
+
+### Tempo Transactions
+
+| Goal | Viem input | Guide |
+| --- | --- | --- |
+| Send multiple calls together | `calls` | [Batch calls](/docs/guide/tempo-transaction#batch-calls) |
+| Pay fees with a chosen token | `feeToken` | [Configurable fee tokens](/docs/guide/tempo-transaction#configurable-fee-tokens) |
+| Let another account pay the fees | `feePayer` | [Fee sponsorship](/docs/guide/tempo-transaction#fee-sponsorship) |
+| Send independent transaction sequences | `nonceKey` | [Concurrent transactions](/docs/guide/tempo-transaction#concurrent-transactions) |
+| Limit when a transaction can run | `validAfter` and `validBefore` | [Scheduled transactions](/docs/guide/tempo-transaction#scheduled-transactions) |
+
+### Tempo guides and API reference
 
 <Cards>
+  <Card
+    description="Send and accept stablecoins, attach memos, and configure payment controls"
+    to="/docs/guide/payments"
+    icon="lucide:send"
+    title="Payments"
+  />
+  <Card
+    description="Launch and operate a TIP-20 stablecoin"
+    to="/docs/guide/issuance"
+    icon="lucide:coins"
+    title="Stablecoin Issuance"
+  />
+  <Card
+    description="Trade stablecoins and provide liquidity"
+    to="/docs/guide/stablecoin-dex"
+    icon="lucide:arrow-left-right"
+    title="Stablecoin Exchange"
+  />
+  <Card
+    description="Use fee tokens, sponsorship, batching, access keys, and concurrent transactions"
+    to="/docs/guide/tempo-transaction"
+    icon="lucide:workflow"
+    title="Tempo Transactions"
+  />
   <Card
     description="Viem Actions for querying data, sending transactions, managing tokens & AMM pools, and more"
     to="https://viem.sh/tempo/actions"

@@ -66,6 +66,15 @@ The system consists of contracts on both Tempo Mainnet and within each Tempo Zon
 - **`ZonePortal`** is the central bridge contract. It locks all deposited tokens, verifies validity proofs, and processes withdrawals. The Zone Portal contract maintains the authoritative state: which deposits have been made, which batches have been proven, and which withdrawals are pending.
 - **`ZoneMessenger`** handles withdrawals that include callbacks. When a user wants to withdraw tokens and trigger a contract call atomically, the messenger executes both operations together. If the callback fails, the entire withdrawal reverts and funds bounce back to the zone.
 
+The protocol manages the shared Tempo contracts at these addresses:
+
+| Component | Address |
+|-----------|---------|
+| `ZoneFactory` | `0x5AF2000000000000000000000000000000000000` |
+| `ZonePortal` implementation | `0x5AD1000000000000000000000000000000000000` |
+| Zone verifier | `0x5a56000000000000000000000000000000000000` |
+| `ZoneMessenger` | `0x5A4d000000000000000000000000000000000000` |
+
 ### Zone Predeploys
 
 Tempo Zones have four system contract predeploys at fixed addresses:

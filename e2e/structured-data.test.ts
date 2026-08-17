@@ -32,8 +32,8 @@ test('renders authored docs metadata and breadcrumbs into JSON-LD', async ({ req
 
   expect(articles).toHaveLength(1)
   expect(articles[0]).toMatchObject({
-    name: 'Send a Payment',
-    headline: 'Send a Payment',
+    name: 'How to send a stablecoin payment on Tempo',
+    headline: 'How to send a stablecoin payment on Tempo',
     description:
       'Send stablecoin payments between accounts on Tempo. Include optional memos for reconciliation and tracking with TypeScript, Rust, or Solidity.',
   })
@@ -41,9 +41,22 @@ test('renders authored docs metadata and breadcrumbs into JSON-LD', async ({ req
   expect(breadcrumbs[0]?.itemListElement).toEqual(
     expect.arrayContaining([
       expect.objectContaining({ name: 'Tempo Docs' }),
-      expect.objectContaining({ name: 'Send a Payment' }),
+      expect.objectContaining({ name: 'How to send a stablecoin payment on Tempo' }),
     ]),
   )
+})
+
+test('keeps audited OpenAPI browser and structured-data titles separate', async ({ request }) => {
+  const nodes = await structuredData(request, '/docs/api/console')
+  const articles = nodesByType(nodes, 'TechArticle')
+
+  expect(articles).toHaveLength(1)
+  expect(articles[0]).toMatchObject({
+    name: 'Using the Tempo API Console',
+    headline: 'Using the Tempo API Console',
+    description:
+      'Use Tempo API Console to create projects and API keys, switch environments, monitor usage, configure billing, and manage organization access in one place.',
+  })
 })
 
 test('renders authored OpenAPI guide metadata into JSON-LD', async ({ request }) => {

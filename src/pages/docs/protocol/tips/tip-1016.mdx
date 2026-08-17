@@ -46,9 +46,9 @@ The reservoir model (from [EIP-8037](https://eips.ethereum.org/EIPS/eip-8037)) s
 
 ---
 
-# Specification
+## Specification
 
-## Gas Dimensions
+### Gas Dimensions
 
 All operations consume gas in two dimensions:
 
@@ -58,7 +58,7 @@ All operations consume gas in two dimensions:
 
 At the transaction level, the user pays for both. At the block level, only regular gas counts toward block and EIP-7825 max transaction gas limits; state gas is exempt.
 
-## Storage Gas Operations
+### Storage Gas Operations
 
 Storage creation operations split their cost between regular gas (computational overhead) and state gas (permanent storage burden):
 
@@ -76,7 +76,7 @@ For zero-to-non-zero `SSTORE`, Tempo keeps revm's decomposed Berlin accounting: 
 When the slot is cold, the existing Berlin cold-slot access charge (`GAS_COLD_SLOAD = 2,100`) is
 retained on top of that write component, for a total of 22,200 regular gas before state gas.
 
-### EIP-7702 Delegation Pricing
+#### EIP-7702 Delegation Pricing
 
 Each EIP-7702 authorization writes a 23-byte delegation designator (`0xef0100 || address`) to the authority account's code field. This is permanent state: redelegation overwrites the account's code pointer but the old code entry persists in the code database.
 
@@ -84,7 +84,7 @@ The base cost per authorization is **25,000 regular gas + 225,000 state gas = 25
 
 For authorizations where `auth.nonce == 0` (new account), the account creation cost (25,000 regular + 225,000 state) applies in addition to the delegation cost, for a total of 500,000 gas.
 
-### Keychain Authorization Pricing
+#### Keychain Authorization Pricing
 
 Keychain `authorize_key` is charged as intrinsic gas (T1B+). The SSTORE components use the same regular/state split as standard EVM SSTOREs:
 
@@ -101,7 +101,7 @@ Keychain `authorize_key` is charged as intrinsic gas (T1B+). The SSTORE componen
 The table above isolates the write component itself. Any first access to a cold storage slot still
 incurs the standard Berlin cold-access charge separately.
 
-### Precompile and Intrinsic Storage Operations
+#### Precompile and Intrinsic Storage Operations
 
 The regular/state gas split applies uniformly to all SSTORE and code deposit operations regardless of call site. Precompile storage operations route through the same path as standard EVM SSTOREs and inherit the split automatically. Intrinsic gas charges that include SSTORE costs (e.g. keychain authorization) use the same split.
 
@@ -114,7 +114,7 @@ The regular/state gas split applies uniformly to all SSTORE and code deposit ope
 - All other operations (non-state-creating) are charged entirely as regular gas
 - Regular gas is set to at least the pre-TIP-1000 (standard EVM) cost for each operation, ensuring that exempting state gas from limits never makes an operation cheaper against protocol limits than it was before TIP-1000
 
-## Transaction Validation
+### Transaction Validation
 
 Before transaction execution, `calculate_intrinsic_cost` returns three values:
 
@@ -138,7 +138,7 @@ The `max` ensures that calldata-heavy transactions cannot pass validation when t
 
 `validate_transaction` also returns `intrinsic_regular_gas`, `intrinsic_state_gas`, and `calldata_floor_gas_cost`.
 
-## Transaction-Level Gas Accounting (Reservoir Model)
+### Transaction-Level Gas Accounting (Reservoir Model)
 
 Since transactions have a single gas limit parameter (`tx.gas`), gas accounting is enforced through a **reservoir model**, in which `gas_left` and `state_gas_reservoir` are initialized as follows:
 
@@ -164,7 +164,7 @@ The `state_gas_reservoir` holds gas that exceeds the per-transaction regular gas
 
 The two counters are returned by the transaction output. Besides the two counters, the EVM also keeps track of `execution_state_gas_used` and `execution_regular_gas_used` during block execution. `state_gas` costs are added to `execution_state_gas_used` while `regular_gas` costs are added to `execution_regular_gas_used`. These two counters are also returned by the transaction output.
 
-## Transaction Gas Used
+### Transaction Gas Used
 
 At the end of transaction execution, the gas used before and after refunds is defined as:
 
@@ -181,7 +181,7 @@ The refund cap remains at 20% of gas used. The `max` with `calldata_floor_gas_co
 
 **Note**: EIP-8037 uses `tx_gas_used` in the refund and post-refund formulas, but that variable is not defined in the same code block. TIP-1016 uses `tx_gas_used_before_refund` consistently to avoid ambiguity.
 
-## Block-Level Gas Accounting
+### Block-Level Gas Accounting
 
 At block level, only **regular gas** counts toward block gas limits. State gas is exempt — it is not tracked at the block level and does not constrain block capacity.
 
@@ -217,7 +217,7 @@ gas_used_delta = parent.gas_used - parent.gas_target
 
 **Divergence from EIP-8037**: EIP-8037 uses a bottleneck model where `gas_used = max(block_regular_gas, block_state_gas)`, effectively capping state gas at the block gas limit. TIP-1016 instead exempts state gas entirely from block limits, relying on fixed high prices (250,000 gas per state element) as the economic deterrent for state growth.
 
-## SSTORE Refund for Slot Restoration
+### SSTORE Refund for Slot Restoration
 
 When a storage slot is set to a non-zero value and then restored to zero within the same transaction (0→X→0 pattern), the following are refunded via `refund_counter`:
 
@@ -226,21 +226,21 @@ When a storage slot is set to a non-zero value and then restored to zero within 
 
 The refund mechanism is identical to EIP-8037. The numeric values differ because Tempo uses fixed pricing (see Storage Gas Operations table) rather than EIP-8037's dynamic `cost_per_state_byte`. The net cost after refund is `GAS_WARM_ACCESS` (100), consistent with pre-EIP-8037 `SSTORE` restoration behavior. Refunds use `refund_counter` rather than direct gas accounting decrements, so that reverted frames do not benefit from the refund.
 
-## Revert Behavior for State Gas
+### Revert Behavior for State Gas
 
 State gas charged for account creation (`CREATE`, `CALL` to new account, and EOA delegation) is consumed even if the frame reverts — state changes are rolled back but gas is not refunded. This is consistent with pre-EIP-8037 behavior where `GAS_NEW_ACCOUNT` was consumed on revert.
 
 This is achieved structurally: `GAS_NEW_ACCOUNT` state gas is charged in the **parent frame** before creating the child frame. On child revert, `handle_reservoir_remaining_gas` restores only the child's `state_gas_spent` to the parent's reservoir — the parent's prior charge is preserved. Similarly, `GAS_CREATE` state gas for contract deployment is charged in the parent before the child initcode runs.
 
-## Receipt Semantics
+### Receipt Semantics
 
 Receipt `cumulative_gas_used` tracks the cumulative sum of `tx_gas_used_after_refund` (post-refund, post-floor) across transactions. This means `receipt[i].cumulative_gas_used - receipt[i-1].cumulative_gas_used` equals the gas paid by transaction `i`.
 
-## Contract Creation Pricing
+### Contract Creation Pricing
 
 Contract code storage cost increases from 1,000 to **2,500 gas/byte** (200 regular + 2,300 state).
 
-### Contract Deployment Cost Calculation
+#### Contract Deployment Cost Calculation
 
 When a contract creation transaction or opcode (`CREATE`/`CREATE2`) is executed, gas is charged differently based on whether the deployment succeeds or fails. Given bytecode `B` (length `L`) returned by initcode and `H = keccak256(B)`:
 
@@ -258,7 +258,7 @@ When a contract creation transaction or opcode (`CREATE`/`CREATE2`) is executed,
 
 This is aligned with EIP-8037's deployment flow, where `GAS_CODE_DEPOSIT` is charged only on the success path.
 
-### Example: 24KB Contract Deployment
+#### Example: 24KB Contract Deployment
 
 Operation | Regular | State gas
 ----------|---------|----------
@@ -272,9 +272,9 @@ Total gas: ~64M (user must authorize with `gas_limit >= 64M`)
 
 **Can deploy with protocol max_transaction_gas_limit = 16M** (only ~7M regular gas counts)
 
-## Examples
+### Examples
 
-### TIP-20 Transfer to New Address
+#### TIP-20 Transfer to New Address
 - Transfer logic: ~50,000 regular gas
 - New balance slot: 20,000 regular gas + 230,000 state gas
 - **Total**: ~70,000 regular gas + 230,000 state gas = ~300,000 gas
@@ -291,7 +291,7 @@ Total gas: ~64M (user must authorize with `gas_limit >= 64M`)
 - Block accounting: adds ~70,000 to `block_regular_gas_used` (state gas is exempt from block limits)
 - Total cost: ~300,000 gas
 
-### TIP-20 Transfer to Existing Address
+#### TIP-20 Transfer to Existing Address
 - Transfer logic: ~50,000 regular gas
 - Update existing slot: included in transfer logic
 - **Total**: ~50,000 regular gas
@@ -299,7 +299,7 @@ Total gas: ~64M (user must authorize with `gas_limit >= 64M`)
 - Counts toward block limit: ~50,000 regular gas
 - Total cost: ~50,000 gas
 
-### Block Throughput
+#### Block Throughput
 At 500M payment lane gas limit (only regular gas counts toward block limits):
 
 - **New account transfers**: ~70k regular gas each → ~7,150 transfers/block ≈ 14,300 TPS
@@ -309,7 +309,7 @@ At 500M payment lane gas limit (only regular gas counts toward block limits):
 
 ---
 
-# Invariants
+## Invariants
 
 1. **User Authorization**: Total gas used (regular + state) MUST NOT exceed `transaction.gas_limit` (prevents surprise costs)
 2. **Protocol Transaction Limit**: Regular gas (via `gas_left`) MUST NOT exceed `max_transaction_gas_limit` (EIP-7825 limit, e.g. 16M)
@@ -335,7 +335,7 @@ At 500M payment lane gas limit (only regular gas counts toward block limits):
 
 ---
 
-# Alignment with EIP-8037
+## Alignment with EIP-8037
 
 This TIP adopts the **reservoir model** from [EIP-8037](https://eips.ethereum.org/EIPS/eip-8037) for transaction-level gas accounting, with the following Tempo-specific differences:
 
