@@ -1197,6 +1197,7 @@ export default defineConfig({
         text: 'Reference and Operations',
         items: [
           { text: 'Tools & SDKs', link: '/docs/tools' },
+          { text: 'Tempo API', link: '/docs/api' },
           { text: 'Tempo Protocol', link: '/docs/protocol' },
           { text: 'Run a Tempo Node', link: '/docs/guide/node' },
           { text: 'Use Tempo with AI', link: '/docs/guide/using-tempo-with-ai' },
