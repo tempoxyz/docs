@@ -63,14 +63,7 @@ At activation, T10 installs the factory and three shared runtimes atomically:
 | Zone verifier | `0x5a56000000000000000000000000000000000000` |
 | Zone messenger | `0x5A4d000000000000000000000000000000000000` |
 
-The factory owner cannot replace these runtimes. Any future runtime replacement requires another hardfork. Because every portal delegates to the shared implementation address, a future replacement upgrades all existing portals and must preserve their storage layout.
-
 ## Integration impact
-
-### For node operators
-
-- Upgrade to v1.13.0 before activation on each network.
-- Nodes that do not upgrade fall out of consensus when T10 activates.
 
 ### For zone operators and applications
 
@@ -79,9 +72,3 @@ The factory owner cannot replace these runtimes. Any future runtime replacement 
 - Ensure the initial TIP-20 token has a TIP-403 policy binding.
 - Read the created portal address from factory state or `ZoneCreated` rather than predicting deployment addresses.
 - Use `isZonePortal` when validating whether an address is a registered portal.
-
-### For indexers and infrastructure
-
-- Index the native factory at its reserved address.
-- Continue consuming `ZoneCreated` and the canonical factory registry.
-- Treat portal accounts as ERC-1167 proxies with independent storage and a shared implementation.
