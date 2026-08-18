@@ -14,6 +14,34 @@ export default function HomeBelowFold() {
   const perfSectionRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    let frameId: number | undefined
+
+    const scrollToHashTarget = () => {
+      const hash = window.location.hash
+      if (!hash) return
+
+      let id = hash.slice(1)
+      try {
+        id = decodeURIComponent(id)
+      } catch {
+        // Keep the literal fragment when it contains malformed percent encoding.
+      }
+
+      const target = document.getElementById(id)
+      if (!target) return
+      if (frameId !== undefined) window.cancelAnimationFrame(frameId)
+      frameId = window.requestAnimationFrame(() => target.scrollIntoView())
+    }
+
+    scrollToHashTarget()
+    window.addEventListener('hashchange', scrollToHashTarget)
+    return () => {
+      window.removeEventListener('hashchange', scrollToHashTarget)
+      if (frameId !== undefined) window.cancelAnimationFrame(frameId)
+    }
+  }, [])
+
+  useEffect(() => {
     const section = perfSectionRef.current
     if (!section || loadPerfData) return
     if (!('IntersectionObserver' in window)) {
