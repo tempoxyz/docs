@@ -13,6 +13,11 @@ AI agents can open pull requests, make API calls, or trigger deployments. In mor
 
 That is the problem we set out to solve.
 
+<video controls autoplay muted loop playsinline preload="metadata" aria-label="Voight-Kampff pull request approval workflow">
+  <source src="/blog/voight-kampff/pr-workflow.mp4" type="video/mp4">
+  <a href="/blog/voight-kampff/pr-workflow.mp4">Watch the Voight-Kampff pull request approval workflow.</a>
+</video>
+
 Voight-Kampff (pronounced [voyt-kahmpf](https://www.youtube.com/watch?t=74&v=fFE5svgQFGY&feature=youtu.be), named after the device from the film *Blade Runner*, used to tell apart humans from synthetic replicants) is our proof-of-human intent layer for high-impact workflows. It verifies that an authorized person performs a real-world physical action before an operation is allowed to proceed. For the common path, the physical action is a simple macOS Touch ID tap on the user’s laptop.
 
 ## What We Wanted

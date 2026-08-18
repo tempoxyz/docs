@@ -1564,6 +1564,14 @@ body {
   margin-top: 1.5em;
   border: 1px solid var(--line);
 }
+.blog-prose video {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 1.5em;
+  border: 1px solid var(--line);
+  background: var(--surface-block);
+}
 /* Diagrams are inlined as SVG at build time (see blogPlugin) so they can
    follow the active theme. Text uses currentColor; shapes use diagram tokens. */
 .blog-prose svg.blog-diagram {
