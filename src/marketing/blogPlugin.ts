@@ -45,9 +45,14 @@ function inlineSvgImages(html: string): string {
 }
 
 // Blog pages are mounted at /developers/blog in production and /blog in
-// previews. Relative media URLs preserve the active mount path in both places.
-export function makeBlogAssetUrlsMountSafe(html: string): string {
-  return html.replace(/(\b(?:src|href)=["'])\/blog\//g, '$1./')
+// previews. Use explicit paths because the marketing page's <base href="/">
+// makes relative media URLs resolve from the domain root.
+export function makeBlogAssetUrlsMountSafe(
+  html: string,
+  vercelEnv = process.env.VERCEL_ENV,
+): string {
+  const base = vercelEnv === 'production' ? '/developers/blog/' : '/blog/'
+  return html.replace(/(\b(?:src|href)=["'])\/blog\//g, `$1${base}`)
 }
 
 const CATEGORY_SLUGS = ['network-upgrades', 'events', 'technical', 'case-studies']
