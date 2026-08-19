@@ -2,7 +2,7 @@
 title: "Human Authorization in Agentic Workflows"
 excerpt: "How Tempo enables AI-accelerated development securely"
 date: 2026-08-17
-category: case-studies
+category: [technical, case-studies]
 ---
 
 At Tempo, we are building more workflows where software can move quickly on a person's behalf. That is useful, but it can also be risky.
