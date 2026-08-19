@@ -21,15 +21,15 @@ Most read endpoints work without credentials at the public rate limit. Use [MPP 
 
 ## How do I monitor a stablecoin payment?
 
-Read the [transaction and receipt](/docs/api/transactions) to follow execution, then inspect its [transaction activities](/docs/api/activities#list-transaction-activities) to identify the stablecoin movement. Configure [webhooks](/docs/api/webhooks) for signed callbacks instead of polling, and review delivery history when you need to audit an attempt.
+Read the [transaction and receipt](/docs/api/transactions) to follow execution, then inspect its [transaction activities](/docs/api/reference#tag/activities) to identify the stablecoin movement. Configure [webhooks](/docs/api/reference#tag/webhooks) for signed callbacks instead of polling, and review delivery history when you need to audit an attempt.
 
 ## Does the Tempo Funding API execute a transfer?
 
-No. The [Funding API](/docs/api/funding/quotes) compares live quotes across supported chains and providers, but it does not execute a transfer. Execute the chosen transfer separately.
+No. The [Funding API](/docs/api/reference#tag/funding) compares live quotes across supported chains and providers, but it does not execute a transfer. Execute the chosen transfer separately.
 
 ## Does the Tempo Exchange API submit a transaction?
 
-No. The [Exchange API](/docs/api/exchange) creates a priced preview on Tempo's native stablecoin DEX and returns unsigned approval and swap calls. Sign and submit the returned calls to complete the exchange.
+No. The [Exchange API](/docs/api/reference#tag/exchange) creates a priced preview on Tempo's native stablecoin DEX and returns unsigned approval and swap calls. Sign and submit the returned calls to complete the exchange.
 
 ## Where do I manage Tempo API projects and keys?
 
