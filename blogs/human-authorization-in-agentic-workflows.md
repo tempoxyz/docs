@@ -117,10 +117,16 @@ This pattern is useful beyond just pull requests. We currently use Voight-Kampff
 - **Kubernetes API calls:** We built an API proxy that requires a Touch ID for certain actions before forwarding to the upstream k8s API server.
 - **GitHub Actions workflows:** Using GitHub’s [custom deployment protection rules](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/create-custom-protection-rules), we can gate certain workflows to only proceed after Touch ID approval.
 
-  ![A GitHub Actions workflow waiting for Voight-Kampff Touch ID approval](/blog/voight-kampff/deployment-approval.png)
-
-  ![A GitHub Actions workflow after Voight-Kampff approval](/blog/voight-kampff/deployment-approved.png)
+  <video controls autoplay muted loop playsinline preload="metadata" aria-label="Voight-Kampff GitHub Actions approval workflow">
+    <source src="/blog/voight-kampff/github-actions-workflow.mp4" type="video/mp4">
+    <a href="/blog/voight-kampff/github-actions-workflow.mp4">Watch the Voight-Kampff GitHub Actions approval workflow.</a>
+  </video>
 
 - **Verifying a coworker’s request on Slack:** In an age where video and audio can be AI-generated, being able to quickly verify someone with a quick @-mention allows us to move quickly for simple tasks that need an extra level of security.
+
+  <video controls autoplay muted loop playsinline preload="metadata" aria-label="Voight-Kampff Slack verification workflow">
+    <source src="/blog/voight-kampff/slack-workflow.mp4" type="video/mp4">
+    <a href="/blog/voight-kampff/slack-workflow.mp4">Watch the Voight-Kampff Slack verification workflow.</a>
+  </video>
 
 The simplicity and security of the Touch ID workflow has served us well at Tempo, and we plan to continue rolling Voight-Kampff out to protect other sensitive actions across our systems.
