@@ -44,6 +44,12 @@ function inlineSvgImages(html: string): string {
   })
 }
 
+// Blog pages are mounted at /developers/blog in production and /blog in
+// previews. Relative media URLs preserve the active mount path in both places.
+export function makeBlogAssetUrlsMountSafe(html: string): string {
+  return html.replace(/(\b(?:src|href)=["'])\/blog\//g, '$1./')
+}
+
 const CATEGORY_SLUGS = ['network-upgrades', 'events', 'technical', 'case-studies']
 
 // ALL-CAPS markdown files (AGENTS.md, DIAGRAMS.md, …) are documentation for
@@ -148,7 +154,7 @@ async function renderPost(filename: string): Promise<SearchablePost> {
     )
   }
 
-  const html = inlineSvgImages(String(await processor.process(content)))
+  const html = makeBlogAssetUrlsMountSafe(inlineSvgImages(String(await processor.process(content))))
 
   return {
     slug,
