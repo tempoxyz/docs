@@ -34,7 +34,7 @@ Finally, the system needed to integrate with existing gates. For pull requests, 
 
 The solution has two pieces: a server and a macOS client that runs as a background LaunchAgent on each user's laptop.
 
-![Voight-Kampff connects GitHub to a user's laptop over a persistent WebSocket connection](/blog/voight-kampff/architecture.png)
+![Voight-Kampff connects GitHub to a user's laptop over a persistent WebSocket connection](/blog/voight-kampff/architecture.webp)
 
 During registration, the client creates a P-256 signing key in the Mac's Secure Enclave. The private key cannot be exported, and the key is protected with macOS `biometryCurrentSet`, which requires Touch ID and invalidates the key if the enrolled fingerprints change. The server stores the public key and binds it to the user's identity.
 
@@ -63,24 +63,24 @@ The normal flow looks like this:
 
 1. A PR is blocked from being merged until it is reviewed.
 
-   ![A GitHub pull request blocked pending review and the Voight-Kampff status check](/blog/voight-kampff/review-required.png)
+   ![A GitHub pull request blocked pending review and the Voight-Kampff status check](/blog/voight-kampff/review-required.webp)
 
 2. A reviewer approves the PR in GitHub.
 
-   ![GitHub's approve review option](/blog/voight-kampff/github-approve-review.png)
+   ![GitHub's approve review option](/blog/voight-kampff/github-approve-review.webp)
 
 3. GitHub sends a `pull_request_review` webhook to the VK server.
 4. The VK server verifies the GitHub webhook signature, checks that the review applies to the current PR head, and creates an approval request for the reviewer.
 5. The request is pushed over a WebSocket to the reviewer's local agent running on their laptop.
 6. The agent shows the Touch ID prompt with context about the PR.
 
-   ![A Voight-Kampff Touch ID prompt showing the repository, pull request, and commit being approved](/blog/voight-kampff/touch-id-review-approval.png)
+   ![A Voight-Kampff Touch ID prompt showing the repository, pull request, and commit being approved](/blog/voight-kampff/touch-id-review-approval.webp)
 
 7. After confirming the request is for the review they just left, the reviewer confirms with Touch ID.
 8. The agent signs the approval payload with the Secure Enclave key and posts it back to the server.
 9. The server verifies the signature, records the result, and updates the GitHub status check.
 
-   ![A GitHub pull request with the Voight-Kampff review check passed](/blog/voight-kampff/review-check-passed.png)
+   ![A GitHub pull request with the Voight-Kampff review check passed](/blog/voight-kampff/review-check-passed.webp)
 
 From the reviewer's perspective, this is still just approving a PR plus a quick Touch ID tap. From GitHub's perspective it is still a required status check, but the check now depends on a real physical action by the reviewer, not just possession of GitHub credentials.
 
