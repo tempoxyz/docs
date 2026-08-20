@@ -132,14 +132,15 @@ A TIP-20 token can declare a currency identifier that identifies the reference a
 
 #### General principle
 
-**The `currency` field identifies the reference asset that 1 unit of the token is designed to be worth** — not what the token is called or what it is denominated in. Two tokens that track the same asset should have the same `currency`. When in doubt, consider that the purpose of this field is to determine what assets a token would trade against on a DEX designed for assets that trade within 2% of a 1:1 price.
+**The `currency` field identifies the reference asset that 1 unit of the token is designed to be worth** — not what the token is called or what it is denominated in. Two tokens that track the same asset should have the same `currency`, unless one intentionally opts out of gas eligibility with the `-NGE` suffix described below. When in doubt, consider that the purpose of this field is to determine what assets a token would trade against on a DEX designed for assets that trade within 2% of a 1:1 price.
 
 #### Guidelines
 
 1. **Tokens that track an asset with an [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) code** — use that code. This includes fiat currencies (`"USD"`, `"EUR"`) as well as commodities (`"XAU"` for gold, `"XAG"` for silver).
 2. **Tokens tracking a non-ISO asset at 1:1** — use the symbol of the reference asset. For example, a bridged WBTC that tracks BTC should use `"BTC"`; a bridged WETH that tracks ETH should use `"ETH"`. Prefer `"BTC"` over `"XBT"`. Use the symbol from the asset's origin chain when there is ambiguity across platforms.
-3. **Tokens denominated in but not pegged to a currency** — do **not** use that currency's code. A tokenized gold product priced in USD should not use `"USD"`, because 1 unit is not designed to be worth 1 USD.
-4. **Tokens with no reference asset** — if a token does not track any external asset (e.g. a governance or utility token), use its own symbol as the currency.
+3. **Tokens that track a currency but must not be gas eligible** — append `-NGE` (not gas eligible) to the reference currency code. For example, use `"USD-NGE"` for a permissioned token that tracks USD but cannot support the Fee Manager or Fee AMM transfer flows. Apply the same convention to other currencies, such as `"EUR-NGE"`. This is a naming convention: the protocol excludes these tokens because gas and Stablecoin DEX eligibility currently require an exact `"USD"` currency value.
+4. **Tokens denominated in but not pegged to a currency** — do **not** use that currency's code. A tokenized gold product priced in USD should not use `"USD"`, because 1 unit is not designed to be worth 1 USD.
+5. **Tokens with no reference asset** — if a token does not track any external asset (e.g. a governance or utility token), use its own symbol as the currency.
 
 #### Currency declaration examples
 
@@ -147,6 +148,7 @@ A TIP-20 token can declare a currency identifier that identifies the reference a
 |-------|--------|------------|
 | USDC | US Dollar | `"USD"` |
 | USDT | US Dollar | `"USD"` |
+| WTGXX | US Dollar, permissioned and not gas eligible | `"USD-NGE"` |
 | EURC | Euro | `"EUR"` |
 | Bridged WBTC | Bitcoin | `"BTC"` |
 | Bridged stETH | Ether | `"ETH"` |
@@ -155,7 +157,7 @@ A TIP-20 token can declare a currency identifier that identifies the reference a
 | Governance token (e.g. UNI) | Itself | `"UNI"` |
 
 :::warning
-The currency code is **immutable** — it cannot be changed after token creation. An incorrect currency code will affect fee payment eligibility, DEX routing, and quote token pairing.
+The currency code is **immutable** — it cannot be changed after token creation. An incorrect currency code will affect fee payment eligibility, DEX routing, and quote token pairing. A token that uses `"USD-NGE"` cannot use a `"USD"` quote token because their currency values differ.
 :::
 
 ### DEX Quote Tokens
