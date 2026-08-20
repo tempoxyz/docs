@@ -909,7 +909,7 @@ export default defineConfig({
             items: [
               {
                 text: 'T10',
-                badge: { text: 'Planned', variant: 'note' as const },
+                badge: { text: 'Testnet', variant: 'note' as const },
                 link: '/docs/protocol/upgrades/t10',
               },
               {
