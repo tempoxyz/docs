@@ -669,6 +669,10 @@ export default defineConfig({
                 link: '/docs/ecosystem',
               },
               {
+                text: 'Payment Routes',
+                link: '/docs/ecosystem/payment-routes',
+              },
+              {
                 text: 'Bridges & Exchanges',
                 link: '/docs/ecosystem/bridges',
               },

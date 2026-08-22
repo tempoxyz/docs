@@ -85,6 +85,7 @@ Status: <Badge variant="red">Required</Badge>
 <OpenApi.Endpoints path="/docs/api" resource="rpc" />
 <OpenApi.Endpoints path="/docs/api" />
 <TempoMcpExplorer />
+<PaymentRoutesExplorer />
 `)
 
     expect(output).toContain('Interactive API example for `getAddressBalances`.')
@@ -92,6 +93,9 @@ Status: <Badge variant="red">Required</Badge>
     expect(output).toContain('Tempo JSON-RPC endpoints')
     expect(output).toContain('Tempo REST API endpoints')
     expect(output).toContain('Use the interactive web page to try the Tempo MCP server.')
+    expect(output).toContain(
+      'Use the interactive web page to filter live Tempo payment routes by rail, chain, currency, and provider.',
+    )
     expect(output).not.toMatch(/<\/?[A-Z]/)
   })
 
