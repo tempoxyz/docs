@@ -73,22 +73,22 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.1",
-    "@playwright/test": "^1.61.1",
-    "@tailwindcss/vite": "^4.3.1",
-    "@types/node": "^26.0.1",
+    "@biomejs/biome": "^2.5.8",
+    "@playwright/test": "^1.62.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.2.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@typescript/native-preview": "7.0.0-dev.20260624.1",
-    "@vitejs/plugin-react": "^6.0.3",
+    "@typescript/native-preview": "7.0.0-dev.20260707.2",
+    "@vitejs/plugin-react": "^6.0.5",
     "anser": "^2.3.5",
     "github-slugger": "2.0.0",
     "remark-stringify": "^11.0.0",
-    "tsx": "^4.22.4",
-    "typescript": "^6.0.3",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2",
     "vite": "^8.1.0",
     "vite-plugin-mkcert": "^2.1.0",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.10"
   },
   "devEngines": {
     "runtime": {
