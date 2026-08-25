@@ -79,7 +79,7 @@ export default function TpsTrendChart({
     number,
     number,
   ]
-  const yTicks = ticks(yDomain[0], yDomain[1], 4)
+  const yTicks = ticks(yDomain[0], yDomain[1], 5)
 
   const xAt = scaleLinear([0, n - 1], [PAD.l, Math.max(width - PAD.r, PAD.l + 1)])
   const yAt = scaleLinear(yDomain, [height - PAD.b, PAD.t])
