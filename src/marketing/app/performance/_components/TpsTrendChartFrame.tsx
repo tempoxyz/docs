@@ -20,6 +20,12 @@ export function tpsChartPad(width: number) {
 export const TPS_CHART_DEFAULT_DOMAIN = [9500, 25_200] as [number, number]
 export const TPS_CHART_DEFAULT_TICKS = [10_000, 15_000, 20_000, 25_000]
 
+function formatTpsTick(value: number, yTicks: number[]) {
+  const tickStep = yTicks.length >= 2 ? Math.abs(yTicks[1] - yTicks[0]) : 1000
+  const precision = tickStep >= 1000 ? 0 : tickStep % 100 === 0 ? 1 : 2
+  return `${(value / 1000).toFixed(precision)}K`
+}
+
 export function TpsChartGrid({
   height,
   showLabels = true,
@@ -48,7 +54,7 @@ export function TpsChartGrid({
               textAnchor="end"
               className="fill-foreground/35 font-mono text-[11px]"
             >
-              {Math.round(t / 1000)}K
+              {formatTpsTick(t, yTicks)}
             </text>
           ) : null}
         </g>
