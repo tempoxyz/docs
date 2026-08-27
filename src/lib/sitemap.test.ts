@@ -65,12 +65,12 @@ describe('finalizeSitemap', () => {
     const result = finalizeSitemap(
       sitemap,
       [],
-      ['billing', 'activities', 'funding/quotes', 'billing'],
+      ['billing', 'activities', 'routes/quotes', 'billing'],
     )
 
     expect(result).toContain('<loc>https://tempo.xyz/developers/docs/api/activities</loc>')
     expect(result).toContain('<loc>https://tempo.xyz/developers/docs/api/billing</loc>')
-    expect(result).toContain('<loc>https://tempo.xyz/developers/docs/api/funding/quotes</loc>')
+    expect(result).toContain('<loc>https://tempo.xyz/developers/docs/api/routes/quotes</loc>')
     expect(result.indexOf('/api/activities')).toBeLessThan(result.indexOf('/api/billing'))
     expect(result).not.toMatch(
       /<loc>https:\/\/tempo\.xyz\/developers\/docs\/api\/(?:activities|billing)<\/loc>\s*<lastmod>/,

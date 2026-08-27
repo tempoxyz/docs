@@ -1,14 +1,14 @@
 ---
 title: "Tempo API"
 seoTitle: "Start with the Tempo API | Tempo Docs"
-description: Build stablecoin payment apps with the official Tempo blockchain API for account activity, webhooks, funding, exchange quotes, fee sponsorship, and indexed SQL.
+description: Build stablecoin payment apps with the official Tempo blockchain API for account activity, webhooks, asset routes, exchange quotes, fee sponsorship, and indexed SQL.
 ---
 
 import { Cards, Card, OpenApi } from 'vocs'
 
 # Tempo API
 
-The Tempo API is the official Tempo blockchain API for stablecoin payment applications. Use it to read account and transaction activity, manage webhooks and integrations, quote funding and exchanges, sponsor fees, run indexed SQL, and call Tempo over JSON-RPC.
+The Tempo API is the official Tempo blockchain API for stablecoin payment applications. Use it to read account and transaction activity, manage webhooks and integrations, quote asset routes and exchanges, sponsor fees, run indexed SQL, and call Tempo over JSON-RPC.
 
 :::warning
 The Tempo API is under active development. Endpoints are not yet stable and may change without notice.
@@ -73,7 +73,7 @@ Create production and sandbox API keys in [Tempo API Console](https://console.te
 
 - **Track and reconcile a stablecoin payment.** Look up the [transaction and receipt](/docs/api/transactions), then inspect its [transaction activities](/docs/api/activities#list-transaction-activities) to confirm the token movement. Use [webhooks](/docs/api/webhooks) when your backend needs signed event callbacks.
 - **Monitor an account.** Read [balances](/docs/api/balances) and [activity](/docs/api/activities) to build payment history, treasury, or account views.
-- **Fund and exchange stablecoins.** Compare [funding quotes](/docs/api/funding/quotes) across supported chains and providers, then [create a transfer](/docs/api/funding/transfers) or [create a reusable deposit address](/docs/api/funding/deposit-addresses). Use [exchange quotes](/docs/api/exchange) to prepare unsigned approval and swap calls for you to sign and submit.
+- **Route and exchange stablecoins.** Compare [route quotes](/docs/api/routes/quotes) across supported chains and providers, then [create a transfer](/docs/api/routes/transfers) or [create a reusable deposit address](/docs/api/routes/deposit-addresses). Use [exchange quotes](/docs/api/exchange) to prepare unsigned approval and swap calls for you to sign and submit.
 - **Sponsor transaction fees.** Use the [Fee Payer API](/docs/api/fee-payer) to apply sponsorship policy and fill, sponsor, and broadcast user transactions.
 - **Query custom payment data.** Use the [Indexer API](/docs/api/indexer-api) for read-only SQL across indexed blocks, transactions, receipts, logs, transfers, and exchange data.
 - **Prepare a production integration.** Create projects and keys in [Tempo API Console](/docs/api/console), then review [authentication](/docs/api/authentication), [rate limits](/docs/api/rate-limits), and [errors](/docs/api/errors).
@@ -132,7 +132,7 @@ Browse the [complete Tempo API reference](/docs/api/reference) to find every API
   />
   <Card
     title="Tempo API FAQ"
-    description="Answers about API surfaces, credentials, payment monitoring, funding, and exchange quotes."
+    description="Answers about API surfaces, credentials, payment monitoring, asset routes, and exchange quotes."
     to="/docs/api/faq"
     icon="lucide:circle-help"
   />
