@@ -77,7 +77,7 @@ tempo download --chain moderato --archive
 Use [snapshots.tempo.xyz](https://snapshots.tempo.xyz/) to compare snapshot profiles or copy generated `tempo download` commands.
 
 :::note[Replacing existing snapshot data]
-When replacing snapshot data in an existing data directory, add `--force` after selecting the right profile. `--force` overwrites snapshot data but preserves `discovery-secret` and `known-peers.json`.
+When replacing snapshot data in an existing data directory, add `--force` after selecting the right profile. `--force` removes the execution databases, static files, `reth.toml`, and the entire consensus directory before installing the new snapshot. It preserves `discovery-secret` and `known-peers.json`.
 :::
 
 ## Verifying Releases
