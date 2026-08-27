@@ -15,7 +15,7 @@ import { TidxQuery } from '../../../components/TidxQuery'
 
 Use the Indexer API to run read-only SQL against Tempo chain data without operating your own indexing pipeline.
 
-The Tempo API exposes [`GET /v1/indexer/query`](/docs/api/indexer), backed by [`tidx`](https://github.com/tempoxyz/tidx). The indexer continuously follows Tempo, stores blocks, transactions, logs, and receipts, and maintains analytics tables for common reads.
+The Tempo API exposes [`GET /v1/indexer/query`](/docs/api/reference#tag/indexer), backed by [`tidx`](https://github.com/tempoxyz/tidx). The indexer continuously follows Tempo, stores blocks, transactions, logs, and receipts, and maintains analytics tables for common reads.
 
 ## Querying the Indexer API
 
@@ -28,7 +28,7 @@ curl --get "https://api.tempo.xyz/v1/indexer/query" \
 
 Requests use the same [authentication](/docs/api/authentication), [rate limits](/docs/api/rate-limits), and `RateLimit-*` headers as the rest of the Tempo API. Use public access for low-volume queries, MPP for pay-per-request access, or an API key for a higher dedicated quota.
 
-See the [indexer query reference](/docs/api/indexer) for the complete request and response contract, live streaming, and error behavior.
+See the [indexer query reference](/docs/api/reference#tag/indexer) for the complete request and response contract, live streaming, and error behavior.
 
 <span id="how-tidx-indexes-tempo-data" />
 
