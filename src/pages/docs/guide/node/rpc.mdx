@@ -26,7 +26,7 @@ tempo node \
   --http.api eth,net,web3,txpool,trace
 ```
 
-As of v1.13.2, `tempo download` automatically discovers the latest snapshot manifest, resolves the default data directory, and downloads the required consensus data. See the [`tempo download` reference](/docs/cli/download) for explicit overrides and instructions for replacing existing snapshot data.
+`tempo download` automatically discovers the latest snapshot manifest, resolves the default data directory, and downloads the required consensus data. See the [`tempo download` reference](/docs/cli/download) for explicit overrides and instructions for replacing existing snapshot data.
 
 An RPC node running in follow mode is a **full node**. It first verifies consensus finalization certificates from the upstream before accepting followed blocks. Those certificates prove the data is backed by a validator quorum, not just the upstream node's local view of the chain. After verification, it fetches blocks from the upstream RPC endpoint, executes every transaction locally through the EVM, validates each block after execution, and stores complete block data with full state. All execution and validation happens locally on your machine.
 

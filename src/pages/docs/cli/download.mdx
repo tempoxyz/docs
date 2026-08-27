@@ -10,7 +10,7 @@ Download chain snapshots for faster initial sync. Fetches MDBX state and static 
 
 Running `tempo download` without a snapshot profile opens an interactive component selector. Passing a profile flag such as `--minimal` or `--archive` skips the selector. Validators should use `--minimal`. RPC providers, indexers, and other workloads that need complete historical data should use `--archive`.
 
-As of v1.13.2, `tempo download` automatically discovers the latest snapshot manifest for the selected chain, resolves the chain's default data directory, and downloads the required consensus data. You do not need to pass `--manifest-url`, `--datadir`, or `--skip-consensus=false` for the standard workflow. `--manifest-url` and `--datadir` remain available as explicit overrides.
+`tempo download` automatically discovers the latest snapshot manifest for the selected chain, resolves the chain's default data directory, and downloads the required consensus data. You do not need to pass `--manifest-url`, `--datadir`, or `--skip-consensus=false` for the standard workflow. `--manifest-url` and `--datadir` remain available as explicit overrides.
 
 ## `tempo download` usage
 
