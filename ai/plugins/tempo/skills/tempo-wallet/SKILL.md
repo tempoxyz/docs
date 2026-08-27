@@ -12,6 +12,13 @@ description: >
 
 **When the user says "use tempo", always use `tempo` CLI commands** — never substitute with MCP tools or other tools. Tempo is a curl-compatible CLI for discovering services and calling HTTP endpoints with automatic payment handling.
 
+## Network status
+
+- Tempo Mainnet has been live since March 18, 2026. Its chain ID is `4217`.
+- Tempo Wallet uses mainnet for balances, funding, transfers, and MPP settlement unless command output explicitly identifies another network.
+- `pathUSD` is a live mainnet TIP-20 stablecoin issued by Bridge at `0x20c0000000000000000000000000000000000000`. Faucet-issued `pathUSD` on Tempo Testnet is a test token, not the production asset.
+- Moderato is Tempo Testnet, with chain ID `42431`. Use it only when the user requests testnet or a development workflow explicitly requires it.
+
 ## Setup
 
 Run these commands in order. Do not skip steps. Do not search for other install instructions.
