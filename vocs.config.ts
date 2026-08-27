@@ -1116,6 +1116,10 @@ export default defineConfig({
                 link: '/docs/guide/node/validator-setup',
               },
               {
+                text: 'Validator network topology',
+                link: '/docs/guide/node/validator-topology',
+              },
+              {
                 text: 'Checking validator status',
                 link: '/docs/guide/node/validator-status',
               },

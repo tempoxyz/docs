@@ -1,0 +1,135 @@
+---
+title: Validator network topology
+seoTitle: Validator Network Topology | Tempo Docs
+description: Isolate a Tempo validator behind RPC nodes and restrict its consensus and execution peer connectivity.
+---
+
+import { StaticMermaidDiagram } from '../../../../components/StaticMermaidDiagram'
+
+# Validator network topology
+
+Run a production validator in an isolated network segment. Allow consensus traffic only between validators, and route execution P2P and transaction ingress through redundant internal follower RPC nodes.
+
+## Recommended validator topology
+
+The validator has two types of network relationship:
+
+- **Consensus P2P:** The validator communicates directly with the other Tempo validators over TCP port `8000`.
+- **Execution P2P:** The validator peers only with two internal follower RPC nodes over TCP and UDP port `30303`. It does not participate directly in the public execution P2P network.
+
+Each internal RPC node runs with `--follow` configured against the validator. The followers provide redundant transaction-ingress paths and relay submitted transactions to the validator over execution P2P. Operating two followers avoids making one RPC node a single point of failure for transaction inclusion by this validator.
+
+<StaticMermaidDiagram chart={`flowchart LR
+    subgraph PUBLIC["Tempo networks"]
+        V["Other validators"]
+        E["Execution P2P peers"]
+    end
+
+    subgraph EDGE["Network boundary"]
+        R1["Follower RPC node A<br/>--follow validator"]
+        R2["Follower RPC node B<br/>--follow validator"]
+    end
+
+    subgraph PRIVATE["Isolated validator network"]
+        N["Validator"]
+    end
+
+    V <-->|"Consensus P2P :8000"| N
+    E <-->|"Execution P2P :30303 TCP/UDP"| R1
+    E <-->|"Execution P2P :30303 TCP/UDP"| R2
+    R1 <-->|"Execution P2P :30303 TCP/UDP"| N
+    R2 <-->|"Execution P2P :30303 TCP/UDP"| N
+    R1 -->|"--follow over private RPC"| N
+    R2 -->|"--follow over private RPC"| N
+`} />
+
+Do not expose the validator's execution P2P, JSON-RPC, WebSocket RPC, metrics, or administrative interfaces to the internet. Keep monitoring and operator access on private management networks.
+
+## Validator firewall policy
+
+Enforce the topology at the network firewall even when the node's peer configuration restricts discovery or selects a fixed peer. Defense in depth prevents a configuration change from exposing the validator directly.
+
+| Traffic | Source or destination | Port | Policy |
+| --- | --- | --- | --- |
+| Consensus P2P | Other Tempo validators | `8000/TCP` | Allow |
+| Execution P2P | Two internal follower RPC nodes | `30303/TCP` and `30303/UDP` | Allow |
+| Follower upstream RPC | Two internal follower RPC nodes | Validator's private RPC port | Allow |
+| Other HTTP and WebSocket RPC | Private operator network, if required | `8545/TCP` and `8546/TCP` | Allow internally or disable |
+| Metrics | Private monitoring network | `9000/TCP` | Allow internally |
+| All other inbound traffic | Any source | Any port | Deny |
+| General internet egress | Internet | Any destination | Deny |
+
+Restrict the validator's execution peer configuration to the two internal follower RPC nodes, and restrict the validator subnet so port `30303` can reach only those nodes. Do not rely on peer discovery alone to provide isolation.
+
+## Restrict validator execution peers
+
+Each follower needs a stable, unique execution P2P identity. On each follower, print its `enode://` URL from the discovery secret that the node uses:
+
+```bash
+tempo p2p enode <FOLLOWER_DISCOVERY_SECRET> --ip <FOLLOWER_PRIVATE_IP>
+```
+
+Run the command once for follower A and once for follower B. Use the private IP that the validator uses to reach that follower. Do not copy a discovery secret between followers; each follower must have a different enode public key.
+
+Add both complete `enode://` URLs to the validator command:
+
+```bash
+tempo node \
+  --chain mainnet \
+  --datadir <VALIDATOR_DATADIR> \
+  --consensus.signing-key <VALIDATOR_SIGNING_KEY> \
+  --consensus.secret <VALIDATOR_SIGNING_SECRET> \
+  --disable-discovery \
+  --trusted-only \
+  --trusted-peers "enode://<FOLLOWER_A_PUBLIC_KEY>@<FOLLOWER_A_PRIVATE_IP>:30303,enode://<FOLLOWER_B_PUBLIC_KEY>@<FOLLOWER_B_PRIVATE_IP>:30303" \
+  --no-persist-peers \
+  --nat none
+```
+
+These flags serve separate purposes:
+
+| Flag | Effect on the validator |
+| --- | --- |
+| `--trusted-peers` | Adds the two follower enode URLs as the validator's trusted execution peers. |
+| `--trusted-only` | Connects to and accepts execution P2P connections from trusted peers only. |
+| `--disable-discovery` | Disables DNS, discv4, and discv5 peer discovery. |
+| `--no-persist-peers` | Prevents learned peers from being written to or restored from the peers file. |
+| `--nat none` | Disables NAT address resolution for the isolated validator. |
+
+Keep the firewall allowlist in place. The enode allowlist authenticates the followers' execution P2P identities, while the firewall restricts which private IPs can reach the validator's port `30303`.
+
+## Internal follower RPC node policy
+
+Place both internal RPC nodes in a separate network segment from the validator. Configure each node to:
+
+- Run in follow mode with `--follow` pointed at the validator's private RPC endpoint.
+- Participate in the Tempo execution P2P network over port `30303`.
+- Accept the validator as an execution peer over the private network.
+- Accept transaction submissions from the intended private or protected RPC clients.
+- Run without validator signing keys or consensus signing shares.
+- Export metrics to the private monitoring network.
+
+The internal follower nodes are replaceable network boundaries, not validator key-bearing hosts. Compromise of a follower must not provide filesystem or administrative access to the validator.
+
+## Failure and maintenance considerations
+
+Both follower RPC nodes are on the validator's transaction-ingress path. Monitor their execution peer counts, block heights, resource utilization, transaction-submission health, and private links to the validator.
+
+Run the followers independently so either node can continue accepting and relaying transactions when the other is unavailable. Configure clients or an internal load balancer to remove an unhealthy follower from rotation. Verify that failure of either follower does not interrupt transaction submission through the remaining node.
+
+Use separate management access for upgrades and incident response. Do not turn the validator into a general-purpose RPC endpoint during maintenance.
+
+## Validate the isolation boundary
+
+After deployment or a firewall change, confirm that:
+
+- Other validators can reach the validator's consensus endpoint on port `8000`.
+- The two internal follower RPC nodes are the validator's only execution peers.
+- Internet hosts cannot reach the validator on ports `30303`, `8545`, `8546`, or `9000`.
+- The validator cannot establish execution P2P connections to internet peers.
+- Each follower is configured with `--follow` against the validator and remains synced.
+- Transactions submitted through either follower reach the validator.
+- Transaction submission continues after either follower is removed from service.
+- Monitoring reaches both hosts only through the private monitoring network.
+
+See [system requirements and ports](/docs/guide/node/system-requirements#ports), [validator monitoring](/docs/guide/node/validator-monitoring), and [node security](/docs/guide/node/security) for the related operational controls.
