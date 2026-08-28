@@ -336,6 +336,17 @@
       "permanent": true
     },
     {
+      "source": "/docs/learn/tempo/receive-policies",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/guide/payments/configure-receive-policies",
+      "permanent": true
+    },
+    {
       "source": "/learn/tempo/receive-policies",
       "has": [
         {
@@ -794,6 +805,11 @@
     {
       "source": "/developers/accounts/server/handler.relay",
       "destination": "/developers/docs/server/relay-handler",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/learn/tempo/receive-policies",
+      "destination": "/developers/docs/guide/payments/configure-receive-policies",
       "permanent": true
     },
     {
