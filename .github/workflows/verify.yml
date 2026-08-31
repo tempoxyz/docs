@@ -42,6 +42,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Fetch OpenAPI specification
+        run: |
+          node --experimental-strip-types scripts/fetch-openapi.ts "$RUNNER_TEMP/openapi.json"
+          echo "OPENAPI_SPEC_URL=$RUNNER_TEMP/openapi.json" >> "$GITHUB_ENV"
+
       - name: Check
         run: pnpm run check
 
@@ -96,6 +101,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Fetch OpenAPI specification
+        run: |
+          node --experimental-strip-types scripts/fetch-openapi.ts "$RUNNER_TEMP/openapi.json"
+          echo "OPENAPI_SPEC_URL=$RUNNER_TEMP/openapi.json" >> "$GITHUB_ENV"
 
       - name: Build Vercel output
         run: pnpm run build

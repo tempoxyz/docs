@@ -10,7 +10,7 @@ import { MermaidDiagram } from '../../../../components/MermaidDiagram'
 
 Use pay-as-you-go sessions when a customer should pay a small amount each time they use an API or service, without sending an on-chain transaction for every request.
 
-This guide uses a simple photo API as the example: the client opens one `mppx` session, then pays $0.01 each time it asks for a photo. `mppx` is the library that manages the MPP session; [Picsum](https://picsum.photos) only supplies sample images for the demo.
+This guide uses a simple photo API as the example: the client opens one `mppx` session, then pays $0.01 each time it asks for a photo. `mppx` is the library that manages the MPP session; [Picsum](https://github.com/DMarby/picsum-photos) only supplies sample images for the demo.
 
 :::info
 Unlike [one-time payments](/docs/guide/machine-payments/one-time-payments), a session opens a payment channel once. Each later request is paid with a signed voucher that the server verifies off-chain.
