@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "mercator": {
+      "type": "http",
+      "url": "https://mercator.tempo.xyz/mcp",
+      "note": "Mercator service discovery, live quotes, durable paid jobs, and product feedback."
+    }
+  }
+}

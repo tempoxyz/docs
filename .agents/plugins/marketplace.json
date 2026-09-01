@@ -15,6 +15,18 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Developer Tools"
+    },
+    {
+      "name": "mercator",
+      "source": {
+        "source": "local",
+        "path": "./ai/plugins/mercator"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Research"
     }
   ]
 }
