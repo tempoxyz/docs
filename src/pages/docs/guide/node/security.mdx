@@ -28,7 +28,7 @@ Tempo's networking layer includes built-in protections, making a cloud firewall 
 - Only accepts connections from trusted IP addresses (active validators on-chain)
 - Rate-limits connections and messages in both consensus and execution layers
 
-For production validators, use the stricter [validator network topology](/docs/guide/node/validator-topology): isolate the validator, allow direct consensus traffic only with other validators, and route execution P2P through redundant follower RPC nodes.
+For production validators, use the stricter [validator network topology](/docs/guide/node/validator-topology): isolate the validator, allow direct consensus traffic only with other validators, and route execution P2P through internal follower RPC nodes.
 
 ### Recommendations
 
