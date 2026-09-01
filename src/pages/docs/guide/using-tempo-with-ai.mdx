@@ -157,13 +157,24 @@ The Tempo plugin installs a complete agent integration: the Tempo MCP server, wo
 
 :::code-group
 ```bash [Codex]
-codex plugin marketplace add tempoxyz/docs
+codex plugin marketplace add tempoxyz/docs --ref main
 codex plugin add docs@tempo
 ```
 
 ```bash [Claude]
 claude plugin marketplace add tempoxyz/docs
 claude plugin install docs@tempo
+```
+:::
+
+:::warning[Legacy Codex marketplace name]
+If Codex reports that the plugin is missing after finding this marketplace as `docs`, replace that
+pre-rename registration once, then rerun the install:
+
+```bash
+codex plugin marketplace remove docs
+codex plugin marketplace add tempoxyz/docs --ref main
+codex plugin add docs@tempo
 ```
 :::
 
@@ -179,7 +190,7 @@ To install the plugin directly from the Tempo marketplace, add the public `tempo
 
 :::code-group
 ```bash [Codex]
-codex plugin marketplace add tempoxyz/docs
+codex plugin marketplace add tempoxyz/docs --ref main
 codex plugin add mercator@tempo
 ```
 

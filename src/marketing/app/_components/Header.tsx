@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AmpLogo, ClaudeLogo, CodexLogo } from '../../../components/AgentLogos'
+import { tempoPluginInstallCommands } from '../../../lib/ai-install-commands'
 import { developersPath } from '../_lib/developersPaths'
 import { featurePath } from '../_lib/featurePaths'
 import { TEMPO_SDK_DOCS_URL } from '../_lib/links'
@@ -287,12 +288,12 @@ const pluginCommands = [
   {
     label: 'Codex',
     logo: <CodexLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    command: 'codex plugin marketplace add tempoxyz/docs\ncodex plugin add docs@tempo',
+    command: tempoPluginInstallCommands.codex,
   },
   {
     label: 'Claude',
     logo: <ClaudeLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    command: 'claude plugin marketplace add tempoxyz/docs\nclaude plugin install docs@tempo',
+    command: tempoPluginInstallCommands.claude,
   },
 ]
 
