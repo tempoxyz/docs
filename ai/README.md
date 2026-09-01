@@ -6,8 +6,8 @@ This directory contains the plugin payloads and skills referenced by the AI mark
 
 Marketplace manifests:
 
-- `.agents/plugins/marketplace.json` for the `docs` Codex marketplace
-- `.claude-plugin/marketplace.json` for the `claude` marketplace
+- `.agents/plugins/marketplace.json` for the `tempo` Codex marketplace
+- `.claude-plugin/marketplace.json` for the `tempo` Claude marketplace
 - `.cursor-plugin/marketplace.json` for compatible Agent Plugin marketplaces
 
 ## Remote MCP

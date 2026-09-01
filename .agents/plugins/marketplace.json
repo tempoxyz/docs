@@ -1,11 +1,11 @@
 {
-  "name": "docs",
+  "name": "tempo",
   "interface": {
     "displayName": "Tempo"
   },
   "plugins": [
     {
-      "name": "tempo",
+      "name": "docs",
       "source": {
         "source": "local",
         "path": "./ai/plugins/tempo"

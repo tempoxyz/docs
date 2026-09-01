@@ -1,5 +1,5 @@
 {
-  "name": "docs",
+  "name": "tempo",
   "owner": {
     "name": "Tempo"
   },
@@ -7,6 +7,13 @@
     "description": "Tempo plugins for documentation and current-data API workflows."
   },
   "plugins": [
+    {
+      "name": "docs",
+      "source": "ai/plugins/tempo",
+      "description": "Tempo docs MCP and skills for developer workflows, wallet, and MPP payments.",
+      "category": "Developer Tools",
+      "tags": ["docs", "mcp", "payments", "tempo"]
+    },
     {
       "name": "mercator",
       "source": "ai/plugins/mercator",

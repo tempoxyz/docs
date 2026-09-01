@@ -287,12 +287,12 @@ const pluginCommands = [
   {
     label: 'Codex',
     logo: <CodexLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    command: 'codex plugin marketplace add tempoxyz/docs\ncodex plugin add tempo@docs',
+    command: 'codex plugin marketplace add tempoxyz/docs\ncodex plugin add docs@tempo',
   },
   {
     label: 'Claude',
     logo: <ClaudeLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    command: 'claude plugin marketplace add tempoxyz/docs\nclaude plugin install tempo@claude',
+    command: 'claude plugin marketplace add tempoxyz/docs\nclaude plugin install docs@tempo',
   },
 ]
 

@@ -1,5 +1,5 @@
 {
-  "name": "tempo",
+  "name": "docs",
   "version": "0.1.0",
   "description": "Tempo MCP and skills for Tempo docs, developer workflows, wallet, and MPP payments.",
   "author": {
@@ -13,7 +13,7 @@
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
-    "displayName": "Tempo",
+    "displayName": "Tempo Docs",
     "shortDescription": "Tempo MCP, docs, wallet, and MPP payments.",
     "longDescription": "Use Tempo MCP from Codex to search Tempo documentation, plus Tempo skills for developer workflows, wallet setup, service discovery, and MPP paid requests.",
     "developerName": "Tempo",
