@@ -1,0 +1,13 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "mercator",
+  "version": "0.2.2",
+  "description": "Discover, live-price, and run current-data and API workflows through Mercator. Powered by MPP.",
+  "author": {
+    "name": "Tempo",
+    "url": "https://tempo.xyz/"
+  },
+  "homepage": "https://mercator.tempo.xyz/",
+  "repository": "https://github.com/tempoxyz/mercator",
+  "keywords": ["api", "current data", "mercator", "mcp", "paid services", "tempo"]
+}

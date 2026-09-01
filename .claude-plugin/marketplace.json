@@ -14,6 +14,13 @@
       "source": "./ai/providers/claude/plugin",
       "category": "development",
       "homepage": "https://docs.tempo.xyz/guide/using-tempo-with-ai"
+    },
+    {
+      "name": "mercator",
+      "description": "Discover, live-price, and run current-data and API workflows through Mercator.",
+      "source": "./ai/plugins/mercator",
+      "category": "research",
+      "homepage": "https://mercator.tempo.xyz"
     }
   ]
 }

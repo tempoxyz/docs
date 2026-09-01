@@ -8,6 +8,7 @@ Marketplace manifests:
 
 - `.agents/plugins/marketplace.json` for the `docs` Codex marketplace
 - `.claude-plugin/marketplace.json` for the `claude` marketplace
+- `.cursor-plugin/marketplace.json` for compatible Agent Plugin marketplaces
 
 ## Remote MCP
 
@@ -30,6 +31,9 @@ Use `source: "mcp"` plus a short `message`, and include `toolName`, `relatedReso
 ## Codex
 
 The Codex plugin lives in `ai/plugins/tempo`.
+
+The Mercator plugin lives in `ai/plugins/mercator` and is available from the Codex, Claude, and
+compatible Agent Plugin marketplace manifests.
 
 ## Claude
 
