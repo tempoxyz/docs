@@ -8,8 +8,8 @@ description: Prepare a follower near the chain tip before rotating it into the v
 
 This runbook prepares a follower near the chain tip before rotating an existing validator to it. The follower syncs its own consistent consensus and execution data. It is not a replica that can reuse the current validator's consensus state or signing key.
 
-:::danger[Use a new validator identity]
-Generate a new signing key for the replacement and use [validator identity rotation](/docs/guide/node/validator-lifecycle#rotate-validator-identity) to move the validator role to it. Never install the old validator's signing key on the replacement. Keep the old validator running until it completes the rotation exit timeline.
+:::warning[Correction to earlier failover guidance]
+Earlier versions of this guide implied that a failover could combine consensus-layer (CL) and execution-layer (EL) data directories from different node states. It cannot. CL and EL data must remain a consistent pair, even when stored on separate mounted volumes.
 :::
 
 ## Prepare a follower
@@ -91,7 +91,53 @@ The replacement can wait in validator mode until the onchain rotation activates 
 
 ### Rotate the validator identity
 
-Follow the [validator identity rotation procedure](/docs/guide/node/validator-lifecycle#rotate-validator-identity) using the replacement's new public key, ingress address, and egress address. Keep the old validator running throughout rotation and until it reports `in_committee: false`.
+The ed25519 key can be changed while keeping your validator index stable. This provides zero-downtime planned failover without leaving and rejoining the committee. [Generate a new signing key](/docs/guide/node/validator-keys#generating-a-signing-key) first.
+
+The rotation command submits a transaction to the validator contract. The transaction signer must control the validator operator address, but it does not need to be a plaintext EOA key. Use the CLI signer backend that matches your custody setup; see [validator operator address custody](/docs/guide/node/validator-keys#validator-operator-address-custody).
+
+:::danger[Do not shut down the old validator]
+Unlike Ethereum, you must **keep your old validator running** after rotation. The rotated-out validator is still a dealer in the committee for at least one more epoch. Shutting it down early will degrade network liveness. See the [exit timeline](/docs/guide/node/validator-lifecycle#exit-timeline) for the full epoch-by-epoch breakdown.
+
+Keep the old validator running until it shows `in_committee: false`:
+
+::::code-group
+```bash [Mainnet]
+tempo consensus validator <OLD_PUBLIC_KEY> --rpc-url https://rpc.tempo.xyz
+```
+```bash [Testnet]
+tempo consensus validator <OLD_PUBLIC_KEY> --rpc-url https://rpc.testnet.tempo.xyz
+```
+::::
+:::
+
+::::code-group
+```bash [Mainnet]
+tempo consensus rotate-validator \
+  --validator-address <YOUR_VALIDATOR_ADDRESS> \
+  --public-key <NEW_PUBLIC_KEY> \
+  --ingress <NEW_IP:PORT> \
+  --egress <NEW_IP> \
+  --signing-key <NEW_PRIVATE_KEY_PATH> \
+  --rpc-url https://rpc.tempo.xyz
+```
+```bash [Testnet]
+tempo consensus rotate-validator \
+  --validator-address <YOUR_VALIDATOR_ADDRESS> \
+  --public-key <NEW_PUBLIC_KEY> \
+  --ingress <NEW_IP:PORT> \
+  --egress <NEW_IP> \
+  --signing-key <NEW_PRIVATE_KEY_PATH> \
+  --rpc-url https://rpc.testnet.tempo.xyz
+```
+::::
+
+If self-service rotation is not yet enabled for your validator, use `tempo consensus create-rotate-validator-signature` to generate the signature and provide it to the Tempo team.
+
+:::info
+Rotation preserves your validator index and active validator count. The old entry is appended to history as deactivated, and the entry at your index is updated in place. You must use a different ingress address. Changing the port is sufficient.
+:::
+
+After rotation, the replacement validator goes through the [standard state transitions](/docs/guide/node/validator-status#state-transitions) with the new identity.
 
 ### Verify replacement participation
 
