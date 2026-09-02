@@ -19,7 +19,7 @@ describe('Mercator marketplace plugin', () => {
     ]) {
       const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
 
-      expect(manifest.version).toMatch(/^0\.3\.0(?:\+|$)/)
+      expect(manifest.version).toMatch(/^0\.3\.1(?:\+|$)/)
       expect(manifest.description).toContain('secure MCP connection')
     }
   })
@@ -30,5 +30,7 @@ describe('Mercator marketplace plugin', () => {
     expect(skill).toContain('`create_job` ->\n`get_job`')
     expect(skill).toContain('accepted `totalAmount` as `approved_total`')
     expect(skill).toContain('OAuth authorization is a one-time')
+    expect(skill).toContain('ready local Mercator wallet')
+    expect(skill).toContain('Never install, create, or connect a wallet for fallback')
   })
 })
