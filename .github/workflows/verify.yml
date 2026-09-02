@@ -27,7 +27,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@6f436eb3a168279692739e8c0c9fdb52b94bfae7
         with:
           run_install: false
           version: 10.28.1
@@ -87,7 +87,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@6f436eb3a168279692739e8c0c9fdb52b94bfae7
         with:
           run_install: false
           version: 10.28.1
@@ -152,7 +152,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@6f436eb3a168279692739e8c0c9fdb52b94bfae7
         with:
           run_install: false
           version: 10.28.1
