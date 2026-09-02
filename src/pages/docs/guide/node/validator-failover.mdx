@@ -6,7 +6,11 @@ description: Promote a follower into a Tempo validator.
 
 # Validator failover: preparing a follower node
 
-This runbook covers a warm failover where a follower is promoted into a validator. A follower running in certified mode stores the same consensus finalization data used to bootstrap the validator.
+This runbook covers a warm failover where a follower is promoted into a validator. A follower running in certified mode stores the same consensus finalization data used to bootstrap the validator. Consensus and execution data are tightly coupled and must remain in the same data directory. Do not separate them during replication, backup, restore, or failover.
+
+:::info[Planned maintenance]
+Failover requires fencing the old validator before starting its replacement. For zero-downtime planned maintenance, use [validator identity rotation](/docs/guide/node/validator-lifecycle#rotate-validator-identity) to bring up a replacement while the old validator completes its exit timeline.
+:::
 
 :::danger[Prevent double-signing]
 Only one node may run with a validator signing key at a time. Before promoting the follower, fence the old validator. Do not start the replacement while the old validator can still sign.
