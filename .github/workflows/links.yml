@@ -58,8 +58,6 @@ jobs:
 
       - name: Open issue on scheduled failure
         if: failure() && github.event_name == 'schedule'
-        uses: peter-evans/create-issue-from-file@e8ef132d6df98ed982188e460ebb3b5d4ef3a9cd # v5
-        with:
-          title: "Broken external links detected"
-          content-filepath: ./lychee/out.md
-          labels: docs, links
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue create --title "Broken external links detected" --body-file lychee/out.md --label docs --label links
