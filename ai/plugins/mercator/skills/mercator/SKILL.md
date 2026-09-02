@@ -46,8 +46,9 @@ fastest way to determine whether Mercator can complete the request.
    OAuth-connected host, Mercator charges the browser-authorized, policy-bounded wallet capability
    and returns the job directly. Continue immediately; do not wait for the user to send a second
    "approved" message. The agent host receives no wallet private key. Other clients complete payment
-   challenges through MCP metadata. Never install or invoke a CLI, translate the request into REST,
-   construct payment credentials, or call `create_job` again.
+   challenges through MCP metadata. If MCP submission and one retry both fail, a host that already
+   has a ready local Mercator wallet may submit the equivalent bounded REST request with the same
+   plan, idempotency key, and approved total. Never install, create, or connect a wallet for fallback.
 6. **Listen for completion.** Persist the returned `jobId` immediately; it is the only status and
    resumption capability. Poll `get_job` with bounded backoff. `ready:false` means the durable job is
    still pending or running. `ready:true` is terminal: return either its cached `result` or stable
@@ -75,6 +76,9 @@ continue automatically after every completed approval or pending status transiti
 - On a stale endpoint or invalid quote, search again, rebuild, and re-quote.
 - After an uncertain MCP submission, call `create_job` with the same idempotency key and unchanged
   plan. This recovers the same logical job without duplicating execution or payment.
+- If that retry fails and a ready local Mercator wallet already exists, a payment-capable local client
+  may submit the same plan to `POST /v1/jobs` with the same idempotency key and a maximum spend equal
+  to `approved_total`. This is an explicit fallback, never an MCP response handoff.
 - If status polling is interrupted, resume `get_job` with the job ID. Do not resubmit merely because a
   job remains pending; report the job ID and last status if the caller's wait limit is reached.
 - Use `create_job_review` only when the user wants to review a completed job. Use
