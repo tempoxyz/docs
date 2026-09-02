@@ -1,6 +1,6 @@
 {
   "name": "mercator",
-  "version": "0.3.0+codex.20260901193640",
+  "version": "0.3.1+codex.20260902183800",
   "description": "Discover, quote, and run paid API workflows through one secure MCP connection. Connect a Tempo Wallet once; no local CLI or wallet setup.",
   "author": {
     "name": "Tempo",

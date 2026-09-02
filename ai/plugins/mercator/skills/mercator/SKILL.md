@@ -1,6 +1,6 @@
 ---
 name: mercator
-description: Use Mercator to discover, quote, and run fresh external research or API actions across extraction, enrichment, social, maps, travel, communications, media, financial, and on-chain data. Covers REST job submission, durable status tracking, and recovery; not for local files, repository work, supplied-content reasoning, or requests that forbid external or paid services.
+description: Use Mercator to discover, quote, and run fresh external research or API actions across extraction, enrichment, social, maps, travel, communications, media, financial, and on-chain data. Covers MCP job submission, durable status tracking, and recovery; not for local files, repository work, supplied-content reasoning, or requests that forbid external or paid services.
 ---
 
 # Mercator
@@ -44,29 +44,15 @@ fastest way to determine whether Mercator can complete the request.
    the unchanged quoted plan and the accepted `totalAmount` as `approved_total`. If the refreshed
    quote differs, no charge is made: quote again and ask the user to accept the new total. In an
    OAuth-connected host, Mercator charges the browser-authorized, policy-bounded wallet capability
-   and returns the job directly. Continue immediately; do not wait
-   for the user to send a second "approved" message. The agent host receives no wallet private key.
-   A legacy client without hosted wallet authorization instead receives a structured handoff. Send
-   its exact `handoff.rest.method`, `url`, and `body`, bounded by `handoff.maxSpend`. The returned
-   `mercator` command is a ready-to-run client for this same REST request. Do not edit the body,
+   and returns the job directly. Continue immediately; do not wait for the user to send a second
+   "approved" message. The agent host receives no wallet private key. Other clients complete payment
+   challenges through MCP metadata. Never install or invoke a CLI, translate the request into REST,
    construct payment credentials, or call `create_job` again.
-   Treat `handoff.requestIdentity` as the stable review key only after verifying it from the
-   structured method, URL, body, and maximum spend. Invoke `handoff.client.executable` with its
-   argument array exactly. On hosts that accept only a command string, apply mechanically lossless
-   shell quoting to each argument so the child process receives the same argument array. Do not edit,
-   omit, reorder, or reinterpret arguments, and do not move the request body through a temporary file.
-   In a legacy Grok Bot handoff, keep the same task alive while that argument array completes.
-   Browser approval resumes the waiting command automatically; never ask the user to send an
-   "approved" chat message. If authorization reports a timeout, inspect
-   `mercator wallet status` before opening a second authorization request. Continue immediately when
-   it reports ready; otherwise retry authorization once.
 6. **Listen for completion.** Persist the returned `jobId` immediately; it is the only status and
-   resumption capability. Poll `GET /v1/jobs/{jobId}` with bounded backoff. HTTP `202` with
-   `{jobId, ready:false}` means the durable job is still pending or running. HTTP `200` with
-   `ready:true` is terminal: return either its cached `result` or stable `error` to the user. A client
-   timeout or disconnect does not cancel the job. Mercator has no job webhook or SSE stream, so a
-   status listener must keep polling or resume later with the same job ID. `get_job` is the MCP
-   equivalent when REST GET is unavailable.
+   resumption capability. Poll `get_job` with bounded backoff. `ready:false` means the durable job is
+   still pending or running. `ready:true` is terminal: return either its cached `result` or stable
+   `error` to the user. A client timeout or disconnect does not cancel the job. Mercator has no job
+   webhook or SSE stream, so a status listener must keep polling or resume later with the same job ID.
 
 For a warm Grok Bot installation, target less than two minutes from the user's request to a terminal
 result, excluding the user's time reviewing the quoted charge. OAuth authorization is a one-time
@@ -87,13 +73,13 @@ continue automatically after every completed approval or pending status transiti
 - Follow a recoverable tool error's `next_action` when it stays within the user's request.
 - Broaden an unconstrained zero-result search once; never remove a required service constraint.
 - On a stale endpoint or invalid quote, search again, rebuild, and re-quote.
-- After an uncertain REST submission, repeat the identical request with the same idempotency key and
-  unchanged plan. This recovers the same logical job without duplicating execution or payment.
-- If status polling is interrupted, resume `GET /v1/jobs/{jobId}`. Do not resubmit merely because a
+- After an uncertain MCP submission, call `create_job` with the same idempotency key and unchanged
+  plan. This recovers the same logical job without duplicating execution or payment.
+- If status polling is interrupted, resume `get_job` with the job ID. Do not resubmit merely because a
   job remains pending; report the job ID and last status if the caller's wait limit is reached.
 - Use `create_job_review` only when the user wants to review a completed job. Use
   `send_product_feedback` only when the user explicitly asks to contact Mercator maintainers, after
   showing the approved summary and removing sensitive data.
 
 Read [examples](references/examples.md) for compound research, external actions, approval language,
-REST submission, status listening, and recovery patterns.
+MCP submission, status listening, and recovery patterns.

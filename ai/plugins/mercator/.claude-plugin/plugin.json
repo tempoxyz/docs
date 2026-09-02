@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "mercator",
   "displayName": "Mercator",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Discover, quote, and run paid API workflows through one secure MCP connection. Connect a Tempo Wallet once; no local CLI or wallet setup.",
   "author": {
     "name": "Tempo"

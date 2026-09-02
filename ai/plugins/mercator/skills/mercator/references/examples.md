@@ -80,26 +80,12 @@ be inferred safely. Then quote the completed plan.
 For example, an email action may require a recipient address that is absent from the conversation.
 Ask for that address; do not invent it or quietly remove the email step.
 
-## REST submission and status
+## MCP submission and status
 
-After approval, submit the unchanged quoted plan to `POST https://mercator.tempo.xyz/v1/jobs` with a
-stable idempotency key and a payment spend limit equal to the approved quote. When using MCP, call
-`create_job` once with the accepted `totalAmount` as `approved_total`. If it returns a handoff, use
-its exact REST request:
-
-```text
-handoff.rest: { method: POST, url: https://mercator.tempo.xyz/v1/jobs, body: {...} }
-handoff.maxSpend: 3.80
-handoff.client: { executable: mercator, arguments: [submit, ...] }
-```
-
-Submit the exact REST request through a payment-capable HTTP client and enforce `maxSpend`. The
-returned `mercator` command performs that same bounded REST submission when the available HTTP
-client cannot handle the payment challenge. Invoke its executable and argument array exactly. If the
-host accepts only a command string, shell-quote each argument mechanically so the child process
-receives the identical array; quoting may change the command's text representation but not an
-argument's value. Never translate it into a legacy `tempo wallet ...` command. Do not edit the request
-body, translate the command into an unbounded request, create a credential, or call `create_job` again.
+After approval, call `create_job` once with the unchanged quoted plan, a stable idempotency key, and
+the accepted `totalAmount` as `approved_total`. OAuth-connected hosts charge the bounded wallet
+inside Mercator. Other clients complete any payment challenge through MCP metadata. Never install a
+CLI or translate MCP submission into a REST request.
 
 A successful submission returns either a terminal job or a pending response:
 
@@ -107,18 +93,17 @@ A successful submission returns either a terminal job or a pending response:
 {"jobId":"4d9ea616-4223-4b9d-bd19-2d3f74c9fa4c","ready":false}
 ```
 
-Persist the job ID and start a status listener for:
+Persist the job ID and start a status listener with:
 
-```http
-GET https://mercator.tempo.xyz/v1/jobs/4d9ea616-4223-4b9d-bd19-2d3f74c9fa4c
-Accept: application/json
+```json
+{"job_id":"4d9ea616-4223-4b9d-bd19-2d3f74c9fa4c"}
 ```
 
-- `202` and `ready:false`: wait with bounded backoff, then GET the same URL again.
-- `200` and `ready:true`: stop; return the cached success result or stable failure.
+- `ready:false`: wait with bounded backoff, then call `get_job` again.
+- `ready:true`: stop; return the cached success result or stable failure.
 - Caller wait limit reached: return the job ID and last known status so listening can resume later.
-- Request timeout or lost response: retry the identical REST submission with the same idempotency
-  key to recover the job, then listen on its returned job ID.
+- Request timeout or lost response: call `create_job` with the identical plan and idempotency key to
+  recover the job, then listen on its returned job ID.
 
 Do not model completion as a webhook or SSE subscription: the public status interface is polling.
 
