@@ -1,30 +1,31 @@
 {
   "name": "mercator",
-  "version": "0.2.2",
-  "description": "Discover, live-price, and run current-data and API workflows through Mercator. Powered by MPP.",
+  "version": "0.3.0+codex.20260901193640",
+  "description": "Discover, quote, and run paid API workflows through one secure MCP connection. Connect a Tempo Wallet once; no local CLI or wallet setup.",
   "author": {
     "name": "Tempo",
     "url": "https://tempo.xyz/"
   },
-  "homepage": "https://mercator.tempoxyz.dev/",
+  "homepage": "https://mercator.tempo.xyz/",
   "repository": "https://github.com/tempoxyz/mercator",
-  "license": "MIT",
   "keywords": ["api", "current data", "mercator", "mcp", "paid services", "tempo"],
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Mercator",
-    "shortDescription": "Discover and run paid API workflows, powered by MPP",
-    "longDescription": "Find current-data and API services, get live quotes, and execute durable paid workflows through one MCP gateway. Powered by MPP.",
+    "shortDescription": "Discover, quote, and run paid API workflows",
+    "longDescription": "Connect agents to current data and paid APIs through one remote MCP server. Authorize a limited Tempo Wallet key once; no CLI or wallet key is installed in the agent VM.",
     "developerName": "Tempo",
-    "category": "Research",
+    "category": "Productivity",
     "capabilities": ["Interactive", "Read", "Write"],
-    "websiteURL": "https://mercator.tempoxyz.dev/",
+    "websiteURL": "https://mercator.tempo.xyz/",
     "defaultPrompt": [
       "Rescue my canceled Boston-to-London flight under $1,200; add a hotel and transfer if needed, then email the itinerary.",
       "Find 15 overlooked Boston HVAC businesses, verify owner emails, flag outdated sites, and map a route from Back Bay.",
       "Investigate unusual AAVE activity across smart-money flows, holders, price, news, and regulation; return a sourced chart."
     ],
-    "brandColor": "#1D4FFF"
+    "brandColor": "#1D4FFF",
+    "composerIcon": "./assets/favicon.svg",
+    "logo": "./assets/favicon.svg"
   }
 }

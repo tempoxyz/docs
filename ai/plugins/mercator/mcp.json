@@ -3,7 +3,7 @@
   "mcpServers": {
     "mercator": {
       "type": "streamable-http",
-      "url": "https://mercator.tempo.xyz/mcp"
+      "url": "https://mercator.tempo.xyz/mcp/auth"
     }
   }
 }

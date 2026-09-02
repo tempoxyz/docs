@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "mercator",
-  "version": "0.2.2",
-  "description": "Discover, live-price, and run current-data and API workflows through Mercator. Powered by MPP.",
+  "version": "0.3.0",
+  "description": "Discover, quote, and run paid API workflows through one secure MCP connection. Connect a Tempo Wallet once; no local CLI or wallet setup.",
   "author": {
     "name": "Tempo",
     "url": "https://tempo.xyz/"

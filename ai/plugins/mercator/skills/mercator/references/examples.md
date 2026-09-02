@@ -20,6 +20,32 @@ Search with the entire outcome. Build a bounded DAG whose independent data nodes
 and whose final node consumes only the outputs it needs. Quote the whole DAG. If the total is at most
 $5 and the plan contains only the requested research, the supplied budget authorizes execution.
 
+Use Mercator's dependency expressions inside the cataloged node inputs. For example, a downstream
+summary node that depends on `holders`, `news`, and `price` can contain:
+
+```json
+{
+  "id": "summarize",
+  "dependsOn": ["holders", "news", "price"],
+  "input": {
+    "addresses": {
+      "$map": {
+        "from": "flow://holders/output#/rows",
+        "path": "/address"
+      }
+    },
+    "headline": "flow://news/output#/items/0/title",
+    "label": {
+      "$concat": ["Asset: ", "flow://price/output#/symbol"]
+    }
+  }
+}
+```
+
+Merge that input with the exact `serviceId`, `method`, and `path` returned by discovery. A plain
+`flow://node/output` reference may include an RFC 6901 JSON Pointer suffix. `$map` projects each item
+from an upstream array; `$concat` combines values only when they resolve to all strings or all arrays.
+
 Before submission, a useful confirmation is:
 
 > I found a five-source research plan covering flows, holders, price, news, and regulation. The
@@ -58,7 +84,8 @@ Ask for that address; do not invent it or quietly remove the email step.
 
 After approval, submit the unchanged quoted plan to `POST https://mercator.tempo.xyz/v1/jobs` with a
 stable idempotency key and a payment spend limit equal to the approved quote. When using MCP, call
-`create_job` once. If it returns a handoff, use its exact REST request:
+`create_job` once with the accepted `totalAmount` as `approved_total`. If it returns a handoff, use
+its exact REST request:
 
 ```text
 handoff.rest: { method: POST, url: https://mercator.tempo.xyz/v1/jobs, body: {...} }
@@ -68,8 +95,11 @@ handoff.client: { executable: mercator, arguments: [submit, ...] }
 
 Submit the exact REST request through a payment-capable HTTP client and enforce `maxSpend`. The
 returned `mercator` command performs that same bounded REST submission when the available HTTP
-client cannot handle the payment challenge. Do not edit the request body, translate the command into
-an unbounded request, create a credential, or call `create_job` again.
+client cannot handle the payment challenge. Invoke its executable and argument array exactly. If the
+host accepts only a command string, shell-quote each argument mechanically so the child process
+receives the identical array; quoting may change the command's text representation but not an
+argument's value. Never translate it into a legacy `tempo wallet ...` command. Do not edit the request
+body, translate the command into an unbounded request, create a credential, or call `create_job` again.
 
 A successful submission returns either a terminal job or a pending response:
 

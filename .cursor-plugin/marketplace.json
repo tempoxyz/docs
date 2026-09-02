@@ -17,7 +17,7 @@
     {
       "name": "mercator",
       "source": "ai/plugins/mercator",
-      "description": "Discover, live-price, and run current-data and API workflows through Mercator. Powered by MPP.",
+      "description": "Discover, quote, and run paid API workflows through one secure MCP connection.",
       "category": "Productivity",
       "tags": ["api", "current-data", "mcp", "payments", "tempo"]
     }

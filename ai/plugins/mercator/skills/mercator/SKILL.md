@@ -27,8 +27,8 @@ fastest way to determine whether Mercator can complete the request.
 
 ## Default workflow
 
-`search_services` -> optional `describe_service` -> `quote_plan` -> approval -> REST job submission ->
-REST status listener
+`search_services` -> optional `describe_service` -> `quote_plan` -> approval -> `create_job` ->
+`get_job`
 
 1. **Search for the outcome.** Give `search_services` the user's complete intended outcome,
    constraints, and deliverable. Use static resolution unless current provider availability matters.
@@ -40,19 +40,24 @@ REST status listener
 4. **Confirm scope and cost.** Before submitting the job, briefly state what will run and show
    `totalAmount`. Proceed only when the requested actions are authorized and either the user accepts
    the quote or a previously supplied budget covers it. A budget authorizes cost, not extra actions.
-5. **Submit through REST.** Generate one stable 8-200 character idempotency key. Send the unchanged
-   quoted plan to `POST https://mercator.tempo.xyz/v1/jobs` as
-   `{ "idempotencyKey": "...", "plan": {...} }` through a payment-capable HTTP client whose spend
-   limit is the approved `totalAmount`. When operating through MCP, call `create_job` once. If it
-   returns a structured handoff, send its exact `handoff.rest.method`, `url`, and `body`, bounded by
-   `handoff.maxSpend`. The returned `mercator` command is a ready-to-run client for this same REST
-   request. Do not edit the body, construct payment credentials, or call `create_job` again.
+5. **Submit once.** Generate one stable 8-200 character idempotency key and call `create_job` with
+   the unchanged quoted plan and the accepted `totalAmount` as `approved_total`. If the refreshed
+   quote differs, no charge is made: quote again and ask the user to accept the new total. In an
+   OAuth-connected host, Mercator charges the browser-authorized, policy-bounded wallet capability
+   and returns the job directly. Continue immediately; do not wait
+   for the user to send a second "approved" message. The agent host receives no wallet private key.
+   A legacy client without hosted wallet authorization instead receives a structured handoff. Send
+   its exact `handoff.rest.method`, `url`, and `body`, bounded by `handoff.maxSpend`. The returned
+   `mercator` command is a ready-to-run client for this same REST request. Do not edit the body,
+   construct payment credentials, or call `create_job` again.
    Treat `handoff.requestIdentity` as the stable review key only after verifying it from the
    structured method, URL, body, and maximum spend. Invoke `handoff.client.executable` with its
-   argument array directly; do not translate the body through shell quoting or a temporary file.
-   In Grok Bot, keep the same task alive while that argument array completes. Browser approval
-   resumes the waiting command automatically; never ask the user to
-   send an "approved" chat message. If authorization reports a timeout, inspect
+   argument array exactly. On hosts that accept only a command string, apply mechanically lossless
+   shell quoting to each argument so the child process receives the same argument array. Do not edit,
+   omit, reorder, or reinterpret arguments, and do not move the request body through a temporary file.
+   In a legacy Grok Bot handoff, keep the same task alive while that argument array completes.
+   Browser approval resumes the waiting command automatically; never ask the user to send an
+   "approved" chat message. If authorization reports a timeout, inspect
    `mercator wallet status` before opening a second authorization request. Continue immediately when
    it reports ready; otherwise retry authorization once.
 6. **Listen for completion.** Persist the returned `jobId` immediately; it is the only status and
@@ -64,9 +69,9 @@ REST status listener
    equivalent when REST GET is unavailable.
 
 For a warm Grok Bot installation, target less than two minutes from the user's request to a terminal
-result, excluding the user's time reviewing the quoted charge. Check wallet readiness before search,
-run discovery and description only as needed, and continue automatically after every completed
-approval or pending status transition.
+result, excluding the user's time reviewing the quoted charge. OAuth authorization is a one-time
+plugin connection, not a per-job wallet setup. Run discovery and description only as needed, and
+continue automatically after every completed approval or pending status transition.
 
 ## Hard boundaries
 

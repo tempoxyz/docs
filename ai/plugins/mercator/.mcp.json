@@ -2,8 +2,8 @@
   "mcpServers": {
     "mercator": {
       "type": "http",
-      "url": "https://mercator.tempo.xyz/mcp",
-      "note": "Mercator service discovery, live quotes, durable paid jobs, and product feedback."
+      "url": "https://mercator.tempo.xyz/mcp/auth",
+      "note": "Mercator remote MCP for service discovery, live quotes, secure Tempo payments, and durable paid jobs."
     }
   }
 }

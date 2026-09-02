@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "mercator",
   "displayName": "Mercator",
   "version": "0.3.0",
@@ -10,7 +9,8 @@
   "homepage": "https://mercator.tempo.xyz/",
   "repository": "https://github.com/tempoxyz/mercator",
   "license": "MIT",
-  "keywords": ["api", "current-data", "mercator", "mcp", "paid-services", "tempo"],
+  "logo": "./assets/favicon.svg",
+  "keywords": ["api", "current-data", "mercator", "mcp", "payments", "tempo"],
   "mcpServers": "./.mcp.json",
   "skills": "./skills/"
 }
