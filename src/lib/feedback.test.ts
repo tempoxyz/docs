@@ -63,6 +63,38 @@ describe('normalizeFeedback', () => {
     expect(() => normalizeFeedback({ source: 'mcp', toolName: 'read_page' })).toThrow(FeedbackError)
   })
 
+  it('normalizes structured MCP product feedback', () => {
+    const feedback = normalizeFeedback({
+      kind: 'bug_report',
+      summary: 'Search misses a page',
+      details: 'A documented page does not appear in search results.',
+      steps_to_reproduce: 'Search for the exact page title.',
+      expected_behavior: 'The page is returned.',
+      actual_behavior: 'No matching page is returned.',
+    })
+
+    expect(feedback).toMatchObject({
+      id: expect.stringMatching(/^fb_[a-z0-9]+_[0-9a-f-]{36}$/),
+      source: 'mcp',
+      kind: 'bug_report',
+      summary: 'Search misses a page',
+      details: 'A documented page does not appear in search results.',
+      stepsToReproduce: 'Search for the exact page title.',
+      expectedBehavior: 'The page is returned.',
+      actualBehavior: 'No matching page is returned.',
+    })
+  })
+
+  it('rejects incomplete structured MCP product feedback', () => {
+    expect(() =>
+      normalizeFeedback({
+        kind: 'feedback',
+        summary: 'Search result ordering',
+        details: '',
+      }),
+    ).toThrow(FeedbackError)
+  })
+
   it('requires docs helpful value', () => {
     expect(() =>
       normalizeFeedback({ source: 'docs', pageUrl: 'https://tempo.xyz/developers' }),

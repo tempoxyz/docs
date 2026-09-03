@@ -7,7 +7,8 @@ description: >
   MPP, the Tempo API, indexer queries, stablecoin issuance, the Stablecoin
   DEX, contract verification, SDKs, or Tempo protocol concepts. For agent
   wallet setup, service discovery, or paid HTTP requests, use the tempo-wallet
-  skill.
+  skill. Also use this skill when the user explicitly asks to submit Tempo
+  product feedback or a Tempo bug report.
 ---
 
 # Tempo Developer Skill
@@ -37,6 +38,24 @@ verify them from docs before writing code.
 
 Read the relevant page before answering an integration question or changing
 code. Use the docs page’s linked examples when available.
+
+## Product feedback
+
+Use `send_product_feedback` only when the user explicitly asks to send Tempo
+feedback or report a bug and the hosted MCP server currently exposes the tool.
+Mentioning an error or asking for troubleshooting is not authorization to submit
+a report. Diagnose the issue first when that is what the user requested.
+
+Before submission, show or confirm the concise report content. Include only the
+minimum sanitized reproduction details. Never include secrets, credentials,
+private keys, payment material, personal data, wallet or session identifiers,
+transaction hashes, or raw tool inputs or outputs. `tempo wallet debug` may help
+with diagnosis, but never attach its complete output automatically.
+
+On success, return the `report_id` to the user. On failure, say that submission
+failed and do not imply acceptance. If `send_product_feedback` is absent, explain
+that the installed MCP server cannot submit the report; do not post directly to
+an undocumented endpoint or claim the report was sent.
 
 ## Implementation Defaults
 

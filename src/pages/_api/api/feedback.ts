@@ -17,6 +17,10 @@ app.post('/api/feedback', async (c) => {
   try {
     const body = await parseFeedbackRequest(c.req.raw)
     const result = await submitFeedback(body)
+    if (result.feedback.kind) {
+      if (!result.delivered) return c.json({ accepted: false, error: 'Submission failed' }, 503)
+      return c.json({ accepted: true, report_id: result.feedback.id }, 201)
+    }
     return c.json({ success: true, id: result.feedback.id, delivered: result.delivered })
   } catch (error) {
     if (error instanceof FeedbackError) {

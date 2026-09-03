@@ -18,15 +18,15 @@ Use the hosted MCP server:
 https://mcp.tempo.xyz
 ```
 
-The current server exposes `search`, `find_pages`, `read_page`, and `code` for documentation search, page discovery, cleaned page reads, and multi-step lookups. Wallet and paid-request workflows are handled by the `tempo-wallet` skill using the Tempo CLI.
+The server exposes `search`, `find_pages`, `read_page`, and `code` for documentation search, page discovery, cleaned page reads, and multi-step lookups. Deployments that list `send_product_feedback` can also submit explicitly approved, sanitized Tempo feedback. Wallet and paid-request workflows are handled by the `tempo-wallet` skill using the Tempo CLI.
 
-Feedback from MCP clients should be sent to the shared docs ingress:
+The MCP server sends approved product feedback to the shared docs ingress:
 
 ```txt
 POST https://tempo.xyz/developers/api/feedback
 ```
 
-Use `source: "mcp"` plus a short `message`, and include `toolName`, `relatedResource`, or `client` when available.
+Clients must use the registered MCP tool rather than posting to the ingress directly.
 
 ## Codex
 

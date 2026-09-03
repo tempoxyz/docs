@@ -24,8 +24,12 @@ Use the hosted MCP server at `https://mcp.tempo.xyz` first. It exposes these too
 | `find_pages` | Find matching page URLs from a source index |
 | `read_page` | Read one cleaned documentation page |
 | `code` | Run multi-step documentation lookups |
+| `send_product_feedback` | Submit approved, sanitized Tempo feedback when available |
 
-If a user reports stale, missing, or confusing Tempo docs while using MCP context, send sanitized feedback to `https://tempo.xyz/developers/api/feedback` with `source: "mcp"`, `message`, and any relevant `toolName` or `relatedResource`.
+Use `send_product_feedback` only when the user explicitly asks to submit feedback
+or report a bug and the server lists the tool. Troubleshooting is not submission
+authorization. Return the report ID after a successful submission; if the tool
+is unavailable or fails, do not imply that the report was accepted.
 
 ## Direct fallbacks
 

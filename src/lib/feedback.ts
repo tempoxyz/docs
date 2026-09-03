@@ -6,7 +6,7 @@ const maxMessageLength = 4_000
 const maxShortLength = 160
 const maxUrlLength = 2_048
 
-const feedbackInputSchema = z
+const legacyFeedbackInputSchema = z
   .object({
     source: z.enum(['docs', 'mcp']).optional(),
     helpful: z.boolean().optional(),
@@ -24,6 +24,20 @@ const feedbackInputSchema = z
   })
   .strict()
 
+const productFeedbackInputSchema = z
+  .object({
+    source: z.literal('mcp').optional(),
+    kind: z.enum(['bug_report', 'feedback']),
+    summary: z.string().trim().min(1).max(200),
+    details: z.string().trim().min(1).max(3_000),
+    steps_to_reproduce: z.string().trim().min(1).max(2_000).optional(),
+    expected_behavior: z.string().trim().min(1).max(2_000).optional(),
+    actual_behavior: z.string().trim().min(1).max(2_000).optional(),
+  })
+  .strict()
+
+const feedbackInputSchema = z.union([legacyFeedbackInputSchema, productFeedbackInputSchema])
+
 export type FeedbackInput = z.input<typeof feedbackInputSchema>
 
 export type NormalizedFeedback = {
@@ -40,6 +54,12 @@ export type NormalizedFeedback = {
   relatedResource?: string | undefined
   client?: string | undefined
   requestId?: string | undefined
+  kind?: 'bug_report' | 'feedback' | undefined
+  summary?: string | undefined
+  details?: string | undefined
+  stepsToReproduce?: string | undefined
+  expectedBehavior?: string | undefined
+  actualBehavior?: string | undefined
 }
 
 export type SubmitFeedbackResult = {
@@ -76,6 +96,8 @@ export function normalizeFeedback(input: FeedbackInput): NormalizedFeedback {
   if (!parsed.success) throw new FeedbackError('Invalid feedback payload', 400)
 
   const data = parsed.data
+  if ('kind' in data) return normalizeProductFeedback(data)
+
   const source = data.source ?? (typeof data.helpful === 'boolean' ? 'docs' : 'mcp')
   const pageUrl = cleanUrl(data.pageUrl)
   const path = cleanPath(data.path ?? pathFromUrl(pageUrl))
@@ -103,6 +125,23 @@ export function normalizeFeedback(input: FeedbackInput): NormalizedFeedback {
     throw new FeedbackError('MCP feedback requires message or category', 400)
 
   return feedback
+}
+
+function normalizeProductFeedback(
+  data: z.infer<typeof productFeedbackInputSchema>,
+): NormalizedFeedback {
+  return {
+    id: `fb_${Date.now().toString(36)}_${crypto.randomUUID()}`,
+    source: 'mcp',
+    sentiment: 'neutral',
+    timestamp: new Date().toISOString(),
+    kind: data.kind,
+    summary: redactSecrets(data.summary),
+    details: redactSecrets(data.details),
+    stepsToReproduce: optionalRedactedText(data.steps_to_reproduce),
+    expectedBehavior: optionalRedactedText(data.expected_behavior),
+    actualBehavior: optionalRedactedText(data.actual_behavior),
+  }
 }
 
 export function redactSecrets(value: string): string {
@@ -139,6 +178,10 @@ function cleanText(value: string | undefined, maxLength: number) {
   if (typeof value !== 'string') return undefined
   const cleaned = redactSecrets(value.replace(/\s+/g, ' ').trim()).slice(0, maxLength)
   return cleaned || undefined
+}
+
+function optionalRedactedText(value: string | undefined) {
+  return value ? redactSecrets(value) : undefined
 }
 
 function cleanPath(value: string | undefined) {
@@ -183,6 +226,23 @@ function sentimentFromHelpful(helpful: boolean | undefined) {
 }
 
 function toVocsFeedback(feedback: NormalizedFeedback) {
+  if (feedback.kind) {
+    return {
+      helpful: false,
+      category: feedback.kind === 'bug_report' ? 'MCP bug report' : 'MCP product feedback',
+      message: compact([
+        `Report ID: ${feedback.id}`,
+        feedback.summary,
+        feedback.details,
+        feedback.stepsToReproduce && `Steps to reproduce: ${feedback.stepsToReproduce}`,
+        feedback.expectedBehavior && `Expected behavior: ${feedback.expectedBehavior}`,
+        feedback.actualBehavior && `Actual behavior: ${feedback.actualBehavior}`,
+      ]).join('\n\n'),
+      pageUrl: 'https://mcp.tempo.xyz',
+      timestamp: feedback.timestamp,
+    }
+  }
+
   if (feedback.source === 'docs') {
     return {
       helpful: feedback.helpful ?? feedback.sentiment === 'positive',

@@ -115,9 +115,9 @@ function marketingPages(): Plugin {
 }
 
 const llmsAgentNotice = [
-  '> Tempo MCP: Use `search`, `find_pages`, `read_page`, and `code` at `https://mcp.tempo.xyz` for current Tempo and related documentation.',
+  '> Tempo MCP: Use `search`, `find_pages`, `read_page`, and `code` at `https://mcp.tempo.xyz` for current Tempo and related documentation. When the server lists `send_product_feedback`, use it only after the user explicitly asks to submit Tempo feedback or a bug report.',
   '>',
-  '> Feedback: If these docs are stale, missing, or confusing, post sanitized feedback to `https://tempo.xyz/developers/api/feedback` with `source: "mcp"`, a short `message`, and any relevant `toolName`, `relatedResource`, or `client`.',
+  '> Feedback: Troubleshooting is not authorization to submit a report. Never send secrets, personal data, wallet or session identifiers, transaction hashes, payment material, or raw tool inputs or outputs.',
   '',
 ].join('\n')
 
