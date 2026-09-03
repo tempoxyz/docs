@@ -53,18 +53,26 @@ async function fund(address: `0x${string}`, headers: Record<string, string>): Pr
   }
 }
 
-function cors(origin: string | null): Record<string, string> {
+function isAllowedOrigin(origin: string): boolean {
   const allowedOrigins = ['https://tempo.xyz', 'https://docs.tempo.xyz']
-
-  if (origin?.includes('vercel.app')) allowedOrigins.push(origin)
   if (process.env.NODE_ENV === 'development') allowedOrigins.push('http://localhost:5173')
+  if (allowedOrigins.includes(origin)) return true
 
+  try {
+    const { protocol, hostname } = new URL(origin)
+    return protocol === 'https:' && hostname.endsWith('.vercel.app')
+  } catch {
+    return false
+  }
+}
+
+function cors(origin: string | null): Record<string, string> {
   const headers: Record<string, string> = {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, x-api-token',
   }
 
-  if (origin && allowedOrigins.includes(origin)) headers['Access-Control-Allow-Origin'] = origin
+  if (origin && isAllowedOrigin(origin)) headers['Access-Control-Allow-Origin'] = origin
 
   return headers
 }
