@@ -20,7 +20,9 @@ Do not submit transactions directly to a validator. Submit them to a trusted RPC
 
 Do not establish execution devp2p connections between validators. A malicious or compromised validator or public peer could otherwise send spurious transactions directly to another validator and attempt to exhaust its resources. With the recommended topology, transactions are gossiped only through the trusted RPC layer, while validators communicate directly with one another only over consensus P2P.
 
+:::info[Run trusted RPC nodes on separate instances]
 Run trusted RPC nodes on machines or instances separate from the validator so they do not share CPU, memory, disk, or network resources with it. The isolation boundary is ineffective if abusive traffic against an RPC node can still exhaust the validator host.
+:::
 
 ## Recommended validator topology
 
