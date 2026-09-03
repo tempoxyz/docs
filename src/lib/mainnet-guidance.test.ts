@@ -6,8 +6,8 @@ const read = (path: string) => readFileSync(path, 'utf8')
 describe('mainnet guidance', () => {
   it('defaults agent wallet and production workflows to mainnet', () => {
     const docsSkill = read('SKILL.md')
-    const developerSkill = read('ai/plugins/tempo/skills/tempo/SKILL.md')
-    const walletSkill = read('ai/plugins/tempo/skills/tempo-wallet/SKILL.md')
+    const developerSkill = read('ai/plugins/tempo-docs/skills/tempo-docs/SKILL.md')
+    const walletSkill = read('ai/plugins/tempo-wallet/skills/tempo-wallet/SKILL.md')
 
     for (const skill of [docsSkill, developerSkill, walletSkill]) {
       expect(skill).toContain('Tempo Mainnet')
@@ -15,7 +15,7 @@ describe('mainnet guidance', () => {
     }
 
     expect(developerSkill).toContain(
-      'Use Tempo Mainnet for wallet setup, funding, transfers, MPP settlement, and production workflows.',
+      'For production examples, use the current Tempo Mainnet details from the docs.',
     )
     expect(developerSkill).not.toContain(
       'Use Tempo Testnet examples unless the user explicitly asks for mainnet.',

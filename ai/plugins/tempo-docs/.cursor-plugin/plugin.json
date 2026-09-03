@@ -1,0 +1,14 @@
+{
+  "name": "tempo-docs",
+  "displayName": "Tempo Docs",
+  "version": "0.1.0",
+  "description": "Read Tempo documentation and use its examples while building on Tempo.",
+  "author": { "name": "Tempo" },
+  "homepage": "https://tempo.xyz/developers/docs/guide/using-tempo-with-ai",
+  "repository": "https://github.com/tempoxyz/docs",
+  "license": "MIT",
+  "logo": "./assets/favicon.svg",
+  "keywords": ["tempo", "documentation", "mcp", "stablecoins", "payments"],
+  "mcpServers": "./.mcp.json",
+  "skills": "./skills/"
+}

@@ -4,6 +4,7 @@ description: >
   Use this skill when the user wants to call an API, make an HTTP request,
   discover available services, set up Tempo Wallet, manage balances, or access
   external data with automatic payments.
+license: MIT
 ---
 
 # tempo-wallet

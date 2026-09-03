@@ -8,11 +8,18 @@
   },
   "plugins": [
     {
-      "name": "docs",
-      "source": "ai/plugins/tempo",
-      "description": "Tempo docs MCP and skills for developer workflows, wallet, and MPP payments.",
+      "name": "tempo-docs",
+      "source": "ai/plugins/tempo-docs",
+      "description": "Read Tempo documentation and use its examples while building on Tempo.",
       "category": "Developer Tools",
       "tags": ["docs", "mcp", "payments", "tempo"]
+    },
+    {
+      "name": "tempo-wallet",
+      "source": "ai/plugins/tempo-wallet",
+      "description": "Set up Tempo Wallet and make explicitly approved paid API requests.",
+      "category": "Finance",
+      "tags": ["mpp", "payments", "tempo", "wallet"]
     },
     {
       "name": "mercator",

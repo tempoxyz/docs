@@ -297,7 +297,7 @@ const pluginCommands = [
   },
 ]
 
-const docsSkillCommand = 'npx skills add tempoxyz/docs'
+const docsSkillCommand = 'npx skills add tempoxyz/docs --skill tempo-docs'
 
 function CopyIcon() {
   return (

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "tempo-docs": {
+      "type": "http",
+      "url": "https://mcp.tempo.xyz",
+      "note": "Read-only Tempo documentation search, page discovery, page reads, and multi-step lookups."
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "tempo-docs",
+  "version": "0.1.0",
+  "description": "Read Tempo documentation and use its examples while building on Tempo.",
+  "author": {
+    "name": "Tempo",
+    "url": "https://tempo.xyz"
+  },
+  "homepage": "https://tempo.xyz/developers/docs/guide/using-tempo-with-ai",
+  "repository": "https://github.com/tempoxyz/docs",
+  "keywords": ["tempo", "documentation", "mcp", "stablecoins", "payments"]
+}

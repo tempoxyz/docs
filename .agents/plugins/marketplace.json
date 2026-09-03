@@ -5,16 +5,28 @@
   },
   "plugins": [
     {
-      "name": "docs",
+      "name": "tempo-docs",
       "source": {
         "source": "local",
-        "path": "./ai/plugins/tempo"
+        "path": "./ai/plugins/tempo-docs"
       },
       "policy": {
         "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Developer Tools"
+    },
+    {
+      "name": "tempo-wallet",
+      "source": {
+        "source": "local",
+        "path": "./ai/plugins/tempo-wallet"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Finance"
     },
     {
       "name": "mercator",

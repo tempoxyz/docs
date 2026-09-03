@@ -1,0 +1,34 @@
+{
+  "name": "tempo-wallet",
+  "version": "0.1.0",
+  "description": "Set up Tempo Wallet and make explicitly approved paid API requests.",
+  "author": {
+    "name": "Tempo",
+    "email": "support@tempo.xyz",
+    "url": "https://tempo.xyz"
+  },
+  "homepage": "https://tempo.xyz/developers/docs/wallet/use-with-agents",
+  "repository": "https://github.com/tempoxyz/docs",
+  "license": "MIT",
+  "keywords": ["tempo", "wallet", "mpp", "payments"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Tempo Wallet",
+    "shortDescription": "Use Tempo Wallet with explicit approvals.",
+    "longDescription": "Set up Tempo Wallet, discover paid services, preview costs, and make explicitly approved requests with scoped spending limits.",
+    "developerName": "Tempo",
+    "category": "Finance",
+    "capabilities": ["Interactive", "Write"],
+    "websiteURL": "https://wallet.tempo.xyz",
+    "privacyPolicyURL": "https://wallet.tempo.xyz/support/privacy-policy",
+    "termsOfServiceURL": "https://wallet.tempo.xyz/support/terms-of-service",
+    "defaultPrompt": [
+      "Check whether Tempo Wallet is ready.",
+      "Find paid services for this task without running them.",
+      "Preview the cost of this paid API request."
+    ],
+    "brandColor": "#000000",
+    "composerIcon": "./assets/favicon.svg",
+    "logo": "./assets/favicon.svg"
+  }
+}

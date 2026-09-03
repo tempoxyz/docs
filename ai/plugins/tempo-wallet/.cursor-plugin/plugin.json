@@ -1,0 +1,13 @@
+{
+  "name": "tempo-wallet",
+  "displayName": "Tempo Wallet",
+  "version": "0.1.0",
+  "description": "Set up Tempo Wallet and make explicitly approved paid API requests.",
+  "author": { "name": "Tempo" },
+  "homepage": "https://tempo.xyz/developers/docs/wallet/use-with-agents",
+  "repository": "https://github.com/tempoxyz/docs",
+  "license": "MIT",
+  "logo": "./assets/favicon.svg",
+  "keywords": ["tempo", "wallet", "mpp", "payments"],
+  "skills": "./skills/"
+}

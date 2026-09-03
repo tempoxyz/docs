@@ -18,7 +18,7 @@ Use the hosted MCP server:
 https://mcp.tempo.xyz
 ```
 
-The current server exposes `search`, `find_pages`, `read_page`, and `code` for documentation search, page discovery, cleaned page reads, and multi-step lookups. Wallet and paid-request workflows are handled by the `tempo-wallet` skill using the Tempo CLI.
+The current server exposes `search`, `find_pages`, `read_page`, and `code` for read-only documentation search, page discovery, cleaned page reads, and multi-step lookups. Wallet and paid-request workflows live in the separate `tempo-wallet` plugin.
 
 Feedback from MCP clients should be sent to the shared docs ingress:
 
@@ -30,16 +30,18 @@ Use `source: "mcp"` plus a short `message`, and include `toolName`, `relatedReso
 
 ## Codex
 
-The Codex plugin lives in `ai/plugins/tempo`.
+The read-only Tempo Docs plugin lives in `ai/plugins/tempo-docs`.
+
+The Tempo Wallet plugin lives in `ai/plugins/tempo-wallet`. Keep wallet setup, funding, paid requests, and transaction execution out of the Tempo Docs bundle.
 
 The Mercator plugin lives in `ai/plugins/mercator` and is available from the Codex, Claude, and
 compatible Agent Plugin marketplace manifests.
 
 ## Claude
 
-The Claude plugin lives in `providers/claude/plugin`.
+Claude uses the same plugin payloads under `ai/plugins`.
 
 ## Skills
 
-- `tempo`: generic Tempo developer skill placeholder.
-- `tempo-wallet`: wallet setup, service discovery, and paid HTTP requests with `tempo wallet` and `tempo request`.
+- `tempo-docs`: read-only Tempo documentation and developer guidance.
+- `tempo-wallet`: wallet setup, service discovery, and paid HTTP requests with `tempo wallet` and `tempo request`; packaged separately from Tempo Docs.

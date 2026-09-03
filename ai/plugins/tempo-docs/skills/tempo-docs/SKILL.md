@@ -1,16 +1,15 @@
 ---
-name: tempo
+name: tempo-docs
 description: >
-  Use this skill when building applications on Tempo, integrating Tempo into an
-  app, writing or reviewing Tempo code, or answering Tempo developer questions
-  about accounts, wallets, passkeys, stablecoin payments, fee sponsorship,
-  MPP, the Tempo API, indexer queries, stablecoin issuance, the Stablecoin
-  DEX, contract verification, SDKs, or Tempo protocol concepts. For agent
-  wallet setup, service discovery, or paid HTTP requests, use the tempo-wallet
-  skill.
+  Read Tempo documentation when building applications on Tempo, integrating
+  Tempo into an app, reviewing Tempo code, or answering developer questions
+  about accounts, passkeys, stablecoin payments, fee sponsorship, MPP, the
+  Tempo API, indexer queries, stablecoin issuance, the Stablecoin DEX, contract
+  verification, SDKs, or Tempo protocol concepts.
+license: MIT
 ---
 
-# Tempo Developer Skill
+# Tempo Docs
 
 Use this skill to build applications on Tempo. Prefer `search`, `find_pages`,
 `read_page`, and `code` from the hosted MCP server at
@@ -18,6 +17,12 @@ Use this skill to build applications on Tempo. Prefer `search`, `find_pages`,
 `https://tempo.xyz/developers` or append `.md` to the docs URL. Do not guess current
 RPC URLs, contract addresses, chain IDs, package APIs, or protocol details;
 verify them from docs before writing code.
+
+This plugin is read-only. It may retrieve and explain documentation, but it
+must not install software, authenticate or fund wallets, call paid services,
+sign messages or transactions, or submit transactions. When a user requests
+one of those actions, provide the relevant documentation and state that the
+action requires a separate tool or plugin.
 
 ## Routing
 
@@ -28,7 +33,7 @@ verify them from docs before writing code.
 | Stablecoin payments | `/guide/payments`, especially send, accept, virtual addresses, memos, fees, sponsorship, and parallel transactions |
 | Sponsored or gasless transactions | `/guide/payments/sponsor-user-fees`, `/api/fee-payer` |
 | MPP or paid APIs | `/guide/machine-payments`, then `/guide/machine-payments/client`, `/server`, or `/agent` |
-| Agent-paid service calls | Use the `tempo-wallet` skill for wallet login, service discovery, and `tempo request` |
+| Agent-paid service calls | `/guide/machine-payments/agent`; provide documentation only |
 | Hosted indexer queries | `/api/indexer-api` |
 | Stablecoin issuance | `/guide/issuance`, `/protocol/tip20/overview`, `/protocol/tip20/spec` |
 | Stablecoin DEX swaps or liquidity | `/guide/stablecoin-dex`, `/protocol/exchange` |
@@ -43,7 +48,7 @@ code. Use the docs page’s linked examples when available.
 - Prefer TypeScript examples for web apps, using the Tempo SDK pages and the
   repo’s existing Wagmi/Viem patterns.
 - Prefer Foundry examples for Solidity contracts and contract verification.
-- Use Tempo Mainnet for wallet setup, funding, transfers, MPP settlement, and production workflows. Use Tempo Testnet only when the user requests it or a development workflow explicitly requires it.
+- For production examples, use the current Tempo Mainnet details from the docs. Use Tempo Testnet only when the user requests it or a development workflow explicitly requires it.
 - Treat `pathUSD` as a live mainnet TIP-20 stablecoin. Distinguish production `pathUSD` from faucet-issued testnet tokens.
 - When network intent is unclear, verify the current connection details and name the selected network explicitly.
 - For production-oriented changes, check the production, security, or Tempo

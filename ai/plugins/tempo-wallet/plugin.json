@@ -1,0 +1,10 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "tempo-wallet",
+  "version": "0.1.0",
+  "description": "Set up Tempo Wallet and make explicitly approved paid API requests.",
+  "author": { "name": "Tempo", "url": "https://tempo.xyz" },
+  "homepage": "https://tempo.xyz/developers/docs/wallet/use-with-agents",
+  "repository": "https://github.com/tempoxyz/docs",
+  "keywords": ["tempo", "wallet", "mpp", "payments"]
+}

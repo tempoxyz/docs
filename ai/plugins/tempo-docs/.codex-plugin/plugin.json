@@ -1,0 +1,35 @@
+{
+  "name": "tempo-docs",
+  "version": "0.1.0",
+  "description": "Read Tempo documentation and use its examples while building on Tempo.",
+  "author": {
+    "name": "Tempo",
+    "email": "support@tempo.xyz",
+    "url": "https://tempo.xyz"
+  },
+  "homepage": "https://tempo.xyz/developers/docs/guide/using-tempo-with-ai",
+  "repository": "https://github.com/tempoxyz/docs",
+  "license": "MIT",
+  "keywords": ["tempo", "documentation", "mcp", "stablecoins", "payments"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Tempo Docs",
+    "shortDescription": "Read Tempo docs and integration examples.",
+    "longDescription": "Search and read current Tempo documentation for SDKs, APIs, stablecoin payments, accounts, protocol concepts, and integration examples through a read-only MCP server.",
+    "developerName": "Tempo",
+    "category": "Developer Tools",
+    "capabilities": ["Read"],
+    "websiteURL": "https://tempo.xyz/developers",
+    "privacyPolicyURL": "https://wallet.tempo.xyz/support/privacy-policy",
+    "termsOfServiceURL": "https://wallet.tempo.xyz/support/terms-of-service",
+    "defaultPrompt": [
+      "Show me how to connect an app to Tempo.",
+      "Find the Tempo docs for sponsored transactions.",
+      "Explain Tempo payment memos with an example."
+    ],
+    "brandColor": "#000000",
+    "composerIcon": "./assets/favicon.svg",
+    "logo": "./assets/favicon.svg"
+  }
+}

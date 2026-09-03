@@ -151,19 +151,19 @@ MCP clients can also post feedback directly to `https://tempo.xyz/developers/api
 
 <TempoMcpExplorer />
 
-## Install Tempo plugins
+## Install Tempo Docs
 
-The Tempo plugin installs a complete agent integration: the Tempo MCP server, workflow skills for using Tempo APIs and docs, and editor metadata that helps agents discover the right Tempo tools without manual setup.
+Tempo Docs installs a read-only integration: the Tempo documentation MCP server and a skill for finding and applying current developer guidance. Wallet setup, paid requests, and transaction execution are intentionally excluded.
 
 :::code-group
 ```bash [Codex]
 codex plugin marketplace add tempoxyz/docs --ref main
-codex plugin add docs@tempo
+codex plugin add tempo-docs@tempo
 ```
 
 ```bash [Claude]
 claude plugin marketplace add tempoxyz/docs
-claude plugin install docs@tempo
+claude plugin install tempo-docs@tempo
 ```
 :::
 
@@ -174,7 +174,7 @@ pre-rename registration once, then rerun the install:
 ```bash
 codex plugin marketplace remove docs
 codex plugin marketplace add tempoxyz/docs --ref main
-codex plugin add docs@tempo
+codex plugin add tempo-docs@tempo
 ```
 :::
 
@@ -207,7 +207,7 @@ claude plugin install mercator@tempo --scope user --yes
 Install the Tempo Docs skill to give AI coding agents access to Tempo documentation, related documentation sources, and examples:
 
 ```bash
-npx skills add tempoxyz/docs
+npx skills add tempoxyz/docs --skill tempo-docs
 ```
 
 Once installed, the agent uses it automatically when relevant tasks are detected.
