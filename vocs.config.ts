@@ -1264,6 +1264,10 @@ export default defineConfig({
       text: 'Docs',
       link: '/docs',
     },
+    {
+      text: 'API',
+      link: '/docs/api',
+    },
 
     { text: 'Ecosystem', link: 'https://tempo.xyz/ecosystem' },
     { text: 'Wallet', link: 'https://wallet.tempo.xyz' },
