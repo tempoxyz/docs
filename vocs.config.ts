@@ -1083,6 +1083,24 @@ export default defineConfig({
               },
             ],
           },
+          {
+            text: 'Web tool methodologies',
+            collapsed: false,
+            items: [
+              {
+                text: 'Fee estimator',
+                link: '/docs/tools/fee-estimator',
+              },
+              {
+                text: 'Cross-border cost',
+                link: '/docs/tools/cross-border-cost',
+              },
+              {
+                text: 'Settlement time',
+                link: '/docs/tools/settlement-time',
+              },
+            ],
+          },
         ],
       },
       {
