@@ -643,7 +643,7 @@ const pluginCommands = [
   },
 ]
 
-const docsSkillCommand = 'npx skills add tempoxyz/docs'
+const docsSkillCommand = 'npx skills add tempoxyz/plugins --skill docs'
 
 function CommandTabs({
   commands,

@@ -1,1 +1,0 @@
-../../../../../plugins/tempo/skills/tempo-wallet/SKILL.md

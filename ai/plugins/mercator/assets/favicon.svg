@@ -1,8 +1,0 @@
-<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <title>Mercator</title>
-  <rect width="96" height="96" fill="#0B0B0B" />
-  <circle cx="48" cy="48" r="30" stroke="#F2F1EC" stroke-width="1.5" />
-  <ellipse cx="48" cy="48" rx="20" ry="30" stroke="#F2F1EC" stroke-width="1.5" />
-  <ellipse cx="48" cy="48" rx="8" ry="30" stroke="#F2F1EC" stroke-width="1.5" />
-  <ellipse cx="48" cy="48" rx="30" ry="8" stroke="#F2F1EC" stroke-width="1.5" />
-</svg>
