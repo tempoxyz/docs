@@ -62,15 +62,4 @@ Read the [TIP-1105 specification](https://tips.sh/1105).
 
 ## Integration impact
 
-### For applications and relayers
-
-- Consider the longer expiry window for transactions that pass through approval or relay workflows.
-- Continue choosing shorter expiry windows when fast expiration is important.
-- Estimate gas against the network where the transaction will execute.
-- Review fixed gas limits for calls with large inputs.
-- Use standard ABI encoding for precompile calls and remove malformed or trailing data.
-- Avoid duplicate values in account key permissions and Zone configuration lists.
-
-## Compatible releases
-
-T11-compatible node and SDK versions will be added here once published.
+Before the rollout, estimate gas on the network where the transaction will execute instead of relying on fixed limits, verify that precompile calls use standard ABI encoding with no trailing data or duplicate list values, and consider the longer expiry window for transactions that pass through approval or relay workflows.
