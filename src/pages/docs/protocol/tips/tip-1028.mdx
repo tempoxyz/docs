@@ -1,0 +1,189 @@
+---
+id: TIP-1028
+title: Address-Level Receive Policies
+description: Lets any account configure token filters and sender allowlists that silently redirect blocked transfers to a claimable receipt instead of reverting.
+authors: Tempo Team
+status: Implemented
+related: TIP-403, TIP-20, TIP-1049
+protocolVersion: T6
+---
+
+# TIP-1028: Address-Level Receive Policies
+
+## Abstract
+
+Allows any account to register a **receive policy** — a combination of token filter and sender policy — that governs what transfers it accepts. When a transfer is blocked by the policy it is not reverted; instead the tokens are held by the `ReceivePolicyGuard` precompile and a receipt is stored on-chain. The originator (or a nominated recovery authority) can later claim the receipt by rerouting the transfer to a permitted destination or resuming it once the policy changes.
+
+---
+
+# Specification
+
+## Activation
+
+Receive policies activate at the T6 hardfork. Before T6, `setReceivePolicy` reverts and no blocking logic runs.
+
+## Setting a receive policy
+
+An account calls `setReceivePolicy` on the TIP-403 precompile to configure its policy:
+
+```solidity
+function setReceivePolicy(
+    uint64 senderPolicyId,
+    uint64 tokenFilterId,
+    address recoveryAuthority
+) external;
+```
+
+| Parameter | Description |
+|---|---|
+| `senderPolicyId` | ID of a TIP-403 sender policy. `0` disables sender filtering. |
+| `tokenFilterId` | ID of a TIP-403 token filter. `0` disables token filtering. |
+| `recoveryAuthority` | Address that may claim receipts. `address(0)` means the originator may claim without a designated authority. |
+
+Emits:
+
+```solidity
+event ReceivePolicyUpdated(
+    address indexed account,
+    uint64 senderPolicyId,
+    uint64 tokenFilterId,
+    address recoveryAuthority
+);
+```
+
+## Transfers subject to receive policy checks
+
+Receive policies are evaluated on the following TIP-20 operations:
+
+| Operation | Checked |
+|---|---|
+| `transfer` | Yes |
+| `transferFrom` | Yes (allowance is consumed even when the transfer is blocked) |
+| `transferWithMemo` | Yes |
+| `transferFromWithMemo` | Yes |
+| `systemTransferFrom` | Yes |
+| `mint` | Yes |
+| `mintWithMemo` | Yes |
+| `approve` | No |
+| `permit` | No |
+| `burn` | No |
+| Fee flows | No |
+
+## Evaluation order
+
+For every eligible transfer targeting an account that has a non-zero `tokenFilterId` or `senderPolicyId`:
+
+1. **Token filter** — if the token is not in the filter's allowlist, the transfer is blocked with reason `TOKEN_FILTER`.
+2. **Sender policy** — if the sender is not authorised under the sender policy, the transfer is blocked with reason `RECEIVE_POLICY`.
+3. **Pass** — if both checks pass (or neither is configured), the transfer completes normally with reason `NONE`.
+
+[TIP-1022](https://tips.sh/1022) virtual addresses are resolved to their master account before the policy check.
+
+## ReceivePolicyGuard precompile
+
+Blocked tokens are held by the `ReceivePolicyGuard` precompile:
+
+```
+0xB10C000000000000000000000000000000000000
+```
+
+This address cannot be used as a `recoveryAuthority` or reroute destination.
+
+## Receipts
+
+When a transfer is blocked, `TransferBlocked` is emitted and a receipt is stored:
+
+```solidity
+event TransferBlocked(
+    address indexed token,
+    address indexed receiver,
+    uint64 indexed blockedNonce,
+    uint256 amount,
+    uint8 receiptVersion,
+    bytes receipt
+);
+```
+
+The receipt encodes:
+
+| Field | Description |
+|---|---|
+| `version` | Receipt schema version |
+| `token` | TIP-20 token address |
+| `recoveryAuthority` | Copied from the receiver's policy at block time |
+| `originator` | Original `msg.sender` of the transfer |
+| `recipient` | Intended receiver |
+| `blockedTimestamp` | Block timestamp when the transfer was blocked |
+| `blockedNonce` | Per-receiver monotonic counter |
+| `blockedReason` | `TOKEN_FILTER` or `RECEIVE_POLICY` |
+| `inboundKind` | Which TIP-20 operation was blocked |
+| `memo` | Memo field if present, otherwise empty |
+
+Receipts are keyed by `keccak256(abi.encode(receipt))`.
+
+## Claiming a receipt
+
+Receipts are claimed via the `ReceivePolicyGuard` precompile. There are two claim types:
+
+### Resume
+
+A **resume** sends the tokens to the original receiver (`to == receiver`). It is available only when `recoveryAuthority != address(0)` and must be called by the `recoveryAuthority`. The receiver's current policy is **not** re-evaluated on resume.
+
+### Reroute
+
+A **reroute** sends the tokens to a different address (`to != receiver`, or any claim when `recoveryAuthority == address(0)`). Rules:
+
+- `to` cannot be `ReceivePolicyGuard`.
+- If `to` is a TIP-1022 virtual address, it is resolved to its master before the transfer.
+- `to` must be authorised as a sender under the token's TIP-403 policy.
+
+Emits on success:
+
+```solidity
+event ReceiptClaimed(
+    address indexed token,
+    address indexed receiver,
+    uint64 indexed blockedNonce,
+    uint64 blockedAt,
+    uint8 receiptVersion,
+    address originator,
+    address recipient,
+    address recoveryAuthority,
+    address caller,
+    address to,
+    uint256 amount
+);
+```
+
+If the receipt is burned without transferring (e.g. tokens are absorbed):
+
+```solidity
+event ReceiptBurned(
+    address indexed token,
+    address indexed receiver,
+    uint64 indexed blockedNonce,
+    uint64 blockedAt,
+    uint8 receiptVersion,
+    address originator,
+    address recipient,
+    address recoveryAuthority,
+    address caller,
+    uint256 amount
+);
+```
+
+---
+
+# Invariants
+
+1. **No revert on block** — a transfer blocked by a receive policy never reverts. The transaction succeeds and a receipt is stored.
+
+2. **Allowance consumed on block** — for `transferFrom` and `transferFromWithMemo`, the caller's allowance is decremented even when the transfer is blocked.
+
+3. **Evaluation order is deterministic** — token filter is always checked before sender policy. A transfer blocked by both reasons is recorded as `TOKEN_FILTER`.
+
+4. **ReceivePolicyGuard is not a valid destination** — neither `recoveryAuthority` nor any reroute `to` may be the `ReceivePolicyGuard` address.
+
+5. **Virtual addresses resolved before check** — TIP-1022 virtual addresses in the sender position are resolved to their master account before the sender policy is evaluated.
+
+6. **Policy snapshot at block time** — the `recoveryAuthority` written into a receipt reflects the receiver's policy at the moment of blocking, not at the time of claiming.
