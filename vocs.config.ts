@@ -908,8 +908,12 @@ export default defineConfig({
             collapsed: false,
             items: [
               {
-                text: 'T10',
+                text: 'T11',
                 badge: { text: 'Latest', variant: 'info' as const },
+                link: '/docs/protocol/upgrades/t11',
+              },
+              {
+                text: 'T10',
                 link: '/docs/protocol/upgrades/t10',
               },
               {

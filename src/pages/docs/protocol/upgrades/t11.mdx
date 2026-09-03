@@ -1,0 +1,89 @@
+---
+title: T11 Network Upgrade
+description: T11 extends transaction expiry windows, updates account key management, and adjusts gas pricing for Tempo precompiles.
+---
+
+# T11 Network Upgrade
+
+T11 gives applications more time to submit signed transactions, simplifies account key management, and updates gas pricing for calls to Tempo's built-in protocol functions.
+
+For most partners, T11 requires action only if you manage account keys directly or use fixed gas limits.
+
+:::info[T11 status]
+T11 is estimated to roll out to testnet on September 9, 2026, and mainnet on September 10, 2026. These dates may change.
+
+Node operators will need to install the T11-compatible release before activation to stay synced.
+:::
+
+## Timeline
+
+| Network | Estimated rollout |
+|---------|-------------------|
+| Testnet | September 9, 2026 |
+| Mainnet | September 10, 2026 |
+
+## T11 upgrade overview
+
+T11 includes three protocol changes:
+
+- **Longer transaction submission window.** Applications can give signed transactions up to five minutes to reach the network, instead of 30 seconds.
+- **Updated account key management.** Wallets and SDKs must use the transaction authorization flow when adding keys. Updating a key's permissions also uses a safer input format.
+- **Updated gas pricing.** Calls to Tempo's built-in protocol functions pay a higher input gas charge that better reflects their processing cost.
+
+## Longer transaction submission window
+
+Some transactions pass through approval systems, relayers, or separate signing devices before reaching the network. The existing 30-second maximum can expire before those steps finish.
+
+T11 increases the maximum expiry window to five minutes. Applications can still choose a shorter window when appropriate.
+
+Replay protection remains in place, so the same signed transaction cannot be submitted twice. Transactions created before T11 continue to follow the existing 30-second limit.
+
+Read the [TIP-1093 specification](https://tips.sh/1093).
+
+## Updated account key management
+
+Tempo accounts can authorize additional keys and limit what each key is allowed to do. T11 changes how applications add these keys and update their permissions.
+
+After T11, applications must authorize new keys through the transaction's `key_authorization` field. The older `authorizeKey` and `authorizeAdminKey` contract calls stop working.
+
+The format used to update a key's allowed calls also changes from nested ABI data to RLP, a compact encoding already used by Tempo transactions. This makes permission updates safer and more predictable to process.
+
+Existing keys and permissions remain unchanged. Partners only need to update integrations that add keys or modify their allowed calls.
+
+Read the [TIP-1099 specification](https://tips.sh/1099).
+
+## Updated gas pricing
+
+Tempo provides built-in protocol functions, called precompiles, for operations such as account and token management. T11 increases the input gas charge for these calls from 6 to 30 gas per 32 bytes.
+
+The increase is small for typical calls. Calls with less than 1 KiB of input add less than 768 gas. Integrations that submit unusually large inputs or use fixed gas limits should test their transactions before the rollout.
+
+Applications that estimate gas before submitting transactions should automatically account for the new pricing once their connected network activates T11.
+
+Read the [TIP-1100 specification](https://tips.sh/1100).
+
+## Integration impact
+
+### For wallets and SDKs
+
+- Use transaction `key_authorization` when adding account keys.
+- Stop constructing calls to `authorizeKey` and `authorizeAdminKey`.
+- Encode updates to allowed call permissions using the new RLP format.
+- Allow expiring transactions to use a window of up to five minutes after T11 activates.
+
+### For applications and relayers
+
+- Consider the longer expiry window for transactions that pass through approval or relay workflows.
+- Continue choosing shorter expiry windows when fast expiration is important.
+- Estimate gas against the network where the transaction will execute.
+- Review fixed gas limits for calls with large inputs.
+
+### For existing accounts
+
+- Existing authorized keys remain valid.
+- Existing key permissions remain unchanged.
+- No account or key migration is required.
+
+## Compatible releases
+
+T11-compatible node and SDK versions will be added here once published.
