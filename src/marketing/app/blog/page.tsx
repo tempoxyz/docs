@@ -17,6 +17,7 @@ export default function BlogPage() {
     excerpt: post.excerpt,
     date: post.date,
     category: post.category,
+    categories: post.categories,
     authors: post.authors,
     featured: post.featured,
   }))

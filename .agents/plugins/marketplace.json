@@ -1,11 +1,11 @@
 {
-  "name": "docs",
+  "name": "tempo",
   "interface": {
     "displayName": "Tempo"
   },
   "plugins": [
     {
-      "name": "tempo",
+      "name": "docs",
       "source": {
         "source": "local",
         "path": "./ai/plugins/tempo"
@@ -15,6 +15,18 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Developer Tools"
+    },
+    {
+      "name": "mercator",
+      "source": {
+        "source": "local",
+        "path": "./ai/plugins/mercator"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
     }
   ]
 }

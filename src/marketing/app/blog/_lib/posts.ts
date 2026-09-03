@@ -10,6 +10,7 @@ export type Post = PostMeta & { html: string }
 const posts: Post[] = renderedPosts.map((post) => ({
   ...post,
   category: post.category as CategorySlug,
+  categories: post.categories as CategorySlug[],
 }))
 
 export function getAllPosts(): Post[] {

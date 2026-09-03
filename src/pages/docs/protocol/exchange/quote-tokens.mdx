@@ -1,20 +1,26 @@
 ---
-title: "Quote tokens on Tempo: understanding pathUSD"
-seoTitle: "Quote Tokens: pathUSD Explained | Docs"
-description: Quote tokens determine trading pairs on Tempo's DEX. Each TIP-20 specifies a quote token, with pathUSD available as an optional neutral choice.
+title: "pathUSD on Tempo Mainnet and quote tokens"
+seoTitle: "pathUSD on Tempo Mainnet | Tempo Docs"
+description: Understand live mainnet pathUSD, its role as an optional quote token on Tempo's DEX, and how it differs from testnet faucet tokens.
 ---
 
-# Quote tokens on Tempo: understanding pathUSD
+# pathUSD on Tempo Mainnet and quote tokens
 
 Each USD TIP-20 on Tempo can choose any other USD TIP-20 as its quote token—the token it is paired against on the native decentralized exchange. This guarantees that there is one path between any two tokens, which reduces fragmentation of liquidity and simplifies routing.
 
+`pathUSD` is live on Tempo Mainnet. The production asset and the faucet-issued test token on Tempo Testnet use the same predeploy address, but they exist on separate networks and are not interchangeable.
+
 ## pathUSD
 
-pathUSD is a USD-denominated stablecoin that can be used as a quote token on Tempo's decentralized exchange. It is the first stablecoin deployed to the chain, and is used as a fallback gas token when the user or validator does not specify a gas token. Use of pathUSD is optional.
+On Tempo Mainnet, pathUSD is a USD-denominated stablecoin that can be used as a quote token on Tempo's decentralized exchange. It is the first stablecoin deployed to the chain, and is used as a fallback gas token when the user or validator does not specify a gas token. Use of pathUSD is optional.
 
 ### Issuance & Backing
 
 pathUSD is issued by Bridge and is backed 1:1 by high-quality USD-denominated reserves. Please see [bridge.xyz](https://www.bridge.xyz) for more about their reserve allocation practices. pathUSD can be minted by depositing USDC.e and redeemed back to USDC through Bridge.
+
+### Testnet pathUSD
+
+Tempo Testnet (Moderato, chain ID `42431`) provides faucet-issued pathUSD for development. Testnet balances have no relationship to production pathUSD on Tempo Mainnet and cannot be treated as mainnet funds. Use the [Tempo faucet](/docs/quickstart/faucet) only for testnet development.
 
 ### Why pathUSD?
 
@@ -28,6 +34,7 @@ pathUSD is a predeployed [TIP-20](/docs/protocol/tip20/spec) at genesis. Since i
 
 | Property       | Value                                        |
 | -------------- | -------------------------------------------- |
+| network        | Tempo Mainnet (chain ID `4217`)              |
 | address        | `0x20c0000000000000000000000000000000000000` |
 | `name()`       | `"pathUSD"`                                  |
 | `symbol()`     | `"pathUSD"`                                  |

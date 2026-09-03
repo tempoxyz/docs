@@ -21,6 +21,7 @@ export const proxiedLegacyDocsRoutes = [
   { source: '/docs/developer-tools/indexer', destination: '/docs/api/indexer-api' },
   { source: '/docs/hosted-services', destination: '/docs/api' },
   { source: '/docs/hosted-services/:path*', destination: '/docs/api' },
+  { source: '/docs/api/funding/:path*', destination: '/docs/api/routes/:path*' },
   {
     source: '/docs/guide/use-accounts/add-funds',
     destination: '/docs/guide/getting-funds',

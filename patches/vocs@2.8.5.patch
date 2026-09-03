@@ -111,7 +111,7 @@ index 06cc466393643245bf0dfcc0c946e013c717a75c..e5b39e12c9e2017238a9744412943e2e
      const title = props.title ?? props.frontmatter?.title;
      const description = props.description ?? props.frontmatter?.description;
 -    return (_jsxs(OpenApiLayout, { frontmatter: { ...props.frontmatter, description, title }, width: "full", children: [title ? _jsx("title", { children: title }) : null, _jsxs("div", { "data-v-openapi-guide": true, children: [props.header && title ? (_jsxs("header", { "data-v-openapi-header": true, children: [_jsxs("h1", { "data-v": true, "data-v-openapi-h1": true, id: props.id, children: [title, props.id ? _jsx(HeadingAnchor, { id: props.id }) : null] }), description ? _jsx(Prose, { markdown: description, attr: "description" }) : null] })) : null, props.children] })] }));
-+    return (_jsx(OpenApiLayout, { documentTitle: resolveDocumentTitle(props.frontmatter, title), frontmatter: { ...props.frontmatter, description, title }, width: "full", children: _jsxs("div", { "data-v-openapi-guide": true, children: [props.header && title ? (_jsxs("header", { "data-v-openapi-header": true, children: [_jsxs("h1", { "data-v": true, "data-v-openapi-h1": true, id: props.id, children: [title, props.id ? _jsx(HeadingAnchor, { id: props.id }) : null] }), description ? _jsx(Prose, { markdown: description, attr: "description" }) : null] })) : null, props.children] }) }));
++    return (_jsx(OpenApiLayout, { documentTitle: resolveDocumentTitle(props.frontmatter, title), frontmatter: { ...props.frontmatter, description, title }, width: "default", children: _jsxs("div", { "data-v-openapi-guide": true, children: [props.header && title ? (_jsxs("header", { "data-v-openapi-header": true, children: [_jsxs("h1", { "data-v": true, "data-v-openapi-h1": true, id: props.id, children: [title, props.id ? _jsx(HeadingAnchor, { id: props.id }) : null] }), description ? _jsx(Prose, { markdown: description, attr: "description" }) : null] })) : null, props.children] }) }));
  }
  /**
   * Renders an isolated, auto-generated OpenAPI reference section (Vite/RSC site
@@ -125,7 +125,7 @@ index 06cc466393643245bf0dfcc0c946e013c717a75c..e5b39e12c9e2017238a9744412943e2e
      // Overview / landing page.
      const title = props.title ?? props.frontmatter?.title ?? ir.info.title;
 -    return (_jsxs(OpenApiLayout, { frontmatter: { ...props.frontmatter, title }, width: "full", children: [_jsx("title", { children: title }), _jsx(ReferenceOverview, { ir: ir, intro: props.intro, endpoints: props.endpoints ? _jsx(Endpoints, { path: ir.path || undefined }) : undefined })] }));
-+    return (_jsx(OpenApiLayout, { documentTitle: resolveDocumentTitle(props.frontmatter, title), frontmatter: { ...props.frontmatter, title }, width: "full", children: _jsx(ReferenceOverview, { ir: ir, intro: props.intro, endpoints: props.endpoints ? _jsx(Endpoints, { path: ir.path || undefined }) : undefined }) }));
++    return (_jsx(OpenApiLayout, { documentTitle: resolveDocumentTitle(props.frontmatter, title), frontmatter: { ...props.frontmatter, title }, width: "default", children: _jsx(ReferenceOverview, { ir: ir, intro: props.intro, endpoints: props.endpoints ? _jsx(Endpoints, { path: ir.path || undefined }) : undefined }) }));
 +}
 +function resolveDocumentTitle(frontmatter, fallback) {
 +    const seoTitle = typeof frontmatter?.seoTitle === 'string' ? frontmatter.seoTitle.trim() : '';
@@ -321,7 +321,7 @@ index 939c937581ec434975aee43e7284c6c2d48add93..4622655fa2c046435180c35f012b6a31
 +    <OpenApiLayout
 +      documentTitle={resolveDocumentTitle(props.frontmatter, title)}
 +      frontmatter={{ ...props.frontmatter, description, title }}
-+      width="full"
++      width="default"
 +    >
        <div data-v-openapi-guide>
          {props.header && title ? (
@@ -349,7 +349,7 @@ index 939c937581ec434975aee43e7284c6c2d48add93..4622655fa2c046435180c35f012b6a31
 +    <OpenApiLayout
 +      documentTitle={resolveDocumentTitle(props.frontmatter, title)}
 +      frontmatter={{ ...props.frontmatter, title }}
-+      width="full"
++      width="default"
 +    >
        <ReferenceOverview
          ir={ir}

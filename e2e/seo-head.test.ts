@@ -44,9 +44,9 @@ const cases: {
 }[] = [
   {
     path: '/',
-    title: 'Tempo developers',
-    ogTitle: 'Tempo developers',
-    descriptionIncludes: 'payments-first Layer 1 blockchain',
+    title: 'Tempo Developers: Build on a Payments-First Blockchain',
+    ogTitle: 'Tempo Developers: Build on a Payments-First Blockchain',
+    descriptionIncludes: 'stablecoin-native tokens',
     ogImageIncludes: '/og-docs.png',
   },
   {

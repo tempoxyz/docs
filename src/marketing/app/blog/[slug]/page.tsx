@@ -48,9 +48,14 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             </Link>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <span className="whitespace-nowrap border border-line-strong px-2.5 py-[3px] font-mono text-[11px] text-foreground/50 uppercase tracking-[0.02em]">
-                {categoryBySlug(post.category).badge}
-              </span>
+              {post.categories.map((category) => (
+                <span
+                  key={category}
+                  className="whitespace-nowrap border border-line-strong px-2.5 py-[3px] font-mono text-[11px] text-foreground/50 uppercase tracking-[0.02em]"
+                >
+                  {categoryBySlug(category).badge}
+                </span>
+              ))}
               <span className="font-mono text-[12px] text-foreground/40 uppercase tracking-[0.02em]">
                 {formatDate(post.date)}
               </span>

@@ -1,0 +1,25 @@
+{
+  "name": "tempo",
+  "owner": {
+    "name": "Tempo"
+  },
+  "metadata": {
+    "description": "Tempo plugins for documentation and current-data API workflows."
+  },
+  "plugins": [
+    {
+      "name": "docs",
+      "source": "ai/plugins/tempo",
+      "description": "Tempo docs MCP and skills for developer workflows, wallet, and MPP payments.",
+      "category": "Developer Tools",
+      "tags": ["docs", "mcp", "payments", "tempo"]
+    },
+    {
+      "name": "mercator",
+      "source": "ai/plugins/mercator",
+      "description": "Discover, quote, and run paid API workflows through one secure MCP connection.",
+      "category": "Productivity",
+      "tags": ["api", "current-data", "mcp", "payments", "tempo"]
+    }
+  ]
+}

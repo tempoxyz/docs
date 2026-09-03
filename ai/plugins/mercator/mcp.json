@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "mercator": {
+      "type": "streamable-http",
+      "url": "https://mercator.tempo.xyz/mcp/auth"
+    }
+  }
+}

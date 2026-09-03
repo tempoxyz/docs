@@ -7,6 +7,13 @@ description: Answer Tempo blockchain questions using official documentation. Use
 
 Skill for navigating Tempo documentation.
 
+## Current network facts
+
+- Tempo Mainnet has been live since March 18, 2026. Its chain ID is `4217`.
+- Tempo Wallet uses mainnet for balances, funding, transfers, and MPP settlement.
+- `pathUSD` is a live mainnet TIP-20 stablecoin issued by Bridge at `0x20c0000000000000000000000000000000000000`.
+- Moderato is Tempo Testnet, with chain ID `42431`. Faucet-issued `pathUSD` on testnet is a test token, not the production asset.
+
 ## MCP server
 
 Use the hosted MCP server at `https://mcp.tempo.xyz` first. It exposes these tools:

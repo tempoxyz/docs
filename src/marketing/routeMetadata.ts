@@ -6,9 +6,9 @@ export type RouteMetadata = { title: string; description: string }
 
 export const routeMetadata: Record<string, RouteMetadata> = {
   '/': {
-    title: 'Tempo developers',
+    title: 'Tempo Developers: Build on a Payments-First Blockchain',
     description:
-      'Tempo is a payments-first Layer 1 blockchain incubated by Stripe and Paradigm. Explore APIs, SDKs, wallets, and protocol documentation.',
+      'Build payment applications on Tempo with stablecoin-native tokens, predictable fees, fast settlement, SDKs, APIs, and open-source developer tools.',
   },
   '/build': {
     title: 'Build on Tempo',

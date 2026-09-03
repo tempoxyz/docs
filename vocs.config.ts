@@ -1,5 +1,6 @@
 import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
 import { resolveBaseUrl } from './src/lib/base-url'
+import { rehypeCompactShikiStyles } from './src/lib/compact-shiki-styles'
 import { docsRouteDestination, proxiedLegacyDocsRoutes } from './src/lib/docs-routing'
 import { docsStructuredDataHead } from './src/lib/docs-structured-data'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
@@ -17,23 +18,35 @@ const tempoChangelog = Changelog.github({ prereleases: true, repo: 'tempoxyz/tem
 
 const changelog = Changelog.from({
   ...tempoChangelog,
-  async fetch(options) {
-    const releases = await tempoChangelog.fetch(options)
-    return releases.map((release) => {
-      // GitHub-generated release notes use HTML disclosures. Markdown output cannot retain
-      // them, so preserve their content as a heading instead.
-      const body = release.body
-        .replace(/<details\b[^>]*>/gi, '')
-        .replace(/<\/details>/gi, '')
-        .replace(/<summary\b[^>]*>([\s\S]*?)<\/summary>/gi, '\n\n#### $1\n\n')
-
-      return {
-        ...release,
-        // The changelog page owns the only H1. Release titles render as H2, so shift body
-        // headings down one level while preserving the release note's relative hierarchy.
-        body: demoteMarkdownHeadings(Changelog.stripDuplicateTitle({ body, title: release.title })),
-      }
+  async fetch(options = {}) {
+    const limit = options.limit ?? 50
+    // The repository also publishes package-only tags. Over-fetch, then retain
+    // the requested number of network releases for the public changelog.
+    const releases = await tempoChangelog.fetch({
+      ...options,
+      limit: Math.min(limit * 5, 100),
     })
+
+    return releases
+      .filter((release) => /^v\d+\.\d+\.\d+(?:[-+].*)?$/.test(release.version))
+      .slice(0, limit)
+      .map((release) => {
+        // GitHub-generated release notes use HTML disclosures. Markdown output cannot retain
+        // them, so preserve their content as a heading instead.
+        const body = release.body
+          .replace(/<details\b[^>]*>/gi, '')
+          .replace(/<\/details>/gi, '')
+          .replace(/<summary\b[^>]*>([\s\S]*?)<\/summary>/gi, '\n\n#### $1\n\n')
+
+        return {
+          ...release,
+          // The changelog page owns the only H1. Release titles render as H2, so shift body
+          // headings down one level while preserving the release note's relative hierarchy.
+          body: demoteMarkdownHeadings(
+            Changelog.stripDuplicateTitle({ body, title: release.title }),
+          ),
+        }
+      })
   },
 })
 
@@ -137,6 +150,7 @@ export default defineConfig({
     lastmod: (_path, { filePath, lastmod }) => (/\.mdx?$/.test(filePath) ? lastmod : false),
   },
   markdown: {
+    rehypePlugins: [rehypeCompactShikiStyles],
     outputRemarkPlugins: [plainMarkdownComponents],
   },
   baseUrl: baseUrl || undefined,
@@ -894,8 +908,17 @@ export default defineConfig({
             collapsed: false,
             items: [
               {
-                text: 'T9',
+                text: 'T11',
+                badge: { text: 'Next', variant: 'info' as const },
+                link: '/docs/protocol/upgrades/t11',
+              },
+              {
+                text: 'T10',
                 badge: { text: 'Latest', variant: 'info' as const },
+                link: '/docs/protocol/upgrades/t10',
+              },
+              {
+                text: 'T9',
                 link: '/docs/protocol/upgrades/t9',
               },
               {
@@ -1096,6 +1119,10 @@ export default defineConfig({
               {
                 text: 'Validator Onboarding',
                 link: '/docs/guide/node/validator-setup',
+              },
+              {
+                text: 'Validator Network Topology',
+                link: '/docs/guide/node/validator-topology',
               },
               {
                 text: 'Checking validator status',

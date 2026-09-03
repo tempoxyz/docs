@@ -3,6 +3,7 @@
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useConfig } from 'vocs'
 import { useRouter, Link as WakuLink } from 'waku'
+import { tempoPluginInstallCommands } from '../lib/ai-install-commands'
 import { DOCS_SEARCH_PARAM } from '../lib/docs-search'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 
@@ -633,12 +634,12 @@ const pluginCommands = [
   {
     label: 'Codex',
     logo: <CodexLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    command: 'codex plugin marketplace add tempoxyz/docs\ncodex plugin add tempo@docs',
+    command: tempoPluginInstallCommands.codex,
   },
   {
     label: 'Claude',
     logo: <ClaudeLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    command: 'claude plugin marketplace add tempoxyz/docs\nclaude plugin install tempo@claude',
+    command: tempoPluginInstallCommands.claude,
   },
 ]
 

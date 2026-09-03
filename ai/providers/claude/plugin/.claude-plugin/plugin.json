@@ -1,6 +1,6 @@
 {
-  "name": "tempo",
-  "description": "Tempo development plugin for Claude",
+  "name": "docs",
+  "description": "Tempo docs and development plugin for Claude",
   "version": "0.1.0",
   "author": {
     "name": "Tempo",

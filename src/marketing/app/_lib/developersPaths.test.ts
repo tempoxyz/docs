@@ -11,6 +11,7 @@ describe('developersPath', () => {
     const { developersPath } = await import('./developersPaths')
 
     expect(developersPath('/')).toBe('/')
+    expect(developersPath('/#open-source')).toBe('/#open-source')
     expect(developersPath('/docs')).toBe('/docs')
     expect(developersPath('/build/tempo-transactions')).toBe('/build/tempo-transactions')
   })
@@ -20,9 +21,8 @@ describe('developersPath', () => {
     const { developersPath } = await import('./developersPaths')
 
     expect(developersPath('/')).toBe('/developers')
+    expect(developersPath('/#open-source')).toBe('/developers/#open-source')
     expect(developersPath('/docs')).toBe('/developers/docs')
-    expect(developersPath('/build/tempo-transactions')).toBe(
-      '/developers/build/tempo-transactions',
-    )
+    expect(developersPath('/build/tempo-transactions')).toBe('/developers/build/tempo-transactions')
   })
 })

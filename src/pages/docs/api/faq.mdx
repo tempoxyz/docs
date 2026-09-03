@@ -1,6 +1,6 @@
 ---
 title: Tempo API FAQ
-description: Answers to common Tempo API questions about hosted services, RPC, authentication, webhooks, funding, exchange quotes, and API endpoints.
+description: Answers to common Tempo API questions about hosted services, RPC, authentication, webhooks, asset routes, exchange quotes, and API endpoints.
 ---
 
 # Tempo API FAQ
@@ -9,7 +9,7 @@ Use these answers to choose the right Tempo API surface and understand what each
 
 ## What is the Tempo API?
 
-The Tempo API is Tempo's official hosted integration surface for stablecoin products. It provides indexed data, signed webhooks, funding and exchange quotes, fee sponsorship, read-only SQL, and JSON-RPC access without requiring you to operate the underlying infrastructure.
+The Tempo API is Tempo's official hosted integration surface for stablecoin products. It provides indexed data, signed webhooks, asset route and exchange quotes, fee sponsorship, read-only SQL, and JSON-RPC access without requiring you to operate the underlying infrastructure.
 
 ## How is the Tempo API different from Tempo RPC?
 
@@ -23,9 +23,9 @@ Most read endpoints work without credentials at the public rate limit. Use [MPP 
 
 Read the [transaction and receipt](/docs/api/transactions) to follow execution, then inspect its [transaction activities](/docs/api/activities#list-transaction-activities) to identify the stablecoin movement. Configure [webhooks](/docs/api/webhooks) for signed callbacks instead of polling, and review delivery history when you need to audit an attempt.
 
-## Does the Tempo Funding API execute a transfer?
+## Does the Tempo Routes API execute a transfer?
 
-No. The [Funding API](/docs/api/funding/quotes) compares live quotes across supported chains and providers, but it does not execute a transfer. Execute the chosen transfer separately.
+No. The [Routes API](/docs/api/routes/quotes) compares live quotes across supported chains and providers, but it does not execute a transfer. Execute the chosen transfer separately.
 
 ## Does the Tempo Exchange API submit a transaction?
 

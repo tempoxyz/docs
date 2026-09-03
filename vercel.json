@@ -737,6 +737,11 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/api/funding/:path*",
+      "destination": "/developers/docs/api/routes/:path*",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/guide/use-accounts/add-funds",
       "destination": "/developers/docs/guide/getting-funds",
       "permanent": true

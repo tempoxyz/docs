@@ -43,7 +43,9 @@ code. Use the docs page’s linked examples when available.
 - Prefer TypeScript examples for web apps, using the Tempo SDK pages and the
   repo’s existing Wagmi/Viem patterns.
 - Prefer Foundry examples for Solidity contracts and contract verification.
-- Use Tempo Testnet examples unless the user explicitly asks for mainnet.
+- Use Tempo Mainnet for wallet setup, funding, transfers, MPP settlement, and production workflows. Use Tempo Testnet only when the user requests it or a development workflow explicitly requires it.
+- Treat `pathUSD` as a live mainnet TIP-20 stablecoin. Distinguish production `pathUSD` from faucet-issued testnet tokens.
+- When network intent is unclear, verify the current connection details and name the selected network explicitly.
 - For production-oriented changes, check the production, security, or Tempo
   API docs before recommending defaults.
 

@@ -1,0 +1,65 @@
+---
+title: T11 Network Upgrade
+description: T11 extends transaction expiry windows and updates pricing and validation for Tempo precompiles.
+---
+
+# T11 Network Upgrade
+
+T11 gives applications more time to submit signed transactions and updates pricing and validation for calls to Tempo's built-in protocol functions.
+
+For most partners, T11 requires action only if you use fixed gas limits or construct precompile calls directly.
+
+:::info[T11 status]
+T11 is estimated to roll out to testnet on September 9, 2026, and mainnet on September 10, 2026. These dates may change.
+
+Node operators will need to install the T11-compatible release before activation to stay synced.
+:::
+
+## Timeline
+
+| Network | Estimated rollout |
+|---------|-------------------|
+| Testnet | September 9, 2026 |
+| Mainnet | September 10, 2026 |
+
+## T11 upgrade overview
+
+T11 includes three protocol changes:
+
+- **Longer transaction submission window.** Applications can give signed transactions up to five minutes to reach the network, instead of 30 seconds.
+- **Updated gas pricing.** Calls to Tempo's built-in protocol functions pay a higher input gas charge that better reflects their processing cost.
+- **Stricter precompile validation.** Precompile calls must use standard ABI encoding, and operations that check lists for duplicate values pay for that work explicitly.
+
+## Longer transaction submission window
+
+Some transactions pass through approval systems, relayers, or separate signing devices before reaching the network. The existing 30-second maximum can expire before those steps finish.
+
+T11 increases the maximum expiry window to five minutes. Applications can still choose a shorter window when appropriate.
+
+Replay protection remains in place, so the same signed transaction cannot be submitted twice. Transactions created before T11 continue to follow the existing 30-second limit.
+
+Read the [TIP-1093 specification](https://tips.sh/1093).
+
+## Updated gas pricing
+
+Tempo provides built-in protocol functions, called precompiles, for operations such as account and token management. T11 increases the input gas charge for these calls from 6 to 30 gas per 32 bytes.
+
+The increase is small for typical calls. Calls with less than 1 KiB of input add less than 768 gas. Integrations that submit unusually large inputs or use fixed gas limits should test their transactions before the rollout.
+
+Applications that estimate gas before submitting transactions should automatically account for the new pricing once their connected network activates T11.
+
+Read the [TIP-1100 specification](https://tips.sh/1100).
+
+## Stricter precompile validation
+
+T11 requires calls to Tempo precompiles to use standard ABI encoding. Calls with overlapping or trailing data, gaps in dynamic data, or non-zero padding are rejected. Applications that use standard contract libraries and SDKs should already produce compatible calls.
+
+T11 also adds a gas charge for checking duplicate values in account key permissions and Zone configuration lists. Duplicate values remain invalid, but the validation work is now included in the transaction's gas cost.
+
+Integrations that construct precompile calls manually should test their encoding before the rollout. Applications should also estimate gas on the network where the transaction will execute instead of relying on fixed limits.
+
+Read the [TIP-1105 specification](https://tips.sh/1105).
+
+## Integration impact
+
+Before the rollout, estimate gas on the network where the transaction will execute instead of relying on fixed limits, verify that precompile calls use standard ABI encoding with no trailing data or duplicate list values, and consider the longer expiry window for transactions that pass through approval or relay workflows.

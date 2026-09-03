@@ -13,6 +13,8 @@ import { TempoMcpExplorer } from '../../../components/TempoMcpExplorer.tsx'
 
 Tempo publishes documentation, Markdown pages, MCP tools, and agent plugins so AI coding agents can work with Tempo using current project context instead of guesses.
 
+Tempo Mainnet has been live since March 18, 2026. Agent wallet workflows use mainnet, and pathUSD in Tempo Wallet is a live mainnet asset. Moderato and its faucet-issued pathUSD are reserved for explicitly testnet development workflows.
+
 Use this page when you want Claude, Codex, Cursor, Amp, or another MCP-compatible client to search Tempo and related documentation, read complete pages, and install reusable Tempo workflows.
 
 ## Connect to Tempo's MCP server
@@ -155,13 +157,46 @@ The Tempo plugin installs a complete agent integration: the Tempo MCP server, wo
 
 :::code-group
 ```bash [Codex]
-codex plugin marketplace add tempoxyz/docs
-codex plugin add tempo@docs
+codex plugin marketplace add tempoxyz/docs --ref main
+codex plugin add docs@tempo
 ```
 
 ```bash [Claude]
 claude plugin marketplace add tempoxyz/docs
-claude plugin install tempo@claude
+claude plugin install docs@tempo
+```
+:::
+
+:::warning[Legacy Codex marketplace name]
+If Codex reports that the plugin is missing after finding this marketplace as `docs`, replace that
+pre-rename registration once, then rerun the install:
+
+```bash
+codex plugin marketplace remove docs
+codex plugin marketplace add tempoxyz/docs --ref main
+codex plugin add docs@tempo
+```
+:::
+
+## Install the Mercator plugin
+
+Mercator adds paid API discovery and execution through the Mercator MCP server. The installer installs the CLI, configures detected MCP clients, and bootstraps the local Mercator plugin:
+
+```bash
+curl -fsSL https://mercator.tempo.xyz/downloads/latest/install.sh | sh
+```
+
+To install the plugin directly from the Tempo marketplace, add the public `tempoxyz/docs` source and select `mercator@tempo`:
+
+:::code-group
+```bash [Codex]
+codex plugin marketplace add tempoxyz/docs --ref main
+codex plugin add mercator@tempo
+```
+
+```bash [Claude]
+claude plugin marketplace add tempoxyz/docs
+claude plugin install mercator@tempo --scope user --yes
 ```
 :::
 

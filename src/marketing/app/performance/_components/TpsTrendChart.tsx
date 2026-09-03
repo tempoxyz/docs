@@ -6,13 +6,7 @@ import { useEffect, useState } from 'react'
 import { linePath, scaleLinear, ticks } from '../_lib/chart'
 import { fmtInt, type PerfRun } from '../_lib/runs'
 import ChartTooltip from './ChartTooltip'
-import {
-  TPS_CHART_DEFAULT_DOMAIN,
-  TPS_CHART_DEFAULT_TICKS,
-  TPS_CHART_MOBILE_BP,
-  TpsChartGrid,
-  tpsChartPad,
-} from './TpsTrendChartFrame'
+import { TPS_CHART_MOBILE_BP, TpsChartGrid, tpsChartPad } from './TpsTrendChartFrame'
 import useMeasure from './useMeasure'
 
 // Vercel-hero-style throughput chart: settled TPS per nightly run, drawn with
@@ -21,6 +15,8 @@ import useMeasure from './useMeasure'
 // left-to-right on mount, with each dot popping in as the stroke reaches it.
 
 const DRAW_MS = 1600
+const MIN_DOMAIN_SPAN_RATIO = 0.04
+const DOMAIN_PADDING_RATIO = 1.4
 
 export default function TpsTrendChart({
   runs,
@@ -75,12 +71,15 @@ export default function TpsTrendChart({
   const values = runs.map((r) => r.settledTps)
   const min = Math.min(...values)
   const max = Math.max(...values)
-  const dynamicYDomain = [min * 0.9, max * 1.06] as [number, number]
-  const stableYDomainFits =
-    dynamicYDomain[0] >= TPS_CHART_DEFAULT_DOMAIN[0] &&
-    dynamicYDomain[1] <= TPS_CHART_DEFAULT_DOMAIN[1]
-  const yDomain = stableYDomainFits ? TPS_CHART_DEFAULT_DOMAIN : dynamicYDomain
-  const yTicks = stableYDomainFits ? TPS_CHART_DEFAULT_TICKS : ticks(yDomain[0], yDomain[1], 4)
+  const midpoint = (min + max) / 2
+  // Keep week-to-week movement legible without letting a nearly flat series
+  // fill the entire plot and overstate tiny changes.
+  const domainSpan = Math.max((max - min) * DOMAIN_PADDING_RATIO, midpoint * MIN_DOMAIN_SPAN_RATIO)
+  const yDomain = [Math.max(0, midpoint - domainSpan / 2), midpoint + domainSpan / 2] as [
+    number,
+    number,
+  ]
+  const yTicks = ticks(yDomain[0], yDomain[1], 5)
 
   const xAt = scaleLinear([0, n - 1], [PAD.l, Math.max(width - PAD.r, PAD.l + 1)])
   const yAt = scaleLinear(yDomain, [height - PAD.b, PAD.t])

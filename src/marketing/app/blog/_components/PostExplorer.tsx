@@ -12,7 +12,7 @@ type Filter = (typeof filters)[number]['slug']
 
 export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
   const [active, setActive] = useState<Filter>('all')
-  const visible = active === 'all' ? posts : posts.filter((p) => p.category === active)
+  const visible = active === 'all' ? posts : posts.filter((p) => p.categories.includes(active))
 
   return (
     <section>
@@ -48,9 +48,14 @@ export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
                 className="group flex flex-col gap-2.5 border-line border-b px-5 py-6 transition-colors hover:bg-surface-block lg:px-8"
               >
                 <span className="flex flex-wrap items-center gap-3">
-                  <span className="whitespace-nowrap border border-line-strong px-2.5 py-[3px] font-mono text-[11px] text-foreground/50 uppercase tracking-[0.02em]">
-                    {categoryBySlug(post.category).badge}
-                  </span>
+                  {post.categories.map((category) => (
+                    <span
+                      key={category}
+                      className="whitespace-nowrap border border-line-strong px-2.5 py-[3px] font-mono text-[11px] text-foreground/50 uppercase tracking-[0.02em]"
+                    >
+                      {categoryBySlug(category).badge}
+                    </span>
+                  ))}
                   {isNew(post.date) && (
                     <span className="whitespace-nowrap border border-indicator-green px-2.5 py-[3px] font-mono text-[11px] text-indicator-green uppercase tracking-[0.02em]">
                       New

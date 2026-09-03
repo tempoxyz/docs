@@ -1,5 +1,5 @@
 {
-  "name": "claude",
+  "name": "tempo",
   "metadata": {
     "description": "Tempo Claude Code plugin marketplace."
   },
@@ -9,11 +9,18 @@
   },
   "plugins": [
     {
-      "name": "tempo",
-      "description": "Tempo MCP and skills for Tempo docs, developer workflows, wallet, and MPP payments.",
+      "name": "docs",
+      "description": "Tempo docs MCP and skills for Tempo developer workflows, wallet, and MPP payments.",
       "source": "./ai/providers/claude/plugin",
       "category": "development",
       "homepage": "https://docs.tempo.xyz/guide/using-tempo-with-ai"
+    },
+    {
+      "name": "mercator",
+      "description": "Discover, quote, and run paid API workflows through one secure MCP connection.",
+      "source": "./ai/plugins/mercator",
+      "category": "research",
+      "homepage": "https://mercator.tempo.xyz"
     }
   ]
 }

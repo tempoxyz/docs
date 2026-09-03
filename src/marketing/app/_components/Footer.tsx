@@ -62,7 +62,7 @@ const columns: FooterColumn[] = [
   {
     header: 'Libraries',
     links: [
-      { label: 'MPP', href: 'https://github.com/tempoxyz/mpp' },
+      { label: 'MPP', href: 'https://mpp.dev/' },
       { label: 'SDKs', href: TEMPO_SDK_DOCS_URL },
       { label: 'GitHub', href: 'https://github.com/tempoxyz' },
     ],
@@ -86,7 +86,7 @@ const columns: FooterColumn[] = [
     links: [
       { label: 'Blog', href: developersPath('/blog') },
       { label: 'Performance', href: developersPath('/performance') },
-      { label: 'Open source', href: `${developersPath('/')}#open-source` },
+      { label: 'Open source', href: developersPath('/#open-source') },
       { label: 'Contact', href: CONTACT_URL },
     ],
   },

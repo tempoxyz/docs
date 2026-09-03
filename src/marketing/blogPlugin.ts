@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import rehypeShiki from '@shikijs/rehype'
+import rehypeRaw from 'rehype-raw'
 import rehypeStringify from 'rehype-stringify'
 import remarkGfm from 'remark-gfm'
 import remarkParse from 'remark-parse'
@@ -9,7 +10,8 @@ import { unified } from 'unified'
 import type { Plugin } from 'vite'
 
 // Blog content lives as dev-managed markdown files in /blogs at the repo root.
-// Frontmatter schema: title, excerpt, date (YYYY-MM-DD), category, optional
+// Frontmatter schema: title, excerpt, date (YYYY-MM-DD), category (a slug or
+// inline list of slugs), optional
 // authors, and an optional `featured: true` to pin a post to the hero card.
 //
 // Markdown is rendered to HTML here, in Node, at build/dev time, so the heavy
@@ -42,6 +44,17 @@ function inlineSvgImages(html: string): string {
   })
 }
 
+// Blog pages are mounted at /developers/blog in production and /blog in
+// previews. Use explicit paths because the marketing page's <base href="/">
+// makes relative media URLs resolve from the domain root.
+export function makeBlogAssetUrlsMountSafe(
+  html: string,
+  vercelEnv = process.env.VERCEL_ENV,
+): string {
+  const base = vercelEnv === 'production' ? '/developers/blog/' : '/blog/'
+  return html.replace(/(\b(?:src|href)=["'])\/blog\//g, `$1${base}`)
+}
+
 const CATEGORY_SLUGS = ['network-upgrades', 'events', 'technical', 'case-studies']
 
 // ALL-CAPS markdown files (AGENTS.md, DIAGRAMS.md, …) are documentation for
@@ -65,6 +78,7 @@ export type RenderedPost = {
   excerpt: string
   date: string
   category: string
+  categories: string[]
   authors: string
   featured: boolean
   html: string
@@ -86,7 +100,8 @@ type SearchablePost = RenderedPost & {
 const processor = unified()
   .use(remarkParse)
   .use(remarkGfm)
-  .use(remarkRehype)
+  .use(remarkRehype, { allowDangerousHtml: true })
+  .use(rehypeRaw)
   .use(rehypeShiki, {
     theme: 'vesper',
     langAlias: { sol: 'solidity' },
@@ -95,8 +110,9 @@ const processor = unified()
   .use(rehypeStringify)
 
 // Minimal frontmatter parser for our simple schema (quoted strings, an
-// unquoted YYYY-MM-DD date, a category slug, and an optional boolean). Avoids
-// pulling in gray-matter + js-yaml for a handful of known keys.
+// unquoted YYYY-MM-DD date, a category slug or inline list of slugs, and an
+// optional boolean). Avoids pulling in gray-matter + js-yaml for a handful of
+// known keys.
 function parseFrontmatter(raw: string): { data: Record<string, string>; content: string } {
   const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/.exec(raw)
   if (!match) return { data: {}, content: raw }
@@ -121,26 +137,37 @@ function parseFrontmatter(raw: string): { data: Record<string, string>; content:
   return { data, content: match[2] }
 }
 
+function parseCategories(value: string): string[] {
+  const list = value.startsWith('[') && value.endsWith(']') ? value.slice(1, -1) : value
+  return list
+    .split(',')
+    .map((category) => category.trim().replace(/^(['"])(.*)\1$/, '$2'))
+    .filter(Boolean)
+}
+
 async function renderPost(filename: string): Promise<SearchablePost> {
   const slug = filename.replace(/\.md$/, '')
   const raw = fs.readFileSync(path.join(BLOGS_DIR, filename), 'utf8')
   const { data, content } = parseFrontmatter(raw)
 
-  if (!CATEGORY_SLUGS.includes(data.category)) {
+  const categories = [...new Set(parseCategories(data.category ?? ''))]
+  const unknownCategories = categories.filter((category) => !CATEGORY_SLUGS.includes(category))
+  if (categories.length === 0 || unknownCategories.length > 0) {
     throw new Error(
-      `blogs/${filename}: unknown category "${data.category}". ` +
+      `blogs/${filename}: unknown category "${unknownCategories[0] ?? data.category}". ` +
         `Expected one of: ${CATEGORY_SLUGS.join(', ')}`,
     )
   }
 
-  const html = inlineSvgImages(String(await processor.process(content)))
+  const html = makeBlogAssetUrlsMountSafe(inlineSvgImages(String(await processor.process(content))))
 
   return {
     slug,
     title: data.title,
     excerpt: data.excerpt,
     date: data.date,
-    category: data.category,
+    category: categories[0],
+    categories,
     authors: data.authors ?? '',
     featured: data.featured === 'true',
     html,
