@@ -151,29 +151,29 @@ MCP clients can also post feedback directly to `https://tempo.xyz/developers/api
 
 <TempoMcpExplorer />
 
-## Install Tempo plugins
+## Install the Tempo Docs plugin
 
-The Tempo plugin installs a complete agent integration: the Tempo MCP server, workflow skills for using Tempo APIs and docs, and editor metadata that helps agents discover the right Tempo tools without manual setup.
+The Tempo Docs plugin installs the read-only Tempo MCP server, documentation skill, and editor metadata. Tempo publishes plugins from the dedicated `tempoxyz/plugins` repository.
 
 :::code-group
 ```bash [Codex]
-codex plugin marketplace add tempoxyz/docs --ref main
+codex plugin marketplace add tempoxyz/plugins --ref main
 codex plugin add docs@tempo
 ```
 
 ```bash [Claude]
-claude plugin marketplace add tempoxyz/docs
+claude plugin marketplace add tempoxyz/plugins
 claude plugin install docs@tempo
 ```
 :::
 
-:::warning[Legacy Codex marketplace name]
-If Codex reports that the plugin is missing after finding this marketplace as `docs`, replace that
-pre-rename registration once, then rerun the install:
+:::warning[Legacy marketplace source]
+If you previously installed Tempo plugins from `tempoxyz/docs`, remove the existing `tempo`
+marketplace once, then add `tempoxyz/plugins`:
 
 ```bash
-codex plugin marketplace remove docs
-codex plugin marketplace add tempoxyz/docs --ref main
+codex plugin marketplace remove tempo
+codex plugin marketplace add tempoxyz/plugins --ref main
 codex plugin add docs@tempo
 ```
 :::
@@ -186,16 +186,16 @@ Mercator adds paid API discovery and execution through the Mercator MCP server. 
 curl -fsSL https://mercator.tempo.xyz/downloads/latest/install.sh | sh
 ```
 
-To install the plugin directly from the Tempo marketplace, add the public `tempoxyz/docs` source and select `mercator@tempo`:
+To install the plugin directly from the Tempo marketplace, add the public `tempoxyz/plugins` source and select `mercator@tempo`:
 
 :::code-group
 ```bash [Codex]
-codex plugin marketplace add tempoxyz/docs --ref main
+codex plugin marketplace add tempoxyz/plugins --ref main
 codex plugin add mercator@tempo
 ```
 
 ```bash [Claude]
-claude plugin marketplace add tempoxyz/docs
+claude plugin marketplace add tempoxyz/plugins
 claude plugin install mercator@tempo --scope user --yes
 ```
 :::
@@ -207,7 +207,7 @@ claude plugin install mercator@tempo --scope user --yes
 Install the Tempo Docs skill to give AI coding agents access to Tempo documentation, related documentation sources, and examples:
 
 ```bash
-npx skills add tempoxyz/docs
+npx skills add tempoxyz/plugins --skill docs
 ```
 
 Once installed, the agent uses it automatically when relevant tasks are detected.
