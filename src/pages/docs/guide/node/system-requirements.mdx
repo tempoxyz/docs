@@ -114,8 +114,8 @@ Use the [validator firewall policy](/docs/guide/node/validator-topology#validato
 |------|----------|---------|--------------------|-------------------|
 | 30303 | TCP/UDP | Execution P2P | Trusted follower RPC hosts only | Public |
 | 8000 | TCP | Consensus P2P | Other Tempo validators only | Not required |
-| 8545 | TCP | HTTP RPC | Private follower endpoint only, if enabled | Optional client access |
-| 8546 | TCP | WebSocket RPC | Private follower endpoint only, if enabled | Optional client access |
+| 8545 | TCP | HTTP RPC | Localhost management only, if enabled | Optional client access |
+| 8546 | TCP | WebSocket RPC | Private follower endpoint (`eth,consensus`) | Optional client access |
 | 9000 | TCP | Metrics | Private monitoring hosts only | Private monitoring hosts only |
 
 Keep validator management RPC on localhost and host management access on a private management network. Never expose the `admin` RPC namespace on follower or client endpoints.
