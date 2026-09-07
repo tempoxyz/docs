@@ -76,20 +76,26 @@ flowchart TB
     style OPERATOR_B stroke-dasharray: 8 6
 `} />
 
-No validator P2P or RPC port should be directly accessible from the internet. Do not allow execution P2P between `V1` and `V2`; transactions cross the validator isolation boundary only through `R1` or `R2`.
+Do not expose validator P2P or RPC ports to untrusted internet hosts. Allow other Tempo validators to reach the consensus port, including over the internet when needed. Do not allow execution P2P between `V1` and `V2`; transactions cross the validator isolation boundary only through `R1` or `R2`.
 
 ## Validator firewall policy
 
 Enforce the topology at the network firewall even when the node's peer configuration restricts discovery or has a fixed peer list.
 
-Firewall for the validator (default ports):
+Firewall for the validator (default destination ports; use the configured ports if you override them):
 
-| Traffic | Source or destination | Port | Policy |
-| --- | --- | --- | --- |
-| Consensus P2P | Other Tempo validators | `8000/TCP` | Allow |
-| Execution P2P | Trusted RPC hosts | `30303/TCP` and `30303/UDP` | Allow |
-| JSON-RPC | Trusted RPC hosts | `8545/TCP` | Allow |
-| All other inbound traffic | Any source | Any port | Deny |
+| Traffic | Direction relative to validator | Allowed source or destination | Port | Policy |
+| --- | --- | --- | --- | --- |
+| Consensus P2P | Inbound and outbound | Other Tempo validators | `8000/TCP` | Allow |
+| Execution P2P | Inbound and outbound | Trusted RPC hosts | `30303/TCP` and `30303/UDP` | Allow only these peers |
+| JSON-RPC | Inbound | Trusted RPC hosts | `8545/TCP`, or `8546/TCP` for WebSocket if enabled | Allow on the private follower endpoint |
+| Metrics | Inbound | Private monitoring hosts | `9000/TCP` if enabled | Allow |
+| Host management | Inbound | Private management network | Configured management ports | Allow only as needed |
+| All other inbound traffic | Inbound | Any source | Any port | Deny |
+
+Allow return traffic for permitted connections. Block outbound execution P2P to public peers and other validators, including peers using non-default ports. If you also restrict other outbound traffic, explicitly allow required operational services such as DNS, time synchronization, and configured telemetry endpoints. Keep the `admin` RPC namespace on localhost only.
+
+Keep consensus firewall rules aligned with validator address changes and committee membership so authorized validators remain reachable.
 
 Restrict the validator's execution peer configuration to the trusted follower RPC nodes. Do not include other validators in this allowlist, and do not rely on peer discovery alone to provide isolation.
 
@@ -179,7 +185,7 @@ After deployment or a firewall change, confirm that:
 
 - Other validators can reach the validator's consensus port.
 - The validator's execution peer count exactly matches the number of trusted RPC nodes.
-- Internet hosts cannot reach the validator on any ports.
+- Untrusted internet hosts cannot reach validator services; authorized validators can still reach consensus P2P.
 - The validator cannot establish execution P2P connections to internet peers or other validators.
 - Each follower is configured with `--follow` against the validator and remains synced.
 - Transactions submitted through either follower reach the validator.

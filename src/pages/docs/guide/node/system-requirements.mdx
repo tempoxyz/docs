@@ -108,10 +108,14 @@ Restart the node after applying for the changes to take effect.
 
 ## Ports
 
-| Port | Protocol | Purpose | Expose |
-|------|----------|---------|--------|
-| 30303 | TCP/UDP | Execution P2P | Public |
-| 8000 | TCP | Consensus P2P | Validators only |
-| 8545 | TCP | HTTP RPC | Optional (internal for validators) |
-| 8546 | TCP | WebSocket RPC | Optional (internal for validators) |
-| 9000 | TCP | Metrics | Internal |
+Use the [validator firewall policy](/docs/guide/node/validator-topology#validator-firewall-policy) for validator ingress and egress rules. The table below summarizes default ports by node role.
+
+| Port | Protocol | Purpose | Validator exposure | RPC-node exposure |
+|------|----------|---------|--------------------|-------------------|
+| 30303 | TCP/UDP | Execution P2P | Trusted follower RPC hosts only | Public |
+| 8000 | TCP | Consensus P2P | Other Tempo validators only | Not required |
+| 8545 | TCP | HTTP RPC | Private follower endpoint only, if enabled | Optional client access |
+| 8546 | TCP | WebSocket RPC | Private follower endpoint only, if enabled | Optional client access |
+| 9000 | TCP | Metrics | Private monitoring hosts only | Private monitoring hosts only |
+
+Keep validator management RPC on localhost and host management access on a private management network. Never expose the `admin` RPC namespace on follower or client endpoints.
