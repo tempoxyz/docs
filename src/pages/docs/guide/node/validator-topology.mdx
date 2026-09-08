@@ -40,16 +40,7 @@ config:
   layout: elk
 ---
 flowchart TB
-    subgraph EXTERNAL["Public Nodes"]
-        direction TB
-
-        E1["External RPC node"]
-        E2["External RPC node"]
-        E3["External RPC node"]
-
-        E1 <-->|"Execution P2P"| E2
-        E1 <-->|"Execution P2P"| E3
-    end
+    EXTERNAL@{ shape: cloud, label: "Public Nodes" }
 
     subgraph VALIDATORS["Validators"]
         direction LR
@@ -71,8 +62,9 @@ flowchart TB
         end
     end
 
-    E2 <-->|"Execution P2P"| R1
-    E3 <-->|"Execution P2P"| R2
+    EXTERNAL <-->|"Execution P2P"| R1
+    EXTERNAL <-->|"Execution P2P"| R2
+    R1 <-->|"Execution P2P"| R2
 
     style OPERATOR_A stroke-dasharray: 8 6
     style OPERATOR_B stroke-dasharray: 8 6
