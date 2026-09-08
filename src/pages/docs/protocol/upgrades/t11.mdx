@@ -7,7 +7,7 @@ description: T11 extends transaction expiry windows and updates pricing and vali
 
 T11 gives applications more time to submit signed transactions and updates pricing and validation for calls to Tempo's built-in protocol functions.
 
-For most partners, T11 requires action only if you use fixed gas limits or construct precompile calls directly.
+Review your integration if you use fixed gas limits, construct precompile calls directly, or create Zones.
 
 :::info[T11 status]
 T11 is estimated to roll out to testnet on September 9, 2026, and mainnet on September 10, 2026. These dates may change.
@@ -44,7 +44,7 @@ Read the [TIP-1093 specification](https://tips.sh/1093).
 
 Tempo provides built-in protocol functions, called precompiles, for operations such as account and token management. T11 increases the input gas charge for these calls from 6 to 30 gas per 32 bytes.
 
-The increase is small for typical calls. Calls with less than 1 KiB of input add less than 768 gas. Integrations that submit unusually large inputs or use fixed gas limits should test their transactions before the rollout.
+Calls with less than 1 KiB of input add at most 768 gas, since the input length rounds up to whole 32-byte words. Integrations that submit unusually large inputs or use fixed gas limits should test their transactions before the rollout.
 
 Applications that estimate gas before submitting transactions should automatically account for the new pricing once their connected network activates T11.
 
@@ -54,7 +54,9 @@ Read the [TIP-1100 specification](https://tips.sh/1100).
 
 T11 requires calls to Tempo precompiles to use standard ABI encoding. Calls with overlapping or trailing data, gaps in dynamic data, or non-zero padding are rejected. Applications that use standard contract libraries and SDKs should already produce compatible calls.
 
-T11 also adds a gas charge for checking duplicate values in account key permissions and Zone configuration lists. Duplicate values remain invalid, but the validation work is now included in the transaction's gas cost.
+T11 charges 20 gas per value processed by duplicate checks in account key permissions and Zone configuration lists. This is separate from the 30-gas-per-word input charge.
+
+For `ZoneFactory.createZone`, every address across `allowedAccounts`, `zoneGateways`, and `sequencers` must be unique. Before T11, duplicates within `allowedAccounts` or `zoneGateways` were permitted; T11 rejects them. Cross-list overlaps and duplicate sequencers were already invalid. Validate the combined lists before submission, even if you use a standard ABI encoder and estimate gas. See [Zone creation](/docs/protocol/zones/architecture#creating-a-zone).
 
 Integrations that construct precompile calls manually should test their encoding before the rollout. Applications should also estimate gas on the network where the transaction will execute instead of relying on fixed limits.
 

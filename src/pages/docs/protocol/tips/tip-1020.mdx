@@ -3,7 +3,7 @@ id: TIP-1020
 title: Signature Verification Precompile
 description: A precompile for verifying Tempo signatures onchain.
 authors: Jake Moxey (@jxom), Tanishk Goyal (@legion2002), Howy (@howydev)
-status: Testnet
+status: Mainnet
 related: Tempo Transaction Spec
 protocolVersion: T3
 ---
@@ -83,6 +83,8 @@ The precompile MUST enforce strict size limits on the `signature` argument **bef
 | WebAuthn | 129–2049 bytes |
 
 ### Gas Costs
+
+The input charge below records the original T3 schedule. From T11, [TIP-1100](https://tips.sh/1100) raises it to 30 gas per 32-byte word, rounded up. See [T11 gas pricing](/docs/protocol/upgrades/t11#updated-gas-pricing) for integration guidance.
 
 The precompile MUST charge gas and verify sufficient gas is available **before** performing any cryptographic verification. The precompile MUST revert with out-of-gas if the call has insufficient gas for the signature type.
 

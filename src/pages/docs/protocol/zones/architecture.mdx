@@ -62,9 +62,9 @@ The system consists of contracts on both Tempo Mainnet and within each Tempo Zon
 
 ### Tempo Contracts
 
-- **`ZoneFactory`** deploys new Tempo Zones. Each zone gets its own Zone Portal and Zone Messenger contracts with deterministic addresses.
+- **`ZoneFactory`** creates zones and installs a deterministic `ZonePortal` proxy for each one. All portals use the same protocol-managed implementation, verifier, and messenger.
 - **`ZonePortal`** is the central bridge contract. It locks all deposited tokens, verifies validity proofs, and processes withdrawals. The Zone Portal contract maintains the authoritative state: which deposits have been made, which batches have been proven, and which withdrawals are pending.
-- **`ZoneMessenger`** handles withdrawals that include callbacks. When a user wants to withdraw tokens and trigger a contract call atomically, the messenger executes both operations together. If the callback fails, the entire withdrawal reverts and funds bounce back to the zone.
+- **`ZoneMessenger`** is shared by all zones and handles withdrawals that include callbacks. When a user wants to withdraw tokens and trigger a contract call atomically, the messenger executes both operations together. If the callback fails, the entire withdrawal reverts and funds bounce back to the zone.
 
 The protocol manages the shared Tempo contracts at these addresses:
 
@@ -88,14 +88,27 @@ Tempo Zones have four system contract predeploys at fixed addresses:
 
 ## Creating a Zone
 
-Tempo Zones are created through the `ZoneFactory`:
+Only the `ZoneFactory.owner()` account can create zones. Submit `createZone(params)` with these `CreateZoneParams` fields:
 
-1. Choose a TIP-20 token to serve as the zone's initial asset.
-2. Select a verifier contract (ZK prover or TEE attestor).
-3. Designate a sequencer address.
-4. Call `ZoneFactory.createZone()` with these parameters.
+| Field | Requirement |
+|-------|-------------|
+| `initialToken` | A TIP-20 token with an explicit TIP-403 transfer-policy binding. |
+| `accessMode` | `true` restricts account access; `false` leaves it open. |
+| `gatewayMode` | `true` restricts callback gateways; `false` leaves them open. |
+| `allowedAccounts` | Addresses assigned the `Account` role, even if access is open. Must exclude the shared messenger. |
+| `zoneGateways` | Addresses assigned the `CallbackGateway` role, even if gateway access is open. |
+| `admin` | A nonzero address that manages the portal configuration. |
+| `sequencers` | One to eight distinct, nonzero addresses. |
+| `threshold` | Required settlement signatures, from `1` to the sequencer count. |
+| `rpcUrl` | The zone's RPC URL. |
 
-The factory deploys a new `ZonePortal` and `ZoneMessenger` for the Tempo Zone. The zone itself runs as a separate chain with the system contracts deployed at genesis. The sequencer can enable additional TIP-20 tokens at any time via `ZonePortal.enableToken()`.
+The factory returns `(zoneId, portal)` and initializes the portal in the same call. It supplies the verifier and shared messenger; callers do not select them. Each portal delegates to the shared implementation while keeping its own state. For example, zone ID `1` has portal address `0x5AD0000000000000000000000000000000000001`.
+
+Creation consumes at least 15,000,000 gas. Estimate the complete transaction rather than using that minimum as a fixed gas limit.
+
+An address cannot appear in more than one of `allowedAccounts`, `zoneGateways`, and `sequencers`. From [T11](/docs/protocol/upgrades/t11#stricter-precompile-validation), duplicates within `allowedAccounts` or `zoneGateways` are also rejected. Validate the combined lists before submission. Empty role lists deny access when their corresponding enforcement mode is enabled.
+
+The zone runs as a separate chain with its system contracts installed at genesis. Sequencers can enable additional TIP-20 tokens via `ZonePortal.enableToken()`. See [TIP-1091](https://tips.sh/1091) for the factory specification.
 
 ### Chain ID
 
@@ -107,14 +120,13 @@ chain_id = 421700000 + zone_id
 
 The prefix `4217` corresponds to the Tempo Mainnet chain ID. This ensures replay protection between Tempo Zones. A transaction signed for one zone cannot be replayed on another.
 
-## Sequencer Transfer
+<span id="sequencer-transfer" />
 
-The sequencer can transfer control to a new address via a two-step process on Tempo Mainnet:
+## Sequencer management
 
-1. Current sequencer calls `ZonePortal.transferSequencer(newSequencer)` to nominate a new sequencer.
-2. New sequencer calls `ZonePortal.acceptSequencer()` to accept the transfer.
+The portal admin calls `ZonePortal.setSequencerSet(newSequencers, newThreshold)` to replace the sequencer set and settlement threshold atomically. A replacement increments the configuration nonce and invalidates settlement certificates from the previous configuration. Each certificate requires at least `threshold` distinct signatures from the active set.
 
-Sequencer management occurs on Tempo Mainnet. Zone-side system contracts read the sequencer from Tempo Mainnet via `ZoneConfig`, which queries `TempoState` to get the sequencer address from the finalized `ZonePortal` storage.
+Use the portal ABI for the runtime installed on your network when updating this configuration. The factory's `sequencers` and `threshold` fields describe the initial settlement configuration.
 
 ## Trust Model
 
