@@ -42,24 +42,20 @@ config:
 flowchart TB
     EXTERNAL@{ shape: cloud, label: "Public Nodes" }
 
-    subgraph VALIDATORS["Validators"]
-        direction LR
+    subgraph OPERATOR_A["Validator"]
+        direction TB
+        R1["R1: Trusted RPC nodes"]
+        V1["V1: Validator"]
+        R1 -->|"--follow (WebSocket)"| V1
+        R1 <-->|"Execution P2P"| V1
+    end
 
-        subgraph OPERATOR_A["&nbsp;"]
-            direction TB
-            R1["R1: Trusted RPC nodes"]
-            V1["V1: Validator"]
-            R1 -->|"--follow (WebSocket)"| V1
-            R1 <-->|"Execution P2P"| V1
-        end
-
-        subgraph OPERATOR_B["&nbsp;"]
-            direction TB
-            R2["R2: Trusted RPC nodes"]
-            V2["V2: Validator"]
-            R2 -->|"--follow (WebSocket)"| V2
-            R2 <-->|"Execution P2P"| V2
-        end
+    subgraph OPERATOR_B["Validator"]
+        direction TB
+        R2["R2: Trusted RPC nodes"]
+        V2["V2: Validator"]
+        R2 -->|"--follow (WebSocket)"| V2
+        R2 <-->|"Execution P2P"| V2
     end
 
     EXTERNAL <-->|"Execution P2P"| R1
