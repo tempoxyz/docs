@@ -17,7 +17,8 @@ export function ValidatorTopologyDiagram() {
           Two separate Validator units sit side by side. Each contains trusted RPC nodes (R1 or R2)
           above its validator (V1 or V2). Both RPC groups connect to the public execution P2P
           network and to each other over execution P2P. Each RPC group follows its own validator
-          over WebSocket and also has a bidirectional execution P2P connection to it.
+          over WebSocket and also has a bidirectional execution P2P connection to it. V1 and V2
+          communicate directly over bidirectional consensus P2P.
         </desc>
         <defs>
           <marker
@@ -133,6 +134,7 @@ export function ValidatorTopologyDiagram() {
           <path d="M 353 119 L 100 175 V 275" />
           <path d="M 478 126 L 740 175 V 275" />
           <path d="M 310 298 H 530" />
+          <path d="M 310 425 H 530" />
         </g>
         <text x="240" y="180">
           Execution P2P
@@ -142,6 +144,9 @@ export function ValidatorTopologyDiagram() {
         </text>
         <text x="420" y="288">
           Execution P2P
+        </text>
+        <text x="420" y="415">
+          Consensus P2P
         </text>
       </svg>
     </div>
