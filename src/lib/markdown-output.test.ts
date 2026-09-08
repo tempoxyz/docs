@@ -79,6 +79,30 @@ Status: <Badge variant="red">Required</Badge>
     expect(output).not.toMatch(/<\/?[A-Z]/)
   })
 
+  test('preserves validator topology relationships in plain Markdown', async () => {
+    const output = await render(`
+import { ValidatorTopologyDiagram } from './ValidatorTopologyDiagram'
+
+<ValidatorTopologyDiagram />
+
+No validator P2P or RPC port should be directly accessible from the internet.
+`)
+
+    expect(output).toContain('R1 with V1, and R2 with V2')
+    expect(output).toContain('submits a transaction to R1 over JSON-RPC')
+    expect(output).toContain(
+      'R1 and R2 each connect to Public Nodes and to each other over bidirectional execution P2P',
+    )
+    expect(output).toContain('R1 follows V1 and R2 follows V2 using --follow over WebSocket')
+    expect(output).toContain('each pair also has a bidirectional execution P2P connection')
+    expect(output).toContain('V1 and V2 communicate over bidirectional consensus P2P')
+    expect(output).toContain('no execution P2P connection between them')
+    expect(output).toContain(
+      'No validator P2P or RPC port should be directly accessible from the internet.',
+    )
+    expect(output).not.toContain('ValidatorTopologyDiagram')
+  })
+
   test('explains interactive and OpenAPI-only content', async () => {
     const output = await render(`
 <OpenApi.Playground operationId="getAddressBalances" hideQueryParams />
