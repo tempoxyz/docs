@@ -3,10 +3,10 @@ export function ValidatorTopologyDiagram() {
     <div style={{ margin: '1.5rem 0', overflowX: 'auto' }}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 840 490"
+        viewBox="-200 0 1040 490"
         role="img"
         aria-labelledby="validator-topology-title validator-topology-description"
-        style={{ display: 'block', width: '100%', minWidth: 640, height: 'auto' }}
+        style={{ display: 'block', width: '100%', minWidth: 800, height: 'auto' }}
         fontFamily="ui-sans-serif, system-ui, sans-serif"
         fontSize="16"
         fill="currentColor"
@@ -18,7 +18,8 @@ export function ValidatorTopologyDiagram() {
           above its validator (V1 or V2). Both RPC groups connect to the public execution P2P
           network and to each other over execution P2P. Each RPC group follows its own validator
           over WebSocket and also has a bidirectional execution P2P connection to it. V1 and V2
-          communicate directly over bidirectional consensus P2P.
+          communicate directly over bidirectional consensus P2P. A client outside the validator
+          units submits a transaction to R1 over JSON-RPC.
         </desc>
         <defs>
           <marker
@@ -113,6 +114,42 @@ export function ValidatorTopologyDiagram() {
             </text>
           </g>
         ))}
+
+        <rect
+          x="-180"
+          y="275"
+          width="100"
+          height="46"
+          rx="4"
+          fill="var(--vocs-background-color-primary, #ffffff)"
+        />
+        <rect
+          x="-180"
+          y="275"
+          width="100"
+          height="46"
+          rx="4"
+          fill="none"
+          stroke="currentColor"
+          strokeOpacity="0.25"
+        />
+        <text x="-130" y="304">
+          Client
+        </text>
+        <path
+          d="M -80 298 H 60"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          opacity="0.6"
+          markerEnd="url(#validator-topology-arrow)"
+        />
+        <text x="-10" y="263">
+          Submit TX
+          <tspan x="-10" dy="20">
+            (JSON-RPC)
+          </tspan>
+        </text>
 
         <path
           d="M 353 119 C 320 122 313 78 338 66 C 331 36 368 19 390 34 C 408 8 450 15 461 39 C 493 29 519 56 506 82 C 537 108 505 142 478 126 C 459 149 430 145 415 132 C 394 148 365 142 353 119 Z"
