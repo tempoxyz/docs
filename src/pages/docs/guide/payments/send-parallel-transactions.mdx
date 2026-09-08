@@ -18,6 +18,8 @@ Tempo enables concurrent transaction execution through its [expiring nonce](/doc
 
 ## Parallel transaction demo
 
+After [T11 activates](/docs/protocol/upgrades/t11) on the network, expiring nonce transactions can set `validBefore` up to 300 seconds (five minutes) ahead of the current block timestamp. Before activation, the maximum is 30 seconds. This is a protocol limit, not an SDK default: check your SDK's expiry settings if you need a longer window. Shorter windows remain valid. See [expiring nonce configuration](/docs/guide/tempo-transaction#expiring-nonces).
+
 By the end of this guide you will understand how to send parallel payments using expiring nonces under-the-hood.
 
 <Demo.Container name="Send Parallel Payments" footerVariant="balances" tokens={[Token.alphaUsd]}>

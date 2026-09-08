@@ -38,6 +38,14 @@ Congestion is managed through:
 
 The payment lane mechanism ensures that payment transactions are not crowded out by other network activity. General network congestion from non-payment use cases cannot affect payment throughput or fees, providing the consistency that payment applications require.
 
+## Precompile input and validation gas
+
+After [T11 activates](/docs/protocol/upgrades/t11), every Tempo precompile call charges `30 * ceil(calldata_length / 32)` execution gas for its input, up from `6 * ceil(calldata_length / 32)`. The length includes all input bytes, including the function selector. This charge is deducted before dispatch or argument decoding; insufficient gas halts execution with out-of-gas. See [TIP-1100](https://tips.sh/1100).
+
+[TIP-1105](https://tips.sh/1105) adds a separate charge of 20 gas per value processed by duplicate checks for AccountKeychain call-scope targets, selectors, and recipients, and ZoneFactory allowed-account, gateway, and sequencer lists. Insufficient gas halts execution before sorting. ZoneFactory rejects duplicate addresses within or across those role lists.
+
+T11 also requires canonical ABI encoding for Tempo precompile calls. Gaps, overlaps, trailing data, and non-zero padding are rejected. Use standard ABI encoders and estimate gas on the network where the transaction will execute, especially for large inputs or integrations with fixed gas limits.
+
 ## Fee payment
 
 Before the execution of each transaction, the protocol takes the following steps:

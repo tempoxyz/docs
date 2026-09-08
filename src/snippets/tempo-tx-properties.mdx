@@ -1557,7 +1557,9 @@ The [expiring nonces specification](https://github.com/tempoxyz/tempo/blob/main/
 - Automatic replay protection via circular buffer
 - No permanent state bloat from unused nonce keys
 
-Expiring nonces can be used by setting `nonceKey` to `maxUint256` and `validBefore` to a time in the future (within 30 seconds).
+Use expiring nonces by setting `nonceKey` to `maxUint256`, `nonce` to `0`, and `validBefore` to a future Unix timestamp in seconds. After [T11 activates](/docs/protocol/upgrades/t11) on the network, the maximum window is 300 seconds (five minutes): `now < validBefore <= now + 300`, where `now` is the current block timestamp. Before activation, the maximum is 30 seconds. See [TIP-1093](https://tips.sh/1093).
+
+Shorter windows remain valid. The examples below use 20 seconds; the five-minute protocol maximum does not imply that an SDK selects that window by default.
 
 <Tabs stateKey="library-exp">
   <Tab title="Viem">
@@ -1781,7 +1783,7 @@ Expiring nonces can be used by setting `nonceKey` to `maxUint256` and `validBefo
       access_list,
       nonce_key, // set to `maxUint256` // [!code focus]
       nonce,
-      valid_before, // set to `now + <30 seconds` // [!code focus]
+      valid_before, // e.g. `now + 20`; maximum `now + 300` after T11, `now + 30` before // [!code focus]
       valid_after,
       fee_token,
       fee_payer_signature,

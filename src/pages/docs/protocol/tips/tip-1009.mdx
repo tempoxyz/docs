@@ -10,6 +10,10 @@ protocolVersion: T1
 
 # TIP-1009: Expiring Nonces
 
+:::info[T11 supersedes the window and capacity below]
+After [T11 activates](/docs/protocol/upgrades/t11), [TIP-1093](https://tips.sh/1093) increases the maximum expiry window from 30 to 300 seconds and the replay-protection buffer from 300,000 to 3,000,000 entries. The post-T11 validity rule is `now < validBefore <= now + 300`, where `now` is the current block timestamp. The 30-second limits, 300,000-entry capacity, pseudocode, and boundary tests below describe the original pre-T11 specification.
+:::
+
 ## Abstract
 
 TIP-1009 introduces expiring nonces, an alternative replay protection mechanism where transactions are valid only within a specified time window. Instead of tracking sequential nonces, the protocol uses transaction hashes with expiry timestamps to prevent replay attacks. This enables use cases like gasless transactions, meta-transactions, and simplified UX where users don't need to manage nonce ordering.
