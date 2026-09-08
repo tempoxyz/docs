@@ -56,16 +56,16 @@ flowchart TB
 
         subgraph OPERATOR_A["&nbsp;"]
             direction TB
-            R1["Trusted RPC nodes"]
-            V1["Validator"]
+            R1["R1: Trusted RPC nodes"]
+            V1["V1: Validator"]
             R1 -->|"--follow (WebSocket)"| V1
             R1 <-->|"Execution P2P"| V1
         end
 
         subgraph OPERATOR_B["&nbsp;"]
             direction TB
-            R2["Trusted RPC nodes"]
-            V2["Validator"]
+            R2["R2: Trusted RPC nodes"]
+            V2["V2: Validator"]
             R2 -->|"--follow (WebSocket)"| V2
             R2 <-->|"Execution P2P"| V2
         end
