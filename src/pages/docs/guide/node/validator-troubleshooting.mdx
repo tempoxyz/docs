@@ -77,7 +77,7 @@ See [Time Synchronization](/docs/guide/node/system-requirements#time-synchroniza
 
 ## I accidentally deleted my consensus data directory
 
-If you deleted `<datadir>/consensus`, your signing share is lost but will be [automatically recovered](/docs/guide/node/validator-keys#signing-share-recovery) from the network when the node restarts. Your node will re-join the committee after the next successful DKG ceremony.
+Current validators require consensus finalization certificates to start. Contact the Tempo team to coordinate restoring a consistent snapshot; do not assume restarting with an empty consensus directory is sufficient. Once startup data is restored, [signing-share recovery](/docs/guide/node/validator-keys#signing-share-recovery) can reconstruct a missing share, or the node can obtain one in a future successful DKG ceremony.
 
 :::danger
 Do **not** delete the entire data directory and attempt to re-sync with the same signing key. This risks double-signing and will require [rotating to a new identity](/docs/guide/node/validator-lifecycle#resetting-your-validators-data).

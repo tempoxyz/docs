@@ -140,6 +140,35 @@ Once your node is up, it may not start syncing immediately. This is because your
 | `--telemetry-metrics-interval <DURATION>` | Interval for pushing metrics (default: `10s`). |
 | `--consensus.datadir <PATH>` | Store consensus data on a separate volume (e.g., AWS EBS) while keeping execution state on high-performance local disks. Migrate by copying `<datadir>/consensus` to the new location. |
 | `--consensus.secret <PATH>` | Read the encrypted signing-key secret from a FIFO, process-substitution path, or regular file. Prefer FIFO or process substitution so the secret is streamed just in time and kept out of the process environment. |
+| `--txpool.filter <ADDRESSES_OR_FILE>` | Reject transactions whose sender or direct call target matches an operator-supplied address list. See [Transaction address filtering](#transaction-address-filtering). |
+
+### Transaction address filtering
+
+From [v1.14.0](https://github.com/tempoxyz/tempo/releases/tag/v1.14.0), you can configure `--txpool.filter` to exclude addresses from your node's transaction pool without maintaining a custom node build. Filtering is optional and disabled by default. You supply and maintain the address list.
+
+Append one of these forms to your existing `tempo node` command:
+
+::::code-group
+```bash [Comma-separated addresses]
+--txpool.filter "0x0000000000000000000000000000000000000001,0x0000000000000000000000000000000000000002"
+```
+```bash [Address file]
+--txpool.filter /etc/tempo/filtered-addresses.txt
+```
+::::
+
+The file is plain text, with addresses separated by commas, newlines, or both:
+
+```text
+0x0000000000000000000000000000000000000001
+0x0000000000000000000000000000000000000002
+```
+
+Whitespace, blank entries, and duplicate addresses are ignored. An empty list, an invalid address, or an unreadable file prevents startup. The file is read at startup; restart the node after changing its contents. Remove the flag to disable filtering.
+
+The node rejects the entire transaction at pool admission when its recovered sender or any direct call target appears in the list. For batched Tempo transactions, every direct call target is checked. A rejection reports `Transaction address check failed for {address}`.
+
+This is a local pool policy. It does not change consensus validation or reject otherwise-valid blocks proposed by other validators. It does not inspect internal contract calls or addresses encoded in calldata, such as a token transfer's recipient. Contract-creation calls have no direct target to check; their sender is still checked.
 
 ### Telemetry endpoint
 
@@ -157,17 +186,10 @@ The URL must include credentials: `--telemetry-url https://user:pass@metrics.exa
 | Execution metrics | Block processing times, transaction pool size, peer count, sync status, database stats |
 | Consensus metrics | Epoch and view progress, DKG ceremony status, proposal and finalization counts |
 | Operational logs | Consensus state transitions, block proposals, sync progress, error events |
+| Hardware metadata | CPU vendor, model and frequency, physical and logical core counts, total memory, and filesystem types for node storage, reported by `tempo_hardware_info` since v1.11.0 |
 
 All consensus metrics are namespaced under a `consensus` prefix.
 
 #### What is **not** collected
 
-The telemetry endpoint does **not** collect any ambient information about the host machine. Specifically:
-
-- No hostname, IP address, or machine identifiers
-- No operating system, CPU, memory, or disk information
-- No information about other processes or services running on the machine
-- No file paths or directory structures beyond the node's own data directory references in logs
-- No network topology or firewall configuration
-
-The data is strictly limited to the node's own operational metrics and logs.
+The `tempo_hardware_info` metric omits hostnames, IP addresses, disk names, mount sources, and filesystem paths. Node operational logs are exported separately and can include the node's configured paths and peer information; the hardware metric's exclusions do not apply to all logs.

@@ -6,7 +6,7 @@ description: Download chain snapshots for faster initial sync of a Tempo node.
 
 # `tempo download`: CLI command reference
 
-Download chain snapshots for faster initial sync. Fetches MDBX state and static files, and generates a `reth.toml` prune config for the target data directory.
+Download chain snapshots for faster initial sync. Fetches execution state, static files, and consensus data, and generates a `reth.toml` prune config for the target data directory. Current releases resolve the default data directory and snapshot manifest from the selected chain.
 
 Running `tempo download` without a snapshot profile opens an interactive component selector. Passing a profile flag such as `--minimal` or `--archive` skips the selector. Validators should use `--minimal`. RPC providers, indexers, and other workloads that need complete historical data should use `--archive`.
 
@@ -22,9 +22,11 @@ tempo download [flags]
 | --- | --- |
 | `--chain <network>` | Target network (`mainnet`, `moderato`) |
 | `--datadir <path>` | Data directory for downloaded state |
+| `--consensus.datadir <path>` | Destination for consensus snapshot data. Defaults to `<datadir>/consensus`; match this to the node's `--consensus.datadir` when using a separate volume. |
 | `-u, --url <url>` | Download a single legacy snapshot archive URL |
 | `--manifest-url <url>` | Download a specific modular snapshot manifest URL |
 | `--list` | List available snapshots |
+| `--print-plan-json` | Print the selected execution and consensus archive plan without downloading archives or modifying the data directory. Select a profile such as `--minimal`. |
 | `--resumable[=<bool>]` | Download to disk before extraction so interrupted downloads can resume. Enabled by default. |
 | `--minimal` | Download the minimal component set without opening the interactive selector. Validators should use this profile. |
 | `--full` | Download the full node component set. |
@@ -72,6 +74,14 @@ If you are unsure which pruning configuration your validator is running, reach o
 :::
 
 ## `tempo download` examples
+
+Preview a validator snapshot download before making changes:
+
+```bash
+tempo download --chain mainnet --minimal --print-plan-json
+```
+
+The JSON plan includes archive URLs, sizes, and checksums when supplied by the manifest. It includes the consensus archive from v1.12.0 onward. Planning still fetches snapshot metadata.
 
 Open the interactive selector for mainnet:
 

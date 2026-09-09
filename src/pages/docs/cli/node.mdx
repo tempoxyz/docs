@@ -38,12 +38,19 @@ Flags grouped by function:
 | --- | --- |
 | `--consensus.signing-key <path>` | Path to validator signing key |
 | `--consensus.secret <path>` | Path to the secret used to decrypt an encrypted validator signing key. Prefer a named pipe (FIFO) or shell process substitution. |
-| `--consensus.fee-recipient <addr>` | Deprecated validator fee-recipient flag. Migrate to on-chain fee-recipient management via Validator Config V2. |
 | `--consensus.datadir <path>` | Separate volume for consensus data |
 
 :::warning
-`--consensus.fee-recipient` is deprecated as of `v1.5.2` and will be removed in an upcoming release. See [updating the fee recipient](/docs/guide/node/validator-lifecycle#update-the-fee-recipient).
+`--consensus.fee-recipient` was removed in `v1.7.0`. Remove it from startup commands and [update the fee recipient on-chain](/docs/guide/node/validator-lifecycle#update-the-fee-recipient).
 :::
+
+### Transaction pool
+
+| Flag | Description |
+| --- | --- |
+| `--txpool.filter <ADDRESSES_OR_FILE>` | Optional address filter, available since v1.14.0. Accepts comma-separated addresses or a plain-text file with comma/newline-separated addresses. Rejects transactions matching the sender or any direct call target at pool admission. |
+
+See [Transaction address filtering](/docs/guide/node/validator-setup#transaction-address-filtering) for examples, file reload behavior, and the limits of this local policy.
 
 ### Observability
 
@@ -70,8 +77,7 @@ Start a validator:
 tempo node --datadir /data/tempo \
   --chain mainnet \
   --consensus.signing-key /etc/tempo/key \
-  --consensus.secret /run/tempo/consensus-secret \
-  --consensus.fee-recipient 0x...
+  --consensus.secret /run/tempo/consensus-secret
 ```
 
 ## Learn more about Tempo node operations

@@ -76,6 +76,18 @@ tempo download --chain moderato --archive
 
 Use [snapshots.tempo.xyz](https://snapshots.tempo.xyz/) to compare snapshot profiles or copy generated `tempo download` commands.
 
+### Preview a snapshot download
+
+Inspect the execution and consensus archives before downloading them or changing your data directory:
+
+```bash
+tempo download --chain mainnet --minimal --print-plan-json
+```
+
+This fetches snapshot metadata and prints a JSON plan. See the [`tempo download` reference](/docs/cli/download) for flags, including `--consensus.datadir` when consensus data lives on a separate volume.
+
+Current validators require consensus finalization certificates at startup. Official Tempo snapshots include the required consensus archive, and `tempo download` restores it by default. Keep execution and consensus data from the same snapshot together; `--consensus.strict-startup` is now a compatibility flag and cannot disable this requirement.
+
 :::note[Replacing existing snapshot data]
 When replacing snapshot data in an existing data directory, add `--force` after selecting the right profile. `--force` removes the execution databases, static files, `reth.toml`, and the entire consensus directory before installing the new snapshot. It preserves `discovery-secret` and `known-peers.json`.
 :::
@@ -86,7 +98,7 @@ All release artifacts are cryptographically signed. We recommend verifying signa
 
 ### Binary Signatures (GPG)
 
-Release binaries are signed with GPG. The `tempoup` installer verifies signatures automatically when `gpg` is available.
+Release binaries are signed with GPG. The `tempoup` installer checks the archive checksum, then verifies GitHub release provenance when authenticated `gh` is available, or falls back to GPG signature verification. Install and authenticate `gh`, or install `gpg`, before using the installer.
 
 To verify manually:
 

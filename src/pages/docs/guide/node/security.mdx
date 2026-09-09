@@ -48,7 +48,7 @@ An unsynchronized clock can cause your node to reject valid blocks or produce bl
 
 ## Data integrity
 
-- **Never delete the data directory and re-sync with the same signing key** — this risks double-signing and will require [rotating to a new identity](/docs/guide/node/validator-lifecycle#resetting-your-validators-data). Deleting only the `consensus` subdirectory is safe; the signing share will be [automatically recovered](/docs/guide/node/validator-keys#signing-share-recovery).
+- **Never delete the data directory and re-sync with the same signing key** — this risks double-signing and will require [rotating to a new identity](/docs/guide/node/validator-lifecycle#resetting-your-validators-data). Deleting the `consensus` subdirectory also removes certificates required at startup; coordinate snapshot recovery with the Tempo team. [Signing-share recovery](/docs/guide/node/validator-keys#signing-share-recovery) does not replace those certificates.
 - **Back up your signing key** — if the key file is lost and no backup exists, you will need to rotate to a new key and coordinate with the Tempo team.
 
 ## Staying up to date
