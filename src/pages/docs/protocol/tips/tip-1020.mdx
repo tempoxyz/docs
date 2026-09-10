@@ -84,8 +84,6 @@ The precompile MUST enforce strict size limits on the `signature` argument **bef
 
 ### Gas Costs
 
-The input charge below records the original T3 schedule. From T11, [TIP-1100](https://tips.sh/1100) raises it to 30 gas per 32-byte word, rounded up. See [T11 gas pricing](/docs/protocol/upgrades/t11#updated-gas-pricing) for integration guidance.
-
 The precompile MUST charge gas and verify sufficient gas is available **before** performing any cryptographic verification. The precompile MUST revert with out-of-gas if the call has insufficient gas for the signature type.
 
 All calls pay the standard Tempo precompile calldata cost of 6 gas per 32-byte word (rounded up) on the full ABI-encoded input, consistent with all other Tempo precompiles. The verification gas per signature type is in-line with the [Tempo Transaction Signature Gas Schedule](https://tempo.xyz/developers/docs/protocol/transactions/spec-tempo-transaction#signature-verification-gas-schedule):

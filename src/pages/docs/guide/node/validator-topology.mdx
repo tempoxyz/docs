@@ -4,7 +4,7 @@ seoTitle: "Validator Network Topology | Tempo Docs"
 description: Isolate a Tempo validator behind RPC nodes and restrict its consensus and execution peer connectivity.
 ---
 
-import { StaticMermaidDiagram } from '../../../../components/StaticMermaidDiagram'
+import { ValidatorTopologyDiagram } from '../../../../components/ValidatorTopologyDiagram'
 
 # Validator network topology
 
@@ -35,46 +35,7 @@ The execution P2P layer is open, so place trusted RPC nodes between the validato
 
 Run at least two trusted RPC nodes for each validator to avoid a single point of failure for execution P2P and transaction ingress:
 
-<StaticMermaidDiagram chart={`---
-config:
-  layout: elk
----
-flowchart TB
-    subgraph EXTERNAL["Public Nodes"]
-        direction TB
-
-        E1["External RPC node"]
-        E2["External RPC node"]
-        E3["External RPC node"]
-
-        E1 <-->|"Execution P2P"| E2
-        E1 <-->|"Execution P2P"| E3
-    end
-
-    subgraph VALIDATORS["Validators"]
-        direction LR
-
-        subgraph OPERATOR_A["&nbsp;"]
-            direction TB
-            R1["Trusted RPC nodes"]
-            V1["Validator"]
-            R1 -->|"--follow"| V1
-        end
-
-        subgraph OPERATOR_B["&nbsp;"]
-            direction TB
-            R2["Trusted RPC nodes"]
-            V2["Validator"]
-            R2 -->|"--follow"| V2
-        end
-    end
-
-    E2 <-->|"Execution P2P"| R1
-    E3 <-->|"Execution P2P"| R2
-
-    style OPERATOR_A stroke-dasharray: 8 6
-    style OPERATOR_B stroke-dasharray: 8 6
-`} />
+<ValidatorTopologyDiagram />
 
 No validator P2P or RPC port should be directly accessible from the internet. Do not allow execution P2P between `V1` and `V2`; transactions cross the validator isolation boundary only through `R1` or `R2`.
 

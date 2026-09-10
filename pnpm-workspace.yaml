@@ -26,8 +26,15 @@ onlyBuiltDependencies:
   - vue-demi
 
 overrides:
+  'baseline-browser-mapping@<2.11.0': 2.11.0
+  'browserslist@<4.28.7': 4.28.7
   dompurify: '>=3.4.0'
+  'fast-uri@>=3.0.0 <3.1.6': 3.1.6
+  'fflate@>=0.4.5 <0.4.9': 0.4.9
+  'nanoid@>=3.0.0 <3.3.18': 3.3.18
   protobufjs: '>=7.5.5'
+  # remark-mdx-frontmatter 5 still requests toml 3; toml 4 fixes its parser advisories.
+  'remark-mdx-frontmatter@5>toml': 4.2.0
   tar: '>=7.5.13'
 
 patchedDependencies:
