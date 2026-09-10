@@ -10,10 +10,6 @@ protocolVersion: T3
 
 # TIP-1020: Signature Verification Precompile
 
-:::info[Updated input gas price]
-[TIP-1100](https://tips.sh/1100) supersedes the input charge below with 30 gas per 32-byte word, rounded up over the full calldata including the function selector. The 6-gas input price below describes the original pre-T11 specification; signature verification gas is unchanged. [TIP-1105](https://tips.sh/1105) also requires canonical ABI encoding for precompile calls.
-:::
-
 ## Abstract
 
 This TIP introduces a signature verification precompile that enables contracts to verify Tempo signature types (secp256k1, P256, WebAuthn) without relying on custom verifier contracts.
@@ -78,6 +74,8 @@ Contracts that need to verify Keychain-based signatures can do so by composing t
 
 ### Calldata Limits
 
+Calls MUST use canonical ABI encoding as required by [TIP-1105](https://tips.sh/1105), with no gaps, overlapping regions, trailing bytes, or nonzero padding.
+
 The precompile MUST enforce strict size limits on the `signature` argument **before** any decoding or copying occurs. If the signature exceeds the limit for its type, the precompile MUST revert with `InvalidFormat()`.
 
 | Type | Exact / Max Length |
@@ -90,7 +88,7 @@ The precompile MUST enforce strict size limits on the `signature` argument **bef
 
 The precompile MUST charge gas and verify sufficient gas is available **before** performing any cryptographic verification. The precompile MUST revert with out-of-gas if the call has insufficient gas for the signature type.
 
-All calls pay the standard Tempo precompile calldata cost of 6 gas per 32-byte word (rounded up) on the full ABI-encoded input, consistent with all other Tempo precompiles. The verification gas per signature type is in-line with the [Tempo Transaction Signature Gas Schedule](https://tempo.xyz/developers/docs/protocol/transactions/spec-tempo-transaction#signature-verification-gas-schedule):
+All calls pay the Tempo precompile input cost of `30 × ceil(calldata_length / 32)` gas on the full ABI-encoded input, including the function selector, as specified by [TIP-1100](https://tips.sh/1100). This charge is applied before dispatch and ABI decoding; insufficient gas causes out-of-gas before decoding. The verification gas per signature type is in-line with the [Tempo Transaction Signature Gas Schedule](https://tempo.xyz/developers/docs/protocol/transactions/spec-tempo-transaction#signature-verification-gas-schedule):
 
 | Type | Verification Gas |
 |------|-----------------|
