@@ -37,7 +37,9 @@ Self-service data resets are coming soon. Once available, you will be able to ro
 
 ValidatorConfig operations below submit transactions from the validator operator address, which does not need to be a plaintext EOA key. Use the CLI signer backend that matches your custody setup; see [validator operator address custody](/docs/guide/node/validator-keys#validator-operator-address-custody). [Fee-token selection](#choose-the-validator-fee-token) uses the fee-recipient address instead.
 
-Add `--dry-run` to commands that submit transactions to print the target and calldata without signing or broadcasting. This previews the transaction; it does not simulate execution or prove the caller is authorized. Without `--dry-run`, the CLI asks for confirmation before sending unless `--yes` is supplied.
+:::info[Preview or confirm transactions]
+Use `--dry-run` to print the target and calldata without signing or sending; it does not simulate execution. Transactions require confirmation unless you pass `--yes`.
+:::
 
 ### Rotate validator identity
 
@@ -150,7 +152,7 @@ tempo consensus set-validator-token <TOKEN> \
   --dry-run
 ```
 
-To submit, remove `--dry-run` and provide the appropriate signer option, such as `--ledger` or `--wallet-key <PATH>`, for the fee-recipient address. Review the transaction and confirm when prompted. For a raw token address, `--no-fetch-verified-tokens` skips the metadata lookup; on-chain token validation still applies.
+For a raw token address, `--no-fetch-verified-tokens` skips the metadata lookup; on-chain token validation still applies.
 
 The token must be a deployed USD-denominated TIP-20. The FeeManager rejects a preference change in a block whose fee recipient is the caller. This command changes the preferred token, not the fee-recipient address; see [Update the fee recipient](#update-the-fee-recipient) to change that address.
 

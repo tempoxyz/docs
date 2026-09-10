@@ -86,7 +86,11 @@ tempo download --chain mainnet --minimal --print-plan-json
 
 This fetches snapshot metadata and prints a JSON plan. See the [`tempo download` reference](/docs/cli/download) for flags, including `--consensus.datadir` when consensus data lives on a separate volume.
 
-Current validators require consensus finalization certificates at startup. Official Tempo snapshots include the required consensus archive, and `tempo download` restores it by default. Keep execution and consensus data from the same snapshot together; `--consensus.strict-startup` is now a compatibility flag and cannot disable this requirement.
+Current validators require consensus finalization certificates at startup. Official Tempo snapshots include the required consensus archive, and `tempo download` restores it by default.
+
+:::info[Keep snapshot data consistent]
+Restore execution and consensus data from the same snapshot and update them together, including when they are stored on separate volumes. Only matching execution and consensus snapshots are currently supported.
+:::
 
 :::note[Replacing existing snapshot data]
 When replacing snapshot data in an existing data directory, add `--force` after selecting the right profile. `--force` removes the execution databases, static files, `reth.toml`, and the entire consensus directory before installing the new snapshot. It preserves `discovery-secret` and `known-peers.json`.
@@ -100,18 +104,23 @@ All release artifacts are cryptographically signed. We recommend verifying signa
 
 Release binaries are signed with GPG. The `tempoup` installer checks the archive checksum, then verifies GitHub release provenance when authenticated `gh` is available, or falls back to GPG signature verification. Install and authenticate `gh`, or install `gpg`, before using the installer.
 
-To verify manually:
+For GPG verification, [`tempoup`](https://github.com/tempoxyz/tempo/blob/main/tempoup/tempoup) embeds the expected key fingerprint, not the public key. It uses the key in your local GPG keyring if present; otherwise, it downloads it from `keyserver.ubuntu.com` over HTTPS.
+
+To verify manually, import the key and compare its full fingerprint with the one below before checking the signature. For independent confirmation of the fingerprint, contact the Tempo team through a trusted channel.
 
 ```bash
 # Import the Tempo release signing key
 gpg --keyserver keyserver.ubuntu.com --recv-keys EE3C5D41EA963E896F310EC3CBBFA54B20D33446
+
+# Inspect the imported key fingerprint
+gpg --fingerprint EE3C5D41EA963E896F310EC3CBBFA54B20D33446
 
 # Verify a downloaded binary
 gpg --verify tempo-v1.1.0-x86_64-unknown-linux-gnu.tar.gz.asc \
     tempo-v1.1.0-x86_64-unknown-linux-gnu.tar.gz
 ```
 
-A successful verification will show `Good signature from "Tempo Release Signing Key"`.
+A successful verification reports `Good signature`. Confirm that the signing key matches the fingerprint below.
 
 **Fingerprint:** `EE3C 5D41 EA96 3E89 6F31 0EC3 CBBF A54B 20D3 3446`
 
