@@ -33,7 +33,11 @@ The validator has two types of network relationships:
 
 The execution P2P layer is open, so place trusted RPC nodes between the validator and that network. Configure each trusted RPC node with `--follow ws://<VALIDATOR_PRIVATE_IP>:8546` so it syncs in lockstep with the validator over a private WebSocket connection.
 
-Run at least two trusted RPC nodes for each validator to avoid a single point of failure for execution P2P and transaction ingress:
+Run at least two trusted RPC nodes to provide redundant execution P2P and transaction ingress. An operator can share the same two RPC nodes across multiple validators on the same chain. Configure every validator to peer with both RPC nodes so either RPC can continue relaying transactions if the other is unavailable. Size the shared RPC pool for the combined load, including operation with one RPC unavailable.
+
+Each RPC node still follows one configured validator upstream over WebSocket; it can exchange execution P2P traffic with multiple validators independently of that upstream. When sharing RPC nodes, use different validator upstreams for the followers so one upstream validator outage does not interrupt both followers.
+
+The diagram below shows separate operators, each with a trusted RPC pool. Operators with multiple validators can connect them to the same pool:
 
 <StaticMermaidDiagram chart={`---
 config:
@@ -179,7 +183,8 @@ These methods update only the validator's in-memory peer set. Update the durable
 
 Place each trusted RPC node on a separate machine or instance from the validator, preferably in a separate network segment. Configure each node to:
 
-- Run in follow mode with `--follow` pointed at the validator's private WebSocket RPC endpoint.
+- Run in follow mode with `--follow` pointed at one of the operator's validators over its private WebSocket RPC endpoint.
+- For a shared RPC pool, allow execution P2P connections with every validator the pool serves. Add both RPC identities and private IPs to each validator's trusted-peer and firewall allowlists.
 - Participate in the public Tempo execution P2P network.
 - Accept transaction submissions from clients or an internal load balancer instead of exposing the validator's JSON-RPC endpoint.
 
@@ -204,9 +209,9 @@ The follower opens an outbound WebSocket connection to the validator. It does no
 
 ## Failure and maintenance considerations
 
-Both follower RPC nodes are on the validator's transaction-ingress path. Monitor their execution peer counts, block heights, resource utilization, transaction-submission health, and private links to the validator.
+The trusted RPC pool provides transaction ingress for the validators it serves. Monitor the RPC nodes' execution peer counts, block heights, resource utilization, transaction-submission health, and private links to those validators. A shared pool also shares its failure impact across those validators.
 
-Run the followers independently so either node can continue accepting and relaying transactions when the other is unavailable. Configure clients or an internal load balancer to remove an unhealthy follower from rotation. Verify that failure of either follower does not interrupt transaction submission through the remaining node.
+Run the followers independently so either node can continue accepting and relaying transactions when the other is unavailable. Configure clients or an internal load balancer to remove an unhealthy follower from rotation. Verify that failure of either follower or its configured validator upstream does not interrupt transaction submission to the remaining validators through the other follower.
 
 ## Validate the isolation boundary
 
@@ -216,11 +221,11 @@ After deployment or a firewall change, confirm that:
 - The validator's execution peer count exactly matches the number of trusted RPC nodes.
 - Untrusted internet hosts cannot reach validator services; authorized validators can still reach consensus P2P.
 - The validator cannot establish execution P2P connections to internet peers or other validators.
-- Each follower is configured with `--follow` against the validator and remains synced.
+- Each follower is configured with `--follow` against its selected validator upstream and remains synced.
 - Each follower can reach the validator's private WebSocket endpoint on port `8546`, but cannot reach its localhost HTTP management endpoint on port `8545` or call `admin` methods over WebSocket.
-- Transactions submitted through either follower reach the validator.
+- Transactions submitted through either follower reach every validator served by the pool.
 - Clients cannot submit transactions directly to the validator.
-- Transaction submission continues after either follower is removed from service.
+- Transaction submission to the remaining validators continues after either follower or its validator upstream is removed from service.
 - Monitoring reaches both hosts only through the private monitoring network.
 
 See [system requirements and ports](/docs/guide/node/system-requirements#ports), [validator monitoring](/docs/guide/node/validator-monitoring), and [node security](/docs/guide/node/security) for the related operational controls.
