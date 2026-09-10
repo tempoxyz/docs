@@ -106,7 +106,7 @@ The factory returns `(zoneId, portal)` and initializes the portal in the same ca
 
 Creation consumes at least 15,000,000 gas. Estimate the complete transaction rather than using that minimum as a fixed gas limit.
 
-An address cannot appear in more than one of `allowedAccounts`, `zoneGateways`, and `sequencers`. From [T11](/docs/protocol/upgrades/t11#stricter-precompile-validation), duplicates within `allowedAccounts` or `zoneGateways` are also rejected. Validate the combined lists before submission. Empty role lists deny access when their corresponding enforcement mode is enabled.
+Every address across `allowedAccounts`, `zoneGateways`, and `sequencers` must be unique. Duplicates within a list or across lists are rejected. Validate the combined lists before submission. Empty role lists deny access when their corresponding enforcement mode is enabled.
 
 The zone runs as a separate chain with its system contracts installed at genesis. Sequencers can enable additional TIP-20 tokens via `ZonePortal.enableToken()`. See [TIP-1091](https://tips.sh/1091) for the factory specification.
 

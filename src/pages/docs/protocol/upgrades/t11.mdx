@@ -36,7 +36,7 @@ Some transactions pass through approval systems, relayers, or separate signing d
 
 T11 increases the maximum expiry window to five minutes. Applications can still choose a shorter window when appropriate.
 
-Replay protection remains in place, so the same signed transaction cannot execute twice. Since T11, nodes enforce the five-minute maximum. T11 does not extend an already-signed transaction's expiry: its original `validBefore` still applies.
+Replay protection remains in place, so the same signed transaction cannot execute twice. Nodes enforce the five-minute maximum. T11 does not extend an already-signed transaction's expiry: its original `validBefore` still applies.
 
 Read the [TIP-1093 specification](https://tips.sh/1093).
 
