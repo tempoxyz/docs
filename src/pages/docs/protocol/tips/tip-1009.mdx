@@ -10,10 +10,6 @@ protocolVersion: T1
 
 # TIP-1009: Expiring Nonces
 
-:::info[Updated expiry window and capacity]
-[TIP-1093](https://tips.sh/1093) supersedes the limits below with a 300-second expiry window and a 3,000,000-entry replay-protection buffer. The validity rule is `now < validBefore <= now + 300`, where `now` is the current block timestamp. The 30-second limits, 300,000-entry capacity, pseudocode, and boundary tests below describe the original pre-T11 specification.
-:::
-
 ## Abstract
 
 TIP-1009 introduces expiring nonces, an alternative replay protection mechanism where transactions are valid only within a specified time window. Instead of tracking sequential nonces, the protocol uses transaction hashes with expiry timestamps to prevent replay attacks. This enables use cases like gasless transactions, meta-transactions, and simplified UX where users don't need to manage nonce ordering.
@@ -62,9 +58,9 @@ now < validBefore <= now + MAX_EXPIRY_SECS
 
 Where:
 - `now` is the current block timestamp
-- `MAX_EXPIRY_SECS = 30` seconds
+- `MAX_EXPIRY_SECS = 300` seconds
 
-Transactions with `validBefore` in the past or more than 30 seconds in the future are rejected.
+Transactions with `validBefore <= now` or `validBefore > now + 300` are rejected. The expiry window and buffer capacity follow [TIP-1093](https://tips.sh/1093).
 
 ### Replay Protection
 
@@ -89,16 +85,16 @@ contract Nonce {
 The circular buffer has a fixed capacity:
 
 ```
-EXPIRING_NONCE_SET_CAPACITY = 300,000
+EXPIRING_NONCE_SET_CAPACITY = 3,000,000
 ```
 
-This capacity is sized for 10,000 TPS × 30 seconds = 300,000 transactions, ensuring entries expire before being overwritten.
+This capacity is sized for 10,000 TPS × 300 seconds = 3,000,000 transactions, ensuring entries expire before being overwritten.
 
 #### Algorithm
 
 When processing an expiring nonce transaction:
 
-1. **Validate expiry window**: Reject if `validBefore <= now` or `validBefore > now + 30`
+1. **Validate expiry window**: Reject if `validBefore <= now` or `validBefore > now + 300`
 
 2. **Replay check**: Read `expiringNonceSeen[txHash]`
    - If entry exists and `expiry > now`, reject as replay
@@ -116,7 +112,7 @@ When processing an expiring nonce transaction:
    - Write `expiringNonceRing[idx] = txHash`
    - Write `expiringNonceSeen[txHash] = validBefore`
 
-7. **Advance pointer**: Write `expiringNonceRingPtr = ptr + 1`
+7. **Advance pointer**: Write `expiringNonceRingPtr = (idx + 1) % CAPACITY`
 
 #### Pseudocode
 
@@ -127,7 +123,7 @@ function checkAndMarkExpiringNonce(
     uint64 now
 ) internal {
     // 1. Validate expiry window
-    require(validBefore > now && validBefore <= now + 30, "InvalidExpiry");
+    require(validBefore > now && validBefore <= now + 300, "InvalidExpiry");
 
     // 2. Replay check
     uint64 seenExpiry = expiringNonceSeen[txHash];
@@ -150,7 +146,7 @@ function checkAndMarkExpiringNonce(
     expiringNonceSeen[txHash] = validBefore;
 
     // 7. Advance pointer
-    expiringNonceRingPtr = ptr + 1;
+    expiringNonceRingPtr = (idx + 1) % CAPACITY;
 }
 ```
 
@@ -174,7 +170,7 @@ EXPIRING_NONCE_GAS = 2 * COLD_SLOAD_COST + WARM_SLOAD_COST + 3 * WARM_SSTORE_RES
 
 **Why SSTORE_RESET (2,900) instead of SSTORE_SET (20,000) for `seen[txHash]`:**
 - SSTORE_SET cost exists to penalize permanent state growth
-- Expiring nonce data is ephemeral: evicted within 30 seconds, fixed-size buffer (300k entries)
+- Expiring nonce data is ephemeral: entries expire within 300 seconds and are reused after expiry in a fixed-size buffer (3,000,000 entries)
 - No permanent state growth, so the 20k penalty doesn't apply
 
 ### Transaction Pool Validation
@@ -232,7 +228,7 @@ These invariants are tested in the Foundry invariant test suite (`TempoTransacti
 | `handler_expiringNonceBasic` | Basic flow | Execute valid expiring nonce tx |
 | `handler_expiringNonceReplay` | E1 | Replay must be rejected |
 | `handler_expiringNonceExpired` | E2 | Tx with `validBefore <= now` must be rejected |
-| `handler_expiringNonceWindowTooFar` | E3 | Tx with `validBefore > now + 30s` must be rejected |
+| `handler_expiringNonceWindowTooFar` | E3 | Tx with `validBefore > now + 300s` must be rejected |
 | `handler_expiringNonceNonZeroNonce` | E4 | Tx with `nonce != 0` must be rejected |
 | `handler_expiringNonceMissingValidBefore` | E5 | Tx without `validBefore` must be rejected |
 | `handler_expiringNonceNoNonceMutation` | E6 | Protocol and 2D nonces unchanged after execution |
@@ -245,8 +241,8 @@ These invariants are tested in the Foundry invariant test suite (`TempoTransacti
 2. **Expiry validation**:
    - `validBefore` in past → reject
    - `validBefore = now` → reject
-   - `validBefore = now + 31` → reject
-   - `validBefore = now + 30` → accept
+   - `validBefore = now + 301` → reject
+   - `validBefore = now + 300` → accept
 
 3. **Nonce validation**:
    - `nonce = 0` → accept
@@ -256,7 +252,7 @@ These invariants are tested in the Foundry invariant test suite (`TempoTransacti
    - `validBefore` missing → reject
    - `nonceKey != uint256.max` → not expiring nonce (uses 2D nonce rules)
 
-5. **Post-expiry replay**: Submit tx, wait for expiry, submit same tx with new `validBefore` (should succeed)
+5. **Post-expiry replay**: Submit tx, wait for expiry, sign and submit a new transaction with a new `validBefore` (should succeed with a different transaction hash)
 
 6. **Buffer eviction**: Fill buffer, verify old entries are evicted when expired
 
@@ -266,7 +262,7 @@ These invariants are tested in the Foundry invariant test suite (`TempoTransacti
 
 ## Benchmark Results
 
-Benchmarks were run to measure state savings from expiring nonces compared to 2D nonces.
+These historical benchmarks measured state savings from expiring nonces compared to 2D nonces using the original 300,000-entry buffer. They are not measurements of the current 3,000,000-entry buffer.
 
 ### Key Findings
 
@@ -309,7 +305,7 @@ The current implementation includes a safety check that reads `expiringNonceSeen
 - Cost is only incurred in the rare case when eviction is needed
 
 **Rationale for removing the check:**
-- The buffer is sized (300k entries) to guarantee entries expire before being overwritten at 10k TPS
+- The buffer is sized (3,000,000 entries) to guarantee entries expire before being overwritten at 10k TPS
 - Removes 1 SLOAD (2,100 gas) from the critical path
 - Simplifies the algorithm
 
@@ -322,9 +318,9 @@ The current implementation includes a safety check that reads `expiringNonceSeen
 
 ### Buffer Capacity Sizing
 
-The current capacity of 300,000 assumes:
+The current capacity of 3,000,000 assumes:
 - Maximum 10,000 TPS sustained
-- 30 second expiry window
+- 300 second expiry window
 
 **Question**: Should the capacity be configurable per-chain or hardcoded? What happens if TPS requirements increase significantly?
 
