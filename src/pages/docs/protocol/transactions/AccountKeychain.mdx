@@ -15,7 +15,7 @@ The Account Keychain precompile manages authorized Access Keys for accounts, ena
 
 ## T11 input validation and gas
 
-After [T11 activates](/docs/protocol/upgrades/t11), calls to this precompile must use canonical ABI encoding. Gaps, overlaps, trailing data, and non-zero padding are rejected. Use a standard ABI encoder when constructing calls.
+Since [T11](/docs/protocol/upgrades/t11), calls to this precompile must use canonical ABI encoding. Gaps, overlaps, trailing data, and non-zero padding are rejected. Use a standard ABI encoder when constructing calls.
 
 The input charge increases from 6 to 30 gas per 32-byte word, rounded up over the full calldata including the function selector, and is deducted before decoding. Call-scope duplicate checks additionally charge 20 gas per target, selector, or recipient processed. Insufficient gas halts execution before sorting; duplicate targets, selectors, and recipients remain invalid. Estimate gas on the target network when authorizing keys or updating permissions.
 
