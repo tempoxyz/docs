@@ -10,6 +10,10 @@ protocolVersion: T3
 
 # TIP-1020: Signature Verification Precompile
 
+:::info[T11 supersedes the input gas price below]
+Since [T11](/docs/protocol/upgrades/t11), [TIP-1100](https://tips.sh/1100) increases the input charge from 6 to 30 gas per 32-byte word, rounded up over the full calldata including the function selector. The 6-gas input price below describes the original pre-T11 specification; signature verification gas is unchanged. [TIP-1105](https://tips.sh/1105) also requires canonical ABI encoding for precompile calls.
+:::
+
 ## Abstract
 
 This TIP introduces a signature verification precompile that enables contracts to verify Tempo signature types (secp256k1, P256, WebAuthn) without relying on custom verifier contracts.
