@@ -19,6 +19,8 @@ Accept stablecoin payments in your application. Learn how to receive payments, v
 
 Payments are automatically credited to the recipient's address when a transfer is executed. You don't need to do anything special to "accept" a payment, it happens automatically onchain.
 
+If you want to limit which tokens or senders your account accepts, set a [receive policy](/docs/guide/payments/configure-receive-policies). Payments that don't match the policy still succeed onchain, but the funds are held in `ReceivePolicyGuard` (`0xB10C000000000000000000000000000000000000`) for your recovery authority to claim, instead of being credited to your balance.
+
 In this basic receiving demo you can see the balances update after you add funds to your account, using the `getBalance` and `watchEvent` calls documented below.
 
 <Demo.Container name="Receive a Payment" footerVariant="balances" tokens={[Token.alphaUsd, Token.betaUsd, Token.thetaUsd]} src="tempoxyz/examples/tree/main/examples/payments">
@@ -183,6 +185,8 @@ Check if a payment has been received by querying the token balance or listening 
 
 ### Listen for TIP-20 transfer events
 
+Filter `Transfer` events by the `to` address you expect to be paid at. If your account has a receive policy, a blocked payment emits a `Transfer` whose `to` is `ReceivePolicyGuard` rather than your address, followed by a `TransferBlocked` event from `ReceivePolicyGuard`. Treat those as held, not received, and index `TransferBlocked` so the recovery authority can claim them. See [Configure Receive Policies](/docs/guide/payments/configure-receive-policies#understand-receive-policy-behavior).
+
 <Tabs stateKey="library">
   <Tab title="Viem">
 
@@ -203,6 +207,7 @@ Check if a payment has been received by querying the token balance or listening 
           { name: 'value', type: 'uint256' },
         ],
       },
+      args: { to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb' }, // only payments to you // [!code focus]
       onLogs: (logs) => { // [!code focus]
         logs.forEach((log) => { // [!code focus]
           console.log('Received payment:', { // [!code focus]
@@ -599,6 +604,7 @@ contract PaymentReceiver {
 2. **Use memos**: Request memos from payers to link payments to invoices or orders
 3. **Check confirmations**: Wait for transaction finality (~1 second on Tempo) before processing
 4. **Handle edge cases**: Account for partial payments, refunds, and failed transactions
+5. **Check the recipient, not just success**: A payment blocked by a [receive policy](/docs/guide/payments/configure-receive-policies) still succeeds but credits `ReceivePolicyGuard`. Only treat a `Transfer` as received when `to` is your address or the master wallet for your virtual address, and index `TransferBlocked` to recover held funds
 
 ## Cross-Stablecoin Payments
 
