@@ -1,0 +1,91 @@
+---
+title: Cross-border cost calculator methodology
+description: Corridor math, World Bank Remittance Prices Worldwide data, and stated assumptions behind the tempo.xyz cross-border payment cost calculator.
+---
+
+# Cross-border cost calculator methodology
+
+The [cross-border payment cost calculator](https://tempo.xyz/tools/cross-border-cost/) on tempo.xyz compares what it costs to send money on eight major corridors by bank wire, remittance provider, and stablecoin rail. This page documents the corridor math, the World Bank dataset behind it, and the assumptions in each comparison row. A markdown mirror of the tool is available at [tempo.xyz/tools/cross-border-cost.md](https://tempo.xyz/tools/cross-border-cost.md).
+
+## What the cost calculator computes
+
+The calculator takes four inputs: a corridor, an amount in USD (capped at $100,000,000), a frequency (one-time or monthly), and an on/off-ramp assumption (0% to 5%, default 0.75%). For each scenario it renders four cost rows — bank wire, average provider, average digital provider, and stablecoin rail — plus annual totals for monthly scenarios and context lines that compare the scenario against the global average remittance cost (6.36%) and the UN Sustainable Development Goal 10.c target (3%).
+
+Scenarios are shareable by URL, for example `?from=us&to=mx&amount=10000&frequency=monthly&ramp=0.75`.
+
+## Corridor averages from World Bank data
+
+Corridor averages are simple means of the total cost — fee plus exchange rate margin — of all services the World Bank surveyed in the corridor for a $200-equivalent send in the Q3 2025 Remittance Prices Worldwide (RPW) collection. Applied to the full dataset, this method reproduces the World Bank's published global average of 6.36% for the same quarter.
+
+The digital average covers services initiated online or by mobile phone. The World Bank's official global digital average (4.59%) uses a stricter definition that also requires digital payout, so per-corridor digital figures on this page are not directly comparable to that headline number.
+
+The Q3 2025 RPW collection surveys 6,470 services across 348 corridors and is published quarterly under a CC BY 4.0 license.
+
+## How each comparison row is computed
+
+| Row | Formula | Notes |
+| --- | --- | --- |
+| Bank wire | flat wire fee + (amount × median bank FX margin) | $40 flat fee from published US bank schedules; the FX margin is the median of banks surveyed in the corridor. Excludes intermediary and receiving-bank deductions, which can reduce what arrives. |
+| Average provider | amount × corridor average total cost % | Mean total cost of every service the World Bank surveyed in the corridor. |
+| Average digital provider | amount × corridor digital average % | Covers only services initiated online or by mobile phone. |
+| Stablecoin rail | $0.001 on-chain fee + (amount × ramp %) | On-chain fee from Tempo's [transaction fees documentation](/docs/protocol/fees); the ramp percentage is an adjustable assumption, default 0.75%. Not a quote from any provider. |
+
+Monthly scenarios multiply each per-transfer cost by 12 for the annual figure.
+
+## Corridors covered
+
+All percentages are from the Q3 2025 RPW collection, computed on a $200-equivalent send.
+
+| Corridor | Average total cost | Digital average | Services surveyed (digital) | Median bank FX margin |
+| --- | --- | --- | --- | --- |
+| United States → Mexico | 4.54% | 4.38% | 46 (29) | 1.12% |
+| United States → India | 3.68% | 3.44% | 46 (37) | 0.74% |
+| United States → Philippines | 4.52% | 4.56% | 58 (45) | 1.17% |
+| United States → Guatemala | 4.18% | 4.05% | 30 (19) | 0.98% |
+| United Arab Emirates → India | 3.71% | 5.76% | 24 (7) | 2.11% |
+| United States → Honduras | 3.99% | 3.58% | 32 (16) | 1.00% (regional estimate) |
+| United States → Dominican Republic | 5.11% | 5.24% | 27 (11) | 0% |
+| United States → El Salvador | 3.50% | 3.28% | 46 (26) | 0% |
+
+Corridor-specific caveats:
+
+- **United States → Honduras**: no banks were surveyed in this corridor in Q3 2025, so the bank wire FX margin is a regional estimate — the midpoint of median bank FX margins in neighboring US-outbound corridors (Guatemala 0.98%, Mexico 1.12%).
+- **United States → Dominican Republic**: the median bank FX margin was 0% because wires are commonly delivered in USD; receiving-side conversion to Dominican pesos may add cost not captured here. Surveyed bank services averaged 11.25% at the $200 send size, driven by flat fees.
+- **United States → El Salvador**: El Salvador is dollarized, so corridor costs are fees rather than FX margins.
+- **United Arab Emirates → India**: surveyed sends are denominated in UAE dirhams; percentages are applied to a USD amount for comparison. The online sample is small (7 services) and includes one high-cost bank service; the median online service costs 1.59%. The bank wire flat fee uses US bank schedules as a proxy.
+- **United States → Mexico**: surveyed totals ranged from promotional pricing below 0% to 17.5% for the most expensive bank service.
+
+## Cross-border calculator assumptions
+
+- The World Bank surveys consumer-sized sends of $200 and $500. The calculator applies those percentages to the entered amount for comparison. Real pricing at larger amounts usually differs: flat fees matter less and negotiated FX matters more, so treat results for business-sized transfers as directional.
+- The bank wire row uses a $40 flat fee from published US bank schedules (Chase charges $40 for online-initiated USD international wires, Bank of America $30, and Wells Fargo up to $45) plus the median FX margin of banks surveyed in the corridor. Wires sent in USD may be converted by the receiving bank at its own rate, and intermediary banks may deduct additional fees.
+- The stablecoin rail row is never zero-cost. The on-chain fee on Tempo is less than $0.001 per simple transfer, per the [transaction fees documentation](/docs/protocol/fees), and the default 0.75% on/off-ramp assumption is an explicit, adjustable estimate of conversion costs on both ends. Actual ramp pricing varies by provider, country, amount, and payout method.
+- Some surveyed services run promotional pricing, which can produce negative FX margins and totals below 0%. These are real observations in the dataset, not errors.
+- Corridor volume figures are estimates assembled from World Bank Migration and Development Briefs and central bank reporting, and are marked as estimates.
+
+Settlement speed context: Tempo produces blocks roughly every 600 milliseconds and reaches deterministic finality in under a second, per the [consensus documentation](/docs/protocol/blockspace/consensus). End-to-end delivery still depends on how quickly each side converts between stablecoins and local currency.
+
+## Cross-border data refresh cadence
+
+- The World Bank publishes RPW quarterly. Recompute corridor averages, digital averages, surveyed-service counts, and median bank FX margins from each new collection. Current figures come from the Q3 2025 collection, retrieved July 2026.
+- Bank wire flat fees come from published bank fee schedules. Re-check when banks publish new schedules.
+- Corridor volume estimates update with each World Bank Migration and Development Brief and with central bank reporting.
+
+## World Bank attribution
+
+The RPW dataset is licensed CC BY 4.0, which requires attribution when the data is reused. The calculator and this page carry the following attribution verbatim:
+
+> Source: World Bank, Remittance Prices Worldwide. Used under CC BY 4.0. Corridor averages computed by Tempo from the public dataset.
+
+Data collected Q3 2025, retrieved July 2026. License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+## Cross-border cost sources
+
+- [World Bank, Remittance Prices Worldwide dataset (Q3 2025)](https://datacatalog.worldbank.org/search/dataset/0037898/remittance-prices-worldwide)
+- [World Bank, Remittance Prices Worldwide site](https://remittanceprices.worldbank.org)
+- [UN SDG indicator 10.c.1 metadata](https://unstats.un.org/sdgs/metadata/files/Metadata-10-0C-01.pdf)
+- [Chase, wire transfer fees](https://www.chase.com/personal/banking/education/basics/wire-transfer-fees)
+- [Bankrate, wire transfer fees survey](https://www.bankrate.com/banking/wire-transfer-fees/)
+- [BIS CPMI analysis of Swift gpi data](https://www.bis.org/cpmi/publ/swift_gpi.pdf)
+- [Tempo transaction fees documentation](/docs/protocol/fees)
+- [Tempo consensus documentation](/docs/protocol/blockspace/consensus)

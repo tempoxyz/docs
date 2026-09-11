@@ -1,0 +1,243 @@
+---
+title: Settlement time estimator methodology
+description: Cutoff times, business-day rules, holiday calendars, and the float cost formula behind the tempo.xyz settlement time estimator.
+---
+
+# Settlement time estimator methodology
+
+The [settlement time estimator](https://tempo.xyz/tools/settlement-time/) on tempo.xyz estimates when a payment arrives on ACH, same-day ACH, Fedwire, FedNow, SEPA, SEPA Instant, Swift gpi, or a stablecoin transfer on Tempo, given a send day and time. This page documents the arrival engine's rules, the rail schedule facts and their sources, the holiday calendars, and the float cost formula. A markdown mirror of the tool is available at [tempo.xyz/tools/settlement-time.md](https://tempo.xyz/tools/settlement-time.md).
+
+## What the settlement estimator computes
+
+For a chosen rail, send day, send time (ET), and — for Swift gpi — destination region, the tool estimates an arrival window, the calendar hours in transit, and the working-capital cost of the wait. It also renders all eight rails side by side for the same send time. The server-rendered default shows a payment sent Friday at 5:00 p.m. ET.
+
+Each estimate is a window, not a guarantee. The early end assumes the payment makes the network's next processing window; the late end adds typical bank posting delays. Estimates assume no compliance holds, sanctions screening delays, or manual review; any rail, including stablecoin transfers at the on-ramp and off-ramp stage, can take longer when a payment is flagged.
+
+## Arrival engine rules
+
+The engine computes:
+
+```
+arrival = next operating window for the rail
+          (cutoff times, operating days, holiday calendar)
+        + the rail's typical processing time
+```
+
+The cutoff and window constants, all in ET unless noted:
+
+- **Assumed customer cutoff**: where the bank's own deadline governs (ACH origination, wire intake), the engine assumes a 5:00 p.m. ET customer cutoff. Banks vary; many are earlier.
+- **Fedwire**: the business day runs 9:00 p.m. ET on the preceding calendar day to 7:00 p.m. ET, Monday through Friday. The network deadline for third-party (customer) transfers is 6:45 p.m. ET.
+- **Standard ACH**: FedACH settles items not eligible for same-day processing at 8:30 a.m. ET on the next banking day. Some banks post funds up to a business day later.
+- **Same-day ACH**: three windows per banking day — submit by 10:30 a.m. settling at 1:00 p.m., submit by 2:45 p.m. settling at 5:00 p.m., and submit by 4:45 p.m. settling at 6:00 p.m.
+- **SEPA credit transfer**: the engine assumes a 4:00 p.m. CET bank cutoff. EU payment rules require credit no later than the next business day after acceptance; before cutoff, transfers are often credited the same day.
+- **Swift gpi**: messages move around the clock, but crediting is approximated per destination region using the receiving bank's business hours — United States 9:00 a.m. to 5:00 p.m. ET, Europe 3:00 a.m. to 11:00 a.m. ET, Asia-Pacific 7:00 p.m. to 11:00 p.m. ET. Swift reports about half of gpi payments credited within 30 minutes and nearly all within 24 hours (BIS analysis of Swift data).
+- **Instant rails** (FedNow, SEPA Instant, stablecoin transfer on Tempo): no cutoff; arrival is immediate at any hour, including weekends and holidays.
+
+Business-day handling: weekends never count as business days, and each rail checks its own holiday calendar — Federal Reserve holidays for US rails, TARGET closing days for SEPA rails, and the union of both for Swift gpi. When an estimate skips a holiday, the tool reports the skipped date and holiday name in a note.
+
+## Virtual ET clock and time zone handling
+
+The engine does wall-clock math on a "virtual ET clock": timestamps whose UTC fields are interpreted as US Eastern wall time. This keeps results deterministic between server rendering and the browser without a timezone library.
+
+CET is approximated as ET + 6 hours. US and EU daylight saving transitions differ by up to three weeks, so SEPA cutoff conversions can be off by an hour during those weeks. All displayed times are ET.
+
+## Float cost formula
+
+```
+float cost = amount × annual rate × (hours in transit ÷ 8,760)
+```
+
+Simple interest, 365-day year, no compounding. The default rate is SOFR, 3.66% as of July 1, 2026, published by the Federal Reserve Bank of New York. SOFR is a proxy for the cost of capital; substitute your own rate, such as your WACC. The hours in transit count calendar hours, including weekends — the number that matters for working capital.
+
+## Settlement estimator assumptions
+
+- Where a bank's own deadline governs (ACH origination, wire intake), the engine assumes a 5:00 p.m. ET customer cutoff.
+- All times are shown in US Eastern Time; SEPA cutoffs are converted assuming CET is six hours ahead of ET.
+- Swift gpi crediting windows are approximated per destination region, since final credit depends on the receiving bank's local business hours.
+- Instant rails (FedNow, SEPA Instant) assume both banks participate in the scheme.
+- The stablecoin row covers the on-chain transfer only. Moving between bank money and stablecoins uses the other rails on this page or a payment provider, which adds fees and time that vary by provider. A stablecoin transfer is not free: Tempo's network fee is under $0.001 per TIP-20 transfer, and on-ramp and off-ramp costs come on top.
+- Float cost uses simple interest with a 365-day year and no compounding, with SOFR as the default rate.
+
+## Payment rail reference
+
+Schedule facts were verified July 2026 against the operators' published pages. Sources are listed per rail.
+
+### ACH (standard)
+
+| Fact | Value |
+| --- | --- |
+| Operating hours | Batch processing on US banking days; no settlement on weekends or Federal Reserve holidays |
+| Cutoffs | Banks set their own origination cutoffs, commonly late afternoon ET; the tool assumes 5:00 p.m. ET |
+| Typical settlement | 1 to 2 business days; non-same-day items settle at 8:30 a.m. ET on the next banking day (FedACH schedule) |
+| Weekends and holidays | No processing or settlement on weekends or Federal Reserve holidays; files queue for the next banking day |
+| Typical cost | Often free for consumers; business pricing varies by bank and processor |
+| Reversibility | Returns and reversals possible under Nacha rules |
+
+Sources: [FedACH processing schedule](https://www.frbservices.org/resources/resource-centers/same-day-ach/fedach-processing-schedule.html), [Nacha, ACH Network resources](https://www.nacha.org/content/same-day-ach).
+
+### Same-day ACH
+
+| Fact | Value |
+| --- | --- |
+| Operating hours | Three settlement windows per US banking day: 1:00 p.m., 5:00 p.m., and 6:00 p.m. ET |
+| Cutoffs | Network submission deadlines 10:30 a.m., 2:45 p.m., and 4:45 p.m. ET; bank cutoffs are earlier |
+| Typical settlement | Same banking day if submitted before 4:45 p.m. ET; next banking day otherwise |
+| Weekends and holidays | No windows on weekends or Federal Reserve holidays; payments queue for the first window of the next banking day |
+| Typical cost | Varies by bank; many charge a per-transfer premium over standard ACH. Per-payment limit $1 million, rising to $10 million on September 17, 2027 per Nacha |
+| Reversibility | Returns and reversals possible under Nacha rules |
+
+Sources: [FedACH processing schedule](https://www.frbservices.org/resources/resource-centers/same-day-ach/fedach-processing-schedule.html), [Nacha, Same Day ACH](https://www.nacha.org/content/same-day-ach), [Nacha, Same Day ACH limit increase to $10 million (April 2026)](https://www.nacha.org/news/same-day-ach-payment-limit-increase-10-million).
+
+### Fedwire (US wire)
+
+| Fact | Value |
+| --- | --- |
+| Operating hours | Business day runs 9:00 p.m. ET (preceding calendar day) to 7:00 p.m. ET, Monday through Friday, excluding Federal Reserve holidays |
+| Cutoffs | Network deadline for third-party transfers 6:45 p.m. ET; banks commonly stop taking customer wire requests earlier in the afternoon |
+| Typical settlement | Minutes, once submitted during operating hours; real-time gross settlement |
+| Weekends and holidays | Closed on weekends and Federal Reserve holidays; a wire that misses Friday's cutoff leaves on Monday |
+| Typical cost | About $15 to $30+ per outgoing domestic wire at major US banks (Bankrate; bank fee schedules) |
+| Reversibility | Immediate, final, and irrevocable once processed |
+
+Sources: [Federal Reserve, Fedwire Funds Service](https://www.federalreserve.gov/paymentsystems/fedfunds_about.htm), [Federal Reserve Financial Services, Fedwire Funds Service](https://www.frbservices.org/financial-services/wires), [Bankrate, wire transfer fees](https://www.bankrate.com/banking/wire-transfer-fees/).
+
+### FedNow
+
+| Fact | Value |
+| --- | --- |
+| Operating hours | 24 hours a day, 7 days a week, 365 days a year |
+| Cutoffs | None; instant settlement around the clock |
+| Typical settlement | Seconds, between participating banks |
+| Weekends and holidays | Settles on weekends and holidays |
+| Typical cost | Customer pricing set by banks; the Federal Reserve charges participating banks a small per-transfer fee (FedNow fee schedule). Banks set their own transaction limits |
+| Reversibility | Final once settled |
+
+Sources: [Federal Reserve Financial Services, FedNow Service](https://www.frbservices.org/financial-services/fednow), [Federal Reserve, FedNow Service overview](https://www.federalreserve.gov/paymentsystems/fednow_about.htm).
+
+### SEPA credit transfer
+
+| Fact | Value |
+| --- | --- |
+| Operating hours | Euro-area banking days (TARGET calendar); no settlement on TARGET closing days or weekends |
+| Cutoffs | Banks set their own cutoffs, commonly mid-to-late afternoon CET; the tool assumes 4:00 p.m. CET |
+| Typical settlement | Credited no later than the next business day after acceptance under EU payment rules; often the same day before bank cutoffs |
+| Weekends and holidays | No settlement on weekends or TARGET closing days; transfers queue for the next TARGET business day |
+| Typical cost | Free or low cost for euro payments; EU rules require cross-border euro transfers to cost the same as domestic ones |
+| Reversibility | A recall procedure exists, but the return of funds is not guaranteed |
+
+Sources: [European Payments Council, SEPA Credit Transfer](https://www.europeanpaymentscouncil.eu/what-we-do/sepa-credit-transfer), [European Central Bank, TARGET Services](https://www.ecb.europa.eu/paym/target/t2/html/index.en.html).
+
+### SEPA Instant (SCT Inst)
+
+| Fact | Value |
+| --- | --- |
+| Operating hours | 24 hours a day, 7 days a week, 365 days a year |
+| Cutoffs | None; the scheme targets crediting within 10 seconds |
+| Typical settlement | About 10 seconds, when both banks support the scheme |
+| Weekends and holidays | Settles on weekends and holidays |
+| Typical cost | Under the EU Instant Payments Regulation (2024/886), instant euro transfers may not cost more than standard credit transfers |
+| Reversibility | Final; a recall procedure exists |
+
+Sources: [European Payments Council, SEPA Instant Credit Transfer](https://www.europeanpaymentscouncil.eu/what-we-do/sepa-instant-credit-transfer), [EU Instant Payments Regulation 2024/886](https://eur-lex.europa.eu/eli/reg/2024/886/oj).
+
+### Swift gpi (international wire)
+
+| Fact | Value |
+| --- | --- |
+| Operating hours | Messages move around the clock, but crediting depends on business hours, cutoffs, and holidays at each bank in the chain |
+| Cutoffs | Sending banks apply wire cutoffs, commonly mid-to-late afternoon local time; correspondent and receiving banks apply their own |
+| Typical settlement | Swift reports about half of gpi payments credited within 30 minutes and nearly all within 24 hours; corridor variance is large (BIS) |
+| Weekends and holidays | Crediting generally waits for the receiving bank's next business day; weekends and holidays at either end add days |
+| Typical cost | About $25 to $50 per outgoing international wire at major US banks, plus possible intermediary and receiving fees and FX margins (Chase fee schedule; Bankrate) |
+| Reversibility | Recall is possible before the beneficiary is credited; difficult afterward |
+
+Sources: [BIS CPMI, analysis of Swift gpi data](https://www.bis.org/cpmi/publ/swift_gpi.pdf), [Chase, wire transfer fees](https://www.chase.com/personal/banking/education/basics/wire-transfer-fees), [Bankrate, wire transfer fees](https://www.bankrate.com/banking/wire-transfer-fees/).
+
+### Stablecoin transfer (Tempo)
+
+| Fact | Value |
+| --- | --- |
+| Operating hours | 24 hours a day, 7 days a week, 365 days a year |
+| Cutoffs | None; blocks are produced roughly every 600 milliseconds |
+| Typical settlement | Under a second on-chain. Converting between bank money and stablecoins before or after the transfer uses the rails above and adds time |
+| Weekends and holidays | Settles on weekends and holidays |
+| Typical cost | Network fee under $0.001 per TIP-20 transfer. On-ramp and off-ramp costs are extra and vary by provider |
+| Reversibility | Final once confirmed on-chain; transfers cannot be reversed |
+
+Sources: [Tempo transaction fees documentation](/docs/protocol/fees), [Tempo consensus documentation](/docs/protocol/blockspace/consensus).
+
+## Holiday calendars used by the estimator
+
+### Federal Reserve holidays, 2026 to 2027 (US rails)
+
+| Date | Holiday |
+| --- | --- |
+| 2026-01-01 | New Year's Day |
+| 2026-01-19 | Martin Luther King Jr. Day |
+| 2026-02-16 | Presidents Day |
+| 2026-05-25 | Memorial Day |
+| 2026-06-19 | Juneteenth |
+| 2026-09-07 | Labor Day |
+| 2026-10-12 | Columbus Day |
+| 2026-11-11 | Veterans Day |
+| 2026-11-26 | Thanksgiving Day |
+| 2026-12-25 | Christmas Day |
+| 2027-01-01 | New Year's Day |
+| 2027-01-18 | Martin Luther King Jr. Day |
+| 2027-02-15 | Presidents Day |
+| 2027-05-31 | Memorial Day |
+| 2027-07-05 | Independence Day (observed) |
+| 2027-09-06 | Labor Day |
+| 2027-10-11 | Columbus Day |
+| 2027-11-11 | Veterans Day |
+| 2027-11-25 | Thanksgiving Day |
+
+Saturday holidays are not observed on Friday — Federal Reserve banks are open the preceding Friday — so July 4, 2026, June 19, 2027, and December 25, 2027 do not appear. Sunday holidays are observed the following Monday: Independence Day 2027 falls on Sunday, July 4 and is observed Monday, July 5, 2027. Source: [Federal Reserve holiday schedules](https://www.frbservices.org/about/holiday-schedules).
+
+### TARGET closing days, 2026 to 2027 (SEPA rails)
+
+TARGET closes on New Year's Day, Good Friday, Easter Monday, 1 May, Christmas Day, and 26 December.
+
+| Date | Closing day |
+| --- | --- |
+| 2026-01-01 | New Year's Day |
+| 2026-04-03 | Good Friday |
+| 2026-04-06 | Easter Monday |
+| 2026-05-01 | Labour Day |
+| 2026-12-25 | Christmas Day |
+| 2026-12-26 | Christmas holiday (Saturday in 2026) |
+| 2027-01-01 | New Year's Day |
+| 2027-03-26 | Good Friday |
+| 2027-03-29 | Easter Monday |
+| 2027-05-01 | Labour Day (Saturday in 2027) |
+| 2027-12-25 | Christmas Day (Saturday in 2027) |
+| 2027-12-26 | Christmas holiday (Sunday in 2027) |
+
+Closing days that fall on weekends are listed for completeness; weekends are already non-settlement days. Source: [ECB, TARGET Services](https://www.ecb.europa.eu/paym/target/t2/html/index.en.html).
+
+## Settlement data refresh cadence
+
+- Rail schedules were last reviewed July 2026 against the primary sources cited above. Review annually: cutoff windows and limits change — for example, the same-day ACH per-payment limit rises from $1 million to $10 million on September 17, 2027 (Nacha, announced April 2026).
+- The SOFR snapshot (3.66% as of July 1, 2026) is refreshed quarterly. The New York Fed publishes the rate daily.
+- The holiday calendars cover 2026 and 2027. Add Federal Reserve holidays and TARGET closing days for 2028 and later before the end of 2027, or the engine has no holiday data for future dates.
+
+## Settlement time sources
+
+- [Federal Reserve Financial Services, FedACH processing schedule](https://www.frbservices.org/resources/resource-centers/same-day-ach/fedach-processing-schedule.html)
+- [Federal Reserve Financial Services, Fedwire Funds Service](https://www.frbservices.org/financial-services/wires)
+- [Federal Reserve Financial Services, FedNow Service](https://www.frbservices.org/financial-services/fednow)
+- [Federal Reserve Financial Services, holiday schedules](https://www.frbservices.org/about/holiday-schedules)
+- [Federal Reserve, Fedwire Funds Service](https://www.federalreserve.gov/paymentsystems/fedfunds_about.htm)
+- [Federal Reserve, FedNow Service overview](https://www.federalreserve.gov/paymentsystems/fednow_about.htm)
+- [Nacha, Same Day ACH](https://www.nacha.org/content/same-day-ach)
+- [Nacha, Same Day ACH limit increase to $10 million](https://www.nacha.org/news/same-day-ach-payment-limit-increase-10-million)
+- [European Payments Council, SEPA Credit Transfer](https://www.europeanpaymentscouncil.eu/what-we-do/sepa-credit-transfer)
+- [European Payments Council, SEPA Instant Credit Transfer](https://www.europeanpaymentscouncil.eu/what-we-do/sepa-instant-credit-transfer)
+- [European Central Bank, TARGET Services](https://www.ecb.europa.eu/paym/target/t2/html/index.en.html)
+- [EU Instant Payments Regulation 2024/886](https://eur-lex.europa.eu/eli/reg/2024/886/oj)
+- [BIS CPMI, analysis of Swift gpi data](https://www.bis.org/cpmi/publ/swift_gpi.pdf)
+- [Chase, wire transfer fees](https://www.chase.com/personal/banking/education/basics/wire-transfer-fees)
+- [Bankrate, wire transfer fees survey](https://www.bankrate.com/banking/wire-transfer-fees/)
+- [Federal Reserve Bank of New York, SOFR](https://markets.newyorkfed.org/api/rates/secured/sofr/last/1.json)
+- [Tempo transaction fees documentation](/docs/protocol/fees)
+- [Tempo consensus documentation](/docs/protocol/blockspace/consensus)
