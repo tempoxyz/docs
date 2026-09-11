@@ -89,7 +89,7 @@ This fetches snapshot metadata and prints a JSON plan. See the [`tempo download`
 Current validators require consensus finalization certificates at startup. Official Tempo snapshots include the required consensus archive, and `tempo download` restores it by default.
 
 :::info[Keep execution and consensus data in sync]
-Restore execution and consensus data from the same snapshot and update them in lockstep, even when stored on separate volumes. Independent updates are not currently supported.
+Restore execution and consensus data from the same snapshot and update them in lockstep, even when stored on separate volumes. Independent updates can work but are brittle. Tempo is working on making this flow possible.
 :::
 
 :::note[Replacing existing snapshot data]

@@ -133,6 +133,10 @@ The validator identity signature and the transaction signer are different:
 
 ## Signing share recovery
 
+:::warning[Deleting consensus data can halt the network]
+A node eventually recovers its signing share, but do not delete the consensus directory lightly. If too many validators delete their shares in the same epoch, the network halts.
+:::
+
 If the signing share is lost — for example by deleting `<datadir>/consensus` — the node will recover a new share in the following epochs from the network when it restarts.
 
 ## ValidatorConfig V2 precompile
