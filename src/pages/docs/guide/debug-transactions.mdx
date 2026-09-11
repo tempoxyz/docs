@@ -1,0 +1,39 @@
+---
+title: "Simulate and debug Tempo transactions"
+seoTitle: "Tempo Transaction Debugger and Simulator | Tempo Docs"
+description: Simulate a Tempo transaction before submitting it, then inspect execution traces, balance changes, events, gas use, and revert details.
+---
+
+# Simulate and debug Tempo transactions
+
+Use the [Tempo transaction debugger](https://explore.tempo.xyz/simulate) to test a transaction against current Mainnet state without broadcasting it. Simulate a transaction to diagnose reverts or verify a contract interaction.
+
+:::info[What simulations show]
+- **Gas flame graphs** show which calls consume the most gas.
+- **State changes** show how balances and contract storage would change.
+- **Event logs** show the events the transaction would emit.
+- **Call traces** show the transaction's execution path across contracts.
+- **Revert errors** identify the call and error that caused a failure.
+:::
+
+## Run a transaction simulation
+
+:::::steps
+
+### Enter the transaction
+
+Open [explore.tempo.xyz/simulate](https://explore.tempo.xyz/simulate), then provide the sender, recipient, value, and calldata.
+
+### Simulate the transaction
+
+Run the simulation against current chain state.
+
+### Inspect the execution
+
+Review the decoded calls, balance changes, events, execution trace, gas use, and any revert details.
+
+:::::
+
+## Diagnose a failed transaction
+
+Start with the first reverted call in the execution trace. Its decoded error or return data usually identifies the contract and condition that rejected the transaction.
