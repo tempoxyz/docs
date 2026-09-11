@@ -38,14 +38,6 @@ Congestion is managed through:
 
 The payment lane mechanism ensures that payment transactions are not crowded out by other network activity. General network congestion from non-payment use cases cannot affect payment throughput or fees, providing the consistency that payment applications require.
 
-## Precompile input and validation gas
-
-Tempo precompile calls charge `30 × ceil(calldata_length / 32)` gas before dispatch and ABI decoding. The length includes the selector; insufficient gas halts before decoding ([TIP-1100](https://tips.sh/1100)).
-
-Duplicate checks on AccountKeychain call scopes and ZoneFactory role lists charge an additional 20 gas per value processed, before sorting ([TIP-1105](https://tips.sh/1105)).
-
-Calls require canonical ABI encoding, without gaps, overlaps, trailing bytes, or nonzero padding. Estimate gas on the target network, especially for large inputs or fixed gas limits.
-
 ## Fee payment
 
 Before the execution of each transaction, the protocol takes the following steps:
@@ -182,7 +174,7 @@ If validators have not specified a fee token preference, the protocol falls back
 
 ## Gas Parameters
 
-As of T7, Tempo uses the following mainnet gas parameters:
+Tempo uses the following mainnet gas parameters:
 
 | Parameter | Value |
 |-----------|-------|
@@ -190,8 +182,12 @@ As of T7, Tempo uses the following mainnet gas parameters:
 | Base fee floor | 600 million attodollars per gas (`6 × 10^8`) |
 | Total block gas limit | 500M gas |
 | General gas limit | 30M gas/block |
+| Precompile input | `30 × ceil(calldata_length / 32)` gas ([TIP-1100](https://tips.sh/1100)) |
+| Duplicate validation | 20 gas per value processed ([TIP-1105](https://tips.sh/1105)) |
 
 A standard TIP-20 transfer (~50,000 gas) costs approximately 600 microdollars ($0.0006) at the cap and approximately 30 microdollars ($0.00003) at the floor.
+
+Precompile input charges include the selector and are deducted before dispatch and ABI decoding. Duplicate-check charges apply to AccountKeychain call scopes and ZoneFactory role lists before sorting. Calls require canonical ABI encoding without gaps, overlaps, trailing bytes, or nonzero padding.
 
 ### Removing validator preference
 
