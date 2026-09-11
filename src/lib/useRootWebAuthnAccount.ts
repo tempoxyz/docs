@@ -24,8 +24,10 @@ export function useRootWebAuthnAccount() {
   const { address, connector } = useConnection()
 
   return useQuery({
-    enabled: Boolean(address && connector?.id === 'webAuthn'),
-    queryKey: ['root-webauthn-account', address],
+    enabled: Boolean(
+      address && (connector?.id === 'webAuthn' || connector?.id === 'xyz.tempo'),
+    ),
+    queryKey: ['root-webauthn-account', connector?.id, address],
     queryFn: async () => {
       if (!address) throw new Error('account address not ready')
       if (!connector) throw new Error('connector not ready')
