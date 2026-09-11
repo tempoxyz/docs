@@ -21,7 +21,7 @@ const handler = Handler.relay({
 })
 ```
 
-By default, the relay configures Viem clients for Tempo mainnet and testnet and loads fee-token candidates from the [Tempo API verified-token list](/docs/api/verified-tokens#gettokenlist). Pass `apiKey` to authenticate the built-in RPC and verified-token requests. When you omit it, the clients use each chain's default Viem transport and the verified-token request is unauthenticated.
+By default, the relay configures Viem clients for Tempo mainnet and testnet and loads fee-token candidates from the [Tempo API verified-token list](/docs/quickstart/tokenlist#token-list-api-endpoints). Pass `apiKey` to authenticate the built-in RPC and verified-token requests. When you omit it, the clients use each chain's default Viem transport and the verified-token request is unauthenticated.
 
 :::info
 The built-in client defaults to mainnet when a request does not specify a chain. Use testnet chain ID `42431` with Sandbox API keys.
@@ -570,7 +570,7 @@ When you use [`Provider.relay`](https://accounts.tempo.xyz/docs/api/provider#rel
 - **Type:** `(chainId: number) => readonly Address[] | Promise<readonly Address[]>`
 - **Optional**
 
-Returns candidate token addresses for fee-token resolution. By default, the relay loads the [Tempo API verified-token list](/docs/api/verified-tokens#gettokenlist) for mainnet and testnet. Pass a resolver to replace these candidates. For additional chains, provide both `getClient` and `resolveTokens`.
+Returns candidate token addresses for fee-token resolution. By default, the relay loads the [Tempo API verified-token list](/docs/quickstart/tokenlist#token-list-api-endpoints) for mainnet and testnet. Pass a resolver to replace these candidates. For additional chains, provide both `getClient` and `resolveTokens`.
 
 ```ts
 const handler = Handler.relay({
