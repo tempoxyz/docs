@@ -40,11 +40,11 @@ The payment lane mechanism ensures that payment transactions are not crowded out
 
 ## Precompile input and validation gas
 
-Every Tempo precompile call charges `30 * ceil(calldata_length / 32)` execution gas for its input. The length includes all input bytes, including the function selector. This charge is deducted before dispatch or argument decoding; insufficient gas halts execution with out-of-gas. See [TIP-1100](https://tips.sh/1100).
+Tempo precompile calls charge `30 × ceil(calldata_length / 32)` gas before dispatch and ABI decoding. The length includes the selector; insufficient gas halts before decoding ([TIP-1100](https://tips.sh/1100)).
 
-[TIP-1105](https://tips.sh/1105) adds a separate charge of 20 gas per value processed by duplicate checks for AccountKeychain call-scope targets, selectors, and recipients, and ZoneFactory allowed-account, gateway, and sequencer lists. Insufficient gas halts execution before sorting. ZoneFactory rejects duplicate addresses within or across those role lists.
+Duplicate checks on AccountKeychain call scopes and ZoneFactory role lists charge an additional 20 gas per value processed, before sorting ([TIP-1105](https://tips.sh/1105)).
 
-Tempo precompile calls must use canonical ABI encoding. Gaps, overlaps, trailing data, and non-zero padding are rejected. Use standard ABI encoders and estimate gas on the network where the transaction will execute, especially for large inputs or integrations with fixed gas limits.
+Calls require canonical ABI encoding, without gaps, overlaps, trailing bytes, or nonzero padding. Estimate gas on the target network, especially for large inputs or fixed gas limits.
 
 ## Fee payment
 

@@ -1557,9 +1557,7 @@ The [expiring nonces specification](https://github.com/tempoxyz/tempo/blob/main/
 - Automatic replay protection via circular buffer
 - No permanent state bloat from unused nonce keys
 
-Use expiring nonces by setting `nonceKey` to `maxUint256`, `nonce` to `0`, and `validBefore` to a future Unix timestamp in seconds. The maximum window is 300 seconds (five minutes): `now < validBefore <= now + 300`, where `now` is the current block timestamp. See [TIP-1093](https://tips.sh/1093).
-
-Shorter windows remain valid. The examples below use shorter windows; the five-minute protocol maximum does not imply that an SDK selects that window by default.
+Set `nonceKey` to `maxUint256`, `nonce` to `0`, and `validBefore` to a Unix timestamp in seconds satisfying `now < validBefore <= now + 300`, where `now` is the current block timestamp. The maximum window is five minutes; SDK defaults may use shorter windows. See [TIP-1093](https://tips.sh/1093).
 
 <Tabs stateKey="library-exp">
   <Tab title="Viem">

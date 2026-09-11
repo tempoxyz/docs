@@ -13,13 +13,7 @@ The Account Keychain precompile manages authorized Access Keys for accounts, ena
 
 `authorizeKey(...)` takes a `KeyRestrictions` tuple that bundles expiry, spending limits, and call scopes. `authorizeAdminKey(...)` provisions an admin key for account key management. Access-key-signed transactions cannot create contracts; use a Root Key for deployment flows.
 
-## Input validation and gas
-
-Calls to this precompile must use canonical ABI encoding. Gaps, overlaps, trailing data, and non-zero padding are rejected. Use a standard ABI encoder when constructing calls.
-
-The input charge is 30 gas per 32-byte word, rounded up over the full calldata including the function selector, and is deducted before decoding. Call-scope duplicate checks additionally charge 20 gas per target, selector, or recipient processed. Insufficient gas halts execution before sorting; duplicate targets, selectors, and recipients remain invalid. Estimate gas on the target network when authorizing keys or updating permissions.
-
-See [TIP-1100](https://tips.sh/1100) for input pricing and [TIP-1105](https://tips.sh/1105) for strict decoding and duplicate-validation pricing.
+See [precompile input and validation gas](/docs/protocol/fees/spec-fee#precompile-input-and-validation-gas) for calldata requirements and gas charges.
 
 ## Motivation
 
