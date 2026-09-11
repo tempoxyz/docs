@@ -46,6 +46,8 @@ const tempoReleasesUrl = 'https://github.com/tempoxyz/tempo/releases'
 
 const interactiveDescriptions: Record<string, string> = {
   ConnectWallet: 'Connect a wallet in the interactive web page.',
+  PaymentRoutesExplorer:
+    'Use the interactive web page to filter live Tempo payment routes by rail, chain, currency, and provider.',
   T7BenchmarkVisual: 'The benchmark values are listed in the table below.',
   TempoMcpExplorer: 'Use the interactive web page to try the Tempo MCP server.',
   TerminalDemo:
