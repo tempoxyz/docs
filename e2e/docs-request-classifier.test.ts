@@ -198,6 +198,16 @@ const cases: ClassificationCase[] = [
       surface: 'docs',
     },
   },
+  {
+    name: 'non-mcp api route is not a docs surface',
+    input: { path: '/api/og', userAgent: 'facebookexternalhit/1.1' },
+    expected: {
+      agent_kind: 'human',
+      match_source: 'none',
+      shouldTrack: false,
+      surface: 'other',
+    },
+  },
 ]
 
 for (const item of cases) {
