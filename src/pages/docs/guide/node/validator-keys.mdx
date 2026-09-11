@@ -133,9 +133,7 @@ The validator identity signature and the transaction signer are different:
 
 ## Signing share recovery
 
-Since [v1.13.2](https://github.com/tempoxyz/tempo/releases/tag/v1.13.2), a node missing its signing share attempts to reconstruct it at startup from the previous epoch's finalized dealer logs. If recovery succeeds, a synced validator can participate in the current epoch without waiting for another DKG cycle. Recovery is best-effort: it requires the validator to be a player in the current outcome and sufficient data from a successful previous ceremony. Otherwise, the node waits for a future successful DKG ceremony to obtain a share.
-
-This does not replace the consensus certificates required at startup or make arbitrary data resets safe. If consensus data is missing, follow the [snapshot guidance](/docs/guide/node/installation#snapshots) and coordinate recovery with the Tempo team. See [Resetting your validator's data](/docs/guide/node/validator-lifecycle#resetting-your-validators-data) before replacing existing state.
+If the signing share is lost — for example by deleting `<datadir>/consensus` — the node will recover a new share in the following epochs from the network when it restarts.
 
 ## ValidatorConfig V2 precompile
 
