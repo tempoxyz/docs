@@ -21,6 +21,17 @@ Core protocol contracts that power Tempo's features.
 | [**Address Registry**](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md) | [`0xFDC0000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0xFDC0000000000000000000000000000000000000) | Resolve virtual TIP-20 deposit addresses to registered master wallets |
 | [**pathUSD**](/docs/protocol/exchange/quote-tokens#pathusd) | [`0x20c0000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x20c0000000000000000000000000000000000000) | First stablecoin deployed |
 
+## Zone contracts
+
+The protocol provides the factory and shared Zone runtimes below. Each zone has its own portal proxy pointing to the shared implementation. These protocol contracts do not imply production readiness: [Tempo Zones](/docs/protocol/zones) remains available for testing on Tempo Testnet only.
+
+| Contract | Address | Description |
+|----------|---------|-------------|
+| [ZoneFactory](/docs/protocol/zones/architecture#creating-a-zone) | [`0x5AF2000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x5AF2000000000000000000000000000000000000) | Create zones and register their portals |
+| [ZonePortal implementation](/docs/protocol/zones/architecture#contract-architecture) | [`0x5AD1000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x5AD1000000000000000000000000000000000000) | Shared bridge logic used by each zone's portal proxy |
+| [Zone verifier](/docs/protocol/zones/architecture#contract-architecture) | [`0x5a56000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x5a56000000000000000000000000000000000000) | Protocol-managed verifier used by zone portals |
+| [ZoneMessenger](/docs/protocol/zones/architecture#contract-architecture) | [`0x5A4d000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x5A4d000000000000000000000000000000000000) | Shared withdrawal callback handler |
+
 ## Standard Utilities
 
 Popular Ethereum contracts deployed for convenience.
