@@ -16,6 +16,10 @@ Validators must run execution state on local NVMe / direct-attached storage. Net
 Consensus state can live on a lower performance volume (for example, EBS), but execution state needs NVMe storage.
 If you want to separate them, use `--datadir` for execution data and `--consensus.datadir` for consensus data.
 
+:::warning[Keep consensus and execution data consistent]
+Mounting consensus data on a separate, slower volume does not make it independent from execution data. Back up, restore, snapshot, copy, and fail over both datasets together. Never combine consensus data from one node or point in time with execution data from another.
+:::
+
 ## RPC Node
 
 | Component | Minimum | Recommended |
