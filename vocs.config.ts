@@ -639,6 +639,10 @@ export default defineConfig({
             link: '/docs/quickstart/wallet-developers',
           },
           {
+            text: 'MoneyGram Cash Ramps',
+            link: '/docs/guide/moneygram-ramps',
+          },
+          {
             text: 'Contract Verification',
             link: '/docs/quickstart/verify-contracts',
           },
