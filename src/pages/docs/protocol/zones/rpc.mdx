@@ -10,7 +10,18 @@ description: Authenticated JSON-RPC interface for Tempo Zones with per-account s
 Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
 :::
 
-The zone RPC starts from the standard Ethereum JSON-RPC and restricts it to enforce privacy guarantees. Every RPC request must include an authorization token that proves the caller controls a Tempo account and scopes all responses to that account.
+Tempo Zones expose two RPC surfaces: a redacted RPC for applications and users, and a private admin RPC for the zone operator. Use the redacted RPC unless you operate the zone.
+
+## Redacted and admin RPC surfaces
+
+| Surface | Access | Data visibility | Availability |
+|---------|--------|-----------------|--------------|
+| Redacted RPC | Public-facing endpoint with signed-message authentication | Restricts account-specific state, transactions, receipts, and events to the authenticated account | Intended for applications and users |
+| Admin RPC | Private operator endpoint | Unrestricted access to the full zone state | Not exposed to the public internet; Tempo API access is currently limited to Privy |
+
+The redacted RPC starts from the standard Ethereum JSON-RPC and restricts it to enforce privacy guarantees. Every request must include an authorization token that proves the caller controls a Tempo account and scopes responses to that account. Unauthorized callers receive an authorization error, and callers cannot use their credentials to inspect another account's protected state.
+
+The admin RPC bypasses these redactions so an operator can administer the zone and inspect its full state. Do not expose it directly to applications or the public internet. Contact Tempo if you need operator-level access for a supported integration.
 
 ## Authorization Tokens
 
