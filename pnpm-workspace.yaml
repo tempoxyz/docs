@@ -31,6 +31,7 @@ overrides:
   dompurify: '>=3.4.0'
   'fast-uri@>=3.0.0 <3.1.6': 3.1.6
   'fflate@>=0.4.5 <0.4.9': 0.4.9
+  'js-yaml@>=4.0.0 <4.3.2': 4.3.2
   'nanoid@>=3.0.0 <3.3.18': 3.3.18
   protobufjs: '>=7.5.5'
   # remark-mdx-frontmatter 5 still requests toml 3; toml 4 fixes its parser advisories.
