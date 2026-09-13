@@ -62,6 +62,10 @@ export const proxiedLegacyDocsRoutes = [
     destination: '/docs/server/relay-handler',
   },
   {
+    source: '/docs/learn/tempo/receive-policies',
+    destination: '/docs/guide/payments/configure-receive-policies',
+  },
+  {
     source: '/learn/tempo/receive-policies',
     destination: '/docs/guide/payments/configure-receive-policies',
   },
@@ -188,6 +192,10 @@ export const legacyDocsHostRoutes = [
     destination: `${canonicalDevelopersOrigin}/docs/server/relay-handler`,
   },
   {
+    source: '/docs/learn/tempo/receive-policies',
+    destination: `${canonicalDevelopersOrigin}/docs/guide/payments/configure-receive-policies`,
+  },
+  {
     source: '/learn/tempo/receive-policies',
     destination: `${canonicalDevelopersOrigin}/docs/guide/payments/configure-receive-policies`,
   },
@@ -246,6 +254,11 @@ export const routingSmokeCases = {
       expectedFinalStatus: 200,
     },
     {
+      path: '/developers/docs/learn/tempo/receive-policies',
+      expectedLocation: `${canonicalDevelopersOrigin}/docs/guide/payments/configure-receive-policies`,
+      expectedFinalStatus: 200,
+    },
+    {
       path: '/developers/learn/use-cases/payroll',
       expectedLocation: 'https://tempo.xyz/learn/stablecoin-payroll/',
       expectedFinalStatus: 200,
@@ -276,6 +289,11 @@ export const routingSmokeCases = {
     {
       path: '/accounts/server/handler.relay',
       expectedLocation: `${canonicalDevelopersOrigin}/docs/server/relay-handler`,
+      expectedFinalStatus: 200,
+    },
+    {
+      path: '/docs/learn/tempo/receive-policies',
+      expectedLocation: `${canonicalDevelopersOrigin}/docs/guide/payments/configure-receive-policies`,
       expectedFinalStatus: 200,
     },
     {
