@@ -17,9 +17,9 @@ Accept stablecoin payments in your application. Learn how to receive payments, v
 
 ## Receive stablecoin payments
 
-Payments are automatically credited to the recipient's address when a transfer is executed. You don't need to do anything special to "accept" a payment, it happens automatically onchain.
+By default, TIP-20 payments are credited to your address automatically. You don't need to submit a transaction to accept them.
 
-If you want to limit which tokens or senders your account accepts, set a [receive policy](/docs/guide/payments/configure-receive-policies). Payments that don't match the policy still succeed onchain, but the funds are held in `ReceivePolicyGuard` (`0xB10C000000000000000000000000000000000000`) for your recovery authority to claim, instead of being credited to your balance.
+To restrict incoming tokens or senders, configure a [receive policy](/docs/guide/payments/configure-receive-policies). A payment blocked by that policy can still succeed onchain, but its funds are held in `ReceivePolicyGuard` instead of your balance. The policy determines [who can claim the held funds](/docs/guide/payments/configure-receive-policies#claim-blocked-receipts).
 
 In this basic receiving demo you can see the balances update after you add funds to your account, using the `getBalance` and `watchEvent` calls documented below.
 
@@ -185,7 +185,9 @@ Check if a payment has been received by querying the token balance or listening 
 
 ### Listen for TIP-20 transfer events
 
-Filter `Transfer` events by the `to` address you expect to be paid at. If your account has a receive policy, a blocked payment emits a `Transfer` whose `to` is `ReceivePolicyGuard` rather than your address, followed by a `TransferBlocked` event from `ReceivePolicyGuard`. Treat those as held, not received, and index `TransferBlocked` so the recovery authority can claim them. See [Configure Receive Policies](/docs/guide/payments/configure-receive-policies#understand-receive-policy-behavior).
+Watch the expected token contract and filter `Transfer` events by your receiving address, as shown below. For [virtual addresses](/docs/protocol/tip20/virtual-addresses#what-this-changes-for-wallets-explorers-and-indexers), verify the forwarding transfer to the master wallet and count the sequence as one payment.
+
+Payments held by a receive policy credit `ReceivePolicyGuard`, so the recipient filter below excludes them. To track held payments separately, [index `TransferBlocked`](/docs/guide/payments/configure-receive-policies#monitor-blocked-receipts) from the guard, filtered by token and receiver, and retain its `receipt` bytes for recovery.
 
 <Tabs stateKey="library">
   <Tab title="Viem">
@@ -207,7 +209,7 @@ Filter `Transfer` events by the `to` address you expect to be paid at. If your a
           { name: 'value', type: 'uint256' },
         ],
       },
-      args: { to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb' }, // only payments to you // [!code focus]
+      args: { to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb' }, // [!code focus]
       onLogs: (logs) => { // [!code focus]
         logs.forEach((log) => { // [!code focus]
           console.log('Received payment:', { // [!code focus]
@@ -248,6 +250,7 @@ Filter `Transfer` events by the `to` address you expect to be paid at. If your a
             &provider, // [!code focus]
         ) // [!code focus]
         .Transfer_filter() // [!code focus]
+        .topic2(address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb").into_word()) // [!code focus]
         .watch() // [!code focus]
         .await? // [!code focus]
         .into_stream(); // [!code focus]
@@ -296,7 +299,10 @@ Filter `Transfer` events by the `to` address you expect to be paid at. If your a
     ) # [!code focus]
 
     # Get historical Transfer events # [!code focus]
-    events = contract.events.Transfer().get_logs(from_block="latest") # [!code focus]
+    events = contract.events.Transfer().get_logs( # [!code focus]
+        from_block="latest", # [!code focus]
+        argument_filters={"to": Web3.to_checksum_address("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb")}, # [!code focus]
+    ) # [!code focus]
     for event in events: # [!code focus]
         print(f"Transfer: {event.args['from']} -> {event.args['to']}: {event.args['value']}") # [!code focus]
     ```
@@ -604,7 +610,7 @@ contract PaymentReceiver {
 2. **Use memos**: Request memos from payers to link payments to invoices or orders
 3. **Check confirmations**: Wait for transaction finality (~1 second on Tempo) before processing
 4. **Handle edge cases**: Account for partial payments, refunds, and failed transactions
-5. **Check the recipient, not just success**: A payment blocked by a [receive policy](/docs/guide/payments/configure-receive-policies) still succeeds but credits `ReceivePolicyGuard`. Only treat a `Transfer` as received when `to` is your address or the master wallet for your virtual address, and index `TransferBlocked` to recover held funds
+5. **Verify delivery**: Match the token, recipient, and amount to the expected payment. Transaction success alone does not prove receipt; [held payments](#listen-for-tip-20-transfer-events) must be tracked separately
 
 ## Cross-Stablecoin Payments
 

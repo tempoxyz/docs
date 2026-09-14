@@ -144,39 +144,25 @@ function SendPaymentWithMemo() {
 
 ### Display the payment receipt
 
-Now that you can send a payment, you can display the transaction receipt on success.
-
-A successful transaction does not always mean the receiver was credited. If the receiver has a [receive policy](/docs/guide/payments/configure-receive-policies) that blocks the token or sender, the transfer still succeeds but the funds are held in `ReceivePolicyGuard` (`0xB10C000000000000000000000000000000000000`) for recovery. Check the `Transfer` event's recipient before showing the payment as delivered.
+Display a link to the transaction receipt after submission succeeds. Transaction success alone does not confirm delivery: a [receive policy](/docs/guide/payments/configure-receive-policies) can redirect funds to `ReceivePolicyGuard` instead of the receiver. Before showing a payment as delivered, [verify its transfer events](#confirm-delivery-not-just-transaction-success).
 
 :::code-group
 
 ```tsx twoslash [SendPaymentWithMemo.tsx]
+import * as React from 'react'
 import { Hooks } from 'wagmi/tempo'
-import { Abis } from 'viem/tempo'
-import { parseUnits, stringToHex, pad, parseEventLogs } from 'viem'
 
-const RECEIVE_POLICY_GUARD = '0xB10C000000000000000000000000000000000000' // [!code ++]
-
-// @noErrors
 function SendPaymentWithMemo() {
   const sendPayment = Hooks.token.useTransferSync()
-
-  const transfer = sendPayment.data // [!code ++]
-    ? parseEventLogs({ abi: Abis.tip20, logs: sendPayment.data.receipt.logs, eventName: 'Transfer' })[0] // [!code ++]
-    : undefined // [!code ++]
-  const held = transfer?.args.to === RECEIVE_POLICY_GUARD // [!code ++]
 
   return (
     <>
       {/* ... your payment form ... */}
-      {sendPayment.data && ( // [!code ++]
-        <> {/* [!code ++] */}
-          <p>{held ? 'Held by receiver policy' : 'Delivered'}</p> {/* [!code ++] */}
-          <a href={`https://explore.tempo.xyz/tx/${sendPayment.data.receipt.transactionHash}`}> {/* [!code ++] */}
-            View receipt {/* [!code ++] */}
-          </a> {/* [!code ++] */}
-        </> {/* [!code ++] */}
-      )} {/* [!code ++] */}
+      {sendPayment.data && (
+        <a href={`https://explore.tempo.xyz/tx/${sendPayment.data.receipt.transactionHash}`}>
+          View receipt
+        </a>
+      )}
     </>
   )
 }
@@ -1015,23 +1001,19 @@ When you send a payment, the token contract emits events:
 - **Transfer**: Standard ERC-20 transfer event
 - **TransferWithMemo**: Additional event with memo (if using `transferWithMemo`)
 
-If the receiver's [receive policy](/docs/guide/payments/configure-receive-policies) blocks the payment, the `Transfer` event names `ReceivePolicyGuard` (`0xB10C000000000000000000000000000000000000`) as the recipient, and `ReceivePolicyGuard` emits one more event:
-
-- **TransferBlocked**: The payment was held and a receipt was recorded. The `receipt` field is what the recovery authority later passes to `claim`.
-
-Index all three events to track payments in your off-chain systems, and treat a `Transfer` to `ReceivePolicyGuard` as **held**, not delivered.
+For held payments, also index `TransferBlocked` from `ReceivePolicyGuard` (`0xB10C000000000000000000000000000000000000`). Filter by the payment's token and receiver, and save the `receipt` bytes for the authorized claimer. See [Monitor blocked receipts](/docs/guide/payments/configure-receive-policies#monitor-blocked-receipts).
 
 ## Stablecoin payment best practices
 
 ### Confirm delivery, not just transaction success
 
-A TIP-20 `transfer` or `transferFrom` succeeds even when the receiver's receive policy blocks it. In that case the funds are credited to `ReceivePolicyGuard` instead of the receiver. Your payment flow should distinguish three outcomes:
+Match events from the expected token contract to the payment's sender, recipient, and amount. Do not rely on the first `Transfer` log in a transaction: a receipt can contain multiple transfers.
 
-- **Failed**: the transaction reverted. Nothing moved.
-- **Delivered**: the `Transfer` recipient is the intended receiver, or the master wallet for its virtual address.
-- **Held**: the `Transfer` recipient is `ReceivePolicyGuard`. Surface the `TransferBlocked` receipt so the recovery authority can claim the funds.
+- **Failed**: the transaction reverted; the payment was not delivered. Transaction fees may still apply.
+- **Delivered**: the matching `Transfer` credits the intended receiver. For a [virtual address](/docs/protocol/tip20/virtual-addresses#what-this-changes-for-wallets-explorers-and-indexers), verify the forwarding transfer to its master wallet and count the sequence as one payment.
+- **Held**: the transfer credits `ReceivePolicyGuard`, with a corresponding `TransferBlocked` event. The receiver has not been paid; retain the blocked receipt for [recovery](/docs/guide/payments/configure-receive-policies#claim-blocked-receipts).
 
-Only mark a payment, withdrawal, or deposit as delivered in the second case. See [Configure Receive Policies](/docs/guide/payments/configure-receive-policies) for how receivers set policies and how held funds are claimed.
+If no matching events are found, leave delivery unconfirmed. A successful transaction alone is not enough to mark a payment, withdrawal, or deposit as delivered.
 
 ### Payment loading states
 Users should see a loading state when the payment is being processed.
