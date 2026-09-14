@@ -26,11 +26,15 @@ See [Managing validator keys](/docs/guide/node/validator-keys) for the full key 
 Deploy validators using the [validator network topology](/docs/guide/node/validator-topology). Isolate the validator, allow direct consensus traffic only with other validators, and route execution P2P through internal follower RPC nodes.
 :::
 
-Tempo's networking layer includes built-in protections, making a cloud firewall or NAT gateway unnecessary in most setups. The node:
+Enforce validator isolation with a network firewall using the [validator firewall policy](/docs/guide/node/validator-topology#validator-firewall-policy). Keep this policy in place even when the node restricts execution peers. A NAT gateway is a separate deployment choice and does not replace the firewall policy.
+
+Tempo's networking layer provides additional safeguards:
 
 - Only accepts consensus connections from validators that can prove their identity
-- Only accepts connections from trusted IP addresses (active validators on-chain)
+- Checks consensus connections against trusted validator IP addresses
 - Rate-limits connections and messages in both consensus and execution layers
+
+Consensus authentication and IP checks do not restrict the public execution P2P network to validators. Restrict the validator's execution connections to its trusted follower RPC nodes at both the firewall and peer-configuration layers.
 
 ### Recommendations
 
