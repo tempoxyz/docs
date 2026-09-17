@@ -19,8 +19,12 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+      id-token: write
 
     steps:
+      - name: Secure runner
+        uses: tempoxyz/gh-actions/actions/secure-runner@6a4184039b7a7537d35ace0badc96764d5a1d4d0
+
       - name: Clone repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -79,8 +83,12 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+      id-token: write
 
     steps:
+      - name: Secure runner
+        uses: tempoxyz/gh-actions/actions/secure-runner@6a4184039b7a7537d35ace0badc96764d5a1d4d0
+
       - name: Clone repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -123,9 +131,14 @@ jobs:
     if: always()
     needs: [check, e2e, sitemap]
     runs-on: ubuntu-latest
-    permissions: {}
+    permissions:
+      id-token: write
     steps:
-      - run: |
+      - name: Secure runner
+        uses: tempoxyz/gh-actions/actions/secure-runner@6a4184039b7a7537d35ace0badc96764d5a1d4d0
+
+      - name: Verify required jobs
+        run: |
           if [[ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
             echo "One or more required jobs failed or were cancelled"
             exit 1
@@ -140,12 +153,16 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
         shard: [1, 2, 3]
 
     steps:
+      - name: Secure runner
+        uses: tempoxyz/gh-actions/actions/secure-runner@6a4184039b7a7537d35ace0badc96764d5a1d4d0
+
       - name: Clone repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
