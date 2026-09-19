@@ -127,4 +127,16 @@ describe('vocs.config docs SEO controls', () => {
     expect(sidebar).toContain('https://tips.sh/')
     expect(sidebar).not.toContain('"/docs/protocol/tips"')
   })
+
+  test('links Tempo API from the docs home reference section', () => {
+    const sidebar = vocsConfig.sidebar as Record<
+      string,
+      Array<{ text: string; items?: Array<{ text: string; link: string }> }>
+    >
+    const referenceSection = sidebar['/docs']?.find(
+      (item) => item.text === 'Reference and Operations',
+    )
+
+    expect(referenceSection?.items).toContainEqual({ text: 'Tempo API', link: '/docs/api' })
+  })
 })
