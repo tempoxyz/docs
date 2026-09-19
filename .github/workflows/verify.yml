@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@6a4184039b7a7537d35ace0badc96764d5a1d4d0
+        uses: tempoxyz/gh-actions/actions/secure-runner@0a60d757d0f4725a34f22f7b9ebf7b91b4b00bcf
 
       - name: Clone repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -31,7 +31,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup pnpm
-        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@6f436eb3a168279692739e8c0c9fdb52b94bfae7
+        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@0a60d757d0f4725a34f22f7b9ebf7b91b4b00bcf
         with:
           run_install: false
           version: 10.28.1
@@ -87,7 +87,7 @@ jobs:
 
     steps:
       - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@6a4184039b7a7537d35ace0badc96764d5a1d4d0
+        uses: tempoxyz/gh-actions/actions/secure-runner@0a60d757d0f4725a34f22f7b9ebf7b91b4b00bcf
 
       - name: Clone repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -95,7 +95,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup pnpm
-        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@6f436eb3a168279692739e8c0c9fdb52b94bfae7
+        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@0a60d757d0f4725a34f22f7b9ebf7b91b4b00bcf
         with:
           run_install: false
           version: 10.28.1
@@ -135,7 +135,7 @@ jobs:
       id-token: write
     steps:
       - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@6a4184039b7a7537d35ace0badc96764d5a1d4d0
+        uses: tempoxyz/gh-actions/actions/secure-runner@0a60d757d0f4725a34f22f7b9ebf7b91b4b00bcf
 
       - name: Verify required jobs
         run: |
@@ -161,7 +161,7 @@ jobs:
 
     steps:
       - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@6a4184039b7a7537d35ace0badc96764d5a1d4d0
+        uses: tempoxyz/gh-actions/actions/secure-runner@0a60d757d0f4725a34f22f7b9ebf7b91b4b00bcf
         with:
           # The Playwright container does not include the GitHub CLI required
           # by the Aegis installer. Container jobs cannot be hardened in-place.
@@ -173,7 +173,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup pnpm
-        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@6f436eb3a168279692739e8c0c9fdb52b94bfae7
+        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@0a60d757d0f4725a34f22f7b9ebf7b91b4b00bcf
         with:
           run_install: false
           version: 10.28.1
