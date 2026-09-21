@@ -29,7 +29,7 @@ jobs:
       DOCS_ROUTING_SMOKE_LEGACY_ORIGIN: ${{ inputs.legacy_origin || 'https://docs.tempo.xyz' }}
     steps:
       - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@0a60d757d0f4725a34f22f7b9ebf7b91b4b00bcf
+        uses: tempoxyz/gh-actions/actions/secure-runner@bce53819ffa60fcdf8f0f349686d807e5a66a71b # 2026-09-21T21-56-41Z-bce53819
 
       - name: Clone repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -37,7 +37,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup pnpm
-        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@0a60d757d0f4725a34f22f7b9ebf7b91b4b00bcf
+        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@bce53819ffa60fcdf8f0f349686d807e5a66a71b # 2026-09-21T21-56-41Z-bce53819
         with:
           run_install: false
           version: 10.28.1
