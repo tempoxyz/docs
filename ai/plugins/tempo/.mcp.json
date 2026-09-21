@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "tempo": {
-      "type": "http",
-      "url": "https://mcp.tempo.xyz",
-      "note": "Tempo MCP server for docs search, page discovery, cleaned page reads, and multi-step lookups."
-    }
-  }
-}
