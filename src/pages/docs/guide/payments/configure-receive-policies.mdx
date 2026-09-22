@@ -11,7 +11,7 @@ Receive policies let a receiver define which [TIP-20](/docs/protocol/tip20/overv
 
 This page is intentionally about the builder flow rather than the full spec. It covers when to configure a policy, what happens when delivery is blocked, and what operators need to watch.
 
-If a receive policy blocks an inbound transfer or mint, the TIP-20 call still succeeds. The funds are credited to `ReceivePolicyGuard` instead of the receiver, and `ReceivePolicyGuard` records a receipt that can be claimed later by the configured recovery authority.
+If a receive policy blocks an ordinary inbound token transfer or mint, the TIP-20 call still succeeds. The funds are credited to `ReceivePolicyGuard` instead of the receiver, and `ReceivePolicyGuard` records a receipt that can be claimed later by the configured recovery authority. See [payment channels](#payment-channels-at-t12) for channel-specific handling at T12.
 
 The token's [TIP-403](/docs/protocol/tip403/spec) policy checks still run first and still revert on failure. Only a receive-policy failure redirects delivery to `ReceivePolicyGuard`.
 
@@ -41,6 +41,12 @@ The receive-policy check applies to `transfer`, `transferFrom`, `transferWithMem
 It does not apply to `approve`, `permit`, or `burn`. It also does not affect fee deposits or refunds through `transfer_fee_pre_tx` or `transfer_fee_post_tx`, TIP-20 rewards, or internal balances.
 
 For `transferFrom`, the spender's allowance is consumed even when the receiver's policy blocks delivery, because the funds still move out of the `from` account.
+
+## Payment channels at T12
+
+For channels opened at or after T12, configure the payee's receive policy to accept the channel token from the payer. Funding checks this policy before moving funds; a later policy change can block capture. Channels opened before T12 present the reserve as sender during capture. Refunds present the reserve as sender to the payer.
+
+Channel receive-policy rejection reverts the operation. Adjust the policy and retry. Correlate channel events with physical token transfers to identify the payer. See [TIP-1095](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1095.md).
 
 ## Configure the policy
 
