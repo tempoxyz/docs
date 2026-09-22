@@ -1,38 +1,62 @@
 ---
 title: T12 Network Upgrade
 seoTitle: T12 Network Upgrade | Tempo Docs
-description: Prepare for T12 changes to DEX quotes, payment-channel policies, expiring nonces, and precompile calls.
+description: T12 improves swap quotes, expands payment-channel support for restricted tokens, and makes repeated payments easier to send.
 ---
 
 # T12 Network Upgrade
 
-T12 updates DEX quotes, payment-channel policies, expiring transactions, and precompile validation.
-
-:::info[Upcoming upgrade]
-The changes below take effect when T12 activates on your network.
-:::
+T12 improves swap quotes, expands payment-channel support for restricted tokens, and makes repeated payments easier to send.
 
 ## Timeline
 
-| Network | Activation (UTC) | Unix timestamp |
-|---------|------------------|----------------|
-| Testnet | October 1, 2026 (time TBD) | TBD |
-| Mainnet | October 6, 2026 (time TBD) | TBD |
+| Network | Planned activation |
+|---------|--------------------|
+| Testnet | October 1, 2026 — time TBD |
+| Mainnet | October 6, 2026 — time TBD |
 
-## T12 upgrade overview
+<span id="t12-upgrade-overview" />
 
-- **Accurate DEX quotes.** Quotes use the same per-order fill math and rounding as swaps for an identical state snapshot. [TIP-1088](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1088.md).
-- **Policy-aware payment channels.** Recipient-restricted tokens can use channels with policy checks on the logical payer-to-payee payment. [TIP-1095](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1095.md).
-- **Expiring nonce discriminators.** Distinct `nonce` values give otherwise identical transactions different hashes. [TIP-1106](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1106.md).
-- **Trailing-byte support.** Precompile calls accept trailing bytes after valid ABI arguments again. [TIP-1116](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1116.md).
+## Overview
+
+- **More reliable swap quotes:** fixes rounding differences between quoted and executed amounts.
+- **Payment channels for restricted tokens:** checks payment permissions against the actual payer and recipient.
+- **Easier repeated payments:** lets apps distinguish otherwise identical transactions.
+- **Compatibility fixes:** restores support for extra data appended to calls to Tempo's built-in contracts.
+
+## Features
+
+### More reliable swap quotes
+
+T12 makes quotes use the same calculation as swaps. This fixes rounding differences that could cause a swap to fail even when the orderbook hadn't changed.
+
+Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1088.md).
+
+### Payment channels for restricted tokens
+
+Some tokens limit who can receive them. T12 checks the actual payer and recipient when funding or settling a channel, allowing these tokens to use payment channels without authorizing the reserve that temporarily holds the funds.
+
+Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1095.md).
+
+### Easier repeated payments
+
+Bridges and apps can give otherwise identical transactions different identifiers using the transaction's `nonce` field. This replaces workarounds that add access-list entries solely to make transactions unique.
+
+Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1106.md).
+
+### Compatibility with appended data
+
+T12 restores support for extra bytes appended to correctly encoded calls to Tempo's built-in contracts, addressing a compatibility issue introduced in T11.
+
+Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1116.md).
 
 ## Operator impact
 
-Upgrade validator, RPC, and indexer nodes to the T12-compatible release before activation on each network.
+Upgrade validator, RPC and indexer nodes before activation on each network. Required release: **TBD**.
 
 ## Integration impact
 
-- **DEX integrations:** recheck gas budgets for quotes and `getTickLevel()`. Read tick liquidity through `getTickLevel()` or active orders; the stored `totalLiquidity` aggregate becomes stale.
-- **Channel indexers:** correlate channel events with token transfers to identify the payer.
-- **Transaction builders and indexers:** preserve explicitly supplied nonce values and treat them as identifiers. Enable nonzero values after activation.
-- **Precompile integrations:** retest affected reads, gas estimation, and transactions with the calldata your integration sends.
+- **DEX tools:** review quote gas limits and timeouts. Read current liquidity through `getTickLevel()` or active orders; stored tick totals become stale.
+- **Channel integrations:** test funding, settlement and refunds against token policies. Combine channel and transfer events to identify the payer.
+- **Wallets and bridges:** after activation, use nonce discriminators instead of access-list entries added only to make transactions unique. This removes one payment-lane exclusion; other eligibility rules still apply. Supporting tools must preserve the supplied nonce.
+- **Integrations affected by T11:** retest calls, simulations and gas estimation with the data your app sends.
