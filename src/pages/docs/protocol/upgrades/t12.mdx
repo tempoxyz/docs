@@ -1,0 +1,24 @@
+---
+title: T12 Network Upgrade
+seoTitle: T12 Network Upgrade | Tempo Docs
+description: Prepare for T12 changes to DEX quotes, payment-channel policies, expiring nonces, and precompile calls.
+---
+
+# T12 Network Upgrade
+
+T12 improves DEX quote accuracy, enables policy-aware payment channels, and adds expiring nonce discriminators.
+
+:::info[Upcoming upgrade]
+The changes below take effect when T12 activates on your network.
+:::
+
+## Operator impact
+
+Upgrade validator, RPC, and indexer nodes to the T12-compatible release before activation on each network.
+
+## Integration impact
+
+- **DEX quotes and liquidity.** Quotes use the same per-order fill math as swaps for an identical state snapshot. Recheck gas budgets for quotes and `getTickLevel()`. Read tick liquidity through `getTickLevel()` or active orders; the stored `totalLiquidity` aggregate becomes stale. See [TIP-1088](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1088.md).
+- **Payment channels.** Recipient-restricted tokens can use channels with policy checks on the logical payer-to-payee payment. Correlate channel events with token transfers to identify the payer. See [TIP-1095](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1095.md).
+- **Expiring transactions.** Use distinct `nonce` values to distinguish otherwise identical transactions after activation. Builders must preserve explicitly supplied values; indexers should treat them as identifiers. See [TIP-1106](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1106.md).
+- **Precompile calls.** T12 restores acceptance of trailing bytes after valid ABI arguments. Retest affected reads, gas estimation, and transactions with the calldata your integration sends. See [TIP-1116](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1116.md).
