@@ -20,7 +20,7 @@
       "description": "Discover, quote, and run paid API workflows through one secure MCP connection.",
       "source": "./ai/plugins/mercator",
       "category": "research",
-      "homepage": "https://mercator.tempo.xyz"
+      "homepage": "https://mercator.sh"
     }
   ]
 }

@@ -6,7 +6,7 @@
     "name": "Tempo",
     "url": "https://tempo.xyz/"
   },
-  "homepage": "https://mercator.tempo.xyz/",
+  "homepage": "https://mercator.sh/",
   "repository": "https://github.com/tempoxyz/mercator",
   "keywords": ["api", "current data", "mercator", "mcp", "paid services", "tempo"],
   "skills": "./skills/",
@@ -18,7 +18,7 @@
     "developerName": "Tempo",
     "category": "Productivity",
     "capabilities": ["Interactive", "Read", "Write"],
-    "websiteURL": "https://mercator.tempo.xyz/",
+    "websiteURL": "https://mercator.sh/",
     "defaultPrompt": [
       "Rescue my canceled Boston-to-London flight under $1,200; add a hotel and transfer if needed, then email the itinerary.",
       "Find 15 overlooked Boston HVAC businesses, verify owner emails, flag outdated sites, and map a route from Back Bay.",
