@@ -14,11 +14,11 @@ import { Cards, Card } from 'vocs'
 
 # Send parallel transactions using expiring nonces
 
-Tempo enables concurrent transaction execution through its [expiring nonce](/docs/guide/tempo-transaction#expiring-nonces) system. Unlike traditional sequential nonces that require transactions to be processed one at a time, expiring nonces allow multiple transactions to be submitted simultaneously without nonce conflicts. Each transaction uses an independent nonce that automatically expires after a set time window, enabling true parallel execution.
+Send several payments at the same time using [expiring transactions](/docs/guide/tempo-transaction#expiring-nonces). Each transaction has a deadline, so you don't need to track a sequence number before sending the next payment.
 
 ## Parallel transaction demo
 
-By the end of this guide you will understand how to send parallel payments using expiring nonces under-the-hood.
+Send two payments at the same time. The demo uses expiring transactions and shows a receipt for each confirmed payment.
 
 <Demo.Container name="Send Parallel Payments" footerVariant="balances" tokens={[Token.alphaUsd]}>
   <Connect stepNumber={1} />
@@ -40,35 +40,36 @@ Ensure that you have set up your project with Wagmi, a Tempo chain config, and a
 
 ### Send concurrent transactions with nonce keys
 
-To send multiple transactions in parallel, simply batch them together. [Expiring nonces](/docs/guide/tempo-transaction#expiring-nonces) are attached to each transaction automatically.
+Set `nonceKey` to `'expiring'` for each payment. The SDK sets an expiry time. Submit both payments together and wait for their receipts.
 
 :::code-group
 
 ```ts twoslash [example.ts]
 // @noErrors
-import { Hooks } from 'wagmi/tempo'
+import { Actions } from 'wagmi/tempo'
 import { parseUnits } from 'viem'
+import { config } from './wagmi.config'
 
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
-const { mutate: transfer } = Hooks.token.useTransferSync()
-
 // Send both transfers in parallel. // [!code focus]
-const [receipt1, receipt2] = await Promise.all([ // [!code focus]
-  transfer.mutate({ // [!code focus]
+const [payment1, payment2] = await Promise.all([ // [!code focus]
+  Actions.token.transferSync(config, { // [!code focus]
     amount: parseUnits('100', 6), // [!code focus]
     to: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8', // [!code focus]
     token: alphaUsd, // [!code focus]
+    nonceKey: 'expiring', // [!code focus]
   }), // [!code focus]
-  transfer.mutate({ // [!code focus]
+  Actions.token.transferSync(config, { // [!code focus]
     amount: parseUnits('50', 6), // [!code focus]
     to: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC', // [!code focus]
     token: alphaUsd, // [!code focus]
+    nonceKey: 'expiring', // [!code focus]
   }), // [!code focus]
 ]) // [!code focus]
 
-console.log('Transaction 1:', receipt1.transactionHash) // [!code focus]
-console.log('Transaction 2:', receipt2.transactionHash) // [!code focus]
+console.log('Transaction 1:', payment1.receipt.transactionHash) // [!code focus]
+console.log('Transaction 2:', payment2.receipt.transactionHash) // [!code focus]
 ```
 
 ```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
@@ -82,9 +83,38 @@ console.log('Transaction 2:', receipt2.transactionHash) // [!code focus]
 
 ## Distinct transactions after T12
 
-After T12 activates, you can set distinct `uint64` values in the expiring transaction's `nonce` field to produce different hashes for otherwise identical transactions. Use builders and signing tools that preserve your supplied value. See [TIP-1106](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1106.md).
+After T12 activates, use different `nonce` values to send otherwise identical payments as separate transactions. Your wallet and signing tools must keep the value you supply. Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1106.md).
 
-If you use access-list entries solely for transaction uniqueness, replace that salt with a nonce discriminator. Check the remaining [payment-lane requirements](/docs/protocol/blockspace/payment-lane-specification) for your calls.
+:::warning[Only after T12 activation]
+Run this example only after T12 activates on the connected network. Earlier versions reject nonzero nonces for expiring transactions.
+:::
+
+This example sends two payments of 50 AlphaUSD to the same recipient, with the same expiry time. Different nonces give each payment its own transaction hash.
+
+```ts [identical-payments.ts]
+import { maxUint256, parseUnits } from 'viem'
+import { Actions } from 'wagmi/tempo'
+import { config } from './wagmi.config'
+
+const payment = {
+  token: '0x20c0000000000000000000000000000000000001',
+  to: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
+  amount: parseUnits('50', 6),
+  nonceKey: maxUint256,
+  validBefore: Math.floor(Date.now() / 1000) + 60,
+} as const
+
+const payments = await Promise.all([
+  Actions.token.transferSync(config, { ...payment, nonce: 1 }),
+  Actions.token.transferSync(config, { ...payment, nonce: 2 }),
+])
+
+for (const { receipt } of payments) console.log(receipt.transactionHash)
+```
+
+Use the numeric `nonceKey: maxUint256` shown above with an explicit expiry time; the SDK's `'expiring'` shortcut can reset the nonce to zero. Choose a new nonce for each otherwise identical payment within the same expiry window.
+
+If you add access-list entries only to make transactions unique, you can replace them with different nonce values after activation. Other [payment-lane requirements](/docs/protocol/blockspace/payment-lane-specification) still apply.
 
 ## Parallel transaction learning resources
 
