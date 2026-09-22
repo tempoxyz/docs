@@ -19,7 +19,7 @@ describe('Mercator marketplace plugin', () => {
     ]) {
       const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
 
-      expect(manifest.version).toMatch(/^0\.3\.1(?:\+|$)/)
+      expect(manifest.version).toMatch(/^0\.3\.2(?:\+|$)/)
       expect(manifest.description).toContain('secure MCP connection')
     }
   })
