@@ -19,40 +19,42 @@ T12 improves swap quotes, expands payment-channel support for restricted tokens,
 
 ## Overview
 
-- **More reliable swap quotes:** fixes rounding differences between quoted and executed amounts.
-- **Payment channels for restricted tokens:** checks payment permissions against the actual payer and recipient.
-- **Easier repeated payments:** lets apps distinguish otherwise identical transactions.
-- **Compatibility fixes:** restores support for extra data appended to calls to Tempo's built-in contracts.
+- **More reliable swap quotes:** fixes rounding differences between the amount quoted and the amount calculated during a swap.
+- **Payment channels for restricted tokens:** checks whether the payer and recipient are allowed to send and receive the token.
+- **Easier repeated payments:** lets apps give separate identifiers to otherwise identical transactions.
+- **Support for extra information:** accepts requests with extra information at the end, such as a tracking tag.
 
 ## Features
 
 ### More reliable swap quotes
 
-T12 makes quotes use the same calculation as swaps. This fixes rounding differences that could cause a swap to fail even when the orderbook hadn't changed.
+T12 makes swap quotes and swaps use the same calculation. This fixes rounding differences that could cause a swap to fail even when the available orders hadn't changed.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1088.md).
 
 ### Payment channels for restricted tokens
 
-Some tokens limit who can receive them. T12 checks the actual payer and recipient when funding or settling a channel, allowing these tokens to use payment channels without authorizing the reserve that temporarily holds the funds.
+Some tokens restrict who can send or receive them. T12 checks permissions for the payer and recipient when adding funds to a payment channel or paying out. The account that temporarily holds the funds no longer needs separate permission from the token issuer.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1095.md).
 
 ### Easier repeated payments
 
-Bridges and apps can give otherwise identical transactions different identifiers using the transaction's `nonce` field. This replaces workarounds that add access-list entries solely to make transactions unique.
+For transactions with an expiry time, bridges and apps can use the `nonce` field as an identifier. This lets them send otherwise identical payments as separate transactions, without adding extra access-list entries just to make each one unique.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1106.md).
 
-### Compatibility with appended data
+<span id="compatibility-with-appended-data" />
 
-T12 restores support for extra bytes appended to correctly encoded calls to Tempo's built-in contracts, addressing a compatibility issue introduced in T11.
+### Support for extra information
+
+Some apps add extra information, such as a tracking tag, to the end of a request to Tempo's built-in contracts. T11 started rejecting these requests. T12 accepts this format again, as long as the request itself is correctly formatted.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1116.md).
 
 ## Integration impact
 
-- **DEX tools:** review quote gas limits and timeouts. Read current liquidity through `getTickLevel()` or active orders; stored tick totals become stale.
-- **Channel integrations:** test funding, settlement and refunds against token policies. Combine channel and transfer events to identify the payer.
-- **Wallets and bridges:** after activation, use nonce discriminators instead of access-list entries added only to make transactions unique. This removes one payment-lane exclusion; other eligibility rules still apply. Supporting tools must preserve the supplied nonce.
-- **Integrations affected by T11:** retest calls, simulations and gas estimation with the data your app sends.
+- **Apps showing swap quotes:** check the time and gas needed for quotes. Use `getTickLevel()` or active orders to show the amount available to trade; stored liquidity totals can become outdated.
+- **Apps using payment channels:** test adding funds, payments and refunds when token rules change. Combine channel and token-transfer records to identify who paid.
+- **Wallets and bridges:** after activation, expiring transactions can use the `nonce` value instead of access-list entries added only to make transactions unique. Removing those entries removes one barrier to the payment lane; other lane rules still apply. Make sure building and signing tools keep the nonce you set.
+- **Apps adding extra information to requests:** if T11 caused these requests to fail, test them again after T12 activates.
