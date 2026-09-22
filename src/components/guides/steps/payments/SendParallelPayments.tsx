@@ -43,8 +43,11 @@ function TransferResult({ label, state }: { label: string; state: TransferState 
         <div className="flex flex-wrap gap-x-3 gap-y-1 pl-2 text-[10px] text-gray9">
           {transaction ? (
             <>
-              <span>Nonce Key: {transaction.nonceKey}</span>
-              <span>Nonce: {transaction.nonce}</span>
+              {transaction.validBefore && (
+                <span>
+                  Expires: {new Date(Number(transaction.validBefore) * 1000).toLocaleTimeString()}
+                </span>
+              )}
             </>
           ) : (
             <span className="animate-pulse">Confirming on chain...</span>
@@ -87,17 +90,16 @@ export function SendParallelPayments(props: DemoStepProps) {
       amount: bigint
       to: `0x${string}`
       token: typeof alphaUsd
-      nonceKey: bigint
-      nonce: number
+      nonceKey: 'expiring'
     },
     setTransfer: React.Dispatch<React.SetStateAction<TransferState>>,
   ) => {
     setTransfer({ status: 'pending' })
-    const actionConfig = config as FirstArgument<typeof Actions.token.transfer>
+    const actionConfig = config as FirstArgument<typeof Actions.token.transferSync>
     Actions.token
-      .transfer(actionConfig, params)
-      .then((hash) => {
-        setTransfer({ status: 'success', hash })
+      .transferSync(actionConfig, params)
+      .then(({ receipt }) => {
+        setTransfer({ status: 'success', hash: receipt.transactionHash })
         queryClient.refetchQueries({ queryKey: ['getBalance'] })
         balanceRefetch()
       })
@@ -106,14 +108,8 @@ export function SendParallelPayments(props: DemoStepProps) {
       })
   }
 
-  const handleSendParallel = async () => {
+  const handleSendParallel = () => {
     if (!address) return
-    const actionConfig = config as FirstArgument<typeof Actions.nonce.getNonce>
-
-    const [nonce1, nonce2] = await Promise.all([
-      Actions.nonce.getNonce(actionConfig, { account: address, nonceKey: 1n }),
-      Actions.nonce.getNonce(actionConfig, { account: address, nonceKey: 2n }),
-    ])
 
     // Send both transfers without blocking
     sendTransfer(
@@ -121,8 +117,7 @@ export function SendParallelPayments(props: DemoStepProps) {
         amount: parseUnits('50', 6),
         to: FAKE_RECIPIENT,
         token: alphaUsd,
-        nonceKey: 1n,
-        nonce: Number(nonce1),
+        nonceKey: 'expiring',
       },
       setTransfer1,
     )
@@ -132,8 +127,7 @@ export function SendParallelPayments(props: DemoStepProps) {
         amount: parseUnits('50', 6),
         to: FAKE_RECIPIENT_2,
         token: alphaUsd,
-        nonceKey: 2n,
-        nonce: Number(nonce2),
+        nonceKey: 'expiring',
       },
       setTransfer2,
     )
