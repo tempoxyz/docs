@@ -1,6 +1,7 @@
 type DocsFrontmatter = {
   description?: string
   title?: string
+  ogImage?: string
 }
 
 type DocsStructuredDataContext = {
@@ -15,6 +16,10 @@ type DocsStructuredDataContext = {
  */
 export function docsStructuredDataHead(path: string, { frontmatter }: DocsStructuredDataContext) {
   const pagePath = path.startsWith('/') ? path : `/${path}`
+  // Use Vocs' native override so it emits one OG image and the matching X card.
+  if (pagePath.startsWith('/blog/') && frontmatter?.ogImage) {
+    return { meta: { ogImage: frontmatter.ogImage } }
+  }
   if (pagePath !== '/docs' && !pagePath.startsWith('/docs/')) return undefined
 
   const title = frontmatter?.title?.trim()

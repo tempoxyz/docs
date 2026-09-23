@@ -16,14 +16,16 @@ import { Head, MdxPageContextProvider } from 'vocs'
 export default function PageHead({
   title,
   description,
+  ogImage,
   children,
 }: {
   title: string
   description: string
+  ogImage?: string
   children?: ReactNode
 }) {
   return (
-    <MdxPageContextProvider frontmatter={{ title, description }}>
+    <MdxPageContextProvider frontmatter={{ title, description, ogImage }}>
       <Head />
       <meta property="og:site_name" content="Tempo" />
       <meta property="og:image:alt" content={title} />

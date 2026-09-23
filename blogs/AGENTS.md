@@ -17,6 +17,7 @@ category: technical # network-upgrades | events | technical | case-studies
 # Use an inline list when a post belongs to multiple categories:
 # category: [technical, case-studies]
 featured: true # optional — pins the post to the hero card on /blog
+ogImage: /blog/my-post-og.png # optional — overrides the generated social card
 ---
 ```
 

@@ -14,6 +14,7 @@ export type PostSeo = {
   date: string // YYYY-MM-DD
   category: CategorySlug
   authors: string
+  ogImage?: string // root-relative static asset under public/
 }
 
 export function absoluteUrl(base: string, pathname: string): string {
@@ -30,6 +31,12 @@ export function absoluteUrl(base: string, pathname: string): string {
 export function ogImageUrl(base: string, params: { title: string; section: string }): string {
   const query = `title=${encodeURIComponent(params.title)}&section=${encodeURIComponent(params.section)}&v=${OG_IMAGE_VERSION}`
   return absoluteUrl(base, `/api/og?${query}`)
+}
+
+export function blogPostImageUrl(base: string, post: PostSeo): string {
+  return post.ogImage
+    ? absoluteUrl(base, post.ogImage)
+    : ogImageUrl(base, { title: post.title, section: 'BLOG' })
 }
 
 // schema.org BlogPosting payload for a post, serialized for a

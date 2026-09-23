@@ -4,6 +4,7 @@ excerpt: "How Tempo Zones keep transactions private while connecting to public i
 date: 2026-09-23
 category: technical
 authors: "Varun"
+ogImage: /blog/inside-tempo-zones-og.png
 ---
 
 ## Introduction
