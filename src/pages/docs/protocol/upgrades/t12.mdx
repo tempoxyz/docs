@@ -1,6 +1,6 @@
 ---
-title: T12 Network Upgrade
-seoTitle: T12 Network Upgrade | Tempo Docs
+title: "T12 Network Upgrade"
+seoTitle: "T12 Network Upgrade | Tempo Docs"
 description: T12 makes repeated payments easier for wallets and bridges, expands payment-channel support, and improves compatibility and swap quotes.
 ---
 
@@ -17,26 +17,30 @@ T12 makes repeated payments easier for wallets and bridges, expands payment-chan
 
 <span id="t12-upgrade-overview" />
 
-## Overview
+<span id="overview" />
+
+## T12 overview
 
 - **Easier repeated payments:** lets wallets and bridges give separate identifiers to otherwise identical transactions.
 - **Payment channels for restricted tokens:** checks whether the payer and recipient are allowed to send and receive the token.
 - **Relaxed ABI validation:** accepts correctly formatted calls to Tempo's built-in contracts with extra data at the end.
 - **More reliable swap quotes:** fixes rounding differences between the amount quoted and the amount calculated during a swap.
 
-## Features
+<span id="features" />
+
+## T12 features
 
 ### Easier repeated payments
 
-Wallets and bridges can use a transaction's `nonce` field to give otherwise identical expiring payments different identifiers. This replaces the practice of adding extra access-list entries just to make each transaction unique.
+For [expiring transactions](/docs/guide/tempo-transaction#expiring-nonces), where `nonceKey` is the maximum `uint256`, T12 allows any `uint64` nonce to distinguish otherwise identical payments without imposing an execution order.
 
-Removing those entries removes one barrier to the [payment lane](/docs/protocol/blockspace/payment-lane-specification); other lane rules still apply.
+Replace access-list entries used only for uniqueness with a nonce to remove one [payment-lane](/docs/protocol/blockspace/payment-lane-specification) exclusion. Other lane rules still apply.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1106.md).
 
 ### Payment channels for restricted tokens
 
-Some tokens restrict who can send or receive them. T12 checks permissions for the payer and recipient when adding funds to a payment channel or paying out. The account that temporarily holds the funds no longer needs separate permission from the token issuer.
+T12 checks the issuer's transfer policy against the payer and recipient when funding or settling a channel, without separately authorising the reserve. Refunds bypass this policy; token pauses and receive policies still apply.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1095.md).
 
@@ -45,18 +49,18 @@ Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-10
 
 ### Relaxed ABI validation
 
-T12 relaxes validation during ABI decoding, the step that reads contract-call data. Tempo's built-in contracts accept extra data at the end of otherwise correctly formatted calls again, restoring compatibility with calls that T11 rejected for this reason.
+T12 relaxes ABI decoding to accept trailing bytes in otherwise valid calls to Tempo's built-in contracts. This restores compatibility with calls rejected at T11; other strict decoding checks remain.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1116.md).
 
 ### More reliable swap quotes
 
-T12 makes swap quotes and swaps use the same calculation. This fixes rounding differences that could cause a swap to fail even when the available orders hadn't changed.
+T12 makes quotes and swaps use the same matching and rounding for unchanged orderbook state, removing the need for rounding buffers in routers. Swaps also stop writing tick liquidity totals.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1088.md).
 
 ## Integration impact
 
-- **Wallets and bridges:** to send otherwise identical expiring payments, set different `nonce` values after activation. Replace access-list entries used only for uniqueness, and ensure builders and signing tools keep the nonce you set.
-- **Apps using payment channels:** for channels opened at or after T12, configure the recipient's receive policy to accept the token from the payer. For refunds, the payer's policy must accept the token from the reserve, the account holding channel funds. Use channel events alongside token transfers to identify who paid.
-- **DEX integrations reading contract storage:** if you read tick liquidity totals directly from storage, switch to `getTickLevel()` or sum the remaining amounts of active orders. Stored tick totals stop updating at T12.
+- **Wallets and bridges:** after activation, use distinct nonces for new expiring payments and ensure builders and signers preserve them. To retry an uncertain submission, resend the same signed transaction while valid; changing its nonce creates another payment.
+- **Payment-channel apps:** new T12 channels check the payer against the recipient's receive policy; older channels retain the reserve and need no migration. The payer's policy must accept refunds from the reserve. Receive-policy failures now revert; update the policy and retry. Use channel events with transfers to identify the payer.
+- **DEX integrations:** use `getTickLevel()` or sum active orders’ remaining amounts; stored tick totals stop updating. Quotes and `getTickLevel()` walk individual orders: allow higher execution gas if you set explicit call limits.
