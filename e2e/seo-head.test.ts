@@ -1,4 +1,4 @@
-import { readdirSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { expect, test } from '@playwright/test'
@@ -124,11 +124,21 @@ for (const c of cases) {
 // docs, not posts) — same rule as src/marketing/blogPlugin.ts. Reading the
 // filesystem instead of scraping the blog index means a post can't silently
 // escape coverage because of a markup change.
-const blogSlugs = readdirSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'blogs'))
+const blogsDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'blogs')
+const blogPosts = readdirSync(blogsDir)
   .filter((f) => f.endsWith('.md') && !/^[A-Z0-9_-]+\.md$/.test(f))
-  .map((f) => f.replace(/\.md$/, ''))
+  .map((filename) => {
+    const source = readFileSync(join(blogsDir, filename), 'utf8')
+    const frontmatter = /^---\r?\n([\s\S]*?)\r?\n---/.exec(source)?.[1] ?? ''
+    const imageValue = /^ogImage:[ \t]*(.*)$/m.exec(frontmatter)?.[1].trim() ?? ''
+    const quotedImage = /^(?:"([^"]*)"|'([^']*)')$/.exec(imageValue)
+    const ogImage = quotedImage
+      ? (quotedImage[1] ?? quotedImage[2])
+      : imageValue.replace(/\s+#.*$/, '').trim()
+    return { slug: filename.replace(/\.md$/, ''), ogImage }
+  })
 
-for (const slug of blogSlugs) {
+for (const { slug, ogImage } of blogPosts) {
   test(`prerendered head for blog post /blog/${slug}`, async ({ request }) => {
     const head = await fetchHead(request, `/blog/${slug}`)
 
@@ -137,6 +147,15 @@ for (const slug of blogSlugs) {
     expect(ogTitle).not.toBe('Tempo') // generic site fallback means the post head lost the dedupe
     expect(metaContent(head, 'og:type')).toBe('article')
     expect(metaContent(head, 'article:published_time')).toMatch(/^\d{4}-\d{2}-\d{2}/)
-    expect(metaContent(head, 'og:image')).toContain('section=BLOG')
+    const renderedImage = metaContent(head, 'og:image')
+    if (ogImage) {
+      expect(renderedImage).toBe(ogImage)
+      const image = await request.get(ogImage)
+      expect(image.status(), `${ogImage} should be served`).toBe(200)
+      expect(image.headers()['content-type']).toMatch(/^image\//)
+    } else {
+      expect(renderedImage).toContain('section=BLOG')
+    }
+    expect(metaContent(head, 'twitter:image')).toBe(renderedImage)
   })
 }
