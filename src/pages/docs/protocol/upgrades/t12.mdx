@@ -32,15 +32,15 @@ T12 makes repeated payments easier for wallets and bridges, expands payment-chan
 
 ### Easier repeated payments
 
-For [expiring transactions](/docs/guide/tempo-transaction#expiring-nonces), where `nonceKey` is the maximum `uint256`, T12 allows any `uint64` nonce to distinguish otherwise identical payments without imposing an execution order.
+Wallets and bridges can use a transaction's `nonce` field to give otherwise identical expiring payments different identifiers. This replaces the practice of adding extra access-list entries just to make each transaction unique.
 
-Replace access-list entries used only for uniqueness with a nonce to remove one [payment-lane](/docs/protocol/blockspace/payment-lane-specification) exclusion. Other lane rules still apply.
+Removing those entries removes one barrier to the [payment lane](/docs/protocol/blockspace/payment-lane-specification); other lane rules still apply.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1106.md).
 
 ### Payment channels for restricted tokens
 
-T12 checks the issuer's transfer policy against the payer and recipient when funding or settling a channel, without separately authorising the reserve. Refunds bypass this policy; token pauses and receive policies still apply.
+Some tokens restrict who can send or receive them. T12 checks permissions for the payer and recipient when adding funds to a payment channel or paying out. The account that temporarily holds the funds no longer needs separate permission from the token issuer.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1095.md).
 
@@ -55,12 +55,12 @@ Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-11
 
 ### More reliable swap quotes
 
-T12 makes quotes and swaps use the same matching and rounding for unchanged orderbook state, removing the need for rounding buffers in routers. Swaps also stop writing tick liquidity totals.
+T12 makes quotes and swaps use the same matching and rounding for unchanged orderbook state. Routers no longer need extra input buffers to compensate for rounding differences.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1088.md).
 
 ## Integration impact
 
-- **Wallets and bridges:** after activation, use distinct nonces for new expiring payments and ensure builders and signers preserve them. To retry an uncertain submission, resend the same signed transaction while valid; changing its nonce creates another payment.
-- **Payment-channel apps:** new T12 channels check the payer against the recipient's receive policy; older channels retain the reserve and need no migration. The payer's policy must accept refunds from the reserve. Receive-policy failures now revert; update the policy and retry. Use channel events with transfers to identify the payer.
-- **DEX integrations:** use `getTickLevel()` or sum active orders’ remaining amounts; stored tick totals stop updating. Quotes and `getTickLevel()` walk individual orders: allow higher execution gas if you set explicit call limits.
+- **Wallets and bridges:** after activation, use different nonces for new expiring payments and ensure builders and signers preserve them. Retry uncertain submissions with the same signed transaction while valid.
+- **Apps using payment channels:** for channels opened from T12, the recipient's receive policy must accept the payer; older channels retain the reserve and need no migration. The payer's policy must accept refunds from the reserve. Receive-policy rejection reverts rather than redirecting funds for recovery. Use channel events with token transfers to identify the payer.
+- **DEX integrations reading contract storage:** if you read tick liquidity totals directly from storage, switch to `getTickLevel()` or sum the remaining amounts of active orders. Stored tick totals stop updating at T12.
