@@ -1,51 +1,46 @@
-<svg width="840" height="360" viewBox="0 0 840 360" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, 'JetBrains Mono', monospace">
+<svg width="840" height="300" viewBox="0 0 840 300" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, 'JetBrains Mono', monospace">
   <defs>
     <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
       <path d="M24 0H0V24" stroke="#242228" stroke-width="0.6"/>
     </pattern>
   </defs>
-  <rect width="840" height="360" fill="#0d0d0f"/>
-  <rect x="16" y="16" width="808" height="328" fill="url(#grid)" stroke="#34313a"/>
+  <rect width="840" height="300" fill="#0d0d0f"/>
+  <rect x="16" y="16" width="808" height="268" fill="url(#grid)" stroke="#34313a"/>
 
-  <text x="40" y="52" font-size="11" letter-spacing="0.12em" fill="#bbb7c2">MERCATOR WORKFLOW</text>
-  <text x="40" y="72" font-size="10" fill="#77727e">ONE AGENT INTERFACE, MULTIPLE PAID SERVICES</text>
-  <text x="40" y="112" font-size="10" letter-spacing="0.1em" fill="#77727e">AGENT</text>
-  <text x="255" y="112" font-size="10" letter-spacing="0.1em" fill="#77727e">MERCATOR</text>
-  <text x="603" y="112" font-size="10" letter-spacing="0.1em" fill="#77727e">DOWNSTREAM SERVICES</text>
+  <rect x="40" y="115" width="166" height="70" fill="#101012" stroke="#39353f"/>
+  <text x="56" y="146" font-family="ui-sans-serif, Arial, sans-serif" font-size="13" font-weight="600" fill="#e8e8ec">Agent</text>
+  <text x="56" y="166" font-size="10" fill="#89848e">Intent + budget</text>
 
-  <rect x="40" y="166" width="166" height="84" fill="#101012" stroke="#39353f"/>
-  <text x="56" y="204" font-family="ui-sans-serif, Arial, sans-serif" font-size="13" font-weight="600" fill="#e8e8ec">Agent</text>
-  <text x="56" y="224" font-size="10" fill="#89848e">Intent + budget</text>
+  <path d="M206 150H238M231 144L238 150L231 156" stroke="#a596c1" stroke-width="1.4"/>
 
-  <path d="M206 208H238M231 202L238 208L231 214" stroke="#a596c1" stroke-width="1.4"/>
-  <rect x="255" y="130" width="308" height="190" fill="#100f13" stroke="#685b79"/>
-  <image href="/blog/mercator-logos/mercator-mark.svg" x="271" y="141" width="19" height="19"/>
-  <text x="299" y="155" font-size="11" letter-spacing="0.11em" fill="#c7b8dc">MERCATOR</text>
+  <rect x="255" y="55" width="308" height="190" fill="#100f13" stroke="#685b79"/>
+  <image href="/blog/mercator-logos/mercator-mark.svg" x="271" y="66" width="19" height="19"/>
+  <text x="299" y="80" font-size="11" letter-spacing="0.11em" fill="#c7b8dc">MERCATOR</text>
+  <rect x="270" y="96" width="278" height="42" fill="#171519" stroke="#39333f"/>
+  <text x="283" y="122" font-size="10" fill="#a999c5">01</text>
+  <text x="310" y="122" font-family="ui-sans-serif, Arial, sans-serif" font-size="12" font-weight="600" fill="#e8e8ec">Search the web</text>
+  <text x="535" y="122" font-size="9" text-anchor="end" fill="#77727e">PARALLEL</text>
+  <rect x="270" y="144" width="278" height="42" fill="#171519" stroke="#39333f"/>
+  <text x="283" y="170" font-size="10" fill="#a999c5">02</text>
+  <text x="310" y="170" font-family="ui-sans-serif, Arial, sans-serif" font-size="12" font-weight="600" fill="#e8e8ec">Enrich records</text>
+  <text x="535" y="170" font-size="9" text-anchor="end" fill="#77727e">PARALLEL</text>
+  <rect x="270" y="192" width="278" height="42" fill="#171519" stroke="#39333f"/>
+  <text x="283" y="218" font-size="10" fill="#a999c5">03</text>
+  <text x="310" y="218" font-family="ui-sans-serif, Arial, sans-serif" font-size="12" font-weight="600" fill="#e8e8ec">Compose result</text>
+  <text x="535" y="218" font-size="9" text-anchor="end" fill="#77727e">AFTER 01 + 02</text>
 
-  <rect x="270" y="172" width="278" height="42" fill="#171519" stroke="#39333f"/>
-  <text x="283" y="198" font-size="10" fill="#a999c5">01</text>
-  <text x="310" y="198" font-family="ui-sans-serif, Arial, sans-serif" font-size="12" font-weight="600" fill="#e8e8ec">Search the web</text>
-  <text x="535" y="198" font-size="9" text-anchor="end" fill="#77727e">PARALLEL</text>
-  <rect x="270" y="220" width="278" height="42" fill="#171519" stroke="#39333f"/>
-  <text x="283" y="246" font-size="10" fill="#a999c5">02</text>
-  <text x="310" y="246" font-family="ui-sans-serif, Arial, sans-serif" font-size="12" font-weight="600" fill="#e8e8ec">Enrich records</text>
-  <text x="535" y="246" font-size="9" text-anchor="end" fill="#77727e">PARALLEL</text>
-  <rect x="270" y="268" width="278" height="42" fill="#171519" stroke="#39333f"/>
-  <text x="283" y="294" font-size="10" fill="#a999c5">03</text>
-  <text x="310" y="294" font-family="ui-sans-serif, Arial, sans-serif" font-size="12" font-weight="600" fill="#e8e8ec">Compose result</text>
-  <text x="535" y="294" font-size="9" text-anchor="end" fill="#77727e">AFTER 01 + 02</text>
+  <path d="M563 150H584M584 77V223M584 77H601M595 71L601 77L595 83M584 150H601M595 144L601 150L595 156M584 223H601M595 217L601 223L595 229" stroke="#a596c1" stroke-width="1.4"/>
 
-  <path d="M563 193H587M580 187L587 193L580 199M563 241H587M580 235L587 241L580 247M563 289H587M580 283L587 289L580 295" stroke="#a596c1" stroke-width="1.4"/>
-  <rect x="603" y="168" width="197" height="50" fill="#101012" stroke="#39353f"/>
-  <image href="/blog/mercator-logos/exa.svg" x="616" y="180" width="24" height="24"/>
-  <text x="651" y="188" font-family="ui-sans-serif, Arial, sans-serif" font-size="12" font-weight="600" fill="#e8e8ec">Exa</text>
-  <text x="651" y="204" font-size="9" fill="#89848e">Web search</text>
-  <rect x="603" y="225" width="197" height="50" fill="#101012" stroke="#39353f"/>
-  <image href="/blog/mercator-logos/parallel.svg" x="616" y="238" width="24" height="24"/>
-  <text x="651" y="245" font-family="ui-sans-serif, Arial, sans-serif" font-size="12" font-weight="600" fill="#e8e8ec">Parallel</text>
-  <text x="651" y="261" font-size="9" fill="#89848e">Web research</text>
-  <rect x="603" y="282" width="197" height="50" fill="#101012" stroke="#39353f"/>
-  <image href="/blog/mercator-logos/openai.svg" x="616" y="295" width="24" height="24"/>
-  <text x="651" y="302" font-family="ui-sans-serif, Arial, sans-serif" font-size="12" font-weight="600" fill="#e8e8ec">OpenAI</text>
-  <text x="651" y="318" font-size="9" fill="#89848e">Model inference</text>
+  <rect x="603" y="51" width="197" height="52" fill="#101012" stroke="#39353f"/>
+  <image href="/blog/mercator-logos/exa.svg" x="616" y="65" width="24" height="24"/>
+  <text x="651" y="73" font-family="ui-sans-serif, Arial, sans-serif" font-size="12" font-weight="600" fill="#e8e8ec">Exa</text>
+  <text x="651" y="89" font-size="9" fill="#89848e">Web search</text>
+  <rect x="603" y="124" width="197" height="52" fill="#101012" stroke="#39353f"/>
+  <image href="/blog/mercator-logos/parallel.svg" x="616" y="138" width="24" height="24"/>
+  <text x="651" y="146" font-family="ui-sans-serif, Arial, sans-serif" font-size="12" font-weight="600" fill="#e8e8ec">Parallel</text>
+  <text x="651" y="162" font-size="9" fill="#89848e">Web research</text>
+  <rect x="603" y="197" width="197" height="52" fill="#101012" stroke="#39353f"/>
+  <image href="/blog/mercator-logos/openai.svg" x="616" y="211" width="24" height="24"/>
+  <text x="651" y="219" font-family="ui-sans-serif, Arial, sans-serif" font-size="12" font-weight="600" fill="#e8e8ec">OpenAI</text>
+  <text x="651" y="235" font-size="9" fill="#89848e">Model inference</text>
 </svg>
