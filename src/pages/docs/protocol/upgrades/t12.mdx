@@ -61,6 +61,6 @@ Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-10
 
 ## Integration impact
 
-- **Wallets and bridges:** after activation, use different nonces for new expiring payments and ensure builders and signers preserve them. Retry uncertain submissions with the same signed transaction while valid.
+- **Wallets and bridges:** after activation, use different nonces for new expiring payments and ensure builders and signers preserve them. For two otherwise identical payments, use `nonce = 101` and `nonce = 102`. To retry the first payment, resend its original signed transaction while valid.
 - **Apps using payment channels:** for channels opened from T12, the recipient's receive policy must accept the payer; older channels retain the reserve and need no migration. The payer's policy must accept refunds from the reserve. Receive-policy rejection reverts rather than redirecting funds for recovery. Use channel events with token transfers to identify the payer.
 - **DEX integrations reading contract storage:** if you read tick liquidity totals directly from storage, switch to `getTickLevel()` or sum the remaining amounts of active orders. Stored tick totals stop updating at T12.
