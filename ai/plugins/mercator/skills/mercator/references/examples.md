@@ -110,7 +110,7 @@ Do not model completion as a webhook or SSE subscription: the public status inte
 ## Existing local wallet fallback
 
 Use REST only when MCP submission fails, one identical retry also fails, and the host already has a
-ready local Mercator wallet. Submit the same plan to `POST https://mercator.tempo.xyz/v1/jobs` with
+ready local Mercator wallet. Submit the same plan to `POST https://mercator.sh/v1/jobs` with
 the same idempotency key and a maximum spend equal to `approved_total`. Never install, create, or
 connect a wallet for fallback. Resume job polling through MCP `get_job` with the returned job ID.
 

@@ -6,7 +6,7 @@ describe('Mercator marketplace plugin', () => {
     for (const manifestPath of ['ai/plugins/mercator/.mcp.json', 'ai/plugins/mercator/mcp.json']) {
       const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
 
-      expect(manifest.mcpServers.mercator.url).toBe('https://mercator.tempo.xyz/mcp/auth')
+      expect(manifest.mcpServers.mercator.url).toBe('https://mercator.sh/mcp/auth')
     }
   })
 
@@ -19,7 +19,7 @@ describe('Mercator marketplace plugin', () => {
     ]) {
       const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
 
-      expect(manifest.version).toMatch(/^0\.3\.1(?:\+|$)/)
+      expect(manifest.version).toMatch(/^0\.3\.2(?:\+|$)/)
       expect(manifest.description).toContain('secure MCP connection')
     }
   })

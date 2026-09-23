@@ -12,7 +12,7 @@ import type { Plugin } from 'vite'
 // Blog content lives as dev-managed markdown files in /blogs at the repo root.
 // Frontmatter schema: title, excerpt, date (YYYY-MM-DD), category (a slug or
 // inline list of slugs), optional
-// authors, and an optional `featured: true` to pin a post to the hero card.
+// authors, ogImage, and an optional `featured: true` to pin a post to the hero card.
 //
 // Markdown is rendered to HTML here, in Node, at build/dev time, so the heavy
 // markdown + Shiki toolchain never ships to the client bundle. The rendered
@@ -80,6 +80,7 @@ export type RenderedPost = {
   category: string
   categories: string[]
   authors: string
+  ogImage?: string
   featured: boolean
   html: string
 }
@@ -169,6 +170,7 @@ async function renderPost(filename: string): Promise<SearchablePost> {
     category: categories[0],
     categories,
     authors: data.authors ?? '',
+    ogImage: data.ogImage || undefined,
     featured: data.featured === 'true',
     html,
     searchText: content,

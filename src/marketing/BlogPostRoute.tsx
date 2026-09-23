@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 import BlogPostPage from './app/blog/[slug]/page'
 import MarketingRoute from './MarketingRoute'
+import type { RouteMetadata } from './routeMetadata'
 
 export default function BlogPostRoute({
   slug,
@@ -10,7 +11,7 @@ export default function BlogPostRoute({
   head,
 }: {
   slug: string
-  metadata: { title: string; description: string }
+  metadata: RouteMetadata
   head?: ReactNode
 }) {
   return (
