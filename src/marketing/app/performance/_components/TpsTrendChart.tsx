@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from 'react'
 import { linePath, scaleLinear, ticks } from '../_lib/chart'
-import { fmtInt, type PerfRun } from '../_lib/runs'
+import { fmtInt, type PerfRun, workloadSegments } from '../_lib/runs'
 import ChartTooltip from './ChartTooltip'
 import { TPS_CHART_MOBILE_BP, TpsChartGrid, tpsChartPad } from './TpsTrendChartFrame'
 import useMeasure from './useMeasure'
@@ -85,6 +85,8 @@ export default function TpsTrendChart({
   const yAt = scaleLinear(yDomain, [height - PAD.b, PAD.t])
   const points = values.map((v, i) => [xAt(i), yAt(v)] as [number, number])
 
+  const segments = workloadSegments(runs)
+
   const labelStep = Math.ceil(n / 6)
 
   const onMove = (e: React.PointerEvent<SVGRectElement>) => {
@@ -143,19 +145,40 @@ export default function TpsTrendChart({
             />
           ) : null}
 
-          <path
-            d={linePath(points)}
-            fill="none"
-            stroke="url(#tps-grad)"
-            strokeWidth="2"
-            strokeLinejoin="round"
-            pathLength={1}
-            strokeDasharray="1"
-            strokeDashoffset={drawn ? 0 : 1}
-            style={{
-              transition: `stroke-dashoffset ${DRAW_MS}ms ease-in`,
-            }}
-          />
+          {segments.map(({ start, end }) => (
+            <path
+              key={runs[start].id}
+              d={linePath(points.slice(start, end))}
+              fill="none"
+              stroke="url(#tps-grad)"
+              strokeWidth="2"
+              strokeLinejoin="round"
+              pathLength={1}
+              strokeDasharray="1"
+              strokeDashoffset={drawn ? 0 : 1}
+              style={{ transition: `stroke-dashoffset ${DRAW_MS}ms ease-in` }}
+            />
+          ))}
+          {segments.slice(1).map(({ start }) => (
+            <g key={runs[start].id}>
+              <line
+                x1={xAt(start)}
+                x2={xAt(start)}
+                y1={PAD.t}
+                y2={height - PAD.b}
+                stroke="var(--line-strong)"
+                strokeDasharray="4 4"
+              />
+              <text
+                x={xAt(start) - 6}
+                y={PAD.t + 12}
+                textAnchor="end"
+                className="fill-foreground/60 font-sans text-[11px]"
+              >
+                Workload changed
+              </text>
+            </g>
+          ))}
 
           {points.map(([x, y], i) => (
             <circle
@@ -211,6 +234,7 @@ export default function TpsTrendChart({
           <p className="whitespace-nowrap font-mono text-[11px] text-foreground/40">
             {active.dateLabel} · {active.timeLabel}
           </p>
+          <p className="mt-1 font-sans text-[11px] text-foreground/60">{active.workload}</p>
           <p className="mt-1 whitespace-nowrap font-mono text-[13px] text-foreground">
             {fmtInt(active.settledTps)}{' '}
             <span className="text-foreground/40">transactions per second</span>

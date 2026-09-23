@@ -58,9 +58,10 @@ export function statValue(stat: Stat): string {
 }
 
 // Latest run from the current nightly benchmark preset.
-const PERF_API_URL = 'https://perf.tempo.xyz/api/perf/runs?feed=nightly&limit=1&scenario_id=public'
+const PERF_API_URL = 'https://perf.tempo.xyz/api/perf/runs?feed=nightly&limit=1&series=default'
 
 type PerfRuns = {
+  series?: string
   runs?: {
     finishedAt?: string
     metrics?: {
@@ -103,6 +104,7 @@ export async function fetchStats(): Promise<PerfData> {
     const res = await fetch(PERF_API_URL)
     if (!res.ok) return fallback
     const data = (await res.json()) as PerfRuns
+    if (data.series !== 'default') return fallback
     const run = data.runs?.[0]
     const m = run?.metrics
     if (!m) return fallback

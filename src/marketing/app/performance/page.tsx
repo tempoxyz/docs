@@ -301,7 +301,7 @@ export default function PerformancePage() {
                   Transactions per second
                 </p>
                 <p className="mt-1 font-sans text-[14px] text-foreground/45 leading-[1.4]">
-                  Nightly benchmark runs
+                  Nightly benchmark runs · {latest?.workload}
                 </p>
               </div>
             </Reveal>
