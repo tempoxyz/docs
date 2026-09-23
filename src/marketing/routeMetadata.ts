@@ -32,6 +32,6 @@ export const routeMetadata: Record<string, RouteMetadata> = {
   '/blog': {
     title: 'Blog',
     description:
-      'Engineering deep dives, network upgrades, events, and case studies from the Tempo team.',
+      'Product announcements, engineering deep dives, network upgrades, events, and case studies from the Tempo team.',
   },
 }

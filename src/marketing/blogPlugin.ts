@@ -55,7 +55,13 @@ export function makeBlogAssetUrlsMountSafe(
   return html.replace(/(\b(?:src|href)=["'])\/blog\//g, `$1${base}`)
 }
 
-const CATEGORY_SLUGS = ['network-upgrades', 'events', 'technical', 'case-studies']
+const CATEGORY_SLUGS = [
+  'product-announcements',
+  'network-upgrades',
+  'events',
+  'technical',
+  'case-studies',
+]
 
 // ALL-CAPS markdown files (AGENTS.md, DIAGRAMS.md, …) are documentation for
 // authors, not posts.
