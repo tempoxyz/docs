@@ -1,5 +1,5 @@
 ---
-title: "Inside Tempo Zones"
+title: "Privacy with Tempo Zones"
 excerpt: "How Tempo Zones keep transactions private while connecting to public infrastructure on Tempo Mainnet."
 date: 2026-09-23
 category: technical
