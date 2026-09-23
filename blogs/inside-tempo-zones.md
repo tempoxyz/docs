@@ -93,3 +93,69 @@ Operators can modify the Zone configuration to only support specific assets and 
 Zones let businesses and users transact on Tempo with strong confidentiality and privacy guarantees. The Zones codebase is [open source](https://github.com/tempoxyz/zones/) and can be reviewed today.
 
 We’re working closely with our first customer to bring privacy to real-world payouts and will announce our first Zone soon, allowing users to privately deposit funds and earn rewards from Mainnet vaults. Over the next few weeks, we plan to integrate the prover, forced withdrawals and general transfers between accounts. Contact our team for early access to Zones.
+
+## FAQ
+
+### When can we start using Zones?
+
+Zones are still in closed access for the next few months. The first Zone will go live in October for one of our customers. [Get in touch](https://tempo.xyz/contact/) if you’re interested in deploying one.
+
+### Who runs the Zone? Can we run our own?
+
+Tempo provides fully hosted Zones, but the software is open source and we can help you run one on your own infrastructure. Running your own Zone involves additional integration work with wallet providers and other services, which we’re working to make easier.
+
+### What does it cost to run a Zone?
+
+Operating a zone requires a sequencer node, rpc nodes and nitro prover. It is also recommended to have multiple instances for high availability. The approximate cost of running multiple instances of all these services is about $5,000 a month with high availability. Contact us if you’re interested in discussing pricing, we also offer hosted zones on our infrastructure.
+
+### Who can see activity inside a Zone?
+
+Users can see transactions and balances pertaining to their addresses and the operator can see transactions and balances globally. Users can also choose to delegate permissions to a service provider (e.g. a wallet service) to fetch information on their behalf. Note that this access does not give them permission to spend or control users’ funds.
+
+### What changes when integrating Zones into an existing wallet or application?
+
+Zones use familiar transaction-signing flows and RPC methods. Providers like Privy support Zones as first class primitives in their wallet APIs.
+
+For direct integrations, applications connect to the Zone’s RPC endpoint and include a signed authorization token to access private data. Responses are scoped to the authenticated account.
+
+### What information remains public when funds enter or leave a Zone?
+
+A deposit exposes its Mainnet sender, token, amount, destination Zone, and transaction timing. The recipient’s Zone address and memo are encrypted.
+
+A withdrawal exposes its Mainnet recipient, token, amount, and timing, while a commitment hides the sender’s Zone address.
+
+### Can users withdraw without the operator’s permission?
+
+In the initial deployment, withdrawals depend on the operator processing them. We’re building forced withdrawals so users can submit requests directly on Mainnet. The Zone would then have to process those requests before advancing its state. Recovery when an operator stops entirely requires a separate mechanism, which is also under development.
+
+### What fees apply, and who pays them?
+
+Internal transactions incur Zone execution fees defined by the operator. Deposits and withdrawals also involve Mainnet transaction fees. In practice, these are less than $.0001 USD per transaction. Contact us for more specifics on fee structures for using zones today.
+
+### Can we make activity on existing accounts private?
+
+Existing wallets can move assets from Mainnet into a Zone through a deposit. Subsequent activity inside the Zone is private, but moving funds into a Zone does not hide their previous public transaction history.
+
+### How secure are TEEs?
+
+TEEs isolate sensitive computation and provide cryptographic evidence of the code that ran, with security that depends on the underlying hardware and software. [1Password](https://support.1password.com/confidential-computing-security/), [Fireblocks](https://developers.fireblocks.com/docs/aws-nitro-api-co-signer), and [Privy](https://docs.privy.io/guide/security/architecture/) already use AWS Nitro Enclaves (a popular and reputable TEE) in deployed products, while Apple uses its own secure hardware architecture for [Private Cloud Compute](https://security.apple.com/blog/private-cloud-compute/).
+
+### What happens if the operator goes offline?
+
+We are designing a mechanism to allow recovery of funds if the operator goes offline for an extended period of time, and will have more to share about this soon.
+
+### Can I deploy smart contracts to a zone?
+
+No, zones are currently designed only to support payments by transferring tokens. Interactions with smart contracts require bridging back to Tempo Mainnet. This has two benefits – it keeps the surface area of zones contained and easy to secure and ensures liquidity pools on mainnet where it can be accessed by multiple zones.
+
+### Why did you pick AWS Nitro over other approaches to proving?
+
+AWS Nitro provides an isolated execution environment and remote attestation for stateless proving. The prover design is independent of Nitro, giving Zones the flexibility to support other proving systems in the future.
+
+### Can funds move between Zones operated by different businesses?
+
+The protocol supports transfers between Zones through Tempo Mainnet. Funds withdrawn from one Zone can be deposited directly into another, with the destination account kept private. Both Zones must support the asset, and the transfer must meet their access rules and the token’s policies.
+
+### What happens if a vault deposit, swap, or withdrawal fails from a Zone?
+
+If a withdrawal initiated from a Zone fails on Tempo Mainnet, including when a swap or vault deposit callback reverts, the callback’s effects revert and the funds are queued to return to the Zone at the fallback account specified in the withdrawal.
