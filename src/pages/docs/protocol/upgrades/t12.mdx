@@ -21,8 +21,8 @@ T12 makes repeated payments easier for wallets and bridges, expands payment-chan
 
 ## T12 overview
 
-- **Easier repeated payments:** lets wallets and bridges give separate identifiers to otherwise identical transactions.
-- **Payment channels for restricted tokens:** checks whether the payer and recipient are allowed to send and receive the token.
+- **Configurable nonces for expiring transactions:** lets developers submit otherwise identical transactions in parallel by assigning distinct `nonce` values, without coordinating sequential nonces.
+- **MPP sessions for closed-loop stablecoins:** lets prepaid credits fund payment channels while preserving restrictions on which merchants can receive payments.
 - **Relaxed ABI validation:** accepts correctly formatted calls to Tempo's built-in contracts with extra data at the end.
 - **More reliable swap quotes:** fixes rounding differences between the amount quoted and the amount calculated during a swap.
 
@@ -38,9 +38,13 @@ Removing those entries removes one barrier to the [payment lane](/docs/protocol/
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1106.md).
 
-### Payment channels for restricted tokens
+<span id="payment-channels-for-restricted-tokens" />
 
-Some tokens restrict who can send or receive them. T12 checks permissions for the payer and recipient when adding funds to a payment channel or paying out. The account that temporarily holds the funds no longer needs separate permission from the token issuer.
+### MPP sessions for closed-loop stablecoins
+
+T12 enables recipient-restricted TIP-20 tokens, such as prepaid credits, to work with MPP payment channels. Users can fund a session and pay approved merchants without the issuer also having to allowlist the channel reserve.
+
+Funding and settlement check TIP-403 permissions against the channel's payer and payee. Refunds can return unused funds to the original payer without adding them to the recipient allowlist. Token pauses and account receive policies still apply.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1095.md).
 
@@ -49,18 +53,23 @@ Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-10
 
 ### Relaxed ABI validation
 
-T12 relaxes ABI decoding to accept trailing bytes in otherwise valid calls to Tempo's built-in contracts. This restores compatibility with calls rejected at T11; other strict decoding checks remain.
+T12 relaxes ABI decoding to accept trailing bytes in otherwise valid calls to Tempo's built-in contracts. This restores compatibility with [calls rejected at T11](/docs/protocol/upgrades/t11); other strict decoding checks remain.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1116.md).
 
-### More reliable swap quotes
+<span id="more-reliable-swap-quotes" />
 
-T12 makes quotes and swaps use the same matching and rounding for unchanged orderbook state. Routers no longer need extra input buffers to compensate for rounding differences.
+### Accurate swap quotes and cheaper execution
+
+T12 makes Stablecoin DEX quotes use the same per-order matching and rounding as swaps. For unchanged orderbook state, quoted amounts match swap fill calculations, eliminating rounding differences that could cause unexpected reverts.
+
+This also removes redundant liquidity-tracking writes during swaps, order placement, and cancellation.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1088.md).
 
 ## Integration impact
 
-- **Wallets and bridges:** after activation, use different nonces for new expiring payments and ensure builders and signers preserve them. For two otherwise identical payments, use `nonce = 101` and `nonce = 102`. To retry the first payment, resend its original signed transaction while valid.
-- **Apps using payment channels:** for channels opened from T12, the recipient's receive policy must accept the payer; older channels retain the reserve and need no migration. The payer's policy must accept refunds from the reserve. Receive-policy rejection reverts rather than redirecting funds for recovery. Use channel events with token transfers to identify the payer.
-- **DEX integrations reading contract storage:** if you read tick liquidity totals directly from storage, switch to `getTickLevel()` or sum the remaining amounts of active orders. Stored tick totals stop updating at T12.
+- **Parallel transactions:** if your integration needs to submit otherwise identical expiring transactions in parallel, assign each a distinct `uint64` nonce after T12 activates. Ensure builders and signers preserve the supplied nonce, and remove access-list entries used only to make transactions unique. To retry a transaction, resend its original signed transaction while valid.
+- **MPP integrations:** after T12 activates, you can use closed-loop credits with [MPP sessions](/docs/guide/machine-payments/pay-as-you-go). Existing channels need no migration.
+- **ABI compatibility:** if your integration was affected by [T11's strict ABI validation](/docs/protocol/upgrades/t11), you can restore calldata suffixes after T12 activates on your network.
+- **DEX integrations:** quote and swap APIs are unchanged. If you read tick liquidity totals directly from storage, switch to `getTickLevel()` or sum the remaining amounts of active orders. Stored tick totals stop updating at T12.
