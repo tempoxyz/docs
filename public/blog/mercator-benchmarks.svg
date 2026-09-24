@@ -6,9 +6,9 @@
 <rect width="840" height="550" fill="url(#mercator-benchmark-grid)"/>
 <text x="40" y="44" fill="#f2f1ec" font-size="21" font-weight="600">GPT-5.6 Luna, with Mercator</text>
 <text x="40" y="70" fill="#a7a2ad" font-size="14">Mean score, across WideSearch, FreshQA, GAIA, and DeepSynth</text>
-<path d="M 40 104 H 76" stroke="#a7a2ad" stroke-width="2" stroke-dasharray="3 5"/>
+<path d="M 40 104 H 76" stroke="#a7a2ad" stroke-width="2"/>
 <text x="86" y="109" fill="#f2f1ec" font-size="15">Agent</text>
-<path d="M 192 104 H 228" stroke="#b9a3ff" stroke-width="2.5"/>
+<path d="M 192 104 H 228" stroke="#b9a3ff" stroke-width="2.5" stroke-dasharray="1 6" stroke-linecap="round"/>
 <text x="238" y="109" fill="#f2f1ec" font-size="15">Agent + Mercator</text>
 <text x="40" y="141" fill="#a7a2ad" font-size="12">SCORE (%)</text>
 <path d="M 94 434 H 760" stroke="#373439" stroke-width=".8"/>
@@ -27,8 +27,8 @@
 <text x="78" y="199" text-anchor="end" fill="#a7a2ad" font-size="13">72</text>
 <path d="M 94 154 H 760" stroke="#373439" stroke-width=".8"/>
 <text x="78" y="159" text-anchor="end" fill="#a7a2ad" font-size="13">74</text>
-<path d="M 140 352.8119842794967 C 233.33333333333331 352.8119842794967 326.6666666666667 298.34934861467184 420 298.34934861467184 C 513.3333333333334 298.34934861467184 606.6666666666666 243.0869017743006 700 243.0869017743006" stroke="#a7a2ad" stroke-width="2" stroke-dasharray="3 5"/>
-<path d="M 140 293.76614066818115 C 233.33333333333331 293.76614066818115 326.6666666666667 228.85728292634235 420 228.85728292634235 C 513.3333333333334 228.85728292634235 606.6666666666666 237.4934366649867 700 237.4934366649867" stroke="#b9a3ff" stroke-width="2.5"/>
+<path d="M 140 352.8119842794967 C 233.33333333333331 352.8119842794967 326.6666666666667 298.34934861467184 420 298.34934861467184 C 513.3333333333334 298.34934861467184 606.6666666666666 243.0869017743006 700 243.0869017743006" stroke="#a7a2ad" stroke-width="2"/>
+<path d="M 140 293.76614066818115 C 233.33333333333331 293.76614066818115 326.6666666666667 228.85728292634235 420 228.85728292634235 C 513.3333333333334 228.85728292634235 606.6666666666666 237.4934366649867 700 237.4934366649867" stroke="#b9a3ff" stroke-width="2.5" stroke-dasharray="1 6" stroke-linecap="round"/>
 <circle cx="140" cy="352.8119842794967" r="4" fill="#0b0b0b" stroke="#a7a2ad" stroke-width="2"/>
 <circle cx="140" cy="293.76614066818115" r="4" fill="#b9a3ff" stroke="#0b0b0b" stroke-width="1"/>
 <text x="140" y="377.8119842794967" fill="#c8c3cc" font-size="17" text-anchor="middle">64.1%</text>

@@ -39,9 +39,9 @@ const svg = [
 <rect width="840" height="550" fill="url(#mercator-benchmark-grid)"/>
 <text x="40" y="44" fill="#f2f1ec" font-size="21" font-weight="600">GPT-5.6 Luna, with Mercator</text>
 <text x="40" y="70" fill="#a7a2ad" font-size="14">Mean score, across WideSearch, FreshQA, GAIA, and DeepSynth</text>
-<path d="M 40 104 H 76" stroke="#a7a2ad" stroke-width="2" stroke-dasharray="3 5"/>
+<path d="M 40 104 H 76" stroke="#a7a2ad" stroke-width="2"/>
 <text x="86" y="109" fill="#f2f1ec" font-size="15">Agent</text>
-<path d="M 192 104 H 228" stroke="#b9a3ff" stroke-width="2.5"/>
+<path d="M 192 104 H 228" stroke="#b9a3ff" stroke-width="2.5" stroke-dasharray="1 6" stroke-linecap="round"/>
 <text x="238" y="109" fill="#f2f1ec" font-size="15">Agent + Mercator</text>
 <text x="40" y="141" fill="#a7a2ad" font-size="12">SCORE (%)</text>`,
 ]
@@ -49,8 +49,8 @@ for (let score = 60; score <= 74; score += 2) {
   svg.push(`<path d="M 94 ${y(score)} H 760" stroke="#373439" stroke-width=".8"/>
 <text x="78" y="${y(score) + 5}" text-anchor="end" fill="#a7a2ad" font-size="13">${score}</text>`)
 }
-svg.push(`<path d="${path('baseline')}" stroke="#a7a2ad" stroke-width="2" stroke-dasharray="3 5"/>
-<path d="${path('mercator')}" stroke="#b9a3ff" stroke-width="2.5"/>`)
+svg.push(`<path d="${path('baseline')}" stroke="#a7a2ad" stroke-width="2"/>
+<path d="${path('mercator')}" stroke="#b9a3ff" stroke-width="2.5" stroke-dasharray="1 6" stroke-linecap="round"/>`)
 for (const p of points) {
   svg.push(`<circle cx="${p.x}" cy="${y(p.baseline)}" r="4" fill="#0b0b0b" stroke="#a7a2ad" stroke-width="2"/>
 <circle cx="${p.x}" cy="${y(p.mercator)}" r="4" fill="#b9a3ff" stroke="#0b0b0b" stroke-width="1"/>
