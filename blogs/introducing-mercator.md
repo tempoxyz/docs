@@ -37,8 +37,6 @@ The same agent, with Mercator added, scores higher across these four production 
 
 The lift is largest for the cheaper models. With Mercator, Codex running GPT-5.6 Luna at high effort scores **70.3% across these suites, up from 66.8%**—a 3.5-point gain, and within 2.3 points of GPT-5.6 Sol at medium effort without Mercator (72.6%). GPT-5.6 Terra at xhigh gains **4.2 points, from 67.6% to 71.8%**.
 
-*Table results pool Luna and Terra at medium, high, and xhigh effort, and Sol at medium.*
-
 ## How Mercator works
 
 Mercator exposes MCP and REST interfaces and connects agents to downstream tools reachable through open payment protocols like MPP and x402. Clients pay Mercator on Tempo; downstream services can settle over their supported rails and currencies.
