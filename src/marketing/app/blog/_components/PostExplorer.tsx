@@ -4,8 +4,10 @@ import Link from 'next/link'
 import { useState } from 'react'
 import Reveal from '../../_components/Reveal'
 import { developersPath } from '../../_lib/developersPaths'
-import { categories, categoryBySlug, isNew, type PostMeta } from '../_lib/categories'
+import { categories, type PostMeta } from '../_lib/categories'
+import PostByline from './PostByline'
 import PostImage from './PostImage'
+import PostLabels from './PostLabels'
 
 const filters = [{ slug: 'all' as const, label: 'All' }, ...categories]
 
@@ -17,68 +19,59 @@ export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
 
   return (
     <section>
-      <div
-        className="flex flex-wrap gap-2 px-5 lg:px-8"
-        role="tablist"
-        aria-label="Filter posts by category"
-      >
+      <fieldset className="flex min-w-0 flex-wrap gap-2 px-5 lg:px-8">
+        <legend className="sr-only">Filter posts by category</legend>
         {filters.map((filter) => (
           <button
             key={filter.slug}
             type="button"
-            role="tab"
-            aria-selected={active === filter.slug}
+            aria-pressed={active === filter.slug}
             onClick={() => setActive(filter.slug)}
-            className={`h-9 whitespace-nowrap border px-4 font-sans text-[13px] tracking-[0] transition-colors ${
+            className={`min-h-11 whitespace-nowrap border px-4 py-2 font-sans text-[13px] tracking-[0] transition-colors focus-visible:outline-2 focus-visible:outline-foreground focus-visible:outline-offset-2 ${
               active === filter.slug
                 ? 'border-foreground bg-foreground text-background'
-                : 'border-line-strong text-foreground/50 hover:border-foreground/40 hover:text-foreground'
+                : 'border-line-strong text-foreground/60 hover:border-foreground/40 hover:text-foreground'
             }`}
           >
             {filter.label}
           </button>
         ))}
-      </div>
+      </fieldset>
 
-      <ul className="mt-8 border-line border-t">
+      <ul className="mt-6 border-line border-t lg:mt-8">
         {visible.map((post, i) => (
           <li key={post.slug}>
             <Reveal delay={Math.min(i, 6) * 40}>
               <Link
                 href={developersPath(`/blog/${post.slug}`)}
-                className="group flex items-center gap-6 border-line border-b px-5 py-6 transition-colors hover:bg-surface-block lg:gap-8 lg:px-8"
+                className="group flex items-center gap-6 border-line border-b px-5 py-6 transition-colors hover:bg-surface-block focus-visible:outline-2 focus-visible:outline-foreground focus-visible:-outline-offset-2 lg:gap-8 lg:px-8"
               >
                 <span className="hidden w-44 shrink-0 overflow-hidden border border-line bg-surface-block md:block lg:w-56">
                   <PostImage post={post} />
                 </span>
-                <span className="flex min-w-0 flex-col gap-2.5">
-                  <span className="flex flex-wrap items-center gap-3">
-                    {post.categories.map((category) => (
-                      <span
-                        key={category}
-                        className="whitespace-nowrap border border-line-strong px-2.5 py-[3px] font-mono text-[11px] text-foreground/50 uppercase tracking-[0.02em]"
-                      >
-                        {categoryBySlug(category).badge}
-                      </span>
-                    ))}
-                    {isNew(post.date) && (
-                      <span className="whitespace-nowrap border border-indicator-green px-2.5 py-[3px] font-mono text-[11px] text-indicator-green uppercase tracking-[0.02em]">
-                        New
-                      </span>
-                    )}
-                    <span className="font-sans text-[16px] text-foreground tracking-[0]">
-                      {post.title}
-                    </span>
-                  </span>
-                  <span className="max-w-[640px] font-sans text-[14px] text-foreground/50 leading-[1.5] tracking-[0] transition-colors group-hover:text-foreground/70">
+                <div className="flex min-w-0 flex-col gap-2.5">
+                  <PostLabels post={post} />
+                  <h2 className="font-sans text-[18px] text-foreground leading-[1.3] tracking-[-0.01em] antialiased sm:text-[20px]">
+                    {post.title}
+                  </h2>
+                  <p className="max-w-[640px] font-sans text-[15px] text-foreground/60 leading-[1.55] tracking-[0] transition-colors group-hover:text-foreground/70">
                     {post.excerpt}
-                  </span>
-                </span>
+                  </p>
+                  <PostByline post={post} />
+                </div>
               </Link>
             </Reveal>
           </li>
         ))}
       </ul>
+      {visible.length === 0 && (
+        <p
+          role="status"
+          className="border-line border-b px-5 py-12 font-sans text-[15px] text-foreground/60 leading-[1.55] lg:px-8"
+        >
+          No posts in this category yet. Choose another category or view all posts.
+        </p>
+      )}
     </section>
   )
 }
