@@ -28,7 +28,7 @@ The chart shows the trial-weighted mean across WideSearch, FreshQA, GAIA, and De
 
 **With Mercator, Luna at high effort improves from 66.8% to 70.3%**, a 3.5-point gain. At medium effort, it gains 3.0 points; at xhigh, 0.3 points.
 
-Per-benchmark results across the full paired model matrix: Luna and Terra at medium, high, and xhigh; Sol at medium. Each row pools matched task pairs across those settings.
+Per-benchmark results across the full paired model matrix: Luna and Terra at medium, high, and xhigh; Sol at medium.
 
 | Benchmark | Agent | Agent + Mercator | Lift |
 | :--- | ---: | ---: | ---: |
