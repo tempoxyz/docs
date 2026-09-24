@@ -74,7 +74,13 @@ Mercator also supports direct USDC.e payments on Tempo and supported pathUSD aut
 
 Mercator is available at [mercator.sh](https://mercator.sh).
 
-Install the CLI:
+Ask your agent to set up Mercator:
+
+```text
+follow https://mercator.sh/setup
+```
+
+Or install the CLI:
 
 ```bash
 curl -fsSL https://mercator.sh/install.sh | sh
@@ -92,14 +98,5 @@ codex mcp add mercator \
 claude mcp add --scope user --transport http mercator \
   https://mercator.sh/mcp/auth
 ```
-
-After authorization, [fund your wallet](https://mercator.sh/fund) and tell your agent what you want to accomplish. Start your prompt with “Use Mercator” and describe the complete outcome:
-
-```text
-Use Mercator to find NVIDIA's latest 10-Q and 8-K via SEC submissions.
-Return official links, dates, and one-sentence summaries.
-```
-
-Include a spending limit in your prompt if you want a tighter budget than your authorization allows. For more ideas, ask your agent for Mercator’s suggested queries or see [Run your first job](https://mercator.sh/docs#run-your-first-job).
 
 Run a service that speaks MPP or x402? [Get it listed](https://mercator.sh/docs#mercator-for-service-owners).
