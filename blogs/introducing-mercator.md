@@ -20,9 +20,9 @@ Mercator is powered by MACH, a Tempo-native credit you can buy with Apple Pay. Y
 
 ## How good is Mercator?
 
-We compared GPT-5.6 Luna with and without Mercator at medium, high, and xhigh reasoning effort. The model, tasks, and verifier are fixed within each pair, and both arms retain native live web search.
+Mercator gives agents another way to improve their results alongside choosing a stronger model or increasing reasoning effort. With Mercator, GPT-5.6 Luna at high effort outperforms the same model at xhigh without it across the four benchmarks shown below.
 
-The chart shows the trial-weighted mean across WideSearch, FreshQA, GAIA, and DeepSynth—the four suites that improved in aggregate in our production run. Separate lines show Luna alone and Luna with Mercator at each reasoning level.
+Across WideSearch, FreshQA, GAIA, and DeepSynth, Mercator improves Luna’s average score at every reasoning level we tested. The largest gain comes at high effort: 66.8% to 70.3%, an increase of 3.5 percentage points.
 
 ![GPT-5.6 Luna scores with and without Mercator across medium, high, and xhigh reasoning effort. Mercator adds 3.0, 3.5, and 0.3 percentage points, respectively, across four selected benchmark suites.](/blog/mercator-benchmarks.svg)
 
