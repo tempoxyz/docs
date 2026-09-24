@@ -158,79 +158,17 @@ The token must be a deployed USD-denominated TIP-20. The FeeManager rejects a pr
 
 ### Claim validator fees
 
-Transaction fees accumulate in the [FeeManager](/docs/protocol/fees/spec-fee-amm#key-functions), separately from your fee recipient's wallet balance. Call `distributeFees(address validator, address token)` to transfer all accrued fees for one token to the fee recipient. The `validator` argument is the **fee-recipient address**, which can differ from your validator operator address.
-
-Anyone can submit this transaction. Funds always go to the specified fee recipient, regardless of who submits it. You do not need the validator's consensus signing key or operator credentials to trigger a claim.
-
-The commands below use [Foundry's `cast`](/docs/sdk/foundry). Use an encrypted keystore account or your existing wallet signing workflow for the transaction.
-
-:::::steps
-
-#### Select the network and fee recipient
-
-Set your configured fee-recipient address and the RPC for the network where the fees accrued. For Moderato testnet, use `https://rpc.testnet.tempo.xyz` instead.
+Validator fees accumulate in the [FeeManager](/docs/protocol/fees/spec-fee-amm#key-functions) and must be claimed with `distributeFees` to reach your wallet. Use your configured fee-recipient address and the token address in which the fees accrued:
 
 ```bash
-RPC_URL="https://rpc.tempo.xyz"
-FEE_MANAGER="0xfeec000000000000000000000000000000000000"
-FEE_RECIPIENT="<FEE_RECIPIENT_ADDRESS>"
+cast send 0xfeec000000000000000000000000000000000000 \
+  "distributeFees(address,address)" \
+  "<FEE_RECIPIENT_ADDRESS>" "<TOKEN_ADDRESS>" \
+  --rpc-url https://rpc.tempo.xyz \
+  --account "<KEYSTORE_ACCOUNT>"
 ```
 
-Read the recipient's current fee-token preference. An unset preference returns the zero address; in that case, the default is pathUSD.
-
-```bash
-CLAIM_TOKEN=$(cast call "$FEE_MANAGER" \
-  "validatorTokens(address)(address)" "$FEE_RECIPIENT" \
-  --rpc-url "$RPC_URL")
-
-if [ "$CLAIM_TOKEN" = "0x0000000000000000000000000000000000000000" ]; then
-  CLAIM_TOKEN="0x20C0000000000000000000000000000000000000"
-fi
-```
-
-Balances are tracked per recipient and token. If you changed either, repeat the process for the previous recipient or token; changing a preference does not move previously accrued fees.
-
-#### Check the accrued balance
-
-```bash
-cast call "$FEE_MANAGER" \
-  "collectedFees(address,address)(uint256)" \
-  "$FEE_RECIPIENT" "$CLAIM_TOKEN" --rpc-url "$RPC_URL"
-
-cast call "$CLAIM_TOKEN" "decimals()(uint8)" --rpc-url "$RPC_URL"
-```
-
-The accrued balance is in the token's smallest units. Divide by `10 ** decimals` to get the token amount. A zero balance means there is nothing to claim for that recipient/token pair.
-
-#### Submit the claim
-
-Replace `<KEYSTORE_ACCOUNT>` with your Foundry keystore account name and `<GAS_FEE_TOKEN_ADDRESS>` with the USD-denominated TIP-20 token that account uses to pay gas. The sender must already hold enough of that token for the transaction fee; unclaimed fees cannot fund the claim transaction.
-
-```bash
-cast send "$FEE_MANAGER" "distributeFees(address,address)" \
-  "$FEE_RECIPIENT" "$CLAIM_TOKEN" \
-  --rpc-url "$RPC_URL" \
-  --account "<KEYSTORE_ACCOUNT>" \
-  --tempo.fee-token "<GAS_FEE_TOKEN_ADDRESS>"
-```
-
-This command signs and broadcasts a transaction. For a multisig or externally managed wallet, submit the same contract call through your wallet's transaction flow, using the FeeManager as the target and the same recipient and token arguments.
-
-#### Verify the payout
-
-Check that the transaction receipt reports success and contains a `FeesDistributed` event for the recipient and token. Read the recipient's token balance and remaining accrued fees:
-
-```bash
-cast call "$CLAIM_TOKEN" "balanceOf(address)(uint256)" \
-  "$FEE_RECIPIENT" --rpc-url "$RPC_URL"
-
-cast call "$FEE_MANAGER" "collectedFees(address,address)(uint256)" \
-  "$FEE_RECIPIENT" "$CLAIM_TOKEN" --rpc-url "$RPC_URL"
-```
-
-A successful distribution clears the claimed balance. New fees may accrue before your next read. Calling `distributeFees` with a zero accrued balance succeeds without transferring tokens or emitting a payout event.
-
-:::::
+For Moderato testnet, use `https://rpc.testnet.tempo.xyz` as the RPC URL.
 
 ### Transfer validator ownership
 
