@@ -50,7 +50,7 @@ export function blogPostJsonLd(base: string, post: PostSeo, ogImage: string): st
     logo: { '@type': 'ImageObject', url: absoluteUrl(base, '/icon-dark.png') },
   }
   const authors = post.authors
-    .split('/')
+    .split(/\/|\s+&\s+/)
     .map((name) => name.trim())
     .filter(Boolean)
     .map((name) => ({ '@type': 'Person', name }))
