@@ -28,6 +28,15 @@ The chart shows the trial-weighted mean across WideSearch, FreshQA, GAIA, and De
 
 **Luna at high effort improves from 66.8% to 70.3% with Mercator**, a 3.5-point gain. At medium effort, it gains 3.0 points; at xhigh, 0.3 points. Tool access gives Luna another way to improve its results alongside increasing reasoning effort.
 
+Per-benchmark results across the full paired model matrix: Luna and Terra at medium, high, and xhigh; Sol at medium. Each row pools matched task pairs across those settings.
+
+| Benchmark | Agent | Agent + Mercator | Lift |
+| :--- | ---: | ---: | ---: |
+| WideSearch | 70.7% | 73.3% | +2.6 pts |
+| FreshQA | 66.7% | 68.5% | +1.8 pts |
+| GAIA | 80.0% | 81.1% | +1.1 pts |
+| DeepSynth | 56.1% | 56.6% | +0.6 pts |
+
 These are four selected suites, not the full study: across all seven suites and paired model settings, the overall score moved from 72.03% to 71.77%. [Full benchmark results (CSV)](/blog/mercator-benchmarks.csv) · [Source data and method (JSON)](/blog/mercator-benchmarks.json).
 
 ## How Mercator works

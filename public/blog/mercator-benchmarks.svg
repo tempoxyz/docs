@@ -1,51 +1,46 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="840" height="550" viewBox="0 0 840 550" fill="none" font-family="Arial, Helvetica, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="480" viewBox="0 0 840 480" fill="none" font-family="Arial, Helvetica, sans-serif">
 <title>GPT-5.6 Luna with and without Mercator</title>
 <desc>Trial-weighted mean on four selected suites. Medium: 64.1% baseline, 67.0% with Mercator. High: 66.8% baseline, 70.3% with Mercator. Xhigh: 69.5% baseline, 69.8% with Mercator. Each point includes 159 matched task pairs.</desc>
-<defs><pattern id="mercator-benchmark-grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M 24 0 H 0 V 24" stroke="#f2f1ec" stroke-opacity=".035"/></pattern></defs>
-<rect width="840" height="550" fill="#0b0b0b"/>
-<rect width="840" height="550" fill="url(#mercator-benchmark-grid)"/>
-<text x="40" y="44" fill="#f2f1ec" font-size="21" font-weight="600">GPT-5.6 Luna, with Mercator</text>
-<text x="40" y="70" fill="#a7a2ad" font-size="14">Mean score, across WideSearch, FreshQA, GAIA, and DeepSynth</text>
-<path d="M 40 104 H 76" stroke="#a7a2ad" stroke-width="2"/>
+<rect width="840" height="480" fill="#0b0b0b"/>
+<text x="40" y="44" fill="#f2f1ec" font-size="23" font-weight="600">GPT-5.6 Luna</text>
+<text x="40" y="71" fill="#a7a2ad" font-size="15">Mean score, across WideSearch, FreshQA, GAIA, and DeepSynth</text>
+<path d="M 40 104 H 76" stroke="#bcb7c3" stroke-width="2"/>
 <text x="86" y="109" fill="#f2f1ec" font-size="15">Agent</text>
-<path d="M 192 104 H 228" stroke="#b9a3ff" stroke-width="2.5" stroke-dasharray="1 6" stroke-linecap="round"/>
+<path d="M 192 104 H 228" stroke="#b9a3ff" stroke-width="3" stroke-dasharray="1 7" stroke-linecap="round"/>
 <text x="238" y="109" fill="#f2f1ec" font-size="15">Agent + Mercator</text>
 <text x="40" y="141" fill="#a7a2ad" font-size="12">SCORE (%)</text>
-<path d="M 94 434 H 760" stroke="#373439" stroke-width=".8"/>
-<text x="78" y="439" text-anchor="end" fill="#a7a2ad" font-size="13">60</text>
-<path d="M 94 394 H 760" stroke="#373439" stroke-width=".8"/>
-<text x="78" y="399" text-anchor="end" fill="#a7a2ad" font-size="13">62</text>
-<path d="M 94 354 H 760" stroke="#373439" stroke-width=".8"/>
-<text x="78" y="359" text-anchor="end" fill="#a7a2ad" font-size="13">64</text>
-<path d="M 94 314 H 760" stroke="#373439" stroke-width=".8"/>
-<text x="78" y="319" text-anchor="end" fill="#a7a2ad" font-size="13">66</text>
-<path d="M 94 274 H 760" stroke="#373439" stroke-width=".8"/>
-<text x="78" y="279" text-anchor="end" fill="#a7a2ad" font-size="13">68</text>
-<path d="M 94 234 H 760" stroke="#373439" stroke-width=".8"/>
-<text x="78" y="239" text-anchor="end" fill="#a7a2ad" font-size="13">70</text>
-<path d="M 94 194 H 760" stroke="#373439" stroke-width=".8"/>
-<text x="78" y="199" text-anchor="end" fill="#a7a2ad" font-size="13">72</text>
-<path d="M 94 154 H 760" stroke="#373439" stroke-width=".8"/>
-<text x="78" y="159" text-anchor="end" fill="#a7a2ad" font-size="13">74</text>
-<path d="M 140 352.8119842794967 C 233.33333333333331 352.8119842794967 326.6666666666667 298.34934861467184 420 298.34934861467184 C 513.3333333333334 298.34934861467184 606.6666666666666 243.0869017743006 700 243.0869017743006" stroke="#a7a2ad" stroke-width="2"/>
-<path d="M 140 293.76614066818115 C 233.33333333333331 293.76614066818115 326.6666666666667 228.85728292634235 420 228.85728292634235 C 513.3333333333334 228.85728292634235 606.6666666666666 237.4934366649867 700 237.4934366649867" stroke="#b9a3ff" stroke-width="2.5" stroke-dasharray="1 6" stroke-linecap="round"/>
-<circle cx="140" cy="352.8119842794967" r="4" fill="#0b0b0b" stroke="#a7a2ad" stroke-width="2"/>
-<circle cx="140" cy="293.76614066818115" r="4" fill="#b9a3ff" stroke="#0b0b0b" stroke-width="1"/>
-<text x="140" y="377.8119842794967" fill="#c8c3cc" font-size="17" text-anchor="middle">64.1%</text>
-<text x="140" y="277.76614066818115" fill="#b9a3ff" font-size="17" font-weight="600" text-anchor="middle">67.0%</text>
-<text x="140" y="463" fill="#f2f1ec" font-size="16" text-anchor="middle">medium</text>
-<text x="140" y="488" fill="#b9a3ff" font-size="14" text-anchor="middle">+3.0 pts</text>
-<circle cx="420" cy="298.34934861467184" r="4" fill="#0b0b0b" stroke="#a7a2ad" stroke-width="2"/>
-<circle cx="420" cy="228.85728292634235" r="4" fill="#b9a3ff" stroke="#0b0b0b" stroke-width="1"/>
-<text x="420" y="323.34934861467184" fill="#c8c3cc" font-size="17" text-anchor="middle">66.8%</text>
-<text x="420" y="212.85728292634235" fill="#b9a3ff" font-size="17" font-weight="600" text-anchor="middle">70.3%</text>
-<text x="420" y="463" fill="#f2f1ec" font-size="16" text-anchor="middle">high</text>
-<text x="420" y="488" fill="#b9a3ff" font-size="14" text-anchor="middle">+3.5 pts</text>
-<circle cx="700" cy="243.0869017743006" r="4" fill="#0b0b0b" stroke="#a7a2ad" stroke-width="2"/>
-<circle cx="700" cy="237.4934366649867" r="4" fill="#b9a3ff" stroke="#0b0b0b" stroke-width="1"/>
-<text x="700" y="268.0869017743006" fill="#c8c3cc" font-size="17" text-anchor="middle">69.5%</text>
-<text x="700" y="221.4934366649867" fill="#b9a3ff" font-size="17" font-weight="600" text-anchor="middle">69.8%</text>
-<text x="700" y="463" fill="#f2f1ec" font-size="16" text-anchor="middle">xhigh</text>
-<text x="700" y="488" fill="#b9a3ff" font-size="14" text-anchor="middle">+0.3 pts</text>
-<text x="420" y="523" fill="#a7a2ad" font-size="14" text-anchor="middle">Reasoning effort</text>
+<path d="M 94 350 H 760" stroke="#373439" stroke-opacity=".65" stroke-width=".8"/>
+<text x="78" y="355" text-anchor="end" fill="#a7a2ad" font-size="13">62</text>
+<path d="M 94 310 H 760" stroke="#373439" stroke-opacity=".65" stroke-width=".8"/>
+<text x="78" y="315" text-anchor="end" fill="#a7a2ad" font-size="13">64</text>
+<path d="M 94 270 H 760" stroke="#373439" stroke-opacity=".65" stroke-width=".8"/>
+<text x="78" y="275" text-anchor="end" fill="#a7a2ad" font-size="13">66</text>
+<path d="M 94 230 H 760" stroke="#373439" stroke-opacity=".65" stroke-width=".8"/>
+<text x="78" y="235" text-anchor="end" fill="#a7a2ad" font-size="13">68</text>
+<path d="M 94 190 H 760" stroke="#373439" stroke-opacity=".65" stroke-width=".8"/>
+<text x="78" y="195" text-anchor="end" fill="#a7a2ad" font-size="13">70</text>
+<path d="M 94 150 H 760" stroke="#373439" stroke-opacity=".65" stroke-width=".8"/>
+<text x="78" y="155" text-anchor="end" fill="#a7a2ad" font-size="13">72</text>
+<path d="M 132 249.76614066818115 C 228 249.76614066818115 324 184.85728292634235 420 184.85728292634235 C 516 184.85728292634235 612 193.4934366649867 708 193.4934366649867 L 708 199.0869017743006 C 612 199.0869017743006 516 254.34934861467184 420 254.34934861467184 C 324 254.34934861467184 228 308.8119842794967 132 308.8119842794967 Z" fill="#b9a3ff" fill-opacity=".08"/>
+<path d="M 132 308.8119842794967 C 228 308.8119842794967 324 254.34934861467184 420 254.34934861467184 C 516 254.34934861467184 612 199.0869017743006 708 199.0869017743006" stroke="#bcb7c3" stroke-width="2"/>
+<path d="M 132 249.76614066818115 C 228 249.76614066818115 324 184.85728292634235 420 184.85728292634235 C 516 184.85728292634235 612 193.4934366649867 708 193.4934366649867" stroke="#b9a3ff" stroke-width="3" stroke-dasharray="1 7" stroke-linecap="round"/>
+<circle cx="132" cy="308.8119842794967" r="4" fill="#0b0b0b" stroke="#bcb7c3" stroke-width="2"/>
+<circle cx="132" cy="249.76614066818115" r="4" fill="#b9a3ff" stroke="#0b0b0b" stroke-width="1"/>
+<text x="132" y="333.8119842794967" fill="#c8c3cc" font-size="19" text-anchor="middle">64.1%</text>
+<text x="132" y="233.76614066818115" fill="#b9a3ff" font-size="19" font-weight="600" text-anchor="middle">67.0%</text>
+<text x="132" y="391" fill="#f2f1ec" font-size="16" text-anchor="middle">medium</text>
+<text x="132" y="418" fill="#b9a3ff" font-size="14" text-anchor="middle">+3.0 pts</text>
+<circle cx="420" cy="254.34934861467184" r="4" fill="#0b0b0b" stroke="#bcb7c3" stroke-width="2"/>
+<circle cx="420" cy="184.85728292634235" r="4" fill="#b9a3ff" stroke="#0b0b0b" stroke-width="1"/>
+<text x="420" y="279.34934861467184" fill="#c8c3cc" font-size="19" text-anchor="middle">66.8%</text>
+<text x="420" y="168.85728292634235" fill="#b9a3ff" font-size="19" font-weight="600" text-anchor="middle">70.3%</text>
+<text x="420" y="391" fill="#f2f1ec" font-size="16" text-anchor="middle">high</text>
+<text x="420" y="418" fill="#b9a3ff" font-size="14" text-anchor="middle">+3.5 pts</text>
+<circle cx="708" cy="199.0869017743006" r="4" fill="#0b0b0b" stroke="#bcb7c3" stroke-width="2"/>
+<circle cx="708" cy="193.4934366649867" r="4" fill="#b9a3ff" stroke="#0b0b0b" stroke-width="1"/>
+<text x="708" y="224.0869017743006" fill="#c8c3cc" font-size="19" text-anchor="middle">69.5%</text>
+<text x="708" y="177.4934366649867" fill="#b9a3ff" font-size="19" font-weight="600" text-anchor="middle">69.8%</text>
+<text x="708" y="391" fill="#f2f1ec" font-size="16" text-anchor="middle">xhigh</text>
+<text x="708" y="418" fill="#b9a3ff" font-size="14" text-anchor="middle">+0.3 pts</text>
+<text x="420" y="453" fill="#a7a2ad" font-size="14" text-anchor="middle">Reasoning effort</text>
 </svg>
