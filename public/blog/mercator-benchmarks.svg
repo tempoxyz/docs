@@ -4,7 +4,7 @@
 <rect width="840" height="480" fill="#0b0b0b"/>
 <text x="40" y="44" fill="#f2f1ec" font-size="23" font-weight="600">GPT-5.6 Luna</text>
 <text x="40" y="71" fill="#a7a2ad" font-size="15">Mean score, across WideSearch, FreshQA, GAIA, and DeepSynth</text>
-<path d="M 40 104 H 76" stroke="#bcb7c3" stroke-width="2"/>
+<path d="M 40 104 H 76" stroke="#bcb7c3" stroke-width="1.5"/>
 <text x="86" y="109" fill="#f2f1ec" font-size="15">Agent</text>
 <path d="M 192 104 H 228" stroke="#b9a3ff" stroke-width="3" stroke-dasharray="1 7" stroke-linecap="round"/>
 <text x="238" y="109" fill="#f2f1ec" font-size="15">Agent + Mercator</text>
@@ -22,21 +22,21 @@
 <path d="M 94 150 H 760" stroke="#373439" stroke-opacity=".65" stroke-width=".8"/>
 <text x="78" y="155" text-anchor="end" fill="#a7a2ad" font-size="13">72</text>
 <path d="M 132 249.76614066818115 C 228 249.76614066818115 324 184.85728292634235 420 184.85728292634235 C 516 184.85728292634235 612 193.4934366649867 708 193.4934366649867 L 708 199.0869017743006 C 612 199.0869017743006 516 254.34934861467184 420 254.34934861467184 C 324 254.34934861467184 228 308.8119842794967 132 308.8119842794967 Z" fill="#b9a3ff" fill-opacity=".08"/>
-<path d="M 132 308.8119842794967 C 228 308.8119842794967 324 254.34934861467184 420 254.34934861467184 C 516 254.34934861467184 612 199.0869017743006 708 199.0869017743006" stroke="#bcb7c3" stroke-width="2"/>
+<path d="M 132 308.8119842794967 C 228 308.8119842794967 324 254.34934861467184 420 254.34934861467184 C 516 254.34934861467184 612 199.0869017743006 708 199.0869017743006" stroke="#bcb7c3" stroke-width="1.5"/>
 <path d="M 132 249.76614066818115 C 228 249.76614066818115 324 184.85728292634235 420 184.85728292634235 C 516 184.85728292634235 612 193.4934366649867 708 193.4934366649867" stroke="#b9a3ff" stroke-width="3" stroke-dasharray="1 7" stroke-linecap="round"/>
-<circle cx="132" cy="308.8119842794967" r="4" fill="#0b0b0b" stroke="#bcb7c3" stroke-width="2"/>
+<circle cx="132" cy="308.8119842794967" r="4" fill="#0b0b0b" stroke="#bcb7c3" stroke-width="1.5"/>
 <circle cx="132" cy="249.76614066818115" r="4" fill="#b9a3ff" stroke="#0b0b0b" stroke-width="1"/>
 <text x="132" y="333.8119842794967" fill="#c8c3cc" font-size="19" text-anchor="middle">64.1%</text>
 <text x="132" y="233.76614066818115" fill="#b9a3ff" font-size="19" font-weight="600" text-anchor="middle">67.0%</text>
 <text x="132" y="391" fill="#f2f1ec" font-size="16" text-anchor="middle">medium</text>
 <text x="132" y="418" fill="#b9a3ff" font-size="14" text-anchor="middle">+3.0 pts</text>
-<circle cx="420" cy="254.34934861467184" r="4" fill="#0b0b0b" stroke="#bcb7c3" stroke-width="2"/>
+<circle cx="420" cy="254.34934861467184" r="4" fill="#0b0b0b" stroke="#bcb7c3" stroke-width="1.5"/>
 <circle cx="420" cy="184.85728292634235" r="4" fill="#b9a3ff" stroke="#0b0b0b" stroke-width="1"/>
 <text x="420" y="279.34934861467184" fill="#c8c3cc" font-size="19" text-anchor="middle">66.8%</text>
 <text x="420" y="168.85728292634235" fill="#b9a3ff" font-size="19" font-weight="600" text-anchor="middle">70.3%</text>
 <text x="420" y="391" fill="#f2f1ec" font-size="16" text-anchor="middle">high</text>
 <text x="420" y="418" fill="#b9a3ff" font-size="14" text-anchor="middle">+3.5 pts</text>
-<circle cx="708" cy="199.0869017743006" r="4" fill="#0b0b0b" stroke="#bcb7c3" stroke-width="2"/>
+<circle cx="708" cy="199.0869017743006" r="4" fill="#0b0b0b" stroke="#bcb7c3" stroke-width="1.5"/>
 <circle cx="708" cy="193.4934366649867" r="4" fill="#b9a3ff" stroke="#0b0b0b" stroke-width="1"/>
 <text x="708" y="224.0869017743006" fill="#c8c3cc" font-size="19" text-anchor="middle">69.5%</text>
 <text x="708" y="177.4934366649867" fill="#b9a3ff" font-size="19" font-weight="600" text-anchor="middle">69.8%</text>
