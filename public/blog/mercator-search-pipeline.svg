@@ -22,7 +22,7 @@
 <text x="420" y="358" font-size="15" font-weight="540" fill="#f2f1ec" text-anchor="middle">Re-rank with categories (Jev)</text>
 <path d="M420 374V392" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
 <rect x="210" y="392" width="420" height="42" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
-<text x="420" y="418" font-size="15" font-weight="540" fill="#f2f1ec" text-anchor="middle">Order by reliability, latency, and price</text>
+<text x="420" y="418" font-size="15" font-weight="540" fill="#f2f1ec" text-anchor="middle">Re-rank with online signals</text>
 <path d="M420 434V452" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
 <rect x="210" y="452" width="420" height="42" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
 <text x="420" y="478" font-size="15" font-weight="540" fill="#f2f1ec" text-anchor="middle">Resolve live endpoints</text>
