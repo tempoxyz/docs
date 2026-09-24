@@ -53,7 +53,7 @@ const cases: {
     path: '/blog',
     title: 'Blog ⋅ Tempo',
     ogTitle: 'Blog',
-    descriptionIncludes: 'Engineering deep dives',
+    descriptionIncludes: 'Product announcements, engineering deep dives',
     ogImageIncludes: 'section=BLOG',
   },
   {
