@@ -36,6 +36,29 @@ Access Keys are secondary signing keys authorized by an account's Root Key or an
 - **No Contract Creation**: Access-key-signed transactions cannot perform `CREATE` or `CREATE2`, including via factory contracts. Use a Root Key for deployments.
 - **Privilege Restrictions**: Limited access keys cannot authorize new keys or modify their own limits or scopes. Admin access keys can manage keys, but cannot carry spending limits, call scopes, or expiry.
 
+:::warning
+Authorize a deny-all key as an explicitly restricted key. An authorization that sets an empty
+scope list but omits limits is indistinguishable from an admin key authorization, and the node
+rejects it.
+
+Admin keys carry no limits, scopes, or expiry ([TIP-1049](https://tips.sh/1049)), so omitting
+limits matches the admin shape. The node then expects the authorization to be admin-signed and
+bound to the parent account, and validation fails with
+`keychain validation failed: admin-signed key authorization account mismatch`.
+
+Set both fields, so the authorization is unambiguously a limited key permitted to call nothing:
+
+```ts
+// viem/tempo
+await Actions.accessKey.authorizeSync(client, {
+  accessKey,
+  expiry,
+  scopes: [], // allowAnyCalls = false, empty allowlist
+  limits: [], // enforceLimits = true, no token may be spent
+})
+```
+:::
+
 ### Authorization Hierarchy
 
 The protocol enforces a strict hierarchy at validation time:
