@@ -161,7 +161,7 @@ The token must be a deployed USD-denominated TIP-20. The FeeManager rejects a pr
 Validator fees accumulate in the [FeeManager](/docs/protocol/fees/spec-fee-amm#key-functions) and must be claimed to reach your wallet. Supply your validator's index, public key, or operator address to look up its current fee recipient, and specify the token address in which the fees accrued:
 
 ```bash
-tempo consensus claim-validator-fees <address/pubkey/index> \
+tempo consensus claim-fees <address/pubkey/index> \
   --token <TOKEN_ADDRESS> \
   --rpc-url https://rpc.tempo.xyz \
   --ledger
