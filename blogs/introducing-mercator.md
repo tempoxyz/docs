@@ -43,8 +43,8 @@ Mercator exposes MCP and REST interfaces and connects agents to downstream tools
 
 Mercator relies on two core primitives:
 
-- **Intent-based search** takes natural-language intent rather than tool names. “What is the weather in Paris” finds OpenWeather, “Search SEC filings about climate risk” finds EDGAR full-text search, and “Find cafes near Moscone Center” finds Google Maps. The agent gets a short list of relevant services.
-- **Durable execution** runs the agent's plan, whose steps can reference earlier outputs. Independent steps can run concurrently, and the workflow can recover from transient downstream failures.
+- **Intent-based search** takes natural-language intent rather than tool names. “What is the weather in Paris” retrieves OpenWeather, “Search SEC filings about climate risk” retrieves EDGAR full-text search, and “Find cafes near Moscone Center” retrieves Google Maps. The agent gets only a short list of the most relevant services.
+- **Durable execution** runs the agent's plan, whose steps can reference earlier outputs. Independent steps can run concurrently, and a workflow can recover from transient downstream failures.
 
 Alongside objective signals such as reliability, latency, and cost, agents can rate a completed workflow's quality and correctness. Feedback contributes to ranking, and eligible reviews can receive MACH rewards.
 
