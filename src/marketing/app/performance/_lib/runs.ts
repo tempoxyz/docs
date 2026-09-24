@@ -2,7 +2,8 @@
 // fetchStats() (app/_components/stats.ts) overlays only the latest run;
 // this module fetches the whole feed for the /performance charts.
 
-const PERF_API_URL = 'https://perf.tempo.xyz/api/perf/runs?feed=nightly&series=default&limit=100'
+const PERF_API_URL =
+  'https://perf.tempo.xyz/api/perf/runs?feed=nightly&series=multi-region&limit=500'
 
 type ApiRun = {
   id?: string
@@ -62,7 +63,7 @@ export async function fetchPerfRuns(): Promise<PerfRun[]> {
     const res = await fetch(PERF_API_URL)
     if (!res.ok) return []
     const data = (await res.json()) as { series?: string; runs?: ApiRun[] }
-    if (data.series !== 'default') return []
+    if (data.series !== 'multi-region') return []
     return (data.runs ?? [])
       .filter((r): r is Required<Pick<ApiRun, 'startedAt' | 'metrics'>> & ApiRun =>
         Boolean(r.startedAt && r.scenario?.id && r.metrics?.settledTps),

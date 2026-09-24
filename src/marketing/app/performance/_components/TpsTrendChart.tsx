@@ -159,26 +159,6 @@ export default function TpsTrendChart({
               style={{ transition: `stroke-dashoffset ${DRAW_MS}ms ease-in` }}
             />
           ))}
-          {segments.slice(1).map(({ start }) => (
-            <g key={runs[start].id}>
-              <line
-                x1={xAt(start)}
-                x2={xAt(start)}
-                y1={PAD.t}
-                y2={height - PAD.b}
-                stroke="var(--line-strong)"
-                strokeDasharray="4 4"
-              />
-              <text
-                x={xAt(start) - 6}
-                y={PAD.t + 12}
-                textAnchor="end"
-                className="fill-foreground/60 font-sans text-[11px]"
-              >
-                Workload changed
-              </text>
-            </g>
-          ))}
 
           {points.map(([x, y], i) => (
             <circle
