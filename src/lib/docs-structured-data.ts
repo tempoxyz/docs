@@ -16,9 +16,15 @@ type DocsStructuredDataContext = {
  */
 export function docsStructuredDataHead(path: string, { frontmatter }: DocsStructuredDataContext) {
   const pagePath = path.startsWith('/') ? path : `/${path}`
-  // Use Vocs' native override so it emits one OG image and the matching X card.
-  if (pagePath.startsWith('/blog/') && frontmatter?.ogImage) {
-    return { meta: { ogImage: frontmatter.ogImage } }
+  // Keep article type in the native head owner: sibling overrides can race
+  // with Vocs' default website tag during streamed prerendering.
+  if (pagePath.startsWith('/blog/')) {
+    return {
+      meta: {
+        ogType: 'article' as const,
+        ...(frontmatter?.ogImage ? { ogImage: frontmatter.ogImage } : {}),
+      },
+    }
   }
   if (pagePath !== '/docs' && !pagePath.startsWith('/docs/')) return undefined
 

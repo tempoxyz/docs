@@ -1,3 +1,5 @@
+import { developersPath } from '../marketing/app/_lib/developersPaths'
+
 type ZoneTransportConfig = {
   onFetchRequest?: (
     request: Request,
@@ -13,13 +15,11 @@ export const swapAndDepositRouter = '0xf9b794e0dca9bc12ac90067df792d7aad33436e4'
 // Private sequencers currently only accept the raw transaction param on eth_sendRawTransactionSync.
 export const zoneRpcSyncTimeout = 0
 export const routerCallbackGasLimit = 2_000_000n
-// Routed settlement can appear before the UI records a post-submission anchor block.
-export const publicSettlementLookbackBlocks = 100n
 export const zeroBytes32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000' as const
 
-const ZONE_A_RPC_URL = 'https://eng:bold-raman-silly-torvalds@rpc-zone-a.testnet.tempo.xyz' as const
-const ZONE_B_RPC_URL = 'https://eng:bold-raman-silly-torvalds@rpc-zone-b.testnet.tempo.xyz' as const
+const ZONE_A_RPC_URL = 'https://rpc-zone-a.testnet.tempo.xyz' as const
+const ZONE_B_RPC_URL = 'https://rpc-zone-b.testnet.tempo.xyz' as const
 
 export const ZONE_A = {
   chainId: 4217000006,
@@ -99,19 +99,23 @@ export function getZoneTransportConfig(rpcUrl: string): ZoneTransportConfig | un
 }
 
 export function getZoneRpcHttpUrl(zoneId: number, rpcUrl: string) {
-  const location = (globalThis as { location?: { origin: string } }).location
-
-  if (import.meta.env.VITE_E2E === 'true' && zoneId in moderatoZoneRpcUrls && location) {
-    return `${location.origin}/__e2e_zone_rpc/${zoneId}`
+  if (isDemoZoneRpc(zoneId, rpcUrl)) {
+    return developersPath(`/api/zone-rpc?zone=${zoneId}`)
   }
 
   return stripRpcBasicAuth(rpcUrl)
 }
 
 export function getZoneRpcTransportConfig(zoneId: number, rpcUrl: string) {
-  if (import.meta.env.VITE_E2E === 'true' && zoneId in moderatoZoneRpcUrls) return undefined
-
+  // The same-origin server route supplies sandbox HTTP credentials. The Zone transport
+  // still attaches the user's account-scoped X-Authorization-Token in the browser.
+  if (isDemoZoneRpc(zoneId, rpcUrl)) return undefined
   return getZoneTransportConfig(rpcUrl)
+}
+
+function isDemoZoneRpc(zoneId: number, rpcUrl: string) {
+  const configuredUrl = moderatoZoneRpcUrls[zoneId as keyof typeof moderatoZoneRpcUrls]
+  return Boolean(configuredUrl && stripRpcBasicAuth(rpcUrl) === stripRpcBasicAuth(configuredUrl))
 }
 
 function encodeBase64(value: string) {

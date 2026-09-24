@@ -1,0 +1,17 @@
+---
+title: "Zones"
+seoTitle: "Zone Withdrawal Status API | Tempo Docs"
+description: Read indexed Tempo Zone withdrawal outcomes and understand sender tags, parent-chain delivery status, and the zone checkpoint used for settlement progress.
+---
+
+# Zones
+
+Use the hosted Tempo API to read parent-chain withdrawal outcomes. This REST endpoint requires an API key with `data:read` and matching Zone read or write access; it is separate from the [account-authenticated zone RPC](/docs/protocol/zones/rpc).
+
+:::info
+The generated reference below includes descriptions from the API schema. For the current Zone runtime, `senderTag` includes a per-withdrawal `fallbackNonce`, so withdrawals in one transaction can have different tags; older runtimes may share a tag. Use the tag emitted for your withdrawal.
+
+`zoneStatus: completed` means the portal’s accepted Tempo checkpoint has reached the withdrawal’s parent-chain block. It does not independently establish execution-proof verification or successful refund delivery. See [proving and settlement](/docs/protocol/zones/proving).
+
+`POST /v1/routes/transfers/zone` is not implemented and returns HTTP `501`. It is not an available deposit integration.
+:::

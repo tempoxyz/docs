@@ -42,7 +42,6 @@ export default function Page({ slug }: { slug: string }) {
       head={
         post ? (
           <>
-            <meta property="og:type" content="article" />
             <meta property="article:published_time" content={post.date} />
             <meta property="article:section" content={categoryBySlug(post.category).label} />
             <script

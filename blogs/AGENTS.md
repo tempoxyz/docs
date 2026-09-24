@@ -18,6 +18,8 @@ category: technical # network-upgrades | events | technical | case-studies
 # category: [technical, case-studies]
 featured: true # optional — pins the post to the hero card on /blog
 ogImage: /blog/my-post-og.png # optional — overrides the generated social card
+heroImage: /blog/my-post-hero.svg # optional — article header and featured cards
+heroImageAlt: "Describe the hero image." # required when heroImage is set
 ---
 ```
 

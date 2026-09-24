@@ -35,6 +35,6 @@ describe('blog social images', () => {
     )
     expect(
       docsStructuredDataHead('/blog/another-post', { frontmatter: { title: 'Another post' } }),
-    ).toBeUndefined()
+    ).toEqual({ meta: { ogType: 'article' } })
   })
 })

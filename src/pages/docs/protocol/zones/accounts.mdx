@@ -1,46 +1,48 @@
 ---
-title: "Accounts and private balances in Tempo Zones on testnet"
-seoTitle: "Accounts & Private Balances in Tempo Zones on Testnet | Docs"
+title: "Accounts and private balances in Tempo Zones"
+seoTitle: "Accounts & Private Balances in Tempo Zones | Docs"
 description: Account-scoped access control on Tempo Zones, including private balances, private allowances, and the two-layer privacy model.
 ---
 
-# Accounts and private balances in Tempo Zones on testnet
+import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
-:::info
-Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
-:::
+# Accounts and private balances in Tempo Zones
 
-Tempo Zones enforce account privacy at two complementary layers: the EVM execution level and the [RPC access control](/docs/protocol/zones/rpc) level. Neither is sufficient alone.
+Tempo Zones keep your balance and account activity private from other users. RPC requests authenticate your Tempo account, and contract execution restricts which balances and allowances that caller can read.
 
-- **Execution alone is insufficient.** Without RPC restrictions, a caller could use `eth_getStorageAt` to read TIP-20 balance mapping slots directly, bypassing `balanceOf` access control.
-- **RPC alone is insufficient.** Without execution-level changes, a caller could use `eth_call` to invoke a contract that reads another account's balance and returns it, bypassing RPC-level filtering.
+<ZoneDiagram
+  name="accounts"
+  alt="An account signs an authorization token for account-scoped RPC access. The RPC sends contract calls from that account. At the token contract, balance reads require the balance owner; allowance reads require the owner or spender."
+/>
 
-This page covers the execution-level protections. For the RPC layer, see the [RPC specification](/docs/protocol/zones/rpc).
+The RPC scopes transactions and event logs to your account and blocks raw storage reads such as `eth_getStorageAt`. Contract-level caller checks prevent an `eth_call` from exposing another account's balance. See [RPC access control](/docs/protocol/zones/rpc) for authentication and method-specific rules.
 
-## Private Balances
+## Private balances
 
 On Tempo Mainnet, anyone can read any account's balance. On a Tempo Zone, `balanceOf(address)` enforces caller restrictions for TIP-20s:
 
 - If `msg.sender == account`, the call succeeds and returns the balance.
-- If `msg.sender` is the sequencer, the call succeeds (required for block production and fee accounting).
 - Otherwise, the call reverts with `Unauthorized()`.
 
-Enforcing this at the contract level (not just the RPC layer) ensures that even onchain composition cannot leak balances. A contract on the Tempo Zone cannot read and emit another account's balance.
+These checks also apply to sequencer-signed getter calls. The Zone operator can still inspect the underlying node state; account privacy does not hide balances from your operator. A contract on the Tempo Zone cannot read and emit another account's balance.
 
-## Private Allowances
+## Private allowances
 
 The `allowance(owner, spender)` function is similarly restricted:
 
 - If `msg.sender == owner` or `msg.sender == spender`, the call succeeds.
-- If `msg.sender` is the sequencer, the call succeeds.
 - Otherwise, the call reverts with `Unauthorized()`.
 
-A non-zero allowance reveals that `owner` has interacted with `spender`, a relationship that should be private. Restricting reads to the two parties involved preserves standard TIP-20 (ERC-20) approval flows without leaking relationship information.
+A non-zero allowance reveals a relationship between `owner` and `spender`. Restricting reads to those two parties preserves TIP-20 approval flows without exposing the allowance to other accounts.
 
-Public views like `totalSupply()`, `name()`, `symbol()`, and `decimals()` remain unrestricted.
+## Other account reads
 
-## Related Specifications
+Public views like `totalSupply()`, `name()`, `symbol()`, and `decimals()` remain unrestricted. Account-specific permit nonces, `NonceManager` nonces, and `AccountKeychain` key and spending-limit reads are restricted to their account owner.
 
-Tempo Zones also charge fixed gas costs for TIP-20 operations to prevent gas-based side channels. See [Execution & Gas](/docs/protocol/zones/execution#fixed-gas-costs) for details.
+<span id="related-specifications" />
+
+## Related execution rules
+
+The current implementation rejects public TIP-20 transfer calls with `Unauthorized()`; token movement uses the inbox and outbox. Approval and permit calls remain available. Tempo Zones also charge fixed gas costs for selected TIP-20 operations to prevent gas-based side channels. See [Execution & Gas](/docs/protocol/zones/execution#fixed-gas-costs) for details.
 
 Tempo Zones currently disable contract creation (`CREATE` and `CREATE2`). See [Execution & Gas](/docs/protocol/zones/execution#contract-creation-disabled) for details.

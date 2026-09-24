@@ -10,8 +10,8 @@ import { Head, MdxPageContextProvider } from 'vocs'
  * gives `.tsx` routes the same single per-page owner with their metadata in
  * context.
  *
- * `children` render after `<Head>` so they can override tags it emits (e.g.
- * `og:type`) as well as add new ones.
+ * `children` add tags not emitted by `<Head>`. Override native tags through
+ * the Vocs head configuration to avoid competing streamed head entries.
  */
 export default function PageHead({
   title,

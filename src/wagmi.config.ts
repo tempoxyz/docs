@@ -69,7 +69,7 @@ export function getConfig(options: getConfig.Options = {}) {
                 url: 'https://sponsor.moderato.tempo.xyz',
               },
             }),
-            webAuthn({ ceremony: WebAuthnCeremony.keys() }),
+            webAuthn({ ceremony: WebAuthnCeremony.keys({ rpId }) }),
           ]),
     ],
     multiInjectedProviderDiscovery,

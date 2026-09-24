@@ -1,59 +1,86 @@
 ---
-title: "Tempo Zones: testnet private transaction protocol"
-seoTitle: "Tempo Zones: Testnet Privacy Protocol | Docs"
-description: Tempo Zones are private execution environments on Tempo Mainnet where balances, transfers, and transaction history are invisible to the public chain.
+title: "Tempo Zones"
+seoTitle: "Tempo Zones | Docs"
+description: Learn how Tempo Zones keep stablecoin balances and account activity private while connecting to Tempo for deposits, withdrawals, settlement, and liquidity.
 ---
 
 import { Cards, Card } from 'vocs'
+import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
-# Tempo Zones: testnet private transaction protocol
+<span id="tempo-zones-private-transaction-protocol" />
 
-:::info
-Tempo Zones are still in early development and available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
-:::
+# Tempo Zones
 
-A Tempo Zone is a private execution environment attached to Tempo Mainnet. Inside a Tempo Zone, balances, transfers, and transaction history are invisible to block explorers, indexers, and other users on Tempo Mainnet. Each Tempo Zone runs its own sequencer and executes transactions independently.
+Tempo Zones are private stablecoin ledgers on Tempo. They let applications keep balances and account activity private while using Tempo for deposits, withdrawals, and settlement.
 
-![Tempo Zones overview](/developers/learn/zones/diagram-overview.svg)
+Each Zone has a portal on Tempo that holds its backing assets and a private ledger maintained by its operator. A deposit locks tokens in the portal and credits an account inside the Zone. A withdrawal moves tokens back to a public Tempo address.
 
-Funds deposited into a Tempo Zone are locked in the Zone Portal contract on Tempo Mainnet. [Validity proofs](/docs/protocol/zones/proving) guarantee that the sequencer executed every transaction correctly. The sequencer orders and includes transactions, but cannot steal funds or forge state transitions.
+<ZoneDiagram
+  name="overview"
+  alt="A public ZonePortal holds backing assets and bridge queues on Tempo. The operator runs a separate private account ledger. Deposits and withdrawals cross the boundary, while settlement submits commitments and sequencer certificates."
+/>
 
-Each Tempo Zone operates as a separate chain, so adding more zones increases throughput without congesting Tempo Mainnet. Tempo Zones share liquidity through Tempo Mainnet. A zone can withdraw tokens, swap them on the Stablecoin DEX, and deposit the result into another zone without exposing who placed the trade. See [composable withdrawals](/docs/protocol/zones/bridging#composable-withdrawals) for details.
+See the [architecture](/docs/protocol/zones/architecture) for contract roles and settlement.
 
-### Tempo Zones are private
+<span id="tempo-zones-are-private" />
 
-Tempo Zones make a key trade-off: Each zone has a sequencer who sees all activity on the zone. Privacy depends on the integrity of whoever is running the sequencer. Thanks to this trade-off, they achieve what few other privacy solutions do: Great privacy with good UX.
+## Private accounts
 
-Most privacy solutions offer either confidentiality (hide the amount) or anonymity (hide the sender). Tempo Zones provide both, and go further. Inside a Tempo Zone, balances, transaction history, and counterparty relationships are all invisible to outside observers. Block explorers and indexers see nothing. Other users cannot query your address.
+Accounts connect through authenticated RPC access to read their own balances and activity. Other users and public block explorers cannot browse the Zone’s account ledger. The operator maintains that ledger and can see its full state.
 
-The [accounts specification](/docs/protocol/zones/accounts) describes how balance and allowance reads are restricted at the contract level, and the [RPC specification](/docs/protocol/zones/rpc) covers how the JSON-RPC interface is scoped per account.
+Bridge activity remains public on Tempo, including deposit amounts, withdrawal destinations, and settlement commitments. The privacy boundary is the account activity inside the Zone.
 
-![End-to-end privacy flow through a zone](/developers/learn/zones/diagram-privacy.svg)
+<ZoneDiagram
+  name="privacy"
+  alt="Public observers see bridge amounts, withdrawal destinations, and settlement checkpoints. An authenticated account can read its own private balance and history. The operator can see the entire Zone state."
+/>
 
-### Tempo Zones are compliant by design
+See [accounts](/docs/protocol/zones/accounts) for private balances and allowances, and [RPC](/docs/protocol/zones/rpc) for account-scoped access.
 
-Every TIP-20 token carries its issuer's compliance policy (whitelists, blacklists, freeze controls) via the [TIP-403 registry](/docs/protocol/tip403/overview). When deposited into a Tempo Zone, the policy is provably mirrored. The validity proof commits that every transaction in the batch followed the issuer's rules.
+<span id="tempo-zones-are-compliant-by-design" />
 
-![Policy inheritance from mainnet to zone](/developers/learn/zones/diagram-tip20.svg)
+## Issuer policies
 
-### Tempo Zones are safe from theft
+Tokens retain their issuer’s transfer policies inside a Zone. Zone execution reads those policies from a finalized Tempo checkpoint, so the same issuer rules govern which accounts can send or receive tokens.
 
-Validity proofs guarantee correct state transitions. Sequencers order transactions but cannot steal deposited funds. See the [proving specification](/docs/protocol/zones/proving) for how proofs are constructed and verified.
+<ZoneDiagram
+  name="policy"
+  alt="The issuer updates its TIP-403 policy on Tempo. The Zone imports a finalized checkpoint through TempoState and applies the policy at that checkpoint during token execution."
+/>
 
-### Tempo Zones are interoperable
+The [TIP-403 registry](/docs/protocol/tip403/overview) defines the policies; [execution](/docs/protocol/zones/execution) explains how a Zone applies them.
 
-Tempo Zones are interoperable with Tempo Mainnet and with each other. Deposits and withdrawals settle in seconds. A Tempo Zone can withdraw tokens, swap them on the Stablecoin DEX, and deposit the result into another Tempo Zone in a single operation. The [bridging specification](/docs/protocol/zones/bridging) covers deposits, withdrawals, encrypted deposits for private on-ramps, and composable withdrawal callbacks for cross-zone transfers.
+<span id="tempo-zones-are-safe-from-theft" />
+<span id="tempo-zone-settlement-verification" />
 
-### GitHub and Specifications
+## Settlement on Tempo
 
-The zones repository is available on [GitHub](https://github.com/tempoxyz/zones), which also includes the full Tempo Zones [specification](https://github.com/tempoxyz/zones/blob/main/specs/spec.md).
+The operator groups Zone blocks into batches and submits their commitments to the portal. When a batch is accepted, the portal records the Zone’s progress and makes its withdrawals available for processing on Tempo.
 
-## Reference
+[Proving and settlement](/docs/protocol/zones/proving) explains batch acceptance, execution validation, and the verification guarantees of the current implementation.
+
+<span id="tempo-zones-are-interoperable" />
+
+## Access to Tempo liquidity
+
+Withdrawals can call Tempo contracts, allowing applications to combine token delivery with a Stablecoin DEX swap or a deposit into another Zone. The public part of the route uses Tempo’s liquidity; the destination Zone then processes its deposit into a private balance.
+
+See [bridging](/docs/protocol/zones/bridging) for deposit and withdrawal flows, including [composable withdrawals](/docs/protocol/zones/bridging#composable-withdrawals).
+
+<span id="github-and-specifications" />
+
+## Source and specification
+
+The [Zones repository](https://github.com/tempoxyz/zones) contains the implementation and [protocol specification](https://github.com/tempoxyz/zones/blob/main/specs/spec.md). To try the integration flows, start with the [testnet guides](/docs/guide/private-zones).
+
+<span id="reference" />
+
+## Zone protocol references
 
 <Cards>
   <Card
     title="Architecture"
-    description="System design, contract layout, sequencer management, and trust model."
+    description="Portals, private ledgers, contract roles, and the settlement lifecycle."
     to="/docs/protocol/zones/architecture"
     icon="lucide:git-branch"
   />
@@ -71,7 +98,7 @@ The zones repository is available on [GitHub](https://github.com/tempoxyz/zones)
   />
   <Card
     title="RPC"
-    description="Authenticated JSON-RPC interface with per-account scoping and timing protections."
+    description="Authenticated JSON-RPC interface with per-account scoping and response redaction."
     to="/docs/protocol/zones/rpc"
     icon="lucide:server"
   />
@@ -83,7 +110,7 @@ The zones repository is available on [GitHub](https://github.com/tempoxyz/zones)
   />
   <Card
     title="Proving"
-    description="Batch submission, validity proofs, and the state transition function."
+    description="Batch acceptance, execution validation, and verification guarantees."
     to="/docs/protocol/zones/proving"
     icon="lucide:shield-check"
   />

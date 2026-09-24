@@ -12,17 +12,18 @@ export const swapZoneBalances = [
   { label: 'Zone B', token: Demo.betaUsd, zone: 7 },
 ]
 
+import { ZoneDiagram } from '../../../../components/ZoneDiagram'
+
 # Swap across zones
 
-:::info
-Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
-:::
-
-Use this guide when you want to leave `Zone A` with `pathUSD` and arrive in `Zone B` with `betaUSD` in one routed flow. The trade briefly touches the public chain, so the confirmation happens in stages rather than as a single balance update.
+Swap stablecoins while moving them between Zones. This example starts with `pathUSD` test tokens in **Zone A** and deposits `betaUSD` into **Zone B**, two example Zones on Tempo Testnet. The swap settles on the public chain before Zone B credits the balance.
 
 The route uses `swapAndDepositRouter` on the public chain: withdraw from `Zone A`, swap on the Stablecoin DEX, then deposit the output token into `Zone B`.
 
-![Cross-zone DEX swap flow](/developers/learn/zones/diagram-swap.svg)
+<ZoneDiagram
+  name="cross-zone-swap"
+  alt="Zone A withdraws pathUSD. The router swaps it for betaUSD on the Stablecoin DEX and deposits into Zone B in one public transaction. Zone B imports the deposit and credits betaUSD later."
+/>
 
 ## Swapping pathUSD from Zone A into betaUSD on Zone B
 
@@ -33,7 +34,7 @@ By the end of this guide you will have swapped **25 pathUSD** from **Zone A** in
 1. Withdraws `pathUSD` from `Zone A`.
 2. Routes it through the public chain and swaps it on the Stablecoin DEX.
 3. Deposits the output token into `Zone B` through `ZonePortal`.
-4. Lets you authorize private reads in `Zone B` so you can confirm the final `betaUSD` balance.
+4. Confirms the credited `betaUSD` balance in `Zone B`.
 
 <Demo.Container
   name="Swap across zones"
@@ -47,6 +48,9 @@ By the end of this guide you will have swapped **25 pathUSD** from **Zone A** in
 ## Code example
 
 This snippet assumes you already have a signed-in `rootClient` on the public chain plus `zoneAClient`, and the shared token, router, and portal constants used throughout the zone guides.
+
+The callback encoding below is specific to the legacy testnet router. Current routers require an encrypted deposit payload and a Tempo refund recipient. See the [testnet compatibility notes](/docs/guide/private-zones#testnet-compatibility) before adapting this route to another deployment.
+
 It shows the core routed swap submission path; use the demo above when you want to watch the output deposit settle into Zone B.
 
 ```ts
@@ -57,7 +61,6 @@ const swapAmount = parseUnits('25', 6)
 
 await zoneAClient.zone.signAuthorizationToken()
 
-const routedWithdrawalFee = await zoneAClient.zone.getWithdrawalFee({ gas: routerCallbackGasLimit })
 const quotedBetaOut = await rootClient.dex.getSellQuote({
   amountIn: swapAmount,
   tokenIn: pathUsd,
@@ -83,8 +86,8 @@ const { receipt } = await Actions.zone.requestWithdrawalSync(zoneAClient, {
   amount: swapAmount,
   data: callbackData,
   feeToken: pathUsd,
+  fallbackRecipient: rootClient.account.address,
   gas: routerCallbackGasLimit,
-  timeout: zoneRpcSyncTimeout,
   to: swapAndDepositRouter,
   token: pathUsd,
 })

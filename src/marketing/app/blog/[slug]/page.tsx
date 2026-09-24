@@ -83,6 +83,16 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             </p>
           </Reveal>
 
+          {post.heroHtml && (
+            <Reveal className="blog-prose blog-hero-image mt-8">
+              <div
+                data-blog-hero
+                // biome-ignore lint/security/noDangerouslySetInnerHtml: trusted build-time blog asset
+                dangerouslySetInnerHTML={{ __html: post.heroHtml }}
+              />
+            </Reveal>
+          )}
+
           {/* Post content is dev-authored markdown from the repo, rendered to
               HTML at build time, so raw HTML injection here is trusted. */}
           <Reveal delay={100} className="blog-prose mt-12 border-line border-t pt-10">

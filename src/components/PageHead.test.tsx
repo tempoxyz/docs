@@ -65,6 +65,7 @@ describe('PageHead blog images', () => {
       />,
     )
 
+    expect(imageMeta(html, 'og:type')).toEqual(['article'])
     expect(imageMeta(html, 'og:image')).toEqual([image])
     expect(imageMeta(html, 'twitter:image')).toEqual([image])
   })
@@ -76,6 +77,7 @@ describe('PageHead blog images', () => {
     )
     const expected = `/api/og?title=T7%20network%20upgrade&section=BLOG&v=${OG_IMAGE_VERSION}`
 
+    expect(imageMeta(html, 'og:type')).toEqual(['article'])
     expect(imageMeta(html, 'og:image')).toEqual([expected])
     expect(imageMeta(html, 'twitter:image')).toEqual([expected])
   })

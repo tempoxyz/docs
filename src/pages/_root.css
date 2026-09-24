@@ -800,6 +800,8 @@
      dark-only artwork so dark mode is unchanged; the light overrides below
      swap these for legible values on a light page. */
   --diagram-bg: #0e0e0e;
+  --diagram-selection-bg: #234b75;
+  --diagram-inverse-selection-bg: #d7eaff;
   --diagram-box: #1c1c1c;
   --diagram-box-border: #2e2e2e;
   --diagram-line: #2e2e2e;
@@ -951,6 +953,8 @@
   --color-prose-caption: color-mix(in srgb, var(--color-foreground) 45%, transparent);
   --color-scrollbar-thumb: #d4d4d4;
   --diagram-bg: #f5f5f5;
+  --diagram-selection-bg: #d7eaff;
+  --diagram-inverse-selection-bg: #234b75;
   --diagram-box: #ffffff;
   --diagram-box-border: #d4d4d4;
   --diagram-line: #d4d4d4;
@@ -1464,6 +1468,9 @@ body {
   font-size: 24px;
   line-height: 1.3;
 }
+.blog-prose h2#frequently-asked-questions {
+  margin-top: 5em;
+}
 .blog-prose h3 {
   margin-top: 2em;
   font-size: 19px;
@@ -1574,7 +1581,7 @@ body {
 }
 /* Diagrams are inlined as SVG at build time (see blogPlugin) so they can
    follow the active theme. Text uses currentColor; shapes use diagram tokens. */
-.blog-prose svg.blog-diagram {
+:is(.blog-prose, .docs-zone-diagram) svg.blog-diagram {
   display: block;
   width: 100%;
   height: auto;
@@ -1582,32 +1589,69 @@ body {
   border: 1px solid var(--line);
   color: var(--foreground);
 }
-.blog-prose svg.blog-diagram .dgm-bg {
+:is(.blog-prose, .docs-zone-diagram) svg.blog-diagram :is(text, tspan) {
+  -webkit-user-select: text;
+  user-select: text;
+  cursor: text;
+}
+.blog-hero-image :is(svg.blog-diagram, img) {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  border: 0;
+}
+:is(.blog-prose, .docs-zone-diagram) svg.blog-diagram :is(text, tspan)::selection {
+  /* SVG glyph fills stay unchanged during selection in Chromium. */
+  background: var(--diagram-selection-bg);
+}
+:is(.blog-prose, .docs-zone-diagram) svg.blog-diagram [fill="var(--on-surface-onyx)"] {
+  --diagram-selection-bg: #234b75;
+}
+:is(.blog-prose, .docs-zone-diagram) svg.blog-diagram [fill="var(--diagram-box)"] {
+  --diagram-selection-bg: var(--diagram-inverse-selection-bg);
+}
+:is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-bg {
   fill: var(--diagram-bg);
 }
-.blog-prose svg.blog-diagram .dgm-box {
+:is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-box {
   fill: var(--diagram-box);
   stroke: var(--diagram-box-border);
 }
-.blog-prose svg.blog-diagram .dgm-accent-box {
+:is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-accent-box {
   fill: var(--diagram-accent-bg);
   stroke: var(--diagram-accent);
 }
-.blog-prose svg.blog-diagram .dgm-line {
+:is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-line {
   stroke: var(--diagram-line);
 }
-.blog-prose svg.blog-diagram .dgm-line-soft {
+:is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-line-soft {
   stroke: var(--diagram-line-soft);
 }
-.blog-prose svg.blog-diagram .dgm-accent-line {
+:is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-accent-line {
   stroke: var(--diagram-accent);
 }
-.blog-prose svg.blog-diagram .dgm-accent {
+:is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-accent {
   fill: var(--diagram-accent);
+}
+.docs-zone-diagram {
+  margin: 2rem 0;
+}
+.docs-zone-diagram svg.blog-diagram {
+  margin: 0;
+  border: 0;
+}
+.docs-zone-diagram figcaption {
+  margin-top: 0.75rem;
+  color: var(--foreground-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: center;
 }
 /* An italic-only paragraph right after an image/diagram is a caption. */
 .blog-prose :is(p:has(img), p:has(svg)) + p:has(> em:only-child) {
   margin-top: 0.75em;
   font-size: 13px;
   color: var(--prose-caption);
+  text-align: center;
 }

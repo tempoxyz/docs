@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="634" viewBox="0 76 960 634" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" aria-labelledby="zone-contracts-title zone-contracts-desc">
+  <title id="zone-contracts-title">Contracts across the settlement boundary</title>
+  <desc id="zone-contracts-desc">On Tempo, ZoneFactory deploys ZonePortal proxies. ZonePortal locks assets, accepts settlement, and invokes ZoneMessenger for callback withdrawals. In a Zone, TempoState provides a finalized view of Tempo to ZoneInbox and ZoneOutbox. Finalized portal deposits are processed by the inbox; the outbox burns tokens and queues withdrawals for processing by the portal after settlement.</desc>
+  <defs>
+    <marker id="zone-contracts-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="m2 1 6 4-6 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <text x="32" y="120" fill="currentColor" font-size="20" font-weight="600">Tempo contracts</text>
+  <text x="648" y="120" fill="currentColor" font-size="20" font-weight="600">Zone precompiles</text>
+
+  <g fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5">
+    <rect x="32" y="144" width="280" height="88" rx="10"/>
+    <rect x="32" y="322" width="280" height="214" rx="10"/>
+    <rect x="32" y="598" width="280" height="88" rx="10"/>
+    <rect x="648" y="144" width="248" height="88" rx="10"/>
+    <rect x="648" y="322" width="248" height="92" rx="10"/>
+    <rect x="648" y="464" width="248" height="92" rx="10"/>
+  </g>
+  <g fill="currentColor" font-size="20" font-family="ui-monospace, SFMono-Regular, monospace">
+    <text x="56" y="180">ZoneFactory</text>
+    <text x="56" y="358">ZonePortal</text>
+    <text x="56" y="635">ZoneMessenger</text>
+    <text x="672" y="180">TempoState</text>
+    <text x="672" y="358">ZoneInbox</text>
+    <text x="672" y="500">ZoneOutbox</text>
+  </g>
+  <g fill="var(--foreground-secondary, #646464)" font-size="16">
+    <text x="56" y="207">Creates portal proxies</text>
+    <text x="56" y="387">Locks backing assets</text>
+    <text x="56" y="662">Executes withdrawal callbacks</text>
+    <text x="672" y="207">Finalized Tempo checkpoint</text>
+    <text x="672" y="387">Mints deposited tokens</text>
+    <text x="672" y="529">Burns + queues withdrawals</text>
+  </g>
+  <path d="M56 412h232" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+  <text x="56" y="446" fill="currentColor" font-size="18">Accepts settlement</text>
+  <text x="56" y="477" fill="currentColor" font-size="18">Processes withdrawals</text>
+  <text x="56" y="509" fill="var(--foreground-secondary, #646464)" font-size="16">Certificates + configured verifier</text>
+
+  <g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#zone-contracts-arrow)">
+    <path d="M172 232v78"/>
+    <path d="M172 536v50"/>
+    <path d="M324 368h312"/>
+    <path d="M636 510H324"/>
+    <path d="M772 232v78"/>
+    <path d="M896 188h32v322h-20" stroke-dasharray="5 6"/>
+  </g>
+  <text x="194" y="281" fill="currentColor" font-size="17">Deploys</text>
+  <text x="194" y="573" fill="currentColor" font-size="17">Callback withdrawals</text>
+  <text x="794" y="281" fill="currentColor" font-size="17">State reads</text>
+  <g text-anchor="middle">
+    <text x="480" y="341" fill="currentColor" font-size="18">Finalized deposits</text>
+    <text x="480" y="393" fill="var(--foreground-secondary, #646464)" font-size="15">From the portal's deposit queue</text>
+    <text x="480" y="480" fill="currentColor" font-size="18">Withdrawal queue</text>
+    <text x="480" y="535" fill="var(--foreground-secondary, #646464)" font-size="15">Processed after batch acceptance</text>
+  </g>
+</svg>

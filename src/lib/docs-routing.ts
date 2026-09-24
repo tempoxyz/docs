@@ -16,7 +16,6 @@ export function docsRouteDestination(destination: string, environment = process.
 // host. Keep the mappings here so tests and deployed smoke checks share one
 // contract.
 export const proxiedLegacyDocsRoutes = [
-  { source: '/blog/inside-tempo-zones', destination: '/blog/privacy-with-tempo-zones' },
   { source: '/docs/developer-tools', destination: '/docs/ecosystem' },
   { source: '/docs/developer-tools/fee-payer', destination: '/docs/api/fee-payer' },
   { source: '/docs/developer-tools/indexer', destination: '/docs/api/indexer-api' },

@@ -2,11 +2,6 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/developers/blog/inside-tempo-zones",
-      "destination": "/developers/blog/privacy-with-tempo-zones",
-      "permanent": true
-    },
-    {
       "source": "/developers/docs/protocol/tips",
       "destination": "https://tips.sh/",
       "permanent": true

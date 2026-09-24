@@ -14,6 +14,7 @@ declare module 'virtual:blog-posts' {
     ogImage?: string
     featured: boolean
     html: string
+    heroHtml: string
   }[]
 }
 
