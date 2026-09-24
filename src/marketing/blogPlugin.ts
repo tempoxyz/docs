@@ -109,7 +109,8 @@ const processor = unified()
   .use(remarkRehype, { allowDangerousHtml: true })
   .use(rehypeRaw)
   .use(rehypeShiki, {
-    theme: 'vesper',
+    themes: { light: 'github-light', dark: 'vesper' },
+    defaultColor: false,
     langAlias: { sol: 'solidity' },
     fallbackLanguage: 'plaintext',
   })

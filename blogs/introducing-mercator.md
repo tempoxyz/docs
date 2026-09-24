@@ -77,10 +77,13 @@ Or connect your agent directly over MCP and complete browser authorization:
 
 ```bash
 # Codex
-codex mcp add mercator --url https://mercator.sh/mcp/auth --oauth-client-registration dcr
+codex mcp add mercator \
+  --url https://mercator.sh/mcp/auth \
+  --oauth-client-registration dcr
 
 # Claude Code
-claude mcp add --scope user --transport http mercator https://mercator.sh/mcp/auth
+claude mcp add --scope user --transport http mercator \
+  https://mercator.sh/mcp/auth
 ```
 
 Run a service that speaks MPP or x402? [Get it listed](https://mercator.sh/docs#mercator-for-service-owners).

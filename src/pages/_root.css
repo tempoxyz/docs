@@ -1520,14 +1520,16 @@ body {
   border-radius: 3px;
 }
 .blog-prose pre {
-  /* !important beats the theme background Shiki inlines on the element,
-     keeping code blocks on the site's surface token. */
   background: var(--surface-block);
   border: 1px solid var(--line);
   padding: 16px 20px;
   overflow-x: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+.blog-prose .shiki,
+.blog-prose .shiki span {
+  color: light-dark(var(--shiki-light), var(--shiki-dark));
 }
 .blog-prose pre code {
   background: none;
