@@ -38,8 +38,6 @@ Search in Mercator involves much more than a single index lookup or categorizati
 
 ![Mercator searches, filters, reranks, and resolves services before returning results to the agent.](/blog/mercator-search-pipeline.svg)
 
-*Live service health and job ratings feed back into ranking.*
-
 Retrieval systems can find services on the right topic, but not always ones that can consistently do the job. For *"latest 10-K for Stripe,"* a company-news API and an SEC filings API both look relevant, but only one can return the relevant documents. Mercator re-ranks the short list with [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev), a small categorization model that asks whether each endpoint can perform the requested action within the query's constraints. Because Jev only scores candidates that are already plausible, this online categorization call stays fast and cheap. On our internal benchmark, adding Jev improved MRR@5 by 25% and cut the rate of known-bad endpoints in results by 80%.
 
 ## Measured performance
