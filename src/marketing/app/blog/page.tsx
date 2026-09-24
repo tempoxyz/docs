@@ -37,9 +37,9 @@ export default function BlogPage() {
             <div className="flex items-center overflow-hidden border-line border-b bg-surface-block lg:order-2 lg:border-b-0 lg:border-l">
               <PostImage post={featured} priority />
             </div>
-            <div className="flex flex-col justify-center gap-4 p-6 lg:order-1 lg:p-10">
+            <div className="flex flex-col justify-center gap-4 p-6 lg:order-1 lg:gap-3 xl:p-8">
               <PostLabels post={featured} />
-              <h1 className="max-w-[480px] font-sans text-[clamp(1.75rem,4vw,2.5rem)] text-foreground leading-[1.15] tracking-[-0.02em] antialiased">
+              <h1 className="max-w-[480px] font-sans text-[clamp(1.75rem,4vw,2.5rem)] text-foreground leading-[1.15] tracking-[-0.02em] antialiased lg:text-[28px] xl:text-[40px]">
                 {featured.title}
               </h1>
               <p className="max-w-[480px] font-sans text-[15px] text-foreground/60 leading-[1.55] tracking-[0]">

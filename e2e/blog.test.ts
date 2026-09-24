@@ -33,7 +33,7 @@ test('filters posts with the keyboard and preserves author credits when opening 
   )
 })
 
-for (const width of [320, 390, 768, 1024, 1440]) {
+for (const width of [320, 390, 768, 1024, 1280, 1440]) {
   test(`keeps the blog readable at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 1000 })
     await page.goto('/blog')
@@ -44,10 +44,34 @@ for (const width of [320, 390, 768, 1024, 1440]) {
     await expect
       .poll(() => featured.locator('img').evaluate((image: HTMLImageElement) => image.naturalWidth))
       .toBeGreaterThan(0)
+    await page.evaluate(() => document.fonts.ready)
 
     const thumbnail = page.locator('section ul li img').first()
     if (width < 768) await expect(thumbnail).toBeHidden()
     else await expect(thumbnail).toBeVisible()
+
+    if (width >= 768) {
+      const cards = page.locator('section ul li a')
+      const alignedCards = width >= 1024 ? cards.or(featured) : cards
+      for (const card of await alignedCards.all()) {
+        const bounds = await card.evaluate((element) => {
+          const image = element.querySelector('img')?.getBoundingClientRect()
+          const content = element.querySelector(':scope > div:last-child')
+          const first = content?.firstElementChild?.getBoundingClientRect()
+          const last = content?.lastElementChild?.getBoundingClientRect()
+          if (!image || !first || !last) throw new Error('Expected an image and card content')
+          return {
+            title: content?.querySelector('h1, h2')?.textContent,
+            imageTop: image.top,
+            imageBottom: image.bottom,
+            textTop: first.top,
+            textBottom: last.bottom,
+          }
+        })
+        expect(bounds.textTop, bounds.title ?? '').toBeGreaterThanOrEqual(bounds.imageTop - 1)
+        expect(bounds.textBottom, bounds.title ?? '').toBeLessThanOrEqual(bounds.imageBottom + 1)
+      }
+    }
 
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       width,
