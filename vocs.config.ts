@@ -750,6 +750,10 @@ export default defineConfig({
                 link: '/docs/protocol/tip403/receive-policies',
               },
               {
+                text: 'Deposit screening',
+                link: '/docs/protocol/tip403/deposit-screening',
+              },
+              {
                 text: 'Rust Implementation',
                 link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip403_registry',
               },
