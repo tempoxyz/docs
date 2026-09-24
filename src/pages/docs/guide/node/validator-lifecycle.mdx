@@ -158,15 +158,17 @@ The token must be a deployed USD-denominated TIP-20. The FeeManager rejects a pr
 
 ### Claim validator fees
 
-Validator fees accumulate in the [FeeManager](/docs/protocol/fees/spec-fee-amm#key-functions) and must be claimed with `distributeFees` to reach your wallet. Use your configured fee-recipient address and the token address in which the fees accrued:
+Validator fees accumulate in the [FeeManager](/docs/protocol/fees/spec-fee-amm#key-functions) and must be claimed to reach your wallet. Use the fee-recipient address and token address in which the fees accrued:
 
 ```bash
-cast send 0xfeec000000000000000000000000000000000000 \
-  "distributeFees(address,address)" \
-  "<FEE_RECIPIENT_ADDRESS>" "<TOKEN_ADDRESS>" \
+tempo consensus claim-validator-fees \
+  --fee-recipient <FEE_RECIPIENT_ADDRESS> \
+  --token <TOKEN_ADDRESS> \
   --rpc-url https://rpc.tempo.xyz \
-  --account "<KEYSTORE_ACCOUNT>"
+  --ledger
 ```
+
+Use the [signer backend](/docs/guide/node/validator-keys#validator-operator-address-custody) that matches your custody setup. Anyone can submit the claim, but the fees always go to the specified fee recipient. If you changed your fee recipient or preferred token, claim each previous recipient/token pair separately. Use `--dry-run` to inspect the target and calldata without connecting a wallet or sending a transaction.
 
 ### Transfer validator ownership
 
