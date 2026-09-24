@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="396" viewBox="0 88 960 396" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" style="color: var(--foreground, #111)">
+  <title id="zones-validation-title">Stateless batch validation</title>
+  <desc id="zones-validation-desc">Trusted configuration and a batch witness feed stateless validation. The verifier checks witnessed state and replays transactions, recomputes state and queue commitments, validates the Tempo anchor, and returns BatchOutput commitments or an error. A configured settlement prover attests this output before batch submission; follower validation is observational.</desc>
+  <defs>
+    <marker id="zones-validation-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M1 1L7 4L1 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <g fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5">
+    <rect x="32" y="112" width="256" height="152" rx="10"/>
+    <rect x="352" y="112" width="256" height="152" rx="10"/>
+    <rect x="672" y="112" width="256" height="152" rx="10"/>
+    <rect x="672" y="312" width="256" height="148" rx="10"/>
+    <rect x="352" y="312" width="256" height="148" rx="10"/>
+  </g>
+  <g stroke="currentColor" stroke-width="1.75" marker-end="url(#zones-validation-arrow)">
+    <path d="M298 188H342"/>
+    <path d="M618 188H662"/>
+    <path d="M800 274V302"/>
+    <path d="M662 386H618"/>
+  </g>
+
+  <g fill="currentColor" font-size="20" font-weight="600">
+    <text x="56" y="148">1. Inputs</text>
+    <text x="376" y="148">2. Verify and replay</text>
+    <text x="696" y="148">3. Recompute</text>
+    <text x="696" y="348">4. Validate anchor</text>
+  </g>
+  <g fill="var(--foreground-secondary, #606060)" font-size="18">
+    <text x="56" y="190">Trusted configuration</text>
+    <text x="56" y="219">Batch witness</text>
+    <text x="376" y="190">Check witnessed state</text>
+    <text x="376" y="219">Replay transactions</text>
+    <text x="696" y="184">State roots</text>
+    <text x="696" y="213">Canonical block hashes</text>
+    <text x="696" y="242">Queue commitments</text>
+    <text x="696" y="390">Match Tempo checkpoint</text>
+    <text x="696" y="419">Directly or via ancestry</text>
+  </g>
+
+  <text x="376" y="348" fill="currentColor" font-size="20" font-weight="600">5.<tspan dx="6" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19">BatchOutput</tspan></text>
+  <g fill="var(--foreground-secondary, #606060)" font-size="18">
+    <text x="376" y="390">Block, deposit, token,</text>
+    <text x="376" y="419">and withdrawal outputs</text>
+  </g>
+</svg>

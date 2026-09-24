@@ -63,37 +63,47 @@ export function SignInButtons() {
     )
 
   return (
-    <div className="flex gap-1">
-      <Button
-        variant="accent"
-        onClick={async () => {
-          await disconnect.disconnectAsync().catch(() => {})
-          connect.connect({
-            connector,
-            ...(isE2E
-              ? ({ capabilities: { method: 'register', name: 'Tempo Docs' } } as const)
-              : {
-                  capabilities: {
-                    method: 'register',
-                    name: 'Tempo Docs',
-                  } as never,
-                }),
-          })
-        }}
-        type="button"
-      >
-        Sign up
-      </Button>
-      <Button
-        variant="default"
-        onClick={async () => {
-          await disconnect.disconnectAsync().catch(() => {})
-          connect.connect({ connector })
-        }}
-        type="button"
-      >
-        Sign in
-      </Button>
+    <div className="space-y-2">
+      <div className="flex gap-1">
+        <Button
+          variant="accent"
+          onClick={async () => {
+            await disconnect.disconnectAsync().catch(() => {})
+            connect.connect({
+              connector,
+              ...(isE2E
+                ? ({ capabilities: { method: 'register', name: 'Tempo Docs' } } as const)
+                : {
+                    capabilities: {
+                      method: 'register',
+                      name: 'Tempo Docs',
+                    } as never,
+                  }),
+            })
+          }}
+          type="button"
+        >
+          Sign up
+        </Button>
+        <Button
+          variant="default"
+          onClick={async () => {
+            await disconnect.disconnectAsync().catch(() => {})
+            connect.connect({ connector })
+          }}
+          type="button"
+        >
+          Sign in
+        </Button>
+      </div>
+      {connect.error && (
+        <div
+          className="max-w-[22rem] rounded bg-destructiveTint px-3 py-2 font-normal text-[13px] text-destructive leading-normal -tracking-[2%]"
+          role="alert"
+        >
+          {'shortMessage' in connect.error ? connect.error.shortMessage : connect.error.message}
+        </div>
+      )}
     </div>
   )
 }

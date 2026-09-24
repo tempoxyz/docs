@@ -11,15 +11,16 @@ import { DepositToZone } from '../../../../components/guides/zones/DepositToZone
 
 export const depositZoneBalances = [{ label: 'Zone A', token: Demo.pathUsd, zone: 6 }]
 
+import { ZoneDiagram } from '../../../../components/ZoneDiagram'
+
 # Deposit pathUSD to a Tempo Zone on testnet
 
-:::info
-Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
-:::
+Deposit tokens from your public Tempo balance into a private Zone. This example uses `pathUSD` test tokens and a Zone on Tempo Testnet named **Zone A**. Submit a public-chain deposit first, then wait for the Zone to credit the net amount after fees.
 
-Use this guide when you want to move `pathUSD` from your public Tempo balance into `Zone A`. You will submit a public-chain deposit first, then wait for `Zone A` to credit the net amount after fees.
-
-![Zone contract architecture](/developers/learn/zones/diagram-deposit.svg)
+<ZoneDiagram
+  name="deposit"
+  alt="A public account signs a plaintext or encrypted deposit, the Zone A portal locks pathUSD, and Zone A later imports the deposit and credits the private balance."
+/>
 
 The deposit is accepted through `ZonePortal` on the public chain. You need private zone authorization to read the resulting zone balance, because those reads are only exposed to the authenticated account.
 
@@ -39,7 +40,8 @@ By the end of this guide you will have deposited `pathUSD` into `Zone A` and con
 ## Code examples
 
 These snippets assume you already have a signed-in `rootClient` on the public chain and the usual token and zone constants in scope.
-Use the plaintext flow when revealing the recipient and memo is acceptable. Use the encrypted flow when only the zone sequencer should be able to read those fields.
+
+On this legacy testnet deployment, use the plaintext flow when revealing the recipient and memo is acceptable, or the encrypted flow to hide those fields from public-chain observers. Current Zone portals require encrypted deposits and a Tempo refund recipient; neither legacy call signature below applies to those portals. See the [testnet compatibility notes](/docs/guide/private-zones#testnet-compatibility) before adapting these SDK calls to another Zone.
 
 <Tabs stateKey="zone-deposit-mode">
   <Tab title="Plaintext">

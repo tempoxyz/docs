@@ -14,6 +14,7 @@ export type PostSeo = {
   date: string // YYYY-MM-DD
   category: CategorySlug
   authors: string
+  ogImage?: string // root-relative static asset under public/
 }
 
 export function absoluteUrl(base: string, pathname: string): string {
@@ -32,6 +33,12 @@ export function ogImageUrl(base: string, params: { title: string; section: strin
   return absoluteUrl(base, `/api/og?${query}`)
 }
 
+export function blogPostImageUrl(base: string, post: PostSeo): string {
+  return post.ogImage
+    ? absoluteUrl(base, post.ogImage)
+    : ogImageUrl(base, { title: post.title, section: 'BLOG' })
+}
+
 // schema.org BlogPosting payload for a post, serialized for a
 // <script type="application/ld+json"> tag. `ogImage` should already be absolute.
 export function blogPostJsonLd(base: string, post: PostSeo, ogImage: string): string {
@@ -43,7 +50,7 @@ export function blogPostJsonLd(base: string, post: PostSeo, ogImage: string): st
     logo: { '@type': 'ImageObject', url: absoluteUrl(base, '/icon-dark.png') },
   }
   const authors = post.authors
-    .split('/')
+    .split(/\/|\s+&\s+/)
     .map((name) => name.trim())
     .filter(Boolean)
     .map((name) => ({ '@type': 'Person', name }))

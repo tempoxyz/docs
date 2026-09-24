@@ -1,6 +1,7 @@
 type DocsFrontmatter = {
   description?: string
   title?: string
+  ogImage?: string
 }
 
 type DocsStructuredDataContext = {
@@ -15,6 +16,16 @@ type DocsStructuredDataContext = {
  */
 export function docsStructuredDataHead(path: string, { frontmatter }: DocsStructuredDataContext) {
   const pagePath = path.startsWith('/') ? path : `/${path}`
+  // Keep article type in the native head owner: sibling overrides can race
+  // with Vocs' default website tag during streamed prerendering.
+  if (pagePath.startsWith('/blog/')) {
+    return {
+      meta: {
+        ogType: 'article' as const,
+        ...(frontmatter?.ogImage ? { ogImage: frontmatter.ogImage } : {}),
+      },
+    }
+  }
   if (pagePath !== '/docs' && !pagePath.startsWith('/docs/')) return undefined
 
   const title = frontmatter?.title?.trim()

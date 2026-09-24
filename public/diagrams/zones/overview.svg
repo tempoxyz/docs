@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="392" viewBox="0 80 960 392" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" aria-labelledby="zone-overview-title zone-overview-desc">
+  <title id="zone-overview-title">Public settlement, private execution</title>
+  <desc id="zone-overview-desc">A Zone Portal on Tempo holds backing assets. Finalized deposits credit the Zone's private ledger. Withdrawals return to Tempo after settlement. The Zone operator sees private state and submits batch commitments with sequencer certificates.</desc>
+  <defs>
+    <marker id="zone-overview-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="m2 1 6 4-6 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+
+  <text x="32" y="124" fill="currentColor" font-size="20" font-weight="600">Tempo</text>
+  <text x="648" y="124" fill="currentColor" font-size="20" font-weight="600">Tempo Zone</text>
+
+  <rect x="32" y="148" width="280" height="300" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+  <text x="56" y="188" fill="currentColor" font-size="20" font-family="ui-monospace, SFMono-Regular, monospace">ZonePortal</text>
+  <text x="56" y="215" fill="var(--foreground-secondary, #646464)" font-size="17">Settlement and bridge</text>
+  <g stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="56" y="248" width="58" height="50" rx="7"/>
+    <path d="M65 248v-7a20 20 0 0 1 40 0v7"/>
+    <circle cx="85" cy="270" r="5"/>
+    <path d="M85 275v8"/>
+  </g>
+  <text x="134" y="266" fill="currentColor" font-size="18" font-weight="600">Backing assets</text>
+  <text x="134" y="291" fill="var(--foreground-secondary, #646464)" font-size="16">Locked on Tempo</text>
+  <path d="M56 323h232" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+  <text x="56" y="358" fill="currentColor" font-size="18">Bridge queues</text>
+  <text x="56" y="389" fill="currentColor" font-size="18">Accepted batches</text>
+  <text x="56" y="421" fill="var(--foreground-secondary, #646464)" font-size="16">Checks sequencer certificates</text>
+
+  <rect x="648" y="148" width="280" height="180" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+  <text x="672" y="188" fill="currentColor" font-size="20" font-weight="600">Private account ledger</text>
+  <g stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+    <circle cx="682" cy="220" r="7"/>
+    <path d="M706 220h75m43 0h79"/>
+    <circle cx="682" cy="251" r="7"/>
+    <path d="M706 251h75m43 0h79"/>
+  </g>
+  <text x="672" y="298" fill="var(--foreground-secondary, #646464)" font-size="17">Balances and account history</text>
+
+  <rect x="648" y="368" width="280" height="80" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+  <g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="672" y="389" width="32" height="13" rx="3"/>
+    <rect x="672" y="414" width="32" height="13" rx="3"/>
+    <path d="M679 396h1m6 0h1m-8 25h1m6 0h1"/>
+  </g>
+  <text x="724" y="406" fill="currentColor" font-size="20" font-weight="600">Zone operator</text>
+  <text x="724" y="431" fill="var(--foreground-secondary, #646464)" font-size="16">Runs the private chain</text>
+  <path d="M788 367v-30" stroke="currentColor" stroke-width="1.8" marker-end="url(#zone-overview-arrow)"/>
+
+  <g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" marker-end="url(#zone-overview-arrow)">
+    <path d="M324 217h312"/>
+    <path d="M636 300H324"/>
+    <path d="M636 408H324" stroke-dasharray="6 6"/>
+  </g>
+  <g fill="currentColor" font-size="18" text-anchor="middle">
+    <text x="480" y="188">Deposits</text>
+    <text x="480" y="270">Withdrawals</text>
+    <text x="480" y="370">Settlement</text>
+  </g>
+  <g fill="var(--foreground-secondary, #646464)" font-size="15" text-anchor="middle">
+    <text x="480" y="242">After Tempo finality</text>
+    <text x="480" y="325">After batch acceptance</text>
+    <text x="480" y="394">Commitments + certificates</text>
+  </g>
+
+</svg>

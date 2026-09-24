@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="278" viewBox="0 84 960 278" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" style="color: var(--foreground, #111)">
+  <title id="zones-privacy-title">Who can see Zone activity</title>
+  <desc id="zones-privacy-desc">Public observers see bridge assets, amounts, withdrawal destinations, and settlement checkpoints. An authenticated account can read its own private balance and history. The operator can see the full Zone state. Public bridge amounts and timing can still reveal connections.</desc>
+
+  <g fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5">
+    <rect x="32" y="108" width="288" height="230" rx="10"/>
+    <rect x="336" y="108" width="288" height="230" rx="10"/>
+    <rect x="640" y="108" width="288" height="230" rx="10"/>
+  </g>
+
+  <!-- Public observer: an eye sees the public bridge and settlement surface. -->
+  <g transform="translate(56 131)" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M0 13C7 0 25 0 32 13C25 26 7 26 0 13Z"/>
+    <circle cx="16" cy="13" r="5"/>
+  </g>
+  <text x="56" y="191" fill="currentColor" font-size="21" font-weight="600">Public observer</text>
+  <g fill="var(--foreground-secondary, #606060)" font-size="18">
+    <text x="56" y="229">Bridge assets and amounts</text>
+    <text x="56" y="263">Withdrawal destinations</text>
+    <text x="56" y="297">Settlement checkpoints</text>
+  </g>
+
+  <!-- An authenticated account has access to its own private records. -->
+  <g transform="translate(360 131)" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="16" cy="6" r="6"/>
+    <path d="M4 29V25C4 15 28 15 28 25V29"/>
+  </g>
+  <text x="360" y="191" fill="currentColor" font-size="21" font-weight="600">Your account</text>
+  <g fill="var(--foreground-secondary, #606060)" font-size="18">
+    <text x="360" y="229">Your private balance</text>
+    <text x="360" y="263">Your transaction history</text>
+    <text x="360" y="297">Authenticated access</text>
+  </g>
+
+  <!-- Operator visibility is a trust boundary, not an exemption in public getters. -->
+  <g transform="translate(664 131)" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="0" y="0" width="32" height="12" rx="3"/>
+    <rect x="0" y="18" width="32" height="12" rx="3"/>
+    <path d="M6 6H6.1M6 24H6.1M12 6H25M12 24H25"/>
+  </g>
+  <text x="664" y="191" fill="currentColor" font-size="21" font-weight="600">Zone operator</text>
+  <g fill="var(--foreground-secondary, #606060)" font-size="18">
+    <text x="664" y="229">All account balances</text>
+    <text x="664" y="263">Full transaction activity</text>
+    <text x="664" y="297">Underlying Zone state</text>
+  </g>
+</svg>

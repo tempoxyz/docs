@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="332" viewBox="0 0 960 332" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" style="color: var(--foreground, #111)">
+<title>Withdrawal from a Zone to Tempo</title>
+<desc>The outbox burns Zone tokens and queues a withdrawal. The operator finalizes the withdrawal queue and submits signed batch commitments. The portal checks the certificate and continuity and calls its configured verifier. After acceptance the withdrawal is processed for public delivery or a callback.</desc>
+<text x="32" y="42" font-size="16" font-weight="500" text-anchor="start" fill="var(--foreground-secondary, #666)">ZONE</text>
+<text x="496" y="42" font-size="16" font-weight="500" text-anchor="start" fill="var(--foreground-secondary, #666)">TEMPO</text>
+<rect x="32" y="64" width="200" height="244" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+<g transform="translate(132 112)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+<rect x="-22" y="-25" width="44" height="50" rx="4"/>
+<path d="M-11 -12h23 M-11 0h23 M-11 12h14"/>
+</g>
+<text x="132" y="165" font-size="20" font-weight="600" text-anchor="middle" fill="currentColor">ZoneOutbox</text>
+<text x="132" y="210" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Burn Zone tokens</text>
+<text x="132" y="238" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Record recipient</text>
+<text x="132" y="266" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Queue withdrawal</text>
+<path d="M240 186 L256 186 M248.00 182.00 L256 186 L248.00 190.00" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="264" y="64" width="200" height="244" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+<g transform="translate(364 112)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+<circle r="23"/>
+<path d="M-11 0l8 8 16-17"/>
+</g>
+<text x="364" y="165" font-size="20" font-weight="600" text-anchor="middle" fill="currentColor">Signed batch</text>
+<text x="364" y="210" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Finalize queue</text>
+<text x="364" y="238" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Sign commitments</text>
+<text x="364" y="266" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Submit batch</text>
+<path d="M472 186 L488 186 M480.00 182.00 L488 186 L480.00 190.00" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="496" y="64" width="200" height="244" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+<g transform="translate(596 112)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+<rect x="-18" y="-3" width="36" height="28" rx="4"/>
+<path d="M-11 -3v-11a11 11 0 0122 0v11 M0 8v7"/>
+</g>
+<text x="596" y="165" font-size="20" font-weight="600" text-anchor="middle" fill="currentColor">ZonePortal</text>
+<text x="596" y="210" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Check certificate</text>
+<text x="596" y="238" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">and continuity</text>
+<text x="596" y="266" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Call verifier; accept</text>
+<path d="M704 186 L720 186 M712.00 182.00 L720 186 L712.00 190.00" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="728" y="64" width="200" height="244" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+<g transform="translate(828 112)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+<rect x="-23" y="-16" width="46" height="34" rx="4"/>
+<path d="M-21 -16v-6h36v6 M9 -5h17v15H9z"/>
+<circle cx="16" cy="2.5" r="1"/>
+</g>
+<text x="828" y="165" font-size="20" font-weight="600" text-anchor="middle" fill="currentColor">Tempo recipient</text>
+<text x="828" y="210" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Process withdrawal</text>
+<text x="828" y="238" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Deliver tokens</text>
+<text x="828" y="266" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Optional callback</text>
+</svg>

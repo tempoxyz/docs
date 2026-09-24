@@ -2,7 +2,7 @@ import { posts } from 'virtual:blog-posts'
 import { type CategorySlug, categoryBySlug } from '../../marketing/app/blog/_lib/categories'
 import BlogPostRoute from '../../marketing/BlogPostRoute'
 import { routeMetadata } from '../../marketing/routeMetadata'
-import { blogPostJsonLd, ogImageUrl, type PostSeo, resolveBaseUrl } from '../../marketing/seo'
+import { blogPostImageUrl, blogPostJsonLd, type PostSeo, resolveBaseUrl } from '../../marketing/seo'
 
 const postBySlug = new Map<string, PostSeo>(
   posts.map((post) => [
@@ -14,6 +14,7 @@ const postBySlug = new Map<string, PostSeo>(
       date: post.date,
       category: post.category as CategorySlug,
       authors: post.authors,
+      ogImage: post.ogImage,
     },
   ]),
 )
@@ -32,26 +33,22 @@ export default function Page({ slug }: { slug: string }) {
 
   const title = post ? post.title : routeMetadata['/blog'].title
   const description = post?.excerpt ?? routeMetadata['/blog'].description
+  const image = post ? blogPostImageUrl(base, post) : ''
 
   return (
     <BlogPostRoute
       slug={slug}
-      metadata={{ title, description }}
+      metadata={{ title, description, ogImage: post?.ogImage ? image : undefined }}
       head={
         post ? (
           <>
-            <meta property="og:type" content="article" />
             <meta property="article:published_time" content={post.date} />
             <meta property="article:section" content={categoryBySlug(post.category).label} />
             <script
               type="application/ld+json"
               // biome-ignore lint/security/noDangerouslySetInnerHtml: build-time, trusted JSON-LD
               dangerouslySetInnerHTML={{
-                __html: blogPostJsonLd(
-                  base,
-                  post,
-                  ogImageUrl(base, { title: post.title, section: 'BLOG' }),
-                ),
+                __html: blogPostJsonLd(base, post, image),
               }}
             />
           </>

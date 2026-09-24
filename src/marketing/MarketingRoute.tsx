@@ -100,7 +100,11 @@ export default function MarketingRoute({
 
   return (
     <>
-      <PageHead title={resolvedMetadata.title} description={resolvedMetadata.description}>
+      <PageHead
+        title={resolvedMetadata.title}
+        description={resolvedMetadata.description}
+        ogImage={resolvedMetadata.ogImage}
+      >
         <MarketingJsonLd
           route={route}
           title={resolvedMetadata.title}

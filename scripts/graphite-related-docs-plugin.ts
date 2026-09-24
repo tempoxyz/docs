@@ -4,6 +4,7 @@ import type { Plugin } from 'vite'
 import {
   canonicalDocsUrl,
   GRAPHITE_RELATED_DOCS_ENDPOINT,
+  normalizeDocsRoutePath,
   PUBLIC_DOCS_PREFIX,
   parseGraphiteRelatedDocs,
   type RelatedDocsLink,
@@ -58,10 +59,64 @@ export function graphiteRelatedDocsPlugin(): Plugin {
         manifestPromises.set(rootDirectory, promise)
       }
 
-      const manifest = await promise.catch(() => ({}))
+      const manifest = await overlayLocalDocsMetadata(
+        rootDirectory,
+        await promise.catch(() => ({})),
+      )
       return `export default ${JSON.stringify(manifest)}`
     },
   }
+}
+
+/** Keep recommendation ranking from Graphite, but use this checkout's page copy. */
+export async function overlayLocalDocsMetadata(
+  rootDirectory: string,
+  manifest: RelatedDocsManifest,
+): Promise<RelatedDocsManifest> {
+  const metadata = new Map<string, { title?: string; description?: string }>()
+  const files = await filesWithin(path.join(rootDirectory, 'src/pages/docs'))
+  await Promise.all(
+    files.map(async (file) => {
+      const route = docsPageRouteFromFile(path.relative(rootDirectory, file))
+      if (!route) return
+      const source = await fs.readFile(file, 'utf8')
+      const frontmatter = source.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/)?.[1]
+      if (!frontmatter) return
+      const title = inlineFrontmatterString(frontmatter, 'title')
+      const description = inlineFrontmatterString(frontmatter, 'description')
+      metadata.set(route, {
+        ...(title ? { title } : {}),
+        ...(description ? { description } : {}),
+      })
+    }),
+  )
+  return Object.fromEntries(
+    Object.entries(manifest).map(([route, links]) => [
+      route,
+      links.map((link) => ({
+        ...link,
+        ...metadata.get(normalizeDocsRoutePath(new URL(link.href, TEMPO_ORIGIN).pathname)),
+      })),
+    ]),
+  )
+}
+
+function inlineFrontmatterString(frontmatter: string, key: string): string | undefined {
+  const value = frontmatter.match(new RegExp(`^${key}:[ \t]*(.+)$`, 'm'))?.[1]?.trim()
+  if (!value) return
+  // Page metadata uses inline strings. Preserve the upstream fallback for other YAML forms.
+  if ('>|&*![{'.includes(value.charAt(0))) return
+  if (value.startsWith('"')) {
+    try {
+      const parsed: unknown = JSON.parse(value)
+      return typeof parsed === 'string' ? parsed : undefined
+    } catch {
+      return
+    }
+  }
+  if (value.startsWith("'"))
+    return value.endsWith("'") ? value.slice(1, -1).replaceAll("''", "'") : undefined
+  return value.replace(/\s+#.*$/, '').trim()
 }
 
 export function docsPageRouteFromFile(filePath: string): string | undefined {

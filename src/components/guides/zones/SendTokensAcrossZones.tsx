@@ -1,7 +1,7 @@
 'use client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { createClient, encodeAbiParameters, type Hex, parseAbiItem, parseUnits } from 'viem'
+import { createClient, encodeAbiParameters, type Hex, parseAbiItem, parseUnits, toHex } from 'viem'
 import { Actions, tempoActions } from 'viem/tempo'
 import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
 import { useConnection, useConnectorClient, usePublicClient } from 'wagmi'
@@ -9,12 +9,10 @@ import { Hooks } from 'wagmi/tempo'
 import {
   getZoneRpcHttpUrl,
   getZoneRpcTransportConfig,
-  publicSettlementLookbackBlocks,
   routerCallbackGasLimit,
   swapAndDepositRouter,
   ZONE_A,
   ZONE_B,
-  zeroBytes32,
   zoneRpcSyncTimeout,
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
@@ -61,13 +59,14 @@ type ZoneClientLike = {
       account: unknown
       amount: bigint
       data?: Hex
+      fallbackRecipient: Hex
       feeToken: Hex
       gas?: bigint
       timeout: number
       to: Hex
       token: Hex
     }) => Promise<{ receipt: { blockNumber: bigint; transactionHash: Hex } }>
-    getWithdrawalFee: (parameters?: { gasLimit?: bigint | undefined }) => Promise<bigint>
+    getWithdrawalFee: (parameters?: { gas?: bigint | undefined }) => Promise<bigint>
     signAuthorizationToken: ZoneAuthClientLike['zone']['signAuthorizationToken']
   }
 }
@@ -156,8 +155,26 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     zoneClient: sourceZoneClient,
   })
 
+  const targetZoneAuthorization = useZoneAuthorization({
+    address,
+    chainId: ZONE_B.chainId,
+    queryKey: ['guide-private-zones-cross-zone-send-target-auth', address, ZONE_B.id],
+    zoneClient: targetZoneClient,
+  })
+
+  const zonesAuthorized =
+    sourceZoneAuthorization.isAuthorized && targetZoneAuthorization.isAuthorized
+  const authorizeZonesMutation = useMutation({
+    mutationFn: async () => {
+      if (!sourceZoneAuthorization.isAuthorized)
+        await sourceZoneAuthorization.authorizeMutation.mutateAsync()
+      if (!targetZoneAuthorization.isAuthorized)
+        await targetZoneAuthorization.authorizeMutation.mutateAsync()
+    },
+  })
+
   const sourceZoneBalanceQuery = useQuery({
-    enabled: Boolean(sourceZoneClient && sourceZoneAuthorization.isAuthorized),
+    enabled: Boolean(sourceZoneClient && zonesAuthorized),
     queryKey: ['guide-private-zones-cross-zone-send-source-balance', address, ZONE_A.id],
     queryFn: async () => {
       if (!sourceZoneClient) throw new Error('Zone A client not ready')
@@ -172,7 +189,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   })
 
   const transferPrereqsQuery = useQuery({
-    enabled: Boolean(connectorClient && publicClient && sourceZoneAuthorization.isAuthorized),
+    enabled: Boolean(connectorClient && publicClient && zonesAuthorized),
     queryKey: ['guide-private-zones-cross-zone-send-prereqs', address, ZONE_A.id, ZONE_B.id],
     queryFn: async () => {
       if (!publicClient) throw new Error('public client not ready')
@@ -180,7 +197,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
 
       const [routedWithdrawalFee, targetDepositFee, targetTokenEnabled] = await Promise.all([
         sourceZoneClient.zone.getWithdrawalFee({
-          gasLimit: routerCallbackGasLimit,
+          gas: routerCallbackGasLimit,
         }),
         publicClient.readContract({
           address: ZONE_B.portalAddress,
@@ -282,12 +299,21 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         throw new Error('Zone A needs more pathUSD before the send can start.')
       }
 
+      if (!targetZoneClient || !targetZoneAuthorization.isAuthorized)
+        throw new Error('Authorize Zone B reads before submitting')
+      const { amount: startingTargetBalance } = await targetZoneClient.token.getBalance({
+        account: address,
+        token: pathUsd,
+      })
+
+      const memo = toHex(crypto.getRandomValues(new Uint8Array(32)))
       const anchorBlock = await publicClient.getBlockNumber()
 
       const { receipt } = await sourceZoneClient.zone.requestWithdrawalSync({
         account: rootWebAuthnAccount,
         amount: TRANSFER_AMOUNT,
-        data: encodeRouterCallback(address),
+        data: encodeRouterCallback(address, memo),
+        fallbackRecipient: address,
         feeToken: pathUsd,
         gas: routerCallbackGasLimit,
         timeout: zoneRpcSyncTimeout,
@@ -297,6 +323,8 @@ function ConnectedZoneFlow(props: { address: Hex }) {
 
       return {
         anchorBlock,
+        memo,
+        startingTargetBalance,
         minimumTargetIncrease: transferPrereqsQuery.data.minimumTargetIncrease,
         receipt,
         targetDepositFee: transferPrereqsQuery.data.targetDepositFee,
@@ -316,22 +344,24 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       'guide-private-zones-cross-zone-send-settlement',
       address,
       sendMutation.data?.anchorBlock?.toString(),
+      sendMutation.data?.memo,
     ],
     queryFn: async () => {
       if (!publicClient) throw new Error('public client not ready')
       if (!sendMutation.data) throw new Error('send submission not ready')
 
-      const fromBlock =
-        sendMutation.data.anchorBlock > publicSettlementLookbackBlocks
-          ? sendMutation.data.anchorBlock - publicSettlementLookbackBlocks
-          : 0n
+      // The anchor is captured before submission; earlier deposits cannot settle this request.
+      const fromBlock = sendMutation.data.anchorBlock + 1n
       const latest = await publicClient.getBlockNumber()
-      const logs = await publicClient.getLogs({
-        address: ZONE_B.portalAddress,
-        event: targetDepositEvent,
-        fromBlock,
-        toBlock: latest,
-      })
+      const logs =
+        latest < fromBlock
+          ? []
+          : await publicClient.getLogs({
+              address: ZONE_B.portalAddress,
+              event: targetDepositEvent,
+              fromBlock,
+              toBlock: latest,
+            })
 
       const match = logs.find((log) => {
         const sender = log.args.sender
@@ -347,11 +377,12 @@ function ConnectedZoneFlow(props: { address: Hex }) {
           sender.toLowerCase() === swapAndDepositRouter.toLowerCase() &&
           token.toLowerCase() === pathUsd.toLowerCase() &&
           recipient.toLowerCase() === address.toLowerCase() &&
+          log.args.memo === sendMutation.data.memo &&
           netAmount >= sendMutation.data.minimumTargetIncrease
         )
       })
 
-      return match ? { txHash: match.transactionHash } : null
+      return match ? { blockNumber: match.blockNumber, txHash: match.transactionHash } : null
     },
     refetchInterval: (query) => {
       if (query.state.error || query.state.data) return false
@@ -363,31 +394,35 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     retry: false,
   })
 
-  const targetZoneAuthorization = useZoneAuthorization({
-    address,
-    chainId: ZONE_B.chainId,
-    queryKey: ['guide-private-zones-cross-zone-send-target-auth', address, ZONE_B.id],
-    zoneClient: targetZoneClient,
-  })
-
   const targetZoneBalanceQuery = useQuery({
     enabled: Boolean(
       targetZoneClient && targetZoneAuthorization.isAuthorized && settlementQuery.data,
     ),
-    queryKey: ['guide-private-zones-cross-zone-send-target-balance', address, ZONE_B.id],
+    queryKey: [
+      'guide-private-zones-cross-zone-send-target-balance',
+      address,
+      ZONE_B.id,
+      sendMutation.data?.memo,
+    ],
     queryFn: async () => {
       if (!targetZoneClient) throw new Error('Zone B client not ready')
+
+      if (!settlementQuery.data || !sendMutation.data) throw new Error('settlement not ready')
 
       const { amount } = await targetZoneClient.token.getBalance({
         account: address,
         token: pathUsd,
       })
-      return amount
+      return (
+        amount >= sendMutation.data.startingTargetBalance + sendMutation.data.minimumTargetIncrease
+      )
     },
+    refetchInterval: (query) => (query.state.error || query.state.data === true ? false : 1_500),
     staleTime: 30_000,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
-    retry: false,
+    retry: 3,
+    retryDelay: 1_500,
   })
 
   const hasRootBalance = Boolean(rootBalance && rootBalance.amount > 0n)
@@ -397,31 +432,33 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   const targetBalanceReady = Boolean(
     settlementQuery.data &&
       targetZoneAuthorization.isAuthorized &&
-      targetZoneBalanceQuery.isSuccess,
+      targetZoneBalanceQuery.data === true,
   )
   const sourceAuthIsPreparing =
-    sourceZoneAuthorization.isChecking || sourceZoneAuthorization.authorizeMutation.isPending
-  const stepTwoAction = sourceZoneAuthorization.isAuthorized ? undefined : (
+    sourceZoneAuthorization.isChecking ||
+    targetZoneAuthorization.isChecking ||
+    authorizeZonesMutation.isPending
+  const stepTwoAction = zonesAuthorized ? undefined : (
     <Button
       className="font-normal text-[14px] -tracking-[2%]"
       disabled={sourceAuthIsPreparing || !sourceZoneClient}
-      onClick={() => sourceZoneAuthorization.authorizeMutation.mutate()}
+      onClick={() => authorizeZonesMutation.mutate()}
       type="button"
       variant={sourceZoneClient ? 'accent' : 'default'}
     >
       {sourceAuthIsPreparing
-        ? `Authorizing ${ZONE_A.label} reads`
-        : sourceZoneAuthorization.authorizeMutation.isError
+        ? `Authorizing ${ZONE_A.label} and ${ZONE_B.label} reads`
+        : authorizeZonesMutation.isError
           ? 'Retry'
-          : `Authorize ${ZONE_A.label} reads`}
+          : `Authorize ${ZONE_A.label} and ${ZONE_B.label} reads`}
     </Button>
   )
 
   React.useEffect(() => {
-    if (!sourceZoneAuthorization.isAuthorized) return
+    if (!zonesAuthorized) return
 
     void queryClient.invalidateQueries({ queryKey: sourceFooterQueryKey })
-  }, [queryClient, sourceFooterQueryKey, sourceZoneAuthorization.isAuthorized])
+  }, [queryClient, sourceFooterQueryKey, zonesAuthorized])
 
   React.useEffect(() => {
     if (!targetZoneAuthorization.isAuthorized) return
@@ -457,12 +494,10 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     stepThreeAction = (
       <Button
         className="font-normal text-[14px] -tracking-[2%]"
-        disabled={
-          fundMutation.isPending || !sourceZoneAuthorization.isAuthorized || rootBalanceIsPending
-        }
+        disabled={fundMutation.isPending || !zonesAuthorized || rootBalanceIsPending}
         onClick={() => fundMutation.mutate()}
         type="button"
-        variant={sourceZoneAuthorization.isAuthorized ? 'accent' : 'default'}
+        variant={zonesAuthorized ? 'accent' : 'default'}
       >
         {fundMutation.isPending ? 'Getting pathUSD' : 'Get testnet pathUSD'}
       </Button>
@@ -471,10 +506,10 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     stepThreeAction = (
       <Button
         className="font-normal text-[14px] -tracking-[2%]"
-        disabled={topUpMutation.isPending || !sourceZoneAuthorization.isAuthorized}
+        disabled={topUpMutation.isPending || !zonesAuthorized}
         onClick={() => topUpMutation.mutate()}
         type="button"
-        variant={sourceZoneAuthorization.isAuthorized ? 'accent' : 'default'}
+        variant={zonesAuthorized ? 'accent' : 'default'}
       >
         {topUpMutation.isPending ? 'Approving + topping up Zone A' : 'Approve + top up Zone A'}
       </Button>
@@ -541,7 +576,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
           : 'Authorize Zone B reads'}
       </Button>
     )
-  } else if (targetZoneBalanceQuery.isPending) {
+  } else if (targetZoneBalanceQuery.isPending || !targetBalanceReady) {
     stepSixAction = (
       <Button
         className="font-normal text-[14px] -tracking-[2%]"
@@ -557,16 +592,20 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   return (
     <>
       <Step
-        active={!sourceZoneAuthorization.isAuthorized}
-        completed={sourceZoneAuthorization.isAuthorized}
+        active={!zonesAuthorized}
+        completed={zonesAuthorized}
         actions={stepTwoAction}
-        error={sourceZoneAuthorization.error}
+        error={
+          authorizeZonesMutation.error ??
+          sourceZoneAuthorization.error ??
+          targetZoneAuthorization.error
+        }
         number={2}
-        title={`Authorize private reads in ${ZONE_A.label}.`}
+        title={`Authorize private reads in ${ZONE_A.label} and ${ZONE_B.label}.`}
       />
 
       <Step
-        active={sourceZoneAuthorization.isAuthorized && !sourceZoneBalanceStepComplete}
+        active={zonesAuthorized && !sourceZoneBalanceStepComplete}
         completed={sourceZoneBalanceStepComplete}
         actions={stepThreeAction}
         error={
@@ -624,7 +663,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
           (settlementQuery.data ? targetZoneBalanceQuery.error : undefined)
         }
         number={6}
-        title={`Authorize private reads in ${ZONE_B.label} and confirm the pathUSD balance.`}
+        title={`Confirm the credited pathUSD balance in ${ZONE_B.label}.`}
       />
     </>
   )
@@ -639,7 +678,7 @@ function DisconnectedZoneFlow() {
         actions={undefined}
         error={undefined}
         number={2}
-        title={`Authorize private reads in ${ZONE_A.label}.`}
+        title={`Authorize private reads in ${ZONE_A.label} and ${ZONE_B.label}.`}
       />
       <Step
         active={false}
@@ -671,13 +710,13 @@ function DisconnectedZoneFlow() {
         actions={undefined}
         error={undefined}
         number={6}
-        title={`Authorize private reads in ${ZONE_B.label} and confirm the pathUSD balance.`}
+        title={`Confirm the credited pathUSD balance in ${ZONE_B.label}.`}
       />
     </>
   )
 }
 
-function encodeRouterCallback(recipient: Hex) {
+function encodeRouterCallback(recipient: Hex, memo: Hex) {
   return encodeAbiParameters(
     [
       { type: 'bool' },
@@ -687,7 +726,7 @@ function encodeRouterCallback(recipient: Hex) {
       { type: 'bytes32' },
       { type: 'uint128' },
     ],
-    [false, pathUsd, ZONE_B.portalAddress, recipient, zeroBytes32, 0n],
+    [false, pathUsd, ZONE_B.portalAddress, recipient, memo, 0n],
   )
 }
 

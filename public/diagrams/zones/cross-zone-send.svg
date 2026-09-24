@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="326" viewBox="0 81 960 326" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" style="color: var(--foreground, #111)">
+<title>Cross-zone same-token transfer</title>
+<desc>Zone A withdraws pathUSD. A public router deposits into Zone B. Zone B credits the destination only after importing the deposit.</desc>
+<rect x="248" y="105" width="464" height="278" rx="14" fill="none" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+<text x="480" y="135" font-size="15" font-weight="500" text-anchor="middle" fill="var(--foreground-secondary, #666)">TEMPO · ONE PUBLIC TRANSACTION</text>
+<text x="128" y="135" font-size="15" font-weight="500" text-anchor="middle" fill="var(--foreground-secondary, #666)">PRIVATE</text>
+<text x="832" y="135" font-size="15" font-weight="500" text-anchor="middle" fill="var(--foreground-secondary, #666)">PRIVATE</text>
+<rect x="32" y="158" width="188" height="206" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+<g transform="translate(126 204)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+<rect x="-22" y="-25" width="44" height="50" rx="4"/>
+<path d="M-11 -12h23 M-11 0h23 M-11 12h14"/>
+</g>
+<text x="126" y="256" font-size="22" font-weight="600" text-anchor="middle" fill="currentColor">Zone A</text>
+<text x="126" y="298" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Withdraw pathUSD</text>
+<text x="126" y="325" font-size="15" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Source balance reduced</text>
+<path d="M231 250 L256 250 M248.00 246.00 L256 250 L248.00 254.00" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="268" y="158" width="188" height="206" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+<g transform="translate(362 204)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+<path d="M-24 0h48 M15 -9l9 9-9 9"/>
+<circle cx="-21" cy="0" r="3" fill="currentColor"/>
+</g>
+<text x="362" y="256" font-size="22" font-weight="600" text-anchor="middle" fill="currentColor">Route</text>
+<text x="362" y="298" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Keep pathUSD</text>
+<text x="362" y="325" font-size="15" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">No DEX swap</text>
+<path d="M467 250 L492 250 M484.00 246.00 L492 250 L484.00 254.00" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="504" y="158" width="188" height="206" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+<g transform="translate(598 204)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+<rect x="-18" y="-3" width="36" height="28" rx="4"/>
+<path d="M-11 -3v-11a11 11 0 0122 0v11 M0 8v7"/>
+</g>
+<text x="598" y="256" font-size="22" font-weight="600" text-anchor="middle" fill="currentColor">Deposit</text>
+<text x="598" y="298" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Zone B portal</text>
+<text x="598" y="325" font-size="15" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Enqueue pathUSD</text>
+<path d="M703 250 L728 250 M720.00 246.00 L728 250 L720.00 254.00" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="740" y="158" width="188" height="206" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+<g transform="translate(834 204)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+<rect x="-22" y="-25" width="44" height="50" rx="4"/>
+<path d="M-11 -12h23 M-11 0h23 M-11 12h14"/>
+</g>
+<text x="834" y="256" font-size="22" font-weight="600" text-anchor="middle" fill="currentColor">Zone B</text>
+<text x="834" y="298" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Credit pathUSD</text>
+<text x="834" y="325" font-size="15" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">After deposit import</text>
+</svg>
