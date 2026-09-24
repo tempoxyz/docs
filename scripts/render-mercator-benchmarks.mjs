@@ -58,6 +58,6 @@ for (const p of points) {
 <text font-family="Geist Mono, monospace" x="${p.x}" y="391" fill="#f2f1ec" font-size="16" text-anchor="middle">${p.effort}</text>
 <text font-family="Geist Mono, monospace" x="${p.x}" y="418" fill="#b9a3ff" font-size="14" text-anchor="middle">+${(p.mercator - p.baseline).toFixed(1)} pts</text>`)
 }
-svg.push(`<text font-family="Geist Mono, monospace" x="420" y="453" fill="#a7a2ad" font-size="14" text-anchor="middle">Reasoning effort</text>
+svg.push(`<text font-family="Geist Mono, monospace" x="420" y="453" fill="#a7a2ad" font-size="14" text-anchor="middle">REASONING EFFORT</text>
 </svg>\n`)
 writeFileSync(new URL('../public/blog/mercator-benchmarks.svg', import.meta.url), svg.join('\n'))
