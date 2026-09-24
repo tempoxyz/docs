@@ -23,7 +23,7 @@ export const TPS_CHART_DEFAULT_TICKS = [10_000, 15_000, 20_000, 25_000]
 function formatTpsTick(value: number, yTicks: number[]) {
   const tickStep = yTicks.length >= 2 ? Math.abs(yTicks[1] - yTicks[0]) : 1000
   const precision = tickStep >= 1000 ? 0 : tickStep % 100 === 0 ? 1 : 2
-  const compactValue = (value / 1000).toFixed(precision).replace(/\.?0+$/, '')
+  const compactValue = Number((value / 1000).toFixed(precision))
   return `${compactValue}K`
 }
 

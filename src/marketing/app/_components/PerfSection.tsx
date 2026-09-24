@@ -5,7 +5,7 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { developersPath } from '../_lib/developersPaths'
 import { linePath } from '../performance/_lib/chart'
-import type { PerfRun } from '../performance/_lib/runs'
+import { type PerfRun, workloadSegments } from '../performance/_lib/runs'
 import ArrowUpRight from './ArrowUpRight'
 import Button from './Button'
 import EdgeMarkers from './EdgeMarkers'
@@ -188,10 +188,11 @@ export default function PerfSection({ stats, runs }: { stats: Stat[]; runs: Perf
   const mainValue = (category: string, fallback: string) =>
     stats.find((s) => s.category === category)?.main.value ?? fallback
 
-  // Headline numbers come from the live benchmark overlay where the API
-  // provides them (Speed, Reliability); the sparklines draw the full nightly
-  // feed. Cost and uptime claims stay static.
-  const hasFeed = runs.length >= 2
+  // Headline numbers come from the latest benchmark. Keep their sparklines
+  // within its workload so a preset change does not look like a TPS regression.
+  const latestSegment = workloadSegments(runs).at(-1)
+  const sparkRuns = latestSegment ? runs.slice(latestSegment.start, latestSegment.end) : []
+  const hasFeed = sparkRuns.length >= 2
   const cards = [
     {
       href: `${PERFORMANCE_PAGE}#settlement`,
@@ -206,8 +207,8 @@ export default function PerfSection({ stats, runs }: { stats: Stat[]; runs: Perf
       href: PERFORMANCE_PAGE,
       label: 'High throughput',
       value: `${mainValue('Reliability', '21,200')} TPS`,
-      desc: 'Settled transfers per second measured during benchmark runs.',
-      spark: hasFeed ? <TpsSpark runs={runs} /> : null,
+      desc: 'Settled transactions per second in the latest nightly benchmark.',
+      spark: hasFeed ? <TpsSpark runs={sparkRuns} /> : null,
       className: 'lg:col-span-4',
     },
     {
@@ -215,7 +216,7 @@ export default function PerfSection({ stats, runs }: { stats: Stat[]; runs: Perf
       label: 'Predictably low fees',
       value: '<$0.001',
       desc: 'Average fee for standard stablecoin transfers.',
-      spark: hasFeed ? <LaneSpark runs={runs} /> : null,
+      spark: hasFeed ? <LaneSpark runs={sparkRuns} /> : null,
       className: 'sm:border-r lg:col-span-3',
     },
     {
