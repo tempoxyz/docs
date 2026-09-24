@@ -3,8 +3,8 @@ import Footer from '../_components/Footer'
 import Header from '../_components/Header'
 import Reveal from '../_components/Reveal'
 import { developersPath } from '../_lib/developersPaths'
-import FeaturedVisual from './_components/FeaturedVisual'
 import PostExplorer from './_components/PostExplorer'
+import PostImage from './_components/PostImage'
 import { formatDate, isNew } from './_lib/categories'
 import { getAllPosts, getFeaturedPost } from './_lib/posts'
 
@@ -19,6 +19,7 @@ export default function BlogPage() {
     category: post.category,
     categories: post.categories,
     authors: post.authors,
+    ogImage: post.ogImage,
     featured: post.featured,
   }))
 
@@ -32,8 +33,8 @@ export default function BlogPage() {
             href={developersPath(`/blog/${featured.slug}`)}
             className="group grid border border-line transition-colors hover:bg-surface-block lg:grid-cols-2"
           >
-            <div className="relative h-[220px] overflow-hidden border-line border-b lg:order-2 lg:h-auto lg:min-h-[320px] lg:border-b-0 lg:border-l">
-              <FeaturedVisual />
+            <div className="flex items-center overflow-hidden border-line border-b bg-surface-block lg:order-2 lg:border-b-0 lg:border-l">
+              <PostImage post={featured} priority />
             </div>
             <div className="flex flex-col justify-center gap-4 p-6 lg:order-1 lg:p-10">
               <h1 className="max-w-[480px] font-sans text-[clamp(1.75rem,4vw,2.5rem)] text-foreground leading-[1.15] tracking-[-0.02em] antialiased">
