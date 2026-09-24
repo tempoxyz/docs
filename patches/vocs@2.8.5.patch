@@ -1,3 +1,179 @@
+diff --git a/dist/internal/git.d.ts b/dist/internal/git.d.ts
+index 91c5147153747eac700536d531be3d1db3e2b73c..8d455f4a2e89259ec25a20cf19f32a048a2b092f 100644
+--- a/dist/internal/git.d.ts
++++ b/dist/internal/git.d.ts
+@@ -1,2 +1,2 @@
+-export declare function getLastModified(filePath: string): string | undefined;
++export declare function getLastModified(filePath: string, pagesDir: string): string | undefined;
+ //# sourceMappingURL=git.d.ts.map
+diff --git a/dist/internal/git.js b/dist/internal/git.js
+index 73aa6c0f8e2543fc53594b1a168b95a541cfd112..77f73eb70da28ca09179d8566494f42ac15e5995 100644
+--- a/dist/internal/git.js
++++ b/dist/internal/git.js
+@@ -1,14 +1,45 @@
+-import { execSync } from 'node:child_process';
+-export function getLastModified(filePath) {
++import { execFileSync } from 'node:child_process';
++import * as path from 'node:path';
++const datesByDirectory = new Map();
++export function getLastModified(filePath, pagesDir) {
+     try {
+-        const result = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
+-            encoding: 'utf-8',
+-            stdio: ['pipe', 'pipe', 'pipe'],
+-        }).trim();
+-        return result || undefined;
++        const directory = path.resolve(pagesDir);
++        let dates = datesByDirectory.get(directory);
++        // A production build uses one Git snapshot. Dev rechecks HEAD after commits.
++        const head = dates && process.env.NODE_ENV === 'production'
++            ? dates.head
++            : git(['rev-parse', 'HEAD'], directory);
++        if (!dates || dates.head !== head) {
++            const root = git(['rev-parse', '--show-toplevel'], directory);
++            const log = git(['log', '-z', '--format=%cI%x00', '--name-only', '--', directory], directory);
++            const values = new Map();
++            let date;
++            for (const entry of log.split('\0')) {
++                if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})$/.test(entry)) {
++                    date = entry;
++                }
++                else {
++                    const file = entry.startsWith('\n') ? entry.slice(1) : entry;
++                    if (file && date && !values.has(file))
++                        values.set(file, date);
++                }
++            }
++            dates = { head, root, values };
++            datesByDirectory.set(directory, dates);
++        }
++        const file = path.relative(dates.root, path.resolve(filePath)).split(path.sep).join('/');
++        return dates.values.get(file);
+     }
+     catch {
+         return undefined;
+     }
+ }
++function git(args, cwd) {
++    return execFileSync('git', args, {
++        cwd,
++        encoding: 'utf-8',
++        maxBuffer: 64 * 1024 * 1024,
++        stdio: ['ignore', 'pipe', 'ignore'],
++    }).trim();
++}
+ //# sourceMappingURL=git.js.map
+diff --git a/dist/internal/mdx.js b/dist/internal/mdx.js
+index b12541659f51af70fadea3db8762a5f85104205e..119335c829abbf68b2623f549e6c26d9fd05d8a4 100644
+--- a/dist/internal/mdx.js
++++ b/dist/internal/mdx.js
+@@ -414,7 +414,7 @@ export function recmaMdxLayout(config) {
+             layoutPaths.set(dir, layoutPath);
+             return `import _Layout from '${layoutPath}';`;
+         }
+-        const lastModified = Git.getLastModified(sourcePath);
++        const lastModified = Git.getLastModified(sourcePath, pagesDirPath);
+         const importAst = EstreeUtil.fromJs(`import { MdxPageContext as _MdxPageContext } from 'vocs';
+        import { createElement as _createElement } from 'react';
+        ${getMdxLayoutImport(vfile.dirname ?? pagesDirPath)}`, { module: true });
+diff --git a/dist/internal/vite-plugins.js b/dist/internal/vite-plugins.js
+index ba17f7d688e4c4df6da2abe1b7bf875655a83e79..4ecfafe5d14072b116e163744d2c1081ae1fdee7 100644
+--- a/dist/internal/vite-plugins.js
++++ b/dist/internal/vite-plugins.js
+@@ -387,7 +387,7 @@ export function sitemap(config) {
+                 if (!resolveSitemapInclude(config, pagePath, filePath))
+                     return;
+                 const loc = `${siteUrl.replace(/\/$/, '')}${pagePath}`;
+-                const gitDate = Git.getLastModified(page);
++                const gitDate = Git.getLastModified(page, pagesDir);
+                 const lastmod = gitDate
+                     ? gitDate.split('T')[0]
+                     : (await fs.stat(page)).mtime.toISOString().split('T')[0];
+diff --git a/src/internal/git.ts b/src/internal/git.ts
+index cb1340d24683b77d6daaff5a5e7749d5625ff195..47684ad8add8d5776757df0cbdb373744f68d7cb 100644
+--- a/src/internal/git.ts
++++ b/src/internal/git.ts
+@@ -1,13 +1,47 @@
+-import { execSync } from 'node:child_process'
++import { execFileSync } from 'node:child_process'
++import * as path from 'node:path'
+ 
+-export function getLastModified(filePath: string): string | undefined {
++type Dates = { head: string; root: string; values: Map<string, string> }
++
++const datesByDirectory = new Map<string, Dates>()
++
++export function getLastModified(filePath: string, pagesDir: string): string | undefined {
+   try {
+-    const result = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
+-      encoding: 'utf-8',
+-      stdio: ['pipe', 'pipe', 'pipe'],
+-    }).trim()
+-    return result || undefined
++    const directory = path.resolve(pagesDir)
++    let dates = datesByDirectory.get(directory)
++    // A production build uses one Git snapshot. Dev rechecks HEAD after commits.
++    const head =
++      dates && process.env.NODE_ENV === 'production'
++        ? dates.head
++        : git(['rev-parse', 'HEAD'], directory)
++    if (!dates || dates.head !== head) {
++      const root = git(['rev-parse', '--show-toplevel'], directory)
++      const log = git(['log', '-z', '--format=%cI%x00', '--name-only', '--', directory], directory)
++      const values = new Map<string, string>()
++      let date: string | undefined
++      for (const entry of log.split('\0')) {
++        if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})$/.test(entry)) {
++          date = entry
++        } else {
++          const file = entry.startsWith('\n') ? entry.slice(1) : entry
++          if (file && date && !values.has(file)) values.set(file, date)
++        }
++      }
++      dates = { head, root, values }
++      datesByDirectory.set(directory, dates)
++    }
++    const file = path.relative(dates.root, path.resolve(filePath)).split(path.sep).join('/')
++    return dates.values.get(file)
+   } catch {
+     return undefined
+   }
+ }
++
++function git(args: string[], cwd: string): string {
++  return execFileSync('git', args, {
++    cwd,
++    encoding: 'utf-8',
++    maxBuffer: 64 * 1024 * 1024,
++    stdio: ['ignore', 'pipe', 'ignore'],
++  }).trim()
++}
+diff --git a/src/internal/mdx.ts b/src/internal/mdx.ts
+index 39fd736d099a6828f4510b44c3f262af190f2fe8..b79af9e5926ffcb76067e5e285a60e87cd4e301c 100644
+--- a/src/internal/mdx.ts
++++ b/src/internal/mdx.ts
+@@ -479,7 +479,7 @@ export function recmaMdxLayout(config: Config.Config) {
+       return `import _Layout from '${layoutPath}';`
+     }
+ 
+-    const lastModified = Git.getLastModified(sourcePath)
++    const lastModified = Git.getLastModified(sourcePath, pagesDirPath)
+ 
+     const importAst = EstreeUtil.fromJs(
+       `import { MdxPageContext as _MdxPageContext } from 'vocs';
+diff --git a/src/internal/vite-plugins.ts b/src/internal/vite-plugins.ts
+index 2852c38212fde11881cb8fa97328576cee9c5a8c..d322b724384598b993f727a166cf534f22f55ce3 100644
+--- a/src/internal/vite-plugins.ts
++++ b/src/internal/vite-plugins.ts
+@@ -419,7 +419,7 @@ export function sitemap(config: Config.Config): PluginOption {
+         if (!resolveSitemapInclude(config, pagePath, filePath)) return
+ 
+         const loc = `${siteUrl.replace(/\/$/, '')}${pagePath}`
+-        const gitDate = Git.getLastModified(page)
++        const gitDate = Git.getLastModified(page, pagesDir)
+         const lastmod = gitDate
+           ? (gitDate.split('T')[0] as string)
+           : ((await fs.stat(page)).mtime.toISOString().split('T')[0] as string)
 diff --git a/dist/react/Head.d.ts b/dist/react/Head.d.ts
 index 8ad0e7d1635b9ca6b13ef2fb4ac9dd1ca9b6fbff..0131bb7f9ccff37b90550a98e7e47d3e69f3ea66 100644
 --- a/dist/react/Head.d.ts
