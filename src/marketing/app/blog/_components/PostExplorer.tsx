@@ -46,8 +46,8 @@ export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
                 href={developersPath(`/blog/${post.slug}`)}
                 className="group flex items-center gap-6 border-line border-b px-5 py-6 transition-colors hover:bg-surface-block focus-visible:outline-2 focus-visible:outline-foreground focus-visible:-outline-offset-2 lg:gap-8 lg:px-8"
               >
-                <span className="hidden w-72 shrink-0 overflow-hidden border border-line bg-surface-block md:block lg:w-80">
-                  <PostImage post={post} />
+                <span className="relative hidden w-48 shrink-0 self-stretch md:block lg:w-56">
+                  <PostImage post={post} thumbnail />
                 </span>
                 <div className="flex min-w-0 flex-col gap-2.5 md:gap-1.5">
                   <PostLabels post={post} />

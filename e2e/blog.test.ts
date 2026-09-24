@@ -61,6 +61,7 @@ for (const width of [320, 390, 768, 1024, 1280, 1440]) {
           const last = content?.lastElementChild?.getBoundingClientRect()
           if (!image || !first || !last) throw new Error('Expected an image and card content')
           return {
+            featured: !!content?.querySelector('h1'),
             title: content?.querySelector('h1, h2')?.textContent,
             imageTop: image.top,
             imageBottom: image.bottom,
@@ -70,6 +71,16 @@ for (const width of [320, 390, 768, 1024, 1280, 1440]) {
         })
         expect(bounds.textTop, bounds.title ?? '').toBeGreaterThanOrEqual(bounds.imageTop - 1)
         expect(bounds.textBottom, bounds.title ?? '').toBeLessThanOrEqual(bounds.imageBottom + 1)
+        if (!bounds.featured) {
+          expect(
+            Math.abs(bounds.imageTop - bounds.textTop),
+            bounds.title ?? '',
+          ).toBeLessThanOrEqual(1)
+          expect(
+            Math.abs(bounds.imageBottom - bounds.textBottom),
+            bounds.title ?? '',
+          ).toBeLessThanOrEqual(1)
+        }
       }
     }
 
