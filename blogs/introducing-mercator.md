@@ -26,16 +26,18 @@ The chart shows the trial-weighted mean across WideSearch, FreshQA, GAIA, and De
 
 ![GPT-5.6 Luna scores with and without Mercator across medium, high, and xhigh reasoning effort. Mercator adds 3.0, 3.5, and 0.3 percentage points, respectively, across four selected benchmark suites.](/blog/mercator-benchmarks.svg)
 
-**With Mercator, Luna at high effort improves from 66.8% to 70.3%**, a 3.5-point gain. At medium effort, it gains 3.0 points; at xhigh, 0.3 points.
+The same agent, with Mercator added, scores higher across these four production benchmark suites:
 
-Per-benchmark results across the full paired model matrix: Luna and Terra at medium, high, and xhigh; Sol at medium.
-
-| Benchmark | Agent | Agent + Mercator | Lift |
+| Suite | Baseline | With Mercator | Δ |
 | :--- | ---: | ---: | ---: |
 | WideSearch | 70.7% | 73.3% | +2.6 pts |
 | FreshQA | 66.7% | 68.5% | +1.8 pts |
 | GAIA | 80.0% | 81.1% | +1.1 pts |
 | DeepSynth | 56.1% | 56.6% | +0.6 pts |
+
+The lift is largest for the cheaper models. With Mercator, Codex running GPT-5.6 Luna at high effort scores **70.3% across these suites, up from 66.8%**—a 3.5-point gain, and within 2.3 points of GPT-5.6 Sol at medium effort without Mercator (72.6%). GPT-5.6 Terra at xhigh gains **4.2 points, from 67.6% to 71.8%**.
+
+*Table results pool Luna and Terra at medium, high, and xhigh effort, and Sol at medium.*
 
 ## How Mercator works
 
