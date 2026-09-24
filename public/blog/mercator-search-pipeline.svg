@@ -7,9 +7,9 @@
 <text x="420" y="92" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Plan</text>
 <path d="M420 108V124M230 124H610M230 124V140M610 124V140" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
 <rect x="40" y="140" width="380" height="42" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
-<text x="230" y="166" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Lexical</text>
+<text x="230" y="166" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Lexical parsing</text>
 <rect x="420" y="140" width="380" height="42" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
-<text x="610" y="166" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Semantic</text>
+<text x="610" y="166" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Semantic parsing</text>
 <path d="M230 182V198M610 182V198M230 198H610M420 198V212" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
 <rect x="210" y="212" width="420" height="42" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
 <text x="420" y="238" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Fuse ranked lists</text>
@@ -18,7 +18,7 @@
 <text x="420" y="298" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Filter + rank</text>
 <path d="M420 314V332" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
 <rect x="210" y="332" width="420" height="42" fill="#0c0a0f" stroke="#b9a3ff" stroke-opacity="0.56" stroke-width="0.8"/>
-<text x="420" y="358" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Rerank with Jev</text>
+<text x="420" y="358" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Re-rank with categories (Jev)</text>
 <path d="M420 374V392" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
 <rect x="210" y="392" width="420" height="42" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
 <text x="420" y="418" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Order by reliability</text>
