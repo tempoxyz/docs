@@ -20,9 +20,9 @@ Mercator is powered by MACH, a Tempo-native credit you can buy with Apple Pay. Y
 
 ## How good is Mercator?
 
-Mercator gives agents another way to improve their results alongside choosing a stronger model or increasing reasoning effort. With Mercator, GPT-5.6 Luna at high effort outperforms the same model at xhigh without it across the four benchmarks shown below.
+Mercator gives agents another way to improve their results alongside choosing a stronger model or increasing reasoning effort. With Mercator, GPT-5.6 Luna at `high` effort outperforms the same model at `xhigh` without it across the four benchmarks shown below.
 
-Across WideSearch, FreshQA, GAIA, and DeepSynth, Mercator improves Luna’s average score at every reasoning level we tested. The largest gain comes at high effort: 66.8% to 70.3%, an increase of 3.5 percentage points.
+Across a range of benchmarks, Mercator improves Luna’s average score at every reasoning level we tested.
 
 ![GPT-5.6 Luna scores with and without Mercator across medium, high, and xhigh reasoning effort. Mercator adds 3.0, 3.5, and 0.3 percentage points, respectively, across four selected benchmark suites.](/blog/mercator-benchmarks.svg)
 
@@ -35,7 +35,7 @@ The same agent, with Mercator added, scores higher across these four production 
 | GAIA | 80.0% | 81.1% | +1.1 pts |
 | DeepSynth | 56.1% | 56.6% | +0.6 pts |
 
-The lift is largest for the cheaper models. With Mercator, Codex running GPT-5.6 Luna at high effort scores **70.3% across these suites, up from 66.8%**—a 3.5-point gain, and within 2.3 points of GPT-5.6 Sol at medium effort without Mercator (72.6%). GPT-5.6 Terra at xhigh gains **4.2 points, from 67.6% to 71.8%**.
+The lift is largest for the cheaper models. With Mercator, Codex running GPT-5.6 Luna at `high` effort scores **70.3% across these suites, up from 66.8%**—a 3.5-point gain, and within 2.3 points of GPT-5.6 Sol at `medium` effort without Mercator (72.6%). GPT-5.6 Terra at `xhigh` gains **4.2 points, from 67.6% to 71.8%**.
 
 ## How Mercator works
 
