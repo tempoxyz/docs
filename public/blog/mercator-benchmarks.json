@@ -1,0 +1,403 @@
+{
+  "run_id": "2026-08-26__10-13-31",
+  "source_revision": "20bf431e7e5d62f03e8528597a44a284391e7218",
+  "source_report": "evals/harbor/reports/2026-08-26-production-paired-matrix",
+  "source_csv_sha256": "8f98cd3fd4f20fcb618aaedda36f47340a7a1303b089c0f8243dbcddd02989a3",
+  "metric": "Native reward, except WideSearch item-level F1; scores scaled to 0\u2013100.",
+  "method": "Mean over complete comparison-eligible task pairs within each benchmark, model and effort. Both arms retain native live web search. No recovery runs; no imputation.",
+  "results": [
+    {
+      "benchmark": "browsecomp",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "high",
+      "complete_pairs": 39,
+      "baseline": 94.87179487179486,
+      "mercator": 89.74358974358975
+    },
+    {
+      "benchmark": "browsecomp",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 77.5,
+      "mercator": 65.0
+    },
+    {
+      "benchmark": "browsecomp",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "xhigh",
+      "complete_pairs": 38,
+      "baseline": 89.47368421052632,
+      "mercator": 86.8421052631579
+    },
+    {
+      "benchmark": "browsecomp",
+      "model": "gpt-5.6-sol",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 92.5,
+      "mercator": 90.0
+    },
+    {
+      "benchmark": "browsecomp",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "high",
+      "complete_pairs": 39,
+      "baseline": 79.48717948717949,
+      "mercator": 74.35897435897436
+    },
+    {
+      "benchmark": "browsecomp",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 65.0,
+      "mercator": 52.5
+    },
+    {
+      "benchmark": "browsecomp",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "xhigh",
+      "complete_pairs": 40,
+      "baseline": 90.0,
+      "mercator": 85.0
+    },
+    {
+      "benchmark": "deepsynth",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "high",
+      "complete_pairs": 40,
+      "baseline": 52.26771196283392,
+      "mercator": 55.698267518389464
+    },
+    {
+      "benchmark": "deepsynth",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 47.55432812445007,
+      "mercator": 52.472077042199
+    },
+    {
+      "benchmark": "deepsynth",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "xhigh",
+      "complete_pairs": 40,
+      "baseline": 56.32723577235772,
+      "mercator": 60.267711962833914
+    },
+    {
+      "benchmark": "deepsynth",
+      "model": "gpt-5.6-sol",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 59.934378629500586,
+      "mercator": 58.24390243902439
+    },
+    {
+      "benchmark": "deepsynth",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "high",
+      "complete_pairs": 40,
+      "baseline": 59.86890243902438,
+      "mercator": 58.809378629500586
+    },
+    {
+      "benchmark": "deepsynth",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 61.78448685460881,
+      "mercator": 57.18329637841833
+    },
+    {
+      "benchmark": "deepsynth",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "xhigh",
+      "complete_pairs": 40,
+      "baseline": 54.77961672473868,
+      "mercator": 53.84509291521486
+    },
+    {
+      "benchmark": "freshqa",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "high",
+      "complete_pairs": 39,
+      "baseline": 69.23076923076923,
+      "mercator": 69.23076923076923
+    },
+    {
+      "benchmark": "freshqa",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "medium",
+      "complete_pairs": 39,
+      "baseline": 69.23076923076923,
+      "mercator": 64.1025641025641
+    },
+    {
+      "benchmark": "freshqa",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "xhigh",
+      "complete_pairs": 39,
+      "baseline": 69.23076923076923,
+      "mercator": 64.1025641025641
+    },
+    {
+      "benchmark": "freshqa",
+      "model": "gpt-5.6-sol",
+      "reasoning_effort": "medium",
+      "complete_pairs": 39,
+      "baseline": 66.66666666666666,
+      "mercator": 66.66666666666666
+    },
+    {
+      "benchmark": "freshqa",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "high",
+      "complete_pairs": 39,
+      "baseline": 69.23076923076923,
+      "mercator": 71.7948717948718
+    },
+    {
+      "benchmark": "freshqa",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "medium",
+      "complete_pairs": 39,
+      "baseline": 61.53846153846154,
+      "mercator": 69.23076923076923
+    },
+    {
+      "benchmark": "freshqa",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "xhigh",
+      "complete_pairs": 39,
+      "baseline": 61.53846153846154,
+      "mercator": 74.35897435897436
+    },
+    {
+      "benchmark": "gaia",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "high",
+      "complete_pairs": 40,
+      "baseline": 80.0,
+      "mercator": 85.0
+    },
+    {
+      "benchmark": "gaia",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 70.0,
+      "mercator": 80.0
+    },
+    {
+      "benchmark": "gaia",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "xhigh",
+      "complete_pairs": 40,
+      "baseline": 82.5,
+      "mercator": 85.0
+    },
+    {
+      "benchmark": "gaia",
+      "model": "gpt-5.6-sol",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 90.0,
+      "mercator": 85.0
+    },
+    {
+      "benchmark": "gaia",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "high",
+      "complete_pairs": 40,
+      "baseline": 80.0,
+      "mercator": 77.5
+    },
+    {
+      "benchmark": "gaia",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 77.5,
+      "mercator": 75.0
+    },
+    {
+      "benchmark": "gaia",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "xhigh",
+      "complete_pairs": 40,
+      "baseline": 80.0,
+      "mercator": 80.0
+    },
+    {
+      "benchmark": "hle",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "high",
+      "complete_pairs": 40,
+      "baseline": 52.5,
+      "mercator": 50.0
+    },
+    {
+      "benchmark": "hle",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 42.5,
+      "mercator": 37.5
+    },
+    {
+      "benchmark": "hle",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "xhigh",
+      "complete_pairs": 40,
+      "baseline": 52.5,
+      "mercator": 50.0
+    },
+    {
+      "benchmark": "hle",
+      "model": "gpt-5.6-sol",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 52.5,
+      "mercator": 52.5
+    },
+    {
+      "benchmark": "hle",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "high",
+      "complete_pairs": 40,
+      "baseline": 47.5,
+      "mercator": 47.5
+    },
+    {
+      "benchmark": "hle",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 47.5,
+      "mercator": 47.5
+    },
+    {
+      "benchmark": "hle",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "xhigh",
+      "complete_pairs": 40,
+      "baseline": 50.0,
+      "mercator": 52.5
+    },
+    {
+      "benchmark": "simpleqa",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "high",
+      "complete_pairs": 40,
+      "baseline": 97.5,
+      "mercator": 95.0
+    },
+    {
+      "benchmark": "simpleqa",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 97.5,
+      "mercator": 100.0
+    },
+    {
+      "benchmark": "simpleqa",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "xhigh",
+      "complete_pairs": 40,
+      "baseline": 97.5,
+      "mercator": 95.0
+    },
+    {
+      "benchmark": "simpleqa",
+      "model": "gpt-5.6-sol",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 97.5,
+      "mercator": 97.5
+    },
+    {
+      "benchmark": "simpleqa",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "high",
+      "complete_pairs": 40,
+      "baseline": 97.5,
+      "mercator": 100.0
+    },
+    {
+      "benchmark": "simpleqa",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 97.5,
+      "mercator": 100.0
+    },
+    {
+      "benchmark": "simpleqa",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "xhigh",
+      "complete_pairs": 40,
+      "baseline": 97.5,
+      "mercator": 92.5
+    },
+    {
+      "benchmark": "widesearch",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "high",
+      "complete_pairs": 40,
+      "baseline": 65.69285500000001,
+      "mercator": 71.0738475
+    },
+    {
+      "benchmark": "widesearch",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 69.58179,
+      "mercator": 71.3994025
+    },
+    {
+      "benchmark": "widesearch",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "xhigh",
+      "complete_pairs": 40,
+      "baseline": 70.1167425,
+      "mercator": 69.78796750000001
+    },
+    {
+      "benchmark": "widesearch",
+      "model": "gpt-5.6-sol",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 73.45884000000001,
+      "mercator": 73.60014
+    },
+    {
+      "benchmark": "widesearch",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "high",
+      "complete_pairs": 40,
+      "baseline": 73.34395,
+      "mercator": 74.73635250000001
+    },
+    {
+      "benchmark": "widesearch",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "medium",
+      "complete_pairs": 40,
+      "baseline": 68.55279250000001,
+      "mercator": 73.4157225
+    },
+    {
+      "benchmark": "widesearch",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "xhigh",
+      "complete_pairs": 40,
+      "baseline": 73.9736875,
+      "mercator": 79.130915
+    }
+  ],
+  "source_repository": "tempoxyz/mercator"
+}

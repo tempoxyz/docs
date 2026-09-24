@@ -1,69 +1,86 @@
 ---
-title: "Introducing Mercator"
-excerpt: "Mercator helps agents discover, price, and execute paid tool workflows through one interface, powered by the Machine Payments Protocol."
+title: "Supercharge your agentic workflows with Mercator"
+excerpt: "A new effort option for agents: discover, price, and execute paid tool workflows through one interface."
 authors: "Brendan Ryan, Parv Ahuja, Georgios Konstantopoulos"
 date: 2026-09-23
 category: product-announcements
 ---
 
-*Mercator is a single interface for agents to discover, price, and execute open-ended workflows using paid tools, powered by the Machine Payments Protocol (MPP). With Mercator, your agent describes a task, selects from a live corpus of services, and pays only for what it runs. [Get started at mercator.sh](https://mercator.sh).*
+<a id="mercator-at-a-glance"></a>
 
-Agents are increasingly doing more open-ended and economically valuable work. A single ambitious task can span research, data enrichment, compute, and an action, such as sending an email or producing a report. Today's tooling assumes the opposite. MCP configs, tool registries, and hardcoded harness integrations all require declaring tools ahead of time, narrowing the paths an agent can take at the source. When an agent discovers it needs a geocoder, a company-data API, or a web search tool it wasn't explicitly provisioned with, it stops: someone has to sign up, fetch an API key, and wire in credentials before work can resume.
+Mercator is a tool router for multi-step agentic workflows. Think of it as a new effort option for your agent: alongside choosing a model and reasoning level, you can give it access to paid tools that help it complete more of the task. A smaller model can use those tools to close part of the gap to a larger one.
 
-Machine-native payments solve half of this. The Machine Payments Protocol ([MPP](https://mpp.dev)) and [x402](https://x402.org) let an agent pay for a tool call over HTTP with no account. But agents still need to know *where* to find these services, which ones are high quality, and how to map them back to the original task. Mercator solves this: finding the right services for a task, composing them into a workflow, and reliably running that workflow.
+Instead of choosing and configuring every tool ahead of time, your agent describes what it needs. Mercator searches a catalog of services powered by the Machine Payments Protocol ([MPP](https://mpp.dev)) and [x402](https://x402.org), ranks them by fit, reliability, and cost, and executes the selected workflow.
 
-## Mercator at a glance
-
-Mercator is an intent-based tool gateway for agents. Your agent describes what it wants to achieve; Mercator finds the right services and reliably executes them on the agent's behalf, without API keys, sign-up portals, or pre-arranged billing relationships.
+Mercator is powered by MACH, a Tempo-native credit you can buy with Apple Pay. You can pay for downstream tools without setting up an account and API key with each provider. [Get started at mercator.sh](https://mercator.sh).
 
 ![An agent sends its intent and budget to Mercator, which plans paid calls to downstream services and composes the result.](/blog/mercator-workflow.svg)
 
-*Mercator connects the agent to services that can complete each step of a paid workflow.*
+<a id="measured-performance"></a>
 
-Mercator gives agents a stable surface area via MCP or REST and can ingest downstream services reachable via open payment protocols like [MPP](https://mpp.dev) and [x402](https://x402.org). Clients pay Mercator on Tempo, while downstream services can settle over whatever rails or currencies they already support.
+## How good is Mercator?
+
+We compared GPT-5.6 Luna with and without Mercator at medium, high, and xhigh reasoning effort. The model, tasks, and verifier are fixed within each pair, and both arms retain native live web search.
+
+The chart shows the trial-weighted mean across WideSearch, FreshQA, GAIA, and DeepSynth—the four suites that improved in aggregate in our production run. Separate lines show Luna alone and Luna with Mercator at each reasoning level.
+
+![GPT-5.6 Luna scores with and without Mercator across medium, high, and xhigh reasoning effort. Mercator adds 3.0, 3.5, and 0.3 percentage points, respectively, across four selected benchmark suites.](/blog/mercator-benchmarks.svg)
+
+**Luna at high effort improves from 66.8% to 70.3% with Mercator**, a 3.5-point gain. At medium effort, it gains 3.0 points; at xhigh, 0.3 points. Tool access gives Luna another way to improve its results alongside increasing reasoning effort.
+
+These are four selected suites, not the full study: across all seven suites and paired model settings, the overall score moved from 72.03% to 71.77%. [Full benchmark results (CSV)](/blog/mercator-benchmarks.csv) · [Source data and method (JSON)](/blog/mercator-benchmarks.json).
 
 ## How Mercator works
 
-Mercator relies on two core primitives to reliably produce high quality results over a wide range of services and queries.
+Mercator exposes MCP and REST interfaces and connects agents to downstream tools reachable through open payment protocols like MPP and x402. Clients pay Mercator on Tempo; downstream services can settle over their supported rails and currencies.
 
-**Intent-based search** takes natural-language intent, not tool names. *"What is the weather in Paris"* finds OpenWeather. *"Search SEC filings about climate risk"* finds EDGAR full-text search. *"Find cafes near Moscone Center"* finds Google Maps. The agent sees a short, confident list rather than a directory.
+Mercator relies on two core primitives:
 
-Callers can rate a workflow after it runs. Ratings feed directly back into ranking, and callers who submit high-signal feedback earn rebates against the cost of the workflow they rated.
+- **Intent-based search** takes natural-language intent rather than tool names. “What is the weather in Paris” finds OpenWeather, “Search SEC filings about climate risk” finds EDGAR full-text search, and “Find cafes near Moscone Center” finds Google Maps. The agent gets a short list of relevant services.
+- **Durable execution** runs the agent's plan, whose steps can reference earlier outputs. Independent steps can run concurrently, and the workflow can recover from transient downstream failures.
 
-**Durable execution.** After searching, the agent builds an execution plan: an immutable DAG whose nodes reference each other's outputs. Plans execute durably, atomically, and concurrently whenever possible, ensuring that agents receive the data they need, even in the face of downstream tool reliability issues.
+Alongside objective signals such as reliability, latency, and cost, agents can rate a completed workflow's quality and correctness. Feedback contributes to ranking, and eligible reviews can receive MACH rewards.
 
 ### Under the hood
 
-Search in Mercator involves much more than a single index lookup or categorization query. A good result has to be relevant to the task, callable by the agent, and reliable in practice. To consider all of these signals across a wide variety of services, Mercator’s search system runs as a multi-stage pipeline, with each stage either removing candidates or re-ranking them.
+Search in Mercator is more than a single index lookup. A good result has to be relevant to the task, callable by the agent, and reliable in practice. To weigh these signals across many services, Mercator runs search as a multi-stage pipeline. Each stage either removes candidates or re-ranks them.
 
 ![Mercator searches, filters, reranks, and resolves services before returning results to the agent.](/blog/mercator-search-pipeline.svg)
 
-Retrieval systems can find services on the right topic, but not always ones that can consistently do the job. For *"latest 10-K for Stripe,"* a company-news API and an SEC filings API both look relevant, but only one can return the relevant documents. Mercator re-ranks the short list with [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev), a small categorization model that asks whether each endpoint can perform the requested action within the query's constraints. Because Jev only scores candidates that are already plausible, this online categorization call stays fast and cheap. On our internal benchmark, adding Jev improved MRR@5 by 25% and cut the rate of known-bad endpoints in results by 80%.
+Retrieval systems can find services on the right topic without finding ones that can complete the job. For “retrieve a company's SEC 10-K filing,” a company-news API and an SEC filings API may both look relevant, but only the latter exposes the requested document retrieval. Mercator re-ranks a pre-filtered candidate list with [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev), a small categorization model that scores whether each endpoint can perform the requested action within the query's constraints. Because Jev only scores plausible candidates, the categorization step works on a short list.
 
-## Measured performance
+## Why build Mercator?
 
-Agents using Mercator deliver better results on tasks that need data they weren't provisioned for. The same agent, with Mercator added, scores higher on every one of our production benchmark suites:
+Agents are doing more open-ended, economically valuable work. A single task can span research, data enrichment, compute, and an action such as sending an email or producing a report. MCP configs, tool registries, and hardcoded harness integrations require declaring tools ahead of time, narrowing the paths an agent can take before it starts. When an agent needs a geocoder, a company-data API, or a web search tool it wasn't provisioned with, someone has to sign up, fetch an API key, and wire in credentials before work can resume.
 
-| Suite | Baseline | With Mercator | Δ |
-| :---- | ----: | ----: | ----: |
-| WideSearch | 70.7% | 73.3% | +2.6 pts |
-| FreshQA | 66.7% | 68.5% | +1.8 pts |
-| GAIA | 80.0% | 81.1% | +1.1 pts |
-| DeepSynth | 56.1% | 56.7% | +0.6 pts |
+Machine-native payments solve half of this. MPP and x402 let an agent pay for a tool call over HTTP. But agents still need to know where to find services, which ones are high quality, and how to map them back to the original task. Mercator handles discovery, composition, and execution together.
 
-The lift is largest for cheaper models. Codex running GPT-5.6 Luna with Mercator scores 70.3% across these suites, up from 66.8% without it, and within 2.3 points of GPT-5.6 Sol alone at 72.6%. GPT-5.6 Terra gains 4.2 points (67.6% → 71.8%).
+<a id="powered-by-mach"></a>
 
-## Powered by MACH
+## What is MACH, and how do I buy it?
 
-Mercator settles on Tempo over MPP, but getting started does not require a stablecoin balance or navigating complicated crypto onramping flows.
+MACH is a USD-denominated credit on Tempo for paying approved merchants, including Mercator. You can purchase it with Apple Pay at [mercator.sh/fund](https://mercator.sh/fund), without first acquiring a stablecoin balance. Your connected wallet uses MACH to pay for jobs against approved quotes.
 
-Mercator is powered by MACH, a Tempo-native token you can purchase directly at [mercator.sh/fund](https://mercator.sh/fund). MACH is accessible via Apple Pay, and spend is drawn down per job against the quote you already approved. Mercator supports MACH in addition to USDC and other stablecoins.
+Mercator also supports direct USDC.e payments on Tempo and supported pathUSD auto-swaps. See [costs and payment](https://mercator.sh/docs#costs-and-payment) for the available payment routes.
 
 ## Get started today
 
-Mercator is available today at [mercator.tempo.xyz](https://mercator.tempo.xyz).
+Mercator is available at [mercator.sh](https://mercator.sh).
 
-- **Install the CLI:** `curl -fsSL https://mercator.tempo.xyz/install.sh | sh`
-- **Add the MCP endpoint directly:** `codex mcp add mercator --url https://mercator.tempo.xyz/mcp`
+Install the CLI:
 
-Run a service that speaks MPP or x402? [Get it listed](https://mercator.sh/docs#mercator-for-service-owners) — Mercator ingests any endpoint reachable over open payment and discovery protocols.
+```bash
+curl -fsSL https://mercator.sh/install.sh | sh
+```
+
+Or connect your agent directly over MCP and complete browser authorization:
+
+```bash
+# Codex
+codex mcp add mercator --url https://mercator.sh/mcp/auth --oauth-client-registration dcr
+
+# Claude Code
+claude mcp add --scope user --transport http mercator https://mercator.sh/mcp/auth
+```
+
+Run a service that speaks MPP or x402? [Get it listed](https://mercator.sh/docs#mercator-for-service-owners).
