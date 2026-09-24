@@ -1,53 +1,30 @@
-<svg width="840" height="690" viewBox="0 0 840 690" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+<svg width="840" height="560" viewBox="0 0 840 560" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
 <defs><pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" stroke="#f2f1ec" stroke-opacity="0.035"/></pattern></defs>
-<rect width="840" height="690" fill="#0b0b0b"/><rect width="840" height="690" fill="url(#grid)"/>
-<text x="40" y="38" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#f2f1ec">INTENT-BASED SERVICE SEARCH</text>
-<text x="40" y="58" font-size="10" fill="#89878b">From query and constraints to executable endpoints</text>
-<rect x="40" y="84" width="760" height="52" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
-<text x="58" y="106" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#89878b">INPUT</text>
-<text x="58" y="123" font-size="13" font-weight="540" fill="#f2f1ec">Query + constraints</text>
-<path d="M420 136V153" stroke="#b9a3ff" stroke-opacity="0.68"/>
-<rect x="190" y="154" width="460" height="54" fill="#0c0a0f" stroke="#b9a3ff" stroke-opacity="0.56" stroke-width="0.8"/>
-<text x="207" y="176" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#b9a3ff">01</text>
-<text x="247" y="177" font-size="13" font-weight="540" fill="#f2f1ec">Plan</text>
-<text x="247" y="194" font-size="10" fill="#89878b">Split actions; identify wants and exclusions</text>
-<path d="M420 208V222M270 222H570M270 222V238M570 222V238" stroke="#b9a3ff" stroke-opacity="0.68"/>
-<rect x="40" y="238" width="370" height="58" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
-<text x="56" y="260" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#b9a3ff">02A</text>
-<text x="100" y="261" font-size="13" font-weight="540" fill="#f2f1ec">Lexical</text>
-<text x="100" y="279" font-size="10" fill="#89878b">Exact names and paths</text>
-<rect x="430" y="238" width="370" height="58" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
-<text x="446" y="260" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#b9a3ff">02B</text>
-<text x="490" y="261" font-size="13" font-weight="540" fill="#f2f1ec">Semantic</text>
-<text x="490" y="279" font-size="10" fill="#89878b">Intent by meaning</text>
-<path d="M225 296V310M615 296V310M225 310H615M420 310V326" stroke="#b9a3ff" stroke-opacity="0.68"/>
-<rect x="190" y="326" width="460" height="54" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
-<text x="207" y="347" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#b9a3ff">03</text>
-<text x="247" y="348" font-size="13" font-weight="540" fill="#f2f1ec">Fuse ranked lists</text>
-<text x="247" y="366" font-size="10" fill="#89878b">Combine lexical and semantic matches</text>
-<path d="M420 380V394" stroke="#b9a3ff" stroke-opacity="0.68"/>
-<rect x="190" y="394" width="460" height="54" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
-<text x="207" y="415" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#b9a3ff">04</text>
-<text x="247" y="416" font-size="13" font-weight="540" fill="#f2f1ec">Filter + rank</text>
-<text x="247" y="434" font-size="10" fill="#89878b">Remove excluded or unpayable services</text>
-<path d="M420 448V462" stroke="#b9a3ff" stroke-opacity="0.68"/>
-<rect x="190" y="462" width="460" height="54" fill="#0c0a0f" stroke="#b9a3ff" stroke-opacity="0.56" stroke-width="0.8"/>
-<text x="207" y="483" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#b9a3ff">05</text>
-<text x="247" y="484" font-size="13" font-weight="540" fill="#f2f1ec">Rerank with Jev</text>
-<text x="247" y="502" font-size="10" fill="#89878b">Can each endpoint do the requested action?</text>
-<path d="M420 516V530" stroke="#b9a3ff" stroke-opacity="0.68"/>
-<rect x="190" y="530" width="460" height="54" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
-<text x="207" y="551" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#b9a3ff">06</text>
-<text x="247" y="552" font-size="13" font-weight="540" fill="#f2f1ec">Order by reliability</text>
-<text x="247" y="570" font-size="10" fill="#89878b">Success rate → P95 latency → price</text>
-<path d="M420 584V598" stroke="#b9a3ff" stroke-opacity="0.68"/>
-<rect x="190" y="598" width="460" height="54" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
-<text x="207" y="619" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#b9a3ff">07</text>
-<text x="247" y="620" font-size="13" font-weight="540" fill="#f2f1ec">Resolve live endpoints</text>
-<text x="247" y="638" font-size="10" fill="#89878b">Probe and drop explicit mismatches</text>
-<text x="678" y="555" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#89878b">HEALTH +</text>
-<text x="678" y="571" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#89878b">FEEDBACK</text>
-<path d="M652 558H666M666 558V624M666 624H652" stroke="#373439"/>
-<path d="M420 652V665" stroke="#b9a3ff" stroke-opacity="0.68"/>
-<text x="420" y="682" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#f2f1ec" text-anchor="middle">RESULTS → AGENT → PAID JOBS + RATINGS</text>
+<rect width="840" height="560" fill="#0b0b0b"/><rect width="840" height="560" fill="url(#grid)"/>
+<text x="420" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#f2f1ec" text-anchor="middle">QUERY + CONSTRAINTS</text>
+<path d="M420 43V64m-6-6 6 6 6-6" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="210" y="66" width="420" height="42" fill="#0c0a0f" stroke="#b9a3ff" stroke-opacity="0.56" stroke-width="0.8"/>
+<text x="420" y="92" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Plan</text>
+<path d="M420 108V124M230 124H610M230 124V140M610 124V140" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="40" y="140" width="380" height="42" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
+<text x="230" y="166" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Lexical</text>
+<rect x="420" y="140" width="380" height="42" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
+<text x="610" y="166" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Semantic</text>
+<path d="M230 182V198M610 182V198M230 198H610M420 198V212" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="210" y="212" width="420" height="42" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
+<text x="420" y="238" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Fuse ranked lists</text>
+<path d="M420 254V272" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="210" y="272" width="420" height="42" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
+<text x="420" y="298" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Filter + rank</text>
+<path d="M420 314V332" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="210" y="332" width="420" height="42" fill="#0c0a0f" stroke="#b9a3ff" stroke-opacity="0.56" stroke-width="0.8"/>
+<text x="420" y="358" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Rerank with Jev</text>
+<path d="M420 374V392" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="210" y="392" width="420" height="42" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
+<text x="420" y="418" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Order by reliability</text>
+<path d="M420 434V452" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="210" y="452" width="420" height="42" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
+<text x="420" y="478" font-size="13" font-weight="540" fill="#f2f1ec" text-anchor="middle">Resolve live endpoints</text>
+<path d="M420 494V516m-6-6 6 6 6-6" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="420" y="542" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" letter-spacing="0.08em" fill="#f2f1ec" text-anchor="middle">FINAL RECOMMENDATIONS</text>
 </svg>

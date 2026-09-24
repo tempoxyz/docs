@@ -11,17 +11,14 @@
 <rect x="260" y="62" width="266" height="58" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
 <text x="273" y="95" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#b9a3ff">01</text>
 <text x="304" y="96" font-size="13" font-weight="540" fill="#f2f1ec">Search the web</text>
-<text x="510" y="95" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#89878b" text-anchor="end">PARALLEL</text>
 <path d="M544 91H568m-6-6 6 6-6 6" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
 <rect x="260" y="128" width="266" height="58" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
 <text x="273" y="161" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#b9a3ff">02</text>
 <text x="304" y="162" font-size="13" font-weight="540" fill="#f2f1ec">Enrich records</text>
-<text x="510" y="161" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#89878b" text-anchor="end">PARALLEL</text>
 <path d="M544 157H568m-6-6 6 6-6 6" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
 <rect x="260" y="194" width="266" height="58" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
 <text x="273" y="227" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#b9a3ff">03</text>
 <text x="304" y="228" font-size="13" font-weight="540" fill="#f2f1ec">Compose result</text>
-<text x="510" y="227" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#89878b" text-anchor="end">AFTER 01 + 02</text>
 <path d="M544 223H568m-6-6 6 6-6 6" stroke="#b9a3ff" stroke-opacity="0.68" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
 <text x="580" y="37" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.1em" fill="#89878b">DOWNSTREAM SERVICES</text>
 <rect x="580" y="62" width="236" height="58" fill="#080808" stroke="#373439" stroke-opacity="1" stroke-width="0.8"/>
