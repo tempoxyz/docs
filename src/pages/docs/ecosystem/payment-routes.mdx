@@ -1,0 +1,37 @@
+---
+title: "Supported payment routes"
+seoTitle: "Supported Payment Routes | Tempo Docs"
+description: Search live routes into and out of Tempo by rail, chain, currency, and provider.
+interactive: true
+---
+
+import { PaymentRoutesExplorer } from '../../../components/PaymentRoutesExplorer'
+
+# Supported payment routes
+
+Search live fiat, cross-chain, and exchange routes into and out of Tempo. Filter by source, destination, currency, provider, or route type.
+
+<PaymentRoutesExplorer />
+
+:::warning
+Route availability can depend on country, account, asset, amount, compliance checks, liquidity, and provider configuration. Confirm a live quote and the destination token contract with the provider before moving funds. Currency symbols in the table follow each provider's naming.
+:::
+
+## How this catalog is maintained
+
+The catalog includes routes that providers publicly describe as live. A provider's general Tempo integration is not enough to add a route: the source, destination, and currencies must also be documented. Announced, planned, prospecting, nurture, and closed-lost integrations are excluded.
+
+Transaction minimums, limits, and settlement estimates are provider-supplied and may change. The catalog was last reviewed on August 22, 2026.
+
+## Sources
+
+- [Bridge route explorer](https://apidocs.bridge.xyz/get-started/introduction/what-we-support/payment-routes#route-explorer)
+- [Due supported currencies and payment methods](https://due.readme.io/docs/supported-payment-methods)
+- [Fonbnk supported countries and cryptocurrencies](https://docs.fonbnk.com/supported-countries-and-cryptocurrencies)
+- [MoonPay Tempo support](https://www.moonpay.com/newsroom/moonpay-tempo)
+- [Kraken Tempo deposits and withdrawals](https://blog.kraken.com/product/new-features/usdt0-and-usdce-now-available-on-tempo)
+- [OKX Tempo USDT support](https://www.okx.com/en-us/help/okx-to-support-usdt-on-the-tempo-chain)
+- [OKX Tempo USDT0 support](https://www.okx.com/en-us/learn/tempo-usdt0)
+- [LayerZero / Stargate guide](/docs/guide/bridge-layerzero)
+- [Bungee guide](/docs/guide/bridge-bungee)
+- [Relay guide](/docs/guide/bridge-relay)
