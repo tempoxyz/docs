@@ -84,8 +84,8 @@ See [`SECURITY.md`](https://github.com/tempoxyz/docs?tab=security-ov-file).
 
 ## License
 
-Licensed under either of [Apache License](./LICENSE-APACHE), Version
-2.0 or [MIT License](./LICENSE-MIT) at your option.
+Licensed under either of [Apache License](https://www.apache.org/licenses/LICENSE-2.0),
+Version 2.0 or [MIT License](https://opensource.org/license/mit), at your option.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in these crates by you, as defined in the Apache-2.0 license,
