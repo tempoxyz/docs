@@ -158,17 +158,18 @@ The token must be a deployed USD-denominated TIP-20. The FeeManager rejects a pr
 
 ### Claim validator fees
 
-Validator fees accumulate in the [FeeManager](/docs/protocol/fees/spec-fee-amm#key-functions) and must be claimed to reach your wallet. Use the fee-recipient address and token address in which the fees accrued:
+Validator fees accumulate in the [FeeManager](/docs/protocol/fees/spec-fee-amm#key-functions) and must be claimed to reach your wallet. Supply your validator's index, public key, or operator address to look up its current fee recipient, and specify the token address in which the fees accrued:
 
 ```bash
-tempo consensus claim-validator-fees \
-  --fee-recipient <FEE_RECIPIENT_ADDRESS> \
+tempo consensus claim-validator-fees <address/pubkey/index> \
   --token <TOKEN_ADDRESS> \
   --rpc-url https://rpc.tempo.xyz \
   --ledger
 ```
 
-Use the [signer backend](/docs/guide/node/validator-keys#validator-operator-address-custody) that matches your custody setup. Anyone can submit the claim, but the fees always go to the specified fee recipient. If you changed your fee recipient or preferred token, claim each previous recipient/token pair separately. Use `--dry-run` to inspect the target and calldata without connecting a wallet or sending a transaction.
+Use the [signer backend](/docs/guide/node/validator-keys#validator-operator-address-custody) that matches your custody setup. Anyone can submit the claim, but the fees always go to the resolved fee recipient. Use `--dry-run` to inspect the target and calldata without connecting a wallet or sending a transaction; looking up the recipient still requires the RPC.
+
+For fees accrued to a previous recipient, omit the validator identifier and use `--fee-recipient <FEE_RECIPIENT_ADDRESS>` instead. Claim each previous recipient/token pair separately. With an explicit recipient, `--dry-run` does not require an RPC connection.
 
 ### Transfer validator ownership
 
