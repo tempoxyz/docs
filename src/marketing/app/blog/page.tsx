@@ -33,7 +33,7 @@ export default function BlogPage() {
             className="group grid border border-line transition-colors hover:bg-surface-block lg:grid-cols-2"
           >
             <div className="relative h-[220px] overflow-hidden border-line border-b lg:order-2 lg:h-auto lg:min-h-[320px] lg:border-b-0 lg:border-l">
-              <FeaturedVisual heroHtml={featured.heroHtml} />
+              <FeaturedVisual />
             </div>
             <div className="flex flex-col justify-center gap-4 p-6 lg:order-1 lg:p-10">
               <h1 className="max-w-[480px] font-sans text-[clamp(1.75rem,4vw,2.5rem)] text-foreground leading-[1.15] tracking-[-0.02em] antialiased">

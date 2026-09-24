@@ -12,7 +12,7 @@ import type { Plugin } from 'vite'
 // Blog content lives as dev-managed markdown files in /blogs at the repo root.
 // Frontmatter schema: title, excerpt, date (YYYY-MM-DD), category (a slug or
 // inline list of slugs), optional
-// authors, ogImage, heroImage, heroImageAlt, and an optional `featured: true` to pin a post to the hero card.
+// authors, ogImage, and an optional `featured: true` to pin a post to the hero card.
 //
 // Markdown is rendered to HTML here, in Node, at build/dev time, so the heavy
 // markdown + Shiki toolchain never ships to the client bundle. The rendered
@@ -83,7 +83,6 @@ export type RenderedPost = {
   ogImage?: string
   featured: boolean
   html: string
-  heroHtml: string
 }
 
 type SearchablePost = RenderedPost & {
@@ -147,23 +146,6 @@ function parseCategories(value: string): string[] {
     .filter(Boolean)
 }
 
-export function renderHeroImage(src?: string, alt?: string): string {
-  if (!src) return ''
-  if (!alt) throw new Error('Blog hero images require heroImageAlt text.')
-  if (!src.startsWith('/blog/') || !fs.existsSync(path.join(PUBLIC_DIR, src))) {
-    throw new Error(`Blog hero image not found in public/blog: ${src}`)
-  }
-  const escapeAttribute = (value: string) =>
-    value
-      .replaceAll('&', '&amp;')
-      .replaceAll('"', '&quot;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-  return makeBlogAssetUrlsMountSafe(
-    inlineSvgImages(`<img src="${escapeAttribute(src)}" alt="${escapeAttribute(alt)}">`),
-  )
-}
-
 async function renderPost(filename: string): Promise<SearchablePost> {
   const slug = filename.replace(/\.md$/, '')
   const raw = fs.readFileSync(path.join(BLOGS_DIR, filename), 'utf8')
@@ -191,7 +173,6 @@ async function renderPost(filename: string): Promise<SearchablePost> {
     ogImage: data.ogImage || undefined,
     featured: data.featured === 'true',
     html,
-    heroHtml: renderHeroImage(data.heroImage, data.heroImageAlt),
     searchText: content,
   }
 }

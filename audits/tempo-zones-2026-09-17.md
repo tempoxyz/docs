@@ -106,3 +106,7 @@ Rechecked Zones `ac49071f` and Tempo `3c4db7f843` before preparing the public do
 Updated the protocol reference, blog, and settlement diagrams accordingly. The older shared testnet demos remain explicitly identified as a different deployment. Preserved the newer public `Privacy with Tempo Zones` article and social-image support while restoring the distinct `Inside Tempo Zones` route.
 
 The publication check also verified the hosted API at `b4a9dbe8`: checkpoint-based withdrawal status and the unimplemented Zone transfer route are unchanged. All 411 unit tests, TypeScript, production build, internal anchors, generated links, and Markdown audit passed. A fresh normal passkey completed all eight live testnet flows in 1.5 minutes. CI exposed an existing race between competing blog `og:type` tags; article type now comes from the native Vocs head configuration, with regression coverage for custom and generated social images.
+
+## Blog publication removed — September 23
+
+Removed the `Inside Tempo Zones` draft, its article assets, and its publishing support from the public repository. Restored the existing redirect to `Privacy with Tempo Zones`; that article is unchanged. The Zones documentation, diagrams, demo fixes, and generic SEO regression fix remain.

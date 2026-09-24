@@ -11,7 +11,6 @@ import {
 import { createRoot } from 'react-dom/client'
 import '../pages/_root.css'
 import Header from './app/_components/Header'
-import { getPost } from './app/blog/_lib/posts'
 import TpsTrendChartFrame from './app/performance/_components/TpsTrendChartFrame'
 import HomePage from './HomePage'
 import { routeMetadata } from './routeMetadata'
@@ -142,10 +141,7 @@ function idFromHash(hash: string) {
 
 function metadataForRoute(path: string) {
   if (routeMetadata[path]) return routeMetadata[path]
-  if (path.startsWith('/blog/')) {
-    const post = getPost(path.slice('/blog/'.length))
-    return post ? { title: post.title, description: post.excerpt } : routeMetadata['/blog']
-  }
+  if (path.startsWith('/blog/')) return routeMetadata['/blog']
   return routeMetadata['/']
 }
 

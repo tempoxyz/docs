@@ -1468,9 +1468,6 @@ body {
   font-size: 24px;
   line-height: 1.3;
 }
-.blog-prose h2#frequently-asked-questions {
-  margin-top: 5em;
-}
 .blog-prose h3 {
   margin-top: 2em;
   font-size: 19px;
@@ -1594,13 +1591,6 @@ body {
   user-select: text;
   cursor: text;
 }
-.blog-hero-image :is(svg.blog-diagram, img) {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin: 0;
-  border: 0;
-}
 :is(.blog-prose, .docs-zone-diagram) svg.blog-diagram :is(text, tspan)::selection {
   /* SVG glyph fills stay unchanged during selection in Chromium. */
   background: var(--diagram-selection-bg);
@@ -1653,5 +1643,4 @@ body {
   margin-top: 0.75em;
   font-size: 13px;
   color: var(--prose-caption);
-  text-align: center;
 }

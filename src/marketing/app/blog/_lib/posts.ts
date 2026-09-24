@@ -5,7 +5,7 @@ import type { CategorySlug, PostMeta } from './categories'
 // build time by the blog Vite plugin (see src/marketing/blogPlugin.ts). This
 // module is the client-side view over that data.
 
-export type Post = PostMeta & { html: string; heroHtml: string }
+export type Post = PostMeta & { html: string }
 
 const posts: Post[] = renderedPosts.map((post) => ({
   ...post,
