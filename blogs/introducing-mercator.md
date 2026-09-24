@@ -14,7 +14,7 @@ Instead of choosing and configuring every tool ahead of time, your agent describ
 
 Mercator is powered by MACH, a Tempo-native credit you can buy with Apple Pay. You can pay for downstream tools without setting up an account and API key with each provider. [Get started at mercator.sh](https://mercator.sh).
 
-![An agent sends its intent and budget to Mercator, which plans paid calls to downstream services and composes the result.](/blog/mercator-workflow.svg)
+![An agent sends its intent and budget to Mercator, which plans paid calls to downstream services and composes the result.](/blog/mercator-workflow-brendan.png)
 
 <a id="measured-performance"></a>
 
@@ -52,7 +52,7 @@ Alongside objective signals such as reliability, latency, and cost, agents can r
 
 Search in Mercator is more than a single index lookup. A good result has to be relevant to the task, callable by the agent, and reliable in practice. To weigh these signals across many services, Mercator runs search as a multi-stage pipeline. Each stage either removes candidates or re-ranks them.
 
-![Mercator searches, filters, reranks, and resolves services before returning results to the agent.](/blog/mercator-search-pipeline.svg)
+![Mercator searches, filters, reranks, and resolves services before returning results to the agent.](/blog/mercator-search-pipeline-brendan.png)
 
 Retrieval systems can find services on the right topic without finding ones that can complete the job. For “retrieve a company's SEC 10-K filing,” a company-news API and an SEC filings API may both look relevant, but only the latter exposes the requested document retrieval. Mercator re-ranks a pre-filtered candidate list with [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev), a small categorization model that scores whether each endpoint can perform the requested action within the query's constraints. Because Jev only scores plausible candidates, the categorization step works on a short list.
 
