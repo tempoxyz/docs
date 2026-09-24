@@ -1,12 +1,12 @@
 ---
 title: "T12 Network Upgrade"
 seoTitle: "T12 Network Upgrade | Tempo Docs"
-description: T12 makes repeated payments easier for wallets and bridges, expands payment-channel support, and improves compatibility and swap quotes.
+description: T12 adds configurable nonces for parallel expiring transactions, enables MPP sessions with closed-loop stablecoins, restores compatibility with calldata suffixes, and improves swap quotes and execution costs.
 ---
 
 # T12 Network Upgrade
 
-T12 makes repeated payments easier for wallets and bridges, expands payment-channel support, and improves compatibility and swap quotes.
+T12 adds configurable nonces for parallel expiring transactions, enables MPP sessions with closed-loop stablecoins, restores compatibility with calldata suffixes, and improves swap quotes and execution costs.
 
 ## Timeline
 
@@ -24,17 +24,19 @@ T12 makes repeated payments easier for wallets and bridges, expands payment-chan
 - **Configurable nonces for expiring transactions:** lets developers submit otherwise identical transactions in parallel by assigning distinct `nonce` values, without coordinating sequential nonces.
 - **MPP sessions for closed-loop stablecoins:** lets prepaid credits fund payment channels while preserving restrictions on which merchants can receive payments.
 - **Relaxed ABI validation:** accepts correctly formatted calls to Tempo's built-in contracts with extra data at the end.
-- **More reliable swap quotes:** fixes rounding differences between the amount quoted and the amount calculated during a swap.
+- **Accurate swap quotes and cheaper execution:** aligns quote calculations with swap fills and removes redundant liquidity-tracking writes.
 
 <span id="features" />
 
 ## T12 features
 
-### Easier repeated payments
+<span id="easier-repeated-payments" />
 
-Wallets and bridges can use a transaction's `nonce` field to give otherwise identical expiring payments different identifiers. This replaces the practice of adding extra access-list entries just to make each transaction unique.
+### Configurable nonces for expiring transactions
 
-Removing those entries removes one barrier to the [payment lane](/docs/protocol/blockspace/payment-lane-specification); other lane rules still apply.
+T12 lets developers set the existing `nonce` field on expiring transactions to any `uint64` value. Distinct values let otherwise identical transactions be submitted in parallel within the same validity window, without coordinating sequential nonces.
+
+This replaces access-list entries used only to make transactions unique. Transactions without an access list can use the [payment lane](/docs/protocol/blockspace/payment-lane-specification) if they meet its other requirements.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1106.md).
 
@@ -69,7 +71,7 @@ Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-10
 
 ## Integration impact
 
-- **Parallel transactions:** if your integration needs to submit otherwise identical expiring transactions in parallel, assign each a distinct `uint64` nonce after T12 activates. Ensure builders and signers preserve the supplied nonce, and remove access-list entries used only to make transactions unique. To retry a transaction, resend its original signed transaction while valid.
+- **Parallel transactions:** if your integration needs to submit otherwise identical expiring transactions in parallel, assign each a distinct `uint64` nonce after T12 activates. For example, use `nonce = 101` and `nonce = 102` for two otherwise identical transactions. Ensure builders and signers preserve the supplied nonce, and remove access-list entries used only to make transactions unique. To retry a transaction, resend its original signed transaction while valid.
 - **MPP integrations:** after T12 activates, you can use closed-loop credits with [MPP sessions](/docs/guide/machine-payments/pay-as-you-go). Existing channels need no migration.
 - **ABI compatibility:** if your integration was affected by [T11's strict ABI validation](/docs/protocol/upgrades/t11), you can restore calldata suffixes after T12 activates on your network.
 - **DEX integrations:** quote and swap APIs are unchanged. If you read tick liquidity totals directly from storage, switch to `getTickLevel()` or sum the remaining amounts of active orders. Stored tick totals stop updating at T12.
