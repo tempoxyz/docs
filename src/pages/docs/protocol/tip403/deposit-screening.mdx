@@ -1,0 +1,132 @@
+---
+title: Deposit screening
+description: Hold incoming TIP-20 deposits for offchain review, then release approved funds using receive policies and receipt-based recovery.
+---
+
+import { Card, Cards } from 'vocs'
+import { MermaidDiagram } from '../../../../components/MermaidDiagram'
+
+# Deposit screening
+
+Use [receive policies](/docs/protocol/tip403/receive-policies) to hold incoming [TIP-20 Tokens](/docs/protocol/tip20/overview) for review before crediting your account. Your application screens each deposit offchain, and your chosen recovery authority releases approved funds from `ReceivePolicyGuard`.
+
+For review of every deposit, configure your account to block all senders and choose yourself or a dedicated recovery address as the recovery authority. Keep this policy in place while claiming individual deposits: approving one receipt does not approve future payments from that sender.
+
+This is an application pattern built on [TIP-1028](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1028.md), introduced in [T6](/docs/protocol/upgrades/t6). The protocol holds funds and enforces claim permissions; your application supplies the screening decision.
+
+## From deposit to approval
+
+The diagram shows a receiver that claims its own approved deposits. Token-level checks must pass before funds can enter the guard.
+
+<div style={{ overflowX: 'auto' }}>
+<div style={{ minWidth: 640 }}>
+<MermaidDiagram chart={`sequenceDiagram
+    participant Sender
+    participant Guard as ReceivePolicyGuard
+    participant Receiver
+
+    Sender->>Guard: (1) TIP-20 redirects blocked deposit
+    Guard-->>Receiver: (2) TransferBlocked with receipt
+    Note over Receiver: (3) Screen deposit offchain
+    Receiver->>Guard: (4) If approved: claim(receiver, receipt)
+    Guard->>Receiver: (5) Release full amount
+`} />
+</div>
+</div>
+
+A blocked deposit is a successful transfer into the guard. The receiver's balance is not credited until a claim succeeds. Use the receipt lifecycle to distinguish funds awaiting review from funds delivered to your account.
+
+| Stage | Where the funds are | What your application does |
+|---|---|---|
+| Pending review | `ReceivePolicyGuard` | Index the receipt and screen the deposit. |
+| Approved, not yet claimed | `ReceivePolicyGuard` | Submit a claim from the recovery authority. |
+| Released | Claim destination | Confirm the successful claim before crediting the deposit as delivered. |
+| Rejected or needs further review | `ReceivePolicyGuard` | Leave the receipt unclaimed, or explicitly reroute it if policy checks permit. |
+
+Approval and rejection are application decisions. They do not move funds onchain by themselves.
+
+## Configure an account for screening
+
+:::::steps
+
+### Hold every incoming deposit
+
+Call `setReceivePolicy(uint64,uint64,address)` on the [TIP-403 registry](/docs/protocol/tip403/spec) at `0x403c000000000000000000000000000000000000` from the receiving account with these arguments:
+
+| Argument | Value | Effect |
+|---|---|---|
+| `senderPolicyId` | `0` | Block all senders so every covered inbound transfer or mint creates a receipt. |
+| `tokenFilterId` | `1` | Allow all tokens at the token-filter layer; the sender policy still holds each deposit. |
+| `recoveryAuthority` | Your receiving account or a dedicated nonzero recovery address | Give that address exclusive authority to claim future receipts. |
+
+You can use a token allowlist instead of `tokenFilterId = 1`. A token rejected by that filter also goes to the guard; it does not cause the inbound call to revert.
+
+Do not use `address(0)` for receiver-controlled screening: it gives the deposit's originator claim authority. If you use [virtual addresses](/docs/protocol/tip20/virtual-addresses), configure the policy on the resolved master account.
+
+### Index deposits awaiting review
+
+Watch `TransferBlocked` events from `ReceivePolicyGuard` at `0xB10C000000000000000000000000000000000000`. Store the emitted `receipt` bytes with the amount, token, receiver, and transaction context.
+
+Receipts are not enumerable onchain. Preserve the exact emitted bytes: they are the witness passed to `balanceOf(receipt)` and `claim(to, receipt)`.
+
+The receipt identifies the originator, original recipient, token, memo, timestamp, nonce, and whether the inbound was a transfer or mint. For virtual-address deposits, the original recipient preserves the deposit alias for attribution; the policy applies to its master account.
+
+### Review each receipt offchain
+
+Apply your application's screening rules to each deposit. For transfers, the originator is the `from` account, including `transferFrom`; for mints, it is the mint caller.
+
+Record the decision against the individual receipt. If you need to review every payment, keep the reject-all sender policy in place. Allowlisting a sender lets its future deposits pass directly when the token filter also allows them.
+
+### Release approved funds
+
+From the recovery authority captured in the receipt, call `claim(to, receipt)` on `ReceivePolicyGuard`, with `to` set to the receiving account. For a virtual-address deposit, use the resolved master address as `to`.
+
+This is a **resume claim**. It skips the receiver's receive policy, so the reject-all screening policy can remain enabled. The receiver must still be authorized under the token's current TIP-403 policy.
+
+A successful claim releases the full amount and consumes the receipt. Partial claims are not supported, and a consumed receipt cannot be claimed again. Confirm `ReceiptClaimed` and the associated transfer before marking the funds as delivered.
+
+:::::
+
+## Handle rejected deposits and refunds
+
+You can leave a receipt unclaimed while review continues. Returning funds requires an explicit claim to another destination; rejection does not automatically refund the sender.
+
+A claim to a destination other than the receiver is a **reroute**. With a nonzero recovery authority, the receiver is the policy subject, even when a separate recovery address submits the claim. A reroute requires:
+
+- The receiver to be authorized as a sender under the token's current TIP-403 policy.
+- The destination to be authorized as a recipient under that token policy.
+- The destination's receive policy to accept the receiver as sender and to accept the token.
+
+These checks also apply when returning a deposit to its originator. A refund can therefore fail if current policies disallow it. Failed claims do not release the funds.
+
+Burning is a separate issuer-controlled action, not a screening rejection: `burnBlockedReceipt` requires `BURN_BLOCKED_ROLE` and a policy subject currently unauthorized as a sender under the token's TIP-403 policy. See the [claim and burn rules](/docs/protocol/tip403/receive-policies#claims).
+
+## Integration boundaries
+
+- **Token controls still run first.** Pauses, balance and allowance checks, and the token's TIP-403 policy can revert an inbound call. Only a receive-policy failure redirects funds into the guard.
+- **Transaction success does not mean receiver credit.** A blocked transfer emits `Transfer` to the guard, followed by `TransferBlocked`. Do not credit a customer from transaction status alone.
+- **Authority is captured per receipt.** Changing the account's recovery authority affects future receipts only. Keep access to the authority needed to resolve outstanding receipts.
+- **Screening covers specific TIP-20 operations.** Transfers and mints listed in the [receive-policy reference](/docs/protocol/tip403/receive-policies#transfer-flow) are covered. Fee deposits, fee refunds, and internal balances are outside this flow.
+
+## Related screening references
+
+<Cards>
+  <Card
+    title="Receive policies"
+    description="Protocol rules for receipt fields, evaluation order, claims, burns, and events."
+    to="/docs/protocol/tip403/receive-policies"
+    icon="lucide:shield-check"
+  />
+  <Card
+    title="Configure receive policies"
+    description="Choose sender rules, token filters, and recovery authority for your account."
+    to="/docs/guide/payments/configure-receive-policies"
+    icon="lucide:settings"
+  />
+  <Card
+    title="TIP-1028 specification"
+    description="Source specification for address-level receive policies and receipt recovery."
+    to="https://github.com/tempoxyz/tempo/blob/main/tips/tip-1028.md"
+    icon="lucide:file-text"
+  />
+</Cards>
