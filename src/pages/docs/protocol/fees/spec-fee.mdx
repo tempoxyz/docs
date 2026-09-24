@@ -16,6 +16,8 @@ Tempo has no native token. Transaction fees are paid directly in USD-denominated
 
 Users can pay gas fees in any [TIP-20](/docs/protocol/tip20/spec) token whose currency is USD, as long as that stablecoin has sufficient liquidity on the enshrined [fee AMM](/docs/protocol/fees/spec-fee-amm) against the token that the current validator wants to receive.
 
+Fee eligibility requires an exact `USD` currency value. Tokens that track USD but must not be gas eligible use the `USD-NGE` [currency convention](/docs/protocol/tip20/overview#currency-declaration). For example, a permissioned token can use `USD-NGE` when its transfer restrictions are incompatible with the Fee Manager or Fee AMM.
+
 In determining *which* token a user pays fees in, we want to maximize customizability (so that wallets or users can implement more sophisticated UX than is possible at the protocol layer), minimize surprise (particularly surprises in which a user pays fees in a stablecoin they did not expect to), and have sane default behavior so that users can begin using basic functions like payments even using wallets that are not customized for Tempo support.
 
 ## Fee units
