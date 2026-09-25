@@ -13,7 +13,6 @@ import { fetchPerfRuns, fmtInt, type PerfRun } from './_lib/runs'
 
 const STATUS_PAGE_URL = 'https://status.tempo.xyz'
 const PERF_DASHBOARD_URL = 'https://perf.tempo.xyz/'
-const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
 const HERO_STAT_LABELS = ['Transactions per second', 'Avg block time', 'Average fee']
 const SETTLEMENT_SKELETON_CELLS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 const UPTIME_SKELETON_BARS = Array.from({ length: 90 }, (_, i) => `bar-${i}`)
@@ -253,13 +252,7 @@ export default function PerformancePage() {
 
   const latest = runs[runs.length - 1]
   const hasRuns = runs.length >= 2
-  const chartRuns = latest
-    ? runs.filter(
-        (run) =>
-          new Date(run.startedAt).getTime() >= new Date(latest.startedAt).getTime() - ONE_WEEK_MS,
-      )
-    : []
-  const hasChartRuns = chartRuns.length >= 2
+  const hasChartRuns = runs.length >= 2
 
   const heroStats = latest
     ? [
@@ -283,7 +276,7 @@ export default function PerformancePage() {
       <div className="mx-auto w-full max-w-7xl border-line border-x bg-surface-shell">
         <Header />
 
-        {/* Hero: headline + live gradient chart of the latest week of nightly runs */}
+        {/* Hero: headline + multi-region nightly history */}
         <section className="relative border-line border-b px-5 pt-20 pb-12 lg:px-8 lg:pt-28">
           <Reveal className="flex flex-col items-center text-center">
             <h1 className="max-w-[880px] text-balance font-sans text-[clamp(2.5rem,6vw,3.5rem)] text-foreground leading-[1.05] tracking-[-0.03em] antialiased">
@@ -295,13 +288,13 @@ export default function PerformancePage() {
             <HeroChartSkeleton />
           ) : hasChartRuns ? (
             <Reveal delay={150} className="mt-16">
-              <TpsTrendChart runs={chartRuns} />
+              <TpsTrendChart runs={runs} />
               <div className="mt-10 text-center">
                 <p className="font-sans text-[20px] text-foreground leading-tight tracking-[0]">
                   Transactions per second
                 </p>
                 <p className="mt-1 font-sans text-[14px] text-foreground/45 leading-[1.4]">
-                  Nightly benchmark runs
+                  Multi-region benchmark history
                 </p>
               </div>
             </Reveal>

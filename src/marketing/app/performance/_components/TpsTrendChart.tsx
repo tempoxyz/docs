@@ -68,6 +68,7 @@ export default function TpsTrendChart({
   const PAD = tpsChartPad(width)
   const mobile = width > 0 && width < TPS_CHART_MOBILE_BP
   const n = runs.length
+  const last = n - 1
   const values = runs.map((r) => r.settledTps)
   const min = Math.min(...values)
   const max = Math.max(...values)
@@ -81,22 +82,22 @@ export default function TpsTrendChart({
   ]
   const yTicks = ticks(yDomain[0], yDomain[1], 5)
 
-  const xAt = scaleLinear([0, n - 1], [PAD.l, Math.max(width - PAD.r, PAD.l + 1)])
+  const times = runs.map((run) => new Date(run.startedAt).getTime())
+  const xAt = scaleLinear([times[0], times[last]], [PAD.l, Math.max(width - PAD.r, PAD.l + 1)])
   const yAt = scaleLinear(yDomain, [height - PAD.b, PAD.t])
-  const points = values.map((v, i) => [xAt(i), yAt(v)] as [number, number])
-
-  const labelStep = Math.ceil(n / 6)
+  const points = values.map((v, i) => [xAt(times[i]), yAt(v)] as [number, number])
 
   const onMove = (e: React.PointerEvent<SVGRectElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const px = e.clientX - rect.left
-    const i = Math.round(((px - PAD.l) / (width - PAD.l - PAD.r)) * (n - 1))
-    const clamped = Math.min(Math.max(i, 0), n - 1)
-    setHover(clamped)
+    let nearest = 0
+    for (let i = 1; i < n; i++) {
+      if (Math.abs(points[i][0] - px) < Math.abs(points[nearest][0] - px)) nearest = i
+    }
+    setHover(nearest)
   }
 
   const active = hover === null ? null : runs[hover]
-  const last = n - 1
 
   return (
     <div ref={ref} className="relative w-full" style={{ height }}>
@@ -119,19 +120,17 @@ export default function TpsTrendChart({
 
           <TpsChartGrid height={height} width={width} yDomain={yDomain} yTicks={yTicks} />
 
-          {runs.map((r, i) =>
-            i === 0 || i === last || i % labelStep === 0 ? (
-              <text
-                key={r.id}
-                x={xAt(i)}
-                y={height - 8}
-                textAnchor={i === 0 ? 'start' : i === last ? 'end' : 'middle'}
-                className="fill-foreground/45 font-sans text-[12px]"
-              >
-                {r.dateLabel}
-              </text>
-            ) : null,
-          )}
+          {[0, last].map((i) => (
+            <text
+              key={runs[i].id}
+              x={points[i][0]}
+              y={height - 8}
+              textAnchor={i === 0 ? 'start' : 'end'}
+              className="fill-foreground/45 font-sans text-[12px]"
+            >
+              {runs[i].dateLabel}
+            </text>
+          ))}
 
           {hover !== null ? (
             <line
@@ -152,9 +151,7 @@ export default function TpsTrendChart({
             pathLength={1}
             strokeDasharray="1"
             strokeDashoffset={drawn ? 0 : 1}
-            style={{
-              transition: `stroke-dashoffset ${DRAW_MS}ms ease-in`,
-            }}
+            style={{ transition: `stroke-dashoffset ${DRAW_MS}ms ease-in` }}
           />
 
           {points.map(([x, y], i) => (
@@ -171,7 +168,7 @@ export default function TpsTrendChart({
                 // sqrt inverts the stroke's roughly-quadratic ease-in, so each
                 // dot still appears right as the stroke tip reaches it. The
                 // radius eases separately (no delay) for hover emphasis.
-                transition: `opacity 250ms ease-out ${Math.sqrt(i / (n - 1)) * DRAW_MS}ms, r 200ms ease-out`,
+                transition: `opacity 250ms ease-out ${Math.sqrt((x - PAD.l) / (points[last][0] - PAD.l || 1)) * DRAW_MS}ms, r 200ms ease-out`,
               }}
             />
           ))}
@@ -211,6 +208,7 @@ export default function TpsTrendChart({
           <p className="whitespace-nowrap font-mono text-[11px] text-foreground/40">
             {active.dateLabel} · {active.timeLabel}
           </p>
+          <p className="mt-1 font-sans text-[11px] text-foreground/60">{active.workload}</p>
           <p className="mt-1 whitespace-nowrap font-mono text-[13px] text-foreground">
             {fmtInt(active.settledTps)}{' '}
             <span className="text-foreground/40">transactions per second</span>

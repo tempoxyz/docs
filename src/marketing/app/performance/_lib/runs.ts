@@ -2,13 +2,8 @@
 // fetchStats() (app/_components/stats.ts) overlays only the latest run;
 // this module fetches the whole feed for the /performance charts.
 
-const PERF_API_URL = 'https://perf.tempo.xyz/api/perf/runs?feed=nightly&limit=100'
-
-const PUBLIC_SCENARIO_FROM = '2026-07-23'
-const PUBLIC_SCENARIO_ID = 'public'
-const TIP20_50K_SCENARIO_FROM = '2026-07-13'
-const TIP20_50K_SCENARIO_ID = 'tip20-50k'
-const TIP20_SCENARIO_UNTIL = '2026-07-10'
+const PERF_API_URL =
+  'https://perf.tempo.xyz/api/perf/runs?feed=nightly&series=multi-region&limit=500'
 
 type ApiRun = {
   id?: string
@@ -61,33 +56,17 @@ const timeLabel = (iso: string) =>
     timeZone: 'UTC',
   })} UTC`
 
-function isNightlyScenario(run: ApiRun): boolean {
-  const startedAt = run.startedAt
-  const scenarioId = run.scenario?.id
-  if (!startedAt || !scenarioId) return false
-
-  if (startedAt >= PUBLIC_SCENARIO_FROM) {
-    return scenarioId === PUBLIC_SCENARIO_ID
-  }
-
-  if (startedAt >= TIP20_50K_SCENARIO_FROM) {
-    return scenarioId === TIP20_50K_SCENARIO_ID
-  }
-
-  return startedAt < TIP20_SCENARIO_UNTIL && scenarioId.startsWith('tip20-')
-}
-
 // Oldest → newest (the API returns newest first). Empty array when the API
 // is down or the shape changes; callers render a fallback notice.
 export async function fetchPerfRuns(): Promise<PerfRun[]> {
   try {
     const res = await fetch(PERF_API_URL)
     if (!res.ok) return []
-    const data = (await res.json()) as { runs?: ApiRun[] }
+    const data = (await res.json()) as { series?: string; runs?: ApiRun[] }
+    if (data.series !== 'multi-region') return []
     return (data.runs ?? [])
-      .filter(
-        (r): r is Required<Pick<ApiRun, 'startedAt' | 'metrics'>> & ApiRun =>
-          Boolean(r.startedAt && r.metrics?.settledTps) && isNightlyScenario(r),
+      .filter((r): r is Required<Pick<ApiRun, 'startedAt' | 'metrics'>> & ApiRun =>
+        Boolean(r.startedAt && r.scenario?.id && r.metrics?.settledTps),
       )
       .map((r) => ({
         id: r.id ?? r.startedAt,
@@ -125,4 +104,17 @@ export const fmtGgas = (gasPerSecond: number) => (gasPerSecond / 1e9).toFixed(2)
 export const fmtDelta = (current: number, previous: number) => {
   const pct = ((current - previous) / previous) * 100
   return `${pct >= 0 ? '+' : '−'}${Math.abs(pct).toFixed(1)}%`
+}
+
+// Keep homepage sparklines within the latest workload.
+export function workloadSegments(runs: PerfRun[]): { start: number; end: number }[] {
+  const segments: { start: number; end: number }[] = []
+  for (let i = 0; i < runs.length; i++) {
+    if (i === 0 || runs[i].scenarioId !== runs[i - 1].scenarioId) {
+      segments.push({ start: i, end: i + 1 })
+    } else {
+      segments[segments.length - 1].end = i + 1
+    }
+  }
+  return segments
 }
