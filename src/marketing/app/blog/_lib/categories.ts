@@ -20,6 +20,7 @@ export type PostMeta = {
   category: CategorySlug
   categories: CategorySlug[]
   authors: string
+  ogImage?: string
   featured: boolean
 }
 
