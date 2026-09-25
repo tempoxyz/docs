@@ -1,12 +1,12 @@
 ---
 title: "T12 Network Upgrade"
 seoTitle: "T12 Network Upgrade | Tempo Docs"
-description: T12 adds configurable nonces for parallel expiring transactions, enables MPP sessions with closed-loop stablecoins, restores compatibility with calldata suffixes, and improves swap quotes and execution costs.
+description: T12 adds configurable nonces for parallel expiring transactions, enables MPP sessions with closed-loop stablecoins, restores compatibility with calldata suffixes, and aligns quote and swap calculations.
 ---
 
 # T12 Network Upgrade
 
-T12 adds configurable nonces for parallel expiring transactions, enables MPP sessions with closed-loop stablecoins, restores compatibility with calldata suffixes, and improves swap quotes and execution costs.
+T12 adds configurable nonces for parallel expiring transactions, enables MPP sessions with closed-loop stablecoins, restores compatibility with calldata suffixes, and aligns quote and swap calculations.
 
 ## Timeline
 
@@ -24,7 +24,7 @@ T12 adds configurable nonces for parallel expiring transactions, enables MPP ses
 - **Configurable nonces for expiring transactions:** lets developers submit otherwise identical transactions in parallel by assigning distinct `nonce` values, without coordinating sequential nonces.
 - **MPP sessions for closed-loop stablecoins:** lets prepaid credits fund payment channels while preserving restrictions on which merchants can receive payments.
 - **Relaxed ABI validation:** accepts correctly formatted calls to Tempo's built-in contracts with extra data at the end.
-- **Accurate swap quotes and cheaper execution:** aligns quote calculations with swap fills and removes redundant liquidity-tracking writes.
+- **More reliable swap quotes:** fixes rounding differences between the amount quoted and the amount calculated during a swap.
 
 <span id="features" />
 
