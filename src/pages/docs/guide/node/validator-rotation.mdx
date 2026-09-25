@@ -1,0 +1,172 @@
+---
+title: Validator rotation
+seoTitle: Validator Key and Network Rotation | Tempo Docs
+description: Change an existing Tempo validator's public key or network addresses, prepare a replacement follower, and verify the transition.
+---
+
+# Validator rotation
+
+Change the public key or network addresses of an existing validator while preserving its validator index. For recovery with the same signing key after a host failure, use [validator failover](/docs/guide/node/validator-failover).
+
+| Change | Procedure |
+| --- | --- |
+| New signing public key, with new network endpoints | [Rotate validator identity](#rotate-validator-identity). |
+| New ingress or egress address, with the same public key | [Update IP addresses](#update-ip-addresses). |
+
+The transaction signer must control the validator operator address. The commands below use `--wallet-key <OPERATOR_KEY_PATH>`; replace it with the [signer backend](/docs/guide/node/validator-keys#validator-operator-address-custody) that matches your custody setup. This operator key is separate from the validator's consensus signing key.
+
+## Prepare a follower
+
+If you are moving to another host, sync it as a follower before rotating. Use a separate data directory and keep the existing validator running while you prepare the replacement.
+
+:::::steps
+
+### Run the follower
+
+Install the same node version and use the same chain as the existing validator. You can start from a [minimal snapshot](/docs/guide/node/installation#snapshots) to reduce sync time.
+
+The upstream must expose certified `consensus` RPCs and WebSockets. The example uses mainnet; use `--chain moderato` for testnet.
+
+```bash
+tempo node --datadir <REPLACEMENT_DATADIR> \
+  --chain mainnet \
+  --follow ws://example.url:8546 \
+  --http --http.port 8545 \
+  --http.api eth,net,web3,txpool,trace,consensus
+```
+
+Keep the follower running without `--consensus.signing-key` while it syncs.
+
+### Verify the follower is current
+
+Compare execution and certified consensus heights with a healthy upstream. Confirm that both continue advancing:
+
+```bash
+cast block-number --rpc-url http://localhost:8545
+cast rpc consensus_getLatest --rpc-url http://localhost:8545
+```
+
+### Prepare the replacement's network endpoints
+
+Make its ingress port reachable by consensus peers and confirm its outgoing traffic uses the intended egress IP. A new validator identity must use a different ingress address from the old identity; changing the port is sufficient. Keep the old validator's endpoints available while it remains in the committee.
+
+:::::
+
+## Rotate validator identity
+
+Rotation changes the ed25519 signing public key at your existing validator index. The old identity is recorded as deactivated, and the new identity follows the [validator state transitions](/docs/guide/node/validator-status#state-transitions).
+
+:::danger[Keep the old identity running]
+Keep the old validator running with its old signing key until its status shows `in_committee: false`. It still has committee duties during the transition. Run the replacement with the new signing key and a separate data directory.
+:::
+
+:::::steps
+
+### Generate the replacement identity
+
+[Generate a new signing key](/docs/guide/node/validator-keys#generating-a-signing-key) and record its public key. Make the encrypted key and its decryption secret available to the replacement. The commands below assume an encrypted signing key and your existing FIFO setup; omit `--secret` or `--consensus.secret` for an unencrypted key.
+
+### Submit the rotation
+
+Use the existing validator operator address, the new public key, and the replacement's ingress and egress addresses. The new signing key proves ownership of the new identity; the operator key authorizes the transaction.
+
+::::code-group
+```bash [Mainnet]
+tempo consensus rotate-validator \
+  --validator-address <YOUR_VALIDATOR_ADDRESS> \
+  --public-key <NEW_PUBLIC_KEY> \
+  --ingress <NEW_IP:PORT> \
+  --egress <NEW_IP> \
+  --signing-key <NEW_PRIVATE_KEY_PATH> \
+  --secret <ENCRYPTION_KEY_FIFO> \
+  --wallet-key <OPERATOR_KEY_PATH> \
+  --rpc-url https://rpc.tempo.xyz
+```
+```bash [Testnet]
+tempo consensus rotate-validator \
+  --validator-address <YOUR_VALIDATOR_ADDRESS> \
+  --public-key <NEW_PUBLIC_KEY> \
+  --ingress <NEW_IP:PORT> \
+  --egress <NEW_IP> \
+  --signing-key <NEW_PRIVATE_KEY_PATH> \
+  --secret <ENCRYPTION_KEY_FIFO> \
+  --wallet-key <OPERATOR_KEY_PATH> \
+  --rpc-url https://rpc.testnet.tempo.xyz
+```
+::::
+
+Wait for the transaction to finalize before starting the replacement in validator mode. If self-service rotation is unavailable for your validator, coordinate with the Tempo team and provide a signature generated with `tempo consensus create-rotate-validator-signature`.
+
+### Start the replacement with the new key
+
+Stop the follower cleanly and wait for it to exit. Reopen the same data directory without `--follow`, using the new signing key and registered ingress port. Preserve any separate `--consensus.datadir` setting.
+
+The example uses mainnet; use `--chain moderato` for testnet. Refill the secret FIFO before starting the node.
+
+```bash
+tempo node --datadir <REPLACEMENT_DATADIR> \
+  --chain mainnet \
+  --consensus.signing-key <NEW_PRIVATE_KEY_PATH> \
+  --consensus.secret <ENCRYPTION_KEY_FIFO> \
+  --consensus.listen-address 0.0.0.0:<NEW_REGISTERED_INGRESS_PORT> \
+  --http --http.port 8545 \
+  --http.api eth,net,web3,txpool,trace,consensus \
+  --telemetry-url <TELEMETRY_URL>
+```
+
+### Verify the transition before retiring the old node
+
+Look up both public keys. Use `https://rpc.testnet.tempo.xyz` for testnet:
+
+```bash
+tempo consensus validator <NEW_PUBLIC_KEY> --rpc-url https://rpc.tempo.xyz
+tempo consensus validator <OLD_PUBLIC_KEY> --rpc-url https://rpc.tempo.xyz
+```
+
+Check the replacement's [peer and DKG metrics](/docs/guide/node/validator-status#checking-state-via-metrics) as it joins the committee. Stop the old validator only after its own lookup reports `in_committee: false`. See the [exit timeline](/docs/guide/node/validator-lifecycle#exit-timeline) for the transition.
+
+:::::
+
+## Update IP addresses
+
+Use this procedure when the public key stays the same and only the ingress or egress address changes. Ingress addresses must be unique across active validators.
+
+:::::steps
+
+### Prepare the new addresses
+
+Configure routing and firewall access for the new ingress and egress addresses. If moving the same signing key to another host, follow [validator failover](/docs/guide/node/validator-failover) to preserve state and fence the old host before starting the replacement.
+
+### Submit the address update
+
+::::code-group
+```bash [Mainnet]
+tempo consensus set-validator-ip-address <address/pubkey/index> \
+  --ingress <NEW_IP:NEW_PORT> \
+  --egress <NEW_IP> \
+  --wallet-key <OPERATOR_KEY_PATH> \
+  --rpc-url https://rpc.tempo.xyz
+```
+```bash [Testnet]
+tempo consensus set-validator-ip-address <address/pubkey/index> \
+  --ingress <NEW_IP:NEW_PORT> \
+  --egress <NEW_IP> \
+  --wallet-key <OPERATOR_KEY_PATH> \
+  --rpc-url https://rpc.testnet.tempo.xyz
+```
+::::
+
+### Verify the registered endpoints
+
+The update takes effect at the next finalized block. Look up the validator and confirm the registered ingress and egress match your configuration, then check peer connectivity and continued block progress.
+
+::::code-group
+```bash [Mainnet]
+tempo consensus validator <pubkey> --rpc-url https://rpc.tempo.xyz
+```
+```bash [Testnet]
+tempo consensus validator <pubkey> --rpc-url https://rpc.testnet.tempo.xyz
+```
+::::
+
+:::::

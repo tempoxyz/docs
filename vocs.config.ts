@@ -1141,6 +1141,10 @@ export default defineConfig({
                 link: '/docs/guide/node/validator-keys',
               },
               {
+                text: 'Validator rotation',
+                link: '/docs/guide/node/validator-rotation',
+              },
+              {
                 text: 'Validator failover',
                 link: '/docs/guide/node/validator-failover',
               },

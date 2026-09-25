@@ -9,6 +9,12 @@ This guide covers how to monitor your Tempo validator's health, diagnose issues,
 
 ## Consensus states
 
+### Signer and verifier
+
+After a restart or failover, look for `we have a share for this epoch, participating as a signer` in the logs. If the node instead reports `we don't have a share for this epoch, participating as a verifier`, it has not resumed signing even if execution and consensus heights are advancing.
+
+Committee membership alone does not show that the node is participating. Confirm that it has a usable signing share, then check proposal and voting activity below.
+
 ### Proposer
 
 Your validator is currently the leader and proposing blocks. Check proposal activity:
