@@ -43,74 +43,11 @@ For `tempo consensus` commands, use `--dry-run` to print the target and calldata
 
 ### Rotate validator identity
 
-The ed25519 key can be changed while keeping your validator index stable. This is useful for key rotation or recovery without leaving and re-joining the committee. [Generate a new signing key](/docs/guide/node/validator-keys#generating-a-signing-key) first.
-
-:::danger[Do not shut down the old validator]
-Unlike Ethereum, you must **keep your old validator running** after rotation. The rotated-out validator is still a dealer in the committee for at least one more epoch. Shutting it down early will degrade network liveness. See the [exit timeline](#exit-timeline) for the full epoch-by-epoch breakdown.
-
-Keep the old validator running until it shows `in_committee: false`:
-
-::::code-group
-```bash [Mainnet]
-tempo consensus validator <old_pubkey> --rpc-url https://rpc.tempo.xyz
-```
-```bash [Testnet]
-tempo consensus validator <old_pubkey> --rpc-url https://rpc.testnet.tempo.xyz
-```
-::::
-:::
-
-::::code-group
-```bash [Mainnet]
-tempo consensus rotate-validator \
-  --validator-address <YOUR_VALIDATOR_ADDRESS> \
-  --public-key <NEW_PUBLIC_KEY> \
-  --ingress <NEW_IP:PORT> \
-  --egress <NEW_IP> \
-  --signing-key <NEW_PRIVATE_KEY_PATH> \
-  --rpc-url https://rpc.tempo.xyz
-```
-```bash [Testnet]
-tempo consensus rotate-validator \
-  --validator-address <YOUR_VALIDATOR_ADDRESS> \
-  --public-key <NEW_PUBLIC_KEY> \
-  --ingress <NEW_IP:PORT> \
-  --egress <NEW_IP> \
-  --signing-key <NEW_PRIVATE_KEY_PATH> \
-  --rpc-url https://rpc.testnet.tempo.xyz
-```
-::::
-
-If self-service rotation is not yet enabled for your validator, use `tempo consensus create-rotate-validator-signature` to generate the signature and provide it to the Tempo team.
-
-:::info
-Rotation preserves your validator index and active validator count. The old entry is appended to history as deactivated, and the entry at your index is updated in place. You must use a different ingress address (changing the port is sufficient).
-:::
-
-After rotation, your validator goes through the [standard state transitions](/docs/guide/node/validator-status#state-transitions) with the new identity.
+Follow [validator rotation](/docs/guide/node/validator-rotation#rotate-validator-identity) to change the signing public key while preserving your validator index. Keep the old validator running until its status shows `in_committee: false`.
 
 ### Update IP addresses
 
-If your node's network endpoints change, update them on-chain. The change takes effect at the next finalized block.
-
-::::code-group
-```bash [Mainnet]
-tempo consensus set-validator-ip-address <address/pubkey/index> \
-  --ingress <NEW_IP:NEW_PORT> \
-  --egress <NEW_IP> \
-  --rpc-url https://rpc.tempo.xyz
-```
-```bash [Testnet]
-tempo consensus set-validator-ip-address <address/pubkey/index> \
-  --ingress <NEW_IP:NEW_PORT> \
-  --egress <NEW_IP> \
-  --rpc-url https://rpc.testnet.tempo.xyz
-```
-::::
-
-:::warning
-Ingress addresses must be unique across all active validators. The transaction will revert if another active validator already uses the same `IP:port`.
-:::
+Follow [update IP addresses](/docs/guide/node/validator-rotation#update-ip-addresses) to change registered ingress or egress addresses while keeping the same public key.
 
 ### Update the fee recipient
 
