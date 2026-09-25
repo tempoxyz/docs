@@ -36,6 +36,10 @@ Ensure that you have set up your client by following the [guide](/docs/sdk/types
 
 Before executing a swap, get a quote to see the expected price.
 
+:::info[T12 quote behavior]
+At T12, quotes use the same per-order fill math and rounding as swaps for an identical state snapshot. Quote calls traverse individual orders, increasing their gas cost. Recheck quote gas limits and RPC timeouts. See [TIP-1088](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1088.md).
+:::
+
 :::code-group
 
 ```tsx twoslash [Buy.tsx]

@@ -22,6 +22,10 @@ Unlike traditional AMMs, you specify exact prices where you want to buy or sell,
 Storage credits can reduce gas for active DEX makers who repeatedly place, cancel, or fully fill eligible orders. See the [T7 network upgrade](/docs/protocol/upgrades/t7#user-attributed-dex-savings) for the feature details.
 :::
 
+## Reading tick liquidity at T12
+
+At T12, read tick liquidity through `getTickLevel()` or sum the remaining amounts of active orders. The stored tick `totalLiquidity` aggregate becomes stale. The getter traverses individual orders, so recheck gas budgets for this read. See [TIP-1088](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1088.md).
+
 ## Order Types
 
 ### Limit Orders

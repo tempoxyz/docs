@@ -80,6 +80,12 @@ console.log('Transaction 2:', receipt2.transactionHash) // [!code focus]
 
 ::::
 
+## Distinct transactions after T12
+
+After T12 activates, you can set distinct `uint64` values in the expiring transaction's `nonce` field to produce different hashes for otherwise identical transactions. Use builders and signing tools that preserve your supplied value. See [TIP-1106](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1106.md).
+
+If you use access-list entries solely for transaction uniqueness, replace that salt with a nonce discriminator. Check the remaining [payment-lane requirements](/docs/protocol/blockspace/payment-lane-specification) for your calls.
+
 ## Parallel transaction learning resources
 
 <Cards>
