@@ -106,7 +106,7 @@ export const fmtDelta = (current: number, previous: number) => {
   return `${pct >= 0 ? '+' : '−'}${Math.abs(pct).toFixed(1)}%`
 }
 
-// Separate paths at workload changes so a switch is not drawn as a regression.
+// Keep homepage sparklines within the latest workload.
 export function workloadSegments(runs: PerfRun[]): { start: number; end: number }[] {
   const segments: { start: number; end: number }[] = []
   for (let i = 0; i < runs.length; i++) {

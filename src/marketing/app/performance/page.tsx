@@ -294,7 +294,7 @@ export default function PerformancePage() {
                   Transactions per second
                 </p>
                 <p className="mt-1 font-sans text-[14px] text-foreground/45 leading-[1.4]">
-                  Multi-region nightly runs · {latest?.workload}
+                  Multi-region benchmark history
                 </p>
               </div>
             </Reveal>

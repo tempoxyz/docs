@@ -13,7 +13,7 @@ const run = (id: string, scenario: string, startedAt: string) => ({
   },
   metrics: { settledTps: 15000, avgBlockTimeMs: 500 },
 })
-test('history and headline use the scheduled multi-region public mix', async () => {
+test('history spans multi-region presets while the headline uses the latest run', async () => {
   const fetch = vi.fn().mockResolvedValue({
     ok: true,
     json: async () => ({
@@ -21,7 +21,7 @@ test('history and headline use the scheduled multi-region public mix', async () 
       runs: [
         run('new2', 'public-mix-multi-region', '2026-09-24'),
         run('new', 'public-mix-multi-region', '2026-09-23'),
-        run('old', 'public-mix-multi-region', '2026-09-10'),
+        run('old', 'tip20_existing_recipients-50k', '2026-07-30'),
       ],
     }),
   })
@@ -32,13 +32,16 @@ test('history and headline use the scheduled multi-region public mix', async () 
     fetch.mock.calls.every(([url]) => new URL(url).searchParams.get('series') === 'multi-region'),
   ).toBe(true)
   expect(runs.map((r) => r.scenarioId)).toEqual([
-    'public-mix-multi-region',
+    'tip20_existing_recipients-50k',
     'public-mix-multi-region',
     'public-mix-multi-region',
   ])
-  expect(workloadSegments(runs)).toEqual([{ start: 0, end: 3 }])
+  expect(workloadSegments(runs)).toEqual([
+    { start: 0, end: 1 },
+    { start: 1, end: 3 },
+  ])
 })
-test('chart segments remain separate if the feed changes workload later', () => {
+test('homepage sparkline can select the latest workload segment', () => {
   const runs = [{ scenarioId: 'old' }, { scenarioId: 'old' }, { scenarioId: 'new' }] as Parameters<
     typeof workloadSegments
   >[0]
