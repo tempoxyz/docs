@@ -9,7 +9,7 @@ import { Cards, Card, Tabs, Tab } from 'vocs'
 # Run a Tempo node: validator, RPC, and standby
 
 :::info[Network identities]
-These BLS threshold public keys verify consensus finalization certificates, including those used to authenticate Tempo snapshots. Tempo includes them in its [built-in network identities](https://github.com/tempoxyz/tempo/blob/main/crates/chainspec/src/network_identity.rs).
+Both follow/RPC nodes and validators use these BLS threshold public keys to verify consensus finalization certificates, including those used to authenticate Tempo snapshots. Tempo includes them in its [built-in network identities](https://github.com/tempoxyz/tempo/blob/main/crates/chainspec/src/network_identity.rs).
 
 <Tabs>
 <Tab title="Mainnet">
@@ -23,7 +23,7 @@ These BLS threshold public keys verify consensus finalization certificates, incl
 To override the built-in identity:
 
 ```bash
-tempo node --chain mainnet --follow \
+tempo node \
   --consensus.network-identity 0xa217bb85001d4dcf8e5c50136f77af88cb2cab1857279b91c6240f41cca95c4f43f6dcab3e0dfb87dafb3ecbeb6251e90a5df2e6c47432482821cd8b84665ee4642589d2d9628a92b03e2bbfb00e006d038cd98def76d2a41b7c228c05f5a193 \
   --consensus.network-identity-from-epoch 0
 ```
@@ -40,7 +40,7 @@ tempo node --chain mainnet --follow \
 To override the built-in identity:
 
 ```bash
-tempo node --chain moderato --follow \
+tempo node --chain moderato \
   --consensus.network-identity 0x84591ad702a9ee67c0c64add2ff166c19a4666a1dc636cc530a810052957d34c185bb1d2c7f5569983485a5af49baed70166ba17ae782bc8c75701099c70474798ccc181d03b0c12054f1d01c7817b27b425bae4bfcf936218c0d097cccf3242 \
   --consensus.network-identity-from-epoch 51
 ```
