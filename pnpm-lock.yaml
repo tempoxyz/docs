@@ -14,7 +14,7 @@ overrides:
   nanoid@>=3.0.0 <3.3.18: 3.3.18
   protobufjs: '>=7.5.5'
   remark-mdx-frontmatter@5>toml: 4.2.0
-  tar: '>=7.5.13'
+  tar: '>=7.5.21'
 
 patchedDependencies:
   '@braintree/sanitize-url@7.1.2':
@@ -4530,8 +4530,8 @@ packages:
     resolution: {integrity: sha512-lzSWGv02xU9fiTVSOm+bVwC9sE4sDRcNlZLhxs3BxxPfoCgmDo+1xJRIn1FpXJNrmbWZ9iBrVBOhutZSmPUxcg==}
     hasBin: true
 
-  tar@7.5.13:
-    resolution: {integrity: sha512-tOG/7GyXpFevhXVh8jOPJrmtRpOTsYqUIkVdVooZYJS/z8WhfQUX8RJILmeuJNinGAMSu1veBr4asSHFt5/hng==}
+  tar@7.5.22:
+    resolution: {integrity: sha512-MFO/QzvtAOmJbkhOaCTvbGcFN9L9b+JunIsDwaKljSOdcLMea3NJ1k9Usz/rjdfSXTq4dfzfeS7W4p4YOAAHeA==}
     engines: {node: '>=18'}
 
   terser-webpack-plugin@5.6.1:
@@ -9387,7 +9387,7 @@ snapshots:
       execa: 9.6.1
       get-port: 7.2.0
       http-proxy: 1.18.1
-      tar: 7.5.13
+      tar: 7.5.22
     transitivePeerDependencies:
       - debug
 
@@ -10040,7 +10040,7 @@ snapshots:
       - waku
       - webpack
 
-  tar@7.5.13:
+  tar@7.5.22:
     dependencies:
       '@isaacs/fs-minipass': 4.0.1
       chownr: 3.0.0
