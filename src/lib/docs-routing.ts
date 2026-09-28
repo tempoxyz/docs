@@ -11,6 +11,15 @@ export function docsRouteDestination(destination: string, environment = process.
   return destination
 }
 
+// Deployed redirects may answer with a relative `Location`, which clients
+// resolve against the request URL. Compare that resolved target, so a
+// proxy-relative `/docs/...` Location still fails by landing outside
+// `/developers`.
+export function resolveRedirectLocation(location: string | null, requestUrl: string) {
+  if (location === null || !URL.canParse(location, requestUrl)) return null
+  return new URL(location, requestUrl).toString()
+}
+
 // These routes are evaluated in three places: Vocs for native route traffic,
 // Vercel before the `/developers` proxy mount reaches Vocs, and the legacy docs
 // host. Keep the mappings here so tests and deployed smoke checks share one
