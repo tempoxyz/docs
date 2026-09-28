@@ -22,6 +22,20 @@ Use different signing keys and operator keys for testnet and mainnet. A testnet 
 | **Fee recipient** | Ethereum address (`0x…`) | Receives transaction fees from blocks your validator proposes. | **Low** — changing it only redirects future fee revenue, no security impact. | [Update fee recipient](/docs/guide/node/validator-lifecycle#update-the-fee-recipient) |
 | **Signing share** | BLS12-381 key share | A share of the committee's threshold signing key, used to sign block notarizations and finalizations. | **Managed automatically** — updated every DKG ceremony (~3 hours). Lost shares are recovered from the network on restart. | Automatic (see [recovery](#signing-share-recovery)) |
 
+## DKG and network identity
+
+The **network identity** is the public BLS threshold key used to verify notarization and finalization certificates produced by the validator committee. Both follow/RPC nodes and validators use it. It also provides a trust anchor for authenticating the consensus certificates that accompany Tempo snapshots downloaded through [tempo.xyz](https://tempo.xyz).
+
+Distributed key generation (DKG) gives each validator a private share of the committee's threshold signing key. Routine DKG resharing updates the shares as the committee changes while preserving the network identity. A full DKG rotation creates a new network identity. This network-wide public key is distinct from an individual validator's Ed25519 signing key.
+
+Tempo can and will rotate the network identity to enhance network safety. When it does, Tempo will release a new binary with the rotated-to identity built in as a trust anchor.
+
+:::warning[Update the binary before starting a new node]
+After an identity rotation, newly spun up nodes must use a binary that includes the new trust anchor, including when starting from a new snapshot. A binary with an outdated identity may be unable to verify certificates signed under the new identity.
+
+Check the [current mainnet and testnet network identities](/docs/guide/node#network-identities) before starting a node. To explicitly supply the trust anchor instead of using the built-in identity, follow [How do I override the network identity?](/docs/guide/node/validator-troubleshooting#override-network-identity).
+:::
+
 ## Generating a signing key
 
 :::warning

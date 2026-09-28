@@ -8,6 +8,8 @@ import { Cards, Card, Tabs, Tab } from 'vocs'
 
 # Run a Tempo node: validator, RPC, and standby
 
+<a id="network-identities" />
+
 :::info[Network identities]
 Both follow/RPC nodes and validators use these BLS threshold public keys to verify consensus finalization certificates, including those used to authenticate Tempo snapshots. Tempo includes them in its [built-in network identities](https://github.com/tempoxyz/tempo/blob/main/crates/chainspec/src/network_identity.rs).
 
@@ -32,7 +34,7 @@ Both follow/RPC nodes and validators use these BLS threshold public keys to veri
 </Tab>
 </Tabs>
 
-To override the built-in identity, see [How do I override the network identity?](/docs/guide/node/validator-troubleshooting#override-network-identity).
+Learn about [DKG and network identity rotation](/docs/guide/node/validator-keys#dkg-and-network-identity), or see [How do I override the network identity?](/docs/guide/node/validator-troubleshooting#override-network-identity).
 :::
 
 Run Tempo infrastructure when you need direct network access, dedicated RPC capacity, validator operations, or lower-level visibility into network behavior.
