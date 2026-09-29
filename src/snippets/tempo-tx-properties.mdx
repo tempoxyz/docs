@@ -1557,7 +1557,7 @@ The [expiring nonces specification](https://github.com/tempoxyz/tempo/blob/main/
 - Automatic replay protection via circular buffer
 - No permanent state bloat from unused nonce keys
 
-Set `nonceKey` to `maxUint256`, `nonce` to `0`, and `validBefore` to a Unix timestamp in seconds satisfying `now < validBefore <= now + 300`, where `now` is the current block timestamp. The maximum window is five minutes; SDK defaults may use shorter windows. See [TIP-1093](https://tips.sh/1093).
+Set `nonceKey` to `maxUint256` and `validBefore` to a Unix timestamp in seconds satisfying `now < validBefore <= now + 300`, where `now` is the current block timestamp. The maximum window is five minutes; SDK defaults may use shorter windows. See [TIP-1093](https://tips.sh/1093).
 
 <Tabs stateKey="library-exp">
   <Tab title="Viem">
@@ -1792,6 +1792,12 @@ Set `nonceKey` to `maxUint256`, `nonce` to `0`, and `validBefore` to a Unix time
     ```
   </Tab>
 </Tabs>
+
+#### Distinguishing identical transactions
+
+Expiring nonce transactions don't use a sequential nonce, so two transactions from the same sender with the same calls, fee parameters, and `validBefore` have the same hash. The second one is rejected as a replay.
+
+After [T12](/docs/protocol/upgrades/t12), the `nonce` field of an expiring nonce transaction can be any `uint64` value. The protocol doesn't track or order it; it only makes the transaction hash unique. To submit otherwise identical transactions in parallel, set a distinct or random `nonce` on each one. Before T12, `nonce` must be `0`. See [TIP-1106](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1106.md).
 
 ### 2D Nonces
 
