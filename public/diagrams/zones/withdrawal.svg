@@ -30,5 +30,5 @@
 </g>
 <text x="798" y="254" font-size="22" font-weight="600" text-anchor="middle" fill="currentColor">Tempo recipient</text>
 <text x="798" y="296" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Process the withdrawal</text>
-<text x="798" y="322" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Receive public pathUSD</text>
+<text x="798" y="322" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Receive public OUSD</text>
 </svg>

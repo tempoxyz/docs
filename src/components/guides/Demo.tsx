@@ -19,7 +19,7 @@ import { Container as ParentContainer } from '../Container'
 import { isFundableWalletConnector } from '../lib/wallets'
 import { alphaUsd } from './tokens'
 
-export { alphaUsd, betaUsd, pathUsd, thetaUsd } from './tokens'
+export { alphaUsd, betaUsd, ousd, pathUsd, thetaUsd } from './tokens'
 
 export const FAKE_RECIPIENT = '0xbeefcafe54750903ac1c8909323af7beb21ea2cb'
 export const FAKE_RECIPIENT_2 = '0xdeadbeef54750903ac1c8909323af7beb21ea2cb'

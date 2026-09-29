@@ -73,7 +73,7 @@ import { Mppx, tempo } from 'mppx/server'
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
     sse: true,
   })],
@@ -91,7 +91,7 @@ import { Mppx, tempo } from 'mppx/nextjs'
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
     sse: true,
   })],
@@ -131,7 +131,7 @@ const app = new Hono()
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
     sse: true,
   })],
@@ -173,7 +173,7 @@ const app = express()
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
     sse: true,
   })],
@@ -212,7 +212,7 @@ import { Mppx, tempo } from 'mppx/server'
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
     sse: true,
   })],
@@ -275,7 +275,7 @@ import { privateKeyToAccount } from 'viem/accounts'
 
 const session = tempo.session({
   account: privateKeyToAccount('0x...'),
-  maxDeposit: '1', // Lock up to 1 pathUSD per channel
+  maxDeposit: '1', // Lock up to 1 OUSD per channel
 })
 
 // .sse() returns an async iterable of SSE data payloads
@@ -288,7 +288,7 @@ for await (const word of stream) {
 
 - **`tempo.session()`** — Creates a session manager that handles the full channel lifecycle: open, voucher signing, and close.
 - **`.sse()`** — Connects to an SSE endpoint. Automatically sends new vouchers when the server emits `payment-need-voucher` events.
-- **`maxDeposit: '1'`** — Locks up to 1 pathUSD. At $0.001/word, this covers ~1,000 words before the channel needs a top-up.
+- **`maxDeposit: '1'`** — Locks up to 1 OUSD. At $0.001/word, this covers ~1,000 words before the channel needs a top-up.
 
 ## Next steps for streamed payments
 

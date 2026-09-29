@@ -1,7 +1,7 @@
 ---
-title: "Withdraw pathUSD from a Tempo Zone on testnet"
-seoTitle: "Withdraw pathUSD from a Tempo Zone on Testnet | Docs"
-description: Withdraw pathUSD from Zone A back to your public-chain balance with a direct zone outbox withdrawal.
+title: "Withdraw OUSD from a Tempo Zone on testnet"
+seoTitle: "Withdraw OUSD from a Tempo Zone on Testnet | Docs"
+description: Withdraw OUSD from Zone A back to your public-chain balance with a direct zone outbox withdrawal.
 interactive: true
 ---
 
@@ -9,29 +9,33 @@ import * as Demo from '../../../../components/guides/Demo.tsx'
 import { Tab, Tabs } from 'vocs'
 import { WithdrawFromZone } from '../../../../components/guides/zones/WithdrawFromZone.tsx'
 
-export const withdrawalZoneBalances = [{ label: 'Zone A', token: Demo.pathUsd, zone: 6 }]
+export const withdrawalZoneBalances = [{ label: 'Zone A', token: Demo.ousd, zone: 6 }]
 
 import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
-# Withdraw pathUSD from a Tempo Zone on testnet
+<a id="withdraw-pathusd-from-a-tempo-zone-on-testnet" />
 
-Withdraw tokens from a private Zone back to your public Tempo balance. This example uses `pathUSD` test tokens in **Zone A**, the example Zone on Tempo Testnet.
+# Withdraw OUSD from a Tempo Zone on testnet
+
+Withdraw tokens from a private Zone back to your public Tempo balance. This example uses `OUSD` test tokens in **Zone A**, the example Zone on Tempo Testnet.
 
 <ZoneDiagram
   name="withdrawal"
-  alt="A signed Zone A outbox request reduces the private balance. Tempo accepts the batch, then processes the withdrawal to deliver pathUSD to the public recipient."
+  alt="A signed Zone A outbox request reduces the private balance. Tempo accepts the batch, then processes the withdrawal to deliver OUSD to the public recipient."
 />
 
 Direct withdrawals exit through `ZoneOutbox` on the zone chain. You submit the withdrawal request in the zone first, then wait for the public balance to increase after the batch settles.
 
-## Withdrawing pathUSD from Zone A
+<a id="withdrawing-pathusd-from-zone-a" />
 
-By the end of this guide you will have withdrawn `pathUSD` from `Zone A` and confirmed the balance update on the public chain.
+## Withdrawing OUSD from Zone A
+
+By the end of this guide you will have withdrawn `OUSD` from `Zone A` and confirmed the balance update on the public chain.
 
 <Demo.Container
   name="Withdraw from Zone A"
   footerVariant="balances"
-  tokens={[Demo.pathUsd]}
+  tokens={[Demo.ousd]}
   zoneBalances={withdrawalZoneBalances}
 >
   <WithdrawFromZone />
@@ -58,9 +62,9 @@ await zoneAClient.zone.signAuthorizationToken()
 
 const { receipt } = await Actions.zone.requestWithdrawalSync(zoneAClient, {
   account: rootClient.account,
-  feeToken: pathUsd,
+  feeToken: ousd,
   amount: withdrawalAmount,
-  token: pathUsd,
+  token: ousd,
   to: rootClient.account.address,
 })
 
@@ -81,10 +85,10 @@ await zoneAClient.zone.signAuthorizationToken()
 
 const { receipt } = await Actions.zone.requestVerifiableWithdrawalSync(zoneAClient, { // [!code focus]
   account: rootClient.account,
-  feeToken: pathUsd,
+  feeToken: ousd,
   amount: withdrawalAmount,
   revealTo, // [!code focus]
-  token: pathUsd,
+  token: ousd,
   to: rootClient.account.address,
 })
 

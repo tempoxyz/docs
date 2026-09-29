@@ -11,7 +11,7 @@ import { SignInWithTempo } from '../../../components/guides/steps/wallet/SignInW
 
 # Getting funds on Tempo: wallet, faucet & bridge
 
-Tempo Wallet uses Tempo Mainnet. Funds added through Tempo Wallet or a mainnet bridge are production assets. pathUSD in Tempo Wallet is live mainnet pathUSD. For development on the separate Moderato testnet, use the faucet described below.
+Tempo Wallet uses Tempo Mainnet. Funds added through Tempo Wallet or a mainnet bridge are production assets. OUSD, the recommended stablecoin on Tempo, and pathUSD in Tempo Wallet are live mainnet assets. For development on the separate Moderato testnet, use the faucet described below.
 
 ## Tempo Wallet
 
@@ -53,11 +53,15 @@ codex exec "Read https://tempo.xyz/SKILL.md and fund my Tempo Wallet"
 ```
 :::
 
+## Get OUSD
+
+OUSD is the recommended stablecoin on Tempo. Mint it 1:1 with no fees through an OUSD integration partner, or swap into it on the [Stablecoin DEX](/docs/guide/stablecoin-dex) from any USD stablecoin already on Tempo. See [OUSD on Tempo](/docs/guide/ousd).
+
 ## Bridge
 
 Use one of these supported bridges to move assets to Tempo:
 
-When you bridge USDC with LayerZero (Stargate), it appears on Tempo as USDC.e. Stargate does not charge its transfer fee on the direct route between Ethereum and Tempo, but other routes can vary, so check the quote before sending.
+When you bridge USDC with LayerZero (Stargate), it appears on Tempo as USDC.e. Swap USDC.e to [OUSD](/docs/guide/ousd) on the Stablecoin DEX if you want to hold the recommended stablecoin. Stargate does not charge its transfer fee on the direct route between Ethereum and Tempo, but other routes can vary, so check the quote before sending.
 
 - **[LayerZero (Stargate)](/docs/guide/bridge-layerzero)**: Bridge USDC to and from Tempo via Stargate. See the [full bridging guide](/docs/guide/bridge-layerzero) for contract addresses, code examples, and EndpointDollar details.
 - **[Chainlink CCIP](https://docs.chain.link/ccip/directory/mainnet/chain/tempo-mainnet)**: Transfer supported tokens to and from Tempo. Check the CCIP Directory for current tokens, lanes, fees, and contract configuration.
@@ -70,4 +74,4 @@ When you bridge USDC with LayerZero (Stargate), it appears on Tempo as USDC.e. S
 
 For development and testing, use the [Tempo Faucet](/docs/quickstart/faucet).
 
-The faucet provides `pathUSD`, `alphaUSD`, `betaUSD`, and `thetaUSD` test stablecoins.
+The faucet provides `OUSD`, `pathUSD`, `alphaUSD`, `betaUSD`, and `thetaUSD` test stablecoins.

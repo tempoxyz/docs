@@ -98,44 +98,44 @@ test('Zones demos complete using an isolated faucet-funded passkey', async ({ pa
       expect(keyServiceRequestCount).toBe(0)
     })
     await authorize(page, 'Zone A')
-    await page.getByRole('button', { name: 'Get testnet pathUSD', exact: true }).click()
+    await page.getByRole('button', { name: 'Get testnet OUSD', exact: true }).click()
     await test.step('Plaintext deposit credits Zone A', async () => {
       await page
-        .getByRole('button', { name: 'Deposit 100 pathUSD', exact: true })
+        .getByRole('button', { name: 'Deposit 100 OUSD', exact: true })
         .click({ timeout: 60_000 })
       await completed(page, 'Wait for Zone A to credit the deposit.')
     })
     await test.step('Encrypted deposit credits Zone A', async () => {
       await page.getByRole('button', { name: 'Encrypted', exact: true }).click()
-      await page.getByRole('button', { name: 'Deposit 100 pathUSD', exact: true }).click()
+      await page.getByRole('button', { name: 'Deposit 100 OUSD', exact: true }).click()
       await completed(page, 'Wait for Zone A to credit the encrypted deposit.')
     })
     await test.step('Private transfer confirms on Zone A', async () => {
       await page.goto('/docs/guide/private-zones/send-tokens-within-a-zone')
       await page
-        .getByRole('button', { name: 'Send 25 pathUSD', exact: true })
+        .getByRole('button', { name: 'Send 25 OUSD', exact: true })
         .click({ timeout: 45_000 })
       await completed(page, 'Wait for Zone A to show the updated private balance.')
     })
     await test.step('Withdrawal settles to the public chain', async () => {
       await page.goto('/docs/guide/private-zones/withdraw-from-a-zone')
       await page
-        .getByRole('button', { name: 'Withdraw 100 pathUSD', exact: true })
+        .getByRole('button', { name: 'Withdraw 100 OUSD', exact: true })
         .click({ timeout: 45_000 })
-      await completed(page, 'Wait for pathUSD to settle back to your public balance.')
+      await completed(page, 'Wait for OUSD to settle back to your public balance.')
     })
     await test.step('Cross-zone send credits Zone B', async () => {
       await page.goto('/docs/guide/private-zones/send-tokens-across-zones')
       await authorize(page, 'Zone A and Zone B')
       await page
-        .getByRole('button', { name: 'Send 25 pathUSD into Zone B', exact: true })
+        .getByRole('button', { name: 'Send 25 OUSD into Zone B', exact: true })
         .click({ timeout: 45_000 })
-      await completed(page, 'Confirm the credited pathUSD balance in Zone B.')
+      await completed(page, 'Confirm the credited OUSD balance in Zone B.')
     })
     await test.step('Cross-zone swap credits betaUSD in Zone B', async () => {
       await page.goto('/docs/guide/private-zones/swap-across-zones')
       await page
-        .getByRole('button', { name: 'Swap 25 pathUSD into Zone B betaUSD', exact: true })
+        .getByRole('button', { name: 'Swap 25 OUSD into Zone B betaUSD', exact: true })
         .click({ timeout: 45_000 })
       await completed(page, 'Confirm the credited betaUSD balance in Zone B.')
     })
@@ -146,9 +146,9 @@ test('Zones demos complete using an isolated faucet-funded passkey', async ({ pa
         .getByRole('button', { name: 'Approve + top up Zone A', exact: true })
         .click({ timeout: 45_000 })
       await page
-        .getByRole('button', { name: 'Withdraw 100 pathUSD', exact: true })
+        .getByRole('button', { name: 'Withdraw 100 OUSD', exact: true })
         .click({ timeout: 45_000 })
-      await completed(page, 'Wait for pathUSD to settle back to your public balance.')
+      await completed(page, 'Wait for OUSD to settle back to your public balance.')
     })
     await test.step('A repeat cross-zone send confirms its own deposit with prior Zone B funds', async () => {
       await page.goto('/docs/guide/private-zones/send-tokens-across-zones')
@@ -156,12 +156,12 @@ test('Zones demos complete using an isolated faucet-funded passkey', async ({ pa
         .getByRole('button', { name: 'Approve + top up Zone A', exact: true })
         .click({ timeout: 45_000 })
       await expect(
-        getDemoStep(page, 'Confirm the credited pathUSD balance in Zone B.'),
+        getDemoStep(page, 'Confirm the credited OUSD balance in Zone B.'),
       ).toHaveAttribute('data-completed', 'false')
       await page
-        .getByRole('button', { name: 'Send 25 pathUSD into Zone B', exact: true })
+        .getByRole('button', { name: 'Send 25 OUSD into Zone B', exact: true })
         .click({ timeout: 45_000 })
-      await completed(page, 'Confirm the credited pathUSD balance in Zone B.')
+      await completed(page, 'Confirm the credited OUSD balance in Zone B.')
     })
     expect(pageErrors).toEqual([])
     expect(keyServiceRequestCount).toBe(0)

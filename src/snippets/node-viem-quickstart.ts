@@ -7,7 +7,7 @@ const client = createClient({ account, testnet: true })
 
 await client.faucet.fundSync({ account })
 
-const token = '0x20c0000000000000000000000000000000000000' // pathUSD
+const token = '0x20c0000000000000000000006a37da5c996874be' // OUSD
 const balance = await client.token.getBalance({ token })
 
 const { receipt } = await client.token.transferSync({

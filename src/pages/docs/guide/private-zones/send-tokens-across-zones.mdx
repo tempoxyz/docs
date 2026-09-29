@@ -1,6 +1,6 @@
 ---
 title: Send tokens across zones
-description: Send pathUSD from Zone A into Zone B by routing a same-token withdrawal through Tempo's L1 router and confirming the target deposit.
+description: Send OUSD from Zone A into Zone B by routing a same-token withdrawal through Tempo's L1 router and confirming the target deposit.
 interactive: true
 ---
 
@@ -10,29 +10,31 @@ import * as Demo from '../../../../components/guides/Demo.tsx'
 import { SendTokensAcrossZones } from '../../../../components/guides/zones/SendTokensAcrossZones.tsx'
 
 export const crossZoneBalances = [
-  { label: 'Zone A', token: Demo.pathUsd, zone: 6 },
-  { label: 'Zone B', token: Demo.pathUsd, zone: 7 },
+  { label: 'Zone A', token: Demo.ousd, zone: 6 },
+  { label: 'Zone B', token: Demo.ousd, zone: 7 },
 ]
 
 # Send tokens across zones
 
-Move tokens from one Zone to another without changing the asset. This example sends `pathUSD` test tokens between **Zone A** and **Zone B**, two Zones on Tempo Testnet. The transfer settles through the public chain before Zone B credits the balance.
+Move tokens from one Zone to another without changing the asset. This example sends `OUSD` test tokens between **Zone A** and **Zone B**, two Zones on Tempo Testnet. The transfer settles through the public chain before Zone B credits the balance.
 
-The flow uses `swapAndDepositRouter` on the public chain in same-token mode: withdraw from `Zone A`, skip the swap because the asset stays as `pathUSD`, then deposit that `pathUSD` into `Zone B`.
+The flow uses `swapAndDepositRouter` on the public chain in same-token mode: withdraw from `Zone A`, skip the swap because the asset stays as `OUSD`, then deposit that `OUSD` into `Zone B`.
 
 <ZoneDiagram
   name="cross-zone-send"
-  alt="Zone A withdraws pathUSD to a public router, which skips the swap and deposits pathUSD into the Zone B portal. Zone B imports the deposit and credits its private balance later."
+  alt="Zone A withdraws OUSD to a public router, which skips the swap and deposits OUSD into the Zone B portal. Zone B imports the deposit and credits its private balance later."
 />
 
-## Sending pathUSD from Zone A into Zone B
+<a id="sending-pathusd-from-zone-a-into-zone-b" />
 
-By the end of this guide you will have sent **25 pathUSD** from **Zone A** into **Zone B** and confirmed the routed deposit.
+## Sending OUSD from Zone A into Zone B
+
+By the end of this guide you will have sent **25 OUSD** from **Zone A** into **Zone B** and confirmed the routed deposit.
 
 <Demo.Container
   name="Send tokens across zones"
   footerVariant="balances"
-  tokens={[Demo.pathUsd]}
+  tokens={[Demo.ousd]}
   zoneBalances={crossZoneBalances}
 >
   <SendTokensAcrossZones />
@@ -63,18 +65,18 @@ const callbackData = encodeAbiParameters(
     { type: 'bytes32' },
     { type: 'uint128' },
   ],
-  [false, pathUsd, ZONE_B.portalAddress, rootClient.account.address, zeroBytes32, 0n],
+  [false, ousd, ZONE_B.portalAddress, rootClient.account.address, zeroBytes32, 0n],
 )
 
 const { receipt } = await Actions.zone.requestWithdrawalSync(zoneAClient, {
   account: rootClient.account,
   amount: transferAmount,
   data: callbackData,
-  feeToken: pathUsd,
+  feeToken: ousd,
   fallbackRecipient: rootClient.account.address,
   gas: routerCallbackGasLimit,
   to: swapAndDepositRouter,
-  token: pathUsd,
+  token: ousd,
 })
 
 console.log(receipt.blockNumber)
@@ -84,12 +86,12 @@ console.log(receipt.blockNumber)
 
 The cross-zone transfer path looks like this: the token leaves `Zone A`, briefly lands on the public chain, and is deposited back into `Zone B` as the same asset.
 
-1. Withdraws `pathUSD` from `Zone A` through `ZoneOutbox`.
+1. Withdraws `OUSD` from `Zone A` through `ZoneOutbox`.
 2. Routes that withdrawal to `swapAndDepositRouter` on Tempo.
-3. Skips the DEX swap because the input and output token are both `pathUSD`.
-4. Deposits the routed `pathUSD` into `Zone B` through `ZonePortal`.
+3. Skips the DEX swap because the input and output token are both `OUSD`.
+4. Deposits the routed `OUSD` into `Zone B` through `ZonePortal`.
 
-The target deposit still pays the normal portal deposit fee, so the amount that arrives in `Zone B` is the routed `pathUSD` minus that fee.
+The target deposit still pays the normal portal deposit fee, so the amount that arrives in `Zone B` is the routed `OUSD` minus that fee.
 
 :::warning
   If the routed withdrawal fails on Tempo—for example because the callback reverts or the target deposit cannot be completed—the amount is bounced back to the withdrawal's `fallbackRecipient` inside `Zone A`. The fee is still paid to the sequencer.

@@ -19,7 +19,7 @@
 <path d="M-11 -3v-11a11 11 0 0122 0v11 M0 8v7"/>
 </g>
 <text x="480" y="254" font-size="22" font-weight="600" text-anchor="middle" fill="currentColor">Zone A portal</text>
-<text x="480" y="296" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Lock pathUSD on Tempo</text>
+<text x="480" y="296" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Lock OUSD on Tempo</text>
 <text x="480" y="322" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Queue the net deposit</text>
 <path d="M626 254 L652 254 M644.00 250.00 L652 254 L644.00 258.00" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
 <text x="668" y="126" font-size="15" font-weight="500" text-anchor="start" fill="var(--foreground-secondary, #666)">3 · CREDIT</text>

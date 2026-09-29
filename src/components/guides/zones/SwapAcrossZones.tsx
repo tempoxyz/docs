@@ -21,7 +21,7 @@ import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
 import { Button, ExplorerLink, Logout, ReceiptHash, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
-import { betaUsd, pathUsd } from '../tokens'
+import { betaUsd, ousd } from '../tokens'
 import { useStickyStepCompletion } from './useStickyStepCompletion.ts'
 
 const SWAP_AMOUNT = parseUnits('25', 6)
@@ -131,7 +131,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     refetch: refetchRootBalance,
   } = Hooks.token.useGetBalance({
     account: address,
-    token: pathUsd,
+    token: ousd,
   })
 
   const sourceZoneClient = React.useMemo(
@@ -164,7 +164,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   )
 
   const sourceFooterQueryKey = React.useMemo(
-    () => ['demo-zone-balance', address, ZONE_A.id, pathUsd],
+    () => ['demo-zone-balance', address, ZONE_A.id, ousd],
     [address],
   )
   const targetFooterQueryKey = React.useMemo(
@@ -205,7 +205,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
 
       const { amount } = await sourceZoneClient.token.getBalance({
         account: address,
-        token: pathUsd,
+        token: ousd,
       })
       return amount
     },
@@ -232,7 +232,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         }),
         Actions.dex.getSellQuote(publicClient as never, {
           amountIn: SWAP_AMOUNT,
-          tokenIn: pathUsd,
+          tokenIn: ousd,
           tokenOut: betaUsd,
         }),
         publicClient.readContract({
@@ -274,7 +274,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       const minimumOutput = applyOnePercentSlippageBuffer(quotedOutput)
       if (minimumOutput <= targetDepositFee) {
         throw new Error(
-          `The current pathUSD -> betaUSD quote is too small to cover the ${ZONE_B.label} deposit fee.`,
+          `The current OUSD -> betaUSD quote is too small to cover the ${ZONE_B.label} deposit fee.`,
         )
       }
 
@@ -326,7 +326,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         account: connectorClient.account,
         amount: sourceZoneTopUpShortfall,
         chain: connectorClient.chain as never,
-        token: pathUsd,
+        token: ousd,
         zoneId: ZONE_A.id,
       })
 
@@ -349,13 +349,13 @@ function ConnectedZoneFlow(props: { address: Hex }) {
 
       const { amount: currentSourceBalance } = await sourceZoneClient.token.getBalance({
         account: address,
-        token: pathUsd,
+        token: ousd,
       })
       if (
         requiredSourceZoneBalance === undefined ||
         currentSourceBalance < requiredSourceZoneBalance
       ) {
-        throw new Error('Zone A needs more pathUSD before the swap can start.')
+        throw new Error('Zone A needs more OUSD before the swap can start.')
       }
 
       if (!targetZoneClient || !targetZoneAuthorization.isAuthorized)
@@ -379,11 +379,11 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         amount: SWAP_AMOUNT,
         data: callbackData,
         fallbackRecipient: address,
-        feeToken: pathUsd,
+        feeToken: ousd,
         gas: routerCallbackGasLimit,
         timeout: zoneRpcSyncTimeout,
         to: swapAndDepositRouter,
-        token: pathUsd,
+        token: ousd,
       })
 
       return {
@@ -563,7 +563,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         type="button"
         variant={zonesAuthorized ? 'accent' : 'default'}
       >
-        {fundMutation.isPending ? 'Getting pathUSD' : 'Get testnet pathUSD'}
+        {fundMutation.isPending ? 'Getting OUSD' : 'Get testnet OUSD'}
       </Button>
     )
   } else if (!hasEnoughSourceZoneBalance) {
@@ -607,7 +607,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
           ? 'Submitting routed swap'
           : swapMutation.isSuccess
             ? 'Swap submitted'
-            : 'Swap 25 pathUSD into Zone B betaUSD'}
+            : 'Swap 25 OUSD into Zone B betaUSD'}
       </Button>
     )
   }
@@ -679,7 +679,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
           fundMutation.error
         }
         number={3}
-        title={`Make sure ${ZONE_A.label} has enough pathUSD for the swap and withdrawal fee.`}
+        title={`Make sure ${ZONE_A.label} has enough OUSD for the swap and withdrawal fee.`}
       >
         {topUpReceipt && (
           <StepBody>
@@ -695,7 +695,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         actions={stepFourAction}
         error={swapMutation.error ?? swapPrereqsQuery.error}
         number={4}
-        title={`Withdraw 25 pathUSD from ${ZONE_A.label}, swap it, and route betaUSD into ${ZONE_B.label}.`}
+        title={`Withdraw 25 OUSD from ${ZONE_A.label}, swap it, and route betaUSD into ${ZONE_B.label}.`}
       >
         {routedSwapReceipt && (
           <StepBody>
@@ -750,7 +750,7 @@ function DisconnectedZoneFlow() {
         actions={undefined}
         error={undefined}
         number={3}
-        title={`Make sure ${ZONE_A.label} has enough pathUSD for the swap and withdrawal fee.`}
+        title={`Make sure ${ZONE_A.label} has enough OUSD for the swap and withdrawal fee.`}
       />
       <Step
         active={false}
@@ -758,7 +758,7 @@ function DisconnectedZoneFlow() {
         actions={undefined}
         error={undefined}
         number={4}
-        title={`Withdraw 25 pathUSD from ${ZONE_A.label}, swap it, and route betaUSD into ${ZONE_B.label}.`}
+        title={`Withdraw 25 OUSD from ${ZONE_A.label}, swap it, and route betaUSD into ${ZONE_B.label}.`}
       />
       <Step
         active={false}

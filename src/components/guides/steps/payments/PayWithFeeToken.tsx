@@ -1,24 +1,24 @@
 'use client'
+import { useQuery } from '@tanstack/react-query'
 import * as React from 'react'
 import type { Address } from 'viem'
 import { isAddress, pad, parseUnits, stringToHex } from 'viem'
-import { useConnection, useConnectionEffect } from 'wagmi'
+import { Actions } from 'viem/tempo'
+import { useConnection, useConnectionEffect, usePublicClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { TokenSelector } from '../../../TokenSelector'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
-import { alphaUsd, betaUsd, pathUsd, thetaUsd } from '../../tokens'
+import { alphaUsd, betaUsd, ousd, thetaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
-
-// Current validator token on testnet
-const validatorToken = alphaUsd
 
 export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
   const { stepNumber, last = false } = props
   const { address } = useConnection()
+  const publicClient = usePublicClient()
   const [recipient, setRecipient] = React.useState<string>(FAKE_RECIPIENT)
   const [memo, setMemo] = React.useState<string>('')
   const [expanded, setExpanded] = React.useState(false)
-  const [feeToken, setFeeToken] = React.useState<Address>(props.feeToken || betaUsd)
+  const [feeToken, setFeeToken] = React.useState<Address>(props.feeToken || ousd)
 
   // Balance for the payment token (AlphaUSD)
   const { data: alphaBalance, refetch: alphaBalanceRefetch } = Hooks.token.useGetBalance({
@@ -36,14 +36,25 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
   const { data: feeTokenMetadata } = Hooks.token.useGetMetadata({
     token: feeToken,
   })
-  // Pool details. Fees are paid in feeToken, so it's the userToken
-  // validator token is a testnet property set at top of file
-  const { data: pool } = Hooks.amm.usePool({
-    userToken: feeToken,
-    validatorToken,
-    query: {
-      enabled: feeToken !== alphaUsd,
+  // Resolve the current validator's fee token rather than assuming a test token.
+  const feeLiquidity = useQuery({
+    queryKey: ['fee-demo-liquidity', publicClient?.chain.id, feeToken],
+    enabled: Boolean(publicClient),
+    queryFn: async () => {
+      if (!publicClient) throw new Error('public client not ready')
+      const block = await publicClient.getBlock()
+      const validatorToken = await Actions.fee.getValidatorToken(publicClient, {
+        validator: block.miner,
+      })
+      if (feeToken.toLowerCase() === validatorToken.address.toLowerCase()) return true
+      const pool = await Actions.amm.getPool(publicClient, {
+        userToken: feeToken,
+        validatorToken: validatorToken.address,
+      })
+      return pool.reserveValidatorToken > 0n
     },
+    staleTime: 10_000,
+    refetchInterval: 10_000,
   })
 
   const sendPayment = Hooks.token.useTransferSync({
@@ -82,9 +93,9 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
         alphaBalance.amount > 0n &&
         feeTokenBalance &&
         feeTokenBalance.amount > 0n &&
-        (feeToken !== alphaUsd ? pool && pool.reserveValidatorToken > 0n : true),
+        feeLiquidity.data === true,
     )
-  }, [address, alphaBalance, feeTokenBalance, pool, feeToken])
+  }, [address, alphaBalance, feeTokenBalance, feeLiquidity.data])
 
   return (
     <Step
@@ -112,6 +123,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
           </Button>
         )
       }
+      error={sendPayment.error ?? feeLiquidity.error}
       number={stepNumber}
       title={`Send 100 AlphaUSD and pay fees in ${feeTokenMetadata ? feeTokenMetadata.name : 'another token'}.`}
     >
@@ -128,7 +140,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-gray10">Fee Token</span>
                   <TokenSelector
-                    tokens={[alphaUsd, betaUsd, thetaUsd, pathUsd]}
+                    tokens={[alphaUsd, betaUsd, thetaUsd, ousd]}
                     value={feeToken}
                     onChange={setFeeToken}
                     name="feeToken"

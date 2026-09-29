@@ -1,7 +1,7 @@
 ---
-title: "Deposit pathUSD to a Tempo Zone on testnet"
-seoTitle: "Deposit pathUSD to a Tempo Zone on Testnet | Docs"
-description: Deposit pathUSD from your public-chain balance into Zone A and confirm the resulting zone balance.
+title: "Deposit OUSD to a Tempo Zone on testnet"
+seoTitle: "Deposit OUSD to a Tempo Zone on Testnet | Docs"
+description: Deposit OUSD from your public-chain balance into Zone A and confirm the resulting zone balance.
 interactive: true
 ---
 
@@ -9,29 +9,33 @@ import * as Demo from '../../../../components/guides/Demo.tsx'
 import { Tab, Tabs } from 'vocs'
 import { DepositToZone } from '../../../../components/guides/zones/DepositToZone.tsx'
 
-export const depositZoneBalances = [{ label: 'Zone A', token: Demo.pathUsd, zone: 6 }]
+export const depositZoneBalances = [{ label: 'Zone A', token: Demo.ousd, zone: 6 }]
 
 import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
-# Deposit pathUSD to a Tempo Zone on testnet
+<a id="deposit-pathusd-to-a-tempo-zone-on-testnet" />
 
-Deposit tokens from your public Tempo balance into a private Zone. This example uses `pathUSD` test tokens and a Zone on Tempo Testnet named **Zone A**. Submit a public-chain deposit first, then wait for the Zone to credit the net amount after fees.
+# Deposit OUSD to a Tempo Zone on testnet
+
+Deposit tokens from your public Tempo balance into a private Zone. This example uses `OUSD` test tokens and a Zone on Tempo Testnet named **Zone A**. Submit a public-chain deposit first, then wait for the Zone to credit the net amount after fees.
 
 <ZoneDiagram
   name="deposit"
-  alt="A public account signs a plaintext or encrypted deposit, the Zone A portal locks pathUSD, and Zone A later imports the deposit and credits the private balance."
+  alt="A public account signs a plaintext or encrypted deposit, the Zone A portal locks OUSD, and Zone A later imports the deposit and credits the private balance."
 />
 
 The deposit is accepted through `ZonePortal` on the public chain. You need private zone authorization to read the resulting zone balance, because those reads are only exposed to the authenticated account.
 
-## Depositing pathUSD to Zone A
+<a id="depositing-pathusd-to-zone-a" />
 
-By the end of this guide you will have deposited `pathUSD` into `Zone A` and confirmed the balance update.
+## Depositing OUSD to Zone A
+
+By the end of this guide you will have deposited `OUSD` into `Zone A` and confirmed the balance update.
 
 <Demo.Container
   name="Deposit to Zone A"
   footerVariant="balances"
-  tokens={[Demo.pathUsd]}
+  tokens={[Demo.ousd]}
   zoneBalances={depositZoneBalances}
 >
   <DepositToZone />
@@ -55,7 +59,7 @@ const depositAmount = parseUnits('100', 6)
 const { receipt } = await Actions.zone.depositSync(rootClient, {
   account: rootClient.account,
   amount: depositAmount,
-  token: pathUsd,
+  token: ousd,
   zoneId: ZONE_A.id,
 })
 
@@ -74,7 +78,7 @@ const depositAmount = parseUnits('100', 6)
 const { receipt } = await Actions.zone.encryptedDepositSync(rootClient, { // [!code focus]
   account: rootClient.account,
   amount: depositAmount,
-  token: pathUsd,
+  token: ousd,
   zoneId: ZONE_A.id,
 })
 

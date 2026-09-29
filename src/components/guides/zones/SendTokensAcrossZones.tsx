@@ -19,7 +19,7 @@ import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
 import { Button, ExplorerLink, Logout, ReceiptHash, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
-import { pathUsd } from '../tokens'
+import { ousd } from '../tokens'
 import { useStickyStepCompletion } from './useStickyStepCompletion.ts'
 
 const TRANSFER_AMOUNT = parseUnits('25', 6)
@@ -107,7 +107,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     refetch: refetchRootBalance,
   } = Hooks.token.useGetBalance({
     account: address,
-    token: pathUsd,
+    token: ousd,
   })
 
   const sourceZoneClient = React.useMemo(
@@ -140,11 +140,11 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   )
 
   const sourceFooterQueryKey = React.useMemo(
-    () => ['demo-zone-balance', address, ZONE_A.id, pathUsd],
+    () => ['demo-zone-balance', address, ZONE_A.id, ousd],
     [address],
   )
   const targetFooterQueryKey = React.useMemo(
-    () => ['demo-zone-balance', address, ZONE_B.id, pathUsd],
+    () => ['demo-zone-balance', address, ZONE_B.id, ousd],
     [address],
   )
 
@@ -181,7 +181,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
 
       const { amount } = await sourceZoneClient.token.getBalance({
         account: address,
-        token: pathUsd,
+        token: ousd,
       })
       return amount
     },
@@ -208,16 +208,16 @@ function ConnectedZoneFlow(props: { address: Hex }) {
           address: ZONE_B.portalAddress,
           abi: portalAbi,
           functionName: 'isTokenEnabled',
-          args: [pathUsd],
+          args: [ousd],
         }),
       ])
 
       if (!targetTokenEnabled) {
-        throw new Error(`${ZONE_B.label} is not ready for pathUSD deposits yet.`)
+        throw new Error(`${ZONE_B.label} is not ready for OUSD deposits yet.`)
       }
       if (TRANSFER_AMOUNT <= targetDepositFee) {
         throw new Error(
-          `The ${ZONE_B.label} deposit fee is currently too high for this 25 pathUSD send.`,
+          `The ${ZONE_B.label} deposit fee is currently too high for this 25 OUSD send.`,
         )
       }
 
@@ -268,7 +268,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         account: connectorClient.account,
         amount: sourceZoneTopUpShortfall,
         chain: connectorClient.chain as never,
-        token: pathUsd,
+        token: ousd,
         zoneId: ZONE_A.id,
       })
 
@@ -290,20 +290,20 @@ function ConnectedZoneFlow(props: { address: Hex }) {
 
       const { amount: currentSourceBalance } = await sourceZoneClient.token.getBalance({
         account: address,
-        token: pathUsd,
+        token: ousd,
       })
       if (
         requiredSourceZoneBalance === undefined ||
         currentSourceBalance < requiredSourceZoneBalance
       ) {
-        throw new Error('Zone A needs more pathUSD before the send can start.')
+        throw new Error('Zone A needs more OUSD before the send can start.')
       }
 
       if (!targetZoneClient || !targetZoneAuthorization.isAuthorized)
         throw new Error('Authorize Zone B reads before submitting')
       const { amount: startingTargetBalance } = await targetZoneClient.token.getBalance({
         account: address,
-        token: pathUsd,
+        token: ousd,
       })
 
       const memo = toHex(crypto.getRandomValues(new Uint8Array(32)))
@@ -314,11 +314,11 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         amount: TRANSFER_AMOUNT,
         data: encodeRouterCallback(address, memo),
         fallbackRecipient: address,
-        feeToken: pathUsd,
+        feeToken: ousd,
         gas: routerCallbackGasLimit,
         timeout: zoneRpcSyncTimeout,
         to: swapAndDepositRouter,
-        token: pathUsd,
+        token: ousd,
       })
 
       return {
@@ -375,7 +375,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
           typeof recipient === 'string' &&
           typeof netAmount === 'bigint' &&
           sender.toLowerCase() === swapAndDepositRouter.toLowerCase() &&
-          token.toLowerCase() === pathUsd.toLowerCase() &&
+          token.toLowerCase() === ousd.toLowerCase() &&
           recipient.toLowerCase() === address.toLowerCase() &&
           log.args.memo === sendMutation.data.memo &&
           netAmount >= sendMutation.data.minimumTargetIncrease
@@ -411,7 +411,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
 
       const { amount } = await targetZoneClient.token.getBalance({
         account: address,
-        token: pathUsd,
+        token: ousd,
       })
       return (
         amount >= sendMutation.data.startingTargetBalance + sendMutation.data.minimumTargetIncrease
@@ -499,7 +499,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         type="button"
         variant={zonesAuthorized ? 'accent' : 'default'}
       >
-        {fundMutation.isPending ? 'Getting pathUSD' : 'Get testnet pathUSD'}
+        {fundMutation.isPending ? 'Getting OUSD' : 'Get testnet OUSD'}
       </Button>
     )
   } else if (!hasEnoughSourceZoneBalance) {
@@ -543,7 +543,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
           ? 'Submitting routed send'
           : sendMutation.isSuccess
             ? 'Send submitted'
-            : 'Send 25 pathUSD into Zone B'}
+            : 'Send 25 OUSD into Zone B'}
       </Button>
     )
   }
@@ -584,7 +584,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         type="button"
         variant="default"
       >
-        Reading Zone B pathUSD
+        Reading Zone B OUSD
       </Button>
     )
   }
@@ -615,7 +615,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
           fundMutation.error
         }
         number={3}
-        title={`Make sure ${ZONE_A.label} has enough pathUSD for the send and withdrawal fee.`}
+        title={`Make sure ${ZONE_A.label} has enough OUSD for the send and withdrawal fee.`}
       >
         {topUpReceipt && (
           <StepBody>
@@ -631,7 +631,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         actions={stepFourAction}
         error={sendMutation.error ?? transferPrereqsQuery.error}
         number={4}
-        title={`Withdraw 25 pathUSD from ${ZONE_A.label} and route it into ${ZONE_B.label}.`}
+        title={`Withdraw 25 OUSD from ${ZONE_A.label} and route it into ${ZONE_B.label}.`}
       >
         {routedSendReceipt && sendMutation.data && (
           <StepBody>
@@ -647,7 +647,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         actions={undefined}
         error={sendMutation.isSuccess ? settlementQuery.error : undefined}
         number={5}
-        title={`Wait for the routed pathUSD deposit to land in ${ZONE_B.label}.`}
+        title={`Wait for the routed OUSD deposit to land in ${ZONE_B.label}.`}
       >
         {settlementTxHash && (
           <StepBody>{settlementTxHash && <ExplorerLink hash={settlementTxHash} />}</StepBody>
@@ -663,7 +663,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
           (settlementQuery.data ? targetZoneBalanceQuery.error : undefined)
         }
         number={6}
-        title={`Confirm the credited pathUSD balance in ${ZONE_B.label}.`}
+        title={`Confirm the credited OUSD balance in ${ZONE_B.label}.`}
       />
     </>
   )
@@ -686,7 +686,7 @@ function DisconnectedZoneFlow() {
         actions={undefined}
         error={undefined}
         number={3}
-        title={`Make sure ${ZONE_A.label} has enough pathUSD for the send and withdrawal fee.`}
+        title={`Make sure ${ZONE_A.label} has enough OUSD for the send and withdrawal fee.`}
       />
       <Step
         active={false}
@@ -694,7 +694,7 @@ function DisconnectedZoneFlow() {
         actions={undefined}
         error={undefined}
         number={4}
-        title={`Withdraw 25 pathUSD from ${ZONE_A.label} and route it into ${ZONE_B.label}.`}
+        title={`Withdraw 25 OUSD from ${ZONE_A.label} and route it into ${ZONE_B.label}.`}
       />
       <Step
         active={false}
@@ -702,7 +702,7 @@ function DisconnectedZoneFlow() {
         actions={undefined}
         error={undefined}
         number={5}
-        title={`Wait for the routed pathUSD deposit to land in ${ZONE_B.label}.`}
+        title={`Wait for the routed OUSD deposit to land in ${ZONE_B.label}.`}
       />
       <Step
         active={false}
@@ -710,7 +710,7 @@ function DisconnectedZoneFlow() {
         actions={undefined}
         error={undefined}
         number={6}
-        title={`Confirm the credited pathUSD balance in ${ZONE_B.label}.`}
+        title={`Confirm the credited OUSD balance in ${ZONE_B.label}.`}
       />
     </>
   )
@@ -726,7 +726,7 @@ function encodeRouterCallback(recipient: Hex, memo: Hex) {
       { type: 'bytes32' },
       { type: 'uint128' },
     ],
-    [false, pathUsd, ZONE_B.portalAddress, recipient, memo, 0n],
+    [false, ousd, ZONE_B.portalAddress, recipient, memo, 0n],
   )
 }
 

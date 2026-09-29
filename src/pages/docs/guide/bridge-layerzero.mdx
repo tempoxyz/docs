@@ -33,6 +33,10 @@ The zero-transfer-fee path is between Tempo and Ethereum:
 
 Routes between Tempo and other chains can carry standard Stargate route fees. If an integrator needs native USDC on another chain, the preferred settlement path is to bridge USDC.e from Tempo to native USDC on Ethereum, then move USDC onward using CCTP or another supported route. The [LayerZero Value Transfer API](https://docs.layerzero.network/v2/developers/value-transfer-api/overview) can help discover and execute available routes.
 
+:::tip
+OUSD is the recommended stablecoin on Tempo and is issued natively, so it does not need a bridge. If you bridge USDC in to pay or hold on Tempo, swap USDC.e to OUSD after it arrives, or mint OUSD directly through an integration partner. See [OUSD on Tempo](/docs/guide/ousd).
+:::
+
 ## Bridged tokens on Tempo
 
 | Token | Address | Bridge |
@@ -46,6 +50,8 @@ Routes between Tempo and other chains can carry standard Stargate route fees. If
 | **GUSD** | [`0x20c0000000000000000000005c0bac7cef389a11`](https://explore.tempo.xyz/address/0x20c0000000000000000000005c0bac7cef389a11) | OFT |
 | **rUSD** | [`0x20c0000000000000000000007f7ba549dd0251b9`](https://explore.tempo.xyz/address/0x20c0000000000000000000007f7ba549dd0251b9) | OFT |
 | **wsrUSD** | [`0x20c000000000000000000000aeed2ec36a54d0e5`](https://explore.tempo.xyz/address/0x20c000000000000000000000aeed2ec36a54d0e5) | OFT |
+
+Natively issued stablecoins such as OUSD are not bridged and do not appear in this table. See [OUSD on Tempo](/docs/guide/ousd).
 
 See the full token list at [tokenlist.tempo.xyz](https://tokenlist.tempo.xyz/list/4217).
 

@@ -1,26 +1,28 @@
 ---
 title: Send tokens within a zone
-description: Send pathUSD inside Zone A with a signed zone transfer and confirm the updated zone balance.
+description: Send OUSD inside Zone A with a signed zone transfer and confirm the updated zone balance.
 interactive: true
 ---
 
 import * as Demo from '../../../../components/guides/Demo.tsx'
 import { SendTokensWithinZone } from '../../../../components/guides/zones/SendTokensWithinZone.tsx'
 
-export const inZoneBalances = [{ label: 'Zone A', token: Demo.pathUsd, zone: 6 }]
+export const inZoneBalances = [{ label: 'Zone A', token: Demo.ousd, zone: 6 }]
 
 # Send tokens within a zone
 
-Send `pathUSD` test tokens between private balances in **Zone A**, the example Zone on Tempo Testnet. This deployment supports direct token transfers inside the Zone without moving funds back through the public chain.
+Send `OUSD` test tokens between private balances in **Zone A**, the example Zone on Tempo Testnet. This deployment supports direct token transfers inside the Zone without moving funds back through the public chain.
 
-## Sending pathUSD within Zone A
+<a id="sending-pathusd-within-zone-a" />
 
-By the end of this guide you will have sent `25 pathUSD` inside `Zone A` and confirmed the updated balance.
+## Sending OUSD within Zone A
+
+By the end of this guide you will have sent `25 OUSD` inside `Zone A` and confirmed the updated balance.
 
 <Demo.Container
   name="Send tokens within Zone A"
   footerVariant="balances"
-  tokens={[Demo.pathUsd]}
+  tokens={[Demo.ousd]}
   zoneBalances={inZoneBalances}
 >
   <SendTokensWithinZone />
@@ -46,8 +48,8 @@ await zoneAClient.zone.signAuthorizationToken()
 const { receipt } = await Actions.token.transferSync(zoneAClient, {
   account: rootClient.account,
   amount: transferAmount,
-  feeToken: pathUsd,
+  feeToken: ousd,
   to: demoRecipient,
-  token: pathUsd,
+  token: ousd,
 })
 ```

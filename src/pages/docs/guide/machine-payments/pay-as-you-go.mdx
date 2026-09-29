@@ -79,14 +79,14 @@ bun add mppx viem
 Set up an `Mppx` instance with the `tempo` method.
 
 - `recipient` is the address where you receive payments.
-- `currency` is the token address for payments (in this case, `pathUSD`).
+- `currency` is the token address for payments (in this case, `OUSD`).
 
 ```ts
 import { Mppx, tempo } from 'mppx/server'
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -103,7 +103,7 @@ import { Mppx, tempo } from 'mppx/nextjs'
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -124,7 +124,7 @@ const app = new Hono()
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -147,7 +147,7 @@ const app = express()
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -167,7 +167,7 @@ import { Mppx, tempo } from 'mppx/server'
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -212,7 +212,7 @@ import { privateKeyToAccount } from 'viem/accounts'
 const mppx = Mppx.create({
   methods: [tempo({
     account: privateKeyToAccount('0x...'),
-    maxDeposit: '1', // Lock up to 1 pathUSD per channel
+    maxDeposit: '1', // Lock up to 1 OUSD per channel
   })],
 })
 
@@ -222,7 +222,7 @@ const mppx = Mppx.create({
 const res = await fetch('http://localhost:3000/api/sessions/photo')
 ```
 
-- **`maxDeposit: '1'`** — Locks up to 1 pathUSD into the payment channel. At $0.01/photo, this covers up to 100 requests before the channel runs out.
+- **`maxDeposit: '1'`** — Locks up to 1 OUSD into the payment channel. At $0.01/photo, this covers up to 100 requests before the channel runs out.
 - The client handles the full session lifecycle automatically: channel open, voucher signing, and retry after `402` responses.
 - If the server sets `suggestedDeposit`, the client uses `min(suggestedDeposit, maxDeposit)`.
 

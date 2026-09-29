@@ -65,7 +65,7 @@ export const feeSponsorCodeVariants: CodeVariant[] = [
       "  amount: parseUnits('10.5', 6),",
       '  feePayer: sponsor,',
       "  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',",
-      "  token: '0x20c0000000000000000000000000000000000000',",
+      "  token: '0x20c0000000000000000000006a37da5c996874be',",
       '});',
     ],
     highlight: ['feePayer: sponsor'],

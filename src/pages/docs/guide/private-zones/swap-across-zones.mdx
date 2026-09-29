@@ -1,6 +1,6 @@
 ---
 title: Swap stablecoins across zones
-description: Swap pathUSD from Zone A into betaUSD on Zone B by routing a zone withdrawal through Tempo's L1 router and confirming the target deposit.
+description: Swap OUSD from Zone A into betaUSD on Zone B by routing a zone withdrawal through Tempo's L1 router and confirming the target deposit.
 interactive: true
 ---
 
@@ -8,7 +8,7 @@ import * as Demo from '../../../../components/guides/Demo.tsx'
 import { SwapAcrossZones } from '../../../../components/guides/zones/SwapAcrossZones.tsx'
 
 export const swapZoneBalances = [
-  { label: 'Zone A', token: Demo.pathUsd, zone: 6 },
+  { label: 'Zone A', token: Demo.ousd, zone: 6 },
   { label: 'Zone B', token: Demo.betaUsd, zone: 7 },
 ]
 
@@ -16,22 +16,24 @@ import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
 # Swap across zones
 
-Swap stablecoins while moving them between Zones. This example starts with `pathUSD` test tokens in **Zone A** and deposits `betaUSD` into **Zone B**, two example Zones on Tempo Testnet. The swap settles on the public chain before Zone B credits the balance.
+Swap stablecoins while moving them between Zones. This example starts with `OUSD` test tokens in **Zone A** and deposits `betaUSD` into **Zone B**, two example Zones on Tempo Testnet. The swap settles on the public chain before Zone B credits the balance.
 
 The route uses `swapAndDepositRouter` on the public chain: withdraw from `Zone A`, swap on the Stablecoin DEX, then deposit the output token into `Zone B`.
 
 <ZoneDiagram
   name="cross-zone-swap"
-  alt="Zone A withdraws pathUSD. The router swaps it for betaUSD on the Stablecoin DEX and deposits into Zone B in one public transaction. Zone B imports the deposit and credits betaUSD later."
+  alt="Zone A withdraws OUSD. The router swaps it for betaUSD on the Stablecoin DEX and deposits into Zone B in one public transaction. Zone B imports the deposit and credits betaUSD later."
 />
 
-## Swapping pathUSD from Zone A into betaUSD on Zone B
+<a id="swapping-pathusd-from-zone-a-into-betausd-on-zone-b" />
 
-By the end of this guide you will have swapped **25 pathUSD** from **Zone A** into **betaUSD** on **Zone B** and confirmed the routed deposit.
+## Swapping OUSD from Zone A into betaUSD on Zone B
+
+By the end of this guide you will have swapped **25 OUSD** from **Zone A** into **betaUSD** on **Zone B** and confirmed the routed deposit.
 
 ## What this swap does
 
-1. Withdraws `pathUSD` from `Zone A`.
+1. Withdraws `OUSD` from `Zone A`.
 2. Routes it through the public chain and swaps it on the Stablecoin DEX.
 3. Deposits the output token into `Zone B` through `ZonePortal`.
 4. Confirms the credited `betaUSD` balance in `Zone B`.
@@ -39,7 +41,7 @@ By the end of this guide you will have swapped **25 pathUSD** from **Zone A** in
 <Demo.Container
   name="Swap across zones"
   footerVariant="balances"
-  tokens={[Demo.pathUsd]}
+  tokens={[Demo.ousd]}
   zoneBalances={swapZoneBalances}
 >
   <SwapAcrossZones />
@@ -63,7 +65,7 @@ await zoneAClient.zone.signAuthorizationToken()
 
 const quotedBetaOut = await rootClient.dex.getSellQuote({
   amountIn: swapAmount,
-  tokenIn: pathUsd,
+  tokenIn: ousd,
   tokenOut: betaUsd,
 })
 
@@ -85,11 +87,11 @@ const { receipt } = await Actions.zone.requestWithdrawalSync(zoneAClient, {
   account: rootClient.account,
   amount: swapAmount,
   data: callbackData,
-  feeToken: pathUsd,
+  feeToken: ousd,
   fallbackRecipient: rootClient.account.address,
   gas: routerCallbackGasLimit,
   to: swapAndDepositRouter,
-  token: pathUsd,
+  token: ousd,
 })
 
 console.log(receipt.blockNumber)

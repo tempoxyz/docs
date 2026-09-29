@@ -3,7 +3,7 @@ import * as React from 'react'
 import { useConnections, useWatchAsset } from 'wagmi'
 import { isBrowserWalletConnectorId } from '../../../lib/wallets'
 import { Button, Step } from '../../Demo'
-import { alphaUsd, betaUsd, pathUsd, thetaUsd } from '../../tokens'
+import { alphaUsd, betaUsd, ousd, thetaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
 type Token = {
@@ -17,7 +17,7 @@ const TOKENS: Token[] = [
   { address: alphaUsd, symbol: 'AlphaUSD', decimals: 6 },
   { address: betaUsd, symbol: 'BetaUSD', decimals: 6 },
   { address: thetaUsd, symbol: 'ThetaUSD', decimals: 6 },
-  { address: pathUsd, symbol: 'pathUSD', decimals: 6 },
+  { address: ousd, symbol: 'OUSD', decimals: 6 },
 ]
 
 function AddTokenButton(props: {

@@ -368,6 +368,10 @@ export default defineConfig({
             link: '/docs/guide/getting-funds',
           },
           {
+            text: 'OUSD on Tempo',
+            link: '/docs/guide/ousd',
+          },
+          {
             text: 'Make Payments',
             collapsed: false,
             items: [
@@ -1245,6 +1249,7 @@ export default defineConfig({
       '/docs': docsHomeSidebar,
       '/docs/build': buildSidebar,
       '/docs/guide/getting-funds': buildSidebar,
+      '/docs/guide/ousd': buildSidebar,
       '/docs/guide/payments': buildSidebar,
       '/docs/guide/issuance': buildSidebar,
       '/docs/guide/stablecoin-dex': buildSidebar,
