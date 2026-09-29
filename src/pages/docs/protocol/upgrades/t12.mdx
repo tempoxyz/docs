@@ -1,19 +1,19 @@
 ---
 title: "T12 Network Upgrade"
 seoTitle: "T12 Network Upgrade | Tempo Docs"
-description: T12 adds configurable nonces for parallel expiring transactions, enables MPP sessions with closed-loop stablecoins, restores compatibility with calldata suffixes, and aligns quote and swap calculations.
+description: T12 adds configurable nonces for parallel expiring transactions, enables MPP sessions with closed-loop stablecoins, restores compatibility with calldata suffixes, aligns quote and swap calculations, and adds authorized burns for TIP-20 tokens.
 ---
 
 # T12 Network Upgrade
 
-T12 adds configurable nonces for parallel expiring transactions, enables MPP sessions with closed-loop stablecoins, restores compatibility with calldata suffixes, and aligns quote and swap calculations.
+T12 adds configurable nonces for parallel expiring transactions, enables MPP sessions with closed-loop stablecoins, restores compatibility with calldata suffixes, aligns quote and swap calculations, and adds authorized burns for TIP-20 tokens.
 
 ## Timeline
 
 | Network | Planned activation |
 |---------|--------------------|
-| Testnet | October 1, 2026 — time TBD |
-| Mainnet | October 6, 2026 — time TBD |
+| Testnet | October 8, 2026 — time TBD |
+| Mainnet | October 15, 2026 — time TBD |
 
 <span id="t12-upgrade-overview" />
 
@@ -25,6 +25,7 @@ T12 adds configurable nonces for parallel expiring transactions, enables MPP ses
 - **MPP sessions for closed-loop stablecoins:** lets prepaid credits fund payment channels while preserving restrictions on which merchants can receive payments.
 - **Relaxed ABI validation:** accepts correctly formatted calls to Tempo's built-in contracts with extra data at the end.
 - **More reliable swap quotes:** fixes rounding differences between the amount quoted and the amount calculated during a swap.
+- **Authorized burns for TIP-20 tokens:** lets callers with a dedicated role burn tokens from unprotected accounts without first blocking the holder under the transfer policy.
 
 <span id="features" />
 
@@ -69,9 +70,18 @@ This also removes redundant liquidity-tracking writes during swaps, order placem
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1088.md).
 
+### Authorized burns for TIP-20 tokens
+
+T12 adds `burnAt(from, amount)` to TIP-20 tokens. Callers with `BURN_AT_ROLE` can burn tokens from unprotected accounts without the holder's approval, regardless of transfer policy status.
+
+This supports bridge contracts that burn tokens directly from users bridging out. Token pauses, protected-address checks, and applicable access-key spending limits still apply.
+
+Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1006.md).
+
 ## Integration impact
 
 - **Parallel transactions:** if your integration needs to submit otherwise identical expiring transactions in parallel, assign each a distinct `uint64` nonce after T12 activates. For example, use `nonce = 101` and `nonce = 102` for two otherwise identical transactions. Ensure builders and signers preserve the supplied nonce, and remove access-list entries used only to make transactions unique. To retry a transaction, resend its original signed transaction while valid.
 - **MPP integrations:** after T12 activates, you can use closed-loop credits with [MPP sessions](/docs/guide/machine-payments/pay-as-you-go). Existing channels need no migration.
 - **ABI compatibility:** if your integration was affected by [T11's strict ABI validation](/docs/protocol/upgrades/t11), you can restore calldata suffixes after T12 activates on your network.
 - **DEX integrations:** quote and swap APIs are unchanged. If you read tick liquidity totals directly from storage, switch to `getTickLevel()` or sum the remaining amounts of active orders. Stored tick totals stop updating at T12.
+- **Token integrations:** after T12 activates, grant `BURN_AT_ROLE` only to tightly scoped contracts, such as a bridge that burns only amounts users request to bridge out. Existing `ISSUER_ROLE` and `BURN_BLOCKED_ROLE` permissions do not grant access to `burnAt`.
