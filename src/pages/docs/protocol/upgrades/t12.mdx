@@ -8,6 +8,12 @@ description: T12 adds configurable nonces for parallel expiring transactions, en
 
 T12 adds configurable nonces for parallel expiring transactions, enables MPP sessions with closed-loop stablecoins, restores compatibility with calldata suffixes, and aligns quote and swap calculations.
 
+:::warning[Breaking change: precompile gas limits]
+T12 applies the [EIP-2200 `SSTORE` sentry](https://eips.ethereum.org/EIPS/eip-2200) to Tempo's native precompiles. A precompile call now halts with an out-of-gas error if it attempts a storage write with 2,300 gas or less remaining in its call frame. Transactions with tight gas limits, including TIP-20 self-transfers, can therefore fail after T12 even if they succeeded before.
+
+Re-estimate gas on the target network after T12 activates, and slightly increase hardcoded gas limits where needed. If your contract forwards a fixed amount of gas to a precompile, you may also need to increase that allowance.
+:::
+
 ## Timeline
 
 | Network | Planned activation |
