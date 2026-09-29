@@ -35,17 +35,16 @@ export const stats: Stat[] = [
   },
   {
     category: 'Performance',
-    title: '20k+ TPS',
+    title: '15k+ TPS',
     caption: "Tempo's highest observed execution rate under peak benchmark load",
-    small: { label: 'PEAK TPS', value: '21,200' },
-    main: { label: 'PEAK PERFORMANCE CAPACITY', value: '1.25', unit: 'Ggas/s' },
+    small: { label: 'AVG EXECUTION', value: '1.45 Ggas/s' },
+    main: { label: 'PEAK PERFORMANCE CAPACITY', value: '1.45', unit: 'Ggas/s' },
     tickerLabel: 'peak execution rate',
   },
   {
     category: 'Reliability',
     title: '99.999 uptime',
-    caption:
-      'Tempo settled ~92% of submitted benchmark load while sustaining high-volume throughput.',
+    caption: 'Tempo sustained high-volume throughput across 10 validators in 5 regions.',
     // Fallback: multi-region public-mix nightly, Sep 29 2026.
     small: { label: 'SETTLED TPS', value: '15,600' },
     main: { label: 'SETTLED TPS', value: '15,600', unit: 'TPS' },
