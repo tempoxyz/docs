@@ -11,9 +11,9 @@ Receive policies let a receiver define which [TIP-20](/docs/protocol/tip20/overv
 
 This page is intentionally about the builder flow rather than the full spec. It covers when to configure a policy, what happens when delivery is blocked, and what operators need to watch.
 
-If a receive policy blocks an inbound transfer or mint, the TIP-20 call still succeeds. The funds are credited to `ReceivePolicyGuard` instead of the receiver, and `ReceivePolicyGuard` records a receipt that can be claimed later by the configured recovery authority.
+For direct token transfers and minting, if the receiver's policy blocks delivery, the funds go to `ReceivePolicyGuard` for later recovery. The transaction succeeds, and the configured recovery authority can claim the funds. From T12, a blocked [channel payment or refund](#payment-channels-at-t12) fails and leaves the funds in place.
 
-The token's [TIP-403](/docs/protocol/tip403/spec) policy checks still run first and still revert on failure. Only a receive-policy failure redirects delivery to `ReceivePolicyGuard`.
+For direct transfers and minting, the token's [TIP-403](/docs/protocol/tip403/spec) policy checks run first. If those checks fail, the transaction fails and the funds do not move.
 
 For the full protocol flow, claim rules, burn rules, and event signatures, see the [Receive Policies protocol overview](/docs/protocol/tip403/receive-policies).
 
@@ -30,6 +30,8 @@ For example, receive policies are useful when:
 
 If an address has no receive policy, all transfers and mints are allowed by the receive-policy layer.
 
+For direct token transfers and minting:
+
 | Result | Transaction result | Where the funds go |
 |---|---|---|
 | Token-level checks fail | The call reverts | Funds are not delivered |
@@ -41,6 +43,14 @@ The receive-policy check applies to `transfer`, `transferFrom`, `transferWithMem
 It does not apply to `approve`, `permit`, or `burn`. It also does not affect fee deposits or refunds through `transfer_fee_pre_tx` or `transfer_fee_post_tx`, TIP-20 rewards, or internal balances.
 
 For `transferFrom`, the spender's allowance is consumed even when the receiver's policy blocks delivery, because the funds still move out of the `from` account.
+
+## Payment channels at T12
+
+Before T12, a channel payment or refund blocked by a receive policy could go to the recovery contract and still count as completed. From T12, the operation fails and the funds stay where they were. Fix the receive policy and retry.
+
+For channels opened at or after T12, the recipient's receive policy must accept the token from the payer. Funding checks this before moving funds; a later policy change can block payment. For older channels, the policy checks the reserve—the contract holding the funds—as the sender. Refunds also use the reserve as the sender.
+
+Use channel events alongside token transfers to identify the payer. Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1095.md).
 
 ## Configure the policy
 

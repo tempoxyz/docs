@@ -1559,6 +1559,8 @@ The [expiring nonces specification](https://github.com/tempoxyz/tempo/blob/main/
 
 Set `nonceKey` to `maxUint256`, `nonce` to `0`, and `validBefore` to a Unix timestamp in seconds satisfying `now < validBefore <= now + 300`, where `now` is the current block timestamp. The maximum window is five minutes; SDK defaults may use shorter windows. See [TIP-1093](https://tips.sh/1093).
 
+After T12 activates, you can choose distinct `uint64` nonce values for otherwise identical transactions. See [nonce discriminators](/docs/guide/payments/send-parallel-transactions#distinct-transactions-after-t12) for integration guidance.
+
 <Tabs stateKey="library-exp">
   <Tab title="Viem">
 
