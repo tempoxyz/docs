@@ -8,12 +8,6 @@ description: T12 adds configurable nonces for parallel expiring transactions, en
 
 T12 adds configurable nonces for parallel expiring transactions, enables MPP sessions with closed-loop stablecoins, restores compatibility with calldata suffixes, and aligns quote and swap calculations.
 
-:::warning[Breaking change: precompile gas limits]
-T12 applies the [EIP-2200 `SSTORE` sentry](https://eips.ethereum.org/EIPS/eip-2200) to Tempo's native precompiles. A precompile call now halts with an out-of-gas error if it attempts a storage write with 2,300 gas or less remaining in its call frame. Transactions with tight gas limits can therefore fail after T12 even if they succeeded before.
-
-Re-estimate gas on the target network after T12 activates, and slightly increase hardcoded gas limits where needed. If your contract forwards a fixed amount of gas to a precompile, you may also need to increase that allowance.
-:::
-
 ## Timeline
 
 | Network | Planned activation |
@@ -81,3 +75,7 @@ Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-10
 - **MPP integrations:** after T12 activates, you can use closed-loop credits with [MPP sessions](/docs/guide/machine-payments/pay-as-you-go). Existing channels need no migration.
 - **ABI compatibility:** if your integration was affected by [T11's strict ABI validation](/docs/protocol/upgrades/t11), you can restore calldata suffixes after T12 activates on your network.
 - **DEX integrations:** quote and swap APIs are unchanged. If you read tick liquidity totals directly from storage, switch to `getTickLevel()` or sum the remaining amounts of active orders. Stored tick totals stop updating at T12.
+
+### Breaking changes
+
+Integrations calling Tempo's native precompiles with tight gas limits may need to slightly increase those limits to avoid out-of-gas failures under T12's [EIP-2200 `SSTORE` sentry](https://eips.ethereum.org/EIPS/eip-2200).
