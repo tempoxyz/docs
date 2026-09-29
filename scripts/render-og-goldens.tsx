@@ -6,6 +6,7 @@ import React from 'react'
 import { OgImage } from '../src/pages/_api/api/og-image'
 
 export const goldenCases = [
+  { name: 'docs-home', title: 'Documentation', section: 'DEVELOPERS', subsection: '' },
   { name: 'short-title', title: 'Tempo', section: 'BUILD', subsection: '' },
   { name: 'blog-index-title', title: 'BLOG', section: 'BLOG', subsection: '' },
   {
@@ -94,6 +95,15 @@ async function main() {
       console.log(`updated ${fileURLToPath(path)}`)
     }
   }
+
+  const landing = await renderGolden(goldenCases[0])
+  const landingPath = new URL('../public/og-docs.png', import.meta.url)
+  if (check) {
+    if (!landing.equals(await readFile(landingPath))) {
+      changed = true
+      console.error('public/og-docs.png differs; run pnpm og:goldens to update it')
+    }
+  } else await writeFile(landingPath, landing)
 
   if (changed) process.exitCode = 1
 }

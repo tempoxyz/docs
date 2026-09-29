@@ -121,9 +121,9 @@ export function OgImage({
           <div
             key={line}
             style={{
-              fontFamily: 'HBSet',
+              fontFamily: section === 'BLOG' ? 'HBSet' : 'Pilat',
               fontSize,
-              fontWeight: 300,
+              fontWeight: section === 'BLOG' ? 300 : 400,
               letterSpacing: '-0.04em',
               color: 'black',
               lineHeight: 1.15,

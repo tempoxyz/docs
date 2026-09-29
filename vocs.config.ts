@@ -163,7 +163,7 @@ export default defineConfig({
     const urlBase = options.baseUrl?.replace(/\/$/, '') ?? ''
     const docsPath = String(path ?? '').replace(/^\/docs(?=\/|$)/, '') || '/'
     const landingPaths = ['/', '/changelog']
-    if (landingPaths.includes(docsPath)) return `${urlBase}/og-docs.png`
+    if (landingPaths.includes(docsPath)) return `${urlBase}/og-docs.png?v=4`
 
     const sectionMap: Record<string, string> = {
       api: 'API',
@@ -221,7 +221,7 @@ export default defineConfig({
     const extra = new URLSearchParams({
       section,
       ...(subsection ? { subsection } : {}),
-      v: '3',
+      v: '4',
     }).toString()
 
     // The HBSet display font's mixed-case "Blog" wordmark has awkward

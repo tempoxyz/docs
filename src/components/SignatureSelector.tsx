@@ -115,7 +115,7 @@ export function SignatureSelector(props: SignatureSelectorProps) {
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => !disabled && setIsOpen(true)}
             placeholder={placeholderText}
-            className="h-[34px] w-full rounded-lg border border-gray4 px-3 text-[13px] focus:outline-none focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-10 w-full rounded-lg border border-gray4 px-3 text-[13px] focus:outline-none focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-50"
             disabled={disabled}
           />
           {value.length > 0 && !disabled && (
@@ -159,7 +159,7 @@ export function SignatureSelector(props: SignatureSelectorProps) {
                         {sig.signature}
                       </span>
                       <span
-                        className={`ml-auto flex h-[16px] shrink-0 items-center justify-center rounded px-1.5 text-center font-medium text-[9px] uppercase leading-none tracking-[2%] ${
+                        className={`ml-auto flex min-h-6 shrink-0 items-center justify-center rounded px-1.5 text-center font-medium text-[12px] leading-4 ${
                           sig.type === 'event' ? 'bg-blue3 text-blue9' : 'bg-purple3 text-purple9'
                         }`}
                       >
