@@ -297,7 +297,7 @@ const pluginCommands = [
   },
 ]
 
-const docsSkillCommand = 'npx skills add tempoxyz/docs'
+const docsSkillCommand = 'npx skills add tempoxyz/plugins --skill docs'
 
 function CopyIcon() {
   return (
@@ -524,7 +524,7 @@ function AgentsPanel({
         <AgentCommandSection
           href={TEMPO_PLUGIN_URL}
           label="Tempo plugin"
-          desc="Install MCP, workflow skills, and editor metadata"
+          desc="Install read-only MCP, a documentation skill, and editor metadata"
           icon={<TerminalIcon />}
           onClick={onNavigate}
         >

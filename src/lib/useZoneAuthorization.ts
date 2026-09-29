@@ -37,41 +37,7 @@ export function useZoneAuthorization(parameters: {
       if (!address) throw new Error('account address not ready')
       if (!zoneClient) throw new Error('zone client not ready')
 
-      const storage = ZoneStorage.defaultStorage()
-      const lowerAddress = address.toLowerCase()
-      const accountStorageKey = `auth:${lowerAddress}:${chainId}`
-      const chainStorageKey = `auth:token:${chainId}`
-      const accountToken = await storage.getItem(accountStorageKey)
-
-      if (accountToken) await storage.setItem(chainStorageKey, accountToken)
-
-      try {
-        const info = await withTimeout(
-          zoneClient.zone.getAuthorizationTokenInfo(),
-          zoneAuthorizationInfoTimeoutMs,
-        )
-        const expired = info.expiresAt <= BigInt(Math.floor(Date.now() / 1000))
-        const matchesAccount = info.account.toLowerCase() === lowerAddress
-
-        if (!matchesAccount || expired) {
-          await storage.removeItem(chainStorageKey)
-          if (accountToken) await storage.removeItem(accountStorageKey)
-          return null
-        }
-
-        if (!accountToken) {
-          const chainToken = await storage.getItem(chainStorageKey)
-          if (chainToken) await storage.setItem(accountStorageKey, chainToken)
-        }
-
-        return info
-      } catch (error) {
-        if (!isZoneAuthorizationError(error)) throw error
-
-        await storage.removeItem(chainStorageKey)
-        if (accountToken) await storage.removeItem(accountStorageKey)
-        return null
-      }
+      return getZoneAuthorizationStatus({ address, chainId, zoneClient })
     },
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
@@ -99,6 +65,54 @@ export function useZoneAuthorization(parameters: {
   }
 }
 
+export async function getZoneAuthorizationStatus(parameters: {
+  address: Hex
+  chainId: number
+  zoneClient: ZoneAuthClientLike
+  storage?: ReturnType<typeof ZoneStorage.defaultStorage>
+}) {
+  const { address, chainId, zoneClient, storage = ZoneStorage.defaultStorage() } = parameters
+  const lowerAddress = address.toLowerCase()
+  const accountStorageKey = `auth:${lowerAddress}:${chainId}`
+  const chainStorageKey = `auth:token:${chainId}`
+  const accountToken = await storage.getItem(accountStorageKey)
+  const chainToken = await storage.getItem(chainStorageKey)
+
+  // A fresh account has no token to validate; authorization starts with a local signature.
+  if (!accountToken && !chainToken) return null
+  if (accountToken) await storage.setItem(chainStorageKey, accountToken)
+
+  try {
+    const info = await withTimeout(
+      zoneClient.zone.getAuthorizationTokenInfo(),
+      zoneAuthorizationInfoTimeoutMs,
+    )
+    const expired = info.expiresAt <= BigInt(Math.floor(Date.now() / 1000))
+    const matchesAccount = info.account.toLowerCase() === lowerAddress
+
+    if (!matchesAccount || expired) {
+      await storage.removeItem(chainStorageKey)
+      if (accountToken) await storage.removeItem(accountStorageKey)
+      return null
+    }
+
+    if (!accountToken && chainToken) await storage.setItem(accountStorageKey, chainToken)
+    return info
+  } catch (error) {
+    if (!isZoneAuthorizationError(error)) {
+      // Keep a saved token when a transport failure prevents checking it.
+      if (getErrorName(error) === 'HttpRequestError' || getErrorName(error) === 'TimeoutError') {
+        throw new Error('The Zone RPC is unavailable. Retry when the endpoint is reachable.')
+      }
+      throw error
+    }
+
+    await storage.removeItem(chainStorageKey)
+    if (accountToken) await storage.removeItem(accountStorageKey)
+    return null
+  }
+}
+
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
   let timeout: ReturnType<typeof setTimeout>
 
@@ -123,29 +137,30 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
   ])
 }
 
-function isZoneAuthorizationError(error: unknown) {
+function isZoneAuthorizationError(error: unknown): boolean {
   const status = getErrorStatus(error)
   if (status === 401 || status === 403) return true
 
-  const name = getErrorName(error)
-  if (name === 'HttpRequestError' || name === 'TimeoutError') return true
+  if (typeof error !== 'object' || error === null) return false
 
-  const message = getErrorMessage(error)
-  return /authorization token/i.test(message)
-}
-
-function getErrorMessage(error: unknown) {
-  if (typeof error === 'object' && error !== null) {
-    if ('shortMessage' in error && typeof error.shortMessage === 'string') {
-      return error.shortMessage
-    }
-
-    if ('message' in error && typeof error.message === 'string') return error.message
+  // Check the server's error text, not the request metadata or a generic HTTP status.
+  const messages = ['details', 'shortMessage'].flatMap((key) => {
+    const value = (error as Record<string, unknown>)[key]
+    return typeof value === 'string' ? [value] : []
+  })
+  if (!messages.length && 'message' in error && typeof error.message === 'string') {
+    messages.push(error.message)
   }
+  if (
+    messages.some((message) =>
+      /authorization token expired|missing X-Authorization-Token|invalid signature|keychain key (?:not authorized|revoked|expired)/i.test(
+        message,
+      ),
+    )
+  )
+    return true
 
-  if (error instanceof Error) return error.message
-
-  return ''
+  return 'cause' in error && isZoneAuthorizationError(error.cause)
 }
 
 function getErrorStatus(error: unknown): number | null {

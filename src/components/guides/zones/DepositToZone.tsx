@@ -10,6 +10,7 @@ import {
   getZoneRpcHttpUrl,
   getZoneRpcTransportConfig,
   moderatoZoneRpcUrls,
+  ZONE_A,
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
@@ -32,10 +33,6 @@ type ZoneClientLike = {
     }) => Promise<{ amount: bigint; decimals: number; formatted: string }>
   }
   zone: ZoneAuthClientLike['zone']
-}
-
-type RootChainWithZones = {
-  zones?: Record<number, { portalAddress: Hex }>
 }
 
 type DepositSetup = {
@@ -61,7 +58,7 @@ export function DepositToZone() {
       <DepositModeSelector mode={mode} onChange={setMode} />
 
       {address ? (
-        <ConnectedZoneFlow address={address as Hex} mode={mode} />
+        <ConnectedZoneFlow key={address} address={address as Hex} mode={mode} />
       ) : (
         <DisconnectedZoneFlow mode={mode} />
       )}
@@ -76,9 +73,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
   const { data: connectorClient } = useConnectorClient()
   const { data: rootWebAuthnAccount } = useRootWebAuthnAccount()
   const publicClient = usePublicClient()
-  const zonePortalAddress = (connectorClient?.chain as RootChainWithZones | undefined)?.zones?.[
-    ZONE_ID
-  ]?.portalAddress
+  const zonePortalAddress = ZONE_A.portalAddress
   const {
     data: rootBalance,
     isPending: rootBalanceIsPending,
@@ -177,7 +172,6 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
           token: pathUsd,
         })
         .then(({ amount }) => amount)
-        .catch(() => 0n)
 
       const creditedAmount = getNetZoneDepositAmount(
         DEPOSIT_AMOUNT,

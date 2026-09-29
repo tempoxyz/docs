@@ -6,34 +6,53 @@ description: Connect to Tempo Zones on testnet using Zone A and Zone B RPC URLs,
 
 # Connect to a Tempo Zone on testnet
 
-:::info
-Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
-:::
+Connect to a Tempo Zone to read your private balance and submit Zone transactions. Your account signs an authorization token so the RPC can scope requests to you.
 
-Use this page when you need the RPC endpoint and chain metadata for `Zone A` or `Zone B`.
+To connect directly, you need a Tempo account, the Zone's RPC URL and chain metadata, and any endpoint credentials supplied by its operator. The interactive guides handle the connection and authorization for you.
 
-Account-scoped zone RPC methods require an `X-Authorization-Token` header signed by the Tempo account you are using. The interactive guides handle that for you automatically. If you are building your own integration, see the [Zone RPC specification](/docs/protocol/zones/rpc) for the token format and the list of scoped methods.
+The guides use two shared Zones on Tempo Testnet named Zone A and Zone B.
 
 ## Create a Viem client
 
-Use `zoneModerato(...)` from `viem/tempo/zones` so the client has the correct chain metadata for the zone you want to reach.
+Use `zoneModerato(...)` from `viem/tempo/zones` for these examples. Zone A and Zone B run an earlier testnet deployment with interfaces that differ from current Tempo Zones. Review the [testnet compatibility notes](/docs/guide/private-zones#testnet-compatibility) before adapting this setup to another deployment.
+
+Obtain [RPC access from Tempo](https://tempo.xyz/contact) before connecting to the shared endpoints directly. The server-side example below reads the operator-provided HTTP `Authorization` header from `ZONE_RPC_AUTHORIZATION`. This endpoint access is separate from the signed `X-Authorization-Token`, which is required even for chain metadata reads.
+
+The example signs that token with an ephemeral account for metadata reads; use your actual account when reading private balances. See [RPC access control](/docs/protocol/zones/rpc) for the token format and scoped methods.
+
+The chain IDs below are the legacy SDK configuration. Confirm the endpoint's `eth_chainId` matches before signing; do not derive current deployment IDs with this older SDK.
 
 ```ts
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 import { createClient } from 'viem/tempo'
 import { http, zoneModerato } from 'viem/tempo/zones'
 
 const rpcUrl = 'https://rpc-zone-a.testnet.tempo.xyz'
+const authorization = process.env.ZONE_RPC_AUTHORIZATION
+if (!authorization) throw new Error('Set ZONE_RPC_AUTHORIZATION from your zone operator.')
 
 const zoneClient = createClient({
+  account: privateKeyToAccount(generatePrivateKey()),
   chain: zoneModerato(6),
-  transport: http(rpcUrl),
+  transport: http(rpcUrl, {
+    fetchOptions: { headers: { Authorization: authorization } },
+  }),
 })
+
+await zoneClient.zone.signAuthorizationToken()
+
+const chainId = await zoneClient.getChainId()
+if (chainId !== zoneClient.chain.id) throw new Error('Zone chain ID does not match the client.')
 
 const blockNumber = await zoneClient.getBlockNumber()
 console.log(blockNumber)
 ```
 
-## Direct Connection Details
+For browser integrations, the RPC gateway must allow `X-Authorization-Token` in its CORS headers. These demos relay requests through the docs server because the shared testnet gateways do not currently allow that header in browsers. The relay preserves your signed token and account-scoped access.
+
+<a id="direct-connection-details" />
+
+## Legacy testnet connection details
 
 ### Zone A
 

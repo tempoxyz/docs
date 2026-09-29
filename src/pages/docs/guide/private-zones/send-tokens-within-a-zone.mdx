@@ -11,13 +11,7 @@ export const inZoneBalances = [{ label: 'Zone A', token: Demo.pathUsd, zone: 6 }
 
 # Send tokens within a zone
 
-:::info
-Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
-:::
-
-Use this guide when you want to send `pathUSD` from one private `Zone A` balance to another without moving funds back through the public chain.
-
-Zone tokens use the `TIP20` token interface, so once you authorize private reads for the session, an in-zone transfer looks much like a normal token transfer.
+Send `pathUSD` test tokens between private balances in **Zone A**, the example Zone on Tempo Testnet. This deployment supports direct token transfers inside the Zone without moving funds back through the public chain.
 
 ## Sending pathUSD within Zone A
 
@@ -35,6 +29,8 @@ By the end of this guide you will have sent `25 pathUSD` inside `Zone A` and con
 ## Code example
 
 This snippet assumes you already have a signed-in `rootClient` on the public chain and a derived `zoneAClient`.
+
+This example uses the earlier testnet deployment's TIP-20 token interface. The current initial permissioned Zone runtime disables direct `transfer`, `transferFrom`, and memo variants; this code does not apply to that runtime. See the [testnet compatibility notes](/docs/guide/private-zones#testnet-compatibility).
 
 It shows the core zone transfer path; use the demo above when you want to watch the updated zone balance.
 

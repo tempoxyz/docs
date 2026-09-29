@@ -4,22 +4,12 @@ import { describe, expect, it } from 'vitest'
 const read = (path: string) => readFileSync(path, 'utf8')
 
 describe('mainnet guidance', () => {
-  it('defaults agent wallet and production workflows to mainnet', () => {
+  it('keeps the published docs skill on current mainnet facts', () => {
     const docsSkill = read('SKILL.md')
-    const developerSkill = read('ai/plugins/tempo/skills/tempo/SKILL.md')
-    const walletSkill = read('ai/plugins/tempo/skills/tempo-wallet/SKILL.md')
 
-    for (const skill of [docsSkill, developerSkill, walletSkill]) {
-      expect(skill).toContain('Tempo Mainnet')
-      expect(skill).toContain('pathUSD')
-    }
-
-    expect(developerSkill).toContain(
-      'Use Tempo Mainnet for wallet setup, funding, transfers, MPP settlement, and production workflows.',
-    )
-    expect(developerSkill).not.toContain(
-      'Use Tempo Testnet examples unless the user explicitly asks for mainnet.',
-    )
+    expect(docsSkill).toContain('Tempo Mainnet')
+    expect(docsSkill).toContain('pathUSD')
+    expect(docsSkill).toContain('Moderato is Tempo Testnet')
   })
 
   it('distinguishes production pathUSD from testnet faucet tokens', () => {

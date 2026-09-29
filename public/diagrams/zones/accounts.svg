@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="340" viewBox="0 0 960 340" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" style="color: var(--foreground, #111)">
+  <title id="zones-accounts-title">Account privacy across RPC and contract execution</title>
+  <desc id="zones-accounts-desc">An account signs an authorization token. The authenticated RPC scopes transaction and log reads to the account, blocks raw storage reads, and uses that account as the sender of contract calls. Contract-level balance reads allow only the balance owner; allowance reads allow the owner or spender. These access controls do not hide the underlying Zone state from the operator.</desc>
+  <defs>
+    <marker id="zones-accounts-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M1 1L7 4L1 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <g fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5">
+    <rect x="32" y="64" width="200" height="220" rx="10"/>
+    <rect x="296" y="24" width="248" height="292" rx="10"/>
+    <rect x="608" y="24" width="320" height="292" rx="10"/>
+  </g>
+  <g stroke="currentColor" stroke-width="1.75" marker-end="url(#zones-accounts-arrow)">
+    <path d="M242 174H286"/>
+    <path d="M554 240H598"/>
+  </g>
+
+  <!-- The token identifies the account at the RPC boundary. -->
+  <g transform="translate(116 96)" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="16" cy="6" r="6"/>
+    <path d="M4 29V25C4 15 28 15 28 25V29"/>
+  </g>
+  <text x="132" y="171" fill="currentColor" text-anchor="middle" font-size="20" font-weight="600">Your account</text>
+  <g fill="var(--foreground-secondary, #606060)" text-anchor="middle" font-size="18">
+    <text x="132" y="213">Signed</text>
+    <text x="132" y="242">authorization token</text>
+  </g>
+
+  <!-- Public RPC responses and calls are scoped to the authenticated identity. -->
+  <text x="320" y="64" fill="currentColor" font-size="20" font-weight="600">Authenticated RPC</text>
+  <g fill="var(--foreground-secondary, #606060)" font-size="18">
+    <text x="320" y="110">Your transactions</text>
+    <text x="320" y="140">Relevant event logs</text>
+  </g>
+  <path d="M320 166H520" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+  <text x="320" y="208" fill="currentColor" font-size="20" font-weight="600">Contract calls</text>
+  <text x="320" y="240" fill="var(--foreground-secondary, #606060)" font-size="17">From your account</text>
+  <text x="320" y="281" fill="var(--foreground-secondary, #606060)" font-size="16">No raw storage reads</text>
+
+  <!-- Getter permissions are enforced by the immediate EVM caller. -->
+  <text x="632" y="64" fill="currentColor" font-size="20" font-weight="600">Contract read checks</text>
+  <text x="632" y="108" fill="currentColor" font-size="18">Private balance</text>
+  <text x="632" y="138" fill="var(--foreground-secondary, #606060)" font-size="17">Caller must be that account</text>
+  <path d="M632 166H904" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+  <text x="632" y="208" fill="currentColor" font-size="18">Private allowance</text>
+  <text x="632" y="240" fill="var(--foreground-secondary, #606060)" font-size="17">Caller must be owner or spender</text>
+  <text x="632" y="281" fill="var(--foreground-secondary, #606060)" font-size="16">Other callers revert</text>
+</svg>

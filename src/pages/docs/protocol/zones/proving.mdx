@@ -1,53 +1,65 @@
 ---
-title: "Planned Tempo Zone proving"
-seoTitle: "Tempo Zone Proving: Planned Design | Docs"
-description: Batch submission and proof verification for Tempo zones, including the state transition function, ZK and TEE deployment modes, and ancestry proofs.
+title: "Tempo Zone proving and settlement"
+seoTitle: "Tempo Zone Proving & Settlement | Docs"
+description: Understand Tempo Zone settlement certificates, stateless execution validation, the Nitro enclave service, and the current onchain verification limits.
 ---
 
-import { StaticMermaidDiagram } from '../../../../components/StaticMermaidDiagram'
+import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
-# Planned Tempo Zone proving
+# Tempo Zone proving and settlement
 
-:::info
-Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
-:::
+Tempo Zone settlement records commitments to private Zone execution on Tempo and queues accepted withdrawals for processing. The stateless proof function (SPF) replays batches against witnessed Zone and Tempo state to validate their execution.
 
-:::warning
-The zone prover is not yet live. This page describes the planned design. The prover will be added in a future release.
-:::
+## Implementation status
 
-Zone settlement uses validity proofs to verify correct execution. The prover implements a pure state transition function in Rust with `no_std` compatibility, allowing it to run in both ZKVMs (SP1) and TEEs (SGX/TDX).
+This page follows Zones source at [`ac49071f`](https://github.com/tempoxyz/zones/tree/ac49071f) and Tempo source at [`3c4db7f843`](https://github.com/tempoxyz/tempo/tree/3c4db7f843), reviewed September 23, 2026. Source support does not establish which runtime a deployed Zone uses.
 
-## Batch Submission
+The Zones Solidity reference verifier still returns `true` without checking execution. Tempo also implements a native Nitro attestation verifier activated by T13. At the reviewed commit, its approved enclave measurements are unset, so it rejects proofs. Check the network's active hardfork, verifier implementation, and approved measurements before relying on execution-proof enforcement.
 
-The sequencer posts batches to Tempo Mainnet via `submitBatch` on the portal. Each batch covers one or more zone blocks and includes:
+The current sequencer can wait for a Nitro-attested batch before submitting it. This node-side requirement is separate from onchain enforcement. Forced exits remain unfinished.
+
+## Batch submission
+
+The sequencer calls `ZonePortal.submitBatch` on Tempo. Each batch covers one or more zone blocks and includes:
 
 | Field | Description |
 |-------|-------------|
-| `tempoBlockNumber` | Tempo block the zone committed to (from zone's TempoState) |
-| `recentTempoBlockNumber` | Optional recent block for ancestry proof (`0` = direct lookup) |
+| `tempoBlockNumber` | Tempo checkpoint committed by the zone |
+| `recentTempoBlockNumber` | Recent anchor for ancestry mode (`0` for direct lookup) |
 | `blockTransition` | Zone block hash transition (`prevBlockHash` → `nextBlockHash`) |
-| `depositQueueTransition` | Deposit queue processing progress |
+| `depositQueueTransition` | Previous and next deposit hashes and deposit numbers |
+| `tokenEnablementTransition` | Previous and next processed enabled-token counts (T13) |
 | `withdrawalQueueHash` | Hash chain of withdrawals for this batch (`0` if none) |
-| `verifierConfig` | Opaque payload for the verifier (domain separation / attestation) |
-| `proof` | Validity proof or TEE attestation |
+| `verifierConfig` | `0x01` for the Nitro verifier policy |
+| `proof` | Nitro attestation when a settlement prover is configured; empty on the unconfigured compatibility path |
+| `zoneHeight` | Height of the submitted zone tip |
+| `signatures` | Distinct sequencer signatures forming the settlement certificate |
 
-The portal verifies that `prevBlockHash` matches the stored `blockHash`, calls the verifier, and on success updates `withdrawalBatchIndex`, `blockHash`, `lastSyncedTempoBlockNumber`, and adds withdrawals to the queue.
+The portal checks continuity with its stored `blockHash`, an increasing zone height, deposit progress, processed token-enablement progress under T13, and the active sequencer quorum. The EIP-712 certificate binds the zone ID, sequencer-set version, batch index, verifier, Tempo anchor, state transitions, withdrawal hash, and verifier configuration. Replacing the sequencer set invalidates certificates from the old configuration.
 
-## Verifier Interface
+The portal then calls the configured verifier. On acceptance it updates the zone tip, processed deposit and enabled-token counts, Tempo checkpoint, and withdrawal batch index, and enqueues any withdrawals. A signature quorum authenticates the submitted commitments; it does not independently prove correct execution.
 
-The verifier is abstracted behind a minimal interface. ZK systems and TEE attesters implement the same contract:
+<ZoneDiagram
+  name="settlement"
+  alt="The sequencer prepares a signed batch and waits for Nitro attestation when configured. The portal checks quorum and continuity, then calls the active verifier. The Solidity reference is a stub; the T13 native verifier checks attestations and requires approved enclave measurements."
+/>
+
+## Verifier interface
+
+The T13 portal calls its configured verifier through this interface. Earlier runtimes use older interfaces; use the ABI for your network:
 
 ```solidity
 interface IVerifier {
     function verify(
+        uint32 zoneId,
         uint64 tempoBlockNumber,
         uint64 anchorBlockNumber,
         bytes32 anchorBlockHash,
         uint64 expectedWithdrawalBatchIndex,
-        address sequencer,
+        uint256 nextZoneHeight,
         BlockTransition calldata blockTransition,
         DepositQueueTransition calldata depositQueueTransition,
+        TokenEnablementTransition calldata tokenEnablementTransition,
         bytes32 withdrawalQueueHash,
         bytes calldata verifierConfig,
         bytes calldata proof
@@ -55,83 +67,62 @@ interface IVerifier {
 }
 ```
 
-The proof verifies that:
+The native T13 verifier binds the attested result to the parent chain, canonical portal, Zone ID, verifier, and batch inputs. It checks the Nitro certificate chain, document signature, enclave measurements, and batch digest. The Solidity reference verifier does not perform these checks.
 
-1. Valid state transition from `prevBlockHash` to `nextBlockHash`.
-2. Zone committed to `tempoBlockNumber` via TempoState.
-3. Anchor block hash matches (direct or ancestry mode).
-4. `ZoneOutbox.lastBatch()` has the correct `withdrawalBatchIndex` and `withdrawalQueueHash`.
-5. Deposit processing is correct (validated via Tempo state read inside proof).
-6. Zone block `beneficiary` matches the registered sequencer.
+## State transition function
 
-## State Transition Function
-
-The prover takes a complete witness of zone blocks and their dependencies, executes the EVM state transitions, and outputs commitments for on-chain verification:
+The SPF is implemented as a Rust verifier. It accepts trusted network configuration separately from the batch witness:
 
 ```rust
-pub fn prove_zone_batch(witness: BatchWitness) -> Result<BatchOutput, Error>
+pub fn prove_zone_batch(
+    config: &SpfConfig,
+    witness: BatchWitness,
+) -> Result<BatchOutput, Error>
 ```
 
-### Execution Flow
+### Execution flow
 
-<StaticMermaidDiagram chart={`flowchart TD
-    A["Batch witness"] --> B["Verify Tempo state proofs"]
-    B --> C["Initialize zone state from previous block hash"]
-    C --> D{"Next zone block"}
-    D --> E["Check parent hash and block number"]
-    E --> F["Verify beneficiary is the sequencer"]
-    F --> G["Execute advanceTempo system transaction if present"]
-    G --> H["Execute user transactions via revm"]
-    H --> I{"Final block in batch?"}
-    I -- No --> J["Compute simplified zone block hash"]
-    J --> D
-    I -- Yes --> K["Execute finalizeWithdrawalBatch"]
-    K --> L["Compute simplified zone block hash"]
-    L --> M["Extract output commitments"]
-    M --> N["Return batch output for verification"]
-`} />
+<ZoneDiagram
+  name="validation"
+  alt="The stateless validator takes trusted configuration and a batch witness, checks and replays state, recomputes roots and queue commitments, validates the Tempo anchor, and returns BatchOutput or an error."
+/>
 
-1. **Verify Tempo state proofs.** Validate MPT proofs for all Tempo storage reads against Tempo state roots.
-2. **Initialize zone state.** Load the zone state from the witness, binding the initial state root to the previous block hash.
-3. **Execute zone blocks.** For each block:
-   - Validate parent hash continuity and block number sequencing.
-   - Verify beneficiary matches the registered sequencer.
-   - Execute `advanceTempo()` system transaction (if present) to process deposits.
-   - Execute user transactions via revm.
-   - Execute `finalizeWithdrawalBatch()` in the final block only.
-   - Compute the zone block hash from the simplified header.
-4. **Extract output commitments.** Block hash transition, deposit queue transition, withdrawal queue hash, and last batch parameters.
+1. **Bind the starting state.** Validate the zone chain ID and portal against trusted configuration. Use the parent header’s state root for zone reads and verify that the initial Tempo witness matches the checkpoint stored in zone state.
+2. **Replay blocks.** Check parent hashes, block numbers, and timestamps. Execute the supplied system and user transactions through the zone EVM, including deposit processing and withdrawal finalization when present.
+3. **Recompute commitments.** Rebuild state roots and canonical Tempo-format zone headers, then read deposit progress, enabled-token progress, and withdrawal batch commitments from the resulting state.
+4. **Validate the anchor.** Match the final Tempo checkpoint to the public inputs, directly or through the supplied ancestry headers.
 
-### Deployment Modes
+The SPF can replay an open zone tip without withdrawal finalization. Settlement policy imposes its batch boundaries separately.
 
-**ZKVM (SP1):** The prover runs inside a ZKVM. The witness is read from the ZKVM IO, and the output is committed to the proof.
+<span id="deployment-modes" />
 
-**TEE (SGX/TDX):** The same function runs inside a trusted execution environment. The output is signed by the TEE attestation.
+### Validation deployment modes
 
-## Ancestry Proofs
+On a sequencer, `--sequencer.enable-prover` requires `--sequencer.prover-address HOST:PORT`. The sequencer waits for the remote prover’s successful batch result and nonempty Nitro attestation before submission, while collecting the settlement certificate in parallel.
 
-EIP-2935 provides access to the last ~8,192 block hashes on Tempo. If a zone is inactive longer than this window, `tempoBlockNumber` rotates out of EIP-2935, which would prevent batch submission.
+On an `rpc_only` follower, the same flag enables observational validation. Without a remote address, this runs in-process. A follower’s observational results do not control settlement. The unconfigured sequencer compatibility path submits empty proof bytes and cannot satisfy an enforcing verifier.
 
-The solution verifies ancestry inside the ZK circuit:
+The remote service runs inside AWS Nitro Enclaves over AF_VSOCK. After replay, it places the canonical batch digest in a Nitro attestation document’s `user_data` and returns `BatchOutput` with a proof bundle: `verifierConfig = 0x01` and the raw COSE/CBOR document as `proof`.
 
-1. The portal reads `recentTempoBlockNumber` hash from EIP-2935 (must be recent).
-2. The prover includes Tempo headers from `tempoBlockNumber + 1` to `recentTempoBlockNumber` as witness data.
-3. The proof verifies the parent hash chain: each header's parent hash must match the previous header's hash.
-4. The portal verifies the constant-size proof against the recent block hash.
+TCP mode supports local transport testing, but successful replay still requires the Nitro Secure Module. Outside an enclave, the service returns `attestation_unavailable` rather than an unattested success. ZK proof generation is not implemented.
+
+## Ancestry proofs
+
+Tempo’s EIP-2935 history exposes an 8,191-block lookup window. If a zone’s checkpoint is older, the submitter chooses a recent Tempo anchor and collects the intervening headers. The SPF validates their consecutive block numbers and parent hashes against that anchor.
 
 | Mode | Condition | Behavior |
 |------|-----------|----------|
-| Direct | `recentTempoBlockNumber = 0` | Portal reads `tempoBlockNumber` hash from EIP-2935 |
-| Ancestry | `recentTempoBlockNumber > tempoBlockNumber` | Portal reads `recentTempoBlockNumber` hash; proof verifies parent chain |
+| Direct | `recentTempoBlockNumber = 0` | Portal reads the `tempoBlockNumber` hash from EIP-2935 |
+| Ancestry | `recentTempoBlockNumber > tempoBlockNumber` | Portal reads the recent hash; SPF checks the intervening header chain |
 
-Proving time increases linearly with the block gap (each gap block adds ~1 keccak operation), but on-chain verification cost remains constant. This prevents the zone from becoming stuck after an extended downtime.
+Both modes can carry the Nitro attestation. The SPF validates ancestry during replay; an enforcing verifier must authenticate the resulting attestation and bind it to the submitted anchor. The Solidity stub does not enforce that check.
 
-## Tempo State Access
+## Tempo state access
 
-The zone accesses Tempo state via the TempoState predeploy (`0x1c00...0000`). During batch execution:
+The zone accesses its finalized Tempo checkpoint through the `TempoState` precompile (`0x1c00...0000`). During execution:
 
-1. `ZoneInbox` calls `TempoState.finalizeTempo(header)` to advance the zone's view of Tempo.
-2. System contracts read Tempo storage via `TempoState.readTempoStorageSlot()`, restricted to zone system contracts only.
-3. The proof includes Merkle proofs for each Tempo account and storage slot accessed during the batch.
+1. `ZoneInbox` calls `TempoState.finalizeTempo(headers)` when advancing the checkpoint.
+2. Zone system execution reads Tempo state at that exact checkpoint.
+3. SPF replay requires witnessed account and storage proofs for those reads.
 
-Tempo state staleness depends on how frequently the sequencer calls `advanceTempo()`. The zone client must only finalize Tempo headers after finality to avoid reorg risk.
+The zone imports finalized Tempo headers in order. Policy updates become visible after the corresponding checkpoint is imported, rather than as unrestricted reads of the latest Tempo state.

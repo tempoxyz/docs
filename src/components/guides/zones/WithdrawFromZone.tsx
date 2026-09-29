@@ -10,7 +10,7 @@ import {
   getZoneRpcHttpUrl,
   getZoneRpcTransportConfig,
   moderatoZoneRpcUrls,
-  publicSettlementLookbackBlocks,
+  ZONE_A,
   zoneRpcSyncTimeout,
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
@@ -296,10 +296,8 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
       if (!connectorClient) throw new Error('connector client not ready')
       if (!withdrawMutation.data) throw new Error('withdrawal submission not ready')
 
-      const fromBlock =
-        withdrawMutation.data.anchorBlock > publicSettlementLookbackBlocks
-          ? withdrawMutation.data.anchorBlock - publicSettlementLookbackBlocks
-          : 0n
+      // The anchor is captured before submission; earlier deposits cannot settle this request.
+      const fromBlock = withdrawMutation.data.anchorBlock + 1n
 
       const [currentRootBalance, currentZoneBalance, latest] = await Promise.all([
         Actions.token
@@ -317,13 +315,16 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
         publicClient.getBlockNumber(),
       ])
 
-      const logs = await publicClient.getLogs({
-        address: pathUsd,
-        args: { to: address },
-        event: tip20TransferEvent,
-        fromBlock,
-        toBlock: latest,
-      })
+      const logs =
+        latest < fromBlock
+          ? []
+          : await publicClient.getLogs({
+              address: pathUsd,
+              args: { from: ZONE_A.portalAddress, to: address },
+              event: tip20TransferEvent,
+              fromBlock,
+              toBlock: latest,
+            })
 
       const settlement = logs.find((log) => log.args.value === WITHDRAWAL_AMOUNT)
 
@@ -547,8 +548,8 @@ function WithdrawalModeSelector(props: {
         <div className="max-w-[34rem]">
           <p className="text-[12px] text-gray9 uppercase tracking-[0.12em]">Withdrawal mode</p>
           <p className="mt-1 text-[13px] text-gray10 leading-relaxed -tracking-[1%]">
-            Standard withdrawals reveal the sender of the withdrawal, while authenticated
-            withdrawals only reveal sender details to the holder of the reveal key.
+            Authenticated withdrawals add sender details encrypted to the reveal key. The
+            destination and amount are public in both modes.
           </p>
         </div>
         <div className="flex shrink-0 self-start rounded-lg border border-gray4 bg-background p-1">

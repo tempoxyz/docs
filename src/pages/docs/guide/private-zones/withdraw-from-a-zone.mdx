@@ -11,15 +11,16 @@ import { WithdrawFromZone } from '../../../../components/guides/zones/WithdrawFr
 
 export const withdrawalZoneBalances = [{ label: 'Zone A', token: Demo.pathUsd, zone: 6 }]
 
+import { ZoneDiagram } from '../../../../components/ZoneDiagram'
+
 # Withdraw pathUSD from a Tempo Zone on testnet
 
-:::info
-Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
-:::
+Withdraw tokens from a private Zone back to your public Tempo balance. This example uses `pathUSD` test tokens in **Zone A**, the example Zone on Tempo Testnet.
 
-Use this guide when you want to move `pathUSD` out of `Zone A` and back to your public Tempo balance.
-
-![Zone contract architecture](/developers/learn/zones/diagram-withdraw.svg)
+<ZoneDiagram
+  name="withdrawal"
+  alt="A signed Zone A outbox request reduces the private balance. Tempo accepts the batch, then processes the withdrawal to deliver pathUSD to the public recipient."
+/>
 
 Direct withdrawals exit through `ZoneOutbox` on the zone chain. You submit the withdrawal request in the zone first, then wait for the public balance to increase after the batch settles.
 
@@ -39,10 +40,13 @@ By the end of this guide you will have withdrawn `pathUSD` from `Zone A` and con
 ## Code examples
 
 These snippets assume you already have a signed-in `rootClient` on the public chain, a derived `zoneAClient`, and the usual token constants in scope.
-Use the plaintext flow when normal withdrawal visibility is fine. Use the authenticated flow when the sender details should only be revealed to the holder of a `revealTo` public key.
+
+These calls target the shared testnet deployment's SDK interfaces. Check the [testnet compatibility notes](/docs/guide/private-zones#testnet-compatibility) before using them with another Zone.
+
+Standard withdrawals omit an encrypted sender disclosure. Authenticated withdrawals attach sender details encrypted to the holder of the `revealTo` public key. The public recipient and amount remain visible in both flows.
 
 <Tabs stateKey="zone-withdrawal-example-mode">
-  <Tab title="Plaintext">
+  <Tab title="Standard">
 
 ```ts
 import { parseUnits } from 'viem'
@@ -99,5 +103,5 @@ Like deposits, withdrawals settle in phases. The request is accepted on the zone
 If Tempo-side processing fails, the withdrawal does not stay stuck in limbo. The protocol re-deposits the withdrawal amount back into the zone to the request's `fallbackRecipient`. The fee is still consumed.
 
 :::warning
-  Even with `gasLimit: 0n`, a direct withdrawal can still fail on Tempo—for example because of token transfer or policy checks. In that case, the amount bounces back to `fallbackRecipient` on the zone instead of increasing the public balance.
+  Even with `gas: 0n`, a direct withdrawal can still fail on Tempo—for example because of token transfer or policy checks. In that case, the amount bounces back to `fallbackRecipient` on the zone instead of increasing the public balance.
 :::

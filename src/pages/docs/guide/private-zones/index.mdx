@@ -1,67 +1,66 @@
 ---
-title: "Connect to Tempo Zones on testnet"
-seoTitle: "Tempo Zones: Private Transactions on Testnet | Docs"
-description: Learn how Tempo Zones work alongside the public chain and follow guides for depositing, sending within a zone, routing pathUSD across zones, swapping into betaUSD, and withdrawing.
+title: "Build with Tempo Zones"
+seoTitle: "Build with Tempo Zones | Docs"
+description: Connect an application to a Tempo Zone, authorize private account access, and try testnet guides for deposits, private transfers, swaps, and withdrawals.
 ---
 
 import { Card, Cards } from 'vocs'
+import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
-# Connect to Tempo Zones on testnet
+# Build with Tempo Zones
 
-:::info
-Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
-:::
+Tempo Zones give applications a private account ledger connected to Tempo. You use a Zone’s RPC to read private balances and submit transactions, and the public Tempo chain to move funds into and out of the Zone.
 
-Tempo Zones let you keep balances and transfers inside a private execution environment while still using the public Tempo chain when funds enter or leave. The important thing to remember is that most zone flows settle in stages: a public or zone transaction lands first, then the private balance update appears shortly after.
+A deposit locks tokens on Tempo and credits a private balance in the Zone. A withdrawal moves funds back to a Tempo address. These operations settle in stages, so the guides show both the transaction being accepted and the balance arriving at its destination.
 
-![Tempo Zones overview](/developers/learn/zones/diagram-overview.svg)
+<ZoneDiagram
+  name="overview"
+  alt="The public Tempo portal holds backing assets while a Zone operator runs the private account ledger. Deposits, withdrawals, and signed settlement commitments connect the two chains."
+/>
 
-## Before you start
+## Connect your application
 
-- Use a Tempo passkey account in the demo so the page can authorize private zone reads.
-- Keep some `pathUSD` on the public chain if you want to try deposits, source-zone top-ups, routed sends, swaps, or withdrawals.
-- Expect deposits, routed sends, routed swaps, and withdrawals to complete asynchronously rather than in a single balance update.
+Your application uses a public Tempo client alongside a client for the Zone. The Zone client authenticates as your Tempo account so it can access that account’s private data.
 
-These guides cover the current zone connection setup plus the baseline workflows used in the demos: deposits through `Actions.zone.depositSync(...)` and `Actions.zone.encryptedDepositSync(...)`, in-zone transfers, same-token routed sends through `Actions.zone.requestWithdrawalSync(...)`, routed swaps, direct withdrawals, and authenticated withdrawals through `Actions.zone.requestVerifiableWithdrawalSync(...)`.
+To connect, you need the Zone’s RPC endpoint, chain ID, and access details from its operator. Start with [Connect to a Zone](/docs/guide/private-zones/connect-to-a-zone) to set up a client and make an authenticated request. For the underlying design, read the [Tempo Zones overview](/docs/protocol/zones).
 
-The deposit guide's demo lets you switch between plaintext and encrypted deposits, and the withdrawal guide lets you switch between standard and authenticated withdrawals, while keeping the transaction flow on the upstream `viem` zone actions.
+<span id="before-you-start" />
 
-## Choose the right guide
+## Try the testnet guides
 
-- **Connect to a zone** if you want the Zone A and Zone B RPC URLs, chain IDs, and a minimal `viem` client setup.
-- **Deposit to a zone** if you want to move `pathUSD` from your public balance into `Zone A`.
-- **Send tokens within a zone** if you want to transfer `pathUSD` between private accounts without leaving `Zone A`.
-- **Send tokens across zones** if you want to leave `Zone A` with `pathUSD` and arrive in `Zone B` with the same token.
-- **Swap across zones** if you want to leave `Zone A` with `pathUSD` and arrive in `Zone B` with `betaUSD`.
-- **Withdraw from a zone** if you want to move `pathUSD` back from `Zone A` to your public balance.
+The interactive guides use two example Zones on Tempo Testnet, called Zone A and Zone B. Zone A is the starting point for deposits and withdrawals; Zone B lets you try moving funds between Zones. The examples use the testnet tokens `pathUSD` and `betaUSD`.
+
+Each demo walks you through signing in with a passkey, getting testnet funds, and authorizing access to your Zone account. The embedded demos handle the RPC connection for you. If you are writing your own application, use the connection guide first.
+
+<span id="choose-the-right-guide" />
 
 <Cards>
   <Card
-    description="Get the Zone A and Zone B RPC details and start with a minimal viem client setup."
+    description="Set up a Zone client, authorize your account, and make your first RPC request."
     icon="lucide:plug"
     title="Connect to a zone"
     to="/docs/guide/private-zones/connect-to-a-zone"
   />
   <Card
-    description="Move pathUSD from your public balance into Zone A and confirm the private balance update."
+    description="Move testnet funds from Tempo into a private balance and wait for the deposit to arrive."
     icon="lucide:shield-ellipsis"
     title="Deposit to a zone"
     to="/docs/guide/private-zones/deposit-to-a-zone"
   />
   <Card
-    description="Send pathUSD between private accounts inside Zone A without returning to the public chain."
+    description="Try a private transfer between accounts in the testnet sandbox."
     icon="lucide:send-horizontal"
     title="Send tokens within a zone"
     to="/docs/guide/private-zones/send-tokens-within-a-zone"
   />
   <Card
-    description="Route pathUSD out of Zone A and into Zone B without changing the token."
+    description="Move testnet funds between two Zones through Tempo."
     icon="lucide:move-right"
     title="Send tokens across zones"
     to="/docs/guide/private-zones/send-tokens-across-zones"
   />
   <Card
-    description="Withdraw from Zone A, swap on the public chain, and land in Zone B as betaUSD."
+    description="Combine a withdrawal, a public-chain swap, and a deposit into another Zone."
     icon="lucide:repeat-2"
     title="Swap stablecoins across zones"
     to="/docs/guide/private-zones/swap-across-zones"
@@ -73,3 +72,11 @@ The deposit guide's demo lets you switch between plaintext and encrypted deposit
     to="/docs/guide/private-zones/withdraw-from-a-zone"
   />
 </Cards>
+
+<span id="testnet-compatibility" />
+
+## About the testnet sandbox
+
+These demos use an earlier testnet deployment with `viem` 2.54.6. Its interfaces and chain IDs differ from the current Zone protocol. The sandbox also supports plaintext deposits and direct in-Zone transfers; the current permissioned runtime uses encrypted deposits and does not yet enable those transfers.
+
+Use the guide’s connection details for this sandbox. For another Zone, get the endpoint, access credentials, and supported SDK version from its operator. The [protocol reference](/docs/protocol/zones) describes the current implementation; the [connection guide](/docs/guide/private-zones/connect-to-a-zone) explains direct RPC access and how the demos connect through the docs server.

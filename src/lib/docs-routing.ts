@@ -11,11 +11,12 @@ export function docsRouteDestination(destination: string, environment = process.
   return destination
 }
 
-// These routes are evaluated in three places: Vocs for native `/docs` traffic,
+// These routes are evaluated in three places: Vocs for native route traffic,
 // Vercel before the `/developers` proxy mount reaches Vocs, and the legacy docs
 // host. Keep the mappings here so tests and deployed smoke checks share one
 // contract.
 export const proxiedLegacyDocsRoutes = [
+  { source: '/blog/inside-tempo-zones', destination: '/blog/privacy-with-tempo-zones' },
   { source: '/docs/developer-tools', destination: '/docs/ecosystem' },
   { source: '/docs/developer-tools/fee-payer', destination: '/docs/api/fee-payer' },
   { source: '/docs/developer-tools/indexer', destination: '/docs/api/indexer-api' },

@@ -38,7 +38,7 @@ Self-service data resets are coming soon. Once available, you will be able to ro
 ValidatorConfig operations below submit transactions from the validator operator address, which does not need to be a plaintext EOA key. Use the CLI signer backend that matches your custody setup; see [validator operator address custody](/docs/guide/node/validator-keys#validator-operator-address-custody). [Fee-token selection](#choose-the-validator-fee-token) uses the fee-recipient address instead.
 
 :::info[Preview or confirm transactions]
-Use `--dry-run` to print the target and calldata without signing or sending; it does not simulate execution. Use `--yes` to skip the confirmation prompt when sending.
+For `tempo consensus` commands, use `--dry-run` to print the target and calldata without signing or sending; it does not simulate execution. Use `--yes` to skip the confirmation prompt when sending.
 :::
 
 ### Rotate validator identity
@@ -64,7 +64,7 @@ tempo consensus validator <old_pubkey> --rpc-url https://rpc.testnet.tempo.xyz
 ```bash [Mainnet]
 tempo consensus rotate-validator \
   --validator-address <YOUR_VALIDATOR_ADDRESS> \
-  --public-key <NEW_PUBLIC_KEY> \
+  --consensus.public-key <NEW_PUBLIC_KEY> \
   --ingress <NEW_IP:PORT> \
   --egress <NEW_IP> \
   --signing-key <NEW_PRIVATE_KEY_PATH> \
@@ -73,7 +73,7 @@ tempo consensus rotate-validator \
 ```bash [Testnet]
 tempo consensus rotate-validator \
   --validator-address <YOUR_VALIDATOR_ADDRESS> \
-  --public-key <NEW_PUBLIC_KEY> \
+  --consensus.public-key <NEW_PUBLIC_KEY> \
   --ingress <NEW_IP:PORT> \
   --egress <NEW_IP> \
   --signing-key <NEW_PRIVATE_KEY_PATH> \
@@ -155,6 +155,18 @@ tempo consensus set-validator-token <TOKEN> \
 For a raw token address, `--no-fetch-verified-tokens` skips the metadata lookup; on-chain token validation still applies.
 
 The token must be a deployed USD-denominated TIP-20. The FeeManager rejects a preference change in a block whose fee recipient is the caller. This command changes the preferred token, not the fee-recipient address; see [Update the fee recipient](#update-the-fee-recipient) to change that address.
+
+### Claim validator fees
+
+Validator fees accumulate in the [FeeManager](/docs/protocol/fees/spec-fee-amm#key-functions) and must be claimed with `distributeFees` to reach your wallet. Use your configured fee-recipient address and the token address in which the fees accrued:
+
+```bash
+cast send 0xfeec000000000000000000000000000000000000 \
+  "distributeFees(address,address)" \
+  "<FEE_RECIPIENT_ADDRESS>" "<TOKEN_ADDRESS>" \
+  --rpc-url https://rpc.tempo.xyz \
+  --account "<KEYSTORE_ACCOUNT>"
+```
 
 ### Transfer validator ownership
 

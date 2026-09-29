@@ -163,6 +163,11 @@ function rewriteNode(
   if (node.name === 'Demo.Container') return renderDemo(node)
   if (node.name === 'MermaidDiagram' || node.name === 'StaticMermaidDiagram')
     return renderMermaid(node)
+  if (node.name === 'ZoneDiagram') {
+    const alt = requiredStringAttribute(node, 'alt')
+    const caption = optionalStaticStringAttribute(node, 'caption')
+    return [paragraph([text(alt)]), ...(caption ? [paragraph([text(caption)])] : [])]
+  }
   if (node.name === 'Badge') return renderBadge(node)
   if (node.name === 'Callout') return renderCallout(node, headingDepth, getSnippet)
   if (node.name === 'DocsLinkButton') return renderLinkButton(node)

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="292" viewBox="0 88 960 292" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" style="color: var(--foreground, #111)">
+<title>Deposit to Zone A</title>
+<desc>Legacy Moderato sandbox · plaintext or encrypted deposits. A public transaction receipt comes before the Zone balance update.</desc>
+<text x="32" y="126" font-size="15" font-weight="500" text-anchor="start" fill="var(--foreground-secondary, #666)">1 · SIGN</text>
+<rect x="32" y="148" width="260" height="212" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+<g transform="translate(162 197)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+<rect x="-23" y="-16" width="46" height="34" rx="4"/>
+<path d="M-21 -16v-6h36v6 M9 -5h17v15H9z"/>
+<circle cx="16" cy="2.5" r="1"/>
+</g>
+<text x="162" y="254" font-size="22" font-weight="600" text-anchor="middle" fill="currentColor">Public account</text>
+<text x="162" y="296" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Choose a deposit mode</text>
+<text x="162" y="322" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Sign the Tempo transaction</text>
+<path d="M308 254 L334 254 M326.00 250.00 L334 254 L326.00 258.00" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="350" y="126" font-size="15" font-weight="500" text-anchor="start" fill="var(--foreground-secondary, #666)">2 · LOCK</text>
+<rect x="350" y="148" width="260" height="212" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+<g transform="translate(480 197)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+<rect x="-18" y="-3" width="36" height="28" rx="4"/>
+<path d="M-11 -3v-11a11 11 0 0122 0v11 M0 8v7"/>
+</g>
+<text x="480" y="254" font-size="22" font-weight="600" text-anchor="middle" fill="currentColor">Zone A portal</text>
+<text x="480" y="296" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Lock pathUSD on Tempo</text>
+<text x="480" y="322" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Queue the net deposit</text>
+<path d="M626 254 L652 254 M644.00 250.00 L652 254 L644.00 258.00" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="668" y="126" font-size="15" font-weight="500" text-anchor="start" fill="var(--foreground-secondary, #666)">3 · CREDIT</text>
+<rect x="668" y="148" width="260" height="212" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+<g transform="translate(798 197)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+<rect x="-22" y="-25" width="44" height="50" rx="4"/>
+<path d="M-11 -12h23 M-11 0h23 M-11 12h14"/>
+</g>
+<text x="798" y="254" font-size="22" font-weight="600" text-anchor="middle" fill="currentColor">Private account</text>
+<text x="798" y="296" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Zone A imports the deposit</text>
+<text x="798" y="322" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">Read the credited balance</text>
+</svg>

@@ -18,7 +18,7 @@ export default function BlogSection() {
           Dive deeper into Tempo&apos;s engineering
         </h2>
         <p className="mt-6 max-w-[560px] font-sans text-[16px] text-foreground/50 leading-[1.4] tracking-[0] lg:text-[20px]">
-          Engineering deep dives, network upgrades, events, and case studies{' '}
+          Product announcements, engineering deep dives, network upgrades, events, and case studies{' '}
           <span className="text-foreground">from the team building Tempo.</span>
         </p>
       </Reveal>
