@@ -46,8 +46,9 @@ export const stats: Stat[] = [
     title: '99.999 uptime',
     caption:
       'Tempo settled ~92% of submitted benchmark load while sustaining high-volume throughput.',
-    small: { label: 'SETTLED TPS', value: '17,311' },
-    main: { label: 'SETTLED TPS', value: '21,200', unit: 'TPS' },
+    // Fallback: multi-region public-mix nightly, Sep 29 2026.
+    small: { label: 'SETTLED TPS', value: '15,600' },
+    main: { label: 'SETTLED TPS', value: '15,600', unit: 'TPS' },
     tickerLabel: 'settled at peak load',
   },
 ]

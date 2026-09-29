@@ -206,7 +206,7 @@ export default function PerfSection({ stats, runs }: { stats: Stat[]; runs: Perf
     {
       href: PERFORMANCE_PAGE,
       label: 'High throughput',
-      value: `${mainValue('Reliability', '21,200')} TPS`,
+      value: `${mainValue('Reliability', '15,600')} TPS`,
       desc: 'Settled transactions per second in the latest multi-region benchmark.',
       spark: hasFeed ? <TpsSpark runs={sparkRuns} /> : null,
       className: 'lg:col-span-4',
