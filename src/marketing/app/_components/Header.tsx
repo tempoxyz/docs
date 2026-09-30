@@ -126,7 +126,6 @@ const developersMenu: MegaMenuData = {
 }
 
 const TEMPO_AI_GUIDE_URL = developersPath('/docs/guide/using-tempo-with-ai')
-const TEMPO_DOCS_SKILL_URL = `${TEMPO_AI_GUIDE_URL}#docs-skill`
 const TEMPO_PLUGIN_URL = `${TEMPO_AI_GUIDE_URL}#install-tempo-plugins`
 const TEMPO_MCP_URL = 'https://mcp.tempo.xyz'
 
@@ -265,39 +264,30 @@ function Chevron({ open }: { open: boolean }) {
   )
 }
 
-// The server URL is appended at render time so it can be color-highlighted.
-const mcpCommands = [
+// One install path per agent: the plugin bundles the MCP server and docs skill where
+// supported, Amp gets the MCP server directly, and other agents get the skill.
+const agentCommands = [
   {
     label: 'Claude',
     logo: <ClaudeLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    prefix: 'claude mcp add --transport http tempo ',
+    command: tempoPluginInstallCommands.claude,
   },
-  {
-    label: 'Codex',
-    logo: <CodexLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    prefix: 'codex mcp add tempo --url ',
-  },
-  {
-    label: 'Amp',
-    logo: <AmpLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    prefix: 'amp mcp add --transport http tempo ',
-  },
-]
-
-const pluginCommands = [
   {
     label: 'Codex',
     logo: <CodexLogo aria-hidden="true" className="size-3.5 shrink-0" />,
     command: tempoPluginInstallCommands.codex,
   },
   {
-    label: 'Claude',
-    logo: <ClaudeLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    command: tempoPluginInstallCommands.claude,
+    label: 'Amp',
+    logo: <AmpLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    command: `amp mcp add --transport http tempo ${TEMPO_MCP_URL}`,
+  },
+  {
+    label: 'Other',
+    logo: null,
+    command: 'npx skills add tempoxyz/plugins --skill docs',
   },
 ]
-
-const docsSkillCommand = 'npx skills add tempoxyz/plugins --skill docs'
 
 function CopyIcon() {
   return (
@@ -457,19 +447,15 @@ function AgentsPanel({
   onNavigate?: () => void
 }) {
   const desktop = variant === 'desktop'
-  const [activeMcpCommandIndex, setActiveMcpCommandIndex] = useState(0)
-  const [activePluginCommandIndex, setActivePluginCommandIndex] = useState(0)
-  const [copiedCommandKey, setCopiedCommandKey] = useState<string | null>(null)
-  const activeMcpCommand = mcpCommands[activeMcpCommandIndex]
-  const activePluginCommand = pluginCommands[activePluginCommandIndex]
+  const [activeCommandIndex, setActiveCommandIndex] = useState(0)
+  const [copied, setCopied] = useState(false)
+  const activeCommand = agentCommands[activeCommandIndex]
 
-  const copyCommand = async (key: string, command: string) => {
+  const copyCommand = async (command: string) => {
     try {
       await navigator.clipboard.writeText(command)
-      setCopiedCommandKey(key)
-      setTimeout(() => {
-        setCopiedCommandKey((current) => (current === key ? null : current))
-      }, 1500)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
     } catch {
       // Clipboard unavailable (e.g. insecure context) — fail silently.
     }
@@ -484,77 +470,26 @@ function AgentsPanel({
       ) : null}
 
       <div className="space-y-1">
-        <div className="rounded-[4px] px-3 py-2.5">
-          <div className="flex items-start gap-3">
-            <span className="grid size-[34px] shrink-0 place-items-center bg-surface-input text-foreground">
-              <McpIcon />
-            </span>
-            <span className="flex min-w-0 flex-col gap-0.5">
-              <span className="font-sans text-[14px] text-foreground tracking-[0]">
-                Tempo MCP server
-              </span>
-              <span className="font-sans text-[13px] text-foreground/45 leading-[1.4] tracking-[0]">
-                Give agents search and read tools for Tempo docs
-              </span>
-            </span>
-          </div>
-
-          {/* Config block hangs under the item's text column (icon 40px + gap 12px). */}
-          <div className="mt-3 ml-[52px] space-y-3">
-            <CommandTabs
-              commands={mcpCommands}
-              activeIndex={activeMcpCommandIndex}
-              onSelect={(index) => {
-                setActiveMcpCommandIndex(index)
-                setCopiedCommandKey(null)
-              }}
-            />
-
-            <CommandSnippet
-              command={activeMcpCommand.prefix + TEMPO_MCP_URL}
-              copyLabel="Copy Tempo MCP install command"
-              copied={copiedCommandKey === 'mcp'}
-              onCopy={(command) => copyCommand('mcp', command)}
-            >
-              {activeMcpCommand.prefix}
-              <span className="text-foreground/65">{TEMPO_MCP_URL}</span>
-            </CommandSnippet>
-          </div>
-        </div>
         <AgentCommandSection
           href={TEMPO_PLUGIN_URL}
-          label="Tempo plugin"
-          desc="Install read-only MCP, a documentation skill, and editor metadata"
-          icon={<TerminalIcon />}
+          label="Tempo for your agent"
+          desc="Give your agent search and read tools for Tempo docs"
+          icon={<McpIcon />}
           onClick={onNavigate}
         >
           <CommandTabs
-            commands={pluginCommands}
-            activeIndex={activePluginCommandIndex}
+            commands={agentCommands}
+            activeIndex={activeCommandIndex}
             onSelect={(index) => {
-              setActivePluginCommandIndex(index)
-              setCopiedCommandKey(null)
+              setActiveCommandIndex(index)
+              setCopied(false)
             }}
           />
           <CommandSnippet
-            command={activePluginCommand.command}
-            copyLabel="Copy Tempo plugin install commands"
-            copied={copiedCommandKey === 'plugin'}
-            onCopy={(command) => copyCommand('plugin', command)}
-          />
-        </AgentCommandSection>
-        <AgentCommandSection
-          href={TEMPO_DOCS_SKILL_URL}
-          label="Tempo Docs skill"
-          desc="Add docs, examples, and source context"
-          icon={<DocsIcon />}
-          onClick={onNavigate}
-        >
-          <CommandSnippet
-            command={docsSkillCommand}
-            copyLabel="Copy Tempo Docs skill install command"
-            copied={copiedCommandKey === 'docs-skill'}
-            onCopy={(command) => copyCommand('docs-skill', command)}
+            command={activeCommand.command}
+            copyLabel={`Copy Tempo install command for ${activeCommand.label}`}
+            copied={copied}
+            onCopy={copyCommand}
           />
         </AgentCommandSection>
       </div>
