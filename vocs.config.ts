@@ -1114,6 +1114,10 @@ export default defineConfig({
             link: '/docs/guide/node/rpc',
           },
           {
+            text: 'Consensus, DKG, and Network Identity',
+            link: '/docs/guide/node/consensus-and-dkg',
+          },
+          {
             text: 'Running a validator',
             items: [
               {
