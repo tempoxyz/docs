@@ -75,6 +75,52 @@ To fix:
 
 See [Time Synchronization](/docs/guide/node/system-requirements#time-synchronization) for full setup details.
 
+## My node fails to start: finalized tip certificate failed verification against the trusted network identity
+
+Starting with [v1.15.0](https://github.com/tempoxyz/tempo/releases/tag/v1.15.0), a validator verifies the finalization certificate of its latest finalized block before its consensus engine starts. If verification fails, the node exits with an error chain that includes `failed initializing dkg manager` and ends with:
+
+```text
+finalized tip certificate at height `<HEIGHT>` in epoch `<EPOCH>` failed verification against the trusted network identity from epoch `<FROM_EPOCH>`; configure an updated network identity if a full DKG rotation occurred while the node was offline
+```
+
+The node checks the certificate against the newest [network identity](/docs/guide/node/consensus-and-dkg) it trusts: the identity built into the binary or passed on the command line, or a newer identity from its own persisted DKG state. Verification fails when the certificate was signed under a network identity the node does not know yet, for example:
+
+- A full DKG rotation happened while your node was offline, and your release predates the rotation.
+- You started from a snapshot taken after a rotation with a release that predates the rotation.
+
+Follow/RPC nodes do not run this startup check. Instead, they log one of these warnings when their network identity is outdated:
+
+```text
+Network identity differs from the onchain DKG outcome!!! Update the binary with the latest network identity
+Network identity derived from the trusted start block differs from the configured network identity!!! Update the binary with the latest network identity
+```
+
+To fix either case, upgrade to a release that includes the current identity. [Network Upgrades and Releases](/docs/guide/node/network-upgrades#network-identities) lists the current identities and the releases that include them.
+
+If you cannot upgrade immediately, override the built-in identity by adding both of these arguments to your existing `tempo node` command:
+
+| Argument | Meaning |
+| --- | --- |
+| `--consensus.network-identity <KEY>` | The full, hex-encoded 96-byte BLS threshold public key to use instead of the built-in network identity. |
+| `--consensus.network-identity-from-epoch <EPOCH>` | The first epoch for which the supplied identity is valid. |
+
+Use the identity and epoch listed in [Network identities](/docs/guide/node/network-upgrades#network-identities). Keep your other node arguments, including `--chain testnet` for testnet nodes.
+
+::::code-group
+```bash [Mainnet]
+tempo node \
+  --consensus.network-identity 0xa217bb85001d4dcf8e5c50136f77af88cb2cab1857279b91c6240f41cca95c4f43f6dcab3e0dfb87dafb3ecbeb6251e90a5df2e6c47432482821cd8b84665ee4642589d2d9628a92b03e2bbfb00e006d038cd98def76d2a41b7c228c05f5a193 \
+  --consensus.network-identity-from-epoch 0
+```
+```bash [Testnet]
+tempo node --chain testnet \
+  --consensus.network-identity 0x84591ad702a9ee67c0c64add2ff166c19a4666a1dc636cc530a810052957d34c185bb1d2c7f5569983485a5af49baed70166ba17ae782bc8c75701099c70474798ccc181d03b0c12054f1d01c7817b27b425bae4bfcf936218c0d097cccf3242 \
+  --consensus.network-identity-from-epoch 51
+```
+::::
+
+If the supplied identity does not match the network's DKG outcome for that epoch, the node stops with `network identity mismatch in epoch` or `persisted DKG network identity differs from the configured identity`. Check the identity and epoch values against [Network identities](/docs/guide/node/network-upgrades#network-identities).
+
 ## I accidentally deleted my consensus data directory
 
 Current validators require consensus finalization certificates to start. Contact the Tempo team to coordinate restoring a consistent snapshot; do not assume restarting with an empty consensus directory is sufficient. Once startup data is restored, [signing-share recovery](/docs/guide/node/validator-keys#signing-share-recovery) can reconstruct a missing share, or the node can obtain one in a future successful DKG ceremony.

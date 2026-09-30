@@ -37,40 +37,7 @@ Follow/RPC nodes and validators verify consensus finalization certificates, incl
 </Tab>
 </Tabs>
 
-After an identity rotation, this section and the release table below list the new identity and the first release that includes it. Start new nodes with that release or later.
-
-### Override the network identity
-
-Upgrade to a release that includes the current identity whenever possible. Override the built-in identity only when your node runs a release with an outdated identity and you cannot upgrade immediately, for example to start a node from a snapshot taken after a rotation.
-
-A node with an outdated identity logs one of these warnings:
-
-```text
-Network identity differs from the onchain DKG outcome!!! Update the binary with the latest network identity
-Network identity derived from the trusted start block differs from the configured network identity!!! Update the binary with the latest network identity
-```
-
-To override the identity, add both of these arguments to your existing `tempo node` command:
-
-| Argument | Meaning |
-| --- | --- |
-| `--consensus.network-identity <KEY>` | The full, hex-encoded 96-byte BLS threshold public key to use instead of the built-in network identity. |
-| `--consensus.network-identity-from-epoch <EPOCH>` | The first epoch for which the supplied identity is valid. |
-
-Use the identity and epoch listed in [Network identities](#network-identities). Keep your other node arguments, including `--chain testnet` for testnet nodes.
-
-::::code-group
-```bash [Mainnet]
-tempo node \
-  --consensus.network-identity 0xa217bb85001d4dcf8e5c50136f77af88cb2cab1857279b91c6240f41cca95c4f43f6dcab3e0dfb87dafb3ecbeb6251e90a5df2e6c47432482821cd8b84665ee4642589d2d9628a92b03e2bbfb00e006d038cd98def76d2a41b7c228c05f5a193 \
-  --consensus.network-identity-from-epoch 0
-```
-```bash [Testnet]
-tempo node --chain testnet \
-  --consensus.network-identity 0x84591ad702a9ee67c0c64add2ff166c19a4666a1dc636cc530a810052957d34c185bb1d2c7f5569983485a5af49baed70166ba17ae782bc8c75701099c70474798ccc181d03b0c12054f1d01c7817b27b425bae4bfcf936218c0d097cccf3242 \
-  --consensus.network-identity-from-epoch 51
-```
-::::
+After an identity rotation, this section and the release table below list the new identity and the first release that includes it. Start new nodes with that release or later. If a node fails to start after a rotation, see [My node fails to start: finalized tip certificate failed verification against the trusted network identity](/docs/guide/node/validator-troubleshooting#my-node-fails-to-start-finalized-tip-certificate-failed-verification-against-the-trusted-network-identity).
 
 ## Node Operator Updates
 
