@@ -12,7 +12,7 @@ Tempo uses scheduled network upgrades to introduce protocol changes. Each upgrad
 
 For detailed release notes and binaries, see the [Changelog](/docs/changelog).
 
-## Network identities {#network-identities}
+## Network identities
 
 Follow/RPC nodes and validators verify consensus finalization certificates, including those that authenticate Tempo snapshots, against the current network identity. Each `tempo` release includes these identities as [built-in trust anchors](https://github.com/tempoxyz/tempo/blob/main/crates/chainspec/src/network_identity.rs). To learn how the identity is produced and rotated, see [Consensus, DKG, and network identity](/docs/guide/node/consensus-and-dkg).
 
@@ -39,7 +39,7 @@ Follow/RPC nodes and validators verify consensus finalization certificates, incl
 
 After an identity rotation, this section and the release table below list the new identity and the first release that includes it. Start new nodes with that release or later.
 
-### Override the network identity {#override-network-identity}
+### Override the network identity
 
 Upgrade to a release that includes the current identity whenever possible. Override the built-in identity only when your node runs a release with an outdated identity and you cannot upgrade immediately, for example to start a node from a snapshot taken after a rotation.
 
