@@ -15,6 +15,7 @@ import LucideWalletCards from '~icons/lucide/wallet-cards'
 import { cva, cx } from '../../../cva.config'
 import { usePostHogTracking } from '../../lib/posthog'
 import { useTempoWalletConnector, useWebAuthnConnector } from '../../wagmi.config'
+import { Badge } from '../Badge'
 import { Container as ParentContainer } from '../Container'
 import { isFundableWalletConnector } from '../lib/wallets'
 import { alphaUsd } from './tokens'
@@ -186,11 +187,7 @@ export function Container(
           <h4 className="font-normal text-[14px] text-gray12 leading-none -tracking-[1%]">
             {name}
           </h4>
-          {showBadge && (
-            <span className="flex h-[19px] items-center justify-center rounded-[30px] bg-accentTint px-1.5 text-center font-medium text-[9px] text-accent uppercase leading-none tracking-[2%]">
-              demo
-            </span>
-          )}
+          {showBadge && <Badge variant="blue">Demo</Badge>}
         </div>
       }
       headerRight={
@@ -521,7 +518,7 @@ export function Button(
 }
 
 const buttonClassName = cva({
-  base: 'relative inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md font-normal transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:cursor-default disabled:opacity-50',
+  base: 'relative inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:cursor-default disabled:opacity-50',
   defaultVariants: {
     size: 'default',
     variant: 'default',
@@ -531,15 +528,16 @@ const buttonClassName = cva({
       true: 'pointer-events-none opacity-50',
     },
     size: {
-      default: 'h-[32px] px-[14px] text-[14px] -tracking-[2%]',
+      default: 'min-h-10 px-4 py-2 text-[14px] leading-5',
     },
     static: {
       true: 'pointer-events-none cursor-default',
     },
     variant: {
-      accent: 'border bg-invert text-invert dark:border-dashed',
-      default: 'border border-invert border-dashed text-primary',
-      destructive: 'border border-dashed bg-destructiveTint text-destructive',
+      accent: 'border border-transparent bg-invert text-invert hover:opacity-90',
+      default:
+        'border border-[var(--line-strong)] bg-[var(--surface-card)] text-primary hover:bg-[var(--surface-panel)]',
+      destructive: 'border border-transparent bg-destructiveTint text-destructive hover:opacity-90',
     },
   },
 })
