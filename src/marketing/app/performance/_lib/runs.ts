@@ -5,6 +5,9 @@
 const PERF_API_URL =
   'https://perf.tempo.xyz/api/perf/runs?feed=nightly&series=multi-region&limit=500'
 
+// Public history starts here; earlier multi-region runs are not representative.
+const HISTORY_FROM = '2026-09-01'
+
 type ApiRun = {
   id?: string
   scenario?: { id?: string; label?: string; workload?: string }
@@ -66,7 +69,9 @@ export async function fetchPerfRuns(): Promise<PerfRun[]> {
     if (data.series !== 'multi-region') return []
     return (data.runs ?? [])
       .filter((r): r is Required<Pick<ApiRun, 'startedAt' | 'metrics'>> & ApiRun =>
-        Boolean(r.startedAt && r.scenario?.id && r.metrics?.settledTps),
+        Boolean(
+          r.startedAt && r.startedAt >= HISTORY_FROM && r.scenario?.id && r.metrics?.settledTps,
+        ),
       )
       .map((r) => ({
         id: r.id ?? r.startedAt,

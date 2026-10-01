@@ -21,7 +21,8 @@ test('history spans multi-region presets while the headline uses the latest run'
       runs: [
         run('new2', 'public-mix-multi-region', '2026-09-24'),
         run('new', 'public-mix-multi-region', '2026-09-23'),
-        run('old', 'tip20_existing_recipients-50k', '2026-07-30'),
+        run('old', 'tip20_existing_recipients-50k', '2026-09-01'),
+        run('early', 'tip20_existing_recipients-50k', '2026-08-31'),
       ],
     }),
   })
