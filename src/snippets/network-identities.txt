@@ -14,11 +14,11 @@ tempo node \
 // [!endregion mainnet-override]
 
 // [!region testnet-identity]
-0x84591ad702a9ee67c0c64add2ff166c19a4666a1dc636cc530a810052957d34c185bb1d2c7f5569983485a5af49baed70166ba17ae782bc8c75701099c70474798ccc181d03b0c12054f1d01c7817b27b425bae4bfcf936218c0d097cccf3242
+0x967ae1a6d3ddbe5cb0fe5e6fc58e74249787b4a277619b549fed6609d04660540dd2449cd7174def35e40f544e5ad72d15d064191a205ed6e0c49619c68f975108b614d0d51def9a8416a10a07c4193bea0cbbc4252ec1b33f21095a5d7aa590
 // [!endregion testnet-identity]
 
 // [!region testnet-override]
 tempo node --chain testnet \
-  --consensus.network-identity 0x84591ad702a9ee67c0c64add2ff166c19a4666a1dc636cc530a810052957d34c185bb1d2c7f5569983485a5af49baed70166ba17ae782bc8c75701099c70474798ccc181d03b0c12054f1d01c7817b27b425bae4bfcf936218c0d097cccf3242 \
-  --consensus.network-identity-from-epoch 51
+  --consensus.network-identity 0x967ae1a6d3ddbe5cb0fe5e6fc58e74249787b4a277619b549fed6609d04660540dd2449cd7174def35e40f544e5ad72d15d064191a205ed6e0c49619c68f975108b614d0d51def9a8416a10a07c4193bea0cbbc4252ec1b33f21095a5d7aa590 \
+  --consensus.network-identity-from-epoch 1747
 // [!endregion testnet-override]
