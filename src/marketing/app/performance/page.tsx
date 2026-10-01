@@ -196,8 +196,8 @@ function PerformanceSectionsSkeleton() {
     <>
       <Section
         id="settlement"
-        title="Guaranteed settlement in half a second."
-        note="Tempo gives payments final settlement in about half a second. Once a payment lands in a finalized block, it can be treated as settled."
+        title="Fast, guaranteed settlement."
+        note="Tempo gives payments fast, final settlement. Once a payment lands in a finalized block, it can be treated as settled."
       >
         <SettlementStreamSkeleton />
       </Section>
@@ -332,8 +332,8 @@ export default function PerformancePage() {
           <>
             <Section
               id="settlement"
-              title="Guaranteed settlement in half a second."
-              note="Tempo gives payments final settlement in about half a second. Once a payment lands in a finalized block, it can be treated as settled."
+              title="Fast, guaranteed settlement."
+              note="Tempo gives payments fast, final settlement. Once a payment lands in a finalized block, it can be treated as settled."
             >
               <SettlementStream />
             </Section>

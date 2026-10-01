@@ -19,7 +19,7 @@ export type Stat = {
 export const stats: Stat[] = [
   {
     category: 'Speed',
-    title: '< 500ms transaction time',
+    title: 'Fast, guaranteed settlement',
     caption: 'Tempo sustained sub-second block times under continuous benchmark load',
     small: { label: 'BLOCK TIME', value: '508ms' },
     main: { label: 'AVG BLOCK TIME', value: '508', unit: 'ms' },
