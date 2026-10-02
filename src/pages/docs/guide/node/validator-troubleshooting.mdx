@@ -145,6 +145,23 @@ After deactivation, your validator is phased out over two epochs:
 
 Keep your node running until `in_committee: false` — check with [validator lookup](/docs/guide/node/validator-status#look-up-your-validator).
 
+## How do I configure my firewall?
+
+Allow consensus P2P (`8000/TCP` by default) between your node and every validator listed by `tempo consensus info`: inbound to your ingress port from each validator's `egress` IP, and outbound to each validator's `ingress` address.
+
+::::code-group
+```bash [Mainnet]
+tempo consensus info --rpc-url https://rpc.tempo.xyz
+```
+```bash [Testnet]
+tempo consensus info --rpc-url https://rpc.testnet.tempo.xyz
+```
+::::
+
+Do not use `ValidatorConfigV2.getActiveValidators()` alone. It returns the configured registry, which can differ from the committee consensus is using: deactivated validators stay in the committee until a DKG ceremony removes them, and a failed DKG round keeps the previous committee. `tempo consensus info` includes both the committee and the active registry.
+
+Validators can update their IPs, new validators can be registered, and identities can be rotated in any finalized block, so automate the refresh and run it continuously rather than on a fixed schedule. See [Configure your firewall](/docs/guide/node/validator-setup#configure-your-firewall) and [Validator network topology](/docs/guide/node/validator-topology#validator-firewall-policy) for details.
+
 ## Can I register my validator without the Tempo team?
 
 No — the active validator set is currently permissioned. Only the contract owner can add validators on-chain. To get started, [contact the Tempo team](https://tempo.xyz/contact).

@@ -132,6 +132,27 @@ The notable difference between RPC nodes and validator nodes is the omission of 
 
 Once your node is up, it may not start syncing immediately. This is because your node might not be part of the active set. In most cases, your validator will enter the active set in under 6 hours after the on-chain addition of the validator identity.
 
+### Configure your firewall
+
+Other validators connect to your ingress `IP:port` over consensus P2P (`8000/TCP` by default) from their registered egress IPs, and your node connects out to theirs. Build the allowlist from `tempo consensus info`:
+
+::::code-group
+```bash [Mainnet]
+tempo consensus info --rpc-url https://rpc.tempo.xyz
+```
+```bash [Testnet]
+tempo consensus info --rpc-url https://rpc.testnet.tempo.xyz
+```
+::::
+
+Allow every validator in the `validators` output: inbound to your ingress port from each `egress` IP, and outbound to each `ingress` address.
+
+:::warning
+Do not build the allowlist from `ValidatorConfigV2.getActiveValidators()` alone. It returns the configured registry, not the committee consensus is using. A deactivated validator stays in the committee until a DKG ceremony removes it, and a failed DKG round keeps the previous committee in place. Your node connects to both the committee and the active registry; `tempo consensus info` returns both.
+:::
+
+The set can change in any finalized block, not only at epoch boundaries: validators can [update their IP addresses](/docs/guide/node/validator-lifecycle#update-ip-addresses), new validators can be registered, and existing validators can [rotate their identity](/docs/guide/node/validator-lifecycle#rotate-validator-identity). Automate the refresh and run it continuously rather than on a fixed schedule, and remove a validator's rules only after it no longer appears in the output. See [Validator network topology](/docs/guide/node/validator-topology#validator-firewall-policy) for the rest of the firewall policy.
+
 ### Optional flags
 
 | Flag | Description |
