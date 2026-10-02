@@ -16,15 +16,6 @@ import { Tabs, Tab } from 'vocs'
 
 Send stablecoin payments between accounts on Tempo. Payments can include optional memos for reconciliation and tracking.
 
-:::warning[Confirm delivery, not just transaction success]
-On post-T6 networks, a blocked TIP-20 `transfer` / `transferFrom` still succeeds, but credits `ReceivePolicyGuard` at `0xB10C000000000000000000000000000000000000` instead of the intended receiver.
-
-- Before marking a payment, withdrawal, or deposit delivered, confirm the `Transfer` recipient is the intended receiver or the master wallet for its virtual address.
-- Index `ReceivePolicyGuard.TransferBlocked` so redirected funds can be surfaced and claimed later.
-
-See [Configure Receive Policies](/docs/guide/payments/configure-receive-policies).
-:::
-
 ## Send payment demo
 
 By the end of this guide you will be able to send payments on Tempo with an optional memo.
@@ -153,26 +144,25 @@ function SendPaymentWithMemo() {
 
 ### Display the payment receipt
 
-Now that you can send a payment, you can display the transaction receipt on success.
+Display a link to the transaction receipt after submission succeeds. Transaction success alone does not confirm delivery: a [receive policy](/docs/guide/payments/configure-receive-policies) can redirect funds to `ReceivePolicyGuard` instead of the receiver. Before showing a payment as delivered, [verify its transfer events](#confirm-delivery-not-just-transaction-success).
 
 :::code-group
 
 ```tsx twoslash [SendPaymentWithMemo.tsx]
+import * as React from 'react'
 import { Hooks } from 'wagmi/tempo'
-import { parseUnits, stringToHex, pad } from 'viem'
 
-// @noErrors
 function SendPaymentWithMemo() {
   const sendPayment = Hooks.token.useTransferSync()
 
   return (
     <>
       {/* ... your payment form ... */}
-      {sendPayment.data && ( // [!code ++]
-        <a href={`https://explore.tempo.xyz/tx/${sendPayment.data.receipt.transactionHash}`}> {/* [!code ++] */}
-          View receipt {/* [!code ++] */}
-        </a> {/* [!code ++] */}
-      )} {/* [!code ++] */}
+      {sendPayment.data && (
+        <a href={`https://explore.tempo.xyz/tx/${sendPayment.data.receipt.transactionHash}`}>
+          View receipt
+        </a>
+      )}
     </>
   )
 }
@@ -1011,9 +1001,19 @@ When you send a payment, the token contract emits events:
 - **Transfer**: Standard ERC-20 transfer event
 - **TransferWithMemo**: Additional event with memo (if using `transferWithMemo`)
 
-You can filter these events to track payments in your off-chain systems.
+For held payments, also index `TransferBlocked` from `ReceivePolicyGuard` (`0xB10C000000000000000000000000000000000000`). Filter by the payment's token and receiver, and save the `receipt` bytes for the authorized claimer. See [Monitor blocked receipts](/docs/guide/payments/configure-receive-policies#monitor-blocked-receipts).
 
 ## Stablecoin payment best practices
+
+### Confirm delivery, not just transaction success
+
+Match events from the expected token contract to the payment's sender, recipient, and amount. Do not rely on the first `Transfer` log in a transaction: a receipt can contain multiple transfers.
+
+- **Failed**: the transaction reverted; the payment was not delivered. Transaction fees may still apply.
+- **Delivered**: the matching `Transfer` credits the intended receiver. For a [virtual address](/docs/protocol/tip20/virtual-addresses#what-this-changes-for-wallets-explorers-and-indexers), verify the forwarding transfer to its master wallet and count the sequence as one payment.
+- **Held**: the transfer credits `ReceivePolicyGuard`, with a corresponding `TransferBlocked` event. The receiver has not been paid; retain the blocked receipt for [recovery](/docs/guide/payments/configure-receive-policies#claim-blocked-receipts).
+
+If no matching events are found, leave delivery unconfirmed. A successful transaction alone is not enough to mark a payment, withdrawal, or deposit as delivered.
 
 ### Payment loading states
 Users should see a loading state when the payment is being processed.
@@ -1052,5 +1052,11 @@ function SendPayment() {
     to="/docs/protocol/transactions"
     icon="lucide:send"
     title="Transactions"
+  />
+  <Card
+    description="Control which tokens and senders an account accepts, and recover held payments"
+    to="/docs/guide/payments/configure-receive-policies"
+    icon="lucide:shield-check"
+    title="Receive Policies"
   />
 </Cards>
