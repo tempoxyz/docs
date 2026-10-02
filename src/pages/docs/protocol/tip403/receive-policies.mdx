@@ -13,6 +13,8 @@ Receive policies let a receiver control which [TIP-20](/docs/protocol/tip20/over
 
 When a receive policy blocks an inbound TIP-20 transfer or mint, the call still succeeds. Delivery is redirected to `ReceivePolicyGuard`, and the guard records a receipt for that blocked transfer or mint. The token's [TIP-403](/docs/protocol/tip403/spec) policy checks still run first and still revert on failure.
 
+To hold every deposit for offchain review and release approved receipts, follow the [deposit screening workflow](/docs/protocol/tip403/deposit-screening).
+
 ## Protocol changes
 
 Receive policies add three protocol surfaces:
