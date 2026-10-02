@@ -1,8 +1,11 @@
 // Sandbox gateways currently omit X-Authorization-Token from their CORS allowlist.
 // Keep HTTP credentials server-side; the caller still supplies a signed Zone token.
-const upstreams: Record<string, string> = {
-  '6': 'https://eng:bold-raman-silly-torvalds@rpc-zone-a.testnet.tempo.xyz',
-  '7': 'https://eng:bold-raman-silly-torvalds@rpc-zone-b.testnet.tempo.xyz',
+// Upstream URLs (which may embed HTTP Basic credentials) come from the environment
+// so no secret is committed to the repository. The lookup is per-request so a
+// misconfigured deployment fails closed instead of shipping a default credential.
+const upstreamEnvKeys: Record<string, string> = {
+  '6': 'ZONE_RPC_UPSTREAM_6',
+  '7': 'ZONE_RPC_UPSTREAM_7',
 }
 
 const maxRequestBytes = 128 * 1024
@@ -28,7 +31,16 @@ const allowedMethods = new Set([
 
 export async function POST(request: Request): Promise<Response> {
   const zoneId = new URL(request.url).searchParams.get('zone') ?? ''
-  if (!Object.hasOwn(upstreams, zoneId)) return failure(400, 'Unknown demo zone')
+  const upstreamEnvKey = Object.hasOwn(upstreamEnvKeys, zoneId)
+    ? upstreamEnvKeys[zoneId]
+    : undefined
+  if (!upstreamEnvKey) return failure(400, 'Unknown demo zone')
+
+  const upstreamUrl = process.env[upstreamEnvKey]
+  if (!upstreamUrl) {
+    console.error(`Zone RPC upstream for zone ${zoneId} is not configured`)
+    return failure(500, 'The demo Zone RPC is unavailable. Try again later.')
+  }
 
   const token = request.headers.get('X-Authorization-Token')
   if (!token || !/^0x[0-9a-f]+$/i.test(token) || token.length > 8192) {
@@ -56,7 +68,7 @@ export async function POST(request: Request): Promise<Response> {
     return failure(400, 'Invalid JSON-RPC request')
   }
 
-  const upstream = new URL(upstreams[zoneId])
+  const upstream = new URL(upstreamUrl)
   const authorization = `Basic ${Buffer.from(
     `${decodeURIComponent(upstream.username)}:${decodeURIComponent(upstream.password)}`,
   ).toString('base64')}`

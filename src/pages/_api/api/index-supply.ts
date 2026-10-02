@@ -122,16 +122,19 @@ export async function OPTIONS(request: Request): Promise<Response> {
 function cors(origin: string | null): Record<string, string> {
   const allowedOrigins = ['https://tempo.xyz', 'https://mainnet.docs.tempo.xyz']
 
-  if (origin?.includes('vercel.app')) allowedOrigins.push(origin)
+  for (const extra of (process.env.ALLOWED_ORIGINS ?? '').split(',')) {
+    const value = extra.trim()
+    if (value) allowedOrigins.push(value)
+  }
   if (process.env.NODE_ENV === 'development') allowedOrigins.push('http://localhost:5173')
 
   const headers: Record<string, string> = {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, x-api-token',
+    Vary: 'Origin',
   }
 
-  if (origin && allowedOrigins.some((allowed) => origin.startsWith(allowed)))
-    headers['Access-Control-Allow-Origin'] = origin
+  if (origin && allowedOrigins.includes(origin)) headers['Access-Control-Allow-Origin'] = origin
 
   return headers
 }

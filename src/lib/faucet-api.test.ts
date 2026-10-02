@@ -1,5 +1,5 @@
 import { Actions } from 'viem/tempo'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { OPTIONS, POST } from '../pages/_api/api/faucet'
 
 vi.mock('viem/tempo', () => ({
@@ -15,6 +15,11 @@ const fund = vi.mocked(Actions.faucet.fund)
 describe('faucet API', () => {
   beforeEach(() => {
     fund.mockReset()
+    delete process.env.ALLOWED_ORIGINS
+  })
+
+  afterEach(() => {
+    delete process.env.ALLOWED_ORIGINS
   })
 
   it.each([
@@ -69,24 +74,36 @@ describe('faucet API', () => {
     })
   })
 
-  it('allows docs and Vercel origins for CORS', async () => {
+  it('allows the default Tempo origins for CORS', async () => {
     const tempoResponse = await OPTIONS(requestWithOrigin('https://tempo.xyz'))
     const docsResponse = await OPTIONS(requestWithOrigin('https://docs.tempo.xyz'))
-    const vercelResponse = await OPTIONS(requestWithOrigin('https://docs-git-branch.vercel.app'))
 
     expect(tempoResponse.headers.get('Access-Control-Allow-Origin')).toBe('https://tempo.xyz')
     expect(docsResponse.headers.get('Access-Control-Allow-Origin')).toBe('https://docs.tempo.xyz')
-    expect(vercelResponse.headers.get('Access-Control-Allow-Origin')).toBe(
-      'https://docs-git-branch.vercel.app',
-    )
+  })
+
+  it('allows extra origins only when they are explicitly allowlisted', async () => {
+    const preview = 'https://docs-git-branch.vercel.app'
+
+    expect(
+      (await OPTIONS(requestWithOrigin(preview))).headers.get('Access-Control-Allow-Origin'),
+    ).toBeNull()
+
+    process.env.ALLOWED_ORIGINS = `https://tempo.xyz, ${preview}`
+
+    expect(
+      (await OPTIONS(requestWithOrigin(preview))).headers.get('Access-Control-Allow-Origin'),
+    ).toBe(preview)
   })
 
   it('does not allow arbitrary CORS origins', async () => {
     const response = await OPTIONS(requestWithOrigin('https://example.com'))
     const prefixResponse = await OPTIONS(requestWithOrigin('https://tempo.xyz.example.com'))
+    const suffixResponse = await OPTIONS(requestWithOrigin('https://evil-tempo.xyz'))
 
     expect(response.headers.get('Access-Control-Allow-Origin')).toBeNull()
     expect(prefixResponse.headers.get('Access-Control-Allow-Origin')).toBeNull()
+    expect(suffixResponse.headers.get('Access-Control-Allow-Origin')).toBeNull()
   })
 })
 

@@ -4,6 +4,11 @@ import { getZoneRpcHttpUrl, getZoneRpcTransportConfig, ZONE_A, ZONE_B } from './
 
 const fetchMock = vi.fn<typeof fetch>()
 const token = '0x1234'
+const upstreamSecret = 'test-upstream-secret'
+const upstreamEnv: Record<string, string | undefined> = {
+  ZONE_RPC_UPSTREAM_6: `https://test-user:${upstreamSecret}@rpc-zone-a.testnet.tempo.xyz`,
+  ZONE_RPC_UPSTREAM_7: `https://test-user:${upstreamSecret}@rpc-zone-b.testnet.tempo.xyz`,
+}
 const rpc = {
   jsonrpc: '2.0',
   id: 7,
@@ -14,8 +19,12 @@ const rpc = {
 beforeEach(() => {
   vi.stubGlobal('fetch', fetchMock)
   fetchMock.mockReset()
+  for (const [key, value] of Object.entries(upstreamEnv)) process.env[key] = value
 })
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+  for (const key of Object.keys(upstreamEnv)) delete process.env[key]
+})
 
 function request(zone = '6', body: unknown = rpc, auth: string | null = token) {
   return new Request(`http://localhost:5174/api/zone-rpc?zone=${zone}`, {
@@ -104,6 +113,17 @@ describe('sandbox Zone RPC proxy', () => {
   test('bounds upstream response size', async () => {
     fetchMock.mockResolvedValueOnce(new Response('x'.repeat(2 * 1024 * 1024 + 1)))
     expect((await POST(request())).status).toBe(502)
+  })
+
+  test('fails closed when an upstream is not configured', async () => {
+    delete process.env.ZONE_RPC_UPSTREAM_6
+    fetchMock.mockResolvedValueOnce(Response.json({ result: '0x1' }))
+
+    const response = await POST(request())
+
+    expect(response.status).toBe(500)
+    expect(await response.text()).not.toContain(upstreamSecret)
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 
   test('browser demo URLs use the same-origin route without HTTP credentials', () => {
