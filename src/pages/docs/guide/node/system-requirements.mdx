@@ -36,12 +36,12 @@ If you want to separate them, use `--datadir` for execution data and `--consensu
 
 ## Cloud provider recommendations
 
-These dedicated servers meet or exceed the recommended specs for both RPC and validator nodes:
+The following are example server configurations. Compare CPU cores, usable storage after RAID, and network bandwidth with the requirements for your node type before ordering.
 
 | Provider | Server | CPU | RAM | Storage |
 |----------|--------|-----|-----|---------|
-| OVH | Advance-4 | Intel Xeon-E 2386G (6c/12t) | 32 GB | 2× 512 GB NVMe |
-| Hetzner | AX42 | AMD Ryzen 5 3600 (6c/12t) | 64 GB | 2× 512 GB NVMe |
+| OVH | [Advance-4 (2026)](https://us.ovhcloud.com/sites/default/files/external_files/ovhcloud-us-advance-gen4-servers-solution-brief.pdf) | AMD EPYC 4585PX (16c/32t) | 64 GB | 2× 960 GB NVMe |
+| Hetzner | [AX42](https://www.hetzner.com/dedicated-rootserver/ax42/) | AMD Ryzen 7 PRO 8700GE (8c/16t) | 64 GB | 2× 512 GB NVMe |
 | AWS | `c6id.8xlarge` | 32 vCPUs | 64 GB | 1.9 TB NVMe |
 
 :::warning
