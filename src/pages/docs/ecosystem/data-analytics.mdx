@@ -70,6 +70,12 @@ Get started with the [CoinGecko API](https://docs.coingecko.com/reference/introd
 
 Start indexing Tempo [here](https://goldsky.com/chains/tempo).
 
+## Pinax
+
+[Pinax](https://pinax.network/) provides [Firehose](https://app.pinax.network/docs/firehose) and [Substreams](https://app.pinax.network/docs/substreams) for Tempo. Firehose streams full blocks over gRPC, including call traces, balance changes and storage changes that a JSON-RPC node does not return. Substreams runs Rust modules in parallel on top of those blocks, writing results to PostgreSQL or ClickHouse, streaming them to a consumer, or feeding a Graph Node as a subgraph data source.
+
+Connect to `tempo.firehose.pinax.network:443` or `tempo.substreams.pinax.network:443` with a key from [app.pinax.network](https://app.pinax.network/).
+
 ## Range
 
 [Range](https://www.range.org) powers the Stablecoin Explorer, which provides a unified view of major stablecoins across 100+ chains. Tempo is fully supported, allowing developers and users to trace stablecoin flows in a way traditional explorers cannot.
