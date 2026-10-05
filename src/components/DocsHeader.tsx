@@ -295,6 +295,12 @@ const developersMenu: MegaMenuData = {
           href: DOCS_BASE_PATH,
           icon: <DocsIcon />,
         },
+        {
+          label: 'Tempo API',
+          desc: 'APIs for stablecoin payment applications',
+          href: `${DOCS_BASE_PATH}/api`,
+          icon: <ApiIcon />,
+        },
       ],
     },
     {
