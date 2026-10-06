@@ -240,6 +240,10 @@ export default defineConfig({
         collapsed: true,
         intro: [
           {
+            text: 'Get started with Routes',
+            link: '/docs/api/routes/get-started',
+          },
+          {
             text: 'API Console',
             collapsed: true,
             items: [
