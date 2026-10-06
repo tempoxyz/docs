@@ -86,8 +86,8 @@ const cases: {
   },
   {
     path: '/docs/api',
-    title: 'Start with the Tempo API | Tempo Docs',
-    ogTitle: 'Tempo API',
+    title: 'Start with the Tempo API Platform | Tempo Docs',
+    ogTitle: 'Tempo API Platform',
     descriptionIncludes: 'official Tempo blockchain API',
     ogImageIncludes: 'section=API',
   },
