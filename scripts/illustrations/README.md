@@ -14,7 +14,7 @@ node scripts/illustrations/generate.mjs
 
 The generator preserves SVG text. `DocsProductOverview` embeds the SVG markup
 directly in the page so its labels remain selectable, using the existing Pilat and
-JetBrains Mono site fonts. Assets contain no raster images or font binaries.
+Tempo JetBrains Mono site fonts. Assets contain no raster images or font binaries.
 
 ## Composition choices
 

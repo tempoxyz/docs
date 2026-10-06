@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="840" height="600" viewBox="0 0 980 700" fill="none" font-family="ui-monospace, 'JetBrains Mono', monospace" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="600" viewBox="0 0 980 700" fill="none" font-family="'Tempo JetBrains Mono', ui-monospace, monospace" role="img" aria-labelledby="title desc">
   <title id="title">Stable Bench score / cost</title>
   <desc id="desc">Aggregate Stable Bench score and cost. Solid lines are documentation-only runs; dotted lines are runs with the Tempo MCP server.</desc>
   <style>
     .page { fill: var(--diagram-bg, transparent); } .ink { fill: currentColor; } .muted { fill: currentColor; opacity: .4; }
-    .subtitle, .axis-label, .tick, .key, .point-label { font: 400 12px ui-monospace, 'JetBrains Mono', monospace; }
+    .subtitle, .axis-label, .tick, .key, .point-label { font: 400 12px 'Tempo JetBrains Mono', ui-monospace, monospace; }
     .axis { stroke: var(--diagram-line, currentColor); stroke-width: 1; } .grid { stroke: var(--diagram-line-soft, currentColor); stroke-width: 1; }
     .leader { stroke: var(--diagram-line, currentColor); stroke-width: 1; opacity: .6; } .claude { stroke: currentColor; fill: currentColor; opacity: .8; }
     .label-background { fill: var(--diagram-bg, transparent); } .gpt { stroke: currentColor; fill: currentColor; opacity: .45; }

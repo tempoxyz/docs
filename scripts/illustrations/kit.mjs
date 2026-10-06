@@ -74,7 +74,7 @@ export function text(
   value,
   { size = 14, fill = ink.black, anchor = 'start', tracking = 0, mono = false } = {},
 ) {
-  return `<text x="${x}" y="${y}" fill="${fill}" font-family="${mono ? 'JetBrains Mono' : 'Pilat'}" font-size="${size}" font-weight="400" text-anchor="${anchor}" letter-spacing="${tracking}">${escapeXml(value)}</text>`
+  return `<text x="${x}" y="${y}" fill="${fill}" font-family="${mono ? 'Tempo JetBrains Mono' : 'Pilat'}" font-size="${size}" font-weight="400" text-anchor="${anchor}" letter-spacing="${tracking}">${escapeXml(value)}</text>`
 }
 
 export function label(x, y, value, options = {}) {
