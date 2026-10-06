@@ -1,0 +1,83 @@
+---
+title: Get started with Tempo Routes
+seoTitle: Get Started with Tempo Routes API | Tempo Docs
+description: Discover supported routes, create an API key, preview a transfer, and track money moving between supported chains and stablecoins.
+---
+
+# Get started with Tempo Routes
+
+Tempo Routes is the first product on the Tempo API Platform. Use one API to discover supported stablecoin routes, get a quote, create a transfer or reusable deposit address, and track the result.
+
+## Find a supported route
+
+Browse the public [Routes explorer](https://tempo.xyz/routes/#explore-routes), or query the catalog without an API key:
+
+```bash
+curl 'https://api.tempo.xyz/v1/routes?limit=50'
+```
+
+Each result identifies the source and destination chains and tokens, plus the methods that the route supports. Follow `nextCursor` until it is `null` to read the full catalog.
+
+| Capability | Use it when |
+| --- | --- |
+| `capabilities.transfer` | Your app requests a transfer and signs the returned source-chain action. Check `modes` for the supported amount modes. |
+| `capabilities.depositAddress` | Your app needs a reusable source-chain address for deposits into Tempo. |
+
+Support for one method does not imply support for the other. Check the exact pair and method when building your flow. A catalog entry is not a quote for a particular amount.
+
+For example, find USDC transfers from Base into USDC.e on Tempo:
+
+```bash
+curl 'https://api.tempo.xyz/v1/routes?sourceChain=base&sourceToken=usdc&destinationChain=tempo&destinationToken=usdce&method=transfer&mode=exactSource'
+```
+
+The catalog can include testnet routes. Check chain IDs and token addresses, and choose the environment that matches your integration. See the [route catalog reference](/docs/api/routes/routes) for all filters and response fields.
+
+## Preview a transfer
+
+:::::steps
+
+### Create a project and API key
+
+Open [Tempo API Console](https://console.tempo.xyz) and follow the [console quickstart](/docs/api/console) to create a project and key. Quote and transfer endpoints require an API key even though route discovery is public.
+
+Use a production key for mainnet routes. Sandbox keys are restricted to non-mainnet chains. Keep the key on your server and select the scopes your integration needs. See [API key setup](/docs/api/console/api-keys).
+
+### Request current terms
+
+Set `TEMPO_API_KEY`, `ROUTES_SENDER`, and `ROUTES_RECIPIENT` in your shell. Use the source-chain signing account for the sender and the destination-chain receiving account for the recipient.
+
+This read-only request previews a mainnet transfer of 10 USDC from Base into USDC.e on Tempo. USDC uses six decimals, so the amount is `10000000` base units.
+
+```bash
+curl --get 'https://api.tempo.xyz/v1/routes/transfers/quote' \
+  --header "Authorization: Bearer $TEMPO_API_KEY" \
+  --data-urlencode 'sourceChain=base' \
+  --data-urlencode 'sourceToken=usdc' \
+  --data-urlencode 'destinationChain=tempo' \
+  --data-urlencode 'destinationToken=usdce' \
+  --data-urlencode 'mode=exactSource' \
+  --data-urlencode 'amount=10000000' \
+  --data-urlencode "sender=$ROUTES_SENDER" \
+  --data-urlencode "recipient=$ROUTES_RECIPIENT"
+```
+
+### Review the quote
+
+Check `destinationAmount`, `destinationAmountMin`, and `fees` before proceeding. The `fees` array lists charges separate from the routed amount. Deductions such as pool fees are already reflected in `destinationAmount`.
+
+A quote does not create or reserve a transfer. Use current terms when you are ready to proceed.
+
+:::::
+
+## Create and track a transfer
+
+When the quote is acceptable, use [`POST /v1/routes/transfers`](/docs/api/routes/transfers) with the source, destination, amount, sender, and recipient. Review the returned `action`, then sign and submit it on the source chain. Creating the transfer record does not submit that transaction for you.
+
+Keep the returned transfer `id` and use `GET /v1/routes/transfers/{id}` to track its status. Handle unsuccessful outcomes as well as `completed`, including `refunded`, `expired`, and `action-required`. Check `statusReason` and the transaction references when reconciling the result.
+
+## Accept repeated deposits
+
+For a route with `capabilities.depositAddress`, use the [deposit-address endpoints](/docs/api/routes/deposit-addresses) to preview terms and create a reusable address. Check that the address is `active` before accepting deposits, and send only the configured source token on the configured chain.
+
+Use the catalog and a fresh quote to check new assets or chains as coverage expands. The broader [Tempo ecosystem](/docs/ecosystem) includes provider integrations that may not be available through the Routes API.
