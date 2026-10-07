@@ -14,7 +14,7 @@ test('serves API coverage without JavaScript and filters a mainnet pair', async 
   expect(html).toContain('OUSD')
   expect(html).toContain('Deposit address, Transfer')
 
-  await page.goto(route)
+  await page.goto(route, { waitUntil: 'networkidle' })
   await expect(page.getByRole('combobox', { name: 'Catalog', exact: true })).toHaveValue('api')
   await expect(page.getByRole('status')).toHaveText('22 routes')
   await expect(page.getByRole('columnheader', { name: 'Provider', exact: true })).toHaveCount(0)
@@ -38,7 +38,7 @@ test('serves API coverage without JavaScript and filters a mainnet pair', async 
 test('keeps provider coverage separate and resets filters when switching catalogs', async ({
   page,
 }) => {
-  await page.goto(route)
+  await page.goto(route, { waitUntil: 'networkidle' })
   await page.getByRole('combobox', { name: 'Source chain', exact: true }).selectOption('Base')
   await page.getByRole('combobox', { name: 'Catalog', exact: true }).selectOption('providers')
   await expect(page.getByRole('columnheader', { name: 'Provider', exact: true })).toBeVisible()
@@ -59,7 +59,7 @@ test('keeps provider coverage separate and resets filters when switching catalog
 
 test('keeps the mobile document within the viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto(route)
+  await page.goto(route, { waitUntil: 'networkidle' })
   await expect(page.getByRole('combobox', { name: 'Catalog', exact: true })).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
   await page.getByRole('combobox', { name: 'Catalog', exact: true }).selectOption('providers')
