@@ -240,6 +240,10 @@ export default defineConfig({
         collapsed: true,
         intro: [
           {
+            text: 'Get started with Routes',
+            link: '/docs/api/routes/get-started',
+          },
+          {
             text: 'API Console',
             collapsed: true,
             items: [
@@ -671,6 +675,10 @@ export default defineConfig({
               {
                 text: 'Overview',
                 link: '/docs/ecosystem',
+              },
+              {
+                text: 'Payment Routes',
+                link: '/docs/ecosystem/payment-routes',
               },
               {
                 text: 'Bridges & Exchanges',

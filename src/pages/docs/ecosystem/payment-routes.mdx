@@ -1,0 +1,42 @@
+---
+title: "Supported payment routes"
+seoTitle: "Supported Payment Routes | Tempo Docs"
+description: Explore the public Routes API catalog and separate provider coverage by source, destination, asset, and payment method.
+interactive: true
+---
+
+import { PaymentRoutesExplorer } from '../../../components/PaymentRoutesExplorer'
+
+# Supported payment routes
+
+Explore the Routes API catalog by source, destination, asset, and method. Switch to **Provider coverage** for fiat, cross-chain, and exchange services offered through providers' own products.
+
+Ready to integrate? [Start with the Routes API](/docs/api/routes/get-started) or [create a project and API key](/docs/api/console).
+
+<PaymentRoutesExplorer />
+
+:::warning
+Route availability can depend on country, account, asset, amount, compliance checks, liquidity, and provider configuration. Confirm a current quote and the destination token contract before moving funds. Provider entries use each provider's asset names and do not establish Routes API availability.
+:::
+
+## How this catalog is maintained
+
+The Routes API view is a dated snapshot of the public [route catalog](https://api.tempo.xyz/v1/routes?limit=50). It shows mainnet routes by default, with testnet routes available separately. Check the current catalog and request a quote for your amount before creating a transfer or deposit address. The public catalog does not identify the underlying provider for each pair.
+
+Provider coverage comes from each provider's documentation and Tempo integration guides. These services have separate onboarding and eligibility requirements. Bridge, Due, and Fonbnk were reviewed on October 6, 2026. Other providers retain their August 22, 2026 review date. Suspended and announced-only routes are excluded from the refreshed entries.
+
+Provider minimums, limits, and settlement estimates may change. Review the linked source and confirm support directly with the provider.
+
+## Sources
+
+- [Public Routes API catalog](https://api.tempo.xyz/v1/routes?limit=50)
+- [Bridge route explorer](https://apidocs.bridge.xyz/get-started/introduction/what-we-support/payment-routes#route-explorer)
+- [Due supported currencies and payment methods](https://due.readme.io/docs/supported-payment-methods)
+- [Fonbnk supported countries and cryptocurrencies](https://docs.fonbnk.com/supported-countries-and-cryptocurrencies)
+- [MoonPay Tempo support](https://www.moonpay.com/newsroom/moonpay-tempo)
+- [Kraken Tempo deposits and withdrawals](https://blog.kraken.com/product/new-features/usdt0-and-usdce-now-available-on-tempo)
+- [OKX Tempo USDT support](https://www.okx.com/en-us/help/okx-to-support-usdt-on-the-tempo-chain)
+- [OKX Tempo USDT0 support](https://www.okx.com/en-us/learn/tempo-usdt0)
+- [LayerZero / Stargate guide](/docs/guide/bridge-layerzero)
+- [Bungee guide](/docs/guide/bridge-bungee)
+- [Relay guide](/docs/guide/bridge-relay)

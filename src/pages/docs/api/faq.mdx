@@ -25,7 +25,7 @@ Read the [transaction and receipt](/docs/api/transactions) to follow execution, 
 
 ## Does the Tempo Routes API execute a transfer?
 
-No. The [Routes API](/docs/api/routes/transfers) quotes a cross-chain transfer and prepares its source transaction, but it does not submit it. Sign and submit the returned transaction to start the transfer.
+No. The [Routes API](/docs/api/routes/transfers) quotes a supported transfer and prepares its source transaction, but it does not submit it. Sign and submit the returned transaction to start the transfer.
 
 ## Does the Tempo Exchange API submit a transaction?
 
@@ -33,4 +33,4 @@ No. The [Exchange API](/docs/api/exchange) creates a priced preview on Tempo's n
 
 ## Where do I manage Tempo API projects and keys?
 
-Use [Tempo API Console](/docs/api/console) to create projects, switch between production and sandbox, issue API keys, monitor usage, and configure billing. Console access is currently invite-only.
+Use [Tempo API Console](/docs/api/console) to create projects, switch between production and sandbox, issue API keys, monitor usage, and configure billing. For Routes, follow the [integration guide](/docs/api/routes/get-started) from public route discovery to an authenticated quote.
