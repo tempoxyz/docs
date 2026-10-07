@@ -1,7 +1,7 @@
 ---
-title: "Deposit pathUSD to a Tempo Zone on testnet"
-seoTitle: "Deposit pathUSD to a Tempo Zone on Testnet | Docs"
-description: Deposit pathUSD from your public-chain balance into Zone A and confirm the resulting zone balance.
+title: "Deposit OUSD to a Tempo Zone on testnet"
+seoTitle: "Deposit OUSD to a Tempo Zone on Testnet | Docs"
+description: Deposit OUSD from your public-chain balance into Zone A and confirm the resulting zone balance.
 interactive: true
 ---
 
@@ -9,28 +9,33 @@ import * as Demo from '../../../../components/guides/Demo.tsx'
 import { Tab, Tabs } from 'vocs'
 import { DepositToZone } from '../../../../components/guides/zones/DepositToZone.tsx'
 
-export const depositZoneBalances = [{ label: 'Zone A', token: Demo.pathUsd, zone: 6 }]
+export const depositZoneBalances = [{ label: 'Zone A', token: Demo.ousd, zone: 6 }]
 
-# Deposit pathUSD to a Tempo Zone on testnet
+import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
-:::info
-Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
-:::
+<a id="deposit-pathusd-to-a-tempo-zone-on-testnet" />
 
-Use this guide when you want to move `pathUSD` from your public Tempo balance into `Zone A`. You will submit a public-chain deposit first, then wait for `Zone A` to credit the net amount after fees.
+# Deposit OUSD to a Tempo Zone on testnet
 
-![Zone contract architecture](/developers/learn/zones/diagram-deposit.svg)
+Deposit tokens from your public Tempo balance into a private Zone. This example uses `OUSD` test tokens and a Zone on Tempo Testnet named **Zone A**. Submit a public-chain deposit first, then wait for the Zone to credit the net amount after fees.
+
+<ZoneDiagram
+  name="deposit"
+  alt="A public account signs a plaintext or encrypted deposit, the Zone A portal locks OUSD, and Zone A later imports the deposit and credits the private balance."
+/>
 
 The deposit is accepted through `ZonePortal` on the public chain. You need private zone authorization to read the resulting zone balance, because those reads are only exposed to the authenticated account.
 
-## Depositing pathUSD to Zone A
+<a id="depositing-pathusd-to-zone-a" />
 
-By the end of this guide you will have deposited `pathUSD` into `Zone A` and confirmed the balance update.
+## Depositing OUSD to Zone A
+
+By the end of this guide you will have deposited `OUSD` into `Zone A` and confirmed the balance update.
 
 <Demo.Container
   name="Deposit to Zone A"
   footerVariant="balances"
-  tokens={[Demo.pathUsd]}
+  tokens={[Demo.ousd]}
   zoneBalances={depositZoneBalances}
 >
   <DepositToZone />
@@ -39,7 +44,8 @@ By the end of this guide you will have deposited `pathUSD` into `Zone A` and con
 ## Code examples
 
 These snippets assume you already have a signed-in `rootClient` on the public chain and the usual token and zone constants in scope.
-Use the plaintext flow when revealing the recipient and memo is acceptable. Use the encrypted flow when only the zone sequencer should be able to read those fields.
+
+On this legacy testnet deployment, use the plaintext flow when revealing the recipient and memo is acceptable, or the encrypted flow to hide those fields from public-chain observers. Current Zone portals require encrypted deposits and a Tempo refund recipient; neither legacy call signature below applies to those portals. See the [testnet compatibility notes](/docs/guide/private-zones#testnet-compatibility) before adapting these SDK calls to another Zone.
 
 <Tabs stateKey="zone-deposit-mode">
   <Tab title="Plaintext">
@@ -53,7 +59,7 @@ const depositAmount = parseUnits('100', 6)
 const { receipt } = await Actions.zone.depositSync(rootClient, {
   account: rootClient.account,
   amount: depositAmount,
-  token: pathUsd,
+  token: ousd,
   zoneId: ZONE_A.id,
 })
 
@@ -72,7 +78,7 @@ const depositAmount = parseUnits('100', 6)
 const { receipt } = await Actions.zone.encryptedDepositSync(rootClient, { // [!code focus]
   account: rootClient.account,
   amount: depositAmount,
-  token: pathUsd,
+  token: ousd,
   zoneId: ZONE_A.id,
 })
 

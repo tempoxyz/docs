@@ -1,7 +1,7 @@
 'use client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { createClient, encodeAbiParameters, type Hex, parseAbiItem, parseUnits } from 'viem'
+import { createClient, encodeAbiParameters, type Hex, parseAbiItem, parseUnits, toHex } from 'viem'
 import { Actions, tempoActions } from 'viem/tempo'
 import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
 import { useConnection, useConnectorClient, usePublicClient } from 'wagmi'
@@ -10,20 +10,18 @@ import {
   getZoneRpcHttpUrl,
   getZoneRpcTransportConfig,
   moderatoZoneFactory,
-  publicSettlementLookbackBlocks,
   routerCallbackGasLimit,
   stablecoinDex,
   swapAndDepositRouter,
   ZONE_A,
   ZONE_B,
-  zeroBytes32,
   zoneRpcSyncTimeout,
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
 import { Button, ExplorerLink, Logout, ReceiptHash, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
-import { betaUsd, pathUsd } from '../tokens'
+import { betaUsd, ousd } from '../tokens'
 import { useStickyStepCompletion } from './useStickyStepCompletion.ts'
 
 const SWAP_AMOUNT = parseUnits('25', 6)
@@ -85,13 +83,14 @@ type ZoneClientLike = {
       account: unknown
       amount: bigint
       data?: Hex
+      fallbackRecipient: Hex
       feeToken: Hex
       gas?: bigint
       timeout: number
       to: Hex
       token: Hex
     }) => Promise<{ receipt: { blockNumber: bigint; transactionHash: Hex } }>
-    getWithdrawalFee: (parameters?: { gasLimit?: bigint | undefined }) => Promise<bigint>
+    getWithdrawalFee: (parameters?: { gas?: bigint | undefined }) => Promise<bigint>
     signAuthorizationToken: ZoneAuthClientLike['zone']['signAuthorizationToken']
   }
 }
@@ -132,7 +131,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     refetch: refetchRootBalance,
   } = Hooks.token.useGetBalance({
     account: address,
-    token: pathUsd,
+    token: ousd,
   })
 
   const sourceZoneClient = React.useMemo(
@@ -165,7 +164,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   )
 
   const sourceFooterQueryKey = React.useMemo(
-    () => ['demo-zone-balance', address, ZONE_A.id, pathUsd],
+    () => ['demo-zone-balance', address, ZONE_A.id, ousd],
     [address],
   )
   const targetFooterQueryKey = React.useMemo(
@@ -180,15 +179,33 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     zoneClient: sourceZoneClient,
   })
 
+  const targetZoneAuthorization = useZoneAuthorization({
+    address,
+    chainId: ZONE_B.chainId,
+    queryKey: ['guide-private-zones-swap-target-auth', address, ZONE_B.id],
+    zoneClient: targetZoneClient,
+  })
+
+  const zonesAuthorized =
+    sourceZoneAuthorization.isAuthorized && targetZoneAuthorization.isAuthorized
+  const authorizeZonesMutation = useMutation({
+    mutationFn: async () => {
+      if (!sourceZoneAuthorization.isAuthorized)
+        await sourceZoneAuthorization.authorizeMutation.mutateAsync()
+      if (!targetZoneAuthorization.isAuthorized)
+        await targetZoneAuthorization.authorizeMutation.mutateAsync()
+    },
+  })
+
   const sourceZoneBalanceQuery = useQuery({
-    enabled: Boolean(sourceZoneClient && sourceZoneAuthorization.isAuthorized),
+    enabled: Boolean(sourceZoneClient && zonesAuthorized),
     queryKey: ['guide-private-zones-swap-source-balance', address, ZONE_A.id],
     queryFn: async () => {
       if (!sourceZoneClient) throw new Error('Zone A client not ready')
 
       const { amount } = await sourceZoneClient.token.getBalance({
         account: address,
-        token: pathUsd,
+        token: ousd,
       })
       return amount
     },
@@ -196,7 +213,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   })
 
   const swapPrereqsQuery = useQuery({
-    enabled: Boolean(connectorClient && publicClient && sourceZoneAuthorization.isAuthorized),
+    enabled: Boolean(connectorClient && publicClient && zonesAuthorized),
     queryKey: ['guide-private-zones-swap-prereqs', address, ZONE_A.id, ZONE_B.id],
     queryFn: async () => {
       if (!connectorClient) throw new Error('connector client not ready')
@@ -211,11 +228,11 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         routerFactory,
       ] = await Promise.all([
         sourceZoneClient?.zone.getWithdrawalFee({
-          gasLimit: routerCallbackGasLimit,
+          gas: routerCallbackGasLimit,
         }),
         Actions.dex.getSellQuote(publicClient as never, {
           amountIn: SWAP_AMOUNT,
-          tokenIn: pathUsd,
+          tokenIn: ousd,
           tokenOut: betaUsd,
         }),
         publicClient.readContract({
@@ -257,7 +274,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       const minimumOutput = applyOnePercentSlippageBuffer(quotedOutput)
       if (minimumOutput <= targetDepositFee) {
         throw new Error(
-          `The current pathUSD -> betaUSD quote is too small to cover the ${ZONE_B.label} deposit fee.`,
+          `The current OUSD -> betaUSD quote is too small to cover the ${ZONE_B.label} deposit fee.`,
         )
       }
 
@@ -309,7 +326,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         account: connectorClient.account,
         amount: sourceZoneTopUpShortfall,
         chain: connectorClient.chain as never,
-        token: pathUsd,
+        token: ousd,
         zoneId: ZONE_A.id,
       })
 
@@ -332,16 +349,25 @@ function ConnectedZoneFlow(props: { address: Hex }) {
 
       const { amount: currentSourceBalance } = await sourceZoneClient.token.getBalance({
         account: address,
-        token: pathUsd,
+        token: ousd,
       })
       if (
         requiredSourceZoneBalance === undefined ||
         currentSourceBalance < requiredSourceZoneBalance
       ) {
-        throw new Error('Zone A needs more pathUSD before the swap can start.')
+        throw new Error('Zone A needs more OUSD before the swap can start.')
       }
 
+      if (!targetZoneClient || !targetZoneAuthorization.isAuthorized)
+        throw new Error('Authorize Zone B reads before submitting')
+      const { amount: startingTargetBalance } = await targetZoneClient.token.getBalance({
+        account: address,
+        token: betaUsd,
+      })
+
+      const memo = toHex(crypto.getRandomValues(new Uint8Array(32)))
       const callbackData = encodeRouterCallback({
+        memo,
         minimumOutput: swapPrereqsQuery.data.minimumOutput,
         recipient: address,
       })
@@ -352,15 +378,18 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         account: rootWebAuthnAccount,
         amount: SWAP_AMOUNT,
         data: callbackData,
-        feeToken: pathUsd,
+        fallbackRecipient: address,
+        feeToken: ousd,
         gas: routerCallbackGasLimit,
         timeout: zoneRpcSyncTimeout,
         to: swapAndDepositRouter,
-        token: pathUsd,
+        token: ousd,
       })
 
       return {
         anchorBlock,
+        memo,
+        startingTargetBalance,
         minimumTargetIncrease: swapPrereqsQuery.data.minimumTargetIncrease,
         receipt,
       }
@@ -379,22 +408,24 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       'guide-private-zones-swap-settlement',
       address,
       swapMutation.data?.anchorBlock?.toString(),
+      swapMutation.data?.memo,
     ],
     queryFn: async () => {
       if (!publicClient) throw new Error('public client not ready')
       if (!swapMutation.data) throw new Error('swap submission not ready')
 
-      const fromBlock =
-        swapMutation.data.anchorBlock > publicSettlementLookbackBlocks
-          ? swapMutation.data.anchorBlock - publicSettlementLookbackBlocks
-          : 0n
+      // The anchor is captured before submission; earlier deposits cannot settle this request.
+      const fromBlock = swapMutation.data.anchorBlock + 1n
       const latest = await publicClient.getBlockNumber()
-      const logs = await publicClient.getLogs({
-        address: ZONE_B.portalAddress,
-        event: targetDepositEvent,
-        fromBlock,
-        toBlock: latest,
-      })
+      const logs =
+        latest < fromBlock
+          ? []
+          : await publicClient.getLogs({
+              address: ZONE_B.portalAddress,
+              event: targetDepositEvent,
+              fromBlock,
+              toBlock: latest,
+            })
 
       const match = logs.find((log) => {
         const sender = log.args.sender
@@ -410,11 +441,12 @@ function ConnectedZoneFlow(props: { address: Hex }) {
           sender.toLowerCase() === swapAndDepositRouter.toLowerCase() &&
           token.toLowerCase() === betaUsd.toLowerCase() &&
           recipient.toLowerCase() === address.toLowerCase() &&
+          log.args.memo === swapMutation.data.memo &&
           netAmount >= swapMutation.data.minimumTargetIncrease
         )
       })
 
-      return match ? { txHash: match.transactionHash } : null
+      return match ? { blockNumber: match.blockNumber, txHash: match.transactionHash } : null
     },
     refetchInterval: (query) => {
       if (query.state.error || query.state.data) return false
@@ -426,62 +458,71 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     retry: false,
   })
 
-  const targetZoneAuthorization = useZoneAuthorization({
-    address,
-    chainId: ZONE_B.chainId,
-    queryKey: ['guide-private-zones-swap-target-auth', address, ZONE_B.id],
-    zoneClient: targetZoneClient,
-  })
-
   const targetZoneBalanceQuery = useQuery({
     enabled: Boolean(
       targetZoneClient && targetZoneAuthorization.isAuthorized && settlementQuery.data,
     ),
-    queryKey: ['guide-private-zones-swap-target-balance', address, ZONE_B.id],
+    queryKey: [
+      'guide-private-zones-swap-target-balance',
+      address,
+      ZONE_B.id,
+      swapMutation.data?.memo,
+    ],
     queryFn: async () => {
       if (!targetZoneClient) throw new Error('Zone B client not ready')
+
+      if (!settlementQuery.data || !swapMutation.data) throw new Error('settlement not ready')
 
       const { amount } = await targetZoneClient.token.getBalance({
         account: address,
         token: betaUsd,
       })
-      return amount
+      return (
+        amount >= swapMutation.data.startingTargetBalance + swapMutation.data.minimumTargetIncrease
+      )
     },
+    refetchInterval: (query) => (query.state.error || query.state.data === true ? false : 1_500),
     staleTime: 30_000,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
-    retry: false,
+    retry: 3,
+    retryDelay: 1_500,
   })
 
   const hasRootBalance = Boolean(rootBalance && rootBalance.amount > 0n)
   const topUpReceipt = topUpMutation.data?.receipt
   const routedSwapReceipt = swapMutation.data?.receipt
   const settlementTxHash = settlementQuery.data?.txHash
-  const targetBalanceReady =
-    settlementQuery.data && targetZoneAuthorization.isAuthorized && targetZoneBalanceQuery.isSuccess
+  const targetBalanceReady = Boolean(
+    settlementQuery.data &&
+      targetZoneAuthorization.isAuthorized &&
+      targetZoneBalanceQuery.data === true,
+  )
   const sourceAuthIsPreparing =
-    sourceZoneAuthorization.isChecking || sourceZoneAuthorization.authorizeMutation.isPending
-  const stepTwoAction = sourceZoneAuthorization.isAuthorized ? undefined : (
+    sourceZoneAuthorization.isChecking ||
+    targetZoneAuthorization.isChecking ||
+    authorizeZonesMutation.isPending
+  const stepTwoAction = zonesAuthorized ? undefined : (
     <Button
       className="font-normal text-[14px] -tracking-[2%]"
       disabled={sourceAuthIsPreparing || !sourceZoneClient}
-      onClick={() => sourceZoneAuthorization.authorizeMutation.mutate()}
+      onClick={() => authorizeZonesMutation.mutate()}
       type="button"
       variant={sourceZoneClient ? 'accent' : 'default'}
     >
       {sourceAuthIsPreparing
-        ? `Authorizing ${ZONE_A.label} reads`
-        : sourceZoneAuthorization.authorizeMutation.isError
+        ? `Authorizing ${ZONE_A.label} and ${ZONE_B.label} reads`
+        : authorizeZonesMutation.isError
           ? 'Retry'
-          : `Authorize ${ZONE_A.label} reads`}
+          : `Authorize ${ZONE_A.label} and ${ZONE_B.label} reads`}
     </Button>
   )
 
   React.useEffect(() => {
-    if (!sourceZoneAuthorization.isAuthorized) return
+    if (!zonesAuthorized) return
 
     void queryClient.invalidateQueries({ queryKey: sourceFooterQueryKey })
-  }, [queryClient, sourceFooterQueryKey, sourceZoneAuthorization.isAuthorized])
+  }, [queryClient, sourceFooterQueryKey, zonesAuthorized])
 
   React.useEffect(() => {
     if (!targetZoneAuthorization.isAuthorized) return
@@ -517,24 +558,22 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     stepThreeAction = (
       <Button
         className="font-normal text-[14px] -tracking-[2%]"
-        disabled={
-          fundMutation.isPending || !sourceZoneAuthorization.isAuthorized || rootBalanceIsPending
-        }
+        disabled={fundMutation.isPending || !zonesAuthorized || rootBalanceIsPending}
         onClick={() => fundMutation.mutate()}
         type="button"
-        variant={sourceZoneAuthorization.isAuthorized ? 'accent' : 'default'}
+        variant={zonesAuthorized ? 'accent' : 'default'}
       >
-        {fundMutation.isPending ? 'Getting pathUSD' : 'Get testnet pathUSD'}
+        {fundMutation.isPending ? 'Getting OUSD' : 'Get testnet OUSD'}
       </Button>
     )
   } else if (!hasEnoughSourceZoneBalance) {
     stepThreeAction = (
       <Button
         className="font-normal text-[14px] -tracking-[2%]"
-        disabled={topUpMutation.isPending || !sourceZoneAuthorization.isAuthorized}
+        disabled={topUpMutation.isPending || !zonesAuthorized}
         onClick={() => topUpMutation.mutate()}
         type="button"
-        variant={sourceZoneAuthorization.isAuthorized ? 'accent' : 'default'}
+        variant={zonesAuthorized ? 'accent' : 'default'}
       >
         {topUpMutation.isPending ? 'Approving + topping up Zone A' : 'Approve + top up Zone A'}
       </Button>
@@ -568,7 +607,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
           ? 'Submitting routed swap'
           : swapMutation.isSuccess
             ? 'Swap submitted'
-            : 'Swap 25 pathUSD into Zone B betaUSD'}
+            : 'Swap 25 OUSD into Zone B betaUSD'}
       </Button>
     )
   }
@@ -601,7 +640,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
           : 'Authorize Zone B reads'}
       </Button>
     )
-  } else if (targetZoneBalanceQuery.isPending) {
+  } else if (targetZoneBalanceQuery.isPending || !targetBalanceReady) {
     stepSixAction = (
       <Button
         className="font-normal text-[14px] -tracking-[2%]"
@@ -617,16 +656,20 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   return (
     <>
       <Step
-        active={!sourceZoneAuthorization.isAuthorized}
-        completed={sourceZoneAuthorization.isAuthorized}
+        active={!zonesAuthorized}
+        completed={zonesAuthorized}
         actions={stepTwoAction}
-        error={sourceZoneAuthorization.error}
+        error={
+          authorizeZonesMutation.error ??
+          sourceZoneAuthorization.error ??
+          targetZoneAuthorization.error
+        }
         number={2}
-        title={`Authorize private reads in ${ZONE_A.label}.`}
+        title={`Authorize private reads in ${ZONE_A.label} and ${ZONE_B.label}.`}
       />
 
       <Step
-        active={sourceZoneAuthorization.isAuthorized && !sourceZoneBalanceStepComplete}
+        active={zonesAuthorized && !sourceZoneBalanceStepComplete}
         completed={sourceZoneBalanceStepComplete}
         actions={stepThreeAction}
         error={
@@ -636,7 +679,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
           fundMutation.error
         }
         number={3}
-        title={`Make sure ${ZONE_A.label} has enough pathUSD for the swap and withdrawal fee.`}
+        title={`Make sure ${ZONE_A.label} has enough OUSD for the swap and withdrawal fee.`}
       >
         {topUpReceipt && (
           <StepBody>
@@ -652,7 +695,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         actions={stepFourAction}
         error={swapMutation.error ?? swapPrereqsQuery.error}
         number={4}
-        title={`Withdraw 25 pathUSD from ${ZONE_A.label}, swap it, and route betaUSD into ${ZONE_B.label}.`}
+        title={`Withdraw 25 OUSD from ${ZONE_A.label}, swap it, and route betaUSD into ${ZONE_B.label}.`}
       >
         {routedSwapReceipt && (
           <StepBody>
@@ -684,7 +727,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
           (settlementQuery.data ? targetZoneBalanceQuery.error : undefined)
         }
         number={6}
-        title={`Authorize private reads in ${ZONE_B.label} and confirm the betaUSD balance.`}
+        title={`Confirm the credited betaUSD balance in ${ZONE_B.label}.`}
       />
     </>
   )
@@ -699,7 +742,7 @@ function DisconnectedZoneFlow() {
         actions={undefined}
         error={undefined}
         number={2}
-        title={`Authorize private reads in ${ZONE_A.label}.`}
+        title={`Authorize private reads in ${ZONE_A.label} and ${ZONE_B.label}.`}
       />
       <Step
         active={false}
@@ -707,7 +750,7 @@ function DisconnectedZoneFlow() {
         actions={undefined}
         error={undefined}
         number={3}
-        title={`Make sure ${ZONE_A.label} has enough pathUSD for the swap and withdrawal fee.`}
+        title={`Make sure ${ZONE_A.label} has enough OUSD for the swap and withdrawal fee.`}
       />
       <Step
         active={false}
@@ -715,7 +758,7 @@ function DisconnectedZoneFlow() {
         actions={undefined}
         error={undefined}
         number={4}
-        title={`Withdraw 25 pathUSD from ${ZONE_A.label}, swap it, and route betaUSD into ${ZONE_B.label}.`}
+        title={`Withdraw 25 OUSD from ${ZONE_A.label}, swap it, and route betaUSD into ${ZONE_B.label}.`}
       />
       <Step
         active={false}
@@ -731,14 +774,14 @@ function DisconnectedZoneFlow() {
         actions={undefined}
         error={undefined}
         number={6}
-        title={`Authorize private reads in ${ZONE_B.label} and confirm the betaUSD balance.`}
+        title={`Confirm the credited betaUSD balance in ${ZONE_B.label}.`}
       />
     </>
   )
 }
 
-function encodeRouterCallback(parameters: { minimumOutput: bigint; recipient: Hex }) {
-  const { minimumOutput, recipient } = parameters
+function encodeRouterCallback(parameters: { memo: Hex; minimumOutput: bigint; recipient: Hex }) {
+  const { memo, minimumOutput, recipient } = parameters
 
   return encodeAbiParameters(
     [
@@ -749,7 +792,7 @@ function encodeRouterCallback(parameters: { minimumOutput: bigint; recipient: He
       { type: 'bytes32' },
       { type: 'uint128' },
     ],
-    [false, betaUsd, ZONE_B.portalAddress, recipient, zeroBytes32, minimumOutput],
+    [false, betaUsd, ZONE_B.portalAddress, recipient, memo, minimumOutput],
   )
 }
 

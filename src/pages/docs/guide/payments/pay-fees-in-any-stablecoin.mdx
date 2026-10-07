@@ -9,7 +9,7 @@ import * as Demo from '../../../../components/guides/Demo.tsx'
 import { AddFunds } from '../../../../components/guides/steps/payments/AddFunds.tsx'
 import { Connect } from '../../../../components/guides/steps/auth/Connect.tsx'
 import { PayWithFeeToken } from '../../../../components/guides/steps/payments/PayWithFeeToken.tsx'
-import { betaUsd, thetaUsd, pathUsd } from '../../../../components/guides/tokens.ts'
+import { betaUsd, thetaUsd, ousd } from '../../../../components/guides/tokens.ts'
 import { Cards, Card, Tabs, Tab } from 'vocs'
 
 # Pay Fees in Any Stablecoin
@@ -23,7 +23,7 @@ By the end of this guide you will be able to pay fees in any stablecoin on Tempo
 <Demo.Container name="Pay Fees in Any Stablecoin" footerVariant="source" src="tempoxyz/examples/tree/main/examples/payments">
   <Connect stepNumber={1} />
   <AddFunds stepNumber={2} />
-  <PayWithFeeToken stepNumber={3} feeToken={betaUsd} last />
+  <PayWithFeeToken stepNumber={3} feeToken={ousd} last />
 </Demo.Container>
 
 <span id="quick-snippet" />
@@ -227,7 +227,7 @@ Before you can pay fees in a token of your choice, you need to fund your account
 
 The built-in Tempo testnet faucet includes `AlphaUSD` and `BetaUSD` when funding.
 
-<Demo.Container name="Add Funds" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd, Demo.betaUsd, Demo.thetaUsd, Demo.pathUsd]}>
+<Demo.Container name="Add Funds" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd, Demo.betaUsd, Demo.thetaUsd, Demo.ousd]}>
   <AddFunds stepNumber={1} last />
 </Demo.Container>
 
@@ -282,7 +282,7 @@ import { parseUnits } from 'viem'
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 const betaUsd = '0x20c0000000000000000000000000000000000002'
 const thetaUsd = '0x20c0000000000000000000000000000000000003'
-const pathUsd = '0x20c0000000000000000000000000000000000000'
+const ousd = '0x20c0000000000000000000006a37da5c996874be'
 
 // @noErrors
 function PayWithFeeToken() {
@@ -320,7 +320,7 @@ function PayWithFeeToken() {
           <option value={alphaUsd}>AlphaUSD</option>
           <option value={betaUsd}>BetaUSD</option>
           <option value={thetaUsd}>ThetaUSD</option>
-          <option value={pathUsd}>pathUSD</option>
+          <option value={ousd}>OUSD</option>
         </select>
       </div>
       <button type="submit" disabled={sendPayment.isPending}>
@@ -350,7 +350,7 @@ import { parseUnits } from 'viem'
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 const betaUsd = '0x20c0000000000000000000000000000000000002'
 const thetaUsd = '0x20c0000000000000000000000000000000000003'
-const pathUsd = '0x20c0000000000000000000000000000000000000'
+const ousd = '0x20c0000000000000000000006a37da5c996874be'
 
 // @noErrors
 function PayWithFeeToken() {
@@ -411,7 +411,7 @@ Before you can pay fees in a token of your choice, you need to fund your account
 
 The built-in Tempo testnet faucet includes `AlphaUSD` and `BetaUSD` when funding.
 
-<Demo.Container name="Add Funds" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd, Demo.betaUsd, Demo.thetaUsd, Demo.pathUsd]}>
+<Demo.Container name="Add Funds" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd, Demo.betaUsd, Demo.thetaUsd, Demo.ousd]}>
   <AddFunds stepNumber={1} last />
 </Demo.Container>
 

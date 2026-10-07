@@ -112,6 +112,10 @@ The protocol checks preferences at each of these levels, stopping at the first o
 
 If no preference is specified at the transaction, account, or contract level, the protocol falls back to [pathUSD](#pathusd).
 
+:::note
+To avoid depending on the pathUSD fallback, set an explicit fee token preference. For most accounts, this is [OUSD](/docs/guide/ousd), the recommended stablecoin on Tempo. Call `setUserToken` on the FeeManager, or set `fee_token` on each transaction.
+:::
+
 ### Transaction level
 
 Tempo's [new transaction type](/docs/protocol/transactions/spec-tempo-transaction), allows transactions to specify a `fee_token` on the transaction. This overrides any preferences set at the account, contract, or validator level.
@@ -174,7 +178,7 @@ If validators have not specified a fee token preference, the protocol falls back
 
 ## Gas Parameters
 
-As of T7, Tempo uses the following mainnet gas parameters:
+Tempo uses the following mainnet gas parameters:
 
 | Parameter | Value |
 |-----------|-------|
@@ -182,8 +186,12 @@ As of T7, Tempo uses the following mainnet gas parameters:
 | Base fee floor | 600 million attodollars per gas (`6 × 10^8`) |
 | Total block gas limit | 500M gas |
 | General gas limit | 30M gas/block |
+| Precompile input | `30 × ceil(calldata_length / 32)` gas ([TIP-1100](https://tips.sh/1100)) |
+| Duplicate validation | 20 gas per value processed ([TIP-1105](https://tips.sh/1105)) |
 
 A standard TIP-20 transfer (~50,000 gas) costs approximately 600 microdollars ($0.0006) at the cap and approximately 30 microdollars ($0.00003) at the floor.
+
+Precompile input charges include the selector and are deducted before dispatch and ABI decoding. Duplicate-check charges apply to AccountKeychain call scopes and ZoneFactory role lists before sorting. Calls require canonical ABI encoding without gaps, overlaps, trailing bytes, or nonzero padding.
 
 ### Removing validator preference
 

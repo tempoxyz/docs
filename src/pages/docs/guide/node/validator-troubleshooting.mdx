@@ -75,9 +75,51 @@ To fix:
 
 See [Time Synchronization](/docs/guide/node/system-requirements#time-synchronization) for full setup details.
 
+## My node fails to start: finalized tip certificate failed verification against the trusted network identity
+
+Starting with [v1.15.0](https://github.com/tempoxyz/tempo/releases/tag/v1.15.0), a validator verifies the finalization certificate of its latest finalized block before its consensus engine starts. If verification fails, the node exits with an error chain that includes `failed initializing dkg manager` and ends with:
+
+```text
+finalized tip certificate at height `<HEIGHT>` in epoch `<EPOCH>` failed verification against the trusted network identity from epoch `<FROM_EPOCH>`; configure an updated network identity if a full DKG rotation occurred while the node was offline
+```
+
+The node checks the certificate against the newest [network identity](/docs/guide/node/consensus-and-dkg) it trusts: the identity built into the binary or passed on the command line, or a newer identity from its own persisted DKG state. Verification fails when the certificate was signed under a network identity the node does not know yet, for example:
+
+- A full DKG rotation happened while your node was offline, and your release predates the rotation.
+- You started from a snapshot taken after a rotation with a release that predates the rotation.
+
+Follow/RPC nodes do not run this startup check. Instead, they log one of these warnings when their network identity is outdated:
+
+```text
+Network identity differs from the onchain DKG outcome!!! Update the binary with the latest network identity
+Network identity derived from the trusted start block differs from the configured network identity!!! Update the binary with the latest network identity
+```
+
+To fix either case, upgrade to a release that includes the current identity. [Network Upgrades and Releases](/docs/guide/node/network-upgrades#network-identities) lists the current identities and the releases that include them.
+
+If you cannot upgrade immediately, override the built-in identity by adding both of these arguments to your existing `tempo node` command:
+
+| Argument | Meaning |
+| --- | --- |
+| `--consensus.network-identity <KEY>` | The full, hex-encoded 96-byte BLS threshold public key to use instead of the built-in network identity. |
+| `--consensus.network-identity-from-epoch <EPOCH>` | The first epoch for which the supplied identity is valid. |
+
+Use the identity and epoch listed in [Network identities](/docs/guide/node/network-upgrades#network-identities). Keep your other node arguments, including `--chain testnet` for testnet nodes.
+
+::::code-group
+```bash [Mainnet]
+// [!include ~/snippets/network-identities.txt:mainnet-override]
+```
+```bash [Testnet]
+// [!include ~/snippets/network-identities.txt:testnet-override]
+```
+::::
+
+If the supplied identity does not match the network's DKG outcome for that epoch, the node stops with `network identity mismatch in epoch` or `persisted DKG network identity differs from the configured identity`. Check the identity and epoch values against [Network identities](/docs/guide/node/network-upgrades#network-identities).
+
 ## I accidentally deleted my consensus data directory
 
-If you deleted `<datadir>/consensus`, your signing share is lost but will be [automatically recovered](/docs/guide/node/validator-keys#signing-share-recovery) from the network when the node restarts. Your node will re-join the committee after the next successful DKG ceremony.
+Current validators require consensus finalization certificates to start. Contact the Tempo team to coordinate restoring a consistent snapshot; do not assume restarting with an empty consensus directory is sufficient. Once startup data is restored, [signing-share recovery](/docs/guide/node/validator-keys#signing-share-recovery) can reconstruct a missing share, or the node can obtain one in a future successful DKG ceremony.
 
 :::danger
 Do **not** delete the entire data directory and attempt to re-sync with the same signing key. This risks double-signing and will require [rotating to a new identity](/docs/guide/node/validator-lifecycle#resetting-your-validators-data).

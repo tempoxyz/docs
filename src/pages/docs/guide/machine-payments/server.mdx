@@ -21,7 +21,7 @@ import { Mppx, tempo } from 'mppx/nextjs'
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -39,7 +39,7 @@ const app = new Hono()
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -59,7 +59,7 @@ const app = express()
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -93,7 +93,7 @@ import { Mppx, tempo } from 'mppx/server'
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -110,7 +110,7 @@ export async function handler(request: Request) {
 ```
 
 :::info[Currency and recipient values]
-`currency` is the TIP-20 token contract address — [`0x20c0…`](https://explore.tempo.xyz/address/0x20c0000000000000000000000000000000000000?live=false) is PathUSD on Tempo. `recipient` is the address that receives payment. See the [Tempo payment method](https://mpp.dev/payment-methods/tempo) for supported tokens.
+`currency` is the TIP-20 token contract address — [`0x20c0000000000000000000006a37da5c996874be`](https://explore.tempo.xyz/address/0x20c0000000000000000000006a37da5c996874be?live=false) is OUSD on Tempo. `recipient` is the address that receives payment. See the [Tempo payment method](https://mpp.dev/payment-methods/tempo) for supported tokens.
 :::
 
 ## MPP payment realm
@@ -123,7 +123,7 @@ Set `realm` explicitly to your public domain:
 const mppx = Mppx.create({
   realm: 'api.example.com', // [!code hl]
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -150,7 +150,7 @@ import { privateKeyToAccount } from 'viem/accounts'
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     feePayer: privateKeyToAccount('0x…'),
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],

@@ -43,6 +43,8 @@ exclude = [
   "^https://hub\\.conduit\\.xyz/tempo-testnet/?$",
   # Temporary upstream error on the published TIP page.
   "^https://tips\\.sh/1066/?$",
+  # Temporary Auto.exchange outage: API root times out (2026-09-24).
+  "^https://api\\.auto\\.exchange/?$",
 ]
 
 # Reuse cached results across runs.

@@ -7,7 +7,7 @@ import { Card, Cards } from 'vocs'
 
 # Accept one-time payments
 
-Build a payment-gated API that charges $0.01 per request using `mppx`. The server returns a random photo from [Picsum](https://picsum.photos) behind a paywall.
+Build a payment-gated API that charges $0.01 per request using `mppx`. The server returns a random photo from [Picsum](https://github.com/DMarby/picsum-photos) behind a paywall.
 
 ## One-time payment server setup
 
@@ -32,14 +32,14 @@ bun add mppx viem
 Set up an `Mppx` instance with the `tempo` method.
 
 - `recipient` is the address where you receive payments.
-- `currency` is the token address for payments (in this case, `pathUSD`).
+- `currency` is the token address for payments (in this case, `OUSD`).
 
 ```ts
 import { Mppx, tempo } from 'mppx/server'
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -56,7 +56,7 @@ import { Mppx, tempo } from 'mppx/nextjs'
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -77,7 +77,7 @@ const app = new Hono()
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -100,7 +100,7 @@ const app = express()
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -120,7 +120,7 @@ import { Mppx, tempo } from 'mppx/server'
 
 const mppx = Mppx.create({
   methods: [tempo({
-    currency: '0x20c0000000000000000000000000000000000000',
+    currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })

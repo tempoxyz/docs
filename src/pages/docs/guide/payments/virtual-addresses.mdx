@@ -45,8 +45,10 @@ This walkthrough shows the full flow:
 
 1. sign in with a passkey and get a Tempo address
 2. register a master id for that address
-3. send `pathUSD` from a second address to a virtual address derived from that master id
+3. send `OUSD` from a second address to a virtual address derived from that master id
 4. confirm that the balance lands in the registered wallet
+
+The Moderato demos use OUSD. Localnet and devnet demos use pathUSD.
 
 <Tabs stateKey="virtual-address-demo-mode">
   <Tab title="Fast demo">
@@ -89,7 +91,7 @@ When the demo succeeds, you should see all of the following:
 
 - the passkey wallet is shown as the registered master wallet
 - the virtual address is distinct from the master wallet
-- the sender transfers `pathUSD` to the virtual address
+- the sender transfers `OUSD` to the virtual address
 - the master wallet balance increases
 - the virtual address TIP-20 balance remains `0`
 - the receipt shows the expected two-hop `Transfer` events

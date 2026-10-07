@@ -10,12 +10,13 @@ import {
   getZoneRpcHttpUrl,
   getZoneRpcTransportConfig,
   moderatoZoneRpcUrls,
+  ZONE_A,
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
 import { Button, ExplorerLink, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
-import { pathUsd } from '../tokens'
+import { ousd } from '../tokens'
 
 const ZONE_LABEL = 'Zone A'
 const ZONE_ID = 6 as const
@@ -32,10 +33,6 @@ type ZoneClientLike = {
     }) => Promise<{ amount: bigint; decimals: number; formatted: string }>
   }
   zone: ZoneAuthClientLike['zone']
-}
-
-type RootChainWithZones = {
-  zones?: Record<number, { portalAddress: Hex }>
 }
 
 type DepositSetup = {
@@ -61,7 +58,7 @@ export function DepositToZone() {
       <DepositModeSelector mode={mode} onChange={setMode} />
 
       {address ? (
-        <ConnectedZoneFlow address={address as Hex} mode={mode} />
+        <ConnectedZoneFlow key={address} address={address as Hex} mode={mode} />
       ) : (
         <DisconnectedZoneFlow mode={mode} />
       )}
@@ -76,16 +73,14 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
   const { data: connectorClient } = useConnectorClient()
   const { data: rootWebAuthnAccount } = useRootWebAuthnAccount()
   const publicClient = usePublicClient()
-  const zonePortalAddress = (connectorClient?.chain as RootChainWithZones | undefined)?.zones?.[
-    ZONE_ID
-  ]?.portalAddress
+  const zonePortalAddress = ZONE_A.portalAddress
   const {
     data: rootBalance,
     isPending: rootBalanceIsPending,
     refetch: refetchRootBalance,
   } = Hooks.token.useGetBalance({
     account: address,
-    token: pathUsd,
+    token: ousd,
   })
 
   const zoneClient = React.useMemo(
@@ -174,10 +169,9 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
       const startingZoneBalance = await zoneClient.token
         .getBalance({
           account: address,
-          token: pathUsd,
+          token: ousd,
         })
         .then(({ amount }) => amount)
-        .catch(() => 0n)
 
       const creditedAmount = getNetZoneDepositAmount(
         DEPOSIT_AMOUNT,
@@ -197,7 +191,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
                   amount: DEPOSIT_AMOUNT,
                   chain: (encryptedDepositClient ?? connectorClient).chain as never,
                   timeout: 60_000,
-                  token: pathUsd,
+                  token: ousd,
                   zoneId: ZONE_ID,
                 } as never,
               )
@@ -209,7 +203,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
                   account: connectorClient.account,
                   amount: DEPOSIT_AMOUNT,
                   chain: connectorClient.chain as never,
-                  token: pathUsd,
+                  token: ousd,
                   zoneId: ZONE_ID,
                 } as never,
               )
@@ -249,7 +243,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
       try {
         const { amount } = await zoneClient.token.getBalance({
           account: address,
-          token: pathUsd,
+          token: ousd,
         })
         return amount
       } catch {
@@ -302,7 +296,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
         type="button"
         variant={zoneAuthorization.isAuthorized ? 'accent' : 'default'}
       >
-        {fundMutation.isPending ? 'Getting pathUSD' : 'Get testnet pathUSD'}
+        {fundMutation.isPending ? 'Getting OUSD' : 'Get testnet OUSD'}
       </Button>
     )
   } else if (depositSetupQuery.isError) {
@@ -491,13 +485,13 @@ function DetailLine(props: { label: string; value: string; dataTestId?: string |
 }
 
 function getDepositActionLabel(parameters: { isPending: boolean }) {
-  return parameters.isPending ? 'Depositing pathUSD' : 'Deposit 100 pathUSD'
+  return parameters.isPending ? 'Depositing OUSD' : 'Deposit 100 OUSD'
 }
 
 function getSubmitStepTitle(mode: DepositMode) {
   return mode === 'encrypted'
-    ? `Fund and submit the encrypted deposit for 100 pathUSD into ${ZONE_LABEL}.`
-    : `Fund and submit the deposit for 100 pathUSD into ${ZONE_LABEL}.`
+    ? `Fund and submit the encrypted deposit for 100 OUSD into ${ZONE_LABEL}.`
+    : `Fund and submit the deposit for 100 OUSD into ${ZONE_LABEL}.`
 }
 
 function getConfirmationStepTitle(mode: DepositMode) {

@@ -10,14 +10,14 @@ import {
   getZoneRpcHttpUrl,
   getZoneRpcTransportConfig,
   moderatoZoneRpcUrls,
-  publicSettlementLookbackBlocks,
+  ZONE_A,
   zoneRpcSyncTimeout,
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
 import { Button, ExplorerLink, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
-import { pathUsd } from '../tokens'
+import { ousd } from '../tokens'
 import { useStickyStepCompletion } from './useStickyStepCompletion.ts'
 
 const ZONE_LABEL = 'Zone A'
@@ -103,7 +103,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
     refetch: refetchRootBalance,
   } = Hooks.token.useGetBalance({
     account: address,
-    token: pathUsd,
+    token: ousd,
   })
 
   const zoneClient = React.useMemo(
@@ -155,7 +155,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
 
       const { amount } = await zoneClient.token.getBalance({
         account: address,
-        token: pathUsd,
+        token: ousd,
       })
       return amount
     },
@@ -201,7 +201,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
         account: connectorClient.account,
         amount: zoneTopUpShortfall,
         chain: connectorClient.chain as never,
-        token: pathUsd,
+        token: ousd,
         zoneId: ZONE_ID,
       })
 
@@ -225,12 +225,12 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
         connectorClient as never,
         {
           account: address,
-          token: pathUsd,
+          token: ousd,
         },
       )
       const { amount: currentZoneBalance } = await zoneClient.token.getBalance({
         account: address,
-        token: pathUsd,
+        token: ousd,
       })
       const anchorBlock = await publicClient.getBlockNumber()
       const receipt =
@@ -239,21 +239,21 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
               await zoneClient.zone.requestVerifiableWithdrawalSync({
                 account: rootWebAuthnAccount,
                 amount: WITHDRAWAL_AMOUNT,
-                feeToken: pathUsd,
+                feeToken: ousd,
                 revealTo: AUTHENTICATED_WITHDRAWAL_REVEAL_TO,
                 timeout: zoneRpcSyncTimeout,
                 to: address,
-                token: pathUsd,
+                token: ousd,
               })
             ).receipt
           : (
               await zoneClient.zone.requestWithdrawalSync({
                 account: rootWebAuthnAccount,
                 amount: WITHDRAWAL_AMOUNT,
-                feeToken: pathUsd,
+                feeToken: ousd,
                 timeout: zoneRpcSyncTimeout,
                 to: address,
-                token: pathUsd,
+                token: ousd,
               })
             ).receipt
 
@@ -296,34 +296,35 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
       if (!connectorClient) throw new Error('connector client not ready')
       if (!withdrawMutation.data) throw new Error('withdrawal submission not ready')
 
-      const fromBlock =
-        withdrawMutation.data.anchorBlock > publicSettlementLookbackBlocks
-          ? withdrawMutation.data.anchorBlock - publicSettlementLookbackBlocks
-          : 0n
+      // The anchor is captured before submission; earlier deposits cannot settle this request.
+      const fromBlock = withdrawMutation.data.anchorBlock + 1n
 
       const [currentRootBalance, currentZoneBalance, latest] = await Promise.all([
         Actions.token
           .getBalance(connectorClient as never, {
             account: address,
-            token: pathUsd,
+            token: ousd,
           })
           .then(({ amount }) => amount),
         zoneClient.token
           .getBalance({
             account: address,
-            token: pathUsd,
+            token: ousd,
           })
           .then(({ amount }) => amount),
         publicClient.getBlockNumber(),
       ])
 
-      const logs = await publicClient.getLogs({
-        address: pathUsd,
-        args: { to: address },
-        event: tip20TransferEvent,
-        fromBlock,
-        toBlock: latest,
-      })
+      const logs =
+        latest < fromBlock
+          ? []
+          : await publicClient.getLogs({
+              address: ousd,
+              args: { from: ZONE_A.portalAddress, to: address },
+              event: tip20TransferEvent,
+              fromBlock,
+              toBlock: latest,
+            })
 
       const settlement = logs.find((log) => log.args.value === WITHDRAWAL_AMOUNT)
 
@@ -400,7 +401,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
         type="button"
         variant={zoneAuthorization.isAuthorized ? 'accent' : 'default'}
       >
-        {fundMutation.isPending ? 'Getting pathUSD' : 'Get testnet pathUSD'}
+        {fundMutation.isPending ? 'Getting OUSD' : 'Get testnet OUSD'}
       </Button>
     )
   } else if (!hasEnoughZoneBalance) {
@@ -459,7 +460,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
           fundMutation.error
         }
         number={3}
-        title={`Make sure ${ZONE_LABEL} has enough pathUSD to cover the withdrawal and fee.`}
+        title={`Make sure ${ZONE_LABEL} has enough OUSD to cover the withdrawal and fee.`}
       >
         {topUpReceipt && (
           <StepBody>
@@ -484,7 +485,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
         actions={undefined}
         error={withdrawMutation.isSuccess ? withdrawalConfirmationQuery.error : undefined}
         number={5}
-        title="Wait for pathUSD to settle back to your public balance."
+        title="Wait for OUSD to settle back to your public balance."
       >
         {settlementTxHash && (
           <StepBody>{settlementTxHash && <ExplorerLink hash={settlementTxHash} />}</StepBody>
@@ -513,7 +514,7 @@ function DisconnectedZoneFlow(props: { mode: WithdrawalMode }) {
         actions={undefined}
         error={undefined}
         number={3}
-        title={`Make sure ${ZONE_LABEL} has enough pathUSD to cover the withdrawal and fee.`}
+        title={`Make sure ${ZONE_LABEL} has enough OUSD to cover the withdrawal and fee.`}
       />
       <Step
         active={false}
@@ -529,7 +530,7 @@ function DisconnectedZoneFlow(props: { mode: WithdrawalMode }) {
         actions={undefined}
         error={undefined}
         number={5}
-        title="Wait for pathUSD to settle back to your public balance."
+        title="Wait for OUSD to settle back to your public balance."
       />
     </>
   )
@@ -547,8 +548,8 @@ function WithdrawalModeSelector(props: {
         <div className="max-w-[34rem]">
           <p className="text-[12px] text-gray9 uppercase tracking-[0.12em]">Withdrawal mode</p>
           <p className="mt-1 text-[13px] text-gray10 leading-relaxed -tracking-[1%]">
-            Standard withdrawals reveal the sender of the withdrawal, while authenticated
-            withdrawals only reveal sender details to the holder of the reveal key.
+            Authenticated withdrawals add sender details encrypted to the reveal key. The
+            destination and amount are public in both modes.
           </p>
         </div>
         <div className="flex shrink-0 self-start rounded-lg border border-gray4 bg-background p-1">
@@ -592,11 +593,11 @@ function StepBody(props: React.PropsWithChildren) {
 function getWithdrawalActionLabel(parameters: { isPending: boolean; isSuccess: boolean }) {
   const { isPending, isSuccess } = parameters
 
-  if (isPending) return 'Withdrawing pathUSD'
+  if (isPending) return 'Withdrawing OUSD'
 
   if (isSuccess) return 'Withdrawal submitted'
 
-  return 'Withdraw 100 pathUSD'
+  return 'Withdraw 100 OUSD'
 }
 
 function getWithdrawalSubmitStepTitle(mode: WithdrawalMode) {

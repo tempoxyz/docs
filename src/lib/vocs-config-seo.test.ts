@@ -73,7 +73,9 @@ describe('vocs.config docs SEO controls', () => {
     expect(head('/docs/guide/payments/send-a-payment', {})).toMatchObject({
       meta: { articleModifiedTime: false },
     })
-    expect(head('/blog/stablecoins-as-a-platform', {})).toBeUndefined()
+    expect(head('/blog/stablecoins-as-a-platform', {})).toEqual({
+      meta: { ogType: 'article' },
+    })
   })
 
   test('excludes route templates from the sitemap', () => {

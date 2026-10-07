@@ -1,72 +1,81 @@
 ---
-title: "Zone bridging on Tempo testnet"
-seoTitle: "Zone Bridging: Deposits & Withdrawals on Testnet | Docs"
+title: "Zone bridging on Tempo"
+seoTitle: "Zone Bridging: Deposits & Withdrawals | Docs"
 description: Deposit and withdraw TIP-20 tokens between Tempo Mainnet and Tempo Zones, including encrypted deposits and composable withdrawal callbacks.
 ---
 
-# Zone bridging on Tempo testnet
+import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
-:::info
-Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
-:::
+# Zone bridging on Tempo
 
-Tempo Zones use Tempo-centric bridging for cross-chain operations: deposits flow from Tempo into a zone, and withdrawals flow from a zone back to Tempo with optional callbacks for composability.
+The `ZonePortal` connects a Zone’s private ledger to tokens on Tempo. Deposits lock tokens in the portal and credit a private account. Withdrawals burn the Zone-side tokens and release the backing assets to a Tempo recipient.
 
-![End-to-end privacy flow through a zone](/developers/learn/zones/diagram-privacy.svg)
-
-Above is an example of the type of complex transaction that can remain privacy-preserving via Tempo Zones, while performing operations such as bridging, deposits & sends, and withdrawals. Learn more about [encrypted deposits](#encrypted-deposits) and [verifiable withdrawals](#verifiable-withdrawals) below.
+Both flows settle in stages: deposits enter the Zone after Tempo finality, and withdrawals reach Tempo after their batch is accepted. Bridge amounts are public; the account ledger remains private.
 
 ## Deposits (Tempo → Zone)
 
-1. User calls `ZonePortal.deposit(token, to, amount, memo)` on Tempo, specifying which enabled TIP-20 to deposit.
-2. The Zone Portal contract validates the token is enabled and deposits are active, deducts the [deposit fee](/docs/protocol/zones/execution#deposit-fees), locks the funds, and appends a deposit to the queue.
-3. The sequencer observes `DepositMade` events and processes deposits in order via `ZoneInbox.advanceTempo()`, minting the corresponding zone-side TIP-20 to the recipient.
-4. A batch proof must prove the zone correctly processed deposits by validating the Tempo state read inside the proof.
+A deposit starts on Tempo and finishes when `ZoneInbox` processes it inside the Zone. The recipient and memo are encrypted to the operator; the token, amount, and public depositor remain visible on Tempo.
 
+<ZoneDiagram
+  name="protocol-deposit"
+  alt="A Tempo account encrypts recipient details and submits a deposit. ZonePortal checks the request, locks backing assets, and queues the net deposit. After Tempo finality, ZoneInbox decrypts and processes it, then credits the recipient’s private balance."
+/>
+
+1. User calls `ZonePortal.depositEncrypted(token, amount, keyIndex, encryptedPayload, tempoRefundRecipient)` on Tempo. `deposit` is an alias with the same encrypted-only arguments; there is no plaintext recipient entry point.
+2. The Zone Portal contract validates the token, encryption key, refund recipient, and configured access rules, checks that deposits are active, deducts the [deposit fee](/docs/protocol/zones/execution#deposit-fees), locks the funds, and appends a deposit to the queue.
+3. The sequencer observes `DepositMade` events and processes deposits in order via `ZoneInbox.advanceTempo()`, minting the corresponding zone-side TIP-20 to the recipient.
+4. Batch submission confirms deposit progress on the portal. The stateless proof function replays deposit processing against witnessed Tempo state; see the [current settlement verification limits](/docs/protocol/zones/proving).
 
 ### Encrypted Deposits
 
-For privacy-sensitive use cases, users can make encrypted deposits where the recipient and memo are encrypted using the sequencer's public key. Only the sequencer can decrypt and credit the correct recipient on the zone.
+All user deposits encrypt the recipient and memo using the operator’s published encryption key. Nodes that hold the corresponding private key can decrypt the deposit and credit its recipient on the zone.
 
 **What's public vs. private:**
 
 | Field | Visibility | Reason |
 |-------|------------|--------|
 | `token` | Public | Needed for locked token accounting |
-| `sender` | Public | Needed for potential refunds if decryption fails |
+| `sender` | Public | Tempo account or gateway making the deposit |
+| `tempoRefundRecipient` | Public | Receives a failed-deposit refund on Tempo |
 | `amount` | Public | Needed for onchain locked token accounting |
-| `to` | Encrypted | Only sequencer knows recipient |
-| `memo` | Encrypted | Only sequencer knows payment context |
+| `to` | Encrypted | Only holders of the decryption key know the recipient |
+| `memo` | Encrypted | Only holders of the decryption key know the payment context |
 
 The encryption uses ECIES with secp256k1:
 
 1. Sequencer publishes a secp256k1 encryption public key via `setSequencerEncryptionKey()` with a proof of possession.
 2. User generates an ephemeral keypair and derives a shared secret via ECDH.
 3. User encrypts `(to || memo)` with AES-256-GCM using the derived key.
-4. User calls `depositEncrypted(token, amount, keyIndex, encryptedPayload)` on the Zone Portal contract.
+4. User calls `depositEncrypted(token, amount, keyIndex, encryptedPayload, tempoRefundRecipient)` on the Zone Portal contract.
 
-If decryption fails (invalid ciphertext, wrong key), the zone mints tokens to the `sender`'s address on the zone. The Tempo Mainnet funds remain locked in the Zone Portal contract. This ensures chain progress is never blocked by invalid encrypted deposits.
-
+The inbox verifies a Chaum–Pedersen proof of the ECDH shared secret before decrypting. If ciphertext authentication fails or the zone cannot mint to the recipient, it queues a refund to `tempoRefundRecipient` on Tempo. The refund deducts the configured bounce-back fee when that fee can be collected. If the Tempo transfer fails, the portal records `refunds(token, owner)` for the recipient to recover through `claimRefund(token)` once the applicable restrictions permit it.
 
 ## Withdrawals (Zone → Tempo)
 
-Users withdraw by creating a withdrawal request on the zone. Withdrawals are processed in two steps:
+A withdrawal starts with a request to `ZoneOutbox`. It burns the Zone-side amount and records the public recipient. The operator includes the request in a batch before the portal can deliver the tokens on Tempo.
 
-1. **Batch submission.** The sequencer calls `finalizeWithdrawalBatch()` at the end of the final block in a batch. This constructs the withdrawal hash chain and writes the `withdrawalQueueHash` and `withdrawalBatchIndex` to state. The proof validates this state and adds withdrawals to Tempo's queue.
-2. **Withdrawal processing.** The sequencer calls `processWithdrawal()` on Tempo to process withdrawals from the queue's oldest slot.
+<ZoneDiagram
+  name="protocol-withdrawal"
+  alt="ZoneOutbox burns the Zone tokens and queues a withdrawal. The operator finalizes the withdrawal queue and submits signed batch commitments. ZonePortal checks the certificate, continuity, and configured verifier before accepting the batch. The queued withdrawal is then processed to deliver tokens or invoke a callback on Tempo."
+/>
+
+1. **Batch submission.** The sequencer calls `finalizeWithdrawalBatch()` at the end of the final block in a batch. This constructs the withdrawal hash chain and writes the `withdrawalQueueHash` and `withdrawalBatchIndex` to state. An accepted portal batch commits this state and adds withdrawals to Tempo’s queue. See [proving and settlement](/docs/protocol/zones/proving#verifier-interface) for the certificate checks, execution validation, and current verifier behavior.
+2. **Withdrawal processing.** The sequencer calls `processWithdrawals(withdrawals, remainingQueue)` on Tempo to process withdrawals in FIFO order.
 
 ### Composable Withdrawals
 
 Withdrawals support callbacks to Tempo contracts via the `ZoneMessenger`. When `gasLimit > 0`, the messenger:
 
-1. Transfers tokens from the Zone Portal contract to the target via `transferFrom`.
+1. Receives tokens from the Zone Portal contract, then transfers them to the target.
 2. Calls the target with the provided `callbackData`.
 
-Both operations are atomic. If the callback reverts, the transfer reverts too. Receiving contracts implement `IWithdrawalReceiver` and verify `msg.sender == zoneMessenger` to authenticate calls. This enables direct composition with DEX swaps, staking, or cross-zone deposits.
+Both operations are atomic. If the callback reverts, the transfer reverts too. Receiving contracts implement `IWithdrawalReceiver`, verify `msg.sender == zoneMessenger`, and validate `zoneId` and `sourcePortal` against the intended source zone. This enables direct composition with DEX swaps, staking, or cross-zone deposits.
 
 ```solidity
 interface IWithdrawalReceiver {
     function onWithdrawalReceived(
+        uint32 zoneId,
+        address sourcePortal,
         bytes32 senderTag,
         address token,
         uint128 amount,
@@ -75,24 +84,27 @@ interface IWithdrawalReceiver {
 }
 ```
 
+Callback data is limited to 1,024 bytes and callback gas to 10,000,000. When gateway enforcement is enabled, the target must have the portal’s `CallbackGateway` role. In closed-access mode, a successful callback must append a deposit to the source portal; registered gateways are trusted to return the intended assets and amounts. Cross-zone callbacks therefore depend on the source zone’s access configuration.
+
 ### Withdrawal Failure and Bounce-Back
 
-Withdrawals can fail if the token transfer or callback reverts (out of gas, TIP-403 policy, token pause, etc.). When a withdrawal fails, the Zone Portal contract bounces back the funds by re-depositing into the same zone to the withdrawal's `fallbackRecipient`:
+Withdrawals can fail if the token transfer or callback reverts (out of gas, TIP-403 policy, token pause, etc.). When a withdrawal fails, the Zone Portal contract bounces back the funds by re-depositing into the same zone to the withdrawal’s zone-side `zoneFallbackRecipient`. Tempo sees only a `fallbackNonce`; the outbox resolves that nonce to the private recipient:
 
 - The withdrawal is **popped unconditionally** from the queue, even on failure.
-- A new deposit is enqueued for the `fallbackRecipient` on the zone.
-- The sequencer keeps the processing fee regardless of success or failure.
+- A new deposit is enqueued carrying the fallback nonce. The inbox resolves it and attempts to mint to the zone recipient.
+- The withdrawal fee is not refunded on a failed delivery.
+- If the bounce-back mint is blocked by policy or a pause, the inbox records a pending refund. The recipient can call `ZoneInbox.claimRefund(token)` once minting is permitted.
 
-This ensures failed withdrawals never block the queue and users always retain their funds.
+Delivery failures do not block subsequent withdrawals. Processing can still wait for deposit-queue capacity: the T13 portal limits outstanding deposits and reserves capacity for callback deposits and bounce-backs. Refund claims remain subject to the applicable token and account restrictions.
 
 ### Verifiable Withdrawals
 
 Zone transactions are private: transaction data is not published on Tempo Mainnet. To protect sender privacy during withdrawal processing on Tempo Mainnet, the plaintext `sender` is replaced with a commitment:
 
-```
-senderTag = keccak256(abi.encodePacked(sender, txHash))
+```solidity
+senderTag = keccak256(abi.encodePacked(sender, txHash, fallbackNonce))
 ```
 
-The `txHash` acts as a blinding factor known only to the sender and sequencer. The sender can selectively disclose their identity by revealing `txHash` to any party, who verifies it against the `senderTag`.
+The `txHash` acts as a blinding factor known only to the sender and sequencer. The sender can selectively disclose their identity by revealing `txHash` to any party, who verifies it against the `senderTag` using the withdrawal’s public `fallbackNonce`.
 
 For automated disclosure, the sender can specify a `revealTo` public key. The sequencer encrypts `(sender, txHash)` to that key using ECDH, populating the `encryptedSender` field in the Tempo Mainnet-facing withdrawal struct. This enables cross-zone transfers where the destination zone's sequencer can automatically attribute incoming deposits.

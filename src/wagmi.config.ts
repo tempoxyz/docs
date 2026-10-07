@@ -14,7 +14,7 @@ import {
   useConnectors,
   webSocket,
 } from 'wagmi'
-import { alphaUsd, betaUsd, pathUsd, thetaUsd } from './components/guides/tokens'
+import { alphaUsd, betaUsd, ousd, pathUsd, thetaUsd } from './components/guides/tokens'
 import * as WebAuthnCeremony from './lib/webAuthnCeremony.ts'
 
 const feeToken = '0x20c0000000000000000000000000000000000001' as const
@@ -58,6 +58,7 @@ export function getConfig(options: getConfig.Options = {}) {
               authorizeAccessKey: () => ({
                 expiry: Expiry.days(1),
                 limits: [
+                  { token: ousd, limit: parseUnits('500', 6) },
                   { token: pathUsd, limit: parseUnits('500', 6) },
                   { token: alphaUsd, limit: parseUnits('500', 6) },
                   { token: betaUsd, limit: parseUnits('500', 6) },
@@ -69,7 +70,7 @@ export function getConfig(options: getConfig.Options = {}) {
                 url: 'https://sponsor.moderato.tempo.xyz',
               },
             }),
-            webAuthn({ ceremony: WebAuthnCeremony.keys() }),
+            webAuthn({ ceremony: WebAuthnCeremony.keys({ rpId }) }),
           ]),
     ],
     multiInjectedProviderDiscovery,

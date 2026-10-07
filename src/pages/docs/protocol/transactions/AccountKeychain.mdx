@@ -13,6 +13,8 @@ The Account Keychain precompile manages authorized Access Keys for accounts, ena
 
 `authorizeKey(...)` takes a `KeyRestrictions` tuple that bundles expiry, spending limits, and call scopes. `authorizeAdminKey(...)` provisions an admin key for account key management. Access-key-signed transactions cannot create contracts; use a Root Key for deployment flows.
 
+See [gas parameters](/docs/protocol/fees/spec-fee#gas-parameters) for calldata requirements and gas charges.
+
 ## Motivation
 
 The Tempo Transaction type unlocks a number of new signature schemes, including WebAuthn (Passkeys). However, for an Account using a Passkey as its Root Key, the sender will subsequently be prompted with passkey prompts for every signature request. This can be a poor user experience for highly interactive or multi-step flows. Additionally, users would also see "Sign In" copy in prompts for signing transactions which is confusing. This proposal introduces the concept of the Root Key being able to provision a scoped Access Key that can be used for subsequent transactions, without the need for repetitive end-user prompting. T6 extends this model with admin access keys for key management. Recurring spending budgets and explicit call scoping make limited keys suitable for subscriptions, connected apps, and session-key-style flows.

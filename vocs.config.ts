@@ -163,7 +163,7 @@ export default defineConfig({
     const urlBase = options.baseUrl?.replace(/\/$/, '') ?? ''
     const docsPath = String(path ?? '').replace(/^\/docs(?=\/|$)/, '') || '/'
     const landingPaths = ['/', '/changelog']
-    if (landingPaths.includes(docsPath)) return `${urlBase}/og-docs.png`
+    if (landingPaths.includes(docsPath)) return `${urlBase}/og-docs.png?v=4`
 
     const sectionMap: Record<string, string> = {
       api: 'API',
@@ -221,7 +221,7 @@ export default defineConfig({
     const extra = new URLSearchParams({
       section,
       ...(subsection ? { subsection } : {}),
-      v: '3',
+      v: '4',
     }).toString()
 
     // The HBSet display font's mixed-case "Blog" wordmark has awkward
@@ -366,6 +366,10 @@ export default defineConfig({
           {
             text: 'Getting Funds on Tempo',
             link: '/docs/guide/getting-funds',
+          },
+          {
+            text: 'OUSD on Tempo',
+            link: '/docs/guide/ousd',
           },
           {
             text: 'Make Payments',
@@ -912,8 +916,17 @@ export default defineConfig({
             collapsed: false,
             items: [
               {
-                text: 'T10',
+                text: 'T12',
+                badge: { text: 'Planned', variant: 'note' as const },
+                link: '/docs/protocol/upgrades/t12',
+              },
+              {
+                text: 'T11',
                 badge: { text: 'Latest', variant: 'info' as const },
+                link: '/docs/protocol/upgrades/t11',
+              },
+              {
+                text: 'T10',
                 link: '/docs/protocol/upgrades/t10',
               },
               {
@@ -1109,6 +1122,10 @@ export default defineConfig({
             link: '/docs/guide/node/rpc',
           },
           {
+            text: 'Consensus, DKG, and Network Identity',
+            link: '/docs/guide/node/consensus-and-dkg',
+          },
+          {
             text: 'Running a validator',
             items: [
               {
@@ -1118,6 +1135,10 @@ export default defineConfig({
               {
                 text: 'Validator Onboarding',
                 link: '/docs/guide/node/validator-setup',
+              },
+              {
+                text: 'Validator Network Topology',
+                link: '/docs/guide/node/validator-topology',
               },
               {
                 text: 'Checking validator status',
@@ -1236,6 +1257,7 @@ export default defineConfig({
       '/docs': docsHomeSidebar,
       '/docs/build': buildSidebar,
       '/docs/guide/getting-funds': buildSidebar,
+      '/docs/guide/ousd': buildSidebar,
       '/docs/guide/payments': buildSidebar,
       '/docs/guide/issuance': buildSidebar,
       '/docs/guide/stablecoin-dex': buildSidebar,

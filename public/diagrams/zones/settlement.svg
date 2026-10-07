@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="340" viewBox="0 88 960 340" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" style="color: var(--foreground, #111)">
+  <title id="zones-settlement-title">What currently gates settlement</title>
+  <desc id="zones-settlement-desc">A signed batch passes sequencer quorum and continuity checks in the portal, then the configured verifier is called. The Solidity reference is a stub; T13 adds native Nitro verification with an approved-measurement policy. A configured sequencer waits for attestation before submitting. On acceptance the portal updates commitments and queues withdrawals.</desc>
+  <defs>
+    <marker id="zones-settlement-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M1 1L7 4L1 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <g fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5">
+    <rect x="32" y="112" width="200" height="172" rx="10"/>
+    <rect x="264" y="112" width="200" height="172" rx="10"/>
+    <rect x="496" y="112" width="200" height="172" rx="10"/>
+    <rect x="728" y="112" width="200" height="172" rx="10"/>
+  </g>
+  <g stroke="currentColor" stroke-width="1.75" marker-end="url(#zones-settlement-arrow)">
+    <path d="M240 198H256"/>
+    <path d="M472 198H488"/>
+    <path d="M704 198H720"/>
+  </g>
+
+  <g fill="currentColor" text-anchor="middle" font-size="20" font-weight="600">
+    <text x="132" y="151">Signed batch</text>
+    <text x="364" y="151">Portal checks</text>
+    <text x="596" y="151">Verifier call</text>
+    <text x="828" y="151">Settlement</text>
+  </g>
+  <g fill="var(--foreground-secondary, #606060)" text-anchor="middle" font-size="17">
+    <text x="132" y="190">Quorum certificate</text>
+    <text x="132" y="219">Batch commitments</text>
+    <text x="132" y="248">Proof when configured</text>
+    <text x="364" y="190">Sequencer quorum</text>
+    <text x="364" y="219">Block continuity</text>
+    <text x="364" y="248">Height + queue progress</text>
+    <text x="596" y="190">Active runtime</text>
+    <text x="596" y="219">Stub or Nitro verifier</text>
+    <text x="596" y="248">Check enclave policy</text>
+    <text x="828" y="190">Update Zone tip</text>
+    <text x="828" y="219">Record commitments</text>
+    <text x="828" y="248">Queue withdrawals</text>
+  </g>
+
+  <!-- Node-side proving is distinct from the portal verifier policy. -->
+  <rect x="32" y="316" width="896" height="88" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5" stroke-dasharray="5 5"/>
+  <g transform="translate(56 344)" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M0 8V0H8M22 0H30V8M30 22V30H22M8 30H0V22"/>
+    <path d="M8 15L13 20L23 10"/>
+  </g>
+  <text x="108" y="352" fill="currentColor" font-size="20" font-weight="600">Configured settlement prover</text>
+  <text x="108" y="382" fill="var(--foreground-secondary, #606060)" font-size="17">The sequencer waits for replay and Nitro attestation before submission.</text>
+</svg>

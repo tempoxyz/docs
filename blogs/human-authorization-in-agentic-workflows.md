@@ -1,6 +1,7 @@
 ---
 title: "Human Authorization in Agentic Workflows"
 excerpt: "How Tempo enables AI-accelerated development securely"
+authors: "Shane da Silva"
 date: 2026-08-17
 category: [technical, case-studies]
 ---

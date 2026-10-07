@@ -3,6 +3,7 @@ title: Network Upgrades and Releases
 description: Timeline and details for Tempo network upgrades and important releases for node operators.
 ---
 
+import { Tab, Tabs } from 'vocs'
 import { Badge } from '../../../../components/Badge'
 
 # Network Upgrades and Releases
@@ -11,13 +12,47 @@ Tempo uses scheduled network upgrades to introduce protocol changes. Each upgrad
 
 For detailed release notes and binaries, see the [Changelog](/docs/changelog).
 
+## Network identities
+
+Follow/RPC nodes and validators verify consensus finalization certificates, including those that authenticate Tempo snapshots, against the current network identity. Each `tempo` release includes these identities as [built-in trust anchors](https://github.com/tempoxyz/tempo/blob/main/crates/chainspec/src/network_identity.rs). To learn how the identity is produced and rotated, see [Consensus, DKG, and network identity](/docs/guide/node/consensus-and-dkg).
+
+<Tabs>
+<Tab title="Mainnet">
+
+**Network identity, from epoch 0:**
+
+```text
+// [!include ~/snippets/network-identities.txt:mainnet-identity]
+```
+
+</Tab>
+<Tab title="Testnet">
+
+**Network identity, from epoch 1747:**
+
+```text
+// [!include ~/snippets/network-identities.txt:testnet-identity]
+```
+
+Testnet nodes on v1.15.0 or earlier that do not already have this identity in their persisted DKG state need the [network identity override](/docs/guide/node/validator-troubleshooting#my-node-fails-to-start-finalized-tip-certificate-failed-verification-against-the-trusted-network-identity).
+
+</Tab>
+</Tabs>
+
+After an identity rotation, this section and the release table below list the new identity and the first release that includes it. Start new nodes with that release or later. If a node fails to start after a rotation, see [My node fails to start: finalized tip certificate failed verification against the trusted network identity](/docs/guide/node/validator-troubleshooting#my-node-fails-to-start-finalized-tip-certificate-failed-verification-against-the-trusted-network-identity).
+
 ## Node Operator Updates
 
 | Release | Date | Network | Description | Priority |
 |---------|------|---------|-------------|----------|
-| [v1.13.0](https://github.com/tempoxyz/tempo/releases/tag/v1.13.0) | Aug 17, 2026 | Testnet + Mainnet | Required for T10. Enshrines ZoneFactory, assigns deterministic ZonePortal addresses, and installs canonical shared zone runtimes. T10 is active on testnet and mainnet. | <Badge variant="red">Required</Badge> |
+| [v1.15.0](https://github.com/tempoxyz/tempo/releases/tag/v1.15.0) | Sep 24, 2026 | Testnet + Mainnet | Maintenance release with Commonware v2026.9.0, validator startup checks for network identity and DKG state, and performance improvements. Adds optional P2P sync via `--consensus.devp2p.finalizations`, disabled by default. Medium priority for validators and RPC nodes. | <Badge variant="yellow">Recommended</Badge> |
+| [v1.14.0](https://github.com/tempoxyz/tempo/releases/tag/v1.14.0) | Sep 7, 2026 | Testnet + Mainnet | Current required release for both networks ([T11](/docs/protocol/upgrades/t11)). Extends expiring-nonce validity and changes precompile pricing and ABI validation. Nodes running v1.13.x must upgrade. | <Badge variant="red">Required for T11</Badge> |
+| [v1.13.2](https://github.com/tempoxyz/tempo/releases/tag/v1.13.2) | Aug 27, 2026 | Testnet + Mainnet | Snapshot download and consensus startup fixes. Superseded by v1.14.0 for T11. | <Badge variant="gray">Superseded</Badge> |
+| [v1.13.1](https://github.com/tempoxyz/tempo/releases/tag/v1.13.1) | Aug 20, 2026 | Testnet + Mainnet | Security release that hardens precompile input processing and improves Zone validation performance. Superseded by v1.14.0 for T11. | <Badge variant="gray">Superseded</Badge> |
+| [v1.13.0](https://github.com/tempoxyz/tempo/releases/tag/v1.13.0) | Aug 17, 2026 | Testnet + Mainnet | Introduced [T10](/docs/protocol/upgrades/t10): native ZoneFactory, deterministic ZonePortal addresses, and shared zone runtimes. Superseded by v1.14.0 for T11. | <Badge variant="gray">Superseded</Badge> |
 | [v1.12.0](https://github.com/tempoxyz/tempo/releases/tag/v1.12.0) | Aug 3, 2026 | Testnet + Mainnet | Required for T9. Adds TIP-403 storage for TIP-20 token policy bindings used by zones/provable contract flows, plus a targeted migration path for existing tokens that need one. T9 is active on testnet and mainnet. | <Badge variant="red">Required</Badge> |
 | [v1.11.0](https://github.com/tempoxyz/tempo/releases/tag/v1.11.0) | Jul 22, 2026 | Testnet + Mainnet | Required for T8. Includes current committee state, FeeAMM policy changes, versioned Stablecoin DEX order storage, DEX V2Order support, and final TIP-20 rewards deprecation. T8 is active on testnet and mainnet. | <Badge variant="red">Required</Badge> |
+| [v1.10.2](https://github.com/tempoxyz/tempo/releases/tag/v1.10.2) | Jul 17, 2026 | Testnet + Mainnet | Patch release with Alloy dependency updates. Operators running v1.10.x should upgrade to v1.10.2. | <Badge variant="red">High priority</Badge> |
 | [v1.10.1](https://github.com/tempoxyz/tempo/releases/tag/v1.10.1) | Jun 29, 2026 | Testnet + Mainnet | Required for T7; includes storage credits for DEX order storage and TIP-20 channel storage, dynamic base fee behavior, and TIP-20 rewards deprecation. | <Badge variant="red">Required</Badge> |
 | [v1.9.1](https://github.com/tempoxyz/tempo/releases/tag/v1.9.1) | Jun 19, 2026 | Testnet + Mainnet | Patch release with follow-mode stability fixes, payload-builder latency fixes, Reth/Rust dependency updates, and transaction-pool/RPC improvements. | <Badge variant="yellow">Recommended</Badge> |
 | [v1.9.0](https://github.com/tempoxyz/tempo/releases/tag/v1.9.0) | Jun 15, 2026 | Testnet + Mainnet | Required for T6; adds account-level receive policies for safer TIP-20 deposits and admin access keys for smoother passkey, device, and delegated-key management. Operators were required to run this release before the T6 activation timestamp on each network. | <Badge variant="red">Required</Badge> |

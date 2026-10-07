@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="312" viewBox="0 82 960 312" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" aria-labelledby="zone-policy-title zone-policy-desc">
+  <title id="zone-policy-title">Issuer policy follows finalized Tempo state</title>
+  <desc id="zone-policy-desc">The issuer configures TIP-403 policy on Tempo. After a Tempo block finalizes and the Zone imports its checkpoint into TempoState, Zone token operations check the issuer policy at that checkpoint. An update is not visible in the Zone until its finalized Tempo block is imported.</desc>
+  <defs>
+    <marker id="zone-policy-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="m2 1 6 4-6 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+
+  <text x="32" y="123" fill="var(--foreground-secondary, #646464)" font-size="17">On Tempo</text>
+  <text x="355" y="123" fill="var(--foreground-secondary, #646464)" font-size="17">Imported by the Zone</text>
+  <text x="678" y="123" fill="var(--foreground-secondary, #646464)" font-size="17">During Zone execution</text>
+  <g fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5">
+    <rect x="32" y="146" width="250" height="224" rx="10"/>
+    <rect x="355" y="146" width="250" height="224" rx="10"/>
+    <rect x="678" y="146" width="250" height="224" rx="10"/>
+  </g>
+  <g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="56" y="170" width="29" height="36" rx="4"/>
+    <path d="M64 181h13m-13 8h13m-13 8h8"/>
+    <rect x="379" y="172" width="35" height="29" rx="4"/>
+    <path d="M387 178h19m-19 7h19m-19 7h11"/>
+    <path d="M705 174h25v18c0 10-12.5 17-12.5 17S705 202 705 192Z"/>
+    <path d="m711 188 5 5 8-9"/>
+  </g>
+  <text x="56" y="243" fill="currentColor" font-size="20" font-weight="600">Issuer policy</text>
+  <text x="379" y="243" fill="currentColor" font-size="20" font-family="ui-monospace, SFMono-Regular, monospace">TempoState</text>
+  <text x="702" y="243" fill="currentColor" font-size="20" font-weight="600">Zone policy checks</text>
+  <text x="56" y="274" fill="var(--foreground-secondary, #646464)" font-size="17" font-family="ui-monospace, SFMono-Regular, monospace">TIP-403 registry</text>
+  <g fill="var(--foreground-secondary, #646464)" font-size="16">
+    <text x="56" y="312">Allowlist / blocklist</text>
+    <text x="56" y="340">Issuer-controlled updates</text>
+    <text x="379" y="274">Finalized block header</text>
+    <text x="379" y="312">Anchors the Tempo state</text>
+    <text x="379" y="340">read by this Zone</text>
+    <text x="702" y="274">Read the issuer's policy</text>
+    <text x="702" y="312">Apply it to the token</text>
+    <text x="702" y="340">operation being executed</text>
+  </g>
+  <g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" marker-end="url(#zone-policy-arrow)">
+    <path d="M294 254h49"/>
+    <path d="M617 254h49"/>
+  </g>
+</svg>

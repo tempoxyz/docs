@@ -1,0 +1,51 @@
+---
+title: Consensus, DKG, and network identity
+description: Learn how Tempo validators share a threshold signing key through DKG, how nodes verify finalizations with the network identity, and what to do when the identity rotates.
+---
+
+# Consensus, DKG, and network identity
+
+Tempo nodes verify consensus finalizations against a single network-wide public key called the network identity. This page explains how the validator committee produces that key through distributed key generation (DKG), how follow/RPC nodes and validators use it, and what node operators do when it rotates.
+
+For the consensus protocol itself, see [Consensus and finality using Simplex BFT](/docs/protocol/blockspace/consensus).
+
+## Committee signing with threshold BLS
+
+Tempo validators form a committee that runs Simplex BFT consensus. Instead of attaching one signature per validator, the committee signs notarizations and finalizations with a BLS12-381 threshold scheme:
+
+- Each committee member holds a private **signing share** of the committee's threshold signing key.
+- A certificate is valid once enough committee members contribute partial signatures to reach the threshold.
+- Anyone can verify the resulting certificate with the committee's single public key, the **network identity**.
+
+The signing share and network identity are separate from each validator's Ed25519 signing key, which identifies the validator in the consensus protocol. See [Managing validator keys](/docs/guide/node/validator-keys) for the keys validators manage directly.
+
+## DKG ceremonies
+
+The committee creates and updates signing shares through DKG ceremonies. In a DKG ceremony, current committee members act as **dealers** that distribute shares, and next-epoch committee members act as **players** that receive them. No single party ever holds the full private key.
+
+Tempo runs a DKG ceremony every epoch (about 3 hours). Validator changes made on-chain in epoch `E` are picked up by the ceremony in epoch `E+1` and take effect in epoch `E+2`. See [Checking validator status](/docs/guide/node/validator-status) for how this affects onboarding and exit.
+
+Tempo uses two kinds of ceremonies:
+
+| Ceremony | Signing shares | Network identity |
+| --- | --- | --- |
+| **Resharing** (routine) | Redistributed to the next committee | Unchanged |
+| **Full DKG** (identity rotation) | Generated fresh | Replaced with a new identity |
+
+Routine resharing lets the committee change membership without changing the key that nodes verify against. A full DKG ceremony creates a new threshold key and therefore a new network identity.
+
+## How nodes use the network identity
+
+Both follow/RPC nodes and validators use the network identity as a trust anchor. A node checks finalization certificates against it before trusting finalized blocks, including the consensus certificates that authenticate Tempo snapshots downloaded through [tempo.xyz](https://tempo.xyz).
+
+Each `tempo` release includes the current [mainnet and testnet network identities](/docs/guide/node/network-upgrades#network-identities), along with the epoch each identity is valid from. Nodes use these built-in values by default.
+
+## Network identity rotation
+
+Tempo can rotate the network identity by scheduling a full DKG ceremony to strengthen network safety. When it does, Tempo publishes a new `tempo` release with the rotated-to identity built in and lists it on [Network Upgrades and Releases](/docs/guide/node/network-upgrades).
+
+:::warning[Update the binary before starting a new node]
+After an identity rotation, start new nodes with a release that includes the new identity, including nodes that start from a new snapshot. A binary with an outdated identity may be unable to verify certificates signed under the new identity.
+:::
+
+If a node fails to start or logs a network identity warning after a rotation, see [My node fails to start: finalized tip certificate failed verification against the trusted network identity](/docs/guide/node/validator-troubleshooting#my-node-fails-to-start-finalized-tip-certificate-failed-verification-against-the-trusted-network-identity).

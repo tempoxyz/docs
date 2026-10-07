@@ -16,7 +16,7 @@ The exchange operates as a singleton precompiled contract at address `0xdec00000
 **Exchange vs. Fee AMM** — these are two different systems. The Exchange is the user-facing market: you (or your app) trade stablecoins at market prices via swaps and orders against an orderbook. The [Fee AMM](/docs/protocol/fees/fee-amm) is protocol fee-conversion liquidity: it converts users' transaction-fee payments into validators' preferred tokens at a fixed price through protocol-driven swaps, and is not a trading venue. See [Exchange vs. Fee AMM](#exchange-vs-fee-amm) below.
 :::
 
-Trading pairs are determined by each token's quote token. All TIP-20 tokens specify a quote token for trading on the exchange. See [Quote Tokens](/docs/protocol/exchange/quote-tokens) for more information on quote token selection and the optional [pathUSD](/docs/protocol/exchange/quote-tokens#pathusd) stablecoin. See the [Stablecoin DEX Specification](/docs/protocol/exchange/spec) for detailed information on the exchange structure.
+Trading pairs are determined by each token's quote token. All TIP-20 tokens specify a quote token for trading on the exchange. See [Quote Tokens](/docs/protocol/exchange/quote-tokens) for more information on quote token selection and the optional [pathUSD](/docs/protocol/exchange/quote-tokens#pathusd) stablecoin. [OUSD](/docs/guide/ousd), the recommended stablecoin on Tempo, uses pathUSD as its quote token, so any USD stablecoin can route to and from OUSD through the exchange. See the [Stablecoin DEX Specification](/docs/protocol/exchange/spec) for detailed information on the exchange structure.
 
 The exchange supports three types of orders, each with different execution behavior:
 

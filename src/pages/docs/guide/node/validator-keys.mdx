@@ -22,6 +22,10 @@ Use different signing keys and operator keys for testnet and mainnet. A testnet 
 | **Fee recipient** | Ethereum address (`0x…`) | Receives transaction fees from blocks your validator proposes. | **Low** — changing it only redirects future fee revenue, no security impact. | [Update fee recipient](/docs/guide/node/validator-lifecycle#update-the-fee-recipient) |
 | **Signing share** | BLS12-381 key share | A share of the committee's threshold signing key, used to sign block notarizations and finalizations. | **Managed automatically** — updated every DKG ceremony (~3 hours). Lost shares are recovered from the network on restart. | Automatic (see [recovery](#signing-share-recovery)) |
 
+:::info[Network identity]
+Signing shares combine into the committee's threshold key, whose public key is the network identity. Validators do not manage the network identity directly. To learn how DKG ceremonies update shares and rotate the identity, see [Consensus, DKG, and network identity](/docs/guide/node/consensus-and-dkg).
+:::
+
 ## Generating a signing key
 
 :::warning
@@ -132,6 +136,10 @@ The validator identity signature and the transaction signer are different:
 :::
 
 ## Signing share recovery
+
+:::warning[Deleting consensus data can halt the network]
+A node eventually recovers its signing share, but do not delete the consensus directory lightly. If too many validators delete their shares in the same epoch, the network halts.
+:::
 
 If the signing share is lost — for example by deleting `<datadir>/consensus` — the node will recover a new share in the following epochs from the network when it restarts.
 

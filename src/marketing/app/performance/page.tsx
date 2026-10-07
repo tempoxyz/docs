@@ -196,8 +196,8 @@ function PerformanceSectionsSkeleton() {
     <>
       <Section
         id="settlement"
-        title="Guaranteed settlement in half a second."
-        note="Tempo gives payments final settlement in about half a second. Once a payment lands in a finalized block, it can be treated as settled."
+        title="Fast, guaranteed settlement."
+        note="Tempo gives payments fast, final settlement. Once a payment lands in a finalized block, it can be treated as settled."
       >
         <SettlementStreamSkeleton />
       </Section>
@@ -252,6 +252,7 @@ export default function PerformancePage() {
 
   const latest = runs[runs.length - 1]
   const hasRuns = runs.length >= 2
+  const hasChartRuns = runs.length >= 2
 
   const heroStats = latest
     ? [
@@ -275,7 +276,7 @@ export default function PerformancePage() {
       <div className="mx-auto w-full max-w-7xl border-line border-x bg-surface-shell">
         <Header />
 
-        {/* Hero: headline + live gradient chart of the full nightly feed */}
+        {/* Hero: headline + multi-region nightly history */}
         <section className="relative border-line border-b px-5 pt-20 pb-12 lg:px-8 lg:pt-28">
           <Reveal className="flex flex-col items-center text-center">
             <h1 className="max-w-[880px] text-balance font-sans text-[clamp(2.5rem,6vw,3.5rem)] text-foreground leading-[1.05] tracking-[-0.03em] antialiased">
@@ -285,7 +286,7 @@ export default function PerformancePage() {
 
           {!runsLoaded ? (
             <HeroChartSkeleton />
-          ) : hasRuns ? (
+          ) : hasChartRuns ? (
             <Reveal delay={150} className="mt-16">
               <TpsTrendChart runs={runs} />
               <div className="mt-10 text-center">
@@ -293,7 +294,7 @@ export default function PerformancePage() {
                   Transactions per second
                 </p>
                 <p className="mt-1 font-sans text-[14px] text-foreground/45 leading-[1.4]">
-                  Nightly benchmark runs
+                  Multi-region benchmark history
                 </p>
               </div>
             </Reveal>
@@ -331,8 +332,8 @@ export default function PerformancePage() {
           <>
             <Section
               id="settlement"
-              title="Guaranteed settlement in half a second."
-              note="Tempo gives payments final settlement in about half a second. Once a payment lands in a finalized block, it can be treated as settled."
+              title="Fast, guaranteed settlement."
+              note="Tempo gives payments fast, final settlement. Once a payment lands in a finalized block, it can be treated as settled."
             >
               <SettlementStream />
             </Section>

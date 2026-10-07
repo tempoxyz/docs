@@ -4,7 +4,8 @@ import Header from '../../_components/Header'
 import Reveal from '../../_components/Reveal'
 import { developersPath } from '../../_lib/developersPaths'
 import MicroHeader from '../_components/MicroHeader'
-import { categoryBySlug, formatDate, isNew } from '../_lib/categories'
+import PostByline from '../_components/PostByline'
+import PostLabels from '../_components/PostLabels'
 import { getPost } from '../_lib/posts'
 
 export default function BlogPostPage({ params }: { params: { slug: string } }) {
@@ -47,28 +48,8 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               ← Blog
             </Link>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              {post.categories.map((category) => (
-                <span
-                  key={category}
-                  className="whitespace-nowrap border border-line-strong px-2.5 py-[3px] font-mono text-[11px] text-foreground/50 uppercase tracking-[0.02em]"
-                >
-                  {categoryBySlug(category).badge}
-                </span>
-              ))}
-              <span className="font-mono text-[12px] text-foreground/40 uppercase tracking-[0.02em]">
-                {formatDate(post.date)}
-              </span>
-              {post.authors && (
-                <span className="font-mono text-[12px] text-foreground/40 uppercase tracking-[0.02em]">
-                  By {post.authors}
-                </span>
-              )}
-              {isNew(post.date) && (
-                <span className="whitespace-nowrap border border-indicator-green px-2.5 py-[3px] font-mono text-[11px] text-indicator-green uppercase tracking-[0.02em]">
-                  New
-                </span>
-              )}
+            <div className="mt-8">
+              <PostLabels post={post} />
             </div>
 
             <h1
@@ -78,9 +59,12 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               {post.title}
             </h1>
 
-            <p className="mt-5 font-sans text-[17px] text-foreground/50 leading-[1.55] tracking-[0]">
+            <p className="mt-5 font-sans text-[17px] text-foreground/60 leading-[1.55] tracking-[0]">
               {post.excerpt}
             </p>
+            <div className="mt-5">
+              <PostByline post={post} />
+            </div>
           </Reveal>
 
           {/* Post content is dev-authored markdown from the repo, rendered to

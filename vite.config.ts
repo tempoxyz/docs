@@ -62,6 +62,15 @@ function developersProxyBasePath(): Plugin {
   return {
     name: 'tempo-developers-proxy-base-path',
     enforce: 'post',
+    configureServer(server) {
+      // Production mounts public learning assets under /developers.
+      server.middlewares.use((req, _res, next) => {
+        if (req.url?.startsWith('/developers/learn/')) {
+          req.url = req.url.slice('/developers'.length)
+        }
+        next()
+      })
+    },
     configEnvironment(name) {
       if (process.env.VERCEL_ENV !== 'production') return
       // tempo.xyz strips /developers before requests reach Waku.

@@ -1,44 +1,44 @@
 ---
-title: "Execution and gas costs within a Tempo Zone on testnet"
-seoTitle: "Execution & Gas in Tempo Zones on Testnet | Docs"
+title: "Execution and gas costs within a Tempo Zone"
+seoTitle: "Execution & Gas in Tempo Zones | Docs"
 description: Specification for gas accounting, fee tokens, fixed TIP-20 gas costs, contract creation limits, and token management on Tempo Zones.
 ---
 
-# Execution and gas costs within a Tempo Zone on testnet
+import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
-:::info
-Tempo Zones is still in early development and is available for testing purposes on Tempo Testnet only. While Tempo Zones are in this stage, expect breaking changes to the design and implementation. Do not use this in production. If you're interested in working with Tempo Labs as a design partner on the development of Tempo Zones, contact us at [tempo.xyz/contact](https://tempo.xyz/contact).
-:::
+# Execution and gas costs within a Tempo Zone
 
-This page specifies how Tempo Zones handle gas accounting, fee collection, and token management. For deposit and withdrawal flows, see the [bridging specification](/docs/protocol/zones/bridging). For balance visibility and access control rules, see the [accounts specification](/docs/protocol/zones/accounts).
+A Tempo Zone executes transactions against its private state using Tempo's gas accounting and a fixed set of system contracts. Transactions pay gas in an enabled TIP-20 token; deposits and withdrawals also incur separate processing fees.
+
+For deposit and withdrawal flows, see the [bridging specification](/docs/protocol/zones/bridging). For balance visibility and access control rules, see the [accounts specification](/docs/protocol/zones/accounts).
 
 ## Fee Tokens
 
-Tempo Zones reuse Tempo fee units and gas accounting. Each transaction includes a `feeToken` field. Any enabled TIP-20 token with USD currency is valid for gas payment. The sequencer accepts all enabled tokens directly, so no Fee AMM is needed.
+Tempo Zones reuse Tempo fee units and gas accounting. A transaction can select an enabled, initialized TIP-20 token through `feeToken`. If it omits this field, the zone uses its creation-time default token. The zone fee manager accepts the selected token directly without Fee AMM conversion; it does not require USD currency. Token pause and compliance policies still apply.
 
 ## Deposit Fees
 
 Deposits charge a fixed processing fee in the deposited token:
 
-```
+```text
 fee = FIXED_DEPOSIT_GAS × zoneGasRate
 ```
 
-`FIXED_DEPOSIT_GAS` is fixed at 100,000 gas. The sequencer configures `zoneGasRate` through `ZonePortal.setZoneGasRate()`. The fee is deducted from the deposit amount and paid to the sequencer on Tempo Mainnet.
+`FIXED_DEPOSIT_GAS` is fixed at 100,000 gas. The portal admin configures `zoneGasRate` through `ZonePortal.setZoneGasRate()`. The fee is deducted from the deposit amount and paid to the admin on Tempo. Deposits must also cover the configured failed-deposit bounce-back fee; use `calculateDepositFee()` and `calculateBouncebackFee()` on the portal to read both amounts.
 
 ## Withdrawal Fees
 
 Withdrawals charge a processing fee in the withdrawn token:
 
-```
-fee = gasLimit × tempoGasRate
+```text
+fee = (WITHDRAWAL_BASE_GAS + gasLimit) × tempoGasRate
 ```
 
-The user specifies `gasLimit` to cover processing and any callback execution. The sequencer configures `tempoGasRate` through `ZoneOutbox.setTempoGasRate()`.
+`WITHDRAWAL_BASE_GAS` is 50,000 gas. The user specifies `gasLimit` for callback execution, with `0` for a plain withdrawal and a maximum of 10,000,000. The sequencer configures `tempoGasRate` through `ZoneOutbox.setTempoGasRate()`, bounded by the portal admin’s `maxTempoGasRate`. Use `calculateWithdrawalFee(gasLimit)` to read the fee. It is charged in addition to the requested withdrawal amount and is separate from the zone transaction gas fee.
 
 ## Fixed Gas Costs
 
-All user-facing TIP-20 transfer and approval operations cost exactly 100,000 gas. This removes gas-based information leaks tied to storage state. On a standard EVM chain, gas varies based on whether a transfer writes to a previously empty storage slot, revealing whether the recipient has received tokens before. Fixed costs eliminate that side channel.
+The TIP-20 selectors below have a fixed precompile charge of 100,000 gas, separate from transaction intrinsic gas. Fixed charges prevent gas-based information leaks tied to storage state. On a standard EVM chain, gas varies based on whether a transfer writes to a previously empty storage slot, revealing whether the recipient has received tokens before. During the current permissioned phase, public transfer calls still revert with `Unauthorized()`.
 
 | Function | Gas Cost |
 |----------|----------|
@@ -47,23 +47,29 @@ All user-facing TIP-20 transfer and approval operations cost exactly 100,000 gas
 | `transferWithMemo(to, amount, memo)` | 100,000 |
 | `transferFromWithMemo(from, to, amount, memo)` | 100,000 |
 | `approve(spender, amount)` | 100,000 |
+| `permit(...)` | 100,000 |
 
-System functions (`systemTransferFrom`, `transferFeePreTx`, `transferFeePostTx`) retain standard gas costs. Only restricted system callers can invoke them, so the gas side channel does not apply.
+Inbox/outbox token movement and fee collection use internal system paths rather than the public transfer selectors.
 
 ## Contract Creation Disabled
 
-Tempo Zones currently disable the `CREATE` and `CREATE2` opcodes. Each Tempo Zone runs a fixed set of system contracts and predeploys. Any transaction that attempts contract creation reverts.
+Contract creation is restricted to protocol-allowlisted deployers. The allowlist is currently empty, so users cannot submit deployment transactions or execute `CREATE` or `CREATE2`. Each Tempo Zone runs a fixed set of system contracts and predeploys.
 
 ## Token Management
 
-![Policy inheritance from mainnet to zone](/developers/learn/zones/diagram-tip20.svg)
+<ZoneDiagram
+  name="policy"
+  alt="Issuer TIP-403 policy is anchored by the finalized Tempo checkpoint imported into TempoState. Zone execution reads and applies that checkpoint's policy to token operations."
+/>
 
-The sequencer manages which TIP-20 tokens are available on a Tempo Zone:
+The portal admin manages which TIP-20 tokens are available on a Tempo Zone:
 
 | Function | Behavior |
 |----------|----------|
 | `enableToken(token)` | Enables a TIP-20 token for bridging and gas payment. Irreversible. |
-| `pauseDeposits(token)` | Stops new deposits for the token. Withdrawals continue. |
+| `pauseDeposits(token)` | Stops new deposits for the token. Withdrawal processing remains available unless the portal is paused. |
 | `resumeDeposits(token)` | Restarts deposits for a previously paused token. |
 
-Once enabled, a token cannot be disabled. This preserves withdrawals for that token, subject to the token's own compliance policy. Tokens on the Tempo Zone use the same address as their Tempo Mainnet counterpart. `ZoneInbox` mints on deposit, `ZoneOutbox` burns on withdrawal. No mechanism exists to create new tokens on the Tempo Zone.
+In the T13 source, `enableToken` also requires a submitted batch to initialize the processed enabled-token cursor, and at most eight token enablements can remain unprocessed. Earlier runtimes use different admission limits.
+
+Once enabled, a token cannot be disabled. Withdrawal availability still depends on the portal pause state, access controls, and the token’s compliance policy. Tokens on the Tempo Zone use the same address as their Tempo Mainnet counterpart. `ZoneInbox` mints on deposit, `ZoneOutbox` burns on withdrawal. No mechanism exists to create new tokens on the Tempo Zone.

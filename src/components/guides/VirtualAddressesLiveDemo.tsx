@@ -22,7 +22,7 @@ import { useClient, useConnect, useConnection, useDisconnect, useWriteContract }
 import { Hooks } from 'wagmi/tempo'
 import { useWebAuthnConnector } from '../../wagmi.config'
 import { Button, ExplorerAccountLink, ExplorerLink, Logout, Step, StringFormatter } from './Demo'
-import { alphaUsd, pathUsd } from './tokens'
+import { alphaUsd, ousd, pathUsd } from './tokens'
 
 const TEST_MNEMONIC = 'test test test test test test test test test test test junk'
 const DEMO_SENDER_KEY =
@@ -143,6 +143,7 @@ export function VirtualAddressesLiveDemo() {
   const isLocalnet = tempoEnv === 'localnet'
   const isDevnet = tempoEnv === 'devnet'
   const isModerato = !isLocalnet && !isDevnet
+  const paymentToken = isModerato ? ousd : pathUsd
   const isPublicTestnet = isDevnet || isModerato
   const isSupported = isLocalnet || isPublicTestnet
   const hasExplorerLink = isModerato || Boolean(import.meta.env.VITE_EXPLORER_OVERRIDE)
@@ -403,14 +404,14 @@ export function VirtualAddressesLiveDemo() {
 
       const decimals = Number(
         await publicClient.readContract({
-          address: pathUsd,
+          address: paymentToken,
           abi: Abis.tip20,
           functionName: 'decimals',
         }),
       )
       const amount = parseUnits('100', decimals)
 
-      await ensureAccountFunded(demoSender.address, isLocalnet ? [alphaUsd] : [pathUsd])
+      await ensureAccountFunded(demoSender.address, isLocalnet ? [alphaUsd] : [paymentToken])
 
       if (isLocalnet) {
         if (!demoAdminClient) throw new Error('Localnet admin client unavailable.')
@@ -422,19 +423,19 @@ export function VirtualAddressesLiveDemo() {
           amount,
           chain: tempoLocalnet,
           to: demoSender.address,
-          token: pathUsd,
+          token: paymentToken,
         })
       }
 
       const [masterBefore, virtualBefore] = await Promise.all([
         publicClient.readContract({
-          address: pathUsd,
+          address: paymentToken,
           abi: Abis.tip20,
           functionName: 'balanceOf',
           args: [address as Address],
         }) as Promise<bigint>,
         publicClient.readContract({
-          address: pathUsd,
+          address: paymentToken,
           abi: Abis.tip20,
           functionName: 'balanceOf',
           args: [registration.virtualAddress],
@@ -445,18 +446,18 @@ export function VirtualAddressesLiveDemo() {
         amount,
         ...(isPublicTestnet ? { feePayer: true } : {}),
         to: registration.virtualAddress,
-        token: pathUsd,
+        token: paymentToken,
       })
 
       const [masterAfter, virtualAfter] = await Promise.all([
         publicClient.readContract({
-          address: pathUsd,
+          address: paymentToken,
           abi: Abis.tip20,
           functionName: 'balanceOf',
           args: [address as Address],
         }) as Promise<bigint>,
         publicClient.readContract({
-          address: pathUsd,
+          address: paymentToken,
           abi: Abis.tip20,
           functionName: 'balanceOf',
           args: [registration.virtualAddress],
@@ -475,7 +476,7 @@ export function VirtualAddressesLiveDemo() {
         events: receipt.logs
           .filter(
             (log) =>
-              log.address.toLowerCase() === pathUsd.toLowerCase() &&
+              log.address.toLowerCase() === paymentToken.toLowerCase() &&
               log.topics[0] === TRANSFER_TOPIC,
           )
           .map((log) => ({
@@ -512,7 +513,7 @@ export function VirtualAddressesLiveDemo() {
     </Button>
   )
 
-  const tokenSymbol = 'pathUSD'
+  const tokenSymbol = isModerato ? 'OUSD' : 'pathUSD'
 
   return (
     <div className="space-y-4">

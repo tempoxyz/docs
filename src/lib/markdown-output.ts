@@ -54,6 +54,13 @@ const interactiveDescriptions: Record<string, string> = {
     'The interactive terminal creates a test wallet, funds it, and makes a paid request.',
   TidxQuery: 'Use the interactive web page to run SQL against the public Tempo indexer.',
   TokenListDemo: 'The interactive web page displays the current Tempo token list.',
+  ValidatorTopologyDiagram:
+    'Two separate Validator units each contain a trusted RPC group and its validator: ' +
+    'R1 with V1, and R2 with V2. A client outside both units submits a transaction to R1 over JSON-RPC. ' +
+    'R1 and R2 each connect to Public Nodes and to each other over bidirectional execution P2P. ' +
+    'R1 follows V1 and R2 follows V2 using --follow over WebSocket; each pair also has a ' +
+    'bidirectional execution P2P connection. V1 and V2 communicate over bidirectional consensus P2P, ' +
+    'with no execution P2P connection between them.',
 }
 
 const demoStepLabels: Record<string, string> = {
@@ -158,6 +165,11 @@ function rewriteNode(
   if (node.name === 'Demo.Container') return renderDemo(node)
   if (node.name === 'MermaidDiagram' || node.name === 'StaticMermaidDiagram')
     return renderMermaid(node)
+  if (node.name === 'ZoneDiagram') {
+    const alt = requiredStringAttribute(node, 'alt')
+    const caption = optionalStaticStringAttribute(node, 'caption')
+    return [paragraph([text(alt)]), ...(caption ? [paragraph([text(caption)])] : [])]
+  }
   if (node.name === 'Badge') return renderBadge(node)
   if (node.name === 'Callout') return renderCallout(node, headingDepth, getSnippet)
   if (node.name === 'DocsLinkButton') return renderLinkButton(node)

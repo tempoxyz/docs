@@ -46,6 +46,7 @@ const columns: FooterColumn[] = [
     header: 'Documentation',
     links: [
       { label: 'Docs', href: '/docs' },
+      { label: 'Tempo API', href: '/docs/api' },
       { label: 'Payments guide', href: '/docs/guide/payments' },
       { label: 'Token issuance', href: '/docs/guide/issuance' },
     ],

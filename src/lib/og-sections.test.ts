@@ -54,7 +54,7 @@ describe('vocs.config ogImageUrl stays in sync with src/lib/og-sections', () => 
   it('uses the static landing image for landing paths', () => {
     for (const path of ogLandingPaths) {
       const docsPath = path === '/' ? '/docs' : `/docs${path}`
-      expect(ogImageUrl(docsPath), `landing ${path}`).toBe('/og-docs.png')
+      expect(ogImageUrl(docsPath), `landing ${path}`).toBe(`/og-docs.png?v=${OG_IMAGE_VERSION}`)
     }
   })
 

@@ -183,9 +183,9 @@ result.capabilities.autoSwap
 //   maxIn: {
 //     decimals: 6,
 //     formatted: '105.000000',
-//     name: 'pathUSD',
-//     symbol: 'pathUSD',
-//     token: '0x20c0000000000000000000000000000000000000',
+//     name: 'OpenUSD',
+//     symbol: 'OUSD',
+//     token: '0x20c0000000000000000000006a37da5c996874be',
 //     value: '0x6422c40',
 //   },
 //   minOut: {
@@ -575,7 +575,7 @@ Returns candidate token addresses for fee-token resolution. By default, the rela
 ```ts
 const handler = Handler.relay({
   resolveTokens: () => [ // [!code focus]
-    '0x20c0000000000000000000000000000000000000', // [!code focus]
+    '0x20c0000000000000000000006a37da5c996874be', // [!code focus]
     '0x20c000000000000000000000b9537d11c60e8b50', // [!code focus]
   ], // [!code focus]
 })

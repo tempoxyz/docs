@@ -15,7 +15,7 @@ import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Logout, ReceiptHash, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
-import { pathUsd } from '../tokens'
+import { ousd } from '../tokens'
 import { useStickyStepCompletion } from './useStickyStepCompletion.ts'
 
 const ZONE_LABEL = 'Zone A'
@@ -68,7 +68,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     refetch: refetchRootBalance,
   } = Hooks.token.useGetBalance({
     account: address,
-    token: pathUsd,
+    token: ousd,
   })
 
   const zoneClient = React.useMemo(
@@ -109,7 +109,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
 
       const { amount } = await zoneClient.token.getBalance({
         account: address,
-        token: pathUsd,
+        token: ousd,
       })
       return amount
     },
@@ -148,7 +148,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         account: connectorClient.account,
         amount: zoneTopUpShortfall,
         chain: connectorClient.chain as never,
-        token: pathUsd,
+        token: ousd,
         zoneId: ZONE_ID,
       })
 
@@ -168,19 +168,19 @@ function ConnectedZoneFlow(props: { address: Hex }) {
 
       const { amount: currentZoneBalance } = await zoneClient.token.getBalance({
         account: address,
-        token: pathUsd,
+        token: ousd,
       })
       if (currentZoneBalance < requiredZoneBalance) {
-        throw new Error('Zone A needs more pathUSD before sending.')
+        throw new Error('Zone A needs more OUSD before sending.')
       }
 
       const { receipt } = await Actions.token.transferSync(zoneClient as never, {
         account: rootWebAuthnAccount,
         amount: TRANSFER_AMOUNT,
         chain: zoneModerato(ZONE_ID) as never,
-        feeToken: pathUsd,
+        feeToken: ousd,
         to: FAKE_RECIPIENT as Hex,
-        token: pathUsd,
+        token: ousd,
       })
 
       return {
@@ -202,7 +202,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
 
       const { amount } = await zoneClient.token.getBalance({
         account: address,
-        token: pathUsd,
+        token: ousd,
       })
       return amount
     },
@@ -286,7 +286,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         type="button"
         variant={zoneAuthorization.isAuthorized ? 'accent' : 'default'}
       >
-        {fundMutation.isPending ? 'Getting pathUSD' : 'Get testnet pathUSD'}
+        {fundMutation.isPending ? 'Getting OUSD' : 'Get testnet OUSD'}
       </Button>
     )
   } else if (!hasEnoughZoneBalance) {
@@ -316,10 +316,10 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         variant={transferMutation.isSuccess ? 'default' : 'accent'}
       >
         {transferMutation.isPending
-          ? 'Sending pathUSD'
+          ? 'Sending OUSD'
           : transferMutation.isSuccess
             ? 'Transfer submitted'
-            : 'Send 25 pathUSD'}
+            : 'Send 25 OUSD'}
       </Button>
     )
   }
@@ -341,7 +341,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         actions={stepThreeAction}
         error={topUpMutation.error ?? zoneBalanceQuery.error ?? fundMutation.error}
         number={3}
-        title={`Make sure ${ZONE_LABEL} has enough pathUSD to cover the transfer and fee.`}
+        title={`Make sure ${ZONE_LABEL} has enough OUSD to cover the transfer and fee.`}
       >
         {topUpReceipt && (
           <StepBody>
@@ -357,7 +357,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
         actions={stepFourAction}
         error={transferMutation.error}
         number={4}
-        title={`Send 25 pathUSD from ${ZONE_LABEL} to the demo recipient.`}
+        title={`Send 25 OUSD from ${ZONE_LABEL} to the demo recipient.`}
       >
         {transferReceipt && (
           <StepBody>
@@ -396,7 +396,7 @@ function DisconnectedZoneFlow() {
         actions={undefined}
         error={undefined}
         number={3}
-        title={`Make sure ${ZONE_LABEL} has enough pathUSD to cover the transfer and fee.`}
+        title={`Make sure ${ZONE_LABEL} has enough OUSD to cover the transfer and fee.`}
       />
       <Step
         active={false}
@@ -404,7 +404,7 @@ function DisconnectedZoneFlow() {
         actions={undefined}
         error={undefined}
         number={4}
-        title={`Send 25 pathUSD to the demo recipient in ${ZONE_LABEL}.`}
+        title={`Send 25 OUSD to the demo recipient in ${ZONE_LABEL}.`}
       />
       <Step
         active={false}

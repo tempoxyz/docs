@@ -1,26 +1,36 @@
 ---
-title: "Quote tokens on Tempo: understanding pathUSD"
-seoTitle: "Quote Tokens: pathUSD Explained | Docs"
-description: Quote tokens determine trading pairs on Tempo's DEX. Each TIP-20 specifies a quote token, with pathUSD available as an optional neutral choice.
+title: "pathUSD on Tempo Mainnet and quote tokens"
+seoTitle: "pathUSD on Tempo Mainnet | Tempo Docs"
+description: Understand live mainnet pathUSD, its role as an optional quote token on Tempo's DEX, and how it differs from testnet faucet tokens.
 ---
 
-# Quote tokens on Tempo: understanding pathUSD
+# pathUSD on Tempo Mainnet and quote tokens
 
 Each USD TIP-20 on Tempo can choose any other USD TIP-20 as its quote token—the token it is paired against on the native decentralized exchange. This guarantees that there is one path between any two tokens, which reduces fragmentation of liquidity and simplifies routing.
 
+`pathUSD` is live on Tempo Mainnet. The production asset and the faucet-issued test token on Tempo Testnet use the same predeploy address, but they exist on separate networks and are not interchangeable.
+
+:::tip
+Looking for a stablecoin to hold, pay, or settle with? Use [OUSD](/docs/guide/ousd), the recommended stablecoin on Tempo. pathUSD is routing infrastructure for the DEX, and OUSD itself uses pathUSD as its quote token.
+:::
+
 ## pathUSD
 
-pathUSD is a USD-denominated stablecoin that can be used as a quote token on Tempo's decentralized exchange. It is the first stablecoin deployed to the chain, and is used as a fallback gas token when the user or validator does not specify a gas token. Use of pathUSD is optional.
+On Tempo Mainnet, pathUSD is a USD-denominated stablecoin that can be used as a quote token on Tempo's decentralized exchange. It is the first stablecoin deployed to the chain, and is used as a fallback gas token when the user or validator does not specify a gas token. Use of pathUSD is optional. For balances and payments, most integrations should use OUSD and set it as their fee token. See [OUSD on Tempo](/docs/guide/ousd).
 
 ### Issuance & Backing
 
 pathUSD is issued by Bridge and is backed 1:1 by high-quality USD-denominated reserves. Please see [bridge.xyz](https://www.bridge.xyz) for more about their reserve allocation practices. pathUSD can be minted by depositing USDC.e and redeemed back to USDC through Bridge.
 
+### Testnet pathUSD
+
+Tempo Testnet (Moderato, chain ID `42431`) provides faucet-issued pathUSD for development. Testnet balances have no relationship to production pathUSD on Tempo Mainnet and cannot be treated as mainnet funds. Use the [Tempo faucet](/docs/quickstart/faucet) only for testnet development.
+
 ### Why pathUSD?
 
 Tempo is designed to be neutral across stablecoin issuers. Rather than defaulting to any single issuer's stablecoin as the quote token, pathUSD provides a neutral option that any token can pair against on Tempo's DEX. This ensures that no single stablecoin issuer has a privileged position in Tempo's liquidity graph and guarantees stablecoin interoperability.
 
-pathUSD is not meant to compete as a consumer-facing stablecoin. Use of pathUSD is optional, and tokens are able to list any other token as their quote token if they choose. pathUSD can also be accepted as a fee token by validators.
+pathUSD is not meant to compete as a consumer-facing stablecoin. For that role, Tempo recommends [OUSD](/docs/guide/ousd). Use of pathUSD is optional, and tokens are able to list any other token as their quote token if they choose. pathUSD can also be accepted as a fee token by validators.
 
 ### Contract
 
@@ -28,6 +38,7 @@ pathUSD is a predeployed [TIP-20](/docs/protocol/tip20/spec) at genesis. Since i
 
 | Property       | Value                                        |
 | -------------- | -------------------------------------------- |
+| network        | Tempo Mainnet (chain ID `4217`)              |
 | address        | `0x20c0000000000000000000000000000000000000` |
 | `name()`       | `"pathUSD"`                                  |
 | `symbol()`     | `"pathUSD"`                                  |
@@ -70,9 +81,9 @@ The tree structure guarantees a single path between any two USD stablecoins. Thi
 
 ### Example: Cross-Stablecoin Payment
 
-1. Market makers provide liquidity for USDX/pathUSD and USDY/pathUSD pairs.
-2. A user wants to send USDX to a merchant who prefers USDY.
-3. The exchange atomically routes the payment: USDX to pathUSD to USDY.
+1. Market makers provide liquidity for USDX/pathUSD and OUSD/pathUSD pairs.
+2. A user wants to send USDX to a merchant who settles in OUSD.
+3. The exchange atomically routes the payment: USDX to pathUSD to OUSD.
 4. This happens in a single transaction with no manual swaps required.
 
 The user and merchant never hold pathUSD directly. It exists only as routing infrastructure.

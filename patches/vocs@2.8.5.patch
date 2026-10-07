@@ -1,3 +1,32 @@
+diff --git a/dist/internal/vite-plugins.js b/dist/internal/vite-plugins.js
+index ba17f7d688e4c4df6da2abe1b7bf875655a83e79..5838377e726db569ff9f0a2e97e49c05049b63d9 100644
+--- a/dist/internal/vite-plugins.js
++++ b/dist/internal/vite-plugins.js
+@@ -218,7 +218,9 @@ export function llms(config) {
+                 next();
+             });
+         },
+-        async buildEnd() {
++        async writeBundle(options) {
++            if (!options.dir?.endsWith('/public'))
++                return;
+             const content = await buildLlmsContent();
+             const outDir = path.resolve(viteConfig.root, config.outDir, 'public');
+             await fs.mkdir(outDir, { recursive: true });
+diff --git a/src/internal/vite-plugins.ts b/src/internal/vite-plugins.ts
+index 2852c38212fde11881cb8fa97328576cee9c5a8c..f9eb59f1b72814aa42d2954897e6671b8b127760 100644
+--- a/src/internal/vite-plugins.ts
++++ b/src/internal/vite-plugins.ts
+@@ -230,7 +230,8 @@ export function llms(config: Config.Config): PluginOption {
+         next()
+       })
+     },
+-    async buildEnd() {
++    async writeBundle(options) {
++      if (!options.dir?.endsWith('/public')) return
+       const content = await buildLlmsContent()
+       const outDir = path.resolve(viteConfig.root, config.outDir, 'public')
+       await fs.mkdir(outDir, { recursive: true })
 diff --git a/dist/react/Head.d.ts b/dist/react/Head.d.ts
 index 8ad0e7d1635b9ca6b13ef2fb4ac9dd1ca9b6fbff..0131bb7f9ccff37b90550a98e7e47d3e69f3ea66 100644
 --- a/dist/react/Head.d.ts
