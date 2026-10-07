@@ -23,6 +23,12 @@ export const proxiedLegacyDocsRoutes = [
   { source: '/docs/hosted-services', destination: '/docs/api' },
   { source: '/docs/hosted-services/:path*', destination: '/docs/api' },
   { source: '/docs/api/funding/:path*', destination: '/docs/api/routes/:path*' },
+  { source: '/docs/api/routes/chains', destination: '/docs/api/conventions#chain-identifiers' },
+  { source: '/docs/api/routes/providers', destination: '/docs/api/reference' },
+  {
+    source: '/docs/guide/use-accounts/embed-passkeys',
+    destination: 'https://accounts.tempo.xyz/docs/adapters/webauthn',
+  },
   {
     source: '/docs/guide/use-accounts/add-funds',
     destination: '/docs/guide/getting-funds',

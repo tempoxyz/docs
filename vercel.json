@@ -747,6 +747,21 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/api/routes/chains",
+      "destination": "/developers/docs/api/conventions#chain-identifiers",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/api/routes/providers",
+      "destination": "/developers/docs/api/reference",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/use-accounts/embed-passkeys",
+      "destination": "https://accounts.tempo.xyz/docs/adapters/webauthn",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/guide/use-accounts/add-funds",
       "destination": "/developers/docs/guide/getting-funds",
       "permanent": true
