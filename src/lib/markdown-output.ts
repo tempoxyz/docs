@@ -1,5 +1,11 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { paymentRoutes, providerReviewedAt } from '../data/paymentRoutes'
+import {
+  mainnetRoutesApiRoutes,
+  routesApiReviewedLabel,
+  routesApiSource,
+} from '../data/routesApiCatalog'
 
 type MarkdownAttribute = {
   name?: string
@@ -46,8 +52,6 @@ const tempoReleasesUrl = 'https://github.com/tempoxyz/tempo/releases'
 
 const interactiveDescriptions: Record<string, string> = {
   ConnectWallet: 'Connect a wallet in the interactive web page.',
-  PaymentRoutesExplorer:
-    'Use the interactive web page to filter live Tempo payment routes by rail, chain, currency, and provider.',
   T7BenchmarkVisual: 'The benchmark values are listed in the table below.',
   TempoMcpExplorer: 'Use the interactive web page to try the Tempo MCP server.',
   TerminalDemo:
@@ -175,6 +179,7 @@ function rewriteNode(
   if (node.name === 'DocsLinkButton') return renderLinkButton(node)
   if (node.name === 'OpenApi.Endpoints' || node.name === 'OpenApi.Playground')
     return renderOpenApi(node)
+  if (node.name === 'PaymentRoutesExplorer') return renderPaymentRoutes()
   if (node.name && interactiveDescriptions[node.name])
     return [paragraph([text(interactiveDescriptions[node.name])])]
 
@@ -185,6 +190,66 @@ function rewriteNode(
 
   rewriteChildren(node, headingDepth, getSnippet)
   return [node]
+}
+
+function renderPaymentRoutes(): MarkdownNode[] {
+  return [
+    paragraph([
+      text(`Routes API mainnet catalog, checked ${routesApiReviewedLabel} UTC. `),
+      link('Check the current catalog', routesApiSource),
+      text(' before requesting a quote. Availability and amounts depend on the quote.'),
+    ]),
+    {
+      type: 'list',
+      ordered: false,
+      spread: false,
+      children: mainnetRoutesApiRoutes().map((route) => ({
+        type: 'listItem',
+        spread: false,
+        children: [
+          paragraph([
+            text(
+              `${route.sourceRail} ${route.sourceCurrency} → ${route.destinationRail} ${route.destinationCurrency}. Methods: ${route.methods.join(', ')}.`,
+            ),
+          ]),
+        ],
+      })),
+    },
+    paragraph([
+      text(
+        'Provider coverage is separate from Routes API availability. Providers offer their own products and onboarding. Confirm current support directly with each provider. Use the interactive page to filter provider entries or view testnet routes.',
+      ),
+    ]),
+    {
+      type: 'list',
+      ordered: false,
+      spread: false,
+      children: paymentRoutes.map((route) => ({
+        type: 'listItem',
+        spread: false,
+        children: [
+          paragraph([
+            text(
+              `${route.sourceRail} ${route.sourceCurrency} → ${route.destinationRail} ${route.destinationCurrency}. Provider: `,
+            ),
+            link(route.provider, route.providerUrl),
+            text(`. Reviewed ${providerReviewedAt(route.provider)}. `),
+            text(
+              [
+                route.region,
+                route.minimum && `Minimum: ${route.minimum}`,
+                route.limit && `Limit: ${route.limit}`,
+                route.settlement && `Settlement: ${route.settlement}`,
+                route.note,
+              ]
+                .filter(Boolean)
+                .join(' · '),
+            ),
+          ]),
+        ],
+      })),
+    },
+  ]
 }
 
 function renderCards(

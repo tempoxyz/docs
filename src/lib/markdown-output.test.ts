@@ -117,9 +117,16 @@ No validator P2P or RPC port should be directly accessible from the internet.
     expect(output).toContain('Tempo JSON-RPC endpoints')
     expect(output).toContain('Tempo REST API endpoints')
     expect(output).toContain('Use the interactive web page to try the Tempo MCP server.')
-    expect(output).toContain(
-      'Use the interactive web page to filter live Tempo payment routes by rail, chain, currency, and provider.',
-    )
+    expect(output).toContain('Routes API mainnet catalog, checked')
+    expect(output).toContain('Deposit address, Transfer')
+    expect(output).toContain('USDC.e')
+    expect(output).toContain('OUSD')
+    expect(output).not.toContain('alphaUSD')
+    expect(output).toContain('Provider coverage is separate from Routes API availability.')
+    expect(output).toContain('[Bridge]')
+    expect(output.match(/Provider: \[Bridge\]/g)).toHaveLength(429)
+    expect(output).toContain('October 6, 2026')
+    expect(output).toContain('August 22, 2026')
     expect(output).not.toMatch(/<\/?[A-Z]/)
   })
 

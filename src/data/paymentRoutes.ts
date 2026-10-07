@@ -29,43 +29,64 @@ const BRIDGE_FIAT_RAILS = new Set([
 ])
 
 const BRIDGE_ROUTES_TSV = `
+ACH	USD	Tempo	OUSD	1 USD
 ACH	USD	Tempo	PATHUSD	1 USD
 ACH	USD	Tempo	USDB	1 USD
 ACH	USD	Tempo	USDC	1 USD
-ACH	USD	Tempo	USDT	20 USD
+ACH	USD	Tempo	USDT	1 USD
+Aptos	USDC	Tempo	OUSD	1 USDC
 Aptos	USDC	Tempo	PATHUSD	1 USDC
 Aptos	USDC	Tempo	USDB	1 USDC
 Aptos	USDC	Tempo	USDC	1 USDC
 Aptos	USDC	Tempo	USDT	5 USDC
+Aptos	USDCBL	Tempo	OUSD	1 USDCBL
 Aptos	USDCBL	Tempo	PATHUSD	1 USDCBL
 Aptos	USDCBL	Tempo	USDB	1 USDCBL
 Aptos	USDCBL	Tempo	USDC	1 USDCBL
 Aptos	USDCBL	Tempo	USDT	20 USDCBL
+Arbitrum	USDC	Tempo	OUSD	1 USDC
 Arbitrum	USDC	Tempo	PATHUSD	1 USDC
 Arbitrum	USDC	Tempo	USDB	1 USDC
 Arbitrum	USDC	Tempo	USDC	1 USDC
 Arbitrum	USDC	Tempo	USDT	5 USDC
+Avalanche C-Chain	USDC	Tempo	OUSD	1 USDC
 Avalanche C-Chain	USDC	Tempo	PATHUSD	1 USDC
 Avalanche C-Chain	USDC	Tempo	USDB	1 USDC
 Avalanche C-Chain	USDC	Tempo	USDC	1 USDC
 Avalanche C-Chain	USDC	Tempo	USDT	5 USDC
+Base	EURC	Tempo	OUSD	1 EURC
 Base	EURC	Tempo	PATHUSD	1 EURC
 Base	EURC	Tempo	USDB	1 EURC
 Base	EURC	Tempo	USDC	1 EURC
 Base	EURC	Tempo	USDT	5 EURC
+Base	OUSD	Tempo	OUSD	1 OUSD
+Base	OUSD	Tempo	PATHUSD	1 OUSD
+Base	OUSD	Tempo	USDB	1 OUSD
+Base	OUSD	Tempo	USDC	1 OUSD
+Base	OUSD	Tempo	USDT	5 OUSD
+Base	USDB	Tempo	EURC	2 USDB
+Base	USDB	Tempo	OUSD	1 USDB
 Base	USDB	Tempo	PATHUSD	1 USDB
 Base	USDB	Tempo	USDB	1 USDB
 Base	USDB	Tempo	USDC	1 USDB
 Base	USDB	Tempo	USDT	5 USDB
+Base	USDC	Tempo	OUSD	1 USDC
 Base	USDC	Tempo	PATHUSD	1 USDC
 Base	USDC	Tempo	USDB	1 USDC
 Base	USDC	Tempo	USDC	1 USDC
 Base	USDC	Tempo	USDT	5 USDC
+Bre-B & Bank Transfer	COP	Tempo	OUSD	100 COP
 Bre-B & Bank Transfer	COP	Tempo	PATHUSD	100 COP
 Bre-B & Bank Transfer	COP	Tempo	USDB	100 COP
 Bre-B & Bank Transfer	COP	Tempo	USDC	100 COP
 Bre-B & Bank Transfer	COP	Tempo	USDT	100 COP
 Bridge Wallet	EURC	Tempo	PATHUSD	1 EURC
+Bridge Wallet	OUSD	Tempo	OUSD	1 OUSD
+Bridge Wallet	OUSD	Tempo	PATHUSD	1 OUSD
+Bridge Wallet	OUSD	Tempo	USDB	1 OUSD
+Bridge Wallet	OUSD	Tempo	USDC	1 OUSD
+Bridge Wallet	OUSD	Tempo	USDT	5 OUSD
+Bridge Wallet	PATHUSD	Tempo	OUSD	1 PATHUSD
 Bridge Wallet	PATHUSD	Tempo	PATHUSD	1 PATHUSD
 Bridge Wallet	PATHUSD	Tempo	USDB	1 PATHUSD
 Bridge Wallet	PATHUSD	Tempo	USDC	1 PATHUSD
@@ -73,115 +94,154 @@ Bridge Wallet	PATHUSD	Tempo	USDT	5 PATHUSD
 Bridge Wallet	PYUSD	Tempo	PATHUSD	1 PYUSD
 Bridge Wallet	PYUSD	Tempo	USDC	1 PYUSD
 Bridge Wallet	PYUSD	Tempo	USDT	5 PYUSD
+Bridge Wallet	USDB	Tempo	EURC	2 USDB
+Bridge Wallet	USDB	Tempo	OUSD	1 USDB
 Bridge Wallet	USDB	Tempo	PATHUSD	1 USDB
 Bridge Wallet	USDB	Tempo	USDB	1 USDB
 Bridge Wallet	USDB	Tempo	USDC	1 USDB
 Bridge Wallet	USDB	Tempo	USDT	5 USDB
+Bridge Wallet	USDC	Tempo	OUSD	1 USDC
 Bridge Wallet	USDC	Tempo	PATHUSD	1 USDC
 Bridge Wallet	USDC	Tempo	USDB	1 USDC
 Bridge Wallet	USDC	Tempo	USDT	5 USDC
+Bridge Wallet	USDT	Tempo	OUSD	1 USDT
 Bridge Wallet	USDT	Tempo	PATHUSD	1 USDT
 Bridge Wallet	USDT	Tempo	USDB	1 USDT
 Bridge Wallet	USDT	Tempo	USDC	1 USDT
 Bridge Wallet	USDT	Tempo	USDT	5 USDT
+Celo	USDC	Tempo	OUSD	1 USDC
 Celo	USDC	Tempo	PATHUSD	1 USDC
 Celo	USDC	Tempo	USDB	1 USDC
 Celo	USDC	Tempo	USDC	1 USDC
 Celo	USDC	Tempo	USDT	5 USDC
+Ethereum	EURC	Tempo	OUSD	1 EURC
 Ethereum	EURC	Tempo	PATHUSD	1 EURC
 Ethereum	EURC	Tempo	USDB	1 EURC
+Ethereum	OUSD	Tempo	EURC	2 OUSD
+Ethereum	OUSD	Tempo	PATHUSD	1 OUSD
+Ethereum	OUSD	Tempo	USDB	1 OUSD
+Ethereum	OUSD	Tempo	USDC	1 OUSD
+Ethereum	OUSD	Tempo	USDT	5 OUSD
 Ethereum	PYUSD	Tempo	PATHUSD	1 PYUSD
 Ethereum	PYUSD	Tempo	USDC	1 PYUSD
 Ethereum	PYUSD	Tempo	USDT	5 PYUSD
+Ethereum	USDB	Tempo	OUSD	1 USDB
 Ethereum	USDB	Tempo	PATHUSD	1 USDB
 Ethereum	USDB	Tempo	USDB	1 USDB
 Ethereum	USDB	Tempo	USDC	1 USDB
 Ethereum	USDB	Tempo	USDT	5 USDB
+Ethereum	USDC	Tempo	OUSD	1 USDC
 Ethereum	USDC	Tempo	PATHUSD	1 USDC
 Ethereum	USDC	Tempo	USDB	1 USDC
 Ethereum	USDC	Tempo	USDC	1 USDC
 Ethereum	USDC	Tempo	USDT	5 USDC
+Ethereum	USDT	Tempo	OUSD	2 USDT
 Ethereum	USDT	Tempo	PATHUSD	2 USDT
 Ethereum	USDT	Tempo	USDB	2 USDT
 Ethereum	USDT	Tempo	USDC	1 USDT
 Ethereum	USDT	Tempo	USDT	5 USDT
+Faster Payments	GBP	Tempo	OUSD	2 GBP
 Faster Payments	GBP	Tempo	PATHUSD	2 GBP
 Faster Payments	GBP	Tempo	USDB	2 GBP
 Faster Payments	GBP	Tempo	USDC	2 GBP
+FedNow	USD	Tempo	OUSD	1 USD
 FedNow	USD	Tempo	PATHUSD	1 USD
 FedNow	USD	Tempo	USDB	1 USD
 FedNow	USD	Tempo	USDC	1 USD
-FedNow	USD	Tempo	USDT	20 USD
+FedNow	USD	Tempo	USDT	1 USD
+HyperEVM	USDC	Tempo	OUSD	1 USDC
 HyperEVM	USDC	Tempo	PATHUSD	1 USDC
 HyperEVM	USDC	Tempo	USDB	1 USDC
 HyperEVM	USDC	Tempo	USDC	1 USDC
 HyperEVM	USDC	Tempo	USDT	5 USDC
+Linea	USDC	Tempo	OUSD	1 USDC
 Linea	USDC	Tempo	PATHUSD	1 USDC
 Linea	USDC	Tempo	USDB	1 USDC
 Linea	USDC	Tempo	USDC	1 USDC
 Linea	USDC	Tempo	USDT	5 USDC
+Monad	USDC	Tempo	OUSD	1 USDC
 Monad	USDC	Tempo	PATHUSD	1 USDC
 Monad	USDC	Tempo	USDB	1 USDC
 Monad	USDC	Tempo	USDC	1 USDC
 Monad	USDC	Tempo	USDT	5 USDC
+Optimism	USDC	Tempo	OUSD	1 USDC
 Optimism	USDC	Tempo	PATHUSD	1 USDC
 Optimism	USDC	Tempo	USDB	1 USDC
 Optimism	USDC	Tempo	USDC	1 USDC
 Optimism	USDC	Tempo	USDT	5 USDC
+Pix	BRL	Tempo	OUSD	10 BRL
 Pix	BRL	Tempo	PATHUSD	10 BRL
 Pix	BRL	Tempo	USDB	10 BRL
 Pix	BRL	Tempo	USDC	10 BRL
 Pix	BRL	Tempo	USDT	10 BRL
+Plasma	USDT	Tempo	OUSD	2 USDT
 Plasma	USDT	Tempo	PATHUSD	2 USDT
 Plasma	USDT	Tempo	USDB	2 USDT
 Plasma	USDT	Tempo	USDC	1 USDT
+Polygon	USDC	Tempo	OUSD	1 USDC
 Polygon	USDC	Tempo	PATHUSD	1 USDC
 Polygon	USDC	Tempo	USDB	1 USDC
 Polygon	USDC	Tempo	USDC	1 USDC
 Polygon	USDC	Tempo	USDT	5 USDC
+SEPA	EUR	Tempo	OUSD	1 EUR
 SEPA	EUR	Tempo	PATHUSD	1 EUR
 SEPA	EUR	Tempo	USDB	1 EUR
 SEPA	EUR	Tempo	USDC	1 EUR
-Solana	CASH	Tempo	PATHUSD	1 CASH
-Solana	CASH	Tempo	USDC	1 CASH
-Solana	CASH	Tempo	USDT	5 CASH
-Solana	EURC	Tempo	PATHUSD	1 EURC
-Solana	EURC	Tempo	USDB	1 EURC
-Solana	EURC	Tempo	USDC	1 EURC
-Solana	PYUSD	Tempo	PATHUSD	1 PYUSD
-Solana	PYUSD	Tempo	USDC	1 PYUSD
-Solana	PYUSD	Tempo	USDT	5 PYUSD
-Solana	USDB	Tempo	PATHUSD	1 USDB
-Solana	USDB	Tempo	USDB	1 USDB
-Solana	USDB	Tempo	USDC	1 USDB
-Solana	USDB	Tempo	USDT	5 USDB
-Solana	USDC	Tempo	PATHUSD	1 USDC
-Solana	USDC	Tempo	USDB	1 USDC
-Solana	USDC	Tempo	USDC	1 USDC
-Solana	USDC	Tempo	USDT	5 USDC
-Solana	USDG	Tempo	PATHUSD	1 USDG
-Solana	USDG	Tempo	USDB	1 USDG
-Solana	USDG	Tempo	USDC	1 USDG
-Solana	USDG	Tempo	USDT	5 USDG
-Solana	USDT	Tempo	PATHUSD	2 USDT
-Solana	USDT	Tempo	USDB	2 USDT
-Solana	USDT	Tempo	USDC	1 USDT
-Solana	USDT	Tempo	USDT	1 USDT
 SPEI	MXN	Tempo	EURC	50 MXN
+SPEI	MXN	Tempo	OUSD	50 MXN
 SPEI	MXN	Tempo	PATHUSD	50 MXN
 SPEI	MXN	Tempo	USDB	50 MXN
 SPEI	MXN	Tempo	USDC	50 MXN
 SPEI	MXN	Tempo	USDT	50 MXN
+Solana	CASH	Tempo	PATHUSD	1 CASH
+Solana	CASH	Tempo	USDC	1 CASH
+Solana	CASH	Tempo	USDT	5 CASH
+Solana	EURC	Tempo	OUSD	1 EURC
+Solana	EURC	Tempo	PATHUSD	1 EURC
+Solana	EURC	Tempo	USDB	1 EURC
+Solana	EURC	Tempo	USDC	1 EURC
+Solana	OUSD	Tempo	OUSD	1 OUSD
+Solana	OUSD	Tempo	PATHUSD	1 OUSD
+Solana	OUSD	Tempo	USDB	1 OUSD
+Solana	OUSD	Tempo	USDC	1 OUSD
+Solana	OUSD	Tempo	USDT	5 OUSD
+Solana	PYUSD	Tempo	PATHUSD	1 PYUSD
+Solana	PYUSD	Tempo	USDC	1 PYUSD
+Solana	PYUSD	Tempo	USDT	5 PYUSD
+Solana	USDB	Tempo	EURC	2 USDB
+Solana	USDB	Tempo	PATHUSD	1 USDB
+Solana	USDB	Tempo	USDB	1 USDB
+Solana	USDB	Tempo	USDC	1 USDB
+Solana	USDB	Tempo	USDT	5 USDB
+Solana	USDC	Tempo	OUSD	1 USDC
+Solana	USDC	Tempo	PATHUSD	1 USDC
+Solana	USDC	Tempo	USDB	1 USDC
+Solana	USDC	Tempo	USDC	1 USDC
+Solana	USDC	Tempo	USDT	5 USDC
+Solana	USDG	Tempo	OUSD	1 USDG
+Solana	USDG	Tempo	PATHUSD	1 USDG
+Solana	USDG	Tempo	USDB	1 USDG
+Solana	USDG	Tempo	USDC	1 USDG
+Solana	USDG	Tempo	USDT	5 USDG
+Solana	USDT	Tempo	OUSD	2 USDT
+Solana	USDT	Tempo	PATHUSD	2 USDT
+Solana	USDT	Tempo	USDB	2 USDT
+Solana	USDT	Tempo	USDC	1 USDT
+Solana	USDT	Tempo	USDT	1 USDT
+Stellar	EURC	Tempo	OUSD	1 EURC
 Stellar	EURC	Tempo	PATHUSD	1 EURC
 Stellar	EURC	Tempo	USDB	1 EURC
+Stellar	USDC	Tempo	OUSD	1 USDC
 Stellar	USDC	Tempo	PATHUSD	1 USDC
 Stellar	USDC	Tempo	USDB	1 USDC
 Stellar	USDC	Tempo	USDC	1 USDC
 Stellar	USDC	Tempo	USDT	5 USDC
+Sui	USDC	Tempo	OUSD	1 USDC
 Sui	USDC	Tempo	PATHUSD	1 USDC
 Sui	USDC	Tempo	USDB	1 USDC
 Sui	USDC	Tempo	USDC	1 USDC
 Sui	USDC	Tempo	USDT	5 USDC
+Sui	USDSUI	Tempo	OUSD	1 USDSUI
 Sui	USDSUI	Tempo	PATHUSD	1 USDSUI
 Sui	USDSUI	Tempo	USDB	1 USDSUI
 Sui	USDSUI	Tempo	USDC	1 USDSUI
@@ -189,10 +249,12 @@ Sui	USDSUI	Tempo	USDT	20 USDSUI
 Tempo	EURC	Arbitrum	USDC	1 EURC
 Tempo	EURC	Avalanche C-Chain	USDC	1 EURC
 Tempo	EURC	Base	EURC	1 EURC
+Tempo	EURC	Base	OUSD	1 EURC
 Tempo	EURC	Base	USDB	1 EURC
 Tempo	EURC	Base	USDC	1 EURC
 Tempo	EURC	Celo	USDC	1 EURC
 Tempo	EURC	Ethereum	EURC	1 EURC
+Tempo	EURC	Ethereum	OUSD	1 EURC
 Tempo	EURC	Ethereum	USDB	1 EURC
 Tempo	EURC	Ethereum	USDC	1 EURC
 Tempo	EURC	HyperEVM	USDC	1 EURC
@@ -201,13 +263,15 @@ Tempo	EURC	Monad	USDC	1 EURC
 Tempo	EURC	Optimism	USDC	1 EURC
 Tempo	EURC	Polygon	USDC	1 EURC
 Tempo	EURC	SEPA	EUR	1 EURC
+Tempo	EURC	SPEI	MXN	1 EURC
 Tempo	EURC	Solana	EURC	1 EURC
+Tempo	EURC	Solana	OUSD	1 EURC
 Tempo	EURC	Solana	USDB	1 EURC
 Tempo	EURC	Solana	USDC	1 EURC
 Tempo	EURC	Solana	USDG	1 EURC
-Tempo	EURC	SPEI	MXN	1 EURC
 Tempo	EURC	Stellar	EURC	1 EURC
 Tempo	EURC	Stellar	USDC	1 EURC
+Tempo	EURC	Tempo	OUSD	1 EURC
 Tempo	EURC	Tempo	PATHUSD	1 EURC
 Tempo	EURC	Tempo	USDB	1 EURC
 Tempo	EURC	Tempo	USDC	1 EURC
@@ -218,9 +282,11 @@ Tempo	PATHUSD	Aptos	USDC	1 PATHUSD
 Tempo	PATHUSD	Aptos	USDCBL	1 PATHUSD
 Tempo	PATHUSD	Arbitrum	USDC	1 PATHUSD
 Tempo	PATHUSD	Avalanche C-Chain	USDC	1 PATHUSD
+Tempo	PATHUSD	Base	OUSD	1 PATHUSD
 Tempo	PATHUSD	Base	USDB	1 PATHUSD
 Tempo	PATHUSD	Base	USDC	1 PATHUSD
 Tempo	PATHUSD	Celo	USDC	1 PATHUSD
+Tempo	PATHUSD	Ethereum	OUSD	1 PATHUSD
 Tempo	PATHUSD	Ethereum	PYUSD	1 PATHUSD
 Tempo	PATHUSD	Ethereum	USDB	1 PATHUSD
 Tempo	PATHUSD	Ethereum	USDC	1 PATHUSD
@@ -234,16 +300,17 @@ Tempo	PATHUSD	Pix	BRL	2 PATHUSD
 Tempo	PATHUSD	Plasma	USDT	5 PATHUSD
 Tempo	PATHUSD	Polygon	USDC	1 PATHUSD
 Tempo	PATHUSD	SEPA	EUR	2 PATHUSD
+Tempo	PATHUSD	SPEI	MXN	2 PATHUSD
+Tempo	PATHUSD	Solana	OUSD	1 PATHUSD
 Tempo	PATHUSD	Solana	PYUSD	1 PATHUSD
 Tempo	PATHUSD	Solana	USDB	1 PATHUSD
 Tempo	PATHUSD	Solana	USDC	1 PATHUSD
 Tempo	PATHUSD	Solana	USDG	1 PATHUSD
 Tempo	PATHUSD	Solana	USDT	5 PATHUSD
-Tempo	PATHUSD	SPEI	MXN	2 PATHUSD
 Tempo	PATHUSD	Stellar	USDC	1 PATHUSD
 Tempo	PATHUSD	Sui	USDC	1 PATHUSD
 Tempo	PATHUSD	Sui	USDSUI	1 PATHUSD
-Tempo	PATHUSD	Tempo	PATHUSD	1 PATHUSD
+Tempo	PATHUSD	Tempo	OUSD	1 PATHUSD
 Tempo	PATHUSD	Tempo	USDB	1 PATHUSD
 Tempo	PATHUSD	Tempo	USDC	1 PATHUSD
 Tempo	PATHUSD	Tempo	USDT	5 PATHUSD
@@ -255,10 +322,13 @@ Tempo	USDB	Aptos	USDC	1 USDB
 Tempo	USDB	Aptos	USDCBL	1 USDB
 Tempo	USDB	Arbitrum	USDC	1 USDB
 Tempo	USDB	Avalanche C-Chain	USDC	1 USDB
+Tempo	USDB	Base	EURC	2 USDB
 Tempo	USDB	Base	USDB	1 USDB
 Tempo	USDB	Base	USDC	1 USDB
 Tempo	USDB	Bre-B & Bank Transfer	COP	1 USDB
 Tempo	USDB	Celo	USDC	1 USDB
+Tempo	USDB	Ethereum	EURC	2 USDB
+Tempo	USDB	Ethereum	OUSD	1 USDB
 Tempo	USDB	Ethereum	PYUSD	1 USDB
 Tempo	USDB	Ethereum	USDB	1 USDB
 Tempo	USDB	Ethereum	USDC	1 USDB
@@ -272,17 +342,20 @@ Tempo	USDB	Pix	BRL	2 USDB
 Tempo	USDB	Plasma	USDT	5 USDB
 Tempo	USDB	Polygon	USDC	1 USDB
 Tempo	USDB	SEPA	EUR	2 USDB
+Tempo	USDB	SPEI	MXN	2 USDB
+Tempo	USDB	Solana	EURC	2 USDB
+Tempo	USDB	Solana	OUSD	1 USDB
 Tempo	USDB	Solana	PYUSD	1 USDB
 Tempo	USDB	Solana	USDB	1 USDB
 Tempo	USDB	Solana	USDC	1 USDB
 Tempo	USDB	Solana	USDG	1 USDB
 Tempo	USDB	Solana	USDT	5 USDB
-Tempo	USDB	SPEI	MXN	2 USDB
+Tempo	USDB	Stellar	EURC	2 USDB
 Tempo	USDB	Stellar	USDC	1 USDB
 Tempo	USDB	Sui	USDC	1 USDB
 Tempo	USDB	Sui	USDSUI	1 USDB
+Tempo	USDB	Tempo	EURC	2 USDB
 Tempo	USDB	Tempo	PATHUSD	1 USDB
-Tempo	USDB	Tempo	USDB	1 USDB
 Tempo	USDB	Tempo	USDC	1 USDB
 Tempo	USDB	Tempo	USDT	5 USDB
 Tempo	USDB	Tron	USDT	5 USDB
@@ -294,11 +367,13 @@ Tempo	USDC	Aptos	USDCBL	1 USDC
 Tempo	USDC	Arbitrum	USDC	1 USDC
 Tempo	USDC	Avalanche C-Chain	USDC	1 USDC
 Tempo	USDC	Base	EURC	2 USDC
+Tempo	USDC	Base	OUSD	1 USDC
 Tempo	USDC	Base	USDB	1 USDC
 Tempo	USDC	Base	USDC	1 USDC
 Tempo	USDC	Bre-B & Bank Transfer	COP	1 USDC
 Tempo	USDC	Celo	USDC	1 USDC
 Tempo	USDC	Ethereum	EURC	2 USDC
+Tempo	USDC	Ethereum	OUSD	1 USDC
 Tempo	USDC	Ethereum	PYUSD	1 USDC
 Tempo	USDC	Ethereum	USDB	1 USDC
 Tempo	USDC	Ethereum	USDC	1 USDC
@@ -312,21 +387,22 @@ Tempo	USDC	Pix	BRL	2 USDC
 Tempo	USDC	Plasma	USDT	5 USDC
 Tempo	USDC	Polygon	USDC	1 USDC
 Tempo	USDC	SEPA	EUR	1 USDC
+Tempo	USDC	SPEI	MXN	2 USDC
 Tempo	USDC	Solana	CASH	1 USDC
 Tempo	USDC	Solana	EURC	2 USDC
+Tempo	USDC	Solana	OUSD	1 USDC
 Tempo	USDC	Solana	PYUSD	1 USDC
 Tempo	USDC	Solana	USDB	1 USDC
 Tempo	USDC	Solana	USDC	1 USDC
 Tempo	USDC	Solana	USDG	1 USDC
 Tempo	USDC	Solana	USDT	5 USDC
-Tempo	USDC	SPEI	MXN	2 USDC
 Tempo	USDC	Stellar	EURC	2 USDC
 Tempo	USDC	Stellar	USDC	1 USDC
 Tempo	USDC	Sui	USDC	1 USDC
 Tempo	USDC	Sui	USDSUI	1 USDC
+Tempo	USDC	Tempo	OUSD	1 USDC
 Tempo	USDC	Tempo	PATHUSD	1 USDC
 Tempo	USDC	Tempo	USDB	1 USDC
-Tempo	USDC	Tempo	USDC	1 USDC
 Tempo	USDC	Tempo	USDT	5 USDC
 Tempo	USDC	Tron	USDT	5 USDC
 Tempo	USDC	Wire	USD	1 USDC
@@ -335,10 +411,12 @@ Tempo	USDT	ACH	USD	2 USDT
 Tempo	USDT	Arbitrum	USDC	2 USDT
 Tempo	USDT	Avalanche C-Chain	USDC	2 USDT
 Tempo	USDT	Base	EURC	2 USDT
+Tempo	USDT	Base	OUSD	2 USDT
 Tempo	USDT	Base	USDB	2 USDT
 Tempo	USDT	Base	USDC	2 USDT
 Tempo	USDT	Bre-B & Bank Transfer	COP	1 USDT
 Tempo	USDT	Ethereum	EURC	2 USDT
+Tempo	USDT	Ethereum	OUSD	2 USDT
 Tempo	USDT	Ethereum	PYUSD	1 USDT
 Tempo	USDT	Ethereum	USDB	2 USDT
 Tempo	USDT	Ethereum	USDC	2 USDT
@@ -349,29 +427,33 @@ Tempo	USDT	Monad	USDC	2 USDT
 Tempo	USDT	Optimism	USDC	2 USDT
 Tempo	USDT	Pix	BRL	2 USDT
 Tempo	USDT	Polygon	USDC	2 USDT
+Tempo	USDT	SPEI	MXN	2 USDT
 Tempo	USDT	Solana	CASH	2 USDT
+Tempo	USDT	Solana	OUSD	2 USDT
 Tempo	USDT	Solana	PYUSD	1 USDT
 Tempo	USDT	Solana	USDB	2 USDT
 Tempo	USDT	Solana	USDC	2 USDT
 Tempo	USDT	Solana	USDG	2 USDT
 Tempo	USDT	Solana	USDT	1 USDT
-Tempo	USDT	SPEI	MXN	2 USDT
 Tempo	USDT	Stellar	EURC	2 USDT
 Tempo	USDT	Stellar	USDC	2 USDT
+Tempo	USDT	Tempo	OUSD	2 USDT
 Tempo	USDT	Tempo	PATHUSD	2 USDT
 Tempo	USDT	Tempo	USDB	2 USDT
 Tempo	USDT	Tempo	USDC	1 USDT
-Tempo	USDT	Tempo	USDT	1 USDT
 Tempo	USDT	Tron	USDT	5 USDT
 Tempo	USDT	Wire	USD	2 USDT
+Tron	USDT	Tempo	OUSD	5 USDT
 Tron	USDT	Tempo	PATHUSD	5 USDT
 Tron	USDT	Tempo	USDB	5 USDT
 Tron	USDT	Tempo	USDC	1 USDT
 Tron	USDT	Tempo	USDT	5 USDT
+Wire	USD	Tempo	OUSD	1 USD
 Wire	USD	Tempo	PATHUSD	1 USD
 Wire	USD	Tempo	USDB	1 USD
 Wire	USD	Tempo	USDC	1 USD
-Wire	USD	Tempo	USDT	20 USD
+Wire	USD	Tempo	USDT	1 USD
+XDC	USDC	Tempo	OUSD	1 USDC
 XDC	USDC	Tempo	PATHUSD	1 USDC
 XDC	USDC	Tempo	USDB	1 USDC
 XDC	USDC	Tempo	USDC	1 USDC
@@ -421,7 +503,6 @@ const dueCorridors: DueCorridor[] = [
   ['DKK', 'out', 'Local wire', 'Denmark', 'T+0'],
   ['NOK', 'out', 'Local wire', 'Norway', 'T+0'],
   ['PLN', 'out', 'Local wire', 'Poland', 'T+0'],
-  ['BRL', 'both', 'Pix', 'Brazil', 'Instant'],
   ['BOB', 'out', 'Local wire', 'Bolivia', 'T+0', 'BOB 10,000,000'],
   ['CAD', 'out', 'EFT', 'Canada', 'T+0 to T+1', 'CA$600,000'],
   ['CLP', 'out', 'Local wire', 'Chile', 'T+1', 'CLP 89,000,000'],
@@ -442,7 +523,6 @@ const dueCorridors: DueCorridor[] = [
   ['USD', 'out', 'Local wire', 'Ecuador', 'T+0'],
   ['USD', 'out', 'Local wire', 'El Salvador', 'T+0', '$7,500'],
   ['USD', 'out', 'Tigo Money', 'El Salvador', 'Instant', '$1,850'],
-  ['UYU', 'out', 'Local wire', 'Uruguay', 'T+1', 'UYU 5,000,000'],
   ['KES', 'both', 'M-Pesa', 'Kenya', 'Instant', 'KES 999,999', 'B2B only; available upon request.'],
   ['NGN', 'both', 'Bank transfer', 'Nigeria', 'Instant', 'NGN 50,000,000'],
   [
@@ -472,8 +552,8 @@ const dueCorridors: DueCorridor[] = [
   ['AED', 'out', 'IPP', 'United Arab Emirates', 'Instant', 'AED 50,000'],
   ['AED', 'out', 'FTS', 'United Arab Emirates', '<2 hours'],
   ['AUD', 'out', 'Local wire', 'Australia', 'T+0'],
-  ['CNY', 'out', 'WeChat Pay', 'China', 'Instant', 'CNY 50,000'],
-  ['CNY', 'out', 'Alipay', 'China', 'Instant', 'CNY 50,000'],
+  ['CNY', 'out', 'WeChat Pay', 'China', 'Instant', 'CNY 50,000', 'Individual accounts only.'],
+  ['CNY', 'out', 'Alipay', 'China', 'Instant', 'CNY 50,000', 'Individual accounts only.'],
   ['HKD', 'out', 'FPS', 'Hong Kong', 'Instant'],
   ['INR', 'out', 'UPI / IMPS', 'India', 'Instant'],
   [
@@ -495,7 +575,6 @@ const dueCorridors: DueCorridor[] = [
   ['PKR', 'out', 'Raast / e-wallets', 'Pakistan', 'Instant', 'PKR 50,000 for e-wallets'],
   ['BDT', 'out', 'Local wire / e-wallets', 'Bangladesh', 'Instant', 'BDT 250,000 for e-wallets'],
   ['SAR', 'out', 'Sarie Instant', 'Saudi Arabia', 'Instant to T+0'],
-  ['SGD', 'out', 'FAST', 'Singapore', 'Instant', 'SGD 200,000'],
   ['THB', 'out', 'PromptPay', 'Thailand', 'Instant', 'THB 49,999–9,999,999'],
   ['TRY', 'out', 'FAST', 'Türkiye', 'Instant', 'TRY 100,000'],
   ['TRY', 'out', 'EFT', 'Türkiye', 'T+0 to T+1'],
@@ -551,10 +630,10 @@ const fonbnkCorridors: FonbnkCorridor[] = [
   ['Ghana', 'GHS', 'Mobile money'],
   ['Ivory Coast', 'XOF', 'Mobile money'],
   ['Kenya', 'KES', 'Mobile money'],
-  ['Malawi', 'MWK', 'Mobile money', 'out'],
+  ['Malawi', 'MWK', 'Airtime', 'out'],
   ['Nigeria', 'NGN', 'Bank transfer'],
   ['Republic of the Congo', 'XAF', 'Mobile money'],
-  ['Rwanda', 'RWF', 'Airtime'],
+  ['Rwanda', 'RWF', 'Airtime', 'out'],
   ['Senegal', 'XOF', 'Mobile money'],
   ['South Africa', 'ZAR', 'Bank transfer'],
   ['Tanzania', 'TZS', 'Mobile money'],
@@ -569,7 +648,7 @@ const fonbnkRoutes: PaymentRoute[] = fonbnkCorridors.flatMap(
       providerUrl: FONBNK_SOURCE,
       category: 'Fiat' as const,
       region,
-      limit: '$1–$500 per order; $2,000 daily',
+      note: 'Availability and limits depend on the account and current provider quote.',
     }
     const routes: PaymentRoute[] = [
       {
@@ -596,7 +675,7 @@ const fonbnkRoutes: PaymentRoute[] = fonbnkCorridors.flatMap(
           destinationRail: 'Tempo',
           destinationCurrency: 'USDC.e',
           ...common,
-          note: 'USDC.e is available for on-ramp routes only.',
+          note: 'USDC.e is available for on-ramp routes only. Confirm current availability and limits with Fonbnk.',
         },
       )
     }
@@ -756,3 +835,13 @@ export const paymentRoutes: PaymentRoute[] = [
   ...exchangeRoutes,
   ...moonPayRoutes,
 ]
+
+const providerReviewDates: Record<string, string> = {
+  Bridge: 'October 6, 2026',
+  Due: 'October 6, 2026',
+  Fonbnk: 'October 6, 2026',
+}
+
+export function providerReviewedAt(provider: string): string {
+  return providerReviewDates[provider] ?? 'August 22, 2026'
+}
