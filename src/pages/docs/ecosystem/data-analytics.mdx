@@ -70,6 +70,12 @@ Get started with the [CoinGecko API](https://docs.coingecko.com/reference/introd
 
 Start indexing Tempo [here](https://goldsky.com/chains/tempo).
 
+## OpenChainBench
+
+[OpenChainBench](https://openchainbench.com/benchmarks/tempo-rpc) measures the public Tempo RPC endpoints and publishes the comparison. It sends one `eth_getBlockByNumber("latest", false)` every 60 seconds from three regions (us-east, eu-west, ap-southeast) and reports p50, p90, p99, mean, success rate and sample count for each endpoint, broken down per region, over a rolling 24 hours.
+
+The [Tempo page](https://openchainbench.com/benchmarks/tempo-rpc) currently covers `rpc.mainnet.tempo.xyz` alongside the dRPC and PublicNode endpoints, each shown with its URL and its measured numbers. The probes, the formula and the raw series are public, and the harness is at [github.com/ChainBench/OpenChainBench](https://github.com/ChainBench/OpenChainBench).
+
 ## Range
 
 [Range](https://www.range.org) powers the Stablecoin Explorer, which provides a unified view of major stablecoins across 100+ chains. Tempo is fully supported, allowing developers and users to trace stablecoin flows in a way traditional explorers cannot.
