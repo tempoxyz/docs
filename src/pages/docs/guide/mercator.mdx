@@ -1,0 +1,61 @@
+---
+title: "Mercator"
+seoTitle: "Connect Your Agent to Mercator | Tempo Docs"
+description: Set up Mercator to discover paid APIs, quote tool workflows, and run jobs from your agent. Verify the connection before starting paid work.
+---
+
+# Mercator
+
+Mercator lets your agent discover paid APIs, get a quote, and run a workflow. Use it for research and other tasks that need external tools, without configuring each provider separately.
+
+Your agent describes the task, Mercator finds relevant services, and the selected calls run as a job. Services use payment protocols such as MPP and x402; your agent can retrieve the job's result when execution finishes.
+
+## Connect Mercator to your agent
+
+For an installed coding agent, follow these steps. For web apps or managed environments, use [Mercator's agent setup guide](https://mercator.sh/setup).
+
+:::::steps
+
+### Install Mercator
+
+Run the installer on the computer where your agent runs, then select the clients you want to connect:
+
+```bash
+curl -fsSL https://mercator.sh/install.sh | sh
+```
+
+If you already use the Tempo plugin marketplace, you can [install `mercator@tempo` directly](/docs/guide/using-tempo-with-ai#install-the-mercator-plugin).
+
+### Authorize your agent
+
+Load the installed configuration and complete authorization in your agent. Choose the wallet access and spending limits for that connection. Follow the [client-specific setup instructions](https://mercator.sh/setup#agent-setup) if Mercator's tools are not available.
+
+### Verify the connection
+
+Ask your agent:
+
+```text
+Search Mercator for web research services and check my Mercator connection status. Do not run a paid job.
+```
+
+The agent checks `search_services` and `get_connection_status`. These calls are free. Complete any authorization or funding steps before starting paid work.
+
+:::::
+
+## Run a quoted workflow
+
+Describe the result you need and how much the agent may spend. For example:
+
+```text
+Use Mercator to find Apple's latest 10-Q filing. Return the filing date, an official source link, and a short summary. Show me the quote before running a paid job.
+```
+
+Discovery and quotes are free. Paid jobs use the wallet and spending limits approved during authorization. You can manage access and funding in [Mercator Account](https://mercator.sh/account).
+
+If a job is still running, keep its job ID and ask your agent to resume checking it. See [Mercator's job guide](https://mercator.sh/docs#run-your-first-job) for the complete flow.
+
+## Integrate or publish a Mercator service
+
+Use the [Mercator documentation](https://mercator.sh/docs) for MCP tools, REST endpoints, quotes, and job status. If you operate a paid API, follow the [service-owner guide](https://mercator.sh/docs#mercator-for-service-owners) to make it discoverable.
+
+To add MPP payments to your service first, use the [server quickstart](/docs/guide/machine-payments/server).

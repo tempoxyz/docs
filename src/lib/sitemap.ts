@@ -13,7 +13,7 @@ export function finalizeSitemap(
 ): string {
   let blogBaseUrl: string | undefined
 
-  const withoutTemplates = sitemap.replace(TEMPLATE_URL_PATTERN, (_entry, location: string) => {
+  let withoutTemplates = sitemap.replace(TEMPLATE_URL_PATTERN, (_entry, location: string) => {
     const blogTemplate = /^(.*\/blog\/)\[slug\]\/?$/.exec(location)
     if (blogTemplate) blogBaseUrl = blogTemplate[1]
     return ''
@@ -28,6 +28,35 @@ export function finalizeSitemap(
       /\/blog\/?$/.test(location),
     )
     if (blogIndexUrl) blogBaseUrl = `${blogIndexUrl.replace(/\/$/, '')}/`
+  }
+
+  // Redirected marketing pages are not canonical content. Keep the sitemap
+  // limited to the docs and blog surfaces, including when finalizing older output.
+  const docsIndexUrl = Array.from(existingLocations).find((location) =>
+    /\/(?:docs|get-started)\/?$/.test(location),
+  )
+  const siteBaseUrl =
+    blogBaseUrl?.replace(/blog\/$/, '') ?? docsIndexUrl?.replace(/(?:docs|get-started)\/?$/, '')
+  if (siteBaseUrl) {
+    withoutTemplates = withoutTemplates.replace(
+      /<url>\s*<loc>([^<]+)<\/loc>[\s\S]*?<\/url>\s*/g,
+      (entry, location: string) => {
+        const relativePath = location.startsWith(siteBaseUrl)
+          ? location.slice(siteBaseUrl.length)
+          : undefined
+        if (
+          location === siteBaseUrl.replace(/\/$/, '') ||
+          relativePath === '' ||
+          relativePath === 'get-started' ||
+          /^docs\/.+/.test(relativePath ?? '') ||
+          /^blog(?:\/|$)/.test(relativePath ?? '')
+        ) {
+          return entry
+        }
+        existingLocations.delete(location)
+        return ''
+      },
+    )
   }
 
   const uniqueBlogPosts = [

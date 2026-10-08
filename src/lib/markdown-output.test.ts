@@ -6,6 +6,45 @@ import { describe, expect, test } from 'vitest'
 import { plainMarkdownComponents } from './markdown-output'
 
 describe('plainMarkdownComponents', () => {
+  test('preserves overview headings, links, illustration meaning, and following content', async () => {
+    const output = await render(`
+<DocsProductOverview image="accounts" alt="A connected account receives stablecoins and sends a payment.">
+
+# Accounts
+
+Connect users to Tempo Wallet.
+
+[Connect an account](/docs/accounts/integrate) to send a test payment.
+
+</DocsProductOverview>
+
+## Reconcile payments
+
+Read the account's transfer history.
+`)
+
+    expect(output).toContain('# Accounts\n\nConnect users to Tempo Wallet.')
+    expect(output).toContain('Connect users to Tempo Wallet.')
+    expect(output).toContain('[Connect an account](/docs/accounts/integrate)')
+    expect(output).toContain('A connected account receives stablecoins and sends a payment.')
+    expect(output).toContain("## Reconcile payments\n\nRead the account's transfer history.")
+    expect(output).not.toContain('DocsProductOverview')
+    expect(output.match(/^# Accounts$/gm)).toHaveLength(1)
+    expect(
+      output.match(/A connected account receives stablecoins and sends a payment\./g),
+    ).toHaveLength(1)
+  })
+
+  test('keeps agent setup and the task prompt usable without the interactive homepage', async () => {
+    const output = await render('<DocsHomeAgent prompt="Send a testnet payment with a memo." />')
+    expect(output).toContain('codex plugin add docs@tempo')
+    expect(output).toContain('claude plugin install docs@tempo')
+    expect(output).toContain('amp mcp add tempo https://mcp.tempo.xyz')
+    expect(output).toContain('npx skills add tempoxyz/plugins --skill docs')
+    expect(output).toContain('> Send a testnet payment with a memo.')
+    expect(output).not.toContain('<DocsHomeAgent')
+  })
+
   test('renders cards and tabs as ordinary Markdown', async () => {
     const output = await render(`
 ## Recipes

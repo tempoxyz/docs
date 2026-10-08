@@ -1,0 +1,115 @@
+---
+title: "Integrate accounts"
+seoTitle: "Integrate Tempo Accounts in Your App | Tempo Docs"
+description: Connect Tempo Wallet with the Accounts SDK, fund an account on Moderato testnet, and verify a stablecoin payment before adding account controls.
+---
+
+# Integrate accounts
+
+Connect a user to Tempo Wallet with the Accounts SDK, then fund the account and verify a stablecoin payment. This browser integration uses Moderato testnet and test stablecoins.
+
+## Connect and fund a test account
+
+:::::steps
+
+### Install the Accounts SDK
+
+Run this in your application's project directory:
+
+```bash
+pnpm add accounts viem
+```
+
+### Connect Tempo Wallet from your application
+
+Create the provider in your browser application. Call `connectAccount` from a user action, such as a connect button, to request the user's account.
+
+```ts [connection.ts]
+import { Provider } from 'accounts'
+import { createPublicClient, createWalletClient, custom, http } from 'viem'
+import { tempoModerato } from 'viem/chains'
+
+const provider = Provider.create({
+  chains: [tempoModerato],
+  testnet: true,
+})
+
+export const walletClient = createWalletClient({
+  chain: tempoModerato,
+  transport: custom(provider),
+})
+
+export const publicClient = createPublicClient({
+  chain: tempoModerato,
+  transport: http(),
+})
+
+export async function connectAccount() {
+  const [address] = await provider.request({
+    method: 'eth_requestAccounts',
+  })
+  return address
+}
+```
+
+Keep the returned address in your application's connection state. The wallet client uses the same Accounts provider for payment authorization; the public client reads receipts from Moderato. The [Accounts SDK documentation](https://accounts.tempo.xyz/docs) covers framework integrations and account connection options.
+
+### Fund the connected address
+
+Open the [Moderato faucet](/docs/quickstart/faucet) and use the address returned by your connection. Keep your application and wallet on the same test network; [connection details](/docs/quickstart/connection-details) lists the network configuration.
+
+### Send and verify a test payment
+
+The faucet provides test AlphaUSD at `0x20c0000000000000000000000000000000000001`, with six decimals. Add this function beside `connection.ts` to send one test AlphaUSD through the connected wallet and check its transfer event.
+
+```ts [payment.ts]
+import { type Address, erc20Abi, parseEventLogs, parseUnits } from 'viem'
+import { publicClient, walletClient } from './connection'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
+export async function sendTestPayment(account: Address, recipient: Address) {
+  const amount = parseUnits('1', 6)
+  const hash = await walletClient.writeContract({
+    account,
+    address: alphaUsd,
+    abi: erc20Abi,
+    functionName: 'transfer',
+    args: [recipient, amount],
+  })
+  const receipt = await publicClient.waitForTransactionReceipt({ hash })
+  const transfers = parseEventLogs({
+    abi: erc20Abi,
+    eventName: 'Transfer',
+    logs: receipt.logs.filter((log) => log.address.toLowerCase() === alphaUsd),
+  })
+  const delivered = receipt.status === 'success' && transfers.some(({ args }) =>
+    args.from.toLowerCase() === account.toLowerCase()
+    && args.to.toLowerCase() === recipient.toLowerCase()
+    && args.value === amount,
+  )
+
+  return { hash, receipt, delivered }
+}
+```
+
+Call `sendTestPayment` from a payment button, passing the connected address and a second test wallet's address. Display the amount and recipient before the user authorizes the request, and disable the button while it is pending. Mark this payment delivered only when `delivered` is `true`.
+
+For memos and other payment variants, see [Send a payment](/docs/guide/payments/send-a-payment). Use [receiving and verification](/docs/guide/payments/accept-a-payment#verify-stablecoin-payments) when building ongoing payment reconciliation.
+
+If you enable receive policies, also handle [blocked receipts](/docs/guide/payments/configure-receive-policies): a successful transaction can route funds to the receive-policy guard instead of crediting the intended recipient.
+
+:::::
+
+## Add your application's account workflow
+
+| Application need | Implementation guide |
+| --- | --- |
+| Match payments to an invoice or record | [Transfer memos](/docs/guide/payments/transfer-memos) |
+| Attribute deposits to individual customers | [Virtual addresses](/docs/guide/payments/virtual-addresses) |
+| Pay transaction fees for users | [Fee sponsorship](/docs/guide/payments/sponsor-user-fees) |
+| Delegate transaction signing | [Access keys](/docs/guide/tempo-transaction#access-keys) |
+| Route wallet requests through your backend | [Relay handler](/docs/server/relay-handler) |
+| Read activity and receive backend notifications | [Tempo API](/docs/api) |
+
+For production, use the mainnet configuration in [connection details](/docs/quickstart/connection-details) and fund the account through a [production funding path](/docs/guide/getting-funds). If you already operate a wallet, follow [wallet integration](/docs/quickstart/wallet-developers) for Tempo-specific balance, fee, and transaction behavior.

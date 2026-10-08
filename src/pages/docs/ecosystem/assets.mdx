@@ -1,0 +1,42 @@
+---
+title: "Assets"
+seoTitle: "Stablecoin Assets and Issuers on Tempo | Tempo Docs"
+description: Find stablecoin assets and issuers on Tempo, then connect token metadata, funding, and payments to your application.
+---
+
+import { Cards, Card } from 'vocs'
+
+# Assets
+
+Choose a stablecoin for the currencies and payment flows your application supports. Start with OUSD for USD balances and payments, or explore other issuers below.
+
+## Open USD (OUSD)
+
+[Open Standard](https://joinopenstandard.com) operates OUSD, a USD stablecoin issued natively on Tempo. OUSD is the recommended stablecoin for holding balances, accepting payments, and settlement on Tempo.
+
+Use the [OUSD integration guide](/docs/guide/ousd) for its contract address, token properties, and funding paths.
+
+## AllUnity
+
+[AllUnity](https://allunity.com) issues stablecoins including EURAU, SEKAU, and CHFAU on Tempo. Follow the issuer's integration requirements for access to its assets and services.
+
+Visit [AllUnity](https://allunity.com) to learn about its stablecoins and discuss an integration.
+
+## Integrate a stablecoin
+
+<Cards>
+  <Card
+    title="Token metadata"
+    description="Use the Tempo token list to populate asset selectors and identify token contracts."
+    to="/docs/quickstart/tokenlist"
+    icon="lucide:list"
+  />
+  <Card
+    title="Fund an account"
+    description="Choose a funding path for balances and payments on Tempo."
+    to="/docs/guide/getting-funds"
+    icon="lucide:arrow-down-to-line"
+  />
+</Cards>
+
+For providers that help you issue a stablecoin or connect fiat funding and payouts, see [Payments & ramps](/docs/ecosystem/orchestration).

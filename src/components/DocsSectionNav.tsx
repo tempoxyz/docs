@@ -1,183 +1,173 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useRouter } from 'waku'
+import ArrowUpRightIcon from '~icons/lucide/arrow-up-right'
+import ChevronDownIcon from '~icons/lucide/chevron-down'
 
-type SectionNavItem = {
-  id: 'overview' | 'build' | 'integrate' | 'protocol' | 'tools' | 'api' | 'node'
-  label: string
-  href: string
-  matches: string[]
-}
+import { docsSections, getActiveDocsSection, specificationsSection } from '../lib/docs-sections'
+import { MercatorLogo, MppLogo, TempoMark } from './ToolLogos'
 
-const sectionNavItems: SectionNavItem[] = [
-  {
-    id: 'overview',
-    label: 'Get Started',
-    href: '/docs',
-    matches: ['/docs', '/docs/guide/using-tempo-with-ai', '/docs/partners'],
-  },
-  {
-    id: 'build',
-    label: 'Build on Tempo',
-    href: '/docs/build',
-    matches: [
-      '/docs/build',
-      '/docs/guide/getting-funds',
-      '/docs/guide/payments',
-      '/docs/guide/issuance',
-      '/docs/guide/stablecoin-dex',
-      '/docs/guide/private-zones',
-      '/docs/guide/machine-payments',
-    ],
-  },
-  {
-    id: 'integrate',
-    label: 'Integrate Tempo',
-    href: '/docs/quickstart/integrate-tempo',
-    matches: [
-      '/docs/ecosystem',
-      '/docs/guide/bridge-bungee',
-      '/docs/guide/bridge-layerzero',
-      '/docs/guide/bridge-relay',
-      '/docs/guide/tempo-transaction',
-      '/docs/quickstart',
-    ],
-  },
-  {
-    id: 'tools',
-    label: 'Tools & SDKs',
-    href: '/docs/tools',
-    matches: [
-      '/docs/cli',
-      '/docs/developer-tools',
-      '/docs/protocol/rpc',
-      '/docs/sdk',
-      '/docs/server',
-      '/docs/tools',
-      '/docs/wallet',
-    ],
-  },
-  {
-    id: 'api',
-    label: 'Tempo API',
-    href: '/docs/api',
-    matches: ['/docs/api'],
-  },
-  {
-    id: 'protocol',
-    label: 'Tempo Protocol',
-    href: '/docs/protocol',
-    matches: ['/docs/protocol'],
-  },
-  {
-    id: 'node',
-    label: 'Run a Tempo Node',
-    href: '/docs/guide/node',
-    matches: ['/docs/changelog', '/docs/guide/node'],
-  },
+export { docsSections, getActiveDocsSection, specificationsSection }
+
+export const docsExternalTools = [
+  { label: 'MPP', href: 'https://mpp.dev/', logo: MppLogo },
+  { label: 'Mercator', href: 'https://mercator.sh/', logo: MercatorLogo },
+  { label: 'Tempo Console', href: 'https://console.tempo.xyz/', logo: TempoMark },
+  { label: 'Tempo Wallet', href: 'https://wallet.tempo.xyz/', logo: TempoMark },
 ]
 
-function pathMatches(pathname: string, prefix: string) {
-  return pathname === prefix || pathname.startsWith(`${prefix}/`)
+export function DocsResourceLinks({ onNavigate }: { onNavigate?: () => void }) {
+  return (
+    <nav aria-label="External tools" className="docs-resource-links">
+      {docsExternalTools.map((tool) => (
+        <a
+          key={tool.href}
+          href={tool.href}
+          aria-label={tool.label}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={onNavigate}
+        >
+          <span className="docs-resource-link-label">
+            <tool.logo className="docs-resource-logo" aria-hidden="true" focusable="false" />
+            <span className="docs-resource-link-text">{tool.label}</span>
+            <ArrowUpRightIcon aria-hidden="true" width="14" height="14" />
+          </span>
+        </a>
+      ))}
+    </nav>
+  )
 }
 
-function isActive(pathname: string, item: SectionNavItem) {
-  if (item.id === 'overview') return item.matches.includes(pathname)
-  if (item.id === 'tools' && pathMatches(pathname, '/docs/protocol/rpc')) return true
-  if (item.id === 'protocol' && pathMatches(pathname, '/docs/protocol/rpc')) return false
-  return item.matches.some((prefix) => pathMatches(pathname, prefix))
+function DocsToolsMenu({ route }: { route: string }) {
+  const [open, setOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const menuRef = useRef<HTMLDivElement | null>(null)
+  const buttonRef = useRef<HTMLButtonElement | null>(null)
+
+  useEffect(() => setMounted(true), [])
+  useEffect(() => setOpen(false), [route])
+
+  useEffect(() => {
+    if (!open) return
+    const onPointerDown = (event: Event) => {
+      if (!menuRef.current?.contains(event.target as Node)) setOpen(false)
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setOpen(false)
+        buttonRef.current?.focus()
+      }
+    }
+    const desktop = window.matchMedia('(min-width: 800px)')
+    const onResize = () => {
+      if (!desktop.matches) setOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('focusin', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    desktop.addEventListener('change', onResize)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('focusin', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+      desktop.removeEventListener('change', onResize)
+    }
+  }, [open])
+
+  const focusFirstLink = () =>
+    requestAnimationFrame(() => menuRef.current?.querySelector<HTMLAnchorElement>('a')?.focus())
+
+  return (
+    <div ref={menuRef} className="docs-reference-menu">
+      <button
+        ref={buttonRef}
+        type="button"
+        disabled={!mounted}
+        aria-expanded={open}
+        aria-controls="docs-reference-panel"
+        className="docs-reference-trigger"
+        onClick={() => setOpen((value) => !value)}
+        onKeyDown={(event) => {
+          if (event.key === 'ArrowDown') {
+            event.preventDefault()
+            setOpen(true)
+            focusFirstLink()
+          }
+        }}
+      >
+        Tools
+        <ChevronDownIcon
+          aria-hidden="true"
+          width="14"
+          height="14"
+          className={open ? 'rotate-180' : undefined}
+        />
+      </button>
+      {open ? (
+        <div id="docs-reference-panel" className="docs-reference-panel">
+          <DocsResourceLinks onNavigate={() => setOpen(false)} />
+        </div>
+      ) : null}
+    </div>
+  )
 }
 
 export default function DocsSectionNav() {
   const { path } = useRouter()
-  const pathname = path ?? '/'
   const navRef = useRef<HTMLElement | null>(null)
   const activeLinkRef = useRef<HTMLAnchorElement | null>(null)
-  const activeLabel = sectionNavItems.find((item) => isActive(pathname, item))?.label ?? null
+  const activeSection = getActiveDocsSection(path ?? '/')
+  const activeLabel = activeSection?.label ?? null
 
   useEffect(() => {
-    if (!activeLabel) return
+    if (!activeLabel || !docsSections.some((section) => section.id === activeSection?.id)) return
     const nav = navRef.current
     const activeLink = activeLinkRef.current
     if (!nav || !activeLink) return
-
     const centeredLeft = activeLink.offsetLeft - nav.clientWidth / 2 + activeLink.offsetWidth / 2
     nav.scrollTo({ left: Math.max(0, centeredLeft), behavior: 'instant' })
-  }, [activeLabel])
+  }, [activeLabel, activeSection?.id])
 
   return (
-    <>
-      <style>{`
-        @media (width >= 1024px) {
-          body:has(.docs-section-nav) nav:has(> a[aria-label='Tempo home']) {
-            display: grid !important;
-            grid-template-columns: minmax(0, 1fr) minmax(300px, 460px) minmax(0, 1fr) !important;
-            align-items: center !important;
-            gap: 12px !important;
-            padding-inline: 20px !important;
+    <div className="docs-section-nav">
+      <nav ref={navRef} aria-label="Documentation sections" className="docs-section-nav-scroll">
+        <ul>
+          {docsSections.map((item) => (
+            <li key={item.id}>
+              <Link
+                ref={(element) => {
+                  if (activeSection?.id === item.id) activeLinkRef.current = element
+                }}
+                to={item.href}
+                unstable_prefetchOnEnter
+                unstable_prefetchOnView
+                aria-current={activeSection?.id === item.id ? 'page' : undefined}
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <div className="docs-section-utilities">
+        <DocsToolsMenu route={path ?? '/'} />
+        <Link
+          to={specificationsSection.href}
+          className="docs-section-utility-link"
+          aria-current={
+            activeSection?.id === 'protocol' || activeSection?.id === 'changelog'
+              ? 'page'
+              : undefined
           }
-
-          body:has(.docs-section-nav) nav:has(> a[aria-label='Tempo home']) > ul {
-            display: none !important;
-          }
-
-          body:has(.docs-section-nav) nav:has(> a[aria-label='Tempo home']) > a[aria-label='Tempo home'] {
-            min-width: 0;
-          }
-
-          body:has(.docs-section-nav) nav:has(> a[aria-label='Tempo home']) > div {
-            grid-column: 3;
-            justify-self: end;
-            gap: 20px !important;
-          }
-
-        }
-
-        @media (width >= 1080px) {
-          .docs-section-nav {
-            right: max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5)) !important;
-            left: max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5)) !important;
-          }
-
-          [data-layout][data-v-sidebar] > [data-v-gutter-left] {
-            padding-top: var(--vocs-spacing-topNav) !important;
-          }
-        }
-      `}</style>
-      <div className="docs-section-nav border-line border-x border-b bg-surface-shell">
-        <nav
-          ref={navRef}
-          aria-label="Documentation sections"
-          className="flex h-[var(--tempo-docs-section-nav-height)] items-stretch overflow-x-auto px-4 [scrollbar-width:none] sm:px-6 [&::-webkit-scrollbar]:hidden"
+          unstable_prefetchOnEnter
+          unstable_prefetchOnView
         >
-          <ul className="flex min-w-max items-stretch gap-8">
-            {sectionNavItems.map((item) => {
-              const active = isActive(pathname, item)
-              return (
-                <li key={item.id}>
-                  <Link
-                    ref={(element) => {
-                      if (active) activeLinkRef.current = element
-                    }}
-                    to={item.href}
-                    unstable_prefetchOnEnter
-                    unstable_prefetchOnView
-                    aria-current={active ? 'page' : undefined}
-                    className={`flex h-full items-center border-b-2 pt-0.5 font-normal font-sans text-[14px] tracking-[0] transition-colors ${
-                      active
-                        ? 'border-foreground text-foreground'
-                        : 'border-transparent text-foreground/50 hover:text-foreground'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        </nav>
+          {specificationsSection.label}
+        </Link>
       </div>
-    </>
+    </div>
   )
 }

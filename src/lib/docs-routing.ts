@@ -5,9 +5,20 @@ export type DocsRouteContract = {
 
 export const canonicalDevelopersOrigin = 'https://tempo.xyz/developers'
 
+// The developer site has two page surfaces: documentation and the engineering
+// blog. Keep the previous marketing entry points useful as permanent redirects.
+export const developerSurfaceRedirects = [
+  { source: '/docs', destination: '/' },
+  { source: '/build', destination: '/docs/build' },
+  { source: '/build/tip20-tokens', destination: '/docs/protocol/tip20/overview' },
+  { source: '/build/tempo-transactions', destination: '/docs/protocol/transactions' },
+  { source: '/performance', destination: '/docs/protocol/blockspace/overview' },
+] as const satisfies readonly DocsRouteContract[]
+
 export function docsRouteDestination(destination: string, environment = process.env.VERCEL_ENV) {
   if (URL.canParse(destination)) return destination
-  if (environment === 'production') return `${canonicalDevelopersOrigin}${destination}`
+  if (environment === 'production')
+    return `${canonicalDevelopersOrigin}${destination === '/' ? '' : destination}`
   return destination
 }
 
@@ -228,7 +239,16 @@ export const legacyDocsHostRoutes = [
 
 export const routingSmokeCases = {
   canonical: [
-    { path: '/developers', expectedStatus: 200 },
+    {
+      path: '/developers',
+      expectedStatus: 200,
+    },
+    { path: '/developers/get-started', expectedStatus: 200 },
+    {
+      path: '/developers/docs',
+      expectedLocation: canonicalDevelopersOrigin,
+      expectedFinalStatus: 200,
+    },
     { path: '/developers/docs/quickstart/integrate-tempo', expectedStatus: 200 },
     { path: '/developers/docs/quickstart/developer-tools', expectedStatus: 200 },
     {
@@ -254,6 +274,8 @@ export const routingSmokeCases = {
     { path: '/developers/api/og', expectedNonRedirect: true },
   ],
   legacy: [
+    { path: '/', expectedLocation: canonicalDevelopersOrigin, expectedFinalStatus: 200 },
+    { path: '/docs', expectedLocation: canonicalDevelopersOrigin, expectedFinalStatus: 200 },
     {
       path: '/guide/bridge-usdc-stargate',
       expectedLocation: `${canonicalDevelopersOrigin}/docs/guide/bridge-layerzero`,

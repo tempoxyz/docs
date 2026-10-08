@@ -1,44 +1,46 @@
 import { expect, test } from '@playwright/test'
+import { developerSurfaceRedirects } from '../src/lib/docs-routing'
 
-test('renders the QA-approved homepage copy and footer targets', async ({ page }) => {
+for (const { source, destination } of developerSurfaceRedirects) {
+  test(`redirects the former ${source} entry point to documentation`, async ({ request }) => {
+    const response = await request.get(`${source}?ref=legacy`, { maxRedirects: 0 })
+    expect(response.status()).toBe(301)
+    const target = new URL(response.headers().location, response.url())
+    expect(target.pathname).toBe(destination)
+    expect(target.searchParams.get('ref')).toBe('legacy')
+  })
+}
+
+test('serves the docs homepage directly at the root URL', async ({ page, request }) => {
+  expect((await request.get('/', { maxRedirects: 0 })).status()).toBe(200)
   await page.goto('/')
-
-  await expect(page).toHaveTitle('Tempo Developers: Build on a Payments-First Blockchain')
-  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
-    'content',
-    'Build payment applications on Tempo with stablecoin-native tokens, predictable fees, fast settlement, SDKs, APIs, and open-source developer tools.',
-  )
-  await expect(
-    page.getByRole('heading', {
-      level: 1,
-      name: 'Build on the blockchain engineered for payments',
-    }),
-  ).toBeVisible()
-
-  const footer = page.locator('footer')
-  await expect(footer.getByRole('link', { name: 'MPP' })).toHaveAttribute(
-    'href',
-    'https://mpp.dev/',
-  )
-  const openSourceLink = footer.getByRole('link', { name: 'Open source' })
-  await expect(openSourceLink).toHaveAttribute('href', '/#open-source')
-
-  await openSourceLink.click()
-  await expect(page).toHaveURL(/\/#open-source$/)
-  await expect
-    .poll(() =>
-      page.locator('#open-source').evaluate((element) => element.getBoundingClientRect().top),
-    )
-    .toBeLessThan(250)
+  await expect(page).toHaveURL((url) => url.pathname === '/')
+  await expect(page.getByRole('heading', { level: 1, name: 'Documentation' })).toBeVisible()
+  await expect(page.getByRole('navigation', { name: 'Developer navigation' })).toBeVisible()
 })
 
-test('scrolls to the lazy Open source section on direct fragment navigation', async ({ page }) => {
-  await page.goto('/#open-source')
+test('keeps legacy docs queries and anchors when opening the new landing', async ({ page }) => {
+  await page.goto('/docs?ref=legacy#start-here')
+  await expect(page).toHaveURL(
+    (url) =>
+      url.pathname === '/' &&
+      url.searchParams.get('ref') === 'legacy' &&
+      url.hash === '#start-here',
+  )
+  await expect(page.locator('#start-here')).toBeAttached()
+})
 
-  const target = page.locator('#open-source')
-  await expect(target).toBeVisible()
-  await expect
-    .poll(() => target.evaluate((element) => Math.abs(element.getBoundingClientRect().top)))
-    .toBeLessThan(250)
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+test('serves getting started directly with its overview sidebar', async ({ page, request }) => {
+  expect((await request.get('/get-started', { maxRedirects: 0 })).status()).toBe(200)
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  await page.goto('/get-started')
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Get Started', exact: true }),
+  ).toBeVisible()
+  const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
+  await expect(sidebar).toBeVisible()
+  await expect(sidebar.getByRole('link', { name: 'Overview', exact: true })).toHaveAttribute(
+    'href',
+    '/get-started',
+  )
 })

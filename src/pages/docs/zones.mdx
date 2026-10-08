@@ -1,0 +1,84 @@
+---
+title: "Tempo Zones"
+seoTitle: "Tempo Zones: Private Stablecoin Balances | Tempo Docs"
+description: Integrate a private stablecoin ledger connected to Tempo, with authenticated account reads, encrypted deposits, and staged withdrawals.
+---
+
+import { DocsProductOverview } from '../../components/DocsProductOverview'
+
+<span id="connect-public-and-private-balances" />
+
+<DocsProductOverview image="zones" alt="A public deposit enters a private Zone account through a controlled boundary; the Zone operator can view its ledger.">
+
+# Tempo Zones
+
+Keep stablecoin balances in a private ledger connected to Tempo. The Zone operator can read that ledger; deposit and withdrawal amounts remain public.
+
+[Request Zone access →](https://tempo.xyz/contact)
+
+</DocsProductOverview>
+
+## Understand the privacy boundary
+
+Each Zone has a private ledger and a `ZonePortal` on Tempo that holds its backing assets. A deposit locks tokens in the portal and credits the recipient inside the Zone. A withdrawal burns the Zone-side tokens and releases backing assets to a Tempo recipient.
+
+| Data | Visibility |
+| --- | --- |
+| Private balances and account activity | Account-scoped RPC limits what other users can read. The Zone operator can inspect the private ledger. |
+| Deposit recipient and memo | Encrypted to the operator when submitted on Tempo. |
+| Deposit token, amount, depositor, and refund recipient | Public on Tempo. |
+| Withdrawal token, amount, destination, and settlement commitments | Public on Tempo. |
+
+Treat the Zone operator as a party that can read private data. Public deposit and withdrawal activity remains visible, including amounts and timing. See [accounts and private balances](/docs/protocol/zones/accounts) and [Zone bridging](/docs/protocol/zones/bridging) for the exact boundaries.
+
+## Integrate a Zone
+
+Confirm the deployment, supported assets, permitted operations, and access requirements with Tempo before building an integration. Zones use separate networks and chain IDs; they are not a privacy setting on a public Tempo account.
+
+:::::steps
+
+### Confirm the deployment details
+
+Get the Zone’s RPC endpoint, chain ID, portal address, enabled assets, supported SDK or contract interfaces, and access credentials from its operator. Confirm the rules for depositors, withdrawal recipients, refunds, and callbacks.
+
+Keep separate clients for public Tempo and the Zone. Use the deployment’s chain ID and contract interfaces when preparing signatures or encoding calls.
+
+### Authenticate private account access
+
+For direct account-scoped Zone RPC, the account signs an authorization token that is sent in the `X-Authorization-Token` header. This is separate from any credentials required to reach the endpoint. Read the account’s balance and activity through that authenticated connection.
+
+Follow the [Zone RPC reference](/docs/protocol/zones/rpc) for token signing, expiry, method access, and event filtering. A public Tempo explorer does not show private Zone activity.
+
+### Deposit from Tempo
+
+Use the operator’s supported tooling to encrypt the recipient and memo with the Zone’s published encryption key. Approve token spending when needed, then submit the encrypted deposit to `ZonePortal` on Tempo with a public refund recipient.
+
+Track the public transaction and the private credit separately. Deposits enter the Zone after Tempo finality; a successful public transaction does not by itself establish that the private balance has been credited. See the [deposit lifecycle](/docs/protocol/zones/bridging#deposits-tempo--zone).
+
+### Read the private balance
+
+Use authenticated account reads to confirm that the deposit reached the recipient. Build your application’s balance and history views from these scoped reads, and keep private data within the same user authorization boundary in your own backend.
+
+### Withdraw to Tempo
+
+Submit a withdrawal through `ZoneOutbox` on the Zone. The operator includes it in a batch, the portal accepts the batch, and the withdrawal is then processed on Tempo. Track destination delivery separately from the Zone transaction’s receipt.
+
+Handle failed delivery and refund states using the [withdrawal lifecycle](/docs/protocol/zones/bridging#withdrawals-zone--tempo). The hosted [Zone withdrawal status API](/docs/api/zones) can report parent-chain outcomes; its `zoneStatus: completed` is a checkpoint signal, not proof of successful refund delivery.
+
+:::::
+
+## Check the capabilities of your deployment
+
+The current permissioned runtime restricts token movement to the inbox and outbox; general TIP-20 transfer calls and user contract deployment are disabled. Do not assume an application that runs on public Tempo can run unchanged inside a Zone. See [Zone execution rules](/docs/protocol/zones/execution).
+
+Withdrawals can invoke contracts on Tempo, subject to the Zone’s access rules. This supports composition with public-chain operations, but the public operation and any later Zone credit have separate settlement stages. Read [composable withdrawals](/docs/protocol/zones/bridging#composable-withdrawals) before integrating callbacks.
+
+Execution-proof enforcement depends on the deployed verifier and network configuration. Forced exits are not a generally available recovery path. Review [proving and settlement](/docs/protocol/zones/proving) with your operator rather than inferring these guarantees from a successful deposit or batch submission.
+
+`POST /v1/routes/transfers/zone` is not implemented and returns HTTP `501`. Use the Zone deposit integration above rather than that Routes endpoint.
+
+## Try the testnet sandbox
+
+The [interactive Zone guides](/docs/guide/private-zones) let you try deposits, private transfers, cross-Zone flows, and withdrawals with testnet funds. They use an earlier sandbox with different interfaces and capabilities, including plaintext deposits and direct transfers that the current permissioned runtime does not enable.
+
+Use those guides for their named testnet deployment. For another Zone, use the operator-provided configuration and the [protocol reference](/docs/protocol/zones).

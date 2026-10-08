@@ -44,6 +44,28 @@
       "permanent": true
     },
     {
+      "source": "/docs",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers",
+      "permanent": true
+    },
+    {
       "source": "/developers/:path*",
       "has": [
         {
@@ -515,6 +537,31 @@
       ],
       "destination": "https://tempo.xyz/developers/docs/guide/getting-funds",
       "permanent": false
+    },
+    {
+      "source": "/developers/docs",
+      "destination": "/developers",
+      "permanent": true
+    },
+    {
+      "source": "/developers/build",
+      "destination": "/developers/docs/build",
+      "permanent": true
+    },
+    {
+      "source": "/developers/build/tip20-tokens",
+      "destination": "/developers/docs/protocol/tip20/overview",
+      "permanent": true
+    },
+    {
+      "source": "/developers/build/tempo-transactions",
+      "destination": "/developers/docs/protocol/transactions",
+      "permanent": true
+    },
+    {
+      "source": "/developers/performance",
+      "destination": "/developers/docs/protocol/blockspace/overview",
+      "permanent": true
     },
     {
       "source": "/accounts",

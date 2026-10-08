@@ -8,13 +8,34 @@ import { Cards, Card } from 'vocs'
 
 # Tempo protocol: specifications and reference
 
-Use this section when you need the technical reference for Tempo itself. These pages are written for implementers, auditors, wallet teams, infrastructure operators, and anyone building against protocol-level behavior rather than a single product workflow.
+Configure your connection to Tempo, issue a stablecoin, run a node, or read the protocol's transaction, token, and network specifications.
 
-If you are building an app, start with the guides in **Build on Tempo** and come here when you need exact semantics, ABI details, or protocol rationale.
+For product integrations, start with [Accounts](/docs/accounts), [Routes](/docs/routes), [Machine Payments](/docs/agents), or [Zones](/docs/zones). Use this section for exact behavior, ABI details, and protocol rationale.
 
-For private execution internals, start with Tempo Zones and the [zone accounts specification](/docs/protocol/zones/accounts), which defines private balance, allowance, and account-scoped access rules.
+## Integrate with the network
 
-## Core Primitives
+<Cards>
+  <Card
+    title="Network integration"
+    description="Configure networks, compare EVM behavior, and find system contracts."
+    to="/docs/quickstart/integrate-tempo"
+    icon="lucide:plug"
+  />
+  <Card
+    title="Issue a stablecoin"
+    description="Create TIP-20 Tokens and manage minting, supply, and permissions."
+    to="/docs/guide/issuance"
+    icon="lucide:coins"
+  />
+  <Card
+    title="Run a node"
+    description="Set up a Tempo node and follow operator and upgrade guidance."
+    to="/docs/guide/node"
+    icon="lucide:server"
+  />
+</Cards>
+
+## Core primitives
 
 <Cards>
   <Card
@@ -43,7 +64,7 @@ For private execution internals, start with Tempo Zones and the [zone accounts s
   />
 </Cards>
 
-## Network Systems
+## Network systems
 
 <Cards>
   <Card
@@ -64,15 +85,9 @@ For private execution internals, start with Tempo Zones and the [zone accounts s
     to="/docs/protocol/zones"
     icon="lucide:scan"
   />
-  <Card
-    title="Network Upgrades"
-    description="Track upgrade specifications, migration notes, and release-level protocol changes."
-    to="/docs/protocol/upgrades/t8"
-    icon="lucide:arrow-up-circle"
-  />
 </Cards>
 
-## Specifications and Source
+## Specifications and source
 
 <Cards>
   <Card

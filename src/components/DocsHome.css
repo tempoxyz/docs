@@ -1,0 +1,523 @@
+.tempo-docs-home {
+  --home-muted: var(--vocs-text-color-secondary);
+  --home-ink: var(--vocs-text-color-primary);
+  --home-panel: var(--surface-block);
+  --home-line: var(--vocs-border-color-primary);
+  color: var(--home-ink);
+  font-family: var(--tempo-font-body, var(--vocs-font-family));
+}
+
+.tempo-docs-home span[id] {
+  display: block;
+  scroll-margin-top: calc(var(--vocs-spacing-topNav) + 32px);
+}
+
+.tempo-docs-home .tempo-docs-home-heading {
+  padding-bottom: 40px;
+}
+
+.tempo-docs-home h1[data-v] {
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+  font-family: var(--tempo-font-display, var(--vocs-font-family));
+  font-size: 48px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.tempo-docs-home .tempo-docs-home-heading p[data-v] {
+  margin: 0;
+  color: var(--home-muted);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.tempo-docs-home .tempo-docs-home-start {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 48px;
+}
+
+.tempo-docs-home h2[data-v] {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+}
+
+.tempo-docs-home .tempo-docs-home-guides {
+  padding-top: 28px;
+}
+
+.tempo-docs-home .tempo-docs-home-guides h2[data-v] {
+  margin-bottom: 28px;
+  font-size: 20px;
+}
+
+.tempo-docs-home .tempo-docs-home-guides > a {
+  display: block;
+  margin-bottom: 28px;
+  text-decoration: none;
+}
+
+.tempo-docs-home .tempo-docs-home-guides strong {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--home-ink);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.tempo-docs-home .tempo-docs-home-guides strong + span {
+  display: block;
+  margin-top: 6px;
+  color: var(--home-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.tempo-docs-home .tempo-docs-home-guides > p[data-v] {
+  margin: 32px 0 0;
+  font-size: 14px;
+}
+
+.tempo-docs-home .tempo-docs-home-products {
+  margin-top: 48px;
+}
+
+.tempo-docs-home .tempo-docs-home-product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 28px;
+}
+
+.tempo-docs-home .tempo-docs-home-product-group {
+  min-width: 0;
+  padding: var(--tempo-card-padding);
+  border-radius: var(--tempo-card-radius);
+  background: var(--home-panel);
+}
+
+.tempo-docs-home .tempo-docs-home-product-group h3[data-v] {
+  margin: 0;
+  padding: 0;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.4;
+}
+
+.tempo-docs-home .tempo-docs-home-product-group h3[data-v] > a:not(.heading-anchor) {
+  color: var(--home-ink);
+  font-weight: inherit;
+  text-decoration: none;
+}
+
+.tempo-docs-home-product-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  vertical-align: -4px;
+  color: var(--home-ink);
+}
+
+.tempo-docs-home .tempo-docs-home-product-group p[data-v] {
+  min-height: 3.2em;
+  margin: 12px 0 20px;
+  color: var(--home-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.tempo-docs-home ul[data-v] {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tempo-docs-home li[data-v] {
+  margin: 0;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.tempo-docs-home li[data-v] + li[data-v] {
+  margin-top: 10px;
+}
+
+.tempo-docs-home :is(li, p)[data-v] a[data-v] {
+  color: var(--home-ink);
+  font-weight: 400;
+  text-decoration: none;
+}
+
+.tempo-docs-home .tempo-docs-home-reference {
+  margin-top: 48px;
+  padding-top: 36px;
+  border-top: 1px solid var(--home-line);
+}
+
+.tempo-docs-home .tempo-docs-home-reference-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 48px;
+  margin-top: 32px;
+}
+
+.tempo-docs-home .tempo-docs-home-reference-grid h3[data-v] {
+  margin: 0 0 16px;
+  padding: 0;
+  color: var(--home-muted);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.tempo-docs-home .tempo-docs-home-reference-grid > div:first-child ul[data-v] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 20px;
+}
+
+.tempo-docs-home .tempo-docs-home-reference-grid > div:first-child li[data-v] {
+  margin: 0;
+}
+
+.tempo-docs-home :is(a, button):focus-visible {
+  outline: 2px solid var(--home-ink);
+  outline-offset: 4px;
+}
+
+.tempo-agent-start {
+  --home-muted: color-mix(in srgb, var(--home-ink) 68%, transparent);
+  min-width: 0;
+  padding: 28px;
+  border-radius: 24px;
+  background: var(--home-panel);
+}
+
+.tempo-agent-start h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.tempo-agent-start > p {
+  margin: 8px 0 18px;
+  color: var(--home-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.tempo-agent-start .tempo-agent-start-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.tempo-agent-start .tempo-agent-start-label {
+  margin: 0;
+  color: var(--home-ink);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+}
+
+.tempo-agent-start .tempo-agent-start-agents {
+  margin: 0 0 20px;
+  padding: 0;
+  border: 0;
+}
+
+.tempo-agent-start-agents legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.tempo-agent-start-agents > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tempo-agent-start .tempo-agent-start-agents button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--home-muted);
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.tempo-agent-start .tempo-agent-start-agents button[aria-pressed="true"] {
+  border-color: var(--home-ink);
+  color: var(--home-ink);
+}
+
+.tempo-agent-start :is(.tempo-agent-start-agents, .tempo-agent-start-destination) svg {
+  width: 14px;
+  height: 14px;
+}
+
+.tempo-agent-start .tempo-agent-start-command {
+  margin-top: 12px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--vocs-background-color-primary);
+}
+
+.tempo-agent-start-command > .tempo-agent-start-toolbar {
+  padding: 8px 8px 0 16px;
+}
+
+.tempo-agent-start .tempo-agent-start-destination {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--home-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.tempo-agent-start .tempo-agent-start-instruction {
+  margin: 6px 0 0;
+  color: var(--home-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.tempo-agent-start pre {
+  margin: 0;
+  overflow-x: auto;
+  padding: 10px 16px 14px;
+  color: var(--home-ink);
+  font-family: var(--vocs-font-family-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.tempo-agent-start pre code {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+}
+
+.tempo-agent-start .tempo-agent-start-copy {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--home-muted);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.tempo-agent-start .tempo-agent-start-copy:hover {
+  color: var(--home-ink);
+}
+
+.tempo-agent-start .tempo-agent-start-copy-primary {
+  min-height: 36px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--home-ink);
+  color: var(--vocs-background-color-primary);
+}
+
+.tempo-agent-start .tempo-agent-start-copy-primary:hover {
+  color: var(--vocs-background-color-primary);
+  opacity: 0.8;
+}
+
+.tempo-agent-start .tempo-agent-start-copy svg {
+  width: 14px;
+  height: 14px;
+}
+
+.tempo-agent-start .tempo-agent-start-prerequisite {
+  margin-left: 4px;
+  color: var(--home-ink);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--home-ink) 35%, transparent);
+  text-underline-offset: 3px;
+}
+
+.tempo-agent-start .tempo-agent-start-task {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--home-line);
+}
+
+.tempo-agent-start .tempo-agent-start-prompt-box {
+  margin-top: 12px;
+  padding-left: 14px;
+  border-left: 2px solid var(--home-line);
+}
+
+.tempo-agent-start .tempo-agent-start-prompt {
+  margin: 0;
+  color: var(--home-ink);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.tempo-agent-start .tempo-agent-start-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 18px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.tempo-agent-start .tempo-agent-start-footer > a {
+  color: var(--home-ink);
+  text-decoration: none;
+}
+
+.tempo-agent-start .tempo-agent-start-feedback {
+  margin: 10px 0 0;
+  color: var(--home-ink);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.tempo-agent-start .tempo-agent-start-feedback:empty {
+  margin: 0;
+}
+
+@media (width < 1100px) {
+  .tempo-docs-home .tempo-docs-home-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tempo-docs-home .tempo-docs-home-start {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: 32px;
+  }
+
+  .tempo-agent-start pre {
+    font-size: 12px;
+  }
+}
+
+@media (width < 800px) {
+  .tempo-docs-home .tempo-docs-home-start {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+  }
+
+  .tempo-docs-home .tempo-docs-home-guides {
+    padding: 0;
+  }
+
+  .tempo-docs-home .tempo-docs-home-reference-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px;
+  }
+
+  .tempo-agent-start pre {
+    font-size: 13px;
+  }
+}
+
+@media (width < 700px) {
+  .tempo-docs-home .tempo-docs-home-product-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .tempo-docs-home .tempo-docs-home-product-group p[data-v] {
+    min-height: 0;
+  }
+}
+
+@media (width < 520px) {
+  .tempo-docs-home h1[data-v] {
+    font-size: 40px;
+  }
+
+  .tempo-docs-home .tempo-docs-home-heading {
+    padding-bottom: 32px;
+  }
+
+  .tempo-docs-home .tempo-docs-home-heading p[data-v] {
+    font-size: 15px;
+  }
+
+  .tempo-docs-home .tempo-docs-home-reference-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+
+  .tempo-docs-home .tempo-docs-home-products {
+    margin-top: 36px;
+  }
+
+  .tempo-docs-home .tempo-docs-home-reference {
+    margin-top: 36px;
+    padding-top: 28px;
+  }
+
+  .tempo-agent-start {
+    padding: 20px;
+  }
+
+  .tempo-agent-start .tempo-agent-start-toolbar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .tempo-agent-start pre {
+    padding: 14px;
+    font-size: 12px;
+  }
+}
+
+.tempo-docs-home :is(li, p)[data-v] a[data-v]:hover,
+.tempo-docs-home .tempo-docs-home-product-group h3[data-v] > a:not(.heading-anchor):hover,
+.tempo-docs-home .tempo-docs-home-guides > a:hover strong,
+.tempo-agent-start .tempo-agent-start-footer > a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}

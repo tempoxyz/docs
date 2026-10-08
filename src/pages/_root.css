@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "../components/DocsCards.css";
+@import "../components/DocsHome.css";
 
 @source "./";
 @source "../marketing";
@@ -30,8 +32,8 @@
 
 @font-face {
   font-family: "Pilat";
-  src: url("/fonts/pilat/Pilat-Regular.woff2") format("woff2");
-  font-weight: 400;
+  src: url("/fonts/pilat/Pilat-Book.woff2") format("woff2");
+  font-weight: 400 500;
   font-style: normal;
   font-display: swap;
 }
@@ -39,7 +41,7 @@
 @font-face {
   font-family: "Pilat";
   src: url("/fonts/pilat/Pilat-Demi.woff2") format("woff2");
-  font-weight: 500 700;
+  font-weight: 600 700;
   font-style: normal;
   font-display: swap;
 }
@@ -86,11 +88,14 @@
 
 @layer utilities {
   :root {
-    --tempo-docs-outline-width: 280px;
+    --tempo-docs-outline-width: 240px;
     --tempo-docs-primary-nav-height: 65px;
     --tempo-docs-section-nav-height: 44px;
     --tempo-docs-shell-width: 100%;
-    --tempo-docs-sidebar-width: 280px;
+    --tempo-docs-sidebar-width: 256px;
+    --tempo-hub-width: 1168px;
+    --tempo-font-display: var(--font-pilat-book);
+    --tempo-font-body: var(--font-pilat-book);
     --vocs-spacing-topNav: calc(
       var(--tempo-docs-primary-nav-height) +
       var(--tempo-docs-section-nav-height)
@@ -126,6 +131,10 @@
     display: none;
   }
 
+  [data-layout][data-v-sidebar] {
+    --vocs-spacing-content: calc(84ch + (var(--vocs-spacing-content-px) * 2));
+  }
+
   [data-layout][data-v-sidebar] > [data-v-gutter-left] {
     @media (width >= 1080px) {
       left: max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5));
@@ -134,7 +143,7 @@
       justify-content: flex-start;
       background: var(--vocs-background-color-primary);
       border-right: 1px solid var(--vocs-border-color-primary);
-      border-left: 1px solid var(--vocs-border-color-primary);
+      border-left: 0;
     }
   }
 
@@ -220,6 +229,23 @@
 
   [data-docs-sidebar-toggle] {
     display: inline-flex;
+
+    @media (width >= 1080px) {
+      display: none;
+    }
+  }
+
+  [data-docs-sidebar-fallback] {
+    position: sticky;
+    z-index: 10;
+    top: calc(var(--vocs-spacing-topNav) + var(--vocs-spacing-banner));
+    display: flex;
+    align-items: center;
+    height: 48px;
+    padding-inline: var(--vocs-spacing-content-px);
+    border-bottom: 1px solid var(--vocs-border-color-primary);
+    background: var(--vocs-background-color-primary);
+    font-size: 13px;
 
     @media (width >= 1080px) {
       display: none;
@@ -324,7 +350,7 @@
     margin: 0 -8px 8px;
     padding: 0 8px;
     background: transparent;
-    color: color-mix(in srgb, var(--foreground) 42%, transparent);
+    color: color-mix(in srgb, var(--foreground) 65%, transparent);
     font-size: 13px;
     font-weight: 400;
     letter-spacing: 0;
@@ -335,9 +361,9 @@
     min-height: 30px;
     margin: 1px -8px;
     padding: 0 8px;
-    border-radius: 6px;
+    border-radius: 4px;
     background: transparent;
-    color: color-mix(in srgb, var(--foreground) 58%, transparent);
+    color: color-mix(in srgb, var(--foreground) 72%, transparent);
     font-size: 14px;
     font-weight: 400;
     letter-spacing: 0;
@@ -349,7 +375,7 @@
     [data-v-sidebar-section-header]:not([data-collapsable="true"]) {
     min-height: 26px;
     margin: 6px -8px 1px;
-    color: color-mix(in srgb, var(--foreground) 42%, transparent);
+    color: color-mix(in srgb, var(--foreground) 65%, transparent);
     font-size: 13px;
     font-weight: 400;
   }
@@ -381,11 +407,11 @@
   }
 
   [data-v-sidebar] [data-v-sidebar-item][data-link] {
-    min-height: 30px;
+    min-height: 34px;
     margin: 0 -8px;
     padding: 0 8px;
-    border-radius: 6px;
-    color: color-mix(in srgb, var(--foreground) 58%, transparent);
+    border-radius: 4px;
+    color: color-mix(in srgb, var(--foreground) 72%, transparent);
     font-size: 14px;
     font-weight: 400;
     letter-spacing: 0;
@@ -398,14 +424,14 @@
   }
 
   [data-v-sidebar] a[data-v-sidebar-item][data-active] {
-    background: transparent;
+    background: color-mix(in srgb, var(--foreground) 5%, transparent);
     color: var(--foreground);
     font-weight: 500;
     box-shadow: none;
   }
 
   [data-v-sidebar] a[data-v-sidebar-item][data-active]:hover {
-    background: color-mix(in srgb, var(--foreground) 4%, transparent);
+    background: color-mix(in srgb, var(--foreground) 10%, transparent);
   }
 
   [data-v-sidebar] [data-v-sidebar-item][data-condensed="true"] {
@@ -930,8 +956,8 @@
 :root:where([data-theme="light"], [data-vocs-theme="light"]) {
   color-scheme: light;
 
-  --color-background: #fafafa;
-  --color-foreground: #111111;
+  --color-background: #ffffff;
+  --color-foreground: #000000;
   --color-foreground-secondary: #737373;
   --color-foreground-secondary-hover: #111111;
   --color-on-accent: #ffffff;
@@ -946,7 +972,7 @@
   --color-surface-deep: #f4f4f5;
   --color-surface-skeleton: #e5e5e5;
   --color-surface-panel: #f7f7f7;
-  --color-surface-page: #fafafa;
+  --color-surface-page: #ffffff;
   --color-surface-shell: #ffffff;
   --color-line: #e5e5e5;
   --color-line-strong: #d4d4d4;
@@ -1049,6 +1075,11 @@ html,
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+html:has(.docs-section-nav),
+body:has(.docs-section-nav) {
+  background: var(--surface-shell);
 }
 
 html {
@@ -1444,12 +1475,6 @@ body {
   background-color: transparent;
 }
 
-[data-v-sidebar][data-v-sidebar] a[data-v-sidebar-item][data-active]:not(:hover) {
-  background: transparent;
-  background-color: transparent;
-  box-shadow: none;
-}
-
 /* ---------------------------------------------------------------------------
  * Terminal theme — scoped color variables for the embedded terminal demo.
  * --------------------------------------------------------------------------- */
@@ -1522,7 +1547,7 @@ body {
 }
 .blog-prose strong {
   color: var(--foreground);
-  font-weight: 500;
+  font-weight: 600;
 }
 .blog-prose ul,
 .blog-prose ol {
@@ -1587,7 +1612,7 @@ body {
 }
 .blog-prose th {
   color: var(--foreground);
-  font-weight: 500;
+  font-weight: 600;
   background: var(--surface-block);
 }
 .blog-prose img {
@@ -1671,27 +1696,102 @@ body {
   color: var(--prose-caption);
 }
 
-/* Shared docs surfaces use the same readable controls and link semantics as Explorer. */
+/* A quiet navigation surface frames the denser developer reading workspace. */
 @layer utilities {
+  [data-layout][data-v-sidebar] > [data-v-gutter-left],
+  [data-v-sidebar-container],
+  [data-v-sidebar-footer-content] {
+    background: var(--surface-shell);
+  }
+
   article[data-v-content] {
     font-size: 16px;
     line-height: 1.7;
   }
 
   article[data-v-content] :is(h1, h2, h3)[data-v] {
+    font-family: var(--tempo-font-display);
     font-weight: 500;
     letter-spacing: -0.025em;
     text-wrap: balance;
   }
 
+  article[data-v-content] > h1[data-v] {
+    max-width: 24ch;
+    border: 0;
+    padding-bottom: 0;
+    font-size: clamp(32px, 3vw, 42px);
+    letter-spacing: -0.04em;
+    line-height: 1.14;
+  }
+
+  article[data-v-content] > h1[data-v] + p[data-v] {
+    color: color-mix(in srgb, var(--foreground) 68%, transparent);
+    font-size: 17px;
+    line-height: 1.7;
+  }
+
+  article[data-v-content] :is(h1, h2, h3, h4)[id] {
+    /* Vocs already accounts for the site header in html scroll-padding-top. */
+    scroll-margin-top: 16px;
+
+    @media (width < 1376px) {
+      scroll-margin-top: 64px;
+    }
+  }
+
+  article[data-v-content] aside[data-v-callout] {
+    border-radius: 6px;
+  }
+
+  [data-v-outline-indicator] {
+    background: var(--foreground);
+  }
+
+  [data-v-outline-item] a[data-active="true"] {
+    color: var(--foreground);
+  }
+
+  body:has(.docs-section-nav) :is(a, button, input, summary):focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 3px;
+  }
+
+  /* The entry page needs room for product discovery, not a second contents list. */
+  [data-layout]:has(.tempo-docs-home) > [data-v-main] {
+    width: var(--tempo-docs-shell-width);
+    max-width: var(--tempo-docs-shell-width);
+    margin-inline: auto;
+    padding-right: 0;
+    border: 0;
+  }
+
+  [data-layout]:has(.tempo-docs-home) [data-v-gutter-left],
+  [data-layout]:has(.tempo-docs-home) [data-v-gutter-right],
+  [data-layout]:has(.tempo-docs-home) [data-v-outline-mobile],
+  [data-layout]:has(.tempo-docs-home) [data-v-outline],
+  [data-layout]:has(.tempo-docs-home) [data-v-content-footer],
+  [data-layout]:has(.tempo-docs-home) [data-v-footer] {
+    display: none;
+  }
+
+  article[data-v-content]:has(.tempo-docs-home) {
+    max-width: calc(var(--tempo-hub-width) + 96px);
+    margin-inline: auto;
+    padding: clamp(24px, 4vw, 48px);
+  }
+
   article[data-v-content] :is(p, li, td)[data-v] a[data-v] {
-    color: var(--accent-blue);
+    color: var(--foreground);
     font-weight: 400;
-    text-decoration-color: color-mix(in srgb, var(--accent-blue) 40%, transparent);
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-color: color-mix(in srgb, var(--foreground) 35%, transparent);
+    text-decoration-thickness: 1px;
     text-underline-offset: 3px;
   }
 
-  article[data-v-content] :is(p, li, td)[data-v] a[data-v]:hover {
+  article[data-v-content] :is(p, li, td)[data-v] a[data-v]:is(:hover, :focus-visible) {
     text-decoration-color: currentColor;
   }
 
@@ -1706,12 +1806,12 @@ body {
   }
 
   .docs-demo :is(input, select, textarea):focus-visible {
-    outline: 2px solid var(--accent-blue);
+    outline: 2px solid var(--foreground);
     outline-offset: 2px;
   }
 
   .docs-demo :is(button, a):focus-visible {
-    outline: 2px solid var(--accent-blue);
+    outline: 2px solid var(--foreground);
     outline-offset: 3px;
   }
 

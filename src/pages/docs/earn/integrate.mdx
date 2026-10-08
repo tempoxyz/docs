@@ -1,0 +1,85 @@
+---
+title: "Add Earn to your app"
+seoTitle: "Integrate Tempo Earn | Tempo Docs"
+description: "Build an earning balance with Tempo Earn: select a vault, connect deposits, read positions and earnings, and track withdrawals."
+---
+
+# Add Earn to your app
+
+Start with one vault and a connected [Tempo account](/docs/accounts/integrate). Use the Earn API to discover the vault and read positions, then use the vault's documented contract interface for deposits and withdrawals.
+
+## Build the earning balance
+
+:::::steps
+
+### Select a vault
+
+Read the curated vault directory. This example queries mainnet; use `chainId=testnet` when working with a testnet deployment.
+
+```bash
+curl 'https://api.tempo.xyz/v1/earn/vaults/verified?chainId=mainnet&include=access,capabilities,apy,token,tvl'
+```
+
+Save the selected vault's `id`, which is its contract address, and the selected network. Check:
+
+- **Asset and access.** Match the accepted asset and confirm the user's eligibility.
+- **Supported operations.** Read `capabilities` for deposits, immediate redemptions, queued redemptions, and exact-amount withdrawals.
+- **Current state.** Check `state.depositsPaused` before enabling deposits. Use `instantLiquidity` to inform the withdrawal experience.
+- **Strategy and rates.** Explain the underlying source, fees, and the measurement window for displayed yield.
+
+Use `asset` and `capability` filters to narrow the directory. See the [vault API reference](/docs/api/earn#getverifiedearnvaults) for the complete response and pagination.
+
+### Connect deposits
+
+Confirm the selected vault's contract interface, deployment, and required approvals with the provider or Tempo. The Earn read API does not submit deposits or withdrawals.
+
+Show the deposit asset and amount before the user authorizes the transaction. A deposit is a contract interaction; transferring stablecoins to the vault address alone does not establish a position.
+
+After execution, verify the resulting share balance. Save the transaction hash, deposited amount, and shares received for reconciliation. Follow [Fund an account](/docs/guide/getting-funds) if the user needs the accepted stablecoin first.
+
+### Display the position
+
+List the account's positions with `GET /v1/earn/addresses/{address}/positions`. For one vault, use `GET /v1/earn/vaults/{vaultId}/positions/{address}`.
+
+The single-position response includes `shareBalance`, `value`, and `valueToken`. Display the asset value as the earning balance, using the token's decimals. Keep the share balance available for accounting; do not treat it as an equal amount of stablecoins.
+
+Use `GET /v1/earn/vaults/{vaultId}/earnings/{address}` for earnings over a selected period. A change in balance alone is not earnings: deposits, withdrawals, and share transfers also change the position. When the response reports `status: incomplete_cost_basis`, show earnings as unavailable rather than zero.
+
+### Handle withdrawals
+
+Read the current capabilities and request a quote through the selected vault's supported interface. Show the output asset, amount, fees, destination, and whether the withdrawal completes immediately or enters a queue.
+
+Track the submitted transaction and any subsequent settlement. Keep the withdrawal pending until the destination receives the funds. Refresh the position and available stablecoin balance after completion.
+
+Use the [transaction and transfer model](/docs/api/transactions-and-transfers) to distinguish execution from token delivery. If the next action is a payment, wait for delivery before treating the withdrawn funds as spendable.
+
+:::::
+
+## Show rates and rewards accurately
+
+Vault responses can include an `apy` object with observed vault yield, reward information, and a measurement window. It can be `null` when no component is measurable. Display unavailable data as unavailable, rather than as zero.
+
+Request account-specific APY from the [position endpoint](/docs/api/earn#getearnvaultposition) when showing a user's effective rate. Reward qualification can lag a new deposit or transfer, and an eligible boost does not mean the whole balance qualifies. Keep temporary reward terms separate from observed vault yield.
+
+For charts, use the [share-price history endpoint](/docs/api/earn#getearnvaultshareprices) for vault share prices and the [earnings endpoint](/docs/api/earn#getearnvaultearnings) for an account's earnings. Label each chart for the metric it shows.
+
+## Track private Earn activity
+
+For a [Zone](/docs/zones) integration, check `capabilities.privateRouting` and the vault's configured Zone routes. Zone-routed positions use Zone withdrawals rather than the direct account approval flow.
+
+Use `GET /v1/earn/transactions/{senderTag}` to track private Earn execution and return delivery. Successful execution and delivery are separate states; do not mark returned funds available until delivery completes. See the [Earn transaction reference](/docs/api/earn#getearntransaction) for the identifiers and status fields.
+
+Account position listing supports private Zones, but its optional earnings data is unavailable for those positions. Check endpoint support before reusing the public-account earnings view.
+
+## Earn API operations
+
+| Task | Endpoint |
+| --- | --- |
+| Discover curated vaults | `GET /v1/earn/vaults/verified` |
+| Inspect a selected vault | `GET /v1/earn/vaults/{vaultId}` |
+| List an account's positions | `GET /v1/earn/addresses/{address}/positions` |
+| Read one position | `GET /v1/earn/vaults/{vaultId}/positions/{address}` |
+| Read account earnings | `GET /v1/earn/vaults/{vaultId}/earnings/{address}` |
+| Read share-price history | `GET /v1/earn/vaults/{vaultId}/share-prices` |
+
+For public-chain data, these endpoints support anonymous reads. Use [API authentication](/docs/api/authentication) when you need dedicated quotas; an API key requires the `data:read` scope. Keep the selected `chainId` consistent across discovery, transactions, and position reads.

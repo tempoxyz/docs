@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { tempoAgentSetupCommands } from './ai-install-commands'
 
 type MarkdownAttribute = {
   name?: string
@@ -41,7 +42,13 @@ type MarkdownNode = {
 }
 
 const openApiSpecUrl = 'https://api.tempo.xyz/openapi.json'
-const presentationOnlyElements = new Set(['meta', 'script', 'style', 'title'])
+const presentationOnlyElements = new Set([
+  'meta',
+  'script',
+  'style',
+  'title',
+  'DocsHomeProductIcon',
+])
 const tempoReleasesUrl = 'https://github.com/tempoxyz/tempo/releases'
 
 const interactiveDescriptions: Record<string, string> = {
@@ -157,6 +164,43 @@ function rewriteNode(
 
   if (node.name && presentationOnlyElements.has(node.name)) return []
   if (node.name === 'Cards') return renderCards(node, headingDepth, getSnippet)
+  if (node.name === 'DocsHomeAgent')
+    return [
+      { type: 'heading', depth: 2, children: [text('Build with your agent')] },
+      paragraph([text('Connect your agent to Tempo docs, then build a test payment.')]),
+      paragraph([text('Choose your coding agent and run its setup commands in your terminal.')]),
+      { type: 'heading', depth: 3, children: [text('Codex')] },
+      paragraph([
+        text('Requires the '),
+        link('Codex CLI', 'https://learn.chatgpt.com/docs/codex/cli'),
+        text('.'),
+      ]),
+      { type: 'code', lang: 'bash', value: tempoAgentSetupCommands.codex },
+      { type: 'heading', depth: 3, children: [text('Claude Code')] },
+      paragraph([
+        text('Requires '),
+        link('Claude Code', 'https://code.claude.com/docs/en/quickstart'),
+        text('.'),
+      ]),
+      { type: 'code', lang: 'bash', value: tempoAgentSetupCommands.claude },
+      { type: 'heading', depth: 3, children: [text('Amp')] },
+      paragraph([
+        text('Connect Tempo’s MCP server with the '),
+        link('Amp CLI', 'https://ampcode.com/docs/cli#install'),
+        text('.'),
+      ]),
+      { type: 'code', lang: 'bash', value: tempoAgentSetupCommands.amp },
+      { type: 'heading', depth: 3, children: [text('Other agents')] },
+      paragraph([text('Add the Tempo docs skill to a skills-compatible agent.')]),
+      { type: 'code', lang: 'bash', value: tempoAgentSetupCommands.other },
+      paragraph([
+        text('After installation, open a new conversation in your project and paste this prompt:'),
+      ]),
+      {
+        type: 'blockquote',
+        children: [paragraph([text(requiredStringAttribute(node, 'prompt'))])],
+      },
+    ]
   if (node.name === 'Card') return [paragraph(cardContent(node))]
   if (node.name === 'Tabs') return renderTabs(node, headingDepth, getSnippet)
   if (node.name === 'Tab') return renderTab(node, headingDepth, getSnippet)
@@ -167,6 +211,11 @@ function rewriteNode(
     const alt = requiredStringAttribute(node, 'alt')
     const caption = optionalStaticStringAttribute(node, 'caption')
     return [paragraph([text(alt)]), ...(caption ? [paragraph([text(caption)])] : [])]
+  }
+  if (node.name === 'DocsProductOverview') {
+    const alt = requiredStringAttribute(node, 'alt')
+    rewriteChildren(node, headingDepth, getSnippet)
+    return [...(node.children ?? []), paragraph([text(alt)])]
   }
   if (node.name === 'Badge') return renderBadge(node)
   if (node.name === 'Callout') return renderCallout(node, headingDepth, getSnippet)

@@ -1,0 +1,57 @@
+---
+title: "Machine Payments"
+seoTitle: "Machine Payments with Mercator and MPP | Tempo Docs"
+description: Give agents access to paid tools with Mercator, or integrate the Machine Payments Protocol to pay for services and accept API payments on Tempo.
+---
+
+import { Cards, Card } from 'vocs'
+import { DocsProductOverview } from '../../components/DocsProductOverview'
+
+<span id="agents" />
+
+<span id="choose-your-agent-integration" />
+<span id="choose-a-machine-payment-integration" />
+
+<DocsProductOverview image="machine-payments" alt="An agent pays for a service through a machine payment on Tempo.">
+
+# Machine Payments
+
+Give agents access to paid tools with Mercator, or integrate the Machine Payments Protocol (MPP) into your client or service on Tempo.
+
+[Set up Mercator →](/docs/guide/mercator)
+
+</DocsProductOverview>
+
+<Cards>
+  <Card
+    title="Mercator"
+    description="Connect your agent to tool discovery, workflow quotes, and paid execution."
+    to="/docs/guide/mercator"
+    icon="lucide:compass"
+  />
+  <Card
+    title="Pay for services with MPP"
+    description="Use the Tempo CLI to discover services, preview costs, and make paid requests."
+    to="/docs/guide/machine-payments/agent"
+    icon="lucide:bot"
+  />
+  <Card
+    title="Accept payments for your API"
+    description="Add MPP payment handling to your service and charge for access."
+    to="/docs/guide/machine-payments/server"
+    icon="lucide:server"
+  />
+</Cards>
+
+## Build with the Machine Payments Protocol
+
+[MPP](https://mpp.dev) lets clients pay for services as part of a request. Use the [Tempo MPP guide](/docs/guide/machine-payments) to understand the payment flow, then choose the integration you need:
+
+- [Client quickstart](/docs/guide/machine-payments/client) — handle payment requests in your application.
+- [One-time payments](/docs/guide/machine-payments/one-time-payments) — charge for an individual request.
+- [Pay-as-you-go payments](/docs/guide/machine-payments/pay-as-you-go) — charge for metered usage through a session.
+- [Discover MPP services](/docs/guide/machine-payments/discover-services) — find APIs through the service directory and MCP server.
+
+## Give your coding agent Tempo documentation
+
+The [Tempo Docs plugin](/docs/guide/using-tempo-with-ai#install-tempo-plugins) gives coding agents documentation and MCP tools for building on Tempo. Use it alongside these guides to look up integration details and code examples.

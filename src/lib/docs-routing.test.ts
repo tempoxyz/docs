@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import vocsConfig from '../../vocs.config'
 import {
   canonicalDevelopersOrigin,
+  developerSurfaceRedirects,
   docsRouteDestination,
   legacyDocsHostRoutes,
   proxiedLegacyDocsRoutes,
@@ -69,11 +70,53 @@ function findHostRedirectIndex(source: string, host: string) {
 
 function developersProxyDestination(destination: string) {
   if (URL.canParse(destination)) return destination
-  return `/developers${destination}`
+  return `/developers${destination === '/' ? '' : destination}`
 }
 
 describe('docs routing redirects', () => {
+  describe('developer site entry points', () => {
+    it.each(developerSurfaceRedirects)('redirects $source to $destination in both mounts', ({
+      source,
+      destination,
+    }) => {
+      expect(vocsRedirects).toContainEqual(
+        expect.objectContaining({
+          source,
+          destination: docsRouteDestination(destination),
+          status: 301,
+        }),
+      )
+      expect(findRedirect(source === '/' ? '/developers' : `/developers${source}`)).toMatchObject({
+        destination: developersProxyDestination(destination),
+        permanent: true,
+      })
+    })
+
+    it('serves the docs landing and getting-started page without a redirect', () => {
+      expect(vocsRedirects.some(({ source }) => source === '/' || source === '/get-started')).toBe(
+        false,
+      )
+      expect(findRedirect('/developers')).toBeUndefined()
+      expect(fs.existsSync(path.join(process.cwd(), 'src/pages/index.mdx'))).toBe(true)
+      expect(fs.existsSync(path.join(process.cwd(), 'src/pages/get-started.mdx'))).toBe(true)
+    })
+
+    it('removes marketing pages from the file-based route tree', () => {
+      for (const page of [
+        'index.tsx',
+        'build/index.tsx',
+        'build/tip20-tokens.tsx',
+        'build/tempo-transactions.tsx',
+        'performance.tsx',
+      ]) {
+        expect(fs.existsSync(path.join(process.cwd(), 'src/pages', page))).toBe(false)
+      }
+    })
+  })
+
   it('keeps proxied route destinations inside the public mount in production', () => {
+    expect(docsRouteDestination('/', 'production')).toBe(canonicalDevelopersOrigin)
+    expect(docsRouteDestination('/', 'preview')).toBe('/')
     expect(docsRouteDestination('/docs/api', 'production')).toBe(
       `${canonicalDevelopersOrigin}/docs/api`,
     )
@@ -157,6 +200,8 @@ describe('docs routing redirects', () => {
     it.each([
       ['/', 'https://tempo.xyz/developers'],
       ['/developers', 'https://tempo.xyz/developers'],
+      ['/docs', 'https://tempo.xyz/developers'],
+      ['/developers/docs', 'https://tempo.xyz/developers'],
       ['/developers/:path*', 'https://tempo.xyz/developers/:path*'],
       ['/:path*', 'https://tempo.xyz/developers/:path*'],
     ])('redirects %s to %s', (source, destination) => {

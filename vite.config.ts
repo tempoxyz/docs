@@ -25,7 +25,6 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       blogPostsPlugin(),
-      marketingPages(),
       developersProxyBasePath(),
       graphiteRelatedDocsPlugin(),
       vocs(),
@@ -56,8 +55,6 @@ export default defineConfig(({ mode }) => {
   }
 })
 
-const marketingRoutes = ['/', '/build', '/blog', '/performance']
-
 function developersProxyBasePath(): Plugin {
   return {
     name: 'tempo-developers-proxy-base-path',
@@ -83,42 +80,6 @@ function developersProxyBasePath(): Plugin {
               : JSON.stringify('/developers/'),
         },
       }
-    },
-  }
-}
-
-function isMarketingPath(pathname: string) {
-  const normalized = pathname.replace(/\/$/, '') || '/'
-  // Let requests for actual files (e.g. /blog/foo.svg) fall through to Vite's
-  // static asset serving instead of returning the marketing SPA shell.
-  const lastSegment = normalized.split('/').pop() ?? ''
-  if (lastSegment.includes('.')) return false
-  return (
-    marketingRoutes.includes(normalized) ||
-    normalized.startsWith('/build/') ||
-    normalized.startsWith('/blog/')
-  )
-}
-
-async function marketingHtml() {
-  const html = await fs.readFile(path.resolve(process.cwd(), 'src/marketing/index.html'), 'utf-8')
-  return html.replace('src="./main.tsx"', 'src="/src/marketing/main.tsx"')
-}
-
-function marketingPages(): Plugin {
-  return {
-    name: 'tempo-marketing-pages',
-    configureServer(server) {
-      server.middlewares.use(async (req, res, next) => {
-        if (!req.url) return next()
-        const url = new URL(req.url, 'http://localhost')
-        if (!isMarketingPath(url.pathname)) return next()
-
-        const html = await server.transformIndexHtml(url.pathname, await marketingHtml())
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'text/html')
-        res.end(html)
-      })
     },
   }
 }

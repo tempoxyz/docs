@@ -1,0 +1,71 @@
+---
+title: "Get Started"
+seoTitle: "Get Started with Tempo | Tempo Docs"
+description: Set up your coding agent, connect a test wallet, get test stablecoins, and send your first payment on Tempo.
+---
+
+import { Cards, Card } from 'vocs'
+import { DocsProductOverview } from '../components/DocsProductOverview'
+
+<DocsProductOverview image="get-started" alt="Stablecoin payments recorded on Tempo’s ledger.">
+
+# Get Started
+
+Set up your coding agent, fund a test wallet, and send your first stablecoin payment on Tempo’s Moderato testnet.
+
+[Set up your agent →](#set-up-your-coding-agent)
+
+</DocsProductOverview>
+
+## Send your first test payment
+
+:::::steps
+
+### Set up your coding agent
+
+Install the [Tempo Docs plugin](/docs/guide/using-tempo-with-ai#install-tempo-plugins) to give your agent documentation and MCP tools. The [AI setup guide](/docs/guide/using-tempo-with-ai) also covers other editors and MCP clients.
+
+Start with this task:
+
+```text
+Use Tempo's docs to build a TypeScript example that sends a stablecoin payment on Moderato testnet with a memo. Include wallet funding and verify delivery to the intended recipient.
+```
+
+### Connect a test wallet
+
+Use the [network connection details](/docs/quickstart/connection-details) to configure your wallet or client for Moderato. Keep this testnet configuration separate from Tempo Mainnet, which uses production funds.
+
+### Get test stablecoins
+
+Open the [testnet faucet](/docs/quickstart/faucet) and connect your test wallet or enter its address. The faucet funds the wallet with test stablecoins for development.
+
+### Send and verify a payment
+
+Follow [Send your first payment](/docs/guide/payments/send-a-payment) to try a transfer and inspect the implementation. Add a memo if you need a payment reference, and confirm that the intended recipient receives the transfer.
+
+:::::
+
+## Continue your Tempo integration
+
+<Cards>
+  <Card
+    title="Accounts"
+    description="Connect Tempo Wallet, accept deposits, and configure account controls."
+    to="/docs/accounts"
+    icon="lucide:wallet"
+  />
+  <Card
+    title="APIs and SDKs"
+    description="Choose libraries, hosted APIs, and command-line tools for your application."
+    to="/docs/tools"
+    icon="lucide:code-2"
+  />
+  <Card
+    title="Routes"
+    description="Fund accounts from other networks with wallet transfers or deposit addresses."
+    to="/docs/routes"
+    icon="lucide:arrow-left-right"
+  />
+</Cards>
+
+Explore [Earn](/docs/earn) for earning balances, [Zones](/docs/zones) for private balances, and [Machine Payments](/docs/agents) for MPP and Mercator. Use the [network integration guide](/docs/quickstart/integrate-tempo) for EVM compatibility and chain configuration.

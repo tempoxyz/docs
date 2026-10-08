@@ -174,11 +174,12 @@ function targetFor(href: string, page: Page): { route: string; fragment: string 
   if (!url.hash || url.origin !== 'https://tempo.local') return
 
   let route = url.pathname
-  if (route === '/developers/docs' || route.startsWith('/developers/docs/')) {
+  if (route === '/developers' || route.startsWith('/developers/')) {
     route = route.slice('/developers'.length)
   }
-  route = normalizeRoute(route)
-  if (route !== '/docs' && !route.startsWith('/docs/')) return
+  route = normalizeRoute(route || '/')
+  if (route === '/docs') route = '/'
+  if (route !== '/' && route !== '/get-started' && !route.startsWith('/docs/')) return
 
   return { route, fragment: decodeURIComponent(url.hash.slice(1)) }
 }
@@ -188,7 +189,11 @@ export function checkInternalAnchors(
 ): InternalAnchorCheck {
   const pages = markdownFiles(pagesDirectory).map((file) => pageFor(file, pagesDirectory))
   const docsPages = pages.filter(
-    (page) => page.route === '/docs' || page.route.startsWith('/docs/'),
+    (page) =>
+      page.route === '/' ||
+      page.route === '/get-started' ||
+      page.route === '/docs' ||
+      page.route.startsWith('/docs/'),
   )
   const eventsByRoute = new Map(docsPages.map((page) => [page.route, sourceEvents(page.file)]))
   const anchorsByRoute = new Map<string, Set<string>>()

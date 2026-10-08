@@ -1,0 +1,111 @@
+---
+title: "Earn"
+seoTitle: "Tempo Earn | Tempo Docs"
+description: "Offer yield in your app with Tempo Earn. Connect to yield providers through a common vault model, track earning balances, and manage withdrawals."
+---
+
+import { Card, Cards } from 'vocs'
+import { DocsProductOverview } from '../../components/DocsProductOverview'
+
+<span id="offer-an-earning-balance" />
+
+<DocsProductOverview image="earn" alt="Illustrative Earn position: 1,200 vault shares valued at 1,250 OUSD. A fluctuating historical value chart illustrates position tracking, not a yield forecast.">
+
+# Earn
+
+Offer yield from different providers through a common vault model. Let users deposit stablecoins, track their earning balance, and request withdrawals.
+
+[Add Earn to your app →](/docs/earn/integrate)
+
+</DocsProductOverview>
+
+<span id="how-earning-balances-work" />
+
+## How Earn works
+
+Earn sits between your app and the providers that generate yield. Your app works with a vault; an **engine** connects that vault to the underlying strategy. This keeps the integration model consistent as you add providers.
+
+| Component | Role |
+| --- | --- |
+| **Vault** | Pools deposits and accounts for users' positions. |
+| **Engine** | Connects the vault to a lending market, managed vault, or liquidity pool. |
+| **Earn shares** | TIP-20 tokens that represent a user's position and are held in their account. |
+
+A deposit gives the user shares. The value of those shares changes with the underlying strategy's returns, losses, and fees. Your app displays the shares' current asset value as the earning balance; one share is not necessarily worth one stablecoin.
+
+The [Earn API](/docs/api/earn) exposes the vault's engine, share token, accepted asset, accounting state, and supported operations.
+
+<span id="choose-the-vault-integration" />
+
+## Choose a yield source
+
+Choose the earning product you want to offer, then select a vault that supports it. An app can offer one vault, a strategy that combines assets, or a choice of vaults with different strategies.
+
+| Source | How it connects to Earn |
+| --- | --- |
+| **Lending** | An engine deposits into an underlying lending vault. |
+| **Managed strategies** | An engine connects to a provider-managed vault that allocates funds across its strategy. |
+| **Tokenized assets** | An engine accesses an asset, such as tokenized treasuries or private credit, through a supported liquidity pool. |
+
+Start with the [verified vault directory](/docs/api/earn#getverifiedearnvaults). Check each vault's accepted asset, strategy, access restrictions, fees, and withdrawal capabilities. The directory's `verified` flag identifies a curated listing; it does not describe the strategy's risk or guarantee a return.
+
+<span id="track-deposits-and-withdrawals" />
+
+## Liquidity and withdrawals
+
+An earning balance is useful when users can also access their funds. A vault can use available cash or liquidity from its underlying venue to support redemptions. When that liquidity is unavailable, a supported withdrawal may need to be queued.
+
+Keep three amounts distinct in your app:
+
+| Amount | What to show |
+| --- | --- |
+| **Position value** | The current asset value of the user's shares. |
+| **Available to withdraw** | The amount available through the vault's supported withdrawal path and a current quote. |
+| **Pending withdrawal** | An exit requested but not yet delivered to the destination account. |
+
+Read `capabilities.redeem` and `capabilities.asyncRedeem` to distinguish immediate and queued redemption support. The vault's `instantLiquidity` reports liquidity across the vault, not a user-specific withdrawal quote; `null` means a reliable value is unavailable. Recheck the withdrawal path when the user submits a request.
+
+<span id="read-vaults-and-positions" />
+
+## Read positions and earnings
+
+Use the [Earn API](/docs/api/earn) for vault discovery, account positions, share-price history, and earnings. You can start with a public read of verified mainnet vaults:
+
+```bash
+curl 'https://api.tempo.xyz/v1/earn/vaults/verified?chainId=mainnet&include=capabilities,apy,token,tvl'
+```
+
+Show an account's position value alongside its earnings over a selected period. Keep the vault's observed yield separate from promotional rewards, and show the rate's measurement window. Use account-specific rate data when available: a vault's headline rate may differ from what a particular balance qualifies for.
+
+Follow [Add Earn to your app](/docs/earn/integrate) for the deposit, balance, and withdrawal workflow.
+
+<span id="connect-earning-balances-to-payments" />
+
+## Use earning balances for payments
+
+To fund a payment, redeem the required stablecoins through the vault's supported interface, confirm that they have reached the account, then [send the payment](/docs/guide/payments/send-a-payment). Keep pending withdrawals separate from the stablecoins available to send.
+
+For private balances, use a vault that supports [Zone routing](/docs/zones) and check its route configuration. Public and private positions have different accounting and tracking requirements; see the [integration guide](/docs/earn/integrate#track-private-earn-activity).
+
+<span id="yield-providers" />
+
+## Connect a yield source
+
+Yield providers implement engines that connect their products to Earn's vault model. The engine handles the underlying venue while the app continues to use vault shares, position data, and capability checks.
+
+For a provider integration, define the accepted asset, share valuation, fees, access controls, and deposit and redemption behavior. Test both available-liquidity and queued-withdrawal paths where supported. Confirm the engine interface and deployment with Tempo before integrating a new source.
+
+<Cards>
+  <Card
+    title="Add Earn to your app"
+    icon="lucide:wallet"
+    description="Discover a vault, connect deposits, display earnings, and track withdrawals."
+    to="/docs/earn/integrate"
+  />
+  <Card
+    title="Earn API"
+    icon="lucide:braces"
+    description="Read vault configuration, positions, share prices, and earnings."
+    to="/docs/api/earn"
+  />
+</Cards>

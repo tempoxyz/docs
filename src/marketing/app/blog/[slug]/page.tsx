@@ -1,84 +1,58 @@
-import Link from 'next/link'
-import Footer from '../../_components/Footer'
-import Header from '../../_components/Header'
-import Reveal from '../../_components/Reveal'
-import { developersPath } from '../../_lib/developersPaths'
+import { Link } from 'waku'
+import DocsHeader from '../../../../components/DocsHeader'
+import BlogFooter from '../_components/BlogFooter'
 import MicroHeader from '../_components/MicroHeader'
 import PostByline from '../_components/PostByline'
 import PostLabels from '../_components/PostLabels'
 import { getPost } from '../_lib/posts'
+import '../BlogShell.css'
 
 export default function BlogPostPage({ params }: { params: { slug: string } }) {
   const post = getPost(params.slug)
 
   if (!post) {
     return (
-      <main className="min-h-screen w-full bg-surface-page">
-        <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col border-line border-x bg-surface-shell">
-          <Header />
-          <div className="flex flex-1 flex-col items-center justify-center gap-4 px-5 py-32 text-center">
-            <h1 className="font-sans text-[clamp(1.75rem,4vw,2.5rem)] text-foreground tracking-[-0.02em] antialiased">
-              Post not found
-            </h1>
-            <Link
-              href={developersPath('/blog')}
-              className="font-mono text-[12px] text-foreground/40 uppercase tracking-[0.02em] transition-colors hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <Footer />
-        </div>
-      </main>
+      <div className="tempo-blog">
+        <DocsHeader surface="blog" />
+        <main id="blog-content" className="tempo-blog-not-found">
+          <h1>Post not found</h1>
+          <Link to="/blog">← Back to the blog</Link>
+        </main>
+        <BlogFooter />
+      </div>
     )
   }
 
   return (
-    <main className="min-h-screen w-full bg-surface-page">
-      <div className="mx-auto w-full max-w-7xl border-line border-x bg-surface-shell">
-        <Header />
-        <MicroHeader title={post.title} />
-
-        <article className="mx-auto w-full max-w-[760px] px-5 pt-14 lg:pt-20" data-blog-article>
-          <Reveal>
-            <Link
-              href={developersPath('/blog')}
-              className="font-mono text-[12px] text-foreground/40 uppercase tracking-[0.02em] transition-colors hover:text-foreground"
-            >
-              ← Blog
+    <div className="tempo-blog tempo-blog-post">
+      <DocsHeader surface="blog" />
+      <MicroHeader title={post.title} />
+      <main id="blog-content">
+        <article className="tempo-blog-article" data-blog-article>
+          <header className="tempo-blog-article-header">
+            <Link to="/blog" className="tempo-blog-back">
+              ← All posts
             </Link>
+            <PostLabels post={post} />
+            <h1 data-blog-title>{post.title}</h1>
+            <p className="tempo-blog-article-lede">{post.excerpt}</p>
+            <PostByline post={post} />
+          </header>
 
-            <div className="mt-8">
-              <PostLabels post={post} />
-            </div>
-
-            <h1
-              className="mt-5 font-sans text-[clamp(2rem,5vw,3rem)] text-foreground leading-[1.1] tracking-[-0.02em] antialiased"
-              data-blog-title
-            >
-              {post.title}
-            </h1>
-
-            <p className="mt-5 font-sans text-[17px] text-foreground/60 leading-[1.55] tracking-[0]">
-              {post.excerpt}
-            </p>
-            <div className="mt-5">
-              <PostByline post={post} />
-            </div>
-          </Reveal>
-
-          {/* Post content is dev-authored markdown from the repo, rendered to
-              HTML at build time, so raw HTML injection here is trusted. */}
-          <Reveal delay={100} className="blog-prose mt-12 border-line border-t pt-10">
-            {/* biome-ignore lint/security/noDangerouslySetInnerHtml: trusted build-time markdown */}
+          <div className="blog-prose tempo-blog-article-body">
+            {/* biome-ignore lint/security/noDangerouslySetInnerHtml: trusted build-time repository markdown */}
             <div data-blog-content dangerouslySetInnerHTML={{ __html: post.html }} />
-          </Reveal>
-        </article>
+          </div>
 
-        <div className="mt-[140px]">
-          <Footer />
-        </div>
-      </div>
-    </main>
+          <div className="tempo-blog-article-end">
+            <Link to="/blog">← More posts</Link>
+            <Link to="/docs">
+              Documentation <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+        </article>
+      </main>
+      <BlogFooter />
+    </div>
   )
 }

@@ -84,6 +84,23 @@ import Shared from '../snippets/shared.mdx'
     expect(checkInternalAnchors(directory)).toMatchObject({ linksChecked: 3, failures: [] })
   })
 
+  it('checks the landing, getting started, and legacy home fragments', () => {
+    const directory = pages({
+      'index.mdx':
+        '# Documentation\n<span id="start-here" />\n[Start](/get-started#first-payment)\n',
+      'get-started.mdx':
+        '# Get Started\n## First payment\n[Home](/#start-here)\n[Legacy](/docs?ref=legacy#start-here)\n[Mounted](/developers#start-here)\n[Mounted start](/developers/get-started#first-payment)\n[Stale](/docs#missing)\n',
+    })
+
+    expect(checkInternalAnchors(directory)).toMatchObject({
+      pagesChecked: 2,
+      linksChecked: 6,
+      failures: [
+        expect.objectContaining({ href: '/docs#missing', targetRoute: '/', fragment: 'missing' }),
+      ],
+    })
+  })
+
   it('leaves missing pages to the Vocs dead-link check', () => {
     const directory = pages({
       'docs/index.mdx': '[Missing](/docs/not-a-page#heading)\n',

@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
+import { getActiveDocsSection } from '../lib/docs-sections'
 import { normalizeDocsPath, resolveSidebarItems } from './DocsHeader'
 
 const sidebar = {
-  '/docs': [{ text: 'Start Here' }],
-  '/docs/protocol': [{ text: 'Tempo Protocol' }],
-  '/docs/tools': [{ text: 'Tools & SDKs' }],
+  '/get-started': [{ text: 'Get Started' }],
+  '/docs': [{ text: 'Get Started' }],
+  '/docs/protocol': [{ text: 'Specifications' }],
+  '/docs/protocol/rpc': [{ text: 'Developer Resources' }],
 }
 
 describe('normalizeDocsPath', () => {
@@ -12,6 +14,7 @@ describe('normalizeDocsPath', () => {
     ['/developers/docs/protocol', '/docs/protocol'],
     ['/developers/docs/protocol/tip20/overview', '/docs/protocol/tip20/overview'],
     ['/developers', '/'],
+    ['/developers/get-started', '/get-started'],
     ['/docs/tools', '/docs/tools'],
     ['', '/'],
   ])('normalizes %s to %s', (pathname, expected) => {
@@ -20,15 +23,94 @@ describe('normalizeDocsPath', () => {
 })
 
 describe('resolveSidebarItems', () => {
+  it('resolves the standalone getting-started sidebar under the production mount', () => {
+    expect(resolveSidebarItems(sidebar, '/developers/get-started')[0]?.text).toBe('Get Started')
+  })
+
   it('uses the current docs section when served from the developers mount', () => {
     const items = resolveSidebarItems(sidebar, '/developers/docs/protocol')
 
-    expect(items[0]?.text).toBe('Tempo Protocol')
+    expect(items[0]?.text).toBe('Specifications')
   })
 
   it('uses the longest matching sidebar key', () => {
-    const items = resolveSidebarItems(sidebar, '/docs/protocol/tip20/overview')
+    const items = resolveSidebarItems(sidebar, '/docs/protocol/rpc/eth_getBalance')
 
-    expect(items[0]?.text).toBe('Tempo Protocol')
+    expect(items[0]?.text).toBe('Developer Resources')
   })
+})
+
+describe('getActiveDocsSection', () => {
+  it('keeps section navigation active under the developers mount and trailing slashes', () => {
+    expect(getActiveDocsSection('/developers/docs/api/transfers/')?.id).toBe('development')
+    expect(getActiveDocsSection('/developers/get-started/')?.id).toBe('overview')
+    expect(getActiveDocsSection('/developers/docs/protocol/upgrades/t12/')?.id).toBe('changelog')
+    expect(getActiveDocsSection('/developers/docs/protocol/')?.label).toBe('Specifications')
+  })
+
+  it.each([
+    ['/get-started', 'overview'],
+    ['/docs/development', 'development'],
+    ['/docs/api/console', 'development'],
+    ['/docs/quickstart/evm-compatibility', 'development'],
+    ['/docs/guide/using-tempo-with-ai', 'development'],
+    ['/docs/quickstart/faucet', 'overview'],
+    ['/docs/accounts', 'accounts'],
+    ['/docs/build', 'accounts'],
+    ['/docs/guide/getting-funds', 'accounts'],
+    ['/docs/guide/payments/send-a-payment', 'accounts'],
+    ['/docs/guide/tempo-transaction', 'accounts'],
+    ['/docs/quickstart/wallet-developers', 'accounts'],
+    ['/docs/quickstart/tokenlist', 'accounts'],
+    ['/docs/earn', 'earn'],
+    ['/docs/routes', 'routes'],
+    ['/docs/guide/stablecoin-dex/executing-swaps', 'routes'],
+    ['/docs/guide/bridge-layerzero', 'routes'],
+    ['/docs/guide/bridge-bungee', 'routes'],
+    ['/docs/guide/bridge-relay', 'routes'],
+    ['/docs/zones', 'zones'],
+    ['/docs/guide/private-zones/connect-to-a-zone', 'zones'],
+    ['/docs/agents', 'agents'],
+    ['/docs/guide/machine-payments/agent', 'agents'],
+    ['/docs/guide/mercator', 'agents'],
+    ['/docs/ecosystem', 'development'],
+    ['/docs/ecosystem/wallets', 'development'],
+    ['/docs/guide/ousd', 'development'],
+    ['/docs/partners', 'development'],
+    ['/docs/quickstart/integrate-tempo', 'development'],
+    ['/docs/quickstart/connection-details', 'development'],
+    ['/docs/guide/issuance/create-a-stablecoin', 'protocol'],
+    ['/docs/protocol/tip20/overview', 'protocol'],
+    ['/docs/guide/node/installation', 'protocol'],
+    ['/docs/protocol/upgrades', 'changelog'],
+    ['/docs/protocol/upgrades/t11', 'changelog'],
+    ['/docs/protocol/upgrades/t12', 'changelog'],
+    ['/docs/guide/node/upgrade-cadence', 'changelog'],
+    ['/docs/guide/node/network-upgrades', 'changelog'],
+    ['/docs/changelog', 'changelog'],
+    ['/docs/api/indexer-api', 'development'],
+    ['/docs/protocol/rpc/eth_getBalance', 'development'],
+    ['/docs/sdk/typescript', 'development'],
+    ['/docs/cli/request', 'development'],
+    ['/docs/wallet/recipes', 'development'],
+    ['/docs/server/relay-handler', 'development'],
+    ['/docs/tools', 'development'],
+    ['/docs/quickstart/developer-tools', 'development'],
+  ])('assigns %s to the %s section', (pathname, expected) => {
+    expect(getActiveDocsSection(pathname)?.id).toBe(expected)
+    expect(getActiveDocsSection(`/developers${pathname}/`)?.id).toBe(expected)
+  })
+
+  it.each([
+    '/',
+    '/developers/',
+    '/docs',
+    '/blog',
+    '/docs/apiary',
+    '/docs/earnings',
+    '/docs/spend',
+    '/docs/spending',
+    '/docs/guide/private-zones-extra',
+  ])('does not mark an unrelated route active: %s', (pathname) =>
+    expect(getActiveDocsSection(pathname)).toBeUndefined())
 })

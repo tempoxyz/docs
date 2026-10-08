@@ -49,10 +49,11 @@ for (const route of publicRoutes) {
 
 test('keeps one route title through docs and OpenAPI client navigation', async ({ page }) => {
   await page.goto('/docs/quickstart/integrate-tempo', { waitUntil: 'networkidle' })
-  await expectSingleTitle(page, 'How to Integrate Tempo | Tempo Docs')
+  await expectSingleTitle(page, 'Integrate Tempo with Apps, Wallets, and Services | Tempo Docs')
 
+  await page.getByRole('button', { name: 'APIs & SDKs', exact: true }).click()
   await page
-    .getByRole('navigation', { name: 'Documentation sections' })
+    .getByRole('navigation', { name: 'API and SDK resources' })
     .getByRole('link', { name: 'Tempo API', exact: true })
     .click()
   await page.waitForURL(/\/docs\/api\/?$/)

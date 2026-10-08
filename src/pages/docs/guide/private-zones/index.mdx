@@ -11,6 +11,8 @@ import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
 Tempo Zones give applications a private account ledger connected to Tempo. You use a Zone’s RPC to read private balances and submit transactions, and the public Tempo chain to move funds into and out of the Zone.
 
+These interactive guides use an earlier testnet sandbox. Start with the [Tempo Zones product guide](/docs/zones) for current integration requirements and privacy boundaries, and review the [sandbox compatibility notes](#testnet-compatibility) before adapting an example to another deployment.
+
 A deposit locks tokens on Tempo and credits a private balance in the Zone. A withdrawal moves funds back to a Tempo address. These operations settle in stages, so the guides show both the transaction being accepted and the balance arriving at its destination.
 
 <ZoneDiagram

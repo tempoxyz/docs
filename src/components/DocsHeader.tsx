@@ -1,37 +1,24 @@
 'use client'
 
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useConfig } from 'vocs'
 import { useRouter, Link as WakuLink } from 'waku'
-import { tempoPluginInstallCommands } from '../lib/ai-install-commands'
-import { DOCS_SEARCH_PARAM } from '../lib/docs-search'
+import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
+import { DOCS_SEARCH_PARAM, docsSearchUrl } from '../lib/docs-search'
+import { publicAssetPath } from '../lib/public-asset-path'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
-
-type MegaLink = {
-  label: string
-  desc: string
-  href: string
-  icon: ReactNode
-}
-
-type MegaColumn = { title: string; items: MegaLink[] }
-type MegaMenuData = { columns: MegaColumn[]; variant?: 'columns' | 'vertical' }
-type MenuItem = { label: string; href: string; mega?: MegaMenuData }
+import { AgentSetupCommand } from './AgentSetupCommand'
+import {
+  DocsResourceLinks,
+  docsSections,
+  getActiveDocsSection,
+  specificationsSection,
+} from './DocsSectionNav'
+import './DocsNavigation.css'
 
 const DOCS_BASE_PATH = '/docs'
 const DEVELOPERS_BASE_PATH = '/developers'
 const TEMPO_AI_GUIDE_URL = `${DOCS_BASE_PATH}/guide/using-tempo-with-ai`
 const TEMPO_PLUGIN_URL = `${TEMPO_AI_GUIDE_URL}#install-tempo-plugins`
-const TEMPO_MCP_URL = 'https://mcp.tempo.xyz'
-const TEMPO_SDK_DOCS_URL = `${DOCS_BASE_PATH}/sdk`
-
-function featurePath(slug: string) {
-  const featurePaths: Record<string, string> = {
-    transactions: '/build/tempo-transactions',
-    tokens: '/build/tip20-tokens',
-  }
-  return featurePaths[slug] ?? '/'
-}
 
 function isExternal(href: string) {
   return !href.startsWith('/') && !href.startsWith('#')
@@ -44,10 +31,6 @@ export function normalizeDocsPath(pathname: string) {
     return path.slice(DEVELOPERS_BASE_PATH.length) || '/'
   }
   return path
-}
-
-function pathMatches(pathname: string, href: string) {
-  return pathname === href || pathname.startsWith(`${href}/`)
 }
 
 export function usePathname() {
@@ -72,14 +55,6 @@ export function usePathname() {
   return pathname
 }
 
-function isActiveMenuItem(pathname: string, item: MenuItem) {
-  if (item.label === 'Build') return pathname.startsWith('/build')
-  if (item.label === 'Resources')
-    return pathname === '/docs/sdk' || pathname.startsWith('/docs/sdk/')
-  if (item.label === 'Docs') return pathname === '/docs' || pathname.startsWith('/docs/')
-  return !isExternal(item.href) && pathMatches(pathname, item.href)
-}
-
 function Anchor({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
   if (!href) return <a {...props}>{children}</a>
   if (isExternal(href)) {
@@ -94,34 +69,6 @@ function Anchor({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnc
       {children}
     </WakuLink>
   )
-}
-
-const prefetchedPaths = new Set<string>()
-
-function appendLink(rel: string, href: string, attributes: Record<string, string> = {}) {
-  if (typeof document === 'undefined') return
-  const selector = `link[rel="${rel}"][href="${href}"]`
-  if (document.head.querySelector(selector)) return
-
-  const link = document.createElement('link')
-  link.rel = rel
-  link.href = href
-  for (const [name, value] of Object.entries(attributes)) {
-    link.setAttribute(name, value)
-  }
-  document.head.appendChild(link)
-}
-
-function prefetchPath(href: string) {
-  if (typeof document === 'undefined') return
-  if (!href.startsWith('/') || prefetchedPaths.has(href)) return
-  prefetchedPaths.add(href)
-
-  appendLink('prefetch', href, { as: 'document' })
-}
-
-function warmMarketingApp() {
-  prefetchPath('/')
 }
 
 function ArrowUpRight({ className }: { className?: string }) {
@@ -140,11 +87,11 @@ function TempoLogo({ className }: { className?: string }) {
       className={`block bg-current ${className ?? ''}`}
       style={{
         aspectRatio: '102.461 / 23.2394',
-        maskImage: "url('/stickers/sticker4/tempo.svg')",
+        maskImage: `url('${publicAssetPath('/stickers/sticker4/tempo.svg')}')`,
         maskRepeat: 'no-repeat',
         maskSize: 'contain',
         maskPosition: 'center',
-        WebkitMaskImage: "url('/stickers/sticker4/tempo.svg')",
+        WebkitMaskImage: `url('${publicAssetPath('/stickers/sticker4/tempo.svg')}')`,
         WebkitMaskRepeat: 'no-repeat',
         WebkitMaskSize: 'contain',
         WebkitMaskPosition: 'center',
@@ -172,71 +119,6 @@ function Glyph({ children }: { children: ReactNode }) {
   )
 }
 
-function TransactionsIcon() {
-  return (
-    <Glyph>
-      <path d="M7 8h10M14 5l3 3-3 3" />
-      <path d="M17 16H7M10 13l-3 3 3 3" />
-    </Glyph>
-  )
-}
-
-function TokensIcon() {
-  return (
-    <Glyph>
-      <circle cx="9.5" cy="12" r="4.5" />
-      <circle cx="14.5" cy="12" r="4.5" />
-    </Glyph>
-  )
-}
-
-function DocsIcon() {
-  return (
-    <Glyph>
-      <rect x="6" y="3.5" width="12" height="17" rx="2" />
-      <path d="M9 8h6M9 12h6M9 16h4" />
-    </Glyph>
-  )
-}
-
-function WalletIcon() {
-  return (
-    <Glyph>
-      <rect x="4" y="6.5" width="16" height="12" rx="2.5" />
-      <path d="M4 9.5h12a2 2 0 0 1 2 2" />
-      <circle cx="16.5" cy="12.5" r="1" />
-    </Glyph>
-  )
-}
-
-function FaucetIcon() {
-  return (
-    <Glyph>
-      <path d="M12 3.5c3.5 4.3 5.3 7.2 5.3 10a5.3 5.3 0 0 1-10.6 0c0-2.8 1.8-5.7 5.3-10Z" />
-      <path d="M10 16.5c1.5 1 3.5.5 4.4-1" />
-    </Glyph>
-  )
-}
-
-function ApiIcon() {
-  return (
-    <Glyph>
-      <path d="M9 5c-2 0-2 2-2 3.4 0 1.4-.4 2.6-2 2.6 1.6 0 2 1.2 2 2.6C7 17 7 19 9 19" />
-      <path d="M15 5c2 0 2 2 2 3.4 0 1.4.4 2.6 2 2.6-1.6 0-2 1.2-2 2.6C17 17 17 19 15 19" />
-    </Glyph>
-  )
-}
-
-function ExplorerIcon() {
-  return (
-    <Glyph>
-      <circle cx="11" cy="11" r="5.5" />
-      <path d="m15 15 4 4" />
-      <path d="M8.5 11h5M11 8.5v5" />
-    </Glyph>
-  )
-}
-
 function McpIcon() {
   return (
     <Glyph>
@@ -246,125 +128,6 @@ function McpIcon() {
     </Glyph>
   )
 }
-
-function TerminalIcon() {
-  return (
-    <Glyph>
-      <rect x="4" y="5" width="16" height="14" rx="2" />
-      <path d="M8 10l2.5 2.5L8 15M13 15h3" />
-    </Glyph>
-  )
-}
-
-const protocolMenu: MegaMenuData = {
-  variant: 'vertical',
-  columns: [
-    {
-      title: 'Transactions',
-      items: [
-        {
-          label: 'Tempo Transactions',
-          desc: 'Flexible transactions for batching, fee sponsorship, scheduling, and more',
-          href: featurePath('transactions'),
-          icon: <TransactionsIcon />,
-        },
-      ],
-    },
-    {
-      title: 'Assets & privacy',
-      items: [
-        {
-          label: 'TIP-20 tokens',
-          desc: 'Stablecoin-first token standard for payments',
-          href: featurePath('tokens'),
-          icon: <TokensIcon />,
-        },
-      ],
-    },
-  ],
-}
-
-const developersMenu: MegaMenuData = {
-  columns: [
-    {
-      title: 'Documentation',
-      items: [
-        {
-          label: 'Docs',
-          desc: 'Guides, references & quickstart',
-          href: DOCS_BASE_PATH,
-          icon: <DocsIcon />,
-        },
-        {
-          label: 'Tempo API',
-          desc: 'APIs for stablecoin payment applications',
-          href: `${DOCS_BASE_PATH}/api`,
-          icon: <ApiIcon />,
-        },
-      ],
-    },
-    {
-      title: 'Tools',
-      items: [
-        {
-          label: 'Tempo Wallet',
-          desc: 'A Tempo-first wallet',
-          href: 'https://wallet.tempo.xyz',
-          icon: <WalletIcon />,
-        },
-        {
-          label: 'Faucet',
-          desc: 'Get testnet tokens for development',
-          href: `${DOCS_BASE_PATH}/quickstart/faucet`,
-          icon: <FaucetIcon />,
-        },
-        {
-          label: 'TIDX',
-          desc: 'Raw indexer queries & event streams',
-          href: `${DOCS_BASE_PATH}/api/indexer-api`,
-          icon: <ApiIcon />,
-        },
-        {
-          label: 'Tempo Explorer',
-          desc: 'Search blocks, txs & tokens',
-          href: 'https://explorer.tempo.xyz',
-          icon: <ExplorerIcon />,
-        },
-        {
-          label: 'Wallet CLI',
-          desc: 'Use Tempo Wallet from the command line for agents',
-          href: `${DOCS_BASE_PATH}/cli/wallet`,
-          icon: <TerminalIcon />,
-        },
-      ],
-    },
-    {
-      title: 'Libraries',
-      items: [
-        {
-          label: 'MPP',
-          desc: 'Open protocol for agentic payments',
-          href: 'https://mpp.dev/',
-          icon: <McpIcon />,
-        },
-        {
-          label: 'SDKs',
-          desc: 'TypeScript, Rust, Go & Foundry',
-          href: TEMPO_SDK_DOCS_URL,
-          icon: <TerminalIcon />,
-        },
-      ],
-    },
-  ],
-}
-
-const menu: MenuItem[] = [
-  { label: 'Build', href: '/#protocol', mega: protocolMenu },
-  { label: 'Resources', href: `${DOCS_BASE_PATH}/guide`, mega: developersMenu },
-  { label: 'Performance', href: '/performance' },
-  { label: 'Blog', href: '/blog' },
-  { label: 'Docs', href: DOCS_BASE_PATH },
-]
 
 function ActiveSquare({ activeKey }: { activeKey: string }) {
   return (
@@ -381,67 +144,6 @@ function ActiveSquare({ activeKey }: { activeKey: string }) {
         )),
       )}
     </svg>
-  )
-}
-
-function MegaItem({ link }: { link: MegaLink }) {
-  const external = isExternal(link.href)
-  return (
-    <Anchor
-      href={link.href}
-      className="group/item relative flex items-start gap-3 rounded-[4px] px-3 py-2.5 transition-colors hover:bg-foreground/[0.04]"
-    >
-      {external ? (
-        <ArrowUpRight className="absolute top-2.5 right-3 size-3 text-foreground/35 transition-colors group-hover/item:text-foreground/60" />
-      ) : null}
-      <span className="grid size-[34px] shrink-0 place-items-center bg-surface-input text-foreground">
-        {link.icon}
-      </span>
-      <span className="flex min-w-0 flex-col gap-0.5">
-        <span className="font-sans text-[14px] text-foreground tracking-[0]">{link.label}</span>
-        <span className="font-sans text-[13px] text-foreground/45 leading-[1.4] tracking-[0]">
-          {link.desc}
-        </span>
-      </span>
-    </Anchor>
-  )
-}
-
-function MegaMenu({ data }: { data: MegaMenuData }) {
-  const columns = data.columns
-
-  if (data.variant === 'vertical') {
-    return (
-      <div className="w-[360px] p-3">
-        <ul className="flex flex-col gap-1">
-          {columns
-            .flatMap((column) => column.items)
-            .map((item) => (
-              <li key={item.label}>
-                <MegaItem link={item} />
-              </li>
-            ))}
-        </ul>
-      </div>
-    )
-  }
-
-  return (
-    <div className="flex w-max gap-1 p-3">
-      {columns.map((column) => {
-        return (
-          <div key={column.title} className="w-[224px]">
-            <ul>
-              {column.items.map((item) => (
-                <li key={item.label}>
-                  <MegaItem link={item} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        )
-      })}
-    </div>
   )
 }
 
@@ -536,27 +238,6 @@ function CloseIcon() {
   )
 }
 
-function GearIcon() {
-  return (
-    // biome-ignore lint/a11y/noSvgWithoutTitle: Decorative icon next to visible text.
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-      className="shrink-0"
-    >
-      <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
-      <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2.1 2.1 0 1 1-2.97 2.97l-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21a2.1 2.1 0 1 1-4.2 0v-.09a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06a2.1 2.1 0 1 1-2.97-2.97l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2.1 2.1 0 1 1 0-4.2h.09A1.7 1.7 0 0 0 4.6 8.74a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2.1 2.1 0 1 1 2.97-2.97l.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 10.14 2.7V2.6a2.1 2.1 0 1 1 4.2 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06a2.1 2.1 0 1 1 2.97 2.97l-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.03h.09a2.1 2.1 0 1 1 0 4.2h-.09A1.7 1.7 0 0 0 19.4 15Z" />
-    </svg>
-  )
-}
-
 function Chevron({ open }: { open: boolean }) {
   return (
     // biome-ignore lint/a11y/noSvgWithoutTitle: Decorative disclosure icon; button exposes expanded state.
@@ -566,7 +247,7 @@ function Chevron({ open }: { open: boolean }) {
       viewBox="0 0 16 16"
       fill="none"
       aria-hidden
-      className={`shrink-0 text-foreground/50 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+      className={`shrink-0 opacity-60 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
     >
       <path
         d="M4 6l4 4 4-4"
@@ -621,24 +302,24 @@ function CheckIcon() {
 // supported, Amp gets the MCP server directly, and other agents get the skill.
 const agentCommands = [
   {
-    label: 'Claude',
-    logo: <ClaudeLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    command: tempoPluginInstallCommands.claude,
-  },
-  {
     label: 'Codex',
     logo: <CodexLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    command: tempoPluginInstallCommands.codex,
+    command: tempoAgentSetupCommands.codex,
+  },
+  {
+    label: 'Claude Code',
+    logo: <ClaudeLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    command: tempoAgentSetupCommands.claude,
   },
   {
     label: 'Amp',
     logo: <AmpLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    command: `amp mcp add --transport http tempo ${TEMPO_MCP_URL}`,
+    command: tempoAgentSetupCommands.amp,
   },
   {
     label: 'Other',
     logo: null,
-    command: 'npx skills add tempoxyz/plugins --skill docs',
+    command: tempoAgentSetupCommands.other,
   },
 ]
 
@@ -659,11 +340,12 @@ function CommandTabs({
           <button
             key={item.label}
             type="button"
+            aria-pressed={active}
             onClick={() => onSelect(index)}
             className={`inline-flex items-center gap-1.5 rounded-[4px] px-2.5 py-1.5 font-sans text-[12px] tracking-[0] transition-colors ${
               active
                 ? 'bg-foreground/[0.06] text-foreground'
-                : 'text-foreground/40 hover:bg-foreground/[0.03] hover:text-foreground/70'
+                : 'text-foreground/60 hover:bg-foreground/[0.03] hover:text-foreground/70'
             }`}
           >
             {item.logo}
@@ -696,13 +378,13 @@ function CommandSnippet({
       className="group/copy flex min-h-[48px] w-full items-start gap-3 rounded-[4px] bg-foreground/[0.035] px-3 py-2.5 text-left transition-colors hover:bg-foreground/[0.06]"
     >
       <code className="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)] gap-2 whitespace-pre-wrap break-words font-mono text-[12px] text-foreground leading-[1.55]">
-        <span aria-hidden="true" className="select-none text-foreground/35">
+        <span aria-hidden="true" className="select-none text-foreground/55">
           $
         </span>
-        <span className="min-w-0">{children ?? command}</span>
+        <span className="min-w-0">{children ?? <AgentSetupCommand command={command} />}</span>
       </code>
       <span
-        className={`mt-1 shrink-0 transition-colors ${copied ? 'text-foreground' : 'text-foreground/35 group-hover/copy:text-foreground/70'}`}
+        className={`mt-1 shrink-0 transition-colors ${copied ? 'text-foreground' : 'text-foreground/55 group-hover/copy:text-foreground/70'}`}
       >
         {copied ? <CheckIcon /> : <CopyIcon />}
       </span>
@@ -733,10 +415,10 @@ function AgentCommandSection(props: {
           className="relative flex min-w-0 flex-col gap-0.5 pr-5"
         >
           {external ? (
-            <ArrowUpRight className="absolute top-0.5 right-0 size-3 text-foreground/35 transition-colors group-hover/item:text-foreground/60" />
+            <ArrowUpRight className="absolute top-0.5 right-0 size-3 text-foreground/55 transition-colors group-hover/item:text-foreground/60" />
           ) : null}
           <span className="font-sans text-[14px] text-foreground tracking-[0]">{label}</span>
-          <span className="font-sans text-[13px] text-foreground/45 leading-[1.4] tracking-[0]">
+          <span className="font-sans text-[13px] text-foreground/60 leading-[1.4] tracking-[0]">
             {desc}
           </span>
         </Anchor>
@@ -769,15 +451,15 @@ function AgentsPanel({
   return (
     <div className={desktop ? 'w-[520px] p-3' : 'pb-4 pl-3'}>
       {desktop ? (
-        <p className="px-3 pt-2 pb-1.5 font-sans text-[13px] text-foreground/35 tracking-[0]">
-          Use Tempo with AI
+        <p className="px-3 pt-2 pb-1.5 font-sans text-[13px] text-foreground/55 tracking-[0]">
+          Connect your coding agent
         </p>
       ) : null}
       <div className="space-y-1">
         <AgentCommandSection
           href={TEMPO_PLUGIN_URL}
-          label="Tempo for your agent"
-          desc="Give your agent search and read tools for Tempo docs"
+          label="Tempo Docs plugin"
+          desc="Search and read Tempo documentation from your editor."
           icon={<McpIcon />}
           onClick={onNavigate}
         >
@@ -799,10 +481,6 @@ function AgentsPanel({
       </div>
     </div>
   )
-}
-
-function megaLinks(data: MegaMenuData) {
-  return data.columns.flatMap((column) => column.items)
 }
 
 type SidebarNode = {
@@ -828,48 +506,62 @@ export function resolveSidebarItems(sidebar: unknown, pathname: string): Sidebar
       if (bestKey === null || key.length > bestKey.length) bestKey = key
     }
   }
-  const entry = entries[bestKey ?? '/docs'] ?? Object.values(entries)[0]
+  const entry = entries[bestKey ?? '/get-started'] ?? entries['/docs'] ?? Object.values(entries)[0]
   if (!entry) return []
   return Array.isArray(entry) ? entry : (entry.items ?? [])
 }
 
-// Vocs treats a sidebar link as active only on an exact path match (ignoring
-// trailing slashes), so an index link like `/docs` doesn't light up on every
-// sub-page.
-function pathIsExact(pathname: string, link: string) {
-  return pathname.replace(/\/+$/, '') === link.replace(/\/+$/, '')
+function sidebarLinkIsActive(pathname: string, link: string, activeAnchor: string | null) {
+  if (isExternal(link)) return false
+  const [target, fragment] = link.split('#')
+  const targetPath = normalizeDocsPath(target?.split('?')[0] || pathname).replace(/\/+$/, '')
+  if (normalizeDocsPath(pathname).replace(/\/+$/, '') !== targetPath) return false
+  if (!fragment) return activeAnchor === null
+
+  try {
+    return decodeURIComponent(fragment) === activeAnchor
+  } catch {
+    return fragment === activeAnchor
+  }
 }
 
-function nodeContainsActive(node: SidebarNode, pathname: string): boolean {
-  if (node.link && pathIsExact(pathname, node.link)) return true
-  return Boolean(node.items?.some((child) => nodeContainsActive(child, pathname)))
+function nodeContainsActive(
+  node: SidebarNode,
+  pathname: string,
+  activeAnchor: string | null,
+): boolean {
+  if (node.link && sidebarLinkIsActive(pathname, node.link, activeAnchor)) return true
+  return Boolean(node.items?.some((child) => nodeContainsActive(child, pathname, activeAnchor)))
 }
 
 function SidebarLeaf({
   node,
   pathname,
+  activeAnchor,
   depth,
   onNavigate,
 }: {
   node: SidebarNode
   pathname: string
+  activeAnchor: string | null
   depth: number
   onNavigate: () => void
 }) {
-  const active = node.link ? pathIsExact(pathname, node.link) : false
+  const active = node.link ? sidebarLinkIsActive(pathname, node.link, activeAnchor) : false
   const external = node.link ? isExternal(node.link) : false
   return (
     <Anchor
       href={node.link ?? '#'}
       onClick={onNavigate}
+      aria-current={active ? (node.link?.includes('#') ? 'location' : 'page') : undefined}
       style={{ paddingLeft: depth > 1 ? `${(depth - 1) * 12 + 8}px` : undefined }}
       className={`-mx-2 flex min-h-8 items-center gap-2 rounded-[6px] px-2 py-1 font-sans text-[14px] tracking-[0] transition-colors ${
         active
           ? 'font-medium text-foreground hover:bg-foreground/[0.04]'
-          : 'text-foreground/55 hover:bg-foreground/[0.04] hover:text-foreground'
+          : 'text-foreground/70 hover:bg-foreground/[0.04] hover:text-foreground'
       }`}
     >
-      {active ? <ActiveSquare activeKey={pathname} /> : null}
+      {active ? <ActiveSquare activeKey={`${pathname}#${activeAnchor ?? ''}`} /> : null}
       {node.text}
       {external ? <ArrowUpRight className="mt-0.5 size-3" /> : null}
     </Anchor>
@@ -879,11 +571,13 @@ function SidebarLeaf({
 export function SidebarNodes({
   nodes,
   pathname,
+  activeAnchor,
   depth,
   onNavigate,
 }: {
   nodes: SidebarNode[]
   pathname: string
+  activeAnchor: string | null
   depth: number
   onNavigate: () => void
 }) {
@@ -900,6 +594,7 @@ export function SidebarNodes({
               key={key}
               node={node}
               pathname={pathname}
+              activeAnchor={activeAnchor}
               depth={depth}
               onNavigate={onNavigate}
             />
@@ -910,7 +605,7 @@ export function SidebarNodes({
         if (node.collapsed === undefined) {
           return (
             <div key={key} className={depth === 0 ? 'mt-5 first:mt-0' : 'mt-3'}>
-              <p className="-mx-2 px-2 pb-2 font-normal font-sans text-[13px] text-foreground/40 leading-[1.3] tracking-[0]">
+              <p className="-mx-2 px-2 pb-2 font-normal font-sans text-[13px] text-foreground/60 leading-[1.3] tracking-[0]">
                 {node.text}
               </p>
               <div
@@ -923,6 +618,7 @@ export function SidebarNodes({
                 <SidebarNodes
                   nodes={node.items ?? []}
                   pathname={pathname}
+                  activeAnchor={activeAnchor}
                   depth={depth + 1}
                   onNavigate={onNavigate}
                 />
@@ -932,7 +628,7 @@ export function SidebarNodes({
         }
 
         // Collapsible subgroup (e.g. "Make Payments"): expandable disclosure.
-        const open = !node.collapsed || nodeContainsActive(node, pathname)
+        const open = !node.collapsed || nodeContainsActive(node, pathname, activeAnchor)
         return (
           <details
             key={key}
@@ -948,6 +644,7 @@ export function SidebarNodes({
               <SidebarNodes
                 nodes={node.items ?? []}
                 pathname={pathname}
+                activeAnchor={activeAnchor}
                 depth={depth + 1}
                 onNavigate={onNavigate}
               />
@@ -959,351 +656,354 @@ export function SidebarNodes({
   )
 }
 
-export default function DocsHeader() {
+export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'blog' }) {
+  const router = useRouter()
   const pathname = usePathname()
-  const config = useConfig()
-  const docsSidebarItems = resolveSidebarItems(config?.sidebar, pathname)
+  const activeSection = getActiveDocsSection(pathname)
   const [open, setOpen] = useState(false)
-  const [expanded, setExpanded] = useState<string | null>(null)
-  const [activeMenu, setActiveMenu] = useState<string | null>(null)
-  const [geom, setGeom] = useState<{ x: number; w: number; h: number } | null>(null)
-  const [morphing, setMorphing] = useState(false)
-  const headerRef = useRef<HTMLElement | null>(null)
-  const triggerRefs = useRef(new Map<string, HTMLElement>())
-  const panelRefs = useRef(new Map<string, HTMLDivElement>())
-  const prevActive = useRef<string | null>(null)
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const cancelClose = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current)
-  }
-  const openMenu = (key: string) => {
-    cancelClose()
-    setActiveMenu(key)
-  }
-  const scheduleClose = () => {
-    cancelClose()
-    closeTimer.current = setTimeout(() => setActiveMenu(null), 120)
-  }
-
-  useLayoutEffect(() => {
-    if (!activeMenu) {
-      prevActive.current = null
-      return
-    }
-    const panel = panelRefs.current.get(activeMenu)
-    const trigger = triggerRefs.current.get(activeMenu)
-    const header = headerRef.current
-    if (!panel || !trigger || !header) return
-    const w = panel.offsetWidth
-    const h = panel.offsetHeight
-    const triggerRect = trigger.getBoundingClientRect()
-    const headerRect = header.getBoundingClientRect()
-    const raw =
-      activeMenu === 'For agents'
-        ? triggerRect.right - headerRect.left - w
-        : triggerRect.left - headerRect.left + triggerRect.width / 2 - w / 2
-    const x = Math.round(Math.min(Math.max(raw, 12), headerRect.width - w - 12))
-    setMorphing(prevActive.current !== null)
-    setGeom({ x, w, h })
-    prevActive.current = activeMenu
-  }, [activeMenu])
-
-  const dropdowns: { key: string; panel: ReactNode }[] = [
-    ...menu.flatMap((item) =>
-      item.mega ? [{ key: item.label, panel: <MegaMenu data={item.mega} /> }] : [],
-    ),
-    { key: 'For agents', panel: <AgentsPanel /> },
-  ]
+  const [mounted, setMounted] = useState(false)
+  const [agentsOpen, setAgentsOpen] = useState(false)
+  const agentMenuRef = useRef<HTMLDivElement | null>(null)
+  const agentTriggerRef = useRef<HTMLButtonElement | null>(null)
+  const mobileDialogRef = useRef<HTMLDialogElement | null>(null)
+  const mobileCloseRef = useRef<HTMLButtonElement | null>(null)
 
   const close = () => {
     setOpen(false)
-    setExpanded(null)
+    setAgentsOpen(false)
   }
 
   const openSearch = () => {
-    cancelClose()
-    setActiveMenu(null)
+    mobileDialogRef.current?.close()
     close()
-    openDocsSearch()
+    if (surface === 'blog') router.push(docsSearchUrl())
+    else requestAnimationFrame(openDocsSearch)
   }
 
   useEffect(() => {
-    warmMarketingApp()
+    setMounted(true)
   }, [])
 
-  // Open the search dialog when arriving from the marketing site's search CTA
-  // (which navigates to `/docs?search=1`). Strip the param so refresh/back
-  // doesn't reopen it.
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (surface !== 'blog') return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        router.push(docsSearchUrl())
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [surface, router])
+
+  // Close menus after navigation, including browser back/forward.
+  useEffect(() => {
+    setOpen(false)
+    setAgentsOpen(false)
+  }, [pathname])
+
+  useEffect(() => {
+    const dialog = mobileDialogRef.current
+    if (!dialog) return
+    if (!open) {
+      dialog.close()
+      return
+    }
+    dialog.showModal()
+    mobileCloseRef.current?.focus()
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    // A resized desktop viewport must not retain an invisible modal.
+    const desktop = window.matchMedia('(min-width: 1080px)')
+    const onResize = () => {
+      if (desktop.matches) setOpen(false)
+    }
+    desktop.addEventListener('change', onResize)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      desktop.removeEventListener('change', onResize)
+      dialog.close()
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (!agentsOpen) return
+    const closeWhenOutside = (event: Event) => {
+      if (!agentMenuRef.current?.contains(event.target as Node)) setAgentsOpen(false)
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setAgentsOpen(false)
+        agentTriggerRef.current?.focus()
+      }
+    }
+    const desktop = window.matchMedia('(min-width: 1080px)')
+    const onResize = () => {
+      if (!desktop.matches) setAgentsOpen(false)
+    }
+    document.addEventListener('pointerdown', closeWhenOutside)
+    document.addEventListener('focusin', closeWhenOutside)
+    document.addEventListener('keydown', onKeyDown)
+    desktop.addEventListener('change', onResize)
+    return () => {
+      document.removeEventListener('pointerdown', closeWhenOutside)
+      document.removeEventListener('focusin', closeWhenOutside)
+      document.removeEventListener('keydown', onKeyDown)
+      desktop.removeEventListener('change', onResize)
+    }
+  }, [agentsOpen])
+
+  // Open search when arriving from the website with ?search=1.
+  useEffect(() => {
+    if (surface === 'blog') return
     const params = new URLSearchParams(window.location.search)
     if (!params.has(DOCS_SEARCH_PARAM)) return
     params.delete(DOCS_SEARCH_PARAM)
     const query = params.toString()
     window.history.replaceState(
-      {},
+      window.history.state,
       '',
       `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`,
     )
     openDocsSearchWhenReady()
-  }, [])
+  }, [surface])
+
+  const brand = (
+    <div className="docs-header-brand">
+      <WakuLink
+        to="/"
+        onClick={close}
+        aria-label="Tempo documentation"
+        className="docs-header-logo"
+      >
+        <TempoLogo className="h-[18px] w-[80px]" />
+      </WakuLink>
+    </div>
+  )
+
+  const destinations = (
+    <div className="docs-header-destinations">
+      <WakuLink
+        to="/"
+        onClick={close}
+        aria-current={surface === 'docs' ? 'page' : undefined}
+        className="docs-header-wordmark"
+      >
+        Docs
+      </WakuLink>
+      <WakuLink
+        to="/blog"
+        onClick={close}
+        aria-current={surface === 'blog' ? 'page' : undefined}
+        className="docs-header-wordmark"
+      >
+        Blog
+      </WakuLink>
+    </div>
+  )
 
   return (
-    <header className="docs-site-header fixed top-0 right-0 left-0 z-[60] bg-background">
-      <div className="w-full border-line border-x bg-surface-shell">
-        <nav
-          ref={headerRef}
-          className="relative grid h-[var(--tempo-docs-primary-nav-height)] grid-cols-[1fr_auto] items-center gap-3 border-line border-b px-4 lg:grid-cols-[minmax(0,1fr)_minmax(300px,460px)_minmax(0,1fr)] lg:px-5"
+    <header className="docs-site-header">
+      <nav className="docs-header-nav" aria-label="Developer navigation">
+        {brand}
+        <button
+          type="button"
+          onClick={openSearch}
+          aria-label="Search documentation"
+          aria-keyshortcuts="Meta+K Control+K"
+          className="docs-header-search"
+          disabled={!mounted}
         >
-          <a
-            href="/"
-            onClick={close}
-            onFocus={warmMarketingApp}
-            onPointerEnter={warmMarketingApp}
-            className="group flex h-9 min-w-0 items-center text-foreground"
-            aria-label="Tempo home"
-          >
-            <TempoLogo className="h-[18px] w-[80px]" />
-          </a>
-
+          <span className="flex min-w-0 items-center gap-2.5">
+            <SearchIcon />
+            <span className="truncate">Search docs</span>
+          </span>
+          <kbd>⌘ K</kbd>
+        </button>
+        <div className="docs-header-actions">
+          {destinations}
+          <div ref={agentMenuRef} className="docs-header-agent-menu">
+            <button
+              ref={agentTriggerRef}
+              type="button"
+              aria-expanded={agentsOpen}
+              aria-controls="docs-agent-tools"
+              onClick={() => setAgentsOpen((value) => !value)}
+              className="docs-header-agent-trigger"
+              disabled={!mounted}
+            >
+              Agent setup
+              <Chevron open={agentsOpen} />
+            </button>
+            {agentsOpen ? (
+              <div id="docs-agent-tools" className="docs-header-agent-panel">
+                <AgentsPanel onNavigate={close} />
+              </div>
+            ) : null}
+          </div>
+        </div>
+        <div className="docs-header-mobile-actions">
+          {destinations}
           <button
             type="button"
             onClick={openSearch}
             aria-label="Search documentation"
             aria-keyshortcuts="Meta+K Control+K"
-            className="hidden h-10 min-w-0 items-center justify-between gap-3 rounded-[6px] border border-line bg-background px-3.5 font-sans text-[14px] text-foreground/55 tracking-[0] shadow-[0_1px_1px_rgba(0,0,0,0.03)] transition-colors hover:bg-foreground/[0.025] hover:text-foreground lg:flex"
+            disabled={!mounted}
+            className="docs-header-icon-button"
           >
-            <span className="flex min-w-0 items-center gap-2">
-              <SearchIcon />
-              <span className="truncate">Search docs...</span>
-            </span>
-            <kbd className="shrink-0 rounded-[4px] border border-line bg-surface-input px-1.5 py-0.5 font-sans text-[11px] text-foreground/45">
-              ⌘K
-            </kbd>
+            <SearchIcon className="size-[18px]" />
           </button>
-
-          <div className="hidden items-center justify-end gap-5 lg:flex">
-            <button
-              ref={(element) => {
-                if (element) triggerRefs.current.set('For agents', element)
-                else triggerRefs.current.delete('For agents')
-              }}
-              type="button"
-              aria-haspopup="dialog"
-              aria-expanded={activeMenu === 'For agents'}
-              onMouseEnter={() => openMenu('For agents')}
-              onMouseLeave={scheduleClose}
-              onFocus={() => openMenu('For agents')}
-              onBlur={scheduleClose}
-              className="flex h-9 items-center gap-2 rounded-[6px] border border-line px-3.5 font-sans text-[14px] text-foreground/75 tracking-[0] transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
-            >
-              <GearIcon />
-              For agents
-              {/* biome-ignore lint/a11y/noSvgWithoutTitle: Decorative disclosure icon; button exposes expanded state. */}
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 16 16"
-                fill="none"
-                aria-hidden
-                className={`shrink-0 text-foreground/40 transition-transform duration-200 ease-out ${activeMenu === 'For agents' ? 'rotate-180' : ''}`}
-              >
-                <path
-                  d="M4 6l4 4 4-4"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <div className="flex items-center gap-1 lg:hidden">
-            <button
-              type="button"
-              onClick={openSearch}
-              aria-label="Search documentation"
-              aria-keyshortcuts="Meta+K Control+K"
-              className="grid size-8 place-items-center text-foreground"
-            >
-              <SearchIcon className="size-[18px]" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setOpen((value) => !value)}
-              aria-label={open ? 'Close menu' : 'Open menu'}
-              aria-expanded={open}
-              className="grid size-8 place-items-center text-foreground"
-            >
-              {open ? <CloseIcon /> : <MenuIcon />}
-            </button>
-          </div>
-        </nav>
-      </div>
-
-      <div className="pointer-events-none absolute top-full right-0 left-0 z-50 hidden lg:block">
-        <div className="w-full">
-          <div
-            className={`transition duration-200 ease-out will-change-[opacity,transform,filter] motion-reduce:transition-none ${
-              activeMenu
-                ? 'translate-y-0 opacity-100 [filter:blur(0px)]'
-                : '-translate-y-2 opacity-0 [filter:blur(8px)]'
-            }`}
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-label="Open menu"
+            disabled={!mounted}
+            aria-expanded={open}
+            aria-controls="docs-mobile-navigation"
+            className="docs-header-icon-button"
           >
-            {/* biome-ignore lint/a11y/noStaticElementInteractions: Hover bridge keeps the shared menu surface open. */}
-            <div
-              role="presentation"
-              onMouseEnter={cancelClose}
-              onMouseLeave={scheduleClose}
-              onFocus={cancelClose}
-              onBlur={scheduleClose}
-              style={{ transform: `translateX(${geom?.x ?? 0}px)` }}
-              className={`w-max pt-3 ${activeMenu ? 'pointer-events-auto' : ''} ${morphing ? 'transition-transform duration-200 ease-out motion-reduce:transition-none' : ''}`}
-            >
-              <div
-                style={{ width: geom?.w, height: geom?.h }}
-                className={`relative overflow-hidden rounded-md border border-line bg-surface-page shadow-2xl ${
-                  morphing
-                    ? 'transition-[width,height] duration-200 ease-out motion-reduce:transition-none'
-                    : ''
-                }`}
-              >
-                {dropdowns.map(({ key, panel }) => (
-                  <div
-                    key={key}
-                    ref={(element) => {
-                      if (element) panelRefs.current.set(key, element)
-                      else panelRefs.current.delete(key)
-                    }}
-                    className={`absolute top-0 left-0 w-max transition-opacity duration-150 ease-out motion-reduce:transition-none ${
-                      activeMenu === key ? 'opacity-100' : 'pointer-events-none opacity-0'
-                    }`}
-                  >
-                    {panel}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+            <MenuIcon />
+          </button>
         </div>
-      </div>
+      </nav>
 
-      <div
-        className={`absolute top-full right-0 left-0 z-40 origin-top transition duration-200 ease-out lg:hidden ${
-          open
-            ? 'pointer-events-auto translate-y-0 opacity-100'
-            : 'pointer-events-none -translate-y-2 opacity-0'
-        }`}
+      <dialog
+        ref={mobileDialogRef}
+        id="docs-mobile-navigation"
+        className="docs-header-mobile-dialog"
+        aria-label="Documentation navigation"
+        onCancel={() => setOpen(false)}
+        onClose={() => setOpen(false)}
+        onKeyDown={(event) => {
+          if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+            event.preventDefault()
+            event.stopPropagation()
+            openSearch()
+          }
+        }}
       >
-        <div className="flex h-[calc(100dvh-var(--tempo-docs-primary-nav-height,65px))] w-full flex-col overflow-y-auto border-line border-x border-b bg-background px-5 pb-5">
-          {menu.map((item) => {
-            const active = isActiveMenuItem(pathname, item)
-            // The "Docs" item is the entry point to the docs sidebar: on docs
-            // pages it expands inline to reveal the page tree instead of being a
-            // plain link, matching the mega-menu accordion pattern.
-            const isDocsEntry = item.label === 'Docs' && docsSidebarItems.length > 0
-            if (isDocsEntry) {
-              return (
-                <div key={item.label} className="border-line border-t">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setExpanded((value) => (value === item.label ? null : item.label))
-                    }
-                    aria-expanded={expanded === item.label}
-                    className="flex w-full items-center justify-between py-4 font-sans text-[16px] text-foreground tracking-[0]"
-                  >
-                    <span className="flex items-center gap-2">
-                      {active ? <ActiveSquare activeKey={pathname} /> : null}
-                      {item.label}
-                    </span>
-                    <Chevron open={expanded === item.label} />
-                  </button>
-                  <div
-                    className={`grid overflow-hidden transition-[grid-template-rows] duration-300 ease-out ${expanded === item.label ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
-                  >
-                    <div className="min-h-0 overflow-hidden">
-                      <div className="flex flex-col pb-2 pl-3">
-                        <SidebarNodes
-                          nodes={docsSidebarItems}
-                          pathname={pathname}
-                          depth={0}
-                          onNavigate={close}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )
-            }
-            return item.mega ? (
-              <div key={item.label} className="border-line border-t">
-                <button
-                  type="button"
-                  onClick={() => setExpanded((value) => (value === item.label ? null : item.label))}
-                  aria-expanded={expanded === item.label}
-                  className="flex w-full items-center justify-between py-4 font-sans text-[16px] text-foreground tracking-[0]"
-                >
-                  <span className="flex items-center gap-2">
-                    {active ? <ActiveSquare activeKey={pathname} /> : null}
-                    {item.label}
-                  </span>
-                  <Chevron open={expanded === item.label} />
-                </button>
-                <div
-                  className={`grid overflow-hidden transition-[grid-template-rows] duration-300 ease-out ${expanded === item.label ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
-                >
-                  <div className="min-h-0 overflow-hidden">
-                    <div className="flex flex-col gap-3 pb-4 pl-3">
-                      {megaLinks(item.mega).map((sub) => (
-                        <Anchor
-                          key={sub.label}
-                          href={sub.href}
-                          onClick={close}
-                          className="flex items-start gap-1.5 font-sans text-[15px] text-foreground/50 tracking-[0] transition-colors hover:text-foreground"
-                        >
-                          {sub.label}
-                          {isExternal(sub.href) ? <ArrowUpRight className="mt-0.5 size-3" /> : null}
-                        </Anchor>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <Anchor
-                key={item.label}
-                href={item.href}
-                onClick={close}
-                className="flex items-start gap-1.5 border-line border-t py-4 font-sans text-[16px] text-foreground tracking-[0]"
-              >
-                {active ? <ActiveSquare activeKey={pathname} /> : null}
-                {item.label}
-              </Anchor>
-            )
-          })}
-          <div className="border-line border-t">
+        <div className="docs-header-mobile-top">
+          {brand}
+          <div className="docs-header-mobile-actions">
+            {destinations}
             <button
               type="button"
-              onClick={() => setExpanded((value) => (value === 'For agents' ? null : 'For agents'))}
-              aria-expanded={expanded === 'For agents'}
-              className="flex w-full items-center justify-between py-4 font-sans text-[16px] text-foreground tracking-[0]"
+              ref={mobileCloseRef}
+              onClick={close}
+              aria-label="Close menu"
+              className="docs-header-icon-button"
             >
-              For agents
-              <Chevron open={expanded === 'For agents'} />
+              <CloseIcon />
             </button>
-            <div
-              className={`grid overflow-hidden transition-[grid-template-rows] duration-300 ease-out ${expanded === 'For agents' ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
-            >
-              <div className="min-h-0 overflow-hidden">
-                <AgentsPanel variant="mobile" onNavigate={close} />
-              </div>
-            </div>
           </div>
         </div>
-      </div>
+        <div className="docs-header-mobile-body">
+          <button type="button" onClick={openSearch} className="docs-header-mobile-search">
+            <SearchIcon /> Search documentation
+          </button>
+          <nav aria-label="All documentation sections" className="docs-header-mobile-sections">
+            <p className="docs-header-mobile-label">Explore the docs</p>
+            {docsSections.map((section) => (
+              <WakuLink
+                key={section.id}
+                to={section.href}
+                onClick={close}
+                aria-current={activeSection?.id === section.id ? 'page' : undefined}
+              >
+                {section.label}
+                <span aria-hidden="true">↗</span>
+              </WakuLink>
+            ))}
+          </nav>
+          <div className="docs-header-mobile-resources">
+            <p className="docs-header-mobile-label">Tools</p>
+            <DocsResourceLinks onNavigate={close} />
+            <WakuLink
+              to={specificationsSection.href}
+              onClick={close}
+              className="docs-header-mobile-utility-link"
+              aria-current={
+                activeSection?.id === 'protocol' || activeSection?.id === 'changelog'
+                  ? 'page'
+                  : undefined
+              }
+            >
+              {specificationsSection.label}
+            </WakuLink>
+          </div>
+          <details className="docs-header-mobile-agents">
+            <summary>Agent setup</summary>
+            <AgentsPanel variant="mobile" onNavigate={close} />
+          </details>
+          <ThemeSelect surface={surface} />
+          <a href="https://tempo.xyz/" className="docs-header-mobile-website">
+            Back to tempo.xyz <ArrowUpRight className="size-4" />
+          </a>
+        </div>
+      </dialog>
     </header>
+  )
+}
+
+function ThemeSelect({ surface }: { surface: 'docs' | 'blog' }) {
+  const [theme, setTheme] = useState('system')
+  useEffect(() => {
+    const sync = () => setTheme(localStorage.getItem('vocs-theme') ?? 'system')
+    sync()
+    const observer = new MutationObserver(sync)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-vocs-theme'],
+    })
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (surface !== 'blog') return
+    const media = window.matchMedia('(prefers-color-scheme: dark)')
+    const apply = () => {
+      const selected = localStorage.getItem('vocs-theme') ?? 'system'
+      const resolved = selected === 'system' ? (media.matches ? 'dark' : 'light') : selected
+      document.documentElement.dataset.vocsTheme = resolved
+      document.documentElement.style.colorScheme = resolved
+    }
+    apply()
+    media.addEventListener('change', apply)
+    return () => media.removeEventListener('change', apply)
+  }, [surface])
+
+  return (
+    <label className="docs-header-mobile-theme">
+      <span>Appearance</span>
+      <select
+        aria-label="Color theme"
+        value={theme}
+        onChange={(event) => {
+          const selected = event.target.value
+          const label = selected.charAt(0).toUpperCase() + selected.slice(1)
+          const control = document.querySelector<HTMLElement>(
+            `[data-v-sidebar-footer-content] [role="radio"][aria-label="${label} theme"]`,
+          )
+          if (control) control.click()
+          else {
+            localStorage.setItem('vocs-theme', selected)
+            const resolved =
+              selected === 'system'
+                ? window.matchMedia('(prefers-color-scheme: dark)').matches
+                  ? 'dark'
+                  : 'light'
+                : selected
+            document.documentElement.dataset.vocsTheme = resolved
+            document.documentElement.style.colorScheme = resolved
+          }
+          setTheme(selected)
+        }}
+      >
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="system">System</option>
+      </select>
+    </label>
   )
 }

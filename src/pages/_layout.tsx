@@ -1,4 +1,5 @@
 import type { PropsWithChildren } from 'react'
+import DocsEntryLayout from '../components/DocsEntryLayout'
 
 export const normalizeProxiedRscFetch = `
 (() => {
@@ -60,7 +61,7 @@ export default function Layout(
       <meta name="twitter:site" content="@tempo" />
       {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static bootstrap must run before the RSC client bundle. */}
       <script dangerouslySetInnerHTML={{ __html: normalizeProxiedRscFetch }} />
-      {props.children}
+      <DocsEntryLayout>{props.children}</DocsEntryLayout>
     </>
   )
 }

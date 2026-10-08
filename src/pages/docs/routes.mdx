@@ -1,0 +1,123 @@
+---
+title: "Tempo Routes"
+seoTitle: "Tempo Routes: Cross-chain Stablecoin Transfers | Tempo Docs"
+description: Connect stablecoin liquidity across chains through one API. Fund Tempo accounts, prepare cross-chain payments, and track delivery to the destination.
+---
+
+import { DocsProductOverview } from '../../components/DocsProductOverview'
+
+<span id="bring-funds-onto-tempo" />
+<span id="move-funds-across-networks" />
+
+<DocsProductOverview image="routes" alt="Supported funding paths connect through the Routes API to a Tempo account.">
+
+# Tempo Routes
+
+Move stablecoins between Tempo and other networks through one API. Get quotes, prepare transfers, and track delivery to the destination.
+
+[Explore supported routes →](/docs/api/routes/routes)
+
+</DocsProductOverview>
+
+## Build with Routes
+
+- **Fund stablecoin accounts.** Let customers deposit from an external wallet, then receive the funds in the stablecoin your app holds on Tempo.
+- **Send payments to other chains.** Prepare a transfer from a Tempo wallet to a recipient on another supported network, then track the funds through delivery.
+- **Settle payments in one asset.** Accept supported source stablecoins while choosing a common destination asset for your business to receive and reconcile.
+
+A route connects a source chain and token to a destination chain and token. Routes gives your app one interface to supported bridges and liquidity providers: specify the payment, read the quote, and track the result. Available paths depend on the chain pair, assets, amount, and funding method.
+
+<span id="choose-a-funding-flow" />
+
+## Choose how to move funds
+
+| Flow | Use when | Your integration |
+| --- | --- | --- |
+| [Deposit addresses](/docs/api/routes/deposit-addresses) | A customer sends funds from a wallet you do not control. | Create a reusable address for a source chain and token, show it to the customer, and track each deposit through delivery to Tempo. |
+| [Transfers](/docs/api/routes/transfers) | Your application can request signatures from the source wallet, for a transfer into or out of Tempo. | Quote the route, create a transfer, sign and submit its source-chain calls, and track delivery. |
+
+Start with the [route directory](/docs/api/routes/routes): `GET /v1/routes` lists supported chain and token pairs, funding methods, and amount modes. Then request a quote for the exact amount and destination you need. A supported chain does not imply that every token or direction is available.
+
+For either flow, your app shows the customer what to send and what the recipient should receive, then tracks delivery. With a connected wallet, your app also requests signatures and submits the source transactions. Routes prepares those transactions; it does not sign them on the customer's behalf.
+
+## Prepare API access
+
+Create a project and API key in [Tempo API Console](/docs/api/console). Your backend needs `data:read` for the route directory, `routes:read` for quotes and status reads, and `routes:write` to create deposit addresses or transfers and register source transactions. Keep the key on your server. See [API key management](/docs/api/console/api-keys) for storage and access controls.
+
+Routes endpoints use the `https://api.tempo.xyz/v1` base URL. Send your key in the `tempo-api-key` header. The API is under active development; use the linked endpoint references for current request fields and supported actions.
+
+## Transfer from a connected wallet
+
+:::::steps
+
+### Quote the transfer
+
+Call `GET /v1/routes/transfers/quote` with the source and destination chains, tokens, sender, recipient, and amount. Use `exactSource` to fix the amount sent or `exactDestination` to fix the amount received. Express `amount` in the base units of the token selected by that mode.
+
+Review the returned source amount, destination amount, minimum destination amount, fees, and `quote.expiresAt`. A quote does not create or reserve a transfer.
+
+### Create the transfer
+
+Call `POST /v1/routes/transfers` with the selected parameters and an `idempotency-key`. Save the returned transfer `id` and unsigned `action`, and review the returned terms before requesting a signature. Transfer reads do not return the executable action.
+
+### Sign and submit the source calls
+
+Use the source wallet to sign and submit the returned calls in order. An action can include approval calls as well as the call that starts the route, and may require separate transactions. Handle the returned `action.type` for the source chain.
+
+The Routes API prepares these calls; it does not sign or broadcast them. Creating a transfer alone does not move funds.
+
+### Register the source transactions
+
+Call `POST /v1/routes/transfers/{id}/source-transactions` with `transactionHash` for one transaction or `transactionHashes` for multiple transactions produced by the prepared calls. The API verifies and associates them with the transfer.
+
+### Track destination delivery
+
+Read `GET /v1/routes/transfers/{id}` to track the transfer. Keep the transfer ID and source, destination, and refund transaction references with your payment record. Treat `completed` as delivery; a submitted source transaction is an earlier stage.
+
+:::::
+
+For example, read an existing transfer from your backend or terminal after setting `TEMPO_API_KEY` and `ROUTE_TRANSFER_ID`:
+
+```bash
+curl "https://api.tempo.xyz/v1/routes/transfers/${ROUTE_TRANSFER_ID}" \
+  --header "tempo-api-key: ${TEMPO_API_KEY}"
+```
+
+See the [Transfers API reference](/docs/api/routes/transfers) for request schemas, action formats, and response fields.
+
+## Accept deposits from external wallets
+
+:::::steps
+
+### Quote the deposit
+
+Call `GET /v1/routes/deposit-addresses/quote` with the source chain, source token, destination token, and amount to check current terms before creating an address.
+
+### Create a reusable address
+
+Call `POST /v1/routes/deposit-addresses` with the route details, a Tempo `recipient`, a source-chain `refundAddress`, and an `idempotency-key`. Store the returned address and ID with the customer’s funding instructions.
+
+### Show the funding instructions
+
+Display the returned source chain, token, and deposit address together. The address belongs to that route; do not present it as an address for arbitrary assets or networks. Check that its status is `active` before inviting new deposits.
+
+### Track each deposit
+
+List deposits with `GET /v1/routes/deposits`, using the `depositAddress` filter, then read an individual deposit with `GET /v1/routes/deposits/{id}`. An active deposit address is ready to receive funds; it does not mean a particular deposit has arrived on Tempo. Reconcile each deposit’s status, delivered amount, and destination transaction references separately.
+
+:::::
+
+See the [Deposit addresses and deposits API reference](/docs/api/routes/deposit-addresses) for the full lifecycle.
+
+## Handle pricing, retries, and incomplete routes
+
+- **Read the complete quote.** `destinationAmount` includes route deductions. The `fees` array lists separately charged fees, so an empty array does not establish a fee-free route.
+- **Reuse the same idempotency key for the same create request.** Changed input with the same key conflicts. Follow the endpoint’s retry behavior before creating a replacement.
+- **Keep pending and refund states distinct.** `processing` or `refunding` does not mean delivered. For `action-required`, inspect `statusReason`; for `refunded`, reconcile the refund references. Do not automatically send the payment again.
+- **Refresh expired terms.** If the quote expires before submission, obtain fresh terms rather than signing an expired action.
+
+## Use routed funds across Tempo
+
+Once a route delivers funds to a Tempo account, your app can use them for [payments](/docs/guide/payments/send-a-payment), an [Earn vault deposit](/docs/earn#choose-the-vault-integration), or a [Zone deposit](/docs/zones#integrate-a-zone). Each product has its own authorization and deposit flow; receiving stablecoins in a wallet does not complete a vault or Zone deposit.
+
+Direct Routes transfers into an Earn vault or a Zone are not available: `/v1/routes/transfers/vault` and `/v1/routes/transfers/zone` return HTTP `501`. Follow the product's separate integration flow after funding the account.

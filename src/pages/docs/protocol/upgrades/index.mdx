@@ -1,0 +1,31 @@
+---
+title: "Changelog"
+seoTitle: "Tempo Changelog: Network Upgrades and Releases | Tempo Docs"
+description: Follow Tempo protocol changes from TIP specifications to testnet and mainnet activation, and find node release notes and operator guidance.
+---
+
+# Changelog
+
+Follow Tempo changes from proposals to network upgrades and node releases. Use the upgrade pages for protocol behavior and integration impact, and the release notes for node software changes.
+
+## Proposals, network upgrades, and node releases
+
+| Change record | What it describes |
+| --- | --- |
+| [Tempo Improvement Proposals](https://tips.sh/) (TIPs) | Proposed changes and their technical specifications. A proposal alone does not establish an activation date. |
+| Named network upgrades (`T` upgrades) | Groups of protocol changes that activate on each network at a scheduled time. Upgrade pages link the specifications and explain integration impact. |
+| [Node releases](/docs/changelog) (`v` versions) | Versions of the Tempo node software. A release can support a network upgrade or provide maintenance fixes without a protocol activation. |
+
+## Testnet validation and mainnet activation
+
+Network upgrades activate on Moderato testnet before mainnet. This gives node operators and application teams a place to validate the new behavior before mainnet activation.
+
+Check the individual upgrade page for its activation timeline and integration notes. The [network upgrades and releases table](/docs/guide/node/network-upgrades) identifies the node releases operators need and their priority. Activation details and migration checklists are also shared through operator channels; [release notes](/docs/changelog) describe the software changes and link to release downloads.
+
+## Prepare your node or integration
+
+Node operators should install the compatible release on testnet, confirm the node syncs through activation, and update mainnet nodes before a required upgrade activates. Monitor logs and metrics after activation. Use the release's stated priority when planning maintenance updates.
+
+Application teams should review the upgrade's integration notes and test affected transactions, reads, and gas estimates on the upgraded testnet.
+
+See [upgrade cadence and rollout guidance](/docs/guide/node/upgrade-cadence) for the operator checklist, release priorities, and notification channels.

@@ -79,18 +79,12 @@ describe('docs structured data', () => {
       {
         '@type': 'ListItem',
         position: 1,
-        name: 'Tempo developers',
-        item: 'https://tempo.xyz/developers/',
+        name: 'Tempo Docs',
+        item: 'https://tempo.xyz/developers',
       },
       {
         '@type': 'ListItem',
         position: 2,
-        name: 'Tempo Docs',
-        item: 'https://tempo.xyz/developers/docs',
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
         name: 'Authentication',
         item: 'https://tempo.xyz/developers/docs/api/authentication',
       },
@@ -107,6 +101,26 @@ describe('docs structured data', () => {
 
     expect(head?.script[0].innerHTML).not.toContain('</script>')
     expect(head?.script[0].innerHTML).toContain('\\u003c/script\\u003e')
+  })
+
+  test.each([
+    ['/', 'Documentation'],
+    ['/get-started', 'Get Started'],
+  ])('includes %s with the canonical docs root breadcrumb', (path, title) => {
+    const schema = graph(path, { title })
+    expect(node(schema, 'TechArticle').url).toBe(
+      `https://tempo.xyz/developers${path === '/' ? '' : path}`,
+    )
+    expect(node(schema, 'BreadcrumbList').itemListElement).toEqual(
+      expect.arrayContaining([
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Tempo Docs',
+          item: 'https://tempo.xyz/developers',
+        },
+      ]),
+    )
   })
 
   test('leaves non-docs routes unchanged', () => {

@@ -6,6 +6,11 @@ import { unified } from 'unified'
 import { describe, expect, test } from 'vitest'
 
 const docsRoot = path.resolve('src/pages/docs')
+const docsFiles = () => [
+  ...markdownFiles(docsRoot),
+  path.resolve('src/pages/index.mdx'),
+  path.resolve('src/pages/get-started.mdx'),
+]
 const markdownParser = unified().use(remarkParse).use(remarkMdx)
 
 const migratedOpenApiTitleFiles = [
@@ -82,14 +87,14 @@ function authoredH1(source: string): string | undefined {
 
 describe('docs SEO metadata', () => {
   test('keeps audited page titles, H1s, and SEO titles aligned', () => {
-    const auditedPages = markdownFiles(docsRoot)
+    const auditedPages = docsFiles()
       .map((file) => ({ file, source: fs.readFileSync(file, 'utf8') }))
       .filter(
         ({ file, source }) =>
           /^seoTitle:/m.test(source) && path.relative(docsRoot, file) !== 'api/reference.mdx',
       )
 
-    expect(auditedPages).toHaveLength(110)
+    expect(auditedPages.length).toBeGreaterThanOrEqual(115)
 
     for (const { file, source } of auditedPages) {
       const title = frontmatterString(source, 'title')
@@ -118,7 +123,7 @@ describe('docs SEO metadata', () => {
   })
 
   test('gives every authored docs page exactly one H1 and no literal title element', () => {
-    for (const file of markdownFiles(docsRoot)) {
+    for (const file of docsFiles()) {
       const source = fs.readFileSync(file, 'utf8')
       const tree = parseMarkdown(source)
       const h1s = findNodes(tree, (node) => node.type === 'heading' && node.depth === 1)

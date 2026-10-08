@@ -26,39 +26,35 @@ export function docsStructuredDataHead(path: string, { frontmatter }: DocsStruct
       },
     }
   }
-  if (pagePath !== '/docs' && !pagePath.startsWith('/docs/')) return undefined
+  if (pagePath !== '/' && pagePath !== '/get-started' && !pagePath.startsWith('/docs/')) {
+    return undefined
+  }
 
   const title = frontmatter?.title?.trim()
   if (!title) return { meta: { articleModifiedTime: false as const } }
 
   const developersUrl = 'https://tempo.xyz/developers'
-  const docsUrl = `${developersUrl}/docs`
+  const docsUrl = developersUrl
   const organizationId = 'https://tempo.xyz/#organization'
   const websiteId = 'https://tempo.xyz/#website'
   const entityDescription =
     'Tempo is a payments-first Layer 1 blockchain built for stablecoin payments, global payouts, agentic payments, and enterprise settlement.'
-  const url = `${developersUrl}${pagePath}`
+  const url = `${developersUrl}${pagePath === '/' ? '' : pagePath}`
   const description = frontmatter?.description?.trim()
   const breadcrumbId = `${url}#breadcrumb`
   const breadcrumbs = [
     {
       '@type': 'ListItem',
       position: 1,
-      name: 'Tempo developers',
-      item: `${developersUrl}/`,
-    },
-    {
-      '@type': 'ListItem',
-      position: 2,
       name: 'Tempo Docs',
       item: docsUrl,
     },
   ]
 
-  if (pagePath !== '/docs') {
+  if (pagePath !== '/') {
     breadcrumbs.push({
       '@type': 'ListItem',
-      position: 3,
+      position: 2,
       name: title,
       item: url,
     })

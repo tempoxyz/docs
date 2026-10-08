@@ -22,6 +22,38 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 </urlset>`
 
 describe('finalizeSitemap', () => {
+  it('excludes redirected marketing surfaces while preserving docs and blog URLs', () => {
+    const previousSite = sitemap.replace(
+      '</urlset>',
+      `${[
+        '',
+        '/get-started',
+        '/docs',
+        '/build',
+        '/build/tip20-tokens',
+        '/build/tempo-transactions',
+        '/performance',
+      ]
+        .map((route) => `<url><loc>https://tempo.xyz/developers${route}</loc></url>`)
+        .join('\n')}</urlset>`,
+    )
+    const result = finalizeSitemap(previousSite, [{ slug: 't6' }])
+
+    const locations = [...result.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])
+    expect(locations).toContain('https://tempo.xyz/developers/blog/t6')
+    expect(locations).toContain('https://tempo.xyz/developers/docs/api')
+    expect(locations).toContain('https://tempo.xyz/developers')
+    expect(locations).toContain('https://tempo.xyz/developers/get-started')
+    expect(locations).not.toContain('https://tempo.xyz/developers/docs')
+    expect(
+      locations.every((location) =>
+        /^https:\/\/tempo\.xyz\/developers(?:\/?$|\/get-started$|\/(?:docs\/|blog(?:\/|$)))/.test(
+          location,
+        ),
+      ),
+    ).toBe(true)
+  })
+
   it('replaces the blog template with canonical post URLs and removes other templates', () => {
     const result = finalizeSitemap(sitemap, [
       { slug: 't7-network-upgrade' },

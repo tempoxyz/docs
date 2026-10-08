@@ -1,97 +1,80 @@
 ---
-title: "Integrating Tempo: getting started"
-seoTitle: "How to Integrate Tempo | Tempo Docs"
-description: Connect apps and wallets to Tempo with network configuration, faucet funding, EVM compatibility notes, bridges, verification, and ecosystem resources.
-interactive: true
+title: "Integrate Tempo"
+seoTitle: "Integrate Tempo with Apps, Wallets, and Services | Tempo Docs"
+description: Connect applications and wallets to Tempo, review EVM and transaction behavior, deploy contracts, and integrate bridges and token discovery.
 ---
 
 import { Cards, Card } from 'vocs'
 
-# Integrating Tempo: getting started
+<span id="integrating-tempo-getting-started" />
 
-Use this section when you are connecting an existing app, wallet, contract, bridge, or infrastructure service to Tempo. These pages cover the practical edges of integration: chain configuration, RPC endpoints, faucet funding, wallet support, EVM compatibility, predeploys, contract verification, and ecosystem resources.
+# Integrate Tempo
 
-Tempo Mainnet has been live since March 18, 2026. Use mainnet for production integrations and Tempo Wallet. Use the separate Moderato testnet only for development and faucet-funded examples.
+Connect an application, wallet, or service to Tempo. Start with network configuration, then review the EVM and transaction behavior your integration depends on.
 
-Tempo is EVM-compatible and targets the **Osaka** EVM hard fork. Most Ethereum tooling works as expected, with Tempo-specific differences documented where they matter.
+For an application that needs user accounts and stablecoin payments, start with [Accounts](/docs/accounts) and the [account integration guide](/docs/accounts/integrate).
 
-## Connect and Fund
+<span id="connect-and-fund" />
+
+## Connect to the network
+
+Use Tempo Mainnet for production and the separate Moderato testnet for development with faucet funds.
 
 <Cards>
   <Card
     icon="lucide:network"
-    title="Connect to Tempo"
-    description="Add Tempo chain configuration, RPC endpoints, explorer links, and wallet connection details."
+    title="Network connection details"
+    description="Find chain configuration, RPC endpoints, explorer links, and wallet connections."
     to="/docs/quickstart/connection-details"
   />
   <Card
-    icon="lucide:droplets"
-    title="Get Testnet Funds"
-    description="Fund test wallets so you can deploy contracts, send payments, and exercise integration flows."
-    to="/docs/quickstart/faucet"
-  />
-  <Card
-    icon="lucide:badge-check"
-    title="Verify Contracts"
-    description="Verify deployed contracts and make them easier to inspect, debug, and share."
-    to="/docs/quickstart/verify-contracts"
+    icon="lucide:wallet"
+    title="Get funds"
+    description="Fund a production wallet or get test stablecoins from the testnet faucet."
+    to="/docs/guide/getting-funds"
   />
 </Cards>
 
-## App and Wallet Readiness
+<span id="app-and-wallet-readiness" />
+
+## Integrate apps and wallets
 
 <Cards>
   <Card
-    icon="lucide:wallet"
-    title="Wallet Integration"
-    description="Support Tempo in wallets with stablecoin-native fees, chain metadata, and transaction behavior."
-    to="/docs/quickstart/wallet-developers"
-  />
-  <Card
     icon="lucide:code-2"
-    title="Tempo EVM Compatibility"
-    description="Understand the Tempo-specific behavior that differs from default Ethereum assumptions."
+    title="EVM compatibility"
+    description="Review Tempo-specific wallet, transaction, and execution behavior."
     to="/docs/quickstart/evm-compatibility"
   />
   <Card
-    icon="lucide:boxes"
-    title="System Contracts and Predeploys"
-    description="Find Tempo predeploys and system contracts used by integrations and protocol features."
-    to="/docs/quickstart/predeployed-contracts"
+    icon="lucide:wallet"
+    title="Wallet integration"
+    description="Support stablecoin fees, chain metadata, and Tempo transactions in a wallet."
+    to="/docs/quickstart/wallet-developers"
   />
   <Card
-    icon="lucide:list"
-    title="Token Lists"
-    description="Use Tempo token lists to discover supported assets and present stablecoins correctly."
-    to="/docs/quickstart/tokenlist"
+    icon="lucide:layers"
+    title="Tempo transactions"
+    description="Use transaction batching, fee sponsorship, and other Tempo transaction features."
+    to="/docs/guide/tempo-transaction"
   />
 </Cards>
 
-## Bridges and Ecosystem
+## Deploy and inspect contracts
 
-<Cards>
-  <Card
-    icon="lucide:arrow-right-left"
-    title="Migrate an ERC-20 to TIP-20"
-    description="Choose native issuance, a bridge adapter, full migration, or an external lifecycle manager for an existing ERC-20."
-    to="/docs/guide/issuance/migrate-erc20-to-tip20"
-  />
-  <Card
-    icon="lucide:bridge"
-    title="LayerZero Bridge"
-    description="Bridge supported assets to and from Tempo using LayerZero."
-    to="/docs/guide/bridge-layerzero"
-  />
-  <Card
-    icon="lucide:route"
-    title="Relay Bridge"
-    description="Use Relay to move assets between Tempo and other supported networks."
-    to="/docs/guide/bridge-relay"
-  />
-  <Card
-    icon="lucide:network"
-    title="Tempo Ecosystem"
-    description="Find bridges, wallets, analytics, infrastructure, compliance, and orchestration partners."
-    to="/docs/ecosystem"
-  />
-</Cards>
+- [Verify contracts](/docs/quickstart/verify-contracts) to publish source for deployed contracts.
+- Find protocol addresses in [system contracts and predeploys](/docs/quickstart/predeployed-contracts).
+- Use [token lists](/docs/quickstart/tokenlist) to display stablecoin metadata in your application.
+
+<span id="bridges-and-ecosystem" />
+
+## Connect other networks
+
+Use the guide for your bridge or routing integration:
+
+- [LayerZero](/docs/guide/bridge-layerzero)
+- [Relay](/docs/guide/bridge-relay)
+- [Bungee](/docs/guide/bridge-bungee)
+- [Tempo Routes](/docs/api/routes/transfers)
+
+For an existing token, [choose an ERC-20 to TIP-20 integration path](/docs/guide/issuance/migrate-erc20-to-tip20). Browse [ecosystem partners](/docs/partners) for wallets, infrastructure, and other integration providers.
