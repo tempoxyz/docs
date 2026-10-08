@@ -1,51 +1,43 @@
 import { expect, test } from '@playwright/test'
 
-const transfer = '/docs/routes#transfer-from-a-connected-wallet'
-const deposits = '/docs/routes#accept-deposits-from-external-wallets'
+const transfer = '/docs/routes/transfers'
+const deposits = '/docs/routes/deposits'
 
-test('desktop sidebar keeps the containing section active through nested steps in both directions', async ({
+test('desktop sidebar keeps the current task active through nested steps and client navigation', async ({
   page,
 }) => {
-  await page.goto('/docs/routes')
+  await page.goto(transfer)
   const sidebar = page.locator('[data-v-gutter-left] nav[data-v-sidebar]')
   const active = sidebar.locator('a[data-active]')
-  await expect(active).toHaveCount(1)
-  await expect(active).toHaveAttribute('href', '/docs/routes')
 
-  // Jumping over the section heading is the regression: a nested H3 used to
-  // steal the active anchor and incorrectly reactivate the page's Overview.
-  for (const [heading, expected] of [
-    ['transfer-from-a-connected-wallet', transfer],
-    ['track-destination-delivery', transfer],
-    ['accept-deposits-from-external-wallets', deposits],
-    ['track-each-deposit', deposits],
-    ['sign-and-submit-the-source-calls', transfer],
+  // Nested headings describe steps within the task. Scrolling through them must
+  // not switch the sidebar selection back to the product overview.
+  for (const heading of [
+    'quote-the-transfer',
+    'track-destination-delivery',
+    'sign-and-submit-the-source-calls',
   ]) {
     await page
       .locator(`[id="${heading}"]`)
       .evaluate((element) => element.scrollIntoView({ behavior: 'instant' }))
     await expect(active).toHaveCount(1)
-    await expect(active).toHaveAttribute('href', expected)
-    await expect(active).toHaveAttribute('aria-current', 'location')
-    // Scrolling updates the highlight without rewriting browser history.
-    await expect(page).toHaveURL(/\/docs\/routes\/?$/)
+    await expect(active).toHaveAttribute('href', transfer)
+    await expect(active).toHaveAttribute('aria-current', 'page')
+    await expect(page).toHaveURL(new RegExp(`${transfer}/?$`))
   }
 
-  await page
-    .locator('article[data-v-content] h1')
-    .evaluate((element) => element.scrollIntoView({ behavior: 'instant' }))
-  await expect(active).toHaveAttribute('href', '/docs/routes')
-  await expect(active).toHaveAttribute('aria-current', 'page')
-
   await sidebar.locator(`a[href="${deposits}"]`).click()
-  await expect(page).toHaveURL(new RegExp(`${deposits}$`))
+  await expect(page).toHaveURL(new RegExp(`${deposits}/?$`))
+  await page
+    .locator('[id="track-each-deposit"]')
+    .evaluate((element) => element.scrollIntoView({ behavior: 'instant' }))
+  await expect(active).toHaveCount(1)
   await expect(active).toHaveAttribute('href', deposits)
-  await sidebar.locator(`a[href="${transfer}"]`).click()
-  await expect(page).toHaveURL(new RegExp(`${transfer}$`))
-  await expect(active).toHaveAttribute('href', transfer)
   await page.goBack()
-  await expect(page).toHaveURL(new RegExp(`${deposits}$`))
-  await expect(active).toHaveAttribute('href', deposits)
+  await expect(page).toHaveURL(new RegExp(`${transfer}/?$`))
+  await expect(active).toHaveAttribute('href', transfer)
+  await sidebar.locator('a[href="/docs/routes"]').click()
+  await expect(active).toHaveAttribute('href', '/docs/routes')
 
   await page
     .getByRole('navigation', { name: 'Documentation sections', exact: true })
@@ -56,77 +48,102 @@ test('desktop sidebar keeps the containing section active through nested steps i
   await expect(active).toHaveAttribute('href', '/docs/accounts')
 })
 
-test('a direct nested-heading URL selects its parent section', async ({ page }) => {
-  await page.goto('/docs/routes#track-destination-delivery')
+test('direct nested headings and legacy overview anchors retain the current page selection', async ({
+  page,
+}) => {
   const active = page.locator('[data-v-gutter-left] nav[data-v-sidebar] a[data-active]')
-  await expect(active).toHaveCount(1)
-  await expect(active).toHaveAttribute('href', transfer)
-  await page.reload()
-  await expect(active).toHaveAttribute('href', transfer)
+  for (const [path, expected] of [
+    [`${transfer}#track-destination-delivery`, transfer],
+    ['/docs/routes#transfer-from-a-connected-wallet', '/docs/routes'],
+    ['/docs/routes#accept-deposits-from-external-wallets', '/docs/routes'],
+  ]) {
+    await page.goto(path)
+    await expect(active).toHaveCount(1)
+    await expect(active).toHaveAttribute('href', expected)
+    await expect(active).toHaveAttribute('aria-current', 'page')
+    await page.reload()
+    await expect(active).toHaveAttribute('href', expected)
+  }
 })
 
 test('a hash belonging to another page does not steal the current guide highlight', async ({
   page,
 }) => {
-  const guide = '/docs/guide/stablecoin-dex'
-  // This fragment is a sidebar destination on Routes, but not on this guide.
-  // A stale or manually edited fragment must not deactivate the guide itself.
-  await page.goto(`${guide}#transfer-from-a-connected-wallet`)
+  // Batch payments is a hash destination in this sidebar, but belongs to the
+  // Send a payment guide. It must never deactivate Receive a payment.
+  const guide = '/docs/guide/payments/accept-a-payment'
+  await page.goto(`${guide}#batch-payment-transactions`)
   const active = page.locator('[data-v-gutter-left] nav[data-v-sidebar] a[data-active]')
   await expect(active).toHaveCount(1)
   await expect(active).toHaveAttribute('href', guide)
   await expect(active).toHaveAttribute('aria-current', 'page')
   await page
     .locator('article[data-v-content] h2')
+    .first()
     .evaluate((element) => element.scrollIntoView({ behavior: 'instant' }))
   await expect(active).toHaveCount(1)
   await expect(active).toHaveAttribute('href', guide)
 })
 
-test('mobile drawer shares the scrolled section and follows anchor navigation', async ({
+test('payment recipes select their own sidebar anchor without stealing earlier guide sections', async ({
+  page,
+}) => {
+  const guide = '/docs/guide/payments/send-a-payment'
+  const batch = `${guide}#batch-payment-transactions`
+  await page.goto(batch)
+  const sidebar = page.locator('[data-v-gutter-left] nav[data-v-sidebar]')
+  const active = sidebar.locator('a[data-active]')
+  await expect(active).toHaveCount(1)
+  await expect(active).toHaveAttribute('href', batch)
+  await expect(active).toHaveAttribute('aria-current', 'location')
+  await page.locator('[id="batch-payment-transactions"]').evaluate((element) => {
+    element.nextElementSibling?.scrollIntoView({ behavior: 'instant' })
+  })
+  await expect(active).toHaveAttribute('href', batch)
+  await page
+    .locator('[id="send-payment-implementation-steps"]')
+    .evaluate((element) => element.scrollIntoView({ behavior: 'instant' }))
+  await expect(active).toHaveCount(1)
+  await expect(active).toHaveAttribute('href', guide)
+  await expect(active).toHaveAttribute('aria-current', 'page')
+})
+
+test('mobile drawer retains the current task after scrolling and follows task navigation', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto('/docs/routes#track-destination-delivery')
+  await page.goto(`${transfer}#track-destination-delivery`)
   const trigger = page.getByRole('button', { name: 'Open docs navigation', exact: true })
   const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
   await trigger.click()
   await expect(drawer.locator('a[aria-current]')).toHaveCount(1)
   await expect(drawer.locator('a[aria-current]')).toHaveAttribute('href', transfer)
-  await expect(drawer.locator('a[aria-current]')).toHaveAttribute('aria-current', 'location')
+  await expect(drawer.locator('a[aria-current]')).toHaveAttribute('aria-current', 'page')
   await drawer.locator(`a[href="${deposits}"]`).click()
   await expect(drawer).toBeHidden()
-  await expect(page).toHaveURL(new RegExp(`${deposits}$`))
+  await expect(page).toHaveURL(new RegExp(`${deposits}/?$`))
   await page
     .locator('[id="track-each-deposit"]')
     .evaluate((element) => element.scrollIntoView({ behavior: 'instant' }))
-  // The drawer locks page scrolling; open it after the requested reading
-  // position is reached, rather than interrupting an in-flight anchor scroll.
-  await expect
-    .poll(async () =>
-      page
-        .locator('[id="track-each-deposit"]')
-        .evaluate((element) => element.getBoundingClientRect().top),
-    )
-    .toBeLessThan(260)
   await trigger.click()
   await expect(drawer.locator('a[aria-current]')).toHaveCount(1)
   await expect(drawer.locator('a[aria-current]')).toHaveAttribute('href', deposits)
-  await page.keyboard.press('Escape')
-  await page
-    .locator('article[data-v-content] h1')
-    .evaluate((element) => element.scrollIntoView({ behavior: 'instant' }))
+  await drawer.locator('a[href="/docs/routes"]').click()
+  await expect(drawer).toBeHidden()
   await trigger.click()
   await expect(drawer.locator('a[aria-current]')).toHaveAttribute('href', '/docs/routes')
   await expect(drawer.locator('a[aria-current]')).toHaveAttribute('aria-current', 'page')
 })
 
-test('OpenAPI endpoints retain their own active state after client navigation from a product guide', async ({
+test('OpenAPI endpoints retain their own active state after client navigation from a task', async ({
   page,
 }) => {
-  await page.goto('/docs/routes#track-destination-delivery')
+  await page.goto(transfer)
   const sidebar = page.locator('[data-v-gutter-left] nav[data-v-sidebar]')
-  await sidebar.getByRole('link', { name: 'Transfer API', exact: true }).click()
+  await page
+    .locator('article[data-v-content]')
+    .getByRole('link', { name: 'Transfers API reference', exact: true })
+    .click()
   await expect(page).toHaveURL(/\/docs\/api\/routes\/transfers\/?$/)
   const operations = sidebar.locator('a[href^="/docs/api/routes/transfers#"]')
   await expect(operations.first()).toBeVisible()

@@ -1,7 +1,7 @@
 ---
 title: "Accounts"
-seoTitle: "Tempo Accounts: Wallets and Stablecoin Payments | Tempo Docs"
-description: Connect users to Tempo Wallet with the Accounts SDK, accept stablecoin deposits, send payments, and configure account controls.
+seoTitle: "Create and Manage Accounts on Tempo | Tempo Docs"
+description: Choose how your application holds stablecoins, manages signing authority, and delegates access to users, services, and agents.
 ---
 
 import { Cards, Card } from 'vocs'
@@ -9,59 +9,56 @@ import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 <span id="build-your-account-integration" />
 
-<DocsProductOverview image="accounts" alt="Illustrative Tempo Wallet account connected on Tempo Mainnet, showing an available balance of 1,000 OUSD and a shortened account address.">
+<DocsProductOverview image="accounts" alt="A Tempo account showing its address and stablecoin balance.">
 
 # Accounts
 
-Connect users to Tempo Wallet with the Accounts SDK, then add stablecoin deposits, payments, and account controls to your application.
+Set up accounts to hold stablecoins and authorize payments from your application. Choose whether your service or your customer controls signing.
 
-[Connect an account →](/docs/accounts/integrate)
+[Create an account →](/docs/accounts/create)
 
 </DocsProductOverview>
 
+An account holds stablecoin balances at an address. A wallet or signing service manages the keys that authorize transactions. Keep customer, invoice, and payroll records in your application, and associate the relevant account addresses with those records.
+
+## Choose an account model
+
+| Who authorizes transactions? | Integration path |
+| --- | --- |
+| Your backend, for payouts or treasury operations | [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key) using your signing infrastructure, or [use a wallet provider](/docs/accounts/providers). |
+| A customer, from inside your application | Use a [wallet provider](/docs/accounts/providers) for embedded wallets, or create a [passkey account](/docs/accounts/create#create-a-passkey-account). |
+| A customer, through an existing wallet | [Connect a wallet](/docs/accounts/integrate) and request authorization for your application. |
+
+For a provider integration, decide who can request signatures and how users regain access. Compare the provider's authentication, recovery, key export, and signing policies against those requirements.
+
+If you collect customer deposits into a shared balance, [virtual addresses](/docs/guide/payments/virtual-addresses) give each customer a deposit address that forwards funds to your account. Track each customer's balance in your ledger; virtual addresses do not hold separate balances.
+
+<span id="configure-account-controls" />
+<span id="control-who-can-use-an-account" />
+
+## Delegate access to applications and services
+
+The **root key** is the account's original signing authority. Authorize separate **limited access keys** for a customer session, backend service, or agent, with an expiry, token spending limit, and allowed calls. Each key acts on the same account and can be revoked independently.
+
+For example, give a payout service permission to transfer a specific stablecoin to approved recipients within a budget. A customer can authorize a short-lived session to make payments without confirming each transaction. Your application's sign-in flow identifies the customer; access-key permissions control what the session can do onchain.
+
+- [Access keys](/docs/accounts/access-keys) covers authorization, limits, and revocation.
+- [Give an agent access](/docs/accounts/agents) explains how to delegate a defined task.
+- [Manage admin keys](/docs/accounts/admin-keys) covers delegation of key management itself.
+
+Plan recovery with your wallet or signing provider. The root public key determines the account address; adding or revoking an access key does not replace it.
+
+<span id="fund-accounts-and-reconcile-payments" />
+<span id="put-an-account-to-use" />
+
+## Connect accounts to your payment system
+
+[Fund the account](/docs/guide/getting-funds), then connect its balances and transactions to your payment flow.
+
 <Cards>
-  <Card
-    title="Connect an account"
-    description="Install the Accounts SDK, connect Tempo Wallet, and prepare your first test payment."
-    to="/docs/accounts/integrate"
-    icon="lucide:wallet"
-  />
-  <Card
-    title="Accept stablecoin deposits"
-    description="Read balances, verify transfers, and reconcile incoming payments."
-    to="/docs/guide/payments/accept-a-payment"
-    icon="lucide:arrow-down-left"
-  />
-  <Card
-    title="Integrate an existing wallet"
-    description="Add Tempo transactions, stablecoin fee handling, and token metadata to your wallet."
-    to="/docs/quickstart/wallet-developers"
-    icon="lucide:plug"
-  />
-  <Card
-    title="Choose a wallet provider"
-    description="Find embedded wallets, key management, and custody integrations in the ecosystem."
-    to="/docs/ecosystem/wallets"
-    icon="lucide:blocks"
-  />
+  <Card title="Balances and activity" description="Read account balances and match transactions to your ledger." to="/docs/accounts/balances" icon="lucide:list" />
+  <Card title="Payments" description="Send stablecoins, accept deposits, and reconcile transfers." to="/docs/payments" icon="lucide:send" />
+  <Card title="Routes" description="Move stablecoins between Tempo and other networks." to="/docs/routes" icon="lucide:arrow-left-right" />
 </Cards>
 
-## Fund accounts and reconcile payments
-
-Use [OUSD](/docs/guide/ousd) for Tempo stablecoin balances and payments. Follow [wallet funding](/docs/guide/getting-funds) for production or use the separate [testnet faucet](/docs/quickstart/faucet) while developing.
-
-- [Send a payment](/docs/guide/payments/send-a-payment) to transfer stablecoins between accounts.
-- [Attach transfer memos](/docs/guide/payments/transfer-memos) to associate transfers with invoices or other records.
-- [Use virtual addresses](/docs/guide/payments/virtual-addresses) to attribute customer deposits to a registered wallet. Virtual addresses share that wallet's balance; they do not create a separate balance for each customer.
-- Use the [Tempo API](/docs/api) to read payment activity and integrate webhooks in your backend.
-
-## Configure account controls
-
-[Tempo Transactions](/docs/guide/tempo-transaction) provide fee sponsorship, batching, and access keys for delegated signing. Add the controls your account flow needs:
-
-- [Sponsor user fees](/docs/guide/payments/sponsor-user-fees) or [set fee token preferences](/docs/guide/payments/pay-fees-in-any-stablecoin).
-- [Configure receive policies](/docs/guide/payments/configure-receive-policies) to control accepted tokens and senders, including recovery of blocked receipts.
-- [Authorize access keys](/docs/guide/tempo-transaction#access-keys) for delegated transaction signing.
-- [Send parallel transactions](/docs/guide/payments/send-parallel-transactions) when your application submits concurrent payments.
-
-For chain configuration and execution behavior, see [Integrate Tempo](/docs/quickstart/integrate-tempo). For custom account implementations, compare [smart account providers](/docs/ecosystem/smart-contract-libraries) and the [Tempo Accounts SDK documentation](https://accounts.tempo.xyz/docs).
+For wallets you operate, follow the [wallet integration guide](/docs/quickstart/wallet-developers).

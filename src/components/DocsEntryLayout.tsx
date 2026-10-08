@@ -8,7 +8,7 @@ import DocsLayout from '../pages/docs/_layout'
 export default function DocsEntryLayout({ children }: PropsWithChildren) {
   const { path } = useRouter()
   const pathname = (path ?? '/').replace(/^\/developers(?=\/|$)/, '').replace(/\/+$/, '') || '/'
-  if (pathname === '/' || pathname === '/get-started') {
+  if (pathname === '/' || pathname === '/get-started' || pathname.startsWith('/get-started/')) {
     return <DocsLayout path={pathname}>{children}</DocsLayout>
   }
   return children

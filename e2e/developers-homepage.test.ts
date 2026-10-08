@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { developerSurfaceRedirects } from '../src/lib/docs-routing'
+import { getDemoStep } from './helpers'
 
 for (const { source, destination } of developerSurfaceRedirects) {
   test(`redirects the former ${source} entry point to documentation`, async ({ request }) => {
@@ -44,3 +45,139 @@ test('serves getting started directly with its overview sidebar', async ({ page,
     '/get-started',
   )
 })
+
+test('keeps documentation page tools off the blog', async ({ page }) => {
+  for (const path of ['/blog', '/blog/introducing-mercator']) {
+    await page.goto(path)
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+    await expect(page.getByRole('navigation', { name: 'Page tools' })).toHaveCount(0)
+    await expect(page.locator('.docs-page-actions-host')).toHaveCount(0)
+  }
+})
+
+for (const entry of ['direct', 'client navigation'] as const) {
+  test(`opens the inline Tempo Wallet example via ${entry}`, async ({ page, context, baseURL }) => {
+    const pageErrors: string[] = []
+    page.on('pageerror', (error) => pageErrors.push(error.message))
+    await page.setViewportSize({ width: 1440, height: 1000 })
+
+    // Exercise the real wallet connector without authenticating a real account.
+    if (!baseURL) throw new Error('The wallet example test requires a docs baseURL')
+    const docsOrigin = new URL(baseURL).origin
+    await context.route('https://wallet.tempo.xyz/embed**', (route) =>
+      route.fulfill({
+        contentType: 'text/html',
+        body: `<!doctype html><title>Tempo Wallet</title>
+          <h1>Tempo Wallet</h1><output aria-label="Connection request"></output>
+          <script>
+            const docsOrigin = ${JSON.stringify(docsOrigin)};
+            const host = window.opener || window.parent;
+            addEventListener('message', (event) => {
+              if (event.origin !== docsOrigin || event.data.topic !== 'rpc-requests') return;
+              const { chainId, requests } = event.data.payload;
+              document.querySelector('output').textContent =
+                requests.map(({ request }) => request.method).join(',') + ':' + chainId;
+            });
+            host.postMessage({ id: 'ready', topic: 'ready', payload: {
+              trustedHosts: [new URL(docsOrigin).hostname]
+            } }, docsOrigin);
+          </script>`,
+      }),
+    )
+
+    if (entry === 'direct') {
+      await page.goto('/get-started#send-your-first-test-payment')
+    } else {
+      await page.goto('/docs/accounts')
+      await page
+        .getByRole('navigation', { name: 'Documentation sections' })
+        .getByRole('link', { name: 'Get Started', exact: true })
+        .click()
+    }
+
+    await expect(page).toHaveURL((url) => url.pathname === '/get-started')
+    await expect(page.locator('#send-your-first-test-payment')).toBeAttached()
+    await expect(page.getByRole('heading', { name: 'Try Tempo Wallet', exact: true })).toBeVisible()
+    const pageTools = page.getByRole('navigation', { name: 'Page tools' })
+    await expect(pageTools).toHaveCount(1)
+    await expect(pageTools.getByRole('link', { name: 'View Markdown' })).toHaveAttribute(
+      'href',
+      '/assets/md/get-started.md',
+    )
+    const signIn = getDemoStep(page, 'Create an account, or use an existing one.').getByRole(
+      'button',
+      { name: 'Sign in', exact: true },
+    )
+    await expect(signIn).toBeEnabled()
+    const addFunds = getDemoStep(page, 'Add testnet funds to your account.').getByRole('button', {
+      name: 'Add funds',
+      exact: true,
+    })
+    await expect(addFunds).toBeDisabled()
+    await expect(
+      getDemoStep(page, 'Send 100 AlphaUSD to a recipient.').getByRole('button', {
+        name: 'Enter details',
+        exact: true,
+      }),
+    ).toBeDisabled()
+
+    if (new URL(page.url()).protocol === 'http:') {
+      const popupPromise = page.waitForEvent('popup')
+      await signIn.click()
+      const wallet = await popupPromise
+      await expect(wallet).toHaveURL((url) => url.origin === 'https://wallet.tempo.xyz')
+      await expect(wallet.getByLabel('Connection request')).toHaveText('wallet_connect:42431')
+      await wallet.close()
+    } else {
+      await signIn.click()
+      const dialog = page.getByRole('dialog', { name: 'Tempo Wallet', exact: true })
+      await expect(dialog).toBeVisible()
+      await expect(dialog.frameLocator('iframe').getByLabel('Connection request')).toHaveText(
+        'wallet_connect:42431',
+      )
+    }
+
+    await expect(addFunds).toBeDisabled()
+    expect(pageErrors).toEqual([])
+  })
+}
+
+for (const entry of ['direct', 'client navigation'] as const) {
+  test(`keeps the docs header and sidebar on nested getting-started pages via ${entry}`, async ({
+    page,
+    request,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 1000 })
+    const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
+    const sections = page.getByRole('navigation', { name: 'Documentation sections' })
+
+    if (entry === 'direct') {
+      expect((await request.get('/get-started/stablecoins', { maxRedirects: 0 })).status()).toBe(
+        200,
+      )
+      await page.goto('/get-started/stablecoins')
+    } else {
+      await page.goto('/docs/accounts')
+      await sections.getByRole('link', { name: 'Get Started', exact: true }).click()
+      await sidebar.getByRole('link', { name: 'Stablecoins on Tempo', exact: true }).click()
+    }
+
+    await expect(page).toHaveURL(/\/get-started\/stablecoins\/?$/)
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Stablecoins on Tempo', exact: true }),
+    ).toBeVisible()
+    await expect(page.getByRole('navigation', { name: 'Developer navigation' })).toBeVisible()
+    await expect(sections).toBeVisible()
+    await expect(sections.locator('[aria-current="page"]')).toHaveText('Get Started')
+    await expect(sidebar).toBeVisible()
+    await expect(sidebar.locator('a[data-active]')).toHaveAttribute(
+      'href',
+      '/get-started/stablecoins',
+    )
+
+    await sidebar.getByRole('link', { name: 'Overview', exact: true }).click()
+    await expect(page).toHaveURL(/\/get-started\/?$/)
+    await expect(sections).toBeVisible()
+    await expect(sidebar.locator('a[data-active]')).toHaveAttribute('href', '/get-started')
+  })
+}

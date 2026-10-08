@@ -3,10 +3,10 @@ import { expect, test } from '@playwright/test'
 const sectionLabels = [
   'Get Started',
   'Accounts',
+  'Payments',
   'Earn',
   'Routes',
   'Zones',
-  'Machine Payments',
   'Developer Resources',
 ]
 const partnerCategoryPaths = [
@@ -69,63 +69,110 @@ test('seven documentation sections and Specifications keep their own sidebars th
     {
       label: 'Accounts',
       path: '/docs/accounts',
-      includes: ['/docs/accounts/integrate', '/docs/guide/payments'],
-      excludes: ['/docs/guide/issuance', '/docs/guide/stablecoin-dex', '/docs/guide/ousd'],
+      includes: [
+        '/docs/accounts/create',
+        '/docs/accounts/integrate',
+        '/docs/accounts/providers',
+        '/docs/accounts/access-keys',
+        '/docs/accounts/agents',
+        '/docs/quickstart/wallet-developers',
+        '/docs/quickstart/tokenlist',
+      ],
+      excludes: [
+        '/docs/payments',
+        '/docs/guide/payments',
+        '/docs/guide/issuance',
+        '/docs/guide/stablecoin-dex',
+      ],
+    },
+    {
+      label: 'Payments',
+      path: '/docs/payments',
+      includes: [
+        '/docs/guide/payments/send-a-payment',
+        '/docs/guide/payments/accept-a-payment',
+        '/docs/agents',
+        '/docs/guide/mercator',
+        '/docs/guide/machine-payments/client',
+        '/docs/guide/machine-payments/server',
+      ],
+      excludes: ['/docs/accounts/create', '/docs/guide/issuance', '/docs/guide/private-zones'],
     },
     {
       label: 'Earn',
       path: '/docs/earn',
-      includes: ['/docs/earn/integrate', '/docs/earn#liquidity-and-withdrawals'],
-      excludes: ['/docs/guide/issuance', '/docs/guide/machine-payments'],
+      includes: [
+        '/docs/earn/vaults',
+        '/docs/earn/integrate',
+        '/docs/earn/balances',
+        '/docs/earn/withdraw',
+        '/docs/earn#connect-a-yield-source',
+      ],
+      excludes: [
+        '/docs/guide/issuance',
+        '/docs/guide/machine-payments',
+        '/docs/earn#liquidity-and-withdrawals',
+      ],
     },
     {
       label: 'Routes',
       path: '/docs/routes',
       includes: [
-        '/docs/api/routes/transfers',
-        '/docs/guide/stablecoin-dex',
-        '/docs/guide/bridge-relay',
+        '/docs/routes/transfers',
+        '/docs/routes/deposits',
+        '/docs/routes/delivery',
+        '/docs/routes/quotes',
+        '/docs/routes/networks',
+        '/docs/guide/stablecoin-dex/executing-swaps',
+        '/docs/guide/stablecoin-dex/providing-liquidity',
+        '/docs/guide/stablecoin-dex/managing-fee-liquidity',
       ],
-      excludes: ['/docs/guide/payments', '/docs/guide/issuance'],
+      excludes: [
+        '/docs/guide/payments',
+        '/docs/guide/issuance',
+        '/docs/guide/bridge-relay',
+        '/docs/api/routes/transfers',
+      ],
     },
     {
       label: 'Zones',
       path: '/docs/zones',
       includes: [
+        '/docs/zones/privacy',
+        '/docs/zones/connect',
+        '/docs/zones/deposit',
+        '/docs/zones/balances',
+        '/docs/zones/withdraw',
         '/docs/guide/private-zones/connect-to-a-zone',
         '/docs/guide/private-zones/deposit-to-a-zone',
       ],
       excludes: ['/docs/guide/issuance', '/docs/guide/machine-payments'],
     },
     {
-      label: 'Machine Payments',
-      path: '/docs/agents',
-      includes: ['/docs/guide/machine-payments/client', '/docs/guide/machine-payments/server'],
-      excludes: ['/docs/guide/issuance', '/docs/guide/private-zones'],
-    },
-    {
       label: 'Developer Resources',
       path: '/docs/development',
       includes: [
-        '/docs/tools',
         '/docs/guide/using-tempo-with-ai',
-        '/docs/api/console',
+        '/docs/api',
         '/docs/ecosystem',
+        '/docs/quickstart/connection-details',
+        '/docs/quickstart/evm-compatibility',
       ],
-      excludes: ['/docs/guide/issuance', '/docs/guide/private-zones'],
+      excludes: ['/docs/guide/issuance', '/docs/guide/private-zones', '/docs/api/console'],
     },
   ]) {
     await navigation.getByRole('link', { name: section.label, exact: true }).click()
     await expect(page).toHaveURL(new RegExp(`${section.path}/?$`))
     await expect(navigation.locator('[aria-current="page"]')).toHaveText(section.label)
     await expect(sidebar).toBeVisible()
-    if (section.label === 'Developer Resources') {
-      await sidebar.getByRole('button', { name: 'API Console', exact: true }).click()
-    }
     for (const href of section.includes) {
       await expect(sidebar.locator(`a[href$="${href}"]`), `${section.label}: ${href}`).toHaveCount(
         1,
       )
+      await expect(
+        sidebar.locator(`a[href$="${href}"]`),
+        `${section.label}: ${href} is expanded`,
+      ).toBeVisible()
     }
     for (const href of section.excludes) {
       await expect(sidebar.locator(`a[href$="${href}"]`), `${section.label}: ${href}`).toHaveCount(
@@ -137,21 +184,26 @@ test('seven documentation sections and Specifications keep their own sidebars th
   await expect(page).toHaveURL(/\/docs\/protocol\/?$/)
   await expect(specifications).toHaveAttribute('aria-current', 'page')
   await expect(navigation.locator('[aria-current="page"]')).toHaveCount(0)
-  await sidebar.getByRole('button', { name: 'Run a node', exact: true }).click()
+  await expect(sidebar.locator('a[href]').first()).toHaveAttribute(
+    'href',
+    '/docs/protocol/upgrades',
+  )
+  await sidebar.getByRole('button', { name: 'Tokens and policies', exact: true }).click()
+  await expect(sidebar.locator('a[href="/docs/protocol/tip20/overview"]')).toHaveCount(1)
   for (const href of [
-    '/docs/protocol/tip20/overview',
     '/docs/guide/node',
     '/docs/guide/issuance',
+    '/docs/guide/machine-payments',
+    '/docs/guide/private-zones',
   ]) {
-    await expect(sidebar.locator(`a[href$="${href}"]`)).toHaveCount(1)
-  }
-  for (const href of ['/docs/guide/machine-payments', '/docs/guide/private-zones']) {
     await expect(sidebar.locator(`a[href$="${href}"]`)).toHaveCount(0)
   }
-  await sidebar.locator('a[href$="/docs/guide/node"]').click()
+  await navigation.getByRole('link', { name: 'Developer Resources', exact: true }).click()
+  await sidebar.getByRole('button', { name: 'Run a node', exact: true }).click()
+  await sidebar.locator('a[href="/docs/guide/node"]').click()
   await expect(page).toHaveURL(/\/docs\/guide\/node\/?$/)
-  await expect(specifications).toHaveAttribute('aria-current', 'page')
-  await expect(navigation.locator('[aria-current="page"]')).toHaveCount(0)
+  await expect(navigation.locator('[aria-current="page"]')).toHaveText('Developer Resources')
+  await expect(specifications).not.toHaveAttribute('aria-current')
   await navigation.getByRole('link', { name: 'Get Started', exact: true }).click()
   await expect(page).toHaveURL(/\/get-started\/?$/)
   await expect(navigation.locator('[aria-current="page"]')).toHaveText('Get Started')
@@ -160,7 +212,25 @@ test('seven documentation sections and Specifications keep their own sidebars th
     'href',
     '/get-started',
   )
-  await expect(sidebar.locator('a[href$="/docs/quickstart/faucet"]')).toHaveCount(1)
+  await expect(sidebar.locator('nav[data-v-sidebar]').getByRole('link')).toHaveText([
+    'Overview',
+    'Stablecoins on Tempo',
+    'Build with AI',
+    'Create an account',
+    'Get test funds',
+    'First payment',
+    'Network details',
+  ])
+  for (const href of [
+    '/get-started/stablecoins',
+    '/docs/guide/using-tempo-with-ai',
+    '/docs/accounts/create',
+    '/docs/quickstart/faucet',
+    '/docs/guide/payments/send-a-payment',
+    '/docs/quickstart/connection-details',
+  ]) {
+    await expect(sidebar.locator(`a[href="${href}"]`)).toBeVisible()
+  }
   await page.getByRole('link', { name: 'Tempo documentation', exact: true }).click()
   await expect(page).toHaveURL((url) => url.pathname === '/')
   await expect(
@@ -181,16 +251,32 @@ for (const section of [
     paths: [
       '/docs/build',
       '/docs/guide/getting-funds',
-      '/docs/guide/payments/transfer-memos',
-      '/docs/guide/tempo-transaction',
+      '/docs/accounts/create',
+      '/docs/accounts/agents',
       '/docs/quickstart/wallet-developers',
       '/docs/quickstart/tokenlist',
     ],
   },
   {
+    label: 'Payments',
+    overview: '/docs/payments',
+    paths: [
+      '/docs/guide/payments/transfer-memos',
+      '/docs/guide/tempo-transaction',
+      '/docs/agents',
+      '/docs/guide/mercator',
+      '/docs/guide/machine-payments/agent',
+      '/docs/guide/machine-payments/server',
+    ],
+  },
+  {
     label: 'Routes',
     overview: '/docs/routes',
-    paths: ['/docs/guide/stablecoin-dex/executing-swaps', '/docs/guide/bridge-relay'],
+    paths: [
+      '/docs/routes/transfers',
+      '/docs/routes/deposits',
+      '/docs/guide/stablecoin-dex/executing-swaps',
+    ],
   },
   {
     label: 'Zones',
@@ -206,6 +292,9 @@ for (const section of [
       '/docs/ecosystem/block-explorers',
       '/docs/partners',
       '/docs/guide/ousd',
+      '/docs/guide/bridge-relay',
+      '/docs/guide/node/installation',
+      '/docs/guide/node/upgrade-cadence',
       '/docs/ecosystem/bridges#coinbase',
       '/docs/ecosystem/orchestration#allunity',
       '/docs/tools',
@@ -274,36 +363,29 @@ test('Developer Resources connects AI setup, the console, and partner discovery'
   }
 })
 
-test('Earn explains vault positions and links to the read API', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 1000 })
+test('Earn separates choosing, depositing, reading, and withdrawing from the overview', async ({
+  page,
+}) => {
   await page.goto('/docs/earn')
   const article = page.locator('article[data-v-content]')
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
-  await expect(article.getByRole('heading', { level: 1, name: 'Earn', exact: true })).toBeVisible()
-  await expect(article).toContainText(/vault/i)
-  await expect(article).toContainText(/shares/i)
-  await expect(article).toContainText(/withdrawal/i)
-  await expect(sidebar.locator('a[href="/docs/earn#liquidity-and-withdrawals"]')).toBeVisible()
-  await sidebar.locator('a[href="/docs/earn#read-positions-and-earnings"]').click()
-  await expect(page).toHaveURL(/\/docs\/earn#read-positions-and-earnings$/)
-  await expect(article.locator('#read-positions-and-earnings')).toBeVisible()
-  await expect(article).toContainText('https://api.tempo.xyz/v1/earn/vaults/verified')
-  for (const anchor of ['read-vaults-and-positions', 'track-deposits-and-withdrawals']) {
-    await expect(article.locator(`[id="${anchor}"]`)).toHaveCount(1)
-  }
-  await sidebar.getByRole('link', { name: 'Add Earn to your app', exact: true }).click()
-  await expect(page).toHaveURL(/\/docs\/earn\/integrate$/)
-  await expect(article.getByRole('heading', { level: 1 })).toHaveText('Add Earn to your app')
-  for (const step of [
-    'Select a vault',
-    'Connect deposits',
-    'Display the position',
-    'Handle withdrawals',
+  await expect(
+    article.getByRole('heading', { level: 1, name: 'Tempo Earn', exact: true }),
+  ).toBeVisible()
+  for (const [label, path] of [
+    ['Choose a vault', '/docs/earn/vaults'],
+    ['Deposit funds', '/docs/earn/integrate'],
+    ['Balances and earnings', '/docs/earn/balances'],
+    ['Withdraw funds', '/docs/earn/withdraw'],
+    ['How Earn works', '/docs/earn/how-it-works'],
   ]) {
-    await expect(article.getByRole('heading', { level: 3, name: step })).toHaveCount(1)
+    await sidebar.getByRole('link', { name: label, exact: true }).click()
+    await expect(page).toHaveURL(new RegExp(`${path}/?$`))
+    await expect(article.getByRole('heading', { level: 1 })).toBeVisible()
+    await expect(sidebar.locator('a[data-active]')).toHaveCount(1)
+    await expect(sidebar.locator('a[data-active]')).toHaveAttribute('href', path)
   }
-  await sidebar.getByRole('link', { name: 'Overview', exact: true }).click()
-  await expect(page).toHaveURL(/\/docs\/earn$/)
+  await sidebar.getByRole('link', { name: 'Balances and earnings', exact: true }).click()
   await article.locator('a[href="/docs/api/earn"]').first().click()
   await expect(page).toHaveURL(/\/docs\/api\/earn\/?$/)
   await expect(
@@ -327,8 +409,8 @@ test('Specifications leads to Changelog and keeps existing upgrade URLs usable',
   const back = sidebar.getByRole('link', { name: '← Back to Specifications', exact: true })
   await expect(changelog).toBeVisible()
   await expect(
-    page.getByRole('article').getByRole('link', { name: /^Changelog Follow the upgrade process/ }),
-  ).toHaveCount(0)
+    page.getByRole('article').getByRole('link', { name: 'View the changelog →', exact: true }),
+  ).toHaveAttribute('href', '/docs/protocol/upgrades')
   await expect(
     page.locator('.docs-section-utilities').getByRole('link', { name: 'Changelog', exact: true }),
   ).toHaveCount(0)
@@ -390,8 +472,8 @@ test('mobile Specifications navigation reaches Changelog from Blog', async ({ pa
   await expect(page).toHaveURL(/\/docs\/protocol\/?$/)
   await expect(menu).toBeHidden()
   await expect(
-    page.getByRole('article').getByRole('link', { name: /^Changelog Follow the upgrade process/ }),
-  ).toHaveCount(0)
+    page.getByRole('article').getByRole('link', { name: 'View the changelog →', exact: true }),
+  ).toHaveAttribute('href', '/docs/protocol/upgrades')
   const trigger = page.getByRole('button', { name: 'Open docs navigation', exact: true })
   const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
   const back = drawer.getByRole('link', { name: '← Back to Specifications', exact: true })
@@ -594,7 +676,7 @@ for (const path of ['/', '/blog']) {
   }
 }
 
-test('agent-first entry page offers setup, task prompts and payment guides', async ({
+test('agent-first entry page offers setup and payment guides', async ({
   page,
   context,
   request,
@@ -605,16 +687,18 @@ test('agent-first entry page offers setup, task prompts and payment guides', asy
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Documentation')
   await expect(page.locator('[data-v-gutter-left]')).toBeHidden()
   await expect(page.locator('.tempo-docs-home-product-group')).toHaveCount(5)
-  for (const product of ['accounts', 'earn', 'routes', 'zones', 'agents']) {
+  for (const product of ['accounts', 'payments', 'earn', 'routes', 'zones']) {
     await expect(
       page.locator(`.tempo-docs-home-product-group h3 a[href="/docs/${product}"]`),
     ).toHaveCount(1)
   }
   const setup = page.locator('.tempo-agent-start')
   const installStatus = setup.locator('.tempo-agent-start-install').getByRole('status')
-  const taskStatus = setup.locator('.tempo-agent-start-task').getByRole('status')
-  const prompt = await setup.locator('.tempo-agent-start-prompt').innerText()
-  expect(prompt).not.toBe('')
+  await expect(setup.getByRole('heading', { level: 3 })).toHaveText('Connect Tempo docs')
+  await expect(setup.getByRole('button', { name: /Copy prompt/ })).toHaveCount(0)
+  await expect(
+    setup.getByRole('link', { name: 'All setup options', exact: false }),
+  ).toHaveAttribute('href', '/docs/guide/using-tempo-with-ai')
   for (const { label, command, instruction } of homeAgentSetups) {
     const multipleCommands = command.includes('\n')
     const commandSuccess = multipleCommands
@@ -622,7 +706,6 @@ test('agent-first entry page offers setup, task prompts and payment guides', asy
       : 'Command copied. Paste it into your terminal and run it.'
     await setup.getByRole('button', { name: label, exact: true }).click()
     await expect(installStatus).toHaveText('')
-    await expect(taskStatus).toHaveText('')
     await expect(
       setup.locator('.tempo-agent-start-install .tempo-agent-start-instruction'),
     ).toContainText(instruction)
@@ -634,17 +717,9 @@ test('agent-first entry page offers setup, task prompts and payment guides', asy
       .click()
     await expect(installStatus).toHaveText(commandSuccess)
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(command)
-    await expect(taskStatus).toHaveText('')
-    await setup.getByRole('button', { name: 'Copy prompt for first payment', exact: true }).click()
-    await expect(taskStatus).toHaveText(
-      `Prompt copied. Paste it into your ${label === 'Other' ? 'agent' : label} conversation.`,
-    )
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(prompt)
-    await expect(installStatus).toHaveText(commandSuccess)
   }
   await setup.getByRole('button', { name: 'Codex', exact: true }).click()
   await expect(installStatus).toHaveText('')
-  await expect(taskStatus).toHaveText('')
   await expect(page.locator('.tempo-docs-home')).not.toContainText('Bring your existing EVM app')
   for (const anchor of [
     'start-here',
@@ -666,13 +741,11 @@ test('agent-first entry page offers setup, task prompts and payment guides', asy
 
   await page.getByRole('link', { name: 'Send your first payment', exact: false }).first().click()
   await page.waitForURL(/\/docs\/guide\/payments\/send-a-payment\/?$/)
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'How to send a stablecoin payment on Tempo',
-  )
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Send a payment')
   await expect(
     page
       .getByRole('navigation', { name: 'Documentation sections' })
-      .getByRole('link', { name: 'Accounts', exact: true }),
+      .getByRole('link', { name: 'Payments', exact: true }),
   ).toHaveAttribute('aria-current', 'page')
 })
 
@@ -693,9 +766,7 @@ test('agent setup offers manual copy recovery without overflowing a narrow viewp
   await page.goto('/')
   const setup = page.locator('.tempo-agent-start')
   const installStatus = setup.locator('.tempo-agent-start-install').getByRole('status')
-  const taskStatus = setup.locator('.tempo-agent-start-task').getByRole('status')
   const commands = setup.locator('.tempo-agent-start-command code')
-  const prompt = setup.locator('.tempo-agent-start-prompt')
   for (const { label, command } of homeAgentSetups) {
     const multipleCommands = command.includes('\n')
     const commandFailure = multipleCommands
@@ -703,7 +774,6 @@ test('agent setup offers manual copy recovery without overflowing a narrow viewp
       : 'Copy failed. Select and copy the command above.'
     await setup.getByRole('button', { name: label, exact: true }).click()
     await expect(installStatus).toHaveText('')
-    await expect(taskStatus).toHaveText('')
     await setup
       .getByRole('button', {
         name: `Copy command${multipleCommands ? 's' : ''} for ${label}`,
@@ -711,13 +781,8 @@ test('agent setup offers manual copy recovery without overflowing a narrow viewp
       })
       .click()
     await expect(installStatus).toHaveText(commandFailure)
-    await expect(taskStatus).toHaveText('')
     await expect(commands).toBeVisible()
     expect(await commands.innerText()).toBe(command)
-    await setup.getByRole('button', { name: 'Copy prompt for first payment', exact: true }).click()
-    await expect(taskStatus).toHaveText('Copy failed. Select and copy the prompt above.')
-    await expect(installStatus).toHaveText(commandFailure)
-    await expect(prompt).toBeVisible()
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
       label,
@@ -742,7 +807,7 @@ test('mobile documentation menu restores focus and navigates to another section'
   await expect(trigger).toBeFocused()
   for (const [label, path] of [
     ['Earn', '/docs/earn'],
-    ['Machine Payments', '/docs/agents'],
+    ['Payments', '/docs/payments'],
     ['Developer Resources', '/docs/development'],
   ]) {
     await trigger.click()
@@ -762,11 +827,31 @@ test('mobile documentation menu restores focus and navigates to another section'
   }
 })
 
+test('mobile product sidebars show supporting tasks without opening a disclosure', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  for (const [path, group, destination] of [
+    ['/docs/accounts', 'Wallet development', '/docs/quickstart/wallet-developers'],
+    ['/docs/earn', 'For providers', '/docs/earn#connect-a-yield-source'],
+    ['/docs/routes', 'For liquidity providers', '/docs/guide/stablecoin-dex/providing-liquidity'],
+    ['/docs/zones', 'Testnet sandbox', '/docs/guide/private-zones/connect-to-a-zone'],
+  ]) {
+    await page.goto(path)
+    await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
+    const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
+    const disclosure = drawer.locator('summary').filter({ hasText: new RegExp(`^${group}$`) })
+    await expect(disclosure.locator('..')).toHaveJSProperty('open', true)
+    await expect(drawer.locator(`a[href="${destination}"]`)).toBeVisible()
+    await page.keyboard.press('Escape')
+  }
+})
+
 test('mobile article drawer survives client navigation and traps keyboard focus', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto('/docs/protocol')
+  await page.goto('/docs/development')
   const trigger = page.getByRole('button', { name: 'Open docs navigation', exact: true })
   await trigger.click()
   const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
@@ -811,6 +896,8 @@ test('mobile pages without an outline still expose the documentation drawer', as
   await trigger.click()
   const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
   await expect(drawer).toBeVisible()
+  const sdkDisclosure = drawer.locator('summary').filter({ hasText: /^SDKs$/ })
+  await expect(sdkDisclosure.locator('..')).toHaveJSProperty('open', true)
   await drawer.getByRole('link', { name: 'Python', exact: true }).click()
   await expect(page).toHaveURL(/\/docs\/sdk\/python\/?$/)
   await expect(drawer).toBeHidden()

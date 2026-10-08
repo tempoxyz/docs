@@ -1,39 +1,24 @@
 ---
-title: "Tempo protocol: specifications and reference"
+title: "Specifications"
 seoTitle: "Tempo Protocol Specifications | Docs"
 description: Read Tempo protocol references for tokens, policies, fees, transactions, blockspace, exchange, zones, network upgrades, TIP specs, and implementation details.
 ---
 
 import { Cards, Card } from 'vocs'
 
-# Tempo protocol: specifications and reference
+# Specifications
 
-Configure your connection to Tempo, issue a stablecoin, run a node, or read the protocol's transaction, token, and network specifications.
+Read the rules that govern Tempo accounts, transactions, assets, and settlement. Use the product guides for implementation workflows and these specifications for exact behavior and interfaces.
 
-For product integrations, start with [Accounts](/docs/accounts), [Routes](/docs/routes), [Machine Payments](/docs/agents), or [Zones](/docs/zones). Use this section for exact behavior, ABI details, and protocol rationale.
+[View the changelog →](/docs/protocol/upgrades)
 
-## Integrate with the network
+## How protocol changes happen
 
-<Cards>
-  <Card
-    title="Network integration"
-    description="Configure networks, compare EVM behavior, and find system contracts."
-    to="/docs/quickstart/integrate-tempo"
-    icon="lucide:plug"
-  />
-  <Card
-    title="Issue a stablecoin"
-    description="Create TIP-20 Tokens and manage minting, supply, and permissions."
-    to="/docs/guide/issuance"
-    icon="lucide:coins"
-  />
-  <Card
-    title="Run a node"
-    description="Set up a Tempo node and follow operator and upgrade guidance."
-    to="/docs/guide/node"
-    icon="lucide:server"
-  />
-</Cards>
+Tempo Improvement Proposals (TIPs) describe proposed protocol changes. Named network upgrades group changes for activation on a particular network; a proposal alone does not establish that a feature is active.
+
+Upgrades activate on Moderato testnet before mainnet. Check the [upgrade's timeline and integration notes](/docs/protocol/upgrades) to determine which behavior applies to your deployment. Node software releases can support a network upgrade or contain maintenance fixes without changing protocol rules.
+
+Read the [upgrade process](/docs/guide/node/upgrade-cadence) for operator rollout guidance, or browse [TIPs](https://tips.sh/) for specifications and rationale.
 
 ## Core primitives
 

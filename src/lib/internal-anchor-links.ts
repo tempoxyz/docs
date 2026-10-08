@@ -179,7 +179,13 @@ function targetFor(href: string, page: Page): { route: string; fragment: string 
   }
   route = normalizeRoute(route || '/')
   if (route === '/docs') route = '/'
-  if (route !== '/' && route !== '/get-started' && !route.startsWith('/docs/')) return
+  if (
+    route !== '/' &&
+    route !== '/get-started' &&
+    !route.startsWith('/get-started/') &&
+    !route.startsWith('/docs/')
+  )
+    return
 
   return { route, fragment: decodeURIComponent(url.hash.slice(1)) }
 }
@@ -192,6 +198,7 @@ export function checkInternalAnchors(
     (page) =>
       page.route === '/' ||
       page.route === '/get-started' ||
+      page.route.startsWith('/get-started/') ||
       page.route === '/docs' ||
       page.route.startsWith('/docs/'),
   )

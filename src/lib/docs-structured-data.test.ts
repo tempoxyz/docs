@@ -106,6 +106,7 @@ describe('docs structured data', () => {
   test.each([
     ['/', 'Documentation'],
     ['/get-started', 'Get Started'],
+    ['/get-started/stablecoins', 'Stablecoins on Tempo'],
   ])('includes %s with the canonical docs root breadcrumb', (path, title) => {
     const schema = graph(path, { title })
     expect(node(schema, 'TechArticle').url).toBe(
@@ -125,6 +126,7 @@ describe('docs structured data', () => {
 
   test('leaves non-docs routes unchanged', () => {
     expect(docsStructuredDataHead('/blog', {})).toBeUndefined()
+    expect(docsStructuredDataHead('/get-started-extra', {})).toBeUndefined()
   })
 
   test('does not emit JSON-LD outside the page frontmatter context', () => {

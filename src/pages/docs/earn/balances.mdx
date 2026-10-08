@@ -1,0 +1,35 @@
+---
+title: "Balances and earnings"
+seoTitle: "Balances and earnings | Tempo Docs"
+description: "Read Earn positions, show their asset value, and distinguish earnings from deposits and withdrawals."
+---
+
+# Balances and earnings
+
+Show the asset value of a user's position as their earning balance. Keep the share count available for accounting, and show pending withdrawals separately.
+
+## Read a position
+
+Use `GET /v1/earn/addresses/{address}/positions` to list an account's positions, or `GET /v1/earn/vaults/{vaultId}/positions/{address}` for one vault. Keep `chainId` consistent with the network used for the deposit.
+
+The single-position response includes `shareBalance`, `value`, and `valueToken`. Format the asset value using the token's decimals. Shares represent a position; their count is not an equal amount of stablecoins.
+
+For public-chain data, these endpoints support anonymous reads. Use [API authentication](/docs/api/authentication) for dedicated quotas; an API key requires `data:read` access.
+
+## Distinguish earnings from balance changes
+
+Use `GET /v1/earn/vaults/{vaultId}/earnings/{address}` for earnings over a selected period. Deposits, withdrawals, and share transfers change a balance without being earnings. When the response reports `status: incomplete_cost_basis`, show earnings as unavailable, rather than zero.
+
+## Show rates and rewards accurately
+
+Vault responses can include an `apy` object with observed vault yield, reward information, and a measurement window. It can be `null` when no component is measurable. Display unavailable data as unavailable, rather than as zero.
+
+Request account-specific APY from the [position endpoint](/docs/api/earn#getearnvaultposition) when showing a user's effective rate. Reward qualification can lag a new deposit or transfer, and an eligible boost does not mean the whole balance qualifies. Keep temporary reward terms separate from observed vault yield.
+
+For charts, use the [share-price history endpoint](/docs/api/earn#getearnvaultshareprices) for vault share prices and the [earnings endpoint](/docs/api/earn#getearnvaultearnings) for an account's earnings. Label each chart for the metric it shows.
+
+## Read private positions
+
+Account position listing supports private Zones, but its optional earnings data is unavailable for those positions. Check endpoint support before reusing the public-account earnings view. See [private Earn tracking](/docs/earn/integrate#track-private-earn-activity).
+
+For schema details, see the [Earn API](/docs/api/earn).

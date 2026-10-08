@@ -1,0 +1,27 @@
+---
+title: "Private balances and activity"
+seoTitle: "Private balances and activity | Tempo Docs"
+description: "Read token balances and filtered activity through an authenticated Zone RPC connection."
+---
+
+# Private balances and activity
+
+Read private account data through the [authenticated Zone connection](/docs/zones/connect). Build the user's balance and activity views from account-scoped responses.
+
+## Read a token balance
+
+Use the Zone token's `balanceOf` through `eth_call`. The RPC executes the call as the authenticated account, and execution-level privacy restricts which balances can be read. Do not substitute `eth_getBalance` for a token balance query.
+
+An empty, zero, or `null` response about another account does not establish that it has no balance or activity. Some restricted reads return silent values to avoid exposing another account's data. See [method access control](/docs/protocol/zones/rpc#method-access-control).
+
+## Read account activity
+
+Use account-scoped `eth_getLogs` filters or log subscriptions for supported token events. Filters must identify the authenticated account in the appropriate indexed topic; broad filters are rejected. Query incoming and outgoing transfers separately, as described in [event filtering](/docs/protocol/zones/rpc#event-filtering).
+
+Transaction and receipt reads are scoped to the sender. To verify an incoming deposit, use the recipient's permitted token events and balance reads rather than relying on access to the sender's receipt.
+
+## Preserve the privacy boundary
+
+Keep cached responses and history tied to the authenticated user in your own application. Do not place private activity in shared logs or a public explorer link. Public deposit and withdrawal records remain visible on Tempo.
+
+When displaying funds returning to Tempo, follow [Withdraw funds](/docs/zones/withdraw). A submitted Zone transaction and a completed public delivery are different stages.

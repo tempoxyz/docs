@@ -1,0 +1,27 @@
+---
+title: "How Earn works"
+seoTitle: "How Earn works | Tempo Docs"
+description: "Understand vaults, shares, and how deposits become earning positions."
+---
+
+# How Earn works
+
+Earn sits between your app and the providers that generate yield. Your app works with a vault; an **engine** connects that vault to the underlying strategy. This keeps the integration model consistent as you add providers.
+
+| Component | Role |
+| --- | --- |
+| **Vault** | Pools deposits and accounts for users' positions. |
+| **Engine** | Connects the vault to a lending market, managed vault, or liquidity pool. |
+| **Earn shares** | TIP-20 tokens that represent a user's position and are held in their account. |
+
+A deposit gives the user shares. The value of those shares changes with the underlying strategy's returns, losses, and fees. Your app displays the shares' current asset value as the earning balance; one share is not necessarily worth one stablecoin.
+
+The [Earn API](/docs/api/earn) exposes the vault's engine, share token, accepted asset, accounting state, and supported operations.
+
+## Keep value and liquidity separate
+
+A position's value can change with returns, losses, and fees. It is not necessarily the amount that can be withdrawn immediately. Read the vault's supported withdrawal methods and current terms before showing funds as available to withdraw.
+
+A vault's `verified` flag identifies a curated listing, not a guarantee of return or a description of the strategy's risk. [Choose a vault](/docs/earn/vaults) based on its accepted asset, access rules, strategy, and withdrawal behavior.
+
+Continue with [Deposit funds](/docs/earn/integrate), then [show balances and earnings](/docs/earn/balances).

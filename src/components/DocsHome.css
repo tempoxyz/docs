@@ -156,10 +156,19 @@
   margin-top: 10px;
 }
 
-.tempo-docs-home :is(li, p)[data-v] a[data-v] {
+.tempo-docs-home li[data-v] a[data-v] {
   color: var(--home-ink);
   font-weight: 400;
   text-decoration: none;
+}
+
+.tempo-docs-home p[data-v] a[data-v] {
+  color: var(--accent-blue);
+  font-weight: 400;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent-blue) 40%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
 .tempo-docs-home .tempo-docs-home-reference {
@@ -354,19 +363,6 @@
   color: var(--home-ink);
 }
 
-.tempo-agent-start .tempo-agent-start-copy-primary {
-  min-height: 36px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: var(--home-ink);
-  color: var(--vocs-background-color-primary);
-}
-
-.tempo-agent-start .tempo-agent-start-copy-primary:hover {
-  color: var(--vocs-background-color-primary);
-  opacity: 0.8;
-}
-
 .tempo-agent-start .tempo-agent-start-copy svg {
   width: 14px;
   height: 14px;
@@ -378,25 +374,6 @@
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, var(--home-ink) 35%, transparent);
   text-underline-offset: 3px;
-}
-
-.tempo-agent-start .tempo-agent-start-task {
-  margin-top: 20px;
-  padding-top: 18px;
-  border-top: 1px solid var(--home-line);
-}
-
-.tempo-agent-start .tempo-agent-start-prompt-box {
-  margin-top: 12px;
-  padding-left: 14px;
-  border-left: 2px solid var(--home-line);
-}
-
-.tempo-agent-start .tempo-agent-start-prompt {
-  margin: 0;
-  color: var(--home-ink);
-  font-size: 14px;
-  line-height: 1.65;
 }
 
 .tempo-agent-start .tempo-agent-start-footer {

@@ -1,6 +1,7 @@
 ---
-title: Use virtual addresses for deposits
-description: Register a virtual-address master, derive deposit addresses offchain, and watch TIP-20 deposits land directly in the registered wallet.
+title: Customer deposit addresses
+seoTitle: Customer Deposit Addresses on Tempo | Tempo Docs
+description: Give each customer a virtual deposit address, receive TIP-20 payments in one account, and attribute deposits through transfer events.
 interactive: true
 ---
 
@@ -10,11 +11,15 @@ import { VirtualAddressesFastDemo } from '../../../../components/guides/VirtualA
 import { VirtualAddressesLiveDemo } from '../../../../components/guides/VirtualAddressesLiveDemo.tsx'
 import { MermaidDiagram } from '../../../../components/MermaidDiagram'
 
-# Use virtual addresses for deposits
+<span id="use-virtual-addresses-for-deposits" />
 
-Virtual addresses let you issue a distinct deposit address for each customer without creating a separate onchain TIP-20 balance for each one. The deposit is attributed to the virtual address, but the balance is credited directly to the registered master wallet.
+# Customer deposit addresses
 
-This page is intentionally about the operator flow rather than the spec. In preview environments the demo may run against pre-release infrastructure, but the flow is the same one operators will use on public testnet.
+Give each customer a distinct deposit address while receiving TIP-20 payments in one registered account. These virtual addresses preserve customer attribution in transfer events; they do not hold separate customer balances.
+
+Virtual addresses receive payments on Tempo. To accept deposits from another network, use [Routes deposit addresses](/docs/routes#accept-deposits-from-external-wallets).
+
+The demo may use pre-release infrastructure in preview environments.
 
 ## How virtual address deposits work
 

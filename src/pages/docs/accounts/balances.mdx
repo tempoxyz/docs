@@ -1,0 +1,75 @@
+---
+title: "Balances and activity"
+seoTitle: "Read Tempo Account Balances and Activity | Tempo Docs"
+description: Read TIP-20 token balances, format amounts, and use account activity to explain changes in stablecoin holdings.
+---
+
+import { OpenApi } from 'vocs'
+
+# Balances and activity
+
+Read stablecoin balances from their token contracts and use account activity to show deposits, payments, and other changes.
+
+## Read a stablecoin balance
+
+This example reads AlphaUSD on Moderato testnet. Set `TEMPO_ACCOUNT_ADDRESS` to the address you want to inspect.
+
+```bash
+pnpm add viem
+```
+
+```ts [balance.ts]
+import { createPublicClient, erc20Abi, formatUnits, getAddress, http } from 'viem'
+import { tempoModerato } from 'viem/chains'
+
+const accountAddress = process.env.TEMPO_ACCOUNT_ADDRESS
+if (!accountAddress) throw new Error('Set TEMPO_ACCOUNT_ADDRESS')
+
+const account = getAddress(accountAddress)
+const token = '0x20c0000000000000000000000000000000000001'
+const client = createPublicClient({
+  chain: tempoModerato,
+  transport: http(),
+})
+
+const [balance, decimals, symbol] = await Promise.all([
+  client.readContract({
+    address: token,
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: [account],
+  }),
+  client.readContract({
+    address: token,
+    abi: erc20Abi,
+    functionName: 'decimals',
+  }),
+  client.readContract({
+    address: token,
+    abi: erc20Abi,
+    functionName: 'symbol',
+  }),
+])
+
+console.log(`${formatUnits(balance, decimals)} ${symbol}`)
+```
+
+Identify the token by its network and contract address. Keep amounts in integer base units for transactions and convert them for display.
+
+## Query balances across tokens
+
+Click **Try**, enter the account's public address, and set `chainId` to the network you want to inspect. The API returns token balances without requiring a wallet connection or signing key.
+
+<OpenApi.Playground operationId="getAddressBalances" hideQueryParams anchors={false} />
+
+## Explain changes in a balance
+
+Use [account activity](/docs/api/activities) for history and [transfers](/docs/api/transfers) for individual token movements. One transaction can produce several transfers.
+
+Keep the token, amount, sender, recipient, and transaction hash together in your application records. Link activity to the [transaction](/docs/api/transactions) when a user needs its status or execution details.
+
+For payment confirmation and reconciliation, follow [Receive a payment](/docs/guide/payments/accept-a-payment#verify-stablecoin-payments).
+
+## Show balances that users can spend
+
+Use TIP-20 balances for spendable stablecoins. Tempo's `eth_getBalance` response is a [compatibility value](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks). Show [Earn positions](/docs/earn) and [Zone balances](/docs/zones) separately.

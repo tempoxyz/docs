@@ -108,4 +108,29 @@ import Shared from '../snippets/shared.mdx'
 
     expect(checkInternalAnchors(directory)).toMatchObject({ linksChecked: 0, failures: [] })
   })
+
+  it('checks links into and out of nested getting-started pages', () => {
+    const directory = pages({
+      'get-started.mdx': '[Tokens](/get-started/stablecoins#token-amounts)\n',
+      'get-started/stablecoins.mdx':
+        '## Token amounts\n[Payment](/docs/payments#send)\n[Same](#token-amounts)\n[Missing](#old-heading)\n',
+      'docs/payments.mdx':
+        '## Send\n[Tokens](/developers/get-started/stablecoins#token-amounts)\n[Stale](/get-started/stablecoins#old-heading)\n',
+    })
+
+    expect(checkInternalAnchors(directory)).toMatchObject({
+      pagesChecked: 3,
+      linksChecked: 6,
+      failures: [
+        expect.objectContaining({
+          href: '/get-started/stablecoins#old-heading',
+          targetRoute: '/get-started/stablecoins',
+        }),
+        expect.objectContaining({
+          href: '#old-heading',
+          targetRoute: '/get-started/stablecoins',
+        }),
+      ],
+    })
+  })
 })

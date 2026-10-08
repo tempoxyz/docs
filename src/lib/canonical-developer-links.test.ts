@@ -84,9 +84,22 @@ describe('canonicalizeGeneratedDeveloperLinks', () => {
       '<a href="/docsify">Docsify</a>',
       '<a href="#section">Section</a><a href="">Current page</a>',
       '{"to":"/get-started","path":"/"}',
+      '<a href="/get-started-extra">Unrelated route</a>',
+      '{"to":"/get-started/stablecoins","path":"/get-started/stablecoins"}',
       '[External](https://example.com/docs)',
     ].join('\n')
 
     expect(canonicalizeGeneratedDeveloperLinks(content, publicDevelopersUrl)).toBe(content)
+  })
+
+  test('canonicalizes nested getting-started links on both route mounts', () => {
+    expect(
+      canonicalizeGeneratedDeveloperLinks(
+        '<a href="/get-started/stablecoins?ref=nav#token-amounts">Tokens</a> [Tokens](/developers/get-started/stablecoins#token-amounts)',
+        publicDevelopersUrl,
+      ),
+    ).toBe(
+      '<a href="https://tempo.xyz/developers/get-started/stablecoins?ref=nav#token-amounts">Tokens</a> [Tokens](https://tempo.xyz/developers/get-started/stablecoins#token-amounts)',
+    )
   })
 })

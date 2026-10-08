@@ -60,7 +60,28 @@ const earn = scene(
   ].join(''),
 )
 
+const payments = scene(
+  {
+    title: 'A stablecoin payment receipt',
+    description: 'Illustrative payment receipt showing 25 OUSD received with the reference Invoice 1042.',
+  },
+  [
+    box(40, 40, 400, 280, 32, ink.subtle),
+    text(80, 84, 'Payment received', { size: 16, fill: ink.secondary }),
+    path('M367 73l8 8 16-18', ink.black, 1.5),
+    text(80, 139, '25.00 OUSD', { size: 32, tracking: -0.32 }),
+    text(80, 182, 'From', { size: 14, fill: ink.secondary }),
+    text(400, 182, '0x84a2…f19c', { size: 14, mono: true, anchor: 'end' }),
+    text(80, 216, 'To', { size: 14, fill: ink.secondary }),
+    text(400, 216, '0x7b31…92e4', { size: 14, mono: true, anchor: 'end' }),
+    path('M80 242H400', ink.divider),
+    text(80, 280, 'Reference', { size: 14, fill: ink.secondary }),
+    text(400, 280, 'Invoice 1042', { size: 16, anchor: 'end' }),
+  ].join(''),
+)
+
 export const interfaceScenes = {
   accounts,
   earn,
+  payments,
 }

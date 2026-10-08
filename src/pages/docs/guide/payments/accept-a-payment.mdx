@@ -1,7 +1,7 @@
 ---
-title: "How to receive stablecoin payments"
+title: "Receive a payment"
 seoTitle: "Receive Stablecoin Payments | Tempo Docs"
-description: Accept stablecoin payments in your application. Verify transactions, listen for transfer events, and reconcile payments using memos.
+description: Verify incoming stablecoin transfers, confirm delivery to your account, and match payments to customers and invoices.
 interactive: true
 ---
 
@@ -11,15 +11,17 @@ import { Connect } from '../../../../components/guides/steps/auth/Connect.tsx'
 import * as Token from '../../../../components/guides/tokens'
 import { Tabs, Tab } from 'vocs'
 
-# How to receive stablecoin payments
+<span id="how-to-receive-stablecoin-payments" />
 
-Accept stablecoin payments in your application. Learn how to receive payments, verify transactions, and reconcile payments using memos.
+# Receive a payment
+
+Receive stablecoins at a Tempo account, confirm the token and amount delivered, and match the transfer to your payment records. Use [payment references](/docs/guide/payments/transfer-memos) for invoices or [customer deposit addresses](/docs/guide/payments/virtual-addresses) to identify who paid.
 
 ## Receive stablecoin payments
 
-Payments are automatically credited to the recipient's address when a transfer is executed. You don't need to do anything special to "accept" a payment, it happens automatically onchain.
+Share your account address with the sender, then read the incoming transfer events to confirm receipt.
 
-In this basic receiving demo you can see the balances update after you add funds to your account, using the `getBalance` and `watchEvent` calls documented below.
+This demo funds a test account and displays its token balances. The examples below use AlphaUSD on Moderato testnet. Configure your client or `RPC_URL` / `TEMPO_RPC_URL` for `https://rpc.moderato.tempo.xyz`; use an account you control as the recipient.
 
 <Demo.Container name="Receive a Payment" footerVariant="balances" tokens={[Token.alphaUsd, Token.betaUsd, Token.thetaUsd]} src="tempoxyz/examples/tree/main/examples/payments">
   <Connect stepNumber={1} />
@@ -28,7 +30,11 @@ In this basic receiving demo you can see the balances update after you add funds
 
 ## Verify stablecoin payments
 
-Check if a payment has been received by querying the token balance or listening for transfer events:
+Use the account balance to display available funds. To verify a payment, match the network, token contract, recipient, and amount in its confirmed transfer events to your payment record.
+
+The event examples below read activity for a token contract. Filter by recipient and use the transaction hash and log index to process each payment once. For virtual addresses, follow the [deposit attribution flow](/docs/guide/payments/virtual-addresses#what-to-verify-in-virtual-address-deposits).
+
+For payments held by a receive policy, see [Handle blocked receipts](/docs/guide/payments/configure-receive-policies#monitor-blocked-receipts).
 
 ### Check receiver token balance
 
@@ -115,7 +121,8 @@ Check if a payment has been received by querying the token balance or listening 
     ```python [provider.py]
     from web3 import Web3
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz"))
+    assert w3.eth.chain_id == 42431, "Expected Moderato testnet"
     ```
 
     :::
@@ -299,7 +306,8 @@ Check if a payment has been received by querying the token balance or listening 
     ```python [provider.py]
     from web3 import Web3
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz"))
+    assert w3.eth.chain_id == 42431, "Expected Moderato testnet"
     ```
 
     :::
@@ -371,41 +379,89 @@ Check if a payment has been received by querying the token balance or listening 
 
 ## Payment Reconciliation with Memos
 
-If payments include memos (invoice IDs, order numbers, etc.), you can reconcile them automatically:
+Match the memo to an invoice, then verify its token, recipient, and amount in the confirmed receipt.
+
+The TypeScript example verifies one payment of 10 AlphaUSD to a regular account on Moderato. Replace its expected values with your invoice details and set `PAYMENT_TX_HASH` to the submitted transaction hash. Other language examples below show how to read memo events; apply the same checks before settling an invoice.
+
+To prevent duplicate credit, store the event key with a unique constraint and update the invoice in the same database transaction. If that event key was already processed, make no balance change. An invoice already paid must not be fulfilled again, even if a different transfer arrives with the same memo.
 
 <Tabs stateKey="library">
   <Tab title="Viem">
 
     :::code-group
 
-    ```ts [example.ts]
-    import { client } from './viem.config'
+    ```ts [verify-payment.ts]
+    import {
+      createPublicClient,
+      http,
+      parseAbiItem,
+      parseEventLogs,
+      parseUnits,
+      stringToHex,
+    } from 'viem'
+    import { tempoModerato } from 'viem/chains'
 
-    // Watch for TransferWithMemo events
-    const unwatch = client.watchEvent({
-      address: '0x20c0000000000000000000000000000000000001',
-      event: {
-        type: 'event',
-        name: 'TransferWithMemo',
-        inputs: [
-          { name: 'from', type: 'address', indexed: true },
-          { name: 'to', type: 'address', indexed: true },
-          { name: 'value', type: 'uint256' },
-          { name: 'memo', type: 'bytes32', indexed: true },
-        ],
-      },
-      onLogs: (logs) => { // [!code focus]
-        logs.forEach((log) => { // [!code focus]
-          const invoiceId = log.args.memo // [!code focus]
-          // Mark invoice as paid in your database // [!code focus]
-          markInvoiceAsPaid(invoiceId, log.args.value) // [!code focus]
-        }) // [!code focus]
-      }, // [!code focus]
+    const client = createPublicClient({
+      chain: tempoModerato,
+      transport: http(),
     })
-    ```
+    const expected = {
+      token: '0x20c0000000000000000000000000000000000001',
+      recipient: '0x742d35cc6634c0532925a3b844bc9e7595f0bebb',
+      amount: parseUnits('10', 6),
+      memo: stringToHex('invoice-001', { size: 32 }),
+    }
 
-    ```ts [viem.config.ts]
-    // [!include ~/snippets/viem.config.ts:setup]
+    const hash = process.env.PAYMENT_TX_HASH
+    if (!hash || !/^0x[0-9a-fA-F]{64}$/.test(hash)) {
+      throw new Error('Set PAYMENT_TX_HASH to the payment transaction hash')
+    }
+    if (await client.getChainId() !== tempoModerato.id) {
+      throw new Error('Expected Moderato testnet')
+    }
+
+    const receipt = await client.waitForTransactionReceipt({
+      hash: hash as `0x${string}`,
+    })
+    if (receipt.status !== 'success') throw new Error('Payment transaction failed')
+
+    const tokenLogs = receipt.logs.filter(
+      (log) => log.address.toLowerCase() === expected.token,
+    )
+    const payments = parseEventLogs({
+      abi: [parseAbiItem(
+        'event TransferWithMemo(address indexed from, address indexed to, uint256 amount, bytes32 indexed memo)',
+      )],
+      logs: tokenLogs,
+      strict: true,
+    }).filter((log) =>
+      log.args.to.toLowerCase() === expected.recipient &&
+      log.args.amount === expected.amount &&
+      log.args.memo === expected.memo,
+    )
+
+    if (payments.length !== 1) {
+      throw new Error('Expected one transfer matching the invoice')
+    }
+
+    const payment = payments[0]
+    const deliveries = parseEventLogs({
+      abi: [parseAbiItem(
+        'event Transfer(address indexed from, address indexed to, uint256 amount)',
+      )],
+      logs: tokenLogs,
+      strict: true,
+    }).filter((log) =>
+      log.args.from.toLowerCase() === payment.args.from.toLowerCase() &&
+      log.args.to.toLowerCase() === expected.recipient &&
+      log.args.amount === expected.amount,
+    )
+    if (deliveries.length !== 1) {
+      throw new Error('Expected one delivery to the invoice recipient')
+    }
+
+    const eventKey = `${tempoModerato.id}:${receipt.transactionHash}:${deliveries[0].logIndex}`
+    console.log('Verified payment:', { eventKey, memo: expected.memo })
     ```
 
     :::
@@ -489,7 +545,8 @@ If payments include memos (invoice IDs, order numbers, etc.), you can reconcile 
     ```python [provider.py]
     from web3 import Web3
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz"))
+    assert w3.eth.chain_id == 42431, "Expected Moderato testnet"
     ```
 
     :::
@@ -564,41 +621,21 @@ If payments include memos (invoice IDs, order numbers, etc.), you can reconcile 
 
 ## Smart Contract Integration
 
-If you're building a smart contract that accepts payments:
+When a contract collects payment with `transferFrom`, require delivery before fulfilling the invoice:
 
-```solidity
-contract PaymentReceiver {
-    ITIP20 public token;
-    mapping(bytes32 => bool) public paidInvoices;
-    
-    event PaymentReceived(
-        address indexed payer,
-        uint256 amount,
-        bytes32 indexed invoiceId
-    );
-    
-    function receivePayment(
-        address payer,
-        uint256 amount,
-        bytes32 invoiceId
-    ) external {
-        require(!paidInvoices[invoiceId], "Invoice already paid");
-        
-        // Transfer tokens from payer to this contract
-        token.transferFrom(payer, address(this), amount);
-        
-        paidInvoices[invoiceId] = true;
-        emit PaymentReceived(payer, amount, invoiceId);
-    }
-}
-```
+- Read the expected token, payer, and amount from the invoice record, and reject an invoice that is already paid.
+- Check that the payer authorized the payment and approved the required token allowance.
+- Read the contract’s token balance before and after `transferFrom`. Require the expected increase before updating the invoice or delivering the purchased item.
+- Revert if the expected funds did not arrive.
+
+See the [TIP-20 contract interface](/docs/protocol/tip20/spec#tip20) and [receive-policy behavior](/docs/guide/payments/configure-receive-policies#understand-receive-policy-behavior) before implementing settlement.
 
 ## Payment Verification Best Practices
 
-1. **Verify onchain**: Always verify payments onchain before marking orders as paid
-2. **Use memos**: Request memos from payers to link payments to invoices or orders
-3. **Check confirmations**: Wait for transaction finality (~1 second on Tempo) before processing
-4. **Handle edge cases**: Account for partial payments, refunds, and failed transactions
+- Verify the token contract, recipient, and amount in confirmed transfer events before marking an order paid.
+- Match a memo or customer deposit address to the expected payment record.
+- Store the transaction hash and log index to avoid processing the same event twice.
+- Handle partial payments, refunds, blocked receipts, and failed transactions explicitly.
 
 ## Cross-Stablecoin Payments
 

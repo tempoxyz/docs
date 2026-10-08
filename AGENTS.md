@@ -9,6 +9,12 @@ Vocs-powered documentation site for Tempo protocol. Use this guidance when creat
 - Do not make protocol, API, chain, fee, or token claims without checking repo source docs first.
 - Prefer small, scoped docs changes that preserve existing URLs, anchors, and sidebar organization.
 
+## Audience
+
+- Write for CTOs and staff software engineers integrating stablecoins into payment, payroll, remittance, or financial products.
+- Start with their integration decisions and workflows, then explain the signing methods, APIs, and protocol mechanics needed to implement them.
+- Use product plans to understand intent and positioning. Verify availability separately; do not describe planned capabilities as live features.
+
 ## Source of Truth
 
 Use repo-local sources first:
@@ -66,7 +72,9 @@ Before finishing docs-only changes, run at least `pnpm check:types` when practic
 4. Preserve old deep links with explicit anchors when renaming headings:
 
    ```mdx
-   ## Tempo API pagination modes {#modes}
+   <span id="modes" />
+
+   ## Tempo API pagination modes
    ```
 
 5. Verify with `pnpm check:types` and `pnpm build` when navigation, imports, MDX syntax, or components changed.

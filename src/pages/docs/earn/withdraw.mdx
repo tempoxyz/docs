@@ -1,0 +1,47 @@
+---
+title: "Withdraw funds"
+seoTitle: "Withdraw funds | Tempo Docs"
+description: "Request an Earn withdrawal, distinguish immediate and queued redemption, and confirm funds reach the account."
+---
+
+# Withdraw funds
+
+Withdraw through the selected vault's supported contract interface. The Earn API reads positions and capabilities; it does not submit a withdrawal for the user.
+
+## Check liquidity and withdrawal support
+
+A vault uses available cash or liquidity from its underlying venue for redemptions. When liquidity is unavailable, withdrawals may enter a queue.
+
+Keep three amounts distinct in your app:
+
+| Amount | What to show |
+| --- | --- |
+| **Position value** | The current asset value of the user's shares. |
+| **Available to withdraw** | The amount available through the vault's supported withdrawal path and a current quote. |
+| **Pending withdrawal** | An exit requested but not yet delivered to the destination account. |
+
+Read `capabilities.redeem` and `capabilities.asyncRedeem` to distinguish immediate and queued redemption support. The vault's `instantLiquidity` reports liquidity across the vault, not a user-specific withdrawal quote; `null` means a reliable value is unavailable. Recheck the withdrawal path when the user submits a request.
+
+## Request and confirm a withdrawal
+
+:::::steps
+
+### Get current withdrawal terms
+
+Use the provider's supported interface to quote the withdrawal. Show the output asset, amount, fees, destination, and whether settlement is immediate or queued before requesting the user's authorization.
+
+### Submit the withdrawal
+
+Request the required signature and submit through that interface. Save the transaction and any withdrawal identifier returned by the provider. If it enters a queue, keep the amount separate from available stablecoins.
+
+### Confirm destination receipt
+
+Track the transaction and any later settlement. Keep the withdrawal pending until the destination receives funds, then refresh the position and stablecoin balance. Use the [transaction and transfer model](/docs/api/transactions-and-transfers) to distinguish execution from delivery.
+
+:::::
+
+## Pay with withdrawn funds
+
+Once the withdrawn stablecoins reach the account, you can [send a payment](/docs/guide/payments/send-a-payment).
+
+For private balances, use a vault that supports [Zone routing](/docs/zones) and check its route configuration. Public and private positions have different accounting and tracking requirements; see the [integration guide](/docs/earn/integrate#track-private-earn-activity).

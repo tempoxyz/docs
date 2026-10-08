@@ -1,4 +1,5 @@
 import ArrowLeftRightIcon from '~icons/lucide/arrow-left-right'
+import SendIcon from '~icons/lucide/send'
 import BotIcon from '~icons/lucide/bot'
 import LockKeyholeIcon from '~icons/lucide/lock-keyhole'
 import TrendingUpIcon from '~icons/lucide/trending-up'
@@ -6,6 +7,7 @@ import WalletIcon from '~icons/lucide/wallet'
 
 const icons = {
   accounts: WalletIcon,
+  payments: SendIcon,
   earn: TrendingUpIcon,
   agents: BotIcon,
   zones: LockKeyholeIcon,

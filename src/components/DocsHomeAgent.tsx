@@ -45,34 +45,32 @@ const agents = [
 ] as const
 
 type Agent = (typeof agents)[number]['id']
-type CopyTarget = 'command' | 'prompt'
 type CopyState = 'copied' | 'error'
 
-export function DocsHomeAgent({ prompt }: { prompt: string }) {
+export function DocsHomeAgent() {
   const [mounted, setMounted] = useState(false)
   const [agent, setAgent] = useState<Agent>('codex')
-  const [copyStates, setCopyStates] = useState<Partial<Record<CopyTarget, CopyState>>>({})
+  const [copyState, setCopyState] = useState<CopyState | null>(null)
   const activeAgent = agents.find((item) => item.id === agent) ?? agents[0]
   const commands = tempoAgentSetupCommands[agent]
   const multipleCommands = commands.includes('\n')
   const copyLabel = multipleCommands ? 'Copy commands' : 'Copy command'
-  const conversationLabel = agent === 'other' ? 'agent' : activeAgent.label
 
   useEffect(() => setMounted(true), [])
 
-  async function copy(value: string, target: CopyTarget) {
+  async function copyCommands() {
     try {
-      await navigator.clipboard.writeText(value)
-      setCopyStates((previous) => ({ ...previous, [target]: 'copied' }))
+      await navigator.clipboard.writeText(commands)
+      setCopyState('copied')
     } catch {
-      setCopyStates((previous) => ({ ...previous, [target]: 'error' }))
+      setCopyState('error')
     }
   }
 
   return (
     <div className="tempo-agent-start">
       <h2>Build with your agent</h2>
-      <p>Connect your agent to Tempo docs, then build a test payment.</p>
+      <p>Connect your coding agent to Tempo documentation.</p>
 
       <fieldset className="tempo-agent-start-agents">
         <legend>Choose your coding agent</legend>
@@ -85,7 +83,7 @@ export function DocsHomeAgent({ prompt }: { prompt: string }) {
               aria-pressed={agent === id}
               onClick={() => {
                 setAgent(id)
-                setCopyStates({})
+                setCopyState(null)
               }}
             >
               {Logo ? <Logo aria-hidden="true" /> : null}
@@ -96,7 +94,7 @@ export function DocsHomeAgent({ prompt }: { prompt: string }) {
       </fieldset>
 
       <div className="tempo-agent-start-install">
-        <h3 className="tempo-agent-start-label">1. Connect Tempo docs</h3>
+        <h3 className="tempo-agent-start-label">Connect Tempo docs</h3>
         <p className="tempo-agent-start-instruction">
           {activeAgent.instruction}{' '}
           {activeAgent.installUrl ? (
@@ -121,14 +119,14 @@ export function DocsHomeAgent({ prompt }: { prompt: string }) {
               disabled={!mounted}
               className="tempo-agent-start-copy"
               aria-label={`${copyLabel} for ${activeAgent.label}`}
-              onClick={() => copy(commands, 'command')}
+              onClick={copyCommands}
             >
-              {copyStates.command === 'copied' ? (
+              {copyState === 'copied' ? (
                 <CheckIcon aria-hidden="true" />
               ) : (
                 <CopyIcon aria-hidden="true" />
               )}
-              <span>{copyStates.command === 'copied' ? 'Copied' : copyLabel}</span>
+              <span>{copyState === 'copied' ? 'Copied' : copyLabel}</span>
             </button>
           </div>
           <pre>
@@ -138,47 +136,14 @@ export function DocsHomeAgent({ prompt }: { prompt: string }) {
           </pre>
         </div>
         <p role="status" className="tempo-agent-start-feedback">
-          {copyStates.command === 'copied'
+          {copyState === 'copied'
             ? multipleCommands
               ? 'Commands copied. Paste them into your terminal and run both commands.'
               : 'Command copied. Paste it into your terminal and run it.'
-            : copyStates.command === 'error'
+            : copyState === 'error'
               ? multipleCommands
                 ? 'Copy failed. Select and copy both commands above.'
                 : 'Copy failed. Select and copy the command above.'
-              : ''}
-        </p>
-      </div>
-
-      <div className="tempo-agent-start-task">
-        <div className="tempo-agent-start-toolbar">
-          <h3 className="tempo-agent-start-label">2. Build a test payment</h3>
-          <button
-            type="button"
-            disabled={!mounted}
-            className="tempo-agent-start-copy tempo-agent-start-copy-primary"
-            aria-label="Copy prompt for first payment"
-            onClick={() => copy(prompt, 'prompt')}
-          >
-            {copyStates.prompt === 'copied' ? (
-              <CheckIcon aria-hidden="true" />
-            ) : (
-              <CopyIcon aria-hidden="true" />
-            )}
-            <span>{copyStates.prompt === 'copied' ? 'Copied' : 'Copy prompt'}</span>
-          </button>
-        </div>
-        <p className="tempo-agent-start-instruction">
-          After setup, paste this into a new {conversationLabel} conversation in your project.
-        </p>
-        <div className="tempo-agent-start-prompt-box">
-          <p className="tempo-agent-start-prompt">{prompt}</p>
-        </div>
-        <p role="status" className="tempo-agent-start-feedback">
-          {copyStates.prompt === 'copied'
-            ? `Prompt copied. Paste it into your ${conversationLabel} conversation.`
-            : copyStates.prompt === 'error'
-              ? 'Copy failed. Select and copy the prompt above.'
               : ''}
         </p>
       </div>

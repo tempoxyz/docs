@@ -29,6 +29,7 @@
 
 import { lazy, type ReactNode, Suspense } from 'react'
 import { Layout, MdxPageContext } from 'vocs'
+import DocsPageActions from '../components/DocsPageActions'
 
 const Providers = lazy(() => import('../components/Providers'))
 
@@ -36,15 +37,23 @@ export default function MDXWrapper({ children }: { children: ReactNode }) {
   const context = MdxPageContext.use()
   const frontmatter = context.frontmatter as Record<string, unknown> | undefined
   const needsProviders = Boolean(frontmatter?.interactive || frontmatter?.mipd)
+  // The toolbar inserts its portal after the introduction. Mount it inside the
+  // article's hydration boundary so it cannot change server HTML before React reads it.
+  const content = (
+    <>
+      {children}
+      <DocsPageActions key={String(frontmatter?.filePath ?? '')} />
+    </>
+  )
 
   return (
     <Layout>
       {needsProviders ? (
         <Suspense fallback={null}>
-          <Providers mipd={frontmatter?.mipd as boolean | undefined}>{children}</Providers>
+          <Providers mipd={frontmatter?.mipd as boolean | undefined}>{content}</Providers>
         </Suspense>
       ) : (
-        children
+        content
       )}
     </Layout>
   )

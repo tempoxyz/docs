@@ -52,6 +52,8 @@ const presentationOnlyElements = new Set([
 const tempoReleasesUrl = 'https://github.com/tempoxyz/tempo/releases'
 
 const interactiveDescriptions: Record<string, string> = {
+  AdminKeyDemo:
+    'In the interactive web page, create or connect a testnet passkey account, authorize an admin key, inspect its onchain status, and revoke it.',
   ConnectWallet: 'Connect a wallet in the interactive web page.',
   T7BenchmarkVisual: 'The benchmark values are listed in the table below.',
   TempoMcpExplorer: 'Use the interactive web page to try the Tempo MCP server.',
@@ -167,7 +169,7 @@ function rewriteNode(
   if (node.name === 'DocsHomeAgent')
     return [
       { type: 'heading', depth: 2, children: [text('Build with your agent')] },
-      paragraph([text('Connect your agent to Tempo docs, then build a test payment.')]),
+      paragraph([text('Connect your coding agent to Tempo documentation.')]),
       paragraph([text('Choose your coding agent and run its setup commands in your terminal.')]),
       { type: 'heading', depth: 3, children: [text('Codex')] },
       paragraph([
@@ -193,13 +195,7 @@ function rewriteNode(
       { type: 'heading', depth: 3, children: [text('Other agents')] },
       paragraph([text('Add the Tempo docs skill to a skills-compatible agent.')]),
       { type: 'code', lang: 'bash', value: tempoAgentSetupCommands.other },
-      paragraph([
-        text('After installation, open a new conversation in your project and paste this prompt:'),
-      ]),
-      {
-        type: 'blockquote',
-        children: [paragraph([text(requiredStringAttribute(node, 'prompt'))])],
-      },
+      paragraph([link('All setup options', '/docs/guide/using-tempo-with-ai')]),
     ]
   if (node.name === 'Card') return [paragraph(cardContent(node))]
   if (node.name === 'Tabs') return renderTabs(node, headingDepth, getSnippet)

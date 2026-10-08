@@ -1,0 +1,39 @@
+---
+title: "Deposit into a Zone"
+seoTitle: "Deposit into a Zone | Tempo Docs"
+description: "Lock stablecoins in a Zone portal and verify that the intended private account receives its credit."
+---
+
+# Deposit into a Zone
+
+Deposit through the Zone's portal on public Tempo, then confirm the private account is credited. First [connect to the Zone](/docs/zones/connect) and get the operator's supported encryption and contract tooling.
+
+## Submit an encrypted deposit
+
+:::::steps
+
+### Check the asset and recipient
+
+Confirm that the deployment accepts the token and that the depositor and recipient satisfy its access rules. Choose the private recipient and memo, and a public refund recipient.
+
+### Check the deposit fees
+
+Use the deployed portal's `calculateDepositFee` and `calculateBouncebackFee` helpers to determine the amount the private account can receive and the required failure coverage. Deposit fees are deducted from the amount sent. Show the expected net credit before authorization; see the [deposit fee rules](/docs/protocol/zones/execution#deposit-fees) for the exact calculation.
+
+### Encrypt and authorize the deposit
+
+Use the operator's supported tooling to encrypt the private recipient and memo with the Zone's published encryption key. Approve token spending where required, then submit the encrypted deposit to `ZonePortal` on Tempo.
+
+The token, amount, depositor, and refund recipient remain public. See the [privacy model](/docs/zones/privacy).
+
+### Confirm the private credit
+
+After the public transaction finalizes, use the recipient's authenticated connection to [check the Zone credit](/docs/zones/balances). Save the public deposit reference and private credit record together.
+
+:::::
+
+## Handle deposit failures
+
+Follow the deployment's [deposit lifecycle](/docs/protocol/zones/bridging#deposits-tempo--zone) for policy failures and refunds. Confirm the eventual credit or refund before retrying a deposit.
+
+If funds start on another network, [route them to Tempo](/docs/routes) first, then deposit through the Zone portal.

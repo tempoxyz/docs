@@ -1,0 +1,43 @@
+---
+title: "Withdraw from a Zone"
+seoTitle: "Withdraw from a Zone | Tempo Docs"
+description: "Submit a Zone withdrawal, track public settlement, and distinguish delivered funds from pending refunds."
+---
+
+# Withdraw from a Zone
+
+Withdraw through the Zone's supported outbox interface, then track delivery on public Tempo. The source transaction, accepted batch, and recipient's token receipt are separate events.
+
+## Submit and track a withdrawal
+
+:::::steps
+
+### Check the destination and access rules
+
+Confirm the token, amount, public Tempo recipient, fallback recipient, and deployment restrictions with the operator's tooling. If using a callback, verify the permitted target and callback interface before requesting authorization.
+
+### Include withdrawal fees
+
+Read `calculateWithdrawalFee(gasLimit)` from the deployed outbox interface. Reserve enough balance for this fee and Zone transaction gas in addition to the amount withdrawn. See the [withdrawal fee rules](/docs/protocol/zones/execution#withdrawal-fees).
+
+### Submit through the Zone outbox
+
+Use the supported interface to submit the withdrawal through `ZoneOutbox`. Save the source transaction and identifiers needed to follow the withdrawal across the private and public networks.
+
+### Track settlement on Tempo
+
+The operator includes the withdrawal in a batch, the portal accepts the batch, and the withdrawal is processed on Tempo. Keep it pending until the destination delivery is confirmed.
+
+The hosted [Zone withdrawal status API](/docs/api/zones) can report parent-chain outcomes. Its `zoneStatus: completed` is a checkpoint signal, not proof that a refund was delivered.
+
+:::::
+
+## Handle failed delivery
+
+A failed token transfer or callback can return funds through a deposit back into the source Zone. That return also needs processing; if minting is blocked, it can leave a pending refund.
+
+Follow [withdrawal failure and bounce-back](/docs/protocol/zones/bridging#withdrawal-failure-and-bounce-back) to track the refund to the recipient.
+
+## Call a contract on Tempo
+
+Withdrawals can invoke contracts on Tempo subject to the deployment's access rules. The public operation and any later Zone credit have separate settlement stages. Use the [composable withdrawal specification](/docs/protocol/zones/bridging#composable-withdrawals) when integrating callbacks.

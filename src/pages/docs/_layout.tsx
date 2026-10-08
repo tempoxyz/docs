@@ -60,8 +60,8 @@ export default function DocsLayout(
       <DocsHeader />
       <DocsSectionNav />
       <DocsSidebarDrawer />
-      <DocsPageActions />
       {props.children}
+      <DocsPageActions openApi />
       <Suspense fallback={null}>
         {needsToaster && (
           <Toaster

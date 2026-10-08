@@ -28,6 +28,8 @@ describe('finalizeSitemap', () => {
       `${[
         '',
         '/get-started',
+        '/get-started/stablecoins',
+        '/get-started-extra',
         '/docs',
         '/build',
         '/build/tip20-tokens',
@@ -44,10 +46,12 @@ describe('finalizeSitemap', () => {
     expect(locations).toContain('https://tempo.xyz/developers/docs/api')
     expect(locations).toContain('https://tempo.xyz/developers')
     expect(locations).toContain('https://tempo.xyz/developers/get-started')
+    expect(locations).toContain('https://tempo.xyz/developers/get-started/stablecoins')
+    expect(locations).not.toContain('https://tempo.xyz/developers/get-started-extra')
     expect(locations).not.toContain('https://tempo.xyz/developers/docs')
     expect(
       locations.every((location) =>
-        /^https:\/\/tempo\.xyz\/developers(?:\/?$|\/get-started$|\/(?:docs\/|blog(?:\/|$)))/.test(
+        /^https:\/\/tempo\.xyz\/developers(?:\/?$|\/get-started(?:\/|$)|\/(?:docs\/|blog(?:\/|$)))/.test(
           location,
         ),
       ),

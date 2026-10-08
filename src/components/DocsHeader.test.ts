@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getActiveDocsSection } from '../lib/docs-sections'
+import { docsSections, getActiveDocsSection } from '../lib/docs-sections'
 import { normalizeDocsPath, resolveSidebarItems } from './DocsHeader'
 
 const sidebar = {
@@ -41,6 +41,18 @@ describe('resolveSidebarItems', () => {
 })
 
 describe('getActiveDocsSection', () => {
+  it('presents products in task order with machine payments inside Payments', () => {
+    expect(docsSections.map(({ label }) => label)).toEqual([
+      'Get Started',
+      'Accounts',
+      'Payments',
+      'Earn',
+      'Routes',
+      'Zones',
+      'Developer Resources',
+    ])
+  })
+
   it('keeps section navigation active under the developers mount and trailing slashes', () => {
     expect(getActiveDocsSection('/developers/docs/api/transfers/')?.id).toBe('development')
     expect(getActiveDocsSection('/developers/get-started/')?.id).toBe('overview')
@@ -50,29 +62,39 @@ describe('getActiveDocsSection', () => {
 
   it.each([
     ['/get-started', 'overview'],
+    ['/get-started/stablecoins', 'overview'],
     ['/docs/development', 'development'],
     ['/docs/api/console', 'development'],
     ['/docs/quickstart/evm-compatibility', 'development'],
     ['/docs/guide/using-tempo-with-ai', 'development'],
     ['/docs/quickstart/faucet', 'overview'],
     ['/docs/accounts', 'accounts'],
+    ['/docs/accounts/create', 'accounts'],
+    ['/docs/accounts/providers', 'accounts'],
+    ['/docs/accounts/access-keys', 'accounts'],
+    ['/docs/accounts/agents', 'accounts'],
+    ['/docs/payments', 'payments'],
     ['/docs/build', 'accounts'],
     ['/docs/guide/getting-funds', 'accounts'],
-    ['/docs/guide/payments/send-a-payment', 'accounts'],
-    ['/docs/guide/tempo-transaction', 'accounts'],
+    ['/docs/guide/payments/send-a-payment', 'payments'],
+    ['/docs/guide/tempo-transaction', 'payments'],
     ['/docs/quickstart/wallet-developers', 'accounts'],
     ['/docs/quickstart/tokenlist', 'accounts'],
     ['/docs/earn', 'earn'],
+    ['/docs/earn/balances', 'earn'],
+    ['/docs/earn/withdraw', 'earn'],
     ['/docs/routes', 'routes'],
+    ['/docs/routes/transfers', 'routes'],
+    ['/docs/routes/deposits', 'routes'],
     ['/docs/guide/stablecoin-dex/executing-swaps', 'routes'],
-    ['/docs/guide/bridge-layerzero', 'routes'],
-    ['/docs/guide/bridge-bungee', 'routes'],
-    ['/docs/guide/bridge-relay', 'routes'],
+    ['/docs/guide/bridge-layerzero', 'development'],
+    ['/docs/guide/bridge-bungee', 'development'],
+    ['/docs/guide/bridge-relay', 'development'],
     ['/docs/zones', 'zones'],
     ['/docs/guide/private-zones/connect-to-a-zone', 'zones'],
-    ['/docs/agents', 'agents'],
-    ['/docs/guide/machine-payments/agent', 'agents'],
-    ['/docs/guide/mercator', 'agents'],
+    ['/docs/agents', 'payments'],
+    ['/docs/guide/machine-payments/agent', 'payments'],
+    ['/docs/guide/mercator', 'payments'],
     ['/docs/ecosystem', 'development'],
     ['/docs/ecosystem/wallets', 'development'],
     ['/docs/guide/ousd', 'development'],
@@ -81,11 +103,11 @@ describe('getActiveDocsSection', () => {
     ['/docs/quickstart/connection-details', 'development'],
     ['/docs/guide/issuance/create-a-stablecoin', 'protocol'],
     ['/docs/protocol/tip20/overview', 'protocol'],
-    ['/docs/guide/node/installation', 'protocol'],
+    ['/docs/guide/node/installation', 'development'],
     ['/docs/protocol/upgrades', 'changelog'],
     ['/docs/protocol/upgrades/t11', 'changelog'],
     ['/docs/protocol/upgrades/t12', 'changelog'],
-    ['/docs/guide/node/upgrade-cadence', 'changelog'],
+    ['/docs/guide/node/upgrade-cadence', 'development'],
     ['/docs/guide/node/network-upgrades', 'changelog'],
     ['/docs/changelog', 'changelog'],
     ['/docs/api/indexer-api', 'development'],

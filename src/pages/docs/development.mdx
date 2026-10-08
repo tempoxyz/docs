@@ -8,7 +8,7 @@ import { Cards, Card } from 'vocs'
 
 # Developer Resources
 
-Build, test, and operate your Tempo integration. Connect your coding agent to the docs, choose your tools, and find the references and providers your application needs.
+Choose tools for your application, connect to Tempo, and find the API references and integration partners you need.
 
 ## Set up your development tools
 
@@ -20,9 +20,9 @@ Build, test, and operate your Tempo integration. Connect your coding agent to th
     icon="lucide:bot"
   />
   <Card
-    title="Tempo API Console"
-    description="Create projects and API keys, separate environments, and review usage."
-    to="/docs/api/console"
+    title="Tempo CLI"
+    description="Manage a wallet and make paid HTTP requests from your terminal."
+    to="/docs/cli"
     icon="lucide:panels-top-left"
   />
   <Card
@@ -32,9 +32,9 @@ Build, test, and operate your Tempo integration. Connect your coding agent to th
     icon="lucide:package"
   />
   <Card
-    title="Tempo CLI"
-    description="Use Tempo Wallet, make paid HTTP requests, and run node commands."
-    to="/docs/cli"
+    title="Local development"
+    description="Run a local Tempo node to develop and test your application."
+    to="/docs/sdk/typescript/prool"
     icon="lucide:terminal"
   />
 </Cards>
@@ -49,13 +49,13 @@ Build, test, and operate your Tempo integration. Connect your coding agent to th
     icon="lucide:braces"
   />
   <Card
-    title="Network configuration"
+    title="Networks"
     description="Find RPC endpoints and chain details for mainnet and Moderato testnet."
     to="/docs/quickstart/connection-details"
     icon="lucide:network"
   />
   <Card
-    title="EVM compatibility"
+    title="EVM differences"
     description="Review the transaction, fee, and execution differences that affect your code."
     to="/docs/quickstart/evm-compatibility"
     icon="lucide:git-compare-arrows"
@@ -67,6 +67,8 @@ Build, test, and operate your Tempo integration. Connect your coding agent to th
     icon="lucide:droplets"
   />
 </Cards>
+
+Use [Tempo API Console](/docs/api/console) to create projects and API keys. The [Tempo API documentation](/docs/api) covers authentication, webhooks, request conventions, and endpoint reference.
 
 Use the [integration guide](/docs/quickstart/integrate-tempo) to connect an existing application or service. For request formats and methods, browse the [REST API](/docs/api/reference) and [JSON-RPC reference](/docs/protocol/rpc).
 
@@ -86,3 +88,7 @@ Use the [integration guide](/docs/quickstart/integrate-tempo) to connect an exis
     icon="lucide:handshake"
   />
 </Cards>
+
+## Inspect transactions and run infrastructure
+
+Use [explorers and debugging tools](/docs/ecosystem/block-explorers) to inspect transaction outcomes. If you operate your own infrastructure, start with [Run a node](/docs/guide/node) for RPC and validator setup, monitoring, and upgrades.

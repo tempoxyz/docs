@@ -1782,11 +1782,11 @@ body {
   }
 
   article[data-v-content] :is(p, li, td)[data-v] a[data-v] {
-    color: var(--foreground);
+    color: var(--accent-blue);
     font-weight: 400;
     text-decoration-line: underline;
     text-decoration-style: solid;
-    text-decoration-color: color-mix(in srgb, var(--foreground) 35%, transparent);
+    text-decoration-color: color-mix(in srgb, var(--accent-blue) 40%, transparent);
     text-decoration-thickness: 1px;
     text-underline-offset: 3px;
   }

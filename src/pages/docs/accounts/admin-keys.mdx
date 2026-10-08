@@ -1,0 +1,82 @@
+---
+title: "Manage admin keys"
+seoTitle: "Manage Tempo Admin Access Keys | Tempo Docs"
+description: Delegate key management with an admin access key, inspect its authority, and revoke it with the account's root or another admin key.
+interactive: true
+---
+
+import { Tab, Tabs } from 'vocs'
+import { AdminKeyDemo } from '../../../components/guides/AdminKeyDemo'
+
+# Manage admin keys
+
+Authorize an admin key when an application or device needs to manage an account's other keys. It can create and revoke limited keys and other admin keys. This delegated authority does not replace the account's root key or change its address.
+
+Admin keys cannot have an expiry, token budget, or call scopes. For spending within those restrictions, use a [limited access key](/docs/accounts/access-keys).
+
+## Authorize an admin key
+
+Create a test account, authorize an admin key, then revoke it. Each transaction requests your passkey confirmation.
+
+<Tabs stateKey="admin-key-example">
+<Tab title="Try it">
+
+<AdminKeyDemo />
+
+</Tab>
+<Tab title="TypeScript">
+
+Use a funded root account on Moderato testnet for this example. Install Viem with `pnpm add viem` and set `TEMPO_ROOT_PRIVATE_KEY` to that test account's private key in your local environment. Run the code in a server or local script.
+
+```ts [admin-key.ts]
+import { tempoModerato } from 'viem/chains'
+import { Account, createClient, P256 } from 'viem/tempo'
+
+const privateKey = process.env.TEMPO_ROOT_PRIVATE_KEY
+if (!privateKey || !/^0x[0-9a-fA-F]{64}$/.test(privateKey)) {
+  throw new Error('Set TEMPO_ROOT_PRIVATE_KEY to a test account private key')
+}
+
+const root = Account.fromSecp256k1(privateKey as `0x${string}`)
+const client = createClient({
+  account: root,
+  chain: tempoModerato,
+  feeToken: '0x20c0000000000000000000000000000000000001',
+})
+const adminKey = Account.fromP256(P256.randomPrivateKey(), { access: root })
+
+await client.accessKey.authorizeSync({
+  accessKey: adminKey,
+  admin: true,
+})
+
+console.log(await client.accessKey.isAdmin({ accessKey: adminKey })) // true
+
+// End this demonstration by removing the temporary admin key.
+await client.accessKey.revokeSync({ accessKey: adminKey })
+console.log(await client.accessKey.isAdmin({ accessKey: adminKey })) // false
+```
+
+The example revokes its temporary key before exiting. For ongoing access, retain the key in secure storage and expose revocation in your account UI.
+
+</Tab>
+</Tabs>
+
+## Use admin authority for key management
+
+The root key or an active admin key can:
+
+- Authorize limited access keys and other admin keys.
+- Revoke keys, including admin keys.
+- Update a limited key's token spending limit.
+- Add, change, or remove allowed-call scopes for a limited key.
+
+Show admin status in your account UI. The `isAdmin` check returns `true` for both the root key and active admin keys. See [access-key restrictions](/docs/accounts/access-keys) for the full permission model.
+
+## Remove or replace an admin key
+
+Have the root or another active admin key revoke the old key and wait for confirmation. Revocation is permanent for that key ID on the account. Authorize a newly generated key if you need a replacement.
+
+Review the keys that administrator previously authorized; those grants remain active after its revocation.
+
+Use the [Account Keychain specification](/docs/protocol/transactions/AccountKeychain) for the ABI and [admin signature verification](/docs/protocol/upgrades/t6#for-admin-access-keys) for contract checks.

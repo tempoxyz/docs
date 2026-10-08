@@ -1,0 +1,46 @@
+---
+title: "Connect to a Zone"
+seoTitle: "Connect to a Zone | Tempo Docs"
+description: "Get deployment details, authenticate private account access, and keep public Tempo and Zone clients separate."
+---
+
+# Connect to a Zone
+
+Start with access to a specific Zone deployment. Get its configuration from the operator or [contact Tempo](https://tempo.xyz/contact). A Zone uses its own network and chain ID; it is not a privacy setting on a public Tempo account.
+
+## Configure the Zone connection
+
+:::::steps
+
+### Get the deployment details
+
+Ask for the RPC endpoint, chain ID, portal address, enabled assets, supported SDK or contract interfaces, and endpoint access credentials. Confirm the rules for depositors, withdrawal recipients, refunds, and callbacks.
+
+### Authenticate the account
+
+For account-scoped Zone RPC, sign an authorization token with the account key and send it in the `X-Authorization-Token` header on every request. This token is separate from credentials required to reach the endpoint.
+
+Use the deployment's signing tooling and follow the [authorization token format](/docs/protocol/zones/rpc#authorization-tokens) for domain separation, chain ID, issuance, and expiry. Renew credentials before they expire.
+
+### Confirm the network
+
+Set `ZONE_RPC_URL` to the deployment's endpoint and `ZONE_AUTH_TOKEN` to the signed token from the previous step. Read the chain ID:
+
+```bash
+curl "$ZONE_RPC_URL" \
+  --header "Content-Type: application/json" \
+  --header "X-Authorization-Token: $ZONE_AUTH_TOKEN" \
+  --data '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}'
+```
+
+Compare the returned chain ID with the operator-provided configuration. Keep separate clients for public Tempo and the Zone. Use the correct chain ID when preparing signatures and calls.
+
+:::::
+
+## Check supported operations
+
+The current permissioned runtime restricts token movement to the inbox and outbox; general TIP-20 transfer calls and user contract deployment are disabled. Check the [execution rules](/docs/protocol/zones/execution) and deployment configuration before moving an existing application into a Zone.
+
+The [testnet sandbox](/docs/guide/private-zones) uses earlier interfaces and supports operations that the current permissioned runtime does not enable. Use its guides only with the named sandbox deployment.
+
+Continue with [Deposit funds](/docs/zones/deposit), then [read the private balance](/docs/zones/balances).

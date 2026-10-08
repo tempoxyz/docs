@@ -1,7 +1,7 @@
 ---
-title: "How to send a stablecoin payment on Tempo"
-seoTitle: "Send a Stablecoin Payment on Tempo | Docs"
-description: Send stablecoin payments between accounts on Tempo. Include optional memos for reconciliation and tracking with TypeScript, Rust, or Solidity.
+title: Send a payment
+seoTitle: Send a Stablecoin Payment | Tempo Docs
+description: Send TIP-20 stablecoins between Tempo accounts, add a payment reference, and confirm delivery to the recipient.
 interactive: true
 ---
 
@@ -12,22 +12,15 @@ import { SendPayment } from '../../../../components/guides/steps/payments/SendPa
 import { Cards, Card } from 'vocs'
 import { Tabs, Tab } from 'vocs'
 
-# How to send a stablecoin payment on Tempo
+<span id="how-to-send-a-stablecoin-payment-on-tempo" />
 
-Send stablecoin payments between accounts on Tempo. Payments can include optional memos for reconciliation and tracking.
+# Send a payment
 
-:::warning[Confirm delivery, not just transaction success]
-On post-T6 networks, a blocked TIP-20 `transfer` / `transferFrom` still succeeds, but credits `ReceivePolicyGuard` at `0xB10C000000000000000000000000000000000000` instead of the intended receiver.
-
-- Before marking a payment, withdrawal, or deposit delivered, confirm the `Transfer` recipient is the intended receiver or the master wallet for its virtual address.
-- Index `ReceivePolicyGuard.TransferBlocked` so redirected funds can be surfaced and claimed later.
-
-See [Configure Receive Policies](/docs/guide/payments/configure-receive-policies).
-:::
+Send TIP-20 stablecoins to a Tempo account and confirm that the recipient receives them. Add a [payment reference](/docs/guide/payments/transfer-memos) when you need to match the transfer to an invoice or order.
 
 ## Send payment demo
 
-By the end of this guide you will be able to send payments on Tempo with an optional memo.
+Fund a test account and send a payment with an optional memo.
 
 <Demo.Container name="Send a Payment" footerVariant="source" src="tempoxyz/examples/tree/main/examples/payments">
   <Connect stepNumber={1} />
@@ -47,11 +40,9 @@ Ensure that you have set up your project with Wagmi, a Tempo chain config, and a
 - [TypeScript SDK](/docs/sdk/typescript)
 - [Wallet integration](/docs/quickstart/wallet-developers)
 
-### Add testnet stablecoin funds¹
+### Add testnet stablecoin funds
 
-Before you can send a payment, you need to fund your account. In this guide you will be sending `AlphaUSD` (`0x20c000…0001`).
-
-The built-in Tempo testnet faucet funds accounts with `AlphaUSD`.
+This guide sends `AlphaUSD` (`0x20c000…0001`) on Moderato testnet. Use the faucet to fund your test account. For mainnet funding, see [Fund an account](/docs/guide/getting-funds).
 
 <Demo.Container name="Add Funds" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd]}>
   <AddFunds stepNumber={1} last />
@@ -83,14 +74,9 @@ function AddFunds() {
 
 :::
 
-:::warning
-¹ It is important to note that the `addFunds` Hook only works on testnets as a convenience feature to get
-started quickly. For production, you will need to onramp & fund your account manually.
-:::
-
 ### Add TIP-20 transfer logic
 
-Now that you have `AlphaUSD` you are ready to add logic to send a payment with an optional memo.
+Send `AlphaUSD` to the recipient and include a memo when you need a payment reference.
 
 <Demo.Container name="Send Payment" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd]}>
   <AddFunds stepNumber={1} />
@@ -153,7 +139,7 @@ function SendPaymentWithMemo() {
 
 ### Display the payment receipt
 
-Now that you can send a payment, you can display the transaction receipt on success.
+Check the receipt’s transfer events for the expected token, amount, and recipient before recording delivery. See [Receive a payment](/docs/guide/payments/accept-a-payment#verify-stablecoin-payments) for verification code.
 
 :::code-group
 
@@ -187,8 +173,7 @@ function SendPaymentWithMemo() {
 
 ### Next steps after sending a payment
 
-Now that you have made a payment you can
-- **[Accept a payment](/docs/guide/payments/accept-a-payment)** to receive payments in your application
+- **[Receive a payment](/docs/guide/payments/accept-a-payment)** and reconcile it in your application
 - Learn about [Tempo Transactions](/docs/protocol/transactions) for batching, sponsorship, scheduling, and more
 - Send a payment [with a specific fee token](/docs/guide/payments/pay-fees-in-any-stablecoin)
 :::: 

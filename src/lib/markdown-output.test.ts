@@ -35,13 +35,15 @@ Read the account's transfer history.
     ).toHaveLength(1)
   })
 
-  test('keeps agent setup and the task prompt usable without the interactive homepage', async () => {
-    const output = await render('<DocsHomeAgent prompt="Send a testnet payment with a memo." />')
+  test('keeps agent setup usable without the interactive homepage', async () => {
+    const output = await render('<DocsHomeAgent />')
     expect(output).toContain('codex plugin add docs@tempo')
     expect(output).toContain('claude plugin install docs@tempo')
     expect(output).toContain('amp mcp add tempo https://mcp.tempo.xyz')
     expect(output).toContain('npx skills add tempoxyz/plugins --skill docs')
-    expect(output).toContain('> Send a testnet payment with a memo.')
+    expect(output).toContain('[All setup options](/docs/guide/using-tempo-with-ai)')
+    expect(output).not.toContain('test payment')
+    expect(output).not.toContain('paste this prompt')
     expect(output).not.toContain('<DocsHomeAgent')
   })
 
@@ -92,6 +94,22 @@ Read the account's transfer history.
       '[tempoxyz/examples/tree/main/examples/payments](https://github.com/tempoxyz/examples/tree/main/examples/payments)',
     )
     expect(output).not.toMatch(/<\/?[A-Z]/)
+  })
+
+  test('describes the admin key demo and preserves the following instructions', async () => {
+    const output = await render(`
+<AdminKeyDemo />
+
+## Revoke an admin key
+
+Use your root key to revoke the admin key.
+`)
+
+    expect(output).toContain('create or connect a testnet passkey account')
+    expect(output).toContain('authorize an admin key, inspect its onchain status, and revoke it')
+    expect(output).toContain('## Revoke an admin key')
+    expect(output).toContain('Use your root key to revoke the admin key.')
+    expect(output).not.toContain('<AdminKeyDemo')
   })
 
   test('keeps diagram, callout, badge, and button meaning', async () => {

@@ -1,7 +1,8 @@
 ---
-title: Attach a Transfer Memo
+title: Payment references
+seoTitle: Payment References and Transfer Memos | Tempo Docs
 interactive: true
-description: Attach 32-byte reference memos to TIP-20 transfers for payment reconciliation, invoice matching, and exchange deposit tracking on Tempo.
+description: Attach a 32-byte memo to a TIP-20 payment and use transfer events to match it to a customer, invoice, or order.
 ---
 
 import { Cards, Card } from 'vocs'
@@ -10,9 +11,11 @@ import { AddFunds } from '../../../../components/guides/steps/payments/AddFunds.
 import { Connect } from '../../../../components/guides/steps/auth/Connect.tsx'
 import { SendPaymentWithMemo } from '../../../../components/guides/steps/payments/SendPaymentWithMemo.tsx'
 
-# Attach a Transfer Memo
+<span id="attach-a-transfer-memo" />
 
-Attach 32-byte references to [TIP-20](/docs/protocol/tip20/overview) transfers for payment reconciliation. Use memos to link onchain transactions to your internal records—customer IDs, invoice numbers, or any identifier that helps you match payments to your database.
+# Payment references
+
+Attach a 32-byte memo to a [TIP-20 payment](/get-started/stablecoins) to identify an invoice, order, or customer record. Read the memo from transfer events to reconcile the payment in your application.
 
 ## Transfer memo demo
 

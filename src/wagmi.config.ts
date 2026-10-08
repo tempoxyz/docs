@@ -1,8 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import { tempoWallet, webAuthn } from '@wagmi/core/tempo'
-import { Expiry } from 'accounts'
 import * as React from 'react'
-import { parseUnits } from 'viem'
 import { tempo, tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
 import { withRelay } from 'viem/tempo'
 import {
@@ -14,7 +12,7 @@ import {
   useConnectors,
   webSocket,
 } from 'wagmi'
-import { alphaUsd, betaUsd, ousd, pathUsd, thetaUsd } from './components/guides/tokens'
+import { demoWalletAuthorization } from './lib/demo-wallet-authorization'
 import * as WebAuthnCeremony from './lib/webAuthnCeremony.ts'
 
 const feeToken = '0x20c0000000000000000000000000000000000001' as const
@@ -55,16 +53,7 @@ export function getConfig(options: getConfig.Options = {}) {
         ? [webAuthn()]
         : [
             tempoWallet({
-              authorizeAccessKey: () => ({
-                expiry: Expiry.days(1),
-                limits: [
-                  { token: ousd, limit: parseUnits('500', 6) },
-                  { token: pathUsd, limit: parseUnits('500', 6) },
-                  { token: alphaUsd, limit: parseUnits('500', 6) },
-                  { token: betaUsd, limit: parseUnits('500', 6) },
-                  { token: thetaUsd, limit: parseUnits('500', 6) },
-                ],
-              }),
+              authorizeAccessKey: demoWalletAuthorization,
               feePayer: {
                 precedence: 'user-first',
                 url: 'https://sponsor.moderato.tempo.xyz',

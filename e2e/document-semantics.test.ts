@@ -51,9 +51,15 @@ test('keeps one route title through docs and OpenAPI client navigation', async (
   await page.goto('/docs/quickstart/integrate-tempo', { waitUntil: 'networkidle' })
   await expectSingleTitle(page, 'Integrate Tempo with Apps, Wallets, and Services | Tempo Docs')
 
-  await page.getByRole('button', { name: 'APIs & SDKs', exact: true }).click()
   await page
-    .getByRole('navigation', { name: 'API and SDK resources' })
+    .getByRole('navigation', { name: 'Documentation sections', exact: true })
+    .getByRole('link', { name: 'Developer Resources', exact: true })
+    .click()
+  await page.waitForURL(/\/docs\/development\/?$/)
+  await expectSingleTitle(page, 'Tempo Developer Resources | Tempo Docs')
+
+  await page
+    .locator('[data-v-gutter-left] [data-v-sidebar-container]')
     .getByRole('link', { name: 'Tempo API', exact: true })
     .click()
   await page.waitForURL(/\/docs\/api\/?$/)

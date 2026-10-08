@@ -1,0 +1,39 @@
+---
+title: "Choose a vault"
+seoTitle: "Choose a vault | Tempo Docs"
+description: "Select an Earn vault by asset, strategy, access rules, and supported deposit and withdrawal operations."
+---
+
+import { OpenApi } from 'vocs'
+
+# Choose a vault
+
+Choose the earning product you want to offer, then select a vault that supports it. An app can offer one vault, a strategy that combines assets, or a choice of vaults with different strategies.
+
+| Source | How it connects to Earn |
+| --- | --- |
+| **Lending** | An engine deposits into an underlying lending vault. |
+| **Managed strategies** | An engine connects to a provider-managed vault that allocates funds across its strategy. |
+| **Tokenized assets** | An engine accesses an asset, such as tokenized treasuries or private credit, through a supported liquidity pool. |
+
+Start with the [verified vault directory](/docs/api/earn#getverifiedearnvaults). Check each vault's accepted asset, strategy, access restrictions, fees, and withdrawal capabilities. The directory's `verified` flag identifies a curated listing; it does not describe the strategy's risk or guarantee a return.
+
+## Inspect the selected vault
+
+Click **Try** to query the live directory. Set `chainId` to `mainnet` or `testnet` and add `include=access,capabilities,apy,tvl` to inspect the fields used below. This is a read-only request; it does not connect a wallet or move funds.
+
+<OpenApi.Playground operationId="getVerifiedEarnVaults" hideQueryParams anchors={false} />
+
+To make the same request from your terminal:
+
+```bash
+curl 'https://api.tempo.xyz/v1/earn/vaults/verified?chainId=mainnet&include=access,capabilities,apy,tvl'
+```
+
+This queries mainnet. Use `chainId=testnet` when working with a testnet deployment. Save the selected vault's `id` (its contract address) and network together.
+
+Before enabling a deposit, check the accepted asset, the user's eligibility, `state.depositsPaused`, and the operations listed in `capabilities`. Confirm the provider's documented contract interface and deployment; the Earn read API does not submit deposits or withdrawals.
+
+Check withdrawal support before the first deposit. `capabilities.redeem` and `capabilities.asyncRedeem` distinguish immediate and queued redemption support. `instantLiquidity` describes vault-wide liquidity, not a user-specific quote; `null` means a reliable value is unavailable.
+
+Continue with [Deposit funds](/docs/earn/integrate). See [Withdraw funds](/docs/earn/withdraw) for the exit flow your application needs to support.

@@ -47,7 +47,7 @@ export function finalizeSitemap(
         if (
           location === siteBaseUrl.replace(/\/$/, '') ||
           relativePath === '' ||
-          relativePath === 'get-started' ||
+          /^get-started(?:\/|$)/.test(relativePath ?? '') ||
           /^docs\/.+/.test(relativePath ?? '') ||
           /^blog(?:\/|$)/.test(relativePath ?? '')
         ) {

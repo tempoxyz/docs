@@ -1,71 +1,78 @@
 ---
-title: "Get Started"
-seoTitle: "Get Started with Tempo | Tempo Docs"
-description: Set up your coding agent, connect a test wallet, get test stablecoins, and send your first payment on Tempo.
+title: Get Started
+seoTitle: Get Started with Tempo | Tempo Docs
+description: Learn how accounts and stablecoins work on Tempo, then send a test payment with Tempo Wallet.
+interactive: true
 ---
 
-import { Cards, Card } from 'vocs'
+import { Card, Cards } from 'vocs'
 import { DocsProductOverview } from '../components/DocsProductOverview'
+import * as Demo from '../components/guides/Demo'
+import { Connect } from '../components/guides/steps/auth/Connect'
+import { AddFunds } from '../components/guides/steps/payments/AddFunds'
+import { SendPayment } from '../components/guides/steps/payments/SendPayment'
 
 <DocsProductOverview image="get-started" alt="Stablecoin payments recorded on Tempo’s ledger.">
 
 # Get Started
 
-Set up your coding agent, fund a test wallet, and send your first stablecoin payment on Tempo’s Moderato testnet.
+Build your first stablecoin payment on Tempo. Learn how accounts hold TIP-20 Tokens, then try a payment with Tempo Wallet below.
 
-[Set up your agent →](#set-up-your-coding-agent)
+[Understand stablecoins on Tempo →](/get-started/stablecoins)
 
 </DocsProductOverview>
 
+## Start with an account and a stablecoin
+
+An account is an address with keys that authorize its transactions. It can hold balances in multiple stablecoins. Each stablecoin has its own token contract, and [TIP-20 Tokens](/get-started/stablecoins) share the same payment interface.
+
+Use [Accounts](/docs/accounts) to choose how to create an account and manage its keys. Use [Payments](/docs/payments) to send funds, receive payments, and match transfers to your records.
+
+Your application can sign transactions from a backend, an embedded customer wallet, or a connected external wallet. The example below uses Tempo Wallet to try the payment flow.
+
 ## Send your first test payment
 
-:::::steps
+Sign in with Tempo Wallet, add test funds, and send 100 AlphaUSD on **Moderato, Tempo’s testnet**. Use the sample recipient or enter your own, then open the transaction in the explorer.
 
-### Set up your coding agent
+<span id="create-and-fund-a-test-account" />
+<span id="connect-a-test-wallet" />
+<span id="get-test-stablecoins" />
+<span id="send-and-verify-a-payment" />
+<span id="send-and-verify-the-payment" />
 
-Install the [Tempo Docs plugin](/docs/guide/using-tempo-with-ai#install-tempo-plugins) to give your agent documentation and MCP tools. The [AI setup guide](/docs/guide/using-tempo-with-ai) also covers other editors and MCP clients.
+<Demo.Container name="Try Tempo Wallet" footerVariant="balances" tokens={[Demo.alphaUsd]}>
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <SendPayment stepNumber={3} last />
+</Demo.Container>
 
-Start with this task:
+<span id="set-up-your-coding-agent" />
 
-```text
-Use Tempo's docs to build a TypeScript example that sends a stablecoin payment on Moderato testnet with a memo. Include wallet funding and verify delivery to the intended recipient.
-```
+Build this into your app with the [TypeScript payment guide](/docs/guide/payments/send-a-payment), or give your coding agent the [Tempo Docs plugin](/docs/guide/using-tempo-with-ai#install-tempo-plugins).
 
-### Connect a test wallet
+<span id="continue-your-tempo-integration" />
 
-Use the [network connection details](/docs/quickstart/connection-details) to configure your wallet or client for Moderato. Keep this testnet configuration separate from Tempo Mainnet, which uses production funds.
-
-### Get test stablecoins
-
-Open the [testnet faucet](/docs/quickstart/faucet) and connect your test wallet or enter its address. The faucet funds the wallet with test stablecoins for development.
-
-### Send and verify a payment
-
-Follow [Send your first payment](/docs/guide/payments/send-a-payment) to try a transfer and inspect the implementation. Add a memo if you need a payment reference, and confirm that the intended recipient receives the transfer.
-
-:::::
-
-## Continue your Tempo integration
+## Build your application
 
 <Cards>
   <Card
     title="Accounts"
-    description="Connect Tempo Wallet, accept deposits, and configure account controls."
+    description="Choose who authorizes payments and how your application manages accounts."
     to="/docs/accounts"
     icon="lucide:wallet"
   />
   <Card
-    title="APIs and SDKs"
-    description="Choose libraries, hosted APIs, and command-line tools for your application."
-    to="/docs/tools"
-    icon="lucide:code-2"
+    title="Payments"
+    description="Send and receive stablecoins, reconcile transfers, and pay for services."
+    to="/docs/payments"
+    icon="lucide:send"
   />
   <Card
-    title="Routes"
-    description="Fund accounts from other networks with wallet transfers or deposit addresses."
-    to="/docs/routes"
-    icon="lucide:arrow-left-right"
+    title="Developer Resources"
+    description="Find SDKs, API access, network settings, and provider integrations."
+    to="/docs/development"
+    icon="lucide:code-2"
   />
 </Cards>
 
-Explore [Earn](/docs/earn) for earning balances, [Zones](/docs/zones) for private balances, and [Machine Payments](/docs/agents) for MPP and Mercator. Use the [network integration guide](/docs/quickstart/integrate-tempo) for EVM compatibility and chain configuration.
+Explore [Earn](/docs/earn) to deposit funds into earning positions, [Routes](/docs/routes) to move funds between networks, and [Zones](/docs/zones) for private account balances and activity.

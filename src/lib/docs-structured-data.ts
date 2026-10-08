@@ -26,7 +26,12 @@ export function docsStructuredDataHead(path: string, { frontmatter }: DocsStruct
       },
     }
   }
-  if (pagePath !== '/' && pagePath !== '/get-started' && !pagePath.startsWith('/docs/')) {
+  if (
+    pagePath !== '/' &&
+    pagePath !== '/get-started' &&
+    !pagePath.startsWith('/get-started/') &&
+    !pagePath.startsWith('/docs/')
+  ) {
     return undefined
   }
 

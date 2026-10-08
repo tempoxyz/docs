@@ -8,7 +8,11 @@ export function canonicalizeGeneratedDeveloperLinks(content: string, publicDocsU
       // Empty hrefs and fragment-only links retain their current-page meaning.
       return pathname ? `${siteUrl}${suffix}` : value
     }
-    if (route === '/get-started' || route.startsWith('/docs/')) {
+    if (
+      route === '/get-started' ||
+      route.startsWith('/get-started/') ||
+      route.startsWith('/docs/')
+    ) {
       return `${siteUrl}${route}${suffix}`
     }
     return value

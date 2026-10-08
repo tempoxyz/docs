@@ -1,0 +1,47 @@
+---
+title: "Accept deposits"
+seoTitle: "Accept deposits | Tempo Docs"
+description: "Create a route-specific deposit address and track each incoming deposit through delivery to Tempo."
+---
+
+# Accept deposits
+
+Use a deposit address when a customer sends from an external wallet independently of your application. The address accepts a specific source network and token and routes funds to your chosen Tempo recipient.
+
+These are cross-network funding addresses. For attributing payments already on Tempo to one shared balance, use [virtual addresses](/docs/guide/payments/virtual-addresses).
+
+## Set up Routes API access
+
+Create a project and API key in [Tempo API Console](/docs/api/console). Your backend needs `data:read` for the route directory, `routes:read` for quotes and status reads, and `routes:write` to create deposit addresses or transfers and register source transactions. Keep the key on your server. See [API key management](/docs/api/console/api-keys) for storage and access controls.
+
+Routes endpoints use the `https://api.tempo.xyz/v1` base URL. Send your key in the `tempo-api-key` header. The API is under active development; use the linked endpoint references for current request fields and supported actions.
+
+## Create and monitor a deposit address
+
+:::::steps
+
+### Quote the deposit
+
+Call `GET /v1/routes/deposit-addresses/quote` with the source chain, source token, destination token, and amount to check current terms before creating an address.
+
+### Create a reusable address
+
+Call `POST /v1/routes/deposit-addresses` with the route details, a Tempo `recipient`, a source-chain `refundAddress`, and an `idempotency-key`. Store the returned address and ID with the customer’s funding instructions.
+
+### Show the funding instructions
+
+Display the returned source chain, token, and deposit address together. The address belongs to that route; do not present it as an address for arbitrary assets or networks. Check that its status is `active` before inviting new deposits.
+
+### Track each deposit
+
+List deposits with `GET /v1/routes/deposits`, using the `depositAddress` filter, then read an individual deposit with `GET /v1/routes/deposits/{id}`. An active deposit address is ready to receive funds; it does not mean a particular deposit has arrived on Tempo. Reconcile each deposit’s status, delivered amount, and destination transaction references separately.
+
+:::::
+
+See the [Deposit addresses and deposits API reference](/docs/api/routes/deposit-addresses) for the full lifecycle.
+
+## Reconcile delivery and refunds
+
+Save the customer, deposit-address ID, and individual deposit IDs together. A deposit address can receive more than one deposit, so use each deposit's delivered amount and destination transaction references when crediting your application ledger.
+
+Follow [Track delivery](/docs/routes/delivery) for pending and refund states. Show the source network and accepted token beside the address every time you display funding instructions.

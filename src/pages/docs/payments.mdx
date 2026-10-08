@@ -1,0 +1,66 @@
+---
+title: Payments
+seoTitle: Stablecoin Payments on Tempo | Tempo Docs
+description: Send and receive stablecoins, reconcile customer payments, and let applications pay for services on Tempo.
+---
+
+import { Card, Cards } from 'vocs'
+import { DocsProductOverview } from '../../components/DocsProductOverview'
+
+<DocsProductOverview image="payments" alt="A stablecoin payment moves from a sender to a recipient, with a reference for reconciliation.">
+
+# Payments
+
+Send stablecoins, receive customer payments, or charge for an API request. Start with a transfer between Tempo accounts, then add the payment features your application needs.
+
+[Send a payment →](/docs/guide/payments/send-a-payment)
+
+</DocsProductOverview>
+
+<Cards>
+  <Card
+    title="Send a payment"
+    description="Transfer stablecoins and confirm delivery to the recipient."
+    to="/docs/guide/payments/send-a-payment"
+    icon="lucide:send"
+  />
+  <Card
+    title="Receive a payment"
+    description="Watch incoming transfers and match them to your payment records."
+    to="/docs/guide/payments/accept-a-payment"
+    icon="lucide:arrow-down-to-line"
+  />
+  <Card
+    title="Machine payments"
+    description="Pay for services or accept payments for your API with MPP."
+    to="/docs/agents"
+    icon="lucide:bot"
+  />
+</Cards>
+
+Start with [Stablecoins on Tempo](/get-started/stablecoins) to understand TIP-20 Tokens and [create an account](/docs/accounts) to hold and send them.
+
+## Match payments to customers and invoices
+
+Choose the payment reference that fits your application:
+
+- **[Transfer memos](/docs/guide/payments/transfer-memos)** attach a 32-byte reference to a payment. Use a memo to match a transfer to an invoice, order, or other record.
+- **[Customer deposit addresses](/docs/guide/payments/virtual-addresses)** give each customer a distinct virtual address. Deposits credit one registered account, while transfer events preserve the address needed to identify the customer.
+
+These deposit addresses receive TIP-20 payments on Tempo. To receive funds from another network, use [Routes deposit addresses](/docs/routes/deposits).
+
+## Choose how payments are submitted
+
+| Your application needs to… | Use |
+| --- | --- |
+| Cover fees for the sender | [Sponsor transaction fees](/docs/guide/payments/sponsor-user-fees) |
+| Select the stablecoin used for fees | [Choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin) |
+| Send several payments in one transaction | [Batch payments](/docs/guide/payments/send-a-payment#batch-payment-transactions) |
+| Submit independent transactions at the same time | [Send parallel transactions](/docs/guide/payments/send-parallel-transactions) |
+| Limit which tokens and senders an account accepts | [Configure receive policies](/docs/guide/payments/configure-receive-policies) |
+
+## Pay for services and accept API payments
+
+[Machine payments](/docs/agents) use the Machine Payments Protocol (MPP) to include payment in a service request. Use [Mercator](/docs/guide/mercator) to give an agent access to paid tools, or integrate MPP into a [client](/docs/guide/machine-payments/client) or [API](/docs/guide/machine-payments/server).
+
+To authorize an agent to spend from an account, start with [Give an agent access](/docs/accounts/agents).

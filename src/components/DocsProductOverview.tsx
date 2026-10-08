@@ -3,6 +3,7 @@ import accounts from '../../public/illustrations/docs/accounts.svg?raw'
 import earn from '../../public/illustrations/docs/earn.svg?raw'
 import getStarted from '../../public/illustrations/docs/get-started.svg?raw'
 import machinePayments from '../../public/illustrations/docs/machine-payments.svg?raw'
+import payments from '../../public/illustrations/docs/payments.svg?raw'
 import partners from '../../public/illustrations/docs/partners.svg?raw'
 import routes from '../../public/illustrations/docs/routes.svg?raw'
 import zones from '../../public/illustrations/docs/zones.svg?raw'
@@ -11,6 +12,7 @@ import './DocsProductOverview.css'
 const illustrations = {
   'get-started': getStarted,
   accounts,
+  payments,
   earn,
   routes,
   zones,

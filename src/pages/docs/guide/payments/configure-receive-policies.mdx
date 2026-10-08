@@ -1,15 +1,16 @@
 ---
-title: Configure Receive Policies
-description: Configure receive policies for TIP-20 payments by choosing sender rules, token filters, and recovery authority for blocked receipts.
+title: Control incoming payments
+seoTitle: Control Incoming Payments with Receive Policies | Tempo Docs
+description: Choose which TIP-20 tokens and senders an account accepts, and configure recovery for payments blocked by its receive policy.
 ---
 
 import { Card, Cards } from 'vocs'
 
-# Configure Receive Policies
+<span id="configure-receive-policies" />
 
-Receive policies let a receiver define which [TIP-20](/docs/protocol/tip20/overview) tokens it accepts and which senders may send those tokens to it.
+# Control incoming payments
 
-This page is intentionally about the builder flow rather than the full spec. It covers when to configure a policy, what happens when delivery is blocked, and what operators need to watch.
+Configure a receive policy to choose which [TIP-20 Tokens](/get-started/stablecoins) an account accepts and which senders may pay it. Choose a recovery authority for payments the policy blocks.
 
 If a receive policy blocks an inbound transfer or mint, the TIP-20 call still succeeds. The funds are credited to `ReceivePolicyGuard` instead of the receiver, and `ReceivePolicyGuard` records a receipt that can be claimed later by the configured recovery authority.
 
