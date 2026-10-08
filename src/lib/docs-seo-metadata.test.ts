@@ -8,6 +8,7 @@ import { describe, expect, test } from 'vitest'
 const docsRoot = path.resolve('src/pages/docs')
 const docsFiles = () => [
   ...markdownFiles(docsRoot),
+  ...markdownFiles(path.resolve('src/pages/get-started')),
   path.resolve('src/pages/index.mdx'),
   path.resolve('src/pages/get-started.mdx'),
 ]
@@ -59,7 +60,11 @@ function frontmatterString(source: string, key: string): string | undefined {
   const frontmatter = source.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1]
   const serialized = frontmatter?.match(new RegExp(`^${key}: (.+)$`, 'm'))?.[1]
   if (!serialized) return undefined
-  return JSON.parse(serialized)
+  const scalar = serialized.trim()
+  if (scalar.startsWith('"')) return JSON.parse(scalar)
+  if (scalar.startsWith("'") && scalar.endsWith("'"))
+    return scalar.slice(1, -1).replaceAll("''", "'")
+  return scalar.replace(/\s+#.*$/, '')
 }
 
 function parseMarkdown(source: string): MarkdownNode {

@@ -22,7 +22,9 @@ test('requires a test account before authorizing or revoking an admin key', asyn
     await route.abort()
   })
 
-  await page.goto('/docs/accounts/admin-keys#authorize-an-admin-key')
+  const ipDemo = new URL('/docs/accounts/admin-keys#authorize-an-admin-key', baseURL)
+  ipDemo.hostname = '127.0.0.1'
+  await page.goto(ipDemo.href)
   const demo = page.getByTestId('admin-key-demo')
   await expect(demo).toBeVisible()
   await expect(demo.getByRole('link', { name: 'Open on localhost' })).toHaveAttribute(

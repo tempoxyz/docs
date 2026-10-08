@@ -202,24 +202,34 @@ export default defineConfig({
     if (landingPaths.includes(docsPath)) return `${urlBase}/og-docs.png?v=4`
 
     const sectionMap: Record<string, string> = {
+      accounts: 'ACCOUNTS',
+      agents: 'MACHINE PAYMENTS',
       api: 'API',
       blog: 'BLOG',
       build: 'BUILD',
       cli: 'CLI',
       'developer-tools': 'DEVELOPER TOOLS',
+      development: 'DEVELOPER RESOURCES',
+      earn: 'EARN',
       ecosystem: 'ECOSYSTEM',
+      'get-started': 'GET STARTED',
       guide: 'BUILD',
       partners: 'PARTNERS',
+      payments: 'PAYMENTS',
       performance: 'PERFORMANCE',
       protocol: 'PROTOCOL',
       quickstart: 'INTEGRATE',
+      routes: 'ROUTES',
       sdk: 'SDKs',
+      server: 'SERVER',
       tools: 'TOOLS',
       wallet: 'WALLET',
+      zones: 'ZONES',
     }
 
     const subsectionMap: Record<string, string> = {
       blockspace: 'BLOCKSPACE',
+      console: 'CONSOLE',
       exchange: 'DEX',
       fees: 'FEES',
       foundry: 'FOUNDRY',
@@ -1245,18 +1255,10 @@ export default defineConfig({
     { text: 'Blog', link: '/blog' },
   ],
   redirects: [
-    ...developerSurfaceRedirects.map((redirect) => ({
-      ...redirect,
-      destination: docsRouteDestination(redirect.destination),
-      status: 301 as const,
-    })),
+    ...developerSurfaceRedirects,
     // Vercel mirrors these at `/developers` because the static router runs before
     // Vocs at that proxy mount. The route contract and tests keep them aligned.
-    ...proxiedLegacyDocsRoutes.map((redirect) => ({
-      ...redirect,
-      destination: docsRouteDestination(redirect.destination),
-      status: 301,
-    })),
+    ...proxiedLegacyDocsRoutes,
     {
       source: '/docs/documentation/protocol/:path*',
       destination: '/docs/protocol/:path*',
@@ -1400,7 +1402,13 @@ export default defineConfig({
       destination: '/docs/protocol/zones',
       status: 301,
     },
-  ],
+  ].map((redirect) => ({
+    ...redirect,
+    // Every entry is a retired documentation URL. Vocs returns Location
+    // verbatim, so the production destination must include the proxy mount.
+    destination: docsRouteDestination(redirect.destination),
+    status: 301 as const,
+  })),
   codeHighlight: {
     langAlias: {
       sol: 'solidity',

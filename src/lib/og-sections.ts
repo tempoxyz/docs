@@ -16,25 +16,35 @@ export const ogLandingPaths = ['/', '/changelog']
 
 /** First path segment → section label. */
 export const ogSectionMap: Record<string, string> = {
+  accounts: 'ACCOUNTS',
+  agents: 'MACHINE PAYMENTS',
   api: 'API',
   blog: 'BLOG',
   build: 'BUILD',
   cli: 'CLI',
   'developer-tools': 'DEVELOPER TOOLS',
+  development: 'DEVELOPER RESOURCES',
+  earn: 'EARN',
   ecosystem: 'ECOSYSTEM',
+  'get-started': 'GET STARTED',
   guide: 'BUILD',
   partners: 'PARTNERS',
+  payments: 'PAYMENTS',
   performance: 'PERFORMANCE',
   protocol: 'PROTOCOL',
   quickstart: 'INTEGRATE',
+  routes: 'ROUTES',
   sdk: 'SDKs',
+  server: 'SERVER',
   tools: 'TOOLS',
   wallet: 'WALLET',
+  zones: 'ZONES',
 }
 
 /** Second path segment → subsection label (only applied to 3+ segment routes). */
 export const ogSubsectionMap: Record<string, string> = {
   blockspace: 'BLOCKSPACE',
+  console: 'CONSOLE',
   exchange: 'DEX',
   fees: 'FEES',
   foundry: 'FOUNDRY',

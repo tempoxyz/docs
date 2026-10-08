@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import vocsConfig from '../../vocs.config'
 import {
   canonicalDevelopersOrigin,
@@ -124,6 +124,40 @@ describe('docs routing redirects', () => {
     expect(docsRouteDestination('https://tempo.xyz/learn/stablecoin-payroll/', 'production')).toBe(
       'https://tempo.xyz/learn/stablecoin-payroll/',
     )
+  })
+
+  it('keeps every retired documentation redirect inside the production mount', async () => {
+    vi.stubEnv('VERCEL_ENV', 'production')
+    vi.resetModules()
+    try {
+      const { default: productionConfig } = await import('../../vocs.config')
+      const productionRedirects = productionConfig.redirects as Array<
+        VocsRedirect & { status: number }
+      >
+      expect(productionRedirects).toHaveLength(vocsRedirects.length)
+      for (const redirect of productionRedirects) {
+        expect(redirect.status, redirect.source).toBe(301)
+        expect(URL.canParse(redirect.destination), redirect.source).toBe(true)
+        const target = new URL(redirect.destination)
+        if (target.origin === 'https://tempo.xyz' && !target.pathname.startsWith('/learn/')) {
+          expect(target.pathname, redirect.source).toMatch(/^\/developers(?:\/|$)/)
+          expect(target.pathname, redirect.source).not.toContain('/developers/developers')
+        }
+      }
+      expect(productionRedirects).toContainEqual({
+        source: '/docs/guide',
+        destination: `${canonicalDevelopersOrigin}/docs/quickstart/integrate-tempo`,
+        status: 301,
+      })
+      expect(productionRedirects).toContainEqual({
+        source: '/docs/protocol/tip20-rewards',
+        destination: `${canonicalDevelopersOrigin}/docs/protocol/upgrades/t7#deprecate-tip-20-rewards`,
+        status: 301,
+      })
+    } finally {
+      vi.unstubAllEnvs()
+      vi.resetModules()
+    }
   })
 
   it('normalizes trailing slashes before static route handling', () => {

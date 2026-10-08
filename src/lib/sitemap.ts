@@ -1,6 +1,25 @@
 const TEMPLATE_URL_PATTERN = /<url>\s*<loc>([^<]*\/\[[^\]]+\][^<]*)<\/loc>[\s\S]*?<\/url>\s*/g
 const LOCATION_PATTERN = /<loc>([^<]+)<\/loc>/g
 
+/** Check built content routes without requiring the retired `/docs` landing page. */
+export function sitemapCoverage(sitemap: string, routes: readonly string[]) {
+  const locations = new Set(
+    Array.from(sitemap.matchAll(LOCATION_PATTERN), ([, location]) => location.replace(/\/$/, '')),
+  )
+  const indexUrl = [...locations].find((location) =>
+    /\/(?:blog|get-started|docs\/api)$/.test(location),
+  )
+  if (!indexUrl) throw new Error('Could not resolve the site base URL from the sitemap')
+  const baseUrl = indexUrl.replace(/\/(?:blog|get-started|docs\/api)$/, '')
+  const urls = [...new Set(routes)].map((route) => {
+    const pathname = route.replace(/^\/+|\/+$/g, '')
+    return pathname
+      ? `${baseUrl}/${pathname.split('/').map(encodeURIComponent).join('/')}`
+      : baseUrl
+  })
+  return { urls, missing: urls.filter((url) => !locations.has(url)) }
+}
+
 export type BlogSitemapEntry = {
   slug: string
   lastmod?: string

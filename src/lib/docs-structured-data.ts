@@ -8,13 +8,26 @@ type DocsStructuredDataContext = {
   frontmatter?: DocsFrontmatter
 }
 
+type DocsHeadTags = {
+  canonical?: string
+  meta: {
+    ogType?: 'article'
+    ogImage?: string
+    articleModifiedTime?: false
+  }
+  script?: { type: 'application/ld+json'; innerHTML: string }[]
+}
+
 /**
  * Builds the docs JSON-LD head entry from Vocs' page context.
  *
  * Vocs serializes this callback for the client, so every runtime dependency must
  * remain inside the function body.
  */
-export function docsStructuredDataHead(path: string, { frontmatter }: DocsStructuredDataContext) {
+export function docsStructuredDataHead(
+  path: string,
+  { frontmatter }: DocsStructuredDataContext,
+): DocsHeadTags | undefined {
   const pagePath = path.startsWith('/') ? path : `/${path}`
   // Keep article type in the native head owner: sibling overrides can race
   // with Vocs' default website tag during streamed prerendering.
@@ -35,10 +48,13 @@ export function docsStructuredDataHead(path: string, { frontmatter }: DocsStruct
     return undefined
   }
 
-  const title = frontmatter?.title?.trim()
-  if (!title) return { meta: { articleModifiedTime: false as const } }
-
   const developersUrl = 'https://tempo.xyz/developers'
+  // The public mount has no trailing slash. Match its redirect policy and the
+  // URLs used by the docs graph instead of Vocs' default baseUrl + "/".
+  const canonical = pagePath === '/' ? { canonical: developersUrl } : {}
+  const title = frontmatter?.title?.trim()
+  if (!title) return { ...canonical, meta: { articleModifiedTime: false as const } }
+
   const docsUrl = developersUrl
   const organizationId = 'https://tempo.xyz/#organization'
   const websiteId = 'https://tempo.xyz/#website'
@@ -133,6 +149,7 @@ export function docsStructuredDataHead(path: string, { frontmatter }: DocsStruct
     .replace(/&/g, '\\u0026')
 
   return {
+    ...canonical,
     meta: { articleModifiedTime: false as const },
     script: [{ type: 'application/ld+json', innerHTML }],
   }

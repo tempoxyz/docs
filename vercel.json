@@ -2,6 +2,28 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/assets/md/docs.md",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/assets/md/index.md",
+      "permanent": true
+    },
+    {
+      "source": "/docs.md",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/index.md",
+      "permanent": true
+    },
+    {
       "source": "/developers/blog/inside-tempo-zones",
       "destination": "/developers/blog/privacy-with-tempo-zones",
       "permanent": true
@@ -364,6 +386,17 @@
     },
     {
       "source": "/learn/tempo/receive-policies",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/guide/payments/configure-receive-policies",
+      "permanent": true
+    },
+    {
+      "source": "/docs/learn/tempo/receive-policies",
       "has": [
         {
           "type": "host",
@@ -859,6 +892,11 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/learn/tempo/receive-policies",
+      "destination": "/developers/docs/guide/payments/configure-receive-policies",
+      "permanent": true
+    },
+    {
       "source": "/developers/learn/use-cases/agentic-commerce",
       "destination": "https://tempo.xyz/learn/blockchain-payments/",
       "permanent": true
@@ -956,6 +994,16 @@
     {
       "source": "/build/partners",
       "destination": "/docs/partners",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs.md",
+      "destination": "/developers/index.md",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs.md",
+      "destination": "/developers/assets/md/index.md",
       "permanent": true
     }
   ],

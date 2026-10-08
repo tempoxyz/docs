@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { finalizeSitemap } from './sitemap'
+import { finalizeSitemap, sitemapCoverage } from './sitemap'
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -20,6 +20,34 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
     <loc>https://tempo.xyz/developers/example/[id]</loc>
   </url>
 </urlset>`
+
+describe('sitemapCoverage', () => {
+  it('validates the new docs home without requiring a /docs index entry', () => {
+    const current = sitemap.replace(
+      '</urlset>',
+      '<url><loc>https://tempo.xyz/developers/</loc></url></urlset>',
+    )
+    expect(sitemapCoverage(current, ['/', '/blog', '/docs/api']).missing).toEqual([])
+  })
+
+  it('detects missing nested getting-started and blog routes', () => {
+    expect(sitemapCoverage(sitemap, ['/get-started/stablecoins', '/blog/t6']).missing).toEqual([
+      'https://tempo.xyz/developers/get-started/stablecoins',
+      'https://tempo.xyz/developers/blog/t6',
+    ])
+  })
+
+  it('uses the API index if no blog index is available', () => {
+    const apiOnly = '<urlset><url><loc>https://example.com/docs/api</loc></url></urlset>'
+    expect(sitemapCoverage(apiOnly, ['/docs/api']).missing).toEqual([])
+  })
+
+  it('rejects a sitemap without a recognizable content index', () => {
+    expect(() => sitemapCoverage('<urlset />', ['/'])).toThrow(
+      'Could not resolve the site base URL',
+    )
+  })
+})
 
 describe('finalizeSitemap', () => {
   it('excludes redirected marketing surfaces while preserving docs and blog URLs', () => {

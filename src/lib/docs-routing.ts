@@ -27,6 +27,8 @@ export function docsRouteDestination(destination: string, environment = process.
 // host. Keep the mappings here so tests and deployed smoke checks share one
 // contract.
 export const proxiedLegacyDocsRoutes = [
+  { source: '/docs.md', destination: '/index.md' },
+  { source: '/assets/md/docs.md', destination: '/assets/md/index.md' },
   { source: '/blog/inside-tempo-zones', destination: '/blog/privacy-with-tempo-zones' },
   { source: '/docs/developer-tools', destination: '/docs/ecosystem' },
   { source: '/docs/developer-tools/fee-payer', destination: '/docs/api/fee-payer' },
@@ -78,6 +80,10 @@ export const proxiedLegacyDocsRoutes = [
     destination: '/docs/guide/payments/configure-receive-policies',
   },
   {
+    source: '/docs/learn/tempo/receive-policies',
+    destination: '/docs/guide/payments/configure-receive-policies',
+  },
+  {
     source: '/learn/use-cases/agentic-commerce',
     destination: 'https://tempo.xyz/learn/blockchain-payments/',
   },
@@ -116,6 +122,11 @@ export const proxiedLegacyDocsRoutes = [
 ] as const satisfies readonly DocsRouteContract[]
 
 export const legacyDocsHostRoutes = [
+  { source: '/docs.md', destination: `${canonicalDevelopersOrigin}/index.md` },
+  {
+    source: '/assets/md/docs.md',
+    destination: `${canonicalDevelopersOrigin}/assets/md/index.md`,
+  },
   {
     source: '/guide/bridge-usdc-stargate',
     destination: `${canonicalDevelopersOrigin}/docs/guide/bridge-layerzero`,
@@ -201,6 +212,10 @@ export const legacyDocsHostRoutes = [
   },
   {
     source: '/learn/tempo/receive-policies',
+    destination: `${canonicalDevelopersOrigin}/docs/guide/payments/configure-receive-policies`,
+  },
+  {
+    source: '/docs/learn/tempo/receive-policies',
     destination: `${canonicalDevelopersOrigin}/docs/guide/payments/configure-receive-policies`,
   },
   {
