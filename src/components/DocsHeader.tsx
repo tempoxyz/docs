@@ -299,7 +299,7 @@ function CheckIcon() {
 }
 
 // One install path per agent: the plugin bundles the MCP server and docs skill where
-// supported, Amp gets the MCP server directly, and other agents get the skill.
+// supported; Skills and MCP expose the client-independent setup options.
 const agentCommands = [
   {
     label: 'Codex',
@@ -317,9 +317,14 @@ const agentCommands = [
     command: tempoAgentSetupCommands.amp,
   },
   {
-    label: 'Other',
+    label: 'Skills',
     logo: null,
-    command: tempoAgentSetupCommands.other,
+    command: tempoAgentSetupCommands.skills,
+  },
+  {
+    label: 'MCP',
+    logo: null,
+    command: tempoAgentSetupCommands.mcp,
   },
 ]
 
@@ -458,7 +463,7 @@ function AgentsPanel({
       <div className="space-y-1">
         <AgentCommandSection
           href={TEMPO_PLUGIN_URL}
-          label="Tempo Docs plugin"
+          label="Tempo Docs"
           desc="Search and read Tempo documentation from your editor."
           icon={<McpIcon />}
           onClick={onNavigate}
@@ -471,9 +476,18 @@ function AgentsPanel({
               setCopied(false)
             }}
           />
+          {activeCommand.label === 'MCP' ? (
+            <p className="px-2.5 py-1 font-sans text-[12px] text-foreground/60">
+              Add this URL as an HTTP MCP server in your agent’s settings.
+            </p>
+          ) : null}
           <CommandSnippet
             command={activeCommand.command}
-            copyLabel={`Copy Tempo install command for ${activeCommand.label}`}
+            copyLabel={
+              activeCommand.label === 'MCP'
+                ? 'Copy MCP server URL'
+                : `Copy Tempo install command for ${activeCommand.label}`
+            }
             copied={copied}
             onCopy={copyCommand}
           />

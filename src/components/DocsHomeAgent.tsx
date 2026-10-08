@@ -5,6 +5,7 @@ import { Link } from 'waku'
 import CheckIcon from '~icons/lucide/check'
 import CopyIcon from '~icons/lucide/copy'
 import TerminalIcon from '~icons/lucide/terminal'
+import PlugIcon from '~icons/lucide/plug'
 import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 import { AgentSetupCommand } from './AgentSetupCommand'
@@ -35,9 +36,17 @@ const agents = [
     Logo: AmpLogo,
   },
   {
-    id: 'other',
-    label: 'Other',
+    id: 'skills',
+    label: 'Skills',
     instruction: 'Run in your terminal to add the docs skill to a compatible agent.',
+    helpLabel: null,
+    installUrl: null,
+    Logo: null,
+  },
+  {
+    id: 'mcp',
+    label: 'MCP',
+    instruction: 'Add this URL as an HTTP MCP server in your agent’s settings.',
     helpLabel: null,
     installUrl: null,
     Logo: null,
@@ -54,7 +63,8 @@ export function DocsHomeAgent() {
   const activeAgent = agents.find((item) => item.id === agent) ?? agents[0]
   const commands = tempoAgentSetupCommands[agent]
   const multipleCommands = commands.includes('\n')
-  const copyLabel = multipleCommands ? 'Copy commands' : 'Copy command'
+  const isMcp = agent === 'mcp'
+  const copyLabel = isMcp ? 'Copy URL' : multipleCommands ? 'Copy commands' : 'Copy command'
 
   useEffect(() => setMounted(true), [])
 
@@ -73,7 +83,7 @@ export function DocsHomeAgent() {
       <p>Connect your coding agent to Tempo documentation.</p>
 
       <fieldset className="tempo-agent-start-agents">
-        <legend>Choose your coding agent</legend>
+        <legend>Choose a setup method</legend>
         <div>
           {agents.map(({ id, label, Logo }) => (
             <button
@@ -111,8 +121,8 @@ export function DocsHomeAgent() {
         <div className="tempo-agent-start-command">
           <div className="tempo-agent-start-toolbar">
             <span className="tempo-agent-start-destination">
-              <TerminalIcon aria-hidden="true" />
-              Terminal
+              {isMcp ? <PlugIcon aria-hidden="true" /> : <TerminalIcon aria-hidden="true" />}
+              {isMcp ? 'MCP server URL' : 'Terminal'}
             </span>
             <button
               type="button"
@@ -130,20 +140,22 @@ export function DocsHomeAgent() {
             </button>
           </div>
           <pre>
-            <code>
-              <AgentSetupCommand command={commands} />
-            </code>
+            <code>{isMcp ? commands : <AgentSetupCommand command={commands} />}</code>
           </pre>
         </div>
         <p role="status" className="tempo-agent-start-feedback">
           {copyState === 'copied'
-            ? multipleCommands
-              ? 'Commands copied. Paste them into your terminal and run both commands.'
-              : 'Command copied. Paste it into your terminal and run it.'
+            ? isMcp
+              ? 'URL copied. Add it as an HTTP MCP server in your agent’s settings.'
+              : multipleCommands
+                ? 'Commands copied. Paste them into your terminal and run both commands.'
+                : 'Command copied. Paste it into your terminal and run it.'
             : copyState === 'error'
-              ? multipleCommands
-                ? 'Copy failed. Select and copy both commands above.'
-                : 'Copy failed. Select and copy the command above.'
+              ? isMcp
+                ? 'Copy failed. Select and copy the server URL above.'
+                : multipleCommands
+                  ? 'Copy failed. Select and copy both commands above.'
+                  : 'Copy failed. Select and copy the command above.'
               : ''}
         </p>
       </div>

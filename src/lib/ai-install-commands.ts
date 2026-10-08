@@ -8,5 +8,6 @@ export const tempoPluginInstallCommands = {
 export const tempoAgentSetupCommands = {
   ...tempoPluginInstallCommands,
   amp: 'amp mcp add tempo https://mcp.tempo.xyz',
-  other: 'npx skills add tempoxyz/plugins --skill docs',
+  skills: 'npx skills add tempoxyz/plugins --skill docs',
+  mcp: 'https://mcp.tempo.xyz',
 } as const

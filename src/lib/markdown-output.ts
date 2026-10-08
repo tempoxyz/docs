@@ -196,9 +196,12 @@ function rewriteNode(
         text('.'),
       ]),
       { type: 'code', lang: 'bash', value: tempoAgentSetupCommands.amp },
-      { type: 'heading', depth: 3, children: [text('Other agents')] },
+      { type: 'heading', depth: 3, children: [text('Skills')] },
       paragraph([text('Add the Tempo docs skill to a skills-compatible agent.')]),
-      { type: 'code', lang: 'bash', value: tempoAgentSetupCommands.other },
+      { type: 'code', lang: 'bash', value: tempoAgentSetupCommands.skills },
+      { type: 'heading', depth: 3, children: [text('MCP')] },
+      paragraph([text('Add this URL as an HTTP MCP server in your agent’s settings.')]),
+      { type: 'code', lang: 'text', value: tempoAgentSetupCommands.mcp },
       paragraph([link('All setup options', '/docs/guide/using-tempo-with-ai')]),
     ]
   if (node.name === 'Card') return [paragraph(cardContent(node))]
