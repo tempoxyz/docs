@@ -370,6 +370,7 @@ export default defineConfig({
         text: 'Get Started',
         items: [
           { text: 'Overview', link: '/get-started' },
+          { text: 'Use Cases', link: '/get-started/use-cases' },
           { text: 'Stablecoins on Tempo', link: '/get-started/stablecoins' },
         ],
       },
@@ -933,12 +934,12 @@ export default defineConfig({
             items: [
               {
                 text: 'T12',
-                badge: { text: 'Planned', variant: 'note' as const },
+                badge: { text: 'Testnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t12',
               },
               {
                 text: 'T11',
-                badge: { text: 'Latest', variant: 'info' as const },
+                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t11',
               },
               {

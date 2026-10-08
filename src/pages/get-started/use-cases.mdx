@@ -1,0 +1,116 @@
+---
+title: Use cases
+seoTitle: Stablecoin Payment Use Cases | Tempo Docs
+description: Build global financial accounts, cross-border payouts, institutional settlement, agentic payments, and tokenized deposit products on Tempo.
+---
+
+import { Cards, Card } from 'vocs'
+
+# Use cases
+
+Help customers hold funds, move money, and pay for services with stablecoins. Explore Tempo's core use cases below, then follow a guide to build the experience into your product.
+
+## Embedded finance
+
+Give customers a financial account inside your app, where they can receive payments, keep a stablecoin balance, and send money. Connect the account to the currencies and payment methods your customers already use through Tempo's partner ecosystem.
+
+<Cards>
+  <Card
+    title="Stablecoin accounts"
+    description="Let customers receive money, keep funds in your app, and pay others from the same balance. Start by choosing how your application manages accounts."
+    to="/docs/accounts"
+    icon="lucide:wallet"
+  />
+  <Card
+    title="Pay-ins and payouts"
+    description="Help customers move money into and out of your app. Find partners that connect stablecoins to bank accounts and local payment methods."
+    to="/docs/partners"
+    icon="lucide:arrow-left-right"
+  />
+</Cards>
+
+[Explore embedded finance on Tempo](https://tempo.xyz/solutions/embedded-finance/).
+
+## Cross-border payments
+
+Pay employees, contractors, suppliers, and customers across countries using stablecoins. A contractor can receive a dollar stablecoin payout and use an offramp partner to withdraw to a bank account in a supported local currency.
+
+<Cards>
+  <Card
+    title="Global payroll and payouts"
+    description="Send stablecoin payouts to employees, contractors, or marketplace sellers. Start by sending a payment to a recipient's account."
+    to="/docs/guide/payments/send-a-payment"
+    icon="lucide:globe"
+  />
+  <Card
+    title="Payment reconciliation"
+    description="Link each transfer to an invoice, payroll run, or customer record with a memo your backend can reconcile."
+    to="/docs/guide/payments/transfer-memos"
+    icon="lucide:receipt-text"
+  />
+</Cards>
+
+[Explore cross-border payments on Tempo](https://tempo.xyz/solutions/cross-border-payments/).
+
+## Institutional settlement
+
+Move funds between financial institutions for treasury operations, counterparty payments, and card settlement. Use transfer policies to control who can transact and memos to match payments to your records. Tempo Zones keep balances and account activity inside a Zone private from the public.
+
+<Cards>
+  <Card
+    title="Treasury and counterparty payments"
+    description="Transfer stablecoins between institutional accounts and track payments in your existing systems. Start with the payment integration guide."
+    to="/docs/payments"
+    icon="lucide:landmark"
+  />
+  <Card
+    title="Private account activity"
+    description="Give users access to their own balances and activity while the Zone operator can see the full ledger. Review what stays private and what becomes public when funds enter or leave."
+    to="/docs/zones/privacy"
+    icon="lucide:lock-keyhole"
+  />
+</Cards>
+
+[Explore institutional settlement on Tempo](https://tempo.xyz/solutions/institutional-money-movement/).
+
+## Agentic payments
+
+Let agents pay for APIs, tools, and digital content as they work. The [Machine Payments Protocol](https://mpp.dev) (MPP) lets services request payment and clients pay as part of an HTTP request.
+
+<Cards>
+  <Card
+    title="Agents that buy services"
+    description="Give an agent a way to discover paid services and pay for the requests it needs. Start with the agent quickstart."
+    to="/docs/guide/machine-payments/agent"
+    icon="lucide:bot"
+  />
+  <Card
+    title="Paid APIs and tools"
+    description="Charge for API requests, MCP tools, or access to content. Add payment verification to your service with MPP."
+    to="/docs/guide/machine-payments/server"
+    icon="lucide:code"
+  />
+</Cards>
+
+[Explore agentic payments on Tempo](https://tempo.xyz/solutions/agentic-payments/).
+
+## Tokenized deposits
+
+Build products that let bank customers hold and move tokenized deposits for commercial payments, intragroup funding, and cash management. Define who can participate, which assets accounts can receive, and who can see balances and transactions.
+
+<Cards>
+  <Card
+    title="Issuer and transfer controls"
+    description="Use TIP-20 Tokens to manage supply, assign administrative roles, and define which accounts can send and receive tokens."
+    to="/docs/protocol/tip20/overview"
+    icon="lucide:shield-check"
+  />
+  <Card
+    title="Private deposit infrastructure"
+    description="Design how customer balances stay in a private ledger and connect to Tempo for deposits, withdrawals, and settlement. Review the Zone architecture."
+    to="/docs/protocol/zones/architecture"
+    icon="lucide:building-2"
+  />
+</Cards>
+
+[Explore tokenized deposits on Tempo](https://tempo.xyz/solutions/tokenized-deposits/).
