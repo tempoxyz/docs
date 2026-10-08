@@ -1,6 +1,6 @@
 ---
 title: Accept Pay-As-You-Go Payments
-description: Session-based billing on Tempo with MPP payment channels. Clients deposit funds, sign off-chain vouchers, and pay per request without on-chain latency.
+description: Session-based billing on Tempo with MPP payment channels. Clients fund a channel and authorize metered usage with offchain vouchers.
 ---
 
 import { Card, Cards } from 'vocs'
@@ -75,6 +75,8 @@ bun add mppx viem
 :::
 
 ### Set up an `Mppx` session instance
+
+[Set `MPP_SECRET_KEY`](/docs/guide/machine-payments/server#set-the-server-secret) before starting the server.
 
 Set up an `Mppx` instance with the `tempo` method.
 
@@ -191,12 +193,10 @@ Bun.serve({
 
 ### Test the pay-as-you-go endpoint
 
-```bash
-# Create account funded with testnet tokens
-$ npx mppx account create
+These examples charge mainnet OUSD. Configure the `mppx` CLI with a funded mainnet account before calling the endpoint; testnet faucet tokens cannot pay a mainnet challenge.
 
-# Make a paid request
-$ npx mppx http://localhost:3000/api/sessions/photo
+```bash
+npx mppx http://localhost:3000/api/sessions/photo
 ```
 
 ::::
@@ -207,11 +207,11 @@ When using sessions from a client, set `maxDeposit` to enable automatic channel 
 
 ```ts
 import { Mppx, tempo } from 'mppx/client'
-import { privateKeyToAccount } from 'viem/accounts'
+import { Account } from 'viem/tempo'
 
 const mppx = Mppx.create({
   methods: [tempo({
-    account: privateKeyToAccount('0x...'),
+    account: Account.fromSecp256k1('0x...'),
     maxDeposit: '1', // Lock up to 1 OUSD per channel
   })],
 })
@@ -237,7 +237,7 @@ const res = await fetch('http://localhost:3000/api/sessions/photo')
   />
   <Card
     icon="lucide:server"
-    title="Server quickstart"
+    title="Accept payments for an API"
     description="Framework middleware reference"
     to="/docs/guide/machine-payments/server"
   />

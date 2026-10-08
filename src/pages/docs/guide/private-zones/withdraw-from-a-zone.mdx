@@ -17,7 +17,7 @@ import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
 # Withdraw OUSD from a Tempo Zone on testnet
 
-Withdraw tokens from a private Zone back to your public Tempo balance. This example uses `OUSD` test tokens in **Zone A**, the example Zone on Tempo Testnet.
+Withdraw `OUSD` test tokens from **Zone A** in the [earlier testnet sandbox](/docs/guide/private-zones#testnet-compatibility) back to your public Tempo balance.
 
 <ZoneDiagram
   name="withdrawal"
@@ -29,8 +29,6 @@ Direct withdrawals exit through `ZoneOutbox` on the zone chain. You submit the w
 <a id="withdrawing-pathusd-from-zone-a" />
 
 ## Withdrawing OUSD from Zone A
-
-By the end of this guide you will have withdrawn `OUSD` from `Zone A` and confirmed the balance update on the public chain.
 
 <Demo.Container
   name="Withdraw from Zone A"
@@ -54,13 +52,12 @@ Standard withdrawals omit an encrypted sender disclosure. Authenticated withdraw
 
 ```ts
 import { parseUnits } from 'viem'
-import { Actions } from 'viem/tempo'
 
 const withdrawalAmount = parseUnits('100', 6)
 
 await zoneAClient.zone.signAuthorizationToken()
 
-const { receipt } = await Actions.zone.requestWithdrawalSync(zoneAClient, {
+const { receipt } = await zoneAClient.zone.requestWithdrawalSync({
   account: rootClient.account,
   feeToken: ousd,
   amount: withdrawalAmount,
@@ -76,14 +73,13 @@ console.log(receipt.blockNumber)
 
 ```ts
 import { parseUnits } from 'viem'
-import { Actions } from 'viem/tempo'
 
 const withdrawalAmount = parseUnits('100', 6)
 const revealTo = '0x031dc147467e8f106eb22850fef549dc74b8f6634aeac554ebdd4ab896b67cdf68' // [!code focus]
 
 await zoneAClient.zone.signAuthorizationToken()
 
-const { receipt } = await Actions.zone.requestVerifiableWithdrawalSync(zoneAClient, { // [!code focus]
+const { receipt } = await zoneAClient.zone.requestVerifiableWithdrawalSync({ // [!code focus]
   account: rootClient.account,
   feeToken: ousd,
   amount: withdrawalAmount,

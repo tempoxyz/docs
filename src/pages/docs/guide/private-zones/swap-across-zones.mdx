@@ -16,7 +16,7 @@ import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
 # Swap across zones
 
-Swap stablecoins while moving them between Zones. This example starts with `OUSD` test tokens in **Zone A** and deposits `betaUSD` into **Zone B**, two example Zones on Tempo Testnet. The swap settles on the public chain before Zone B credits the balance.
+Swap `OUSD` in **Zone A** for `betaUSD` in **Zone B**, using test tokens in the [earlier testnet sandbox](/docs/guide/private-zones#testnet-compatibility). The swap settles on the public chain before Zone B credits the balance.
 
 The route uses `swapAndDepositRouter` on the public chain: withdraw from `Zone A`, swap on the Stablecoin DEX, then deposit the output token into `Zone B`.
 
@@ -28,8 +28,6 @@ The route uses `swapAndDepositRouter` on the public chain: withdraw from `Zone A
 <a id="swapping-pathusd-from-zone-a-into-betausd-on-zone-b" />
 
 ## Swapping OUSD from Zone A into betaUSD on Zone B
-
-By the end of this guide you will have swapped **25 OUSD** from **Zone A** into **betaUSD** on **Zone B** and confirmed the routed deposit.
 
 ## What this swap does
 
@@ -57,7 +55,6 @@ It shows the core routed swap submission path; use the demo above when you want 
 
 ```ts
 import { encodeAbiParameters, parseUnits } from 'viem'
-import { Actions } from 'viem/tempo'
 
 const swapAmount = parseUnits('25', 6)
 
@@ -83,7 +80,7 @@ const callbackData = encodeAbiParameters(
   [false, betaUsd, ZONE_B.portalAddress, rootClient.account.address, zeroBytes32, minimumBetaOut],
 )
 
-const { receipt } = await Actions.zone.requestWithdrawalSync(zoneAClient, {
+const { receipt } = await zoneAClient.zone.requestWithdrawalSync({
   account: rootClient.account,
   amount: swapAmount,
   data: callbackData,

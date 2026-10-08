@@ -1,7 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { ImageResponse } from '@takumi-rs/image-response'
-// biome-ignore lint/correctness/noUnusedImports: tsx uses the classic JSX runtime for this script
 import React from 'react'
 import { OgImage } from '../src/pages/_api/api/og-image'
 
@@ -57,12 +56,12 @@ export async function renderGolden(testCase: (typeof goldenCases)[number]): Prom
   ])
   const backgroundUrl = `data:image/png;base64,${Buffer.from(background).toString('base64')}`
   const response = new ImageResponse(
-    <OgImage
-      title={testCase.title}
-      section={testCase.section}
-      subsection={testCase.subsection}
-      backgroundUrl={backgroundUrl}
-    />,
+    React.createElement(OgImage, {
+      title: testCase.title,
+      section: testCase.section,
+      subsection: testCase.subsection,
+      backgroundUrl,
+    }),
     {
       width: 1200,
       height: 657,

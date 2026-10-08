@@ -6,7 +6,7 @@ description: Use Open USD (OUSD), the recommended stablecoin on Tempo, for balan
 
 # OUSD on Tempo
 
-Open USD (OUSD) is a USD stablecoin operated by [Open Standard](https://joinopenstandard.com), an independent company whose founding partners include Coinbase, Mastercard, Shopify, Stripe, and Visa. OUSD is issued natively on Tempo as a [TIP-20](/docs/protocol/tip20/spec) token and is the recommended stablecoin for holding balances, accepting payments, and settling on Tempo.
+Open USD (OUSD) is a USD stablecoin operated by [Open Standard](https://joinopenstandard.com), an independent company whose founding partners include Coinbase, Mastercard, Shopify, Stripe, and Visa. OUSD is issued natively on Tempo as a [TIP-20 token](/get-started/stablecoins) and is the recommended stablecoin for holding balances, accepting payments, and settling on Tempo.
 
 ## Why OUSD
 
@@ -33,7 +33,7 @@ OUSD is also listed in the [Tempo token list](/docs/quickstart/tokenlist).
 
 - **Mint or redeem through an integration partner.** OUSD integration partners mint and redeem OUSD 1:1 with USD. See [joinopenstandard.com](https://joinopenstandard.com) to get started.
 - **Swap on the Stablecoin DEX.** OUSD trades against pathUSD on the [Stablecoin DEX](/docs/guide/stablecoin-dex), so you can swap into OUSD from any USD stablecoin on Tempo.
-- **Bridge, then swap.** If you bridge USDC to Tempo, it arrives as USDC.e. Swap it to OUSD on the Stablecoin DEX. See [Getting funds on Tempo](/docs/guide/getting-funds).
+- **Bridge, then swap.** If you bridge USDC to Tempo, it arrives as USDC.e. Swap it to OUSD on the Stablecoin DEX. See [Fund an account](/docs/guide/getting-funds).
 
 ## How OUSD, pathUSD, and USDC.e fit together
 
@@ -57,7 +57,7 @@ Set OUSD as your fee token so your transactions do not fall back to pathUSD. You
 
 ### Accepting payments
 
-Keep accepting USDC.e and pathUSD while your customers move over. Senders can pay in any USD stablecoin and the Stablecoin DEX can route the payment to OUSD. See [Pay fees in any stablecoin](/docs/guide/payments/pay-fees-in-any-stablecoin).
+If your application accepts USDC.e or pathUSD and settles in OUSD, use a [Stablecoin DEX swap](/docs/guide/stablecoin-dex/executing-swaps) to convert the received funds. Quote the swap and verify its output amount. Choosing OUSD as the fee token pays transaction fees in OUSD; it does not convert the payment amount.
 
 ### Token selectors and allowlists
 

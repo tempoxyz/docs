@@ -7,23 +7,27 @@ description: Authenticate requests to the Tempo blockchain API with public acces
 
 # Authentication
 
-The Tempo API supports three ways to authenticate a request, so you can start without credentials and add authentication as your needs grow:
+Choose public access, pay per request with MPP, or authenticate with an API key:
 
 | Method | Credential | Use for |
 | --- | --- | --- |
 | **Public** | None | Trying the API and low-volume reads, within a per-IP [rate limit](/docs/api/rate-limits). |
 | **MPP** | `Authorization: Payment <credential>` | Paying per request without a key, or continuing past a rate limit. |
-| **API key** | `Authorization: Bearer tempo:sk:...` | Authenticating as your account for higher, dedicated quotas. |
+| **API key** | `Authorization: Bearer tempo:sk:...` | Attributing requests to your API project with dedicated quotas. |
 
 Most read endpoints are open to **public** (anonymous) callers, so no credential is required to get started. To raise your throughput, pay per request with [MPP](#mpp-paying-per-request) or send an **API key**. Some endpoints, such as webhook management, require a key.
 
 :::info
-Create production and sandbox API keys in [Tempo API Console](https://console.tempo.xyz/?to=/:org/api-keys). The [console API-key guide](/docs/api/console/api-keys) covers project selection, scopes, storage, rotation, and revocation.
+Create production and sandbox API keys in [Tempo Console](https://console.tempo.xyz/?to=/:org/api-keys). The [console API-key guide](/docs/api/console/api-keys) covers project selection, scopes, storage, rotation, and revocation.
 :::
 
-## API Keys
+<span id="api-keys" />
 
-Every key belongs to one of two environments, **production** or **sandbox**, that determine which chains the key may access. A key's environment is fixed when it is provisioned, and its token carries an environment-specific prefix so a leaked key is recognizable at a glance:
+## API keys
+
+An API key grants access to API operations; it does not authorize transactions from a Tempo account. Account [access keys](/docs/accounts/access-keys) are separate signing credentials.
+
+Every API key belongs to one of two environments, **production** or **sandbox**, that determine which chains the key may access. A key's environment is fixed when it is provisioned, and its token carries an environment-specific prefix so a leaked key is recognizable at a glance:
 
 - Production: `tempo:sk:...`
 - Sandbox: `tempo_sandbox:sk:...`
@@ -51,7 +55,7 @@ Authorization: Bearer tempo:sk:...
 tempo-api-key: tempo:sk:...
 ```
 
-Select the chain with the `chainId` query parameter, which accepts `mainnet`, `testnet`, or a numeric chain id. It defaults to `mainnet`:
+Select the chain with the `chainId` query parameter, which accepts `mainnet`, `testnet`, or a numeric chain id. When omitted, it defaults to mainnet for production keys and testnet for sandbox keys:
 
 ```bash
 curl 'https://api.tempo.xyz/v1/blocks?chainId=testnet' \
@@ -74,7 +78,9 @@ An API key can carry an allowlist of exact IPv4 or IPv6 addresses and CIDR range
 
 An omitted or empty allowlist leaves the key unrestricted. Updates are eventually consistent and may take a minute or more to propagate globally. See [Restrict an API key by IP address](/docs/api/console/api-keys#restrict-an-api-key-by-ip-address) for management examples and safe rollout guidance.
 
-## MPP (Paying per Request)
+<span id="mpp-paying-per-request" />
+
+## Pay per request with MPP
 
 Endpoints that permit anonymous access also accept [MPP](https://mpp.dev), a pay-per-request payment protocol, as an alternative to an API key. Use it to call those endpoints without a key, or to keep going once you exceed a rate limit.
 

@@ -8,6 +8,18 @@ description: "Get deployment details, authenticate private account access, and k
 
 Start with access to a specific Zone deployment. Get its configuration from the operator or [contact Tempo](https://tempo.xyz/contact). A Zone uses its own network and chain ID; it is not a privacy setting on a public Tempo account.
 
+## Confirm the integration interfaces
+
+Keep three controls separate when working with the Zone operator or your wallet provider:
+
+| Control | Confirm before integrating |
+| --- | --- |
+| **Signing authority** | Which account keys or provider interface sign deposits and withdrawals. |
+| **Read access** | Which credentials let your application read balances and activity, and which accounts they expose. |
+| **Funding rules** | Which assets, depositors, withdrawal recipients, and callbacks the deployment permits. |
+
+An RPC connection alone does not establish all three. If you use a hosted provider, confirm its authentication and data-scoping rules. The flow below uses the account-scoped, redacted Zone RPC; operator RPC is a separate interface.
+
 ## Configure the Zone connection
 
 :::::steps
@@ -16,9 +28,11 @@ Start with access to a specific Zone deployment. Get its configuration from the 
 
 Ask for the RPC endpoint, chain ID, portal address, enabled assets, supported SDK or contract interfaces, and endpoint access credentials. Confirm the rules for depositors, withdrawal recipients, refunds, and callbacks.
 
-### Authenticate the account
+<span id="authenticate-the-account" />
 
-For account-scoped Zone RPC, sign an authorization token with the account key and send it in the `X-Authorization-Token` header on every request. This token is separate from credentials required to reach the endpoint.
+### Authenticate RPC requests
+
+For account-scoped Zone RPC, sign an authorization token with the account key and send it in the `X-Authorization-Token` header on every request. This token authenticates RPC requests; it does not replace signatures on transactions or credentials required to reach the endpoint.
 
 Use the deployment's signing tooling and follow the [authorization token format](/docs/protocol/zones/rpc#authorization-tokens) for domain separation, chain ID, issuance, and expiry. Renew credentials before they expire.
 

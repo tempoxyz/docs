@@ -1,70 +1,48 @@
 ---
-title: Pay for Data Enrichment and Lead Generation
-description: Enrich contacts, find emails, profile companies, and generate leads using Apollo, Hunter, Clado, and more via MPP on Tempo.
+title: "Enrich company data"
+seoTitle: "Enrich company data with MPP | Tempo Docs"
+description: "Request company information from an MPP data service. This example looks up a company by its domain."
 ---
 
-import { Card, Cards } from 'vocs'
+<span id="pay-for-data-enrichment-and-lead-generation" />
+<span id="the-data-enrichment-payment-problem" />
+<span id="how-mpp-enables-paid-data-enrichment" />
 
-# Pay for data enrichment and lead generation
+# Enrich company data
 
-Let your agents enrich contacts, find emails, profile companies, and search LinkedIn — pay per lookup with stablecoins on Tempo. No API keys, no monthly minimums, no seat-based pricing.
+Request company information from an MPP data service. This example looks up a company by its domain.
 
-## The data enrichment payment problem
+Set up [Tempo Wallet CLI](/docs/cli/wallet) before running the example. These are paid service requests; check the wallet network and balance before proceeding.
 
-Sales and marketing data APIs charge monthly subscriptions with per-seat pricing, even when usage is sporadic. An agent that enriches 50 leads one week and zero the next still pays the same monthly fee. Each provider requires its own account, API key, and billing setup.
+<span id="data-enrichment-services-you-can-pay-for" />
 
-## How MPP enables paid data enrichment
+## Find a data enrichment service
 
-With MPP, your agent pays per enrichment request. Look up a company, enrich a contact, verify an email — each operation is a single paid HTTP request. No contracts, no minimums, no wasted spend during quiet periods.
-
-## Data enrichment services you can pay for
-
-| Provider | Capabilities | Service URL |
-|---|---|---|
-| [Apollo](https://apollo.mpp.paywithlocus.com) | 275M+ contacts, company enrichment, lead search | `apollo.mpp.paywithlocus.com` |
-| [Hunter](https://hunter.mpp.paywithlocus.com) | Email finding, verification, company enrichment | `hunter.mpp.paywithlocus.com` |
-| [Clado](https://clado.mpp.paywithlocus.com) | People search, LinkedIn enrichment, deep research | `clado.mpp.paywithlocus.com` |
-| [Company Enrichment](https://abstract-company-enrichment.mpp.paywithlocus.com) | Company data from domain name | `abstract-company-enrichment.mpp.paywithlocus.com` |
-| [Email Reputation](https://abstract-email-reputation.mpp.paywithlocus.com) | Email reputation and risk scoring | `abstract-email-reputation.mpp.paywithlocus.com` |
-| [BuiltWith](https://builtwith.mpp.paywithlocus.com) | Technology profiling for 100M+ websites | `builtwith.mpp.paywithlocus.com` |
-
-## Try Apollo with Tempo payments
+Use the current directory to inspect endpoints, schemas, and availability:
 
 ```bash
-# Install Tempo CLI + wallet
-curl -L https://tempo.xyz/install | bash && tempo add request && tempo wallet login
-
-# Enrich a company via Apollo
-tempo request apollo.mpp.paywithlocus.com/v1/organizations/enrich \
-  -d '{"domain": "tempo.xyz"}'
+tempo wallet services --search enrichment
+tempo wallet services <SERVICE_ID>
 ```
 
-## Prompt your agent to buy lead enrichment
+<span id="try-apollo-with-tempo-payments" />
 
+## Preview the example request
+
+Use the service details to confirm the example URL and payload. Preview its payment terms:
+
+```bash
+tempo request --dry-run https://apollo.mpp.paywithlocus.com/v1/organizations/enrich \
+  --json '{"domain": "tempo.xyz"}'
 ```
-Use apollo.mpp.paywithlocus.com to enrich company data via Tempo.
-Pay per lookup with stablecoins — no API key needed.
-```
 
-## Next steps for data enrichment payments
+After reviewing the price, run the command without `--dry-run` to make the paid request. Add [`--max-spend`](/docs/cli/request#tempo-request-flags) to cap spending.
 
-<Cards>
-  <Card
-    icon="lucide:credit-card"
-    title="Accept one-time payments"
-    description="Build a payment-gated enrichment API"
-    to="/docs/guide/machine-payments/one-time-payments"
-  />
-  <Card
-    icon="lucide:bot"
-    title="Agent quickstart"
-    description="Set up your agent to discover and pay for services"
-    to="/docs/guide/machine-payments/agent"
-  />
-  <Card
-    icon="lucide:globe"
-    title="Browse all services"
-    description="85+ MPP-enabled services in the directory"
-    to="https://mpp.dev/services"
-  />
-</Cards>
+<span id="prompt-your-agent-to-buy-lead-enrichment" />
+<span id="next-steps-for-data-enrichment-payments" />
+
+## Use the returned company record
+
+Check whether a company was matched and which requested fields are present. Keep missing data distinct from an empty or negative result when updating your records.
+
+For application code, use [Pay for services](/docs/guide/machine-payments/client). For discovery through MCP or the catalog API, use [Find services](/docs/guide/machine-payments/discover-services).

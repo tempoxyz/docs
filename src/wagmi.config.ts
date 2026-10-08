@@ -43,25 +43,22 @@ export const webAuthnRpId = rpId
 
 export function getConfig(options: getConfig.Options = {}) {
   const { multiInjectedProviderDiscovery = false } = options
+  const wallet = tempoWallet({
+    accessKey: { authorize: demoWalletAuthorization },
+    feePayer: {
+      precedence: 'user-first',
+      url: 'https://sponsor.moderato.tempo.xyz',
+    },
+  })
   return createConfig({
     batch: {
       multicall: false,
     },
     chains: [chain, tempo],
-    connectors: [
-      ...(import.meta.env.VITE_E2E === 'true'
-        ? [webAuthn()]
-        : [
-            tempoWallet({
-              authorizeAccessKey: demoWalletAuthorization,
-              feePayer: {
-                precedence: 'user-first',
-                url: 'https://sponsor.moderato.tempo.xyz',
-              },
-            }),
-            webAuthn({ ceremony: WebAuthnCeremony.keys({ rpId }) }),
-          ]),
-    ],
+    connectors:
+      import.meta.env.VITE_E2E === 'true'
+        ? [webAuthn(), wallet]
+        : [wallet, webAuthn({ ceremony: WebAuthnCeremony.keys({ rpId }) })],
     multiInjectedProviderDiscovery,
     storage: createStorage<Record<string, unknown>>({
       storage: typeof window !== 'undefined' ? localStorage : undefined,

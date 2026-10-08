@@ -1,9 +1,8 @@
 'use client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { createClient, encodeAbiParameters, type Hex, parseAbiItem, parseUnits, toHex } from 'viem'
-import { Actions, tempoActions } from 'viem/tempo'
-import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
+import { encodeAbiParameters, type Hex, parseAbiItem, parseUnits, toHex } from 'viem'
+import { Actions, createClient, Zone, http as zoneHttp } from 'viem/tempo'
 import { useConnection, useConnectorClient, usePublicClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import {
@@ -139,12 +138,12 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       rootWebAuthnAccount
         ? (createClient({
             account: rootWebAuthnAccount,
-            chain: zoneModerato(ZONE_A.id),
+            chain: Zone.a,
             transport: zoneHttp(
               getZoneRpcHttpUrl(ZONE_A.id, ZONE_A.rpcUrl),
               getZoneRpcTransportConfig(ZONE_A.id, ZONE_A.rpcUrl),
             ),
-          }).extend(tempoActions()) as unknown as ZoneClientLike)
+          }) as unknown as ZoneClientLike)
         : undefined,
     [rootWebAuthnAccount],
   )
@@ -153,12 +152,12 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       rootWebAuthnAccount
         ? (createClient({
             account: rootWebAuthnAccount,
-            chain: zoneModerato(ZONE_B.id),
+            chain: Zone.b,
             transport: zoneHttp(
               getZoneRpcHttpUrl(ZONE_B.id, ZONE_B.rpcUrl),
               getZoneRpcTransportConfig(ZONE_B.id, ZONE_B.rpcUrl),
             ),
-          }).extend(tempoActions()) as unknown as ZoneClientLike)
+          }) as unknown as ZoneClientLike)
         : undefined,
     [rootWebAuthnAccount],
   )

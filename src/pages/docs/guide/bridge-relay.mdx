@@ -6,9 +6,7 @@ description: Bridge tokens to and from Tempo using Relay. Includes supported tok
 
 # Bridging stablecoins with Relay
 
-[Relay](https://relay.link/) is a cross-chain payments network powered by a solver that fills bridge requests instantly. Users deposit on the source chain and receive funds on the destination chain within seconds - no lock-and-mint or messaging protocol required.
-
-If you are bringing an existing ERC-20 to Tempo, first decide whether to preserve it as the canonical asset behind a bridge adapter or migrate issuance to native TIP-20. See [Migrate an ERC-20 to TIP-20](/docs/guide/issuance/migrate-erc20-to-tip20).
+[Relay](https://relay.link/) routes transfers through solvers that deliver funds on the destination chain. Request a quote, submit the source transaction, and track the request until the destination account receives funds.
 
 Tempo's Relay chain ID is **`4217`**.
 
@@ -35,7 +33,7 @@ Relay uses an intent-based model with three steps:
 
 1. **Quote** - Request a quote from the Relay API specifying origin chain, destination chain, currencies, and amount. The API returns ready-to-sign transaction data.
 2. **Execute** - Submit the transaction to the source chain. The user deposits funds into Relay's depository contract.
-3. **Fill** - A Relay solver detects the deposit and fills the request on the destination chain, typically within seconds.
+3. **Fill** - A Relay solver detects the deposit and fills the request on the destination chain. Track the request to confirm delivery.
 
 For ERC-20 tokens, the quote response includes any required approval steps automatically.
 
@@ -258,10 +256,9 @@ curl "https://api.relay.link/intents/status/v3?requestId=<REQUEST_ID>"
 ### Using TypeScript (viem)
 
 ```typescript
-import { privateKeyToAccount } from 'viem/accounts'
-import { createClient } from 'viem/tempo'
+import { Account, createClient } from 'viem/tempo'
 
-const account = privateKeyToAccount('0x...')
+const account = Account.fromSecp256k1('0x...')
 
 const client = createClient({
   account,
@@ -335,6 +332,8 @@ curl "https://api.relay.link/chains"
 Common routes include Ethereum, Base, Arbitrum, Optimism, Polygon, and more. See [Relay's supported chains](https://docs.relay.link/resources/supported-chains) for the complete list.
 
 ## Further reading
+
+For token issuers bringing an ERC-20 to Tempo, see [Migrate an ERC-20 to TIP-20](/docs/guide/issuance/migrate-erc20-to-tip20).
 
 - [Relay documentation](https://docs.relay.link)
 - [Relay API reference](https://docs.relay.link/references/api/overview)

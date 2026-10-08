@@ -1,71 +1,48 @@
 ---
-title: Pay for Image, Video, and Audio Generation
-description: Generate images, videos, audio, and speech with fal.ai, OpenAI, Gemini, and Deepgram via MPP stablecoin payments on Tempo.
+title: "Generate media"
+seoTitle: "Generate media with MPP | Tempo Docs"
+description: "Request an image from an MPP generation service. Choose a supported model and provide the prompt required by its endpoint."
 ---
 
-import { Card, Cards } from 'vocs'
+<span id="pay-for-image-video-and-audio-generation" />
+<span id="the-media-generation-payment-problem" />
+<span id="how-mpp-enables-paid-media-generation" />
 
-# Pay for image, video, and audio generation
+# Generate media
 
-Let your agents generate images, videos, audio, and speech — pay per generation with stablecoins on Tempo. Access 600+ models through fal.ai, or use OpenAI, Gemini, and Deepgram directly.
+Request an image from an MPP generation service. Choose a supported model and provide the prompt required by its endpoint.
 
-## The media generation payment problem
+Set up [Tempo Wallet CLI](/docs/cli/wallet) before running the example. These are paid service requests; check the wallet network and balance before proceeding.
 
-Media generation APIs require separate accounts and API keys per provider. Costs vary wildly by model and resolution, making budgeting unpredictable. Agents that need to generate a product image, a voiceover, and a video clip in a single workflow must juggle three sets of credentials and billing systems.
+<span id="media-generation-services-you-can-pay-for" />
 
-## How MPP enables paid media generation
+## Find an image service
 
-With MPP, your agent pays per generation using stablecoins on Tempo. The price is declared upfront in the `402` Challenge — the agent knows exactly what it will pay before generating anything. One wallet, one balance, any provider.
-
-**Tempo Charge** is ideal for media generation: each request is a discrete unit with a known cost. The agent signs a TIP-20 transfer, the provider verifies it in ~500ms, and returns the generated media.
-
-## Media generation services you can pay for
-
-| Provider | Capabilities | Service URL |
-|---|---|---|
-| fal.ai | 600+ models: Flux, SD, Recraft, Grok | `fal.mpp.tempo.xyz` |
-| OpenAI | DALL·E image generation, Whisper audio | `openai.mpp.tempo.xyz` |
-| Google Gemini | Veo video, Nano Banana image gen | `gemini.mpp.tempo.xyz` |
-| [Deepgram](https://deepgram.mpp.paywithlocus.com) | Nova-3 transcription, Aura-2 TTS | `deepgram.mpp.paywithlocus.com` |
-| [Mathpix](https://mathpix.mpp.paywithlocus.com) | OCR for math, science docs, LaTeX | `mathpix.mpp.paywithlocus.com` |
-
-## Try fal.ai with Tempo payments
+Use the current directory to inspect endpoints, schemas, and availability:
 
 ```bash
-# Install Tempo CLI + wallet
-curl -L https://tempo.xyz/install | bash && tempo add request && tempo wallet login
-
-# Generate an image via fal.ai
-tempo request fal.mpp.tempo.xyz/fal-ai/flux/dev \
-  -d '{"prompt": "a futuristic city skyline at sunset"}'
+tempo wallet services --search image
+tempo wallet services <SERVICE_ID>
 ```
 
-## Prompt your agent to buy media generation
+<span id="try-falai-with-tempo-payments" />
 
+## Preview the example request
+
+Use the service details to confirm the example URL and payload. Preview its payment terms:
+
+```bash
+tempo request --dry-run https://fal.mpp.tempo.xyz/fal-ai/flux/dev \
+  --json '{"prompt": "a futuristic city skyline at sunset"}'
 ```
-Use fal.mpp.tempo.xyz to generate images via Tempo.
-Pay per image with stablecoins — no API key needed.
-```
 
-## Next steps for media generation payments
+After reviewing the price, run the command without `--dry-run` to make the paid request. Add [`--max-spend`](/docs/cli/request#tempo-request-flags) to cap spending.
 
-<Cards>
-  <Card
-    icon="lucide:credit-card"
-    title="Accept one-time payments"
-    description="Build a payment-gated media generation API"
-    to="/docs/guide/machine-payments/one-time-payments"
-  />
-  <Card
-    icon="lucide:bot"
-    title="Agent quickstart"
-    description="Set up your agent to discover and pay for services"
-    to="/docs/guide/machine-payments/agent"
-  />
-  <Card
-    icon="lucide:globe"
-    title="Browse all services"
-    description="85+ MPP-enabled services in the directory"
-    to="https://mpp.dev/services"
-  />
-</Cards>
+<span id="prompt-your-agent-to-buy-media-generation" />
+<span id="next-steps-for-media-generation-payments" />
+
+## Retrieve the generated asset
+
+Check whether the response contains an asset URL or a queued job. Follow the service’s status and download instructions to retrieve the output.
+
+For application code, use [Pay for services](/docs/guide/machine-payments/client). For discovery through MCP or the catalog API, use [Find services](/docs/guide/machine-payments/discover-services).

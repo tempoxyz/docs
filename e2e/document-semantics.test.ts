@@ -71,7 +71,7 @@ test('keeps one route title through docs and OpenAPI client navigation', async (
 
   await page.locator('a[href="/docs/api/transfers"]:visible').first().click()
   await page.waitForURL(/\/docs\/api\/transfers\/?$/)
-  await expectSingleTitle(page, 'Stablecoin Transfers API | Tempo Docs')
+  await expectSingleTitle(page, 'Read Token Transfers with the Tempo API | Tempo Docs')
 })
 
 test('gives missing pages one noindex title and one H1', async ({ page }) => {

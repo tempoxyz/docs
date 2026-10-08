@@ -157,6 +157,13 @@ Each step should be actionable and concrete. Keep long conceptual background out
 
 ## Protocol Concept Naming
 
+- Match task names across the sidebar, page title, cards, and incoming links. Preserve existing URLs and anchors when changing a visible label.
+- Distinguish an account and its signing authority from the wallet software or provider that manages signing. API keys and account access keys grant different kinds of access.
+- Identify who acts: the application, backend service, customer, wallet provider, or agent. Distinguish application authentication, provider signing policies, and onchain permissions.
+- Use "transaction" for execution, "transfer" for token movement, and "payment" for the application's business operation. A batch contains atomic calls; concurrently submitted transactions have separate outcomes.
+- Keep account balance, DEX balance, vault shares, position value, earnings, and available withdrawal amount distinct. Use "base units" for integer token amounts.
+- Keep shared explanations in one primary guide with short, relevant reminders beside examples. Product plans inform positioning, not deployment claims.
+
 - Use literal concept names in user-facing docs.
 - Use `TIP-20 Tokens` for sidebar labels, page titles, headings, and first-introduction contexts.
 - Use `TIP-20 tokens` in sentence-case prose after introduction.

@@ -2,7 +2,10 @@
 title: "Create an account"
 seoTitle: "Create an Account with Passkeys or Signing Keys | Tempo Docs"
 description: Decide whether your backend or your customer authorizes transactions, then create an account with a wallet provider, signing key, or passkey.
+interactive: true
 ---
+
+import { PasskeyAccountDemo } from '../../../components/guides/PasskeyAccountDemo'
 
 # Create an account
 
@@ -16,13 +19,41 @@ Start with who authorizes transactions. A payroll service may sign payouts from 
 
 The account address is derived from its root public key. Store the address against the corresponding customer or business record in your application.
 
+## Try a passkey account
+
+Create a passkey for this site and inspect its account address. Use the [signing-key example](#create-an-account-from-a-signing-key) for backend signing, or the [passkey example](#create-a-passkey-account) to build this browser flow into your application.
+
+<PasskeyAccountDemo />
+
+## Create an account from a signing key
+
+Install Viem with `pnpm add viem`. For a local development account, generate a secp256k1 private key and derive the account address:
+
+```ts [create-account.ts]
+import { generatePrivateKey } from 'viem/accounts'
+import { Account } from 'viem/tempo'
+
+const privateKey = generatePrivateKey()
+export const account = Account.fromSecp256k1(privateKey)
+
+console.log(account.address)
+```
+
+This example creates a new key each time it runs. To keep the account, save the key in your application's secret storage and load it when constructing the signer.
+
+For a signer that uses raw P-256 keys, use `Account.fromP256` with `P256.randomPrivateKey()` from `viem/tempo`. Choose the method your signing environment supports:
+
+| Signing method | What it means |
+| --- | --- |
+| secp256k1 | The ECDSA curve commonly used by Ethereum wallets. |
+| P-256 | Another ECDSA curve, supported by many device and platform signing systems. |
+| WebAuthn | A passkey authentication ceremony that uses P-256 signatures and additional authentication data. |
+
+ECDSA is the signature algorithm; secp256k1 and P-256 are curves. WebAuthn wraps a P-256 signature with authentication data. See the [signature specification](/docs/protocol/transactions/spec-tempo-transaction#signature-types) for each encoding.
+
 ## Create a passkey account
 
-This browser example uses WebAuthn to create a passkey and derives a Tempo account from its public key. Install Viem in your application:
-
-```bash
-pnpm add viem
-```
+This browser example uses WebAuthn to create a passkey and derives a Tempo account from its public key. It uses the same Viem package.
 
 Call this function from a user action, such as a **Create account** button, on an HTTPS origin or localhost:
 
@@ -49,32 +80,6 @@ export async function createPasskeyAccount() {
 Save the credential ID and public key in the customer's account record. On a later visit, pass them to `Account.fromWebAuthnP256` to reconnect the signer. Signing still requires access to the original passkey and the same WebAuthn relying-party configuration.
 
 The passkey signs Tempo transaction requests; your application handles customer login. For a device or application session, authorize a [limited access key](/docs/accounts/access-keys) with the permissions it needs.
-
-## Create an account from a signing key
-
-For a local development account, generate a secp256k1 private key and derive the account address:
-
-```ts [create-account.ts]
-import { generatePrivateKey } from 'viem/accounts'
-import { Account } from 'viem/tempo'
-
-const privateKey = generatePrivateKey()
-export const account = Account.fromSecp256k1(privateKey)
-
-console.log(account.address)
-```
-
-This example creates a new key each time it runs. To keep the account, save the key in your application's secret storage and load it when constructing the signer.
-
-For a signer that uses raw P-256 keys, use `Account.fromP256` with `P256.randomPrivateKey()` from `viem/tempo`. Choose the method your signing environment supports:
-
-| Signing method | What it means |
-| --- | --- |
-| secp256k1 | The ECDSA curve commonly used by Ethereum wallets. |
-| P-256 | Another ECDSA curve, supported by many device and platform signing systems. |
-| WebAuthn | A passkey authentication ceremony that uses P-256 signatures and additional authentication data. |
-
-ECDSA is the signature algorithm; secp256k1 and P-256 are curves. WebAuthn wraps a P-256 signature with authentication data. See the [signature specification](/docs/protocol/transactions/spec-tempo-transaction#signature-types) for each encoding.
 
 ## Fund and use the account
 

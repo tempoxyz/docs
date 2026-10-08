@@ -1,7 +1,7 @@
 ---
 title: "Tempo Earn"
 seoTitle: "Tempo Earn | Tempo Docs"
-description: Offer earning positions in your app. Choose a vault, deposit stablecoins, track earnings, and withdraw funds.
+description: Add an earning balance to your app. Choose a vault, deposit stablecoins, display earnings, and handle withdrawals.
 ---
 
 import { Cards, Card } from 'vocs'
@@ -13,7 +13,7 @@ import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 # Tempo Earn
 
-Let users deposit stablecoins into earning positions, track their earnings, and withdraw funds.
+Add an earning balance to your app. Let customers deposit stablecoins into a vault, see their earnings, and withdraw funds.
 
 [Choose a vault →](/docs/earn/vaults)
 
@@ -23,13 +23,15 @@ Let users deposit stablecoins into earning positions, track their earnings, and 
 
 ## How Earn works
 
-Your app connects to a vault that accepts deposits and issues shares representing each user's position. The value of those shares changes with the underlying strategy's returns, losses, and fees. An engine connects the vault to the yield provider.
+A vault accepts stablecoin deposits and issues shares representing each account's holding, called a position. The value of those shares changes with the underlying strategy's returns, losses, and fees.
 
-Read [How Earn works](/docs/earn/how-it-works) for the account model. A position's value and the amount immediately available to withdraw can differ.
+Read [How Earn works](/docs/earn/how-it-works) for the vault and share model. A position's value and the amount immediately available to withdraw can differ.
 
 <span id="choose-the-vault-integration" />
 
-## Choose a yield source
+<span id="choose-a-yield-source" />
+
+## Build the deposit flow
 
 <Cards>
   <Card title="Choose a vault" description="Check the accepted asset, strategy, access requirements, and withdrawal support." to="/docs/earn/vaults" icon="lucide:search" />
@@ -56,8 +58,10 @@ Redeem the required stablecoins, confirm their arrival, then [send a payment](/d
 
 <span id="yield-providers" />
 
+<span id="for-yield-providers" />
+
 ## Connect a yield source
 
-Yield providers implement engines that connect their products to Earn's vault model. Define the accepted asset, share valuation, fees, access controls, and deposit and redemption behavior. Confirm the engine interface and deployment with Tempo before integrating a new source.
+An engine connects a vault to its underlying yield strategy. If you provide that strategy, implement the engine interface to connect it to Earn. Define the accepted asset, share valuation, fees, access controls, and deposit and redemption behavior. Confirm the engine interface and deployment with Tempo before integrating a new source.
 
 For a [Zone](/docs/zones) integration, check vault support and [private Earn tracking](/docs/earn/integrate#track-private-earn-activity) before using the public-account flow.

@@ -44,7 +44,7 @@ Start with [Stablecoins on Tempo](/get-started/stablecoins) to understand TIP-20
 
 Choose the payment reference that fits your application:
 
-- **[Transfer memos](/docs/guide/payments/transfer-memos)** attach a 32-byte reference to a payment. Use a memo to match a transfer to an invoice, order, or other record.
+- **[Payment references](/docs/guide/payments/transfer-memos)** use a 32-byte transfer memo to identify a payment. Use a memo to match a transfer to an invoice, order, or other record.
 - **[Customer deposit addresses](/docs/guide/payments/virtual-addresses)** give each customer a distinct virtual address. Deposits credit one registered account, while transfer events preserve the address needed to identify the customer.
 
 These deposit addresses receive TIP-20 payments on Tempo. To receive funds from another network, use [Routes deposit addresses](/docs/routes/deposits).
@@ -53,11 +53,11 @@ These deposit addresses receive TIP-20 payments on Tempo. To receive funds from 
 
 | Your application needs to… | Use |
 | --- | --- |
-| Cover fees for the sender | [Sponsor transaction fees](/docs/guide/payments/sponsor-user-fees) |
+| Cover fees for the sender | [Sponsor fees](/docs/guide/payments/sponsor-user-fees) |
 | Select the stablecoin used for fees | [Choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin) |
 | Send several payments in one transaction | [Batch payments](/docs/guide/payments/send-a-payment#batch-payment-transactions) |
-| Submit independent transactions at the same time | [Send parallel transactions](/docs/guide/payments/send-parallel-transactions) |
-| Limit which tokens and senders an account accepts | [Configure receive policies](/docs/guide/payments/configure-receive-policies) |
+| Submit independent transactions at the same time | [Send payments in parallel](/docs/guide/payments/send-parallel-transactions) |
+| Limit which tokens and senders an account accepts | [Control incoming payments](/docs/guide/payments/configure-receive-policies) |
 
 ## Pay for services and accept API payments
 

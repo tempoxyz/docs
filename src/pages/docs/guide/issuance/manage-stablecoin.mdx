@@ -21,15 +21,15 @@ import { Cards, Card } from 'vocs'
 
 # Managing your TIP-20 stablecoin
 
-Configure your stablecoin's permissions, supply limits, and compliance policies after deployment. This guide covers granting roles to manage token operations, setting supply caps, configuring transfer policies, and controlling token transfers through pause/unpause functionality.
+Assign token-management roles, set a supply cap, and configure transfer policies. The walkthrough uses a token created on Moderato testnet.
 
 TIP-20 tokens use a role-based access control system that allows you to delegate different administrative functions to different addresses. For detailed information about the role system, see the [TIP-20 specification](/docs/protocol/tip20/spec#tip-20-roles).
 
 ## Stablecoin management steps
 
-In this guide, we'll walk through how to assign and check the **`issuer`** role, but the process is identical for other roles like `pause`, `unpause`, `burnBlocked`, and `defaultAdmin`.
+The first example assigns and checks the `issuer` role. Use the same role-management methods for `pause`, `unpause`, `burnBlocked`, and `defaultAdmin`.
 
-::::steps
+:::::steps
 
 ### Set up stablecoin management
 
@@ -85,17 +85,7 @@ export function GrantRoles() {
 
 ```tsx twoslash [config.ts] filename="config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { tempoWallet } from 'wagmi/connectors'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -162,17 +152,7 @@ export function GrantRoles() {
 
 ```tsx twoslash [config.ts] filename="config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { tempoWallet } from 'wagmi/connectors'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -273,22 +253,12 @@ export function RevokeRoles() {
 
 ```tsx twoslash [config.ts] filename="config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { tempoWallet } from 'wagmi/connectors'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
 
-::::
+:::::
 
 ## Stablecoin management recipes
 
@@ -346,17 +316,7 @@ export function SetSupplyCap() {
 
 ```tsx twoslash [config.ts] filename="config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { tempoWallet } from 'wagmi/connectors'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -455,17 +415,7 @@ export function LinkTokenPolicy() {
 
 ```tsx twoslash [config.ts] filename="config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { tempoWallet } from 'wagmi/connectors'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -533,17 +483,7 @@ export function PauseUnpauseTransfers() {
 
 ```tsx twoslash [config.ts] filename="config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { tempoWallet } from 'wagmi/connectors'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -605,17 +545,7 @@ export function BurnBlocked() {
 
 ```tsx twoslash [config.ts] filename="config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { tempoWallet } from 'wagmi/connectors'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::

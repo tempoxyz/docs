@@ -10,7 +10,14 @@ Quote the exact payment before requesting a signature or showing deposit instruc
 
 ## Choose which amount to fix
 
-For connected-wallet transfers, use `GET /v1/routes/transfers/quote`. Select `exactSource` to fix the amount sent or `exactDestination` to fix the amount received. Express `amount` in the base units of the token selected by that mode.
+For transfers, use `GET /v1/routes/transfers/quote` and choose which side determines the quote:
+
+| Your application specifies | Amount mode | `amount` uses |
+| --- | --- | --- |
+| How much to send | `exactSource` | Source token base units |
+| How much the recipient should receive | `exactDestination` | Destination token base units |
+
+Review the returned amounts and minimum destination amount before continuing.
 
 For deposit addresses, use `GET /v1/routes/deposit-addresses/quote` with the source chain, source token, destination token, and amount. Check the [endpoint reference](/docs/api/routes/deposit-addresses) for the supported parameters.
 
@@ -20,7 +27,7 @@ Present the source asset and amount, destination asset and amount, minimum desti
 
 `destinationAmount` includes route deductions. The `fees` array lists separately charged fees, so an empty array does not establish a fee-free route.
 
-A quote does not create or reserve a transfer. Review the terms returned when you create the transfer as well, before asking the wallet to sign its action.
+A quote does not create or reserve a transfer. Review the terms returned when you create the transfer as well, before asking the source account's signer to sign its action.
 
 ## Refresh expired quotes
 

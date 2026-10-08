@@ -218,7 +218,7 @@ test('seven documentation sections and Specifications keep their own sidebars th
     'Build with AI',
     'Create an account',
     'Get test funds',
-    'First payment',
+    'Send a payment',
     'Network details',
   ])
   for (const href of [

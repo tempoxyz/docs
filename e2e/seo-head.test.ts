@@ -59,7 +59,7 @@ const cases: {
     path: '/get-started',
     title: 'Get Started with Tempo | Tempo Docs',
     ogTitle: 'Get Started',
-    descriptionIncludes: 'Understand stablecoins on Tempo, create a test account',
+    descriptionIncludes: 'Learn how accounts and stablecoins work on Tempo',
     ogImageIncludes: '/api/og',
   },
   {
@@ -85,8 +85,8 @@ const cases: {
   },
   {
     path: '/docs/api/console',
-    title: 'How to Use the Tempo API Console | Docs',
-    ogTitle: 'Using the Tempo API Console',
+    title: 'How to Use the Tempo Console | Docs',
+    ogTitle: 'Tempo Console',
     descriptionIncludes: 'create projects and API keys',
     ogImageIncludes: 'section=API',
   },

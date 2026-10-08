@@ -23,6 +23,6 @@ mutate({
   token: '0x20c0000000000000000000000000000000000001',
 })
 
-console.log('Transaction hash:', result.receipt.transactionHash)
+if (result) console.log('Transaction hash:', result.receipt.transactionHash)
 // @log: Transaction hash: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
 // [!endregion wagmi-hooks]

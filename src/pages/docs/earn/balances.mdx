@@ -6,7 +6,7 @@ description: "Read Earn positions, show their asset value, and distinguish earni
 
 # Balances and earnings
 
-Show the asset value of a user's position as their earning balance. Keep the share count available for accounting, and show pending withdrawals separately.
+Display the current asset value of each account's position as its earning balance. Keep share balance, earnings, available withdrawals, and pending withdrawals distinct.
 
 ## Read a position
 
@@ -24,7 +24,7 @@ Use `GET /v1/earn/vaults/{vaultId}/earnings/{address}` for earnings over a selec
 
 Vault responses can include an `apy` object with observed vault yield, reward information, and a measurement window. It can be `null` when no component is measurable. Display unavailable data as unavailable, rather than as zero.
 
-Request account-specific APY from the [position endpoint](/docs/api/earn#getearnvaultposition) when showing a user's effective rate. Reward qualification can lag a new deposit or transfer, and an eligible boost does not mean the whole balance qualifies. Keep temporary reward terms separate from observed vault yield.
+Request account-specific APY from the [position endpoint](/docs/api/earn#getearnvaultposition) when showing an account's effective rate. Reward qualification can lag a new deposit or transfer, and an eligible boost does not mean the whole balance qualifies. Keep temporary reward terms separate from observed vault yield.
 
 For charts, use the [share-price history endpoint](/docs/api/earn#getearnvaultshareprices) for vault share prices and the [earnings endpoint](/docs/api/earn#getearnvaultearnings) for an account's earnings. Label each chart for the metric it shows.
 

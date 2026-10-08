@@ -1,7 +1,7 @@
 ---
-title: "Getting funds on Tempo: wallet, faucet & bridge"
-seoTitle: "Get Funds on Tempo: 3 Ways to Start | Docs"
-description: Bridge assets to Tempo, add funds in Tempo Wallet, or use the faucet on testnet.
+title: "Fund an account"
+seoTitle: "Fund a Tempo account | Tempo Docs"
+description: Get testnet stablecoins, try funding with Tempo Wallet, or integrate cross-network deposits with Routes.
 interactive: true
 ---
 
@@ -9,9 +9,18 @@ import * as Demo from '../../../components/guides/Demo.tsx'
 import { DepositToTempoWallet } from '../../../components/guides/steps/wallet/DepositToTempoWallet.tsx'
 import { SignInWithTempo } from '../../../components/guides/steps/wallet/SignInWithTempo.tsx'
 
-# Getting funds on Tempo: wallet, faucet & bridge
+<span id="getting-funds-on-tempo-wallet-faucet--bridge" />
 
-Tempo Wallet uses Tempo Mainnet. Funds added through Tempo Wallet or a mainnet bridge are production assets. OUSD, the recommended stablecoin on Tempo, and pathUSD in Tempo Wallet are live mainnet assets. For development on the separate Moderato testnet, use the faucet described below.
+# Fund an account
+
+Choose a funding path for the network and integration you are building. Tempo Wallet uses mainnet and real funds; the Moderato faucet supplies separate test tokens.
+
+| You want to | Start with |
+| --- | --- |
+| Test a payment or integration | [Get testnet funds](#testnet-funds) |
+| Try funding an account | [Tempo Wallet](#tempo-wallet) |
+| Add cross-network funding to your application | [Tempo Routes](/docs/routes) |
+| Integrate a specific bridge provider | [Bridge integrations](#bridge) |
 
 ## Tempo Wallet
 
@@ -24,14 +33,7 @@ Tempo Wallet uses Tempo Mainnet. Funds added through Tempo Wallet or a mainnet b
 
 ### With the CLI
 
-Install the [Tempo CLI](/docs/cli/wallet) and log in to your wallet:
-
-```bash
-curl -fsSL https://tempo.xyz/install | bash
-tempo wallet login
-```
-
-Then fund your wallet:
+After [setting up Tempo Wallet in the CLI](/docs/cli/wallet), run:
 
 ```bash
 tempo wallet fund
@@ -55,20 +57,23 @@ codex exec "Read https://tempo.xyz/SKILL.md and fund my Tempo Wallet"
 
 ## Get OUSD
 
-OUSD is the recommended stablecoin on Tempo. Mint it 1:1 with no fees through an OUSD integration partner, or swap into it on the [Stablecoin DEX](/docs/guide/stablecoin-dex) from any USD stablecoin already on Tempo. See [OUSD on Tempo](/docs/guide/ousd).
+See [OUSD on Tempo](/docs/guide/ousd) for minting, redemption, and swap options. Check the token contract address and network when adding an asset to your application.
 
-## Bridge
+## Add funding to your application
 
-Use one of these supported bridges to move assets to Tempo:
+Use [Tempo Routes](/docs/routes) to quote a cross-network transfer or create a deposit address for customers who send funds independently. Track destination delivery before crediting the payment in your application.
 
-When you bridge USDC with LayerZero (Stargate), it appears on Tempo as USDC.e. Swap USDC.e to [OUSD](/docs/guide/ousd) on the Stablecoin DEX if you want to hold the recommended stablecoin. Stargate does not charge its transfer fee on the direct route between Ethereum and Tempo, but other routes can vary, so check the quote before sending.
+<span id="bridge" />
 
-- **[LayerZero (Stargate)](/docs/guide/bridge-layerzero)**: Bridge USDC to and from Tempo via Stargate. See the [full bridging guide](/docs/guide/bridge-layerzero) for contract addresses, code examples, and EndpointDollar details.
-- **[Chainlink CCIP](https://docs.chain.link/ccip/directory/mainnet/chain/tempo-mainnet)**: Transfer supported tokens to and from Tempo. Check the CCIP Directory for current tokens, lanes, fees, and contract configuration.
-- **[Squid](https://app.squidrouter.com/)**: Swap and bridge assets to Tempo in one flow.
-- **[Relay](https://relay.link/)**: Bridge assets to Tempo with low fees.
-- **[Across](https://app.across.to/)**: Bridge assets to Tempo quickly with competitive fees.
-- **[Bungee](/docs/guide/bridge-bungee)**: Swap and bridge assets to and from Tempo using Bungee Deposit. See the [full Bungee guide](/docs/guide/bridge-bungee) for quote, transaction, and status examples.
+## Bridge integrations
+
+If you integrate a bridge directly, follow its quote, submission, and delivery flow:
+
+- [LayerZero (Stargate)](/docs/guide/bridge-layerzero)
+- [Bungee](/docs/guide/bridge-bungee)
+- [Relay](/docs/guide/bridge-relay)
+
+See [bridge providers](/docs/ecosystem/bridges) for the directory. Check the output asset as well as the network: USDC sent through Stargate arrives on Tempo as USDC.e.
 
 ## Testnet funds
 

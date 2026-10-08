@@ -26,6 +26,8 @@ onlyBuiltDependencies:
   - vue-demi
 
 overrides:
+  # accounts 0.18.5 was published with unresolved catalog dependencies.
+  'tapimo>accounts': 0.18.4
   'baseline-browser-mapping@<2.11.0': 2.11.0
   'browserslist@<4.28.7': 4.28.7
   dompurify: '>=3.4.0'

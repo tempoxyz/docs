@@ -1,13 +1,15 @@
 ---
-title: "Transferring stablecoins with the Tempo API"
-seoTitle: "Stablecoin Transfers API | Tempo Docs"
-description: List token transfer events across Tempo — the token movements produced by executing transactions.
+title: "Read token transfers"
+seoTitle: "Read Token Transfers with the Tempo API | Tempo Docs"
+description: Read token movements, recipient addresses, and payment memos from Tempo API transfer records.
 ---
 
-# Transferring stablecoins with the Tempo API
+<span id="transferring-stablecoins-with-the-tempo-api" />
 
-A transfer is an effect of executing a [transaction](/docs/api/transactions): a TIP-20 token moved from one account to another, optionally with a payment memo. Multiple transfers can come from one transaction, and some transactions produce none; each transfer links back to its transaction via `transactionHash`.
+# Read token transfers
 
-:::info
-See [Transactions & Transfers](/docs/api/transactions-and-transfers) for how a transfer relates to the transaction that produced it.
-:::
+Read the token movements produced by Tempo transactions. A transfer record identifies the token, sender, recipient, and amount, and links to its transaction through `transactionHash`.
+
+Use the [Transfers API reference](/docs/api/reference) for request and response fields. The [transaction and transfer model](/docs/api/transactions-and-transfers) explains how the records relate.
+
+To create a payment, follow [Send a payment](/docs/guide/payments/send-a-payment). To reconcile incoming payments, follow [Receive a payment](/docs/guide/payments/accept-a-payment).

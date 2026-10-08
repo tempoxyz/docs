@@ -1,51 +1,44 @@
 ---
-title: "Exchange stablecoins on the Tempo DEX"
-seoTitle: "How the Tempo Stablecoin DEX Works | Docs"
-description: Trade between stablecoins on Tempo's enshrined DEX. Execute swaps, provide liquidity, and query the onchain orderbook for optimal pricing.
+title: "Stablecoin DEX"
+seoTitle: "Stablecoin DEX | Tempo Docs"
+description: Swap stablecoins on Tempo, provide orderbook liquidity, and supply liquidity for fee-token conversions.
 ---
 
 import { Cards, Card } from 'vocs'
 
-# Exchange stablecoins on the Tempo DEX
+<span id="exchange-stablecoins-on-the-tempo-dex" />
 
-Trade between stablecoins on Tempo's enshrined decentralized exchange (DEX). Start with quote-token behavior, then execute swaps, provide liquidity, or manage the fee-liquidity path for a stablecoin.
+# Stablecoin DEX
 
-## Stablecoin Exchange Paths
+Swap stablecoins on Tempo through the onchain orderbook. Request a quote, set an output limit, and submit the swap in your application.
+
+<span id="stablecoin-exchange-paths" />
+
+## Swap or provide liquidity
 
 <Cards>
   <Card
-    description="Learn about pathUSD, the root quote token that powers stablecoin interoperability."
-    to="/docs/protocol/exchange/quote-tokens#pathusd"
-    icon="lucide:coins"
-    title="Understand pathUSD"
-  />
-
-  <Card
-    description="Learn about OUSD, the recommended stablecoin on Tempo, and how it trades against pathUSD."
-    to="/docs/guide/ousd"
-    icon="lucide:badge-dollar-sign"
-    title="Understand OUSD"
-  />
-
-  <Card
-    description="Execute swaps between stablecoins."
+    description="Quote and swap between stablecoins with slippage protection."
     to="/docs/guide/stablecoin-dex/executing-swaps"
     icon="lucide:arrow-left-right"
-    title="Execute Stablecoin Swaps"
+    title="Swap stablecoins"
   />
-
   <Card
-    description="Provide liquidity by placing limit orders or flip orders in the orderbook."
+    description="Place limit orders or flip orders in the orderbook."
     to="/docs/guide/stablecoin-dex/providing-liquidity"
     icon="lucide:droplet"
-    title="Provide Stablecoin Liquidity"
+    title="Provide liquidity"
   />
-
   <Card
-    description="Keep fee pools balanced so users can pay transaction fees with your stablecoin."
+    description="Supply Fee AMM reserves for transaction-fee conversions."
     to="/docs/guide/stablecoin-dex/managing-fee-liquidity"
     icon="lucide:badge-dollar-sign"
-    title="Manage Fee Liquidity"
+    title="Provide fee liquidity"
   />
-
 </Cards>
+
+Fee AMM pools convert transaction fees. Use the Stablecoin DEX swap flow to convert account funds or payment amounts.
+
+## Understand trading pairs and balances
+
+[Quote tokens](/docs/protocol/exchange/quote-tokens) explain how trading pairs connect through pathUSD. [DEX balances](/docs/protocol/exchange/exchange-balance) describe funds held in the exchange separately from an account's token balance.

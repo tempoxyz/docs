@@ -25,14 +25,16 @@ Move stablecoins between Tempo and supported networks. Get a quote, authorize th
 
 <span id="choose-how-to-move-funds" />
 
-## Choose how funds arrive
+<span id="choose-how-funds-arrive" />
+
+## Choose a transfer flow
 
 <Cards>
-  <Card title="Make a transfer" description="Request signatures from a connected wallet to move funds into or out of Tempo." to="/docs/routes/transfers" icon="lucide:arrow-left-right" />
+  <Card title="Make a transfer" description="Move funds when your application can authorize transactions from the source account." to="/docs/routes/transfers" icon="lucide:arrow-left-right" />
   <Card title="Accept deposits" description="Give a customer an address to fund from an external wallet, then track each deposit." to="/docs/routes/deposits" icon="lucide:arrow-down-left" />
 </Cards>
 
-A route connects a source network and token to a destination network and token. Start with [supported networks and assets](/docs/routes/networks), then quote the exact payment. Routes prepares transfers; your source wallet authorizes and submits them.
+A route connects a source network and token to a destination network and token. Start with [supported networks and assets](/docs/routes/networks), then quote the exact payment. Routes prepares the source-chain calls; your application uses the source account's signer to sign and submit them.
 
 <span id="quote-the-transfer" />
 <span id="create-the-transfer" />
@@ -40,9 +42,11 @@ A route connects a source network and token to a destination network and token. 
 <span id="register-the-source-transactions" />
 <span id="track-destination-delivery" />
 
-## Transfer from a connected wallet
+<span id="transfer-from-a-connected-wallet" />
 
-[Make a transfer](/docs/routes/transfers) covers quoting, creating the transfer, signing the source calls, and registering the resulting transaction hashes. Use this flow when your application can request signatures from the source wallet.
+## Transfer from an account your app can authorize
+
+[Make a transfer](/docs/routes/transfers) covers quoting, creating the transfer, signing the source calls, and registering the resulting transaction hashes. Use this flow when your application controls source signing or can request signatures through a wallet provider or connected wallet.
 
 <span id="quote-the-deposit" />
 <span id="create-a-reusable-address" />
@@ -51,7 +55,7 @@ A route connects a source network and token to a destination network and token. 
 
 ## Accept deposits from external wallets
 
-[Accept deposits](/docs/routes/deposits) covers reusable addresses for a specific source network and token. Each incoming deposit has its own delivery status. These differ from [virtual addresses](/docs/guide/payments/virtual-addresses), which attribute payments on Tempo to a shared balance.
+[Accept deposits](/docs/routes/deposits) covers reusable addresses for customers who send funds independently of your application, on a specific source network and token. Each incoming deposit has its own delivery status. These differ from [virtual addresses](/docs/guide/payments/virtual-addresses), which attribute payments on Tempo to a shared balance.
 
 <span id="prepare-api-access" />
 

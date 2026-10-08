@@ -1,9 +1,8 @@
 'use client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { createClient, type Hex, parseUnits } from 'viem'
-import { Actions, tempoActions } from 'viem/tempo'
-import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
+import { type Hex, parseUnits } from 'viem'
+import { Actions, createClient, Zone, http as zoneHttp } from 'viem/tempo'
 import { useConnection, useConnectorClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import {
@@ -76,19 +75,19 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       rootWebAuthnAccount
         ? (createClient({
             account: rootWebAuthnAccount,
-            chain: zoneModerato(ZONE_ID),
+            chain: Zone.a,
             transport: zoneHttp(
               getZoneRpcHttpUrl(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]),
               getZoneRpcTransportConfig(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]),
             ),
-          }).extend(tempoActions()) as unknown as ZoneClientLike)
+          }) as unknown as ZoneClientLike)
         : undefined,
     [rootWebAuthnAccount],
   )
 
   const zoneAuthorization = useZoneAuthorization({
     address,
-    chainId: zoneModerato(ZONE_ID).id,
+    chainId: Zone.a.id,
     queryKey: ['guide-private-zones-send-auth', address, ZONE_ID],
     zoneClient,
   })
@@ -177,7 +176,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       const { receipt } = await Actions.token.transferSync(zoneClient as never, {
         account: rootWebAuthnAccount,
         amount: TRANSFER_AMOUNT,
-        chain: zoneModerato(ZONE_ID) as never,
+        chain: Zone.a as never,
         feeToken: ousd,
         to: FAKE_RECIPIENT as Hex,
         token: ousd,

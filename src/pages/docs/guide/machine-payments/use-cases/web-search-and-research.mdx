@@ -1,72 +1,48 @@
 ---
-title: Pay for Web Search and Research
-description: Let agents search the web, extract content, and crawl pages using MPP services like Parallel, Exa, Brave, and Firecrawl with stablecoin payments.
+title: "Search the web"
+seoTitle: "Search the web with MPP | Tempo Docs"
+description: "Submit a search query to an MPP research service. This example searches for information about the Machine Payments Protocol."
 ---
 
-import { Card, Cards } from 'vocs'
+<span id="pay-for-web-search-and-research" />
+<span id="the-web-search-payment-problem" />
+<span id="how-mpp-enables-paid-web-research" />
 
-# Pay for web search and research
+# Search the web
 
-Give your agents access to web search, content extraction, and multi-hop research — pay per query with stablecoins on Tempo. No API keys, no monthly plans, no usage caps.
+Submit a search query to an MPP research service. This example searches for information about the Machine Payments Protocol.
 
-## The web search payment problem
+Set up [Tempo Wallet CLI](/docs/cli/wallet) before running the example. These are paid service requests; check the wallet network and balance before proceeding.
 
-Agents that research, summarize, or fact-check need reliable web search. But search APIs require developer accounts, billing setups, and API keys for every provider. Rate limits are tied to pricing tiers, and switching between providers means managing multiple integrations.
+<span id="web-research-services-you-can-pay-for" />
 
-## How MPP enables paid web research
+## Find a web search service
 
-With MPP, your agent pays per search query or page extraction in a single HTTP request. The agent discovers the price via the `402` Challenge, pays with a stablecoin transfer, and gets results — no signup required. Switch between search providers by changing the URL.
-
-**Tempo Charge** works well here: each search query is an independent request with a known price. The agent signs a TIP-20 transfer, the provider verifies it in ~500ms, and returns the results.
-
-## Web research services you can pay for
-
-| Provider | Capabilities | Service URL |
-|---|---|---|
-| [Parallel](https://parallelmpp.dev) | Web search, page extraction, multi-hop research | `parallelmpp.dev` |
-| Exa | AI-powered search, content retrieval, answers | `api.exa.ai` |
-| [Brave](https://brave.mpp.paywithlocus.com) | Web, news, images, videos, AI answers | `brave.mpp.paywithlocus.com` |
-| Firecrawl | Web scraping, crawling, structured extraction | `firecrawl.mpp.tempo.xyz` |
-| [Diffbot](https://diffbot.mpp.paywithlocus.com) | Article, product, and discussion extraction | `diffbot.mpp.paywithlocus.com` |
-| Oxylabs | Web scraping with geo-targeting and JS rendering | `oxylabs.mpp.tempo.xyz` |
-
-## Try Parallel with Tempo payments
+Use the current directory to inspect endpoints, schemas, and availability:
 
 ```bash
-# Install Tempo CLI + wallet
-curl -L https://tempo.xyz/install | bash && tempo add request && tempo wallet login
-
-# Search the web via Parallel
-tempo request parallelmpp.dev/search \
-  -d '{"query": "machine payments protocol"}'
+tempo wallet services --search search
+tempo wallet services <SERVICE_ID>
 ```
 
-## Prompt your agent to buy web research
+<span id="try-parallel-with-tempo-payments" />
 
+## Preview the example request
+
+Use the service details to confirm the example URL and payload. Preview its payment terms:
+
+```bash
+tempo request --dry-run https://parallelmpp.dev/search \
+  --json '{"query": "machine payments protocol"}'
 ```
-Use parallelmpp.dev to search the web via Tempo.
-Pay per query with stablecoins — no API key needed.
-```
 
-## Next steps for web research payments
+After reviewing the price, run the command without `--dry-run` to make the paid request. Add [`--max-spend`](/docs/cli/request#tempo-request-flags) to cap spending.
 
-<Cards>
-  <Card
-    icon="lucide:credit-card"
-    title="Accept one-time payments"
-    description="Build a payment-gated search API"
-    to="/docs/guide/machine-payments/one-time-payments"
-  />
-  <Card
-    icon="lucide:bot"
-    title="Agent quickstart"
-    description="Set up your agent to discover and pay for services"
-    to="/docs/guide/machine-payments/agent"
-  />
-  <Card
-    icon="lucide:globe"
-    title="Browse all services"
-    description="85+ MPP-enabled services in the directory"
-    to="https://mpp.dev/services"
-  />
-</Cards>
+<span id="prompt-your-agent-to-buy-web-research" />
+<span id="next-steps-for-web-research-payments" />
+
+## Use the search results
+
+Keep source URLs and publication dates with the extracted information. Search results identify material to inspect; they do not verify the claims in that material.
+
+For application code, use [Pay for services](/docs/guide/machine-payments/client). For discovery through MCP or the catalog API, use [Find services](/docs/guide/machine-payments/discover-services).

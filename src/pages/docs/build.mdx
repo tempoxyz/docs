@@ -1,54 +1,30 @@
 ---
 title: "Stablecoins"
 seoTitle: "Build with Stablecoins on Tempo | Tempo Docs"
-description: Send and accept stablecoin payments, issue TIP-20 Tokens, and exchange stablecoins on Tempo with guides for transfers, fees, and payment controls.
+description: Learn about Tempo stablecoins and find guides for accounts, payments, and exchange.
 ---
-
-import { Cards, Card } from 'vocs'
 
 <span id="build-on-tempo" />
 
 # Stablecoins
 
-Send and accept payments, issue TIP-20 Tokens, and exchange stablecoins on Tempo. Start by [sending your first payment](/docs/guide/payments/send-a-payment) with a test wallet.
+Start with [Stablecoins on Tempo](/get-started/stablecoins) to understand TIP-20 Tokens, then use [Accounts](/docs/accounts) and [Payments](/docs/payments) to build your integration.
 
 <span id="core-build-paths" />
 
 ## Build with stablecoins
 
-<Cards>
-  <Card
-    title="Stablecoin payments"
-    description="Send and accept payments, attach memos, and reconcile transfers."
-    to="/docs/guide/payments"
-    icon="lucide:send"
-  />
-  <Card
-    title="TIP-20 Tokens"
-    description="Create a stablecoin, mint tokens, and manage supply and permissions."
-    to="/docs/guide/issuance"
-    icon="lucide:coins"
-  />
-  <Card
-    title="Stablecoin exchange"
-    description="Swap stablecoins and provide liquidity on Tempo's built-in exchange."
-    to="/docs/guide/stablecoin-dex"
-    icon="lucide:arrow-left-right"
-  />
-</Cards>
+- [Payments](/docs/payments) covers sending, receiving, and reconciling payments.
+- [Routes](/docs/routes) covers moving funds between Tempo and other networks.
+- [Stablecoin exchange](/docs/guide/stablecoin-dex) covers swaps and liquidity on Tempo.
+- [Issue stablecoins](/docs/guide/issuance) covers token creation, supply, and permissions for issuers.
 
 <span id="production-essentials" />
 
 ## Add payment controls
 
-- [Attach transfer memos](/docs/guide/payments/transfer-memos) to associate payments with invoices or other records.
-- [Use virtual addresses](/docs/guide/payments/virtual-addresses) to assign a deposit address to each customer.
-- [Sponsor transaction fees](/docs/guide/payments/sponsor-user-fees) on behalf of your users.
-- [Choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin) to pay transaction fees with a supported stablecoin.
-- [Configure receive policies](/docs/guide/payments/configure-receive-policies) to control accepted tokens and senders, and handle blocked transfers.
+Use the [Payments overview](/docs/payments#choose-how-payments-are-submitted) to choose fee sponsorship, a fee token, batch payments, or receive policies. For reconciliation, choose [payment references](/docs/guide/payments/transfer-memos) or [customer deposit addresses](/docs/guide/payments/virtual-addresses).
 
 ## Connect and fund your application
 
-Start with [Accounts](/docs/accounts) to connect a wallet and add payment controls. Use [Routes](/docs/routes) to fund accounts across networks, or the separate [testnet faucet](/docs/quickstart/faucet) for development. For chain configuration and EVM behavior, follow the [network integration guide](/docs/quickstart/integrate-tempo).
-
-For backend payment activity and event notifications, start with the [Tempo API](/docs/api).
+Follow [Fund an account](/docs/guide/getting-funds) for funding options. Use [Developer Resources](/docs/development) for SDKs, network configuration, API references, and integration partners.

@@ -1,18 +1,18 @@
 ---
 title: "Make a transfer"
 seoTitle: "Make a transfer | Tempo Docs"
-description: "Quote a cross-network transfer, request source-wallet signatures, and track delivery to the recipient."
+description: "Quote a cross-network transfer, authorize the source transactions, and track delivery to the recipient."
 ---
 
 # Make a transfer
 
-Use a transfer when your application can request signatures from the source wallet. The same flow supports transfers into or out of Tempo, subject to the [supported networks and assets](/docs/routes/networks).
+Use a transfer when your application can authorize transactions from the source account, through its own signing infrastructure, a wallet provider, or a connected wallet. The same flow supports transfers into or out of Tempo, subject to the [supported networks and assets](/docs/routes/networks).
 
-Routes prepares the source-chain calls for your wallet to sign and submit.
+Routes prepares the source-chain calls for the account's signer to sign and submit.
 
 ## Set up Routes API access
 
-Create a project and API key in [Tempo API Console](/docs/api/console). Your backend needs `data:read` for the route directory, `routes:read` for quotes and status reads, and `routes:write` to create deposit addresses or transfers and register source transactions. Keep the key on your server. See [API key management](/docs/api/console/api-keys) for storage and access controls.
+Create a project and API key in [Tempo Console](/docs/api/console). For this flow, use `routes:read` for quotes and status reads and `routes:write` to create transfers and register source transactions. Authenticated route-directory reads also require `data:read`. Keep the key on your backend; see [API authentication](/docs/api/authentication).
 
 Routes endpoints use the `https://api.tempo.xyz/v1` base URL. Send your key in the `tempo-api-key` header.
 
@@ -22,7 +22,7 @@ Routes endpoints use the `https://api.tempo.xyz/v1` base URL. Send your key in t
 
 ### Quote the transfer
 
-Call `GET /v1/routes/transfers/quote` with the source and destination chains, tokens, sender, recipient, and amount. Use `exactSource` to fix the amount sent or `exactDestination` to fix the amount received. Express `amount` in the base units of the token selected by that mode.
+Call `GET /v1/routes/transfers/quote` with the source and destination chains, tokens, sender, recipient, and amount. Choose whether to specify the source amount or requested destination amount, as described in [Quotes and fees](/docs/routes/quotes#choose-which-amount-to-fix).
 
 Review the returned source amount, destination amount, minimum destination amount, fees, and `quote.expiresAt`. A quote does not create or reserve a transfer.
 
@@ -32,7 +32,7 @@ Call `POST /v1/routes/transfers` with the selected parameters and an `idempotenc
 
 ### Sign and submit the source calls
 
-Use the source wallet to sign and submit the returned calls in order. An action can include approval calls as well as the call that starts the route, and may require separate transactions. Handle the returned `action.type` for the source chain.
+Use the source account's signer to sign and submit the returned calls in order. An action can include approval calls as well as the call that starts the route, and may require separate transactions. Handle the returned `action.type` for the source chain.
 
 ### Register the source transactions
 
@@ -43,12 +43,5 @@ Call `POST /v1/routes/transfers/{id}/source-transactions` with `transactionHash`
 Read `GET /v1/routes/transfers/{id}` until the transfer reaches `completed`. Save the source and destination transaction references with your payment record. For refunds or other outcomes, follow [Track delivery](/docs/routes/delivery).
 
 :::::
-
-For example, read an existing transfer from your backend or terminal after setting `TEMPO_API_KEY` and `ROUTE_TRANSFER_ID`:
-
-```bash
-curl "https://api.tempo.xyz/v1/routes/transfers/${ROUTE_TRANSFER_ID}" \
-  --header "tempo-api-key: ${TEMPO_API_KEY}"
-```
 
 See the [Transfers API reference](/docs/api/routes/transfers) for request schemas, action formats, and response fields.

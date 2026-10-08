@@ -6,34 +6,31 @@ description: Connect to Tempo Zones on testnet using Zone A and Zone B RPC URLs,
 
 # Connect to a Tempo Zone on testnet
 
-Connect to a Tempo Zone to read your private balance and submit Zone transactions. Your account signs an authorization token so the RPC can scope requests to you.
+Connect to Zone A or Zone B in the [earlier testnet sandbox](/docs/guide/private-zones#testnet-compatibility) to read private balances and submit Zone transactions. Your account signs an authorization token so the RPC can scope requests to you.
 
 To connect directly, you need a Tempo account, the Zone's RPC URL and chain metadata, and any endpoint credentials supplied by its operator. The interactive guides handle the connection and authorization for you.
 
-The guides use two shared Zones on Tempo Testnet named Zone A and Zone B.
-
 ## Create a Viem client
 
-Use `zoneModerato(...)` from `viem/tempo/zones` for these examples. Zone A and Zone B run an earlier testnet deployment with interfaces that differ from current Tempo Zones. Review the [testnet compatibility notes](/docs/guide/private-zones#testnet-compatibility) before adapting this setup to another deployment.
+Use `Zone.a` or `Zone.b` from `viem/tempo` for these examples. Zone A and Zone B run an earlier testnet deployment with interfaces that differ from current Tempo Zones. Review the [testnet compatibility notes](/docs/guide/private-zones#testnet-compatibility) before adapting this setup to another deployment.
 
 Obtain [RPC access from Tempo](https://tempo.xyz/contact) before connecting to the shared endpoints directly. The server-side example below reads the operator-provided HTTP `Authorization` header from `ZONE_RPC_AUTHORIZATION`. This endpoint access is separate from the signed `X-Authorization-Token`, which is required even for chain metadata reads.
 
 The example signs that token with an ephemeral account for metadata reads; use your actual account when reading private balances. See [RPC access control](/docs/protocol/zones/rpc) for the token format and scoped methods.
 
-The chain IDs below are the legacy SDK configuration. Confirm the endpoint's `eth_chainId` matches before signing; do not derive current deployment IDs with this older SDK.
+The chain IDs below belong to these sandbox deployments. Confirm the endpoint's `eth_chainId` matches before signing. Use the operator-provided chain configuration for another deployment.
 
 ```ts
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
-import { createClient } from 'viem/tempo'
-import { http, zoneModerato } from 'viem/tempo/zones'
+import { generatePrivateKey } from 'viem/accounts'
+import { Account, createClient, http, Zone } from 'viem/tempo'
 
 const rpcUrl = 'https://rpc-zone-a.testnet.tempo.xyz'
 const authorization = process.env.ZONE_RPC_AUTHORIZATION
 if (!authorization) throw new Error('Set ZONE_RPC_AUTHORIZATION from your zone operator.')
 
 const zoneClient = createClient({
-  account: privateKeyToAccount(generatePrivateKey()),
-  chain: zoneModerato(6),
+  account: Account.fromSecp256k1(generatePrivateKey()),
+  chain: Zone.a,
   transport: http(rpcUrl, {
     fetchOptions: { headers: { Authorization: authorization } },
   }),

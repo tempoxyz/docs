@@ -6,6 +6,13 @@ import { describe, expect, test } from 'vitest'
 import { plainMarkdownComponents } from './markdown-output'
 
 describe('plainMarkdownComponents', () => {
+  test('explains the account demo without claiming a funding or payment action', async () => {
+    const output = await render('<PasskeyAccountDemo />')
+    expect(output).toContain('create a passkey account or reconnect an existing passkey')
+    expect(output).toContain('does not move or fund stablecoins')
+    expect(output).not.toContain('<PasskeyAccountDemo')
+  })
+
   test('preserves overview headings, links, illustration meaning, and following content', async () => {
     const output = await render(`
 <DocsProductOverview image="accounts" alt="A connected account receives stablecoins and sends a payment.">
@@ -255,7 +262,8 @@ export const data = [{ label: 'Example' }]
 \`\`\`
 `)
 
-    expect(output).toContain("import { privateKeyToAccount } from 'viem/accounts'")
+    expect(output).toContain("import { Account, createClient } from 'viem/tempo'")
+    expect(output).toContain("account: Account.fromSecp256k1('0x...')")
     expect(output).toContain('export const client = createClient({')
     expect(output).not.toContain('[!include')
     expect(output).not.toContain('[!region')

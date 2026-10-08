@@ -108,10 +108,15 @@ Once a master is registered, operators derive virtual addresses offchain from th
 :::code-group
 
 ```ts [virtualAddress.ts]
-import { VirtualAddress } from 'ox/tempo'
+import { VirtualAddress } from 'viem/tempo'
+
+const masterId = process.env.TEMPO_MASTER_ID
+if (!masterId || !/^0x[0-9a-fA-F]{8}$/.test(masterId)) {
+  throw new Error('Set TEMPO_MASTER_ID to your registered 4-byte master ID')
+}
 
 const virtualAddress = VirtualAddress.from({
-  masterId,
+  masterId: masterId as `0x${string}`,
   userTag: '0x000000000001',
 })
 ```

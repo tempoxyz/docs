@@ -52,13 +52,17 @@ const presentationOnlyElements = new Set([
 const tempoReleasesUrl = 'https://github.com/tempoxyz/tempo/releases'
 
 const interactiveDescriptions: Record<string, string> = {
+  EarnVaultDemo:
+    'In the interactive web page, select a network, load the verified Earn vault directory, and choose a vault to inspect its asset, access rules, deposit status, withdrawal capabilities, and available liquidity. The demo makes read-only requests to Tempo API and starts on Moderato testnet. See the [verified vault API reference](/docs/api/earn#getverifiedearnvaults) for the request and response fields.',
+  PasskeyAccountDemo:
+    'In the interactive web page, create a passkey account or reconnect an existing passkey, inspect and copy its address, and disconnect. Creating the account does not move or fund stablecoins.',
   AdminKeyDemo:
     'In the interactive web page, create or connect a testnet passkey account, authorize an admin key, inspect its onchain status, and revoke it.',
   ConnectWallet: 'Connect a wallet in the interactive web page.',
   T7BenchmarkVisual: 'The benchmark values are listed in the table below.',
   TempoMcpExplorer: 'Use the interactive web page to try the Tempo MCP server.',
   TerminalDemo:
-    'The interactive terminal creates a test wallet, funds it, and makes a paid request.',
+    'The interactive terminal simulates the challenge, payment, and retry sequence for a paid request.',
   TidxQuery: 'Use the interactive web page to run SQL against the public Tempo indexer.',
   TokenListDemo: 'The interactive web page displays the current Tempo token list.',
   ValidatorTopologyDiagram:
@@ -107,7 +111,7 @@ const demoStepLabels: Record<string, string> = {
   SendTokensWithinZone: 'Send tokens within zone',
   SetFeeToken: 'Set fee token',
   SetSupplyCap: 'Set supply cap',
-  SignInWithTempo: 'Sign in with tempo',
+  SignInWithTempo: 'Connect Tempo Wallet',
   SwapAcrossZones: 'Swap across zones',
   VirtualAddressesFastDemo: 'Virtual addresses fast demo',
   VirtualAddressesLiveDemo: 'Virtual addresses live demo',

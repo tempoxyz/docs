@@ -6,11 +6,11 @@ description: Authenticated JSON-RPC interface for Tempo Zones with per-account s
 
 # Tempo Zone RPC access control
 
-A Tempo Zone's RPC is an authenticated Ethereum JSON-RPC interface for reading account data and submitting transactions. Every request includes an authorization token that proves the caller controls a Tempo account. The RPC scopes account data to that account and redacts shared data, such as block headers, to protect other accounts' activity.
+This reference describes the account-scoped, redacted Ethereum JSON-RPC interface for reading Zone data and submitting transactions. Every request includes an authorization token proving control of a Tempo account. Responses are scoped to that account; shared data, such as block headers, is redacted. Operator RPC and hosted provider APIs have separate access rules.
 
-## Authorization Tokens
+## Authorization tokens
 
-Authorization tokens are short-lived credentials (maximum 30 days, or a shorter operator-configured limit) signed by the caller's Tempo account key. Tempo accounts support multiple signature types (secp256k1, P256, WebAuthn), and accounts with Access Keys via the `AccountKeychain` precompile can use those keys to authenticate.
+Authorization tokens are short-lived credentials (maximum 30 days, or a shorter operator-configured limit) signed by the caller's Tempo account key. Tempo accounts support multiple signature types (secp256k1, P256, WebAuthn), and accounts with access keys via the `AccountKeychain` precompile can use those keys to authenticate.
 
 The signed message includes:
 - `"TempoZoneRPC"` magic prefix for domain separation
@@ -19,7 +19,7 @@ The signed message includes:
 
 Tokens are sent via the `X-Authorization-Token` HTTP header on every request. WebSocket clients supply the token when opening the connection; subscriptions remain scoped to that account.
 
-## Method Access Control
+## Method access control
 
 The redacted RPC exposes an explicit method allowlist. Authenticating with a sequencer key does not bypass its privacy rules; operator methods belong on the separate operator RPC.
 
@@ -78,7 +78,7 @@ Raw storage and code reads, access-list creation, transaction-count and transact
 
 The current implementation does not enforce a fixed minimum response time. Silent `null` or zero responses prevent direct disclosure through result values, but they do not guarantee indistinguishable timings. Log filters must include the caller in an eligible indexed topic before retrieval, which limits the scope of backend queries.
 
-## Block Responses
+## Block responses
 
 All block headers returned through the redacted RPC are sanitized:
 
@@ -89,7 +89,7 @@ All block headers returned through the redacted RPC are sanitized:
 
 Transaction and receipt ordering fields are also redacted. Receipt logs include only visible events, `transactionIndex` is zero, and `cumulativeGasUsed` is replaced with that transaction’s gas usage.
 
-## Event Filtering
+## Event filtering
 
 Log queries are restricted to enabled zone tokens and the receive-policy guard. Filters must include the authenticated address, padded to 32 bytes, in `topics[1]` or `topics[2]` as appropriate for the event. Broad filters without an eligible caller topic return `-32602`. To find both outgoing and incoming transfers, query each indexed position separately.
 
@@ -106,7 +106,7 @@ Returned events are restricted to those where the authenticated account is a rel
 
 All other event topics (system events, role events, configuration events) are filtered out. Visible `logIndex` values restart at zero for each transaction, hiding the number of preceding private events.
 
-## Zone-Specific RPC Methods
+## Zone-specific RPC methods
 
 | Method | Access | Description |
 |--------|--------|-------------|

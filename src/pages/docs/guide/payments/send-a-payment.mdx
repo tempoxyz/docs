@@ -18,9 +18,45 @@ import { Tabs, Tab } from 'vocs'
 
 Send TIP-20 stablecoins to a Tempo account and confirm that the recipient receives them. Add a [payment reference](/docs/guide/payments/transfer-memos) when you need to match the transfer to an invoice or order.
 
+Use **AlphaUSD on Moderato testnet** for the examples below. Fund an account with the [faucet](/docs/quickstart/faucet) and choose a recipient you control. For the Rust, Go, and Cast examples, set `RPC_URL` or `TEMPO_RPC_URL` to `https://rpc.moderato.tempo.xyz`.
+
+- **Backend:** [send with Viem](#send-from-your-backend) using your application's signer.
+- **Browser:** [try the wallet demo](#send-payment-demo), then [add a payment action](#add-a-payment-action-in-the-browser).
+- **Other languages:** use the [payment recipes](#stablecoin-payment-recipes).
+
+## Send from your backend
+
+Install Viem with `pnpm add viem`. Set `TEMPO_PRIVATE_KEY` to your funded test account's private key and `TEMPO_RECIPIENT` to the recipient address in your local environment. Keep the signing key on your server.
+
+:::code-group
+
+```ts [send-payment.ts]
+import { getAddress, parseUnits } from 'viem'
+import { client } from './viem.config'
+
+const recipientAddress = process.env.TEMPO_RECIPIENT
+if (!recipientAddress) throw new Error('Set TEMPO_RECIPIENT')
+
+const { receipt } = await client.token.transferSync({
+  token: '0x20c0000000000000000000000000000000000001',
+  to: getAddress(recipientAddress),
+  amount: parseUnits('10', 6),
+})
+
+console.log(receipt.transactionHash)
+```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/viem.moderato.config.ts:setup]
+```
+
+:::
+
+`transferSync` waits for a transaction receipt. Before marking the payment delivered, [verify its transfer events](/docs/guide/payments/accept-a-payment#verify-stablecoin-payments) against the expected token, amount, and recipient.
+
 ## Send payment demo
 
-Fund a test account and send a payment with an optional memo.
+Connect Tempo Wallet, add test funds, and send a payment.
 
 <Demo.Container name="Send a Payment" footerVariant="source" src="tempoxyz/examples/tree/main/examples/payments">
   <Connect stepNumber={1} />
@@ -28,9 +64,13 @@ Fund a test account and send a payment with an optional memo.
   <SendPayment stepNumber={3} last />
 </Demo.Container>
 
-## Send payment implementation steps
+<span id="send-payment-implementation-steps" />
 
-::::steps
+## Add a payment action in the browser
+
+Use this section when customers authorize payments in your application.
+
+:::::steps
 
 ### Set up Wagmi for Tempo payments
 
@@ -60,7 +100,10 @@ function AddFunds() {
   const { mutate, isPending } = Hooks.faucet.useFundSync()
 
   return (
-    <button onClick={() => mutate({ account: address })} disabled={isPending}>
+    <button
+      onClick={() => { if (address) mutate({ account: address }) }}
+      disabled={!address || isPending}
+    >
       Add Funds
     </button>
   )
@@ -69,7 +112,7 @@ function AddFunds() {
 
 ```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
 // @noErrors
-// [!include ~/snippets/wagmi.config.ts:setup]
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -87,7 +130,7 @@ Send `AlphaUSD` to the recipient and include a memo when you need a payment refe
 
 ```tsx twoslash [SendPaymentWithMemo.tsx]
 import { Hooks } from 'wagmi/tempo'
-import { parseUnits, stringToHex, pad } from 'viem'
+import { getAddress, parseUnits, toHex } from 'viem'
 
 // @noErrors
 function SendPaymentWithMemo() {
@@ -99,21 +142,20 @@ function SendPaymentWithMemo() {
         event.preventDefault()
         const formData = new FormData(event.target as HTMLFormElement)
 
-        const recipient = (formData.get('recipient') ||
-          '0x0000000000000000000000000000000000000000') as `0x${string}`
+        const recipient = getAddress(String(formData.get('recipient')))
         const memo = (formData.get('memo') || '') as string
 
         sendPayment.mutate({ // [!code hl]
           amount: parseUnits('100', 6), // [!code hl]
           to: recipient, // [!code hl]
           token: '0x20c0000000000000000000000000000000000001', // [!code hl]
-          memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined, // [!code hl]
+          memo: memo ? toHex(memo, { size: 32 }) : undefined, // [!code hl]
         }) // [!code hl]
       }
     }>
       <div>
         <label htmlFor="recipient">Recipient address</label>
-        <input type="text" name="recipient" placeholder="0x..." />
+        <input type="text" name="recipient" placeholder="0x..." required />
       </div>
       <div>
         <label htmlFor="memo">Memo (optional)</label>
@@ -132,7 +174,7 @@ function SendPaymentWithMemo() {
 
 ```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
 // @noErrors
-// [!include ~/snippets/wagmi.config.ts:setup]
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -145,7 +187,6 @@ Check the receipt’s transfer events for the expected token, amount, and recipi
 
 ```tsx twoslash [SendPaymentWithMemo.tsx]
 import { Hooks } from 'wagmi/tempo'
-import { parseUnits, stringToHex, pad } from 'viem'
 
 // @noErrors
 function SendPaymentWithMemo() {
@@ -155,7 +196,7 @@ function SendPaymentWithMemo() {
     <>
       {/* ... your payment form ... */}
       {sendPayment.data && ( // [!code ++]
-        <a href={`https://explore.tempo.xyz/tx/${sendPayment.data.receipt.transactionHash}`}> {/* [!code ++] */}
+        <a href={`https://explore.testnet.tempo.xyz/tx/${sendPayment.data.receipt.transactionHash}`}> {/* [!code ++] */}
           View receipt {/* [!code ++] */}
         </a> {/* [!code ++] */}
       )} {/* [!code ++] */}
@@ -166,7 +207,7 @@ function SendPaymentWithMemo() {
 
 ```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
 // @noErrors
-// [!include ~/snippets/wagmi.config.ts:setup]
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -174,9 +215,9 @@ function SendPaymentWithMemo() {
 ### Next steps after sending a payment
 
 - **[Receive a payment](/docs/guide/payments/accept-a-payment)** and reconcile it in your application
-- Learn about [Tempo Transactions](/docs/protocol/transactions) for batching, sponsorship, scheduling, and more
+- Learn about [Tempo Transactions](/docs/protocol/transactions) for batched calls, sponsorship, and transaction validity windows
 - Send a payment [with a specific fee token](/docs/guide/payments/pay-fees-in-any-stablecoin)
-:::: 
+:::::
 
 ## Stablecoin payment recipes
 
@@ -202,7 +243,7 @@ Send a payment using the standard `transfer` function:
     ```
 
     ```ts twoslash [viem.config.ts]
-    // [!include ~/snippets/viem.config.ts:setup]
+    // [!include ~/snippets/viem.moderato.config.ts:setup]
     ```
 
     :::
@@ -320,7 +361,7 @@ Send a payment using the standard `transfer` function:
     from web3 import Web3
     from eth_account import Account
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz"))
     account = Account.from_key("0x...")
     ```
 
@@ -363,7 +404,7 @@ Send a payment using the standard `transfer` function:
     	recipient := common.HexToAddress("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb")
     	alphaUSD := common.HexToAddress("0x20c0000000000000000000000000000000000001")
 
-    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdMainnet)).
+        tx := transaction.NewBuilder(big.NewInt(42431)).
     		SetNonce(nonce).
     		SetGas(100_000).
     		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
@@ -423,7 +464,7 @@ Send a payment using the standard `transfer` function:
 
 ### Transfer with memo
 
-Include a memo for payment reconciliation and tracking. The memo is a 32-byte value that can store payment references, invoice IDs, order numbers, or any other metadata.
+Include a memo for payment reconciliation and tracking. Use a short invoice or order ID. Follow [Payment references](/docs/guide/payments/transfer-memos#encode-a-payment-reference) for the shared UTF-8 encoding and length checks.
 
 <Tabs stateKey="library">
   <Tab title="Viem">
@@ -432,10 +473,10 @@ Include a memo for payment reconciliation and tracking. The memo is a 32-byte va
 
     ```ts twoslash [example.ts]
     // @noErrors
-    import { parseUnits, stringToHex, pad } from 'viem'
+    import { parseUnits, toHex } from 'viem'
     import { client } from './viem.config'
 
-    const invoiceId = pad(stringToHex('INV-12345'), { size: 32 }) // [!code hl]
+    const invoiceId = toHex('INV-12345', { size: 32 }) // [!code hl]
 
     const { receipt } = await client.token.transferSync({
       amount: parseUnits('100', 6),
@@ -446,7 +487,7 @@ Include a memo for payment reconciliation and tracking. The memo is a 32-byte va
     ```
 
     ```ts twoslash [viem.config.ts]
-    // [!include ~/snippets/viem.config.ts:setup]
+    // [!include ~/snippets/viem.moderato.config.ts:setup]
     ```
 
     :::
@@ -458,7 +499,7 @@ Include a memo for payment reconciliation and tracking. The memo is a 32-byte va
     ```tsx twoslash
     // @noErrors
     import { Hooks } from 'wagmi/tempo'
-    import { parseUnits, stringToHex, pad } from 'viem'
+    import { parseUnits, toHex } from 'viem'
 
     function SendPaymentWithMemo() {
       const { mutate, isPending } = Hooks.token.useTransferSync()
@@ -470,7 +511,7 @@ Include a memo for payment reconciliation and tracking. The memo is a 32-byte va
               amount: parseUnits('100', 6),
               to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
               token: '0x20c0000000000000000000000000000000000001',
-              memo: pad(stringToHex('INV-12345'), { size: 32 }), // [!code hl]
+              memo: toHex('INV-12345', { size: 32 }), // [!code hl]
             })
           }
           disabled={isPending}
@@ -568,7 +609,7 @@ Include a memo for payment reconciliation and tracking. The memo is a 32-byte va
     from web3 import Web3
     from eth_account import Account
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz"))
     account = Account.from_key("0x...")
     ```
 
@@ -615,7 +656,7 @@ Include a memo for payment reconciliation and tracking. The memo is a 32-byte va
     	var memo [32]byte // [!code hl]
     	copy(memo[:], []byte("INV-12345")) // [!code hl]
 
-    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdMainnet)).
+        tx := transaction.NewBuilder(big.NewInt(42431)).
     		SetNonce(nonce).
     		SetGas(100_000).
     		SetMaxFeePerGas(big.NewInt(25_000_000_000)).
@@ -681,7 +722,7 @@ Include a memo for payment reconciliation and tracking. The memo is a 32-byte va
 
 ### Batch payment transactions
 
-Send multiple payments in a single transaction using batch transactions:
+Send several payments as calls in one transaction. If a call reverts, the whole batch reverts. For separate transaction receipts, [send payments in parallel](/docs/guide/payments/send-parallel-transactions).
 
 <Tabs stateKey="library">
   <Tab title="Viem">
@@ -690,8 +731,8 @@ Send multiple payments in a single transaction using batch transactions:
 
     ```ts twoslash [example.ts]
     // @noErrors
-    import { encodeFunctionData, parseUnits } from 'viem'
-    import { Abis } from 'viem/tempo'
+    import { parseUnits } from 'viem'
+    import { Actions } from 'viem/tempo'
     import { client } from './viem.config'
 
     const token = '0x20c0000000000000000000000000000000000001' as const
@@ -700,20 +741,15 @@ Send multiple payments in a single transaction using batch transactions:
       { to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8', amount: parseUnits('50', 6) },
     ] as const
 
-    const calls = payments.map(({ to, amount }) => ({ // [!code hl]
-      to: token, // [!code hl]
-      data: encodeFunctionData({ // [!code hl]
-        abi: Abis.tip20, // [!code hl]
-        functionName: 'transfer', // [!code hl]
-        args: [to, amount], // [!code hl]
-      }), // [!code hl]
-    })) // [!code hl]
+    const calls = payments.map(({ to, amount }) =>
+      Actions.token.transfer.call({ token, to, amount }), // [!code hl]
+    )
 
     await client.sendTransaction({ calls }) // [!code hl]
     ```
 
     ```ts twoslash [viem.config.ts]
-    // [!include ~/snippets/viem.config.ts:setup]
+    // [!include ~/snippets/viem.moderato.config.ts:setup]
     ```
 
     :::
@@ -725,13 +761,12 @@ Send multiple payments in a single transaction using batch transactions:
     ```tsx twoslash
     // @noErrors
     import { useSendTransactionSync } from 'wagmi'
-    import { encodeFunctionData, parseUnits } from 'viem'
-    import { Abis } from 'viem/tempo'
+    import { parseUnits } from 'viem'
+    import { Actions } from 'viem/tempo'
 
     function BatchPayment() {
       const { sendTransactionSync, isPending } = useSendTransactionSync()
 
-      const tokenABI = Abis.tip20
       const token = '0x20c0000000000000000000000000000000000001'
 
       return (
@@ -739,22 +774,16 @@ Send multiple payments in a single transaction using batch transactions:
           onClick={() =>
             sendTransactionSync({
               calls: [ // [!code hl]
-                { // [!code hl]
-                  to: token, // [!code hl]
-                  data: encodeFunctionData({ // [!code hl]
-                    abi: tokenABI, // [!code hl]
-                    functionName: 'transfer', // [!code hl]
-                    args: ['0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', parseUnits('100', 6)], // [!code hl]
-                  }), // [!code hl]
-                }, // [!code hl]
-                { // [!code hl]
-                  to: token, // [!code hl]
-                  data: encodeFunctionData({ // [!code hl]
-                    abi: tokenABI, // [!code hl]
-                    functionName: 'transfer', // [!code hl]
-                    args: ['0x70997970C51812dc3A010C7d01b50e0d17dc79C8', parseUnits('50', 6)], // [!code hl]
-                  }), // [!code hl]
-                }, // [!code hl]
+                Actions.token.transfer.call({ // [!code hl]
+                  token, // [!code hl]
+                  to: '0x742d35cc6634c0532925a3b844bc9e7595f0bebb', // [!code hl]
+                  amount: parseUnits('100', 6), // [!code hl]
+                }), // [!code hl]
+                Actions.token.transfer.call({ // [!code hl]
+                  token, // [!code hl]
+                  to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8', // [!code hl]
+                  amount: parseUnits('50', 6), // [!code hl]
+                }), // [!code hl]
               ], // [!code hl]
             })
           }
@@ -882,7 +911,7 @@ Send multiple payments in a single transaction using batch transactions:
     from web3 import Web3
     from eth_account import Account
 
-    w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
+    w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz"))
     account = Account.from_key("0x...")
     ```
 
@@ -926,7 +955,7 @@ Send multiple payments in a single transaction using batch transactions:
     	recipient2 := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
     	alphaUSD := common.HexToAddress("0x20c0000000000000000000000000000000000001")
 
-    	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdMainnet)).
+        tx := transaction.NewBuilder(big.NewInt(42431)).
     		SetNonce(nonce).
     		SetGas(200_000).
     		SetMaxFeePerGas(big.NewInt(25_000_000_000)).

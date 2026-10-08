@@ -6,7 +6,7 @@ description: "Read token balances and filtered activity through an authenticated
 
 # Private balances and activity
 
-Read private account data through the [authenticated Zone connection](/docs/zones/connect). Build the user's balance and activity views from account-scoped responses.
+Read Zone balances and activity through the [account-scoped, redacted RPC connection](/docs/zones/connect). The calls below apply to that interface; if you use a hosted provider, use its documented read API and account-scoping rules.
 
 ## Read a token balance
 
@@ -22,6 +22,6 @@ Transaction and receipt reads are scoped to the sender. To verify an incoming de
 
 ## Preserve the privacy boundary
 
-Keep cached responses and history tied to the authenticated user in your own application. Do not place private activity in shared logs or a public explorer link. Public deposit and withdrawal records remain visible on Tempo.
+Keep cached responses and history tied to the authenticated customer and account in your application. Do not place private activity in shared logs or a public explorer link. Public deposit and withdrawal records remain visible on Tempo.
 
 When displaying funds returning to Tempo, follow [Withdraw funds](/docs/zones/withdraw). A submitted Zone transaction and a completed public delivery are different stages.

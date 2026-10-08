@@ -87,7 +87,7 @@ function boostSearchDocument(
 }
 
 const apiConsoleSidebar = {
-  text: 'API Console',
+  text: 'Tempo Console',
   collapsed: true,
   items: [
     {
@@ -379,7 +379,7 @@ export default defineConfig({
           { text: 'Build with AI', link: '/docs/guide/using-tempo-with-ai' },
           { text: 'Create an account', link: '/docs/accounts/create' },
           { text: 'Get test funds', link: '/docs/quickstart/faucet' },
-          { text: 'First payment', link: '/docs/guide/payments/send-a-payment' },
+          { text: 'Send a payment', link: '/docs/guide/payments/send-a-payment' },
           { text: 'Network details', link: '/docs/quickstart/connection-details' },
         ],
       },
@@ -551,7 +551,7 @@ export default defineConfig({
           { text: 'Track delivery', link: '/docs/routes/delivery' },
           { text: 'Quotes and fees', link: '/docs/routes/quotes' },
           { text: 'Supported networks and assets', link: '/docs/routes/networks' },
-          { text: 'Swap on Tempo', link: '/docs/guide/stablecoin-dex/executing-swaps' },
+          { text: 'Swap stablecoins', link: '/docs/guide/stablecoin-dex/executing-swaps' },
         ],
       },
       {
@@ -560,7 +560,7 @@ export default defineConfig({
         items: [
           { text: 'How exchange works', link: '/docs/guide/stablecoin-dex' },
           {
-            text: 'Provide exchange liquidity',
+            text: 'Provide liquidity',
             link: '/docs/guide/stablecoin-dex/providing-liquidity',
           },
           {

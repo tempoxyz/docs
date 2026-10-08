@@ -1,14 +1,26 @@
 ---
-title: "Server quickstart: add MPP payments to your server"
-seoTitle: "Add MPP Payments to Your Server | Docs"
+title: "Accept payments for an API"
+seoTitle: "Accept payments for an API | Tempo Docs"
 description: Add payment gating to any HTTP endpoint on Tempo with mppx middleware for Next.js, Hono, Express, and the Fetch API.
 ---
 
 import { Card, Cards } from 'vocs'
 
-# Server quickstart: add MPP payments to your server
+<span id="server-quickstart-add-mpp-payments-to-your-server" />
 
-Plug MPP into any server framework to accept payments for protected resources. Use `mppx` middleware for your framework, or call `mppx/server` directly with the Fetch API.
+# Accept payments for an API
+
+Add payment verification to an API endpoint. Use the `mppx` middleware for your framework, or call `mppx/server` with the Fetch API.
+
+## Set the server secret
+
+`Mppx.create()` requires a server secret to authenticate payment challenges. Generate one before starting the server:
+
+```bash
+export MPP_SECRET_KEY="$(openssl rand -base64 32)"
+```
+
+Store this value in your deployment's secret manager and reuse it across server instances. It is separate from the account's signing key.
 
 ## MPP server framework middleware
 
@@ -78,8 +90,8 @@ You can override `currency` and `recipient` per call if different routes need di
 ```ts
 mppx.charge({
   amount: '0.1',
-  currency: '0x…',
-  recipient: '0x…',
+  currency: '0x...',
+  recipient: '0x...',
 })
 ```
 :::
@@ -146,12 +158,12 @@ To sponsor gas fees for pull-mode clients, pass a `feePayer` account to `tempo()
 
 ```ts
 import { Mppx, tempo } from 'mppx/server'
-import { privateKeyToAccount } from 'viem/accounts'
+import { Account } from 'viem/tempo'
 
 const mppx = Mppx.create({
   methods: [tempo({
     currency: '0x20c0000000000000000000006a37da5c996874be',
-    feePayer: privateKeyToAccount('0x…'),
+    feePayer: Account.fromSecp256k1('0x...'),
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -161,14 +173,10 @@ When a pull-mode client submits a signed transaction, the server co-signs with t
 
 ## Test your MPP server
 
-After your server is running, test it with the `mppx` CLI:
+These examples charge mainnet OUSD. Configure the `mppx` CLI with a funded mainnet account before calling the endpoint; testnet faucet tokens cannot pay a mainnet challenge.
 
 ```bash
-# Create an account funded with testnet tokens
-$ npx mppx account create
-
-# Make a paid request
-$ npx mppx <your-server>/resource
+npx mppx https://your-server.example/resource
 ```
 
 :::tip
@@ -180,7 +188,7 @@ Use `npx mppx --inspect` to debug your server's Challenge response without makin
 <Cards>
   <Card
     icon="lucide:user"
-    title="Client quickstart"
+    title="Pay for services"
     description="Handle payment-gated resources automatically"
     to="/docs/guide/machine-payments/client"
   />

@@ -6,14 +6,14 @@ description: "How Tempo Transactions extend EIP-7702 delegation with additional 
 
 # Comparing Tempo Transactions and EIP-7702
 
-EIP-7702 allows EOAs to delegate to smart contract code temporarily within a transaction. Tempo Transactions build on this foundation and extend it with additional capabilities.
+[EIP-7702](https://eips.ethereum.org/EIPS/eip-7702) allows an externally owned account (EOA) to delegate execution to smart contract code. The delegation persists until a later authorization replaces or clears it. Tempo Transactions support this delegation alongside native transaction features.
 
 ## EIP-7702 Design Goals
 
 EIP-7702 enables EOAs to:
 
 - **Delegate to contract code**: An EOA can execute as if it were a smart contract
-- **Batch transactions**: Through delegation to a batching contract
+- **Batch calls**: Through delegation to a batching contract
 - **Maintain EOA properties**: The account remains an EOA after the transaction
 
 ## How Tempo Extends EIP-7702
@@ -33,7 +33,7 @@ EIP-7702 provides delegation as a building block. Applications must implement hi
 Tempo Transactions include these features natively:
 
 - **Fee sponsorship**: Built into the transaction type, not requiring delegation. See the [fee sponsorship guide](/docs/guide/payments/sponsor-user-fees).
-- **Scheduled execution**: Native `validAfter` and `validBefore` timestamp windows for time-bounded transactions.
+- **Validity windows**: Native `validAfter` and `validBefore` fields restrict when a submitted transaction may be included.
 - **Parallelizable nonces**: Multiple nonce keys for concurrent transactions. See the [parallel transactions guide](/docs/guide/payments/send-parallel-transactions).
 - **Access keys**: Delegate signing to secondary keys with configurable permissions. See the [Account Keychain specification](/docs/protocol/transactions/AccountKeychain).
 
@@ -49,7 +49,7 @@ Tempo Transactions can use EIP-7702 delegation alongside native features. An app
 | Signature schemes | secp256k1 only | secp256k1, P256, WebAuthn |
 | Fee sponsorship | Via delegated contract | Native |
 | Batching | Via delegated contract | Native |
-| Scheduled execution | Not available | Native |
+| Validity windows | Implemented by delegated code | Native transaction fields |
 | Concurrent nonces | Not available | Native |
 
 ## Implementation

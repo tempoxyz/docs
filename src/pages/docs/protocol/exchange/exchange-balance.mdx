@@ -1,20 +1,16 @@
 ---
 title: "Understanding DEX balances on Tempo"
 seoTitle: "Understanding DEX Balances | Tempo Docs"
-description: Hold token balances directly on the Stablecoin DEX to save gas costs on trades, receive maker proceeds automatically, and trade more efficiently.
+description: Read balances recorded by the Stablecoin DEX, use them for trades, and withdraw tokens to your account.
 ---
 
 # Understanding DEX balances on Tempo
 
-The Stablecoin DEX allows you to hold token balances directly using the DEX contract. This eliminates the need for token transfers on every trade, significantly reducing gas costs for active traders and liquidity providers.
+The Stablecoin DEX records a token balance for each trading account. This DEX balance is separate from the tokens held at the account's address. Order fills credit proceeds to the DEX balance; withdraw those tokens when you need them in the account.
 
-## Why DEX Balances?
+<span id="why-dex-balances" />
 
-When you trade or provide liquidity on the DEX, constantly transferring tokens between your wallet and the DEX contract wastes gas. By maintaining a balance via the DEX contract, you can:
-
-- **Save on gas costs** - Avoid ERC-20 transfer costs for each trade
-- **Trade more efficiently** - Execute multiple swaps without transfers between each trade
-- **Receive maker proceeds automatically** - When your limit orders are filled, proceeds are credited to your DEX balance instead of requiring a transfer for each fill
+Use the DEX balance for repeated trades without transferring tokens into the contract for each operation. See [account balances](/docs/accounts/balances) to read holdings outside the DEX.
 
 ## Checking Your Balance
 

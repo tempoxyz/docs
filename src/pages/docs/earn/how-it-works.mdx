@@ -1,20 +1,20 @@
 ---
 title: "How Earn works"
 seoTitle: "How Earn works | Tempo Docs"
-description: "Understand vaults, shares, and how deposits become earning positions."
+description: "Understand how deposits become vault shares, how shares are valued, and what is available to withdraw."
 ---
 
 # How Earn works
 
-Earn sits between your app and the providers that generate yield. Your app works with a vault; an **engine** connects that vault to the underlying strategy. This keeps the integration model consistent as you add providers.
+When your application deposits stablecoins into a vault, the account receives shares representing its position. Use the shares' current asset value to display an earning balance, and the vault's withdrawal interface to return stablecoins to the account.
 
 | Component | Role |
 | --- | --- |
-| **Vault** | Pools deposits and accounts for users' positions. |
-| **Engine** | Connects the vault to a lending market, managed vault, or liquidity pool. |
-| **Earn shares** | TIP-20 tokens that represent a user's position and are held in their account. |
+| **Vault** | Accepts deposits and accounts for positions. |
+| **Vault shares** | Units representing an account's position in the vault. Check the selected vault's share token and contract interface. |
+| **Engine** | Connects the vault to a lending market, managed strategy, or liquidity pool. |
 
-A deposit gives the user shares. The value of those shares changes with the underlying strategy's returns, losses, and fees. Your app displays the shares' current asset value as the earning balance; one share is not necessarily worth one stablecoin.
+A share is not necessarily worth one stablecoin. Its value changes with the underlying strategy's returns, losses, and fees. An account's **position value** is the asset value of all its shares; **earnings** are returns over a period, separate from deposits and withdrawals.
 
 The [Earn API](/docs/api/earn) exposes the vault's engine, share token, accepted asset, accounting state, and supported operations.
 
@@ -24,4 +24,4 @@ A position's value can change with returns, losses, and fees. It is not necessar
 
 A vault's `verified` flag identifies a curated listing, not a guarantee of return or a description of the strategy's risk. [Choose a vault](/docs/earn/vaults) based on its accepted asset, access rules, strategy, and withdrawal behavior.
 
-Continue with [Deposit funds](/docs/earn/integrate), then [show balances and earnings](/docs/earn/balances).
+Continue with [Deposit funds](/docs/earn/integrate), then [show balances and earnings](/docs/earn/balances). If you operate a yield strategy, see [Connect a yield source](/docs/earn#connect-a-yield-source).

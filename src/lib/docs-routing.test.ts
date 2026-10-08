@@ -86,7 +86,7 @@ describe('docs routing redirects', () => {
           status: 301,
         }),
       )
-      expect(findRedirect(source === '/' ? '/developers' : `/developers${source}`)).toMatchObject({
+      expect(findRedirect(`/developers${source}`)).toMatchObject({
         destination: developersProxyDestination(destination),
         permanent: true,
       })

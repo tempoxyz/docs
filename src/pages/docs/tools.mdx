@@ -1,73 +1,26 @@
 ---
 title: "APIs and SDKs"
-seoTitle: "Tempo APIs, SDKs, and Developer Tools | Tempo Docs"
-description: Find Tempo SDKs, CLI commands, API docs, wallet docs, RPC references, and indexer tools for building, testing, and operating production integrations.
+seoTitle: "Tempo APIs and SDKs | Tempo Docs"
+description: Find Tempo SDKs, command-line tools, and API references in Developer Resources.
 ---
-
-import { Cards, Card } from 'vocs'
 
 <span id="tempo-developer-tools-and-sdks" />
 
 # APIs and SDKs
 
-Choose an SDK, API, or command-line tool for building on Tempo. Start with the TypeScript SDK for application code or the Tempo API for backend data and hosted services.
+[Developer Resources](/docs/development) is the starting point for Tempo SDKs, APIs, development tools, and integration partners.
 
 ## Build with SDKs
 
-<Cards>
-  <Card
-    title="Tempo SDKs"
-    description="Use TypeScript, Go, Foundry, Python, and Rust tooling for Tempo applications."
-    to="/docs/sdk"
-    icon="lucide:package"
-  />
-  <Card
-    title="Tempo CLI"
-    description="Manage wallets, make requests, download binaries, and run node-related commands."
-    to="/docs/cli"
-    icon="lucide:terminal"
-  />
-  <Card
-    title="Tempo API"
-    description="Use JSON-RPC, fee sponsorship, and indexed data through the Tempo API."
-    to="/docs/api"
-    icon="lucide:cloud"
-  />
-  <Card
-    title="Tempo Wallet"
-    description="Integrate the Tempo Wallet, recipes, references, and agent-oriented wallet flows."
-    to="/docs/wallet"
-    icon="lucide:wallet"
-  />
-</Cards>
+Use [Tempo SDKs](/docs/sdk) for application code, the [Tempo CLI](/docs/cli) for terminal commands, and the [Tempo API](/docs/api) for hosted services and indexed data. For paid HTTP requests, start with [Pay with the CLI](/docs/guide/machine-payments/agent).
 
 <span id="operate-and-inspect" />
 
 ## Inspect network data and transactions
 
-<Cards>
-  <Card
-    title="JSON-RPC API"
-    description="Browse Tempo RPC methods, request shapes, and protocol-level API behavior."
-    to="/docs/protocol/rpc"
-    icon="lucide:braces"
-  />
-  <Card
-    title="Indexer API"
-    description="Query Tempo blocks, transactions, logs, token balances, and decoded events through SQL."
-    to="/docs/api/indexer-api"
-    icon="lucide:database"
-  />
-  <Card
-    title="Fee Payer API"
-    description="Sponsor Tempo transaction fees through the hosted Fee Payer API."
-    to="/docs/api/fee-payer"
-    icon="lucide:badge-dollar-sign"
-  />
-  <Card
-    title="Use Tempo with AI"
-    description="Install MCP, plugins, and docs context so coding agents can work with Tempo accurately."
-    to="/docs/guide/using-tempo-with-ai"
-    icon="lucide:bot"
-  />
-</Cards>
+- [REST API reference](/docs/api/reference) for request and response schemas.
+- [JSON-RPC reference](/docs/protocol/rpc) for chain methods.
+- [Indexer API](/docs/api/indexer-api) for SQL queries over chain data.
+- [Fee Payer API](/docs/api/fee-payer) for hosted fee sponsorship.
+
+For provider integrations, browse [Partners](/docs/ecosystem).

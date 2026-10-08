@@ -59,7 +59,7 @@ Use the Tempo JSON-RPC API with command-line tools, TypeScript clients, React ho
 
     const client = Client.create({ apiKey: process.env.TEMPO_API_KEY })
 
-    const response = await client.rpc[':chain{mainnet|testnet|[0-9]+}?'].$post({
+    const response = await client.rpc[':chain{(mainnet|testnet|[0-9]+)}'].$post({
       param: { chain: 'testnet' }, // [!code focus]
       json: { jsonrpc: '2.0', id: 1, method: 'eth_blockNumber', params: [] }, // [!code focus]
     })

@@ -40,7 +40,7 @@ Access Keys are secondary signing keys authorized by an account's Root Key or an
 
 The protocol enforces a strict hierarchy at validation time:
 
-1. **Root Key**: The account's main key (derived from the account address)
+1. **Root Key**: The account's original signing authority; its public key determines the account address
    - Can call all precompile functions, including the key-management mutators (`authorizeKey`, `authorizeAdminKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`)
    - Has no spending limits or call-scope restrictions
 

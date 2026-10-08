@@ -8,14 +8,12 @@ description: Bridge tokens to and from Tempo using LayerZero. Covers Stargate po
 
 [LayerZero](https://layerzero.network) is the omnichain messaging protocol that powers token bridging on Tempo. Tokens are bridged using the [OFT (Omnichain Fungible Token)](https://docs.layerzero.network/v2/developers/evm/oft/quickstart) standard - the source chain locks or burns tokens and the destination chain mints the bridged equivalent.
 
-There are two flavors of OFT on Tempo:
+There are two OFT interfaces on Tempo:
 
 - **Stargate** - an application built on LayerZero that manages liquidity pools. Tokens like USDC.e and EURC.e use Stargate's `sendToken()` interface.
 - **Standard OFT** - token issuers (e.g. Tether for USDT0) deploy their own OFT adapters using LayerZero's `send()` interface directly.
 
 Both use the same underlying LayerZero endpoint on Tempo.
-
-If you are bringing an existing ERC-20 to Tempo, first decide whether to preserve it as the canonical asset behind a bridge adapter or migrate issuance to native TIP-20. See [Migrate an ERC-20 to TIP-20](/docs/guide/issuance/migrate-erc20-to-tip20).
 
 ## USDC.e and native USDC
 
@@ -33,10 +31,6 @@ The zero-transfer-fee path is between Tempo and Ethereum:
 
 Routes between Tempo and other chains can carry standard Stargate route fees. If an integrator needs native USDC on another chain, the preferred settlement path is to bridge USDC.e from Tempo to native USDC on Ethereum, then move USDC onward using CCTP or another supported route. The [LayerZero Value Transfer API](https://docs.layerzero.network/v2/developers/value-transfer-api/overview) can help discover and execute available routes.
 
-:::tip
-OUSD is the recommended stablecoin on Tempo and is issued natively, so it does not need a bridge. If you bridge USDC in to pay or hold on Tempo, swap USDC.e to OUSD after it arrives, or mint OUSD directly through an integration partner. See [OUSD on Tempo](/docs/guide/ousd).
-:::
-
 ## Bridged tokens on Tempo
 
 | Token | Address | Bridge |
@@ -51,7 +45,7 @@ OUSD is the recommended stablecoin on Tempo and is issued natively, so it does n
 | **rUSD** | [`0x20c0000000000000000000007f7ba549dd0251b9`](https://explore.tempo.xyz/address/0x20c0000000000000000000007f7ba549dd0251b9) | OFT |
 | **wsrUSD** | [`0x20c000000000000000000000aeed2ec36a54d0e5`](https://explore.tempo.xyz/address/0x20c000000000000000000000aeed2ec36a54d0e5) | OFT |
 
-Natively issued stablecoins such as OUSD are not bridged and do not appear in this table. See [OUSD on Tempo](/docs/guide/ousd).
+Natively issued stablecoins are separate from bridged assets. See [OUSD on Tempo](/docs/guide/ousd) for how OUSD and USDC.e relate.
 
 See the full token list at [tokenlist.tempo.xyz](https://tokenlist.tempo.xyz/list/4217).
 
@@ -392,10 +386,9 @@ https://scan.layerzero-api.com/v1/messages/tx/<SOURCE_TX_HASH>
 
 ```typescript
 import { parseUnits, pad } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { createClient } from 'viem/tempo'
+import { Account, createClient } from 'viem/tempo'
 
-const account = privateKeyToAccount('0x...')
+const account = Account.fromSecp256k1('0x...')
 
 const client = createClient({
   account,
@@ -509,7 +502,7 @@ const sendParam = {
 ```
 
 :::warning
-Bus mode is not available on all routes. If a bus route is not configured for your source/destination pair, the transaction will revert. Use taxi mode (`0x`) for guaranteed delivery.
+Bus mode is not available on all routes. If a bus route is not configured for your source/destination pair, the transaction will revert. Use taxi mode (`0x`) when bus mode is unavailable, and track the destination transaction to confirm receipt.
 :::
 
 ## Standard OFT tokens
@@ -563,6 +556,8 @@ How fees flow:
 - **Bridging from Tempo** - `LZEndpointDollar` deducts the messaging fee from an LZD token (a wrapped TIP-20 stablecoin) instead of `msg.value`. Before calling `sendToken` / `send`, you must wrap USDC.e into LZD and approve LZD to the OFT contract. See [Bridge from Tempo](#bridge-from-tempo) for the exact steps.
 
 ## Further reading
+
+For token issuers bringing an ERC-20 to Tempo, see [Migrate an ERC-20 to TIP-20](/docs/guide/issuance/migrate-erc20-to-tip20).
 
 - [LayerZero V2 documentation](https://docs.layerzero.network/v2)
 - [Stargate documentation](https://stargateprotocol.gitbook.io/stargate/v2-developer-docs)

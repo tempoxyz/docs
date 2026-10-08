@@ -12,7 +12,7 @@ Tempo distributes TypeScript SDKs for:
 - [Viem](https://viem.sh): TypeScript interface for EVM blockchains
 - [Wagmi](https://wagmi.sh): React Hooks (and reactive primitives) for EVM blockchains
 
-The Tempo extensions cover common chain operations such as querying state, sending Tempo Transactions, and managing tokens and AMM pools.
+Use `viem/tempo` for onchain reads and transactions, Wagmi for wallet-connected React applications, and the [Tempo API typed client](/docs/api/typed-client) for indexed data and hosted services.
 
 <Cards>
   <Card
@@ -50,7 +50,7 @@ Install Viem:
 npm install viem
 ```
 
-Connect to Tempo Testnet, fund an account, read its OUSD balance, and send a confirmed transfer.
+Connect to Tempo Testnet, fund an account, read its alphaUSD balance, and send a confirmed transfer.
 
 ```ts twoslash [testnet.ts] filename="testnet.ts"
 // [!include ~/snippets/node-viem-quickstart.ts:testnet]

@@ -1,5 +1,6 @@
 ---
-title: Use Your Stablecoin for Fees
+title: Use your stablecoin for fees
+seoTitle: Use Your Stablecoin for Transaction Fees | Tempo Docs
 description: Enable users to pay transaction fees using your stablecoin. Add fee pool liquidity and integrate with Tempo's flexible fee payment system.
 interactive: true
 ---
@@ -14,9 +15,9 @@ import { MintFeeAmmLiquidity } from '../../../../components/guides/steps/amm/Min
 import { MintToken } from '../../../../components/guides/steps/issuance/MintToken.tsx'
 import { PayWithIssuedToken } from '../../../../components/guides/steps/payments/PayWithIssuedToken.tsx'
 
-# Use Your Stablecoin for Fees
+# Use your stablecoin for fees
 
-Enable users to pay transaction fees using your stablecoin. Tempo supports flexible fee payment options, allowing users to pay fees in any stablecoin they hold.
+Provide fee-pool liquidity so users can pay transaction fees in your USD-denominated TIP-20 token. The examples use Moderato testnet; see [transaction fees](/docs/protocol/fees) for eligibility and conversion rules.
 
 ## Fee-token stablecoin demo
 
@@ -32,7 +33,7 @@ Enable users to pay transaction fees using your stablecoin. Tempo supports flexi
 
 ## Fee-token stablecoin setup steps
 
-::::steps
+:::::steps
 
 ### Create your fee-token stablecoin
 
@@ -44,30 +45,27 @@ Before users can pay fees with your token, you need to provide liquidity in the 
 
 To determine which validator tokens are needed, sample recent blocks and check the miner's preferred fee token using `getValidatorToken` on the FeeManager contract. For example, on Moderato testnet, validators accept fees in pathUSD and AlphaUSD. On mainnet, this token mix is different and subject to change.
 
-Add liquidity to your token's fee pool:
+Add liquidity to your token's fee pool with the [backend Viem client](/docs/guide/payments/send-a-payment#send-from-your-backend). Set `TEMPO_TOKEN` to the token you issued on Moderato:
 
 :::code-group
 
-```tsx twoslash [TypeScript]
-// @noErrors
-import { Hooks } from 'wagmi/tempo'
-import { parseUnits } from 'viem'
-import { useConnection } from 'wagmi'
+```ts [add-fee-liquidity.ts]
+import { getAddress, parseUnits } from 'viem'
+import { client } from './viem.config'
 
-const { address } = useConnection()
-const yourToken = '0x...' // Your issued token address
-const validatorToken = '0x20c0000000000000000000000000000000000001' // AlphaUSD on testnet
+const token = process.env.TEMPO_TOKEN
+if (!token) throw new Error('Set TEMPO_TOKEN to your issued token address')
+const validatorToken = '0x20c0000000000000000000000000000000000001'
 
-const mintFeeLiquidity = Hooks.amm.useMintSync() // [!code hl]
-
-// Add 100 AlphaUSD of liquidity to the fee pool // [!code hl]
-mintFeeLiquidity.mutate({ // [!code hl]
+const { receipt } = await client.amm.mintSync({
   feeToken: validatorToken,
-  to: address,
-  userTokenAddress: yourToken,
+  to: client.account.address,
+  userTokenAddress: getAddress(token),
   validatorTokenAddress: validatorToken,
   validatorTokenAmount: parseUnits('100', 6),
-}) // [!code hl]
+})
+
+console.log(receipt.transactionHash)
 ```
 
 ```solidity [Solidity]
@@ -90,16 +88,19 @@ You can also check your token's fee pool liquidity at any time:
 
 :::code-group
 
-```tsx twoslash [TypeScript]
-// @noErrors
-import { Hooks } from 'wagmi/tempo'
+```ts [check-fee-liquidity.ts]
+import { getAddress } from 'viem'
+import { client } from './viem.config'
 
-const { data: pool } = Hooks.amm.usePool({
-  userToken: yourToken,
-  validatorToken: '0x20c0000000000000000000000000000000000001', // AlphaUSD on testnet
+const token = process.env.TEMPO_TOKEN
+if (!token) throw new Error('Set TEMPO_TOKEN to your issued token address')
+
+const pool = await client.amm.getPool({
+  userToken: getAddress(token),
+  validatorToken: '0x20c0000000000000000000000000000000000001',
 })
 
-const hasLiquidity = pool && pool.reserveValidatorToken > 0n
+console.log('Has validator-token liquidity:', pool.reserveValidatorToken > 0n)
 ```
 
 ```solidity [Solidity]
@@ -116,7 +117,7 @@ require(reserveValidator > 0, "No liquidity available for fee conversion");
 
 :::
 
-If the pool has no liquidity (`reserveValidatorToken == 0`), you'll need to add liquidity to the fee pool before users can pay fees with your token. See the [Create a Stablecoin](/docs/guide/issuance/create-a-stablecoin) guide for instructions on minting fee AMM liquidity.
+If the pool has no liquidity (`reserveValidatorToken == 0`), you'll need to add liquidity to the fee pool before users can pay fees with your token. See [Manage fee liquidity](/docs/guide/stablecoin-dex/managing-fee-liquidity) for adding and rebalancing reserves.
 
 ### Send a payment using your stablecoin as the fee token
 
@@ -128,7 +129,7 @@ Your users can send payments using your issued stablecoin as the fee token:
 import React from 'react'
 import { Hooks } from 'wagmi/tempo'
 import { useConnection } from 'wagmi'
-import { parseUnits, pad, stringToHex, isAddress } from 'viem'
+import { parseUnits, toHex, isAddress } from 'viem'
 
 // @noErrors
 export function PayWithIssuedToken() {
@@ -168,7 +169,7 @@ export function PayWithIssuedToken() {
       amount: parseUnits('100', 6), // [!code hl]
       to: recipient as `0x${string}`, // [!code hl]
       token: paymentToken, // [!code hl]
-      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined, // [!code hl]
+      memo: memo ? toHex(memo, { size: 32 }) : undefined, // [!code hl]
       feeToken, // Pay fees with your issued token // [!code hl]
     }) // [!code hl]
   } // [!code hl]
@@ -207,99 +208,22 @@ export function PayWithIssuedToken() {
 
 ```tsx twoslash [config.ts] filename="config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { tempoWallet } from 'wagmi/connectors'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
-```
-
-```solidity [Solidity]
-ITIP20 token = ITIP20(0x20c0000000000000000000000000000000000001); // AlphaUSD
-address yourToken = 0x20c0000000000000000000000000000000000004; // Your issued stablecoin
-address recipient = 0xbeefcafe54750903ac1c8909323af7beb21ea2cb;
-
-// Send payment using your token for fees
-IFeeManager feeManager = IFeeManager(TIP_FEE_MANAGER_ADDRESS);
-feeManager.setTransactionFeeToken(yourToken);
-token.transfer(recipient, 100_000_000);
-```
-
-```rust [Rust]
-use alloy::{
-    primitives::{address, U256},
-    providers::ProviderBuilder,
-};
-use tempo_alloy::{
-    TempoNetwork,
-    contracts::precompiles::{ITIPFeeAMM, TIP_FEE_MANAGER_ADDRESS},
-};
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
-        .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
-        .await?;
-
-    // Your issued token
-    let your_token = address!("0x20c0000000000000000000000000000000000004"); // [!code focus]
-    // AlphaUSD
-    let validator_token = address!("0x20c0000000000000000000000000000000000001"); // [!code focus]
-
-    let fee_amm = ITIPFeeAMM::new( // [!code focus]
-        TIP_FEE_MANAGER_ADDRESS, // [!code focus]
-        &provider, // [!code focus]
-    ); // [!code focus]
-
-    let recipient = address!("0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"); // [!code focus]
-
-    // Add 100 AlphaUSD of liquidity to the fee pool
-    fee_amm // [!code focus]
-        .mint( // [!code focus]
-            your_token, // [!code focus]
-            validator_token, // [!code focus]
-            U256::from(100_000_000), // [!code focus]
-            recipient, // [!code focus]
-        ) // [!code focus]
-        .send() // [!code focus]
-        .await? // [!code focus]
-        .get_receipt() // [!code focus]
-        .await?; // [!code focus]
-
-    println!("Fee liquidity added successfully"); // [!code focus]
-
-    Ok(())
-}
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
 
 Users can set your stablecoin as their default fee token at the account level, or specify it for individual transactions. Learn more about [how users pay fees in different stablecoins](/docs/guide/payments/pay-fees-in-any-stablecoin).
 
-::::
+:::::
 
 ## How stablecoin fee payments work
 
-When users pay transaction fees with your stablecoin, Tempo's fee system automatically handles the conversion if validators prefer a different token. The [Fee AMM](/docs/protocol/fees/spec-fee-amm) ensures seamless fee payments across all supported stablecoins.
+Users can [choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin) for a transaction or set an account default. The Fee AMM converts the fee when the selected token differs from the validator's preferred token. This conversion does not change the token or amount sent to the payment recipient.
 
-Users can select your stablecoin as their fee token through:
-- **Account-level preference**: Set as default for all transactions
-- **Transaction-level preference**: Specify for individual transactions
-- **Automatic selection**: When directly interacting with your token contract
+<span id="benefits-of-stablecoin-fee-tokens" />
 
-Learn more about [how users pay fees in different stablecoins](/docs/guide/payments/pay-fees-in-any-stablecoin) and the complete [fee token preference hierarchy](/docs/protocol/fees/spec-fee#fee-token-preferences).
-
-## Benefits of stablecoin fee tokens
-
-- **User convenience**: Users can pay fees with the same token they're using
-- **Liquidity**: Encourages users to hold your stablecoin
-- **Flexibility**: Works seamlessly with Tempo's fee system
+See the [fee-token selection rules](/docs/protocol/fees/spec-fee#fee-token-preferences) for the full preference order.
 
 ## Stablecoin fee-token best practices
 

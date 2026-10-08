@@ -19,42 +19,26 @@ pnpm add viem
 ```
 
 ```ts [balance.ts]
-import { createPublicClient, erc20Abi, formatUnits, getAddress, http } from 'viem'
+import { getAddress } from 'viem'
 import { tempoModerato } from 'viem/chains'
+import { createClient } from 'viem/tempo'
 
 const accountAddress = process.env.TEMPO_ACCOUNT_ADDRESS
 if (!accountAddress) throw new Error('Set TEMPO_ACCOUNT_ADDRESS')
 
 const account = getAddress(accountAddress)
 const token = '0x20c0000000000000000000000000000000000001'
-const client = createPublicClient({
-  chain: tempoModerato,
-  transport: http(),
-})
+const client = createClient({ chain: tempoModerato })
 
-const [balance, decimals, symbol] = await Promise.all([
-  client.readContract({
-    address: token,
-    abi: erc20Abi,
-    functionName: 'balanceOf',
-    args: [account],
-  }),
-  client.readContract({
-    address: token,
-    abi: erc20Abi,
-    functionName: 'decimals',
-  }),
-  client.readContract({
-    address: token,
-    abi: erc20Abi,
-    functionName: 'symbol',
-  }),
+const [balance, { symbol }] = await Promise.all([
+  client.token.getBalance({ account, token }),
+  client.token.getMetadata({ token }),
 ])
 
-console.log(`${formatUnits(balance, decimals)} ${symbol}`)
+console.log(`${balance.formatted} ${symbol}`)
 ```
 
-Identify the token by its network and contract address. Keep amounts in integer base units for transactions and convert them for display.
+Identify the token by its network and contract address. `balance.amount` contains integer base units; `balance.formatted` is the decimal string for display.
 
 ## Query balances across tokens
 

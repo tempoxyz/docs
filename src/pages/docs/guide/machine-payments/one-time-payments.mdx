@@ -1,6 +1,6 @@
 ---
 title: Accept One-Time Payments
-description: Charge per request on Tempo using the mppx charge intent. Each request triggers a TIP-20 transfer that settles in ~500ms.
+description: Charge per request on Tempo using the mppx charge intent. Configure a price and recipient, verify payment, and return a receipt.
 ---
 
 import { Card, Cards } from 'vocs'
@@ -28,6 +28,8 @@ bun add mppx viem
 :::
 
 ### Set up an `Mppx` charge instance
+
+[Set `MPP_SECRET_KEY`](/docs/guide/machine-payments/server#set-the-server-secret) before starting the server.
 
 Set up an `Mppx` instance with the `tempo` method.
 
@@ -144,12 +146,10 @@ Bun.serve({
 
 ### Test the one-time payment endpoint
 
-```bash
-# Create account funded with testnet tokens
-$ npx mppx account create
+These examples charge mainnet OUSD. Configure the `mppx` CLI with a funded mainnet account before calling the endpoint; testnet faucet tokens cannot pay a mainnet challenge.
 
-# Make a paid request
-$ npx mppx http://localhost:3000/api/photo
+```bash
+npx mppx http://localhost:3000/api/charges/photo
 ```
 
 ::::
@@ -165,7 +165,7 @@ $ npx mppx http://localhost:3000/api/photo
   />
   <Card
     icon="lucide:server"
-    title="Server quickstart"
+    title="Accept payments for an API"
     description="Framework middleware reference"
     to="/docs/guide/machine-payments/server"
   />

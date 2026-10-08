@@ -15,7 +15,7 @@ import { SendRelayerSponsoredPayment } from '../../../../components/guides/steps
 
 # Sponsor fees
 
-Pay transaction fees on behalf of your users. Connect your application to a fee payer service, then request sponsorship when submitting a payment.
+Pay transaction fees on behalf of your users. A fee payer service signs the fee authorization; the sender still signs the payment and supplies the funds being transferred.
 
 ## Fee sponsorship demo
 
@@ -27,7 +27,7 @@ Pay transaction fees on behalf of your users. Connect your application to a fee 
 
 ## Fee sponsorship implementation steps
 
-::::steps
+:::::steps
 
 ### Set up the fee payer service
 
@@ -101,16 +101,13 @@ Set `feePayer: true` to request sponsorship from the configured fee payer servic
 
 ```tsx twoslash [SendSponsoredPayment.tsx] filename="SendSponsoredPayment.tsx"
 import { Hooks } from 'wagmi/tempo'
-import { parseUnits } from 'viem'
+import { getAddress, parseUnits } from 'viem'
 
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
 // @noErrors
 function SendSponsoredPayment() {
   const sendPayment = Hooks.token.useTransferSync() // [!code hl]
-  const metadata = Hooks.token.useGetMetadata({
-    token: alphaUsd,
-  })
 
   return (
     <form onSubmit={
@@ -118,11 +115,10 @@ function SendSponsoredPayment() {
         event.preventDefault()
         const formData = new FormData(event.target as HTMLFormElement)
 
-        const recipient = (formData.get('recipient') ||
-          '0x0000000000000000000000000000000000000000') as `0x${string}`
+        const recipient = getAddress(String(formData.get('recipient')))
 
         sendPayment.mutate({ // [!code hl]
-          amount: parseUnits('100', metadata.data.decimals), // [!code hl]
+          amount: parseUnits('100', 6), // [!code hl]
           feePayer: true, // [!code focus]
           to: recipient, // [!code hl]
           token: alphaUsd, // [!code hl]
@@ -131,7 +127,7 @@ function SendSponsoredPayment() {
     }>
       <div>
         <label htmlFor="recipient"> Recipient address </label>
-        <input type="text" placeholder="0x..." />
+        <input type="text" name="recipient" placeholder="0x..." required />
       </div>
       <button type="submit" disabled={sendPayment.isPending}>
         Send Payment
@@ -150,20 +146,15 @@ function SendSponsoredPayment() {
 
 ### Next steps for fee sponsorship
 
-Now that you've implemented fee sponsorship, you can:
-
 - Learn more about the [Tempo Transaction](/docs/protocol/transactions/spec-tempo-transaction#fee-payer-signature-details) type and fee payer signature details
 - Use Tempo Transactions to sponsor multiple calls in a single signed operation
-- Learn how to [Pay Fees in Any Stablecoin](/docs/guide/payments/pay-fees-in-any-stablecoin)
+- Learn how to [Choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin)
 
-::::
+:::::
 
 ## Fee sponsorship best practices
 
-1. **Set sponsorship limits**: Implement daily or per-user limits to control costs
-2. **Monitor expenses**: Track sponsorship costs regularly to stay within budget
-3. **Consider selective sponsorship**: Only sponsor fees for specific operations or user segments
-4. **Educate users**: Clearly communicate when fees are being sponsored
+Configure the fee payer service to check the sender, target contracts, allowed methods, and spending budget before signing. Track sponsored fees against your application or customer records, and show the sender when your application covers the fee.
 
 ### Fee sponsorship security considerations
 
@@ -191,6 +182,6 @@ Now that you've implemented fee sponsorship, you can:
     description="Understand fee token selection and how to pay with different stablecoins"
     to="/docs/guide/payments/pay-fees-in-any-stablecoin"
     icon="lucide:coins"
-    title="Pay Fees in Any Stablecoin"
+    title="Choose a fee token"
   />
 </Cards>

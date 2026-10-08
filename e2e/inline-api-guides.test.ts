@@ -2,14 +2,6 @@ import { expect, test } from '@playwright/test'
 
 const guides = [
   {
-    page: '/docs/earn/vaults',
-    anchor: 'inspect-the-selected-vault',
-    title: 'Choose a vault',
-    operation: 'List verified vaults',
-    endpoint: '/v1/earn/vaults/verified',
-    requestPath: /^\/v1\/earn\/vaults\/verified$/,
-  },
-  {
     page: '/docs/accounts/balances',
     anchor: 'query-balances-across-tokens',
     title: 'Balances and activity',
@@ -36,7 +28,7 @@ for (const guide of guides) {
     const responseMarker = 'inline-guide-e2e-next-page'
     const requests: { method: string; pathname: string }[] = []
 
-    // Exercise the real client without depending on live balances, vaults,
+    // Exercise the real client without depending on live balances, routes,
     // credentials, or public rate limits. Empty data is a valid list response.
     await page.route('https://api.tempo.xyz/v1/**', async (route) => {
       const request = route.request()

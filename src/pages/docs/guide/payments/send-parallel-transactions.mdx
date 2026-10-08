@@ -1,7 +1,7 @@
 ---
-title: "Send parallel transactions using expiring nonces"
-seoTitle: "Parallel Transactions with Expiring Nonces | Docs"
-description: Submit multiple transactions concurrently using Tempo's expiring nonce system under-the-hood.
+title: Send payments in parallel
+seoTitle: Submit Parallel Tempo Transactions | Tempo Docs
+description: Submit independent payment transactions concurrently and track each transaction's receipt.
 interactive: true
 ---
 
@@ -12,13 +12,21 @@ import { SendParallelPayments } from '../../../../components/guides/steps/paymen
 import * as Token from '../../../../components/guides/tokens'
 import { Cards, Card } from 'vocs'
 
-# Send parallel transactions using expiring nonces
+<span id="send-parallel-transactions-using-expiring-nonces" />
 
-Tempo enables concurrent transaction execution through its [expiring nonce](/docs/guide/tempo-transaction#expiring-nonces) system. Unlike traditional sequential nonces that require transactions to be processed one at a time, expiring nonces allow multiple transactions to be submitted simultaneously without nonce conflicts. Each transaction uses an independent nonce that automatically expires after a set time window, enabling true parallel execution.
+# Send payments in parallel
 
-## Parallel transaction demo
+Submit independent payment transactions concurrently when each payment needs its own receipt. Use [batch payments](/docs/guide/payments/send-a-payment#batch-payment-transactions) when the calls must succeed or fail together in one transaction.
 
-By the end of this guide you will understand how to send parallel payments using expiring nonces under-the-hood.
+<span id="parallel-transaction-implementation-steps" />
+<span id="set-up-wagmi-for-parallel-transactions" />
+<span id="send-concurrent-transactions-with-nonce-keys" />
+
+## Submit independent transactions
+
+<span id="parallel-transaction-demo" />
+
+Connect a test account and send two independent transactions on Moderato testnet. The wallet demo uses separate nonce keys; the backend example below uses expiring nonces. Both produce a receipt for each transaction.
 
 <Demo.Container name="Send Parallel Payments" footerVariant="balances" tokens={[Token.alphaUsd]}>
   <Connect stepNumber={1} />
@@ -26,73 +34,52 @@ By the end of this guide you will understand how to send parallel payments using
   <SendParallelPayments stepNumber={3} />
 </Demo.Container>
 
-## Parallel transaction implementation steps
-
-::::steps
-
-### Set up Wagmi for parallel transactions
-
-Ensure that you have set up your project with Wagmi, a Tempo chain config, and a wallet connector:
-
-- [Connection details](/docs/quickstart/connection-details)
-- [TypeScript SDK](/docs/sdk/typescript)
-- [Wallet integration](/docs/quickstart/wallet-developers)
-
-### Send concurrent transactions with nonce keys
-
-To send multiple transactions in parallel, simply batch them together. [Expiring nonces](/docs/guide/tempo-transaction#expiring-nonces) are attached to each transaction automatically.
+Use the funded Moderato account from [Send a payment](/docs/guide/payments/send-a-payment#send-from-your-backend). This Viem example explicitly selects [expiring nonces](/docs/guide/tempo-transaction#expiring-nonces), so the transactions do not compete for a sequential nonce.
 
 :::code-group
 
-```ts twoslash [example.ts]
-// @noErrors
-import { Hooks } from 'wagmi/tempo'
+```ts [parallel-payments.ts]
 import { parseUnits } from 'viem'
+import { client } from './viem.config'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const payments = [
+  { to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8', amount: '10' },
+  { to: '0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc', amount: '5' },
+] as const
 
-const { mutate: transfer } = Hooks.token.useTransferSync()
+const results = await Promise.allSettled(
+  payments.map(({ to, amount }) =>
+    client.token.transferSync({
+      token: '0x20c0000000000000000000000000000000000001',
+      to,
+      amount: parseUnits(amount, 6),
+      nonceKey: 'expiring',
+    }),
+  ),
+)
 
-// Send both transfers in parallel. // [!code focus]
-const [receipt1, receipt2] = await Promise.all([ // [!code focus]
-  transfer.mutate({ // [!code focus]
-    amount: parseUnits('100', 6), // [!code focus]
-    to: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8', // [!code focus]
-    token: alphaUsd, // [!code focus]
-  }), // [!code focus]
-  transfer.mutate({ // [!code focus]
-    amount: parseUnits('50', 6), // [!code focus]
-    to: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC', // [!code focus]
-    token: alphaUsd, // [!code focus]
-  }), // [!code focus]
-]) // [!code focus]
-
-console.log('Transaction 1:', receipt1.transactionHash) // [!code focus]
-console.log('Transaction 2:', receipt2.transactionHash) // [!code focus]
+for (const [index, result] of results.entries()) {
+  if (result.status === 'fulfilled') {
+    console.log(index, result.value.receipt.transactionHash)
+  } else {
+    console.error(index, result.reason)
+  }
+}
 ```
 
-```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
-// @noErrors
-// [!include ~/snippets/wagmi.config.ts:setup]
+```ts [viem.config.ts]
+// [!include ~/snippets/viem.moderato.config.ts:setup]
 ```
 
 :::
 
-::::
+Replace the example recipients with test accounts you control. Each payment produces a separate result; one failure does not roll back the others. [Verify delivery](/docs/guide/payments/accept-a-payment#verify-stablecoin-payments) for each receipt before marking its payment complete.
+
+Expiring nonces include a transaction validity window. If a submission times out, check its transaction hash before rebuilding or retrying the payment. See [expiring nonce behavior](/docs/guide/tempo-transaction#expiring-nonces) for expiry and replay rules.
 
 ## Parallel transaction learning resources
 
 <Cards>
-  <Card
-    description="Learn more about expiring nonces that power concurrent transactions."
-    to="/docs/guide/tempo-transaction#expiring-nonces"
-    icon="lucide:timer"
-    title="Expiring Nonces"
-  />
-  <Card
-    description="Learn more about Tempo Transactions and their properties."
-    to="/docs/protocol/transactions"
-    icon="lucide:send"
-    title="Transactions"
-  />
+  <Card description="Choose nonce and validity-window settings for concurrent submissions." to="/docs/guide/tempo-transaction#expiring-nonces" icon="lucide:timer" title="Expiring nonces" />
+  <Card description="Read the transaction format and execution rules." to="/docs/protocol/transactions" icon="lucide:send" title="Transactions" />
 </Cards>

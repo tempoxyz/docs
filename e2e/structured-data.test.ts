@@ -52,10 +52,10 @@ test('keeps audited OpenAPI browser and structured-data titles separate', async 
 
   expect(articles).toHaveLength(1)
   expect(articles[0]).toMatchObject({
-    name: 'Using the Tempo API Console',
-    headline: 'Using the Tempo API Console',
+    name: 'Tempo Console',
+    headline: 'Tempo Console',
     description:
-      'Use Tempo API Console to create projects and API keys, switch environments, monitor usage, configure billing, and manage organization access in one place.',
+      'Use Tempo Console to create projects and API keys, switch environments, monitor usage, configure billing, and manage organization access in one place.',
   })
 })
 

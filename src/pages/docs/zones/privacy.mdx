@@ -21,9 +21,9 @@ Amounts and timing at the public boundary remain observable. Do not describe the
 
 ## Keep application access scoped
 
-The Zone RPC authenticates the caller and scopes results to that account. Preserve that boundary in your application's backend, caches, logs, and user interface. A public Tempo explorer does not show private Zone activity.
+The account-scoped, redacted Zone RPC authenticates the caller and scopes results to that account. If your application uses a hosted provider instead, confirm which accounts its credentials can read. Enforce customer access in your backend, caches, logs, and user interface. A public Tempo explorer does not show private Zone activity.
 
-See [account privacy rules](/docs/protocol/zones/accounts) and [RPC access control](/docs/protocol/zones/rpc) for exact read restrictions and response redaction.
+Read access is separate from transaction-signing authority and the portal's funding rules. See [account privacy rules](/docs/protocol/zones/accounts) and [RPC access control](/docs/protocol/zones/rpc) for exact read restrictions and response redaction.
 
 ## Check settlement assumptions
 

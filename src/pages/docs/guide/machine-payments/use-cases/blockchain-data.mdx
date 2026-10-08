@@ -1,71 +1,48 @@
 ---
-title: Pay for Blockchain Data and Analytics
-description: Query on-chain data from Alchemy, Allium, Nansen, Dune, and Codex using MPP stablecoin payments on Tempo — no API keys required.
+title: "Query blockchain data"
+seoTitle: "Query blockchain data with MPP | Tempo Docs"
+description: "Request chain data from an MPP endpoint. This example reads a block number through JSON-RPC."
 ---
 
-import { Card, Cards } from 'vocs'
+<span id="pay-for-blockchain-data-and-analytics" />
+<span id="the-blockchain-data-payment-problem" />
+<span id="how-mpp-enables-paid-blockchain-data" />
 
-# Pay for blockchain data and analytics
+# Query blockchain data
 
-Access on-chain data — token prices, wallet analytics, DEX trades, stablecoin flows, and smart contract events — from any MPP-enabled blockchain data provider. Pay per query with stablecoins on Tempo.
+Request chain data from an MPP endpoint. This example reads a block number through JSON-RPC.
 
-## The blockchain data payment problem
+Set up [Tempo Wallet CLI](/docs/cli/wallet) before running the example. These are paid service requests; check the wallet network and balance before proceeding.
 
-Blockchain data APIs gate access behind API keys, developer accounts, and monthly subscription tiers. Agents that need to query multiple providers — one for wallet balances, another for DEX analytics, a third for historical prices — must manage separate credentials and billing for each. Free tiers run out fast, and upgrading means committing to monthly plans before knowing actual usage.
+<span id="blockchain-data-services-you-can-pay-for" />
 
-## How MPP enables paid blockchain data
+## Find a blockchain service
 
-With MPP, your agent pays per query. No accounts, no API keys, no tier commitments. The agent calls any blockchain data provider, pays with a stablecoin transfer on Tempo, and gets the data back in the same response.
-
-**Tempo Charge** is a natural fit for data queries: each request has a known cost, settlement takes ~500ms, and the agent only pays for queries it actually makes.
-
-## Blockchain data services you can pay for
-
-| Provider | Data | Service URL |
-|---|---|---|
-| [Alchemy](https://mpp.alchemy.com) | Core RPC, prices, portfolios, NFTs across 100+ chains | `mpp.alchemy.com` |
-| [Allium](https://agents.allium.so) | Token prices, wallet balances, transactions, PnL, SQL | `agents.allium.so` |
-| [Nansen](https://api.nansen.ai) | Smart money, wallet profiling, DEX trades, flow analysis | `api.nansen.ai` |
-| [Dune](https://api.dune.com) | Raw transactions, decoded events, stablecoin flows, DeFi | `api.dune.com` |
-| [Codex](https://graph.codex.io) | Token data, prediction markets, charts, wallet analytics | `graph.codex.io` |
-
-## Try Alchemy with Tempo payments
+Use the current directory to inspect endpoints, schemas, and availability:
 
 ```bash
-# Install Tempo CLI + wallet
-curl -L https://tempo.xyz/install | bash && tempo add request && tempo wallet login
-
-# Query blockchain data via Alchemy
-tempo request mpp.alchemy.com/v2 \
-  -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
+tempo wallet services --search blockchain
+tempo wallet services <SERVICE_ID>
 ```
 
-## Prompt your agent to buy blockchain data
+<span id="try-alchemy-with-tempo-payments" />
 
+## Preview the example request
+
+Use the service details to confirm the example URL and payload. Preview its payment terms:
+
+```bash
+tempo request --dry-run https://mpp.alchemy.com/v2 \
+  --json '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
 ```
-Use agents.allium.so to query token prices and wallet balances via Tempo.
-Pay per query with stablecoins — no API key needed.
-```
 
-## Next steps for blockchain data payments
+After reviewing the price, run the command without `--dry-run` to make the paid request. Add [`--max-spend`](/docs/cli/request#tempo-request-flags) to cap spending.
 
-<Cards>
-  <Card
-    icon="lucide:credit-card"
-    title="Accept one-time payments"
-    description="Build a payment-gated data API"
-    to="/docs/guide/machine-payments/one-time-payments"
-  />
-  <Card
-    icon="lucide:bot"
-    title="Agent quickstart"
-    description="Set up your agent to discover and pay for services"
-    to="/docs/guide/machine-payments/agent"
-  />
-  <Card
-    icon="lucide:globe"
-    title="Browse all services"
-    description="85+ MPP-enabled services in the directory"
-    to="https://mpp.dev/services"
-  />
-</Cards>
+<span id="prompt-your-agent-to-buy-blockchain-data" />
+<span id="next-steps-for-blockchain-data-payments" />
+
+## Check the network and result
+
+Confirm which network the endpoint serves before making the request. A JSON-RPC response can contain an `error` even when the HTTP request succeeds. Associate the result with its network and block context.
+
+For application code, use [Pay for services](/docs/guide/machine-payments/client). For discovery through MCP or the catalog API, use [Find services](/docs/guide/machine-payments/discover-services).

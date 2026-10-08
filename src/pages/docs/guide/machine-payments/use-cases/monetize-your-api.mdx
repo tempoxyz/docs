@@ -1,111 +1,38 @@
 ---
-title: Monetize Your API with Agentic Payments
-description: Accept stablecoin payments for your API using MPP on Tempo. Charge per request without requiring signups, billing accounts, or API keys.
+title: "Charge for an API request"
+seoTitle: "Charge for an API Request with MPP | Tempo Docs"
+description: Choose one-time or metered payments for your API and integrate MPP verification into its request handler.
 ---
 
-import { Card, Cards } from 'vocs'
+<span id="monetize-your-api-with-agentic-payments" />
 
-# Monetize your API with agentic payments
+# Charge for an API request
 
-Accept stablecoin payments for any HTTP endpoint. No signup flows, no billing accounts, no API key management. Your users — agents, apps, or humans — pay per request with stablecoins on Tempo, and you get paid instantly.
+Use MPP to request payment before your API performs a paid operation. Follow [Accept payments for an API](/docs/guide/machine-payments/server) for middleware and request-handler examples.
 
-## The API monetization problem
+<span id="the-api-monetization-problem" />
+<span id="how-mpp-adds-agentic-api-payments" />
 
-Monetizing an API today means building a billing system: user registration, API key provisioning, usage metering, invoicing, and payment collection. For most developers, the billing infrastructure is harder to build than the API itself. Stripe and similar tools help, but still require account creation and credit card onboarding from every customer.
+## Choose how to charge
 
-## How MPP adds agentic API payments
+- [One-time payments](/docs/guide/machine-payments/one-time-payments) charge a fixed amount for a request or resource.
+- [Payment sessions](/docs/guide/machine-payments/pay-as-you-go) meter usage through a funded channel and signed vouchers.
+- [Streamed payments](/docs/guide/machine-payments/streamed-payments) coordinate usage and payment while sending a streaming response.
 
-With MPP, you add a few lines of code to your HTTP endpoint and it becomes payment-gated. The server returns a `402` Challenge with the price, the client pays with a stablecoin transfer, and the server delivers the response with a `Receipt`. Settlement happens in ~500ms on Tempo.
+<span id="add-api-payments-in-5-minutes" />
+<span id="install-the-mpp-sdk" />
+<span id="add-mpp-payment-gating" />
+<span id="test-the-paid-api" />
+<span id="why-tempo-for-api-monetization" />
 
-**Two billing models** are available out of the box:
-- **Tempo Charge** — One-time payment per request. Best for single API calls, content access, or discrete operations.
-- **Tempo Session** — Continuous pay-as-you-go via payment channels. Best for LLM APIs, metered services, or streamed responses.
+## Integrate payment verification
 
-## Add API payments in 5 minutes
+Choose the accepted token, price, and recipient in your [server configuration](/docs/guide/machine-payments/server). The server issues a payment challenge; the client retries with a credential. Perform the paid operation after verification and return the payment receipt with the response.
 
-::::steps
+Keep application authorization separate from payment verification. Paying for a request does not grant access to another customer's data.
 
-### Install the MPP SDK
+<span id="next-steps-for-api-monetization" />
 
-:::code-group
-```bash [npm]
-npm install mppx viem
-```
-```bash [pnpm]
-pnpm add mppx viem
-```
-```bash [bun]
-bun add mppx viem
-```
-:::
+## Test and publish the endpoint
 
-### Add MPP payment gating
-
-```ts
-import { Mppx, tempo } from 'mppx/server'
-
-const mppx = Mppx.create({
-  methods: [tempo({
-    currency: '0x20c0000000000000000000006a37da5c996874be',
-    recipient: '0xYOUR_ADDRESS_HERE',
-  })],
-})
-
-export async function handler(request: Request) {
-  const result = await mppx.charge({
-    amount: '0.01',
-    description: 'API call',
-  })(request)
-
-  if (result.status === 402) return result.challenge
-
-  // Your API logic here
-  return result.withReceipt(Response.json({ data: '...' }))
-}
-```
-
-### Test the paid API
-
-```bash
-npx mppx account create
-npx mppx http://localhost:3000/api/endpoint
-```
-
-::::
-
-## Why Tempo for API monetization
-
-- **~500ms settlement** — Fast enough for synchronous request/response flows
-- **Sub-cent fees** — Charge $0.001 per request and still be profitable
-- **No customer onboarding** — Clients pay with a wallet, no signup required
-- **Fee sponsorship** — Cover gas fees for your customers so they only need stablecoins
-- **Any stablecoin** — Accept OUSD, USDC.e, or any TIP-20 token
-
-## Next steps for API monetization
-
-<Cards>
-  <Card
-    icon="lucide:credit-card"
-    title="Accept one-time payments"
-    description="Step-by-step guide with framework examples"
-    to="/docs/guide/machine-payments/one-time-payments"
-  />
-  <Card
-    icon="lucide:repeat"
-    title="Accept pay-as-you-go payments"
-    description="Session-based billing for metered services"
-    to="/docs/guide/machine-payments/pay-as-you-go"
-  />
-  <Card
-    icon="lucide:zap"
-    title="Accept streamed payments"
-    description="Pay-per-chunk for streaming responses"
-    to="/docs/guide/machine-payments/streamed-payments"
-  />
-  <Card
-    icon="lucide:book-open"
-    title="Full MPP documentation"
-    description="Protocol spec, SDK reference, and guides"
-    to="https://mpp.dev"
-  />
-</Cards>
+Test the request with [Pay with the CLI](/docs/guide/machine-payments/agent), then follow [MPP discovery documentation](https://mpp.dev/advanced/discovery) to make the endpoint discoverable.

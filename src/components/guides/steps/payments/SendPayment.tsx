@@ -1,6 +1,6 @@
 'use client'
 import * as React from 'react'
-import { isAddress, pad, parseUnits, stringToHex } from 'viem'
+import { isAddress, parseUnits, toHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
@@ -38,7 +38,7 @@ export function SendPayment(props: DemoStepProps) {
   const validateMemo = (value: string): string | null => {
     const byteLength = new TextEncoder().encode(value).length
     if (byteLength > 32) {
-      return `${byteLength - 32} characters too long`
+      return 'Memo must fit in 32 UTF-8 bytes'
     }
     return null
   }
@@ -55,7 +55,7 @@ export function SendPayment(props: DemoStepProps) {
       amount: parseUnits('100', 6),
       to: recipient as `0x${string}`,
       token: alphaUsd,
-      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
+      memo: memo ? toHex(memo, { size: 32 }) : undefined,
     })
   }
 

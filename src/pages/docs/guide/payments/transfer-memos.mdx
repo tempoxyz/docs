@@ -15,9 +15,40 @@ import { SendPaymentWithMemo } from '../../../../components/guides/steps/payment
 
 # Payment references
 
-Attach a 32-byte memo to a [TIP-20 payment](/get-started/stablecoins) to identify an invoice, order, or customer record. Read the memo from transfer events to reconcile the payment in your application.
+Attach a 32-byte transfer memo to a [TIP-20 payment](/get-started/stablecoins) to identify an invoice, order, or customer record. Store the reference with your payment record, then match it to confirmed transfer events.
 
-## Transfer memo demo
+<span id="transfer-memo-best-practices" />
+<span id="use-consistent-memo-formats" />
+<span id="keep-memos-under-32-bytes" />
+
+## Encode a payment reference
+
+Use a short, opaque ID such as `INV-12345`. Memos are public transaction data; keep customer details in your application.
+
+Use the same encoding when sending a reference and searching for it. This helper encodes a UTF-8 string and pads it on the right with zero bytes to fit the `bytes32` field:
+
+```ts [payment-reference.ts]
+import { toHex } from 'viem'
+
+export function encodePaymentReference(reference: string) {
+  if (new TextEncoder().encode(reference).length > 32) {
+    throw new Error('Payment references must fit in 32 UTF-8 bytes')
+  }
+  return toHex(reference, { size: 32 })
+}
+```
+
+The limit is **32 bytes**, not 32 characters. `toHex` throws if the input exceeds the requested size; it does not truncate it. For a longer reference, keep the full value in your database and put a short lookup ID in the memo.
+
+<span id="transfer-memo-implementation-steps" />
+<span id="set-up-your-project-for-transfer-memos" />
+<span id="send-a-transfer-with-memo" />
+
+## Send a payment with a reference
+
+<span id="transfer-memo-demo" />
+
+Connect a test account and send a payment with a reference on Moderato testnet.
 
 <Demo.Container name="Transfer with Memo" footerVariant="source" src="tempoxyz/examples/tree/main/examples/payments">
   <Connect stepNumber={1} />
@@ -25,199 +56,94 @@ Attach a 32-byte memo to a [TIP-20 payment](/get-started/stablecoins) to identif
   <SendPaymentWithMemo stepNumber={3} last />
 </Demo.Container>
 
-## Transfer memo implementation steps
-
-::::steps
-
-### Set up your project for transfer memos
-
-Ensure you have Wagmi configured with Tempo:
-
-- [Connection details](/docs/quickstart/connection-details)
-- [TypeScript SDK](/docs/sdk/typescript)
-- [Wallet integration](/docs/quickstart/wallet-developers)
-
-### Send a transfer with memo
-
-Use `transferWithMemo` to attach a reference to your payment. The memo is a 32-byte value that gets emitted in the `TransferWithMemo` event.
+Use the funded Moderato test account from [Send a payment](/docs/guide/payments/send-a-payment#send-from-your-backend). Set `TEMPO_RECIPIENT` to an account you control and save the helper above as `payment-reference.ts`.
 
 :::code-group
 
-```tsx twoslash [SendWithMemo.tsx]
-// @noErrors
-import { Hooks } from 'wagmi/tempo'
-import { parseUnits, toHex } from 'viem'
-import { useConnection } from 'wagmi'
+```ts [send-payment.ts]
+import { getAddress, parseUnits } from 'viem'
+import { encodePaymentReference } from './payment-reference'
+import { client } from './viem.config'
 
-export function SendWithMemo() {
-  const { address } = useConnection()
-  const transfer = Hooks.token.useTransferSync()
+const recipient = process.env.TEMPO_RECIPIENT
+if (!recipient) throw new Error('Set TEMPO_RECIPIENT')
 
-  const handleSend = () => {
-    transfer.mutate({
-      token: '0x20c0000000000000000000000000000000000001',
-      to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
-      amount: parseUnits('100', 6),
-      memo: toHex('INV-12345', { size: 32 }),
-    })
-  }
-
-  return (
-    <button onClick={handleSend} disabled={transfer.isPending}>
-      {transfer.isPending ? 'Sending...' : 'Send Payment'}
-    </button>
-  )
-}
-```
-
-```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
-// @noErrors
-// [!include ~/snippets/wagmi.config.ts:setup]
-```
-
-:::
-
-### Watch for transfers with memos
-
-Listen for `TransferWithMemo` events to reconcile incoming payments. The memo is indexed, so you can filter by specific values.
-
-:::code-group
-
-```tsx twoslash [WatchMemos.tsx]
-// @noErrors
-import { useWatchContractEvent } from 'wagmi'
-import { fromHex } from 'viem'
-import { Abis } from 'viem/tempo'
-
-export function WatchMemos({ depositAddress }: { depositAddress: `0x${string}` }) {
-  useWatchContractEvent({
-    address: '0x20c0000000000000000000000000000000000001',
-    abi: Abis.TIP20,
-    eventName: 'TransferWithMemo',
-    onLogs: (logs) => {
-      for (const log of logs) {
-        if (log.args.to === depositAddress) {
-          const memo = fromHex(log.args.memo, 'string').replace(/\0/g, '')
-          console.log(`Received ${log.args.value} with memo: ${memo}`)
-        }
-      }
-    },
-  })
-
-  return <div>Watching for deposits...</div>
-}
-```
-
-```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
-// @noErrors
-// [!include ~/snippets/wagmi.config.ts:setup]
-```
-
-:::
-
-::::
-
-## Transfer memo recipes
-
-### Exchange deposit reconciliation
-
-As an exchange, use a single master hot wallet for all customer deposits. Customers include their customer ID as the memo, and you credit their account by parsing the event.
-
-```ts
-import { Actions } from 'viem/tempo'
-import { parseUnits, stringToHex, pad } from 'viem'
-
-// Customer deposits with their customer ID
-await Actions.token.transferSync(walletClient, {
-  token: tokenAddress,
-  to: exchangeHotWallet,
-  amount: parseUnits('500', 6),
-  memo: pad(stringToHex('CUST-12345'), { size: 32 }),
+const { receipt } = await client.token.transferSync({
+  token: '0x20c0000000000000000000000000000000000001',
+  to: getAddress(recipient),
+  amount: parseUnits('10', 6),
+  memo: encodePaymentReference('INV-12345'),
 })
+
+console.log(receipt.transactionHash)
 ```
+
+```ts [viem.config.ts]
+// [!include ~/snippets/viem.moderato.config.ts:setup]
+```
+
+:::
+
+Passing `memo` makes the SDK call `transferWithMemo`. For a browser integration, pass the same value to `Hooks.token.useTransferSync` in your [payment action](/docs/guide/payments/send-a-payment#add-a-payment-action-in-the-browser).
+
+<span id="watch-for-transfers-with-memos" />
+<span id="index-memos-for-efficient-queries" />
+
+## Find payments by reference
+
+The `TransferWithMemo` event indexes `memo`, so you can query the token contract for a specific reference. Set `TEMPO_RECIPIENT` to your receiving account and `TEMPO_FROM_BLOCK` to the first block in the range you want to inspect.
+
+```ts [find-payment.ts]
+import { getAddress } from 'viem'
+import { tempoModerato } from 'viem/chains'
+import { Abis, createClient } from 'viem/tempo'
+import { encodePaymentReference } from './payment-reference'
+
+const recipient = process.env.TEMPO_RECIPIENT
+const fromBlock = process.env.TEMPO_FROM_BLOCK
+if (!recipient || !fromBlock) {
+  throw new Error('Set TEMPO_RECIPIENT and TEMPO_FROM_BLOCK')
+}
+
+const client = createClient({ chain: tempoModerato })
+const logs = await client.getContractEvents({
+  address: '0x20c0000000000000000000000000000000000001',
+  abi: Abis.tip20,
+  eventName: 'TransferWithMemo',
+  args: {
+    to: getAddress(recipient),
+    memo: encodePaymentReference('INV-12345'),
+  },
+  fromBlock: BigInt(fromBlock),
+  toBlock: 'latest',
+})
+
+console.log(logs)
+```
+
+A memo match identifies a candidate payment. [Verify the token, recipient, amount, and receipt](/docs/guide/payments/accept-a-payment#reconcile-payments-with-memos) before crediting it. Store the transaction hash and log index so replaying events cannot credit the same transfer twice.
+
+<span id="transfer-memo-recipes" />
+<span id="exchange-deposit-reconciliation" />
+
+## Choose a reference for your workflow
+
+For customer deposits, assign a short customer ID and ask the sender to include it. If the sender cannot supply a memo, use [customer deposit addresses](/docs/guide/payments/virtual-addresses) instead.
 
 ### Payroll batch payments
 
-Start with the [Viem batch payment setup](/docs/guide/payments/send-a-payment#batch-payment-transactions), then encode `transferWithMemo` for each employee ID.
+Encode a distinct payment reference for each call in a [batch payment](/docs/guide/payments/send-a-payment#batch-payment-transactions). Store that reference with the corresponding payroll record so you can reconcile each transfer, even though the batch shares one transaction hash.
 
-```ts
-import { Abis } from 'viem/tempo'
-import { encodeFunctionData, parseUnits, stringToHex, pad } from 'viem'
-import { client } from './viem.config'
+<span id="refund-address-in-memo" />
 
-const calls = employees.map(emp => ({
-  to: tokenAddress,
-  data: encodeFunctionData({
-    abi: Abis.tip20,
-    functionName: 'transferWithMemo',
-    args: [emp.wallet, parseUnits(emp.salary, 6), pad(stringToHex(emp.id), { size: 32 })]
-  })
-}))
+### Link refunds to the original payment
 
-await client.sendTransaction({ calls })
-```
-
-### Refund address in memo
-
-Include a refund address in the memo so the recipient knows where to send funds if a reversal is needed.
-
-```ts
-import { Actions } from 'viem/tempo'
-import { parseUnits, stringToHex, pad } from 'viem'
-
-const refundMemo = pad(stringToHex('REFUND 0x742d35Cc6634C0532925a3b8'), { size: 32 })
-
-await Actions.token.transferSync(walletClient, {
-  token: tokenAddress,
-  to: merchantAddress,
-  amount: parseUnits('100', 6),
-  memo: refundMemo,
-})
-```
-
-## Transfer memo best practices
-
-### Use consistent memo formats
-
-Establish a naming convention for your memos (e.g., `CUST-{id}`, `INV-{number}`, `REFUND-{id}`) to make parsing and filtering reliable across your system.
-
-### Keep memos under 32 bytes
-
-Memos are `bytes32` values. Use `toHex(string, { size: 32 })` to convert strings—if your string exceeds 32 bytes, it will be truncated. For longer references, store the full data offchain and use a hash or short ID as the memo.
-
-### Index memos for efficient queries
-
-The `TransferWithMemo` event has `memo` as an indexed parameter. Use `getLogs` with the `args` filter to query transactions by memo without scanning all events.
-
-```ts
-import { parseAbiItem, stringToHex, pad } from 'viem'
-
-const logs = await client.getLogs({
-  address: tokenAddress,
-  event: parseAbiItem('event TransferWithMemo(address indexed from, address indexed to, uint256 value, bytes32 indexed memo)'),
-  args: { memo: pad(stringToHex('INV-12345'), { size: 32 }) },
-})
-```
+Use an original payment ID or a separate refund ID as the memo. Keep the refund destination in the payment record and verify it before submitting the refund. An Ethereum-style address written as text takes 42 bytes and cannot fit in this 32-byte field.
 
 ## Transfer memo learning resources
 
 <Cards>
-  <Card
-    description="Complete guide to sending stablecoin payments with optional memos"
-    to="/docs/guide/payments/send-a-payment"
-    icon="lucide:send"
-    title="Send a Payment"
-  />
-  <Card
-    description="Watch for incoming payments and integrate reconciliation flows"
-    to="/docs/guide/payments/accept-a-payment"
-    icon="lucide:handshake"
-    title="Accept a Payment"
-  />
-  <Card
-    description="Full API reference for memo methods and events"
-    to="/docs/protocol/tip20/spec"
-    icon="lucide:file-text"
-    title="TIP-20 Specification"
-  />
+  <Card description="Transfer stablecoins from a backend or browser application." to="/docs/guide/payments/send-a-payment" icon="lucide:send" title="Send a payment" />
+  <Card description="Verify incoming transfers and reconcile payment records." to="/docs/guide/payments/accept-a-payment" icon="lucide:arrow-down-to-line" title="Receive a payment" />
+  <Card description="Read the contract methods and event definitions." to="/docs/protocol/tip20/spec" icon="lucide:file-text" title="TIP-20 Specification" />
 </Cards>

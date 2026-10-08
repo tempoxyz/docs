@@ -6,7 +6,7 @@ description: "Request an Earn withdrawal, distinguish immediate and queued redem
 
 # Withdraw funds
 
-Withdraw through the selected vault's supported contract interface. The Earn API reads positions and capabilities; it does not submit a withdrawal for the user.
+Withdraw through the selected vault's supported contract interface. The Earn API reads positions and capabilities; it does not submit withdrawals.
 
 ## Check liquidity and withdrawal support
 
@@ -16,7 +16,7 @@ Keep three amounts distinct in your app:
 
 | Amount | What to show |
 | --- | --- |
-| **Position value** | The current asset value of the user's shares. |
+| **Position value** | The current asset value of the account's shares. |
 | **Available to withdraw** | The amount available through the vault's supported withdrawal path and a current quote. |
 | **Pending withdrawal** | An exit requested but not yet delivered to the destination account. |
 
@@ -28,7 +28,7 @@ Read `capabilities.redeem` and `capabilities.asyncRedeem` to distinguish immedia
 
 ### Get current withdrawal terms
 
-Use the provider's supported interface to quote the withdrawal. Show the output asset, amount, fees, destination, and whether settlement is immediate or queued before requesting the user's authorization.
+Use the provider's supported interface to quote the withdrawal. Show the output asset, amount, fees, destination, and whether the withdrawal is immediate or queued before the account signs it.
 
 ### Submit the withdrawal
 

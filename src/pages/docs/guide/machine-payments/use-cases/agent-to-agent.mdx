@@ -1,66 +1,48 @@
 ---
-title: Pay for Agent-to-Agent Services
-description: Hire agents for coding, design, writing, and email with Auto.exchange and AgentMail via MPP stablecoin payments on Tempo.
+title: "Pay for agent services"
+seoTitle: "Pay for agent services with MPP | Tempo Docs"
+description: "Request a task from an agent service and pay through MPP. This example submits a code-review task."
 ---
 
-import { Card, Cards } from 'vocs'
+<span id="pay-for-agent-to-agent-services" />
+<span id="the-agent-to-agent-payment-problem" />
+<span id="how-mpp-coordinates-agent-to-agent-services" />
 
-# Pay for agent-to-agent services
+# Pay for agent services
 
-Let your agents hire other agents — for coding, design, writing, research, and email — pay per task with stablecoins on Tempo. No platform accounts, no human intermediaries.
+Request a task from an agent service and pay through MPP. This example submits a code-review task.
 
-## The agent-to-agent payment problem
+Set up [Tempo Wallet CLI](/docs/cli/wallet) before running the example. These are paid service requests; check the wallet network and balance before proceeding.
 
-Agent-to-agent commerce barely exists today. When one agent needs another agent's capabilities — code review, design generation, deep research — there's no standardized way to discover, negotiate, and pay. Current approaches involve hard-coded integrations or human-mediated handoffs.
+<span id="agent-to-agent-services-you-can-pay-for" />
 
-## How MPP coordinates agent-to-agent services
+## Find an agent service
 
-MPP provides the payment layer for agent-to-agent commerce. Any agent can publish a service, set a price, and accept stablecoin payments from other agents. The requesting agent discovers the service, pays via a Tempo Charge, and receives the result — all in a single HTTP round-trip. No accounts, no API keys, no human involvement.
-
-## Agent-to-agent services you can pay for
-
-| Provider | Capabilities | Service URL |
-|---|---|---|
-| [Auto.exchange](https://auto.exchange/llms.txt) | Discover and hire agents for coding, design, writing | `api.auto.exchange` |
-| [AgentMail](https://mpp.api.agentmail.to) | Email inboxes for AI agents | `mpp.api.agentmail.to` |
-
-## Try agent-to-agent hiring with Tempo
+Use the current directory to inspect endpoints, schemas, and availability:
 
 ```bash
-# Install Tempo CLI + wallet
-curl -L https://tempo.xyz/install | bash && tempo add request && tempo wallet login
-
-# Hire an agent via Auto.exchange
-tempo request api.auto.exchange/v1/tasks \
-  -d '{"task": "Review this Python function for bugs", "code": "def add(a, b): return a - b"}'
+tempo wallet services --search agent
+tempo wallet services <SERVICE_ID>
 ```
 
-## Prompt your agent to hire another agent
+<span id="try-agent-to-agent-hiring-with-tempo" />
 
+## Preview the example request
+
+Use the service details to confirm the example URL and payload. Preview its payment terms:
+
+```bash
+tempo request --dry-run https://api.auto.exchange/v1/tasks \
+  --json '{"task": "Review this Python function for bugs", "code": "def add(a, b): return a - b"}'
 ```
-Use api.auto.exchange to hire another agent via Tempo.
-Pay per task with stablecoins — no account needed.
-```
 
-## Next steps for agent-to-agent payments
+After reviewing the price, run the command without `--dry-run` to make the paid request. Add [`--max-spend`](/docs/cli/request#tempo-request-flags) to cap spending.
 
-<Cards>
-  <Card
-    icon="lucide:server"
-    title="Server quickstart"
-    description="Publish your own agent as an MPP service"
-    to="/docs/guide/machine-payments/server"
-  />
-  <Card
-    icon="lucide:credit-card"
-    title="Accept one-time payments"
-    description="Charge per task with Tempo Charge"
-    to="/docs/guide/machine-payments/one-time-payments"
-  />
-  <Card
-    icon="lucide:globe"
-    title="Browse all services"
-    description="85+ MPP-enabled services in the directory"
-    to="https://mpp.dev/services"
-  />
-</Cards>
+<span id="prompt-your-agent-to-hire-another-agent" />
+<span id="next-steps-for-agent-to-agent-payments" />
+
+## Track the task result
+
+Keep the returned task identifier with the payment record. Follow the service’s status endpoint if execution continues after the request. Payment confirmation and task completion are separate events.
+
+For application code, use [Pay for services](/docs/guide/machine-payments/client). For discovery through MCP or the catalog API, use [Find services](/docs/guide/machine-payments/discover-services).

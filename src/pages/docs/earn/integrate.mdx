@@ -20,17 +20,17 @@ Start with a funded [Tempo account](/docs/accounts) and a [vault](/docs/earn/vau
 
 ### Check the asset and access requirements
 
-Save the vault address and network together. Match the account's token to the accepted asset and confirm the user's eligibility. Read `capabilities` and `state.depositsPaused` before enabling the deposit action.
+Save the vault address and network together. Match the account's token to the accepted asset and confirm the account's eligibility. Read `capabilities` and `state.depositsPaused` before enabling the deposit action.
 
 ### Prepare the deposit
 
-Confirm the contract interface, deployment, and required token approvals with the provider or Tempo. Show the asset, amount, and destination vault before requesting authorization.
+Confirm the contract interface, deployment, and required token approvals with the provider or Tempo. Show the asset, amount, and destination vault before the account signs the deposit.
 
 A deposit is a contract interaction. Transferring stablecoins directly to the vault address does not establish a position. The Earn read API does not submit deposits or withdrawals.
 
 ### Submit and verify the position
 
-Have the account authorize the required contract calls through the supported interface. After execution, verify the resulting share balance. Save the transaction hash, deposited amount, and shares received for reconciliation.
+Use the account's signer to sign and submit the required contract calls through the supported interface. After execution, verify the resulting share balance. Save the transaction hash, deposited amount, and shares received for reconciliation.
 
 Read `GET /v1/earn/vaults/{vaultId}/positions/{address}` to display the resulting position.
 

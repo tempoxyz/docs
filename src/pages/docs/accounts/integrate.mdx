@@ -2,7 +2,11 @@
 title: "Connect a wallet"
 seoTitle: "Connect Tempo Wallet to Your Application | Tempo Docs"
 description: Use the Accounts SDK to connect Tempo Wallet, read the selected account, and keep your application in sync with wallet changes.
+interactive: true
 ---
+
+import * as Demo from '../../../components/guides/Demo'
+import { SignInWithTempo } from '../../../components/guides/steps/wallet/SignInWithTempo'
 
 <span id="integrate-accounts" />
 
@@ -16,6 +20,14 @@ This browser example uses Moderato testnet.
 
 ## Connect Tempo Wallet
 
+Try the connection below. Tempo Wallet asks you to connect and approve access for the testnet demos, then the selected account address appears here.
+
+<Demo.Container name="Connect Tempo Wallet" showRestart={false}>
+  <SignInWithTempo stepNumber={1} />
+</Demo.Container>
+
+Use the Accounts SDK to add this connection flow to your application:
+
 :::::steps
 
 ### Install the Accounts SDK
@@ -23,7 +35,7 @@ This browser example uses Moderato testnet.
 Run this in your application's project directory:
 
 ```bash
-pnpm add accounts viem
+pnpm add --save-exact accounts@0.18.4 viem
 ```
 
 <span id="connect-tempo-wallet-from-your-application" />
@@ -34,22 +46,21 @@ Use the same network for the provider, wallet client, and public client:
 
 ```ts [connection.ts]
 import { Provider } from 'accounts'
-import { createPublicClient, createWalletClient, custom, http } from 'viem'
 import { tempoModerato } from 'viem/chains'
+import { createClient, custom } from 'viem/tempo'
 
 export const provider = Provider.create({
   chains: [tempoModerato],
   testnet: true,
 })
 
-export const walletClient = createWalletClient({
+export const walletClient = createClient({
   chain: tempoModerato,
   transport: custom(provider),
 })
 
-export const publicClient = createPublicClient({
+export const publicClient = createClient({
   chain: tempoModerato,
-  transport: http(),
 })
 
 export async function connectAccount() {

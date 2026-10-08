@@ -10,7 +10,7 @@ A successful source-chain transaction starts a route; it does not establish that
 
 ## Read the transfer or deposit
 
-For a connected-wallet transfer, use `GET /v1/routes/transfers/{id}`. Register the submitted source transaction hashes as described in [Make a transfer](/docs/routes/transfers).
+For a transfer your application authorizes, use `GET /v1/routes/transfers/{id}`. Register the submitted source transaction hashes as described in [Make a transfer](/docs/routes/transfers).
 
 For a deposit-address flow, list deposits with `GET /v1/routes/deposits`, filtering by `depositAddress`, then read each deposit with `GET /v1/routes/deposits/{id}`. The address being `active` says it can receive deposits; it does not describe a particular deposit's progress.
 

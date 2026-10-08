@@ -1,6 +1,6 @@
 'use client'
 import * as React from 'react'
-import { isAddress, pad, parseUnits, stringToHex } from 'viem'
+import { isAddress, parseUnits, toHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
@@ -43,7 +43,7 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
       amount: parseUnits('100', 6),
       to: recipient as `0x${string}`,
       token: alphaUsd,
-      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
+      memo: memo ? toHex(memo, { size: 32 }) : undefined,
     })
   }
 

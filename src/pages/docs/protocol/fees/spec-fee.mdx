@@ -20,9 +20,9 @@ In determining *which* token a user pays fees in, we want to maximize customizab
 
 ## Fee units
 
-Fees in the `max_base_fee_per_gas` and `max_fee_per_gas` fields of transactions, as well as in the block's `base_fee_per_gas` field, are specified in **attodollars** (10^-18 USD) per gas. Since TIP-20 tokens have 6 decimal places — where 1 token unit = 1 **microdollar** (10^-6 USD) — the fee for a transaction can be calculated as `ceil(base_fee * gas_used / 10^12)`.
+Fees in the `max_base_fee_per_gas` and `max_fee_per_gas` fields of transactions, as well as in the block's `base_fee_per_gas` field, are specified in **attodollars** (10^-18 USD) per gas. TIP-20 tokens have 6 decimal places: 1 base unit is 0.000001 token. For USD-denominated fee accounting, this is 1 **microdollar** (10^-6 USD). The fee in base units is calculated as `ceil(base_fee * gas_used / 10^12)`.
 
-Attodollars provide sufficient precision for low-fee transactions. Since TIP-20 tokens have only 6 decimal places (microdollars), expressing fees directly in token units per gas would not provide enough precision for transactions with very low gas costs. By using attodollars (10^-18 USD) and dividing by 10^12 to convert to microdollars, the protocol ensures that even small fee amounts can be accurately represented and calculated.
+Attodollars provide the precision needed to calculate fees below one token base unit per gas. Divide by 10^12 and round up to convert the total fee to base units.
 
 ### Base Fee Model
 

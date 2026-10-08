@@ -12,9 +12,9 @@ These are cross-network funding addresses. For attributing payments already on T
 
 ## Set up Routes API access
 
-Create a project and API key in [Tempo API Console](/docs/api/console). Your backend needs `data:read` for the route directory, `routes:read` for quotes and status reads, and `routes:write` to create deposit addresses or transfers and register source transactions. Keep the key on your server. See [API key management](/docs/api/console/api-keys) for storage and access controls.
+Create a project and API key in [Tempo Console](/docs/api/console). For this flow, use `routes:read` for quotes and deposit status and `routes:write` to create deposit addresses. Authenticated route-directory reads also require `data:read`. Keep the key on your backend; see [API authentication](/docs/api/authentication).
 
-Routes endpoints use the `https://api.tempo.xyz/v1` base URL. Send your key in the `tempo-api-key` header. The API is under active development; use the linked endpoint references for current request fields and supported actions.
+Routes endpoints use the `https://api.tempo.xyz/v1` base URL. Send your key in the `tempo-api-key` header.
 
 ## Create and monitor a deposit address
 

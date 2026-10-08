@@ -13,7 +13,7 @@ This spec introduces native protocol support for the following features, using T
 * Parallelizable nonces - allows higher tx throughput for each account
 * Gas sponsorship - allows apps to pay for their users' transactions
 * Call Batching - allows users to multicall efficiently and atomically
-* Scheduled Txs - allow users to specify a time window in which their tx can be executed
+* Validity windows - specify the earliest and latest times a transaction may be included
 * Access Keys - allow a sender's key to provision scoped access keys with spending limits or admin access keys for key management
 
 ## Motivation
@@ -447,16 +447,8 @@ rlp([to, value, input])
 ```
 
 **Key Authorization Encoding:**
-```
-rlp([
-    chain_id,
-    key_type,
-    key_id,
-    expiry?,         // Optional trailing field (omitted or 0x80 if None)
-    limits?,         // Optional trailing field (omitted or 0x80 if None)
-    signature        // PrimitiveSignature bytes
-])
-```
+
+Use the [signed key authorization format](#key-authorization-encoding), including the trailing optional restrictions and signature. The same section defines the unsigned digest and omission rules.
 
 **Notes:**
 - Optional fields encode as `0x80` (EMPTY_STRING_CODE) when `None`
@@ -580,6 +572,8 @@ A sender can authorize a key by signing over a "key authorization" item that con
   - `Some([])` (an empty top-level allowlist) means scoped deny-all.
 
 Access-key-signed transactions cannot perform contract creation. Calls within the batch that would `CREATE` or `CREATE2` (including via factory contracts) are rejected. Use the Root Key for deployment flows.
+
+<span id="key-authorization-encoding" />
 
 #### RLP Encoding
 
@@ -920,8 +914,11 @@ Using signature length for type detection avoids adding explicit type fields whi
 ### Linear Gas Scaling for Nonce Keys
 The progressive pricing model prevents state bloat while keeping initial keys affordable. The 20,000 gas increment approximates the long-term state cost of maintaining each additional nonce mapping.
 
-### No Nonce Expiry
-Avoiding expiry simplifies the protocol and prevents edge cases where in-flight transactions become invalid. Wallets handle nonce key allocation to prevent conflicts.
+<span id="no-nonce-expiry" />
+
+### Sequential and expiring nonces
+
+Sequential nonce streams retain their counters across transactions. [Expiring nonces](/docs/protocol/tips/tip-1009) provide a separate mode for transactions with a bounded validity window. Choose the mode appropriate for the application's ordering and replay-protection requirements.
 
 ### Backwards Compatibility
 

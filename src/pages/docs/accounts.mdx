@@ -13,15 +13,17 @@ import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 # Accounts
 
-Set up accounts to hold stablecoins and authorize payments from your application. Choose whether your service or your customer controls signing.
+Create accounts to hold stablecoins and send payments. Choose who controls signing, then grant services or agents the access they need.
 
 [Create an account →](/docs/accounts/create)
 
 </DocsProductOverview>
 
-An account holds stablecoin balances at an address. A wallet or signing service manages the keys that authorize transactions. Keep customer, invoice, and payroll records in your application, and associate the relevant account addresses with those records.
+An account holds stablecoin balances at an address. A wallet is software or a service that manages signing keys and requests signatures. Keep customer, invoice, and payroll records in your application, and associate the relevant account addresses with those records.
 
-## Choose an account model
+<span id="choose-an-account-model" />
+
+## Choose who controls signing
 
 | Who authorizes transactions? | Integration path |
 | --- | --- |
@@ -31,7 +33,7 @@ An account holds stablecoin balances at an address. A wallet or signing service 
 
 For a provider integration, decide who can request signatures and how users regain access. Compare the provider's authentication, recovery, key export, and signing policies against those requirements.
 
-If you collect customer deposits into a shared balance, [virtual addresses](/docs/guide/payments/virtual-addresses) give each customer a deposit address that forwards funds to your account. Track each customer's balance in your ledger; virtual addresses do not hold separate balances.
+If you collect customer deposits into a shared balance, [customer deposit addresses](/docs/guide/payments/virtual-addresses) give each customer a virtual address that forwards funds to your account. Track each customer's balance in your ledger; virtual addresses do not hold separate balances.
 
 <span id="configure-account-controls" />
 <span id="control-who-can-use-an-account" />

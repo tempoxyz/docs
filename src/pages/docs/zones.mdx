@@ -21,7 +21,7 @@ Keep stablecoin balances and account activity in a private ledger connected to T
 
 ## Understand the privacy boundary
 
-Account-scoped access limits what other users can read. Review the [privacy model](/docs/zones/privacy) to understand what the operator and public observers can see before building your integration.
+Use a Zone when customer balances or treasury activity should remain off the public ledger. Decide which accounts your application controls and who needs access to their balances and history. Review the [privacy model](/docs/zones/privacy) for what account holders, the operator, and public observers can see.
 
 <span id="confirm-the-deployment-details" />
 <span id="authenticate-private-account-access" />
@@ -32,7 +32,7 @@ Account-scoped access limits what other users can read. Review the [privacy mode
 ## Integrate a Zone
 
 <Cards>
-  <Card title="Connect to a Zone" description="Get deployment details and authenticate account access." to="/docs/zones/connect" icon="lucide:plug" />
+  <Card title="Connect to a Zone" description="Confirm signing, read access, and funding rules for your deployment." to="/docs/zones/connect" icon="lucide:plug" />
   <Card title="Deposit funds" description="Deposit through the public portal and confirm the private credit." to="/docs/zones/deposit" icon="lucide:arrow-down-left" />
   <Card title="Balances and activity" description="Read the account's token balances and filtered history." to="/docs/zones/balances" icon="lucide:list" />
   <Card title="Withdraw funds" description="Return funds to Tempo and track delivery or refunds." to="/docs/zones/withdraw" icon="lucide:arrow-up-right" />
