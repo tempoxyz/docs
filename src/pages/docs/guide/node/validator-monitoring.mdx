@@ -31,11 +31,9 @@ curl -s localhost:8002/metrics \
   | grep -E 'message="(Notarize|Finalize)"'
 ```
 
-Check the series whose `epoch` label matches `consensus_engine_epoch_manager_latest_epoch`. Increasing counters confirm your node is signing and attempting to broadcast votes for that epoch. For startup health, also check that finalized and processed heights are increasing together, as described in [Up to sync](#up-to-sync).
+Increasing counters confirm your node is signing and attempting to broadcast votes.
 
 The same outbound metric counts certificates under `message="Notarization"`, `"Finalization"`, and `"Nullification"`. A node observing an epoch without a signing share can broadcast certificates built from other validators' votes, so keep the individual-vote filter above. An epoch engine exists in both signer and observer modes.
-
-Outbound vote counts confirm local voting activity, but do not prove peers received or accepted your votes. Inbound message counts confirm receipt before signature verification. The aggregate `consensus_engine_epoch_manager_simplex_batcher_verified_total` counter has no per-peer label, so it cannot confirm successful verification of a particular validator's votes.
 
 ## Execution states
 
@@ -73,7 +71,7 @@ Both values should be nearly equal and increasing together.
 | `consensus_engine_marshal_processed_height` | Latest height your node has processed | Critical when it hasn't increased in an hour, warning when it's behind finalized height | Your node is processing blocks |
 | `consensus_engine_peer_manager_peers` | Number of peers registered with the consensus peer manager | Warning when it's below the expected validator count, critical when it's 0 | Your node is registered with consensus peers |
 | `consensus_engine_epoch_manager_simplex_batcher_inbound_messages_total` | Number of inbound messages related to voting on the consensus layer | Warning when it's not increasing and your node is synced | Your node is receiving voting messages from the consensus layer |
-| `consensus_engine_epoch_manager_simplex_voter_outbound_messages_total` | Number of outbound votes and certificates, distinguished by `message` | Warning when `Notarize` and `Finalize` counters stop increasing while your node is synced and expected to vote in the current epoch | Your node is attempting to broadcast votes when filtered to `Notarize` and `Finalize`; certificate broadcasts also occur in observer mode |
+| `consensus_engine_epoch_manager_simplex_voter_outbound_messages_total` | Number of outbound votes and certificates, distinguished by `message` | Warning when `Notarize` and `Finalize` counters stop increasing while your node is synced and expected to vote | Your node is attempting to broadcast votes when filtered to `Notarize` and `Finalize`; certificate broadcasts also occur in observer mode |
 | `consensus_application_parent_ahead_of_local_time` | Number of times the parent block timestamp was ahead of local time | Warning when it increases frequently | Your node's clock may be out of sync — check NTP configuration |
 | `reth_sync_checkpoint` | Current sync progress | Warning on when there are no changes in the `Finish` stage | Your node is syncing with the network |
 | `reth_payloads_resolved_block` | Number of built and resolved payloads | Warning when it hasn't increased in 12 hours | Your node has built and resolved blocks |
