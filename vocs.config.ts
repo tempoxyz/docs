@@ -386,30 +386,34 @@ export default defineConfig({
     ]
     const accountsSidebar = [
       {
-        text: 'Accounts',
+        text: 'Start building',
         items: [
           { text: 'Overview', link: '/docs/accounts' },
           { text: 'Create an account', link: '/docs/accounts/create' },
-          { text: 'Connect a wallet', link: '/docs/accounts/integrate' },
-          { text: 'Use a wallet provider', link: '/docs/accounts/providers' },
+          { text: 'Integration walkthrough', link: '/docs/accounts/integration' },
+        ],
+      },
+      {
+        text: 'Connect your application',
+        items: [
+          { text: 'Wallet providers', link: '/docs/accounts/providers' },
+          { text: 'Connect an existing wallet', link: '/docs/accounts/integrate' },
+        ],
+      },
+      {
+        text: 'Manage accounts',
+        items: [
           { text: 'Fund an account', link: '/docs/guide/getting-funds' },
           { text: 'Balances and activity', link: '/docs/accounts/balances' },
         ],
       },
       {
-        text: 'Access and permissions',
+        text: 'Control access',
         items: [
+          { text: 'Keys and signing', link: '/docs/accounts/keys' },
           { text: 'Access keys', link: '/docs/accounts/access-keys' },
-          { text: 'Give an agent access', link: '/docs/accounts/agents' },
-          { text: 'Manage admin keys', link: '/docs/accounts/admin-keys' },
-        ],
-      },
-      {
-        text: 'Wallet development',
-        collapsed: false,
-        items: [
-          { text: 'Integrate a wallet', link: '/docs/quickstart/wallet-developers' },
-          { text: 'Token lists', link: '/docs/quickstart/tokenlist' },
+          { text: 'Admin keys', link: '/docs/accounts/admin-keys' },
+          { text: 'Agent access', link: '/docs/accounts/agents' },
         ],
       },
     ]
@@ -460,64 +464,6 @@ export default defineConfig({
               { text: 'How MPP works', link: '/docs/guide/machine-payments' },
               { text: 'One-time payments', link: '/docs/guide/machine-payments/one-time-payments' },
               { text: 'Streamed payments', link: '/docs/guide/machine-payments/streamed-payments' },
-              {
-                text: 'Use cases',
-                collapsed: true,
-                items: [
-                  {
-                    text: 'Monetize your API',
-                    link: '/docs/guide/machine-payments/use-cases/monetize-your-api',
-                  },
-                  {
-                    text: 'AI model access',
-                    link: '/docs/guide/machine-payments/use-cases/ai-model-access',
-                  },
-                  {
-                    text: 'Web search and research',
-                    link: '/docs/guide/machine-payments/use-cases/web-search-and-research',
-                  },
-                  {
-                    text: 'Image and media generation',
-                    link: '/docs/guide/machine-payments/use-cases/image-and-media-generation',
-                  },
-                  {
-                    text: 'Browser automation',
-                    link: '/docs/guide/machine-payments/use-cases/browser-automation',
-                  },
-                  {
-                    text: 'Compute and code execution',
-                    link: '/docs/guide/machine-payments/use-cases/compute-and-code-execution',
-                  },
-                  {
-                    text: 'Storage',
-                    link: '/docs/guide/machine-payments/use-cases/storage',
-                  },
-                  {
-                    text: 'Blockchain data and analytics',
-                    link: '/docs/guide/machine-payments/use-cases/blockchain-data',
-                  },
-                  {
-                    text: 'Financial and market data',
-                    link: '/docs/guide/machine-payments/use-cases/financial-data',
-                  },
-                  {
-                    text: 'Data enrichment and leads',
-                    link: '/docs/guide/machine-payments/use-cases/data-enrichment-and-leads',
-                  },
-                  {
-                    text: 'Translation and language',
-                    link: '/docs/guide/machine-payments/use-cases/translation-and-language',
-                  },
-                  {
-                    text: 'Maps and location data',
-                    link: '/docs/guide/machine-payments/use-cases/location-and-maps',
-                  },
-                  {
-                    text: 'Agent-to-agent services',
-                    link: '/docs/guide/machine-payments/use-cases/agent-to-agent',
-                  },
-                ],
-              },
             ],
           },
         ],
@@ -1198,6 +1144,13 @@ export default defineConfig({
         ],
       },
       {
+        text: 'Wallet development',
+        items: [
+          { text: 'Build a wallet integration', link: '/docs/quickstart/wallet-developers' },
+          { text: 'Token lists', link: '/docs/quickstart/tokenlist' },
+        ],
+      },
+      {
         text: 'Libraries and reference',
         collapsed: true,
         items: [
@@ -1255,6 +1208,11 @@ export default defineConfig({
     { text: 'Blog', link: '/blog' },
   ],
   redirects: [
+    {
+      source: '/docs/guide/machine-payments/use-cases/:path*',
+      destination: '/docs/guide/machine-payments',
+      status: 301,
+    },
     ...developerSurfaceRedirects,
     // Vercel mirrors these at `/developers` because the static router runs before
     // Vocs at that proxy mount. The route contract and tests keep them aligned.

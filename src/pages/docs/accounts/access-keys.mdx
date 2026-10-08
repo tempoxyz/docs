@@ -12,13 +12,7 @@ The access key acts on the same account and balances. It is a transaction signer
 
 ## Choose the authority to delegate
 
-| Key | Use it for |
-| --- | --- |
-| Root key | The account's original signing authority, including authorizing other keys. |
-| Limited access key | Transactions bounded by the permissions you configure. It cannot manage keys. |
-| Admin key | Key management, including authorizing and revoking other keys. It cannot have spending limits, call scopes, or expiry. |
-
-Use a limited access key for payment tasks. See [Manage admin keys](/docs/accounts/admin-keys) when you need to delegate key management.
+Use a limited access key for payment tasks. It can have an expiry, per-token spending limits, and allowed calls, but cannot manage keys. See [Keys and signing](/docs/accounts/keys#delegate-only-the-authority-a-task-needs) for the authority model, or [Manage admin keys](/docs/accounts/admin-keys) to delegate key management.
 
 ## Authorize a limited key
 

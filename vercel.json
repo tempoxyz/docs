@@ -2,6 +2,11 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/developers/docs/guide/machine-payments/use-cases/:path*",
+      "destination": "/developers/docs/guide/machine-payments",
+      "permanent": true
+    },
+    {
       "source": "/assets/md/docs.md",
       "has": [
         {

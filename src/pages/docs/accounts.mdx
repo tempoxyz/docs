@@ -19,7 +19,20 @@ Create accounts to hold stablecoins and send payments. Choose who controls signi
 
 </DocsProductOverview>
 
-An account holds stablecoin balances at an address. A wallet is software or a service that manages signing keys and requests signatures. Keep customer, invoice, and payroll records in your application, and associate the relevant account addresses with those records.
+An account holds stablecoin balances at an address. A wallet is software or a service that manages signing keys and requests signatures.
+
+## Fit accounts into your application
+
+Your customer record and a Tempo account serve different purposes. Your application identifies the customer and maintains its ledger; the Tempo account holds token balances and authorizes transactions. Associate addresses with the customer or business records they serve.
+
+| Component | Responsibility |
+| --- | --- |
+| Your application and backend | Customer identity, address mappings, payment records, and reconciliation. |
+| Your signer or wallet provider | Key storage, signature requests, and the authentication and recovery flow you choose. |
+| Tempo network | Validate transaction signatures and permissions, execute transactions, and record token balances and transfers. |
+| Tempo API | Read indexed balances and activity and deliver configured webhook events. API credentials do not authorize account spending. |
+
+Follow the [integration walkthrough](/docs/accounts/integration) to connect these pieces, from creating an account to recording its first payment.
 
 <span id="choose-an-account-model" />
 
@@ -40,15 +53,19 @@ If you collect customer deposits into a shared balance, [customer deposit addres
 
 ## Delegate access to applications and services
 
-The **root key** is the account's original signing authority. Authorize separate **limited access keys** for a customer session, backend service, or agent, with an expiry, token spending limit, and allowed calls. Each key acts on the same account and can be revoked independently.
+Use a limited access key when a service, customer session, or agent needs to act on an account. Set its expiry, token budget, and allowed calls for the task. For example, a payout service can receive permission to transfer one stablecoin to approved recipients within a budget.
 
-For example, give a payout service permission to transfer a specific stablecoin to approved recipients within a budget. A customer can authorize a short-lived session to make payments without confirming each transaction. Your application's sign-in flow identifies the customer; access-key permissions control what the session can do onchain.
+[Keys and signing](/docs/accounts/keys) explains root authority, delegation, and how transaction signing differs from customer login and API authentication.
 
 - [Access keys](/docs/accounts/access-keys) covers authorization, limits, and revocation.
 - [Give an agent access](/docs/accounts/agents) explains how to delegate a defined task.
 - [Manage admin keys](/docs/accounts/admin-keys) covers delegation of key management itself.
 
 Plan recovery with your wallet or signing provider. The root public key determines the account address; adding or revoking an access key does not replace it.
+
+## Understand account visibility
+
+Balances and transfers on Tempo's public ledger are publicly readable. Signing permissions control who can move funds; they do not make the account's activity private. For private balances and activity, review [Tempo Zones](/docs/zones/privacy), including what remains visible to the operator and on the public ledger.
 
 <span id="fund-accounts-and-reconcile-payments" />
 <span id="put-an-account-to-use" />

@@ -30,8 +30,6 @@ export const docsSections: DocsSection[] = [
       '/docs/accounts',
       '/docs/build',
       '/docs/guide/getting-funds',
-      '/docs/quickstart/wallet-developers',
-      '/docs/quickstart/tokenlist',
     ],
   },
   {
@@ -66,6 +64,8 @@ export const docsSections: DocsSection[] = [
     href: '/docs/development',
     matches: [
       '/docs/development',
+      '/docs/quickstart/wallet-developers',
+      '/docs/quickstart/tokenlist',
       '/docs/guide/using-tempo-with-ai',
       '/docs/api',
       '/docs/tools',

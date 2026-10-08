@@ -1,0 +1,59 @@
+---
+title: Integration walkthrough
+seoTitle: Integrate Tempo Accounts into Your Application | Tempo Docs
+description: Connect account creation, address records, funding, and payment confirmation in your application.
+---
+
+# Integration walkthrough
+
+Connect a Tempo account to your application's records, fund it, and record a payment. This walkthrough follows a company-controlled account used by a backend payout service. Start on Moderato testnet with test stablecoins.
+
+For customer-approved payments, use an [embedded wallet provider](/docs/accounts/providers) or [connect an existing wallet](/docs/accounts/integrate). The address mapping and reconciliation steps still apply; the customer approves signing through their wallet.
+
+:::::steps
+
+### Create the account and connect its signer
+
+Use your [wallet provider](/docs/accounts/providers) to create an account, or try the [backend signing-key example](/docs/accounts/create#create-an-account-from-a-signing-key). Configure the signer for [Moderato](/docs/quickstart/connection-details).
+
+Your backend requests signatures from the provider or signing infrastructure. Keep its credentials and keys outside browser code. The account's public address is the value your application uses to receive funds and query balances.
+
+**Result:** you have an account address and a way to authorize transactions from it. Generating a new key on each request would create a different account; retain the signer for subsequent payments.
+
+### Associate the address with your business records
+
+Save the network and account address against the business or treasury record the account serves. If you use a provider, retain its wallet identifier so your backend can request signatures for the same account later.
+
+An onchain balance belongs to an address and token. Your application maintains any allocation of that balance to customers or business units. For pooled collections, [customer deposit addresses](/docs/guide/payments/virtual-addresses) can identify deposits while forwarding funds into one account.
+
+**Result:** your backend can resolve an application record to the correct account and signer.
+
+### Fund and inspect the account
+
+Use the [testnet faucet](/docs/quickstart/faucet), then [read the token balance](/docs/accounts/balances#read-a-stablecoin-balance). Identify the stablecoin by its network and contract address, rather than its symbol alone.
+
+Balance reads use the public address and do not need its signing key. The [balance playground](/docs/accounts/balances#query-balances-across-tokens) lets you inspect the address directly.
+
+**Result:** the account holds test stablecoins on the same network your signer uses. For production funding, choose a [supported funding path](/docs/guide/getting-funds).
+
+### Authorize and send a payment
+
+Follow [Send a payment](/docs/guide/payments/send-a-payment) to select the recipient, token, and amount. For an ongoing payout service, authorize a [limited access key](/docs/accounts/access-keys) with the budget and allowed calls it needs.
+
+Keep a payment record in your backend before requesting a signature. Associate the submitted transaction hash with that record. A [payment reference](/docs/guide/payments/transfer-memos) can link the transfer to an invoice or payout in your system.
+
+**Result:** you have a submitted transaction associated with a specific payment. If the submission response is interrupted, inspect its outcome before initiating another payment.
+
+### Confirm the transfer and update your records
+
+Follow [payment verification](/docs/guide/payments/accept-a-payment#verify-stablecoin-payments) to check execution and the actual token transfer, including the recipient and amount. Use [account activity](/docs/accounts/balances#explain-changes-in-a-balance) to explain the resulting balance change.
+
+Store the network, token, amount, sender, recipient, and transaction hash with the payment record. One transaction can contain several transfers, so reconcile the relevant transfer rather than assuming the transaction represents a single payment.
+
+**Result:** your application can show the payment outcome and trace it back to the recorded transfer.
+
+:::::
+
+## Extend the account integration
+
+Use [Agent access](/docs/accounts/agents) for delegated automated tasks, [Routes](/docs/routes) for transfers between networks, and [Payments](/docs/payments) for collection and reconciliation workflows.
