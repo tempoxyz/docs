@@ -347,6 +347,12 @@ export default defineConfig({
       {
         text: 'Get Started',
         link: '/docs',
+        items: [
+          {
+            text: 'Use Cases',
+            link: '/docs/use-cases',
+          },
+        ],
       },
       {
         text: 'AI',
