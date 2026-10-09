@@ -22,7 +22,7 @@ const run: AgentRun = {
   quoteQuery: { amount: '1000000', sourceChain: 'eip155:8453', sender, recipient, subsidize: true },
   createBody: { amount: '1000000', sender, recipient, mode: 'exactSource' },
   addresses: { sender, recipient },
-  outcome: { deliveredAmount: '1', destinationHash: `0x${'d'.repeat(64)}` },
+  outcome: { deliveredAmount: '1' },
 }
 
 describe('agent instructions', () => {
@@ -38,7 +38,8 @@ describe('agent instructions', () => {
     expect(markdown).toContain('-H "tempo-api-key: $TEMPO_API_KEY"')
     expect(markdown).toContain('## 3. Sign and send the source transactions')
     expect(markdown).toContain('`evm:calls`')
-    expect(markdown).toContain(`destination transaction \`0x${'d'.repeat(64)}\``)
+    expect(markdown).toContain('A run of it delivered 1 USDC.e.')
+    expect(markdown).not.toMatch(/0x[\da-f]{64}/)
   })
   it('funds a deposit address instead of signing calls', () => {
     const markdown = agentInstructions({

@@ -194,9 +194,12 @@ async function mockRoutesApi(page: Page, replies: Record<string, Reply[]>) {
 
 /** Answers the docs quote proxy, which quotes for readers who have not added a key. */
 async function mockQuoteProxy(page: Page, replies: Reply[]) {
-  const requests: URLSearchParams[] = []
-  await page.route('**/api/routes-quote?**', async (route) => {
-    requests.push(new URL(route.request().url()).searchParams)
+  const requests: Record<string, string>[] = []
+  await page.route('**/api/routes-quote', async (route) => {
+    // The quote travels in a JSON body, never in the URL.
+    expect(route.request().method()).toBe('POST')
+    expect(new URL(route.request().url()).search).toBe('')
+    requests.push(route.request().postDataJSON())
     const reply = replies.length > 1 ? (replies.shift() as Reply) : replies[0]
     await route.fulfill({
       status: reply.status ?? 200,
@@ -1229,7 +1232,7 @@ test.describe('Routes demo without a key', () => {
     await button(page, 'Get quote').click()
 
     await expect(lifecycle(page)).toContainText('Recipient gets1 USDC.e')
-    expect(Object.fromEntries(proxied[0])).toMatchObject({
+    expect(proxied[0]).toMatchObject({
       kind: 'deposit-addresses',
       amount: '1000000',
       sourceChain: chains.base.id,

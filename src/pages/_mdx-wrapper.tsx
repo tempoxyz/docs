@@ -26,8 +26,8 @@
  *   extension wallets like MetaMask). Implies `interactive`. Only needed on
  *   pages where users connect external wallets.
  * - `accessKey: false` connects Tempo Wallet without the guides' bounded access key: signing
- *   in only shares the address, and the wallet approves each transaction. Use it on pages that
- *   move real funds.
+ *   in only shares the address, and the wallet approves each transaction. Wallet connections, and
+ *   the addresses in them, last only for the tab. Use it on pages that move real funds.
  */
 
 import { lazy, type ReactNode, Suspense } from 'react'

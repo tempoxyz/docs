@@ -154,9 +154,19 @@ it('falls back to the docs quote proxy while the API still requires a key', asyn
   vi.stubGlobal('fetch', fetcher)
   const quote = quoteRequest(route, { ...input, method: 'depositAddress' })
   await executeRoutesRequest(quote, '')
-  expect(fetcher.mock.calls[1][0]).toBe(
-    '/api/routes-quote?kind=deposit-addresses&amount=1500000&sourceChain=eip155%3A1&sourceToken=source&destinationToken=destination&subsidize=false',
-  )
+  // The proxy gets the quote as a JSON body, so no address lands in a docs site URL.
+  const [proxyUrl, proxyInit] = fetcher.mock.calls[1]
+  expect(proxyUrl).toBe('/api/routes-quote')
+  expect(proxyInit.method).toBe('POST')
+  expect(proxyInit.headers).toEqual({ 'content-type': 'application/json' })
+  expect(JSON.parse(proxyInit.body)).toEqual({
+    kind: 'deposit-addresses',
+    amount: '1500000',
+    sourceChain: 'eip155:1',
+    sourceToken: 'source',
+    destinationToken: 'destination',
+    subsidize: 'false',
+  })
   await expect(executeRoutesRequest(quote, '')).rejects.toThrow(
     'The docs demo key cannot quote this route. Add your project API key to quote this route. (routes_not_allowed · request r)',
   )

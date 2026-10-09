@@ -1213,10 +1213,7 @@ function RouteLifecycle({
           quoteQuery: quoteParams,
           createBody: body,
           addresses: { sender, recipient, refundAddress },
-          outcome: {
-            deliveredAmount: quantity(current.destinationAmount),
-            destinationHash: (current.destinationTransactionHashes as string[] | undefined)?.[0],
-          },
+          outcome: { deliveredAmount: quantity(current.destinationAmount) },
         })
       : undefined
   const reportInstructions = useRef(onInstructions)

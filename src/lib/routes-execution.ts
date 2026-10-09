@@ -204,10 +204,15 @@ export async function executeRoutesRequest(
   } catch (e) {
     // Until the API serves public quotes, the docs quote proxy prices them instead.
     if (!(e instanceof RoutesApiError && e.code === 'api_key_missing')) throw e
+    // The quote goes in the body, so the reader's addresses stay out of the docs site's URLs.
     const kind = request.path.match(quotePath)?.[1] ?? ''
-    const params = new URLSearchParams({ kind })
-    for (const [name, value] of Object.entries(request.query ?? {})) params.set(name, String(value))
-    return send(`${developersPath('/api/routes-quote')}?${params}`, request, {}, { docsKey: true })
+    const query = Object.entries(request.query ?? {}).map(([name, value]) => [name, String(value)])
+    return send(
+      developersPath('/api/routes-quote'),
+      { method: 'POST', path: request.path, body: { ...Object.fromEntries(query), kind } },
+      {},
+      { docsKey: true },
+    )
   }
 }
 export function quoteRequest(

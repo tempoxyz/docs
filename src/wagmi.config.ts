@@ -79,8 +79,11 @@ export function getConfig(options: getConfig.Options = {}) {
         : [wallet, webAuthn({ ceremony: WebAuthnCeremony.keys({ rpId }) })],
     multiInjectedProviderDiscovery,
     storage: createStorage<Record<string, unknown>>({
-      storage: typeof window !== 'undefined' ? localStorage : undefined,
-      key: 'tempo-docs',
+      // Pages that move real funds keep wallet connections, and the addresses in them, for the
+      // tab only, apart from the guides' saved connections.
+      storage:
+        typeof window === 'undefined' ? undefined : accessKey ? localStorage : sessionStorage,
+      key: accessKey ? 'tempo-docs' : 'tempo-docs-funds',
     }),
     transports: {
       [tempoModerato.id]: withRelay(
@@ -117,7 +120,10 @@ export function getConfig(options: getConfig.Options = {}) {
 
 export namespace getConfig {
   export type Options = Partial<Pick<CreateConfigParameters, 'multiInjectedProviderDiscovery'>> & {
-    /** Authorize the guides' bounded access key when Tempo Wallet connects. Defaults to true. */
+    /**
+     * Authorize the guides' bounded access key when Tempo Wallet connects, and save wallet
+     * connections across visits. Defaults to true; pages that move real funds set it to false.
+     */
     accessKey?: boolean
   }
 }

@@ -17,19 +17,36 @@ const params = new Set([
   'subsidize',
 ])
 
-export async function GET(request: Request): Promise<Response> {
+// The quote arrives as a JSON body rather than a query string, so the reader's addresses stay out
+// of request URLs and the logs that record them. A JSON body also makes browsers preflight
+// cross-site requests, which this route never approves.
+export async function POST(request: Request): Promise<Response> {
   // Only this docs site's demo may spend the docs key; browsers mark other sites' requests.
   if (request.headers.get('sec-fetch-site') === 'cross-site')
     return failure(403, 'forbidden', 'Quote from the docs demo.')
-  const url = new URL(request.url)
-  const kind = url.searchParams.get('kind') ?? ''
-  if (!kinds.has(kind)) return failure(400, 'param_invalid', 'Unknown quote type.')
+  if (!request.headers.get('content-type')?.startsWith('application/json'))
+    return failure(415, 'content_type_invalid', 'Send the quote as JSON.')
+  let body: unknown
+  try {
+    body = await request.json()
+  } catch {
+    return failure(400, 'body_invalid', 'Send the quote as JSON.')
+  }
+  if (!body || typeof body !== 'object' || Array.isArray(body))
+    return failure(400, 'body_invalid', 'Send the quote as JSON.')
+  const { kind, ...query } = body as Record<string, unknown>
+  if (typeof kind !== 'string' || !kinds.has(kind))
+    return failure(400, 'param_invalid', 'Unknown quote type.')
   const key = process.env.ROUTES_QUOTE_API_KEY
   if (!key) return failure(503, 'quote_proxy_unavailable', 'Add a project API key to quote.')
 
   const target = new URL(`${upstream}/${kind}/quote`)
-  for (const [name, value] of url.searchParams)
-    if (params.has(name)) target.searchParams.set(name, value)
+  for (const [name, value] of Object.entries(query)) {
+    if (!params.has(name)) continue
+    if (!['string', 'number', 'boolean'].includes(typeof value) || String(value).length > 128)
+      return failure(400, 'param_invalid', `Invalid ${name}.`)
+    target.searchParams.set(name, String(value))
+  }
   try {
     const response = await fetch(target, {
       headers: { 'tempo-api-key': key },

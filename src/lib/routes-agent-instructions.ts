@@ -14,7 +14,8 @@ export type AgentRun = {
   createBody: Record<string, unknown>
   /** The reader's own addresses, replaced with placeholders for the next user. */
   addresses: { sender?: string; recipient?: string; refundAddress?: string }
-  outcome: { deliveredAmount?: string; destinationHash?: string }
+  /** Only the delivered amount: a transaction hash would lead back to the reader's addresses. */
+  outcome: { deliveredAmount?: string }
 }
 
 const placeholders = {
@@ -139,14 +140,6 @@ export function agentInstructions(run: AgentRun): string {
     '```',
     '',
     'Read it every 6 seconds until `status` is `completed`, `refunded`, `action-required`, or `expired`. Success is `completed`: report `destinationAmount` and `destinationTransactionHashes` to the user.',
-    ...(outcome.destinationHash
-      ? [
-          '',
-          '## Reference run',
-          '',
-          `The demo run delivered ${outcome.deliveredAmount ?? 'the transfer'} ${route.destinationToken.symbol}, in destination transaction \`${outcome.destinationHash}\`.`,
-        ]
-      : []),
     '',
   ]
   return lines.join('\n')
