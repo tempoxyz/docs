@@ -7,6 +7,8 @@ import {
   docsRouteDestination,
   legacyDocsHostRoutes,
   proxiedLegacyDocsRoutes,
+  resolveRedirectLocation,
+  routingSmokeCases,
 } from './docs-routing'
 
 type Redirect = {
@@ -252,5 +254,50 @@ describe('docs routing redirects', () => {
     ['/api/:path(.*)', 'real API functions such as /api/feedback must stay routable'],
   ])('does not add broad API docs redirect %s because %s', (source) => {
     expect(findRedirect(source)).toBeUndefined()
+  })
+})
+
+describe('routing smoke redirect locations', () => {
+  const relaySource = 'https://tempo.xyz/developers/accounts/server/handler.relay'
+  const relayDestination = `${canonicalDevelopersOrigin}/docs/server/relay-handler`
+
+  it('resolves a relative Location against the request URL', () => {
+    expect(resolveRedirectLocation('/developers/docs/server/relay-handler', relaySource)).toBe(
+      relayDestination,
+    )
+  })
+
+  it('keeps absolute Locations and fragments unchanged', () => {
+    expect(resolveRedirectLocation(relayDestination, relaySource)).toBe(relayDestination)
+    expect(
+      resolveRedirectLocation(
+        '/developers/docs/guide/tempo-transaction#batch-calls',
+        'https://tempo.xyz/developers/docs/guide/use-accounts/batch-transactions',
+      ),
+    ).toBe(`${canonicalDevelopersOrigin}/docs/guide/tempo-transaction#batch-calls`)
+    expect(
+      resolveRedirectLocation(
+        'https://tempo.xyz/learn/stablecoin-payroll/',
+        'https://tempo.xyz/developers/learn/use-cases/payroll',
+      ),
+    ).toBe('https://tempo.xyz/learn/stablecoin-payroll/')
+  })
+
+  it('does not treat a proxy-relative Location that escapes /developers as canonical', () => {
+    expect(resolveRedirectLocation('/docs/server/relay-handler', relaySource)).not.toBe(
+      relayDestination,
+    )
+  })
+
+  it('returns null when the Location header is missing or unparseable', () => {
+    expect(resolveRedirectLocation(null, relaySource)).toBeNull()
+    expect(resolveRedirectLocation('https://[invalid', relaySource)).toBeNull()
+  })
+
+  it('declares every expected smoke Location in resolved form', () => {
+    for (const testCase of [...routingSmokeCases.canonical, ...routingSmokeCases.legacy]) {
+      if (!('expectedLocation' in testCase)) continue
+      expect(new URL(testCase.expectedLocation).toString()).toBe(testCase.expectedLocation)
+    }
   })
 })

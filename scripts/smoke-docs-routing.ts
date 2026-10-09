@@ -1,4 +1,8 @@
-import { canonicalDevelopersOrigin, routingSmokeCases } from '../src/lib/docs-routing'
+import {
+  canonicalDevelopersOrigin,
+  resolveRedirectLocation,
+  routingSmokeCases,
+} from '../src/lib/docs-routing'
 
 type SmokeCase =
   | (typeof routingSmokeCases.canonical)[number]
@@ -37,11 +41,12 @@ async function checkCase(origin: string, testCase: SmokeCase) {
   }
 
   const location = response.headers.get('location')
-  if (location !== testCase.expectedLocation) {
+  const resolvedLocation = resolveRedirectLocation(location, source)
+  if (resolvedLocation !== testCase.expectedLocation) {
     throw new Error(`${source} redirected to ${location}; expected ${testCase.expectedLocation}`)
   }
 
-  const finalResponse = await request(new URL(location, source).toString())
+  const finalResponse = await request(resolvedLocation)
   if (finalResponse.status !== testCase.expectedFinalStatus) {
     throw new Error(
       `${source} reached ${location} with ${finalResponse.status}; expected ${testCase.expectedFinalStatus}`,
