@@ -120,9 +120,10 @@ jobs:
           restore-keys: |
             docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-
 
+      # The Check sibling validates types once; builds preserve the normal site pipeline.
       - name: Build
         if: matrix.target == 'production'
-        run: pnpm run build
+        run: node scripts/guard-vocs-config.mjs && pnpm run build:site
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max-old-space-size=4096
@@ -143,7 +144,7 @@ jobs:
 
       - name: Build app for E2E
         if: matrix.target == 'e2e'
-        run: pnpm run build
+        run: node scripts/guard-vocs-config.mjs && pnpm run build:site
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max-old-space-size=4096
