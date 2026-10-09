@@ -16,6 +16,7 @@
     "search:benchmark": "bun search-benchmark/run.ts",
     "test": "vitest run --dir src",
     "test:e2e": "playwright test",
+    "test:routes-api": "vitest run scripts/routes-api.live.test.ts",
     "test:routing:smoke": "tsx scripts/smoke-docs-routing.ts",
     "bundle:analyze": "node --experimental-strip-types scripts/bundle-diff.ts --skip-build",
     "bundle:diff": "node --experimental-strip-types scripts/bundle-diff.ts",
