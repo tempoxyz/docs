@@ -1,4 +1,5 @@
 'use client'
+
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import { parseUnits } from 'viem'
@@ -6,9 +7,9 @@ import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
-import * as ui from './BurnTokenBlocked.recipes'
 
 export function BurnTokenBlocked(props: DemoStepProps) {
   const { stepNumber, last = false } = props
@@ -81,7 +82,7 @@ export function BurnTokenBlocked(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className={ui.burnTokenBlockedButton().className}
+            className={form.actionButton().className}
             type="button"
           >
             Hide
@@ -92,7 +93,7 @@ export function BurnTokenBlocked(props: DemoStepProps) {
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className={ui.burnTokenBlockedButton().className}
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -102,15 +103,15 @@ export function BurnTokenBlocked(props: DemoStepProps) {
       title={`Burn 100 ${metadata ? metadata.name : 'tokens'} from blocked address.`}
     >
       {expanded && (
-        <div {...ui.burnTokenBlockedLayout()}>
-          <div {...ui.burnTokenBlockedLayout2()}>
-            <div {...ui.burnTokenBlockedLayout3()}>
-              <div {...ui.burnTokenBlockedLayout4()}>
-                <label {...ui.label()} htmlFor="blockedAddress">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...form.fieldsRow()}>
+              <div {...form.primaryField()}>
+                <label {...form.label()} htmlFor="blockedAddress">
                   Blocked address
                 </label>
                 <input
-                  {...ui.burnTokenBlockedInput()}
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="blockedAddress"
@@ -126,7 +127,7 @@ export function BurnTokenBlocked(props: DemoStepProps) {
                 disabled={!address}
                 onClick={handleBurnBlocked}
                 type="button"
-                className={ui.burnTokenBlockedButton().className}
+                className={form.actionButton().className}
               >
                 {burnBlocked.isPending ? 'Burning...' : 'Burn'}
               </Button>

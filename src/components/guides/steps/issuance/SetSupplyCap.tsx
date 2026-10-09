@@ -1,13 +1,14 @@
 'use client'
+
 import * as React from 'react'
 import { parseUnits } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
-import * as ui from './SetSupplyCap.recipes'
 
 export function SetSupplyCap(props: DemoStepProps) {
   const { stepNumber, last = false } = props
@@ -61,7 +62,7 @@ export function SetSupplyCap(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className={ui.setSupplyCapButton().className}
+            className={form.actionButton().className}
             type="button"
           >
             Hide
@@ -72,7 +73,7 @@ export function SetSupplyCap(props: DemoStepProps) {
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className={ui.setSupplyCapButton().className}
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -82,15 +83,15 @@ export function SetSupplyCap(props: DemoStepProps) {
       title={`Set supply cap to 1,000 ${metadata ? metadata.name : 'tokens'}.`}
     >
       {expanded && (
-        <div {...ui.setSupplyCapLayout()}>
-          <div {...ui.setSupplyCapLayout2()}>
-            <div {...ui.setSupplyCapLayout3()}>
-              <div {...ui.setSupplyCapLayout4()}>
-                <label {...ui.label()} htmlFor="supplyCap">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...form.fieldsRow()}>
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="supplyCap">
                   Supply cap amount
                 </label>
                 <input
-                  {...ui.setSupplyCapInput()}
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="supplyCap"
@@ -105,7 +106,7 @@ export function SetSupplyCap(props: DemoStepProps) {
                 disabled={!active}
                 onClick={handleSetSupplyCap}
                 type="button"
-                className={ui.setSupplyCapButton().className}
+                className={form.actionButton().className}
               >
                 {setSupplyCap.isPending ? 'Setting...' : 'Set Cap'}
               </Button>

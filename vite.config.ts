@@ -34,6 +34,7 @@ export default defineConfig(({ mode }) => {
       zyzz({
         exclude: [
           'src/snippets',
+          'src/test',
           'src/pages/_api',
           'src/marketing/blogPlugin.ts',
           'scripts',

@@ -1,4 +1,5 @@
 'use client'
+
 import { useQueryClient } from '@tanstack/react-query'
 import type { TokenRole } from 'ox/tempo'
 import * as React from 'react'
@@ -6,9 +7,9 @@ import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
-import * as ui from './RevokeTokenRoles.recipes'
 
 export function RevokeTokenRoles(
   props: DemoStepProps & {
@@ -76,7 +77,7 @@ export function RevokeTokenRoles(
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className={ui.revokeTokenRolesButton().className}
+            className={form.actionButton().className}
             type="button"
           >
             Hide
@@ -89,7 +90,7 @@ export function RevokeTokenRoles(
             disabled={!tokenAddress || !hasAnyRole}
             onClick={() => setExpanded(true)}
             type="button"
-            className={ui.revokeTokenRolesButton().className}
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -99,15 +100,15 @@ export function RevokeTokenRoles(
       title={`Revoke ${roles.join(', ')} role${roles.length > 1 ? 's' : ''} on ${metadata ? metadata.name : 'token'}.`}
     >
       {expanded && (
-        <div {...ui.revokeTokenRolesLayout()}>
-          <div {...ui.revokeTokenRolesLayout2()}>
-            <div {...ui.revokeTokenRolesLayout3()}>
-              <div {...ui.revokeTokenRolesLayout4()}>
-                <label {...ui.label()} htmlFor="recipient">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...form.fieldsRow()}>
+              <div {...form.primaryField()}>
+                <label {...form.label()} htmlFor="recipient">
                   Revoke role from yourself
                 </label>
                 <input
-                  {...ui.revokeTokenRolesInput()}
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -123,7 +124,7 @@ export function RevokeTokenRoles(
                 disabled={!address}
                 onClick={handleRevoke}
                 type="button"
-                className={ui.revokeTokenRolesButton().className}
+                className={form.actionButton().className}
               >
                 {revoke.isPending ? 'Revoking...' : 'Revoke'}
               </Button>

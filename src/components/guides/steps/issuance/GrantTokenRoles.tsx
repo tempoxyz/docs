@@ -1,4 +1,5 @@
 'use client'
+
 import { useQueryClient } from '@tanstack/react-query'
 import type { TokenRole } from 'ox/tempo'
 import * as React from 'react'
@@ -6,9 +7,9 @@ import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
-import * as ui from './GrantTokenRoles.recipes'
 
 export function GrantTokenRoles(
   props: DemoStepProps & {
@@ -76,7 +77,7 @@ export function GrantTokenRoles(
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className={ui.grantTokenRolesButton().className}
+            className={form.actionButton().className}
             type="button"
           >
             Hide
@@ -89,7 +90,7 @@ export function GrantTokenRoles(
             disabled={!tokenAddress || hasAllRoles}
             onClick={() => setExpanded(true)}
             type="button"
-            className={ui.grantTokenRolesButton().className}
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -99,15 +100,15 @@ export function GrantTokenRoles(
       title={`Grant ${roles.join(', ')} role${roles.length > 1 ? 's' : ''} on ${metadata ? metadata.name : 'token'}.`}
     >
       {expanded && (
-        <div {...ui.grantTokenRolesLayout()}>
-          <div {...ui.grantTokenRolesLayout2()}>
-            <div {...ui.grantTokenRolesLayout3()}>
-              <div {...ui.grantTokenRolesLayout4()}>
-                <label {...ui.label()} htmlFor="recipient">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...form.fieldsRow()}>
+              <div {...form.primaryField()}>
+                <label {...form.label()} htmlFor="recipient">
                   Grant role to yourself
                 </label>
                 <input
-                  {...ui.grantTokenRolesInput()}
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -123,7 +124,7 @@ export function GrantTokenRoles(
                 disabled={!address}
                 onClick={handleGrant}
                 type="button"
-                className={ui.grantTokenRolesButton().className}
+                className={form.actionButton().className}
               >
                 {grant.isPending ? 'Granting...' : 'Grant'}
               </Button>

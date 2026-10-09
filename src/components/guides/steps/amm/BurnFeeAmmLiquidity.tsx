@@ -1,4 +1,5 @@
 'use client'
+
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import { parseUnits } from 'viem'
@@ -6,9 +7,9 @@ import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
-import * as ui from './BurnFeeAmmLiquidity.recipes'
 
 const validatorToken = alphaUsd
 
@@ -73,7 +74,7 @@ export function BurnFeeAmmLiquidity(props: DemoStepProps) {
             })
           }}
           type="button"
-          className={ui.burnFeeAmmLiquidityButton().className}
+          className={form.actionButton().className}
         >
           Burn Liquidity
         </Button>
@@ -82,8 +83,8 @@ export function BurnFeeAmmLiquidity(props: DemoStepProps) {
       title={`Burn 10 LP tokens from ${metadata ? metadata.name : 'your token'} pool.`}
     >
       {burnLiquidity.data && (
-        <div {...ui.burnFeeAmmLiquidityLayout()}>
-          <div {...ui.burnFeeAmmLiquidityLayout2()}>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             <ExplorerLink hash={burnLiquidity.data.receipt.transactionHash} />
           </div>
         </div>

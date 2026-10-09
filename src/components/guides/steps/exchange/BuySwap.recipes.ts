@@ -15,11 +15,7 @@ export const buySwapHeading = style({
   lineHeight: 'var(--text-sm--line-height)',
   fontWeight: metrics.fontWeight.semibold,
 })
-export const buySwapButton = style({
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-})
+
 export const buySwapLayout3 = style({
   fontSize: '14px',
   color: 'var(--color-red-500)',

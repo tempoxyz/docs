@@ -1,4 +1,5 @@
 'use client'
+
 import { useQuery } from '@tanstack/react-query'
 import * as React from 'react'
 import type { Address } from 'viem'
@@ -8,6 +9,7 @@ import { useConnection, useConnectionEffect, usePublicClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { TokenSelector } from '../../../TokenSelector'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd, betaUsd, ousd, thetaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 import * as ui from './PayWithFeeToken.recipes'
@@ -113,7 +115,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className={ui.payWithFeeTokenButton().className}
+            className={form.actionButton().className}
             type="button"
           >
             Cancel
@@ -124,7 +126,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className={ui.payWithFeeTokenButton().className}
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -135,8 +137,8 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
       title={`Send 100 AlphaUSD and pay fees in ${feeTokenMetadata ? feeTokenMetadata.name : 'another token'}.`}
     >
       {expanded && (
-        <div {...ui.payWithFeeTokenLayout()}>
-          <div {...ui.payWithFeeTokenLayout2()}>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             {/* Token info display */}
             <div {...ui.payWithFeeTokenLayout3()}>
               <div {...ui.payWithFeeTokenLayout4()}>
@@ -166,13 +168,13 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
               </div>
             </div>
 
-            <div {...ui.payWithFeeTokenLayout6()}>
-              <div {...ui.payWithFeeTokenLayout7()}>
-                <label {...ui.label()} htmlFor="recipient">
+            <div {...form.fieldsRow()}>
+              <div {...form.primaryField()}>
+                <label {...form.label()} htmlFor="recipient">
                   Recipient address
                 </label>
                 <input
-                  {...ui.payWithFeeTokenInput()}
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -182,12 +184,12 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                   placeholder="0x..."
                 />
               </div>
-              <div {...ui.payWithFeeTokenLayout8()}>
-                <label {...ui.label()} htmlFor="memo">
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  {...ui.payWithFeeTokenInput()}
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="memo"
@@ -202,7 +204,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                 disabled={!active}
                 onClick={handleTransfer}
                 type="button"
-                className={ui.payWithFeeTokenButton().className}
+                className={form.actionButton().className}
               >
                 {sendPayment.isPending ? 'Sending...' : 'Send'}
               </Button>

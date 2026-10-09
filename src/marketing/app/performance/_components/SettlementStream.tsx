@@ -93,7 +93,7 @@ export default function SettlementStream() {
                   {...ui.settlementStreamLink({ className: 'group' })}
                 >
                   <div
-                    className={` ${ui.settlementStreamLayout5({ className: `block-in settle-flash ${blockIn().className + ' ' + settleFlash().className}` }).className} ${
+                    className={` ${ui.settlementStreamLayout5({ className: `block-in settle-flash ${blockIn().className} ${settleFlash().className}` }).className} ${
                       i === last
                         ? `settled-cell ${settledCell().className}`
                         : ui.settlementStreamLayout6().className

@@ -1,9 +1,11 @@
 'use client'
+
 import * as React from 'react'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Login, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 import * as ui from './CreateToken.recipes'
@@ -57,7 +59,7 @@ export function CreateToken(props: DemoStepProps) {
     >
       {(active || create.isSuccess) && (
         <div {...ui.createTokenLayout()}>
-          <div {...ui.createTokenLayout2()}>
+          <div {...form.stepRail()}>
             <form
               onSubmit={(event) => {
                 event.preventDefault()
@@ -73,8 +75,8 @@ export function CreateToken(props: DemoStepProps) {
               }}
               {...ui.form()}
             >
-              <div {...ui.createTokenLayout3()}>
-                <label {...ui.label()} htmlFor="name">
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="name">
                   Token name
                 </label>
                 <input
@@ -88,8 +90,8 @@ export function CreateToken(props: DemoStepProps) {
                   placeholder="demoUSD"
                 />
               </div>
-              <div {...ui.createTokenLayout3()}>
-                <label {...ui.label()} htmlFor="symbol">
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="symbol">
                   Token symbol
                 </label>
                 <input

@@ -1,9 +1,11 @@
 'use client'
+
 import * as React from 'react'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import type { DemoStepProps } from '../types'
 import * as ui from './CancelOrder.recipes'
 
@@ -46,7 +48,7 @@ export function CancelOrder(props: DemoStepProps) {
             }
           }}
           type="button"
-          className={ui.cancelOrderButton().className}
+          className={form.actionButton().className}
         >
           {cancelOrder.isPending ? 'Canceling...' : 'Cancel Order'}
         </Button>
@@ -55,8 +57,8 @@ export function CancelOrder(props: DemoStepProps) {
       title="Cancel the order"
     >
       {cancelOrder.isSuccess && cancelOrder.data && (
-        <div {...ui.cancelOrderLayout()}>
-          <div {...ui.cancelOrderLayout2()}>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             <ExplorerLink hash={cancelOrder.data.receipt.transactionHash} />
             <div {...ui.cancelOrderLayout3()}>
               Order #{orderId?.toString()} has been cancelled. Refunded tokens are in your exchange

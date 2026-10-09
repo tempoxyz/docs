@@ -1,4 +1,5 @@
 'use client'
+
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import { parseUnits } from 'viem'
@@ -8,6 +9,7 @@ import LucideCheck from '~icons/lucide/check'
 import LucideCircle from '~icons/lucide/circle'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd, pathUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 import * as ui from './MintFeeAmmLiquidity.recipes'
@@ -116,7 +118,7 @@ export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance?: bo
           disabled={!active || mintFeeLiquidity.isPending}
           onClick={handleMintAll}
           type="button"
-          className={ui.mintFeeAmmLiquidityButton().className}
+          className={form.actionButton().className}
         >
           {mintFeeLiquidity.isPending
             ? 'Adding...'
@@ -133,7 +135,7 @@ export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance?: bo
     >
       {someMinted && (
         <div {...ui.mintFeeAmmLiquidityLayout()}>
-          <div {...ui.mintFeeAmmLiquidityLayout2()}>
+          <div {...form.stepRail()}>
             <div {...ui.mintFeeAmmLiquidityLayout3()}>
               <div {...ui.mintFeeAmmLiquidityLayout4()}>
                 {pathUsdMinted ? (

@@ -120,7 +120,7 @@ export function DocsApiDropdown({
       role="group"
       className={
         mobile
-          ? `docs-reference-menu docs-api-menu-mobile ${docsReferenceMenu().className + ' ' + docsApiMenuMobile().className}`
+          ? `docs-reference-menu docs-api-menu-mobile ${docsReferenceMenu().className} ${docsApiMenuMobile().className}`
           : `docs-reference-menu ${docsReferenceMenu().className}`
       }
       onBlur={(event) => {
@@ -150,7 +150,7 @@ export function DocsApiDropdown({
         id={panelId}
         aria-label="APIs & SDKs"
         hidden={!open}
-        className={`docs-reference-panel docs-resource-links ${docsReferencePanel().className + ' ' + docsResourceLinks().className}`}
+        className={`docs-reference-panel docs-resource-links ${docsReferencePanel().className} ${docsResourceLinks().className}`}
       >
         {[
           { label: 'Overview', href: '/docs/tools', icon: CompassIcon },

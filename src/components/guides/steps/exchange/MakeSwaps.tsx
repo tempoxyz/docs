@@ -1,9 +1,11 @@
 'use client'
+
 import * as React from 'react'
 import { parseUnits } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd, betaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 import { BuySwap } from './BuySwap'
@@ -61,8 +63,8 @@ export function MakeSwaps({ stepNumber, last = false }: DemoStepProps) {
       title="Make Swaps"
     >
       {(active || completed) && (
-        <div {...ui.makeSwapsLayout()}>
-          <div {...ui.makeSwapsLayout2()}>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             <div {...ui.makeSwapsLayout3()}>
               <BuySwap onSuccess={() => setBuyCompleted(true)} />
               <SellSwap onSuccess={() => setSellCompleted(true)} />

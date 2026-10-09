@@ -1,9 +1,11 @@
 'use client'
+
 import * as React from 'react'
 import { isAddress, parseUnits, toHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 import * as ui from './SponsorUserFees.recipes'
@@ -61,7 +63,7 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className={ui.sendRelayerSponsoredPaymentButton().className}
+            className={form.actionButton().className}
             type="button"
           >
             Cancel
@@ -72,7 +74,7 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className={ui.sendRelayerSponsoredPaymentButton().className}
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -82,8 +84,8 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
       title="Send 100 AlphaUSD with fees sponsored by the testnet fee payer."
     >
       {expanded && (
-        <div {...ui.sendRelayerSponsoredPaymentLayout()}>
-          <div {...ui.sendRelayerSponsoredPaymentLayout2()}>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             <div {...ui.sendRelayerSponsoredPaymentLayout3()}>
               <div {...ui.sendRelayerSponsoredPaymentLayout4()}>
                 <div {...ui.sendRelayerSponsoredPaymentLayout5()}>
@@ -99,13 +101,13 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
               </div>
             </div>
 
-            <div {...ui.sendRelayerSponsoredPaymentLayout7()}>
-              <div {...ui.sendRelayerSponsoredPaymentLayout8()}>
-                <label {...ui.label()} htmlFor="recipient">
+            <div {...form.fieldsRow()}>
+              <div {...form.primaryField()}>
+                <label {...form.label()} htmlFor="recipient">
                   Recipient address
                 </label>
                 <input
-                  {...ui.sendRelayerSponsoredPaymentInput()}
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -115,12 +117,12 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
                   placeholder="0x..."
                 />
               </div>
-              <div {...ui.sendRelayerSponsoredPaymentLayout9()}>
-                <label {...ui.label()} htmlFor="memo">
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  {...ui.sendRelayerSponsoredPaymentInput()}
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="memo"
@@ -135,7 +137,7 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
                 disabled={!(active && isValidRecipient)}
                 onClick={handleTransfer}
                 type="button"
-                className={ui.sendRelayerSponsoredPaymentButton().className}
+                className={form.actionButton().className}
               >
                 {sendPayment.isPending ? 'Sending...' : 'Send'}
               </Button>

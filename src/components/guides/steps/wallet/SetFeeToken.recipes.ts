@@ -26,29 +26,13 @@ export const select = style({
       },
   },
 })
-export const setFeeTokenLayout2 = style({
-  marginInline: metrics.spacing['6'],
-  display: 'flex',
-  flexDirection: 'column',
-  gap: metrics.spacing['3'],
-  paddingBottom: metrics.spacing['4'],
-})
-export const setFeeTokenLayout3 = style({
-  borderInlineStartStyle: 'solid',
-  borderInlineStartWidth: '2px',
-  borderColor: 'var(--color-gray4)',
-  paddingInlineStart: metrics.spacing['5'],
-})
+
 export const setFeeTokenLayout4 = style({
   marginTop: metrics.spacing['2'],
   display: 'flex',
   flexDirection: 'column',
 })
-export const label = style({
-  fontSize: '11px',
-  letterSpacing: '-0.01em',
-  color: 'var(--color-gray9)',
-})
+
 export const setFeeTokenInput = style({
   height: '34px',
   borderRadius: 'calc(infinity * 1px)',

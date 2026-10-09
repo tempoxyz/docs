@@ -1,4 +1,5 @@
 'use client'
+
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import { parseUnits, toHex } from 'viem'
@@ -6,9 +7,9 @@ import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
-import * as ui from './BurnToken.recipes'
 
 export function BurnToken(props: DemoStepProps) {
   const { stepNumber, last = false } = props
@@ -74,7 +75,7 @@ export function BurnToken(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className={ui.burnTokenButton().className}
+            className={form.actionButton().className}
             type="button"
           >
             Hide
@@ -85,7 +86,7 @@ export function BurnToken(props: DemoStepProps) {
             disabled={!canBurn}
             onClick={() => setExpanded(true)}
             type="button"
-            className={ui.burnTokenButton().className}
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -95,15 +96,15 @@ export function BurnToken(props: DemoStepProps) {
       title={`Burn 100 ${metadata ? metadata.name : 'tokens'} from yourself.`}
     >
       {expanded && (
-        <div {...ui.burnTokenLayout()}>
-          <div {...ui.burnTokenLayout2()}>
-            <div {...ui.burnTokenLayout3()}>
-              <div {...ui.burnTokenLayout4()}>
-                <label {...ui.label()} htmlFor="memo">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...form.fieldsRow()}>
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  {...ui.burnTokenInput()}
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="memo"
@@ -118,7 +119,7 @@ export function BurnToken(props: DemoStepProps) {
                 disabled={!address}
                 onClick={handleBurn}
                 type="button"
-                className={ui.burnTokenButton().className}
+                className={form.actionButton().className}
               >
                 {burn.isPending ? 'Burning...' : 'Burn'}
               </Button>

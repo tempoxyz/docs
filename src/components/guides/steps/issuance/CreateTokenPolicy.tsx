@@ -1,9 +1,11 @@
 'use client'
+
 import * as React from 'react'
 import { useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 import * as ui from './CreateTokenPolicy.recipes'
@@ -55,7 +57,7 @@ export function CreateTokenPolicy(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className={ui.createTokenPolicyButton().className}
+            className={form.actionButton().className}
             type="button"
           >
             Hide
@@ -66,7 +68,7 @@ export function CreateTokenPolicy(props: DemoStepProps) {
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className={ui.createTokenPolicyButton().className}
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -76,10 +78,10 @@ export function CreateTokenPolicy(props: DemoStepProps) {
       title="Create a transfer policy."
     >
       {expanded && (
-        <div {...ui.createTokenPolicyLayout()}>
-          <div {...ui.createTokenPolicyLayout2()}>
-            <div {...ui.createTokenPolicyLayout3()}>
-              <div {...ui.createTokenPolicyLayout4()}>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...form.fieldsRow()}>
+              <div {...form.secondaryField()}>
                 <div {...ui.createTokenPolicyLayout5()}>
                   This will create a blacklist policy that blocks {FAKE_RECIPIENT} from sending or
                   receiving tokens.
@@ -93,7 +95,7 @@ export function CreateTokenPolicy(props: DemoStepProps) {
                 onClick={handleCreatePolicy}
                 disabled={isCreating}
                 type="button"
-                className={ui.createTokenPolicyButton().className}
+                className={form.actionButton().className}
               >
                 {isCreating ? 'Creating...' : 'Create Policy'}
               </Button>

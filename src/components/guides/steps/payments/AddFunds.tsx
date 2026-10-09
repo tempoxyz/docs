@@ -1,4 +1,5 @@
 'use client'
+
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import type { Chain, Client, Transport } from 'viem'
@@ -8,9 +9,9 @@ import { Actions } from 'viem/tempo'
 import { useBlockNumber, useClient, useConnection } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { Button, Login, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
-import * as ui from './AddFunds.recipes'
 
 export function AddFunds(props: DemoStepProps) {
   const { stepNumber = 2, last = false } = props
@@ -72,7 +73,7 @@ export function AddFunds(props: DemoStepProps) {
         <Button
           disabled={fundAccount.isPending}
           variant="default"
-          className={ui.addFundsButton().className}
+          className={form.actionButton().className}
           onClick={() => fundAccount.mutate()}
           type="button"
         >
@@ -83,7 +84,7 @@ export function AddFunds(props: DemoStepProps) {
       <Button
         disabled={!address || fundAccount.isPending}
         variant={address ? 'accent' : 'default'}
-        className={ui.addFundsButton().className}
+        className={form.actionButton().className}
         type="button"
         onClick={() => fundAccount.mutate()}
       >

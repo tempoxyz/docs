@@ -1,10 +1,12 @@
 'use client'
+
 import * as React from 'react'
 import { type Address, isAddress } from 'viem'
 import { useChainId, useConfig, useConnections } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { isBrowserWalletConnectorId } from '../../../lib/wallets'
 import { Button, ExplorerLink, Step, StringFormatter } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd, betaUsd, thetaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 import * as ui from './SetFeeToken.recipes'
@@ -180,11 +182,11 @@ export function SetFeeToken(props: DemoStepProps) {
       title="Set your fee token for EVM transactions."
     >
       {(selectedOption.value === 'other' || currentFeeTokenLabel || txHash) && (
-        <div {...ui.setFeeTokenLayout2()}>
-          <div {...ui.setFeeTokenLayout3()}>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             {selectedOption.value === 'other' && (
               <div {...ui.setFeeTokenLayout4()}>
-                <label {...ui.label()} htmlFor="customFeeToken">
+                <label {...form.label()} htmlFor="customFeeToken">
                   Custom fee token address
                 </label>
                 <input

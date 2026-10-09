@@ -7,12 +7,7 @@ export const createTokenLayout = style({
   gap: metrics.spacing['3'],
   paddingBlock: metrics.spacing['4'],
 })
-export const createTokenLayout2 = style({
-  borderInlineStartStyle: 'solid',
-  borderInlineStartWidth: '2px',
-  borderColor: 'var(--color-gray4)',
-  paddingInlineStart: metrics.spacing['5'],
-})
+
 export const form = style({
   marginTop: 'calc(var(--spacing) * -2.5)',
   display: 'flex',
@@ -23,16 +18,7 @@ export const form = style({
     alignItems: 'flex-end',
   },
 })
-export const createTokenLayout3 = style({
-  display: 'flex',
-  flex: '1 1 0%',
-  flexDirection: 'column',
-})
-export const label = style({
-  fontSize: '11px',
-  letterSpacing: '-0.01em',
-  color: 'var(--color-gray9)',
-})
+
 export const createTokenInput = style({
   height: '34px',
   borderRadius: metrics.radius.lg,

@@ -1,4 +1,5 @@
 'use client'
+
 import { useQueryClient } from '@tanstack/react-query'
 import { type Config, getPublicClient } from '@wagmi/core'
 import * as React from 'react'
@@ -7,6 +8,7 @@ import { Abis } from 'viem/tempo'
 import { useConfig, useConnection, useConnectionEffect, useTransaction } from 'wagmi'
 import { Actions, Hooks } from 'wagmi/tempo'
 import { Button, ExplorerLink, FAKE_RECIPIENT, FAKE_RECIPIENT_2, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 import * as ui from './SendParallelPayments.recipes'
@@ -217,7 +219,7 @@ export function SendParallelPayments(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className={ui.sendParallelPaymentsButton().className}
+            className={form.actionButton().className}
             type="button"
           >
             Cancel
@@ -234,7 +236,7 @@ export function SendParallelPayments(props: DemoStepProps) {
             disabled={!(address && balance && balance.amount >= parseUnits('100', 6))}
             onClick={() => setExpanded(true)}
             type="button"
-            className={ui.sendParallelPaymentsButton().className}
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -244,12 +246,12 @@ export function SendParallelPayments(props: DemoStepProps) {
       title="Send 50 AlphaUSD to two recipients in parallel."
     >
       {expanded && (
-        <div {...ui.sendParallelPaymentsLayout()}>
-          <div {...ui.sendParallelPaymentsLayout2()}>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             <div {...ui.sendParallelPaymentsLayout3()}>
               <div {...ui.sendParallelPaymentsLayout4()}>
                 <div {...ui.transferResultLayout()}>
-                  <label {...ui.label()} htmlFor="recipient1">
+                  <label {...form.label()} htmlFor="recipient1">
                     Recipient 1
                   </label>
                   <input
@@ -264,7 +266,7 @@ export function SendParallelPayments(props: DemoStepProps) {
                   />
                 </div>
                 <div {...ui.transferResultLayout()}>
-                  <label {...ui.label()} htmlFor="recipient2">
+                  <label {...form.label()} htmlFor="recipient2">
                     Recipient 2
                   </label>
                   <input
@@ -293,7 +295,7 @@ export function SendParallelPayments(props: DemoStepProps) {
                   }
                   onClick={handleSendParallel}
                   type="button"
-                  className={ui.sendParallelPaymentsButton().className}
+                  className={form.actionButton().className}
                 >
                   {isSending ? 'Confirming payments...' : 'Send both payments'}
                 </Button>

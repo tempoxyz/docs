@@ -1,10 +1,12 @@
 'use client'
+
 import * as React from 'react'
 import { isAddress, parseUnits, toHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 import * as ui from './PayWithIssuedToken.recipes'
@@ -94,7 +96,7 @@ export function PayWithIssuedToken(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className={ui.payWithIssuedTokenButton().className}
+            className={form.actionButton().className}
             type="button"
           >
             Cancel
@@ -105,7 +107,7 @@ export function PayWithIssuedToken(props: DemoStepProps) {
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className={ui.payWithIssuedTokenButton().className}
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -115,8 +117,8 @@ export function PayWithIssuedToken(props: DemoStepProps) {
       title={`Send 100 AlphaUSD and pay fees in ${feeTokenMetadata ? feeTokenMetadata.name : 'your token'}.`}
     >
       {expanded && (
-        <div {...ui.payWithIssuedTokenLayout()}>
-          <div {...ui.payWithIssuedTokenLayout2()}>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             {/* Token info display */}
             <div {...ui.payWithIssuedTokenLayout3()}>
               <div {...ui.payWithIssuedTokenLayout4()}>
@@ -137,13 +139,13 @@ export function PayWithIssuedToken(props: DemoStepProps) {
               </div>
             </div>
 
-            <div {...ui.payWithIssuedTokenLayout6()}>
-              <div {...ui.payWithIssuedTokenLayout7()}>
-                <label {...ui.label()} htmlFor="recipient">
+            <div {...form.fieldsRow()}>
+              <div {...form.primaryField()}>
+                <label {...form.label()} htmlFor="recipient">
                   Recipient address
                 </label>
                 <input
-                  {...ui.payWithIssuedTokenInput()}
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -153,12 +155,12 @@ export function PayWithIssuedToken(props: DemoStepProps) {
                   placeholder="0x..."
                 />
               </div>
-              <div {...ui.payWithIssuedTokenLayout8()}>
-                <label {...ui.label()} htmlFor="memo">
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  {...ui.payWithIssuedTokenInput()}
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="memo"
@@ -173,7 +175,7 @@ export function PayWithIssuedToken(props: DemoStepProps) {
                 disabled={!active}
                 onClick={handleTransfer}
                 type="button"
-                className={ui.payWithIssuedTokenButton().className}
+                className={form.actionButton().className}
               >
                 {sendPayment.isPending ? 'Sending...' : 'Send'}
               </Button>

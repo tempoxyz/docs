@@ -1,10 +1,12 @@
 'use client'
+
 import * as React from 'react'
 import { formatUnits } from 'viem'
 import { Tick } from 'viem/tempo'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import type { DemoStepProps } from '../types'
 import * as ui from './QueryOrder.recipes'
 
@@ -53,7 +55,7 @@ export function QueryOrder(props: DemoStepProps) {
           disabled={!active || isQuerying}
           onClick={handleQuery}
           type="button"
-          className={ui.queryOrderButton().className}
+          className={form.actionButton().className}
         >
           {isQuerying ? 'Querying...' : hasQueried ? 'Query Again' : 'Query Order'}
         </Button>
@@ -62,8 +64,8 @@ export function QueryOrder(props: DemoStepProps) {
       title={`Query order details${orderId ? ` (ID: ${orderId})` : ''}`}
     >
       {hasQueried && isSuccess && order && (
-        <div {...ui.queryOrderLayout()}>
-          <div {...ui.queryOrderLayout2()}>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             <div {...ui.queryOrderLayout3()}>
               {/* Order Type and Price */}
               <div {...ui.queryOrderLayout4()}>

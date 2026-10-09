@@ -1,10 +1,6 @@
 import { metrics } from '../../../../styles/metrics'
 import { style } from '../../../../styles/recipes'
-export const mintFeeAmmLiquidityButton = style({
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-})
+
 export const mintFeeAmmLiquidityLayout = style({
   marginInline: metrics.spacing['6'],
   display: 'flex',
@@ -12,12 +8,7 @@ export const mintFeeAmmLiquidityLayout = style({
   gap: metrics.spacing['2'],
   paddingBottom: metrics.spacing['4'],
 })
-export const mintFeeAmmLiquidityLayout2 = style({
-  borderInlineStartStyle: 'solid',
-  borderInlineStartWidth: '2px',
-  borderColor: 'var(--color-gray4)',
-  paddingInlineStart: metrics.spacing['5'],
-})
+
 export const mintFeeAmmLiquidityLayout3 = style({
   marginTop: metrics.spacing['2'],
   selectors: {

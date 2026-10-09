@@ -5,6 +5,15 @@ import { cascadeLayers } from '../src/styles/layers'
 /** Bridge compiled Zyzz styles to Vocs' server-rendered MDX and RSC delivery. */
 export async function vocsWithZyzz() {
   const plugins = await flatten(await vocs())
+  // Let Vite finish pruning CSS-only chunks before RSC records asset URLs.
+  const manifest = plugins.find((plugin) => plugin.name === 'rsc:virtual:vite-rsc/assets-manifest')
+  const generateBundle = manifest?.generateBundle
+  if (!manifest || !generateBundle)
+    throw new Error('Vocs changed its RSC asset plugin; update Zyzz CSS ordering')
+  manifest.generateBundle =
+    typeof generateBundle === 'function'
+      ? { order: 'post', handler: generateBundle }
+      : { ...generateBundle, order: 'post' }
   // Waku inserts its RSC transforms inside the Vocs plugin group. Extend the
   // MDX transform here so loadCss is present before rsc:importer-resources runs.
   const mdx = plugins.find(

@@ -36,7 +36,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 
   return (
     <div
-      className={`tempo-blog tempo-blog-post ${tempoBlog().className + ' ' + tempoBlogPost().className}`}
+      className={`tempo-blog tempo-blog-post ${tempoBlog().className} ${tempoBlogPost().className}`}
     >
       <DocsHeader surface="blog" />
       <MicroHeader title={post.title} />

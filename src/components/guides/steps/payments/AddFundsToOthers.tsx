@@ -1,4 +1,5 @@
 'use client'
+
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import type { Address, Chain, Client, Transport } from 'viem'
@@ -8,6 +9,7 @@ import { Actions } from 'viem/tempo'
 import { useBlockNumber, useClient, useConnection } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { Button, ExplorerAccountLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 import * as ui from './AddFundsToOthers.recipes'
@@ -86,7 +88,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
         <Button
           disabled={!isValidTarget || fundAccount.isPending}
           variant="default"
-          className={ui.addFundsToOthersButton().className}
+          className={form.actionButton().className}
           onClick={() => fundAccount.mutate()}
           type="button"
         >
@@ -97,7 +99,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
       <Button
         disabled={!isValidTarget || fundAccount.isPending}
         variant={isValidTarget ? 'accent' : 'default'}
-        className={ui.addFundsToOthersButton().className}
+        className={form.actionButton().className}
         type="button"
         onClick={() => fundAccount.mutate()}
       >
@@ -122,10 +124,10 @@ export function AddFundsToOthers(props: DemoStepProps) {
       number={stepNumber}
       title="Add testnet funds to an address."
     >
-      <div {...ui.addFundsToOthersLayout()}>
-        <div {...ui.addFundsToOthersLayout2()}>
+      <div {...form.stepBody()}>
+        <div {...form.stepRail()}>
           <div {...ui.addFundsToOthersLayout3()}>
-            <label {...ui.label()} htmlFor="fundAddress">
+            <label {...form.label()} htmlFor="fundAddress">
               Address to fund
             </label>
             <input

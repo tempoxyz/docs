@@ -1,9 +1,11 @@
 'use client'
+
 import { formatUnits, parseUnits } from 'viem'
 import { Actions, Addresses } from 'viem/tempo'
 import { useConnection, useConnectionEffect, useSendCallsSync } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { Button, ExplorerLink } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd, betaUsd } from '../../tokens'
 import * as ui from './SellSwap.recipes'
 
@@ -73,7 +75,7 @@ export function SellSwap({ onSuccess }: { onSuccess?: () => void }) {
             })
           }}
           type="button"
-          className={ui.sellSwapButton().className}
+          className={form.actionButton().className}
         >
           {sendCalls.isPending ? 'Selling...' : 'Sell'}
         </Button>

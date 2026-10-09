@@ -1,24 +1,29 @@
-import { metrics } from '../../../../styles/metrics'
-import { style } from '../../../../styles/recipes'
-export const sendPaymentButton = style({
+import { metrics } from '../../styles/metrics'
+import { style } from '../../styles/recipes'
+
+// Shared visual structure for interactive payment, issuance, wallet, and exchange forms.
+export const actionButton = style({
   fontSize: '14px',
   fontWeight: metrics.fontWeight.normal,
   letterSpacing: '-0.02em',
 })
-export const sendPaymentLayout = style({
+
+export const stepBody = style({
   marginInline: metrics.spacing['6'],
   display: 'flex',
   flexDirection: 'column',
   gap: metrics.spacing['3'],
   paddingBottom: metrics.spacing['4'],
 })
-export const sendPaymentLayout2 = style({
+
+export const stepRail = style({
   borderInlineStartStyle: 'solid',
   borderInlineStartWidth: '2px',
   borderColor: 'var(--color-gray4)',
   paddingInlineStart: metrics.spacing['5'],
 })
-export const sendPaymentLayout3 = style({
+
+export const fieldsRow = style({
   marginTop: metrics.spacing['2'],
   display: 'flex',
   flexDirection: 'column',
@@ -29,17 +34,20 @@ export const sendPaymentLayout3 = style({
     alignItems: 'flex-end',
   },
 })
-export const sendPaymentLayout4 = style({
+
+export const primaryField = style({
   display: 'flex',
   flex: '2 1 0%',
   flexDirection: 'column',
 })
+
 export const label = style({
   fontSize: '11px',
   letterSpacing: '-0.01em',
   color: 'var(--color-gray9)',
 })
-export const sendPaymentInput = style({
+
+export const input = style({
   height: '34px',
   borderRadius: '50px',
   borderStyle: 'solid',
@@ -60,12 +68,14 @@ export const sendPaymentInput = style({
       },
   },
 })
-export const sendPaymentLayout5 = style({
+
+export const secondaryField = style({
   display: 'flex',
   flex: '1 1 0%',
   flexDirection: 'column',
 })
-export const sendPaymentInput2 = style({
+
+export const validatedInput = style({
   height: '34px',
   borderRadius: '50px',
   borderStyle: 'solid',
@@ -85,13 +95,16 @@ export const sendPaymentInput2 = style({
       },
   },
 })
-export const sendPaymentInput3 = style({
+
+export const invalidBorder = style({
   borderColor: 'var(--color-red-500)',
 })
-export const sendPaymentInput4 = style({
+
+export const defaultBorder = style({
   borderColor: 'var(--color-gray4)',
 })
-export const sendPaymentText = style({
+
+export const errorText = style({
   marginTop: 'var(--spacing)',
   fontSize: '11px',
   color: 'var(--color-red-500)',

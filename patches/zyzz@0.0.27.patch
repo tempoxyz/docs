@@ -12,23 +12,22 @@ index ad5de1ad177684d7c8e7134b862984e3da472d8f..53552aeb5b0b92a5eb5f05c03c31cde7
          readonly native?: Graph.compile.Options['native'];
          /** Include the CSS reset. Defaults to false. */
 diff --git a/dist/vite/index.js b/dist/vite/index.js
-index 27d151823db83a014703f72d7718a8fe93a70774..908df0cd83072098a4dab58caf878941d4d06292 100644
+index 27d151823db83a014703f72d7718a8fe93a70774..983c4e0aace44c8c2b28c37f28a816868476d2cc 100644
 --- a/dist/vite/index.js
 +++ b/dist/vite/index.js
-@@ -40,7 +40,7 @@ export function zyzz(options = {}) {
-     if (native && options.compiler === false)
-         throw new Error('Native builds require source compilation.');
-     const snapshots = new WeakMap();
--    const states = new WeakMap();
-+    const states = new Map();
-     const removed = new WeakMap();
-     const reads = new WeakMap();
-     const compilers = new WeakMap();
-@@ -117,6 +117,16 @@ export function zyzz(options = {}) {
+@@ -65,6 +65,7 @@ export function zyzz(options = {}) {
+     const lazyImports = new WeakMap();
+     let directories;
+     let root;
++    let devServer;
+     function snapshot(environment) {
+         let value = snapshots.get(environment);
+         if (!value) {
+@@ -117,6 +118,16 @@ export function zyzz(options = {}) {
          return resource(id) ? id : id.split('?')[0];
      }
      function eligible(id) {
-+        // Documentation source trees may contain fragments that are not modules.
++        // Source trees may contain documentation fragments that are not modules.
 +        if (options.exclude?.some((entry) => {
 +          const relative = Path.relative(Path.resolve(root, entry), normalize(id))
 +          return relative === '' || (
@@ -41,7 +40,40 @@ index 27d151823db83a014703f72d7718a8fe93a70774..908df0cd83072098a4dab58caf878941
          if (sourceEntrypoints.has(normalize(id)))
              return true;
          // Ids carrying foreign queries are Vite resources such as inline-module proxies, not source.
-@@ -1113,16 +1123,25 @@ export function zyzz(options = {}) {
+@@ -944,6 +955,7 @@ export function zyzz(options = {}) {
+             },
+         },
+         configureServer(server) {
++            devServer = server;
+             // Directory watches belong to the server, not module import dependencies.
+             server.watcher.add(directories.slice(1));
+             server.middlewares.use((request, response, next) => {
+@@ -1036,6 +1048,24 @@ export function zyzz(options = {}) {
+             await updateDiscovery(this.environment, file, change.event);
+         },
+         async hotUpdate({ file, modules, timestamp, type, server }) {
++            // Client stylesheet modules can be backed by server-only compilations.
++            // Include those modules in the browser's normal CSS HMR invalidation.
++            if (this.environment.name === 'client') {
++                const borrowed = new Set(modules);
++                for (const environment of Object.values(server.environments)) {
++                    if (environment.config.consumer !== 'server') continue;
++                    for (const entry of states.get(environment)?.values() ?? []) {
++                        if (!entry.files.has(file)) continue;
++                        for (const id of [cssId(entry.file), sharedId]) {
++                            const module = this.environment.moduleGraph.getModuleById(id);
++                            if (!module) continue;
++                            this.environment.moduleGraph.invalidateModule(module, new Set(), timestamp, true);
++                            borrowed.add(module);
++                        }
++                    }
++                }
++                modules = [...borrowed];
++            }
+             const state = entries(this.environment);
+             const previous = [...state.values()].map((entry) => ({
+                 code: entry.code,
+@@ -1113,16 +1143,29 @@ export function zyzz(options = {}) {
              const file = id === sharedId
                  ? undefined
                  : decodeURIComponent(id.slice(prefix.length, -4));
@@ -49,10 +81,13 @@ index 27d151823db83a014703f72d7718a8fe93a70774..908df0cd83072098a4dab58caf878941
 +            let entry = file === undefined
                  ? entries(this.environment).values().next().value
                  : entries(this.environment).get(file);
-+            // RSC stylesheets may have only a server-environment owner.
-+            if (!entry && this.environment.mode === 'dev') {
-+                for (const state of states.values()) {
-+                    entry = file === undefined ? state.values().next().value : state.get(file);
++            // Browser requests for server-only CSS have no client compilation record.
++            // Find the actual owner without merging per-environment compiler state.
++            if (!entry && this.environment.mode === 'dev' && this.environment.name === 'client' && devServer) {
++                for (const environment of Object.values(devServer.environments)) {
++                    if (environment.config.consumer !== 'server') continue;
++                    const state = states.get(environment);
++                    entry = file === undefined ? state?.values().next().value : state?.get(file);
 +                    if (entry) break;
 +                }
 +            }
@@ -61,42 +96,32 @@ index 27d151823db83a014703f72d7718a8fe93a70774..908df0cd83072098a4dab58caf878941
                  return '';
              if (!entry)
                  throw new Error(`Unknown Zyzz stylesheet: ${file}`);
++            const owner = entry.environment;
              const output = await compile(entry, {
 -                resolve: (source, importer) => this.resolve(source, importer),
-+                resolve: (source, importer) => entry.environment.mode === 'dev'
-+                ? entry.environment.pluginContainer.resolveId(source, importer)
-+                : this.resolve(source, importer),
++                resolve: (source, importer) => owner.mode === 'dev'
++                    ? owner.pluginContainer.resolveId(source, importer)
++                    : this.resolve(source, importer),
                  watch: (file) => this.addWatchFile(file),
                  asset: async (file) => {
                      const reference = this.emitFile({
-@@ -1229,7 +1248,8 @@ export function zyzz(options = {}) {
-                 if (source !== null)
-                     Mapping.setSourceContent(shifted, source, output.map.sourcesContent?.[index] ?? null);
-             return {
--                code: `${before}${sharedImport}${output.code.slice(offset)}\nimport ${JSON.stringify(cssId(id))};`,
-+                // Empty production sheets can become dangling RSC preload aliases.
-+        code: `${before}${sharedImport}${output.code.slice(offset)}${this.environment.config.command === 'build' && !output.css.trim() ? '' : `\nimport ${JSON.stringify(cssId(id))};`}`,
-                 map: JSON.stringify(Mapping.toEncodedMap(shifted)),
-             };
-         },
 diff --git a/src/vite/index.ts b/src/vite/index.ts
-index ab3405777d33a17896f73a71d19e62130c786765..1c116432125939a76fb521059cab5b1e6d53f750 100644
+index ab3405777d33a17896f73a71d19e62130c786765..a99a2b4ced69bd7ea8b3262987e08e62b16105bb 100644
 --- a/src/vite/index.ts
 +++ b/src/vite/index.ts
-@@ -48,7 +48,7 @@ export function zyzz(options: zyzz.Options = {}): Plugin {
-     Environment,
-     ReturnType<typeof Snapshot.create>
-   >()
--  const states = new WeakMap<Environment, Map<string, Entry>>()
-+  const states = new Map<Environment, Map<string, Entry>>()
-   const removed = new WeakMap<Environment, Set<string>>()
-   const reads = new WeakMap<Environment, Map<string, string>>()
-   const compilers = new WeakMap<Environment, Graph.create.ReturnType>()
-@@ -141,6 +141,16 @@ export function zyzz(options: zyzz.Options = {}): Plugin {
+@@ -74,6 +74,7 @@ export function zyzz(options: zyzz.Options = {}): Plugin {
+   const lazyImports = new WeakMap<Parser.ParseResult, string[]>()
+   let directories: readonly string[]
+   let root: string
++  let devServer: ViteDevServer | undefined
+ 
+   function snapshot(environment: Environment) {
+     let value = snapshots.get(environment)
+@@ -141,6 +142,16 @@ export function zyzz(options: zyzz.Options = {}): Plugin {
    }
  
    function eligible(id: string) {
-+    // Documentation source trees may contain fragments that are not modules.
++    // Source trees may contain documentation fragments that are not modules.
 +    if (options.exclude?.some((entry) => {
 +      const relative = Path.relative(Path.resolve(root, entry), normalize(id))
 +      return relative === '' || (
@@ -109,7 +134,40 @@ index ab3405777d33a17896f73a71d19e62130c786765..1c116432125939a76fb521059cab5b1e
      if (sourceEntrypoints.has(normalize(id))) return true
      // Ids carrying foreign queries are Vite resources such as inline-module proxies, not source.
      if (resource(id)) return false
-@@ -1454,10 +1464,18 @@ export function zyzz(options: zyzz.Options = {}): Plugin {
+@@ -1222,6 +1233,7 @@ export function zyzz(options: zyzz.Options = {}): Plugin {
+       },
+     },
+     configureServer(server) {
++      devServer = server
+       // Directory watches belong to the server, not module import dependencies.
+       server.watcher.add(directories.slice(1))
+ 
+@@ -1351,6 +1363,24 @@ export function zyzz(options: zyzz.Options = {}): Plugin {
+       await updateDiscovery(this.environment, file, change.event)
+     },
+     async hotUpdate({ file, modules, timestamp, type, server }) {
++      // Client stylesheet modules can be backed by server-only compilations.
++      // Include those modules in the browser's normal CSS HMR invalidation.
++      if (this.environment.name === 'client') {
++        const borrowed = new Set(modules)
++        for (const environment of Object.values(server.environments)) {
++          if (environment.config.consumer !== 'server') continue
++          for (const entry of states.get(environment)?.values() ?? []) {
++            if (!entry.files.has(file)) continue
++            for (const id of [cssId(entry.file), sharedId]) {
++              const module = this.environment.moduleGraph.getModuleById(id)
++              if (!module) continue
++              this.environment.moduleGraph.invalidateModule(module, new Set(), timestamp, true)
++              borrowed.add(module)
++            }
++          }
++        }
++        modules = [...borrowed]
++      }
+       const state = entries(this.environment)
+       const previous = [...state.values()].map((entry) => ({
+         code: entry.code,
+@@ -1454,18 +1484,31 @@ export function zyzz(options: zyzz.Options = {}): Plugin {
          id === sharedId
            ? undefined
            : decodeURIComponent(id.slice(prefix.length, -4))
@@ -118,39 +176,32 @@ index ab3405777d33a17896f73a71d19e62130c786765..1c116432125939a76fb521059cab5b1e
          file === undefined
            ? entries(this.environment).values().next().value
            : entries(this.environment).get(file)
-+      // RSC stylesheets are requested by the browser without transforming their
-+      // server-only owner in the client environment. Reuse that owner's graph.
-+      if (!entry && this.environment.mode === 'dev') {
-+        for (const state of states.values()) {
-+          entry = file === undefined ? state.values().next().value : state.get(file)
++      // Browser requests for server-only CSS have no client compilation record.
++      // Find the actual owner without merging per-environment compiler state.
++      if (!entry && this.environment.mode === 'dev' && this.environment.name === 'client' && devServer) {
++        for (const environment of Object.values(devServer.environments)) {
++          if (environment.config.consumer !== 'server') continue
++          const state = states.get(environment)
++          entry = file === undefined ? state?.values().next().value : state?.get(file)
 +          if (entry) break
 +        }
 +      }
        // A pruned JavaScript module can leave its stylesheet loaded in the browser.
        if (!entry && file && removed.get(this.environment)?.has(file)) return ''
        if (!entry) throw new Error(`Unknown Zyzz stylesheet: ${file}`)
-@@ -1465,7 +1483,9 @@ export function zyzz(options: zyzz.Options = {}): Plugin {
+ 
++      const owner = entry.environment
        const output = await compile(
          entry,
          {
 -          resolve: (source, importer) => this.resolve(source, importer),
-+          resolve: (source, importer) => entry.environment.mode === 'dev'
-+                ? entry.environment.pluginContainer.resolveId(source, importer)
-+                : this.resolve(source, importer),
++          resolve: (source, importer) => owner.mode === 'dev'
++            ? owner.pluginContainer.resolveId(source, importer)
++            : this.resolve(source, importer),
            watch: (file) => this.addWatchFile(file),
            asset: async (file) => {
              const reference = this.emitFile({
-@@ -1606,7 +1626,8 @@ export function zyzz(options: zyzz.Options = {}): Plugin {
-           )
- 
-       return {
--        code: `${before}${sharedImport}${output.code.slice(offset)}\nimport ${JSON.stringify(cssId(id))};`,
-+        // Empty production sheets can become dangling RSC preload aliases.
-+        code: `${before}${sharedImport}${output.code.slice(offset)}${this.environment.config.command === 'build' && !output.css.trim() ? '' : `\nimport ${JSON.stringify(cssId(id))};`}`,
-         map: JSON.stringify(Mapping.toEncodedMap(shifted)),
-       }
-     },
-@@ -1681,6 +1702,8 @@ export declare namespace zyzz {
+@@ -1681,6 +1724,8 @@ export declare namespace zyzz {
      readonly compiler?: boolean | undefined
      /** Additional source directories, absolute or relative to the Vite root. */
      readonly include?: readonly string[] | undefined

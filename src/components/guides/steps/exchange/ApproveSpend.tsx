@@ -1,13 +1,14 @@
 'use client'
+
 import * as React from 'react'
 import { parseUnits } from 'viem'
 import { Addresses } from 'viem/tempo'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { Button, ExplorerLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd, pathUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
-import * as ui from './ApproveSpend.recipes'
 
 export function ApproveSpend(props: DemoStepProps) {
   const { stepNumber, last = false } = props
@@ -44,7 +45,7 @@ export function ApproveSpend(props: DemoStepProps) {
             })
           }}
           type="button"
-          className={ui.approveSpendButton().className}
+          className={form.actionButton().className}
         >
           {approve.isPending ? 'Approving...' : 'Approve Spend'}
         </Button>
@@ -53,8 +54,8 @@ export function ApproveSpend(props: DemoStepProps) {
       title="Approve the Stablecoin DEX to spend pathUSD"
     >
       {approve.data && (
-        <div {...ui.approveSpendLayout()}>
-          <div {...ui.approveSpendLayout2()}>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             <ExplorerLink hash={approve.data.receipt.transactionHash} />
           </div>
         </div>

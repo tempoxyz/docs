@@ -1,10 +1,12 @@
 'use client'
+
 import * as React from 'react'
 import { formatUnits } from 'viem'
 import { useConnection } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 import * as ui from './CheckFeeAmmPool.recipes'
@@ -48,8 +50,8 @@ export function CheckFeeAmmPool(props: DemoStepProps) {
       title={`View Fee AMM pool for ${metadata ? metadata.name : 'your token'}.`}
     >
       {active && pool && lpBalance && (
-        <div {...ui.checkFeeAmmPoolLayout()}>
-          <div {...ui.checkFeeAmmPoolLayout2()}>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             <div {...ui.checkFeeAmmPoolLayout3()}>
               <div {...ui.checkFeeAmmPoolLayout4()}>
                 <div {...ui.checkFeeAmmPoolLayout5()}>

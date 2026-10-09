@@ -1,13 +1,14 @@
 'use client'
+
 import * as React from 'react'
 import { isAddress, parseUnits, toHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { cx as composeStyles } from 'zyzz'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
-import * as ui from './SendPayment.recipes'
 
 export function SendPayment(props: DemoStepProps) {
   const { stepNumber, last = false } = props
@@ -72,7 +73,7 @@ export function SendPayment(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className={ui.sendPaymentButton().className}
+            className={form.actionButton().className}
             type="button"
           >
             Cancel
@@ -89,7 +90,7 @@ export function SendPayment(props: DemoStepProps) {
             disabled={!(address && balance && balance.amount > 0n)}
             onClick={() => setExpanded(true)}
             type="button"
-            className={ui.sendPaymentButton().className}
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -99,15 +100,15 @@ export function SendPayment(props: DemoStepProps) {
       title="Send 100 AlphaUSD to a recipient."
     >
       {expanded && (
-        <div {...ui.sendPaymentLayout()}>
-          <div {...ui.sendPaymentLayout2()}>
-            <div {...ui.sendPaymentLayout3()}>
-              <div {...ui.sendPaymentLayout4()}>
-                <label {...ui.label()} htmlFor="recipient">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...form.fieldsRow()}>
+              <div {...form.primaryField()}>
+                <label {...form.label()} htmlFor="recipient">
                   Recipient address
                 </label>
                 <input
-                  {...ui.sendPaymentInput()}
+                  {...form.input()}
                   data-1p-ignore
                   id="recipient"
                   type="text"
@@ -117,15 +118,15 @@ export function SendPayment(props: DemoStepProps) {
                   placeholder="0x..."
                 />
               </div>
-              <div {...ui.sendPaymentLayout5()}>
-                <label {...ui.label()} htmlFor="memo">
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
                   {...composeStyles(
-                    ui.sendPaymentInput2(),
-                    !!memoError && ui.sendPaymentInput3(),
-                    !memoError && ui.sendPaymentInput4(),
+                    form.validatedInput(),
+                    !!memoError && form.invalidBorder(),
+                    !memoError && form.defaultBorder(),
                   )}
                   data-1p-ignore
                   id="memo"
@@ -147,12 +148,12 @@ export function SendPayment(props: DemoStepProps) {
                 }
                 onClick={handleTransfer}
                 type="button"
-                className={ui.sendPaymentButton().className}
+                className={form.actionButton().className}
               >
                 {sendPayment.isPending ? 'Sending...' : 'Send'}
               </Button>
             </div>
-            {memoError && <span {...ui.sendPaymentText()}>{memoError}</span>}
+            {memoError && <span {...form.errorText()}>{memoError}</span>}
             {sendPayment.isSuccess && sendPayment.data && (
               <ExplorerLink hash={sendPayment.data.receipt.transactionHash} />
             )}

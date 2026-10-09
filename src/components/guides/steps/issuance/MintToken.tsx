@@ -1,4 +1,5 @@
 'use client'
+
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import { type Address, parseUnits, toHex } from 'viem'
@@ -6,9 +7,9 @@ import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
-import * as ui from './MintToken.recipes'
 
 export function MintToken(props: DemoStepProps & { recipient?: Address }) {
   const { stepNumber, recipient, last = false } = props
@@ -76,7 +77,7 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className={ui.mintTokenButton().className}
+            className={form.actionButton().className}
             type="button"
           >
             Hide
@@ -93,7 +94,7 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
             disabled={Boolean(!tokenAddress || !hasRole || hasSufficientBalance)}
             onClick={() => setExpanded(true)}
             type="button"
-            className={ui.mintTokenButton().className}
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -103,15 +104,15 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
       title={`Mint 100 ${metadata ? metadata.name : 'tokens'} to ${recipient ? 'recipient' : 'yourself'}.`}
     >
       {expanded && (
-        <div {...ui.mintTokenLayout()}>
-          <div {...ui.mintTokenLayout2()}>
-            <div {...ui.mintTokenLayout3()}>
-              <div {...ui.mintTokenLayout4()}>
-                <label {...ui.label()} htmlFor="recipient">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...form.fieldsRow()}>
+              <div {...form.primaryField()}>
+                <label {...form.label()} htmlFor="recipient">
                   Recipient address
                 </label>
                 <input
-                  {...ui.mintTokenInput()}
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -122,12 +123,12 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
                   placeholder="0x..."
                 />
               </div>
-              <div {...ui.mintTokenLayout5()}>
-                <label {...ui.label()} htmlFor="memo">
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  {...ui.mintTokenInput()}
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="memo"
@@ -142,7 +143,7 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
                 disabled={!address}
                 onClick={handleMint}
                 type="button"
-                className={ui.mintTokenButton().className}
+                className={form.actionButton().className}
               >
                 {mint.isPending ? 'Minting...' : 'Mint'}
               </Button>

@@ -1,8 +1,10 @@
 'use client'
+
 import { useConnect, useConnection, useConnections, useSwitchConnection } from 'wagmi'
 import LucidePictureInPicture2 from '~icons/lucide/picture-in-picture-2'
 import { useTempoWalletConnector } from '../../../../wagmi.config'
 import { Button, Logout, Step, TempoMarkBoxed, useHydrated } from '../../Demo'
+import * as form from '../../form.recipes'
 import type { DemoStepProps } from '../types'
 import * as ui from './SignInWithTempo.recipes'
 
@@ -35,7 +37,7 @@ export function SignInWithTempo(props: DemoStepProps) {
         ) : (
           <Button
             variant="accent"
-            className={ui.signInWithTempoButton().className}
+            className={form.actionButton().className}
             onClick={() => {
               connect.reset()
               switchConnection.reset()

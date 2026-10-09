@@ -31,24 +31,7 @@ export const transferResultLayout3 = style({
 export const transferResultText3 = style({
   animation: 'var(--animate-pulse)',
 })
-export const sendParallelPaymentsButton = style({
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-})
-export const sendParallelPaymentsLayout = style({
-  marginInline: metrics.spacing['6'],
-  display: 'flex',
-  flexDirection: 'column',
-  gap: metrics.spacing['3'],
-  paddingBottom: metrics.spacing['4'],
-})
-export const sendParallelPaymentsLayout2 = style({
-  borderInlineStartStyle: 'solid',
-  borderInlineStartWidth: '2px',
-  borderColor: 'var(--color-gray4)',
-  paddingInlineStart: metrics.spacing['5'],
-})
+
 export const sendParallelPaymentsLayout3 = style({
   marginTop: metrics.spacing['2'],
   display: 'flex',
@@ -60,11 +43,7 @@ export const sendParallelPaymentsLayout4 = style({
   flexDirection: 'column',
   gap: metrics.spacing['2'],
 })
-export const label = style({
-  fontSize: '11px',
-  letterSpacing: '-0.01em',
-  color: 'var(--color-gray9)',
-})
+
 export const sendParallelPaymentsInput = style({
   height: '34px',
   borderRadius: '50px',

@@ -1,11 +1,12 @@
 'use client'
+
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
-import * as ui from './PauseUnpauseTransfers.recipes'
 
 export function PauseUnpauseTransfers(props: DemoStepProps) {
   const { stepNumber, last = false } = props
@@ -81,7 +82,7 @@ export function PauseUnpauseTransfers(props: DemoStepProps) {
           disabled={!active || isProcessing}
           onClick={handleToggle}
           type="button"
-          className={ui.pauseUnpauseTransfersButton().className}
+          className={form.actionButton().className}
         >
           {isProcessing ? 'Processing...' : paused ? 'Unpause' : 'Pause'}
         </Button>
@@ -90,8 +91,8 @@ export function PauseUnpauseTransfers(props: DemoStepProps) {
       title={`${paused ? 'Unpause' : 'Pause'} transfers for ${metadata ? metadata.name : 'token'}.`}
     >
       {(pause.isSuccess || unpause.isSuccess) && (pause.data || unpause.data) && (
-        <div {...ui.pauseUnpauseTransfersLayout()}>
-          <div {...ui.pauseUnpauseTransfersLayout2()}>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             <ExplorerLink
               hash={
                 pause.data?.receipt.transactionHash ?? unpause.data?.receipt.transactionHash ?? ''

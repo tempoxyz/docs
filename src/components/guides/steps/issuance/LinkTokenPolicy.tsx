@@ -1,9 +1,11 @@
 'use client'
+
 import * as React from 'react'
 import { useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 import * as ui from './LinkTokenPolicy.recipes'
@@ -57,7 +59,7 @@ export function LinkTokenPolicy(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className={ui.linkTokenPolicyButton().className}
+            className={form.actionButton().className}
             type="button"
           >
             Hide
@@ -68,7 +70,7 @@ export function LinkTokenPolicy(props: DemoStepProps) {
             disabled={!tokenAddress || !policyId || isComplete}
             onClick={() => setExpanded(true)}
             type="button"
-            className={ui.linkTokenPolicyButton().className}
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -78,10 +80,10 @@ export function LinkTokenPolicy(props: DemoStepProps) {
       title={`Link the policy to ${metadata ? metadata.name : 'your token'}.`}
     >
       {expanded && (
-        <div {...ui.linkTokenPolicyLayout()}>
-          <div {...ui.linkTokenPolicyLayout2()}>
-            <div {...ui.linkTokenPolicyLayout3()}>
-              <div {...ui.linkTokenPolicyLayout4()}>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...form.fieldsRow()}>
+              <div {...form.secondaryField()}>
                 <div {...ui.linkTokenPolicyLayout5()}>
                   This will link the transfer policy to {metadata ? metadata.name : 'your token'},
                   enforcing the blacklist.
@@ -95,7 +97,7 @@ export function LinkTokenPolicy(props: DemoStepProps) {
                 onClick={handleLinkPolicy}
                 disabled={isLinking}
                 type="button"
-                className={ui.linkTokenPolicyButton().className}
+                className={form.actionButton().className}
               >
                 {isLinking ? 'Linking...' : 'Link Policy'}
               </Button>

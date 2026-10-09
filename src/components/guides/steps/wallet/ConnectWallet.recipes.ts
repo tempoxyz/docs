@@ -35,11 +35,7 @@ export const lucideCheck = style({
   marginTop: '1px',
   color: 'var(--color-gray9)',
 })
-export const connectWalletButton2 = style({
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-})
+
 export const connectWalletButton3 = style({
   width: 'fit-content',
 })

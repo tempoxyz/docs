@@ -1,4 +1,5 @@
 'use client'
+
 import * as React from 'react'
 import {
   type Connector,
@@ -16,6 +17,7 @@ import {
   isFundableWalletConnector,
 } from '../../../lib/wallets'
 import { Button, Step, StringFormatter, useCopyToClipboard } from '../../Demo'
+import * as form from '../../form.recipes'
 import type { DemoStepProps } from '../types'
 import * as ui from './ConnectWallet.recipes'
 
@@ -106,7 +108,7 @@ export function ConnectWallet(props: DemoStepProps) {
           </Button>
           <Button
             variant="destructive"
-            className={ui.connectWalletButton2().className}
+            className={form.actionButton().className}
             onClick={() => disconnect.disconnect({ connector: walletConnector })}
             type="button"
           >

@@ -1,24 +1,7 @@
 import { style as instanceStyle } from 'zyzz'
 import { metrics } from '../../../../styles/metrics'
 import { style } from '../../../../styles/recipes'
-export const queryOrderButton = style({
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-})
-export const queryOrderLayout = style({
-  marginInline: metrics.spacing['6'],
-  display: 'flex',
-  flexDirection: 'column',
-  gap: metrics.spacing['3'],
-  paddingBottom: metrics.spacing['4'],
-})
-export const queryOrderLayout2 = style({
-  borderInlineStartStyle: 'solid',
-  borderInlineStartWidth: '2px',
-  borderColor: 'var(--color-gray4)',
-  paddingInlineStart: metrics.spacing['5'],
-})
+
 export const queryOrderLayout3 = style({
   display: 'flex',
   flexDirection: 'column',

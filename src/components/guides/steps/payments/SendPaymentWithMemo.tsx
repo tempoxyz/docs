@@ -7,6 +7,7 @@ import { useConnection, useConnectionEffect, useWatchContractEvent } from 'wagmi
 import { Hooks } from 'wagmi/tempo'
 import { cx as composeStyles } from 'zyzz'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 import * as ui from './SendPaymentWithMemo.recipes'
@@ -113,7 +114,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className={ui.sendPaymentWithMemoButton().className}
+            className={form.actionButton().className}
             type="button"
           >
             Cancel
@@ -130,7 +131,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
             disabled={!(address && balance && balance.amount > 0n)}
             onClick={() => setExpanded(true)}
             type="button"
-            className={ui.sendPaymentWithMemoButton().className}
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -140,18 +141,18 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
       title="Send a payment with a memo for reconciliation."
     >
       {expanded && (
-        <div {...ui.sendPaymentWithMemoLayout()}>
-          <div {...ui.sendPaymentWithMemoLayout2()}>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             <div {...ui.sendPaymentWithMemoLayout3()}>
               <div {...ui.sendPaymentWithMemoLayout4()}>
-                <label {...ui.label()} htmlFor="memo">
+                <label {...form.label()} htmlFor="memo">
                   Memo (e.g., customer ID, invoice number)
                 </label>
                 <input
                   {...composeStyles(
-                    ui.sendPaymentWithMemoInput(),
-                    !!memoError && ui.sendPaymentWithMemoInput2(),
-                    !memoError && ui.sendPaymentWithMemoInput3(),
+                    form.validatedInput(),
+                    !!memoError && form.invalidBorder(),
+                    !memoError && form.defaultBorder(),
                   )}
                   data-1p-ignore
                   type="text"
@@ -161,15 +162,15 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
                   onChange={handleMemoChange}
                   placeholder="CUST-12345"
                 />
-                {memoError && <span {...ui.sendPaymentWithMemoText()}>{memoError}</span>}
+                {memoError && <span {...form.errorText()}>{memoError}</span>}
               </div>
               <div {...ui.sendPaymentWithMemoLayout5()}>
-                <div {...ui.sendPaymentWithMemoLayout6()}>
-                  <label {...ui.label()} htmlFor="recipient">
+                <div {...form.secondaryField()}>
+                  <label {...form.label()} htmlFor="recipient">
                     Recipient address
                   </label>
                   <input
-                    {...ui.sendPaymentWithMemoInput4()}
+                    {...form.input()}
                     data-1p-ignore
                     type="text"
                     id="recipient"
@@ -201,7 +202,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
                   }
                   onClick={handleTransfer}
                   type="button"
-                  className={ui.sendPaymentWithMemoButton().className}
+                  className={form.actionButton().className}
                 >
                   {sendPayment.isPending ? 'Sending...' : 'Send with Memo'}
                 </Button>
