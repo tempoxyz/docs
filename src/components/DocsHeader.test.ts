@@ -1,5 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { normalizeDocsPath, resolveSidebarItems } from './DocsHeader'
+
+// These tests exercise routing helpers, not the Vocs UI or its virtual modules.
+vi.mock('vocs', () => ({ useConfig: vi.fn() }))
 
 const sidebar = {
   '/docs': [{ text: 'Start Here' }],

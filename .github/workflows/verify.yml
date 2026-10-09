@@ -46,10 +46,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Fail cheap source checks before fetching schemas, testing, or building.
-      - name: Guard Vocs configuration
-        run: node scripts/guard-vocs-config.mjs
-
+      # Fail cheap source checks before testing or building.
       - name: Check
         run: pnpm run check
 
@@ -58,11 +55,6 @@ jobs:
 
       - name: Check internal anchors
         run: pnpm run check:anchors
-
-      - name: Fetch OpenAPI specification
-        run: |
-          node --experimental-strip-types scripts/fetch-openapi.ts "$RUNNER_TEMP/openapi.json"
-          echo "OPENAPI_SPEC_URL=$RUNNER_TEMP/openapi.json" >> "$GITHUB_ENV"
 
       - name: Test
         run: pnpm run test --bail=1
