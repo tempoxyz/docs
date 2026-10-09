@@ -44,7 +44,7 @@ Some endpoints use a one-shot `charge` intent instead of session-based channels.
 ### Install the Tempo CLI
 
 ```bash
-curl -fsSL https://tempo.xyz/install | bash
+curl -fsSL https://tempo.xyz/install | TEMPO_INSTALL_SOURCE=tempo-docs-foundry-mpp bash
 ```
 
 ### Install Foundry
@@ -201,7 +201,7 @@ Some MPP endpoints sponsor the payment transaction's gas fees. When the challeng
 
 | Error | Cause | Fix |
 |---|---|---|
-| `tempo: command not found` | Tempo CLI not installed | Run `curl -fsSL https://tempo.xyz/install \| bash` |
+| `tempo: command not found` | Tempo CLI not installed | Run `curl -fsSL https://tempo.xyz/install \| TEMPO_INSTALL_SOURCE=tempo-docs-foundry-mpp bash` |
 | Tempo Accounts store cannot provide a wallet | No usable access key for the payment challenge | Run `cast tempo login --chain-id <CHAIN_ID>`; use `--no-browser` on a headless machine |
 | Insufficient balance | The authorized account cannot fund the payment | Follow the funding command printed by Foundry and check the network and currency |
 | Access key authorization fails | The key is missing, expired, or lacks permission | Authorize a suitable key with `cast tempo login --chain-id <CHAIN_ID>` and retry |

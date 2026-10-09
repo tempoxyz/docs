@@ -76,6 +76,62 @@ The pull-request route guard rejects deleted docs pages without both native and 
 
 ## Contributing
 
+### Docs install attribution
+
+Docs CLI commands set `TEMPO_INSTALL_SOURCE` to a fixed page label. The Tempo
+bootstrap installer reports `tempo_cli_install_completed` to
+`/api/install-event` only after the installed binary passes `tempo --version`.
+Deploy this endpoint before enabling the installer callback in
+`tempoxyz/tempo`. The endpoint uses the existing `VITE_POSTHOG_KEY` and
+`VITE_POSTHOG_HOST` configuration.
+
+Count completion events by `install_source` and filter `first_install = true`
+to exclude installs over an existing executable. These are anonymous install
+executions, not unique people or confirmed wallet-extension activations.
+Unattributed commands are outside this measurement.
+The public ingestion endpoint validates payloads but cannot authenticate a
+terminal's claim of installation. Opt-outs and network failures cause undercounting.
+
+```sql
+SELECT properties.install_source AS source, count() AS installs
+FROM events
+WHERE event = 'tempo_cli_install_completed'
+  AND properties.first_install = true
+  AND timestamp >= now() - INTERVAL 30 DAY
+GROUP BY source
+ORDER BY installs DESC
+```
+
+`DO_NOT_TRACK=1` or `TEMPO_TELEMETRY_DISABLED=1` disables installer reporting.
+Only page attribution, a random event ID, and the first-install flag are sent;
+wallet and persistent machine identifiers are not collected by the callback.
+
+MPP SDK install intent is measured separately as
+`docs_mpp_sdk_install_copy_clicked`. It captures copy-button clicks for `mppx`
+package-install commands with `sdk_package`, `package_manager`, and `page_path`.
+It does not confirm clipboard success or completion in a terminal and must not
+be counted as a completed install. The browser listener does not collect copied
+code or modify the displayed or copied commands.
+
+Both metrics carry `install_product` (`tempo_cli` or `mpp_sdk`) and `measurement`
+(`install_completed` or `install_intent`). To report them side by side without
+combining unlike outcomes:
+
+```sql
+SELECT event, properties.install_product AS product,
+       properties.measurement AS measurement,
+       properties.page_path AS page, count() AS events,
+       count(DISTINCT distinct_id) AS distinct_ids
+FROM events
+WHERE event IN ('tempo_cli_install_completed', 'docs_mpp_sdk_install_copy_clicked')
+  AND timestamp >= now() - INTERVAL 30 DAY
+GROUP BY event, product, measurement, page
+ORDER BY product, page
+```
+
+For CLI completions each `distinct_id` identifies an anonymous execution. For
+SDK intent it is the browser's PostHog ID, so distinct IDs approximate browsers.
+
 Our contributor guidelines can be found in [`CONTRIBUTING.md`](https://github.com/tempoxyz/docs?tab=contributing-ov-file).
 
 ## Security
