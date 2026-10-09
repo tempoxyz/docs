@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AmpLogo, ClaudeLogo, CodexLogo } from '../../../components/AgentLogos'
-import { tempoPluginInstallCommands } from '../../../lib/ai-install-commands'
+import { tempoAgentSetupCommands } from '../../../lib/ai-install-commands'
 import { developersPath } from '../_lib/developersPaths'
 import { featurePath } from '../_lib/featurePaths'
 import { TEMPO_SDK_DOCS_URL } from '../_lib/links'
@@ -133,7 +133,6 @@ const developersMenu: MegaMenuData = {
 
 const TEMPO_AI_GUIDE_URL = developersPath('/docs/guide/using-tempo-with-ai')
 const TEMPO_PLUGIN_URL = `${TEMPO_AI_GUIDE_URL}#install-tempo-plugins`
-const TEMPO_MCP_URL = 'https://mcp.tempo.xyz'
 
 type MenuItem = { label: string; href: string; mega?: MegaMenuData }
 
@@ -276,22 +275,22 @@ const agentCommands = [
   {
     label: 'Claude',
     logo: <ClaudeLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    command: tempoPluginInstallCommands.claude,
+    command: tempoAgentSetupCommands.claude,
   },
   {
     label: 'Codex',
     logo: <CodexLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    command: tempoPluginInstallCommands.codex,
+    command: tempoAgentSetupCommands.codex,
   },
   {
     label: 'Amp',
     logo: <AmpLogo aria-hidden="true" className="size-3.5 shrink-0" />,
-    command: `amp mcp add --transport http tempo ${TEMPO_MCP_URL}`,
+    command: tempoAgentSetupCommands.amp,
   },
   {
     label: 'Other',
     logo: null,
-    command: 'npx skills add tempoxyz/plugins --skill docs',
+    command: tempoAgentSetupCommands.skills,
   },
 ]
 

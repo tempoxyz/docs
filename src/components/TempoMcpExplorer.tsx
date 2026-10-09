@@ -38,6 +38,7 @@ type FormState = {
 type McpEnvelope = {
   result?: {
     content?: Array<{ type: string; text?: string }>
+    isError?: boolean
     structuredContent?: {
       success?: boolean
       result?: unknown
@@ -70,17 +71,32 @@ const initialState: FormState = {
   maxChars: 1600,
 }
 
-function parseSseResponse(body: string) {
+/** Read a JSON-RPC message from a streamable HTTP response (SSE or plain JSON). */
+function parseMcpResponse(body: string, status: number) {
   const dataLines = body
     .split('\n')
     .map((line) => line.trim())
     .filter((line) => line.startsWith('data:'))
     .map((line) => line.slice(5).trim())
     .filter((line) => line && line !== '[DONE]')
+  const payload = dataLines.at(-1) ?? body.trim()
+  if (!payload) throw new Error(`MCP server returned an empty response (HTTP ${status}).`)
+  try {
+    return JSON.parse(payload) as McpEnvelope
+  } catch {
+    throw new Error(`MCP server returned an unexpected response (HTTP ${status}).`)
+  }
+}
 
-  const last = dataLines.at(-1)
-  if (!last) throw new Error('MCP server returned an empty response.')
-  return JSON.parse(last) as McpEnvelope
+function toolErrorMessage(result: NonNullable<McpEnvelope['result']>) {
+  const text = result.content?.find((item) => item.type === 'text')?.text ?? ''
+  try {
+    const parsed = JSON.parse(text) as { error?: unknown }
+    if (typeof parsed.error === 'string') return parsed.error
+  } catch {
+    // Fall back to the raw text.
+  }
+  return text || 'The MCP tool call failed.'
 }
 
 function buildArguments(state: FormState) {
@@ -106,7 +122,6 @@ function buildArguments(state: FormState) {
     source: DEFAULT_SOURCE,
     path: state.path || undefined,
     url: state.url || undefined,
-    query: state.query || undefined,
     max_chars: state.maxChars,
     response_format: 'structured',
   }
@@ -269,21 +284,25 @@ export function TempoMcpExplorer() {
     setResult(null)
 
     try {
-      const response = await fetch(MCP_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          'Content-Type': 'application/json',
-        },
-        body: preview,
-      })
-
-      const body = await response.text()
-      const envelope = parseSseResponse(body)
-
-      if (!response.ok || envelope.error) {
-        throw new Error(envelope.error?.message ?? response.statusText)
+      let response: Response
+      try {
+        response = await fetch(MCP_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            'Content-Type': 'application/json',
+          },
+          body: preview,
+        })
+      } catch {
+        throw new Error(`Could not reach the MCP server at ${MCP_ENDPOINT}. Try again.`)
       }
+
+      const envelope = parseMcpResponse(await response.text(), response.status)
+
+      if (envelope.error) throw new Error(envelope.error.message ?? 'MCP request failed.')
+      if (!response.ok) throw new Error(`MCP server returned HTTP ${response.status}.`)
+      if (envelope.result?.isError) throw new Error(toolErrorMessage(envelope.result))
 
       setResult(envelope.result?.structuredContent?.result ?? envelope.result ?? envelope)
     } catch (err) {
