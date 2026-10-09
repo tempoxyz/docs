@@ -20,7 +20,9 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.target == 'e2e' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     container: ${{ matrix.container }}
-    timeout-minutes: 15
+    # Vocs compiles five environments; the enforced Zyzz contract takes ~4–6
+    # minutes per environment on CI. Keep cheap checks on the existing budget.
+    timeout-minutes: ${{ matrix.target == 'check' && 15 || 35 }}
     permissions:
       contents: read
       id-token: write

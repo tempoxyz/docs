@@ -1,59 +1,7 @@
-import { defineConfig } from 'zyzz'
-import { design } from './contract'
 import { inherited } from './inherited'
-import { vars as tokens } from './theme'
+import { vars as tokens, variants } from './theme'
 
-// Shared control recipes sit below caller-owned layout recipes in the cascade.
-export const { style, variants } = defineConfig({
-  id: 'tempo-controls',
-  vars: design,
-  // Zyzz requires literal mappings; check:styles verifies these against contract.ts.
-  mappings: {
-    spacing: [
-      'gap',
-      'rowGap',
-      'columnGap',
-      'padding',
-      'paddingBlock',
-      'paddingInline',
-      'paddingTop',
-      'paddingBottom',
-      'paddingLeft',
-      'paddingRight',
-      'paddingBlockStart',
-      'paddingBlockEnd',
-      'paddingInlineStart',
-      'paddingInlineEnd',
-      'margin',
-      'marginBlock',
-      'marginInline',
-      'marginTop',
-      'marginBottom',
-      'marginLeft',
-      'marginRight',
-      'marginBlockStart',
-      'marginBlockEnd',
-      'marginInlineStart',
-      'marginInlineEnd',
-    ],
-    zIndex: ['zIndex'],
-  },
-  // Literal data is required by Zyzz; checked against layers.ts by check:styles.
-  layers: [
-    'reset',
-    'properties',
-    'vocs_theme',
-    'theme',
-    'base',
-    'vocs_base',
-    'vocs_components',
-    'components',
-    'vocs_utilities',
-    'utilities',
-  ],
-  defaultLayer: 'components',
-})
-
+// Shared controls use the component contract; caller layout recipes override them.
 export const button = variants({
   base: {
     position: 'relative',

@@ -5,9 +5,7 @@ import ts from 'typescript'
 const keyword =
   /^(?:0(?:px)?|auto|none|normal|inherit|initial|unset|revert(?:-layer)?|currentcolor|transparent)(?: !custom)?$/i
 const factories = new Set(
-  ['theme', 'recipes', 'controls', 'scoped', 'contract', 'palette'].map(
-    (name) => `src/styles/${name}.ts`,
-  ),
+  ['theme', 'recipes', 'scoped', 'contract', 'palette'].map((name) => `src/styles/${name}.ts`),
 )
 const vocabulary = new Set([
   'src/styles/contract.ts',
@@ -83,7 +81,7 @@ export function checkStylePolicy(source: string, file: string): string[] {
             tokenImports.add(item.name.text)
           if (
             ['style', 'variants'].includes(imported) &&
-            /^src\/styles\/(theme|recipes|controls|scoped)$/.test(target)
+            /^src\/styles\/(theme|recipes|scoped)$/.test(target)
           )
             helpers.set(item.name.text, 'configured')
           if (specifier === 'zyzz/web' && ['global', 'keyframes'].includes(imported))

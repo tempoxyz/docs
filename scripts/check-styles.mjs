@@ -116,7 +116,7 @@ function layerNames(file) {
   return JSON.stringify(result)
 }
 const cascade = layerNames('src/styles/layers.ts')
-for (const name of ['theme', 'recipes', 'controls', 'scoped', 'globals']) {
+for (const name of ['theme', 'recipes', 'scoped', 'globals']) {
   const file = `src/styles/${name}.ts`
   if (layerNames(file) !== cascade) failures.push(`${file}: CSS layers must match layers.ts`)
 }
@@ -154,7 +154,7 @@ function configPolicy(file) {
   return { mappings: JSON.stringify(mappings), vars }
 }
 const expectedPolicy = configPolicy('src/styles/contract.ts')
-for (const name of ['theme', 'recipes', 'controls', 'scoped']) {
+for (const name of ['theme', 'recipes', 'scoped']) {
   const file = `src/styles/${name}.ts`
   const policy = configPolicy(file)
   if (policy.vars !== 'design' || policy.mappings !== expectedPolicy.mappings) {

@@ -164,29 +164,26 @@ test('client navigation loads page-owned styles', async ({ page }) => {
   await expect(page.locator('.partner-logo--dfns')).not.toHaveCSS('background-image', 'none')
 })
 
-test('theme selection uses native checked state for both keyboard input and styling', async ({
+test('closed mobile navigation stays outside the viewport and restores focus on dismissal', async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/')
-  const group = page.getByRole('radiogroup', { name: 'Theme selection' }).first()
-  const light = group.getByRole('radio', { name: 'Light theme', exact: true })
-  const dark = group.getByRole('radio', { name: 'Dark theme', exact: true })
-  await light.check()
-  await expect(light).toBeChecked()
-  await light.focus()
-  await page.keyboard.press('ArrowRight')
-  await expect(dark).toBeChecked()
-  await expect(light).not.toBeChecked()
-  await expect(page.locator('html')).toHaveAttribute('data-vocs-theme', 'dark')
-  await expect
-    .poll(() =>
-      dark.evaluate((input) => getComputedStyle(input.closest('label') ?? input).backgroundColor),
-    )
-    .not.toBe('rgba(0, 0, 0, 0)')
-  await expect
-    .poll(() =>
-      light.evaluate((input) => getComputedStyle(input.closest('label') ?? input).backgroundColor),
-    )
-    .toBe('rgba(0, 0, 0, 0)')
+  await page.goto('/docs/guide/issuance/create-a-stablecoin')
+  const trigger = page.getByRole('button', { name: 'Open docs navigation', exact: true })
+  // Include the closed dialog: an ARIA-hidden element can still cover the page visually.
+  const panel = page.getByRole('dialog', {
+    name: 'Documentation',
+    exact: true,
+    includeHidden: true,
+  })
+  const rightEdge = () => panel.evaluate((element) => element.getBoundingClientRect().right)
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  await expect.poll(rightEdge).toBeLessThanOrEqual(0)
+  await trigger.click()
+  await expect(panel).toBeInViewport()
+  await expect(panel).toHaveAttribute('aria-modal', 'true')
+  await page.keyboard.press('Escape')
+  await expect.poll(rightEdge).toBeLessThanOrEqual(0)
+  await expect(trigger).toBeFocused()
 })

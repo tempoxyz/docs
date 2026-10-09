@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { variants } from '../../../styles/controls'
-import { vars as tokens } from '../../../styles/theme'
+import { vars as tokens, variants } from '../../../styles/theme'
 import ArrowUpRight from './ArrowUpRight'
 import * as ui from './Button.recipes'
 
