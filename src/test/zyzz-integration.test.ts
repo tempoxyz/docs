@@ -83,24 +83,32 @@ it('serves server-compiled CSS to the browser without compiling its owner in the
     expect(server.environments.client.moduleGraph.getModuleById(source)).toBeUndefined()
 
     // A browser stylesheet must also update when only its server owner changes.
-    await server.environments.client.transformRequest(cssIds[0])
+    await server.environments.client.transformRequest(`${cssIds[0]}?direct`)
     const send = vi.spyOn(server.environments.client.hot, 'send')
-    await writeFile(
-      source,
-      "import { style } from 'zyzz'; export const card = style({ color: 'blue' });",
-    )
-    await vi.waitFor(() => {
-      expect(
-        (send.mock.calls as unknown as [HMRPayload][]).some(
-          ([payload]) =>
-            typeof payload === 'object' &&
-            payload.type === 'update' &&
-            payload.updates.some((update) => update.path.includes('zyzz:')),
-        ),
-      ).toBe(true)
-    })
-    const updated = await server.environments.client.pluginContainer.load(cssIds[0])
-    expect(typeof updated === 'string' ? updated : updated?.code).toMatch(/color:\s*(?:blue|#00f)/)
+    for (const [color, pattern] of [
+      ['blue', /color:\s*(?:blue|#00f)/],
+      ['red', /color:\s*(?:red|#f00)/],
+    ] as const) {
+      send.mockClear()
+      await writeFile(
+        source,
+        `import { style } from 'zyzz'; export const card = style({ color: '${color}' });`,
+      )
+      await vi.waitFor(() => {
+        expect(
+          (send.mock.calls as unknown as [HMRPayload][]).some(
+            ([payload]) =>
+              typeof payload === 'object' &&
+              payload.type === 'update' &&
+              payload.updates.some(
+                (update) => update.type === 'css-update' && update.path.includes('zyzz:'),
+              ),
+          ),
+        ).toBe(true)
+      })
+      const updated = await server.environments.client.pluginContainer.load(cssIds[0])
+      expect(typeof updated === 'string' ? updated : updated?.code).toMatch(pattern)
+    }
   } finally {
     await server.close()
     await rm(root, { recursive: true, force: true })

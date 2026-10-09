@@ -32,7 +32,7 @@ patchedDependencies:
     hash: f6c7f9fac4060248becb3b14c637d6c1636b2a803e915ba3eb4fc10f6c2fd799
     path: patches/waku@1.0.0-beta.6.patch
   zyzz@0.0.27:
-    hash: e19b25be8391ad7f918022a1b4ceddf0c4c919fd5b999872f85d0f9e180e4039
+    hash: 504f2d92f3fb010fd4d83c293576b5fc8c2800db76a24ac46e1aea6d27493f29
     path: patches/zyzz@0.0.27.patch
 
 importers:
@@ -170,7 +170,7 @@ importers:
         version: 4.4.3
       zyzz:
         specifier: 0.0.27
-        version: 0.0.27(patch_hash=e19b25be8391ad7f918022a1b4ceddf0c4c919fd5b999872f85d0f9e180e4039)(@babel/core@7.29.7)(esbuild@0.28.1)(react@19.2.7)(rolldown@1.1.4)(rollup@4.60.1)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.104.1(esbuild@0.28.1))
+        version: 0.0.27(patch_hash=504f2d92f3fb010fd4d83c293576b5fc8c2800db76a24ac46e1aea6d27493f29)(@babel/core@7.29.7)(esbuild@0.28.1)(react@19.2.7)(rolldown@1.1.4)(rollup@4.60.1)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.104.1(esbuild@0.28.1))
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.5.1
@@ -12908,7 +12908,7 @@ snapshots:
 
   zwitch@2.0.4: {}
 
-  zyzz@0.0.27(patch_hash=e19b25be8391ad7f918022a1b4ceddf0c4c919fd5b999872f85d0f9e180e4039)(@babel/core@7.29.7)(esbuild@0.28.1)(react@19.2.7)(rolldown@1.1.4)(rollup@4.60.1)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.104.1(esbuild@0.28.1)):
+  zyzz@0.0.27(patch_hash=504f2d92f3fb010fd4d83c293576b5fc8c2800db76a24ac46e1aea6d27493f29)(@babel/core@7.29.7)(esbuild@0.28.1)(react@19.2.7)(rolldown@1.1.4)(rollup@4.60.1)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.104.1(esbuild@0.28.1)):
     dependencies:
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
