@@ -750,6 +750,7 @@ test('sandbox routes reveal their guides within the Zones sidebar', async ({ pag
     drawer.locator('a[href="/docs/guide/private-zones/deposit-to-a-zone"]'),
   ).toBeVisible()
   await drawer.locator('a[href="/docs/guide/private-zones/deposit-to-a-zone"]').click()
+  await expect(page).toHaveURL(/\/docs\/guide\/private-zones\/deposit-to-a-zone\/?$/)
   await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
   await expect(
     drawer.locator('a[href="/docs/guide/private-zones/withdraw-from-a-zone"]'),
