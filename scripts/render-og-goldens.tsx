@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
-import { createOgResponse } from '../src/pages/_api/api/og-response'
+import { createOgResponse } from '../src/lib/og-response'
 
 export const goldenCases = [
   { name: 'docs-home', title: 'Documentation', section: 'DEVELOPERS', subsection: '' },

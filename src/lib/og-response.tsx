@@ -1,6 +1,6 @@
 /** @jsxRuntime automatic */
 import { ImageResponse } from '@takumi-rs/image-response/wasm'
-import { OgImage } from './og-image'
+import { OgImage } from '../pages/_api/api/og-image'
 
 /** Production WASM response, also exercised by the golden-image pipeline. */
 export async function createOgResponse(
