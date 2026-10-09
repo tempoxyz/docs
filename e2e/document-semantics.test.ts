@@ -12,6 +12,17 @@ const publicRoutes = process.env.CI ? discoverPublicRoutes(publicOutputRoot) : [
 
 test.skip(!process.env.CI, 'requires the production build output')
 
+// This sweep checks rendered document metadata, not chain state. Keep background
+// demo queries from competing with the dedicated live-transaction tests.
+test.beforeEach(async ({ page }) => {
+  await page.route(/^https?:\/\/(rpc|sponsor)\.(moderato\.)?tempo\.xyz(?:\/|$)/, (route) =>
+    route.abort(),
+  )
+  await page.routeWebSocket(/^wss?:\/\/rpc\.(moderato\.)?tempo\.xyz(?:\/|$)/, (socket) =>
+    socket.close(),
+  )
+})
+
 for (const route of publicRoutes) {
   test(`single title and H1 for ${route}`, async ({ page, request }) => {
     const response = await request.get(route)
