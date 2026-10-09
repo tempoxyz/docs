@@ -6,8 +6,8 @@
   "packageManager": "pnpm@10.28.1",
   "scripts": {
     "dev": "node --env-file-if-exists=.env --import=tsx node_modules/vite/bin/vite.js",
-    "build": "node scripts/guard-vocs-config.mjs && pnpm run check:styles && pnpm run check:types && pnpm run build:site",
-    "build:site": "vite build && node --experimental-strip-types scripts/finalize-sitemap.ts",
+    "build": "node scripts/guard-vocs-config.mjs && pnpm run check:types && pnpm run build:site",
+    "build:site": "pnpm run check:styles && vite build && node --experimental-strip-types scripts/finalize-sitemap.ts",
     "check": "biome check --write --unsafe .",
     "check:anchors": "node --experimental-strip-types scripts/check-internal-anchors.ts",
     "check:markdown": "node scripts/check-markdown-components.mjs && tsx scripts/check-ai-docs.ts",

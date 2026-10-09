@@ -4,6 +4,10 @@ import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 're
 import { useRouter, Link as WakuLink } from 'waku'
 import { cx as composeStyles } from 'zyzz'
 import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
+import { normalizeDocsPath, resolveSidebarItems, type SidebarNode } from '../lib/docs-sidebar'
+
+export { normalizeDocsPath, resolveSidebarItems } from '../lib/docs-sidebar'
+
 import { DOCS_SEARCH_PARAM, docsSearchUrl } from '../lib/docs-search'
 import { publicAssetPath } from '../lib/public-asset-path'
 import { navActiveSquare } from '../styles/surfaces.styles'
@@ -45,21 +49,11 @@ import {
 } from './DocsSectionNav'
 
 const DOCS_BASE_PATH = '/docs'
-const DEVELOPERS_BASE_PATH = '/developers'
 const TEMPO_AI_GUIDE_URL = `${DOCS_BASE_PATH}/guide/using-tempo-with-ai`
 const TEMPO_PLUGIN_URL = `${TEMPO_AI_GUIDE_URL}#install-tempo-plugins`
 
 function isExternal(href: string) {
   return !href.startsWith('/') && !href.startsWith('#')
-}
-
-export function normalizeDocsPath(pathname: string) {
-  const path = pathname || '/'
-  if (path === DEVELOPERS_BASE_PATH) return '/'
-  if (path.startsWith(`${DEVELOPERS_BASE_PATH}/`)) {
-    return path.slice(DEVELOPERS_BASE_PATH.length) || '/'
-  }
-  return path
 }
 
 export function usePathname() {
@@ -507,34 +501,6 @@ function AgentsPanel({
       </div>
     </div>
   )
-}
-
-type SidebarNode = {
-  text?: string
-  link?: string
-  collapsed?: boolean
-  items?: SidebarNode[]
-}
-
-// The docs sidebar is configured in vocs.config.ts (keyed by path). Resolve the
-// entry that best matches the current path so the mobile menu mirrors the
-// desktop sidebar.
-export function resolveSidebarItems(sidebar: unknown, pathname: string): SidebarNode[] {
-  if (!sidebar) return []
-  if (Array.isArray(sidebar)) return sidebar as SidebarNode[]
-  if (typeof sidebar !== 'object') return []
-
-  const path = normalizeDocsPath(pathname)
-  const entries = sidebar as Record<string, SidebarNode[] | { items?: SidebarNode[] }>
-  let bestKey: string | null = null
-  for (const key of Object.keys(entries)) {
-    if (path === key || path.startsWith(key === '/' ? '/' : `${key}/`)) {
-      if (bestKey === null || key.length > bestKey.length) bestKey = key
-    }
-  }
-  const entry = entries[bestKey ?? '/get-started'] ?? entries['/docs'] ?? Object.values(entries)[0]
-  if (!entry) return []
-  return Array.isArray(entry) ? entry : (entry.items ?? [])
 }
 
 function sidebarLinkIsActive(pathname: string, link: string, activeAnchor: string | null) {
