@@ -18,7 +18,7 @@ concurrency:
 jobs:
   verify:
     name: ${{ matrix.name }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.target == 'e2e' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     container: ${{ matrix.container }}
     timeout-minutes: 15
     permissions:
