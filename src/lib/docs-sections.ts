@@ -10,7 +10,6 @@ export type DocsSection = {
     | 'api'
     | 'tools'
     | 'ecosystem'
-    | 'changelog'
   label: string
   href: string
   matches: string[]
@@ -34,6 +33,9 @@ export const docsSections: DocsSection[] = [
       '/docs/payments',
       '/docs/guide/payments',
       '/docs/guide/getting-funds',
+      '/docs/protocol/transactions/AccountKeychain',
+      '/docs/protocol/tip20/virtual-addresses',
+      '/docs/protocol/tip403/receive-policies',
     ],
   },
   { id: 'earn', label: 'Earn', href: '/docs/earn', matches: ['/docs/earn'] },
@@ -42,7 +44,7 @@ export const docsSections: DocsSection[] = [
     id: 'zones',
     label: 'Zones',
     href: '/docs/zones',
-    matches: ['/docs/zones', '/docs/guide/private-zones'],
+    matches: ['/docs/zones', '/docs/guide/private-zones', '/docs/protocol/zones'],
   },
   {
     id: 'machine-payments',
@@ -59,6 +61,7 @@ export const docsSections: DocsSection[] = [
       '/docs/development',
       '/docs/quickstart',
       '/docs/protocol',
+      '/docs/changelog',
       '/docs/guide/tempo-transaction',
       '/docs/guide/issuance',
       '/docs/guide/stablecoin-dex',
@@ -66,13 +69,6 @@ export const docsSections: DocsSection[] = [
     ],
   },
 ]
-
-export const changelogSection: DocsSection = {
-  id: 'changelog',
-  label: 'Changelog',
-  href: '/docs/protocol/upgrades',
-  matches: ['/docs/protocol/upgrades', '/docs/changelog', '/docs/guide/node/network-upgrades'],
-}
 
 export const docsUtilitySections: DocsSection[] = [
   {
@@ -103,7 +99,6 @@ export const docsUtilitySections: DocsSection[] = [
       '/docs/guide/bridge-relay',
     ],
   },
-  changelogSection,
 ]
 
 export function normalizeDocsSectionPath(path: string) {

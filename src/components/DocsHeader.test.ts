@@ -61,7 +61,7 @@ describe('getActiveDocsSection', () => {
   it('keeps section navigation active under the developers mount and trailing slashes', () => {
     expect(getActiveDocsSection('/developers/docs/api/transfers/')?.id).toBe('tools')
     expect(getActiveDocsSection('/developers/get-started/')?.id).toBe('overview')
-    expect(getActiveDocsSection('/developers/docs/protocol/upgrades/t12/')?.id).toBe('changelog')
+    expect(getActiveDocsSection('/developers/docs/protocol/upgrades/t12/')?.id).toBe('developers')
     expect(getActiveDocsSection('/developers/docs/protocol/')?.label).toBe('Tempo EVM')
   })
 
@@ -81,6 +81,9 @@ describe('getActiveDocsSection', () => {
     ['/docs/accounts/providers', 'accounts'],
     ['/docs/accounts/access-keys', 'accounts'],
     ['/docs/accounts/agents', 'accounts'],
+    ['/docs/protocol/transactions/AccountKeychain', 'accounts'],
+    ['/docs/protocol/tip20/virtual-addresses', 'accounts'],
+    ['/docs/protocol/tip403/receive-policies', 'accounts'],
     ['/docs/payments', 'accounts'],
     ['/docs/build', 'accounts'],
     ['/docs/guide/getting-funds', 'accounts'],
@@ -99,6 +102,13 @@ describe('getActiveDocsSection', () => {
     ['/docs/guide/bridge-bungee', 'ecosystem'],
     ['/docs/guide/bridge-relay', 'ecosystem'],
     ['/docs/zones', 'zones'],
+    ['/docs/protocol/zones', 'zones'],
+    ['/docs/protocol/zones/architecture', 'zones'],
+    ['/docs/protocol/zones/accounts', 'zones'],
+    ['/docs/protocol/zones/bridging', 'zones'],
+    ['/docs/protocol/zones/rpc', 'zones'],
+    ['/docs/protocol/zones/execution', 'zones'],
+    ['/docs/protocol/zones/proving', 'zones'],
     ['/docs/guide/private-zones/connect-to-a-zone', 'zones'],
     ['/docs/agents', 'machine-payments'],
     ['/docs/guide/machine-payments/agent', 'machine-payments'],
@@ -114,14 +124,25 @@ describe('getActiveDocsSection', () => {
     ['/docs/guide/issuance/create-a-stablecoin', 'developers'],
     ['/docs/guide/issuance/manage-stablecoin', 'developers'],
     ['/docs/guide/issuance/migrate-erc20-to-tip20', 'developers'],
+    ['/docs/protocol', 'developers'],
+    ['/docs/protocol/transactions', 'developers'],
+    ['/docs/protocol/transactions/spec-tempo-transaction', 'developers'],
+    ['/docs/protocol/transactions/eip-4337', 'developers'],
+    ['/docs/protocol/transactions/eip-7702', 'developers'],
+    ['/docs/protocol/fees/spec-fee', 'developers'],
+    ['/docs/protocol/fees/fee-amm', 'developers'],
     ['/docs/protocol/tip20/overview', 'developers'],
+    ['/docs/protocol/tip20/spec', 'developers'],
+    ['/docs/protocol/tip403/spec', 'developers'],
+    ['/docs/protocol/exchange/spec', 'developers'],
+    ['/docs/protocol/blockspace/payment-lane-specification', 'developers'],
     ['/docs/guide/node/installation', 'developers'],
-    ['/docs/protocol/upgrades', 'changelog'],
-    ['/docs/protocol/upgrades/t11', 'changelog'],
-    ['/docs/protocol/upgrades/t12', 'changelog'],
+    ['/docs/protocol/upgrades', 'developers'],
+    ['/docs/protocol/upgrades/t11', 'developers'],
+    ['/docs/protocol/upgrades/t12', 'developers'],
     ['/docs/guide/node/upgrade-cadence', 'developers'],
-    ['/docs/guide/node/network-upgrades', 'changelog'],
-    ['/docs/changelog', 'changelog'],
+    ['/docs/guide/node/network-upgrades', 'developers'],
+    ['/docs/changelog', 'developers'],
     ['/docs/api/indexer-api', 'tools'],
     ['/docs/protocol/rpc/eth_getBalance', 'developers'],
     ['/docs/sdk/typescript', 'tools'],

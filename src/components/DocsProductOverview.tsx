@@ -6,6 +6,7 @@ import machinePayments from '../../public/illustrations/docs/machine-payments.sv
 import payments from '../../public/illustrations/docs/payments.svg?raw'
 import partners from '../../public/illustrations/docs/partners.svg?raw'
 import routes from '../../public/illustrations/docs/routes.svg?raw'
+import tempoEvm from '../../public/illustrations/docs/tempo-evm.svg?raw'
 import zones from '../../public/illustrations/docs/zones.svg?raw'
 import './DocsProductOverview.css'
 
@@ -18,6 +19,7 @@ const illustrations = {
   zones,
   'machine-payments': machinePayments,
   partners,
+  'tempo-evm': tempoEvm,
 }
 
 /** A single page introduction, with authored text beside the product illustration. */

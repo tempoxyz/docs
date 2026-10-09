@@ -1,6 +1,6 @@
 # Documentation overview illustrations
 
-Editable sources for the seven top-level documentation illustrations. The supplied
+Editable sources for the top-level documentation illustrations. The supplied
 Tempo Interface, Linework, and Illustration Foundations packs define the visual
 language. Static images are used here; no motion dependencies are required.
 
@@ -20,7 +20,7 @@ JetBrains Mono site fonts. Assets contain no raster images or font binaries.
 
 - Interface: Accounts and Earn. One product state per illustration,
   one neutral panel with a transparent surround, one emphasis, no UI chrome or shadows.
-- Linework: Get Started, Routes, Zones, Machine Payments, and Partners. Thin neutral structure,
+- Linework: Get Started, Routes, Zones, Machine Payments, Tempo EVM, and Partners. Thin neutral structure,
   smoothed square marks, and one selected path; drawn on the page's white surface.
 - Get Started uses the Ledger rows variant of LNW-P2 at Standard scale and Medium
   density: evenly spaced records, one emphasized entry, no product values or status.

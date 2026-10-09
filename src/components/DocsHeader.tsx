@@ -8,6 +8,7 @@ import { publicAssetPath } from '../lib/public-asset-path'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 import { AgentSetupCommand } from './AgentSetupCommand'
 import {
+  DocsApiDropdown,
   DocsResourceLinks,
   docsSections,
   docsUtilitySections,
@@ -964,17 +965,26 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
           </nav>
           <div className="docs-header-mobile-resources">
             <p className="docs-header-mobile-label">Resources</p>
-            {docsUtilitySections.map((section) => (
-              <WakuLink
-                key={section.id}
-                to={section.href}
-                onClick={close}
-                className="docs-header-mobile-utility-link"
-                aria-current={activeSection?.id === section.id ? 'page' : undefined}
-              >
-                {section.label}
-              </WakuLink>
-            ))}
+            {docsUtilitySections.map((section) =>
+              section.id === 'tools' ? (
+                <DocsApiDropdown
+                  key={section.id}
+                  active={activeSection?.id === section.id}
+                  mobile
+                  onNavigate={close}
+                />
+              ) : (
+                <WakuLink
+                  key={section.id}
+                  to={section.href}
+                  onClick={close}
+                  className="docs-header-mobile-utility-link"
+                  aria-current={activeSection?.id === section.id ? 'page' : undefined}
+                >
+                  {section.label}
+                </WakuLink>
+              ),
+            )}
             <DocsResourceLinks onNavigate={close} />
           </div>
           <details className="docs-header-mobile-agents">

@@ -264,8 +264,36 @@ const partners = illustration(
   ]),
 )
 
+// An execution layer between incoming calls and recorded state. Abstract marks
+// avoid implying a particular validator topology, fee, or throughput guarantee.
+const tempoEvm = illustration(
+  'Tempo EVM execution',
+  'Transaction calls pass through Tempo EVM and become entries in the ledger.',
+  join([
+    group('Connections', join([132, 180, 228].map((y) => join([
+      fade(`evm-input-${y}`, 56, y, 112, y, ink.line, 'start'),
+      line(56, y, 112, y, `url(#evm-input-${y})`),
+      line(128, y, 180, y, y === 180 ? ink.black : ink.line),
+      line(316, y, 368, y, y === 180 ? ink.black : ink.line),
+      line(388, y, 440, y, ink.faint),
+    ])))),
+    group('Execution', join([
+      box(180, 100, 136, 160, 24, ink.white, ink.strong),
+      box(192, 112, 112, 136, 16, ink.white, ink.faint),
+      path('M232 154L218 168L232 182M264 154L278 168L264 182M253 148L243 188', ink.black, 1.5),
+      label(248, 220, 'Tempo EVM', { anchor: 'middle', fill: ink.black, size: 14 }),
+      ...[212, 248, 284].flatMap((x) => [line(x, 88, x, 100), line(x, 260, x, 272)]),
+    ])),
+    group('Calls and ledger entries', join([132, 180, 228].flatMap((y) => [
+      node(120, y, 12, y === 180 ? ink.black : ink.white, y === 180 ? ink.black : ink.strong),
+      node(378, y, 16, y === 180 ? ink.black : ink.white, y === 180 ? ink.black : ink.border),
+    ]))),
+  ]),
+)
+
 export const lineworkScenes = {
   'get-started': getStarted,
+  'tempo-evm': tempoEvm,
   routes,
   zones,
   'machine-payments': machinePayments,

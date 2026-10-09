@@ -19,13 +19,17 @@ import { DocsProductOverview } from '../../../components/DocsProductOverview'
 
 # Ecosystem
 
-Find assets, wallets, exchanges, and infrastructure for your Tempo application. Browse providers by category and follow their integration guides.
+Find the providers you need to build on Tempo: wallets for customer accounts, services for moving money, and infrastructure for running your application. Choose a category below for provider details and integration links.
 
-[Browse partner categories →](#partner-categories)
+[Browse providers →](#partner-categories)
 
 </DocsProductOverview>
 
 <span id="partner-categories" />
+
+## Move money
+
+Choose the assets your application accepts and the services that connect them to other networks, exchanges, or bank accounts.
 
 <Cards>
   <Card
@@ -33,12 +37,6 @@ Find assets, wallets, exchanges, and infrastructure for your Tempo application. 
     description="Explore stablecoins and issuers on Tempo, including OUSD and AllUnity."
     to="/docs/ecosystem/assets"
     icon="lucide:coins"
-  />
-  <Card
-    title="Wallets"
-    description="Find embedded wallets, custody, key management, and smart accounts."
-    to="/docs/ecosystem/wallets"
-    icon="lucide:wallet"
   />
   <Card
     title="Exchanges"
@@ -58,6 +56,32 @@ Find assets, wallets, exchanges, and infrastructure for your Tempo application. 
     to="/docs/ecosystem/orchestration"
     icon="lucide:banknote"
   />
+</Cards>
+
+## Build customer accounts
+
+Choose how customers hold funds and authorize payments. Start with wallet providers for embedded or custodial accounts, or smart accounts for programmable contract wallets.
+
+<Cards>
+  <Card
+    title="Wallets"
+    description="Find embedded wallets, custody, key management, and self-custodial wallets."
+    to="/docs/ecosystem/wallets"
+    icon="lucide:wallet"
+  />
+  <Card
+    title="Smart accounts"
+    description="Explore programmable wallets, multisignature accounts, and account abstraction providers."
+    to="/docs/ecosystem/smart-contract-libraries"
+    icon="lucide:key-round"
+  />
+</Cards>
+
+## Run and monitor your application
+
+Connect to the network, read its data, inspect transactions, and integrate the controls your application needs.
+
+<Cards>
   <Card
     title="Node providers"
     description="Connect through hosted RPC endpoints and managed node services."
@@ -71,8 +95,14 @@ Find assets, wallets, exchanges, and infrastructure for your Tempo application. 
     icon="lucide:chart-line"
   />
   <Card
+    title="Explorers and debugging"
+    description="Look up accounts and transactions, inspect execution traces, and investigate reverts."
+    to="/docs/ecosystem/block-explorers"
+    icon="lucide:search"
+  />
+  <Card
     title="Developer tools"
-    description="Inspect transfers, contracts, and transaction execution."
+    description="Find simulation tools and resources for building account integrations."
     to="/docs/ecosystem/developer-tools"
     icon="lucide:code-2"
   />
@@ -88,4 +118,13 @@ Find assets, wallets, exchanges, and infrastructure for your Tempo application. 
 
 Use [Accounts](/docs/accounts) for wallet connections, deposits, and payment controls. Follow [network configuration](/docs/quickstart/connection-details) when connecting an RPC provider, and [EVM compatibility](/docs/quickstart/evm-compatibility) when adapting an existing application.
 
-The [Tempo SDKs](/docs/sdk) and [Tempo API](/docs/api) provide implementation and reference documentation. For a provider introduction or a new integration, [contact the Tempo team](/docs/partners).
+For Tempo’s own clients, CLI, and API reference, use [APIs & SDKs](/docs/tools). Provider support can differ by network, asset, and Tempo transaction feature; check the provider’s integration guide for the capabilities your application uses.
+
+## Try a provider integration
+
+- [Fund an account with OUSD](/docs/guide/ousd): find token addresses and funding paths.
+- [Bridge with Bungee](/docs/guide/bridge-bungee): request a deposit quote, execute it, and track delivery.
+- [Bridge with Relay](/docs/guide/bridge-relay): discover supported tokens, request a quote, and track the transfer.
+- [Bridge with LayerZero](/docs/guide/bridge-layerzero): use Stargate pools or token-specific OFT adapters.
+
+For a provider introduction or a new integration, [contact the Tempo team](/docs/partners).

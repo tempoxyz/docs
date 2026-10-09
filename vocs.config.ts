@@ -1,4 +1,4 @@
-import { Changelog, type Config, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
+import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
 import { resolveBaseUrl } from './src/lib/base-url'
 import { rehypeCompactShikiStyles } from './src/lib/compact-shiki-styles'
 import {
@@ -12,8 +12,6 @@ import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 import { demoteMarkdownHeadings } from './src/lib/markdown-headings'
 import { plainMarkdownComponents } from './src/lib/markdown-output'
 import { loadTempoOpenApi } from './src/lib/tempo-openapi'
-
-type SidebarItem = Extract<Config['sidebar'], readonly unknown[]>[number]
 
 // Only set baseUrl in production — Vocs injects a <base> tag from this value,
 // which causes all links to resolve to the absolute URL on preview deployments.
@@ -400,6 +398,7 @@ export default defineConfig({
       {
         text: 'Integration guides',
         items: [
+          { text: 'Client setup', link: '/docs/accounts/examples' },
           { text: 'Integration walkthrough', link: '/docs/accounts/integration' },
           { text: 'Payment integration', link: '/docs/guide/payments' },
           { text: 'Browser payments', link: '/docs/guide/payments/send-a-payment/browser' },
@@ -424,6 +423,8 @@ export default defineConfig({
             text: 'Control incoming payments',
             link: '/docs/guide/payments/configure-receive-policies',
           },
+          { text: 'Deposit address reference', link: '/docs/protocol/tip20/virtual-addresses' },
+          { text: 'Receive policy reference', link: '/docs/protocol/tip403/receive-policies' },
         ],
       },
       {
@@ -433,14 +434,7 @@ export default defineConfig({
           { text: 'Access keys', link: '/docs/accounts/access-keys' },
           { text: 'Admin keys', link: '/docs/accounts/admin-keys' },
           { text: 'Agent access', link: '/docs/accounts/agents' },
-        ],
-      },
-      {
-        text: 'Code examples',
-        collapsed: true,
-        items: [
-          { text: 'Account examples', link: '/docs/accounts/examples' },
-          { text: 'Payment examples', link: '/docs/guide/payments/send-a-payment/examples' },
+          { text: 'Keychain specification', link: '/docs/protocol/transactions/AccountKeychain' },
         ],
       },
     ]
@@ -514,6 +508,19 @@ export default defineConfig({
           { text: 'Withdraw', link: '/docs/zones/withdraw' },
           { text: 'Client setup', link: '/docs/zones/examples' },
           { text: 'Testnet sandbox', link: '/docs/guide/private-zones' },
+        ],
+      },
+      {
+        text: 'Technical reference',
+        collapsed: true,
+        items: [
+          { text: 'How Zones work', link: '/docs/protocol/zones' },
+          { text: 'Architecture', link: '/docs/protocol/zones/architecture' },
+          { text: 'Accounts and privacy', link: '/docs/protocol/zones/accounts' },
+          { text: 'Bridging', link: '/docs/protocol/zones/bridging' },
+          { text: 'RPC reference', link: '/docs/protocol/zones/rpc' },
+          { text: 'Execution and gas', link: '/docs/protocol/zones/execution' },
+          { text: 'Proving and settlement', link: '/docs/protocol/zones/proving' },
         ],
       },
     ]
@@ -683,221 +690,6 @@ export default defineConfig({
         },
       ],
     }
-    const protocolSidebar = [
-      {
-        text: 'Specifications',
-        items: [
-          { text: 'Changelog', link: '/docs/protocol/upgrades' },
-          { text: 'Overview', link: '/docs/protocol' },
-          { text: 'Protocol changes', link: '/docs/protocol#how-protocol-changes-happen' },
-          {
-            text: 'Accounts and transactions',
-            collapsed: true,
-            items: [
-              {
-                text: 'Tempo Transactions',
-                collapsed: false,
-                items: [
-                  {
-                    text: 'Overview',
-                    link: '/docs/protocol/transactions',
-                  },
-                  {
-                    text: 'Specification',
-                    link: '/docs/protocol/transactions/spec-tempo-transaction',
-                  },
-                  {
-                    text: 'EIP-4337 comparison',
-                    link: '/docs/protocol/transactions/eip-4337',
-                  },
-                  {
-                    text: 'EIP-7702 comparison',
-                    link: '/docs/protocol/transactions/eip-7702',
-                  },
-                  {
-                    text: 'Account Keychain specification',
-                    link: '/docs/protocol/transactions/AccountKeychain',
-                  },
-                  {
-                    text: 'Rust implementation',
-                    link: 'https://github.com/tempoxyz/tempo/blob/main/crates/primitives/src/transaction/tempo_transaction.rs',
-                  },
-                ],
-              },
-              {
-                text: 'Fees',
-                collapsed: false,
-                items: [
-                  {
-                    text: 'Overview',
-                    link: '/docs/protocol/fees',
-                  },
-                  {
-                    text: 'Specification',
-                    link: '/docs/protocol/fees/spec-fee',
-                  },
-                  {
-                    text: 'Fee AMM',
-                    collapsed: false,
-                    items: [
-                      {
-                        text: 'Overview',
-                        link: '/docs/protocol/fees/fee-amm',
-                      },
-                      {
-                        text: 'Specification',
-                        link: '/docs/protocol/fees/spec-fee-amm',
-                      },
-                      {
-                        text: 'Rust implementation',
-                        link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip_fee_manager',
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            text: 'Tokens and policies',
-            collapsed: true,
-            items: [
-              {
-                text: 'TIP-20 Tokens',
-                collapsed: false,
-                items: [
-                  {
-                    text: 'Overview',
-                    link: '/docs/protocol/tip20/overview',
-                  },
-                  {
-                    text: 'Specification',
-                    link: '/docs/protocol/tip20/spec',
-                  },
-                  {
-                    text: 'Virtual addresses',
-                    link: '/docs/protocol/tip20/virtual-addresses',
-                  },
-                  {
-                    text: 'Rust implementation',
-                    link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip20',
-                  },
-                ],
-              },
-              {
-                text: 'Tempo Policies (TIP-403)',
-                collapsed: false,
-                items: [
-                  {
-                    text: 'Overview',
-                    link: '/docs/protocol/tip403/overview',
-                  },
-                  {
-                    text: 'Specification',
-                    link: '/docs/protocol/tip403/spec',
-                  },
-                  {
-                    text: 'Receive policies',
-                    link: '/docs/protocol/tip403/receive-policies',
-                  },
-                  {
-                    text: 'Rust implementation',
-                    link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/tip403_registry',
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            text: 'Exchange',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/docs/protocol/exchange',
-              },
-              {
-                text: 'Specification',
-                link: '/docs/protocol/exchange/spec',
-              },
-              {
-                text: 'Quote tokens',
-                link: '/docs/protocol/exchange/quote-tokens',
-              },
-              {
-                text: 'Executing swaps',
-                link: '/docs/protocol/exchange/executing-swaps',
-              },
-              {
-                text: 'Providing liquidity',
-                link: '/docs/protocol/exchange/providing-liquidity',
-              },
-              {
-                text: 'DEX balance',
-                link: '/docs/protocol/exchange/exchange-balance',
-              },
-              {
-                text: 'Rust implementation',
-                link: 'https://github.com/tempoxyz/tempo/tree/main/crates/precompiles/src/stablecoin_dex',
-              },
-            ],
-          },
-          {
-            text: 'Consensus and blockspace',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/docs/protocol/blockspace/overview',
-              },
-              {
-                text: 'Payment lane specification',
-                link: '/docs/protocol/blockspace/payment-lane-specification',
-              },
-              {
-                text: 'Consensus and finality',
-                link: '/docs/protocol/blockspace/consensus',
-              },
-            ],
-          },
-          {
-            text: 'Zones',
-            collapsed: true,
-            items: [
-              {
-                text: 'Overview',
-                link: '/docs/protocol/zones',
-              },
-              {
-                text: 'Architecture',
-                link: '/docs/protocol/zones/architecture',
-              },
-              {
-                text: 'Accounts',
-                link: '/docs/protocol/zones/accounts',
-              },
-              {
-                text: 'Bridging',
-                link: '/docs/protocol/zones/bridging',
-              },
-              {
-                text: 'RPC',
-                link: '/docs/protocol/zones/rpc',
-              },
-              {
-                text: 'Execution and gas',
-                link: '/docs/protocol/zones/execution',
-              },
-              {
-                text: 'Proving',
-                link: '/docs/protocol/zones/proving',
-              },
-            ],
-          },
-          { text: 'TIPs', link: 'https://tips.sh/' },
-        ],
-      },
-    ]
     const changelogSidebar = [
       { text: '← Back to Tempo EVM', link: '/docs/development' },
       {
@@ -1103,8 +895,8 @@ export default defineConfig({
       },
     ]
 
-    // One stable tree for every Developers page. Group controls only disclose
-    // pages; Vocs opens the active page's ancestors without replacing the tree.
+    // Keep guides and specifications in one chapter per topic. Group controls
+    // disclose pages; Vocs opens the active chapter without replacing the tree.
     const developersSidebar = [
       {
         text: 'Tempo EVM',
@@ -1119,14 +911,34 @@ export default defineConfig({
             ],
           },
           {
-            text: 'Transactions and fees',
+            text: 'Transactions',
             collapsed: true,
             items: [
               { text: 'Send a transaction', link: '/docs/network/transactions' },
               { text: 'Transaction features', link: '/docs/guide/tempo-transaction' },
-              { text: 'Fees', link: '/docs/network/fees' },
-              { text: 'Fee liquidity', link: '/docs/guide/stablecoin-dex/managing-fee-liquidity' },
               { text: 'Client setup', link: '/docs/network/examples' },
+              { text: 'How transactions work', link: '/docs/protocol/transactions' },
+              {
+                text: 'Transaction specification',
+                link: '/docs/protocol/transactions/spec-tempo-transaction',
+              },
+              { text: 'EIP-4337 comparison', link: '/docs/protocol/transactions/eip-4337' },
+              { text: 'EIP-7702 comparison', link: '/docs/protocol/transactions/eip-7702' },
+            ],
+          },
+          {
+            text: 'Fees',
+            collapsed: true,
+            items: [
+              { text: 'Pay fees', link: '/docs/network/fees' },
+              {
+                text: 'Provide fee liquidity',
+                link: '/docs/guide/stablecoin-dex/managing-fee-liquidity',
+              },
+              { text: 'How fees work', link: '/docs/protocol/fees' },
+              { text: 'Fee specification', link: '/docs/protocol/fees/spec-fee' },
+              { text: 'Fee AMM', link: '/docs/protocol/fees/fee-amm' },
+              { text: 'Fee AMM specification', link: '/docs/protocol/fees/spec-fee-amm' },
             ],
           },
           {
@@ -1140,6 +952,10 @@ export default defineConfig({
               { text: 'Migrate from ERC-20', link: '/docs/guide/issuance/migrate-erc20-to-tip20' },
               { text: 'Use for fees', link: '/docs/guide/issuance/use-for-fees' },
               { text: 'Issuance guide', link: '/docs/guide/issuance' },
+              { text: 'Token behavior', link: '/docs/protocol/tip20/overview' },
+              { text: 'TIP-20 Specification', link: '/docs/protocol/tip20/spec' },
+              { text: 'Transfer policies', link: '/docs/protocol/tip403/overview' },
+              { text: 'TIP-403 specification', link: '/docs/protocol/tip403/spec' },
             ],
           },
           {
@@ -1158,6 +974,12 @@ export default defineConfig({
               { text: 'Introduction', link: '/docs/guide/stablecoin-dex' },
               { text: 'Swap walkthrough', link: '/docs/guide/stablecoin-dex/executing-swaps' },
               { text: 'Provide liquidity', link: '/docs/guide/stablecoin-dex/providing-liquidity' },
+              { text: 'How the exchange works', link: '/docs/protocol/exchange' },
+              { text: 'Quote tokens', link: '/docs/protocol/exchange/quote-tokens' },
+              { text: 'Swap reference', link: '/docs/protocol/exchange/executing-swaps' },
+              { text: 'Order reference', link: '/docs/protocol/exchange/providing-liquidity' },
+              { text: 'DEX balances', link: '/docs/protocol/exchange/exchange-balance' },
+              { text: 'Exchange specification', link: '/docs/protocol/exchange/spec' },
             ],
           },
           {
@@ -1169,6 +991,13 @@ export default defineConfig({
               { text: 'EVM differences', link: '/docs/quickstart/evm-compatibility' },
               { text: 'Integrate an existing app', link: '/docs/quickstart/integrate-tempo' },
               { text: 'JSON-RPC reference', link: '/docs/protocol/rpc' },
+              { text: 'Blockspace', link: '/docs/protocol/blockspace/overview' },
+              {
+                text: 'Payment lanes',
+                link: '/docs/protocol/blockspace/payment-lane-specification',
+              },
+              { text: 'Consensus and finality', link: '/docs/protocol/blockspace/consensus' },
+              { text: 'TIPs', link: 'https://tips.sh/' },
             ],
           },
           {
@@ -1180,22 +1009,8 @@ export default defineConfig({
               ...(item.items ? { collapsed: true } : {}),
             })),
           },
-          {
-            text: 'Protocol',
-            collapsed: true,
-            items: protocolSidebar[0].items
-              .filter((item) => item.text !== 'Changelog' && item.text !== 'Protocol changes')
-              .flatMap<SidebarItem>((item) =>
-                item.text === 'Accounts and transactions' || item.text === 'Tokens and policies'
-                  ? (item.items ?? [])
-                  : [item],
-              )
-              .map((item) => ({
-                ...item,
-                ...(item.text === 'Overview' ? { text: 'Introduction' } : {}),
-                ...(item.items ? { collapsed: true } : {}),
-              })),
-          },
+          { text: 'All specifications', link: '/docs/protocol' },
+          { ...changelogSidebar[1], collapsed: true },
         ],
       },
     ]
@@ -1225,7 +1040,6 @@ export default defineConfig({
       api: [{ text: 'API reference', items: [{ text: 'Introduction', link: '/docs/api' }] }],
       tools: toolsSidebar,
       ecosystem: partnerResourcesSidebar,
-      changelog: changelogSidebar,
     }
 
     return {

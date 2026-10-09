@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useRouter } from 'waku'
 import ArrowUpRightIcon from '~icons/lucide/arrow-up-right'
+import ChevronDownIcon from '~icons/lucide/chevron-down'
 
 import { docsSections, docsUtilitySections, getActiveDocsSection } from '../lib/docs-sections'
 import { MercatorLogo, MppLogo, TempoMark } from './ToolLogos'
@@ -36,6 +37,90 @@ export function DocsResourceLinks({ onNavigate }: { onNavigate?: () => void }) {
         </a>
       ))}
     </nav>
+  )
+}
+
+export function DocsApiDropdown({
+  active,
+  mobile = false,
+  onNavigate,
+}: {
+  active: boolean
+  mobile?: boolean
+  onNavigate?: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const panelId = useId()
+  const { path } = useRouter()
+
+  useEffect(() => {
+    setOpen(false)
+  }, [path])
+  useEffect(() => {
+    if (!open) return
+    const dismiss = (event: PointerEvent) => {
+      if (!ref.current?.contains(event.target as Node)) setOpen(false)
+    }
+    document.addEventListener('pointerdown', dismiss)
+    return () => document.removeEventListener('pointerdown', dismiss)
+  }, [open])
+
+  return (
+    // biome-ignore lint/a11y/useSemanticElements: This groups a navigation disclosure, not form controls.
+    <div
+      ref={ref}
+      role="group"
+      className={mobile ? 'docs-reference-menu docs-api-menu-mobile' : 'docs-reference-menu'}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false)
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape' && open) {
+          event.preventDefault()
+          event.stopPropagation()
+          setOpen(false)
+          buttonRef.current?.focus()
+        }
+      }}
+    >
+      <button
+        ref={buttonRef}
+        type="button"
+        className="docs-reference-trigger"
+        aria-expanded={open}
+        aria-controls={panelId}
+        aria-current={active ? 'page' : undefined}
+        onClick={() => setOpen(!open)}
+      >
+        APIs & SDKs <ChevronDownIcon aria-hidden="true" width="14" height="14" />
+      </button>
+      <nav
+        id={panelId}
+        aria-label="APIs & SDKs"
+        hidden={!open}
+        className="docs-reference-panel docs-resource-links"
+      >
+        {[
+          { label: 'Overview', href: '/docs/tools' },
+          { label: 'API reference', href: '/docs/api' },
+          { label: 'SDKs', href: '/docs/tools#sdks' },
+          { label: 'CLI', href: '/docs/cli' },
+        ].map((item) => (
+          <Link
+            key={item.href}
+            to={item.href}
+            onClick={() => {
+              setOpen(false)
+              onNavigate?.()
+            }}
+          >
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+    </div>
   )
 }
 
@@ -77,18 +162,22 @@ export default function DocsSectionNav() {
         </ul>
       </nav>
       <div className="docs-section-utilities">
-        {docsUtilitySections.map((section) => (
-          <Link
-            key={section.id}
-            to={section.href}
-            className="docs-section-utility-link"
-            aria-current={activeSection?.id === section.id ? 'page' : undefined}
-            unstable_prefetchOnEnter
-            unstable_prefetchOnView
-          >
-            {section.label}
-          </Link>
-        ))}
+        {docsUtilitySections.map((section) =>
+          section.id === 'tools' ? (
+            <DocsApiDropdown key={section.id} active={activeSection?.id === section.id} />
+          ) : (
+            <Link
+              key={section.id}
+              to={section.href}
+              className="docs-section-utility-link"
+              aria-current={activeSection?.id === section.id ? 'page' : undefined}
+              unstable_prefetchOnEnter
+              unstable_prefetchOnView
+            >
+              {section.label}
+            </Link>
+          ),
+        )}
       </div>
     </div>
   )

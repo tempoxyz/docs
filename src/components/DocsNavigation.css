@@ -532,3 +532,29 @@
   color: inherit;
   font: inherit;
 }
+
+.docs-reference-panel[hidden] {
+  display: none;
+}
+.docs-reference-panel {
+  z-index: 50;
+}
+.docs-reference-trigger {
+  background: none;
+  border: 0;
+}
+.docs-api-menu-mobile .docs-reference-trigger {
+  height: auto;
+  padding: 12px 0;
+  font-size: 16px;
+}
+.docs-api-menu-mobile .docs-reference-panel {
+  position: static;
+  width: 100%;
+  box-shadow: none;
+  margin-bottom: 8px;
+}
+.docs-reference-panel a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
