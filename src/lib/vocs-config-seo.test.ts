@@ -70,6 +70,7 @@ describe('vocs.config docs SEO controls', () => {
       meta: { articleModifiedTime: false },
     })
     expect(head('/blog/stablecoins-as-a-platform', {})).toEqual({
+      base: false,
       meta: { ogType: 'article' },
     })
   })
