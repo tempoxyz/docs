@@ -135,13 +135,14 @@ describe('docs structured data', () => {
     )
   })
 
-  test('leaves non-docs routes unchanged', () => {
-    expect(docsStructuredDataHead('/blog', {})).toBeUndefined()
-    expect(docsStructuredDataHead('/get-started-extra', {})).toBeUndefined()
+  test('omits the base tag on non-docs routes too', () => {
+    expect(docsStructuredDataHead('/blog', {})).toEqual({ base: false, meta: {} })
+    expect(docsStructuredDataHead('/get-started-extra', {})).toEqual({ base: false, meta: {} })
   })
 
   test('does not emit JSON-LD outside the page frontmatter context', () => {
     expect(docsStructuredDataHead('/docs/api/activities', {})).toEqual({
+      base: false,
       meta: { articleModifiedTime: false },
     })
   })

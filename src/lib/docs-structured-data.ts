@@ -9,6 +9,7 @@ type DocsStructuredDataContext = {
 }
 
 type DocsHeadTags = {
+  base: false
   canonical?: string
   meta: {
     ogType?: 'article'
@@ -33,6 +34,7 @@ export function docsStructuredDataHead(
   // with Vocs' default website tag during streamed prerendering.
   if (pagePath.startsWith('/blog/')) {
     return {
+      base: false,
       meta: {
         ogType: 'article' as const,
         ...(frontmatter?.ogImage ? { ogImage: frontmatter.ogImage } : {}),
@@ -45,7 +47,7 @@ export function docsStructuredDataHead(
     !pagePath.startsWith('/get-started/') &&
     !pagePath.startsWith('/docs/')
   ) {
-    return undefined
+    return { base: false, meta: {} }
   }
 
   const developersUrl = 'https://tempo.xyz/developers'
@@ -53,7 +55,7 @@ export function docsStructuredDataHead(
   // URLs used by the docs graph instead of Vocs' default baseUrl + "/".
   const canonical = pagePath === '/' ? { canonical: developersUrl } : {}
   const title = frontmatter?.title?.trim()
-  if (!title) return { ...canonical, meta: { articleModifiedTime: false as const } }
+  if (!title) return { base: false, ...canonical, meta: { articleModifiedTime: false as const } }
 
   const docsUrl = developersUrl
   const organizationId = 'https://tempo.xyz/#organization'
@@ -149,6 +151,7 @@ export function docsStructuredDataHead(
     .replace(/&/g, '\\u0026')
 
   return {
+    base: false,
     ...canonical,
     meta: { articleModifiedTime: false as const },
     script: [{ type: 'application/ld+json', innerHTML }],

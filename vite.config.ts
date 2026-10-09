@@ -76,13 +76,13 @@ function developersProxyBasePath(): Plugin {
     configEnvironment(name) {
       if (process.env.VERCEL_ENV !== 'production') return
       // tempo.xyz strips /developers before requests reach Waku.
-      // Production SSR targets that canonical mount; clients on other hosts stay unprefixed.
+      // Vercel serves at root. Only the browser on tempo.xyz uses the external mount.
       return {
         define: {
           'import.meta.env.WAKU_CONFIG_BASE_PATH':
             name === 'client'
               ? "(window.location.hostname === 'tempo.xyz' ? '/developers/' : '/')"
-              : JSON.stringify('/developers/'),
+              : JSON.stringify('/'),
         },
       }
     },
@@ -123,8 +123,6 @@ function llmsAgentPreamble(): Plugin {
                 path.join(directory, 'llms.txt'),
                 path.join(directory, 'llms-full.txt'),
                 ...(await markdownFiles(path.join(directory, 'assets/md'))),
-                ...(await filesWithExtension(directory, '.html')),
-                ...(await filesWithExtension(path.join(directory, 'RSC'), '.txt')),
               ]),
             )
           ).flat()
@@ -147,24 +145,6 @@ async function markdownFiles(directory: string): Promise<string[]> {
         const entryPath = path.join(directory, entry.name)
         if (entry.isDirectory()) return markdownFiles(entryPath)
         if (entry.isFile() && entry.name.endsWith('.md')) return [entryPath]
-        return []
-      }),
-    )
-    return files.flat()
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []
-    throw error
-  }
-}
-
-async function filesWithExtension(directory: string, extension: string): Promise<string[]> {
-  try {
-    const entries = await fs.readdir(directory, { withFileTypes: true })
-    const files = await Promise.all(
-      entries.map(async (entry) => {
-        const entryPath = path.join(directory, entry.name)
-        if (entry.isDirectory()) return filesWithExtension(entryPath, extension)
-        if (entry.isFile() && entry.name.endsWith(extension)) return [entryPath]
         return []
       }),
     )

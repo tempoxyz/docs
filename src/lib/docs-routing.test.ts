@@ -114,19 +114,17 @@ describe('docs routing redirects', () => {
     })
   })
 
-  it('keeps proxied route destinations inside the public mount in production', () => {
-    expect(docsRouteDestination('/', 'production')).toBe(canonicalDevelopersOrigin)
+  it('keeps Vercel redirects root-relative in production and preview', () => {
+    expect(docsRouteDestination('/', 'production')).toBe('/')
     expect(docsRouteDestination('/', 'preview')).toBe('/')
-    expect(docsRouteDestination('/docs/api', 'production')).toBe(
-      `${canonicalDevelopersOrigin}/docs/api`,
-    )
+    expect(docsRouteDestination('/docs/api', 'production')).toBe('/docs/api')
     expect(docsRouteDestination('/docs/api', 'preview')).toBe('/docs/api')
     expect(docsRouteDestination('https://tempo.xyz/learn/stablecoin-payroll/', 'production')).toBe(
       'https://tempo.xyz/learn/stablecoin-payroll/',
     )
   })
 
-  it('keeps every retired documentation redirect inside the production mount', async () => {
+  it('keeps retired documentation redirects on the deployment host', async () => {
     vi.stubEnv('VERCEL_ENV', 'production')
     vi.resetModules()
     try {
@@ -137,21 +135,19 @@ describe('docs routing redirects', () => {
       expect(productionRedirects).toHaveLength(vocsRedirects.length)
       for (const redirect of productionRedirects) {
         expect(redirect.status, redirect.source).toBe(301)
-        expect(URL.canParse(redirect.destination), redirect.source).toBe(true)
-        const target = new URL(redirect.destination)
-        if (target.origin === 'https://tempo.xyz' && !target.pathname.startsWith('/learn/')) {
-          expect(target.pathname, redirect.source).toMatch(/^\/developers(?:\/|$)/)
-          expect(target.pathname, redirect.source).not.toContain('/developers/developers')
+        if (!URL.canParse(redirect.destination)) {
+          expect(redirect.destination).toMatch(/^\//)
+          expect(redirect.destination).not.toMatch(/^\/developers(?:\/|$)/)
         }
       }
       expect(productionRedirects).toContainEqual({
         source: '/docs/guide',
-        destination: `${canonicalDevelopersOrigin}/docs/quickstart/integrate-tempo`,
+        destination: '/docs/quickstart/integrate-tempo',
         status: 301,
       })
       expect(productionRedirects).toContainEqual({
         source: '/docs/protocol/tip20-rewards',
-        destination: `${canonicalDevelopersOrigin}/docs/protocol/upgrades/t7#deprecate-tip-20-rewards`,
+        destination: '/docs/protocol/upgrades/t7#deprecate-tip-20-rewards',
         status: 301,
       })
     } finally {

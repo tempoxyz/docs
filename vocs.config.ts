@@ -14,8 +14,8 @@ import { demoteMarkdownHeadings } from './src/lib/markdown-headings'
 import { plainMarkdownComponents } from './src/lib/markdown-output'
 import { loadTempoOpenApi } from './src/lib/tempo-openapi'
 
-// Only set baseUrl in production — Vocs injects a <base> tag from this value,
-// which causes all links to resolve to the absolute URL on preview deployments.
+// Keep the canonical origin for metadata and exported docs. The head config
+// omits <base> so navigation stays on the host serving the page.
 const baseUrl = resolveBaseUrl()
 const openApiSpecUrl = process.env.OPENAPI_SPEC_URL ?? 'https://api.tempo.xyz/openapi.json'
 
@@ -1241,8 +1241,7 @@ export default defineConfig({
     },
   ].map((redirect) => ({
     ...redirect,
-    // Every entry is a retired documentation URL. Vocs returns Location
-    // verbatim, so the production destination must include the proxy mount.
+    // Vercel serves these redirects at root; the public site owns its proxy mount.
     destination: docsRouteDestination(redirect.destination),
     status: 301 as const,
   })),

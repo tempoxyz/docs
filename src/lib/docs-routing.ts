@@ -15,10 +15,7 @@ export const developerSurfaceRedirects = [
   { source: '/performance', destination: '/docs/protocol/blockspace/overview' },
 ] as const satisfies readonly DocsRouteContract[]
 
-export function docsRouteDestination(destination: string, environment = process.env.VERCEL_ENV) {
-  if (URL.canParse(destination)) return destination
-  if (environment === 'production')
-    return `${canonicalDevelopersOrigin}${destination === '/' ? '' : destination}`
+export function docsRouteDestination(destination: string, _environment = process.env.VERCEL_ENV) {
   return destination
 }
 

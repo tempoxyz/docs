@@ -50,8 +50,16 @@ const outputArtifacts = await Promise.all(
 
 const candidateGroups = outputArtifacts.flatMap(
   ({ htmlFiles, rscFiles, markdownFiles, llmsFiles }) => [
-    { files: htmlFiles, patterns: [attributeLink, serializedHref] },
-    { files: rscFiles, patterns: [attributeLink, serializedHref] },
+    {
+      files: [...htmlFiles, ...rscFiles],
+      patterns: [
+        {
+          label: 'absolute browser navigation',
+          pattern: /(?:<a\b[^>]*href=|\\?"href\\?":)\\?"https:\/\/tempo\.xyz\/developers/g,
+        },
+        { label: 'absolute base URL', pattern: /<base\b[^>]*https:\/\/tempo\.xyz/g },
+      ],
+    },
     {
       files: [...markdownFiles, ...llmsFiles],
       patterns: [attributeLink, serializedHref, markdownLink, markdownReference],
@@ -77,7 +85,8 @@ for (const { label, directory, htmlFiles, rscFiles, markdownFiles } of outputArt
   ]) {
     const file = path.join(directory, relativePath)
     const content = await readFile(file, 'utf8')
-    if (!content.includes(canonicalApiPrefix)) {
+    const expectedPrefix = relativePath.endsWith('.md') ? canonicalApiPrefix : '/docs/api/'
+    if (!content.includes(expectedPrefix)) {
       failures.push(
         `${path.relative(process.cwd(), file)} does not contain canonical Tempo API links`,
       )
