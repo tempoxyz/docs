@@ -8,6 +8,9 @@ on:
 
 permissions: {}
 
+env:
+  NODE_USE_SYSTEM_CA: 1
+
 concurrency:
   group: verify-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
