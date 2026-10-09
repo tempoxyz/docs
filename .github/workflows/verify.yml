@@ -65,7 +65,7 @@ jobs:
           echo "OPENAPI_SPEC_URL=$RUNNER_TEMP/openapi.json" >> "$GITHUB_ENV"
 
       - name: Test
-        run: pnpm run test
+        run: pnpm run test --bail=1
 
   # Keep the required Sitemap status and validate all generated production output.
   sitemap:
@@ -106,6 +106,18 @@ jobs:
         run: |
           node --experimental-strip-types scripts/fetch-openapi.ts "$RUNNER_TEMP/openapi.json"
           echo "OPENAPI_SPEC_URL=$RUNNER_TEMP/openapi.json" >> "$GITHUB_ENV"
+
+      # Vocs keys snippets by content; also invalidate when their type environment changes.
+      # Graphite checks its own 24-hour TTL and route coverage before using cached links.
+      - name: Cache documentation build inputs
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: |
+            node_modules/.cache/vocs/twoslash
+            node_modules/.cache/graphite-related-docs.json
+          key: docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}
+          restore-keys: |
+            docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-
 
       - name: Build
         run: pnpm run build
@@ -175,6 +187,18 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # Vocs keys snippets by content; also invalidate when their type environment changes.
+      # Graphite checks its own 24-hour TTL and route coverage before using cached links.
+      - name: Cache documentation build inputs
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: |
+            node_modules/.cache/vocs/twoslash
+            node_modules/.cache/graphite-related-docs.json
+          key: docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}
+          restore-keys: |
+            docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-
 
       - name: Build app for E2E
         run: pnpm run build
