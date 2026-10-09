@@ -114,7 +114,8 @@ function TransferResult({ label, state }: { label: string; state: TransferState 
         <div {...ui.transferResultLayout3()}>
           {transaction ? (
             <>
-              <span>Nonce Key: {transaction.nonceKey}</span>
+              {/* Only Tempo transactions carry a nonce key. */}
+              {'nonceKey' in transaction && <span>Nonce Key: {transaction.nonceKey}</span>}
               <span>Nonce: {transaction.nonce}</span>
             </>
           ) : (

@@ -12,6 +12,7 @@ import { docsStructuredDataHead } from './src/lib/docs-structured-data'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 import { demoteMarkdownHeadings } from './src/lib/markdown-headings'
 import { plainMarkdownComponents } from './src/lib/markdown-output'
+import { annotateRoutesAvailability } from './src/lib/routes-openapi'
 import { loadTempoOpenApi } from './src/lib/tempo-openapi'
 
 // Keep the canonical origin for metadata and exported docs. The head config
@@ -287,7 +288,7 @@ export default defineConfig({
   openapi: [
     {
       path: '/docs/api',
-      spec: () => loadTempoOpenApi(openApiSpecUrl),
+      spec: async () => annotateRoutesAvailability(await loadTempoOpenApi(openApiSpecUrl)),
       sidebar: {
         backLink: false,
         collapsed: true,
@@ -503,6 +504,7 @@ export default defineConfig({
       {
         text: 'Integration guides',
         items: [
+          { text: 'Test a route', link: '/docs/routes/test' },
           { text: 'API setup', link: '/docs/routes/api-setup' },
           { text: 'Deposit address example', link: '/docs/routes/examples/deposits' },
           { text: 'Transfer example', link: '/docs/routes/examples/transfers' },

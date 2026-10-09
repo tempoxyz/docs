@@ -96,6 +96,8 @@ for (const guide of guides) {
     const client = page.getByRole('dialog', { name: 'API Client', exact: true })
     await expect(client).toBeVisible()
     await expect(client.locator(`[aria-label="Request: ${guide.operation}"]`)).toBeVisible()
+    // Count only the playground's request; the page may read the same API on load.
+    requests.length = 0
     await client.getByRole('button', { name: /^Send Request/ }).click()
 
     // A unique cursor from the mocked response distinguishes the actual result

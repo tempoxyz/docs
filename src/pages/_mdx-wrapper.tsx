@@ -25,6 +25,9 @@
  * - `mipd` enables Multi Injected Provider Discovery (auto-detects browser
  *   extension wallets like MetaMask). Implies `interactive`. Only needed on
  *   pages where users connect external wallets.
+ * - `accessKey: false` connects Tempo Wallet without the guides' bounded access key: signing
+ *   in only shares the address, and the wallet approves each transaction. Use it on pages that
+ *   move real funds.
  */
 
 import { lazy, type ReactNode, Suspense } from 'react'
@@ -50,7 +53,12 @@ export default function MDXWrapper({ children }: { children: ReactNode }) {
     <Layout>
       {needsProviders ? (
         <Suspense fallback={null}>
-          <Providers mipd={frontmatter?.mipd as boolean | undefined}>{content}</Providers>
+          <Providers
+            mipd={frontmatter?.mipd as boolean | undefined}
+            accessKey={frontmatter?.accessKey !== false}
+          >
+            {content}
+          </Providers>
         </Suspense>
       ) : (
         content

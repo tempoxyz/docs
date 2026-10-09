@@ -30,6 +30,7 @@
   "dependencies": {
     "@iconify-json/lucide": "^1.2.114",
     "@iconify-json/simple-icons": "^1.2.87",
+    "@iconify-json/token-branded": "^1.2.46",
     "@monaco-editor/react": "^4.7.0",
     "@shikijs/rehype": "^4.3.0",
     "@takumi-rs/image-response": "0.62.8",

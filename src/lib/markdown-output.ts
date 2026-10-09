@@ -84,6 +84,14 @@ const interactiveDescriptions: Record<string, string> = {
     'In the interactive web page, create a passkey account or reconnect an existing passkey, inspect and copy its address, and disconnect. Creating the account does not move or fund stablecoins.',
   AdminKeyDemo:
     'In the interactive web page, create or connect a testnet passkey account, authorize an admin key, inspect its onchain status, and revoke it.',
+  SupportedRoutesTable:
+    'The interactive page lists every route in the live directory, read from GET https://api.tempo.xyz/v1/routes, ' +
+    "with each route's source and destination asset, funding methods, and whether fee coverage (1:1 delivery) is available.",
+  RoutesTester:
+    'Open the interactive Routes API demo at /docs/routes/test. Choose source and destination assets, ' +
+    'optionally request subsidized 1:1 delivery, get a quote, create the transfer or deposit address, ' +
+    'sign with Tempo Wallet (Tempo sources) or a browser wallet, and track delivery. ' +
+    'The demo sends API requests directly to api.tempo.xyz; API keys stay in tab memory.',
   ConnectWallet: 'Connect a wallet in the interactive web page.',
   T7BenchmarkVisual: 'The benchmark values are listed in the table below.',
   TempoMcpExplorer: 'Use the interactive web page to try the Tempo MCP server.',

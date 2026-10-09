@@ -1,7 +1,18 @@
 import { QueryClient } from '@tanstack/react-query'
 import { tempoWallet, webAuthn } from '@wagmi/core/tempo'
 import * as React from 'react'
-import { tempo, tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
+import {
+  base,
+  bsc,
+  hyperEvm,
+  mainnet,
+  monad,
+  polygon,
+  tempo,
+  tempoDevnet,
+  tempoLocalnet,
+  tempoModerato,
+} from 'viem/chains'
 import { withRelay } from 'viem/tempo'
 import {
   type CreateConfigParameters,
@@ -41,10 +52,17 @@ const rpId = (() => {
 
 export const webAuthnRpId = rpId
 
+/** EVM networks Routes transfers start from, so browser wallets can switch to and send on them. */
+export const routesSourceChains = [mainnet, base, polygon, bsc, monad, hyperEvm] as const
+/** Chains the docs reach through Tempo Wallet and the Tempo accounts SDK. */
+export const tempoChainIds: ReadonlySet<number> = new Set([chain.id, tempo.id])
+
 export function getConfig(options: getConfig.Options = {}) {
-  const { multiInjectedProviderDiscovery = false } = options
+  const { multiInjectedProviderDiscovery = false, accessKey = true } = options
   const wallet = tempoWallet({
-    accessKey: { authorize: demoWalletAuthorization },
+    // The guides authorize a bounded access key on connect. Without one, connecting only signs in
+    // with a passkey and shares the address, and each transaction is approved in Tempo Wallet.
+    ...(accessKey ? { accessKey: { authorize: demoWalletAuthorization } } : {}),
     feePayer: {
       precedence: 'user-first',
       url: 'https://sponsor.moderato.tempo.xyz',
@@ -54,7 +72,7 @@ export function getConfig(options: getConfig.Options = {}) {
     batch: {
       multicall: false,
     },
-    chains: [chain, tempo],
+    chains: [chain, tempo, ...routesSourceChains],
     connectors:
       import.meta.env.VITE_E2E === 'true'
         ? [webAuthn(), wallet]
@@ -86,13 +104,22 @@ export function getConfig(options: getConfig.Options = {}) {
         { policy: 'sign-only' },
       ),
       [tempo.id]: http(tempo.rpcUrls.default.http[0]),
+      [mainnet.id]: http(),
+      [base.id]: http(),
+      [polygon.id]: http(),
+      [bsc.id]: http(),
+      [monad.id]: http(),
+      [hyperEvm.id]: http(),
       [tempoLocalnet.id]: http(undefined, { batch: true }),
     },
   })
 }
 
 export namespace getConfig {
-  export type Options = Partial<Pick<CreateConfigParameters, 'multiInjectedProviderDiscovery'>>
+  export type Options = Partial<Pick<CreateConfigParameters, 'multiInjectedProviderDiscovery'>> & {
+    /** Authorize the guides' bounded access key when Tempo Wallet connects. Defaults to true. */
+    accessKey?: boolean
+  }
 }
 
 export type Config = ReturnType<typeof getConfig>

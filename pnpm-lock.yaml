@@ -45,6 +45,9 @@ importers:
       '@iconify-json/simple-icons':
         specifier: ^1.2.87
         version: 1.2.88
+      '@iconify-json/token-branded':
+        specifier: ^1.2.46
+        version: 1.2.46
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -771,6 +774,9 @@ packages:
 
   '@iconify-json/simple-icons@1.2.88':
     resolution: {integrity: sha512-+cvi1qCuvReL29ehi6t62L4fb7GDXe+UlGHFcsJcV7I2l9wtqn9XE2IBKcDr3CI5iGUGS5ISnXv699pSGpyx1Q==}
+
+  '@iconify-json/token-branded@1.2.46':
+    resolution: {integrity: sha512-GO3E7200wKryPs6HiyVZNhhcInZRWyVkwJuzgTPsVEXUUNv7ggnfF3RYWueH6r7kEDFt6xulvFfU37S0b4Jh5A==}
 
   '@iconify-json/vscode-icons@1.2.58':
     resolution: {integrity: sha512-ZM6O1GpImQ+n2+/dVijB4uDR1OVgfwoPgnVlKMnUxzJwExPTzuBb/Hd2iwnHj4gWbgBba9Io1qRolVJwYty50A==}
@@ -6934,6 +6940,10 @@ snapshots:
       '@iconify/types': 2.0.0
 
   '@iconify-json/simple-icons@1.2.88':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-json/token-branded@1.2.46':
     dependencies:
       '@iconify/types': 2.0.0
 

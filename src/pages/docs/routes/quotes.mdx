@@ -44,6 +44,12 @@ Present the source asset and amount, destination asset and amount, minimum desti
 
 A quote does not create or reserve a transfer. Review the terms returned when you create the transfer as well, before asking the source account's signer to sign its action.
 
+## Offer 1:1 delivery
+
+Where your organization is approved for subsidies, send `subsidize: true` on the quote and the create request. Tempo then guarantees normalized 1:1 delivery: the recipient receives the amount sent, and `destinationAmountRequired` shows that guaranteed amount. Transfers support this for `exactSource` only.
+
+The route directory's `subsidies` field shows which funding methods accept a subsidy on each route. Without approval, the API rejects the request with a `routes_subsidy_*` error code. Try it in the [Routes API demo](/docs/routes/test).
+
 ## Refresh expired quotes
 
 For transfers, read `quote.expiresAt`. If the quote expires before submission, obtain fresh terms rather than signing an expired action. Show changed terms to the user before continuing.
