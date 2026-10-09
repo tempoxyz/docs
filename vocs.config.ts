@@ -406,6 +406,7 @@ export default defineConfig({
       {
         text: 'Payments',
         items: [
+          { text: 'Payment integration', link: '/docs/guide/payments' },
           { text: 'Fund an account', link: '/docs/guide/getting-funds' },
           {
             text: 'Send payments',
@@ -424,6 +425,9 @@ export default defineConfig({
               { text: 'Customer deposit addresses', link: '/docs/guide/payments/virtual-addresses' },
               { text: 'Payment references', link: '/docs/guide/payments/transfer-memos' },
               { text: 'Receive policies', link: '/docs/guide/payments/configure-receive-policies' },
+              { text: 'Verify payments', link: '/docs/guide/payments/accept-a-payment/examples' },
+              { text: 'Deposit address reference', link: '/docs/protocol/tip20/virtual-addresses' },
+              { text: 'Receive policy reference', link: '/docs/protocol/tip403/receive-policies' },
             ],
           },
         ],
