@@ -8,6 +8,7 @@ import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd, pathUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './PlaceOrder.recipes'
 
 export function PlaceOrder(props: DemoStepProps) {
   const { stepNumber, last = false } = props
@@ -78,7 +79,7 @@ export function PlaceOrder(props: DemoStepProps) {
             })
           }}
           type="button"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className={ui.placeOrderButton().className}
         >
           {sendCalls.isPending ? 'Placing Order...' : 'Place Order'}
         </Button>
@@ -87,8 +88,8 @@ export function PlaceOrder(props: DemoStepProps) {
       title="Approve spend and place buy order for 100 AlphaUSD"
     >
       {sendCalls.isSuccess && sendCalls.data && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
+        <div {...ui.placeOrderLayout()}>
+          <div {...ui.placeOrderLayout2()}>
             <ExplorerLink hash={sendCalls.data.receipts?.at(0)?.transactionHash as `0x${string}`} />
           </div>
         </div>

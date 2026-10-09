@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { cx as composeStyles } from 'zyzz'
 import Button from '../../_components/Button'
 import CodeWindow, { type CodeVariant } from '../../_components/CodeWindow'
 import EdgeMarkers from '../../_components/EdgeMarkers'
@@ -14,6 +15,7 @@ import {
 import FeatureDiagram from '../../diagrams/_components/FeatureDiagram'
 import type { FeatureDiagramSpec } from '../../diagrams/_lib/featureDiagram'
 import FeatureFaq, { type FaqItem } from './FeatureFaq'
+import * as ui from './TokensSections.recipes'
 
 type FeaturePoint = {
   title: string
@@ -548,31 +550,33 @@ function StoryPointsList({
   points: FeaturePoint[]
   selectable?: boolean
 }) {
-  const pointGridClass = points.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-3'
+  const pointGridClass =
+    points.length === 2
+      ? ui.storyPointsListStateState().className
+      : ui.storyPointsListStateState2().className
 
   return (
-    <ul className={`grid border-line border-t ${pointGridClass} lg:grid-cols-1`}>
+    <ul
+      className={` ${ui.storyPointsListList().className} ${pointGridClass} ${ui.storyPointsListList2().className} `}
+    >
       {points.map((point, i) => {
         const content = (
           <>
             <span
-              aria-hidden
-              className="mt-0.5 size-5 shrink-0"
-              style={{
-                backgroundImage: `radial-gradient(circle, ${colorForIndex(i)} 1px, transparent 1.4px)`,
-                backgroundSize: '5px 5px',
-              }}
+              aria-hidden="true"
+              {...ui.storyPointsListTextAppearance({
+                value0: `radial-gradient(circle, ${colorForIndex(i)} 1px, transparent 1.4px)`,
+                className: ui.storyPointsListText().className,
+              })}
             />
             <span>
-              <h3 className="font-sans text-[18px] text-foreground leading-[1.2] tracking-[0]">
-                {point.title}
-              </h3>
+              <h3 {...ui.storyPointsListHeading()}>{point.title}</h3>
               <p
-                className={`mt-2 font-sans text-[14px] leading-[1.45] tracking-[0] ${
-                  selectable && activeIndex === i
-                    ? 'text-foreground/55'
-                    : 'text-foreground/45 group-hover:text-foreground/55'
-                }`}
+                {...composeStyles(
+                  ui.storyPointsListDescription(),
+                  !!(selectable && activeIndex === i) && ui.storyPointsListDescription2(),
+                  !(selectable && activeIndex === i) && ui.storyPointsListDescription3(),
+                )}
               >
                 {point.desc}
               </p>
@@ -581,10 +585,7 @@ function StoryPointsList({
         )
 
         return (
-          <li
-            key={point.title}
-            className="border-line border-b last:border-b-0 sm:border-r sm:border-b-0 sm:last:border-r-0 lg:border-r-0 lg:border-b lg:last:border-b-0"
-          >
+          <li key={point.title} {...ui.storyPointsListItem()}>
             {selectable ? (
               <button
                 type="button"
@@ -592,14 +593,16 @@ function StoryPointsList({
                 onFocus={() => onSelect?.(i)}
                 onClick={() => onSelect?.(i)}
                 aria-pressed={activeIndex === i}
-                className={`group flex h-full w-full items-start gap-4 px-5 py-6 text-left transition-colors lg:px-12 ${
-                  activeIndex === i ? 'bg-surface-block' : 'hover:bg-surface-block'
-                }`}
+                {...composeStyles(
+                  ui.storyPointsListButton({ className: 'group' }),
+                  !!(activeIndex === i) && ui.storyPointsListButton2(),
+                  !(activeIndex === i) && ui.storyPointsListButton3(),
+                )}
               >
                 {content}
               </button>
             ) : (
-              <div className="flex items-start gap-4 px-5 py-6 lg:px-12">{content}</div>
+              <div {...ui.storyPointsListLayout()}>{content}</div>
             )}
           </li>
         )
@@ -621,19 +624,18 @@ function StorySection({ story, index }: { story: Story; index: number }) {
   const panelVariants = activePoint?.variants ?? story.variants
 
   return (
-    <section id={story.id} className={`${index === 0 ? '' : 'mt-[140px]'} scroll-mt-12`}>
-      <Reveal className="relative border-line border-t">
+    <section
+      id={story.id}
+      {...composeStyles(!(index === 0) && ui.storySectionSection(), ui.storySectionSection2())}
+    >
+      <Reveal className={ui.reveal().className}>
         <EdgeMarkers wideOnly />
-        <div className="grid border-line border-b bg-surface-shell lg:grid-cols-2">
-          <div className="flex flex-col border-line border-b text-left lg:border-r lg:border-b-0">
-            <div className="flex flex-1 flex-col justify-center px-5 py-14 lg:px-12 lg:py-20">
-              <h2 className="max-w-[620px] text-balance font-sans text-[clamp(1.5rem,5vw,2.5rem)] text-foreground leading-[1.08] tracking-[-0.03em] antialiased">
-                {story.title}
-              </h2>
-              <p className="mt-6 max-w-[620px] text-balance font-sans text-[16px] text-foreground/50 leading-[1.5] tracking-[0]">
-                {story.copy}
-              </p>
-              <div className="mt-9 flex flex-wrap items-center gap-2.5">
+        <div {...ui.storySectionLayout()}>
+          <div {...ui.storySectionLayout2()}>
+            <div {...ui.storySectionLayout3()}>
+              <h2 {...ui.storySectionHeading()}>{story.title}</h2>
+              <p {...ui.storySectionDescription()}>{story.copy}</p>
+              <div {...ui.storySectionLayout4()}>
                 {story.ctas.map((cta) => (
                   <Button
                     key={cta.label}
@@ -654,22 +656,30 @@ function StorySection({ story, index }: { story: Story; index: number }) {
             />
           </div>
 
-          <div className="relative lg:min-h-[620px]">
-            <div className="absolute right-5 bottom-5 z-20 lg:right-8 lg:bottom-8">
+          <div {...ui.storySectionLayout5()}>
+            <div {...ui.storySectionLayout6()}>
               <ModeToggle mode={mode} setMode={setMode} />
             </div>
-            <div className="grid grid-cols-1 lg:absolute lg:inset-0 lg:min-h-0">
+            <div {...ui.storySectionLayout7()}>
               <div
                 inert={mode !== 'visual'}
-                className={`grid lg:h-full lg:min-h-0 ${mode === 'visual' ? '[grid-area:1/1]' : 'hidden'}`}
+                {...composeStyles(
+                  ui.storySectionLayout8(),
+                  !!(mode === 'visual') && ui.storySectionLayout9(),
+                  !(mode === 'visual') && ui.storySectionLayout10(),
+                )}
               >
                 <FeatureDiagram spec={panelSpec} />
               </div>
               <div
                 inert={mode !== 'code'}
-                className={`flex min-h-[420px] items-center justify-center p-6 pb-20 lg:h-full lg:min-h-0 lg:p-10 lg:pb-24 ${mode === 'code' ? '[grid-area:1/1]' : 'hidden'}`}
+                {...composeStyles(
+                  ui.storySectionLayout11(),
+                  !!(mode === 'code') && ui.storySectionLayout9(),
+                  !(mode === 'code') && ui.storySectionLayout10(),
+                )}
               >
-                <div className="w-full max-w-[560px]">
+                <div {...ui.storySectionLayout12()}>
                   <CodeWindow
                     key={panelTitle}
                     title={panelTitle}

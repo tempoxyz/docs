@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import * as ui from './MermaidDiagram.recipes'
 
 // ---------------------------------------------------------------------------
 // Layout constants
@@ -980,52 +981,19 @@ export function MermaidDiagram({ chart }: { chart: string }) {
 
   const th = isDark ? THEMES.dark : THEMES.light
 
-  const btnStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 28,
-    height: 28,
-    borderRadius: '50%',
-    border: `1px solid ${th.actorStroke}`,
-    background: th.actorFill,
-    color: th.textMuted,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    padding: 0,
-    opacity: 0.7,
-    transition: 'opacity 0.2s',
-  }
-
   return (
-    <div
-      ref={wrapperRef}
-      className="mermaid-diagram"
-      style={{
-        margin: '2rem 0',
-        padding: '1.5rem 1rem',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        overflowX: 'auto',
-        minHeight: '100px',
-        position: 'relative',
-      }}
-    >
+    <div ref={wrapperRef} {...ui.mermaidDiagramLayoutAppearance({ className: 'mermaid-diagram' })}>
       <div ref={svgRef} />
       {phase === 'playing' && (
         <button
           type="button"
           onClick={() => animRef.current?.skipToEnd()}
           aria-label="Skip to end"
-          style={btnStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = '1'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = '0.7'
-          }}
+          {...ui.playbackControl({
+            border: th.actorStroke,
+            background: th.actorFill,
+            foreground: th.textMuted,
+          })}
         >
           <svg
             width="14"
@@ -1050,13 +1018,11 @@ export function MermaidDiagram({ chart }: { chart: string }) {
             requestAnimationFrame(renderDiagram)
           }}
           aria-label="Replay animation"
-          style={btnStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = '1'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = '0.7'
-          }}
+          {...ui.playbackControl({
+            border: th.actorStroke,
+            background: th.actorFill,
+            foreground: th.textMuted,
+          })}
         >
           <svg
             width="14"

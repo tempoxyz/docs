@@ -6,7 +6,7 @@
   "packageManager": "pnpm@10.28.1",
   "scripts": {
     "dev": "node --env-file-if-exists=.env --import=tsx node_modules/vite/bin/vite.js",
-    "build": "node scripts/guard-vocs-config.mjs && pnpm run check:types && pnpm run build:site",
+    "build": "node scripts/guard-vocs-config.mjs && pnpm run check:styles && pnpm run check:types && pnpm run build:site",
     "build:site": "vite build && node --experimental-strip-types scripts/finalize-sitemap.ts",
     "check": "biome check --write --unsafe .",
     "check:anchors": "node --experimental-strip-types scripts/check-internal-anchors.ts",
@@ -24,7 +24,8 @@
     "lighthouse:mobile": "node --experimental-strip-types scripts/lighthouse.ts --mobile",
     "og:probe": "node --experimental-strip-types scripts/probe-og.ts",
     "og:goldens": "tsx scripts/render-og-goldens.tsx",
-    "og:goldens:check": "tsx scripts/render-og-goldens.tsx --check"
+    "og:goldens:check": "tsx scripts/render-og-goldens.tsx --check",
+    "check:styles": "node scripts/check-styles.mjs"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.114",
@@ -39,7 +40,6 @@
     "@wagmi/core": "3.6.5",
     "abitype": "^1.2.4",
     "accounts": "0.18.4",
-    "cva": "1.0.0-beta.4",
     "hono": "^4.13.5",
     "mermaid": "^11.14.0",
     "minisearch": "7.2.0",
@@ -60,8 +60,6 @@
     "shiki": "^4.3.0",
     "sonner": "^2.0.7",
     "sql-formatter": "^15.8.2",
-    "tailwind-merge": "^3.6.0",
-    "tailwindcss": "^4.3.1",
     "tapimo": "0.18.2",
     "unified": "^11.0.5",
     "unplugin-auto-import": "^21.0.0",
@@ -72,12 +70,12 @@
     "wagmi": "3.7.7",
     "waku": "^1.0.0-beta.6",
     "webauthx": "~0.1.2",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "zyzz": "0.0.27"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.1",
     "@playwright/test": "^1.61.1",
-    "@tailwindcss/vite": "^4.3.1",
     "@types/node": "^26.0.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

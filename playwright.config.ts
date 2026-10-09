@@ -17,7 +17,8 @@ const liveTests = [
 ].map((name) => `**/${name}.test.ts`)
 
 const isCI = !!process.env.CI
-const webServerUrl = isCI ? 'http://localhost:5173' : 'https://localhost:5173'
+const externalBaseURL = process.env.PLAYWRIGHT_BASE_URL
+const webServerUrl = externalBaseURL ?? (isCI ? 'http://localhost:5173' : 'https://localhost:5173')
 
 export default defineConfig({
   testDir: './e2e',
@@ -48,14 +49,16 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: isCI
-      ? 'PORT=5173 VITE_E2E=true VITE_USE_HTTP=true node dist/preview.js'
-      : 'pnpm run dev 2>/dev/null',
-    url: webServerUrl,
-    ignoreHTTPSErrors: true,
-    reuseExistingServer: !isCI,
-    stdout: 'ignore',
-    stderr: 'ignore',
-  },
+  webServer: externalBaseURL
+    ? undefined
+    : {
+        command: isCI
+          ? 'PORT=5173 VITE_E2E=true VITE_USE_HTTP=true node dist/preview.js'
+          : 'pnpm run dev 2>/dev/null',
+        url: webServerUrl,
+        ignoreHTTPSErrors: true,
+        reuseExistingServer: !isCI,
+        stdout: 'ignore',
+        stderr: 'ignore',
+      },
 })

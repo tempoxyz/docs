@@ -3,9 +3,9 @@ import { formatUnits, parseUnits } from 'viem'
 import { Actions, Addresses } from 'viem/tempo'
 import { useConnection, useConnectionEffect, useSendCallsSync } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
-
 import { Button, ExplorerLink } from '../../Demo'
 import { alphaUsd, betaUsd } from '../../tokens'
+import * as ui from './SellSwap.recipes'
 
 export function SellSwap({ onSuccess }: { onSuccess?: () => void }) {
   const { address } = useConnection()
@@ -61,9 +61,9 @@ export function SellSwap({ onSuccess }: { onSuccess?: () => void }) {
   ]
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-sm">Sell 10 AlphaUSD for BetaUSD</h3>
+    <div {...ui.sellSwapLayout()}>
+      <div {...ui.sellSwapLayout2()}>
+        <h3 {...ui.sellSwapHeading()}>Sell 10 AlphaUSD for BetaUSD</h3>
         <Button
           variant={sendCalls.isSuccess ? 'default' : 'accent'}
           disabled={!address || !quote || sendCalls.isPending}
@@ -73,17 +73,17 @@ export function SellSwap({ onSuccess }: { onSuccess?: () => void }) {
             })
           }}
           type="button"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className={ui.sellSwapButton().className}
         >
           {sendCalls.isPending ? 'Selling...' : 'Sell'}
         </Button>
       </div>
-      {sendCalls.error && <div className="text-[14px] text-red-500">{sendCalls.error.message}</div>}
+      {sendCalls.error && <div {...ui.sellSwapLayout3()}>{sendCalls.error.message}</div>}
       {quote && address && (
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-start gap-1">
-            <span className="text-[14px] text-gray11">Quote:</span>
-            <span className="text-[14px] text-gray12">
+        <div {...ui.sellSwapLayout4()}>
+          <div {...ui.sellSwapLayout5()}>
+            <span {...ui.sellSwapText()}>Quote:</span>
+            <span {...ui.sellSwapText2()}>
               10 {tokenInMetadata?.name} = {formatUnits(quote, tokenOutMetadata?.decimals || 6)}{' '}
               {tokenOutMetadata?.name}
             </span>

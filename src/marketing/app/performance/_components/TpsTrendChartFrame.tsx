@@ -1,8 +1,7 @@
-// biome-ignore-all lint/a11y/noSvgWithoutTitle: The loading SVG is decorative and paired with visible chart context.
-
 'use client'
 
 import { scaleLinear } from '../_lib/chart'
+import * as ui from './TpsTrendChartFrame.recipes'
 import useMeasure from './useMeasure'
 
 // Below this container width the chart reserves only a tiny right gutter and
@@ -49,12 +48,7 @@ export function TpsChartGrid({
         <g key={t}>
           <line x1={pad.l} x2={width - pad.r} y1={yAt(t)} y2={yAt(t)} stroke="var(--line)" />
           {showLabels ? (
-            <text
-              x={pad.l - 10}
-              y={yAt(t) + 4}
-              textAnchor="end"
-              className="fill-foreground/35 font-mono text-[11px]"
-            >
+            <text x={pad.l - 10} y={yAt(t) + 4} textAnchor="end" {...ui.text()}>
               {formatTpsTick(t, yTicks)}
             </text>
           ) : null}
@@ -74,9 +68,16 @@ export default function TpsTrendChartFrame({
   const { ref, width } = useMeasure<HTMLDivElement>()
 
   return (
-    <div ref={ref} className="relative w-full" style={{ height }} aria-hidden>
+    <div
+      ref={ref}
+      {...ui.tpsTrendChartFrameLayoutAppearance({
+        value0: `${height}px`,
+        className: ui.tpsTrendChartFrameLayout().className,
+      })}
+      aria-hidden="true"
+    >
       {width > 0 ? (
-        <svg width={width} height={height} className="block">
+        <svg width={width} height={height} {...ui.tpsTrendChartFrameIcon()}>
           <title>Benchmark chart frame</title>
           <TpsChartGrid height={height} showLabels={showLabels} width={width} />
         </svg>

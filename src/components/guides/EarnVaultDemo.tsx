@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { Container } from '../Container'
 import { Button, Step, StringFormatter, useCopyToClipboard, useHydrated } from './Demo'
+import * as ui from './EarnVaultDemo.recipes'
 import {
   type EarnNetwork,
   type EarnVaultDirectory,
@@ -118,24 +119,23 @@ export function EarnVaultDemo() {
     }
   }, [loadVaults])
 
-  const inputClass =
-    'min-h-10 min-w-0 max-w-full rounded-md border border-[var(--line-strong)] bg-[var(--surface-card)] px-3 py-2 text-[14px] text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+  const inputClass = ui.earnVaultDemoStateState().className
 
   return (
     <div data-testid="earn-vault-demo">
       <Container
-        headerLeft={<span className="font-medium text-[14px]">Inspect an Earn vault</span>}
-        headerRight={<span className="text-[13px] text-gray10">Read-only demo</span>}
+        headerLeft={<span {...ui.earnVaultDemoText()}>Inspect an Earn vault</span>}
+        headerRight={<span {...ui.earnVaultDemoText2()}>Read-only demo</span>}
         footer={
-          <div className="flex w-full flex-wrap items-center justify-between gap-2">
+          <div {...ui.earnVaultDemoLayout()}>
             <span>No wallet connection required.</span>
-            <a href="/docs/api/earn#getverifiedearnvaults" className="text-accent hover:underline">
+            <a href="/docs/api/earn#getverifiedearnvaults" {...ui.earnVaultDemoLink()}>
               API reference
             </a>
           </div>
         }
       >
-        <div className="space-y-6" aria-busy={pending}>
+        <div {...ui.earnVaultDemoLayout2()} aria-busy={pending}>
           <Step
             number={1}
             title="Choose a network"
@@ -152,8 +152,8 @@ export function EarnVaultDemo() {
               </Button>
             }
           >
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <label htmlFor={`${inputId}-network`} className="text-[13px] text-gray10">
+            <div {...ui.earnVaultDemoLayout3()}>
+              <label htmlFor={`${inputId}-network`} {...ui.earnVaultDemoText2()}>
                 Network
               </label>
               <select
@@ -167,7 +167,7 @@ export function EarnVaultDemo() {
                 <option value="mainnet">Tempo mainnet</option>
               </select>
               {loaded && (
-                <span role="status" className="text-[13px] text-gray10">
+                <span role="status" {...ui.earnVaultDemoText2()}>
                   {vaults.length === 0
                     ? 'No verified vaults found on this network.'
                     : `${vaults.length} vault${vaults.length === 1 ? '' : 's'} loaded`}
@@ -175,7 +175,7 @@ export function EarnVaultDemo() {
               )}
             </div>
             {error && (
-              <p role="alert" className="mt-3 text-[13px] text-destructive">
+              <p role="alert" {...ui.earnVaultDemoDescription()}>
                 {error}
               </p>
             )}
@@ -188,8 +188,8 @@ export function EarnVaultDemo() {
             completed={Boolean(selected)}
           >
             {vaults.length > 0 ? (
-              <div className="mt-3 space-y-4">
-                <label htmlFor={`${inputId}-vault`} className="sr-only">
+              <div {...ui.earnVaultDemoLayout4()}>
+                <label htmlFor={`${inputId}-vault`} {...ui.label()}>
                   Vault
                 </label>
                 <select
@@ -199,7 +199,7 @@ export function EarnVaultDemo() {
                   onChange={(event) =>
                     setDirectory((current) => ({ ...current, selectedId: event.target.value }))
                   }
-                  className={`${inputClass} w-full`}
+                  className={`${inputClass} ${ui.select().className} `}
                 >
                   <option value="">Choose a vault</option>
                   {vaults.map((vault) => (
@@ -218,13 +218,11 @@ export function EarnVaultDemo() {
                   </Button>
                 )}
                 {selected && (
-                  <div data-testid="earn-vault-details" className="space-y-4">
-                    <dl className="grid min-w-0 grid-cols-1 gap-x-6 gap-y-4 border-[var(--line)] border-t pt-4 sm:grid-cols-2">
+                  <div data-testid="earn-vault-details" {...ui.earnVaultDemoLayout5()}>
+                    <dl {...ui.dl()}>
                       <Field label="Accepted asset">
                         {selected.assetToken.symbol}
-                        <span className="mt-1 block break-all font-mono text-[12px] text-gray10">
-                          {selected.assetToken.address}
-                        </span>
+                        <span {...ui.earnVaultDemoText3()}>{selected.assetToken.address}</span>
                       </Field>
                       <Field label="Share-token access">
                         {selected.access?.status === 'open'
@@ -246,13 +244,13 @@ export function EarnVaultDemo() {
                         {supported(selected.capabilities?.asyncRedeem)}
                       </Field>
                       <Field label="Vault address">
-                        <span className="break-all font-mono text-[12px]">{selected.id}</span>
+                        <span {...ui.earnVaultDemoText4()}>{selected.id}</span>
                       </Field>
                       <Field label="Network">
                         {network === 'testnet' ? 'Moderato testnet' : 'Tempo mainnet'}
                       </Field>
                     </dl>
-                    <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div {...ui.earnVaultDemoLayout6()}>
                       <Button
                         type="button"
                         onClick={async () => {
@@ -267,7 +265,7 @@ export function EarnVaultDemo() {
                 )}
               </div>
             ) : (
-              <p className="mt-3 text-[13px] text-gray10">
+              <p {...ui.earnVaultDemoDescription2()}>
                 {pending
                   ? 'Loading verified vaults…'
                   : loaded
@@ -288,9 +286,9 @@ function supported(value: boolean | undefined) {
 
 function Field({ label, children }: React.PropsWithChildren<{ label: string }>) {
   return (
-    <div className="min-w-0">
-      <dt className="text-[12px] text-gray10">{label}</dt>
-      <dd className="mt-1 text-[14px] text-primary">{children}</dd>
+    <div {...ui.fieldLayout()}>
+      <dt {...ui.dt()}>{label}</dt>
+      <dd {...ui.dd()}>{children}</dd>
     </div>
   )
 }

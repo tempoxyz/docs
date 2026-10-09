@@ -7,6 +7,7 @@ import { isBrowserWalletConnectorId } from '../../../lib/wallets'
 import { Button, ExplorerLink, Step, StringFormatter } from '../../Demo'
 import { alphaUsd, betaUsd, thetaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './SetFeeToken.recipes'
 
 type FeeTokenOption =
   | {
@@ -140,9 +141,9 @@ export function SetFeeToken(props: DemoStepProps) {
 
   const actions = React.useMemo(() => {
     return (
-      <div className="flex flex-wrap items-center gap-2">
+      <div {...ui.setFeeTokenLayout()}>
         <select
-          className="h-[32px] rounded-full border border-gray4 bg-white px-3 font-medium text-[14px] text-black -tracking-[2%] dark:bg-transparent dark:text-white"
+          {...ui.select()}
           value={selectedFeeToken}
           onChange={(event) => {
             const value = event.target.value as FeeTokenOption['value']
@@ -179,15 +180,15 @@ export function SetFeeToken(props: DemoStepProps) {
       title="Set your fee token for EVM transactions."
     >
       {(selectedOption.value === 'other' || currentFeeTokenLabel || txHash) && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
+        <div {...ui.setFeeTokenLayout2()}>
+          <div {...ui.setFeeTokenLayout3()}>
             {selectedOption.value === 'other' && (
-              <div className="mt-2 flex flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="customFeeToken">
+              <div {...ui.setFeeTokenLayout4()}>
+                <label {...ui.label()} htmlFor="customFeeToken">
                   Custom fee token address
                 </label>
                 <input
-                  className="h-[34px] rounded-full border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...ui.setFeeTokenInput()}
                   autoCapitalize="none"
                   autoComplete="off"
                   autoCorrect="off"
@@ -202,9 +203,8 @@ export function SetFeeToken(props: DemoStepProps) {
               </div>
             )}
             {currentFeeTokenLabel && (
-              <div className="mt-2 text-[13px] text-gray9">
-                Current fee token:{' '}
-                <span className="text-black dark:text-white">{currentFeeTokenLabel}</span>
+              <div {...ui.setFeeTokenLayout5()}>
+                Current fee token: <span {...ui.setFeeTokenText()}>{currentFeeTokenLabel}</span>
               </div>
             )}
             {txHash && <ExplorerLink hash={txHash} />}

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { fetchPerfRuns } from '../performance/_lib/runs'
 import BlogSection from './BlogSection'
 import Footer from './Footer'
+import * as ui from './HomeBelowFold.recipes'
 import HomeShowcases from './HomeShowcases'
 import OpenSourceSection from './OpenSourceSection'
 import PerfSection from './PerfSection'
@@ -77,13 +78,13 @@ export default function HomeBelowFold() {
   return (
     <>
       <HomeShowcases />
-      <div ref={perfSectionRef} id="performance" className="mt-[140px] scroll-mt-12">
+      <div ref={perfSectionRef} id="performance" {...ui.homeBelowFoldLayout()}>
         <PerfSection stats={stats} runs={runs} />
       </div>
-      <div id="open-source" className="mt-[140px] scroll-mt-12">
+      <div id="open-source" {...ui.homeBelowFoldLayout()}>
         <OpenSourceSection />
       </div>
-      <div id="blog" className="mt-[140px] scroll-mt-12">
+      <div id="blog" {...ui.homeBelowFoldLayout()}>
         <BlogSection />
       </div>
       <Footer />

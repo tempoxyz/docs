@@ -1,5 +1,6 @@
 import type { PropsWithChildren } from 'react'
 import DocsEntryLayout from '../components/DocsEntryLayout'
+import '../styles/globals'
 
 export const normalizeProxiedRscFetch = `
 (() => {

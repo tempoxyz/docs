@@ -9,7 +9,12 @@ import payments from '../../public/illustrations/docs/payments.svg?raw'
 import routes from '../../public/illustrations/docs/routes.svg?raw'
 import tempoEvm from '../../public/illustrations/docs/tempo-evm.svg?raw'
 import zones from '../../public/illustrations/docs/zones.svg?raw'
-import './DocsProductOverview.css'
+import {
+  docsProductOverview,
+  docsProductOverviewArt,
+  docsProductOverviewCopy,
+  docsProductOverviewLayout,
+} from './DocsProductOverview.styles'
 
 const illustrations = {
   ousd,
@@ -42,10 +47,12 @@ export function DocsProductOverview({
   )
 
   return (
-    <header className="docs-product-overview">
-      <div className="docs-product-overview-layout">
-        <div className="docs-product-overview-copy">{children}</div>
-        <figure className="docs-product-overview-art">
+    <header className={`docs-product-overview ${docsProductOverview().className}`}>
+      <div className={`docs-product-overview-layout ${docsProductOverviewLayout().className}`}>
+        <div className={`docs-product-overview-copy ${docsProductOverviewCopy().className}`}>
+          {children}
+        </div>
+        <figure className={`docs-product-overview-art ${docsProductOverviewArt().className}`}>
           {/* Inline checked-in artwork preserves selectable text and the site font. */}
           {/* biome-ignore lint/security/noDangerouslySetInnerHtml: trusted local SVG source; alt is escaped above. */}
           <div dangerouslySetInnerHTML={{ __html: svg }} />

@@ -1,5 +1,6 @@
 import { Link } from 'vocs'
 import FileText from '~icons/lucide/file-text'
+import * as styles from './TipsList.recipes'
 
 const modules = import.meta.glob('../pages/docs/protocol/tips/tip-*.mdx', {
   eager: true,
@@ -18,23 +19,15 @@ const tips = Object.entries(modules)
 
 export function TipsList() {
   return (
-    <div className="vocs:flex vocs:flex-col vocs:gap-2">
+    <div {...styles.list()}>
       {tips.map((tip) => (
-        <Link
-          key={tip.id}
-          to={tip.path}
-          className="vocs:flex vocs:items-center vocs:gap-3 vocs:rounded-md vocs:border vocs:border-primary vocs:bg-surfaceTint/70 vocs:px-3 vocs:py-2.5 vocs:no-underline vocs:transition-colors vocs:hover:bg-surfaceTint"
-        >
-          <FileText className="vocs:size-4 vocs:shrink-0 vocs:text-secondary" />
-          <div className="vocs:flex vocs:flex-col">
-            <span className="vocs:font-medium vocs:text-heading vocs:text-sm">
+        <Link key={tip.id} to={tip.path} {...styles.card()}>
+          <FileText {...styles.icon()} />
+          <div {...styles.copy()}>
+            <span {...styles.title()}>
               {tip.id}: {tip.title}
             </span>
-            {tip.description && (
-              <span className="vocs:line-clamp-1 vocs:text-secondary vocs:text-xs">
-                {tip.description}
-              </span>
-            )}
+            {tip.description && <span {...styles.description()}>{tip.description}</span>}
           </div>
         </Link>
       ))}

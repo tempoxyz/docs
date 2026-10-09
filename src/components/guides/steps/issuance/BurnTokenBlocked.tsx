@@ -8,6 +8,7 @@ import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './BurnTokenBlocked.recipes'
 
 export function BurnTokenBlocked(props: DemoStepProps) {
   const { stepNumber, last = false } = props
@@ -80,7 +81,7 @@ export function BurnTokenBlocked(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={ui.burnTokenBlockedButton().className}
             type="button"
           >
             Hide
@@ -91,7 +92,7 @@ export function BurnTokenBlocked(props: DemoStepProps) {
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={ui.burnTokenBlockedButton().className}
           >
             Enter details
           </Button>
@@ -101,15 +102,15 @@ export function BurnTokenBlocked(props: DemoStepProps) {
       title={`Burn 100 ${metadata ? metadata.name : 'tokens'} from blocked address.`}
     >
       {expanded && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
-            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
-              <div className="flex flex-2 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="blockedAddress">
+        <div {...ui.burnTokenBlockedLayout()}>
+          <div {...ui.burnTokenBlockedLayout2()}>
+            <div {...ui.burnTokenBlockedLayout3()}>
+              <div {...ui.burnTokenBlockedLayout4()}>
+                <label {...ui.label()} htmlFor="blockedAddress">
                   Blocked address
                 </label>
                 <input
-                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...ui.burnTokenBlockedInput()}
                   data-1p-ignore
                   type="text"
                   id="blockedAddress"
@@ -125,7 +126,7 @@ export function BurnTokenBlocked(props: DemoStepProps) {
                 disabled={!address}
                 onClick={handleBurnBlocked}
                 type="button"
-                className="font-normal text-[14px] -tracking-[2%]"
+                className={ui.burnTokenBlockedButton().className}
               >
                 {burnBlocked.isPending ? 'Burning...' : 'Burn'}
               </Button>

@@ -7,6 +7,7 @@ import { Hooks } from 'wagmi/tempo'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd, pathUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './ApproveSpend.recipes'
 
 export function ApproveSpend(props: DemoStepProps) {
   const { stepNumber, last = false } = props
@@ -43,7 +44,7 @@ export function ApproveSpend(props: DemoStepProps) {
             })
           }}
           type="button"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className={ui.approveSpendButton().className}
         >
           {approve.isPending ? 'Approving...' : 'Approve Spend'}
         </Button>
@@ -52,8 +53,8 @@ export function ApproveSpend(props: DemoStepProps) {
       title="Approve the Stablecoin DEX to spend pathUSD"
     >
       {approve.data && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
+        <div {...ui.approveSpendLayout()}>
+          <div {...ui.approveSpendLayout2()}>
             <ExplorerLink hash={approve.data.receipt.transactionHash} />
           </div>
         </div>

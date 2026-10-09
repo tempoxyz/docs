@@ -4,6 +4,8 @@ seoTitle: Tempo EVM | Tempo Docs
 description: Build stablecoin payments with dedicated payment capacity, stablecoin fees, fast finality, and native account and token controls.
 ---
 
+import { feature } from './development.recipes'
+
 import { DocsLinkCards } from '../../components/DocsLinkCards'
 import { Cards, Card } from 'vocs'
 import { DocsProductOverview } from '../../components/DocsProductOverview'
@@ -55,7 +57,7 @@ Read the [protocol specifications](/docs/protocol) for the underlying execution 
 Start with a transfer or contract call, then add the capabilities your application needs. Standard EVM transactions work for basic transfers and calls; use [Tempo Transactions](/docs/guide/tempo-transaction) for features such as batching, fee sponsorship, and access keys.
 
 <Cards>
-  <div id="payment-lanes" style={{ display: 'grid' }}>
+  <div id="payment-lanes" className={feature().className}>
     <Card
       title="Payment lanes"
       description="Reserved capacity for eligible payment calls when other applications are busy. Qualifying transactions use it automatically; payment capacity is still finite."
@@ -63,7 +65,7 @@ Start with a transfer or contract call, then add the capabilities your applicati
       icon="lucide:route"
     />
   </div>
-  <div id="stablecoin-fees" style={{ display: 'grid' }}>
+  <div id="stablecoin-fees" className={feature().className}>
     <Card
       title="Stablecoin fees"
       description="Pay fees in supported USD stablecoins or sponsor them for customers. The base fee stays within fixed bounds; total cost depends on gas usage and priority fees."
@@ -71,7 +73,7 @@ Start with a transfer or contract call, then add the capabilities your applicati
       icon="lucide:coins"
     />
   </div>
-  <div id="fast-finality" style={{ display: 'grid' }}>
+  <div id="fast-finality" className={feature().className}>
     <Card
       title="Fast finality"
       description="Transactions normally reach deterministic finality in less than a second. Once finalized, they need no additional confirmation blocks."
@@ -79,7 +81,7 @@ Start with a transfer or contract call, then add the capabilities your applicati
       icon="lucide:zap"
     />
   </div>
-  <div id="payment-operations" style={{ display: 'grid' }}>
+  <div id="payment-operations" className={feature().className}>
     <Card
       title="Payment operations"
       description="Batch calls atomically, send payments concurrently, and set validity windows. Choose whether payments succeed together or each has its own outcome."
@@ -87,7 +89,7 @@ Start with a transfer or contract call, then add the capabilities your applicati
       icon="lucide:layers"
     />
   </div>
-  <div id="accounts-and-permissions" style={{ display: 'grid' }}>
+  <div id="accounts-and-permissions" className={feature().className}>
     <Card
       title="Accounts and keys"
       description="Use secp256k1, P-256, or WebAuthn signatures. Authorize access keys with spending limits and call scopes, or admin keys to manage authorization."
@@ -95,7 +97,7 @@ Start with a transfer or contract call, then add the capabilities your applicati
       icon="lucide:key-round"
     />
   </div>
-  <div id="payment-reconciliation" style={{ display: 'grid' }}>
+  <div id="payment-reconciliation" className={feature().className}>
     <Card
       title="Payment reconciliation"
       description="Attach payment references with memos. Attribute incoming TIP-20 deposits to customers through virtual addresses that credit one account, without wallet sweeps."
@@ -103,7 +105,7 @@ Start with a transfer or contract call, then add the capabilities your applicati
       icon="lucide:receipt-text"
     />
   </div>
-  <div id="tip-20-tokens-and-exchange" style={{ display: 'grid' }}>
+  <div id="tip-20-tokens-and-exchange" className={feature().className}>
     <Card
       title="TIP-20 Tokens"
       description="Create stablecoins with minting, burning, supply caps, issuer roles, and transfer policies built in. Configure controls without writing a custom token contract."
@@ -111,7 +113,7 @@ Start with a transfer or contract call, then add the capabilities your applicati
       icon="lucide:circle-dollar-sign"
     />
   </div>
-  <div id="stablecoin-exchange" style={{ display: 'grid' }}>
+  <div id="stablecoin-exchange" className={feature().className}>
     <Card
       title="Stablecoin exchange"
       description="Swap supported stablecoins through a shared orderbook. Set slippage limits and trade against available liquidity."

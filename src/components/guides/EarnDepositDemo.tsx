@@ -12,6 +12,7 @@ import {
   serializeAdminKeyDemoSession,
 } from './admin-key-demo'
 import { Button, Step, StringFormatter, useCopyToClipboard, useHydrated } from './Demo'
+import * as ui from './EarnDepositDemo.recipes'
 import {
   createEarnDemoClient,
   type EarnDemoCredential,
@@ -255,20 +256,20 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
     <div data-testid={mode === 'deposit' ? 'earn-deposit-demo' : 'earn-withdraw-demo'}>
       <Container
         headerLeft={
-          <span className="font-medium text-[14px]">
+          <span {...ui.earnDepositDemoText()}>
             {mode === 'deposit' ? 'Deposit into a test vault' : 'Withdraw from the test vault'}
           </span>
         }
-        headerRight={<span className="text-[13px] text-gray10">Moderato testnet</span>}
+        headerRight={<span {...ui.earnDepositDemoText2()}>Moderato testnet</span>}
         footer={<span>Test tokens only. This vault does not demonstrate or promise a return.</span>}
       >
-        <div className="space-y-6" aria-busy={pending !== null}>
-          <p className="text-[13px] text-gray10">
+        <div {...ui.earnDepositDemoLayout()} aria-busy={pending !== null}>
+          <p {...ui.earnDepositDemoText2()}>
             {mode === 'deposit'
               ? 'Deposit test funds into the '
               : 'Withdraw your test position from the '}
             <a
-              className="text-accent underline"
+              {...ui.earnDepositDemoLink()}
               href={`${tempoModerato.blockExplorers.default.url}/address/${earnDemoVault}`}
               target="_blank"
               rel="noreferrer"
@@ -278,11 +279,11 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
             . Each transaction asks for your confirmation.
           </p>
           {client && (
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
+            <div {...ui.earnDepositDemoLayout2()}>
               <span>Test account: {StringFormatter.truncate(client.account.address)}</span>
               <button
                 type="button"
-                className="text-accent underline"
+                {...ui.earnDepositDemoLink()}
                 onClick={() => copy(client.account.address)}
               >
                 {copied ? 'Copied address' : 'Copy account address'}
@@ -291,8 +292,8 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
           )}
           {mode === 'deposit' ? (
             <>
-              <div className="space-y-2">
-                <label htmlFor={amountId} className="block font-medium text-[13px]">
+              <div {...ui.earnDepositDemoLayout3()}>
+                <label htmlFor={amountId} {...ui.label()}>
                   Deposit amount (pathUSD)
                 </label>
                 <input
@@ -308,9 +309,9 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
                     setAmountInput(event.target.value)
                     setQuote(null)
                   }}
-                  className="min-h-10 w-full rounded-md border border-[var(--line-strong)] bg-[var(--surface-card)] px-3 py-2 text-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  {...ui.earnDepositDemoInput()}
                 />
-                <p id={`${amountId}-help`} className="text-[13px] text-gray10">
+                <p id={`${amountId}-help`} {...ui.earnDepositDemoText2()}>
                   {assetAmount
                     ? 'Starts at 1 pathUSD. The faucet supplies test funds; keep some for transaction fees.'
                     : 'Enter a positive amount with up to 6 decimal places.'}
@@ -338,7 +339,7 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
                   )
                 }
               >
-                <p className="mt-2 text-[13px] text-gray10">
+                <p {...ui.earnDepositDemoDescription()}>
                   {client
                     ? `${StringFormatter.truncate(client.account.address)} · ${position ? formatUnits(position.assetBalance, 6) : '…'} pathUSD`
                     : (environment?.message ??
@@ -367,12 +368,12 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
                   </Button>
                 }
               >
-                <p className="mt-2 text-[13px] text-gray10">
+                <p {...ui.earnDepositDemoDescription()}>
                   Approve only {amountLabel} pathUSD for this vault, then simulate the deposit to
                   check the shares you receive.
                 </p>
                 {quote && (
-                  <p className="mt-2 text-[13px]" role="status">
+                  <p {...ui.earnDepositDemoDescription2()} role="status">
                     Expected: {formatUnits(quote.shares, 6)} shares · Minimum:{' '}
                     {formatUnits(quote.minimum, 6)} shares (0.5% tolerance).
                   </p>
@@ -397,7 +398,7 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
                 }
               >
                 {position && (
-                  <p className="mt-2 text-[13px]" role="status">
+                  <p {...ui.earnDepositDemoDescription2()} role="status">
                     {formatUnits(position.shareBalance, 6)} vault shares · Position value:{' '}
                     {formatUnits(position.value, 6)} pathUSD.
                   </p>
@@ -406,7 +407,7 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
               </Step>
             </>
           ) : (
-            <div className="space-y-3 text-[13px]">
+            <div {...ui.earnDepositDemoLayout4()}>
               {!client && <p>Use the same browser and test account as the deposit demo.</p>}
               {position && (
                 <p role="status">
@@ -416,7 +417,7 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
               )}
               {(!position || position.shareBalance === 0n) && !withdrawHash && (
                 <p>
-                  <a href="/docs/earn/integrate#try-a-deposit" className="text-accent underline">
+                  <a href="/docs/earn/integrate#try-a-deposit" {...ui.earnDepositDemoLink()}>
                     Make a test deposit
                   </a>{' '}
                   first. This demo restores that account and selects all its shares for withdrawal.
@@ -428,7 +429,7 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
             </div>
           )}
           {(mode === 'withdraw' || (position && position.shareBalance > 0n)) && (
-            <div className="space-y-2 text-[13px]">
+            <div {...ui.earnDepositDemoLayout5()}>
               <Button
                 type="button"
                 disabled={
@@ -438,36 +439,36 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
               >
                 {pending === 'withdraw' ? 'Confirming withdrawal…' : 'Withdraw test position'}
               </Button>
-              <p className="text-gray10">
+              <p {...ui.earnDepositDemoDescription3()}>
                 Redeem the displayed shares for pathUSD, with a 0.5% output tolerance against a
                 fresh quote.
               </p>
             </div>
           )}
           {withdrawHash && (
-            <div className="space-y-2 text-[13px]">
+            <div {...ui.earnDepositDemoLayout5()}>
               <p role="status">Withdrawal confirmed.</p>
               <ReceiptLink hash={withdrawHash}>View withdrawal receipt</ReceiptLink>
             </div>
           )}
           {error && (
-            <p role="alert" className="text-[13px] text-destructive">
+            <p role="alert" {...ui.earnDepositDemoDescription4()}>
               {error}
             </p>
           )}
           <button
             type="button"
-            className="text-[13px] underline disabled:opacity-50"
+            {...ui.earnDepositDemoButton()}
             disabled={!ready || pending !== null}
             onClick={() => run('check', check)}
           >
             {pending === 'check' ? 'Checking test vault…' : 'Check again'}
           </button>
           {!(mode === 'deposit' ? available : redeemAvailable) && pending === null && (
-            <p className="text-[13px] text-gray10">
+            <p {...ui.earnDepositDemoText2()}>
               {mode === 'deposit' ? 'Deposits' : 'Withdrawals'} stay disabled until the live
               directory and deployed contract match.{' '}
-              <a href="https://tempo.xyz/contact" className="underline">
+              <a href="https://tempo.xyz/contact" {...ui.earnDepositDemoLink2()}>
                 Contact Tempo
               </a>{' '}
               for access.
@@ -486,7 +487,7 @@ export function EarnWithdrawDemo() {
 function ReceiptLink({ hash, children }: React.PropsWithChildren<{ hash: Hex }>) {
   return (
     <a
-      className="mt-2 block text-[13px] text-accent underline"
+      {...ui.receiptLinkLink()}
       href={`${tempoModerato.blockExplorers.default.url}/tx/${hash}`}
       target="_blank"
       rel="noreferrer"

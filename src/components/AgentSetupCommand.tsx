@@ -1,11 +1,11 @@
-import './AgentSetupCommand.css'
+import { tempoAgentCommandSyntax } from './AgentSetupCommand.styles'
 
 /** Highlight the simple, whitespace-delimited commands in tempoAgentSetupCommands. */
 export function AgentSetupCommand({ command }: { command: string }) {
   let startsCommand = true
 
   return (
-    <span className="tempo-agent-command-syntax">
+    <span className={`tempo-agent-command-syntax ${tempoAgentCommandSyntax().className}`}>
       {Array.from(command.matchAll(/\s+|\S+/g), ([text], index) => {
         if (/^\s+$/.test(text)) {
           if (text.includes('\n')) startsCommand = true

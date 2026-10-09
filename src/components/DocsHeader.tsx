@@ -2,11 +2,40 @@
 
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useRouter, Link as WakuLink } from 'waku'
+import { cx as composeStyles } from 'zyzz'
 import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
 import { DOCS_SEARCH_PARAM, docsSearchUrl } from '../lib/docs-search'
 import { publicAssetPath } from '../lib/public-asset-path'
+import { navActiveSquare } from '../styles/surfaces.styles'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 import { AgentSetupCommand } from './AgentSetupCommand'
+import * as ui from './DocsHeader.recipes'
+import {
+  docsHeaderActions,
+  docsHeaderAgentMenu,
+  docsHeaderAgentPanel,
+  docsHeaderAgentTrigger,
+  docsHeaderBrand,
+  docsHeaderDestinations,
+  docsHeaderIconButton,
+  docsHeaderLogo,
+  docsHeaderMobileActions,
+  docsHeaderMobileAgents,
+  docsHeaderMobileBody,
+  docsHeaderMobileDialog,
+  docsHeaderMobileLabel,
+  docsHeaderMobileResources,
+  docsHeaderMobileSearch,
+  docsHeaderMobileSections,
+  docsHeaderMobileTheme,
+  docsHeaderMobileTop,
+  docsHeaderMobileUtilityLink,
+  docsHeaderMobileWebsite,
+  docsHeaderNav,
+  docsHeaderSearch,
+  docsHeaderWordmark,
+  docsSiteHeader,
+} from './DocsNavigation.styles'
 import {
   DocsApiDropdown,
   DocsResourceLinks,
@@ -14,7 +43,6 @@ import {
   docsUtilitySections,
   getActiveDocsSection,
 } from './DocsSectionNav'
-import './DocsNavigation.css'
 
 const DOCS_BASE_PATH = '/docs'
 const DEVELOPERS_BASE_PATH = '/developers'
@@ -74,8 +102,14 @@ function Anchor({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnc
 
 function ArrowUpRight({ className }: { className?: string }) {
   return (
-    // biome-ignore lint/a11y/noSvgWithoutTitle: Decorative external-link icon.
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden className={className}>
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className={className}
+    >
       <path d="M7 17 17 7M17 7H8M17 7V16" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   )
@@ -84,26 +118,18 @@ function ArrowUpRight({ className }: { className?: string }) {
 function TempoLogo({ className }: { className?: string }) {
   return (
     <span
-      aria-hidden
-      className={`block bg-current ${className ?? ''}`}
-      style={{
-        aspectRatio: '102.461 / 23.2394',
-        maskImage: `url('${publicAssetPath('/stickers/sticker4/tempo.svg')}')`,
-        maskRepeat: 'no-repeat',
-        maskSize: 'contain',
-        maskPosition: 'center',
-        WebkitMaskImage: `url('${publicAssetPath('/stickers/sticker4/tempo.svg')}')`,
-        WebkitMaskRepeat: 'no-repeat',
-        WebkitMaskSize: 'contain',
-        WebkitMaskPosition: 'center',
-      }}
+      aria-hidden="true"
+      {...ui.tempoLogoTextAppearance({
+        value0: `url('${publicAssetPath('/stickers/sticker4/tempo.svg')}')`,
+        value1: `url('${publicAssetPath('/stickers/sticker4/tempo.svg')}')`,
+        className: ` ${ui.tempoLogoText().className} ${className ?? ''}`,
+      })}
     />
   )
 }
 
 function Glyph({ children }: { children: ReactNode }) {
   return (
-    // biome-ignore lint/a11y/noSvgWithoutTitle: Decorative mega-menu icon.
     <svg
       width="18"
       height="18"
@@ -113,7 +139,7 @@ function Glyph({ children }: { children: ReactNode }) {
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      aria-hidden
+      aria-hidden="true"
     >
       {children}
     </svg>
@@ -132,12 +158,11 @@ function McpIcon() {
 
 function ActiveSquare({ activeKey }: { activeKey: string }) {
   return (
-    // biome-ignore lint/a11y/noSvgWithoutTitle: Decorative active-state indicator.
     <svg
       key={activeKey}
       viewBox="0 0 11 11"
-      aria-hidden
-      className="nav-active-square size-[11px] shrink-0 text-foreground/70"
+      aria-hidden="true"
+      {...ui.activeSquareIcon({ className: `nav-active-square ${navActiveSquare().className}` })}
     >
       {[0, 4, 8].flatMap((y) =>
         [0, 4, 8].map((x) => (
@@ -150,8 +175,7 @@ function ActiveSquare({ activeKey }: { activeKey: string }) {
 
 function MenuIcon() {
   return (
-    // biome-ignore lint/a11y/noSvgWithoutTitle: Button provides the accessible label.
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
       <path d="M3 7h14M3 13h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
@@ -159,7 +183,6 @@ function MenuIcon() {
 
 function SearchIcon({ className }: { className?: string }) {
   return (
-    // biome-ignore lint/a11y/noSvgWithoutTitle: Button provides the accessible label.
     <svg
       width="15"
       height="15"
@@ -169,8 +192,8 @@ function SearchIcon({ className }: { className?: string }) {
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      aria-hidden
-      className={`shrink-0 ${className ?? ''}`}
+      aria-hidden="true"
+      className={` ${ui.searchIconIcon().className} ${className ?? ''}`}
     >
       <circle cx="11" cy="11" r="7" />
       <path d="m21 21-4.3-4.3" />
@@ -182,7 +205,7 @@ function SearchIcon({ className }: { className?: string }) {
 // `[data-v-gutter-top]` container still mounts Vocs' built-in `<Search />`
 // (it owns a global Cmd/Ctrl+K listener and the search dialog). Rather than
 // importing that internal, unexported component, we re-expose the affordance by
-// dispatching the same shortcut Vocs already handles. See src/pages/_root.css
+// dispatching the same shortcut Vocs already handles. See src/styles/globals.ts
 // where the gutter is hidden, and node_modules/vocs Search.tsx for the listener.
 //
 // Returns true when Vocs handled the shortcut (it calls `preventDefault`, so
@@ -227,8 +250,7 @@ function openDocsSearchWhenReady(attempt = 0) {
 
 function CloseIcon() {
   return (
-    // biome-ignore lint/a11y/noSvgWithoutTitle: Button provides the accessible label.
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
       <path
         d="M5 5l10 10M15 5L5 15"
         stroke="currentColor"
@@ -241,14 +263,13 @@ function CloseIcon() {
 
 function Chevron({ open }: { open: boolean }) {
   return (
-    // biome-ignore lint/a11y/noSvgWithoutTitle: Decorative disclosure icon; button exposes expanded state.
     <svg
       width="16"
       height="16"
       viewBox="0 0 16 16"
       fill="none"
-      aria-hidden
-      className={`shrink-0 opacity-60 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+      aria-hidden="true"
+      {...composeStyles(ui.chevronIcon(), !!open && ui.chevronIcon2())}
     >
       <path
         d="M4 6l4 4 4-4"
@@ -263,8 +284,7 @@ function Chevron({ open }: { open: boolean }) {
 
 function CopyIcon() {
   return (
-    // biome-ignore lint/a11y/noSvgWithoutTitle: Parent copy button provides the accessible label.
-    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <rect
         x="5.25"
         y="5.25"
@@ -286,8 +306,7 @@ function CopyIcon() {
 
 function CheckIcon() {
   return (
-    // biome-ignore lint/a11y/noSvgWithoutTitle: Parent copy button provides the accessible label.
-    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path
         d="M3 8.5L6.5 12L13 4"
         stroke="currentColor"
@@ -304,17 +323,17 @@ function CheckIcon() {
 const agentCommands = [
   {
     label: 'Codex',
-    logo: <CodexLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    logo: <CodexLogo aria-hidden="true" className={ui.codexLogo().className} />,
     command: tempoAgentSetupCommands.codex,
   },
   {
     label: 'Claude Code',
-    logo: <ClaudeLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    logo: <ClaudeLogo aria-hidden="true" className={ui.codexLogo().className} />,
     command: tempoAgentSetupCommands.claude,
   },
   {
     label: 'Amp',
-    logo: <AmpLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    logo: <AmpLogo aria-hidden="true" className={ui.codexLogo().className} />,
     command: tempoAgentSetupCommands.amp,
   },
   {
@@ -339,7 +358,7 @@ function CommandTabs({
   onSelect: (index: number) => void
 }) {
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div {...ui.commandTabsLayout()}>
       {commands.map((item, index) => {
         const active = index === activeIndex
         return (
@@ -348,11 +367,11 @@ function CommandTabs({
             type="button"
             aria-pressed={active}
             onClick={() => onSelect(index)}
-            className={`inline-flex items-center gap-1.5 rounded-[4px] px-2.5 py-1.5 font-sans text-[12px] tracking-[0] transition-colors ${
-              active
-                ? 'bg-foreground/[0.06] text-foreground'
-                : 'text-foreground/60 hover:bg-foreground/[0.03] hover:text-foreground/70'
-            }`}
+            {...composeStyles(
+              ui.commandTabsButton(),
+              !!active && ui.commandTabsButton2(),
+              !active && ui.commandTabsButton3(),
+            )}
           >
             {item.logo}
             <span>{item.label}</span>
@@ -381,16 +400,22 @@ function CommandSnippet({
       type="button"
       onClick={() => onCopy(command)}
       aria-label={copyLabel}
-      className="group/copy flex min-h-[48px] w-full items-start gap-3 rounded-[4px] bg-foreground/[0.035] px-3 py-2.5 text-left transition-colors hover:bg-foreground/[0.06]"
+      {...ui.commandSnippetButton({ className: 'group/copy' })}
     >
-      <code className="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)] gap-2 whitespace-pre-wrap break-words font-mono text-[12px] text-foreground leading-[1.55]">
-        <span aria-hidden="true" className="select-none text-foreground/55">
+      <code {...ui.code()}>
+        <span aria-hidden="true" {...ui.commandSnippetText()}>
           $
         </span>
-        <span className="min-w-0">{children ?? <AgentSetupCommand command={command} />}</span>
+        <span {...ui.commandSnippetText2()}>
+          {children ?? <AgentSetupCommand command={command} />}
+        </span>
       </code>
       <span
-        className={`mt-1 shrink-0 transition-colors ${copied ? 'text-foreground' : 'text-foreground/55 group-hover/copy:text-foreground/70'}`}
+        {...composeStyles(
+          ui.commandSnippetText3(),
+          !!copied && ui.commandSnippetText4(),
+          !copied && ui.commandSnippetText5(),
+        )}
       >
         {copied ? <CheckIcon /> : <CopyIcon />}
       </span>
@@ -410,26 +435,16 @@ function AgentCommandSection(props: {
   const external = isExternal(href)
 
   return (
-    <div className="group/item rounded-[4px] px-3 py-2.5 transition-colors hover:bg-foreground/[0.04]">
-      <div className="flex items-start gap-3">
-        <span className="grid size-[34px] shrink-0 place-items-center bg-surface-input text-foreground">
-          {icon}
-        </span>
-        <Anchor
-          href={href}
-          onClick={onClick}
-          className="relative flex min-w-0 flex-col gap-0.5 pr-5"
-        >
-          {external ? (
-            <ArrowUpRight className="absolute top-0.5 right-0 size-3 text-foreground/55 transition-colors group-hover/item:text-foreground/60" />
-          ) : null}
-          <span className="font-sans text-[14px] text-foreground tracking-[0]">{label}</span>
-          <span className="font-sans text-[13px] text-foreground/60 leading-[1.4] tracking-[0]">
-            {desc}
-          </span>
+    <div {...ui.agentCommandSectionLayout({ className: 'group/item' })}>
+      <div {...ui.agentCommandSectionLayout2()}>
+        <span {...ui.agentCommandSectionText()}>{icon}</span>
+        <Anchor href={href} onClick={onClick} className={ui.anchor().className}>
+          {external ? <ArrowUpRight className={ui.arrowUpRight().className} /> : null}
+          <span {...ui.agentCommandSectionText2()}>{label}</span>
+          <span {...ui.agentCommandSectionText3()}>{desc}</span>
         </Anchor>
       </div>
-      {children ? <div className="mt-3 ml-[52px] space-y-3">{children}</div> : null}
+      {children ? <div {...ui.agentCommandSectionLayout3()}>{children}</div> : null}
     </div>
   )
 }
@@ -455,13 +470,9 @@ function AgentsPanel({
   }
 
   return (
-    <div className={desktop ? 'w-[520px] p-3' : 'pb-4 pl-3'}>
-      {desktop ? (
-        <p className="px-3 pt-2 pb-1.5 font-sans text-[13px] text-foreground/55 tracking-[0]">
-          Connect your coding agent
-        </p>
-      ) : null}
-      <div className="space-y-1">
+    <div className={desktop ? ui.agentsPanelLayout().className : ui.agentsPanelLayout2().className}>
+      {desktop ? <p {...ui.agentsPanelDescription()}>Connect your coding agent</p> : null}
+      <div {...ui.agentsPanelLayout3()}>
         <AgentCommandSection
           href={TEMPO_PLUGIN_URL}
           label="Tempo Docs"
@@ -478,7 +489,7 @@ function AgentsPanel({
             }}
           />
           {activeCommand.label === 'MCP' ? (
-            <p className="px-2.5 py-1 font-sans text-[12px] text-foreground/60">
+            <p {...ui.agentsPanelDescription2()}>
               Add this URL as an HTTP MCP server in your agent’s settings.
             </p>
           ) : null}
@@ -569,16 +580,16 @@ function SidebarLeaf({
       href={node.link ?? '#'}
       onClick={onNavigate}
       aria-current={active ? (node.link?.includes('#') ? 'location' : 'page') : undefined}
-      style={{ paddingLeft: depth > 1 ? `${(depth - 1) * 12 + 8}px` : undefined }}
-      className={`-mx-2 flex min-h-8 items-center gap-2 rounded-[6px] px-2 py-1 font-sans text-[14px] tracking-[0] transition-colors ${
-        active
-          ? 'font-medium text-foreground hover:bg-foreground/[0.04]'
-          : 'text-foreground/70 hover:bg-foreground/[0.04] hover:text-foreground'
-      }`}
+      {...ui.sidebarLeafAnchorAppearance({
+        value0: depth > 1 ? `${(depth - 1) * 12 + 8}px` : '8px',
+        className: ` ${ui.anchor2().className} ${
+          active ? ui.anchor3().className : ui.anchor4().className
+        }`,
+      })}
     >
       {active ? <ActiveSquare activeKey={`${pathname}#${activeAnchor ?? ''}`} /> : null}
       {node.text}
-      {external ? <ArrowUpRight className="mt-0.5 size-3" /> : null}
+      {external ? <ArrowUpRight className={ui.arrowUpRight2().className} /> : null}
     </Anchor>
   )
 }
@@ -609,14 +620,16 @@ function SidebarDisclosure({
     <details
       open={open}
       onToggle={(event) => setOpen(event.currentTarget.open)}
-      className="group/sb mt-1"
-      style={{ paddingLeft: depth > 1 ? `${(depth - 1) * 12}px` : undefined }}
+      {...ui.sidebarDisclosureDetailsAppearance({
+        value0: depth > 1 ? `${(depth - 1) * 12}px` : '0px',
+        className: ui.sidebarDisclosureDetails({ className: 'group/sb' }).className,
+      })}
     >
-      <summary className="-mx-2 flex min-h-8 cursor-pointer list-none items-center justify-between rounded-[6px] px-2 py-1 font-sans text-[14px] text-foreground/65 tracking-[0] transition-colors hover:bg-foreground/[0.04] hover:text-foreground [&::-webkit-details-marker]:hidden">
+      <summary {...ui.sidebarDisclosureSummary()}>
         {node.text}
         <Chevron open={open} />
       </summary>
-      <div className="mt-1 ml-2 flex flex-col gap-0 border-line border-l pl-3">
+      <div {...ui.sidebarDisclosureLayout()}>
         <SidebarNodes
           nodes={node.items ?? []}
           pathname={pathname}
@@ -665,15 +678,18 @@ export function SidebarNodes({
         // Non-collapsible section (e.g. "Build on Tempo"): a heading + children.
         if (node.collapsed === undefined) {
           return (
-            <div key={key} className={depth === 0 ? 'mt-5 first:mt-0' : 'mt-3'}>
-              <p className="-mx-2 px-2 pb-2 font-normal font-sans text-[13px] text-foreground/60 leading-[1.3] tracking-[0]">
-                {node.text}
-              </p>
+            <div
+              key={key}
+              className={
+                depth === 0 ? ui.sidebarNodesLayout().className : ui.sidebarNodesLayout2().className
+              }
+            >
+              <p {...ui.sidebarNodesDescription()}>{node.text}</p>
               <div
                 className={
                   depth > 0
-                    ? 'ml-2 flex flex-col gap-0 border-line border-l pl-3'
-                    : 'flex flex-col gap-0'
+                    ? ui.sidebarNodesLayout3().className
+                    : ui.sidebarNodesLayout4().className
                 }
               >
                 <SidebarNodes
@@ -816,25 +832,25 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
   }, [surface])
 
   const brand = (
-    <div className="docs-header-brand">
+    <div className={`docs-header-brand ${docsHeaderBrand().className}`}>
       <WakuLink
         to="/"
         onClick={close}
         aria-label="Tempo documentation"
-        className="docs-header-logo"
+        className={`docs-header-logo ${docsHeaderLogo().className}`}
       >
-        <TempoLogo className="h-[18px] w-[80px]" />
+        <TempoLogo className={ui.tempoLogo().className} />
       </WakuLink>
     </div>
   )
 
   const destinations = (
-    <div className="docs-header-destinations">
+    <div className={`docs-header-destinations ${docsHeaderDestinations().className}`}>
       <WakuLink
         to="/"
         onClick={close}
         aria-current={surface === 'docs' ? 'page' : undefined}
-        className="docs-header-wordmark"
+        className={`docs-header-wordmark ${docsHeaderWordmark().className}`}
       >
         Docs
       </WakuLink>
@@ -842,7 +858,7 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
         to="/blog"
         onClick={close}
         aria-current={surface === 'blog' ? 'page' : undefined}
-        className="docs-header-wordmark"
+        className={`docs-header-wordmark ${docsHeaderWordmark().className}`}
       >
         Blog
       </WakuLink>
@@ -850,46 +866,55 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
   )
 
   return (
-    <header className="docs-site-header">
-      <nav className="docs-header-nav" aria-label="Developer navigation">
+    <header className={`docs-site-header ${docsSiteHeader().className}`}>
+      <nav
+        className={`docs-header-nav ${docsHeaderNav().className}`}
+        aria-label="Developer navigation"
+      >
         {brand}
         <button
           type="button"
           onClick={openSearch}
           aria-label="Search documentation"
           aria-keyshortcuts="Meta+K Control+K"
-          className="docs-header-search"
+          className={`docs-header-search ${docsHeaderSearch().className}`}
           disabled={!mounted}
         >
-          <span className="flex min-w-0 items-center gap-2.5">
+          <span {...ui.docsHeaderText()}>
             <SearchIcon />
-            <span className="truncate">Search docs</span>
+            <span {...ui.docsHeaderText2()}>Search docs</span>
           </span>
           <kbd>⌘ K</kbd>
         </button>
-        <div className="docs-header-actions">
+        <div className={`docs-header-actions ${docsHeaderActions().className}`}>
           {destinations}
-          <div ref={agentMenuRef} className="docs-header-agent-menu">
+          <div
+            ref={agentMenuRef}
+            className={`docs-header-agent-menu ${docsHeaderAgentMenu().className}`}
+          >
             <button
               ref={agentTriggerRef}
               type="button"
               aria-expanded={agentsOpen}
               aria-controls="docs-agent-tools"
               onClick={() => setAgentsOpen((value) => !value)}
-              className="docs-header-agent-trigger"
+              className={`docs-header-agent-trigger ${docsHeaderAgentTrigger().className}`}
               disabled={!mounted}
             >
               Agent setup
               <Chevron open={agentsOpen} />
             </button>
             {agentsOpen ? (
-              <div id="docs-agent-tools" className="docs-header-agent-panel">
+              <div
+                id="docs-agent-tools"
+                className={`docs-header-agent-panel ${docsHeaderAgentPanel().className}`}
+              >
                 <AgentsPanel onNavigate={close} />
               </div>
             ) : null}
           </div>
         </div>
-        <div className="docs-header-mobile-actions">
+        <div className={`docs-header-mobile-actions ${docsHeaderMobileActions().className}`}>
           {destinations}
           <button
             type="button"
@@ -897,9 +922,9 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
             aria-label="Search documentation"
             aria-keyshortcuts="Meta+K Control+K"
             disabled={!mounted}
-            className="docs-header-icon-button"
+            className={`docs-header-icon-button ${docsHeaderIconButton().className}`}
           >
-            <SearchIcon className="size-[18px]" />
+            <SearchIcon className={ui.searchIcon().className} />
           </button>
           <button
             type="button"
@@ -908,7 +933,7 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
             disabled={!mounted}
             aria-expanded={open}
             aria-controls="docs-mobile-navigation"
-            className="docs-header-icon-button"
+            className={`docs-header-icon-button ${docsHeaderIconButton().className}`}
           >
             <MenuIcon />
           </button>
@@ -918,7 +943,7 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
       <dialog
         ref={mobileDialogRef}
         id="docs-mobile-navigation"
-        className="docs-header-mobile-dialog"
+        className={`docs-header-mobile-dialog ${docsHeaderMobileDialog().className}`}
         aria-label="Documentation navigation"
         onCancel={() => setOpen(false)}
         onClose={() => setOpen(false)}
@@ -930,27 +955,36 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
           }
         }}
       >
-        <div className="docs-header-mobile-top">
+        <div className={`docs-header-mobile-top ${docsHeaderMobileTop().className}`}>
           {brand}
-          <div className="docs-header-mobile-actions">
+          <div className={`docs-header-mobile-actions ${docsHeaderMobileActions().className}`}>
             {destinations}
             <button
               type="button"
               ref={mobileCloseRef}
               onClick={close}
               aria-label="Close menu"
-              className="docs-header-icon-button"
+              className={`docs-header-icon-button ${docsHeaderIconButton().className}`}
             >
               <CloseIcon />
             </button>
           </div>
         </div>
-        <div className="docs-header-mobile-body">
-          <button type="button" onClick={openSearch} className="docs-header-mobile-search">
+        <div className={`docs-header-mobile-body ${docsHeaderMobileBody().className}`}>
+          <button
+            type="button"
+            onClick={openSearch}
+            className={`docs-header-mobile-search ${docsHeaderMobileSearch().className}`}
+          >
             <SearchIcon /> Search documentation
           </button>
-          <nav aria-label="All documentation sections" className="docs-header-mobile-sections">
-            <p className="docs-header-mobile-label">Explore the docs</p>
+          <nav
+            aria-label="All documentation sections"
+            className={`docs-header-mobile-sections ${docsHeaderMobileSections().className}`}
+          >
+            <p className={`docs-header-mobile-label ${docsHeaderMobileLabel().className}`}>
+              Explore the docs
+            </p>
             {docsSections.map((section) => (
               <WakuLink
                 key={section.id}
@@ -963,8 +997,10 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
               </WakuLink>
             ))}
           </nav>
-          <div className="docs-header-mobile-resources">
-            <p className="docs-header-mobile-label">Resources</p>
+          <div className={`docs-header-mobile-resources ${docsHeaderMobileResources().className}`}>
+            <p className={`docs-header-mobile-label ${docsHeaderMobileLabel().className}`}>
+              Resources
+            </p>
             {docsUtilitySections.map((section) =>
               section.id === 'tools' ? (
                 <DocsApiDropdown
@@ -978,7 +1014,7 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
                   key={section.id}
                   to={section.href}
                   onClick={close}
-                  className="docs-header-mobile-utility-link"
+                  className={`docs-header-mobile-utility-link ${docsHeaderMobileUtilityLink().className}`}
                   aria-current={activeSection?.id === section.id ? 'page' : undefined}
                 >
                   {section.label}
@@ -987,13 +1023,16 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
             )}
             <DocsResourceLinks onNavigate={close} />
           </div>
-          <details className="docs-header-mobile-agents">
+          <details className={`docs-header-mobile-agents ${docsHeaderMobileAgents().className}`}>
             <summary>Agent setup</summary>
             <AgentsPanel variant="mobile" onNavigate={close} />
           </details>
           <ThemeSelect surface={surface} />
-          <a href="https://tempo.xyz/" className="docs-header-mobile-website">
-            Back to tempo.xyz <ArrowUpRight className="size-4" />
+          <a
+            href="https://tempo.xyz/"
+            className={`docs-header-mobile-website ${docsHeaderMobileWebsite().className}`}
+          >
+            Back to tempo.xyz <ArrowUpRight className={ui.arrowUpRight3().className} />
           </a>
         </div>
       </dialog>
@@ -1029,7 +1068,7 @@ function ThemeSelect({ surface }: { surface: 'docs' | 'blog' }) {
   }, [surface])
 
   return (
-    <label className="docs-header-mobile-theme">
+    <label className={`docs-header-mobile-theme ${docsHeaderMobileTheme().className}`}>
       <span>Appearance</span>
       <select
         aria-label="Color theme"

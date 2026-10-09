@@ -1,12 +1,13 @@
+import * as ui from './ValidatorTopologyDiagram.recipes'
 export function ValidatorTopologyDiagram() {
   return (
-    <div style={{ margin: '1.5rem 0', overflowX: 'auto' }}>
+    <div {...ui.validatorTopologyDiagramLayoutAppearance()}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="-200 0 1040 490"
         role="img"
         aria-labelledby="validator-topology-title validator-topology-description"
-        style={{ display: 'block', width: '100%', minWidth: 800, height: 'auto' }}
+        {...ui.validatorTopologyDiagramIconAppearance()}
         fontFamily="ui-sans-serif, system-ui, sans-serif"
         fontSize="16"
         fill="currentColor"

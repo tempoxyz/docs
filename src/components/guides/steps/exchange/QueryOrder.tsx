@@ -6,6 +6,7 @@ import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, Step } from '../../Demo'
 import type { DemoStepProps } from '../types'
+import * as ui from './QueryOrder.recipes'
 
 export function QueryOrder(props: DemoStepProps) {
   const { stepNumber, last = false } = props
@@ -52,7 +53,7 @@ export function QueryOrder(props: DemoStepProps) {
           disabled={!active || isQuerying}
           onClick={handleQuery}
           type="button"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className={ui.queryOrderButton().className}
         >
           {isQuerying ? 'Querying...' : hasQueried ? 'Query Again' : 'Query Order'}
         </Button>
@@ -61,61 +62,57 @@ export function QueryOrder(props: DemoStepProps) {
       title={`Query order details${orderId ? ` (ID: ${orderId})` : ''}`}
     >
       {hasQueried && isSuccess && order && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
-            <div className="flex flex-col gap-3 text-sm">
+        <div {...ui.queryOrderLayout()}>
+          <div {...ui.queryOrderLayout2()}>
+            <div {...ui.queryOrderLayout3()}>
               {/* Order Type and Price */}
-              <div className="grid grid-cols-2 gap-3">
+              <div {...ui.queryOrderLayout4()}>
                 <div>
-                  <div className="mb-1 text-gray11 text-xs uppercase tracking-wider">Type</div>
-                  <div className="font-medium">
+                  <div {...ui.queryOrderLayout5()}>Type</div>
+                  <div {...ui.queryOrderLayout6()}>
                     {order.isFlip ? 'Flip ' : 'Limit '}
                     {order.isBid ? (
-                      <span className="text-green-11">Buy</span>
+                      <span {...ui.buy()}>Buy</span>
                     ) : (
-                      <span className="text-red-11">Sell</span>
+                      <span {...ui.sell()}>Sell</span>
                     )}
                   </div>
                 </div>
                 <div>
-                  <div className="mb-1 text-gray11 text-xs uppercase tracking-wider">Price</div>
-                  <div className="font-mono">
+                  <div {...ui.queryOrderLayout5()}>Price</div>
+                  <div {...ui.queryOrderLayout7()}>
                     ${Tick.toPrice(order.tick)}{' '}
-                    <span className="text-gray11 text-xs">(tick: {order.tick})</span>
+                    <span {...ui.queryOrderText()}>(tick: {order.tick})</span>
                   </div>
                 </div>
               </div>
 
               {/* Amounts */}
-              <div className="grid grid-cols-2 gap-3">
+              <div {...ui.queryOrderLayout4()}>
                 <div>
-                  <div className="mb-1 text-gray11 text-xs uppercase tracking-wider">
-                    Original Amount
-                  </div>
-                  <div className="font-mono">{formatUnits(order.amount, 6)} AlphaUSD</div>
+                  <div {...ui.queryOrderLayout5()}>Original Amount</div>
+                  <div {...ui.queryOrderLayout7()}>{formatUnits(order.amount, 6)} AlphaUSD</div>
                 </div>
                 <div>
-                  <div className="mb-1 text-gray11 text-xs uppercase tracking-wider">Remaining</div>
-                  <div className="font-mono">{formatUnits(order.remaining, 6)} AlphaUSD</div>
+                  <div {...ui.queryOrderLayout5()}>Remaining</div>
+                  <div {...ui.queryOrderLayout7()}>{formatUnits(order.remaining, 6)} AlphaUSD</div>
                 </div>
               </div>
 
               {/* Fill Progress */}
               {order.amount > 0n && order.amount !== order.remaining && (
                 <div>
-                  <div className="mb-1 text-gray11 text-xs uppercase tracking-wider">
-                    Fill Progress
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-3">
+                  <div {...ui.queryOrderLayout5()}>Fill Progress</div>
+                  <div {...ui.queryOrderLayout8()}>
+                    <div {...ui.queryOrderLayout9()}>
                       <div
-                        className="h-full bg-accent-9 transition-all"
-                        style={{
-                          width: `${Math.max(0, Math.min(100, Number(((order.amount - order.remaining) * 10000n) / order.amount) / 100))}%`,
-                        }}
+                        {...ui.queryOrderLayoutAppearance({
+                          value0: `${Math.max(0, Math.min(100, Number(((order.amount - order.remaining) * 10000n) / order.amount) / 100))}%`,
+                          className: ui.queryOrderLayout10().className,
+                        })}
                       />
                     </div>
-                    <span className="font-mono text-xs">
+                    <span {...ui.queryOrderText2()}>
                       {Math.max(
                         0,
                         Math.min(

@@ -2,8 +2,12 @@
 
 import Image from 'next/image'
 import { useState } from 'react'
+import { ripple } from '../../../styles/motion'
+import { repoBrandSquareNeutral } from '../../../styles/surfaces.styles'
+import { variants } from '../../../styles/theme'
 import ArrowUpRight from './ArrowUpRight'
 import EdgeMarkers from './EdgeMarkers'
+import * as ui from './OpenSourceSection.recipes'
 import Reveal from './Reveal'
 
 type Repo = {
@@ -57,17 +61,17 @@ const repos: Repo[] = [
 // Only rendered when the viewport is wide enough for it to hang outside the
 // max-w-7xl shell without being clipped.
 function RethBadge({ shown }: { shown: boolean }) {
-  const reveal = `transition-[opacity,scale] duration-350 ease-out motion-reduce:transition-none ${
-    shown ? 'scale-100 opacity-100' : 'scale-40 opacity-0'
+  const reveal = ` ${ui.rethBadgeStateState().className} ${
+    shown ? ui.rethBadgeStateState2().className : ui.rethBadgeStateState3().className
   }`
 
   return (
-    <div aria-hidden className="absolute top-0 left-0 hidden -translate-x-1/2 2xl:block">
-      <div className={`group relative border border-line/30 bg-surface-page p-2.5 ${reveal}`}>
+    <div aria-hidden="true" {...ui.rethBadgeLayout()}>
+      <div className={` ${ui.rethBadgeLayout2({ className: 'group' }).className} ${reveal}`}>
         {/* Ripple rings: invisible at rest, expanding outward while hovered. */}
-        <span className="pointer-events-none absolute inset-0 border border-line opacity-0 motion-safe:group-hover:animate-[ripple_2.8s_ease-out_infinite]" />
-        <span className="pointer-events-none absolute inset-0 border border-line opacity-0 motion-safe:group-hover:animate-[ripple_2.8s_ease-out_1.4s_infinite]" />
-        <div className={`border border-line p-2.5 ${reveal}`}>
+        <span {...rippleRing({ delayed: false })} />
+        <span {...rippleRing({ delayed: true })} />
+        <div className={` ${ui.rethBadgeLayout3().className} ${reveal}`}>
           <Image src="/assets/reth.svg" alt="" width={75} height={75} className={reveal} />
         </div>
       </div>
@@ -78,53 +82,49 @@ function RethBadge({ shown }: { shown: boolean }) {
 export default function OpenSourceSection() {
   const [rethHovered, setRethHovered] = useState(false)
   return (
-    <section className="relative pb-6">
+    <section {...ui.openSourceSectionSection()}>
       <RethBadge shown={rethHovered} />
-      <Reveal className="flex flex-col items-center px-5 text-center">
-        <h2 className="font-sans text-[clamp(2rem,6vw,3rem)] text-foreground leading-[1.1] tracking-[-0.02em] antialiased">
-          Open source
-        </h2>
-        <p className="mt-6 max-w-[560px] font-sans text-[16px] text-foreground/50 leading-[1.4] tracking-[0] lg:text-[20px]">
+      <Reveal className={ui.reveal().className}>
+        <h2 {...ui.openSourceSectionHeading()}>Open source</h2>
+        <p {...ui.openSourceSectionDescription()}>
           All of Tempo&apos;s code is open source, built by the same team behind Reth, Foundry,
           viem, and more.
         </p>
       </Reveal>
 
-      <div className="relative mt-16">
+      <div {...ui.openSourceSectionLayout()}>
         <EdgeMarkers wideOnly />
-        <ul className="grid auto-rows-fr grid-cols-1 gap-px border-line border-y bg-line md:grid-cols-2 xl:grid-cols-3">
+        <ul {...ui.openSourceSectionList()}>
           {repos.map(({ name, desc, href, brandColor }, i) => {
             const neutralMarker = name === 'Tempo' || name === 'MPP'
             const isReth = name === 'Reth'
 
             return (
-              <li key={name} className="h-full">
-                <Reveal delay={i * 50} className="h-full">
+              <li key={name} {...ui.openSourceSectionItem()}>
+                <Reveal delay={i * 50} className={ui.openSourceSectionItem().className}>
                   <a
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
                     onMouseEnter={isReth ? () => setRethHovered(true) : undefined}
                     onMouseLeave={isReth ? () => setRethHovered(false) : undefined}
-                    className="group flex h-full min-h-[220px] flex-col justify-between bg-surface-shell p-6 text-left transition-colors hover:bg-surface-block lg:p-8"
+                    {...ui.openSourceSectionLink({ className: 'group' })}
                   >
-                    <span className="flex items-center justify-between gap-4">
-                      <span className="flex items-center gap-3">
+                    <span {...ui.openSourceSectionText()}>
+                      <span {...ui.openSourceSectionText2()}>
                         <span
-                          aria-hidden
-                          className={`size-3 shrink-0 ${neutralMarker ? 'repo-brand-square-neutral' : ''}`}
-                          style={neutralMarker ? undefined : { backgroundColor: brandColor }}
+                          aria-hidden="true"
+                          {...ui.openSourceSectionTextAppearance({
+                            value0: neutralMarker ? 'var(--foreground)' : brandColor,
+                            className: ` ${ui.openSourceSectionText3().className} ${neutralMarker ? `repo-brand-square-neutral ${repoBrandSquareNeutral().className}` : ''}`,
+                          })}
                         />
-                        <span className="font-sans text-[18px] text-foreground tracking-[0]">
-                          {name}
-                        </span>
+                        <span {...ui.openSourceSectionText4()}>{name}</span>
                       </span>
-                      <ArrowUpRight className="size-4 shrink-0 text-foreground/35 transition-colors group-hover:text-foreground/80" />
+                      <ArrowUpRight className={ui.arrowUpRight().className} />
                     </span>
 
-                    <span className="mt-8 font-sans text-[15px] text-foreground/65 leading-[1.45] tracking-[0] transition-colors group-hover:text-foreground/85">
-                      {desc}
-                    </span>
+                    <span {...ui.openSourceSectionText5()}>{desc}</span>
                   </a>
                 </Reveal>
               </li>
@@ -136,13 +136,30 @@ export default function OpenSourceSection() {
             href="https://github.com/tempoxyz"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center justify-center gap-2 border-line border-b px-5 py-5 font-sans text-[16px] text-foreground tracking-[0] transition-colors hover:bg-surface-block lg:px-8"
+            {...ui.openSourceSectionLink2({ className: 'group' })}
           >
             View on GitHub
-            <ArrowUpRight className="size-4 shrink-0 text-foreground/45 transition-colors group-hover:text-foreground/80" />
+            <ArrowUpRight className={ui.arrowUpRight2().className} />
           </a>
         </Reveal>
       </div>
     </section>
   )
 }
+
+const rippleRing = variants({
+  base: {
+    pointerEvents: 'none',
+    position: 'absolute',
+    inset: 0,
+    border: '1px solid var(--line)',
+    opacity: 0,
+    animationDuration: '2.8s',
+    animationTimingFunction: 'ease-out',
+    animationIterationCount: 'infinite',
+    '@media (prefers-reduced-motion: no-preference) and (hover: hover)': {
+      selectors: { '.group:hover &': { animationName: ripple } },
+    },
+  },
+  variants: { delayed: { true: { animationDelay: '1.4s' }, false: { animationDelay: '0s' } } },
+})

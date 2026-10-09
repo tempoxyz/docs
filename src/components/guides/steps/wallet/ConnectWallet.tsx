@@ -17,6 +17,7 @@ import {
 } from '../../../lib/wallets'
 import { Button, Step, StringFormatter, useCopyToClipboard } from '../../Demo'
 import type { DemoStepProps } from '../types'
+import * as ui from './ConnectWallet.recipes'
 
 export function ConnectWallet(props: DemoStepProps) {
   const { stepNumber = 1 } = props
@@ -64,22 +65,22 @@ export function ConnectWallet(props: DemoStepProps) {
 
   const actions = React.useMemo(() => {
     if (!fundableConnectors.length) {
-      return <div className="flex items-center text-[14px] -tracking-[2%]">No wallets found.</div>
+      return <div {...ui.connectWalletLayout()}>No wallets found.</div>
     }
 
     if (!hasNonWebAuthnWallet) {
       return (
-        <div className="flex flex-wrap justify-center gap-2">
+        <div {...ui.connectWalletLayout2()}>
           {fundableConnectors.map((conn) => (
             <Button
               variant="default"
-              className="flex items-center gap-1.5"
+              className={ui.connectWalletButton().className}
               key={conn.id}
               disabled={connect.isPending}
               onClick={() => void handleConnect(conn)}
               type="button"
             >
-              {conn.icon ? <img className="size-5" src={conn.icon} alt={conn.name} /> : <div />}
+              {conn.icon ? <img {...ui.img()} src={conn.icon} alt={conn.name} /> : <div />}
               {conn.name}
             </Button>
           ))}
@@ -88,13 +89,13 @@ export function ConnectWallet(props: DemoStepProps) {
     }
 
     return (
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-1">
+      <div {...ui.connectWalletLayout3()}>
+        <div {...ui.connectWalletLayout4()}>
           <Button onClick={() => walletAddress && copyToClipboard(walletAddress)} variant="default">
             {copied ? (
-              <LucideCheck className="mt-px text-gray9" />
+              <LucideCheck className={ui.lucideCheck().className} />
             ) : (
-              <LucideWalletCards className="mt-px text-gray9" />
+              <LucideWalletCards className={ui.lucideCheck().className} />
             )}
             {walletAddress &&
               StringFormatter.truncate(walletAddress, {
@@ -105,7 +106,7 @@ export function ConnectWallet(props: DemoStepProps) {
           </Button>
           <Button
             variant="destructive"
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={ui.connectWalletButton2().className}
             onClick={() => disconnect.disconnect({ connector: walletConnector })}
             type="button"
           >
@@ -114,7 +115,7 @@ export function ConnectWallet(props: DemoStepProps) {
         </div>
         {!isSupported && (
           <Button
-            className="w-fit"
+            className={ui.connectWalletButton3().className}
             variant="accent"
             onClick={() =>
               switchChain.switchChain({
@@ -134,7 +135,7 @@ export function ConnectWallet(props: DemoStepProps) {
           </Button>
         )}
         {switchChain.isSuccess && (
-          <div className="flex items-center font-normal text-[14px] -tracking-[2%]">
+          <div {...ui.connectWalletLayout5()}>
             Added Tempo to {walletConnector?.name ?? 'Wallet'}!
           </div>
         )}

@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { Container } from './Container'
 import { SqlEditor } from './SqlEditor'
+import * as ui from './TidxQuery.recipes'
 
 type Network = {
   name: string
@@ -81,7 +82,7 @@ function shorten(value: string) {
 }
 
 function renderValue(value: string | number | boolean | null) {
-  if (value === null) return <span className="text-gray9 italic">null</span>
+  if (value === null) return <span {...ui.renderValueText()}>null</span>
   if (typeof value === 'boolean') return value ? 'true' : 'false'
   if (typeof value === 'string') return shorten(value)
   return String(value)
@@ -151,29 +152,24 @@ export function TidxQuery() {
   return (
     <Container
       headerLeft={
-        <h4 className="font-normal text-[14px] text-gray12 leading-none">
+        <h4 {...ui.tidxQueryHeading()}>
           Public <code>tidx</code> Query
         </h4>
       }
       headerRight={
-        <button
-          type="button"
-          onClick={runQuery}
-          disabled={isLoading}
-          className="rounded-md bg-accent px-3 py-1.5 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        <button type="button" onClick={runQuery} disabled={isLoading} {...ui.tidxQueryButton()}>
           {isLoading ? 'Running...' : 'Run query'}
         </button>
       }
     >
-      <div className="space-y-4">
-        <div className="grid gap-3 md:grid-cols-3">
-          <label className="space-y-1 text-sm">
-            <span className="text-gray11">Example</span>
+      <div {...ui.tidxQueryLayout()}>
+        <div {...ui.tidxQueryLayout2()}>
+          <label {...ui.label()}>
+            <span {...ui.tidxQueryText()}>Example</span>
             <select
               value={presetIndex}
               onChange={(event) => applyPreset(Number(event.target.value))}
-              className="w-full rounded-md border border-gray6 bg-gray1 px-3 py-2 text-gray12"
+              {...ui.select()}
             >
               {PRESETS.map((preset, index) => (
                 <option key={preset.name} value={index}>
@@ -182,12 +178,12 @@ export function TidxQuery() {
               ))}
             </select>
           </label>
-          <label className="space-y-1 text-sm">
-            <span className="text-gray11">Network</span>
+          <label {...ui.label()}>
+            <span {...ui.tidxQueryText()}>Network</span>
             <select
               value={networkKey}
               onChange={(event) => setNetworkKey(event.target.value as 'mainnet' | 'testnet')}
-              className="w-full rounded-md border border-gray6 bg-gray1 px-3 py-2 text-gray12"
+              {...ui.select()}
             >
               {Object.entries(NETWORKS).map(([key, value]) => (
                 <option key={key} value={key}>
@@ -196,12 +192,12 @@ export function TidxQuery() {
               ))}
             </select>
           </label>
-          <label className="space-y-1 text-sm">
-            <span className="text-gray11">Engine</span>
+          <label {...ui.label()}>
+            <span {...ui.tidxQueryText()}>Engine</span>
             <select
               value={engine}
               onChange={(event) => setEngine(event.target.value as 'postgres' | 'clickhouse')}
-              className="w-full rounded-md border border-gray6 bg-gray1 px-3 py-2 text-gray12"
+              {...ui.select()}
             >
               <option value="clickhouse">ClickHouse</option>
               <option value="postgres">PostgreSQL</option>
@@ -209,41 +205,37 @@ export function TidxQuery() {
           </label>
         </div>
 
-        <p className="text-gray11 text-sm">{activePreset.description}</p>
+        <p {...ui.tidxQueryDescription()}>{activePreset.description}</p>
 
-        <label className="block space-y-1 text-sm">
-          <span className="text-gray11">Event signature (optional)</span>
+        <label {...ui.label2()}>
+          <span {...ui.tidxQueryText()}>Event signature (optional)</span>
           <input
             value={signature}
             onChange={(event) => setSignature(event.target.value)}
             placeholder="Transfer(address indexed from, address indexed to, uint256 value)"
-            className="w-full rounded-md border border-gray6 bg-gray1 px-3 py-2 font-mono text-gray12"
+            {...ui.tidxQueryInput()}
           />
         </label>
 
         <SqlEditor value={sql} onChange={setSql} minHeight="180px" />
 
-        {error && (
-          <div className="rounded-md border border-red6 bg-red2 px-3 py-2 text-red11 text-sm">
-            {error}
-          </div>
-        )}
+        {error && <div {...ui.tidxQueryLayout3()}>{error}</div>}
 
         {result && (
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-2 text-gray11 text-xs">
+          <div {...ui.tidxQueryLayout4()}>
+            <div {...ui.tidxQueryLayout5()}>
               <span>Rows: {result.row_count}</span>
               <span>Engine: {result.engine}</span>
               {result.query_time_ms !== undefined && (
                 <span>Query time: {result.query_time_ms.toFixed(1)} ms</span>
               )}
             </div>
-            <div className="overflow-x-auto rounded-md border border-gray6">
-              <table className="min-w-full text-left text-sm">
-                <thead className="bg-gray2 text-gray11">
+            <div {...ui.tidxQueryLayout6()}>
+              <table {...ui.table()}>
+                <thead {...ui.thead()}>
                   <tr>
                     {result.columns.map((column) => (
-                      <th key={column} className="px-3 py-2 font-medium">
+                      <th key={column} {...ui.th()}>
                         {column}
                       </th>
                     ))}
@@ -251,9 +243,9 @@ export function TidxQuery() {
                 </thead>
                 <tbody>
                   {result.rows.map((row) => (
-                    <tr key={JSON.stringify(row)} className="border-gray5 border-t">
+                    <tr key={JSON.stringify(row)} {...ui.tr()}>
                       {result.columns.map((column, cellIndex) => (
-                        <td key={column} className="px-3 py-2 font-mono">
+                        <td key={column} {...ui.td()}>
                           {renderValue(row[cellIndex] ?? null)}
                         </td>
                       ))}

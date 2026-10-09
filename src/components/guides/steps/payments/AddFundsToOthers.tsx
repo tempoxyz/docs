@@ -10,6 +10,7 @@ import { Hooks } from 'wagmi/tempo'
 import { Button, ExplorerAccountLink, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './AddFundsToOthers.recipes'
 
 export function AddFundsToOthers(props: DemoStepProps) {
   const { stepNumber = 2, last = false } = props
@@ -37,7 +38,6 @@ export function AddFundsToOthers(props: DemoStepProps) {
       refetchInterval: 1_500,
     },
   })
-  // biome-ignore lint/correctness/useExhaustiveDependencies: _
   React.useEffect(() => {
     balanceRefetch()
   }, [blockNumber])
@@ -86,7 +86,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
         <Button
           disabled={!isValidTarget || fundAccount.isPending}
           variant="default"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className={ui.addFundsToOthersButton().className}
           onClick={() => fundAccount.mutate()}
           type="button"
         >
@@ -97,7 +97,7 @@ export function AddFundsToOthers(props: DemoStepProps) {
       <Button
         disabled={!isValidTarget || fundAccount.isPending}
         variant={isValidTarget ? 'accent' : 'default'}
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.addFundsToOthersButton().className}
         type="button"
         onClick={() => fundAccount.mutate()}
       >
@@ -122,14 +122,14 @@ export function AddFundsToOthers(props: DemoStepProps) {
       number={stepNumber}
       title="Add testnet funds to an address."
     >
-      <div className="mx-6 flex flex-col gap-3 pb-4">
-        <div className="border-gray4 border-s-2 ps-5">
-          <div className="mt-2 flex flex-col">
-            <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="fundAddress">
+      <div {...ui.addFundsToOthersLayout()}>
+        <div {...ui.addFundsToOthersLayout2()}>
+          <div {...ui.addFundsToOthersLayout3()}>
+            <label {...ui.label()} htmlFor="fundAddress">
               Address to fund
             </label>
             <input
-              className="h-[34px] rounded-full border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+              {...ui.addFundsToOthersInput()}
               autoCapitalize="none"
               autoComplete="off"
               autoCorrect="off"

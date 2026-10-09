@@ -8,7 +8,8 @@ import DownloadIcon from '~icons/lucide/download'
 import ExternalLinkIcon from '~icons/lucide/external-link'
 import { publicAssetPath } from '../lib/public-asset-path'
 import { usePathname } from './DocsHeader'
-import './DocsPageActions.css'
+import * as ui from './DocsPageActions.recipes'
+import { docsPageActions, docsPageActionsError } from './DocsPageActions.styles'
 
 /** Place page tools after the article introduction, including after client navigation. */
 export default function DocsPageActions({ openApi = false }: { openApi?: boolean }) {
@@ -87,7 +88,10 @@ export default function DocsPageActions({ openApi = false }: { openApi?: boolean
       <span ref={marker} hidden />
       {host &&
         createPortal(
-          <nav aria-label="Page tools" className="docs-page-actions">
+          <nav
+            aria-label="Page tools"
+            className={`docs-page-actions ${docsPageActions().className}`}
+          >
             <button type="button" onClick={copyPage} disabled={state === 'copying'}>
               <CopyIcon aria-hidden="true" width="14" height="14" />
               {state === 'copied' ? 'Copied' : state === 'copying' ? 'Copying…' : 'Copy for agent'}
@@ -100,7 +104,11 @@ export default function DocsPageActions({ openApi = false }: { openApi?: boolean
             </Link>
             <span
               role="status"
-              className={state === 'error' ? 'docs-page-actions-error' : 'sr-only'}
+              className={
+                state === 'error'
+                  ? `docs-page-actions-error ${docsPageActionsError().className}`
+                  : ui.docsPageActionsText().className
+              }
             >
               {state === 'error'
                 ? 'Could not copy. Open View Markdown to select the page text.'

@@ -4,6 +4,7 @@ import LucidePictureInPicture2 from '~icons/lucide/picture-in-picture-2'
 import { useTempoWalletConnector } from '../../../../wagmi.config'
 import { Button, Logout, Step, TempoMarkBoxed, useHydrated } from '../../Demo'
 import type { DemoStepProps } from '../types'
+import * as ui from './SignInWithTempo.recipes'
 
 export function SignInWithTempo(props: DemoStepProps) {
   const { stepNumber = 1 } = props
@@ -28,13 +29,13 @@ export function SignInWithTempo(props: DemoStepProps) {
           </Button>
         ) : connect.isPending || switchConnection.isPending ? (
           <Button disabled variant="default">
-            <LucidePictureInPicture2 className="mt-px" />
+            <LucidePictureInPicture2 className={ui.lucidePictureInPicture2().className} />
             Check prompt
           </Button>
         ) : (
           <Button
             variant="accent"
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={ui.signInWithTempoButton().className}
             onClick={() => {
               connect.reset()
               switchConnection.reset()
@@ -44,7 +45,7 @@ export function SignInWithTempo(props: DemoStepProps) {
             }}
             type="button"
           >
-            <TempoMarkBoxed className="size-[14px]" />
+            <TempoMarkBoxed className={ui.tempoMarkBoxed().className} />
             Connect Tempo Wallet
           </Button>
         )

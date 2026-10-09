@@ -4,23 +4,25 @@ seoTitle: Stablecoin Card Issuing Partners | Tempo Docs
 description: Integrate stablecoin-backed card programs through Bridge, Wirex, or UR, with product documentation and Tempo support links.
 ---
 
+import { partnerLogo, partnerLogoBridge, partnerLogoWirex, partnerLogoUr } from '../../../components/PartnerLogos.styles'
+
 # Cards
 
 Add card spending to your application through a card issuing partner. Start with the product below that matches how your customers hold and spend funds.
 
-## <span className="partner-logo partner-logo--bridge" aria-hidden="true" />Bridge Cards
+## <span className={`partner-logo partner-logo--bridge ${partnerLogo().className + ' ' + partnerLogoBridge().className}`} aria-hidden="true" />Bridge Cards
 
 Issue stablecoin-backed Visa cards with Bridge and Stripe Issuing. Bridge handles customer onboarding and KYC; Stripe handles card creation, controls, and operations. Funding options include custodial and noncustodial wallets.
 
 [Cards product](https://www.withbridge.com/product/cards) · [Consumer issuing guide](https://apidocs.bridge.xyz/platform/cards/overview/stripe-issuing) · [Tempo integration guide](https://apidocs.bridge.xyz/get-started/guides/move-money/tempo-integration-guide)
 
-## <span className="partner-logo partner-logo--wirex" aria-hidden="true" />Wirex BaaS
+## <span className={`partner-logo partner-logo--wirex ${partnerLogo().className + ' ' + partnerLogoWirex().className}`} aria-hidden="true" />Wirex BaaS
 
 Build a stablecoin card program with Wirex's card issuance APIs. Its Tempo integration uses Tempo as the settlement layer. Follow the card guide to create cardholders and issue virtual or physical cards.
 
 [Card issuance guide](https://docs.wirexapp.com/docs/retail-card-issuance) · [Supported environments](https://docs.wirexapp.com/docs/retail-environments) · [Tempo launch announcement](https://tempo.xyz/blog/wirex-is-now-live-on-tempo/)
 
-## <span className="partner-logo partner-logo--ur" aria-hidden="true" />UR Mastercard
+## <span className={`partner-logo partner-logo--ur ${partnerLogo().className + ' ' + partnerLogoUr().className}`} aria-hidden="true" />UR Mastercard
 
 Add a Mastercard debit card as part of a UR account integration. Card spending draws from the customer's multi-currency UR account; UR also provides the account and bank transfer infrastructure.
 

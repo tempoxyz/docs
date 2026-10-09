@@ -3,11 +3,11 @@ import * as React from 'react'
 import { parseUnits } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
-
 import { Step } from '../../Demo'
 import { alphaUsd, betaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 import { BuySwap } from './BuySwap'
+import * as ui from './MakeSwaps.recipes'
 import { SellSwap } from './SellSwap'
 
 export function MakeSwaps({ stepNumber, last = false }: DemoStepProps) {
@@ -61,9 +61,9 @@ export function MakeSwaps({ stepNumber, last = false }: DemoStepProps) {
       title="Make Swaps"
     >
       {(active || completed) && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
-            <div className="flex flex-col gap-6">
+        <div {...ui.makeSwapsLayout()}>
+          <div {...ui.makeSwapsLayout2()}>
+            <div {...ui.makeSwapsLayout3()}>
               <BuySwap onSuccess={() => setBuyCompleted(true)} />
               <SellSwap onSuccess={() => setSellCompleted(true)} />
             </div>

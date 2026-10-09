@@ -1,10 +1,8 @@
-// biome-ignore-all lint/a11y/noSvgWithoutTitle: Theme glyphs are decorative inside labelled radio buttons.
-// biome-ignore-all lint/a11y/useSemanticElements: Segmented theme buttons expose radio state while applying changes immediately.
-
 'use client'
 
 import type { ReactNode } from 'react'
-import { useSyncExternalStore } from 'react'
+import { useId, useSyncExternalStore } from 'react'
+import * as ui from './ThemeToggle.recipes'
 
 type Theme = 'light' | 'dark' | 'system'
 
@@ -80,23 +78,20 @@ function subscribe(onStoreChange: () => void) {
 }
 
 export default function ThemeToggle() {
+  const group = useId()
   const theme = useSyncExternalStore(subscribe, getStoredTheme, getServerTheme)
 
   return (
-    <div
-      role="radiogroup"
-      aria-label="Theme selection"
-      className="flex w-fit items-center rounded-full border border-line-strong bg-surface-block p-0.5"
-    >
-      <Option label="Light theme" value="light" theme={theme}>
+    <div role="radiogroup" aria-label="Theme selection" {...ui.themeToggleLayout()}>
+      <Option label="Light theme" value="light" theme={theme} group={group}>
         <SunIcon />
       </Option>
 
-      <Option label="Dark theme" value="dark" theme={theme}>
+      <Option label="Dark theme" value="dark" theme={theme} group={group}>
         <MoonIcon />
       </Option>
 
-      <Option label="System theme" value="system" theme={theme}>
+      <Option label="System theme" value="system" theme={theme} group={group}>
         <MonitorIcon />
       </Option>
     </div>
@@ -105,11 +100,13 @@ export default function ThemeToggle() {
 
 function Option({
   children,
+  group,
   label,
   value,
   theme,
 }: {
   children: ReactNode
+  group: string
   label: string
   value: Theme
   theme: Theme
@@ -117,29 +114,27 @@ function Option({
   const checked = theme === value
 
   return (
-    <button
-      type="button"
-      role="radio"
-      aria-label={label}
-      aria-checked={checked}
-      onClick={() => {
-        setStoredTheme(value)
-        applyTheme(value)
-      }}
-      className={`flex size-7 cursor-pointer items-center justify-center rounded-full border transition-all duration-150 ${
-        checked
-          ? 'border-line-strong bg-surface-shell text-foreground shadow-sm'
-          : 'border-transparent text-foreground-secondary hover:text-foreground'
-      }`}
-    >
+    <label {...ui.themeOption({ selected: checked })}>
+      <input
+        {...ui.themeRadio()}
+        type="radio"
+        name={group}
+        value={value}
+        aria-label={label}
+        checked={checked}
+        onChange={() => {
+          setStoredTheme(value)
+          applyTheme(value)
+        }}
+      />
       {children}
-    </button>
+    </label>
   )
 }
 
 function SunIcon() {
   return (
-    <svg className="size-4" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg {...ui.sunIconIcon()} viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2" />
       <path
         d="M12 2v2.5M12 19.5V22M4.93 4.93 6.7 6.7M17.3 17.3l1.77 1.77M2 12h2.5M19.5 12H22M4.93 19.07 6.7 17.3M17.3 6.7l1.77-1.77"
@@ -153,7 +148,7 @@ function SunIcon() {
 
 function MoonIcon() {
   return (
-    <svg className="size-4" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg {...ui.sunIconIcon()} viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
         d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z"
         stroke="currentColor"
@@ -167,7 +162,7 @@ function MoonIcon() {
 
 function MonitorIcon() {
   return (
-    <svg className="size-4" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg {...ui.sunIconIcon()} viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <rect x="3" y="4" width="18" height="12" rx="1.5" stroke="currentColor" strokeWidth="2" />
       <path d="M8 21h8M12 16v5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>

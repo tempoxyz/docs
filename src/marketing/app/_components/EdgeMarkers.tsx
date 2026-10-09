@@ -1,10 +1,20 @@
+import * as ui from './EdgeMarkers.recipes'
+
 type Props = {
   edge?: 'top' | 'bottom'
   wideOnly?: boolean
 }
 
 export default function EdgeMarkers({ edge = 'top', wideOnly = false }: Props) {
-  const visibility = wideOnly ? 'hidden 2xl:grid' : 'grid'
+  const visibility = wideOnly
+    ? ui.edgeMarkersStateState().className
+    : ui.edgeMarkersStateState2().className
 
-  return <span aria-hidden data-edge={edge} className={`pointer-events-none ${visibility}`} />
+  return (
+    <span
+      aria-hidden="true"
+      data-edge={edge}
+      className={` ${ui.edgeMarkersText().className} ${visibility}`}
+    />
+  )
 }

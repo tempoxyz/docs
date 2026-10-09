@@ -6,6 +6,7 @@ import { useConnection } from 'wagmi'
 import { useTempoWalletConnector } from '../../../../wagmi.config'
 import { Button, Step } from '../../Demo'
 import type { DemoStepProps } from '../types'
+import * as ui from './DepositToTempoWallet.recipes'
 
 export function DepositToTempoWallet(props: DemoStepProps) {
   const { stepNumber = 2 } = props
@@ -36,7 +37,7 @@ export function DepositToTempoWallet(props: DemoStepProps) {
         <Button
           disabled={!isTempoWallet || deposit.isPending}
           variant={isTempoWallet ? 'accent' : 'default'}
-          className="font-normal text-[14px] -tracking-[2%]"
+          className={ui.depositToTempoWalletButton().className}
           onClick={() => deposit.mutate()}
           type="button"
         >

@@ -5,6 +5,7 @@ import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './PauseUnpauseTransfers.recipes'
 
 export function PauseUnpauseTransfers(props: DemoStepProps) {
   const { stepNumber, last = false } = props
@@ -80,7 +81,7 @@ export function PauseUnpauseTransfers(props: DemoStepProps) {
           disabled={!active || isProcessing}
           onClick={handleToggle}
           type="button"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className={ui.pauseUnpauseTransfersButton().className}
         >
           {isProcessing ? 'Processing...' : paused ? 'Unpause' : 'Pause'}
         </Button>
@@ -89,8 +90,8 @@ export function PauseUnpauseTransfers(props: DemoStepProps) {
       title={`${paused ? 'Unpause' : 'Pause'} transfers for ${metadata ? metadata.name : 'token'}.`}
     >
       {(pause.isSuccess || unpause.isSuccess) && (pause.data || unpause.data) && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
+        <div {...ui.pauseUnpauseTransfersLayout()}>
+          <div {...ui.pauseUnpauseTransfersLayout2()}>
             <ExplorerLink
               hash={
                 pause.data?.receipt.transactionHash ?? unpause.data?.receipt.transactionHash ?? ''

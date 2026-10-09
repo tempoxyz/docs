@@ -10,6 +10,7 @@ import { Hooks } from 'wagmi/tempo'
 import { Button, Login, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './AddFunds.recipes'
 
 export function AddFunds(props: DemoStepProps) {
   const { stepNumber = 2, last = false } = props
@@ -25,7 +26,6 @@ export function AddFunds(props: DemoStepProps) {
       refetchInterval: 1_500,
     },
   })
-  // biome-ignore lint/correctness/useExhaustiveDependencies: _
   React.useEffect(() => {
     balanceRefetch()
   }, [blockNumber])
@@ -72,7 +72,7 @@ export function AddFunds(props: DemoStepProps) {
         <Button
           disabled={fundAccount.isPending}
           variant="default"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className={ui.addFundsButton().className}
           onClick={() => fundAccount.mutate()}
           type="button"
         >
@@ -83,7 +83,7 @@ export function AddFunds(props: DemoStepProps) {
       <Button
         disabled={!address || fundAccount.isPending}
         variant={address ? 'accent' : 'default'}
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.addFundsButton().className}
         type="button"
         onClick={() => fundAccount.mutate()}
       >

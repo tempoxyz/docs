@@ -1,11 +1,11 @@
-// biome-ignore-all lint/a11y/noSvgWithoutTitle: Dialog SVGs are decorative; controls carry their own labels.
-
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { cx as composeStyles } from 'zyzz'
 import { loadSearchIndex, type SearchResult, searchDocs } from '../../search'
 import { developersPath } from '../_lib/developersPaths'
+import * as ui from './SearchDialog.recipes'
 
 export function searchResultHref(href: string): string {
   return developersPath(href)
@@ -22,8 +22,8 @@ function SearchIcon() {
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      aria-hidden
-      className="shrink-0"
+      aria-hidden="true"
+      {...ui.searchIconIcon()}
     >
       <circle cx="11" cy="11" r="7" />
       <path d="m21 21-4.3-4.3" />
@@ -42,8 +42,8 @@ function PageIcon() {
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      aria-hidden
-      className="mt-0.5 shrink-0 text-foreground/40"
+      aria-hidden="true"
+      {...ui.pageIconIcon()}
     >
       <path d="M14 3v4a1 1 0 0 0 1 1h4" />
       <path d="M5 3h9l5 5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" />
@@ -62,8 +62,8 @@ function HashIcon() {
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      aria-hidden
-      className="mt-0.5 shrink-0 text-foreground/40"
+      aria-hidden="true"
+      {...ui.pageIconIcon()}
     >
       <path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18" />
     </svg>
@@ -95,25 +95,16 @@ function ResultRow({
       data-selected={selected}
       onMouseMove={onHover}
       onClick={onSelect}
-      className={`group flex cursor-pointer items-start gap-3 px-4 py-2.5 transition-colors ${
-        selected ? 'bg-foreground/[0.06]' : ''
-      }`}
+      {...composeStyles(
+        ui.resultRowLayout({ className: 'group' }),
+        !!selected && ui.resultRowLayout2(),
+      )}
     >
       {result.type === 'page' ? <PageIcon /> : <HashIcon />}
-      <span className="flex min-w-0 flex-col gap-0.5">
-        {breadcrumb ? (
-          <span className="truncate font-sans text-[12px] text-foreground/45 tracking-[0]">
-            {breadcrumb}
-          </span>
-        ) : null}
-        <span className="truncate font-sans text-[14px] text-foreground tracking-[0]">
-          {result.title}
-        </span>
-        {result.text ? (
-          <span className="line-clamp-2 font-sans text-[13px] text-foreground/45 leading-[1.4] tracking-[0]">
-            {result.text}
-          </span>
-        ) : null}
+      <span {...ui.resultRowText()}>
+        {breadcrumb ? <span {...ui.resultRowText2()}>{breadcrumb}</span> : null}
+        <span {...ui.resultRowText3()}>{result.title}</span>
+        {result.text ? <span {...ui.resultRowText4()}>{result.text}</span> : null}
       </span>
     </div>
   )
@@ -217,28 +208,16 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
 
   const body = useMemo(() => {
     if (loadError) {
-      return (
-        <div className="px-4 py-10 text-center font-sans text-[14px] text-foreground/45">
-          Couldn’t load search. Please try again.
-        </div>
-      )
+      return <div {...ui.searchDialogLayout()}>Couldn’t load search. Please try again.</div>
     }
     if (!query.trim()) {
-      return (
-        <div className="px-4 py-10 text-center font-sans text-[14px] text-foreground/45">
-          Start typing to search docs and blog posts…
-        </div>
-      )
+      return <div {...ui.searchDialogLayout()}>Start typing to search docs and blog posts…</div>
     }
     if (results.length === 0) {
-      return (
-        <div className="px-4 py-10 text-center font-sans text-[14px] text-foreground/45">
-          No results found
-        </div>
-      )
+      return <div {...ui.searchDialogLayout()}>No results found</div>
     }
     return (
-      <div ref={listRef} role="listbox" aria-label="Search results" className="py-2">
+      <div ref={listRef} role="listbox" aria-label="Search results" {...ui.searchDialogLayout2()}>
         {results.map((result, i) => (
           <ResultRow
             key={result.id}
@@ -257,19 +236,16 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
   return createPortal(
     // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-close is a standard modal affordance.
     // biome-ignore lint/a11y/useKeyWithClickEvents: Escape is handled on the input/dialog.
-    <div
-      className="fixed inset-0 z-[200] flex items-start justify-center bg-black/60 px-4 pt-[12vh] backdrop-blur-sm"
-      onClick={onClose}
-    >
+    <div {...ui.searchDialogLayout3()} onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Search documentation"
         onClick={(event) => event.stopPropagation()}
         onKeyDown={handleKeyDown}
-        className="flex max-h-[70vh] w-full max-w-[600px] flex-col overflow-hidden rounded-md border border-line bg-surface-page shadow-2xl"
+        {...ui.searchDialogLayout4()}
       >
-        <div className="flex items-center gap-3 border-line border-b px-4 py-3 text-foreground/60">
+        <div {...ui.searchDialogLayout5()}>
           <SearchIcon />
           <input
             ref={inputRef}
@@ -283,13 +259,11 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
             placeholder="Search docs and blog posts…"
             value={query}
             onChange={(event) => runQuery(event.target.value)}
-            className="flex-1 bg-transparent font-sans text-[15px] text-foreground tracking-[0] outline-none placeholder:text-foreground/40"
+            {...ui.searchDialogInput()}
           />
-          <kbd className="rounded border border-line px-1.5 py-0.5 font-sans text-[11px] text-foreground/40">
-            Esc
-          </kbd>
+          <kbd {...ui.kbd()}>Esc</kbd>
         </div>
-        <div id="marketing-search-results" className="flex-1 overflow-y-auto">
+        <div id="marketing-search-results" {...ui.searchDialogLayout6()}>
           {body}
         </div>
       </div>

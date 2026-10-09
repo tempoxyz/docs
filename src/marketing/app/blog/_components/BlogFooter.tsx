@@ -1,8 +1,9 @@
 import { Link } from 'waku'
+import { tempoBlogFooter } from '../BlogShell.styles'
 
 export default function BlogFooter() {
   return (
-    <footer className="tempo-blog-footer">
+    <footer className={`tempo-blog-footer ${tempoBlogFooter().className}`}>
       <span>© {new Date().getFullYear()} Tempo</span>
       <nav aria-label="Blog footer">
         <Link to="/docs">Docs</Link>

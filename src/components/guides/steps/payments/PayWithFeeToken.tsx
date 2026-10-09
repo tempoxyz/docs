@@ -10,6 +10,7 @@ import { TokenSelector } from '../../../TokenSelector'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
 import { alphaUsd, betaUsd, ousd, thetaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './PayWithFeeToken.recipes'
 
 export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
   const { stepNumber, last = false } = props
@@ -112,7 +113,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={ui.payWithFeeTokenButton().className}
             type="button"
           >
             Cancel
@@ -123,7 +124,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={ui.payWithFeeTokenButton().className}
           >
             Enter details
           </Button>
@@ -134,17 +135,19 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
       title={`Send 100 AlphaUSD and pay fees in ${feeTokenMetadata ? feeTokenMetadata.name : 'another token'}.`}
     >
       {expanded && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
+        <div {...ui.payWithFeeTokenLayout()}>
+          <div {...ui.payWithFeeTokenLayout2()}>
             {/* Token info display */}
-            <div className="mt-2 mb-3 rounded-lg bg-gray2 p-3 text-[13px] -tracking-[1%]">
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray10">Payment Token: AlphaUSD</span>
-                  <span className="text-gray12">balance: {alphaBalance?.formatted ?? '0'}</span>
+            <div {...ui.payWithFeeTokenLayout3()}>
+              <div {...ui.payWithFeeTokenLayout4()}>
+                <div {...ui.payWithFeeTokenLayout5()}>
+                  <span {...ui.payWithFeeTokenText()}>Payment Token: AlphaUSD</span>
+                  <span {...ui.payWithFeeTokenText2()}>
+                    balance: {alphaBalance?.formatted ?? '0'}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray10">Fee Token</span>
+                <div {...ui.payWithFeeTokenLayout5()}>
+                  <span {...ui.payWithFeeTokenText()}>Fee Token</span>
                   <TokenSelector
                     tokens={[alphaUsd, betaUsd, thetaUsd, ousd]}
                     value={feeToken}
@@ -152,22 +155,24 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                     name="feeToken"
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray10">
+                <div {...ui.payWithFeeTokenLayout5()}>
+                  <span {...ui.payWithFeeTokenText()}>
                     {`Fee Token: ${feeTokenMetadata ? feeTokenMetadata.name : ''}`}
                   </span>
-                  <span className="text-gray12">balance: {feeTokenBalance?.formatted ?? '0'}</span>
+                  <span {...ui.payWithFeeTokenText2()}>
+                    balance: {feeTokenBalance?.formatted ?? '0'}
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
-              <div className="flex flex-2 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient">
+            <div {...ui.payWithFeeTokenLayout6()}>
+              <div {...ui.payWithFeeTokenLayout7()}>
+                <label {...ui.label()} htmlFor="recipient">
                   Recipient address
                 </label>
                 <input
-                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...ui.payWithFeeTokenInput()}
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -177,12 +182,12 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                   placeholder="0x..."
                 />
               </div>
-              <div className="flex flex-1 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="memo">
+              <div {...ui.payWithFeeTokenLayout8()}>
+                <label {...ui.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...ui.payWithFeeTokenInput()}
                   data-1p-ignore
                   type="text"
                   id="memo"
@@ -197,7 +202,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                 disabled={!active}
                 onClick={handleTransfer}
                 type="button"
-                className="font-normal text-[14px] -tracking-[2%]"
+                className={ui.payWithFeeTokenButton().className}
               >
                 {sendPayment.isPending ? 'Sending...' : 'Send'}
               </Button>

@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { terminalTheme } from '../styles/surfaces.styles'
+import * as ui from './TerminalDemo.recipes'
 
 // ---------------------------------------------------------------------------
 // Constants & helpers
@@ -31,33 +33,33 @@ function Spinner() {
     const timer = setInterval(() => setFrame((f) => (f + 1) % SPINNER_FRAMES.length), 80)
     return () => clearInterval(timer)
   }, [])
-  return <span style={{ color: 'var(--term-blue9)' }}>{SPINNER_FRAMES[frame]}</span>
+  return <span {...ui.spinnerTextAppearance()}>{SPINNER_FRAMES[frame]}</span>
 }
 
 // biome-ignore format: contains unicode ✔︎
 function StepIcon({ spinning }: { spinning: boolean }) {
   return (
-    <span className="inline-block w-[1ch] text-center">
+    <span {...ui.stepIconText()}>
       {spinning ? (
         <Spinner />
       ) : (
-        <span style={{ color: "var(--term-green9)" }}>✔︎</span>
+        <span {...ui.stepIconTextAppearance()}>✔︎</span>
       )}
     </span>
   );
 }
 
 function BlankLine() {
-  return <div className="h-6" />
+  return <div {...ui.blankLineLayout()} />
 }
 
 function TruncatedHex({ hash }: { hash: string }) {
   return (
     <>
-      <span className="md:hidden">
+      <span {...ui.truncatedHexText()}>
         {hash.slice(0, 6)}…{hash.slice(-4)}
       </span>
-      <span className="hidden md:inline">{hash}</span>
+      <span {...ui.truncatedHexText2()}>{hash}</span>
     </>
   )
 }
@@ -71,28 +73,20 @@ function PhotoOutput({ url }: { url: string }) {
 
   return (
     <div>
-      <div
-        className="relative block overflow-hidden rounded"
-        style={{
-          width: 200,
-          height: 200,
-          borderColor: 'var(--term-gray4)',
-          borderWidth: 1,
-          borderStyle: 'solid',
-        }}
-      >
+      <div {...ui.photoOutputLayoutAppearance({ className: ui.photoOutputLayout().className })}>
         {!loaded && (
-          <div className="absolute inset-0" style={{ backgroundColor: 'var(--term-gray3)' }} />
+          <div
+            {...ui.photoOutputLayoutAppearance2({ className: ui.photoOutputLayout2().className })}
+          />
         )}
         <img
           src={url}
           alt="Generated"
           onLoad={() => setLoaded(true)}
-          className="absolute inset-0 h-full w-full object-cover"
-          style={{
-            transition: 'opacity 0.5s',
-            opacity: loaded ? 1 : 0,
-          }}
+          {...ui.photoOutputImgAppearance({
+            value0: loaded ? 1 : 0,
+            className: ui.img().className,
+          })}
         />
       </div>
     </div>
@@ -155,56 +149,54 @@ function ChargeSteps({
   }, [step, currentKey, steps, onDone])
 
   return (
-    <div className="flex flex-col">
+    <div {...ui.chargeStepsLayout()}>
       <BlankLine />
       {atOrPast('wallet') && (
-        <p style={{ color: 'var(--term-gray6)' }}>
+        <p {...ui.chargeStepsDescriptionAppearance()}>
           <StepIcon spinning={atStep('wallet')} /> Create a wallet{' '}
-          <span style={{ color: 'var(--term-gray5)' }}>⋅</span>{' '}
+          <span {...ui.chargeStepsTextAppearance()}>⋅</span>{' '}
           <a
             href={`https://explore.tempo.xyz/address/${address}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:underline"
-            style={{ color: 'var(--term-blue9)' }}
+            {...ui.chargeStepsLinkAppearance({ className: ui.chargeStepsLink().className })}
           >
             <TruncatedHex hash={address} />
           </a>
         </p>
       )}
       {atOrPast('fund') && (
-        <p style={{ color: 'var(--term-gray6)' }}>
+        <p {...ui.chargeStepsDescriptionAppearance2()}>
           <StepIcon spinning={atStep('fund')} /> Add test funds{' '}
-          <span style={{ color: 'var(--term-gray5)' }}>⋅</span>{' '}
-          <span style={{ color: 'var(--term-amber9)' }}>100 USD</span>
+          <span {...ui.chargeStepsTextAppearance2()}>⋅</span>{' '}
+          <span {...ui.chargeStepsTextAppearance3()}>100 USD</span>
         </p>
       )}
       {/* biome-ignore format: contains unicode → */}
       {atOrPast('req402') && (
-        <p style={{ color: 'var(--term-gray6)' }}>
+        <p {...ui.chargeStepsDescriptionAppearance3()}>
           <StepIcon spinning={atStep('req402')} /> Call {endpoint}
           {pastStep('req402') && (
             <>
               {' '}
-              → <span style={{ color: 'var(--term-orange9)' }}>402</span>{' '}
-              <span style={{ color: 'var(--term-gray6)' }}>(payment required)</span>
+              → <span {...ui.chargeStepsTextAppearance4()}>402</span>{' '}
+              <span {...ui.chargeStepsTextAppearance5()}>(payment required)</span>
             </>
           )}
         </p>
       )}
       {atOrPast('pay') && (
-        <p style={{ color: 'var(--term-gray6)' }}>
+        <p {...ui.chargeStepsDescriptionAppearance4()}>
           <StepIcon spinning={atStep('pay')} /> Fulfill payment
           {pastStep('pay') && (
             <>
               {' '}
-              <span style={{ color: 'var(--term-gray5)' }}>⋅</span>{' '}
+              <span {...ui.chargeStepsTextAppearance6()}>⋅</span>{' '}
               <a
                 href={`https://explore.tempo.xyz/receipt/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:underline"
-                style={{ color: 'var(--term-blue9)' }}
+                {...ui.chargeStepsLinkAppearance2({ className: ui.chargeStepsLink().className })}
               >
                 {txHash.slice(0, 6)}…{txHash.slice(-4)}
               </a>
@@ -214,13 +206,13 @@ function ChargeSteps({
       )}
       {/* biome-ignore format: contains unicode → */}
       {atOrPast('req200') && (
-        <p style={{ color: 'var(--term-gray6)' }}>
+        <p {...ui.chargeStepsDescriptionAppearance5()}>
           <StepIcon spinning={atStep('req200')} /> Call {endpoint}
           {pastStep('req200') && (
             <>
               {' '}
-              → <span style={{ color: 'var(--term-orange9)' }}>200</span>{' '}
-              <span style={{ color: 'var(--term-gray6)' }}>(success)</span>
+              → <span {...ui.chargeStepsTextAppearance7()}>200</span>{' '}
+              <span {...ui.chargeStepsTextAppearance8()}>(success)</span>
             </>
           )}
         </p>
@@ -241,19 +233,7 @@ function ChargeSteps({
 // ---------------------------------------------------------------------------
 
 function CssTriangle() {
-  return (
-    <span
-      style={{
-        display: 'inline-block',
-        width: 0,
-        height: 0,
-        borderTop: '0.3em solid transparent',
-        borderBottom: '0.3em solid transparent',
-        borderLeft: '0.45em solid currentColor',
-        verticalAlign: 'middle',
-      }}
-    />
-  )
+  return <span {...ui.cssTriangleTextAppearance()} />
 }
 
 // ---------------------------------------------------------------------------
@@ -295,61 +275,29 @@ export function TerminalDemo({ className }: { className?: string }) {
 
   return (
     <div
-      className={`terminal-theme ${className ?? ''}`}
-      style={{
-        fontFamily: 'var(--font-mono, "Geist Mono", monospace)',
-        height: '100%',
-        minHeight: 0,
-        userSelect: 'text',
-        WebkitUserSelect: 'text',
-      }}
+      {...ui.terminalDemoLayoutAppearance({
+        className: `terminal-theme  ${terminalTheme().className} ${className ?? ''}`,
+      })}
     >
-      <div
-        className="flex flex-col overflow-hidden rounded-xl"
-        style={{
-          height: '100%',
-          minHeight: 0,
-          borderColor: 'var(--vocs-border-color-primary, var(--term-gray4))',
-          borderWidth: 1,
-          borderStyle: 'solid',
-          backgroundColor: 'var(--term-bg2)',
-        }}
-      >
+      <div {...ui.terminalDemoLayoutAppearance2({ className: ui.terminalDemoLayout().className })}>
         {/* Title bar */}
         <div
-          className="flex items-center gap-2 px-4 py-3"
-          style={{
-            backgroundColor: 'var(--term-bg2)',
-            borderBottom: '1px solid var(--term-gray4)',
-          }}
+          {...ui.terminalDemoLayoutAppearance3({ className: ui.terminalDemoLayout2().className })}
         >
           <span
-            className="rounded-full"
-            style={{ width: 14, height: 14, backgroundColor: 'var(--term-gray4)' }}
+            {...ui.terminalDemoTextAppearance({ className: ui.terminalDemoText().className })}
           />
           <span
-            className="rounded-full"
-            style={{ width: 14, height: 14, backgroundColor: 'var(--term-gray4)' }}
+            {...ui.terminalDemoTextAppearance2({ className: ui.terminalDemoText().className })}
           />
           <span
-            className="rounded-full"
-            style={{ width: 14, height: 14, backgroundColor: 'var(--term-gray4)' }}
+            {...ui.terminalDemoTextAppearance3({ className: ui.terminalDemoText().className })}
           />
-          <span style={{ flex: 1 }} />
+          <span {...ui.terminalDemoTextAppearance4()} />
           <button
             type="button"
             onClick={restart}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--term-gray5)',
-              padding: 2,
-              borderRadius: 4,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'color 0.15s',
-            }}
+            {...ui.terminalDemoButtonAppearance()}
             onMouseEnter={(e) => {
               e.currentTarget.style.color = 'var(--term-gray10)'
             }}
@@ -381,24 +329,24 @@ export function TerminalDemo({ className }: { className?: string }) {
         {/* Terminal body */}
         <div
           ref={scrollRef}
-          className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden break-words px-5 pb-5 text-[13.5px] leading-[1.35rem] md:text-[0.9rem] md:leading-[1.5rem]"
-          style={{ backgroundColor: 'var(--term-bg2)' }}
+          {...ui.terminalDemoLayoutAppearance4({ className: ui.terminalDemoLayout3().className })}
         >
           <div ref={contentRef}>
-            <div className="h-2" />
+            <div {...ui.terminalDemoLayout4()} />
 
             {!started && (
-              <div className="flex flex-col">
+              <div {...ui.chargeStepsLayout()}>
                 <BlankLine />
                 <button
                   type="button"
-                  className="w-fit cursor-pointer text-left"
-                  style={{ color: 'var(--term-pink9)' }}
+                  {...ui.terminalDemoButtonAppearance2({
+                    className: ui.terminalDemoButton().className,
+                  })}
                   onClick={() => setStarted(true)}
                 >
                   <CssTriangle /> Run demo
                 </button>
-                <p style={{ color: 'var(--term-gray5)' }}>Press Enter or click to start</p>
+                <p {...ui.terminalDemoDescriptionAppearance()}>Press Enter or click to start</p>
               </div>
             )}
 
@@ -415,8 +363,9 @@ export function TerminalDemo({ className }: { className?: string }) {
             {done && (
               <button
                 type="button"
-                className="cursor-pointer text-left"
-                style={{ color: 'var(--term-gray6)' }}
+                {...ui.terminalDemoButtonAppearance3({
+                  className: ui.terminalDemoButton2().className,
+                })}
                 onClick={restart}
               >
                 [Press Enter or click to restart]

@@ -1,0 +1,36 @@
+import { style as instanceStyle } from 'zyzz'
+export const mermaidDiagramLayoutAppearance = instanceStyle({
+  margin: '2rem 0',
+  padding: '1.5rem 1rem',
+  borderRadius: '12px',
+  overflow: 'hidden',
+  overflowX: 'auto',
+  minHeight: '100px',
+  position: 'relative',
+})
+export const playbackControl = instanceStyle(
+  (values: { border: string; background: string; foreground: string }) => ({
+    '--tempo-border': values.border,
+    '--tempo-background': values.background,
+    '--tempo-foreground': values.foreground,
+    position: 'absolute',
+    top: '12px',
+    right: '12px',
+    width: '28px',
+    height: '28px',
+    borderRadius: '50%',
+    border: '1px solid var(--tempo-border)',
+    backgroundColor: 'var(--tempo-background)',
+    color: 'var(--tempo-foreground)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    padding: 0,
+    opacity: 0.7,
+    transition: 'opacity 200ms',
+    ':hover': { opacity: 1 },
+    ':focus-visible': { outline: '2px solid var(--accent-blue)', outlineOffset: '3px', opacity: 1 },
+    '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+  }),
+)

@@ -7,8 +7,8 @@ import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
-
 import type { DemoStepProps } from '../types'
+import * as ui from './RevokeTokenRoles.recipes'
 
 export function RevokeTokenRoles(
   props: DemoStepProps & {
@@ -76,7 +76,7 @@ export function RevokeTokenRoles(
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={ui.revokeTokenRolesButton().className}
             type="button"
           >
             Hide
@@ -89,7 +89,7 @@ export function RevokeTokenRoles(
             disabled={!tokenAddress || !hasAnyRole}
             onClick={() => setExpanded(true)}
             type="button"
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={ui.revokeTokenRolesButton().className}
           >
             Enter details
           </Button>
@@ -99,15 +99,15 @@ export function RevokeTokenRoles(
       title={`Revoke ${roles.join(', ')} role${roles.length > 1 ? 's' : ''} on ${metadata ? metadata.name : 'token'}.`}
     >
       {expanded && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
-            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
-              <div className="flex flex-2 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient">
+        <div {...ui.revokeTokenRolesLayout()}>
+          <div {...ui.revokeTokenRolesLayout2()}>
+            <div {...ui.revokeTokenRolesLayout3()}>
+              <div {...ui.revokeTokenRolesLayout4()}>
+                <label {...ui.label()} htmlFor="recipient">
                   Revoke role from yourself
                 </label>
                 <input
-                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...ui.revokeTokenRolesInput()}
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -123,7 +123,7 @@ export function RevokeTokenRoles(
                 disabled={!address}
                 onClick={handleRevoke}
                 type="button"
-                className="font-normal text-[14px] -tracking-[2%]"
+                className={ui.revokeTokenRolesButton().className}
               >
                 {revoke.isPending ? 'Revoking...' : 'Revoke'}
               </Button>

@@ -11,6 +11,7 @@ import { isFundableWalletConnector } from '../../../lib/wallets'
 import { Button, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './AddFundsToWallet.recipes'
 
 export function AddFundsToWallet(props: DemoStepProps) {
   const { stepNumber = 2, last = false } = props
@@ -36,7 +37,6 @@ export function AddFundsToWallet(props: DemoStepProps) {
       refetchInterval: 1_500,
     },
   })
-  // biome-ignore lint/correctness/useExhaustiveDependencies: _
   React.useEffect(() => {
     balanceRefetch()
   }, [blockNumber])
@@ -77,7 +77,7 @@ export function AddFundsToWallet(props: DemoStepProps) {
         <Button
           disabled={!hasNonWebAuthnWallet || fundAccount.isPending}
           variant="default"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className={ui.addFundsToWalletButton().className}
           onClick={() => fundAccount.mutate()}
           type="button"
         >
@@ -88,7 +88,7 @@ export function AddFundsToWallet(props: DemoStepProps) {
       <Button
         disabled={!hasNonWebAuthnWallet || fundAccount.isPending}
         variant={hasNonWebAuthnWallet ? 'accent' : 'default'}
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.addFundsToWalletButton().className}
         type="button"
         onClick={() => fundAccount.mutate()}
       >

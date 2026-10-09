@@ -16,6 +16,7 @@ import { Actions, createClient, Zone, http as zoneHttp } from '../../../lib/zone
 import { Button, ExplorerLink, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { ousd } from '../tokens'
+import * as ui from './DepositToZone.recipes'
 
 const ZONE_LABEL = 'Zone A'
 const ZONE_ID = 6 as const
@@ -271,7 +272,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
     zoneAuthorization.isChecking || zoneAuthorization.authorizeMutation.isPending
   const stepTwoAction = zoneAuthorization.isAuthorized ? undefined : (
     <Button
-      className="font-normal text-[14px] -tracking-[2%]"
+      className={ui.connectedZoneFlowButton().className}
       disabled={authIsPreparing || !zoneClient}
       onClick={() => zoneAuthorization.authorizeMutation.mutate()}
       type="button"
@@ -289,7 +290,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
   if (!hasRootBalance) {
     stepThreeAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled={fundMutation.isPending || !zoneAuthorization.isAuthorized || rootBalanceIsPending}
         onClick={() => fundMutation.mutate()}
         type="button"
@@ -301,7 +302,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
   } else if (depositSetupQuery.isError) {
     stepThreeAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         onClick={() => depositSetupQuery.refetch()}
         type="button"
         variant="default"
@@ -312,7 +313,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
   } else if (depositSetupQuery.isPending || depositSetupQuery.data === undefined) {
     stepThreeAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled
         type="button"
         variant="default"
@@ -323,7 +324,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
   } else {
     stepThreeAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled={
           depositMutation.isPending ||
           !zoneAuthorization.isAuthorized ||
@@ -376,7 +377,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
         title={getConfirmationStepTitle(mode)}
       >
         <StepBody>
-          <p className="text-[13px] text-gray10 leading-relaxed -tracking-[1%]">
+          <p {...ui.connectedZoneFlowDescription()}>
             Your public-chain deposit is already submitted. This last step polls the private{' '}
             {ZONE_LABEL} balance every 1.5 seconds until the post-fee amount appears.
           </p>
@@ -423,16 +424,16 @@ function DepositModeSelector(props: { mode: DepositMode; onChange: (mode: Deposi
   const { mode, onChange } = props
 
   return (
-    <div className="ms-[42px] rounded-xl border border-gray4 bg-gray2/40 p-3">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-        <div className="max-w-[34rem]">
-          <p className="text-[12px] text-gray9 uppercase tracking-[0.12em]">Deposit mode</p>
-          <p className="mt-1 text-[13px] text-gray10 leading-relaxed -tracking-[1%]">
+    <div {...ui.depositModeSelectorLayout()}>
+      <div {...ui.depositModeSelectorLayout2()}>
+        <div {...ui.depositModeSelectorLayout3()}>
+          <p {...ui.depositModeSelectorDescription()}>Deposit mode</p>
+          <p {...ui.depositModeSelectorDescription2()}>
             Plaintext reveals both the recipient and memo of the deposit, while encrypted only lets
             the sequencer see those details.
           </p>
         </div>
-        <div className="flex shrink-0 self-start rounded-lg border border-gray4 bg-background p-1">
+        <div {...ui.depositModeSelectorLayout4()}>
           {[
             ['plaintext', 'Plaintext'],
             ['encrypted', 'Encrypted'],
@@ -445,8 +446,10 @@ function DepositModeSelector(props: { mode: DepositMode; onChange: (mode: Deposi
                 type="button"
                 aria-pressed={selected}
                 className={[
-                  'rounded-md px-3 py-1.5 font-normal text-[13px] -tracking-[1%] transition-colors',
-                  selected ? 'bg-invert text-invert' : 'text-gray10 hover:text-gray12',
+                  ui.depositModeSelectorButtonState().className,
+                  selected
+                    ? ui.depositModeSelectorButtonState2().className
+                    : ui.depositModeSelectorButtonState3().className,
                 ].join(' ')}
                 onClick={() => onChange(value as DepositMode)}
               >
@@ -462,9 +465,9 @@ function DepositModeSelector(props: { mode: DepositMode; onChange: (mode: Deposi
 
 function StepBody(props: React.PropsWithChildren) {
   return (
-    <div className="mx-6 pb-4">
-      <div className="mt-3 border-gray4 border-s-2 ps-5">
-        <div className="flex flex-col gap-2 py-0.5">{props.children}</div>
+    <div {...ui.stepBodyLayout()}>
+      <div {...ui.stepBodyLayout2()}>
+        <div {...ui.stepBodyLayout3()}>{props.children}</div>
       </div>
     </div>
   )
@@ -474,9 +477,9 @@ function DetailLine(props: { label: string; value: string; dataTestId?: string |
   const { dataTestId, label, value } = props
 
   return (
-    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px] -tracking-[1%]">
-      <span className="text-gray9">{label}</span>
-      <span className="break-all font-mono text-[12px] text-gray12" data-testid={dataTestId}>
+    <div {...ui.detailLineLayout()}>
+      <span {...ui.detailLineText()}>{label}</span>
+      <span {...ui.detailLineText2()} data-testid={dataTestId}>
         {value}
       </span>
     </div>

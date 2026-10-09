@@ -9,6 +9,7 @@ import TerminalIcon from '~icons/lucide/terminal'
 import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 import { AgentSetupCommand } from './AgentSetupCommand'
+import { tempoAgentStart, tempoAgentStartAgents, tempoAgentStartCommand } from './DocsHome.styles'
 
 const agents = [
   {
@@ -78,11 +79,11 @@ export function DocsHomeAgent() {
   }
 
   return (
-    <div className="tempo-agent-start">
+    <div className={`tempo-agent-start ${tempoAgentStart().className}`}>
       <h2>Build with your agent</h2>
       <p>Connect your coding agent to Tempo documentation.</p>
 
-      <fieldset className="tempo-agent-start-agents">
+      <fieldset className={`tempo-agent-start-agents ${tempoAgentStartAgents().className}`}>
         <legend>Choose a setup method</legend>
         <div>
           {agents.map(({ id, label, Logo }) => (
@@ -118,7 +119,7 @@ export function DocsHomeAgent() {
             </a>
           ) : null}
         </p>
-        <div className="tempo-agent-start-command">
+        <div className={`tempo-agent-start-command ${tempoAgentStartCommand().className}`}>
           <div className="tempo-agent-start-toolbar">
             <span className="tempo-agent-start-destination">
               {isMcp ? <PlugIcon aria-hidden="true" /> : <TerminalIcon aria-hidden="true" />}

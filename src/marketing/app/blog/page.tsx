@@ -6,7 +6,15 @@ import PostExplorer from './_components/PostExplorer'
 import PostImage from './_components/PostImage'
 import PostLabels from './_components/PostLabels'
 import { getAllPosts, getFeaturedPost } from './_lib/posts'
-import './BlogShell.css'
+import {
+  tempoBlog,
+  tempoBlogExcerpt,
+  tempoBlogFeatured,
+  tempoBlogFeaturedCopy,
+  tempoBlogFeaturedImage,
+  tempoBlogIndex,
+  tempoBlogIntro,
+} from './BlogShell.styles'
 
 export default function BlogPage() {
   const posts = getAllPosts()
@@ -24,23 +32,28 @@ export default function BlogPage() {
   }))
 
   return (
-    <div className="tempo-blog">
+    <div className={`tempo-blog ${tempoBlog().className}`}>
       <DocsHeader surface="blog" />
-      <main id="blog-content" className="tempo-blog-index">
-        <header className="tempo-blog-intro">
+      <main id="blog-content" className={`tempo-blog-index ${tempoBlogIndex().className}`}>
+        <header className={`tempo-blog-intro ${tempoBlogIntro().className}`}>
           <h1>Blog</h1>
           <p>Engineering and product updates from Tempo.</p>
         </header>
 
         {featured ? (
-          <Link to={`/blog/${featured.slug}`} className="tempo-blog-featured">
-            <div className="tempo-blog-featured-copy">
+          <Link
+            to={`/blog/${featured.slug}`}
+            className={`tempo-blog-featured ${tempoBlogFeatured().className}`}
+          >
+            <div className={`tempo-blog-featured-copy ${tempoBlogFeaturedCopy().className}`}>
               <PostLabels post={featured} />
               <h2>{featured.title}</h2>
-              <p className="tempo-blog-excerpt">{featured.excerpt}</p>
+              <p className={`tempo-blog-excerpt ${tempoBlogExcerpt().className}`}>
+                {featured.excerpt}
+              </p>
               <PostByline post={featured} />
             </div>
-            <div className="tempo-blog-featured-image">
+            <div className={`tempo-blog-featured-image ${tempoBlogFeaturedImage().className}`}>
               <PostImage post={featured} priority />
             </div>
           </Link>

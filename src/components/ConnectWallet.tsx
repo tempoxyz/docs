@@ -2,6 +2,7 @@
 import * as React from 'react'
 import { tempo } from 'viem/chains'
 import { useChains, useConnect, useConnection, useConnectors, useSwitchChain } from 'wagmi'
+import * as ui from './ConnectWallet.recipes'
 import { Button, Logout } from './guides/Demo'
 import { filterSupportedInjectedConnectors } from './lib/wallets'
 
@@ -35,21 +36,19 @@ export function ConnectWallet({
   const isSupported =
     network === 'mainnet' ? chain?.id === targetChainId : chains.some((c) => c.id === chain?.id)
   if (!injectedConnectors.length)
-    return (
-      <div className="flex items-center text-[14px] -tracking-[2%]">No browser wallets found.</div>
-    )
+    return <div {...ui.connectWalletLayout()}>No browser wallets found.</div>
   if (!address || connector?.id === 'webAuthn')
     return (
-      <div className="flex gap-2">
+      <div {...ui.connectWalletLayout2()}>
         {injectedConnectors.map((connector) => (
           <Button
             variant="default"
-            className="flex items-center gap-1.5"
+            className={ui.connectWalletButton().className}
             key={connector.id}
             onClick={() => connect.connect({ connector })}
           >
             {connector.icon ? (
-              <img className="size-5" src={connector.icon} alt={connector.name} />
+              <img {...ui.img()} src={connector.icon} alt={connector.name} />
             ) : (
               <div />
             )}
@@ -71,11 +70,11 @@ export function ConnectWallet({
         }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div {...ui.connectWalletLayout3()}>
       <Logout />
       {showAddChain && !isSupported && (
         <Button
-          className="w-fit"
+          className={ui.connectWalletButton2().className}
           variant="accent"
           onClick={() => switchChain.switchChain(switchParams)}
         >
@@ -83,9 +82,7 @@ export function ConnectWallet({
         </Button>
       )}
       {switchChain.isSuccess && (
-        <div className="flex items-center font-normal text-[14px] -tracking-[2%]">
-          Added Tempo to {connector?.name ?? 'Wallet'}!
-        </div>
+        <div {...ui.connectWalletLayout4()}>Added Tempo to {connector?.name ?? 'Wallet'}!</div>
       )}
     </div>
   )

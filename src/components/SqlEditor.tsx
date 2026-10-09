@@ -1,6 +1,7 @@
 'use client'
 import type * as Monaco from 'monaco-editor'
 import * as React from 'react'
+import * as ui from './SqlEditor.recipes'
 
 const Editor = React.lazy(() =>
   import('@monaco-editor/react').then((mod) => ({ default: mod.Editor })),
@@ -328,12 +329,15 @@ export function SqlEditor(props: SqlEditorProps) {
   }, [])
 
   return (
-    <div className={`${className} ${isFocused ? 'ring-1 ring-accent' : ''}`}>
+    <div className={`${className} ${isFocused ? ui.sqlEditorLayout().className : ''}`}>
       <React.Suspense
         fallback={
           <div
-            style={{ height: editorHeight, minHeight }}
-            className="flex items-center justify-center bg-gray2 text-[13px] text-gray9"
+            {...ui.sqlEditorLayoutAppearance({
+              value0: editorHeight,
+              value1: minHeight,
+              className: ui.sqlEditorLayout2().className,
+            })}
           >
             Loading editor...
           </div>

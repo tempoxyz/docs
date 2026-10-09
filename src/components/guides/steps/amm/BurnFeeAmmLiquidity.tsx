@@ -8,6 +8,7 @@ import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './BurnFeeAmmLiquidity.recipes'
 
 const validatorToken = alphaUsd
 
@@ -72,7 +73,7 @@ export function BurnFeeAmmLiquidity(props: DemoStepProps) {
             })
           }}
           type="button"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className={ui.burnFeeAmmLiquidityButton().className}
         >
           Burn Liquidity
         </Button>
@@ -81,8 +82,8 @@ export function BurnFeeAmmLiquidity(props: DemoStepProps) {
       title={`Burn 10 LP tokens from ${metadata ? metadata.name : 'your token'} pool.`}
     >
       {burnLiquidity.data && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
+        <div {...ui.burnFeeAmmLiquidityLayout()}>
+          <div {...ui.burnFeeAmmLiquidityLayout2()}>
             <ExplorerLink hash={burnLiquidity.data.receipt.transactionHash} />
           </div>
         </div>
