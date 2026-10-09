@@ -52,7 +52,8 @@ export async function vocsWithZyzz() {
     transform(code, id) {
       // RSC may put a leaf stylesheet before the shared sheet. Establish the
       // cascade in each asset, before Vite hashes and minifies its contents.
-      if (code.trim() && id.startsWith('\0zyzz:') && id.split('?', 1)[0].endsWith('.css'))
+      // Keep this declaration even for empty sheets: RSC can retain their asset URLs.
+      if (id.startsWith('\0zyzz:') && id.split('?', 1)[0].endsWith('.css'))
         return { code: `@layer ${cascadeLayers.join(',')};\n${code}`, map: null }
     },
   }
