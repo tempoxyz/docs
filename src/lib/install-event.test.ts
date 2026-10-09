@@ -40,6 +40,8 @@ describe('install completion ingestion', () => {
         $process_person_profile: false,
         $geoip_disable: true,
         site: 'docs',
+        install_product: 'tempo_cli',
+        measurement: 'install_completed',
         install_source: event.source,
         page_path: '/docs/cli/wallet',
         first_install: true,

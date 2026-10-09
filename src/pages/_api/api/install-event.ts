@@ -50,6 +50,8 @@ app.post('/api/install-event', async (c) => {
           $process_person_profile: false,
           $geoip_disable: true,
           site: 'docs',
+          install_product: 'tempo_cli',
+          measurement: 'install_completed',
           install_source: body.source,
           page_path: sources[body.source as keyof typeof sources],
           first_install: body.first_install,

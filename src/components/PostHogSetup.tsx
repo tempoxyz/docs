@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { trackMppSdkInstallCopyClicks } from '../lib/mpp-sdk-install-tracking'
 import { POSTHOG_REPLAY_PRIVACY_CONFIG } from '../lib/posthog-privacy'
 
 function PostHogInitializer({ site }: { site: string }) {
@@ -10,8 +11,12 @@ function PostHogInitializer({ site }: { site: string }) {
 
     if (!posthogKey || !posthogHost) return
 
+    let disposed = false
+    let stopTracking: (() => void) | undefined
+
     const init = async () => {
       const { default: posthog } = await import('posthog-js')
+      if (disposed) return
 
       posthog.init(posthogKey, {
         api_host: '/ingest',
@@ -22,15 +27,28 @@ function PostHogInitializer({ site }: { site: string }) {
         ...POSTHOG_REPLAY_PRIVACY_CONFIG,
       })
       posthog.register({ site })
+      if (site === 'docs') {
+        stopTracking = trackMppSdkInstallCopyClicks(document, (properties) => {
+          posthog.capture('docs_mpp_sdk_install_copy_clicked', properties)
+        })
+      }
     }
 
     if ('requestIdleCallback' in window) {
       const idleId = window.requestIdleCallback(init, { timeout: 2_000 })
-      return () => window.cancelIdleCallback(idleId)
+      return () => {
+        disposed = true
+        window.cancelIdleCallback(idleId)
+        stopTracking?.()
+      }
     }
 
     const timeoutId = globalThis.setTimeout(init, 1)
-    return () => globalThis.clearTimeout(timeoutId)
+    return () => {
+      disposed = true
+      globalThis.clearTimeout(timeoutId)
+      stopTracking?.()
+    }
   }, [site])
 
   return null
