@@ -202,6 +202,8 @@ export default defineConfig({
   ogImageUrl: (path, options = {}) => {
     const urlBase = options.baseUrl?.replace(/\/$/, '') ?? ''
     const docsPath = String(path ?? '').replace(/^\/docs(?=\/|$)/, '') || '/'
+    if (docsPath === '/routes/networks')
+      return 'https://tempo.xyz/images/opengraph/tempo-opengraph.png'
     const landingPaths = ['/', '/changelog']
     if (landingPaths.includes(docsPath)) return `${urlBase}/og-docs.png?v=4`
 
