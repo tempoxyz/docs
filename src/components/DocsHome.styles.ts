@@ -213,9 +213,21 @@ export const tempoDocsHome = style({
       textDecoration: 'underline',
       textUnderlineOffset: '4px',
     },
-    '& .tempo-docs-home-guides > a:hover strong': {
-      textDecoration: 'underline',
-      textUnderlineOffset: '4px',
+    '& .tempo-docs-home-guides strong > span': {
+      transition: 'translate 150ms',
+    },
+    '& .tempo-docs-home-guides > a:hover strong > span': {
+      translate: '4px 0',
+    },
+    '& .tempo-docs-home-guides > a:hover strong + span': {
+      color: inherited.color.homeInk,
+    },
+  },
+  '@media (prefers-reduced-motion: reduce)': {
+    selectors: {
+      '& .tempo-docs-home-guides strong > span': {
+        transition: 'none',
+      },
     },
   },
   '@media (width < 1100px)': {
