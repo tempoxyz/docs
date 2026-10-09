@@ -77,10 +77,27 @@ jobs:
       - name: Audit generated Markdown
         run: pnpm run check:markdown
 
+  # Preserve the required status name; coverage is validated on Check's build above.
+  sitemap:
+    name: Sitemap
+    needs: check
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Secure runner
+        uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
+
+      - name: Verify sitemap validation succeeded
+        env:
+          CHECK_RESULT: ${{ needs.check.result }}
+        run: test "$CHECK_RESULT" = success
+
   ci-gate:
     name: CI Gate
     if: always()
-    needs: [check, e2e-build, e2e]
+    needs: [check, e2e-build, e2e, sitemap]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
