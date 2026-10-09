@@ -4,7 +4,7 @@ seoTitle: Tempo Network | Tempo Docs
 description: Connect to Tempo mainnet or testnet, check EVM differences, and find RPC and node resources.
 ---
 
-import { Cards, Card } from 'vocs'
+import { DocsLinkCards } from '../../components/DocsLinkCards'
 
 <span id="tempo-network" />
 
@@ -16,12 +16,7 @@ Connect to Tempo mainnet or Moderato testnet, check EVM differences, and choose 
 
 ## Connect to Tempo
 
-<Cards>
-  <Card title="Network details" description="RPC endpoints, chain IDs, and explorers for mainnet and testnet." to="/docs/quickstart/connection-details" icon="lucide:network" />
-  <Card title="EVM differences" description="Check what changes when you bring an Ethereum application to Tempo." to="/docs/quickstart/evm-compatibility" icon="lucide:git-compare" />
-  <Card title="JSON-RPC reference" description="Read the RPC methods supported by Tempo nodes." to="/docs/protocol/rpc" icon="lucide:braces" />
-  <Card title="Run a node" description="Install a Tempo node and operate your own RPC infrastructure." to="/docs/guide/node" icon="lucide:server" />
-</Cards>
+<DocsLinkCards collection="network" />
 
 ## How Tempo differs from Ethereum
 
@@ -29,5 +24,3 @@ Connect to Tempo mainnet or Moderato testnet, check EVM differences, and choose 
 - **Transactions support payment workflows.** Use [atomic batches, access keys, and independent nonces](/docs/guide/tempo-transaction) through Tempo SDKs.
 - **Tokens have payment features.** [TIP-20 Tokens](/docs/network/tokens) support transfer memos, issuance roles, and transfer policies.
 - **Execution has some differences.** Review [EVM differences](/docs/quickstart/evm-compatibility) before porting a wallet or contract, especially native-balance checks and gas estimates.
-
-For exact behavior, read the [protocol specifications](/docs/protocol). Track changes in [network upgrades](/docs/protocol/upgrades), or inspect Tempo's [source code](https://github.com/tempoxyz/tempo).

@@ -30,7 +30,7 @@ export const proxiedLegacyDocsRoutes = [
   { source: '/docs.md', destination: '/index.md' },
   { source: '/assets/md/docs.md', destination: '/assets/md/index.md' },
   { source: '/blog/inside-tempo-zones', destination: '/blog/privacy-with-tempo-zones' },
-  { source: '/docs/developer-tools', destination: '/docs/ecosystem' },
+  { source: '/docs/developer-tools', destination: '/docs/partners' },
   { source: '/docs/developer-tools/fee-payer', destination: '/docs/api/fee-payer' },
   { source: '/docs/developer-tools/indexer', destination: '/docs/api/indexer-api' },
   { source: '/docs/hosted-services', destination: '/docs/api' },
@@ -38,6 +38,7 @@ export const proxiedLegacyDocsRoutes = [
   { source: '/docs/api/funding/:path*', destination: '/docs/api/routes/:path*' },
   { source: '/docs/api/routes/chains', destination: '/docs/api/conventions#chain-identifiers' },
   { source: '/docs/api/routes/providers', destination: '/docs/api/reference' },
+  { source: '/docs/api/routes/quotes', destination: '/docs/api/routes/transfers#quoteroutestransfer' },
   {
     source: '/docs/guide/use-accounts/embed-passkeys',
     destination: 'https://accounts.tempo.xyz/docs/adapters/webauthn',
@@ -149,7 +150,7 @@ export const legacyDocsHostRoutes = [
     source: '/AccountKeychain',
     destination: `${canonicalDevelopersOrigin}/docs/protocol/transactions/AccountKeychain`,
   },
-  { source: '/developer-tools', destination: `${canonicalDevelopersOrigin}/docs/ecosystem` },
+  { source: '/developer-tools', destination: `${canonicalDevelopersOrigin}/docs/partners` },
   {
     source: '/developer-tools/fee-payer',
     destination: `${canonicalDevelopersOrigin}/docs/api/fee-payer`,
@@ -160,13 +161,13 @@ export const legacyDocsHostRoutes = [
   },
   { source: '/hosted-services', destination: `${canonicalDevelopersOrigin}/docs/api` },
   { source: '/hosted-services/:path*', destination: `${canonicalDevelopersOrigin}/docs/api` },
-  { source: '/learn/partners', destination: `${canonicalDevelopersOrigin}/docs/partners` },
-  { source: '/docs/learn/partners', destination: `${canonicalDevelopersOrigin}/docs/partners` },
+  { source: '/learn/partners', destination: `${canonicalDevelopersOrigin}/docs/partners/join` },
+  { source: '/docs/learn/partners', destination: `${canonicalDevelopersOrigin}/docs/partners/join` },
   {
     source: '/docs/guide/using-tempo-with-ai/partners',
-    destination: `${canonicalDevelopersOrigin}/docs/partners`,
+    destination: `${canonicalDevelopersOrigin}/docs/partners/join`,
   },
-  { source: '/build/partners', destination: `${canonicalDevelopersOrigin}/docs/partners` },
+  { source: '/build/partners', destination: `${canonicalDevelopersOrigin}/docs/partners/join` },
   {
     source: '/network-upgrades',
     destination: `${canonicalDevelopersOrigin}/docs/guide/node/network-upgrades`,

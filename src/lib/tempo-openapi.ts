@@ -84,12 +84,23 @@ function prepareEarnRequestExamples(pathname: string, path: Record<string, unkno
   }
 }
 
-/** Prepare editable Earn samples without changing the API contract. */
+/** Prepare documentation routes and editable samples without changing the API contract. */
 export function prepareTempoOpenApi(
   source: Record<string, unknown>,
   sourceUrl = canonicalSpecUrl,
 ): Record<string, unknown> {
   const spec = structuredClone(source)
+  // API-key/MPP authentication is an authored guide at /docs/api/authentication.
+  // Keep the Console's sign-in operations on their own reference page so Vocs
+  // does not append them to the guide or replace its Markdown export.
+  if (Array.isArray(spec.tags)) {
+    for (const tag of spec.tags) {
+      if (isObject(tag) && tag.name === 'Authentication') {
+        tag['x-displayName'] = 'Console authentication'
+        tag['x-pagePath'] = 'console/authentication'
+      }
+    }
+  }
   const schemas = isObject(spec.components) ? spec.components.schemas : undefined
   if (isObject(schemas)) {
     for (const [name, schema] of Object.entries(schemas)) {

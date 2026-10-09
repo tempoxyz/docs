@@ -61,18 +61,18 @@ exchange.withdraw(USDG_ADDRESS, 1000e6);
 ```
 
 :::warning
-The withdraw function will revert if you attempt to withdraw more than your available balance on the exchange.
+The withdraw function will revert if you attempt to withdraw more than your available balance on the DEX.
 :::
 
 ## How Balances Work
 
 ### When Swapping
 
-- **Before swap**: Exchange checks your balance, transfers from wallet if needed
-- **After swap**: Output tokens are transferred directly to your wallet (not kept on exchange)
+- **Before swap**: The DEX checks your balance, transfers from wallet if needed
+- **After swap**: Output tokens are transferred directly to your wallet (not kept on the DEX)
 
 ### When Placing Orders
 
-- **On placement**: Required tokens are debited from your exchange balance (or transferred from wallet if insufficient)
-- **When filled**: Proceeds are credited to your exchange balance
-- **On cancellation**: Unfilled portion is refunded to your exchange balance
+- **On placement**: Required tokens are debited from your DEX balance (or transferred from wallet if insufficient)
+- **When filled**: Proceeds are credited to your DEX balance
+- **On cancellation**: Unfilled portion is refunded to your DEX balance

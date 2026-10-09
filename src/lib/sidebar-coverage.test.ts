@@ -25,8 +25,12 @@ const generatedApiGroups = new Set([
   '/docs/api/transfers',
   '/docs/api/zones',
 ])
-// Full examples remain discoverable through their primary integration guide.
+// Supporting guides remain discoverable through their primary guide or partner category.
 const supportingPages = new Map([
+  ['/docs/guide/bridge-layerzero', '/docs/partners/bridges'],
+  ['/docs/guide/bridge-bungee', '/docs/partners/bridges'],
+  ['/docs/guide/bridge-relay', '/docs/partners/bridges'],
+  ['/docs/partners/developer-tools', '/docs/partners/explorers-and-debugging'],
   ['/docs/guide/payments/send-a-payment/examples', '/docs/guide/payments/send-a-payment'],
 ])
 const routes = readdirSync(new URL('../pages/', import.meta.url), { recursive: true })
@@ -77,7 +81,7 @@ describe('specification navigation ownership', () => {
   })
 
   it.each([
-    ['/docs/protocol/transactions/AccountKeychain', 'accounts', '/docs/accounts'],
+    ['/docs/protocol/transactions/AccountKeychain', 'developers', '/docs/development'],
     ['/docs/protocol/tip20/virtual-addresses', 'accounts', '/docs/accounts'],
     ['/docs/protocol/tip403/receive-policies', 'accounts', '/docs/accounts'],
     ...['', '/architecture', '/accounts', '/bridging', '/rpc', '/execution', '/proving'].map(
@@ -87,7 +91,8 @@ describe('specification navigation ownership', () => {
     expect(getActiveDocsSection(route)?.id).toBe(section)
     expect(sidebarFor(route)).toBe(sidebarFor(overview))
     expect(links(sidebarFor(route)).filter((link) => link === route)).toHaveLength(1)
-    expect(links(sidebarFor('/docs/development'))).not.toContain(route)
+    if (section !== 'developers')
+      expect(links(sidebarFor('/docs/development'))).not.toContain(route)
   })
 
   it('places specifications directly in the matching Tempo EVM chapter', () => {
@@ -104,8 +109,8 @@ describe('specification navigation ownership', () => {
       ['Fees', '/docs/protocol/fees/spec-fee'],
       ['Fees', '/docs/protocol/fees/spec-fee-amm'],
       ['TIP-20 Tokens', '/docs/protocol/tip20/spec'],
-      ['TIP-20 Tokens', '/docs/protocol/tip403/spec'],
-      ['Exchange', '/docs/protocol/exchange/spec'],
+      ['Policies', '/docs/protocol/tip403/spec'],
+      ['Stablecoin DEX', '/docs/protocol/exchange/spec'],
       ['Network', '/docs/protocol/blockspace/payment-lane-specification'],
       ['Network', '/docs/protocol/blockspace/consensus'],
     ]) {

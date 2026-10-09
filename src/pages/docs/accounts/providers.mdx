@@ -16,7 +16,7 @@ Keep these responsibilities clear in your integration:
 - **Your wallet provider** manages signing keys and enforces its configured policies before signing.
 - **Tempo** validates transaction signatures and enforces the authorized access key's onchain restrictions.
 
-A provider policy applies to requests that provider signs. A [limited access key](/docs/accounts/access-keys) lets another signer act on the account, so configure its expiry, budget, and allowed calls when authorizing it.
+A provider policy applies only to requests that the provider signs. A [limited access key](/docs/accounts/access-keys) lets another signer act on the account, so configure its expiry, budget, and allowed calls when authorizing it.
 
 Check the provider's recovery and key-export options for your account model. For passkeys or delegated signing, confirm that its Tempo integration exposes the authorization methods you need.
 
@@ -34,4 +34,4 @@ Turnkey's [Tempo integration](https://docs.turnkey.com/features/networks/tempo) 
 
 Start with Turnkey's [Tempo example](https://github.com/tkhq/sdk/tree/main/examples/chain-integrations/with-tempo) for transaction construction and broadcast. It includes single calls, batches, and fee sponsorship. For embedded wallet UI, use the [Embedded Wallet Kit](https://docs.turnkey.com/sdks/react/getting-started).
 
-Browse [wallet partners](/docs/ecosystem/wallets) for other integrations.
+Browse [wallet partners](/docs/partners/wallets) for other integrations.

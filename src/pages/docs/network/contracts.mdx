@@ -70,6 +70,6 @@ You can also add `--verify --verifier-url https://contracts.tempo.xyz` to the de
 
 ## EVM differences
 
-There is no native gas token: use TIP-20 balances and stablecoin fees. Review [EVM differences](/docs/quickstart/evm-compatibility) for native-balance behavior and state-creation gas costs before porting a contract. Estimate deployment gas against the target network.
+There is no native gas token: use [TIP-20 token balances](/docs/network/tokens) and stablecoin fees. Review [EVM differences](/docs/quickstart/evm-compatibility) for native-balance behavior and state-creation gas costs before porting a contract. Estimate deployment gas against the target network.
 
 Use [system contract addresses](/docs/quickstart/predeployed-contracts) when integrating Tempo primitives, and [`tempo-std`](/docs/sdk/foundry) for Solidity interfaces. For local testing, run [Anvil in Tempo mode](/docs/sdk/foundry#local-tempo-development-with-anvil).

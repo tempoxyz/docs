@@ -1,0 +1,146 @@
+---
+title: "Partners"
+seoTitle: "Tempo Partners: Ecosystem and Infrastructure | Tempo Docs"
+description: Find assets, wallets, exchanges, bridges, payment providers, and infrastructure for your Tempo application.
+---
+
+import { Cards, Card } from 'vocs'
+import { DocsProductOverview } from '../../../components/DocsProductOverview'
+
+<span id="tempo-ecosystem-infrastructure" />
+<span id="ecosystem" />
+
+<span id="choose-infrastructure-for-your-application" />
+<span id="find-a-partner" />
+
+<DocsProductOverview image="partners" alt="Connect your application to the independent provider that fits its needs.">
+
+<span id="partners" />
+
+# Partners
+
+Find the providers you need to build on Tempo: wallets for customer accounts, services for moving money, and infrastructure for running your application. Choose a category below for provider details and integration links.
+
+[Browse providers →](#partner-categories)
+
+</DocsProductOverview>
+
+<span id="partner-categories" />
+
+<span id="move-money" />
+
+## Ecosystem
+
+Choose the assets your application accepts and the services that connect them to other networks, exchanges, or bank accounts.
+
+<Cards>
+  <Card
+    title="Stablecoins"
+    description="Explore stablecoins and issuers on Tempo, including OUSD and AllUnity."
+    to="/docs/partners/stablecoins"
+    icon="lucide:coins"
+  />
+  <Card
+    title="RWAs"
+    description="Find tokenized Treasuries and other assets from Ondo, Figure, and Hastra."
+    to="/docs/partners/rwas"
+    icon="lucide:landmark"
+  />
+  <Card
+    title="Exchanges"
+    description="Connect to stablecoin trading and exchange liquidity."
+    to="/docs/partners/exchanges"
+    icon="lucide:arrow-left-right"
+  />
+  <Card
+    title="Bridges"
+    description="Move stablecoins between Tempo and other networks."
+    to="/docs/partners/bridges"
+    icon="lucide:waypoints"
+  />
+  <Card
+    title="Cards"
+    description="Add card spending with Bridge, Wirex, or UR."
+    to="/docs/partners/cards"
+    icon="lucide:credit-card"
+  />
+  <Card
+    title="Payments & ramps"
+    description="Connect fiat funding, payouts, issuance, and payment operations."
+    to="/docs/partners/payments-and-ramps"
+    icon="lucide:banknote"
+  />
+</Cards>
+
+<span id="build-customer-accounts" />
+
+Choose how customers hold funds and authorize payments. Start with wallet providers for embedded or custodial accounts, or smart accounts for programmable contract wallets.
+
+<Cards>
+  <Card
+    title="Wallets"
+    description="Find embedded wallets, custody, key management, and self-custodial wallets."
+    to="/docs/partners/wallets"
+    icon="lucide:wallet"
+  />
+  <Card
+    title="Smart accounts"
+    description="Explore programmable wallets, multisignature accounts, and account abstraction providers."
+    to="/docs/partners/smart-accounts"
+    icon="lucide:key-round"
+  />
+</Cards>
+
+<span id="run-and-monitor-your-application" />
+
+## Infra
+
+Connect to the network, read its data, inspect transactions, and integrate the controls your application needs.
+
+<Cards>
+  <Card
+    title="Node providers"
+    description="Connect through hosted RPC endpoints and managed node services."
+    to="/docs/partners/rpc-and-nodes"
+    icon="lucide:server"
+  />
+  <Card
+    title="Data"
+    description="Query indexed data, analyze activity, and integrate oracles."
+    to="/docs/partners/data-and-oracles"
+    icon="lucide:chart-line"
+  />
+  <Card
+    title="Explorers and debugging"
+    description="Look up accounts and transactions, inspect execution traces, and investigate reverts."
+    to="/docs/partners/explorers-and-debugging"
+    icon="lucide:search"
+  />
+  <Card
+    title="Developer tools"
+    description="Find simulation tools and resources for building account integrations."
+    to="/docs/partners/developer-tools"
+    icon="lucide:code-2"
+  />
+  <Card
+    title="Security and compliance"
+    description="Add transaction screening, risk monitoring, and reconciliation tools."
+    to="/docs/partners/security-and-compliance"
+    icon="lucide:shield-check"
+  />
+</Cards>
+
+## Connect providers to your Tempo integration
+
+Use [Accounts](/docs/accounts) for wallet connections, deposits, and payment controls. Follow [network configuration](/docs/quickstart/connection-details) when connecting an RPC provider, and [EVM compatibility](/docs/quickstart/evm-compatibility) when adapting an existing application.
+
+For Tempo’s own clients, CLI, and API reference, use [APIs & SDKs](/docs/tools). Provider support can differ by network, asset, and Tempo transaction feature; check the provider’s integration guide for the capabilities your application uses.
+
+## Try a provider integration
+
+- [Fund an account with OUSD](/docs/guide/ousd): find token addresses and funding paths.
+- [Bridge with Bungee](/docs/guide/bridge-bungee): request a deposit quote, execute it, and track delivery.
+- [Bridge with Relay](/docs/guide/bridge-relay): discover supported tokens, request a quote, and track the transfer.
+- [Bridge with LayerZero](/docs/guide/bridge-layerzero): use Stargate pools or token-specific OFT adapters.
+
+For a provider introduction or a new integration, [contact the Tempo team](/docs/partners/join).

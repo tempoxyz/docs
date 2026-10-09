@@ -127,7 +127,7 @@ export async function handler(request: Request) {
 
 ## MPP payment realm
 
-The `realm` identifies your server in payment challenges and on-chain attribution. By default, mppx auto-detects it from environment variables (`HOSTNAME`, `VERCEL_URL`, etc.), but this can produce incorrect values in containerized environments where `HOSTNAME` is set to an internal identifier (e.g. a Kubernetes pod name).
+The `realm` identifies your server in payment challenges and onchain attribution. `mppx` resolves it from `MPP_REALM` or supported hosting variables such as `VERCEL_URL`, then falls back to the request URL's hostname. Configure it explicitly when a proxy or deployment exposes an internal hostname.
 
 Set `realm` explicitly to your public domain:
 
@@ -180,8 +180,10 @@ npx mppx https://your-server.example/resource
 ```
 
 :::tip
-Use `npx mppx --inspect` to debug your server's Challenge response without making any payments.
+Use `npx mppx --inspect https://your-server.example/resource` to debug your server's Challenge response without making any payments.
 :::
+
+To test on Moderato, add `testnet: true` to the server's `tempo({ ... })` configuration. The OUSD address above exists on both networks; `testnet: true` selects chain `42431`. Fund the payer with [testnet OUSD](/docs/quickstart/faucet), and connect the client to the same network. For a browser client, use the [Moderato Wagmi configuration](/docs/guide/machine-payments/client#use-mpp-with-wagmi).
 
 ## Next steps for MPP servers
 

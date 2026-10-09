@@ -55,8 +55,10 @@ html:has(.tempo-blog) {
   grid-template-columns: 1fr 1fr;
   align-items: center;
   gap: 48px;
-  padding-bottom: 40px;
-  border-bottom: 1px solid var(--blog-rule);
+  padding: var(--tempo-card-padding, 28px);
+  border: 0;
+  border-radius: var(--tempo-card-radius, 24px);
+  background: var(--color-surface-block);
   color: inherit;
   text-decoration: none;
 }
@@ -90,6 +92,7 @@ html:has(.tempo-blog) {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  border-radius: 12px;
   background: var(--color-surface-shell);
 }
 
@@ -416,6 +419,7 @@ html:has(.tempo-blog) {
   .tempo-blog-featured {
     grid-template-columns: 1fr;
     gap: 28px;
+    padding: 24px;
   }
 
   .tempo-blog-featured-copy {

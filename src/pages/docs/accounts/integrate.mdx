@@ -76,7 +76,7 @@ The [complete browser setup](/docs/accounts/examples#browser-wallet-setup) creat
 
 ### Read the connected account
 
-Use `publicClient` to [read balances and activity](/docs/accounts/balances), and `walletClient` to request transaction authorization.
+Use the clients from the [browser setup](/docs/accounts/examples#browser-wallet-setup): `publicClient` [reads balances and activity](/docs/accounts/balances), and `walletClient` requests transaction authorization.
 
 On `accountsChanged`, update the selected address or clear it when the wallet disconnects. On `chainChanged`, refresh network-dependent state before enabling transactions.
 
@@ -88,6 +88,8 @@ On `accountsChanged`, update the selected address or clear it when the wallet di
 ### Fund the connected account
 
 Fund the connected address with the [Moderato faucet](/docs/quickstart/faucet), then follow [Send payments](/docs/guide/payments/send-a-payment). Show the recipient and amount before asking the wallet to authorize the request.
+
+For mainnet, add a funding button with the [Accounts SDK funding guide](/docs/guide/getting-funds#open-funding-with-the-accounts-sdk). It opens Tempo Wallet’s onramp and other funding methods from your application.
 
 :::::
 

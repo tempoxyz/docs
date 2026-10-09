@@ -21,7 +21,7 @@ Give your coding agent access to Tempo documentation. Install the Tempo Docs plu
 
 ## Connect your coding agent
 
-The Tempo Docs plugin installs the read-only Tempo MCP server, documentation skill, and editor metadata. Tempo publishes plugins from the public [`tempoxyz/plugins`](https://github.com/tempoxyz/plugins) repository.
+The Tempo Docs plugin connects your agent to the read-only Tempo MCP server and installs a documentation skill and editor metadata. Tempo publishes plugins from the public [`tempoxyz/plugins`](https://github.com/tempoxyz/plugins) repository.
 
 Run both commands for your client in your computer's terminal:
 
@@ -166,6 +166,26 @@ Use Tempo's docs to build a TypeScript example that sends a stablecoin payment o
 
 Use the [testnet faucet](/docs/quickstart/faucet) for test funds and [Quickstart](/get-started/quickstart) to review the implementation.
 
+### Choose a starting page
+
+Ask your agent to read the guide for the integration you are building before writing code:
+
+| Task | Start with |
+| --- | --- |
+| Choose a product or send a first test payment | [Get Started](/get-started) |
+| Create accounts, read balances, send or receive payments | [Accounts](/docs/accounts) |
+| Find a vault, deposit, or withdraw | [Earn](/docs/earn) |
+| Move funds between Tempo and other networks | [Routes](/docs/routes) |
+| Work with private balances, deposits, and withdrawals | [Zones](/docs/zones) |
+| Pay for an API or charge for your service | [Machine Payments](/docs/agents) |
+| Work with transactions, tokens, contracts, or nodes | [Tempo EVM](/docs/development) |
+| Choose a client, CLI, or API reference | [APIs & SDKs](/docs/tools) |
+| Find wallet, bridge, data, or infrastructure providers | [Partners](/docs/partners) |
+
+Read each product's overview for its current availability and access requirements. Earn and Routes are in beta; Zones is in limited preview.
+
+The hosted MCP reads published documentation. It cannot see your local edits or preview deployment. For a preview, give your agent that preview's Markdown URL. If MCP results use older page names or omit a section, read `/llms.txt` and `/SKILL.md` from the docs site you are using, then fetch the relevant page directly.
+
 ### MCP tools
 
 The MCP endpoint exposes these tools to connected agents:
@@ -185,9 +205,9 @@ MCP clients can also post feedback directly to `https://tempo.xyz/developers/api
 {
   "source": "mcp",
   "sentiment": "negative",
-  "message": "The read_page result for /guide/payments is missing fee-token setup.",
+  "message": "The read_page result for /docs/guide/payments/send-a-payment is missing fee-token setup.",
   "toolName": "read_page",
-  "relatedResource": "/guide/payments",
+  "relatedResource": "/docs/guide/payments/send-a-payment",
   "client": "codex"
 }
 ```
@@ -232,17 +252,17 @@ Install the Tempo Docs skill to give AI coding agents access to Tempo documentat
 npx skills add tempoxyz/plugins --skill docs
 ```
 
-Once installed, the agent uses it automatically when relevant tasks are detected.
+Ask your agent to use the Docs skill for Tempo integration tasks. The [published docs skill](https://tempo.xyz/developers/SKILL.md) contains the current documentation map; the plugin bundles a copy that is updated separately.
 
 #### Read docs as Markdown
 
-Every page on this site is available as plain Markdown — append `.md` to any URL:
+Append `.md` to a documentation page URL to read its Markdown:
 
 ```text
-https://tempo.xyz/developers/docs/quickstart/integrate-tempo.md
+https://tempo.xyz/developers/get-started.md
 ```
 
-For LLM consumption, two [`llms.txt`](https://llmstxt.org/) files are served at the root:
+For broader context, use the [`llms.txt`](https://llmstxt.org/) files at the documentation root:
 
 | URL | Contents |
 | --- | --- |

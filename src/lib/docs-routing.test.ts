@@ -160,6 +160,34 @@ describe('docs routing redirects', () => {
     }
   })
 
+  it.each(vocsRedirects)('mirrors every retired URL at the public mount: $source', ({
+    source,
+    destination,
+  }) => {
+    const target = destination.startsWith(canonicalDevelopersOrigin)
+      ? destination.slice(canonicalDevelopersOrigin.length) || '/'
+      : destination
+    expect(findRedirect(`/developers${source}`)).toMatchObject({
+      destination: developersProxyDestination(target),
+      permanent: true,
+    })
+  })
+
+  it('keeps the developer tools compatibility page and its provider anchors reachable', () => {
+    expect(findRedirect('/developers/docs/quickstart/developer-tools')).toBeUndefined()
+  })
+
+  it('redirects old asset directories directly to Stablecoins', () => {
+    for (const prefix of ['', '/developers']) {
+      for (const source of ['/docs/ecosystem/assets', '/docs/partners/assets']) {
+        expect(findRedirect(`${prefix}${source}`)).toMatchObject({
+          destination: `${prefix}/docs/partners/stablecoins`,
+          permanent: true,
+        })
+      }
+    }
+  })
+
   it('normalizes trailing slashes before static route handling', () => {
     expect(vercelConfig.trailingSlash).toBe(false)
   })
@@ -294,6 +322,12 @@ describe('docs routing redirects', () => {
     ['/tools', '/docs/tools'],
     ['/tools/:path*', '/docs/tools/:path*'],
     ['/partners', '/docs/partners'],
+    ['/docs/ecosystem', '/docs/partners'],
+    ['/docs/ecosystem/node-infrastructure', '/docs/partners/rpc-and-nodes'],
+    [
+      '/developers/docs/ecosystem/smart-contract-libraries',
+      '/developers/docs/partners/smart-accounts',
+    ],
     ['/api', '/docs/api'],
     ['/api/authentication', '/docs/api/authentication'],
     ['/api/conventions', '/docs/api/conventions'],
@@ -308,8 +342,7 @@ describe('docs routing redirects', () => {
     ['/api/transactions-and-transfers', '/docs/api/transactions-and-transfers'],
     ['/api/transfers', '/docs/api/transfers'],
     ['/api/versioning-policy', '/docs/api/versioning-policy'],
-    ['/developers/docs/quickstart/developer-tools', '/developers/docs/ecosystem'],
-    ['/developers/docs/developer-tools', '/developers/docs/ecosystem'],
+    ['/developers/docs/developer-tools', '/developers/docs/partners'],
     ['/developers/docs/developer-tools/fee-payer', '/developers/docs/api/fee-payer'],
     ['/developers/docs/developer-tools/indexer', '/developers/docs/api/indexer-api'],
     ['/developers/docs/hosted-services', '/developers/docs/api'],

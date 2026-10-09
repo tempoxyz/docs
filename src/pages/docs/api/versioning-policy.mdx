@@ -12,7 +12,9 @@ The Tempo API evolves without breaking existing integrations whenever practical.
 The Tempo API is under active development. Endpoints are not yet stable and may change without notice. The policy below will apply after stabilization.
 :::
 
-## Where This Policy Does Not Apply
+<span id="where-this-policy-does-not-apply" />
+
+## Versioning scope
 
 This policy covers the versioned REST API under `/v1`. It does **not** apply to the following endpoint, which follows an external specification and is versioned independently of the Tempo API:
 
@@ -20,7 +22,9 @@ This policy covers the versioned REST API under `/v1`. It does **not** apply to 
 | --- | --- |
 | `/rpc` | The Ethereum JSON-RPC interface, which tracks the upstream JSON-RPC and node specifications. |
 
-## Backward-Compatible Changes
+<span id="backward-compatible-changes" />
+
+## Compatible API changes
 
 These changes are released continuously and **do not** require you to change your integration or select a new version:
 
@@ -31,10 +35,12 @@ These changes are released continuously and **do not** require you to change you
 - Adding new error `code`s within an existing documented category.
 - Changing human-readable text, such as descriptions or error `message`s, without changing the machine-readable `code` or its meaning.
 - Fixing behavior to match the documented API.
-- Changing the format or length of opaque identifiers, hashes, and cursors. Treat them as opaque strings.
+- Changing the format or length of opaque API resource identifiers and cursors. Onchain addresses and transaction hashes retain their specified formats.
 - Adding or adjusting `RateLimit-*` headers.
 
-## Breaking Changes
+<span id="breaking-changes" />
+
+## Breaking API changes
 
 A breaking change is any change that could require a correctly implemented client to change code to keep working as documented. Breaking changes are introduced behind an explicit version with a migration path. Examples:
 
@@ -48,17 +54,23 @@ A breaking change is any change that could require a correctly implemented clien
 We may make immediate changes without the usual notice when required to address security, abuse, data-integrity, legal, or chain-safety issues. We document these as soon as practical.
 :::
 
-## Deprecation and Sunset
+<span id="deprecation-and-sunset" />
 
-We will not deprecate a stable endpoint or version until a replacement is available and documented with a migration path. Deprecated endpoints are marked `deprecated: true` in this OpenAPI document and return standard signaling headers:
+## API deprecation and sunset
+
+We will not deprecate a stable endpoint or version until a replacement is available and documented with a migration path. Deprecated endpoints are marked `deprecated: true` in the [Tempo OpenAPI specification](https://api.tempo.xyz/openapi.json) and return standard signaling headers:
+
+For example (illustrative dates):
 
 ```http
-Deprecation: true
-Sunset: Wed, 15 Jan 2027 00:00:00 GMT
+Deprecation: @1798761600
+Sunset: Fri, 15 Jan 2027 00:00:00 GMT
 Link: <https://tempo.xyz/developers/docs/api/versioning-policy>; rel="deprecation"
 ```
 
-## Communicating Changes
+<span id="communicating-changes" />
+
+## API change notices
 
 - All breaking changes and meaningful additions are recorded in the changelog with affected endpoints, migration notes, and any sunset date.
-- Deprecated operations and fields are flagged in this OpenAPI document.
+- Deprecated operations and fields are flagged in the [Tempo OpenAPI specification](https://api.tempo.xyz/openapi.json).

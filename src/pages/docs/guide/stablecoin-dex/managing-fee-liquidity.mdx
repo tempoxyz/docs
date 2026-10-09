@@ -87,7 +87,7 @@ export const config = createConfig({
 
 ### Add liquidity
 
-Add validator token to the pool to receive LP tokens representing your share. The first liquidity provider to a new pool must burn 1,000 units of liquidity. This costs approximately 0.002 USD and prevents attacks on pool reserves. Learn more in the [Fee AMM specification](/docs/protocol/fees/spec-fee-amm).
+Add validator tokens to receive liquidity shares tracked by the Fee AMM; these are not separate ERC-20 tokens. The first liquidity provider to a new pool must burn 1,000 units of liquidity. This costs approximately 0.002 USD and prevents attacks on pool reserves. Learn more in the [Fee AMM specification](/docs/protocol/fees/spec-fee-amm).
 
 :::code-group
 
@@ -390,7 +390,7 @@ function RebalancePool() {
       <div>Validator token reserves: {formatUnits(pool?.reserveValidatorToken ?? 0n, 6)}</div>
       <button type="button" onClick={() => { // [!code hl]
         if (!address || !pool) return // [!code hl]
-        // Swap validator token for user token at 0.9985 rate // [!code hl]
+        // Pay approximately 0.9985 validator tokens per user token received // [!code hl]
         rebalance.mutate({ // [!code hl]
           userToken, // [!code hl]
           validatorToken, // [!code hl]

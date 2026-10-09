@@ -14,7 +14,7 @@ Fund a test account with the [faucet](/docs/quickstart/faucet) and replace the e
 
 ## Send a payment
 
-Send a payment using the standard `transfer` function:
+Send a payment using the standard `transfer` function. The Solidity examples are owner-operated treasury contracts: pass the token address to the constructor and fund the contract before calling it.
 
 <Tabs stateKey="library">
   <Tab title="Viem">
@@ -243,9 +243,16 @@ Send a payment using the standard `transfer` function:
     import {ITIP20} from "tempo-std/interfaces/ITIP20.sol";
 
     contract PaymentSender {
-        ITIP20 public token;
+        ITIP20 public immutable token;
+        address public immutable owner;
+
+        constructor(ITIP20 token_) {
+            token = token_;
+            owner = msg.sender;
+        }
 
         function sendPayment(address recipient, uint256 amount) external {
+            require(msg.sender == owner, "Only owner");
             token.transfer(recipient, amount); // [!code hl]
         }
     }
@@ -342,7 +349,7 @@ Include a memo for payment reconciliation and tracking. Use a short invoice or o
             .transferWithMemo( // [!code hl]
                 address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb"),
                 U256::from(100_000_000),
-                B256::left_padding_from("INV-12345".as_bytes()), // [!code hl]
+                B256::right_padding_from("INV-12345".as_bytes()), // [!code hl]
             )
             .send()
             .await?
@@ -498,13 +505,20 @@ Include a memo for payment reconciliation and tracking. Use a short invoice or o
     import {ITIP20} from "tempo-std/interfaces/ITIP20.sol";
 
     contract PaymentSender {
-        ITIP20 public token;
+        ITIP20 public immutable token;
+        address public immutable owner;
+
+        constructor(ITIP20 token_) {
+            token = token_;
+            owner = msg.sender;
+        }
 
         function sendPaymentWithMemo(
             address recipient,
             uint256 amount,
             bytes32 invoiceId
         ) external {
+            require(msg.sender == owner, "Only owner");
             token.transferWithMemo(recipient, amount, invoiceId); // [!code hl]
         }
     }
@@ -792,7 +806,13 @@ Send several payments as calls in one transaction. If a call reverts, the whole 
     import {ITIP20} from "tempo-std/interfaces/ITIP20.sol";
 
     contract BatchPaymentSender {
-        ITIP20 public token;
+        ITIP20 public immutable token;
+        address public immutable owner;
+
+        constructor(ITIP20 token_) {
+            token = token_;
+            owner = msg.sender;
+        }
 
         struct Payment {
             address recipient;
@@ -800,6 +820,7 @@ Send several payments as calls in one transaction. If a call reverts, the whole 
         }
 
         function batchPay(Payment[] calldata payments) external {
+            require(msg.sender == owner, "Only owner");
             for (uint256 i = 0; i < payments.length; i++) {
                 token.transfer(payments[i].recipient, payments[i].amount); // [!code hl]
             }

@@ -1,3 +1,4 @@
+@import "../components/PartnerLogos.css";
 @import "tailwindcss";
 @import "../components/DocsCards.css";
 @import "../components/DocsHome.css";
@@ -107,6 +108,8 @@
     background: var(--vocs-background-color-primary);
     color: var(--vocs-text-color-primary);
     font-family: var(--font-pilat-book), ui-sans-serif, system-ui, sans-serif;
+    /* Pilat kerning compresses spaces after punctuation. */
+    font-kerning: none;
   }
 
   .docs-section-nav {
@@ -336,7 +339,7 @@
   }
 
   [data-v-sidebar-container] [data-v-sidebar] {
-    gap: 14px;
+    gap: 24px;
     font-family: var(--font-pilat-book), ui-sans-serif, system-ui, sans-serif;
   }
 
@@ -344,30 +347,36 @@
     min-width: 0;
   }
 
+  [data-v-sidebar] > [data-v-sidebar-section] + [data-v-sidebar-section] {
+    border-top: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+    padding-top: 24px;
+  }
+
   [data-v-sidebar] > [data-v-sidebar-section] > [data-v-sidebar-section-header] {
     height: auto;
     min-height: 0;
-    margin: 0 -8px 8px;
+    margin: 0 -8px 12px;
     padding: 0 8px;
     background: transparent;
-    color: color-mix(in srgb, var(--foreground) 65%, transparent);
-    font-size: 13px;
-    font-weight: 400;
-    letter-spacing: 0;
-    line-height: 1.3;
+    color: color-mix(in srgb, var(--foreground) 78%, transparent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.055em;
+    line-height: 1.5;
+    text-transform: uppercase;
   }
 
   [data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header] {
-    min-height: 30px;
-    margin: 1px -8px;
-    padding: 0 8px;
+    min-height: 34px;
+    margin: 0 -8px;
+    padding: 6px 8px;
     border-radius: 4px;
     background: transparent;
     color: color-mix(in srgb, var(--foreground) 72%, transparent);
     font-size: 14px;
     font-weight: 400;
     letter-spacing: 0;
-    line-height: 1.35;
+    line-height: 1.5;
   }
 
   [data-v-sidebar]
@@ -409,13 +418,13 @@
   [data-v-sidebar] [data-v-sidebar-item][data-link] {
     min-height: 34px;
     margin: 0 -8px;
-    padding: 0 8px;
+    padding: 6px 8px;
     border-radius: 4px;
     color: color-mix(in srgb, var(--foreground) 72%, transparent);
     font-size: 14px;
     font-weight: 400;
     letter-spacing: 0;
-    line-height: 1.35;
+    line-height: 1.5;
   }
 
   [data-v-sidebar] a[data-v-sidebar-item][data-link]:hover {
@@ -451,6 +460,17 @@
   [data-v-sidebar-footer-content] [data-v-socials] a[aria-label="X (Twitter)"] svg {
     width: 16px;
     height: 16px;
+  }
+
+  /* Vocs portals this outline to body; align it with the docs gutter. */
+  [data-v-version-outline] {
+    display: none;
+
+    @media (width >= 1376px) {
+      display: block;
+      right: max(24px, calc((100% - var(--tempo-docs-shell-width)) * 0.5 + 24px));
+      width: calc(var(--tempo-docs-outline-width) - 48px);
+    }
   }
 
   [data-v-ask-ai-container] {
@@ -1820,4 +1840,23 @@ body {
       font-size: 16px;
     }
   }
+}
+
+/* Formal specifications link back to their index above the page title. */
+.docs-specification-meta {
+  margin-bottom: 1rem;
+}
+
+.docs-specification-meta > a {
+  display: inline-flex;
+  text-decoration: none;
+}
+
+.docs-specification-meta > a:hover > span {
+  color: var(--vocs-text-color-primary);
+  background: var(--color-gray4);
+}
+
+.docs-specification-meta + h1 {
+  margin-top: 0;
 }

@@ -1,14 +1,22 @@
 ---
-title: Keys and permissions
-seoTitle: Tempo Account Keys and Permissions | Tempo Docs
+title: Accounts and keys
+seoTitle: Tempo EVM Accounts and Keys | Tempo Docs
 description: Understand root keys, delegated access, and the difference between account signing, customer login, and Tempo API authentication.
 ---
 
 <span id="keys-and-signing" />
 
-# Keys and permissions
+<span id="keys-and-permissions" />
 
-Choose how your application requests signatures and how much authority each signer needs. A Tempo account's address derives from its root public key; delegated keys act on that same account.
+# Accounts and keys
+
+Understand how Tempo EVM identifies accounts, verifies signatures, and authorizes keys. For the application workflow—customer balances, deposits, and payments—start with [Accounts](/docs/accounts).
+
+## Account identity and signing authority
+
+An account's address derives from its root public key. Its token balances are associated with that address. An authorized access key signs for the same account; it does not create a new balance or customer account.
+
+Tempo verifies the signature and enforces the key's onchain permissions. Your application or wallet provider manages customer identity, login, and the experience for approving a payment.
 
 <span id="separate-login-from-transaction-authority" />
 

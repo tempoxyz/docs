@@ -25,7 +25,7 @@ Receive stablecoins at a Tempo account, confirm the token and amount delivered, 
 
 Share an account address you control with the sender. For customer-specific addresses that credit a shared account, use [customer deposit addresses](/docs/guide/payments/virtual-addresses); your application maintains the customer ledger. For deposits from other networks, use [Routes](/docs/routes/deposits).
 
-Show the network and token alongside the receiving address, then read incoming transfer events to confirm delivery.
+Show the network and token alongside the receiving address, then read incoming transfer events to confirm delivery. To accept only specific tokens or senders, [configure an address-level receive policy](/docs/guide/payments/configure-receive-policies) before sharing the address.
 
 This demo funds a test account and displays its token balances. The examples below use AlphaUSD on Moderato testnet. Configure your client or `RPC_URL` / `TEMPO_RPC_URL` for `https://rpc.moderato.tempo.xyz`; use an account you control as the recipient.
 
@@ -52,7 +52,7 @@ For balance snapshots and display formatting, use [Balances and activity](/docs/
 
 Enter the receiving account as both `address` and `recipient`. Set `chainId` to `42431` and `type` to `transfer` to read incoming payments on Moderato:
 
-<OpenApi.Playground operationId="getAddressActivities" anchors={false} />
+<OpenApi.Playground operationId="getAddressActivities" query="chainId=42431&type=transfer" anchors={false} />
 
 For direct transfer subscriptions, use the [CLI, Viem, or Wagmi setup](/docs/accounts/examples#choose-your-tools). Set `account` to the recipient and `token` to AlphaUSD. Wagmi hooks run inside a React component and clean up on unmount:
 
@@ -91,7 +91,7 @@ Use [webhooks](/docs/api/webhooks) for backend callbacks. Read historical activi
 
 Use the memo to find an invoice, or a [customer deposit address](/docs/guide/payments/virtual-addresses) to identify who paid. Enter the candidate transaction hash and its network below to inspect the token movements.
 
-<OpenApi.Playground operationId="getTransactionActivities" anchors={false} />
+<OpenApi.Playground operationId="getTransactionActivities" query="chainId=42431" anchors={false} />
 
 :::::steps
 

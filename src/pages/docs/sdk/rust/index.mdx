@@ -8,16 +8,17 @@ description: Build blockchain apps with the Tempo Rust SDK using Alloy. Query ch
 
 Tempo distributes a Rust SDK in the form of an [Alloy](https://alloy.rs) crate. Alloy is a popular Rust crate for interacting with EVM-compatible blockchains.
 
-The Tempo Alloy crate can be used to perform common operations with the chain, such as: querying the chain, sending Tempo Transactions, managing tokens & their AMM pools, and more.
+The Tempo Alloy crate can be used to perform common operations with the chain, such as: querying the chain, sending Tempo Transactions, managing tokens and interacting with the stablecoin exchange, and more.
 
 ::::steps
 
 ## Install the Rust SDK
 
-To install the Tempo extension, you will need to install [Alloy](https://alloy.rs) and Tempo:
+Use Rust 1.95 or later for `tempo-alloy` 1.10.1. Install [Alloy](https://alloy.rs), the async runtime, and the Tempo extension:
 
 ```bash [cargo]
-cargo add alloy tokio
+cargo add alloy@2.1.1
+cargo add tokio --features macros,rt-multi-thread
 cargo add tempo-alloy --git https://github.com/tempoxyz/tempo --tag tempo-alloy@1.10.1
 ```
 
@@ -29,10 +30,12 @@ We use [`tokio`](https://tokio.rs) in this example, but you can use any async ru
 
 To use the Tempo extension crate, you will need to create a [`Provider`] using the [`TempoNetwork`](https://tempoxyz.github.io/tempo/tempo_alloy/struct.TempoNetwork.html). This will enable the usage of Tempo specific types on the [`Provider`] instance.
 
+Set `RPC_URL=https://rpc.moderato.tempo.xyz` to use Moderato testnet.
+
 For more information about network types, see the Alloy [documentation](https://alloy.rs/guides/interacting-with-multiple-networks#interacting-with-multiple-networks).
 
 ```rs [main.rs]
-use alloy::providers::ProviderBuilder; // [!code focus]
+use alloy::providers::{Provider, ProviderBuilder}; // [!code focus]
 use tempo_alloy::TempoNetwork; // [!code focus]
 
 #[tokio::main]
@@ -42,7 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?; // [!code focus]
 
     println!("Provider connected successfully"); // [!code focus]
-    println!("Chain ID: {provider:?}"); // [!code focus]
+    println!("Chain ID: {}", provider.get_chain_id().await?); // [!code focus]
 
     Ok(())
 }

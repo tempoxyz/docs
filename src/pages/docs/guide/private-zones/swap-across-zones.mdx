@@ -27,9 +27,9 @@ The route uses `swapAndDepositRouter` on the public chain: withdraw from `Zone A
 
 <a id="swapping-pathusd-from-zone-a-into-betausd-on-zone-b" />
 
-## Swapping OUSD from Zone A into betaUSD on Zone B
+<span id="swapping-ousd-from-zone-a-into-betausd-on-zone-b" />
 
-## What this swap does
+## Swap OUSD for betaUSD
 
 1. Withdraws `OUSD` from `Zone A`.
 2. Routes it through the public chain and swaps it on the Stablecoin DEX.
@@ -94,7 +94,9 @@ const { receipt } = await zoneAClient.zone.requestWithdrawalSync({
 console.log(receipt.blockNumber)
 ```
 
-## How Routed Zone Swaps Settle
+<span id="how-routed-zone-swaps-settle" />
+
+## How the swap settles
 
 This guide's swap flow is asynchronous because the trade temporarily leaves the zone.
 

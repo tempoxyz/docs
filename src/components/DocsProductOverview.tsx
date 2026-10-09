@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import ousd from '../../public/icons/ousd.svg?raw'
 import accounts from '../../public/illustrations/docs/accounts.svg?raw'
 import earn from '../../public/illustrations/docs/earn.svg?raw'
 import getStarted from '../../public/illustrations/docs/get-started.svg?raw'
@@ -11,6 +12,7 @@ import zones from '../../public/illustrations/docs/zones.svg?raw'
 import './DocsProductOverview.css'
 
 const illustrations = {
+  ousd,
   'get-started': getStarted,
   accounts,
   payments,

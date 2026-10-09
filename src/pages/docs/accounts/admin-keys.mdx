@@ -71,12 +71,12 @@ The root key or an active admin key can:
 - Update a limited key's token spending limit.
 - Add, change, or remove allowed-call scopes for a limited key.
 
-Show admin status in your account UI. The `isAdmin` check returns `true` for both the root key and active admin keys. See [access-key restrictions](/docs/accounts/access-keys) for the full permission model.
+Show admin status in your account UI. The `isAdmin` check returns `true` for both the root key and active admin keys. See [Access keys](/docs/accounts/access-keys) for the full permission model.
 
 ## Remove or replace an admin key
 
 Have the root or another active admin key revoke the old key and wait for confirmation. Revocation is permanent for that key ID on the account. Authorize a newly generated key if you need a replacement.
 
-Review the keys that administrator previously authorized; those grants remain active after its revocation.
+Revoking an admin key does not revoke the keys it authorized. Review those grants and revoke them separately.
 
 Use the [Account Keychain specification](/docs/protocol/transactions/AccountKeychain) for the ABI and [admin signature verification](/docs/protocol/upgrades/t6#for-admin-access-keys) for contract checks.

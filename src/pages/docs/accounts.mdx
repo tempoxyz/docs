@@ -4,7 +4,7 @@ seoTitle: Accounts on Tempo | Tempo Docs
 description: Create accounts, hold stablecoins, and control who can sign payments for your application.
 ---
 
-import { Cards, Card } from 'vocs'
+import { DocsLinkCards } from '../../components/DocsLinkCards'
 import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 <span id="build-your-account-integration" />
@@ -13,7 +13,7 @@ import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 # Accounts
 
-Create accounts to hold stablecoins and send payments. Connect a customer's wallet, use a wallet provider, or manage signing in your backend.
+Build stablecoin accounts into your application: give customers a balance, accept deposits, send payments, and show activity. Connect a customer's wallet, use a wallet provider, or manage signing in your backend.
 
 [Create an account →](/docs/accounts/create)
 
@@ -33,19 +33,19 @@ An **account** holds token balances at an address. A **wallet** is software or a
 | A customer inside your app | Use an [embedded wallet provider](/docs/accounts/providers) or create a [passkey account](/docs/accounts/create#create-a-passkey-account). |
 | A customer with an existing wallet | [Connect a wallet](/docs/accounts/integrate). |
 
-Associate account addresses with the customers or businesses they serve. Your application maintains customer identity and payment records; Tempo records balances and transfers. The [integration walkthrough](/docs/accounts/integration) shows how those pieces fit together.
+[Choose an account model](/docs/accounts/integration) to decide between separate customer balances, shared deposit collection, and company payout accounts. Your application maintains customer identity and payment records; Tempo records balances and transfers.
 
 <span id="configure-account-controls" />
 <span id="control-who-can-use-an-account" />
 <span id="delegate-access-to-applications-and-services" />
 
-## Keys and permissions
+<span id="keys-and-permissions" />
 
-An account's root key controls signing authority. Grant a service, session, or agent a limited access key when it needs to act on the account. Set the expiry, token budget, and allowed calls for that task.
+## Control account access
 
-[Keys and permissions](/docs/accounts/keys) explains how to sign transactions, grant access, and revoke it. Account keys authorize transactions; Tempo API credentials authorize API requests. Neither replaces your application's customer login.
+Choose who approves payments: your backend, the customer, or a service with limited authority. For a payout service or agent, use an [access key](/docs/accounts/access-keys) with a spending limit, expiry, and allowed calls. Keep customer identity, login, and payment approvals in your application.
 
-Plan recovery with your wallet or signing provider. The root public key determines the account address; adding or revoking an access key does not replace it.
+The underlying signing model lives in [Tempo EVM: Accounts and keys](/docs/accounts/keys). It explains signature types, root authority, and key authorization. Plan recovery with your wallet or signing provider.
 
 <span id="understand-account-visibility" />
 
@@ -55,8 +55,6 @@ Balances and transfers on Tempo's public ledger are publicly readable. For priva
 <span id="put-an-account-to-use" />
 <span id="connect-accounts-to-your-payment-system" />
 
-<Cards>
-  <Card title="Balances and activity" description="Read balances and show payment history." to="/docs/accounts/balances" icon="lucide:list" />
-  <Card title="Send payments" description="Transfer stablecoins, batch payments, and confirm delivery." to="/docs/guide/payments/send-a-payment" icon="lucide:send" />
-  <Card title="Receive payments" description="Accept deposits and match them to customer records." to="/docs/guide/payments/accept-a-payment" icon="lucide:arrow-down-to-line" />
-</Cards>
+## Build the account experience
+
+<DocsLinkCards collection="accounts" />

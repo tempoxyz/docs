@@ -1,0 +1,73 @@
+.docs-setup-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-block: 24px;
+}
+
+.docs-setup-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--color-surface-block);
+  color: var(--color-foreground);
+}
+
+.docs-setup-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.docs-setup-card svg {
+  flex-shrink: 0;
+}
+
+.docs-setup-card p {
+  margin: 12px 0 24px;
+  color: color-mix(in srgb, var(--color-foreground) 65%, transparent);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.docs-setup-links {
+  display: grid;
+  gap: 4px;
+  margin-top: auto;
+}
+
+.docs-setup-links a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+  padding: 6px 8px;
+  margin-inline: -8px;
+  border-radius: 6px;
+  color: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.docs-setup-links a:hover {
+  background: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+}
+
+.docs-setup-links a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+@media (width < 640px) {
+  .docs-setup-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

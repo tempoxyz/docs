@@ -1,16 +1,17 @@
 ---
 title: Build on Tempo
 seoTitle: Get Started with Tempo | Tempo Docs
-description: Find your starting point for accounts, payments, tokens, and smart contracts, or send your first test payment on Tempo.
+description: Build stablecoin accounts, transfer funds onchain, offer earning balances, and charge for API access on Tempo.
 ---
 
 import { Card, Cards } from 'vocs'
+import { DocsSetupCards } from '../components/DocsSetupCards'
 
 <span id="get-started" />
 
 # Build on Tempo
 
-Tempo is a blockchain for payments. Add stablecoin accounts and payments to your application, create tokens, or deploy Solidity contracts.
+Tempo is a blockchain for stablecoin financial products. Give customers accounts to hold and move money, let them earn on stablecoins, or accept payments for your API.
 
 <span id="send-your-first-test-payment" />
 <span id="create-and-fund-a-test-account" />
@@ -20,7 +21,7 @@ Tempo is a blockchain for payments. Add stablecoin accounts and payments to your
 <span id="send-and-verify-the-payment" />
 <span id="make-your-first-payment" />
 
-**[Send a test payment →](/get-started/quickstart)** Connect a wallet, get test funds, and confirm your first transfer in the interactive quickstart.
+Send your first test payment with the [interactive quickstart](/get-started/quickstart).
 
 <span id="start-with-an-account-and-a-stablecoin" />
 <span id="continue-your-tempo-integration" />
@@ -31,18 +32,16 @@ Tempo is a blockchain for payments. Add stablecoin accounts and payments to your
 ## Choose what to build
 
 <Cards>
-  <Card title="Add accounts and payments" description="Choose a wallet or backend signer, then send and receive stablecoins." to="/docs/accounts" icon="lucide:wallet" />
-  <Card title="Pay for or charge for APIs" description="Make paid API requests, or accept payments for your service." to="/docs/agents" icon="lucide:bot" />
-  <Card title="Create a TIP-20 token" description="Create a test stablecoin, then mint tokens and manage supply." to="/docs/guide/issuance/create-a-stablecoin" icon="lucide:coins" />
-  <Card title="Deploy a contract" description="Deploy and verify a Solidity contract on testnet with Foundry." to="/docs/network/contracts" icon="lucide:code-2" />
+  <Card title="Build stablecoin accounts" description="Give customers a place to hold stablecoins, receive payments, and send money inside your app." to="/docs/accounts" icon="lucide:wallet" />
+  <Card title="Transfer across networks" description="Move stablecoins between Tempo and supported networks with Routes." to="/docs/routes" icon="lucide:arrow-left-right" />
+  <Card title="Earn on stablecoins" description="Let customers deposit stablecoins into vaults, track earnings, and withdraw through your app with Tempo Earn." to="/docs/earn" icon="lucide:chart-no-axes-combined" />
+  <Card title="Charge for APIs" description="Accept payments from agents and applications for API requests, tools, or content with MPP." to="/docs/guide/machine-payments/server" icon="lucide:code-2" />
 </Cards>
 
 <span id="set-up-your-coding-agent" />
 
-## Connect your tools
+<span id="connect-your-tools" />
 
-[RPC and chain IDs](/docs/quickstart/connection-details) · [Testnet faucet](/docs/quickstart/faucet) · [SDKs and CLI](/docs/tools)
+## Set up your project
 
-[API reference](/docs/api/reference) · [API keys](/docs/api/console/api-keys) · [Build with AI](/docs/guide/using-tempo-with-ai)
-
-Browse [all developer guides](/docs/development) for wallet integrations, transaction features, and interactive walkthroughs.
+<DocsSetupCards />

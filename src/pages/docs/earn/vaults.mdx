@@ -13,13 +13,9 @@ import { EarnVaultDemo } from '../../../components/guides/EarnVaultDemo'
 
 Choose a vault that accepts the stablecoin your customers hold and supports the access and withdrawal requirements of your product.
 
-## Available vaults
+<span id="available-vaults" />
 
-| Source | How it connects to Earn |
-| --- | --- |
-| **Lending** | An engine deposits into an underlying lending vault. |
-| **Managed strategies** | An engine connects to a provider-managed vault that allocates funds across its strategy. |
-| **Tokenized assets** | An engine accesses an asset, such as tokenized treasuries or private credit, through a supported liquidity pool. |
+## Find a vault
 
 Start with the [verified vault directory](/docs/api/earn#getverifiedearnvaults). Check each vault's accepted asset, strategy, access restrictions, fees, and withdrawal capabilities. The directory's `verified` flag identifies a curated listing; it does not describe the strategy's risk or guarantee a return.
 
@@ -31,9 +27,19 @@ The demo loads verified vaults from Moderato testnet and selects the deposit dem
 
 <EarnVaultDemo />
 
-Save the selected vault's `id` (its contract address) and network together. Use the [API reference](/docs/api/earn#getverifiedearnvaults) to add the same query to your application.
+Save the selected vault's `id` (its contract address) and network together. The directory uses public read access; the [verified vault API reference](/docs/api/earn#getverifiedearnvaults) includes request fields, code samples, and authenticated access.
 
-The directory uses public read access. For request fields, generated code samples, and authenticated access, use the [verified vault API reference](/docs/api/earn#getverifiedearnvaults).
+<span id="where-yield-comes-from" />
+
+## How vaults generate returns
+
+An engine is the contract that connects an Earn vault to its underlying strategy.
+
+| Source | How it connects to Earn |
+| --- | --- |
+| **Lending** | An engine deposits into an underlying lending vault. |
+| **Managed strategies** | An engine connects to a provider-managed vault that allocates funds across its strategy. |
+| **Tokenized assets** | An engine accesses an asset, such as tokenized treasuries or private credit, through a supported liquidity pool. |
 
 ## Eligibility and risk
 

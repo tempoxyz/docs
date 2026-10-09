@@ -1,14 +1,16 @@
 ---
 title: "Mercator"
 seoTitle: "Connect Your Agent to Mercator | Tempo Docs"
-description: Set up Mercator to discover paid APIs, quote tool workflows, and run jobs from your agent. Verify the connection before starting paid work.
+description: Give your agent access to web research, data enrichment, and other paid services through Mercator. Discover tools, check prices, and run tasks within a budget.
 ---
 
 # Mercator
 
-Mercator lets your agent discover paid APIs, get a quote, and run a workflow. Use it for research and other tasks that need external tools, without configuring each provider separately.
+[Mercator](https://mercator.sh/docs) connects AI agents to paid tools and services through one interface. Your agent can search the web, research companies, enrich records, or call a model without you integrating each provider separately. Connect it to your agent through the Model Context Protocol (MCP), or build an integration with its REST API.
 
-Your agent describes the task, Mercator finds relevant services, and the selected calls run as a job. Services use payment protocols such as MPP and x402; your agent can retrieve the job's result when execution finishes.
+Give your agent a task and a budget. For example, ask it to research three competitors and turn the findings into a sourced brief. The agent uses Mercator to find services, get a price for the selected tool calls, and pay for and run them as one job. You can retrieve the results later, even if the agent disconnects.
+
+Mercator coordinates discovery, payment, and execution across independently operated services. It uses the [Machine Payments Protocol](/docs/guide/machine-payments) (MPP) for payments on Tempo and also supports providers using x402. Discovery and quotes are free; paid execution stays within your authorized wallet limits and any additional budget you give the agent.
 
 ## Connect Mercator to your agent
 

@@ -20,7 +20,9 @@ T3 is active on both testnet and mainnet.
 
 Node operators needed to upgrade to the T3-compatible release before the testnet activation timestamp.
 
-## Overview
+<span id="overview" />
+
+## T3 integration changes
 
 | TIP | What it does | Who should review |
 |-----|-------------|-------------------|
@@ -40,7 +42,7 @@ If you use an updated SDK, this is mostly a tooling upgrade. If you hand-encode 
 
 ### Access-key contract creation
 
-Access-key-signed transactions can no longer create contracts in any configuration — including direct CREATE, factory CREATE, and internal CREATE2. Move those flows to a root key path.
+Access-key-signed transactions cannot include transaction-level creation calls (`to` omitted). Factory calls remain subject to the key's target and selector scopes and can create contracts internally. Use a root key for transaction-level deployment.
 
 ### Migration checklist
 

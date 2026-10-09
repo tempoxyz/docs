@@ -40,7 +40,7 @@ codex exec "Read https://tempo.xyz/SKILL.md and set up tempo"
 ```
 :::
 
-All commands support `--help` for documentation and `--describe` for JSON command schemas. For scripts and agents, pass `-t` (`--toon-output`) to get compact, machine-readable output, and use `--dry-run` or `--max-spend` before paid calls.
+Use `--help` for each command’s supported options. Wallet and request extensions also provide `--schema` for JSON command schemas and `--format toon` for compact output. Preview paid requests with `--dry-run` and cap them with `--max-spend`; these payment options do not apply to node commands.
 
 ## Tempo CLI commands
 
@@ -50,7 +50,7 @@ Dive into each command:
   <Card
     title="tempo download"
     description="Fetch chain snapshots for faster initial sync"
-    to="/docs/cli/node"
+    to="/docs/cli/download"
     icon="lucide:download"
   />
   <Card

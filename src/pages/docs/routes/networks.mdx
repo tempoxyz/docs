@@ -20,16 +20,18 @@ Click **Try** to read the live directory. Filter by source or destination networ
 
 <OpenApi.Playground operationId="listRoutes" anchors={false} />
 
-Public requests use the API's shared rate limit. For authenticated access, see [Routes API access](/docs/routes/transfers#set-up-routes-api-access).
+Public requests use the API's [public rate limit](/docs/api/rate-limits). For authenticated access, see [Routes API access](/docs/routes/transfers#set-up-routes-api-access).
 
 Use the returned source and destination chain/token pairs, funding methods, and amount modes to build the choices in your application. Pass `nextCursor` as `cursor` to read subsequent pages. Match tokens by network and contract address, not by symbol alone.
 
 <span id="check-the-selected-payment" />
 
-## Route limits
+<span id="route-limits" />
+
+## Quote the selected route
 
 Once the user chooses a pair and amount, [request a quote](/docs/routes/quotes). Availability depends on those inputs and the funding method. Refresh the quote when the user changes them.
 
 Use [transfers](/docs/routes/transfers) when your app can authorize source transactions, or [deposit addresses](/docs/routes/deposits) when the sender pays independently.
 
-For current request and response fields, see the [route directory reference](/docs/api/routes/routes). To integrate a bridge directly, see [bridge providers](/docs/ecosystem/bridges).
+For current request and response fields, see the [route directory reference](/docs/api/routes/routes). To integrate a bridge directly, see [bridge providers](/docs/partners/bridges).

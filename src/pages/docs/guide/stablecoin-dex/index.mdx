@@ -1,13 +1,15 @@
 ---
-title: Exchange
-seoTitle: Stablecoin Exchange | Tempo Docs
+title: Stablecoin DEX
+seoTitle: Stablecoin DEX | Tempo Docs
 description: Swap stablecoins on Tempo and provide liquidity through the onchain orderbook.
 ---
 
 <span id="stablecoin-dex" />
 <span id="exchange-stablecoins-on-the-tempo-dex" />
 
-# Exchange
+<span id="exchange" />
+
+# Stablecoin DEX
 
 Swap stablecoins on Tempo through the onchain orderbook, or provide liquidity by placing orders. Use [Routes](/docs/routes) when you need to move funds between networks.
 
@@ -54,33 +56,9 @@ quote = dex.functions.quoteSwapExactAmountIn(
 
 ::::
 
-### Approve the input token
+<span id="approve-the-input-token" />
 
-Allow the exchange to spend one AlphaUSD. The SDK waits for this approval before continuing.
-
-::::code-group
-
-```ts [Viem]
-// [!include ~/snippets/network-exchange.ts:approve]
-```
-
-```bash [CLI]
-cast erc20 approve "$TOKEN" "$DEX" 1000000 \
-  --rpc-url "$RPC_URL" --tempo.fee-token "$TOKEN" --interactive
-```
-
-```ts [Wagmi]
-// [!include ~/snippets/network-wagmi.ts:approve]
-```
-
-```python [Python]
-from network_config import TIP20, make_transaction, submit
-
-call = TIP20(ALPHA_USD).approve(spender=dex.address, amount=1_000_000)
-submit(make_transaction((call,)))
-```
-
-::::
+The Stablecoin DEX can pull TIP-20 input tokens through the protocol's implicit-approval path. A separate token approval is not required. The pull still enforces balance, transfer-policy, and access-key spending-limit checks.
 
 ### Submit the swap
 
@@ -105,6 +83,7 @@ cast send "$DEX" 'swapExactAmountIn(address,address,uint128,uint128)' \
 
 ```python [Python]
 from pytempo.contracts import StablecoinDEX
+from network_config import make_transaction, submit
 
 call = StablecoinDEX.swap_exact_amount_in(
     token_in=ALPHA_USD, token_out=BETA_USD,
@@ -130,4 +109,4 @@ Fee AMM reserves serve a different purpose: converting transaction fees into a v
 
 ## Account and exchange balances
 
-Funds held by the exchange are distinct from an account's TIP-20 balance. Read [DEX balances](/docs/protocol/exchange/exchange-balance) before showing available funds or reconciling orders. The [exchange specification](/docs/protocol/exchange/spec) defines order, swap, and settlement behavior.
+Balances recorded by the DEX contract are distinct from an account's TIP-20 balance. Read [DEX balances](/docs/protocol/exchange/exchange-balance) before showing available funds or reconciling orders. The [DEX specification](/docs/protocol/exchange/spec) defines order, swap, and settlement behavior.

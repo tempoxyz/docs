@@ -10,11 +10,11 @@ import { Tabs, Tab } from 'vocs'
 
 Read incoming transfers and verify delivery before crediting a customer. These full examples use AlphaUSD on Moderato testnet. Use [Receive payments](/docs/guide/payments/accept-a-payment) for the integration flow and short API examples.
 
-Set `RPC_URL` or `TEMPO_RPC_URL` to `https://rpc.moderato.tempo.xyz`. Use the [SDK setup](/docs/sdk) for your language.
+Set `RPC_URL` or `TEMPO_RPC_URL` to `https://rpc.moderato.tempo.xyz`. Use the [SDK setup](/docs/sdk) for your language. The Rust watcher also requires `cargo add futures`.
 
 ## Listen for TIP-20 transfer events
 
-Set `TEMPO_RECIPIENT` to your receiving account. The Viem and Cast examples filter incoming transfers to that address. Cast subscribes over WebSocket; stop it with Ctrl+C.
+Set `TEMPO_RECIPIENT` to your receiving account. Viem and Cast watch incoming transfers to that address; Go queries its transfers in the latest 100 blocks. The Rust and Python watchers show all transfers for the token. Cast subscribes over WebSocket; stop it with Ctrl+C.
 
 <Tabs stateKey="library">
   <Tab title="Viem">
@@ -143,38 +143,48 @@ Set `TEMPO_RECIPIENT` to your receiving account. The Viem and Cast examples filt
     package main
 
     import (
-    	"context"
-    	"fmt"
-    	"log"
+        "context"
+        "fmt"
+        "log"
+        "os"
 
-    	"github.com/ethereum/go-ethereum/crypto"
+        "github.com/ethereum/go-ethereum/common"
+        "github.com/ethereum/go-ethereum/crypto"
     )
 
     func main() {
-    	c := newClient()
-    	ctx := context.Background()
+        c := newClient()
+        ctx := context.Background()
 
-    	token := "0x20c0000000000000000000000000000000000001"
+        token := "0x20c0000000000000000000000000000000000001"
+        recipient := os.Getenv("TEMPO_RECIPIENT")
+        if !common.IsHexAddress(recipient) { log.Fatal("Set TEMPO_RECIPIENT") }
+        latest, err := c.GetBlockNumber(ctx)
+        if err != nil { log.Fatal(err) }
+        var fromBlock uint64
+        if latest > 99 { fromBlock = latest - 99 }
+        recipientTopic := common.BytesToHash(common.HexToAddress(recipient).Bytes())
 
-    	// Transfer(address,address,uint256) event topic // [!code focus]
-    	transferTopic := crypto.Keccak256Hash([]byte("Transfer(address,address,uint256)")) // [!code focus]
+        // Transfer(address,address,uint256) event topic // [!code focus]
+        transferTopic := crypto.Keccak256Hash([]byte("Transfer(address,address,uint256)")) // [!code focus]
 
-    	resp, err := c.SendRequest(ctx, "eth_getLogs", map[string]interface{}{ // [!code focus]
-    		"fromBlock": "0x0", // [!code focus]
-    		"toBlock":   "latest", // [!code focus]
-    		"address":   token, // [!code focus]
-    		"topics":    []interface{}{transferTopic.Hex()}, // [!code focus]
-    	}) // [!code focus]
-    	if err != nil {
-    		log.Fatal(err)
-    	}
+        resp, err := c.SendRequest(ctx, "eth_getLogs", map[string]interface{}{ // [!code focus]
+            "fromBlock": fmt.Sprintf("0x%x", fromBlock), // [!code focus]
+            "toBlock":   fmt.Sprintf("0x%x", latest), // [!code focus]
+            "address":   token, // [!code focus]
+            "topics":    []interface{}{transferTopic.Hex(), nil, recipientTopic.Hex()}, // [!code focus]
+        }) // [!code focus]
+        if err != nil {
+            log.Fatal(err)
+        }
 
-    	logs, _ := resp.Result.([]interface{}) // [!code focus]
-    	for _, entry := range logs { // [!code focus]
-    		l := entry.(map[string]interface{}) // [!code focus]
-    		topics := l["topics"].([]interface{}) // [!code focus]
-    		fmt.Printf("Transfer: %s -> %s (data: %s)\n", topics[1], topics[2], l["data"]) // [!code focus]
-    	} // [!code focus]
+        if err := resp.CheckError(); err != nil { log.Fatal(err) }
+        logs, _ := resp.Result.([]interface{}) // [!code focus]
+        for _, entry := range logs { // [!code focus]
+            l := entry.(map[string]interface{}) // [!code focus]
+            topics := l["topics"].([]interface{}) // [!code focus]
+            fmt.Printf("Transfer: %s -> %s (data: %s)\n", topics[1], topics[2], l["data"]) // [!code focus]
+        } // [!code focus]
     }
     ```
 

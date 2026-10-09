@@ -31,12 +31,7 @@ Create a Tempo API client with `Client.create`.
 import { Client } from 'tapimo'
 
 const client = Client.create({
-  // API key sugar for the canonical `tempo-api-key` header.
-  apiKey: 'tempo_api_key',
-  // Override the API URL. Defaults to `Client.defaultUrl`.
-  url: 'https://api.tempo.xyz',
-  // Or pass custom headers directly.
-  headers: { authorization: 'Bearer tempo_api_key' },
+  apiKey: process.env.TEMPO_API_KEY,
 })
 ```
 
@@ -67,7 +62,7 @@ if (response.status !== 200) {
     //         ^?
   } else if (response.status === 402) {
     // Handle the payment challenge from `WWW-Authenticate`
-    const challenge = await response.text()
+    const challenge = response.headers.get('WWW-Authenticate')
     //    ^?
   } else {
     // Handle validation, auth, rate-limit, or upstream errors
@@ -78,7 +73,7 @@ if (response.status !== 200) {
   throw new Error('Request failed')
 }
 
-// Request is successfull
+// Request succeeded
 response.status // Response is narrowed to 200
 //       ^?
 // Get typed response body

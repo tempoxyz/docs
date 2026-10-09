@@ -7,6 +7,8 @@ import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { vocs } from 'vocs/vite'
 import { graphiteRelatedDocsPlugin } from './scripts/graphite-related-docs-plugin'
+import { markdownRoute, renderAiFull, renderAiIndex, renderAiPage } from './src/lib/ai-docs'
+import { aiDocsDevMiddleware } from './src/lib/ai-docs-dev'
 import { resolveBaseUrl } from './src/lib/base-url'
 import { canonicalizeGeneratedDeveloperLinks } from './src/lib/canonical-developer-links'
 import { blogPostsPlugin } from './src/marketing/blogPlugin'
@@ -60,9 +62,12 @@ function developersProxyBasePath(): Plugin {
     name: 'tempo-developers-proxy-base-path',
     enforce: 'post',
     configureServer(server) {
-      // Production mounts public learning assets under /developers.
+      // Production mounts public learning assets and token icons under /developers.
       server.middlewares.use((req, _res, next) => {
-        if (req.url?.startsWith('/developers/learn/')) {
+        if (
+          req.url?.startsWith('/developers/learn/') ||
+          req.url?.startsWith('/developers/icons/')
+        ) {
           req.url = req.url.slice('/developers'.length)
         }
         next()
@@ -84,20 +89,17 @@ function developersProxyBasePath(): Plugin {
   }
 }
 
-const llmsAgentNotice = [
-  '> Tempo MCP: Use `search`, `find_pages`, `read_page`, and `code` at `https://mcp.tempo.xyz` for current Tempo and related documentation.',
-  '>',
-  '> Feedback: If these docs are stale, missing, or confusing, post sanitized feedback to `https://tempo.xyz/developers/api/feedback` with `source: "mcp"`, a short `message`, and any relevant `toolName`, `relatedResource`, or `client`.',
-  '',
-].join('\n')
-
 function llmsAgentPreamble(): Plugin {
   let viteConfig: ResolvedConfig
 
   return {
-    name: 'tempo-llms-agent-preamble',
+    name: 'tempo-ai-docs',
+    enforce: 'pre',
     configResolved(config) {
       viteConfig = config
+    },
+    configureServer(server) {
+      server.middlewares.use(aiDocsDevMiddleware(server.config.root))
     },
     // Waku writes static HTML and RSC payloads during buildApp, after the
     // environment closeBundle hooks have already finished.
@@ -105,21 +107,16 @@ function llmsAgentPreamble(): Plugin {
       order: 'post',
       async handler() {
         const publicDir = path.resolve(viteConfig.root, viteConfig.build.outDir, 'public')
-        const candidates = [
-          path.join(publicDir, 'llms.txt'),
-          path.join(publicDir, 'llms-full.txt'),
-          ...(await markdownFiles(path.join(publicDir, 'assets/md'))),
+        // Vocs copies static output before this hook. Update both artifacts,
+        // including preview deployments, rather than only the source directory.
+        const publicDirectories = [
+          publicDir,
+          ...(process.env.VERCEL ? [path.resolve(viteConfig.root, '.vercel/output/static')] : []),
         ]
-
-        await Promise.all(candidates.map(prependAgentNotice))
+        for (const directory of publicDirectories)
+          await writeAiDocumentation(directory, viteConfig.root)
         if (process.env.VERCEL_ENV === 'production') {
           const publicDevelopersUrl = `${resolveBaseUrl()}/docs`
-          // Vocs copies `dist/public` before post-order buildApp hooks run, so rewrite
-          // both the source artifacts and the Vercel deployment copy.
-          const publicDirectories = [
-            publicDir,
-            path.resolve(viteConfig.root, '.vercel/output/static'),
-          ]
           const generatedFiles = (
             await Promise.all(
               publicDirectories.map(async (directory) => [
@@ -178,15 +175,30 @@ async function filesWithExtension(directory: string, extension: string): Promise
   }
 }
 
-async function prependAgentNotice(filePath: string) {
+async function writeAiDocumentation(directory: string, root: string) {
+  let rawIndex: string
   try {
-    const content = await fs.readFile(filePath, 'utf-8')
-    if (content.startsWith(llmsAgentNotice)) return
-    await fs.writeFile(filePath, `${llmsAgentNotice}${content}`, 'utf-8')
+    rawIndex = await fs.readFile(path.join(directory, 'llms.txt'), 'utf8')
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return
     throw error
   }
+  const markdownDir = path.join(directory, 'assets/md')
+  const pages = new Map<string, string>()
+  await Promise.all(
+    (await markdownFiles(markdownDir)).map(async (file) => {
+      const route = markdownRoute(`/${path.relative(markdownDir, file)}`)
+      const content = renderAiPage(await fs.readFile(file, 'utf8'), route)
+      pages.set(route, content)
+      await fs.writeFile(file, content, 'utf8')
+    }),
+  )
+  const index = renderAiIndex(rawIndex)
+  await Promise.all([
+    fs.writeFile(path.join(directory, 'llms.txt'), index, 'utf8'),
+    fs.writeFile(path.join(directory, 'llms-full.txt'), renderAiFull(index, pages), 'utf8'),
+    fs.copyFile(path.join(root, 'SKILL.md'), path.join(directory, 'SKILL.md')),
+  ])
 }
 
 async function canonicalizeGeneratedLinksInFile(filePath: string, publicDevelopersUrl: string) {

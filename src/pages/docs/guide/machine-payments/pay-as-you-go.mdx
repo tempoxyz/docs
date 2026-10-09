@@ -29,7 +29,7 @@ Unlike [one-time payments](/docs/guide/machine-payments/one-time-payments), a se
     Server-->>Client: 200 OK (session established)
     loop Per request
         Client->>Server: (3) Request + voucher
-        Note over Server: ecrecover only
+        Note over Server: Verify voucher signature and amount
         Server-->>Client: 200 OK + Receipt
     end
     Note over Server: (4) Periodic settlement
@@ -40,7 +40,7 @@ Unlike [one-time payments](/docs/guide/machine-payments/one-time-payments), a se
 `} />
 
 1. **Open** — Client deposits funds into an on-chain reserve contract, creating a payment channel
-2. **Session** — Client signs EIP-712 vouchers with increasing cumulative amounts as service is consumed
+2. **Session** — Client signs vouchers with increasing cumulative amounts as service is consumed
 3. **Top up** — If the channel runs low, the client deposits additional tokens without closing the channel
 4. **Close** — Either party closes the channel, settling the final balance on-chain and refunding unused deposit
 
@@ -193,7 +193,7 @@ Bun.serve({
 
 ### Test the pay-as-you-go endpoint
 
-These examples charge mainnet OUSD. Configure the `mppx` CLI with a funded mainnet account before calling the endpoint; testnet faucet tokens cannot pay a mainnet challenge.
+These examples charge mainnet OUSD. Configure the `mppx` CLI with a funded mainnet account before calling the endpoint; testnet faucet tokens cannot pay a mainnet challenge. To use test funds, [configure the server and client for Moderato](/docs/guide/machine-payments/server#test-your-mpp-server).
 
 ```bash
 npx mppx http://localhost:3000/api/sessions/photo
@@ -216,14 +216,15 @@ const mppx = Mppx.create({
   })],
 })
 
-// Each fetch automatically manages the session lifecycle:
+// Mppx.create wraps global fetch by default:
+// Each fetch handles session payments:
 // 1st request: opens channel on-chain, sends initial voucher
 // 2nd+ requests: sends off-chain vouchers (no on-chain tx)
 const res = await fetch('http://localhost:3000/api/sessions/photo')
 ```
 
 - **`maxDeposit: '1'`** — Locks up to 1 OUSD into the payment channel. At $0.01/photo, this covers up to 100 requests before the channel runs out.
-- The client handles the full session lifecycle automatically: channel open, voucher signing, and retry after `402` responses.
+- The client opens channels, signs vouchers, and retries `402` responses. Channels do not close automatically; use the [session manager and call `close()`](/docs/guide/machine-payments/streamed-payments#streamed-payment-client-setup) to release unused funds.
 - If the server sets `suggestedDeposit`, the client uses `min(suggestedDeposit, maxDeposit)`.
 
 ## Next steps for pay-as-you-go payments

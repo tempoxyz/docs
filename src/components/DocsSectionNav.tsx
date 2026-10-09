@@ -7,6 +7,7 @@ import BracesIcon from '~icons/lucide/braces'
 import ChevronDownIcon from '~icons/lucide/chevron-down'
 import CodeIcon from '~icons/lucide/code-xml'
 import CompassIcon from '~icons/lucide/compass'
+import ScanSearchIcon from '~icons/lucide/scan-search'
 import TerminalIcon from '~icons/lucide/terminal'
 
 import {
@@ -142,6 +143,21 @@ export function DocsApiDropdown({
             </span>
           </Link>
         ))}
+        <a
+          href="https://explore.tempo.xyz"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => {
+            setOpen(false)
+            onNavigate?.()
+          }}
+        >
+          <span className="docs-api-menu-item">
+            <ScanSearchIcon aria-hidden="true" width="18" height="18" />
+            Explorer
+            <ArrowUpRightIcon aria-hidden="true" width="14" height="14" />
+          </span>
+        </a>
       </nav>
     </div>
   )

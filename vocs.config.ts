@@ -1,4 +1,5 @@
 import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
+import { aiDocsDescription } from './src/lib/ai-docs'
 import { resolveBaseUrl } from './src/lib/base-url'
 import { rehypeCompactShikiStyles } from './src/lib/compact-shiki-styles'
 import {
@@ -138,7 +139,7 @@ export default defineConfig({
     if (title?.includes('Tempo')) return undefined
     return '%s ⋅ Tempo'
   },
-  description: 'Documentation for the Tempo network and protocol specifications',
+  description: aiDocsDescription,
   renderStrategy: 'partial-static',
   feedback: createFeedbackAdapter(),
   head: docsStructuredDataHead,
@@ -173,7 +174,7 @@ export default defineConfig({
     query: {
       combineWith: 'OR',
       fuzzy: 0.1,
-      prefix: false,
+      prefix: true,
       boost: searchBoost,
       boostDocument: boostSearchDocument,
     },
@@ -387,54 +388,51 @@ export default defineConfig({
         text: 'Accounts',
         items: [
           { text: 'Introduction', link: '/docs/accounts' },
-          { text: 'Create an account', link: '/docs/accounts/create' },
-          { text: 'Connect a wallet', link: '/docs/accounts/integrate' },
-          { text: 'Balances and activity', link: '/docs/accounts/balances' },
-          { text: 'Send payments', link: '/docs/guide/payments/send-a-payment' },
-          { text: 'Receive payments', link: '/docs/guide/payments/accept-a-payment' },
-          { text: 'Keys and permissions', link: '/docs/accounts/keys' },
-        ],
-      },
-      {
-        text: 'Integration guides',
-        items: [
-          { text: 'Client setup', link: '/docs/accounts/examples' },
-          { text: 'Integration walkthrough', link: '/docs/accounts/integration' },
-          { text: 'Payment integration', link: '/docs/guide/payments' },
-          { text: 'Browser payments', link: '/docs/guide/payments/send-a-payment/browser' },
-          { text: 'Fund an account', link: '/docs/guide/getting-funds' },
-          { text: 'Customer deposit addresses', link: '/docs/guide/payments/virtual-addresses' },
-          { text: 'Wallet providers', link: '/docs/accounts/providers' },
-        ],
-      },
-      {
-        text: 'Payment controls',
-        collapsed: true,
-        items: [
-          { text: 'Payment verification', link: '/docs/guide/payments/accept-a-payment/examples' },
-          { text: 'Payment references', link: '/docs/guide/payments/transfer-memos' },
+          { text: 'Choose an account model', link: '/docs/accounts/integration' },
           {
-            text: 'Send payments in parallel',
-            link: '/docs/guide/payments/send-parallel-transactions',
+            text: 'Account setup',
+            collapsed: true,
+            items: [
+              { text: 'Client setup', link: '/docs/accounts/examples' },
+              { text: 'Create an account', link: '/docs/accounts/create' },
+              { text: 'Connect a wallet', link: '/docs/accounts/integrate' },
+              { text: 'Wallet providers', link: '/docs/accounts/providers' },
+            ],
           },
+          { text: 'Balances and activity', link: '/docs/accounts/balances' },
+          { text: 'Delegate account access', link: '/docs/accounts/agents' },
+        ],
+      },
+      {
+        text: 'Payments',
+        items: [
+          { text: 'Fund an account', link: '/docs/guide/getting-funds' },
+          {
+            text: 'Send payments',
+            link: '/docs/guide/payments/send-a-payment',
+            collapsed: true,
+            items: [
+              { text: 'Browser payments', link: '/docs/guide/payments/send-a-payment/browser' },
+              { text: 'Parallel payments', link: '/docs/guide/payments/send-parallel-transactions' },
+            ],
+          },
+          {
+            text: 'Receive payments',
+            link: '/docs/guide/payments/accept-a-payment',
+            collapsed: true,
+            items: [
+              { text: 'Customer deposit addresses', link: '/docs/guide/payments/virtual-addresses' },
+              { text: 'Payment references', link: '/docs/guide/payments/transfer-memos' },
+              { text: 'Receive policies', link: '/docs/guide/payments/configure-receive-policies' },
+            ],
+          },
+        ],
+      },
+      {
+        text: 'Fees',
+        items: [
           { text: 'Sponsor fees', link: '/docs/guide/payments/sponsor-user-fees' },
           { text: 'Choose a fee token', link: '/docs/guide/payments/pay-fees-in-any-stablecoin' },
-          {
-            text: 'Control incoming payments',
-            link: '/docs/guide/payments/configure-receive-policies',
-          },
-          { text: 'Deposit address reference', link: '/docs/protocol/tip20/virtual-addresses' },
-          { text: 'Receive policy reference', link: '/docs/protocol/tip403/receive-policies' },
-        ],
-      },
-      {
-        text: 'Key management',
-        collapsed: true,
-        items: [
-          { text: 'Access keys', link: '/docs/accounts/access-keys' },
-          { text: 'Admin keys', link: '/docs/accounts/admin-keys' },
-          { text: 'Agent access', link: '/docs/accounts/agents' },
-          { text: 'Keychain specification', link: '/docs/protocol/transactions/AccountKeychain' },
         ],
       },
     ]
@@ -470,7 +468,7 @@ export default defineConfig({
           { text: 'Balances and earnings', link: '/docs/earn/balances' },
           { text: 'Withdraw', link: '/docs/earn/withdraw' },
           { text: 'How Earn works', link: '/docs/earn/how-it-works' },
-          { text: 'Connect a yield source', link: '/docs/earn/providers' },
+          { text: 'Connect a strategy', link: '/docs/earn/providers' },
           { text: 'Testnet example', link: '/docs/earn/example' },
         ],
       },
@@ -543,75 +541,34 @@ export default defineConfig({
     ]
     const ecosystemSidebar = [
       {
-        text: 'Ecosystem',
+        text: 'ECOSYSTEM',
         items: [
+          { text: 'All partners', link: '/docs/partners' },
           {
-            text: 'Overview',
-            link: '/docs/ecosystem',
-          },
-          {
-            text: 'Assets',
+            text: 'Stablecoins',
             collapsed: false,
             items: [
-              { text: 'Assets on Tempo', link: '/docs/ecosystem/assets' },
+              { text: 'Overview', link: '/docs/partners/stablecoins' },
               { text: 'OUSD on Tempo', link: '/docs/guide/ousd' },
             ],
           },
-          {
-            text: 'Wallets',
-            collapsed: false,
-            items: [
-              { text: 'Wallet providers', link: '/docs/ecosystem/wallets' },
-              { text: 'Smart accounts', link: '/docs/ecosystem/smart-contract-libraries' },
-            ],
-          },
-          {
-            text: 'Exchanges',
-            link: '/docs/ecosystem/exchanges',
-          },
-          {
-            text: 'Bridges',
-            collapsed: false,
-            items: [
-              { text: 'Bridge providers', link: '/docs/ecosystem/bridges' },
-              { text: 'LayerZero', link: '/docs/guide/bridge-layerzero' },
-              { text: 'Bungee', link: '/docs/guide/bridge-bungee' },
-              { text: 'Relay', link: '/docs/guide/bridge-relay' },
-            ],
-          },
-          {
-            text: 'Payments & ramps',
-            link: '/docs/ecosystem/orchestration',
-          },
-          {
-            text: 'Node providers',
-            link: '/docs/ecosystem/node-infrastructure',
-          },
-          {
-            text: 'Data',
-            link: '/docs/ecosystem/data-analytics',
-          },
-          {
-            text: 'Developer tools',
-            collapsed: false,
-            items: [
-              { text: 'Overview', link: '/docs/ecosystem/developer-tools' },
-              { text: 'Explorers and debugging', link: '/docs/ecosystem/block-explorers' },
-            ],
-          },
-          {
-            text: 'Security and compliance',
-            link: '/docs/ecosystem/security-compliance',
-          },
+          { text: 'RWAs', link: '/docs/partners/rwas' },
+          { text: 'Wallets', link: '/docs/partners/wallets' },
+          { text: 'Smart accounts', link: '/docs/partners/smart-accounts' },
+          { text: 'Exchanges', link: '/docs/partners/exchanges' },
+          { text: 'Bridges', link: '/docs/partners/bridges' },
+          { text: 'Payments & ramps', link: '/docs/partners/payments-and-ramps' },
+      { text: 'Cards', link: '/docs/partners/cards' },
+          { text: 'Partner with Tempo', link: '/docs/partners/join' },
         ],
       },
       {
-        text: 'Work with Tempo',
+        text: 'INFRA',
         items: [
-          {
-            text: 'Partner with Tempo',
-            link: '/docs/partners',
-          },
+          { text: 'RPC & nodes', link: '/docs/partners/rpc-and-nodes' },
+          { text: 'Data & oracles', link: '/docs/partners/data-and-oracles' },
+          { text: 'Explorers & debugging', link: '/docs/partners/explorers-and-debugging' },
+          { text: 'Security & compliance', link: '/docs/partners/security-and-compliance' },
         ],
       },
     ]
@@ -901,11 +858,17 @@ export default defineConfig({
         items: [
           { text: 'Introduction', link: '/docs/development' },
           {
-            text: 'Wallets',
+            text: 'Accounts and keys',
             collapsed: true,
             items: [
+              { text: 'Account model', link: '/docs/accounts/keys' },
+              { text: 'Access keys', link: '/docs/accounts/access-keys' },
+              { text: 'Admin keys', link: '/docs/accounts/admin-keys' },
               { text: 'Integrate a wallet', link: '/docs/quickstart/wallet-developers' },
-              { text: 'Token lists', link: '/docs/quickstart/tokenlist' },
+              {
+                text: 'Keychain specification',
+                link: '/docs/protocol/transactions/AccountKeychain',
+              },
             ],
           },
           {
@@ -944,6 +907,7 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: 'Introduction', link: '/docs/network/tokens' },
+              { text: 'Token lists', link: '/docs/quickstart/tokenlist' },
               { text: 'Create a token', link: '/docs/guide/issuance/create-a-stablecoin' },
               { text: 'Mint and burn', link: '/docs/guide/issuance/mint-stablecoins' },
               { text: 'Manage tokens', link: '/docs/guide/issuance/manage-stablecoin' },
@@ -952,6 +916,12 @@ export default defineConfig({
               { text: 'Issuance guide', link: '/docs/guide/issuance' },
               { text: 'Token behavior', link: '/docs/protocol/tip20/overview' },
               { text: 'TIP-20 Specification', link: '/docs/protocol/tip20/spec' },
+            ],
+          },
+          {
+            text: 'Policies',
+            collapsed: true,
+            items: [
               { text: 'Transfer policies', link: '/docs/protocol/tip403/overview' },
               { text: 'TIP-403 specification', link: '/docs/protocol/tip403/spec' },
             ],
@@ -966,18 +936,18 @@ export default defineConfig({
             ],
           },
           {
-            text: 'Exchange',
+            text: 'Stablecoin DEX',
             collapsed: true,
             items: [
               { text: 'Introduction', link: '/docs/guide/stablecoin-dex' },
               { text: 'Swap walkthrough', link: '/docs/guide/stablecoin-dex/executing-swaps' },
               { text: 'Provide liquidity', link: '/docs/guide/stablecoin-dex/providing-liquidity' },
-              { text: 'How the exchange works', link: '/docs/protocol/exchange' },
+              { text: 'How the DEX works', link: '/docs/protocol/exchange' },
               { text: 'Quote tokens', link: '/docs/protocol/exchange/quote-tokens' },
               { text: 'Swap reference', link: '/docs/protocol/exchange/executing-swaps' },
               { text: 'Order reference', link: '/docs/protocol/exchange/providing-liquidity' },
               { text: 'DEX balances', link: '/docs/protocol/exchange/exchange-balance' },
-              { text: 'Exchange specification', link: '/docs/protocol/exchange/spec' },
+              { text: 'DEX specification', link: '/docs/protocol/exchange/spec' },
             ],
           },
           {
@@ -1048,8 +1018,8 @@ export default defineConfig({
         ),
       ),
       '/docs/guide/private-zones': sandboxSidebar,
-      '/docs/ecosystem': partnerResourcesSidebar,
       '/docs/partners': partnerResourcesSidebar,
+      '/docs/partners/join': partnerResourcesSidebar,
       '/docs/guide/ousd': partnerResourcesSidebar,
       '/docs/guide/bridge-layerzero': partnerResourcesSidebar,
       '/docs/guide/bridge-bungee': partnerResourcesSidebar,
@@ -1065,6 +1035,48 @@ export default defineConfig({
     { text: 'Blog', link: '/blog' },
   ],
   redirects: [
+    { source: '/docs/ecosystem/assets', destination: '/docs/partners/stablecoins', status: 301 },
+    { source: '/docs/partners/assets', destination: '/docs/partners/stablecoins', status: 301 },
+    { source: '/docs/ecosystem/wallets', destination: '/docs/partners/wallets', status: 301 },
+    {
+      source: '/docs/ecosystem/smart-contract-libraries',
+      destination: '/docs/partners/smart-accounts',
+      status: 301,
+    },
+    { source: '/docs/ecosystem/exchanges', destination: '/docs/partners/exchanges', status: 301 },
+    { source: '/docs/ecosystem/bridges', destination: '/docs/partners/bridges', status: 301 },
+    {
+      source: '/docs/ecosystem/orchestration',
+      destination: '/docs/partners/payments-and-ramps',
+      status: 301,
+    },
+    {
+      source: '/docs/ecosystem/node-infrastructure',
+      destination: '/docs/partners/rpc-and-nodes',
+      status: 301,
+    },
+    {
+      source: '/docs/ecosystem/data-analytics',
+      destination: '/docs/partners/data-and-oracles',
+      status: 301,
+    },
+    {
+      source: '/docs/ecosystem/block-explorers',
+      destination: '/docs/partners/explorers-and-debugging',
+      status: 301,
+    },
+    {
+      source: '/docs/ecosystem/security-compliance',
+      destination: '/docs/partners/security-and-compliance',
+      status: 301,
+    },
+    {
+      source: '/docs/ecosystem/developer-tools',
+      destination: '/docs/partners/developer-tools',
+      status: 301,
+    },
+    { source: '/docs/ecosystem', destination: '/docs/partners', status: 301 },
+
     {
       source: '/docs/guide/machine-payments/use-cases/:path*',
       destination: '/docs/guide/machine-payments',
@@ -1125,22 +1137,22 @@ export default defineConfig({
     },
     {
       source: '/docs/learn/partners',
-      destination: '/docs/partners',
+      destination: '/docs/partners/join',
       status: 301,
     },
     {
       source: '/learn/partners',
-      destination: '/docs/partners',
+      destination: '/docs/partners/join',
       status: 301,
     },
     {
       source: '/docs/guide/using-tempo-with-ai/partners',
-      destination: '/docs/partners',
+      destination: '/docs/partners/join',
       status: 301,
     },
     {
       source: '/build/partners',
-      destination: '/docs/partners',
+      destination: '/docs/partners/join',
       status: 301,
     },
     {

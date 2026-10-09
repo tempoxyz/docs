@@ -10,7 +10,7 @@ import { OpenApi } from 'vocs'
 
 # Send payments
 
-Send stablecoins between Tempo accounts and verify delivery. Use a payment reference when you need to match a transfer to an invoice or order.
+Send stablecoin payments and payouts between Tempo accounts and verify delivery. Use a payment reference when you need to match a transfer to an invoice or order.
 
 The examples use AlphaUSD on Moderato testnet. [Create and fund a test account](/get-started/quickstart), then choose a recipient you control.
 
@@ -172,6 +172,7 @@ The Viem and CLI examples select AlphaUSD for transaction fees. Wallet-connected
 
 - [Choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin) when the sender pays.
 - [Sponsor fees](/docs/guide/payments/sponsor-user-fees) when your application pays for its customers.
+- [Estimate costs](/docs/network/fees#estimate-costs) before funding a payment run.
 
 Choosing a fee token does not convert the payment itself. Use [Routes](/docs/routes) for supported cross-network transfers and [Exchange](/docs/guide/stablecoin-dex) for onchain swaps.
 
@@ -212,9 +213,11 @@ print(receipt["transactionHash"].hex())
 
 ::::
 
-<OpenApi.Playground operationId="getReceipt" anchors={false} />
+<OpenApi.Playground operationId="getReceipt" query="chainId=42431" anchors={false} />
 
-Check the transaction status, then match the token contract, recipient, and amount in the receipt's `Transfer` events. A successful transaction alone is not proof that the intended recipient received funds; a receive policy can redirect funds to `ReceivePolicyGuard` instead of the recipient.
+Check the transaction status, then match the token contract, recipient, and amount in the receipt's `Transfer` events. A successful transaction alone is not proof that the intended recipient received funds; a [receive policy](/docs/guide/payments/configure-receive-policies#monitor-blocked-receipts) can redirect funds to `ReceivePolicyGuard` instead of the recipient.
+
+If submission times out, check the submitted transaction hash before rebuilding or sending another payment.
 
 Use the [verification example](/docs/guide/payments/accept-a-payment/examples#verify-an-invoice) to connect confirmed transfers to application records. Save the network, transaction hash, and transfer log index so a replay cannot credit the same payment twice.
 

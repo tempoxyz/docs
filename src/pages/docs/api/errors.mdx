@@ -14,7 +14,7 @@ The Tempo API uses conventional HTTP status codes to indicate the result of a re
 
 ## API error response format
 
-Every error returns the same JSON envelope:
+REST API errors normally use this JSON envelope. MPP challenges, JSON-RPC errors, and edge-level failures can use different formats:
 
 ```json
 {
@@ -74,7 +74,7 @@ Authentication failed or is required. See [Authentication](/docs/api/authenticat
 
 ## 402: Payment Required
 
-The request exceeded the anonymous quota and carried no valid payment. This response is **protocol-native**, not the JSON error envelope: read the `WWW-Authenticate` header for the challenge, settle it, and retry with an `Authorization: Payment` credential. See [paying per request with MPP](/docs/api/authentication).
+An eligible request exceeded its quota and carried no valid payment. This can apply to anonymous or API-key requests. This response is **protocol-native**, not the JSON error envelope: read the `WWW-Authenticate` header for the challenge, settle it, and retry with an `Authorization: Payment` credential. See [paying per request with MPP](/docs/api/authentication).
 
 ## 403: Forbidden
 
@@ -82,7 +82,7 @@ The credential is valid but not permitted to perform the request.
 
 | Code | Meaning |
 | --- | --- |
-| `api_key_forbidden` | The API key is missing a [scope](/docs/api/authentication) required by this endpoint. |
+| `api_key_forbidden` | The API key lacks a required [scope](/docs/api/authentication), or a sandbox key targets mainnet. |
 | `api_key_ip_forbidden` | The API key has an IP allowlist, but the trusted client IP is missing or does not match it. |
 | `limit_exceeded` | A resource limit was reached (for example, the maximum number of webhooks). |
 
@@ -112,11 +112,11 @@ You exceeded the rate limit. The response carries a `Retry-After` header. See [R
 | Code | Meaning |
 | --- | --- |
 | `rate_limit_exceeded` | The request exceeded the quota for its window. |
-| `payment_required` | The request was over quota on an endpoint where payment is accepted but none was supplied. |
+| `payment_required` | The request needs payment, but no MPP payment method is available for this endpoint or selected chain. |
 
 ## 5xx: Tempo server errors
 
-Something went wrong on Tempo's side. These are transient. Retry with [exponential backoff](/docs/api/rate-limits#retry-rate-limited-requests-with-backoff).
+Something went wrong on Tempo's side. Some failures are transient. Retry safe read requests with [exponential backoff](/docs/api/rate-limits#retry-rate-limited-requests-with-backoff).
 
 | Status | Code | Meaning |
 | --- | --- | --- |

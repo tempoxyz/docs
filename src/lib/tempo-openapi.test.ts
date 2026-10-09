@@ -1,7 +1,73 @@
+import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { pathToFileURL } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { prepareTempoOpenApi } from './tempo-openapi'
+
+describe('Tempo authentication documentation routes', () => {
+  it('keeps Console operations separate from the API-key guide in routes and agent exports', async () => {
+    const { parse } = await import('../../node_modules/vocs/dist/internal/openapi/parser.js')
+    const { fromIr } = await import('../../node_modules/vocs/dist/internal/openapi/markdown.js')
+    const { toSidebar } = await import('../../node_modules/vocs/dist/internal/openapi/sidebar.js')
+    const { toSearchDocuments } = await import(
+      '../../node_modules/vocs/dist/internal/openapi/search.js'
+    )
+    const operations = [
+      ['createSiweChallenge', '/v1/auth/siwe/challenge'],
+      ['verifySiwe', '/v1/auth/siwe'],
+      ['verifyIdentity', '/v1/auth/identity'],
+      ['logout', '/v1/auth/logout'],
+    ]
+    const source = {
+      openapi: '3.1.0',
+      info: { title: 'Tempo API', version: '1.0.0' },
+      tags: [{ name: 'Authentication', description: 'Authenticate into the Tempo Platform.' }],
+      'x-tagGroups': [{ name: 'Platform API', tags: ['Authentication'] }],
+      paths: Object.fromEntries(
+        operations.map(([operationId, path]) => [
+          path,
+          {
+            post: {
+              operationId,
+              tags: ['Authentication'],
+              responses: { '200': { description: 'Success' } },
+            },
+          },
+        ]),
+      ),
+    }
+    const prepared = prepareTempoOpenApi(source)
+    const parsed = await parse({ path: '/docs/api', spec: () => prepared })
+    expect(prepared.paths).toEqual(source.paths)
+    expect(source.tags[0]).not.toHaveProperty('x-pagePath')
+    expect(parsed.groups[0]).toMatchObject({
+      id: 'authentication',
+      name: 'Console authentication',
+      pagePath: 'console/authentication',
+    })
+
+    const generatedPages = fromIr(parsed)
+    expect(generatedPages.map((page) => page.path)).toEqual([
+      '/docs/api',
+      '/docs/api/console/authentication',
+    ])
+    const sidebar = JSON.stringify(toSidebar(parsed))
+    const search = await toSearchDocuments(parsed)
+    const guide = readFileSync('src/pages/docs/api/authentication.mdx', 'utf8')
+    for (const [operationId] of operations) {
+      const anchor = operationId.toLowerCase()
+      const destination = `/docs/api/console/authentication#${anchor}`
+      expect(generatedPages[0].content).toContain(`](${destination})`)
+      expect(sidebar).toContain(destination)
+      expect(search.some((result) => result.href === destination)).toBe(true)
+      // Existing endpoint hashes still land on a link to the new reference.
+      expect(guide).toContain(`<span id="${anchor}" />`)
+      expect(guide).toContain(`](${destination})`)
+    }
+    expect(guide).toContain('## API keys')
+    expect(guide).toContain('## Pay per request with MPP')
+  })
+})
 
 describe('Tempo OpenAPI examples', () => {
   it('replaces provider metadata in field, object, and list samples only', () => {

@@ -54,13 +54,13 @@ As specified in the preference system above, the simplest way to specify the fee
 
 #### Consideration 2: Paying fees in the TIP-20 contract being interacted with
 
-If the user is calling a method on a TIP-20 token (e.g., `transfer`), the default fee token is that token itself. For example, if the user is calling the `transfer` method on a TIP-20 token with a symbol of "USDG", the default fee token would be "USDG".
+If no account preference is set, a top-level `transfer` or `transferWithMemo` call to a USD-denominated TIP-20 token uses that token for fees. Other TIP-20 methods do not automatically select their target token. For example, if the user is calling the `transfer` method on a TIP-20 token with a symbol of "USDG", the default fee token would be "USDG".
 
-Importantly, note that the `amount` field in this case is sent in full. So, if the user is calling the `transfer` method on a TIP-20 token with a symbol of "USDG" with the `amount` field set to 1000, the full amount of the token will be transferred **and** the sender's balance will be reduced by the amount spent in fees. So, the recipient will receive 1000 USDG.
+Importantly, note that the `amount` field in this case is sent in full. So, if the user is calling the `transfer` method on a TIP-20 token with a symbol of "USDG" with the `amount` field set to `1000 * 10^6` base units, the full 1,000 USDG is transferred and fees are deducted separately. A receiver's receive policy can redirect that delivery to the ReceivePolicyGuard.
 
 #### Consideration 3: The fallback in the case of a non-TIP-20 contract
 
-If the user is calling a contract that is not a TIP-20 token, the EVM transaction will default to the pathUSD token. Thus, in order to send transactions to non-TIP-20 contracts, the wallet must hold some balance of pathUSD, or set an account fee token such as [OUSD](/docs/guide/ousd) with `setUserToken` on the FeeManager so it can pay fees in OUSD instead.
+If neither an account preference nor contract-specific inference applies, the EVM transaction defaults to pathUSD. Eligible Stablecoin DEX swap calls instead infer their input token. Thus, in order to send transactions to non-TIP-20 contracts, the wallet must hold some balance of pathUSD, or set an account fee token such as [OUSD](/docs/guide/ousd) with `setUserToken` on the FeeManager so it can pay fees in OUSD instead.
 
 On the Tempo Testnet, pathUSD is available from the [faucet](/docs/quickstart/faucet).
 
@@ -81,7 +81,7 @@ Tempo's [state creation costs](https://github.com/tempoxyz/tempo/blob/main/tips/
 | New storage slot (SSTORE 0→non-zero) | 250,000 gas | 20,000 gas |
 | Account creation | 250,000 gas | 0 gas |
 | Contract creation per byte | 1,000 gas | 200 gas |
-| Transaction gas cap | 30M gas | 30M gas |
+| Transaction gas cap | 30M gas | 16,777,216 gas (EIP-7825) |
 
 This means transfers to new addresses cost ~300k gas, and contract deployments cost 5-10x more than on Ethereum. Update your `gas_limit` estimates accordingly.
 

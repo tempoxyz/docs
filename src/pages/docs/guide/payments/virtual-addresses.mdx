@@ -17,7 +17,7 @@ import { MermaidDiagram } from '../../../../components/MermaidDiagram'
 
 Give each customer a distinct deposit address while receiving TIP-20 payments in one registered account. These virtual addresses preserve customer attribution in transfer events; they do not hold separate customer balances.
 
-Virtual addresses receive payments on Tempo. To accept deposits from another network, use [Routes deposit addresses](/docs/routes#accept-deposits-from-external-wallets).
+Virtual addresses receive payments on Tempo. To accept deposits from another network, use [Routes deposit addresses](/docs/routes/deposits).
 
 The demo may use pre-release infrastructure in preview environments.
 
@@ -46,7 +46,7 @@ The important behavior is:
 
 ## Virtual address live demo
 
-This walkthrough shows the full flow:
+The fast demo uses a docs-managed master wallet. Choose **Real registration** to complete the full flow with your own passkey:
 
 1. sign in with a passkey and get a Tempo address
 2. register a master id for that address
@@ -94,9 +94,9 @@ Mining a virtual-address salt can take 30+ seconds depending on your browser, ha
 
 When the demo succeeds, you should see all of the following:
 
-- the passkey wallet is shown as the registered master wallet
+- the selected wallet is shown as the registered master wallet
 - the virtual address is distinct from the master wallet
-- the sender transfers `OUSD` to the virtual address
+- the sender transfers the selected test token to the virtual address
 - the master wallet balance increases
 - the virtual address TIP-20 balance remains `0`
 - the receipt shows the expected two-hop `Transfer` events
@@ -132,7 +132,7 @@ A few things matter in production:
 - virtual forwarding applies only to **TIP-20** transfer and mint paths
 - `balanceOf(virtualAddress)` stays `0`; use events and your own `userTag` mapping for attribution
 - policy checks apply to the **resolved master wallet**, not the literal virtual address
-- avoid using virtual addresses in reward protocols (lending pools, DEX rewards, etc) unless explicitly supported, as they can't track or hold funds
+- avoid using virtual addresses in reward protocols (lending pools, DEX rewards, etc) unless explicitly supported, because virtual addresses hold no balance, so protocols that read `balanceOf` see zero
 
 ## Learn more about TIP-20 virtual addresses
 

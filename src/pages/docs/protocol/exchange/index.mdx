@@ -1,24 +1,26 @@
 ---
-title: "Exchanging stablecoins: exchange vs. Fee AMM"
-seoTitle: "Exchange vs. Fee AMM for Stablecoins | Docs"
+title: "Exchanging stablecoins: DEX vs. Fee AMM"
+seoTitle: "DEX vs. Fee AMM for Stablecoins | Docs"
 description: Tempo's enshrined decentralized exchange for trading between stablecoins with optimal pricing, limit orders, and flip orders for liquidity provision.
 ---
 
 import { Cards, Card } from 'vocs'
 
-# Exchanging stablecoins: exchange vs. Fee AMM
+# Exchanging stablecoins: DEX vs. Fee AMM
 
-Tempo features an enshrined decentralized exchange (DEX) designed specifically for trading between stablecoins of the same underlying asset (e.g., USDG to USDT). The exchange provides optimal pricing for cross-stablecoin payments while minimizing chain load from excessive market activity.
+<span id="exchanging-stablecoins-exchange-vs-fee-amm" />
 
-The exchange operates as a singleton precompiled contract at address `0xdec0000000000000000000000000000000000000`. It maintains an orderbook with separate queues for each price tick, using price-time priority for order matching.
+Tempo features an enshrined decentralized exchange (DEX) designed specifically for trading between stablecoins of the same underlying asset (e.g., USDG to USDT). The DEX provides optimal pricing for cross-stablecoin payments while minimizing chain load from excessive market activity.
+
+The DEX operates as a singleton precompiled contract at address `0xdec0000000000000000000000000000000000000`. It maintains an onchain orderbook with separate queues for each price tick, using price-time priority for order matching.
 
 :::info
-**Exchange vs. Fee AMM** — these are two different systems. The Exchange is the user-facing market: you (or your app) trade stablecoins at market prices via swaps and orders against an orderbook. The [Fee AMM](/docs/protocol/fees/fee-amm) is protocol fee-conversion liquidity: it converts users' transaction-fee payments into validators' preferred tokens at a fixed price through protocol-driven swaps, and is not a trading venue. See [Exchange vs. Fee AMM](#exchange-vs-fee-amm) below.
+**DEX vs. Fee AMM** — these are two different systems. The DEX is the user-facing market: you (or your app) trade stablecoins at market prices via swaps and orders against an onchain orderbook. The [Fee AMM](/docs/protocol/fees/fee-amm) is protocol fee-conversion liquidity: it converts users' transaction-fee payments into validators' preferred tokens at a fixed price through protocol-driven swaps, and is not a trading venue. See [DEX vs. Fee AMM](#exchange-vs-fee-amm) below.
 :::
 
-Trading pairs are determined by each token's quote token. All TIP-20 tokens specify a quote token for trading on the exchange. See [Quote Tokens](/docs/protocol/exchange/quote-tokens) for more information on quote token selection and the optional [pathUSD](/docs/protocol/exchange/quote-tokens#pathusd) stablecoin. [OUSD](/docs/guide/ousd), the recommended stablecoin on Tempo, uses pathUSD as its quote token, so any USD stablecoin can route to and from OUSD through the exchange. See the [Stablecoin DEX Specification](/docs/protocol/exchange/spec) for detailed information on the exchange structure.
+Trading pairs are determined by each token's quote token. All TIP-20 tokens specify a quote token for trading on the DEX. See [Quote Tokens](/docs/protocol/exchange/quote-tokens) for more information on quote token selection and the optional [pathUSD](/docs/protocol/exchange/quote-tokens#pathusd) stablecoin. [OUSD](/docs/guide/ousd), the recommended stablecoin on Tempo, uses pathUSD as its quote token, so any USD stablecoin can route to and from OUSD through the DEX. See the [Stablecoin DEX Specification](/docs/protocol/exchange/spec) for detailed information on the DEX structure.
 
-The exchange supports three types of orders, each with different execution behavior:
+The DEX supports three types of orders, each with different execution behavior:
 
 | Order Type | Description |
 |------------|-------------|
@@ -28,22 +30,24 @@ The exchange supports three types of orders, each with different execution behav
 
 For the complete execution mechanics, see the [Stablecoin DEX Specification](/docs/protocol/exchange/spec).
 
-## Exchange vs. Fee AMM
+<span id="exchange-vs-fee-amm" />
+
+## DEX vs. Fee AMM
 
 Tempo has two stablecoin-swapping systems that are easy to confuse. They serve different purposes:
 
-| | Exchange (DEX) | [Fee AMM](/docs/protocol/fees/fee-amm) |
+| | Stablecoin DEX | [Fee AMM](/docs/protocol/fees/fee-amm) |
 |---|---|---|
 | **Purpose** | User-facing stablecoin trading | Converting transaction fees into validators' preferred tokens |
 | **Who initiates swaps** | Users and apps | The protocol, automatically (plus arbitrageurs rebalancing) |
-| **Pricing** | Market-driven orderbook (price-time priority) | Fixed conversion price |
-| **Liquidity** | Limit and flip orders resting in the orderbook | LP deposits into per-pair fee pools |
+| **Pricing** | Market-driven onchain orderbook (price-time priority) | Fixed conversion price |
+| **Liquidity** | Limit and flip orders resting in the onchain orderbook | LP deposits into per-pair fee pools |
 | **Contract** | Stablecoin DEX precompile (`0xdec0…0000`) | `FeeManager` precompile (`0xfeec…0000`) |
-| **Use it for** | Swaps, prices, orderbook depth, fills | Letting users pay fees in any stablecoin |
+| **Use it for** | Swaps, prices, onchain orderbook depth, fills | Letting users pay fees in any stablecoin |
 
-If you want to **trade** stablecoins or read market data (pairs, swaps, orders, prices), use the Exchange. If you want to **enable fee payments** in your stablecoin or provide fee-conversion liquidity, see the [Fee AMM](/docs/protocol/fees/fee-amm).
+If you want to **trade** stablecoins or read market data (pairs, swaps, orders, prices), use the DEX. If you want to **enable fee payments** in your stablecoin or provide fee-conversion liquidity, see the [Fee AMM](/docs/protocol/fees/fee-amm).
 
-To get started with the exchange, explore these guides:
+To get started with the DEX, explore these guides:
 
 <Cards>
   <Card

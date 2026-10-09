@@ -36,9 +36,9 @@ Choose the measurement window with the same account, vault, and network:
 
 ### Show rates and rewards
 
-Vault responses can include an `apy` object with observed vault yield, reward information, and a measurement window. It can be `null` when no component is measurable. Display unavailable data as unavailable, rather than as zero.
+Vault responses can include an `apy` object with observed vault returns, reward information, and a measurement window. It can be `null` when no component is measurable. Display unavailable data as unavailable, rather than as zero.
 
-Request account-specific APY from the [position endpoint](/docs/api/earn#getearnvaultposition) when showing an account's effective rate. Reward qualification can lag a new deposit or transfer, and an eligible boost does not mean the whole balance qualifies. Keep temporary reward terms separate from observed vault yield.
+Request account-specific APY from the [position endpoint](/docs/api/earn#getearnvaultposition) when showing an account's effective rate. Reward qualification can lag a new deposit or transfer, and an eligible boost does not mean the whole balance qualifies. Keep temporary reward terms separate from observed vault returns.
 
 For charts, use the [share-price history endpoint](/docs/api/earn#getearnvaultshareprices) for vault share prices and the [earnings endpoint](/docs/api/earn#getearnvaultearnings) for an account's earnings. Label each chart for the metric it shows.
 

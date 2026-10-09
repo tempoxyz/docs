@@ -24,18 +24,20 @@ Use the API key from [API setup](/docs/routes/api-setup) and enter the transfer 
 
 <span id="keep-delivery-and-refund-states-distinct" />
 
-## Handle failures
+<span id="handle-failures" />
 
-| State | Application behavior |
-| --- | --- |
-| `awaiting-source` | Transfer created; source funding has not been registered. |
-| `detected`, `bridging`, `settling` | Deposit detected and moving through delivery. Keep it pending. |
-| `processing` | Transfer in progress. Keep the payment pending. |
-| `completed` | Reconcile destination delivery, including the delivered amount and transaction references. |
-| `action-required` | Inspect `statusReason` and the endpoint's instructions before continuing. |
-| `expired` | Transfer expired. Inspect its source funding before starting a replacement. |
-| `refunding` | Keep the refund pending. |
-| `refunded` | Reconcile the refund amount and transaction references. |
+## Delivery states
+
+| State | Applies to | Application behavior |
+| --- | --- | --- |
+| `awaiting-source` | Transfers | Source funding has not been registered. |
+| `detected`, `bridging`, `settling` | Deposits | Funds are moving through delivery. Keep the deposit pending. |
+| `processing` | Transfers | Keep the payment pending. |
+| `completed` | Both | Reconcile the delivered amount and destination transaction references. |
+| `action-required` | Both | Inspect `statusReason` and the endpoint's instructions. |
+| `expired` | Transfers | Inspect source funding before starting a replacement. |
+| `refunding` | Both | Keep the refund pending. |
+| `refunded` | Both | Reconcile the refund amount and transaction references. |
 
 Use the full [transfer](/docs/api/routes/transfers) or [deposit](/docs/api/routes/deposit-addresses) reference for the lifecycle and response fields. Do not automatically send the payment again when it is pending or being refunded.
 

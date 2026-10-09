@@ -64,7 +64,7 @@ type PageCandidate = {
 const initialState: FormState = {
   tool: 'search',
   query: 'How do I connect an AI agent to Tempo?',
-  path: '/guide/using-tempo-with-ai',
+  path: '/docs/guide/using-tempo-with-ai',
   url: '',
   maxResults: 3,
   maxChars: 1600,
@@ -368,7 +368,7 @@ export function TempoMcpExplorer() {
               <input
                 value={state.path}
                 onChange={(event) => updateState('path', event.target.value)}
-                placeholder="/guide/using-tempo-with-ai"
+                placeholder="/docs/guide/using-tempo-with-ai"
                 className="w-full rounded-md border border-gray6 bg-gray1 px-3 py-2 font-mono text-gray12"
               />
             </label>

@@ -1,14 +1,14 @@
 ---
 title: "Using MPP with Foundry"
 seoTitle: "Use MPP with Foundry | Tempo Docs"
-description: Use Foundry tools (cast, forge, anvil, chisel) with MPP-gated RPC endpoints on Tempo — automatic 402 handling with zero config.
+description: Authorize a Tempo account and use Foundry tools with MPP-gated RPC endpoints, including automatic payments and reusable payment channels.
 ---
 
 import { Card, Cards } from 'vocs'
 
 # Using MPP with Foundry
 
-Foundry includes native MPP support on Tempo. When an RPC endpoint returns `402 Payment Required`, Foundry automatically handles the payment challenge with no wrapper scripts, middleware, or code changes.
+Foundry includes native MPP support on Tempo. Authorize a Tempo account, then use `cast`, `forge`, `anvil`, or `chisel` with a paid RPC URL. When the endpoint returns `402 Payment Required`, Foundry handles the payment challenge. These instructions target [Foundry v1.8.5](https://github.com/foundry-rs/foundry/releases/tag/v1.8.5).
 
 :::warning[`tempo-foundry` is deprecated]
 `tempo-foundry` and `foundryup -n tempo` are deprecated. Install the latest Foundry release with `foundryup`.
@@ -27,15 +27,12 @@ When you point any Foundry tool at an MPP-gated RPC URL, the built-in transport 
 
 1. **First request** — Foundry sends a normal JSON-RPC request to the endpoint.
 2. **402 challenge** — The server responds with `402 Payment Required` and a `WWW-Authenticate: Payment` header describing the price.
-3. **Key discovery** — Foundry reads your signing key from `$TEMPO_HOME/wallet/keys.toml` (default `~/.tempo/wallet/keys.toml`) or the `TEMPO_PRIVATE_KEY` env var. If the server offers multiple payment challenges (e.g. different chains or currencies), Foundry automatically picks the one matching your key's chain ID and spending allowance.
-4. **Channel open** — If no payment channel exists, Foundry opens one on-chain with a deposit (default: `100,000` base units). This is a one-time on-chain lockup — unused balance remains in the channel.
-5. **Voucher payment** — Foundry signs an off-chain voucher against the open channel and retries the request with an `Authorization: Payment` header.
-6. **Auto top-up** — When a channel's deposit is exhausted, Foundry sends a top-up transaction. The server accepts it with `204 No Content`, then Foundry signs a fresh voucher and retries automatically.
-7. **Channel reuse** — Subsequent requests reuse the same channel. Channel state is persisted to `$TEMPO_HOME/foundry/channels.json` (default `~/.tempo/foundry/channels.json`) across process invocations.
+3. **Account discovery** — Foundry reads an authorized access key from the Tempo Accounts store at `$TEMPO_HOME/wallet/store.json` (default `~/.tempo/wallet/store.json`) for the challenge's chain.
+4. **Channel open** — For a session challenge, Foundry opens a payment channel. When the server does not suggest a deposit, the fallback is `20,000` base units (`0.02` of a six-decimal token). Unused funds remain in the channel until it closes.
+5. **Voucher payment** — Foundry signs an off-chain voucher and retries the request with an `Authorization: Payment` header.
+6. **Channel reuse** — Later requests reuse the channel. Foundry persists channel state in a local SQLite store, separated by RPC origin, and tops up sessions within its automatic deposit limit.
 
-:::tip
-Channel reuse means the first call to an MPP endpoint has roughly one confirmation of overhead (~500ms on Tempo), but all subsequent calls add near-zero latency.
-:::
+Opening or topping up a channel requires an on-chain transaction. Requests paid with vouchers reuse the channel without a new on-chain payment each time.
 
 ## Foundry MPP setup
 
@@ -60,19 +57,17 @@ foundryup
 
 All standard Foundry commands work as before — MPP activates only when an endpoint returns `402`.
 
-### Configure your wallet
+<span id="configure-your-wallet" />
+
+### Authorize your account
+
+Authorize an access key for Tempo mainnet:
 
 ```bash
-tempo wallet login
+cast tempo login
 ```
 
-This creates `~/.tempo/wallet/keys.toml` with your signing key. Foundry discovers this key automatically on the first `402` response.
-
-Alternatively, set the `TEMPO_PRIVATE_KEY` environment variable:
-
-```bash
-export TEMPO_PRIVATE_KEY=0xabc…123
-```
+Use `cast tempo login --no-browser` on a headless machine. The login stores the access-key private key in `~/.tempo/wallet/store.json`; it does not store your account's root key. Authorize the account and fund it for the network and currency requested by the endpoint before making paid requests.
 
 ### Use MPP endpoints
 
@@ -174,62 +169,42 @@ Type: uint256
 
 ### MPP deposit amount
 
-Set the fallback deposit amount used when the server does not suggest one:
-
-```bash
-export MPP_DEPOSIT=500000
-cast block-number --rpc-url https://rpc.mpp.tempo.xyz
-```
-
-The deposit determines how many RPC calls you can make before the channel needs a top-up. When a channel is exhausted, Foundry automatically tops it up.
+Foundry v1.8.5 uses a fallback deposit and top-up amount of `20,000` base units, with an automatic session deposit limit of `1,000,000` base units. For a six-decimal token, these are `0.02` and `1` token. The server can suggest a deposit within the client limit. This limits the channel reserve, not cumulative spending across requests.
 
 ### MPP key discovery
 
-Foundry discovers MPP signing keys in this order:
-
-1. **`TEMPO_PRIVATE_KEY`** env var — highest priority, no keychain metadata
-2. **`$TEMPO_HOME/wallet/keys.toml`** — created by `tempo wallet login`, includes keychain signing mode and authorized signer metadata
-
-Within `keys.toml`, the key selection priority is:
-- Passkey entries first
-- Entries with an inline private key second
-- First entry as fallback
-
-Foundry needs a usable inline private key — entries without one are skipped.
-
-When the server offers multiple chains or currencies, Foundry picks the first key that matches both the chain ID and currency from the challenge.
+Foundry reads the Tempo Accounts store at `$TEMPO_HOME/wallet/store.json` (default `~/.tempo/wallet/store.json`). Use `cast tempo login --chain-id <CHAIN_ID>` to authorize an access key on the network requested by the challenge.
 
 ### MPP channel persistence
 
-Open channels are saved to `$TEMPO_HOME/foundry/channels.json` (default `~/.tempo/foundry/channels.json`). This allows channel reuse across process invocations — you won't re-open a channel every time you run `cast` or `forge`.
-
-Channels are automatically evicted when fully spent or closed. If the server restarts and returns `410 Gone`, Foundry clears stale local state and opens a fresh channel on the next request.
+Foundry reuses open channels across process invocations through a local SQLite channel store. Channel state is namespaced by RPC origin, so different services do not share the same local session state.
 
 ## Tempo MPP testnet workflow
 
-Use the Moderato testnet MPP endpoint for development:
+Authorize an access key for Moderato, then use its testnet MPP endpoint:
 
 ```bash
+cast tempo login --chain-id 42431
 cast block-number --rpc-url https://rpc.mpp.moderato.tempo.xyz
 
 # Mainnet
 cast block-number --rpc-url https://rpc.mpp.tempo.xyz
 ```
 
-Fund your testnet wallet with `tempo wallet fund` before making requests.
+Fund the authorized account on Moderato before making requests. Follow the [testnet faucet instructions](/docs/quickstart/faucet); mainnet and testnet balances are separate.
 
 ### MPP gas sponsorship
 
-Some MPP endpoints sponsor gas fees on behalf of the caller. When the server's challenge includes a `feePayer` flag, Foundry delegates gas payment to the server, so no native balance is needed for gas.
+Some MPP endpoints sponsor the payment transaction's gas fees. When the challenge supports sponsorship, the server pays those fees. You still need funds for the service charge or channel deposit. Without sponsorship, Tempo transaction fees also require a supported fee token.
 
 ## Troubleshoot MPP with Foundry
 
 | Error | Cause | Fix |
 |---|---|---|
 | `tempo: command not found` | Tempo CLI not installed | Run `curl -fsSL https://tempo.xyz/install \| bash` |
-| `no supported MPP challenge` | Missing wallet key or wrong chain/currency | Run `tempo wallet login` or check `keys.toml` |
-| `410 Gone` | Stale local channel state | Re-run the command — Foundry clears stale state and opens a fresh channel |
-| `access key does not exist` | Signing key not yet provisioned on-chain | Foundry retries automatically with a key provisioning bundle — no action needed |
+| Tempo Accounts store cannot provide a wallet | No usable access key for the payment challenge | Run `cast tempo login --chain-id <CHAIN_ID>`; use `--no-browser` on a headless machine |
+| Insufficient balance | The authorized account cannot fund the payment | Follow the funding command printed by Foundry and check the network and currency |
+| Access key authorization fails | The key is missing, expired, or lacks permission | Authorize a suitable key with `cast tempo login --chain-id <CHAIN_ID>` and retry |
 
 ## Next steps for MPP with Foundry
 

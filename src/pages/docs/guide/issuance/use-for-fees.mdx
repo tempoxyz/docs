@@ -43,7 +43,7 @@ First, create and mint your stablecoin by following the [Create a Stablecoin](/d
 
 Before users can pay fees with your token, you need to provide liquidity in the Fee AMM between your token and a liquid quote token, or directly against validator payout tokens where you want explicit direct-route coverage.
 
-To determine which validator tokens are needed, sample recent blocks and check the miner's preferred fee token using `getValidatorToken` on the FeeManager contract. For example, on Moderato testnet, validators accept fees in pathUSD and AlphaUSD. On mainnet, this token mix is different and subject to change.
+To determine which validator tokens are needed, sample recent blocks and query `validatorTokens(block.miner)` on the FeeManager contract. An unset preference resolves to pathUSD. Preferences can change; do not assume all validators accept the same payout token.
 
 Add liquidity to your token's fee pool with the [backend Viem client](/docs/guide/payments/send-a-payment#send-from-your-backend). Set `TEMPO_TOKEN` to the token you issued on Moderato:
 
@@ -109,10 +109,10 @@ address yourToken = 0x20c0000000000000000000000000000000000004; // Your issued t
 address validatorToken = 0x20c0000000000000000000000000000000000001; // AlphaUSD
 
 // Get pool reserves
-(uint256 reserveValidator, uint256 reserveUser) = feeAmm.getReserves(yourToken, validatorToken);
+IFeeAMM.Pool memory pool = feeAmm.getPool(yourToken, validatorToken);
 
 // Check if there's sufficient liquidity
-require(reserveValidator > 0, "No liquidity available for fee conversion");
+require(pool.reserveValidatorToken > 0, "No liquidity available for fee conversion");
 ```
 
 :::

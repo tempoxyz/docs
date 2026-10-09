@@ -1,59 +1,52 @@
 ---
-title: Integration walkthrough
-seoTitle: Integrate Tempo Accounts into Your Application | Tempo Docs
-description: Connect account creation, address records, funding, and payment confirmation in your application.
+title: Choose an account model
+seoTitle: Choose an Account Model | Tempo Docs
+description: Decide where customer funds live, who signs payments, and which records your application maintains.
 ---
 
-# Integration walkthrough
+# Choose an account model
 
-Connect a Tempo account to your application's records, fund it, and record a payment. This walkthrough follows a company-controlled account used by a backend payout service. Start on Moderato testnet with test stablecoins.
+Decide whether each customer needs a separate onchain balance or whether deposits should collect in a shared account. Then choose who can authorize payments from those accounts.
 
-For customer-approved payments, use an [embedded wallet provider](/docs/accounts/providers) or [connect an existing wallet](/docs/accounts/integrate). The address mapping and reconciliation steps still apply; the customer approves signing through their wallet.
+<span id="integration-walkthrough" />
+<span id="associate-the-address-with-your-business-records" />
 
-:::::steps
+## Where should funds live?
 
-### Create the account and connect its signer
+| Your product needs | Account model | Build it |
+| --- | --- | --- |
+| Customers hold and spend their own stablecoin balances | Use a separate account for each customer. Read balances and activity at that account's address. | [Create an account](/docs/accounts/create) or [connect the customer's wallet](/docs/accounts/integrate) |
+| Customers deposit into your business, and you need to identify who paid | Give each customer a virtual deposit address that forwards payments to a shared account. Track customer credits in your application's ledger. | [Customer deposit addresses](/docs/guide/payments/virtual-addresses) |
+| Your business pays employees, suppliers, or other recipients | Fund a company account and send payments from it. Track each payout against your business records. | [Fund an account](/docs/guide/getting-funds), then [send payments](/docs/guide/payments/send-a-payment) |
 
-Use your [wallet provider](/docs/accounts/providers) to create an account, or try the [backend signing-key example](/docs/accounts/create#create-an-account-from-a-signing-key). Configure the signer for [Moderato](/docs/quickstart/connection-details).
+A virtual deposit address identifies incoming payments; it does **not** hold a separate balance or give the customer signing authority over the shared account. For example, if two customers deposit 100 and 50 tokens, the shared account receives 150. Your ledger records which customer receives each credit.
 
-Your backend requests signatures from the provider or signing infrastructure. Keep its credentials and keys outside browser code. The account's public address is the value your application uses to receive funds and query balances.
+You can combine these models: a product might give customers separate accounts while using a company account for payouts.
 
-**Result:** you have an account address and a way to authorize transactions from it. Generating a new key on each request would create a different account; retain the signer for subsequent payments.
+<span id="create-the-account-and-connect-its-signer" />
+<span id="authorize-and-send-a-payment" />
 
-### Associate the address with your business records
+## Who approves payments?
 
-Save the network and account address against the business or treasury record the account serves. If you use a provider, retain its wallet identifier so your backend can request signatures for the same account later.
+Separate accounts do not determine who controls signing. Choose signing based on how your product approves spending:
 
-An onchain balance belongs to an address and token. Your application maintains any allocation of that balance to customers or business units. For pooled collections, [customer deposit addresses](/docs/guide/payments/virtual-addresses) can identify deposits while forwarding funds into one account.
+- **The customer approves each payment:** connect an existing wallet, or use an [embedded wallet provider](/docs/accounts/providers) or [passkey account](/docs/accounts/create#create-a-passkey-account) within your app.
+- **Your backend approves payments:** use your signing infrastructure or a [wallet provider](/docs/accounts/providers). Keep signing credentials on the server.
+- **A service acts within a budget:** authorize an [access key](/docs/accounts/agents) with a spending limit, expiry, and allowed calls.
 
-**Result:** your backend can resolve an application record to the correct account and signer.
+A customer logging into your application does not itself authorize an onchain payment. Your integration must also obtain the wallet signature or use a key already authorized for that operation.
 
-### Fund and inspect the account
+<span id="fund-and-inspect-the-account" />
+<span id="confirm-the-transfer-and-update-your-records" />
 
-Use the [testnet faucet](/docs/quickstart/faucet), then [read the token balance](/docs/accounts/balances#read-a-stablecoin-balance). Identify the stablecoin by its network and contract address, rather than its symbol alone.
+## What does your application record?
 
-Balance reads use the public address and do not need its signing key. The [balance playground](/docs/accounts/balances#query-balances-across-tokens) lets you inspect the address directly.
+Keep the customer or business identifier alongside the network, account address, and provider wallet identifier if you use one. These records connect your users to the accounts your integration reads and signs for.
 
-**Result:** the account holds test stablecoins on the same network your signer uses. For production funding, choose a [supported funding path](/docs/guide/getting-funds).
+Use [balances and activity](/docs/accounts/balances) to show onchain funds. For a shared account, show each customer's ledger balance rather than the account's total balance.
 
-### Authorize and send a payment
+For deposits, [verify the actual transfer](/docs/guide/payments/accept-a-payment#verify-stablecoin-payments) before crediting a customer. Record the network, transaction hash, and log index to avoid processing the same transfer twice. For payouts, associate your payment record with its transaction and confirm the outcome before marking it paid.
 
-Follow [Send payments](/docs/guide/payments/send-a-payment) to select the recipient, token, and amount. For an ongoing payout service, authorize a [limited access key](/docs/accounts/access-keys) with the budget and allowed calls it needs.
+<span id="extend-the-account-integration" />
 
-Keep a payment record in your backend before requesting a signature. Associate the submitted transaction hash with that record. A [payment reference](/docs/guide/payments/transfer-memos) can link the transfer to an invoice or payout in your system.
-
-**Result:** you have a submitted transaction associated with a specific payment. If the submission response is interrupted, inspect its outcome before initiating another payment.
-
-### Confirm the transfer and update your records
-
-Follow [payment verification](/docs/guide/payments/accept-a-payment#verify-stablecoin-payments) to check execution and the actual token transfer, including the recipient and amount. Use [account activity](/docs/accounts/balances#explain-changes-in-a-balance) to explain the resulting balance change.
-
-Store the network, token, amount, sender, recipient, and transaction hash with the payment record. One transaction can contain several transfers, so reconcile the relevant transfer rather than assuming the transaction represents a single payment.
-
-**Result:** your application can show the payment outcome and trace it back to the recorded transfer.
-
-:::::
-
-## Extend the account integration
-
-Use [Agent access](/docs/accounts/agents) for delegated automated tasks, [Routes](/docs/routes) for transfers between networks, and [Payments](/docs/payments) for collection and reconciliation workflows.
+Once you have chosen the model, use [Client setup](/docs/accounts/examples) for the shared SDK configuration. The funding, sending, and receiving guides cover each operation separately.

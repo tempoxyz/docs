@@ -1,14 +1,20 @@
 ---
 title: "Fee AMM specification: how fee conversion works"
 seoTitle: "Tempo Fee AMM Specification | Docs"
-description: Technical specification for the Fee AMM enabling automatic stablecoin conversion for transaction fees with fixed-rate swaps and MEV protection.
+description: Technical specification for the Fee AMM enabling automatic stablecoin conversion for transaction fees with fixed-rate swaps and liquidity accounting.
 ---
+
+import { Badge } from '../../../../components/Badge'
+
+<div className="docs-specification-meta">
+  <a href="/docs/protocol"><Badge>Specification</Badge></a>
+</div>
 
 # Fee AMM specification: how fee conversion works
 
 ## Abstract
 
-This specification defines a system of one-way Automated Market Makers (AMMs) designed to facilitate gas fee payments from a user using one stablecoin (the `userToken`) to a validator who prefers a different stablecoin (the `validatorToken`). Each AMM handles fee swaps from a `userToken` to a `validatorToken` at one price (0.9970 `validatorToken` per `userToken`), and allows rebalancing in the other direction at another fixed price (1.0015 `userToken` per `validatorToken`).
+This specification defines a system of one-way Automated Market Makers (AMMs) designed to facilitate gas fee payments from a user using one stablecoin (the `userToken`) to a validator who prefers a different stablecoin (the `validatorToken`). Each AMM handles fee swaps from a `userToken` to a `validatorToken` at one price (0.9970 `validatorToken` per `userToken`), and allows rebalancing in the other direction at another fixed price (approximately 1.0015 `userToken` per `validatorToken`, before integer rounding).
 
 ## Motivation
 
@@ -16,11 +22,7 @@ Current blockchain fee systems typically require users to hold native tokens for
 
 The Fee AMM is a dedicated AMM for trading between stablecoins, which can only be used by the protocol (and by arbitrageurs rebalancing it to keep it balanced). The protocol automatically collects fees in many different coins and immediately swaps them (paying a constant price) into the token preferred by the validator. Fees accumulate in the FeeManager, and validators can claim them on-demand. 
 
-The system is designed to minimize several forms of MEV:
-
-- **No Probabilistic MEV**: The fixed fee swap rate prevents profitable backrunning of fee swaps. There is no way to profitably spam the chain with transactions hoping an opportunity might arise.
-- **No Sandwich Attacks**: Fee swaps execute at a fixed rate, eliminating sandwich attack vectors.
-- **Top-of-Block Auction**: The main MEV in the AMM (from rebalancing) occurs as a single race at the top of the next block rather than creating probabilistic spam throughout.
+Fixed conversion rates avoid price movement caused by trade size. Rebalancing is available throughout the block as reserves change; fixed pricing does not eliminate competition for available liquidity or validator control over transaction ordering.
 
 ## Specification
 
@@ -46,8 +48,8 @@ struct Pool {
 ```
 
 Each pool is directional: `userToken` → `validatorToken`. For a pair of tokens A and B, there are two separate pools:
-- Pool(A, B): for swapping A to B at fixed rate of 0.997 (fee swaps) and B to A at fixed rate of 0.9985 (rebalancing)
-- Pool(B, A): for swapping B to A at fixed rate of 0.997 (fee swaps) and A to B at fixed rate of 0.9985 (rebalancing)
+- Pool(A, B): for swapping A to B at fixed rate of 0.997 (fee swaps) and rebalancing B to A by paying approximately 0.9985 B per A received
+- Pool(B, A): for swapping B to A at fixed rate of 0.997 (fee swaps) and rebalancing A to B by paying approximately 0.9985 A per B received
 
 ##### Constants
 - `M = 9970` (scaled by 10000, representing 0.9970)
@@ -84,19 +86,7 @@ function rebalanceSwap(
 ) external returns (uint256 amountIn)
 ```
 
-Executes rebalancing swaps from `validatorToken` to `userToken` at fixed rate of 1.0015 (user token per validator token). Can be executed by anyone. Calculates `amountIn = (amountOut * N) / SCALE + 1` (rounds up). Updates reserves immediately. Emits `RebalanceSwap` event.
-
-```solidity
-function mint(
-    address userToken,
-    address validatorToken,
-    uint256 amountUserToken,
-    uint256 amountValidatorToken,
-    address to
-) external returns (uint256 liquidity)
-```
-
-Adds liquidity to a pool with both tokens. First provider sets initial reserves and must burn `MIN_LIQUIDITY` tokens. Subsequent providers must provide proportional amounts. Receives fungible LP tokens representing pro-rata share of pool reserves.
+Executes rebalancing swaps from `validatorToken` to `userToken` at fixed rate of 1.0015 (user token per validator token). Can be executed by anyone. Calculates `amountIn = floor(amountOut * N / SCALE) + 1` (adds one base unit even when the division is exact). Updates reserves immediately. Emits `RebalanceSwap` event.
 
 ```solidity
 function mint(
@@ -107,7 +97,7 @@ function mint(
 ) external returns (uint256 liquidity)
 ```
 
-Single-sided liquidity provision with validator token only. Treats the deposit as equivalent to performing a hypothetical `rebalanceSwap` first at rate `n = 0.9985` until the ratio of reserves match, then minting liquidity by depositing both. Formula: `liquidity = amountValidatorToken * _totalSupply / (V + n * U)`, where `n = N / SCALE`. Rounds down to avoid over-issuing LP tokens. Updates reserves by increasing only `validatorToken` by `amountValidatorToken`. Emits `Mint` event with `amountUserToken = 0`.
+Adds liquidity using only the validator token. For a new pool, the provider receives `floor(amountValidatorToken / 2) - MIN_LIQUIDITY` shares, with `MIN_LIQUIDITY` permanently locked; the deposit must make this amount positive. For an existing pool, shares equal `floor(amountValidatorToken * totalSupply / (V + floor(N * U / SCALE)))`. Only the validator-token reserve increases. Shares are tracked in `liquidityBalances(poolId, account)`, not a separate ERC-20 token. Emits `Mint`.
 
 ```solidity
 function burn(
@@ -128,7 +118,7 @@ function executeFeeSwap(
 ) internal returns (uint256 amountOut)
 ```
 
-Executes a fee swap immediately. Calculates `amountOut = (amountIn * M) / SCALE`. Only executed by the protocol during transaction execution. Emits `FeeSwap` event. Note: `FeeSwap` events are not emitted for immediate swaps.
+Executes a fee swap immediately. Calculates `amountOut = (amountIn * M) / SCALE`. Only executed by the protocol during transaction execution. This is an internal operation, not a public ABI method, and does not emit a `FeeSwap` event.
 
 ```solidity
 function checkSufficientLiquidity(
@@ -144,7 +134,7 @@ Verifies sufficient validator token reserves for the fee swap. Calculates `maxAm
 
 Tempo introduces a precompiled contract, the `FeeManager`, at the address `0xfeec000000000000000000000000000000000000`.
 
-The `FeeManager` is a singleton contract that implements all the functions of the Fee AMM for every pool. It handles the collection and refunding of fees during each transaction, executes fee swaps immediately, stores fee token preferences for users and validators, and accumulates fees for validators to claim via `distributeFees()`.
+The `FeeManager` is a singleton contract that implements all the functions of the Fee AMM for every pool. It handles the collection and refunding of fees during each transaction, executes fee swaps immediately, stores fee token preferences for users and validators, and accumulates fees for validators to claim via `distributeFees(validator, token)`.
 
 ##### Key Functions
 
@@ -160,26 +150,7 @@ function setValidatorToken(address token) external
 
 Sets the fee token preference for the caller (validator). Requires token to be a USD TIP-20 token. Cannot be called during a block built by that validator. Emits `ValidatorTokenSet` event. Access: Direct calls only (not via delegatecall).
 
-```solidity
-function collectFeePreTx(
-    address user,
-    address userToken,
-    uint256 maxAmount
-) external
-```
-
-Called by the protocol before transaction execution. The fee token (`userToken`) is determined by the protocol before calling using logic that considers: explicit tx fee token, setUserToken calls, stored user preference, tx.to if TIP-20. Reserves AMM liquidity if user token differs from validator token. Collects maximum possible fee from user. Access: Protocol only (`msg.sender == address(0)`).
-
-```solidity
-function collectFeePostTx(
-    address user,
-    uint256 maxAmount,
-    uint256 actualUsed,
-    address userToken
-) external
-```
-
-Called by the protocol after transaction execution. The validator token and fee recipient are inferred from `block.coinbase`. Calculates refund amount: `refundAmount = maxAmount - actualUsed`. Refunds unused tokens to user. If user token differs from validator token, executes the fee swap immediately and accumulates the output for the validator. Access: Protocol only (`msg.sender == address(0)`).
+Fee collection and refund are internal execution-handler hooks. They are not exposed through the FeeManager ABI and cannot be invoked by calling the precompile with a special sender. Before execution, the handler collects the maximum fee and validates conversion liquidity. After execution, it refunds the unused amount, executes any conversion, and records fees for the block's fee recipient.
 
 ```solidity
 function distributeFees(address validator, address token) external
@@ -191,7 +162,7 @@ Allows anyone to trigger distribution of accumulated fees for a specific token t
 function collectedFees(address validator, address token) external view returns (uint256)
 ```
 
-Returns the amount of accumulated fees for a validator and specific token that can be claimed via `distributeFees()`.
+Returns the amount of accumulated fees for a validator and specific token that can be claimed via `distributeFees(validator, token)`.
 
 ### Swap Mechanisms
 
@@ -214,14 +185,14 @@ Returns the amount of accumulated fees for a validator and specific token that c
 
 1. **Pre-Transaction**:
    - Protocol determines user's fee token using logic that considers: explicit tx fee token, setUserToken calls, stored user preference, tx.to if TIP-20
-   - Protocol calculates maximum gas needed (`maxAmount = gasLimit * maxFeePerGas`)
+   - Protocol calculates the maximum token charge from the gas limit and applicable gas price, converting attodollars to base units with upward rounding
    - `FeeManager.collectFeePreTx(user, userToken, maxAmount)` is called:
      - If user token differs from validator token, checks AMM has sufficient liquidity via `checkSufficientLiquidity()`
      - Collects maximum fee from user using `transferFeePreTx()`
    - If any check fails (insufficient balance, insufficient liquidity), transaction is invalid
 
 2. **Post-Transaction**:
-   - Calculate actual gas used (`actualUsed = gasUsed * gasPrice`)
+   - Calculate the actual token charge as `ceil(gasUsed * effectiveGasPrice / 10^12)`
    - `FeeManager.collectFeePostTx(user, maxAmount, actualUsed, userToken)` is called:
      - Validator token and fee recipient are inferred from `block.coinbase`
      - Calculates refund: `refundAmount = maxAmount - actualUsed`
@@ -230,7 +201,7 @@ Returns the amount of accumulated fees for a validator and specific token that c
      - Accumulates swapped fees for the validator
 
 3. **Fee Distribution**:
-   - Validators (or anyone) can call `distributeFees(validator)` at any time to transfer accumulated fees to the validator
+   - Validators (or anyone) can call `distributeFees(validator, token)` at any time to transfer accumulated fees to the validator
 
 ### Events
 
@@ -242,17 +213,11 @@ event RebalanceSwap(
     uint256 amountIn,
     uint256 amountOut
 )
-event FeeSwap(
-    address indexed userToken,
-    address indexed validatorToken,
-    uint256 amountIn,
-    uint256 amountOut
-)
 event Mint(
-    address indexed sender,
+    address sender,
+    address indexed to,
     address indexed userToken,
     address indexed validatorToken,
-    uint256 amountUserToken,
     uint256 amountValidatorToken,
     uint256 liquidity
 )
@@ -269,7 +234,7 @@ event UserTokenSet(address indexed user, address indexed token)
 event ValidatorTokenSet(address indexed validator, address indexed token)
 ```
 
-`Transfer` events are emitted as usual for transactions, with the exception of paying gas fees via TIP20 tokens. For fee payments, a single `Transfer` event is emitted post execution to represent the actual fee amount consumed (i.e. `gasUsed * gasPrice`).
+`Transfer` events are emitted as usual for transactions, with the exception of paying gas fees via TIP20 tokens. For fee payments, a single `Transfer` event is emitted post execution to represent the actual fee amount consumed (i.e. `ceil(gasUsed * effectiveGasPrice / 10^12)` token base units).
 
 ### Gas
 

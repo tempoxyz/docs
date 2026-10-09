@@ -83,7 +83,7 @@ Once logged in, verify everything works:
 tempo wallet whoami
 ```
 
-If `ready=true`, the wallet is ready for [`tempo request`](/docs/cli/request).
+If `ready=true`, the wallet is configured for [`tempo request`](/docs/cli/request). Check the balance and preview the request to confirm it can cover that payment.
 
 Refresh a stale access key without logging out:
 
@@ -170,7 +170,7 @@ tempo wallet sessions close --orphaned
 tempo wallet sessions close --finalize
 ```
 
-`sync` reconciles local records with onchain state. `close --orphaned` cleans up sessions whose counterparty is unreachable. `close --finalize` finalizes channels already pending close. Use `--dry-run` with any close command to preview before executing.
+`sync` reconciles local records with onchain state. `close --orphaned` targets orphaned onchain channels. `close --finalize` finalizes channels already pending close. Use `--dry-run` with any close command to preview before executing.
 
 ## Agent and script mode
 
@@ -244,7 +244,7 @@ tempo wallet -t transfer --credits --mpp-challenge-file "$headers"
 | `tempo wallet sessions list` | List active payment sessions |
 | `tempo wallet sessions sync` | Reconcile local sessions with onchain state |
 | `tempo wallet sessions close --all` | Close all sessions |
-| `tempo wallet sessions close --orphaned` | Close sessions whose counterparty is unreachable |
+| `tempo wallet sessions close --orphaned` | Close orphaned onchain channels |
 | `tempo wallet sessions close --finalize` | Finalize channels pending close |
 | `tempo wallet sessions close --cooperative <url>` | Request a cooperative close from the service |
 

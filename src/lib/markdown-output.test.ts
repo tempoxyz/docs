@@ -2,10 +2,53 @@ import remarkMdx from 'remark-mdx'
 import remarkParse from 'remark-parse'
 import remarkStringify from 'remark-stringify'
 import { unified } from 'unified'
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
+import type { Ir } from '../../node_modules/vocs/dist/internal/openapi/parser.js'
+import { docsLinkCards } from './docs-link-cards'
 import { plainMarkdownComponents } from './markdown-output'
 
 describe('plainMarkdownComponents', () => {
+  test('keeps the linked specification badge with its own page in full exports', async () => {
+    const output = await render(`
+<span id="old-title" />
+
+<div className="docs-specification-meta">
+  <a href="/docs/protocol"><Badge>Specification</Badge></a>
+</div>
+
+# Tokens
+
+Token rules.
+`)
+    expect(output.indexOf('<span id="old-title"')).toBeLessThan(output.indexOf('# Tokens'))
+    expect(output).toContain('# Tokens\n\n[**Specification**](/docs/protocol)')
+    expect(output.indexOf('[**Specification**]')).toBeLessThan(output.indexOf('Token rules.'))
+    expect(output).not.toContain('docs-specification-meta')
+    expect(output).not.toContain('<Badge')
+  })
+
+  test('exports setup card descriptions and destinations for agents', async () => {
+    const output = await render('## Set up your project\n\n<DocsSetupCards />')
+    expect(output).toContain('### Connect to Tempo')
+    expect(output).toContain('Find RPC endpoints and chain IDs')
+    expect(output).toContain('[Testnet faucet](/docs/quickstart/faucet)')
+    expect(output).toContain('[SDKs and CLI](/docs/tools)')
+    expect(output).toContain('[API keys](/docs/api/console/api-keys)')
+    expect(output).toContain('[Build with AI](/docs/guide/using-tempo-with-ai)')
+    expect(output).not.toContain('<DocsSetupCards')
+  })
+
+  test.each(
+    Object.keys(docsLinkCards),
+  )('exports every destination in the %s card collection', async (collection) => {
+    const output = await render(`<DocsLinkCards collection="${collection}" />`)
+    for (const card of docsLinkCards[collection as keyof typeof docsLinkCards]) {
+      expect(output).toContain(card.title)
+      for (const [label, href] of card.links) expect(output).toContain(`[${label}](${href})`)
+    }
+    expect(output).not.toContain('<DocsLinkCards')
+  })
+
   test('explains the account demo without claiming a funding or payment action', async () => {
     const output = await render('<PasskeyAccountDemo />')
     expect(output).toContain('create a passkey account or reconnect an existing passkey')
@@ -182,20 +225,169 @@ No validator P2P or RPC port should be directly accessible from the internet.
     expect(output).not.toContain('ValidatorTopologyDiagram')
   })
 
-  test('explains interactive and OpenAPI-only content', async () => {
-    const output = await render(`
-<OpenApi.Playground operationId="getAddressBalances" hideQueryParams />
-<OpenApi.Endpoints path="/docs/api" resource="rpc" />
-<OpenApi.Endpoints path="/docs/api" />
-<TempoMcpExplorer />
-`)
+  test('exports the endpoint directory with group names and canonical operation links', async () => {
+    const output = await render('<OpenApi.Endpoints path="/docs/api" />')
+    expect(output).toContain('## Balances')
+    expect(output).toContain(
+      '[`GET /v1/addresses/{address}/balances`](/docs/api/balances#getaddressbalances) — List balances',
+    )
+    expect(output).toContain('## JSON-RPC')
+    expect(output).toContain('[`POST /rpc`](/docs/api/rpc#eth-blocknumber)')
+    expect(output).toContain(
+      '[`POST /v1/routes/transfers`](/docs/api/routes/transfers#createroutestransfer)',
+    )
+    expect(output).not.toContain('OpenApi.')
+  })
 
-    expect(output).toContain('Interactive API example for `getAddressBalances`.')
-    expect(output).toContain('[Tempo OpenAPI specification](https://api.tempo.xyz/openapi.json)')
-    expect(output).toContain('Tempo JSON-RPC endpoints')
-    expect(output).toContain('Tempo REST API endpoints')
+  test('keeps an endpoint directory filtered to the selected resource', async () => {
+    const output = await render('<OpenApi.Endpoints path="/docs/api" resource="rpc" />')
+    expect(output).toContain('## JSON-RPC')
+    expect(output).toContain('POST /rpc')
+    expect(output).not.toContain('GET /v1/addresses')
+  })
+
+  test('exports API playground method, path, schema link, and request samples', async () => {
+    const output = await render('<OpenApi.Playground operationId="getAddressBalances" />')
+    expect(output).toContain('`GET /v1/addresses/{address}/balances`')
+    expect(output).toContain('[API reference](/docs/api/balances#getaddressbalances)')
+    expect(output).toContain('```bash')
+    expect(output).toContain('curl')
+    expect(output).toContain('fetch(')
+    expect(output).toContain('https://api.tempo.xyz/v1/addresses/0x123/balances?chainId=testnet')
+    expect(output).not.toContain('OpenApi.Playground')
+  })
+
+  test('exports an initial request without conflicting pagination or unrelated optional filters', async () => {
+    const output = await render('<OpenApi.Playground operationId="getAddressBalances" />')
+    expect(output).toContain('chainId=testnet')
+    expect(output).not.toMatch(/[?&](?:cursor|page|limit|currency)=/)
+    expect(output).not.toContain('cursor_example')
+  })
+
+  test('retains required query inputs and source/destination network selectors', async () => {
+    const output = await render('<OpenApi.Playground operationId="quoteRoutesTransfer" />')
+    expect(output).toContain('amount=1000000')
+    expect(output).toContain('sourceChain=base')
+    expect(output).toContain('destinationChain=tempo')
+    expect(output).not.toContain('slippageBps=')
+  })
+
+  test('uses an embed query preset without changing subsequent reference samples', async () => {
+    const output = await render(
+      '<OpenApi.Playground operationId="getAddressBalances" query="chainId=42431&currency=usd" />',
+    )
+    expect(output).toContain('chainId=42431')
+    expect(output).toContain('currency=usd')
+    expect(output).not.toContain('chainId=testnet')
+
+    const unchanged = await render('<OpenApi.Playground operationId="getAddressBalances" />')
+    expect(unchanged).toContain('chainId=testnet')
+    expect(unchanged).not.toContain('currency=')
+  })
+
+  test('matches hidden query parameters in the API tool', async () => {
+    const output = await render(
+      '<OpenApi.Playground operationId="getAddressBalances" hideQueryParams />',
+    )
+    expect(output).toContain('https://api.tempo.xyz/v1/addresses/0x123/balances')
+    expect(output).not.toContain('chainId=')
+    const visible = await render(
+      '<OpenApi.Playground operationId="getAddressBalances" hideQueryParams={false} />',
+    )
+    expect(visible).toContain('chainId=testnet')
+  })
+
+  test('exports write request bodies, required headers, and authentication without running a request', async () => {
+    const output = await render('<OpenApi.Playground operationId="createRoutesTransfer" />')
+    expect(output).toContain('`POST /v1/routes/transfers`')
+    expect(output).toContain('tempo-api-key: YOUR_API_KEY')
+    expect(output).toContain('idempotency-key: transfer_example')
+    expect(output).toContain('[Tempo API key](/docs/api/console/api-keys)')
+    expect(output).toContain('quoteId')
+    expect(output).toContain('quote_example')
+    expect(output).toContain('[API reference](/docs/api/routes/transfers#createroutestransfer)')
+  })
+
+  test.each([
+    ['<OpenApi.Playground operationId="missing" />', 'Unknown OpenAPI operation'],
+    ['<OpenApi.Endpoints path="/docs/api" resource="missing" />', 'Unknown OpenAPI resource'],
+    ['<OpenApi.Endpoints path="/other-api" />', 'Unknown OpenAPI path'],
+    [
+      '<OpenApi.Playground operationId="getAddressBalances" spec="/other-api" />',
+      'Unknown OpenAPI spec',
+    ],
+    [
+      '<OpenApi.Playground operationId="getAddressBalances" hideQueryParams={dynamic} />',
+      'static boolean',
+    ],
+    [
+      '<OpenApi.Playground operationId="getAddressBalances" query={dynamic} />',
+      'static query attribute',
+    ],
+  ])('fails instead of silently losing API content: %s', async (source, message) => {
+    await expect(render(source)).rejects.toThrow(message)
+  })
+
+  test('does not load API data for an ordinary guide', async () => {
+    const loadOpenApi = vi.fn()
+    await unified()
+      .use(remarkParse)
+      .use(remarkMdx)
+      .use(plainMarkdownComponents, { loadOpenApi })
+      .use(remarkStringify)
+      .process('# Guide\n\n[Read more](/docs/accounts)')
+    expect(loadOpenApi).not.toHaveBeenCalled()
+  })
+
+  test('keeps links inside interactive demo descriptions clickable', async () => {
+    const output = await render('<EarnVaultDemo />\n\n<TempoMcpExplorer />')
+    expect(output).toContain('[verified vault API reference](/docs/api/earn#getverifiedearnvaults)')
+    expect(output).not.toContain('\\[verified vault API reference')
     expect(output).toContain('Use the interactive web page to try the Tempo MCP server.')
-    expect(output).not.toMatch(/<\/?[A-Z]/)
+  })
+
+  test('preserves Tempo EVM card anchors while removing their visual wrappers', async () => {
+    const output = await render(`
+<Cards>
+  <div id="payment-lanes" style={{ display: 'grid' }}>
+    <Card title="Payment lanes" description="Reserved payment capacity." to="/docs/protocol/blockspace/payment-lane-specification" />
+  </div>
+</Cards>
+`)
+    expect(output).toContain('<span id="payment-lanes" />')
+    expect(output).toContain(
+      '[Payment lanes](/docs/protocol/blockspace/payment-lane-specification) — Reserved payment capacity.',
+    )
+    expect(output).not.toContain('style=')
+    expect(output).not.toContain('<div')
+  })
+
+  test('exports homepage guide cards as readable links and descriptions', async () => {
+    const output = await render(`
+<a href="/get-started/quickstart"><strong>Send your first payment <span aria-hidden="true">→</span></strong><span>Send stablecoins with a test wallet.</span></a>
+<p><a href="/docs/development">Browse developer guides →</a></p>
+`)
+    expect(output).toContain(
+      '[Send your first payment](/get-started/quickstart) — Send stablecoins with a test wallet.',
+    )
+    expect(output).toContain('[Browse developer guides →](/docs/development)')
+    expect(output).not.toMatch(/<(?:a|p|strong|span)\b/)
+  })
+
+  test('preserves anchor-only links used by legacy Zone guides', async () => {
+    const output = await render('<a id="depositing-pathusd-to-zone-a" />\n\n## Deposit')
+    expect(output).toContain('<a id="depositing-pathusd-to-zone-a" />')
+    expect(output).toContain('## Deposit')
+  })
+
+  test('retains image meaning and destinations without executable presentation attributes', async () => {
+    const output = await render(
+      '<img src="/developers/icons/ousd.svg" alt="OUSD" style={{ display: "inline" }} className="dark:hidden" />',
+    )
+    expect(output).toContain('src="/developers/icons/ousd.svg"')
+    expect(output).toContain('alt="OUSD"')
+    expect(output).not.toContain('style=')
+    expect(output).not.toContain('className=')
   })
 
   test('removes executable and presentation-only MDX without dropping later content', async () => {
@@ -362,7 +554,7 @@ async function render(source: string) {
     await unified()
       .use(remarkParse)
       .use(remarkMdx)
-      .use(plainMarkdownComponents)
+      .use(plainMarkdownComponents, { loadOpenApi: async () => fixtureOpenApi })
       .use(remarkStringify)
       .process(source),
   )
@@ -372,8 +564,101 @@ async function renderMarkdown(source: string) {
   return String(
     await unified()
       .use(remarkParse)
-      .use(plainMarkdownComponents)
+      .use(plainMarkdownComponents, { loadOpenApi: async () => fixtureOpenApi })
       .use(remarkStringify)
       .process(source),
   )
+}
+
+const fixtureOpenApi: Ir = {
+  path: '/docs/api',
+  client: { url: 'https://api.tempo.xyz/openapi.json' },
+  info: { title: 'Tempo API' },
+  servers: [{ url: 'https://api.tempo.xyz' }],
+  traits: [],
+  securitySchemes: { apiKey: { type: 'apiKey', in: 'header', name: 'tempo-api-key' } },
+  groups: [
+    {
+      id: 'balances',
+      name: 'Balances',
+      operations: [
+        {
+          id: 'getaddressbalances',
+          method: 'GET',
+          path: '/v1/addresses/{address}/balances',
+          summary: 'List balances',
+          parameters: [
+            {
+              name: 'address',
+              in: 'path',
+              required: true,
+              schema: { type: 'string', example: '0x123' },
+            },
+            { name: 'chainId', in: 'query', schema: { type: 'string', example: 'testnet' } },
+            { name: 'cursor', in: 'query', schema: { type: 'string', example: 'cursor_example' } },
+            { name: 'page', in: 'query', schema: { type: 'integer', example: 2 } },
+            { name: 'limit', in: 'query', schema: { type: 'integer', example: 10 } },
+            { name: 'currency', in: 'query', schema: { type: 'string', example: 'EUR' } },
+          ],
+          responses: [],
+        },
+      ],
+    },
+    {
+      id: 'rpc',
+      name: 'JSON-RPC',
+      operations: [
+        {
+          id: 'eth-blocknumber',
+          method: 'POST',
+          path: '/rpc',
+          parameters: [],
+          responses: [],
+        },
+      ],
+    },
+    {
+      id: 'transfers',
+      name: 'Routes',
+      pagePath: 'routes/transfers',
+      operations: [
+        {
+          id: 'quoteroutestransfer',
+          method: 'GET',
+          path: '/v1/routes/transfers/quote',
+          parameters: [
+            {
+              name: 'amount',
+              in: 'query',
+              required: true,
+              schema: { type: 'string', example: '1000000' },
+            },
+            { name: 'sourceChain', in: 'query', schema: { type: 'string', example: 'base' } },
+            { name: 'destinationChain', in: 'query', schema: { type: 'string', example: 'tempo' } },
+            { name: 'slippageBps', in: 'query', schema: { type: 'integer', example: 50 } },
+          ],
+          responses: [],
+        },
+        {
+          id: 'createroutestransfer',
+          security: [{ apiKey: [] }],
+          method: 'POST',
+          path: '/v1/routes/transfers',
+          parameters: [
+            {
+              name: 'idempotency-key',
+              in: 'header',
+              required: true,
+              schema: { type: 'string', example: 'transfer_example' },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: [{ mediaType: 'application/json', example: { quoteId: 'quote_example' } }],
+          },
+          responses: [],
+        },
+      ],
+    },
+  ],
 }

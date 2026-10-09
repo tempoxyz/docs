@@ -4,6 +4,7 @@ seoTitle: Tempo EVM | Tempo Docs
 description: Build stablecoin payments with dedicated payment capacity, stablecoin fees, fast finality, and native account and token controls.
 ---
 
+import { DocsLinkCards } from '../../components/DocsLinkCards'
 import { Cards, Card } from 'vocs'
 import { DocsProductOverview } from '../../components/DocsProductOverview'
 
@@ -20,10 +21,28 @@ Tempo is a blockchain for payments. Tempo EVM is its Ethereum-compatible executi
 
 </DocsProductOverview>
 
-The chain handles more of the work a payment application needs. Pay transaction fees in supported stablecoins, sponsor fees for customers, attach references to transfers, and give an application limited signing permissions. Native token contracts provide issuance and transfer controls, while payment lanes reserve capacity for eligible payments.
+Build wallets, payment applications, and financial services on Tempo EVM. It combines Ethereum’s smart contract model with infrastructure designed for moving money: stablecoin fees, fast finality, and dedicated capacity for eligible payments. Use it to accept customer deposits, send payouts, issue stablecoins, or build your own onchain application.
 
-For example, a payout service can send payments concurrently, cover transaction fees, and include an invoice reference with each transfer. Your application still decides who to pay and keeps its own records; Tempo executes the transfers and enforces the permissions you configure.
+Accounts, tokens, and transactions come with payment capabilities built in. Give customers passkey-based accounts, cover their fees, and automate payments with limited signing permissions. Issue tokens with configurable controls and exchange stablecoins through shared onchain liquidity. Start with these native capabilities, then use Solidity to add the logic your application needs.
 
+<span id="use-your-existing-tools" />
+<span id="try-a-walkthrough" />
+<span id="set-up-your-development-tools" />
+<span id="choose-your-tools" />
+<span id="build-wallet-support" />
+<span id="build-a-wallet" />
+<span id="work-with-tempo-partners" />
+<span id="inspect-transactions-and-run-infrastructure" />
+<span id="find-infrastructure" />
+<span id="contracts-and-infrastructure" />
+
+## Build on Tempo
+
+Start with a wallet integration, an interactive token walkthrough, or a Solidity contract. Use the setup guides to connect your application to Tempo.
+
+<DocsLinkCards collection="build" />
+
+Read the [protocol specifications](/docs/protocol) for the underlying execution rules.
 
 <span id="core-ideas" />
 <span id="accounts-and-payments" />
@@ -70,9 +89,9 @@ Start with a transfer or contract call, then add the capabilities your applicati
   </div>
   <div id="accounts-and-permissions" style={{ display: 'grid' }}>
     <Card
-      title="Accounts and permissions"
-      description="Sign with passkeys, delegate limited access, and revoke keys. Configure receive policies for accepted tokens and senders, with blocked payments held for recovery."
-      to="/docs/accounts"
+      title="Accounts and keys"
+      description="Use secp256k1, P-256, or WebAuthn signatures. Authorize access keys with spending limits and call scopes, or admin keys to manage authorization."
+      to="/docs/accounts/keys"
       icon="lucide:key-round"
     />
   </div>
@@ -101,44 +120,6 @@ Start with a transfer or contract call, then add the capabilities your applicati
     />
   </div>
 </Cards>
-
-<span id="use-your-existing-tools" />
-<span id="try-a-walkthrough" />
-<span id="set-up-your-development-tools" />
-<span id="choose-your-tools" />
-<span id="build-wallet-support" />
-<span id="build-a-wallet" />
-<span id="work-with-tempo-partners" />
-<span id="inspect-transactions-and-run-infrastructure" />
-<span id="find-infrastructure" />
-<span id="contracts-and-infrastructure" />
-
-## Build on Tempo
-
-Use Solidity, Foundry, Viem, and Wagmi. Standard EVM transactions and contracts work alongside Tempo’s native payment features; review the [EVM differences](/docs/quickstart/evm-compatibility) when porting an application. [Deploy a contract](/docs/network/contracts) or start with an interactive walkthrough:
-
-<Cards>
-  <Card
-    title="Browser payments"
-    description="Accounts · Fund a test account and add a wallet-approved payment form with Wagmi."
-    to="/docs/guide/payments/send-a-payment/browser"
-    icon="lucide:send"
-  />
-  <Card
-    title="Create a TIP-20 token"
-    description="Create a test stablecoin on Moderato and inspect the new token."
-    to="/docs/guide/issuance/create-a-stablecoin"
-    icon="lucide:coins"
-  />
-  <Card
-    title="Swap stablecoins"
-    description="Get a quote and swap test AlphaUSD and BetaUSD."
-    to="/docs/guide/stablecoin-dex/executing-swaps"
-    icon="lucide:arrow-left-right"
-  />
-</Cards>
-
-Find [RPC endpoints](/docs/quickstart/connection-details), choose an [API or SDK](/docs/tools), or read the [protocol specifications](/docs/protocol).
 
 <span id="explore-product-guides" />
 

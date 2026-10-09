@@ -16,7 +16,7 @@ Read stablecoin balances from their token contracts and use account activity to 
 
 Read indexed token balances with the Tempo API. Enter the account address, choose Moderato (`chainId=42431`), and click **Try**. The tool also provides request examples for your application.
 
-<OpenApi.Playground operationId="getAddressBalances" anchors={false} />
+<OpenApi.Playground operationId="getAddressBalances" query="chainId=42431" anchors={false} />
 
 For a direct read, use the [CLI, Viem, and Wagmi setup](/docs/accounts/examples#choose-your-tools). Set `TEMPO_ACCOUNT_ADDRESS` (CLI), `account` (Viem/Wagmi), or `account_address` (Python) to the address to inspect. Call Wagmi hooks inside a React component:
 
@@ -65,7 +65,7 @@ Use [account activity](/docs/api/activities) for indexed history and [transfers]
 
 Enter the same address and network below. Set `type` to `transfer` to list payments rather than other account activity:
 
-<OpenApi.Playground operationId="getAddressActivities" anchors={false} />
+<OpenApi.Playground operationId="getAddressActivities" query="chainId=42431&type=transfer" anchors={false} />
 
 Follow the [API pagination](/docs/api/pagination) fields for older activity. To query chain logs instead, use the [complete onchain examples](/docs/accounts/examples#onchain-balances-and-history).
 
@@ -77,7 +77,7 @@ For payment confirmation and reconciliation, follow [Receive payments](/docs/gui
 
 ### Available funds
 
-Use TIP-20 balances for spendable stablecoins. Tempo's `eth_getBalance` response is a [compatibility value](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks). Show [Earn positions](/docs/earn) and [Zone balances](/docs/zones) separately.
+Use TIP-20 balances for spendable stablecoins. Tempo's `eth_getBalance` response is a [compatibility value](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks), not a spendable stablecoin balance. Show [Earn positions](/docs/earn) and [Zone balances](/docs/zones) separately.
 
 ## Watch for changes
 

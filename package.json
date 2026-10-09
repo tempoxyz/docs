@@ -9,7 +9,7 @@
     "build": "node scripts/guard-vocs-config.mjs && pnpm run check:types && vite build && node --experimental-strip-types scripts/finalize-sitemap.ts",
     "check": "biome check --write --unsafe .",
     "check:anchors": "node --experimental-strip-types scripts/check-internal-anchors.ts",
-    "check:markdown": "node scripts/check-markdown-components.mjs",
+    "check:markdown": "node scripts/check-markdown-components.mjs && tsx scripts/check-ai-docs.ts",
     "check:types": "tsgo --project tsconfig.app.json --noEmit && tsgo --project tsconfig.node.json --noEmit",
     "preview": "node dist/preview.js",
     "search:benchmark": "bun search-benchmark/run.ts",

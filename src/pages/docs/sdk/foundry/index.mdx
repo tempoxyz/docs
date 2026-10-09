@@ -141,8 +141,8 @@ export VERIFIER_URL=https://contracts.tempo.xyz
 cast wallet new
 cast rpc tempo_fundAddress <YOUR_WALLET_ADDRESS> --rpc-url https://rpc.moderato.tempo.xyz
 
-# Run all tests on Tempo's testnet
-forge test
+# Run tests against a fork of Tempo testnet
+forge test --fork-url "$TEMPO_RPC_URL"
 
 # Deploy and verify a simple contract
 forge create src/Mail.sol:Mail \
@@ -192,16 +192,16 @@ forge script script/Deploy.s.sol \
   --private-key $PRIVATE_KEY
 ```
 
-Use a root key for `forge create`. Access keys can sign calls but not deployments.
+Use a root key for `forge create`. Access keys cannot sign a top-level contract-creation call.
 
 For more verification options including verifying existing contracts and API verification, see [Contract Verification](/docs/quickstart/verify-contracts).
 
 :::warning[Batch Transaction Rules]
 - **Atomic execution**: If any call reverts, the entire batch reverts
-- **Single CREATE allowed**: At most one contract deployment per batch
-- **CREATE must be first**: Deployment must be the first operation
+- **Single CREATE allowed**: At most one top-level contract-creation call per batch
+- **CREATE must be first**: A top-level contract-creation call must be the first operation
 - **Value must be zero**: Since Tempo has no native token, value must be 0
-- **Silent failures**: Calling a non-existent function without a fallback succeeds silently
+- **Check the destination**: A low-level call to an address with no code can succeed without doing anything. An unknown function on a deployed Solidity contract reverts unless its fallback accepts the call.
 :::
 
 ### Interact and debug Tempo contracts with `cast`
@@ -259,13 +259,12 @@ cast batch-send \
   --rpc-url $TEMPO_RPC_URL \
   --private-key $PRIVATE_KEY
 
-# Sponsored transaction (gasless for sender):
-# Step 1: Get the fee payer signature hash
-FEE_PAYER_HASH=$(cast mktx <CONTRACT_ADDRESS> 'increment()' --rpc-url $TEMPO_RPC_URL --private-key $SENDER_KEY --tempo.print-sponsor-hash)
-# Step 2: Sponsor signs the hash
-SPONSOR_SIG=$(cast wallet sign --private-key $SPONSOR_KEY "$FEE_PAYER_HASH" --no-hash)
-# Step 3: Send with sponsor signature
-cast send <CONTRACT_ADDRESS> 'increment()' --rpc-url $TEMPO_RPC_URL --private-key $SENDER_KEY --tempo.sponsor-signature "$SPONSOR_SIG"
+# Sponsored transaction using a local fee-payer signer (Foundry v1.8.5):
+# SPONSOR_KEY is the funded sponsor private key in your environment.
+SPONSOR_ADDRESS=$(cast wallet address --private-key "$SPONSOR_KEY")
+cast send <CONTRACT_ADDRESS> 'increment()' \
+  --rpc-url "$TEMPO_RPC_URL" --private-key "$SENDER_KEY" \
+  --tempo.sponsor "$SPONSOR_ADDRESS" --tempo.sponsor-signer env://SPONSOR_KEY
 
 # Send with 2D nonce (parallel tx submission):
 cast send <CONTRACT_ADDRESS> 'increment()' \
@@ -273,7 +272,7 @@ cast send <CONTRACT_ADDRESS> 'increment()' \
   --private-key $PRIVATE_KEY \
   --nonce 0 --tempo.nonce-key 1
 
-# Send with expiring nonce (time-bounded tx, max 30s):
+# Send with an expiring nonce and a 25-second validity window:
 VALID_BEFORE=$(($(date +%s) + 25))
 cast send <CONTRACT_ADDRESS> 'increment()' \
   --rpc-url $TEMPO_RPC_URL \
@@ -296,7 +295,7 @@ cast send <CONTRACT_ADDRESS> 'increment()' \
 
 If the access key will be used with passkey or WebAuthn signatures, pass `2` for `SignatureType`. `1` is only for raw P256 signatures.
 
-Access-key transactions cannot create contracts, so use a root key for deployments or other flows that perform `CREATE`.
+Access keys cannot sign top-level contract creation. They can call a factory that creates contracts internally when their call scopes permit that factory call.
 
 ### Local Tempo development with Anvil
 
@@ -347,14 +346,16 @@ The following flags are available for `cast` and `forge script` for Tempo-specif
 | `--tempo.fee-token <ADDRESS>` | Specify the TIP-20 token to pay transaction fees | `--tempo.fee-token 0x20c0...0001` |
 | `--tempo.nonce-key <KEY>` | 2D nonce key for parallel transaction submission | `--tempo.nonce-key 1` |
 | `--tempo.expiring-nonce` | Enable expiring nonce for time-bounded transactions | `--tempo.expiring-nonce` |
-| `--tempo.valid-before <TIMESTAMP>` | Unix timestamp before which tx must execute (max 30s from now) | `--tempo.valid-before 1704067200` |
+| `--tempo.valid-before <TIMESTAMP>` | Unix timestamp before which the transaction must execute; expiring-nonce windows depend on the network hardfork | `--tempo.valid-before 1704067200` |
 | `--tempo.valid-after <TIMESTAMP>` | Unix timestamp after which tx can execute | `--tempo.valid-after 1704067100` |
-| `--tempo.sponsor-signature <SIG>` | Pre-signed sponsor signature for gasless transactions | `--tempo.sponsor-signature 0x...` |
+| `--tempo.sponsor <ADDRESS>` | Sponsor address, required with a sponsor signer or signature | `--tempo.sponsor $SPONSOR_ADDRESS` |
+| `--tempo.sponsor-signer <SIGNER>` | Sign the exact sponsored transaction using a signer URI | `--tempo.sponsor-signer env://SPONSOR_KEY` |
+| `--tempo.sponsor-signature <SIG>` | Pre-signed sponsor signature; requires `--tempo.sponsor` | `--tempo.sponsor-signature 0x...` |
 | `--tempo.print-sponsor-hash` | Print fee payer signature hash and exit (for sponsor to sign) | `--tempo.print-sponsor-hash` |
 | `--tempo.access-key <KEY>` | Private key for delegated signing via access key | `--tempo.access-key $ACCESS_KEY_PRIVATE_KEY` |
 | `--tempo.root-account <ADDRESS>` | Root account address when using an access key | `--tempo.root-account $ROOT_ADDRESS` |
 
-Ledger and Trezor wallets are not yet compatible with any `--tempo.*` option.
+Signer support depends on the transaction role and Foundry release. In v1.8.5, `--tempo.sponsor-signer` accepts Ledger and Trezor signer URIs; this does not imply that every hardware wallet can sign a Tempo sender transaction.
 
 ## `cast keychain` for Tempo access keys
 

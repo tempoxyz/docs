@@ -116,10 +116,12 @@ Use all three controls together:
 
 Spending limits cover direct TIP-20 `transfer`, `transferWithMemo`, and `approve` calls. `transferFrom` and token movements initiated by another contract fall outside these checks, so pair budgets with call scopes.
 
+Access-key-signed transactions cannot contain a top-level contract-creation call. A call to a factory can create contracts internally when the key's call scopes permit that factory call.
+
 The example permits `transfer(address,uint256)`. Add a scope for each additional function your integration needs.
 
 ## Change an existing budget
 
-The root or an active admin key can call `client.accessKey.updateLimit` with `accessKey`, `token`, and `limit`. Wait for its transaction receipt before showing the new budget as active. Updating a limit resets both its maximum and remaining amount; it preserves the configured period and current period end.
+The root or an active admin key can call `client.accessKey.updateLimit` with `accessKey`, `token`, and `limit`. Wait for its transaction receipt before showing the new budget as active. Updating a limit sets both its maximum and remaining amount to the new limit; it preserves the configured period and current period end.
 
-For scope changes and exact enforcement rules, see the [Account Keychain specification](/docs/protocol/transactions/AccountKeychain). Access-key-signed transactions cannot create contracts, including through factory contracts; deployment requires the root key.
+For scope changes and exact enforcement rules, see the [Account Keychain specification](/docs/protocol/transactions/AccountKeychain).

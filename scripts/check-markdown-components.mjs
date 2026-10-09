@@ -83,6 +83,7 @@ const generatedComponents = new Set()
 const generatedEsmFiles = new Set()
 const generatedExpressions = new Set()
 const generatedPresentationElements = []
+const generatedPresentationAttributes = []
 for (const file of generatedFiles) {
   const content = await readFile(file, 'utf8')
   const parseableContent = maskHtmlComments(content)
@@ -92,6 +93,15 @@ for (const file of generatedFiles) {
     if (node.type === 'mdxFlowExpression' || node.type === 'mdxTextExpression')
       generatedExpressions.add(file)
     if (node.type !== 'mdxJsxFlowElement' && node.type !== 'mdxJsxTextElement') return
+    for (const attribute of node.attributes ?? []) {
+      if (
+        attribute.type === 'mdxJsxExpressionAttribute' ||
+        (attribute.value && typeof attribute.value === 'object')
+      )
+        generatedExpressions.add(file)
+      if (attribute.name === 'style' || attribute.name === 'className')
+        generatedPresentationAttributes.push({ file, name: attribute.name })
+    }
     if (/^(?:meta|script|style|title)$/.test(node.name ?? ''))
       generatedPresentationElements.push({ file, name: node.name })
     if (!/^[A-Z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)*$/.test(node.name ?? '')) return
@@ -103,7 +113,8 @@ if (
   generatedComponents.size > 0 ||
   generatedEsmFiles.size > 0 ||
   generatedExpressions.size > 0 ||
-  generatedPresentationElements.length > 0
+  generatedPresentationElements.length > 0 ||
+  generatedPresentationAttributes.length > 0
 ) {
   console.error('Generated Markdown syntax audit failed.')
   for (const name of generatedComponents) console.error(`- ${name}: unresolved component`)
@@ -111,6 +122,8 @@ if (
   for (const file of generatedExpressions) console.error(`- ${file}: executable expression`)
   for (const { file, name } of generatedPresentationElements)
     console.error(`- ${file}: presentation-only <${name}> element`)
+  for (const { file, name } of generatedPresentationAttributes)
+    console.error(`- ${file}: presentation-only ${name} attribute`)
   process.exit(1)
 }
 

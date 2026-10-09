@@ -1,43 +1,31 @@
 ---
 title: Integrate stablecoin payments
 seoTitle: Integrate Stablecoin Payments | Tempo Docs
-description: Build a payment flow that sends TIP-20 stablecoins, verifies delivery, and records customer and invoice references.
+description: Find the guides for sending, receiving, and reconciling stablecoin payments in your application.
 ---
 
 # Integrate stablecoin payments
 
-Build a payment flow from the first transfer through reconciliation. Payments belong to [Accounts](/docs/accounts). Start with the [quickstart](/get-started/quickstart) for a test payment, then use this flow to connect transfers to your application records.
+Send stablecoins, collect deposits, and confirm payments in your application. If you are still deciding where funds should live and who signs, start with [Choose an account model](/docs/accounts/integration).
 
 <span id="core-payment-flows" />
+<span id="build-the-payment-flow" />
 
-## Build the payment flow
+## Send and receive payments
 
-:::::steps
-
-### Choose an account and token
-
-[Create or connect an account](/docs/accounts) and choose the [stablecoin](/get-started/stablecoins) your application will use. Record the network and token contract address alongside the payment amount and recipient.
-
-### Send a payment
-
-Use the [transfer guide](/docs/guide/payments/send-a-payment) to submit a payment and read its receipt. Add a [memo](/docs/guide/payments/transfer-memos) if the recipient needs an invoice or order reference.
-
-### Confirm receipt
-
-Follow [Receive payments](/docs/guide/payments/accept-a-payment) to read transfer events and verify the token, amount, and recipient. Handle [blocked receipts](/docs/guide/payments/configure-receive-policies#monitor-blocked-receipts) before treating a successful transaction as delivery.
-
-### Reconcile the payment
-
-Match the memo to your records, or use [customer deposit addresses](/docs/guide/payments/virtual-addresses) to attribute incoming payments while receiving funds in one registered account.
-
-:::::
+| Task | Guide |
+| --- | --- |
+| Fund an account | [Choose a funding path](/docs/guide/getting-funds). |
+| Send stablecoins | [Send payments](/docs/guide/payments/send-a-payment), including references and batches. |
+| Collect and reconcile payments | [Receive payments](/docs/guide/payments/accept-a-payment), verify delivery, and record each payment once. |
+| Identify customer deposits | [Customer deposit addresses](/docs/guide/payments/virtual-addresses) attribute payments into a shared account. |
+| Move funds between networks | [Routes](/docs/routes) connects Tempo with other networks. |
 
 <span id="payment-controls" />
+<span id="add-payment-controls" />
 
-## Add payment controls
+## Configure payment behavior
 
-- [Sponsor fees](/docs/guide/payments/sponsor-user-fees) or [choose a supported fee token](/docs/guide/payments/pay-fees-in-any-stablecoin).
-- [Batch payments](/docs/guide/payments/send-a-payment#batch-payment-transactions) in one transaction, or [submit independent transactions in parallel](/docs/guide/payments/send-parallel-transactions).
+- [Sponsor fees](/docs/guide/payments/sponsor-user-fees) or [choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin).
+- [Send independent payments in parallel](/docs/guide/payments/send-parallel-transactions) when each payment needs its own receipt.
 - [Configure receive policies](/docs/guide/payments/configure-receive-policies) to choose which tokens and senders an account accepts.
-
-Use [Routes](/docs/routes) when funds need to move between Tempo and another network.

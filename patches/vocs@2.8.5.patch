@@ -1045,3 +1045,347 @@ index 0000000000000000000000000000000000000000..33a3e4485f2750e181e5471451f94981
 +
 +  return active.path === currentPath ? active.id : null
 +}
+diff --git a/dist/internal/openapi/query-presets.d.ts b/dist/internal/openapi/query-presets.d.ts
+new file mode 100644
+index 00000000..6198c7fe
+--- /dev/null
++++ b/dist/internal/openapi/query-presets.d.ts
+@@ -0,0 +1,4 @@
++import type { IrOperation } from './parser.js';
++export type QueryPreset = { method: string; path: string; query: string };
++export declare function operationWithQuery(operation: IrOperation, query?: string): IrOperation;
++export declare function documentWithQuery(document: Record<string, unknown>, preset?: QueryPreset): Record<string, unknown>;
+diff --git a/dist/internal/openapi/query-presets.js b/dist/internal/openapi/query-presets.js
+new file mode 100644
+index 00000000..39cecdb1
+--- /dev/null
++++ b/dist/internal/openapi/query-presets.js
+@@ -0,0 +1,39 @@
++function presetParameters(parameters, query) {
++    const values = new URLSearchParams(query);
++    return parameters.map((parameter) => {
++        if (parameter.in !== 'query' || !parameter.name || !values.has(parameter.name))
++            return parameter;
++        const raw = values.get(parameter.name);
++        const value = parameter.schema?.type === 'array' ? raw.split(',') : raw;
++        const { example: _example, ...rest } = parameter;
++        return {
++            ...rest,
++            // Scalar reads parameter examples and needs optional rows explicitly enabled.
++            examples: { default: { value, 'x-disabled': false } },
++            // Vocs generates snippets from schema examples. Neither changes API defaults.
++            schema: { ...parameter.schema, example: value, examples: [value] },
++        };
++    });
++}
++/** Apply editable query examples to one embed without changing its shared spec. */
++export function operationWithQuery(operation, query) {
++    if (!query)
++        return operation;
++    return { ...operation, parameters: presetParameters(operation.parameters, query) };
++}
++/** Prepare the isolated Scalar document used by this playground instance. */
++export function documentWithQuery(document, preset) {
++    if (!preset?.query)
++        return document;
++    const copy = structuredClone(document);
++    const paths = copy.paths;
++    const path = paths?.[preset.path];
++    const operation = path?.[preset.method.toLowerCase()];
++    if (!operation)
++        return copy;
++    for (const owner of [path, operation]) {
++        if (Array.isArray(owner.parameters))
++            owner.parameters = presetParameters(owner.parameters, preset.query);
++    }
++    return copy;
++}
+diff --git a/dist/react/internal/openapi/Playground.client.d.ts b/dist/react/internal/openapi/Playground.client.d.ts
+index 1d656d2e..0dcf91fa 100644
+--- a/dist/react/internal/openapi/Playground.client.d.ts
++++ b/dist/react/internal/openapi/Playground.client.d.ts
+@@ -1,3 +1,4 @@
++import type { QueryPreset } from '../../../internal/openapi/query-presets.js';
+ import * as React from 'react';
+ /**
+  * Mounts the Scalar API client modal once per spec and exposes an `open`
+@@ -11,6 +12,8 @@ export declare namespace PlaygroundProvider {
+         children: React.ReactNode;
+         /** Spec mount path; scopes the persisted auth (e.g. `/api`). */
+         mount?: string | undefined;
++        /** Editable query values scoped to this provider instance. */
++        queryPreset?: QueryPreset | undefined;
+     };
+ }
+ /**
+diff --git a/dist/react/internal/openapi/Playground.client.js b/dist/react/internal/openapi/Playground.client.js
+index 8b2cf490..08c49715 100644
+--- a/dist/react/internal/openapi/Playground.client.js
++++ b/dist/react/internal/openapi/Playground.client.js
+@@ -3,6 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+ import * as React from 'react';
+ import { createPortal } from 'react-dom';
+ import LucidePlay from '~icons/lucide/play';
++import { documentWithQuery } from '../../../internal/openapi/query-presets.js';
+ import { useColorScheme } from '../../useColorScheme.js';
+ import * as Auth from './auth.js';
+ const PlaygroundContext = React.createContext(null);
+@@ -13,7 +14,8 @@ const PlaygroundContext = React.createContext(null);
+  * server rendering.
+  */
+ export function PlaygroundProvider(props) {
+-    const { children, mount: specMount = '/' } = props;
++    const { children, mount: specMount = '/', queryPreset } = props;
++    const presetKey = queryPreset ? JSON.stringify(queryPreset) : '';
+     const containerRef = React.useRef(null);
+     // biome-ignore lint/suspicious/noExplicitAny: Scalar's modal type lives in a client-only module.
+     const modalRef = React.useRef(null);
+@@ -39,7 +41,7 @@ export function PlaygroundProvider(props) {
+             storeRef.current = null;
+             initializeRef.current = null;
+         };
+-    }, [specMount]);
++    }, [specMount, presetKey]);
+     // When another playground instance (another page/tab) persists new
+     // credentials, load them into this live store so its "Try" stays in sync
+     // without reopening the modal.
+@@ -84,7 +86,15 @@ export function PlaygroundProvider(props) {
+             });
+             await store.addDocument({
+                 name: 'default',
+-                ...('url' in client ? { url: client.url } : { document: client.content }),
++                ...('url' in client
++                    ? queryPreset
++                        ? { document: documentWithQuery(await fetch(client.url).then((response) => {
++                                if (!response.ok)
++                                    throw new Error(`Failed to load OpenAPI spec: ${response.status}`);
++                                return response.json();
++                            }), queryPreset) }
++                        : { url: client.url }
++                    : { document: documentWithQuery(client.content, queryPreset) }),
+             });
+             if (generation !== generationRef.current)
+                 return null;
+@@ -109,7 +119,7 @@ export function PlaygroundProvider(props) {
+         });
+         initializeRef.current = pending;
+         return pending;
+-    }, [specMount]);
++    }, [specMount, presetKey]);
+     const open = React.useCallback((operation) => {
+         void initialize().then((modal) => modal?.open({
+             method: operation.method.toLowerCase(),
+@@ -170,4 +180,3 @@ export function TestRequestButton(props) {
+     const context = React.useContext(PlaygroundContext);
+     return (_jsxs("button", { type: "button", "data-v-openapi-action": true, "data-v-openapi-test-request": true, disabled: !context || context.loading, onClick: () => context?.open({ method, path, example }), children: [_jsx(LucidePlay, { "data-v-openapi-action-icon": true }), "Try"] }));
+ }
+-//# sourceMappingURL=Playground.client.js.map
+\ No newline at end of file
+diff --git a/dist/react/internal/openapi/PlaygroundStandalone.d.ts b/dist/react/internal/openapi/PlaygroundStandalone.d.ts
+index 3e12168d..980e4117 100644
+--- a/dist/react/internal/openapi/PlaygroundStandalone.d.ts
++++ b/dist/react/internal/openapi/PlaygroundStandalone.d.ts
+@@ -50,6 +50,8 @@ export declare namespace Playground {
+          * @default false
+          */
+         hideQueryParams?: boolean | undefined;
++        /** Editable query values for this embed, e.g. `chainId=42431`. */
++        query?: string | undefined;
+     };
+ }
+ //# sourceMappingURL=PlaygroundStandalone.d.ts.map
+\ No newline at end of file
+diff --git a/dist/react/internal/openapi/PlaygroundStandalone.js b/dist/react/internal/openapi/PlaygroundStandalone.js
+index 0ef0a76d..f63270c7 100644
+--- a/dist/react/internal/openapi/PlaygroundStandalone.js
++++ b/dist/react/internal/openapi/PlaygroundStandalone.js
+@@ -1,5 +1,6 @@
+ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+ import { specs } from 'virtual:vocs/openapi';
++import { operationWithQuery } from '../../../internal/openapi/query-presets.js';
+ import { codeSamples, responseSamples } from '../../../internal/openapi/sample.js';
+ import { CodeSample } from './CodeSample.client.js';
+ import { findOperation } from './find-operation.js';
+@@ -35,7 +36,8 @@ export function Playground(props) {
+     const ir = specs[mount];
+     if (!ir)
+         return _jsxs("p", { children: ["No OpenAPI spec is mounted at ", mount, "."] });
+-    const operation = findOperation(ir, props);
++    const found = findOperation(ir, props);
++    const operation = found && operationWithQuery(found, props.query);
+     if (!operation)
+         return (_jsxs("p", { children: ["No matching operation found in the API mounted at ", mount, ". Pass an ", _jsx("code", { children: "operationId" }), ", or a ", _jsx("code", { children: "method" }), " and ", _jsx("code", { children: "path" }), "."] }));
+     const samples = codeSamples(operation, ir.servers[0]?.url, {
+@@ -44,6 +46,5 @@ export function Playground(props) {
+     if (samples.length === 0)
+         return null;
+     const responses = responseSamples(operation);
+-    return (_jsx("div", { "data-v-openapi": true, children: _jsx(PlaygroundProvider, { mount: ir.path, children: _jsx(CodeSample, { samples: samples, responses: responses, anchors: props.anchors, action: _jsx(TestRequestButton, { method: operation.method, path: operation.path, example: operation.rpcExample }) }) }) }));
++    return (_jsx("div", { "data-v-openapi": true, children: _jsx(PlaygroundProvider, { mount: ir.path, queryPreset: props.query ? { method: operation.method, path: operation.path, query: props.query } : undefined, children: _jsx(CodeSample, { samples: samples, responses: responses, anchors: props.anchors, action: _jsx(TestRequestButton, { method: operation.method, path: operation.path, example: operation.rpcExample }) }) }) }));
+ }
+-//# sourceMappingURL=PlaygroundStandalone.js.map
+\ No newline at end of file
+diff --git a/src/internal/openapi/query-presets.ts b/src/internal/openapi/query-presets.ts
+new file mode 100644
+index 00000000..6ee138e2
+--- /dev/null
++++ b/src/internal/openapi/query-presets.ts
+@@ -0,0 +1,53 @@
++import type { IrOperation } from './parser.js'
++
++export type QueryPreset = { method: string; path: string; query: string }
++
++type Parameter = {
++  name?: string
++  in?: string
++  schema?: Record<string, unknown>
++}
++
++function presetParameters<T extends Parameter>(parameters: T[], query: string): T[] {
++  const values = new URLSearchParams(query)
++  return parameters.map((parameter) => {
++    if (parameter.in !== 'query' || !parameter.name || !values.has(parameter.name))
++      return parameter
++    const raw = values.get(parameter.name)!
++    const value = parameter.schema?.type === 'array' ? raw.split(',') : raw
++    const { example: _example, ...rest } = parameter
++    return {
++      ...rest,
++      // Scalar reads parameter examples and needs optional rows explicitly enabled.
++      examples: { default: { value, 'x-disabled': false } },
++      // Vocs generates snippets from schema examples. Neither changes API defaults.
++      schema: { ...parameter.schema, example: value, examples: [value] },
++    } as T
++  })
++}
++
++/** Apply editable query examples to one embed without changing its shared spec. */
++export function operationWithQuery(operation: IrOperation, query?: string): IrOperation {
++  if (!query) return operation
++  return { ...operation, parameters: presetParameters(operation.parameters, query) }
++}
++
++/** Prepare the isolated Scalar document used by this playground instance. */
++export function documentWithQuery(
++  document: Record<string, unknown>,
++  preset?: QueryPreset,
++): Record<string, unknown> {
++  if (!preset?.query) return document
++  const copy = structuredClone(document)
++  const paths = copy.paths as Record<string, Record<string, unknown>> | undefined
++  const path = paths?.[preset.path]
++  const operation = path?.[preset.method.toLowerCase()] as
++    | Record<string, unknown>
++    | undefined
++  if (!operation) return copy
++  for (const owner of [path!, operation]) {
++    if (Array.isArray(owner.parameters))
++      owner.parameters = presetParameters(owner.parameters, preset.query)
++  }
++  return copy
++}
+diff --git a/src/react/internal/openapi/Playground.client.tsx b/src/react/internal/openapi/Playground.client.tsx
+index ff2d8240..921f3a9d 100644
+--- a/src/react/internal/openapi/Playground.client.tsx
++++ b/src/react/internal/openapi/Playground.client.tsx
+@@ -3,6 +3,7 @@
+ import * as React from 'react'
+ import { createPortal } from 'react-dom'
+ import LucidePlay from '~icons/lucide/play'
++import { documentWithQuery, type QueryPreset } from '../../../internal/openapi/query-presets.js'
+ import { useColorScheme } from '../../useColorScheme.js'
+ import * as Auth from './auth.js'
+ 
+@@ -17,7 +18,8 @@ const PlaygroundContext = React.createContext<{ open: OpenFn; loading: boolean }
+  * server rendering.
+  */
+ export function PlaygroundProvider(props: PlaygroundProvider.Props) {
+-  const { children, mount: specMount = '/' } = props
++  const { children, mount: specMount = '/', queryPreset } = props
++  const presetKey = queryPreset ? JSON.stringify(queryPreset) : ''
+   const containerRef = React.useRef<HTMLDivElement>(null)
+   // biome-ignore lint/suspicious/noExplicitAny: Scalar's modal type lives in a client-only module.
+   const modalRef = React.useRef<any>(null)
+@@ -43,7 +45,7 @@ export function PlaygroundProvider(props: PlaygroundProvider.Props) {
+       storeRef.current = null
+       initializeRef.current = null
+     }
+-  }, [specMount])
++  }, [specMount, presetKey])
+ 
+   // When another playground instance (another page/tab) persists new
+   // credentials, load them into this live store so its "Try" stays in sync
+@@ -89,7 +91,14 @@ export function PlaygroundProvider(props: PlaygroundProvider.Props) {
+         })
+         await store.addDocument({
+           name: 'default',
+-          ...('url' in client ? { url: client.url } : { document: client.content }),
++          ...('url' in client
++            ? queryPreset
++              ? { document: documentWithQuery(await fetch(client.url).then((response) => {
++                  if (!response.ok) throw new Error(`Failed to load OpenAPI spec: ${response.status}`)
++                  return response.json()
++                }), queryPreset) }
++              : { url: client.url }
++            : { document: documentWithQuery(client.content, queryPreset) }),
+         })
+         if (generation !== generationRef.current) return null
+ 
+@@ -112,7 +121,7 @@ export function PlaygroundProvider(props: PlaygroundProvider.Props) {
+       })
+     initializeRef.current = pending
+     return pending
+-  }, [specMount])
++  }, [specMount, presetKey])
+ 
+   const open = React.useCallback<OpenFn>(
+     (operation) => {
+@@ -171,6 +180,8 @@ export declare namespace PlaygroundProvider {
+     children: React.ReactNode
+     /** Spec mount path; scopes the persisted auth (e.g. `/api`). */
+     mount?: string | undefined
++    /** Editable query values scoped to this provider instance. */
++    queryPreset?: QueryPreset | undefined
+   }
+ }
+ 
+diff --git a/src/react/internal/openapi/PlaygroundStandalone.tsx b/src/react/internal/openapi/PlaygroundStandalone.tsx
+index db348a0c..f35e4d8a 100644
+--- a/src/react/internal/openapi/PlaygroundStandalone.tsx
++++ b/src/react/internal/openapi/PlaygroundStandalone.tsx
+@@ -1,4 +1,5 @@
+ import { specs } from 'virtual:vocs/openapi'
++import { operationWithQuery } from '../../../internal/openapi/query-presets.js'
+ import { codeSamples, responseSamples } from '../../../internal/openapi/sample.js'
+ import { CodeSample } from './CodeSample.client.js'
+ import { findOperation } from './find-operation.js'
+@@ -41,7 +42,8 @@ export function Playground(props: Playground.Props) {
+   const ir = specs[mount]
+   if (!ir) return <p>No OpenAPI spec is mounted at {mount}.</p>
+ 
+-  const operation = findOperation(ir, props)
++  const found = findOperation(ir, props)
++  const operation = found && operationWithQuery(found, props.query)
+   if (!operation)
+     return (
+       <p>
+@@ -58,7 +60,10 @@ export function Playground(props: Playground.Props) {
+ 
+   return (
+     <div data-v-openapi>
+-      <PlaygroundProvider mount={ir.path}>
++      <PlaygroundProvider
++        mount={ir.path}
++        queryPreset={props.query ? { method: operation.method, path: operation.path, query: props.query } : undefined}
++      >
+         <CodeSample
+           samples={samples}
+           responses={responses}
+@@ -107,5 +112,7 @@ export declare namespace Playground {
+      * @default false
+      */
+     hideQueryParams?: boolean | undefined
++    /** Editable query values for this embed, e.g. `chainId=42431`. */
++    query?: string | undefined
+   }
+ }

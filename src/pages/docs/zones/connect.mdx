@@ -42,7 +42,19 @@ Ask for the RPC endpoint, chain ID, portal address, enabled assets, supported SD
 
 For account-scoped Zone RPC, sign an authorization token with the account key and send it in the `X-Authorization-Token` header on every request. This token authenticates RPC requests; it does not replace signatures on transactions or credentials required to reach the endpoint.
 
-Use the deployment's signing tooling and follow the [authorization token format](/docs/protocol/zones/rpc#authorization-tokens) for domain separation, chain ID, issuance, and expiry. Renew credentials before they expire.
+With Viem, use your application's [Tempo account signer](/docs/accounts/keys) and the [Zone chain configuration](/docs/zones/examples). Set `ZONE_ID` to the operator-provided Zone ID. This signs locally; it does not submit a transaction.
+
+```ts [Viem]
+import { createClient } from 'viem/tempo'
+import { zoneChain } from './zone.config'
+const client = createClient({ account, chain: zoneChain })
+const { token } = await client.zone.signAuthorizationToken({
+  zoneId: Number(process.env.ZONE_ID),
+  expiresAt: Math.floor(Date.now() / 1000) + 3600,
+})
+```
+
+Use the returned `token` as `ZONE_AUTH_TOKEN`. Keep it private and renew it before expiry. Other signers must follow the [authorization token format](/docs/protocol/zones/rpc#authorization-tokens); confirm the operator's maximum lifetime.
 
 <span id="confirm-the-network" />
 

@@ -9,7 +9,7 @@ const sectionLabels = [
   'Machine Payments',
   'Tempo EVM',
 ]
-const utilityLabels = ['Ecosystem']
+const utilityLabels = ['Partners']
 const externalTools = [
   ['MPP', 'https://mpp.dev/'],
   ['Mercator', 'https://mercator.sh/'],
@@ -69,7 +69,6 @@ test('seven sections expose product tasks and expandable developer chapters', as
         '/docs/accounts/balances',
         '/docs/guide/payments/send-a-payment',
         '/docs/guide/payments/accept-a-payment',
-        '/docs/accounts/keys',
         '/docs/accounts/integration',
         '/docs/accounts/examples',
         '/docs/guide/payments/send-a-payment/browser',
@@ -216,11 +215,11 @@ for (const section of [
     paths: ['/docs/sdk', '/docs/cli'],
   },
   {
-    label: 'Ecosystem',
-    overview: '/docs/ecosystem',
+    label: 'Partners',
+    overview: '/docs/partners',
     paths: [
-      '/docs/ecosystem/wallets',
-      '/docs/ecosystem/bridges#coinbase',
+      '/docs/partners/wallets',
+      '/docs/partners/bridges#coinbase',
       '/docs/guide/bridge-relay',
     ],
   },
@@ -395,9 +394,9 @@ test('Tools is a keyboard-accessible utility with SDKs and external services', a
     await expect(link).toHaveAttribute('rel', /noopener/)
     await expect(link).toHaveAttribute('rel', /noreferrer/)
   }
-  await article.locator('a[href="/docs/ecosystem"]').click()
+  await article.locator('a[href="/docs/partners"]').click()
   await expect(page).toHaveURL(/\/docs\/ecosystem\/?$/)
-  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Ecosystem')
+  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Partners')
 })
 
 for (const path of ['/', '/blog']) {
@@ -713,7 +712,7 @@ test('mobile sidebars keep useful product guides visible', async ({ page }) => {
   await expect(
     drawer.locator('a[href="/docs/guide/payments/send-a-payment/examples"]'),
   ).toHaveCount(0)
-  for (const label of ['Payment controls', 'Key management']) {
+  for (const label of ['Payment controls']) {
     const disclosure = drawer.locator('summary').filter({ hasText: new RegExp(`^${label}$`) })
     await expect(disclosure.locator('..')).toHaveJSProperty('open', false)
   }
@@ -899,7 +898,7 @@ test('developer chapters expand in place and retain their tree across client nav
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
   const controls = sidebar.getByRole('button')
   const tokens = developerDisclosure(sidebar, 'TIP-20 Tokens', false)
-  const wallets = developerDisclosure(sidebar, 'Wallets', false)
+  const wallets = developerDisclosure(sidebar, 'Accounts and keys', false)
   const tokenIntro = sidebar.locator('a[href="/docs/network/tokens"]')
   const tokenLists = sidebar.locator('a[href="/docs/quickstart/tokenlist"]')
   await expect(tokens).toBeVisible()
@@ -968,7 +967,7 @@ for (const mobile of [false, true]) {
       name: 'wallet integration',
       section: 'Tempo EVM',
       path: '/docs/quickstart/wallet-developers',
-      group: 'Wallets',
+      group: 'Accounts and keys',
       sibling: '/docs/quickstart/tokenlist',
       unrelated: '/docs/guide/issuance/manage-stablecoin',
     },
@@ -1001,9 +1000,9 @@ for (const mobile of [false, true]) {
     },
     {
       name: 'account keychain reference',
-      section: 'Accounts',
+      section: 'Tempo EVM',
       path: '/docs/protocol/transactions/AccountKeychain',
-      group: 'Key management',
+      group: 'Accounts and keys',
       sibling: '/docs/accounts/access-keys',
       unrelated: '/docs/guide/payments/transfer-memos',
       guide: '/docs/accounts/access-keys',

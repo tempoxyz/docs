@@ -9,7 +9,7 @@ import { OpenApi, Tabs, Tab } from 'vocs'
 
 # Tempo JSON-RPC API
 
-The Tempo API exposes a **JSON-RPC entrypoint** for raw, node-level chain access alongside its REST and Indexer surfaces. Through it, Tempo nodes serve all standard [Ethereum JSON-RPC methods](https://ethereum.org/developers/docs/apis/json-rpc/) (`eth_`, `net_`, `web3_`, `txpool_`, `trace_`, `debug_`) plus Tempo-specific namespaces for fork scheduling, consensus data, and node administration.
+The Tempo API exposes a **JSON-RPC entrypoint** for raw, node-level chain access alongside its REST and Indexer surfaces. Use it for [Ethereum-compatible JSON-RPC methods](https://ethereum.org/developers/docs/apis/json-rpc/) and Tempo-specific chain queries. Method availability depends on the endpoint; debug and administration methods may require your own node.
 
 Point any Ethereum-compatible client at the hosted entrypoint, or [run your own node](/docs/guide/node/rpc):
 

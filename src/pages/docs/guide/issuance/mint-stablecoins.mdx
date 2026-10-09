@@ -386,7 +386,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 If your token has a supply cap set, any `mint()` or `mintWithMemo()` call that would exceed the cap will revert with `SupplyCapExceeded()`. You must either:
 - Burn tokens to reduce total supply below the cap
 - Increase the supply cap (requires `DEFAULT_ADMIN_ROLE`)
-- Remove the cap entirely by setting it to `type(uint256).max`
+- Set the largest supported cap with `type(uint128).max` (2¹²⁸ − 1 base units)
 
 Use [`getMetadata`](https://viem.sh/tempo/actions/token.getMetadata) to check your token's total supply before minting.
 

@@ -43,7 +43,7 @@ Use the supported interface to submit the withdrawal through `ZoneOutbox`. Save 
 
 The operator includes the withdrawal in a batch, the portal accepts the batch, and the withdrawal is processed on Tempo. Keep it pending until the destination delivery is confirmed.
 
-The hosted [Zone withdrawal status API](/docs/api/zones) can report parent-chain outcomes. Its `zoneStatus: completed` is a checkpoint signal, not proof that a refund was delivered.
+The hosted [Zone withdrawal status API](/docs/api/zones) can report parent-chain outcomes. Its `zoneStatus: completed` is a checkpoint signal; check the delivery outcome and any refund separately.
 
 :::::
 

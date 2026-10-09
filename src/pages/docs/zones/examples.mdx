@@ -10,18 +10,17 @@ Configure the authenticated client used in the Zone guides. These examples run o
 
 ## Configure Wagmi for a Zone
 
-Install `@wagmi/core` and `viem` with `pnpm add @wagmi/core viem`. Get the Zone's chain ID, RPC URL, and signed authorization token from [Connect](/docs/zones/connect). Set `ZONE_CHAIN_ID`, `ZONE_RPC_URL`, and `ZONE_AUTH_TOKEN` in your environment.
+Install `@wagmi/core` and `viem` with `pnpm add @wagmi/core viem`. Get the Zone's chain ID, RPC URL, and signed authorization token from [Connect](/docs/zones/connect). Set `ZONE_CHAIN_ID`, `ZONE_PARENT_CHAIN_ID`, `ZONE_RPC_URL`, and `ZONE_AUTH_TOKEN` in your environment. The parent chain ID is the public Tempo network that hosts the portal (`4217` for mainnet or `42431` for Moderato).
 
 Save this as `zone.config.ts` in an ESM project. It configures reads against the operator-provided Zone, without adding a wallet connector or signing account.
 
 ```ts [zone.config.ts]
 import { createConfig, http } from '@wagmi/core'
-import { defineChain } from 'viem'
-import { tempo } from 'viem/chains'
+import { Zone } from 'viem/tempo'
 
 const rpcUrl = process.env.ZONE_RPC_URL!
-const zoneChain = defineChain({
-  ...tempo,
+export const zoneChain = Zone.from({
+  sourceId: Number(process.env.ZONE_PARENT_CHAIN_ID),
   id: Number(process.env.ZONE_CHAIN_ID),
   name: 'Tempo Zone',
   rpcUrls: { default: { http: [rpcUrl] } },

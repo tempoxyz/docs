@@ -23,8 +23,8 @@ Not all methods listed below are available on public endpoints. Method availabil
 |---|---|
 | `tempo_forkSchedule` | All Tempo nodes |
 | `tempo_fundAddress` | Faucet-enabled testnet endpoints only |
-| `consensus_*` | Validator nodes only |
-| `consensus_subscribe` | Validator nodes over WebSocket only |
+| `consensus_*` | Validators and certified follower RPC nodes with the namespace enabled |
+| `consensus_subscribe` | Nodes serving certified consensus data, over WebSocket |
 | `admin_validatorKey` | Self-hosted nodes with `admin` API enabled |
 
 ## Tempo-specific `tempo_` namespace
@@ -55,7 +55,7 @@ Each `ForkInfo`:
 cast rpc tempo_forkSchedule --rpc-url https://rpc.tempo.xyz
 ```
 
-**Example response:**
+**Historical example response (T3):**
 
 ```json
 {
@@ -91,7 +91,7 @@ cast rpc tempo_fundAddress 0xYOUR_ADDRESS \
 
 ## Tempo consensus `consensus_` namespace
 
-Available on validator nodes only. Provides real-time consensus state for explorers, bridges, and indexers.
+Available on validators and RPC nodes following certified consensus data when the `consensus` namespace is enabled. Provides consensus state for explorers, bridges, and indexers.
 
 ### `consensus_getFinalization`
 

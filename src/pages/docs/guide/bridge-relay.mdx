@@ -48,13 +48,13 @@ For ERC-20 tokens, the quote response includes any required approval steps autom
 
 ### Using curl + cast (Foundry)
 
-This example bridges USDC.e (Bridged USDC) from Base to Tempo. Replace the currency addresses and chain IDs for other tokens or routes.
+This example bridges native USDC on Base to USDC.e (Bridged USDC) on Tempo. Replace the currency addresses and chain IDs for other tokens or routes.
 
 :::::steps
 
 ### Get a quote
 
-Replace `<YOUR_ADDRESS>` with your wallet address and `<AMOUNT>` with the amount in base units (e.g. `1000000` for 1 USDC.e with 6 decimals).
+Replace `<YOUR_ADDRESS>` with your wallet address and `<AMOUNT>` with the amount in base units (e.g. `1000000` for 1 USDC with 6 decimals).
 
 ```bash
 curl -X POST "https://api.relay.link/quote/v2" \
@@ -105,12 +105,12 @@ Poll the status endpoint with the `requestId` from the quote response:
 curl "https://api.relay.link/intents/status/v3?requestId=<REQUEST_ID>"
 ```
 
-Status values: `waiting` -> `depositing` -> `pending` -> `success`.
+The transfer can pass through `waiting`, `depositing`, `pending`, or `submitted` before `success`; `delayed` means it is still processing. Stop polling on `failure` or `refund` and show the returned outcome. A refund is not a successful destination payment. See [Relay's status reference](https://docs.relay.link/references/api/get-intents-status-v3).
 
 Once complete, view the destination transaction on Tempo:
 
 ```text
-https://explore.tempo.xyz/tx/<DESTINATION_TX_HASH>
+https://explore.tempo.xyz/receipt/<DESTINATION_TX_HASH>
 ```
 
 :::::
@@ -182,8 +182,8 @@ const pollStatus = async () => {
       console.log('Bridge complete:', status.txHashes)
       return status
     }
-    if (status.status === 'failure') {
-      throw new Error('Bridge failed')
+    if (status.status === 'failure' || status.status === 'refund') {
+      throw new Error(`Bridge ended with status: ${status.status}`)
     }
 
     await new Promise((r) => setTimeout(r, 1000))
@@ -310,8 +310,8 @@ const pollStatus = async () => {
       console.log('Bridge complete:', status.txHashes)
       return status
     }
-    if (status.status === 'failure') {
-      throw new Error('Bridge failed')
+    if (status.status === 'failure' || status.status === 'refund') {
+      throw new Error(`Bridge ended with status: ${status.status}`)
     }
 
     await new Promise((r) => setTimeout(r, 1000))
@@ -337,5 +337,5 @@ For token issuers bringing an ERC-20 to Tempo, see [Migrate an ERC-20 to TIP-20]
 
 - [Relay documentation](https://docs.relay.link)
 - [Relay API reference](https://docs.relay.link/references/api/overview)
-- [Bridges & Exchanges on Tempo](/docs/ecosystem/bridges)
+- [Bridges & Exchanges on Tempo](/docs/partners/bridges)
 - [Getting Funds on Tempo](/docs/guide/getting-funds)

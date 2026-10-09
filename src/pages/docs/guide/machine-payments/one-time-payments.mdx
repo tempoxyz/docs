@@ -146,10 +146,10 @@ Bun.serve({
 
 ### Test the one-time payment endpoint
 
-These examples charge mainnet OUSD. Configure the `mppx` CLI with a funded mainnet account before calling the endpoint; testnet faucet tokens cannot pay a mainnet challenge.
+These examples charge mainnet OUSD. Configure the `mppx` CLI with a funded mainnet account before calling the endpoint; testnet faucet tokens cannot pay a mainnet challenge. To use test funds, [configure the server and client for Moderato](/docs/guide/machine-payments/server#test-your-mpp-server).
 
 ```bash
-npx mppx http://localhost:3000/api/charges/photo
+npx mppx http://localhost:3000/api/photo
 ```
 
 ::::

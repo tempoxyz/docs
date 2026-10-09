@@ -4,12 +4,15 @@ export function canonicalizeGeneratedDeveloperLinks(content: string, publicDocsU
   function canonicalUrl(value: string) {
     const [, pathname = '', suffix = ''] = /^([^?#]*)(.*)$/.exec(value) ?? []
     const route = pathname.replace(/^\/developers(?=\/|$)/, '')
+    if (['/llms.txt', '/llms-full.txt', '/SKILL.md', '/index.md'].includes(route))
+      return `${siteUrl}${route}${suffix}`
     if (route === '/' || route === '' || route === '/docs') {
       // Empty hrefs and fragment-only links retain their current-page meaning.
       return pathname ? `${siteUrl}${suffix}` : value
     }
     if (
       route === '/get-started' ||
+      route === '/get-started.md' ||
       route.startsWith('/get-started/') ||
       route.startsWith('/docs/')
     ) {

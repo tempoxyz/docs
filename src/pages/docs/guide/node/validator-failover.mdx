@@ -73,7 +73,7 @@ If the follower is not managed by systemd, send `SIGINT` or `SIGTERM` and wait f
 
 ### Restart the standby in validator mode
 
-Restart the same data directory without `--follow`, and add the validator signing key.
+Restart the same data directory without `--follow`, and add the validator signing key. The Bash/Zsh commands below assume an encrypted key: replace `<ENCRYPTION_KEY_CMD>` with the command that retrieves its encryption secret. Omit `--consensus.secret` only for an unencrypted key.
 
 Use the same consensus signing key as the validator you are failing over from. This procedure moves an existing validator identity to the standby; it does not rotate the identity. To use a different signing key,
 the validator's onchain configuration must be rotated. Follow the [rotate the validator identity](/docs/guide/node/validator-lifecycle#rotate-validator-identity) procedure.
@@ -83,6 +83,7 @@ the validator's onchain configuration must be rotated. Follow the [rotate the va
 tempo node --datadir <datadir> \
   --chain mainnet \
   --consensus.signing-key <PRIVATE_KEY_PATH> \
+  --consensus.secret <(<ENCRYPTION_KEY_CMD>) \
   --consensus.listen-address 0.0.0.0:<REGISTERED_INGRESS_PORT> \
   --http --http.port 8545 \
   --http.api eth,net,web3,txpool,trace,consensus \
@@ -92,6 +93,7 @@ tempo node --datadir <datadir> \
 tempo node --datadir <datadir> \
   --chain testnet \
   --consensus.signing-key <PRIVATE_KEY_PATH> \
+  --consensus.secret <(<ENCRYPTION_KEY_CMD>) \
   --consensus.listen-address 0.0.0.0:<REGISTERED_INGRESS_PORT> \
   --http --http.port 8545 \
   --http.api eth,net,web3,txpool,trace,consensus \

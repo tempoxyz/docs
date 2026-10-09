@@ -104,6 +104,9 @@ for (const guide of guides) {
     expect(requests).toHaveLength(1)
     expect(requests[0].method).toBe('GET')
     expect(requests[0].pathname).toMatch(guide.requestPath)
+    if (guide.page === '/docs/accounts/balances') {
+      expect(requests[0].chainId).toBe('42431')
+    }
     if (guide.page === '/docs/earn/balances') {
       expect(requests[0].chainId).toBe('testnet')
       expect(requests[0].pathname).toContain('/vaults/0x20147491b5701dea880263241c335caca9be326d/')

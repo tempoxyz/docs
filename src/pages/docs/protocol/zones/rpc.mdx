@@ -10,7 +10,7 @@ This reference describes the account-scoped, redacted Ethereum JSON-RPC interfac
 
 ## Authorization tokens
 
-Authorization tokens are short-lived credentials (maximum 30 days, or a shorter operator-configured limit) signed by the caller's Tempo account key. Tempo accounts support multiple signature types (secp256k1, P256, WebAuthn), and accounts with access keys via the `AccountKeychain` precompile can use those keys to authenticate.
+Authorization tokens are credentials signed by the caller's Tempo account key. They expire after at most 30 days, or a shorter operator-configured limit. Tempo accounts support multiple signature types (secp256k1, P256, WebAuthn), and accounts with access keys via the `AccountKeychain` precompile can use those keys to authenticate.
 
 The signed message includes:
 - `"TempoZoneRPC"` magic prefix for domain separation

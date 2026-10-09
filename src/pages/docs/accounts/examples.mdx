@@ -89,7 +89,7 @@ const keyRestrictions = {
 } as const
 ```
 
-`1` identifies the P-256 signature type in `authorizeKey`. Use the actual type of your generated key; secp256k1 is `0`. A connected wallet submits this root-authorized contract call; it does not expose its private key to the application.
+The raw ABI names the token allowance `amount`; Viem’s helper names it `limit`. In the [Wagmi authorization call](/docs/accounts/keys#grant-access), `1` identifies the P-256 signature type in `authorizeKey`. Use the actual type of your generated key; secp256k1 is `0`. A connected wallet submits this root-authorized contract call; it does not expose its private key to the application.
 
 ## API requests
 

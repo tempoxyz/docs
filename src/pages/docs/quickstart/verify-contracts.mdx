@@ -79,7 +79,7 @@ For more details on deployment and verification options, see the [Foundry docume
 
 ## Verify with Hardhat
 
-If you deployed with Hardhat, add Sourcify verification to your `hardhat.config.ts` using [`@nomicfoundation/hardhat-verify`](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify):
+For a Hardhat 2 project, add Sourcify verification to your `hardhat.config.ts` using [`@nomicfoundation/hardhat-verify`](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify):
 
 ```ts
 import "@nomicfoundation/hardhat-verify";
@@ -102,7 +102,7 @@ npx hardhat verify --network tempo <CONTRACT_ADDRESS> [constructor args...]
 
 ### Verify from deployment artifacts
 
-If you have Hardhat deployment JSON files (from `hardhat-deploy` or `hardhat-ignition`) but no longer have the project set up, you can still verify. These files contain embedded compiler metadata with full source code (when compiled with `useLiteralContent: true`, the default for `hardhat-deploy`).
+If you have Hardhat deployment JSON files (from `hardhat-deploy` or `hardhat-ignition`) but no longer have the project set up, you can still verify. Check that the artifact contains compiler metadata and literal source content. Artifact formats vary; an Ignition deployment journal alone is not a Solidity standard JSON input. Include the original source files when metadata contains only source hashes or URLs.
 
 Extract the `metadata` field, parse it as JSON, then construct a [verification API request](#verify-with-the-api) using:
 - `metadata.sources` → `stdJsonInput.sources`
@@ -135,7 +135,7 @@ curl -X POST https://contracts.tempo.xyz/v2/verify/42431/<CONTRACT_ADDRESS> \
       },
       "settings": {
         "optimizer": { "enabled": false, "runs": 200 },
-        "evmVersion": "cancun"
+        "evmVersion": "shanghai"
       }
     },
     "compilerVersion": "0.8.20+commit.a1b79de6",

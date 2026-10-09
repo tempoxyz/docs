@@ -26,7 +26,7 @@ Submit independent payment transactions concurrently when each payment needs its
 
 <span id="parallel-transaction-demo" />
 
-Connect a test account and send two independent transactions on Moderato testnet. The wallet demo uses separate nonce keys; the backend example below uses expiring nonces. Both produce a receipt for each transaction.
+Connect a test account and send two independent transactions on Moderato testnet. The wallet demo uses separate nonce keys; the backend example below uses expiring nonces. The wallet demo shows each submitted hash and confirms the expected token transfer before marking it complete. The backend example waits for each transaction’s receipt.
 
 <Demo.Container name="Send Parallel Payments" footerVariant="balances" tokens={[Token.alphaUsd]}>
   <Connect stepNumber={1} />
@@ -34,7 +34,7 @@ Connect a test account and send two independent transactions on Moderato testnet
   <SendParallelPayments stepNumber={3} />
 </Demo.Container>
 
-Use the funded Moderato account from [Send a payment](/docs/guide/payments/send-a-payment#send-from-your-backend). This Viem example explicitly selects [expiring nonces](/docs/guide/tempo-transaction#expiring-nonces), so the transactions do not compete for a sequential nonce.
+Use the funded Moderato account from the [Viem client setup](/docs/accounts/examples#viem-client). This Viem example selects [expiring nonces](/docs/guide/tempo-transaction#expiring-nonces) with `nonceKey: 'expiring'`, so the transactions do not compete for a sequential nonce.
 
 :::code-group
 

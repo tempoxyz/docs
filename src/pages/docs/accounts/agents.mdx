@@ -8,7 +8,7 @@ description: Define an agent's account permissions, authorize a limited access k
 
 Let an agent transact from your account with an access key. Set its budget, expiry, and allowed actions, then connect the signer to your payment client.
 
-For a ready-made wallet integration, use [Tempo Wallet with agents](/docs/wallet/use-with-agents).
+For an agent that pays for APIs, start with [Tempo Wallet with agents](/docs/wallet/use-with-agents). The steps below use a key authorized to send test stablecoins to one recipient.
 
 ## Authorize the agent's task
 
@@ -18,7 +18,7 @@ For a ready-made wallet integration, use [Tempo Wallet with agents](/docs/wallet
 
 Choose the network, token, total or recurring budget, expiry, and contracts the agent needs to call. For a payment to a known recipient, scope the key to that token's transfer function and recipient.
 
-For paid API requests, scope the key to the contracts and functions used by your [payment method](/docs/guide/machine-payments).
+For a custom [MPP client](/docs/guide/machine-payments/client), authorize the calls its payment mode requires. One-time payments can use `transferWithMemo`; payment sessions use channel operations. The linked limited-key example permits direct transfers only. Review the client's token, recipients, and contract calls before authorizing its key.
 
 ### Create and authorize a separate signer
 
@@ -28,11 +28,19 @@ Store the agent's key in its runtime's secret storage. Keep the root key with th
 
 ### Connect the signer to the payment client
 
-Pass the authorized signer, bound to the original account, to a client that supports Tempo access-key signatures. Follow [Machine Payments](/docs/guide/machine-payments) to handle paid API requests.
+After authorization and before revocation, create a Viem client using `accessKey`, `alphaUsd`, and `tempoModerato` from the [authorization example](/docs/accounts/access-keys#authorize-a-limited-key):
+
+```ts [Viem]
+const agentClient = createClient({
+  account: accessKey, chain: tempoModerato, feeToken: alphaUsd,
+})
+```
+
+Use this client for the authorized AlphaUSD transfers on Moderato. For paid API requests, configure the [MPP client](/docs/guide/machine-payments/client) separately with a signer authorized for its payment calls.
 
 ### Show spending and end access
 
-Show the agent's name, account, budget, expiry, and allowed actions in the account UI. Read the [remaining key budget](/docs/accounts/access-keys#authorize-a-limited-key) and [account activity](/docs/accounts/balances) to explain what it spent.
+Show the agent's name, account, budget, expiry, and allowed actions in the account UI. Read the [remaining key budget](/docs/accounts/access-keys#read-the-remaining-permission) and [account activity](/docs/accounts/balances) to explain what it spent.
 
 Provide a revoke action using the root or an active admin key. Wait for revocation to be confirmed before showing access as removed.
 

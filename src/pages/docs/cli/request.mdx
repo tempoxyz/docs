@@ -10,7 +10,7 @@ import { Cards, Card } from 'vocs'
 
 A curl-compatible HTTP client that handles [Machine Payments Protocol](https://mpp.dev/overview) negotiation transparently. When a server responds with [`402 Payment Required`](https://mpp.dev/protocol/http-402), `tempo request` reads the [challenge](https://mpp.dev/protocol/challenges), authorizes payment using the configured method, then retries with the [credential](https://mpp.dev/protocol/credentials) in one command.
 
-Requires [`tempo wallet login`](/docs/cli/wallet) first. Use [`tempo wallet services`](/docs/cli/wallet#discover-services) before calling paid endpoints so agents and scripts use registered URLs, methods, pricing, and request schemas instead of guessing.
+For the wallet-backed flow, run [`tempo wallet login`](/docs/cli/wallet) first. A `--dry-run` preview can read payment terms without logging in. Use [`tempo wallet services`](/docs/cli/wallet#discover-services) before calling paid endpoints so agents and scripts use registered URLs, methods, pricing, and request schemas instead of guessing.
 
 ## `tempo request` usage
 
@@ -30,7 +30,7 @@ Requires [`tempo wallet login`](/docs/cli/wallet) first. Use [`tempo wallet serv
 | `--json <body>` | Send a JSON body (implies `-X POST`) |
 | `-H <header>` | Add a custom header |
 | `--dry-run` | Request payment terms without paying |
-| `--max-spend <amount>` | Stop if the request would exceed a spend cap |
+| `--max-spend <amount>` | Set a hard cap for cumulative payment spend |
 | `-D <file>` / `--dump-header <file>` | Write response headers, useful for inspecting MPP challenges |
 | `-t` / `--toon-output` | Compact machine-readable output for scripts and agents |
 

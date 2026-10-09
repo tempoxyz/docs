@@ -10,6 +10,10 @@ protocolVersion: T3
 
 # TIP-1011: Enhanced Access Key Permissions
 
+:::info[Versioned proposal]
+This TIP records the enhanced-permissions proposal. Later upgrades change key authorization to the `KeyRestrictions` tuple and add admin keys. Use the [Account Keychain reference](/docs/protocol/transactions/AccountKeychain) for the current ABI.
+:::
+
 ## Abstract
 
 This TIP extends Access Keys with three permission features:
@@ -260,7 +264,7 @@ function authorizeKey(
 /// @dev For each selector rule, `recipients = []` means no recipient restriction.
 function setAllowedCalls(
     address keyId,
-    CallScope calldata scope
+    CallScope[] calldata scopes
 ) external;
 
 /// @notice Removes one target scope for a key

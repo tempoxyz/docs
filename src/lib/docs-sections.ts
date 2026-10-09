@@ -33,7 +33,6 @@ export const docsSections: DocsSection[] = [
       '/docs/payments',
       '/docs/guide/payments',
       '/docs/guide/getting-funds',
-      '/docs/protocol/transactions/AccountKeychain',
       '/docs/protocol/tip20/virtual-addresses',
       '/docs/protocol/tip403/receive-policies',
     ],
@@ -57,6 +56,9 @@ export const docsSections: DocsSection[] = [
     label: 'Tempo EVM',
     href: '/docs/development',
     matches: [
+      '/docs/accounts/keys',
+      '/docs/accounts/access-keys',
+      '/docs/accounts/admin-keys',
       '/docs/network',
       '/docs/development',
       '/docs/quickstart',
@@ -88,10 +90,9 @@ export const docsUtilitySections: DocsSection[] = [
   },
   {
     id: 'ecosystem',
-    label: 'Ecosystem',
-    href: '/docs/ecosystem',
+    label: 'Partners',
+    href: '/docs/partners',
     matches: [
-      '/docs/ecosystem',
       '/docs/partners',
       '/docs/guide/ousd',
       '/docs/guide/bridge-layerzero',

@@ -15,6 +15,17 @@ Vocs-powered documentation site for Tempo protocol. Use this guidance when creat
 - Start with their integration decisions and workflows, then explain the signing methods, APIs, and protocol mechanics needed to implement them.
 - Use product plans to understand intent and positioning. Verify availability separately; do not describe planned capabilities as live features.
 
+## Documentation IA and agent exports
+
+- `src/lib/docs-sections.ts` owns the section labels, landing routes, and route ownership; `vocs.config.ts` owns the sidebar within each section.
+- Primary sections: Get Started (`/get-started`), Accounts (`/docs/accounts`), Earn (`/docs/earn`), Routes (`/docs/routes`), Zones (`/docs/zones`), and Machine Payments (`/docs/agents`).
+- Tempo EVM (`/docs/development`) covers wallets and signing keys, transactions, fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.
+- APIs & SDKs (`/docs/tools`) contains the API reference, SDKs, CLI, and wallet/server libraries. Partners (`/docs/partners`) contains third-party integrations.
+- Keep Earn and Routes beta notices and the Zones limited-preview notice on their overview pages. The earlier `/docs/guide/private-zones` sandbox is a separate integration.
+- `SKILL.md` is the docs site's published skill. The installable plugin's skill lives in `tempoxyz/plugins`; update it separately when routing changes.
+- `src/lib/ai-docs.ts` and the Vite build hook generate `llms.txt`, `llms-full.txt`, Markdown section context, and the published skill from source. Never edit `dist` or `.vercel` copies by hand.
+- After changing navigation or exported components, build and run `pnpm check:markdown` to check content and IA coverage. Keep Markdown exports useful without interactive UI.
+
 ## Source of Truth
 
 Use repo-local sources first:

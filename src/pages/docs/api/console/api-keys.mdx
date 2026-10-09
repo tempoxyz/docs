@@ -124,7 +124,7 @@ Return to [**API Keys**](https://console.tempo.xyz/?to=/:org/api-keys), open the
 | The key cannot be found in the console | Confirm that the selected environment and project filter match the key. |
 | The API rejects the credential | Check that the full token was copied, has not been revoked, and is sent in a supported header. |
 | A scoped endpoint denies access | Open the key's project and confirm that the key was created with the required scope. Create a replacement to change scopes. |
-| A sandbox key appears to use public access on mainnet | Sandbox keys cannot authenticate mainnet requests. Remove the mainnet selector or use a production key. |
+| A sandbox key returns `403 api_key_forbidden` | Select `chainId=testnet`, or use a production key for mainnet. An omitted `chainId` targets mainnet. |
 | The plaintext token was lost | Create a replacement key. Existing tokens cannot be revealed again. |
 
 For complete credential and chain-selection behavior, see [API authentication](/docs/api/authentication).
