@@ -60,7 +60,7 @@ const cases: {
     title: 'Get Started with Tempo | Tempo Docs',
     ogTitle: 'Build on Tempo',
     descriptionIncludes:
-      'Find your starting point for accounts, payments, tokens, and smart contracts',
+      'Build stablecoin accounts, transfer funds onchain, offer earning balances, and charge for API access on Tempo.',
     ogImageIncludes: '/api/og',
   },
   {

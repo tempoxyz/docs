@@ -32,16 +32,16 @@ test('renders authored docs metadata and breadcrumbs into JSON-LD', async ({ req
 
   expect(articles).toHaveLength(1)
   expect(articles[0]).toMatchObject({
-    name: 'Send a payment',
-    headline: 'Send a payment',
+    name: 'Send payments',
+    headline: 'Send payments',
     description:
-      'Send TIP-20 stablecoins between Tempo accounts, add a payment reference, and confirm delivery to the recipient.',
+      'Send stablecoins, batch payments, choose how to pay fees, and verify delivery to the recipient.',
   })
   expect(breadcrumbs).toHaveLength(1)
   expect(breadcrumbs[0]?.itemListElement).toEqual(
     expect.arrayContaining([
       expect.objectContaining({ name: 'Tempo Docs' }),
-      expect.objectContaining({ name: 'Send a payment' }),
+      expect.objectContaining({ name: 'Send payments' }),
     ]),
   )
 })

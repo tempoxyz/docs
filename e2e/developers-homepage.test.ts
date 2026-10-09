@@ -56,7 +56,7 @@ test('keeps documentation page tools off the blog', async ({ page }) => {
 })
 
 for (const entry of ['direct', 'client navigation'] as const) {
-  test(`opens the inline Tempo Wallet example via ${entry}`, async ({ page, context, baseURL }) => {
+  test(`opens the inline account example via ${entry}`, async ({ page, context, baseURL }) => {
     const pageErrors: string[] = []
     page.on('pageerror', (error) => pageErrors.push(error.message))
     await page.setViewportSize({ width: 1440, height: 1000 })
@@ -95,7 +95,7 @@ for (const entry of ['direct', 'client navigation'] as const) {
         .click()
       await page
         .locator('article[data-v-content]')
-        .getByRole('link', { name: 'Send a test payment →', exact: true })
+        .getByRole('link', { name: 'interactive quickstart', exact: true })
         .click()
     }
 
@@ -125,7 +125,23 @@ for (const entry of ['direct', 'client navigation'] as const) {
       }),
     ).toBeDisabled()
 
-    if (new URL(page.url()).protocol === 'http:') {
+    if (process.env.CI) {
+      // The E2E build deliberately uses local WebAuthn instead of Tempo Wallet.
+      const cdp = await context.newCDPSession(page)
+      await cdp.send('WebAuthn.enable')
+      await cdp.send('WebAuthn.addVirtualAuthenticator', {
+        options: {
+          protocol: 'ctap2',
+          transport: 'internal',
+          hasResidentKey: true,
+          hasUserVerification: true,
+          isUserVerified: true,
+        },
+      })
+      await signIn.click()
+      await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeVisible()
+      await expect(addFunds).toBeEnabled()
+    } else if (new URL(page.url()).protocol === 'http:') {
       const popupPromise = page.waitForEvent('popup')
       await signIn.click()
       const wallet = await popupPromise
@@ -141,7 +157,7 @@ for (const entry of ['direct', 'client navigation'] as const) {
       )
     }
 
-    await expect(addFunds).toBeDisabled()
+    if (!process.env.CI) await expect(addFunds).toBeDisabled()
     expect(pageErrors).toEqual([])
   })
 }

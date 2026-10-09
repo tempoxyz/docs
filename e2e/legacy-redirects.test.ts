@@ -1,7 +1,6 @@
 import { expect, test } from '@playwright/test'
 
 const legacyRoutes = [
-  ['/docs.md', '/index.md'],
   ['/assets/md/docs.md', '/assets/md/index.md'],
   ['/docs/guide', '/docs/quickstart/integrate-tempo'],
   ['/docs/quickstart', '/docs/quickstart/integrate-tempo'],
@@ -29,3 +28,10 @@ for (const [source, destination] of legacyRoutes) {
     expect(target.searchParams.get('utm_source')).toBe('docs')
   })
 }
+
+test('serves the legacy docs Markdown URL as the landing export', async ({ request }) => {
+  const response = await request.get('/docs.md?ref=legacy', { maxRedirects: 0 })
+  expect(response.status()).toBe(200)
+  expect(response.headers()['content-type']).toContain('text/markdown')
+  expect(await response.text()).toContain('# Documentation')
+})

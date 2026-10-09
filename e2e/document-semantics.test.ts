@@ -53,17 +53,18 @@ test('keeps one route title through docs and OpenAPI client navigation', async (
 
   await page
     .getByRole('navigation', { name: 'Documentation sections', exact: true })
-    .getByRole('link', { name: 'Developer Resources', exact: true })
+    .getByRole('link', { name: 'Tempo EVM', exact: true })
     .click()
   await page.waitForURL(/\/docs\/development\/?$/)
-  await expectSingleTitle(page, 'Tempo Developer Resources | Tempo Docs')
+  await expectSingleTitle(page, 'Tempo EVM | Tempo Docs')
 
+  await page.getByRole('button', { name: 'APIs & SDKs', exact: true }).click()
   await page
-    .locator('[data-v-gutter-left] [data-v-sidebar-container]')
-    .getByRole('link', { name: 'Tempo API', exact: true })
+    .getByRole('navigation', { name: 'APIs & SDKs', exact: true })
+    .getByRole('link', { name: 'API reference', exact: true })
     .click()
   await page.waitForURL(/\/docs\/api\/?$/)
-  await expectSingleTitle(page, 'Start with the Tempo API | Tempo Docs')
+  await expectSingleTitle(page, 'Tempo API reference | Tempo Docs')
 
   await page.locator('a[href="/docs/api/transactions"]:visible').first().click()
   await page.waitForURL(/\/docs\/api\/transactions\/?$/)
