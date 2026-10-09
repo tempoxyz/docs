@@ -109,6 +109,19 @@ jobs:
         if: matrix.target == 'check'
         run: pnpm run check:anchors
 
+      - name: Check OG image goldens
+        if: matrix.target == 'check'
+        run: pnpm og:goldens:check
+
+      - name: Upload OG image review gallery
+        if: ${{ !cancelled() && matrix.target == 'check' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: og-image-goldens
+          path: test-results/og-goldens/
+          if-no-files-found: error
+          retention-days: 15
+
       - name: Test
         if: matrix.target == 'check'
         run: pnpm run test --bail=1
