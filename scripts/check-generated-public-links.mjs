@@ -55,7 +55,7 @@ const candidateGroups = outputArtifacts.flatMap(
       patterns: [
         {
           label: 'absolute browser navigation',
-          pattern: /(?:<a\b[^>]*href=|\\?"href\\?":)\\?"https:\/\/tempo\.xyz\/developers/g,
+          pattern: /(?:<a\b[^>]*href=|\\?"href\\?":)\\?"https:\/\/tempo\.xyz\/developers([^"\\]*)/g,
         },
         { label: 'absolute base URL', pattern: /<base\b[^>]*https:\/\/tempo\.xyz/g },
       ],
@@ -99,6 +99,12 @@ for (const { files, patterns } of candidateGroups) {
     const content = await readFile(file, 'utf8')
     for (const { label, pattern } of patterns) {
       for (const match of content.matchAll(pattern)) {
+        // Published agent resources intentionally point at their canonical downloads.
+        if (
+          label === 'absolute browser navigation' &&
+          ['/SKILL.md', '/llms.txt', '/llms-full.txt'].includes(match[1])
+        )
+          continue
         const line = content.slice(0, match.index).split('\n').length
         failures.push(`${path.relative(process.cwd(), file)}:${line} (${label})`)
       }
