@@ -13,13 +13,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: Check
+  build:
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
       id-token: write
+    # Report cheap failures early and cancel sibling builds without a serial setup stage.
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - target: check
+            name: Check
+          - target: production
+            name: Sitemap
+          - target: e2e
+            name: Build E2E app
 
     steps:
       - name: Secure runner
@@ -48,53 +59,23 @@ jobs:
 
       # Fail cheap source checks before testing or building.
       - name: Check
+        if: matrix.target == 'check'
         run: pnpm run check
 
       - name: Check types
+        if: matrix.target == 'check'
         run: pnpm run check:types
 
       - name: Check internal anchors
+        if: matrix.target == 'check'
         run: pnpm run check:anchors
 
       - name: Test
+        if: matrix.target == 'check'
         run: pnpm run test --bail=1
 
-  # Keep the required Sitemap status and validate all generated production output.
-  sitemap:
-    name: Sitemap
-    needs: check
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
-
-      - name: Clone repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Setup pnpm
-        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
-        with:
-          run_install: false
-          version: 10.28.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version: 24.12.0
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
       - name: Fetch OpenAPI specification
+        if: matrix.target == 'production'
         run: |
           node --experimental-strip-types scripts/fetch-openapi.ts "$RUNNER_TEMP/openapi.json"
           echo "OPENAPI_SPEC_URL=$RUNNER_TEMP/openapi.json" >> "$GITHUB_ENV"
@@ -102,16 +83,18 @@ jobs:
       # Vocs keys snippets by content; also invalidate when their type environment changes.
       # Graphite checks its own 24-hour TTL and route coverage before using cached links.
       - name: Cache documentation build inputs
+        if: matrix.target != 'check'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: |
             node_modules/.cache/vocs/twoslash
             node_modules/.cache/graphite-related-docs.json
-          key: docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}
+          key: docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.target }}
           restore-keys: |
             docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-
 
       - name: Build
+        if: matrix.target == 'production'
         run: pnpm run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -120,79 +103,19 @@ jobs:
           VERCEL_ENV: production
 
       - name: Check sitemap coverage
+        if: matrix.target == 'production'
         run: node --experimental-strip-types scripts/check-vercel-sitemap.ts
 
       - name: Check generated public links
+        if: matrix.target == 'production'
         run: node scripts/check-generated-public-links.mjs
 
       - name: Audit generated Markdown
+        if: matrix.target == 'production'
         run: pnpm run check:markdown
 
-  ci-gate:
-    name: CI Gate
-    if: always()
-    needs: [check, e2e-build, e2e, sitemap]
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-    steps:
-      - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
-
-      - name: Verify required jobs
-        run: |
-          if [[ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}" == "true" ]]; then
-            echo "One or more required jobs failed, were cancelled, or were skipped"
-            exit 1
-          fi
-
-  e2e-build:
-    name: Build E2E app
-    needs: check
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
-
-      - name: Clone repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Setup pnpm
-        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
-        with:
-          run_install: false
-          version: 10.28.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version: 24.12.0
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      # Vocs keys snippets by content; also invalidate when their type environment changes.
-      # Graphite checks its own 24-hour TTL and route coverage before using cached links.
-      - name: Cache documentation build inputs
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: |
-            node_modules/.cache/vocs/twoslash
-            node_modules/.cache/graphite-related-docs.json
-          key: docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}
-          restore-keys: |
-            docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-
-
       - name: Build app for E2E
+        if: matrix.target == 'e2e'
         run: pnpm run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -202,9 +125,11 @@ jobs:
 
       # A tar preserves modes and includes hidden files in the build output.
       - name: Package E2E app
+        if: matrix.target == 'e2e'
         run: tar -cf "$RUNNER_TEMP/e2e-app.tar" dist
 
       - name: Upload E2E app
+        if: matrix.target == 'e2e'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: e2e-app
@@ -215,7 +140,7 @@ jobs:
 
   e2e:
     name: E2E Tests (${{ matrix.shard }}/${{ strategy.job-total }})
-    needs: e2e-build
+    needs: build
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.61.1-noble
@@ -277,3 +202,20 @@ jobs:
           name: playwright-report-${{ matrix.shard }}
           path: playwright-report/
           retention-days: 15
+  ci-gate:
+    name: CI Gate
+    if: always()
+    needs: [build, e2e]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Secure runner
+        uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
+
+      - name: Verify required jobs
+        run: |
+          if [[ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}" == "true" ]]; then
+            echo "One or more required jobs failed, were cancelled, or were skipped"
+            exit 1
+          fi
