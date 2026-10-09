@@ -1,0 +1,124 @@
+---
+title: "Transfer example"
+seoTitle: "Routes transfer example | Tempo Docs"
+description: Quote a transfer, sign the source transactions, and confirm delivery to the recipient.
+---
+
+# Transfer example
+
+Move stablecoins when your application can authorize the source transaction through a connected wallet, wallet provider, or its own signer. Routes prepares the source calls; your application signs them and tracks delivery.
+
+## Set up Routes API access
+
+After confirming [beta access](/docs/routes), create a project and API key in [Tempo Console](/docs/api/console). Use `routes:read` for quotes and status and `routes:write` to create transfers and register source transactions. Authenticated directory reads require `data:read`.
+
+Run the examples from your backend or terminal with `curl` and `jq`. Set `TEMPO_API_KEY` to your API key and keep it out of browser code. Choose a pair from [Supported routes](/docs/routes/networks), then set:
+
+| Variable | Value |
+| --- | --- |
+| `SOURCE_CHAIN`, `DESTINATION_CHAIN` | Chain IDs or slugs from the directory. |
+| `SOURCE_TOKEN`, `DESTINATION_TOKEN` | Token addresses or keys on those networks. |
+| `ROUTE_SENDER`, `ROUTE_RECIPIENT` | The source signing account and destination account. |
+| `ROUTE_AMOUNT` | Source token amount in base units. |
+
+This guide uses `exactSource`. Check that the selected route supports that mode and confirm its networks before funding it. See [Quotes and fees](/docs/routes/quotes) for `exactDestination`.
+
+<span id="submit-and-track-a-transfer" />
+
+## Transfer funds
+
+<span id="quote-the-transfer" />
+
+
+:::::steps
+
+### Get a quote
+
+```bash
+curl --get 'https://api.tempo.xyz/v1/routes/transfers/quote' \
+  --header "tempo-api-key: ${TEMPO_API_KEY}" \
+  --data-urlencode "sourceChain=${SOURCE_CHAIN}" \
+  --data-urlencode "sourceToken=${SOURCE_TOKEN}" \
+  --data-urlencode "destinationChain=${DESTINATION_CHAIN}" \
+  --data-urlencode "destinationToken=${DESTINATION_TOKEN}" \
+  --data-urlencode "sender=${ROUTE_SENDER}" \
+  --data-urlencode "recipient=${ROUTE_RECIPIENT}" \
+  --data-urlencode "amount=${ROUTE_AMOUNT}" \
+  --data-urlencode 'mode=exactSource'
+```
+
+A quote does not create or reserve a transfer.
+
+### Review fees
+
+Show the source amount, expected destination amount, minimum destination amount, and fees. `destinationAmount` includes route deductions; an empty `fees` array does not mean the route is free. Check `quote.expiresAt` and refresh expired terms before continuing.
+
+### Create the transfer
+
+Write the same inputs to a request file. Set `ROUTE_REQUEST_KEY` to a unique identifier for this transfer; reuse it when retrying the same request.
+
+```bash
+jq -n \
+  --arg sourceChain "$SOURCE_CHAIN" \
+  --arg sourceToken "$SOURCE_TOKEN" \
+  --arg destinationChain "$DESTINATION_CHAIN" \
+  --arg destinationToken "$DESTINATION_TOKEN" \
+  --arg sender "$ROUTE_SENDER" \
+  --arg recipient "$ROUTE_RECIPIENT" \
+  --arg amount "$ROUTE_AMOUNT" \
+  '$ARGS.named + {mode: "exactSource"}' > route-request.json
+
+curl --fail-with-body 'https://api.tempo.xyz/v1/routes/transfers' \
+  --header "tempo-api-key: ${TEMPO_API_KEY}" \
+  --header "idempotency-key: ${ROUTE_REQUEST_KEY}" \
+  --header 'Content-Type: application/json' \
+  --data @route-request.json \
+  --output route-transfer.json
+```
+
+Save the returned `id` and unsigned `action`. Review the terms in this response before requesting a signature; transfer reads do not return the executable action.
+
+<span id="sign-and-submit-the-source-calls" />
+
+### Sign and submit
+
+Use the source account's signer to submit the returned calls in order. Calls can include approvals and may require separate transactions. Handle the returned `action.type` for the source chain; the [Transfers API reference](/docs/api/routes/transfers) describes the EVM and Tron action formats.
+
+For an `evm:calls` action, pass each call's `to`, `data`, and `value` to your source-chain wallet client. Wait for successful execution before submitting the next call. Use the quoted sender and source network, preserve the call order, and retain each transaction hash. Do not restart the whole sequence after a partial submission without checking the transactions already sent.
+
+### Register the source transactions
+
+Set `ROUTE_TRANSFER_ID` to the returned `id`. Save the hashes produced by your signer in `source-transactions.json`, using `transactionHash` for one transaction or `transactionHashes` for multiple:
+
+```json
+{
+  "transactionHashes": [
+    "0x5151515151515151515151515151515151515151515151515151515151515151"
+  ]
+}
+```
+
+Replace the example hash with the actual source transaction hashes, then register them:
+
+```bash
+curl --fail-with-body \
+  "https://api.tempo.xyz/v1/routes/transfers/${ROUTE_TRANSFER_ID}/source-transactions" \
+  --header "tempo-api-key: ${TEMPO_API_KEY}" \
+  --header 'Content-Type: application/json' \
+  --data @source-transactions.json
+```
+
+The API verifies and associates them with the transfer.
+
+<span id="track-destination-delivery" />
+
+### Confirm the transfer
+
+```bash
+curl "https://api.tempo.xyz/v1/routes/transfers/${ROUTE_TRANSFER_ID}" \
+  --header "tempo-api-key: ${TEMPO_API_KEY}"
+```
+
+Keep the payment pending until the transfer reaches `completed`. Reconcile its destination amount and transaction references with your payment record. Follow [Track delivery](/docs/routes/delivery) for pending, failed, and refund outcomes.
+
+:::::

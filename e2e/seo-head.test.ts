@@ -52,21 +52,22 @@ const cases: {
     path: '/',
     title: 'Tempo Developer Docs: APIs, SDKs &amp; Guides',
     ogTitle: 'Documentation',
-    descriptionIncludes: 'Build with Tempo Accounts, Payments, Earn, Routes, and Zones',
+    descriptionIncludes: 'Build with Tempo Accounts, Earn, Routes, and Zones',
     ogImageIncludes: '/og-docs.png',
   },
   {
     path: '/get-started',
     title: 'Get Started with Tempo | Tempo Docs',
-    ogTitle: 'Get Started',
-    descriptionIncludes: 'Learn how accounts and stablecoins work on Tempo',
+    ogTitle: 'Build on Tempo',
+    descriptionIncludes:
+      'Find your starting point for accounts, payments, tokens, and smart contracts',
     ogImageIncludes: '/api/og',
   },
   {
     path: '/docs/guide/payments/send-a-payment',
-    title: 'Send a Stablecoin Payment | Tempo Docs',
-    ogTitle: 'Send a payment',
-    descriptionIncludes: 'Send TIP-20 stablecoins between Tempo accounts',
+    title: 'Send Stablecoin Payments on Tempo | Tempo Docs',
+    ogTitle: 'Send payments',
+    descriptionIncludes: 'Send stablecoins, batch payments, choose how to pay fees',
     ogImageIncludes: 'subsection=PAYMENTS',
   },
   {
@@ -78,9 +79,9 @@ const cases: {
   },
   {
     path: '/docs/api',
-    title: 'Start with the Tempo API | Tempo Docs',
-    ogTitle: 'Tempo API',
-    descriptionIncludes: 'official Tempo blockchain API',
+    title: 'Tempo API reference | Tempo Docs',
+    ogTitle: 'API reference',
+    descriptionIncludes: 'Read balances, track payments, configure webhooks',
     ogImageIncludes: 'section=API',
   },
   {

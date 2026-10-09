@@ -3,16 +3,24 @@ import { expect, test } from '@playwright/test'
 const guides = [
   {
     page: '/docs/accounts/balances',
-    anchor: 'query-balances-across-tokens',
+    anchor: 'read-balances',
     title: 'Balances and activity',
     operation: 'List address balances',
     endpoint: '/v1/addresses/',
     requestPath: /^\/v1\/addresses\/0x[0-9a-fA-F]{40}\/balances$/,
   },
   {
+    page: '/docs/earn/balances',
+    anchor: 'read-a-position',
+    title: 'Balances and earnings',
+    operation: 'Get account position',
+    endpoint: '/v1/earn/vaults/',
+    requestPath: /^\/v1\/earn\/vaults\/0x[0-9a-fA-F]{40}\/positions\/0x[0-9a-fA-F]{40}$/,
+  },
+  {
     page: '/docs/routes/networks',
     anchor: 'read-the-route-directory',
-    title: 'Supported networks and assets',
+    title: 'Supported routes',
     operation: 'List routes',
     endpoint: '/v1/routes',
     requestPath: /^\/v1\/routes$/,
@@ -26,7 +34,7 @@ for (const guide of guides) {
     page,
   }) => {
     const responseMarker = 'inline-guide-e2e-next-page'
-    const requests: { method: string; pathname: string }[] = []
+    const requests: { method: string; pathname: string; chainId: string | null }[] = []
 
     // Exercise the real client without depending on live balances, routes,
     // credentials, or public rate limits. Empty data is a valid list response.
@@ -43,7 +51,11 @@ for (const guide of guides) {
       }
 
       const pathname = new URL(request.url()).pathname
-      requests.push({ method: request.method(), pathname })
+      requests.push({
+        method: request.method(),
+        pathname,
+        chainId: new URL(request.url()).searchParams.get('chainId'),
+      })
       if (request.method() !== 'GET' || !guide.requestPath.test(pathname)) {
         await route.abort()
         return
@@ -66,7 +78,12 @@ for (const guide of guides) {
       /No matching operation|No OpenAPI spec|Multiple OpenAPI specs/,
     )
 
-    const playground = article.locator('[data-v-openapi]')
+    const playground = article
+      .locator('[data-v-openapi]')
+      .filter({
+        has: page.locator('[data-v-openapi-sample-request-body]', { hasText: guide.endpoint }),
+      })
+      .first()
     await expect(playground).toHaveCount(1)
     await expect(playground).not.toContainText(/deelusd/i)
     await expect(playground.locator('[data-v-openapi-sample-request-body]')).toContainText(
@@ -87,6 +104,10 @@ for (const guide of guides) {
     expect(requests).toHaveLength(1)
     expect(requests[0].method).toBe('GET')
     expect(requests[0].pathname).toMatch(guide.requestPath)
+    if (guide.page === '/docs/earn/balances') {
+      expect(requests[0].chainId).toBe('testnet')
+      expect(requests[0].pathname).toContain('/vaults/0x20147491b5701dea880263241c335caca9be326d/')
+    }
 
     await page.keyboard.press('Escape')
     await expect(client).toBeHidden()

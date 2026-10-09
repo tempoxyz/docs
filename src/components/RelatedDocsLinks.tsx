@@ -2,11 +2,26 @@
 
 import relatedDocsManifest from 'virtual:graphite-related-docs'
 import { Link, useRouter } from 'waku'
+import { docsSections, docsUtilitySections, normalizeDocsSectionPath } from '../lib/docs-sections'
 import { relatedDocsForRoute } from '../lib/graphite-related-docs'
+
+// Landing pages already provide curated paths into their section.
+const curatedLandingRoutes = new Set([
+  '/',
+  '/docs/build',
+  '/docs/development',
+  '/docs/network',
+  '/docs/payments',
+  ...docsSections.map((section) => section.href),
+  ...docsUtilitySections.map((section) => section.href),
+])
 
 export default function RelatedDocsLinks() {
   const { path } = useRouter()
-  const links = relatedDocsForRoute(relatedDocsManifest, path ?? '/')
+  const route = normalizeDocsSectionPath(path ?? '/')
+  if (curatedLandingRoutes.has(route)) return null
+
+  const links = relatedDocsForRoute(relatedDocsManifest, route)
   if (links.length === 0) return null
 
   return (

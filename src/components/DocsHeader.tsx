@@ -10,8 +10,8 @@ import { AgentSetupCommand } from './AgentSetupCommand'
 import {
   DocsResourceLinks,
   docsSections,
+  docsUtilitySections,
   getActiveDocsSection,
-  specificationsSection,
 } from './DocsSectionNav'
 import './DocsNavigation.css'
 
@@ -582,6 +582,52 @@ function SidebarLeaf({
   )
 }
 
+function SidebarDisclosure({
+  node,
+  pathname,
+  activeAnchor,
+  depth,
+  onNavigate,
+}: {
+  node: SidebarNode
+  pathname: string
+  activeAnchor: string | null
+  depth: number
+  onNavigate: () => void
+}) {
+  const containsActivePage = nodeContainsActive(node, pathname, activeAnchor)
+  const [open, setOpen] = useState(() => !node.collapsed || containsActivePage)
+
+  // Match the desktop sidebar: reveal newly selected pages while preserving
+  // groups the reader has opened themselves.
+  useEffect(() => {
+    if (containsActivePage) setOpen(true)
+  }, [containsActivePage])
+
+  return (
+    <details
+      open={open}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+      className="group/sb mt-1"
+      style={{ paddingLeft: depth > 1 ? `${(depth - 1) * 12}px` : undefined }}
+    >
+      <summary className="-mx-2 flex min-h-8 cursor-pointer list-none items-center justify-between rounded-[6px] px-2 py-1 font-sans text-[14px] text-foreground/65 tracking-[0] transition-colors hover:bg-foreground/[0.04] hover:text-foreground [&::-webkit-details-marker]:hidden">
+        {node.text}
+        <Chevron open={open} />
+      </summary>
+      <div className="mt-1 ml-2 flex flex-col gap-0 border-line border-l pl-3">
+        <SidebarNodes
+          nodes={node.items ?? []}
+          pathname={pathname}
+          activeAnchor={activeAnchor}
+          depth={depth + 1}
+          onNavigate={onNavigate}
+        />
+      </div>
+    </details>
+  )
+}
+
 export function SidebarNodes({
   nodes,
   pathname,
@@ -641,29 +687,15 @@ export function SidebarNodes({
           )
         }
 
-        // Collapsible subgroup (e.g. "Make Payments"): expandable disclosure.
-        const open = !node.collapsed || nodeContainsActive(node, pathname, activeAnchor)
         return (
-          <details
+          <SidebarDisclosure
             key={key}
-            open={open}
-            className="group/sb mt-1"
-            style={{ paddingLeft: depth > 1 ? `${(depth - 1) * 12}px` : undefined }}
-          >
-            <summary className="-mx-2 flex min-h-8 cursor-pointer list-none items-center justify-between rounded-[6px] px-2 py-1 font-sans text-[14px] text-foreground/65 tracking-[0] transition-colors hover:bg-foreground/[0.04] hover:text-foreground [&::-webkit-details-marker]:hidden">
-              {node.text}
-              <Chevron open={open} />
-            </summary>
-            <div className="mt-1 ml-2 flex flex-col gap-0 border-line border-l pl-3">
-              <SidebarNodes
-                nodes={node.items ?? []}
-                pathname={pathname}
-                activeAnchor={activeAnchor}
-                depth={depth + 1}
-                onNavigate={onNavigate}
-              />
-            </div>
-          </details>
+            node={node}
+            pathname={pathname}
+            activeAnchor={activeAnchor}
+            depth={depth}
+            onNavigate={onNavigate}
+          />
         )
       })}
     </>
@@ -931,20 +963,19 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
             ))}
           </nav>
           <div className="docs-header-mobile-resources">
-            <p className="docs-header-mobile-label">Tools</p>
+            <p className="docs-header-mobile-label">Resources</p>
+            {docsUtilitySections.map((section) => (
+              <WakuLink
+                key={section.id}
+                to={section.href}
+                onClick={close}
+                className="docs-header-mobile-utility-link"
+                aria-current={activeSection?.id === section.id ? 'page' : undefined}
+              >
+                {section.label}
+              </WakuLink>
+            ))}
             <DocsResourceLinks onNavigate={close} />
-            <WakuLink
-              to={specificationsSection.href}
-              onClick={close}
-              className="docs-header-mobile-utility-link"
-              aria-current={
-                activeSection?.id === 'protocol' || activeSection?.id === 'changelog'
-                  ? 'page'
-                  : undefined
-              }
-            >
-              {specificationsSection.label}
-            </WakuLink>
           </div>
           <details className="docs-header-mobile-agents">
             <summary>Agent setup</summary>

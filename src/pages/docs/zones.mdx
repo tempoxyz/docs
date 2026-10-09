@@ -1,6 +1,6 @@
 ---
 title: "Tempo Zones"
-seoTitle: "Tempo Zones: Private Stablecoin Balances | Tempo Docs"
+seoTitle: "Tempo Zones | Tempo Docs"
 description: Connect to a private stablecoin ledger, deposit from Tempo, read account activity, and track withdrawals.
 ---
 
@@ -13,37 +13,46 @@ import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 # Tempo Zones
 
-Keep stablecoin balances and account activity in a private ledger connected to Tempo. The operator can read the ledger; deposit and withdrawal amounts remain public.
+Keep stablecoin balances and account activity in a private ledger connected to Tempo. Deposit funds from Tempo, read private balances, and withdraw to the public network.
 
-[Connect to a Zone →](/docs/zones/connect)
+[Read the privacy model →](/docs/zones/privacy)
 
 </DocsProductOverview>
 
-## Understand the privacy boundary
+:::warning
+Zones is in limited preview. [Contact Tempo](https://tempo.xyz/contact) to discuss access and the deployment your application needs.
+:::
 
-Use a Zone when customer balances or treasury activity should remain off the public ledger. Decide which accounts your application controls and who needs access to their balances and history. Review the [privacy model](/docs/zones/privacy) for what account holders, the operator, and public observers can see.
+<span id="understand-the-privacy-boundary" />
 
+## How Zones work
+
+Each Zone has its own network and a portal on Tempo that holds its backing assets. Account-scoped access lets your application read private balances and activity. The operator can read the ledger; deposit and withdrawal amounts remain public. Read [Privacy](/docs/zones/privacy) before choosing a deployment.
+
+<span id="check-the-capabilities-of-your-deployment" />
+
+## Supported features
+
+The current permissioned runtime supports funding through the inbox and outbox. General TIP-20 transfers and user contract deployment are disabled. Confirm the operator's supported assets, signing tools, read access, and funding rules before integrating.
+
+Execution-proof enforcement depends on the deployed verifier and network configuration. Review [proving and settlement](/docs/protocol/zones/proving) with the operator; forced exits are not a generally available recovery path.
+
+<span id="integrate-a-zone" />
 <span id="confirm-the-deployment-details" />
 <span id="authenticate-private-account-access" />
 <span id="deposit-from-tempo" />
 <span id="read-the-private-balance" />
 <span id="withdraw-to-tempo" />
 
-## Integrate a Zone
+## Start building
 
 <Cards>
-  <Card title="Connect to a Zone" description="Confirm signing, read access, and funding rules for your deployment." to="/docs/zones/connect" icon="lucide:plug" />
-  <Card title="Deposit funds" description="Deposit through the public portal and confirm the private credit." to="/docs/zones/deposit" icon="lucide:arrow-down-left" />
-  <Card title="Balances and activity" description="Read the account's token balances and filtered history." to="/docs/zones/balances" icon="lucide:list" />
-  <Card title="Withdraw funds" description="Return funds to Tempo and track delivery or refunds." to="/docs/zones/withdraw" icon="lucide:arrow-up-right" />
+  <Card title="Connect" description="Configure and authenticate access to your Zone." to="/docs/zones/connect" icon="lucide:plug" />
+  <Card title="Deposit" description="Fund a private account through the portal on Tempo." to="/docs/zones/deposit" icon="lucide:arrow-down-left" />
+  <Card title="Balances and activity" description="Read the account's balances and filtered history." to="/docs/zones/balances" icon="lucide:list" />
+  <Card title="Withdraw" description="Return funds to Tempo and track delivery." to="/docs/zones/withdraw" icon="lucide:arrow-up-right" />
 </Cards>
 
-## Check the capabilities of your deployment
+<span id="try-the-testnet-sandbox" />
 
-The current permissioned runtime restricts token movement to the inbox and outbox. General TIP-20 transfers and user contract deployment are disabled. Check the operator's supported interfaces and [execution rules](/docs/protocol/zones/execution).
-
-Execution-proof enforcement depends on the deployed verifier and network configuration. Review [proving and settlement](/docs/protocol/zones/proving) with the operator; forced exits are not a generally available recovery path.
-
-## Try the testnet sandbox
-
-The [interactive sandbox](/docs/guide/private-zones) uses earlier interfaces and capabilities, including plaintext deposits and direct transfers. Use its guides with their named deployment. For another Zone, start with its operator-provided configuration.
+The [testnet sandbox](/docs/guide/private-zones) has interactive examples for an earlier deployment, including direct transfers. Its interfaces and capabilities differ from the current preview. Use those examples only with the named sandbox deployment.

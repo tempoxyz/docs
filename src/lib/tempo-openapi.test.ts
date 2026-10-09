@@ -1,3 +1,5 @@
+import { createRequire } from 'node:module'
+import { pathToFileURL } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { prepareTempoOpenApi } from './tempo-openapi'
 
@@ -66,6 +68,185 @@ describe('Tempo OpenAPI examples', () => {
     expect(result.components.schemas.UnrelatedSchema).toEqual(vaultSchema)
     expect(result.paths).toEqual(source.paths)
     expect(source.components.schemas.EarnVault.examples).toEqual([vault])
+  })
+
+  const vaultReadPaths = [
+    '/v1/earn/vaults',
+    '/v1/earn/vaults/verified',
+    '/v1/earn/vaults/{vaultId}',
+    '/v1/earn/vaults/{vaultId}/share-prices',
+    '/v1/earn/vaults/{vaultId}/positions/{address}',
+    '/v1/earn/vaults/{vaultId}/earnings/{address}',
+    '/v1/earn/addresses/{address}/positions',
+  ]
+  const vaultId = '0x20147491b5701dea880263241c335caca9be326d'
+  const chainParameter = {
+    in: 'query',
+    name: 'chainId',
+    description: 'Defaults to mainnet when omitted.',
+    schema: {
+      anyOf: [{ type: 'string', enum: ['mainnet', 'testnet'] }, { type: 'number' }],
+      default: 'mainnet',
+      examples: [4217],
+    },
+  }
+  const vaultParameter = {
+    in: 'path',
+    name: 'vaultId',
+    required: true,
+    schema: { type: 'string', pattern: '^0x[0-9a-fA-F]{40}$', example: '0x123' },
+  }
+  const includeParameter = {
+    in: 'query',
+    name: 'include',
+    schema: {
+      type: 'array',
+      items: { type: 'string', enum: ['access', 'apy', 'capabilities'] },
+      examples: [['apy']],
+    },
+  }
+  const accountParameter = {
+    in: 'path',
+    name: 'address',
+    required: true,
+    schema: { type: 'string', examples: ['0xbe058e1c4df8a4366a387bf595b284246a93039e'] },
+  }
+
+  it.each(vaultReadPaths)('prefills only editable request examples for GET %s', (path) => {
+    const parameters = [
+      chainParameter,
+      ...(path.includes('{vaultId}') ? [vaultParameter] : []),
+      ...(path.includes('{address}') ? [accountParameter] : []),
+      includeParameter,
+      { in: 'query', name: 'cursor', schema: { type: 'string', examples: ['existing-cursor'] } },
+      { in: 'query', name: 'asset', schema: { type: 'string', examples: ['existing-asset'] } },
+    ]
+    const operation = { parameters, responses: { '200': { description: 'Success' } } }
+    const source = { paths: { [path]: { get: operation, post: operation } } }
+    const snapshot = structuredClone(source)
+    const result = prepareTempoOpenApi(source) as typeof source
+    const expectedParameters = parameters.map((parameter) => {
+      const example =
+        parameter.name === 'chainId'
+          ? 'testnet'
+          : parameter.name === 'vaultId'
+            ? vaultId
+            : undefined
+      if (example === undefined) return parameter
+      return {
+        ...parameter,
+        ...(parameter.name === 'chainId'
+          ? { examples: { default: { value: 'testnet', 'x-disabled': false } } }
+          : { example }),
+        schema: {
+          ...parameter.schema,
+          examples: [example],
+          ...(Object.hasOwn(parameter.schema, 'example') ? { example } : {}),
+        },
+      }
+    })
+
+    expect(result).toEqual({
+      paths: { [path]: { get: { ...operation, parameters: expectedParameters }, post: operation } },
+    })
+    expect(source).toEqual(snapshot)
+  })
+
+  it('preserves Zone transaction IDs, other APIs, and unrelated parameter locations', () => {
+    const operation = { parameters: [chainParameter, vaultParameter, accountParameter] }
+    const source = {
+      paths: {
+        '/v1/earn/transactions/{senderTag}': {
+          get: {
+            parameters: [{ ...chainParameter, required: true, schema: { examples: [1424310003] } }],
+          },
+        },
+        '/v1/addresses/{address}/balances': { get: operation },
+        '/v1/routes': { get: operation },
+        '/v1/earn/vaults/{vaultId}': {
+          get: {
+            parameters: [
+              { ...chainParameter, in: 'header' },
+              { ...vaultParameter, in: 'query' },
+              accountParameter,
+            ],
+          },
+        },
+      },
+      components: { schemas: { ChainId: chainParameter.schema } },
+    }
+    expect(prepareTempoOpenApi(source)).toEqual(source)
+  })
+
+  it('uses the same testnet inputs in Vocs samples and the editable Scalar Try client', async () => {
+    const { parse } = await import('../../node_modules/vocs/dist/internal/openapi/parser.js')
+    const { codeSamples } = await import('../../node_modules/vocs/dist/internal/openapi/sample.js')
+    const requireFromVocs = createRequire(import.meta.resolve('vocs'))
+    const requestExamplesUrl = pathToFileURL(
+      requireFromVocs.resolve('@scalar/workspace-store/request-example'),
+    )
+    const { getExample } = await import(requestExamplesUrl.href)
+    const { buildRequestParameters } = await import(
+      new URL('./builder/header/build-request-parameters.js', requestExamplesUrl).href
+    )
+    const path = '/v1/earn/vaults/{vaultId}'
+    const spec = prepareTempoOpenApi({
+      openapi: '3.1.0',
+      info: { title: 'Tempo API', version: '1.0.0' },
+      servers: [{ url: 'https://api.tempo.xyz' }],
+      paths: {
+        [path]: {
+          get: {
+            operationId: 'getEarnVault',
+            parameters: [
+              { ...chainParameter, example: 'mainnet' },
+              vaultParameter,
+              includeParameter,
+            ],
+            responses: { '200': { description: 'Success' } },
+          },
+        },
+      },
+    })
+    const parsed = await parse({ path: '/docs/api', spec })
+    const operation = parsed.groups.flatMap((group) => group.operations)[0]
+    const samples = codeSamples(operation, parsed.servers[0]?.url)
+    expect(samples.length).toBeGreaterThan(0)
+    for (const sample of samples) {
+      expect(sample.code).toContain(`/v1/earn/vaults/${vaultId}`)
+      expect(sample.code).toContain('chainId=testnet')
+      expect(sample.code).toContain('include=apy')
+    }
+    expect(parsed.client).toHaveProperty('content')
+    if (!('content' in parsed.client)) throw new Error('Try must receive the prepared inline spec')
+    const paths = parsed.client.content.paths as Record<
+      string,
+      { get: { parameters: { name: string; schema: Record<string, unknown> }[] } }
+    >
+    const parameters = paths[path].get.parameters
+    expect(getExample(parameters.find((parameter) => parameter.name === 'chainId'))).toEqual({
+      value: 'testnet',
+      'x-disabled': false,
+    })
+    expect(getExample(parameters.find((parameter) => parameter.name === 'vaultId'))).toEqual({
+      value: vaultId,
+    })
+    expect(getExample(parameters.find((parameter) => parameter.name === 'include'))).toEqual({
+      value: ['apy'],
+    })
+    const chain = parameters.find((parameter) => parameter.name === 'chainId')
+    expect(chain).not.toHaveProperty('example')
+    expect(chain).not.toHaveProperty('required')
+    expect(chain?.schema.default).toBe('mainnet')
+    const request = buildRequestParameters(parameters)
+    expect(request.urlParams.toString()).toBe('chainId=testnet')
+    expect(request.pathVariables.vaultId).toBe(vaultId)
+
+    // Users can still change the network or uncheck the optional query row.
+    const edited = { ...chain, examples: { default: { value: 'mainnet', 'x-disabled': false } } }
+    expect(buildRequestParameters([edited]).urlParams.toString()).toBe('chainId=mainnet')
+    edited.examples.default['x-disabled'] = true
+    expect(buildRequestParameters([edited]).urlParams.has('chainId')).toBe(false)
   })
 
   it('keeps Try requests on the API host when resolving relative server URLs', () => {

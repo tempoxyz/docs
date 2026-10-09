@@ -1,13 +1,18 @@
 import { describe, expect, it } from 'vitest'
+import { earnDemoVault } from './earn-deposit-demo'
 import {
   type EarnVault,
+  earnVaultDetailRequestUrl,
   earnVaultRequestUrl,
   formatVaultLiquidity,
+  parseEarnVaultDetail,
   parseEarnVaultPage,
+  updateEarnVaultDirectory,
 } from './earn-vault-demo'
 
 const vault: EarnVault = {
   id: '0x1234567890123456789012345678901234567890',
+  verified: true,
   label: 'Test vault',
   assetToken: {
     address: '0x20c0000000000000000000000000000000000000',
@@ -109,5 +114,67 @@ describe('Earn vault requests', () => {
     expect(url.searchParams.get('cursor')).toBe(cursor)
     expect(url.searchParams.getAll('chainId')).toEqual(['mainnet'])
     expect(url.hash).toBe('')
+  })
+})
+
+describe('Earn vault discovery defaults', () => {
+  const empty = { vaults: [], selectedId: '', nextCursor: null, loaded: false }
+  const preferred = { ...vault, id: earnDemoVault, label: 'Verified test deployment' }
+  const page = { data: [vault, preferred], nextCursor: 'next' }
+
+  it('selects the real testnet deployment if listed and otherwise the first verified vault', () => {
+    expect(updateEarnVaultDirectory(empty, page, 'testnet').selectedId).toBe(earnDemoVault)
+    expect(updateEarnVaultDirectory(empty, page, 'mainnet').selectedId).toBe(vault.id)
+    expect(updateEarnVaultDirectory(empty, { ...page, data: [vault] }, 'testnet').selectedId).toBe(
+      vault.id,
+    )
+  })
+
+  it('does not invent a vault or select an unverified result', () => {
+    const unverified = { ...preferred, verified: false }
+    expect(
+      updateEarnVaultDirectory(empty, { data: [unverified], nextCursor: null }, 'testnet')
+        .selectedId,
+    ).toBe('')
+    expect(parseEarnVaultPage({ data: [unverified, vault], nextCursor: null }).data).toEqual([
+      vault,
+    ])
+  })
+
+  it('preserves a deliberate selection on refresh and pagination', () => {
+    const chosen = { ...empty, vaults: [vault], selectedId: vault.id, loaded: true }
+    expect(updateEarnVaultDirectory(chosen, page, 'testnet').selectedId).toBe(vault.id)
+    const next = updateEarnVaultDirectory(
+      chosen,
+      { data: [preferred, vault], nextCursor: null },
+      'testnet',
+      true,
+    )
+    expect(next.selectedId).toBe(vault.id)
+    expect(next.vaults).toEqual([vault, preferred])
+  })
+
+  it('replaces a removed selection using verified current data', () => {
+    const chosen = { ...empty, vaults: [vault], selectedId: vault.id, loaded: true }
+    expect(
+      updateEarnVaultDirectory(chosen, { data: [preferred], nextCursor: null }, 'testnet')
+        .selectedId,
+    ).toBe(earnDemoVault)
+    expect(updateEarnVaultDirectory(chosen, { data: [], nextCursor: null }, 'testnet')).toEqual({
+      ...empty,
+      loaded: true,
+    })
+  })
+
+  it('uses a matching verified detail response to refresh a selection outside the first page', () => {
+    expect(parseEarnVaultDetail(vault, vault.id)).toEqual(vault)
+    expect(parseEarnVaultDetail({ ...vault, verified: false }, vault.id)).toBeNull()
+    expect(() => parseEarnVaultDetail(preferred, vault.id)).toThrow('unexpected vault response')
+    const url = new URL(earnVaultDetailRequestUrl('testnet', vault.id))
+    expect(url.pathname).toBe(`/v1/earn/vaults/${vault.id}`)
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      chainId: 'testnet',
+      include: 'access,capabilities,apy,tvl',
+    })
   })
 })

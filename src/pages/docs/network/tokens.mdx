@@ -1,0 +1,120 @@
+---
+title: TIP-20 Tokens
+seoTitle: TIP-20 Tokens | Tempo Docs
+description: Create a TIP-20 token on Tempo, mint its initial supply, and configure token permissions.
+---
+
+# TIP-20 Tokens
+
+Create stablecoins with Tempo's native token standard. TIP-20 tokens include transfer memos, issuance roles, supply controls, and transfer policies, without deploying a custom token implementation.
+
+:::info[Interactive walkthrough]
+[Create a token](/docs/guide/issuance/create-a-stablecoin#stablecoin-creation-demo) with a test wallet, then follow the browser implementation.
+:::
+
+## Tokens on Tempo
+
+Use [token lists](/docs/quickstart/tokenlist) to discover assets for your application and [read balances](/docs/accounts/balances) to show what an account holds. Read and write methods use integer base units; TIP-20 tokens have six decimal places.
+
+Creating a token creates its onchain representation. It does not provide the reserves or redemption arrangements behind a stablecoin. If you already issue an ERC-20, use the [migration guide](/docs/guide/issuance/migrate-erc20-to-tip20) to choose an integration path.
+
+## Create a token
+
+Create a test token on Moderato using the [Network example setup](/docs/network/examples). The Python setup includes the token-factory ABI; each example assigns the funded account as administrator.
+
+::::code-group
+
+```ts [Viem]
+// [!include ~/snippets/network-tokens.ts:create]
+```
+
+```bash [CLI]
+SALT=0x$(openssl rand -hex 32)
+cast tip20-token create 'Demo USD' DEMO USD "$TOKEN" "$SENDER" "$SALT" \
+  --rpc-url "$RPC_URL" --tempo.fee-token "$TOKEN" --interactive
+DEMO_TOKEN=$(cast call "$FACTORY" 'getTokenAddress(address,bytes32)(address)' \
+  "$SENDER" "$SALT" --rpc-url "$RPC_URL")
+```
+
+```ts [Wagmi]
+// [!include ~/snippets/network-wagmi.ts:create]
+```
+
+```python [Python]
+import os
+from network_config import ALPHA_USD, Call, account, factory, make_transaction, submit
+
+salt = os.urandom(32)
+args = ["Demo USD", "DEMO", "USD", ALPHA_USD, account.address, salt]
+data = factory.encode_abi("createToken", args=args)
+submit(make_transaction((Call.create(to=factory.address, data=data),)))
+token_address = factory.functions.getTokenAddress(account.address, salt).call()
+print(token_address)
+```
+
+::::
+
+Choose the `currency` carefully: it is immutable and describes the asset the token tracks.
+
+## Manage supply and permissions
+
+Creation does not mint a supply. Continue with the new token to grant the issuer role to your test account:
+
+::::code-group
+
+```ts [Viem]
+// [!include ~/snippets/network-tokens.ts:roles]
+```
+
+```bash [CLI]
+cast tip20-token grant-role "$DEMO_TOKEN" issuer "$SENDER" \
+  --rpc-url "$RPC_URL" --tempo.fee-token "$TOKEN" --interactive
+```
+
+```ts [Wagmi]
+// [!include ~/snippets/network-wagmi.ts:roles]
+```
+
+```python [Python]
+from network_config import TIP20, w3
+
+token = TIP20(token_address)
+call = token.grant_role(role=token.issuer_role(w3), account=account.address)
+submit(make_transaction((call,)))
+```
+
+::::
+
+Then mint 100 tokens:
+
+::::code-group
+
+```ts [Viem]
+// [!include ~/snippets/network-tokens.ts:mint]
+```
+
+```bash [CLI]
+cast erc20 mint "$DEMO_TOKEN" "$SENDER" 100000000 \
+  --rpc-url "$RPC_URL" --tempo.fee-token "$TOKEN" --interactive
+```
+
+```ts [Wagmi]
+// [!include ~/snippets/network-wagmi.ts:mint]
+```
+
+```python [Python]
+call = token.mint(to=account.address, amount=100_000_000)
+submit(make_transaction((call,)))
+```
+
+::::
+
+These are signed onchain operations. To submit through HTTP, [encode and sign the transaction locally, then broadcast through JSON-RPC](/docs/network/transactions#sign-and-submit).
+
+For production operations, assign each role to the account responsible for that operation. Use the detailed guides to:
+
+- [Mint and burn tokens](/docs/guide/issuance/mint-stablecoins).
+- [Manage roles, supply caps, and transfer policies](/docs/guide/issuance/manage-stablecoin).
+- [Enable the token for fee payment](/docs/guide/issuance/use-for-fees).
+
+The [TIP-20 specification](/docs/protocol/tip20/spec) is the reference for contract behavior. [Receive policies](/docs/protocol/tip403/receive-policies) govern which tokens and senders an account accepts and how blocked delivery is handled.

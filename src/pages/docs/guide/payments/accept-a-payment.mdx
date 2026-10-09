@@ -1,25 +1,31 @@
 ---
-title: "Receive a payment"
+title: "Receive payments"
 seoTitle: "Receive Stablecoin Payments | Tempo Docs"
 description: Verify incoming stablecoin transfers, confirm delivery to your account, and match payments to customers and invoices.
 interactive: true
 ---
 
+import { OpenApi } from 'vocs'
 import * as Demo from '../../../../components/guides/Demo.tsx'
 import { AddFunds } from '../../../../components/guides/steps/payments/AddFunds.tsx'
 import { Connect } from '../../../../components/guides/steps/auth/Connect.tsx'
 import * as Token from '../../../../components/guides/tokens'
-import { Tabs, Tab } from 'vocs'
 
 <span id="how-to-receive-stablecoin-payments" />
 
-# Receive a payment
+<span id="receive-a-payment" />
+
+# Receive payments
 
 Receive stablecoins at a Tempo account, confirm the token and amount delivered, and match the transfer to your payment records. Use [payment references](/docs/guide/payments/transfer-memos) for invoices or [customer deposit addresses](/docs/guide/payments/virtual-addresses) to identify who paid.
 
-## Receive stablecoin payments
+<span id="receive-stablecoin-payments" />
 
-Share your account address with the sender, then read the incoming transfer events to confirm receipt.
+## Get a deposit address
+
+Share an account address you control with the sender. For customer-specific addresses that credit a shared account, use [customer deposit addresses](/docs/guide/payments/virtual-addresses); your application maintains the customer ledger. For deposits from other networks, use [Routes](/docs/routes/deposits).
+
+Show the network and token alongside the receiving address, then read incoming transfer events to confirm delivery.
 
 This demo funds a test account and displays its token balances. The examples below use AlphaUSD on Moderato testnet. Configure your client or `RPC_URL` / `TEMPO_RPC_URL` for `https://rpc.moderato.tempo.xyz`; use an account you control as the recipient.
 
@@ -28,7 +34,9 @@ This demo funds a test account and displays its token balances. The examples bel
   <AddFunds stepNumber={2} last />
 </Demo.Container>
 
-## Verify stablecoin payments
+<span id="verify-stablecoin-payments" />
+
+## Detect payments
 
 Use the account balance to display available funds. To verify a payment, match the network, token contract, recipient, and amount in its confirmed transfer events to your payment record.
 
@@ -40,319 +48,76 @@ For payments held by a receive policy, see [Handle blocked receipts](/docs/guide
 
 For balance snapshots and display formatting, use [Balances and activity](/docs/accounts/balances#read-a-stablecoin-balance). A balance change alone does not identify which customer or invoice to credit.
 
-### Listen for TIP-20 transfer events
+<span id="listen-for-tip-20-transfer-events" />
 
-Set `TEMPO_RECIPIENT` to your receiving account. The Viem example filters incoming transfers to that address.
+Enter the receiving account as both `address` and `recipient`. Set `chainId` to `42431` and `type` to `transfer` to read incoming payments on Moderato:
 
-<Tabs stateKey="library">
-  <Tab title="Viem">
+<OpenApi.Playground operationId="getAddressActivities" anchors={false} />
 
-    :::code-group
+For direct transfer subscriptions, use the [CLI, Viem, or Wagmi setup](/docs/accounts/examples#choose-your-tools). Set `account` to the recipient and `token` to AlphaUSD. Wagmi hooks run inside a React component and clean up on unmount:
 
-    ```ts [example.ts]
-    import { getAddress } from 'viem'
-    import { client } from './viem.config'
+::::code-group
 
-    const recipient = process.env.TEMPO_RECIPIENT
-    if (!recipient) throw new Error('Set TEMPO_RECIPIENT')
+```ts [Viem]
+const unwatch = client.token.watchTransfer({
+  token, args: { to: account },
+  onTransfer: (transfer, log) => console.log(transfer, log.transactionHash),
+})
+// Call unwatch() when the view closes.
+```
 
-    const unwatch = client.token.watchTransfer({
-      token: '0x20c0000000000000000000000000000000000001',
-      args: { to: getAddress(recipient) },
-      onTransfer: (transfer, log) => {
-        console.log('Incoming transfer:', {
-          from: transfer.from,
-          amount: transfer.amount,
-          transactionHash: log.transactionHash,
-          logIndex: log.logIndex,
-        })
-      },
-    })
-    ```
+```bash [CLI]
+cast logs 'Transfer(address indexed from,address indexed to,uint256 value)' \
+  '' "$TEMPO_ACCOUNT_ADDRESS" --address "$ALPHA_USD" \
+  --subscribe --rpc-url wss://rpc.moderato.tempo.xyz
+```
 
-    ```ts [viem.config.ts]
-    // [!include ~/snippets/viem.moderato.public.ts:setup]
-    ```
+```tsx [Wagmi]
+import { Hooks } from 'wagmi/tempo'
+Hooks.token.useWatchTransfer({
+  token, args: { to: account },
+  onTransfer: (transfer, log) => console.log(transfer, log.transactionHash),
+})
+```
 
-    :::
+::::
 
-  </Tab>
+Use [webhooks](/docs/api/webhooks) for backend callbacks. Read historical activity after reconnecting and follow pagination to recover missed events. The [complete event examples](/docs/guide/payments/accept-a-payment/examples#listen-for-tip-20-transfer-events) cover direct RPC log queries.
 
-  <Tab title="Rust">
-
-    :::code-group
-
-    ```rust [example.rs]
-    use alloy::{primitives::address, providers::ProviderBuilder};
-    use futures::StreamExt;
-    use tempo_alloy::{TempoNetwork, contracts::precompiles::ITIP20};
-
-    #[tokio::main]
-    async fn main() -> Result<(), Box<dyn std::error::Error>> {
-        let provider = ProviderBuilder::new_with_network::<TempoNetwork>()
-            .connect(&std::env::var("RPC_URL").expect("No RPC URL set"))
-            .await?;
-
-        // Watch for incoming transfers // [!code focus]
-        let mut transfers = ITIP20::new( // [!code focus]
-            address!("0x20c0000000000000000000000000000000000001"), // [!code focus]
-            &provider, // [!code focus]
-        ) // [!code focus]
-        .Transfer_filter() // [!code focus]
-        .watch() // [!code focus]
-        .await? // [!code focus]
-        .into_stream(); // [!code focus]
-
-        while let Some(Ok((payment, _))) = transfers.next().await { // [!code focus]
-            println!("Received payment: {payment:?}") // [!code focus]
-        } // [!code focus]
-
-        Ok(())
-    }
-    ```
-
-    ```rust [provider.rs]
-    // [!include ~/snippets/rust-provider.rs:setup]
-    ```
-
-    :::
-
-  </Tab>
-
-  <Tab title="Python">
-
-    :::code-group
-
-    ```python [example.py]
-    import json
-    from web3 import Web3
-    from provider import w3
-
-    token_address = "0x20c0000000000000000000000000000000000001"  # AlphaUSD
-
-    transfer_event_abi = { # [!code focus]
-        "anonymous": False, # [!code focus]
-        "name": "Transfer", # [!code focus]
-        "type": "event", # [!code focus]
-        "inputs": [ # [!code focus]
-            {"indexed": True, "name": "from", "type": "address"}, # [!code focus]
-            {"indexed": True, "name": "to", "type": "address"}, # [!code focus]
-            {"indexed": False, "name": "value", "type": "uint256"}, # [!code focus]
-        ], # [!code focus]
-    } # [!code focus]
-
-    contract = w3.eth.contract( # [!code focus]
-        address=Web3.to_checksum_address(token_address), # [!code focus]
-        abi=[transfer_event_abi], # [!code focus]
-    ) # [!code focus]
-
-    # Get historical Transfer events # [!code focus]
-    events = contract.events.Transfer().get_logs(from_block="latest") # [!code focus]
-    for event in events: # [!code focus]
-        print(f"Transfer: {event.args['from']} -> {event.args['to']}: {event.args['value']}") # [!code focus]
-    ```
-
-    ```python [provider.py]
-    from web3 import Web3
-
-    w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz"))
-    assert w3.eth.chain_id == 42431, "Expected Moderato testnet"
-    ```
-
-    :::
-
-  </Tab>
-
-  <Tab title="Go">
-
-    :::code-group
-
-    ```go [main.go]
-    package main
-
-    import (
-    	"context"
-    	"fmt"
-    	"log"
-
-    	"github.com/ethereum/go-ethereum/crypto"
-    )
-
-    func main() {
-    	c := newClient()
-    	ctx := context.Background()
-
-    	token := "0x20c0000000000000000000000000000000000001"
-
-    	// Transfer(address,address,uint256) event topic // [!code focus]
-    	transferTopic := crypto.Keccak256Hash([]byte("Transfer(address,address,uint256)")) // [!code focus]
-
-    	resp, err := c.SendRequest(ctx, "eth_getLogs", map[string]interface{}{ // [!code focus]
-    		"fromBlock": "0x0", // [!code focus]
-    		"toBlock":   "latest", // [!code focus]
-    		"address":   token, // [!code focus]
-    		"topics":    []interface{}{transferTopic.Hex()}, // [!code focus]
-    	}) // [!code focus]
-    	if err != nil {
-    		log.Fatal(err)
-    	}
-
-    	logs, _ := resp.Result.([]interface{}) // [!code focus]
-    	for _, entry := range logs { // [!code focus]
-    		l := entry.(map[string]interface{}) // [!code focus]
-    		topics := l["topics"].([]interface{}) // [!code focus]
-    		fmt.Printf("Transfer: %s -> %s (data: %s)\n", topics[1], topics[2], l["data"]) // [!code focus]
-    	} // [!code focus]
-    }
-    ```
-
-    ```go [provider.go]
-    // [!include ~/snippets/go-provider.go:setup]
-    ```
-
-    :::
-
-  </Tab>
-
-  <Tab title="Cast">
-
-    ```bash
-    $ cast logs \
-      --address 0x20c0000000000000000000000000000000000001 \
-      "Transfer(address indexed, address indexed, uint256)" \
-      --rpc-url $TEMPO_RPC_URL
-    ```
-
-  </Tab>
-</Tabs>
-
-## Reconcile payments with memos
-
+<span id="reconcile-payments-with-memos" />
 <span id="payment-reconciliation-with-memos" />
 
-Use the memo to find the invoice, then verify the payment before marking it paid.
+## Match payments to customers
+
+Use the memo to find an invoice, or a [customer deposit address](/docs/guide/payments/virtual-addresses) to identify who paid. Enter the candidate transaction hash and its network below to inspect the token movements.
+
+<OpenApi.Playground operationId="getTransactionActivities" anchors={false} />
 
 :::::steps
 
 ### Find the invoice
 
-Read the memo from `TransferWithMemo` and look up the corresponding invoice. Use the [same memo encoding](/docs/guide/payments/transfer-memos#encode-a-payment-reference) when sending and matching payments.
+Match the transfer's memo using the [same reference encoding](/docs/guide/payments/transfer-memos#encode-a-payment-reference) your application requested.
 
 ### Verify delivery
 
-Check the network, token, recipient, and amount against the invoice using the confirmed `Transfer` event. For [blocked receipts](/docs/guide/payments/configure-receive-policies#monitor-blocked-receipts), the recipient is the receive-policy guard.
+Check the network, token, recipient, and amount against the invoice. Confirm the successful transaction and the delivered `Transfer` event. For a blocked receipt, funds go to the receive-policy guard rather than the intended recipient.
 
 ### Record the payment once
 
-Store the network, transaction hash, and transfer log index as a unique event key. Save it and mark the invoice paid in the same database transaction. Replayed events or another payment with the same memo must not fulfill a paid invoice again.
+Store the network, transaction hash, and transfer log index as a unique event key. Save that event and mark the invoice paid in one database transaction. An API response or matching memo alone must not fulfill an invoice.
 
 :::::
 
-<details>
-<summary>Full TypeScript verification example</summary>
-
-This example verifies one payment of 10 AlphaUSD to a regular account on Moderato testnet. Replace the expected values with your invoice details and set `PAYMENT_TX_HASH` to the payment transaction hash. It prints an event key for your database to record.
-
-```ts [verify-payment.ts]
-import {
-  parseEventLogs,
-  parseUnits,
-  toHex,
-} from 'viem'
-import { tempoModerato } from 'viem/chains'
-import { Abis, createClient } from 'viem/tempo'
-
-const client = createClient({ chain: tempoModerato })
-const expected = {
-  token: '0x20c0000000000000000000000000000000000001',
-  recipient: '0x742d35cc6634c0532925a3b844bc9e7595f0bebb',
-  amount: parseUnits('10', 6),
-  memo: toHex('invoice-001', { size: 32 }),
-}
-
-const hash = process.env.PAYMENT_TX_HASH
-if (!hash || !/^0x[0-9a-fA-F]{64}$/.test(hash)) {
-  throw new Error('Set PAYMENT_TX_HASH to the payment transaction hash')
-}
-if (await client.getChainId() !== tempoModerato.id) {
-  throw new Error('Expected Moderato testnet')
-}
-
-const receipt = await client.waitForTransactionReceipt({
-  hash: hash as `0x${string}`,
-})
-if (receipt.status !== 'success') throw new Error('Payment transaction failed')
-
-const tokenLogs = receipt.logs.filter(
-  (log) => log.address.toLowerCase() === expected.token,
-)
-const payments = parseEventLogs({
-  abi: Abis.tip20,
-  eventName: 'TransferWithMemo',
-  logs: tokenLogs,
-  strict: true,
-}).filter((log) =>
-  log.args.to.toLowerCase() === expected.recipient &&
-  log.args.amount === expected.amount &&
-  log.args.memo === expected.memo,
-)
-
-if (payments.length !== 1) {
-  throw new Error('Expected one transfer matching the invoice')
-}
-
-const payment = payments[0]
-const deliveries = parseEventLogs({
-  abi: Abis.tip20,
-  eventName: 'Transfer',
-  logs: tokenLogs,
-  strict: true,
-}).filter((log) =>
-  log.args.from.toLowerCase() === payment.args.from.toLowerCase() &&
-  log.args.to.toLowerCase() === expected.recipient &&
-  log.args.amount === expected.amount,
-)
-if (deliveries.length !== 1) {
-  throw new Error('Expected one delivery to the invoice recipient')
-}
-
-const eventKey = `${tempoModerato.id}:${receipt.transactionHash}:${deliveries[0].logIndex}`
-console.log('Verified payment:', { eventKey, memo: expected.memo })
-```
-
-</details>
+Use the [complete TypeScript verifier](/docs/guide/payments/accept-a-payment/examples#verify-an-invoice) for receipt checks, memo matching, and a stable event key.
 
 <span id="smart-contract-integration" />
-
-## Receive payments in a contract
-
-When a contract collects payment with `transferFrom`, require delivery before fulfilling the invoice:
-
-- Read the expected token, payer, and amount from the invoice record, and reject an invoice that is already paid.
-- Check that the payer authorized the payment and approved the required token allowance.
-- Read the contract’s token balance before and after `transferFrom`. Require the expected increase before updating the invoice or delivering the purchased item.
-- Revert if the expected funds did not arrive.
-
-See the [TIP-20 contract interface](/docs/protocol/tip20/spec#tip20) and [receive-policy behavior](/docs/guide/payments/configure-receive-policies#understand-receive-policy-behavior) before implementing settlement.
-
+<span id="receive-payments-in-a-contract" />
 <span id="payment-verification-best-practices" />
-
-## Record a payment once
-
-- Verify the token contract, recipient, and amount in confirmed transfer events before marking an order paid.
-- Match a memo or customer deposit address to the expected payment record.
-- Store the transaction hash and log index to avoid processing the same event twice.
-- Handle partial payments, refunds, blocked receipts, and failed transactions explicitly.
-
+<span id="record-a-payment-once" />
 <span id="cross-stablecoin-payments" />
-
-## Convert a received stablecoin
-
-If your application accepts one stablecoin but holds another, [swap the received funds](/docs/guide/stablecoin-dex/executing-swaps). Set the minimum acceptable output from a current quote. Choosing a different fee token only changes how you pay transaction fees.
-
+<span id="convert-a-received-stablecoin" />
 <span id="next-steps-for-accepting-payments" />
+<span id="continue-your-payment-integration" />
 
-## Continue your payment integration
-
-- **[Send a payment](/docs/guide/payments/send-a-payment)** to learn how to send payments
-- Learn more about [Exchange](/docs/guide/stablecoin-dex) for cross-stablecoin payments
+For contract-based collections, read [Receive payments in a contract](/docs/guide/payments/accept-a-payment/examples#receive-payments-in-a-contract). If you need to hold a different stablecoin, [swap the received funds](/docs/guide/stablecoin-dex/executing-swaps) after verifying delivery.

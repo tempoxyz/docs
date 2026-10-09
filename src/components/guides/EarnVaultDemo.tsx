@@ -5,96 +5,118 @@ import { Container } from '../Container'
 import { Button, Step, StringFormatter, useCopyToClipboard, useHydrated } from './Demo'
 import {
   type EarnNetwork,
-  type EarnVault,
+  type EarnVaultDirectory,
+  earnVaultDetailRequestUrl,
   earnVaultRequestUrl,
   formatVaultLiquidity,
+  parseEarnVaultDetail,
   parseEarnVaultPage,
+  updateEarnVaultDirectory,
 } from './earn-vault-demo'
 
 export function EarnVaultDemo() {
   const inputId = React.useId()
   const ready = useHydrated()
   const [network, setNetwork] = React.useState<EarnNetwork>('testnet')
-  const [vaults, setVaults] = React.useState<EarnVault[]>([])
-  const [selectedId, setSelectedId] = React.useState('')
-  const [nextCursor, setNextCursor] = React.useState<string | null>(null)
-  const [loaded, setLoaded] = React.useState(false)
-  const [pending, setPending] = React.useState(false)
+  const [directory, setDirectory] = React.useState<EarnVaultDirectory>({
+    vaults: [],
+    selectedId: '',
+    nextCursor: null,
+    loaded: false,
+  })
+  const { vaults, selectedId, nextCursor, loaded } = directory
+  const [pending, setPending] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [copied, copy] = useCopyToClipboard()
   const request = React.useRef<AbortController | null>(null)
   const selected = vaults.find((vault) => vault.id === selectedId)
 
-  React.useEffect(
-    () => () => {
-      request.current?.abort()
-      request.current = null
-    },
-    [],
-  )
-
   function changeNetwork(value: EarnNetwork) {
+    if (value === network) return
     request.current?.abort()
     request.current = null
     setNetwork(value)
-    setVaults([])
-    setSelectedId('')
-    setNextCursor(null)
-    setLoaded(false)
-    setPending(false)
+    setDirectory({ vaults: [], selectedId: '', nextCursor: null, loaded: false })
+    setPending(true)
     setError(null)
   }
 
-  async function loadVaults(more = false) {
-    if (!ready || pending || (more && !nextCursor)) return
-    request.current?.abort()
-    const controller = new AbortController()
-    request.current = controller
-    setPending(true)
-    setError(null)
-    const timeout = setTimeout(() => controller.abort(), 20_000)
-    try {
-      const response = await fetch(
-        earnVaultRequestUrl(network, more ? (nextCursor ?? undefined) : undefined),
-        {
+  const loadVaults = React.useCallback(
+    async (cursor?: string, selectedVault?: string) => {
+      if (!ready || request.current) return
+      const controller = new AbortController()
+      request.current = controller
+      setPending(true)
+      setError(null)
+      const timeout = setTimeout(() => controller.abort(), 20_000)
+      try {
+        const response = await fetch(earnVaultRequestUrl(network, cursor), {
           signal: controller.signal,
           credentials: 'omit',
           referrerPolicy: 'no-referrer',
-        },
-      )
-      if (!response.ok) {
-        if (response.status === 429) throw new Error('Too many requests. Wait a moment and retry.')
-        if ([401, 402, 403].includes(response.status))
-          throw new Error(
-            'Public access is unavailable. Use the API reference for authenticated requests.',
-          )
-        throw new Error(`Could not load vaults (HTTP ${response.status}). Try again.`)
+        })
+        if (!response.ok) {
+          if (response.status === 429)
+            throw new Error('Too many requests. Wait a moment and retry.')
+          if ([401, 402, 403].includes(response.status))
+            throw new Error(
+              'Public access is unavailable. Use the API reference for authenticated requests.',
+            )
+          throw new Error(`Could not load vaults (HTTP ${response.status}). Try again.`)
+        }
+        const result = parseEarnVaultPage(await response.json())
+        if (request.current !== controller) return
+        // A selected vault may be outside the refreshed first page. Refresh its
+        // own listing instead of silently replacing it or retaining stale details.
+        if (
+          !cursor &&
+          selectedVault &&
+          !result.data.some((vault) => vault.id.toLowerCase() === selectedVault.toLowerCase())
+        ) {
+          const detailResponse = await fetch(earnVaultDetailRequestUrl(network, selectedVault), {
+            signal: controller.signal,
+            credentials: 'omit',
+            referrerPolicy: 'no-referrer',
+          })
+          if (request.current !== controller) return
+          if (detailResponse.ok) {
+            const detail = parseEarnVaultDetail(await detailResponse.json(), selectedVault)
+            if (detail) result.data.push(detail)
+          } else if (detailResponse.status !== 404) {
+            throw new Error('Could not refresh the selected vault. Try again.')
+          }
+        }
+        if (request.current !== controller) return
+        setDirectory((previous) =>
+          updateEarnVaultDirectory(previous, result, network, Boolean(cursor)),
+        )
+      } catch (cause) {
+        if (request.current !== controller) return
+        setError(
+          controller.signal.aborted
+            ? 'The request timed out. Try again.'
+            : cause instanceof Error && !(cause instanceof TypeError)
+              ? cause.message
+              : 'Could not reach Tempo API. Check your connection and try again.',
+        )
+      } finally {
+        clearTimeout(timeout)
+        if (request.current === controller) {
+          request.current = null
+          setPending(false)
+        }
       }
-      const result = parseEarnVaultPage(await response.json())
-      if (request.current !== controller) return
-      const items = more ? [...vaults, ...result.data] : result.data
-      const unique = [...new Map(items.map((vault) => [vault.id, vault])).values()]
-      setVaults(unique)
-      setNextCursor(result.nextCursor)
-      setSelectedId((id) => (unique.some((vault) => vault.id === id) ? id : ''))
-      setLoaded(true)
-    } catch (cause) {
-      if (request.current !== controller) return
-      setError(
-        controller.signal.aborted
-          ? 'The request timed out. Try again.'
-          : cause instanceof Error && !(cause instanceof TypeError)
-            ? cause.message
-            : 'Could not reach Tempo API. Check your connection and try again.',
-      )
-    } finally {
-      clearTimeout(timeout)
-      if (request.current === controller) {
-        request.current = null
-        setPending(false)
-      }
+    },
+    [network, ready],
+  )
+
+  React.useEffect(() => {
+    void loadVaults()
+    return () => {
+      request.current?.abort()
+      request.current = null
     }
-  }
+  }, [loadVaults])
 
   const inputClass =
     'min-h-10 min-w-0 max-w-full rounded-md border border-[var(--line-strong)] bg-[var(--surface-card)] px-3 py-2 text-[14px] text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
@@ -116,7 +138,7 @@ export function EarnVaultDemo() {
         <div className="space-y-6" aria-busy={pending}>
           <Step
             number={1}
-            title="Load the vault directory"
+            title="Choose a network"
             active
             completed={loaded}
             actions={
@@ -124,7 +146,7 @@ export function EarnVaultDemo() {
                 type="button"
                 variant="accent"
                 disabled={!ready || pending}
-                onClick={() => loadVaults()}
+                onClick={() => loadVaults(undefined, selectedId)}
               >
                 {pending ? 'Loading…' : loaded ? 'Refresh vaults' : 'Load vaults'}
               </Button>
@@ -174,7 +196,9 @@ export function EarnVaultDemo() {
                   id={`${inputId}-vault`}
                   value={selectedId}
                   disabled={pending}
-                  onChange={(event) => setSelectedId(event.target.value)}
+                  onChange={(event) =>
+                    setDirectory((current) => ({ ...current, selectedId: event.target.value }))
+                  }
                   className={`${inputClass} w-full`}
                 >
                   <option value="">Choose a vault</option>
@@ -185,7 +209,11 @@ export function EarnVaultDemo() {
                   ))}
                 </select>
                 {nextCursor && (
-                  <Button type="button" disabled={pending} onClick={() => loadVaults(true)}>
+                  <Button
+                    type="button"
+                    disabled={pending}
+                    onClick={() => loadVaults(nextCursor ?? undefined)}
+                  >
                     Load more
                   </Button>
                 )}
@@ -240,7 +268,11 @@ export function EarnVaultDemo() {
               </div>
             ) : (
               <p className="mt-3 text-[13px] text-gray10">
-                Load a directory to see its available vaults.
+                {pending
+                  ? 'Loading verified vaults…'
+                  : loaded
+                    ? 'No verified vaults are available on this network.'
+                    : 'Retry loading the directory to inspect a vault.'}
               </p>
             )}
           </Step>

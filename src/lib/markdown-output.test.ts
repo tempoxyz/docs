@@ -119,6 +119,21 @@ Use your root key to revoke the admin key.
     expect(output).not.toContain('<AdminKeyDemo')
   })
 
+  test('describes the testnet Earn deposit flow for agent readers', async () => {
+    const output = await render('<EarnDepositDemo />')
+    expect(output).toContain('create a testnet passkey account')
+    expect(output).toContain('choose a deposit amount (1 pathUSD by default)')
+    expect(output).toContain('withdraw the test position')
+    expect(output).not.toContain('<EarnDepositDemo')
+  })
+
+  test('describes restoring the deposit account for a test withdrawal', async () => {
+    const output = await render('<EarnWithdrawDemo />')
+    expect(output).toContain('restore the passkey test account from the deposit demo')
+    expect(output).toContain('redeem its full position')
+    expect(output).not.toContain('<EarnWithdrawDemo')
+  })
+
   test('keeps diagram, callout, badge, and button meaning', async () => {
     const output = await render(`
 <MermaidDiagram chart={\`sequenceDiagram

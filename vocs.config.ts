@@ -1,4 +1,4 @@
-import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
+import { Changelog, type Config, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
 import { resolveBaseUrl } from './src/lib/base-url'
 import { rehypeCompactShikiStyles } from './src/lib/compact-shiki-styles'
 import {
@@ -6,12 +6,14 @@ import {
   docsRouteDestination,
   proxiedLegacyDocsRoutes,
 } from './src/lib/docs-routing'
-import { docsSections, specificationsSection } from './src/lib/docs-sections'
+import { docsSections, docsUtilitySections } from './src/lib/docs-sections'
 import { docsStructuredDataHead } from './src/lib/docs-structured-data'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 import { demoteMarkdownHeadings } from './src/lib/markdown-headings'
 import { plainMarkdownComponents } from './src/lib/markdown-output'
 import { loadTempoOpenApi } from './src/lib/tempo-openapi'
+
+type SidebarItem = Extract<Config['sidebar'], readonly unknown[]>[number]
 
 // Only set baseUrl in production — Vocs injects a <base> tag from this value,
 // which causes all links to resolve to the absolute URL on preview deployments.
@@ -209,11 +211,12 @@ export default defineConfig({
       build: 'BUILD',
       cli: 'CLI',
       'developer-tools': 'DEVELOPER TOOLS',
-      development: 'DEVELOPER RESOURCES',
+      development: 'TEMPO EVM',
       earn: 'EARN',
       ecosystem: 'ECOSYSTEM',
       'get-started': 'GET STARTED',
       guide: 'BUILD',
+      network: 'NETWORK',
       partners: 'PARTNERS',
       payments: 'PAYMENTS',
       performance: 'PERFORMANCE',
@@ -222,7 +225,7 @@ export default defineConfig({
       routes: 'ROUTES',
       sdk: 'SDKs',
       server: 'SERVER',
-      tools: 'TOOLS',
+      tools: 'APIS & SDKS',
       wallet: 'WALLET',
       zones: 'ZONES',
     }
@@ -284,7 +287,10 @@ export default defineConfig({
       sidebar: {
         backLink: false,
         collapsed: true,
-        top: [{ text: '← Back to developer resources', link: '/docs/development' }],
+        top: [
+          { text: '← APIs & SDKs', link: '/docs/tools' },
+          { text: 'API reference', link: '/docs/api' },
+        ],
         intro: [
           apiConsoleSidebar,
           {
@@ -340,7 +346,7 @@ export default defineConfig({
             link: '/docs/api/reference',
           },
         ],
-        tagGroupsCollapsed: false,
+        tagGroupsCollapsed: true,
       },
     },
   ],
@@ -369,79 +375,51 @@ export default defineConfig({
       {
         text: 'Get Started',
         items: [
-          { text: 'Overview', link: '/get-started' },
-          { text: 'Use Cases', link: '/get-started/use-cases' },
-          { text: 'Stablecoins on Tempo', link: '/get-started/stablecoins' },
-        ],
-      },
-      {
-        text: 'Start building',
-        items: [
+          { text: 'Start building', link: '/get-started' },
+          { text: 'Quickstart', link: '/get-started/quickstart' },
+          { text: 'Testnet faucet', link: '/docs/quickstart/faucet' },
           { text: 'Build with AI', link: '/docs/guide/using-tempo-with-ai' },
-          { text: 'Create an account', link: '/docs/accounts/create' },
-          { text: 'Get test funds', link: '/docs/quickstart/faucet' },
-          { text: 'Send a payment', link: '/docs/guide/payments/send-a-payment' },
-          { text: 'Network details', link: '/docs/quickstart/connection-details' },
+          { text: 'Stablecoins on Tempo', link: '/get-started/stablecoins' },
+          { text: 'Use cases', link: '/get-started/use-cases' },
         ],
       },
     ]
     const accountsSidebar = [
       {
-        text: 'Start building',
+        text: 'Accounts',
         items: [
-          { text: 'Overview', link: '/docs/accounts' },
+          { text: 'Introduction', link: '/docs/accounts' },
           { text: 'Create an account', link: '/docs/accounts/create' },
-          { text: 'Integration walkthrough', link: '/docs/accounts/integration' },
-        ],
-      },
-      {
-        text: 'Connect your application',
-        items: [
-          { text: 'Wallet providers', link: '/docs/accounts/providers' },
-          { text: 'Connect an existing wallet', link: '/docs/accounts/integrate' },
-        ],
-      },
-      {
-        text: 'Manage accounts',
-        items: [
-          { text: 'Fund an account', link: '/docs/guide/getting-funds' },
+          { text: 'Connect a wallet', link: '/docs/accounts/integrate' },
           { text: 'Balances and activity', link: '/docs/accounts/balances' },
+          { text: 'Send payments', link: '/docs/guide/payments/send-a-payment' },
+          { text: 'Receive payments', link: '/docs/guide/payments/accept-a-payment' },
+          { text: 'Keys and permissions', link: '/docs/accounts/keys' },
         ],
       },
       {
-        text: 'Control access',
+        text: 'Integration guides',
         items: [
-          { text: 'Keys and signing', link: '/docs/accounts/keys' },
-          { text: 'Access keys', link: '/docs/accounts/access-keys' },
-          { text: 'Admin keys', link: '/docs/accounts/admin-keys' },
-          { text: 'Agent access', link: '/docs/accounts/agents' },
-        ],
-      },
-    ]
-    const paymentsSidebar = [
-      {
-        text: 'Payments',
-        items: [
-          { text: 'Overview', link: '/docs/payments' },
-          { text: 'Send a payment', link: '/docs/guide/payments/send-a-payment' },
-          { text: 'Receive a payment', link: '/docs/guide/payments/accept-a-payment' },
-        ],
-      },
-      {
-        text: 'Payment features',
-        items: [
-          { text: 'Payment references', link: '/docs/guide/payments/transfer-memos' },
+          { text: 'Integration walkthrough', link: '/docs/accounts/integration' },
+          { text: 'Payment integration', link: '/docs/guide/payments' },
+          { text: 'Browser payments', link: '/docs/guide/payments/send-a-payment/browser' },
+          { text: 'Fund an account', link: '/docs/guide/getting-funds' },
           { text: 'Customer deposit addresses', link: '/docs/guide/payments/virtual-addresses' },
-          { text: 'Sponsor fees', link: '/docs/guide/payments/sponsor-user-fees' },
-          { text: 'Choose a fee token', link: '/docs/guide/payments/pay-fees-in-any-stablecoin' },
-          {
-            text: 'Batch payments',
-            link: '/docs/guide/payments/send-a-payment#batch-payment-transactions',
-          },
+          { text: 'Wallet providers', link: '/docs/accounts/providers' },
+        ],
+      },
+      {
+        text: 'Payment controls',
+        collapsed: true,
+        items: [
+          { text: 'Payment verification', link: '/docs/guide/payments/accept-a-payment/examples' },
+          { text: 'Payment references', link: '/docs/guide/payments/transfer-memos' },
           {
             text: 'Send payments in parallel',
             link: '/docs/guide/payments/send-parallel-transactions',
           },
+          { text: 'Sponsor fees', link: '/docs/guide/payments/sponsor-user-fees' },
+          { text: 'Choose a fee token', link: '/docs/guide/payments/pay-fees-in-any-stablecoin' },
           {
             text: 'Control incoming payments',
             link: '/docs/guide/payments/configure-receive-policies',
@@ -449,24 +427,42 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Machine payments',
+        text: 'Key management',
+        collapsed: true,
         items: [
-          { text: 'Overview', link: '/docs/agents' },
-          { text: 'Use Mercator', link: '/docs/guide/mercator' },
-          { text: 'Pay for services', link: '/docs/guide/machine-payments/client' },
+          { text: 'Access keys', link: '/docs/accounts/access-keys' },
+          { text: 'Admin keys', link: '/docs/accounts/admin-keys' },
+          { text: 'Agent access', link: '/docs/accounts/agents' },
+        ],
+      },
+      {
+        text: 'Code examples',
+        collapsed: true,
+        items: [
+          { text: 'Account examples', link: '/docs/accounts/examples' },
+          { text: 'Payment examples', link: '/docs/guide/payments/send-a-payment/examples' },
+        ],
+      },
+    ]
+    const machinePaymentsSidebar = [
+      {
+        text: 'Machine Payments',
+        items: [
+          { text: 'Introduction', link: '/docs/agents' },
+          { text: 'Pay for an API', link: '/docs/guide/machine-payments/client' },
+          { text: 'Accept API payments', link: '/docs/guide/machine-payments/server' },
           { text: 'Pay with the CLI', link: '/docs/guide/machine-payments/agent' },
           { text: 'Find services', link: '/docs/guide/machine-payments/discover-services' },
-          { text: 'Accept payments for an API', link: '/docs/guide/machine-payments/server' },
+          { text: 'Use Mercator', link: '/docs/guide/mercator' },
+        ],
+      },
+      {
+        text: 'Payment flows',
+        items: [
+          { text: 'How MPP works', link: '/docs/guide/machine-payments' },
+          { text: 'One-time payments', link: '/docs/guide/machine-payments/one-time-payments' },
           { text: 'Payment sessions', link: '/docs/guide/machine-payments/pay-as-you-go' },
-          {
-            text: 'More about MPP',
-            collapsed: true,
-            items: [
-              { text: 'How MPP works', link: '/docs/guide/machine-payments' },
-              { text: 'One-time payments', link: '/docs/guide/machine-payments/one-time-payments' },
-              { text: 'Streamed payments', link: '/docs/guide/machine-payments/streamed-payments' },
-            ],
-          },
+          { text: 'Streamed payments', link: '/docs/guide/machine-payments/streamed-payments' },
         ],
       },
     ]
@@ -474,46 +470,35 @@ export default defineConfig({
       {
         text: 'Earn',
         items: [
-          { text: 'Overview', link: '/docs/earn' },
-          { text: 'Choose a vault', link: '/docs/earn/vaults' },
-          { text: 'Deposit funds', link: '/docs/earn/integrate' },
+          { text: 'Introduction', link: '/docs/earn' },
+          { text: 'Vaults', link: '/docs/earn/vaults' },
+          { text: 'Deposit', link: '/docs/earn/integrate' },
           { text: 'Balances and earnings', link: '/docs/earn/balances' },
-          { text: 'Withdraw funds', link: '/docs/earn/withdraw' },
+          { text: 'Withdraw', link: '/docs/earn/withdraw' },
           { text: 'How Earn works', link: '/docs/earn/how-it-works' },
+          { text: 'Connect a yield source', link: '/docs/earn/providers' },
+          { text: 'Testnet example', link: '/docs/earn/example' },
         ],
-      },
-      {
-        text: 'For providers',
-        collapsed: false,
-        items: [{ text: 'Connect a yield source', link: '/docs/earn#connect-a-yield-source' }],
       },
     ]
     const routesSidebar = [
       {
         text: 'Routes',
         items: [
-          { text: 'Overview', link: '/docs/routes' },
-          { text: 'Make a transfer', link: '/docs/routes/transfers' },
-          { text: 'Accept deposits', link: '/docs/routes/deposits' },
-          { text: 'Track delivery', link: '/docs/routes/delivery' },
+          { text: 'Introduction', link: '/docs/routes' },
+          { text: 'Supported routes', link: '/docs/routes/networks' },
           { text: 'Quotes and fees', link: '/docs/routes/quotes' },
-          { text: 'Supported networks and assets', link: '/docs/routes/networks' },
-          { text: 'Swap stablecoins', link: '/docs/guide/stablecoin-dex/executing-swaps' },
+          { text: 'Accept deposits', link: '/docs/routes/deposits' },
+          { text: 'Make a transfer', link: '/docs/routes/transfers' },
+          { text: 'Track delivery', link: '/docs/routes/delivery' },
         ],
       },
       {
-        text: 'For liquidity providers',
-        collapsed: false,
+        text: 'Integration guides',
         items: [
-          { text: 'How exchange works', link: '/docs/guide/stablecoin-dex' },
-          {
-            text: 'Provide liquidity',
-            link: '/docs/guide/stablecoin-dex/providing-liquidity',
-          },
-          {
-            text: 'Provide fee liquidity',
-            link: '/docs/guide/stablecoin-dex/managing-fee-liquidity',
-          },
+          { text: 'API setup', link: '/docs/routes/api-setup' },
+          { text: 'Deposit address example', link: '/docs/routes/examples/deposits' },
+          { text: 'Transfer example', link: '/docs/routes/examples/transfers' },
         ],
       },
     ]
@@ -521,46 +506,37 @@ export default defineConfig({
       {
         text: 'Zones',
         items: [
-          { text: 'Overview', link: '/docs/zones' },
-          { text: 'Privacy model', link: '/docs/zones/privacy' },
-          { text: 'Connect to a Zone', link: '/docs/zones/connect' },
-          { text: 'Deposit funds', link: '/docs/zones/deposit' },
+          { text: 'Introduction', link: '/docs/zones' },
+          { text: 'Privacy', link: '/docs/zones/privacy' },
+          { text: 'Connect', link: '/docs/zones/connect' },
+          { text: 'Deposit', link: '/docs/zones/deposit' },
           { text: 'Balances and activity', link: '/docs/zones/balances' },
-          { text: 'Withdraw funds', link: '/docs/zones/withdraw' },
+          { text: 'Withdraw', link: '/docs/zones/withdraw' },
+          { text: 'Client setup', link: '/docs/zones/examples' },
+          { text: 'Testnet sandbox', link: '/docs/guide/private-zones' },
         ],
       },
+    ]
+    const sandboxSidebar = [
+      ...zonesSidebar,
       {
-        text: 'Testnet sandbox',
-        collapsed: false,
+        text: 'Sandbox guides',
         items: [
-          { text: 'Sandbox overview', link: '/docs/guide/private-zones' },
+          { text: 'Connect', link: '/docs/guide/private-zones/connect-to-a-zone' },
+          { text: 'Deposit', link: '/docs/guide/private-zones/deposit-to-a-zone' },
           {
-            text: 'Connect to a sandbox Zone',
-            link: '/docs/guide/private-zones/connect-to-a-zone',
-          },
-          {
-            text: 'Deposit to a sandbox Zone',
-            link: '/docs/guide/private-zones/deposit-to-a-zone',
-          },
-          {
-            text: 'Send tokens within a Zone',
+            text: 'Send within a Zone',
             link: '/docs/guide/private-zones/send-tokens-within-a-zone',
           },
-          {
-            text: 'Send tokens across Zones',
-            link: '/docs/guide/private-zones/send-tokens-across-zones',
-          },
+          { text: 'Send across Zones', link: '/docs/guide/private-zones/send-tokens-across-zones' },
           { text: 'Swap across Zones', link: '/docs/guide/private-zones/swap-across-zones' },
-          {
-            text: 'Withdraw from a sandbox Zone',
-            link: '/docs/guide/private-zones/withdraw-from-a-zone',
-          },
+          { text: 'Withdraw', link: '/docs/guide/private-zones/withdraw-from-a-zone' },
         ],
       },
     ]
     const ecosystemSidebar = [
       {
-        text: 'Partners',
+        text: 'Ecosystem',
         items: [
           {
             text: 'Overview',
@@ -923,7 +899,7 @@ export default defineConfig({
       },
     ]
     const changelogSidebar = [
-      { text: '← Back to Specifications', link: '/docs/protocol' },
+      { text: '← Back to Tempo EVM', link: '/docs/development' },
       {
         text: 'Changelog',
         items: [
@@ -989,7 +965,7 @@ export default defineConfig({
     ]
     const developerToolsSidebar = [
       {
-        text: 'Tools & SDKs',
+        text: 'APIs & SDKs',
         items: [
           {
             text: 'Overview',
@@ -1078,6 +1054,10 @@ export default defineConfig({
                     link: '/docs/sdk/typescript',
                   },
                   {
+                    text: 'Local testing with Prool',
+                    link: '/docs/sdk/typescript/prool/setup',
+                  },
+                  {
                     text: 'Viem reference',
                     link: 'https://viem.sh/tempo',
                   },
@@ -1123,75 +1103,139 @@ export default defineConfig({
       },
     ]
 
-    const resourcesOverview = {
-      text: 'Developer Resources',
-      items: [{ text: 'Overview', link: '/docs/development' }],
-    }
-    const developerResourcesSidebar = [
+    // One stable tree for every Developers page. Group controls only disclose
+    // pages; Vocs opens the active page's ancestors without replacing the tree.
+    const developersSidebar = [
       {
-        text: 'Developer Resources',
+        text: 'Tempo EVM',
         items: [
-          { text: 'Overview', link: '/docs/development' },
-          { text: 'Build with AI', link: '/docs/guide/using-tempo-with-ai' },
-          ...developerToolsSidebar[0].items
-            .filter((item) => item.text === 'SDKs' || item.text === 'CLI')
-            .sort((a, b) => (a.text === 'SDKs' ? -1 : b.text === 'SDKs' ? 1 : 0))
-            .map((item) => ({ ...item, collapsed: true })),
-          { text: 'Tempo API', link: '/docs/api' },
-          { text: 'Networks', link: '/docs/quickstart/connection-details' },
-          { text: 'EVM differences', link: '/docs/quickstart/evm-compatibility' },
-          { text: 'Explorers', link: '/docs/ecosystem/block-explorers' },
-          { text: 'Partners', link: '/docs/ecosystem' },
+          { text: 'Introduction', link: '/docs/development' },
+          {
+            text: 'Wallets',
+            collapsed: true,
+            items: [
+              { text: 'Integrate a wallet', link: '/docs/quickstart/wallet-developers' },
+              { text: 'Token lists', link: '/docs/quickstart/tokenlist' },
+            ],
+          },
+          {
+            text: 'Transactions and fees',
+            collapsed: true,
+            items: [
+              { text: 'Send a transaction', link: '/docs/network/transactions' },
+              { text: 'Transaction features', link: '/docs/guide/tempo-transaction' },
+              { text: 'Fees', link: '/docs/network/fees' },
+              { text: 'Fee liquidity', link: '/docs/guide/stablecoin-dex/managing-fee-liquidity' },
+              { text: 'Client setup', link: '/docs/network/examples' },
+            ],
+          },
+          {
+            text: 'TIP-20 Tokens',
+            collapsed: true,
+            items: [
+              { text: 'Introduction', link: '/docs/network/tokens' },
+              { text: 'Create a token', link: '/docs/guide/issuance/create-a-stablecoin' },
+              { text: 'Mint and burn', link: '/docs/guide/issuance/mint-stablecoins' },
+              { text: 'Manage tokens', link: '/docs/guide/issuance/manage-stablecoin' },
+              { text: 'Migrate from ERC-20', link: '/docs/guide/issuance/migrate-erc20-to-tip20' },
+              { text: 'Use for fees', link: '/docs/guide/issuance/use-for-fees' },
+              { text: 'Issuance guide', link: '/docs/guide/issuance' },
+            ],
+          },
+          {
+            text: 'Smart contracts',
+            collapsed: true,
+            items: [
+              { text: 'Deploy a contract', link: '/docs/network/contracts' },
+              { text: 'Verify contracts', link: '/docs/quickstart/verify-contracts' },
+              { text: 'System contracts', link: '/docs/quickstart/predeployed-contracts' },
+            ],
+          },
+          {
+            text: 'Exchange',
+            collapsed: true,
+            items: [
+              { text: 'Introduction', link: '/docs/guide/stablecoin-dex' },
+              { text: 'Swap walkthrough', link: '/docs/guide/stablecoin-dex/executing-swaps' },
+              { text: 'Provide liquidity', link: '/docs/guide/stablecoin-dex/providing-liquidity' },
+            ],
+          },
+          {
+            text: 'Network',
+            collapsed: true,
+            items: [
+              { text: 'Introduction', link: '/docs/network' },
+              { text: 'Connection details', link: '/docs/quickstart/connection-details' },
+              { text: 'EVM differences', link: '/docs/quickstart/evm-compatibility' },
+              { text: 'Integrate an existing app', link: '/docs/quickstart/integrate-tempo' },
+              { text: 'JSON-RPC reference', link: '/docs/protocol/rpc' },
+            ],
+          },
+          {
+            text: 'Run a node',
+            collapsed: true,
+            items: nodeSidebar.items.map((item) => ({
+              ...item,
+              ...(item.text === 'Overview' ? { text: 'Introduction' } : {}),
+              ...(item.items ? { collapsed: true } : {}),
+            })),
+          },
+          {
+            text: 'Protocol',
+            collapsed: true,
+            items: protocolSidebar[0].items
+              .filter((item) => item.text !== 'Changelog' && item.text !== 'Protocol changes')
+              .flatMap<SidebarItem>((item) =>
+                item.text === 'Accounts and transactions' || item.text === 'Tokens and policies'
+                  ? (item.items ?? [])
+                  : [item],
+              )
+              .map((item) => ({
+                ...item,
+                ...(item.text === 'Overview' ? { text: 'Introduction' } : {}),
+                ...(item.items ? { collapsed: true } : {}),
+              })),
+          },
         ],
       },
-      {
-        text: 'Wallet development',
-        items: [
-          { text: 'Build a wallet integration', link: '/docs/quickstart/wallet-developers' },
-          { text: 'Token lists', link: '/docs/quickstart/tokenlist' },
-        ],
-      },
-      {
-        text: 'Libraries and reference',
-        collapsed: true,
-        items: [
-          { text: 'Tools overview', link: '/docs/tools' },
-          ...developerToolsSidebar[0].items
-            .filter((item) => item.text === 'Wallet' || item.text === 'Server tools')
-            .map((item) => ({ ...item, collapsed: true })),
-          { text: 'Integrate an existing application', link: '/docs/quickstart/integrate-tempo' },
-          { text: 'Verify contracts', link: '/docs/quickstart/verify-contracts' },
-          { text: 'System contracts', link: '/docs/quickstart/predeployed-contracts' },
-          { text: 'Testnet funds', link: '/docs/quickstart/faucet' },
-          { text: 'JSON-RPC reference', link: '/docs/protocol/rpc' },
-        ],
-      },
-      nodeSidebar,
     ]
-    const partnerResourcesSidebar = [resourcesOverview, ...ecosystemSidebar]
-
+    const toolsSidebar = [
+      {
+        text: 'APIs & SDKs',
+        items: [
+          { text: 'Introduction', link: '/docs/tools' },
+          { text: 'API reference', link: '/docs/api' },
+          { text: 'Authentication', link: '/docs/api/authentication' },
+          { text: 'API keys', link: '/docs/api/console/api-keys' },
+          ...developerToolsSidebar[0].items
+            .filter((item) => item.text !== 'Overview' && item.text !== 'RPC reference')
+            .map((item) => ({ ...item, collapsed: true })),
+        ],
+      },
+    ]
+    const partnerResourcesSidebar = [...ecosystemSidebar]
     const productSidebars = {
       overview: getStartedSidebar,
       accounts: accountsSidebar,
       earn: earnSidebar,
       routes: routesSidebar,
       zones: zonesSidebar,
-      payments: paymentsSidebar,
-      development: developerResourcesSidebar,
-      protocol: protocolSidebar,
+      developers: developersSidebar,
+      'machine-payments': machinePaymentsSidebar,
+      api: [{ text: 'API reference', items: [{ text: 'Introduction', link: '/docs/api' }] }],
+      tools: toolsSidebar,
+      ecosystem: partnerResourcesSidebar,
       changelog: changelogSidebar,
     }
 
     return {
       '/docs': getStartedSidebar,
       ...Object.fromEntries(
-        [...docsSections, specificationsSection].flatMap((section) =>
+        [...docsSections, ...docsUtilitySections].flatMap((section) =>
           section.matches.map((path) => [path, productSidebars[section.id]]),
         ),
       ),
-      '/docs/protocol/upgrades': changelogSidebar,
-      '/docs/changelog': changelogSidebar,
-      '/docs/guide/node/network-upgrades': changelogSidebar,
+      '/docs/guide/private-zones': sandboxSidebar,
       '/docs/ecosystem': partnerResourcesSidebar,
       '/docs/partners': partnerResourcesSidebar,
       '/docs/guide/ousd': partnerResourcesSidebar,

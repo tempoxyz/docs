@@ -69,8 +69,7 @@ test('direct nested headings and legacy overview anchors retain the current page
 test('a hash belonging to another page does not steal the current guide highlight', async ({
   page,
 }) => {
-  // Batch payments is a hash destination in this sidebar, but belongs to the
-  // Send a payment guide. It must never deactivate Receive a payment.
+  // A fragment from another task must never deactivate Receive payments.
   const guide = '/docs/guide/payments/accept-a-payment'
   await page.goto(`${guide}#batch-payment-transactions`)
   const active = page.locator('[data-v-gutter-left] nav[data-v-sidebar] a[data-active]')
@@ -85,21 +84,19 @@ test('a hash belonging to another page does not steal the current guide highligh
   await expect(active).toHaveAttribute('href', guide)
 })
 
-test('payment recipes select their own sidebar anchor without stealing earlier guide sections', async ({
-  page,
-}) => {
+test('payment sections keep the current task selected while scrolling', async ({ page }) => {
   const guide = '/docs/guide/payments/send-a-payment'
   const batch = `${guide}#batch-payment-transactions`
   await page.goto(batch)
   const sidebar = page.locator('[data-v-gutter-left] nav[data-v-sidebar]')
   const active = sidebar.locator('a[data-active]')
   await expect(active).toHaveCount(1)
-  await expect(active).toHaveAttribute('href', batch)
-  await expect(active).toHaveAttribute('aria-current', 'location')
+  await expect(active).toHaveAttribute('href', guide)
+  await expect(active).toHaveAttribute('aria-current', 'page')
   await page.locator('[id="batch-payment-transactions"]').evaluate((element) => {
     element.nextElementSibling?.scrollIntoView({ behavior: 'instant' })
   })
-  await expect(active).toHaveAttribute('href', batch)
+  await expect(active).toHaveAttribute('href', guide)
   await page
     .locator('[id="send-payment-implementation-steps"]')
     .evaluate((element) => element.scrollIntoView({ behavior: 'instant' }))
@@ -142,7 +139,7 @@ test('OpenAPI endpoints retain their own active state after client navigation fr
   const sidebar = page.locator('[data-v-gutter-left] nav[data-v-sidebar]')
   await page
     .locator('article[data-v-content]')
-    .getByRole('link', { name: 'Transfers API reference', exact: true })
+    .getByRole('link', { name: 'EVM or Tron action format', exact: true })
     .click()
   await expect(page).toHaveURL(/\/docs\/api\/routes\/transfers\/?$/)
   const operations = sidebar.locator('a[href^="/docs/api/routes/transfers#"]')

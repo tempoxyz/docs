@@ -9,7 +9,9 @@ import { PasskeyAccountDemo } from '../../../components/guides/PasskeyAccountDem
 
 # Create an account
 
-Start with who authorizes transactions. A payroll service may sign payouts from its backend; a customer wallet may ask the customer to approve each payment.
+Create a Tempo account for your backend or your customers. Choose a signer, derive the account address, and save the public details your application needs.
+
+## Choose a signer
 
 | Who authorizes transactions | Start here |
 | --- | --- |
@@ -19,25 +21,52 @@ Start with who authorizes transactions. A payroll service may sign payouts from 
 
 The account address is derived from its root public key. Store the address against the corresponding customer or business record in your application.
 
-## Try a passkey account
+<span id="try-a-passkey-account" />
+
+## Create the account
 
 Create a passkey for this site and inspect its account address. Use the [signing-key example](#create-an-account-from-a-signing-key) for backend signing, or the [passkey example](#create-a-passkey-account) to build this browser flow into your application.
 
 <PasskeyAccountDemo />
 
-## Create an account from a signing key
+### Create an account from a signing key
 
-Install Viem with `pnpm add viem`. For a local development account, generate a secp256k1 private key and derive the account address:
+Use the [CLI, Viem, and Wagmi setup](/docs/accounts/examples#choose-your-tools) to create a local signer or connect a customer wallet. Python needs `python -m pip install eth-account`:
 
-```ts [create-account.ts]
+::::code-group
+
+```ts [Viem]
 import { generatePrivateKey } from 'viem/accounts'
 import { Account } from 'viem/tempo'
 
 const privateKey = generatePrivateKey()
-export const account = Account.fromSecp256k1(privateKey)
-
+const account = Account.fromSecp256k1(privateKey)
 console.log(account.address)
 ```
+
+```bash [CLI]
+cast wallet new
+```
+
+```tsx [Wagmi]
+import { useConnect, useConnectors } from 'wagmi'
+const { mutate: connect } = useConnect()
+const connector = useConnectors().find((item) => item.id === 'xyz.tempo')
+const connectWallet = () => connector && connect({ connector })
+```
+
+```python [Python]
+from eth_account import Account
+
+account = Account.create()
+print(account.address)
+```
+
+::::
+
+Wagmi uses the configured Tempo Wallet connector: call `connectWallet` from a button inside your React component. The wallet creates or selects the account. CLI and Viem generate a key locally.
+
+Creating a key is a local operation; there is no hosted create-account endpoint. Use a [wallet provider](/docs/accounts/providers) if your application delegates key management.
 
 This example creates a new key each time it runs. To keep the account, save the key in your application's secret storage and load it when constructing the signer.
 
@@ -51,37 +80,33 @@ For a signer that uses raw P-256 keys, use `Account.fromP256` with `P256.randomP
 
 ECDSA is the signature algorithm; secp256k1 and P-256 are curves. WebAuthn wraps a P-256 signature with authentication data. See the [signature specification](/docs/protocol/transactions/spec-tempo-transaction#signature-types) for each encoding.
 
-## Create a passkey account
+### Create a passkey account
 
 This browser example uses WebAuthn to create a passkey and derives a Tempo account from its public key. It uses the same Viem package.
 
-Call this function from a user action, such as a **Create account** button, on an HTTPS origin or localhost:
+Run this code from a user action, such as a **Create account** button, on an HTTPS origin or localhost:
 
-```ts [create-account.ts]
+```ts [Viem]
 import { Account, WebAuthnP256 } from 'viem/tempo'
 
-export async function createPasskeyAccount() {
-  const credential = await WebAuthnP256.createCredential({
-    label: 'My Tempo account',
-    userId: crypto.getRandomValues(new Uint8Array(32)),
-  })
-  const account = Account.fromWebAuthnP256(credential)
-
-  return {
-    account,
-    credential: {
-      id: credential.id,
-      publicKey: credential.publicKey,
-    },
-  }
-}
+const credential = await WebAuthnP256.createCredential({
+  label: 'My Tempo account',
+  userId: crypto.getRandomValues(new Uint8Array(32)),
+})
+const account = Account.fromWebAuthnP256(credential)
 ```
+
+The [complete passkey function](/docs/accounts/examples#passkey-creation) returns the account and public credential details. Passkey creation uses browser WebAuthn; CLI requests cannot trigger the user’s authenticator. React applications can call this same Viem function from a button; Wagmi manages the wallet connection rather than creating raw passkeys.
 
 Save the credential ID and public key in the customer's account record. On a later visit, pass them to `Account.fromWebAuthnP256` to reconnect the signer. Signing still requires access to the original passkey and the same WebAuthn relying-party configuration.
 
 The passkey signs Tempo transaction requests; your application handles customer login. For a device or application session, authorize a [limited access key](/docs/accounts/access-keys) with the permissions it needs.
 
-## Fund and use the account
+<span id="fund-and-use-the-account" />
+
+## Get its address
+
+Read `account.address` from either example and save it against the corresponding customer or business record. Do not store private keys in that record.
 
 Choose the [network](/docs/quickstart/connection-details) before requesting funds. Use the [faucet](/docs/quickstart/faucet) for Moderato testnet, or a [funding path](/docs/guide/getting-funds) for mainnet.
 

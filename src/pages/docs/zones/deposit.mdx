@@ -1,41 +1,66 @@
 ---
-title: "Deposit into a Zone"
+title: "Deposit"
 seoTitle: "Deposit into a Zone | Tempo Docs"
 description: "Lock stablecoins in a Zone portal and verify that the intended private account receives its credit."
 ---
 
-# Deposit into a Zone
+import { OpenApi } from 'vocs'
+
+<span id="deposit-into-a-zone" />
+
+# Deposit
 
 Deposit through the Zone's portal on public Tempo, then confirm the private account is credited. First [connect to the Zone](/docs/zones/connect) and get the operator's supported encryption and contract tooling.
 
-[Try a deposit in the testnet sandbox](/docs/guide/private-zones/deposit-to-a-zone#depositing-ousd-to-zone-a). That example uses earlier sandbox interfaces; follow the procedure below for a current Zone deployment.
+[Try the deposit demo](/docs/guide/private-zones/deposit-to-a-zone) with test funds. It uses the earlier sandbox interface.
 
 ## Submit an encrypted deposit
 
+<span id="check-the-asset-and-recipient" />
+
+
 :::::steps
 
-### Check the asset and recipient
+### Prepare the deposit
 
 Confirm that the deployment accepts the token and that the depositor and recipient satisfy its access rules. Choose the private recipient and memo, and a public refund recipient.
 
-### Check the deposit fees
+<span id="check-the-deposit-fees" />
+
+#### Calculate deposit fees
 
 Use the deployed portal's `calculateDepositFee` and `calculateBouncebackFee` helpers to determine the amount the private account can receive and the required failure coverage. Deposit fees are deducted from the amount sent. Show the expected net credit before authorization; see the [deposit fee rules](/docs/protocol/zones/execution#deposit-fees) for the exact calculation.
 
-### Encrypt and authorize the deposit
+<span id="encrypt-and-authorize-the-deposit" />
+
+### Send funds
 
 Use the operator's supported tooling to encrypt the private recipient and memo with the Zone's published encryption key. Approve token spending where required, then submit the encrypted deposit to `ZonePortal` on Tempo.
 
 The token, amount, depositor, and refund recipient remain public. See the [privacy model](/docs/zones/privacy).
 
-### Confirm the private credit
+<span id="confirm-the-private-credit" />
+
+### Confirm arrival
 
 After the public transaction finalizes, use the recipient's authenticated connection to [check the Zone credit](/docs/zones/balances). Save the public deposit reference and private credit record together.
 
 :::::
+
+## Track the deposit
+
+Read the deposit outcome with the [Zone status API](/docs/api/zones). Use the queue hash returned by `ZonePortal.depositEncrypted`, not its transaction hash.
+
+Click **Try**, enter the deposit queue hash and the Zone’s numeric `chainId`, then use an API key with `data:read` and access to that Zone. The request tool includes language examples and the response.
+
+<OpenApi.Playground operationId="getZoneDeposit" anchors={false} />
+
+A `pending` deposit has not completed. For a failed deposit, inspect `refund.status` and confirm the refund before retrying. Continue to use authenticated [balance and activity reads](/docs/zones/balances) for the private account's ledger.
 
 ## Handle deposit failures
 
 Follow the deployment's [deposit lifecycle](/docs/protocol/zones/bridging#deposits-tempo--zone) for policy failures and refunds. Confirm the eventual credit or refund before retrying a deposit.
 
 If funds start on another network, [route them to Tempo](/docs/routes) first, then deposit through the Zone portal.
+
+<span id="try-a-sandbox-deposit" />

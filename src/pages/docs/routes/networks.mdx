@@ -1,26 +1,32 @@
 ---
-title: "Supported networks and assets"
-seoTitle: "Supported networks and assets | Tempo Docs"
+title: "Supported routes"
+seoTitle: "Supported routes | Tempo Docs"
 description: "Discover valid chain and token pairs, funding methods, and amount modes before quoting a route."
 ---
 
 import { OpenApi } from 'vocs'
 
-# Supported networks and assets
+<span id="supported-networks-and-assets" />
+
+# Supported routes
 
 Read the route directory before offering a network or asset in your application. A network being supported does not mean every token, direction, or funding method is available.
 
-## Read the route directory
+<span id="read-the-route-directory" />
+
+## Networks and tokens
 
 Click **Try** to read the live directory. Filter by source or destination network and token to narrow the results. This request lists supported routes; it does not create a transfer or request a signature.
 
-<OpenApi.Playground operationId="listRoutes" hideQueryParams anchors={false} />
+<OpenApi.Playground operationId="listRoutes" anchors={false} />
 
 Public requests use the API's shared rate limit. For authenticated access, see [Routes API access](/docs/routes/transfers#set-up-routes-api-access).
 
-Use the returned source and destination chain/token pairs, funding methods, and amount modes to build the choices in your application. Match tokens by network and contract address, not by symbol alone.
+Use the returned source and destination chain/token pairs, funding methods, and amount modes to build the choices in your application. Pass `nextCursor` as `cursor` to read subsequent pages. Match tokens by network and contract address, not by symbol alone.
 
-## Check the selected payment
+<span id="check-the-selected-payment" />
+
+## Route limits
 
 Once the user chooses a pair and amount, [request a quote](/docs/routes/quotes). Availability depends on those inputs and the funding method. Refresh the quote when the user changes them.
 

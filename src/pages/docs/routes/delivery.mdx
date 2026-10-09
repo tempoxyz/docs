@@ -4,36 +4,48 @@ seoTitle: "Track delivery | Tempo Docs"
 description: "Distinguish source submission, destination delivery, and refunds when reconciling Routes payments."
 ---
 
+import { OpenApi } from 'vocs'
+
 # Track delivery
 
 A successful source-chain transaction starts a route; it does not establish that the destination received funds. Keep the Routes object ID with your payment record and follow its status through delivery or refund.
 
-## Read the transfer or deposit
+<span id="read-the-transfer-or-deposit" />
+
+## Check status
 
 For a transfer your application authorizes, use `GET /v1/routes/transfers/{id}`. Register the submitted source transaction hashes as described in [Make a transfer](/docs/routes/transfers).
 
 For a deposit-address flow, list deposits with `GET /v1/routes/deposits`, filtering by `depositAddress`, then read each deposit with `GET /v1/routes/deposits/{id}`. The address being `active` says it can receive deposits; it does not describe a particular deposit's progress.
 
-```bash
-curl "https://api.tempo.xyz/v1/routes/transfers/${ROUTE_TRANSFER_ID}" \
-  --header "tempo-api-key: ${TEMPO_API_KEY}"
-```
+Use the API key from [API setup](/docs/routes/api-setup) and enter the transfer `id` returned when you created it.
 
-Run this from your backend or terminal after setting the API key and transfer ID. See [API authentication](/docs/api/authentication).
+<OpenApi.Playground operationId="getRoutesTransfer" anchors={false} />
 
-## Keep delivery and refund states distinct
+<span id="keep-delivery-and-refund-states-distinct" />
+
+## Handle failures
 
 | State | Application behavior |
 | --- | --- |
-| `processing` | Keep the payment pending. |
+| `awaiting-source` | Transfer created; source funding has not been registered. |
+| `detected`, `bridging`, `settling` | Deposit detected and moving through delivery. Keep it pending. |
+| `processing` | Transfer in progress. Keep the payment pending. |
 | `completed` | Reconcile destination delivery, including the delivered amount and transaction references. |
 | `action-required` | Inspect `statusReason` and the endpoint's instructions before continuing. |
+| `expired` | Transfer expired. Inspect its source funding before starting a replacement. |
 | `refunding` | Keep the refund pending. |
 | `refunded` | Reconcile the refund amount and transaction references. |
 
 Use the full [transfer](/docs/api/routes/transfers) or [deposit](/docs/api/routes/deposit-addresses) reference for the lifecycle and response fields. Do not automatically send the payment again when it is pending or being refunded.
 
-## Retry a create request safely
+## Track refunds
+
+Keep `refunding` separate from `refunded`. Reconcile the returned refund amount and transaction references before updating the customer's balance. A refund and a successful delivery are different outcomes for the original payment.
+
+<span id="retry-a-create-request-safely" />
+
+### Retry a create request
 
 Reuse the same `idempotency-key` for the same create request. Changing the input while keeping the key conflicts. If a response is lost, follow the endpoint's retry behavior before creating a replacement; a missing response does not prove that creation failed.
 

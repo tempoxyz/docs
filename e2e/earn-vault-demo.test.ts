@@ -1,4 +1,5 @@
 import { expect, type Locator, type Route, test } from '@playwright/test'
+import { earnDemoVault } from '../src/components/guides/earn-deposit-demo'
 
 const vaultsPage = '/docs/earn/vaults#inspect-the-selected-vault'
 const endpoint = 'https://api.tempo.xyz/v1/earn/vaults/verified?**'
@@ -90,11 +91,7 @@ test('loads live vault data inline and updates details for the selected vault', 
   await page.goto(vaultsPage)
   const demo = page.getByTestId('earn-vault-demo')
   await expect(demo.getByLabel('Network', { exact: true })).toHaveValue('testnet')
-  expect(requests).toHaveLength(0)
-  await demo.getByRole('button', { name: 'Load vaults', exact: true }).click()
-  await expect(demo.getByLabel('Vault', { exact: true })).toHaveValue('')
-  await expect(demo.getByTestId('earn-vault-details')).toHaveCount(0)
-  await demo.getByLabel('Vault', { exact: true }).selectOption(firstVault.id)
+  await expect(demo.getByLabel('Vault', { exact: true })).toHaveValue(firstVault.id)
   await expect(field(demo, 'Vault address')).toHaveText(firstVault.vaultAddress)
   await expect(field(demo, 'Share-token access')).toContainText(/open/i)
   await expect(field(demo, 'Vault-wide liquidity')).toHaveText('1 USD')
@@ -131,8 +128,7 @@ test('loads another page without losing the current selection', async ({ page })
   })
   await page.goto(vaultsPage)
   const demo = page.getByTestId('earn-vault-demo')
-  await demo.getByRole('button', { name: 'Load vaults', exact: true }).click()
-  await demo.getByLabel('Vault', { exact: true }).selectOption(firstVault.id)
+  await expect(demo.getByLabel('Vault', { exact: true })).toHaveValue(firstVault.id)
   await demo.getByRole('button', { name: 'Load more', exact: true }).click()
   await expect(demo.getByLabel('Vault', { exact: true }).locator('option')).toHaveCount(3)
   await expect(demo.getByLabel('Vault', { exact: true })).toHaveValue(firstVault.id)
@@ -168,16 +164,13 @@ test('clears old results and ignores an in-flight response when the network chan
   })
   await page.goto(vaultsPage)
   const demo = page.getByTestId('earn-vault-demo')
-  await demo.getByRole('button', { name: 'Load vaults', exact: true }).click()
-  await demo.getByLabel('Vault', { exact: true }).selectOption(firstVault.id)
+  await expect(demo.getByLabel('Vault', { exact: true })).toHaveValue(firstVault.id)
   await expect(field(demo, 'Vault address')).toHaveText(firstVault.vaultAddress)
   await demo.getByRole('button', { name: 'Refresh vaults', exact: true }).click()
   await expect.poll(() => Boolean(releaseTestnet)).toBe(true)
   await demo.getByLabel('Network', { exact: true }).selectOption('mainnet')
-  await expect(demo.getByLabel('Vault', { exact: true })).toHaveCount(0)
   await expect(demo).not.toContainText(firstVault.vaultAddress)
-  await demo.getByRole('button', { name: 'Load vaults', exact: true }).click()
-  await demo.getByLabel('Vault', { exact: true }).selectOption(mainnetVault.id)
+  await expect(demo.getByLabel('Vault', { exact: true })).toHaveValue(mainnetVault.id)
   await expect(field(demo, 'Vault address')).toHaveText(mainnetVault.vaultAddress)
   releaseTestnet?.()
   await expect.poll(() => staleResponseReleased).toBe(true)
@@ -207,11 +200,10 @@ test('shows a request error and allows retry without requesting a payment or key
   })
   await page.goto(vaultsPage)
   const demo = page.getByTestId('earn-vault-demo')
-  await demo.getByRole('button', { name: 'Load vaults', exact: true }).click()
   await expect(demo.getByRole('alert')).toBeVisible()
   await expect(demo.getByLabel('Vault', { exact: true })).toHaveCount(0)
   await demo.getByRole('button', { name: 'Load vaults', exact: true }).click()
-  await demo.getByLabel('Vault', { exact: true }).selectOption(firstVault.id)
+  await expect(demo.getByLabel('Vault', { exact: true })).toHaveValue(firstVault.id)
   await expect(field(demo, 'Vault address')).toHaveText(firstVault.vaultAddress)
   await expect(demo.getByRole('alert')).toHaveCount(0)
   expect(attempts).toBe(2)
@@ -221,7 +213,6 @@ test('shows an empty result without inventing a sample vault', async ({ page }) 
   await page.route(endpoint, (route) => respond(route, []))
   await page.goto(vaultsPage)
   const demo = page.getByTestId('earn-vault-demo')
-  await demo.getByRole('button', { name: 'Load vaults', exact: true }).click()
   await expect(demo).toContainText(/no .*vaults/i)
   await expect(demo.getByLabel('Vault', { exact: true })).toHaveCount(0)
   await expect(demo.locator('dd')).toHaveCount(0)
@@ -233,10 +224,53 @@ test('keeps the loaded vault and controls usable on a narrow screen', async ({ p
   await page.route(endpoint, (route) => respond(route, [firstVault, secondVault]))
   await page.goto(vaultsPage)
   const demo = page.getByTestId('earn-vault-demo')
-  await demo.getByRole('button', { name: 'Load vaults', exact: true }).click()
   await expect(demo.getByLabel('Network', { exact: true })).toBeVisible()
   await expect(demo.getByLabel('Vault', { exact: true })).toBeVisible()
   await demo.getByLabel('Vault', { exact: true }).selectOption(secondVault.id)
   await expect(field(demo, 'Vault address')).toHaveText(secondVault.vaultAddress)
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+})
+
+test('preselects the verified testnet demo vault and preserves a deliberate choice on refresh', async ({
+  page,
+}) => {
+  const preferred = {
+    ...vault(4, 'Testnet pathUSD vault'),
+    id: earnDemoVault,
+    vaultAddress: earnDemoVault,
+  }
+  await page.route(endpoint, (route) => respond(route, [firstVault, preferred]))
+  await page.goto(vaultsPage)
+  const demo = page.getByTestId('earn-vault-demo')
+  await expect(demo.getByLabel('Vault', { exact: true })).toHaveValue(earnDemoVault)
+  await expect(field(demo, 'Vault address')).toHaveText(earnDemoVault)
+  await demo.getByLabel('Vault', { exact: true }).selectOption(firstVault.id)
+  await demo.getByRole('button', { name: 'Refresh vaults', exact: true }).click()
+  await expect(demo.getByRole('button', { name: 'Refresh vaults', exact: true })).toBeEnabled()
+  await expect(demo.getByLabel('Vault', { exact: true })).toHaveValue(firstVault.id)
+})
+
+test('refreshes a selected vault outside the first page instead of resetting it or keeping stale details', async ({
+  page,
+}) => {
+  await page.route(endpoint, (route) => {
+    const more = new URL(route.request().url()).searchParams.has('cursor')
+    return respond(route, more ? [secondVault] : [firstVault], more ? null : 'next-page')
+  })
+  await page.route(`https://api.tempo.xyz/v1/earn/vaults/${secondVault.id}?**`, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers,
+      body: JSON.stringify({ ...secondVault, instantLiquidity: '2000000' }),
+    }),
+  )
+  await page.goto(vaultsPage)
+  const demo = page.getByTestId('earn-vault-demo')
+  await expect(demo.getByLabel('Vault', { exact: true })).toHaveValue(firstVault.id)
+  await demo.getByRole('button', { name: 'Load more', exact: true }).click()
+  await demo.getByLabel('Vault', { exact: true }).selectOption(secondVault.id)
+  await demo.getByRole('button', { name: 'Refresh vaults', exact: true }).click()
+  await expect(field(demo, 'Vault-wide liquidity')).toHaveText('2 USD')
+  await expect(demo.getByLabel('Vault', { exact: true })).toHaveValue(secondVault.id)
 })

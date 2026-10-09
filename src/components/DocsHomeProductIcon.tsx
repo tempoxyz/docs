@@ -1,12 +1,14 @@
 import ArrowLeftRightIcon from '~icons/lucide/arrow-left-right'
-import SendIcon from '~icons/lucide/send'
 import BotIcon from '~icons/lucide/bot'
 import LockKeyholeIcon from '~icons/lucide/lock-keyhole'
+import NetworkIcon from '~icons/lucide/network'
+import SendIcon from '~icons/lucide/send'
 import TrendingUpIcon from '~icons/lucide/trending-up'
 import WalletIcon from '~icons/lucide/wallet'
 
 const icons = {
   accounts: WalletIcon,
+  network: NetworkIcon,
   payments: SendIcon,
   earn: TrendingUpIcon,
   agents: BotIcon,

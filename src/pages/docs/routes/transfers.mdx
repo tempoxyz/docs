@@ -1,47 +1,69 @@
 ---
-title: "Make a transfer"
-seoTitle: "Make a transfer | Tempo Docs"
-description: "Quote a cross-network transfer, authorize the source transactions, and track delivery to the recipient."
+title: Make a transfer
+seoTitle: Make a Transfer | Tempo Docs
+description: Quote a transfer, sign the source transactions, and confirm delivery to the recipient.
 ---
+
+import { OpenApi } from 'vocs'
 
 # Make a transfer
 
-Use a transfer when your application can authorize transactions from the source account, through its own signing infrastructure, a wallet provider, or a connected wallet. The same flow supports transfers into or out of Tempo, subject to the [supported networks and assets](/docs/routes/networks).
-
-Routes prepares the source-chain calls for the account's signer to sign and submit.
+Move stablecoins when your application can authorize the source transaction through a wallet or its own signer. Routes prepares the source calls; your application signs them and tracks delivery.
 
 ## Set up Routes API access
 
-Create a project and API key in [Tempo Console](/docs/api/console). For this flow, use `routes:read` for quotes and status reads and `routes:write` to create transfers and register source transactions. Authenticated route-directory reads also require `data:read`. Keep the key on your backend; see [API authentication](/docs/api/authentication).
+Create a key with `routes:read` and `routes:write` using [API setup](/docs/routes/api-setup). Choose the networks and tokens from [Supported routes](/docs/routes/networks). The request builders below expose the API fields and copyable code samples.
 
-Routes endpoints use the `https://api.tempo.xyz/v1` base URL. Send your key in the `tempo-api-key` header.
+The example fixes the source amount with `exactSource`. Check that the selected route supports it. The [complete cURL example](/docs/routes/examples/transfers) shows every input and request in one place.
 
-## Submit and track a transfer
+<span id="submit-and-track-a-transfer" />
+
+## Transfer funds
 
 :::::steps
 
-### Quote the transfer
+### Get a quote
 
-Call `GET /v1/routes/transfers/quote` with the source and destination chains, tokens, sender, recipient, and amount. Choose whether to specify the source amount or requested destination amount, as described in [Quotes and fees](/docs/routes/quotes#choose-which-amount-to-fix).
+<span id="quote-the-transfer" />
 
-Review the returned source amount, destination amount, minimum destination amount, fees, and `quote.expiresAt`. A quote does not create or reserve a transfer.
+<OpenApi.Playground operationId="quoteRoutesTransfer" anchors={false} />
+
+A quote prices the request; it does not reserve or create a transfer.
+
+### Review fees
+
+Show the source amount, expected destination amount, minimum destination amount, and fees. `destinationAmount` includes route deductions; an empty `fees` array does not mean the route is free. Check `quote.expiresAt` and refresh expired terms.
 
 ### Create the transfer
 
-Call `POST /v1/routes/transfers` with the selected parameters and an `idempotency-key`. Save the returned transfer `id` and unsigned `action`, and review the returned terms before requesting a signature. Transfer reads do not return the executable action.
+Set a unique `idempotency-key` for this operation. Reuse it when retrying the create request with unchanged inputs.
 
-### Sign and submit the source calls
+<OpenApi.Playground operationId="createRoutesTransfer" anchors={false} />
 
-Use the source account's signer to sign and submit the returned calls in order. An action can include approval calls as well as the call that starts the route, and may require separate transactions. Handle the returned `action.type` for the source chain.
+Save the returned transfer `id` and retain its unsigned `action`. Review the returned terms before requesting a signature. Transfer reads do not return the executable action.
+
+<span id="sign-and-submit-the-source-calls" />
+
+### Sign and submit
+
+Use the source account's signer to submit the returned calls in order. Calls can include approvals and may require separate transactions. Handle the returned `action.type` using the [EVM or Tron action format](/docs/api/routes/transfers).
+
+For an `evm:calls` action, pass each call's `to`, `data`, and `value` to your source-chain wallet client. Wait for successful execution before the next call, and retain all hashes as `transactionHashes`. If submission stops partway through, inspect the transactions already sent before resuming. The Routes API key does not authorize the source account.
 
 ### Register the source transactions
 
-Call `POST /v1/routes/transfers/{id}/source-transactions` with `transactionHash` for one transaction or `transactionHashes` for multiple transactions produced by the prepared calls. The API verifies and associates them with the transfer.
+Enter the transfer `id` from creation and the actual `transactionHashes` produced by your signer. Use `transactionHash` instead when there is only one source transaction.
 
-### Track destination delivery
+<OpenApi.Playground operationId="registerRoutesTransferSourceTransaction" anchors={false} />
 
-Read `GET /v1/routes/transfers/{id}` until the transfer reaches `completed`. Save the source and destination transaction references with your payment record. For refunds or other outcomes, follow [Track delivery](/docs/routes/delivery).
+The API verifies and associates the hashes with the transfer.
+
+<span id="track-destination-delivery" />
+
+### Confirm the transfer
+
+<OpenApi.Playground operationId="getRoutesTransfer" anchors={false} />
+
+Keep the payment pending until `status` is `completed`. Reconcile the delivered amount and destination transaction references. Follow [Track delivery](/docs/routes/delivery) for failures and refunds.
 
 :::::
-
-See the [Transfers API reference](/docs/api/routes/transfers) for request schemas, action formats, and response fields.

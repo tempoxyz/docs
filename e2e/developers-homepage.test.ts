@@ -36,11 +36,11 @@ test('serves getting started directly with its overview sidebar', async ({ page,
   await page.setViewportSize({ width: 1440, height: 1000 })
   await page.goto('/get-started')
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Get Started', exact: true }),
+    page.getByRole('heading', { level: 1, name: 'Build on Tempo', exact: true }),
   ).toBeVisible()
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
   await expect(sidebar).toBeVisible()
-  await expect(sidebar.getByRole('link', { name: 'Overview', exact: true })).toHaveAttribute(
+  await expect(sidebar.getByRole('link', { name: 'Start building', exact: true })).toHaveAttribute(
     'href',
     '/get-started',
   )
@@ -86,23 +86,27 @@ for (const entry of ['direct', 'client navigation'] as const) {
     )
 
     if (entry === 'direct') {
-      await page.goto('/get-started#send-your-first-test-payment')
+      await page.goto('/get-started/quickstart#try-a-payment')
     } else {
       await page.goto('/docs/accounts')
       await page
         .getByRole('navigation', { name: 'Documentation sections' })
         .getByRole('link', { name: 'Get Started', exact: true })
         .click()
+      await page
+        .locator('article[data-v-content]')
+        .getByRole('link', { name: 'Send a test payment →', exact: true })
+        .click()
     }
 
-    await expect(page).toHaveURL((url) => url.pathname === '/get-started')
-    await expect(page.locator('#send-your-first-test-payment')).toBeAttached()
-    await expect(page.getByRole('heading', { name: 'Try Tempo Wallet', exact: true })).toBeVisible()
+    await expect(page).toHaveURL((url) => url.pathname === '/get-started/quickstart')
+    await expect(page.locator('#try-a-payment')).toBeAttached()
+    await expect(page.locator('h2#try-a-payment')).toBeVisible()
     const pageTools = page.getByRole('navigation', { name: 'Page tools' })
     await expect(pageTools).toHaveCount(1)
     await expect(pageTools.getByRole('link', { name: 'View Markdown' })).toHaveAttribute(
       'href',
-      '/assets/md/get-started.md',
+      '/assets/md/get-started/quickstart.md',
     )
     const signIn = getDemoStep(page, 'Create an account, or use an existing one.').getByRole(
       'button',
@@ -152,19 +156,17 @@ for (const entry of ['direct', 'client navigation'] as const) {
     const sections = page.getByRole('navigation', { name: 'Documentation sections' })
 
     if (entry === 'direct') {
-      expect((await request.get('/get-started/stablecoins', { maxRedirects: 0 })).status()).toBe(
-        200,
-      )
-      await page.goto('/get-started/stablecoins')
+      expect((await request.get('/get-started/quickstart', { maxRedirects: 0 })).status()).toBe(200)
+      await page.goto('/get-started/quickstart')
     } else {
       await page.goto('/docs/accounts')
       await sections.getByRole('link', { name: 'Get Started', exact: true }).click()
-      await sidebar.getByRole('link', { name: 'Stablecoins on Tempo', exact: true }).click()
+      await sidebar.getByRole('link', { name: 'Quickstart', exact: true }).click()
     }
 
-    await expect(page).toHaveURL(/\/get-started\/stablecoins\/?$/)
+    await expect(page).toHaveURL(/\/get-started\/quickstart\/?$/)
     await expect(
-      page.getByRole('heading', { level: 1, name: 'Stablecoins on Tempo', exact: true }),
+      page.getByRole('heading', { level: 1, name: 'Quickstart', exact: true }),
     ).toBeVisible()
     await expect(page.getByRole('navigation', { name: 'Developer navigation' })).toBeVisible()
     await expect(sections).toBeVisible()
@@ -172,10 +174,10 @@ for (const entry of ['direct', 'client navigation'] as const) {
     await expect(sidebar).toBeVisible()
     await expect(sidebar.locator('a[data-active]')).toHaveAttribute(
       'href',
-      '/get-started/stablecoins',
+      '/get-started/quickstart',
     )
 
-    await sidebar.getByRole('link', { name: 'Overview', exact: true }).click()
+    await sidebar.getByRole('link', { name: 'Start building', exact: true }).click()
     await expect(page).toHaveURL(/\/get-started\/?$/)
     await expect(sections).toBeVisible()
     await expect(sidebar.locator('a[data-active]')).toHaveAttribute('href', '/get-started')

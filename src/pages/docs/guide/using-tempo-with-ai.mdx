@@ -17,7 +17,9 @@ Give your coding agent access to Tempo documentation. Install the Tempo Docs plu
 
 <span id="install-tempo-plugins" />
 
-## Install the Tempo Docs plugin
+<span id="install-the-tempo-docs-plugin" />
+
+## Connect your coding agent
 
 The Tempo Docs plugin installs the read-only Tempo MCP server, documentation skill, and editor metadata. Tempo publishes plugins from the public [`tempoxyz/plugins`](https://github.com/tempoxyz/plugins) repository.
 
@@ -48,17 +50,9 @@ codex plugin add docs@tempo
 ```
 </details>
 
-After installation, start a new conversation in your project and give the agent a concrete task. For example:
-
-```text
-Use Tempo's docs to build a TypeScript example that sends a stablecoin payment on Moderato testnet with a memo. Include wallet funding and verify delivery to the intended recipient.
-```
-
-Use the [testnet faucet](/docs/quickstart/faucet) for test funds and [Send your first payment](/docs/guide/payments/send-a-payment) to review the implementation.
-
 For Cursor, Amp, and other clients, connect to the MCP server below. If your agent supports skills, you can also [install the Docs skill](#docs-skill).
 
-## Connect to Tempo's MCP server
+### Connect to Tempo's MCP server
 
 Use this option if your editor does not support the Tempo Docs plugin. The MCP server lets your agent search documentation and read complete pages at `https://mcp.tempo.xyz`. Choose your client below.
 
@@ -162,7 +156,17 @@ amp mcp add tempo https://mcp.tempo.xyz
 
 </div>
 
-## MCP tools
+## Start a project
+
+After installation, start a new conversation in your project and give the agent a concrete task. For example:
+
+```text
+Use Tempo's docs to build a TypeScript example that sends a stablecoin payment on Moderato testnet with a memo. Include wallet funding and verify delivery to the intended recipient.
+```
+
+Use the [testnet faucet](/docs/quickstart/faucet) for test funds and [Quickstart](/get-started/quickstart) to review the implementation.
+
+### MCP tools
 
 The MCP endpoint exposes these tools to connected agents:
 
@@ -173,7 +177,7 @@ The MCP endpoint exposes these tools to connected agents:
 | `read_page` | Read one cleaned documentation page. | `source` plus `path` or `url` |
 | `code` | Run multi-step documentation lookups. | `code` |
 
-### MCP feedback
+#### MCP feedback
 
 MCP clients can also post feedback directly to `https://tempo.xyz/developers/api/feedback`:
 
@@ -188,11 +192,13 @@ MCP clients can also post feedback directly to `https://tempo.xyz/developers/api
 }
 ```
 
-### Try the MCP server
+#### Try the MCP server
 
 <TempoMcpExplorer />
 
-## Install the Mercator plugin
+<span id="install-the-mercator-plugin" />
+
+### Add paid tools
 
 Mercator adds paid API discovery and execution to your agent. Follow the [Mercator guide](/docs/guide/mercator) to authorize your client and verify the connection after installation:
 
@@ -216,9 +222,9 @@ claude plugin install mercator@tempo --scope user --yes
 
 <span id="tempo-docs" />
 
-## Use skills and Markdown
+### Use skills and Markdown
 
-### Docs skill
+#### Docs skill
 
 Install the Tempo Docs skill to give AI coding agents access to Tempo documentation, related documentation sources, and examples:
 
@@ -228,7 +234,7 @@ npx skills add tempoxyz/plugins --skill docs
 
 Once installed, the agent uses it automatically when relevant tasks are detected.
 
-### Read docs as Markdown
+#### Read docs as Markdown
 
 Every page on this site is available as plain Markdown — append `.md` to any URL:
 

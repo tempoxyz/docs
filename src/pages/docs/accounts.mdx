@@ -1,7 +1,7 @@
 ---
-title: "Accounts"
-seoTitle: "Create and Manage Accounts on Tempo | Tempo Docs"
-description: Choose how your application holds stablecoins, manages signing authority, and delegates access to users, services, and agents.
+title: Accounts
+seoTitle: Accounts on Tempo | Tempo Docs
+description: Create accounts, hold stablecoins, and control who can sign payments for your application.
 ---
 
 import { Cards, Card } from 'vocs'
@@ -13,71 +13,50 @@ import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 # Accounts
 
-Create accounts to hold stablecoins and send payments. Choose who controls signing, then grant services or agents the access they need.
+Create accounts to hold stablecoins and send payments. Connect a customer's wallet, use a wallet provider, or manage signing in your backend.
 
 [Create an account →](/docs/accounts/create)
 
 </DocsProductOverview>
 
-An account holds stablecoin balances at an address. A wallet is software or a service that manages signing keys and requests signatures.
-
-## Fit accounts into your application
-
-Your customer record and a Tempo account serve different purposes. Your application identifies the customer and maintains its ledger; the Tempo account holds token balances and authorizes transactions. Associate addresses with the customer or business records they serve.
-
-| Component | Responsibility |
-| --- | --- |
-| Your application and backend | Customer identity, address mappings, payment records, and reconciliation. |
-| Your signer or wallet provider | Key storage, signature requests, and the authentication and recovery flow you choose. |
-| Tempo network | Validate transaction signatures and permissions, execute transactions, and record token balances and transfers. |
-| Tempo API | Read indexed balances and activity and deliver configured webhook events. API credentials do not authorize account spending. |
-
-Follow the [integration walkthrough](/docs/accounts/integration) to connect these pieces, from creating an account to recording its first payment.
-
+<span id="fit-accounts-into-your-application" />
 <span id="choose-an-account-model" />
+<span id="choose-who-controls-signing" />
 
-## Choose who controls signing
+## Accounts and wallets
 
-| Who authorizes transactions? | Integration path |
+An **account** holds token balances at an address. A **wallet** is software or a service that manages signing and requests signatures. Your application's customer record identifies the person or business using that account.
+
+| Who authorizes payments? | Start here |
 | --- | --- |
-| Your backend, for payouts or treasury operations | [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key) using your signing infrastructure, or [use a wallet provider](/docs/accounts/providers). |
-| A customer, from inside your application | Use a [wallet provider](/docs/accounts/providers) for embedded wallets, or create a [passkey account](/docs/accounts/create#create-a-passkey-account). |
-| A customer, through an existing wallet | [Connect a wallet](/docs/accounts/integrate) and request authorization for your application. |
+| Your backend | [Create an account](/docs/accounts/create) with your signing infrastructure or a [wallet provider](/docs/accounts/providers). |
+| A customer inside your app | Use an [embedded wallet provider](/docs/accounts/providers) or create a [passkey account](/docs/accounts/create#create-a-passkey-account). |
+| A customer with an existing wallet | [Connect a wallet](/docs/accounts/integrate). |
 
-For a provider integration, decide who can request signatures and how users regain access. Compare the provider's authentication, recovery, key export, and signing policies against those requirements.
-
-If you collect customer deposits into a shared balance, [customer deposit addresses](/docs/guide/payments/virtual-addresses) give each customer a virtual address that forwards funds to your account. Track each customer's balance in your ledger; virtual addresses do not hold separate balances.
+Associate account addresses with the customers or businesses they serve. Your application maintains customer identity and payment records; Tempo records balances and transfers. The [integration walkthrough](/docs/accounts/integration) shows how those pieces fit together.
 
 <span id="configure-account-controls" />
 <span id="control-who-can-use-an-account" />
+<span id="delegate-access-to-applications-and-services" />
 
-## Delegate access to applications and services
+## Keys and permissions
 
-Use a limited access key when a service, customer session, or agent needs to act on an account. Set its expiry, token budget, and allowed calls for the task. For example, a payout service can receive permission to transfer one stablecoin to approved recipients within a budget.
+An account's root key controls signing authority. Grant a service, session, or agent a limited access key when it needs to act on the account. Set the expiry, token budget, and allowed calls for that task.
 
-[Keys and signing](/docs/accounts/keys) explains root authority, delegation, and how transaction signing differs from customer login and API authentication.
-
-- [Access keys](/docs/accounts/access-keys) covers authorization, limits, and revocation.
-- [Give an agent access](/docs/accounts/agents) explains how to delegate a defined task.
-- [Manage admin keys](/docs/accounts/admin-keys) covers delegation of key management itself.
+[Keys and permissions](/docs/accounts/keys) explains how to sign transactions, grant access, and revoke it. Account keys authorize transactions; Tempo API credentials authorize API requests. Neither replaces your application's customer login.
 
 Plan recovery with your wallet or signing provider. The root public key determines the account address; adding or revoking an access key does not replace it.
 
-## Understand account visibility
+<span id="understand-account-visibility" />
 
-Balances and transfers on Tempo's public ledger are publicly readable. Signing permissions control who can move funds; they do not make the account's activity private. For private balances and activity, review [Tempo Zones](/docs/zones/privacy), including what remains visible to the operator and on the public ledger.
+Balances and transfers on Tempo's public ledger are publicly readable. For private balances and activity, review [Zones](/docs/zones/privacy), including what remains visible to the operator and on the public ledger.
 
 <span id="fund-accounts-and-reconcile-payments" />
 <span id="put-an-account-to-use" />
-
-## Connect accounts to your payment system
-
-[Fund the account](/docs/guide/getting-funds), then connect its balances and transactions to your payment flow.
+<span id="connect-accounts-to-your-payment-system" />
 
 <Cards>
-  <Card title="Balances and activity" description="Read account balances and match transactions to your ledger." to="/docs/accounts/balances" icon="lucide:list" />
-  <Card title="Payments" description="Send stablecoins, accept deposits, and reconcile transfers." to="/docs/payments" icon="lucide:send" />
-  <Card title="Routes" description="Move stablecoins between Tempo and other networks." to="/docs/routes" icon="lucide:arrow-left-right" />
+  <Card title="Balances and activity" description="Read balances and show payment history." to="/docs/accounts/balances" icon="lucide:list" />
+  <Card title="Send payments" description="Transfer stablecoins, batch payments, and confirm delivery." to="/docs/guide/payments/send-a-payment" icon="lucide:send" />
+  <Card title="Receive payments" description="Accept deposits and match them to customer records." to="/docs/guide/payments/accept-a-payment" icon="lucide:arrow-down-to-line" />
 </Cards>
-
-For wallets you operate, follow the [wallet integration guide](/docs/quickstart/wallet-developers).

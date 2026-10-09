@@ -1,14 +1,20 @@
 ---
-title: "Connect to a Zone"
+title: "Connect"
 seoTitle: "Connect to a Zone | Tempo Docs"
 description: "Get deployment details, authenticate private account access, and keep public Tempo and Zone clients separate."
 ---
 
-# Connect to a Zone
+<span id="connect-to-a-zone" />
+
+# Connect
 
 Start with access to a specific Zone deployment. Get its configuration from the operator or [contact Tempo](https://tempo.xyz/contact). A Zone uses its own network and chain ID; it is not a privacy setting on a public Tempo account.
 
-## Confirm the integration interfaces
+<span id="confirm-the-integration-interfaces" />
+
+[Try the connection demo](/docs/guide/private-zones/connect-to-a-zone) with test funds. It uses the earlier sandbox interface.
+
+## Get connection details
 
 Keep three controls separate when working with the Zone operator or your wallet provider:
 
@@ -30,22 +36,59 @@ Ask for the RPC endpoint, chain ID, portal address, enabled assets, supported SD
 
 <span id="authenticate-the-account" />
 
-### Authenticate RPC requests
+<span id="authenticate-rpc-requests" />
+
+### Authorize access
 
 For account-scoped Zone RPC, sign an authorization token with the account key and send it in the `X-Authorization-Token` header on every request. This token authenticates RPC requests; it does not replace signatures on transactions or credentials required to reach the endpoint.
 
 Use the deployment's signing tooling and follow the [authorization token format](/docs/protocol/zones/rpc#authorization-tokens) for domain separation, chain ID, issuance, and expiry. Renew credentials before they expire.
 
-### Confirm the network
+<span id="confirm-the-network" />
 
-Set `ZONE_RPC_URL` to the deployment's endpoint and `ZONE_AUTH_TOKEN` to the signed token from the previous step. Read the chain ID:
+### Check the connection
 
-```bash
-curl "$ZONE_RPC_URL" \
-  --header "Content-Type: application/json" \
-  --header "X-Authorization-Token: $ZONE_AUTH_TOKEN" \
-  --data '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}'
+Set `ZONE_RPC_URL` to the deployment's endpoint and `ZONE_AUTH_TOKEN` to the signed token. TypeScript uses `viem` (`pnpm add viem`); Python uses `requests` (`pip install requests`). CLI examples use [Foundry](/docs/sdk/foundry). These examples run on your backend. Wagmi uses its core actions with the [authenticated Zone config](/docs/zones/examples); keep shared operator credentials out of browser code.
+
+::::code-group
+
+```ts [Viem]
+import { createPublicClient, http } from 'viem'
+import { tempoActions } from 'viem/tempo'
+const zone = createPublicClient({
+  transport: http(process.env.ZONE_RPC_URL, {
+    fetchOptions: { headers: { 'X-Authorization-Token': process.env.ZONE_AUTH_TOKEN! } },
+  }),
+}).extend(tempoActions())
+console.log(await zone.getChainId())
 ```
+
+```ts [Wagmi]
+import { getPublicClient } from '@wagmi/core'
+import { zoneConfig } from './zone.config'
+const chainId = await getPublicClient(zoneConfig)!.getChainId()
+```
+
+```python [Python]
+import os, requests
+zone_rpc_url = os.environ["ZONE_RPC_URL"]
+zone = requests.Session()
+zone.headers["X-Authorization-Token"] = os.environ["ZONE_AUTH_TOKEN"]
+response = zone.post(zone_rpc_url, json={
+    "jsonrpc": "2.0", "id": 1, "method": "eth_chainId", "params": []
+})
+response.raise_for_status()
+print(response.json())
+```
+
+```bash [CLI]
+cast chain-id --rpc-url "$ZONE_RPC_URL" \
+  --rpc-headers "X-Authorization-Token: $ZONE_AUTH_TOKEN"
+```
+
+::::
+
+Reuse `zone` in the TypeScript and Python [balance examples](/docs/zones/balances). For raw RPC responses, check for an `error` before using `result`; a successful HTTP request can contain a JSON-RPC error.
 
 Compare the returned chain ID with the operator-provided configuration. Keep separate clients for public Tempo and the Zone. Use the correct chain ID when preparing signatures and calls.
 
@@ -57,4 +100,4 @@ The current permissioned runtime restricts token movement to the inbox and outbo
 
 The [testnet sandbox](/docs/guide/private-zones) uses earlier interfaces and supports operations that the current permissioned runtime does not enable. Use its guides only with the named sandbox deployment.
 
-Continue with [Deposit funds](/docs/zones/deposit), then [read the private balance](/docs/zones/balances).
+Continue with [Deposit](/docs/zones/deposit), then [read the private balance](/docs/zones/balances).

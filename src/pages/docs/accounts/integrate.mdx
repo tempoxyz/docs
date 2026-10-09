@@ -16,9 +16,15 @@ Let users connect Tempo Wallet to your application with the Accounts SDK. The wa
 
 This browser example uses Moderato testnet.
 
+## Choose a provider
+
+Use the Accounts SDK below for Tempo Wallet. If customers already use another wallet or your app embeds a provider, follow that [provider’s Tempo integration](/docs/accounts/providers). The wallet handles signing; connecting it does not replace your application’s customer login.
+
 <span id="connect-and-fund-a-test-account" />
 
-## Connect Tempo Wallet
+<span id="connect-tempo-wallet" />
+
+## Connect your app
 
 Try the connection below. Tempo Wallet asks you to connect and approve access for the testnet demos, then the selected account address appears here.
 
@@ -40,39 +46,33 @@ pnpm add --save-exact accounts@0.18.4 viem
 
 <span id="connect-tempo-wallet-from-your-application" />
 
-### Create a provider and clients
+### Connect the provider
 
-Use the same network for the provider, wallet client, and public client:
+Create a provider for Moderato and request the selected address from a **Connect wallet** button:
 
-```ts [connection.ts]
+::::code-group
+
+```ts [TypeScript (Accounts SDK)]
 import { Provider } from 'accounts'
 import { tempoModerato } from 'viem/chains'
-import { createClient, custom } from 'viem/tempo'
 
-export const provider = Provider.create({
-  chains: [tempoModerato],
-  testnet: true,
-})
-
-export const walletClient = createClient({
-  chain: tempoModerato,
-  transport: custom(provider),
-})
-
-export const publicClient = createClient({
-  chain: tempoModerato,
-})
-
-export async function connectAccount() {
-  const [address] = await provider.request({
-    method: 'eth_requestAccounts',
-  })
-  if (!address) throw new Error('No account was selected')
-  return address
-}
+const provider = Provider.create({ chains: [tempoModerato], testnet: true })
+const [address] = await provider.request({ method: 'eth_requestAccounts' })
+if (!address) throw new Error('No account was selected')
 ```
 
-Call `connectAccount` from a **Connect wallet** button and save the returned address in your application's connection state. The address identifies the selected wallet account; connecting it does not authenticate a customer in your application. Keep wallet connection state separate from your customer's authenticated session.
+```tsx [Wagmi]
+import { useConnect, useConnectors } from 'wagmi'
+const { mutate: connect } = useConnect()
+const connector = useConnectors().find((item) => item.id === 'xyz.tempo')
+const connectWallet = () => connector && connect({ connector })
+```
+
+::::
+
+The [complete browser setup](/docs/accounts/examples#browser-wallet-setup) creates `walletClient` and `publicClient` from this provider and exports `connectAccount()`. For Wagmi, use the [Tempo Wallet connector setup](/docs/accounts/examples#wagmi-client), place the hooks in your React component, and call `connectWallet` from a button. Browser wallet authorization requires the user's wallet; CLI or API requests cannot authorize that browser session. Keep this connection separate from your application's authenticated customer session.
+
+<span id="create-a-provider-and-clients" />
 
 ### Read the connected account
 
@@ -83,14 +83,20 @@ On `accountsChanged`, update the selected address or clear it when the wallet di
 <span id="fund-the-connected-address" />
 <span id="send-and-verify-a-test-payment" />
 
-### Add a payment action
+<span id="add-a-payment-action" />
 
-Fund the connected address with the [Moderato faucet](/docs/quickstart/faucet), then follow [Send a payment](/docs/guide/payments/send-a-payment). Show the recipient and amount before asking the wallet to authorize the request.
+### Fund the connected account
+
+Fund the connected address with the [Moderato faucet](/docs/quickstart/faucet), then follow [Send payments](/docs/guide/payments/send-a-payment). Show the recipient and amount before asking the wallet to authorize the request.
 
 :::::
 
 <span id="add-your-applications-account-workflow" />
 
-## Choose your wallet integration
+<span id="choose-your-wallet-integration" />
 
-The [Accounts SDK documentation](https://accounts.tempo.xyz/docs) covers framework integration and connection options. To let your application sign within explicit limits, use [access keys](/docs/accounts/access-keys).
+## Sign a transaction
+
+Request payments from the connected wallet using the [CLI, Viem, and Wagmi payment examples](/docs/guide/payments/send-a-payment#send-a-payment). For Viem, pass `account: address` to `walletClient.token.transferSync`; Wagmi uses the connected account. Show the recipient and amount before requesting authorization.
+
+Use [Send payments](/docs/guide/payments/send-a-payment#confirm-delivery) to verify delivery before updating your application records. The [Accounts SDK documentation](https://accounts.tempo.xyz/docs) covers framework integration and connection options. To let your application sign within explicit limits, use [access keys](/docs/accounts/access-keys).

@@ -1,0 +1,151 @@
+---
+title: Fees
+seoTitle: Transaction Fees | Tempo Docs
+description: Choose a stablecoin for transaction fees, sponsor fees for customers, and estimate costs before submitting a transaction.
+---
+
+# Fees
+
+Pay transaction fees with a supported USD-denominated TIP-20 token. Tempo has no native gas token. The sender can pay, or a separate fee payer can sponsor the transaction.
+
+:::info[Interactive walkthrough]
+Try [Sponsor fees](/docs/guide/payments/sponsor-user-fees#fee-sponsorship-demo) in Accounts: send a test payment with a fee payer, then follow the wallet implementation.
+:::
+
+Use the [Network example setup](/docs/network/examples) for these Moderato examples. The sender needs test AlphaUSD and a recipient address.
+
+## Choose a fee token
+
+Set a client default with `feeToken`, or pass it on an individual transaction. The token must have enough Fee AMM liquidity when conversion to the validator's preferred token is needed.
+
+To save an account preference onchain:
+
+::::code-group
+
+```ts [Viem]
+// [!include ~/snippets/network-fees.ts:choose]
+```
+
+```bash [CLI]
+cast send 0xfeec000000000000000000000000000000000000 \
+  'setUserToken(address)' "$TOKEN" \
+  --rpc-url "$RPC_URL" --tempo.fee-token "$TOKEN" --interactive
+```
+
+```ts [Wagmi]
+// [!include ~/snippets/network-wagmi.ts:fee-token]
+```
+
+```python [Python]
+from pytempo.contracts import FeeManager
+from network_config import ALPHA_USD, make_transaction, submit
+
+call = FeeManager.set_user_token(token=ALPHA_USD)
+submit(make_transaction((call,)))
+```
+
+::::
+
+An explicit transaction fee token overrides the saved preference. [Choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin) includes a working demo and per-transaction examples.
+
+## Sponsor fees
+
+The sender signs the transaction and supplies any funds it transfers. The fee payer separately authorizes payment of its transaction fees.
+
+Configure the public testnet relay in the [Viem setup](/docs/network/examples#sponsored-transactions) or [Wagmi wallet setup](/docs/network/examples#wagmi-setup), then request sponsorship. The CLI passes the relay URL directly. Foundry 1.8.5 estimates gas before attaching the sponsor signature, so this example adds a 20% gas margin:
+
+::::code-group
+
+```ts [Viem]
+// [!include ~/snippets/network-fees.ts:sponsor]
+```
+
+```bash [CLI]
+GAS=$(cast estimate "$TOKEN" 'transfer(address,uint256)' "$TEMPO_RECIPIENT" 1000000 \
+  --from "$SENDER" --rpc-url "$RPC_URL" --tempo.fee-token "$TOKEN")
+cast erc20 transfer "$TOKEN" "$TEMPO_RECIPIENT" 1000000 \
+  --rpc-url "$RPC_URL" --sponsor-url https://sponsor.moderato.tempo.xyz \
+  --gas-limit "$(((GAS * 120 + 99) / 100))" --interactive
+```
+
+```ts [Wagmi]
+// [!include ~/snippets/network-wagmi.ts:sponsor]
+```
+
+::::
+
+The public testnet endpoint needs no API key. For authenticated sandbox and production sponsorship, use the [Fee Payer API](/docs/api/fee-payer). The [Python SDK](/docs/sdk/python#fee-sponsorship-with-python) supports co-signing with a separate fee payer account. A raw RPC request must already contain the required signatures.
+
+Use the [sponsorship demo](/docs/guide/payments/sponsor-user-fees) to try the flow, or the [relay handler](/docs/server/relay-handler) to enforce your own sponsorship policy.
+
+## Estimate costs
+
+Estimate the actual call with its sender and fee configuration. A transfer to a new recipient can require more gas than a transfer to an existing token holder, so avoid hard-coding one gas limit for every payment.
+
+Estimate a one-AlphaUSD transfer. The HTTP tab uses `SENDER`, `TOKEN`, and `CALL_DATA` from the [RPC setup](/docs/network/examples#http-requests).
+
+::::code-group
+
+```ts [Viem]
+// [!include ~/snippets/network-fees.ts:estimate]
+```
+
+```bash [CLI]
+GAS=$(cast estimate "$TOKEN" 'transfer(address,uint256)' \
+  "$TEMPO_RECIPIENT" 1000000 --from "$SENDER" \
+  --rpc-url "$RPC_URL" --tempo.fee-token "$TOKEN")
+```
+
+```ts [Wagmi]
+// [!include ~/snippets/network-wagmi.ts:estimate]
+```
+
+```python [Python]
+from network_config import ALPHA_USD, TIP20, account, recipient, w3
+
+call = TIP20(ALPHA_USD).transfer(to=recipient, amount=1_000_000)
+request = {"type": "0x76", "from": account.address, "feeToken": ALPHA_USD,
+           "calls": [{"to": ALPHA_USD, "data": "0x" + call.data.hex()}]}
+gas = int(w3.manager.request_blocking("eth_estimateGas", [request]), 16)
+```
+
+```bash [API (RPC)]
+curl "$RPC_URL" -H 'Content-Type: application/json' --data @- <<JSON
+{"jsonrpc":"2.0","id":1,"method":"eth_estimateGas","params":[{
+  "type":"0x76","from":"$SENDER","feeToken":"$TOKEN",
+  "calls":[{"to":"$TOKEN","data":"$CALL_DATA"}]
+}]}
+JSON
+```
+
+::::
+
+Gas prices are in attodollars (10⁻¹⁸ USD) per gas. Convert the estimate to USD, rounding up to six decimal places:
+
+::::code-group
+
+```ts [Viem]
+// [!include ~/snippets/network-fees.ts:cost]
+```
+
+```bash [CLI]
+GAS_PRICE=$(cast gas-price --rpc-url "$RPC_URL")
+MICRODOLLARS=$(((GAS * GAS_PRICE + 999999999999) / 1000000000000))
+cast format-units "$MICRODOLLARS" 6
+```
+
+```ts [Wagmi]
+// [!include ~/snippets/network-wagmi.ts:cost]
+```
+
+```python [Python]
+gas_price = w3.eth.gas_price
+microdollars = (gas * gas_price + 10**12 - 1) // 10**12
+print(f"Estimated fee (USD): {microdollars / 10**6:.6f}")
+```
+
+::::
+
+This is an estimate at the current suggested gas price. Gas usage, the base fee, and network state can change before inclusion. Read the receipt for actual gas usage and the fee-token transfer for the amount charged.
+
+The [fee specification](/docs/protocol/fees/spec-fee#fee-units) defines fee units, maximum-fee reservation, and refunds. [Fee AMM liquidity](/docs/guide/stablecoin-dex/managing-fee-liquidity) supports conversion between fee tokens; it is separate from swapping application funds on the Exchange.

@@ -4,13 +4,28 @@ seoTitle: "Quotes and fees | Tempo Docs"
 description: "Read source and destination amounts, quote expiry, and fees before authorizing a Routes transfer."
 ---
 
+import { OpenApi, Tab, Tabs } from 'vocs'
+
 # Quotes and fees
 
 Quote the exact payment before requesting a signature or showing deposit instructions. The supported route directory identifies possible paths; the quote gives terms for the selected amount and recipient.
 
+## Get a quote
+
+Choose a flow, click **Try**, and enter the source asset, destination asset, amount, and recipient where required. Use an API key with access to Routes. Review the returned amounts before creating the transfer or deposit address.
+
+<Tabs>
+  <Tab title="Transfer">
+    <OpenApi.Playground operationId="quoteRoutesTransfer" anchors={false} />
+  </Tab>
+  <Tab title="Deposit address">
+    <OpenApi.Playground operationId="quoteRoutesDepositAddress" anchors={false} />
+  </Tab>
+</Tabs>
+
 ## Choose which amount to fix
 
-For transfers, use `GET /v1/routes/transfers/quote` and choose which side determines the quote:
+For a transfer, choose which side determines the quote:
 
 | Your application specifies | Amount mode | `amount` uses |
 | --- | --- | --- |
@@ -19,7 +34,7 @@ For transfers, use `GET /v1/routes/transfers/quote` and choose which side determ
 
 Review the returned amounts and minimum destination amount before continuing.
 
-For deposit addresses, use `GET /v1/routes/deposit-addresses/quote` with the source chain, source token, destination token, and amount. Check the [endpoint reference](/docs/api/routes/deposit-addresses) for the supported parameters.
+For a deposit address, quote the source chain, source token, destination token, and amount. Check the [endpoint reference](/docs/api/routes/deposit-addresses) for the supported parameters.
 
 ## Show the payment terms
 

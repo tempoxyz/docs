@@ -1,0 +1,319 @@
+---
+title: Account example setup
+seoTitle: Complete Account Examples | Tempo Docs
+description: Configure Tempo API requests, Viem and Python clients, and browser wallets for the short account examples.
+---
+
+# Account example setup
+
+Use these complete setups with the short examples in Accounts. The chain examples use AlphaUSD on Moderato testnet; API examples use the same network with `chainId=42431`.
+
+## Choose your tools
+
+The short examples use AlphaUSD on Moderato. Choose one signing environment for each workflow: a CLI/private-key signer, a Viem client, or a wallet connected through Wagmi. Read-only examples need no private key.
+
+- [CLI](#cli-client): install the current Foundry release with Tempo support.
+- [Viem](#viem-client): use a local script or backend signer.
+- [Wagmi](#wagmi-client): connect Tempo Wallet in React.
+- [Python](#python-client): use the typed Python SDK.
+
+## CLI client
+
+Follow [Foundry installation](/docs/sdk/foundry#get-started-with-foundry). These examples require a current release with Tempo support, including `cast batch-send` and `cast keychain`.
+
+```bash
+export TEMPO_RPC_URL=https://rpc.moderato.tempo.xyz
+export ALPHA_USD=0x20c0000000000000000000000000000000000001
+export TEMPO_ACCOUNT_ADDRESS=your_test_account_address
+export TEMPO_RECIPIENT=your_test_recipient_address
+export TEMPO_PRIVATE_KEY=your_test_account_private_key
+```
+
+Replace the last three values with your own test inputs. `cast wallet new` creates a local key and address. Keep the private key in your signing environment. A read-only balance query only needs the RPC URL, token, and address. Set `PAYMENT_TX_HASH` to a returned transaction hash when inspecting its receipt.
+
+`cast erc20 transfer` and token amounts in `cast send` or `cast batch-send` use base units: `1000000` is one AlphaUSD. `cast erc20 balance` also returns base units. `cast logs --subscribe` uses the Moderato WebSocket endpoint; stop it with Ctrl+C.
+
+## Wagmi client
+
+Install `wagmi`, `viem`, and `@tanstack/react-query`. Save the network and Tempo Wallet connector configuration:
+
+```ts [wagmi.config.ts]
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
+
+declare module 'wagmi' {
+  interface Register { config: typeof config }
+}
+```
+
+The type registration lets Wagmi accept Tempo transaction fields such as `calls`. Wrap your application in the providers once:
+
+```tsx [App.tsx]
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { WagmiProvider } from 'wagmi'
+import { config } from './wagmi.config'
+import { Payments } from './Payments'
+
+const queryClient = new QueryClient()
+export function App() {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <Payments />
+      </QueryClientProvider>
+    </WagmiProvider>
+  )
+}
+```
+
+`Payments` is your React component. Keep imports at module scope and put the short hook examples in its body. Call write handlers such as `sendPayment`, `getTestFunds`, `grantAccess`, and `revokeAccess` only from user actions. Disable buttons while pending or disconnected and display errors. The [complete browser form](/docs/guide/payments/send-a-payment/browser) shows validation, connection, and receipt states.
+
+Set `alphaUsd` to `0x20c0000000000000000000000000000000000001` and `recipient` to your intended address. Read examples take `account` as an address. The configured connector uses Moderato; keep the connected account on that network.
+
+### Access-key restrictions
+
+For [granting access](/docs/accounts/keys#grant-access), use the new P-256 `accessKey` from the [access-key example](/docs/accounts/access-keys#authorize-a-limited-key). The connected wallet must control the root account that key is intended to act for. The official Account Keychain ABI represents the same one-hour, 10 AlphaUSD, recipient-scoped permission as follows:
+
+```ts
+const keyRestrictions = {
+  expiry: BigInt(Math.floor(Date.now() / 1000) + 3600),
+  enforceLimits: true,
+  limits: [{ token: alphaUsd, amount: 10_000_000n, period: 0n }],
+  allowAnyCalls: false,
+  allowedCalls: [{ target: alphaUsd, selectorRules: [{
+    selector: '0xa9059cbb', recipients: [recipient],
+  }] }],
+} as const
+```
+
+`1` identifies the P-256 signature type in `authorizeKey`. Use the actual type of your generated key; secp256k1 is `0`. A connected wallet submits this root-authorized contract call; it does not expose its private key to the application.
+
+## API requests
+
+Get a [Tempo API key](/docs/api/authentication). Set `TEMPO_API_KEY` and `TEMPO_ACCOUNT_ADDRESS` in your environment. `PAYMENT_TX_HASH` is needed only when reading a specific payment. Keep API keys on your backend.
+
+::::code-group
+
+```ts [TypeScript (fetch)]
+const apiHeaders = { 'tempo-api-key': process.env.TEMPO_API_KEY! }
+const accountAddress = process.env.TEMPO_ACCOUNT_ADDRESS!
+const transactionHash = process.env.PAYMENT_TX_HASH!
+if (!apiHeaders['tempo-api-key'] || !accountAddress)
+  throw new Error('Set TEMPO_API_KEY and TEMPO_ACCOUNT_ADDRESS')
+```
+
+```python [Python]
+import os
+import requests
+
+api_headers = {"tempo-api-key": os.environ["TEMPO_API_KEY"]}
+account_address = os.environ["TEMPO_ACCOUNT_ADDRESS"]
+transaction_hash = os.environ.get("PAYMENT_TX_HASH")
+```
+
+```bash [cURL (API)]
+export TEMPO_API_KEY=your_api_key
+export TEMPO_ACCOUNT_ADDRESS=your_account_address
+export PAYMENT_TX_HASH=your_transaction_hash
+```
+
+::::
+
+Install `requests` with `python -m pip install requests`. Run TypeScript examples in an ESM file such as `example.mts` with `pnpm exec tsx example.mts` after installing `viem` and `tsx`. Replace the shell values with your real inputs. Public reads can support anonymous access; an API key identifies your project's requests and usage.
+
+## Viem client
+
+Install `viem` and `tsx`. Set `TEMPO_PRIVATE_KEY` to your test account key and `TEMPO_RECIPIENT` to an address you control. Fund the signer with the [faucet](/docs/quickstart/faucet). Save this as `viem.config.ts`:
+
+```ts [viem.config.ts]
+// [!include ~/snippets/viem.moderato.config.ts:setup]
+```
+
+Use these imports and inputs before the short payment examples:
+
+```ts [payment.mts]
+import { getAddress, toHex } from 'viem'
+import { Actions } from 'viem/tempo'
+import { client } from './viem.config'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const recipientInput = process.env.TEMPO_RECIPIENT
+if (!recipientInput) throw new Error('Set TEMPO_RECIPIENT')
+const recipient = getAddress(recipientInput)
+```
+
+Amounts use six decimal places: `1_000_000n` is one AlphaUSD. The client signs with the test account and pays fees in AlphaUSD. A browser uses a wallet client instead of a backend private key.
+
+## Python client
+
+Install the typed SDK with `python -m pip install pytempo==0.6.1 requests`. Set `TEMPO_PRIVATE_KEY`, `TEMPO_RECIPIENT`, and `TEMPO_GAS_LIMIT` before running a payment. The gas limit is your cap for the calls you submit; estimate for your actual transaction instead of assuming every payment has the same cost.
+
+Save this as `payment_setup.py`. It exposes `w3`, `account`, `private_key`, `recipient`, `alpha_usd`, and `transaction_options()` for the examples. The function refreshes the nonce and fee fields each time you build a transaction.
+
+```python [payment_setup.py]
+import os
+from web3 import Web3
+from pytempo import TempoTransaction
+from pytempo.contracts import TIP20
+
+w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz"))
+private_key = os.environ["TEMPO_PRIVATE_KEY"]
+account = w3.eth.account.from_key(private_key)
+recipient = Web3.to_checksum_address(os.environ["TEMPO_RECIPIENT"])
+alpha_usd = "0x20c0000000000000000000000000000000000001"
+
+def transaction_options():
+    chain_id = w3.eth.chain_id
+    if chain_id != 42431:
+        raise ValueError("Expected Moderato testnet")
+    gas_price = w3.eth.gas_price
+    return {
+        "chain_id": chain_id,
+        "nonce": w3.eth.get_transaction_count(account.address),
+        "gas_limit": int(os.environ["TEMPO_GAS_LIMIT"]),
+        "max_fee_per_gas": gas_price * 2,
+        "max_priority_fee_per_gas": gas_price,
+        "fee_token": alpha_usd,
+    }
+```
+
+Import the setup before a Python payment example:
+
+```python
+from payment_setup import (
+    w3, account, private_key, recipient, alpha_usd, transaction_options,
+)
+from pytempo import TempoTransaction
+from pytempo.contracts import TIP20
+```
+
+`TIP20.transfer` returns a typed call. `TempoTransaction.create` adds transaction fields; `.sign` signs it; `w3.eth.send_raw_transaction` submits the encoded result. To submit the same signed bytes through cURL instead, print `"0x" + signed_tx.encode().hex()` and set `SIGNED_TRANSACTION` to that value. Do not submit both paths unless you intend to rebroadcast the same transaction.
+
+## First payment script
+
+For a complete TypeScript quickstart, save the following as `first-payment.mts` and run `pnpm exec tsx first-payment.mts`. It creates fresh test accounts, requests test funds, transfers one AlphaUSD, and verifies delivery. It needs no API key.
+
+```ts [first-payment.mts]
+// [!include ~/snippets/first-payment.ts:account]
+// [!include ~/snippets/first-payment.ts:funds]
+// [!include ~/snippets/first-payment.ts:payment]
+// [!include ~/snippets/first-payment.ts:receipt]
+```
+
+## Browser wallet setup
+
+Install `accounts@0.18.4` and `viem`. Save this as `connection.ts`; call `connectAccount` from a user action such as a Connect button.
+
+```ts [connection.ts]
+import { Provider } from 'accounts'
+import { tempoModerato } from 'viem/chains'
+import { createClient, custom } from 'viem/tempo'
+
+export const provider = Provider.create({
+  chains: [tempoModerato],
+  testnet: true,
+})
+
+export const walletClient = createClient({
+  chain: tempoModerato,
+  transport: custom(provider),
+})
+
+export const publicClient = createClient({
+  chain: tempoModerato,
+})
+
+export async function connectAccount() {
+  const [address] = await provider.request({
+    method: 'eth_requestAccounts',
+  })
+  if (!address) throw new Error('No account was selected')
+  return address
+}
+```
+
+For a complete React payment form with loading and error states, follow [Browser payments](/docs/guide/payments/send-a-payment/browser).
+
+## Passkey creation
+
+Call this function from a user action on localhost or an HTTPS origin. Persist the credential ID and public key in the customer's record so the same passkey can reconnect later.
+
+```ts [create-passkey.ts]
+import { Account, WebAuthnP256 } from 'viem/tempo'
+
+export async function createPasskeyAccount() {
+  const credential = await WebAuthnP256.createCredential({
+    label: 'My Tempo account',
+    userId: crypto.getRandomValues(new Uint8Array(32)),
+  })
+  const account = Account.fromWebAuthnP256(credential)
+
+  return {
+    account,
+    credential: {
+      id: credential.id,
+      publicKey: credential.publicKey,
+    },
+  }
+}
+```
+
+## Onchain balances and history
+
+Read balances and index account activity directly from the chain. Set `TEMPO_ACCOUNT_ADDRESS` and `TEMPO_FROM_BLOCK` before running `balance.mts`.
+
+```ts [balance.mts]
+import { getAddress } from 'viem'
+import { tempoModerato } from 'viem/chains'
+import { Abis, createClient } from 'viem/tempo'
+
+const accountAddress = process.env.TEMPO_ACCOUNT_ADDRESS
+if (!accountAddress) throw new Error('Set TEMPO_ACCOUNT_ADDRESS')
+
+const account = getAddress(accountAddress)
+const token = '0x20c0000000000000000000000000000000000001'
+const client = createClient({ chain: tempoModerato })
+
+const [balance, { symbol }] = await Promise.all([
+  client.token.getBalance({ account, token }),
+  client.token.getMetadata({ token }),
+])
+
+console.log(`${balance.formatted} ${symbol}`)
+
+const fromBlock = process.env.TEMPO_FROM_BLOCK
+if (!fromBlock) throw new Error('Set TEMPO_FROM_BLOCK')
+
+const payments = await client.getContractEvents({
+  address: token,
+  abi: Abis.tip20,
+  eventName: 'Transfer',
+  args: { to: account },
+  fromBlock: BigInt(fromBlock),
+  toBlock: 'latest',
+})
+
+console.log(payments.map((payment) => ({
+  from: payment.args.from,
+  amount: payment.args.amount,
+  transactionHash: payment.transactionHash,
+  logIndex: payment.logIndex,
+})))
+
+const unwatch = client.token.watchTransfer({
+  token,
+  args: { to: account },
+  onTransfer: async (transfer, log) => {
+    const balance = await client.token.getBalance({ account, token })
+    console.log({
+      balance: balance.formatted,
+      received: transfer.amount,
+      transactionHash: log.transactionHash,
+      logIndex: log.logIndex,
+    })
+  },
+})
+
+// Call unwatch() when the application no longer needs the subscription.
+```
+
+Call `unwatch()` when the subscription is no longer needed. For indexed reads from any language, use the [interactive API tools](/docs/accounts/balances).

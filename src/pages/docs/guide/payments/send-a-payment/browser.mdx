@@ -1,0 +1,205 @@
+---
+title: Browser payments
+seoTitle: Send Tempo Payments from a Browser | Tempo Docs
+description: Add a wallet-authorized stablecoin payment form, test funding, and receipt handling to a React application.
+interactive: true
+---
+
+import * as Demo from '../../../../../components/guides/Demo'
+import { AddFunds } from '../../../../../components/guides/steps/payments/AddFunds'
+import { SendPayment } from '../../../../../components/guides/steps/payments/SendPayment'
+
+# Browser payments
+
+Add a payment form that asks customers to authorize stablecoin transfers in their wallet. This walkthrough uses React, Wagmi, and AlphaUSD on Moderato testnet.
+
+:::::steps
+
+### Set up Wagmi for Tempo payments
+
+Ensure that you have set up your project with Wagmi, a Tempo chain config, and a wallet connector:
+
+- [Connection details](/docs/quickstart/connection-details)
+- [TypeScript SDK](/docs/sdk/typescript)
+- [Wallet integration](/docs/quickstart/wallet-developers)
+
+### Add testnet stablecoin funds
+
+This guide sends `AlphaUSD` (`0x20c000…0001`) on Moderato testnet. Use the faucet to fund your test account. For mainnet funding, see [Fund an account](/docs/guide/getting-funds).
+
+<Demo.Container name="Add Funds" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd]}>
+  <AddFunds stepNumber={1} last />
+</Demo.Container>
+
+:::code-group
+
+```tsx twoslash [AddFunds.ts]
+// @noErrors
+import { Hooks } from 'wagmi/tempo'
+import { useConnection } from 'wagmi'
+
+function AddFunds() {
+  const { address } = useConnection()
+  const { mutate, isPending } = Hooks.faucet.useFundSync()
+
+  return (
+    <button
+      onClick={() => { if (address) mutate({ account: address }) }}
+      disabled={!address || isPending}
+    >
+      Add Funds
+    </button>
+  )
+}
+```
+
+```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
+// @noErrors
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
+```
+
+:::
+
+### Add TIP-20 transfer logic
+
+Send `AlphaUSD` to the recipient and include a memo when you need a payment reference. Validate the address and the memo’s 32-byte limit before requesting a signature; show validation and wallet errors beside the form.
+
+<Demo.Container name="Send Payment" footerVariant="balances" showBadge={false} tokens={[Demo.alphaUsd]}>
+  <AddFunds stepNumber={1} />
+  <SendPayment stepNumber={2} last />
+</Demo.Container>
+
+:::code-group
+
+```tsx twoslash [SendPaymentWithMemo.tsx]
+import React, { useState } from 'react'
+import { Hooks } from 'wagmi/tempo'
+import { getAddress, isAddress, parseUnits, toHex } from 'viem'
+
+function SendPaymentWithMemo() {
+  const sendPayment = Hooks.token.useTransferSync()
+  const [validationError, setValidationError] = useState<string | null>(null)
+
+  return (
+    <form onSubmit={
+      (event) => {
+        event.preventDefault()
+        const formData = new FormData(event.currentTarget)
+        const recipient = String(formData.get('recipient') ?? '').trim()
+        const memo = String(formData.get('memo') ?? '')
+
+        if (!isAddress(recipient)) {
+          setValidationError('Enter a valid recipient address.')
+          return
+        }
+        if (new TextEncoder().encode(memo).length > 32) {
+          setValidationError('The memo must fit in 32 UTF-8 bytes.')
+          return
+        }
+
+        setValidationError(null)
+        sendPayment.mutate({ // [!code hl]
+          amount: parseUnits('100', 6), // [!code hl]
+          to: getAddress(recipient), // [!code hl]
+          token: '0x20c0000000000000000000000000000000000001', // [!code hl]
+          memo: memo ? toHex(memo, { size: 32 }) : undefined, // [!code hl]
+        }) // [!code hl]
+      }
+    }>
+      <div>
+        <label htmlFor="recipient">Recipient address</label>
+        <input id="recipient" type="text" name="recipient" placeholder="0x..." required />
+      </div>
+      <div>
+        <label htmlFor="memo">Memo (optional)</label>
+        <input id="memo" type="text" name="memo" placeholder="Optional memo" />
+      </div>
+      <button // [!code hl]
+        type="submit" // [!code hl]
+        disabled={sendPayment.isPending} // [!code hl]
+      > {/* [!code hl] */}
+        Send Payment {/* [!code hl] */}
+      </button> {/* [!code hl] */}
+      {(validationError || sendPayment.error) && (
+        <p role="alert">{validationError ?? sendPayment.error?.message}</p>
+      )}
+    </form>
+  )
+}
+```
+
+```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
+// @noErrors
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
+```
+
+:::
+
+### Display the payment receipt
+
+Check the receipt’s transfer events for the expected token, amount, and recipient before recording delivery. See [Receive a payment](/docs/guide/payments/accept-a-payment#verify-stablecoin-payments) for verification code.
+
+:::code-group
+
+```tsx twoslash [SendPaymentWithMemo.tsx]
+import { Hooks } from 'wagmi/tempo'
+
+// @noErrors
+function SendPaymentWithMemo() {
+  const sendPayment = Hooks.token.useTransferSync()
+
+  return (
+    <>
+      {/* ... your payment form ... */}
+      {sendPayment.data && ( // [!code ++]
+        <a href={`https://explore.testnet.tempo.xyz/tx/${sendPayment.data.receipt.transactionHash}`}> {/* [!code ++] */}
+          View receipt {/* [!code ++] */}
+        </a> {/* [!code ++] */}
+      )} {/* [!code ++] */}
+    </>
+  )
+}
+```
+
+```tsx twoslash [wagmi.config.ts] filename="wagmi.config.ts"
+// @noErrors
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
+```
+
+:::
+
+### Connect payment records
+
+- **[Receive a payment](/docs/guide/payments/accept-a-payment)** and reconcile it in your application
+- Learn about [Tempo Transactions](/docs/protocol/transactions) for batched calls, sponsorship, and transaction validity windows
+- Send a payment [with a specific fee token](/docs/guide/payments/pay-fees-in-any-stablecoin)
+:::::
+
+
+## Payment states
+
+### Pending payments
+Users should see a loading state when the payment is being processed.
+
+You can use the `isPending` property from the `useTransferSync` hook to show pending state to the user.
+
+### Failed payments
+If an error unexpectedly occurs, you can display an error message to the user by using the `error` property from the `useTransferSync` hook.
+
+```tsx
+import { Hooks } from 'wagmi/tempo'
+
+function SendPayment() {
+  const sendPayment = Hooks.token.useTransferSync()
+
+  return (
+    <>
+      {/* ... your paymentform ... */}
+      {sendPayment.error && <div>Error: {sendPayment.error.message}</div>}
+    </>
+  )
+}
+```
+
+
+Return to [Send payments](/docs/guide/payments/send-a-payment) for batching, fees, and delivery checks.

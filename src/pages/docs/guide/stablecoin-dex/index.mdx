@@ -1,44 +1,133 @@
 ---
-title: "Stablecoin DEX"
-seoTitle: "Stablecoin DEX | Tempo Docs"
-description: Swap stablecoins on Tempo, provide orderbook liquidity, and supply liquidity for fee-token conversions.
+title: Exchange
+seoTitle: Stablecoin Exchange | Tempo Docs
+description: Swap stablecoins on Tempo and provide liquidity through the onchain orderbook.
 ---
 
-import { Cards, Card } from 'vocs'
-
+<span id="stablecoin-dex" />
 <span id="exchange-stablecoins-on-the-tempo-dex" />
 
-# Stablecoin DEX
+# Exchange
 
-Swap stablecoins on Tempo through the onchain orderbook. Request a quote, set an output limit, and submit the swap in your application.
+Swap stablecoins on Tempo through the onchain orderbook, or provide liquidity by placing orders. Use [Routes](/docs/routes) when you need to move funds between networks.
+
+:::info[Interactive walkthrough]
+Try the [swap walkthrough](/docs/guide/stablecoin-dex/executing-swaps) with a test wallet, then build the swap form in your application.
+:::
 
 <span id="stablecoin-exchange-paths" />
+<span id="swap-or-provide-liquidity" />
 
-## Swap or provide liquidity
+## Swap stablecoins
 
-<Cards>
-  <Card
-    description="Quote and swap between stablecoins with slippage protection."
-    to="/docs/guide/stablecoin-dex/executing-swaps"
-    icon="lucide:arrow-left-right"
-    title="Swap stablecoins"
-  />
-  <Card
-    description="Place limit orders or flip orders in the orderbook."
-    to="/docs/guide/stablecoin-dex/providing-liquidity"
-    icon="lucide:droplet"
-    title="Provide liquidity"
-  />
-  <Card
-    description="Supply Fee AMM reserves for transaction-fee conversions."
-    to="/docs/guide/stablecoin-dex/managing-fee-liquidity"
-    icon="lucide:badge-dollar-sign"
-    title="Provide fee liquidity"
-  />
-</Cards>
+Choose the input and output tokens, request a quote, and set the minimum output your application accepts. This example swaps one AlphaUSD for BetaUSD on Moderato, using the [Network example setup](/docs/network/examples). The pair needs available liquidity.
 
-Fee AMM pools convert transaction fees. Use the Stablecoin DEX swap flow to convert account funds or payment amounts.
+:::::steps
 
-## Understand trading pairs and balances
+### Get a quote
 
-[Quote tokens](/docs/protocol/exchange/quote-tokens) explain how trading pairs connect through pathUSD. [DEX balances](/docs/protocol/exchange/exchange-balance) describe funds held in the exchange separately from an account's token balance.
+The quote is an integer amount of the output token in base units.
+
+::::code-group
+
+```ts [Viem]
+// [!include ~/snippets/network-exchange.ts:quote]
+```
+
+```bash [CLI]
+QUOTE=$(cast call "$DEX" \
+  'quoteSwapExactAmountIn(address,address,uint128)(uint128)' \
+  "$TOKEN" "$BETA_TOKEN" 1000000 --rpc-url "$RPC_URL" --json | jq -r '.[0]')
+```
+
+```ts [Wagmi]
+// [!include ~/snippets/network-wagmi.ts:quote]
+```
+
+```python [Python]
+from network_config import ALPHA_USD, BETA_USD, dex
+
+quote = dex.functions.quoteSwapExactAmountIn(
+    ALPHA_USD, BETA_USD, 1_000_000
+).call()
+```
+
+::::
+
+### Approve the input token
+
+Allow the exchange to spend one AlphaUSD. The SDK waits for this approval before continuing.
+
+::::code-group
+
+```ts [Viem]
+// [!include ~/snippets/network-exchange.ts:approve]
+```
+
+```bash [CLI]
+cast erc20 approve "$TOKEN" "$DEX" 1000000 \
+  --rpc-url "$RPC_URL" --tempo.fee-token "$TOKEN" --interactive
+```
+
+```ts [Wagmi]
+// [!include ~/snippets/network-wagmi.ts:approve]
+```
+
+```python [Python]
+from network_config import TIP20, make_transaction, submit
+
+call = TIP20(ALPHA_USD).approve(spender=dex.address, amount=1_000_000)
+submit(make_transaction((call,)))
+```
+
+::::
+
+### Submit the swap
+
+This example accepts at most 0.5% less output than the quote. A quote does not reserve liquidity; the transaction enforces `minAmountOut` and reverts if the limit cannot be met.
+
+::::code-group
+
+```ts [Viem]
+// [!include ~/snippets/network-exchange.ts:swap]
+```
+
+```bash [CLI]
+MIN_OUT=$((QUOTE * 995 / 1000))
+cast send "$DEX" 'swapExactAmountIn(address,address,uint128,uint128)' \
+  "$TOKEN" "$BETA_TOKEN" 1000000 "$MIN_OUT" \
+  --rpc-url "$RPC_URL" --tempo.fee-token "$TOKEN" --interactive
+```
+
+```ts [Wagmi]
+// [!include ~/snippets/network-wagmi.ts:swap]
+```
+
+```python [Python]
+from pytempo.contracts import StablecoinDEX
+
+call = StablecoinDEX.swap_exact_amount_in(
+    token_in=ALPHA_USD, token_out=BETA_USD,
+    amount_in=1_000_000, min_amount_out=quote * 995 // 1000,
+)
+receipt = submit(make_transaction((call,)))
+print(receipt["transactionHash"].hex())
+```
+
+::::
+
+:::::
+
+For direct HTTP submission, [sign locally and broadcast through JSON-RPC](/docs/network/transactions#sign-and-submit). [Quote tokens](/docs/protocol/exchange/quote-tokens) explains how supported trading pairs connect.
+
+## Provide liquidity
+
+Place a limit order to trade at a chosen price, or use a flip order to place a reverse order after a fill. The [liquidity guide](/docs/guide/stablecoin-dex/providing-liquidity) covers token approvals, order placement, querying, and cancellation with a working demo.
+
+Fee AMM reserves serve a different purpose: converting transaction fees into a validator's preferred token. Use [Provide fee liquidity](/docs/guide/stablecoin-dex/managing-fee-liquidity) for that workflow.
+
+<span id="understand-trading-pairs-and-balances" />
+
+## Account and exchange balances
+
+Funds held by the exchange are distinct from an account's TIP-20 balance. Read [DEX balances](/docs/protocol/exchange/exchange-balance) before showing available funds or reconciling orders. The [exchange specification](/docs/protocol/exchange/spec) defines order, swap, and settlement behavior.

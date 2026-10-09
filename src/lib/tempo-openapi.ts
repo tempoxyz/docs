@@ -1,6 +1,17 @@
 import { readFile } from 'node:fs/promises'
 
 const canonicalSpecUrl = 'https://api.tempo.xyz/openapi.json'
+// The verified Moderato deployment also used by the interactive Earn deposit demo.
+const earnVaultExample = '0x20147491b5701dea880263241c335caca9be326d'
+const earnReadPaths = new Set([
+  '/v1/earn/vaults',
+  '/v1/earn/vaults/verified',
+  '/v1/earn/vaults/{vaultId}',
+  '/v1/earn/vaults/{vaultId}/share-prices',
+  '/v1/earn/vaults/{vaultId}/positions/{address}',
+  '/v1/earn/vaults/{vaultId}/earnings/{address}',
+  '/v1/earn/addresses/{address}/positions',
+])
 const vaultExampleFields: Record<string, string> = {
   label: 'Example vault',
   slug: 'example-vault',
@@ -36,7 +47,44 @@ function rewriteSchemaExamples(value: unknown, field?: string) {
   }
 }
 
-/** Keep vault samples independent of a provider without changing the API contract. */
+function prepareEarnRequestExamples(pathname: string, path: Record<string, unknown>) {
+  // Transaction status reads require a destination Zone chain ID, not Moderato.
+  if (!earnReadPaths.has(pathname) || !isObject(path.get)) return
+  const operation = path.get
+  if (!Array.isArray(operation.parameters)) return
+  path.get = {
+    ...operation,
+    parameters: operation.parameters.map((parameter) => {
+      if (!isObject(parameter) || !isObject(parameter.schema)) return parameter
+      const example =
+        parameter.in === 'query' && parameter.name === 'chainId'
+          ? 'testnet'
+          : parameter.in === 'path' && parameter.name === 'vaultId'
+            ? earnVaultExample
+            : undefined
+      if (example === undefined) return parameter
+
+      // Vocs reads schema examples; Scalar also needs its optional query row
+      // enabled. These are editable request examples, not API defaults.
+      const prepared: Record<string, unknown> = {
+        ...parameter,
+        example,
+        schema: {
+          ...parameter.schema,
+          examples: [example],
+          ...(Object.hasOwn(parameter.schema, 'example') ? { example } : {}),
+        },
+      }
+      if (parameter.in === 'query') {
+        delete prepared.example
+        prepared.examples = { default: { value: example, 'x-disabled': false } }
+      }
+      return prepared
+    }),
+  }
+}
+
+/** Prepare editable Earn samples without changing the API contract. */
 export function prepareTempoOpenApi(
   source: Record<string, unknown>,
   sourceUrl = canonicalSpecUrl,
@@ -61,8 +109,9 @@ export function prepareTempoOpenApi(
     }
   }
   if (isObject(spec.paths)) {
-    for (const path of Object.values(spec.paths)) {
+    for (const [pathname, path] of Object.entries(spec.paths)) {
       if (!isObject(path)) continue
+      prepareEarnRequestExamples(pathname, path)
       for (const operation of Object.values(path)) {
         if (!isObject(operation)) continue
         const openRpc = operation['x-openrpc']

@@ -1,78 +1,48 @@
 ---
-title: Get Started
+title: Build on Tempo
 seoTitle: Get Started with Tempo | Tempo Docs
-description: Learn how accounts and stablecoins work on Tempo, then send a test payment with Tempo Wallet.
-interactive: true
+description: Find your starting point for accounts, payments, tokens, and smart contracts, or send your first test payment on Tempo.
 ---
 
 import { Card, Cards } from 'vocs'
-import { DocsProductOverview } from '../components/DocsProductOverview'
-import * as Demo from '../components/guides/Demo'
-import { Connect } from '../components/guides/steps/auth/Connect'
-import { AddFunds } from '../components/guides/steps/payments/AddFunds'
-import { SendPayment } from '../components/guides/steps/payments/SendPayment'
 
-<DocsProductOverview image="get-started" alt="Stablecoin payments recorded on Tempo’s ledger.">
+<span id="get-started" />
 
-# Get Started
+# Build on Tempo
 
-Build your first stablecoin payment on Tempo. Learn how accounts hold TIP-20 Tokens, then try a payment with Tempo Wallet below.
+Tempo is a blockchain for payments. Add stablecoin accounts and payments to your application, create tokens, or deploy Solidity contracts.
 
-[Understand stablecoins on Tempo →](/get-started/stablecoins)
-
-</DocsProductOverview>
-
-## Start with an account and a stablecoin
-
-An account is an address with keys that authorize its transactions. It can hold balances in multiple stablecoins. Each stablecoin has its own token contract, and [TIP-20 Tokens](/get-started/stablecoins) share the same payment interface.
-
-Use [Accounts](/docs/accounts) to choose how to create an account and manage its keys. Use [Payments](/docs/payments) to send funds, receive payments, and match transfers to your records.
-
-Your application can sign transactions from a backend, an embedded customer wallet, or a connected external wallet. The example below uses Tempo Wallet to try the payment flow.
-
-## Send your first test payment
-
-Sign in with Tempo Wallet, add test funds, and send 100 AlphaUSD on **Moderato, Tempo’s testnet**. Use the sample recipient or enter your own, then open the transaction in the explorer.
-
+<span id="send-your-first-test-payment" />
 <span id="create-and-fund-a-test-account" />
 <span id="connect-a-test-wallet" />
 <span id="get-test-stablecoins" />
 <span id="send-and-verify-a-payment" />
 <span id="send-and-verify-the-payment" />
+<span id="make-your-first-payment" />
 
-<Demo.Container name="Try Tempo Wallet" footerVariant="balances" tokens={[Demo.alphaUsd]}>
-  <Connect stepNumber={1} />
-  <AddFunds stepNumber={2} />
-  <SendPayment stepNumber={3} last />
-</Demo.Container>
+**[Send a test payment →](/get-started/quickstart)** Connect a wallet, get test funds, and confirm your first transfer in the interactive quickstart.
+
+<span id="start-with-an-account-and-a-stablecoin" />
+<span id="continue-your-tempo-integration" />
+<span id="build-your-application" />
+<span id="start-building" />
+<span id="explore-tempo" />
+
+## Choose what to build
+
+<Cards>
+  <Card title="Add accounts and payments" description="Choose a wallet or backend signer, then send and receive stablecoins." to="/docs/accounts" icon="lucide:wallet" />
+  <Card title="Pay for or charge for APIs" description="Make paid API requests, or accept payments for your service." to="/docs/agents" icon="lucide:bot" />
+  <Card title="Create a TIP-20 token" description="Create a test stablecoin, then mint tokens and manage supply." to="/docs/guide/issuance/create-a-stablecoin" icon="lucide:coins" />
+  <Card title="Deploy a contract" description="Deploy and verify a Solidity contract on testnet with Foundry." to="/docs/network/contracts" icon="lucide:code-2" />
+</Cards>
 
 <span id="set-up-your-coding-agent" />
 
-Build this into your app with the [TypeScript payment guide](/docs/guide/payments/send-a-payment), or give your coding agent the [Tempo Docs plugin](/docs/guide/using-tempo-with-ai#install-tempo-plugins).
+## Connect your tools
 
-<span id="continue-your-tempo-integration" />
+[RPC and chain IDs](/docs/quickstart/connection-details) · [Testnet faucet](/docs/quickstart/faucet) · [SDKs and CLI](/docs/tools)
 
-## Build your application
+[API reference](/docs/api/reference) · [API keys](/docs/api/console/api-keys) · [Build with AI](/docs/guide/using-tempo-with-ai)
 
-<Cards>
-  <Card
-    title="Accounts"
-    description="Choose who authorizes payments and how your application manages accounts."
-    to="/docs/accounts"
-    icon="lucide:wallet"
-  />
-  <Card
-    title="Payments"
-    description="Send and receive stablecoins, reconcile transfers, and pay for services."
-    to="/docs/payments"
-    icon="lucide:send"
-  />
-  <Card
-    title="Developer Resources"
-    description="Find SDKs, API access, network settings, and provider integrations."
-    to="/docs/development"
-    icon="lucide:code-2"
-  />
-</Cards>
-
-Explore [Earn](/docs/earn) to add an earning balance to your application, [Routes](/docs/routes) to move funds between networks, and [Zones](/docs/zones) for private account balances and activity.
+Browse [all developer guides](/docs/development) for wallet integrations, transaction features, and interactive walkthroughs.

@@ -5,22 +5,24 @@ export type DocsSection = {
     | 'earn'
     | 'routes'
     | 'zones'
-    | 'payments'
-    | 'development'
-    | 'protocol'
+    | 'developers'
+    | 'machine-payments'
+    | 'api'
+    | 'tools'
+    | 'ecosystem'
     | 'changelog'
   label: string
   href: string
   matches: string[]
 }
 
-/** Shared by the section tabs and Vocs sidebars, including existing deep links. */
+/** One section owner for every current and retained documentation route. */
 export const docsSections: DocsSection[] = [
   {
     id: 'overview',
     label: 'Get Started',
     href: '/get-started',
-    matches: ['/get-started', '/docs/quickstart/faucet'],
+    matches: ['/get-started', '/docs/quickstart/faucet', '/docs/guide/using-tempo-with-ai'],
   },
   {
     id: 'accounts',
@@ -29,29 +31,13 @@ export const docsSections: DocsSection[] = [
     matches: [
       '/docs/accounts',
       '/docs/build',
+      '/docs/payments',
+      '/docs/guide/payments',
       '/docs/guide/getting-funds',
     ],
   },
-  {
-    id: 'payments',
-    label: 'Payments',
-    href: '/docs/payments',
-    matches: [
-      '/docs/payments',
-      '/docs/guide/payments',
-      '/docs/guide/tempo-transaction',
-      '/docs/agents',
-      '/docs/guide/machine-payments',
-      '/docs/guide/mercator',
-    ],
-  },
   { id: 'earn', label: 'Earn', href: '/docs/earn', matches: ['/docs/earn'] },
-  {
-    id: 'routes',
-    label: 'Routes',
-    href: '/docs/routes',
-    matches: ['/docs/routes', '/docs/guide/stablecoin-dex'],
-  },
+  { id: 'routes', label: 'Routes', href: '/docs/routes', matches: ['/docs/routes'] },
   {
     id: 'zones',
     label: 'Zones',
@@ -59,45 +45,27 @@ export const docsSections: DocsSection[] = [
     matches: ['/docs/zones', '/docs/guide/private-zones'],
   },
   {
-    id: 'development',
-    label: 'Developer Resources',
+    id: 'machine-payments',
+    label: 'Machine Payments',
+    href: '/docs/agents',
+    matches: ['/docs/agents', '/docs/guide/machine-payments', '/docs/guide/mercator'],
+  },
+  {
+    id: 'developers',
+    label: 'Tempo EVM',
     href: '/docs/development',
     matches: [
+      '/docs/network',
       '/docs/development',
-      '/docs/quickstart/wallet-developers',
-      '/docs/quickstart/tokenlist',
-      '/docs/guide/using-tempo-with-ai',
-      '/docs/api',
-      '/docs/tools',
-      '/docs/developer-tools',
-      '/docs/quickstart/developer-tools',
-      '/docs/quickstart/integrate-tempo',
-      '/docs/quickstart/connection-details',
-      '/docs/quickstart/evm-compatibility',
-      '/docs/cli',
-      '/docs/sdk',
-      '/docs/wallet',
-      '/docs/server',
-      '/docs/protocol/rpc',
-      '/docs/ecosystem',
-      '/docs/partners',
-      '/docs/guide/ousd',
-      '/docs/guide/bridge-layerzero',
-      '/docs/guide/bridge-bungee',
-      '/docs/guide/bridge-relay',
+      '/docs/quickstart',
+      '/docs/protocol',
+      '/docs/guide/tempo-transaction',
+      '/docs/guide/issuance',
+      '/docs/guide/stablecoin-dex',
       '/docs/guide/node',
-      '/docs/quickstart/verify-contracts',
-      '/docs/quickstart/predeployed-contracts',
     ],
   },
 ]
-
-export const specificationsSection: DocsSection = {
-  id: 'protocol',
-  label: 'Specifications',
-  href: '/docs/protocol',
-  matches: ['/docs/protocol', '/docs/guide/issuance', '/docs/quickstart'],
-}
 
 export const changelogSection: DocsSection = {
   id: 'changelog',
@@ -105,6 +73,38 @@ export const changelogSection: DocsSection = {
   href: '/docs/protocol/upgrades',
   matches: ['/docs/protocol/upgrades', '/docs/changelog', '/docs/guide/node/network-upgrades'],
 }
+
+export const docsUtilitySections: DocsSection[] = [
+  {
+    id: 'tools',
+    label: 'APIs & SDKs',
+    href: '/docs/tools',
+    matches: [
+      '/docs/api',
+      '/docs/tools',
+      '/docs/developer-tools',
+      '/docs/quickstart/developer-tools',
+      '/docs/cli',
+      '/docs/sdk',
+      '/docs/wallet',
+      '/docs/server',
+    ],
+  },
+  {
+    id: 'ecosystem',
+    label: 'Ecosystem',
+    href: '/docs/ecosystem',
+    matches: [
+      '/docs/ecosystem',
+      '/docs/partners',
+      '/docs/guide/ousd',
+      '/docs/guide/bridge-layerzero',
+      '/docs/guide/bridge-bungee',
+      '/docs/guide/bridge-relay',
+    ],
+  },
+  changelogSection,
+]
 
 export function normalizeDocsSectionPath(path: string) {
   return path.replace(/^\/developers(?=\/|$)/, '').replace(/\/+$/, '') || '/'
@@ -116,7 +116,7 @@ export function matchesDocsSectionPath(pathname: string, prefix: string) {
 
 export function getActiveDocsSection(path: string) {
   const pathname = normalizeDocsSectionPath(path)
-  return [...docsSections, specificationsSection, changelogSection]
+  return [...docsSections, ...docsUtilitySections]
     .flatMap((section) => section.matches.map((prefix) => ({ section, prefix })))
     .filter(({ prefix }) => matchesDocsSectionPath(pathname, prefix))
     .sort((a, b) => b.prefix.length - a.prefix.length)[0]?.section

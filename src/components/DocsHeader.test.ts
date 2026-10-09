@@ -5,8 +5,8 @@ import { normalizeDocsPath, resolveSidebarItems } from './DocsHeader'
 const sidebar = {
   '/get-started': [{ text: 'Get Started' }],
   '/docs': [{ text: 'Get Started' }],
-  '/docs/protocol': [{ text: 'Specifications' }],
-  '/docs/protocol/rpc': [{ text: 'Developer Resources' }],
+  '/docs/protocol': [{ text: 'Tempo EVM' }],
+  '/docs/protocol/rpc': [{ text: 'RPC reference' }],
 }
 
 describe('normalizeDocsPath', () => {
@@ -30,94 +30,106 @@ describe('resolveSidebarItems', () => {
   it('uses the current docs section when served from the developers mount', () => {
     const items = resolveSidebarItems(sidebar, '/developers/docs/protocol')
 
-    expect(items[0]?.text).toBe('Specifications')
+    expect(items[0]?.text).toBe('Tempo EVM')
   })
 
   it('uses the longest matching sidebar key', () => {
     const items = resolveSidebarItems(sidebar, '/docs/protocol/rpc/eth_getBalance')
 
-    expect(items[0]?.text).toBe('Developer Resources')
+    expect(items[0]?.text).toBe('RPC reference')
   })
 })
 
 describe('getActiveDocsSection', () => {
-  it('presents products in task order with machine payments inside Payments', () => {
+  it('presents seven product and developer tabs without availability badges', () => {
     expect(docsSections.map(({ label }) => label)).toEqual([
       'Get Started',
       'Accounts',
-      'Payments',
       'Earn',
       'Routes',
       'Zones',
-      'Developer Resources',
+      'Machine Payments',
+      'Tempo EVM',
     ])
   })
 
+  it('opens the guide library from Tempo EVM and the MPP introduction from Machine payments', () => {
+    expect(docsSections.find(({ id }) => id === 'developers')?.href).toBe('/docs/development')
+    expect(docsSections.find(({ id }) => id === 'machine-payments')?.href).toBe('/docs/agents')
+  })
+
   it('keeps section navigation active under the developers mount and trailing slashes', () => {
-    expect(getActiveDocsSection('/developers/docs/api/transfers/')?.id).toBe('development')
+    expect(getActiveDocsSection('/developers/docs/api/transfers/')?.id).toBe('tools')
     expect(getActiveDocsSection('/developers/get-started/')?.id).toBe('overview')
     expect(getActiveDocsSection('/developers/docs/protocol/upgrades/t12/')?.id).toBe('changelog')
-    expect(getActiveDocsSection('/developers/docs/protocol/')?.label).toBe('Specifications')
+    expect(getActiveDocsSection('/developers/docs/protocol/')?.label).toBe('Tempo EVM')
   })
 
   it.each([
     ['/get-started', 'overview'],
+    ['/get-started/quickstart', 'overview'],
+    ['/docs/network', 'developers'],
+    ['/docs/network/transactions', 'developers'],
     ['/get-started/stablecoins', 'overview'],
-    ['/docs/development', 'development'],
-    ['/docs/api/console', 'development'],
-    ['/docs/quickstart/evm-compatibility', 'development'],
-    ['/docs/guide/using-tempo-with-ai', 'development'],
+    ['/docs/development', 'developers'],
+    ['/docs/api/console', 'tools'],
+    ['/docs/quickstart/evm-compatibility', 'developers'],
+    ['/docs/guide/using-tempo-with-ai', 'overview'],
     ['/docs/quickstart/faucet', 'overview'],
     ['/docs/accounts', 'accounts'],
     ['/docs/accounts/create', 'accounts'],
     ['/docs/accounts/providers', 'accounts'],
     ['/docs/accounts/access-keys', 'accounts'],
     ['/docs/accounts/agents', 'accounts'],
-    ['/docs/payments', 'payments'],
+    ['/docs/payments', 'accounts'],
     ['/docs/build', 'accounts'],
     ['/docs/guide/getting-funds', 'accounts'],
-    ['/docs/guide/payments/send-a-payment', 'payments'],
-    ['/docs/guide/tempo-transaction', 'payments'],
-    ['/docs/quickstart/wallet-developers', 'development'],
-    ['/docs/quickstart/tokenlist', 'development'],
+    ['/docs/guide/payments/send-a-payment', 'accounts'],
+    ['/docs/guide/tempo-transaction', 'developers'],
+    ['/docs/quickstart/wallet-developers', 'developers'],
+    ['/docs/quickstart/tokenlist', 'developers'],
     ['/docs/earn', 'earn'],
     ['/docs/earn/balances', 'earn'],
     ['/docs/earn/withdraw', 'earn'],
     ['/docs/routes', 'routes'],
     ['/docs/routes/transfers', 'routes'],
     ['/docs/routes/deposits', 'routes'],
-    ['/docs/guide/stablecoin-dex/executing-swaps', 'routes'],
-    ['/docs/guide/bridge-layerzero', 'development'],
-    ['/docs/guide/bridge-bungee', 'development'],
-    ['/docs/guide/bridge-relay', 'development'],
+    ['/docs/guide/stablecoin-dex/executing-swaps', 'developers'],
+    ['/docs/guide/bridge-layerzero', 'ecosystem'],
+    ['/docs/guide/bridge-bungee', 'ecosystem'],
+    ['/docs/guide/bridge-relay', 'ecosystem'],
     ['/docs/zones', 'zones'],
     ['/docs/guide/private-zones/connect-to-a-zone', 'zones'],
-    ['/docs/agents', 'payments'],
-    ['/docs/guide/machine-payments/agent', 'payments'],
-    ['/docs/guide/mercator', 'payments'],
-    ['/docs/ecosystem', 'development'],
-    ['/docs/ecosystem/wallets', 'development'],
-    ['/docs/guide/ousd', 'development'],
-    ['/docs/partners', 'development'],
-    ['/docs/quickstart/integrate-tempo', 'development'],
-    ['/docs/quickstart/connection-details', 'development'],
-    ['/docs/guide/issuance/create-a-stablecoin', 'protocol'],
-    ['/docs/protocol/tip20/overview', 'protocol'],
-    ['/docs/guide/node/installation', 'development'],
+    ['/docs/agents', 'machine-payments'],
+    ['/docs/guide/machine-payments/agent', 'machine-payments'],
+    ['/docs/guide/machine-payments/pay-as-you-go', 'machine-payments'],
+    ['/docs/guide/machine-payments/streamed-payments', 'machine-payments'],
+    ['/docs/guide/mercator', 'machine-payments'],
+    ['/docs/ecosystem', 'ecosystem'],
+    ['/docs/ecosystem/wallets', 'ecosystem'],
+    ['/docs/guide/ousd', 'ecosystem'],
+    ['/docs/partners', 'ecosystem'],
+    ['/docs/quickstart/integrate-tempo', 'developers'],
+    ['/docs/quickstart/connection-details', 'developers'],
+    ['/docs/guide/issuance/create-a-stablecoin', 'developers'],
+    ['/docs/guide/issuance/manage-stablecoin', 'developers'],
+    ['/docs/guide/issuance/migrate-erc20-to-tip20', 'developers'],
+    ['/docs/protocol/tip20/overview', 'developers'],
+    ['/docs/guide/node/installation', 'developers'],
     ['/docs/protocol/upgrades', 'changelog'],
     ['/docs/protocol/upgrades/t11', 'changelog'],
     ['/docs/protocol/upgrades/t12', 'changelog'],
-    ['/docs/guide/node/upgrade-cadence', 'development'],
+    ['/docs/guide/node/upgrade-cadence', 'developers'],
     ['/docs/guide/node/network-upgrades', 'changelog'],
     ['/docs/changelog', 'changelog'],
-    ['/docs/api/indexer-api', 'development'],
-    ['/docs/protocol/rpc/eth_getBalance', 'development'],
-    ['/docs/sdk/typescript', 'development'],
-    ['/docs/cli/request', 'development'],
-    ['/docs/wallet/recipes', 'development'],
-    ['/docs/server/relay-handler', 'development'],
-    ['/docs/tools', 'development'],
-    ['/docs/quickstart/developer-tools', 'development'],
+    ['/docs/api/indexer-api', 'tools'],
+    ['/docs/protocol/rpc/eth_getBalance', 'developers'],
+    ['/docs/sdk/typescript', 'tools'],
+    ['/docs/cli/request', 'tools'],
+    ['/docs/wallet/recipes', 'tools'],
+    ['/docs/server/relay-handler', 'tools'],
+    ['/docs/tools', 'tools'],
+    ['/docs/quickstart/developer-tools', 'tools'],
   ])('assigns %s to the %s section', (pathname, expected) => {
     expect(getActiveDocsSection(pathname)?.id).toBe(expected)
     expect(getActiveDocsSection(`/developers${pathname}/`)?.id).toBe(expected)
@@ -133,6 +145,8 @@ describe('getActiveDocsSection', () => {
     '/docs/spend',
     '/docs/spending',
     '/docs/guide/private-zones-extra',
+    '/docs/guide/machine-payments-extra',
+    '/docs/agents-extra',
   ])('does not mark an unrelated route active: %s', (pathname) =>
     expect(getActiveDocsSection(pathname)).toBeUndefined())
 })

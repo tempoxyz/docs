@@ -1,14 +1,13 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link, useRouter } from 'waku'
 import ArrowUpRightIcon from '~icons/lucide/arrow-up-right'
-import ChevronDownIcon from '~icons/lucide/chevron-down'
 
-import { docsSections, getActiveDocsSection, specificationsSection } from '../lib/docs-sections'
+import { docsSections, docsUtilitySections, getActiveDocsSection } from '../lib/docs-sections'
 import { MercatorLogo, MppLogo, TempoMark } from './ToolLogos'
 
-export { docsSections, getActiveDocsSection, specificationsSection }
+export { docsSections, docsUtilitySections, getActiveDocsSection }
 
 export const docsExternalTools = [
   { label: 'MPP', href: 'https://mpp.dev/', logo: MppLogo },
@@ -37,81 +36,6 @@ export function DocsResourceLinks({ onNavigate }: { onNavigate?: () => void }) {
         </a>
       ))}
     </nav>
-  )
-}
-
-function DocsToolsMenu({ route }: { route: string }) {
-  const [open, setOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
-  const menuRef = useRef<HTMLDivElement | null>(null)
-  const buttonRef = useRef<HTMLButtonElement | null>(null)
-
-  useEffect(() => setMounted(true), [])
-  useEffect(() => setOpen(false), [route])
-
-  useEffect(() => {
-    if (!open) return
-    const onPointerDown = (event: Event) => {
-      if (!menuRef.current?.contains(event.target as Node)) setOpen(false)
-    }
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        setOpen(false)
-        buttonRef.current?.focus()
-      }
-    }
-    const desktop = window.matchMedia('(min-width: 800px)')
-    const onResize = () => {
-      if (!desktop.matches) setOpen(false)
-    }
-    document.addEventListener('pointerdown', onPointerDown)
-    document.addEventListener('focusin', onPointerDown)
-    document.addEventListener('keydown', onKeyDown)
-    desktop.addEventListener('change', onResize)
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown)
-      document.removeEventListener('focusin', onPointerDown)
-      document.removeEventListener('keydown', onKeyDown)
-      desktop.removeEventListener('change', onResize)
-    }
-  }, [open])
-
-  const focusFirstLink = () =>
-    requestAnimationFrame(() => menuRef.current?.querySelector<HTMLAnchorElement>('a')?.focus())
-
-  return (
-    <div ref={menuRef} className="docs-reference-menu">
-      <button
-        ref={buttonRef}
-        type="button"
-        disabled={!mounted}
-        aria-expanded={open}
-        aria-controls="docs-reference-panel"
-        className="docs-reference-trigger"
-        onClick={() => setOpen((value) => !value)}
-        onKeyDown={(event) => {
-          if (event.key === 'ArrowDown') {
-            event.preventDefault()
-            setOpen(true)
-            focusFirstLink()
-          }
-        }}
-      >
-        Tools
-        <ChevronDownIcon
-          aria-hidden="true"
-          width="14"
-          height="14"
-          className={open ? 'rotate-180' : undefined}
-        />
-      </button>
-      {open ? (
-        <div id="docs-reference-panel" className="docs-reference-panel">
-          <DocsResourceLinks onNavigate={() => setOpen(false)} />
-        </div>
-      ) : null}
-    </div>
   )
 }
 
@@ -153,20 +77,18 @@ export default function DocsSectionNav() {
         </ul>
       </nav>
       <div className="docs-section-utilities">
-        <DocsToolsMenu route={path ?? '/'} />
-        <Link
-          to={specificationsSection.href}
-          className="docs-section-utility-link"
-          aria-current={
-            activeSection?.id === 'protocol' || activeSection?.id === 'changelog'
-              ? 'page'
-              : undefined
-          }
-          unstable_prefetchOnEnter
-          unstable_prefetchOnView
-        >
-          {specificationsSection.label}
-        </Link>
+        {docsUtilitySections.map((section) => (
+          <Link
+            key={section.id}
+            to={section.href}
+            className="docs-section-utility-link"
+            aria-current={activeSection?.id === section.id ? 'page' : undefined}
+            unstable_prefetchOnEnter
+            unstable_prefetchOnView
+          >
+            {section.label}
+          </Link>
+        ))}
       </div>
     </div>
   )

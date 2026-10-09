@@ -1,12 +1,18 @@
 ---
-title: "Deposit funds"
-seoTitle: "Deposit funds | Tempo Docs"
+title: "Deposit"
+seoTitle: "Deposit into Earn | Tempo Docs"
 description: "Deposit stablecoins into a selected Earn vault and confirm the resulting share balance."
+interactive: true
 ---
 
-# Deposit funds
+import { OpenApi } from 'vocs'
+import { EarnDepositDemo } from '../../../components/guides/EarnDepositDemo'
 
-Start with a funded [Tempo account](/docs/accounts) and a [vault](/docs/earn/vaults) that accepts its stablecoin. Use the Earn API to inspect the vault, then its provider's documented contract interface to submit the deposit.
+<span id="deposit-funds" />
+
+# Deposit
+
+Deposit from a funded Tempo account into a [vault](/docs/earn/vaults) that accepts its stablecoin. Approve and submit the deposit with your account’s signer, then read the resulting shares and asset value.
 
 <span id="select-a-vault" />
 <span id="connect-deposits" />
@@ -14,7 +20,15 @@ Start with a funded [Tempo account](/docs/accounts) and a [vault](/docs/earn/vau
 <span id="handle-withdrawals" />
 <span id="build-the-earning-balance" />
 
+## Try a deposit
+
+Create a passkey test account, get faucet funds, and deposit into a verified pathUSD vault on Moderato testnet. The vault and network are selected for you, and the amount starts at 1 pathUSD. The demo checks the live deployment before enabling deposits. You can withdraw the test position afterward.
+
+<EarnDepositDemo />
+
 ## Deposit into a vault
+
+Use the [testnet setup](/docs/earn/example) for your tool: CLI variables and `minimum_output`, a Viem `client`, or Wagmi imports and a connected React component. Every version deposits 1 pathUSD into the same vault. Keep the signer and vault on the same network.
 
 :::::steps
 
@@ -22,17 +36,124 @@ Start with a funded [Tempo account](/docs/accounts) and a [vault](/docs/earn/vau
 
 Save the vault address and network together. Match the account's token to the accepted asset and confirm the account's eligibility. Read `capabilities` and `state.depositsPaused` before enabling the deposit action.
 
-### Prepare the deposit
+<span id="prepare-the-deposit" />
 
-Confirm the contract interface, deployment, and required token approvals with the provider or Tempo. Show the asset, amount, and destination vault before the account signs the deposit.
+### Approve funds
+
+Approve the deposit amount so you can simulate the vault call. Show the asset, amount, and vault before asking the account to sign.
+
+::::code-group
+
+```ts [Viem]
+await client.token.approveSync({
+  token: assetToken,
+  spender: vault,
+  amount: assetAmount,
+})
+```
+
+```bash [CLI (Cast)]
+cast erc20 approve "$ASSET_TOKEN" "$VAULT" "$ASSET_AMOUNT" \
+  --rpc-url "$TEMPO_RPC_URL" --account "$KEYSTORE" \
+  --tempo.fee-token "$ASSET_TOKEN"
+```
+
+```tsx [Wagmi]
+const approval = Hooks.token.useApproveSync({
+  mutation: { onSuccess: () => setApproved(true) },
+})
+const approve = () => approval.mutateAsync({
+  token: assetToken, spender: vault, amount: assetAmount,
+})
+```
+
+::::
+
+After approval confirms, simulate with a positive minimum to obtain the expected shares. The signed deposit below accepts at most 0.5% less than this quote. `Actions`, `Abis`, and `EarnShares` come from `viem/tempo`.
+
+::::code-group
+
+```ts [Viem]
+const { result: quotedShares } = await Actions.earn.deposit.simulate(client, {
+  vault,
+  assetAmount,
+  shareAmountMin: 1n,
+})
+const shareAmountMin = EarnShares.minimumOutput(quotedShares, 50)
+```
+
+```bash [CLI (Cast)]
+QUOTED_SHARES=$(cast call "$VAULT" \
+  'deposit(uint256,address,uint256)(uint256)' \
+  "$ASSET_AMOUNT" "$ACCOUNT" 1 --from "$ACCOUNT" \
+  --rpc-url "$TEMPO_RPC_URL" --json | \
+  python3 -c 'import json,sys; print(json.load(sys.stdin)[0])')
+MIN_SHARES=$(minimum_output "$QUOTED_SHARES")
+```
+
+```tsx [Wagmi]
+const quote = useSimulateContract({
+  abi: Abis.earnVault, address: vault, account: address,
+  functionName: 'deposit', args: [assetAmount, address, 1n],
+  query: { enabled: approved },
+})
+const shareAmountMin = quote.data
+  ? EarnShares.minimumOutput(quote.data.result, 50)
+  : undefined
+```
+
+::::
+
+Refresh the simulation if the customer waits before signing. In Wagmi, call `quote.refetch()` to refresh and keep the deposit button disabled until a positive quote is available.
 
 A deposit is a contract interaction. Transferring stablecoins directly to the vault address does not establish a position. The Earn read API does not submit deposits or withdrawals.
 
-### Submit and verify the position
+<span id="submit-and-verify-the-position" />
 
-Use the account's signer to sign and submit the required contract calls through the supported interface. After execution, verify the resulting share balance. Save the transaction hash, deposited amount, and shares received for reconciliation.
+### Make a deposit
 
-Read `GET /v1/earn/vaults/{vaultId}/positions/{address}` to display the resulting position.
+Viem and Wagmi batch the required approval and deposit in one transaction. Cast uses the approval confirmed above. The account receives shares; the positive minimum output bounds execution.
+
+::::code-group
+
+```ts [Viem]
+const { receipt, shareAmount } = await client.earn.depositSync({
+  vault,
+  assetAmount,
+  shareAmountMin,
+})
+```
+
+```bash [CLI (Cast)]
+cast send "$VAULT" 'deposit(uint256,address,uint256)' \
+  "$ASSET_AMOUNT" "$ACCOUNT" "$MIN_SHARES" \
+  --rpc-url "$TEMPO_RPC_URL" --account "$KEYSTORE" \
+  --tempo.fee-token "$ASSET_TOKEN"
+```
+
+```tsx [Wagmi]
+const deposit = useSendCallsSync()
+const submitDeposit = async () => {
+  if (!shareAmountMin) return
+  const calls = Actions.earn.deposit.calls({
+    vault, assetToken, assetAmount,
+    recipient: address, shareAmountMin,
+  })
+  return deposit.mutateAsync({ calls, forceAtomic: true })
+}
+```
+
+::::
+
+Confirm the receipt succeeded and save its transaction hash, deposited amount, and shares received for reconciliation.
+
+### Confirm your position
+
+The API example starts with the same vault and `testnet` network. Replace `address` with your test account’s address; use a matching vault and network for other deposits. Use **Try** to read the position or switch the request’s code language to copy an example.
+
+<OpenApi.Playground operationId="getEarnVaultPosition" anchors={false} />
+
+Read `shareBalance` for the shares held and `value` for their current asset value. Do not treat the share count as the same amount of stablecoins.
 
 :::::
 

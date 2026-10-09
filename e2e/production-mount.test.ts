@@ -14,7 +14,7 @@ test('production navigation preserves the mount through history and page tools',
   const audit = await proxyProductionMount(context, upstream)
   const page = await context.newPage()
   await page.setViewportSize({ width: 1440, height: 1000 })
-  await page.goto(`${productionDocsUrl}/get-started/stablecoins`)
+  await page.goto(`${productionDocsUrl}/get-started/quickstart`)
   const sections = page.getByRole('navigation', { name: 'Documentation sections', exact: true })
   const sidebar = page.locator('[data-v-gutter-left] nav[data-v-sidebar]')
   await expect(sections.locator('[aria-current]')).toHaveText('Get Started')
@@ -92,13 +92,13 @@ test('production mobile menus keep the docs mount and current sidebar selection'
   const trigger = page.getByRole('button', { name: 'Open docs navigation', exact: true })
   const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
   await trigger.click()
-  await drawer.getByRole('link', { name: 'Stablecoins on Tempo', exact: true }).click()
-  await expect(page).toHaveURL(`${productionDocsUrl}/get-started/stablecoins`)
+  await drawer.getByRole('link', { name: 'Quickstart', exact: true }).click()
+  await expect(page).toHaveURL(`${productionDocsUrl}/get-started/quickstart`)
   await expect(drawer).toBeHidden()
   await trigger.click()
   await expect(drawer.locator('a[aria-current]')).toHaveAttribute(
     'href',
-    '/developers/get-started/stablecoins',
+    '/developers/get-started/quickstart',
   )
   await page.keyboard.press('Escape')
   await expect(drawer).toBeHidden()

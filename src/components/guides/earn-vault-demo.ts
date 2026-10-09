@@ -1,5 +1,6 @@
 import { formatUnits } from 'viem'
 import { z } from 'zod'
+import { earnDemoVault } from './earn-deposit-demo'
 
 export type EarnNetwork = 'mainnet' | 'testnet'
 
@@ -7,6 +8,7 @@ const address = z.string().regex(/^0x[0-9a-fA-F]{40}$/)
 const decimalAmount = z.string().regex(/^\d+(\.\d+)?$/)
 const vaultSchema = z.object({
   id: address,
+  verified: z.boolean(),
   label: z.string(),
   assetToken: z.object({
     address,
@@ -46,7 +48,50 @@ export function parseEarnVaultPage(value: unknown): {
     throw new Error(
       'The Earn API returned an unexpected vault response. Try loading the vaults again.',
     )
-  return result.data
+  return { ...result.data, data: result.data.data.filter((vault) => vault.verified) }
+}
+
+export type EarnVaultDirectory = {
+  vaults: EarnVault[]
+  selectedId: string
+  nextCursor: string | null
+  loaded: boolean
+}
+
+export function updateEarnVaultDirectory(
+  previous: EarnVaultDirectory,
+  page: { data: EarnVault[]; nextCursor: string | null },
+  network: EarnNetwork,
+  more = false,
+): EarnVaultDirectory {
+  const items = (more ? [...previous.vaults, ...page.data] : page.data).filter(
+    (vault) => vault.verified,
+  )
+  const vaults = [...new Map(items.map((vault) => [vault.id.toLowerCase(), vault])).values()]
+  const selected =
+    vaults.find((vault) => vault.id.toLowerCase() === previous.selectedId.toLowerCase()) ??
+    (network === 'testnet'
+      ? vaults.find((vault) => vault.id.toLowerCase() === earnDemoVault)
+      : undefined) ??
+    vaults[0]
+  return { vaults, selectedId: selected?.id ?? '', nextCursor: page.nextCursor, loaded: true }
+}
+
+export function parseEarnVaultDetail(value: unknown, expectedId: string): EarnVault | null {
+  const result = vaultSchema.safeParse(value)
+  if (!result.success || result.data.id.toLowerCase() !== expectedId.toLowerCase())
+    throw new Error(
+      'The Earn API returned an unexpected vault response. Try loading the vaults again.',
+    )
+  return result.data.verified ? result.data : null
+}
+
+export function earnVaultDetailRequestUrl(network: EarnNetwork, vaultId: string): string {
+  address.parse(vaultId)
+  const url = new URL(earnVaultRequestUrl(network))
+  url.pathname = `/v1/earn/vaults/${vaultId}`
+  url.searchParams.delete('limit')
+  return url.toString()
 }
 
 export function earnVaultRequestUrl(network: EarnNetwork, cursor?: string): string {

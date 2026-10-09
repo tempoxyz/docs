@@ -1,98 +1,104 @@
 ---
-title: "Developer Resources"
-seoTitle: "Tempo Developer Resources | Tempo Docs"
-description: Set up your coding agent, use Tempo SDKs and APIs, manage API projects, and find integration partners.
+title: Tempo EVM
+seoTitle: Tempo EVM | Tempo Docs
+description: Build on Tempo with familiar EVM tools, stablecoin fees, flexible transactions, native tokens, and payment infrastructure.
 ---
 
 import { Cards, Card } from 'vocs'
 
-# Developer Resources
+<span id="developer-resources" />
 
-Choose tools for your application, connect to Tempo, and find the API references and integration partners you need.
+<span id="developer-guides" />
 
-## Set up your development tools
+# Tempo EVM
 
-<Cards>
-  <Card
-    title="Build with AI"
-    description="Install the Tempo Docs plugin or connect your editor through MCP."
-    to="/docs/guide/using-tempo-with-ai"
-    icon="lucide:bot"
-  />
-  <Card
-    title="Tempo CLI"
-    description="Manage a wallet and make paid HTTP requests from your terminal."
-    to="/docs/cli"
-    icon="lucide:panels-top-left"
-  />
-  <Card
-    title="SDKs"
-    description="Choose a language SDK for transactions, chain reads, or hosted API calls."
-    to="/docs/sdk"
-    icon="lucide:package"
-  />
-  <Card
-    title="Local development"
-    description="Run a local Tempo node to develop and test your application."
-    to="/docs/sdk/typescript/prool"
-    icon="lucide:terminal"
-  />
-</Cards>
+Tempo EVM is Tempo’s Ethereum-compatible execution environment, built for payments. Use Solidity and familiar Ethereum tools, with account, token, and payment features built into the chain.
 
-## Connect and test your integration
+## Core ideas
+
+| Idea | What it lets you build |
+| --- | --- |
+| **Stablecoin fees** | Pay transaction fees in supported USD-denominated TIP-20 tokens, without managing a separate gas token. Your app can [sponsor fees](/docs/guide/payments/sponsor-user-fees) for customers. |
+| **Payment capacity** | [Payment lanes](/docs/protocol/blockspace/payment-lane-specification) reserve capacity for eligible payments alongside general-purpose applications. |
+| **Flexible transactions** | [Tempo Transactions](/docs/guide/tempo-transaction) support atomic batches, fee sponsorship, and concurrent payments. [Access keys](/docs/accounts/access-keys) give apps limited, revocable signing permissions. |
+| **Native tokens and exchange** | [TIP-20 Tokens](/docs/network/tokens) provide issuance and transfer controls. The [stablecoin exchange](/docs/guide/stablecoin-dex) supplies shared onchain liquidity for supported pairs. |
+| **Deposits and reconciliation** | [Customer deposit addresses](/docs/guide/payments/virtual-addresses) credit one registered account while preserving customer attribution. [Transfer memos](/docs/guide/payments/transfer-memos) carry payment references. |
+
+Your application manages customer records, transaction submission, accounting, and screening decisions. Tempo enforces the configured transaction, permission, and token rules. [Zones](/docs/zones) add private balances through a separate integration.
+
+## Use your existing tools
+
+Standard EVM transactions work for basic transfers and contract calls. Use Tempo Transactions when you need batching, fee sponsorship, access keys, or concurrent payments. Review [EVM differences](/docs/quickstart/evm-compatibility) before porting an application, especially native-balance checks and fee-token selection.
+
+Start with [RPC endpoints and chain IDs](/docs/quickstart/connection-details), choose an [API or SDK](/docs/tools), or find a [wallet or infrastructure provider](/docs/ecosystem). Provider support varies by feature.
+
+## Try a walkthrough
 
 <Cards>
   <Card
-    title="Tempo API"
-    description="Read payment activity, receive webhook events, and use hosted services."
-    to="/docs/api"
-    icon="lucide:braces"
+    title="Browser payments"
+    description="Accounts · Fund a test account and add a wallet-approved payment form with Wagmi."
+    to="/docs/guide/payments/send-a-payment/browser"
+    icon="lucide:send"
   />
   <Card
-    title="Networks"
-    description="Find RPC endpoints and chain details for mainnet and Moderato testnet."
-    to="/docs/quickstart/connection-details"
-    icon="lucide:network"
+    title="Create a TIP-20 token"
+    description="Deploy a test stablecoin on Moderato, then inspect the new token."
+    to="/docs/guide/issuance/create-a-stablecoin"
+    icon="lucide:coins"
   />
   <Card
-    title="EVM differences"
-    description="Review the transaction, fee, and execution differences that affect your code."
-    to="/docs/quickstart/evm-compatibility"
-    icon="lucide:git-compare-arrows"
-  />
-  <Card
-    title="Testnet faucet"
-    description="Fund a test wallet with stablecoins before sending your first payment."
-    to="/docs/quickstart/faucet"
-    icon="lucide:droplets"
+    title="Swap stablecoins"
+    description="Fund a test account, choose a token pair, and execute a swap."
+    to="/docs/guide/stablecoin-dex/executing-swaps"
+    icon="lucide:arrow-left-right"
   />
 </Cards>
 
-Use [Tempo Console](/docs/api/console) to create projects and API keys. The [Tempo API documentation](/docs/api) covers authentication, webhooks, request conventions, and endpoint reference.
+New to Tempo? The [payment quickstart](/get-started/quickstart) connects a wallet, adds test funds, and sends a payment in one place.
 
-Use the [integration guide](/docs/quickstart/integrate-tempo) to connect an existing application or service. For request formats and methods, browse the [REST API](/docs/api/reference) and [JSON-RPC reference](/docs/protocol/rpc).
+<span id="set-up-your-development-tools" />
+<span id="choose-your-tools" />
 
-## Build wallet support
+Choose an [SDK or CLI](/docs/tools), [build with AI](/docs/guide/using-tempo-with-ai), or set up a [local Tempo node for testing](/docs/sdk/typescript/prool/setup). [Network details](/docs/quickstart/connection-details) lists RPC endpoints, chain IDs, and explorers.
 
-If you develop a wallet, follow the [wallet integration guide](/docs/quickstart/wallet-developers) for Tempo support and use [token lists](/docs/quickstart/tokenlist) to display assets. To connect a wallet to a payment application, use [Accounts](/docs/accounts) instead.
+<span id="connect-and-test-your-integration" />
+<span id="connect-an-application" />
 
-## Work with Tempo partners
+## Accounts and payments
 
-<Cards>
-  <Card
-    title="Find a partner"
-    description="Explore assets, wallets, exchanges, bridges, and infrastructure providers."
-    to="/docs/ecosystem"
-    icon="lucide:blocks"
-  />
-  <Card
-    title="Partner with Tempo"
-    description="Discuss a new integration or ask for an introduction to a provider."
-    to="/docs/partners"
-    icon="lucide:handshake"
-  />
-</Cards>
+[Accounts](/docs/accounts) covers creating accounts, connecting wallets, sending payments, and confirming delivery. These walkthroughs remain in the Accounts tab:
 
-## Inspect transactions and run infrastructure
+- [Customer deposit addresses](/docs/guide/payments/virtual-addresses) — try address derivation and a live test deposit into a shared account.
+- [Sponsor fees](/docs/guide/payments/sponsor-user-fees) — send a payment with your application paying the fee.
+- [Manage admin keys](/docs/accounts/admin-keys) — authorize and revoke a test account's delegated administrator.
 
-Use [explorers and debugging tools](/docs/ecosystem/block-explorers) to inspect transaction outcomes. If you operate your own infrastructure, start with [Run a node](/docs/guide/node) for RPC and validator setup, monitoring, and upgrades.
+Use the [integration walkthrough](/docs/accounts/integration) to connect signing and payment confirmation to your application records, or start from the [complete payment examples](/docs/guide/payments/send-a-payment/examples).
+
+## Tokens and exchange
+
+Use [TIP-20 Tokens](/docs/network/tokens) for token behavior and [Exchange](/docs/guide/stablecoin-dex) for swaps and the orderbook.
+
+- [Mint stablecoins](/docs/guide/issuance/mint-stablecoins) — create or load a token, grant minting authority, and mint test funds.
+- [Manage your stablecoin](/docs/guide/issuance/manage-stablecoin) — try supply caps, roles, policies, and transfer pauses.
+- [Provide liquidity](/docs/guide/stablecoin-dex/providing-liquidity) — approve funds, place an order, inspect it, and cancel it.
+
+<span id="build-wallet-support" />
+<span id="build-a-wallet" />
+<span id="work-with-tempo-partners" />
+<span id="inspect-transactions-and-run-infrastructure" />
+<span id="find-infrastructure" />
+
+## Contracts and infrastructure
+
+- [Deploy a smart contract](/docs/network/contracts) — build a Foundry project, deploy on testnet, and verify the source.
+- [Build a wallet integration](/docs/quickstart/wallet-developers) — support Tempo transactions, signing, and stablecoin fees.
+- [Run a node](/docs/guide/node) — operate your own RPC infrastructure, or find a [hosted provider](/docs/ecosystem).
+
+Review [EVM differences](/docs/quickstart/evm-compatibility) when porting an application. Use [transaction features](/docs/guide/tempo-transaction) for atomic calls, fee sponsorship, and concurrent transactions.
+
+## Explore product guides
+
+- **Earn:** [Try a deposit](/docs/earn/integrate#try-a-deposit) into a verified testnet vault and inspect the resulting shares.
+- **Zones:** [Deposit in the testnet sandbox](/docs/guide/private-zones/deposit-to-a-zone). See [Zones](/docs/zones) for limited-preview access and integration requirements.
+- **Machine payments:** [Pay with the CLI](/docs/guide/machine-payments/agent), or [accept API payments](/docs/guide/machine-payments/server).

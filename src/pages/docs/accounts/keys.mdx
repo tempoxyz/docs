@@ -1,14 +1,18 @@
 ---
-title: Keys and signing
-seoTitle: Understand Tempo Account Keys and Signing | Tempo Docs
+title: Keys and permissions
+seoTitle: Tempo Account Keys and Permissions | Tempo Docs
 description: Understand root keys, delegated access, and the difference between account signing, customer login, and Tempo API authentication.
 ---
 
-# Keys and signing
+<span id="keys-and-signing" />
+
+# Keys and permissions
 
 Choose how your application requests signatures and how much authority each signer needs. A Tempo account's address derives from its root public key; delegated keys act on that same account.
 
-## Separate login from transaction authority
+<span id="separate-login-from-transaction-authority" />
+
+## Sign transactions
 
 | Credential | What it authorizes |
 | --- | --- |
@@ -18,13 +22,17 @@ Choose how your application requests signatures and how much authority each sign
 
 A passkey can be used to sign Tempo transactions. Your application still handles customer identity and login. A wallet provider may connect these experiences; review its authentication and recovery model when choosing an integration.
 
-## Choose the signing environment
+<span id="choose-the-signing-environment" />
+
+### Choose a signer
 
 For a backend service, use your signing infrastructure or a [wallet provider](/docs/accounts/providers). For customer-approved transactions, use an embedded wallet, a [passkey account](/docs/accounts/create#create-a-passkey-account), or an [existing wallet](/docs/accounts/integrate).
 
 Tempo supports secp256k1, P-256, and WebAuthn signatures. secp256k1 and P-256 are ECDSA curves; WebAuthn wraps a P-256 signature with authentication data. Choose the method supported by your signer. The [account creation guide](/docs/accounts/create#create-an-account-from-a-signing-key) includes Viem examples, and the [transaction specification](/docs/protocol/transactions/spec-tempo-transaction#signature-types) defines the encodings.
 
-## Delegate only the authority a task needs
+<span id="delegate-only-the-authority-a-task-needs" />
+
+## Grant access
 
 | Key | Authority | Guide |
 | --- | --- | --- |
@@ -36,8 +44,100 @@ Use a limited access key for a payout service, customer session, or agent. Use a
 
 Authorization is recorded onchain. Constructing a signer in your SDK does not itself grant it permission to use another account. Follow the authorization and inspection steps in the relevant guide before using a delegated signer.
 
-## Keep access and recovery explicit
+The [access-key setup](/docs/accounts/access-keys#authorize-a-limited-key) defines a root-signed `client`, a new `accessKey`, and `recipient`. Grant one hour and a 10 AlphaUSD budget for transfers to that recipient. CLI and Wagmi use its P-256 `accessKey.accessKeyAddress`; set `ACCESS_KEY_ADDRESS` to that address. Use the [CLI and Wagmi setup](/docs/accounts/examples#choose-your-tools), including the exact `keyRestrictions` object for Wagmi:
+
+::::code-group
+
+```ts [Viem]
+await client.accessKey.authorizeSync({
+  accessKey, expiry: Math.floor(Date.now() / 1000) + 3600,
+  limits: [{ token: alphaUsd, limit: 10_000_000n, period: 0 }],
+  scopes: [{ address: alphaUsd, selector: 'transfer(address,uint256)',
+    recipients: [recipient] }],
+})
+```
+
+```bash [CLI]
+EXPIRY=$(($(date +%s) + 3600))
+cast keychain authorize "$ACCESS_KEY_ADDRESS" p256 "$EXPIRY" \
+  --limit "$ALPHA_USD:10000000" \
+  --scope "$ALPHA_USD:transfer@$TEMPO_RECIPIENT" \
+  --rpc-url "$TEMPO_RPC_URL" --private-key "$TEMPO_PRIVATE_KEY"
+```
+
+```tsx [Wagmi]
+import { useWriteContractSync } from 'wagmi'
+import { Abis, Addresses } from 'viem/tempo'
+const { mutate: authorize, isPending, error } = useWriteContractSync()
+const grantAccess = () => authorize({
+  address: Addresses.accountKeychain, abi: Abis.accountKeychain,
+  functionName: 'authorizeKey', args: [accessKey.accessKeyAddress, 1, keyRestrictions],
+})
+```
+
+```python [Python]
+from pytempo import CallScope, KeyRestrictions, SignatureType, TokenLimit
+from pytempo.contracts import AccountKeychain
+limits = [TokenLimit(token=alpha_usd, limit=10_000_000)]
+scopes = [CallScope.transfer(target=alpha_usd, recipients=[recipient])]
+call = AccountKeychain.authorize_key(
+    key_id=access_key_address, signature_type=SignatureType.SECP256K1,
+    restrictions=KeyRestrictions(expiry=expiry, limits=limits, allowed_calls=scopes))
+tx = TempoTransaction.create(**transaction_options(), calls=(call,))
+tx_hash = w3.eth.send_raw_transaction(tx.sign(private_key).encode())
+```
+
+::::
+
+Wagmi has no dedicated access-key hook; this calls the official Account Keychain ABI through the connected root signer. Define `grantAccess` inside a React component and call it from a button.
+
+Python uses the [transaction setup](/docs/accounts/examples#python-client) with the root signer. Set `access_key_address` to the new secp256k1 signer’s address and `expiry` to a Unix timestamp one hour ahead. Wait for the authorization receipt before using that key. There is no hosted API that grants signing permission without an account signature.
+
+<span id="keep-access-and-recovery-explicit" />
+
+## Revoke access
 
 Keep private keys in your signing environment. Store public addresses and provider wallet identifiers in your application records. For a passkey integration, retain the credential ID and public key as described in [Create an account](/docs/accounts/create#create-a-passkey-account).
 
-Revoke delegated keys when a service, session, or device no longer needs access. Plan root-key recovery with your wallet or signing provider: adding or revoking access keys does not replace the root public key that determines the address.
+Use the root or an active admin key to revoke a delegated key when a service, session, or device no longer needs access. With the `client` and `accessKey` from the [access-key guide](/docs/accounts/access-keys#authorize-a-limited-key):
+
+::::code-group
+
+```ts [Viem]
+await client.accessKey.revokeSync({ accessKey })
+const metadata = await client.accessKey.getMetadata({ accessKey })
+console.log(metadata.isRevoked)
+```
+
+```bash [CLI]
+cast keychain revoke "$ACCESS_KEY_ADDRESS" \
+  --rpc-url "$TEMPO_RPC_URL" --private-key "$TEMPO_PRIVATE_KEY"
+cast keychain check "$TEMPO_ACCOUNT_ADDRESS" "$ACCESS_KEY_ADDRESS" \
+  --rpc-url "$TEMPO_RPC_URL"
+```
+
+```tsx [Wagmi]
+import { useWriteContractSync } from 'wagmi'
+import { Abis, Addresses } from 'viem/tempo'
+const { mutate: revoke, data: receipt, isPending, error } = useWriteContractSync()
+const revokeAccess = () => revoke({
+  address: Addresses.accountKeychain, abi: Abis.accountKeychain,
+  functionName: 'revokeKey', args: [accessKey.accessKeyAddress],
+})
+```
+
+```python [Python]
+from pytempo.contracts import AccountKeychain
+
+call = AccountKeychain.revoke_key(key_id=access_key_address)
+tx = TempoTransaction.create(**transaction_options(), calls=(call,))
+signed_tx = tx.sign(private_key)
+tx_hash = w3.eth.send_raw_transaction(signed_tx.encode())
+w3.eth.wait_for_transaction_receipt(tx_hash)
+```
+
+::::
+
+For Python, use the [Python transaction setup](/docs/accounts/examples#python-client) with the root or an active admin signer, and set `access_key_address` to the key being revoked. For cURL, submit those signed bytes with [`eth_sendRawTransaction`](/docs/guide/payments/send-a-payment#send-a-payment).
+
+A revoked key cannot be authorized again for the same account. Create a new key for a new grant. Plan root-key recovery with your wallet or signing provider: adding or revoking access keys does not replace the root public key that determines the address.

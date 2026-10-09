@@ -52,8 +52,12 @@ const presentationOnlyElements = new Set([
 const tempoReleasesUrl = 'https://github.com/tempoxyz/tempo/releases'
 
 const interactiveDescriptions: Record<string, string> = {
+  EarnDepositDemo:
+    'In the interactive web page, create a testnet passkey account, get test pathUSD from the faucet, choose a deposit amount (1 pathUSD by default), approve it for the verified vault, and confirm a deposit. Inspect the resulting shares and receipt, then withdraw the test position. Every transaction requires your confirmation and uses Moderato testnet.',
+  EarnWithdrawDemo:
+    'In the interactive web page, restore the passkey test account from the deposit demo and redeem its full position in the verified Moderato pathUSD vault. Confirm the withdrawal and inspect the receipt. If the account has no shares, make a test deposit first.',
   EarnVaultDemo:
-    'In the interactive web page, select a network, load the verified Earn vault directory, and choose a vault to inspect its asset, access rules, deposit status, withdrawal capabilities, and available liquidity. The demo makes read-only requests to Tempo API and starts on Moderato testnet. See the [verified vault API reference](/docs/api/earn#getverifiedearnvaults) for the request and response fields.',
+    'In the interactive web page, inspect the automatically loaded verified Earn vault directory, starting with the testnet demo vault when available, or select another network and vault to inspect its asset, access rules, deposit status, withdrawal capabilities, and available liquidity. The demo makes read-only requests to Tempo API and starts on Moderato testnet. See the [verified vault API reference](/docs/api/earn#getverifiedearnvaults) for the request and response fields.',
   PasskeyAccountDemo:
     'In the interactive web page, create a passkey account or reconnect an existing passkey, inspect and copy its address, and disconnect. Creating the account does not move or fund stablecoins.',
   AdminKeyDemo:

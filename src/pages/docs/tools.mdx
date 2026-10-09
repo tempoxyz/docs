@@ -1,26 +1,64 @@
 ---
-title: "APIs and SDKs"
-seoTitle: "Tempo APIs and SDKs | Tempo Docs"
-description: Find Tempo SDKs, command-line tools, and API references in Developer Resources.
+title: APIs & SDKs
+seoTitle: Tempo APIs and SDKs | Tempo Docs
+description: Find Tempo API references, SDKs, CLI commands, authentication, and local development tools.
 ---
 
+import { Cards, Card } from 'vocs'
+
+<span id="apis-and-sdks" />
 <span id="tempo-developer-tools-and-sdks" />
 
-# APIs and SDKs
+<span id="tools" />
 
-[Developer Resources](/docs/development) is the starting point for Tempo SDKs, APIs, development tools, and integration partners.
+# APIs & SDKs
 
-## Build with SDKs
+Use Tempo APIs to read data and integrate hosted services, SDKs to build and sign transactions, and the CLI to work from your terminal.
 
-Use [Tempo SDKs](/docs/sdk) for application code, the [Tempo CLI](/docs/cli) for terminal commands, and the [Tempo API](/docs/api) for hosted services and indexed data. For paid HTTP requests, start with [Pay with the CLI](/docs/guide/machine-payments/agent).
+## APIs
+
+<Cards>
+  <Card title="API reference" description="Browse endpoints and try requests for balances, activity, and Tempo products." to="/docs/api" icon="lucide:braces" />
+  <Card title="JSON-RPC" description="Read chain state and submit signed transactions." to="/docs/api/json-rpc" icon="lucide:radio-tower" />
+  <Card title="Fee payer" description="Sponsor and broadcast transactions through a hosted relay." to="/docs/api/fee-payer" icon="lucide:send" />
+  <Card title="Indexer" description="Query indexed blockchain data with SQL." to="/docs/api/indexer-api" icon="lucide:database" />
+</Cards>
+
+Start with [API authentication](/docs/api/authentication) and [API keys](/docs/api/console/api-keys). Use [Tempo Console](/docs/api/console) to manage projects, access, and billing. API keys authenticate API requests; account signing keys authorize transactions.
+
+<span id="build-with-sdks" />
+
+## SDKs
+
+| Language or environment | Start here |
+| --- | --- |
+| TypeScript and React | [Viem and Wagmi](/docs/sdk/typescript) |
+| Rust | [tempo-alloy](/docs/sdk/rust) |
+| Go | [tempo-go](/docs/sdk/go) |
+| Python | [pytempo](/docs/sdk/python) |
+| Solidity | [Foundry](/docs/sdk/foundry) |
+| Hosted API calls | [Tempo API typed client](/docs/api/typed-client) |
+
+Use [Build with AI](/docs/guide/using-tempo-with-ai) to give your coding agent Tempo documentation. For local tests, use [Prool](/docs/sdk/typescript/prool) or [Anvil](/docs/sdk/foundry#local-tempo-development-with-anvil).
+
+## CLI
+
+The [Tempo CLI](/docs/cli) supports wallet operations, paid HTTP requests, and node operations. Choose the command for your task:
+
+- [Wallet CLI](/docs/cli/wallet): fund an account, read balances, and manage access.
+- [`tempo request`](/docs/cli/request): make HTTP requests with MPP payments.
+- [`tempo node`](/docs/cli/node): run and sync a node.
+
+For contract deployment and debugging, use [Foundry's `forge` and `cast`](/docs/sdk/foundry).
+
+Use [Tempo Console](https://console.tempo.xyz/) to manage API access or [Tempo Wallet](https://wallet.tempo.xyz/) to connect an account. [MPP](https://mpp.dev/) documents the payment protocol; [Mercator](https://mercator.sh/) helps agents find paid services.
 
 <span id="operate-and-inspect" />
+<span id="inspect-network-data-and-transactions" />
 
-## Inspect network data and transactions
+## Find infrastructure
 
-- [REST API reference](/docs/api/reference) for request and response schemas.
-- [JSON-RPC reference](/docs/protocol/rpc) for chain methods.
-- [Indexer API](/docs/api/indexer-api) for SQL queries over chain data.
-- [Fee Payer API](/docs/api/fee-payer) for hosted fee sponsorship.
+Use [Ecosystem](/docs/ecosystem) to find wallet providers, RPC services, explorers, indexers, and other integrations. [Network details](/docs/quickstart/connection-details) lists Tempo’s RPC endpoints and chain IDs.
 
-For provider integrations, browse [Partners](/docs/ecosystem).
+<span id="explorers" />
+<span id="partners" />

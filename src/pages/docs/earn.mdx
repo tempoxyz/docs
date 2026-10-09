@@ -9,59 +9,55 @@ import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 <span id="offer-an-earning-balance" />
 
-<DocsProductOverview image="earn" alt="Illustrative Earn position: 1,200 vault shares valued at 1,250 OUSD. A fluctuating historical chart illustrates position tracking, not a yield forecast.">
+<DocsProductOverview image="earn" alt="Illustrative Earn position: 1,200 vault shares valued at 1,250 OUSD. A historical chart illustrates position tracking, not a yield forecast.">
 
 # Tempo Earn
 
-Add an earning balance to your app. Let customers deposit stablecoins into a vault, see their earnings, and withdraw funds.
+Add an earning balance to your app. Customers deposit stablecoins into a vault, see their earnings, and withdraw funds.
 
-[Choose a vault →](/docs/earn/vaults)
+[Try a testnet deposit →](/docs/earn/integrate#try-a-deposit)
 
 </DocsProductOverview>
+
+:::warning
+Earn is in beta. [Contact Tempo](https://tempo.xyz/contact) to discuss access and the right integration for your application.
+:::
 
 <span id="how-earning-balances-work" />
 
 ## How Earn works
 
-A vault accepts stablecoin deposits and issues shares representing each account's holding, called a position. The value of those shares changes with the underlying strategy's returns, losses, and fees.
+A vault accepts stablecoin deposits and issues shares representing an account's position. The value of those shares changes with the underlying strategy's returns, losses, and fees. Your app shows the position's current asset value as an earning balance.
 
-Read [How Earn works](/docs/earn/how-it-works) for the vault and share model. A position's value and the amount immediately available to withdraw can differ.
-
-<span id="choose-the-vault-integration" />
-
-<span id="choose-a-yield-source" />
-
-## Build the deposit flow
-
-<Cards>
-  <Card title="Choose a vault" description="Check the accepted asset, strategy, access requirements, and withdrawal support." to="/docs/earn/vaults" icon="lucide:search" />
-  <Card title="Deposit funds" description="Authorize a deposit and confirm the account receives shares." to="/docs/earn/integrate" icon="lucide:arrow-down-left" />
-</Cards>
-
+<span id="liquidity-and-withdrawals" />
 <span id="track-deposits-and-withdrawals" />
 
-## Liquidity and withdrawals
+Choose a vault by its accepted asset, eligibility, strategy, and withdrawal behavior. Position value and the amount immediately available to withdraw can differ. [How Earn works](/docs/earn/how-it-works) explains the vault and share model.
 
-Keep position value, available withdrawals, and pending withdrawals distinct. Follow [Withdraw funds](/docs/earn/withdraw) for immediate and queued redemption flows.
-
+<span id="choose-the-vault-integration" />
+<span id="choose-a-yield-source" />
+<span id="build-the-deposit-flow" />
 <span id="read-vaults-and-positions" />
+<span id="read-positions-and-earnings" />
 
-## Read positions and earnings
+## Start building
 
-Use the [Earn API](/docs/api/earn) to read positions, share prices, and earnings. [Balances and earnings](/docs/earn/balances) explains how to display them without treating deposits or withdrawals as investment returns.
+Use an existing Tempo account and signer. Viem’s Earn actions submit deposits and supported withdrawals; the Earn API reads vaults, positions, and earnings.
+
+<Cards>
+  <Card title="Vaults" description="Choose an asset, strategy, and withdrawal path." to="/docs/earn/vaults" icon="lucide:search" />
+  <Card title="Deposit" description="Try a testnet deposit with a vault and amount already selected." to="/docs/earn/integrate" icon="lucide:arrow-down-left" />
+  <Card title="Balances and earnings" description="Show position value and returns in your application." to="/docs/earn/balances" icon="lucide:chart-line" />
+  <Card title="Withdraw" description="Return funds to the account and track delivery." to="/docs/earn/withdraw" icon="lucide:arrow-up-right" />
+</Cards>
 
 <span id="connect-earning-balances-to-payments" />
+<span id="use-earning-balances-for-payments" />
 
-## Use earning balances for payments
-
-Redeem the required stablecoins, confirm their arrival, then [send a payment](/docs/guide/payments/send-a-payment). Pending withdrawals are not available to spend.
+To use an earning balance for a payment, withdraw the required stablecoins and confirm their arrival before [sending the payment](/docs/guide/payments/send-a-payment).
 
 <span id="yield-providers" />
-
 <span id="for-yield-providers" />
+<span id="connect-a-yield-source" />
 
-## Connect a yield source
-
-An engine connects a vault to its underlying yield strategy. If you provide that strategy, implement the engine interface to connect it to Earn. Define the accepted asset, share valuation, fees, access controls, and deposit and redemption behavior. Confirm the engine interface and deployment with Tempo before integrating a new source.
-
-For a [Zone](/docs/zones) integration, check vault support and [private Earn tracking](/docs/earn/integrate#track-private-earn-activity) before using the public-account flow.
+If you operate a yield strategy, see [Connect a yield source](/docs/earn/providers). For a Zone integration, check the vault's support for [private Earn activity](/docs/earn/integrate#track-private-earn-activity).
