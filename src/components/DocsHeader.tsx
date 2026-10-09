@@ -4,7 +4,7 @@ import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 're
 import { useRouter, Link as WakuLink } from 'waku'
 import { cx as composeStyles } from 'zyzz'
 import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
-import { normalizeDocsPath, resolveSidebarItems, type SidebarNode } from '../lib/docs-sidebar'
+import { normalizeDocsPath, type SidebarNode } from '../lib/docs-sidebar'
 
 export { normalizeDocsPath, resolveSidebarItems } from '../lib/docs-sidebar'
 
