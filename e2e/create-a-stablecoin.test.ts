@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { expectDemoSuccess } from './helpers'
 
 test('create a stablecoin', async ({ page }) => {
   test.setTimeout(120000)
@@ -34,9 +35,7 @@ test('create a stablecoin', async ({ page }) => {
   await addFundsButton.click()
 
   // Wait for "Add more funds" button (indicates funds were added)
-  await expect(page.getByRole('button', { name: 'Add more funds' }).first()).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('button', { name: 'Add more funds' }).first())
 
   // Step 3: Fill in token details and deploy
   // Use label-based selectors to ensure we're filling the right inputs in the demo form
@@ -53,7 +52,7 @@ test('create a stablecoin', async ({ page }) => {
   await deployButton.click()
 
   // Wait for success - View receipt link
-  await expect(page.getByRole('link', { name: 'View receipt' })).toBeVisible({ timeout: 90000 })
+  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }))
 
   // Clean up
   await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })

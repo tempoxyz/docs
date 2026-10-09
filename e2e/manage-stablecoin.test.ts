@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { getDemoStep } from './helpers'
+import { expectDemoSuccess, getDemoStep } from './helpers'
 
 test('manage stablecoin - grant and revoke roles', async ({ page }) => {
   test.setTimeout(180000)
@@ -33,9 +33,7 @@ test('manage stablecoin - grant and revoke roles', async ({ page }) => {
   await expect(addFundsButton).toBeVisible()
   await addFundsButton.click()
 
-  await expect(page.getByRole('button', { name: 'Add more funds' }).first()).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('button', { name: 'Add more funds' }).first())
 
   // Step 3: Create a token
   // Use label-based selectors to ensure we're filling the right inputs in the demo form
@@ -51,9 +49,7 @@ test('manage stablecoin - grant and revoke roles', async ({ page }) => {
   await expect(deployButton).toBeVisible()
   await deployButton.click()
 
-  await expect(page.getByRole('link', { name: 'View receipt' }).first()).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).first())
 
   // Step 4: Grant issuer role
   const grantStep = getDemoStep(page, /Grant issuer role on /)
@@ -65,9 +61,7 @@ test('manage stablecoin - grant and revoke roles', async ({ page }) => {
   await expect(grantButton).toBeVisible()
   await grantButton.click()
 
-  await expect(page.getByRole('link', { name: 'View receipt' }).nth(1)).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(1))
 
   // Step 5: Revoke issuer role
   const revokeStep = getDemoStep(page, /Revoke issuer role on /)
@@ -80,9 +74,7 @@ test('manage stablecoin - grant and revoke roles', async ({ page }) => {
   await revokeButton.click()
 
   // Wait for revoke receipt
-  await expect(page.getByRole('link', { name: 'View receipt' }).nth(2)).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(2))
 
   // Clean up
   await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })
