@@ -63,7 +63,8 @@ const earn = scene(
 const payments = scene(
   {
     title: 'A stablecoin payment receipt',
-    description: 'Illustrative payment receipt showing 25 OUSD received with the reference Invoice 1042.',
+    description:
+      'Illustrative payment receipt showing 25 OUSD received with the reference Invoice 1042.',
   },
   [
     box(40, 40, 400, 280, 32, ink.subtle),

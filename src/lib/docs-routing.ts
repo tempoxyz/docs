@@ -38,7 +38,10 @@ export const proxiedLegacyDocsRoutes = [
   { source: '/docs/api/funding/:path*', destination: '/docs/api/routes/:path*' },
   { source: '/docs/api/routes/chains', destination: '/docs/api/conventions#chain-identifiers' },
   { source: '/docs/api/routes/providers', destination: '/docs/api/reference' },
-  { source: '/docs/api/routes/quotes', destination: '/docs/api/routes/transfers#quoteroutestransfer' },
+  {
+    source: '/docs/api/routes/quotes',
+    destination: '/docs/api/routes/transfers#quoteroutestransfer',
+  },
   {
     source: '/docs/guide/use-accounts/embed-passkeys',
     destination: 'https://accounts.tempo.xyz/docs/adapters/webauthn',
@@ -162,7 +165,10 @@ export const legacyDocsHostRoutes = [
   { source: '/hosted-services', destination: `${canonicalDevelopersOrigin}/docs/api` },
   { source: '/hosted-services/:path*', destination: `${canonicalDevelopersOrigin}/docs/api` },
   { source: '/learn/partners', destination: `${canonicalDevelopersOrigin}/docs/partners/join` },
-  { source: '/docs/learn/partners', destination: `${canonicalDevelopersOrigin}/docs/partners/join` },
+  {
+    source: '/docs/learn/partners',
+    destination: `${canonicalDevelopersOrigin}/docs/partners/join`,
+  },
   {
     source: '/docs/guide/using-tempo-with-ai/partners',
     destination: `${canonicalDevelopersOrigin}/docs/partners/join`,

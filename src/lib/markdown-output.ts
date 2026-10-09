@@ -129,7 +129,8 @@ const demoStepLabels: Record<string, string> = {
   PlaceOrder: 'Place order',
   QueryOrder: 'Query order',
   RevokeTokenRoles: 'Revoke token roles',
-  ReceivePolicyDemo: 'Create a temporary Moderato account, accept AlphaUSD, hold BetaUSD, and recover the blocked payment.',
+  ReceivePolicyDemo:
+    'Create a temporary Moderato account, accept AlphaUSD, hold BetaUSD, and recover the blocked payment.',
   SendParallelPayments: 'Send parallel payments',
   SendPayment: 'Send payment',
   SendPaymentWithMemo: 'Send payment with memo',

@@ -14,7 +14,8 @@ export const docsLinkCards = {
     },
     {
       title: 'Add money with Tempo Wallet',
-      description: 'Use the fiat onramp in Tempo Wallet, or open its funding flow directly from your app.',
+      description:
+        'Use the fiat onramp in Tempo Wallet, or open its funding flow directly from your app.',
       icon: 'wallet',
       links: [
         ['Try the onramp', '/docs/guide/getting-funds#tempo-wallet'],
@@ -23,7 +24,8 @@ export const docsLinkCards = {
     },
     {
       title: 'Transfer from another network',
-      description: 'Use Routes to move stablecoins to Tempo or accept customer deposits from other networks.',
+      description:
+        'Use Routes to move stablecoins to Tempo or accept customer deposits from other networks.',
       icon: 'network',
       links: [
         ['Transfer with Routes', '/docs/routes'],
@@ -33,7 +35,8 @@ export const docsLinkCards = {
     },
     {
       title: 'Get OUSD on Tempo',
-      description: 'Explore minting through an integration partner or swapping stablecoins already on Tempo.',
+      description:
+        'Explore minting through an integration partner or swapping stablecoins already on Tempo.',
       icon: 'tokens',
       links: [
         ['OUSD funding options', '/docs/guide/ousd#get-ousd'],

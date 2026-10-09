@@ -414,7 +414,10 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: 'Browser payments', link: '/docs/guide/payments/send-a-payment/browser' },
-              { text: 'Parallel payments', link: '/docs/guide/payments/send-parallel-transactions' },
+              {
+                text: 'Parallel payments',
+                link: '/docs/guide/payments/send-parallel-transactions',
+              },
             ],
           },
           {
@@ -422,7 +425,10 @@ export default defineConfig({
             link: '/docs/guide/payments/accept-a-payment',
             collapsed: true,
             items: [
-              { text: 'Customer deposit addresses', link: '/docs/guide/payments/virtual-addresses' },
+              {
+                text: 'Customer deposit addresses',
+                link: '/docs/guide/payments/virtual-addresses',
+              },
               { text: 'Payment references', link: '/docs/guide/payments/transfer-memos' },
               { text: 'Receive policies', link: '/docs/guide/payments/configure-receive-policies' },
               { text: 'Verify payments', link: '/docs/guide/payments/accept-a-payment/examples' },
@@ -562,7 +568,7 @@ export default defineConfig({
           { text: 'Exchanges', link: '/docs/partners/exchanges' },
           { text: 'Bridges', link: '/docs/partners/bridges' },
           { text: 'Payments & ramps', link: '/docs/partners/payments-and-ramps' },
-      { text: 'Cards', link: '/docs/partners/cards' },
+          { text: 'Cards', link: '/docs/partners/cards' },
           { text: 'Partner with Tempo', link: '/docs/partners/join' },
         ],
       },
