@@ -94,6 +94,20 @@ const mppx = Mppx.create({
 })
 ```
 
+#### Use prepaid credits
+
+On post-T12 networks, you can accept recipient-restricted TIP-20 tokens, such as prepaid service credits, using the same session setup:
+
+- Set `currency` to your credit token's address.
+- Set `recipient` to your service's payment address, which must be permitted by the token's transfer policy.
+- Ensure the customer holds enough credits to fund the session and is permitted to send them.
+
+The issuer does not need to allowlist the channel reserve. Funding and settlement check the token's transfer policy against the customer and your service. When the channel closes, unused credits return to the customer and remain subject to the token's spending restrictions.
+
+Token pauses and account receive policies still apply. No additional session configuration is required.
+
+See [Configure stablecoin transfer policies](/docs/guide/issuance/manage-stablecoin#configure-stablecoin-transfer-policies) for token-policy configuration and the [T12 upgrade notes](/docs/protocol/upgrades/t12#mpp-sessions-for-closed-loop-stablecoins) for activation details.
+
 ### Add a pay-as-you-go route
 
 Add payment verification using `mppx.session` as route middleware. The handler only runs after payment is verified.
