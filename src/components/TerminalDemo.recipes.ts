@@ -226,6 +226,8 @@ export const terminalDemoButtonAppearance = instanceStyle({
   alignItems: 'center',
   justifyContent: 'center',
   transition: 'color 0.15s',
+  ':is(:hover, :focus-visible)': { color: inherited.color.termGray10 },
+  '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
 })
 export const terminalDemoLayoutAppearance4 = instanceStyle({
   backgroundColor: inherited.color.termBg2,

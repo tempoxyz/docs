@@ -62,7 +62,6 @@
     "sql-formatter": "^15.8.2",
     "tapimo": "0.18.2",
     "unified": "^11.0.5",
-    "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",
     "viem": "^2.57.4",
     "viem-zones-sandbox": "npm:viem@2.54.6",

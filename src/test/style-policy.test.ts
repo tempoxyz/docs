@@ -104,3 +104,19 @@ it('runs the registered Zyzz rules against the actual configured-helper imports'
     await rm(root, { recursive: true, force: true })
   }
 })
+
+it('keeps presentation out of imperative DOM styles while allowing runtime integration', () => {
+  for (const source of [
+    "element.style.color = 'red'",
+    "element['style']['padding'] = '13px'",
+    "element.style.cssText = 'color: red'",
+    "element.style.setProperty('color', 'red')",
+  ])
+    expect(checkStylePolicy(source, file)).toHaveLength(1)
+  expect(
+    checkStylePolicy(
+      "document.body.style.overflow = 'hidden'; document.documentElement.style.colorScheme = resolved; line.style.setProperty('--diagram-line-length', String(length));",
+      file,
+    ),
+  ).toEqual([])
+})

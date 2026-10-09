@@ -49,3 +49,35 @@ export const playbackControl = instanceStyle(
     '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
   }),
 )
+
+// React owns playback state; the compiled stylesheet owns its presentation.
+// Only measured line lengths are bound dynamically on the generated SVG.
+export const diagramCanvas = instanceStyle({
+  selectors: {
+    '& > svg': {
+      maxWidth: '100%',
+      height: 'auto',
+      display: 'block',
+      marginBlock: 0,
+      marginInline: 'auto !custom',
+    },
+    '& [data-step]': {
+      strokeDasharray: 'var(--diagram-line-length)',
+      strokeDashoffset: 0,
+      transition: 'opacity 0.3s ease, stroke-dashoffset 1.2s ease-out',
+    },
+    '& [data-step-arrow]': { transition: 'opacity 0.3s ease' },
+    '& [data-step-fade="label"]': { transition: 'opacity 0.6s ease' },
+    '& [data-step-fade="note"]': { transition: 'opacity 0.8s ease' },
+    '& [data-step-state="pending"]': { opacity: 0, transition: 'none' },
+    '& [data-step][data-step-state="pending"]': {
+      strokeDashoffset: 'var(--diagram-line-length)',
+    },
+    '& [data-step-state="shown"]': { opacity: 1 },
+    '& [data-animation="complete"] [data-step-state]': {
+      opacity: 1,
+      strokeDashoffset: 0,
+      transition: 'none',
+    },
+  },
+})

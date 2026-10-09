@@ -176,7 +176,40 @@ export function checkStylePolicy(source: string, file: string): string[] {
     }
     ts.forEachChild(node, (child) => declarations(child, kind, seen))
   }
+  function member(node: ts.Node): { object: ts.Expression; key?: string } | undefined {
+    if (ts.isPropertyAccessExpression(node)) return { object: node.expression, key: node.name.text }
+    if (ts.isElementAccessExpression(node))
+      return {
+        object: node.expression,
+        key: ts.isStringLiteral(node.argumentExpression) ? node.argumentExpression.text : undefined,
+      }
+  }
   function visit(node: ts.Node) {
+    if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
+      const target = member(node.left)
+      if (
+        target &&
+        member(target.object)?.key === 'style' &&
+        !['overflow', 'colorScheme'].includes(target.key ?? '')
+      )
+        report(
+          node,
+          'Use Zyzz selectors for presentation; DOM style assignments are reserved for scroll locking and theme application.',
+        )
+    }
+    if (ts.isCallExpression(node)) {
+      const method = member(node.expression)
+      if (method?.key === 'setProperty' && member(method.object)?.key === 'style') {
+        const argument = node.arguments[0]
+        const property = argument && ts.isStringLiteral(argument) ? argument.text : ''
+        if (!property.startsWith('--') && !['overflow', 'color-scheme'].includes(property))
+          report(
+            node,
+            'Bind a named CSS variable for runtime measurements; define presentation in Zyzz.',
+          )
+      }
+    }
+
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
       const kind = helpers.get(node.expression.text)
       if (kind && node.arguments[0]) declarations(node.arguments[0], kind)

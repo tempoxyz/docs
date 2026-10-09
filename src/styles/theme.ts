@@ -6,6 +6,8 @@ import { design } from './contract'
 export const { style, variants, vars } = defineConfig({
   id: 'tempo-theme',
   vars: design,
+  // Keep server-rendered class lists compact; cx still resolves composed overrides.
+  cssOutput: 'grouped',
   // Zyzz requires literal mappings; check:styles verifies these against contract.ts.
   mappings: {
     spacing: [

@@ -298,12 +298,6 @@ export function TerminalDemo({ className }: { className?: string }) {
             type="button"
             onClick={restart}
             {...ui.terminalDemoButtonAppearance()}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = 'var(--term-gray10)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = 'var(--term-gray5)'
-            }}
             aria-label="Restart demo"
           >
             <svg

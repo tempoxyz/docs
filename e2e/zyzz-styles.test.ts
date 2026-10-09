@@ -187,3 +187,67 @@ test('closed mobile navigation stays outside the viewport and restores focus on 
   await expect.poll(rightEdge).toBeLessThanOrEqual(0)
   await expect(trigger).toBeFocused()
 })
+
+test('terminal controls share compiled hover and keyboard focus styling', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/docs/guide/machine-payments')
+  const restart = page.getByRole('button', { name: 'Restart demo', exact: true })
+  await restart.scrollIntoViewIfNeeded()
+  const idleColor = await restart.evaluate((element) => getComputedStyle(element).color)
+  await restart.focus()
+  await expect(restart).not.toHaveCSS('color', idleColor)
+  const activeColor = await restart.evaluate((element) => getComputedStyle(element).color)
+  await restart.evaluate((element) => element.blur())
+  await expect(restart).toHaveCSS('color', idleColor)
+  await restart.hover()
+  await expect(restart).toHaveCSS('color', activeColor)
+})
+
+test('compiled diagram states support playback, skip, replay, and reduced motion', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await page.goto('/docs/guide/payments/virtual-addresses')
+  const diagram = page.locator('.mermaid-diagram').first()
+  const svg = diagram.locator('div > svg').first()
+  await svg.scrollIntoViewIfNeeded()
+  const firstLine = svg.locator('[data-step]').first()
+  await expect(firstLine).toHaveCSS('opacity', '1')
+  await expect(firstLine).toHaveCSS('stroke-dashoffset', '0px')
+  await diagram.getByRole('button', { name: 'Skip to end', exact: true }).click()
+  await expect
+    .poll(() =>
+      svg.locator('[data-step-state]').evaluateAll((elements) =>
+        elements.every((element) => {
+          const style = getComputedStyle(element)
+          return style.opacity === '1' && style.strokeDashoffset === '0px'
+        }),
+      ),
+    )
+    .toBe(true)
+  await diagram.getByRole('button', { name: 'Replay animation', exact: true }).click()
+  await expect(svg.locator('[data-step-state="pending"]').first()).toHaveCSS('opacity', '0')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.reload()
+  await expect(diagram.getByRole('button', { name: 'Replay animation', exact: true })).toBeVisible()
+  await expect(firstLine).toHaveCSS('opacity', '1')
+  await expect(firstLine).toHaveCSS('stroke-dashoffset', '0px')
+})
+
+test('generated diagrams fit their containers on mobile and desktop', async ({ page }) => {
+  await page.goto('/docs/guide/node/validator-status')
+  const svg = page.locator('.mermaid-diagram div > svg').first()
+  await expect(svg).toBeVisible()
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 1000 })
+    await expect(svg).toHaveCSS('display', 'block')
+    await expect
+      .poll(() =>
+        svg.evaluate((element) => {
+          const container = element.parentElement
+          return !!container && element.getBoundingClientRect().width <= container.clientWidth + 1
+        }),
+      )
+      .toBe(true)
+  }
+})

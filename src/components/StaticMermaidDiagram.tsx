@@ -78,13 +78,6 @@ export function StaticMermaidDiagram({ chart }: { chart: string }) {
         const { svg } = await mermaid.render(id, chart.trim())
         if (cancelled || !el) return
         el.innerHTML = svg
-        const svgEl = el.querySelector('svg')
-        if (svgEl) {
-          svgEl.style.maxWidth = '100%'
-          svgEl.style.height = 'auto'
-          svgEl.style.display = 'block'
-          svgEl.style.margin = '0 auto'
-        }
       } catch (err) {
         console.error('StaticMermaidDiagram:', err)
       }

@@ -4,7 +4,6 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useActiveSidebarAnchor, useConfig } from 'vocs'
 import { useRouter } from 'waku'
-import { cx as composeStyles } from 'zyzz'
 import { resolveSidebarItems, SidebarNodes, usePathname } from './DocsHeader'
 import * as ui from './DocsSidebarDrawer.recipes'
 
@@ -55,8 +54,7 @@ export default function DocsSidebarDrawer() {
       }
       span = document.createElement('span')
       span.dataset.docsSidebarToggle = ''
-      if (row) span.style.marginRight = '0.5rem'
-      else span.dataset.docsSidebarFallback = ''
+      if (!row) span.dataset.docsSidebarFallback = ''
       target.prepend(span)
       setHost(span)
     }
@@ -199,22 +197,11 @@ export default function DocsSidebarDrawer() {
   return (
     <>
       {toggle}
-      <div
-        {...composeStyles(ui.docsSidebarDrawerLayout(), !open && ui.docsSidebarDrawerLayout2())}
-        aria-hidden={!open}
-        inert={!open}
-      >
+      <div {...ui.docsSidebarDrawerLayout()} aria-hidden={!open} inert={!open}>
         {/* Backdrop */}
         {/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop dismiss. */}
         {/* biome-ignore lint/a11y/useKeyWithClickEvents: Escape handled globally. */}
-        <div
-          onClick={() => setOpen(false)}
-          {...composeStyles(
-            ui.docsSidebarDrawerLayout3(),
-            !!open && ui.docsSidebarDrawerLayout4(),
-            !open && ui.docsSidebarDrawerLayout5(),
-          )}
-        />
+        <div onClick={() => setOpen(false)} {...ui.docsSidebarDrawerLayout3()} />
         {/* Panel */}
         <div
           ref={panelRef}
@@ -223,11 +210,7 @@ export default function DocsSidebarDrawer() {
           aria-modal={open ? true : undefined}
           aria-labelledby={titleId}
           tabIndex={-1}
-          {...composeStyles(
-            ui.docsSidebarDrawerLayout6(),
-            !!open && ui.docsSidebarDrawerLayout7(),
-            !open && ui.docsSidebarDrawerLayout8(),
-          )}
+          {...ui.docsSidebarDrawerLayout6()}
         >
           <div {...ui.docsSidebarDrawerLayout9()}>
             <span id={titleId} {...ui.docsSidebarDrawerText()}>

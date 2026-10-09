@@ -34,14 +34,14 @@ export const docsSidebarDrawerLayout = style({
   position: 'fixed',
   inset: '0',
   zIndex: tokens.zIndex.drawer,
+  selectors: { '&[aria-hidden="true"]': { pointerEvents: 'none' } },
   '@media (width >= 1080px)': {
     display: 'none',
   },
 })
-export const docsSidebarDrawerLayout2 = style({
-  pointerEvents: 'none',
-})
 export const docsSidebarDrawerLayout3 = style({
+  opacity: 1,
+  selectors: { '[aria-hidden="true"] > &': { opacity: 0 } },
   position: 'absolute',
   inset: '0',
 
@@ -53,13 +53,9 @@ export const docsSidebarDrawerLayout3 = style({
     transitionProperty: 'none',
   },
 })
-export const docsSidebarDrawerLayout4 = style({
-  opacity: '100%',
-})
-export const docsSidebarDrawerLayout5 = style({
-  opacity: '0%',
-})
 export const docsSidebarDrawerLayout6 = style({
+  translate: '0',
+  selectors: { '[aria-hidden="true"] > &': { translate: '-100% 0' } },
   position: 'absolute',
   top: '0',
   insetInlineStart: '0',
@@ -78,14 +74,6 @@ export const docsSidebarDrawerLayout6 = style({
   '@media (prefers-reduced-motion: reduce)': {
     transitionProperty: 'none',
   },
-})
-export const docsSidebarDrawerLayout7 = style({
-  '--tempo-style-translate-x': '0',
-  translate: 'var(--tempo-style-translate-x) var(--tempo-style-translate-y)',
-})
-export const docsSidebarDrawerLayout8 = style({
-  '--tempo-style-translate-x': '-100%',
-  translate: 'var(--tempo-style-translate-x) var(--tempo-style-translate-y)',
 })
 export const docsSidebarDrawerLayout9 = style({
   display: 'flex',

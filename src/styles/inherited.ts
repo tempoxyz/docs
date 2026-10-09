@@ -103,6 +103,7 @@ export const inherited = {
     termGray3: 'var(--term-gray3) !custom',
     termGray6: 'var(--term-gray6) !custom',
     termGray5: 'var(--term-gray5) !custom',
+    termGray10: 'var(--term-gray10) !custom',
     termAmber9: 'var(--term-amber9) !custom',
     termOrange9: 'var(--term-orange9) !custom',
     vocsBorderColorPrimaryVarTermGray4:

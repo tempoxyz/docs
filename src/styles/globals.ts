@@ -316,6 +316,9 @@ global({
     '[data-docs-sidebar-toggle]': {
       display: 'inline-flex',
     },
+    '[data-docs-sidebar-toggle]:not([data-docs-sidebar-fallback])': {
+      marginInlineEnd: tokens.spacing['2'],
+    },
   },
 })
 

@@ -14,5 +14,15 @@ export const staticMermaidDiagramLayoutAppearance = instanceStyle({
 export const staticMermaidDiagramLayoutAppearance2 = instanceStyle({
   maxWidth: '540px',
   // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-  margin: '0 auto !custom',
+  marginBlock: 0,
+  marginInline: 'auto !custom',
+  selectors: {
+    '& > svg': {
+      maxWidth: '100%',
+      height: 'auto',
+      display: 'block',
+      marginBlock: 0,
+      marginInline: 'auto !custom',
+    },
+  },
 })
