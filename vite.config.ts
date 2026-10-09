@@ -22,6 +22,8 @@ export default defineConfig(({ mode }) => {
 
   const useHttp = process.env.CI === 'true' || process.env.VITE_USE_HTTP === 'true'
   return {
+    // Gzip-size reporting compresses every output just for the build log.
+    build: { reportCompressedSize: !process.env.CI },
     define: {
       'import.meta.env.VERCEL_ENV': JSON.stringify(process.env.VERCEL_ENV ?? ''),
     },
