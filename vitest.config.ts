@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [react(), Icons({ compiler: 'jsx', jsx: 'react' })],
   test: {
     // Keep real Vocs head rendering while honoring the tests' virtual-config mock.
-    server: { deps: { inline: ['vocs'] } },
+    // Bundle the browser-targeted Takumi WASM package as the site build does.
+    server: { deps: { inline: ['vocs', /@takumi-rs\//] } },
   },
 })
