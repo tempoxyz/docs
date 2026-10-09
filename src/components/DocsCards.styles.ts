@@ -25,10 +25,12 @@ global({
       minWidth: 0,
       // design-exception: Preserve the inherited component/framework scope at the point of use.
       padding: 'var(--tempo-card-padding) !custom',
-      border: 0,
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: tokens.color.line,
       // design-exception: Preserve the inherited component/framework scope at the point of use.
       borderRadius: 'var(--tempo-card-radius) !custom',
-      backgroundColor: tokens.color.block,
+      backgroundColor: inherited.color.surfacePanel,
 
       color: inherited.color.vocsTextColorPrimary,
       textDecoration: 'none',
