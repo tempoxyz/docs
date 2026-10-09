@@ -26,7 +26,7 @@ const TOOLS = [
 
 type ToolName = (typeof TOOLS)[number]['name']
 
-type FormState = {
+export type FormState = {
   tool: ToolName
   query: string
   path: string
@@ -35,7 +35,7 @@ type FormState = {
   maxChars: number
 }
 
-type McpEnvelope = {
+export type McpEnvelope = {
   result?: {
     content?: Array<{ type: string; text?: string }>
     isError?: boolean
@@ -71,15 +71,22 @@ const initialState: FormState = {
   maxChars: 1600,
 }
 
-/** Read a JSON-RPC message from a streamable HTTP response (SSE or plain JSON). */
-function parseMcpResponse(body: string, status: number) {
-  const dataLines = body
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line.startsWith('data:'))
-    .map((line) => line.slice(5).trim())
-    .filter((line) => line && line !== '[DONE]')
-  const payload = dataLines.at(-1) ?? body.trim()
+/**
+ * Read the last JSON-RPC message from a streamable HTTP response. SSE events
+ * may split one message across several `data:` lines; plain JSON has none.
+ */
+export function parseMcpResponse(body: string, status: number) {
+  const events = body
+    .split(/\r?\n\r?\n/)
+    .map((event) =>
+      event
+        .split(/\r?\n/)
+        .filter((line) => line.startsWith('data:'))
+        .map((line) => line.slice(5).replace(/^ /, ''))
+        .join('\n'),
+    )
+    .filter((data) => data.trim() && data.trim() !== '[DONE]')
+  const payload = events.at(-1) ?? body.trim()
   if (!payload) throw new Error(`MCP server returned an empty response (HTTP ${status}).`)
   try {
     return JSON.parse(payload) as McpEnvelope
@@ -88,7 +95,7 @@ function parseMcpResponse(body: string, status: number) {
   }
 }
 
-function toolErrorMessage(result: NonNullable<McpEnvelope['result']>) {
+export function toolErrorMessage(result: NonNullable<McpEnvelope['result']>) {
   const text = result.content?.find((item) => item.type === 'text')?.text ?? ''
   try {
     const parsed = JSON.parse(text) as { error?: unknown }
@@ -99,7 +106,7 @@ function toolErrorMessage(result: NonNullable<McpEnvelope['result']>) {
   return text || 'The MCP tool call failed.'
 }
 
-function buildArguments(state: FormState) {
+export function buildArguments(state: FormState) {
   if (state.tool === 'search') {
     return {
       query: state.query,
