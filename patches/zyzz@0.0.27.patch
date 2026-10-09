@@ -12,7 +12,7 @@ index ad5de1ad177684d7c8e7134b862984e3da472d8f..53552aeb5b0b92a5eb5f05c03c31cde7
          readonly native?: Graph.compile.Options['native'];
          /** Include the CSS reset. Defaults to false. */
 diff --git a/dist/vite/index.js b/dist/vite/index.js
-index 27d151823db83a014703f72d7718a8fe93a70774..4b6e1ad271d97b9ab895373aca92b58572899c7d 100644
+index 27d151823db83a014703f72d7718a8fe93a70774..d3f375ee3612a4c5c109543ece7bca028d04674c 100644
 --- a/dist/vite/index.js
 +++ b/dist/vite/index.js
 @@ -65,6 +65,7 @@ export function zyzz(options = {}) {
@@ -105,8 +105,25 @@ index 27d151823db83a014703f72d7718a8fe93a70774..4b6e1ad271d97b9ab895373aca92b585
                  watch: (file) => this.addWatchFile(file),
                  asset: async (file) => {
                      const reference = this.emitFile({
+@@ -1228,8 +1271,15 @@ export function zyzz(options = {}) {
+             for (const [index, source] of output.map.sources.entries())
+                 if (source !== null)
+                     Mapping.setSourceContent(shifted, source, output.map.sourcesContent?.[index] ?? null);
++            // Empty production sheets become dangling references in RSC asset manifests.
++            // Development retains the import so later edits can introduce styles.
++            const stylesheetImport =
++              this.environment.config.command === 'build' && !output.css.trim()
++                ? ''
++                : `\nimport ${JSON.stringify(cssId(id))};`;
++
+             return {
+-                code: `${before}${sharedImport}${output.code.slice(offset)}\nimport ${JSON.stringify(cssId(id))};`,
++                code: `${before}${sharedImport}${output.code.slice(offset)}${stylesheetImport}`,
+                 map: JSON.stringify(Mapping.toEncodedMap(shifted)),
+             };
+         },
 diff --git a/src/vite/index.ts b/src/vite/index.ts
-index ab3405777d33a17896f73a71d19e62130c786765..5264c1e8741a9ae2e22ef66e943ad4c76e5debbf 100644
+index ab3405777d33a17896f73a71d19e62130c786765..0bee85abcc233f317e39fd1e698dbfd0fe842374 100644
 --- a/src/vite/index.ts
 +++ b/src/vite/index.ts
 @@ -74,6 +74,7 @@ export function zyzz(options: zyzz.Options = {}): Plugin {
@@ -201,7 +218,24 @@ index ab3405777d33a17896f73a71d19e62130c786765..5264c1e8741a9ae2e22ef66e943ad4c7
            watch: (file) => this.addWatchFile(file),
            asset: async (file) => {
              const reference = this.emitFile({
-@@ -1681,6 +1724,8 @@ export declare namespace zyzz {
+@@ -1605,8 +1648,15 @@ export function zyzz(options: zyzz.Options = {}): Plugin {
+             output.map.sourcesContent?.[index] ?? null,
+           )
+ 
++      // Empty production sheets become dangling references in RSC asset manifests.
++      // Development retains the import so later edits can introduce styles.
++      const stylesheetImport =
++        this.environment.config.command === 'build' && !output.css.trim()
++          ? ''
++          : `\nimport ${JSON.stringify(cssId(id))};`
++
+       return {
+-        code: `${before}${sharedImport}${output.code.slice(offset)}\nimport ${JSON.stringify(cssId(id))};`,
++        code: `${before}${sharedImport}${output.code.slice(offset)}${stylesheetImport}`,
+         map: JSON.stringify(Mapping.toEncodedMap(shifted)),
+       }
+     },
+@@ -1681,6 +1731,8 @@ export declare namespace zyzz {
      readonly compiler?: boolean | undefined
      /** Additional source directories, absolute or relative to the Vite root. */
      readonly include?: readonly string[] | undefined
