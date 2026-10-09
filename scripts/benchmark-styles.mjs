@@ -108,15 +108,15 @@ try {
           })
           const requested = new Set()
           const failures = []
+          page.on('pageerror', (error) => failures.push(error.message))
           page.on('response', (response) => {
             const url = new URL(response.url())
             if (url.origin !== new URL(revision.url).origin) return
-            const type = response.request().resourceType()
-            if (!['script', 'stylesheet'].includes(type)) return
+            // Include preloads as well as executed scripts and applied stylesheets.
+            if (!/\.(css|js)$/.test(url.pathname)) return
             if (response.status() >= 400) failures.push(`${response.status()} ${url.pathname}`)
             if (revision.assets.has(url.pathname)) requested.add(url.pathname)
-            else if (/\.(css|js)$/.test(url.pathname))
-              failures.push(`Asset not found in build: ${url.pathname}`)
+            else failures.push(`Asset not found in build: ${url.pathname}`)
           })
           const response = await page.goto(new URL(route, revision.url).href, {
             waitUntil: 'load',
