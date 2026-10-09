@@ -323,8 +323,8 @@
   width: max-content;
   min-width: 100%;
   height: 100%;
-  align-items: stretch;
-  gap: 26px;
+  align-items: center;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -334,14 +334,24 @@
   position: relative;
   display: flex;
   align-items: center;
-  height: 100%;
-  padding-top: 1px;
+  gap: 7px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
   color: color-mix(in srgb, var(--color-foreground) 65%, transparent);
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
-  transition: color 150ms;
+  transition:
+    color 150ms,
+    border-color 150ms,
+    background-color 150ms;
+}
+
+.docs-section-icon {
+  flex-shrink: 0;
 }
 
 .docs-section-nav-scroll a:hover,
@@ -349,15 +359,13 @@
   color: var(--color-foreground);
 }
 
-.docs-section-nav-scroll a[aria-current="page"]::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 2px;
-  border-radius: 2px 2px 0 0;
-  background: currentColor;
+.docs-section-nav-scroll a:hover {
+  background: color-mix(in srgb, var(--color-foreground) 3%, transparent);
+}
+
+.docs-section-nav-scroll a[aria-current="page"] {
+  border-color: color-mix(in srgb, var(--color-foreground) 30%, transparent);
+  background: color-mix(in srgb, var(--color-foreground) 3%, transparent);
 }
 
 .docs-section-utilities {
@@ -492,10 +500,6 @@
     padding-inline: 28px;
   }
 
-  .docs-section-nav-scroll ul {
-    gap: 30px;
-  }
-
   .docs-section-utilities {
     margin-right: 28px;
   }
@@ -557,4 +561,13 @@
 .docs-reference-panel a:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: -2px;
+}
+
+.docs-api-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.docs-api-menu-item svg {
+  flex-shrink: 0;
 }

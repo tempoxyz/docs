@@ -3,12 +3,32 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useRouter } from 'waku'
 import ArrowUpRightIcon from '~icons/lucide/arrow-up-right'
+import BracesIcon from '~icons/lucide/braces'
 import ChevronDownIcon from '~icons/lucide/chevron-down'
+import CodeIcon from '~icons/lucide/code-xml'
+import CompassIcon from '~icons/lucide/compass'
+import TerminalIcon from '~icons/lucide/terminal'
 
-import { docsSections, docsUtilitySections, getActiveDocsSection } from '../lib/docs-sections'
+import {
+  type DocsSection,
+  docsSections,
+  docsUtilitySections,
+  getActiveDocsSection,
+} from '../lib/docs-sections'
+import { docsProductIcons } from './DocsHomeProductIcon'
 import { MercatorLogo, MppLogo, TempoMark } from './ToolLogos'
 
 export { docsSections, docsUtilitySections, getActiveDocsSection }
+
+const sectionIcons: Partial<Record<DocsSection['id'], typeof CompassIcon>> = {
+  overview: CompassIcon,
+  accounts: docsProductIcons.accounts,
+  earn: docsProductIcons.earn,
+  routes: docsProductIcons.routes,
+  zones: docsProductIcons.zones,
+  'machine-payments': docsProductIcons.agents,
+  developers: docsProductIcons.network,
+}
 
 export const docsExternalTools = [
   { label: 'MPP', href: 'https://mpp.dev/', logo: MppLogo },
@@ -103,10 +123,10 @@ export function DocsApiDropdown({
         className="docs-reference-panel docs-resource-links"
       >
         {[
-          { label: 'Overview', href: '/docs/tools' },
-          { label: 'API reference', href: '/docs/api' },
-          { label: 'SDKs', href: '/docs/tools#sdks' },
-          { label: 'CLI', href: '/docs/cli' },
+          { label: 'Overview', href: '/docs/tools', icon: CompassIcon },
+          { label: 'API reference', href: '/docs/api', icon: BracesIcon },
+          { label: 'SDKs', href: '/docs/tools#sdks', icon: CodeIcon },
+          { label: 'CLI', href: '/docs/cli', icon: TerminalIcon },
         ].map((item) => (
           <Link
             key={item.href}
@@ -116,7 +136,10 @@ export function DocsApiDropdown({
               onNavigate?.()
             }}
           >
-            {item.label}
+            <span className="docs-api-menu-item">
+              <item.icon aria-hidden="true" width="18" height="18" />
+              {item.label}
+            </span>
           </Link>
         ))}
       </nav>
@@ -144,21 +167,34 @@ export default function DocsSectionNav() {
     <div className="docs-section-nav">
       <nav ref={navRef} aria-label="Documentation sections" className="docs-section-nav-scroll">
         <ul>
-          {docsSections.map((item) => (
-            <li key={item.id}>
-              <Link
-                ref={(element) => {
-                  if (activeSection?.id === item.id) activeLinkRef.current = element
-                }}
-                to={item.href}
-                unstable_prefetchOnEnter
-                unstable_prefetchOnView
-                aria-current={activeSection?.id === item.id ? 'page' : undefined}
-              >
-                {item.label}
-              </Link>
-            </li>
-          ))}
+          {docsSections.map((item) => {
+            const Icon = sectionIcons[item.id]
+            return (
+              <li key={item.id}>
+                <Link
+                  ref={(element) => {
+                    if (activeSection?.id === item.id) activeLinkRef.current = element
+                  }}
+                  to={item.href}
+                  unstable_prefetchOnEnter
+                  unstable_prefetchOnView
+                  aria-current={activeSection?.id === item.id ? 'page' : undefined}
+                >
+                  {Icon && (
+                    <Icon
+                      className="docs-section-icon"
+                      aria-hidden="true"
+                      focusable="false"
+                      width="16"
+                      height="16"
+                      strokeWidth="1.75"
+                    />
+                  )}
+                  {item.label}
+                </Link>
+              </li>
+            )
+          })}
         </ul>
       </nav>
       <div className="docs-section-utilities">

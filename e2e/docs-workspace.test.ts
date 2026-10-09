@@ -427,7 +427,10 @@ for (const path of ['/', '/blog']) {
     await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')
     await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
     const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
-    await drawer.getByRole('button', { name: 'Changelog', exact: true }).click()
+    await drawer
+      .locator('summary')
+      .filter({ hasText: /^Changelog$/ })
+      .click()
     await drawer.locator('a[href="/docs/protocol/upgrades/t12"]').click()
     await expect(page).toHaveURL(/\/docs\/protocol\/upgrades\/t12\/?$/)
     await expect(drawer).toBeHidden()
@@ -754,7 +757,7 @@ test('mobile article drawer traps focus and survives client navigation', async (
   const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
   const close = drawer.getByRole('button', { name: 'Close docs navigation', exact: true })
   await expect(close).toBeFocused()
-  const specifications = drawer.getByRole('button', { name: 'Changelog', exact: true })
+  const specifications = drawer.locator('summary').filter({ hasText: /^Changelog$/ })
   await page.keyboard.press('Shift+Tab')
   await expect(specifications).toBeFocused()
   await page.keyboard.press('Tab')
@@ -879,7 +882,7 @@ function developerDisclosure(sidebar: Locator, label: string, mobile: boolean) {
 }
 
 async function expectOnlyActiveLeaf(sidebar: Locator, path: string) {
-  const active = sidebar.locator('a[data-active], [aria-current="page"]')
+  const active = sidebar.locator('a[data-active], a[aria-current="page"]')
   await expect(active).toHaveCount(1)
   await expect(active).toHaveAttribute('href', path)
   const hrefs = await sidebar
@@ -1097,7 +1100,7 @@ for (const mobile of [false, true]) {
     const sidebar = mobile
       ? page.getByRole('dialog', { name: 'Documentation', exact: true })
       : page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
-    const active = sidebar.locator('a[data-active], [aria-current="page"]')
+    const active = sidebar.locator('a[data-active], a[aria-current="page"]')
     await expect(active).toHaveCount(1)
     await expect(active).toHaveAttribute('href', '/docs/guide/machine-payments/pay-as-you-go')
     await expect(sidebar.getByRole('link', { name: 'Use Mercator', exact: true })).toBeVisible()
@@ -1133,7 +1136,7 @@ test('the developer guide catalog opens Browser payments in its Accounts home', 
   await expect(article.getByRole('heading', { level: 1 })).toHaveText('Browser payments')
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
   await expect(sidebar.getByText('Integration guides', { exact: true })).toBeVisible()
-  const active = sidebar.locator('a[data-active], [aria-current="page"]')
+  const active = sidebar.locator('a[data-active], a[aria-current="page"]')
   await expect(active).toHaveCount(1)
   await expect(active).toHaveAttribute('href', '/docs/guide/payments/send-a-payment/browser')
 })

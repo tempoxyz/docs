@@ -750,8 +750,6 @@ export default defineConfig({
           },
           { text: 'Node releases', link: '/docs/changelog' },
           { text: 'Operator updates', link: '/docs/guide/node/network-upgrades' },
-          { text: 'Upgrade process', link: '/docs/guide/node/upgrade-cadence' },
-          { text: 'TIPs', link: 'https://tips.sh/' },
         ],
       },
     ]

@@ -6,7 +6,7 @@ import SendIcon from '~icons/lucide/send'
 import TrendingUpIcon from '~icons/lucide/trending-up'
 import WalletIcon from '~icons/lucide/wallet'
 
-const icons = {
+export const docsProductIcons = {
   accounts: WalletIcon,
   network: NetworkIcon,
   payments: SendIcon,
@@ -16,8 +16,8 @@ const icons = {
   routes: ArrowLeftRightIcon,
 }
 
-export function DocsHomeProductIcon({ product }: { product: keyof typeof icons }) {
-  const Icon = icons[product]
+export function DocsHomeProductIcon({ product }: { product: keyof typeof docsProductIcons }) {
+  const Icon = docsProductIcons[product]
   return (
     <Icon
       className="tempo-docs-home-product-icon"
