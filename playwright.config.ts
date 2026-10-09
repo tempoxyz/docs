@@ -8,7 +8,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 1 : 1, // Retry once due to testnet flakiness
-  workers: isCI ? 1 : undefined,
+  workers: isCI ? 2 : undefined,
   timeout: 180000, // 3 min default timeout for testnet transactions
   reporter: 'html',
   use: {

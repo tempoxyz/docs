@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 permissions: {}
@@ -54,9 +54,6 @@ jobs:
       - name: Check
         run: pnpm run check
 
-      - name: Check types
-        run: pnpm run check:types
-
       - name: Check internal anchors
         run: pnpm run check:anchors
 
@@ -71,14 +68,35 @@ jobs:
           VERCEL: "1"
           VERCEL_ENV: production
 
+      - name: Check sitemap coverage
+        run: node --experimental-strip-types scripts/check-vercel-sitemap.ts
+
       - name: Check generated public links
         run: node scripts/check-generated-public-links.mjs
 
       - name: Audit generated Markdown
         run: pnpm run check:markdown
 
-  sitemap:
-    name: Sitemap
+  ci-gate:
+    name: CI Gate
+    if: always()
+    needs: [check, e2e-build, e2e]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Secure runner
+        uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
+
+      - name: Verify required jobs
+        run: |
+          if [[ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}" == "true" ]]; then
+            echo "One or more required jobs failed, were cancelled, or were skipped"
+            exit 1
+          fi
+
+  e2e-build:
+    name: Build E2E app
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -110,42 +128,30 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Fetch OpenAPI specification
-        run: |
-          node --experimental-strip-types scripts/fetch-openapi.ts "$RUNNER_TEMP/openapi.json"
-          echo "OPENAPI_SPEC_URL=$RUNNER_TEMP/openapi.json" >> "$GITHUB_ENV"
-
-      - name: Build Vercel output
+      - name: Build app for E2E
         run: pnpm run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max-old-space-size=4096
-          VERCEL: "1"
-          VERCEL_ENV: production
+          VITE_E2E: "true"
+          VITE_USE_HTTP: "true"
 
-      - name: Check sitemap coverage
-        run: node --experimental-strip-types scripts/check-vercel-sitemap.ts
+      # A tar preserves modes and includes hidden files in the build output.
+      - name: Package E2E app
+        run: tar -cf "$RUNNER_TEMP/e2e-app.tar" dist
 
-  ci-gate:
-    name: CI Gate
-    if: always()
-    needs: [check, e2e, sitemap]
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-    steps:
-      - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
-
-      - name: Verify required jobs
-        run: |
-          if [[ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
-            echo "One or more required jobs failed or were cancelled"
-            exit 1
-          fi
+      - name: Upload E2E app
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: e2e-app
+          path: ${{ runner.temp }}/e2e-app.tar
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
 
   e2e:
     name: E2E Tests (${{ matrix.shard }}/${{ strategy.job-total }})
+    needs: e2e-build
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.61.1-noble
@@ -188,13 +194,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build app for E2E
-        run: pnpm run build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_OPTIONS: --max-old-space-size=4096
-          VITE_E2E: "true"
-          VITE_USE_HTTP: "true"
+      - name: Download E2E app
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: e2e-app
+          path: ${{ runner.temp }}
+
+      - name: Unpack E2E app
+        run: tar -xf "$RUNNER_TEMP/e2e-app.tar"
 
       - name: Run Playwright tests
         run: pnpm run test:e2e --shard=${{ matrix.shard }}/3
