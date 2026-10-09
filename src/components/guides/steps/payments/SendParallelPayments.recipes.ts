@@ -1,5 +1,6 @@
-import { metrics } from '../../../../styles/metrics'
+import { inherited } from '../../../../styles/inherited'
 import { style } from '../../../../styles/recipes'
+import { vars as tokens } from '../../../../styles/theme'
 export const transferResultLayout = style({
   display: 'flex',
   flexDirection: 'column',
@@ -7,57 +8,59 @@ export const transferResultLayout = style({
 export const transferResultLayout2 = style({
   display: 'flex',
   alignItems: 'center',
-  gap: metrics.spacing['2'],
+  gap: tokens.spacing['2'],
 })
 export const transferResultText = style({
-  marginTop: 'var(--spacing)',
-  fontSize: '13px',
-  color: 'var(--color-gray9)',
+  marginTop: tokens.spacing['1'],
+  fontSize: tokens.fontSize.compact,
+  color: tokens.color.gray9,
 })
 export const transferResultText2 = style({
-  marginTop: 'var(--spacing)',
-  fontSize: '13px',
-  color: 'var(--color-red-500)',
+  marginTop: tokens.spacing['1'],
+  fontSize: tokens.fontSize.compact,
+
+  color: inherited.color.colorRed500,
 })
 export const transferResultLayout3 = style({
   display: 'flex',
   flexWrap: 'wrap',
-  columnGap: metrics.spacing['3'],
-  rowGap: 'var(--spacing)',
-  paddingLeft: metrics.spacing['2'],
-  fontSize: '10px',
-  color: 'var(--color-gray9)',
+  columnGap: tokens.spacing['3'],
+
+  rowGap: tokens.spacing['1'],
+  paddingInlineStart: tokens.spacing['2'],
+  fontSize: tokens.fontSize.tiny,
+  color: tokens.color.gray9,
 })
 export const transferResultText3 = style({
   animation: 'var(--animate-pulse)',
 })
 
 export const sendParallelPaymentsLayout3 = style({
-  marginTop: metrics.spacing['2'],
+  marginTop: tokens.spacing['2'],
   display: 'flex',
-  gap: metrics.spacing['3'],
+  gap: tokens.spacing['3'],
 })
 export const sendParallelPaymentsLayout4 = style({
   display: 'flex',
   flex: '1 1 0%',
   flexDirection: 'column',
-  gap: metrics.spacing['2'],
+  gap: tokens.spacing['2'],
 })
 
 export const sendParallelPaymentsInput = style({
   height: '34px',
-  borderRadius: '50px',
+  borderRadius: tokens.radius.pill,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray4)',
-  paddingInline: 'calc(var(--spacing) * 3.25)',
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-  color: 'var(--color-black)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
+  paddingInline: tokens.spacing.controlInset,
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.compact,
+  color: tokens.color.black,
   selectors: {
     '&::placeholder': {
-      color: 'var(--color-gray9)',
+      color: tokens.color.gray9,
     },
     '&:disabled': {
       cursor: 'not-allowed',
@@ -65,7 +68,7 @@ export const sendParallelPaymentsInput = style({
     },
     '&:where( [data-vocs-theme="dark"], [data-vocs-theme="dark"] *, [style*="color-scheme: dark"], [style*="color-scheme: dark"] * )':
       {
-        color: 'var(--color-white)',
+        color: tokens.color.white,
       },
   },
 })
@@ -74,8 +77,9 @@ export const sendParallelPaymentsLayout5 = style({
   alignItems: 'flex-start',
 })
 export const sendParallelPaymentsLayout6 = style({
-  marginTop: metrics.spacing['2'],
+  marginTop: tokens.spacing['2'],
   display: 'flex',
   flexDirection: 'column',
-  gap: 'var(--spacing)',
+
+  gap: tokens.spacing['1'],
 })

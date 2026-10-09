@@ -1,117 +1,138 @@
-import { style } from 'zyzz'
+import { inherited } from '../styles/inherited'
+import { style } from '../styles/scoped'
+import { vars as tokens } from '../styles/theme'
 
 export const tempoDocsHome = style({
   '--home-muted': 'var(--vocs-text-color-secondary)',
   '--home-ink': 'var(--vocs-text-color-primary)',
   '--home-panel': 'var(--surface-block)',
   '--home-line': 'var(--vocs-border-color-primary)',
-  color: 'var(--home-ink)',
-  fontFamily: 'var(--tempo-font-body, var(--vocs-font-family))',
+
+  color: inherited.color.homeInk,
+
+  fontFamily: inherited.fontFamily.tempoFontBodyVarVocsFontFamily,
   selectors: {
     '& span[id]': {
       display: 'block',
       scrollMarginTop: 'calc(var(--vocs-spacing-topNav) + 32px)',
     },
     '& .tempo-docs-home-heading': {
-      paddingBottom: '40px',
+      paddingBottom: tokens.spacing['10'],
     },
     '& h1[data-v]': {
-      margin: '0 0 18px',
+      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+      margin: '0 0 18px !custom',
       padding: 0,
       border: 0,
-      fontFamily: 'var(--tempo-font-display, var(--vocs-font-family))',
-      fontSize: '48px',
-      fontWeight: 500,
-      letterSpacing: '-0.03em',
-      lineHeight: 1.1,
+
+      fontFamily: inherited.fontFamily.tempoFontDisplayVarVocsFontFamily,
+      fontSize: tokens.fontSize.displayLarge,
+      fontWeight: tokens.fontWeight.medium,
+      letterSpacing: tokens.letterSpacing.heading,
+      lineHeight: tokens.lineHeight.display,
     },
     '& .tempo-docs-home-heading p[data-v]': {
       margin: 0,
-      color: 'var(--home-muted)',
-      fontSize: '16px',
-      lineHeight: 1.6,
+
+      color: inherited.color.homeMuted,
+      fontSize: tokens.fontSize.body,
+      lineHeight: tokens.lineHeight.relaxed,
     },
     '& .tempo-docs-home-start': {
       display: 'grid',
       gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1fr)',
       alignItems: 'start',
-      gap: '48px',
+      gap: tokens.spacing['12'],
     },
     '& h2[data-v]': {
       margin: 0,
       padding: 0,
       border: 0,
-      fontSize: '24px',
-      fontWeight: 500,
-      letterSpacing: '-0.025em',
-      lineHeight: 1.3,
+      fontSize: tokens.fontSize.title,
+      fontWeight: tokens.fontWeight.medium,
+
+      letterSpacing: tokens.letterSpacing.heading,
+      lineHeight: tokens.lineHeight.compact,
     },
     '& .tempo-docs-home-guides': {
-      paddingTop: '28px',
+      paddingTop: tokens.spacing['7'],
     },
     '& .tempo-docs-home-guides h2[data-v]': {
-      marginBottom: '28px',
-      fontSize: '20px',
+      marginBottom: tokens.spacing['7'],
+      fontSize: tokens.fontSize.subheading,
     },
     '& .tempo-docs-home-guides > a': {
       display: 'block',
-      marginBottom: '28px',
+      marginBottom: tokens.spacing['7'],
       textDecoration: 'none',
     },
     '& .tempo-docs-home-guides strong': {
       display: 'flex',
       justifyContent: 'space-between',
-      gap: '16px',
-      color: 'var(--home-ink)',
-      fontSize: '15px',
-      fontWeight: 500,
-      lineHeight: 1.5,
+      gap: tokens.spacing['4'],
+
+      color: inherited.color.homeInk,
+      fontSize: tokens.fontSize.bodySmall,
+      fontWeight: tokens.fontWeight.medium,
+      lineHeight: tokens.lineHeight.normal,
     },
     '& .tempo-docs-home-guides strong + span': {
       display: 'block',
-      marginTop: '6px',
-      color: 'var(--home-muted)',
-      fontSize: '14px',
-      lineHeight: 1.6,
+      marginTop: tokens.spacing['1_5'],
+
+      color: inherited.color.homeMuted,
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.relaxed,
     },
     '& .tempo-docs-home-guides > p[data-v]': {
-      margin: '32px 0 0',
-      fontSize: '14px',
+      marginTop: tokens.spacing['8'],
+      marginInlineEnd: tokens.spacing['0'],
+      marginBottom: tokens.spacing['0'],
+      marginInlineStart: tokens.spacing['0'],
+      fontSize: tokens.fontSize.sm,
     },
     '& .tempo-docs-home-products': {
-      marginTop: '48px',
+      marginTop: tokens.spacing['12'],
     },
     '& .tempo-docs-home-product-grid': {
       display: 'grid',
       gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-      gap: '20px',
-      marginTop: '28px',
+      gap: tokens.spacing['5'],
+      marginTop: tokens.spacing['7'],
     },
     '& .tempo-docs-home-product-group': {
       minWidth: 0,
-      padding: 'var(--tempo-card-padding)',
-      borderRadius: 'var(--tempo-card-radius)',
-      background: 'var(--home-panel)',
+      // design-exception: Preserve the inherited component/framework scope at the point of use.
+      padding: 'var(--tempo-card-padding) !custom',
+      // design-exception: Preserve the inherited component/framework scope at the point of use.
+      borderRadius: 'var(--tempo-card-radius) !custom',
+      backgroundColor: inherited.color.homePanel,
     },
     '& .tempo-docs-home-product-group h3[data-v]': {
       margin: 0,
       padding: 0,
-      fontSize: '18px',
-      fontWeight: 500,
-      letterSpacing: '-0.015em',
-      lineHeight: 1.4,
+      fontSize: tokens.fontSize.lead,
+      fontWeight: tokens.fontWeight.medium,
+
+      letterSpacing: tokens.letterSpacing.tight,
+      lineHeight: tokens.lineHeight.snug,
     },
     '& .tempo-docs-home-product-group h3[data-v] > a:not(.heading-anchor)': {
-      color: 'var(--home-ink)',
-      fontWeight: 'inherit',
+      color: inherited.color.homeInk,
+      fontWeight: 'inherit !custom',
       textDecoration: 'none',
     },
     '& .tempo-docs-home-product-group p[data-v]': {
       minHeight: '3.2em',
-      margin: '12px 0 20px',
-      color: 'var(--home-muted)',
-      fontSize: '14px',
-      lineHeight: 1.6,
+
+      marginTop: tokens.spacing['3'],
+      marginInlineEnd: tokens.spacing['0'],
+      marginBottom: tokens.spacing['5'],
+      marginInlineStart: tokens.spacing['0'],
+
+      color: inherited.color.homeMuted,
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.relaxed,
     },
     '& ul[data-v]': {
       margin: 0,
@@ -121,54 +142,64 @@ export const tempoDocsHome = style({
     '& li[data-v]': {
       margin: 0,
       padding: 0,
-      fontSize: '15px',
-      lineHeight: 1.6,
+      fontSize: tokens.fontSize.bodySmall,
+      lineHeight: tokens.lineHeight.relaxed,
     },
     '& li[data-v] + li[data-v]': {
-      marginTop: '10px',
+      marginTop: tokens.spacing['2_5'],
     },
     '& li[data-v] a[data-v]': {
-      color: 'var(--home-ink)',
-      fontWeight: 400,
+      color: inherited.color.homeInk,
+      fontWeight: tokens.fontWeight.normal,
       textDecoration: 'none',
     },
     '& p[data-v] a[data-v]': {
-      color: 'var(--accent-blue)',
-      fontWeight: 400,
+      color: tokens.color.accent,
+      fontWeight: tokens.fontWeight.normal,
       textDecoration: 'underline',
-      textDecorationColor: 'color-mix(in srgb, var(--accent-blue) 40%, transparent)',
+
+      textDecorationColor: inherited.color.colorMixInSrgbAccentBlue40Transparent,
       textDecorationThickness: '1px',
       textUnderlineOffset: '3px',
     },
     '& .tempo-docs-home-reference': {
-      marginTop: '48px',
-      paddingTop: '36px',
-      borderTop: '1px solid var(--home-line)',
+      marginTop: tokens.spacing['12'],
+      paddingTop: tokens.spacing['9'],
+      borderTopWidth: tokens.borderWidth.hairline,
+      borderTopStyle: 'solid',
+      borderTopColor: inherited.color.homeLine,
     },
     '& .tempo-docs-home-reference-grid': {
       display: 'grid',
       gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-      gap: '48px',
-      marginTop: '32px',
+      gap: tokens.spacing['12'],
+      marginTop: tokens.spacing['8'],
     },
     '& .tempo-docs-home-reference-grid h3[data-v]': {
-      margin: '0 0 16px',
+      marginTop: tokens.spacing['0'],
+      marginInlineEnd: tokens.spacing['0'],
+      marginBottom: tokens.spacing['4'],
+      marginInlineStart: tokens.spacing['0'],
       padding: 0,
-      color: 'var(--home-muted)',
-      fontSize: '14px',
-      fontWeight: 400,
-      letterSpacing: 0,
+
+      color: inherited.color.homeMuted,
+      fontSize: tokens.fontSize.sm,
+      fontWeight: tokens.fontWeight.normal,
+      letterSpacing: tokens.letterSpacing.normal,
     },
     '& .tempo-docs-home-reference-grid > div:first-child ul[data-v]': {
       display: 'grid',
       gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-      gap: '10px 20px',
+      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+      gap: '10px 20px !custom',
     },
     '& .tempo-docs-home-reference-grid > div:first-child li[data-v]': {
       margin: 0,
     },
     '& :is(a, button):focus-visible': {
-      outline: '2px solid var(--home-ink)',
+      outlineWidth: tokens.borderWidth.emphasis,
+      outlineStyle: 'solid',
+      outlineColor: inherited.color.homeInk,
       outlineOffset: '4px',
     },
     '& :is(li, p)[data-v] a[data-v]:hover': {
@@ -191,7 +222,7 @@ export const tempoDocsHome = style({
       },
       '& .tempo-docs-home-start': {
         gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)',
-        gap: '32px',
+        gap: tokens.spacing['8'],
       },
     },
   },
@@ -199,14 +230,14 @@ export const tempoDocsHome = style({
     selectors: {
       '& .tempo-docs-home-start': {
         gridTemplateColumns: 'minmax(0, 1fr)',
-        gap: '36px',
+        gap: tokens.spacing['9'],
       },
       '& .tempo-docs-home-guides': {
         padding: 0,
       },
       '& .tempo-docs-home-reference-grid': {
         gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-        gap: '32px',
+        gap: tokens.spacing['8'],
       },
     },
   },
@@ -214,8 +245,8 @@ export const tempoDocsHome = style({
     selectors: {
       '& .tempo-docs-home-product-grid': {
         gridTemplateColumns: 'minmax(0, 1fr)',
-        gap: '16px',
-        marginTop: '24px',
+        gap: tokens.spacing['4'],
+        marginTop: tokens.spacing['6'],
       },
       '& .tempo-docs-home-product-group p[data-v]': {
         minHeight: 0,
@@ -225,24 +256,24 @@ export const tempoDocsHome = style({
   '@media (width < 520px)': {
     selectors: {
       '& h1[data-v]': {
-        fontSize: '40px',
+        fontSize: tokens.fontSize.display,
       },
       '& .tempo-docs-home-heading': {
-        paddingBottom: '32px',
+        paddingBottom: tokens.spacing['8'],
       },
       '& .tempo-docs-home-heading p[data-v]': {
-        fontSize: '15px',
+        fontSize: tokens.fontSize.bodySmall,
       },
       '& .tempo-docs-home-reference-grid': {
         gridTemplateColumns: 'minmax(0, 1fr)',
-        gap: '32px',
+        gap: tokens.spacing['8'],
       },
       '& .tempo-docs-home-products': {
-        marginTop: '36px',
+        marginTop: tokens.spacing['9'],
       },
       '& .tempo-docs-home-reference': {
-        marginTop: '36px',
-        paddingTop: '28px',
+        marginTop: tokens.spacing['9'],
+        paddingTop: tokens.spacing['7'],
       },
     },
   },
@@ -252,101 +283,127 @@ export const tempoDocsHomeProductIcon = style({
   display: 'inline-block',
   width: '20px',
   height: '20px',
-  marginRight: '10px',
+  marginInlineEnd: tokens.spacing['2_5'],
   verticalAlign: '-4px',
-  color: 'var(--home-ink)',
+
+  color: inherited.color.homeInk,
 })
 
 export const tempoAgentStart = style({
   '--home-muted': 'color-mix(in srgb, var(--home-ink) 68%, transparent)',
   minWidth: 0,
-  padding: '28px',
-  borderRadius: '24px',
-  background: 'var(--home-panel)',
+  padding: tokens.spacing['7'],
+
+  borderRadius: tokens.radius.xl,
+  backgroundColor: inherited.color.homePanel,
   selectors: {
     '& h2': {
       margin: 0,
-      fontSize: '22px',
-      fontWeight: 500,
-      letterSpacing: '-0.02em',
-      lineHeight: 1.3,
+      fontSize: tokens.fontSize.titleSmall,
+      fontWeight: tokens.fontWeight.medium,
+      letterSpacing: tokens.letterSpacing.compact,
+      lineHeight: tokens.lineHeight.compact,
     },
     '& > p': {
-      margin: '8px 0 18px',
-      color: 'var(--home-muted)',
-      fontSize: '14px',
-      lineHeight: 1.6,
+      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+      margin: '8px 0 18px !custom',
+
+      color: inherited.color.homeMuted,
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.relaxed,
     },
     '& .tempo-agent-start-toolbar': {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      gap: '16px',
+      gap: tokens.spacing['4'],
     },
     '& .tempo-agent-start-label': {
       margin: 0,
-      color: 'var(--home-ink)',
-      fontSize: '16px',
-      fontWeight: 500,
-      letterSpacing: '-0.01em',
-      lineHeight: 1.5,
+
+      color: inherited.color.homeInk,
+      fontSize: tokens.fontSize.body,
+      fontWeight: tokens.fontWeight.medium,
+      letterSpacing: tokens.letterSpacing.tight,
+      lineHeight: tokens.lineHeight.normal,
     },
     '& .tempo-agent-start-agents': {
-      margin: '0 0 20px',
+      marginTop: tokens.spacing['0'],
+      marginInlineEnd: tokens.spacing['0'],
+      marginBottom: tokens.spacing['5'],
+      marginInlineStart: tokens.spacing['0'],
       padding: 0,
       border: 0,
     },
     '& .tempo-agent-start-agents button': {
       display: 'inline-flex',
       alignItems: 'center',
-      gap: '8px',
+      gap: tokens.spacing['2'],
       minHeight: '40px',
-      padding: '8px 14px',
-      border: '1px solid transparent',
-      borderRadius: '999px',
-      background: 'transparent',
-      color: 'var(--home-muted)',
-      fontSize: '13px',
-      fontFamily: 'inherit',
-      lineHeight: 1.5,
+
+      paddingBlock: tokens.spacing['2'],
+      paddingInline: tokens.spacing['3_5'],
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: 'transparent !custom',
+
+      borderRadius: tokens.radius.pill,
+      backgroundColor: 'transparent !custom',
+
+      color: inherited.color.homeMuted,
+      fontSize: tokens.fontSize.compact,
+      fontFamily: 'inherit !custom',
+      lineHeight: tokens.lineHeight.normal,
       cursor: 'pointer',
     },
     '& .tempo-agent-start-agents button[aria-pressed="true"]': {
-      borderColor: 'var(--home-ink)',
-      color: 'var(--home-ink)',
+      borderColor: inherited.color.homeInk,
+
+      color: inherited.color.homeInk,
     },
     '& :is(.tempo-agent-start-agents, .tempo-agent-start-destination) svg': {
       width: '14px',
       height: '14px',
     },
     '& .tempo-agent-start-command': {
-      marginTop: '12px',
+      marginTop: tokens.spacing['3'],
       overflow: 'hidden',
-      borderRadius: '12px',
-      background: 'var(--vocs-background-color-primary)',
+      borderRadius: tokens.radius.xl,
+      backgroundColor: inherited.color.vocsBackgroundColorPrimary,
     },
     '& .tempo-agent-start-destination': {
       display: 'inline-flex',
       alignItems: 'center',
-      gap: '6px',
-      color: 'var(--home-muted)',
-      fontSize: '12px',
-      lineHeight: 1.5,
+      gap: tokens.spacing['1_5'],
+
+      color: inherited.color.homeMuted,
+      fontSize: tokens.fontSize.xs,
+      lineHeight: tokens.lineHeight.normal,
     },
     '& .tempo-agent-start-instruction': {
-      margin: '6px 0 0',
-      color: 'var(--home-muted)',
-      fontSize: '14px',
-      lineHeight: 1.6,
+      marginTop: tokens.spacing['1_5'],
+      marginInlineEnd: tokens.spacing['0'],
+      marginBottom: tokens.spacing['0'],
+      marginInlineStart: tokens.spacing['0'],
+
+      color: inherited.color.homeMuted,
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.relaxed,
     },
     '& pre': {
       margin: 0,
       overflowX: 'auto',
-      padding: '10px 16px 14px',
-      color: 'var(--home-ink)',
-      fontFamily: 'var(--vocs-font-family-mono)',
-      fontSize: '13px',
-      lineHeight: 1.7,
+
+      paddingTop: tokens.spacing['2_5'],
+      paddingInlineEnd: tokens.spacing['4'],
+      paddingBottom: tokens.spacing['3_5'],
+      paddingInlineStart: tokens.spacing['4'],
+
+      color: inherited.color.homeInk,
+
+      fontFamily: inherited.fontFamily.vocsFontFamilyMono,
+      fontSize: tokens.fontSize.compact,
+      lineHeight: tokens.lineHeight.prose,
       whiteSpace: 'pre-wrap',
       overflowWrap: 'anywhere',
     },
@@ -354,7 +411,7 @@ export const tempoAgentStart = style({
       display: 'block',
       padding: 0,
       border: 0,
-      background: 'transparent',
+      backgroundColor: 'transparent !custom',
       font: 'inherit',
     },
     '& .tempo-agent-start-copy': {
@@ -362,50 +419,61 @@ export const tempoAgentStart = style({
       flexShrink: 0,
       alignItems: 'center',
       justifyContent: 'center',
-      gap: '6px',
+      gap: tokens.spacing['1_5'],
       minHeight: '32px',
-      padding: '6px 8px',
+
+      paddingBlock: tokens.spacing['1_5'],
+      paddingInline: tokens.spacing['2'],
       border: 0,
-      borderRadius: '4px',
-      background: 'transparent',
-      color: 'var(--home-muted)',
-      fontFamily: 'inherit',
-      fontSize: '13px',
-      lineHeight: 1.5,
+      borderRadius: tokens.radius.sm,
+      backgroundColor: 'transparent !custom',
+
+      color: inherited.color.homeMuted,
+      fontFamily: 'inherit !custom',
+      fontSize: tokens.fontSize.compact,
+      lineHeight: tokens.lineHeight.normal,
       cursor: 'pointer',
     },
     '& .tempo-agent-start-copy:hover': {
-      color: 'var(--home-ink)',
+      color: inherited.color.homeInk,
     },
     '& .tempo-agent-start-copy svg': {
       width: '14px',
       height: '14px',
     },
     '& .tempo-agent-start-prerequisite': {
-      marginLeft: '4px',
-      color: 'var(--home-ink)',
+      marginInlineStart: tokens.spacing['1'],
+
+      color: inherited.color.homeInk,
       textDecoration: 'underline',
-      textDecorationColor: 'color-mix(in srgb, var(--home-ink) 35%, transparent)',
+
+      textDecorationColor: inherited.color.colorMixInSrgbHomeInk35Transparent,
       textUnderlineOffset: '3px',
     },
     '& .tempo-agent-start-footer': {
       display: 'flex',
       flexWrap: 'wrap',
       alignItems: 'center',
-      gap: '8px 16px',
-      marginTop: '18px',
-      fontSize: '13px',
-      lineHeight: 1.6,
+      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+      gap: '8px 16px !custom',
+
+      marginTop: tokens.spacing['4'],
+      fontSize: tokens.fontSize.compact,
+      lineHeight: tokens.lineHeight.relaxed,
     },
     '& .tempo-agent-start-footer > a': {
-      color: 'var(--home-ink)',
+      color: inherited.color.homeInk,
       textDecoration: 'none',
     },
     '& .tempo-agent-start-feedback': {
-      margin: '10px 0 0',
-      color: 'var(--home-ink)',
-      fontSize: '12px',
-      lineHeight: 1.6,
+      marginTop: tokens.spacing['2_5'],
+      marginInlineEnd: tokens.spacing['0'],
+      marginBottom: tokens.spacing['0'],
+      marginInlineStart: tokens.spacing['0'],
+
+      color: inherited.color.homeInk,
+      fontSize: tokens.fontSize.xs,
+      lineHeight: tokens.lineHeight.relaxed,
     },
     '& .tempo-agent-start-feedback:empty': {
       margin: 0,
@@ -418,27 +486,27 @@ export const tempoAgentStart = style({
   '@media (width < 1100px)': {
     selectors: {
       '& pre': {
-        fontSize: '12px',
+        fontSize: tokens.fontSize.xs,
       },
     },
   },
   '@media (width < 800px)': {
     selectors: {
       '& pre': {
-        fontSize: '13px',
+        fontSize: tokens.fontSize.compact,
       },
     },
   },
   '@media (width < 520px)': {
-    padding: '20px',
+    padding: tokens.spacing['5'],
     selectors: {
       '& .tempo-agent-start-toolbar': {
         flexWrap: 'wrap',
-        gap: '12px',
+        gap: tokens.spacing['3'],
       },
       '& pre': {
-        padding: '14px',
-        fontSize: '12px',
+        padding: tokens.spacing['3_5'],
+        fontSize: tokens.fontSize.xs,
       },
     },
   },
@@ -457,7 +525,7 @@ export const tempoAgentStartAgents = style({
     '& > div': {
       display: 'flex',
       flexWrap: 'wrap',
-      gap: '8px',
+      gap: tokens.spacing['2'],
     },
   },
 })
@@ -465,7 +533,10 @@ export const tempoAgentStartAgents = style({
 export const tempoAgentStartCommand = style({
   selectors: {
     '& > .tempo-agent-start-toolbar': {
-      padding: '8px 8px 0 16px',
+      paddingTop: tokens.spacing['2'],
+      paddingInlineEnd: tokens.spacing['2'],
+      paddingBottom: tokens.spacing['0'],
+      paddingInlineStart: tokens.spacing['4'],
     },
   },
 })

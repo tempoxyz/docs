@@ -1,44 +1,47 @@
-import { metrics } from '../../../styles/metrics'
+import { inherited } from '../../../styles/inherited'
 import { style } from '../../../styles/recipes'
+import { vars as tokens } from '../../../styles/theme'
 export const reveal = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  paddingInline: metrics.spacing['5'],
+  paddingInline: tokens.spacing['5'],
   textAlign: 'center',
 })
 export const blogSectionHeading = style({
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: 'clamp(2rem, 6vw, 3rem)',
-  lineHeight: 1.1,
-  letterSpacing: '-0.02em',
-  color: 'var(--foreground)',
+  fontFamily: tokens.fontFamily.book,
+  // design-exception: Preserve this responsive geometry across viewport sizes.
+  fontSize: 'clamp(2rem, 6vw, 3rem) !custom',
+  lineHeight: tokens.lineHeight.display,
+  letterSpacing: tokens.letterSpacing.compact,
+  color: tokens.color.foreground,
   WebkitFontSmoothing: 'antialiased',
   MozOsxFontSmoothing: 'grayscale',
 })
 export const blogSectionDescription = style({
-  marginTop: metrics.spacing['6'],
+  marginTop: tokens.spacing['6'],
   maxWidth: '560px',
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '16px',
-  lineHeight: 1.4,
-  letterSpacing: '0',
-  color: 'color-mix(in oklab, var(--foreground) 50%, transparent)',
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.body,
+  lineHeight: tokens.lineHeight.snug,
+  letterSpacing: tokens.letterSpacing.normal,
+
+  color: inherited.color.colorMixInOklabForeground50Transparent,
   '@media (width >= 64rem)': {
-    fontSize: '20px',
+    fontSize: tokens.fontSize.subheading,
   },
 })
 export const blogSectionText = style({
-  color: 'var(--foreground)',
+  color: tokens.color.foreground,
 })
 export const reveal2 = style({
-  marginTop: metrics.spacing['16'],
+  marginTop: tokens.spacing['16'],
 })
 export const link = style({
   display: 'grid',
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--line)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -46,7 +49,7 @@ export const link = style({
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'var(--surface-block)',
+        backgroundColor: tokens.color.block,
       },
     },
   },
@@ -59,70 +62,76 @@ export const blogSectionLayout = style({
   height: '200px',
   overflow: 'hidden',
   borderBottomStyle: 'solid',
-  borderBottomWidth: '1px',
-  borderColor: 'var(--line)',
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
   '@media (width >= 64rem)': {
     order: 2,
     height: 'auto',
     minHeight: '280px',
     borderBottomStyle: 'solid',
-    borderBottomWidth: '0px',
-    borderLeftStyle: 'solid',
-    borderLeftWidth: '1px',
+    borderBottomWidth: tokens.borderWidth.none,
+    borderInlineStartStyle: 'solid',
+    borderInlineStartWidth: tokens.borderWidth.hairline,
   },
 })
 export const blogSectionLayout2 = style({
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center',
-  gap: metrics.spacing['4'],
-  padding: metrics.spacing['6'],
+  gap: tokens.spacing['4'],
+  padding: tokens.spacing['6'],
   '@media (width >= 64rem)': {
     order: 1,
-    padding: metrics.spacing['10'],
+    padding: tokens.spacing['10'],
   },
 })
 export const blogSectionHeading2 = style({
   maxWidth: '480px',
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: 'clamp(1.5rem, 3.5vw, 2.125rem)',
-  lineHeight: 1.15,
-  letterSpacing: '-0.02em',
-  color: 'var(--foreground)',
+  fontFamily: tokens.fontFamily.book,
+  // design-exception: Preserve this responsive geometry across viewport sizes.
+  fontSize: 'clamp(1.5rem, 3.5vw, 2.125rem) !custom',
+
+  lineHeight: tokens.lineHeight.display,
+  letterSpacing: tokens.letterSpacing.compact,
+  color: tokens.color.foreground,
   WebkitFontSmoothing: 'antialiased',
   MozOsxFontSmoothing: 'grayscale',
 })
 export const blogSectionDescription2 = style({
   maxWidth: '480px',
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '15px',
-  lineHeight: 1.55,
-  letterSpacing: '0',
-  color: 'color-mix(in oklab, var(--foreground) 50%, transparent)',
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.bodySmall,
+
+  lineHeight: tokens.lineHeight.normal,
+  letterSpacing: tokens.letterSpacing.normal,
+
+  color: inherited.color.colorMixInOklabForeground50Transparent,
 })
 export const blogSectionDescription3 = style({
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '12px',
-  letterSpacing: '0.02em',
-  color: 'color-mix(in oklab, var(--foreground) 40%, transparent)',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.xs,
+  letterSpacing: tokens.letterSpacing.wider,
+
+  color: inherited.color.colorMixInOklabForeground40Transparent,
   textTransform: 'uppercase',
 })
 export const blogSectionLayout3 = style({
   position: 'relative',
-  marginTop: '-1px',
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  marginTop: '-1px !custom',
   borderTopStyle: 'solid',
-  borderTopWidth: '1px',
-  borderColor: 'var(--line)',
+  borderTopWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
 })
 export const link2 = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: metrics.spacing['2'],
+  gap: tokens.spacing['2'],
   borderBottomStyle: 'solid',
-  borderBottomWidth: '1px',
-  borderColor: 'var(--line)',
-  paddingInline: metrics.spacing['5'],
-  paddingBlock: metrics.spacing['5'],
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  paddingInline: tokens.spacing['5'],
+  paddingBlock: tokens.spacing['5'],
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -130,7 +139,7 @@ export const link2 = style({
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'var(--surface-block)',
+        backgroundColor: tokens.color.block,
       },
     },
   },
@@ -138,15 +147,15 @@ export const link2 = style({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: metrics.spacing['12'],
-    paddingInline: metrics.spacing['8'],
+    gap: tokens.spacing['12'],
+    paddingInline: tokens.spacing['8'],
   },
 })
 export const blogSectionText2 = style({
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '16px',
-  letterSpacing: '0',
-  color: 'var(--foreground)',
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.body,
+  letterSpacing: tokens.letterSpacing.normal,
+  color: tokens.color.foreground,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -156,14 +165,15 @@ export const blogSectionText3 = style({
   display: 'flex',
   flexWrap: 'wrap',
   alignItems: 'center',
-  gap: metrics.spacing['3'],
+  gap: tokens.spacing['3'],
 })
 export const blogSectionText4 = style({
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '12px',
-  letterSpacing: '0.02em',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.xs,
+  letterSpacing: tokens.letterSpacing.wider,
   whiteSpace: 'nowrap',
-  color: 'color-mix(in oklab, var(--foreground) 40%, transparent)',
+
+  color: inherited.color.colorMixInOklabForeground40Transparent,
   textTransform: 'uppercase',
 })
 export const link3 = style({
@@ -171,14 +181,14 @@ export const link3 = style({
   alignItems: 'center',
   justifyContent: 'center',
   borderBottomStyle: 'solid',
-  borderBottomWidth: '1px',
-  borderColor: 'var(--line)',
-  paddingInline: metrics.spacing['5'],
-  paddingBlock: metrics.spacing['5'],
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '16px',
-  letterSpacing: '0',
-  color: 'var(--foreground)',
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  paddingInline: tokens.spacing['5'],
+  paddingBlock: tokens.spacing['5'],
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.body,
+  letterSpacing: tokens.letterSpacing.normal,
+  color: tokens.color.foreground,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -186,11 +196,11 @@ export const link3 = style({
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'var(--surface-block)',
+        backgroundColor: tokens.color.block,
       },
     },
   },
   '@media (width >= 64rem)': {
-    paddingInline: metrics.spacing['8'],
+    paddingInline: tokens.spacing['8'],
   },
 })

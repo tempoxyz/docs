@@ -1,82 +1,88 @@
-import { metrics } from '../../styles/metrics'
+import { inherited } from '../../styles/inherited'
 import { style } from '../../styles/recipes'
+import { vars as tokens } from '../../styles/theme'
 export const adminKeyDemoText = style({
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.medium,
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.medium,
 })
 export const adminKeyDemoText2 = style({
-  fontSize: '13px',
-  color: 'var(--color-gray10)',
+  fontSize: tokens.fontSize.compact,
+  color: tokens.color.gray10,
 })
 export const adminKeyDemoLayout = style({
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(calc(var(--spacing) * 5) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd:
-        'calc(calc(var(--spacing) * 5) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['5'],
     },
   },
 })
 export const adminKeyDemoLink = style({
-  borderRadius: metrics.radius.lg,
-  backgroundColor: 'var(--color-black)',
-  paddingInline: metrics.spacing['4'],
-  paddingBlock: metrics.spacing['3'],
-  fontSize: '14px',
-  color: 'var(--color-white)',
+  borderRadius: tokens.radius.lg,
+  backgroundColor: tokens.color.black,
+  paddingInline: tokens.spacing['4'],
+  paddingBlock: tokens.spacing['3'],
+  fontSize: tokens.fontSize.sm,
+  color: tokens.color.white,
   selectors: {
     '&:where( [data-vocs-theme="dark"], [data-vocs-theme="dark"] *, [style*="color-scheme: dark"], [style*="color-scheme: dark"] * )':
       {
-        backgroundColor: 'var(--color-white)',
-        color: 'var(--color-black)',
+        backgroundColor: tokens.color.white,
+        color: tokens.color.black,
       },
   },
 })
 export const adminKeyDemoLayout2 = style({
-  marginTop: metrics.spacing['2'],
-  fontSize: '13px',
-  color: 'var(--color-gray10)',
+  marginTop: tokens.spacing['2'],
+  fontSize: tokens.fontSize.compact,
+  color: tokens.color.gray10,
 })
 export const adminKeyDemoLayout3 = style({
   display: 'flex',
   flexWrap: 'wrap',
   alignItems: 'center',
-  columnGap: metrics.spacing['4'],
-  rowGap: 'var(--spacing)',
+  columnGap: tokens.spacing['4'],
+
+  rowGap: tokens.spacing['1'],
 })
 export const adminKeyDemoLayout4 = style({
-  marginTop: metrics.spacing['2'],
+  marginTop: tokens.spacing['2'],
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(var(--spacing) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd: 'calc(var(--spacing) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['1'],
     },
   },
-  fontSize: '13px',
+  fontSize: tokens.fontSize.compact,
 })
 export const adminKeyDemoLayout5 = style({
-  fontFamily: 'var(--font-jetbrains-mono)',
+  fontFamily: tokens.fontFamily.code,
   wordBreak: 'break-all',
 })
 export const adminKeyDemoLayout6 = style({
   display: 'flex',
   flexWrap: 'wrap',
   alignItems: 'center',
-  gap: metrics.spacing['3'],
+  gap: tokens.spacing['3'],
 })
 export const adminKeyDemoLayout7 = style({
-  marginTop: metrics.spacing['2'],
-  fontSize: '13px',
+  marginTop: tokens.spacing['2'],
+  fontSize: tokens.fontSize.compact,
 })
 export const adminKeyDemoDescription = style({
-  fontSize: '13px',
-  color: 'var(--text-color-destructive)',
+  fontSize: tokens.fontSize.compact,
+
+  color: inherited.color.textColorDestructive,
 })
 export const adminKeyDemoButton = style({
-  fontSize: '13px',
-  color: 'var(--color-gray10)',
+  fontSize: tokens.fontSize.compact,
+  color: tokens.color.gray10,
   textDecorationLine: 'underline',
   textUnderlineOffset: '4px',
   selectors: {

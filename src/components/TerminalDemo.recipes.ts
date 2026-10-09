@@ -1,13 +1,14 @@
-import { style as instanceStyle } from 'zyzz'
-import { metrics } from '../styles/metrics'
+import { inherited } from '../styles/inherited'
 import { style } from '../styles/recipes'
+import { style as instanceStyle } from '../styles/scoped'
+import { vars as tokens } from '../styles/theme'
 export const stepIconText = style({
   display: 'inline-block',
   width: '1ch',
   textAlign: 'center',
 })
 export const blankLineLayout = style({
-  height: metrics.spacing['6'],
+  height: tokens.spacing['6'],
 })
 export const truncatedHexText = style({
   '@media (width >= 48rem)': {
@@ -24,7 +25,7 @@ export const photoOutputLayout = style({
   position: 'relative',
   display: 'block',
   overflow: 'hidden',
-  borderRadius: '0.25rem',
+  borderRadius: tokens.radius.smRem,
 })
 export const photoOutputLayout2 = style({
   position: 'absolute',
@@ -54,35 +55,38 @@ export const terminalDemoLayout = style({
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
-  borderRadius: metrics.radius.xl,
+  borderRadius: tokens.radius.xl,
 })
 export const terminalDemoLayout2 = style({
   display: 'flex',
   alignItems: 'center',
-  gap: metrics.spacing['2'],
-  paddingInline: metrics.spacing['4'],
-  paddingBlock: metrics.spacing['3'],
+  gap: tokens.spacing['2'],
+  paddingInline: tokens.spacing['4'],
+  paddingBlock: tokens.spacing['3'],
 })
 export const terminalDemoText = style({
-  borderRadius: 'calc(infinity * 1px)',
+  borderRadius: tokens.radius.full,
 })
 export const terminalDemoLayout3 = style({
   minHeight: '0',
   flex: '1 1 0%',
   overflowX: 'hidden',
   overflowY: 'auto',
-  paddingInline: metrics.spacing['5'],
-  paddingBottom: metrics.spacing['5'],
-  fontSize: '13.5px',
-  lineHeight: '1.35rem',
+  paddingInline: tokens.spacing['5'],
+  paddingBottom: tokens.spacing['5'],
+
+  fontSize: tokens.fontSize.compact,
+
+  lineHeight: tokens.lineHeight.dense,
   overflowWrap: 'break-word',
   '@media (width >= 48rem)': {
-    fontSize: '0.9rem',
-    lineHeight: '1.5rem',
+    fontSize: tokens.fontSize.sm,
+
+    lineHeight: tokens.lineHeight.body,
   },
 })
 export const terminalDemoLayout4 = style({
-  height: metrics.spacing['2'],
+  height: tokens.spacing['2'],
 })
 export const terminalDemoButton = style({
   width: 'fit-content',
@@ -94,77 +98,81 @@ export const terminalDemoButton2 = style({
   textAlign: 'left',
 })
 export const spinnerTextAppearance = instanceStyle({
-  color: 'var(--term-blue9)',
+  color: inherited.color.termBlue9,
 })
 export const stepIconTextAppearance = instanceStyle({
-  color: 'var(--term-green9)',
+  color: inherited.color.termGreen9,
 })
 export const photoOutputLayoutAppearance = instanceStyle({
   width: '200px',
   height: '200px',
-  borderColor: 'var(--term-gray4)',
-  borderWidth: '1px',
+
+  borderColor: inherited.color.termGray4,
+  borderWidth: tokens.borderWidth.hairline,
   borderStyle: 'solid',
 })
 export const photoOutputLayoutAppearance2 = instanceStyle({
-  backgroundColor: 'var(--term-gray3)',
+  backgroundColor: inherited.color.termGray3,
 })
 export const chargeStepsDescriptionAppearance = instanceStyle({
-  color: 'var(--term-gray6)',
+  color: inherited.color.termGray6,
 })
 export const chargeStepsTextAppearance = instanceStyle({
-  color: 'var(--term-gray5)',
+  color: inherited.color.termGray5,
 })
 export const chargeStepsLinkAppearance = instanceStyle({
-  color: 'var(--term-blue9)',
+  color: inherited.color.termBlue9,
 })
 export const chargeStepsDescriptionAppearance2 = instanceStyle({
-  color: 'var(--term-gray6)',
+  color: inherited.color.termGray6,
 })
 export const chargeStepsTextAppearance2 = instanceStyle({
-  color: 'var(--term-gray5)',
+  color: inherited.color.termGray5,
 })
 export const chargeStepsTextAppearance3 = instanceStyle({
-  color: 'var(--term-amber9)',
+  color: inherited.color.termAmber9,
 })
 export const chargeStepsDescriptionAppearance3 = instanceStyle({
-  color: 'var(--term-gray6)',
+  color: inherited.color.termGray6,
 })
 export const chargeStepsTextAppearance4 = instanceStyle({
-  color: 'var(--term-orange9)',
+  color: inherited.color.termOrange9,
 })
 export const chargeStepsTextAppearance5 = instanceStyle({
-  color: 'var(--term-gray6)',
+  color: inherited.color.termGray6,
 })
 export const chargeStepsDescriptionAppearance4 = instanceStyle({
-  color: 'var(--term-gray6)',
+  color: inherited.color.termGray6,
 })
 export const chargeStepsTextAppearance6 = instanceStyle({
-  color: 'var(--term-gray5)',
+  color: inherited.color.termGray5,
 })
 export const chargeStepsLinkAppearance2 = instanceStyle({
-  color: 'var(--term-blue9)',
+  color: inherited.color.termBlue9,
 })
 export const chargeStepsDescriptionAppearance5 = instanceStyle({
-  color: 'var(--term-gray6)',
+  color: inherited.color.termGray6,
 })
 export const chargeStepsTextAppearance7 = instanceStyle({
-  color: 'var(--term-orange9)',
+  color: inherited.color.termOrange9,
 })
 export const chargeStepsTextAppearance8 = instanceStyle({
-  color: 'var(--term-gray6)',
+  color: inherited.color.termGray6,
 })
 export const cssTriangleTextAppearance = instanceStyle({
   display: 'inline-block',
   width: 0,
   height: 0,
-  borderTop: '0.3em solid transparent',
-  borderBottom: '0.3em solid transparent',
-  borderLeft: '0.45em solid currentColor',
+  // design-exception: Preserve this surface's layered artwork or focus treatment.
+  borderTop: '0.3em solid transparent !custom',
+  // design-exception: Preserve this surface's layered artwork or focus treatment.
+  borderBottom: '0.3em solid transparent !custom',
+  // design-exception: Preserve this surface's layered artwork or focus treatment.
+  borderInlineStart: '0.45em solid currentColor !custom',
   verticalAlign: 'middle',
 })
 export const terminalDemoLayoutAppearance = instanceStyle({
-  fontFamily: 'var(--font-mono, "Geist Mono", monospace)',
+  fontFamily: inherited.fontFamily.fontMonoGeistMonoMonospace,
   height: '100%',
   minHeight: 0,
   userSelect: 'text',
@@ -173,55 +181,63 @@ export const terminalDemoLayoutAppearance = instanceStyle({
 export const terminalDemoLayoutAppearance2 = instanceStyle({
   height: '100%',
   minHeight: 0,
-  borderColor: 'var(--vocs-border-color-primary, var(--term-gray4))',
-  borderWidth: '1px',
+
+  borderColor: inherited.color.vocsBorderColorPrimaryVarTermGray4,
+  borderWidth: tokens.borderWidth.hairline,
   borderStyle: 'solid',
-  backgroundColor: 'var(--term-bg2)',
+
+  backgroundColor: inherited.color.termBg2,
 })
 export const terminalDemoLayoutAppearance3 = instanceStyle({
-  backgroundColor: 'var(--term-bg2)',
-  borderBottom: '1px solid var(--term-gray4)',
+  backgroundColor: inherited.color.termBg2,
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderBottomStyle: 'solid',
+  borderBottomColor: inherited.color.termGray4,
 })
 export const terminalDemoTextAppearance = instanceStyle({
   width: '14px',
   height: '14px',
-  backgroundColor: 'var(--term-gray4)',
+
+  backgroundColor: inherited.color.termGray4,
 })
 export const terminalDemoTextAppearance2 = instanceStyle({
   width: '14px',
   height: '14px',
-  backgroundColor: 'var(--term-gray4)',
+
+  backgroundColor: inherited.color.termGray4,
 })
 export const terminalDemoTextAppearance3 = instanceStyle({
   width: '14px',
   height: '14px',
-  backgroundColor: 'var(--term-gray4)',
+
+  backgroundColor: inherited.color.termGray4,
 })
 export const terminalDemoTextAppearance4 = instanceStyle({
   flex: 1,
 })
 export const terminalDemoButtonAppearance = instanceStyle({
-  background: 'transparent',
+  backgroundColor: 'transparent !custom',
   border: 'none',
-  color: 'var(--term-gray5)',
-  padding: '2px',
-  borderRadius: '4px',
+
+  color: inherited.color.termGray5,
+  padding: tokens.spacing['0_5'],
+  borderRadius: tokens.radius.sm,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   transition: 'color 0.15s',
 })
 export const terminalDemoLayoutAppearance4 = instanceStyle({
-  backgroundColor: 'var(--term-bg2)',
+  backgroundColor: inherited.color.termBg2,
 })
 export const terminalDemoButtonAppearance2 = instanceStyle({
-  color: 'var(--term-pink9)',
+  color: inherited.color.termPink9,
 })
 export const terminalDemoDescriptionAppearance = instanceStyle({
-  color: 'var(--term-gray5)',
+  color: inherited.color.termGray5,
 })
 export const terminalDemoButtonAppearance3 = instanceStyle({
-  color: 'var(--term-gray6)',
+  color: inherited.color.termGray6,
 })
 export const photoOutputImgAppearance = instanceStyle((values: { value0: number }) => ({
   transition: 'opacity 0.5s',

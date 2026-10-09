@@ -1,10 +1,11 @@
-import { metrics } from '../../../styles/metrics'
 import { style } from '../../../styles/recipes'
+import { vars as tokens } from '../../../styles/theme'
 export const homeShowcasesLayout = style({
-  marginTop: '140px',
-  scrollMarginTop: metrics.spacing['12'],
+  marginTop: tokens.spacing['36'],
+  scrollMarginTop: tokens.spacing['12'],
 })
 export const homeShowcasesLayout2 = style({
-  marginTop: '-1px',
-  scrollMarginTop: metrics.spacing['12'],
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  marginTop: '-1px !custom',
+  scrollMarginTop: tokens.spacing['12'],
 })

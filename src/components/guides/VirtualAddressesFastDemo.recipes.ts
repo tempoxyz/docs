@@ -1,158 +1,170 @@
-import { metrics } from '../../styles/metrics'
+import { inherited } from '../../styles/inherited'
 import { style } from '../../styles/recipes'
+import { vars as tokens } from '../../styles/theme'
 export const virtualAddressesFastDemoLayout = style({
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(calc(var(--spacing) * 4) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd:
-        'calc(calc(var(--spacing) * 4) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['4'],
     },
   },
 })
 export const virtualAddressesFastDemoButton = style({
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.compact,
 })
 export const virtualAddressesFastDemoLayout2 = style({
-  marginInline: metrics.spacing['6'],
+  marginInline: tokens.spacing['6'],
   borderInlineStartStyle: 'solid',
-  borderInlineStartWidth: '2px',
-  borderColor: 'var(--color-gray4)',
-  paddingInlineStart: metrics.spacing['5'],
-  paddingBottom: metrics.spacing['4'],
+  borderInlineStartWidth: tokens.borderWidth.emphasis,
+  borderColor: tokens.color.gray4,
+  paddingInlineStart: tokens.spacing['5'],
+  paddingBottom: tokens.spacing['4'],
 })
 export const virtualAddressesFastDemoLayout3 = style({
-  marginTop: metrics.spacing['2'],
-  fontSize: '13px',
-  letterSpacing: '-0.01em',
-  color: 'var(--color-gray9)',
+  marginTop: tokens.spacing['2'],
+  fontSize: tokens.fontSize.compact,
+  letterSpacing: tokens.letterSpacing.tight,
+  color: tokens.color.gray9,
 })
 export const virtualAddressesFastDemoLayout4 = style({
-  marginTop: metrics.spacing['2'],
+  marginTop: tokens.spacing['2'],
   display: 'grid',
-  gap: metrics.spacing['2'],
-  fontSize: '13px',
-  letterSpacing: '-0.01em',
-  color: 'var(--color-gray9)',
+  gap: tokens.spacing['2'],
+  fontSize: tokens.fontSize.compact,
+  letterSpacing: tokens.letterSpacing.tight,
+  color: tokens.color.gray9,
 })
 export const virtualAddressesFastDemoLayout5 = style({
   display: 'grid',
   gridTemplateColumns: 'max-content minmax(0,1fr)',
   alignItems: 'flex-start',
-  columnGap: metrics.spacing['4'],
+  columnGap: tokens.spacing['4'],
 })
 export const virtualAddressesFastDemoText = style({
-  color: 'var(--text-color-primary)',
+  color: inherited.color.textColorPrimary,
 })
 export const code = style({
   minWidth: '0',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '12px',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.xs,
   wordBreak: 'break-all',
-  color: 'var(--text-color-primary)',
+
+  color: inherited.color.textColorPrimary,
 })
 export const code2 = style({
-  fontFamily: 'var(--font-jetbrains-mono)',
-  color: 'var(--text-color-primary)',
+  fontFamily: tokens.fontFamily.code,
+
+  color: inherited.color.textColorPrimary,
 })
 export const virtualAddressesFastDemoLayout6 = style({
-  marginTop: metrics.spacing['2'],
+  marginTop: tokens.spacing['2'],
   display: 'flex',
   flexDirection: 'column',
-  gap: metrics.spacing['2'],
+  gap: tokens.spacing['2'],
 })
 export const virtualAddressesFastDemoLayout7 = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: 'var(--spacing)',
+
+  gap: tokens.spacing['1'],
 })
 export const label = style({
-  fontSize: '11px',
-  letterSpacing: '-0.01em',
-  color: 'var(--color-gray9)',
+  fontSize: tokens.fontSize.caption,
+  letterSpacing: tokens.letterSpacing.tight,
+  color: tokens.color.gray9,
 })
 export const virtualAddressesFastDemoInput = style({
   height: '34px',
-  borderRadius: 'calc(infinity * 1px)',
+  borderRadius: tokens.radius.full,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray4)',
-  paddingInline: 'calc(var(--spacing) * 3.25)',
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-  color: 'var(--color-black)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
+  paddingInline: tokens.spacing.controlInset,
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.compact,
+  color: tokens.color.black,
   selectors: {
     '&::placeholder': {
-      color: 'var(--color-gray9)',
+      color: tokens.color.gray9,
     },
     '&:where( [data-vocs-theme="dark"], [data-vocs-theme="dark"] *, [style*="color-scheme: dark"], [style*="color-scheme: dark"] * )':
       {
-        color: 'var(--color-white)',
+        color: tokens.color.white,
       },
   },
 })
 export const virtualAddressesFastDemoLayout8 = style({
   display: 'flex',
   alignItems: 'baseline',
-  gap: metrics.spacing['2'],
-  fontSize: '11px',
-  letterSpacing: '-0.01em',
-  color: 'var(--color-gray9)',
+  gap: tokens.spacing['2'],
+  fontSize: tokens.fontSize.caption,
+  letterSpacing: tokens.letterSpacing.tight,
+  color: tokens.color.gray9,
 })
 export const virtualAddressesFastDemoLayout9 = style({
   display: 'flex',
   flexWrap: 'wrap',
   alignItems: 'baseline',
-  columnGap: metrics.spacing['3'],
-  rowGap: 'var(--spacing)',
+  columnGap: tokens.spacing['3'],
+
+  rowGap: tokens.spacing['1'],
 })
 export const virtualAddressesFastDemoLayout10 = style({
-  fontSize: '12px',
-  letterSpacing: '-0.01em',
-  color: 'var(--text-color-destructive)',
+  fontSize: tokens.fontSize.xs,
+  letterSpacing: tokens.letterSpacing.tight,
+
+  color: inherited.color.textColorDestructive,
 })
 export const virtualAddressesFastDemoText2 = style({
-  fontFamily: 'var(--font-jetbrains-mono)',
+  fontFamily: tokens.fontFamily.code,
 })
 export const virtualAddressesFastDemoLayout11 = style({
-  marginTop: metrics.spacing['2'],
+  marginTop: tokens.spacing['2'],
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(calc(var(--spacing) * 3) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd:
-        'calc(calc(var(--spacing) * 3) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['3'],
     },
   },
-  fontSize: '13px',
-  letterSpacing: '-0.01em',
-  color: 'var(--color-gray9)',
+  fontSize: tokens.fontSize.compact,
+  letterSpacing: tokens.letterSpacing.tight,
+  color: tokens.color.gray9,
 })
 export const virtualAddressesFastDemoLayout12 = style({
   display: 'grid',
-  gap: metrics.spacing['2'],
+  gap: tokens.spacing['2'],
 })
 export const code3 = style({
   minWidth: '0',
-  fontFamily: 'var(--font-jetbrains-mono)',
+  fontFamily: tokens.fontFamily.code,
   wordBreak: 'break-all',
-  color: 'var(--text-color-primary)',
+
+  color: inherited.color.textColorPrimary,
 })
 export const virtualAddressesFastDemoLayout13 = style({
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(var(--spacing) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd: 'calc(var(--spacing) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['1'],
     },
   },
 })
 export const code4 = style({
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '12px',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.xs,
   wordBreak: 'break-all',
-  color: 'var(--text-color-primary)',
+
+  color: inherited.color.textColorPrimary,
 })

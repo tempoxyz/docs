@@ -1,6 +1,7 @@
 import { style } from '../../../../styles/recipes'
+import { vars as tokens } from '../../../../styles/theme'
 export const lucidePictureInPicture2 = style({
-  marginTop: '1px',
+  marginTop: tokens.spacing['0'],
 })
 
 export const tempoMarkBoxed = style({

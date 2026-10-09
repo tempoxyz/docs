@@ -1,13 +1,18 @@
-import { style as instanceStyle } from 'zyzz'
+import { style as instanceStyle } from '../styles/scoped'
+import { vars as tokens } from '../styles/theme'
 export const staticMermaidDiagramLayoutAppearance = instanceStyle({
-  margin: '1.5rem 0',
-  padding: '1rem 0.5rem',
-  borderRadius: '12px',
+  marginBlock: tokens.spacing['6'],
+  marginInline: tokens.spacing['0'],
+
+  paddingBlock: tokens.spacing['4'],
+  paddingInline: tokens.spacing['2'],
+  borderRadius: tokens.radius.xl,
   overflow: 'hidden',
   overflowX: 'auto',
   position: 'relative',
 })
 export const staticMermaidDiagramLayoutAppearance2 = instanceStyle({
   maxWidth: '540px',
-  margin: '0 auto',
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  margin: '0 auto !custom',
 })

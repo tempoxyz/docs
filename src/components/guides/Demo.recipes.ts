@@ -1,18 +1,21 @@
-import { metrics } from '../../styles/metrics'
+import { inherited } from '../../styles/inherited'
 import { style } from '../../styles/recipes'
+import { vars as tokens } from '../../styles/theme'
 export const explorerLinkLayout = style({
   display: 'inline-flex',
 })
 export const explorerLinkLayout2 = style({
-  marginTop: 'var(--spacing)',
+  marginTop: tokens.spacing['1'],
 })
 export const explorerLinkLink = style({
   display: 'flex',
   alignItems: 'center',
-  gap: 'var(--spacing)',
-  fontSize: '13px',
-  letterSpacing: '-0.01em',
-  color: 'var(--text-color-accent)',
+
+  gap: tokens.spacing['1'],
+  fontSize: tokens.fontSize.compact,
+  letterSpacing: tokens.letterSpacing.tight,
+
+  color: inherited.color.textColorAccent,
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
@@ -22,30 +25,30 @@ export const explorerLinkLink = style({
   },
 })
 export const lucideExternalLink = style({
-  width: metrics.spacing['3'],
-  height: metrics.spacing['3'],
+  width: tokens.spacing['3'],
+  height: tokens.spacing['3'],
 })
 export const receiptHashLayout = style({
-  marginTop: 'var(--spacing)',
+  marginTop: tokens.spacing['1'],
   display: 'flex',
   alignItems: 'center',
-  gap: metrics.spacing['2'],
-  fontSize: '13px',
-  letterSpacing: '-0.01em',
+  gap: tokens.spacing['2'],
+  fontSize: tokens.fontSize.compact,
+  letterSpacing: tokens.letterSpacing.tight,
 })
 export const receiptHashText = style({
-  color: 'var(--color-gray9)',
+  color: tokens.color.gray9,
 })
 export const code = style({
   minWidth: '0',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '12px',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.xs,
   wordBreak: 'break-all',
-  color: 'var(--color-gray12)',
+  color: tokens.color.gray12,
 })
 export const receiptHashButton = style({
   flexShrink: 0,
-  color: 'var(--color-gray9)',
+  color: tokens.color.gray9,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -53,7 +56,7 @@ export const receiptHashButton = style({
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        color: 'var(--color-gray12)',
+        color: tokens.color.gray12,
       },
     },
   },
@@ -61,78 +64,83 @@ export const receiptHashButton = style({
 export const containerLayout = style({
   display: 'flex',
   alignItems: 'center',
-  gap: metrics.spacing['1_5'],
+  gap: tokens.spacing['1_5'],
 })
 export const containerHeading = style({
-  fontSize: '14px',
-  lineHeight: 1,
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.01em',
-  color: 'var(--color-gray12)',
+  fontSize: tokens.fontSize.sm,
+  lineHeight: tokens.lineHeight.none,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.tight,
+  color: tokens.color.gray12,
 })
 export const containerButton = style({
   display: 'flex',
   alignItems: 'center',
-  gap: 'var(--spacing)',
-  fontSize: '12.5px',
-  lineHeight: 1,
-  letterSpacing: '-0.01em',
-  color: 'var(--color-gray9)',
+
+  gap: tokens.spacing['1'],
+
+  fontSize: tokens.fontSize.xs,
+  lineHeight: tokens.lineHeight.none,
+  letterSpacing: tokens.letterSpacing.tight,
+  color: tokens.color.gray9,
 })
 export const lucideRotateCcw = style({
-  marginTop: '1px',
-  width: metrics.spacing['3'],
-  height: metrics.spacing['3'],
-  color: 'var(--color-gray9)',
+  marginTop: tokens.spacing['0'],
+  width: tokens.spacing['3'],
+  height: tokens.spacing['3'],
+  color: tokens.color.gray9,
 })
 export const containerLayout2 = style({
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(calc(var(--spacing) * 4) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd:
-        'calc(calc(var(--spacing) * 4) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['4'],
     },
   },
 })
 export const balancesFooterItemText = style({
   display: 'flex',
-  gap: 'var(--spacing)',
+
+  gap: tokens.spacing['1'],
 })
 export const balancesFooterItemText2 = style({
-  color: 'var(--color-gray10)',
+  color: tokens.color.gray10,
 })
 export const balancesFooterLayout = style({
   display: 'flex',
   height: '100%',
   flexDirection: 'column',
-  gap: metrics.spacing['2'],
-  paddingBlock: metrics.spacing['2'],
-  lineHeight: 1,
+  gap: tokens.spacing['2'],
+  paddingBlock: tokens.spacing['2'],
+  lineHeight: tokens.lineHeight.none,
 })
 export const balancesFooterLayout2 = style({
   display: 'grid',
   gridTemplateColumns: '7rem 1px minmax(0,1fr)',
   alignItems: 'center',
-  columnGap: metrics.spacing['2'],
-  rowGap: 'var(--spacing)',
+  columnGap: tokens.spacing['2'],
+
+  rowGap: tokens.spacing['1'],
 })
 export const balancesFooterLayout3 = style({
-  minHeight: metrics.spacing['5'],
+  minHeight: tokens.spacing['5'],
   width: '1px',
   alignSelf: 'stretch',
-  backgroundColor: 'var(--color-gray4)',
+  backgroundColor: tokens.color.gray4,
 })
 export const balancesFooterLayout4 = style({
   display: 'flex',
   minWidth: '0',
   flexDirection: 'column',
-  gap: metrics.spacing['2'],
+  gap: tokens.spacing['2'],
   '@media (width >= 40rem)': {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    columnGap: metrics.spacing['3'],
-    rowGap: metrics.spacing['2'],
+    columnGap: tokens.spacing['3'],
+    rowGap: tokens.spacing['2'],
   },
 })
 export const sourceFooterLayout = style({
@@ -144,29 +152,34 @@ export const sourceFooterLayout2 = style({
   display: 'flex',
   cursor: 'pointer',
   alignItems: 'center',
-  gap: '6px',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '12px',
-  letterSpacing: 'var(--tracking-tight)',
-  color: 'var(--text-color-primary)',
+  gap: tokens.spacing['1_5'],
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.xs,
+
+  letterSpacing: inherited.letterSpacing.trackingTight,
+
+  color: inherited.color.textColorPrimary,
   '@media (width < 40rem)': {
     display: 'none',
   },
 })
 export const lucideCheck = style({
-  width: metrics.spacing['3'],
-  height: metrics.spacing['3'],
-  color: 'var(--color-gray10)',
+  width: tokens.spacing['3'],
+  height: tokens.spacing['3'],
+  color: tokens.color.gray10,
 })
 export const sourceFooterLayout3 = style({
-  fontSize: '12px',
-  letterSpacing: 'var(--tracking-tight)',
-  color: 'var(--text-color-accent)',
+  fontSize: tokens.fontSize.xs,
+
+  letterSpacing: inherited.letterSpacing.trackingTight,
+
+  color: inherited.color.textColorAccent,
 })
 export const sourceFooterLink = style({
   display: 'flex',
   alignItems: 'center',
-  gap: 'var(--spacing)',
+
+  gap: tokens.spacing['1'],
 })
 export const lucideExternalLink2 = style({
   width: '12px',
@@ -176,7 +189,7 @@ export const stepHeader = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: metrics.spacing['4'],
+  gap: tokens.spacing['4'],
   '@media (width < 40rem)': {
     flexDirection: 'column',
     alignItems: 'flex-start',
@@ -186,19 +199,19 @@ export const stepHeader = style({
 export const stepLayout = style({
   display: 'flex',
   alignItems: 'center',
-  gap: metrics.spacing['3_5'],
+  gap: tokens.spacing['3_5'],
 })
 export const stepLayout2 = style({
   display: 'flex',
-  width: metrics.spacing['7'],
-  height: metrics.spacing['7'],
+  width: tokens.spacing['7'],
+  height: tokens.spacing['7'],
   flexShrink: 0,
   alignItems: 'center',
   justifyContent: 'center',
-  borderRadius: 'calc(infinity * 1px)',
+  borderRadius: tokens.radius.full,
   textAlign: 'center',
-  fontSize: '13px',
-  color: 'var(--color-black)',
+  fontSize: tokens.fontSize.compact,
+  color: tokens.color.black,
   '--tempo-style-numeric-spacing': 'tabular-nums',
   fontVariantNumeric:
     'var(--tempo-style-ordinal,) var(--tempo-style-slashed-zero,) var(--tempo-style-numeric-figure,) var(--tempo-style-numeric-spacing,) var(--tempo-style-numeric-fraction,)',
@@ -209,30 +222,30 @@ export const stepLayout2 = style({
     },
     '&:where( [data-vocs-theme="dark"], [data-vocs-theme="dark"] *, [style*="color-scheme: dark"], [style*="color-scheme: dark"] * )':
       {
-        color: 'var(--color-white)',
+        color: tokens.color.white,
       },
   },
 })
 export const stepLayout3 = style({
-  backgroundColor: 'var(--color-green3)',
+  backgroundColor: tokens.color.green3,
 })
 export const stepLayout4 = style({
-  backgroundColor: 'var(--color-gray4)',
+  backgroundColor: tokens.color.gray4,
 })
 export const lucideCheck2 = style({
-  color: 'var(--color-green9)',
+  color: tokens.color.green9,
 })
 export const stepLayout5 = style({
-  fontSize: '14px',
-  letterSpacing: '-0.01em',
-  color: 'var(--color-black)',
+  fontSize: tokens.fontSize.sm,
+  letterSpacing: tokens.letterSpacing.tight,
+  color: tokens.color.black,
   selectors: {
     '&:is(:where(.group)[data-active="false"] *)': {
       opacity: '40%',
     },
     '&:where( [data-vocs-theme="dark"], [data-vocs-theme="dark"] *, [style*="color-scheme: dark"], [style*="color-scheme: dark"] * )':
       {
-        color: 'var(--color-white)',
+        color: tokens.color.white,
       },
   },
 })
@@ -248,50 +261,57 @@ export const stepLayout6 = style({
   },
 })
 export const stepLayout7 = style({
-  height: metrics.spacing['2'],
+  height: tokens.spacing['2'],
 })
 export const stepLayout8 = style({
-  borderRadius: '0.25rem',
-  backgroundColor: 'var(--background-color-destructiveTint)',
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['2'],
-  fontSize: '14px',
-  lineHeight: 'var(--leading-normal)',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-  color: 'var(--text-color-destructive)',
+  borderRadius: tokens.radius.smRem,
+
+  backgroundColor: inherited.color.backgroundColorDestructiveTint,
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['2'],
+  fontSize: tokens.fontSize.sm,
+
+  lineHeight: inherited.lineHeight.leadingNormal,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.compact,
+
+  color: inherited.color.textColorDestructive,
 })
 export const loginLayout = style({
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(calc(var(--spacing) * 2) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd:
-        'calc(calc(var(--spacing) * 2) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['2'],
     },
   },
 })
 export const lucidePictureInPicture2 = style({
-  marginTop: '1px',
+  marginTop: tokens.spacing['0'],
 })
 export const loginButton = style({
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.compact,
 })
 export const loginLayout2 = style({
   maxWidth: '22rem',
-  borderRadius: '0.25rem',
-  backgroundColor: 'var(--background-color-destructiveTint)',
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['2'],
-  fontSize: '13px',
-  lineHeight: 'var(--leading-normal)',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-  color: 'var(--text-color-destructive)',
+  borderRadius: tokens.radius.smRem,
+
+  backgroundColor: inherited.color.backgroundColorDestructiveTint,
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['2'],
+  fontSize: tokens.fontSize.compact,
+
+  lineHeight: inherited.lineHeight.leadingNormal,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.compact,
+
+  color: inherited.color.textColorDestructive,
 })
 export const lucideCheck3 = style({
-  marginTop: '1px',
-  color: 'var(--color-gray9)',
+  marginTop: tokens.spacing['0'],
+  color: tokens.color.gray9,
 })

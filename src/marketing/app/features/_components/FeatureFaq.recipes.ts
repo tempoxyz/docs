@@ -1,62 +1,66 @@
-import { metrics } from '../../../../styles/metrics'
+import { inherited } from '../../../../styles/inherited'
 import { style } from '../../../../styles/recipes'
+import { vars as tokens } from '../../../../styles/theme'
 export const featureFaqSection = style({
-  marginTop: '140px',
-  scrollMarginTop: metrics.spacing['12'],
+  marginTop: tokens.spacing['36'],
+  scrollMarginTop: tokens.spacing['12'],
 })
 export const reveal = style({
   position: 'relative',
   borderTopStyle: 'solid',
-  borderTopWidth: '1px',
-  borderColor: 'var(--line)',
+  borderTopWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
 })
 export const featureFaqLayout = style({
   display: 'grid',
   borderBottomStyle: 'solid',
-  borderBottomWidth: '1px',
-  borderColor: 'var(--line)',
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
   '@media (width >= 64rem)': {
     gridTemplateColumns: '0.78fr 1.22fr',
   },
 })
 export const featureFaqLayout2 = style({
   borderBottomStyle: 'solid',
-  borderBottomWidth: '1px',
-  borderColor: 'var(--line)',
-  backgroundColor: 'var(--surface-shell)',
-  paddingInline: metrics.spacing['5'],
-  paddingBlock: metrics.spacing['14'],
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  backgroundColor: tokens.color.shell,
+  paddingInline: tokens.spacing['5'],
+  paddingBlock: tokens.spacing['14'],
   '@media (width >= 64rem)': {
-    borderRightStyle: 'solid',
-    borderRightWidth: '1px',
+    borderInlineEndStyle: 'solid',
+    borderInlineEndWidth: tokens.borderWidth.hairline,
     borderBottomStyle: 'solid',
-    borderBottomWidth: '0px',
-    paddingInline: metrics.spacing['12'],
-    paddingBlock: metrics.spacing['20'],
+    borderBottomWidth: tokens.borderWidth.none,
+    paddingInline: tokens.spacing['12'],
+    paddingBlock: tokens.spacing['20'],
   },
 })
 export const featureFaqHeading = style({
   maxWidth: '520px',
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: 'clamp(2rem, 6vw, 3rem)',
-  lineHeight: 1.08,
-  letterSpacing: '-0.03em',
+  fontFamily: tokens.fontFamily.book,
+  // design-exception: Preserve this responsive geometry across viewport sizes.
+  fontSize: 'clamp(2rem, 6vw, 3rem) !custom',
+
+  lineHeight: tokens.lineHeight.display,
+  letterSpacing: tokens.letterSpacing.heading,
   textWrap: 'balance',
-  color: 'var(--foreground)',
+  color: tokens.color.foreground,
   WebkitFontSmoothing: 'antialiased',
   MozOsxFontSmoothing: 'grayscale',
 })
 export const featureFaqDescription = style({
-  marginTop: metrics.spacing['5'],
+  marginTop: tokens.spacing['5'],
   maxWidth: '500px',
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '16px',
-  lineHeight: 1.5,
-  letterSpacing: '0',
-  color: 'color-mix(in oklab, var(--foreground) 50%, transparent)',
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.body,
+  lineHeight: tokens.lineHeight.normal,
+  letterSpacing: tokens.letterSpacing.normal,
+
+  color: inherited.color.colorMixInOklabForeground50Transparent,
 })
 export const featureFaqLayout3 = style({
-  backgroundColor: 'var(--surface-shell)',
+  backgroundColor: tokens.color.shell,
 })
 export const featureFaqLayout4 = style({
   display: 'flex',
@@ -64,28 +68,28 @@ export const featureFaqLayout4 = style({
   justifyContent: 'center',
   overflow: 'hidden',
   borderBottomStyle: 'solid',
-  borderBottomWidth: '1px',
-  borderColor: 'var(--line)',
-  paddingInline: metrics.spacing['5'],
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  paddingInline: tokens.spacing['5'],
   transitionProperty: 'height,background-color',
   transitionTimingFunction: 'var(--ease-out)',
   transitionDuration: '300ms',
   selectors: {
     '&:last-child': {
       borderBottomStyle: 'solid',
-      borderBottomWidth: '0px',
+      borderBottomWidth: tokens.borderWidth.none,
     },
   },
   '@media (prefers-reduced-motion: reduce)': {
     transitionProperty: 'none',
   },
   '@media (width >= 64rem)': {
-    paddingInline: metrics.spacing['10'],
+    paddingInline: tokens.spacing['10'],
   },
 })
 export const featureFaqLayout5 = style({
   height: '236px',
-  backgroundColor: 'var(--surface-block)',
+  backgroundColor: tokens.color.block,
   '@media (width >= 48rem)': {
     height: '220px',
   },
@@ -98,44 +102,44 @@ export const featureFaqButton = style({
   width: '100%',
   alignItems: 'flex-start',
   justifyContent: 'space-between',
-  gap: metrics.spacing['6'],
+  gap: tokens.spacing['6'],
   textAlign: 'left',
 })
 export const featureFaqText = style({
   maxWidth: '720px',
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '20px',
-  lineHeight: 1.2,
-  letterSpacing: '0',
-  color: 'var(--foreground)',
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.subheading,
+  lineHeight: tokens.lineHeight.heading,
+  letterSpacing: tokens.letterSpacing.normal,
+  color: tokens.color.foreground,
   '@media (width >= 64rem)': {
-    fontSize: '24px',
+    fontSize: tokens.fontSize.title,
   },
 })
 export const featureFaqText2 = style({
-  marginTop: 'var(--spacing)',
+  marginTop: tokens.spacing['1'],
   display: 'grid',
-  width: metrics.spacing['6'],
-  height: metrics.spacing['6'],
+  width: tokens.spacing['6'],
+  height: tokens.spacing['6'],
   flexShrink: 0,
   placeItems: 'center',
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--line)',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '16px',
-  lineHeight: 1,
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.body,
+  lineHeight: tokens.lineHeight.none,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
   transitionDuration: '150ms',
 })
 export const featureFaqText3 = style({
-  backgroundColor: 'var(--foreground)',
-  color: 'var(--background)',
+  backgroundColor: tokens.color.foreground,
+  color: tokens.color.background,
 })
 export const featureFaqText4 = style({
-  color: 'color-mix(in oklab, var(--foreground) 45%, transparent)',
+  color: inherited.color.colorMixInOklabForeground45Transparent,
 })
 export const featureFaqLayout7 = style({
   display: 'grid',
@@ -148,12 +152,12 @@ export const featureFaqLayout7 = style({
   },
 })
 export const featureFaqLayout8 = style({
-  marginTop: metrics.spacing['5'],
+  marginTop: tokens.spacing['5'],
   gridTemplateRows: '1fr',
   opacity: '100%',
 })
 export const featureFaqLayout9 = style({
-  marginTop: '0',
+  marginTop: tokens.spacing['0'],
   gridTemplateRows: '0fr',
   opacity: '0%',
 })
@@ -161,16 +165,19 @@ export const featureFaqLayout10 = style({
   overflow: 'hidden',
 })
 export const featureFaqDescription2 = style({
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '16px',
-  lineHeight: 1.55,
-  letterSpacing: '0',
-  color: 'color-mix(in oklab, var(--foreground) 50%, transparent)',
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.body,
+
+  lineHeight: tokens.lineHeight.normal,
+  letterSpacing: tokens.letterSpacing.normal,
+
+  color: inherited.color.colorMixInOklabForeground50Transparent,
 })
 export const featureFaqLink = style({
-  color: 'color-mix(in oklab, var(--foreground) 75%, transparent)',
+  color: inherited.color.colorMixInOklabForeground75Transparent,
   textDecorationLine: 'underline',
-  textDecorationColor: 'color-mix(in oklab, var(--foreground) 25%, transparent)',
+
+  textDecorationColor: inherited.color.colorMixInOklabForeground25Transparent,
   textUnderlineOffset: '4px',
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
@@ -179,8 +186,8 @@ export const featureFaqLink = style({
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        color: 'var(--foreground)',
-        textDecorationColor: 'var(--foreground)',
+        color: tokens.color.foreground,
+        textDecorationColor: tokens.color.foreground,
       },
     },
   },

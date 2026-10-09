@@ -1,4 +1,6 @@
-'use client'
+import { vars as tokens } from '../styles/theme'
+
+;('use client')
 
 import { docsDemo } from '../styles/surfaces.styles'
 import { style } from '../styles/theme'
@@ -26,10 +28,18 @@ export function Container(
 }
 
 const container = style({
-  borderRadius: '8px',
-  border: '1px solid var(--line)',
-  backgroundColor: 'card',
-  selectors: { '& > :not(:last-child)': { borderBottom: '1px solid var(--line)' } },
+  borderRadius: tokens.radius.lg,
+  borderWidth: tokens.borderWidth.hairline,
+  borderStyle: 'solid',
+  borderColor: tokens.color.line,
+  backgroundColor: tokens.color.card,
+  selectors: {
+    '& > :not(:last-child)': {
+      borderBottomWidth: tokens.borderWidth.hairline,
+      borderBottomStyle: 'solid',
+      borderBottomColor: tokens.color.line,
+    },
+  },
 })
 const header = style({
   display: 'flex',
@@ -37,18 +47,22 @@ const header = style({
   flexWrap: 'wrap',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: '12px',
-  padding: '12px 20px',
+  gap: tokens.spacing['3'],
+
+  paddingBlock: tokens.spacing['3'],
+  paddingInline: tokens.spacing['5'],
 })
-const content = style({ padding: '20px' })
+const content = style({ padding: tokens.spacing['5'] })
 const footerStyle = style({
   display: 'flex',
   minHeight: '40px',
   minWidth: 0,
   flexWrap: 'wrap',
   alignItems: 'center',
-  gap: '8px',
-  padding: '8px 20px',
-  fontSize: '13px',
-  color: 'var(--color-gray10) !custom',
+  gap: tokens.spacing['2'],
+
+  paddingBlock: tokens.spacing['2'],
+  paddingInline: tokens.spacing['5'],
+  fontSize: tokens.fontSize.compact,
+  color: tokens.color.gray10,
 })

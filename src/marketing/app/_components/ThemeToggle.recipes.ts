@@ -1,81 +1,48 @@
-import { metrics } from '../../../styles/metrics'
-import { style, variants } from '../../../styles/recipes'
+import { style } from '../../../styles/recipes'
+import { vars as tokens } from '../../../styles/theme'
 export const themeToggleLayout = style({
   display: 'flex',
   width: 'fit-content',
   alignItems: 'center',
-  borderRadius: 'calc(infinity * 1px)',
+  borderRadius: tokens.radius.full,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--line-strong)',
-  backgroundColor: 'var(--surface-block)',
-  padding: metrics.spacing['0_5'],
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.lineStrong,
+  backgroundColor: tokens.color.block,
+  padding: tokens.spacing['0_5'],
 })
-export const optionButton = style({
+export const sunIconIcon = style({
+  width: tokens.spacing['4'],
+  height: tokens.spacing['4'],
+})
+
+export const themeOption = style({
+  position: 'relative',
   display: 'flex',
-  width: metrics.spacing['7'],
-  height: metrics.spacing['7'],
+  width: tokens.spacing['7'],
+  height: tokens.spacing['7'],
   cursor: 'pointer',
   alignItems: 'center',
   justifyContent: 'center',
-  borderRadius: 'calc(infinity * 1px)',
+  borderRadius: tokens.radius.full,
+  borderWidth: tokens.borderWidth.hairline,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  transitionProperty: 'all',
-  transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-  transitionDuration: '150ms',
-})
-export const optionButton2 = style({
-  borderColor: 'var(--line-strong)',
-  backgroundColor: 'var(--surface-shell)',
-  color: 'var(--foreground)',
-  '--tempo-style-shadow':
-    '0 1px 3px 0 var(--tempo-style-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tempo-style-shadow-color, rgb(0 0 0 / 0.1))',
-  boxShadow:
-    'var(--tempo-style-inset-shadow), var(--tempo-style-inset-ring-shadow), var(--tempo-style-ring-offset-shadow), var(--tempo-style-ring-shadow), var(--tempo-style-shadow)',
-})
-export const optionButton3 = style({
-  borderColor: 'transparent',
-  color: 'var(--foreground-secondary)',
-  selectors: {
-    '&:hover': {
-      '@media (hover: hover)': {
-        color: 'var(--foreground)',
-      },
-    },
+  borderColor: 'transparent !custom',
+  color: tokens.color.muted,
+  transition: 'color 150ms, background-color 150ms, border-color 150ms',
+  ':hover': { color: tokens.color.foreground },
+  ':has(input:checked)': {
+    borderColor: tokens.color.lineStrong,
+    backgroundColor: tokens.color.shell,
+    color: tokens.color.foreground,
   },
-})
-export const sunIconIcon = style({
-  width: metrics.spacing['4'],
-  height: metrics.spacing['4'],
-})
-
-export const themeOption = variants({
-  base: {
-    position: 'relative',
-    display: 'flex',
-    width: '28px',
-    height: '28px',
-    cursor: 'pointer',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '9999px',
-    border: '1px solid transparent',
-    transition: 'color 150ms, background-color 150ms, border-color 150ms',
-    ':has(input:focus-visible)': { outline: '2px solid var(--accent-blue)', outlineOffset: '3px' },
-    '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+  ':has(input:focus-visible)': {
+    outlineWidth: tokens.borderWidth.emphasis,
+    outlineStyle: 'solid',
+    outlineColor: tokens.color.accent,
+    outlineOffset: '3px',
   },
-  variants: {
-    selected: {
-      true: {
-        borderColor: 'var(--line-strong)',
-        backgroundColor: 'var(--surface-shell)',
-        color: 'var(--foreground)',
-        boxShadow: '0 1px 3px rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-      },
-      false: { color: 'var(--foreground-secondary)', ':hover': { color: 'var(--foreground)' } },
-    },
-  },
+  '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
 })
 export const themeRadio = style({
   position: 'absolute',

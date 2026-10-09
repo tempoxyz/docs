@@ -54,6 +54,15 @@ Use `pnpm`.
 
 Before finishing docs-only changes, run at least `pnpm check:types` when practical. Run `pnpm build` for config, component, routing, sidebar, or MDX structure changes. Run targeted tests for changed interactive components.
 
+## Site styling rules
+
+- Import `style`/`variants` from `src/styles/recipes.ts` for layout recipes, `theme.ts` for semantic components, or `scoped.ts` for existing unlayered selectors. Do not import unrestricted helpers from `zyzz` or create component-local configs.
+- Use the shared `vars` exported by `theme.ts`, or configured token names. `contract.ts` owns spacing, typography, radius, border, and stacking scales; `palette.ts` owns colors. Add a token only for a reusable design decision.
+- `inherited.ts` is the reviewed bridge to existing Vocs, blog, terminal, and artwork CSS scopes. Its expressions must resolve on the styled element; do not hoist local CSS variables into root tokens.
+- An intentional one-off uses ` !custom` and a declaration-local `// design-exception: <specific reason>` comment. Native CSS keywords need no explanation. Prefer normalizing incidental values to the scale over adding exceptions.
+- Global styles and keyframes use explicit token references. Use token-based border/background longhands, logical properties, and explicit transition properties. Style interactive state through existing ARIA/data attributes or native `:checked`/`:disabled` selectors.
+- `pnpm check` runs Biome plus the architecture policy and Zyzz Oxlint rules. `pnpm check:types` checks token/variant contracts, including negative fixtures. `pnpm build` also enforces the compiler contract. Keep all three passing; do not suppress errors or weaken helper mappings to make a new value fit.
+
 ## Project Structure
 
 - `src/pages/` - Vocs file-based routes

@@ -1,19 +1,19 @@
-import { metrics } from '../../../../styles/metrics'
 import { style } from '../../../../styles/recipes'
+import { vars as tokens } from '../../../../styles/theme'
 
 export const payWithIssuedTokenLayout3 = style({
-  marginTop: metrics.spacing['2'],
-  marginBottom: metrics.spacing['3'],
-  borderRadius: metrics.radius.lg,
-  backgroundColor: 'var(--color-gray2)',
-  padding: metrics.spacing['3'],
-  fontSize: '13px',
-  letterSpacing: '-0.01em',
+  marginTop: tokens.spacing['2'],
+  marginBottom: tokens.spacing['3'],
+  borderRadius: tokens.radius.lg,
+  backgroundColor: tokens.color.gray2,
+  padding: tokens.spacing['3'],
+  fontSize: tokens.fontSize.compact,
+  letterSpacing: tokens.letterSpacing.tight,
 })
 export const payWithIssuedTokenLayout4 = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: metrics.spacing['1_5'],
+  gap: tokens.spacing['1_5'],
 })
 export const payWithIssuedTokenLayout5 = style({
   display: 'flex',
@@ -21,9 +21,9 @@ export const payWithIssuedTokenLayout5 = style({
   justifyContent: 'space-between',
 })
 export const payWithIssuedTokenText = style({
-  fontWeight: metrics.fontWeight.medium,
-  color: 'var(--color-gray10)',
+  fontWeight: tokens.fontWeight.medium,
+  color: tokens.color.gray10,
 })
 export const payWithIssuedTokenText2 = style({
-  color: 'var(--color-gray12)',
+  color: tokens.color.gray12,
 })

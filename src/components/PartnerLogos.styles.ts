@@ -1,5 +1,6 @@
-import { style } from 'zyzz'
 import { global } from 'zyzz/web'
+import { style } from '../styles/scoped'
+import { vars as tokens } from '../styles/theme'
 
 // Document/Vocs integration selectors cannot be attached to owned elements.
 global({
@@ -154,7 +155,7 @@ export const partnerLogo = style({
   display: 'inline-block',
   width: '28px',
   height: '24px',
-  marginInlineEnd: '10px',
+  marginInlineEnd: tokens.spacing['2_5'],
   verticalAlign: '-3px',
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat',
@@ -199,8 +200,9 @@ export const partnerLogoAlchemy = style({
 export const partnerLogoGemWallet = style({
   width: '94px',
   backgroundImage: 'url("/partners/directory/gem-wallet.svg")',
-  backgroundColor: '#171717',
-  borderRadius: '4px',
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  backgroundColor: '#171717 !custom',
+  borderRadius: tokens.radius.sm,
   backgroundSize: '90% auto',
   height: '28px',
   verticalAlign: '-5px',
@@ -209,8 +211,9 @@ export const partnerLogoGemWallet = style({
 export const partnerLogoBlockradar = style({
   width: '94px',
   backgroundImage: 'url("/partners/directory/blockradar.svg")',
-  backgroundColor: '#171717',
-  borderRadius: '4px',
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  backgroundColor: '#171717 !custom',
+  borderRadius: tokens.radius.sm,
   backgroundSize: '90% auto',
   height: '28px',
   verticalAlign: '-5px',
@@ -260,8 +263,9 @@ export const partnerLogoRio = style({
 export const partnerLogoDrpc = style({
   width: '84px',
   backgroundImage: 'url("/partners/directory/drpc.svg")',
-  backgroundColor: '#171717',
-  borderRadius: '4px',
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  backgroundColor: '#171717 !custom',
+  borderRadius: tokens.radius.sm,
   backgroundSize: '90% auto',
   height: '28px',
   verticalAlign: '-5px',

@@ -1,18 +1,20 @@
-import { metrics } from '../../../../styles/metrics'
+import { inherited } from '../../../../styles/inherited'
 import { style } from '../../../../styles/recipes'
+import { vars as tokens } from '../../../../styles/theme'
 export const createTokenLayout = style({
-  marginLeft: metrics.spacing['6'],
+  marginInlineStart: tokens.spacing['6'],
   display: 'flex',
   flexDirection: 'column',
-  gap: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['4'],
+  gap: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['4'],
 })
 
 export const form = style({
-  marginTop: 'calc(var(--spacing) * -2.5)',
+  // design-exception: Derive this layout value from the existing responsive CSS variables.
+  marginTop: 'calc(var(--spacing) * -2.5) !custom',
   display: 'flex',
   flexDirection: 'column',
-  gap: metrics.spacing['2'],
+  gap: tokens.spacing['2'],
   '@media (width >= 48rem)': {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -21,22 +23,22 @@ export const form = style({
 
 export const createTokenInput = style({
   height: '34px',
-  borderRadius: metrics.radius.lg,
+  borderRadius: tokens.radius.lg,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray4)',
-  paddingInline: 'calc(var(--spacing) * 3.25)',
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-  color: 'var(--color-black)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
+  paddingInline: tokens.spacing.controlInset,
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.compact,
+  color: tokens.color.black,
   selectors: {
     '&::placeholder': {
-      color: 'var(--color-gray9)',
+      color: tokens.color.gray9,
     },
     '&:where( [data-vocs-theme="dark"], [data-vocs-theme="dark"] *, [style*="color-scheme: dark"], [style*="color-scheme: dark"] * )':
       {
-        color: 'var(--color-white)',
+        color: tokens.color.white,
       },
   },
 })
@@ -47,17 +49,20 @@ export const createTokenLayout5 = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  borderRadius: '10px',
-  backgroundColor: 'var(--color-gray2)',
-  padding: metrics.spacing['4'],
+
+  borderRadius: tokens.radius.lg,
+  backgroundColor: tokens.color.gray2,
+  padding: tokens.spacing['4'],
   textAlign: 'center',
-  fontSize: '13px',
-  lineHeight: 'var(--leading-snug)',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-  color: 'var(--color-gray9)',
+  fontSize: tokens.fontSize.compact,
+
+  lineHeight: inherited.lineHeight.leadingSnug,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.compact,
+  color: tokens.color.gray9,
 })
 export const createTokenText = style({
-  fontWeight: metrics.fontWeight.medium,
-  color: 'var(--text-color-primary)',
+  fontWeight: tokens.fontWeight.medium,
+
+  color: inherited.color.textColorPrimary,
 })

@@ -1,13 +1,15 @@
-import { metrics } from '../styles/metrics'
+import { inherited } from '../styles/inherited'
 import { style } from '../styles/recipes'
+import { vars as tokens } from '../styles/theme'
 export const docsSidebarDrawerButton = style({
   display: 'flex',
-  minHeight: metrics.spacing['9'],
+  minHeight: tokens.spacing['9'],
   alignItems: 'center',
-  gap: metrics.spacing['1_5'],
-  borderRadius: metrics.radius.md,
-  fontFamily: 'var(--font-pilat-book)',
-  color: 'color-mix(in oklab, var(--foreground) 70%, transparent)',
+  gap: tokens.spacing['1_5'],
+  borderRadius: tokens.radius.md,
+  fontFamily: tokens.fontFamily.book,
+
+  color: inherited.color.colorMixInOklabForeground70Transparent,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -15,7 +17,7 @@ export const docsSidebarDrawerButton = style({
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        color: 'var(--foreground)',
+        color: tokens.color.foreground,
       },
     },
     '&:focus-visible': {
@@ -31,7 +33,7 @@ export const docsSidebarDrawerButton = style({
 export const docsSidebarDrawerLayout = style({
   position: 'fixed',
   inset: '0',
-  zIndex: 70,
+  zIndex: tokens.zIndex.drawer,
   '@media (width >= 1080px)': {
     display: 'none',
   },
@@ -42,7 +44,8 @@ export const docsSidebarDrawerLayout2 = style({
 export const docsSidebarDrawerLayout3 = style({
   position: 'absolute',
   inset: '0',
-  backgroundColor: 'color-mix(in oklab, var(--color-black) 40%, transparent)',
+
+  backgroundColor: inherited.color.colorMixInOklabColorBlack40Transparent,
   transitionProperty: 'opacity',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
   transitionDuration: '200ms',
@@ -59,16 +62,16 @@ export const docsSidebarDrawerLayout5 = style({
 export const docsSidebarDrawerLayout6 = style({
   position: 'absolute',
   top: '0',
-  left: '0',
+  insetInlineStart: '0',
   display: 'flex',
   height: '100%',
   width: '82%',
   maxWidth: '320px',
   flexDirection: 'column',
-  borderRightStyle: 'solid',
-  borderRightWidth: '1px',
-  borderColor: 'var(--line)',
-  backgroundColor: 'var(--background)',
+  borderInlineEndStyle: 'solid',
+  borderInlineEndWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  backgroundColor: tokens.color.background,
   transitionProperty: 'transform, translate, scale, rotate',
   transitionTimingFunction: 'var(--ease-out)',
   transitionDuration: '200ms',
@@ -89,24 +92,25 @@ export const docsSidebarDrawerLayout9 = style({
   alignItems: 'center',
   justifyContent: 'space-between',
   borderBottomStyle: 'solid',
-  borderBottomWidth: '1px',
-  borderColor: 'var(--line)',
-  paddingInline: metrics.spacing['5'],
-  paddingBlock: metrics.spacing['4'],
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  paddingInline: tokens.spacing['5'],
+  paddingBlock: tokens.spacing['4'],
 })
 export const docsSidebarDrawerText = style({
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '15px',
-  letterSpacing: '0',
-  color: 'var(--foreground)',
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.bodySmall,
+  letterSpacing: tokens.letterSpacing.normal,
+  color: tokens.color.foreground,
 })
 export const docsSidebarDrawerButton2 = style({
   display: 'grid',
-  width: metrics.spacing['10'],
-  height: metrics.spacing['10'],
+  width: tokens.spacing['10'],
+  height: tokens.spacing['10'],
   placeItems: 'center',
-  borderRadius: metrics.radius.lg,
-  color: 'color-mix(in oklab, var(--foreground) 70%, transparent)',
+  borderRadius: tokens.radius.lg,
+
+  color: inherited.color.colorMixInOklabForeground70Transparent,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -114,8 +118,8 @@ export const docsSidebarDrawerButton2 = style({
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'color-mix(in oklab, var(--foreground) 5%, transparent)',
-        color: 'var(--foreground)',
+        backgroundColor: inherited.color.colorMixInOklabForeground5Transparent,
+        color: tokens.color.foreground,
       },
     },
     '&:focus-visible': {
@@ -130,6 +134,6 @@ export const docsSidebarDrawerLayout10 = style({
   flex: '1 1 0%',
   flexDirection: 'column',
   overflowY: 'auto',
-  paddingInline: metrics.spacing['5'],
-  paddingBlock: metrics.spacing['3'],
+  paddingInline: tokens.spacing['5'],
+  paddingBlock: tokens.spacing['3'],
 })

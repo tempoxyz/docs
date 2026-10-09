@@ -1,10 +1,9 @@
 import { defineConfig } from 'zyzz'
 import { design } from './contract'
 
-// Reference the existing theme variables so Vocs and the marketing theme toggle
-// remain the single authority for light, dark, and system preferences.
-export const { style, variants, vars } = defineConfig({
-  id: 'tempo-theme',
+// Existing scoped selectors retain their unlayered cascade priority.
+export const { style, variants } = defineConfig({
+  id: 'tempo-scoped',
   vars: design,
   // Zyzz requires literal mappings; check:styles verifies these against contract.ts.
   mappings: {
@@ -37,7 +36,6 @@ export const { style, variants, vars } = defineConfig({
     ],
     zIndex: ['zIndex'],
   },
-  // Literal data is required by Zyzz; checked against layers.ts by check:styles.
   layers: [
     'reset',
     'properties',
@@ -50,5 +48,4 @@ export const { style, variants, vars } = defineConfig({
     'vocs_utilities',
     'utilities',
   ],
-  defaultLayer: 'components',
 })

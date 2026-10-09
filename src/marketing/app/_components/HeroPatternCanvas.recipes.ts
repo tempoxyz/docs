@@ -1,4 +1,5 @@
 import { style } from '../../../styles/recipes'
+import { vars as tokens } from '../../../styles/theme'
 export const plusCanvas = style({
-  zIndex: 'calc(10 * -1)',
+  zIndex: tokens.zIndex.decoration,
 })

@@ -1,4 +1,5 @@
 import { style } from '../../../styles/recipes'
+import { vars as tokens } from '../../../styles/theme'
 export const featuresText = style({
-  color: 'var(--foreground)',
+  color: tokens.color.foreground,
 })

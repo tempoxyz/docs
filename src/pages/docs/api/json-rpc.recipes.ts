@@ -1,5 +1,5 @@
-import { metrics } from '../../../styles/metrics'
 import { style } from '../../../styles/recipes'
+import { vars as tokens } from '../../../styles/theme'
 export const div = style({
-  height: metrics.spacing['4'],
+  height: tokens.spacing['4'],
 })

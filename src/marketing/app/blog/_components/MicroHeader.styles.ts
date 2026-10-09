@@ -1,30 +1,38 @@
-import { style } from 'zyzz'
+import { inherited } from '../../../../styles/inherited'
+import { style } from '../../../../styles/scoped'
+import { vars as tokens } from '../../../../styles/theme'
 
 export const blogMicroHeader = style({
   position: 'fixed',
-  zIndex: 40,
+  zIndex: tokens.zIndex.floating,
   bottom: 'max(18px, env(safe-area-inset-bottom))',
-  left: '50%',
+  insetInlineStart: '50%',
   display: 'flex',
   width: 'min(560px, calc(100% - 32px))',
   alignItems: 'center',
-  gap: '14px',
+  gap: tokens.spacing['3_5'],
   overflow: 'hidden',
-  border: '1px solid color-mix(in srgb, var(--color-foreground) 14%, transparent)',
-  borderRadius: '6px',
-  padding: '8px 10px 10px 16px',
+  borderWidth: tokens.borderWidth.hairline,
+  borderStyle: 'solid',
+  borderColor: inherited.color.colorMixInSrgbColorForeground14Transparent,
+  borderRadius: tokens.radius.md,
+
+  paddingTop: tokens.spacing['2'],
+  paddingInlineEnd: tokens.spacing['2_5'],
+  paddingBottom: tokens.spacing['2_5'],
+  paddingInlineStart: tokens.spacing['4'],
   transform: 'translateX(-50%)',
-  background: 'var(--color-surface-page)',
-  color: 'var(--color-foreground)',
-  fontFamily: 'var(--font-pilat-book), ui-sans-serif, system-ui, sans-serif',
+  backgroundColor: inherited.color.colorSurfacePage,
+  color: tokens.color.foreground,
+  fontFamily: tokens.fontFamily.system,
   selectors: {
     '&[hidden]': {
       display: 'none',
     },
   },
   '@media (width < 480px)': {
-    gap: '10px',
-    paddingLeft: '12px',
+    gap: tokens.spacing['2_5'],
+    paddingInlineStart: tokens.spacing['3'],
   },
 })
 
@@ -36,12 +44,14 @@ export const blogMicroSection = style({
       width: '100%',
       minWidth: 0,
       border: 0,
-      padding: '6px 0',
+
+      paddingBlock: tokens.spacing['1_5'],
+      paddingInline: tokens.spacing['0'],
       overflow: 'hidden',
-      background: 'var(--color-surface-page)',
-      color: 'inherit',
+      backgroundColor: inherited.color.colorSurfacePage,
+      color: 'inherit !custom',
       font: 'inherit',
-      fontSize: '12px',
+      fontSize: tokens.fontSize.xs,
       textOverflow: 'ellipsis',
       cursor: 'pointer',
     },
@@ -51,17 +61,17 @@ export const blogMicroSection = style({
 export const blogMicroPostTitle = style({
   flex: 1,
   overflow: 'hidden',
-  fontSize: '12px',
+  fontSize: tokens.fontSize.xs,
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
 })
 
 export const blogMicroReadtime = style({
-  color: 'color-mix(in srgb, var(--color-foreground) 65%, transparent)',
-  fontSize: '11px',
+  color: inherited.color.colorMixInSrgbColorForeground65Transparent,
+  fontSize: tokens.fontSize.caption,
   whiteSpace: 'nowrap',
   '@media (width < 480px)': {
-    fontSize: '10px',
+    fontSize: tokens.fontSize.tiny,
   },
 })
 
@@ -72,13 +82,13 @@ export const blogMicroTop = style({
   flexShrink: 0,
   placeItems: 'center',
   border: 0,
-  borderRadius: '2px',
-  background: 'transparent',
-  color: 'inherit',
+  borderRadius: tokens.radius.xs,
+  backgroundColor: 'transparent !custom',
+  color: 'inherit !custom',
   cursor: 'pointer',
   selectors: {
     '&:hover': {
-      background: 'color-mix(in srgb, var(--color-foreground) 10%, transparent)',
+      backgroundColor: inherited.color.colorMixInSrgbColorForeground10Transparent,
     },
   },
 })
@@ -86,22 +96,22 @@ export const blogMicroTop = style({
 export const blogMicroProgress = style({
   position: 'absolute',
   bottom: 0,
-  left: 0,
+  insetInlineStart: 0,
   width: '100%',
   height: '2px',
   appearance: 'none',
   border: 0,
-  background: 'color-mix(in srgb, var(--color-foreground) 8%, transparent)',
-  color: 'var(--color-foreground)',
+  backgroundColor: inherited.color.colorMixInSrgbColorForeground8Transparent,
+  color: tokens.color.foreground,
   selectors: {
     '&::-webkit-progress-bar': {
-      background: 'color-mix(in srgb, var(--color-foreground) 8%, transparent)',
+      backgroundColor: inherited.color.colorMixInSrgbColorForeground8Transparent,
     },
     '&::-webkit-progress-value': {
-      background: 'var(--color-foreground)',
+      backgroundColor: tokens.color.foreground,
     },
     '&::-moz-progress-bar': {
-      background: 'var(--color-foreground)',
+      backgroundColor: tokens.color.foreground,
     },
   },
 })

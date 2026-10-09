@@ -1,12 +1,13 @@
 import { style } from '../../../styles/recipes'
+import { vars as tokens } from '../../../styles/theme'
 export const plusCanvas = style({
-  zIndex: 'calc(10 * -1)',
+  zIndex: tokens.zIndex.decoration,
 })
 export const heroDotsLayout = style({
   pointerEvents: 'none',
   position: 'absolute',
   inset: '0',
-  zIndex: 'calc(10 * -1)',
+  zIndex: tokens.zIndex.decoration,
   '--tempo-style-gradient-position': 'to bottom in oklab',
   backgroundImage: 'linear-gradient(var(--tempo-style-gradient-stops))',
   '--tempo-style-gradient-from': 'var(--surface-shell)',

@@ -1,8 +1,8 @@
-import { style as instanceStyle } from 'zyzz'
 import { style } from '../../../styles/recipes'
+import { style as instanceStyle } from '../../../styles/scoped'
 export const tempoLogoText = style({
   display: 'block',
-  backgroundColor: 'currentcolor',
+  backgroundColor: 'currentcolor !custom',
 })
 export const tempoLogoTextAppearance = instanceStyle({
   aspectRatio: '102.461 / 23.2394',

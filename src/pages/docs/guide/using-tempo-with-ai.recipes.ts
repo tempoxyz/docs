@@ -1,8 +1,8 @@
-import { metrics } from '../../../styles/metrics'
 import { style } from '../../../styles/recipes'
+import { vars as tokens } from '../../../styles/theme'
 export const docsLinkButton = style({
-  marginBlock: '0',
-  marginBottom: metrics.spacing['4'],
+  marginBlock: tokens.spacing['0'],
+  marginBottom: tokens.spacing['4'],
 })
 export const mcpTabs = style({
   selectors: {
@@ -11,9 +11,10 @@ export const mcpTabs = style({
         content: "''",
         width: '1em',
         height: '1em',
-        marginRight: '0.375rem',
+
+        marginInlineEnd: tokens.spacing['1_5'],
         display: 'inline-block',
-        backgroundColor: 'currentColor',
+        backgroundColor: 'currentColor !custom',
         maskPosition: 'center',
         maskRepeat: 'no-repeat',
         maskSize: 'contain',
@@ -42,5 +43,5 @@ export const mcpTabs = style({
   },
 })
 export const cursorConfig = style({
-  marginTop: '1rem',
+  marginTop: tokens.spacing['4'],
 })

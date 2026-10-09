@@ -1,9 +1,9 @@
-import { metrics } from '../../../../styles/metrics'
 import { style } from '../../../../styles/recipes'
+import { vars as tokens } from '../../../../styles/theme'
 
 export const addTokensToWalletLayout3 = style({
-  marginTop: metrics.spacing['2'],
+  marginTop: tokens.spacing['2'],
   display: 'flex',
   flexWrap: 'wrap',
-  gap: metrics.spacing['2'],
+  gap: tokens.spacing['2'],
 })

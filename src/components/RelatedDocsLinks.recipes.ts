@@ -1,42 +1,43 @@
-import { metrics } from '../styles/metrics'
+import { inherited } from '../styles/inherited'
 import { style } from '../styles/recipes'
+import { vars as tokens } from '../styles/theme'
 export const relatedDocsLinksSection = style({
-  marginTop: metrics.spacing['10'],
+  marginTop: tokens.spacing['10'],
   borderTopStyle: 'solid',
-  borderTopWidth: '1px',
-  borderColor: 'var(--line)',
-  paddingTop: metrics.spacing['8'],
+  borderTopWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  paddingTop: tokens.spacing['8'],
 })
 export const relatedDocsLinksHeading = style({
-  marginBottom: metrics.spacing['4'],
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '20px',
-  fontWeight: metrics.fontWeight.medium,
-  letterSpacing: '-0.01em',
-  color: 'var(--foreground)',
+  marginBottom: tokens.spacing['4'],
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.subheading,
+  fontWeight: tokens.fontWeight.medium,
+  letterSpacing: tokens.letterSpacing.tight,
+  color: tokens.color.foreground,
 })
 export const relatedDocsLinksList = style({
   display: 'grid',
   listStyleType: 'none',
-  gap: metrics.spacing['3'],
-  padding: '0',
+  gap: tokens.spacing['3'],
+  padding: tokens.spacing['0'],
   '@media (width >= 40rem)': {
     gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
   },
 })
 export const relatedDocsLinksItem = style({
-  margin: '0',
+  margin: tokens.spacing['0'],
 })
 export const link = style({
-  '@media (hover: hover)': { ':hover': { backgroundColor: 'var(--surface-block)' } },
+  '@media (hover: hover)': { ':hover': { backgroundColor: tokens.color.block } },
   display: 'block',
   height: '100%',
-  borderRadius: metrics.radius.lg,
+  borderRadius: tokens.radius.lg,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--line)',
-  padding: metrics.spacing['4'],
-  color: 'var(--foreground)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  padding: tokens.spacing['4'],
+  color: tokens.color.foreground,
   textDecorationLine: 'none',
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
@@ -45,14 +46,15 @@ export const link = style({
 })
 export const relatedDocsLinksText = style({
   display: 'block',
-  fontSize: '15px',
-  lineHeight: metrics.spacing['5'],
-  fontWeight: metrics.fontWeight.medium,
+  fontSize: tokens.fontSize.bodySmall,
+  lineHeight: tokens.spacing['5'],
+  fontWeight: tokens.fontWeight.medium,
 })
 export const relatedDocsLinksText2 = style({
-  marginTop: metrics.spacing['1_5'],
+  marginTop: tokens.spacing['1_5'],
   display: 'block',
-  fontSize: '14px',
-  lineHeight: metrics.spacing['5'],
-  color: 'color-mix(in oklab, var(--foreground) 60%, transparent)',
+  fontSize: tokens.fontSize.sm,
+  lineHeight: tokens.spacing['5'],
+
+  color: inherited.color.colorMixInOklabForeground60Transparent,
 })

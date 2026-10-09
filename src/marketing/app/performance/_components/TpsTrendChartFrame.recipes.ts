@@ -1,9 +1,11 @@
-import { style as instanceStyle } from 'zyzz'
+import { inherited } from '../../../../styles/inherited'
 import { style } from '../../../../styles/recipes'
+import { style as instanceStyle } from '../../../../styles/scoped'
+import { vars as tokens } from '../../../../styles/theme'
 export const text = style({
-  fill: 'color-mix(in oklab, var(--foreground) 35%, transparent)',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '11px',
+  fill: inherited.color.colorMixInOklabForeground35Transparent,
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.caption,
 })
 export const tpsTrendChartFrameLayout = style({
   position: 'relative',

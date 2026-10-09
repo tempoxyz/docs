@@ -1,22 +1,24 @@
-import { metrics } from '../styles/metrics'
+import { inherited } from '../styles/inherited'
 import { style } from '../styles/recipes'
+import { vars as tokens } from '../styles/theme'
 export const select = style({
-  minHeight: metrics.spacing['10'],
-  borderRadius: metrics.radius.md,
+  minHeight: tokens.spacing['10'],
+  borderRadius: tokens.radius.md,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--line-strong)',
-  backgroundColor: 'var(--surface-input)',
-  paddingInline: metrics.spacing['3'],
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  color: 'var(--foreground)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.lineStrong,
+
+  backgroundColor: inherited.color.surfaceInput,
+  paddingInline: tokens.spacing['3'],
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.normal,
+  color: tokens.color.foreground,
   selectors: {
     '&:focus-visible': {
       outlineStyle: 'solid',
       outlineWidth: '2px',
       outlineOffset: '2px',
-      outlineColor: 'var(--accent-blue)',
+      outlineColor: tokens.color.accent,
     },
   },
 })

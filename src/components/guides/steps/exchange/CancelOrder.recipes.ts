@@ -1,9 +1,12 @@
-import { metrics } from '../../../../styles/metrics'
+import { inherited } from '../../../../styles/inherited'
 import { style } from '../../../../styles/recipes'
+import { vars as tokens } from '../../../../styles/theme'
 
 export const cancelOrderLayout3 = style({
-  marginTop: metrics.spacing['2'],
-  fontSize: metrics.fontSize.xs,
-  lineHeight: 'var(--text-xs--line-height)',
-  color: 'var(--color-gray-600)',
+  marginTop: tokens.spacing['2'],
+  fontSize: tokens.fontSize.xs,
+
+  lineHeight: inherited.lineHeight.textXsLineHeight,
+
+  color: inherited.color.colorGray600,
 })

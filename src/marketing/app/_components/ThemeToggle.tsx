@@ -114,7 +114,7 @@ function Option({
   const checked = theme === value
 
   return (
-    <label {...ui.themeOption({ selected: checked })}>
+    <label {...ui.themeOption()}>
       <input
         {...ui.themeRadio()}
         type="radio"

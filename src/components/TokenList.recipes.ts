@@ -1,5 +1,6 @@
-import { metrics } from '../styles/metrics'
+import { inherited } from '../styles/inherited'
 import { style } from '../styles/recipes'
+import { vars as tokens } from '../styles/theme'
 export const tokenListDemoButton = style({
   textDecorationLine: 'underline',
 })
@@ -7,7 +8,7 @@ export const tokenListDemoList = style({
   display: 'grid',
   listStyleType: 'none',
   gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-  gap: metrics.spacing['2'],
+  gap: tokens.spacing['2'],
   '@media (width >= 40rem)': {
     gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
   },
@@ -17,12 +18,12 @@ export const tokenListDemoLink = style({
   height: '100%',
   minWidth: '0',
   alignItems: 'center',
-  gap: metrics.spacing['2'],
-  borderRadius: metrics.radius.lg,
+  gap: tokens.spacing['2'],
+  borderRadius: tokens.radius.lg,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray4)',
-  padding: metrics.spacing['2'],
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
+  padding: tokens.spacing['2'],
   textDecorationLine: 'none',
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
@@ -31,14 +32,14 @@ export const tokenListDemoLink = style({
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'var(--color-gray2)',
+        backgroundColor: tokens.color.gray2,
       },
     },
   },
 })
 export const img = style({
-  width: metrics.spacing['7'],
-  height: metrics.spacing['7'],
+  width: tokens.spacing['7'],
+  height: tokens.spacing['7'],
   flexShrink: 0,
 })
 export const tokenListDemoText = style({
@@ -46,7 +47,8 @@ export const tokenListDemoText = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontSize: metrics.fontSize.sm,
-  lineHeight: 'var(--text-sm--line-height)',
-  fontWeight: metrics.fontWeight.medium,
+  fontSize: tokens.fontSize.sm,
+
+  lineHeight: inherited.lineHeight.textSmLineHeight,
+  fontWeight: tokens.fontWeight.medium,
 })

@@ -163,3 +163,30 @@ test('client navigation loads page-owned styles', async ({ page }) => {
   await expect(page).toHaveURL(/\/docs\/partners\/wallets\/?$/)
   await expect(page.locator('.partner-logo--dfns')).not.toHaveCSS('background-image', 'none')
 })
+
+test('theme selection uses native checked state for both keyboard input and styling', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  const group = page.getByRole('radiogroup', { name: 'Theme selection' }).first()
+  const light = group.getByRole('radio', { name: 'Light theme', exact: true })
+  const dark = group.getByRole('radio', { name: 'Dark theme', exact: true })
+  await light.check()
+  await expect(light).toBeChecked()
+  await light.focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(dark).toBeChecked()
+  await expect(light).not.toBeChecked()
+  await expect(page.locator('html')).toHaveAttribute('data-vocs-theme', 'dark')
+  await expect
+    .poll(() =>
+      dark.evaluate((input) => getComputedStyle(input.closest('label') ?? input).backgroundColor),
+    )
+    .not.toBe('rgba(0, 0, 0, 0)')
+  await expect
+    .poll(() =>
+      light.evaluate((input) => getComputedStyle(input.closest('label') ?? input).backgroundColor),
+    )
+    .toBe('rgba(0, 0, 0, 0)')
+})

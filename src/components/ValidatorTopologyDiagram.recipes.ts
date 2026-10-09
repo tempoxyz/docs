@@ -1,6 +1,7 @@
-import { style as instanceStyle } from 'zyzz'
+import { style as instanceStyle } from '../styles/scoped'
 export const validatorTopologyDiagramLayoutAppearance = instanceStyle({
-  margin: '1.5rem 0',
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  margin: '1.5rem 0 !custom',
   overflowX: 'auto',
 })
 export const validatorTopologyDiagramIconAppearance = instanceStyle({

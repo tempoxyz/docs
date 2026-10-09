@@ -1,5 +1,7 @@
-import { style as instanceStyle } from 'zyzz'
+import { inherited } from '../../../../styles/inherited'
 import { style } from '../../../../styles/recipes'
+import { style as instanceStyle } from '../../../../styles/scoped'
+import { vars as tokens } from '../../../../styles/theme'
 export const tpsTrendChartLayout = style({
   position: 'relative',
   width: '100%',
@@ -8,38 +10,40 @@ export const tpsTrendChartIcon = style({
   display: 'block',
 })
 export const text = style({
-  fill: 'color-mix(in oklab, var(--foreground) 45%, transparent)',
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '12px',
+  fill: inherited.color.colorMixInOklabForeground45Transparent,
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.xs,
 })
 export const text2 = style({
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '11px',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.caption,
   '@media (prefers-reduced-motion: reduce)': {
     transitionProperty: 'none',
   },
 })
 export const tpsTrendChartDescription = style({
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '11px',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.caption,
   whiteSpace: 'nowrap',
-  color: 'color-mix(in oklab, var(--foreground) 40%, transparent)',
+
+  color: inherited.color.colorMixInOklabForeground40Transparent,
 })
 export const tpsTrendChartDescription2 = style({
-  marginTop: 'var(--spacing)',
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '11px',
-  color: 'color-mix(in oklab, var(--foreground) 60%, transparent)',
+  marginTop: tokens.spacing['1'],
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.caption,
+
+  color: inherited.color.colorMixInOklabForeground60Transparent,
 })
 export const tpsTrendChartDescription3 = style({
-  marginTop: 'var(--spacing)',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '13px',
+  marginTop: tokens.spacing['1'],
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.compact,
   whiteSpace: 'nowrap',
-  color: 'var(--foreground)',
+  color: tokens.color.foreground,
 })
 export const tpsTrendChartText = style({
-  color: 'color-mix(in oklab, var(--foreground) 40%, transparent)',
+  color: inherited.color.colorMixInOklabForeground40Transparent,
 })
 export const tpsTrendChartLayoutAppearance = instanceStyle((values: { value0: `${number}px` }) => ({
   height: values.value0,

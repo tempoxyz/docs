@@ -1,4 +1,6 @@
-'use client'
+import { vars as tokens } from '../../../styles/theme'
+
+;('use client')
 
 import Image from 'next/image'
 import { useState } from 'react'
@@ -152,7 +154,9 @@ const rippleRing = variants({
     pointerEvents: 'none',
     position: 'absolute',
     inset: 0,
-    border: '1px solid var(--line)',
+    borderWidth: tokens.borderWidth.hairline,
+    borderStyle: 'solid',
+    borderColor: tokens.color.line,
     opacity: 0,
     animationDuration: '2.8s',
     animationTimingFunction: 'ease-out',

@@ -1,40 +1,45 @@
-import { style as instanceStyle } from 'zyzz'
-import { metrics } from '../../../../styles/metrics'
+import { inherited } from '../../../../styles/inherited'
 import { style } from '../../../../styles/recipes'
+import { style as instanceStyle } from '../../../../styles/scoped'
+import { vars as tokens } from '../../../../styles/theme'
 export const uptimeStripLayout = style({
-  marginBottom: metrics.spacing['6'],
+  marginBottom: tokens.spacing['6'],
   display: 'flex',
   flexWrap: 'wrap',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: metrics.spacing['3'],
+  gap: tokens.spacing['3'],
 })
 export const uptimeStripLayout2 = style({
   display: 'flex',
   alignItems: 'center',
-  gap: metrics.spacing['2_5'],
+  gap: tokens.spacing['2_5'],
 })
 export const uptimeStripText = style({
-  width: metrics.spacing['2'],
-  height: metrics.spacing['2'],
-  borderRadius: 'calc(infinity * 1px)',
+  width: tokens.spacing['2'],
+  height: tokens.spacing['2'],
+  borderRadius: tokens.radius.full,
 })
 export const uptimeStripText2 = style({
-  backgroundColor: 'var(--background-color-warning)',
+  backgroundColor: inherited.color.backgroundColorWarning,
 })
 export const uptimeStripDescription = style({
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '11px',
-  letterSpacing: 'var(--tracking-wider)',
-  color: 'color-mix(in oklab, var(--foreground) 60%, transparent)',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.caption,
+
+  letterSpacing: inherited.letterSpacing.trackingWider,
+
+  color: inherited.color.colorMixInOklabForeground60Transparent,
   textTransform: 'uppercase',
 })
 export const uptimeStripDescription2 = style({
-  marginLeft: 'auto',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '11px',
-  letterSpacing: 'var(--tracking-wider)',
-  color: 'color-mix(in oklab, var(--foreground) 40%, transparent)',
+  marginInlineStart: 'auto !custom',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.caption,
+
+  letterSpacing: inherited.letterSpacing.trackingWider,
+
+  color: inherited.color.colorMixInOklabForeground40Transparent,
   textTransform: 'uppercase',
 })
 export const uptimeStripLayout3 = style({
@@ -50,34 +55,38 @@ export const rect = style({
   },
 })
 export const uptimeStripDescription3 = style({
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '11px',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.caption,
   whiteSpace: 'nowrap',
-  color: 'color-mix(in oklab, var(--foreground) 40%, transparent)',
+
+  color: inherited.color.colorMixInOklabForeground40Transparent,
 })
 export const uptimeStripDescription4 = style({
-  marginTop: 'var(--spacing)',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '13px',
+  marginTop: tokens.spacing['1'],
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.compact,
   whiteSpace: 'nowrap',
-  color: 'var(--foreground)',
+  color: tokens.color.foreground,
 })
 export const uptimeStripDescription5 = style({
-  marginTop: metrics.spacing['0_5'],
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '11px',
+  marginTop: tokens.spacing['0_5'],
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.caption,
   whiteSpace: 'nowrap',
-  color: 'color-mix(in oklab, var(--foreground) 40%, transparent)',
+
+  color: inherited.color.colorMixInOklabForeground40Transparent,
 })
 export const uptimeStripLayout4 = style({
-  marginTop: metrics.spacing['3'],
+  marginTop: tokens.spacing['3'],
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '10px',
-  letterSpacing: 'var(--tracking-wider)',
-  color: 'color-mix(in oklab, var(--foreground) 35%, transparent)',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.tiny,
+
+  letterSpacing: inherited.letterSpacing.trackingWider,
+
+  color: inherited.color.colorMixInOklabForeground35Transparent,
   textTransform: 'uppercase',
 })
 export const uptimeStripLayoutAppearance = instanceStyle((values: { value0: `${number}px` }) => ({

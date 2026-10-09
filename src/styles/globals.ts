@@ -1,3 +1,5 @@
+import { inherited } from './inherited'
+import { vars as tokens } from './theme'
 import './tokens'
 import '../components/DocsCards.styles'
 import { fontFace, global, layers } from 'zyzz/web'
@@ -109,9 +111,10 @@ global({
 global({
   '@layer utilities': {
     'html, body': {
-      background: 'var(--vocs-background-color-primary)',
-      color: 'var(--vocs-text-color-primary)',
-      fontFamily: 'var(--font-pilat-book), ui-sans-serif, system-ui, sans-serif',
+      backgroundColor: inherited.color.vocsBackgroundColorPrimary,
+
+      color: inherited.color.vocsTextColorPrimary,
+      fontFamily: tokens.fontFamily.system,
     },
   },
 })
@@ -156,10 +159,13 @@ global({
       '[data-layout][data-v-sidebar] > [data-v-gutter-left]': {
         left: 'max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5))',
         width: 'var(--tempo-docs-sidebar-width)',
-        paddingTop: 'var(--vocs-spacing-topNav)',
+        // design-exception: Preserve the inherited component/framework scope at the point of use.
+        paddingTop: 'var(--vocs-spacing-topNav) !custom',
         justifyContent: 'flex-start',
-        background: 'var(--vocs-background-color-primary)',
-        borderRight: '1px solid var(--vocs-border-color-primary)',
+        backgroundColor: inherited.color.vocsBackgroundColorPrimary,
+        borderRightWidth: tokens.borderWidth.hairline,
+        borderRightStyle: 'solid',
+        borderRightColor: inherited.color.vocsBorderColorPrimary,
         borderLeft: 0,
       },
     },
@@ -169,7 +175,7 @@ global({
 global({
   '@layer utilities': {
     '[data-v-sidebar-container], [data-v-sidebar-footer-content], [data-v-mobile-nav]': {
-      background: 'var(--vocs-background-color-primary)',
+      backgroundColor: inherited.color.vocsBackgroundColorPrimary,
     },
   },
 })
@@ -177,7 +183,7 @@ global({
 global({
   '@layer utilities': {
     '[data-v-sidebar-container]': {
-      paddingTop: '24px',
+      paddingTop: tokens.spacing['6'],
       scrollbarWidth: 'none',
     },
   },
@@ -210,13 +216,19 @@ global({
 global({
   '@layer utilities': {
     '[data-v-sidebar-footer-content]': {
-      marginTop: '12px',
-      marginRight: 'calc(var(--vocs-spacing-sidebar-px) * -1)',
-      marginLeft: 'calc(var(--vocs-spacing-sidebar-px) * -1)',
-      paddingTop: '14px',
-      paddingRight: 'var(--vocs-spacing-sidebar-px)',
-      paddingLeft: 'var(--vocs-spacing-sidebar-px)',
-      borderTop: '1px solid var(--vocs-border-color-primary)',
+      marginTop: tokens.spacing['3'],
+      // design-exception: Preserve the inherited component/framework scope at the point of use.
+      marginRight: 'calc(var(--vocs-spacing-sidebar-px) * -1) !custom',
+      // design-exception: Preserve the inherited component/framework scope at the point of use.
+      marginLeft: 'calc(var(--vocs-spacing-sidebar-px) * -1) !custom',
+      paddingTop: tokens.spacing['3_5'],
+      // design-exception: Preserve the inherited component/framework scope at the point of use.
+      paddingRight: 'var(--vocs-spacing-sidebar-px) !custom',
+      // design-exception: Preserve the inherited component/framework scope at the point of use.
+      paddingLeft: 'var(--vocs-spacing-sidebar-px) !custom',
+      borderTopWidth: tokens.borderWidth.hairline,
+      borderTopStyle: 'solid',
+      borderTopColor: inherited.color.vocsBorderColorPrimary,
     },
   },
 })
@@ -225,10 +237,11 @@ global({
   '@layer utilities': {
     'aside[data-v][data-v-callout]': {
       '--tempo-callout-accent': 'var(--vocs-text-color-muted)',
-      background:
-        'color-mix( in srgb, var(--tempo-callout-accent) 10%, var(--vocs-background-color-surface) )',
-      borderColor: 'color-mix(in srgb, var(--tempo-callout-accent) 28%, transparent)',
-      color: 'var(--vocs-text-color-primary)',
+      backgroundColor: inherited.color.colorMixInSrgbTempoCalloutAccent10VocsBackgroundColorSurface,
+
+      borderColor: inherited.color.colorMixInSrgbTempoCalloutAccent28Transparent,
+
+      color: inherited.color.vocsTextColorPrimary,
     },
   },
 })
@@ -277,7 +290,7 @@ global({
   '@layer utilities': {
     'aside[data-v][data-v-callout] p[data-v], aside[data-v][data-v-callout] li[data-v], aside[data-v][data-v-callout] a[data-v], aside[data-v][data-v-callout] code[data-v]':
       {
-        color: 'var(--vocs-text-color-primary)',
+        color: inherited.color.vocsTextColorPrimary,
       },
   },
 })
@@ -285,7 +298,7 @@ global({
 global({
   '@layer utilities': {
     'aside[data-v][data-v-callout] li::marker': {
-      color: 'var(--vocs-text-color-primary)',
+      color: inherited.color.vocsTextColorPrimary,
     },
   },
 })
@@ -293,7 +306,7 @@ global({
 global({
   '@layer utilities': {
     'aside[data-v][data-v-callout] > [data-v-callout-icon]': {
-      color: 'var(--tempo-callout-accent)',
+      color: inherited.color.tempoCalloutAccent,
     },
   },
 })
@@ -320,15 +333,18 @@ global({
   '@layer utilities': {
     '[data-docs-sidebar-fallback]': {
       position: 'sticky',
-      zIndex: 10,
+      zIndex: tokens.zIndex.raised,
       top: 'calc(var(--vocs-spacing-topNav) + var(--vocs-spacing-banner))',
       display: 'flex',
       alignItems: 'center',
       height: '48px',
-      paddingInline: 'var(--vocs-spacing-content-px)',
-      borderBottom: '1px solid var(--vocs-border-color-primary)',
-      background: 'var(--vocs-background-color-primary)',
-      fontSize: '13px',
+      // design-exception: Preserve the inherited component/framework scope at the point of use.
+      paddingInline: 'var(--vocs-spacing-content-px) !custom',
+      borderBottomWidth: tokens.borderWidth.hairline,
+      borderBottomStyle: 'solid',
+      borderBottomColor: inherited.color.vocsBorderColorPrimary,
+      backgroundColor: inherited.color.vocsBackgroundColorPrimary,
+      fontSize: tokens.fontSize.compact,
     },
   },
 })
@@ -357,10 +373,13 @@ global({
       '[data-layout][data-v-sidebar] > [data-v-main]': {
         width: 'calc(var(--tempo-docs-shell-width) - var(--tempo-docs-sidebar-width))',
         maxWidth: 'calc(var(--tempo-docs-shell-width) - var(--tempo-docs-sidebar-width))',
+        // design-exception: Preserve the inherited component/framework scope at the point of use.
         marginLeft:
-          'calc( max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5)) + var(--tempo-docs-sidebar-width) )',
-        background: 'var(--vocs-background-color-primary)',
-        borderRight: '1px solid var(--vocs-border-color-primary)',
+          'calc( max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5)) + var(--tempo-docs-sidebar-width) ) !custom',
+        backgroundColor: inherited.color.vocsBackgroundColorPrimary,
+        borderRightWidth: tokens.borderWidth.hairline,
+        borderRightStyle: 'solid',
+        borderRightColor: inherited.color.vocsBorderColorPrimary,
         minHeight: '100dvh',
       },
     },
@@ -371,7 +390,8 @@ global({
   '@layer utilities': {
     '@media (width >= 1376px)': {
       '[data-layout][data-v-sidebar] > [data-v-main]': {
-        paddingRight: 'var(--tempo-docs-outline-width)',
+        // design-exception: Preserve the inherited component/framework scope at the point of use.
+        paddingRight: 'var(--tempo-docs-outline-width) !custom',
       },
     },
   },
@@ -383,8 +403,10 @@ global({
       '[data-v-gutter-right]': {
         right: 'max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5))',
         width: 'var(--tempo-docs-outline-width)',
-        background: 'var(--vocs-background-color-primary)',
-        borderRight: '1px solid var(--vocs-border-color-primary)',
+        backgroundColor: inherited.color.vocsBackgroundColorPrimary,
+        borderRightWidth: tokens.borderWidth.hairline,
+        borderRightStyle: 'solid',
+        borderRightColor: inherited.color.vocsBorderColorPrimary,
       },
     },
   },
@@ -393,7 +415,7 @@ global({
 global({
   '@layer utilities': {
     '[data-v-sidebar] [data-v-content], [data-v-sidebar] [data-v-footer]': {
-      background: 'transparent',
+      backgroundColor: 'transparent !custom',
     },
   },
 })
@@ -402,8 +424,8 @@ global({
   '@layer utilities': {
     '@media (width >= 1376px)': {
       '[data-v-sidebar] [data-v-content], [data-v-sidebar] [data-v-footer]': {
-        marginLeft: 'auto',
-        marginRight: 'auto',
+        marginLeft: 'auto !custom',
+        marginRight: 'auto !custom',
       },
     },
   },
@@ -457,8 +479,8 @@ global({
 global({
   '@layer utilities': {
     '[data-v-sidebar-container] [data-v-sidebar]': {
-      gap: '24px',
-      fontFamily: 'var(--font-pilat-book), ui-sans-serif, system-ui, sans-serif',
+      gap: tokens.spacing['6'],
+      fontFamily: tokens.fontFamily.system,
     },
   },
 })
@@ -474,8 +496,10 @@ global({
 global({
   '@layer utilities': {
     '[data-v-sidebar] > [data-v-sidebar-section] + [data-v-sidebar-section]': {
-      borderTop: '1px solid color-mix(in srgb, var(--foreground) 12%, transparent)',
-      paddingTop: '24px',
+      borderTopWidth: tokens.borderWidth.hairline,
+      borderTopStyle: 'solid',
+      borderTopColor: inherited.color.colorMixInSrgbForeground12Transparent,
+      paddingTop: tokens.spacing['6'],
     },
   },
 })
@@ -485,14 +509,19 @@ global({
     '[data-v-sidebar] > [data-v-sidebar-section] > [data-v-sidebar-section-header]': {
       height: 'auto',
       minHeight: 0,
-      margin: '0 -8px 12px',
-      padding: '0 8px',
-      background: 'transparent',
-      color: 'color-mix(in srgb, var(--foreground) 78%, transparent)',
-      fontSize: '12px',
-      fontWeight: 600,
-      letterSpacing: '0.055em',
-      lineHeight: 1.5,
+      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+      margin: '0 -8px 12px !custom',
+
+      paddingBlock: tokens.spacing['0'],
+      paddingInline: tokens.spacing['2'],
+      backgroundColor: 'transparent !custom',
+
+      color: inherited.color.colorMixInSrgbForeground78Transparent,
+      fontSize: tokens.fontSize.xs,
+      fontWeight: tokens.fontWeight.semibold,
+
+      letterSpacing: tokens.letterSpacing.wider,
+      lineHeight: tokens.lineHeight.normal,
       textTransform: 'uppercase',
     },
   },
@@ -502,15 +531,19 @@ global({
   '@layer utilities': {
     '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header]': {
       minHeight: '34px',
-      margin: '0 -8px',
-      padding: '6px 8px',
-      borderRadius: '4px',
-      background: 'transparent',
-      color: 'color-mix(in srgb, var(--foreground) 72%, transparent)',
-      fontSize: '14px',
-      fontWeight: 400,
-      letterSpacing: 0,
-      lineHeight: 1.5,
+      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+      margin: '0 -8px !custom',
+
+      paddingBlock: tokens.spacing['1_5'],
+      paddingInline: tokens.spacing['2'],
+      borderRadius: tokens.radius.sm,
+      backgroundColor: 'transparent !custom',
+
+      color: inherited.color.colorMixInSrgbForeground72Transparent,
+      fontSize: tokens.fontSize.sm,
+      fontWeight: tokens.fontWeight.normal,
+      letterSpacing: tokens.letterSpacing.normal,
+      lineHeight: tokens.lineHeight.normal,
     },
   },
 })
@@ -520,10 +553,12 @@ global({
     '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header]:not([data-collapsable="true"])':
       {
         minHeight: '26px',
-        margin: '6px -8px 1px',
-        color: 'color-mix(in srgb, var(--foreground) 65%, transparent)',
-        fontSize: '13px',
-        fontWeight: 400,
+        // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+        margin: '6px -8px 1px !custom',
+
+        color: inherited.color.colorMixInSrgbForeground65Transparent,
+        fontSize: tokens.fontSize.compact,
+        fontWeight: tokens.fontWeight.normal,
       },
   },
 })
@@ -532,7 +567,7 @@ global({
   '@layer utilities': {
     '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header][data-collapsable="true"]':
       {
-        color: 'color-mix(in srgb, var(--foreground) 68%, transparent)',
+        color: inherited.color.colorMixInSrgbForeground68Transparent,
       },
   },
 })
@@ -541,8 +576,8 @@ global({
   '@layer utilities': {
     '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header][data-collapsable="true"]:hover':
       {
-        background: 'color-mix(in srgb, var(--foreground) 4%, transparent)',
-        color: 'var(--foreground)',
+        backgroundColor: inherited.color.colorMixInSrgbForeground4Transparent,
+        color: tokens.color.foreground,
       },
   },
 })
@@ -560,9 +595,10 @@ global({
 global({
   '@layer utilities': {
     '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-content]': {
-      marginTop: '2px',
-      marginBottom: '2px',
-      borderLeftColor: 'color-mix(in srgb, var(--foreground) 10%, transparent)',
+      marginTop: tokens.spacing['0_5'],
+      marginBottom: tokens.spacing['0_5'],
+
+      borderLeftColor: inherited.color.colorMixInSrgbForeground10Transparent,
       gap: 0,
     },
   },
@@ -572,14 +608,18 @@ global({
   '@layer utilities': {
     '[data-v-sidebar] [data-v-sidebar-item][data-link]': {
       minHeight: '34px',
-      margin: '0 -8px',
-      padding: '6px 8px',
-      borderRadius: '4px',
-      color: 'color-mix(in srgb, var(--foreground) 72%, transparent)',
-      fontSize: '14px',
-      fontWeight: 400,
-      letterSpacing: 0,
-      lineHeight: 1.5,
+      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+      margin: '0 -8px !custom',
+
+      paddingBlock: tokens.spacing['1_5'],
+      paddingInline: tokens.spacing['2'],
+      borderRadius: tokens.radius.sm,
+
+      color: inherited.color.colorMixInSrgbForeground72Transparent,
+      fontSize: tokens.fontSize.sm,
+      fontWeight: tokens.fontWeight.normal,
+      letterSpacing: tokens.letterSpacing.normal,
+      lineHeight: tokens.lineHeight.normal,
     },
   },
 })
@@ -587,8 +627,8 @@ global({
 global({
   '@layer utilities': {
     '[data-v-sidebar] a[data-v-sidebar-item][data-link]:hover': {
-      background: 'color-mix(in srgb, var(--foreground) 4%, transparent)',
-      color: 'var(--foreground)',
+      backgroundColor: inherited.color.colorMixInSrgbForeground4Transparent,
+      color: tokens.color.foreground,
     },
   },
 })
@@ -596,9 +636,9 @@ global({
 global({
   '@layer utilities': {
     '[data-v-sidebar] a[data-v-sidebar-item][data-active]': {
-      background: 'color-mix(in srgb, var(--foreground) 5%, transparent)',
-      color: 'var(--foreground)',
-      fontWeight: 500,
+      backgroundColor: inherited.color.colorMixInSrgbForeground5Transparent,
+      color: tokens.color.foreground,
+      fontWeight: tokens.fontWeight.medium,
       boxShadow: 'none',
     },
   },
@@ -607,7 +647,7 @@ global({
 global({
   '@layer utilities': {
     '[data-v-sidebar] a[data-v-sidebar-item][data-active]:hover': {
-      background: 'color-mix(in srgb, var(--foreground) 10%, transparent)',
+      backgroundColor: inherited.color.colorMixInSrgbForeground10Transparent,
     },
   },
 })
@@ -616,7 +656,7 @@ global({
   '@layer utilities': {
     '[data-v-sidebar] [data-v-sidebar-item][data-condensed="true"]': {
       minHeight: '28px',
-      fontSize: '13px',
+      fontSize: tokens.fontSize.compact,
     },
   },
 })
@@ -624,7 +664,7 @@ global({
 global({
   '@layer utilities': {
     '[data-v-sidebar] [data-v-sidebar-section-header] svg': {
-      color: 'color-mix(in srgb, var(--foreground) 38%, transparent)',
+      color: inherited.color.colorMixInSrgbForeground38Transparent,
     },
   },
 })
@@ -961,14 +1001,14 @@ global({
 
 global({
   'html, body': {
-    background: 'var(--background)',
-    color: 'var(--foreground)',
+    backgroundColor: tokens.color.background,
+    color: tokens.color.foreground,
   },
 })
 
 global({
   'html:has(.docs-section-nav), body:has(.docs-section-nav)': {
-    background: 'var(--surface-shell)',
+    backgroundColor: tokens.color.shell,
   },
 })
 
@@ -982,7 +1022,7 @@ global({
 global({
   body: {
     userSelect: 'text',
-    fontFamily: 'var(--font-pilat-book)',
+    fontFamily: tokens.fontFamily.book,
   },
 })
 
@@ -995,8 +1035,9 @@ global({
 
 global({
   '::selection': {
-    background: 'var(--selection-bg)',
-    color: 'var(--selection-fg)',
+    backgroundColor: inherited.color.selectionBg,
+
+    color: inherited.color.selectionFg,
   },
 })
 
@@ -1037,7 +1078,7 @@ global({
 global({
   '[data-v-logo] img': {
     height: '20px',
-    marginTop: '2px',
+    marginTop: tokens.spacing['0_5'],
   },
 })
 
@@ -1050,7 +1091,7 @@ global({
 global({
   '[data-v-openapi-overview] [data-v-openapi-disclosure-trigger]:hover, [data-v-openapi-overview] [data-v-openapi-overview-endpoint]:hover':
     {
-      backgroundColor: 'transparent',
+      backgroundColor: 'transparent !custom',
     },
 })
 
@@ -1070,9 +1111,12 @@ global({
     display: 'block',
     width: '100%',
     height: 'auto',
-    marginTop: '1.5em',
-    border: '1px solid var(--line)',
-    color: 'var(--foreground)',
+
+    marginTop: inherited.spacing.block,
+    borderWidth: tokens.borderWidth.hairline,
+    borderStyle: 'solid',
+    borderColor: tokens.color.line,
+    color: tokens.color.foreground,
   },
 })
 
@@ -1088,7 +1132,7 @@ global({
 
 global({
   ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram :is(text, tspan)::selection': {
-    background: 'var(--diagram-selection-bg)',
+    backgroundColor: inherited.color.diagramSelectionBg,
   },
 })
 
@@ -1106,45 +1150,47 @@ global({
 
 global({
   ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-bg': {
-    fill: 'var(--diagram-bg)',
+    fill: inherited.color.diagramBg,
   },
 })
 
 global({
   ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-box': {
-    fill: 'var(--diagram-box)',
-    stroke: 'var(--diagram-box-border)',
+    fill: inherited.color.diagramBox,
+
+    stroke: inherited.color.diagramBoxBorder,
   },
 })
 
 global({
   ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-accent-box': {
-    fill: 'var(--diagram-accent-bg)',
-    stroke: 'var(--diagram-accent)',
+    fill: inherited.color.diagramAccentBg,
+
+    stroke: inherited.color.diagramAccent,
   },
 })
 
 global({
   ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-line': {
-    stroke: 'var(--diagram-line)',
+    stroke: inherited.color.diagramLine,
   },
 })
 
 global({
   ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-line-soft': {
-    stroke: 'var(--diagram-line-soft)',
+    stroke: inherited.color.diagramLineSoft,
   },
 })
 
 global({
   ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-accent-line': {
-    stroke: 'var(--diagram-accent)',
+    stroke: inherited.color.diagramAccent,
   },
 })
 
 global({
   ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-accent': {
-    fill: 'var(--diagram-accent)',
+    fill: inherited.color.diagramAccent,
   },
 })
 
@@ -1156,7 +1202,7 @@ global({
   '@layer utilities': {
     '[data-layout][data-v-sidebar] > [data-v-gutter-left], [data-v-sidebar-container], [data-v-sidebar-footer-content]':
       {
-        background: 'var(--surface-shell)',
+        backgroundColor: tokens.color.shell,
       },
   },
 })
@@ -1164,8 +1210,8 @@ global({
 global({
   '@layer utilities': {
     'article[data-v-content]': {
-      fontSize: '16px',
-      lineHeight: 1.7,
+      fontSize: tokens.fontSize.body,
+      lineHeight: tokens.lineHeight.prose,
     },
   },
 })
@@ -1173,9 +1219,10 @@ global({
 global({
   '@layer utilities': {
     'article[data-v-content] :is(h1, h2, h3)[data-v]': {
-      fontFamily: 'var(--tempo-font-display)',
-      fontWeight: 500,
-      letterSpacing: '-0.025em',
+      fontFamily: inherited.fontFamily.tempoFontDisplay,
+      fontWeight: tokens.fontWeight.medium,
+
+      letterSpacing: tokens.letterSpacing.heading,
       textWrap: 'balance',
     },
   },
@@ -1187,9 +1234,11 @@ global({
       maxWidth: '24ch',
       border: 0,
       paddingBottom: 0,
-      fontSize: 'clamp(32px, 3vw, 42px)',
-      letterSpacing: '-0.04em',
-      lineHeight: 1.14,
+      // design-exception: Preserve this responsive geometry across viewport sizes.
+      fontSize: 'clamp(32px, 3vw, 42px) !custom',
+      letterSpacing: tokens.letterSpacing.display,
+
+      lineHeight: tokens.lineHeight.display,
     },
   },
 })
@@ -1197,9 +1246,10 @@ global({
 global({
   '@layer utilities': {
     'article[data-v-content] > h1[data-v] + p[data-v]': {
-      color: 'color-mix(in srgb, var(--foreground) 68%, transparent)',
-      fontSize: '17px',
-      lineHeight: 1.7,
+      color: inherited.color.colorMixInSrgbForeground68Transparent,
+
+      fontSize: tokens.fontSize.body,
+      lineHeight: tokens.lineHeight.prose,
     },
   },
 })
@@ -1227,7 +1277,7 @@ global({
 global({
   '@layer utilities': {
     'article[data-v-content] aside[data-v-callout]': {
-      borderRadius: '6px',
+      borderRadius: tokens.radius.md,
     },
   },
 })
@@ -1235,7 +1285,7 @@ global({
 global({
   '@layer utilities': {
     '[data-v-outline-indicator]': {
-      background: 'var(--foreground)',
+      backgroundColor: tokens.color.foreground,
     },
   },
 })
@@ -1243,7 +1293,7 @@ global({
 global({
   '@layer utilities': {
     '[data-v-outline-item] a[data-active="true"]': {
-      color: 'var(--foreground)',
+      color: tokens.color.foreground,
     },
   },
 })
@@ -1251,7 +1301,9 @@ global({
 global({
   '@layer utilities': {
     'body:has(.docs-section-nav) :is(a, button, input, summary):focus-visible': {
-      outline: '2px solid var(--foreground)',
+      outlineWidth: tokens.borderWidth.emphasis,
+      outlineStyle: 'solid',
+      outlineColor: tokens.color.foreground,
       outlineOffset: '3px',
     },
   },
@@ -1264,7 +1316,7 @@ global({
     '[data-layout]:has(.tempo-docs-home) > [data-v-main]': {
       width: 'var(--tempo-docs-shell-width)',
       maxWidth: 'var(--tempo-docs-shell-width)',
-      marginInline: 'auto',
+      marginInline: 'auto !custom',
       paddingRight: 0,
       border: 0,
     },
@@ -1284,8 +1336,9 @@ global({
   '@layer utilities': {
     'article[data-v-content]:has(.tempo-docs-home)': {
       maxWidth: 'calc(var(--tempo-hub-width) + 96px)',
-      marginInline: 'auto',
-      padding: 'clamp(24px, 4vw, 48px)',
+      marginInline: 'auto !custom',
+      // design-exception: Preserve this responsive geometry across viewport sizes.
+      padding: 'clamp(24px, 4vw, 48px) !custom',
     },
   },
 })
@@ -1293,11 +1346,12 @@ global({
 global({
   '@layer utilities': {
     'article[data-v-content] :is(p, li, td)[data-v] a[data-v]': {
-      color: 'var(--accent-blue)',
-      fontWeight: 400,
+      color: tokens.color.accent,
+      fontWeight: tokens.fontWeight.normal,
       textDecorationLine: 'underline',
       textDecorationStyle: 'solid',
-      textDecorationColor: 'color-mix(in srgb, var(--accent-blue) 40%, transparent)',
+
+      textDecorationColor: inherited.color.colorMixInSrgbAccentBlue40Transparent,
       textDecorationThickness: '1px',
       textUnderlineOffset: '3px',
     },
@@ -1307,7 +1361,7 @@ global({
 global({
   '@layer utilities': {
     'article[data-v-content] :is(p, li, td)[data-v] a[data-v]:is(:hover, :focus-visible)': {
-      textDecorationColor: 'currentColor',
+      textDecorationColor: 'currentColor !custom',
     },
   },
 })

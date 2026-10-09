@@ -1,4 +1,4 @@
-import { style } from 'zyzz'
+import { inherited } from './inherited'
 import {
   blockIn as blockInMotion,
   buildFill as buildFillMotion,
@@ -9,17 +9,19 @@ import {
   settleFlash as settleFlashMotion,
   zoneBreathe as zoneBreatheMotion,
 } from './motion'
+import { style } from './scoped'
+import { vars as tokens } from './theme'
 
 export const docsSectionNav = style({
   '@layer utilities': {
     position: 'fixed',
     top: 'var(--tempo-docs-primary-nav-height)',
-    right: 0,
-    left: 0,
-    zIndex: 50,
+    insetInlineEnd: 0,
+    insetInlineStart: 0,
+    zIndex: tokens.zIndex.sectionNav,
     '@media (width >= 1080px)': {
-      right: 'max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5))',
-      left: 'max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5))',
+      insetInlineEnd: 'max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5))',
+      insetInlineStart: 'max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5))',
     },
   },
 })
@@ -71,11 +73,11 @@ export const navActiveSquare = style({
 })
 
 export const edgeMarker = style({
-  backgroundColor: 'var(--line-dashed)',
+  backgroundColor: inherited.color.lineDashed,
 })
 
 export const repoBrandSquareNeutral = style({
-  backgroundColor: 'var(--foreground)',
+  backgroundColor: tokens.color.foreground,
 })
 
 export const showcaseVisualFrame = style({
@@ -83,15 +85,16 @@ export const showcaseVisualFrame = style({
 })
 
 export const showcaseVisualCard = style({
-  borderColor: 'var(--line)',
-  backgroundColor: 'var(--surface-card)',
+  borderColor: tokens.color.line,
+  backgroundColor: tokens.color.card,
   boxShadow: 'none',
 })
 
 export const showcaseVisualPanel = style({
-  borderColor: 'var(--line)',
-  backgroundColor: 'var(--surface-panel)',
-  color: 'var(--foreground)',
+  borderColor: tokens.color.line,
+
+  backgroundColor: inherited.color.surfacePanel,
+  color: tokens.color.foreground,
 })
 
 export const themePreserveDark = style({
@@ -136,172 +139,181 @@ export const featureDiagramMark = style({
 
 export const heading64 = style({
   '@layer utilities': {
-    fontSize: '64px',
-    fontWeight: 600,
-    lineHeight: 1.1,
-    letterSpacing: 0,
+    fontSize: tokens.fontSize.hero,
+    fontWeight: tokens.fontWeight.semibold,
+    lineHeight: tokens.lineHeight.display,
+    letterSpacing: tokens.letterSpacing.normal,
   },
 })
 
 export const heading48 = style({
   '@layer utilities': {
-    fontSize: '48px',
-    fontWeight: 600,
-    lineHeight: 1.15,
-    letterSpacing: 0,
+    fontSize: tokens.fontSize.displayLarge,
+    fontWeight: tokens.fontWeight.semibold,
+
+    lineHeight: tokens.lineHeight.display,
+    letterSpacing: tokens.letterSpacing.normal,
   },
 })
 
 export const heading40 = style({
   '@layer utilities': {
-    fontSize: '40px',
-    fontWeight: 600,
-    lineHeight: 1.2,
-    letterSpacing: 0,
+    fontSize: tokens.fontSize.display,
+    fontWeight: tokens.fontWeight.semibold,
+    lineHeight: tokens.lineHeight.heading,
+    letterSpacing: tokens.letterSpacing.normal,
   },
 })
 
 export const heading32 = style({
   '@layer utilities': {
-    fontSize: '32px',
-    fontWeight: 500,
-    lineHeight: 1.25,
-    letterSpacing: 0,
+    fontSize: tokens.fontSize.displaySmall,
+    fontWeight: tokens.fontWeight.medium,
+
+    lineHeight: tokens.lineHeight.heading,
+    letterSpacing: tokens.letterSpacing.normal,
   },
 })
 
 export const heading24 = style({
   '@layer utilities': {
-    fontSize: '24px',
-    fontWeight: 500,
-    lineHeight: 1.35,
-    letterSpacing: 0,
+    fontSize: tokens.fontSize.title,
+    fontWeight: tokens.fontWeight.medium,
+
+    lineHeight: tokens.lineHeight.snug,
+    letterSpacing: tokens.letterSpacing.normal,
   },
 })
 
 export const heading20 = style({
   '@layer utilities': {
-    fontSize: '20px',
-    fontWeight: 500,
-    lineHeight: 1.4,
-    letterSpacing: '0.01em',
+    fontSize: tokens.fontSize.subheading,
+    fontWeight: tokens.fontWeight.medium,
+    lineHeight: tokens.lineHeight.snug,
+    letterSpacing: tokens.letterSpacing.wide,
   },
 })
 
 export const heading16 = style({
   '@layer utilities': {
-    fontSize: '16px',
-    fontWeight: 500,
-    lineHeight: 1.5,
-    letterSpacing: '0.01em',
+    fontSize: tokens.fontSize.body,
+    fontWeight: tokens.fontWeight.medium,
+    lineHeight: tokens.lineHeight.normal,
+    letterSpacing: tokens.letterSpacing.wide,
   },
 })
 
 export const copy16 = style({
   '@layer utilities': {
-    fontSize: '16px',
-    fontWeight: 400,
-    lineHeight: 1.6,
-    letterSpacing: '0.01em',
+    fontSize: tokens.fontSize.body,
+    fontWeight: tokens.fontWeight.normal,
+    lineHeight: tokens.lineHeight.relaxed,
+    letterSpacing: tokens.letterSpacing.wide,
   },
 })
 
 export const copy15 = style({
   '@layer utilities': {
-    fontSize: '15px',
-    fontWeight: 400,
-    lineHeight: 1.6,
-    letterSpacing: '0.01em',
+    fontSize: tokens.fontSize.bodySmall,
+    fontWeight: tokens.fontWeight.normal,
+    lineHeight: tokens.lineHeight.relaxed,
+    letterSpacing: tokens.letterSpacing.wide,
   },
 })
 
 export const copy14 = style({
   '@layer utilities': {
-    fontSize: '14px',
-    fontWeight: 400,
-    lineHeight: 1.6,
-    letterSpacing: '0.01em',
+    fontSize: tokens.fontSize.sm,
+    fontWeight: tokens.fontWeight.normal,
+    lineHeight: tokens.lineHeight.relaxed,
+    letterSpacing: tokens.letterSpacing.wide,
   },
 })
 
 export const copy13 = style({
   '@layer utilities': {
-    fontSize: '13px',
-    fontWeight: 400,
-    lineHeight: 1.55,
-    letterSpacing: '0.01em',
+    fontSize: tokens.fontSize.compact,
+    fontWeight: tokens.fontWeight.normal,
+
+    lineHeight: tokens.lineHeight.normal,
+    letterSpacing: tokens.letterSpacing.wide,
   },
 })
 
 export const label16 = style({
   '@layer utilities': {
-    fontSize: '16px',
-    fontWeight: 400,
-    lineHeight: 1.5,
-    letterSpacing: '0.01em',
+    fontSize: tokens.fontSize.body,
+    fontWeight: tokens.fontWeight.normal,
+    lineHeight: tokens.lineHeight.normal,
+    letterSpacing: tokens.letterSpacing.wide,
   },
 })
 
 export const label15 = style({
   '@layer utilities': {
-    fontSize: '15px',
-    fontWeight: 400,
-    lineHeight: 1.45,
-    letterSpacing: '0.01em',
+    fontSize: tokens.fontSize.bodySmall,
+    fontWeight: tokens.fontWeight.normal,
+
+    lineHeight: tokens.lineHeight.snug,
+    letterSpacing: tokens.letterSpacing.wide,
   },
 })
 
 export const label14 = style({
   '@layer utilities': {
-    fontSize: '14px',
-    fontWeight: 400,
-    lineHeight: 1.45,
-    letterSpacing: '0.01em',
+    fontSize: tokens.fontSize.sm,
+    fontWeight: tokens.fontWeight.normal,
+
+    lineHeight: tokens.lineHeight.snug,
+    letterSpacing: tokens.letterSpacing.wide,
   },
 })
 
 export const label13 = style({
   '@layer utilities': {
-    fontSize: '13px',
-    fontWeight: 400,
-    lineHeight: 1.4,
-    letterSpacing: '0.01em',
+    fontSize: tokens.fontSize.compact,
+    fontWeight: tokens.fontWeight.normal,
+    lineHeight: tokens.lineHeight.snug,
+    letterSpacing: tokens.letterSpacing.wide,
   },
 })
 
 export const label12 = style({
   '@layer utilities': {
-    fontSize: '12px',
-    fontWeight: 400,
-    lineHeight: 1.35,
-    letterSpacing: '0.01em',
+    fontSize: tokens.fontSize.xs,
+    fontWeight: tokens.fontWeight.normal,
+
+    lineHeight: tokens.lineHeight.snug,
+    letterSpacing: tokens.letterSpacing.wide,
   },
 })
 
 export const button16 = style({
   '@layer utilities': {
-    fontSize: '16px',
-    fontWeight: 500,
-    lineHeight: 1.5,
-    letterSpacing: '0.01em',
+    fontSize: tokens.fontSize.body,
+    fontWeight: tokens.fontWeight.medium,
+    lineHeight: tokens.lineHeight.normal,
+    letterSpacing: tokens.letterSpacing.wide,
   },
 })
 
 export const button14 = style({
   '@layer utilities': {
-    fontSize: '14px',
-    fontWeight: 500,
-    lineHeight: 1.45,
-    letterSpacing: '0.01em',
+    fontSize: tokens.fontSize.sm,
+    fontWeight: tokens.fontWeight.medium,
+
+    lineHeight: tokens.lineHeight.snug,
+    letterSpacing: tokens.letterSpacing.wide,
   },
 })
 
 export const button12 = style({
   '@layer utilities': {
-    fontSize: '12px',
-    fontWeight: 500,
-    lineHeight: 1.35,
-    letterSpacing: '0.01em',
+    fontSize: tokens.fontSize.xs,
+    fontWeight: tokens.fontWeight.medium,
+
+    lineHeight: tokens.lineHeight.snug,
+    letterSpacing: tokens.letterSpacing.wide,
   },
 })
 
@@ -349,7 +361,7 @@ export const zoneBreathe = style({
 })
 
 export const settledCell = style({
-  backgroundColor: 'color-mix(in srgb, var(--indicator-green) 12%, var(--surface-shell))',
+  backgroundColor: inherited.color.colorMixInSrgbIndicatorGreen12SurfaceShell,
 })
 
 export const blockIn = style({
@@ -381,11 +393,11 @@ export const codeScroll = style({
       height: '8px',
     },
     '&::-webkit-scrollbar-track': {
-      background: 'transparent',
+      backgroundColor: 'transparent !custom',
     },
     '&::-webkit-scrollbar-thumb': {
-      background: 'var(--scrollbar-thumb)',
-      borderRadius: '4px',
+      backgroundColor: inherited.color.scrollbarThumb,
+      borderRadius: tokens.radius.sm,
     },
   },
 })
@@ -408,154 +420,190 @@ export const terminalTheme = style({
 })
 
 export const blogProse = style({
-  fontSize: '16px',
-  lineHeight: 1.7,
-  letterSpacing: '0.01em',
-  color: 'var(--prose-body)',
+  fontSize: tokens.fontSize.body,
+  lineHeight: tokens.lineHeight.prose,
+  letterSpacing: tokens.letterSpacing.wide,
+
+  color: inherited.color.proseBody,
   selectors: {
     '& h2': {
-      color: 'var(--foreground)',
-      letterSpacing: 0,
-      marginTop: '2.5em',
-      fontSize: '24px',
-      lineHeight: 1.3,
+      color: tokens.color.foreground,
+      letterSpacing: tokens.letterSpacing.normal,
+
+      marginTop: inherited.spacing.heading,
+      fontSize: tokens.fontSize.title,
+      lineHeight: tokens.lineHeight.compact,
     },
     '& h3': {
-      color: 'var(--foreground)',
-      letterSpacing: 0,
-      marginTop: '2em',
-      fontSize: '19px',
-      lineHeight: 1.35,
+      color: tokens.color.foreground,
+      letterSpacing: tokens.letterSpacing.normal,
+
+      marginTop: inherited.spacing.subheading,
+
+      fontSize: tokens.fontSize.lead,
+
+      lineHeight: tokens.lineHeight.snug,
     },
     '& h4': {
-      color: 'var(--foreground)',
-      letterSpacing: 0,
-      marginTop: '1.75em',
-      fontSize: '16px',
-      lineHeight: 1.4,
+      color: tokens.color.foreground,
+      letterSpacing: tokens.letterSpacing.normal,
+
+      marginTop: inherited.spacing.subtitle,
+      fontSize: tokens.fontSize.body,
+      lineHeight: tokens.lineHeight.snug,
     },
     '& p': {
-      marginTop: '1.25em',
+      marginTop: inherited.spacing.paragraph,
     },
     '& ul': {
-      marginTop: '1.25em',
-      paddingLeft: '1.4em',
+      marginTop: inherited.spacing.paragraph,
+
+      paddingInlineStart: inherited.spacing.listInset,
       listStyle: 'disc',
     },
     '& ol': {
-      marginTop: '1.25em',
-      paddingLeft: '1.4em',
+      marginTop: inherited.spacing.paragraph,
+
+      paddingInlineStart: inherited.spacing.listInset,
       listStyle: 'decimal',
     },
     '& table': {
-      marginTop: '1.25em',
+      marginTop: inherited.spacing.paragraph,
       width: '100%',
       borderCollapse: 'collapse',
-      fontSize: '14px',
+      fontSize: tokens.fontSize.sm,
     },
     '& blockquote': {
-      marginTop: '1.25em',
-      borderLeft: '2px solid var(--line-strong)',
-      paddingLeft: '1.25em',
-      color: 'var(--prose-quote)',
+      marginTop: inherited.spacing.paragraph,
+      borderInlineStartWidth: tokens.borderWidth.emphasis,
+      borderInlineStartStyle: 'solid',
+      borderInlineStartColor: tokens.color.lineStrong,
+
+      paddingInlineStart: inherited.spacing.paragraph,
+
+      color: inherited.color.proseQuote,
     },
     '& pre': {
-      marginTop: '1.25em',
-      background: 'var(--surface-block)',
-      border: '1px solid var(--line)',
-      padding: '16px 20px',
+      marginTop: inherited.spacing.paragraph,
+      backgroundColor: tokens.color.block,
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: tokens.color.line,
+
+      paddingBlock: tokens.spacing['4'],
+      paddingInline: tokens.spacing['5'],
       overflowX: 'auto',
       scrollbarWidth: 'thin',
       scrollbarColor: 'var(--scrollbar-thumb) transparent',
     },
     '& a': {
-      color: 'var(--foreground)',
+      color: tokens.color.foreground,
       textDecoration: 'underline',
       textUnderlineOffset: '3px',
-      textDecorationColor: 'var(--prose-link-decoration)',
+
+      textDecorationColor: inherited.color.proseLinkDecoration,
       transition: 'text-decoration-color 150ms',
     },
     '& a:hover': {
-      textDecorationColor: 'var(--foreground)',
+      textDecorationColor: tokens.color.foreground,
     },
     '& strong': {
-      color: 'var(--foreground)',
-      fontWeight: 600,
+      color: tokens.color.foreground,
+      fontWeight: tokens.fontWeight.semibold,
     },
     '& li': {
-      marginTop: '0.4em',
+      marginTop: inherited.spacing.marker,
     },
     '& li::marker': {
-      color: 'var(--prose-marker)',
+      color: inherited.color.proseMarker,
     },
     '& code': {
-      fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace',
-      fontSize: '0.875em',
-      background: 'var(--surface-panel)',
-      padding: '0.15em 0.4em',
-      borderRadius: '3px',
+      fontFamily: tokens.fontFamily.mono,
+
+      fontSize: inherited.spacing.inlineCode,
+      backgroundColor: inherited.color.surfacePanel,
+      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+      padding: '0.15em 0.4em !custom',
+
+      borderRadius: tokens.radius.xs,
     },
     '& .shiki': {
-      color: 'light-dark(var(--shiki-light), var(--shiki-dark))',
+      color: inherited.color.lightDarkShikiLightShikiDark,
     },
     '& .shiki span': {
-      color: 'light-dark(var(--shiki-light), var(--shiki-dark))',
+      color: inherited.color.lightDarkShikiLightShikiDark,
     },
     '& pre code': {
       background: 'none',
       padding: 0,
-      fontSize: '13px',
-      lineHeight: 1.6,
+      fontSize: tokens.fontSize.compact,
+      lineHeight: tokens.lineHeight.relaxed,
     },
     '& hr': {
-      marginTop: '2.5em',
-      borderColor: 'var(--line)',
+      marginTop: inherited.spacing.heading,
+      borderColor: tokens.color.line,
     },
     '& th': {
-      border: '1px solid var(--line)',
-      padding: '8px 14px',
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: tokens.color.line,
+
+      paddingBlock: tokens.spacing['2'],
+      paddingInline: tokens.spacing['3_5'],
       textAlign: 'left',
-      color: 'var(--foreground)',
-      fontWeight: 600,
-      background: 'var(--surface-block)',
+      color: tokens.color.foreground,
+      fontWeight: tokens.fontWeight.semibold,
+      backgroundColor: tokens.color.block,
     },
     '& td': {
-      border: '1px solid var(--line)',
-      padding: '8px 14px',
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: tokens.color.line,
+
+      paddingBlock: tokens.spacing['2'],
+      paddingInline: tokens.spacing['3_5'],
       textAlign: 'left',
     },
     '& img': {
-      marginTop: '1.5em',
-      border: '1px solid var(--line)',
+      marginTop: inherited.spacing.block,
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: tokens.color.line,
     },
     '& video': {
       display: 'block',
       width: '100%',
       height: 'auto',
-      marginTop: '1.5em',
-      border: '1px solid var(--line)',
-      background: 'var(--surface-block)',
+
+      marginTop: inherited.spacing.block,
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: tokens.color.line,
+      backgroundColor: tokens.color.block,
     },
     '& :is(p:has(img), p:has(svg)) + p:has(> em:only-child)': {
-      marginTop: '0.75em',
-      fontSize: '13px',
-      color: 'var(--prose-caption)',
+      marginTop: inherited.spacing.caption,
+      fontSize: tokens.fontSize.compact,
+
+      color: inherited.color.proseCaption,
     },
   },
 })
 
 export const docsZoneDiagram = style({
-  margin: '2rem 0',
+  marginBlock: tokens.spacing['8'],
+  marginInline: tokens.spacing['0'],
   selectors: {
     '& svg.blog-diagram': {
       margin: 0,
       border: 0,
     },
     '& figcaption': {
-      marginTop: '0.75rem',
-      color: 'var(--foreground-secondary)',
-      fontSize: '0.8125rem',
-      lineHeight: 1.5,
+      marginTop: tokens.spacing['3'],
+      color: tokens.color.muted,
+
+      fontSize: tokens.fontSize.compact,
+      lineHeight: tokens.lineHeight.normal,
       textAlign: 'center',
     },
   },
@@ -566,26 +614,30 @@ export const docsDemo = style({
     selectors: {
       '& :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea)': {
         minHeight: '40px',
-        borderRadius: '6px',
-        borderColor: 'var(--line-strong)',
-        background: 'var(--surface-input)',
-        color: 'var(--foreground)',
-        fontSize: '14px',
-        lineHeight: 1.5,
+        borderRadius: tokens.radius.md,
+        borderColor: tokens.color.lineStrong,
+        backgroundColor: inherited.color.surfaceInput,
+        color: tokens.color.foreground,
+        fontSize: tokens.fontSize.sm,
+        lineHeight: tokens.lineHeight.normal,
       },
       '& :is(input, select, textarea):focus-visible': {
-        outline: '2px solid var(--foreground)',
+        outlineWidth: tokens.borderWidth.emphasis,
+        outlineStyle: 'solid',
+        outlineColor: tokens.color.foreground,
         outlineOffset: '2px',
       },
       '& :is(button, a):focus-visible': {
-        outline: '2px solid var(--foreground)',
+        outlineWidth: tokens.borderWidth.emphasis,
+        outlineStyle: 'solid',
+        outlineColor: tokens.color.foreground,
         outlineOffset: '3px',
       },
     },
     '@media (width < 640px)': {
       selectors: {
         '& :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea)': {
-          fontSize: '16px',
+          fontSize: tokens.fontSize.body,
         },
       },
     },
@@ -593,15 +645,15 @@ export const docsDemo = style({
 })
 
 export const docsSpecificationMeta = style({
-  marginBottom: '1rem',
+  marginBottom: tokens.spacing['4'],
   selectors: {
     '& > a': {
       display: 'inline-flex',
       textDecoration: 'none',
     },
     '& > a:hover > span': {
-      color: 'var(--vocs-text-color-primary)',
-      background: 'var(--color-gray4)',
+      color: inherited.color.vocsTextColorPrimary,
+      backgroundColor: tokens.color.gray4,
     },
     '& + h1': {
       marginTop: 0,

@@ -1,5 +1,6 @@
-import { metrics } from '../../../styles/metrics'
+import { inherited } from '../../../styles/inherited'
 import { style } from '../../../styles/recipes'
+import { vars as tokens } from '../../../styles/theme'
 export const modeToggleLayout = style({
   display: 'flex',
   justifyContent: 'flex-end',
@@ -7,19 +8,19 @@ export const modeToggleLayout = style({
 export const modeToggleText = style({
   display: 'flex',
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--line)',
-  backgroundColor: 'var(--surface-shell)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  backgroundColor: tokens.color.shell,
 })
 export const modeToggleButton = style({
-  height: metrics.spacing['8'],
-  borderRightStyle: 'solid',
-  borderRightWidth: '1px',
-  borderColor: 'var(--line)',
-  paddingInline: metrics.spacing['3'],
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '10px',
-  letterSpacing: '0.12em',
+  height: tokens.spacing['8'],
+  borderInlineEndStyle: 'solid',
+  borderInlineEndWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  paddingInline: tokens.spacing['3'],
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.tiny,
+  letterSpacing: tokens.letterSpacing.label,
   textTransform: 'uppercase',
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
@@ -27,22 +28,23 @@ export const modeToggleButton = style({
   transitionDuration: '150ms',
   selectors: {
     '&:last-child': {
-      borderRightStyle: 'solid',
-      borderRightWidth: '0px',
+      borderInlineEndStyle: 'solid',
+      borderInlineEndWidth: tokens.borderWidth.none,
     },
   },
 })
 export const modeToggleButton2 = style({
-  backgroundColor: 'var(--surface-card-elev)',
-  color: 'var(--foreground)',
+  backgroundColor: tokens.color.elevated,
+  color: tokens.color.foreground,
 })
 export const modeToggleButton3 = style({
-  color: 'color-mix(in oklab, var(--foreground) 55%, transparent)',
+  color: inherited.color.colorMixInOklabForeground55Transparent,
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'var(--surface-block)',
-        color: 'color-mix(in oklab, var(--foreground) 70%, transparent)',
+        backgroundColor: tokens.color.block,
+
+        color: inherited.color.colorMixInOklabForeground70Transparent,
       },
     },
   },

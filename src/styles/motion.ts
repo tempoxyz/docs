@@ -1,4 +1,5 @@
 import { keyframes } from 'zyzz/web'
+import { inherited } from './inherited'
 
 export const navActivePixel = keyframes({
   '0%': {
@@ -73,7 +74,7 @@ export const buildFill = keyframes({
 
 export const settleFlash = keyframes({
   from: {
-    backgroundColor: 'color-mix(in srgb, var(--indicator-green) 28%, var(--surface-shell))',
+    backgroundColor: inherited.color.colorMixInSrgbIndicatorGreen28SurfaceShell,
   },
 })
 

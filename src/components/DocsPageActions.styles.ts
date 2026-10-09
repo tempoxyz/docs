@@ -1,5 +1,7 @@
-import { style } from 'zyzz'
 import { global } from 'zyzz/web'
+import { inherited } from '../styles/inherited'
+import { style } from '../styles/scoped'
+import { vars as tokens } from '../styles/theme'
 
 // Document/Vocs integration selectors cannot be attached to owned elements.
 global({
@@ -12,33 +14,40 @@ export const docsPageActions = style({
   display: 'flex',
   flexWrap: 'wrap',
   alignItems: 'center',
-  gap: '12px 22px',
-  paddingBlock: '4px 22px',
-  marginBottom: '34px',
-  fontFamily: 'var(--font-pilat-book), sans-serif',
-  fontSize: '13px',
-  lineHeight: 1.5,
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  gap: '12px 22px !custom',
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  paddingBlock: '4px 22px !custom',
+
+  marginBottom: tokens.spacing['8'],
+  fontFamily: tokens.fontFamily.sansFallback,
+  fontSize: tokens.fontSize.compact,
+  lineHeight: tokens.lineHeight.normal,
   selectors: {
     '& :is(a, button)': {
       display: 'inline-flex',
       alignItems: 'center',
-      gap: '6px',
-      padding: '3px 0',
-      color: 'color-mix(in srgb, var(--foreground) 65%, transparent)',
+      gap: tokens.spacing['1_5'],
+      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+      padding: '3px 0 !custom',
+
+      color: inherited.color.colorMixInSrgbForeground65Transparent,
       textDecoration: 'none',
       cursor: 'pointer',
     },
     '& :is(a, button):hover': {
-      color: 'var(--foreground)',
+      color: tokens.color.foreground,
     },
   },
   '@media (width < 600px)': {
-    gap: '8px 18px',
-    marginBottom: '24px',
+    // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+    gap: '8px 18px !custom',
+    marginBottom: tokens.spacing['6'],
   },
 })
 
 export const docsPageActionsError = style({
   width: '100%',
-  color: 'var(--vocs-text-color-muted)',
+
+  color: inherited.color.vocsTextColorMuted,
 })

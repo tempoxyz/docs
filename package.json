@@ -8,7 +8,7 @@
     "dev": "node --env-file-if-exists=.env --import=tsx node_modules/vite/bin/vite.js",
     "build": "node scripts/guard-vocs-config.mjs && pnpm run check:types && pnpm run build:site",
     "build:site": "pnpm run check:styles && vite build && node --experimental-strip-types scripts/finalize-sitemap.ts",
-    "check": "biome check --write --unsafe .",
+    "check": "biome check --write --unsafe . && pnpm run check:styles",
     "check:anchors": "node --experimental-strip-types scripts/check-internal-anchors.ts",
     "check:markdown": "node scripts/check-markdown-components.mjs && tsx scripts/check-ai-docs.ts",
     "check:types": "tsgo --project tsconfig.app.json --noEmit && tsgo --project tsconfig.node.json --noEmit",
@@ -25,7 +25,7 @@
     "og:probe": "node --experimental-strip-types scripts/probe-og.ts",
     "og:goldens": "tsx scripts/render-og-goldens.tsx",
     "og:goldens:check": "tsx scripts/render-og-goldens.tsx --check",
-    "check:styles": "node scripts/check-styles.mjs"
+    "check:styles": "node scripts/check-styles.mjs && oxlint src"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.114",
@@ -84,6 +84,7 @@
     "anser": "^2.3.5",
     "github-slugger": "2.0.0",
     "mppx": "0.13.3",
+    "oxlint": "1.72.0",
     "remark-stringify": "^11.0.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",

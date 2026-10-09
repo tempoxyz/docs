@@ -1,5 +1,7 @@
-import { style } from 'zyzz'
 import { global } from 'zyzz/web'
+import { inherited } from '../styles/inherited'
+import { style } from '../styles/scoped'
+import { vars as tokens } from '../styles/theme'
 
 // Document/Vocs integration selectors cannot be attached to owned elements.
 global({
@@ -7,18 +9,22 @@ global({
     margin: 0,
     padding: 0,
     border: 0,
-    fontSize: 'clamp(32px, 4.5cqi, 42px)',
-    letterSpacing: '-0.04em',
-    lineHeight: 1.14,
+    // design-exception: Preserve this responsive geometry across viewport sizes.
+    fontSize: 'clamp(32px, 4.5cqi, 42px) !custom',
+    letterSpacing: tokens.letterSpacing.display,
+
+    lineHeight: tokens.lineHeight.display,
   },
   'article[data-v-content] .docs-product-overview-copy p[data-v]': {
-    marginBlock: '16px 0',
-    fontSize: '16px',
-    lineHeight: 1.6,
+    // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+    marginBlock: '16px 0 !custom',
+    fontSize: tokens.fontSize.body,
+    lineHeight: tokens.lineHeight.relaxed,
   },
   'article[data-v-content] .docs-product-overview-copy h1[data-v] + p[data-v]': {
-    color: 'color-mix(in srgb, var(--foreground) 68%, transparent)',
-    fontSize: '17px',
+    color: inherited.color.colorMixInSrgbForeground68Transparent,
+
+    fontSize: tokens.fontSize.body,
   },
   ':where(.dark, [data-vocs-theme="dark"], [style*="color-scheme: dark"]) .docs-product-overview-art':
     {
@@ -36,17 +42,18 @@ global({
 
 export const docsProductOverview = style({
   containerType: 'inline-size',
-  marginBlock: '0 24px',
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  marginBlock: '0 24px !custom',
 })
 
 export const docsProductOverviewLayout = style({
   display: 'grid',
   gridTemplateColumns: 'minmax(0, 3fr) minmax(0, 2fr)',
   alignItems: 'center',
-  gap: '32px',
+  gap: tokens.spacing['8'],
   '@container (width <= 640px)': {
     gridTemplateColumns: 'minmax(0, 1fr)',
-    gap: '20px',
+    gap: tokens.spacing['5'],
   },
 })
 
@@ -60,14 +67,16 @@ export const docsProductOverviewArt = style({
   margin: 0,
   justifySelf: 'end',
   overflow: 'hidden',
-  borderRadius: '16px',
+
+  borderRadius: tokens.radius.xl,
   selectors: {
     '& svg': {
       display: 'block',
       width: '100%',
       height: 'auto',
       aspectRatio: '4 / 3',
-      fontFamily: 'var(--tempo-font-body), sans-serif',
+
+      fontFamily: inherited.fontFamily.tempoFontBodySansSerif,
     },
     '& svg text': {
       WebkitUserSelect: 'text',

@@ -1,10 +1,12 @@
-import { style } from 'zyzz'
+import { inherited } from '../styles/inherited'
+import { style } from '../styles/scoped'
+import { vars as tokens } from '../styles/theme'
 
 export const docsSetupGrid = style({
   display: 'grid',
   gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-  gap: '16px',
-  marginBlock: '24px',
+  gap: tokens.spacing['4'],
+  marginBlock: tokens.spacing['6'],
   '@media (width < 640px)': {
     gridTemplateColumns: 'minmax(0, 1fr)',
   },
@@ -14,56 +16,65 @@ export const docsSetupCard = style({
   display: 'flex',
   flexDirection: 'column',
   minWidth: 0,
-  padding: '24px',
-  borderRadius: '16px',
-  background: 'var(--color-surface-block)',
-  color: 'var(--color-foreground)',
+  padding: tokens.spacing['6'],
+
+  borderRadius: tokens.radius.xl,
+  backgroundColor: inherited.color.colorSurfaceBlock,
+  color: tokens.color.foreground,
   selectors: {
     '& h3': {
       display: 'flex',
       alignItems: 'center',
-      gap: '10px',
+      gap: tokens.spacing['2_5'],
       margin: 0,
-      fontSize: '18px',
-      fontWeight: 500,
-      lineHeight: 1.4,
+      fontSize: tokens.fontSize.lead,
+      fontWeight: tokens.fontWeight.medium,
+      lineHeight: tokens.lineHeight.snug,
     },
     '& svg': {
       flexShrink: 0,
     },
     '& p': {
-      margin: '12px 0 24px',
-      color: 'color-mix(in srgb, var(--color-foreground) 65%, transparent)',
-      fontSize: '14px',
-      lineHeight: 1.6,
+      marginTop: tokens.spacing['3'],
+      marginInlineEnd: tokens.spacing['0'],
+      marginBottom: tokens.spacing['6'],
+      marginInlineStart: tokens.spacing['0'],
+
+      color: inherited.color.colorMixInSrgbColorForeground65Transparent,
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.relaxed,
     },
   },
 })
 
 export const docsSetupLinks = style({
   display: 'grid',
-  gap: '4px',
-  marginTop: 'auto',
+  gap: tokens.spacing['1'],
+  marginTop: 'auto !custom',
   selectors: {
     '& a': {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      gap: '12px',
+      gap: tokens.spacing['3'],
       minHeight: '36px',
-      padding: '6px 8px',
-      marginInline: '-8px',
-      borderRadius: '6px',
-      color: 'inherit',
-      fontSize: '14px',
-      lineHeight: 1.5,
+
+      paddingBlock: tokens.spacing['1_5'],
+      paddingInline: tokens.spacing['2'],
+      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+      marginInline: '-8px !custom',
+      borderRadius: tokens.radius.md,
+      color: 'inherit !custom',
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.normal,
       textDecoration: 'none',
     },
     '& a:hover': {
-      background: 'color-mix(in srgb, var(--color-foreground) 6%, transparent)',
+      backgroundColor: inherited.color.colorMixInSrgbColorForeground6Transparent,
     },
     '& a:focus-visible': {
-      outline: '2px solid currentColor',
+      // design-exception: Preserve this surface's layered artwork or focus treatment.
+      outline: '2px solid currentColor !custom',
       outlineOffset: '2px',
     },
   },

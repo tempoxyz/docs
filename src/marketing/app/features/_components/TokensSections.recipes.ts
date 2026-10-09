@@ -1,11 +1,12 @@
-import { style as instanceStyle } from 'zyzz'
-import { metrics } from '../../../../styles/metrics'
+import { inherited } from '../../../../styles/inherited'
 import { style } from '../../../../styles/recipes'
+import { style as instanceStyle } from '../../../../styles/scoped'
+import { vars as tokens } from '../../../../styles/theme'
 export const storyPointsListList = style({
   display: 'grid',
   borderTopStyle: 'solid',
-  borderTopWidth: '1px',
-  borderColor: 'var(--line)',
+  borderTopWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
 })
 export const storyPointsListList2 = style({
   '@media (width >= 64rem)': {
@@ -13,69 +14,70 @@ export const storyPointsListList2 = style({
   },
 })
 export const storyPointsListText = style({
-  marginTop: metrics.spacing['0_5'],
-  width: metrics.spacing['5'],
-  height: metrics.spacing['5'],
+  marginTop: tokens.spacing['0_5'],
+  width: tokens.spacing['5'],
+  height: tokens.spacing['5'],
   flexShrink: 0,
 })
 export const storyPointsListHeading = style({
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '18px',
-  lineHeight: 1.2,
-  letterSpacing: '0',
-  color: 'var(--foreground)',
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.lead,
+  lineHeight: tokens.lineHeight.heading,
+  letterSpacing: tokens.letterSpacing.normal,
+  color: tokens.color.foreground,
 })
 export const storyPointsListDescription = style({
-  marginTop: metrics.spacing['2'],
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '14px',
-  lineHeight: 1.45,
-  letterSpacing: '0',
+  marginTop: tokens.spacing['2'],
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.sm,
+
+  lineHeight: tokens.lineHeight.snug,
+  letterSpacing: tokens.letterSpacing.normal,
 })
 export const storyPointsListDescription2 = style({
-  color: 'color-mix(in oklab, var(--foreground) 55%, transparent)',
+  color: inherited.color.colorMixInOklabForeground55Transparent,
 })
 export const storyPointsListDescription3 = style({
-  color: 'color-mix(in oklab, var(--foreground) 45%, transparent)',
+  color: inherited.color.colorMixInOklabForeground45Transparent,
   selectors: {
     '&:is(:where(.group):hover *)': {
       '@media (hover: hover)': {
-        color: 'color-mix(in oklab, var(--foreground) 55%, transparent)',
+        color: inherited.color.colorMixInOklabForeground55Transparent,
       },
     },
   },
 })
 export const storyPointsListItem = style({
   borderBottomStyle: 'solid',
-  borderBottomWidth: '1px',
-  borderColor: 'var(--line)',
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
   selectors: {
     '&:last-child': {
       borderBottomStyle: 'solid',
-      borderBottomWidth: '0px',
+      borderBottomWidth: tokens.borderWidth.none,
     },
   },
   '@media (width >= 40rem)': {
-    borderRightStyle: 'solid',
-    borderRightWidth: '1px',
+    borderInlineEndStyle: 'solid',
+    borderInlineEndWidth: tokens.borderWidth.hairline,
     borderBottomStyle: 'solid',
-    borderBottomWidth: '0px',
+    borderBottomWidth: tokens.borderWidth.none,
     selectors: {
       '&:last-child': {
-        borderRightStyle: 'solid',
-        borderRightWidth: '0px',
+        borderInlineEndStyle: 'solid',
+        borderInlineEndWidth: tokens.borderWidth.none,
       },
     },
   },
   '@media (width >= 64rem)': {
-    borderRightStyle: 'solid',
-    borderRightWidth: '0px',
+    borderInlineEndStyle: 'solid',
+    borderInlineEndWidth: tokens.borderWidth.none,
     borderBottomStyle: 'solid',
-    borderBottomWidth: '1px',
+    borderBottomWidth: tokens.borderWidth.hairline,
     selectors: {
       '&:last-child': {
         borderBottomStyle: 'solid',
-        borderBottomWidth: '0px',
+        borderBottomWidth: tokens.borderWidth.none,
       },
     },
   },
@@ -85,26 +87,26 @@ export const storyPointsListButton = style({
   height: '100%',
   width: '100%',
   alignItems: 'flex-start',
-  gap: metrics.spacing['4'],
-  paddingInline: metrics.spacing['5'],
-  paddingBlock: metrics.spacing['6'],
+  gap: tokens.spacing['4'],
+  paddingInline: tokens.spacing['5'],
+  paddingBlock: tokens.spacing['6'],
   textAlign: 'left',
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
   transitionDuration: '150ms',
   '@media (width >= 64rem)': {
-    paddingInline: metrics.spacing['12'],
+    paddingInline: tokens.spacing['12'],
   },
 })
 export const storyPointsListButton2 = style({
-  backgroundColor: 'var(--surface-block)',
+  backgroundColor: tokens.color.block,
 })
 export const storyPointsListButton3 = style({
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'var(--surface-block)',
+        backgroundColor: tokens.color.block,
       },
     },
   },
@@ -112,31 +114,31 @@ export const storyPointsListButton3 = style({
 export const storyPointsListLayout = style({
   display: 'flex',
   alignItems: 'flex-start',
-  gap: metrics.spacing['4'],
-  paddingInline: metrics.spacing['5'],
-  paddingBlock: metrics.spacing['6'],
+  gap: tokens.spacing['4'],
+  paddingInline: tokens.spacing['5'],
+  paddingBlock: tokens.spacing['6'],
   '@media (width >= 64rem)': {
-    paddingInline: metrics.spacing['12'],
+    paddingInline: tokens.spacing['12'],
   },
 })
 export const storySectionSection2 = style({
-  scrollMarginTop: metrics.spacing['12'],
+  scrollMarginTop: tokens.spacing['12'],
 })
 export const storySectionSection = style({
-  marginTop: '140px',
+  marginTop: tokens.spacing['36'],
 })
 export const reveal = style({
   position: 'relative',
   borderTopStyle: 'solid',
-  borderTopWidth: '1px',
-  borderColor: 'var(--line)',
+  borderTopWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
 })
 export const storySectionLayout = style({
   display: 'grid',
   borderBottomStyle: 'solid',
-  borderBottomWidth: '1px',
-  borderColor: 'var(--line)',
-  backgroundColor: 'var(--surface-shell)',
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  backgroundColor: tokens.color.shell,
   '@media (width >= 64rem)': {
     gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
   },
@@ -145,14 +147,14 @@ export const storySectionLayout2 = style({
   display: 'flex',
   flexDirection: 'column',
   borderBottomStyle: 'solid',
-  borderBottomWidth: '1px',
-  borderColor: 'var(--line)',
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
   textAlign: 'left',
   '@media (width >= 64rem)': {
-    borderRightStyle: 'solid',
-    borderRightWidth: '1px',
+    borderInlineEndStyle: 'solid',
+    borderInlineEndWidth: tokens.borderWidth.hairline,
     borderBottomStyle: 'solid',
-    borderBottomWidth: '0px',
+    borderBottomWidth: tokens.borderWidth.none,
   },
 })
 export const storySectionLayout3 = style({
@@ -160,40 +162,43 @@ export const storySectionLayout3 = style({
   flex: '1 1 0%',
   flexDirection: 'column',
   justifyContent: 'center',
-  paddingInline: metrics.spacing['5'],
-  paddingBlock: metrics.spacing['14'],
+  paddingInline: tokens.spacing['5'],
+  paddingBlock: tokens.spacing['14'],
   '@media (width >= 64rem)': {
-    paddingInline: metrics.spacing['12'],
-    paddingBlock: metrics.spacing['20'],
+    paddingInline: tokens.spacing['12'],
+    paddingBlock: tokens.spacing['20'],
   },
 })
 export const storySectionHeading = style({
   maxWidth: '620px',
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: 'clamp(1.5rem, 5vw, 2.5rem)',
-  lineHeight: 1.08,
-  letterSpacing: '-0.03em',
+  fontFamily: tokens.fontFamily.book,
+  // design-exception: Preserve this responsive geometry across viewport sizes.
+  fontSize: 'clamp(1.5rem, 5vw, 2.5rem) !custom',
+
+  lineHeight: tokens.lineHeight.display,
+  letterSpacing: tokens.letterSpacing.heading,
   textWrap: 'balance',
-  color: 'var(--foreground)',
+  color: tokens.color.foreground,
   WebkitFontSmoothing: 'antialiased',
   MozOsxFontSmoothing: 'grayscale',
 })
 export const storySectionDescription = style({
-  marginTop: metrics.spacing['6'],
+  marginTop: tokens.spacing['6'],
   maxWidth: '620px',
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '16px',
-  lineHeight: 1.5,
-  letterSpacing: '0',
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.body,
+  lineHeight: tokens.lineHeight.normal,
+  letterSpacing: tokens.letterSpacing.normal,
   textWrap: 'balance',
-  color: 'color-mix(in oklab, var(--foreground) 50%, transparent)',
+
+  color: inherited.color.colorMixInOklabForeground50Transparent,
 })
 export const storySectionLayout4 = style({
-  marginTop: metrics.spacing['9'],
+  marginTop: tokens.spacing['9'],
   display: 'flex',
   flexWrap: 'wrap',
   alignItems: 'center',
-  gap: metrics.spacing['2_5'],
+  gap: tokens.spacing['2_5'],
 })
 export const storySectionLayout5 = style({
   position: 'relative',
@@ -203,12 +208,12 @@ export const storySectionLayout5 = style({
 })
 export const storySectionLayout6 = style({
   position: 'absolute',
-  right: metrics.spacing['5'],
-  bottom: metrics.spacing['5'],
-  zIndex: 20,
+  insetInlineEnd: tokens.spacing['5'],
+  bottom: tokens.spacing['5'],
+  zIndex: tokens.zIndex.overlay,
   '@media (width >= 64rem)': {
-    right: metrics.spacing['8'],
-    bottom: metrics.spacing['8'],
+    insetInlineEnd: tokens.spacing['8'],
+    bottom: tokens.spacing['8'],
   },
 })
 export const storySectionLayout7 = style({
@@ -238,13 +243,13 @@ export const storySectionLayout11 = style({
   minHeight: '420px',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: metrics.spacing['6'],
-  paddingBottom: metrics.spacing['20'],
+  padding: tokens.spacing['6'],
+  paddingBottom: tokens.spacing['20'],
   '@media (width >= 64rem)': {
     height: '100%',
     minHeight: '0',
-    padding: metrics.spacing['10'],
-    paddingBottom: metrics.spacing['24'],
+    padding: tokens.spacing['10'],
+    paddingBottom: tokens.spacing['24'],
   },
 })
 export const storySectionLayout12 = style({

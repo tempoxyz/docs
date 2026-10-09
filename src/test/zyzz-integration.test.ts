@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
+import { cp, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { build, createServer, type HMRPayload } from 'vite'
@@ -111,6 +111,41 @@ it('serves server-compiled CSS to the browser without compiling its owner in the
     }
   } finally {
     await server.close()
+    await rm(root, { recursive: true, force: true })
+  }
+}, 30_000)
+
+it('compiles the Tempo contract and rejects off-system declarations', async () => {
+  const root = await fixture()
+  try {
+    await mkdir(path.join(root, 'styles'))
+    for (const name of ['palette', 'contract', 'theme', 'recipes', 'scoped', 'inherited'])
+      await cp(`src/styles/${name}.ts`, path.join(root, 'styles', `${name}.ts`))
+    const compile = () =>
+      build({
+        configFile: false,
+        root,
+        logLevel: 'silent',
+        plugins: [zyzz({ exclude: ['snippets'], script: false })],
+        build: {
+          write: false,
+          minify: false,
+          lib: { entry: path.join(root, 'main.ts'), formats: ['es'] },
+        },
+      })
+    await writeFile(
+      path.join(root, 'main.ts'),
+      "import { style } from './styles/recipes'; export const card = style({ color: 'foreground', padding: '3', fontSize: 'compact', zIndex: 'header' }); import { inherited } from './styles/inherited'; import { vars } from './styles/theme'; export const nested = style({ color: inherited.color.homeInk, padding: vars.spacing['3'] });",
+    )
+    await expect(compile()).resolves.toBeDefined()
+    for (const declaration of ["color: '#0070f3'", "padding: '13px'", 'zIndex: 12345']) {
+      await writeFile(
+        path.join(root, 'main.ts'),
+        `import { style } from './styles/recipes'; export const card = style({ ${declaration} });`,
+      )
+      await expect(compile()).rejects.toThrow()
+    }
+  } finally {
     await rm(root, { recursive: true, force: true })
   }
 }, 30_000)

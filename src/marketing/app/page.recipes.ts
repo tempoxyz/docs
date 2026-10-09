@@ -1,15 +1,18 @@
+import { inherited } from '../../styles/inherited'
 import { style } from '../../styles/recipes'
+import { vars as tokens } from '../../styles/theme'
 export const main = style({
   minHeight: '100vh',
   width: '100%',
-  backgroundColor: 'var(--surface-page)',
+
+  backgroundColor: inherited.color.surfacePage,
 })
 export const homeLayout = style({
-  marginInline: 'auto',
+  marginInline: 'auto !custom',
   width: '100%',
   maxWidth: 'var(--container-7xl)',
   borderInlineStyle: 'solid',
-  borderInlineWidth: '1px',
-  borderColor: 'var(--line)',
-  backgroundColor: 'var(--surface-shell)',
+  borderInlineWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  backgroundColor: tokens.color.shell,
 })

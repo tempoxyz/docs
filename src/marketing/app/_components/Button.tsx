@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { variants } from '../../../styles/controls'
+import { vars as tokens } from '../../../styles/theme'
 import ArrowUpRight from './ArrowUpRight'
 import * as ui from './Button.recipes'
 
@@ -51,29 +52,36 @@ const button = variants({
     height: '44px',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '8px',
-    paddingInline: '20px',
-    fontFamily: 'var(--font-pilat-book)',
-    fontSize: '14px',
-    letterSpacing: 0,
+    gap: tokens.spacing['2'],
+    paddingInline: tokens.spacing['5'],
+    fontFamily: tokens.fontFamily.book,
+    fontSize: tokens.fontSize.sm,
+    letterSpacing: tokens.letterSpacing.normal,
     whiteSpace: 'nowrap',
     transition: 'color 150ms, background-color 150ms, opacity 150ms',
-    ':focus-visible': { outline: '2px solid var(--accent-blue)', outlineOffset: '3px' },
+    ':focus-visible': {
+      outlineWidth: tokens.borderWidth.emphasis,
+      outlineStyle: 'solid',
+      outlineColor: tokens.color.accent,
+      outlineOffset: '3px',
+    },
     '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
   },
   defaultVariants: { variant: 'secondary' },
   variants: {
     variant: {
       primary: {
-        backgroundColor: 'var(--surface-onyx)',
-        color: 'var(--on-surface-onyx)',
+        backgroundColor: tokens.color.onyx,
+        color: tokens.color.onOnyx,
         '@media (hover: hover)': { ':hover': { opacity: 0.8 } },
       },
       secondary: {
-        border: '1px solid var(--line)',
-        backgroundColor: 'var(--surface-shell)',
-        color: 'var(--foreground)',
-        '@media (hover: hover)': { ':hover': { backgroundColor: 'var(--surface-block)' } },
+        borderWidth: tokens.borderWidth.hairline,
+        borderStyle: 'solid',
+        borderColor: tokens.color.line,
+        backgroundColor: tokens.color.shell,
+        color: tokens.color.foreground,
+        '@media (hover: hover)': { ':hover': { backgroundColor: tokens.color.block } },
       },
     },
   },

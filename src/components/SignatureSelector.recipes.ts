@@ -1,5 +1,6 @@
-import { metrics } from '../styles/metrics'
+import { inherited } from '../styles/inherited'
 import { style } from '../styles/recipes'
+import { vars as tokens } from '../styles/theme'
 export const signatureSelectorLayout = style({
   position: 'relative',
 })
@@ -7,33 +8,35 @@ export const signatureSelectorLayout2 = style({
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(calc(var(--spacing) * 2) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd:
-        'calc(calc(var(--spacing) * 2) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['2'],
     },
   },
 })
 export const label = style({
   display: 'block',
-  fontSize: '13px',
-  color: 'var(--color-gray11)',
+  fontSize: tokens.fontSize.compact,
+  color: tokens.color.gray11,
 })
 export const signatureSelectorInput = style({
   ':focus': { '--tempo-style-ring-color': 'var(--accent-blue)' },
-  minHeight: metrics.spacing['10'],
+  minHeight: tokens.spacing['10'],
   width: '100%',
-  borderRadius: metrics.radius.lg,
+  borderRadius: tokens.radius.lg,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray4)',
-  paddingInline: metrics.spacing['3'],
-  fontSize: '13px',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
+  paddingInline: tokens.spacing['3'],
+  fontSize: tokens.fontSize.compact,
   selectors: {
     '&:focus': {
       '--tempo-style-ring-shadow':
         'var(--tempo-style-ring-inset,) 0 0 0 calc(1px + var(--tempo-style-ring-offset-width)) var(--tempo-style-ring-color, currentcolor)',
+      // design-exception: Preserve this surface's layered artwork or focus treatment.
       boxShadow:
-        'var(--tempo-style-inset-shadow), var(--tempo-style-inset-ring-shadow), var(--tempo-style-ring-offset-shadow), var(--tempo-style-ring-shadow), var(--tempo-style-shadow)',
+        'var(--tempo-style-inset-shadow), var(--tempo-style-inset-ring-shadow), var(--tempo-style-ring-offset-shadow), var(--tempo-style-ring-shadow), var(--tempo-style-shadow) !custom',
       '--tempo-style-outline-style': 'none',
       outlineStyle: 'none',
     },
@@ -46,82 +49,86 @@ export const signatureSelectorInput = style({
 export const signatureSelectorButton = style({
   position: 'absolute',
   top: 'calc(1 / 2 * 100%)',
-  right: metrics.spacing['2'],
+  insetInlineEnd: tokens.spacing['2'],
   '--tempo-style-translate-y': 'calc(calc(1 / 2 * 100%) * -1)',
   translate: 'var(--tempo-style-translate-x) var(--tempo-style-translate-y)',
-  fontSize: '11px',
-  color: 'var(--color-gray9)',
+  fontSize: tokens.fontSize.caption,
+  color: tokens.color.gray9,
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        color: 'var(--color-gray12)',
+        color: tokens.color.gray12,
       },
     },
   },
 })
 export const signatureSelectorLayout3 = style({
   position: 'absolute',
-  zIndex: 10,
-  marginTop: 'var(--spacing)',
+  zIndex: tokens.zIndex.raised,
+
+  marginTop: tokens.spacing['1'],
   maxHeight: '400px',
   width: '100%',
   overflowY: 'auto',
-  borderRadius: metrics.radius.lg,
+  borderRadius: tokens.radius.lg,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray4)',
-  backgroundColor: 'var(--color-gray1)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
+  backgroundColor: tokens.color.gray1,
   '--tempo-style-shadow':
     '0 10px 15px -3px var(--tempo-style-shadow-color, rgb(0 0 0 / 0.1)), 0 4px 6px -4px var(--tempo-style-shadow-color, rgb(0 0 0 / 0.1))',
+  // design-exception: Preserve this surface's layered artwork or focus treatment.
   boxShadow:
-    'var(--tempo-style-inset-shadow), var(--tempo-style-inset-ring-shadow), var(--tempo-style-ring-offset-shadow), var(--tempo-style-ring-shadow), var(--tempo-style-shadow)',
+    'var(--tempo-style-inset-shadow), var(--tempo-style-inset-ring-shadow), var(--tempo-style-ring-offset-shadow), var(--tempo-style-ring-shadow), var(--tempo-style-shadow) !custom',
 })
 export const signatureSelectorLayout4 = style({
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['4'],
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['4'],
   textAlign: 'center',
-  fontSize: '13px',
-  color: 'var(--color-gray9)',
+  fontSize: tokens.fontSize.compact,
+  color: tokens.color.gray9,
 })
 export const signatureSelectorLayout5 = style({
   borderBottomStyle: 'solid',
-  borderBottomWidth: '1px',
-  borderColor: 'var(--color-gray4)',
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
   selectors: {
     '&:last-child': {
       borderBottomStyle: 'solid',
-      borderBottomWidth: '0px',
+      borderBottomWidth: tokens.borderWidth.none,
     },
   },
 })
 export const signatureSelectorLayout6 = style({
   position: 'sticky',
   top: '0',
-  zIndex: 10,
-  backgroundColor: 'var(--color-gray2)',
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: 'var(--spacing)',
-  fontSize: '11px',
-  fontWeight: metrics.fontWeight.medium,
-  letterSpacing: 'var(--tracking-wide)',
-  color: 'var(--color-gray10)',
+  zIndex: tokens.zIndex.raised,
+  backgroundColor: tokens.color.gray2,
+  paddingInline: tokens.spacing['3'],
+
+  paddingBlock: tokens.spacing['1'],
+  fontSize: tokens.fontSize.caption,
+  fontWeight: tokens.fontWeight.medium,
+
+  letterSpacing: inherited.letterSpacing.trackingWide,
+  color: tokens.color.gray10,
   textTransform: 'uppercase',
 })
 export const signatureSelectorLayout7 = style({
-  paddingBlock: metrics.spacing['0_5'],
+  paddingBlock: tokens.spacing['0_5'],
 })
 export const signatureSelectorButton2 = style({
   display: 'flex',
   width: '100%',
   alignItems: 'center',
-  gap: metrics.spacing['1_5'],
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['1_5'],
+  gap: tokens.spacing['1_5'],
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['1_5'],
   textAlign: 'left',
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'var(--color-gray3)',
+        backgroundColor: tokens.color.gray3,
       },
     },
   },
@@ -131,45 +138,46 @@ export const signatureSelectorInput2 = style({
 })
 export const signatureSelectorText = style({
   flexShrink: 0,
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '11px',
-  color: 'var(--color-gray12)',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.caption,
+  color: tokens.color.gray12,
 })
 export const signatureSelectorText2 = style({
   minWidth: '0',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '11px',
-  color: 'var(--color-gray9)',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.caption,
+  color: tokens.color.gray9,
 })
 export const signatureSelectorText3 = style({
-  marginLeft: 'auto',
+  marginInlineStart: 'auto !custom',
   display: 'flex',
-  minHeight: metrics.spacing['6'],
+  minHeight: tokens.spacing['6'],
   flexShrink: 0,
   alignItems: 'center',
   justifyContent: 'center',
-  borderRadius: '0.25rem',
-  paddingInline: metrics.spacing['1_5'],
+  borderRadius: tokens.radius.smRem,
+  paddingInline: tokens.spacing['1_5'],
   textAlign: 'center',
-  fontSize: '12px',
-  lineHeight: metrics.spacing['4'],
-  fontWeight: metrics.fontWeight.medium,
+  fontSize: tokens.fontSize.xs,
+  lineHeight: tokens.spacing['4'],
+  fontWeight: tokens.fontWeight.medium,
 })
 export const signatureSelectorText4 = style({
-  backgroundColor: 'var(--color-blue3)',
-  color: 'var(--color-blue9)',
+  backgroundColor: tokens.color.blue3,
+  color: tokens.color.blue9,
 })
 export const signatureSelectorLayout8 = style({
-  marginTop: metrics.spacing['2'],
+  marginTop: tokens.spacing['2'],
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(calc(var(--spacing) * 2) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd:
-        'calc(calc(var(--spacing) * 2) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['2'],
     },
   },
 })
@@ -177,43 +185,46 @@ export const signatureSelectorLayout9 = style({
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(calc(var(--spacing) * 2) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd:
-        'calc(calc(var(--spacing) * 2) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['2'],
     },
   },
-  borderRadius: '0.25rem',
+  borderRadius: tokens.radius.smRem,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray4)',
-  backgroundColor: 'var(--color-gray2)',
-  padding: metrics.spacing['3'],
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
+  backgroundColor: tokens.color.gray2,
+  padding: tokens.spacing['3'],
 })
 export const signatureSelectorLayout10 = style({
-  fontSize: '12px',
-  lineHeight: 'var(--leading-relaxed)',
-  color: 'var(--color-gray11)',
+  fontSize: tokens.fontSize.xs,
+
+  lineHeight: inherited.lineHeight.leadingRelaxed,
+  color: tokens.color.gray11,
 })
 export const signatureSelectorLayout11 = style({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: metrics.spacing['2'],
+  gap: tokens.spacing['2'],
 })
 export const code = style({
-  borderRadius: '0.25rem',
-  backgroundColor: 'var(--color-gray3)',
-  paddingInline: metrics.spacing['2'],
-  paddingBlock: 'var(--spacing)',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '11px',
-  color: 'var(--color-gray11)',
+  borderRadius: tokens.radius.smRem,
+  backgroundColor: tokens.color.gray3,
+  paddingInline: tokens.spacing['2'],
+
+  paddingBlock: tokens.spacing['1'],
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.caption,
+  color: tokens.color.gray11,
 })
 export const signatureSelectorLayout12 = style({
-  fontSize: '11px',
-  color: 'var(--color-gray10)',
+  fontSize: tokens.fontSize.caption,
+  color: tokens.color.gray10,
 })
 export const signatureSelectorLink = style({
-  color: 'var(--text-color-accent)',
+  color: inherited.color.textColorAccent,
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
@@ -225,98 +236,104 @@ export const signatureSelectorLink = style({
 export const signatureSelectorLayout13 = style({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: 'var(--spacing)',
+
+  gap: tokens.spacing['1'],
 })
 export const signatureSelectorLayout14 = style({
   display: 'inline-flex',
   alignItems: 'center',
-  gap: metrics.spacing['1_5'],
-  borderRadius: '0.25rem',
+  gap: tokens.spacing['1_5'],
+  borderRadius: tokens.radius.smRem,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray4)',
-  backgroundColor: 'var(--color-gray3)',
-  paddingInline: metrics.spacing['2'],
-  paddingBlock: 'var(--spacing)',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '11px',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
+  backgroundColor: tokens.color.gray3,
+  paddingInline: tokens.spacing['2'],
+
+  paddingBlock: tokens.spacing['1'],
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.caption,
 })
 export const signatureSelectorText5 = style({
-  width: metrics.spacing['2'],
-  height: metrics.spacing['2'],
+  width: tokens.spacing['2'],
+  height: tokens.spacing['2'],
   flexShrink: 0,
-  borderRadius: 'calc(infinity * 1px)',
+  borderRadius: tokens.radius.full,
 })
 export const signatureSelectorText6 = style({
-  backgroundColor: 'var(--color-blue9)',
+  backgroundColor: tokens.color.blue9,
 })
 export const signatureSelectorText7 = style({
   maxWidth: '300px',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  color: 'var(--color-gray11)',
+  color: tokens.color.gray11,
 })
 export const signatureSelectorButton3 = style({
-  lineHeight: 1,
-  color: 'var(--color-gray9)',
+  lineHeight: tokens.lineHeight.none,
+  color: tokens.color.gray9,
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        color: 'var(--color-gray12)',
+        color: tokens.color.gray12,
       },
     },
   },
 })
 export const signatureSelectorLayout15 = style({
-  borderColor: 'var(--color-amber6)',
-  backgroundColor: 'var(--color-amber3)',
-  color: 'var(--color-amber11)',
-  borderRadius: '0.25rem',
+  borderColor: tokens.color.amber6,
+  backgroundColor: tokens.color.amber3,
+  color: tokens.color.amber11,
+  borderRadius: tokens.radius.smRem,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['2'],
-  fontSize: '12px',
-  lineHeight: 'var(--leading-normal)',
+  borderWidth: tokens.borderWidth.hairline,
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['2'],
+  fontSize: tokens.fontSize.xs,
+
+  lineHeight: inherited.lineHeight.leadingNormal,
 })
 export const signatureSelectorLayout16 = style({
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(calc(var(--spacing) * 2) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd:
-        'calc(calc(var(--spacing) * 2) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['2'],
     },
   },
-  borderRadius: '0.25rem',
+  borderRadius: tokens.radius.smRem,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-blue4)',
-  backgroundColor: 'var(--color-blue2)',
-  padding: metrics.spacing['3'],
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.blue4,
+  backgroundColor: tokens.color.blue2,
+  padding: tokens.spacing['3'],
 })
 export const signatureSelectorLayout17 = style({
-  fontSize: '11px',
-  fontWeight: metrics.fontWeight.medium,
-  color: 'var(--color-blue11)',
+  fontSize: tokens.fontSize.caption,
+  fontWeight: tokens.fontWeight.medium,
+  color: tokens.color.blue11,
 })
 export const code2 = style({
-  borderRadius: '0.25rem',
-  backgroundColor: 'var(--color-blue3)',
-  paddingInline: metrics.spacing['2'],
-  paddingBlock: 'var(--spacing)',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '11px',
-  color: 'var(--color-blue11)',
+  borderRadius: tokens.radius.smRem,
+  backgroundColor: tokens.color.blue3,
+  paddingInline: tokens.spacing['2'],
+
+  paddingBlock: tokens.spacing['1'],
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.caption,
+  color: tokens.color.blue11,
 })
 export const signatureSelectorLayout18 = style({
-  fontSize: '11px',
-  lineHeight: 'var(--leading-relaxed)',
-  color: 'var(--color-blue9)',
+  fontSize: tokens.fontSize.caption,
+
+  lineHeight: inherited.lineHeight.leadingRelaxed,
+  color: tokens.color.blue9,
 })
 export const functionTag = style({
-  backgroundColor: 'var(--color-violet3)',
-  color: 'var(--color-violet9)',
+  backgroundColor: tokens.color.violet3,
+  color: tokens.color.violet9,
 })
-export const functionIndicator = style({ backgroundColor: 'var(--color-violet9)' })
+export const functionIndicator = style({ backgroundColor: tokens.color.violet9 })

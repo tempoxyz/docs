@@ -1,5 +1,7 @@
-import { style } from 'zyzz'
 import { global } from 'zyzz/web'
+import { inherited } from '../../../styles/inherited'
+import { style } from '../../../styles/scoped'
+import { vars as tokens } from '../../../styles/theme'
 
 // Document/Vocs integration selectors cannot be attached to owned elements.
 global({
@@ -15,16 +17,21 @@ export const tempoBlog = style({
   display: 'flex',
   minHeight: '100dvh',
   flexDirection: 'column',
-  paddingTop: 'var(--tempo-docs-primary-nav-height, 65px)',
-  background: 'var(--color-surface-page)',
-  color: 'var(--blog-ink)',
-  fontFamily: 'var(--font-pilat-book), ui-sans-serif, system-ui, sans-serif',
+  // design-exception: Preserve the inherited component/framework scope at the point of use.
+  paddingTop: 'var(--tempo-docs-primary-nav-height, 65px) !custom',
+  backgroundColor: inherited.color.colorSurfacePage,
+
+  color: inherited.color.blogInk,
+  fontFamily: tokens.fontFamily.system,
   selectors: {
     '& .docs-site-header': {
-      borderBottom: '1px solid var(--blog-rule)',
+      borderBottomWidth: tokens.borderWidth.hairline,
+      borderBottomStyle: 'solid',
+      borderBottomColor: inherited.color.blogRule,
     },
     '& :is(a, button, select):focus-visible': {
-      outline: '2px solid currentColor',
+      // design-exception: Preserve this surface's layered artwork or focus treatment.
+      outline: '2px solid currentColor !custom',
       outlineOffset: '5px',
     },
   },
@@ -32,42 +39,50 @@ export const tempoBlog = style({
 
 export const tempoBlogIndex = style({
   width: 'min(100% - 96px, var(--tempo-hub-width, 1168px))',
-  marginInline: 'auto',
+  marginInline: 'auto !custom',
   '@media (width < 800px)': {
     width: 'calc(100% - 48px)',
   },
 })
 
 export const tempoBlogIntro = style({
-  padding: '56px 0 40px',
+  paddingTop: tokens.spacing['14'],
+  paddingInlineEnd: tokens.spacing['0'],
+  paddingBottom: tokens.spacing['10'],
+  paddingInlineStart: tokens.spacing['0'],
   selectors: {
     '& h1': {
-      margin: '0 0 18px',
-      fontFamily: 'var(--tempo-font-display, var(--font-pilat-book))',
-      fontSize: 'clamp(40px, 4vw, 48px)',
-      fontWeight: 500,
-      lineHeight: 1.1,
-      letterSpacing: '-0.03em',
+      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+      margin: '0 0 18px !custom',
+
+      fontFamily: inherited.fontFamily.tempoFontDisplayVarFontPilatBook,
+      // design-exception: Preserve this responsive geometry across viewport sizes.
+      fontSize: 'clamp(40px, 4vw, 48px) !custom',
+      fontWeight: tokens.fontWeight.medium,
+      lineHeight: tokens.lineHeight.display,
+      letterSpacing: tokens.letterSpacing.heading,
     },
     '& > p:last-child': {
       maxWidth: '640px',
       margin: 0,
-      color: 'var(--blog-muted)',
-      fontSize: '16px',
-      lineHeight: 1.6,
+
+      color: inherited.color.blogMuted,
+      fontSize: tokens.fontSize.body,
+      lineHeight: tokens.lineHeight.relaxed,
     },
   },
   '@media (width < 800px)': {
-    paddingTop: '40px',
-    paddingBottom: '32px',
+    paddingTop: tokens.spacing['10'],
+    paddingBottom: tokens.spacing['8'],
   },
   '@media (width < 600px)': {
     selectors: {
       '& h1': {
-        letterSpacing: '-1px',
+        // design-exception: Preserve the optical typography of this specific surface.
+        letterSpacing: '-1px !custom',
       },
       '& > p:last-child': {
-        fontSize: '16px',
+        fontSize: tokens.fontSize.body,
       },
     },
   },
@@ -77,12 +92,14 @@ export const tempoBlogFeatured = style({
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
   alignItems: 'center',
-  gap: '48px',
-  padding: 'var(--tempo-card-padding, 28px)',
+  gap: tokens.spacing['12'],
+  // design-exception: Preserve the inherited component/framework scope at the point of use.
+  padding: 'var(--tempo-card-padding, 28px) !custom',
   border: 0,
-  borderRadius: 'var(--tempo-card-radius, 24px)',
-  background: 'var(--color-surface-block)',
-  color: 'inherit',
+  // design-exception: Preserve the inherited component/framework scope at the point of use.
+  borderRadius: 'var(--tempo-card-radius, 24px) !custom',
+  backgroundColor: inherited.color.colorSurfaceBlock,
+  color: 'inherit !custom',
   textDecoration: 'none',
   selectors: {
     '&:where(:hover) h2': {
@@ -92,17 +109,20 @@ export const tempoBlogFeatured = style({
     },
     '& h2': {
       margin: 0,
-      fontFamily: 'var(--tempo-font-display, var(--font-pilat-book))',
-      fontSize: 'clamp(26px, 2.5vw, 32px)',
-      fontWeight: 500,
-      lineHeight: 1.2,
-      letterSpacing: '-0.8px',
+
+      fontFamily: inherited.fontFamily.tempoFontDisplayVarFontPilatBook,
+      // design-exception: Preserve this responsive geometry across viewport sizes.
+      fontSize: 'clamp(26px, 2.5vw, 32px) !custom',
+      fontWeight: tokens.fontWeight.medium,
+      lineHeight: tokens.lineHeight.heading,
+      // design-exception: Preserve the optical typography of this specific surface.
+      letterSpacing: '-0.8px !custom',
     },
   },
   '@media (width < 800px)': {
     gridTemplateColumns: '1fr',
-    gap: '28px',
-    padding: '24px',
+    gap: tokens.spacing['7'],
+    padding: tokens.spacing['6'],
   },
 })
 
@@ -111,8 +131,10 @@ export const tempoBlogFeaturedCopy = style({
   alignItems: 'flex-start',
   flexDirection: 'column',
   justifyContent: 'center',
-  gap: '16px',
-  padding: '16px 0',
+  gap: tokens.spacing['4'],
+
+  paddingBlock: tokens.spacing['4'],
+  paddingInline: tokens.spacing['0'],
   '@media (width < 800px)': {
     padding: 0,
   },
@@ -126,8 +148,8 @@ export const tempoBlogFeaturedImage = style({
   alignItems: 'center',
   justifyContent: 'center',
   overflow: 'hidden',
-  borderRadius: '12px',
-  background: 'var(--color-surface-shell)',
+  borderRadius: tokens.radius.xl,
+  backgroundColor: inherited.color.colorSurfaceShell,
   selectors: {
     '& img': {
       width: '100%',
@@ -142,23 +164,26 @@ export const tempoBlogFeaturedImage = style({
 
 export const tempoBlogExcerpt = style({
   margin: 0,
-  color: 'var(--blog-muted)',
-  fontSize: '16px',
-  lineHeight: 1.6,
+
+  color: inherited.color.blogMuted,
+  fontSize: tokens.fontSize.body,
+  lineHeight: tokens.lineHeight.relaxed,
 })
 
 export const tempoBlogByline = style({
   display: 'flex',
   flexWrap: 'wrap',
   alignItems: 'center',
-  gap: '7px 16px',
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  gap: '7px 16px !custom',
   margin: 0,
-  color: 'var(--blog-muted)',
-  fontSize: '13px',
-  lineHeight: 1.6,
+
+  color: inherited.color.blogMuted,
+  fontSize: tokens.fontSize.compact,
+  lineHeight: tokens.lineHeight.relaxed,
   selectors: {
     '& > span': {
-      color: 'var(--blog-ink)',
+      color: inherited.color.blogInk,
     },
     '& time': {
       whiteSpace: 'nowrap',
@@ -170,25 +195,29 @@ export const tempoBlogLabels = style({
   display: 'flex',
   alignItems: 'center',
   flexWrap: 'wrap',
-  gap: '8px 16px',
-  color: 'var(--blog-muted)',
-  fontSize: '12px',
-  lineHeight: 1.5,
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  gap: '8px 16px !custom',
+
+  color: inherited.color.blogMuted,
+  fontSize: tokens.fontSize.xs,
+  lineHeight: tokens.lineHeight.normal,
   selectors: {
     '& > span::first-letter': {
       textTransform: 'uppercase',
     },
     '& > span + span': {
-      borderLeft: '1px solid var(--blog-rule)',
-      paddingLeft: '16px',
+      borderInlineStartWidth: tokens.borderWidth.hairline,
+      borderInlineStartStyle: 'solid',
+      borderInlineStartColor: inherited.color.blogRule,
+      paddingInlineStart: tokens.spacing['4'],
     },
   },
 })
 
 export const tempoBlogExplorer = style({
-  marginTop: '48px',
+  marginTop: tokens.spacing['12'],
   '@media (width < 600px)': {
-    marginTop: '44px',
+    marginTop: tokens.spacing['11'],
   },
 })
 
@@ -196,26 +225,27 @@ export const tempoBlogExplorerHeading = style({
   display: 'flex',
   alignItems: 'baseline',
   justifyContent: 'space-between',
-  gap: '20px',
-  marginBottom: '24px',
+  gap: tokens.spacing['5'],
+  marginBottom: tokens.spacing['6'],
   selectors: {
     '& h2': {
       margin: 0,
-      fontFamily: 'var(--tempo-font-display, var(--font-pilat-book))',
-      fontSize: '24px',
-      fontWeight: 500,
-      letterSpacing: '-0.03em',
+
+      fontFamily: inherited.fontFamily.tempoFontDisplayVarFontPilatBook,
+      fontSize: tokens.fontSize.title,
+      fontWeight: tokens.fontWeight.medium,
+      letterSpacing: tokens.letterSpacing.heading,
     },
     '& > span': {
-      color: 'var(--blog-muted)',
-      fontSize: '12px',
+      color: inherited.color.blogMuted,
+      fontSize: tokens.fontSize.xs,
       whiteSpace: 'nowrap',
     },
   },
   '@media (width < 600px)': {
     selectors: {
       '& h2': {
-        fontSize: '22px',
+        fontSize: tokens.fontSize.titleSmall,
       },
     },
   },
@@ -224,34 +254,45 @@ export const tempoBlogExplorerHeading = style({
 export const tempoBlogFilters = style({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: '8px 24px',
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  gap: '8px 24px !custom',
   minWidth: 0,
-  padding: '0 0 24px',
+
+  paddingTop: tokens.spacing['0'],
+  paddingInlineEnd: tokens.spacing['0'],
+  paddingBottom: tokens.spacing['6'],
+  paddingInlineStart: tokens.spacing['0'],
   border: 0,
   selectors: {
     '& button': {
       minHeight: '36px',
       border: 0,
-      borderBottom: '1px solid transparent',
-      padding: '7px 0',
-      color: 'var(--blog-muted)',
-      background: 'transparent',
+      borderBottomWidth: tokens.borderWidth.hairline,
+      borderBottomStyle: 'solid',
+      borderBottomColor: 'transparent !custom',
+      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+      padding: '7px 0 !custom',
+
+      color: inherited.color.blogMuted,
+      backgroundColor: 'transparent !custom',
       font: 'inherit',
-      fontSize: '13px',
+      fontSize: tokens.fontSize.compact,
       whiteSpace: 'nowrap',
       cursor: 'pointer',
       transition: 'color 150ms',
     },
     '& button:hover': {
-      color: 'var(--blog-ink)',
+      color: inherited.color.blogInk,
     },
     '& button[aria-pressed="true"]': {
-      borderBottomColor: 'var(--blog-ink)',
-      color: 'var(--blog-ink)',
+      borderBottomColor: inherited.color.blogInk,
+
+      color: inherited.color.blogInk,
     },
   },
   '@media (width < 600px)': {
-    gap: '4px 20px',
+    // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+    gap: '4px 20px !custom',
     selectors: {
       '& button': {
         minHeight: '44px',
@@ -271,7 +312,9 @@ export const tempoBlogFilters = style({
 export const tempoBlogPostList = style({
   margin: 0,
   padding: 0,
-  borderTop: '1px solid var(--blog-rule)',
+  borderTopWidth: tokens.borderWidth.hairline,
+  borderTopStyle: 'solid',
+  borderTopColor: inherited.color.blogRule,
   listStyle: 'none',
 })
 
@@ -279,15 +322,20 @@ export const tempoBlogPostRow = style({
   display: 'grid',
   gridTemplateColumns: 'minmax(0, 1fr) 220px 20px',
   alignItems: 'center',
-  gap: '32px',
-  padding: '32px 0',
-  borderBottom: '1px solid var(--blog-rule)',
-  color: 'inherit',
+  gap: tokens.spacing['8'],
+
+  paddingBlock: tokens.spacing['8'],
+  paddingInline: tokens.spacing['0'],
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderBottomStyle: 'solid',
+  borderBottomColor: inherited.color.blogRule,
+  color: 'inherit !custom',
   textDecoration: 'none',
   selectors: {
     '&:hover .tempo-blog-post-arrow': {
       transform: 'translate(2px, -2px)',
-      color: 'var(--blog-ink)',
+
+      color: inherited.color.blogInk,
     },
     '&:hover h3': {
       textDecoration: 'underline',
@@ -297,27 +345,31 @@ export const tempoBlogPostRow = style({
   },
   '@media (width < 800px)': {
     gridTemplateColumns: 'minmax(0, 1fr) 170px 16px',
-    gap: '20px',
+    gap: tokens.spacing['5'],
   },
   '@media (width < 600px)': {
     gridTemplateColumns: 'minmax(0, 1fr) 16px',
-    gap: '18px',
-    paddingBlock: '26px',
+
+    gap: tokens.spacing['4'],
+
+    paddingBlock: tokens.spacing['6'],
   },
 })
 
 export const tempoBlogPostCopy = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '12px',
+  gap: tokens.spacing['3'],
   selectors: {
     '& h3': {
       margin: 0,
-      fontFamily: 'var(--tempo-font-display, var(--font-pilat-book))',
-      fontSize: '24px',
-      fontWeight: 500,
-      lineHeight: 1.3,
-      letterSpacing: '-0.4px',
+
+      fontFamily: inherited.fontFamily.tempoFontDisplayVarFontPilatBook,
+      fontSize: tokens.fontSize.title,
+      fontWeight: tokens.fontWeight.medium,
+      lineHeight: tokens.lineHeight.compact,
+      // design-exception: Preserve the optical typography of this specific surface.
+      letterSpacing: '-0.4px !custom',
     },
     '& .tempo-blog-excerpt': {
       display: 'var(--tempo-clamped-display, -webkit-box)',
@@ -329,7 +381,7 @@ export const tempoBlogPostCopy = style({
   '@media (width < 800px)': {
     selectors: {
       '& h3': {
-        fontSize: '20px',
+        fontSize: tokens.fontSize.subheading,
       },
     },
   },
@@ -337,7 +389,7 @@ export const tempoBlogPostCopy = style({
 
 export const tempoBlogPostThumbnail = style({
   overflow: 'hidden',
-  background: 'var(--color-surface-shell)',
+  backgroundColor: inherited.color.colorSurfaceShell,
   '@media (width < 600px)': {
     display: 'none',
   },
@@ -345,8 +397,9 @@ export const tempoBlogPostThumbnail = style({
 
 export const tempoBlogPostArrow = style({
   alignSelf: 'start',
-  marginTop: '4px',
-  color: 'var(--blog-muted)',
+  marginTop: tokens.spacing['1'],
+
+  color: inherited.color.blogMuted,
   transition: 'transform 150ms',
   '@media (prefers-reduced-motion: reduce)': {
     transition: 'none',
@@ -355,10 +408,13 @@ export const tempoBlogPostArrow = style({
 
 export const tempoBlogEmpty = style({
   margin: 0,
-  padding: '48px 0',
-  color: 'var(--blog-muted)',
-  fontSize: '15px',
-  lineHeight: 1.6,
+
+  paddingBlock: tokens.spacing['12'],
+  paddingInline: tokens.spacing['0'],
+
+  color: inherited.color.blogMuted,
+  fontSize: tokens.fontSize.bodySmall,
+  lineHeight: tokens.lineHeight.relaxed,
 })
 
 export const tempoBlogFooter = style({
@@ -366,24 +422,33 @@ export const tempoBlogFooter = style({
   width: 'min(100% - 96px, var(--tempo-hub-width, 1168px))',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: '24px',
-  margin: '80px auto 0',
-  borderTop: '1px solid var(--blog-rule)',
-  padding: '28px 0 36px',
-  color: 'var(--blog-muted)',
-  fontSize: '12px',
+  gap: tokens.spacing['6'],
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  margin: '80px auto 0 !custom',
+  borderTopWidth: tokens.borderWidth.hairline,
+  borderTopStyle: 'solid',
+  borderTopColor: inherited.color.blogRule,
+
+  paddingTop: tokens.spacing['7'],
+  paddingInlineEnd: tokens.spacing['0'],
+  paddingBottom: tokens.spacing['9'],
+  paddingInlineStart: tokens.spacing['0'],
+
+  color: inherited.color.blogMuted,
+  fontSize: tokens.fontSize.xs,
   selectors: {
     '& nav': {
       display: 'flex',
       flexWrap: 'wrap',
-      gap: '12px 24px',
+      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+      gap: '12px 24px !custom',
     },
     '& a': {
-      color: 'inherit',
+      color: 'inherit !custom',
       textDecoration: 'none',
     },
     '& a:hover': {
-      color: 'var(--blog-ink)',
+      color: inherited.color.blogInk,
     },
   },
   '@media (width < 800px)': {
@@ -392,11 +457,12 @@ export const tempoBlogFooter = style({
   '@media (width < 600px)': {
     alignItems: 'flex-start',
     flexDirection: 'column',
-    gap: '18px',
-    marginTop: '56px',
+
+    gap: tokens.spacing['4'],
+    marginTop: tokens.spacing['14'],
     selectors: {
       '& nav': {
-        gap: '20px',
+        gap: tokens.spacing['5'],
       },
     },
   },
@@ -404,31 +470,38 @@ export const tempoBlogFooter = style({
 
 export const tempoBlogArticle = style({
   width: 'min(100% - 64px, 740px)',
-  marginInline: 'auto',
+  marginInline: 'auto !custom',
   '@media (width < 600px)': {
     width: 'calc(100% - 48px)',
   },
 })
 
 export const tempoBlogArticleHeader = style({
-  padding: '54px 0 40px',
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  padding: '54px 0 40px !custom',
   selectors: {
     '& h1': {
-      margin: '22px 0',
-      fontFamily: 'var(--tempo-font-display, var(--font-pilat-book))',
-      fontSize: 'clamp(32px, 4.5vw, 46px)',
-      fontWeight: 500,
-      lineHeight: 1.16,
-      letterSpacing: '-0.03em',
+      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+      margin: '22px 0 !custom',
+
+      fontFamily: inherited.fontFamily.tempoFontDisplayVarFontPilatBook,
+      // design-exception: Preserve this responsive geometry across viewport sizes.
+      fontSize: 'clamp(32px, 4.5vw, 46px) !custom',
+      fontWeight: tokens.fontWeight.medium,
+
+      lineHeight: tokens.lineHeight.heading,
+      letterSpacing: tokens.letterSpacing.heading,
       textWrap: 'balance',
     },
   },
   '@media (width < 600px)': {
-    paddingTop: '32px',
-    paddingBottom: '30px',
+    paddingTop: tokens.spacing['8'],
+
+    paddingBottom: tokens.spacing['7'],
     selectors: {
       '& h1': {
-        letterSpacing: '-0.8px',
+        // design-exception: Preserve the optical typography of this specific surface.
+        letterSpacing: '-0.8px !custom',
       },
     },
   },
@@ -436,70 +509,80 @@ export const tempoBlogArticleHeader = style({
 
 export const tempoBlogBack = style({
   display: 'inline-block',
-  marginBottom: '38px',
-  color: 'var(--blog-muted)',
-  fontSize: '13px',
+
+  marginBottom: tokens.spacing['9'],
+
+  color: inherited.color.blogMuted,
+  fontSize: tokens.fontSize.compact,
   textDecoration: 'none',
   selectors: {
     '&:hover': {
-      color: 'var(--blog-ink)',
+      color: inherited.color.blogInk,
     },
   },
   '@media (width < 600px)': {
-    marginBottom: '30px',
+    marginBottom: tokens.spacing['7'],
   },
 })
 
 export const tempoBlogArticleLede = style({
-  margin: '0 0 26px',
-  color: 'var(--blog-muted)',
-  fontSize: '18px',
-  lineHeight: 1.6,
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  margin: '0 0 26px !custom',
+
+  color: inherited.color.blogMuted,
+  fontSize: tokens.fontSize.lead,
+  lineHeight: tokens.lineHeight.relaxed,
   '@media (width < 600px)': {
-    fontSize: '16px',
+    fontSize: tokens.fontSize.body,
   },
 })
 
 export const tempoBlogArticleBody = style({
-  borderTop: '1px solid var(--blog-rule)',
-  paddingTop: '36px',
-  fontSize: '16px',
-  lineHeight: 1.75,
+  borderTopWidth: tokens.borderWidth.hairline,
+  borderTopStyle: 'solid',
+  borderTopColor: inherited.color.blogRule,
+  paddingTop: tokens.spacing['9'],
+  fontSize: tokens.fontSize.body,
+
+  lineHeight: tokens.lineHeight.prose,
   selectors: {
     '& :is(h2, h3, h4)': {
       scrollMarginTop: '8px',
-      fontWeight: 500,
-      letterSpacing: '-0.45px',
+      fontWeight: tokens.fontWeight.medium,
+      // design-exception: Preserve the optical typography of this specific surface.
+      letterSpacing: '-0.45px !custom',
     },
     '& img': {
       height: 'auto',
-      borderRadius: '2px',
+      borderRadius: tokens.radius.xs,
     },
     '& pre': {
-      borderRadius: '2px',
+      borderRadius: tokens.radius.xs,
     },
   },
   '@media (width < 600px)': {
-    paddingTop: '24px',
-    fontSize: '16px',
+    paddingTop: tokens.spacing['6'],
+    fontSize: tokens.fontSize.body,
   },
 })
 
 export const tempoBlogArticleEnd = style({
   display: 'flex',
   justifyContent: 'space-between',
-  gap: '20px',
-  marginTop: '56px',
-  paddingBlock: '28px',
-  borderTop: '1px solid var(--blog-rule)',
-  fontSize: '13px',
+  gap: tokens.spacing['5'],
+  marginTop: tokens.spacing['14'],
+  paddingBlock: tokens.spacing['7'],
+  borderTopWidth: tokens.borderWidth.hairline,
+  borderTopStyle: 'solid',
+  borderTopColor: inherited.color.blogRule,
+  fontSize: tokens.fontSize.compact,
   selectors: {
     '& a': {
-      color: 'var(--blog-muted)',
+      color: inherited.color.blogMuted,
       textDecoration: 'none',
     },
     '& a:hover': {
-      color: 'var(--blog-ink)',
+      color: inherited.color.blogInk,
     },
   },
   '@media (width < 600px)': {
@@ -510,24 +593,25 @@ export const tempoBlogArticleEnd = style({
 export const tempoBlogPost = style({
   selectors: {
     '& .tempo-blog-footer': {
-      paddingBottom: '90px',
-      marginTop: '32px',
+      paddingBottom: tokens.spacing['24'],
+      marginTop: tokens.spacing['8'],
     },
   },
 })
 
 export const tempoBlogNotFound = style({
   flex: 1,
-  padding: '100px 24px',
+  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+  padding: '100px 24px !custom',
   textAlign: 'center',
   selectors: {
     '& h1': {
-      marginBottom: '20px',
-      fontSize: '40px',
-      fontWeight: 400,
+      marginBottom: tokens.spacing['5'],
+      fontSize: tokens.fontSize.display,
+      fontWeight: tokens.fontWeight.normal,
     },
     '& a': {
-      color: 'var(--blog-muted)',
+      color: inherited.color.blogMuted,
     },
   },
 })

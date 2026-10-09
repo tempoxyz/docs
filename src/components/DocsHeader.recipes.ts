@@ -1,15 +1,17 @@
-import { style as instanceStyle } from 'zyzz'
-import { metrics } from '../styles/metrics'
+import { inherited } from '../styles/inherited'
 import { style } from '../styles/recipes'
+import { style as instanceStyle } from '../styles/scoped'
+import { vars as tokens } from '../styles/theme'
 export const tempoLogoText = style({
   display: 'block',
-  backgroundColor: 'currentcolor',
+  backgroundColor: 'currentcolor !custom',
 })
 export const activeSquareIcon = style({
   width: '11px',
   height: '11px',
   flexShrink: 0,
-  color: 'color-mix(in oklab, var(--foreground) 70%, transparent)',
+
+  color: inherited.color.colorMixInOklabForeground70Transparent,
 })
 export const searchIconIcon = style({
   flexShrink: 0,
@@ -25,41 +27,42 @@ export const chevronIcon2 = style({
   rotate: '180deg',
 })
 export const codexLogo = style({
-  width: metrics.spacing['3_5'],
-  height: metrics.spacing['3_5'],
+  width: tokens.spacing['3_5'],
+  height: tokens.spacing['3_5'],
   flexShrink: 0,
 })
 export const commandTabsLayout = style({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: metrics.spacing['1_5'],
+  gap: tokens.spacing['1_5'],
 })
 export const commandTabsButton = style({
   display: 'inline-flex',
   alignItems: 'center',
-  gap: metrics.spacing['1_5'],
-  borderRadius: '4px',
-  paddingInline: metrics.spacing['2_5'],
-  paddingBlock: metrics.spacing['1_5'],
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '12px',
-  letterSpacing: '0',
+  gap: tokens.spacing['1_5'],
+  borderRadius: tokens.radius.sm,
+  paddingInline: tokens.spacing['2_5'],
+  paddingBlock: tokens.spacing['1_5'],
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.xs,
+  letterSpacing: tokens.letterSpacing.normal,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
   transitionDuration: '150ms',
 })
 export const commandTabsButton2 = style({
-  backgroundColor: 'color-mix(in oklab, var(--foreground) 6%, transparent)',
-  color: 'var(--foreground)',
+  backgroundColor: inherited.color.colorMixInOklabForeground6Transparent,
+  color: tokens.color.foreground,
 })
 export const commandTabsButton3 = style({
-  color: 'color-mix(in oklab, var(--foreground) 60%, transparent)',
+  color: inherited.color.colorMixInOklabForeground60Transparent,
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'color-mix(in oklab, var(--foreground) 3%, transparent)',
-        color: 'color-mix(in oklab, var(--foreground) 70%, transparent)',
+        backgroundColor: inherited.color.colorMixInOklabForeground3Transparent,
+
+        color: inherited.color.colorMixInOklabForeground70Transparent,
       },
     },
   },
@@ -69,11 +72,12 @@ export const commandSnippetButton = style({
   minHeight: '48px',
   width: '100%',
   alignItems: 'flex-start',
-  gap: metrics.spacing['3'],
-  borderRadius: '4px',
-  backgroundColor: 'color-mix(in oklab, var(--foreground) 3.5000000000000004%, transparent)',
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['2_5'],
+  gap: tokens.spacing['3'],
+  borderRadius: tokens.radius.sm,
+
+  backgroundColor: inherited.color.colorMixInOklabForeground35000000000000004Transparent,
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['2_5'],
   textAlign: 'left',
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
@@ -82,7 +86,7 @@ export const commandSnippetButton = style({
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'color-mix(in oklab, var(--foreground) 6%, transparent)',
+        backgroundColor: inherited.color.colorMixInOklabForeground6Transparent,
       },
     },
   },
@@ -92,16 +96,17 @@ export const code = style({
   minWidth: '0',
   flex: '1 1 0%',
   gridTemplateColumns: 'auto minmax(0,1fr)',
-  gap: metrics.spacing['2'],
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '12px',
-  lineHeight: 1.55,
+  gap: tokens.spacing['2'],
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.xs,
+
+  lineHeight: tokens.lineHeight.normal,
   overflowWrap: 'break-word',
   whiteSpace: 'pre-wrap',
-  color: 'var(--foreground)',
+  color: tokens.color.foreground,
 })
 export const commandSnippetText = style({
-  color: 'color-mix(in oklab, var(--foreground) 55%, transparent)',
+  color: inherited.color.colorMixInOklabForeground55Transparent,
   WebkitUserSelect: 'none',
   userSelect: 'none',
 })
@@ -109,7 +114,7 @@ export const commandSnippetText2 = style({
   minWidth: '0',
 })
 export const commandSnippetText3 = style({
-  marginTop: 'var(--spacing)',
+  marginTop: tokens.spacing['1'],
   flexShrink: 0,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
@@ -117,22 +122,22 @@ export const commandSnippetText3 = style({
   transitionDuration: '150ms',
 })
 export const commandSnippetText4 = style({
-  color: 'var(--foreground)',
+  color: tokens.color.foreground,
 })
 export const commandSnippetText5 = style({
-  color: 'color-mix(in oklab, var(--foreground) 55%, transparent)',
+  color: inherited.color.colorMixInOklabForeground55Transparent,
   selectors: {
     '&:is(:where(.group\\/copy):hover *)': {
       '@media (hover: hover)': {
-        color: 'color-mix(in oklab, var(--foreground) 70%, transparent)',
+        color: inherited.color.colorMixInOklabForeground70Transparent,
       },
     },
   },
 })
 export const agentCommandSectionLayout = style({
-  borderRadius: '4px',
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['2_5'],
+  borderRadius: tokens.radius.sm,
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['2_5'],
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -140,7 +145,7 @@ export const agentCommandSectionLayout = style({
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'color-mix(in oklab, var(--foreground) 4%, transparent)',
+        backgroundColor: inherited.color.colorMixInOklabForeground4Transparent,
       },
     },
   },
@@ -148,7 +153,7 @@ export const agentCommandSectionLayout = style({
 export const agentCommandSectionLayout2 = style({
   display: 'flex',
   alignItems: 'flex-start',
-  gap: metrics.spacing['3'],
+  gap: tokens.spacing['3'],
 })
 export const agentCommandSectionText = style({
   display: 'grid',
@@ -156,24 +161,26 @@ export const agentCommandSectionText = style({
   height: '34px',
   flexShrink: 0,
   placeItems: 'center',
-  backgroundColor: 'var(--surface-input)',
-  color: 'var(--foreground)',
+
+  backgroundColor: inherited.color.surfaceInput,
+  color: tokens.color.foreground,
 })
 export const anchor = style({
   position: 'relative',
   display: 'flex',
   minWidth: '0',
   flexDirection: 'column',
-  gap: metrics.spacing['0_5'],
-  paddingRight: metrics.spacing['5'],
+  gap: tokens.spacing['0_5'],
+  paddingInlineEnd: tokens.spacing['5'],
 })
 export const arrowUpRight = style({
   position: 'absolute',
-  top: metrics.spacing['0_5'],
-  right: '0',
-  width: metrics.spacing['3'],
-  height: metrics.spacing['3'],
-  color: 'color-mix(in oklab, var(--foreground) 55%, transparent)',
+  top: tokens.spacing['0_5'],
+  insetInlineEnd: '0',
+  width: tokens.spacing['3'],
+  height: tokens.spacing['3'],
+
+  color: inherited.color.colorMixInOklabForeground55Transparent,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -181,131 +188,144 @@ export const arrowUpRight = style({
   selectors: {
     '&:is(:where(.group\\/item):hover *)': {
       '@media (hover: hover)': {
-        color: 'color-mix(in oklab, var(--foreground) 60%, transparent)',
+        color: inherited.color.colorMixInOklabForeground60Transparent,
       },
     },
   },
 })
 export const agentCommandSectionText2 = style({
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '14px',
-  letterSpacing: '0',
-  color: 'var(--foreground)',
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.sm,
+  letterSpacing: tokens.letterSpacing.normal,
+  color: tokens.color.foreground,
 })
 export const agentCommandSectionText3 = style({
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '13px',
-  lineHeight: 1.4,
-  letterSpacing: '0',
-  color: 'color-mix(in oklab, var(--foreground) 60%, transparent)',
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.compact,
+  lineHeight: tokens.lineHeight.snug,
+  letterSpacing: tokens.letterSpacing.normal,
+
+  color: inherited.color.colorMixInOklabForeground60Transparent,
 })
 export const agentCommandSectionLayout3 = style({
-  marginTop: metrics.spacing['3'],
-  marginLeft: '52px',
+  marginTop: tokens.spacing['3'],
+
+  marginInlineStart: tokens.spacing['12'],
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(calc(var(--spacing) * 3) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd:
-        'calc(calc(var(--spacing) * 3) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['3'],
     },
   },
 })
 export const agentsPanelLayout = style({
   width: '520px',
-  padding: metrics.spacing['3'],
+  padding: tokens.spacing['3'],
 })
 export const agentsPanelLayout2 = style({
-  paddingBottom: metrics.spacing['4'],
-  paddingLeft: metrics.spacing['3'],
+  paddingBottom: tokens.spacing['4'],
+  paddingInlineStart: tokens.spacing['3'],
 })
 export const agentsPanelDescription = style({
-  paddingInline: metrics.spacing['3'],
-  paddingTop: metrics.spacing['2'],
-  paddingBottom: metrics.spacing['1_5'],
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '13px',
-  letterSpacing: '0',
-  color: 'color-mix(in oklab, var(--foreground) 55%, transparent)',
+  paddingInline: tokens.spacing['3'],
+  paddingTop: tokens.spacing['2'],
+  paddingBottom: tokens.spacing['1_5'],
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.compact,
+  letterSpacing: tokens.letterSpacing.normal,
+
+  color: inherited.color.colorMixInOklabForeground55Transparent,
 })
 export const agentsPanelLayout3 = style({
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(var(--spacing) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd: 'calc(var(--spacing) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['1'],
     },
   },
 })
 export const agentsPanelDescription2 = style({
-  paddingInline: metrics.spacing['2_5'],
-  paddingBlock: 'var(--spacing)',
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '12px',
-  color: 'color-mix(in oklab, var(--foreground) 60%, transparent)',
+  paddingInline: tokens.spacing['2_5'],
+
+  paddingBlock: tokens.spacing['1'],
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.xs,
+
+  color: inherited.color.colorMixInOklabForeground60Transparent,
 })
 export const anchor2 = style({
-  marginInline: 'calc(var(--spacing) * -2)',
+  // design-exception: Derive this layout value from the existing responsive CSS variables.
+  marginInline: 'calc(var(--spacing) * -2) !custom',
   display: 'flex',
-  minHeight: metrics.spacing['8'],
+  minHeight: tokens.spacing['8'],
   alignItems: 'center',
-  gap: metrics.spacing['2'],
-  borderRadius: '6px',
-  paddingInline: metrics.spacing['2'],
-  paddingBlock: 'var(--spacing)',
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '14px',
-  letterSpacing: '0',
+  gap: tokens.spacing['2'],
+  borderRadius: tokens.radius.md,
+  paddingInline: tokens.spacing['2'],
+
+  paddingBlock: tokens.spacing['1'],
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.sm,
+  letterSpacing: tokens.letterSpacing.normal,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
   transitionDuration: '150ms',
 })
 export const anchor3 = style({
-  fontWeight: metrics.fontWeight.medium,
-  color: 'var(--foreground)',
+  fontWeight: tokens.fontWeight.medium,
+  color: tokens.color.foreground,
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'color-mix(in oklab, var(--foreground) 4%, transparent)',
+        backgroundColor: inherited.color.colorMixInOklabForeground4Transparent,
       },
     },
   },
 })
 export const anchor4 = style({
-  color: 'color-mix(in oklab, var(--foreground) 70%, transparent)',
+  color: inherited.color.colorMixInOklabForeground70Transparent,
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'color-mix(in oklab, var(--foreground) 4%, transparent)',
-        color: 'var(--foreground)',
+        backgroundColor: inherited.color.colorMixInOklabForeground4Transparent,
+        color: tokens.color.foreground,
       },
     },
   },
 })
 export const arrowUpRight2 = style({
-  marginTop: metrics.spacing['0_5'],
-  width: metrics.spacing['3'],
-  height: metrics.spacing['3'],
+  marginTop: tokens.spacing['0_5'],
+  width: tokens.spacing['3'],
+  height: tokens.spacing['3'],
 })
 export const sidebarDisclosureDetails = style({
-  marginTop: 'var(--spacing)',
+  marginTop: tokens.spacing['1'],
 })
 export const sidebarDisclosureSummary = style({
-  marginInline: 'calc(var(--spacing) * -2)',
+  // design-exception: Derive this layout value from the existing responsive CSS variables.
+  marginInline: 'calc(var(--spacing) * -2) !custom',
   display: 'flex',
-  minHeight: metrics.spacing['8'],
+  minHeight: tokens.spacing['8'],
   cursor: 'pointer',
   listStyleType: 'none',
   alignItems: 'center',
   justifyContent: 'space-between',
-  borderRadius: '6px',
-  paddingInline: metrics.spacing['2'],
-  paddingBlock: 'var(--spacing)',
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '14px',
-  letterSpacing: '0',
-  color: 'color-mix(in oklab, var(--foreground) 65%, transparent)',
+  borderRadius: tokens.radius.md,
+  paddingInline: tokens.spacing['2'],
+
+  paddingBlock: tokens.spacing['1'],
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.sm,
+  letterSpacing: tokens.letterSpacing.normal,
+
+  color: inherited.color.colorMixInOklabForeground65Transparent,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -313,8 +333,8 @@ export const sidebarDisclosureSummary = style({
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'color-mix(in oklab, var(--foreground) 4%, transparent)',
-        color: 'var(--foreground)',
+        backgroundColor: inherited.color.colorMixInOklabForeground4Transparent,
+        color: tokens.color.foreground,
       },
     },
     '&::-webkit-details-marker': {
@@ -323,52 +343,54 @@ export const sidebarDisclosureSummary = style({
   },
 })
 export const sidebarDisclosureLayout = style({
-  marginTop: 'var(--spacing)',
-  marginLeft: metrics.spacing['2'],
+  marginTop: tokens.spacing['1'],
+  marginInlineStart: tokens.spacing['2'],
   display: 'flex',
   flexDirection: 'column',
-  gap: '0',
-  borderLeftStyle: 'solid',
-  borderLeftWidth: '1px',
-  borderColor: 'var(--line)',
-  paddingLeft: metrics.spacing['3'],
+  gap: tokens.spacing['0'],
+  borderInlineStartStyle: 'solid',
+  borderInlineStartWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  paddingInlineStart: tokens.spacing['3'],
 })
 export const sidebarNodesLayout = style({
-  marginTop: metrics.spacing['5'],
+  marginTop: tokens.spacing['5'],
   selectors: {
     '&:first-child': {
-      marginTop: '0',
+      marginTop: tokens.spacing['0'],
     },
   },
 })
 export const sidebarNodesLayout2 = style({
-  marginTop: metrics.spacing['3'],
+  marginTop: tokens.spacing['3'],
 })
 export const sidebarNodesDescription = style({
-  marginInline: 'calc(var(--spacing) * -2)',
-  paddingInline: metrics.spacing['2'],
-  paddingBottom: metrics.spacing['2'],
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '13px',
-  lineHeight: 1.3,
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '0',
-  color: 'color-mix(in oklab, var(--foreground) 60%, transparent)',
+  // design-exception: Derive this layout value from the existing responsive CSS variables.
+  marginInline: 'calc(var(--spacing) * -2) !custom',
+  paddingInline: tokens.spacing['2'],
+  paddingBottom: tokens.spacing['2'],
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.compact,
+  lineHeight: tokens.lineHeight.compact,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.normal,
+
+  color: inherited.color.colorMixInOklabForeground60Transparent,
 })
 export const sidebarNodesLayout3 = style({
-  marginLeft: metrics.spacing['2'],
+  marginInlineStart: tokens.spacing['2'],
   display: 'flex',
   flexDirection: 'column',
-  gap: '0',
-  borderLeftStyle: 'solid',
-  borderLeftWidth: '1px',
-  borderColor: 'var(--line)',
-  paddingLeft: metrics.spacing['3'],
+  gap: tokens.spacing['0'],
+  borderInlineStartStyle: 'solid',
+  borderInlineStartWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  paddingInlineStart: tokens.spacing['3'],
 })
 export const sidebarNodesLayout4 = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '0',
+  gap: tokens.spacing['0'],
 })
 export const tempoLogo = style({
   height: '18px',
@@ -378,7 +400,7 @@ export const docsHeaderText = style({
   display: 'flex',
   minWidth: '0',
   alignItems: 'center',
-  gap: metrics.spacing['2_5'],
+  gap: tokens.spacing['2_5'],
 })
 export const docsHeaderText2 = style({
   overflow: 'hidden',
@@ -390,8 +412,8 @@ export const searchIcon = style({
   height: '18px',
 })
 export const arrowUpRight3 = style({
-  width: metrics.spacing['4'],
-  height: metrics.spacing['4'],
+  width: tokens.spacing['4'],
+  height: tokens.spacing['4'],
 })
 export const tempoLogoTextAppearance = instanceStyle(
   (values: { value0: string; value1: string }) => ({
@@ -410,9 +432,11 @@ export const tempoLogoTextAppearance = instanceStyle(
 )
 export const sidebarLeafAnchorAppearance = instanceStyle((values: { value0: string }) => ({
   '--tempo-paddingLeft': values.value0,
-  paddingLeft: 'var(--tempo-paddingLeft)',
+  // design-exception: Preserve the inherited component/framework scope at the point of use.
+  paddingInlineStart: 'var(--tempo-paddingLeft) !custom',
 }))
 export const sidebarDisclosureDetailsAppearance = instanceStyle((values: { value0: string }) => ({
   '--tempo-paddingLeft': values.value0,
-  paddingLeft: 'var(--tempo-paddingLeft)',
+  // design-exception: Preserve the inherited component/framework scope at the point of use.
+  paddingInlineStart: 'var(--tempo-paddingLeft) !custom',
 }))

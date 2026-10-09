@@ -1,30 +1,30 @@
-import { metrics } from '../../../../styles/metrics'
 import { style } from '../../../../styles/recipes'
+import { vars as tokens } from '../../../../styles/theme'
 
 export const addFundsToOthersLayout3 = style({
-  marginTop: metrics.spacing['2'],
+  marginTop: tokens.spacing['2'],
   display: 'flex',
   flexDirection: 'column',
 })
 
 export const addFundsToOthersInput = style({
   height: '34px',
-  borderRadius: 'calc(infinity * 1px)',
+  borderRadius: tokens.radius.full,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray4)',
-  paddingInline: 'calc(var(--spacing) * 3.25)',
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-  color: 'var(--color-black)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
+  paddingInline: tokens.spacing.controlInset,
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.compact,
+  color: tokens.color.black,
   selectors: {
     '&::placeholder': {
-      color: 'var(--color-gray9)',
+      color: tokens.color.gray9,
     },
     '&:where( [data-vocs-theme="dark"], [data-vocs-theme="dark"] *, [style*="color-scheme: dark"], [style*="color-scheme: dark"] * )':
       {
-        color: 'var(--color-white)',
+        color: tokens.color.white,
       },
   },
 })

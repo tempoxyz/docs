@@ -1,23 +1,26 @@
-import { metrics } from '../styles/metrics'
+import { inherited } from '../styles/inherited'
 import { style } from '../styles/recipes'
+import { vars as tokens } from '../styles/theme'
 export const renderValueText = style({
-  color: 'var(--color-gray9)',
+  color: tokens.color.gray9,
   fontStyle: 'italic',
 })
 export const tidxQueryHeading = style({
-  fontSize: '14px',
-  lineHeight: 1,
-  fontWeight: metrics.fontWeight.normal,
-  color: 'var(--color-gray12)',
+  fontSize: tokens.fontSize.sm,
+  lineHeight: tokens.lineHeight.none,
+  fontWeight: tokens.fontWeight.normal,
+  color: tokens.color.gray12,
 })
 export const tidxQueryButton = style({
-  borderRadius: metrics.radius.md,
-  backgroundColor: 'var(--background-color-accent)',
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['1_5'],
-  fontSize: metrics.fontSize.sm,
-  lineHeight: 'var(--text-sm--line-height)',
-  color: 'var(--color-white)',
+  borderRadius: tokens.radius.md,
+
+  backgroundColor: inherited.color.backgroundColorAccent,
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['1_5'],
+  fontSize: tokens.fontSize.sm,
+
+  lineHeight: inherited.lineHeight.textSmLineHeight,
+  color: tokens.color.white,
   selectors: {
     '&:disabled': {
       cursor: 'not-allowed',
@@ -29,15 +32,16 @@ export const tidxQueryLayout = style({
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(calc(var(--spacing) * 4) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd:
-        'calc(calc(var(--spacing) * 4) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['4'],
     },
   },
 })
 export const tidxQueryLayout2 = style({
   display: 'grid',
-  gap: metrics.spacing['3'],
+  gap: tokens.spacing['3'],
   '@media (width >= 48rem)': {
     gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
   },
@@ -46,115 +50,126 @@ export const label = style({
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(var(--spacing) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd: 'calc(var(--spacing) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['1'],
     },
   },
-  fontSize: metrics.fontSize.sm,
-  lineHeight: 'var(--text-sm--line-height)',
+  fontSize: tokens.fontSize.sm,
+
+  lineHeight: inherited.lineHeight.textSmLineHeight,
 })
 export const tidxQueryText = style({
-  color: 'var(--color-gray11)',
+  color: tokens.color.gray11,
 })
 export const select = style({
   width: '100%',
-  borderRadius: metrics.radius.md,
+  borderRadius: tokens.radius.md,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray6)',
-  backgroundColor: 'var(--color-gray1)',
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['2'],
-  color: 'var(--color-gray12)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray6,
+  backgroundColor: tokens.color.gray1,
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['2'],
+  color: tokens.color.gray12,
 })
 export const tidxQueryDescription = style({
-  fontSize: metrics.fontSize.sm,
-  lineHeight: 'var(--text-sm--line-height)',
-  color: 'var(--color-gray11)',
+  fontSize: tokens.fontSize.sm,
+
+  lineHeight: inherited.lineHeight.textSmLineHeight,
+  color: tokens.color.gray11,
 })
 export const label2 = style({
   display: 'block',
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(var(--spacing) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd: 'calc(var(--spacing) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['1'],
     },
   },
-  fontSize: metrics.fontSize.sm,
-  lineHeight: 'var(--text-sm--line-height)',
+  fontSize: tokens.fontSize.sm,
+
+  lineHeight: inherited.lineHeight.textSmLineHeight,
 })
 export const tidxQueryInput = style({
   width: '100%',
-  borderRadius: metrics.radius.md,
+  borderRadius: tokens.radius.md,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray6)',
-  backgroundColor: 'var(--color-gray1)',
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['2'],
-  fontFamily: 'var(--font-jetbrains-mono)',
-  color: 'var(--color-gray12)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray6,
+  backgroundColor: tokens.color.gray1,
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['2'],
+  fontFamily: tokens.fontFamily.code,
+  color: tokens.color.gray12,
 })
 export const tidxQueryLayout3 = style({
-  borderRadius: metrics.radius.md,
+  borderRadius: tokens.radius.md,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-red6)',
-  backgroundColor: 'var(--color-red2)',
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['2'],
-  fontSize: metrics.fontSize.sm,
-  lineHeight: 'var(--text-sm--line-height)',
-  color: 'var(--color-red11)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.red6,
+  backgroundColor: tokens.color.red2,
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['2'],
+  fontSize: tokens.fontSize.sm,
+
+  lineHeight: inherited.lineHeight.textSmLineHeight,
+  color: tokens.color.red11,
 })
 export const tidxQueryLayout4 = style({
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(calc(var(--spacing) * 3) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd:
-        'calc(calc(var(--spacing) * 3) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['3'],
     },
   },
 })
 export const tidxQueryLayout5 = style({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: metrics.spacing['2'],
-  fontSize: metrics.fontSize.xs,
-  lineHeight: 'var(--text-xs--line-height)',
-  color: 'var(--color-gray11)',
+  gap: tokens.spacing['2'],
+  fontSize: tokens.fontSize.xs,
+
+  lineHeight: inherited.lineHeight.textXsLineHeight,
+  color: tokens.color.gray11,
 })
 export const tidxQueryLayout6 = style({
   overflowX: 'auto',
-  borderRadius: metrics.radius.md,
+  borderRadius: tokens.radius.md,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray6)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray6,
 })
 export const table = style({
   minWidth: '100%',
   textAlign: 'left',
-  fontSize: metrics.fontSize.sm,
-  lineHeight: 'var(--text-sm--line-height)',
+  fontSize: tokens.fontSize.sm,
+
+  lineHeight: inherited.lineHeight.textSmLineHeight,
 })
 export const thead = style({
-  backgroundColor: 'var(--color-gray2)',
-  color: 'var(--color-gray11)',
+  backgroundColor: tokens.color.gray2,
+  color: tokens.color.gray11,
 })
 export const th = style({
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['2'],
-  fontWeight: metrics.fontWeight.medium,
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['2'],
+  fontWeight: tokens.fontWeight.medium,
 })
 export const tr = style({
   borderTopStyle: 'solid',
-  borderTopWidth: '1px',
-  borderColor: 'var(--color-gray5)',
+  borderTopWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray5,
 })
 export const td = style({
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['2'],
-  fontFamily: 'var(--font-jetbrains-mono)',
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['2'],
+  fontFamily: tokens.fontFamily.code,
 })

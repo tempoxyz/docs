@@ -1,34 +1,35 @@
-import { metrics } from '../../styles/metrics'
+import { inherited } from '../../styles/inherited'
 import { style } from '../../styles/recipes'
+import { vars as tokens } from '../../styles/theme'
 
 // Shared visual structure for interactive payment, issuance, wallet, and exchange forms.
 export const actionButton = style({
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.compact,
 })
 
 export const stepBody = style({
-  marginInline: metrics.spacing['6'],
+  marginInline: tokens.spacing['6'],
   display: 'flex',
   flexDirection: 'column',
-  gap: metrics.spacing['3'],
-  paddingBottom: metrics.spacing['4'],
+  gap: tokens.spacing['3'],
+  paddingBottom: tokens.spacing['4'],
 })
 
 export const stepRail = style({
   borderInlineStartStyle: 'solid',
-  borderInlineStartWidth: '2px',
-  borderColor: 'var(--color-gray4)',
-  paddingInlineStart: metrics.spacing['5'],
+  borderInlineStartWidth: tokens.borderWidth.emphasis,
+  borderColor: tokens.color.gray4,
+  paddingInlineStart: tokens.spacing['5'],
 })
 
 export const fieldsRow = style({
-  marginTop: metrics.spacing['2'],
+  marginTop: tokens.spacing['2'],
   display: 'flex',
   flexDirection: 'column',
-  gap: metrics.spacing['2'],
-  paddingInlineEnd: metrics.spacing['8'],
+  gap: tokens.spacing['2'],
+  paddingInlineEnd: tokens.spacing['8'],
   '@media (width >= 48rem)': {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -42,29 +43,29 @@ export const primaryField = style({
 })
 
 export const label = style({
-  fontSize: '11px',
-  letterSpacing: '-0.01em',
-  color: 'var(--color-gray9)',
+  fontSize: tokens.fontSize.caption,
+  letterSpacing: tokens.letterSpacing.tight,
+  color: tokens.color.gray9,
 })
 
 export const input = style({
   height: '34px',
-  borderRadius: '50px',
+  borderRadius: tokens.radius.pill,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray4)',
-  paddingInline: 'calc(var(--spacing) * 3.25)',
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-  color: 'var(--color-black)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
+  paddingInline: tokens.spacing.controlInset,
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.compact,
+  color: tokens.color.black,
   selectors: {
     '&::placeholder': {
-      color: 'var(--color-gray9)',
+      color: tokens.color.gray9,
     },
     '&:where( [data-vocs-theme="dark"], [data-vocs-theme="dark"] *, [style*="color-scheme: dark"], [style*="color-scheme: dark"] * )':
       {
-        color: 'var(--color-white)',
+        color: tokens.color.white,
       },
   },
 })
@@ -77,35 +78,36 @@ export const secondaryField = style({
 
 export const validatedInput = style({
   height: '34px',
-  borderRadius: '50px',
+  borderRadius: tokens.radius.pill,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  paddingInline: 'calc(var(--spacing) * 3.25)',
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-  color: 'var(--color-black)',
+  borderWidth: tokens.borderWidth.hairline,
+  paddingInline: tokens.spacing.controlInset,
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.compact,
+  color: tokens.color.black,
   selectors: {
     '&::placeholder': {
-      color: 'var(--color-gray9)',
+      color: tokens.color.gray9,
     },
     '&:where( [data-vocs-theme="dark"], [data-vocs-theme="dark"] *, [style*="color-scheme: dark"], [style*="color-scheme: dark"] * )':
       {
-        color: 'var(--color-white)',
+        color: tokens.color.white,
       },
   },
 })
 
 export const invalidBorder = style({
-  borderColor: 'var(--color-red-500)',
+  borderColor: inherited.color.colorRed500,
 })
 
 export const defaultBorder = style({
-  borderColor: 'var(--color-gray4)',
+  borderColor: tokens.color.gray4,
 })
 
 export const errorText = style({
-  marginTop: 'var(--spacing)',
-  fontSize: '11px',
-  color: 'var(--color-red-500)',
+  marginTop: tokens.spacing['1'],
+  fontSize: tokens.fontSize.caption,
+
+  color: inherited.color.colorRed500,
 })

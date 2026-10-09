@@ -1,70 +1,70 @@
-import { metrics } from '../../../../styles/metrics'
 import { style } from '../../../../styles/recipes'
+import { vars as tokens } from '../../../../styles/theme'
 export const setFeeTokenLayout = style({
   display: 'flex',
   flexWrap: 'wrap',
   alignItems: 'center',
-  gap: metrics.spacing['2'],
+  gap: tokens.spacing['2'],
 })
 export const select = style({
   height: '32px',
-  borderRadius: 'calc(infinity * 1px)',
+  borderRadius: tokens.radius.full,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray4)',
-  backgroundColor: 'var(--color-white)',
-  paddingInline: metrics.spacing['3'],
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.medium,
-  letterSpacing: '-0.02em',
-  color: 'var(--color-black)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
+  backgroundColor: tokens.color.white,
+  paddingInline: tokens.spacing['3'],
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.medium,
+  letterSpacing: tokens.letterSpacing.compact,
+  color: tokens.color.black,
   selectors: {
     '&:where( [data-vocs-theme="dark"], [data-vocs-theme="dark"] *, [style*="color-scheme: dark"], [style*="color-scheme: dark"] * )':
       {
-        backgroundColor: 'transparent',
-        color: 'var(--color-white)',
+        backgroundColor: 'transparent !custom',
+        color: tokens.color.white,
       },
   },
 })
 
 export const setFeeTokenLayout4 = style({
-  marginTop: metrics.spacing['2'],
+  marginTop: tokens.spacing['2'],
   display: 'flex',
   flexDirection: 'column',
 })
 
 export const setFeeTokenInput = style({
   height: '34px',
-  borderRadius: 'calc(infinity * 1px)',
+  borderRadius: tokens.radius.full,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray4)',
-  paddingInline: 'calc(var(--spacing) * 3.25)',
-  fontSize: '14px',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-  color: 'var(--color-black)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
+  paddingInline: tokens.spacing.controlInset,
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.compact,
+  color: tokens.color.black,
   selectors: {
     '&::placeholder': {
-      color: 'var(--color-gray9)',
+      color: tokens.color.gray9,
     },
     '&:where( [data-vocs-theme="dark"], [data-vocs-theme="dark"] *, [style*="color-scheme: dark"], [style*="color-scheme: dark"] * )':
       {
-        color: 'var(--color-white)',
+        color: tokens.color.white,
       },
   },
 })
 export const setFeeTokenLayout5 = style({
-  marginTop: metrics.spacing['2'],
-  fontSize: '13px',
-  color: 'var(--color-gray9)',
+  marginTop: tokens.spacing['2'],
+  fontSize: tokens.fontSize.compact,
+  color: tokens.color.gray9,
 })
 export const setFeeTokenText = style({
-  color: 'var(--color-black)',
+  color: tokens.color.black,
   selectors: {
     '&:where( [data-vocs-theme="dark"], [data-vocs-theme="dark"] *, [style*="color-scheme: dark"], [style*="color-scheme: dark"] * )':
       {
-        color: 'var(--color-white)',
+        color: tokens.color.white,
       },
   },
 })

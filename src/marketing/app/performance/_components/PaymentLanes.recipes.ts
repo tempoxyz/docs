@@ -1,5 +1,7 @@
-import { style as instanceStyle } from 'zyzz'
+import { inherited } from '../../../../styles/inherited'
 import { style } from '../../../../styles/recipes'
+import { style as instanceStyle } from '../../../../styles/scoped'
+import { vars as tokens } from '../../../../styles/theme'
 export const paymentLanesLayout = style({
   position: 'relative',
   width: '100%',
@@ -13,15 +15,17 @@ export const rect = style({
   },
 })
 export const text = style({
-  fill: 'color-mix(in oklab, var(--foreground) 35%, transparent)',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '10px',
-  letterSpacing: 'var(--tracking-wider)',
+  fill: inherited.color.colorMixInOklabForeground35Transparent,
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.tiny,
+
+  letterSpacing: inherited.letterSpacing.trackingWider,
 })
 export const text2 = style({
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '10px',
-  letterSpacing: 'var(--tracking-wider)',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.tiny,
+
+  letterSpacing: inherited.letterSpacing.trackingWider,
 })
 export const path = style({
   '@media (prefers-reduced-motion: reduce)': {
@@ -29,9 +33,9 @@ export const path = style({
   },
 })
 export const text3 = style({
-  fill: 'color-mix(in oklab, var(--foreground) 40%, transparent)',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '11px',
+  fill: inherited.color.colorMixInOklabForeground40Transparent,
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.caption,
   '@media (prefers-reduced-motion: reduce)': {
     transitionProperty: 'none',
   },
@@ -42,8 +46,8 @@ export const path2 = style({
   },
 })
 export const text4 = style({
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '11px',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.caption,
 })
 export const paymentLanesLayoutAppearance = instanceStyle((values: { value0: `${number}px` }) => ({
   height: values.value0,

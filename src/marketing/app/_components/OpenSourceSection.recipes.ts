@@ -1,10 +1,11 @@
-import { style as instanceStyle } from 'zyzz'
-import { metrics } from '../../../styles/metrics'
+import { inherited } from '../../../styles/inherited'
 import { style } from '../../../styles/recipes'
+import { style as instanceStyle } from '../../../styles/scoped'
+import { vars as tokens } from '../../../styles/theme'
 export const rethBadgeLayout = style({
   position: 'absolute',
   top: '0',
-  left: '0',
+  insetInlineStart: '0',
   display: 'none',
   '--tempo-style-translate-x': 'calc(calc(1 / 2 * 100%) * -1)',
   translate: 'var(--tempo-style-translate-x) var(--tempo-style-translate-y)',
@@ -15,62 +16,67 @@ export const rethBadgeLayout = style({
 export const rethBadgeLayout2 = style({
   position: 'relative',
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'color-mix(in oklab, var(--line) 30%, transparent)',
-  backgroundColor: 'var(--surface-page)',
-  padding: metrics.spacing['2_5'],
+  borderWidth: tokens.borderWidth.hairline,
+
+  borderColor: inherited.color.colorMixInOklabLine30Transparent,
+
+  backgroundColor: inherited.color.surfacePage,
+  padding: tokens.spacing['2_5'],
 })
 export const rethBadgeLayout3 = style({
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--line)',
-  padding: metrics.spacing['2_5'],
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  padding: tokens.spacing['2_5'],
 })
 export const openSourceSectionSection = style({
   position: 'relative',
-  paddingBottom: metrics.spacing['6'],
+  paddingBottom: tokens.spacing['6'],
 })
 export const reveal = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  paddingInline: metrics.spacing['5'],
+  paddingInline: tokens.spacing['5'],
   textAlign: 'center',
 })
 export const openSourceSectionHeading = style({
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: 'clamp(2rem, 6vw, 3rem)',
-  lineHeight: 1.1,
-  letterSpacing: '-0.02em',
-  color: 'var(--foreground)',
+  fontFamily: tokens.fontFamily.book,
+  // design-exception: Preserve this responsive geometry across viewport sizes.
+  fontSize: 'clamp(2rem, 6vw, 3rem) !custom',
+  lineHeight: tokens.lineHeight.display,
+  letterSpacing: tokens.letterSpacing.compact,
+  color: tokens.color.foreground,
   WebkitFontSmoothing: 'antialiased',
   MozOsxFontSmoothing: 'grayscale',
 })
 export const openSourceSectionDescription = style({
-  marginTop: metrics.spacing['6'],
+  marginTop: tokens.spacing['6'],
   maxWidth: '560px',
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '16px',
-  lineHeight: 1.4,
-  letterSpacing: '0',
-  color: 'color-mix(in oklab, var(--foreground) 50%, transparent)',
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.body,
+  lineHeight: tokens.lineHeight.snug,
+  letterSpacing: tokens.letterSpacing.normal,
+
+  color: inherited.color.colorMixInOklabForeground50Transparent,
   '@media (width >= 64rem)': {
-    fontSize: '20px',
+    fontSize: tokens.fontSize.subheading,
   },
 })
 export const openSourceSectionLayout = style({
   position: 'relative',
-  marginTop: metrics.spacing['16'],
+  marginTop: tokens.spacing['16'],
 })
 export const openSourceSectionList = style({
   display: 'grid',
   gridAutoRows: 'minmax(0, 1fr)',
   gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
-  gap: '1px',
+
+  gap: tokens.spacing['0'],
   borderBlockStyle: 'solid',
-  borderBlockWidth: '1px',
-  borderColor: 'var(--line)',
-  backgroundColor: 'var(--line)',
+  borderBlockWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  backgroundColor: tokens.color.line,
   '@media (width >= 48rem)': {
     gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
   },
@@ -87,8 +93,8 @@ export const openSourceSectionLink = style({
   minHeight: '220px',
   flexDirection: 'column',
   justifyContent: 'space-between',
-  backgroundColor: 'var(--surface-shell)',
-  padding: metrics.spacing['6'],
+  backgroundColor: tokens.color.shell,
+  padding: tokens.spacing['6'],
   textAlign: 'left',
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
@@ -97,41 +103,42 @@ export const openSourceSectionLink = style({
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'var(--surface-block)',
+        backgroundColor: tokens.color.block,
       },
     },
   },
   '@media (width >= 64rem)': {
-    padding: metrics.spacing['8'],
+    padding: tokens.spacing['8'],
   },
 })
 export const openSourceSectionText = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: metrics.spacing['4'],
+  gap: tokens.spacing['4'],
 })
 export const openSourceSectionText2 = style({
   display: 'flex',
   alignItems: 'center',
-  gap: metrics.spacing['3'],
+  gap: tokens.spacing['3'],
 })
 export const openSourceSectionText3 = style({
-  width: metrics.spacing['3'],
-  height: metrics.spacing['3'],
+  width: tokens.spacing['3'],
+  height: tokens.spacing['3'],
   flexShrink: 0,
 })
 export const openSourceSectionText4 = style({
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '18px',
-  letterSpacing: '0',
-  color: 'var(--foreground)',
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.lead,
+  letterSpacing: tokens.letterSpacing.normal,
+  color: tokens.color.foreground,
 })
 export const arrowUpRight = style({
-  width: metrics.spacing['4'],
-  height: metrics.spacing['4'],
+  width: tokens.spacing['4'],
+  height: tokens.spacing['4'],
   flexShrink: 0,
-  color: 'color-mix(in oklab, var(--foreground) 35%, transparent)',
+
+  color: inherited.color.colorMixInOklabForeground35Transparent,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -139,18 +146,20 @@ export const arrowUpRight = style({
   selectors: {
     '&:is(:where(.group):hover *)': {
       '@media (hover: hover)': {
-        color: 'color-mix(in oklab, var(--foreground) 80%, transparent)',
+        color: inherited.color.colorMixInOklabForeground80Transparent,
       },
     },
   },
 })
 export const openSourceSectionText5 = style({
-  marginTop: metrics.spacing['8'],
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '15px',
-  lineHeight: 1.45,
-  letterSpacing: '0',
-  color: 'color-mix(in oklab, var(--foreground) 65%, transparent)',
+  marginTop: tokens.spacing['8'],
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.bodySmall,
+
+  lineHeight: tokens.lineHeight.snug,
+  letterSpacing: tokens.letterSpacing.normal,
+
+  color: inherited.color.colorMixInOklabForeground65Transparent,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -158,7 +167,7 @@ export const openSourceSectionText5 = style({
   selectors: {
     '&:is(:where(.group):hover *)': {
       '@media (hover: hover)': {
-        color: 'color-mix(in oklab, var(--foreground) 85%, transparent)',
+        color: inherited.color.colorMixInOklabForeground85Transparent,
       },
     },
   },
@@ -167,16 +176,16 @@ export const openSourceSectionLink2 = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: metrics.spacing['2'],
+  gap: tokens.spacing['2'],
   borderBottomStyle: 'solid',
-  borderBottomWidth: '1px',
-  borderColor: 'var(--line)',
-  paddingInline: metrics.spacing['5'],
-  paddingBlock: metrics.spacing['5'],
-  fontFamily: 'var(--font-pilat-book)',
-  fontSize: '16px',
-  letterSpacing: '0',
-  color: 'var(--foreground)',
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.line,
+  paddingInline: tokens.spacing['5'],
+  paddingBlock: tokens.spacing['5'],
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.body,
+  letterSpacing: tokens.letterSpacing.normal,
+  color: tokens.color.foreground,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -184,19 +193,20 @@ export const openSourceSectionLink2 = style({
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'var(--surface-block)',
+        backgroundColor: tokens.color.block,
       },
     },
   },
   '@media (width >= 64rem)': {
-    paddingInline: metrics.spacing['8'],
+    paddingInline: tokens.spacing['8'],
   },
 })
 export const arrowUpRight2 = style({
-  width: metrics.spacing['4'],
-  height: metrics.spacing['4'],
+  width: tokens.spacing['4'],
+  height: tokens.spacing['4'],
   flexShrink: 0,
-  color: 'color-mix(in oklab, var(--foreground) 45%, transparent)',
+
+  color: inherited.color.colorMixInOklabForeground45Transparent,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -204,7 +214,7 @@ export const arrowUpRight2 = style({
   selectors: {
     '&:is(:where(.group):hover *)': {
       '@media (hover: hover)': {
-        color: 'color-mix(in oklab, var(--foreground) 80%, transparent)',
+        color: inherited.color.colorMixInOklabForeground80Transparent,
       },
     },
   },
@@ -233,5 +243,6 @@ export const rethBadgeStateState3 = style({
 })
 export const openSourceSectionTextAppearance = instanceStyle((values: { value0: string }) => ({
   '--tempo-backgroundColor': values.value0,
-  backgroundColor: 'var(--tempo-backgroundColor)',
+
+  backgroundColor: inherited.color.tempoBackgroundColor,
 }))

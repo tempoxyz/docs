@@ -1,11 +1,12 @@
-import { metrics } from '../styles/metrics'
+import { inherited } from '../styles/inherited'
 import { style } from '../styles/recipes'
+import { vars as tokens } from '../styles/theme'
 export const renderCellValueText = style({
-  color: 'var(--color-gray9)',
+  color: tokens.color.gray9,
   fontStyle: 'italic',
 })
 export const renderCellValueLink = style({
-  color: 'var(--text-color-accent)',
+  color: inherited.color.textColorAccent,
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
@@ -15,19 +16,20 @@ export const renderCellValueLink = style({
   },
 })
 export const indexSupplyQueryHeading = style({
-  fontSize: '14px',
-  lineHeight: 1,
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.01em',
-  color: 'var(--color-gray12)',
+  fontSize: tokens.fontSize.sm,
+  lineHeight: tokens.lineHeight.none,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.tight,
+  color: tokens.color.gray12,
 })
 export const indexSupplyQueryLayout = style({
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(calc(var(--spacing) * 4) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd:
-        'calc(calc(var(--spacing) * 4) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['4'],
     },
   },
 })
@@ -35,21 +37,22 @@ export const indexSupplyQueryLayout2 = style({
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
-      marginBlockStart: 'calc(calc(var(--spacing) * 2) * var(--tempo-style-space-y-reverse))',
-      marginBlockEnd:
-        'calc(calc(var(--spacing) * 2) * calc(1 - var(--tempo-style-space-y-reverse)))',
+
+      marginBlockStart: 0,
+
+      marginBlockEnd: tokens.spacing['2'],
     },
   },
 })
 export const indexSupplyQueryLayout3 = style({
   display: 'flex',
   alignItems: 'center',
-  gap: metrics.spacing['1_5'],
-  fontSize: '13px',
-  color: 'var(--color-gray11)',
+  gap: tokens.spacing['1_5'],
+  fontSize: tokens.fontSize.compact,
+  color: tokens.color.gray11,
 })
 export const indexSupplyQueryLink = style({
-  color: 'var(--color-gray9)',
+  color: tokens.color.gray9,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -57,58 +60,60 @@ export const indexSupplyQueryLink = style({
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
-        color: 'var(--color-gray11)',
+        color: tokens.color.gray11,
       },
     },
   },
 })
 export const lucideExternalLink = style({
-  width: metrics.spacing['3'],
-  height: metrics.spacing['3'],
+  width: tokens.spacing['3'],
+  height: tokens.spacing['3'],
 })
 export const indexSupplyQueryLayout4 = style({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: 'var(--spacing)',
+
+  gap: tokens.spacing['1'],
 })
 export const indexSupplyQueryLayout5 = style({
   display: 'inline-flex',
   alignItems: 'center',
-  gap: metrics.spacing['1_5'],
-  borderRadius: '0.25rem',
+  gap: tokens.spacing['1_5'],
+  borderRadius: tokens.radius.smRem,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray4)',
-  backgroundColor: 'var(--color-gray3)',
-  paddingInline: metrics.spacing['2'],
-  paddingBlock: 'var(--spacing)',
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: '11px',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
+  backgroundColor: tokens.color.gray3,
+  paddingInline: tokens.spacing['2'],
+
+  paddingBlock: tokens.spacing['1'],
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.caption,
 })
 export const indexSupplyQueryText = style({
-  width: metrics.spacing['2'],
-  height: metrics.spacing['2'],
+  width: tokens.spacing['2'],
+  height: tokens.spacing['2'],
   flexShrink: 0,
-  borderRadius: 'calc(infinity * 1px)',
+  borderRadius: tokens.radius.full,
 })
 export const indexSupplyQueryText2 = style({
-  backgroundColor: 'var(--color-blue9)',
+  backgroundColor: tokens.color.blue9,
 })
 export const indexSupplyQueryText3 = style({
   maxWidth: '300px',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  color: 'var(--color-gray11)',
+  color: tokens.color.gray11,
 })
 export const sqlEditor = style({
   width: '100%',
-  borderRadius: '0.25rem',
+  borderRadius: tokens.radius.smRem,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray4)',
-  backgroundColor: 'var(--color-gray2)',
-  fontFamily: 'var(--font-jetbrains-mono)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
+  backgroundColor: tokens.color.gray2,
+  fontFamily: tokens.fontFamily.code,
   selectors: {
     '&:focus': {
       '--tempo-style-outline-style': 'none',
@@ -121,78 +126,82 @@ export const sqlEditor = style({
   },
 })
 export const sqlEditor2 = style({
-  fontSize: '11px',
-  lineHeight: 1.4,
+  fontSize: tokens.fontSize.caption,
+  lineHeight: tokens.lineHeight.snug,
 })
 export const sqlEditor3 = style({
-  fontSize: '13px',
-  lineHeight: 'var(--leading-normal)',
+  fontSize: tokens.fontSize.compact,
+
+  lineHeight: inherited.lineHeight.leadingNormal,
 })
 export const indexSupplyQueryLayout6 = style({
-  borderRadius: '0.25rem',
-  backgroundColor: 'var(--background-color-destructiveTint)',
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['2'],
-  fontSize: '14px',
-  lineHeight: 'var(--leading-normal)',
-  fontWeight: metrics.fontWeight.normal,
-  letterSpacing: '-0.02em',
-  color: 'var(--text-color-destructive)',
+  borderRadius: tokens.radius.smRem,
+
+  backgroundColor: inherited.color.backgroundColorDestructiveTint,
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['2'],
+  fontSize: tokens.fontSize.sm,
+
+  lineHeight: inherited.lineHeight.leadingNormal,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.compact,
+
+  color: inherited.color.textColorDestructive,
 })
 export const indexSupplyQueryLayout7 = style({
   overflow: 'auto',
-  borderRadius: '0.25rem',
+  borderRadius: tokens.radius.smRem,
   borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: 'var(--color-gray4)',
+  borderWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
 })
 export const table = style({
   width: '100%',
-  fontSize: '12px',
+  fontSize: tokens.fontSize.xs,
 })
 export const thead = style({
   borderBottomStyle: 'solid',
-  borderBottomWidth: '1px',
-  borderColor: 'var(--color-gray4)',
-  backgroundColor: 'var(--color-gray2)',
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
+  backgroundColor: tokens.color.gray2,
 })
 export const th = style({
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['2'],
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['2'],
   textAlign: 'left',
-  fontWeight: metrics.fontWeight.medium,
-  color: 'var(--color-gray12)',
+  fontWeight: tokens.fontWeight.medium,
+  color: tokens.color.gray12,
 })
 export const indexSupplyQueryLayout8 = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: metrics.spacing['0_5'],
+  gap: tokens.spacing['0_5'],
 })
 export const td = style({
-  paddingBlock: metrics.spacing['4'],
+  paddingBlock: tokens.spacing['4'],
   textAlign: 'center',
-  color: 'var(--color-gray9)',
+  color: tokens.color.gray9,
 })
 export const tr = style({
   borderBottomStyle: 'solid',
-  borderBottomWidth: '1px',
-  borderColor: 'var(--color-gray4)',
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderColor: tokens.color.gray4,
   selectors: {
     '&:last-child': {
       borderBottomStyle: 'solid',
-      borderBottomWidth: '0px',
+      borderBottomWidth: tokens.borderWidth.none,
     },
     '&:hover': {
       '@media (hover: hover)': {
-        backgroundColor: 'var(--color-gray2)',
+        backgroundColor: tokens.color.gray2,
       },
     },
   },
 })
 export const td2 = style({
-  paddingInline: metrics.spacing['3'],
-  paddingBlock: metrics.spacing['2'],
-  fontFamily: 'var(--font-jetbrains-mono)',
-  color: 'var(--color-gray11)',
+  paddingInline: tokens.spacing['3'],
+  paddingBlock: tokens.spacing['2'],
+  fontFamily: tokens.fontFamily.code,
+  color: tokens.color.gray11,
 })
-export const functionIndicator = style({ backgroundColor: 'var(--color-violet9)' })
+export const functionIndicator = style({ backgroundColor: tokens.color.violet9 })

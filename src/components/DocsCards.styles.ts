@@ -1,4 +1,6 @@
 import { global } from 'zyzz/web'
+import { inherited } from '../styles/inherited'
+import { vars as tokens } from '../styles/theme'
 
 // Document/Vocs integration selectors cannot be attached to owned elements.
 global({
@@ -17,13 +19,17 @@ global({
       gridTemplateColumns: 'minmax(0, 1fr)',
       gridTemplateRows: 'auto 1fr',
       alignContent: 'start',
-      gap: '12px 10px',
+      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
+      gap: '12px 10px !custom',
       minWidth: 0,
-      padding: 'var(--tempo-card-padding)',
+      // design-exception: Preserve the inherited component/framework scope at the point of use.
+      padding: 'var(--tempo-card-padding) !custom',
       border: 0,
-      borderRadius: 'var(--tempo-card-radius)',
-      background: 'var(--surface-block)',
-      color: 'var(--vocs-text-color-primary)',
+      // design-exception: Preserve the inherited component/framework scope at the point of use.
+      borderRadius: 'var(--tempo-card-radius) !custom',
+      backgroundColor: tokens.color.block,
+
+      color: inherited.color.vocsTextColorPrimary,
       textDecoration: 'none',
     },
   ':is(article[data-v-content] a[class~="vocs:flex-col"]:has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > div':
@@ -40,11 +46,12 @@ global({
       gridRow: 1,
       width: '20px',
       height: '20px',
-      marginTop: '3px',
+
+      marginTop: tokens.spacing['1'],
       border: 0,
       borderRadius: 0,
-      background: 'transparent',
-      color: 'inherit',
+      backgroundColor: 'transparent !custom',
+      color: 'inherit !custom',
     },
   ':is(:is(article[data-v-content] a[class~="vocs:flex-col"]:has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > [class~="vocs:size-8"]) > svg':
     {
@@ -54,18 +61,20 @@ global({
   ':is(article[data-v-content] a[class~="vocs:flex-col"]:has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > [class~="vocs:text-heading"]':
     {
       gridRow: 1,
-      fontSize: '18px',
-      fontWeight: 500,
-      letterSpacing: '-0.015em',
-      lineHeight: 1.4,
+      fontSize: tokens.fontSize.lead,
+      fontWeight: tokens.fontWeight.medium,
+
+      letterSpacing: tokens.letterSpacing.tight,
+      lineHeight: tokens.lineHeight.snug,
     },
   ':is(article[data-v-content] a[class~="vocs:flex-col"]:has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > [class~="vocs:text-secondary"]':
     {
       gridColumn: '1 / -1',
       alignSelf: 'start',
-      color: 'var(--vocs-text-color-secondary)',
-      fontSize: '14px',
-      lineHeight: 1.6,
+
+      color: inherited.color.vocsTextColorSecondary,
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.relaxed,
     },
   ':is(article[data-v-content] a[class~="vocs:flex-col"]:has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )):hover > [class~="vocs:text-heading"]':
     {
@@ -74,7 +83,9 @@ global({
     },
   ':is(article[data-v-content] a[class~="vocs:flex-col"]:has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )):focus-visible':
     {
-      outline: '2px solid var(--vocs-text-color-primary)',
+      outlineWidth: tokens.borderWidth.emphasis,
+      outlineStyle: 'solid',
+      outlineColor: inherited.color.vocsTextColorPrimary,
       outlineOffset: '4px',
     },
 })

@@ -1,65 +1,71 @@
-import { style as instanceStyle } from 'zyzz'
-import { metrics } from '../../../../styles/metrics'
+import { inherited } from '../../../../styles/inherited'
 import { style } from '../../../../styles/recipes'
+import { style as instanceStyle } from '../../../../styles/scoped'
+import { vars as tokens } from '../../../../styles/theme'
 
 export const queryOrderLayout3 = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: metrics.spacing['3'],
-  fontSize: metrics.fontSize.sm,
-  lineHeight: 'var(--text-sm--line-height)',
+  gap: tokens.spacing['3'],
+  fontSize: tokens.fontSize.sm,
+
+  lineHeight: inherited.lineHeight.textSmLineHeight,
 })
 export const queryOrderLayout4 = style({
   display: 'grid',
   gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-  gap: metrics.spacing['3'],
+  gap: tokens.spacing['3'],
 })
 export const queryOrderLayout5 = style({
-  marginBottom: 'var(--spacing)',
-  fontSize: metrics.fontSize.xs,
-  lineHeight: 'var(--text-xs--line-height)',
-  letterSpacing: 'var(--tracking-wider)',
-  color: 'var(--color-gray11)',
+  marginBottom: tokens.spacing['1'],
+  fontSize: tokens.fontSize.xs,
+
+  lineHeight: inherited.lineHeight.textXsLineHeight,
+
+  letterSpacing: inherited.letterSpacing.trackingWider,
+  color: tokens.color.gray11,
   textTransform: 'uppercase',
 })
 export const queryOrderLayout6 = style({
-  fontWeight: metrics.fontWeight.medium,
+  fontWeight: tokens.fontWeight.medium,
 })
 export const queryOrderLayout7 = style({
-  fontFamily: 'var(--font-jetbrains-mono)',
+  fontFamily: tokens.fontFamily.code,
 })
 export const queryOrderText = style({
-  fontSize: metrics.fontSize.xs,
-  lineHeight: 'var(--text-xs--line-height)',
-  color: 'var(--color-gray11)',
+  fontSize: tokens.fontSize.xs,
+
+  lineHeight: inherited.lineHeight.textXsLineHeight,
+  color: tokens.color.gray11,
 })
 export const queryOrderLayout8 = style({
   display: 'flex',
   alignItems: 'center',
-  gap: metrics.spacing['2'],
+  gap: tokens.spacing['2'],
 })
 export const queryOrderLayout9 = style({
-  backgroundColor: 'var(--color-gray3)',
-  height: metrics.spacing['2'],
+  backgroundColor: tokens.color.gray3,
+  height: tokens.spacing['2'],
   flex: '1 1 0%',
   overflow: 'hidden',
-  borderRadius: 'calc(infinity * 1px)',
+  borderRadius: tokens.radius.full,
 })
 export const queryOrderLayout10 = style({
-  backgroundColor: 'var(--color-blue9)',
+  backgroundColor: tokens.color.blue9,
   height: '100%',
-  transitionProperty: 'all',
+  transitionProperty: 'color, background-color, border-color, opacity, transform',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
   transitionDuration: '150ms',
 })
 export const queryOrderText2 = style({
-  fontFamily: 'var(--font-jetbrains-mono)',
-  fontSize: metrics.fontSize.xs,
-  lineHeight: 'var(--text-xs--line-height)',
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.xs,
+
+  lineHeight: inherited.lineHeight.textXsLineHeight,
 })
 export const queryOrderLayoutAppearance = instanceStyle((values: { value0: string }) => ({
   '--tempo-width': values.value0,
   width: 'var(--tempo-width)',
 }))
-export const buy = style({ color: 'var(--color-green11)' })
-export const sell = style({ color: 'var(--color-red11)' })
+export const buy = style({ color: tokens.color.green11 })
+export const sell = style({ color: tokens.color.red11 })
