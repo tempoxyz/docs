@@ -273,8 +273,8 @@ test('Get started recommends a test payment and offers build paths and tool link
   await expect(quickstart).toHaveAccessibleName('interactive quickstart')
   await expect(quickstart).toBeVisible()
   for (const [label, href] of [
-    ['Build stablecoin accounts', '/docs/accounts'],
-    ['Transfer across networks', '/docs/routes'],
+    ['Embed stablecoins in your app', '/docs/accounts'],
+    ['Route stablecoins across chains', '/docs/routes'],
     ['Earn on stablecoins', '/docs/earn'],
     ['Charge for APIs', '/docs/guide/machine-payments/server'],
   ]) {
